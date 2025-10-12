@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2025-10-13 10:24:13
+!-- Timestamp: 2025-10-13 10:25:19
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/TODO.md
 !-- --- -->
@@ -12,6 +12,9 @@
 - [ ] Implement in SciTeX Cloud (https://scitex.ai; hosted using django; ~/proj/scitex-cloud)
 
 ## For Development
+
+### Impact Factor
+- [ ] Combine core related to local CrossRef database
 
 ### Failure Analysis
 - [ ] Identify unsupported journals and publishers
