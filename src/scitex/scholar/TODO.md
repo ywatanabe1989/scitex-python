@@ -1,22 +1,17 @@
 <!-- ---
-!-- Timestamp: 2025-10-13 09:53:31
+!-- Timestamp: 2025-10-13 10:24:13
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/TODO.md
 !-- --- -->
 
 # Scholar Module TODO
 
-## Release Preparation
+## For Visibility
 
-### Config System
-- [ ] Organize ./config/default.yaml in separated yaml files while ensuring current codebase works
+- [ ] Demo Movie
+- [ ] Implement in SciTeX Cloud (https://scitex.ai; hosted using django; ~/proj/scitex-cloud)
 
-### Documentation and Examples
-Currently, `./pipelines` works perfectly. Now, we need:
-- [ ] Update README.md files to reflect current codebase
-- [ ] Revise and restructure ./examples for current implementation
-- [ ] Update CLI and __main__.py interfaces
-- [ ] Create demonstration video/tutorial
+## For Development
 
 ### Failure Analysis
 - [ ] Identify unsupported journals and publishers
@@ -25,21 +20,8 @@ Currently, `./pipelines` works perfectly. Now, we need:
 
 ## Zotero compatibility
 
-### Implementation Status
-- [ ] Complete Zotero translator support for major publishers
-- [ ] Develop Python port of zotero-translators (installed via `pip install -e`)
-- [ ] Translate community-maintained JavaScript translators to Python
-- [ ] Maintain compatibility with authentic community implementations
-
-### Move zotero translator into this module
-- [ ] whether to include `zotero_translator` as a keyword
-- [ ] Zotero importing/exporting for compatibility
-- [ ] Zotero database
-  - [ ] We have pure zotero library at ~/Zotero/
-  - [ ] So, we can check/implement compatibility layers
-- [ ] Positioning scholar module as "Zotero Enhancer" would collect attraction easily
-
-### SciTeX Cloud
-- [ ] Expose scitex scholar usable in web (https://scitex.ai; django; ~/proj/scitex-cloud)
+- [ ] Migrate zotero-translators-python to this module
+- [ ] Import from zotero
+- [ ] Export to zotero
 
 <!-- EOF -->
