@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-13 06:29:01 (ywatanabe)"
+# Timestamp: "2025-10-16 01:47:39 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/pipelines/ScholarPipelineBibTeX.py
 # ----------------------------------------
 from __future__ import annotations

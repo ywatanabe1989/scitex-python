@@ -244,6 +244,13 @@ ANTHROPIC_MODELS = [
         "provider": "Anthropic",
     },
     {
+        "name": "claude-haiku-4-5-20251001",
+        "input_cost": 1.00,
+        "output_cost": 5.00,
+        "api_key_env": "ANTHROPIC_API_KEY",
+        "provider": "Anthropic",
+    },
+    {
         "name": "claude-3-5-haiku-20241022",
         "input_cost": 0.80,
         "output_cost": 4.00,

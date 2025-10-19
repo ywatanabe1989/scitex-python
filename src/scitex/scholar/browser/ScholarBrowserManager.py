@@ -305,8 +305,10 @@ class ScholarBrowserManager(BrowserMixin):
         self._persistent_context = await self._persistent_playwright.chromium.launch_persistent_context(
             **persistent_context_launch_options
         )
-        await close_unwanted_pages(self._persistent_context)
-        asyncio.create_task(close_unwanted_pages(self._persistent_context))
+        # First cleanup run (immediate, non-continuous)
+        await close_unwanted_pages(self._persistent_context, delay_sec=1, continuous=False)
+        # Background continuous monitoring task
+        asyncio.create_task(close_unwanted_pages(self._persistent_context, delay_sec=5, continuous=True))
         # await self._close_unwanted_extension_pages_async()
         # asyncio.create_task(self._close_unwanted_extension_pages_async())
         await self._apply_stealth_scripts_to_persistent_context_async()

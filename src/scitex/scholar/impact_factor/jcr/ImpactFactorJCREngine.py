@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-12 07:23:17 (ywatanabe)"
+# Timestamp: "2025-10-13 11:08:24 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/impact_factor/jcr/ImpactFactorJCREngine.py
 # ----------------------------------------
 from __future__ import annotations
@@ -113,7 +113,7 @@ class ImpactFactorJCREngine:
         Returns:
             List of matching journal records as dictionaries
         """
-        from scitex.contextmanager import suppress_output
+        from scitex.context import suppress_output
 
         default_keys = ["issn", "eissn", "nlm_id", "journal", "journal_abbr"]
         keys = [key] if key else default_keys
@@ -127,7 +127,8 @@ class ImpactFactorJCREngine:
                     )
                 else:
                     result = self.query.filter(
-                        func.lower(FactorData.__dict__[field]) == func.lower(value)
+                        func.lower(FactorData.__dict__[field])
+                        == func.lower(value)
                     )
 
                 if result.count():
@@ -148,7 +149,7 @@ class ImpactFactorJCREngine:
         Returns:
             List of matching journal records
         """
-        from scitex.contextmanager import suppress_output
+        from scitex.context import suppress_output
 
         # Suppress SQLAlchemy echo output during queries
         with suppress_output():

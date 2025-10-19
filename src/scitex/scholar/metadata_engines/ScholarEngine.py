@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-11 20:39:13 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/engines/ScholarEngine.py
+# Timestamp: "2025-10-13 11:01:42 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/metadata_engines/ScholarEngine.py
 # ----------------------------------------
 from __future__ import annotations
 import os
 __FILE__ = (
-    "./src/scitex/scholar/engines/ScholarEngine.py"
+    "./src/scitex/scholar/metadata_engines/ScholarEngine.py"
 )
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
+import json
 
 import scitex as stx
 
@@ -19,22 +20,21 @@ import asyncio
 import hashlib
 import re
 import time
-from typing import Dict, List
+from typing import Dict
+from typing import List
 
 from tqdm import tqdm
 
 from scitex import logging
 from scitex.scholar import ScholarConfig
 
-from .individual import (
-    ArXivEngine,
-    CrossRefEngine,
-    CrossRefLocalEngine,
-    OpenAlexEngine,
-    PubMedEngine,
-    SemanticScholarEngine,
-    URLDOIEngine,
-)
+from .individual import ArXivEngine
+from .individual import CrossRefEngine
+from .individual import CrossRefLocalEngine
+from .individual import OpenAlexEngine
+from .individual import PubMedEngine
+from .individual import SemanticScholarEngine
+from .individual import URLDOIEngine
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,7 @@ class ScholarEngine:
         use_cache=True,
         clear_cache=False,
     ):
+        self.name = self.__class__.__name__
         self.config = config if config else ScholarConfig()
         self.engines = self.config.resolve("engines", engines)
         self.use_cache = self.config.resolve("use_cache_engine", use_cache)
@@ -66,7 +67,7 @@ class ScholarEngine:
 
         if clear_cache and self.cache_file.exists():
             self.cache_file.unlink()
-            logger.info("Cleared engine search cache")
+            logger.info(f"{self.name}Cleared engine search cache")
 
         self._load_cache()
 
@@ -74,9 +75,9 @@ class ScholarEngine:
         """Load cache from file."""
         if self.use_cache and self.cache_file.exists():
             try:
-                # with open(self.cache_file, "r") as f:
-                #     self._cache = json.load(f)
-                self._cache = stx.io.load(self.cache_file)
+                with open(self.cache_file, "r") as f:
+                    self._cache = json.load(f)
+                # self._cache = stx.io.load(self.cache_file)
             except:
                 self._cache = {}
         else:
@@ -86,9 +87,9 @@ class ScholarEngine:
         """Save cache to file."""
         if self.use_cache:
             try:
-                # with open(self.cache_file, "w") as f:
-                #     json.dump(self._cache, f, indent=2)
-                stx.io.save(self._cache, self.cache_file)
+                with open(self.cache_file, "w") as f:
+                    json.dump(self._cache, f, indent=2)
+                # stx.io.save(self._cache, self.cache_file)
             except Exception as e:
                 logger.warning(f"Failed to save engine cache: {e}")
 

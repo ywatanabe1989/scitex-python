@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-11 10:14:47 (ywatanabe)"
+# Timestamp: "2025-10-13 11:22:44 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/browser/utils/close_unwanted_pages.py
 # ----------------------------------------
 from __future__ import annotations
@@ -25,8 +25,17 @@ async def close_unwanted_pages(
     delay_sec=1,
     max_attempts: int = 20,
     func_name="close_unwanted_pages",
+    continuous: bool = False,
 ):
-    """Close unwanted extension and blank pages while keeping at least one page open."""
+    """Close unwanted extension and blank pages while keeping at least one page open.
+
+    Args:
+        context: Browser context to clean up
+        delay_sec: Initial delay before starting cleanup
+        max_attempts: Maximum cleanup attempts (for single-run mode)
+        func_name: Name for logging purposes
+        continuous: If True, run continuously monitoring for new unwanted pages
+    """
 
     # URL patterns to identify unwanted pages
     UNWANTED_PAGE_EXPRESSIONS = [
@@ -34,11 +43,18 @@ async def close_unwanted_pages(
         "pbapi.xyz",
         "options.html",
         # "newtab",
+        # "about:blank",
+        # "chrome://newtab",
     ]
 
     await asyncio.sleep(delay_sec)
 
-    for attempt in range(max_attempts):
+    attempts = 0
+    while True:
+        if not continuous and attempts >= max_attempts:
+            break
+
+        attempts += 1
 
         try:
             # Get current pages first to avoid stale references
@@ -69,11 +85,15 @@ async def close_unwanted_pages(
             ]
 
             if not unwanted_pages:
-                if valid_page:
+                if valid_page and not continuous:
                     await browser_logger.debug(
                         valid_page, f"{func_name}: Extension cleanup completed"
                     )
-                break
+                if not continuous:
+                    break
+                # In continuous mode, wait before checking again
+                await asyncio.sleep(2)
+                continue
 
             # Log what we're about to close
             if valid_page and unwanted_pages:
@@ -107,7 +127,7 @@ async def close_unwanted_pages(
             if closed_count > 0 and valid_page:
                 await browser_logger.debug(
                     valid_page,
-                    f"{func_name}: Closed {closed_count} page(s) (attempt {attempt + 1})",
+                    f"{func_name}: Closed {closed_count} page(s) (attempt {attempts + 1})",
                 )
 
         except Exception as e:

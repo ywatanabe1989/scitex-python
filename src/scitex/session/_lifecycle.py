@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-02 10:21:02 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/session/_lifecycle.py
+# Timestamp: "2025-10-16 20:25:05 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex_repo/src/scitex/session/_lifecycle.py
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = __file__
+__FILE__ = (
+    "./src/scitex/session/_lifecycle.py"
+)
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
+
+__FILE__ = __file__
 
 """Session lifecycle management for SciTeX experiments.
 
@@ -16,7 +20,6 @@ scitex.session.start() and scitex.session.close() with enhanced session manageme
 """
 
 import inspect
-import logging
 import os as _os
 import re
 import shutil
@@ -29,12 +32,15 @@ from pprint import pprint
 from time import sleep
 from typing import Any, Dict, Optional, Tuple, Union
 
-logger = logging.getLogger(__name__)
+from ..logging import getLogger
+
+logger = getLogger(__name__)
 
 import matplotlib
 import matplotlib.pyplot as plt_module
 
 from ..dict import DotDict
+
 # Lazy import to avoid circular dependency with scitex.gen
 from ..io import flush
 from ..io import save as scitex_io_save
@@ -101,7 +107,7 @@ def _print_header(
     sleep(1)
     if verbose:
         print(f"\n{'-'*40}\n")
-        pprint(configs)
+        pprint(configs.to_dict())
         print(f"\n{'-'*40}\n")
     sleep(1)
 
@@ -463,8 +469,7 @@ def start(
     # Initialize RandomStateManager (automatically fixes all seeds)
     rng = RandomStateManager(seed=seed, verbose=verbose)
     if verbose:
-        module_logger = logging.getLogger(__name__)
-        module_logger.info(f"Initialized RandomStateManager with seed {seed}")
+        logger.info(f"Initialized RandomStateManager with seed {seed}")
 
     # Matplotlib configurations
     plt, CC = _setup_matplotlib(
@@ -638,9 +643,6 @@ def running2finished(
             if os.path.basename(running_base) == "RUNNING":
                 try:
                     os.rmdir(running_base)
-                    # print(
-                    #     f"Cleaned up empty RUNNING directory: {running_base}"
-                    # )
                 except OSError:
                     pass
 

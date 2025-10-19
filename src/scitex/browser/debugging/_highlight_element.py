@@ -51,36 +51,39 @@ async def highlight_element_async(element: Locator, duration_ms: int = 1_000, fu
     """
     await element.evaluate(
         """(element, duration) => {
-            // Get element position and size
-            const rect = element.getBoundingClientRect();
-
-            // Create overlay div
-            const overlay = document.createElement('div');
-            overlay.id = 'highlight-overlay-' + Date.now();
-            overlay.style.cssText = `
-                position: fixed;
-                top: ${rect.top}px;
-                left: ${rect.left}px;
-                width: ${rect.width}px;
-                height: ${rect.height}px;
-                border: 5px solid red;
-                background-color: rgba(255, 0, 0, 0.2);
-                pointer-events: none;
-                z-index: 999999;
-                box-shadow: 0 0 20px red;
-            `;
-
-            document.body.appendChild(overlay);
-
-            // Scroll element into view
+            // Scroll element into view FIRST
             element.scrollIntoView({behavior: 'smooth', block: 'center'});
 
-            // Remove overlay after duration
+            // Wait for scroll to complete, then create overlay
             setTimeout(() => {
-                if (overlay && overlay.parentNode) {
-                    overlay.parentNode.removeChild(overlay);
-                }
-            }, duration);
+                // Get element position AFTER scroll
+                const rect = element.getBoundingClientRect();
+
+                // Create overlay div
+                const overlay = document.createElement('div');
+                overlay.id = 'highlight-overlay-' + Date.now();
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: ${rect.top}px;
+                    left: ${rect.left}px;
+                    width: ${rect.width}px;
+                    height: ${rect.height}px;
+                    border: 5px solid red;
+                    background-color: rgba(255, 0, 0, 0.2);
+                    pointer-events: none;
+                    z-index: 999999;
+                    box-shadow: 0 0 20px red;
+                `;
+
+                document.body.appendChild(overlay);
+
+                // Remove overlay after duration
+                setTimeout(() => {
+                    if (overlay && overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, duration);
+            }, 500);  // Wait 500ms for smooth scroll to complete
         }""",
         duration_ms,
     )

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-07 21:22:27 (ywatanabe)"
+# Timestamp: "2025-10-16 03:09:46 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/io/_save.py
 # ----------------------------------------
 from __future__ import annotations
@@ -484,7 +484,16 @@ def _save(
     # Try dispatch dictionary first for O(1) lookup
     if ext in _FILE_HANDLERS:
         # Check if handler needs special parameters
-        if ext in [".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".svg", ".pdf"]:
+        if ext in [
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".gif",
+            ".tiff",
+            ".tif",
+            ".svg",
+            ".pdf",
+        ]:
             _FILE_HANDLERS[ext](
                 obj,
                 spath,
@@ -519,9 +528,7 @@ def _save(
                 rel_path = spath
 
             print()
-            logger.success(
-                color_text(f"Saved to: ./{rel_path} ({file_size})", c="yellow")
-            )
+            logger.success(f"Saved to: ./{rel_path} ({file_size})")
 
 
 def _save_separate_legends(
@@ -598,7 +605,13 @@ def _save_separate_legends(
 
 
 def _handle_image_with_csv(
-    obj, spath, no_csv=False, symlink_from_cwd=False, dry_run=False, symlink_to=None, **kwargs
+    obj,
+    spath,
+    no_csv=False,
+    symlink_from_cwd=False,
+    dry_run=False,
+    symlink_to=None,
+    **kwargs,
 ):
     """Handle image file saving with optional CSV export."""
     if dry_run:
@@ -646,7 +659,9 @@ def _handle_image_with_csv(
 
                         # Create symlink_to for CSV if it was specified for the image
                         if symlink_to:
-                            csv_symlink_to = _os.path.splitext(symlink_to)[0] + ".csv"
+                            csv_symlink_to = (
+                                _os.path.splitext(symlink_to)[0] + ".csv"
+                            )
                             _symlink_to(csv_path, csv_symlink_to, True)
 
                         # Create symlink for CSV manually if needed
@@ -705,8 +720,15 @@ def _handle_image_with_csv(
 
                         # Create symlink_to for SigmaPlot CSV if it was specified for the image
                         if symlink_to:
-                            csv_sigmaplot_symlink_to = _os.path.splitext(symlink_to)[0] + "_for_sigmaplot.csv"
-                            _symlink_to(csv_sigmaplot_path, csv_sigmaplot_symlink_to, True)
+                            csv_sigmaplot_symlink_to = (
+                                _os.path.splitext(symlink_to)[0]
+                                + "_for_sigmaplot.csv"
+                            )
+                            _symlink_to(
+                                csv_sigmaplot_path,
+                                csv_sigmaplot_symlink_to,
+                                True,
+                            )
 
                         # Create symlink for SigmaPlot CSV manually if needed
                         if symlink_from_cwd:
