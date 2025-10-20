@@ -44,7 +44,7 @@ autodoc_default_options = {
 }
 
 # Autosummary settings
-autosummary_generate = True
+autosummary_generate = False  # Disable to avoid module import errors during build
 
 # Napoleon settings for numpy/google style docstrings
 napoleon_google_docstring = True
@@ -70,10 +70,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "to_claude/**"]
 
 # The suffix(es) of source filenames.
-source_suffix = {
-    '.rst': None,
-    '.md': 'myst_parser',
-}
+source_suffix = [".rst", ".md"]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -121,7 +118,6 @@ myst_enable_extensions = [
     "deflist",
     "html_admonition",
     "html_image",
-    "linkify",
     "replacements",
     "smartquotes",
     "substitution",

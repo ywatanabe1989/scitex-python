@@ -1,0 +1,29 @@
+# Timestamp: "2025-10-18 (ywatanabe)"
+# File: ./config/capture.yaml
+
+# Configuration for scitex.capture (cammy integration)
+capture:
+  # Screenshot capture settings
+  screenshot:
+    quality: 85  # JPEG quality (1-100)
+    monitor_id: 0  # Primary monitor by default
+    output_dir: null  # null = use default (~/.cache/cammy)
+
+  # Monitoring settings
+  monitoring:
+    interval: 1.0  # Seconds between captures
+    quality: 60  # Lower quality for continuous monitoring
+    verbose: true  # Show capture messages
+    capture_all: false  # Capture all monitors
+
+  # GIF creation settings
+  gif:
+    duration: 0.5  # Duration per frame in seconds
+    optimize: true  # Optimize for smaller file size
+    max_frames: null  # null = no limit
+
+  # Cache management
+  cache:
+    max_size_gb: 1.0  # Keep cache under this size
+
+# EOF

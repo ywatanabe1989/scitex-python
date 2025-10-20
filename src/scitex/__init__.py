@@ -78,6 +78,7 @@ units = _LazyModule("units")
 logging = _LazyModule("logging")
 # log = _LazyModule("log")
 session = _LazyModule("session")
+capture = _LazyModule("capture")
 
 # Import sh function directly as it's commonly used
 try:
@@ -104,6 +105,7 @@ __all__ = [
     "logging",
     "session",
     "rng",
+    "capture",
 ]
 
 # EOF

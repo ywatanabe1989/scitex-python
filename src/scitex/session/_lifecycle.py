@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-09-22 01:35:47 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/session/_lifecycle.py
+# Timestamp: "2025-10-16 20:25:05 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex_repo/src/scitex/session/_lifecycle.py
 # ----------------------------------------
 from __future__ import annotations
 import os
@@ -11,6 +11,8 @@ __FILE__ = (
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
+__FILE__ = __file__
+
 """Session lifecycle management for SciTeX experiments.
 
 This module contains the start() and close() functions that replace
@@ -18,7 +20,6 @@ scitex.session.start() and scitex.session.close() with enhanced session manageme
 """
 
 import inspect
-import logging
 import os as _os
 import re
 import shutil
@@ -31,12 +32,15 @@ from pprint import pprint
 from time import sleep
 from typing import Any, Dict, Optional, Tuple, Union
 
-logger = logging.getLogger(__name__)
+from ..logging import getLogger
+
+logger = getLogger(__name__)
 
 import matplotlib
 import matplotlib.pyplot as plt_module
 
 from ..dict import DotDict
+
 # Lazy import to avoid circular dependency with scitex.gen
 from ..io import flush
 from ..io import save as scitex_io_save
@@ -103,7 +107,7 @@ def _print_header(
     sleep(1)
     if verbose:
         print(f"\n{'-'*40}\n")
-        pprint(configs)
+        pprint(configs.to_dict())
         print(f"\n{'-'*40}\n")
     sleep(1)
 
@@ -185,7 +189,7 @@ def _setup_matplotlib(
     Parameters
     ----------
     plt : module
-        Matplotlib.pyplot module
+        Matplotlib.pyplot module (will be replaced with scitex.plt)
     agg : bool
         Whether to use Agg backend
     **mpl_kwargs : dict
@@ -194,15 +198,19 @@ def _setup_matplotlib(
     Returns
     -------
     tuple
-        (plt, CC) - Configured pyplot module and color cycle
+        (plt, CC) - Configured scitex.plt module and color cycle
     """
     if plt is not None:
         plt.close("all")
-        plt, CC = configure_mpl(plt, **mpl_kwargs)
+        _, CC = configure_mpl(plt, **mpl_kwargs)
         CC["gray"] = CC["grey"]
         if agg:
             matplotlib.use("Agg")
-        return plt, CC
+
+        # Replace matplotlib.pyplot with scitex.plt to get wrapped functions
+        import scitex.plt as stx_plt
+
+        return stx_plt, CC
     return plt, None
 
 
@@ -229,7 +237,7 @@ def _simplify_relative_path(sdir: str) -> str:
     """
     base_path = _os.getcwd()
     relative_sdir = _os.path.relpath(sdir, base_path) if base_path else sdir
-    simplified_path = relative_sdir.replace("scripts/", "./").replace(
+    simplified_path = relative_sdir.replace("scripts/", "./scripts/").replace(
         "RUNNING/", ""
     )
     # Remove date-time pattern and random string
@@ -409,7 +417,7 @@ def start(
     if sys is not None:
         flush(sys)
         # Lazy import to avoid circular dependency
-        from ..gen._tee import tee
+        from ..logging._Tee import tee
 
         sys.stdout, sys.stderr = tee(sys, sdir=sdir, verbose=verbose)
         CONFIGS["sys"] = sys
@@ -461,8 +469,7 @@ def start(
     # Initialize RandomStateManager (automatically fixes all seeds)
     rng = RandomStateManager(seed=seed, verbose=verbose)
     if verbose:
-        module_logger = logging.getLogger(__name__)
-        module_logger.info(f"Initialized RandomStateManager with seed {seed}")
+        logger.info(f"Initialized RandomStateManager with seed {seed}")
 
     # Matplotlib configurations
     plt, CC = _setup_matplotlib(
@@ -636,9 +643,6 @@ def running2finished(
             if os.path.basename(running_base) == "RUNNING":
                 try:
                     os.rmdir(running_base)
-                    # print(
-                    #     f"Cleaned up empty RUNNING directory: {running_base}"
-                    # )
                 except OSError:
                     pass
 

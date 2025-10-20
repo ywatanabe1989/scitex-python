@@ -5,14 +5,13 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/config/__init__.py"
-)
+__FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
-from ._ScholarConfig import ScholarConfig
+from .ScholarConfig import ScholarConfig
+from .PublisherRules import PublisherRules
 
-__all__ = ["ScholarConfig"]
+__all__ = ["ScholarConfig", "PublisherRules"]
 
 # EOF

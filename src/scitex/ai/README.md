@@ -10,7 +10,7 @@ The AI module is organized into several submodules:
 
 - **`genai`** - Generative AI integration with multiple providers (OpenAI, Anthropic, Google, etc.)
 - **`training`** - Training utilities (EarlyStopping, LearningCurveLogger)
-- **`classification`** - Classification tools (ClassificationReporter, ClassifierServer)
+- **`classification`** - Classification tools (ClassificationReporter, Classifier)
 
 ### Neural Network Components
 
@@ -290,6 +290,6 @@ When contributing to the AI module:
 
 ## Contact
 
-Yusuke Watanabe (ywata1989@gmail.com)
+Yusuke Watanabe (ywatanabe@scitex.ai)
 
 For more information and updates, please visit the [scitex GitHub repository](https://github.com/ywatanabe1989/scitex).

@@ -77,8 +77,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            # Add any command-line scripts here if needed
-            # "scitex=scitex.cli:main",
+            "scitex=scitex.cli:cli",
         ],
     },
     extras_require={

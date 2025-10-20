@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-09-24 14:07:02 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_save.py
+# Timestamp: "2025-10-16 03:09:46 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex_repo/src/scitex/io/_save.py
 # ----------------------------------------
 from __future__ import annotations
 import os
@@ -10,6 +10,8 @@ __FILE__ = (
 )
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
+
+__FILE__ = __file__
 
 import warnings
 
@@ -40,12 +42,29 @@ from ..path._getsize import getsize
 from ..str._clean_path import clean_path
 from ..str._color_text import color_text
 from ..str._readable_bytes import readable_bytes
+
 # Import save functions from the new modular structure
-from ._save_modules import (save_catboost, save_csv, save_excel, save_hdf5,
-                            save_html, save_image, save_joblib, save_json,
-                            save_matlab, save_mp4, save_npy, save_npz,
-                            save_pickle, save_pickle_compressed, save_text,
-                            save_torch, save_yaml, save_zarr)
+from ._save_modules import (
+    save_catboost,
+    save_csv,
+    save_excel,
+    save_hdf5,
+    save_html,
+    save_image,
+    save_joblib,
+    save_json,
+    save_matlab,
+    save_mp4,
+    save_npy,
+    save_npz,
+    save_pickle,
+    save_pickle_compressed,
+    save_tex,
+    save_text,
+    save_torch,
+    save_yaml,
+    save_zarr,
+)
 from ._save_modules._bibtex import save_bibtex
 
 logger = logging.getLogger()
@@ -142,6 +161,7 @@ def save(
     symlink_to: Union[str, Path] = None,
     dry_run: bool = False,
     no_csv: bool = False,
+    use_caller_path: bool = False,
     **kwargs,
 ) -> None:
     """
@@ -163,6 +183,10 @@ def save(
         If specified, create a symlink at this path pointing to the saved file. Default is None.
     dry_run : bool, optional
         If True, simulate the saving process without actually writing files. Default is False.
+    use_caller_path : bool, optional
+        If True, intelligently determine the script path by skipping internal library frames.
+        This is useful when stx.io.save is called from within scitex library code.
+        Default is False.
     **kwargs
         Additional keyword arguments to pass to the underlying save function of the specific format.
 
@@ -296,7 +320,28 @@ def save(
 
             elif env_type == "script":
                 # Regular script handling
-                script_path = inspect.stack()[1].filename
+                if use_caller_path:
+                    # Smart path detection: skip internal scitex library frames
+                    script_path = None
+                    scitex_src_path = _os.path.join(
+                        _os.path.dirname(__file__), "..", ".."
+                    )
+                    scitex_src_path = _os.path.abspath(scitex_src_path)
+
+                    # Walk through the call stack from caller to find the first non-scitex frame
+                    for frame_info in inspect.stack()[1:]:
+                        frame_path = _os.path.abspath(frame_info.filename)
+                        # Skip frames from scitex library
+                        if not frame_path.startswith(scitex_src_path):
+                            script_path = frame_path
+                            break
+
+                    # Fallback to stack[1] if we couldn't find a non-scitex frame
+                    if script_path is None:
+                        script_path = inspect.stack()[1].filename
+                else:
+                    script_path = inspect.stack()[1].filename
+
                 sdir = clean_path(_os.path.splitext(script_path)[0] + "_out")
                 spath = _os.path.join(sdir, specified_path)
 
@@ -361,6 +406,7 @@ def save(
             spath_final,
             verbose=verbose,
             symlink_from_cwd=symlink_from_cwd,
+            symlink_to=symlink_to,
             dry_run=dry_run,
             no_csv=no_csv,
             **kwargs,
@@ -369,6 +415,8 @@ def save(
         # Symbolic links
         _symlink(spath, spath_cwd, symlink_from_cwd, verbose)
         _symlink_to(spath_final, symlink_to, verbose)
+        return Path(spath)
+        # return True
 
     except Exception as e:
         logger.error(
@@ -378,6 +426,7 @@ def save(
             f"Debug: specified_path type = {type(specified_path)}\n"
             f"Debug: specified_path = {specified_path}"
         )
+        return False
 
 
 def _symlink(spath, spath_cwd, symlink_from_cwd, verbose):
@@ -422,6 +471,7 @@ def _save(
     symlink_from_cwd=False,
     dry_run=False,
     no_csv=False,
+    symlink_to=None,
     **kwargs,
 ):
     # Don't use object's own save method - use consistent handlers
@@ -434,12 +484,22 @@ def _save(
     # Try dispatch dictionary first for O(1) lookup
     if ext in _FILE_HANDLERS:
         # Check if handler needs special parameters
-        if ext in [".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".svc"]:
+        if ext in [
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".gif",
+            ".tiff",
+            ".tif",
+            ".svg",
+            ".pdf",
+        ]:
             _FILE_HANDLERS[ext](
                 obj,
                 spath,
                 no_csv=no_csv,
                 symlink_from_cwd=symlink_from_cwd,
+                symlink_to=symlink_to,
                 dry_run=dry_run,
                 **kwargs,
             )
@@ -468,9 +528,7 @@ def _save(
                 rel_path = spath
 
             print()
-            logger.success(
-                color_text(f"Saved to: ./{rel_path} ({file_size})", c="yellow")
-            )
+            logger.success(f"Saved to: ./{rel_path} ({file_size})")
 
 
 def _save_separate_legends(
@@ -547,7 +605,13 @@ def _save_separate_legends(
 
 
 def _handle_image_with_csv(
-    obj, spath, no_csv=False, symlink_from_cwd=False, dry_run=False, **kwargs
+    obj,
+    spath,
+    no_csv=False,
+    symlink_from_cwd=False,
+    dry_run=False,
+    symlink_to=None,
+    **kwargs,
 ):
     """Handle image file saving with optional CSV export."""
     if dry_run:
@@ -577,10 +641,13 @@ def _handle_image_with_csv(
                 if hasattr(fig_obj, "export_as_csv"):
                     csv_data = fig_obj.export_as_csv()
                     if csv_data is not None and not csv_data.empty:
-                        # For CSV files, we want them in the same directory as the image
-                        # Use the full path but it will be handled correctly by save()
-                        csv_path = spath.replace(ext_wo_dot, "csv")
+                        # Save CSV in same directory as image with .csv extension
+                        # Example: ./path/to/output/fig.jpg -> ./path/to/output/fig.csv
+                        csv_path = _os.path.splitext(spath)[0] + ".csv"
+                        # Ensure parent directory exists (should already exist from image save)
+                        _os.makedirs(_os.path.dirname(csv_path), exist_ok=True)
                         # Save directly using _save to avoid path doubling
+                        # Don't pass image-specific kwargs to CSV save
                         _save(
                             csv_data,
                             csv_path,
@@ -588,8 +655,15 @@ def _handle_image_with_csv(
                             symlink_from_cwd=False,  # Will handle symlink manually
                             dry_run=dry_run,
                             no_csv=True,
-                            **kwargs,
                         )
+
+                        # Create symlink_to for CSV if it was specified for the image
+                        if symlink_to:
+                            csv_symlink_to = (
+                                _os.path.splitext(symlink_to)[0] + ".csv"
+                            )
+                            _symlink_to(csv_path, csv_symlink_to, True)
+
                         # Create symlink for CSV manually if needed
                         if symlink_from_cwd:
                             # Get the relative path from the original specified path
@@ -634,6 +708,7 @@ def _handle_image_with_csv(
                             ext_wo_dot, "csv"
                         ).replace(".csv", "_for_sigmaplot.csv")
                         # Save directly using _save to avoid path doubling
+                        # Don't pass image-specific kwargs to CSV save
                         _save(
                             sigmaplot_data,
                             csv_sigmaplot_path,
@@ -641,8 +716,20 @@ def _handle_image_with_csv(
                             symlink_from_cwd=False,  # Will handle symlink manually
                             dry_run=dry_run,
                             no_csv=True,
-                            **kwargs,
                         )
+
+                        # Create symlink_to for SigmaPlot CSV if it was specified for the image
+                        if symlink_to:
+                            csv_sigmaplot_symlink_to = (
+                                _os.path.splitext(symlink_to)[0]
+                                + "_for_sigmaplot.csv"
+                            )
+                            _symlink_to(
+                                csv_sigmaplot_path,
+                                csv_sigmaplot_symlink_to,
+                                True,
+                            )
+
                         # Create symlink for SigmaPlot CSV manually if needed
                         if symlink_from_cwd:
                             csv_cwd = (
@@ -651,8 +738,13 @@ def _handle_image_with_csv(
                                 + _os.path.basename(csv_sigmaplot_path)
                             )
                             _symlink(csv_sigmaplot_path, csv_cwd, True, True)
-        except Exception:
-            pass
+        except Exception as e:
+            import warnings
+
+            warnings.warn(f"CSV export failed: {e}")
+            import traceback
+
+            traceback.print_exc()
 
 
 # Dispatch dictionary for O(1) file format lookup
@@ -682,6 +774,7 @@ _FILE_HANDLERS = {
     ".py": save_text,
     ".css": save_text,
     ".js": save_text,
+    ".tex": save_tex,
     # Bibliography
     ".bib": save_bibtex,
     # Data formats

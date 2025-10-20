@@ -5,9 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/ai/_gen_ai/_PARAMS.py"
-)
+__FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -242,6 +240,13 @@ ANTHROPIC_MODELS = [
         "name": "claude-3-5-sonnet-20241022",
         "input_cost": 3.00,
         "output_cost": 15.00,
+        "api_key_env": "ANTHROPIC_API_KEY",
+        "provider": "Anthropic",
+    },
+    {
+        "name": "claude-haiku-4-5-20251001",
+        "input_cost": 1.00,
+        "output_cost": 5.00,
         "api_key_env": "ANTHROPIC_API_KEY",
         "provider": "Anthropic",
     },
