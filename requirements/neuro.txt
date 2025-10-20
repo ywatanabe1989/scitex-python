@@ -1,0 +1,10 @@
+# ============================================
+# Neuroscience & Specialized Scientific
+# ============================================
+mne
+obspy
+pyedflib
+pybids
+tensorpac
+ripple_detection
+geom_median

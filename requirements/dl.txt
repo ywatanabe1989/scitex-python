@@ -1,0 +1,14 @@
+# ============================================
+# Deep Learning & AI (Heavy - 2-4 GB)
+# ============================================
+torch
+torchvision
+torchaudio
+torchsummary
+transformers
+accelerate
+bitsandbytes
+fairscale
+pytorch_pretrained_vit
+pytorch-optimizer
+einops

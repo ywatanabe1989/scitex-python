@@ -1,0 +1,36 @@
+# ============================================
+# Extra Utilities (Nice to have but not essential)
+# ============================================
+nest-asyncio
+google-search-results
+googlesearch-python
+sqlalchemy
+psycopg2-binary
+Pyarrow
+xmltodict
+sounddevice
+joypy
+julius
+pebble
+impact-factor
+tk
+icecream
+pyperclip
+readchar
+plyer
+timeout-decorator
+ansi-escapes
+chardet
+termplotlib
+tldr
+attrdict
+reportlab
+readability
+readability-lxml
+python-magic
+thefuzz
+pyautogui
+webrequests
+sql_manager
+pymatreader
+six
