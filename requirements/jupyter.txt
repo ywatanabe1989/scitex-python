@@ -1,0 +1,10 @@
+# ============================================
+# Jupyter & Interactive Development
+# ============================================
+jupyterlab
+jupyter-collaboration
+ipykernel
+ipdb
+papermill
+jupytext
+nbsphinx

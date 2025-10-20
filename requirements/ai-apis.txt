@@ -1,0 +1,8 @@
+# ============================================
+# AI Services & APIs
+# ============================================
+openai
+anthropic
+google-genai
+groq
+llama-stack

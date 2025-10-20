@@ -22,18 +22,65 @@ with open(version_file) as f:
     exec(f.read(), version_dict)
 version = version_dict["__version__"]
 
-# Read requirements
-with open("requirements.txt") as f:
-    requirements = [
-        line.strip() for line in f if line.strip() and not line.startswith("#")
-    ]
-    # Remove duplicate entries and fix typos
-    requirements = list(dict.fromkeys(requirements))
-    # Fix typo in papermill
-    requirements = [
-        req.replace("pepermill", "papermill") if req == "pepermill" else req
-        for req in requirements
-    ]
+
+def read_requirements(filename):
+    """Read requirements from a file."""
+    filepath = os.path.join("requirements", filename)
+    if not os.path.exists(filepath):
+        return []
+    with open(filepath) as f:
+        return [
+            line.strip()
+            for line in f
+            if line.strip() and not line.startswith("#")
+        ]
+
+
+# Core dependencies (always installed)
+install_requires = read_requirements("core.txt")
+
+# Optional dependency groups
+extras_require = {
+    # Deep Learning (Heavy - 2-4 GB)
+    "dl": read_requirements("dl.txt"),
+    
+    # AI APIs
+    "ai-apis": read_requirements("ai-apis.txt"),
+    
+    # Scholar module (paper management)
+    "scholar": read_requirements("scholar.txt"),
+    
+    # Additional ML tools
+    "ml": read_requirements("ml.txt"),
+    
+    # Neuroscience & specialized
+    "neuro": read_requirements("neuro.txt"),
+    
+    # Web frameworks
+    "web": read_requirements("web.txt"),
+    
+    # Jupyter notebooks
+    "jupyter": read_requirements("jupyter.txt"),
+    
+    # Extra utilities
+    "extras": read_requirements("extras.txt"),
+    
+    # Development tools
+    "dev": read_requirements("dev.txt"),
+}
+
+# Convenience groups
+extras_require["recommended"] = (
+    extras_require["ml"] + 
+    extras_require["jupyter"]
+)
+
+extras_require["all"] = list(set(
+    sum(
+        [v for k, v in extras_require.items() if k not in ["dev", "all"]],
+        []
+    )
+))
 
 # Read README for long description
 readme_path = "README.md"
@@ -46,19 +93,19 @@ setup(
     name="scitex",
     version=version,
     author="Yusuke Watanabe",
-    author_email="ywatanabe@scitex.ai",  # Update with actual email
+    author_email="ywatanabe@scitex.ai",
     description="A comprehensive scientific computing framework for Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ywatanabe1989/SciTeX-Code",  # Update with actual URL
+    url="https://github.com/ywatanabe1989/scitex-code",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    install_requires=requirements,
+    install_requires=install_requires,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",  # Update with actual license
+        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
@@ -80,21 +127,7 @@ setup(
             "scitex=scitex.cli:cli",
         ],
     },
-    extras_require={
-        "dev": [
-            "pytest",
-            "pytest-cov",
-            "black",
-            "isort",
-            "flake8",
-            "sphinx",
-        ],
-        "docs": [
-            "sphinx",
-            "sphinx-rtd-theme",
-            "sphinx-autodoc-typehints",
-        ],
-    },
+    extras_require=extras_require,
     keywords="scientific computing, data analysis, machine learning, visualization, research",
 )
 

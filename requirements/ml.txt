@@ -1,0 +1,11 @@
+# ============================================
+# Additional Machine Learning Tools
+# ============================================
+scikit-image
+imbalanced-learn
+umap-learn
+sktime
+catboost
+optuna
+sympy
+opencv-python
