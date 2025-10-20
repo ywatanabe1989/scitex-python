@@ -9,13 +9,14 @@ This module provides separated, focused utilities for:
 - Report generation
 """
 
-from .metrics import (
-    calc_balanced_accuracy,
+# Import from centralized metrics module
+from scitex.ml.metrics import (
+    calc_bacc,
     calc_mcc,
-    calc_confusion_matrix,
-    calc_classification_report,
+    calc_conf_mat,
+    calc_clf_report,
     calc_roc_auc,
-    calc_pr_auc
+    calc_pre_rec_auc
 )
 
 from .storage import (
@@ -46,31 +47,31 @@ from .aggregation import (
 
 __all__ = [
     # Metrics
-    'calc_balanced_accuracy',
-    'calc_mcc', 
-    'calc_confusion_matrix',
-    'calc_classification_report',
+    'calc_bacc',
+    'calc_mcc',
+    'calc_conf_mat',
+    'calc_clf_report',
     'calc_roc_auc',
-    'calc_pr_auc',
-    
+    'calc_pre_rec_auc',
+
     # Storage
     'MetricStorage',
     'save_metric',
     'save_figure',
     'save_dataframe',
     'organize_outputs',
-    
+
     # Validation
     'MetricValidator',
     'validate_completeness',
     'check_required_metrics',
-    
+
     # Reporting
     'generate_markdown_report',
     'generate_latex_report',
     'create_summary_statistics',
     'export_for_paper',
-    
+
     # Aggregation
     'aggregate_fold_metrics',
     'calculate_mean_std',

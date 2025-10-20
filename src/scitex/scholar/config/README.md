@@ -1,7 +1,7 @@
 <!-- ---
-!-- Timestamp: 2025-08-09 01:30:11
+!-- Timestamp: 2025-10-13 09:47:44
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/config/README.md
+!-- File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/config/README.md
 !-- --- -->
 
 ## Cascading Config Environment Variables
@@ -16,7 +16,7 @@ Example can be seen at `./config/default.yaml`
 config = ScholarConfig()
 api_key = config.cascade.resolve("semantic_scholar_api_key")
 is_debug = config.cascade.resolve("debug_mode", type=bool)
-download_dir = config.path_manager.get_downloads_dir()
+download_dir = config.path_manager.get_library_downloads_dir()
 ```
 
 ## Modules
@@ -24,5 +24,8 @@ download_dir = config.path_manager.get_downloads_dir()
 2. `ScholarConfig` - Scholar-specific wrapper using CascadeConfig
 3. `PathManager` - Directory structure management
 4. Flattened YAML - No unnecessary nesting
+
+## TODO
+- [ ] Migrate to separated files
 
 <!-- EOF -->

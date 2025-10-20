@@ -5,9 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/storage/_BibTeXHandler.py"
-)
+__FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 import tempfile
@@ -23,8 +21,24 @@ class BibTeXHandler:
     """Handles BibTeX parsing and conversion to Paper objects."""
 
     def __init__(self, project: str = None, config=None):
+        self.name = self.__class__.__name__
         self.project = project
         self.config = config
+
+    def _extract_primitive(self, value):
+        """Extract primitive value from DotDict or nested structure."""
+        from scitex.dict import DotDict
+
+        if value is None:
+            return None
+        if isinstance(value, DotDict):
+            # Convert DotDict to plain dict first
+            value = dict(value)
+        if isinstance(value, dict):
+            # For nested dict structures, return as-is
+            return value
+        # Return primitive types as-is
+        return value
 
     def papers_from_bibtex(
         self, bibtex_input: Union[str, Path]
@@ -116,9 +130,13 @@ class BibTeXHandler:
 
         basic_data = {
             "title": title,
+            "title_source": "input",
             "authors": authors,
+            "authors_source": "input" if authors else None,
             "abstract": fields.get("abstract", ""),
+            "abstract_source": "input" if fields.get("abstract") else None,
             "year": int(fields.get("year")) if fields.get("year") else None,
+            "year_source": "input" if fields.get("year") else None,
             "keywords": (
                 fields.get("keywords", "").split(", ")
                 if fields.get("keywords")
@@ -128,30 +146,83 @@ class BibTeXHandler:
 
         id_data = {
             "doi": fields.get("doi"),
+            "doi_source": "input" if fields.get("doi") else None,
             "pmid": fields.get("pmid"),
+            "pmid_source": "input" if fields.get("pmid") else None,
             "arxiv_id": fields.get("eprint"),
+            "arxiv_id_source": "input" if fields.get("eprint") else None,
         }
 
         publication_data = {
             "journal": fields.get("journal"),
+            "journal_source": "input" if fields.get("journal") else None,
         }
+
+        # Parse citation count
+        citation_count_data = None
+        if "citation_count" in fields:
+            try:
+                # Try parsing as JSON first (for enriched BibTeX files)
+                import json
+                cc_raw = fields["citation_count"]
+                if isinstance(cc_raw, str) and cc_raw.strip().startswith("{"):
+                    citation_count_data = json.loads(cc_raw)
+                    # Add source if not present
+                    if "total_source" not in citation_count_data:
+                        citation_count_data["total_source"] = "input"
+                else:
+                    # Simple integer format
+                    citation_count_data = {
+                        "total": int(cc_raw),
+                        "total_source": "input"
+                    }
+            except (ValueError, TypeError, json.JSONDecodeError):
+                pass
 
         url_data = {
             "pdf": fields.get("url"),
         }
 
-        # Use utility function for backward compatibility
-        from scitex.scholar.utils.paper_utils import paper_from_structured
+        # Create Paper with Pydantic structure
+        paper = Paper()
 
-        paper = paper_from_structured(
-            basic=basic_data,
-            id=id_data,
-            publication=publication_data,
-            url=url_data,
-            project=self.project,
-            # config is not stored in Paper anymore
-        )
+        # Set basic metadata
+        paper.metadata.basic.title = basic_data.get("title", "")
+        paper.metadata.basic.authors = basic_data.get("authors")
+        paper.metadata.basic.abstract = basic_data.get("abstract")
+        paper.metadata.basic.year = basic_data.get("year")
+        paper.metadata.basic.keywords = basic_data.get("keywords")
 
+        # Set ID metadata
+        if id_data.get("doi"):
+            paper.metadata.set_doi(id_data["doi"])
+        paper.metadata.id.pmid = id_data.get("pmid")
+        paper.metadata.id.arxiv_id = id_data.get("arxiv_id")
+
+        # Set publication metadata
+        paper.metadata.publication.journal = publication_data.get("journal")
+        paper.metadata.publication.volume = publication_data.get("volume")
+        paper.metadata.publication.issue = publication_data.get("issue")
+        paper.metadata.publication.publisher = publication_data.get("publisher")
+
+        # Set citation count
+        if citation_count_data and citation_count_data.get("total") is not None:
+            paper.metadata.citation_count.total = citation_count_data["total"]
+
+        # Set impact factor
+        if "journal_impact_factor" in fields:
+            impact_str = str(fields["journal_impact_factor"])
+            if impact_str.replace(".", "").isdigit():
+                paper.metadata.publication.impact_factor = float(impact_str)
+
+        # Set URL metadata
+        if url_data.get("pdf"):
+            paper.metadata.url.pdfs.append({"url": url_data["pdf"], "source": "bibtex"})
+
+        # Set container metadata
+        paper.container.projects = [self.project] if self.project else []
+
+        # Set BibTeX metadata as special fields
         paper._original_bibtex_fields = fields.copy()
         paper._bibtex_entry_type = entry.get("entry_type", "misc")
         paper._bibtex_key = entry.get("key", "")
@@ -166,8 +237,9 @@ class BibTeXHandler:
         """Handle enriched metadata from BibTeX fields."""
         if "citation_count" in fields:
             try:
-                paper.citation_count.total = int(fields["citation_count"])
-                paper.citation_count.source = fields.get(
+                citation_str = str(fields["citation_count"]).replace(",", "")
+                paper.citation_count.total = int(citation_str)
+                paper.citation_count.total_engines = fields.get(
                     "citation_count_source", "bibtex"
                 )
             except (ValueError, AttributeError):
@@ -177,7 +249,7 @@ class BibTeXHandler:
             if "impact_factor" in field_name and "JCR" in field_name:
                 try:
                     paper.publication.impact_factor = float(fields[field_name])
-                    paper.publication.impact_factor_source = fields.get(
+                    paper.publication.impact_factor_engines = fields.get(
                         "impact_factor_source", "bibtex"
                     )
                     break
@@ -187,7 +259,8 @@ class BibTeXHandler:
         for field_name in fields:
             if "quartile" in field_name and "JCR" in field_name:
                 try:
-                    paper.publication.journal_quartile = fields[field_name]
+                    # Store in system or publication section
+                    paper.publication["journal_quartile"] = fields[field_name]
                     break
                 except AttributeError:
                     pass
@@ -199,7 +272,14 @@ class BibTeXHandler:
                 pass
         if "pages" in fields:
             try:
-                paper.publication.pages = fields["pages"]
+                # Split pages into first_page and last_page
+                pages = fields["pages"]
+                if pages and "-" in str(pages):
+                    first, last = str(pages).split("-", 1)
+                    paper.publication.first_page = first.strip()
+                    paper.publication.last_page = last.strip()
+                else:
+                    paper.publication.first_page = pages
             except AttributeError:
                 pass
 
@@ -207,61 +287,63 @@ class BibTeXHandler:
         """Convert a Paper object to a BibTeX entry dictionary."""
         # Create entry type based on available data
         entry_type = getattr(paper, "_bibtex_entry_type", "misc")
-        if paper.journal:
+        if paper.metadata.publication.journal:
             entry_type = "article"
         elif hasattr(paper, "booktitle") and paper.booktitle:
             entry_type = "inproceedings"
 
         # Create a unique key from authors and year
-        first_author = paper.authors[0].split()[-1] if paper.authors else "Unknown"
-        year = paper.year or "NoYear"
+        authors = paper.metadata.basic.authors
+        first_author = authors[0].split()[-1] if authors else "Unknown"
+        year = paper.metadata.basic.year or "NoYear"
         key = getattr(paper, "_bibtex_key", f"{first_author}-{year}")
 
         # Build fields dictionary with all available data
         fields = {}
 
         # Basic fields
-        if paper.title:
-            fields["title"] = paper.title
-        if paper.authors:
-            fields["author"] = " and ".join(paper.authors)
-        if paper.year:
-            fields["year"] = str(paper.year)
-        if paper.abstract:
-            fields["abstract"] = paper.abstract
-        if paper.keywords:
-            fields["keywords"] = ", ".join(paper.keywords)
+        if paper.metadata.basic.title:
+            fields["title"] = paper.metadata.basic.title
+        if paper.metadata.basic.authors:
+            fields["author"] = " and ".join(paper.metadata.basic.authors)
+        if paper.metadata.basic.year:
+            fields["year"] = str(paper.metadata.basic.year)
+        if paper.metadata.basic.abstract:
+            fields["abstract"] = paper.metadata.basic.abstract
+        if paper.metadata.basic.keywords:
+            fields["keywords"] = ", ".join(paper.metadata.basic.keywords)
 
         # Identifiers
-        if paper.doi:
-            fields["doi"] = paper.doi
-        if paper.pmid:
-            fields["pmid"] = paper.pmid
-        if paper.arxiv_id:
-            fields["eprint"] = paper.arxiv_id
+        if paper.metadata.id.doi:
+            fields["doi"] = paper.metadata.id.doi
+        if paper.metadata.id.pmid:
+            fields["pmid"] = paper.metadata.id.pmid
+        if paper.metadata.id.arxiv_id:
+            fields["eprint"] = paper.metadata.id.arxiv_id
 
         # Publication info
-        if paper.journal:
-            fields["journal"] = paper.journal
-        if paper.volume:
-            fields["volume"] = paper.volume
-        if paper.pages:
-            fields["pages"] = paper.pages
+        if paper.metadata.publication.journal:
+            fields["journal"] = paper.metadata.publication.journal
+        if paper.metadata.publication.volume:
+            fields["volume"] = paper.metadata.publication.volume
+        if paper.metadata.publication.pages:
+            fields["pages"] = paper.metadata.publication.pages
+
+        # Metrics
+        citation_count_val = paper.metadata.citation_count.total
+        if citation_count_val is not None and citation_count_val != 0:
+            fields["citation_count"] = str(int(citation_count_val))
+
+        impact_factor_val = paper.metadata.publication.impact_factor
+        if impact_factor_val is not None:
+            fields["journal_impact_factor"] = str(impact_factor_val)
 
         # URLs
-        if paper.pdf_url:
-            fields["url"] = paper.pdf_url
-
-        # Enrichment metadata (if available)
-        if paper.citation_count and paper.citation_count > 0:
-            fields["citation_count"] = str(paper.citation_count)
-            if hasattr(paper, "citation_count_source"):
-                fields["citation_count_source"] = paper.citation_count_source
-
-        if hasattr(paper, "impact_factor") and paper.impact_factor:
-            fields["impact_factor"] = str(paper.impact_factor)
-            if hasattr(paper, "impact_factor_source"):
-                fields["impact_factor_source"] = paper.impact_factor_source
+        if paper.metadata.url.pdfs and len(paper.metadata.url.pdfs) > 0:
+            # Use the first PDF URL
+            pdf_url = paper.metadata.url.pdfs[0].get("url")
+            if pdf_url:
+                fields["url"] = pdf_url if isinstance(pdf_url, str) else str(pdf_url)
 
         # Include original BibTeX fields if they exist
         if hasattr(paper, "_original_bibtex_fields"):
@@ -426,8 +508,10 @@ class BibTeXHandler:
 
         for paper in papers:
             # Create keys for indexing
-            doi_key = paper.doi.lower() if paper.doi else None
-            title_key = self._normalize_title(paper.title) if paper.title else None
+            doi = paper.metadata.id.doi
+            doi_key = doi.lower() if doi else None
+            title = paper.metadata.basic.title
+            title_key = self._normalize_title(title) if title else None
 
             is_duplicate = False
             merge_with = None
@@ -485,18 +569,24 @@ class BibTeXHandler:
     def _are_same_paper(self, paper1: "Paper", paper2: "Paper") -> bool:
         """Determine if two papers are the same based on metadata."""
         # If both have DOIs and they match
-        if paper1.doi and paper2.doi:
-            return paper1.doi.lower() == paper2.doi.lower()
+        doi1 = paper1.metadata.id.doi
+        doi2 = paper2.metadata.id.doi
+        if doi1 and doi2:
+            return doi1.lower() == doi2.lower()
 
         # Check title similarity
-        if paper1.title and paper2.title:
-            title1 = self._normalize_title(paper1.title)
-            title2 = self._normalize_title(paper2.title)
+        title1_raw = paper1.metadata.basic.title
+        title2_raw = paper2.metadata.basic.title
+        if title1_raw and title2_raw:
+            title1 = self._normalize_title(title1_raw)
+            title2 = self._normalize_title(title2_raw)
 
             if title1 == title2:
                 # Check year (allow 1 year difference for online vs print)
-                if paper1.year and paper2.year:
-                    if abs(paper1.year - paper2.year) <= 1:
+                year1 = paper1.metadata.basic.year
+                year2 = paper2.metadata.basic.year
+                if year1 and year2:
+                    if abs(year1 - year2) <= 1:
                         return True
                 else:
                     # No year to compare, assume same if title matches
@@ -511,14 +601,18 @@ class BibTeXHandler:
         # Calculate completeness score for each paper
         score1 = sum([
             1 for field in [
-                paper1.doi, paper1.abstract, paper1.journal,
-                paper1.citation_count, paper1.pdf_url, paper1.authors
+                paper1.metadata.id.doi, paper1.metadata.basic.abstract,
+                paper1.metadata.publication.journal,
+                paper1.metadata.citation_count.total,
+                paper1.metadata.url.pdfs, paper1.metadata.basic.authors
             ] if field
         ])
         score2 = sum([
             1 for field in [
-                paper2.doi, paper2.abstract, paper2.journal,
-                paper2.citation_count, paper2.pdf_url, paper2.authors
+                paper2.metadata.id.doi, paper2.metadata.basic.abstract,
+                paper2.metadata.publication.journal,
+                paper2.metadata.citation_count.total,
+                paper2.metadata.url.pdfs, paper2.metadata.basic.authors
             ] if field
         ])
 
@@ -531,46 +625,52 @@ class BibTeXHandler:
             donor = paper1
 
         # Fill in missing fields from donor
-        if not merged.doi and donor.doi:
-            merged.doi = donor.doi
-        if not merged.abstract and donor.abstract:
-            merged.abstract = donor.abstract
-        if not merged.journal and donor.journal:
-            merged.journal = donor.journal
-        if not merged.publisher and donor.publisher:
-            merged.publisher = donor.publisher
-        if not merged.volume and donor.volume:
-            merged.volume = donor.volume
-        if not merged.issue and donor.issue:
-            merged.issue = donor.issue
-        if not merged.pages and donor.pages:
-            merged.pages = donor.pages
-        if not merged.pdf_url and donor.pdf_url:
-            merged.pdf_url = donor.pdf_url
-        if not merged.url and donor.url:
-            merged.url = donor.url
+        if not merged.metadata.id.doi and donor.metadata.id.doi:
+            merged.metadata.set_doi(donor.metadata.id.doi)
+        if not merged.metadata.basic.abstract and donor.metadata.basic.abstract:
+            merged.metadata.basic.abstract = donor.metadata.basic.abstract
+        if not merged.metadata.publication.journal and donor.metadata.publication.journal:
+            merged.metadata.publication.journal = donor.metadata.publication.journal
+        if not merged.metadata.publication.publisher and donor.metadata.publication.publisher:
+            merged.metadata.publication.publisher = donor.metadata.publication.publisher
+        if not merged.metadata.publication.volume and donor.metadata.publication.volume:
+            merged.metadata.publication.volume = donor.metadata.publication.volume
+        if not merged.metadata.publication.issue and donor.metadata.publication.issue:
+            merged.metadata.publication.issue = donor.metadata.publication.issue
+        if not merged.metadata.publication.pages and donor.metadata.publication.pages:
+            merged.metadata.publication.pages = donor.metadata.publication.pages
+        # Merge PDF URLs (union)
+        for donor_pdf in donor.metadata.url.pdfs:
+            if not any(p.get("url") == donor_pdf.get("url") for p in merged.metadata.url.pdfs):
+                merged.metadata.url.pdfs.append(donor_pdf)
+        if not merged.metadata.url.publisher and donor.metadata.url.publisher:
+            merged.metadata.url.publisher = donor.metadata.url.publisher
 
         # Take maximum citation count
-        if donor.citation_count:
-            if not merged.citation_count or donor.citation_count > merged.citation_count:
-                merged.citation_count = donor.citation_count
+        donor_cc = donor.metadata.citation_count.total or 0
+        merged_cc = merged.metadata.citation_count.total or 0
+
+        if donor_cc > merged_cc:
+            merged.metadata.citation_count.total = donor_cc
 
         # Merge authors (union, preserving order)
-        if donor.authors and not merged.authors:
-            merged.authors = donor.authors
-        elif donor.authors and merged.authors:
+        if donor.metadata.basic.authors and not merged.metadata.basic.authors:
+            merged.metadata.basic.authors = donor.metadata.basic.authors
+        elif donor.metadata.basic.authors and merged.metadata.basic.authors:
             # Add unique authors from donor
-            for author in donor.authors:
-                if author not in merged.authors:
-                    merged.authors.append(author)
+            for author in donor.metadata.basic.authors:
+                if author not in merged.metadata.basic.authors:
+                    merged.metadata.basic.authors.append(author)
 
         # Merge keywords (union)
-        if donor.keywords:
-            if merged.keywords:
-                all_keywords = list(set(merged.keywords + donor.keywords))
-                merged.keywords = sorted(all_keywords)
+        donor_keywords = donor.metadata.basic.keywords
+        merged_keywords = merged.metadata.basic.keywords
+        if donor_keywords:
+            if merged_keywords:
+                all_keywords = list(set(merged_keywords + donor_keywords))
+                merged.metadata.basic.keywords = sorted(all_keywords)
             else:
-                merged.keywords = donor.keywords
+                merged.metadata.basic.keywords = donor_keywords
 
         return merged
 
@@ -642,13 +742,18 @@ class BibTeXHandler:
                 bibtex_lines.append("")
 
                 # Add papers from this source
-                source_paper_set = set(p.title for p in source_papers if p.title)
+                source_paper_set = set(
+                    p.metadata.basic.title
+                    for p in source_papers
+                    if p.metadata.basic.title
+                )
                 for paper in paper_list:
-                    if paper.title and paper.title in source_paper_set:
+                    title = paper.metadata.basic.title
+                    if title and title in source_paper_set:
                         entry = self.paper_to_bibtex_entry(paper)
                         bibtex_lines.append(self._format_bibtex_entry(entry))
                         # Remove from set to avoid duplicates
-                        source_paper_set.discard(paper.title)
+                        source_paper_set.discard(title)
 
             # Add any papers not assigned to a source (e.g., merged duplicates)
             all_source_titles = set()
@@ -696,5 +801,218 @@ class BibTeXHandler:
         lines.append("}\n")
 
         return "\n".join(lines)
+
+    # =========================================================================
+    # Bibliography Directory Management
+    # =========================================================================
+
+    def setup_project_bibliography(
+        self,
+        project: str,
+        bibtex_files: Optional[List[Union[str, Path]]] = None,
+    ) -> Path:
+        """Setup info/bibliography directory structure for a project.
+
+        Creates:
+            - info/bibliography/
+            - info/bibliography/*.bib (symlinks to source files)
+            - info/bibliography/combined.bib (merged unique entries)
+            - info/{project}.bib -> bibliography/combined.bib
+
+        Args:
+            project: Project name
+            bibtex_files: Optional list of BibTeX files to include
+
+        Returns:
+            Path to combined.bib file
+        """
+        if not self.config:
+            raise ValueError("Config required for project bibliography management")
+
+        # Get project directory
+        project_dir = self.config.path_manager.get_library_project_dir(project)
+        bib_dir = project_dir / "info" / "bibliography"
+        bib_dir.mkdir(parents=True, exist_ok=True)
+
+        logger.info(f"Setting up bibliography for project: {project}")
+
+        # Link provided BibTeX files
+        if bibtex_files:
+            for bib_file in bibtex_files:
+                bib_file = Path(bib_file)
+                if bib_file.exists():
+                    link_name = bib_dir / f"{bib_file.stem}.bib"
+                    if not link_name.exists():
+                        link_name.symlink_to(bib_file.absolute())
+                        logger.info(f"Linked: {link_name.name} -> {bib_file}")
+
+        # Merge all BibTeX files in bibliography directory
+        combined_path = self.update_combined_bibliography(project)
+
+        # Create convenience symlink at project root
+        project_bib_link = project_dir / "info" / f"{project}.bib"
+        if project_bib_link.exists() or project_bib_link.is_symlink():
+            project_bib_link.unlink()
+        project_bib_link.symlink_to(f"bibliography/combined.bib")
+        logger.success(f"Created {project}.bib -> bibliography/combined.bib")
+
+        return combined_path
+
+    def update_combined_bibliography(self, project: str) -> Path:
+        """Update combined.bib with all BibTeX files in bibliography directory.
+
+        Args:
+            project: Project name
+
+        Returns:
+            Path to updated combined.bib
+        """
+        if not self.config:
+            raise ValueError("Config required for project bibliography management")
+
+        project_dir = self.config.path_manager.get_library_project_dir(project)
+        bib_dir = project_dir / "info" / "bibliography"
+
+        if not bib_dir.exists():
+            logger.warning(f"Bibliography directory not found: {bib_dir}")
+            return None
+
+        # Find all BibTeX files (excluding combined.bib itself)
+        bib_files = [
+            f for f in bib_dir.glob("*.bib")
+            if f.name not in ["combined.bib", "merged.bib"]
+        ]
+
+        if not bib_files:
+            logger.warning("No BibTeX files found in bibliography directory")
+            return None
+
+        logger.info(f"Merging {len(bib_files)} BibTeX files...")
+
+        # Merge files
+        combined_path = bib_dir / "combined.bib"
+        merged_papers = self.merge_bibtex_files(
+            bib_files,
+            output_path=combined_path,
+            dedup_strategy="smart"
+        )
+
+        logger.success(
+            f"Updated combined.bib: {len(merged_papers)} unique papers "
+            f"from {len(bib_files)} files"
+        )
+
+        return combined_path
+
+    def export_project_bibliography(
+        self,
+        project: str,
+        output_path: Optional[Union[str, Path]] = None,
+        include_all_entries: bool = True
+    ) -> Path:
+        """Export all papers from project library to BibTeX file.
+
+        This creates a BibTeX file from ALL papers in the project library,
+        not just from existing BibTeX files. Useful for exporting the complete
+        project bibliography after downloads and enrichment.
+
+        Args:
+            project: Project name
+            output_path: Optional output path (default: info/bibliography/library_export.bib)
+            include_all_entries: If True, export all papers; if False, only papers with PDFs
+
+        Returns:
+            Path to exported BibTeX file
+        """
+        if not self.config:
+            raise ValueError("Config required for project bibliography export")
+
+        project_dir = self.config.path_manager.get_library_project_dir(project)
+        master_dir = self.config.path_manager.get_library_master_dir()
+
+        # Default output path
+        if output_path is None:
+            bib_dir = project_dir / "info" / "bibliography"
+            bib_dir.mkdir(parents=True, exist_ok=True)
+            output_path = bib_dir / "library_export.bib"
+        else:
+            output_path = Path(output_path)
+
+        logger.info(f"Exporting project bibliography: {project}")
+
+        # Collect all papers from project symlinks
+        from ..core.Paper import Paper
+        papers = []
+
+        for item in project_dir.iterdir():
+            if not item.is_symlink():
+                continue
+
+            # Resolve symlink to master directory
+            try:
+                master_path = item.resolve()
+                if not master_path.exists():
+                    logger.warning(f"Broken symlink: {item.name}")
+                    continue
+
+                # Load metadata.json
+                metadata_file = master_path / "metadata.json"
+                if not metadata_file.exists():
+                    logger.warning(f"No metadata: {master_path.name}")
+                    continue
+
+                # Check for PDF if filtering
+                if not include_all_entries:
+                    pdf_files = list(master_path.glob("*.pdf"))
+                    if not pdf_files:
+                        continue
+
+                # Load paper
+                paper = Paper.from_file(metadata_file)
+                if paper:
+                    papers.append(paper)
+
+            except Exception as e:
+                logger.warning(f"Error loading {item.name}: {e}")
+                continue
+
+        logger.info(f"Found {len(papers)} papers in project library")
+
+        if not papers:
+            logger.warning("No papers found to export")
+            return None
+
+        # Convert to BibTeX
+        from datetime import datetime
+        from ..core.Papers import Papers
+
+        papers_collection = Papers(papers, project=project)
+
+        # Save with project info header
+        bibtex_content = []
+        bibtex_content.append("% ============================================================")
+        bibtex_content.append(f"% SciTeX Scholar - Project Library Export")
+        bibtex_content.append(f"% Project: {project}")
+        bibtex_content.append(f"% Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        bibtex_content.append(f"% Entries: {len(papers)}")
+        bibtex_content.append(f"% Filter: {'All papers' if include_all_entries else 'Papers with PDFs only'}")
+        bibtex_content.append("% ============================================================")
+        bibtex_content.append("")
+
+        # Add papers
+        for paper in papers:
+            entry = self.paper_to_bibtex_entry(paper)
+            bibtex_content.append(self._format_bibtex_entry(entry))
+
+        # Write to file
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text("\n".join(bibtex_content))
+
+        logger.success(f"Exported {len(papers)} papers to: {output_path}")
+
+        # Update combined.bib to include this export
+        self.update_combined_bibliography(project)
+
+        return output_path
 
 # EOF

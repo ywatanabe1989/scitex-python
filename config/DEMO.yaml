@@ -1,0 +1,8 @@
+# Timestamp: "2025-10-16 03:14:09 (ywatanabe)"
+# File: ./config/DEMO.yaml
+
+demo:
+  xxx: 111
+  yyy: 222
+
+# EOF
