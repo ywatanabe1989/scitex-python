@@ -15,7 +15,8 @@ Pipeline Steps:
   1. Create worker tasks with semaphore control
   2. Each worker uses ScholarPipelineMetadataSingle
   3. Parallel API calls for metadata enrichment
-  4. Aggregate results
+  4. Impact factor enrichment via ImpactFactorEngine
+  5. Aggregate results
 
 Dependencies:
   - API engines only (no playwright/browser)
@@ -93,6 +94,7 @@ class ScholarPipelineMetadataParallel:
         logger.info(
             f"{self.name}: Enriching {total} papers with {effective_workers} workers"
         )
+        logger.info(f"{self.name}: on_progress callback={'PROVIDED' if on_progress else 'NOT PROVIDED'}")
 
         # Create semaphore for controlled parallelism
         semaphore = asyncio.Semaphore(effective_workers)
@@ -133,6 +135,7 @@ class ScholarPipelineMetadataParallel:
 
                 # Call progress callback if provided
                 if on_progress:
+                    logger.info(f"{self.name}: About to invoke callback for paper {index + 1}/{total}")
                     async with progress_lock:
                         completed_count += 1
 
@@ -144,6 +147,7 @@ class ScholarPipelineMetadataParallel:
 
                         # Invoke callback (synchronous callback from async context)
                         try:
+                            logger.info(f"{self.name}: Calling on_progress({completed_count}, {total}, title={title[:30]}...)")
                             on_progress(
                                 completed_count,
                                 total,
@@ -154,6 +158,7 @@ class ScholarPipelineMetadataParallel:
                                     'index': index,
                                 }
                             )
+                            logger.info(f"{self.name}: Callback completed successfully")
                         except Exception as cb_error:
                             logger.error(f"{self.name}: Progress callback error: {cb_error}")
 

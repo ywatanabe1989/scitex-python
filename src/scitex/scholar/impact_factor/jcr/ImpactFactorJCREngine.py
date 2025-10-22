@@ -45,9 +45,11 @@ from scitex import logging
 logger = logging.getLogger(__name__)
 
 """Parameters"""
-DEFAULT_DB = (
-    Path(".") / "data" / "scholar" / "impact_factor" / "JCR_IF_2024.db"
-)
+# Use absolute path based on package location
+# __file__ is in: src/scitex/scholar/impact_factor/jcr/ImpactFactorJCREngine.py
+# We need: data/scholar/impact_factor/JCR_IF_2024.db (sibling to src/)
+_PACKAGE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
+DEFAULT_DB = _PACKAGE_DIR / "data" / "scholar" / "impact_factor" / "JCR_IF_2024.db"
 
 """Functions & Classes"""
 # Database model
