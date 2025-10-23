@@ -1,0 +1,95 @@
+Bootstrap: docker
+From: pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
+
+%labels
+    Author ywatanabe
+    Version 1.0.0
+    Description SciTeX ML - Machine Learning and Deep Learning environment with PyTorch
+
+%help
+    SciTeX ML Container
+
+    Includes:
+    - PyTorch 2.1.0 with CUDA 11.8 support
+    - Transformers (Hugging Face)
+    - scikit-learn, optuna
+    - ML utilities
+
+    Size: ~3GB
+
+    Usage:
+        singularity exec scitex-ml.sif python train_model.py
+        singularity exec --nv scitex-ml.sif python train_gpu.py  # With GPU
+
+    Note: Use --nv flag for GPU access
+
+%post
+    # Update package list
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        git \
+        wget \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Upgrade pip
+    pip install --no-cache-dir --upgrade pip setuptools wheel
+
+    # Install PyTorch ecosystem (already included in base, but ensure latest)
+    pip install --no-cache-dir \
+        torch \
+        torchvision \
+        torchaudio
+
+    # Install Transformers and Accelerate
+    pip install --no-cache-dir \
+        transformers>=4.30.0 \
+        accelerate>=0.20.0 \
+        datasets>=2.14.0 \
+        tokenizers>=0.13.0
+
+    # Install scikit-learn ecosystem
+    pip install --no-cache-dir \
+        scikit-learn>=1.3.0 \
+        scikit-image>=0.21.0
+
+    # Install optimization tools
+    pip install --no-cache-dir \
+        optuna>=3.3.0 \
+        hyperopt>=0.2.7
+
+    # Install utilities
+    pip install --no-cache-dir \
+        pandas>=2.0.0 \
+        numpy>=1.24.0 \
+        matplotlib>=3.7.0 \
+        seaborn>=0.12.0 \
+        tqdm>=4.65.0 \
+        click>=8.0.0 \
+        PyYAML>=6.0.0
+
+    # Clean up
+    apt-get clean
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* ~/.cache
+
+%runscript
+    exec python "$@"
+
+%environment
+    export LC_ALL=C
+    export PYTHONUNBUFFERED=1
+    export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+    export TRANSFORMERS_CACHE=/tmp/transformers_cache
+    export HF_HOME=/tmp/huggingface
+
+%test
+    # Test PyTorch
+    python -c "import torch; print(f'PyTorch: {torch.__version__}')"
+    python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
+
+    # Test Transformers
+    python -c "import transformers; print(f'Transformers: {transformers.__version__}')"
+
+    # Test scikit-learn
+    python -c "import sklearn; print(f'scikit-learn: {sklearn.__version__}')"
+
+# EOF
