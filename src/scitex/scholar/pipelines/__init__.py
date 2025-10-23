@@ -10,6 +10,8 @@ Pipelines:
 - ScholarPipelineSingle: Process one paper (DOI → metadata → URLs → PDF)
 - ScholarPipelineParallel: Process multiple papers in parallel
 - ScholarPipelineBibTeX: Import and process BibTeX files
+- ScholarPipelineMetadataSingle: Enrich one paper with metadata only (API-only, no browser)
+- ScholarPipelineMetadataParallel: Enrich multiple papers with metadata in parallel (API-only)
 
 Usage:
     # Single paper processing
@@ -39,11 +41,15 @@ Usage:
 from .ScholarPipelineSingle import ScholarPipelineSingle
 from .ScholarPipelineParallel import ScholarPipelineParallel
 from .ScholarPipelineBibTeX import ScholarPipelineBibTeX
+from .ScholarPipelineMetadataSingle import ScholarPipelineMetadataSingle
+from .ScholarPipelineMetadataParallel import ScholarPipelineMetadataParallel
 
 __all__ = [
     "ScholarPipelineSingle",
     "ScholarPipelineParallel",
     "ScholarPipelineBibTeX",
+    "ScholarPipelineMetadataSingle",
+    "ScholarPipelineMetadataParallel",
 ]
 
 # EOF

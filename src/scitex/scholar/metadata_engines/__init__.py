@@ -10,12 +10,18 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 """
-DOI engines for the SingleDOIResolver.
+Metadata engines for Scholar search functionality.
 
-This module provides different engines for resolving DOIs including
-CrossRef, PubMed, OpenAlex, and Semantic Scholar.
+This module provides different engines for resolving DOIs and searching
+academic papers including CrossRef, PubMed, OpenAlex, Semantic Scholar,
+and arXiv. Also provides pipeline implementations for single and parallel
+search operations.
 """
 
 from .ScholarEngine import ScholarEngine
+
+__all__ = [
+    "ScholarEngine",
+]
 
 # EOF
