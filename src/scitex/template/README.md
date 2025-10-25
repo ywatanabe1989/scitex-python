@@ -45,7 +45,7 @@ Container-based project with Singularity.
 - Environment specifications
 - Deployment configuration
 
-### 4. Paper Directory (`create_paper_directory`)
+### 4. Paper Directory (`create_writer_directory`)
 Academic paper writing template with scitex-writer.
 
 **Use case:** Writing academic papers with LaTeX and BibTeX management
@@ -67,7 +67,7 @@ from scitex.template import (
     create_research,
     create_pip_project,
     create_singularity,
-    create_paper_directory,
+    create_writer_directory,
 )
 
 # Create a research project
@@ -80,7 +80,7 @@ create_pip_project("my_package", "~/projects")
 create_singularity("my_container")
 
 # Create a paper directory
-create_paper_directory("my_paper", "~/papers")
+create_writer_directory("my_paper", "~/papers")
 ```
 
 ### Command Line
@@ -99,8 +99,8 @@ python -m scitex create_singularity my_container
 python -m scitex create_singularity my_container ~/containers
 
 # Paper directory
-python -m scitex create_paper_directory my_paper
-python -m scitex create_paper_directory my_paper ~/papers
+python -m scitex create_writer_directory my_paper
+python -m scitex create_writer_directory my_paper ~/papers
 ```
 
 ### Get Template Information
