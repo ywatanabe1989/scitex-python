@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/template/create_paper_directory.py
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/template/create_writer_directory.py
 
 """
 Create a new paper directory from the scitex-writer template.
@@ -14,7 +14,7 @@ from ._create_project import create_project
 TEMPLATE_REPO_URL = "git@github.com:ywatanabe1989/scitex-writer.git"
 
 
-def create_paper_directory(project_name: str, target_dir: Optional[str] = None) -> bool:
+def create_writer_directory(project_name: str, target_dir: Optional[str] = None) -> bool:
     """
     Create a new paper directory from the scitex-writer template repository.
 
@@ -32,8 +32,8 @@ def create_paper_directory(project_name: str, target_dir: Optional[str] = None) 
 
     Example
     -------
-    >>> from scitex.template import create_paper_directory
-    >>> create_paper_directory("my_paper")
+    >>> from scitex.template import create_writer_directory
+    >>> create_writer_directory("my_paper")
     """
     return create_project(
         project_name,
@@ -45,7 +45,7 @@ def create_paper_directory(project_name: str, target_dir: Optional[str] = None) 
 
 def main(args: list = None) -> None:
     """
-    Command-line interface for create_paper_directory.
+    Command-line interface for create_writer_directory.
 
     Parameters
     ----------
@@ -56,21 +56,21 @@ def main(args: list = None) -> None:
         args = sys.argv[1:]
 
     if len(args) < 1:
-        print("Usage: python -m scitex create_paper_directory <project-name> [target-dir]")
+        print("Usage: python -m scitex create_writer_directory <project-name> [target-dir]")
         print("")
         print("Arguments:")
         print("  project-name  Name of the new paper directory/project")
         print("  target-dir    Optional: Directory where project will be created (default: current directory)")
         print("")
         print("Example:")
-        print("  python -m scitex create_paper_directory my_paper")
-        print("  python -m scitex create_paper_directory my_paper ~/papers")
+        print("  python -m scitex create_writer_directory my_paper")
+        print("  python -m scitex create_writer_directory my_paper ~/papers")
         sys.exit(1)
 
     project_name = args[0]
     target_dir = args[1] if len(args) > 1 else None
 
-    success = create_paper_directory(project_name, target_dir)
+    success = create_writer_directory(project_name, target_dir)
     sys.exit(0 if success else 1)
 
 

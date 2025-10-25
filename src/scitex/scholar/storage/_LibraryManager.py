@@ -1671,7 +1671,7 @@ class LibraryManager:
             )
             return False
 
-    def create_paper_directory_structure(
+    def create_writer_directory_structure(
         self, paper_id: str, project: str
     ) -> Path:
         """Create basic paper directory structure."""
