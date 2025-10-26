@@ -16,12 +16,13 @@ __FILE__ = __file__
 """
 Find PDF URLs using Python Zotero translators.
 
-This module uses the zotero-translators-python package instead of running
-JavaScript translators. It provides better performance, reliability, and
-maintainability compared to the JavaScript-based approach.
+This module uses the built-in scitex.scholar.translators (integrated from
+zotero-translators-python) instead of running JavaScript translators. It provides
+better performance, reliability, and maintainability compared to the
+JavaScript-based approach.
 
 Features:
-- 100+ Python translators available
+- 300+ Python translators available
 - No JavaScript execution overhead
 - Better error handling
 - Easier debugging
@@ -36,7 +37,7 @@ Usage:
 from typing import List
 
 from playwright.async_api import Page
-from zotero_translators_python.core.registry import TranslatorRegistry
+from scitex.scholar.url_finder.translators.core.registry import TranslatorRegistry
 
 from scitex import logging
 from scitex.browser import browser_logger

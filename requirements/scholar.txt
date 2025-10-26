@@ -14,3 +14,4 @@ pdfplumber
 PyMuPDF
 pytesseract
 bibtexparser
+playwright>=1.40.0
