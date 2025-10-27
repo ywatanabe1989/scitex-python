@@ -10,13 +10,14 @@ handling subprocess execution, output parsing, and exit code management.
 """
 
 import subprocess
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, List, Tuple
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
+from scitex.logging import getLogger
+
+logger = getLogger(__name__)
 
 
 @dataclass

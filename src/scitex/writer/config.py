@@ -11,9 +11,10 @@ Provides configuration management and helper functions for scitex.writer.
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
-import logging
 
-logger = logging.getLogger(__name__)
+from scitex.logging import getLogger
+
+logger = getLogger(__name__)
 
 
 @dataclass
