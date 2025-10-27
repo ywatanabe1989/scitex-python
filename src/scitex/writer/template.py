@@ -9,11 +9,12 @@ Provides functions to create and copy writer project templates.
 """
 
 import shutil
-import logging
 from pathlib import Path
 from typing import Optional
 
-logger = logging.getLogger(__name__)
+from scitex.logging import getLogger
+
+logger = getLogger(__name__)
 
 
 def copy_template(source: Path, dest: Path, name: str = None) -> Path:
@@ -54,13 +55,42 @@ def copy_template(source: Path, dest: Path, name: str = None) -> Path:
     return dest
 
 
+def init_directory(project_name: str, target_dir: Optional[str] = None) -> bool:
+    """
+    Initialize a new writer project directory from scitex-writer template.
+
+    Convenience wrapper for scitex.template.create_writer_directory.
+    Handles template cloning and project setup automatically.
+
+    Args:
+        project_name: Name of the new paper directory/project
+        target_dir: Directory where the project will be created (optional)
+
+    Returns:
+        True if successful, False otherwise
+
+    Examples:
+        >>> from scitex.writer import init_directory
+        >>> init_directory("my_paper")
+        >>> init_directory("my_paper", target_dir="/path/to/papers")
+    """
+    from scitex.template import create_writer_directory as _create
+
+    try:
+        result = _create(project_name, target_dir)
+        return result
+    except Exception as e:
+        logger.error(f"Failed to initialize writer directory: {e}")
+        return False
+
+
 def create_writer_project(
     dest: Path,
     name: str,
     template_source: Optional[Path] = None
 ) -> Path:
     """
-    Create new writer project from template.
+    Create new writer project from local template.
 
     Args:
         dest: Destination directory for new project
@@ -76,6 +106,10 @@ def create_writer_project(
         ...     Path("/path/to/my-paper"),
         ...     name="My Paper"
         ... )
+
+    Note:
+        This requires the template to be available locally.
+        For automatic template cloning, use init_directory() instead.
     """
     dest = Path(dest)
 
@@ -94,7 +128,8 @@ def create_writer_project(
         if template_source is None:
             raise FileNotFoundError(
                 "scitex-writer template not found. "
-                "Please clone to /tmp/scitex-writer or ~/proj/scitex-writer"
+                "Please clone to /tmp/scitex-writer or ~/proj/scitex-writer, "
+                "or use init_directory() for automatic template cloning."
             )
 
     return copy_template(template_source, dest, name)
@@ -123,6 +158,7 @@ def _update_project_name(project_dir: Path, name: str) -> None:
 
 
 __all__ = [
+    'init_directory',
     'copy_template',
     'create_writer_project',
 ]

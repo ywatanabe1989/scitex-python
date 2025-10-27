@@ -31,6 +31,7 @@ Examples:
         >>> result = compile_manuscript(project_dir=writer_dir)
 """
 
+from .writer import Writer
 from .compile import (
     compile_manuscript,
     compile_supplementary,
@@ -38,26 +39,28 @@ from .compile import (
     CompilationResult,
 )
 from .watch import watch_manuscript
-from .template import create_writer_project, copy_template
+from .template import init_directory
 from .config import WriterConfig, find_writer_root
 
 __version__ = "0.1.0"
 
 __all__ = [
-    # Compilation
+    # Main class
+    'Writer',
+
+    # Initialization
+    'init_directory',
+
+    # Compilation (for advanced use)
     'compile_manuscript',
     'compile_supplementary',
     'compile_revision',
     'CompilationResult',
 
-    # Watch mode
+    # Watch mode (for advanced use)
     'watch_manuscript',
 
-    # Templates
-    'create_writer_project',
-    'copy_template',
-
-    # Configuration
+    # Configuration (for advanced use)
     'WriterConfig',
     'find_writer_root',
 ]

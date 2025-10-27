@@ -9,11 +9,12 @@ Monitors file changes and triggers automatic recompilation.
 """
 
 import subprocess
-import logging
 from pathlib import Path
 from typing import Optional, Callable
 
-logger = logging.getLogger(__name__)
+from scitex.logging import getLogger
+
+logger = getLogger(__name__)
 
 
 def watch_manuscript(
