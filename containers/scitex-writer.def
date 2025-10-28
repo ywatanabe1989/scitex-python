@@ -1,0 +1,100 @@
+Bootstrap: docker
+From: texlive/texlive:latest
+
+%labels
+    Author ywatanabe
+    Version 1.0.0
+    Description SciTeX Writer - LaTeX compilation environment with full TeXLive
+
+%help
+    SciTeX Writer Container
+
+    Includes:
+    - Full TeXLive distribution
+    - ImageMagick (image conversion)
+    - Ghostscript (PDF processing)
+    - Mermaid CLI (diagram generation)
+    - Python 3 with basic utilities
+
+    Size: ~2GB
+
+    Usage:
+        singularity exec scitex-writer.sif pdflatex manuscript.tex
+        singularity exec scitex-writer.sif bibtex manuscript
+        singularity run scitex-writer.sif /path/to/compile manuscript
+
+    App Usage:
+        singularity run --app pdflatex scitex-writer.sif manuscript.tex
+        singularity run --app bibtex scitex-writer.sif manuscript
+        singularity run --app convert scitex-writer.sif input.png output.pdf
+
+%post
+    # Update and install system dependencies
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        python3 \
+        python3-pip \
+        imagemagick \
+        ghostscript \
+        make \
+        git \
+        wget \
+        curl \
+        nodejs \
+        npm \
+        fonts-liberation \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Configure ImageMagick to allow PDF processing
+    sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml || true
+
+    # Install Mermaid CLI for diagram generation
+    npm install -g @mermaid-js/mermaid-cli
+
+    # Install Python utilities
+    pip3 install --no-cache-dir \
+        click>=8.0.0 \
+        PyYAML>=6.0.0 \
+        watchdog>=3.0.0
+
+    # Clean up
+    apt-get clean
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* ~/.npm
+
+%runscript
+    # Default: run shell command
+    exec "$@"
+
+%apprun pdflatex
+    exec pdflatex "$@"
+
+%apprun xelatex
+    exec xelatex "$@"
+
+%apprun lualatex
+    exec lualatex "$@"
+
+%apprun bibtex
+    exec bibtex "$@"
+
+%apprun biber
+    exec biber "$@"
+
+%apprun convert
+    exec convert "$@"
+
+%apprun mmdc
+    exec mmdc "$@"
+
+%apprun compile
+    # Run scitex-writer compile script
+    exec "$@"
+
+%environment
+    export LC_ALL=C
+    export TEXMFHOME=/texmf
+    export TEXMFVAR=/tmp/texmf-var
+    export TEXMFCONFIG=/tmp/texmf-config
+    export PATH=/usr/local/texlive/2024/bin/x86_64-linux:$PATH
+
+# EOF

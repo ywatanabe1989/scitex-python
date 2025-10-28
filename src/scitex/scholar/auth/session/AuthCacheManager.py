@@ -54,7 +54,14 @@ class AuthCacheManager:
         self.cache_name = cache_name
         self.cache_json = self.config.get_cache_auth_json(self.cache_name)
         self.cache_dir = self.config.get_cache_auth_dir()
-        os.chmod(self.cache_dir, 0o700)
+
+        # Ensure cache directory exists and set permissions if possible
+        Path(self.cache_dir).mkdir(parents=True, exist_ok=True)
+        try:
+            os.chmod(self.cache_dir, 0o700)
+        except OSError:
+            # Permission denied in WSL or other systems where chmod may not work
+            logger.debug(f"{self.name}: Could not set directory permissions: {self.cache_dir}")
 
         self.email = email
 

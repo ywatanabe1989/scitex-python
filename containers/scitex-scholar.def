@@ -1,0 +1,144 @@
+Bootstrap: docker
+From: python:3.10
+
+%labels
+    Author ywatanabe
+    Version 1.0.0
+    Description SciTeX Scholar - Literature management with headless Chrome for web scraping
+
+%help
+    SciTeX Scholar Container
+
+    Includes:
+    - Python 3.10
+    - Chromium (headless browser for web scraping)
+    - ChromeDriver (Selenium automation)
+    - Scholarly, PyMed, BeautifulSoup (literature APIs)
+    - Selenium, requests (web scraping)
+    - BibTeX tools (pybtex, bibtexparser)
+
+    Size: ~1GB
+
+    Usage:
+        # Run Python script with browser access
+        singularity exec scitex-scholar.sif python enrich_bibtex.py
+
+        # Run headless Chrome
+        singularity exec scitex-scholar.sif chromium-browser --headless --dump-dom https://example.com
+
+        # Selenium automation
+        singularity run scitex-scholar.sif your_scraper.py
+
+    Important Notes:
+        - Chrome runs in headless mode (no GUI)
+        - X11 forwarding not needed
+        - Works on HPC clusters without display
+
+%post
+    # Update package list
+    apt-get update
+
+    # Install system dependencies
+    apt-get install -y --no-install-recommends \
+        wget \
+        curl \
+        gnupg \
+        ca-certificates \
+        fonts-liberation \
+        libasound2 \
+        libatk-bridge2.0-0 \
+        libatk1.0-0 \
+        libatspi2.0-0 \
+        libcups2 \
+        libdbus-1-3 \
+        libdrm2 \
+        libgbm1 \
+        libgtk-3-0 \
+        libnspr4 \
+        libnss3 \
+        libwayland-client0 \
+        libxcomposite1 \
+        libxdamage1 \
+        libxfixes3 \
+        libxkbcommon0 \
+        libxrandr2 \
+        xdg-utils \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Install Chromium browser
+    apt-get update
+    apt-get install -y --no-install-recommends chromium chromium-driver
+    rm -rf /var/lib/apt/lists/*
+
+    # Upgrade pip
+    pip install --no-cache-dir --upgrade pip setuptools wheel
+
+    # Install web scraping tools
+    pip install --no-cache-dir \
+        selenium>=4.10.0 \
+        webdriver-manager>=4.0.0 \
+        beautifulsoup4>=4.12.0 \
+        lxml>=4.9.0 \
+        requests>=2.31.0 \
+        aiohttp>=3.8.0
+
+    # Install scholarly and literature APIs
+    pip install --no-cache-dir \
+        scholarly>=1.7.0 \
+        pymed>=0.8.0 \
+        biopython>=1.81 \
+        habanero>=1.2.0
+
+    # Install BibTeX tools
+    pip install --no-cache-dir \
+        pybtex>=0.24.0 \
+        bibtexparser>=1.4.0
+
+    # Install data processing
+    pip install --no-cache-dir \
+        pandas>=2.0.0 \
+        openpyxl>=3.1.0
+
+    # Install utilities
+    pip install --no-cache-dir \
+        click>=8.0.0 \
+        PyYAML>=6.0.0 \
+        python-dotenv>=1.0.0
+
+    # Clean up
+    apt-get clean
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* ~/.cache
+
+%runscript
+    exec python "$@"
+
+%apprun chromium
+    exec chromium-browser --headless --no-sandbox --disable-dev-shm-usage "$@"
+
+%apprun chrome
+    exec chromium-browser --headless --no-sandbox --disable-dev-shm-usage "$@"
+
+%apprun selenium
+    # Run Python script with Selenium
+    exec python "$@"
+
+%environment
+    export LC_ALL=C
+    export PYTHONUNBUFFERED=1
+    # Chrome headless configuration
+    export CHROME_BIN=/usr/bin/chromium-browser
+    export CHROMEDRIVER_PATH=/usr/bin/chromedriver
+    # Disable Chrome sandbox (required in containers)
+    export CHROME_ARGS="--headless --no-sandbox --disable-dev-shm-usage --disable-gpu"
+
+%test
+    # Test Chrome installation
+    chromium-browser --version
+    chromedriver --version
+
+    # Test Python packages
+    python -c "import selenium; print(f'Selenium: {selenium.__version__}')"
+    python -c "import scholarly; print('Scholarly: OK')"
+    python -c "from bs4 import BeautifulSoup; print('BeautifulSoup: OK')"
+
+# EOF

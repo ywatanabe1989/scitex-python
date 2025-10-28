@@ -6,9 +6,11 @@
 Template management for SciTeX projects.
 """
 
-from .create_research import create_research, TEMPLATE_REPO_URL as RESEARCH_URL
-from .create_pip_project import create_pip_project, TEMPLATE_REPO_URL as PIP_PROJECT_URL
-from .create_singularity import create_singularity, TEMPLATE_REPO_URL as SINGULARITY_URL
+from .clone_research import clone_research, TEMPLATE_REPO_URL as RESEARCH_URL
+from .clone_pip_project import clone_pip_project, TEMPLATE_REPO_URL as PIP_PROJECT_URL
+from .clone_singularity import clone_singularity, TEMPLATE_REPO_URL as SINGULARITY_URL
+from .clone_writer_directory import clone_writer_directory, TEMPLATE_REPO_URL as PAPER_DIRECTORY_URL
+from scitex.git import init_git_repo, find_parent_git, create_child_git, remove_child_git
 
 
 def get_available_templates_info():
@@ -74,14 +76,32 @@ def get_available_templates_info():
                 "Deployment configuration",
             ],
         },
+        {
+            "id": "paper_directory",
+            "name": "Paper Directory",
+            "description": "Academic paper writing template with scitex-writer",
+            "github_url": PAPER_DIRECTORY_URL,
+            "use_case": "Writing academic papers with LaTeX and BibTeX management",
+            "features": [
+                "LaTeX document structure",
+                "BibTeX bibliography management",
+                "Figure and table organization",
+                "Manuscript tracking",
+            ],
+        },
     ]
 
 
 __all__ = [
-    "create_research",
-    "create_pip_project",
-    "create_singularity",
+    "clone_research",
+    "clone_pip_project",
+    "clone_singularity",
+    "clone_writer_directory",
     "get_available_templates_info",
+    "init_git_repo",
+    "find_parent_git",
+    "create_child_git",
+    "remove_child_git",
 ]
 
 # EOF

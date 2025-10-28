@@ -444,4 +444,88 @@ def status():
     subprocess.run(['git', 'status'])
 
 
+@cloud.command()
+@click.option('-i', '--input', 'input_file', required=True, type=click.Path(exists=True), help='Input BibTeX file')
+@click.option('-o', '--output', 'output_file', required=True, type=click.Path(), help='Output BibTeX file')
+@click.option('-a', '--api-key', envvar='SCITEX_API_KEY', help='SciTeX API key (or set SCITEX_API_KEY env var)')
+@click.option('--no-cache', is_flag=True, help='Disable cache (force fresh metadata)')
+@click.option('--url', default='https://scitex.cloud', help='SciTeX Cloud URL')
+def enrich(input_file, output_file, api_key, no_cache, url):
+    """
+    Enrich BibTeX file with metadata
+
+    Usage:
+        scitex cloud enrich -i refs.bib -o enriched.bib -a $SCITEX_API_KEY
+    """
+    import requests
+    import time
+
+    if not api_key:
+        click.echo("Error: API key required", err=True)
+        click.echo("Set SCITEX_API_KEY env var or use --api-key", err=True)
+        click.echo("Get key at: https://scitex.cloud/api-keys/", err=True)
+        sys.exit(1)
+
+    click.echo(f"Enriching: {input_file}")
+
+    # Upload
+    with open(input_file, 'rb') as f:
+        files = {'bibtex_file': f}
+        data = {'use_cache': 'false' if no_cache else 'true'}
+        headers = {'Authorization': f'Bearer {api_key}', 'X-Requested-With': 'XMLHttpRequest'}
+
+        response = requests.post(
+            f'{url}/scholar/bibtex/upload/',
+            headers=headers,
+            files=files,
+            data=data
+        )
+
+    if response.status_code != 200:
+        click.echo(f"Error: Upload failed ({response.status_code})", err=True)
+        sys.exit(1)
+
+    result = response.json()
+    if not result.get('success'):
+        click.echo(f"Error: {result.get('error', 'Upload failed')}", err=True)
+        sys.exit(1)
+
+    job_id = result['job_id']
+    click.echo(f"Job ID: {job_id}")
+    click.echo("Processing", nl=False)
+
+    # Poll status
+    while True:
+        response = requests.get(
+            f'{url}/scholar/api/bibtex/job/{job_id}/status/',
+            headers=headers
+        )
+        data = response.json()
+        status = data['status']
+
+        if status == 'completed':
+            click.echo(" Done!")
+            break
+        elif status in ('failed', 'cancelled'):
+            click.echo(f" {status.capitalize()}!", err=True)
+            sys.exit(1)
+
+        click.echo(".", nl=False)
+        time.sleep(2)
+
+    # Download
+    response = requests.get(
+        f'{url}/scholar/api/bibtex/job/{job_id}/download/',
+        headers=headers
+    )
+
+    if response.status_code == 200:
+        with open(output_file, 'wb') as f:
+            f.write(response.content)
+        click.echo(f"✓ Saved: {output_file}")
+    else:
+        click.echo("Error: Download failed", err=True)
+        sys.exit(1)
+
+
 # EOF

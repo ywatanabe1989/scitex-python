@@ -79,12 +79,15 @@ logging = _LazyModule("logging")
 # log = _LazyModule("log")
 session = _LazyModule("session")
 capture = _LazyModule("capture")
+template = _LazyModule("template")
 
-# Import sh function directly as it's commonly used
+# Import sh functions directly as they're commonly used
 try:
-    from ._sh import sh
+    from .sh import sh, sh_run, quote
 except ImportError:
     sh = None
+    sh_run = None
+    quote = None
 
 __all__ = [
     "io",
@@ -100,12 +103,15 @@ __all__ = [
     "decorators",
     "__version__",
     "sh",
+    "sh_run",
+    "quote",
     "errors",
     "units",
     "logging",
     "session",
     "rng",
     "capture",
+    "template",
 ]
 
 # EOF

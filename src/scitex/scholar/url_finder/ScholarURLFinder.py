@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-13 07:54:47 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/url_finder/ScholarURLFinder.py
+# Timestamp: "2025-10-26 17:04:54 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/url_finder/ScholarURLFinder.py
 # ----------------------------------------
 from __future__ import annotations
 import os
@@ -18,22 +18,23 @@ Simple, focused responsibility: Given a page or URL, find PDF URLs.
 """
 
 from contextlib import asynccontextmanager
-from typing import Dict, List, Optional, Union
+from typing import Dict
+from typing import List, Optional, Union
 
-from playwright.async_api import BrowserContext, Page
+from playwright.async_api import BrowserContext
+from playwright.async_api import Page
 
 from scitex import logging
 from scitex.browser.debugging import browser_logger
 from scitex.scholar.auth.gateway import OpenURLResolver
-from scitex.scholar.config import PublisherRules, ScholarConfig
+from scitex.scholar.config import PublisherRules
+from scitex.scholar.config import ScholarConfig
 
 # Import strategies
-from .strategies import (
-    find_pdf_urls_by_direct_links,
-    find_pdf_urls_by_navigation,
-    find_pdf_urls_by_publisher_patterns,
-    find_pdf_urls_by_zotero_translators,
-)
+from .strategies import find_pdf_urls_by_direct_links
+from .strategies import find_pdf_urls_by_navigation
+from .strategies import find_pdf_urls_by_publisher_patterns
+from .strategies import find_pdf_urls_by_zotero_translators
 
 # Strategy execution order (priority order)
 STRATEGIES = [
@@ -352,22 +353,22 @@ if __name__ == "__main__":
 
 """
 # With URL
-python -m scitex.scholar.url.ScholarURLFinder \
+python -m scitex.scholar.url_finder.ScholarURLFinder \
 	--url "https://arxiv.org/abs/2308.09312" \
 	--browser-mode stealth
 
 # With DOI
-python -m scitex.scholar.url.ScholarURLFinder \
+python -m scitex.scholar.url_finder.ScholarURLFinder \
 	--url "10.1038/s41598-017-02626-y" \
 	--browser-mode stealth
 
 # With doi: prefix
-python -m scitex.scholar.url.ScholarURLFinder \
+python -m scitex.scholar.url_finder.ScholarURLFinder \
 	--url "doi:10.3389/fnins.2024.1472747" \
 	--browser-mode stealth
 
 # No doi prefix
-python -m scitex.scholar.url.ScholarURLFinder \
+python -m scitex.scholar.url_finder.ScholarURLFinder \
 	--url "10.1016/j.clinph.2024.09.017" \
 	--browser-mode stealth
 

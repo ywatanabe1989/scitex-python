@@ -85,7 +85,12 @@ def _load_txt(lpath, strip=True, as_lines=True):
     - If strip=True, strip whitespace from each line.
     - If as_lines=True, return list of lines.
     """
-    if not lpath.endswith((".txt", ".log", ".event", ".py", ".sh")):
+    # Convert Path object to string if needed
+    from pathlib import Path
+    if isinstance(lpath, Path):
+        lpath = str(lpath)
+
+    if not lpath.endswith((".txt", ".log", ".event", ".py", ".sh", ".tex", ".bib")):
         warnings.warn(f"Unexpected extension for file: {lpath}")
 
     try:
