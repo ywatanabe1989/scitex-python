@@ -100,6 +100,68 @@ def git_retry(
         ) from last_exception
 
 
+def run_session() -> None:
+    """Initialize scitex framework, run main function, and cleanup."""
+    global CONFIG, CC, sys, plt, rng
+    import sys
+    import matplotlib.pyplot as plt
+    import scitex as stx
+
+    args = parse_args()
+
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+        sys,
+        plt,
+        args=args,
+        file=__FILE__,
+        sdir_suffix=None,
+        verbose=False,
+        agg=True,
+    )
+
+    exit_status = main(args)
+
+    stx.session.close(
+        CONFIG,
+        verbose=False,
+        notify=False,
+        message="",
+        exit_status=exit_status,
+    )
+
+
+def main(args):
+    def demo_operation():
+        print("Simulating git operation...")
+        return "Success"
+
+    result = git_retry(demo_operation, max_retries=args.max_retries)
+    print(f"Result: {result}")
+    return 0
+
+
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Demonstrate git retry with exponential backoff"
+    )
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=5,
+        help="Maximum retry attempts (default: 5)",
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    run_session()
+
+
 __all__ = ["git_retry"]
+
+# python -m scitex.writer.utils._git_retry --max-retries 3
 
 # EOF

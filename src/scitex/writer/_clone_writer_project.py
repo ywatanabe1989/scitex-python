@@ -63,8 +63,89 @@ def clone_writer_project(
         return False
 
 
+def run_session() -> None:
+    """Initialize scitex framework, run main function, and cleanup."""
+    global CONFIG, CC, sys, plt, rng
+    import sys
+    import matplotlib.pyplot as plt
+    import scitex as stx
+
+    args = parse_args()
+
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+        sys,
+        plt,
+        args=args,
+        file=__FILE__,
+        sdir_suffix=None,
+        verbose=False,
+        agg=True,
+    )
+
+    exit_status = main(args)
+
+    stx.session.close(
+        CONFIG,
+        verbose=False,
+        notify=False,
+        message="",
+        exit_status=exit_status,
+    )
+
+
+def main(args):
+    result = clone_writer_project(
+        args.project_name,
+        target_dir=args.target_dir,
+        git_strategy=args.git_strategy,
+    )
+
+    if result:
+        print(f"Successfully created writer project: {args.project_name}")
+        return 0
+    else:
+        print(f"Failed to create writer project: {args.project_name}")
+        return 1
+
+
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Clone scitex writer project template"
+    )
+    parser.add_argument(
+        "project_name",
+        type=str,
+        help="Name of the new project",
+    )
+    parser.add_argument(
+        "--target-dir",
+        "-d",
+        type=str,
+        default=None,
+        help="Target directory (default: current directory)",
+    )
+    parser.add_argument(
+        "--git-strategy",
+        "-g",
+        type=str,
+        choices=["child", "parent", "origin", "none"],
+        default="child",
+        help="Git initialization strategy (default: child)",
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    run_session()
+
+
 __all__ = [
     "clone_writer_project",
 ]
+
+# python -m scitex.writer._clone_writer_project my_paper --git-strategy child
 
 # EOF

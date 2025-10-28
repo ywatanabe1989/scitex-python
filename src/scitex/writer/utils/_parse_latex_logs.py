@@ -54,8 +54,86 @@ def parse_compilation_output(
     return errors, warnings
 
 
+def run_session() -> None:
+    """Initialize scitex framework, run main function, and cleanup."""
+    global CONFIG, CC, sys, plt, rng
+    import sys
+    import matplotlib.pyplot as plt
+    import scitex as stx
+
+    args = parse_args()
+
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+        sys,
+        plt,
+        args=args,
+        file=__FILE__,
+        sdir_suffix=None,
+        verbose=False,
+        agg=True,
+    )
+
+    exit_status = main(args)
+
+    stx.session.close(
+        CONFIG,
+        verbose=False,
+        notify=False,
+        message="",
+        exit_status=exit_status,
+    )
+
+
+def main(args):
+    if args.file:
+        with open(args.file) as f_f:
+            output = f_f.read()
+    else:
+        output = args.text
+
+    errors, warnings = parse_compilation_output(output)
+
+    print(f"Errors: {len(errors)}")
+    for err in errors:
+        print(f"  - {err}")
+
+    print(f"Warnings: {len(warnings)}")
+    for warn in warnings:
+        print(f"  - {warn}")
+
+    return 0
+
+
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Parse LaTeX compilation output for errors and warnings"
+    )
+    parser.add_argument(
+        "--file",
+        "-f",
+        type=str,
+        help="File containing compilation output",
+    )
+    parser.add_argument(
+        "--text",
+        "-t",
+        type=str,
+        help="Compilation output text",
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    run_session()
+
+
 __all__ = [
     "parse_compilation_output",
 ]
+
+# python -m scitex.writer.utils._parse_latex_logs --file compilation.log
 
 # EOF
