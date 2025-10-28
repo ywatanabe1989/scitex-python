@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-28 16:41:11 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/types/document_section.py
+# Timestamp: "2025-10-29 06:08:40 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/_DocumentSection.py
 # ----------------------------------------
 from __future__ import annotations
 import os
 __FILE__ = (
-    "./src/scitex/writer/types/document_section.py"
+    "./src/scitex/writer/dataclasses/_DocumentSection.py"
 )
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -179,9 +179,230 @@ class DocumentSection:
             logger.error(f"Error getting diff for {self.path}: {e}")
             return ""
 
+    def diff_between(self, ref1: str, ref2: str) -> str:
+        """
+        Compare two arbitrary git references.
+
+        Args:
+            ref1: First git reference (commit, branch, tag, or human-readable spec)
+            ref2: Second git reference (commit, branch, tag, or human-readable spec)
+
+        Returns:
+            Diff output string, or "" if error or no differences.
+
+        Examples:
+            section.diff_between("HEAD~2", "HEAD")
+            section.diff_between("v1.0", "v2.0")
+            section.diff_between("main", "develop")
+            section.diff_between("2 days ago", "now")
+        """
+        if not self.git_root:
+            logger.debug(f"No git repository for {self.path}")
+            return ""
+
+        try:
+            # Resolve human-readable refs to commit hashes
+            resolved_ref1 = self._resolve_ref(ref1)
+            resolved_ref2 = self._resolve_ref(ref2)
+
+            if not resolved_ref1 or not resolved_ref2:
+                logger.error(f"Failed to resolve references: {ref1} or {ref2}")
+                return ""
+
+            rel_path = self.path.relative_to(self.git_root)
+
+            # Use git diff ref1..ref2 file (three-dot shows what changed on ref2 since ref1 diverged)
+            result = subprocess.run(
+                [
+                    "git",
+                    "diff",
+                    f"{resolved_ref1}..{resolved_ref2}",
+                    str(rel_path),
+                ],
+                cwd=self.git_root,
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+
+            return result.stdout if result.returncode == 0 else ""
+        except subprocess.TimeoutExpired:
+            logger.warning(f"Git diff timed out for {self.path}")
+            return ""
+        except Exception as e:
+            logger.error(f"Error getting diff_between for {self.path}: {e}")
+            return ""
+
+    def _resolve_ref(self, spec: str) -> Optional[str]:
+        """
+        Resolve human-readable reference specification to git reference.
+
+        Handles:
+        - Standard git refs: HEAD, HEAD~N, branch, tag, commit hash
+        - Relative time: "N days ago", "N weeks ago", "N hours ago", "now"
+        - Absolute dates: "2025-10-28", "2025-10-28 14:30"
+
+        Args:
+            spec: Reference specification
+
+        Returns:
+            Git reference (commit hash or ref name), or None if invalid.
+        """
+        if not self.git_root:
+            return None
+
+        spec = spec.strip()
+
+        # Direct git reference (HEAD, branch, tag, hash)
+        if self._is_valid_git_ref(spec):
+            return spec
+
+        # Handle "now" as HEAD
+        if spec.lower() == "now":
+            return "HEAD"
+
+        # Handle "today" as start of day
+        if spec.lower() == "today":
+            from datetime import datetime, timedelta
+
+            today = datetime.now().replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+            return self._find_commit_at_timestamp(today)
+
+        # Handle relative time like "2 days ago", "1 week ago", "24 hours ago"
+        time_ref = self._parse_relative_time(spec)
+        if time_ref:
+            return self._find_commit_at_timestamp(time_ref)
+
+        # Handle absolute date like "2025-10-28" or "2025-10-28 14:30"
+        date_ref = self._parse_absolute_date(spec)
+        if date_ref:
+            return self._find_commit_at_timestamp(date_ref)
+
+        logger.warning(f"Could not resolve reference: {spec}")
+        return None
+
+    def _is_valid_git_ref(self, ref: str) -> bool:
+        """Check if reference exists in git repository."""
+        if not self.git_root:
+            return False
+
+        try:
+            result = subprocess.run(
+                ["git", "rev-parse", "--verify", ref],
+                cwd=self.git_root,
+                capture_output=True,
+                timeout=2,
+            )
+            return result.returncode == 0
+        except Exception:
+            return False
+
+    def _parse_relative_time(self, spec: str):
+        """
+        Parse relative time specification like "2 days ago".
+
+        Returns:
+            datetime object or None if not a valid time spec.
+        """
+        import re
+        from datetime import datetime, timedelta
+
+        # Pattern: "N <unit> ago"
+        match = re.match(
+            r"(\d+)\s*(day|week|hour|minute)s?\s*ago", spec, re.IGNORECASE
+        )
+        if not match:
+            return None
+
+        amount = int(match.group(1))
+        unit = match.group(2).lower()
+
+        now = datetime.now()
+        if unit == "day":
+            return now - timedelta(days=amount)
+        elif unit == "week":
+            return now - timedelta(weeks=amount)
+        elif unit == "hour":
+            return now - timedelta(hours=amount)
+        elif unit == "minute":
+            return now - timedelta(minutes=amount)
+
+        return None
+
+    def _parse_absolute_date(self, spec: str):
+        """
+        Parse absolute date specification like "2025-10-28" or "2025-10-28 14:30".
+
+        Returns:
+            datetime object or None if not a valid date spec.
+        """
+        from datetime import datetime
+
+        # Try YYYY-MM-DD HH:MM format
+        try:
+            return datetime.strptime(spec, "%Y-%m-%d %H:%M")
+        except ValueError:
+            pass
+
+        # Try YYYY-MM-DD format
+        try:
+            return datetime.strptime(spec, "%Y-%m-%d")
+        except ValueError:
+            pass
+
+        return None
+
+    def _find_commit_at_timestamp(self, target_datetime) -> Optional[str]:
+        """
+        Find commit closest to (before) given timestamp.
+
+        Args:
+            target_datetime: datetime object
+
+        Returns:
+            Commit hash or None if not found.
+        """
+        if not self.git_root:
+            return None
+
+        try:
+            # Format timestamp for git
+            timestamp_str = target_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+            # Find commit at or before this timestamp
+            result = subprocess.run(
+                [
+                    "git",
+                    "log",
+                    "--format=%H",
+                    "--before=" + timestamp_str,
+                    "-1",  # Get only the most recent one
+                ],
+                cwd=self.git_root,
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout.strip()
+            else:
+                logger.warning(f"No commit found before {timestamp_str}")
+                return None
+        except subprocess.TimeoutExpired:
+            logger.warning(
+                f"Git log timed out looking for commit at {target_datetime}"
+            )
+            return None
+        except Exception as e:
+            logger.error(f"Error finding commit at timestamp: {e}")
+            return None
+
     def commit(self, message: str) -> bool:
         """Commit this file to project's git repo with retry logic."""
-        from ..git_utils import git_retry
+        from .._git_retry import git_retry
 
         if not self.git_root:
             logger.warning(f"No git repository found for {self.path}")

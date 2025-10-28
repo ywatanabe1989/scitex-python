@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-28 16:40:33 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/types/revision_document.py
+# Timestamp: "2025-10-29 06:08:44 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/_RevisionContents.py
 # ----------------------------------------
 from __future__ import annotations
 import os
 __FILE__ = (
-    "./src/scitex/writer/types/revision_document.py"
+    "./src/scitex/writer/dataclasses/_RevisionContents.py"
 )
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 """
-RevisionDocument - dataclass for revision response structure.
+RevisionContents - dataclass for revision contents structure.
 
-Represents the 03_revision/ directory structure.
-Provides typed access and verification of revision sections.
+Represents the 03_revision/contents/ directory structure.
 """
 
 from pathlib import Path
@@ -123,78 +122,6 @@ class RevisionContents:
         return len(issues) == 0, issues
 
 
-@dataclass
-class RevisionDocument:
-    """
-    Revision response document with validation.
-
-    Represents 03_revision/ directory structure.
-    """
-
-    dir: Path
-    git_root: Optional[Path] = None
-
-    # Subdirectories
-    contents: RevisionContents = None
-    archive: Path = None
-    docs: Path = None
-
-    # Files
-    base: DocumentSection = None
-    revision: DocumentSection = None
-    readme: DocumentSection = None
-
-    def __post_init__(self):
-        """Initialize all components."""
-        if self.contents is None:
-            self.contents = RevisionContents(
-                self.dir / "contents", self.git_root
-            )
-        if self.archive is None:
-            self.archive = self.dir / "archive"
-        if self.docs is None:
-            self.docs = self.dir / "docs"
-        if self.base is None:
-            self.base = DocumentSection(self.dir / "base.tex", self.git_root)
-        if self.revision is None:
-            self.revision = DocumentSection(
-                self.dir / "revision.tex", self.git_root
-            )
-        if self.readme is None:
-            self.readme = DocumentSection(
-                self.dir / "README.md", self.git_root
-            )
-
-    def verify_structure(self) -> tuple[bool, list[str]]:
-        """
-        Verify revision directory structure.
-
-        Returns:
-            (is_valid, list_of_issues)
-        """
-        issues = []
-
-        # Check required directories
-        if not (self.dir / "contents").exists():
-            issues.append("Missing 03_revision/contents/")
-        if not self.archive.exists():
-            issues.append("Missing 03_revision/archive/")
-        if not self.docs.exists():
-            issues.append("Missing 03_revision/docs/")
-
-        # Check contents structure
-        contents_valid, content_issues = self.contents.verify_structure()
-        if not contents_valid:
-            for issue in content_issues:
-                issues.append(f"03_revision/contents/{issue}")
-
-        return len(issues) == 0, issues
-
-    def __repr__(self) -> str:
-        """String representation."""
-        return f"RevisionDocument({self.dir.name})"
-
-
-__all__ = ["RevisionDocument", "RevisionContents"]
+__all__ = ["RevisionContents"]
 
 # EOF

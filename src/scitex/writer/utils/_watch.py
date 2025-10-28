@@ -38,12 +38,11 @@ def watch_manuscript(
         ...     print("Recompiled!")
         >>> watch_manuscript(Path("/path/to/project"), on_compile=on_change)
     """
-    from .compile import _find_compile_script
+    # Get compile script from project directory
+    compile_script = project_dir / "compile"
 
-    try:
-        compile_script = _find_compile_script()
-    except FileNotFoundError as e:
-        logger.error(str(e))
+    if not compile_script.exists():
+        logger.error(f"compile script not found: {compile_script}")
         return
 
     # Build watch command
