@@ -49,6 +49,19 @@ from .validate import (
     validate_all_documents,
     list_missing_files,
 )
+from .parse_latex import (
+    LaTeXIssue,
+    parse_latex_log,
+    parse_compilation_output,
+    format_issues,
+    summarize_issues,
+)
+from .compile_async import (
+    compile_manuscript_async,
+    compile_supplementary_async,
+    compile_revision_async,
+    compile_all_async,
+)
 
 __version__ = "0.1.0"
 
@@ -79,6 +92,19 @@ __all__ = [
     'validate_revision_structure',
     'validate_all_documents',
     'list_missing_files',
+
+    # LaTeX error parsing (for advanced use)
+    'LaTeXIssue',
+    'parse_latex_log',
+    'parse_compilation_output',
+    'format_issues',
+    'summarize_issues',
+
+    # Async compilation (for advanced use)
+    'compile_manuscript_async',
+    'compile_supplementary_async',
+    'compile_revision_async',
+    'compile_all_async',
 ]
 
 # EOF
