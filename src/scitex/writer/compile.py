@@ -10,12 +10,14 @@ handling subprocess execution, output parsing, and exit code management.
 """
 
 import subprocess
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, List, Tuple
 from datetime import datetime
 
 from scitex.logging import getLogger
+from .validate import validate_manuscript_structure, validate_supplementary_structure, validate_revision_structure, ProjectValidationError
 
 logger = getLogger(__name__)
 
@@ -81,26 +83,48 @@ def _find_compile_script() -> Path:
     """
     Find the compile script from scitex-writer.
 
+    Searches in this order:
+    1. SCITEX_WRITER_TEMPLATE_PATH environment variable (if set)
+    2. /tmp/scitex-writer/compile (temporary clone)
+    3. ~/proj/scitex-code/my_paper/compile (scitex-code repo)
+    4. ~/proj/scitex-writer/compile (dedicated scitex-writer repo)
+    5. Built-in scripts directory
+
     Returns:
         Path to compile script
 
     Raises:
         FileNotFoundError: If compile script not found
     """
-    # Try common locations
-    locations = [
+    # Try common locations (in order of preference)
+    locations = []
+
+    # 1. Environment variable override
+    if env_path := os.getenv("SCITEX_WRITER_TEMPLATE_PATH"):
+        locations.append(Path(env_path) / "compile")
+
+    # 2-4. Common project locations
+    locations.extend([
         Path("/tmp/scitex-writer/compile"),
+        Path.home() / "proj" / "scitex-code" / "my_paper" / "compile",  # Primary location
         Path.home() / "proj" / "scitex-writer" / "compile",
-        Path(__file__).parent / "scripts" / "compile",
-    ]
+    ])
+
+    # 5. Built-in scripts
+    locations.append(Path(__file__).parent / "scripts" / "compile")
 
     for location in locations:
-        if location.exists():
+        if location and location.exists():
+            logger.debug(f"Found compile script at: {location}")
             return location
 
+    # Provide helpful error message with all searched locations
+    searched = [str(loc) for loc in locations if loc]
     raise FileNotFoundError(
         "scitex-writer compile script not found. "
-        "Please clone scitex-writer to /tmp/scitex-writer or ~/proj/scitex-writer"
+        f"Searched in: {', '.join(searched[:3])}... "
+        "Set SCITEX_WRITER_TEMPLATE_PATH environment variable or "
+        "clone scitex-writer to ~/proj/scitex-writer or ~/proj/scitex-code/my_paper"
     )
 
 
@@ -123,6 +147,28 @@ def _run_compile(
         CompilationResult with compilation status and outputs
     """
     start_time = datetime.now()
+    project_dir = Path(project_dir)
+
+    # Validate project structure before compilation
+    validator_map = {
+        'manuscript': validate_manuscript_structure,
+        'supplementary': validate_supplementary_structure,
+        'revision': validate_revision_structure,
+    }
+
+    try:
+        validator = validator_map.get(doc_type)
+        if validator:
+            validator(project_dir)
+    except ProjectValidationError as e:
+        logger.error(f"Project validation failed: {e}")
+        return CompilationResult(
+            success=False,
+            exit_code=1,
+            stdout="",
+            stderr=f"Project validation failed: {e}",
+            duration=0.0
+        )
 
     try:
         compile_script = _find_compile_script()

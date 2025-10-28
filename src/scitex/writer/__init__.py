@@ -41,6 +41,14 @@ from .compile import (
 from .watch import watch_manuscript
 from .template import init_directory
 from .config import WriterConfig, find_writer_root
+from .validate import (
+    ProjectValidationError,
+    validate_manuscript_structure,
+    validate_supplementary_structure,
+    validate_revision_structure,
+    validate_all_documents,
+    list_missing_files,
+)
 
 __version__ = "0.1.0"
 
@@ -63,6 +71,14 @@ __all__ = [
     # Configuration (for advanced use)
     'WriterConfig',
     'find_writer_root',
+
+    # Validation (for advanced use)
+    'ProjectValidationError',
+    'validate_manuscript_structure',
+    'validate_supplementary_structure',
+    'validate_revision_structure',
+    'validate_all_documents',
+    'list_missing_files',
 ]
 
 # EOF

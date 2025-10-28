@@ -31,20 +31,74 @@ class DocumentSection:
     - Enables advanced users to use git directly when needed
     """
 
-    def __init__(self, path: Path):
-        """Initialize with file path."""
+    def __init__(self, path: Path, git_root: Optional[Path] = None):
+        """
+        Initialize with file path and optional git root.
+
+        Args:
+            path: Path to the document file
+            git_root: Path to git repository root (for efficiency)
+        """
         self.path = path
+        self._git_root = git_root
+        self._cached_git_root = None
+
+    @property
+    def git_root(self) -> Optional[Path]:
+        """Get cached git root, finding it if needed."""
+        if self._git_root is not None:
+            return self._git_root
+        if self._cached_git_root is None:
+            self._cached_git_root = self._find_git_root()
+        return self._cached_git_root
+
+    @staticmethod
+    def _find_git_root(start_path: Path = None) -> Optional[Path]:
+        """Find git root by walking up directory tree."""
+        if start_path is None:
+            start_path = Path.cwd()
+        current = start_path.absolute()
+        while current != current.parent:
+            if (current / '.git').exists():
+                return current
+            current = current.parent
+        return None
 
     def read(self):
-        """Read file contents (uses scitex.io.load internally)."""
+        """Read file contents with intelligent fallback strategy."""
         if not self.path.exists():
+            logger.warning(f"File does not exist: {self.path}")
             return None
+
         try:
             import scitex.io as stx_io
             return stx_io.load(str(self.path))
-        except Exception:
-            # Fallback to plain text read
-            return self.path.read_text()
+        except ImportError:
+            logger.debug("scitex.io not available, using plain text reader")
+            return self._read_plain_text()
+        except ValueError as e:
+            logger.warning(
+                f"scitex.io could not parse {self.path} ({e}), "
+                "falling back to plain text"
+            )
+            return self._read_plain_text()
+        except Exception as e:
+            logger.error(
+                f"Unexpected error reading {self.path}: {e}",
+                exc_info=True
+            )
+            return None
+
+    def _read_plain_text(self):
+        """Read file as plain text with proper encoding handling."""
+        try:
+            return self.path.read_text(encoding='utf-8')
+        except UnicodeDecodeError:
+            logger.warning(f"UTF-8 decode failed for {self.path}, trying latin-1")
+            return self.path.read_text(encoding='latin-1')
+        except Exception as e:
+            logger.error(f"Failed to read {self.path} as text: {e}")
+            return None
 
     def write(self, content) -> bool:
         """Write content to file."""
@@ -65,46 +119,48 @@ class DocumentSection:
         """Get version history (uses git log internally)."""
         import subprocess
 
+        if not self.git_root:
+            logger.debug(f"No git repository for {self.path}")
+            return []
+
         try:
-            # Find project root (contains .git)
-            result = subprocess.run(
-                ["git", "rev-parse", "--show-toplevel"],
-                cwd=self.path.parent,
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-
-            if result.returncode != 0:
-                return []
-
-            repo_root = Path(result.stdout.strip())
-            rel_path = self.path.relative_to(repo_root)
+            rel_path = self.path.relative_to(self.git_root)
 
             result = subprocess.run(
                 ["git", "log", "--oneline", str(rel_path)],
-                cwd=repo_root,
+                cwd=self.git_root,
                 capture_output=True,
                 text=True,
                 timeout=5
             )
 
             if result.returncode != 0:
+                logger.debug(f"No history found for {self.path}")
                 return []
 
             lines = result.stdout.strip().split('\n')
             return [line for line in lines if line]
-        except Exception:
+        except ValueError as e:
+            logger.warning(f"File {self.path} not in git repository: {e}")
+            return []
+        except subprocess.TimeoutExpired:
+            logger.error(f"Git log timed out for {self.path}")
+            return []
+        except Exception as e:
+            logger.error(f"Error getting history for {self.path}: {e}", exc_info=True)
             return []
 
     def diff(self) -> str:
         """Get changes vs last version (uses git diff internally)."""
         import subprocess
 
+        if not self.git_root:
+            return "No git repository"
+
         try:
             result = subprocess.run(
                 ["git", "diff", "HEAD", str(self.path)],
-                cwd=self.path.parent,
+                cwd=self.git_root,
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -114,67 +170,94 @@ class DocumentSection:
                 return "No changes or file not tracked"
 
             return result.stdout
+        except subprocess.TimeoutExpired:
+            return "Git diff timed out"
         except Exception as e:
+            logger.error(f"Error computing diff for {self.path}: {e}", exc_info=True)
             return f"Error computing diff: {e}"
 
     def commit(self, message: str) -> bool:
-        """Commit this file to project's git repo."""
+        """Commit this file to project's git repo with retry logic."""
         import subprocess
+        from .git_utils import git_retry
 
-        try:
-            result = subprocess.run(
-                ["git", "rev-parse", "--show-toplevel"],
-                cwd=self.path.parent,
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
+        if not self.git_root:
+            logger.warning(f"No git repository found for {self.path}")
+            return False
 
-            if result.returncode != 0:
-                return False
+        if not self.path.exists():
+            logger.error(f"File does not exist: {self.path}")
+            return False
 
-            repo_root = Path(result.stdout.strip())
-            rel_path = self.path.relative_to(repo_root)
+        def _do_commit():
+            """Perform git add and commit."""
+            rel_path = self.path.relative_to(self.git_root)
 
-            # Stage this file
+            # Stage the file
             subprocess.run(
                 ["git", "add", str(rel_path)],
-                cwd=repo_root,
+                cwd=self.git_root,
                 capture_output=True,
+                check=True,
                 timeout=5
             )
 
             # Commit
-            result = subprocess.run(
+            subprocess.run(
                 ["git", "commit", "-m", message],
-                cwd=repo_root,
+                cwd=self.git_root,
                 capture_output=True,
+                check=True,
                 timeout=5
             )
 
-            return result.returncode == 0
-        except Exception:
+        try:
+            git_retry(_do_commit)
+            logger.info(f"Committed {self.path}: {message}")
+            return True
+        except TimeoutError as e:
+            logger.error(f"Git lock timeout for {self.path}: {e}")
+            return False
+        except subprocess.CalledProcessError as e:
+            stderr = e.stderr.decode('utf-8', errors='ignore') if isinstance(e.stderr, bytes) else (e.stderr or '')
+            if "nothing to commit" in stderr.lower():
+                logger.debug(f"No changes to commit in {self.path}")
+                return True
+            logger.error(f"Commit failed for {self.path}: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error during commit: {e}", exc_info=True)
             return False
 
     def checkout(self, ref: str = "HEAD") -> bool:
         """Restore file from git revision (e.g., 'HEAD', 'HEAD~1')."""
         import subprocess
 
+        if not self.git_root:
+            logger.warning(f"No git repository found for {self.path}")
+            return False
+
         try:
             result = subprocess.run(
                 ["git", "show", f"{ref}:{self.path}"],
-                cwd=self.path.parent,
+                cwd=self.git_root,
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
+                check=True
             )
 
-            if result.returncode != 0:
-                return False
-
             self.path.write_text(result.stdout)
+            logger.info(f"Restored {self.path} from {ref}")
             return True
-        except Exception:
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Checkout failed for {self.path}: {e}")
+            return False
+        except subprocess.TimeoutExpired:
+            logger.error(f"Git show timed out for {self.path}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error during checkout: {e}", exc_info=True)
             return False
 
     def save(self, message: str = "Save version") -> bool:
@@ -193,14 +276,15 @@ class DocumentSection:
 class Document:
     """Base document accessor."""
 
-    def __init__(self, doc_dir: Path):
+    def __init__(self, doc_dir: Path, git_root: Optional[Path] = None):
         """Initialize document accessor."""
         self.dir = doc_dir
+        self.git_root = git_root
 
     def __getattr__(self, name: str) -> DocumentSection:
         """Get file path by name (e.g., introduction -> introduction.tex)."""
         file_path = self.dir / "contents" / f"{name}.tex"
-        return DocumentSection(file_path)
+        return DocumentSection(file_path, git_root=self.git_root)
 
     def __repr__(self) -> str:
         """String representation."""
@@ -213,27 +297,27 @@ class ManuscriptDocument(Document):
     @property
     def abstract(self) -> DocumentSection:
         """Get abstract.tex."""
-        return DocumentSection(self.dir / "contents" / "abstract.tex")
+        return DocumentSection(self.dir / "contents" / "abstract.tex", git_root=self.git_root)
 
     @property
     def introduction(self) -> DocumentSection:
         """Get introduction.tex."""
-        return DocumentSection(self.dir / "contents" / "introduction.tex")
+        return DocumentSection(self.dir / "contents" / "introduction.tex", git_root=self.git_root)
 
     @property
     def methods(self) -> DocumentSection:
         """Get methods.tex."""
-        return DocumentSection(self.dir / "contents" / "methods.tex")
+        return DocumentSection(self.dir / "contents" / "methods.tex", git_root=self.git_root)
 
     @property
     def results(self) -> DocumentSection:
         """Get results.tex."""
-        return DocumentSection(self.dir / "contents" / "results.tex")
+        return DocumentSection(self.dir / "contents" / "results.tex", git_root=self.git_root)
 
     @property
     def discussion(self) -> DocumentSection:
         """Get discussion.tex."""
-        return DocumentSection(self.dir / "contents" / "discussion.tex")
+        return DocumentSection(self.dir / "contents" / "discussion.tex", git_root=self.git_root)
 
 
 class SupplementaryDocument(Document):
@@ -292,10 +376,10 @@ class Writer:
         # Initialize git repo based on strategy
         self.git_root = self._init_git_repo()
 
-        # Document accessors
-        self.manuscript = ManuscriptDocument(self.project_dir / "01_manuscript")
-        self.supplementary = SupplementaryDocument(self.project_dir / "02_supplementary")
-        self.revision = RevisionDocument(self.project_dir / "03_revision")
+        # Document accessors (pass git_root for efficiency)
+        self.manuscript = ManuscriptDocument(self.project_dir / "01_manuscript", git_root=self.git_root)
+        self.supplementary = SupplementaryDocument(self.project_dir / "02_supplementary", git_root=self.git_root)
+        self.revision = RevisionDocument(self.project_dir / "03_revision", git_root=self.git_root)
 
     def _find_parent_git(self) -> Optional[Path]:
         """
@@ -362,27 +446,34 @@ class Writer:
 
     def _init_git_repo(self) -> Optional[Path]:
         """
-        Initialize or detect git repository based on git_strategy.
+        Initialize or detect git repository based on git_strategy with graceful degradation.
 
         Returns:
             Path to git repository root, or None if disabled
 
-        Raises:
-            ValueError: If strategy='parent' but no parent git found
+        Strategy details:
+        - None: Git disabled, returns None
+        - 'child': Creates isolated git repo in project directory
+        - 'parent': Tries to use parent git, degrades to 'child' if not found
         """
         # Strategy: disabled
         if self.git_strategy is None:
             return None
 
-        # Strategy: parent (require existing parent repo)
+        # Strategy: parent (with graceful degradation to child)
         if self.git_strategy == 'parent':
             parent_git = self._find_parent_git()
-            if not parent_git:
-                raise ValueError(
-                    f"git_strategy='parent' but no parent git repository found "
-                    f"for {self.project_dir}"
-                )
-            return parent_git
+
+            if parent_git:
+                logger.info(f"Using parent git repository: {parent_git}")
+                return parent_git
+
+            # Graceful degradation: no parent git found, use child strategy
+            logger.warning(
+                f"No parent git repository found for {self.project_dir}. "
+                f"Degrading to 'child' strategy (isolated git repo)."
+            )
+            return self._create_child_git()
 
         # Strategy: child (create isolated repo)
         if self.git_strategy == 'child':
