@@ -402,7 +402,7 @@ class DocumentSection:
 
     def commit(self, message: str) -> bool:
         """Commit this file to project's git repo with retry logic."""
-        from .._git_retry import git_retry
+        from scitex.git import git_retry
 
         if not self.git_root:
             logger.warning(f"No git repository found for {self.path}")

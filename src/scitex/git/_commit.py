@@ -18,9 +18,9 @@ Examples
 from pathlib import Path
 from scitex.logging import getLogger
 from scitex._sh import sh
-from .utils import _in_directory
-from .constants import EXIT_SUCCESS, EXIT_FAILURE
-from .validation import validate_commit_message, validate_path
+from ._utils import _in_directory
+from ._constants import EXIT_SUCCESS, EXIT_FAILURE
+from ._validation import validate_commit_message, validate_path
 
 logger = getLogger(__name__)
 
@@ -155,7 +155,7 @@ def parse_args():
 
 def run_session():
     """Initialize scitex framework, run main function, and cleanup."""
-    from .session import run_with_session
+    from ._session import run_with_session
     run_with_session(parse_args, main)
 
 

@@ -68,7 +68,7 @@ Academic paper writing template with scitex-writer.
 
 All template functions support a `git_strategy` parameter to control git initialization:
 
-- `"child"` (default): Creates new isolated git repository with initial commit
+- `"child"` (default): Creates new isolated git repository with initial commit and main/develop branches
 - `"parent"`: Uses existing parent git repository (degrades to "child" if not found)
 - `"origin"`: Preserves template's original git history for upstream tracking
 - `None`: Disables git initialization entirely
