@@ -39,7 +39,7 @@ from .compile import (
     CompilationResult,
 )
 from .watch import watch_manuscript
-from .template import init_directory
+from ._init_directory import init_directory
 from .config import WriterConfig, find_writer_root
 from .validate import (
     ProjectValidationError,
