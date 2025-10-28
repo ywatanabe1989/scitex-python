@@ -1,41 +1,40 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-28 16:40:33 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/types/revision_document.py
+# Timestamp: "2025-10-28 16:40:44 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/types/supplementary_document.py
 # ----------------------------------------
 from __future__ import annotations
 import os
 __FILE__ = (
-    "./src/scitex/writer/types/revision_document.py"
+    "./src/scitex/writer/types/supplementary_document.py"
 )
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 """
-RevisionDocument - dataclass for revision response structure.
+SupplementaryDocument - dataclass for supplementary materials structure.
 
-Represents the 03_revision/ directory structure.
-Provides typed access and verification of revision sections.
+Represents the 02_supplementary/ directory structure.
+Provides typed access and verification of supplementary sections.
 """
 
 from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
-from .document_section import DocumentSection
+from ._DocumentSection import DocumentSection
 
 
 @dataclass
-class RevisionContents:
-    """Contents subdirectory of revision (03_revision/contents/)."""
+class SupplementaryContents:
+    """Contents subdirectory of supplementary (02_supplementary/contents/)."""
 
     root: Path
     git_root: Optional[Path] = None
 
     # Core sections
-    introduction: DocumentSection = None
-    conclusion: DocumentSection = None
-    references: DocumentSection = None
+    methods: DocumentSection = None
+    results: DocumentSection = None
 
     # Metadata
     title: DocumentSection = None
@@ -43,30 +42,22 @@ class RevisionContents:
     keywords: DocumentSection = None
     journal_name: DocumentSection = None
 
-    # Reviewer responses (subdirectories)
-    editor: Path = None
-    reviewer1: Path = None
-    reviewer2: Path = None
-
     # Files/directories
     figures: Path = None
     tables: Path = None
     bibliography: DocumentSection = None
     latex_styles: Path = None
+    wordcount: DocumentSection = None
 
     def __post_init__(self):
         """Initialize all DocumentSection instances."""
-        if self.introduction is None:
-            self.introduction = DocumentSection(
-                self.root / "introduction.tex", self.git_root
+        if self.methods is None:
+            self.methods = DocumentSection(
+                self.root / "methods.tex", self.git_root
             )
-        if self.conclusion is None:
-            self.conclusion = DocumentSection(
-                self.root / "conclusion.tex", self.git_root
-            )
-        if self.references is None:
-            self.references = DocumentSection(
-                self.root / "references.tex", self.git_root
+        if self.results is None:
+            self.results = DocumentSection(
+                self.root / "results.tex", self.git_root
             )
         if self.title is None:
             self.title = DocumentSection(
@@ -84,12 +75,6 @@ class RevisionContents:
             self.journal_name = DocumentSection(
                 self.root / "journal_name.tex", self.git_root
             )
-        if self.editor is None:
-            self.editor = self.root / "editor"
-        if self.reviewer1 is None:
-            self.reviewer1 = self.root / "reviewer1"
-        if self.reviewer2 is None:
-            self.reviewer2 = self.root / "reviewer2"
         if self.figures is None:
             self.figures = self.root / "figures"
         if self.tables is None:
@@ -100,10 +85,14 @@ class RevisionContents:
             )
         if self.latex_styles is None:
             self.latex_styles = self.root / "latex_styles"
+        if self.wordcount is None:
+            self.wordcount = DocumentSection(
+                self.root / "wordcount.tex", self.git_root
+            )
 
     def verify_structure(self) -> tuple[bool, list[str]]:
         """
-        Verify revision contents structure.
+        Verify supplementary contents structure.
 
         Returns:
             (is_valid, list_of_issues)
@@ -117,48 +106,48 @@ class RevisionContents:
             issues.append("Missing tables/")
         if not self.latex_styles.exists():
             issues.append("Missing latex_styles/")
-        if not self.editor.exists():
-            issues.append("Missing editor/")
 
         return len(issues) == 0, issues
 
 
 @dataclass
-class RevisionDocument:
+class SupplementaryDocument:
     """
-    Revision response document with validation.
+    Supplementary materials document with validation.
 
-    Represents 03_revision/ directory structure.
+    Represents 02_supplementary/ directory structure.
     """
 
     dir: Path
     git_root: Optional[Path] = None
 
     # Subdirectories
-    contents: RevisionContents = None
+    contents: SupplementaryContents = None
     archive: Path = None
-    docs: Path = None
 
     # Files
     base: DocumentSection = None
-    revision: DocumentSection = None
+    supplementary: DocumentSection = None
+    supplementary_diff: DocumentSection = None
     readme: DocumentSection = None
 
     def __post_init__(self):
         """Initialize all components."""
         if self.contents is None:
-            self.contents = RevisionContents(
+            self.contents = SupplementaryContents(
                 self.dir / "contents", self.git_root
             )
         if self.archive is None:
             self.archive = self.dir / "archive"
-        if self.docs is None:
-            self.docs = self.dir / "docs"
         if self.base is None:
             self.base = DocumentSection(self.dir / "base.tex", self.git_root)
-        if self.revision is None:
-            self.revision = DocumentSection(
-                self.dir / "revision.tex", self.git_root
+        if self.supplementary is None:
+            self.supplementary = DocumentSection(
+                self.dir / "supplementary.tex", self.git_root
+            )
+        if self.supplementary_diff is None:
+            self.supplementary_diff = DocumentSection(
+                self.dir / "supplementary_diff.tex", self.git_root
             )
         if self.readme is None:
             self.readme = DocumentSection(
@@ -167,7 +156,7 @@ class RevisionDocument:
 
     def verify_structure(self) -> tuple[bool, list[str]]:
         """
-        Verify revision directory structure.
+        Verify supplementary directory structure.
 
         Returns:
             (is_valid, list_of_issues)
@@ -176,25 +165,23 @@ class RevisionDocument:
 
         # Check required directories
         if not (self.dir / "contents").exists():
-            issues.append("Missing 03_revision/contents/")
+            issues.append("Missing 02_supplementary/contents/")
         if not self.archive.exists():
-            issues.append("Missing 03_revision/archive/")
-        if not self.docs.exists():
-            issues.append("Missing 03_revision/docs/")
+            issues.append("Missing 02_supplementary/archive/")
 
         # Check contents structure
         contents_valid, content_issues = self.contents.verify_structure()
         if not contents_valid:
             for issue in content_issues:
-                issues.append(f"03_revision/contents/{issue}")
+                issues.append(f"02_supplementary/contents/{issue}")
 
         return len(issues) == 0, issues
 
     def __repr__(self) -> str:
         """String representation."""
-        return f"RevisionDocument({self.dir.name})"
+        return f"SupplementaryDocument({self.dir.name})"
 
 
-__all__ = ["RevisionDocument", "RevisionContents"]
+__all__ = ["SupplementaryDocument", "SupplementaryContents"]
 
 # EOF

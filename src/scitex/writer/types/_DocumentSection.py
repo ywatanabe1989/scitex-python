@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Timestamp: "2025-10-28 16:41:11 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/types/document_section.py
+# ----------------------------------------
+from __future__ import annotations
+import os
+__FILE__ = (
+    "./src/scitex/writer/types/document_section.py"
+)
+__DIR__ = os.path.dirname(__FILE__)
+# ----------------------------------------
 
 """
 DocumentSection - wrapper for document file with git-backed version control.
@@ -133,7 +142,11 @@ class DocumentSection:
                 logger.debug(f"Git log failed: {result.stderr}")
                 return []
 
-            return result.stdout.strip().split("\n") if result.stdout.strip() else []
+            return (
+                result.stdout.strip().split("\n")
+                if result.stdout.strip()
+                else []
+            )
         except subprocess.TimeoutExpired:
             logger.warning(f"Git log timed out for {self.path}")
             return []
@@ -234,6 +247,6 @@ class DocumentSection:
         return f"DocumentSection({self.path.name})"
 
 
-__all__ = ['DocumentSection']
+__all__ = ["DocumentSection"]
 
 # EOF

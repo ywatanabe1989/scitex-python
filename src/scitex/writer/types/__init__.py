@@ -12,11 +12,11 @@ Each document type includes:
 - verify_structure() method for validation
 """
 
-from .document_section import DocumentSection
-from .document import Document
-from .manuscript_document import ManuscriptDocument, ManuscriptContents
-from .supplementary_document import SupplementaryDocument, SupplementaryContents
-from .revision_document import RevisionDocument, RevisionContents
+from ._DocumentSection import DocumentSection
+from ._Document import Document
+from ._ManuscriptDocument import ManuscriptDocument, ManuscriptContents
+from ._SupplementaryDocument import SupplementaryDocument, SupplementaryContents
+from ._RevisionDocument import RevisionDocument, RevisionContents
 
 __all__ = [
     # Core types

@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
-from .document_section import DocumentSection
+from ._DocumentSection import DocumentSection
 
 
 @dataclass
