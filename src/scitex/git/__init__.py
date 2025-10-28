@@ -6,35 +6,39 @@
 Git operations and utilities.
 """
 
-from .init import (
+from ._init import (
     init_git_repo,
     find_parent_git,
     create_child_git,
     remove_child_git,
 )
 
-from .clone import (
+from ._clone import (
     clone_repo,
     git_init,
 )
 
-from .commit import (
+from ._commit import (
     git_add_all,
     git_commit,
 )
 
-from .branch import (
+from ._branch import (
     git_branch_rename,
     git_checkout_new_branch,
 )
 
-from .remote import (
+from ._remote import (
     get_remote_url,
     is_cloned_from,
 )
 
-from .workflow import (
+from ._workflow import (
     setup_branches,
+)
+
+from ._retry import (
+    git_retry,
 )
 
 __all__ = [
@@ -51,6 +55,7 @@ __all__ = [
     "get_remote_url",
     "is_cloned_from",
     "setup_branches",
+    "git_retry",
 ]
 
 # EOF

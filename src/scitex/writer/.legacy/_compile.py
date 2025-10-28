@@ -18,7 +18,6 @@ This module provides Python wrappers around scitex-writer shell scripts,
 handling subprocess execution, output parsing, and exit code management.
 """
 
-import subprocess
 from pathlib import Path
 from datetime import datetime
 
@@ -28,6 +27,7 @@ from .dataclasses.config import DOC_TYPE_DIRS, DOC_TYPE_FLAGS
 from .dataclasses import CompilationResult
 
 from scitex.logging import getLogger
+from scitex._sh import sh
 
 logger = getLogger(__name__)
 
@@ -91,19 +91,27 @@ def _run_compile(
     logger.info(f"Working directory: {project_dir}")
 
     try:
-        # Run compilation
-        # Use cwd parameter to set working directory
-        # Use executable="/bin/bash" because scripts use bash-specific features like 'source'
-        result = subprocess.run(
-            cmd,
-            cwd=project_dir,
-            executable="/bin/bash",
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
+        import os
+        cwd_original = Path.cwd()
+        os.chdir(project_dir)
 
-        duration = (datetime.now() - start_time).total_seconds()
+        try:
+            result_dict = sh(
+                cmd,
+                verbose=True,
+                return_as="dict",
+                timeout=timeout * 1000,
+            )
+
+            result = type('Result', (), {
+                'returncode': result_dict['exit_code'],
+                'stdout': result_dict['stdout'],
+                'stderr': result_dict['stderr']
+            })()
+
+            duration = (datetime.now() - start_time).total_seconds()
+        finally:
+            os.chdir(cwd_original)
 
         # Determine output paths
         doc_dir = project_dir / DOC_TYPE_DIRS[doc_type]
@@ -166,17 +174,6 @@ def _run_compile(
                 logger.error(f"Found {len(errors)} errors")
 
         return compilation_result
-
-    except subprocess.TimeoutExpired:
-        duration = (datetime.now() - start_time).total_seconds()
-        logger.error(f"Compilation timed out after {duration:.2f}s")
-        return CompilationResult(
-            success=False,
-            exit_code=124,  # Timeout exit code
-            stdout="",
-            stderr=f"Compilation timed out after {timeout}s",
-            duration=duration,
-        )
 
     except Exception as e:
         duration = (datetime.now() - start_time).total_seconds()

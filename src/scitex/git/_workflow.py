@@ -7,8 +7,8 @@ Git workflow operations combining multiple git commands.
 """
 
 from pathlib import Path
-from .commit import git_add_all, git_commit
-from .branch import git_branch_rename, git_checkout_new_branch
+from ._commit import git_add_all, git_commit
+from ._branch import git_branch_rename, git_checkout_new_branch
 
 
 def setup_branches(repo_path: Path, template_name: str, verbose: bool = True) -> bool:
@@ -63,7 +63,7 @@ def _rollback_commit(repo_path: Path, verbose: bool = True) -> None:
         Enable verbose output
     """
     from scitex._sh import sh
-    from .utils import _in_directory
+    from ._utils import _in_directory
     from scitex.logging import getLogger
 
     logger = getLogger(__name__)

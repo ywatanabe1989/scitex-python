@@ -9,7 +9,7 @@ Session management utilities for git module CLI tools.
 import sys
 import matplotlib.pyplot as plt
 import scitex as stx
-from .constants import EXIT_SUCCESS
+from ._constants import EXIT_SUCCESS
 
 
 def run_with_session(parse_args_func, main_func):

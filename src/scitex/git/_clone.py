@@ -9,7 +9,7 @@ Git clone operations.
 from pathlib import Path
 from scitex.logging import getLogger
 from scitex._sh import sh
-from .constants import EXIT_SUCCESS, EXIT_FAILURE
+from ._constants import EXIT_SUCCESS, EXIT_FAILURE
 
 logger = getLogger(__name__)
 
@@ -32,7 +32,7 @@ def clone_repo(url: str, target_path: Path, verbose: bool = True) -> bool:
     bool
         True if successful, False otherwise
     """
-    from .remote import _validate_git_url
+    from ._remote import _validate_git_url
 
     if not _validate_git_url(url):
         logger.error(f"Invalid git URL: {url}")
@@ -68,7 +68,7 @@ def git_init(repo_path: Path, verbose: bool = True) -> bool:
     bool
         True if successful, False otherwise
     """
-    from .utils import _in_directory
+    from ._utils import _in_directory
 
     if (repo_path / ".git").exists():
         logger.warning("Git repository already initialized")
@@ -114,7 +114,7 @@ def parse_args():
 
 def run_session():
     """Initialize scitex framework, run main function, and cleanup."""
-    from .session import run_with_session
+    from ._session import run_with_session
     run_with_session(parse_args, main)
 
 

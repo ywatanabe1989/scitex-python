@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-29 08:39:30 (ywatanabe)"
-# File: ./tests/scitex/git/test.sh
+# Timestamp: "2025-10-29 09:25:28 (ywatanabe)"
+# File: ./tests/scitex/writer/run_test.sh
 
 ORIG_DIR="$(pwd)"
 THIS_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
@@ -23,6 +23,11 @@ echo_error() { echo -e "${RED}ERRO: $1${NC}"; }
 echo_header() { echo_info "=== $1 ==="; }
 # ---------------------------------------
 
+echo_info "Running $0..." | tee $LOG_PATH
+
+cd $GIT_ROOT
 pytest "$THIS_DIR" | tee $LOG_PATH
+
+echo_info "See full log: $LOG_PATH" | tee $LOG_PATH
 
 # EOF
