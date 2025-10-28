@@ -21,8 +21,6 @@ Provides object-oriented interface to scitex-writer functionality.
 from pathlib import Path
 from typing import Optional
 from typing import Callable
-from git import Repo
-from git import InvalidGitRepositoryError
 
 from ._compile import compile_manuscript
 from ._compile import compile_supplementary
@@ -38,6 +36,7 @@ from .dataclasses import SupplementaryTree
 from .dataclasses import RevisionTree
 from .dataclasses.tree import ScriptsTree
 from scitex import logging
+from scitex.git import init_git_repo
 
 logger = logging.getLogger(__name__)
 
@@ -79,8 +78,8 @@ class Writer:
         # Create or attach to project
         self.project_dir = self._attach_or_create_project(name)
 
-        # Initialize git repository based on strategy
-        self.git_root = self._init_git_repo()
+        # Initialize git repository based on strategy (delegates to template module)
+        self.git_root = init_git_repo(self.project_dir, self.git_strategy)
 
         # Document accessors (pass git_root for efficiency)
         self.manuscript = ManuscriptTree(
@@ -191,165 +190,6 @@ class Writer:
 
         logger.success(
             f"Writer: Project structure verified at {self.project_dir.absolute()}"
-        )
-
-    def _remove_child_git(self) -> None:
-        """
-        Remove project's local .git folder when using parent git strategy.
-
-        When parent git is found, the project's own .git/ is redundant and
-        should be removed to avoid nested git repository issues.
-
-        Logs warning/success/error as appropriate.
-        """
-        child_git = self.project_dir / ".git"
-
-        if not child_git.exists():
-            logger.info(f"Writer: No child .git found at {self.project_dir}")
-            return
-
-        try:
-            import shutil
-
-            logger.info(
-                f"Writer: Removing project's child .git to use parent repository..."
-            )
-            shutil.rmtree(child_git)
-            logger.success(
-                f"Writer: Removed child .git from {self.project_dir}"
-            )
-        except Exception as e:
-            logger.warning(
-                f"Writer: Failed to remove child .git from {self.project_dir}: {e}"
-            )
-
-    def _find_parent_git(self) -> Optional[Path]:
-        """
-        Find parent git repository by walking up directory tree.
-
-        Uses GitPython to search parent directories for git repo.
-
-        Returns:
-            Path to parent git root, or None if not found
-        """
-        try:
-            # search_parent_directories=True searches up the tree
-            repo_parent = Repo(
-                self.project_dir.parent, search_parent_directories=True
-            )
-            return Path(repo_parent.git_dir).parent
-        except InvalidGitRepositoryError:
-            return None
-
-    def _create_child_git(self) -> Optional[Path]:
-        """
-        Create isolated git repository in project directory.
-
-        Uses GitPython to initialize and make initial commit.
-
-        Returns:
-            Path to git root (project_dir), or None on failure
-        """
-        try:
-            # Check if already a git repo
-            try:
-                repo = Repo(self.project_dir)
-                logger.info(
-                    f"Writer: Project is already a git repository at {self.project_dir}"
-                )
-                return self.project_dir
-            except InvalidGitRepositoryError:
-                # Not yet a repo, initialize one
-                logger.info(
-                    f"Writer: Initializing new git repository at {self.project_dir}"
-                )
-                repo = Repo.init(self.project_dir)
-
-            # Stage and commit
-            repo.index.add(["."])
-            repo.index.commit("Initial commit from scitex-writer")
-
-            logger.success(
-                f"Writer: Git repository initialized at {self.project_dir}"
-            )
-            return self.project_dir
-        except Exception as e:
-            logger.warning(
-                f"Writer: Failed to create child git repository: {e}"
-            )
-            return None
-
-    def _init_git_repo(self) -> Optional[Path]:
-        """
-        Initialize or detect git repository based on git_strategy with graceful degradation.
-
-        Returns:
-            Path to git repository root, or None if disabled
-
-        Strategy details:
-        - None: Git disabled, returns None
-        - 'child': Creates isolated git repo in project directory
-        - 'parent': Tries to use parent git, degrades to 'child' if not found
-        - 'origin': Preserves template's original git history (handled by clone)
-        """
-        # Strategy: disabled
-        if self.git_strategy is None:
-            logger.info(
-                "Writer: Git initialization disabled (git_strategy=None)"
-            )
-            return None
-
-        # Strategy: parent (with graceful degradation to child)
-        if self.git_strategy == "parent":
-            logger.info(
-                f"Writer: Using 'parent' git strategy, searching for parent repository..."
-            )
-            parent_git = self._find_parent_git()
-
-            if parent_git:
-                logger.info(
-                    f"Writer: Found parent git repository: {parent_git}"
-                )
-                # Remove cloned project's .git if it exists (will use parent git instead)
-                self._remove_child_git()
-                return parent_git
-
-            # Graceful degradation: no parent git found, use child strategy
-            logger.warning(
-                f"Writer: No parent git repository found for {self.project_dir}. "
-                f"Degrading to 'child' strategy (isolated git repo)."
-            )
-            return self._create_child_git()
-
-        # Strategy: child (create isolated repo)
-        if self.git_strategy == "child":
-            logger.info(
-                f"Writer: Using 'child' git strategy, creating isolated repository..."
-            )
-            return self._create_child_git()
-
-        # Strategy: origin (preserve template git history)
-        if self.git_strategy == "origin":
-            logger.info(
-                f"Writer: Using 'origin' git strategy, template git history preserved..."
-            )
-            try:
-                repo = Repo(self.project_dir)
-                logger.info(
-                    f"Writer: Found git repository at {self.project_dir}"
-                )
-                return self.project_dir
-            except InvalidGitRepositoryError:
-                logger.warning(
-                    f"Writer: No git repository found at {self.project_dir}. "
-                    f"Degrading to 'child' strategy."
-                )
-                return self._create_child_git()
-
-        # Unknown strategy
-        raise ValueError(
-            f"Writer: Unknown git_strategy: {self.git_strategy}. "
-            f"Expected 'parent', 'child', 'origin', or None"
         )
 
     def compile_manuscript(self, timeout: int = 300) -> CompilationResult:
