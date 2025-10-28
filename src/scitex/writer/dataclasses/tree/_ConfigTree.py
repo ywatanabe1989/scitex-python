@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
-from .._DocumentSection import DocumentSection
+from ..core import DocumentSection
 
 
 @dataclass

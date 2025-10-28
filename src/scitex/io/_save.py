@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-16 03:09:46 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/io/_save.py
+# Timestamp: "2025-10-29 07:21:17 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save.py
 # ----------------------------------------
 from __future__ import annotations
 import os
@@ -14,6 +14,7 @@ __DIR__ = os.path.dirname(__FILE__)
 __FILE__ = __file__
 
 import warnings
+
 
 """
 1. Functionality:
@@ -32,7 +33,8 @@ import warnings
 import inspect
 import os as _os
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
+from typing import Union
 
 from scitex import logging
 
@@ -44,27 +46,25 @@ from ..str._color_text import color_text
 from ..str._readable_bytes import readable_bytes
 
 # Import save functions from the new modular structure
-from ._save_modules import (
-    save_catboost,
-    save_csv,
-    save_excel,
-    save_hdf5,
-    save_html,
-    save_image,
-    save_joblib,
-    save_json,
-    save_matlab,
-    save_mp4,
-    save_npy,
-    save_npz,
-    save_pickle,
-    save_pickle_compressed,
-    save_tex,
-    save_text,
-    save_torch,
-    save_yaml,
-    save_zarr,
-)
+from ._save_modules import save_catboost
+from ._save_modules import save_csv
+from ._save_modules import save_excel
+from ._save_modules import save_hdf5
+from ._save_modules import save_html
+from ._save_modules import save_image
+from ._save_modules import save_joblib
+from ._save_modules import save_json
+from ._save_modules import save_matlab
+from ._save_modules import save_mp4
+from ._save_modules import save_npy
+from ._save_modules import save_npz
+from ._save_modules import save_pickle
+from ._save_modules import save_pickle_compressed
+from ._save_modules import save_tex
+from ._save_modules import save_text
+from ._save_modules import save_torch
+from ._save_modules import save_yaml
+from ._save_modules import save_zarr
 from ._save_modules._bibtex import save_bibtex
 
 logger = logging.getLogger()
@@ -380,7 +380,7 @@ def save(
 
         if not should_skip_deletion:
             for path in [spath_final, spath_cwd]:
-                sh(f"rm -f {path}", verbose=False)
+                sh(["rm", "-f", f"{path}"], verbose=False)
 
         if dry_run:
             # Get relative path from current working directory
@@ -433,8 +433,8 @@ def _symlink(spath, spath_cwd, symlink_from_cwd, verbose):
     """Create a symbolic link from the current working directory."""
     if symlink_from_cwd and (spath != spath_cwd):
         _os.makedirs(_os.path.dirname(spath_cwd), exist_ok=True)
-        sh(f"rm -f {spath_cwd}", verbose=False)
-        sh(f"ln -sfr {spath} {spath_cwd}", verbose=False)
+        sh(["rm", "-f", f"{spath_cwd}"], verbose=False)
+        sh(["ln", "-sfr", f"{spath}", f"{spath_cwd}"], verbose=False)
         if verbose:
             # Get file extension to provide more informative message
             ext = _os.path.splitext(spath_cwd)[1].lower()
@@ -455,10 +455,10 @@ def _symlink_to(spath_final, symlink_to, verbose):
         _os.makedirs(_os.path.dirname(symlink_to), exist_ok=True)
 
         # Remove existing symlink or file
-        sh(f"rm -f {symlink_to}", verbose=False)
+        sh(["rm", "-f", f"{symlink_to}"], verbose=False)
 
         # Create the symlink using relative path for robustness
-        sh(f"ln -sfr {spath_final} {symlink_to}", verbose=False)
+        sh(["ln", "-sfr", f"{spath_final}", f"{symlink_to}"], verbose=False)
 
         if verbose:
             print(color_text(f"\n(Symlinked to: {symlink_to})", "yellow"))

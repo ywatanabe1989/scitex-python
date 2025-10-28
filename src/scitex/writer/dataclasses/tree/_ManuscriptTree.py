@@ -21,8 +21,8 @@ from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
-from .._ManuscriptContents import ManuscriptContents
-from .._DocumentSection import DocumentSection
+from ..contents import ManuscriptContents
+from ..core import DocumentSection
 
 
 @dataclass
