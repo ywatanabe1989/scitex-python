@@ -468,6 +468,94 @@ class DocumentSection:
         return f"DocumentSection({self.path.name})"
 
 
+def run_session() -> None:
+    """Initialize scitex framework, run main function, and cleanup."""
+    global CONFIG, CC, sys, plt, rng
+    import sys
+    import matplotlib.pyplot as plt
+    import scitex as stx
+
+    args = parse_args()
+
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+        sys,
+        plt,
+        args=args,
+        file=__FILE__,
+        sdir_suffix=None,
+        verbose=False,
+        agg=True,
+    )
+
+    exit_status = main(args)
+
+    stx.session.close(
+        CONFIG,
+        verbose=False,
+        notify=False,
+        message="",
+        exit_status=exit_status,
+    )
+
+
+def main(args):
+    section = DocumentSection(Path(args.file))
+
+    if args.action == "read":
+        content = section.read()
+        print(content if content else "File not found or empty")
+
+    elif args.action == "history":
+        history = section.history()
+        print(f"History ({len(history)} commits):")
+        for entry in history:
+            print(f"  {entry}")
+
+    elif args.action == "diff":
+        diff = section.diff(args.ref)
+        print(diff if diff else "No differences")
+
+    return 0
+
+
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Demonstrate DocumentSection version control"
+    )
+    parser.add_argument(
+        "--file",
+        "-f",
+        type=str,
+        required=True,
+        help="Path to document section file",
+    )
+    parser.add_argument(
+        "--action",
+        "-a",
+        type=str,
+        choices=["read", "history", "diff"],
+        default="read",
+        help="Action to perform (default: read)",
+    )
+    parser.add_argument(
+        "--ref",
+        "-r",
+        type=str,
+        default="HEAD",
+        help="Git reference for diff (default: HEAD)",
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    run_session()
+
+
 __all__ = ["DocumentSection"]
+
+# python -m scitex.writer.dataclasses.core._DocumentSection --file ./01_manuscript/contents/introduction.tex --action history
 
 # EOF

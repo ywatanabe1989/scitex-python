@@ -149,6 +149,98 @@ class ManuscriptContents:
         return len(missing) == 0, missing
 
 
+def run_session() -> None:
+    """Initialize scitex framework, run main function, and cleanup."""
+    global CONFIG, CC, sys, plt, rng
+    import sys
+    import matplotlib.pyplot as plt
+    import scitex as stx
+
+    args = parse_args()
+
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+        sys,
+        plt,
+        args=args,
+        file=__FILE__,
+        sdir_suffix=None,
+        verbose=False,
+        agg=True,
+    )
+
+    exit_status = main(args)
+
+    stx.session.close(
+        CONFIG,
+        verbose=False,
+        notify=False,
+        message="",
+        exit_status=exit_status,
+    )
+
+
+def main(args):
+    contents_path = Path(args.dir) / "01_manuscript" / "contents"
+    git_root = Path(args.dir) if args.git_root else None
+
+    contents = ManuscriptContents(
+        root=contents_path,
+        git_root=git_root,
+    )
+
+    print(f"Root: {contents.root}")
+    print(f"Git root: {contents.git_root}")
+    print(f"\nCore sections:")
+    print(f"  Abstract: {contents.abstract.path}")
+    print(f"  Introduction: {contents.introduction.path}")
+    print(f"  Methods: {contents.methods.path}")
+    print(f"  Results: {contents.results.path}")
+    print(f"  Discussion: {contents.discussion.path}")
+
+    if args.verify:
+        is_valid, missing = contents.verify_structure()
+        if is_valid:
+            print("\nStructure verification: PASSED")
+        else:
+            print(f"\nStructure verification: FAILED")
+            print(f"Missing files: {', '.join(missing)}")
+            return 1
+
+    return 0
+
+
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Demonstrate ManuscriptContents dataclass"
+    )
+    parser.add_argument(
+        "--dir",
+        type=str,
+        default="./my_paper",
+        help="Project directory (default: ./my_paper)",
+    )
+    parser.add_argument(
+        "--git-root",
+        action="store_true",
+        help="Use project dir as git root",
+    )
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Verify structure has required files",
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    run_session()
+
+
 __all__ = ["ManuscriptContents"]
+
+# python -m scitex.writer.dataclasses.contents._ManuscriptContents --dir ./my_paper --verify
 
 # EOF

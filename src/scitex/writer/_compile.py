@@ -249,11 +249,107 @@ def compile_revision(
     )
 
 
+def run_session() -> None:
+    """Initialize scitex framework, run main function, and cleanup."""
+    global CONFIG, CC, sys, plt, rng
+    import sys
+    import matplotlib.pyplot as plt
+    import scitex as stx
+
+    args = parse_args()
+
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+        sys,
+        plt,
+        args=args,
+        file=__FILE__,
+        sdir_suffix=None,
+        verbose=False,
+        agg=True,
+    )
+
+    exit_status = main(args)
+
+    stx.session.close(
+        CONFIG,
+        verbose=False,
+        notify=False,
+        message="",
+        exit_status=exit_status,
+    )
+
+
+def main(args):
+    project_dir = Path(args.dir) if args.dir else Path.cwd()
+
+    if args.document == "manuscript":
+        result = compile_manuscript(project_dir, timeout=args.timeout)
+    elif args.document == "supplementary":
+        result = compile_supplementary(project_dir, timeout=args.timeout)
+    elif args.document == "revision":
+        result = compile_revision(
+            project_dir,
+            track_changes=args.track_changes,
+            timeout=args.timeout
+        )
+
+    if result.success:
+        print(f"Compilation successful: {result.output_pdf}")
+        return 0
+    else:
+        print(f"Compilation failed (exit code {result.exit_code})")
+        if result.errors:
+            print(f"Errors: {len(result.errors)}")
+        return result.exit_code
+
+
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Compile LaTeX documents for scitex writer project"
+    )
+    parser.add_argument(
+        "--dir",
+        "-d",
+        type=str,
+        default=None,
+        help="Project directory (default: current directory)",
+    )
+    parser.add_argument(
+        "--document",
+        "-t",
+        type=str,
+        choices=["manuscript", "supplementary", "revision"],
+        default="manuscript",
+        help="Document type to compile (default: manuscript)",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=300,
+        help="Compilation timeout in seconds (default: 300)",
+    )
+    parser.add_argument(
+        "--track-changes",
+        action="store_true",
+        help="Enable change tracking for revision (revision only)",
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    run_session()
+
+
 __all__ = [
     "CompilationResult",
     "compile_manuscript",
     "compile_supplementary",
     "compile_revision",
 ]
+
+# python -m scitex.writer._compile --dir ./my_paper --document manuscript
 
 # EOF

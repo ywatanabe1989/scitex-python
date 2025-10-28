@@ -467,6 +467,135 @@ class Writer:
             return False
 
 
+def run_session() -> None:
+    """Initialize scitex framework, run main function, and cleanup."""
+    global CONFIG, CC, sys, plt, rng
+    import sys
+    import matplotlib.pyplot as plt
+    import scitex as stx
+
+    args = parse_args()
+
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+        sys,
+        plt,
+        args=args,
+        file=__FILE__,
+        sdir_suffix=None,
+        verbose=False,
+        agg=True,
+    )
+
+    exit_status = main(args)
+
+    stx.session.close(
+        CONFIG,
+        verbose=False,
+        notify=False,
+        message="",
+        exit_status=exit_status,
+    )
+
+
+def main(args):
+    if args.action == "create":
+        writer = Writer.create(
+            args.project_name,
+            git_strategy=args.git_strategy,
+        )
+        if writer:
+            print(f"Created writer project: {writer.project_dir}")
+            return 0
+        else:
+            print("Failed to create writer project")
+            return 1
+
+    elif args.action == "compile":
+        writer = Writer(Path(args.dir) if args.dir else Path.cwd())
+
+        if args.document == "manuscript":
+            result = writer.compile_manuscript()
+        elif args.document == "supplementary":
+            result = writer.compile_supplementary()
+        elif args.document == "revision":
+            result = writer.compile_revision(track_changes=args.track_changes)
+
+        if result.success:
+            print(f"Compilation successful: {result.output_pdf}")
+            return 0
+        else:
+            print(f"Compilation failed (exit code {result.exit_code})")
+            return result.exit_code
+
+    elif args.action == "info":
+        writer = Writer(Path(args.dir) if args.dir else Path.cwd())
+        print(f"Project: {writer.project_dir}")
+        print(f"\nDocuments:")
+        print(f"  - Manuscript: {writer.manuscript}")
+        print(f"  - Supplementary: {writer.supplementary}")
+        print(f"  - Revision: {writer.revision}")
+        return 0
+
+
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Writer project management and compilation"
+    )
+    parser.add_argument(
+        "--action",
+        "-a",
+        type=str,
+        choices=["create", "compile", "info"],
+        default="info",
+        help="Action to perform (default: info)",
+    )
+    parser.add_argument(
+        "--project-name",
+        "-n",
+        type=str,
+        help="Project name (for create action)",
+    )
+    parser.add_argument(
+        "--dir",
+        "-d",
+        type=str,
+        help="Project directory (for compile/info)",
+    )
+    parser.add_argument(
+        "--document",
+        "-t",
+        type=str,
+        choices=["manuscript", "supplementary", "revision"],
+        default="manuscript",
+        help="Document to compile (default: manuscript)",
+    )
+    parser.add_argument(
+        "--git-strategy",
+        "-g",
+        type=str,
+        choices=["child", "parent", "origin", "none"],
+        default="child",
+        help="Git strategy (for create action, default: child)",
+    )
+    parser.add_argument(
+        "--track-changes",
+        action="store_true",
+        help="Enable change tracking (revision only)",
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    run_session()
+
+
 __all__ = ["Writer"]
+
+# python -m scitex.writer.Writer --action create --project-name my_paper
+# python -m scitex.writer.Writer --action compile --dir ./my_paper --document manuscript
+# python -m scitex.writer.Writer --action info --dir ./my_paper
 
 # EOF

@@ -72,6 +72,76 @@ class Document:
         return f"{self.__class__.__name__}({self.dir.name})"
 
 
+def run_session() -> None:
+    """Initialize scitex framework, run main function, and cleanup."""
+    global CONFIG, CC, sys, plt, rng
+    import sys
+    import matplotlib.pyplot as plt
+    import scitex as stx
+
+    args = parse_args()
+
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+        sys,
+        plt,
+        args=args,
+        file=__FILE__,
+        sdir_suffix=None,
+        verbose=False,
+        agg=True,
+    )
+
+    exit_status = main(args)
+
+    stx.session.close(
+        CONFIG,
+        verbose=False,
+        notify=False,
+        message="",
+        exit_status=exit_status,
+    )
+
+
+def main(args):
+    doc = Document(Path(args.dir))
+
+    print(f"Document: {doc}")
+    print(f"Directory: {doc.dir}")
+
+    contents_dir = doc.dir / "contents"
+    if contents_dir.exists():
+        tex_files = list(contents_dir.glob("*.tex"))
+        print(f"\nAvailable sections ({len(tex_files)}):")
+        for tex_file in sorted(tex_files):
+            section_name = tex_file.stem
+            print(f"  - {section_name}")
+
+    return 0
+
+
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Demonstrate Document accessor functionality"
+    )
+    parser.add_argument(
+        "--dir",
+        "-d",
+        type=str,
+        required=True,
+        help="Path to document directory",
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    run_session()
+
+
 __all__ = ["Document"]
+
+# python -m scitex.writer.dataclasses.core._Document --dir ./01_manuscript
 
 # EOF

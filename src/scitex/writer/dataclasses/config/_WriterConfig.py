@@ -98,6 +98,83 @@ class WriterConfig:
         return True
 
 
+def run_session() -> None:
+    """Initialize scitex framework, run main function, and cleanup."""
+    global CONFIG, CC, sys, plt, rng
+    import sys
+    import matplotlib.pyplot as plt
+    import scitex as stx
+
+    args = parse_args()
+
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+        sys,
+        plt,
+        args=args,
+        file=__FILE__,
+        sdir_suffix=None,
+        verbose=False,
+        agg=True,
+    )
+
+    exit_status = main(args)
+
+    stx.session.close(
+        CONFIG,
+        verbose=False,
+        notify=False,
+        message="",
+        exit_status=exit_status,
+    )
+
+
+def main(args):
+    config = WriterConfig.from_directory(Path(args.dir))
+
+    print(f"Project dir: {config.project_dir}")
+    print(f"Manuscript dir: {config.manuscript_dir}")
+    print(f"Supplementary dir: {config.supplementary_dir}")
+    print(f"Revision dir: {config.revision_dir}")
+    print(f"Shared dir: {config.shared_dir}")
+
+    if args.validate:
+        try:
+            config.validate()
+            print("\nValidation: PASSED")
+        except ValueError as ee:
+            print(f"\nValidation: FAILED - {ee}")
+            return 1
+
+    return 0
+
+
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Demonstrate WriterConfig dataclass"
+    )
+    parser.add_argument(
+        "--dir",
+        type=str,
+        default="./my_paper",
+        help="Project directory (default: ./my_paper)",
+    )
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="Validate directory structure",
+    )
+
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    run_session()
+
+
 __all__ = ["WriterConfig"]
+
+# python -m scitex.writer.dataclasses.config._WriterConfig --dir ./my_paper --validate
 
 # EOF
