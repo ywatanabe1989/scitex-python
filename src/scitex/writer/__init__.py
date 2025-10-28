@@ -32,6 +32,13 @@ Examples:
 """
 
 from .writer import Writer
+from .types import (
+    DocumentSection,
+    Document,
+    ManuscriptDocument,
+    SupplementaryDocument,
+    RevisionDocument,
+)
 from .compile import (
     compile_manuscript,
     compile_supplementary,
@@ -68,6 +75,13 @@ __version__ = "0.1.0"
 __all__ = [
     # Main class
     'Writer',
+
+    # Type definitions
+    'DocumentSection',
+    'Document',
+    'ManuscriptDocument',
+    'SupplementaryDocument',
+    'RevisionDocument',
 
     # Initialization
     'init_directory',
