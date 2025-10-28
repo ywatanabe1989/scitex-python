@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-28 16:40:44 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/types/supplementary_document.py
+# Timestamp: "2025-10-29 06:08:46 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/_SupplementaryContents.py
 # ----------------------------------------
 from __future__ import annotations
 import os
 __FILE__ = (
-    "./src/scitex/writer/types/supplementary_document.py"
+    "./src/scitex/writer/dataclasses/_SupplementaryContents.py"
 )
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 """
-SupplementaryDocument - dataclass for supplementary materials structure.
+SupplementaryContents - dataclass for supplementary contents structure.
 
-Represents the 02_supplementary/ directory structure.
-Provides typed access and verification of supplementary sections.
+Represents the 02_supplementary/contents/ directory structure.
 """
 
 from pathlib import Path
@@ -110,78 +109,6 @@ class SupplementaryContents:
         return len(issues) == 0, issues
 
 
-@dataclass
-class SupplementaryDocument:
-    """
-    Supplementary materials document with validation.
-
-    Represents 02_supplementary/ directory structure.
-    """
-
-    dir: Path
-    git_root: Optional[Path] = None
-
-    # Subdirectories
-    contents: SupplementaryContents = None
-    archive: Path = None
-
-    # Files
-    base: DocumentSection = None
-    supplementary: DocumentSection = None
-    supplementary_diff: DocumentSection = None
-    readme: DocumentSection = None
-
-    def __post_init__(self):
-        """Initialize all components."""
-        if self.contents is None:
-            self.contents = SupplementaryContents(
-                self.dir / "contents", self.git_root
-            )
-        if self.archive is None:
-            self.archive = self.dir / "archive"
-        if self.base is None:
-            self.base = DocumentSection(self.dir / "base.tex", self.git_root)
-        if self.supplementary is None:
-            self.supplementary = DocumentSection(
-                self.dir / "supplementary.tex", self.git_root
-            )
-        if self.supplementary_diff is None:
-            self.supplementary_diff = DocumentSection(
-                self.dir / "supplementary_diff.tex", self.git_root
-            )
-        if self.readme is None:
-            self.readme = DocumentSection(
-                self.dir / "README.md", self.git_root
-            )
-
-    def verify_structure(self) -> tuple[bool, list[str]]:
-        """
-        Verify supplementary directory structure.
-
-        Returns:
-            (is_valid, list_of_issues)
-        """
-        issues = []
-
-        # Check required directories
-        if not (self.dir / "contents").exists():
-            issues.append("Missing 02_supplementary/contents/")
-        if not self.archive.exists():
-            issues.append("Missing 02_supplementary/archive/")
-
-        # Check contents structure
-        contents_valid, content_issues = self.contents.verify_structure()
-        if not contents_valid:
-            for issue in content_issues:
-                issues.append(f"02_supplementary/contents/{issue}")
-
-        return len(issues) == 0, issues
-
-    def __repr__(self) -> str:
-        """String representation."""
-        return f"SupplementaryDocument({self.dir.name})"
-
-
-__all__ = ["SupplementaryDocument", "SupplementaryContents"]
+__all__ = ["SupplementaryContents"]
 
 # EOF

@@ -31,42 +31,18 @@ Examples:
         >>> result = compile_manuscript(project_dir=writer_dir)
 """
 
-from .writer import Writer
-from .types import (
-    DocumentSection,
-    Document,
-    ManuscriptDocument,
-    ManuscriptContents,
-    SupplementaryDocument,
-    SupplementaryContents,
-    RevisionDocument,
-    RevisionContents,
+from .Writer import Writer
+from .dataclasses import (
+    CompilationResult,
+    WriterConfig,
+    LaTeXIssue,
 )
-from .compile import (
+from ._compile import (
     compile_manuscript,
     compile_supplementary,
     compile_revision,
-    CompilationResult,
 )
-from .watch import watch_manuscript
-from ._init_directory import init_directory
-from .config import WriterConfig, find_writer_root
-from .validate import (
-    ProjectValidationError,
-    validate_manuscript_structure,
-    validate_supplementary_structure,
-    validate_revision_structure,
-    validate_all_documents,
-    list_missing_files,
-)
-from .parse_latex import (
-    LaTeXIssue,
-    parse_latex_log,
-    parse_compilation_output,
-    format_issues,
-    summarize_issues,
-)
-from .compile_async import (
+from ._compile_async import (
     compile_manuscript_async,
     compile_supplementary_async,
     compile_revision_async,
@@ -76,57 +52,13 @@ from .compile_async import (
 __version__ = "0.1.0"
 
 __all__ = [
-    # Main class
     'Writer',
-
-    # Type definitions
-    'DocumentSection',
-    'Document',
-
-    # Manuscript types
-    'ManuscriptDocument',
-    'ManuscriptContents',
-
-    # Supplementary types
-    'SupplementaryDocument',
-    'SupplementaryContents',
-
-    # Revision types
-    'RevisionDocument',
-    'RevisionContents',
-
-    # Initialization
-    'init_directory',
-
-    # Compilation (for advanced use)
+    'CompilationResult',
+    'WriterConfig',
+    'LaTeXIssue',
     'compile_manuscript',
     'compile_supplementary',
     'compile_revision',
-    'CompilationResult',
-
-    # Watch mode (for advanced use)
-    'watch_manuscript',
-
-    # Configuration (for advanced use)
-    'WriterConfig',
-    'find_writer_root',
-
-    # Validation (for advanced use)
-    'ProjectValidationError',
-    'validate_manuscript_structure',
-    'validate_supplementary_structure',
-    'validate_revision_structure',
-    'validate_all_documents',
-    'list_missing_files',
-
-    # LaTeX error parsing (for advanced use)
-    'LaTeXIssue',
-    'parse_latex_log',
-    'parse_compilation_output',
-    'format_issues',
-    'summarize_issues',
-
-    # Async compilation (for advanced use)
     'compile_manuscript_async',
     'compile_supplementary_async',
     'compile_revision_async',

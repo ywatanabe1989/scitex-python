@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Timestamp: "2025-10-28 17:10:52 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/git_utils.py
+# ----------------------------------------
+from __future__ import annotations
+import os
+__FILE__ = (
+    "./src/scitex/writer/git_utils.py"
+)
+__DIR__ = os.path.dirname(__FILE__)
+# ----------------------------------------
 
 """
 Git utilities for Writer.
@@ -10,12 +19,13 @@ Provides git lock handling and retry logic for concurrent access.
 
 import time
 import subprocess
-from typing import Callable, TypeVar
+from typing import Callable
+from typing import TypeVar
 from scitex.logging import getLogger
 
 logger = getLogger(__name__)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def git_retry(
@@ -23,7 +33,7 @@ def git_retry(
     max_retries: int = 5,
     initial_delay: float = 0.1,
     max_delay: float = 2.0,
-    backoff_factor: float = 2.0
+    backoff_factor: float = 2.0,
 ) -> T:
     """
     Retry git operations with exponential backoff.
@@ -57,11 +67,17 @@ def git_retry(
             return operation()
         except subprocess.CalledProcessError as e:
             # Check if it's a lock error
-            stderr = e.stderr if isinstance(e.stderr, str) else (
-                e.stderr.decode('utf-8', errors='ignore') if e.stderr else ''
+            stderr = (
+                e.stderr
+                if isinstance(e.stderr, str)
+                else (
+                    e.stderr.decode("utf-8", errors="ignore")
+                    if e.stderr
+                    else ""
+                )
             )
 
-            if 'index.lock' in stderr and attempt < max_retries - 1:
+            if "index.lock" in stderr and attempt < max_retries - 1:
                 logger.debug(
                     f"Git lock detected, retrying in {delay:.2f}s "
                     f"(attempt {attempt + 1}/{max_retries})"
@@ -84,6 +100,6 @@ def git_retry(
         ) from last_exception
 
 
-__all__ = ['git_retry']
+__all__ = ["git_retry"]
 
 # EOF

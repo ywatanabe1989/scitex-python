@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-28 16:40:17 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/types/manuscript_document.py
+# Timestamp: "2025-10-29 06:08:43 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/_ManuscriptContents.py
 # ----------------------------------------
 from __future__ import annotations
 import os
 __FILE__ = (
-    "./src/scitex/writer/types/manuscript_document.py"
+    "./src/scitex/writer/dataclasses/_ManuscriptContents.py"
 )
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 """
-ManuscriptDocument - dataclass for manuscript structure with validation.
+ManuscriptContents - dataclass for manuscript contents structure.
 
-Represents the 01_manuscript/ directory structure with all expected files.
-Provides typed access and verification of manuscript sections.
+Represents the 01_manuscript/contents/ directory structure with all files.
 """
 
 from pathlib import Path
@@ -30,6 +29,7 @@ class ManuscriptContents:
     """Contents subdirectory of manuscript (01_manuscript/contents/)."""
 
     root: Path
+    git_root: Optional[Path] = None
 
     # Core sections
     abstract: DocumentSection = None
@@ -57,55 +57,63 @@ class ManuscriptContents:
     bibliography: DocumentSection = None
     latex_styles: Path = None
 
-    def __post_init__(self, git_root: Optional[Path] = None):
+    def __post_init__(self):
         """Initialize all DocumentSection instances."""
         if self.abstract is None:
             self.abstract = DocumentSection(
-                self.root / "abstract.tex", git_root
+                self.root / "abstract.tex", self.git_root
             )
         if self.introduction is None:
             self.introduction = DocumentSection(
-                self.root / "introduction.tex", git_root
+                self.root / "introduction.tex", self.git_root
             )
         if self.methods is None:
-            self.methods = DocumentSection(self.root / "methods.tex", git_root)
+            self.methods = DocumentSection(
+                self.root / "methods.tex", self.git_root
+            )
         if self.results is None:
-            self.results = DocumentSection(self.root / "results.tex", git_root)
+            self.results = DocumentSection(
+                self.root / "results.tex", self.git_root
+            )
         if self.discussion is None:
             self.discussion = DocumentSection(
-                self.root / "discussion.tex", git_root
+                self.root / "discussion.tex", self.git_root
             )
         if self.title is None:
-            self.title = DocumentSection(self.root / "title.tex", git_root)
+            self.title = DocumentSection(
+                self.root / "title.tex", self.git_root
+            )
         if self.authors is None:
-            self.authors = DocumentSection(self.root / "authors.tex", git_root)
+            self.authors = DocumentSection(
+                self.root / "authors.tex", self.git_root
+            )
         if self.keywords is None:
             self.keywords = DocumentSection(
-                self.root / "keywords.tex", git_root
+                self.root / "keywords.tex", self.git_root
             )
         if self.journal_name is None:
             self.journal_name = DocumentSection(
-                self.root / "journal_name.tex", git_root
+                self.root / "journal_name.tex", self.git_root
             )
         if self.graphical_abstract is None:
             self.graphical_abstract = DocumentSection(
-                self.root / "graphical_abstract.tex", git_root
+                self.root / "graphical_abstract.tex", self.git_root
             )
         if self.highlights is None:
             self.highlights = DocumentSection(
-                self.root / "highlights.tex", git_root
+                self.root / "highlights.tex", self.git_root
             )
         if self.data_availability is None:
             self.data_availability = DocumentSection(
-                self.root / "data_availability.tex", git_root
+                self.root / "data_availability.tex", self.git_root
             )
         if self.additional_info is None:
             self.additional_info = DocumentSection(
-                self.root / "additional_info.tex", git_root
+                self.root / "additional_info.tex", self.git_root
             )
         if self.wordcount is None:
             self.wordcount = DocumentSection(
-                self.root / "wordcount.tex", git_root
+                self.root / "wordcount.tex", self.git_root
             )
         if self.figures is None:
             self.figures = self.root / "figures"
@@ -113,7 +121,7 @@ class ManuscriptContents:
             self.tables = self.root / "tables"
         if self.bibliography is None:
             self.bibliography = DocumentSection(
-                self.root / "bibliography.bib", git_root
+                self.root / "bibliography.bib", self.git_root
             )
         if self.latex_styles is None:
             self.latex_styles = self.root / "latex_styles"
@@ -141,68 +149,6 @@ class ManuscriptContents:
         return len(missing) == 0, missing
 
 
-@dataclass
-class ManuscriptDocument:
-    """
-    Manuscript document accessor with validation.
-
-    Represents 01_manuscript/ directory with all subdirectories and files.
-    """
-
-    dir: Path
-    git_root: Optional[Path] = None
-
-    # Subdirectories
-    contents: ManuscriptContents = None
-    archive: Path = None
-
-    # Files
-    base: DocumentSection = None
-    readme: DocumentSection = None
-
-    def __post_init__(self):
-        """Initialize all components."""
-        if self.contents is None:
-            self.contents = ManuscriptContents(
-                self.dir / "contents", self.git_root
-            )
-        if self.archive is None:
-            self.archive = self.dir / "archive"
-        if self.base is None:
-            self.base = DocumentSection(self.dir / "base.tex", self.git_root)
-        if self.readme is None:
-            self.readme = DocumentSection(
-                self.dir / "README.md", self.git_root
-            )
-
-    def verify_structure(self) -> tuple[bool, list[str]]:
-        """
-        Verify manuscript directory structure.
-
-        Returns:
-            (is_valid, list_of_issues)
-        """
-        issues = []
-
-        # Check required directories
-        if not (self.dir / "contents").exists():
-            issues.append("Missing 01_manuscript/contents/")
-        if not self.archive.exists():
-            issues.append("Missing 01_manuscript/archive/")
-
-        # Check contents structure
-        contents_valid, missing_files = self.contents.verify_structure()
-        if not contents_valid:
-            for file in missing_files:
-                issues.append(f"Missing 01_manuscript/contents/{file}")
-
-        return len(issues) == 0, issues
-
-    def __repr__(self) -> str:
-        """String representation."""
-        return f"ManuscriptDocument({self.dir.name})"
-
-
-__all__ = ["ManuscriptDocument", "ManuscriptContents"]
+__all__ = ["ManuscriptContents"]
 
 # EOF
