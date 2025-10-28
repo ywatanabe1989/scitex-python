@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2025-10-28
+!-- Timestamp: 2025-10-28 16:26:56
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/README.md
 !-- --- -->
@@ -14,8 +14,8 @@ Python interface for LaTeX manuscript compilation.
 from scitex.writer import Writer
 from pathlib import Path
 
-# Standalone manuscript (isolated git repository - default)
-writer = Writer(Path("my_paper"))
+# # Standalone manuscript (isolated git repository - default)
+# writer = Writer(Path("my_paper"))
 
 # Project-integrated manuscript (use parent's git repository)
 writer = Writer(Path("my_project/scitex/writer"), git_strategy='parent')

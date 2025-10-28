@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Timestamp: "2025-10-28 16:24:36 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/template.py
+# ----------------------------------------
+from __future__ import annotations
+import os
+__FILE__ = (
+    "./src/scitex/writer/template.py"
+)
+__DIR__ = os.path.dirname(__FILE__)
+# ----------------------------------------
 
 """
 Writer project template management.
 
-Provides functions to initialize writer project directories.
+Provides functions to create and copy writer project templates.
 """
 
-from pathlib import Path
 from typing import Optional
 
 from scitex.logging import getLogger
@@ -16,7 +24,9 @@ from scitex.logging import getLogger
 logger = getLogger(__name__)
 
 
-def init_directory(project_name: str, target_dir: Optional[str] = None) -> bool:
+def init_directory(
+    project_name: str, target_dir: Optional[str] = None
+) -> bool:
     """
     Initialize a new writer project directory from scitex-writer template.
 
@@ -46,7 +56,7 @@ def init_directory(project_name: str, target_dir: Optional[str] = None) -> bool:
 
 
 __all__ = [
-    'init_directory',
+    "init_directory",
 ]
 
 # EOF
