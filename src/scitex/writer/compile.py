@@ -79,16 +79,14 @@ class CompilationResult:
         return "\n".join(lines)
 
 
-def _find_compile_script() -> Path:
+def _find_compile_script(project_dir: Path = None) -> Path:
     """
-    Find the compile script from scitex-writer.
+    Find the compile script for the project.
 
     Searches in this order:
-    1. SCITEX_WRITER_TEMPLATE_PATH environment variable (if set)
-    2. /tmp/scitex-writer/compile (temporary clone)
-    3. ~/proj/scitex-code/my_paper/compile (scitex-code repo)
-    4. ~/proj/scitex-writer/compile (dedicated scitex-writer repo)
-    5. Built-in scripts directory
+    1. Project directory itself (project_dir/compile) - if project_dir provided
+    2. SCITEX_WRITER_TEMPLATE_PATH environment variable (if set)
+    3. Built-in scripts directory
 
     Returns:
         Path to compile script
@@ -96,21 +94,17 @@ def _find_compile_script() -> Path:
     Raises:
         FileNotFoundError: If compile script not found
     """
-    # Try common locations (in order of preference)
     locations = []
 
-    # 1. Environment variable override
+    # 1. Project directory (self-contained, travels with project in git)
+    if project_dir:
+        locations.append(Path(project_dir) / "compile")
+
+    # 2. Environment variable override (for shared templates)
     if env_path := os.getenv("SCITEX_WRITER_TEMPLATE_PATH"):
         locations.append(Path(env_path) / "compile")
 
-    # 2-4. Common project locations
-    locations.extend([
-        Path("/tmp/scitex-writer/compile"),
-        Path.home() / "proj" / "scitex-code" / "my_paper" / "compile",  # Primary location
-        Path.home() / "proj" / "scitex-writer" / "compile",
-    ])
-
-    # 5. Built-in scripts
+    # 3. Built-in scripts (fallback)
     locations.append(Path(__file__).parent / "scripts" / "compile")
 
     for location in locations:
@@ -118,13 +112,11 @@ def _find_compile_script() -> Path:
             logger.debug(f"Found compile script at: {location}")
             return location
 
-    # Provide helpful error message with all searched locations
-    searched = [str(loc) for loc in locations if loc]
+    # Provide helpful error message
     raise FileNotFoundError(
-        "scitex-writer compile script not found. "
-        f"Searched in: {', '.join(searched[:3])}... "
-        "Set SCITEX_WRITER_TEMPLATE_PATH environment variable or "
-        "clone scitex-writer to ~/proj/scitex-writer or ~/proj/scitex-code/my_paper"
+        "compile script not found in project directory or system templates. "
+        "Ensure compile script is included in project git repository or "
+        "set SCITEX_WRITER_TEMPLATE_PATH environment variable."
     )
 
 
@@ -171,7 +163,7 @@ def _run_compile(
         )
 
     try:
-        compile_script = _find_compile_script()
+        compile_script = _find_compile_script(project_dir)
     except FileNotFoundError as e:
         logger.error(str(e))
         return CompilationResult(
