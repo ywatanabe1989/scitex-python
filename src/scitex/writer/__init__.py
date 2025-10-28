@@ -36,8 +36,11 @@ from .types import (
     DocumentSection,
     Document,
     ManuscriptDocument,
+    ManuscriptContents,
     SupplementaryDocument,
+    SupplementaryContents,
     RevisionDocument,
+    RevisionContents,
 )
 from .compile import (
     compile_manuscript,
@@ -79,9 +82,18 @@ __all__ = [
     # Type definitions
     'DocumentSection',
     'Document',
+
+    # Manuscript types
     'ManuscriptDocument',
+    'ManuscriptContents',
+
+    # Supplementary types
     'SupplementaryDocument',
+    'SupplementaryContents',
+
+    # Revision types
     'RevisionDocument',
+    'RevisionContents',
 
     # Initialization
     'init_directory',
