@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2025-10-29 11:33:17
+!-- Timestamp: 2025-10-29 17:33:34
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/README.md
 !-- --- -->
@@ -44,10 +44,10 @@ result = writer.compile_manuscript()
 if result.success:
     print(f"PDF: {result.output_pdf}")
 
-# # Utilities
-# pdf = writer.get_pdf()
-# writer.watch()
-# writer.delete()
+# Utilities
+pdf = writer.get_pdf()
+writer.watch()
+writer.delete()
 ```
 
 **Git Strategies:**

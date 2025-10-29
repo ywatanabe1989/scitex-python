@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-29 05:56:39 (ywatanabe)"
+# Timestamp: "2025-10-29 11:49:39 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/template/clone_writer_directory.py
 # ----------------------------------------
 from __future__ import annotations
