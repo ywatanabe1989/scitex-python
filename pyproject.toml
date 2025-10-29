@@ -163,35 +163,21 @@ ml = [
     "optuna",
     "sympy",
     "opencv-python",
-    # AI Services & APIs
     "openai",
     "anthropic",
     "google-genai",
     "groq",
     "llama-stack",
 ]
-
-# Writer Module - Academic Paper Writing & LaTeX Compilation
-writer = [
-    "yq",  # YAML query tool for compilation script configuration
-]
-
-# Scholar Module - Paper Management & Browser
-scholar = [
-    "selenium",
-    "webdriver-manager",
-    "bs4",
-    "html2text",
-    "crawl4ai",
-    "scholarly",
-    "pymed",
-    "python-docx",
-    "PyPDF2",
-    "pdfplumber",
-    "PyMuPDF",
-    "pytesseract",
-    "bibtexparser",
-    "playwright>=1.40.0",
+# Jupyter & Interactive Development
+jupyter = [
+    "jupyterlab",
+    "jupyter-collaboration",
+    "ipykernel",
+    "ipdb",
+    "papermill",
+    "jupytext",
+    "nbsphinx",
 ]
 
 # Neuroscience & Specialized Scientific
@@ -212,15 +198,27 @@ web = [
     "streamlit",
 ]
 
-# Jupyter & Interactive Development
-jupyter = [
-    "jupyterlab",
-    "jupyter-collaboration",
-    "ipykernel",
-    "ipdb",
-    "papermill",
-    "jupytext",
-    "nbsphinx",
+# Scholar Module - Paper Management & Browser
+scholar = [
+    "selenium",
+    "webdriver-manager",
+    "bs4",
+    "html2text",
+    "crawl4ai",
+    "scholarly",
+    "pymed",
+    "python-docx",
+    "PyPDF2",
+    "pdfplumber",
+    "PyMuPDF",
+    "pytesseract",
+    "bibtexparser",
+    "playwright>=1.40.0",
+]
+
+# Writer Module - Academic Paper Writing & LaTeX Compilation
+writer = [
+    "yq",  # YAML query tool for compilation script configuration
 ]
 
 # Development Tools
@@ -273,8 +271,6 @@ dev = [
 
 # All features except dev
 all = [
-    # writer
-    "yq",
     # dl
     "torch",
     "torchvision",
@@ -296,6 +292,19 @@ all = [
     "optuna",
     "sympy",
     "opencv-python",
+    "openai",
+    "anthropic",
+    "google-genai",
+    "groq",
+    "llama-stack",    
+    # neuro
+    "mne",
+    "obspy",
+    "pyedflib",
+    "pybids",
+    "tensorpac",
+    "ripple_detection",
+    "geom_median",
     # scholar
     "selenium",
     "webdriver-manager",
@@ -311,24 +320,12 @@ all = [
     "pytesseract",
     "bibtexparser",
     "playwright>=1.40.0",
-    # ai-apis
-    "openai",
-    "anthropic",
-    "google-genai",
-    "groq",
-    "llama-stack",
-    # neuro
-    "mne",
-    "obspy",
-    "pyedflib",
-    "pybids",
-    "tensorpac",
-    "ripple_detection",
-    "geom_median",
     # web
     "fastapi",
     "flask",
     "streamlit",
+    # writer
+    "yq",
     # jupyter
     "jupyterlab",
     "jupyter-collaboration",
@@ -337,40 +334,6 @@ all = [
     "papermill",
     "jupytext",
     "nbsphinx",
-    # extras
-    "nest-asyncio",
-    "google-search-results",
-    "googlesearch-python",
-    "sqlalchemy",
-    "psycopg2-binary",
-    "Pyarrow",
-    "xmltodict",
-    "sounddevice",
-    "joypy",
-    "julius",
-    "pebble",
-    "impact-factor",
-    "tk",
-    "icecream",
-    "pyperclip",
-    "readchar",
-    "plyer",
-    "timeout-decorator",
-    "ansi-escapes",
-    "chardet",
-    "termplotlib",
-    "tldr",
-    "attrdict",
-    "reportlab",
-    "readability",
-    "readability-lxml",
-    "python-magic",
-    "thefuzz",
-    "pyautogui",
-    "webrequests",
-    "sql_manager",
-    "pymatreader",
-    "six",
 ]
 
 # ============================================
@@ -532,10 +495,3 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = "setup"
 ignore_errors = true
-
-# ============================================
-# Computed Convenience Groups (at end)
-# ============================================
-# Note: These are computed from other groups
-# recommended = ml + jupyter
-# all = dl + ml + scholar + ai-apis + neuro + web + jupyter + extras
