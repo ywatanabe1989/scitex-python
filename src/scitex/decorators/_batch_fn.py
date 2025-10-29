@@ -14,7 +14,6 @@ from functools import wraps
 from typing import Callable
 
 import numpy as np
-import torch
 from tqdm import tqdm as _tqdm
 
 from ._converters import is_nested_decorator
@@ -68,6 +67,7 @@ def batch_fn(func: Callable) -> Callable:
                 # Fallback for wrapped functions
                 batch_result = func(x[start:end], *args, **kwargs)
 
+            import torch
             if isinstance(batch_result, torch.Tensor):
                 batch_result = batch_result.cpu()
             elif isinstance(batch_result, tuple):
@@ -78,6 +78,7 @@ def batch_fn(func: Callable) -> Callable:
 
             results.append(batch_result)
 
+        import torch
         if isinstance(results[0], tuple):
             n_vars = len(results[0])
             combined_results = []

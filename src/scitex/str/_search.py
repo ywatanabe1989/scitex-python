@@ -7,8 +7,6 @@ import re
 from collections import abc
 
 import numpy as np
-import pandas as pd
-import xarray as xr
 from natsort import natsorted
 
 
@@ -85,6 +83,10 @@ def search(
         >>> to_list(np.array(['x', 'y']))
         ['x', 'y']
         """
+        # Lazy imports to avoid circular import issues
+        import pandas as pd
+        import xarray as xr
+
         if isinstance(string_or_pattern, (np.ndarray, pd.Series, xr.DataArray)):
             return string_or_pattern.tolist()
         elif isinstance(string_or_pattern, abc.KeysView):

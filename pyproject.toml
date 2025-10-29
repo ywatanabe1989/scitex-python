@@ -3,6 +3,8 @@
 # https://scitex.ai
 # ============================================
 
+# /home/ywatanabe/proj/scitex-code/pyproject.toml
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -127,6 +129,11 @@ ml = [
     "optuna",
     "sympy",
     "opencv-python",
+]
+
+# Writer Module - Academic Paper Writing & LaTeX Compilation
+writer = [
+    "yq",  # YAML query tool for compilation script configuration
 ]
 
 # Scholar Module - Paper Management & Browser
@@ -271,27 +278,12 @@ dev = [
 ]
 
 # Convenience groups (combinations for common use cases)
-recommended = [
-    # ML + Jupyter (most common use cases)
-    "scikit-image",
-    "imbalanced-learn",
-    "umap-learn",
-    "sktime",
-    "catboost",
-    "optuna",
-    "sympy",
-    "opencv-python",
-    "jupyterlab",
-    "jupyter-collaboration",
-    "ipykernel",
-    "ipdb",
-    "papermill",
-    "jupytext",
-    "nbsphinx",
-]
+recommended = ml + jupyter
 
 # All features except dev
 all = [
+    # writer
+    "yq",
     # dl
     "torch",
     "torchvision",
