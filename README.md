@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2025-10-30 10:03:31
+!-- Timestamp: 2025-10-30 10:05:52
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -22,10 +22,10 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 
 ## 📦 Installation
 
-| Option           | Command                                                                    | Size    | Use Case           |
-|------------------|----------------------------------------------------------------------------|---------|-------------------|
-| **Basic**        | `pip install scitex`                                                       | ~600 MB | Core + utilities   |
-| **All Features** | `pip install scitex[dl,ml,jupyter,neuro,web,scholar,writer,dev]` | ~2-5 GB | Complete toolkit   |
+``` bash
+pip install scitex # ~600 MB, Core + utilities
+pip install scitex[dl,ml,jupyter,neuro,web,scholar,writer,dev] # ~2-5 GB, Complete toolkit
+```
 
 **Optional Groups**:
 
@@ -33,10 +33,10 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 |-------------|---------------------------------------------------------|-------------|
 | **dl**      | PyTorch, transformers                                   | +2-4 GB     |
 | **ml**      | scikit-image, catboost, optuna, OpenAI, Anthropic, Groq | ~200 MB     |
-| **scholar** | Selenium, PDF tools, paper management                   | ~150 MB     |
-| **web**     | FastAPI, Flask, Streamlit                               | ~50 MB      |
-| **neuro**   | MNE, obspy (EEG/MEG analysis)                           | ~200 MB     |
 | **jupyter** | JupyterLab, papermill                                   | ~100 MB     |
+| **neuro**   | MNE, obspy (EEG/MEG analysis)                           | ~200 MB     |
+| **web**     | FastAPI, Flask, Streamlit                               | ~50 MB      |
+| **scholar** | Selenium, PDF tools, paper management                   | ~150 MB     |
 | **writer**  | LaTeX compilation tools                                 | ~10 MB      |
 | **dev**     | Testing, linting (dev only)                             | ~100 MB     |
 
