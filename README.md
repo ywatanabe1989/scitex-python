@@ -25,7 +25,7 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 | Option           | Command                                                                    | Size    | Use Case           |
 |------------------|----------------------------------------------------------------------------|---------|-------------------|
 | **Basic**        | `pip install scitex`                                                       | ~600 MB | Core + utilities   |
-| **All Features** | `pip install scitex[dl,ml,scholar,web,neuro,jupyter,writer,dev]` | ~2-5 GB | Complete toolkit   |
+| **All Features** | `pip install scitex[dl,ml,jupyter,neuro,web,scholar,writer,dev]` | ~2-5 GB | Complete toolkit   |
 
 **Optional Groups**:
 
