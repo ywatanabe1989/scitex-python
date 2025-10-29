@@ -22,109 +22,53 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 
 ## 📦 Installation
 
-### Quick Start
-
+### Basic
 ```bash
 pip install scitex
 ```
+Core package with essential functionality.
 
-For the most common use cases with frequently-used dependencies:
+### With ML + Jupyter (Most Common)
 ```bash
-pip install scitex[recommended]
+pip install scitex[ml,jupyter]
 ```
 
-For all features (2-5 GB download):
+### Other Options
 ```bash
-pip install scitex[all]
+pip install scitex[dl]        # Deep Learning (PyTorch)
+pip install scitex[scholar]   # Paper Management
+pip install scitex[web]       # Web Frameworks
+pip install scitex[neuro]     # Neuroscience Tools
+pip install scitex[ai-apis]   # AI Service Clients
 ```
 
-<details>
-<summary><strong>Installation Options</strong> - Feature-specific and development installs</summary>
-
-#### Feature-Specific Installation
-
-**Deep Learning** - PyTorch-based features (2-4 GB):
+### Combine Multiple Features
 ```bash
-pip install scitex[dl]
-```
-
-**Machine Learning** - Additional tools (scikit-image, catboost, optuna):
-```bash
-pip install scitex[ml]
-```
-
-**Scholar Module** - Paper management and browser automation:
-```bash
-pip install scitex[scholar]
-```
-
-**AI APIs** - OpenAI, Anthropic, Google, Groq clients:
-```bash
-pip install scitex[ai-apis]
-```
-
-**Neuroscience** - EEG/MEG analysis (MNE, pyedflib, etc.):
-```bash
-pip install scitex[neuro]
-```
-
-**Web Frameworks** - FastAPI, Flask, Streamlit:
-```bash
-pip install scitex[web]
-```
-
-**Jupyter Notebooks** - JupyterLab and notebook tools:
-```bash
-pip install scitex[jupyter]
-```
-
-#### Combining Multiple Features
-
-```bash
-# Deep learning + Scholar
-pip install scitex[dl,scholar]
-
-# ML + Jupyter + Web
 pip install scitex[ml,jupyter,web]
 ```
 
-#### Development Installation
-
-For contributing to SciTeX:
+### Development Installation
 ```bash
 git clone https://github.com/ywatanabe1989/scitex-code.git
 cd scitex-code
 pip install -e .[dev]
 ```
 
-#### Dependency Size Comparison
-
-| Installation | Download Size | Packages | Use Case |
-|-------------|---------------|----------|----------|
-| `scitex` | ~200-300 MB | ~30 | Core scientific computing |
-| `scitex[recommended]` | ~500-800 MB | ~50 | Most common use cases |
-| `scitex[dl]` | ~2-4 GB | +11 | Deep learning with PyTorch |
-| `scitex[all]` | ~2-5 GB | ~200 | All features |
-
-</details>
+### All Features
+```bash
+pip install scitex[all]
+```
 
 <details>
-<summary><strong>Troubleshooting</strong> - Common installation issues and solutions</summary>
+<summary><strong>Troubleshooting</strong> - Installation help</summary>
 
-#### Missing Dependency Errors
+#### Missing Dependency Error
 
 If you see an error like:
 ```
-ImportError:
-======================================================================
-Optional dependency 'torch' is not installed.
-
+ImportError: Optional dependency 'torch' is not installed.
 To use this feature, install it with:
   pip install scitex[dl]
-
-Or install all optional dependencies:
-  pip install scitex[all]
-======================================================================
 ```
 
 Simply install the suggested extra:
@@ -134,39 +78,26 @@ pip install scitex[dl]
 
 #### Upgrading
 
-To upgrade SciTeX with all your existing extras:
 ```bash
-pip install --upgrade scitex[all]
+pip install --upgrade scitex
 ```
 
 #### What's Included
 
-**Core Installation** (`scitex`):
+**Core** (`scitex`):
 - numpy, scipy, pandas - Scientific computing
-- matplotlib, seaborn, plotly - Visualization
+- matplotlib, seaborn - Visualization
 - scikit-learn, statsmodels - Basic ML
-- h5py, PyYAML, openpyxl - Data formats
-- requests, joblib, psutil - Utilities
 
 **Optional Groups**:
-- **dl**: PyTorch, transformers (2-4 GB)
 - **ml**: scikit-image, catboost, optuna
-- **scholar**: Browser automation, PDF tools
-- **ai-apis**: OpenAI, Anthropic, etc.
-- **neuro**: MNE, obspy (specialized science)
-- **web**: FastAPI, Flask, Streamlit
+- **dl**: PyTorch, transformers (2-4 GB)
 - **jupyter**: JupyterLab, papermill
-- **dev**: Testing, linting, docs (developers only)
-
-#### Why Optional Dependencies?
-
-SciTeX has many features, but not everyone needs everything:
-- **PyTorch alone is 800-2000 MB** (CPU) or 2-4 GB (GPU)
-- Reduces download time by 90%+ for users who don't need deep learning
-- Allows faster CI/CD pipelines
-- More professional package structure
-
-Choose what you need, install only that!
+- **scholar**: Browser automation, PDF tools
+- **web**: FastAPI, Flask, Streamlit
+- **neuro**: MNE, obspy (specialized science)
+- **ai-apis**: OpenAI, Anthropic, Groq
+- **dev**: Testing, linting, docs (contributors only)
 
 </details>
 

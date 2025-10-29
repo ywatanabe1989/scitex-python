@@ -277,27 +277,6 @@ dev = [
     "types-setuptools",
 ]
 
-# Convenience groups (combinations for common use cases)
-recommended = [
-    # ml
-    "scikit-image",
-    "imbalanced-learn",
-    "umap-learn",
-    "sktime",
-    "catboost",
-    "optuna",
-    "sympy",
-    "opencv-python",
-    # jupyter
-    "jupyterlab",
-    "jupyter-collaboration",
-    "ipykernel",
-    "ipdb",
-    "papermill",
-    "jupytext",
-    "nbsphinx",
-]
-
 # All features except dev
 all = [
     # writer
