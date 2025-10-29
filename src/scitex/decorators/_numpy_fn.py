@@ -10,8 +10,6 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import numpy as np
-import pandas as pd
-import torch
 
 THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_numpy_fn.py"
 
@@ -67,11 +65,14 @@ def numpy_fn(func: Callable) -> Callable:
             if original_object is not None:
                 if isinstance(original_object, list):
                     return results.tolist()
-                elif isinstance(original_object, torch.Tensor):
+                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Tensor':
+                    import torch
                     return torch.tensor(results)
-                elif isinstance(original_object, pd.DataFrame):
+                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataFrame':
+                    import pandas as pd
                     return pd.DataFrame(results)
-                elif isinstance(original_object, pd.Series):
+                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Series':
+                    import pandas as pd
                     return pd.Series(results)
             return results
 

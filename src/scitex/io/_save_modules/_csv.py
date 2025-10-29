@@ -4,14 +4,13 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/io/_save_modules/_csv.py
 
 import os
-import pandas as pd
 import numpy as np
 
 
 def _save_csv(obj, spath: str, **kwargs) -> None:
     """
     Save data to a CSV file, handling various input types appropriately.
-    
+
     Parameters
     ----------
     obj : Any
@@ -20,16 +19,19 @@ def _save_csv(obj, spath: str, **kwargs) -> None:
         Path where the CSV file will be saved.
     **kwargs : dict
         Additional keyword arguments to pass to the pandas to_csv method.
-        
+
     Returns
     -------
     None
-    
+
     Raises
     ------
     ValueError
         If the object type cannot be converted to CSV format.
     """
+    # Lazy import to avoid circular import issues
+    import pandas as pd
+
     # Check if path already exists
     if os.path.exists(spath):
         # Calculate hash of new data
