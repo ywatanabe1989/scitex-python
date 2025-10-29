@@ -831,6 +831,11 @@ flycheck_*.el
 SigMacro/
 **/.claude/settings.local.json
 
+# Embedded git repositories (should be submodules)
+examples/**/pip-project-template/
+my_paper/
+src/scitex/scholar/docs/to_claude/examples/pip-project-template/
+
 # Archive and cleanup
 .archive/
 *.log-tmp
