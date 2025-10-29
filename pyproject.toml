@@ -129,6 +129,12 @@ ml = [
     "optuna",
     "sympy",
     "opencv-python",
+    # AI Services & APIs
+    "openai",
+    "anthropic",
+    "google-genai",
+    "groq",
+    "llama-stack",
 ]
 
 # Writer Module - Academic Paper Writing & LaTeX Compilation
@@ -152,15 +158,6 @@ scholar = [
     "pytesseract",
     "bibtexparser",
     "playwright>=1.40.0",
-]
-
-# AI Services & APIs
-ai-apis = [
-    "openai",
-    "anthropic",
-    "google-genai",
-    "groq",
-    "llama-stack",
 ]
 
 # Neuroscience & Specialized Scientific

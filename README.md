@@ -1,7 +1,7 @@
 <!-- ---
-!-- Timestamp: 2025-10-09 10:41:59
+!-- Timestamp: 2025-10-30 09:58:59
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex_repo/README.md
+!-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
 
 # SciTeX
@@ -22,84 +22,22 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 
 ## 📦 Installation
 
-### Basic
-```bash
-pip install scitex
-```
-Core package with essential functionality.
-
-### With ML + Jupyter (Most Common)
-```bash
-pip install scitex[ml,jupyter]
-```
-
-### Other Options
-```bash
-pip install scitex[dl]        # Deep Learning (PyTorch)
-pip install scitex[scholar]   # Paper Management
-pip install scitex[web]       # Web Frameworks
-pip install scitex[neuro]     # Neuroscience Tools
-pip install scitex[ai-apis]   # AI Service Clients
-```
-
-### Combine Multiple Features
-```bash
-pip install scitex[ml,jupyter,web]
-```
-
-### Development Installation
-```bash
-git clone https://github.com/ywatanabe1989/scitex-code.git
-cd scitex-code
-pip install -e .[dev]
-```
-
-### All Features
-```bash
-pip install scitex[all]
-```
-
-<details>
-<summary><strong>Troubleshooting</strong> - Installation help</summary>
-
-#### Missing Dependency Error
-
-If you see an error like:
-```
-ImportError: Optional dependency 'torch' is not installed.
-To use this feature, install it with:
-  pip install scitex[dl]
-```
-
-Simply install the suggested extra:
-```bash
-pip install scitex[dl]
-```
-
-#### Upgrading
-
-```bash
-pip install --upgrade scitex
-```
-
-#### What's Included
-
-**Core** (`scitex`):
-- numpy, scipy, pandas - Scientific computing
-- matplotlib, seaborn - Visualization
-- scikit-learn, statsmodels - Basic ML
+| Option | Command | Size | Use Case |
+|--------|---------|------|----------|
+| **Basic** | `pip install scitex` | ~300 MB | Core functionality |
+| **With ML+Jupyter** | `pip install scitex[ml,jupyter]` | ~800 MB | Most common use |
+| **All Features** | `pip install scitex[dl,ml,scholar,web,neuro,jupyter,writer,extras,dev]` | ~2-5 GB | Complete toolkit |
 
 **Optional Groups**:
-- **ml**: scikit-image, catboost, optuna
-- **dl**: PyTorch, transformers (2-4 GB)
+- **ml**: scikit-image, catboost, optuna, OpenAI, Anthropic, Groq
+- **dl**: PyTorch, transformers (adds 2-4 GB)
 - **jupyter**: JupyterLab, papermill
-- **scholar**: Browser automation, PDF tools
+- **scholar**: Selenium, PDF tools, paper management
 - **web**: FastAPI, Flask, Streamlit
-- **neuro**: MNE, obspy (specialized science)
-- **ai-apis**: OpenAI, Anthropic, Groq
-- **dev**: Testing, linting, docs (contributors only)
-
-</details>
+- **neuro**: MNE, obspy (EEG/MEG analysis)
+- **extras**: Additional utilities
+- **writer**: LaTeX compilation tools
+- **dev**: Testing, linting (dev only)
 
 ## 📦 Module Overview
 
