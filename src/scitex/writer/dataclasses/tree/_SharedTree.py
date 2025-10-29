@@ -65,7 +65,7 @@ class SharedTree:
             )
         if self.bibliography is None:
             self.bibliography = DocumentSection(
-                self.root / "bibliography.bib", self.git_root
+                self.root / "bib_files" / "bibliography.bib", self.git_root
             )
         if self.bib_files is None:
             self.bib_files = self.root / "bib_files"
