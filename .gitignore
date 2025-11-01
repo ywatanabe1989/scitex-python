@@ -862,3 +862,6 @@ src/scitex/docs
 .dev
 docs/from_agents
 **/.rename_backups
+
+# External symlinks
+src/scitex/scholar/crossref_local

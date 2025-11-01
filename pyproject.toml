@@ -344,6 +344,16 @@ all = [
 path = "src/scitex/__version__.py"
 pattern = '__version__ = "(?P<version>[^"]+)"'
 
+[tool.hatch.build.targets.wheel]
+exclude = [
+    "src/scitex/scholar/crossref_local",
+]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "src/scitex/scholar/crossref_local",
+]
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["tests"]
