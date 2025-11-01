@@ -56,6 +56,7 @@ class RandomStateManager:
         self._generators = {}
         self._cache_dir = Path.home() / ".scitex" / "rng"
         self._cache_dir.mkdir(parents=True, exist_ok=True)
+        self._jax_key = None  # Initialize to None, will be set if jax is available
 
         if verbose:
             print(f"RandomStateManager initialized with seed {seed}")
@@ -120,13 +121,17 @@ class RandomStateManager:
         except ImportError:
             pass
 
-        # JAX
+        # JAX (deferred import to avoid circular imports)
         try:
             import jax
 
             self._jax_key = jax.random.PRNGKey(self.seed)
             fixed_modules.append("jax")
-        except ImportError:
+        except (ImportError, AttributeError, RuntimeError):
+            # ImportError: jax not installed
+            # AttributeError: circular import in jax._src.clusters
+            # RuntimeError: other jax initialization errors
+            self._jax_key = None
             pass
 
         if verbose and fixed_modules:

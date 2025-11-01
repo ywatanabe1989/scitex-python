@@ -62,6 +62,7 @@ repro = _LazyModule("repro")
 reproduce = _LazyModule("reproduce")
 rng = _LazyModule("rng")
 scholar = _LazyModule("scholar")
+writer = _LazyModule("writer")
 resource = _LazyModule("resource")
 tex = _LazyModule("tex")
 linalg = _LazyModule("linalg")
@@ -76,7 +77,6 @@ gists = _LazyModule("gists")
 errors = _LazyModule("errors")
 units = _LazyModule("units")
 logging = _LazyModule("logging")
-# log = _LazyModule("log")
 session = _LazyModule("session")
 capture = _LazyModule("capture")
 template = _LazyModule("template")
@@ -120,6 +120,7 @@ __all__ = [
     "repro",
     "reproduce",
     "scholar",
+    "writer",
     "resource",
     "tex",
     "linalg",
