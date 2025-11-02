@@ -214,6 +214,8 @@ scholar = [
     "pytesseract",
     "bibtexparser",
     "playwright>=1.40.0",
+    "feedparser",
+    "httpx",
 ]
 
 # Writer Module - Academic Paper Writing & LaTeX Compilation
@@ -320,6 +322,8 @@ all = [
     "pytesseract",
     "bibtexparser",
     "playwright>=1.40.0",
+    "feedparser",
+    "httpx",
     # web
     "fastapi",
     "flask",
