@@ -69,6 +69,7 @@ dependencies = [
     "lxml_html_clean",
     "xarray",
     "zarr",
+    "numcodecs",
     # Image Processing
     "Pillow",
     # Utilities
@@ -216,6 +217,9 @@ scholar = [
     "playwright>=1.40.0",
     "feedparser",
     "httpx",
+    "tenacity",
+    "pydantic",
+    "watchdog",
 ]
 
 # Writer Module - Academic Paper Writing & LaTeX Compilation
@@ -324,6 +328,9 @@ all = [
     "playwright>=1.40.0",
     "feedparser",
     "httpx",
+    "tenacity",
+    "pydantic",
+    "watchdog",
     # web
     "fastapi",
     "flask",
