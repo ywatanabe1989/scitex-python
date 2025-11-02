@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Scitex centralized plotting module.
 
-Note: Metric calculation functions (calc_*) are imported from scitex.ml.metrics
+Note: Metric calculation functions (calc_*) are imported from scitex.ai.metrics
 but re-exported here for backward compatibility. New code should import directly
-from scitex.ml.metrics instead.
+from scitex.ai.metrics instead.
 """
 
 from ._plot_conf_mat import calc_bACC_from_conf_mat, calc_bacc_from_conf_mat, plot_conf_mat, conf_mat
@@ -54,7 +54,7 @@ __all__ = [
     "select_ticks",
     "set_yaxis_for_acc",
     "vline_at_epochs",
-    # Metric calculations (re-exported from scitex.ml.metrics for backward compat)
+    # Metric calculations (re-exported from scitex.ai.metrics for backward compat)
     "calc_bACC_from_conf_mat",
     "calc_bacc_from_conf_mat",
 ]

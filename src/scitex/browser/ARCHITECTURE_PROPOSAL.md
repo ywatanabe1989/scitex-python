@@ -647,8 +647,8 @@ async def main():
         auth_strategy=DjangoAuthStrategy(
             login_url="http://127.0.0.1:8000/auth/login/",
             credentials={
-                'username': os.getenv('SCITEX_USERNAME'),
-                'password': os.getenv('SCITEX_PASSWORD'),
+                'username': os.getenv('SCITEX_CLOUD_USERNAME'),
+                'password': os.getenv('SCITEX_CLOUD_PASSWORD'),
             },
         ),
     ) as browser:
@@ -733,8 +733,8 @@ async def snap_authenticated(
     """
     from scitex.browser.automation import AuthenticatedBrowser, DjangoAuthStrategy
 
-    username = username or os.getenv('SCITEX_USERNAME')
-    password = password or os.getenv('SCITEX_PASSWORD')
+    username = username or os.getenv('SCITEX_CLOUD_USERNAME')
+    password = password or os.getenv('SCITEX_CLOUD_PASSWORD')
 
     async with AuthenticatedBrowser(
         auth_strategy=DjangoAuthStrategy(

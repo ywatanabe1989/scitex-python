@@ -13,7 +13,7 @@ __DIR__ = os.path.dirname(__FILE__)
 Classification Plotter - Delegates to stx.ml.plt functions.
 
 This module provides a Plotter class that delegates to centralized
-plotting functions in scitex.ml.plt to maintain DRY principle.
+plotting functions in scitex.ai.plt to maintain DRY principle.
 
 Features:
 - Graceful error handling
@@ -44,9 +44,9 @@ try:
 
     # Import scitex plotting functions
     import scitex as stx
-    from scitex.ml.plt.plot_conf_mat import plot_conf_mat as conf_mat
-    from scitex.ml.plt.plot_roc_curve import plot_roc_curve as roc_auc
-    from scitex.ml.plt.plot_pre_rec_curve import plot_pre_rec_curve as pre_rec_auc
+    from scitex.ai.plt.plot_conf_mat import plot_conf_mat as conf_mat
+    from scitex.ai.plt.plot_roc_curve import plot_roc_curve as roc_auc
+    from scitex.ai.plt.plot_pre_rec_curve import plot_pre_rec_curve as pre_rec_auc
 
     PLOTTING_AVAILABLE = True
 except ImportError:
@@ -787,7 +787,7 @@ class Plotter:
                 importance = feature_importance
 
             # Delegate to centralized plotting function
-            from scitex.ml.plt import plot_feature_importance as plot_fi
+            from scitex.ai.plt import plot_feature_importance as plot_fi
 
             fig = plot_fi(
                 importance=importance,

@@ -419,7 +419,7 @@ if __name__ == "__main__":
     # BandPassFilter(bands, fs, xx.shape)
     m = DifferentiableBandPassFilter(xx.shape[-1], fs).cuda()
 
-    scitex.ml.utils.check_params(m)
+    scitex.ai.utils.check_params(m)
     # {'pha_mids': (torch.Size([30]), 'Learnable'),
     #  'amp_mids': (torch.Size([50]), 'Learnable')}
 

@@ -20,11 +20,11 @@ echo_warning() { echo -e "${YELLOW}$1${NC}"; }
 echo_error() { echo -e "${RED}$1${NC}"; }
 # ---------------------------------------
 
-python -m  scitex.ml.classification.timeseries._TimeSeriesBlockingSplit
-python -m  scitex.ml.classification.timeseries._TimeSeriesCalendarSplit
-python -m  scitex.ml.classification.timeseries._TimeSeriesMetadata
-python -m  scitex.ml.classification.timeseries._TimeSeriesSlidingWindowSplit
-python -m  scitex.ml.classification.timeseries._TimeSeriesStrategy
-python -m  scitex.ml.classification.timeseries._TimeSeriesStratifiedSplit
+python -m  scitex.ai.classification.timeseries._TimeSeriesBlockingSplit
+python -m  scitex.ai.classification.timeseries._TimeSeriesCalendarSplit
+python -m  scitex.ai.classification.timeseries._TimeSeriesMetadata
+python -m  scitex.ai.classification.timeseries._TimeSeriesSlidingWindowSplit
+python -m  scitex.ai.classification.timeseries._TimeSeriesStrategy
+python -m  scitex.ai.classification.timeseries._TimeSeriesStratifiedSplit
 
 # EOF
