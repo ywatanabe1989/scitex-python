@@ -155,7 +155,8 @@ def run_compile(
 
     # Build command
     script_path = compile_script.absolute()
-    cmd = [str(script_path)]
+    # Use stdbuf to force unbuffered output for better real-time streaming
+    cmd = ["stdbuf", "-oL", "-eL", str(script_path)]
     if track_changes and doc_type == "revision":
         cmd.append("--track-changes")
 
@@ -171,7 +172,8 @@ def run_compile(
                 cmd,
                 verbose=True,
                 return_as="dict",
-                timeout=timeout * 1000,
+                timeout=timeout,
+                stream_output=True,  # Enable live output streaming
             )
 
             result = type('Result', (), {

@@ -30,9 +30,9 @@ def create_mock_scholar_config(tmp_path):
         Mock object with all ScholarConfig attributes
     """
     mock_config = Mock(spec=ScholarConfig)
-    
+
     # Core paths
-    mock_config.get_workspace_dir() = tmp_path
+    mock_config.get_workspace_dir.return_value = tmp_path
     mock_config.pdf_dir = str(tmp_path / "pdfs")
     
     # API Keys

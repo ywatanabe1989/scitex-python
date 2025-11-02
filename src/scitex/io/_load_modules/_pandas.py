@@ -3,11 +3,12 @@
 # Time-stamp: "2024-11-14 07:41:31 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/io/_load_modules/_pandas.py
 
-import pandas as pd
-
 
 def _load_csv(lpath, **kwargs):
     """Load CSV files."""
+    # Lazy import to avoid circular import issues
+    import pandas as pd
+
     if not lpath.endswith(".csv"):
         raise ValueError("File must have .csv extension")
 

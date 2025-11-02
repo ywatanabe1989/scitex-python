@@ -31,8 +31,8 @@ async def main():
         resolver_url="https://go.openathens.net/redirector/unisa.edu.au",
         
         # Authentication credentials (from environment or direct)
-        openathens_username=os.getenv("OPENATHENS_USERNAME"),
-        openathens_password=os.getenv("OPENATHENS_PASSWORD"),
+        openathens_username=os.getenv("SCITEX_SCHOLAR_OPENATHENS_USERNAME"),
+        openathens_password=os.getenv("SCITEX_SCHOLAR_OPENATHENS_PASSWORD"),
         
         # Enable verbose logging to see what's happening
         verbose=True
@@ -135,8 +135,8 @@ if __name__ == "__main__":
     print("- SCITEX_SCHOLAR_BROWSER_BACKEND=zenrows")
     print("- SCITEX_SCHOLAR_ZENROWS_API_KEY=your_api_key")
     print("- SCITEX_SCHOLAR_2CAPTCHA_API_KEY=your_2captcha_key")
-    print("- OPENATHENS_USERNAME=your_username")
-    print("- OPENATHENS_PASSWORD=your_password")
+    print("- SCITEX_SCHOLAR_OPENATHENS_USERNAME=your_username")
+    print("- SCITEX_SCHOLAR_OPENATHENS_PASSWORD=your_password")
     print("\nOr source the .env.zenrows file: source .env.zenrows\n")
     
     asyncio.run(main())

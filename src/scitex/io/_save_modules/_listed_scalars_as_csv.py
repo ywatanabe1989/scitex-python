@@ -10,7 +10,6 @@ __DIR__ = os.path.dirname(__FILE__)
 # Time-stamp: "2024-11-02 21:26:48 (ywatanabe)"
 
 import numpy as np
-import pandas as pd
 
 from .._mv_to_tmp import _mv_to_tmp
 
@@ -26,6 +25,8 @@ def _save_listed_scalars_as_csv(
     verbose=False,
 ):
     """Puts to df and save it as csv"""
+    # Lazy import to avoid circular import issues
+    import pandas as pd
 
     if overwrite == True:
         _mv_to_tmp(spath_csv, L=2)

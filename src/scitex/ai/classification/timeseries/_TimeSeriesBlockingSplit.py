@@ -72,7 +72,7 @@ class TimeSeriesBlockingSplit(BaseCrossValidator):
     
     Examples
     --------
-    >>> from scitex.ml.classification import TimeSeriesBlockingSplit
+    >>> from scitex.ai.classification import TimeSeriesBlockingSplit
     >>> import numpy as np
     >>> 
     >>> # Create data: 100 samples, 4 subjects (25 samples each)

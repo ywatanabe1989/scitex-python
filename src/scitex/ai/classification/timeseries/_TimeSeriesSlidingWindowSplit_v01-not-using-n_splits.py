@@ -85,7 +85,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
 
     Examples
     --------
-    >>> from scitex.ml.classification import TimeSeriesSlidingWindowSplit
+    >>> from scitex.ai.classification import TimeSeriesSlidingWindowSplit
     >>> import numpy as np
     >>>
     >>> X = np.random.randn(100, 10)

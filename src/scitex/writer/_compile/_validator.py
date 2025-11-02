@@ -38,7 +38,6 @@ def validate_before_compile(project_dir: Path) -> None:
         If validation fails
     """
     validate_tree_structures(project_dir)
-    logger.info("Project structure validated for compilation")
 
 
 __all__ = ["validate_before_compile"]

@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2025-10-29 05:24:57
+!-- Timestamp: 2025-10-29 17:33:34
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/README.md
 !-- --- -->
@@ -302,25 +302,79 @@ python -m pytest src/scitex/writer/tests/test_writer_integration.py --cov=scitex
 - Project name handling
 - Child git cleanup for parent strategy
 
-## Recent Improvements (2025-10-28 - Continued)
+## Recent Improvements
 
-### Bug Fixes
+### 2025-10-29: Live Streaming & Timeout Support
+
+**Live Output Streaming** - See compilation progress in real-time:
+- **Real-time output**: View LaTeX compilation output as it happens, not buffered until completion
+- **ANSI color preservation**: Color-coded messages (INFO, SUCC, ERRO, WARNING) display correctly
+- **Progress visibility**: Know exactly which step is running and how long it takes
+- **Immediate error detection**: Errors appear instantly instead of after full compilation
+- **Stdbuf integration**: Forces line-buffered output for shell scripts
+
+**Timeout Support**:
+- **Configurable timeouts**: Default 300s (5 minutes), customizable per compilation
+- **Graceful termination**: Process killed cleanly on timeout
+- **Clear timeout messages**: Explicit notification when compilation exceeds time limit
+- **Works with streaming**: Timeout checks happen during execution, not after
+
+**Enhanced Compilation**:
+```python
+# Compilation with default timeout (300s)
+result = writer.compile_manuscript()
+
+# Custom timeout
+result = writer.compile_manuscript(timeout=600)  # 10 minutes
+
+# Watch real-time output with color coding:
+# INFO: Running compilation...
+# SUCC: All required tools available
+# INFO: Pass 1/3: Initial (3s)
+# SUCC: PDF ready (828K)
+```
+
+**Implementation Details**:
+- Non-blocking I/O with `fcntl` for true streaming
+- Unbuffered subprocess execution (`bufsize=0`)
+- Environment variable propagation (`PYTHONUNBUFFERED=1`)
+- Progressive output reading without blocking
+- Separate stdout/stderr handling with immediate display
+
+**Test Coverage** - 64 comprehensive tests:
+- Real-time behavior verification (timing-based proofs)
+- ANSI color code preservation tests
+- Timeout during execution tests
+- Large output handling (100+ lines)
+- Stdbuf wrapper integration tests
+- Streaming vs buffered consistency tests
+
+**Benefits**:
+- 🔍 **Visibility**: See what's happening during long compilations (161s in example)
+- ⚡ **Responsiveness**: Decide to wait or interrupt based on live progress
+- 🎨 **Clarity**: Color-coded output for easy scanning
+- ⏱️ **Control**: Prevent runaway compilations with timeouts
+- 🐛 **Debugging**: Errors visible immediately with full context
+
+### 2025-10-28: Enhanced Git Integration & Temporal Queries
+
+**Bug Fixes**:
 - Fixed incomplete initialization that left `git_root` uninitialized
 - Removed blocking debug code (`ipdb.set_trace()`)
 - Fixed return type annotation in `_attach_or_create_project()`
 - Improved error handling with proper logging throughout
 
-### New Features
+**New Features**:
 - **Structure Validation**: Automatically verifies project has required directories (01_manuscript, 02_supplementary, 03_revision) when attaching
 - **Child Git Cleanup**: Automatically removes project's `.git/` when using `'parent'` strategy and parent repo is found, preventing nested git issues
 
-### Enhanced Logging
+**Enhanced Logging**:
 - Detailed initialization logs with project name, directory, and git strategy
 - Clear strategy selection and progression messages
 - Explicit error messages with full context
 - Success confirmations for key operations
 
-### Enhanced diff() Capability
+**Enhanced diff() Capability**:
 - **New `diff_between()` method** for comparing any two arbitrary git states
   - Compare commits: `diff_between("HEAD~2", "HEAD")`
   - Compare releases: `diff_between("v1.0", "v2.0")`
@@ -335,7 +389,7 @@ python -m pytest src/scitex/writer/tests/test_writer_integration.py --cov=scitex
   - Timestamp-based commit finding with `git log --before`
 - 15 new tests for diff_between functionality (all passing)
 
-### Comprehensive Testing
+**Comprehensive Testing**:
 - 99 tests covering all Writer and DocumentSection functionality
 - DocumentSection operations fully tested (read/write/commit/history/diff/diff_between/checkout)
 - End-to-end workflow testing (project creation → document editing → git operations)
@@ -343,7 +397,7 @@ python -m pytest src/scitex/writer/tests/test_writer_integration.py --cov=scitex
 - Error handling and edge cases covered
 - All tests passing ✅
 
-**Test Coverage:**
+**Test Coverage**:
 - Writer initialization and configuration
 - Project creation and attachment
 - Git strategy handling (child, parent, None)
@@ -351,10 +405,16 @@ python -m pytest src/scitex/writer/tests/test_writer_integration.py --cov=scitex
 - Git operations (history, diff, checkout)
 - Tree structure verification
 - Error handling
+- Live streaming infrastructure
+- Timeout handling
 
-**Run tests:**
+**Run tests**:
 ```bash
+# Writer module tests
 pytest src/scitex/writer/tests/ -v
+
+# Shell/streaming infrastructure tests
+pytest tests/scitex/sh/ -v
 ```
 
 ## Requirements

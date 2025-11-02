@@ -14,9 +14,6 @@ from typing import Any as _Any
 from typing import Callable
 
 import numpy as np
-import pandas as pd
-import torch
-import xarray as xr
 
 from ._converters import _return_always, is_nested_decorator, to_torch
 
@@ -90,6 +87,7 @@ def torch_fn(func: Callable) -> Callable:
 
         # Skip strict assertion for certain types that may not convert to tensors
         # Instead, convert what we can and pass through what we can't
+        import torch
         validated_args = []
         for arg_index, arg in enumerate(converted_args):
             if isinstance(arg, torch.Tensor):
@@ -111,17 +109,21 @@ def torch_fn(func: Callable) -> Callable:
         results = func(*validated_args, **converted_kwargs)
 
         # Convert results back to original input types
+        import torch
         if isinstance(results, torch.Tensor):
             if original_object is not None:
                 if isinstance(original_object, list):
                     return results.detach().cpu().numpy().tolist()
                 elif isinstance(original_object, np.ndarray):
                     return results.detach().cpu().numpy()
-                elif isinstance(original_object, pd.DataFrame):
+                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataFrame':
+                    import pandas as pd
                     return pd.DataFrame(results.detach().cpu().numpy())
-                elif isinstance(original_object, pd.Series):
+                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Series':
+                    import pandas as pd
                     return pd.Series(results.detach().cpu().numpy().flatten())
-                elif isinstance(original_object, xr.DataArray):
+                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataArray':
+                    import xarray as xr
                     return xr.DataArray(results.detach().cpu().numpy())
             return results
 

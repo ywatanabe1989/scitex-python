@@ -76,7 +76,7 @@ def git_init(repo_path: Path, verbose: bool = True) -> bool:
 
     with _in_directory(repo_path):
         result = sh(
-            ["git", "init"],
+            ["git", "init", "-b", "main"],
             verbose=verbose,
             return_as="dict"
         )

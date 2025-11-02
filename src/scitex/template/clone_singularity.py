@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-29 05:56:38 (ywatanabe)"
+# Timestamp: "2025-10-30 08:47:52 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/template/clone_singularity.py
 # ----------------------------------------
 from __future__ import annotations

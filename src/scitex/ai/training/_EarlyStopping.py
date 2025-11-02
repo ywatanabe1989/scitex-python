@@ -84,7 +84,7 @@ if __name__ == "__main__":
     pass
     # # starts the current fold's loop
     # i_global = 0
-    # lc_logger = scitex.ml.LearningCurveLogger()
+    # lc_logger = scitex.ai.LearningCurveLogger()
     # early_stopping = utils.EarlyStopping(patience=50, verbose=True)
     # for i_epoch, epoch in enumerate(tqdm(range(merged_conf["MAX_EPOCHS"]))):
 

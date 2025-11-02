@@ -297,7 +297,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         # AUC metrics (only if probabilities available)
         if y_proba is not None:
             try:
-                from scitex.ml.metrics import calc_pre_rec_auc, calc_roc_auc
+                from scitex.ai.metrics import calc_pre_rec_auc, calc_roc_auc
 
                 metrics["roc-auc"] = calc_roc_auc(
                     y_true,
@@ -348,7 +348,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         # Handle feature importance automatically if model provided
         if model is not None and feature_names is not None:
             try:
-                from scitex.ml.feature_selection import \
+                from scitex.ai.feature_selection import \
                     extract_feature_importance
 
                 importance_dict = extract_feature_importance(
@@ -620,7 +620,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 y_proba_pos = y_proba
 
             # Normalize labels to integers for sklearn curve functions
-            from scitex.ml.metrics import _normalize_labels
+            from scitex.ai.metrics import _normalize_labels
 
             y_true_norm, _, _, _ = _normalize_labels(y_true, y_true)
 
@@ -838,7 +838,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 )
 
         if feature_importances_list:
-            from scitex.ml.feature_selection import (
+            from scitex.ai.feature_selection import (
                 aggregate_feature_importances,
                 create_feature_importance_dataframe)
 
@@ -934,7 +934,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             Dictionary of feature importances {feature_name: importance}
         """
         # Use centralized metric calculation
-        from scitex.ml.metrics import calc_feature_importance
+        from scitex.ai.metrics import calc_feature_importance
 
         try:
             importance_dict, importances = calc_feature_importance(
@@ -1031,7 +1031,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         )
 
         # Create visualization using centralized plotting function
-        from scitex.ml.plt import plot_feature_importance_cv_summary
+        from scitex.ai.plt import plot_feature_importance_cv_summary
 
         jpg_filename = FILENAME_PATTERNS[
             "cv_summary_feature_importance_jpg"
@@ -1117,7 +1117,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         )
 
         # Normalize labels to integers for sklearn curve functions in plotter
-        from scitex.ml.metrics import _normalize_labels
+        from scitex.ai.metrics import _normalize_labels
 
         all_y_true_norm, _, label_names, _ = _normalize_labels(
             all_y_true, all_y_true
@@ -1187,7 +1187,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 y_proba_pos = y_proba
 
             # Normalize labels to integers for sklearn curve functions
-            from scitex.ml.metrics import _normalize_labels
+            from scitex.ai.metrics import _normalize_labels
 
             y_true_norm, _, _, _ = _normalize_labels(y_true, y_true)
 

@@ -4,7 +4,7 @@
 # Author: Yusuke Watanabe (ywatanabe@scitex.ai)
 
 """
-This script defines scitex.ml.utils.grid_search
+This script defines scitex.ai.utils.grid_search
 """
 
 # Imports

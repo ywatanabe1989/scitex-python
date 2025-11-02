@@ -911,12 +911,12 @@ echo_warning() { echo -e "${YELLOW}$1${NC}"; }
 echo_error() { echo -e "${RED}$1${NC}"; }
 # ---------------------------------------
 
-python -m  scitex.ml.classification.timeseries._TimeSeriesBlockingSplit
-python -m  scitex.ml.classification.timeseries._TimeSeriesCalendarSplit
-python -m  scitex.ml.classification.timeseries._TimeSeriesMetadata
-python -m  scitex.ml.classification.timeseries._TimeSeriesSlidingWindowSplit
-python -m  scitex.ml.classification.timeseries._TimeSeriesStrategy
-python -m  scitex.ml.classification.timeseries._TimeSeriesStratifiedSplit
+python -m  scitex.ai.classification.timeseries._TimeSeriesBlockingSplit
+python -m  scitex.ai.classification.timeseries._TimeSeriesCalendarSplit
+python -m  scitex.ai.classification.timeseries._TimeSeriesMetadata
+python -m  scitex.ai.classification.timeseries._TimeSeriesSlidingWindowSplit
+python -m  scitex.ai.classification.timeseries._TimeSeriesStrategy
+python -m  scitex.ai.classification.timeseries._TimeSeriesStratifiedSplit
 
 # EOF
 ...
@@ -3518,9 +3518,9 @@ setup(
 #!/usr/bin/env python3
 """Scitex centralized plotting module.
 
-Note: Metric calculation functions (calc_*) are imported from scitex.ml.metrics
+Note: Metric calculation functions (calc_*) are imported from scitex.ai.metrics
 but re-exported here for backward compatibility. New code should import directly
-from scitex.ml.metrics instead.
+from scitex.ai.metrics instead.
 """
 
 from ._plot_conf_mat import calc_bACC_from_conf_mat, calc_bacc_from_conf_mat, plot_conf_mat, conf_mat
@@ -3596,8 +3596,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix
 
-# Import metric calculation from centralized location (SoC: metrics in scitex.ml.metrics)
-from scitex.ml.metrics import calc_bacc_from_conf_mat
+# Import metric calculation from centralized location (SoC: metrics in scitex.ai.metrics)
+from scitex.ai.metrics import calc_bacc_from_conf_mat
 
 # Aliases for backward compatibility
 calc_bACC_from_conf_mat = calc_bacc_from_conf_mat
@@ -4405,14 +4405,14 @@ Functionality:
     - Records and visualizes learning curves during model training
     - Supports tracking of multiple metrics across training/validation/test phases
     - Generates plots showing training progress over iterations and epochs
-    - Delegates plotting to scitex.ml.plt.plot_learning_curve for consistency
+    - Delegates plotting to scitex.ai.plt.plot_learning_curve for consistency
 
 Input:
     - Training metrics dictionary containing loss, accuracy, predictions etc.
     - Step information (Training/Validation/Test)
 
 Output:
-    - Learning curve plots via scitex.ml.plt.plot_learning_curve
+    - Learning curve plots via scitex.ai.plt.plot_learning_curve
     - DataFrames with recorded metrics
     - Training progress prints
 
@@ -4715,7 +4715,7 @@ def format_samples_for_sktime(X):
 # Author: Yusuke Watanabe (ywata1989@gmail.com)
 
 """
-This script defines scitex.ml.utils.grid_search
+This script defines scitex.ai.utils.grid_search
 """
 
 # Imports
