@@ -14,14 +14,14 @@ Functionality:
     - Records and visualizes learning curves during model training
     - Supports tracking of multiple metrics across training/validation/test phases
     - Generates plots showing training progress over iterations and epochs
-    - Delegates plotting to scitex.ml.plt.plot_learning_curve for consistency
+    - Delegates plotting to scitex.ai.plt.plot_learning_curve for consistency
 
 Input:
     - Training metrics dictionary containing loss, accuracy, predictions etc.
     - Step information (Training/Validation/Test)
 
 Output:
-    - Learning curve plots via scitex.ml.plt.plot_learning_curve
+    - Learning curve plots via scitex.ai.plt.plot_learning_curve
     - DataFrames with recorded metrics
     - Training progress prints
 
@@ -148,7 +148,7 @@ class LearningCurveLogger:
     ) -> matplotlib.figure.Figure:
         """Plots learning curves from logged metrics.
 
-        Delegates to scitex.ml.plt.plot_learning_curve for consistent plotting.
+        Delegates to scitex.ai.plt.plot_learning_curve for consistent plotting.
 
         Parameters
         ----------
@@ -170,7 +170,7 @@ class LearningCurveLogger:
         matplotlib.figure.Figure
             Figure containing learning curves
         """
-        from scitex.ml.plt import plot_learning_curve
+        from scitex.ai.plt import plot_learning_curve
 
         # Convert to metrics DataFrame
         metrics_df = self.to_metrics_df()

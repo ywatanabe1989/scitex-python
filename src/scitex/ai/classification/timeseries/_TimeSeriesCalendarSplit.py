@@ -77,7 +77,7 @@ class TimeSeriesCalendarSplit(BaseCrossValidator):
     
     Examples
     --------
-    >>> from scitex.ml.classification import TimeSeriesCalendarSplit
+    >>> from scitex.ai.classification import TimeSeriesCalendarSplit
     >>> import pandas as pd
     >>> import numpy as np
     >>> 

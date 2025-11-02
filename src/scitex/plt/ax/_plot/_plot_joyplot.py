@@ -11,15 +11,13 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import warnings
 
-import joypy
-
 from .._style._set_xyt import set_xyt as scitex_plt_set_xyt
 
 
 def plot_joyplot(ax, data, orientation="vertical", **kwargs):
     """
     Create a joyplot (ridgeline plot) with proper orientation handling.
-    
+
     Parameters
     ----------
     ax : matplotlib.axes.Axes
@@ -30,26 +28,29 @@ def plot_joyplot(ax, data, orientation="vertical", **kwargs):
         Plot orientation. Either "vertical" or "horizontal"
     **kwargs
         Additional keyword arguments passed to joypy.joyplot()
-    
+
     Returns
     -------
     matplotlib.axes.Axes
         The axes with the joyplot
-    
+
     Raises
     ------
     ValueError
         If orientation is not "vertical" or "horizontal"
     """
+    # Lazy import to avoid scipy circular import on startup
+    import joypy
+
     if orientation not in ["vertical", "horizontal"]:
         raise ValueError("orientation must be either 'vertical' or 'horizontal'")
-    
+
     # Handle orientation by setting appropriate joypy parameters
     if orientation == "horizontal":
         # For horizontal orientation, we need to transpose the data display
         # joypy doesn't have direct horizontal support, so we work with the result
         kwargs.setdefault("kind", "kde")  # Ensure we're using KDE plots
-        
+
     fig, axes = joypy.joyplot(
         data=data,
         **kwargs,

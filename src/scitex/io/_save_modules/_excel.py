@@ -14,7 +14,6 @@ Excel saving functionality for scitex.io.save
 """
 
 import numpy as np
-import pandas as pd
 
 
 def _generate_pval_variants():
@@ -55,6 +54,8 @@ def _is_statistical_results(df):
     bool
         True if DataFrame appears to contain statistical test results
     """
+    import pandas as pd
+
     if not isinstance(df, pd.DataFrame):
         return False
 
@@ -81,6 +82,8 @@ def _apply_stats_styling(df, spath):
     - Yellow background: p < 0.05 (*)
     - Light gray: p >= 0.05 (ns)
     """
+    import pandas as pd
+
     try:
         from openpyxl import load_workbook
         from openpyxl.styles import Font, PatternFill
@@ -183,6 +186,9 @@ def save_excel(obj, spath, style=True, **kwargs):
     >>> stx.io.save(results, 'results.xlsx')  # Auto-styled
     >>> stx.io.save(results, 'results.xlsx', style=False)  # No styling
     """
+    # Lazy import to avoid circular import issues
+    import pandas as pd
+
     # Convert to DataFrame
     if isinstance(obj, pd.DataFrame):
         df = obj

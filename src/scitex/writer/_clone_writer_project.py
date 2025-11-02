@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-29 05:50:51 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_init_directory.py
+# Timestamp: "2025-10-29 15:25:21 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_clone_writer_project.py
 # ----------------------------------------
 from __future__ import annotations
 import os
 __FILE__ = (
-    "./src/scitex/writer/_init_directory.py"
+    "./src/scitex/writer/_clone_writer_project.py"
 )
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------

@@ -70,7 +70,7 @@ class TimeSeriesStratifiedSplit(BaseCrossValidator):
     
     Examples
     --------
-    >>> from scitex.ml.classification import TimeSeriesStratifiedSplit
+    >>> from scitex.ai.classification import TimeSeriesStratifiedSplit
     >>> import numpy as np
     >>> 
     >>> X = np.random.randn(100, 10)

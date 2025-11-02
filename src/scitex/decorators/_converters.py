@@ -15,9 +15,6 @@ from typing import Any as _Any
 from typing import Callable, Dict, Tuple, Union
 
 import numpy as np
-import pandas as pd
-import torch
-import xarray
 
 """
 Core conversion utilities for handling data type transformations.
@@ -39,7 +36,7 @@ def _cached_warning(message: str) -> None:
     warnings.warn(message, category=ConversionWarning)
 
 
-def _conversion_warning(old: _Any, new: torch.Tensor) -> None:
+def _conversion_warning(old: _Any, new) -> None:
     """Generate standardized type conversion warning."""
     message = (
         f"Converted from {type(old).__name__} to {type(new).__name__} ({new.device}). "
@@ -48,8 +45,9 @@ def _conversion_warning(old: _Any, new: torch.Tensor) -> None:
     _cached_warning(message)
 
 
-def _try_device(tensor: torch.Tensor, device: str) -> torch.Tensor:
+def _try_device(tensor, device: str):
     """Try to move tensor to specified device with graceful fallback."""
+    import torch
     if not isinstance(tensor, torch.Tensor):
         return tensor
 
@@ -67,6 +65,7 @@ def _try_device(tensor: torch.Tensor, device: str) -> torch.Tensor:
 
 def is_torch(*args: _Any, **kwargs: _Any) -> bool:
     """Check if any input is a PyTorch tensor."""
+    import torch
     return any(isinstance(arg, torch.Tensor) for arg in args) or any(
         isinstance(val, torch.Tensor) for val in kwargs.values()
     )
@@ -74,6 +73,7 @@ def is_torch(*args: _Any, **kwargs: _Any) -> bool:
 
 def is_cuda(*args: _Any, **kwargs: _Any) -> bool:
     """Check if any input is a CUDA tensor."""
+    import torch
     return any((isinstance(arg, torch.Tensor) and arg.is_cuda) for arg in args) or any(
         (isinstance(val, torch.Tensor) and val.is_cuda) for val in kwargs.values()
     )
@@ -103,11 +103,15 @@ def to_torch(
     **kwargs: _Any,
 ) -> _Any:
     """Convert various data types to PyTorch tensors."""
+    import torch
     if device is None:
         device = kwargs.get("device", "cuda" if torch.cuda.is_available() else "cpu")
 
     def _to_torch(data: _Any) -> _Any:
         """Internal conversion function for various data types."""
+        import torch
+        import pandas as pd
+
         # Check for None
         if data is None:
             return None
@@ -121,7 +125,7 @@ def to_torch(
             # Check if it's a tuple/list of integers (like dimensions)
             if all(isinstance(item, int) for item in data):
                 return data  # Keep as is for dimension tuples
-            
+
             # Check if it's a numeric array-like structure
             try:
                 # Try to convert to tensor directly
@@ -160,7 +164,8 @@ def to_torch(
             return new_data
 
         # Handle xarray
-        if isinstance(data, xarray.core.dataarray.DataArray):
+        import xarray
+        if hasattr(data, '__class__') and data.__class__.__module__ == 'xarray.core.dataarray' and data.__class__.__name__ == 'DataArray':
             new_data = torch.tensor(np.array(data)).float()
             new_data = _try_device(new_data, device)
             if device == "cuda":
@@ -190,6 +195,9 @@ def to_numpy(*args: _Any, return_fn: Callable = _return_if, **kwargs: _Any) -> _
 
     def _to_numpy(data: _Any) -> _Any:
         """Internal conversion function for various data types."""
+        import torch
+        import pandas as pd
+
         # Check for None
         if data is None:
             return None
@@ -211,7 +219,7 @@ def to_numpy(*args: _Any, return_fn: Callable = _return_if, **kwargs: _Any) -> _
             # Check if it's a tuple/list of integers (like dimensions)
             if all(isinstance(item, int) for item in data):
                 return data  # Keep as is for dimension tuples
-            
+
             # Check if it's a numeric array-like structure
             try:
                 # Try to convert to numpy array directly

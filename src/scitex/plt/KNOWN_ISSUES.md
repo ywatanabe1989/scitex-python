@@ -33,7 +33,7 @@ cax = divider.append_axes("right", size="5%", pad=0.1)  # ← Works
 ```
 
 ### Impact
-- `scitex.ml.plt.plot_conf_mat` - Cannot use stx.plt.subplots (uses divider for colorbar)
+- `scitex.ai.plt.plot_conf_mat` - Cannot use stx.plt.subplots (uses divider for colorbar)
 - Any plotting function that uses axes_grid1 features
 
 ### Root Cause
@@ -55,9 +55,9 @@ cax = divider.append_axes("right", size="5%", pad=0.1)  # ← Works
 Demo/test functions in plotting modules may still pass `plt` as first parameter even though it's been deprecated and moved to end as optional parameter.
 
 ### Affected
-- `scitex.ml.plt.plot_conf_mat.main()`
-- `scitex.ml.plt.plot_roc_curve.main()`
-- `scitex.ml.plt.plot_pre_rec_curve.main()`
+- `scitex.ai.plt.plot_conf_mat.main()`
+- `scitex.ai.plt.plot_roc_curve.main()`
+- `scitex.ai.plt.plot_pre_rec_curve.main()`
 
 ### Workaround
 Update demo functions to use new API without `plt` parameter.

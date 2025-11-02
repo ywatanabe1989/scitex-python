@@ -15,7 +15,9 @@ from ._execute import execute
 def sh(
     command_str_or_list: CommandInput,
     verbose: bool = True,
-    return_as: ReturnFormat = "dict"
+    return_as: ReturnFormat = "dict",
+    timeout: int = None,
+    stream_output: bool = False
 ) -> Union[str, ShellResult]:
     """
     Executes a shell command safely (list format only).
@@ -24,6 +26,8 @@ def sh(
     - command_str_or_list: Command to execute (MUST be list format)
     - verbose: Whether to print command and output
     - return_as: Return format ("dict" or "str")
+    - timeout: Timeout in seconds (None for no timeout)
+    - stream_output: Whether to stream output in real-time (default: False)
 
     Returns:
     - If return_as="str": output string
@@ -39,12 +43,19 @@ def sh(
     >>> from scitex.sh import sh
     >>> sh(["ls", "-la", "/home"])
     >>> sh(["git", "status"])
+    >>> sh(["sleep", "10"], timeout=5)  # Will timeout after 5 seconds
+    >>> sh(["./compile.sh"], stream_output=True)  # Stream output in real-time
     >>>
     >>> # For grep-like filtering, use Python:
     >>> result = sh(["ls", "-la"])
     >>> filtered = [l for l in result['stdout'].split('\\n') if '.py' in l]
     """
-    result = execute(command_str_or_list, verbose=verbose)
+    result = execute(
+        command_str_or_list,
+        verbose=verbose,
+        timeout=timeout,
+        stream_output=stream_output
+    )
 
     if return_as == "dict":
         return result

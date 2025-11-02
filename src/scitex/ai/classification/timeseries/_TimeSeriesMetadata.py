@@ -50,7 +50,7 @@ class TimeSeriesMetadata:
     Examples
     --------
     >>> import numpy as np
-    >>> from scitex.ml.classification import TimeSeriesMetadata
+    >>> from scitex.ai.classification import TimeSeriesMetadata
     >>> 
     >>> # Create metadata for a dataset
     >>> metadata = TimeSeriesMetadata(

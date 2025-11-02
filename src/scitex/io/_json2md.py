@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: "2024-12-19 15:37:46 (ywatanabe)"
-# File: ./Ninja/workspace/formats/json2md.py
-
-THIS_FILE = "/home/ywatanabe/.emacs.d/lisp/Ninja/workspace/formats/json2md.py"
+# Timestamp: "2025-10-30 09:08:07 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_json2md.py
+# ----------------------------------------
+from __future__ import annotations
+import os
+__FILE__ = (
+    "./src/scitex/io/_json2md.py"
+)
+__DIR__ = os.path.dirname(__FILE__)
+# ----------------------------------------
 
 import json
 import sys
 import argparse
-
 
 def json2md(obj, level=1):
     output = []
@@ -60,8 +65,6 @@ if __name__ == "__main__":
 python ./Ninja/workspace/formats/json2md.py
 python -m workspace.formats.json2md
 """
-# EOF
-
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-12-19 15:29:28 (ywatanabe)"
@@ -111,3 +114,5 @@ python -m workspace.formats.json2md
 # """
 
 # # EOF
+
+# EOF

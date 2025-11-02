@@ -21,8 +21,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix
 
-# Import metric calculation from centralized location (SoC: metrics in scitex.ml.metrics)
-from scitex.ml.metrics import calc_bacc_from_conf_mat
+# Import metric calculation from centralized location (SoC: metrics in scitex.ai.metrics)
+from scitex.ai.metrics import calc_bacc_from_conf_mat
 
 # Aliases for backward compatibility
 calc_bACC_from_conf_mat = calc_bacc_from_conf_mat
@@ -273,9 +273,9 @@ def plot_conf_mat(
 conf_mat = plot_conf_mat
 
 
-# Metric calculation functions have been moved to scitex.ml.metrics
+# Metric calculation functions have been moved to scitex.ai.metrics
 # They are imported above for use in this module
-# This maintains SoC: plotting in scitex.ml.plt, metrics in scitex.ml.metrics
+# This maintains SoC: plotting in scitex.ai.plt, metrics in scitex.ai.metrics
 
 
 def main(args):

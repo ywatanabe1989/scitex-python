@@ -213,7 +213,7 @@ merge_cols = merge_columns
 # #     df = deepcopy(_df)
 # #     merged = deepcopy(df[columns[0]])  # initialization
 # #     for c in columns[1:]:
-# #         merged = scitex.ml.utils.merge_labels(list(merged), deepcopy(df[c]))
+# #         merged = scitex.ai.utils.merge_labels(list(merged), deepcopy(df[c]))
 # #     df.loc[:, scitex.gen.connect_strs(columns)] = merged
 # #     return df
 

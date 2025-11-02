@@ -10,7 +10,7 @@ This module provides separated, focused utilities for:
 """
 
 # Import from centralized metrics module
-from scitex.ml.metrics import (
+from scitex.ai.metrics import (
     calc_bacc,
     calc_mcc,
     calc_conf_mat,

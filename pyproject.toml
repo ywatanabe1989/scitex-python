@@ -3,13 +3,15 @@
 # https://scitex.ai
 # ============================================
 
+# /home/ywatanabe/proj/scitex-code/pyproject.toml
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
 name = "scitex"
-version = "2.1.0"
+version = "2.1.2"
 description = "A comprehensive Python library for scientific computing and data analysis"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -85,6 +87,40 @@ dependencies = [
     "GitPython",
     # CLI
     "click",
+    # Extras
+    "nest-asyncio",
+    "google-search-results",
+    "googlesearch-python",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "Pyarrow",
+    "xmltodict",
+    "sounddevice",
+    "joypy",
+    "julius",
+    "pebble",
+    "impact-factor",
+    "tk",
+    "icecream",
+    "pyperclip",
+    "readchar",
+    "plyer",
+    "timeout-decorator",
+    "ansi-escapes",
+    "chardet",
+    "termplotlib",
+    "tldr",
+    "attrdict",
+    "reportlab",
+    "readability",
+    "readability-lxml",
+    "python-magic",
+    "thefuzz",
+    "pyautogui",
+    "webrequests",
+    "sql_manager",
+    "pymatreader",
+    "six",
 ]
 
 [project.urls]
@@ -127,33 +163,21 @@ ml = [
     "optuna",
     "sympy",
     "opencv-python",
-]
-
-# Scholar Module - Paper Management & Browser
-scholar = [
-    "selenium",
-    "webdriver-manager",
-    "bs4",
-    "html2text",
-    "crawl4ai",
-    "scholarly",
-    "pymed",
-    "python-docx",
-    "PyPDF2",
-    "pdfplumber",
-    "PyMuPDF",
-    "pytesseract",
-    "bibtexparser",
-    "playwright>=1.40.0",
-]
-
-# AI Services & APIs
-ai-apis = [
     "openai",
     "anthropic",
     "google-genai",
     "groq",
     "llama-stack",
+]
+# Jupyter & Interactive Development
+jupyter = [
+    "jupyterlab",
+    "jupyter-collaboration",
+    "ipykernel",
+    "ipdb",
+    "papermill",
+    "jupytext",
+    "nbsphinx",
 ]
 
 # Neuroscience & Specialized Scientific
@@ -174,52 +198,27 @@ web = [
     "streamlit",
 ]
 
-# Jupyter & Interactive Development
-jupyter = [
-    "jupyterlab",
-    "jupyter-collaboration",
-    "ipykernel",
-    "ipdb",
-    "papermill",
-    "jupytext",
-    "nbsphinx",
+# Scholar Module - Paper Management & Browser
+scholar = [
+    "selenium",
+    "webdriver-manager",
+    "bs4",
+    "html2text",
+    "crawl4ai",
+    "scholarly",
+    "pymed",
+    "python-docx",
+    "PyPDF2",
+    "pdfplumber",
+    "PyMuPDF",
+    "pytesseract",
+    "bibtexparser",
+    "playwright>=1.40.0",
 ]
 
-# Extra Utilities
-extras = [
-    "nest-asyncio",
-    "google-search-results",
-    "googlesearch-python",
-    "sqlalchemy",
-    "psycopg2-binary",
-    "Pyarrow",
-    "xmltodict",
-    "sounddevice",
-    "joypy",
-    "julius",
-    "pebble",
-    "impact-factor",
-    "tk",
-    "icecream",
-    "pyperclip",
-    "readchar",
-    "plyer",
-    "timeout-decorator",
-    "ansi-escapes",
-    "chardet",
-    "termplotlib",
-    "tldr",
-    "attrdict",
-    "reportlab",
-    "readability",
-    "readability-lxml",
-    "python-magic",
-    "thefuzz",
-    "pyautogui",
-    "webrequests",
-    "sql_manager",
-    "pymatreader",
-    "six",
+# Writer Module - Academic Paper Writing & LaTeX Compilation
+writer = [
+    "yq",  # YAML query tool for compilation script configuration
 ]
 
 # Development Tools
@@ -270,26 +269,6 @@ dev = [
     "types-setuptools",
 ]
 
-# Convenience groups (combinations for common use cases)
-recommended = [
-    # ML + Jupyter (most common use cases)
-    "scikit-image",
-    "imbalanced-learn",
-    "umap-learn",
-    "sktime",
-    "catboost",
-    "optuna",
-    "sympy",
-    "opencv-python",
-    "jupyterlab",
-    "jupyter-collaboration",
-    "ipykernel",
-    "ipdb",
-    "papermill",
-    "jupytext",
-    "nbsphinx",
-]
-
 # All features except dev
 all = [
     # dl
@@ -313,6 +292,19 @@ all = [
     "optuna",
     "sympy",
     "opencv-python",
+    "openai",
+    "anthropic",
+    "google-genai",
+    "groq",
+    "llama-stack",    
+    # neuro
+    "mne",
+    "obspy",
+    "pyedflib",
+    "pybids",
+    "tensorpac",
+    "ripple_detection",
+    "geom_median",
     # scholar
     "selenium",
     "webdriver-manager",
@@ -328,24 +320,12 @@ all = [
     "pytesseract",
     "bibtexparser",
     "playwright>=1.40.0",
-    # ai-apis
-    "openai",
-    "anthropic",
-    "google-genai",
-    "groq",
-    "llama-stack",
-    # neuro
-    "mne",
-    "obspy",
-    "pyedflib",
-    "pybids",
-    "tensorpac",
-    "ripple_detection",
-    "geom_median",
     # web
     "fastapi",
     "flask",
     "streamlit",
+    # writer
+    "yq",
     # jupyter
     "jupyterlab",
     "jupyter-collaboration",
@@ -354,40 +334,6 @@ all = [
     "papermill",
     "jupytext",
     "nbsphinx",
-    # extras
-    "nest-asyncio",
-    "google-search-results",
-    "googlesearch-python",
-    "sqlalchemy",
-    "psycopg2-binary",
-    "Pyarrow",
-    "xmltodict",
-    "sounddevice",
-    "joypy",
-    "julius",
-    "pebble",
-    "impact-factor",
-    "tk",
-    "icecream",
-    "pyperclip",
-    "readchar",
-    "plyer",
-    "timeout-decorator",
-    "ansi-escapes",
-    "chardet",
-    "termplotlib",
-    "tldr",
-    "attrdict",
-    "reportlab",
-    "readability",
-    "readability-lxml",
-    "python-magic",
-    "thefuzz",
-    "pyautogui",
-    "webrequests",
-    "sql_manager",
-    "pymatreader",
-    "six",
 ]
 
 # ============================================
@@ -397,6 +343,16 @@ all = [
 [tool.hatch.version]
 path = "src/scitex/__version__.py"
 pattern = '__version__ = "(?P<version>[^"]+)"'
+
+[tool.hatch.build.targets.wheel]
+exclude = [
+    "src/scitex/scholar/crossref_local",
+]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "src/scitex/scholar/crossref_local",
+]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -549,10 +505,3 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = "setup"
 ignore_errors = true
-
-# ============================================
-# Computed Convenience Groups (at end)
-# ============================================
-# Note: These are computed from other groups
-# recommended = ml + jupyter
-# all = dl + ml + scholar + ai-apis + neuro + web + jupyter + extras

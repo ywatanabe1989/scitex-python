@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-29 05:56:39 (ywatanabe)"
+# Timestamp: "2025-10-30 08:47:48 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/template/clone_writer_directory.py
 # ----------------------------------------
 from __future__ import annotations
@@ -20,7 +20,7 @@ from typing import Optional
 
 from ._clone_project import clone_project
 
-TEMPLATE_REPO_URL = "git@github.com:ywatanabe1989/scitex-writer.git"
+TEMPLATE_REPO_URL = "https://github.com/ywatanabe1989/scitex-writer.git"
 
 
 def clone_writer_directory(

@@ -86,7 +86,7 @@ def demo_basic_splitters():
     print("DEMO: Basic Time Series CV Splitters")
     print("=" * 70)
     
-    from scitex.ml.classification import (
+    from scitex.ai.classification import (
         StratifiedTimeSeriesSplit,
         BlockingTimeSeriesSplit,
         SlidingWindowSplit
@@ -147,7 +147,7 @@ def demo_coordinator():
     print("DEMO: TimeSeriesCVCoordinator (Automatic Strategy Selection)")
     print("=" * 70)
     
-    from scitex.ml.classification import TimeSeriesCVCoordinator
+    from scitex.ai.classification import TimeSeriesCVCoordinator
     
     scenarios = [
         ("Small dataset", 50, 5, None),
@@ -204,7 +204,7 @@ def demo_with_classifier():
     print("DEMO: Integration with Classification")
     print("=" * 70)
     
-    from scitex.ml.classification import (
+    from scitex.ai.classification import (
         TimeSeriesCVCoordinator,
         SingleTaskClassificationReporter
     )
@@ -263,7 +263,7 @@ def demo_train_val_test_split():
     print("DEMO: Train/Validation/Test Splitting")
     print("=" * 70)
     
-    from scitex.ml.classification import TimeSeriesCVCoordinator
+    from scitex.ai.classification import TimeSeriesCVCoordinator
     
     # Generate data
     X, y, timestamps, _ = generate_synthetic_timeseries(n_samples=1000)
@@ -309,7 +309,7 @@ def visualize_cv_splits():
     print("VISUALIZATION: CV Split Strategies")
     print("=" * 70)
     
-    from scitex.ml.classification import (
+    from scitex.ai.classification import (
         StratifiedTimeSeriesSplit,
         SlidingWindowSplit,
         TimeSeriesCVCoordinator
