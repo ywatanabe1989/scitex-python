@@ -45,16 +45,18 @@ def copy_tree_skip_broken_symlinks(src: Path, dst: Path) -> None:
         src_item = src / item.name
         dst_item = dst / item.name
 
-        # Check if it's a symlink and if it's broken
+        # Check if it's a symlink
         if src_item.is_symlink():
             try:
-                # Try to resolve the symlink
+                # Read the symlink target (relative path)
+                link_target = src_item.readlink()
+
+                # Verify the symlink isn't broken
                 src_item.resolve(strict=True)
-                # If successful, copy it
-                if src_item.is_dir():
-                    copy_tree_skip_broken_symlinks(src_item, dst_item)
-                else:
-                    shutil.copy2(src_item, dst_item)
+
+                # Create the symlink at destination (preserve relative paths)
+                dst_item.symlink_to(link_target)
+                logger.debug(f"Copied symlink: {src_item.name} -> {link_target}")
             except (OSError, FileNotFoundError):
                 # Broken symlink - skip it
                 logger.warning(f"Skipping broken symlink: {src_item}")
