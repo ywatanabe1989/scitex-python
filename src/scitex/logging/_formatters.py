@@ -90,7 +90,14 @@ class SciTeXConsoleFormatter(logging.Formatter):
         # Use parent formatter to apply template
         formatted = super().format(record)
 
-        if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
+        # Check if we can use colors (stdout is a tty and not closed)
+        try:
+            use_colors = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+        except ValueError:
+            # stdout/stderr is closed
+            use_colors = False
+
+        if use_colors:
             # Check for custom color override
             custom_color = getattr(record, "color", None)
 

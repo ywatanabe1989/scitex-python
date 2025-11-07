@@ -36,14 +36,19 @@ Usage:
 # Import session management functionality
 from ._manager import SessionManager
 from ._lifecycle import start, close, running2finished
+from ._decorator import session, run
 
 # Export public API
 __all__ = [
     # Session lifecycle (main functions)
     'start',
-    'close', 
+    'close',
     'running2finished',
-    
+
+    # Session decorator (new simplified API)
+    'session',
+    'run',
+
     # Advanced session management
     'SessionManager',
 ]
