@@ -681,6 +681,45 @@ def close(CONFIG, message=":)", notify=False, verbose=True, exit_status=None):
         CONFIG = CONFIG.to_dict()
         CONFIG = _process_timestamp(CONFIG, verbose=verbose)
         sys = CONFIG.pop("sys", None)
+
+        # CRITICAL: Close matplotlib BEFORE closing streams to prevent segfault
+        try:
+            import matplotlib
+            import matplotlib.pyplot as plt
+            import atexit
+
+            # Close all figures
+            plt.close('all')
+
+            # CRITICAL: Unregister matplotlib's atexit handlers to prevent segfault
+            # Matplotlib registers handlers that try to cleanup on exit,
+            # but we're closing streams first, causing segfault
+            try:
+                # Remove matplotlib-related atexit handlers
+                import weakref
+                # Matplotlib uses weakref for some cleanup
+                if hasattr(matplotlib, '_pylab_helpers'):
+                    matplotlib._pylab_helpers.Gcf.destroy_all()
+
+                # Clear any pyplot state
+                if hasattr(plt, 'get_fignums'):
+                    for fignum in plt.get_fignums():
+                        plt.close(fignum)
+
+            except Exception:
+                pass
+
+            # Force garbage collection to cleanup matplotlib resources
+            import gc
+            gc.collect()
+
+            if verbose:
+                logger.info("Matplotlib cleanup completed")
+
+        except Exception as e:
+            if verbose:
+                logger.warning(f"Could not close matplotlib: {e}")
+
         _save_configs(CONFIG)
 
         # RUNNING to FINISHED
