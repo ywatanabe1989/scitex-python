@@ -209,4 +209,99 @@ def compile_manuscript(self, timeout=300, log_callback=None, progress_callback=N
 - No generator complexity
 - Backward compatible (callbacks are optional)
 
+---
+
+## Implementation Status
+
+**Status:** ✅ IMPLEMENTED (2025-11-07)
+
+**Branch:** `feature/writer-live-compilation-logs`
+
+**Files modified:**
+- `src/scitex/writer/_compile.py` (created) - Core compilation with callback support
+- `src/scitex/writer/Writer.py` (updated) - Added callbacks to compile_* methods
+- `.dev/test_writer_callbacks.py` (created) - Test/demo script
+
+**Implementation details:**
+
+1. **Custom streaming execution** (`_execute_with_callbacks`):
+   - Line-by-line stdout/stderr capture using non-blocking I/O
+   - Real-time callback invocation for each log line
+   - Proper buffer handling for incomplete lines
+   - Timeout support with callback notification
+
+2. **Progress tracking stages** (in `_run_compile`):
+   - 0%: Starting compilation
+   - 5%: Project structure validated
+   - 10%: Files and environment prepared
+   - 15%: LaTeX compilation started
+   - 90%: Compilation successful (if success)
+   - 95%: Parsing LaTeX logs
+   - 100%: Complete
+
+3. **Log message format** (following semantic logging):
+   - `[INFO]` - General information (blue/cyan in UI)
+   - `[SUCCESS]` - Successful operations (green in UI)
+   - `[ERROR]` - Errors (red in UI)
+   - `[WARNING]` - Warnings (yellow in UI)
+   - `[STDERR]` - stderr output (red in UI)
+
+4. **API changes** (backward compatible):
+   ```python
+   # All three methods now accept optional callbacks
+   def compile_manuscript(
+       self,
+       timeout: int = 300,
+       log_callback: Optional[Callable[[str], None]] = None,
+       progress_callback: Optional[Callable[[int, str], None]] = None,
+   ) -> CompilationResult
+
+   def compile_supplementary(...) # Same signature
+   def compile_revision(...) # Same signature with track_changes
+   ```
+
+5. **Usage examples:**
+   ```python
+   from scitex.writer import Writer
+
+   # Simple usage
+   def on_log(msg):
+       print(f"LOG: {msg}")
+
+   def on_progress(percent, step):
+       print(f"{percent}%: {step}")
+
+   writer = Writer(project_path)
+   result = writer.compile_manuscript(
+       log_callback=on_log,
+       progress_callback=on_progress
+   )
+
+   # For scitex-cloud integration
+   def on_log(msg):
+       append_to_job_log(job_id, msg)
+
+   def on_progress(percent, step):
+       update_job_progress(job_id, percent, step)
+
+   result = writer.compile_manuscript(
+       timeout=300,
+       log_callback=on_log,
+       progress_callback=on_progress
+   )
+   ```
+
+6. **Testing:**
+   - See `.dev/test_writer_callbacks.py` for demo/test script
+   - Tests backward compatibility (no callbacks)
+   - Demonstrates scitex-cloud integration pattern
+   - Shows database update simulation
+
+**Notes:**
+- Callbacks are 100% optional - existing code continues to work unchanged
+- Log streaming uses non-blocking I/O to avoid buffer deadlocks
+- Progress percentages are approximate estimates
+- All log lines are collected in CompilationResult.stdout for post-processing
+- Works with existing shell compilation scripts (no changes needed)
+
 <!-- EOF -->
