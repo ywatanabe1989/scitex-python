@@ -304,4 +304,93 @@ def compile_manuscript(self, timeout=300, log_callback=None, progress_callback=N
 - All log lines are collected in CompilationResult.stdout for post-processing
 - Works with existing shell compilation scripts (no changes needed)
 
+---
+
+## Testing Status
+
+**What was tested:**
+- ✅ API design and interface (callbacks are properly typed and documented)
+- ✅ Module imports and syntax (no import errors)
+- ✅ Demo script runs without errors
+- ✅ Code structure and organization
+
+**What was NOT tested (requires real writer project):**
+- ❌ Actual LaTeX compilation with callbacks
+- ❌ Real-time log streaming during pdflatex execution
+- ❌ Progress callback timing and percentages
+- ❌ Timeout behavior with callbacks
+- ❌ Error handling during failed compilations
+- ❌ Integration with existing writer projects
+
+**Testing TODO (before merging to main):**
+1. Create or use existing writer project
+2. Run compilation with callbacks and verify:
+   - Log messages are streamed line-by-line in real-time
+   - Progress callbacks are invoked at correct stages
+   - Callbacks receive correct message formats
+   - Compilation still works without callbacks
+   - Error cases are handled properly
+3. Test with all three document types (manuscript, supplementary, revision)
+4. Verify no performance degradation compared to original implementation
+5. Test timeout behavior
+6. Test with long-running compilations (verify streaming, not buffering)
+
+**Recommended testing command:**
+```bash
+# Create test writer project
+python -c "
+from pathlib import Path
+from scitex.writer import Writer
+
+# Test with live callbacks
+logs = []
+progress_updates = []
+
+def on_log(msg):
+    print(f'[LOG] {msg}')
+    logs.append(msg)
+
+def on_progress(percent, step):
+    print(f'[PROGRESS] {percent}% - {step}')
+    progress_updates.append((percent, step))
+
+writer = Writer(Path('/path/to/test/project'))
+result = writer.compile_manuscript(
+    log_callback=on_log,
+    progress_callback=on_progress
+)
+
+print(f'\\nSuccess: {result.success}')
+print(f'Total log lines: {len(logs)}')
+print(f'Progress updates: {len(progress_updates)}')
+print(f'Final progress: {progress_updates[-1] if progress_updates else None}')
+"
+```
+
+**Risk assessment:**
+- **Medium risk** - Code is well-structured but untested with real LaTeX compilation
+- **Recommendation:** Test with actual writer project before merging to develop
+- **Fallback:** Implementation is backward compatible; can be disabled by not using callbacks
+
+---
+
+## Reply from Implementation (2025-11-07)
+
+**Implementation completed but requires validation with real writer project.**
+
+The callback infrastructure is in place and follows the proposed design exactly. However, I did not have access to a real writer project during development to verify:
+
+1. That the non-blocking I/O correctly captures pdflatex output line-by-line
+2. That progress percentages align with actual compilation stages
+3. That callbacks are invoked at the right times
+4. That the implementation handles LaTeX errors gracefully
+
+**Next steps before marking as "ready for production":**
+1. Test with real writer project (preferably with figures, bibliography, multiple sections)
+2. Verify log streaming works during actual LaTeX compilation
+3. Adjust progress percentages if needed based on actual timing
+4. Handle edge cases discovered during testing
+
+**Confidence level:** 75% - Architecture is sound, but real-world testing needed.
+
 <!-- EOF -->
