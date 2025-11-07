@@ -35,6 +35,7 @@ from .dataclasses import ManuscriptTree
 from .dataclasses import SupplementaryTree
 from .dataclasses import RevisionTree
 from .dataclasses.tree import ScriptsTree
+from .dataclasses.tree import SharedTree
 from scitex import logging
 from scitex.git import init_git_repo
 
@@ -82,6 +83,9 @@ class Writer:
         self.git_root = init_git_repo(self.project_dir, self.git_strategy)
 
         # Document accessors (pass git_root for efficiency)
+        self.shared = SharedTree(
+            self.project_dir / "shared", git_root=self.git_root
+        )
         self.manuscript = ManuscriptTree(
             self.project_dir / "01_manuscript", git_root=self.git_root
         )
