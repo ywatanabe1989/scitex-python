@@ -17,6 +17,10 @@ Executes LaTeX compilation scripts and captures results.
 
 from pathlib import Path
 from datetime import datetime
+from typing import Optional, Callable
+import subprocess
+import time
+import fcntl
 
 from scitex.logging import getLogger
 from scitex._sh import sh
@@ -100,14 +104,146 @@ def _find_output_files(
     return output_pdf, diff_pdf, log_file
 
 
+def _execute_with_callbacks(
+    command: list,
+    cwd: Path,
+    timeout: int,
+    log_callback: Optional[Callable[[str], None]] = None,
+) -> dict:
+    """
+    Execute command with line-by-line output capture and callbacks.
+
+    Parameters
+    ----------
+    command : list
+        Command to execute as list
+    cwd : Path
+        Working directory
+    timeout : int
+        Timeout in seconds
+    log_callback : Optional[Callable[[str], None]]
+        Called with each output line
+
+    Returns
+    -------
+    dict
+        Dict with stdout, stderr, exit_code, success
+    """
+    # Set environment for unbuffered output
+    env = os.environ.copy()
+    env['PYTHONUNBUFFERED'] = '1'
+
+    process = subprocess.Popen(
+        command,
+        shell=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        bufsize=0,  # Unbuffered
+        cwd=str(cwd),
+        env=env,
+    )
+
+    stdout_lines = []
+    stderr_lines = []
+    start_time = time.time()
+
+    # Make file descriptors non-blocking
+    def make_non_blocking(fd):
+        flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+
+    make_non_blocking(process.stdout)
+    make_non_blocking(process.stderr)
+
+    stdout_buffer = b""
+    stderr_buffer = b""
+
+    try:
+        while True:
+            # Check timeout
+            if timeout and (time.time() - start_time) > timeout:
+                process.kill()
+                timeout_msg = f"[ERROR] Command timed out after {timeout} seconds"
+                if log_callback:
+                    log_callback(timeout_msg)
+                stderr_lines.append(timeout_msg)
+                break
+
+            # Check if process has finished
+            poll_result = process.poll()
+
+            # Read from stdout
+            try:
+                chunk = process.stdout.read()
+                if chunk:
+                    stdout_buffer += chunk
+                    # Process complete lines
+                    while b'\n' in stdout_buffer:
+                        line, stdout_buffer = stdout_buffer.split(b'\n', 1)
+                        line_str = line.decode("utf-8", errors="replace")
+                        stdout_lines.append(line_str)
+                        if log_callback:
+                            log_callback(line_str)
+            except (IOError, BlockingIOError):
+                pass
+
+            # Read from stderr
+            try:
+                chunk = process.stderr.read()
+                if chunk:
+                    stderr_buffer += chunk
+                    # Process complete lines
+                    while b'\n' in stderr_buffer:
+                        line, stderr_buffer = stderr_buffer.split(b'\n', 1)
+                        line_str = line.decode("utf-8", errors="replace")
+                        stderr_lines.append(line_str)
+                        if log_callback:
+                            log_callback(f"[STDERR] {line_str}")
+            except (IOError, BlockingIOError):
+                pass
+
+            # If process finished, do final read and break
+            if poll_result is not None:
+                # Process remaining buffer content
+                if stdout_buffer:
+                    line_str = stdout_buffer.decode("utf-8", errors="replace")
+                    stdout_lines.append(line_str)
+                    if log_callback:
+                        log_callback(line_str)
+
+                if stderr_buffer:
+                    line_str = stderr_buffer.decode("utf-8", errors="replace")
+                    stderr_lines.append(line_str)
+                    if log_callback:
+                        log_callback(f"[STDERR] {line_str}")
+
+                break
+
+            # Small sleep to prevent CPU spinning
+            time.sleep(0.05)
+
+    except Exception as e:
+        process.kill()
+        raise
+
+    return {
+        "stdout": "\n".join(stdout_lines),
+        "stderr": "\n".join(stderr_lines),
+        "exit_code": process.returncode,
+        "success": process.returncode == 0,
+    }
+
+
 def run_compile(
     doc_type: str,
     project_dir: Path,
     timeout: int = 300,
     track_changes: bool = False,
+    log_callback: Optional[Callable[[str], None]] = None,
+    progress_callback: Optional[Callable[[int, str], None]] = None,
 ) -> CompilationResult:
     """
-    Run compilation script and parse results.
+    Run compilation script and parse results with optional callbacks.
 
     Parameters
     ----------
@@ -119,6 +255,10 @@ def run_compile(
         Timeout in seconds
     track_changes : bool
         Enable change tracking (revision only)
+    log_callback : Optional[Callable[[str], None]]
+        Called with each log line
+    progress_callback : Optional[Callable[[int, str], None]]
+        Called with progress updates (percent, step)
 
     Returns
     -------
@@ -128,10 +268,30 @@ def run_compile(
     start_time = datetime.now()
     project_dir = Path(project_dir).absolute()
 
+    # Helper for progress tracking
+    def progress(percent: int, step: str):
+        if progress_callback:
+            progress_callback(percent, step)
+        logger.info(f"Progress: {percent}% - {step}")
+
+    # Helper for logging
+    def log(message: str):
+        if log_callback:
+            log_callback(message)
+        logger.info(message)
+
+    # Progress: Starting
+    progress(0, 'Starting compilation...')
+    log('[INFO] Starting LaTeX compilation...')
+
     # Validate project structure before compilation
     try:
+        progress(5, 'Validating project structure...')
         validate_before_compile(project_dir)
+        log('[INFO] Project structure validated')
     except Exception as e:
+        error_msg = f"[ERROR] Validation failed: {e}"
+        log(error_msg)
         return CompilationResult(
             success=False,
             exit_code=1,
@@ -143,8 +303,8 @@ def run_compile(
     # Get compile script
     compile_script = _get_compile_script(project_dir, doc_type)
     if not compile_script or not compile_script.exists():
-        error_msg = f"Compilation script not found: {compile_script}"
-        logger.error(error_msg)
+        error_msg = f"[ERROR] Compilation script not found: {compile_script}"
+        log(error_msg)
         return CompilationResult(
             success=False,
             exit_code=127,
@@ -154,27 +314,39 @@ def run_compile(
         )
 
     # Build command
+    progress(10, 'Preparing compilation command...')
     script_path = compile_script.absolute()
-    # Use stdbuf to force unbuffered output for better real-time streaming
-    cmd = ["stdbuf", "-oL", "-eL", str(script_path)]
+    cmd = [str(script_path)]
     if track_changes and doc_type == "revision":
         cmd.append("--track-changes")
 
-    logger.info(f"Running compilation: {' '.join(cmd)}")
-    logger.info(f"Working directory: {project_dir}")
+    log(f'[INFO] Running: {" ".join(cmd)}')
+    log(f'[INFO] Working directory: {project_dir}')
 
     try:
         cwd_original = Path.cwd()
         os.chdir(project_dir)
 
         try:
-            result_dict = sh(
-                cmd,
-                verbose=True,
-                return_as="dict",
-                timeout=timeout,
-                stream_output=True,  # Enable live output streaming
-            )
+            progress(15, 'Executing LaTeX compilation...')
+
+            # Use callbacks version if callbacks provided
+            if log_callback:
+                result_dict = _execute_with_callbacks(
+                    command=cmd,
+                    cwd=project_dir,
+                    timeout=timeout,
+                    log_callback=log_callback,
+                )
+            else:
+                # Fallback to original sh() implementation
+                result_dict = sh(
+                    cmd,
+                    verbose=True,
+                    return_as="dict",
+                    timeout=timeout,
+                    stream_output=True,
+                )
 
             result = type('Result', (), {
                 'returncode': result_dict['exit_code'],
@@ -187,11 +359,18 @@ def run_compile(
             os.chdir(cwd_original)
 
         # Find output files
-        output_pdf, diff_pdf, log_file = _find_output_files(
-            project_dir, doc_type
-        ) if result.returncode == 0 else (None, None, None)
+        if result.returncode == 0:
+            progress(90, 'Compilation successful, locating output files...')
+            log('[INFO] Compilation succeeded, checking output files...')
+            output_pdf, diff_pdf, log_file = _find_output_files(project_dir, doc_type)
+            if output_pdf:
+                log(f'[SUCCESS] PDF generated: {output_pdf}')
+        else:
+            output_pdf, diff_pdf, log_file = None, None, None
+            log(f'[ERROR] Compilation failed with exit code {result.returncode}')
 
         # Parse errors and warnings
+        progress(95, 'Parsing compilation logs...')
         errors, warnings = parse_output(
             result.stdout, result.stderr, log_file=log_file
         )
@@ -210,15 +389,12 @@ def run_compile(
         )
 
         if compilation_result.success:
-            logger.info(f"Compilation succeeded in {duration:.2f}s")
-            if output_pdf:
-                logger.info(f"Output PDF: {output_pdf}")
+            progress(100, 'Complete!')
+            log(f'[SUCCESS] Compilation succeeded in {duration:.2f}s')
         else:
-            logger.error(
-                f"Compilation failed with exit code {result.returncode}"
-            )
+            progress(100, 'Compilation failed')
             if errors:
-                logger.error(f"Found {len(errors)} errors")
+                log(f'[ERROR] Found {len(errors)} errors')
 
         return compilation_result
 

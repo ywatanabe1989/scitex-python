@@ -196,14 +196,21 @@ class Writer:
             f"Writer: Project structure verified at {self.project_dir.absolute()}"
         )
 
-    def compile_manuscript(self, timeout: int = 300) -> CompilationResult:
+    def compile_manuscript(
+        self,
+        timeout: int = 300,
+        log_callback: Optional[Callable[[str], None]] = None,
+        progress_callback: Optional[Callable[[int, str], None]] = None,
+    ) -> CompilationResult:
         """
-        Compile manuscript to PDF.
+        Compile manuscript to PDF with optional live callbacks.
 
         Runs scripts/shell/compile_manuscript.sh with configured settings.
 
         Args:
             timeout: Maximum compilation time in seconds (default: 300)
+            log_callback: Called with each log line: log_callback("Running pdflatex...")
+            progress_callback: Called with progress: progress_callback(50, "Pass 2/3")
 
         Returns:
             CompilationResult with success status, PDF path, and errors/warnings
@@ -221,17 +228,39 @@ class Writer:
             >>> result = writer.compile_manuscript()
             >>> if result.success:
             ...     print(f"PDF created: {result.output_pdf}")
-        """
-        return compile_manuscript(self.project_dir, timeout=timeout)
 
-    def compile_supplementary(self, timeout: int = 300) -> CompilationResult:
+            >>> # With callbacks for live updates
+            >>> def on_log(msg):
+            ...     append_to_job_log(job_id, msg)
+            >>> def on_progress(percent, step):
+            ...     update_job_progress(job_id, percent, step)
+            >>> result = writer.compile_manuscript(
+            ...     log_callback=on_log,
+            ...     progress_callback=on_progress
+            ... )
         """
-        Compile supplementary materials to PDF.
+        return compile_manuscript(
+            self.project_dir,
+            timeout=timeout,
+            log_callback=log_callback,
+            progress_callback=progress_callback,
+        )
+
+    def compile_supplementary(
+        self,
+        timeout: int = 300,
+        log_callback: Optional[Callable[[str], None]] = None,
+        progress_callback: Optional[Callable[[int, str], None]] = None,
+    ) -> CompilationResult:
+        """
+        Compile supplementary materials to PDF with optional live callbacks.
 
         Runs scripts/shell/compile_supplementary.sh with configured settings.
 
         Args:
             timeout: Maximum compilation time in seconds (default: 300)
+            log_callback: Called with each log line
+            progress_callback: Called with progress updates
 
         Returns:
             CompilationResult with success status, PDF path, and errors/warnings
@@ -248,19 +277,30 @@ class Writer:
             >>> if result.success:
             ...     print(f"PDF created: {result.output_pdf}")
         """
-        return compile_supplementary(self.project_dir, timeout=timeout)
+        return compile_supplementary(
+            self.project_dir,
+            timeout=timeout,
+            log_callback=log_callback,
+            progress_callback=progress_callback,
+        )
 
     def compile_revision(
-        self, track_changes: bool = False, timeout: int = 300
+        self,
+        track_changes: bool = False,
+        timeout: int = 300,
+        log_callback: Optional[Callable[[str], None]] = None,
+        progress_callback: Optional[Callable[[int, str], None]] = None,
     ) -> CompilationResult:
         """
-        Compile revision document with optional change tracking.
+        Compile revision document with optional change tracking and live callbacks.
 
         Runs scripts/shell/compile_revision.sh with configured settings.
 
         Args:
             track_changes: Enable change tracking in compiled PDF (default: False)
             timeout: Maximum compilation time in seconds (default: 300)
+            log_callback: Called with each log line
+            progress_callback: Called with progress updates
 
         Returns:
             CompilationResult with success status, PDF path, and errors/warnings
@@ -279,7 +319,11 @@ class Writer:
             ...     print(f"Revision PDF: {result.output_pdf}")
         """
         return compile_revision(
-            self.project_dir, track_changes=track_changes, timeout=timeout
+            self.project_dir,
+            track_changes=track_changes,
+            timeout=timeout,
+            log_callback=log_callback,
+            progress_callback=progress_callback,
         )
 
     def watch(self, on_compile: Optional[Callable] = None) -> None:
