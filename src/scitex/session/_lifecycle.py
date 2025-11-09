@@ -48,7 +48,7 @@ from ..io._load import load
 from ..io._load_configs import load_configs
 from ..plt.utils._configure_mpl import configure_mpl
 from ..repro._gen_ID import gen_ID
-from ..rng import RandomStateManager
+from ..repro import RandomStateManager
 from ..str._clean_path import clean_path
 from ..str._printc import printc as _printc
 from ..utils._notify import notify as scitex_utils_notify
@@ -360,12 +360,12 @@ def start(
     Returns
     -------
     tuple
-        (CONFIGS, stdout, stderr, plt, CC, rng)
+        (CONFIGS, stdout, stderr, plt, CC, rng_manager)
         - CONFIGS: Configuration dictionary
         - stdout, stderr: Redirected output streams
         - plt: Configured matplotlib.pyplot module
         - CC: Color cycle dictionary
-        - rng: Global RandomStateManager instance for reproducible random generation
+        - rng_manager: Global RandomStateManager instance for reproducible random generation
     """
     IS_DEBUG = _get_debug_mode()
     ID, PID = _initialize_env(IS_DEBUG)
@@ -467,7 +467,7 @@ def start(
             pass
 
     # Initialize RandomStateManager (automatically fixes all seeds)
-    rng = RandomStateManager(seed=seed, verbose=verbose)
+    rng_manager = RandomStateManager(seed=seed, verbose=verbose)
     if verbose:
         logger.info(f"Initialized RandomStateManager with seed {seed}")
 
@@ -505,9 +505,9 @@ def start(
 
     # Return appropriate values based on whether sys was provided
     if sys is not None:
-        return CONFIGS, sys.stdout, sys.stderr, plt, CC, rng
+        return CONFIGS, sys.stdout, sys.stderr, plt, CC, rng_manager
     else:
-        return CONFIGS, None, None, plt, CC, rng
+        return CONFIGS, None, None, plt, CC, rng_manager
 
 
 def _format_diff_time(diff_time):

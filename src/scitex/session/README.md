@@ -19,7 +19,7 @@ import sys
 import matplotlib.pyplot as plt
 from scitex import session
 
-CONFIG, sys.stdout, sys.stderr, plt, CC, rng = session.start(sys, plt)
+CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = session.start(sys, plt)
 
 # Your experiment code here
 
@@ -159,7 +159,7 @@ CONFIG contains:
 ## Matplotlib Integration
 
 ```python
-CONFIG, sys.stdout, sys.stderr, plt, CC, rng = session.start(
+CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = session.start(
     sys, plt,
     fig_size_mm=(160, 100),
     dpi_save=300,
@@ -175,7 +175,7 @@ CONFIG, sys.stdout, sys.stderr, plt, CC, rng = session.start(
 ## Random State Management
 
 ```python
-CONFIG, *_, rng = session.start(sys, plt, seed=42)
+CONFIG, *_, rng_manager = session.start(sys, plt, seed=42)
 
 random_array = rng.random((10, 10))
 ```

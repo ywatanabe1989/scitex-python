@@ -43,6 +43,10 @@ def session(
     - Cleanup
     - Error handling
 
+    This decorator is designed for script entry points. The decorated function
+    should be called without arguments from `if __name__ == '__main__':` to
+    trigger CLI parsing and session management.
+
     Args:
         func: Function to wrap (set automatically by decorator)
         verbose: Enable verbose logging
@@ -60,13 +64,42 @@ def session(
             stx.io.save(result, "output.csv")
             return 0
 
+        if __name__ == '__main__':
+            analyze()  # No arguments = CLI mode with session management
+
         # CLI: python script.py --data-path data.csv --threshold 0.7
 
     Example with options:
         @stx.session(verbose=True, notify=True)
-        def analyze(data_path: str):
-            '''Analyze data.'''
-            pass
+        def train_model(model_name: str, epochs: int = 10):
+            '''Train ML model.'''
+            # These are automatically available as globals:
+            # - CONFIG: Session configuration dict
+            # - plt: Matplotlib pyplot (configured for session)
+            # - CC: Custom Colors
+            # - rng_manager: RandomStateManager (fixes seeds, creates named generators)
+            logger.info(f"Session ID: {CONFIG['ID']}")
+            logger.info(f"Output directory: {CONFIG['SDIR']}")
+            # ... training code ...
+            return 0
+
+        if __name__ == '__main__':
+            train_model()
+
+    Notes:
+        - Function name can be anything (not just 'main')
+        - Calling with arguments bypasses session management: analyze('/path', 0.5)
+        - Only one session-managed function per script
+        - Do NOT call multiple @session decorated functions from one script
+        - Do NOT nest session-decorated function calls without arguments
+
+    Injected Global Variables:
+        When called without arguments (CLI mode), these are injected into globals:
+        - CONFIG (dict): Session configuration with ID, SDIR, paths, etc.
+        - plt (module): matplotlib.pyplot configured with session settings
+        - CC (CustomColors): Custom Colors for consistent plotting
+        - rng_manager (RandomStateManager): Manages reproducibility by fixing global seeds
+                                             and creating named generators via rng_manager("name")
     """
 
     def decorator(func: Callable) -> Callable:
@@ -124,7 +157,7 @@ def _run_with_session(
     # Start session
     import matplotlib.pyplot as plt
 
-    CONFIG, stdout, stderr, plt, CC, rng = start(
+    CONFIG, stdout, stderr, plt, CC, rng_manager = start(
         sys=sys_module,
         plt=plt,
         args=args,
@@ -140,7 +173,7 @@ def _run_with_session(
     func_globals['CONFIG'] = CONFIG
     func_globals['plt'] = plt
     func_globals['CC'] = CC
-    func_globals['rng'] = rng
+    func_globals['rng_manager'] = rng_manager
 
     # Run function
     exit_status = 0
@@ -332,7 +365,7 @@ def run(
     # Start session
     import matplotlib.pyplot as plt
 
-    CONFIG, stdout, stderr, plt, CC, rng = start(
+    CONFIG, stdout, stderr, plt, CC, rng_manager = start(
         sys=sys_module,
         plt=plt,
         args=args,
