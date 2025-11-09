@@ -89,9 +89,12 @@ def _print_header(
         Whether to print detailed information, by default True
     """
 
-    args_str = "Arguments:"
-    for arg, value in args._get_kwargs():
-        args_str += f"\n    {arg}: {value}"
+    if args is not None and hasattr(args, '_get_kwargs'):
+        args_str = "Arguments:"
+        for arg, value in args._get_kwargs():
+            args_str += f"\n    {arg}: {value}"
+    else:
+        args_str = "Arguments: None"
 
     _printc(
         (
