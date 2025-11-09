@@ -80,7 +80,7 @@ class ScriptsTree:
         Verify scripts structure has required directories and scripts.
 
         Returns:
-            (is_valid, list_of_missing_items)
+            (is_valid, list_of_missing_items_with_paths)
         """
         missing = []
 
@@ -91,7 +91,8 @@ class ScriptsTree:
         ]
         for name, path in required_dirs:
             if not path.exists():
-                missing.append(f"Missing {name}/")
+                expected_path = path.relative_to(self.git_root) if self.git_root else path
+                missing.append(f"Missing {name}/ (expected at: {expected_path})")
 
         # Check required compilation scripts
         required_scripts = [
@@ -101,7 +102,8 @@ class ScriptsTree:
         ]
         for name, section in required_scripts:
             if not section.path.exists():
-                missing.append(f"Missing {name}")
+                expected_path = section.path.relative_to(self.git_root) if self.git_root else section.path
+                missing.append(f"Missing {name} (expected at: {expected_path})")
 
         return len(missing) == 0, missing
 

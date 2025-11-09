@@ -32,7 +32,7 @@ def run_with_session(parse_args_func, main_func):
 
     args = parse_args_func()
 
-    CONFIG, sys.stdout, sys.stderr, plt_obj, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt_obj, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,

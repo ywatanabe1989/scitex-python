@@ -131,7 +131,7 @@ class ManuscriptContents:
         Verify manuscript structure has required files.
 
         Returns:
-            (is_valid, list_of_missing_files)
+            (is_valid, list_of_missing_files_with_paths)
         """
         required = [
             ("abstract.tex", self.abstract),
@@ -144,7 +144,8 @@ class ManuscriptContents:
         missing = []
         for name, section in required:
             if not section.path.exists():
-                missing.append(name)
+                expected_path = section.path.relative_to(self.git_root) if self.git_root else section.path
+                missing.append(f"{name} (expected at: {expected_path})")
 
         return len(missing) == 0, missing
 
@@ -158,7 +159,7 @@ def run_session() -> None:
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,

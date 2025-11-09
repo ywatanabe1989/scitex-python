@@ -79,7 +79,7 @@ def run_session() -> None:
     import matplotlib.pyplot as plt
     import scitex as stx
     args = parse_args()
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,
@@ -656,7 +656,7 @@ def run_session() -> None:
     
     args = parse_args()
     
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys, plt, args=args, file=__FILE__, 
         sdir_suffix=None, verbose=False, agg=True,
     )
@@ -1270,7 +1270,7 @@ def _run_with_session(
     # Start session
     import matplotlib.pyplot as plt
     
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = start(
         sys=sys,
         plt=plt,
         args=args,
@@ -1458,7 +1458,7 @@ def run(
     # Start session
     import matplotlib.pyplot as plt
     
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = start(
         sys=sys,
         plt=plt,
         args=args,

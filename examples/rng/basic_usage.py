@@ -14,7 +14,7 @@ def main():
     
     # Create RandomStateManager instance
     print("Creating RandomStateManager with seed=42")
-    rng = stx.rng.RandomStateManager(seed=42)
+    rng_manager = stx.rng.RandomStateManager(seed=42)
     
     # Get independent named generators
     print("\nGetting independent generators...")
@@ -72,11 +72,11 @@ def main():
     print("\n--- Global Instance ---")
     
     # Get global instance
-    global_rng = stx.rng.get()
+    global_rng_manager = stx.rng.get()
     print(f"Global RNG seed: {global_rng.seed}")
     
     # Reset with new seed
-    new_rng = stx.rng.reset(seed=123)
+    new_rng_manager = stx.rng.reset(seed=123)
     print(f"Reset RNG seed: {new_rng.seed}")
     
     print("\nExample completed successfully!")

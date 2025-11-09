@@ -225,6 +225,8 @@ scholar = [
 # Writer Module - Academic Paper Writing & LaTeX Compilation
 writer = [
     "yq",  # YAML query tool for compilation script configuration
+    "xlsx2csv",
+    "csv2latex",
 ]
 
 # Development Tools

@@ -16,7 +16,7 @@ def demonstrate_cache_management():
     print("=" * 60)
     
     # Initialize RNG
-    rng = stx.rng.RandomStateManager(seed=42, verbose=False)
+    rng_manager = stx.rng.RandomStateManager(seed=42, verbose=False)
     
     # Generate some data
     print("\n1. Generating data...")
@@ -74,7 +74,7 @@ def demonstrate_verification_workflow():
     
     # Initial run
     print("\n1. Initial run - creating baseline...")
-    rng = stx.rng.RandomStateManager(seed=123, verbose=False)
+    rng_manager = stx.rng.RandomStateManager(seed=123, verbose=False)
     
     # Simulate experiment
     data = rng.get_np_generator("experiment").random(1000)

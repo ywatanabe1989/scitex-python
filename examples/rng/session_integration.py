@@ -90,7 +90,7 @@ def main():
     print("=" * 60)
     
     # Start session with seed - returns 6 values including RNG
-    CONFIG, stdout, stderr, plt, CC, rng = stx.session.start(
+    CONFIG, stdout, stderr, plt, CC, rng_manager = stx.session.start(
         sys=sys,
         seed=2024,
         ID="rng_example",
@@ -191,7 +191,7 @@ def test_reproducibility():
         print(f"\nRun {run + 1}:")
         
         # Start fresh session
-        CONFIG, _, _, _, _, rng = stx.session.start(
+        CONFIG, _, _, _, _, rng_manager = stx.session.start(
             sys=sys,
             seed=999,
             ID=f"repro_test_{run}",

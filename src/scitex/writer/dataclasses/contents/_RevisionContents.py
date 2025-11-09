@@ -105,19 +105,23 @@ class RevisionContents:
         Verify revision contents structure.
 
         Returns:
-            (is_valid, list_of_issues)
+            (is_valid, list_of_issues_with_paths)
         """
         issues = []
 
         # Check required directories
         if not self.figures.exists():
-            issues.append("Missing figures/")
+            expected_path = self.figures.relative_to(self.git_root) if self.git_root else self.figures
+            issues.append(f"Missing figures/ (expected at: {expected_path})")
         if not self.tables.exists():
-            issues.append("Missing tables/")
+            expected_path = self.tables.relative_to(self.git_root) if self.git_root else self.tables
+            issues.append(f"Missing tables/ (expected at: {expected_path})")
         if not self.latex_styles.exists():
-            issues.append("Missing latex_styles/")
+            expected_path = self.latex_styles.relative_to(self.git_root) if self.git_root else self.latex_styles
+            issues.append(f"Missing latex_styles/ (expected at: {expected_path})")
         if not self.editor.exists():
-            issues.append("Missing editor/")
+            expected_path = self.editor.relative_to(self.git_root) if self.git_root else self.editor
+            issues.append(f"Missing editor/ (expected at: {expected_path})")
 
         return len(issues) == 0, issues
 

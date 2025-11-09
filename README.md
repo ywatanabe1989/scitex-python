@@ -246,7 +246,7 @@ def main(args):
 
 if __name__ == '__main__':
     # Initialize SciTeX session (logging, reproducibility, etc.)
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys, plt,
         file=__file__,
         verbose=True
@@ -276,7 +276,7 @@ def expensive_computation(x):
     return process_large_dataset(x)
 
 # Reproducible random numbers
-rng = stx.rng.get_rng(seed=42)
+rng_manager = stx.rng.get_rng(seed=42)
 random_data = rng.normal(0, 1, size=1000)
 
 # Path management
@@ -308,7 +308,7 @@ def run_main() -> None:
     #   Setup matplotlib wrapper for saving plotted data as csv
     #   CC: Custom colors for plotting
     #   rng: Fix random seeds for common packages as 42
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,
@@ -427,7 +427,7 @@ def run_main() -> None:
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,

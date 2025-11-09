@@ -49,7 +49,7 @@ def validate_structure(project_dir: Path) -> None:
         if not dir_path.exists():
             logger.error(f"Expected directory missing: {dir_path}")
             raise RuntimeError(
-                f"Project structure invalid: missing {dir_path.name} directory"
+                f"Project structure invalid: missing {dir_path.name} directory (expected at: {dir_path})"
             )
 
     logger.success(
