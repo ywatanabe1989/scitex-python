@@ -28,6 +28,7 @@ def clone_pip_project(
     target_dir: Optional[str] = None,
     git_strategy: Optional[str] = "child",
     branch: Optional[str] = None,
+    tag: Optional[str] = None,
 ) -> bool:
     """
     Create a new pip project from the template repository.
@@ -42,6 +43,10 @@ def clone_pip_project(
         Git initialization strategy ('child', 'parent', None). Default is 'child'.
     branch : str, optional
         Specific branch of the template repository to clone. If None, clones the default branch.
+        Mutually exclusive with tag parameter.
+    tag : str, optional
+        Specific tag/release of the template repository to clone. If None, clones the default branch.
+        Mutually exclusive with branch parameter.
 
     Returns
     -------
@@ -53,6 +58,7 @@ def clone_pip_project(
     >>> from scitex.template import clone_pip_project
     >>> clone_pip_project("my_pip_project")
     >>> clone_pip_project("my_project", branch="develop")
+    >>> clone_pip_project("my_project", tag="v1.0.0")
     """
     return clone_project(
         project_name,
@@ -61,6 +67,7 @@ def clone_pip_project(
         "pip-project-template",
         git_strategy,
         branch,
+        tag,
     )
 
 

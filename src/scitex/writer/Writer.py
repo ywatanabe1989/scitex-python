@@ -51,6 +51,7 @@ class Writer:
         name: Optional[str] = None,
         git_strategy: Optional[str] = "child",
         branch: Optional[str] = None,
+        tag: Optional[str] = None,
     ):
         """
         Initialize for project directory.
@@ -66,19 +67,26 @@ class Writer:
                 - 'origin': Preserve template's original git history
                 - None: Disable git initialization
             branch: Specific branch of template repository to clone (optional)
-                If None, clones the default branch
+                If None, clones the default branch. Mutually exclusive with tag.
+            tag: Specific tag/release of template repository to clone (optional)
+                If None, clones the default branch. Mutually exclusive with branch.
         """
         self.project_name = name or Path(project_dir).name
         self.project_dir = Path(project_dir)
         self.git_strategy = git_strategy
         self.branch = branch
+        self.tag = tag
 
-        branch_info = f" (branch: {branch})" if branch else ""
+        ref_info = ""
+        if branch:
+            ref_info = f" (branch: {branch})"
+        elif tag:
+            ref_info = f" (tag: {tag})"
         logger.info(
             f"Writer: Initializing with:\n"
             f"    Project Name: {self.project_name}\n"
             f"    Project Directory: {self.project_dir.absolute()}\n"
-            f"    Git Strategy: {self.git_strategy}{branch_info}..."
+            f"    Git Strategy: {self.git_strategy}{ref_info}..."
         )
 
         # Create or attach to project
@@ -139,7 +147,7 @@ class Writer:
 
         # Initialize project directory structure
         success = _clone_writer_project(
-            project_name, str(target_dir), self.git_strategy, self.branch
+            project_name, str(target_dir), self.git_strategy, self.branch, self.tag
         )
 
         if not success:

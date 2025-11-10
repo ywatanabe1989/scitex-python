@@ -29,6 +29,7 @@ def clone_writer_project(
     target_dir: Optional[str] = None,
     git_strategy: Optional[str] = "child",
     branch: Optional[str] = None,
+    tag: Optional[str] = None,
 ) -> bool:
     """
     Initialize a new writer project directory from scitex-writer template.
@@ -45,7 +46,9 @@ def clone_writer_project(
             - 'origin': Preserve template's original git history
             - None: Disable git initialization
         branch: Specific branch of the template repository to clone (optional)
-            If None, clones the default branch
+            If None, clones the default branch. Mutually exclusive with tag.
+        tag: Specific tag/release of the template repository to clone (optional)
+            If None, clones the default branch. Mutually exclusive with branch.
 
     Returns:
         True if successful, False otherwise
@@ -56,11 +59,12 @@ def clone_writer_project(
         >>> clone_writer_project("my_paper", target_dir="/path/to/papers")
         >>> clone_writer_project("my_paper", git_strategy="parent")
         >>> clone_writer_project("my_paper", branch="develop")
+        >>> clone_writer_project("my_paper", tag="v1.0.0")
     """
     from scitex.template import clone_writer_directory
 
     try:
-        result = clone_writer_directory(project_name, target_dir, git_strategy, branch)
+        result = clone_writer_directory(project_name, target_dir, git_strategy, branch, tag)
         return result
     except Exception as e:
         logger.error(f"Failed to initialize writer directory: {e}")
@@ -103,6 +107,7 @@ def main(args):
         target_dir=args.target_dir,
         git_strategy=args.git_strategy,
         branch=args.branch,
+        tag=args.tag,
     )
 
     if result:
@@ -144,7 +149,14 @@ def parse_args():
         "-b",
         type=str,
         default=None,
-        help="Specific branch of template to clone (default: default branch)",
+        help="Specific branch of template to clone (mutually exclusive with --tag)",
+    )
+    parser.add_argument(
+        "--tag",
+        "-t",
+        type=str,
+        default=None,
+        help="Specific tag/release of template to clone (mutually exclusive with --branch)",
     )
 
     return parser.parse_args()
@@ -160,5 +172,6 @@ __all__ = [
 
 # python -m scitex.writer._clone_writer_project my_paper --git-strategy child
 # python -m scitex.writer._clone_writer_project my_paper --branch develop
+# python -m scitex.writer._clone_writer_project my_paper --tag v1.0.0
 
 # EOF
