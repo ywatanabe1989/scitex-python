@@ -19,6 +19,7 @@ scitex-code (monorepo)  →  Separate standalone packages
 | `errors.py` | `scitex-core` | ✅ Extracted | `~/proj/scitex-core` | Error classes |
 | `sh/` | `scitex-core` | ✅ Extracted | `~/proj/scitex-core` | Shell utilities |
 | `io/` | `scitex-io` | ✅ Extracted | `~/proj/scitex-io` | Data I/O (62 files) |
+| `db/` | `scitex-db` | ✅ Extracted | `~/proj/scitex-db` | Database (57 files, SQLite3 + PostgreSQL) |
 
 ### 🔄 In Progress
 
@@ -67,7 +68,7 @@ These are lightweight utilities that stay in the main package:
 | `torch/` | Medium | PyTorch utilities |
 | `ai/` | Medium | AI utilities |
 | `pd/` | Medium | Pandas utilities |
-| `db/` | Medium | Database (57 files) - inline wrapper sufficient |
+| ~~`db/`~~ | ~~Medium~~ | ~~Extracted to scitex-db~~ |
 | `git/` | Medium | Git operations |
 | `tex/` | Small | LaTeX utilities |
 | `resource/` | Small | Resource management |
@@ -125,7 +126,8 @@ For each module extraction:
 | Package | Version | Git Commits | PyPI Published |
 |---------|---------|-------------|----------------|
 | scitex-core | 1.0.0 | 2 | ❌ Not yet |
-| scitex-io | 1.0.0 | 1 | ❌ Not yet |
+| scitex-io | 1.0.0 | 2 | ❌ Not yet |
+| scitex-db | 1.0.0 | 1 | ❌ Not yet |
 | scitex-writer | 2.0.0a0 | - | ✅ Published |
 | scitex-scholar | - | - | ❌ Not created |
 
