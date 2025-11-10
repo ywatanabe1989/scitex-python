@@ -30,6 +30,7 @@ def clone_research(
     target_dir: Optional[str] = None,
     git_strategy: Optional[str] = "child",
     branch: Optional[str] = None,
+    tag: Optional[str] = None,
 ) -> bool:
     """
     Create a new research project from the template repository.
@@ -44,6 +45,10 @@ def clone_research(
         Git initialization strategy ('child', 'parent', None). Default is 'child'.
     branch : str, optional
         Specific branch of the template repository to clone. If None, clones the default branch.
+        Mutually exclusive with tag parameter.
+    tag : str, optional
+        Specific tag/release of the template repository to clone. If None, clones the default branch.
+        Mutually exclusive with branch parameter.
 
     Returns
     -------
@@ -55,6 +60,7 @@ def clone_research(
     >>> from scitex.template import clone_research
     >>> clone_research("my_research_project")
     >>> clone_research("my_project", branch="develop")
+    >>> clone_research("my_project", tag="v1.0.0")
     """
     return clone_project(
         project_name,
@@ -63,6 +69,7 @@ def clone_research(
         "scitex_template_research",
         git_strategy,
         branch,
+        tag,
     )
 
 

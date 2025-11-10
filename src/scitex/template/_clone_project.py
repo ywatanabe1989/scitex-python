@@ -41,6 +41,7 @@ def clone_project(
     template_name: str,
     git_strategy: Optional[str] = "child",
     branch: Optional[str] = None,
+    tag: Optional[str] = None,
 ) -> bool:
     """
     Create a project from a template repository.
@@ -70,6 +71,10 @@ def clone_project(
         - None: No git initialization
     branch : str, optional
         Specific branch of the template repository to clone. If None, clones the default branch.
+        Mutually exclusive with tag parameter.
+    tag : str, optional
+        Specific tag/release of the template repository to clone. If None, clones the default branch.
+        Mutually exclusive with branch parameter.
 
     Returns
     -------
@@ -103,11 +108,15 @@ def clone_project(
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir) / "template"
 
-            branch_info = f" (branch: {branch})" if branch else ""
-            logger.info(f"Cloning template from {template_url}{branch_info}")
+            ref_info = ""
+            if branch:
+                ref_info = f" (branch: {branch})"
+            elif tag:
+                ref_info = f" (tag: {tag})"
+            logger.info(f"Cloning template from {template_url}{ref_info}")
 
             # Clone the template repository
-            if not scitex.git.clone_repo(template_url, temp_path, branch=branch):
+            if not scitex.git.clone_repo(template_url, temp_path, branch=branch, tag=tag):
                 logger.error("Failed to clone template")
                 return False
 
