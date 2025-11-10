@@ -14,7 +14,7 @@ from ._constants import EXIT_SUCCESS, EXIT_FAILURE
 logger = getLogger(__name__)
 
 
-def clone_repo(url: str, target_path: Path, verbose: bool = True) -> bool:
+def clone_repo(url: str, target_path: Path, branch: str = None, verbose: bool = True) -> bool:
     """
     Safely clone a git repository.
 
@@ -24,6 +24,8 @@ def clone_repo(url: str, target_path: Path, verbose: bool = True) -> bool:
         Git repository URL
     target_path : Path
         Destination path for cloning
+    branch : str, optional
+        Specific branch to clone. If None, clones the default branch
     verbose : bool
         Enable verbose output
 
@@ -38,8 +40,13 @@ def clone_repo(url: str, target_path: Path, verbose: bool = True) -> bool:
         logger.error(f"Invalid git URL: {url}")
         return False
 
+    cmd = ["git", "clone"]
+    if branch:
+        cmd.extend(["--branch", branch])
+    cmd.extend([url, str(target_path)])
+
     result = sh(
-        ["git", "clone", url, str(target_path)],
+        cmd,
         verbose=verbose,
         return_as="dict"
     )
@@ -48,7 +55,8 @@ def clone_repo(url: str, target_path: Path, verbose: bool = True) -> bool:
         logger.error(f"Failed to clone repository: {result['stderr']}")
         return False
 
-    logger.info("Repository cloned successfully")
+    branch_info = f" (branch: {branch})" if branch else ""
+    logger.info(f"Repository cloned successfully{branch_info}")
     return True
 
 
@@ -94,7 +102,7 @@ def main(args):
         if not args.url:
             logger.error("URL required for clone action")
             return EXIT_FAILURE
-        success = clone_repo(args.url, args.path, args.verbose)
+        success = clone_repo(args.url, args.path, branch=args.branch, verbose=args.verbose)
         return EXIT_SUCCESS if success else EXIT_FAILURE
     elif args.action == "init":
         success = git_init(args.path, args.verbose)
@@ -108,6 +116,7 @@ def parse_args():
     parser.add_argument("--action", choices=["clone", "init"], required=True)
     parser.add_argument("--url", help="Repository URL for cloning")
     parser.add_argument("--path", type=Path, required=True)
+    parser.add_argument("--branch", help="Branch to clone (optional)")
     parser.add_argument("--verbose", action="store_true")
     return parser.parse_args()
 

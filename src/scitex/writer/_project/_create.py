@@ -30,6 +30,7 @@ def ensure_project_exists(
     project_dir: Path,
     project_name: str,
     git_strategy: Optional[str] = "child",
+    branch: Optional[str] = None,
 ) -> Path:
     """
     Ensure project directory exists, creating it if necessary.
@@ -42,6 +43,8 @@ def ensure_project_exists(
         Name of the project
     git_strategy : str or None
         Git initialization strategy
+    branch : str, optional
+        Specific branch of template repository to clone. If None, clones the default branch.
 
     Returns
     -------
@@ -66,7 +69,7 @@ def ensure_project_exists(
 
     # Initialize project directory structure
     success = _clone_writer_project(
-        project_name, str(target_dir), git_strategy
+        project_name, str(target_dir), git_strategy, branch
     )
 
     if not success:
