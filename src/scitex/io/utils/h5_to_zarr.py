@@ -35,7 +35,7 @@ from typing import Optional, Union, Dict, Any, List, Tuple
 import warnings
 from tqdm import tqdm
 
-from ...errors import (
+from scitex.errors import (
     IOError as SciTeXIOError,
     FileFormatError,
     PathNotFoundError,

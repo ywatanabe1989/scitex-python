@@ -9,7 +9,7 @@ import re as _re
 from glob import glob as _glob
 from pathlib import Path
 from typing import Union
-from ..str._parse import parse as _parse
+from scitex.str._parse import parse as _parse
 from natsort import natsorted as _natsorted
 
 

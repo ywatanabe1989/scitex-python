@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import psutil as _psutil
 import yaml as _yaml
 from ._utils._get_env_info import get_env_info
-from ..str import readable_bytes
+from scitex.str import readable_bytes
 
 
 def get_specs(

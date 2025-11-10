@@ -8,7 +8,7 @@ __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
-from ...db import SQLite3
+from scitex.db import SQLite3
 
 _load_db_sqlite3 = SQLite3
 

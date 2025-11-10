@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: "2024-11-02 12:40:04 (ywatanabe)"
-# File: ./scitex_repo/src/scitex/dict/_pop_keys.py
+# Timestamp: "2025-11-10 22:40:16 (ywatanabe)"
+
 
 import numpy as np
 
@@ -31,6 +31,5 @@ def pop_keys(keys_list, keys_to_pop):
     indi_to_remain = [k not in keys_to_pop for k in keys_list]
     keys_remainded_list = list(np.array(keys_list)[list(indi_to_remain)])
     return keys_remainded_list
-
 
 # EOF

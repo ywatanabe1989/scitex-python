@@ -12,8 +12,8 @@ __DIR__ = os.path.dirname(__FILE__)
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ....dict._to_str import to_str
-from ....types import is_listed_X
+from scitex.dict._to_str import to_str
+from scitex.types import is_listed_X
 
 
 def set_ticks(ax, xvals=None, xticks=None, yvals=None, yticks=None):

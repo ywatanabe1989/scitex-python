@@ -20,8 +20,8 @@ Features:
 
 from typing import Optional, Dict, Tuple, Union, Any
 import numpy as np
-from ....units import Unit, Q, Units
-from ....errors import SciTeXError
+from scitex.units import Unit, Q, Units
+from scitex.errors import SciTeXError
 
 
 class UnitMismatchError(SciTeXError):

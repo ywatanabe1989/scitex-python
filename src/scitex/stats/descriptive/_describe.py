@@ -39,7 +39,7 @@ import scitex as stx
 import torch
 from scitex import logging
 
-from ...decorators import batch_fn, torch_fn
+from scitex.decorators import batch_fn, torch_fn
 from ._nan import (nancount, nankurtosis, nanmax, nanmean, nanmin, nanq25,
                    nanq50, nanq75, nanskewness, nanstd, nanvar)
 from ._real import kurtosis, mean, q25, q50, q75, skewness, std

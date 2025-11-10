@@ -18,7 +18,7 @@ Prerequisites:
 """
 
 try:
-    from ..str._latex_fallback import safe_latex_render, latex_fallback_decorator
+    from scitex.str._latex_fallback import safe_latex_render, latex_fallback_decorator
     FALLBACK_AVAILABLE = True
 except ImportError:
     FALLBACK_AVAILABLE = False

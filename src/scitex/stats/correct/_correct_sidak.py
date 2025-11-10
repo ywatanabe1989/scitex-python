@@ -149,7 +149,7 @@ def correct_sidak(
     correct_holm : Sequential Bonferroni method
     correct_fdr : FDR control (less conservative)
     """
-    from ..utils._formatters import p2stars
+    from scitex.stats.utils._formatters import p2stars
 
     if verbose:
         logger.info("Applying Šidák correction")

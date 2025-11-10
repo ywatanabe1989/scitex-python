@@ -332,7 +332,7 @@ class OpenAthensAuthenticator(BaseAuthenticator):
     async def _notify_user_intervention_needed_async(self) -> None:
         """Send email notification that user intervention is needed for OpenAthens authentication."""
         try:
-            from ..utils._email import send_email_async
+            from scitex.utils._email import send_email_async
 
             # Get notification email addresses from config
             to_email = self.scholar_config.resolve(
@@ -400,7 +400,7 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
     async def _notify_authentication_success_async(self) -> None:
         """Send email notification that OpenAthens authentication was successful."""
         try:
-            from ..utils._email import send_email_async
+            from scitex.utils._email import send_email_async
 
             # Get notification email addresses from config
             to_email = self.scholar_config.resolve(
@@ -458,7 +458,7 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
     ) -> None:
         """Send email notification that OpenAthens authentication failed."""
         try:
-            from ..utils._email import send_email_async
+            from scitex.utils._email import send_email_async
 
             # Get notification email addresses from config
             to_email = self.scholar_config.resolve(

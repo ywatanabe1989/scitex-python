@@ -14,7 +14,7 @@ __DIR__ = os.path.dirname(__FILE__)
 from pathlib import Path
 from typing import Optional, Union
 
-from ..dict import DotDict
+from scitex.dict import DotDict
 from ._glob import glob
 from ._load import load
 

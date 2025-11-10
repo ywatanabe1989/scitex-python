@@ -14,7 +14,7 @@ from functools import lru_cache
 from typing import Union, Tuple, Optional
 import hashlib
 
-from ..decorators import torch_fn
+from scitex.decorators import torch_fn
 
 
 # Cache for normalized data

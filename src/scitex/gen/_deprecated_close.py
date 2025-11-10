@@ -16,7 +16,7 @@ This module provides backward compatibility by forwarding calls to the new
 scitex.session.close function while showing deprecation warnings.
 """
 
-from ..decorators._deprecated import deprecated
+from scitex.decorators._deprecated import deprecated
 
 
 @deprecated(
@@ -42,7 +42,7 @@ def close(*args, **kwargs):
         Same return value as scitex.session.close()
     """
     # Import here to avoid circular dependencies
-    from ..session import close as session_close
+    from scitex.session import close as session_close
 
     return session_close(*args, **kwargs)
 
@@ -70,7 +70,7 @@ def running2finished(*args, **kwargs):
         Same return value as scitex.session.running2finished()
     """
     # Import here to avoid circular dependencies
-    from ..session import running2finished as session_running2finished
+    from scitex.session import running2finished as session_running2finished
 
     return session_running2finished(*args, **kwargs)
 

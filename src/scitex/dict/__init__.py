@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 """Scitex dict module."""
 
 from ._DotDict import DotDict

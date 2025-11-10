@@ -10,7 +10,7 @@ This script does XYZ.
 
 import torch
 from geom_median.torch import compute_geometric_median
-from ..decorators import torch_fn
+from scitex.decorators import torch_fn
 
 # @torch_fn
 # def geometric_median(xx, dim=-1):

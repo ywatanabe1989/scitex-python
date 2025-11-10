@@ -15,7 +15,7 @@ from ripple_detection.simulate import simulate_LFP, simulate_time
 from scipy.signal import chirp
 from tensorpac.signals import pac_signals_wavelet
 
-from ..io._load_configs import load_configs
+from scitex.io._load_configs import load_configs
 
 # Config
 CONFIG = load_configs(verbose=False)

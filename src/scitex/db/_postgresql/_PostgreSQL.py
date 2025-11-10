@@ -7,7 +7,7 @@ THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_postgresql/_Postgre
 
 from typing import List, Optional
 
-from ...str import printc as _printc
+from scitex.str import printc as _printc
 from typing import Optional
 import psycopg2
 from ._PostgreSQLMixins._BackupMixin import _BackupMixin

@@ -20,7 +20,7 @@ from typing import Callable, Any, get_type_hints
 import sys as sys_module
 
 from ._lifecycle import start, close
-from ..logging import getLogger
+from scitex.logging import getLogger
 
 logger = getLogger(__name__)
 

@@ -13,8 +13,8 @@ import glob
 from pathlib import Path
 from typing import Any, Union
 
-from ..decorators import preserve_doc
-from ..str._clean_path import clean_path
+from scitex.decorators import preserve_doc
+from scitex.str._clean_path import clean_path
 from ._load_cache import (
     cache_data,
     configure_cache,

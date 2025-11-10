@@ -50,7 +50,7 @@ if result['success']:
 Old imports still work:
 
 ```python
-from scitex._sh import sh, sh_run, quote
+from scitex.sh import sh, sh_run, quote
 ```
 
 # EOF

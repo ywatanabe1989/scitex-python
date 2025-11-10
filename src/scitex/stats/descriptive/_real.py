@@ -38,7 +38,7 @@ import scitex as stx
 import torch
 from scitex import logging
 
-from ...decorators import torch_fn
+from scitex.decorators import torch_fn
 
 logger = logging.getLogger(__name__)
 

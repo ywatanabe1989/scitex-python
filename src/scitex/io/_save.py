@@ -38,12 +38,12 @@ from typing import Union
 
 from scitex import logging
 
-from .._sh import sh
-from ..path._clean import clean
-from ..path._getsize import getsize
-from ..str._clean_path import clean_path
-from ..str._color_text import color_text
-from ..str._readable_bytes import readable_bytes
+from scitex.sh import sh
+from scitex.path._clean import clean
+from scitex.path._getsize import getsize
+from scitex.str._clean_path import clean_path
+from scitex.str._color_text import color_text
+from scitex.str._readable_bytes import readable_bytes
 
 # Import save functions from the new modular structure
 from ._save_modules import save_catboost
@@ -296,8 +296,8 @@ def save(
         # When relative path
         else:
             # Import here to avoid circular imports
-            from ..gen._detect_environment import detect_environment
-            from ..gen._get_notebook_path import get_notebook_info_simple
+            from scitex.gen._detect_environment import detect_environment
+            from scitex.gen._get_notebook_path import get_notebook_info_simple
 
             # Detect the current environment
             env_type = detect_environment()

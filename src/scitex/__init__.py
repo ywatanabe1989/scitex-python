@@ -81,14 +81,6 @@ session = _LazyModule("session")
 capture = _LazyModule("capture")
 template = _LazyModule("template")
 
-# Import sh functions directly as they're commonly used
-try:
-    from .sh import sh, sh_run, quote
-except ImportError:
-    sh = None
-    sh_run = None
-    quote = None
-
 __all__ = [
     "io",
     "gen",

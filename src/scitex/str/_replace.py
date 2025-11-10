@@ -13,7 +13,7 @@ THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/str/_replace.py"
 THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/str/_replace.py"
 
 from typing import Union, Dict, Optional
-from ..dict import DotDict as _DotDict
+from scitex.dict import DotDict as _DotDict
 
 
 def replace(

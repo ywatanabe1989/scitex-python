@@ -32,31 +32,31 @@ from pprint import pprint
 from time import sleep
 from typing import Any, Dict, Optional, Tuple, Union
 
-from ..logging import getLogger
+from scitex.logging import getLogger
 
 logger = getLogger(__name__)
 
 import matplotlib
 import matplotlib.pyplot as plt_module
 
-from ..dict import DotDict
+from scitex.dict import DotDict
 
 # Lazy import to avoid circular dependency with scitex.gen
-from ..io import flush
-from ..io import save as scitex_io_save
-from ..io._load import load
-from ..io._load_configs import load_configs
-from ..plt.utils._configure_mpl import configure_mpl
-from ..repro._gen_ID import gen_ID
-from ..repro import RandomStateManager
-from ..str._clean_path import clean_path
-from ..str._printc import printc as _printc
-from ..utils._notify import notify as scitex_utils_notify
+from scitex.io import flush
+from scitex.io import save as scitex_io_save
+from scitex.io._load import load
+from scitex.io._load_configs import load_configs
+from scitex.plt.utils._configure_mpl import configure_mpl
+from scitex.repro._gen_ID import gen_ID
+from scitex.repro import RandomStateManager
+from scitex.str._clean_path import clean_path
+from scitex.str._printc import printc as _printc
+from scitex.utils._notify import notify as scitex_utils_notify
 from ._manager import get_global_session_manager
 
 # For development code flow analysis
 try:
-    from ..dev._analyze_code_flow import analyze_code_flow
+    from scitex.dev._analyze_code_flow import analyze_code_flow
 except ImportError:
 
     def analyze_code_flow(file):
@@ -420,7 +420,7 @@ def start(
     if sys is not None:
         flush(sys)
         # Lazy import to avoid circular dependency
-        from ..logging._Tee import tee
+        from scitex.logging._Tee import tee
 
         sys.stdout, sys.stderr = tee(sys, sdir=sdir, verbose=verbose)
         CONFIGS["sys"] = sys

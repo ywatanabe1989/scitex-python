@@ -4,7 +4,7 @@
 # File: ./scitex_repo/src/scitex/gen/_symlink.py
 
 import os
-from ..str._color_text import color_text
+from scitex.str._color_text import color_text
 
 
 def symlink(tgt, src, force=False):
