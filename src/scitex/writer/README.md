@@ -19,7 +19,10 @@ writer = Writer(Path("my_paper"))
 
 # # Project-integrated manuscript (use parent's git repository)
 # writer = Writer(Path("my_project/scitex/writer"), git_strategy='parent')
-#  
+#
+# # Clone specific branch of template
+# writer = Writer(Path("my_paper"), branch="develop")
+#
 # # No git (temporary work)
 # writer = Writer(Path("temp_work"), git_strategy=None)
 
@@ -64,7 +67,13 @@ writer.delete()
 ### Writer Class
 
 ```python
-Writer(project_dir, name=None, git_strategy='child')
+Writer(project_dir, name=None, git_strategy='child', branch=None)
+
+# Parameters:
+# - project_dir: Path to project directory
+# - name: Project name (optional, defaults to directory name)
+# - git_strategy: 'child' (default), 'parent', 'origin', or None
+# - branch: Specific branch of template to clone (optional)
 
 # Attributes:
 writer.project_dir       # Path to project

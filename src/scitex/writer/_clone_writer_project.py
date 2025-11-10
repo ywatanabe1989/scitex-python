@@ -28,6 +28,7 @@ def clone_writer_project(
     project_name: str,
     target_dir: Optional[str] = None,
     git_strategy: Optional[str] = "child",
+    branch: Optional[str] = None,
 ) -> bool:
     """
     Initialize a new writer project directory from scitex-writer template.
@@ -43,6 +44,8 @@ def clone_writer_project(
             - 'parent': Use parent git repository
             - 'origin': Preserve template's original git history
             - None: Disable git initialization
+        branch: Specific branch of the template repository to clone (optional)
+            If None, clones the default branch
 
     Returns:
         True if successful, False otherwise
@@ -52,11 +55,12 @@ def clone_writer_project(
         >>> clone_writer_project("my_paper")
         >>> clone_writer_project("my_paper", target_dir="/path/to/papers")
         >>> clone_writer_project("my_paper", git_strategy="parent")
+        >>> clone_writer_project("my_paper", branch="develop")
     """
     from scitex.template import clone_writer_directory
 
     try:
-        result = clone_writer_directory(project_name, target_dir, git_strategy)
+        result = clone_writer_directory(project_name, target_dir, git_strategy, branch)
         return result
     except Exception as e:
         logger.error(f"Failed to initialize writer directory: {e}")
@@ -98,6 +102,7 @@ def main(args):
         args.project_name,
         target_dir=args.target_dir,
         git_strategy=args.git_strategy,
+        branch=args.branch,
     )
 
     if result:
@@ -134,6 +139,13 @@ def parse_args():
         default="child",
         help="Git initialization strategy (default: child)",
     )
+    parser.add_argument(
+        "--branch",
+        "-b",
+        type=str,
+        default=None,
+        help="Specific branch of template to clone (default: default branch)",
+    )
 
     return parser.parse_args()
 
@@ -147,5 +159,6 @@ __all__ = [
 ]
 
 # python -m scitex.writer._clone_writer_project my_paper --git-strategy child
+# python -m scitex.writer._clone_writer_project my_paper --branch develop
 
 # EOF

@@ -27,6 +27,7 @@ def clone_singularity(
     project_name: str,
     target_dir: Optional[str] = None,
     git_strategy: Optional[str] = "child",
+    branch: Optional[str] = None,
 ) -> bool:
     """
     Create a new singularity project from the template repository.
@@ -39,6 +40,8 @@ def clone_singularity(
         Directory where the project will be created. If None, uses current directory.
     git_strategy : str, optional
         Git initialization strategy ('child', 'parent', None). Default is 'child'.
+    branch : str, optional
+        Specific branch of the template repository to clone. If None, clones the default branch.
 
     Returns
     -------
@@ -49,6 +52,7 @@ def clone_singularity(
     -------
     >>> from scitex.template import clone_singularity
     >>> clone_singularity("my_singularity_project")
+    >>> clone_singularity("my_project", branch="develop")
     """
     return clone_project(
         project_name,
@@ -56,6 +60,7 @@ def clone_singularity(
         TEMPLATE_REPO_URL,
         "singularity_template",
         git_strategy,
+        branch,
     )
 
 
