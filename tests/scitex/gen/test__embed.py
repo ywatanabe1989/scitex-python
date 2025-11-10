@@ -176,7 +176,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_embed.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_embed.py
 # --------------------------------------------------------------------------------
 # """
 # This script does XYZ.
@@ -248,12 +248,12 @@ if __name__ == "__main__":
 #     import scitex
 #     
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 
 #     embed()
 # 
 #     # Close
-#     scitex.gen.close(CONFIG)
+#     scitex.session.close(CONFIG)
 # 
 # # EOF
 # 
@@ -262,5 +262,5 @@ if __name__ == "__main__":
 # """
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_embed.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_embed.py
 # --------------------------------------------------------------------------------

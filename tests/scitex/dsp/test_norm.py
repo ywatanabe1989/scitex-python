@@ -220,14 +220,14 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/norm.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/norm.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-04-05 12:15:42 (ywatanabe)"
 # 
 # import torch as _torch
-# from ..decorators import signal_fn as _signal_fn
+# from scitex.decorators import signal_fn as _signal_fn
 # 
 # 
 # @_signal_fn
@@ -242,5 +242,5 @@ if __name__ == "__main__":
 #     return amp * x / _torch.maximum(MM, mm)
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/norm.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/norm.py
 # --------------------------------------------------------------------------------

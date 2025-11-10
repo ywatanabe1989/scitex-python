@@ -243,7 +243,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/decorators/_batch_fn.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_batch_fn.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -261,7 +261,6 @@ if __name__ == "__main__":
 # from typing import Callable
 # 
 # import numpy as np
-# import torch
 # from tqdm import tqdm as _tqdm
 # 
 # from ._converters import is_nested_decorator
@@ -315,6 +314,7 @@ if __name__ == "__main__":
 #                 # Fallback for wrapped functions
 #                 batch_result = func(x[start:end], *args, **kwargs)
 # 
+#             import torch
 #             if isinstance(batch_result, torch.Tensor):
 #                 batch_result = batch_result.cpu()
 #             elif isinstance(batch_result, tuple):
@@ -325,6 +325,7 @@ if __name__ == "__main__":
 # 
 #             results.append(batch_result)
 # 
+#         import torch
 #         if isinstance(results[0], tuple):
 #             n_vars = len(results[0])
 #             combined_results = []
@@ -374,5 +375,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/decorators/_batch_fn.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_batch_fn.py
 # --------------------------------------------------------------------------------

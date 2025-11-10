@@ -175,7 +175,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/params.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/params.py
 # --------------------------------------------------------------------------------
 # import numpy as np
 # import pandas as pd
@@ -230,5 +230,5 @@ if __name__ == "__main__":
 # ]
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/params.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/params.py
 # --------------------------------------------------------------------------------

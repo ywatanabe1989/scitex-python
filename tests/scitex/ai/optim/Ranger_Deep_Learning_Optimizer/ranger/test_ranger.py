@@ -18,7 +18,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/ranger/ranger.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/ranger/ranger.py
 # --------------------------------------------------------------------------------
 # # Ranger deep learning optimizer - RAdam + Lookahead + Gradient Centralization, combined into one optimizer.
 # 
@@ -229,5 +229,5 @@ if __name__ == "__main__":
 #         return loss
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/ranger/ranger.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/ranger/ranger.py
 # --------------------------------------------------------------------------------

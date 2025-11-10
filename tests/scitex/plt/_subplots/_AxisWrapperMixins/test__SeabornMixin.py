@@ -327,16 +327,16 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/_subplots/_AxisWrapperMixins/_SeabornMixin.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_AxisWrapperMixins/_SeabornMixin.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-05-18 16:26:18 (ywatanabe)"
-# # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_AxisWrapperMixins/_SeabornMixin.py
+# # File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_AxisWrapperMixins/_SeabornMixin.py
 # # ----------------------------------------
 # import os
 # 
-# __FILE__ = "./src/scitex/plt/_subplots/_AxisWrapperMixins/_SeabornMixin.py"
+# __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
@@ -374,7 +374,29 @@ if __name__ == "__main__":
 #                     kwargs, primary_key="palette", alternate_key="hue_colors"
 #                 )
 # 
-#             self._axis_mpl = sns_plot_fn(ax=self._axis_mpl, *args, **kwargs)
+#             # Suppress matplotlib's categorical units warning and info messages
+#             import warnings
+#             from scitex import logging
+#             
+#             # Temporarily suppress matplotlib's INFO level logging
+#             mpl_logger = logging.getLogger('matplotlib')
+#             original_level = mpl_logger.level
+#             mpl_logger.setLevel(logging.WARNING)
+#             
+#             try:
+#                 with warnings.catch_warnings():
+#                     warnings.filterwarnings('ignore', 
+#                                           message='.*categorical units.*parsable as floats or dates.*',
+#                                           category=UserWarning)
+#                     warnings.filterwarnings('ignore',
+#                                           message='.*Using categorical units.*',
+#                                           module='matplotlib.*')
+#                     warnings.simplefilter('ignore', UserWarning)
+#                     
+#                     self._axis_mpl = sns_plot_fn(ax=self._axis_mpl, *args, **kwargs)
+#             finally:
+#                 # Restore original logging level
+#                 mpl_logger.setLevel(original_level)
 # 
 #         # Track the plot if required
 #         track_obj = track_obj if track_obj is not None else args
@@ -389,7 +411,7 @@ if __name__ == "__main__":
 #         """Formats data passed to sns functions with (data=data, x=x, y=y) keyword arguments"""
 #         df = kwargs.get("data")
 #         x, y, hue = kwargs.get("x"), kwargs.get("y"), kwargs.get("hue")
-# 
+#         
 #         track_obj = self._sns_prepare_xyhue(df, x, y, hue) if df is not None else None
 #         self._sns_base(
 #             method_name,
@@ -699,5 +721,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/_subplots/_AxisWrapperMixins/_SeabornMixin.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_AxisWrapperMixins/_SeabornMixin.py
 # --------------------------------------------------------------------------------

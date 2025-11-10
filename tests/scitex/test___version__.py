@@ -416,7 +416,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/__version__.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/__version__.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -429,10 +429,10 @@ if __name__ == "__main__":
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
-# __version__ = "2.0.0"
+# __version__ = "2.1.3"
 # 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/__version__.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/__version__.py
 # --------------------------------------------------------------------------------

@@ -236,18 +236,19 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load_modules/_torch.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_modules/_torch.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-14 07:41:34 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/io/_load_modules/_torch.py
 # 
-# import torch
-# 
 # 
 # def _load_torch(lpath, **kwargs):
 #     """Load PyTorch model/checkpoint file."""
+#     # Lazy import to avoid circular import issues
+#     import torch
+# 
 #     if not lpath.endswith((".pth", ".pt")):
 #         raise ValueError("File must have .pth or .pt extension")
 #     return torch.load(lpath, **kwargs)
@@ -256,5 +257,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load_modules/_torch.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_modules/_torch.py
 # --------------------------------------------------------------------------------

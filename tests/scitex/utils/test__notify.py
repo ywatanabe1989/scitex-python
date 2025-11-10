@@ -354,7 +354,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/utils/_notify.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/utils/_notify.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -362,9 +362,7 @@ if __name__ == "__main__":
 # # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/utils/_notify.py
 # # ----------------------------------------
 # import os
-# __FILE__ = (
-#     "./src/scitex/utils/_notify.py"
-# )
+# __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # # Time-stamp: "2024-11-24 17:54:38 (ywatanabe)"
@@ -447,9 +445,10 @@ if __name__ == "__main__":
 #         warnings.warn(str(e))
 # 
 #     FAKE_PYTHON_SCRIPT_NAME = "$ python -c ..."
-#     sender_gmail = os.getenv("SCITEX_SENDER_GMAIL")
-#     sender_password = os.getenv("SCITEX_SENDER_GMAIL_PASSWORD")
-#     recipient_email = recipient_email or os.getenv("SCITEX_RECIPIENT_GMAIL")
+#     # Use scitex.ai email addresses (not Gmail)
+#     sender_gmail = os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS", os.getenv("SCITEX_EMAIL_AGENT", "agent@scitex.ai"))
+#     sender_password = os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD", os.getenv("SCITEX_EMAIL_PASSWORD", ""))
+#     recipient_email = recipient_email or os.getenv("SCITEX_SCHOLAR_TO_EMAIL_ADDRESS", "ywata1989@gmail.com")
 # 
 #     if file is not None:
 #         script_name = str(file)
@@ -481,9 +480,13 @@ if __name__ == "__main__":
 #         print(
 #             f"""
 #         Please set environmental variables to use this function (f"{inspect.stack()[0][3]}"):\n\n
-#         $ export SciTeX_SENDER_GMAIL="scitex.notification@gmail.com"
-#         $ export SciTeX_SENDER_GMAIL_PASSWORD="YOUR_APP_PASSWORD"
-#         $ export SciTeX_RECIPIENT_GMAIL="YOUR_GMAIL_ADDRESS"
+#         $ export SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS="agent@scitex.ai"
+#         $ export SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD="YOUR_EMAIL_PASSWORD"
+#         $ export SCITEX_SCHOLAR_TO_EMAIL_ADDRESS="YOUR_EMAIL_ADDRESS"
+# 
+#         Or alternatively:
+#         $ export SCITEX_EMAIL_AGENT="agent@scitex.ai"
+#         $ export SCITEX_EMAIL_PASSWORD="YOUR_EMAIL_PASSWORD"
 #         """
 #         )
 # 
@@ -510,7 +513,7 @@ if __name__ == "__main__":
 # # # Example in shell
 # # #!/bin/bash
 # # # /home/ywatanabe/.dotfiles/.bin/notify
-# # # Author: ywatanabe (ywatanabe@alumni.u-tokyo.ac.jp)
+# # # Author: ywatanabe (ywatanabe@scitex.ai)
 # # # Date: $(date +"%Y-%m-%d-%H-%M")
 # 
 # # # LOG_FILE="${0%.sh}.log"
@@ -605,5 +608,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/utils/_notify.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/utils/_notify.py
 # --------------------------------------------------------------------------------

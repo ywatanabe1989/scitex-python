@@ -476,12 +476,12 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_style/_set_meta.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_style/_set_meta.py
 # --------------------------------------------------------------------------------
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2025-06-04 11:35:00 (ywatanabe)"
-# # Author: Yusuke Watanabe (ywata1989@gmail.com)
+# # Author: Yusuke Watanabe (ywatanabe@scitex.ai)
 # 
 # """
 # Scientific metadata management for figures with YAML export.
@@ -572,7 +572,13 @@ if __name__ == "__main__":
 #     # Add automatic metadata
 #     import datetime
 #     metadata['created_timestamp'] = datetime.datetime.now().isoformat()
-#     metadata['scitex_version'] = '1.11.0'  # TODO: Get from __version__
+#     
+#     # Get version dynamically
+#     try:
+#         import scitex
+#         metadata['scitex_version'] = getattr(scitex, '__version__', 'unknown')
+#     except ImportError:
+#         metadata['scitex_version'] = 'unknown'
 #     
 #     # Store metadata in figure for automatic saving
 #     fig = ax.get_figure()
@@ -722,7 +728,7 @@ if __name__ == "__main__":
 #     import sys
 #     import matplotlib.pyplot as plt
 #     import scitex
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 
 #     # Example usage
 #     fig, ax = plt.subplots()
@@ -737,9 +743,9 @@ if __name__ == "__main__":
 #     export_metadata_yaml(fig, 'example_metadata.yaml')
 # 
 #     # Close
-#     scitex.gen.close(CONFIG)
+#     scitex.session.close(CONFIG)
 # 
 # # EOF
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_style/_set_meta.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_style/_set_meta.py
 # --------------------------------------------------------------------------------

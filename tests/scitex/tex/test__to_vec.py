@@ -208,7 +208,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/tex/_to_vec.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/tex/_to_vec.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -230,7 +230,7 @@ if __name__ == "__main__":
 # """
 # 
 # try:
-#     from ..str._latex_fallback import safe_latex_render, latex_fallback_decorator
+#     from scitex.str._latex_fallback import safe_latex_render, latex_fallback_decorator
 #     FALLBACK_AVAILABLE = True
 # except ImportError:
 #     FALLBACK_AVAILABLE = False
@@ -328,5 +328,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/tex/_to_vec.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/tex/_to_vec.py
 # --------------------------------------------------------------------------------

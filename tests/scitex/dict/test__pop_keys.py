@@ -183,12 +183,12 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dict/_pop_keys.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dict/_pop_keys.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# # Time-stamp: "2024-11-02 12:40:04 (ywatanabe)"
-# # File: ./scitex_repo/src/scitex/dict/_pop_keys.py
+# # Timestamp: "2025-11-10 22:40:16 (ywatanabe)"
+# 
 # 
 # import numpy as np
 # 
@@ -219,9 +219,8 @@ if __name__ == "__main__":
 #     keys_remainded_list = list(np.array(keys_list)[list(indi_to_remain)])
 #     return keys_remainded_list
 # 
-# 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dict/_pop_keys.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dict/_pop_keys.py
 # --------------------------------------------------------------------------------

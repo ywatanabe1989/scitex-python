@@ -227,32 +227,36 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load_configs.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_configs.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# # Timestamp: "2025-04-22 07:19:03 (ywatanabe)"
-# # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_load_configs.py
+# # Timestamp: "2025-10-11 23:54:07 (ywatanabe)"
+# # File: /home/ywatanabe/proj/scitex_repo/src/scitex/io/_load_configs.py
 # # ----------------------------------------
+# from __future__ import annotations
 # import os
-# 
-# __FILE__ = "/ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_load_configs.py"
+# __FILE__ = (
+#     "./src/scitex/io/_load_configs.py"
+# )
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
-# THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/io/_load_configs.py"
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Time-stamp: "2025-02-27 11:09:00 (ywatanabe)"
-# # File: ./scitex_repo/src/scitex/io/_load_configs.py
+# from pathlib import Path
+# from typing import Optional, Union
 # 
-# from ..dict import DotDict
-# from ._load import load
+# from scitex.dict import DotDict
 # from ._glob import glob
+# from ._load import load
 # 
 # 
-# def load_configs(IS_DEBUG=None, show=False, verbose=False):
-#     """Load YAML configuration files from ./config directory.
+# def load_configs(
+#     IS_DEBUG=None,
+#     show=False,
+#     verbose=False,
+#     config_dir: Optional[Union[str, Path]] = None,
+# ):
+#     """Load YAML configuration files from specified directory.
 # 
 #     Parameters
 #     ----------
@@ -262,6 +266,9 @@ if __name__ == "__main__":
 #         Show configuration changes
 #     verbose : bool
 #         Print detailed information
+#     config_dir : Union[str, Path], optional
+#         Directory containing configuration files. Can be a string or pathlib.Path object.
+#         Defaults to "./config" if None
 # 
 #     Returns
 #     -------
@@ -285,21 +292,39 @@ if __name__ == "__main__":
 #         return config
 # 
 #     try:
+#         # Handle config directory parameter
+#         if config_dir is None:
+#             config_dir = "./config"
+#         elif isinstance(config_dir, Path):
+#             config_dir = str(config_dir)
+# 
 #         # Set debug mode
+#         debug_config_path = f"{config_dir}/IS_DEBUG.yaml"
 #         IS_DEBUG = (
 #             IS_DEBUG
 #             or os.getenv("CI") == "True"
 #             or (
-#                 os.path.exists("./config/IS_DEBUG.yaml")
-#                 and load("./config/IS_DEBUG.yaml").get("IS_DEBUG")
+#                 os.path.exists(debug_config_path)
+#                 and load(debug_config_path).get("IS_DEBUG")
 #             )
 #         )
 # 
 #         # Load and merge configs
 #         CONFIGS = {}
-#         for lpath in glob("./config/*.yaml"):
+# 
+#         # Load from main config directory
+#         config_pattern = f"{config_dir}/*.yaml"
+#         for lpath in glob(config_pattern):
 #             if config := load(lpath):
 #                 CONFIGS.update(apply_debug_values(config, IS_DEBUG))
+# 
+#         # Load from categories subdirectory if it exists
+#         categories_dir = f"{config_dir}/categories"
+#         if os.path.exists(categories_dir):
+#             categories_pattern = f"{categories_dir}/*.yaml"
+#             for lpath in glob(categories_pattern):
+#                 if config := load(lpath):
+#                     CONFIGS.update(apply_debug_values(config, IS_DEBUG))
 # 
 #         return DotDict(CONFIGS)
 # 
@@ -377,5 +402,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load_configs.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_configs.py
 # --------------------------------------------------------------------------------

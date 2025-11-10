@@ -544,7 +544,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_ModulationIndex.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_ModulationIndex.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -718,7 +718,7 @@ if __name__ == "__main__":
 #     import scitex
 # 
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt, fig_scale=3)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, fig_scale=3)
 # 
 #     # Parameters
 #     FS = 512
@@ -757,7 +757,7 @@ if __name__ == "__main__":
 #     scitex.io.save(fig, CONFIG["SDIR"] + "modulation_index.png")  # plt.show()
 # 
 #     # Close
-#     scitex.gen.close(CONFIG)
+#     scitex.session.close(CONFIG)
 # 
 # # EOF
 # 
@@ -769,5 +769,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_ModulationIndex.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_ModulationIndex.py
 # --------------------------------------------------------------------------------

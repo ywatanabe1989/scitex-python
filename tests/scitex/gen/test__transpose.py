@@ -185,14 +185,14 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_transpose.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_transpose.py
 # --------------------------------------------------------------------------------
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-08-24 09:47:16 (ywatanabe)"
 # # ./src/scitex/gen/_transpose.py
 # 
-# from ..decorators import numpy_fn
+# from scitex.decorators import numpy_fn
 # import numpy as np
 # 
 # 
@@ -226,5 +226,5 @@ if __name__ == "__main__":
 #     return arr_like.transpose(*[np.where(src_dims == dim)[0][0] for dim in tgt_dims])
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_transpose.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_transpose.py
 # --------------------------------------------------------------------------------

@@ -201,7 +201,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/optim/_get_set.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/optim/_get_set.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # """Optimizer utilities - legacy interface maintained for compatibility."""
@@ -236,5 +236,5 @@ if __name__ == "__main__":
 #     return get_optimizer(optim_str)
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/optim/_get_set.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/optim/_get_set.py
 # --------------------------------------------------------------------------------

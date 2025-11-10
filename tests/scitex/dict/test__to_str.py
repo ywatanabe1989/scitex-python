@@ -202,12 +202,14 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dict/_to_str.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dict/_to_str.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
+# # Timestamp: "2025-11-10 22:38:47 (ywatanabe)"
+# 
+# 
 # # Time-stamp: "ywatanabe (2024-11-03 00:48:22)"
-# # File: ./scitex_repo/src/scitex/dict/_to_str.py
 # 
 # 
 # def to_str(dictionary, delimiter="_"):
@@ -232,11 +234,12 @@ if __name__ == "__main__":
 #     str
 #         A string representation of the input dictionary.
 #     """
-#     return delimiter.join(f"{key}-{value}" for key, value in dictionary.items())
-# 
+#     return delimiter.join(
+#         f"{key}-{value}" for key, value in dictionary.items()
+#     )
 # 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dict/_to_str.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dict/_to_str.py
 # --------------------------------------------------------------------------------

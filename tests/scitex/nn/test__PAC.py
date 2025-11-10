@@ -498,7 +498,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_PAC.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_PAC.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -804,7 +804,7 @@ if __name__ == "__main__":
 # 
 # if __name__ == "__main__":
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 
 #     ts = scitex.gen.TimeStamper()
 # 
@@ -916,5 +916,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_PAC.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_PAC.py
 # --------------------------------------------------------------------------------

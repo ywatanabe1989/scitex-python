@@ -112,7 +112,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/decorators/_xarray_fn.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_xarray_fn.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -129,9 +129,6 @@ if __name__ == "__main__":
 # from typing import Callable
 # 
 # import numpy as np
-# import pandas as pd
-# import torch
-# import xarray as xr
 # 
 # from ._converters import is_nested_decorator
 # 
@@ -152,17 +149,21 @@ if __name__ == "__main__":
 # 
 #         # Convert args to xarray DataArrays
 #         def to_xarray(data):
+#             import xarray as xr
+#             import pandas as pd
+#             import torch
+# 
 #             if isinstance(data, xr.DataArray):
 #                 return data
 #             elif isinstance(data, np.ndarray):
 #                 return xr.DataArray(data)
 #             elif isinstance(data, list):
 #                 return xr.DataArray(data)
-#             elif isinstance(data, torch.Tensor):
+#             elif hasattr(data, '__class__') and data.__class__.__name__ == 'Tensor':
 #                 return xr.DataArray(data.detach().cpu().numpy())
-#             elif isinstance(data, pd.DataFrame):
+#             elif hasattr(data, '__class__') and data.__class__.__name__ == 'DataFrame':
 #                 return xr.DataArray(data.values)
-#             elif isinstance(data, pd.Series):
+#             elif hasattr(data, '__class__') and data.__class__.__name__ == 'Series':
 #                 return xr.DataArray(data.values)
 #             else:
 #                 return xr.DataArray([data])
@@ -171,6 +172,7 @@ if __name__ == "__main__":
 #         converted_kwargs = {k: to_xarray(v) for k, v in kwargs.items()}
 # 
 #         # Assertion to ensure all args are converted to xarray DataArrays
+#         import xarray as xr
 #         for arg_index, arg in enumerate(converted_args):
 #             assert isinstance(
 #                 arg, xr.DataArray
@@ -179,17 +181,21 @@ if __name__ == "__main__":
 #         results = func(*converted_args, **converted_kwargs)
 # 
 #         # Convert results back to original input types
+#         import xarray as xr
 #         if isinstance(results, xr.DataArray):
 #             if original_object is not None:
 #                 if isinstance(original_object, list):
 #                     return results.values.tolist()
 #                 elif isinstance(original_object, np.ndarray):
 #                     return results.values
-#                 elif isinstance(original_object, torch.Tensor):
+#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Tensor':
+#                     import torch
 #                     return torch.tensor(results.values)
-#                 elif isinstance(original_object, pd.DataFrame):
+#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataFrame':
+#                     import pandas as pd
 #                     return pd.DataFrame(results.values)
-#                 elif isinstance(original_object, pd.Series):
+#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Series':
+#                     import pandas as pd
 #                     return pd.Series(results.values.flatten())
 #             return results
 # 
@@ -204,5 +210,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/decorators/_xarray_fn.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_xarray_fn.py
 # --------------------------------------------------------------------------------

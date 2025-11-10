@@ -223,7 +223,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/repro/_gen_ID.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/repro/_gen_ID.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -279,8 +279,92 @@ if __name__ == "__main__":
 # # Backward compatibility
 # gen_ID = gen_id  # Deprecated: use gen_id instead
 # 
+# 
+# # ================================================================================
+# # Example Usage
+# # ================================================================================
+# def parse_args():
+#     """Parse command line arguments."""
+#     import argparse
+#     parser = argparse.ArgumentParser(description="Demonstrate ID generation")
+#     parser.add_argument(
+#         "--format",
+#         type=str,
+#         default="%YY-%mM-%dD-%Hh%Mm%Ss",
+#         help="Time format (default: %%YY-%%mM-%%dD-%%Hh%%Mm%%Ss)"
+#     )
+#     parser.add_argument(
+#         "--length",
+#         type=int,
+#         default=8,
+#         help="Random string length (default: 8)"
+#     )
+#     return parser.parse_args()
+# 
+# 
+# def main(args):
+#     """Main execution function.
+# 
+#     Demonstrates ID generation with different formats.
+#     """
+#     print(f"\n{'='*60}")
+#     print("ID Generation Demo")
+#     print(f"{'='*60}")
+# 
+#     # Generate with default format
+#     print(f"\n{'Default Format':-^60}")
+#     id1 = gen_id()
+#     print(f"Generated ID: {id1}")
+# 
+#     # Generate with custom format
+#     print(f"\n{'Custom Format':-^60}")
+#     id2 = gen_id(time_format=args.format, N=args.length)
+#     print(f"Format: {args.format}")
+#     print(f"Length: {args.length}")
+#     print(f"Generated ID: {id2}")
+# 
+#     # Generate multiple IDs
+#     print(f"\n{'Multiple IDs':-^60}")
+#     ids = [gen_id(N=4) for _ in range(5)]
+#     for i, id_str in enumerate(ids, 1):
+#         print(f"{i}. {id_str}")
+# 
+#     print(f"\n{'='*60}")
+#     print("Demo completed successfully!")
+#     print(f"{'='*60}\n")
+# 
+#     return 0
+# 
+# 
+# if __name__ == "__main__":
+#     import sys
+#     import matplotlib.pyplot as plt
+#     import scitex as stx
+# 
+#     args = parse_args()
+# 
+#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+#         sys,
+#         plt,
+#         args=args,
+#         file=__file__,
+#         sdir_suffix="gen_ID_demo",
+#         verbose=True,
+#         agg=True,
+#     )
+# 
+#     exit_status = main(args)
+# 
+#     stx.session.close(
+#         CONFIG,
+#         verbose=True,
+#         notify=False,
+#         message="ID generation demo completed",
+#         exit_status=exit_status,
+#     )
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/repro/_gen_ID.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/repro/_gen_ID.py
 # --------------------------------------------------------------------------------

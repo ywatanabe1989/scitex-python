@@ -413,7 +413,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_Wavelet.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_Wavelet.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -430,8 +430,8 @@ if __name__ == "__main__":
 # import torch
 # import torch.nn as nn
 # import torch.nn.functional as F
-# from ..gen._to_even import to_even
-# from ..gen._to_odd import to_odd
+# from scitex.gen._to_even import to_even
+# from scitex.gen._to_odd import to_odd
 # 
 # 
 # class Wavelet(nn.Module):
@@ -600,5 +600,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_Wavelet.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_Wavelet.py
 # --------------------------------------------------------------------------------

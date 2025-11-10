@@ -263,7 +263,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/_gen_ai/_DeepSeek.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/_gen_ai/_DeepSeek.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -406,7 +406,7 @@ if __name__ == "__main__":
 #     import matplotlib.pyplot as plt
 # 
 #     # Configurations
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys,
 #         plt,
 #         verbose=False,
@@ -439,7 +439,7 @@ if __name__ == "__main__":
 #     # -----------------------------------
 #     # Cleanup scitex format
 #     # -----------------------------------
-#     scitex.gen.close(
+#     scitex.session.close(
 #         CONFIG,
 #         verbose=False,
 #         notify=False,
@@ -450,5 +450,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/_gen_ai/_DeepSeek.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/_gen_ai/_DeepSeek.py
 # --------------------------------------------------------------------------------

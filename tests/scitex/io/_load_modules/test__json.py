@@ -188,7 +188,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load_modules/_json.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_modules/_json.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -200,9 +200,11 @@ if __name__ == "__main__":
 # 
 # 
 # def _load_json(lpath: str, **kwargs) -> Any:
-#     """Load JSON file."""
-#     if not lpath.endswith(".json"):
-#         raise ValueError("File must have .json extension")
+#     """Load JSON file.
+# 
+#     Extension validation is handled by load() function, not here.
+#     This allows loading files without extensions when ext='json' is specified.
+#     """
 #     with open(lpath, "r") as f:
 #         return json.load(f)
 # 
@@ -210,5 +212,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load_modules/_json.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_modules/_json.py
 # --------------------------------------------------------------------------------

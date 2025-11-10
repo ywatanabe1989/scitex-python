@@ -902,7 +902,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/resource/_utils/_get_env_info.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/resource/_utils/_get_env_info.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # 
@@ -1387,5 +1387,5 @@ if __name__ == "__main__":
 #     print(env_info)
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/resource/_utils/_get_env_info.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/resource/_utils/_get_env_info.py
 # --------------------------------------------------------------------------------

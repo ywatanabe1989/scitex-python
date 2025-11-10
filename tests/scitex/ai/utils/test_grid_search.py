@@ -339,15 +339,15 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/utils/grid_search.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/grid_search.py
 # --------------------------------------------------------------------------------
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-04-22 23:54:02"
-# # Author: Yusuke Watanabe (ywata1989@gmail.com)
+# # Author: Yusuke Watanabe (ywatanabe@scitex.ai)
 # 
 # """
-# This script defines scitex.ml.utils.grid_search
+# This script defines scitex.ai.utils.grid_search
 # """
 # 
 # # Imports
@@ -453,7 +453,7 @@ if __name__ == "__main__":
 #     import pandas as pd
 # 
 #     # Start
-#     CONFIG, _sys.stdout, _sys.stderr, _plt, CC = _scitex.gen.start(
+#     CONFIG, _sys.stdout, _sys.stderr, _plt, CC = _scitex.session.start(
 #         _sys, _plt, verbose=False
 #     )
 # 
@@ -482,7 +482,7 @@ if __name__ == "__main__":
 #         print(param_dict)
 # 
 #     # Close
-#     _scitex.gen.close(CONFIG, verbose=False, notify=False)
+#     _scitex.session.close(CONFIG, verbose=False, notify=False)
 # 
 # # EOF
 # 
@@ -491,5 +491,5 @@ if __name__ == "__main__":
 # """
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/utils/grid_search.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/grid_search.py
 # --------------------------------------------------------------------------------
