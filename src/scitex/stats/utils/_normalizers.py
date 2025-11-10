@@ -122,11 +122,6 @@ def normalize_result(
     """
     normalized = result.copy()
 
-    if fill_missing:
-        for col, default in STANDARD_DEFAULTS.items():
-            if col not in normalized:
-                normalized[col] = default
-
     # Use adjusted pvalue if available, otherwise use raw pvalue
     pvalue_for_decision = normalized.get(
         "pvalue_adjusted", normalized.get("pvalue")
@@ -136,14 +131,22 @@ def normalize_result(
     )
 
     # Compute pstars based on adjusted pvalue if available
+    # Do this BEFORE filling defaults so we compute actual values
     if "pstars" not in normalized and pvalue_for_decision is not None:
         from ._formatters import p2stars
 
         normalized["pstars"] = p2stars(pvalue_for_decision)
 
     # Compute rejected based on adjusted criteria if available
+    # Do this BEFORE filling defaults so we compute actual values
     if "rejected" not in normalized and pvalue_for_decision is not None:
         normalized["rejected"] = pvalue_for_decision < alpha_for_decision
+
+    # Fill missing columns with defaults AFTER computing derived values
+    if fill_missing:
+        for col, default in STANDARD_DEFAULTS.items():
+            if col not in normalized:
+                normalized[col] = default
 
     return normalized
 
