@@ -287,7 +287,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/reference.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/reference.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -295,7 +295,7 @@ if __name__ == "__main__":
 # # File: ./scitex_repo/src/scitex/dsp/reference.py
 # 
 # import torch as _torch
-# from ..decorators import torch_fn as _torch_fn
+# from scitex.decorators import torch_fn as _torch_fn
 # 
 # 
 # @_torch_fn
@@ -334,5 +334,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/reference.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/reference.py
 # --------------------------------------------------------------------------------

@@ -176,7 +176,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_mat2py.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_mat2py.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -268,5 +268,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_mat2py.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_mat2py.py
 # --------------------------------------------------------------------------------

@@ -231,7 +231,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/_transform.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/_transform.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -243,7 +243,7 @@ if __name__ == "__main__":
 # import numpy as np
 # import pandas as pd
 # import torch
-# from ..decorators import torch_fn
+# from scitex.decorators import torch_fn
 # 
 # 
 # def to_sktime_df(arr):
@@ -303,5 +303,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/_transform.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/_transform.py
 # --------------------------------------------------------------------------------

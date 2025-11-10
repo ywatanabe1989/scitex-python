@@ -225,7 +225,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/color/_colors.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/color/_colors.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -241,7 +241,7 @@ if __name__ == "__main__":
 # import matplotlib.colors as _colors
 # import numpy as np
 # 
-# from ...decorators._deprecated import deprecated
+# from scitex.decorators._deprecated import deprecated
 # from ._PARAMS import PARAMS
 # 
 # # RGB
@@ -434,5 +434,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/color/_colors.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/color/_colors.py
 # --------------------------------------------------------------------------------

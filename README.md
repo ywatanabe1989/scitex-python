@@ -16,6 +16,8 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 [![License](https://img.shields.io/github/license/ywatanabe1989/SciTeX-Code)](https://github.com/ywatanabe1989/SciTeX-Code/blob/main/LICENSE)
 [![Tests](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/ci.yml/badge.svg)](https://github.com/ywatanabe1989/SciTeX-Code/actions)
 [![Coverage](https://codecov.io/gh/ywatanabe1989/SciTeX-Code/branch/main/graph/badge.svg)](https://codecov.io/gh/ywatanabe1989/SciTeX-Code)
+[![Stats Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ywatanabe1989/GIST_ID/raw/scitex-stats-coverage.json)](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/stats-coverage.yml)
+[![Logging Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ywatanabe1989/GIST_ID/raw/scitex-logging-coverage.json)](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/logging-coverage.yml)
 [![Documentation](https://readthedocs.org/projects/scitex/badge/?version=latest)](https://scitex.readthedocs.io/en/latest/?badge=latest)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)

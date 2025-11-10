@@ -183,7 +183,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_plot/_plot_conf_mat.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_plot/_plot_conf_mat.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -204,8 +204,8 @@ if __name__ == "__main__":
 # import pandas as pd
 # import seaborn as sns
 # 
-# from ...utils._calc_bacc_from_conf_mat import calc_bacc_from_conf_mat
-# from ...utils import assert_valid_axis
+# from scitex.plt.utils._calc_bacc_from_conf_mat import calc_bacc_from_conf_mat
+# from scitex.plt.utils import assert_valid_axis
 # from .._style._extend import extend as scitex_plt_extend
 # 
 # 
@@ -323,5 +323,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_plot/_plot_conf_mat.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_plot/_plot_conf_mat.py
 # --------------------------------------------------------------------------------

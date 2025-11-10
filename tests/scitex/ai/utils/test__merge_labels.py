@@ -201,7 +201,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/utils/_merge_labels.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/_merge_labels.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # 
@@ -227,5 +227,5 @@ if __name__ == "__main__":
 #         return np.array(y)
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/utils/_merge_labels.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/_merge_labels.py
 # --------------------------------------------------------------------------------

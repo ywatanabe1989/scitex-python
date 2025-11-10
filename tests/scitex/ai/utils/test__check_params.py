@@ -276,7 +276,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/utils/_check_params.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/_check_params.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Time-stamp: "2024-02-17 12:38:40 (ywatanabe)"
@@ -330,5 +330,5 @@ if __name__ == "__main__":
 #     return out_dict
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/utils/_check_params.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/_check_params.py
 # --------------------------------------------------------------------------------

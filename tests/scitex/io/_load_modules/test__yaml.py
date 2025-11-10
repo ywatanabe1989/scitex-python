@@ -213,7 +213,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load_modules/_yaml.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_modules/_yaml.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -224,10 +224,11 @@ if __name__ == "__main__":
 # 
 # 
 # def _load_yaml(lpath, **kwargs):
-#     """Load YAML file with optional key lowercasing."""
-#     if not lpath.endswith((".yaml", ".yml")):
-#         raise ValueError("File must have .yaml or .yml extension")
+#     """Load YAML file with optional key lowercasing.
 # 
+#     Extension validation is handled by load() function, not here.
+#     This allows loading files without extensions when ext='yaml' is specified.
+#     """
 #     lower = kwargs.pop("lower", False)
 #     with open(lpath) as f:
 #         obj = yaml.safe_load(f, **kwargs)
@@ -240,5 +241,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load_modules/_yaml.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_modules/_yaml.py
 # --------------------------------------------------------------------------------

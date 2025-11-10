@@ -532,7 +532,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/clustering/_umap.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/clustering/_umap.py
 # --------------------------------------------------------------------------------
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
@@ -902,15 +902,15 @@ if __name__ == "__main__":
 #     # args = parser.parse_args()
 # 
 #     # Main
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys, plt, verbose=False, agg=True
 #     )
 #     _test(dataset_str="mnist")
 #     # main()
-#     scitex.gen.close(CONFIG, verbose=False, notify=False)
+#     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/clustering/_umap.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/clustering/_umap.py
 # --------------------------------------------------------------------------------

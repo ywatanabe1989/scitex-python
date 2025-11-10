@@ -372,7 +372,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/resource/_log_processor_usages.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/resource/_log_processor_usages.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -403,10 +403,10 @@ if __name__ == "__main__":
 # import scitex
 # import pandas as pd
 # 
-# from .._sh import sh
-# from ..io._load import load
-# from ..io._save import save
-# from ..str import printc
+# from scitex.sh import sh
+# from scitex.io._load import load
+# from scitex.io._save import save
+# from scitex.str import printc
 # from ._get_processor_usages import get_processor_usages
 # 
 # """Functions & Classes"""
@@ -557,14 +557,14 @@ if __name__ == "__main__":
 # main = log_processor_usages
 # 
 # if __name__ == "__main__":
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
 #     main()
-#     scitex.gen.close(CONFIG, verbose=False, notify=False)
+#     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 
 # # python -c "import scitex; scitex.resource.log_processor_usages(\"/tmp/processor_usages.csv\", init=True)"
 # 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/resource/_log_processor_usages.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/resource/_log_processor_usages.py
 # --------------------------------------------------------------------------------

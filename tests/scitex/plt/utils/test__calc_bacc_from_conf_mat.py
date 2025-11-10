@@ -229,7 +229,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/utils/_calc_bacc_from_conf_mat.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_calc_bacc_from_conf_mat.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -244,7 +244,7 @@ if __name__ == "__main__":
 # 
 # import numpy as np
 # 
-# from ...context import suppress_output
+# from scitex.context import suppress_output
 # 
 # 
 # def calc_bacc_from_conf_mat(confusion_matrix: np.ndarray, n_round=3) -> float:
@@ -279,5 +279,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/utils/_calc_bacc_from_conf_mat.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_calc_bacc_from_conf_mat.py
 # --------------------------------------------------------------------------------

@@ -338,7 +338,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/utils/filter.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/utils/filter.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -349,8 +349,8 @@ if __name__ == "__main__":
 # import numpy as np
 # from scipy.signal import firwin, freqz
 # 
-# from ...decorators import numpy_fn
-# from ...gen._to_even import to_even
+# from scitex.decorators import numpy_fn
+# from scitex.gen._to_even import to_even
 # 
 # 
 # @numpy_fn
@@ -750,5 +750,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/utils/filter.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/utils/filter.py
 # --------------------------------------------------------------------------------

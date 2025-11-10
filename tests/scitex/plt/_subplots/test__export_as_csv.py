@@ -482,30 +482,32 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/_subplots/_export_as_csv.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_export_as_csv.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# # Timestamp: "2025-05-18 18:14:08 (ywatanabe)"
+# # Timestamp: "2025-09-21 01:52:22 (ywatanabe)"
 # # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_export_as_csv.py
 # # ----------------------------------------
+# from __future__ import annotations
 # import os
-# 
-# __FILE__ = "./src/scitex/plt/_subplots/_export_as_csv.py"
+# __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
 # import warnings
 # 
+# import numpy as np
 # import pandas as pd
+# from scitex.pd import to_xyz
 # 
-# from ._export_as_csv_formatters import (_format_bar, _format_barh,
-#                                         _format_boxplot, _format_contour,
-#                                         _format_errorbar, _format_eventplot,
-#                                         _format_fill, _format_fill_between,
-#                                         _format_hist, _format_imshow,
-#                                         _format_imshow2d, _format_plot,
-#                                         _format_plot_box,
+# from ._export_as_csv_formatters import (_format_annotate, _format_bar,
+#                                         _format_barh, _format_boxplot,
+#                                         _format_contour, _format_errorbar,
+#                                         _format_eventplot, _format_fill,
+#                                         _format_fill_between, _format_hist,
+#                                         _format_imshow, _format_imshow2d,
+#                                         _format_plot, _format_plot_box,
 #                                         _format_plot_conf_mat,
 #                                         _format_plot_ecdf, _format_plot_fillv,
 #                                         _format_plot_heatmap,
@@ -517,6 +519,7 @@ if __name__ == "__main__":
 #                                         _format_plot_median_iqr,
 #                                         _format_plot_raster,
 #                                         _format_plot_rectangle,
+#                                         _format_plot_scatter,
 #                                         _format_plot_scatter_hist,
 #                                         _format_plot_shaded_line,
 #                                         _format_plot_violin, _format_scatter,
@@ -531,30 +534,30 @@ if __name__ == "__main__":
 #                                         _format_sns_scatterplot,
 #                                         _format_sns_stripplot,
 #                                         _format_sns_swarmplot,
-#                                         _format_sns_violinplot, _format_violin,
-#                                         _format_violinplot)
-# 
-# from scitex.pd import to_xyz
+#                                         _format_sns_violinplot, _format_text,
+#                                         _format_violin, _format_violinplot)
 # 
 # 
 # def _to_numpy(data):
 #     """Convert various data types to numpy array.
-#     
+# 
 #     Handles torch tensors, pandas Series/DataFrame, and other array-like objects.
-#     
+# 
 #     Parameters
 #     ----------
 #     data : array-like
 #         Data to convert to numpy array
-#         
+# 
 #     Returns
 #     -------
 #     numpy.ndarray
 #         Data as numpy array
 #     """
-#     if hasattr(data, 'numpy'):  # torch tensor
-#         return data.detach().numpy() if hasattr(data, 'detach') else data.numpy()
-#     elif hasattr(data, 'values'):  # pandas series/dataframe
+#     if hasattr(data, "numpy"):  # torch tensor
+#         return (
+#             data.detach().numpy() if hasattr(data, "detach") else data.numpy()
+#         )
+#     elif hasattr(data, "values"):  # pandas series/dataframe
 #         return data.values
 #     else:
 #         return np.asarray(data)
@@ -584,23 +587,30 @@ if __name__ == "__main__":
 #                 dfs.append(formatted_df)
 #         except Exception as e:
 #             warnings.warn(f"Failed to format record {record[0]}: {e}")
-#     
+# 
 #     # If no valid dataframes were created, return an empty one
 #     if not dfs:
 #         warnings.warn("No valid data found to export.")
 #         return pd.DataFrame()
 # 
 #     try:
-#         df = pd.concat(dfs, axis=1)
+#         # Reset index for each dataframe to avoid alignment issues
+#         dfs_reset = [df.reset_index(drop=True) for df in dfs]
+#         df = pd.concat(dfs_reset, axis=1)
 #         return df
 #     except Exception as e:
 #         warnings.warn(f"Failed to combine plotting records: {e}")
 #         # Return a DataFrame with metadata about what records were attempted
-#         meta_df = pd.DataFrame({
-#             "record_id": [r[0] for r in history_records.values()],
-#             "method": [r[1] for r in history_records.values()],
-#             "has_data": ["Yes" if r[2] and r[2] != {} else "No" for r in history_records.values()]
-#         })
+#         meta_df = pd.DataFrame(
+#             {
+#                 "record_id": [r[0] for r in history_records.values()],
+#                 "method": [r[1] for r in history_records.values()],
+#                 "has_data": [
+#                     "Yes" if r[2] and r[2] != {} else "No"
+#                     for r in history_records.values()
+#                 ],
+#             }
+#         )
 #         return meta_df
 # 
 # 
@@ -646,6 +656,10 @@ if __name__ == "__main__":
 #         return _format_violin(id, tracked_dict, kwargs)
 #     elif method == "violinplot":
 #         return _format_violinplot(id, tracked_dict, kwargs)
+#     elif method == "text":
+#         return _format_text(id, tracked_dict, kwargs)
+#     elif method == "annotate":
+#         return _format_annotate(id, tracked_dict, kwargs)
 # 
 #     # Custom plotting functions
 #     elif method == "plot_box":
@@ -676,6 +690,8 @@ if __name__ == "__main__":
 #         return _format_plot_raster(id, tracked_dict, kwargs)
 #     elif method == "plot_rectangle":
 #         return _format_plot_rectangle(id, tracked_dict, kwargs)
+#     elif method == "plot_scatter":
+#         return _format_plot_scatter(id, tracked_dict, kwargs)
 #     elif method == "plot_scatter_hist":
 #         return _format_plot_scatter_hist(id, tracked_dict, kwargs)
 #     elif method == "plot_shaded_line":
@@ -718,5 +734,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/_subplots/_export_as_csv.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_export_as_csv.py
 # --------------------------------------------------------------------------------

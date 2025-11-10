@@ -255,7 +255,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_DimHandler.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_DimHandler.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -418,7 +418,7 @@ if __name__ == "__main__":
 #     import scitex
 # 
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 
 #     # Example1:
 #     scitex.gen.printc("Example 1")
@@ -443,7 +443,7 @@ if __name__ == "__main__":
 #     print(y.shape)  # torch.Size([2, 4, 5, 1, 6])
 # 
 #     # Close
-#     scitex.gen.close(CONFIG)
+#     scitex.session.close(CONFIG)
 # 
 # # EOF
 # 
@@ -455,5 +455,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_DimHandler.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_DimHandler.py
 # --------------------------------------------------------------------------------

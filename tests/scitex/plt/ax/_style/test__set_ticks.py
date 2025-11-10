@@ -134,7 +134,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_style/_set_ticks.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_style/_set_ticks.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -150,8 +150,8 @@ if __name__ == "__main__":
 # import matplotlib.pyplot as plt
 # import numpy as np
 # 
-# from ....dict._to_str import to_str
-# from ....types import is_listed_X
+# from scitex.dict._to_str import to_str
+# from scitex.types import is_listed_X
 # 
 # 
 # def set_ticks(ax, xvals=None, xticks=None, yvals=None, yticks=None):
@@ -414,5 +414,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_style/_set_ticks.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_style/_set_ticks.py
 # --------------------------------------------------------------------------------

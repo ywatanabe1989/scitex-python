@@ -283,18 +283,19 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load_modules/_pandas.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_modules/_pandas.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-14 07:41:31 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/io/_load_modules/_pandas.py
 # 
-# import pandas as pd
-# 
 # 
 # def _load_csv(lpath, **kwargs):
 #     """Load CSV files."""
+#     # Lazy import to avoid circular import issues
+#     import pandas as pd
+# 
 #     if not lpath.endswith(".csv"):
 #         raise ValueError("File must have .csv extension")
 # 
@@ -356,5 +357,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load_modules/_pandas.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_modules/_pandas.py
 # --------------------------------------------------------------------------------

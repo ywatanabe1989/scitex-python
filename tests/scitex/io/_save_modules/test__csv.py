@@ -182,7 +182,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_save_modules/_csv.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_csv.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -190,14 +190,13 @@ if __name__ == "__main__":
 # # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/io/_save_modules/_csv.py
 # 
 # import os
-# import pandas as pd
 # import numpy as np
 # 
 # 
 # def _save_csv(obj, spath: str, **kwargs) -> None:
 #     """
 #     Save data to a CSV file, handling various input types appropriately.
-#     
+# 
 #     Parameters
 #     ----------
 #     obj : Any
@@ -206,16 +205,19 @@ if __name__ == "__main__":
 #         Path where the CSV file will be saved.
 #     **kwargs : dict
 #         Additional keyword arguments to pass to the pandas to_csv method.
-#         
+# 
 #     Returns
 #     -------
 #     None
-#     
+# 
 #     Raises
 #     ------
 #     ValueError
 #         If the object type cannot be converted to CSV format.
 #     """
+#     # Lazy import to avoid circular import issues
+#     import pandas as pd
+# 
 #     # Check if path already exists
 #     if os.path.exists(spath):
 #         # Calculate hash of new data
@@ -279,5 +281,5 @@ if __name__ == "__main__":
 #                 raise ValueError(f"Unable to save type {type(obj)} as CSV")
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_save_modules/_csv.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_csv.py
 # --------------------------------------------------------------------------------

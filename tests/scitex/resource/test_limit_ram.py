@@ -187,7 +187,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/resource/limit_ram.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/resource/limit_ram.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -224,5 +224,5 @@ if __name__ == "__main__":
 #     limit_ram(0.1)
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/resource/limit_ram.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/resource/limit_ram.py
 # --------------------------------------------------------------------------------

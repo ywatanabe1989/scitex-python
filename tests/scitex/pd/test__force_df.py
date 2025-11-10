@@ -369,7 +369,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/pd/_force_df.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/pd/_force_df.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -385,7 +385,7 @@ if __name__ == "__main__":
 # import numpy as np
 # import pandas as pd
 # 
-# from ..types import is_listed_X
+# from scitex.types import is_listed_X
 # 
 # 
 # def force_df(data, filler=np.nan):
@@ -527,5 +527,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/pd/_force_df.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/pd/_force_df.py
 # --------------------------------------------------------------------------------

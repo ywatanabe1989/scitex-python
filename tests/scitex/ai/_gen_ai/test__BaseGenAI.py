@@ -305,7 +305,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/_gen_ai/_BaseGenAI.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/_gen_ai/_BaseGenAI.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -326,7 +326,7 @@ if __name__ == "__main__":
 # import matplotlib.pyplot as plt
 # import numpy as np
 # 
-# from ...io._load import load
+# from scitex.io._load import load
 # from ._calc_cost import calc_cost
 # from ._format_output_func import format_output_func
 # from ._PARAMS import MODELS
@@ -633,9 +633,9 @@ if __name__ == "__main__":
 # if __name__ == "__main__":
 #     import scitex
 # 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
 #     main()
-#     scitex.gen.close(CONFIG, verbose=False, notify=False)
+#     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 
 # """
 # python src/scitex/ai/_gen_ai/_BaseGenAI.py
@@ -645,5 +645,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/_gen_ai/_BaseGenAI.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/_gen_ai/_BaseGenAI.py
 # --------------------------------------------------------------------------------

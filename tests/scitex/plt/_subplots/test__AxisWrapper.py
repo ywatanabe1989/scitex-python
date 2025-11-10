@@ -61,16 +61,16 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/_subplots/_AxisWrapper.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_AxisWrapper.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-05-01 17:11:28 (ywatanabe)"
-# # File: /home/ywatanabe/proj/_scitex_repo/src/scitex/plt/_subplots/_AxisWrapper.py
+# # File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_AxisWrapper.py
 # # ----------------------------------------
 # import os
 # 
-# __FILE__ = "./src/scitex/plt/_subplots/_AxisWrapper.py"
+# __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
@@ -84,10 +84,11 @@ if __name__ == "__main__":
 #     MatplotlibPlotMixin,
 #     SeabornMixin,
 #     TrackingMixin,
+#     UnitAwareMixin,
 # )
 # 
 # 
-# class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMixin):
+# class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMixin, UnitAwareMixin):
 #     def __init__(self, fig_scitex, axis_mpl, track):
 #         """Initialize the AxisWrapper.
 #         
@@ -115,6 +116,9 @@ if __name__ == "__main__":
 #         self.track = track
 #         self.id = 0
 #         self._counter_part = matplotlib.axes.Axes
+#         
+#         # Initialize unit awareness
+#         UnitAwareMixin.__init__(self)
 # 
 #     def get_figure(self, root=True):
 #         """Get the figure, compatible with matplotlib 3.8+"""
@@ -314,5 +318,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/_subplots/_AxisWrapper.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_AxisWrapper.py
 # --------------------------------------------------------------------------------

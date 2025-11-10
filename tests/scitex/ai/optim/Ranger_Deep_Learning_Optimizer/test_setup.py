@@ -193,7 +193,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/setup.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/setup.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python
 # 
@@ -221,5 +221,5 @@ if __name__ == "__main__":
 # )
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/setup.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/setup.py
 # --------------------------------------------------------------------------------

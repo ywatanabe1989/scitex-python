@@ -369,7 +369,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/pd/_find_pval.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/pd/_find_pval.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -486,5 +486,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/pd/_find_pval.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/pd/_find_pval.py
 # --------------------------------------------------------------------------------

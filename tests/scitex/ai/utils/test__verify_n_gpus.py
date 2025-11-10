@@ -158,7 +158,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/utils/_verify_n_gpus.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/_verify_n_gpus.py
 # --------------------------------------------------------------------------------
 # import torch
 # import warnings
@@ -178,5 +178,5 @@ if __name__ == "__main__":
 #         return n_gpus
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/utils/_verify_n_gpus.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/_verify_n_gpus.py
 # --------------------------------------------------------------------------------
