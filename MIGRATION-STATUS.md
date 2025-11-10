@@ -81,11 +81,12 @@ These are lightweight utilities that stay in the main package:
 ## Package Dependency Graph
 
 ```
-scitex-core (foundation)
+scitex-core v0.1.0 (foundation)
     ↓
-├── scitex-io
-├── scitex-writer
-├── scitex-scholar
+├── scitex-db v0.1.0 (depends on scitex-core)
+├── scitex-io v0.1.0 (standalone with inlined utils)
+├── scitex-writer (needs update to use scitex-core)
+├── scitex-scholar (planned)
 └── scitex (main package with utilities)
 ```
 
@@ -98,13 +99,16 @@ To maintain standalone packages without circular dependencies, we've inlined:
 - `clean_path` (from `scitex.str`)
 - `color_text` (from `scitex.str`)
 - `readable_bytes` (from `scitex.str`)
-- `SQLite3` (simple 8-line wrapper from `scitex.db`)
 - Path utilities (from `scitex.path`)
 - String parsing (from `scitex.str`)
 
 ### scitex-core inlined utilities:
 - `clean_path` (from `scitex.str`)
 - `printc` (from `scitex.str`)
+
+### scitex-db approach:
+- Depends on `scitex-core>=0.1.0` for errors module
+- Has minimal `_utils.py` with `printc` for colored output
 
 ## Migration Checklist
 
@@ -123,13 +127,13 @@ For each module extraction:
 
 ## Package Versions
 
-| Package | Version | Git Commits | PyPI Published |
-|---------|---------|-------------|----------------|
-| scitex-core | 1.0.0 | 2 | ❌ Not yet |
-| scitex-io | 1.0.0 | 2 | ❌ Not yet |
-| scitex-db | 1.0.0 | 1 | ❌ Not yet |
-| scitex-writer | 2.0.0a0 | - | ✅ Published |
-| scitex-scholar | - | - | ❌ Not created |
+| Package | Version | Git Commits | PyPI Published | Notes |
+|---------|---------|-------------|----------------|-------|
+| scitex-core | 0.1.0 | 3 | ❌ Not yet | logging, errors, sh modules |
+| scitex-io | 0.1.0 | 3 | ❌ Not yet | 62 files, standalone |
+| scitex-db | 0.1.0 | 2 | ❌ Not yet | 57 files, depends on scitex-core |
+| scitex-writer | 2.0.0a0 | - | ✅ Published | Needs update for scitex-core |
+| scitex-scholar | - | - | ❌ Not created | 2313 files, 276MB planned |
 
 ## Next Steps
 
