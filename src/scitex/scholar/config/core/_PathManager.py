@@ -446,6 +446,48 @@ class PathManager:
         paper_id = hash_obj.hexdigest()[:8].upper()
         return self._sanitize_filename(paper_id)
 
+    def get_paper_storage_paths(
+        self,
+        doi: Optional[str] = None,
+        title: Optional[str] = None,
+        authors: Optional[List[str]] = None,
+        year: Optional[int] = None,
+        journal: Optional[str] = None,
+        project: str = "MASTER",
+    ) -> tuple:
+        """Generate storage paths and metadata for a paper.
+
+        Args:
+            doi: DOI identifier
+            title: Paper title
+            authors: List of authors
+            year: Publication year
+            journal: Journal name
+            project: Project name (default: "MASTER")
+
+        Returns:
+            Tuple of (storage_path, readable_name, paper_id)
+        """
+        # Generate unique paper ID
+        paper_id = self._generate_paper_id(doi=doi, title=title, authors=authors, year=year)
+
+        # Get storage path (always in MASTER directory)
+        storage_path = self.get_library_master_paper_dir(paper_id)
+
+        # Generate readable name
+        first_author = "Unknown"
+        if authors and len(authors) > 0:
+            author_parts = str(authors[0]).strip().split()
+            if author_parts:
+                first_author = author_parts[-1]
+
+        journal_clean = self._sanitize_filename(journal) if journal else "Unknown"
+        year_str = str(year) if year else "NoYear"
+
+        readable_name = f"{first_author}-{year_str}-{journal_clean}"
+
+        return (storage_path, readable_name, paper_id)
+
     # ========================================
     # Maintenance
     # ========================================
