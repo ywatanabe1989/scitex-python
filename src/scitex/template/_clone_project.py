@@ -86,7 +86,12 @@ def clone_project(
         if target_dir is None:
             target_dir = os.getcwd()
 
-        target_path = Path(target_dir) / project_name
+        # Ensure target directory exists (mkdir -p behavior)
+        target_dir_path = Path(target_dir)
+        target_dir_path.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Ensured target directory exists: {target_dir_path}")
+
+        target_path = target_dir_path / project_name
 
         # Check if target directory already exists
         if target_path.exists():
