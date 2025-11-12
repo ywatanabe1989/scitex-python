@@ -97,7 +97,7 @@ class Writer:
 
         # Document accessors (pass git_root for efficiency)
         self.shared = SharedTree(
-            self.project_dir / "shared", git_root=self.git_root
+            self.project_dir / "00_shared", git_root=self.git_root
         )
         self.manuscript = ManuscriptTree(
             self.project_dir / "01_manuscript", git_root=self.git_root

@@ -41,11 +41,11 @@ import matplotlib.pyplot as plt_module
 
 from scitex.dict import DotDict
 
-# Lazy import to avoid circular dependency with scitex.gen
-from scitex.io import flush
-from scitex.io import save as scitex_io_save
-from scitex.io._load import load
-from scitex.io._load_configs import load_configs
+# Lazy imports moved to functions to avoid circular dependency
+# from scitex.io._flush import flush
+# from scitex.io._save import save as scitex_io_save
+# from scitex.io._load import load
+# from scitex.io._load_configs import load_configs
 from scitex.plt.utils._configure_mpl import configure_mpl
 from scitex.repro._gen_ID import gen_ID
 from scitex.repro import RandomStateManager
@@ -166,6 +166,7 @@ def _setup_configs(
     dict
         Configuration dictionary
     """
+    from scitex.io._load_configs import load_configs
     CONFIGS = load_configs(IS_DEBUG).to_dict()
     CONFIGS.update(
         {
@@ -253,6 +254,7 @@ def _simplify_relative_path(sdir: str) -> str:
 def _get_debug_mode() -> bool:
     """Get debug mode from configuration."""
     try:
+        from scitex.io._load import load
         IS_DEBUG_PATH = "./config/IS_DEBUG.yaml"
         if _os.path.exists(IS_DEBUG_PATH):
             IS_DEBUG = load(IS_DEBUG_PATH).get("IS_DEBUG", False)
@@ -418,6 +420,7 @@ def start(
 
     # Logging
     if sys is not None:
+        from scitex.io._flush import flush
         flush(sys)
         # Lazy import to avoid circular dependency
         from scitex.logging._Tee import tee
@@ -545,6 +548,7 @@ def _process_timestamp(CONFIG, verbose=True):
 
 def _save_configs(CONFIG):
     """Save configuration to files."""
+    from scitex.io._save import save as scitex_io_save
     scitex_io_save(
         CONFIG, CONFIG["SDIR"] + "CONFIGS/CONFIG.pkl", verbose=False
     )

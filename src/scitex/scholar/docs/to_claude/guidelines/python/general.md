@@ -27,7 +27,7 @@ Use `Agg` for matplotlib backend. Do not show images but save to file.
     ```
 
 ## Lint with Black
-IMPORTANT: LINT ALL .PY SCRIPTS USING `black` (`~/.env/bin/black`)
+IMPORTANT: LINT ALL .PY SCRIPTS USING `black` (`~/.venv/bin/black`)
 
 ## Run scripts
 Do not hesitate to run scripts as long as they are destructive.

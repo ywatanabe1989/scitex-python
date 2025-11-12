@@ -220,6 +220,7 @@ scholar = [
     "tenacity",
     "pydantic",
     "watchdog",
+    "natsort",
 ]
 
 # Writer Module - Academic Paper Writing & LaTeX Compilation

@@ -47,6 +47,12 @@ class URLDOIExtractor:
         r"(?:doi[\.:/]|DOI[\.:/])([0-9]{2}\.[0-9]{4,}/[^\s\?&#]+)",
     ]
 
+    # ScienceDirect PII pattern
+    SCIENCEDIRECT_PII_PATTERN = re.compile(
+        r"sciencedirect\.com/science/article/pii/([A-Z0-9]+)",
+        re.IGNORECASE
+    )
+
     # Valid DOI pattern for validation
     DOI_PATTERN = re.compile(r"^10\.\d{4,}/[^\s]+$")
 
@@ -75,7 +81,19 @@ class URLDOIExtractor:
         if not url:
             return None
 
-        # Try each pattern
+        # Check for ScienceDirect PII first (special case)
+        pii_match = self.SCIENCEDIRECT_PII_PATTERN.search(url)
+        if pii_match:
+            pii = pii_match.group(1)
+            logger.info(
+                f"Detected ScienceDirect PII: {pii}. "
+                "Note: PII-to-DOI resolution requires CrossRef or Elsevier API. "
+                "Title-based search will be attempted instead."
+            )
+            # Return None so that title-based search engines can try
+            return None
+
+        # Try each DOI pattern
         for pattern in self.compiled_patterns:
             match = pattern.search(url)
             if match:
