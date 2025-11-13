@@ -159,27 +159,38 @@ def demo_visual_metadata_with_qr():
     ax_sep.set_ylim(0, 1)
     ax_sep.axis('off')
 
-    # QR code area (bottom left) - smaller
-    ax_qr = plt.subplot2grid((10, 10), (8, 0), rowspan=2, colspan=2)
-
-    # Generate QR code (optimized for size, not iPhone)
+    # Generate QR code (minimal size, responsive to metadata)
     metadata_json = json.dumps(metadata, ensure_ascii=False)
     qr = qrcode.QRCode(
-        version=None,  # Auto-detect version
-        error_correction=qrcode.constants.ERROR_CORRECT_L,  # Low error correction for smaller size
-        box_size=5,  # Smaller box size (half of previous)
-        border=1,  # Minimal border
+        version=1,  # Start with smallest version
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=3,  # Very small box size
+        border=1,
     )
     qr.add_data(metadata_json)
-    qr.make(fit=True)
+    qr.make(fit=True)  # Auto-adjust to minimal version needed
     qr_img = qr.make_image(fill_color="black", back_color="white")
 
+    # Determine QR code size based on version
+    qr_version = qr.version
+    # Dynamically allocate columns based on QR size
+    # Version 1-5: 1 column, 6-10: 1.5 columns, 11+: 2 columns
+    if qr_version <= 5:
+        qr_cols = 1
+    elif qr_version <= 10:
+        qr_cols = 1
+    else:
+        qr_cols = 2
+
+    # QR code area (bottom left) - truly minimal
+    ax_qr = plt.subplot2grid((10, 10), (8, 0), rowspan=2, colspan=qr_cols)
     ax_qr.imshow(qr_img, cmap='gray')
     ax_qr.axis('off')
-    ax_qr.set_title('Metadata', fontsize=8, pad=3)
 
-    # Metadata display area (bottom middle)
-    ax_meta = plt.subplot2grid((10, 10), (8, 2), rowspan=2, colspan=6)
+    # Metadata display area (bottom middle) - adaptive
+    meta_start_col = qr_cols
+    meta_cols = 8 - qr_cols
+    ax_meta = plt.subplot2grid((10, 10), (8, meta_start_col), rowspan=2, colspan=meta_cols)
 
     # Format metadata text (more compact, 2 columns)
     meta_lines = []
@@ -204,18 +215,17 @@ def demo_visual_metadata_with_qr():
     # Logo area (bottom right) - smaller
     ax_logo = plt.subplot2grid((10, 10), (8, 8), rowspan=2, colspan=2)
 
-    # Load and display logo (smaller)
+    # Load and display logo (minimal 16x16px)
     if LOGO_PATH.exists():
         logo_img = Image.open(LOGO_PATH)
-        # Resize to make it smaller (50% of original)
-        new_size = (logo_img.width // 2, logo_img.height // 2)
-        logo_img = logo_img.resize(new_size, Image.Resampling.LANCZOS)
+        # Resize to minimal size: 16×16 pixels
+        logo_img = logo_img.resize((16, 16), Image.Resampling.LANCZOS)
         ax_logo.imshow(logo_img)
         ax_logo.axis('off')
     else:
-        # Fallback: text signature
-        ax_logo.text(0.5, 0.5, 'SciTeX\nscitex.ai',
-                     ha='center', va='center', fontsize=7,
+        # Fallback: minimal text
+        ax_logo.text(0.5, 0.5, 'S',
+                     ha='center', va='center', fontsize=6,
                      color='#1e3a5f', weight='bold',
                      transform=ax_logo.transAxes)
         ax_logo.set_xlim(0, 1)
@@ -231,8 +241,10 @@ def demo_visual_metadata_with_qr():
     print(f"\n📝 Saving visual demo with QR code to: {output_path}")
     stx.io.save(fig, str(output_path), metadata=metadata)
     print("✓ Visual demo with QR code saved successfully")
-    print(f"  QR code contains: {len(metadata_json)} characters")
-    print(f"  QR version: {qr.version}")
+    print(f"  Metadata size: {len(metadata_json)} characters")
+    print(f"  QR version: {qr.version} (minimal, auto-sized)")
+    print(f"  QR physical size: ~{qr.modules_count * 3}×{qr.modules_count * 3} pixels")
+    print(f"  Layout columns: QR={qr_cols}, Metadata={meta_cols}, Logo=2")
 
     plt.close()
 
@@ -313,18 +325,17 @@ def demo_visual_metadata():
     # Logo area (bottom right)
     ax_logo = plt.subplot2grid((10, 10), (8, 8), rowspan=2, colspan=2)
 
-    # Load and display logo (smaller)
+    # Load and display logo (minimal 16x16px)
     if LOGO_PATH.exists():
         logo_img = Image.open(LOGO_PATH)
-        # Resize to make it smaller (50% of original)
-        new_size = (logo_img.width // 2, logo_img.height // 2)
-        logo_img = logo_img.resize(new_size, Image.Resampling.LANCZOS)
+        # Resize to minimal size: 16×16 pixels
+        logo_img = logo_img.resize((16, 16), Image.Resampling.LANCZOS)
         ax_logo.imshow(logo_img)
         ax_logo.axis('off')
     else:
-        # Fallback: text signature
-        ax_logo.text(0.5, 0.5, 'SciTeX\nscitex.ai',
-                     ha='center', va='center', fontsize=7,
+        # Fallback: minimal text
+        ax_logo.text(0.5, 0.5, 'S',
+                     ha='center', va='center', fontsize=6,
                      color='#1e3a5f', weight='bold',
                      transform=ax_logo.transAxes)
         ax_logo.set_xlim(0, 1)
