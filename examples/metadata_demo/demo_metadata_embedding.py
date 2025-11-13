@@ -212,15 +212,16 @@ def demo_visual_metadata_with_qr():
     ax_meta.set_ylim(0, 1)
     ax_meta.axis('off')
 
-    # Logo area (bottom right) - smaller
+    # Logo area (bottom right) - minimal display
     ax_logo = plt.subplot2grid((10, 10), (8, 8), rowspan=2, colspan=2)
 
-    # Load and display logo (minimal 16x16px)
+    # Load and display logo at 16×16 pixel dimensions
     if LOGO_PATH.exists():
         logo_img = Image.open(LOGO_PATH)
-        # Resize to minimal size: 16×16 pixels
-        logo_img = logo_img.resize((16, 16), Image.Resampling.LANCZOS)
-        ax_logo.imshow(logo_img)
+        # Display at exact 16×16 pixel dimensions
+        ax_logo.imshow(logo_img, extent=[0.35, 0.65, 0.35, 0.65])
+        ax_logo.set_xlim(0, 1)
+        ax_logo.set_ylim(0, 1)
         ax_logo.axis('off')
     else:
         # Fallback: minimal text
