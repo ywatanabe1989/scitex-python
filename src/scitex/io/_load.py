@@ -52,6 +52,7 @@ def load(
     show: bool = False,
     verbose: bool = False,
     cache: bool = True,
+    return_metadata: bool = False,
     **kwargs,
 ) -> Any:
     """
@@ -73,6 +74,9 @@ def load(
         If True, print verbose output during loading. Default is False.
     cache : bool, optional
         If True, enable caching for faster repeated loads. Default is True.
+    return_metadata : bool, optional
+        If True and loading an image, return tuple (image, metadata_df).
+        Only works for image files (.png, .jpg, .tiff). Default is False.
     **kwargs : dict
         Additional keyword arguments to be passed to the specific loading function.
 
@@ -80,6 +84,7 @@ def load(
     -------
     object
         The loaded data object, which can be of various types depending on the input file format.
+        For images with return_metadata=True, returns tuple (image, metadata_df).
 
     Raises
     ------
@@ -156,8 +161,8 @@ def load(
             except Exception:
                 raise FileNotFoundError(f"File not found: {lpath}")
 
-    # Try to get from cache first
-    if cache:
+    # Try to get from cache first (skip cache if return_metadata is requested for images)
+    if cache and not return_metadata:
         cached_data = get_cached_data(lpath)
         if cached_data is not None:
             if verbose:
@@ -240,10 +245,14 @@ def load(
     loader = preserve_doc(loaders_dict.get(detected_ext, _load_txt))
 
     try:
-        result = loader(lpath, **kwargs)
+        # Pass return_metadata for image files
+        if detected_ext in ["jpg", "jpeg", "png", "tiff", "tif"] and return_metadata:
+            result = loader(lpath, return_metadata=return_metadata, **kwargs)
+        else:
+            result = loader(lpath, **kwargs)
 
-        # Cache the result if caching is enabled
-        if cache:
+        # Cache the result if caching is enabled (skip if return_metadata was used)
+        if cache and not return_metadata:
             cache_data(lpath, result)
             if verbose:
                 print(f"[Cache STORED] Cached data for: {lpath}")
