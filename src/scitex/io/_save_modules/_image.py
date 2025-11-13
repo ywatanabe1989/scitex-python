@@ -14,7 +14,7 @@ import plotly
 from PIL import Image
 
 
-def save_image(obj, spath, **kwargs):
+def save_image(obj, spath, metadata=None, **kwargs):
     # png
     if spath.endswith(".png"):
         # plotly
@@ -134,5 +134,14 @@ def save_image(obj, spath, **kwargs):
             except AttributeError:
                 obj.figure.savefig(spath, format="pdf")
         del obj
+
+    # Embed metadata if provided
+    if metadata is not None:
+        from .._metadata import embed_metadata
+        try:
+            embed_metadata(spath, metadata)
+        except Exception as e:
+            import warnings
+            warnings.warn(f"Failed to embed metadata: {e}")
 
 # EOF

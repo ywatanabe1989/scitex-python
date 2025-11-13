@@ -69,6 +69,14 @@ except ImportError:
     migrate_h5_to_zarr = None
     migrate_h5_to_zarr_batch = None
 
+# Import metadata functions
+try:
+    from ._metadata import read_metadata, embed_metadata, has_metadata
+except ImportError:
+    read_metadata = None
+    embed_metadata = None
+    has_metadata = None
+
 __all__ = [
     "save",
     "load",
@@ -99,6 +107,10 @@ __all__ = [
     "get_cache_info",
     "configure_cache",
     "clear_load_cache",
+    # Metadata functions
+    "read_metadata",
+    "embed_metadata",
+    "has_metadata",
 ]
 
 # EOF

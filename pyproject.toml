@@ -72,6 +72,8 @@ dependencies = [
     "numcodecs",
     # Image Processing
     "Pillow",
+    "piexif",  # For JPEG EXIF metadata
+    "qrcode[pil]",  # For QR code generation
     # Utilities
     "requests",
     "aiohttp",
