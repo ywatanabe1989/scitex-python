@@ -18,7 +18,6 @@ from ._timeout import timeout
 from ._torch_fn import torch_fn
 from ._wrap import wrap
 from ._xarray_fn import xarray_fn
-from scitex.session import session
 
 __all__ = [
     "AutoOrderDecorator",
@@ -54,5 +53,4 @@ __all__ = [
     "torch_fn",
     "wrap",
     "xarray_fn",
-    "session",
 ]

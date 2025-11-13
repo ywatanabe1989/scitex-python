@@ -52,7 +52,7 @@ def load(
     show: bool = False,
     verbose: bool = False,
     cache: bool = True,
-    return_metadata: bool = False,
+    metadata: bool = None,  # None = auto-detect (True for images)
     **kwargs,
 ) -> Any:
     """
@@ -74,9 +74,11 @@ def load(
         If True, print verbose output during loading. Default is False.
     cache : bool, optional
         If True, enable caching for faster repeated loads. Default is True.
-    return_metadata : bool, optional
-        If True and loading an image, return tuple (image, metadata_dict).
-        Only works for image files (.png, .jpg, .tiff). Default is False.
+    metadata : bool or None, optional
+        If True, return tuple (image, metadata_dict) for images.
+        If False, return image only.
+        If None (default), automatically True for images, False for other formats.
+        Only works for image files (.png, .jpg, .jpeg, .tiff, .tif).
     **kwargs : dict
         Additional keyword arguments to be passed to the specific loading function.
 
@@ -84,7 +86,7 @@ def load(
     -------
     object
         The loaded data object, which can be of various types depending on the input file format.
-        For images with return_metadata=True, returns tuple (image, metadata_dict).
+        For images with metadata=True, returns tuple (image, metadata_dict).
         metadata_dict is None if no metadata found.
 
     Raises
@@ -162,8 +164,8 @@ def load(
             except Exception:
                 raise FileNotFoundError(f"File not found: {lpath}")
 
-    # Try to get from cache first (skip cache if return_metadata is requested for images)
-    if cache and not return_metadata:
+    # Try to get from cache first (skip cache if metadata is requested for images)
+    if cache and not metadata:
         cached_data = get_cached_data(lpath)
         if cached_data is not None:
             if verbose:
@@ -239,6 +241,12 @@ def load(
         # Auto-detect from filename
         detected_ext = lpath.split(".")[-1] if "." in lpath else ""
 
+    # Auto-detect metadata for images
+    is_image = detected_ext in ["jpg", "jpeg", "png", "tiff", "tif"]
+    if metadata is None:
+        # Default: True for images, False for other formats
+        metadata = is_image
+
     # Special handling for numpy files with caching
     if cache and detected_ext in ["npy", "npz"]:
         return load_npy_cached(lpath, **kwargs)
@@ -246,14 +254,14 @@ def load(
     loader = preserve_doc(loaders_dict.get(detected_ext, _load_txt))
 
     try:
-        # Pass return_metadata for image files
-        if detected_ext in ["jpg", "jpeg", "png", "tiff", "tif"] and return_metadata:
-            result = loader(lpath, return_metadata=return_metadata, **kwargs)
+        # Pass metadata and verbose parameters for image files
+        if is_image:
+            result = loader(lpath, metadata=metadata, verbose=verbose, **kwargs)
         else:
             result = loader(lpath, **kwargs)
 
-        # Cache the result if caching is enabled (skip if return_metadata was used)
-        if cache and not return_metadata:
+        # Cache the result if caching is enabled (skip if metadata was used)
+        if cache and not metadata:
             cache_data(lpath, result)
             if verbose:
                 print(f"[Cache STORED] Cached data for: {lpath}")
