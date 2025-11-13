@@ -9,20 +9,30 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import io as _io
+import logging
 
 import plotly
 from PIL import Image
 
+logger = logging.getLogger(__name__)
 
-def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-right', **kwargs):
+
+def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-right', verbose=False, **kwargs):
     # Add URL to metadata if not present
     if metadata is not None:
+        if verbose:
+            logger.info(f"📝 Saving figure with metadata to: {spath}")
+
         if 'url' not in metadata:
             metadata = dict(metadata)
             metadata['url'] = 'https://scitex.ai'
+            if verbose:
+                logger.info("  • Auto-added URL: https://scitex.ai")
 
         # Add QR code to figure if requested
         if add_qr:
+            if verbose:
+                logger.info(f"  • Adding QR code at position: {qr_position}")
             try:
                 from .._qr_utils import add_qr_to_figure
                 # Only add QR for matplotlib figures
@@ -158,6 +168,8 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
         from .._metadata import embed_metadata
         try:
             embed_metadata(spath, metadata)
+            if verbose:
+                logger.info(f"  • Embedded metadata: {metadata}")
         except Exception as e:
             import warnings
             warnings.warn(f"Failed to embed metadata: {e}")
