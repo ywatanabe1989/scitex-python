@@ -14,7 +14,25 @@ import plotly
 from PIL import Image
 
 
-def save_image(obj, spath, metadata=None, **kwargs):
+def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-right', **kwargs):
+    # Add URL to metadata if not present
+    if metadata is not None:
+        if 'url' not in metadata:
+            metadata = dict(metadata)
+            metadata['url'] = 'https://scitex.ai'
+
+        # Add QR code to figure if requested
+        if add_qr:
+            try:
+                from .._qr_utils import add_qr_to_figure
+                # Only add QR for matplotlib figures
+                if hasattr(obj, 'savefig') or (hasattr(obj, 'figure') and hasattr(obj.figure, 'savefig')):
+                    fig = obj if hasattr(obj, 'savefig') else obj.figure
+                    obj = add_qr_to_figure(fig, metadata, position=qr_position)
+            except Exception as e:
+                import warnings
+                warnings.warn(f"Failed to add QR code: {e}")
+
     # png
     if spath.endswith(".png"):
         # plotly
