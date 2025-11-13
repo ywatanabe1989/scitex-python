@@ -75,7 +75,7 @@ def load(
     cache : bool, optional
         If True, enable caching for faster repeated loads. Default is True.
     return_metadata : bool, optional
-        If True and loading an image, return tuple (image, metadata_df).
+        If True and loading an image, return tuple (image, metadata_dict).
         Only works for image files (.png, .jpg, .tiff). Default is False.
     **kwargs : dict
         Additional keyword arguments to be passed to the specific loading function.
@@ -84,7 +84,8 @@ def load(
     -------
     object
         The loaded data object, which can be of various types depending on the input file format.
-        For images with return_metadata=True, returns tuple (image, metadata_df).
+        For images with return_metadata=True, returns tuple (image, metadata_dict).
+        metadata_dict is None if no metadata found.
 
     Raises
     ------
