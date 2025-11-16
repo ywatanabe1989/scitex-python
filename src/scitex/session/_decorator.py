@@ -175,6 +175,18 @@ def _run_with_session(
     func_globals['CC'] = CC
     func_globals['rng_manager'] = rng_manager
 
+    # Log injected globals for user awareness
+    logger.info("=" * 60)
+    logger.info("Injected Global Variables (available in your function):")
+    logger.info("  • CONFIG - Session configuration dict")
+    logger.info(f"      - CONFIG['ID']: {CONFIG['ID']}")
+    logger.info(f"      - CONFIG['SDIR']: {CONFIG['SDIR']}")
+    logger.info(f"      - CONFIG['PID']: {CONFIG['PID']}")
+    logger.info("  • plt - matplotlib.pyplot (configured for session)")
+    logger.info("  • CC - CustomColors (for consistent plotting)")
+    logger.info("  • rng_manager - RandomStateManager (for reproducibility)")
+    logger.info("=" * 60)
+
     # Run function
     exit_status = 0
     result = None
@@ -262,9 +274,26 @@ def _create_parser(func: Callable) -> argparse.ArgumentParser:
     except Exception:
         type_hints = {}
 
-    # Create parser
+    # Create parser with epilog documenting injected globals
+    epilog = """
+Global Variables Injected by @session Decorator:
+  CONFIG (dict)         Session configuration with ID, paths, timestamps
+    - CONFIG['ID']      Unique session identifier (timestamp-based)
+    - CONFIG['SDIR']    Session output directory (absolute path)
+    - CONFIG['PID']     Process ID
+    - CONFIG['ARGS']    Parsed command-line arguments
+
+  plt (module)          matplotlib.pyplot configured for session
+  CC (CustomColors)     Consistent color palette for plotting
+  rng_manager (obj)     RandomStateManager for reproducible randomness
+
+These variables are automatically available in your decorated function.
+Use --help to see this message again.
+"""
+
     parser = argparse.ArgumentParser(
         description=doc,
+        epilog=epilog,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
