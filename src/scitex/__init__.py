@@ -80,6 +80,15 @@ logging = _LazyModule("logging")
 session = _LazyModule("session")
 capture = _LazyModule("capture")
 template = _LazyModule("template")
+cloud = _LazyModule("cloud")
+
+# Auto-load cloud hooks if in cloud environment
+import os as _os
+if _os.environ.get('SCITEX_CLOUD_CODE_WORKSPACE') == 'true':
+    try:
+        from .cloud import _matplotlib_hook
+    except Exception:
+        pass  # Silently fail if matplotlib not available
 
 __all__ = [
     "io",
@@ -124,6 +133,7 @@ __all__ = [
     "context",
     "dev",
     "gists",
+    "cloud",
 ]
 
 # EOF
