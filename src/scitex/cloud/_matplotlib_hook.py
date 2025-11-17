@@ -34,30 +34,39 @@ def _cloud_show(*args, **kwargs):
     Wrapper for matplotlib's show that saves and displays inline in cloud.
     """
     import matplotlib.pyplot as plt
-    from scitex.cloud import is_cloud_environment, get_project_root, emit_inline_image
+    import os
+    import time
+    from scitex.cloud import is_cloud_environment, emit_inline_image, get_project_root
 
     if is_cloud_environment():
         # Get all figures
         fignums = plt.get_fignums()
 
         if fignums:
-            # Save figures to temporary location and emit inline markers
+            # Save figures to project directory scitex/temp/
             project_root = get_project_root()
-            if project_root:
-                output_dir = project_root / '.scitex_figures'
-                output_dir.mkdir(exist_ok=True)
+            if not project_root:
+                return None
 
-                for fignum in fignums:
-                    fig = plt.figure(fignum)
-                    output_path = output_dir / f'figure_{fignum}.png'
+            # Use timestamp for this session's outputs
+            timestamp = time.strftime('%Y%m%d_%H%M%S')
+            output_dir = project_root / 'scitex' / 'temp' / timestamp
+            output_dir.mkdir(parents=True, exist_ok=True)
 
-                    # Save figure
-                    fig.savefig(output_path, dpi=150, bbox_inches='tight')
+            for fignum in fignums:
+                fig = plt.figure(fignum)
 
-                    # Emit inline image marker
-                    emit_inline_image(str(output_path))
+                filename = f'figure_{fignum}.png'
+                output_path = output_dir / filename
 
-                    print(f"Figure {fignum} saved to: {output_path.relative_to(project_root)}")
+                # Save figure
+                fig.savefig(output_path, dpi=150, bbox_inches='tight')
+
+                # Emit inline image marker with project-relative path
+                relative_path = output_path.relative_to(project_root)
+                emit_inline_image(str(relative_path))
+
+                print(f"Figure {fignum} saved to: {relative_path}")
 
         # Don't call original show() in cloud (headless environment)
         return None

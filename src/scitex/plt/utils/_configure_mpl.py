@@ -13,6 +13,7 @@ from typing import Dict, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 import scitex
+from scitex.dict import DotDict
 
 
 def configure_mpl(
@@ -68,7 +69,7 @@ def configure_mpl(
     Returns
     -------
     tuple
-        (plt, dict of RGBA colors)
+        (plt, DotDict of RGBA colors) - Access as COLORS.blue or COLORS['blue']
     """
     # # Convert base font size
     # base_size = _convert_font_size(fontsize)
@@ -256,7 +257,8 @@ def configure_mpl(
 
     plt.set_n_ticks = set_n_ticks
 
-    return plt, RGBA_NORM
+    # Convert to DotDict for convenient access (COLORS.blue or COLORS['blue'])
+    return plt, DotDict(RGBA_NORM)
 
 
 # def _convert_font_size(size: Union[str, int, float]) -> float:

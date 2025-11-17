@@ -65,7 +65,7 @@ def test_mk_colorbar_custom_colors():
         ("green", "yellow"),
         ("purple", "orange"),
         ("navy", "pink"),
-        ("brown", "light_blue")
+        ("brown", "lightblue")
     ]
     
     for start, end in color_pairs:

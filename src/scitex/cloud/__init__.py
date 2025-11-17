@@ -26,9 +26,9 @@ def get_project_root() -> Optional[Path]:
     return Path(project_root) if project_root else None
 
 
-def emit_inline_image(image_path: str, alt_text: str = "Figure") -> None:
+def emit_inline_image(image_path: str, alt_text: str = "Figure", width: int = 600) -> None:
     """
-    Emit inline image marker for terminal display.
+    Emit inline image marker for terminal display using iTerm2 protocol.
 
     The terminal frontend will detect this marker and render the image inline.
 
@@ -38,6 +38,8 @@ def emit_inline_image(image_path: str, alt_text: str = "Figure") -> None:
         Path to the image file (absolute or relative to project root)
     alt_text : str, optional
         Alternative text for the image
+    width : int, optional
+        Display width in pixels (default: 600)
     """
     if not is_cloud_environment():
         return
@@ -58,20 +60,25 @@ def emit_inline_image(image_path: str, alt_text: str = "Figure") -> None:
         print(f"Warning: Image not found: {image_path}", file=sys.stderr)
         return
 
-    # Read and encode image as base64
+    # Emit custom SciTeX marker for TypeScript to detect and render
+    # Format: [SCITEX_IMAGE:path:width:alt_text]
+    # The terminal consumer will detect this and send a WebSocket message
+    # to the frontend to inject an <img> element
     try:
-        with open(image_path, 'rb') as f:
-            image_data = f.read()
-            image_base64 = base64.b64encode(image_data).decode('utf-8')
+        # Convert to relative path for portability
+        project_root = get_project_root()
+        if project_root and image_path.is_relative_to(project_root):
+            display_path = image_path.relative_to(project_root)
+        else:
+            display_path = image_path
 
-        # Emit special marker that frontend can detect
-        # Format: \x1b]1337;File=inline=1;size=<size>:<base64_data>\x07
-        # This is iTerm2-compatible inline image protocol
-        print(f"\n\x1b]1337;File=name={base64.b64encode(image_path.name.encode()).decode()};inline=1:{image_base64}\x07")
-        print(f"[Image: {image_path.name}]")  # Fallback text
+        # Emit marker that terminal consumer will detect
+        print(f'\n[SCITEX_IMAGE:{display_path}:{width}:{alt_text}]\n', flush=True)
 
     except Exception as e:
         print(f"Error displaying inline image: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc(file=sys.stderr)
 
 
 def emit_file_link(file_path: str, line_number: Optional[int] = None) -> None:
@@ -112,5 +119,13 @@ __all__ = [
     'emit_inline_image',
     'emit_file_link',
 ]
+
+# Auto-import matplotlib hook to enable inline plotting
+# This will automatically hook plt.show() when in cloud environment
+if is_cloud_environment():
+    try:
+        from . import _matplotlib_hook
+    except ImportError:
+        pass  # matplotlib not available
 
 # EOF

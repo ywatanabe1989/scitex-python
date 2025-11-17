@@ -25,6 +25,14 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 # Version
 from .__version__ import __version__
 
+# Sentinel object for decorator-injected parameters
+class _InjectedSentinel:
+    """Sentinel value indicating a parameter will be injected by a decorator"""
+    def __repr__(self):
+        return "<INJECTED>"
+
+INJECTED = _InjectedSentinel()
+
 # Lazy loading for all modules
 class _LazyModule:
     def __init__(self, name):
@@ -39,6 +47,74 @@ class _LazyModule:
                 f".{self._name}", package="scitex"
             )
         return getattr(self._module, attr)
+
+
+class _CallableModuleWrapper:
+    """Callable module wrapper that acts as both a decorator and a module.
+
+    This allows:
+    - @scitex.session (new clean API)
+    - @scitex.session.session (old API for backwards compatibility)
+    - scitex.session.start() and other module functions
+
+    Example:
+        import scitex
+
+        @scitex.session  # Clean! Calls __call__()
+        def main(): pass
+
+        @scitex.session.session  # Backwards compatible
+        def main(): pass
+
+        scitex.session.start(...)  # Access other functions
+    """
+
+    def __init__(self, module_name, main_decorator_name='session'):
+        self._module_name = module_name
+        self._main_decorator_name = main_decorator_name
+        self._module = None
+        self._parent_name = None
+        self._attr_name = None
+
+    def _setup_persistence(self, parent_name, attr_name):
+        """Set up persistence information to prevent replacement."""
+        self._parent_name = parent_name
+        self._attr_name = attr_name
+
+    def _load_module(self):
+        """Lazy load the actual module."""
+        if self._module is None:
+            import importlib
+            import sys
+
+            # Import the module
+            self._module = importlib.import_module(
+                f".{self._module_name}", package="scitex"
+            )
+
+            # Restore ourselves in the parent module's __dict__ to prevent replacement
+            if self._parent_name and self._attr_name:
+                parent_module = sys.modules.get(self._parent_name)
+                if parent_module is not None:
+                    setattr(parent_module, self._attr_name, self)
+
+        return self._module
+
+    def __call__(self, *args, **kwargs):
+        """When used as @scitex.session"""
+        module = self._load_module()
+        main_decorator = getattr(module, self._main_decorator_name)
+        return main_decorator(*args, **kwargs)
+
+    def __getattr__(self, name):
+        """When accessed as scitex.session.session or scitex.session.start"""
+        if name == self._main_decorator_name:
+            # Return self so @scitex.session.session works
+            return self
+
+        # Otherwise, delegate to the actual module
+        module = self._load_module()
+        return getattr(module, name)
 
 
 # Create lazy modules
@@ -77,7 +153,8 @@ gists = _LazyModule("gists")
 errors = _LazyModule("errors")
 units = _LazyModule("units")
 logging = _LazyModule("logging")
-session = _LazyModule("session")
+session = _CallableModuleWrapper("session", main_decorator_name="session")
+session._setup_persistence("scitex", "session")
 capture = _LazyModule("capture")
 template = _LazyModule("template")
 cloud = _LazyModule("cloud")
@@ -134,6 +211,7 @@ __all__ = [
     "dev",
     "gists",
     "cloud",
+    "INJECTED",
 ]
 
 # EOF

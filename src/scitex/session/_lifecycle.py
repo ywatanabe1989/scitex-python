@@ -166,22 +166,33 @@ def _setup_configs(
     dict
         Configuration dictionary
     """
+    # Calculate SDIR_OUT (base output directory)
+    # sdir format: /path/to/script_out/RUNNING/ID/
+    sdir_path = Path(sdir) if sdir else None
+    if sdir_path:
+        # Remove /RUNNING/ID/ to get base output dir
+        parts = sdir_path.parts
+        if 'RUNNING' in parts:
+            running_idx = parts.index('RUNNING')
+            sdir_out = Path(*parts[:running_idx])
+        else:
+            sdir_out = sdir_path.parent
+    else:
+        sdir_out = None
+
+    # Load YAML configs from ./config/*.yaml
     from scitex.io._load_configs import load_configs
     CONFIGS = load_configs(IS_DEBUG).to_dict()
-    CONFIGS.update(
-        {
-            "ID": ID,
-            "PID": PID,
-            "START_TIME": datetime.now(),
-            "FILE": file,
-            "SDIR": sdir,
-            "REL_SDIR": relative_sdir,
-            # Path object versions for convenience (maintain backward compatibility)
-            "SDIR_PATH": Path(sdir) if sdir else None,
-            "REL_SDIR_PATH": Path(relative_sdir) if relative_sdir else None,
-            "FILE_PATH": Path(file) if file else None,
-        }
-    )
+
+    # Add session-specific config with clean structure (Path objects only)
+    CONFIGS.update({
+        "ID": ID,
+        "PID": PID,
+        "START_DATETIME": datetime.now(),
+        "FILE": Path(file) if file else None,
+        "SDIR_OUT": sdir_out,
+        "SDIR_RUN": sdir_path,
+    })
     return CONFIGS
 
 
@@ -202,19 +213,19 @@ def _setup_matplotlib(
     Returns
     -------
     tuple
-        (plt, CC) - Configured scitex.plt module and color cycle
+        (plt, COLORS) - Configured scitex.plt module and color cycle
     """
     if plt is not None:
         plt.close("all")
-        _, CC = configure_mpl(plt, **mpl_kwargs)
-        CC["gray"] = CC["grey"]
+        _, COLORS = configure_mpl(plt, **mpl_kwargs)
+        COLORS["gray"] = COLORS["grey"]
         if agg:
             matplotlib.use("Agg")
 
         # Replace matplotlib.pyplot with scitex.plt to get wrapped functions
         import scitex.plt as stx_plt
 
-        return stx_plt, CC
+        return stx_plt, COLORS
     return plt, None
 
 
@@ -365,11 +376,11 @@ def start(
     Returns
     -------
     tuple
-        (CONFIGS, stdout, stderr, plt, CC, rng_manager)
+        (CONFIGS, stdout, stderr, plt, COLORS, rng_manager)
         - CONFIGS: Configuration dictionary
         - stdout, stderr: Redirected output streams
         - plt: Configured matplotlib.pyplot module
-        - CC: Color cycle dictionary
+        - COLORS: Color cycle dictionary
         - rng_manager: Global RandomStateManager instance for reproducible random generation
     """
     IS_DEBUG = _get_debug_mode()
@@ -426,7 +437,7 @@ def start(
         from scitex.logging._Tee import tee
 
         sys.stdout, sys.stderr = tee(sys, sdir=sdir, verbose=verbose)
-        CONFIGS["sys"] = sys
+        CONFIGS["_sys"] = sys  # Private key, won't show in user-facing pprint
 
         # Redirect logging handlers to use the tee-wrapped streams
         # This ensures that logger output is captured in the log files
@@ -478,7 +489,7 @@ def start(
         logger.info(f"Initialized RandomStateManager with seed {seed}")
 
     # Matplotlib configurations
-    plt, CC = _setup_matplotlib(
+    plt, COLORS = _setup_matplotlib(
         plt,
         agg,
         fig_size_mm=fig_size_mm,
@@ -511,9 +522,9 @@ def start(
 
     # Return appropriate values based on whether sys was provided
     if sys is not None:
-        return CONFIGS, sys.stdout, sys.stderr, plt, CC, rng_manager
+        return CONFIGS, sys.stdout, sys.stderr, plt, COLORS, rng_manager
     else:
-        return CONFIGS, None, None, plt, CC, rng_manager
+        return CONFIGS, None, None, plt, COLORS, rng_manager
 
 
 def _format_diff_time(diff_time):
@@ -529,15 +540,15 @@ def _format_diff_time(diff_time):
 def _process_timestamp(CONFIG, verbose=True):
     """Process session timestamps."""
     try:
-        CONFIG["END_TIME"] = datetime.now()
-        CONFIG["RUN_TIME"] = _format_diff_time(
-            CONFIG["END_TIME"] - CONFIG["START_TIME"]
+        CONFIG["END_DATETIME"] = datetime.now()
+        CONFIG["RUN_DURATION"] = _format_diff_time(
+            CONFIG["END_DATETIME"] - CONFIG["START_DATETIME"]
         )
         if verbose:
             print()
-            print(f"START TIME: {CONFIG['START_TIME']}")
-            print(f"END TIME: {CONFIG['END_TIME']}")
-            print(f"RUN TIME: {CONFIG['RUN_TIME']}")
+            print(f"START TIME: {CONFIG['START_DATETIME']}")
+            print(f"END TIME: {CONFIG['END_DATETIME']}")
+            print(f"RUN DURATION: {CONFIG['RUN_DURATION']}")
             print()
 
     except Exception as e:
@@ -549,11 +560,15 @@ def _process_timestamp(CONFIG, verbose=True):
 def _save_configs(CONFIG):
     """Save configuration to files."""
     from scitex.io._save import save as scitex_io_save
+
+    # Convert to dict with all keys (including private ones) for saving
+    config_dict = CONFIG.to_dict(include_private=True) if hasattr(CONFIG, 'to_dict') else CONFIG
+
     scitex_io_save(
-        CONFIG, CONFIG["SDIR"] + "CONFIGS/CONFIG.pkl", verbose=False
+        config_dict, str(CONFIG["SDIR_RUN"] / "CONFIGS/CONFIG.pkl"), verbose=False
     )
     scitex_io_save(
-        CONFIG, CONFIG["SDIR"] + "CONFIGS/CONFIG.yaml", verbose=False
+        config_dict, str(CONFIG["SDIR_RUN"] / "CONFIGS/CONFIG.yaml"), verbose=False
     )
 
 
@@ -610,13 +625,13 @@ def running2finished(
         Updated configuration with new SDIR
     """
     if exit_status == 0:
-        dest_dir = CONFIG["SDIR"].replace("RUNNING/", "FINISHED_SUCCESS/")
+        dest_dir = str(CONFIG["SDIR_RUN"]).replace("RUNNING/", "FINISHED_SUCCESS/")
     elif exit_status == 1:
-        dest_dir = CONFIG["SDIR"].replace("RUNNING/", "FINISHED_ERROR/")
+        dest_dir = str(CONFIG["SDIR_RUN"]).replace("RUNNING/", "FINISHED_ERROR/")
     else:  # exit_status is None:
-        dest_dir = CONFIG["SDIR"].replace("RUNNING/", "FINISHED/")
+        dest_dir = str(CONFIG["SDIR_RUN"]).replace("RUNNING/", "FINISHED/")
 
-    src_dir = CONFIG["SDIR"]
+    src_dir = str(CONFIG["SDIR_RUN"])
     _os.makedirs(dest_dir, exist_ok=True)
     try:
 
@@ -656,7 +671,7 @@ def running2finished(
         else:
             print(f"Copy operation timed out after {max_wait} seconds")
 
-        CONFIG["SDIR"] = dest_dir
+        CONFIG["SDIR_RUN"] = Path(dest_dir)
     except Exception as e:
         print(e)
 
@@ -687,7 +702,7 @@ def close(CONFIG, message=":)", notify=False, verbose=True, exit_status=None):
         CONFIG.EXIT_STATUS = exit_status
         CONFIG = CONFIG.to_dict()
         CONFIG = _process_timestamp(CONFIG, verbose=verbose)
-        sys = CONFIG.pop("sys", None)
+        sys = CONFIG.pop("_sys", None)  # Pop private sys reference
 
         # CRITICAL: Close matplotlib BEFORE closing streams to prevent segfault
         try:
@@ -733,7 +748,7 @@ def close(CONFIG, message=":)", notify=False, verbose=True, exit_status=None):
         CONFIG = running2finished(CONFIG, exit_status=exit_status)
 
         # ANSI code escape
-        log_files = _glob(CONFIG["SDIR"] + "logs/*.log")
+        log_files = _glob(str(CONFIG["SDIR_RUN"]) + "logs/*.log")
         _escape_ansi_from_log_files(log_files)
 
         if CONFIG.get("ARGS"):

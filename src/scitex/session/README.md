@@ -15,22 +15,64 @@ scitex.session provides lifecycle management for scientific experiments with aut
 ## Quick Start
 
 ```python
-import sys
-import matplotlib.pyplot as plt
-from scitex import session
+import scitex
 
-CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = session.start(sys, plt)
+@scitex.session.session
+def main(
+    CONFIG=scitex.INJECTED,
+    plt=scitex.INJECTED,
+    COLORS=scitex.INJECTED,
+    rng_manager=scitex.INJECTED,
+):
+    """Args injected by @scitex.session.session decorator"""
+    print(f"Session ID: {CONFIG['ID']}")
+    # Your experiment code here
 
-# Your experiment code here
-
-session.close(CONFIG)
+if __name__ == "__main__":
+    main()
 ```
 
 ## Core Functions
 
-### session.start()
+### @session.session Decorator
 
-Initialize experiment session with reproducibility settings.
+The recommended way to use scitex.session is through the `@scitex.session.session` decorator, which automatically handles session initialization and cleanup.
+
+```python
+import scitex
+
+@scitex.session.session
+def main(
+    CONFIG=scitex.INJECTED,
+    plt=scitex.INJECTED,
+    COLORS=scitex.INJECTED,
+    rng_manager=scitex.INJECTED,
+):
+    """Args injected by @scitex.session.session decorator"""
+    print(f"Session ID: {CONFIG['ID']}")
+
+if __name__ == "__main__":
+    main()
+```
+
+The decorator automatically injects the following parameters:
+- `CONFIG`: Configuration dictionary with session metadata
+- `plt`: Configured matplotlib.pyplot module
+- `COLORS`: Color cycle dictionary
+- `rng_manager`: RandomStateManager instance
+
+Using `scitex.INJECTED` as default values makes it explicit that these parameters are injected by the decorator.
+
+Decorator Parameters:
+- file: Script file path (auto-detected if None)
+- sdir: Save directory (auto-generated if None)
+- seed: Random seed for reproducibility (default: 42)
+- agg: Use matplotlib Agg backend (default: False)
+- verbose: Print detailed information (default: True)
+
+### session.start() (Advanced)
+
+Initialize experiment session with reproducibility settings. Note: The decorator approach is recommended over direct start()/close() calls.
 
 Parameters:
 - sys: Python sys module for I/O redirection
@@ -45,12 +87,12 @@ Returns:
 - CONFIGS: Configuration dictionary with session metadata
 - stdout, stderr: Redirected output streams
 - plt: Configured matplotlib.pyplot module
-- CC: Color cycle dictionary
+- COLORS: Color cycle dictionary
 - rng: RandomStateManager instance
 
-### session.close()
+### session.close() (Advanced)
 
-Close experiment session and finalize logging.
+Close experiment session and finalize logging. Note: The decorator handles this automatically.
 
 Parameters:
 - CONFIG: Configuration dictionary from start()
@@ -87,7 +129,7 @@ Parameters:
 - Auto-generates save directories
 - RUNNING/ for active sessions
 - FINISHED/ for completed sessions
-- FINISHED_SUCCESS/ and FINISHED_ERROR/ based on exit status
+- FINISHED_SUCOLORSESS/ and FINISHED_ERROR/ based on exit status
 
 ### Configuration Management
 
@@ -101,7 +143,15 @@ Parameters:
 ### Custom Save Directory
 
 ```python
-CONFIG, *_ = session.start(sys, plt, sdir="/custom/path/")
+import scitex
+
+@scitex.session.session(sdir="/custom/path/")
+def main():
+    # Your experiment code here
+    pass
+
+if __name__ == "__main__":
+    main()
 ```
 
 ### Debug Mode
@@ -138,7 +188,7 @@ info = manager.get_session(session_id)
 │           ├── CONFIG.pkl
 │           └── CONFIG.yaml
 ├── FINISHED/
-├── FINISHED_SUCCESS/
+├── FINISHED_SUCOLORSESS/
 └── FINISHED_ERROR/
 ```
 
@@ -147,37 +197,52 @@ info = manager.get_session(session_id)
 CONFIG contains:
 - ID: Session identifier
 - PID: Process ID
-- START_TIME: Session start timestamp
-- END_TIME: Session end timestamp
-- RUN_TIME: Formatted runtime (HH:MM:SS)
-- FILE: Script file path
-- SDIR: Save directory path
-- SDIR_PATH: Path object version
-- ARGS: Command-line arguments
-- EXIT_STATUS: Exit code
+- START_DATETIME: Session start timestamp (datetime object)
+- END_DATETIME: Session end timestamp (datetime object)
+- RUN_DURATION: Formatted runtime string (HH:MM:SS)
+- FILE: Script file path (Path object)
+- SDIR_OUT: Base output directory (Path object)
+- SDIR_RUN: Current session directory (Path object)
+- ARGS: Command-line arguments (dict)
+- EXIT_STATUS: Exit code (0=success, 1=error)
 
 ## Matplotlib Integration
 
 ```python
-CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = session.start(
-    sys, plt,
+import scitex
+
+@scitex.session.session(
     fig_size_mm=(160, 100),
     dpi_save=300,
     hide_top_right_spines=True,
     alpha=0.9
 )
+def main():
+    # plt and COLORS are automatically available
+    plt.plot([1, 2, 3], color=COLORS[0])
+    plt.show()
+
+if __name__ == "__main__":
+    main()
 ```
 
 - plt is replaced with scitex.plt wrapper
-- CC provides color cycle dictionary
+- COLORS provides color cycle dictionary
 - Automatic style configuration
 
 ## Random State Management
 
 ```python
-CONFIG, *_, rng_manager = session.start(sys, plt, seed=42)
+import scitex
 
-random_array = rng.random((10, 10))
+@scitex.session.session(seed=42)
+def main():
+    # rng is automatically available
+    random_array = rng.random((10, 10))
+    print(random_array)
+
+if __name__ == "__main__":
+    main()
 ```
 
 - rng is global RandomStateManager

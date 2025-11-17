@@ -21,7 +21,7 @@ Usage:
     from scitex import session
     
     # Start a session
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = session.start(sys, plt)
+    CONFIG, sys.stdout, sys.stderr, plt, COLORS, rng_manager = session.start(sys, plt)
     
     # Your experiment code here
     
