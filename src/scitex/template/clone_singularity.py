@@ -24,8 +24,7 @@ TEMPLATE_REPO_URL = "https://github.com/ywatanabe1989/singularity_template.git"
 
 
 def clone_singularity(
-    project_name: str,
-    target_dir: Optional[str] = None,
+    project_dir: str,
     git_strategy: Optional[str] = "child",
     branch: Optional[str] = None,
     tag: Optional[str] = None,
@@ -35,10 +34,9 @@ def clone_singularity(
 
     Parameters
     ----------
-    project_name : str
-        Name of the new singularity project
-    target_dir : str, optional
-        Directory where the project will be created. If None, uses current directory.
+    project_dir : str
+        Path to project directory (will be created). Can be a simple name like "my_project"
+        or a full path like "./projects/my_project"
     git_strategy : str, optional
         Git initialization strategy ('child', 'parent', None). Default is 'child'.
     branch : str, optional
@@ -57,12 +55,12 @@ def clone_singularity(
     -------
     >>> from scitex.template import clone_singularity
     >>> clone_singularity("my_singularity_project")
+    >>> clone_singularity("./projects/my_project")
     >>> clone_singularity("my_project", branch="develop")
     >>> clone_singularity("my_project", tag="v1.0.0")
     """
     return clone_project(
-        project_name,
-        target_dir,
+        project_dir,
         TEMPLATE_REPO_URL,
         "singularity_template",
         git_strategy,
@@ -85,28 +83,21 @@ def main(args: list = None) -> None:
 
     if len(args) < 1:
         print(
-            "Usage: python -m scitex clone_singularity_project <project-name> [target-dir]"
+            "Usage: python -m scitex clone_singularity_project <project-dir>"
         )
         print("")
         print("Arguments:")
-        print("  project-name  Name of the new singularity project")
-        print(
-            "  target-dir    Optional: Directory where project will be created (default: current directory)"
-        )
+        print("  project-dir   Path to project directory (will be created)")
+        print("                Can be a simple name like 'my_project' or a full path like './projects/my_project'")
         print("")
         print("Example:")
-        print(
-            "  python -m scitex clone_singularity_project my_singularity_project"
-        )
-        print(
-            "  python -m scitex clone_singularity_project my_project ~/projects"
-        )
+        print("  python -m scitex clone_singularity_project my_singularity_project")
+        print("  python -m scitex clone_singularity_project ./projects/my_project")
         sys.exit(1)
 
-    project_name = args[0]
-    target_dir = args[1] if len(args) > 1 else None
+    project_dir = args[0]
 
-    success = clone_singularity(project_name, target_dir)
+    success = clone_singularity(project_dir)
     sys.exit(0 if success else 1)
 
 
