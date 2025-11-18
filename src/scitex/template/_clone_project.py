@@ -36,8 +36,7 @@ logger = getLogger(__name__)
 
 
 def clone_project(
-    project_name: str,
-    target_dir: Optional[str],
+    project_dir: str,
     template_url: str,
     template_name: str,
     git_strategy: Optional[str] = "child",
@@ -56,10 +55,9 @@ def clone_project(
 
     Parameters
     ----------
-    project_name : str
-        Name of the new project
-    target_dir : str, optional
-        Directory where the project will be created. If None, uses current directory.
+    project_dir : str
+        Path to project directory (will be created). Can be a simple name like "my_paper"
+        or a full path like "./papers/my_paper"
     template_url : str
         Git repository URL of the template
     template_name : str
@@ -83,11 +81,10 @@ def clone_project(
         True if successful, False otherwise
     """
     try:
-        # Determine target directory
-        if target_dir is None:
-            target_dir = os.getcwd()
-
-        target_dir_path = Path(target_dir)
+        # Parse project_dir into name and parent directory
+        project_path = Path(project_dir)
+        project_name = project_path.name
+        target_dir_path = project_path.parent if project_path.parent != Path('.') else Path.cwd()
         target_path = target_dir_path / project_name
 
         # Check if target directory already exists

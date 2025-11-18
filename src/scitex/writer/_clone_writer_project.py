@@ -53,17 +53,11 @@ def clone_writer_project(
         >>> clone_writer_project("my_paper", branch="develop")
         >>> clone_writer_project("my_paper", tag="v1.0.0")
     """
-    from pathlib import Path
     from scitex.template import clone_writer_directory
 
     try:
-        # Parse project_dir into name and target_dir
-        project_path = Path(project_dir)
-        project_name = project_path.name
-        target_dir = str(project_path.parent) if project_path.parent != Path('.') else None
-
         result = clone_writer_directory(
-            project_name, target_dir, git_strategy, branch, tag
+            project_dir, git_strategy, branch, tag
         )
         return result
     except Exception as e:
