@@ -8,7 +8,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import torch
-from ..decorators import torch_fn
+from scitex.decorators import torch_fn
 
 
 def to_sktime_df(arr):

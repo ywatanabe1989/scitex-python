@@ -12,9 +12,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from ...decorators import torch_fn
-from ...gen._to_even import to_even
-from ...gen._to_odd import to_odd
+from scitex.decorators import torch_fn
+from scitex.gen._to_even import to_even
+from scitex.gen._to_odd import to_odd
 
 try:
     from torchaudio.prototype.functional import sinc_impulse_response

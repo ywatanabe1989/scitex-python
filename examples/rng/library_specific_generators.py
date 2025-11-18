@@ -15,7 +15,7 @@ def demonstrate_numpy():
     print("NumPy Generators")
     print("=" * 60)
     
-    rng = stx.rng.RandomStateManager(seed=42, verbose=False)
+    rng_manager = stx.rng.RandomStateManager(seed=42, verbose=False)
     
     # Get named NumPy generators
     data_gen = rng.get_np_generator("data")
@@ -42,7 +42,7 @@ def demonstrate_sklearn():
         from sklearn.model_selection import train_test_split, KFold
         from sklearn.ensemble import RandomForestClassifier
         
-        rng = stx.rng.RandomStateManager(seed=42, verbose=False)
+        rng_manager = stx.rng.RandomStateManager(seed=42, verbose=False)
         
         # Generate sample data
         np_gen = rng.get_np_generator("data")
@@ -89,7 +89,7 @@ def demonstrate_pytorch():
     try:
         import torch
         
-        rng = stx.rng.RandomStateManager(seed=42, verbose=False)
+        rng_manager = stx.rng.RandomStateManager(seed=42, verbose=False)
         
         # Get named PyTorch generators
         model_gen = rng.get_torch_generator("model_init")
@@ -115,7 +115,7 @@ def demonstrate_mixed_usage():
     print("Mixed Library Usage")
     print("=" * 60)
     
-    rng = stx.rng.RandomStateManager(seed=42, verbose=False)
+    rng_manager = stx.rng.RandomStateManager(seed=42, verbose=False)
     
     # NumPy for data generation
     data_gen = rng.get_np_generator("data")

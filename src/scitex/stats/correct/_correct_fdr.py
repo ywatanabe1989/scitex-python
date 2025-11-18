@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-01 20:48:08 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/correct/_correct_fdr.py
-# ----------------------------------------
-from __future__ import annotations
-import os
+# Timestamp: "2025-11-11 01:58:30 (ywatanabe)"
+
+
+import matplotlib.pyplot as plt
+
 __FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
 """
 Functionalities:
@@ -25,14 +23,17 @@ IO:
 """
 
 """Imports"""
-import argparse
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Literal
+from typing import Optional
+from typing import Union
 
 import matplotlib
 import matplotlib.axes
 import numpy as np
 import pandas as pd
-import scitex as stx
 from scitex.logging import getLogger
 
 logger = getLogger(__name__)
@@ -160,8 +161,8 @@ def correct_fdr(
     >>> corrected_bh[0]['pvalue_adjusted'] < corrected_by[0]['pvalue_adjusted']
     True
     """
-    from ..utils._formatters import p2stars
-    from ..utils._normalizers import force_dataframe, to_dict
+    from scitex.stats.utils._formatters import p2stars
+    from scitex.stats.utils._normalizers import force_dataframe, to_dict
 
     if verbose:
         method_name = (
@@ -293,6 +294,7 @@ def correct_fdr(
     if plot:
         if ax is None:
             import matplotlib.pyplot as plt
+
             fig, ax = plt.subplots(figsize=(10, 6))
         _plot_fdr(df_result, alpha, method, ax)
 
@@ -320,24 +322,55 @@ def _plot_fdr(df, alpha, method, ax):
     x = np.arange(m)
 
     # Plot original p-values and q-values
-    ax.scatter(x, df["pvalue"], label="Original p-values", alpha=0.7, s=100, color="C0")
-    ax.scatter(x, df["pvalue_adjusted"], label="Q-values (FDR-adjusted)", alpha=0.7, s=100, color="C1", marker="s")
+    ax.scatter(
+        x,
+        df["pvalue"],
+        label="Original p-values",
+        alpha=0.7,
+        s=100,
+        color="C0",
+    )
+    ax.scatter(
+        x,
+        df["pvalue_adjusted"],
+        label="Q-values (FDR-adjusted)",
+        alpha=0.7,
+        s=100,
+        color="C1",
+        marker="s",
+    )
 
     # Connect original to adjusted with lines
     for i in range(m):
-        ax.plot([i, i], [df["pvalue"].iloc[i], df["pvalue_adjusted"].iloc[i]],
-                "k-", alpha=0.3, linewidth=0.5)
+        ax.plot(
+            [i, i],
+            [df["pvalue"].iloc[i], df["pvalue_adjusted"].iloc[i]],
+            "k-",
+            alpha=0.3,
+            linewidth=0.5,
+        )
 
     # Add significance threshold
-    ax.axhline(alpha, color="red", linestyle="--", linewidth=2, alpha=0.5, label=f"α = {alpha}")
+    ax.axhline(
+        alpha,
+        color="red",
+        linestyle="--",
+        linewidth=2,
+        alpha=0.5,
+        label=f"α = {alpha}",
+    )
 
     # Formatting
-    method_name = "Benjamini-Hochberg" if method == "bh" else "Benjamini-Yekutieli"
+    method_name = (
+        "Benjamini-Hochberg" if method == "bh" else "Benjamini-Yekutieli"
+    )
     ax.set_xlabel("Test Index")
     ax.set_ylabel("P-value / Q-value")
     rejections = df["rejected"].sum()
-    ax.set_title(f"FDR Correction ({method_name}, m={m} tests)\n"
-                 f"{rejections}/{m} hypotheses rejected")
+    ax.set_title(
+        f"FDR Correction ({method_name}, m={m} tests)\n"
+        f"{rejections}/{m} hypotheses rejected"
+    )
     ax.set_yscale("log")
     ax.grid(True, alpha=0.3)
     ax.legend()
@@ -363,8 +396,12 @@ def _plot_fdr(df, alpha, method, ax):
 """Main function"""
 
 
-def main(args):
+def demo(verbose=False):
     """Demonstrate FDR correction."""
+    import scitex as stx
+
+    # CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager
+
     logger.info("Demonstrating False Discovery Rate correction")
 
     # Example 1: Single test (no correction needed)
@@ -377,7 +414,7 @@ def main(args):
         "alpha": 0.05,
     }
 
-    corrected_single = correct_fdr(single_result, verbose=args.verbose)
+    corrected_single = correct_fdr(single_result, verbose=verbose)
 
     # Example 2: Multiple tests - BH method
     logger.info("\n=== Example 2: Multiple tests (Benjamini-Hochberg) ===")
@@ -391,14 +428,14 @@ def main(args):
     ]
 
     corrected_bh = correct_fdr(
-        multiple_results, method="bh", alpha=0.05, verbose=args.verbose
+        multiple_results, method="bh", alpha=0.05, verbose=verbose
     )
 
     # Example 3: BH vs BY comparison
     logger.info("\n=== Example 3: BH vs BY comparison ===")
 
     corrected_by = correct_fdr(
-        multiple_results, method="by", alpha=0.05, verbose=args.verbose
+        multiple_results, method="by", alpha=0.05, verbose=verbose
     )
 
     # Example 4: Bonferroni vs FDR
@@ -591,44 +628,7 @@ def main(args):
     return 0
 
 
-def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Demonstrate FDR correction")
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
-    return parser.parse_args()
-
-
-def run_main():
-    """Initialize SciTeX framework and run main."""
-    global CONFIG, sys, plt, rng
-
-    import sys
-
-    import matplotlib.pyplot as plt
-
-    args = parse_args()
-
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
-        sys,
-        plt,
-        args=args,
-        file=__file__,
-        verbose=args.verbose,
-        agg=True,
-    )
-
-    exit_status = main(args)
-
-    stx.session.close(
-        CONFIG,
-        verbose=args.verbose,
-        exit_status=exit_status,
-    )
-
-
 if __name__ == "__main__":
-    run_main()
+    demo()
 
 # EOF

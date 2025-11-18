@@ -332,12 +332,12 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_title_case.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_title_case.py
 # --------------------------------------------------------------------------------
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-04-24 15:05:34"
-# # Author: Yusuke Watanabe (ywata1989@gmail.com)
+# # Author: Yusuke Watanabe (ywatanabe@scitex.ai)
 # 
 # 
 # """
@@ -417,12 +417,12 @@ if __name__ == "__main__":
 # 
 # 
 # if __name__ == "__main__":
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
 #     main()
-#     scitex.gen.close(CONFIG, verbose=False, notify=False)
+#     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_title_case.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_title_case.py
 # --------------------------------------------------------------------------------

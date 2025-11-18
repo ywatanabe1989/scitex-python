@@ -45,7 +45,7 @@ import scitex as stx
 import torch
 from scitex import logging
 
-from ...decorators import batch_fn, torch_fn
+from scitex.decorators import batch_fn, torch_fn
 
 logger = logging.getLogger(__name__)
 
@@ -513,7 +513,7 @@ def run_main() -> None:
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,

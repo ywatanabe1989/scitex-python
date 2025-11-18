@@ -21,26 +21,32 @@ from typing import Optional
 from ._clone_project import clone_project
 
 TEMPLATE_REPO_URL = (
-    "https://github.com/ywatanabe1989/scitex_template_research.git"
+    "https://github.com/ywatanabe1989/scitex-research-template.git"
 )
 
 
 def clone_research(
-    project_name: str,
-    target_dir: Optional[str] = None,
+    project_dir: str,
     git_strategy: Optional[str] = "child",
+    branch: Optional[str] = None,
+    tag: Optional[str] = None,
 ) -> bool:
     """
     Create a new research project from the template repository.
 
     Parameters
     ----------
-    project_name : str
-        Name of the new research project
-    target_dir : str, optional
-        Directory where the project will be created. If None, uses current directory.
+    project_dir : str
+        Path to project directory (will be created). Can be a simple name like "my_project"
+        or a full path like "./projects/my_project"
     git_strategy : str, optional
         Git initialization strategy ('child', 'parent', None). Default is 'child'.
+    branch : str, optional
+        Specific branch of the template repository to clone. If None, clones the default branch.
+        Mutually exclusive with tag parameter.
+    tag : str, optional
+        Specific tag/release of the template repository to clone. If None, clones the default branch.
+        Mutually exclusive with branch parameter.
 
     Returns
     -------
@@ -51,13 +57,17 @@ def clone_research(
     -------
     >>> from scitex.template import clone_research
     >>> clone_research("my_research_project")
+    >>> clone_research("./projects/my_project")
+    >>> clone_research("my_project", branch="develop")
+    >>> clone_research("my_project", tag="v1.0.0")
     """
     return clone_project(
-        project_name,
-        target_dir,
+        project_dir,
         TEMPLATE_REPO_URL,
-        "scitex_template_research",
+        "scitex-research-template",
         git_strategy,
+        branch,
+        tag,
     )
 
 
@@ -75,26 +85,21 @@ def main(args: list = None) -> None:
 
     if len(args) < 1:
         print(
-            "Usage: python -m scitex clone_research_project <project-name> [target-dir]"
+            "Usage: python -m scitex clone_research_project <project-dir>"
         )
         print("")
         print("Arguments:")
-        print("  project-name  Name of the new research project")
-        print(
-            "  target-dir    Optional: Directory where project will be created (default: current directory)"
-        )
+        print("  project-dir   Path to project directory (will be created)")
+        print("                Can be a simple name like 'my_project' or a full path like './projects/my_project'")
         print("")
         print("Example:")
         print("  python -m scitex clone_research_project my_research_project")
-        print(
-            "  python -m scitex clone_research_project my_project ~/projects"
-        )
+        print("  python -m scitex clone_research_project ./projects/my_project")
         sys.exit(1)
 
-    project_name = args[0]
-    target_dir = args[1] if len(args) > 1 else None
+    project_dir = args[0]
 
-    success = clone_research(project_name, target_dir)
+    success = clone_research(project_dir)
     sys.exit(0 if success else 1)
 
 

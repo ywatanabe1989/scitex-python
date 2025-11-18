@@ -105,7 +105,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/decorators/_torch_fn.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_torch_fn.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -123,9 +123,6 @@ if __name__ == "__main__":
 # from typing import Callable
 # 
 # import numpy as np
-# import pandas as pd
-# import torch
-# import xarray as xr
 # 
 # from ._converters import _return_always, is_nested_decorator, to_torch
 # 
@@ -199,6 +196,7 @@ if __name__ == "__main__":
 # 
 #         # Skip strict assertion for certain types that may not convert to tensors
 #         # Instead, convert what we can and pass through what we can't
+#         import torch
 #         validated_args = []
 #         for arg_index, arg in enumerate(converted_args):
 #             if isinstance(arg, torch.Tensor):
@@ -220,17 +218,21 @@ if __name__ == "__main__":
 #         results = func(*validated_args, **converted_kwargs)
 # 
 #         # Convert results back to original input types
+#         import torch
 #         if isinstance(results, torch.Tensor):
 #             if original_object is not None:
 #                 if isinstance(original_object, list):
 #                     return results.detach().cpu().numpy().tolist()
 #                 elif isinstance(original_object, np.ndarray):
 #                     return results.detach().cpu().numpy()
-#                 elif isinstance(original_object, pd.DataFrame):
+#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataFrame':
+#                     import pandas as pd
 #                     return pd.DataFrame(results.detach().cpu().numpy())
-#                 elif isinstance(original_object, pd.Series):
+#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Series':
+#                     import pandas as pd
 #                     return pd.Series(results.detach().cpu().numpy().flatten())
-#                 elif isinstance(original_object, xr.DataArray):
+#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataArray':
+#                     import xarray as xr
 #                     return xr.DataArray(results.detach().cpu().numpy())
 #             return results
 # 
@@ -245,5 +247,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/decorators/_torch_fn.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_torch_fn.py
 # --------------------------------------------------------------------------------

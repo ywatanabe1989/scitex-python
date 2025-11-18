@@ -20,7 +20,7 @@ Prerequisites:
 import numpy as np
 
 try:
-    from ..str._latex_fallback import safe_latex_render, latex_fallback_decorator
+    from scitex.str._latex_fallback import safe_latex_render, latex_fallback_decorator
     FALLBACK_AVAILABLE = True
 except ImportError:
     FALLBACK_AVAILABLE = False
@@ -61,7 +61,7 @@ def preview(tex_str_list, enable_fallback=True):
     If LaTeX rendering fails, this function automatically falls back to 
     mathtext or unicode alternatives while preserving the preview layout.
     """
-    from ..plt import subplots
+    from scitex.plt import subplots
 
     if not isinstance(tex_str_list, (list, tuple)):
         tex_str_list = [tex_str_list]

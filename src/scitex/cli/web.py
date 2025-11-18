@@ -12,6 +12,9 @@ from pathlib import Path
 from scitex.web import get_urls, download_images, get_image_urls
 from scitex.web._scraping import _get_default_download_dir
 from scitex.logging import getLogger
+import subprocess
+import json
+from datetime import datetime
 
 logger = getLogger(__name__)
 
@@ -26,6 +29,7 @@ def web():
       get-urls        Extract URLs from a webpage
       get-image-urls  Extract image URLs from a webpage
       download-images Download images from a webpage
+      take-screenshot Capture a screenshot of a webpage
 
     \b
     Examples:
@@ -34,6 +38,8 @@ def web():
       scitex web get-image-urls https://example.com
       scitex web download-images https://example.com --output ./downloads
       scitex web download-images https://example.com --min-size 100x100
+      scitex web take-screenshot https://example.com
+      scitex web take-screenshot https://example.com --output ./screenshots
     """
     pass
 
@@ -235,10 +241,168 @@ def download_images_cmd(url, output, pattern, min_size, same_domain, max_workers
         sys.exit(1)
 
 
+@web.command()
+@click.argument('url')
+@click.option(
+    '--output', '-o',
+    type=click.Path(),
+    help='Output directory for the screenshot (default: ~/.scitex/capture)'
+)
+@click.option(
+    '--message', '-m',
+    help='Optional message to include in the screenshot filename'
+)
+@click.option(
+    '--quality', '-q',
+    type=int,
+    default=85,
+    help='JPEG quality 1-100 (default: 85)'
+)
+@click.option(
+    '--full-page',
+    is_flag=True,
+    help='Capture the full page (scrolling) instead of just viewport'
+)
+def take_screenshot_cmd(url, output, message, quality, full_page):
+    """
+    Capture a screenshot of a webpage.
+
+    \b
+    Output directory priority:
+      1. --output option if specified
+      2. ~/.scitex/capture (default)
+
+    \b
+    Features:
+      - Captures webpage screenshots with timestamps
+      - Supports custom messages in filenames for organization
+      - Adjustable quality settings
+      - Full page or viewport-only capture
+
+    \b
+    Examples:
+      scitex web take-screenshot https://example.com
+      scitex web take-screenshot https://example.com --output ./screenshots
+      scitex web take-screenshot https://example.com --message "homepage-test"
+      scitex web take-screenshot https://example.com --quality 95 --full-page
+    """
+    try:
+        click.echo(f"Capturing screenshot of: {url}")
+
+        # Prepare output directory
+        if output:
+            output_path = Path(output).resolve()
+            output_path.mkdir(parents=True, exist_ok=True)
+            output_dir = str(output_path)
+        else:
+            output_dir = str(Path.home() / ".scitex" / "capture")
+            Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+        # Generate timestamped filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        if message:
+            filename = f"screenshot_{timestamp}_{message}.png"
+        else:
+            filename = f"screenshot_{timestamp}.png"
+
+        output_file = Path(output_dir) / filename
+
+        # Use playwright MCP server to take screenshot
+        # We'll use a simple approach: navigate to URL and take screenshot
+        cmd = [
+            'playwright', 'screenshot',
+            url,
+            str(output_file)
+        ]
+
+        # Try using the MCP approach first, fall back to direct playwright if available
+        try:
+            # For now, we'll use a simpler approach with playwright directly
+            import asyncio
+            from playwright.async_api import async_playwright
+
+            async def capture():
+                async with async_playwright() as p:
+                    browser = await p.chromium.launch()
+                    page = await browser.new_page()
+                    await page.goto(url)
+                    await page.screenshot(
+                        path=str(output_file),
+                        full_page=full_page,
+                        type='png' if str(output_file).endswith('.png') else 'jpeg',
+                        quality=quality if str(output_file).endswith('.jpg') or str(output_file).endswith('.jpeg') else None
+                    )
+                    await browser.close()
+
+            asyncio.run(capture())
+
+            if output_file.exists():
+                click.secho(f"Screenshot saved successfully", fg='green')
+                click.echo(f"Location: {output_file}")
+                sys.exit(0)
+            else:
+                raise Exception("Screenshot file was not created")
+
+        except ImportError:
+            # Fall back to using playwright CLI if the Python package is not available
+            click.secho("Playwright Python package not found, trying CLI...", fg='yellow')
+            result = subprocess.run(
+                ['playwright', 'screenshot', url, str(output_file)],
+                capture_output=True,
+                text=True
+            )
+
+            if result.returncode == 0 and output_file.exists():
+                click.secho(f"Screenshot saved successfully", fg='green')
+                click.echo(f"Location: {output_file}")
+                sys.exit(0)
+            else:
+                raise Exception(f"Playwright CLI failed: {result.stderr}")
+
+    except Exception as e:
+        error_msg = str(e)
+        click.secho(f"ERROR: {error_msg}", fg='red', err=True)
+        click.echo()
+
+        # Provide context-specific troubleshooting
+        if "ERR_CONNECTION_REFUSED" in error_msg or "Connection refused" in error_msg:
+            click.echo("Troubleshooting - Connection Refused:")
+            click.echo("  1. Make sure a web server is running at the specified URL")
+            click.echo("  2. Check if the port is correct (e.g., http://127.0.0.1:8000/)")
+            click.echo("  3. Verify the server is accessible: curl <url>")
+            click.echo("  4. If using WSL, you may need to use the WSL IP instead of 127.0.0.1")
+        elif "ERR_NAME_NOT_RESOLVED" in error_msg or "Name or service not known" in error_msg:
+            click.echo("Troubleshooting - DNS Resolution Failed:")
+            click.echo("  1. Check if the domain name is correct")
+            click.echo("  2. Verify internet connection")
+            click.echo("  3. Try pinging the domain: ping <domain>")
+        elif "Timeout" in error_msg or "timeout" in error_msg:
+            click.echo("Troubleshooting - Connection Timeout:")
+            click.echo("  1. The server may be slow to respond")
+            click.echo("  2. Check network connectivity")
+            click.echo("  3. Try accessing the URL in a regular browser")
+        elif "No module named 'playwright'" in error_msg or "ImportError" in error_msg:
+            click.echo("Troubleshooting - Playwright Not Installed:")
+            click.echo("  1. Install Playwright: pip install playwright")
+            click.echo("  2. Install browsers: playwright install chromium")
+        elif "Executable doesn't exist" in error_msg or "browser executable" in error_msg.lower():
+            click.echo("Troubleshooting - Browser Not Installed:")
+            click.echo("  1. Install Chromium browser: playwright install chromium")
+            click.echo("  2. Or install all browsers: playwright install")
+        else:
+            click.echo("Troubleshooting:")
+            click.echo("  1. Verify the URL is accessible in a regular browser")
+            click.echo("  2. Check Playwright installation: pip install playwright")
+            click.echo("  3. Check browser installation: playwright install chromium")
+
+        sys.exit(1)
+
+
 # Register command aliases
 web.add_command(get_urls_cmd, name='get-urls')
 web.add_command(get_image_urls_cmd, name='get-image-urls')
 web.add_command(download_images_cmd, name='download-images')
+web.add_command(take_screenshot_cmd, name='take-screenshot')
 
 
 if __name__ == '__main__':

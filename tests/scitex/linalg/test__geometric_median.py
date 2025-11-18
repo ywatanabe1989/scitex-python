@@ -557,7 +557,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/linalg/_geometric_median.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/linalg/_geometric_median.py
 # --------------------------------------------------------------------------------
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
@@ -571,7 +571,7 @@ if __name__ == "__main__":
 # 
 # import torch
 # from geom_median.torch import compute_geometric_median
-# from ..decorators import torch_fn
+# from scitex.decorators import torch_fn
 # 
 # # @torch_fn
 # # def geometric_median(xx, dim=-1):
@@ -622,12 +622,12 @@ if __name__ == "__main__":
 #     # args = parser.parse_args()
 # 
 #     # Main
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
 #     main()
-#     scitex.gen.close(CONFIG, verbose=False, notify=False)
+#     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/linalg/_geometric_median.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/linalg/_geometric_median.py
 # --------------------------------------------------------------------------------

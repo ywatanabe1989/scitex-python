@@ -336,7 +336,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_ChannelGainChanger.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_ChannelGainChanger.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -384,5 +384,5 @@ if __name__ == "__main__":
 #     # summary(sb, x, s)
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_ChannelGainChanger.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_ChannelGainChanger.py
 # --------------------------------------------------------------------------------

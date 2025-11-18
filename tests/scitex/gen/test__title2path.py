@@ -166,7 +166,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_title2path.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_title2path.py
 # --------------------------------------------------------------------------------
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
@@ -230,5 +230,5 @@ if __name__ == "__main__":
 # #     return path.lower()
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_title2path.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_title2path.py
 # --------------------------------------------------------------------------------

@@ -55,7 +55,7 @@ def run_experiment(seed=42):
     print("=" * 50)
     
     # Initialize RNG - automatically fixes all random modules
-    rng = stx.rng.RandomStateManager(seed=seed)
+    rng_manager = stx.rng.RandomStateManager(seed=seed)
     
     # Step 1: Generate data
     print("\n1. Generating synthetic data...")

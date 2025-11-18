@@ -334,7 +334,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_list_packages.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_list_packages.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -456,7 +456,7 @@ if __name__ == "__main__":
 #     import matplotlib.pyplot as plt
 #     import scitex
 # 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys,
 #         plt,
 #         verbose=False,
@@ -465,7 +465,7 @@ if __name__ == "__main__":
 # 
 #     exit_status = main()
 # 
-#     scitex.gen.close(
+#     scitex.session.close(
 #         CONFIG,
 #         verbose=False,
 #         sys=sys,
@@ -477,5 +477,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_list_packages.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_list_packages.py
 # --------------------------------------------------------------------------------

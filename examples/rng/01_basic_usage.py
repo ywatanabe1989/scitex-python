@@ -22,7 +22,7 @@ def main():
     
     # Method 1: Create a standalone RandomStateManager
     logger.info("Method 1: Direct RandomStateManager creation")
-    rng = stx.rng.RandomStateManager(seed=42)
+    rng_manager = stx.rng.RandomStateManager(seed=42)
     
     # Get named generators for different purposes
     # Each name gets its own deterministic seed derived from the main seed
@@ -47,7 +47,7 @@ def main():
     
     # Method 2: Using the global instance
     logger.info("\nMethod 2: Global RandomStateManager")
-    global_rng = stx.rng.get()  # Gets or creates global instance
+    global_rng_manager = stx.rng.get()  # Gets or creates global instance
     
     # Generate some data with global instance
     global_data = global_rng("experiment").random(10)
@@ -55,7 +55,7 @@ def main():
     
     # Method 3: Reset global with new seed
     logger.info("\nMethod 3: Reset global instance")
-    reset_rng = stx.rng.reset(seed=123)
+    reset_rng_manager = stx.rng.reset(seed=123)
     new_data = reset_rng("experiment").random(10)
     logger.info(f"After reset, first 3 values: {new_data[:3]}")
     

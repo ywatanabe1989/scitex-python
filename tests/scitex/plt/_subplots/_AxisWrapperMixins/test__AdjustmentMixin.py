@@ -219,7 +219,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/_subplots/_AxisWrapperMixins/_AdjustmentMixin.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_AxisWrapperMixins/_AdjustmentMixin.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -227,9 +227,7 @@ if __name__ == "__main__":
 # # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/.claude-worktree/scitex_repo/src/scitex/plt/_subplots/_AxisWrapperMixins/_AdjustmentMixin.py
 # # ----------------------------------------
 # import os
-# __FILE__ = (
-#     "./src/scitex/plt/_subplots/_AxisWrapperMixins/_AdjustmentMixin.py"
-# )
+# __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
@@ -243,20 +241,55 @@ if __name__ == "__main__":
 # 
 #     def rotate_labels(
 #         self,
-#         x: float = 30,
-#         y: float = 30,
-#         x_ha: str = "right",
-#         y_ha: str = "center",
+#         x: float = None,
+#         y: float = None,
+#         x_ha: str = None,
+#         y_ha: str = None,
+#         x_va: str = None,
+#         y_va: str = None,
+#         auto_adjust: bool = True,
+#         scientific_convention: bool = True,
+#         tight_layout: bool = False,
 #     ) -> None:
+#         """Rotate x and y axis labels with automatic positioning.
+#         
+#         Parameters
+#         ----------
+#         x : float or None, optional
+#             Rotation angle for x-axis labels in degrees. 
+#             If None or 0, x-axis labels are not rotated. Default is None.
+#         y : float or None, optional
+#             Rotation angle for y-axis labels in degrees.
+#             If None or 0, y-axis labels are not rotated. Default is None.
+#         x_ha : str or None, optional
+#             Horizontal alignment for x-axis labels. If None, automatically determined.
+#         y_ha : str or None, optional
+#             Horizontal alignment for y-axis labels. If None, automatically determined.
+#         x_va : str or None, optional
+#             Vertical alignment for x-axis labels. If None, automatically determined.
+#         y_va : str or None, optional
+#             Vertical alignment for y-axis labels. If None, automatically determined.
+#         auto_adjust : bool, optional
+#             Whether to automatically adjust alignment. Default is True.
+#         scientific_convention : bool, optional
+#             Whether to follow scientific conventions. Default is True.
+#         tight_layout : bool, optional
+#             Whether to apply tight_layout to prevent overlapping. Default is False.
+#         """
 #         self._axis_mpl = ax_module.rotate_labels(
-#             self._axis_mpl, x=x, y=y, x_ha=x_ha, y_ha=y_ha
+#             self._axis_mpl, x=x, y=y, x_ha=x_ha, y_ha=y_ha,
+#             x_va=x_va, y_va=y_va, auto_adjust=auto_adjust,
+#             scientific_convention=scientific_convention,
+#             tight_layout=tight_layout
 #         )
 # 
-#     def legend(self, loc: str = "upper left", **kwargs) -> None:
+#     def legend(self, *args, loc: str = "upper left", **kwargs) -> None:
 #         """Places legend at specified location, with support for outside positions.
 # 
 #         Parameters
 #         ----------
+#         *args : tuple
+#             Positional arguments (handles, labels) as in matplotlib
 #         loc : str
 #             Legend position. Standard matplotlib positions plus:
 #             - "outer": Automatically place legend outside plot area (right side)
@@ -270,12 +303,13 @@ if __name__ == "__main__":
 #             For "separate": can include 'filename' (default: 'legend.png')
 #         """
 #         import matplotlib.pyplot as plt
-#         
+# 
 #         # Handle special cases
 #         if loc == "outer":
 #             # Place legend outside on the right, adjusting figure to make room
 #             legend = self._axis_mpl.legend(
-#                 loc='center left', 
+#                 *args,
+#                 loc='center left',
 #                 bbox_to_anchor=(1.02, 0.5),
 #                 **kwargs
 #             )
@@ -393,8 +427,8 @@ if __name__ == "__main__":
 # 
 #         if loc in outside_positions:
 #             location, bbox = outside_positions[loc]
-#             return self._axis_mpl.legend(loc=location, bbox_to_anchor=bbox, **kwargs)
-#         return self._axis_mpl.legend(loc=loc, **kwargs)
+#             return self._axis_mpl.legend(*args, loc=location, bbox_to_anchor=bbox, **kwargs)
+#         return self._axis_mpl.legend(*args, loc=loc, **kwargs)
 # 
 #     def set_xyt(
 #         self,
@@ -637,5 +671,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/_subplots/_AxisWrapperMixins/_AdjustmentMixin.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_AxisWrapperMixins/_AdjustmentMixin.py
 # --------------------------------------------------------------------------------

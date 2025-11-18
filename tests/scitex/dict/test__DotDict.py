@@ -335,18 +335,12 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dict/_DotDict.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dict/_DotDict.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# # Timestamp: "2025-04-24 09:31:50 (ywatanabe)"
-# # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/dict/_DotDict.py
-# # ----------------------------------------
-# import os
+# # Timestamp: "2025-11-10 22:40:05 (ywatanabe)"
 # 
-# __FILE__ = "./src/scitex/dict/_DotDict.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
 # 
 # import json
 # 
@@ -362,13 +356,14 @@ if __name__ == "__main__":
 #         # Avoids conflicts with keys named like standard methods ('keys', 'items', etc.)
 #         super().__setattr__("_data", {})
 #         if dictionary is not None:
-#             if not isinstance(dictionary, dict):
+#             if isinstance(dictionary, DotDict):
+#                 dictionary = dictionary._data
+#             elif not isinstance(dictionary, dict):
 #                 raise TypeError("Input must be a dictionary.")
+# 
 #             for key, value in dictionary.items():
-#                 # Recursively convert nested dictionaries
-#                 if isinstance(value, dict):
+#                 if isinstance(value, dict) and not isinstance(value, DotDict):
 #                     value = DotDict(value)
-#                 # Use __setitem__ to populate data correctly
 #                 self[key] = value
 # 
 #     # --- Attribute Access (for valid identifiers) ---
@@ -394,9 +389,8 @@ if __name__ == "__main__":
 #         if key == "_data" or key.startswith("_"):
 #             super().__setattr__(key, value)
 #         else:
-#             # Store in the internal dictionary
-#             if isinstance(value, dict):
-#                 value = DotDict(value)  # Convert dicts on the fly
+#             if isinstance(value, dict) and not isinstance(value, DotDict):
+#                 value = DotDict(value)
 #             self._data[key] = value
 # 
 #     def __delattr__(self, key):
@@ -419,8 +413,8 @@ if __name__ == "__main__":
 # 
 #     def __setitem__(self, key, value):
 #         # Called for obj[key] = value
-#         if isinstance(value, dict):
-#             value = DotDict(value)  # Convert dicts on the fly
+#         if isinstance(value, dict) and not isinstance(value, DotDict):
+#             value = DotDict(value)
 #         self._data[key] = value
 # 
 #     def __delitem__(self, key):
@@ -463,7 +457,9 @@ if __name__ == "__main__":
 # 
 #         try:
 #             # Use the internal _data for representation
-#             return json.dumps(self.to_dict(), indent=4, default=default_handler)
+#             return json.dumps(
+#                 self.to_dict(), indent=4, default=default_handler
+#             )
 #         except TypeError as e:
 #             # Fallback if default_handler still fails (e.g., complex recursion)
 #             return f"<DotDict object at {hex(id(self))}, contains: {list(self._data.keys())}> Error: {e}"
@@ -538,7 +534,9 @@ if __name__ == "__main__":
 #         """
 #         # Mimic dict.pop behavior with optional default
 #         if len(args) > 1:
-#             raise TypeError(f"pop expected at most 2 arguments, got {1 + len(args)}")
+#             raise TypeError(
+#                 f"pop expected at most 2 arguments, got {1 + len(args)}"
+#             )
 #         if key not in self._data:
 #             if args:
 #                 return args[0]  # Return default if provided
@@ -585,6 +583,64 @@ if __name__ == "__main__":
 # 
 #         # Return a sorted list of the combined unique names
 #         return sorted(list(standard_attrs.union(data_keys)))
+# 
+#     # --- Comparison Methods ---
+# 
+#     def __eq__(self, other):
+#         """Check equality. Supports comparison with dict, DotDict, and scalar values."""
+#         if isinstance(other, DotDict):
+#             return self._data == other._data
+#         elif isinstance(other, dict):
+#             return self._data == other
+#         else:
+#             # For scalar comparison, compare against empty/falsy
+#             return False
+# 
+#     def __ne__(self, other):
+#         """Check inequality."""
+#         return not self.__eq__(other)
+# 
+#     def __lt__(self, other):
+#         """Less than comparison - delegate to _data or handle scalars."""
+#         if isinstance(other, (int, float)):
+#             # If comparing to scalar, treat empty as 0
+#             if len(self._data) == 0:
+#                 return 0 < other
+#             # If single numeric value in total field, use it
+#             if "total" in self._data and isinstance(
+#                 self._data["total"], (int, float)
+#             ):
+#                 return self._data["total"] < other
+#             # Otherwise not comparable
+#             return NotImplemented
+#         return NotImplemented
+# 
+#     def __le__(self, other):
+#         """Less than or equal."""
+#         return self.__lt__(other) or self.__eq__(other)
+# 
+#     def __gt__(self, other):
+#         """Greater than comparison - delegate to _data or handle scalars."""
+#         if isinstance(other, (int, float)):
+#             # If comparing to scalar, treat empty as 0
+#             if len(self._data) == 0:
+#                 return 0 > other
+#             # If single numeric value in total field, use it
+#             if "total" in self._data and isinstance(
+#                 self._data["total"], (int, float)
+#             ):
+#                 return self._data["total"] > other
+#             # Otherwise not comparable
+#             return NotImplemented
+#         return NotImplemented
+# 
+#     def __ge__(self, other):
+#         """Greater than or equal."""
+#         return self.__gt__(other) or self.__eq__(other)
+# 
+#     def __bool__(self):
+#         """Truth value testing. Empty DotDict is False, non-empty is True."""
+#         return len(self._data) > 0
 # 
 # 
 # # Example Usage:
@@ -655,131 +711,8 @@ if __name__ == "__main__":
 #     print(f"Original dd.name: {dd.name}")
 #     print(f"Copy dd_copy.name: {dd_copy.name}")
 # 
-# # class DotDict:
-# #     """
-# #     A dictionary subclass that allows attribute-like access to keys.
-# #     """
-# 
-# #     def __init__(self, dictionary):
-# #         for key, value in dictionary.items():
-# #             if isinstance(value, dict):
-# #                 value = DotDict(value)
-# #             setattr(self, key, value)
-# 
-# #     def __getitem__(self, key):
-# #         return getattr(self, key)
-# 
-# #     def __setitem__(self, key, value):
-# #         setattr(self, key, value)
-# 
-# #     def get(self, key, default=None):
-# #         return getattr(self, key, default)
-# 
-# #     def to_dict(self):
-# #         """
-# #         Recursively converts DotDict and nested DotDict objects back to ordinary dictionaries.
-# #         """
-# #         result = {}
-# #         for key, value in self.__dict__.items():
-# #             if isinstance(value, DotDict):
-# #                 value = value.to_dict()
-# #             result[key] = value
-# #         return result
-# 
-# #     # def __str__(self):
-# #     #     """
-# #     #     Returns a string representation of the dotdict by converting it to a dictionary and pretty-printing it.
-# #     #     """
-# #     #     return json.dumps(self.to_dict(), indent=4)
-# 
-# #     def __str__(self):
-# #         """
-# #         Returns a string representation, handling non-JSON-serializable objects.
-# #         """
-# #         def default_handler(obj):
-# #             return str(obj)
-# 
-# #         return json.dumps(self.to_dict(), indent=4, default=default_handler)
-# 
-# #     def __repr__(self):
-# #         """
-# #         Returns a string representation of the dotdict for debugging and development.
-# #         """
-# #         return self.__str__()
-# 
-# #     def __len__(self):
-# #         """
-# #         Returns the number of key-value pairs in the dictionary.
-# #         """
-# #         return len(self.__dict__)
-# 
-# #     def keys(self):
-# #         """
-# #         Returns a view object displaying a list of all the keys in the dictionary.
-# #         """
-# #         return self.__dict__.keys()
-# 
-# #     def values(self):
-# #         """
-# #         Returns a view object displaying a list of all the values in the dictionary.
-# #         """
-# #         return self.__dict__.values()
-# 
-# #     def items(self):
-# #         """
-# #         Returns a view object displaying a list of all the items (key, value pairs) in the dictionary.
-# #         """
-# #         return self.__dict__.items()
-# 
-# #     def update(self, dictionary):
-# #         """
-# #         Updates the dictionary with the key-value pairs from another dictionary.
-# #         """
-# #         for key, value in dictionary.items():
-# #             if isinstance(value, dict):
-# #                 value = DotDict(value)
-# #             setattr(self, key, value)
-# 
-# #     def setdefault(self, key, default=None):
-# #         """
-# #         Returns the value of the given key. If the key does not exist, insert the key with the specified default value.
-# #         """
-# #         if key not in self.__dict__:
-# #             self[key] = default
-# #         return self[key]
-# 
-# #     def pop(self, key, default=None):
-# #         """
-# #         Removes the specified key and returns the corresponding value.
-# #         """
-# #         return self.__dict__.pop(key, default)
-# 
-# #     def __contains__(self, key):
-# #         """
-# #         Checks if the dotdict contains the specified key.
-# #         """
-# #         return key in self.__dict__
-# 
-# #     def __iter__(self):
-# #         """
-# #         Returns an iterator over the keys of the dictionary.
-# #         """
-# #         return iter(self.__dict__)
-# 
-# #     def copy(self):
-# #         """
-# #         Creates a deep copy of the DotDict object.
-# #         """
-# #         return DotDict(self.to_dict().copy())
-# 
-# #     def __delitem__(self, key):
-# #         """
-# #         Deletes the specified key from the dictionary.
-# #         """
-# #         delattr(self, key)
-# 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dict/_DotDict.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dict/_DotDict.py
 # --------------------------------------------------------------------------------

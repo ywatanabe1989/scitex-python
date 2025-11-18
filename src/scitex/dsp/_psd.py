@@ -7,8 +7,8 @@
 
 import torch
 
-from ..decorators import signal_fn
-from ..nn._PSD import PSD
+from scitex.decorators import signal_fn
+from scitex.nn._PSD import PSD
 
 
 @signal_fn

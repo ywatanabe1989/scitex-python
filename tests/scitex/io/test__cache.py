@@ -301,7 +301,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_cache.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_cache.py
 # --------------------------------------------------------------------------------
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
@@ -406,5 +406,5 @@ if __name__ == "__main__":
 #     print(var1, var2, var3)
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_cache.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_cache.py
 # --------------------------------------------------------------------------------

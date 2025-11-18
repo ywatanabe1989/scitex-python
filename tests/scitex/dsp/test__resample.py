@@ -229,7 +229,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/_resample.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/_resample.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -238,7 +238,7 @@ if __name__ == "__main__":
 # 
 # import torch
 # import torchaudio.transforms as T
-# from ..decorators import signal_fn
+# from scitex.decorators import signal_fn
 # import scitex
 # 
 # 
@@ -258,7 +258,7 @@ if __name__ == "__main__":
 #     import matplotlib.pyplot as plt
 # 
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 
 #     # Parameters
 #     T_SEC = 1
@@ -299,5 +299,5 @@ if __name__ == "__main__":
 # """
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/_resample.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/_resample.py
 # --------------------------------------------------------------------------------

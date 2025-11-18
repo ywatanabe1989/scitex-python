@@ -10,7 +10,12 @@ This gives users familiar git hosting workflows (like gh/tea).
 import click
 import subprocess
 import sys
+import os
+import socket
+import time
+import fcntl
 from pathlib import Path
+from datetime import datetime
 
 
 def run_tea(*args):
@@ -40,6 +45,178 @@ def run_tea(*args):
     except Exception as e:
         click.echo(f"Error running tea: {e}", err=True)
         sys.exit(1)
+
+
+def is_in_workspace():
+    """
+    Check if current environment is a SciTeX workspace container.
+
+    Returns:
+        bool: True if running in workspace, False otherwise
+    """
+    # Method A: Environment variable
+    if os.environ.get('SCITEX_WORKSPACE'):
+        return True
+
+    # Method B: Check hostname pattern
+    hostname = socket.gethostname()
+    if hostname.startswith('scitex-workspace-'):
+        return True
+
+    # Method C: Check special marker file
+    if Path('/.scitex-workspace').exists():
+        return True
+
+    return False
+
+
+def ensure_not_in_workspace():
+    """
+    Ensure user is NOT in workspace container.
+
+    The 'scitex cloud' commands are designed for local machines only.
+    Inside workspace, users should use regular git commands or just edit files
+    (auto-backups handle the rest).
+
+    Raises:
+        SystemExit: If running inside workspace container
+    """
+    if is_in_workspace():
+        click.echo("", err=True)
+        click.echo("❌ Error: You are inside a SciTeX workspace!", err=True)
+        click.echo("", err=True)
+        click.echo("The 'scitex cloud' commands are for your LOCAL machine", err=True)
+        click.echo("to interact with your cloud workspace.", err=True)
+        click.echo("", err=True)
+        click.echo("Inside the workspace, use regular git commands:", err=True)
+        click.echo("", err=True)
+        click.echo("  git status              # Check current state", err=True)
+        click.echo("  git add .", err=True)
+        click.echo("  git commit -m 'msg'", err=True)
+        click.echo("  git push origin main", err=True)
+        click.echo("", err=True)
+        click.echo("💡 Or just edit and save files - automatic backups", err=True)
+        click.echo("   run every 5 minutes for disaster recovery!", err=True)
+        click.echo("", err=True)
+        sys.exit(1)
+
+
+def check_workspace_sync_status():
+    """
+    Check if workspace has uncommitted or unpushed changes.
+
+    Returns:
+        tuple: (needs_sync: bool, status_message: str)
+    """
+    try:
+        # Check for uncommitted changes
+        result = subprocess.run(
+            ['git', 'status', '--porcelain'],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+
+        if result.stdout.strip():
+            return True, "⚠ Uncommitted changes"
+
+        # Check for unpushed commits
+        result = subprocess.run(
+            ['git', 'rev-list', '--count', 'origin/main..HEAD'],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+
+        if result.returncode == 0 and int(result.stdout.strip()) > 0:
+            return True, "⚠ Unpushed commits"
+
+        return False, "✓ Synced"
+
+    except Exception:
+        return False, "⚠ Cannot determine status"
+
+
+def check_large_files(threshold_mb=100):
+    """
+    Check for files larger than threshold.
+
+    Args:
+        threshold_mb: Size threshold in megabytes
+
+    Returns:
+        list: List of (filepath, size_mb) tuples for large files
+    """
+    large_files = []
+    threshold_bytes = threshold_mb * 1024 * 1024
+
+    try:
+        # Get all tracked and untracked files
+        result = subprocess.run(
+            ['git', 'ls-files', '--others', '--exclude-standard'],
+            capture_output=True,
+            text=True,
+            cwd=os.getcwd()
+        )
+
+        untracked_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
+
+        # Check sizes
+        for filepath in untracked_files:
+            full_path = Path(os.getcwd()) / filepath
+            if full_path.exists() and full_path.is_file():
+                size = full_path.stat().st_size
+                if size > threshold_bytes:
+                    size_mb = size / (1024 * 1024)
+                    large_files.append((filepath, size_mb))
+
+    except Exception as e:
+        click.echo(f"⚠ Warning: Could not check file sizes: {e}", err=True)
+
+    return large_files
+
+
+class SyncLock:
+    """File-based lock for preventing concurrent sync operations."""
+
+    def __init__(self, lock_path='/tmp/scitex-workspace-sync.lock', timeout=30):
+        self.lock_path = lock_path
+        self.timeout = timeout
+        self.lock_file = None
+
+    def __enter__(self):
+        """Acquire lock."""
+        self.lock_file = open(self.lock_path, 'w')
+        start_time = time.time()
+
+        while True:
+            try:
+                # Try to acquire exclusive lock
+                fcntl.flock(self.lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                # Write PID for debugging
+                self.lock_file.write(str(os.getpid()))
+                self.lock_file.flush()
+                return self
+            except IOError:
+                # Lock held by another process
+                if time.time() - start_time > self.timeout:
+                    raise TimeoutError("Could not acquire sync lock - another sync in progress")
+                click.echo("⏳ Waiting for ongoing sync to complete...", err=True)
+                time.sleep(1)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Release lock."""
+        if self.lock_file:
+            try:
+                fcntl.flock(self.lock_file.fileno(), fcntl.LOCK_UN)
+                self.lock_file.close()
+            except Exception:
+                pass
+
+
+# NOTE: ensure_workspace_synced() removed - no longer needed
+# New architecture: Users manually sync from local machine only
+# Workspace files are backed up via rsync snapshots (not auto-git-sync)
 
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']})
@@ -377,10 +554,14 @@ def issue_list():
 @cloud.command()
 def push():
     """
-    Push current branch to remote
+    Push local changes to workspace
 
-    Wrapper for: git push origin <current-branch>
+    Pushes your local Git commits to the SciTeX Cloud workspace.
+    Use this after committing changes locally that you want to sync to the cloud.
     """
+    # Ensure this is run from LOCAL machine only
+    ensure_not_in_workspace()
+
     try:
         # Get current branch
         result = subprocess.run(
@@ -395,9 +576,10 @@ def push():
             click.echo("Error: Not on any branch", err=True)
             sys.exit(1)
 
-        # Push to origin
+        # Push to workspace
+        click.echo("📤 Pushing to workspace...")
         subprocess.run(['git', 'push', 'origin', branch], check=True)
-        click.echo(f"✓ Pushed to origin/{branch}")
+        click.echo(f"✓ Pushed to workspace (origin/{branch})")
 
     except subprocess.CalledProcessError as e:
         click.echo(f"Error: {e}", err=True)
@@ -407,10 +589,14 @@ def push():
 @cloud.command()
 def pull():
     """
-    Pull latest changes from remote
+    Pull workspace changes to local machine
 
-    Wrapper for: git pull origin <current-branch>
+    Pulls changes from your SciTeX Cloud workspace to your local machine.
+    Use this to sync the latest changes from the cloud workspace.
     """
+    # Ensure this is run from LOCAL machine only
+    ensure_not_in_workspace()
+
     try:
         # Get current branch
         result = subprocess.run(
@@ -425,9 +611,10 @@ def pull():
             click.echo("Error: Not on any branch", err=True)
             sys.exit(1)
 
-        # Pull from origin
+        # Pull from workspace
+        click.echo("📥 Pulling from workspace...")
         subprocess.run(['git', 'pull', 'origin', branch], check=True)
-        click.echo(f"✓ Pulled from origin/{branch}")
+        click.echo(f"✓ Pulled from workspace (origin/{branch})")
 
     except subprocess.CalledProcessError as e:
         click.echo(f"Error: {e}", err=True)
@@ -439,8 +626,12 @@ def status():
     """
     Show repository status
 
-    Wrapper for: git status
+    Shows the current Git status of your local repository.
     """
+    # Ensure this is run from LOCAL machine only
+    ensure_not_in_workspace()
+
+    # Show regular git status
     subprocess.run(['git', 'status'])
 
 

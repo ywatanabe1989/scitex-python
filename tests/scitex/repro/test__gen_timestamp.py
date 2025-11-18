@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 def test_gen_timestamp_basic():
     """Test basic timestamp generation."""
-    from scitex.str import gen_timestamp
+    from scitex.repro import gen_timestamp
     
     timestamp = gen_timestamp()
     
@@ -31,7 +31,7 @@ def test_gen_timestamp_basic():
 
 def test_gen_timestamp_format():
     """Test timestamp format details."""
-    from scitex.str import gen_timestamp
+    from scitex.repro import gen_timestamp
     
     timestamp = gen_timestamp()
     
@@ -56,10 +56,10 @@ def test_gen_timestamp_format():
     assert hour_min.isdigit()
 
 
-@patch('scitex.str._gen_timestamp._datetime')
+@patch('scitex.repro._gen_timestamp._datetime')
 def test_gen_timestamp_specific_time(mock_datetime):
     """Test with specific mocked datetime."""
-    from scitex.str import gen_timestamp
+    from scitex.repro import gen_timestamp
     
     # Mock specific datetime: June 2, 2025, 15:30:45
     mock_time = datetime(2025, 6, 2, 15, 30, 45)
@@ -72,10 +72,10 @@ def test_gen_timestamp_specific_time(mock_datetime):
     assert timestamp == expected
 
 
-@patch('scitex.str._gen_timestamp._datetime')
+@patch('scitex.repro._gen_timestamp._datetime')
 def test_gen_timestamp_edge_cases(mock_datetime):
     """Test edge cases for timestamp generation."""
-    from scitex.str import gen_timestamp
+    from scitex.repro import gen_timestamp
     
     test_cases = [
         # (year, month, day, hour, minute, expected)
@@ -95,7 +95,7 @@ def test_gen_timestamp_edge_cases(mock_datetime):
 
 def test_gen_timestamp_uniqueness_over_time():
     """Test that timestamps change over time."""
-    from scitex.str import gen_timestamp
+    from scitex.repro import gen_timestamp
     import time
     
     timestamp1 = gen_timestamp()
@@ -112,7 +112,7 @@ def test_gen_timestamp_uniqueness_over_time():
 
 def test_gen_timestamp_current_time():
     """Test that timestamp reflects current time."""
-    from scitex.str import gen_timestamp
+    from scitex.repro import gen_timestamp
     
     # Get timestamp and current time
     timestamp = gen_timestamp()
@@ -137,7 +137,7 @@ def test_gen_timestamp_current_time():
 
 def test_timestamp_alias():
     """Test timestamp alias."""
-    from scitex.str import timestamp, gen_timestamp
+    from scitex.repro import timestamp, gen_timestamp
     
     # Should be the same function
     assert timestamp is gen_timestamp
@@ -154,12 +154,12 @@ def test_timestamp_alias():
 
 def test_gen_timestamp_month_padding():
     """Test proper zero-padding for months."""
-    from scitex.str import gen_timestamp
+    from scitex.repro import gen_timestamp
     from unittest.mock import patch
     
     # Test months 1-9 (should be zero-padded)
     for month in range(1, 10):
-        with patch('scitex.str._gen_timestamp._datetime') as mock_datetime:
+        with patch('scitex.repro._gen_timestamp._datetime') as mock_datetime:
             mock_time = datetime(2025, month, 15, 12, 30, 0)
             mock_datetime.now.return_value = mock_time
             
@@ -170,12 +170,12 @@ def test_gen_timestamp_month_padding():
 
 def test_gen_timestamp_day_padding():
     """Test proper zero-padding for days."""
-    from scitex.str import gen_timestamp
+    from scitex.repro import gen_timestamp
     from unittest.mock import patch
     
     # Test days 1-9 (should be zero-padded)
     for day in range(1, 10):
-        with patch('scitex.str._gen_timestamp._datetime') as mock_datetime:
+        with patch('scitex.repro._gen_timestamp._datetime') as mock_datetime:
             mock_time = datetime(2025, 6, day, 12, 30, 0)
             mock_datetime.now.return_value = mock_time
             
@@ -186,7 +186,7 @@ def test_gen_timestamp_day_padding():
 
 def test_gen_timestamp_hour_minute_padding():
     """Test proper zero-padding for hours and minutes."""
-    from scitex.str import gen_timestamp
+    from scitex.repro import gen_timestamp
     from unittest.mock import patch
     
     # Test hours and minutes 0-9 (should be zero-padded)
@@ -199,7 +199,7 @@ def test_gen_timestamp_hour_minute_padding():
     ]
     
     for hour, minute, expected_hhmm in test_cases:
-        with patch('scitex.str._gen_timestamp._datetime') as mock_datetime:
+        with patch('scitex.repro._gen_timestamp._datetime') as mock_datetime:
             mock_time = datetime(2025, 6, 15, hour, minute, 30)
             mock_datetime.now.return_value = mock_time
             
@@ -210,7 +210,7 @@ def test_gen_timestamp_hour_minute_padding():
 
 def test_gen_timestamp_filename_usage():
     """Test typical usage for filename generation."""
-    from scitex.str import gen_timestamp
+    from scitex.repro import gen_timestamp
     
     timestamp = gen_timestamp()
     
@@ -233,7 +233,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/repro/_gen_timestamp.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/repro/_gen_timestamp.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -269,8 +269,86 @@ if __name__ == "__main__":
 # 
 # timestamp = gen_timestamp
 # 
+# 
+# # ================================================================================
+# # Example Usage
+# # ================================================================================
+# def parse_args():
+#     """Parse command line arguments."""
+#     import argparse
+#     parser = argparse.ArgumentParser(description="Demonstrate timestamp generation")
+#     parser.add_argument(
+#         "--count",
+#         type=int,
+#         default=5,
+#         help="Number of timestamps to generate (default: 5)"
+#     )
+#     return parser.parse_args()
+# 
+# 
+# def main(args):
+#     """Main execution function.
+# 
+#     Demonstrates timestamp generation for file naming.
+#     """
+#     import time
+# 
+#     print(f"\n{'='*60}")
+#     print("Timestamp Generation Demo")
+#     print(f"{'='*60}")
+# 
+#     # Generate single timestamp
+#     print(f"\n{'Single Timestamp':-^60}")
+#     ts = gen_timestamp()
+#     print(f"Generated: {ts}")
+#     print(f"Example usage: experiment_{ts}.csv")
+# 
+#     # Generate multiple timestamps with small delays
+#     print(f"\n{'Multiple Timestamps':-^60}")
+#     print(f"Generating {args.count} timestamps...")
+#     timestamps = []
+#     for i in range(args.count):
+#         ts = gen_timestamp()
+#         timestamps.append(ts)
+#         print(f"{i+1}. {ts}")
+#         time.sleep(0.5)  # Small delay to show time progression
+# 
+#     print(f"\n{'='*60}")
+#     print("Demo completed successfully!")
+#     print(f"{'='*60}\n")
+# 
+#     return 0
+# 
+# 
+# if __name__ == "__main__":
+#     import sys
+#     import matplotlib.pyplot as plt
+#     import scitex as stx
+# 
+#     args = parse_args()
+# 
+#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+#         sys,
+#         plt,
+#         args=args,
+#         file=__file__,
+#         sdir_suffix="gen_timestamp_demo",
+#         verbose=True,
+#         agg=True,
+#     )
+# 
+#     exit_status = main(args)
+# 
+#     stx.session.close(
+#         CONFIG,
+#         verbose=True,
+#         notify=False,
+#         message="Timestamp generation demo completed",
+#         exit_status=exit_status,
+#     )
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/repro/_gen_timestamp.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/repro/_gen_timestamp.py
 # --------------------------------------------------------------------------------

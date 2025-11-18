@@ -347,7 +347,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_plot/_plot_joyplot.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_plot/_plot_joyplot.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -362,15 +362,13 @@ if __name__ == "__main__":
 # 
 # import warnings
 # 
-# import joypy
-# 
 # from .._style._set_xyt import set_xyt as scitex_plt_set_xyt
 # 
 # 
 # def plot_joyplot(ax, data, orientation="vertical", **kwargs):
 #     """
 #     Create a joyplot (ridgeline plot) with proper orientation handling.
-#     
+# 
 #     Parameters
 #     ----------
 #     ax : matplotlib.axes.Axes
@@ -381,26 +379,29 @@ if __name__ == "__main__":
 #         Plot orientation. Either "vertical" or "horizontal"
 #     **kwargs
 #         Additional keyword arguments passed to joypy.joyplot()
-#     
+# 
 #     Returns
 #     -------
 #     matplotlib.axes.Axes
 #         The axes with the joyplot
-#     
+# 
 #     Raises
 #     ------
 #     ValueError
 #         If orientation is not "vertical" or "horizontal"
 #     """
+#     # Lazy import to avoid scipy circular import on startup
+#     import joypy
+# 
 #     if orientation not in ["vertical", "horizontal"]:
 #         raise ValueError("orientation must be either 'vertical' or 'horizontal'")
-#     
+# 
 #     # Handle orientation by setting appropriate joypy parameters
 #     if orientation == "horizontal":
 #         # For horizontal orientation, we need to transpose the data display
 #         # joypy doesn't have direct horizontal support, so we work with the result
 #         kwargs.setdefault("kind", "kde")  # Ensure we're using KDE plots
-#         
+# 
 #     fig, axes = joypy.joyplot(
 #         data=data,
 #         **kwargs,
@@ -427,5 +428,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_plot/_plot_joyplot.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_plot/_plot_joyplot.py
 # --------------------------------------------------------------------------------

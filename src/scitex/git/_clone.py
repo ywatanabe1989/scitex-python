@@ -8,13 +8,13 @@ Git clone operations.
 
 from pathlib import Path
 from scitex.logging import getLogger
-from scitex._sh import sh
+from scitex.sh import sh
 from ._constants import EXIT_SUCCESS, EXIT_FAILURE
 
 logger = getLogger(__name__)
 
 
-def clone_repo(url: str, target_path: Path, verbose: bool = True) -> bool:
+def clone_repo(url: str, target_path: Path, branch: str = None, tag: str = None, verbose: bool = True) -> bool:
     """
     Safely clone a git repository.
 
@@ -24,6 +24,12 @@ def clone_repo(url: str, target_path: Path, verbose: bool = True) -> bool:
         Git repository URL
     target_path : Path
         Destination path for cloning
+    branch : str, optional
+        Specific branch to clone. If None, clones the default branch.
+        Mutually exclusive with tag parameter.
+    tag : str, optional
+        Specific tag/release to clone. If None, clones the default branch.
+        Mutually exclusive with branch parameter.
     verbose : bool
         Enable verbose output
 
@@ -31,15 +37,34 @@ def clone_repo(url: str, target_path: Path, verbose: bool = True) -> bool:
     -------
     bool
         True if successful, False otherwise
+
+    Raises
+    ------
+    ValueError
+        If both branch and tag are specified
     """
     from ._remote import _validate_git_url
+
+    # Validate mutual exclusivity
+    if branch and tag:
+        raise ValueError("Cannot specify both 'branch' and 'tag' parameters. They are mutually exclusive.")
 
     if not _validate_git_url(url):
         logger.error(f"Invalid git URL: {url}")
         return False
 
+    cmd = ["git", "clone"]
+    ref_info = ""
+    if branch:
+        cmd.extend(["--branch", branch])
+        ref_info = f" (branch: {branch})"
+    elif tag:
+        cmd.extend(["--branch", tag])
+        ref_info = f" (tag: {tag})"
+    cmd.extend([url, str(target_path)])
+
     result = sh(
-        ["git", "clone", url, str(target_path)],
+        cmd,
         verbose=verbose,
         return_as="dict"
     )
@@ -48,7 +73,8 @@ def clone_repo(url: str, target_path: Path, verbose: bool = True) -> bool:
         logger.error(f"Failed to clone repository: {result['stderr']}")
         return False
 
-    logger.info("Repository cloned successfully")
+    if verbose:
+        logger.info(f"Repository cloned successfully{ref_info}")
     return True
 
 
@@ -85,7 +111,8 @@ def git_init(repo_path: Path, verbose: bool = True) -> bool:
             logger.warning(f"Failed to initialize git repository: {result['stderr']}")
             return False
 
-        logger.info("Git repository initialized")
+        if verbose:
+            logger.info("Git repository initialized")
         return True
 
 
@@ -94,7 +121,7 @@ def main(args):
         if not args.url:
             logger.error("URL required for clone action")
             return EXIT_FAILURE
-        success = clone_repo(args.url, args.path, args.verbose)
+        success = clone_repo(args.url, args.path, branch=args.branch, tag=args.tag, verbose=args.verbose)
         return EXIT_SUCCESS if success else EXIT_FAILURE
     elif args.action == "init":
         success = git_init(args.path, args.verbose)
@@ -108,6 +135,8 @@ def parse_args():
     parser.add_argument("--action", choices=["clone", "init"], required=True)
     parser.add_argument("--url", help="Repository URL for cloning")
     parser.add_argument("--path", type=Path, required=True)
+    parser.add_argument("--branch", help="Branch to clone (mutually exclusive with --tag)")
+    parser.add_argument("--tag", help="Tag/release to clone (mutually exclusive with --branch)")
     parser.add_argument("--verbose", action="store_true")
     return parser.parse_args()
 

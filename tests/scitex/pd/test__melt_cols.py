@@ -422,7 +422,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/pd/_melt_cols.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/pd/_melt_cols.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -507,5 +507,5 @@ if __name__ == "__main__":
 #         return melted_df.drop("global_index", axis=1)
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/pd/_melt_cols.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/pd/_melt_cols.py
 # --------------------------------------------------------------------------------

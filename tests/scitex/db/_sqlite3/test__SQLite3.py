@@ -550,28 +550,29 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/db/_sqlite3/_SQLite3.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/db/_sqlite3/_SQLite3.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# # Timestamp: "2025-07-16 09:46:57 (ywatanabe)"
+# # Timestamp: "2025-09-11 07:57:49 (ywatanabe)"
 # # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/db/_sqlite3/_SQLite3.py
 # # ----------------------------------------
+# from __future__ import annotations
 # import os
-# __FILE__ = (
-#     "./src/scitex/db/_sqlite3/_SQLite3.py"
-# )
+# __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
 # import warnings
 # from typing import List, Optional
 # 
-# from ...str import printc as _printc
+# from scitex.str import printc as _printc
 # from ._SQLite3Mixins._ArrayMixin import _ArrayMixin
 # from ._SQLite3Mixins._BatchMixin import _BatchMixin
 # from ._SQLite3Mixins._BlobMixin import _BlobMixin
+# from ._SQLite3Mixins._ColumnMixin import _ColumnMixin
 # from ._SQLite3Mixins._ConnectionMixin import _ConnectionMixin
+# from ._SQLite3Mixins._GitMixin import _GitMixin
 # from ._SQLite3Mixins._ImportExportMixin import _ImportExportMixin
 # from ._SQLite3Mixins._IndexMixin import _IndexMixin
 # from ._SQLite3Mixins._MaintenanceMixin import _MaintenanceMixin
@@ -586,6 +587,7 @@ if __name__ == "__main__":
 #     _ConnectionMixin,
 #     _QueryMixin,
 #     _TransactionMixin,
+#     _ColumnMixin,
 #     _TableMixin,
 #     _IndexMixin,
 #     _RowMixin,
@@ -593,6 +595,7 @@ if __name__ == "__main__":
 #     _BlobMixin,
 #     _ImportExportMixin,
 #     _MaintenanceMixin,
+#     _GitMixin,
 # ):
 #     """SQLite database manager with automatic metadata handling, numpy array storage, and compression.
 # 
@@ -761,5 +764,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/db/_sqlite3/_SQLite3.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/db/_sqlite3/_SQLite3.py
 # --------------------------------------------------------------------------------

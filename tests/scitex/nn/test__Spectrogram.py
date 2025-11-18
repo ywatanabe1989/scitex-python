@@ -388,7 +388,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_Spectrogram.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_Spectrogram.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -400,7 +400,7 @@ if __name__ == "__main__":
 # import numpy as np
 # import matplotlib.pyplot as plt
 # import scitex
-# from ..decorators import numpy_fn, torch_fn
+# from scitex.decorators import numpy_fn, torch_fn
 # 
 # 
 # class Spectrogram(nn.Module):
@@ -498,9 +498,15 @@ if __name__ == "__main__":
 # 
 # @torch_fn
 # def spectrograms(x, fs, dj=0.125, cuda=False):
-#     from wavelets_pytorch.transform import (
-#         WaveletTransformTorch,
-#     )  # PyTorch version
+#     try:
+#         from wavelets_pytorch.transform import (
+#             WaveletTransformTorch,
+#         )  # PyTorch version
+#     except ImportError:
+#         raise ImportError(
+#             "The spectrograms function requires the wavelets-pytorch package. "
+#             "Install it with: pip install wavelets-pytorch"
+#         )
 # 
 #     dt = 1 / fs
 #     # dj = 0.125
@@ -556,5 +562,5 @@ if __name__ == "__main__":
 #     plt.show()
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_Spectrogram.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_Spectrogram.py
 # --------------------------------------------------------------------------------

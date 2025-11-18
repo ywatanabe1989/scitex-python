@@ -1,0 +1,572 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Time-stamp: "2025-11-09"
+# File: ./tests/scitex/session/test__decorator.py
+
+"""Tests for session decorator."""
+
+import pytest
+import tempfile
+from pathlib import Path
+from scitex.session import session
+
+
+class TestSessionDecorator:
+    """Test @session decorator functionality."""
+
+    def test_decorator_exists(self):
+        """Test session decorator is importable."""
+        assert callable(session)
+
+    def test_decorator_without_args(self):
+        """Test decorator can be used without arguments."""
+        @session
+        def dummy_func():
+            return 0
+
+        assert hasattr(dummy_func, '_is_session_wrapped')
+        assert dummy_func._is_session_wrapped is True
+
+    def test_decorator_with_args(self):
+        """Test decorator can be used with arguments."""
+        @session(verbose=False, agg=True)
+        def dummy_func():
+            return 0
+
+        assert hasattr(dummy_func, '_is_session_wrapped')
+        assert dummy_func._is_session_wrapped is True
+
+    def test_decorator_preserves_function_attributes(self):
+        """Test decorator preserves function name and docstring."""
+        @session
+        def my_function():
+            """My docstring."""
+            return 0
+
+        assert my_function.__name__ == 'my_function'
+        assert my_function.__doc__ == """My docstring."""
+
+    def test_decorator_with_parameters(self):
+        """Test decorator with function parameters."""
+        @session
+        def func_with_params(x: int, y: str = "default"):
+            """Function with parameters."""
+            return 0
+
+        assert hasattr(func_with_params, '_is_session_wrapped')
+
+    def test_decorator_callable_with_args_bypasses_session(self):
+        """Test calling decorated function with args bypasses session management."""
+        call_count = []
+
+        @session
+        def test_func(value: int = 1):
+            call_count.append(value)
+            return value
+
+        # Call with arguments - should bypass session management
+        result = test_func(42)
+
+        assert result == 42
+        assert call_count == [42]
+
+    def test_decorator_stores_original_function(self):
+        """Test decorator stores reference to original function."""
+        def original():
+            return 42
+
+        wrapped = session(original)
+
+        assert hasattr(wrapped, '_func')
+        assert wrapped._func is original
+
+
+class TestSessionDecoratorOptions:
+    """Test session decorator configuration options."""
+
+    def test_verbose_option(self):
+        """Test verbose parameter."""
+        @session(verbose=True)
+        def dummy():
+            return 0
+
+        assert hasattr(dummy, '_is_session_wrapped')
+
+    def test_agg_option(self):
+        """Test agg parameter."""
+        @session(agg=False)
+        def dummy():
+            return 0
+
+        assert hasattr(dummy, '_is_session_wrapped')
+
+    def test_notify_option(self):
+        """Test notify parameter."""
+        @session(notify=True)
+        def dummy():
+            return 0
+
+        assert hasattr(dummy, '_is_session_wrapped')
+
+    def test_sdir_suffix_option(self):
+        """Test sdir_suffix parameter."""
+        @session(sdir_suffix="custom_suffix")
+        def dummy():
+            return 0
+
+        assert hasattr(dummy, '_is_session_wrapped')
+
+    def test_multiple_options(self):
+        """Test multiple configuration options."""
+        @session(verbose=True, agg=False, notify=True, sdir_suffix="test")
+        def dummy():
+            return 0
+
+        assert hasattr(dummy, '_is_session_wrapped')
+
+
+class TestRunFunction:
+    """Test session.run() function."""
+
+    def test_run_function_exists(self):
+        """Test run function exists."""
+        from scitex.session import run
+        assert callable(run)
+
+
+class TestDecoratorIntegration:
+    """Integration tests for decorator."""
+
+    def test_decorator_with_return_value(self):
+        """Test decorator handles return values."""
+        @session
+        def return_func(value: int = 5):
+            return value * 2
+
+        # Call with args to bypass session
+        result = return_func(10)
+        assert result == 20
+
+    def test_decorator_with_no_return(self):
+        """Test decorator handles functions with no return."""
+        @session
+        def no_return_func(x: int = 1):
+            pass
+
+        # Call with args
+        result = no_return_func(5)
+        assert result is None
+
+if __name__ == "__main__":
+    import os
+
+    import pytest
+
+    pytest.main([os.path.abspath(__file__)])
+
+# --------------------------------------------------------------------------------
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/session/_decorator.py
+# --------------------------------------------------------------------------------
+# #!/usr/bin/env python3
+# # -*- coding: utf-8 -*-
+# # Timestamp: "2025-11-05"
+# # File: /home/ywatanabe/proj/scitex-code/src/scitex/session/_decorator.py
+# # ----------------------------------------
+# """Session decorator for scitex.
+# 
+# Provides @stx.session decorator that automatically:
+# - Generates CLI from function signature
+# - Manages session lifecycle
+# - Handles errors
+# - Organizes outputs
+# """
+# 
+# import functools
+# import inspect
+# import argparse
+# from pathlib import Path
+# from typing import Callable, Any, get_type_hints
+# import sys as sys_module
+# 
+# from ._lifecycle import start, close
+# from scitex.logging import getLogger
+# 
+# logger = getLogger(__name__)
+# 
+# 
+# def session(
+#     func: Callable = None,
+#     *,
+#     verbose: bool = False,
+#     agg: bool = True,
+#     notify: bool = False,
+#     sdir_suffix: str = None,
+#     **session_kwargs,
+# ) -> Callable:
+#     """Decorator to wrap function in scitex session.
+# 
+#     Automatically handles:
+#     - CLI argument parsing from function signature
+#     - Session initialization (logging, output directories)
+#     - Execution
+#     - Cleanup
+#     - Error handling
+# 
+#     This decorator is designed for script entry points. The decorated function
+#     should be called without arguments from `if __name__ == '__main__':` to
+#     trigger CLI parsing and session management.
+# 
+#     Args:
+#         func: Function to wrap (set automatically by decorator)
+#         verbose: Enable verbose logging
+#         agg: Use matplotlib Agg backend
+#         notify: Send notification on completion
+#         sdir_suffix: Suffix for output directory name
+#         **session_kwargs: Additional session configuration parameters
+# 
+#     Example:
+#         @stx.session
+#         def analyze(data_path: str, threshold: float = 0.5):
+#             '''Analyze data file.'''
+#             data = stx.io.load(data_path)
+#             result = process(data, threshold)
+#             stx.io.save(result, "output.csv")
+#             return 0
+# 
+#         if __name__ == '__main__':
+#             analyze()  # No arguments = CLI mode with session management
+# 
+#         # CLI: python script.py --data-path data.csv --threshold 0.7
+# 
+#     Example with options:
+#         @stx.session(verbose=True, notify=True)
+#         def train_model(model_name: str, epochs: int = 10):
+#             '''Train ML model.'''
+#             # These are automatically available as globals:
+#             # - CONFIG: Session configuration dict
+#             # - plt: Matplotlib pyplot (configured for session)
+#             # - CC: Custom Colors
+#             # - rng_manager: RandomStateManager (fixes seeds, creates named generators)
+#             logger.info(f"Session ID: {CONFIG['ID']}")
+#             logger.info(f"Output directory: {CONFIG['SDIR']}")
+#             # ... training code ...
+#             return 0
+# 
+#         if __name__ == '__main__':
+#             train_model()
+# 
+#     Notes:
+#         - Function name can be anything (not just 'main')
+#         - Calling with arguments bypasses session management: analyze('/path', 0.5)
+#         - Only one session-managed function per script
+#         - Do NOT call multiple @session decorated functions from one script
+#         - Do NOT nest session-decorated function calls without arguments
+# 
+#     Injected Global Variables:
+#         When called without arguments (CLI mode), these are injected into globals:
+#         - CONFIG (dict): Session configuration with ID, SDIR, paths, etc.
+#         - plt (module): matplotlib.pyplot configured with session settings
+#         - CC (CustomColors): Custom Colors for consistent plotting
+#         - rng_manager (RandomStateManager): Manages reproducibility by fixing global seeds
+#                                              and creating named generators via rng_manager("name")
+#     """
+# 
+#     def decorator(func: Callable) -> Callable:
+# 
+#         @functools.wraps(func)
+#         def wrapper(*args, **kwargs):
+#             # If called with arguments (not CLI), run directly
+#             if args or kwargs:
+#                 return func(*args, **kwargs)
+# 
+#             # Otherwise, parse CLI and run with session management
+#             return _run_with_session(
+#                 func,
+#                 verbose=verbose,
+#                 agg=agg,
+#                 notify=notify,
+#                 sdir_suffix=sdir_suffix,
+#                 **session_kwargs,
+#             )
+# 
+#         # Store original function for direct access
+#         wrapper._func = func
+#         wrapper._is_session_wrapped = True
+# 
+#         return wrapper
+# 
+#     # Handle @stx.session vs @stx.session()
+#     if func is None:
+#         # Called with arguments: @stx.session(verbose=True)
+#         return decorator
+#     else:
+#         # Called without arguments: @stx.session
+#         return decorator(func)
+# 
+# 
+# def _run_with_session(
+#     func: Callable,
+#     verbose: bool,
+#     agg: bool,
+#     notify: bool,
+#     sdir_suffix: str,
+#     **session_kwargs,
+# ) -> Any:
+#     """Run function with full session management."""
+# 
+#     # Get calling file
+#     frame = inspect.currentframe()
+#     caller_frame = frame.f_back.f_back  # Go up two levels
+#     caller_file = caller_frame.f_globals.get('__file__', 'unknown.py')
+# 
+#     # Generate argparse from function signature
+#     parser = _create_parser(func)
+#     args = parser.parse_args()
+# 
+#     # Start session
+#     import matplotlib.pyplot as plt
+# 
+#     CONFIG, stdout, stderr, plt, CC, rng_manager = start(
+#         sys=sys_module,
+#         plt=plt,
+#         args=args,
+#         file=caller_file,
+#         sdir_suffix=sdir_suffix or func.__name__,
+#         verbose=verbose,
+#         agg=agg,
+#         **session_kwargs,
+#     )
+# 
+#     # Store session variables in function globals
+#     func_globals = func.__globals__
+#     func_globals['CONFIG'] = CONFIG
+#     func_globals['plt'] = plt
+#     func_globals['CC'] = CC
+#     func_globals['rng_manager'] = rng_manager
+# 
+#     # Run function
+#     exit_status = 0
+#     result = None
+# 
+#     try:
+#         # Convert args namespace to kwargs
+#         kwargs = vars(args)
+# 
+#         # Get function parameters
+#         sig = inspect.signature(func)
+#         func_params = set(sig.parameters.keys())
+# 
+#         # Filter kwargs to only include function parameters
+#         filtered_kwargs = {
+#             k: v for k, v in kwargs.items()
+#             if k in func_params
+#         }
+# 
+#         logger.info(f"Running {func.__name__} with args: {filtered_kwargs}")
+# 
+#         # Execute function
+#         result = func(**filtered_kwargs)
+# 
+#         # Handle return value
+#         if isinstance(result, int):
+#             exit_status = result
+#         else:
+#             exit_status = 0
+# 
+#     except Exception as e:
+#         logger.error(f"Error in {func.__name__}: {e}", exc_info=True)
+#         exit_status = 1
+#         raise
+# 
+#     finally:
+#         # Close session with error handling
+#         try:
+#             close(
+#                 CONFIG=CONFIG,
+#                 verbose=verbose,
+#                 notify=notify,
+#                 message=f"{func.__name__} completed",
+#                 exit_status=exit_status,
+#             )
+#         except SystemExit:
+#             # Allow normal exits
+#             raise
+#         except KeyboardInterrupt:
+#             # Allow Ctrl+C
+#             raise
+#         except Exception as e:
+#             # Log but don't crash on cleanup errors
+#             try:
+#                 logger.error(f"Session cleanup error: {e}")
+#             except:
+#                 print(f"Session cleanup error: {e}")
+# 
+#         # Final matplotlib cleanup (belt and suspenders approach)
+#         try:
+#             import matplotlib.pyplot as plt
+#             plt.close('all')
+#         except:
+#             pass
+# 
+#     return result
+# 
+# 
+# def _create_parser(func: Callable) -> argparse.ArgumentParser:
+#     """Create ArgumentParser from function signature.
+# 
+#     Args:
+#         func: Function to create parser for
+# 
+#     Returns:
+#         Configured ArgumentParser
+#     """
+# 
+#     # Get function info
+#     sig = inspect.signature(func)
+#     doc = inspect.getdoc(func) or f"Run {func.__name__}"
+# 
+#     # Try to get type hints
+#     try:
+#         type_hints = get_type_hints(func)
+#     except Exception:
+#         type_hints = {}
+# 
+#     # Create parser
+#     parser = argparse.ArgumentParser(
+#         description=doc,
+#         formatter_class=argparse.RawDescriptionHelpFormatter,
+#     )
+# 
+#     # Add arguments from function signature
+#     for param_name, param in sig.parameters.items():
+#         _add_argument(parser, param_name, param, type_hints)
+# 
+#     return parser
+# 
+# 
+# def _add_argument(
+#     parser: argparse.ArgumentParser,
+#     param_name: str,
+#     param: inspect.Parameter,
+#     type_hints: dict,
+# ):
+#     """Add single argument to parser.
+# 
+#     Args:
+#         parser: ArgumentParser to add to
+#         param_name: Parameter name
+#         param: Parameter object
+#         type_hints: Type hints dictionary
+#     """
+# 
+#     # Get type
+#     param_type = type_hints.get(param_name, param.annotation)
+#     if param_type == inspect.Parameter.empty:
+#         param_type = str
+# 
+#     # Get default
+#     has_default = param.default != inspect.Parameter.empty
+#     default = param.default if has_default else None
+# 
+#     # Convert parameter name to CLI format
+#     arg_name = f"--{param_name.replace('_', '-')}"
+# 
+#     # Handle different types
+#     if param_type == bool:
+#         # Boolean flags
+#         parser.add_argument(
+#             arg_name,
+#             action='store_true' if not default else 'store_false',
+#             default=default,
+#             help=f"(default: {default})",
+#         )
+#     else:
+#         # Regular arguments
+#         kwargs = {
+#             'type': param_type,
+#             'help': f"(default: {default})" if has_default else "(required)",
+#         }
+# 
+#         if has_default:
+#             kwargs['default'] = default
+#         else:
+#             kwargs['required'] = True
+# 
+#         parser.add_argument(arg_name, **kwargs)
+# 
+# 
+# def run(
+#     func: Callable,
+#     parse_args: Callable = None,
+#     **session_kwargs
+# ) -> Any:
+#     """Run function with session management.
+# 
+#     Alternative to decorator for more explicit control.
+# 
+#     Args:
+#         func: Function to run
+#         parse_args: Optional custom argument parser
+#         **session_kwargs: Session configuration
+# 
+#     Example:
+#         def main(args):
+#             # Your code
+#             return 0
+# 
+#         if __name__ == '__main__':
+#             stx.session.run(main)
+#     """
+# 
+#     if parse_args is None:
+#         # Auto-generate parser
+#         parser = _create_parser(func)
+#         args = parser.parse_args()
+#     else:
+#         # Use custom parser
+#         args = parse_args()
+# 
+#     # Get file
+#     frame = inspect.currentframe()
+#     caller_frame = frame.f_back
+#     caller_file = caller_frame.f_globals.get('__file__', 'unknown.py')
+# 
+#     # Start session
+#     import matplotlib.pyplot as plt
+# 
+#     CONFIG, stdout, stderr, plt, CC, rng_manager = start(
+#         sys=sys_module,
+#         plt=plt,
+#         args=args,
+#         file=caller_file,
+#         **session_kwargs,
+#     )
+# 
+#     # Run
+#     try:
+#         if hasattr(args, '__dict__'):
+#             exit_status = func(args)
+#         else:
+#             exit_status = func()
+# 
+#         exit_status = exit_status or 0
+# 
+#     except Exception as e:
+#         logger.error(f"Error: {e}", exc_info=True)
+#         exit_status = 1
+#         raise
+# 
+#     finally:
+#         close(
+#             CONFIG=CONFIG,
+#             exit_status=exit_status,
+#             **session_kwargs,
+#         )
+# 
+#     return exit_status
+# 
+# # EOF
+
+# --------------------------------------------------------------------------------
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/session/_decorator.py
+# --------------------------------------------------------------------------------

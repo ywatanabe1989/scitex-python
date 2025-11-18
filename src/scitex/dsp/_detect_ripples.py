@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import find_peaks
 
-from ..gen._norm import to_z
+from scitex.gen._norm import to_z
 from ._demo_sig import demo_sig
 from ._hilbert import hilbert
 from ._resample import resample

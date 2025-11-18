@@ -27,10 +27,10 @@ import matplotlib.pyplot as plt
 import scitex
 import pandas as pd
 
-from .._sh import sh
-from ..io._load import load
-from ..io._save import save
-from ..str import printc
+from scitex.sh import sh
+from scitex.io._load import load
+from scitex.io._save import save
+from scitex.str import printc
 from ._get_processor_usages import get_processor_usages
 
 """Functions & Classes"""

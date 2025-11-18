@@ -30,6 +30,8 @@ def ensure_project_exists(
     project_dir: Path,
     project_name: str,
     git_strategy: Optional[str] = "child",
+    branch: Optional[str] = None,
+    tag: Optional[str] = None,
 ) -> Path:
     """
     Ensure project directory exists, creating it if necessary.
@@ -42,6 +44,12 @@ def ensure_project_exists(
         Name of the project
     git_strategy : str or None
         Git initialization strategy
+    branch : str, optional
+        Specific branch of template repository to clone. If None, clones the default branch.
+        Mutually exclusive with tag parameter.
+    tag : str, optional
+        Specific tag/release of template repository to clone. If None, clones the default branch.
+        Mutually exclusive with branch parameter.
 
     Returns
     -------
@@ -59,14 +67,13 @@ def ensure_project_exists(
         )
         return project_dir
 
-    target_dir = project_dir.parent
     logger.info(
-        f"Creating new project '{project_name}' in {target_dir}"
+        f"Creating new project '{project_name}' at {project_dir.absolute()}"
     )
 
     # Initialize project directory structure
     success = _clone_writer_project(
-        project_name, str(target_dir), git_strategy
+        str(project_dir), git_strategy, branch, tag
     )
 
     if not success:
@@ -75,15 +82,6 @@ def ensure_project_exists(
         )
         raise RuntimeError(
             f"Could not create project directory at {project_dir}"
-        )
-
-    # Verify target directory exists
-    if not target_dir.exists():
-        logger.error(
-            f"Target directory {target_dir} does not exist"
-        )
-        raise RuntimeError(
-            f"Target directory {target_dir} was not created"
         )
 
     # Verify project directory was created

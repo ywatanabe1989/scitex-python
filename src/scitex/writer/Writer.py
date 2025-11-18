@@ -50,6 +50,8 @@ class Writer:
         project_dir: Path,
         name: Optional[str] = None,
         git_strategy: Optional[str] = "child",
+        branch: Optional[str] = None,
+        tag: Optional[str] = None,
     ):
         """
         Initialize for project directory.
@@ -64,16 +66,27 @@ class Writer:
                 - 'parent': Use parent git repository
                 - 'origin': Preserve template's original git history
                 - None: Disable git initialization
+            branch: Specific branch of template repository to clone (optional)
+                If None, clones the default branch. Mutually exclusive with tag.
+            tag: Specific tag/release of template repository to clone (optional)
+                If None, clones the default branch. Mutually exclusive with branch.
         """
         self.project_name = name or Path(project_dir).name
         self.project_dir = Path(project_dir)
         self.git_strategy = git_strategy
+        self.branch = branch
+        self.tag = tag
 
+        ref_info = ""
+        if branch:
+            ref_info = f" (branch: {branch})"
+        elif tag:
+            ref_info = f" (tag: {tag})"
         logger.info(
             f"Writer: Initializing with:\n"
             f"    Project Name: {self.project_name}\n"
             f"    Project Directory: {self.project_dir.absolute()}\n"
-            f"    Git Strategy: {self.git_strategy}..."
+            f"    Git Strategy: {self.git_strategy}{ref_info}..."
         )
 
         # Create or attach to project
@@ -84,7 +97,7 @@ class Writer:
 
         # Document accessors (pass git_root for efficiency)
         self.shared = SharedTree(
-            self.project_dir / "shared", git_root=self.git_root
+            self.project_dir / "00_shared", git_root=self.git_root
         )
         self.manuscript = ManuscriptTree(
             self.project_dir / "01_manuscript", git_root=self.git_root
@@ -126,15 +139,14 @@ class Writer:
             return self.project_dir
 
         project_name = name or self.project_dir.name
-        target_dir = self.project_dir.parent
 
         logger.info(
-            f"Writer: Creating new project '{project_name}' in {target_dir}"
+            f"Writer: Creating new project '{project_name}' at {self.project_dir.absolute()}"
         )
 
         # Initialize project directory structure
         success = _clone_writer_project(
-            project_name, str(target_dir), self.git_strategy
+            str(self.project_dir), self.git_strategy, self.branch, self.tag
         )
 
         if not success:
@@ -364,7 +376,7 @@ def run_session() -> None:
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,

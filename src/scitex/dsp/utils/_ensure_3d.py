@@ -3,7 +3,7 @@
 # Time-stamp: "2024-11-05 01:04:03 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/dsp/utils/_ensure_3d.py
 
-from ...decorators import torch_fn
+from scitex.decorators import torch_fn
 
 
 @torch_fn

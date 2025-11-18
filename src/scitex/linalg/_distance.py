@@ -6,8 +6,8 @@
 import numpy as np
 import scipy.spatial.distance as _distance
 
-from ..decorators._numpy_fn import numpy_fn
-from ..decorators._wrap import wrap
+from scitex.decorators._numpy_fn import numpy_fn
+from scitex.decorators._wrap import wrap
 
 
 @numpy_fn

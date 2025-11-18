@@ -26,6 +26,8 @@ from typing import Optional
 from scitex.logging import getLogger
 import scitex.git
 
+from ._logging_helpers import log_group
+
 logger = getLogger(__name__)
 
 
@@ -41,7 +43,7 @@ def remove_template_git(project_path: Path) -> None:
     git_dir = project_path / ".git"
     if git_dir.exists():
         shutil.rmtree(git_dir)
-        logger.info("Removed template .git directory")
+        logger.debug("Removed template .git directory")
 
 
 def apply_git_strategy(
@@ -71,49 +73,47 @@ def apply_git_strategy(
         If invalid git strategy provided
     """
     if git_strategy is None:
-        logger.info("Git initialization disabled (git_strategy=None)")
+        logger.debug("Git initialization disabled (git_strategy=None)")
         remove_template_git(project_path)
         return
 
     if git_strategy == "origin":
-        logger.info("Using 'origin' git strategy, preserving template git history")
+        logger.debug("Using 'origin' git strategy, preserving template git history")
         git_dir = project_path / ".git"
         if not git_dir.exists():
             logger.warning(
                 "No .git directory found, cannot preserve origin history"
             )
-        else:
-            logger.success(f"Preserved original git history from {template_name}")
         return
 
-    if git_strategy == "parent":
-        # Remove template git first
-        remove_template_git(project_path)
+    # Git initialization group
+    with log_group("Initializing git repository", "📝") as ctx:
+        if git_strategy == "parent":
+            # Remove template git first
+            remove_template_git(project_path)
 
-        parent_git = scitex.git.find_parent_git(project_path)
-        if parent_git:
-            logger.info(f"Found parent git repository: {parent_git}")
-            logger.info(f"Using parent git at: {parent_git}")
+            parent_git = scitex.git.find_parent_git(project_path)
+            if parent_git:
+                ctx.step(f"Using parent repository: {parent_git}")
+                return
+            else:
+                logger.warning(
+                    "No parent git repository found. Using 'child' strategy."
+                )
+                git_strategy = "child"
+
+        if git_strategy == "child":
+            # Remove template git first
+            remove_template_git(project_path)
+
+            if not scitex.git.git_init(project_path, verbose=False):
+                ctx.step("Failed to initialize repository", success=False)
+            else:
+                scitex.git.setup_branches(project_path, template_name, verbose=False)
+                ctx.step("Created branch: main")
+                ctx.step("Created branch: develop")
+                ctx.step("Initial commit complete")
             return
-        else:
-            logger.warning(
-                "No parent git repository found. Degrading to 'child' strategy."
-            )
-            git_strategy = "child"
-
-    if git_strategy == "child":
-        # Remove template git first
-        remove_template_git(project_path)
-
-        logger.info("Initializing new git repository")
-        if not scitex.git.git_init(project_path):
-            logger.warning("Failed to initialize git repository")
-        else:
-            logger.info("Git repository initialized successfully")
-            logger.info("Setting up branches and initial commit")
-            scitex.git.setup_branches(project_path, template_name)
-            logger.success(f"Git repository initialized with 'child' strategy")
-        return
 
     raise ValueError(f"Invalid git strategy: {git_strategy}")
 

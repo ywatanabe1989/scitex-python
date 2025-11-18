@@ -25,7 +25,10 @@ logger = getLogger(__name__)
 
 def copy_tree_skip_broken_symlinks(src: Path, dst: Path) -> None:
     """
-    Copy directory tree, skipping broken symlinks.
+    Copy directory tree, preserving symlinks as-is.
+
+    Symlinks are copied with their original target paths (relative or absolute).
+    Relative symlinks will work correctly once the full directory tree is copied.
 
     Parameters
     ----------
@@ -48,18 +51,16 @@ def copy_tree_skip_broken_symlinks(src: Path, dst: Path) -> None:
         # Check if it's a symlink
         if src_item.is_symlink():
             try:
-                # Read the symlink target (relative path)
+                # Read the symlink target (preserve relative/absolute paths as-is)
                 link_target = src_item.readlink()
 
-                # Verify the symlink isn't broken
-                src_item.resolve(strict=True)
-
-                # Create the symlink at destination (preserve relative paths)
+                # Create the symlink at destination
+                # Don't verify target exists - relative symlinks will work once full tree is copied
                 dst_item.symlink_to(link_target)
                 logger.debug(f"Copied symlink: {src_item.name} -> {link_target}")
-            except (OSError, FileNotFoundError):
-                # Broken symlink - skip it
-                logger.warning(f"Skipping broken symlink: {src_item}")
+            except (OSError, FileNotFoundError) as e:
+                # Failed to copy symlink
+                logger.warning(f"Failed to copy symlink {src_item}: {e}")
                 continue
         elif src_item.is_dir():
             copy_tree_skip_broken_symlinks(src_item, dst_item)
@@ -67,7 +68,7 @@ def copy_tree_skip_broken_symlinks(src: Path, dst: Path) -> None:
             shutil.copy2(src_item, dst_item)
 
 
-def copy_template(src: Path, dst: Path) -> Path:
+def copy_template(src: Path, dst: Path, quiet: bool = False) -> Path:
     """
     Copy template directory to destination.
 
@@ -77,6 +78,8 @@ def copy_template(src: Path, dst: Path) -> Path:
         Source template directory
     dst : Path
         Destination directory
+    quiet : bool
+        If True, suppress logging messages
 
     Returns
     -------
@@ -88,9 +91,11 @@ def copy_template(src: Path, dst: Path) -> Path:
     OSError
         If copy operation fails
     """
-    logger.info(f"Copying template from {src} to {dst}")
+    if not quiet:
+        logger.info(f"Copying template from {src} to {dst}")
     copy_tree_skip_broken_symlinks(src, dst)
-    logger.info("Template copied successfully")
+    if not quiet:
+        logger.info("Template copied successfully")
     return dst
 
 

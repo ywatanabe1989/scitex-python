@@ -387,7 +387,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/pd/_merge_columns.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/pd/_merge_columns.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -604,7 +604,7 @@ if __name__ == "__main__":
 # # #     df = deepcopy(_df)
 # # #     merged = deepcopy(df[columns[0]])  # initialization
 # # #     for c in columns[1:]:
-# # #         merged = scitex.ml.utils.merge_labels(list(merged), deepcopy(df[c]))
+# # #         merged = scitex.ai.utils.merge_labels(list(merged), deepcopy(df[c]))
 # # #     df.loc[:, scitex.gen.connect_strs(columns)] = merged
 # # #     return df
 # 
@@ -612,5 +612,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/pd/_merge_columns.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/pd/_merge_columns.py
 # --------------------------------------------------------------------------------

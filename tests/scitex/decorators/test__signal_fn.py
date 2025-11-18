@@ -274,7 +274,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/decorators/_signal_fn.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_signal_fn.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -292,9 +292,6 @@ if __name__ == "__main__":
 # from typing import Callable
 # 
 # import numpy as np
-# import pandas as pd
-# import torch
-# import xarray as xr
 # 
 # from ._converters import _return_always, is_nested_decorator, to_torch
 # 
@@ -333,22 +330,27 @@ if __name__ == "__main__":
 #         results = func(*converted_args, **kwargs)
 # 
 #         # Convert results back to original input types
+#         import torch
 #         if isinstance(results, torch.Tensor):
 #             if original_object is not None:
 #                 if isinstance(original_object, list):
 #                     return results.detach().cpu().numpy().tolist()
 #                 elif isinstance(original_object, np.ndarray):
 #                     return results.detach().cpu().numpy()
-#                 elif isinstance(original_object, pd.DataFrame):
+#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataFrame':
+#                     import pandas as pd
 #                     return pd.DataFrame(results.detach().cpu().numpy())
-#                 elif isinstance(original_object, pd.Series):
+#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Series':
+#                     import pandas as pd
 #                     return pd.Series(results.detach().cpu().numpy().flatten())
-#                 elif isinstance(original_object, xr.DataArray):
+#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataArray':
+#                     import xarray as xr
 #                     return xr.DataArray(results.detach().cpu().numpy())
 #             return results
 # 
 #         # Handle tuple returns (e.g., (signal, frequencies))
 #         elif isinstance(results, tuple):
+#             import torch
 #             converted_results = []
 #             for r in results:
 #                 if isinstance(r, torch.Tensor):
@@ -373,5 +375,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/decorators/_signal_fn.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_signal_fn.py
 # --------------------------------------------------------------------------------

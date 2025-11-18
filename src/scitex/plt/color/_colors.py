@@ -12,7 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 import matplotlib.colors as _colors
 import numpy as np
 
-from ...decorators._deprecated import deprecated
+from scitex.decorators._deprecated import deprecated
 from ._PARAMS import PARAMS
 
 # RGB

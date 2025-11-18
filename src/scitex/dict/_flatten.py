@@ -1,15 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-07 21:42:24 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/dict/_flatten.py
-# ----------------------------------------
-from __future__ import annotations
-import os
-__FILE__ = (
-    "./src/scitex/dict/_flatten.py"
-)
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+# Timestamp: "2025-11-10 22:38:40 (ywatanabe)"
+
 
 def flatten(nested_dict, parent_key="", sep="_"):
     items = []

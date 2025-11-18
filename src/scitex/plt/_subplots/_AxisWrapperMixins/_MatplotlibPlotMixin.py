@@ -17,8 +17,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import gaussian_kde
 
-from ....pd import to_xyz
-from ....types import ArrayLike
+from scitex.pd import to_xyz
+from scitex.types import ArrayLike
 
 
 class MatplotlibPlotMixin:

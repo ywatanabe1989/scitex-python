@@ -10,10 +10,10 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from ..str import printc
+from scitex.str import printc
 
-from ..decorators import signal_fn, batch_fn
-from ..nn._PAC import PAC
+from scitex.decorators import signal_fn, batch_fn
+from scitex.nn._PAC import PAC
 
 """
 scitex.dsp.pac function

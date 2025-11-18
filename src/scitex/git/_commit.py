@@ -17,7 +17,7 @@ Examples
 
 from pathlib import Path
 from scitex.logging import getLogger
-from scitex._sh import sh
+from scitex.sh import sh
 from ._utils import _in_directory
 from ._constants import EXIT_SUCCESS, EXIT_FAILURE
 from ._validation import validate_commit_message, validate_path
@@ -126,7 +126,8 @@ def git_commit(repo_path: Path, message: str, verbose: bool = True) -> bool:
             logger.error(f"Failed to commit in {repo_path}: {error_msg}")
             return False
 
-        logger.info("Commit created successfully")
+        if verbose:
+            logger.info("Commit created successfully")
         return True
 
 

@@ -3,7 +3,7 @@
 # Time-stamp: "2024-11-05 01:03:47 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/dsp/_ensure_3d.py
 
-from ..decorators import signal_fn
+from scitex.decorators import signal_fn
 
 
 @signal_fn

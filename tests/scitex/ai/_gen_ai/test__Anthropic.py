@@ -246,7 +246,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/_gen_ai/_Anthropic.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/_gen_ai/_Anthropic.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -254,9 +254,7 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ai/_gen_ai/_Anthropic.py
 # # ----------------------------------------
 # import os
-# __FILE__ = (
-#     "./src/scitex/ai/_gen_ai/_Anthropic.py"
-# )
+# __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
@@ -408,11 +406,11 @@ if __name__ == "__main__":
 # if __name__ == "__main__":
 #     import scitex
 # 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys, plt, verbose=False
 #     )
 #     main()
-#     scitex.gen.close(CONFIG, verbose=False, notify=False)
+#     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 
 # 
 # """
@@ -423,5 +421,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/_gen_ai/_Anthropic.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/_gen_ai/_Anthropic.py
 # --------------------------------------------------------------------------------

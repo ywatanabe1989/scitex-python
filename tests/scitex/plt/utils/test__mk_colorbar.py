@@ -65,7 +65,7 @@ def test_mk_colorbar_custom_colors():
         ("green", "yellow"),
         ("purple", "orange"),
         ("navy", "pink"),
-        ("brown", "light_blue")
+        ("brown", "lightblue")
     ]
     
     for start, end in color_pairs:
@@ -266,7 +266,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/utils/_mk_colorbar.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_mk_colorbar.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -335,5 +335,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/utils/_mk_colorbar.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_mk_colorbar.py
 # --------------------------------------------------------------------------------

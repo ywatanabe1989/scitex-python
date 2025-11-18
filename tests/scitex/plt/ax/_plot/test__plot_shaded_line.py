@@ -109,7 +109,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_plot/_plot_shaded_line.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_plot/_plot_shaded_line.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -129,7 +129,7 @@ if __name__ == "__main__":
 # import pandas as pd
 # from matplotlib.axes._axes import Axes
 # 
-# from ....types import ColorLike
+# from scitex.types import ColorLike
 # from ....plt.utils import assert_valid_axis
 # 
 # 
@@ -255,5 +255,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_plot/_plot_shaded_line.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_plot/_plot_shaded_line.py
 # --------------------------------------------------------------------------------

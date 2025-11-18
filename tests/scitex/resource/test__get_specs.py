@@ -414,7 +414,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/resource/_get_specs.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/resource/_get_specs.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -434,7 +434,7 @@ if __name__ == "__main__":
 # import psutil as _psutil
 # import yaml as _yaml
 # from ._utils._get_env_info import get_env_info
-# from ..str import readable_bytes
+# from scitex.str import readable_bytes
 # 
 # 
 # def get_specs(
@@ -680,13 +680,13 @@ if __name__ == "__main__":
 #     import scitex
 # 
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 
 #     info = scitex.res.get_specs()
 #     scitex.io.save(info, "specs.yaml")
 # 
 #     # Close
-#     scitex.gen.close(CONFIG)
+#     scitex.session.close(CONFIG)
 # 
 # # EOF
 # 
@@ -698,5 +698,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/resource/_get_specs.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/resource/_get_specs.py
 # --------------------------------------------------------------------------------

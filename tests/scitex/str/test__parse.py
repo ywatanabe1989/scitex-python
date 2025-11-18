@@ -222,7 +222,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/str/_parse.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/str/_parse.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -230,16 +230,14 @@ if __name__ == "__main__":
 # # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/str/_parse.py
 # # ----------------------------------------
 # import os
-# __FILE__ = (
-#     "./src/scitex/str/_parse.py"
-# )
+# __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
 # import re
 # from typing import Dict, Union
 # 
-# from ..dict._DotDict import DotDict as _DotDict
+# from scitex.dict._DotDict import DotDict as _DotDict
 # 
 # 
 # def parse(
@@ -394,5 +392,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/str/_parse.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/str/_parse.py
 # --------------------------------------------------------------------------------

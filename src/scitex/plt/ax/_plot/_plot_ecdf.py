@@ -14,7 +14,7 @@ import warnings
 import matplotlib
 import numpy as np
 
-from ....pd._force_df import force_df as scitex_pd_force_df
+from scitex.pd._force_df import force_df as scitex_pd_force_df
 from ....plt.utils import assert_valid_axis
 
 

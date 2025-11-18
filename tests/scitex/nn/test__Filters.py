@@ -665,7 +665,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_Filters.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_Filters.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -705,12 +705,12 @@ if __name__ == "__main__":
 # import torch.nn as nn
 # import torch.nn.functional as F
 # 
-# from ..dsp.utils import build_bandpass_filters, init_bandpass_filters
-# from ..dsp.utils._ensure_3d import ensure_3d
-# from ..dsp.utils._ensure_even_len import ensure_even_len
-# from ..dsp.utils._zero_pad import zero_pad
-# from ..dsp.utils.filter import design_filter
-# from ..gen._to_even import to_even
+# from scitex.dsp.utils import build_bandpass_filters, init_bandpass_filters
+# from scitex.dsp.utils._ensure_3d import ensure_3d
+# from scitex.dsp.utils._ensure_even_len import ensure_even_len
+# from scitex.dsp.utils._zero_pad import zero_pad
+# from scitex.dsp.utils.filter import design_filter
+# from scitex.gen._to_even import to_even
 # 
 # 
 # class BaseFilter1D(nn.Module):
@@ -1080,7 +1080,7 @@ if __name__ == "__main__":
 #     import scitex
 # 
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt, fig_scale=5)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, fig_scale=5)
 # 
 #     xx, tt, fs = scitex.dsp.demo_sig(sig_type="chirp", fs=1024)
 #     xx = torch.tensor(xx).cuda()
@@ -1088,7 +1088,7 @@ if __name__ == "__main__":
 #     # BandPassFilter(bands, fs, xx.shape)
 #     m = DifferentiableBandPassFilter(xx.shape[-1], fs).cuda()
 # 
-#     scitex.ml.utils.check_params(m)
+#     scitex.ai.utils.check_params(m)
 #     # {'pha_mids': (torch.Size([30]), 'Learnable'),
 #     #  'amp_mids': (torch.Size([50]), 'Learnable')}
 # 
@@ -1149,7 +1149,7 @@ if __name__ == "__main__":
 #     # plt.show()
 # 
 #     # Close
-#     scitex.gen.close(CONFIG)
+#     scitex.session.close(CONFIG)
 # 
 # """
 # /home/ywatanabe/proj/entrance/scitex/dsp/nn/_Filters.py
@@ -1158,5 +1158,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/nn/_Filters.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/nn/_Filters.py
 # --------------------------------------------------------------------------------

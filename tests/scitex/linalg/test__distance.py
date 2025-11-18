@@ -520,7 +520,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/linalg/_distance.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/linalg/_distance.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -530,8 +530,8 @@ if __name__ == "__main__":
 # import numpy as np
 # import scipy.spatial.distance as _distance
 # 
-# from ..decorators._numpy_fn import numpy_fn
-# from ..decorators._wrap import wrap
+# from scitex.decorators._numpy_fn import numpy_fn
+# from scitex.decorators._wrap import wrap
 # 
 # 
 # @numpy_fn
@@ -587,5 +587,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/linalg/_distance.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/linalg/_distance.py
 # --------------------------------------------------------------------------------

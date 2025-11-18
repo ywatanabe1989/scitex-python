@@ -74,20 +74,23 @@ class SupplementaryTree:
         Verify supplementary structure has required components.
 
         Returns:
-            (is_valid, list_of_missing_items)
+            (is_valid, list_of_missing_items_with_paths)
         """
         missing = []
 
         # Check contents structure
         contents_valid, contents_issues = self.contents.verify_structure()
         if not contents_valid:
-            missing.extend([f"contents/{item}" for item in contents_issues])
+            # Contents already includes full paths, just pass them through
+            missing.extend(contents_issues)
 
         # Check root level files
         if not self.base.path.exists():
-            missing.append("base.tex")
+            expected_path = self.base.path.relative_to(self.git_root) if self.git_root else self.base.path
+            missing.append(f"base.tex (expected at: {expected_path})")
         if not self.supplementary.path.exists():
-            missing.append("supplementary.tex")
+            expected_path = self.supplementary.path.relative_to(self.git_root) if self.git_root else self.supplementary.path
+            missing.append(f"supplementary.tex (expected at: {expected_path})")
 
         return len(missing) == 0, missing
 

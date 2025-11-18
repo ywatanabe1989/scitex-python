@@ -4,6 +4,7 @@ DEPRECATED: The 'reproduce' module has been renamed to 'repro'.
 
 This module exists only for backward compatibility and will be removed in a
 future version.
+
 Please update your imports from:
     from scitex.reproduce import ...
 to:
@@ -22,5 +23,4 @@ warnings.warn(
 )
 
 # Import everything from the new module for backward compatibility
-from ..repro import *  # noqa: F403,F401,E402
-from ._hash_array import hash_array
+from scitex.repro import *  # noqa: F403,F401

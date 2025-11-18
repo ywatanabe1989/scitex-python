@@ -4,7 +4,7 @@
 # File: ./scitex_repo/src/scitex/gen/_check_host.py
 
 
-from .._sh import sh
+from scitex.sh import sh
 import sys
 
 

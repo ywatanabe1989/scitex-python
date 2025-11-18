@@ -4,7 +4,7 @@
 # File: ./scitex_repo/src/scitex/dsp/add_noise.py
 
 import torch
-from ..decorators import signal_fn
+from scitex.decorators import signal_fn
 
 
 def _uniform(shape, amp=1.0):

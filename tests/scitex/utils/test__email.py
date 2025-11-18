@@ -316,7 +316,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/utils/_email.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/utils/_email.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -331,7 +331,7 @@ if __name__ == "__main__":
 # from email.mime.text import MIMEText as _MIMEText
 # import mimetypes
 # 
-# from ..repro._gen_ID import gen_ID
+# from scitex.repro._gen_ID import gen_ID
 # 
 # import re
 # 
@@ -349,7 +349,14 @@ if __name__ == "__main__":
 #     ID=None,
 #     attachment_paths=None,
 #     verbose=True,
+#     smtp_server=None,
+#     smtp_port=None,
 # ):
+#     """
+#     Send email via SMTP. Despite the name, supports any SMTP server.
+#     Uses mail1030.onamae.ne.jp by default (for scitex.ai emails).
+#     Falls back to Gmail if sender email is @gmail.com.
+#     """
 #     if ID == "auto":
 #         ID = gen_ID()
 # 
@@ -359,8 +366,20 @@ if __name__ == "__main__":
 #         else:
 #             subject = f"ID: {ID}"
 # 
+#     # Auto-detect SMTP server based on sender email or use provided server
+#     if smtp_server is None:
+#         if '@gmail.com' in sender_gmail:
+#             smtp_server = 'smtp.gmail.com'
+#             smtp_port = smtp_port or 587
+#         else:
+#             # Use scitex.ai mail server for scitex.ai emails
+#             smtp_server = os.getenv('SCITEX_SCHOLAR_FROM_EMAIL_SMTP_SERVER', 'mail1030.onamae.ne.jp')
+#             smtp_port = smtp_port or int(os.getenv('SCITEX_SCHOLAR_FROM_EMAIL_SMTP_PORT', '587'))
+# 
+#     smtp_port = smtp_port or 587
+# 
 #     try:
-#         server = smtplib.SMTP("smtp.gmail.com", 587)
+#         server = smtplib.SMTP(smtp_server, smtp_port)
 #         server.starttls()
 #         server.login(sender_gmail, sender_password)
 # 
@@ -440,5 +459,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/utils/_email.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/utils/_email.py
 # --------------------------------------------------------------------------------

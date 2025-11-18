@@ -202,28 +202,17 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dict/_safe_merge.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dict/_safe_merge.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# # Time-stamp: "ywatanabe (2024-11-03 00:47:50)"
-# # File: ./scitex_repo/src/scitex/dict/_safe_merge.py
+# # Timestamp: "2025-11-10 22:55:38 (ywatanabe)"
 # 
-# """
-# Functionality:
-#     - Safely merges multiple dictionaries without overlapping keys
-# Input:
-#     - Multiple dictionaries to be merged
-# Output:
-#     - A single merged dictionary
-# Prerequisites:
-#     - scitex.gen package with search function
-# """
 # 
 # from typing import Any as _Any
 # from typing import Dict
 # 
-# from ..utils import search
+# from scitex.utils import search
 # 
 # 
 # def safe_merge(*dicts: Dict[_Any, _Any]) -> Dict[_Any, _Any]:
@@ -255,7 +244,9 @@ if __name__ == "__main__":
 #         merged_dict: Dict[_Any, _Any] = {}
 #         for current_dict in dicts:
 #             overlap_check = search(
-#                 merged_dict.keys(), current_dict.keys(), only_perfect_match=True
+#                 merged_dict.keys(),
+#                 current_dict.keys(),
+#                 only_perfect_match=True,
 #             )
 #             if overlap_check != ([], []):
 #                 raise ValueError("Overlapping keys found between dictionaries")
@@ -264,9 +255,8 @@ if __name__ == "__main__":
 #     except Exception as error:
 #         raise ValueError(f"Dictionary merge failed: {str(error)}")
 # 
-# 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dict/_safe_merge.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dict/_safe_merge.py
 # --------------------------------------------------------------------------------

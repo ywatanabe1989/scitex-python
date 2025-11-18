@@ -141,7 +141,7 @@ def correct_holm(
     >>> df = pd.DataFrame(results)
     >>> df_corrected = correct_holm(df)
     """
-    from ..utils._normalizers import force_dataframe
+    from scitex.stats.utils._normalizers import force_dataframe
 
     if verbose:
         logger.info("Applying Holm-Bonferroni correction")
@@ -524,7 +524,7 @@ def run_main():
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,

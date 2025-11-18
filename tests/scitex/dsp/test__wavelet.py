@@ -227,7 +227,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/_wavelet.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/_wavelet.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -237,8 +237,8 @@ if __name__ == "__main__":
 # """scitex.dsp.wavelet function"""
 # 
 # 
-# from ..decorators import batch_fn, signal_fn
-# from ..nn._Wavelet import Wavelet
+# from scitex.decorators import batch_fn, signal_fn
+# from scitex.nn._Wavelet import Wavelet
 # import scitex
 # 
 # 
@@ -357,7 +357,7 @@ if __name__ == "__main__":
 #     import numpy as np
 # 
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt, agg=True)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, agg=True)
 # 
 #     # Parameters
 #     FS = 512
@@ -432,7 +432,7 @@ if __name__ == "__main__":
 #     scitex.io.save(fig, "wavelet.png")
 # 
 #     # Close
-#     scitex.gen.close(CONFIG)
+#     scitex.session.close(CONFIG)
 # 
 # # EOF
 # 
@@ -444,5 +444,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/_wavelet.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/_wavelet.py
 # --------------------------------------------------------------------------------

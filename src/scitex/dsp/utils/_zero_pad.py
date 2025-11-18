@@ -8,7 +8,7 @@ THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/dsp/utils/_zero_pad.py"
 import numpy as np
 import torch
 import torch.nn.functional as F
-from ...decorators import torch_fn
+from scitex.decorators import torch_fn
 
 
 def _zero_pad_1d(x, target_length):

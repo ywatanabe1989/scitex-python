@@ -287,7 +287,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/path/_find.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/path/_find.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -296,7 +296,7 @@ if __name__ == "__main__":
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-04-17 09:34:43"
-# # Author: Yusuke Watanabe (ywata1989@gmail.com)
+# # Author: Yusuke Watanabe (ywatanabe@scitex.ai)
 # 
 # """
 # This script does XYZ.
@@ -387,12 +387,12 @@ if __name__ == "__main__":
 #         plt = None
 #     
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 
 #     # (YOUR AWESOME CODE)
 # 
 #     # Close
-#     scitex.gen.close(CONFIG)
+#     scitex.session.close(CONFIG)
 # 
 # # EOF
 # 
@@ -404,5 +404,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/path/_find.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/path/_find.py
 # --------------------------------------------------------------------------------

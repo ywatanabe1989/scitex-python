@@ -217,7 +217,7 @@ def _check_run_main_unchanged(content: str) -> bool:
         r"import matplotlib\.pyplot as plt",
         r"import scitex as stx",
         r"args = parse_args\(\)",
-        r"CONFIG, sys\.stdout, sys\.stderr, plt, CC, rng = stx\.session\.start\(",
+        r"CONFIG, sys\.stdout, sys\.stderr, plt, CC, rng_manager = stx\.session\.start\(",
         r"exit_status = main\(args\)",
         r"stx\.session\.close\(",
     ]
@@ -560,7 +560,7 @@ def run_main() -> None:
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,

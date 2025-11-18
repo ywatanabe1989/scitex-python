@@ -1552,7 +1552,7 @@ import numpy as np
 from pytorch_pretrained_vit import ViT
 from torchvision import transforms as _transforms
 
-# from ...decorators import batch_torch_fn
+# from scitex.decorators import batch_torch_fn
 
 
 def _setup_device(device: Union[str, None]) -> str:
@@ -1660,7 +1660,7 @@ from typing import Any, Dict, Generator, List, Optional, Union
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ...io._load import load
+from scitex.io._load import load
 from ._calc_cost import calc_cost
 from ._format_output_func import format_output_func
 from ._PARAMS import MODELS
@@ -2459,7 +2459,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from ...repro import fix_seeds
+from scitex.repro import fix_seeds
 
 
 class MultiTaskLoss(nn.Module):
@@ -3988,7 +3988,7 @@ from scitex.ai.genai import GenAI
 THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/ai/sampling/undersample.py"
 
 from typing import Tuple
-from ...types import ArrayLike
+from scitex.types import ArrayLike
 
 try:
     from imblearn.under_sampling import RandomUnderSampler

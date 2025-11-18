@@ -36,12 +36,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ..dsp.utils import build_bandpass_filters, init_bandpass_filters
-from ..dsp.utils._ensure_3d import ensure_3d
-from ..dsp.utils._ensure_even_len import ensure_even_len
-from ..dsp.utils._zero_pad import zero_pad
-from ..dsp.utils.filter import design_filter
-from ..gen._to_even import to_even
+from scitex.dsp.utils import build_bandpass_filters, init_bandpass_filters
+from scitex.dsp.utils._ensure_3d import ensure_3d
+from scitex.dsp.utils._ensure_even_len import ensure_even_len
+from scitex.dsp.utils._zero_pad import zero_pad
+from scitex.dsp.utils.filter import design_filter
+from scitex.gen._to_even import to_even
 
 
 class BaseFilter1D(nn.Module):

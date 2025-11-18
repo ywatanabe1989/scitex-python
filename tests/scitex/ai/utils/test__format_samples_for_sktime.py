@@ -206,7 +206,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/utils/_format_samples_for_sktime.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/_format_samples_for_sktime.py
 # --------------------------------------------------------------------------------
 # import pandas as pd
 # import torch
@@ -236,5 +236,5 @@ if __name__ == "__main__":
 #     return pd.DataFrame([_format_a_sample_for_sktime(X[i]) for i in range(len(X))])
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/utils/_format_samples_for_sktime.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/_format_samples_for_sktime.py
 # --------------------------------------------------------------------------------

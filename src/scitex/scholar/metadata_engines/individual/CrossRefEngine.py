@@ -92,9 +92,9 @@ class CrossRefEngine(BaseDOIEngine):
             return None
 
         params = {
-            "query": title,
+            "query.title": title,  # Use query.title for more precise title-based search
             "rows": max_results,
-            "select": "DOI,title,published-print,published-online,container-title,short-container-title,publisher,volume,issue,ISSN,abstract,author",
+            "select": "DOI,title,published-print,published-online,container-title,short-container-title,publisher,volume,issue,ISSN,abstract,author,is-referenced-by-count",
             "mailto": self.email,
         }
 
@@ -117,7 +117,17 @@ class CrossRefEngine(BaseDOIEngine):
                 item_title = " ".join(item.get("title", []))
                 if item_title.endswith("."):
                     item_title = item_title[:-1]
-                if self._is_title_match(title, item_title):
+
+                # Enhanced title matching for better compatibility with shortened titles
+                # Check if search title is a substring of result title (common with shortened BibTeX titles)
+                if title.lower() in item_title.lower():
+                    logger.debug(
+                        f"Title substring match: '{title}' found in '{item_title}'"
+                    )
+                    return self._extract_metadata_from_item(item, return_as)
+
+                # Fall back to similarity matching with lower threshold (85% instead of 95%)
+                if self._is_title_match(title, item_title, threshold=0.85):
                     return self._extract_metadata_from_item(item, return_as)
             return self._create_minimal_metadata(
                 title=title,
@@ -167,6 +177,9 @@ class CrossRefEngine(BaseDOIEngine):
         issn_list = item.get("ISSN", [])
         issn = issn_list[0] if issn_list else None
 
+        # Extract citation count
+        citation_count = item.get("is-referenced-by-count")
+
         metadata = {
             "id": {
                 "doi": item.get("DOI"),
@@ -185,6 +198,10 @@ class CrossRefEngine(BaseDOIEngine):
                 ),
                 "authors": extracted_authors if extracted_authors else None,
                 "authors_engines": [self.name] if extracted_authors else None,
+            },
+            "citation_count": {
+                "total": citation_count if citation_count is not None else None,
+                "total_engines": [self.name] if citation_count is not None else None,
             },
             "publication": {
                 "journal": journal if journal else None,

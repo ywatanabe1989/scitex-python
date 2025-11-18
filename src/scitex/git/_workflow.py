@@ -62,7 +62,7 @@ def _rollback_commit(repo_path: Path, verbose: bool = True) -> None:
     verbose : bool
         Enable verbose output
     """
-    from scitex._sh import sh
+    from scitex.sh import sh
     from ._utils import _in_directory
     from scitex.logging import getLogger
 

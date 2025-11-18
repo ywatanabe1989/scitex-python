@@ -14,7 +14,7 @@ __DIR__ = os.path.dirname(__FILE__)
 """
 SharedTree - dataclass for shared directory structure.
 
-Represents the shared/ directory with files used across documents.
+Represents the 00_shared/ directory with files used across documents.
 """
 
 from pathlib import Path
@@ -26,7 +26,7 @@ from ..core import DocumentSection
 
 @dataclass
 class SharedTree:
-    """Shared directory structure (shared/)."""
+    """Shared directory structure (00_shared/)."""
 
     root: Path
     git_root: Optional[Path] = None
@@ -79,7 +79,7 @@ class SharedTree:
         Verify shared structure has required files.
 
         Returns:
-            (is_valid, list_of_missing_files)
+            (is_valid, list_of_missing_files_with_paths)
         """
         required = [
             ("authors.tex", self.authors),
@@ -92,7 +92,8 @@ class SharedTree:
         missing = []
         for name, section in required:
             if not section.path.exists():
-                missing.append(name)
+                expected_path = section.path.relative_to(self.git_root) if self.git_root else section.path
+                missing.append(f"{name} (expected at: {expected_path})")
 
         return len(missing) == 0, missing
 

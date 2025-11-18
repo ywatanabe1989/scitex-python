@@ -407,7 +407,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_xml2dict.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_xml2dict.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Time-stamp: "2021-09-07 13:06:33 (ylab)"
@@ -487,5 +487,5 @@ if __name__ == "__main__":
 #                 self.update({element.tag: element.text})
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_xml2dict.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_xml2dict.py
 # --------------------------------------------------------------------------------

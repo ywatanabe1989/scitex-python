@@ -154,7 +154,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_save_modules/_plotly.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_plotly.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -184,5 +184,5 @@ if __name__ == "__main__":
 #     else:
 #         raise TypeError("Object must be a plotly.graph_objs.Figure")
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_save_modules/_plotly.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_plotly.py
 # --------------------------------------------------------------------------------

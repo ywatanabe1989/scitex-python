@@ -31,7 +31,7 @@ logger = getLogger(__name__)
 # Parameters
 TREE_VALIDATORS = {
     "config": {"dir_name": "config", "tree_class": ConfigTree},
-    "shared": {"dir_name": "shared", "tree_class": SharedTree},
+    "00_shared": {"dir_name": "00_shared", "tree_class": SharedTree},
     "01_manuscript": {
         "dir_name": "01_manuscript",
         "tree_class": ManuscriptTree,
@@ -106,10 +106,10 @@ def _validate_scripts_structure(project_dir: Path) -> bool:
     )
 
 
-def _validate_shared_structure(project_dir: Path) -> bool:
+def _validate_00_shared_structure(project_dir: Path) -> bool:
     """Validates shared structure."""
     return _validate_tree_structure_base(
-        project_dir, **TREE_VALIDATORS["shared"]
+        project_dir, **TREE_VALIDATORS["00_shared"]
     )
 
 
@@ -158,7 +158,7 @@ def run_session() -> None:
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,

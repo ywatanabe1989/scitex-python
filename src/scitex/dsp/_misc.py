@@ -7,7 +7,7 @@
 # -*- coding: utf-8 -*-
 # Time-stamp: "2024-04-05 12:14:08 (ywatanabe)"
 
-from ..decorators import torch_fn
+from scitex.decorators import torch_fn
 
 
 @torch_fn

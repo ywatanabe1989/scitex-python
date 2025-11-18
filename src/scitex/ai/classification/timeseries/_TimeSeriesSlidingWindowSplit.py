@@ -152,7 +152,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
         self.gap = gap
         self.val_ratio = val_ratio
         self.random_state = random_state
-        self.rng = np.random.default_rng(random_state)
+        self.rng_manager = np.random.default_rng(random_state)
         self.overlapping_tests = overlapping_tests
         self.expanding_window = expanding_window
         self.undersample = undersample
@@ -781,8 +781,8 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                         train_end - train_start + 1,
                         0.6,
                         linewidth=1,
-                        edgecolor=COLORS["RGBA_NORM"]["light_blue"],
-                        facecolor=COLORS["RGBA_NORM"]["light_blue"],
+                        edgecolor=COLORS["RGBA_NORM"]["lightblue"],
+                        facecolor=COLORS["RGBA_NORM"]["lightblue"],
                         alpha=0.7,
                         label="Train" if fold == 0 else "",
                     )
@@ -927,7 +927,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         train_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["blue"] if y[idx] == 0 else stx.plt.color.PARAMS["RGBA_NORM"]["light_blue"]
+                            stx.plt.color.PARAMS["RGBA_NORM"]["blue"] if y[idx] == 0 else stx.plt.color.PARAMS["RGBA_NORM"]["lightblue"]
                             for idx in train_idx
                         ]
                         ax.plot_scatter(
@@ -1050,7 +1050,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         train_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["blue"] if y[idx] == 0 else stx.plt.color.PARAMS["RGBA_NORM"]["light_blue"]
+                            stx.plt.color.PARAMS["RGBA_NORM"]["blue"] if y[idx] == 0 else stx.plt.color.PARAMS["RGBA_NORM"]["lightblue"]
                             for idx in train_idx
                         ]
                         ax.plot_scatter(
@@ -1689,7 +1689,7 @@ def run_main() -> None:
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys,
         plt,
         args=args,

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Timestamp: "2025-11-10 22:38:47 (ywatanabe)"
+
+
 # Time-stamp: "ywatanabe (2024-11-03 00:48:22)"
-# File: ./scitex_repo/src/scitex/dict/_to_str.py
 
 
 def to_str(dictionary, delimiter="_"):
@@ -26,7 +28,8 @@ def to_str(dictionary, delimiter="_"):
     str
         A string representation of the input dictionary.
     """
-    return delimiter.join(f"{key}-{value}" for key, value in dictionary.items())
-
+    return delimiter.join(
+        f"{key}-{value}" for key, value in dictionary.items()
+    )
 
 # EOF

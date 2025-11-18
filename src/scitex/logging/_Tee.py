@@ -35,8 +35,8 @@ import re
 import sys
 from typing import Any, TextIO
 
-from ..str._clean_path import clean_path
-from ..str._printc import printc
+from scitex.str._clean_path import clean_path
+from scitex.str._printc import printc
 
 """Functions & Classes"""
 def _get_logger():

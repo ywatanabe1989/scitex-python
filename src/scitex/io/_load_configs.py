@@ -14,7 +14,7 @@ __DIR__ = os.path.dirname(__FILE__)
 from pathlib import Path
 from typing import Optional, Union
 
-from ..dict import DotDict
+from scitex.dict import DotDict
 from ._glob import glob
 from ._load import load
 
@@ -78,14 +78,17 @@ def load_configs(
             )
         )
 
-        # Load and merge configs
+        # Load and merge configs (namespaced by filename)
         CONFIGS = {}
 
         # Load from main config directory
         config_pattern = f"{config_dir}/*.yaml"
         for lpath in glob(config_pattern):
             if config := load(lpath):
-                CONFIGS.update(apply_debug_values(config, IS_DEBUG))
+                # Extract filename without extension as namespace
+                filename = Path(lpath).stem
+                # Apply debug values and namespace under filename
+                CONFIGS[filename] = apply_debug_values(config, IS_DEBUG)
 
         # Load from categories subdirectory if it exists
         categories_dir = f"{config_dir}/categories"
@@ -93,7 +96,9 @@ def load_configs(
             categories_pattern = f"{categories_dir}/*.yaml"
             for lpath in glob(categories_pattern):
                 if config := load(lpath):
-                    CONFIGS.update(apply_debug_values(config, IS_DEBUG))
+                    # Extract filename without extension as namespace
+                    filename = Path(lpath).stem
+                    CONFIGS[filename] = apply_debug_values(config, IS_DEBUG)
 
         return DotDict(CONFIGS)
 

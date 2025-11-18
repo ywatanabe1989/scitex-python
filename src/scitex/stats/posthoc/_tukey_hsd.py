@@ -29,8 +29,8 @@ import numpy as np
 import pandas as pd
 from typing import Union, List, Optional
 from scipy import stats
-from ..utils._formatters import p2stars
-from ..utils._normalizers import convert_results
+from scitex.stats.utils._formatters import p2stars
+from scitex.stats.utils._normalizers import convert_results
 
 
 def studentized_range_critical(k: int, df: int, alpha: float = 0.05) -> float:
@@ -279,7 +279,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     args = parser.parse_args([])
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys=sys,
         plt=None,
         args=args,

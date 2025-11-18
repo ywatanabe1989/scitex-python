@@ -10,7 +10,7 @@
 import torch
 
 # from .._converters import
-from ..decorators import torch_fn
+from scitex.decorators import torch_fn
 
 
 @torch_fn

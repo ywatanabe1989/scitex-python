@@ -149,7 +149,7 @@ def correct_sidak(
     correct_holm : Sequential Bonferroni method
     correct_fdr : FDR control (less conservative)
     """
-    from ..utils._formatters import p2stars
+    from scitex.stats.utils._formatters import p2stars
 
     if verbose:
         logger.info("Applying Šidák correction")
@@ -312,7 +312,7 @@ def main():
     parser.add_argument('--verbose', action='store_true', default=True, help='Enable verbose output')
     args = parser.parse_args([])
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
         sys=sys,
         plt=plt,
         args=args,

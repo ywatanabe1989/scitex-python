@@ -312,7 +312,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_src.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_src.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -320,9 +320,7 @@ if __name__ == "__main__":
 # # File: /ssh:sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_src.py
 # # ----------------------------------------
 # import os
-# __FILE__ = (
-#     "./src/scitex/gen/_src.py"
-# )
+# __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
@@ -411,14 +409,14 @@ if __name__ == "__main__":
 #     import matplotlib.pyplot as plt
 # 
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys, plt, verbose=False
 #     )
 #     import sys
 # 
 #     # (YOUR AWESOME CODE)
 #     # Close
-#     scitex.gen.close(CONFIG, verbose=False, notify=False)
+#     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 
 # """
 # /ssh:ywatanabe@444:/home/ywatanabe/proj/entrance/scitex/gen/_def.py
@@ -427,5 +425,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_src.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_src.py
 # --------------------------------------------------------------------------------

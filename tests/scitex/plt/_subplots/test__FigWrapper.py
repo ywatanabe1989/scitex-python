@@ -121,7 +121,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/_subplots/_FigWrapper.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_FigWrapper.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -143,6 +143,7 @@ if __name__ == "__main__":
 # class FigWrapper:
 #     def __init__(self, fig_mpl):
 #         self._fig_mpl = fig_mpl
+#         self._axes = []  # Keep track of axes for synchronization
 #         self._last_saved_info = None
 #         self._not_saved_yet_flag = True
 #         self._called_from_mng_io_save = False
@@ -161,7 +162,17 @@ if __name__ == "__main__":
 # 
 #             @wraps(attr_mpl)
 #             def wrapper(*args, track=None, id=None, **kwargs):
-#                 results = attr_mpl(*args, **kwargs)
+#                 # Suppress constrained_layout warnings for certain operations
+#                 import warnings
+#                 with warnings.catch_warnings():
+#                     if attr in ['subplots_adjust', 'tight_layout']:
+#                         warnings.filterwarnings('ignore', 
+#                                               message='.*constrained_layout.*',
+#                                               category=UserWarning)
+#                         warnings.filterwarnings('ignore',
+#                                               message='.*layout engine.*incompatible.*',
+#                                               category=UserWarning)
+#                     results = attr_mpl(*args, **kwargs)
 #                 # self._track(track, id, attr, args, kwargs)
 #                 return results
 # 
@@ -221,15 +232,59 @@ if __name__ == "__main__":
 #             if df is not None and not df.empty:
 #                 # Add axis ID prefix to column names if not already present
 #                 prefix = f"ax_{ii:02d}_"
-#                 df.columns = [
-#                     col if col.startswith(prefix) else f"{prefix}{col}" 
-#                     for col in df.columns
-#                 ]
+#                 # Make column names unique by appending index if there are duplicates
+#                 new_cols = []
+#                 col_counts = {}
+#                 for col in df.columns:
+#                     # Convert to string and check if already has prefix
+#                     col_str = str(col) if not (isinstance(col, str) and col.startswith(prefix)) else col
+#                     if not col_str.startswith(prefix):
+#                         col_str = f"{prefix}{col_str}"
+# 
+#                     # Handle duplicates by adding a counter
+#                     if col_str in col_counts:
+#                         col_counts[col_str] += 1
+#                         col_str = f"{col_str}_{col_counts[col_str]}"
+#                     else:
+#                         col_counts[col_str] = 0
+# 
+#                     new_cols.append(col_str)
+# 
+#                 df.columns = new_cols
 #                 dfs.append(df)
 #         
 #         # Return concatenated DataFrame or empty DataFrame if no data
 #         return pd.concat(dfs, axis=1) if dfs else pd.DataFrame()
-#     
+# 
+#     def colorbar(self, mappable, ax=None, **kwargs):
+#         """Add a colorbar to the figure, automatically unwrapping SciTeX axes.
+# 
+#         This method properly handles both regular matplotlib axes and SciTeX
+#         AxisWrapper objects when creating colorbars.
+# 
+#         Parameters:
+#         -----------
+#         mappable : ScalarMappable
+#             The image, contour set, etc. to which the colorbar applies
+#         ax : Axes or AxisWrapper, optional
+#             The axes to attach the colorbar to. If not specified, uses current axes.
+#         **kwargs : dict
+#             Additional keyword arguments passed to matplotlib's colorbar
+# 
+#         Returns:
+#         --------
+#         Colorbar
+#             The created colorbar object
+#         """
+#         # Unwrap axes if it's a SciTeX AxisWrapper
+#         if ax is not None:
+#             ax_mpl = ax._axis_mpl if hasattr(ax, '_axis_mpl') else ax
+#         else:
+#             ax_mpl = None
+# 
+#         # Call matplotlib's colorbar with the unwrapped axes
+#         return self._fig_mpl.colorbar(mappable, ax=ax_mpl, **kwargs)
+# 
 #     def _traverse_axes(self):
 #         """Helper method to traverse all axis wrappers in the figure."""
 #         if hasattr(self, 'axes'):
@@ -304,6 +359,7 @@ if __name__ == "__main__":
 #                 # If both fail, do nothing - figure will use default layout
 #                 pass
 # 
+#     
 #     def adjust_layout(self, **kwargs):
 #         """Adjust the constrained layout parameters.
 #         
@@ -351,5 +407,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/_subplots/_FigWrapper.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_FigWrapper.py
 # --------------------------------------------------------------------------------

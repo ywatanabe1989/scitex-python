@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from ...repro import fix_seeds
+from scitex.repro import fix_seeds
 
 
 class MultiTaskLoss(nn.Module):

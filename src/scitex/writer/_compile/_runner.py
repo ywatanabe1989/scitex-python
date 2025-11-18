@@ -23,7 +23,7 @@ import time
 import fcntl
 
 from scitex.logging import getLogger
-from scitex._sh import sh
+from scitex.sh import sh
 from scitex.writer.dataclasses.config import DOC_TYPE_DIRS
 from scitex.writer.dataclasses import CompilationResult
 from ._validator import validate_before_compile
@@ -239,6 +239,12 @@ def run_compile(
     project_dir: Path,
     timeout: int = 300,
     track_changes: bool = False,
+    no_figs: bool = False,
+    ppt2tif: bool = False,
+    crop_tif: bool = False,
+    quiet: bool = False,
+    verbose: bool = False,
+    force: bool = False,
     log_callback: Optional[Callable[[str], None]] = None,
     progress_callback: Optional[Callable[[int, str], None]] = None,
 ) -> CompilationResult:
@@ -255,6 +261,18 @@ def run_compile(
         Timeout in seconds
     track_changes : bool
         Enable change tracking (revision only)
+    no_figs : bool
+        Exclude figures for quick compilation (manuscript only)
+    ppt2tif : bool
+        Convert PowerPoint to TIF on WSL
+    crop_tif : bool
+        Crop TIF images to remove excess whitespace
+    quiet : bool
+        Suppress detailed logs for LaTeX compilation
+    verbose : bool
+        Show detailed logs for LaTeX compilation
+    force : bool
+        Force full recompilation, ignore cache (manuscript only)
     log_callback : Optional[Callable[[str], None]]
         Called with each log line
     progress_callback : Optional[Callable[[int, str], None]]
@@ -317,8 +335,35 @@ def run_compile(
     progress(10, 'Preparing compilation command...')
     script_path = compile_script.absolute()
     cmd = [str(script_path)]
-    if track_changes and doc_type == "revision":
-        cmd.append("--track-changes")
+
+    # Add document-specific options
+    if doc_type == "revision":
+        if track_changes:
+            cmd.append("--track-changes")
+
+    elif doc_type == "manuscript":
+        if no_figs:
+            cmd.append("--no_figs")
+        if ppt2tif:
+            cmd.append("--ppt2tif")
+        if crop_tif:
+            cmd.append("--crop_tif")
+        if quiet:
+            cmd.append("--quiet")
+        elif verbose:
+            cmd.append("--verbose")
+        if force:
+            cmd.append("--force")
+
+    elif doc_type == "supplementary":
+        if not no_figs:  # For supplementary, --figs means include figures (default)
+            cmd.append("--figs")
+        if ppt2tif:
+            cmd.append("--ppt2tif")
+        if crop_tif:
+            cmd.append("--crop_tif")
+        if quiet:
+            cmd.append("--quiet")
 
     log(f'[INFO] Running: {" ".join(cmd)}')
     log(f'[INFO] Working directory: {project_dir}')

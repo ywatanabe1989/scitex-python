@@ -210,14 +210,14 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/_ensure_3d.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/_ensure_3d.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-05 01:03:47 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/dsp/_ensure_3d.py
 # 
-# from ..decorators import signal_fn
+# from scitex.decorators import signal_fn
 # 
 # 
 # @signal_fn
@@ -232,5 +232,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/_ensure_3d.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/_ensure_3d.py
 # --------------------------------------------------------------------------------
