@@ -21,7 +21,7 @@ from typing import Optional
 from ._clone_project import clone_project
 
 TEMPLATE_REPO_URL = (
-    "https://github.com/ywatanabe1989/scitex_template_research.git"
+    "https://github.com/ywatanabe1989/scitex-research-template.git"
 )
 
 
@@ -64,7 +64,7 @@ def clone_research(
     return clone_project(
         project_dir,
         TEMPLATE_REPO_URL,
-        "scitex_template_research",
+        "scitex-research-template",
         git_strategy,
         branch,
         tag,
