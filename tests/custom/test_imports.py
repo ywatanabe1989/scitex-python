@@ -197,6 +197,13 @@ SKIP_MODULES = {
     'scitex.scholar',  # Complex optional dependencies
     'scitex.browser',  # Playwright optional dependencies
     'scitex.web',      # Complex optional dependencies
+    'scitex.dsp',      # torchaudio dependency issues
+    'scitex.ml',       # Optional ML dependencies
+    'scitex.nn',       # torch docstring compatibility issue
+    'scitex.session.template',  # Module object not callable issue
+    'scitex.ai.optim.Ranger_Deep_Learning_Optimizer.setup',  # setup.py not meant to be imported
+    'scitex.ai.sk',    # Deprecated/missing module
+    'scitex.ai.sklearn.clf',  # Deprecated/missing module
 }
 
 # Module patterns to skip
@@ -206,6 +213,7 @@ SKIP_PATTERNS = [
     '.tests',
     '.test_',
     'example',
+    '.setup',  # setup.py files not meant to be imported
 ]
 
 
