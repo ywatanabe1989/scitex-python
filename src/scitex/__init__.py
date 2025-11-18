@@ -181,8 +181,6 @@ __all__ = [
     "decorators",
     "__version__",
     "sh",
-    "sh_run",
-    "quote",
     "errors",
     "units",
     "logging",
