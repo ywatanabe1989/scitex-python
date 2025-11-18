@@ -6,7 +6,7 @@
 THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/ai/sampling/undersample.py"
 
 from typing import Tuple
-from ...types import ArrayLike
+from scitex.types import ArrayLike
 
 try:
     from imblearn.under_sampling import RandomUnderSampler

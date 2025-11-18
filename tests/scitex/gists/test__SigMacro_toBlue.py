@@ -8,7 +8,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gists/_SigMacro_toBlue.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gists/_SigMacro_toBlue.py
 # --------------------------------------------------------------------------------
 # def sigmacro_to_blue():
 #     """Print a macro for SigmaPlot (v12.0) that changes the color and style of the selected object.
@@ -184,5 +184,5 @@ if __name__ == "__main__":
 #     return sigmacro_to_blue()
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gists/_SigMacro_toBlue.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gists/_SigMacro_toBlue.py
 # --------------------------------------------------------------------------------

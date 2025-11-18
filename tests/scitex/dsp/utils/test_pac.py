@@ -392,7 +392,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/utils/pac.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/utils/pac.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -532,7 +532,7 @@ if __name__ == "__main__":
 #     import torch
 # 
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 
 #     # Parameters
 #     FS = 512
@@ -564,7 +564,7 @@ if __name__ == "__main__":
 #     plt.show()
 # 
 #     # Close
-#     scitex.gen.close(CONFIG)
+#     scitex.session.close(CONFIG)
 # 
 # """
 # /home/ywatanabe/proj/entrance/scitex/dsp/utils/pac.py
@@ -573,5 +573,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/utils/pac.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/utils/pac.py
 # --------------------------------------------------------------------------------

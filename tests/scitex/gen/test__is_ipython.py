@@ -165,7 +165,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_is_ipython.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_is_ipython.py
 # --------------------------------------------------------------------------------
 # def is_ipython():
 #     try:
@@ -181,5 +181,5 @@ if __name__ == "__main__":
 #     return not is_ipython()
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_is_ipython.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_is_ipython.py
 # --------------------------------------------------------------------------------

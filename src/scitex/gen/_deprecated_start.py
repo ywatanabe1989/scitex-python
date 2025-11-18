@@ -9,7 +9,7 @@ This module provides backward compatibility by forwarding calls to the new
 scitex.session.start function while showing deprecation warnings.
 """
 
-from ..decorators._deprecated import deprecated
+from scitex.decorators._deprecated import deprecated
 
 
 @deprecated(

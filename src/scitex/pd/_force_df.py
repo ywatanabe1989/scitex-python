@@ -12,7 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 import numpy as np
 import pandas as pd
 
-from ..types import is_listed_X
+from scitex.types import is_listed_X
 
 
 def force_df(data, filler=np.nan):

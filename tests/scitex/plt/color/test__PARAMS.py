@@ -30,7 +30,7 @@ def test_params_rgb_keys():
         "gray",
         "grey",
         "purple",
-        "light_blue",
+        "lightblue",
         "brown",
         "navy",
         "orange",
@@ -286,7 +286,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/color/_PARAMS.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/color/_PARAMS.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -311,7 +311,7 @@ if __name__ == "__main__":
 #     "gray": [128, 128, 128],
 #     "grey": [128, 128, 128],
 #     "purple": [200, 50, 255],
-#     "light_blue": [20, 200, 200],
+#     "lightblue": [20, 200, 200],
 #     "brown": [128, 0, 0],
 #     "navy": [0, 0, 100],
 #     "orange": [228, 94, 50],
@@ -340,7 +340,7 @@ if __name__ == "__main__":
 #     "gray": "#808080",
 #     "grey": "#808080",
 #     "purple": "#C832FF",
-#     "light_blue": "#14C8C8",
+#     "lightblue": "#14C8C8",
 #     "brown": "#800000",
 #     "navy": "#000064",
 #     "orange": "#E45E32",
@@ -360,5 +360,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/color/_PARAMS.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/color/_PARAMS.py
 # --------------------------------------------------------------------------------

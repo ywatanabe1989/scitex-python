@@ -8,7 +8,7 @@ Git clone operations.
 
 from pathlib import Path
 from scitex.logging import getLogger
-from scitex._sh import sh
+from scitex.sh import sh
 from ._constants import EXIT_SUCCESS, EXIT_FAILURE
 
 logger = getLogger(__name__)
@@ -73,7 +73,8 @@ def clone_repo(url: str, target_path: Path, branch: str = None, tag: str = None,
         logger.error(f"Failed to clone repository: {result['stderr']}")
         return False
 
-    logger.info(f"Repository cloned successfully{ref_info}")
+    if verbose:
+        logger.info(f"Repository cloned successfully{ref_info}")
     return True
 
 
@@ -110,7 +111,8 @@ def git_init(repo_path: Path, verbose: bool = True) -> bool:
             logger.warning(f"Failed to initialize git repository: {result['stderr']}")
             return False
 
-        logger.info("Git repository initialized")
+        if verbose:
+            logger.info("Git repository initialized")
         return True
 
 

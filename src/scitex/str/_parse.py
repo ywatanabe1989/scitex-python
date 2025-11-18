@@ -11,7 +11,7 @@ __DIR__ = os.path.dirname(__FILE__)
 import re
 from typing import Dict, Union
 
-from ..dict._DotDict import DotDict as _DotDict
+from scitex.dict._DotDict import DotDict as _DotDict
 
 
 def parse(

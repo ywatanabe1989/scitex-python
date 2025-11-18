@@ -256,7 +256,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/_pac.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/_pac.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -270,10 +270,10 @@ if __name__ == "__main__":
 # import matplotlib.pyplot as plt
 # import numpy as np
 # import torch
-# from ..str import printc
+# from scitex.str import printc
 # 
-# from ..decorators import signal_fn, batch_fn
-# from ..nn._PAC import PAC
+# from scitex.decorators import signal_fn, batch_fn
+# from scitex.nn._PAC import PAC
 # 
 # """
 # scitex.dsp.pac function
@@ -370,7 +370,7 @@ if __name__ == "__main__":
 #     import scitex
 # 
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 
 #     pac, freqs_pha, freqs_amp = scitex.dsp.pac(
 #         np.random.rand(1, 16, 24000),
@@ -579,5 +579,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/_pac.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/_pac.py
 # --------------------------------------------------------------------------------

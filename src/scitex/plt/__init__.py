@@ -40,11 +40,14 @@ def figure(*args, **kwargs):
 
 def tight_layout(**kwargs):
     """
-    Wrapper for matplotlib.pyplot.tight_layout that suppresses the layout change warning.
+    Wrapper for matplotlib.pyplot.tight_layout that handles colorbar layout compatibility.
 
-    This function calls tight_layout on the current figure and suppresses the common
-    UserWarning: "The figure layout has changed to tight" which is informational
-    and typically not actionable.
+    This function calls tight_layout on the current figure and gracefully handles:
+    1. UserWarning: "The figure layout has changed to tight" - informational only
+    2. RuntimeError: Colorbar layout incompatibility - occurs when colorbars exist with old engine
+
+    When a colorbar layout error occurs, the function silently continues as the layout
+    is still functional even if the engine cannot be changed.
 
     Parameters
     ----------
@@ -56,7 +59,14 @@ def tight_layout(**kwargs):
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="The figure layout has changed to tight")
-        plt.tight_layout(**kwargs)
+        try:
+            plt.tight_layout(**kwargs)
+        except RuntimeError as e:
+            # Silently handle colorbar layout engine incompatibility
+            # This occurs when colorbars were created before tight_layout is called
+            # The layout is still usable, so we can safely ignore this error
+            if "Colorbar layout" not in str(e):
+                raise
 
 
 def colorbar(mappable=None, cax=None, ax=None, **kwargs):

@@ -8,7 +8,7 @@ import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 import scitex
-from ..decorators import numpy_fn, torch_fn
+from scitex.decorators import numpy_fn, torch_fn
 
 
 class Spectrogram(nn.Module):

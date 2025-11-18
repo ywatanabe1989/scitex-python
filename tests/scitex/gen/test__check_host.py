@@ -480,7 +480,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_check_host.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_check_host.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -488,7 +488,7 @@ if __name__ == "__main__":
 # # File: ./scitex_repo/src/scitex/gen/_check_host.py
 # 
 # 
-# from .._sh import sh
+# from scitex.sh import sh
 # import sys
 # 
 # 
@@ -518,5 +518,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_check_host.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/gen/_check_host.py
 # --------------------------------------------------------------------------------

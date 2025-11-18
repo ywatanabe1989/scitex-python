@@ -177,7 +177,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_style/_share_axes.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_style/_share_axes.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -438,12 +438,12 @@ if __name__ == "__main__":
 #     # parser.add_argument('--flag', '-f', action='store_true', default=False, help='')
 #     # args = parser.parse_args()
 #     # Main
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
 #     main()
-#     scitex.gen.close(CONFIG, verbose=False, notify=False)
+#     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_style/_share_axes.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_style/_share_axes.py
 # --------------------------------------------------------------------------------

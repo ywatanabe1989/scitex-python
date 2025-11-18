@@ -19,6 +19,14 @@ from ._torch_fn import torch_fn
 from ._wrap import wrap
 from ._xarray_fn import xarray_fn
 
+# Lazy import session decorator to avoid circular imports
+def __getattr__(name):
+    if name == 'session':
+        # Import the parent scitex module to get the wrapper
+        import scitex
+        return scitex.session
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
 __all__ = [
     "AutoOrderDecorator",
     "ConversionWarning",
@@ -44,6 +52,7 @@ __all__ = [
     "pandas_fn",
     "pandas_fn",
     "preserve_doc",
+    "session",
     "signal_fn",
     "timeout",
     "to_numpy",

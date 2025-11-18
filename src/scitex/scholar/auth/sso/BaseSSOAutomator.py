@@ -228,7 +228,7 @@ class BaseSSOAutomator(ABC):
             **kwargs: Additional context for the notification
         """
         try:
-            from ...utils._email import send_email_async
+            from scitex.utils._email import send_email_async
 
             # Generate notification content based on event type
             subject, message, priority = self._generate_notification_content(

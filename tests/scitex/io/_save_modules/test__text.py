@@ -138,7 +138,6 @@ Line 4"""
         
         assert content == code
 
-
 if __name__ == "__main__":
     import os
 
@@ -147,7 +146,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_save_modules/_text.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_text.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -174,5 +173,5 @@ if __name__ == "__main__":
 #         file.write(obj)
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_save_modules/_text.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_text.py
 # --------------------------------------------------------------------------------

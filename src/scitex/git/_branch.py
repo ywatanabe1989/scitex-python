@@ -16,7 +16,7 @@ Examples
 
 from pathlib import Path
 from scitex.logging import getLogger
-from scitex._sh import sh
+from scitex.sh import sh
 from ._utils import _in_directory
 from ._constants import EXIT_SUCCESS, EXIT_FAILURE
 from ._validation import validate_branch_name, validate_path
@@ -76,7 +76,8 @@ def git_branch_rename(repo_path: Path, new_name: str, verbose: bool = True) -> b
             logger.error(f"Failed to rename branch in {repo_path}: {error_msg}")
             return False
 
-        logger.info(f"Branch renamed to {new_name}")
+        if verbose:
+            logger.info(f"Branch renamed to {new_name}")
         return True
 
 
@@ -132,7 +133,8 @@ def git_checkout_new_branch(repo_path: Path, branch_name: str, verbose: bool = T
             logger.error(f"Failed to create branch {branch_name} in {repo_path}: {error_msg}")
             return False
 
-        logger.info(f"Switched to new branch: {branch_name}")
+        if verbose:
+            logger.info(f"Switched to new branch: {branch_name}")
         return True
 
 

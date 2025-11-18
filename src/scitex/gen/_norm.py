@@ -7,8 +7,8 @@ THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/gen/_norm.py"
 
 import torch
 
-from ..decorators import torch_fn
-from ..torch import nanstd
+from scitex.decorators import torch_fn
+from scitex.torch import nanstd
 
 
 @torch_fn

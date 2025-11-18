@@ -9,7 +9,7 @@ Git remote operations.
 from pathlib import Path
 from typing import Optional
 from scitex.logging import getLogger
-from scitex._sh import sh
+from scitex.sh import sh
 from ._utils import _in_directory
 from ._constants import EXIT_SUCCESS, EXIT_FAILURE
 

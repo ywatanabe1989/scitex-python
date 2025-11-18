@@ -23,7 +23,7 @@ warnings.warn(
 )
 
 # Import everything from the new module for backward compatibility
-from ..repro import RandomStateManager, get, reset  # noqa: F401
+from scitex.repro import RandomStateManager, get, reset  # noqa: F401
 
 __all__ = [
     "RandomStateManager",

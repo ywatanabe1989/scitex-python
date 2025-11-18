@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes._axes import Axes
 
-from ....types import ColorLike
+from scitex.types import ColorLike
 from ....plt.utils import assert_valid_axis
 
 

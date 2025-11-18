@@ -331,7 +331,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/feature_extraction/vit.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/feature_extraction/vit.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -360,7 +360,7 @@ if __name__ == "__main__":
 # from pytorch_pretrained_vit import ViT
 # from torchvision import transforms as _transforms
 # 
-# # from ...decorators import batch_torch_fn
+# # from scitex.decorators import batch_torch_fn
 # 
 # 
 # def _setup_device(device: Union[str, None]) -> str:
@@ -484,5 +484,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/feature_extraction/vit.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/feature_extraction/vit.py
 # --------------------------------------------------------------------------------

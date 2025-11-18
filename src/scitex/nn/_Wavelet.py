@@ -13,8 +13,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..gen._to_even import to_even
-from ..gen._to_odd import to_odd
+from scitex.gen._to_even import to_even
+from scitex.gen._to_odd import to_odd
 
 
 class Wavelet(nn.Module):

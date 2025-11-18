@@ -17,7 +17,7 @@ from typing import Any, Dict, Generator, List, Optional, Union
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ...io._load import load
+from scitex.io._load import load
 from ._calc_cost import calc_cost
 from ._format_output_func import format_output_func
 from ._PARAMS import MODELS

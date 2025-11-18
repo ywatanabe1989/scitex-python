@@ -11,7 +11,7 @@ Usage:
 """
 
 # Re-export everything from ai module
-from ..ai import *  # noqa: F403,F401
+from scitex.ai import *  # noqa: F403,F401
 
 __all__ = [
     "classification",

@@ -11,7 +11,7 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import numpy as np
 
-from ...context import suppress_output
+from scitex.context import suppress_output
 
 
 def calc_bacc_from_conf_mat(confusion_matrix: np.ndarray, n_round=3) -> float:

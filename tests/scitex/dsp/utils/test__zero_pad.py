@@ -346,7 +346,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/utils/_zero_pad.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/utils/_zero_pad.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -358,7 +358,7 @@ if __name__ == "__main__":
 # import numpy as np
 # import torch
 # import torch.nn.functional as F
-# from ...decorators import torch_fn
+# from scitex.decorators import torch_fn
 # 
 # 
 # def _zero_pad_1d(x, target_length):
@@ -398,5 +398,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/utils/_zero_pad.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/utils/_zero_pad.py
 # --------------------------------------------------------------------------------

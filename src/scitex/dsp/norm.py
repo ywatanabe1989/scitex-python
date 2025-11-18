@@ -3,7 +3,7 @@
 # Time-stamp: "2024-04-05 12:15:42 (ywatanabe)"
 
 import torch as _torch
-from ..decorators import signal_fn as _signal_fn
+from scitex.decorators import signal_fn as _signal_fn
 
 
 @_signal_fn

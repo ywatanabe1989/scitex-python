@@ -6,8 +6,8 @@
 """scitex.dsp.wavelet function"""
 
 
-from ..decorators import batch_fn, signal_fn
-from ..nn._Wavelet import Wavelet
+from scitex.decorators import batch_fn, signal_fn
+from scitex.nn._Wavelet import Wavelet
 import scitex
 
 

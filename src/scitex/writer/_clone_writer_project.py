@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-29 15:25:21 (ywatanabe)"
+# Timestamp: "2025-11-18 15:41:26 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_clone_writer_project.py
-# ----------------------------------------
-from __future__ import annotations
+
 import os
-__FILE__ = (
-    "./src/scitex/writer/_clone_writer_project.py"
-)
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
 """
 Writer project template management.
@@ -25,8 +19,7 @@ logger = getLogger(__name__)
 
 
 def clone_writer_project(
-    project_name: str,
-    target_dir: Optional[str] = None,
+    project_dir: str,
     git_strategy: Optional[str] = "child",
     branch: Optional[str] = None,
     tag: Optional[str] = None,
@@ -38,8 +31,7 @@ def clone_writer_project(
     Handles template cloning and project setup automatically.
 
     Args:
-        project_name: Name of the new paper directory/project
-        target_dir: Directory where the project will be created (optional)
+        project_dir: Path to project directory (will be created)
         git_strategy: Git initialization strategy (optional)
             - 'child': Create isolated git in project directory (default)
             - 'parent': Use parent git repository
@@ -56,7 +48,7 @@ def clone_writer_project(
     Examples:
         >>> from scitex.writer import clone_writer_project
         >>> clone_writer_project("my_paper")
-        >>> clone_writer_project("my_paper", target_dir="/path/to/papers")
+        >>> clone_writer_project("./papers/my_paper")
         >>> clone_writer_project("my_paper", git_strategy="parent")
         >>> clone_writer_project("my_paper", branch="develop")
         >>> clone_writer_project("my_paper", tag="v1.0.0")
@@ -64,7 +56,9 @@ def clone_writer_project(
     from scitex.template import clone_writer_directory
 
     try:
-        result = clone_writer_directory(project_name, target_dir, git_strategy, branch, tag)
+        result = clone_writer_directory(
+            project_dir, git_strategy, branch, tag
+        )
         return result
     except Exception as e:
         logger.error(f"Failed to initialize writer directory: {e}")
@@ -103,18 +97,17 @@ def run_session() -> None:
 
 def main(args):
     result = clone_writer_project(
-        args.project_name,
-        target_dir=args.target_dir,
+        args.project_dir,
         git_strategy=args.git_strategy,
         branch=args.branch,
         tag=args.tag,
     )
 
     if result:
-        print(f"Successfully created writer project: {args.project_name}")
+        print(f"Successfully created writer project: {args.project_dir}")
         return 0
     else:
-        print(f"Failed to create writer project: {args.project_name}")
+        print(f"Failed to create writer project: {args.project_dir}")
         return 1
 
 
@@ -125,16 +118,9 @@ def parse_args():
         description="Clone scitex writer project template"
     )
     parser.add_argument(
-        "project_name",
+        "project_dir",
         type=str,
-        help="Name of the new project",
-    )
-    parser.add_argument(
-        "--target-dir",
-        "-d",
-        type=str,
-        default=None,
-        help="Target directory (default: current directory)",
+        help="Path to project directory (will be created)",
     )
     parser.add_argument(
         "--git-strategy",
@@ -171,6 +157,7 @@ __all__ = [
 ]
 
 # python -m scitex.writer._clone_writer_project my_paper --git-strategy child
+# python -m scitex.writer._clone_writer_project ./papers/my_paper
 # python -m scitex.writer._clone_writer_project my_paper --branch develop
 # python -m scitex.writer._clone_writer_project my_paper --tag v1.0.0
 

@@ -14,7 +14,7 @@ __DIR__ = os.path.dirname(__FILE__)
 """
 SharedTree - dataclass for shared directory structure.
 
-Represents the shared/ directory with files used across documents.
+Represents the 00_shared/ directory with files used across documents.
 """
 
 from pathlib import Path
@@ -26,7 +26,7 @@ from ..core import DocumentSection
 
 @dataclass
 class SharedTree:
-    """Shared directory structure (shared/)."""
+    """Shared directory structure (00_shared/)."""
 
     root: Path
     git_root: Optional[Path] = None

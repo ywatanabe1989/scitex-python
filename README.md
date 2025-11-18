@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2025-11-02 12:07:30
+!-- Timestamp: 2025-11-18 10:12:53
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -16,6 +16,8 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 [![License](https://img.shields.io/github/license/ywatanabe1989/SciTeX-Code)](https://github.com/ywatanabe1989/SciTeX-Code/blob/main/LICENSE)
 [![Tests](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/ci.yml/badge.svg)](https://github.com/ywatanabe1989/SciTeX-Code/actions)
 [![Coverage](https://codecov.io/gh/ywatanabe1989/SciTeX-Code/branch/main/graph/badge.svg)](https://codecov.io/gh/ywatanabe1989/SciTeX-Code)
+[![Stats Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ywatanabe1989/GIST_ID/raw/scitex-stats-coverage.json)](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/stats-coverage.yml)
+[![Logging Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ywatanabe1989/GIST_ID/raw/scitex-logging-coverage.json)](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/logging-coverage.yml)
 [![Documentation](https://readthedocs.org/projects/scitex/badge/?version=latest)](https://scitex.readthedocs.io/en/latest/?badge=latest)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
@@ -39,6 +41,313 @@ pip install scitex[dl,ml,jupyter,neuro,web,scholar,writer,dev] # ~2-5 GB, Comple
 | **scholar** | Selenium, PDF tools, paper management                   | ~150 MB     |
 | **writer**  | LaTeX compilation tools                                 | ~10 MB      |
 | **dev**     | Testing, linting (dev only)                             | ~100 MB     |
+
+## 🚀 Quick Start
+
+
+### The SciTeX Advantage: **70% Less Code**
+
+Compare these two implementations that produce **identical research outputs**:
+
+#### With SciTeX ([57 Lines of Code]((./examples/demo_session_plt_io.py)))
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Timestamp: "2025-11-18 09:34:36 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_session_plt_io.py
+
+
+"""Minimal Demonstration for scitex.{session,io,plt}"""
+
+import numpy as np
+import scitex as stx
+
+
+def demo(filename, verbose=False):
+    """Show metadata without QR code (just embedded)."""
+
+    # matplotlib.pyplot wrapper.
+    fig, ax = stx.plt.subplots()
+
+    t = np.linspace(0, 2, 1000)
+    signal = np.sin(2 * np.pi * 5 * t) * np.exp(-t / 2)
+
+    ax.plot_line(t, signal)  # Original plot for automatic CSV export
+    ax.set_xyt(
+        "Time (s)",
+        "Amplitude",
+        "Clean Figure (metadata embedded, no QR overlay)",
+    )
+
+    # Saving: stx.io.save(obj, rel_path, **kwargs)
+    stx.io.save(
+        fig,
+        filename,
+        metadata={"exp": "s01", "subj": "S001"},  # with meatadata embedding
+        symlink_to="./data",  # Symlink for centralized outputs
+        verbose=verbose,  # Automatic terminal logging (no manual print())
+    )
+    fig.close()
+
+    # Loading: stx.io.load(path)
+    ldir = __file__.replace(".py", "_out")
+    img, meta = stx.io.load(
+        f"{ldir}/{filename}",
+        verbose=verbose,
+    )
+
+
+@stx.session
+def main(filename="demo.jpg", verbose=True):
+    """Run demo for scitex.{session,plt,io}."""
+
+    demo(filename, verbose=verbose)
+
+    return 0
+
+
+if __name__ == "__main__":
+    main()
+```
+
+#### Without SciTeX ([188 Lines of Code](./examples/demo_session_plt_io_pure_python.py))
+<details>
+<summary>Click to see the pure Python equivalent requiring 3.3× more code</summary>
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Timestamp: "2025-11-18 09:34:51 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_session_plt_io_pure_python.py
+
+
+"""Minimal Demonstration - Pure Python Version"""
+
+import argparse
+import json
+import logging
+import os
+import shutil
+import sys
+from datetime import datetime
+from pathlib import Path
+import random
+import string
+
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+from PIL.PngImagePlugin import PngInfo
+
+
+def generate_session_id():
+    """Generate unique session ID."""
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    random_suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+    return f"{timestamp}_{random_suffix}"
+
+
+def setup_logging(log_dir):
+    """Set up logging infrastructure."""
+    log_dir.mkdir(parents=True, exist_ok=True)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    
+    stdout_handler = logging.FileHandler(log_dir / "stdout.log")
+    stderr_handler = logging.FileHandler(log_dir / "stderr.log")
+    console_handler = logging.StreamHandler(sys.stdout)
+    
+    formatter = logging.Formatter('%(levelname)s: %(message)s')
+    stdout_handler.setFormatter(formatter)
+    stderr_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
+    
+    logger.addHandler(stdout_handler)
+    logger.addHandler(stderr_handler)
+    logger.addHandler(console_handler)
+    
+    return logger
+
+
+def save_plot_data_to_csv(fig, output_path):
+    """Extract and save plot data."""
+    csv_path = output_path.with_suffix('.csv')
+    data_lines = ["ax_00_plot_line_0_line_x,ax_00_plot_line_0_line_y"]
+    
+    for ax in fig.get_axes():
+        for line in ax.get_lines():
+            x_data = line.get_xdata()
+            y_data = line.get_ydata()
+            for x, y in zip(x_data, y_data):
+                data_lines.append(f"{x},{y}")
+    
+    csv_path.write_text('\n'.join(data_lines))
+    return csv_path, csv_path.stat().st_size / 1024
+
+
+def embed_metadata_in_image(image_path, metadata):
+    """Embed metadata into image file."""
+    img = Image.open(image_path)
+    
+    if image_path.suffix.lower() in ['.png']:
+        pnginfo = PngInfo()
+        for key, value in metadata.items():
+            pnginfo.add_text(key, str(value))
+        img.save(image_path, pnginfo=pnginfo)
+    elif image_path.suffix.lower() in ['.jpg', '.jpeg']:
+        json_path = image_path.with_suffix(image_path.suffix + '.meta.json')
+        json_path.write_text(json.dumps(metadata, indent=2))
+        img.save(image_path, quality=95)
+
+
+def save_figure(fig, output_path, metadata=None, symlink_to=None, logger=None):
+    """Save figure with metadata and symlink."""
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    if metadata is None:
+        metadata = {}
+    metadata['url'] = 'https://scitex.ai'
+    
+    if logger:
+        logger.info(f"📝 Saving figure with metadata to: {output_path}")
+        logger.info(f"  • Embedded metadata: {metadata}")
+    
+    csv_path, csv_size = save_plot_data_to_csv(fig, output_path)
+    if logger:
+        logger.info(f"✅ Saved to: {csv_path} ({csv_size:.1f} KiB)")
+    
+    fig.savefig(output_path, dpi=150, bbox_inches='tight')
+    embed_metadata_in_image(output_path, metadata)
+    
+    if symlink_to:
+        symlink_dir = Path(symlink_to)
+        symlink_dir.mkdir(parents=True, exist_ok=True)
+        symlink_path = symlink_dir / output_path.name
+        if symlink_path.exists() or symlink_path.is_symlink():
+            symlink_path.unlink()
+        symlink_path.symlink_to(output_path.resolve())
+
+
+def demo(output_dir, filename, verbose=False, logger=None):
+    """Generate, plot, and save signal."""
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
+    t = np.linspace(0, 2, 1000)
+    signal = np.sin(2 * np.pi * 5 * t) * np.exp(-t / 2)
+    
+    ax.plot(t, signal)
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Amplitude")
+    ax.set_title("Damped Oscillation")
+    ax.grid(True, alpha=0.3)
+    
+    output_path = output_dir / filename
+    save_figure(fig, output_path, metadata={"exp": "s01", "subj": "S001"},
+                symlink_to=output_dir.parent / "data", logger=logger)
+    plt.close(fig)
+    
+    return 0
+
+
+def main():
+    """Run demo - Pure Python Version."""
+    parser = argparse.ArgumentParser(description="Run demo - Pure Python Version")
+    parser.add_argument('-f', '--filename', default='demo.jpg')
+    parser.add_argument('-v', '--verbose', type=bool, default=True)
+    args = parser.parse_args()
+    
+    session_id = generate_session_id()
+    script_path = Path(__file__).resolve()
+    output_base = script_path.parent / (script_path.stem + "_out")
+    running_dir = output_base / "RUNNING" / session_id
+    logs_dir = running_dir / "logs"
+    config_dir = running_dir / "CONFIGS"
+    
+    logger = setup_logging(logs_dir)
+    
+    print("=" * 40)
+    print(f"Pure Python Demo")
+    print(f"{session_id} (PID: {os.getpid()})")
+    print(f"\n{script_path}")
+    print(f"\nArguments:")
+    print(f"    filename: {args.filename}")
+    print(f"    verbose: {args.verbose}")
+    print("=" * 40)
+    
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_data = {
+        'ID': session_id,
+        'FILE': str(script_path),
+        'SDIR_OUT': str(output_base),
+        'SDIR_RUN': str(running_dir),
+        'PID': os.getpid(),
+        'ARGS': vars(args)
+    }
+    (config_dir / "CONFIG.json").write_text(json.dumps(config_data, indent=2))
+    
+    try:
+        result = demo(output_base, args.filename, args.verbose, logger)
+        success_dir = output_base / "FINISHED_SUCCESS" / session_id
+        success_dir.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(running_dir), str(success_dir))
+        logger.info(f"\n✅ Script completed: {success_dir}")
+        return result
+    except Exception as e:
+        error_dir = output_base / "FINISHED_ERROR" / session_id
+        error_dir.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(running_dir), str(error_dir))
+        logger.error(f"\n❌ Error: {e}", exc_info=True)
+        raise
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+</details>
+
+### What You Get With `@stx.session`
+
+Both implementations produce **identical outputs**, but SciTeX eliminates 131 lines of boilerplate:
+```bash
+demo_session_plt_io_out/
+├── demo.csv              # Auto-extracted plot data
+├── demo.jpg              # With embedded metadata
+└── FINISHED_SUCCESS/
+    └── 2025Y-11M-18D-09h12m03s_HmH5-main/
+        ├── CONFIGS/
+        │   ├── CONFIG.pkl    # Python object
+        │   └── CONFIG.yaml   # Human-readable
+        └── logs/
+            ├── stderr.log
+            └── stdout.log
+```
+
+**What SciTeX Automates:**
+- ✅ Session ID generation and tracking
+- ✅ Output directory management (`RUNNING/` → `FINISHED_SUCCESS/`)
+- ✅ Argument parsing with auto-generated help
+- ✅ Logging to files and console
+- ✅ Config serialization (YAML + pickle)
+- ✅ CSV export from matplotlib plots
+- ✅ Metadata embedding in images
+- ✅ Symlink management for centralized outputs
+- ✅ Error handling and directory cleanup
+- ✅ Global variable injection (CONFIG, plt, COLORS, logger, rng_manager)
+
+**Research Benefits:**
+- 📊 **Figures + data always together** - CSV auto-exported from every plot
+- 🔄 **Perfect reproducibility** - Every run tracked with unique session ID
+- 🌍 **Universal format** - CSV data readable anywhere
+- 📝 **Zero manual work** - Metadata embedded automatically
+- 🎯 **3.3× less code** - Focus on research, not infrastructure
+
+### Try It Yourself
+```bash
+pip install scitex
+python ./examples/demo_session_plt_io.py
+```
 
 ## 📦 Module Overview
 
@@ -94,367 +403,6 @@ SciTeX is organized into focused modules for different aspects of scientific com
 | [`scitex.resource`](./src/scitex/resource#readme)     | System resource monitoring (CPU, memory, GPU)       |
 | [`scitex.dict`](./src/scitex/dict#readme)             | Dictionary manipulation and nested access           |
 | [`scitex.str`](./src/scitex/str#readme)               | String utilities for scientific text processing     |
-
-## 🚀 Quick Start
-
-### Use Case 1: Data Analysis with Statistics
-
-```python
-import scitex as stx
-
-# Load data
-data = stx.io.load("experiment_data.csv")
-control = data[data['group'] == 'control']['response']
-treatment = data[data['group'] == 'treatment']['response']
-
-# Statistical comparison
-from scitex.stats.tests.parametric import ttest_ind
-from scitex.stats.effect_sizes import cohens_d
-
-result = ttest_ind(control, treatment)
-effect = cohens_d(treatment, control)
-
-print(f"{result['formatted']}")  # "t(58) = 2.45, p = 0.017*"
-print(f"Cohen's d = {effect['d']:.2f} ({effect['interpretation']})")
-
-# Visualization
-fig, ax = stx.plt.subplots()
-ax.boxplot([control, treatment], labels=['Control', 'Treatment'])
-stx.io.save(fig, "comparison.png")  # Saves figure + data as CSV
-```
-
-### Use Case 2: Signal Processing Pipeline
-
-```python
-import scitex as stx
-
-# Load EEG/neural data
-signal = stx.io.load("neural_recording.h5")  # (n_channels, n_epochs, n_timepoints)
-fs = 1000  # Sampling rate
-
-# Preprocessing
-from scitex.dsp import filt, psd, wavelet
-
-# Filter to theta band (4-8 Hz)
-theta = filt.bandpass(signal, fs, bands=[[4, 8]])
-
-# Power spectral density
-freqs, power = psd(signal, fs)
-
-# Time-frequency analysis
-import numpy as np
-tf_freqs = np.logspace(np.log10(1), np.log10(100), 50)
-wavelet_coeffs = wavelet(signal, fs, freqs=tf_freqs)
-
-# Save results
-stx.io.save(theta, "processed/theta_filtered.npy")
-stx.io.save(power, "processed/psd_results.h5")
-```
-
-### Use Case 3: Literature Management
-
-```python
-import scitex as stx
-
-# Search and download academic papers
-scholar = stx.scholar.Scholar(project="my_research")
-
-# Enrich BibTeX with citations and impact factors
-papers = scholar.load_bibtex("references.bib")
-enriched = scholar.enrich_papers(papers)
-
-# Filter high-impact papers
-high_impact = enriched.filter(
-    year_min=2020,
-    min_citations=50,
-    min_impact_factor=5.0
-)
-
-# Download PDFs (requires institutional access)
-import asyncio
-dois = [p.doi for p in high_impact if p.doi]
-asyncio.run(scholar.download_pdfs_from_dois_async(dois))
-
-# Export results
-scholar.save_papers_as_bibtex(high_impact, "high_impact_papers.bib")
-```
-
-### Use Case 4: Machine Learning Workflow
-
-```python
-import scitex as stx
-import numpy as np
-
-# Load and prepare data
-X_train = stx.io.load("features_train.npy")
-y_train = stx.io.load("labels_train.npy")
-X_test = stx.io.load("features_test.npy")
-y_test = stx.io.load("labels_test.npy")
-
-# Train model
-from scitex.ai import ClassificationReporter, EarlyStopping
-
-model = YourModel()  # Your PyTorch/sklearn model
-early_stopper = EarlyStopping(patience=10)
-
-# Training loop
-for epoch in range(100):
-    train_loss = train_epoch(model, X_train, y_train)
-    val_loss = validate(model, X_val, y_val)
-
-    early_stopper(val_loss, model)
-    if early_stopper.early_stop:
-        break
-
-# Evaluate with comprehensive metrics
-reporter = ClassificationReporter(save_dir="./results")
-y_pred = model.predict(X_test)
-y_prob = model.predict_proba(X_test)
-
-reporter.calc_metrics(y_test, y_pred, y_prob, labels=['class0', 'class1'])
-reporter.summarize()  # Prints confusion matrix, ROC, PR curves
-reporter.save()  # Saves all metrics and plots
-```
-
-### Use Case 5: Complete Research Script
-
-```python
-#!/usr/bin/env python3
-import scitex as stx
-import sys
-import matplotlib.pyplot as plt
-
-def main(args):
-    # Load experimental data
-    data = stx.io.load("data.csv")
-
-    # Preprocess
-    processed = preprocess_data(data)
-
-    # Statistical analysis
-    results = perform_statistical_tests(processed)
-
-    # Generate publication-quality figures
-    fig, axes = stx.plt.subplots(2, 2, figsize=(12, 10))
-    plot_results(axes, results)
-    stx.io.save(fig, "results/figure1.png")  # Auto-exports data as CSV
-
-    # Save results
-    stx.io.save(results, "results/statistical_results.json")
-
-    return 0
-
-if __name__ == '__main__':
-    # Initialize SciTeX session (logging, reproducibility, etc.)
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-        sys, plt,
-        file=__file__,
-        verbose=True
-    )
-
-    # Run main analysis
-    exit_status = main(None)
-
-    # Cleanup and finalize
-    stx.session.close(CONFIG, exit_status=exit_status)
-```
-
-### Common Patterns
-
-```python
-import scitex as stx
-
-# Universal I/O - format auto-detected
-data = stx.io.load("data.csv")       # → pandas DataFrame
-array = stx.io.load("data.npy")      # → numpy array
-model = stx.io.load("model.pth")     # → PyTorch state dict
-config = stx.io.load("config.yaml")  # → dict
-
-# Caching expensive operations
-@stx.io.cache(cache_dir=".cache")
-def expensive_computation(x):
-    return process_large_dataset(x)
-
-# Reproducible random numbers
-rng_manager = stx.rng.get_rng(seed=42)
-random_data = rng.normal(0, 1, size=1000)
-
-# Path management
-project_root = stx.path.find_git_root()
-data_dir = project_root / "data"
-latest_results = stx.path.find_latest("results/experiment_v*.csv")
-
-def parse_args() -> argparse.Namespace:
-    """Parse command line arguments."""
-    import scitex as stx
-    parser = argparse.ArgumentParser(description='')
-    args = parser.parse_args()
-    return args
-
-def run_main() -> None:
-    """Initialize scitex framework, run main function, and cleanup."""
-    global CONFIG, CC, sys, plt, rng
-
-    import sys
-    import matplotlib.pyplot as plt
-    import scitex as stx
-
-    args = parse_args()
-
-    # Start an session with:
-    #   Collect configs defined in ./config/*yaml
-    #   Prepare runtime directory as /path/to/script_out/RUNNING/YYYY_MMDD_mmss_<4-random-digit>/
-    #   Start logging to <runtime_directory>/logs/{stdout.log,stderr.log}
-    #   Setup matplotlib wrapper for saving plotted data as csv
-    #   CC: Custom colors for plotting
-    #   rng: Fix random seeds for common packages as 42
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-        sys,
-        plt,
-        args=args,
-        file=__FILE__,
-        sdir_suffix=None,
-        verbose=False,
-        agg=True,
-    )
-
-    # Check the runtime status at the end
-    exit_status = main(args)
-
-    # Close the session with:
-    #   Route all logs and outputs created by the session to RUNNING
-    #   Send notification user (needs setup)
-    stx.session.close(
-        CONFIG,
-        verbose=False,
-        notify=False,
-        message="",
-        exit_status=exit_status,
-    )
-```
-
-## 
-<details>
-
-<summary>Recommended Python Script Template for SciTeX project</summary>
-
-``` python
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2024-11-03 10:33:13 (ywatanabe)"
-# File: placeholder.py
-
-__FILE__ = "placeholder.py"
-
-"""
-Functionalities:
-  - Does XYZ
-  - Does XYZ
-  - Does XYZ
-  - Saves XYZ
-
-Dependencies:
-  - scripts:
-    - /path/to/script1
-    - /path/to/script2
-  - packages:
-    - package1
-    - package2
-IO:
-  - input-files:
-    - /path/to/input/file.xxx
-    - /path/to/input/file.xxx
-
-  - output-files:
-    - /path/to/input/file.xxx
-    - /path/to/input/file.xxx
-
-(Remove me: Please fill docstrings above, while keeping the bulette point style, and remove this instruction line)
-"""
-
-"""Imports"""
-import os
-import sys
-import argparse
-import scitex as stx
-from scitex import logging
-
-logger = logging.getLogger(__name__)
-
-"""Warnings"""
-# stx.pd.ignore_SettingWithCopyWarning()
-# warnings.simplefilter("ignore", UserWarning)
-# with warnings.catch_warnings():
-#     warnings.simplefilter("ignore", UserWarning)
-
-"""Parameters"""
-# CONFIG = stx.io.load_configs()
-
-"""Functions & Classes"""
-def main(args):
-    return 0
-
-import argparse
-def parse_args() -> argparse.Namespace:
-    """Parse command line arguments."""
-    import scitex as stx
-    parser = argparse.ArgumentParser(description='')
-    # parser.add_argument(
-    #     "--var",
-    #     "-v",
-    #     type=int,
-    #     choices=None,
-    #     default=1,
-    #     help="(default: %(default)s)",
-    # )
-    # parser.add_argument(
-    #     "--flag",
-    #     "-f",
-    #     action="store_true",
-    #     default=False,
-    #     help="(default: %%(default)s)",
-    # )
-    args = parser.parse_args()
-    return args
-
-def run_main() -> None:
-    """Initialize scitex framework, run main function, and cleanup."""
-    global CONFIG, CC, sys, plt, rng
-
-    import sys
-    import matplotlib.pyplot as plt
-    import scitex as stx
-
-    args = parse_args()
-
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-        sys,
-        plt,
-        args=args,
-        file=__FILE__,
-        sdir_suffix=None,
-        verbose=False,
-        agg=True,
-    )
-
-    exit_status = main(args)
-
-    stx.session.close(
-        CONFIG,
-        verbose=False,
-        notify=False,
-        message="",
-        exit_status=exit_status,
-    )
-
-if __name__ == '__main__':
-    run_main()
-
-# EOF
-```
-
-</details>
-
 
 ## 📖 Documentation
 

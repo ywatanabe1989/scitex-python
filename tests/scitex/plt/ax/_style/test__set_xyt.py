@@ -110,12 +110,12 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_style/_set_xyt.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_style/_set_xyt.py
 # --------------------------------------------------------------------------------
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-07-13 08:14:19 (ywatanabe)"
-# # Author: Yusuke Watanabe (ywata1989@gmail.com)
+# # Author: Yusuke Watanabe (ywatanabe@scitex.ai)
 # 
 # """
 # This script does XYZ.
@@ -221,12 +221,12 @@ if __name__ == "__main__":
 # 
 # if __name__ == "__main__":
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 
 #     # (YOUR AWESOME CODE)
 # 
 #     # Close
-#     scitex.gen.close(CONFIG)
+#     scitex.session.close(CONFIG)
 # 
 # # EOF
 # 
@@ -235,5 +235,5 @@ if __name__ == "__main__":
 # """
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/ax/_style/_set_xyt.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_style/_set_xyt.py
 # --------------------------------------------------------------------------------

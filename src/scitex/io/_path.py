@@ -8,8 +8,8 @@ import os
 import re
 from glob import glob as _glob
 
-from ..path._split import split
-from ..path._this_path import this_path
+from scitex.path._split import split
+from scitex.path._this_path import this_path
 
 ################################################################################
 ## PATH

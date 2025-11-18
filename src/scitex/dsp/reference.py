@@ -4,7 +4,7 @@
 # File: ./scitex_repo/src/scitex/dsp/reference.py
 
 import torch as _torch
-from ..decorators import torch_fn as _torch_fn
+from scitex.decorators import torch_fn as _torch_fn
 
 
 @_torch_fn

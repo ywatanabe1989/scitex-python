@@ -277,16 +277,18 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/context/_suppress_output.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/context/_suppress_output.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# # Timestamp: "2025-05-01 09:11:04 (ywatanabe)"
+# # Timestamp: "2025-10-13 08:18:37 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/context/_suppress_output.py
 # # ----------------------------------------
+# from __future__ import annotations
 # import os
-# 
-# __FILE__ = "./src/scitex/context/_suppress_output.py"
+# __FILE__ = (
+#     "./src/scitex/context/_suppress_output.py"
+# )
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
@@ -319,5 +321,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/context/_suppress_output.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/context/_suppress_output.py
 # --------------------------------------------------------------------------------

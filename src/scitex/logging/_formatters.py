@@ -60,7 +60,7 @@ class SciTeXConsoleFormatter(logging.Formatter):
         "light_red": "\033[91m",
         "light_green": "\033[92m",
         "light_yellow": "\033[93m",
-        "light_blue": "\033[94m",
+        "lightblue": "\033[94m",
         "light_magenta": "\033[95m",
         "light_cyan": "\033[96m",
     }

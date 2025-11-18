@@ -269,7 +269,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/pd/_to_xyz.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/pd/_to_xyz.py
 # --------------------------------------------------------------------------------
 # #!/./env/bin/python3
 # # -*- coding: utf-8 -*-
@@ -383,5 +383,5 @@ if __name__ == "__main__":
 # #     return pd.concat(formatted_data_frames, ignore_index=True)
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/pd/_to_xyz.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/pd/_to_xyz.py
 # --------------------------------------------------------------------------------

@@ -25,7 +25,7 @@ import numpy as np
 from pytorch_pretrained_vit import ViT
 from torchvision import transforms as _transforms
 
-# from ...decorators import batch_torch_fn
+# from scitex.decorators import batch_torch_fn
 
 
 def _setup_device(device: Union[str, None]) -> str:

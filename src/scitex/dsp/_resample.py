@@ -5,7 +5,7 @@
 
 import torch
 import torchaudio.transforms as T
-from ..decorators import signal_fn
+from scitex.decorators import signal_fn
 import scitex
 
 

@@ -12,7 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 import warnings
 from typing import List, Optional
 
-from ...str import printc as _printc
+from scitex.str import printc as _printc
 from ._SQLite3Mixins._ArrayMixin import _ArrayMixin
 from ._SQLite3Mixins._BatchMixin import _BatchMixin
 from ._SQLite3Mixins._BlobMixin import _BlobMixin

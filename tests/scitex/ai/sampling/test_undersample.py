@@ -262,7 +262,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/sampling/undersample.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/sampling/undersample.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -272,8 +272,13 @@ if __name__ == "__main__":
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/ai/sampling/undersample.py"
 # 
 # from typing import Tuple
-# from ...types import ArrayLike
-# from imblearn.under_sampling import RandomUnderSampler
+# from scitex.types import ArrayLike
+# 
+# try:
+#     from imblearn.under_sampling import RandomUnderSampler
+#     IMBLEARN_AVAILABLE = True
+# except ImportError:
+#     IMBLEARN_AVAILABLE = False
 # 
 # 
 # def undersample(
@@ -286,7 +291,16 @@ if __name__ == "__main__":
 #         y: Labels array-like of shape (n_samples,)
 #     Returns:
 #         Resampled X, y of same type as input
+#         
+#     Raises:
+#         ImportError: If imblearn is not installed
 #     """
+#     if not IMBLEARN_AVAILABLE:
+#         raise ImportError(
+#             "The undersample function requires the imbalanced-learn package. "
+#             "Install it with: pip install imbalanced-learn"
+#         )
+#     
 #     rus = RandomUnderSampler(random_state=random_state)
 #     X_resampled, y_resampled = rus.fit_resample(X, y)
 #     return X_resampled, y_resampled
@@ -295,5 +309,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/sampling/undersample.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/sampling/undersample.py
 # --------------------------------------------------------------------------------

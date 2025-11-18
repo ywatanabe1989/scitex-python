@@ -67,7 +67,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/utils/_is_valid_axis.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_is_valid_axis.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -75,9 +75,7 @@ if __name__ == "__main__":
 # # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/utils/_is_valid_axis.py
 # # ----------------------------------------
 # import os
-# __FILE__ = (
-#     "./src/scitex/plt/utils/_is_valid_axis.py"
-# )
+# __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
@@ -148,5 +146,5 @@ if __name__ == "__main__":
 # 
 # # EOF
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/plt/utils/_is_valid_axis.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_is_valid_axis.py
 # --------------------------------------------------------------------------------

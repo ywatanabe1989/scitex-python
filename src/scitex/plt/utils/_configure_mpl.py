@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-09-12 23:01:15 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/plt/utils/_configure_mpl.py
-# ----------------------------------------
-from __future__ import annotations
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+# Timestamp: "2025-11-16 10:09:17 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_configure_mpl.py
 
-from typing import Any, Dict, Tuple
+import os
+
+__FILE__ = __file__
+
+from typing import Any
+from typing import Dict, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scitex
+from scitex.dict import DotDict
 
 
 def configure_mpl(
@@ -69,7 +69,7 @@ def configure_mpl(
     Returns
     -------
     tuple
-        (plt, dict of RGBA colors)
+        (plt, DotDict of RGBA colors) - Access as COLORS.blue or COLORS['blue']
     """
     # # Convert base font size
     # base_size = _convert_font_size(fontsize)
@@ -257,7 +257,8 @@ def configure_mpl(
 
     plt.set_n_ticks = set_n_ticks
 
-    return plt, RGBA_NORM
+    # Convert to DotDict for convenient access (COLORS.blue or COLORS['blue'])
+    return plt, DotDict(RGBA_NORM)
 
 
 # def _convert_font_size(size: Union[str, int, float]) -> float:

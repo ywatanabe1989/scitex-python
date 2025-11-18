@@ -144,13 +144,38 @@ class BibTeXHandler:
             ),
         }
 
+        # Extract corpus_id from URL if present
+        corpus_id = None
+        url_field = fields.get("url", "")
+        if url_field and "CorpusId" in url_field:
+            import re
+            match = re.search(r"CorpusId:(\d+)", url_field)
+            if match:
+                corpus_id = match.group(1)
+
+        # Extract arXiv ID from volume field if present (e.g., "abs/2503.04921")
+        arxiv_id = fields.get("eprint")
+        arxiv_id_source = "input" if arxiv_id else None
+
+        if not arxiv_id:
+            volume_field = fields.get("volume", "")
+            if volume_field:
+                import re
+                # Match patterns like "abs/2503.04921" or "2503.04921"
+                match = re.search(r'(?:abs/)?(\d{4}\.\d+)', volume_field)
+                if match:
+                    arxiv_id = match.group(1)
+                    arxiv_id_source = "volume"
+
         id_data = {
             "doi": fields.get("doi"),
             "doi_source": "input" if fields.get("doi") else None,
             "pmid": fields.get("pmid"),
             "pmid_source": "input" if fields.get("pmid") else None,
-            "arxiv_id": fields.get("eprint"),
-            "arxiv_id_source": "input" if fields.get("eprint") else None,
+            "arxiv_id": arxiv_id,
+            "arxiv_id_source": arxiv_id_source,
+            "corpus_id": corpus_id,
+            "corpus_id_source": "url" if corpus_id else None,
         }
 
         publication_data = {
@@ -197,7 +222,12 @@ class BibTeXHandler:
         if id_data.get("doi"):
             paper.metadata.set_doi(id_data["doi"])
         paper.metadata.id.pmid = id_data.get("pmid")
-        paper.metadata.id.arxiv_id = id_data.get("arxiv_id")
+        if id_data.get("arxiv_id"):
+            paper.metadata.id.arxiv_id = id_data["arxiv_id"]
+            paper.metadata.id.arxiv_id_engines = [id_data.get("arxiv_id_source", "input")]
+        if id_data.get("corpus_id"):
+            paper.metadata.id.corpus_id = id_data["corpus_id"]
+            paper.metadata.id.corpus_id_engines = ["url"]
 
         # Set publication metadata
         paper.metadata.publication.journal = publication_data.get("journal")
@@ -758,9 +788,9 @@ class BibTeXHandler:
             # Add any papers not assigned to a source (e.g., merged duplicates)
             all_source_titles = set()
             for source_papers in file_papers.values():
-                all_source_titles.update(p.title for p in source_papers if p.title)
+                all_source_titles.update(p.metadata.basic.title for p in source_papers if p.metadata.basic.title)
 
-            unassigned = [p for p in paper_list if not p.title or p.title not in all_source_titles]
+            unassigned = [p for p in paper_list if not p.metadata.basic.title or p.metadata.basic.title not in all_source_titles]
             if unassigned:
                 bibtex_lines.append("")
                 bibtex_lines.append(f"% ============================================================")

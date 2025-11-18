@@ -20,7 +20,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/ranger/ranger913A.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/ranger/ranger913A.py
 # --------------------------------------------------------------------------------
 # # Ranger deep learning optimizer - RAdam + Lookahead + calibrated adaptive LR combined.
 # # https://github.com/lessw2020/Ranger-Deep-Learning-Optimizer
@@ -239,5 +239,5 @@ if __name__ == "__main__":
 #         return loss
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/ranger/ranger913A.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/optim/Ranger_Deep_Learning_Optimizer/ranger/ranger913A.py
 # --------------------------------------------------------------------------------

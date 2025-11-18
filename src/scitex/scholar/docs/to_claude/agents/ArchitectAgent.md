@@ -1,5 +1,5 @@
 ---
-name: ArchitectAgent
+name: ArchitectAgent-Opus
 description: MUST BE USED. Accomplish architecture agreement with user
 color: yellow
 model: opus

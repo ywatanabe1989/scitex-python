@@ -233,7 +233,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/repro/_gen_timestamp.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/repro/_gen_timestamp.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -269,8 +269,86 @@ if __name__ == "__main__":
 # 
 # timestamp = gen_timestamp
 # 
+# 
+# # ================================================================================
+# # Example Usage
+# # ================================================================================
+# def parse_args():
+#     """Parse command line arguments."""
+#     import argparse
+#     parser = argparse.ArgumentParser(description="Demonstrate timestamp generation")
+#     parser.add_argument(
+#         "--count",
+#         type=int,
+#         default=5,
+#         help="Number of timestamps to generate (default: 5)"
+#     )
+#     return parser.parse_args()
+# 
+# 
+# def main(args):
+#     """Main execution function.
+# 
+#     Demonstrates timestamp generation for file naming.
+#     """
+#     import time
+# 
+#     print(f"\n{'='*60}")
+#     print("Timestamp Generation Demo")
+#     print(f"{'='*60}")
+# 
+#     # Generate single timestamp
+#     print(f"\n{'Single Timestamp':-^60}")
+#     ts = gen_timestamp()
+#     print(f"Generated: {ts}")
+#     print(f"Example usage: experiment_{ts}.csv")
+# 
+#     # Generate multiple timestamps with small delays
+#     print(f"\n{'Multiple Timestamps':-^60}")
+#     print(f"Generating {args.count} timestamps...")
+#     timestamps = []
+#     for i in range(args.count):
+#         ts = gen_timestamp()
+#         timestamps.append(ts)
+#         print(f"{i+1}. {ts}")
+#         time.sleep(0.5)  # Small delay to show time progression
+# 
+#     print(f"\n{'='*60}")
+#     print("Demo completed successfully!")
+#     print(f"{'='*60}\n")
+# 
+#     return 0
+# 
+# 
+# if __name__ == "__main__":
+#     import sys
+#     import matplotlib.pyplot as plt
+#     import scitex as stx
+# 
+#     args = parse_args()
+# 
+#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+#         sys,
+#         plt,
+#         args=args,
+#         file=__file__,
+#         sdir_suffix="gen_timestamp_demo",
+#         verbose=True,
+#         agg=True,
+#     )
+# 
+#     exit_status = main(args)
+# 
+#     stx.session.close(
+#         CONFIG,
+#         verbose=True,
+#         notify=False,
+#         message="Timestamp generation demo completed",
+#         exit_status=exit_status,
+#     )
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/repro/_gen_timestamp.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/repro/_gen_timestamp.py
 # --------------------------------------------------------------------------------

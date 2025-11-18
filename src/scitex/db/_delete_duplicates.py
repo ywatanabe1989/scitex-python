@@ -14,7 +14,7 @@ The actual implementation has been moved to _sqlite3._delete_duplicates
 as it is SQLite3-specific.
 """
 
-from ..errors import warn_deprecated
+from scitex.errors import warn_deprecated
 from ._sqlite3._delete_duplicates import delete_sqlite3_duplicates
 
 def delete_duplicates(*args, **kwargs):

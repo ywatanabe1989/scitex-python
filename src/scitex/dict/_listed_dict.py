@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: "2024-11-02 12:40:01 (ywatanabe)"
-# File: ./scitex_repo/src/scitex/dict/_listed_dict.py
+# Timestamp: "2025-11-10 22:39:50 (ywatanabe)"
+
 
 from collections import defaultdict
 
@@ -37,6 +37,5 @@ def listed_dict(keys=None):
         for k in keys:
             dict_list[k] = []
     return dict_list
-
 
 # EOF

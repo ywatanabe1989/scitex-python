@@ -502,7 +502,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/db/_postgresql/_PostgreSQL.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/db/_postgresql/_PostgreSQL.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -513,7 +513,7 @@ if __name__ == "__main__":
 # 
 # from typing import List, Optional
 # 
-# from ...str import printc as _printc
+# from scitex.str import printc as _printc
 # from typing import Optional
 # import psycopg2
 # from ._PostgreSQLMixins._BackupMixin import _BackupMixin
@@ -632,5 +632,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/db/_postgresql/_PostgreSQL.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/db/_postgresql/_PostgreSQL.py
 # --------------------------------------------------------------------------------

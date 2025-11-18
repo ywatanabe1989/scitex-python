@@ -29,8 +29,8 @@ import numpy as np
 import pandas as pd
 from typing import Union, List, Optional
 from scipy import stats
-from ..utils._formatters import p2stars
-from ..utils._normalizers import convert_results
+from scitex.stats.utils._formatters import p2stars
+from scitex.stats.utils._normalizers import convert_results
 
 
 def welch_satterthwaite_df(var_i: float, n_i: int, var_j: float, n_j: int) -> float:

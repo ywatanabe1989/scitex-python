@@ -280,7 +280,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/utils/_differential_bandpass_filters.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/utils/_differential_bandpass_filters.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -296,9 +296,9 @@ if __name__ == "__main__":
 # import torch
 # import torch.nn as nn
 # 
-# from ...decorators import torch_fn
-# from ...gen._to_even import to_even
-# from ...gen._to_odd import to_odd
+# from scitex.decorators import torch_fn
+# from scitex.gen._to_even import to_even
+# from scitex.gen._to_odd import to_odd
 # 
 # try:
 #     from torchaudio.prototype.functional import sinc_impulse_response
@@ -364,7 +364,7 @@ if __name__ == "__main__":
 #     import scitex
 # 
 #     # Start
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt, agg=True)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, agg=True)
 # 
 #     # Demo signal
 #     freqs_hz = [10, 30, 100, 300]
@@ -404,5 +404,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dsp/utils/_differential_bandpass_filters.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/utils/_differential_bandpass_filters.py
 # --------------------------------------------------------------------------------

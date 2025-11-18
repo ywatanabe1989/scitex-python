@@ -253,12 +253,12 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dict/_listed_dict.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dict/_listed_dict.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# # Time-stamp: "2024-11-02 12:40:01 (ywatanabe)"
-# # File: ./scitex_repo/src/scitex/dict/_listed_dict.py
+# # Timestamp: "2025-11-10 22:39:50 (ywatanabe)"
+# 
 # 
 # from collections import defaultdict
 # 
@@ -295,9 +295,8 @@ if __name__ == "__main__":
 #             dict_list[k] = []
 #     return dict_list
 # 
-# 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/dict/_listed_dict.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dict/_listed_dict.py
 # --------------------------------------------------------------------------------

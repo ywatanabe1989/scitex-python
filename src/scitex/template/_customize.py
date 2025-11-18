@@ -70,7 +70,7 @@ def update_references(
     target_path: Path,
     new_name: str,
     template_package_name: str = "pip_project_template",
-) -> None:
+) -> int:
     """
     Update all references from template package name to new project name.
 
@@ -82,8 +82,13 @@ def update_references(
         New name for the project/package
     template_package_name : str
         Original template package name to be replaced
+
+    Returns
+    -------
+    int
+        Number of files updated
     """
-    logger.info(
+    logger.debug(
         f"Updating references from {template_package_name} to {new_name}"
     )
 
@@ -101,12 +106,12 @@ def update_references(
     updated_count = 0
     for file_path in files_to_update:
         if update_file_references(file_path, template_package_name, new_name):
-            logger.info(
+            logger.debug(
                 f"Updated references in {file_path.relative_to(target_path)}"
             )
             updated_count += 1
 
-    logger.info(f"Updated {updated_count} files with new project name")
+    return updated_count
 
 
 __all__ = ["update_file_references", "update_references"]

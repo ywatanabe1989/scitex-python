@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-29 07:21:17 (ywatanabe)"
+# Timestamp: "2025-11-14 08:56:29 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save.py
-# ----------------------------------------
-from __future__ import annotations
+
+
 import os
-__FILE__ = (
-    "./src/scitex/io/_save.py"
-)
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
 __FILE__ = __file__
 
@@ -38,12 +33,12 @@ from typing import Union
 
 from scitex import logging
 
-from .._sh import sh
-from ..path._clean import clean
-from ..path._getsize import getsize
-from ..str._clean_path import clean_path
-from ..str._color_text import color_text
-from ..str._readable_bytes import readable_bytes
+from scitex.sh import sh
+from scitex.path._clean import clean
+from scitex.path._getsize import getsize
+from scitex.str._clean_path import clean_path
+from scitex.str._color_text import color_text
+from scitex.str._readable_bytes import readable_bytes
 
 # Import save functions from the new modular structure
 from ._save_modules import save_catboost
@@ -296,8 +291,8 @@ def save(
         # When relative path
         else:
             # Import here to avoid circular imports
-            from ..gen._detect_environment import detect_environment
-            from ..gen._get_notebook_path import get_notebook_info_simple
+            from scitex.gen._detect_environment import detect_environment
+            from scitex.gen._get_notebook_path import get_notebook_info_simple
 
             # Detect the current environment
             env_type = detect_environment()
@@ -390,7 +385,6 @@ def save(
                 rel_path = spath
 
             if verbose:
-                print()
                 logger.success(
                     color_text(f"(dry run) Saved to: ./{rel_path}", c="yellow")
                 )
@@ -451,8 +445,12 @@ def _symlink_to(spath_final, symlink_to, verbose):
         # Clean the symlink path
         symlink_to = clean(symlink_to)
 
-        # Ensure the symlink directory exists
-        _os.makedirs(_os.path.dirname(symlink_to), exist_ok=True)
+        # Ensure the symlink directory exists (only if there is a directory component)
+        symlink_dir = _os.path.dirname(symlink_to)
+        if (
+            symlink_dir
+        ):  # Only create directory if there's a directory component
+            _os.makedirs(symlink_dir, exist_ok=True)
 
         # Remove existing symlink or file
         sh(["rm", "-f", f"{symlink_to}"], verbose=False)
@@ -461,7 +459,12 @@ def _symlink_to(spath_final, symlink_to, verbose):
         sh(["ln", "-sfr", f"{spath_final}", f"{symlink_to}"], verbose=False)
 
         if verbose:
-            print(color_text(f"\n(Symlinked to: {symlink_to})", "yellow"))
+            symlink_to_full = (
+                os.path.realpath(symlink_to)
+                + "/"
+                + os.path.basename(spath_final)
+            )
+            logger.success(f"Symlinked: {spath_final} -> {symlink_to_full}")
 
 
 def _save(
@@ -497,6 +500,7 @@ def _save(
             _FILE_HANDLERS[ext](
                 obj,
                 spath,
+                verbose=verbose,
                 no_csv=no_csv,
                 symlink_from_cwd=symlink_from_cwd,
                 symlink_to=symlink_to,
@@ -527,7 +531,6 @@ def _save(
             except ValueError:
                 rel_path = spath
 
-            print()
             logger.success(f"Saved to: ./{rel_path} ({file_size})")
 
 
@@ -607,6 +610,7 @@ def _save_separate_legends(
 def _handle_image_with_csv(
     obj,
     spath,
+    verbose=False,
     no_csv=False,
     symlink_from_cwd=False,
     dry_run=False,
@@ -617,7 +621,7 @@ def _handle_image_with_csv(
     if dry_run:
         return
 
-    save_image(obj, spath, **kwargs)
+    save_image(obj, spath, verbose=verbose, **kwargs)
 
     # Handle separate legend saving
     _save_separate_legends(

@@ -231,7 +231,7 @@ logger.success("Extra emphasis", c="light_green")  # Light green
 
 **Available Colors**:
 - Basic: `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`, `grey`
-- Light variants: `light_red`, `light_green`, `light_yellow`, `light_blue`, `light_magenta`, `light_cyan`
+- Light variants: `light_red`, `light_green`, `light_yellow`, `lightblue`, `light_magenta`, `light_cyan`
 
 **Use Cases**:
 - Highlight critical information in INFO logs: `logger.info("msg", c="red")`

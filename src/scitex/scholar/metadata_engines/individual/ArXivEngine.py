@@ -84,7 +84,10 @@ class ArXivEngine(BaseDOIEngine):
         doi = doi.replace("https://doi.org/", "").replace(
             "http://doi.org/", ""
         )
-        arxiv_id = doi.split("arXiv.")[-1]
+        # Extract arXiv ID - handle both "arXiv." and "arxiv." (case-insensitive)
+        import re
+        match = re.search(r'arxiv\.(\d+\.\d+)', doi, re.IGNORECASE)
+        arxiv_id = match.group(1) if match else doi.split("arXiv.")[-1]
 
         params = {
             "search_query": f'id:"{arxiv_id}"',

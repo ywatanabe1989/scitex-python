@@ -37,7 +37,7 @@ class WriterConfig:
     """Directory for revision (03_revision/)"""
 
     shared_dir: Path
-    """Directory for shared resources (shared/)"""
+    """Directory for shared resources (00_shared/)"""
 
     compile_script: Optional[Path] = None
     """Path to compile script (auto-detected if None)"""
@@ -64,7 +64,7 @@ class WriterConfig:
             manuscript_dir=project_dir / "01_manuscript",
             supplementary_dir=project_dir / "02_supplementary",
             revision_dir=project_dir / "03_revision",
-            shared_dir=project_dir / "shared",
+            shared_dir=project_dir / "00_shared",
         )
 
     def validate(self) -> bool:

@@ -598,7 +598,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/decorators/_timeout.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_timeout.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
@@ -608,7 +608,7 @@ if __name__ == "__main__":
 # #!./env/bin/python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-04-23 19:11:33"
-# # Author: Yusuke Watanabe (ywata1989@gmail.com)
+# # Author: Yusuke Watanabe (ywatanabe@scitex.ai)
 # 
 # """
 # This script does XYZ.
@@ -657,5 +657,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/SciTeX-Code/src/scitex/decorators/_timeout.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_timeout.py
 # --------------------------------------------------------------------------------

@@ -7,7 +7,7 @@ SciTeX CLI Main Entry Point
 import os
 import sys
 import click
-from . import cloud, scholar, security, web
+from . import cloud, scholar, security, web, writer
 
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']})
@@ -15,18 +15,6 @@ from . import cloud, scholar, security, web
 def cli():
     """
     SciTeX - Integrated Scientific Research Platform
-
-    \b
-    Commands:
-      cloud      Git operations (via Gitea) - AVAILABLE NOW
-      scholar    Literature management - AVAILABLE NOW
-      security   GitHub security alerts - AVAILABLE NOW
-      web        Web scraping utilities - AVAILABLE NOW
-      completion Install shell tab-completion - AVAILABLE NOW
-      code       Analysis execution (coming soon)
-      viz        Visualization (coming soon)
-      writer     Manuscript writing (coming soon)
-      project    Integrated workflows (coming soon)
 
     \b
     Examples:
@@ -51,6 +39,7 @@ cli.add_command(cloud.cloud)
 cli.add_command(scholar.scholar)
 cli.add_command(security.security)
 cli.add_command(web.web)
+cli.add_command(writer.writer)
 
 
 @cli.command()
@@ -107,19 +96,28 @@ def completion(shell, show):
 
     shell = shell.lower()
 
+    # Get full path to scitex executable
+    scitex_path = sys.argv[0]
+    if not os.path.isabs(scitex_path):
+        # If relative path, find the full path
+        import shutil
+        scitex_full = shutil.which('scitex') or scitex_path
+    else:
+        scitex_full = scitex_path
+
     # Generate completion script
     if shell == 'bash':
-        completion_script = '_SCITEX_COMPLETE=bash_source scitex'
+        completion_script = f'_SCITEX_COMPLETE=bash_source {scitex_full}'
         rc_file = os.path.expanduser('~/.bashrc')
-        eval_line = 'eval "$(_SCITEX_COMPLETE=bash_source scitex)"'
+        eval_line = f'eval "$(_SCITEX_COMPLETE=bash_source {scitex_full})"'
     elif shell == 'zsh':
-        completion_script = '_SCITEX_COMPLETE=zsh_source scitex'
+        completion_script = f'_SCITEX_COMPLETE=zsh_source {scitex_full}'
         rc_file = os.path.expanduser('~/.zshrc')
-        eval_line = 'eval "$(_SCITEX_COMPLETE=zsh_source scitex)"'
+        eval_line = f'eval "$(_SCITEX_COMPLETE=zsh_source {scitex_full})"'
     elif shell == 'fish':
-        completion_script = '_SCITEX_COMPLETE=fish_source scitex'
+        completion_script = f'_SCITEX_COMPLETE=fish_source {scitex_full}'
         rc_file = os.path.expanduser('~/.config/fish/config.fish')
-        eval_line = 'eval (env _SCITEX_COMPLETE=fish_source scitex)'
+        eval_line = f'eval (env _SCITEX_COMPLETE=fish_source {scitex_full})'
 
     if show:
         # Just show the completion script
@@ -128,19 +126,21 @@ def completion(shell, show):
         click.secho(eval_line, fg='green')
         sys.exit(0)
 
-    # Check if already installed
+    # Check if already installed (and not commented out)
     if os.path.exists(rc_file):
         with open(rc_file, 'r') as f:
-            content = f.read()
-            if eval_line in content:
-                click.secho(
-                    f"Tab completion is already installed in {rc_file}",
-                    fg='yellow'
-                )
-                click.echo()
-                click.echo("To reload, run:")
-                click.secho(f"  source {rc_file}", fg='cyan')
-                sys.exit(0)
+            for line in f:
+                # Check if the line exists and is not commented
+                stripped = line.strip()
+                if stripped == eval_line and not stripped.startswith('#'):
+                    click.secho(
+                        f"Tab completion is already installed in {rc_file}",
+                        fg='yellow'
+                    )
+                    click.echo()
+                    click.echo("To reload, run:")
+                    click.secho(f"  source {rc_file}", fg='cyan')
+                    sys.exit(0)
 
     # Install completion
     try:

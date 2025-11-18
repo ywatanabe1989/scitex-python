@@ -5,8 +5,8 @@
 
 import torch
 
-from ..decorators import signal_fn
-from ..nn._ModulationIndex import ModulationIndex
+from scitex.decorators import signal_fn
+from scitex.nn._ModulationIndex import ModulationIndex
 
 
 @signal_fn
