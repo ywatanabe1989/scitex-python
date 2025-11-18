@@ -1,7 +1,7 @@
 <!-- ---
-!-- Timestamp: 2025-10-16 02:47:57
+!-- Timestamp: 2025-11-18 10:14:48
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex_repo/src/scitex/session/README.md
+!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/session/README.md
 !-- --- -->
 
 # scitex.session
@@ -17,14 +17,14 @@ scitex.session provides lifecycle management for scientific experiments with aut
 ```python
 import scitex
 
-@scitex.session.session
+@scitex.session
 def main(
     CONFIG=scitex.INJECTED,
     plt=scitex.INJECTED,
     COLORS=scitex.INJECTED,
     rng_manager=scitex.INJECTED,
 ):
-    """Args injected by @scitex.session.session decorator"""
+    """Args injected by @scitex.session decorator"""
     print(f"Session ID: {CONFIG['ID']}")
     # Your experiment code here
 
@@ -36,19 +36,19 @@ if __name__ == "__main__":
 
 ### @session.session Decorator
 
-The recommended way to use scitex.session is through the `@scitex.session.session` decorator, which automatically handles session initialization and cleanup.
+The recommended way to use scitex.session is through the `@scitex.session` decorator, which automatically handles session initialization and cleanup.
 
 ```python
 import scitex
 
-@scitex.session.session
+@scitex.session
 def main(
     CONFIG=scitex.INJECTED,
     plt=scitex.INJECTED,
     COLORS=scitex.INJECTED,
     rng_manager=scitex.INJECTED,
 ):
-    """Args injected by @scitex.session.session decorator"""
+    """Args injected by @scitex.session decorator"""
     print(f"Session ID: {CONFIG['ID']}")
 
 if __name__ == "__main__":
@@ -145,7 +145,7 @@ Parameters:
 ```python
 import scitex
 
-@scitex.session.session(sdir="/custom/path/")
+@scitex.session(sdir="/custom/path/")
 def main():
     # Your experiment code here
     pass
@@ -211,7 +211,7 @@ CONFIG contains:
 ```python
 import scitex
 
-@scitex.session.session(
+@scitex.session(
     fig_size_mm=(160, 100),
     dpi_save=300,
     hide_top_right_spines=True,
@@ -235,7 +235,7 @@ if __name__ == "__main__":
 ```python
 import scitex
 
-@scitex.session.session(seed=42)
+@scitex.session(seed=42)
 def main():
     # rng is automatically available
     random_array = rng.random((10, 10))

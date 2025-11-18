@@ -15,6 +15,51 @@ import numpy as np
 import pandas as pd
 from scitex.pd import to_xyz
 
+# Global warning registry to track which warnings have been shown
+_warning_registry = set()
+
+# Mapping of matplotlib/seaborn methods to their scitex equivalents
+_METHOD_ALTERNATIVES = {
+    # Matplotlib methods
+    'imshow': 'plot_imshow',
+    'plot': 'plot',  # already tracked
+    'scatter': 'plot_scatter',  # already tracked
+    'bar': 'plot_bar',  # already tracked
+    'barh': 'plot_barh',  # already tracked
+    'hist': 'hist',  # already tracked
+    'boxplot': 'plot_box or plot_boxplot',
+    'violinplot': 'plot_violin or plot_violinplot',
+    'fill_between': 'plot_fill_between',
+    'errorbar': 'plot_errorbar',
+    'contour': 'plot_contour',
+    'heatmap': 'plot_heatmap',
+
+    # Seaborn methods (accessed via ax.sns_*)
+    'scatterplot': 'sns_scatterplot',
+    'lineplot': 'sns_lineplot',
+    'barplot': 'sns_barplot',
+    'boxplot_sns': 'sns_boxplot',
+    'violinplot_sns': 'sns_violinplot',
+    'stripplot': 'sns_stripplot',
+    'swarmplot': 'sns_swarmplot',
+    'histplot': 'sns_histplot',
+    'kdeplot': 'sns_kdeplot',
+    'heatmap_sns': 'sns_heatmap',
+    'jointplot': 'sns_jointplot',
+    'pairplot': 'sns_pairplot',
+}
+
+def _warn_once(message, category=UserWarning):
+    """Show a warning only once per runtime.
+
+    Args:
+        message: Warning message to display
+        category: Warning category (default: UserWarning)
+    """
+    if message not in _warning_registry:
+        _warning_registry.add(message)
+        warnings.warn(message, category, stacklevel=3)
+
 from ._export_as_csv_formatters import (_format_annotate, _format_bar,
                                         _format_barh, _format_boxplot,
                                         _format_contour, _format_errorbar,
@@ -26,6 +71,7 @@ from ._export_as_csv_formatters import (_format_annotate, _format_bar,
                                         _format_plot_ecdf, _format_plot_fillv,
                                         _format_plot_heatmap,
                                         _format_plot_image,
+                                        _format_plot_imshow,
                                         _format_plot_joyplot, _format_plot_kde,
                                         _format_plot_line,
                                         _format_plot_mean_ci,
@@ -94,17 +140,36 @@ def export_as_csv(history_records):
         return pd.DataFrame()  # Return empty DataFrame instead of None
 
     dfs = []
+    failed_methods = set()  # Track failed methods for helpful warnings
+
     for record in list(history_records.values()):
         try:
             formatted_df = format_record(record)
             if formatted_df is not None and not formatted_df.empty:
                 dfs.append(formatted_df)
+            else:
+                # Track the method that failed to format
+                method_name = record[1] if len(record) > 1 else "unknown"
+                failed_methods.add(method_name)
         except Exception as e:
-            warnings.warn(f"Failed to format record {record[0]}: {e}")
+            method_name = record[1] if len(record) > 1 else "unknown"
+            failed_methods.add(method_name)
 
-    # If no valid dataframes were created, return an empty one
-    if not dfs:
-        warnings.warn("No valid data found to export.")
+    # If no valid dataframes were created, provide helpful suggestions
+    if not dfs and failed_methods:
+        for method in failed_methods:
+            if method in _METHOD_ALTERNATIVES:
+                alternative = _METHOD_ALTERNATIVES[method]
+                message = (
+                    f"Matplotlib method '{method}()' does not support full data tracking for CSV export. "
+                    f"Consider using 'ax.{alternative}()' instead for better data export support."
+                )
+            else:
+                message = (
+                    f"Method '{method}()' does not support data tracking for CSV export. "
+                    f"Consider using scitex plot methods (e.g., plot_image, plot_imshow) for data export support."
+                )
+            _warn_once(message)
         return pd.DataFrame()
 
     try:
@@ -188,6 +253,8 @@ def format_record(record):
         return _format_plot_heatmap(id, tracked_dict, kwargs)
     elif method == "plot_image":
         return _format_plot_image(id, tracked_dict, kwargs)
+    elif method == "plot_imshow":
+        return _format_plot_imshow(id, tracked_dict, kwargs)
     elif method == "plot_joyplot":
         return _format_plot_joyplot(id, tracked_dict, kwargs)
     elif method == "plot_kde":

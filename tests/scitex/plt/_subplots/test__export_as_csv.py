@@ -474,6 +474,218 @@ class TestEdgeCases:
         assert isinstance(result, pd.DataFrame)
         assert f"{special_id}_plot_x" in result.columns
 
+
+class TestWarningSystem:
+    """Test suite for the improved warning system."""
+
+    def test_warn_once_single_warning(self):
+        """Test that _warn_once shows a warning only once."""
+        from scitex.plt._subplots._export_as_csv import _warn_once, _warning_registry
+
+        # Clear registry for clean test
+        _warning_registry.clear()
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+
+            # First call should warn
+            _warn_once("Test warning message")
+            assert len(w) == 1
+            assert "Test warning message" in str(w[0].message)
+
+            # Second call should NOT warn
+            _warn_once("Test warning message")
+            assert len(w) == 1  # Still only 1 warning
+
+    def test_warn_once_different_warnings(self):
+        """Test that different warnings are shown separately."""
+        from scitex.plt._subplots._export_as_csv import _warn_once, _warning_registry
+
+        _warning_registry.clear()
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+
+            _warn_once("First warning")
+            _warn_once("Second warning")
+            _warn_once("First warning")  # Duplicate, shouldn't show
+
+            assert len(w) == 2  # Only 2 unique warnings
+            assert "First warning" in str(w[0].message)
+            assert "Second warning" in str(w[1].message)
+
+    def test_helpful_warning_for_imshow(self):
+        """Test that imshow without tracking shows helpful warning."""
+        from scitex.plt._subplots._export_as_csv import _warning_registry
+
+        _warning_registry.clear()
+
+        # Create history with imshow (no data tracked)
+        history = {
+            "img1": ("img1", "imshow", {"args": (np.random.rand(10, 10),)}, {})
+        }
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            result = export_as_csv(history)
+
+            # Should get helpful warning
+            assert len(w) >= 1
+            warning_text = str(w[0].message)
+            assert "imshow" in warning_text
+            assert "plot_imshow" in warning_text
+            assert "Consider using" in warning_text
+
+    def test_helpful_warning_for_unknown_method(self):
+        """Test that unknown methods show generic helpful warning."""
+        from scitex.plt._subplots._export_as_csv import _warning_registry
+
+        _warning_registry.clear()
+
+        history = {
+            "unknown1": ("unknown1", "custom_plot", {"args": ([1, 2, 3],)}, {})
+        }
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            result = export_as_csv(history)
+
+            # Should get generic warning
+            assert len(w) >= 1
+            warning_text = str(w[0].message)
+            assert "custom_plot" in warning_text
+            assert "scitex plot methods" in warning_text
+
+    def test_no_duplicate_warnings_multiple_axes(self):
+        """Test that using same method on multiple axes warns only once."""
+        from scitex.plt._subplots._export_as_csv import _warning_registry
+
+        _warning_registry.clear()
+
+        # Simulate multiple axes using imshow
+        history = {
+            "img1": ("img1", "imshow", {"args": (np.random.rand(5, 5),)}, {}),
+            "img2": ("img2", "imshow", {"args": (np.random.rand(5, 5),)}, {}),
+            "img3": ("img3", "imshow", {"args": (np.random.rand(5, 5),)}, {}),
+        }
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            result = export_as_csv(history)
+
+            # Should only warn once for imshow despite 3 uses
+            imshow_warnings = [msg for msg in w if "imshow" in str(msg.message)]
+            assert len(imshow_warnings) == 1
+
+    def test_method_alternatives_coverage(self):
+        """Test that _METHOD_ALTERNATIVES includes common methods."""
+        from scitex.plt._subplots._export_as_csv import _METHOD_ALTERNATIVES
+
+        # Matplotlib methods
+        assert "imshow" in _METHOD_ALTERNATIVES
+        assert "boxplot" in _METHOD_ALTERNATIVES
+        assert "violinplot" in _METHOD_ALTERNATIVES
+        assert "fill_between" in _METHOD_ALTERNATIVES
+
+        # Seaborn methods
+        assert "scatterplot" in _METHOD_ALTERNATIVES
+        assert "barplot" in _METHOD_ALTERNATIVES
+        assert "histplot" in _METHOD_ALTERNATIVES
+
+        # Check alternatives are meaningful
+        assert _METHOD_ALTERNATIVES["imshow"] == "plot_imshow"
+        assert "sns_" in _METHOD_ALTERNATIVES["scatterplot"]
+
+
+class TestPlotImshowExport:
+    """Test suite for plot_imshow CSV export functionality."""
+
+    def test_plot_imshow_basic_export(self):
+        """Test basic plot_imshow export."""
+        # Create sample image data
+        img_data = np.random.rand(5, 5)
+        df = pd.DataFrame(img_data, columns=[f"col_{i}" for i in range(5)])
+
+        history = {
+            "img1": ("img1", "plot_imshow", {"imshow_df": df}, {})
+        }
+
+        result = export_as_csv(history)
+        assert isinstance(result, pd.DataFrame)
+        assert not result.empty
+
+        # Check column naming
+        assert any("img1_plot_imshow" in col for col in result.columns)
+
+    def test_plot_imshow_multiple_images(self):
+        """Test export with multiple plot_imshow calls."""
+        img1 = np.random.rand(3, 3)
+        img2 = np.random.rand(3, 3)
+
+        df1 = pd.DataFrame(img1, columns=[f"col_{i}" for i in range(3)])
+        df2 = pd.DataFrame(img2, columns=[f"col_{i}" for i in range(3)])
+
+        history = {
+            "img1": ("img1", "plot_imshow", {"imshow_df": df1}, {}),
+            "img2": ("img2", "plot_imshow", {"imshow_df": df2}, {}),
+        }
+
+        result = export_as_csv(history)
+        assert isinstance(result, pd.DataFrame)
+        assert not result.empty
+
+        # Should have columns from both images
+        img1_cols = [col for col in result.columns if "img1_plot_imshow" in col]
+        img2_cols = [col for col in result.columns if "img2_plot_imshow" in col]
+
+        assert len(img1_cols) == 3
+        assert len(img2_cols) == 3
+
+    def test_plot_imshow_with_none_id(self):
+        """Test plot_imshow export without explicit ID."""
+        img_data = np.random.rand(4, 4)
+        df = pd.DataFrame(img_data, columns=[f"col_{i}" for i in range(4)])
+
+        history = {
+            None: (None, "plot_imshow", {"imshow_df": df}, {})
+        }
+
+        result = export_as_csv(history)
+        assert isinstance(result, pd.DataFrame)
+        assert not result.empty
+
+    def test_plot_imshow_empty_data(self):
+        """Test plot_imshow with empty tracked dict."""
+        history = {
+            "img1": ("img1", "plot_imshow", {}, {})
+        }
+
+        result = export_as_csv(history)
+        # Should handle gracefully with empty DataFrame
+        assert isinstance(result, pd.DataFrame)
+
+    def test_plot_imshow_mixed_with_plot_image(self):
+        """Test mix of plot_imshow and plot_image in same export."""
+        img1 = np.random.rand(3, 3)
+        img2 = np.random.rand(3, 3)
+
+        df1 = pd.DataFrame(img1, columns=[f"col_{i}" for i in range(3)])
+        df2 = pd.DataFrame(img2)
+
+        history = {
+            "imshow1": ("imshow1", "plot_imshow", {"imshow_df": df1}, {}),
+            "image1": ("image1", "plot_image", {"image_df": df2}, {}),
+        }
+
+        result = export_as_csv(history)
+        assert isinstance(result, pd.DataFrame)
+        assert not result.empty
+
+        # Should have data from both methods
+        imshow_cols = [col for col in result.columns if "plot_imshow" in col]
+        assert len(imshow_cols) > 0
+
+
 if __name__ == "__main__":
     import os
 

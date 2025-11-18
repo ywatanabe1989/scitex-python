@@ -28,6 +28,7 @@ from ._format_violin import _format_violin
 from ._format_violinplot import _format_violinplot
 
 # Custom plotting formatters
+from ._format_plot_imshow import _format_plot_imshow
 from ._format_plot_box import _format_plot_box
 from ._format_plot_conf_mat import _format_plot_conf_mat
 from ._format_plot_ecdf import _format_plot_ecdf

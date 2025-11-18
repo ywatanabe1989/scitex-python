@@ -126,7 +126,8 @@ def git_commit(repo_path: Path, message: str, verbose: bool = True) -> bool:
             logger.error(f"Failed to commit in {repo_path}: {error_msg}")
             return False
 
-        logger.info("Commit created successfully")
+        if verbose:
+            logger.info("Commit created successfully")
         return True
 
 

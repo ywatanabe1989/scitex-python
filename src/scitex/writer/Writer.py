@@ -139,15 +139,14 @@ class Writer:
             return self.project_dir
 
         project_name = name or self.project_dir.name
-        target_dir = self.project_dir.parent
 
         logger.info(
-            f"Writer: Creating new project '{project_name}' in {target_dir}"
+            f"Writer: Creating new project '{project_name}' at {self.project_dir.absolute()}"
         )
 
         # Initialize project directory structure
         success = _clone_writer_project(
-            project_name, str(target_dir), self.git_strategy, self.branch, self.tag
+            str(self.project_dir), self.git_strategy, self.branch, self.tag
         )
 
         if not success:

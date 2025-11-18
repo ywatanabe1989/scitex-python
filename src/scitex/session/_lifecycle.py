@@ -37,6 +37,30 @@ from scitex.logging import getLogger
 logger = getLogger(__name__)
 
 import matplotlib
+
+# CRITICAL: Set backend before importing pyplot to avoid tkinter issues in headless/WSL environments
+# Check if we're in a headless environment (no DISPLAY) or WSL
+import os
+import sys
+import platform
+
+# Detect headless/WSL environments
+is_headless = False
+try:
+    # Check for WSL
+    if 'microsoft' in platform.uname().release.lower() or 'WSL' in os.environ.get('WSL_DISTRO_NAME', ''):
+        is_headless = True
+    # Check for no X11 display
+    elif not os.environ.get('DISPLAY'):
+        is_headless = True
+except Exception:
+    # Fallback: if on Linux without DISPLAY, assume headless
+    if sys.platform.startswith('linux') and not os.environ.get('DISPLAY'):
+        is_headless = True
+
+if is_headless:
+    matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt_module
 
 from scitex.dict import DotDict
@@ -219,8 +243,16 @@ def _setup_matplotlib(
         plt.close("all")
         _, COLORS = configure_mpl(plt, **mpl_kwargs)
         COLORS["gray"] = COLORS["grey"]
-        if agg:
-            matplotlib.use("Agg")
+
+        # Note: Backend is now set early in module initialization (line 50)
+        # to avoid tkinter threading issues in headless/WSL environments.
+        # The 'agg' parameter is kept for backwards compatibility but has
+        # no effect since backend must be set before pyplot import.
+        if agg and not is_headless:
+            logger.warning(
+                "agg=True specified but backend was already set to Agg "
+                "during module initialization for headless environment"
+            )
 
         # Replace matplotlib.pyplot with scitex.plt to get wrapped functions
         import scitex.plt as stx_plt

@@ -73,7 +73,8 @@ def clone_repo(url: str, target_path: Path, branch: str = None, tag: str = None,
         logger.error(f"Failed to clone repository: {result['stderr']}")
         return False
 
-    logger.info(f"Repository cloned successfully{ref_info}")
+    if verbose:
+        logger.info(f"Repository cloned successfully{ref_info}")
     return True
 
 
@@ -110,7 +111,8 @@ def git_init(repo_path: Path, verbose: bool = True) -> bool:
             logger.warning(f"Failed to initialize git repository: {result['stderr']}")
             return False
 
-        logger.info("Git repository initialized")
+        if verbose:
+            logger.info("Git repository initialized")
         return True
 
 
