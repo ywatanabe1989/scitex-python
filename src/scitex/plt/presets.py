@@ -64,6 +64,7 @@ SCITEX_STYLE = {
     "transparent": True,     # Transparent background for professional crop workflow
     "mode": "publication",
     "dpi": 300,
+    "auto_scale_axes": True,  # Automatically factor out powers of 10 from axis tick labels
 }
 
 # Nature journal style
@@ -106,6 +107,7 @@ NATURE_STYLE = {
     "transparent": True,     # Transparent background for professional crop workflow
     "mode": "publication",
     "dpi": 300,
+    "auto_scale_axes": True,  # Automatically factor out powers of 10 from axis tick labels
 }
 
 # Science journal style
@@ -142,6 +144,7 @@ SCIENCE_STYLE = {
     "transparent": True,     # Transparent background for professional crop workflow
     "mode": "publication",
     "dpi": 300,
+    "auto_scale_axes": True,  # Automatically factor out powers of 10 from axis tick labels
 }
 
 # Cell journal style
@@ -178,6 +181,7 @@ CELL_STYLE = {
     "transparent": True,     # Transparent background for professional crop workflow
     "mode": "publication",
     "dpi": 300,
+    "auto_scale_axes": True,  # Automatically factor out powers of 10 from axis tick labels
 }
 
 # PNAS journal style
@@ -214,6 +218,7 @@ PNAS_STYLE = {
     "transparent": True,     # Transparent background for professional crop workflow
     "mode": "publication",
     "dpi": 300,
+    "auto_scale_axes": True,  # Automatically factor out powers of 10 from axis tick labels
 }
 
 # EOF

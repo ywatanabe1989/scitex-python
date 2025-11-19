@@ -805,6 +805,9 @@ def demo_publication_plot_kde():
     ax.set_title("Kernel Density Estimate")
     ax.legend(frameon=False)
 
+    # Auto-scale Y-axis to factor out small values
+    stx.plt.ax.auto_scale_axis(ax, axis='y')
+
     # Save in publication formats (PNG, PDF)
     save_path = os.path.join(OUTPUT_DIR_FUNCTIONAL, "01_plot_kde.png")
     png_path, pdf_path, jpg_path = save_multi_format(fig, save_path, dpi=300)
