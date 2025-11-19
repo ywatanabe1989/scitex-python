@@ -21,6 +21,7 @@ from ._figure_from_axes_mm import (
     print_dimension_info,
 )
 from ._units import inch_to_mm, mm_to_inch, mm_to_pt, pt_to_mm
+from ._collect_figure_metadata import collect_figure_metadata
 
 __all__ = [
     "HistogramBinManager",
@@ -35,6 +36,7 @@ __all__ = [
     "calc_nice_ticks",
     "caption_manager",
     "close",
+    "collect_figure_metadata",
     "colorbar",
     "compare_modes",
     "configure_mpl",

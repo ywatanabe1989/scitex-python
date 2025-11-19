@@ -14,13 +14,17 @@ need to meet specific size requirements (e.g., Nature, Science journals).
 
 __FILE__ = __file__
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from ._units import mm_to_inch, mm_to_pt
+
+if TYPE_CHECKING:
+    from scitex.plt._subplots._FigWrapper import FigWrapper
+    from scitex.plt._subplots._AxisWrapper import AxisWrapper
 
 
 def create_figure_ax_mm(
@@ -33,7 +37,7 @@ def create_figure_ax_mm(
     bottom_margin_mm: float = 4.0,
     top_margin_mm: float = 2.0,
     style: Optional[Dict] = None,
-) -> Tuple[Figure, Axes]:
+) -> Tuple["FigWrapper", "AxisWrapper"]:
     """
     Create a Matplotlib figure and a single Axes with millimeter control.
 
@@ -135,7 +139,36 @@ def create_figure_ax_mm(
     if style is not None:
         apply_style_mm(ax, style)
 
-    return fig, ax
+    # Tag axes with metadata for later embedding
+    # Calculate actual axes size from figure size and margins
+    axes_width_mm = fig_width_mm - left_margin_mm - right_margin_mm
+    axes_height_mm = fig_height_mm - bottom_margin_mm - top_margin_mm
+
+    ax._scitex_metadata = {
+        "created_with": "scitex.plt.utils.create_figure_ax_mm",
+        "mode": "publication",  # This function always uses publication mode
+        "figure_size_mm": (fig_width_mm, fig_height_mm),
+        "axes_size_mm": (axes_width_mm, axes_height_mm),
+        "margin_mm": {
+            "left": left_margin_mm,
+            "right": right_margin_mm,
+            "bottom": bottom_margin_mm,
+            "top": top_margin_mm,
+        },
+        "style_mm": style,
+    }
+
+    # Wrap in scitex wrappers for consistent API
+    from scitex.plt._subplots._FigWrapper import FigWrapper
+    from scitex.plt._subplots._AxisWrapper import AxisWrapper
+
+    fig_wrapped = FigWrapper(fig)
+    ax_wrapped = AxisWrapper(fig_wrapped, ax, track=False)
+
+    # Store axes reference in FigWrapper
+    fig_wrapped.axes = ax_wrapped
+
+    return fig_wrapped, ax_wrapped
 
 
 def apply_style_mm(ax: Axes, style: Dict) -> float:

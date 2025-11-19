@@ -15,13 +15,17 @@ not the total figure size. The figure size is just axes + margins.
 
 __FILE__ = __file__
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from ._units import mm_to_inch, mm_to_pt
+
+if TYPE_CHECKING:
+    from scitex.plt._subplots._FigWrapper import FigWrapper
+    from scitex.plt._subplots._AxisWrapper import AxisWrapper
 
 
 def create_axes_with_size_mm(
@@ -32,7 +36,7 @@ def create_axes_with_size_mm(
     margin_mm: Optional[Dict[str, float]] = None,
     style_mm: Optional[Dict[str, float]] = None,
     mode: str = "publication",  # "publication" or "display"
-) -> Tuple[Figure, Axes]:
+) -> Tuple["FigWrapper", "AxisWrapper"]:
     """
     Create figure by specifying AXES box size (not figure size).
 
@@ -146,7 +150,26 @@ def create_axes_with_size_mm(
 
         apply_style_mm(ax, style_mm)
 
-    return fig, ax
+    # Tag axes with metadata for later embedding
+    ax._scitex_metadata = {
+        "created_with": "scitex.plt.utils.create_axes_with_size_mm",
+        "mode": mode,
+        "axes_size_mm": (axes_width_mm, axes_height_mm),
+        "margin_mm": margin_mm,
+        "style_mm": style_mm,
+    }
+
+    # Wrap in scitex wrappers for consistent API
+    from scitex.plt._subplots._FigWrapper import FigWrapper
+    from scitex.plt._subplots._AxisWrapper import AxisWrapper
+
+    fig_wrapped = FigWrapper(fig)
+    ax_wrapped = AxisWrapper(fig_wrapped, ax, track=False)
+
+    # Store axes reference in FigWrapper
+    fig_wrapped.axes = ax_wrapped
+
+    return fig_wrapped, ax_wrapped
 
 
 def get_dimension_info(fig, ax) -> Dict:
