@@ -1580,7 +1580,7 @@ manuscript.generate_submission_package()  # Journal-ready submission
 ## Best Practices
 
 1. **Always use tracking** - It's enabled by default, don't disable it
-2. **Assign unique IDs** - Use the `id` parameter for easy data identification  
+2. **Assign unique IDs** - Use the `id` parameter for easy data identification
 3. **Separate styling from metadata** - Use `set_xyt()` for labels, `set_meta()` for scientific metadata
 4. **Structure experimental details** - Use dictionaries for machine-readable experimental parameters
 5. **Include comprehensive keywords** - Enable AI agents to categorize and process figures automatically
@@ -1589,6 +1589,31 @@ manuscript.generate_submission_package()  # Journal-ready submission
 8. **Plan for AI integration** - Structure metadata for SciTeX ecosystem processing
 9. **Use figure-level metadata** - Apply `set_figure_meta()` for multi-panel comprehensive descriptions
 10. **Export YAML for reproducibility** - All metadata automatically preserved for AI agent processing
+
+### ⚠️ File Format Best Practices
+
+**NEVER use JPEG for scientific figures!**
+
+JPEG uses lossy compression that creates visible artifacts around text, lines, and sharp edges.
+
+**Use these formats:**
+- **PNG** ✅ Lossless raster (perfect for figures with text/lines)
+- **PDF** ✅ Vector format (infinite zoom, required by journals)
+- **JPEG** ❌ NEVER for scientific plots (only for photographs)
+
+```python
+# Correct - Publication-ready formats
+scitex.io.save(fig, 'figure.png', dpi=300, auto_crop=True)  # Lossless
+scitex.io.save(fig, 'figure.pdf')                           # Vector
+
+# Wrong - Creates artifacts around text and lines
+# scitex.io.save(fig, 'figure.jpg')  # ❌ NEVER do this!
+```
+
+**Auto-cropping** is enabled by default and preserves:
+- Image quality (PNG: lossless, PDF: vector)
+- DPI metadata (300 DPI for publication)
+- Scitex metadata (version, style, dimensions, padding, etc.)
 
 ### SciTeX Ecosystem Workflow
 ```python

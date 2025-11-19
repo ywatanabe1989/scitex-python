@@ -157,6 +157,8 @@ def save(
     dry_run: bool = False,
     no_csv: bool = False,
     use_caller_path: bool = False,
+    auto_crop: bool = False,
+    crop_margin_mm: float = 1.0,
     **kwargs,
 ) -> None:
     """
@@ -178,6 +180,12 @@ def save(
         If specified, create a symlink at this path pointing to the saved file. Default is None.
     dry_run : bool, optional
         If True, simulate the saving process without actually writing files. Default is False.
+    auto_crop : bool, optional
+        If True, automatically crop the saved image to content area with margin (for PNG/JPEG/TIFF).
+        Vector formats (PDF/SVG) are not cropped. Default is False.
+    crop_margin_mm : float, optional
+        Margin in millimeters to add around content when auto_crop=True.
+        At 300 DPI: 1mm = ~12 pixels. Default is 1.0mm (Nature Reviews style).
     use_caller_path : bool, optional
         If True, intelligently determine the script path by skipping internal library frames.
         This is useful when stx.io.save is called from within scitex library code.
@@ -403,6 +411,8 @@ def save(
             symlink_to=symlink_to,
             dry_run=dry_run,
             no_csv=no_csv,
+            auto_crop=auto_crop,
+            crop_margin_mm=crop_margin_mm,
             **kwargs,
         )
 
@@ -475,6 +485,8 @@ def _save(
     dry_run=False,
     no_csv=False,
     symlink_to=None,
+    auto_crop=False,
+    crop_margin_mm=1.0,
     **kwargs,
 ):
     # Don't use object's own save method - use consistent handlers
@@ -505,6 +517,8 @@ def _save(
                 symlink_from_cwd=symlink_from_cwd,
                 symlink_to=symlink_to,
                 dry_run=dry_run,
+                auto_crop=auto_crop,
+                crop_margin_mm=crop_margin_mm,
                 **kwargs,
             )
         elif ext in [".hdf5", ".h5", ".zarr"]:
@@ -615,13 +629,80 @@ def _handle_image_with_csv(
     symlink_from_cwd=False,
     dry_run=False,
     symlink_to=None,
+    auto_crop=True,
+    crop_margin_mm=1.0,
     **kwargs,
 ):
-    """Handle image file saving with optional CSV export."""
+    """Handle image file saving with optional CSV export and auto-cropping."""
     if dry_run:
         return
 
+    # Auto-collect metadata from scitex figures if not explicitly provided
+    if 'metadata' not in kwargs or kwargs['metadata'] is None:
+        try:
+            # Check if this is a matplotlib figure or scitex wrapper
+            import matplotlib.figure
+
+            fig_mpl = None
+            if isinstance(obj, matplotlib.figure.Figure):
+                fig_mpl = obj
+            elif hasattr(obj, '_fig_mpl'):  # FigWrapper
+                fig_mpl = obj._fig_mpl
+            elif hasattr(obj, 'figure') and isinstance(obj.figure, matplotlib.figure.Figure):
+                fig_mpl = obj.figure
+
+            # If we have a figure, try to collect metadata
+            if fig_mpl is not None:
+                # Get first axes if available
+                ax = None
+                if hasattr(fig_mpl, 'axes') and len(fig_mpl.axes) > 0:
+                    ax = fig_mpl.axes[0]
+
+                # Collect metadata using scitex's metadata collector
+                try:
+                    from scitex.plt.utils import collect_figure_metadata
+                    auto_metadata = collect_figure_metadata(fig_mpl, ax)
+
+                    if auto_metadata:
+                        kwargs['metadata'] = auto_metadata
+                        if verbose:
+                            logger.info("  • Auto-collected metadata from figure")
+                except ImportError:
+                    pass  # collect_figure_metadata not available
+                except Exception as e:
+                    if verbose:
+                        import warnings
+                        warnings.warn(f"Could not auto-collect metadata: {e}")
+        except Exception:
+            pass  # Silently continue if auto-collection fails
+
     save_image(obj, spath, verbose=verbose, **kwargs)
+
+    # Auto-crop if requested (only for raster formats)
+    if auto_crop and not dry_run:
+        # Get file extension
+        ext = spath.lower()
+
+        # Only crop raster formats (PNG, JPEG, TIFF)
+        # Skip vector formats (PDF, SVG) as they don't benefit from cropping
+        if ext.endswith(('.png', '.jpg', '.jpeg', '.tiff', '.tif')):
+            try:
+                from scitex.plt.utils._crop import crop
+
+                # Convert mm to pixels (assuming 300 DPI)
+                # 1mm at 300 DPI = 11.81 pixels ≈ 12 pixels
+                dpi = kwargs.get('dpi', 300)
+                margin_px = int(crop_margin_mm * dpi / 25.4)  # 25.4mm per inch
+
+                # Crop the saved image in place
+                crop(spath, output_path=spath, margin=margin_px, overwrite=True, verbose=False)
+
+                if verbose:
+                    logger.info(f"  • Auto-cropped with {crop_margin_mm}mm margin ({margin_px}px at {dpi} DPI)")
+
+            except Exception as e:
+                import warnings
+                warnings.warn(f"Auto-crop failed: {e}. Image saved without cropping.")
 
     # Handle separate legend saving
     _save_separate_legends(
