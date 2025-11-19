@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-11-16 10:09:17 (ywatanabe)"
+# Timestamp: "2025-11-19 12:01:10 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_configure_mpl.py
 
-import os
-
-__FILE__ = __file__
 
 from typing import Any
-from typing import Dict, Tuple
+from typing import Dict
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
