@@ -81,23 +81,20 @@ def format_scale_factor(power: int) -> str:
     Returns
     -------
     str
-        Formatted string (e.g., "×10⁻³", "×10³", "×10⁶")
+        Formatted string using matplotlib mathtext (e.g., "×10$^{-3}$", "×10$^{6}$")
 
     Examples
     --------
     >>> format_scale_factor(-3)
-    '×10⁻³'
+    '×10$^{-3}$'
     >>> format_scale_factor(6)
-    '×10⁶'
+    '×10$^{6}$'
     """
     if power == 0:
         return ""
 
-    # Unicode superscript digits
-    superscript = str.maketrans("0123456789-", "⁰¹²³⁴⁵⁶⁷⁸⁹⁻")
-    power_str = str(power).translate(superscript)
-
-    return f"×10{power_str}"
+    # Use matplotlib's mathtext for reliable rendering across all formats
+    return f"×10$^{{{power}}}$"
 
 
 def auto_scale_axis(ax, axis: str = 'both', threshold: float = 1e-2) -> None:
