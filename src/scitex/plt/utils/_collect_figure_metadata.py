@@ -70,6 +70,7 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
 
     # Base metadata
     metadata = {
+        "metadata_version": "1.0.0",  # Version of the metadata schema itself
         "scitex": {
             "version": scitex.__version__,
             "created_at": datetime.datetime.now().isoformat(),
@@ -105,12 +106,46 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
             fig_w_mm, fig_h_mm = dim_info["figure_size_mm"]
             axes_w_mm, axes_h_mm = dim_info["axes_size_mm"]
             axes_pos = dim_info["axes_position"]
+            fig_w_px, fig_h_px = dim_info["figure_size_px"]
+            axes_w_px, axes_h_px = dim_info["axes_size_px"]
+            dpi = dim_info["dpi"]
 
             metadata["margins_mm"] = {
                 "left": axes_pos[0] * fig_w_mm,
                 "bottom": axes_pos[1] * fig_h_mm,
                 "right": fig_w_mm - (axes_pos[0] * fig_w_mm + axes_w_mm),
                 "top": fig_h_mm - (axes_pos[1] * fig_h_mm + axes_h_mm),
+            }
+
+            # Calculate axes bounding box in pixels and millimeters
+            # axes_position is (left, bottom, width, height) in figure coordinates (0-1)
+            # Convert to absolute coordinates
+            x0_px = int(axes_pos[0] * fig_w_px)
+            y0_px = int((1 - axes_pos[1] - axes_pos[3]) * fig_h_px)  # Flip Y (matplotlib origin is bottom-left)
+            x1_px = x0_px + axes_w_px
+            y1_px = y0_px + axes_h_px
+
+            x0_mm = axes_pos[0] * fig_w_mm
+            y0_mm = (1 - axes_pos[1] - axes_pos[3]) * fig_h_mm  # Flip Y
+            x1_mm = x0_mm + axes_w_mm
+            y1_mm = y0_mm + axes_h_mm
+
+            metadata["axes_bbox_px"] = {
+                "x0": x0_px,
+                "y0": y0_px,
+                "x1": x1_px,
+                "y1": y1_px,
+                "width": axes_w_px,
+                "height": axes_h_px,
+            }
+
+            metadata["axes_bbox_mm"] = {
+                "x0": x0_mm,
+                "y0": y0_mm,
+                "x1": x1_mm,
+                "y1": y1_mm,
+                "width": axes_w_mm,
+                "height": axes_h_mm,
             }
 
         except Exception as e:
@@ -136,6 +171,41 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
         for key, value in scitex_meta.items():
             if key not in metadata["scitex"]:
                 metadata["scitex"][key] = value
+
+    # Add actual font information
+    try:
+        from ._get_actual_font import get_actual_font_name
+        actual_font = get_actual_font_name()
+
+        # Store both requested and actual font
+        if "style_mm" in metadata.get("scitex", {}):
+            requested_font = metadata["scitex"]["style_mm"].get("font_family", "Arial")
+            metadata["scitex"]["style_mm"]["font_family_requested"] = requested_font
+            metadata["scitex"]["style_mm"]["font_family_actual"] = actual_font
+
+            # Warn if requested and actual fonts differ
+            if requested_font != actual_font:
+                try:
+                    from scitex.logging import getLogger
+                    logger = getLogger(__name__)
+                    logger.warning(
+                        f"Font mismatch: Requested '{requested_font}' but using '{actual_font}'. "
+                        f"For {requested_font}: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
+                    )
+                except ImportError:
+                    # Fallback to warnings if scitex.logging not available
+                    import warnings
+                    warnings.warn(
+                        f"Font mismatch: Requested '{requested_font}' but using '{actual_font}'",
+                        UserWarning
+                    )
+        else:
+            # If no style_mm, add font info to scitex section
+            if "scitex" in metadata:
+                metadata["scitex"]["font_family_actual"] = actual_font
+    except Exception:
+        # If font detection fails, continue without it
+        pass
 
     return metadata
 

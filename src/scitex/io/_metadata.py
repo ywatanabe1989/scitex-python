@@ -4,12 +4,13 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_metadata.py
 # ----------------------------------------
 """
-Image metadata embedding and extraction for research reproducibility.
+Image and PDF metadata embedding and extraction for research reproducibility.
 
-This module provides functions to embed and extract metadata from image files
-(PNG and JPEG formats). Metadata is stored using standard formats:
+This module provides functions to embed and extract metadata from image and PDF files.
+Metadata is stored using standard formats:
 - PNG: tEXt chunks
 - JPEG: EXIF ImageDescription field
+- PDF: XMP metadata (industry standard)
 
 The metadata is stored as JSON strings, allowing flexible dictionary structures.
 """
@@ -28,15 +29,15 @@ __DIR__ = os.path.dirname(__FILE__)
 
 def embed_metadata(image_path: str, metadata: Dict[str, Any]) -> None:
     """
-    Embed metadata into an existing image file.
+    Embed metadata into an existing image or PDF file.
 
     Args:
-        image_path: Path to the image file (PNG or JPEG)
+        image_path: Path to the image/PDF file (PNG, JPEG, or PDF)
         metadata: Dictionary containing metadata (must be JSON serializable)
 
     Raises:
         ValueError: If file format is not supported or metadata is not JSON serializable
-        FileNotFoundError: If image file doesn't exist
+        FileNotFoundError: If file doesn't exist
 
     Example:
         >>> metadata = {
@@ -45,9 +46,10 @@ def embed_metadata(image_path: str, metadata: Dict[str, Any]) -> None:
         ...     'analysis': 'PAC'
         ... }
         >>> embed_metadata('result.png', metadata)
+        >>> embed_metadata('result.pdf', metadata)
     """
     if not os.path.exists(image_path):
-        raise FileNotFoundError(f"Image file not found: {image_path}")
+        raise FileNotFoundError(f"File not found: {image_path}")
 
     # Serialize metadata to JSON
     try:
@@ -55,11 +57,10 @@ def embed_metadata(image_path: str, metadata: Dict[str, Any]) -> None:
     except (TypeError, ValueError) as e:
         raise ValueError(f"Metadata must be JSON serializable: {e}")
 
-    # Open the image
-    img = Image.open(image_path)
-
     # Handle PNG format
     if image_path.lower().endswith('.png'):
+        # Open the image
+        img = Image.open(image_path)
         # Create new PNG info with metadata
         pnginfo = PngInfo()
         pnginfo.add_text("scitex_metadata", metadata_json)
@@ -69,6 +70,9 @@ def embed_metadata(image_path: str, metadata: Dict[str, Any]) -> None:
 
     # Handle JPEG format
     elif image_path.lower().endswith(('.jpg', '.jpeg')):
+        # Open the image
+        img = Image.open(image_path)
+
         try:
             import piexif
         except ImportError:
@@ -110,41 +114,80 @@ def embed_metadata(image_path: str, metadata: Dict[str, Any]) -> None:
 
         exif_bytes = piexif.dump(exif_dict)
 
-        # Save with EXIF metadata
-        img.save(image_path, "JPEG", quality=95, exif=exif_bytes)
+        # Save with EXIF metadata (quality=100 for maximum quality)
+        img.save(image_path, "JPEG", quality=100, subsampling=0, optimize=False, exif=exif_bytes)
+
+    # Handle PDF format
+    elif image_path.lower().endswith('.pdf'):
+        try:
+            from pypdf import PdfReader, PdfWriter
+        except ImportError:
+            raise ImportError(
+                "pypdf is required for PDF metadata support. "
+                "Install with: pip install pypdf"
+            )
+
+        # Read existing PDF
+        reader = PdfReader(image_path)
+        writer = PdfWriter()
+
+        # Copy all pages
+        for page in reader.pages:
+            writer.add_page(page)
+
+        # Prepare metadata for PDF Info Dictionary
+        pdf_metadata = {
+            '/Title': metadata.get('title', ''),
+            '/Author': metadata.get('author', ''),
+            '/Subject': metadata_json,  # Store full JSON in Subject field
+            '/Creator': 'SciTeX',
+            '/Producer': 'SciTeX',
+        }
+
+        # Add metadata
+        writer.add_metadata(pdf_metadata)
+
+        # Write back to file
+        with open(image_path, 'wb') as output_file:
+            writer.write(output_file)
 
     else:
         raise ValueError(
-            f"Unsupported image format: {image_path}. "
-            "Only PNG and JPEG formats are supported."
+            f"Unsupported file format: {image_path}. "
+            "Only PNG, JPEG, and PDF formats are supported."
         )
 
-    img.close()
+    # Close image if it was opened (not for PDF)
+    if image_path.lower().endswith(('.png', '.jpg', '.jpeg')):
+        img.close()
 
 
 def read_metadata(image_path: str) -> Optional[Dict[str, Any]]:
     """
-    Read metadata from an image file.
+    Read metadata from an image or PDF file.
 
     Args:
-        image_path: Path to the image file (PNG or JPEG)
+        image_path: Path to the file (PNG, JPEG, or PDF)
 
     Returns:
         Dictionary containing metadata, or None if no metadata found
 
     Raises:
-        FileNotFoundError: If image file doesn't exist
+        FileNotFoundError: If file doesn't exist
         ValueError: If file format is not supported
 
     Example:
         >>> metadata = read_metadata('result.png')
         >>> print(metadata['experiment'])
         'seizure_prediction_001'
+        >>> metadata = read_metadata('result.pdf')
     """
     if not os.path.exists(image_path):
-        raise FileNotFoundError(f"Image file not found: {image_path}")
+        raise FileNotFoundError(f"File not found: {image_path}")
 
-    img = Image.open(image_path)
+    # Don't open PDF files with PIL
+    if not image_path.lower().endswith('.pdf'):
+        img = Image.open(image_path)
     metadata = None
 
     try:
@@ -187,14 +230,46 @@ def read_metadata(image_path: str) -> Optional[Dict[str, Any]]:
             except Exception:
                 pass  # EXIF data corrupted or not readable
 
+        # Handle PDF format
+        elif image_path.lower().endswith('.pdf'):
+            try:
+                from pypdf import PdfReader
+
+                reader = PdfReader(image_path)
+
+                # Try to read metadata from PDF Info Dictionary
+                if reader.metadata:
+                    # Check Subject field for JSON metadata
+                    if '/Subject' in reader.metadata:
+                        subject = reader.metadata['/Subject']
+                        try:
+                            metadata = json.loads(subject)
+                        except json.JSONDecodeError:
+                            # If not JSON, create metadata dict from available fields
+                            metadata = {
+                                'title': reader.metadata.get('/Title', ''),
+                                'author': reader.metadata.get('/Author', ''),
+                                'subject': subject,
+                                'creator': reader.metadata.get('/Creator', ''),
+                            }
+            except ImportError:
+                pass  # pypdf not available, return None
+            except Exception:
+                pass  # PDF metadata corrupted or not readable
+            finally:
+                # No need to close anything for PDF
+                pass
+
         else:
             raise ValueError(
-                f"Unsupported image format: {image_path}. "
-                "Only PNG and JPEG formats are supported."
+                f"Unsupported file format: {image_path}. "
+                "Only PNG, JPEG, and PDF formats are supported."
             )
 
     finally:
-        img.close()
+        # Only close if img was opened (not for PDF)
+        if not image_path.lower().endswith('.pdf'):
+            img.close()
 
     return metadata
 

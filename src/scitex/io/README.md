@@ -79,7 +79,7 @@ scitex.io.save(model.state_dict(), 'model.pth')
 
 # Save an image using PIL
 image = Image.new('RGB', (100, 100), color='red')
-scitex.io.save(image, 'image.jpg')
+scitex.io.save(image, 'image.png')  # Use PNG for lossless quality
 
 # Save a dictionary as a JSON file
 data = {'name': 'Alice', 'age': 30}
@@ -90,7 +90,71 @@ text = "Hello, World!"
 scitex.io.save(text, 'hello.txt')
 ```
 
+## ⚠️ File Format Best Practices for Scientific Figures
 
+### **NEVER use JPEG for scientific figures!**
+
+JPEG uses lossy compression that creates artifacts around text, lines, and sharp edges, making it unsuitable for scientific figures.
+
+#### Recommended Formats:
+
+1. **PNG (Portable Network Graphics)** ✅ BEST for raster figures
+   - **Lossless compression** - no quality loss
+   - Perfect for figures with text, lines, and solid colors
+   - Supports transparency
+   - Metadata preserved (scitex stores full metadata in PNG tEXt chunks)
+   - Auto-cropping preserves quality and DPI
+   ```python
+   scitex.io.save(fig, 'figure.png', dpi=300, auto_crop=True)
+   ```
+
+2. **PDF (Portable Document Format)** ✅ BEST for vector graphics
+   - **Vector format** - infinite zoom without quality loss
+   - Required by most scientific journals
+   - Smaller file size for line art
+   - Metadata preserved (scitex stores metadata in PDF Subject field)
+   ```python
+   scitex.io.save(fig, 'figure.pdf')
+   ```
+
+3. **JPEG (Joint Photographic Experts Group)** ❌ NEVER for scientific figures
+   - **Lossy compression** - creates visible artifacts
+   - Degrades quality around text and lines
+   - Not suitable for graphs, plots, or diagrams
+   - Only use for photographs
+
+#### Example - Publication-Ready Figure Saving:
+
+```python
+import scitex as stx
+
+# Create publication figure
+fig, ax = stx.plt.subplots(**stx.plt.presets.SCITEX_STYLE)
+ax.plot(x, y, label='Data')
+ax.set_xlabel('Time [s]')
+ax.set_ylabel('Amplitude [a.u.]')
+ax.legend()
+
+# Save in publication formats (PNG + PDF)
+stx.io.save(fig, 'figure1.png', dpi=300, auto_crop=True)  # Lossless raster
+stx.io.save(fig, 'figure1.pdf')                           # Vector format
+
+# DO NOT save as JPEG - it creates artifacts!
+# stx.io.save(fig, 'figure1.jpg')  # ❌ WRONG - lossy compression!
+```
+
+#### Auto-Cropping Feature:
+
+By default (`auto_crop=True`), figures are automatically cropped to content with 1mm margin:
+- Removes excess whitespace
+- Preserves image quality (PNG: lossless, PDF: vector)
+- Preserves DPI metadata (300 DPI for publication)
+- Preserves scitex metadata (version, style, dimensions, etc.)
+
+```python
+# Auto-crop is enabled by default
+stx.io.save(fig, 'figure.png')  # Automatically cropped, metadata preserved
+```
 
 <summary>Advanced Usage</summary>
 
