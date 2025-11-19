@@ -30,14 +30,169 @@ class SubplotsWrapper:
         self._fig_scitex = None
         self._counter_part = plt.subplots
 
-    def __call__(self, *args, track=True, sharex=False, sharey=False, constrained_layout=None, **kwargs):
+    def __call__(
+        self,
+        *args,
+        track=True,
+        sharex=False,
+        sharey=False,
+        constrained_layout=None,
+        # MM-control parameters (unified style system)
+        ax_width_mm=None,
+        ax_height_mm=None,
+        margin_left_mm=None,
+        margin_right_mm=None,
+        margin_bottom_mm=None,
+        margin_top_mm=None,
+        space_w_mm=None,
+        space_h_mm=None,
+        ax_thickness_mm=None,
+        tick_length_mm=None,
+        tick_thickness_mm=None,
+        trace_thickness_mm=None,
+        axis_font_size_pt=None,
+        tick_font_size_pt=None,
+        mode=None,
+        dpi=None,
+        styles=None,  # List of style dicts for per-axes control
+        **kwargs
+    ):
+        """
+        Create figure and axes with optional millimeter-based control.
 
+        Parameters
+        ----------
+        *args : int
+            nrows, ncols passed to matplotlib.pyplot.subplots
+        track : bool, optional
+            Track plotting operations for CSV export (default: True)
+        sharex, sharey : bool, optional
+            Share axes (default: False)
+        constrained_layout : dict or None, optional
+            Layout engine parameters
+
+        MM-Control Parameters (Unified Style System)
+        ---------------------------------------------
+        ax_width_mm : float or list, optional
+            Axes width in mm (single value for all, or list for each)
+        ax_height_mm : float or list, optional
+            Axes height in mm (single value for all, or list for each)
+        margin_left_mm : float, optional
+            Left margin in mm (default: 5.0)
+        margin_right_mm : float, optional
+            Right margin in mm (default: 2.0)
+        margin_bottom_mm : float, optional
+            Bottom margin in mm (default: 5.0)
+        margin_top_mm : float, optional
+            Top margin in mm (default: 2.0)
+        space_w_mm : float, optional
+            Horizontal spacing between axes in mm (default: 3.0)
+        space_h_mm : float, optional
+            Vertical spacing between axes in mm (default: 3.0)
+        ax_thickness_mm : float, optional
+            Axes spine thickness in mm
+        tick_length_mm : float, optional
+            Tick length in mm
+        tick_thickness_mm : float, optional
+            Tick thickness in mm
+        trace_thickness_mm : float, optional
+            Plot line thickness in mm
+        axis_font_size_pt : float, optional
+            Axis label font size in points
+        tick_font_size_pt : float, optional
+            Tick label font size in points
+        mode : str, optional
+            'publication' or 'display' (default: None, uses standard matplotlib)
+        dpi : int, optional
+            Resolution (default: 300 for publication, 100 for display)
+        styles : list of dict, optional
+            Individual style dicts for each axes
+        **kwargs
+            Additional arguments passed to matplotlib.pyplot.subplots
+
+        Returns
+        -------
+        fig : FigWrapper
+            Wrapped matplotlib Figure
+        ax or axes : AxisWrapper or AxesWrapper
+            Wrapped matplotlib Axes
+
+        Examples
+        --------
+        Single axes with style:
+
+        >>> fig, ax = stx.plt.subplots(
+        ...     ax_width_mm=30,
+        ...     ax_height_mm=21,
+        ...     ax_thickness_mm=0.2,
+        ...     tick_length_mm=0.8,
+        ...     mode='publication'
+        ... )
+
+        Multiple axes with uniform style:
+
+        >>> fig, axes = stx.plt.subplots(
+        ...     nrows=2, ncols=3,
+        ...     ax_width_mm=30,
+        ...     ax_height_mm=21,
+        ...     space_w_mm=3,
+        ...     space_h_mm=3,
+        ...     mode='publication'
+        ... )
+
+        Using style preset:
+
+        >>> NATURE_STYLE = {
+        ...     'ax_width_mm': 30,
+        ...     'ax_height_mm': 21,
+        ...     'ax_thickness_mm': 0.2,
+        ...     'tick_length_mm': 0.8,
+        ... }
+        >>> fig, ax = stx.plt.subplots(**NATURE_STYLE)
+        """
+
+        # Check if mm-control is requested
+        mm_control_requested = any([
+            ax_width_mm is not None,
+            ax_height_mm is not None,
+            mode is not None,
+            styles is not None,
+        ])
+
+        if mm_control_requested:
+            # Use mm-control pathway
+            return self._create_with_mm_control(
+                *args,
+                track=track,
+                sharex=sharex,
+                sharey=sharey,
+                ax_width_mm=ax_width_mm,
+                ax_height_mm=ax_height_mm,
+                margin_left_mm=margin_left_mm,
+                margin_right_mm=margin_right_mm,
+                margin_bottom_mm=margin_bottom_mm,
+                margin_top_mm=margin_top_mm,
+                space_w_mm=space_w_mm,
+                space_h_mm=space_h_mm,
+                ax_thickness_mm=ax_thickness_mm,
+                tick_length_mm=tick_length_mm,
+                tick_thickness_mm=tick_thickness_mm,
+                trace_thickness_mm=trace_thickness_mm,
+                axis_font_size_pt=axis_font_size_pt,
+                tick_font_size_pt=tick_font_size_pt,
+                mode=mode,
+                dpi=dpi,
+                styles=styles,
+                **kwargs
+            )
+
+        # Standard matplotlib pathway (existing behavior)
         # If constrained_layout is not specified, use it by default for better colorbar handling
         if constrained_layout is None and 'layout' not in kwargs:
             # Use a dict to set padding parameters for better spacing
             # Increased w_pad to prevent colorbar overlap
             kwargs['constrained_layout'] = {'w_pad': 0.1, 'h_pad': 0.1, 'wspace': 0.05, 'hspace': 0.05}
-            
+
         # Start from the original matplotlib figure and axes
         self._fig_mpl, self._axes_mpl = self._counter_part(
             *args, sharex=sharex, sharey=sharey, **kwargs
@@ -72,6 +227,201 @@ class SubplotsWrapper:
         # Wrap the array of axes
         self._axes_scitex = AxesWrapper(self._fig_scitex, axes_array_scitex)
         self._fig_scitex.axes = self._axes_scitex
+        return self._fig_scitex, self._axes_scitex
+
+    def _create_with_mm_control(
+        self,
+        *args,
+        track=True,
+        sharex=False,
+        sharey=False,
+        ax_width_mm=None,
+        ax_height_mm=None,
+        margin_left_mm=None,
+        margin_right_mm=None,
+        margin_bottom_mm=None,
+        margin_top_mm=None,
+        space_w_mm=None,
+        space_h_mm=None,
+        ax_thickness_mm=None,
+        tick_length_mm=None,
+        tick_thickness_mm=None,
+        trace_thickness_mm=None,
+        axis_font_size_pt=None,
+        tick_font_size_pt=None,
+        mode=None,
+        dpi=None,
+        styles=None,
+        **kwargs
+    ):
+        """Create figure with mm-based control over axes dimensions."""
+        from scitex.plt.utils import mm_to_inch, apply_style_mm
+
+        # Parse nrows, ncols from args (like matplotlib.pyplot.subplots)
+        nrows, ncols = 1, 1
+        if len(args) >= 1:
+            nrows = args[0]
+        if len(args) >= 2:
+            ncols = args[1]
+
+        n_axes = nrows * ncols
+
+        # Apply mode-specific defaults
+        if mode == 'display':
+            scale_factor = 3.0
+            dpi = dpi or 100
+        else:  # publication or None
+            scale_factor = 1.0
+            dpi = dpi or 300
+
+        # Set defaults - if value is provided, apply scaling; if not, use scaled default
+        if ax_width_mm is None:
+            ax_width_mm = 30.0 * scale_factor
+        elif mode == 'display':
+            ax_width_mm = ax_width_mm * scale_factor
+
+        if ax_height_mm is None:
+            ax_height_mm = 21.0 * scale_factor
+        elif mode == 'display':
+            ax_height_mm = ax_height_mm * scale_factor
+
+        margin_left_mm = margin_left_mm if margin_left_mm is not None else (5.0 * scale_factor)
+        margin_right_mm = margin_right_mm if margin_right_mm is not None else (2.0 * scale_factor)
+        margin_bottom_mm = margin_bottom_mm if margin_bottom_mm is not None else (5.0 * scale_factor)
+        margin_top_mm = margin_top_mm if margin_top_mm is not None else (2.0 * scale_factor)
+        space_w_mm = space_w_mm if space_w_mm is not None else (3.0 * scale_factor)
+        space_h_mm = space_h_mm if space_h_mm is not None else (3.0 * scale_factor)
+
+        # Handle list vs scalar for ax_width_mm and ax_height_mm
+        if isinstance(ax_width_mm, (list, tuple)):
+            ax_widths_mm = list(ax_width_mm)
+            if len(ax_widths_mm) != n_axes:
+                raise ValueError(f"ax_width_mm list length ({len(ax_widths_mm)}) must match nrows*ncols ({n_axes})")
+        else:
+            ax_widths_mm = [ax_width_mm] * n_axes
+
+        if isinstance(ax_height_mm, (list, tuple)):
+            ax_heights_mm = list(ax_height_mm)
+            if len(ax_heights_mm) != n_axes:
+                raise ValueError(f"ax_height_mm list length ({len(ax_heights_mm)}) must match nrows*ncols ({n_axes})")
+        else:
+            ax_heights_mm = [ax_height_mm] * n_axes
+
+        # Calculate figure size from axes grid
+        # For simplicity, use max width per column and max height per row
+        ax_widths_2d = np.array(ax_widths_mm).reshape(nrows, ncols)
+        ax_heights_2d = np.array(ax_heights_mm).reshape(nrows, ncols)
+
+        max_widths_per_col = ax_widths_2d.max(axis=0)  # Max width in each column
+        max_heights_per_row = ax_heights_2d.max(axis=1)  # Max height in each row
+
+        total_width_mm = (
+            margin_left_mm
+            + max_widths_per_col.sum()
+            + (ncols - 1) * space_w_mm
+            + margin_right_mm
+        )
+        total_height_mm = (
+            margin_bottom_mm
+            + max_heights_per_row.sum()
+            + (nrows - 1) * space_h_mm
+            + margin_top_mm
+        )
+
+        # Create figure with calculated size
+        figsize_inch = (mm_to_inch(total_width_mm), mm_to_inch(total_height_mm))
+        self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi)
+
+        # Create axes array and position each one manually
+        axes_mpl_list = []
+        ax_idx = 0
+
+        for row in range(nrows):
+            for col in range(ncols):
+                # Calculate position for this axes
+                # Left position: left margin + sum of previous column widths + spacing
+                left_mm = margin_left_mm + max_widths_per_col[:col].sum() + col * space_w_mm
+
+                # Bottom position: bottom margin + sum of heights above this row + spacing
+                # (rows are counted from top in matplotlib)
+                rows_below = nrows - row - 1
+                bottom_mm = margin_bottom_mm + max_heights_per_row[row+1:].sum() + rows_below * space_h_mm
+
+                # Convert to figure coordinates [0-1]
+                left = left_mm / total_width_mm
+                bottom = bottom_mm / total_height_mm
+                width = ax_widths_mm[ax_idx] / total_width_mm
+                height = ax_heights_mm[ax_idx] / total_height_mm
+
+                # Create axes at exact position
+                ax_mpl = self._fig_mpl.add_axes([left, bottom, width, height])
+                axes_mpl_list.append(ax_mpl)
+
+                # Tag with metadata
+                ax_mpl._scitex_metadata = {
+                    'created_with': 'scitex.plt.subplots (mm-control)',
+                    'mode': mode or 'publication',
+                    'axes_size_mm': (ax_widths_mm[ax_idx], ax_heights_mm[ax_idx]),
+                    'position_in_grid': (row, col),
+                }
+
+                ax_idx += 1
+
+        # Apply styling to each axes
+        for i, ax_mpl in enumerate(axes_mpl_list):
+            # Determine which style dict to use
+            if styles is not None:
+                if isinstance(styles, list):
+                    if len(styles) != n_axes:
+                        raise ValueError(f"styles list length ({len(styles)}) must match nrows*ncols ({n_axes})")
+                    style_dict = styles[i]
+                else:
+                    style_dict = styles
+            else:
+                # Build style dict from individual parameters
+                style_dict = {}
+                if ax_thickness_mm is not None:
+                    style_dict['axis_thickness_mm'] = ax_thickness_mm
+                if tick_length_mm is not None:
+                    style_dict['tick_length_mm'] = tick_length_mm
+                if tick_thickness_mm is not None:
+                    style_dict['tick_thickness_mm'] = tick_thickness_mm
+                if trace_thickness_mm is not None:
+                    style_dict['trace_thickness_mm'] = trace_thickness_mm
+                if axis_font_size_pt is not None:
+                    style_dict['axis_font_size_pt'] = axis_font_size_pt
+                if tick_font_size_pt is not None:
+                    style_dict['tick_font_size_pt'] = tick_font_size_pt
+
+            # Apply style if not empty
+            if style_dict:
+                apply_style_mm(ax_mpl, style_dict)
+                # Add style to metadata
+                ax_mpl._scitex_metadata['style_mm'] = style_dict
+
+        # Wrap the figure
+        self._fig_scitex = FigWrapper(self._fig_mpl)
+
+        # Reshape axes list to match grid shape
+        axes_array_mpl = np.array(axes_mpl_list).reshape(nrows, ncols)
+
+        # Handle single axis case
+        if n_axes == 1:
+            ax_mpl_scalar = axes_array_mpl.item()
+            self._axis_scitex = AxisWrapper(self._fig_scitex, ax_mpl_scalar, track)
+            self._fig_scitex.axes = self._axis_scitex
+            return self._fig_scitex, self._axis_scitex
+
+        # Handle multiple axes case
+        axes_flat_scitex_list = [
+            AxisWrapper(self._fig_scitex, ax_mpl, track)
+            for ax_mpl in axes_mpl_list
+        ]
+
+        axes_array_scitex = np.array(axes_flat_scitex_list).reshape(nrows, ncols)
+        self._axes_scitex = AxesWrapper(self._fig_scitex, axes_array_scitex)
+        self._fig_scitex.axes = self._axes_scitex
+
         return self._fig_scitex, self._axes_scitex
 
     # def __getattr__(self, name):

@@ -13,6 +13,7 @@ from ._tpl import termplot
 from . import color
 from . import utils
 from . import ax
+from . import presets
 
 # Lazy import for subplots to avoid circular dependencies
 _subplots = None
@@ -119,6 +120,7 @@ __all__ = [
     "tight_layout",
     "utils",
     "color",
+    "presets",
 ]
 
 def __getattr__(name):
