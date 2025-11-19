@@ -14,6 +14,12 @@ from ._mk_colorbar import mk_colorbar
 from ._mk_patches import mk_patches
 from ._scientific_captions import ScientificCaption, add_figure_caption, add_panel_captions, caption_manager, create_figure_list, cross_ref, enhance_scitex_save_with_captions, export_captions, quick_caption, save_with_caption
 from ._scitex_config import SciTeXConfig, configure_scitex_ecosystem, get_scitex_config
+from ._dimension_viewer import compare_modes, view_dimensions
+from ._figure_from_axes_mm import (
+    create_axes_with_size_mm,
+    get_dimension_info,
+    print_dimension_info,
+)
 from ._units import inch_to_mm, mm_to_inch, mm_to_pt, pt_to_mm
 
 __all__ = [
@@ -30,13 +36,16 @@ __all__ = [
     "caption_manager",
     "close",
     "colorbar",
+    "compare_modes",
     "configure_mpl",
     "configure_scitex_ecosystem",
+    "create_axes_with_size_mm",
     "create_figure_ax_mm",
     "create_figure_list",
     "cross_ref",
     "enhance_scitex_save_with_captions",
     "export_captions",
+    "get_dimension_info",
     "get_scitex_config",
     "histogram_bin_manager",
     "im2grid",
@@ -46,7 +55,9 @@ __all__ = [
     "mk_patches",
     "mm_to_inch",
     "mm_to_pt",
+    "print_dimension_info",
     "pt_to_mm",
     "quick_caption",
     "save_with_caption",
+    "view_dimensions",
 ]
