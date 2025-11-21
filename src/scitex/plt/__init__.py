@@ -9,14 +9,61 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 """Scitex plt module."""
 
+# Register Arial fonts eagerly (before lazy imports)
+import matplotlib.font_manager as fm
+import matplotlib as mpl
+
+_arial_enabled = False
+try:
+    fm.findfont("Arial", fallback_to_default=False)
+    _arial_enabled = True
+except Exception:
+    # Search for Arial font files and register them
+    arial_paths = [
+        f for f in fm.findSystemFonts()
+        if os.path.basename(f).lower().startswith("arial")
+    ]
+
+    if arial_paths:
+        for path in arial_paths:
+            try:
+                fm.fontManager.addfont(path)
+            except Exception:
+                pass
+
+        # Verify Arial is now available
+        try:
+            fm.findfont("Arial", fallback_to_default=False)
+            _arial_enabled = True
+        except Exception:
+            pass
+
+# Configure matplotlib to use Arial if available
+if _arial_enabled:
+    mpl.rcParams["font.family"] = "Arial"
+    mpl.rcParams["font.sans-serif"] = ["Arial", "Helvetica", "DejaVu Sans", "Liberation Sans"]
+else:
+    # Warn about missing Arial
+    try:
+        from scitex.logging import getLogger
+        _logger = getLogger(__name__)
+        _logger.warning(
+            "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+            "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
+        )
+    except:
+        pass  # Skip warning if logging not available
+
 from ._tpl import termplot
 from . import color
 from . import utils
 from . import ax
+from . import presets
 
 # Lazy import for subplots to avoid circular dependencies
 _subplots = None
 _figure = None
+_crop = None
 
 def subplots(*args, **kwargs):
     """Lazy-loaded subplots function."""
@@ -37,6 +84,46 @@ def figure(*args, **kwargs):
             return FigWrapper(fig_mpl)
         _figure = _figure_func
     return _figure(*args, **kwargs)
+
+def crop(input_path, output_path=None, margin=12, overwrite=False, verbose=False):
+    """
+    Auto-crop a figure to its content area.
+
+    This function automatically detects the content area of a saved figure
+    and crops it, removing excess whitespace. Designed for publication figures
+    created with large margins.
+
+    Parameters
+    ----------
+    input_path : str
+        Path to the input image
+    output_path : str, optional
+        Path to save cropped image. If None and overwrite=True, overwrites input.
+        If None and overwrite=False, adds '_cropped' suffix.
+    margin : int, optional
+        Margin in pixels around content (default: 12, ~1mm at 300 DPI)
+    overwrite : bool, optional
+        Overwrite input file (default: False)
+    verbose : bool, optional
+        Print detailed information (default: False)
+
+    Returns
+    -------
+    str
+        Path to the saved cropped image
+
+    Examples
+    --------
+    >>> fig, ax = stx.plt.subplots(**stx.plt.presets.SCITEX_STYLE)
+    >>> ax.plot([1, 2, 3], [1, 2, 3])
+    >>> stx.io.save(fig, "figure.png")
+    >>> stx.plt.crop("figure.png", "figure_cropped.png")  # 1mm margin
+    """
+    global _crop
+    if _crop is None:
+        from .utils._crop import crop as _crop_func
+        _crop = _crop_func
+    return _crop(input_path, output_path, margin, overwrite, verbose)
 
 def tight_layout(**kwargs):
     """
@@ -119,6 +206,7 @@ __all__ = [
     "tight_layout",
     "utils",
     "color",
+    "presets",
 ]
 
 def __getattr__(name):

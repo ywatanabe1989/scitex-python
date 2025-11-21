@@ -27,6 +27,7 @@ from ._plot_statistical_shaded_line import (
     plot_mean_ci,
     plot_median_iqr,
 )
+from ._add_fitted_line import add_fitted_line
 
 __all__ = [
     "plot_scatter_hist",
@@ -48,6 +49,7 @@ __all__ = [
     "plot_mean_std",
     "plot_mean_ci",
     "plot_median_iqr",
+    "add_fitted_line",
 ]
 
 # EOF

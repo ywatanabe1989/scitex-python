@@ -73,6 +73,7 @@ dependencies = [
     # Image Processing
     "Pillow",
     "piexif",  # For JPEG EXIF metadata
+    "pypdf",  # For PDF metadata embedding (Nature Reviews compliance)
     "qrcode[pil]",  # For QR code generation
     # Utilities
     "requests",

@@ -11,6 +11,7 @@ __DIR__ = os.path.dirname(__FILE__)
 
 from ._add_marginal_ax import add_marginal_ax
 from ._add_panel import add_panel
+from ._auto_scale_axis import auto_scale_axis
 from ._extend import extend
 from ._force_aspect import force_aspect
 from ._format_label import format_label
