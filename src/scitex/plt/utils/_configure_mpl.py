@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-11-16 10:09:17 (ywatanabe)"
+# Timestamp: "2025-11-19 12:01:10 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_configure_mpl.py
 
-import os
-
-__FILE__ = __file__
 
 from typing import Any
-from typing import Dict, Tuple
+from typing import Dict
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,7 +26,7 @@ def configure_mpl(
     hide_top_right_spines=True,
     line_width=1.0,  # Increased from 0.5 for better visibility
     alpha=0.85,  # Adjusted for better contrast
-    enable_latex=True,  # Enable LaTeX rendering by default
+    enable_latex=False,  # Disable LaTeX, use Arial font instead
     latex_preamble=None,  # Custom LaTeX preamble
     verbose=False,
     **kwargs,
@@ -108,13 +106,16 @@ def configure_mpl(
         "savefig.dpi": dpi_save,
         # Figure Size
         "figure.figsize": figsize_inch,
-        # # Font Sizes
-        # "font.size": base_size,
-        # "axes.titlesize": title_size,
-        # "axes.labelsize": label_size,
-        # "xtick.labelsize": small_size,
-        # "ytick.labelsize": small_size,
-        # "legend.fontsize": small_size,
+        # Font Sizes (7pt for titles/labels, 6pt for legend)
+        "font.size": 7,  # Base font size
+        "axes.titlesize": 7,  # Title size (prevent "large" default)
+        "axes.labelsize": 7,  # Axis label size
+        "xtick.labelsize": 7,  # Tick label size
+        "ytick.labelsize": 7,  # Tick label size
+        # Legend configuration
+        "legend.fontsize": 6,  # 6pt for legend labels
+        "legend.frameon": False,  # No frame by default
+        "legend.loc": "best",  # Auto-position to avoid overlap
         # Auto Layout
         "figure.autolayout": autolayout,
         # Top and Right Axes
@@ -200,15 +201,83 @@ def configure_mpl(
                     print("⚠️  LaTeX fallback module not available")
 
     else:
-        # Use mathtext only with enhanced configuration
-        mpl_config.update(
-            {
-                "text.usetex": False,
-                "mathtext.default": "regular",
-                "mathtext.fontset": "cm",
-                "mathtext.fallback": "cm",
-            }
-        )
+        # Use sans-serif fonts without LaTeX
+        # Try to enable Arial explicitly
+        import matplotlib.font_manager as fm
+        import os
+
+        # Try to detect and register Arial fonts
+        arial_enabled = False
+        try:
+            # First check if Arial is already available
+            fm.findfont("Arial", fallback_to_default=False)
+            arial_enabled = True
+        except Exception:
+            # Search for Arial font files and register them
+            arial_paths = [
+                f for f in fm.findSystemFonts()
+                if os.path.basename(f).lower().startswith("arial")
+            ]
+
+            if arial_paths:
+                for path in arial_paths:
+                    try:
+                        fm.fontManager.addfont(path)
+                    except Exception:
+                        pass
+
+                # Verify Arial is now available
+                try:
+                    fm.findfont("Arial", fallback_to_default=False)
+                    arial_enabled = True
+                except Exception:
+                    pass
+
+        # Configure font family
+        if arial_enabled:
+            mpl_config.update(
+                {
+                    "text.usetex": False,
+                    "font.family": "Arial",
+                    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans", "Liberation Sans"],
+                    "mathtext.fontset": "dejavusans",
+                    "mathtext.default": "regular",
+                }
+            )
+        else:
+            # Fall back to sans-serif with Helvetica/DejaVu Sans
+            mpl_config.update(
+                {
+                    "text.usetex": False,
+                    "font.family": "sans-serif",
+                    "font.sans-serif": ["Helvetica", "DejaVu Sans", "Liberation Sans", "sans-serif"],
+                    "mathtext.fontset": "dejavusans",
+                    "mathtext.default": "regular",
+                }
+            )
+
+            # Warn user about missing Arial using scitex.logging
+            try:
+                from scitex.logging import getLogger
+                logger = getLogger(__name__)
+                logger.warning(
+                    "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+                    "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
+                )
+            except ImportError:
+                # Fallback to warnings if scitex.logging not available
+                import warnings
+                warnings.warn(
+                    "Arial font not found on system. Using fallback fonts (Helvetica/DejaVu Sans). "
+                    "For publication-quality figures with Arial, install Microsoft Core Fonts: "
+                    "sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv",
+                    UserWarning,
+                    stacklevel=2
+                )
+
+        # Suppress matplotlib's own font warnings
+        import logging
+        logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
         # Set fallback mode to mathtext
         try:

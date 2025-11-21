@@ -139,6 +139,7 @@ reproduce = _LazyModule("reproduce")
 rng = _LazyModule("rng")
 scholar = _LazyModule("scholar")
 writer = _LazyModule("writer")
+vis = _LazyModule("vis")
 resource = _LazyModule("resource")
 tex = _LazyModule("tex")
 linalg = _LazyModule("linalg")
@@ -197,6 +198,7 @@ __all__ = [
     "reproduce",
     "scholar",
     "writer",
+    "vis",
     "resource",
     "tex",
     "linalg",

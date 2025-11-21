@@ -75,19 +75,28 @@ def load(
     cache : bool, optional
         If True, enable caching for faster repeated loads. Default is True.
     metadata : bool or None, optional
-        If True, return tuple (image, metadata_dict) for images.
-        If False, return image only.
-        If None (default), automatically True for images, False for other formats.
-        Only works for image files (.png, .jpg, .jpeg, .tiff, .tif).
+        If True, return tuple (data, metadata_dict) for images and PDFs.
+        If False, return data only.
+        If None (default), automatically True for images, False for PDFs and other formats.
+        Works for image files (.png, .jpg, .jpeg, .tiff, .tif) and PDF files.
+        For PDFs, metadata_dict contains embedded scitex metadata from PDF Subject field.
     **kwargs : dict
         Additional keyword arguments to be passed to the specific loading function.
+        For PDFs, can include: mode='full'|'text'|'scientific', etc.
 
     Returns
     -------
     object
         The loaded data object, which can be of various types depending on the input file format.
-        For images with metadata=True, returns tuple (image, metadata_dict).
-        metadata_dict is None if no metadata found.
+
+        For images with metadata=True (default):
+            Returns tuple (image, metadata_dict). metadata_dict is None if no metadata found.
+
+        For PDFs with metadata=False (default):
+            Returns dict with keys: 'full_text', 'sections', 'metadata', 'pages', etc.
+
+        For PDFs with metadata=True:
+            Returns tuple (pdf_data_dict, metadata_dict). Enables consistent API with images.
 
     Raises
     ------
@@ -108,9 +117,27 @@ def load(
 
     Examples
     --------
+    >>> # Load CSV data
     >>> data = load('data.csv')
-    >>> image = load('image.png')
-    >>> model = load('model.pth')
+
+    >>> # Load image with metadata (default behavior)
+    >>> img, meta = load('figure.png')
+    >>> print(meta['scitex']['version'])
+
+    >>> # Load image without metadata
+    >>> img = load('figure.png', metadata=False)
+
+    >>> # Load PDF with default extraction (no metadata tuple)
+    >>> pdf = load('paper.pdf')
+    >>> print(pdf['full_text'])
+
+    >>> # Load PDF with metadata tuple (consistent API with images)
+    >>> pdf, meta = load('paper.pdf', metadata=True)
+    >>> print(meta['scitex']['version'])
+
+    >>> # Load PDF with specific mode
+    >>> text = load('paper.pdf', mode='text')
+
     >>> # Load file without extension (e.g., UUID PDF)
     >>> pdf = load('f2694ccb-1b6f-4994-add8-5111fd4d52f1', ext='pdf')
     """
@@ -241,10 +268,12 @@ def load(
         # Auto-detect from filename
         detected_ext = lpath.split(".")[-1] if "." in lpath else ""
 
-    # Auto-detect metadata for images
+    # Auto-detect metadata for images and PDFs
     is_image = detected_ext in ["jpg", "jpeg", "png", "tiff", "tif"]
+    is_pdf = detected_ext == "pdf"
+
     if metadata is None:
-        # Default: True for images, False for other formats
+        # Default: True for images, False for other formats (PDFs default to False for backward compatibility)
         metadata = is_image
 
     # Special handling for numpy files with caching
@@ -254,9 +283,12 @@ def load(
     loader = preserve_doc(loaders_dict.get(detected_ext, _load_txt))
 
     try:
-        # Pass metadata and verbose parameters for image files
+        # Pass metadata parameter for images and PDFs
         if is_image:
             result = loader(lpath, metadata=metadata, verbose=verbose, **kwargs)
+        elif is_pdf:
+            # Pass metadata parameter to PDF loader for API consistency
+            result = loader(lpath, metadata=metadata, **kwargs)
         else:
             result = loader(lpath, **kwargs)
 
