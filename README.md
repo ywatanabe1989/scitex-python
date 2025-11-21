@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2025-11-18 10:12:53
+!-- Timestamp: 2025-11-19 16:19:32
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -27,6 +27,50 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 ``` bash
 pip install scitex # ~600 MB, Core + utilities
 pip install scitex[dl,ml,jupyter,neuro,web,scholar,writer,dev] # ~2-5 GB, Complete toolkit
+```
+
+### Alial
+
+``` bash
+# Ubuntu
+sudo apt update
+sudo apt-get install ttf-mscorefonts-installer
+sudo DEBIAN_FRONTEND=noninteractive \
+    apt install -y ttf-mscorefonts-installer
+sudo mkdir -p /usr/share/fonts/truetype/custom
+sudo cp /mnt/c/Windows/Fonts/arial*.ttf /usr/share/fonts/truetype/custom/
+sudo fc-cache -fv
+rm ~/.cache/matplotlib -rf
+
+# WSL
+mkdir -p ~/.local/share/fonts/windows
+cp /mnt/c/Windows/Fonts/arial*.ttf ~/.local/share/fonts/windows/
+fc-cache -fv ~/.local/share/fonts/windows
+rm ~/.cache/matplotlib -rf
+```
+
+``` python
+# Check
+import matplotlib
+print(matplotlib.rcParams['font.family'])
+
+import matplotlib.font_manager as fm
+fonts = fm.findSystemFonts()
+print("Arial found:", any("Arial" in f or "arial" in f for f in fonts))
+[a for a in fonts if "Arial" in a or "arial" in a][:5]
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+mpl.rcParams["font.family"] = "Arial"
+mpl.rcParams["font.sans-serif"] = ["Arial"]  # 念のため
+
+fig, ax = plt.subplots(figsize=(3, 2))
+ax.text(0.5, 0.5, "Arial Test", fontsize=32, ha="center", va="center")
+ax.set_axis_off()
+
+fig.savefig("arial_test.png", dpi=300)
+plt.close(fig)
 ```
 
 **Optional Groups**:

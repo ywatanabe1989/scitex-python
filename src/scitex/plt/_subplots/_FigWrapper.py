@@ -72,7 +72,7 @@ class FigWrapper:
         fname : str
             Output file path
         embed_metadata : bool, optional
-            Automatically embed dimension/style metadata in PNG/JPEG/TIFF (default: True)
+            Automatically embed dimension/style metadata in PNG/JPEG/TIFF/PDF (default: True)
         metadata : dict, optional
             Additional custom metadata to merge with auto-collected metadata
         *args, **kwargs
@@ -80,7 +80,7 @@ class FigWrapper:
 
         Notes
         -----
-        For PNG/JPEG/TIFF formats, metadata is automatically embedded including:
+        For PNG/JPEG/TIFF/PDF formats, metadata is automatically embedded including:
         - Software versions (scitex, matplotlib)
         - Timestamp
         - Figure/axes dimensions (mm, inch, px)
@@ -88,7 +88,7 @@ class FigWrapper:
         - Styling parameters (if available via _scitex_metadata)
         - Mode (display/publication)
 
-        For other formats (SVG, PDF, etc.), delegates to matplotlib's savefig.
+        For other formats (SVG, etc.), delegates to matplotlib's savefig.
 
         Examples
         --------
@@ -102,8 +102,8 @@ class FigWrapper:
         >>> # Disable metadata embedding
         >>> fig.savefig('result.png', embed_metadata=False)
         """
-        # Check if this is a PNG/JPEG/TIFF that can have metadata
-        is_image_format = fname.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.tif'))
+        # Check if this is a format that can have metadata (PNG/JPEG/TIFF/PDF)
+        is_image_format = fname.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.tif', '.pdf'))
 
         if is_image_format and embed_metadata:
             # Collect automatic metadata
@@ -280,8 +280,8 @@ class FigWrapper:
                     for ax in self.axes:
                         yield ax
 
-    def legend(self, *args, loc="upper left", **kwargs):
-        """Legend with upper left by default for all axes."""
+    def legend(self, *args, loc="best", **kwargs):
+        """Legend with 'best' automatic placement by default for all axes."""
         for ax in self._traverse_axes():
             try:
                 ax.legend(*args, loc=loc, **kwargs)

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-11-19 14:08:24 (ywatanabe)"
+# Timestamp: "2025-11-22 00:31:22 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/examples/demo_plot_all_types_publication.py
 
-# Time-stamp: "2025-11-19 13:45:00 (ywatanabe)"
 
 """
 Publication-ready comprehensive demo suite using the unified style system.
@@ -27,13 +26,11 @@ Key Features:
 
 import os
 import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 matplotlib.use("Agg")
 
-# Import scitex
 import scitex as stx
 from scitex.plt.presets import SCITEX_STYLE  # Universal publication style
 
@@ -51,41 +48,101 @@ OUTPUT_DIR_MULTI = "publication/05_multi_panel"
 # ============================================================================
 
 
-def get_linewidth_from_style(style_dict):
-    """Get proper linewidth in points from mm-based style dict."""
-    from scitex.plt.utils import mm_to_pt
-    trace_mm = style_dict.get('trace_thickness_mm', 0.12)
-    return mm_to_pt(trace_mm)
+# def get_linewidth_from_style(style_dict):
+#     """Get proper linewidth in points from mm-based style dict."""
+#     from scitex.plt.utils import mm_to_pt
+
+#     trace_mm = style_dict.get("trace_thickness_mm", 0.12)
+#     return mm_to_pt(trace_mm)
 
 
-def set_ticks(ax, n=4):
-    """Set number of ticks on both axes."""
-    from matplotlib.ticker import MaxNLocator
-    ax.xaxis.set_major_locator(MaxNLocator(n))
-    ax.yaxis.set_major_locator(MaxNLocator(n))
+# def set_ticks(ax, n=4):
+#     """Set number of ticks on both axes."""
+#     from matplotlib.ticker import MaxNLocator
+
+#     ax.xaxis.set_major_locator(MaxNLocator(n))
+#     ax.yaxis.set_major_locator(MaxNLocator(n))
 
 
-def save_multi_format(fig, base_path, dpi=300):
-    """Save figure in PNG, PDF, and JPEG formats.
+def save_multi_format(
+    fig,
+    base_path,
+    dpi=300,
+    *,
+    plot_type=None,
+    style_name=None,
+    style_overrides=None,
+):
+    """Save figure in PNG, PDF, and JPEG formats with metadata.
 
     - PNG: Lossless raster, best for publication (metadata preserved)
     - PDF: Vector format, infinite zoom, best for publication
     - JPEG: High-quality (quality=100) for daily use, smaller file size
 
-    Note: For final publication submission, prefer PNG or PDF.
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure or scitex wrapper
+        The figure to save
+    base_path : str
+        Base path for saving (should end with .png)
+    dpi : int, optional
+        DPI for raster formats. Default is 300.
+    plot_type : str, optional
+        Type of plot (e.g., "line", "scatter", "bar", "hist", etc.)
+    style_name : str, optional
+        Name of the style preset used (e.g., "SCITEX_STYLE")
+    style_overrides : dict, optional
+        Dictionary of style parameters that override the base style
+
+    Returns
+    -------
+    tuple
+        (png_path, pdf_path, jpg_path)
+
+    Note
+    ----
+    For final publication submission, prefer PNG or PDF.
     JPEG is included with quality=100 for daily workflow and sharing.
     """
+    # Build metadata_extra
+    metadata_extra = {}
+    if plot_type is not None:
+        metadata_extra["plot_type"] = plot_type
+    if style_name is not None or style_overrides is not None:
+        metadata_extra["style"] = {
+            "name": style_name,
+            "overrides": style_overrides or {},
+        }
+
     # Save PNG with auto-crop (1mm margin) - lossless format
-    png_path = base_path if base_path.endswith('.png') else base_path.replace('.png', '.png')
-    stx.io.save(fig, png_path, dpi=dpi, auto_crop=True, crop_margin_mm=1.0)
+    png_path = (
+        base_path
+        if base_path.endswith(".png")
+        else base_path.replace(".png", ".png")
+    )
+    stx.io.save(
+        fig,
+        png_path,
+        dpi=dpi,
+        auto_crop=True,
+        crop_margin_mm=1.0,
+        metadata_extra=metadata_extra,
+    )
 
     # Save PDF (vector format, infinite zoom, no cropping needed)
-    pdf_path = png_path.replace('.png', '.pdf')
-    stx.io.save(fig, pdf_path)
+    pdf_path = png_path.replace(".png", ".pdf")
+    stx.io.save(fig, pdf_path, metadata_extra=metadata_extra)
 
     # Save JPEG (quality=100, 600 DPI for better sharpness despite lossy compression)
-    jpg_path = png_path.replace('.png', '.jpg')
-    stx.io.save(fig, jpg_path, dpi=600, auto_crop=True, crop_margin_mm=1.0)
+    jpg_path = png_path.replace(".png", ".jpg")
+    stx.io.save(
+        fig,
+        jpg_path,
+        dpi=600,
+        auto_crop=True,
+        crop_margin_mm=1.0,
+        metadata_extra=metadata_extra,
+    )
 
     return png_path, pdf_path, jpg_path
 
@@ -114,17 +171,28 @@ def demo_publication_plot():
     ax.plot(x, y2, "r-", label="cos(x)", id="cosine")
 
     # Labels and styling (use bracket units)
-    ax.set_xlabel(stx.plt.ax.format_label("Time", "s"))
-    ax.set_ylabel(stx.plt.ax.format_label("Amplitude", "a.u."))
-    ax.set_title("Oscillatory Response")
+    # ax.set_xlabel(stx.plt.ax.format_label("Time", "s"))
+    # ax.set_ylabel(stx.plt.ax.format_label("Amplitude", "a.u."))
+    # ax.set_title("Oscillatory Response")
+    ax.set_xyt(
+        stx.plt.ax.format_label("Time", "s"),
+        stx.plt.ax.format_label("Amplitude", "a.u."),
+        "Oscillatory Response",
+    )
     ax.legend(frameon=False)
 
-    # Save in publication formats (PNG, PDF)
+    # Save in publication formats (PNG, PDF) with plot_type metadata
     save_path = os.path.join(OUTPUT_DIR_BASIC, "01_plot.png")
-    png_path, pdf_path, jpg_path = save_multi_format(fig, save_path, dpi=300)
+    png_path, pdf_path, jpg_path = save_multi_format(
+        fig,
+        save_path,
+        dpi=300,
+        plot_type="line",
+        style_name="SCITEX_STYLE",
+    )
     fig.close()
 
-    print(f"- Saved: {png_path}, .pdf, .jpg")
+    # print(f"- Saved: {png_path}, .pdf, .jpg")
 
 
 def demo_publication_scatter():
@@ -143,7 +211,9 @@ def demo_publication_scatter():
     y = 2 * x + np.random.normal(0, 0.5, n)
 
     # Scatter plot with styling
-    scatter = ax.scatter(x, y, alpha=0.6, c="steelblue", id="scatter_data", label="Data")
+    scatter = ax.scatter(
+        x, y, alpha=0.6, c="steelblue", id="scatter_data", label="Data"
+    )
     stx.plt.ax.style_scatter(scatter, size_mm=0.8)
 
     # Add regression line
@@ -158,9 +228,15 @@ def demo_publication_scatter():
     ax.set_title("Correlation Analysis")
     ax.legend(frameon=False)
 
-    # Save in publication formats (PNG, PDF)
+    # Save in publication formats (PNG, PDF) with plot_type metadata
     save_path = os.path.join(OUTPUT_DIR_BASIC, "02_scatter.png")
-    png_path, pdf_path, jpg_path = save_multi_format(fig, save_path, dpi=300)
+    png_path, pdf_path, jpg_path = save_multi_format(
+        fig,
+        save_path,
+        dpi=300,
+        plot_type="scatter",
+        style_name="SCITEX_STYLE",
+    )
     fig.close()
 
     print(f"- Saved: {png_path}, .pdf, .jpg")
@@ -192,14 +268,14 @@ def demo_publication_bar():
     )
 
     # Style bar edges
-    stx.plt.ax.style_barplot(bars, edge_thickness_mm=0.2, edgecolor='black')
+    stx.plt.ax.style_barplot(bars, edge_thickness_mm=0.2, edgecolor="black")
 
     # Add error bars
     eb = ax.errorbar(
         x_pos,
         values,
         yerr=errors,
-        fmt='none',
+        fmt="none",
         capsize=3,
         id="error_bars",
     )
@@ -295,7 +371,9 @@ def demo_publication_boxplot():
     ]
 
     # Boxplot with styling
-    bp = ax.boxplot(data, labels=["Group A", "Group B", "Group C"], id="boxplot")
+    bp = ax.boxplot(
+        data, labels=["Group A", "Group B", "Group C"], id="boxplot"
+    )
     stx.plt.ax.style_boxplot(bp, linewidth_mm=0.2)
 
     # Labels
@@ -377,7 +455,7 @@ def demo_publication_barh():
         color="steelblue",
         id="barh_data",
     )
-    stx.plt.ax.style_barplot(bars, edge_thickness_mm=0.2, edgecolor='black')
+    stx.plt.ax.style_barplot(bars, edge_thickness_mm=0.2, edgecolor="black")
 
     # Labels
     ax.set_xlabel(stx.plt.ax.format_label("Score", ""))
@@ -791,10 +869,12 @@ def demo_publication_plot_kde():
 
     # Generate bimodal data
     np.random.seed(42)
-    data = np.concatenate([
-        np.random.normal(0, 1, 500),
-        np.random.normal(5, 1, 300),
-    ])
+    data = np.concatenate(
+        [
+            np.random.normal(0, 1, 500),
+            np.random.normal(5, 1, 300),
+        ]
+    )
 
     # KDE plot
     ax.plot_kde(data, label="Density", id="kde")
@@ -806,11 +886,17 @@ def demo_publication_plot_kde():
     ax.legend(frameon=False)
 
     # Auto-scale Y-axis to factor out small values
-    stx.plt.ax.auto_scale_axis(ax, axis='y')
+    stx.plt.ax.auto_scale_axis(ax, axis="y")
 
-    # Save in publication formats (PNG, PDF)
+    # Save in publication formats (PNG, PDF) with plot_type metadata
     save_path = os.path.join(OUTPUT_DIR_FUNCTIONAL, "01_plot_kde.png")
-    png_path, pdf_path, jpg_path = save_multi_format(fig, save_path, dpi=300)
+    png_path, pdf_path, jpg_path = save_multi_format(
+        fig,
+        save_path,
+        dpi=300,
+        plot_type="kde",
+        style_name="SCITEX_STYLE",
+    )
     fig.close()
 
     print(f"- Saved: {png_path}, .pdf, .jpg")
@@ -832,14 +918,18 @@ def demo_publication_sns_boxplot():
 
     # Generate data
     np.random.seed(42)
-    df = pd.DataFrame({
-        "category": np.repeat(["A", "B", "C"], 50),
-        "value": np.concatenate([
-            np.random.normal(0, 1, 50),
-            np.random.normal(2, 1, 50),
-            np.random.normal(4, 1.5, 50),
-        ]),
-    })
+    df = pd.DataFrame(
+        {
+            "category": np.repeat(["A", "B", "C"], 50),
+            "value": np.concatenate(
+                [
+                    np.random.normal(0, 1, 50),
+                    np.random.normal(2, 1, 50),
+                    np.random.normal(4, 1.5, 50),
+                ]
+            ),
+        }
+    )
 
     # Seaborn boxplot
     ax.sns_boxplot(x="category", y="value", data=df, id="sns_box")
@@ -868,14 +958,18 @@ def demo_publication_sns_violinplot():
 
     # Generate data
     np.random.seed(42)
-    df = pd.DataFrame({
-        "category": np.repeat(["A", "B", "C"], 50),
-        "value": np.concatenate([
-            np.random.normal(0, 1, 50),
-            np.random.normal(2, 1, 50),
-            np.random.normal(4, 1.5, 50),
-        ]),
-    })
+    df = pd.DataFrame(
+        {
+            "category": np.repeat(["A", "B", "C"], 50),
+            "value": np.concatenate(
+                [
+                    np.random.normal(0, 1, 50),
+                    np.random.normal(2, 1, 50),
+                    np.random.normal(4, 1.5, 50),
+                ]
+            ),
+        }
+    )
 
     # Seaborn violinplot
     ax.sns_violinplot(x="category", y="value", data=df, id="sns_violin")
@@ -905,11 +999,13 @@ def demo_publication_sns_scatterplot():
     # Generate data
     np.random.seed(42)
     n = 100
-    df = pd.DataFrame({
-        "x": np.random.normal(0, 1, n),
-        "y": np.random.normal(0, 1, n),
-        "category": np.random.choice(["A", "B", "C"], n),
-    })
+    df = pd.DataFrame(
+        {
+            "x": np.random.normal(0, 1, n),
+            "y": np.random.normal(0, 1, n),
+            "category": np.random.choice(["A", "B", "C"], n),
+        }
+    )
     df["y"] = df["x"] * 2 + df["y"]
 
     # Seaborn scatterplot
@@ -947,15 +1043,19 @@ def demo_publication_sns_lineplot():
     # Generate data
     np.random.seed(42)
     x = np.linspace(0, 10, 50)
-    df = pd.DataFrame({
-        "x": np.tile(x, 3),
-        "y": np.concatenate([
-            np.sin(x) + np.random.normal(0, 0.1, len(x)),
-            np.cos(x) + np.random.normal(0, 0.1, len(x)),
-            -np.sin(x) + np.random.normal(0, 0.1, len(x)),
-        ]),
-        "group": np.repeat(["A", "B", "C"], len(x)),
-    })
+    df = pd.DataFrame(
+        {
+            "x": np.tile(x, 3),
+            "y": np.concatenate(
+                [
+                    np.sin(x) + np.random.normal(0, 0.1, len(x)),
+                    np.cos(x) + np.random.normal(0, 0.1, len(x)),
+                    -np.sin(x) + np.random.normal(0, 0.1, len(x)),
+                ]
+            ),
+            "group": np.repeat(["A", "B", "C"], len(x)),
+        }
+    )
 
     # Seaborn lineplot
     ax.sns_lineplot(
@@ -991,13 +1091,17 @@ def demo_publication_sns_histplot():
 
     # Generate data
     np.random.seed(42)
-    df = pd.DataFrame({
-        "value": np.concatenate([
-            np.random.normal(0, 1, 200),
-            np.random.normal(3, 1, 150),
-        ]),
-        "category": np.repeat(["A", "B"], [200, 150]),
-    })
+    df = pd.DataFrame(
+        {
+            "value": np.concatenate(
+                [
+                    np.random.normal(0, 1, 200),
+                    np.random.normal(3, 1, 150),
+                ]
+            ),
+            "category": np.repeat(["A", "B"], [200, 150]),
+        }
+    )
 
     # Seaborn histplot
     ax.sns_histplot(
@@ -1034,14 +1138,18 @@ def demo_publication_sns_barplot():
 
     # Generate data
     np.random.seed(42)
-    df = pd.DataFrame({
-        "category": np.repeat(["A", "B", "C"], 50),
-        "value": np.concatenate([
-            np.random.normal(20, 5, 50),
-            np.random.normal(35, 7, 50),
-            np.random.normal(28, 6, 50),
-        ]),
-    })
+    df = pd.DataFrame(
+        {
+            "category": np.repeat(["A", "B", "C"], 50),
+            "value": np.concatenate(
+                [
+                    np.random.normal(20, 5, 50),
+                    np.random.normal(35, 7, 50),
+                    np.random.normal(28, 6, 50),
+                ]
+            ),
+        }
+    )
 
     # Seaborn barplot
     ax.sns_barplot(x="category", y="value", data=df, id="sns_bar")
@@ -1070,14 +1178,18 @@ def demo_publication_sns_stripplot():
 
     # Generate data
     np.random.seed(42)
-    df = pd.DataFrame({
-        "category": np.repeat(["A", "B", "C"], 30),
-        "value": np.concatenate([
-            np.random.normal(0, 1, 30),
-            np.random.normal(2, 1, 30),
-            np.random.normal(4, 1.5, 30),
-        ]),
-    })
+    df = pd.DataFrame(
+        {
+            "category": np.repeat(["A", "B", "C"], 30),
+            "value": np.concatenate(
+                [
+                    np.random.normal(0, 1, 30),
+                    np.random.normal(2, 1, 30),
+                    np.random.normal(4, 1.5, 30),
+                ]
+            ),
+        }
+    )
 
     # Seaborn stripplot
     ax.sns_stripplot(
@@ -1112,13 +1224,17 @@ def demo_publication_sns_kdeplot():
 
     # Generate data
     np.random.seed(42)
-    df = pd.DataFrame({
-        "value": np.concatenate([
-            np.random.normal(0, 1, 200),
-            np.random.normal(3, 1, 150),
-        ]),
-        "category": np.repeat(["A", "B"], [200, 150]),
-    })
+    df = pd.DataFrame(
+        {
+            "value": np.concatenate(
+                [
+                    np.random.normal(0, 1, 200),
+                    np.random.normal(3, 1, 150),
+                ]
+            ),
+            "category": np.repeat(["A", "B"], [200, 150]),
+        }
+    )
 
     # Seaborn kdeplot (note: wrapper has issues with id parameter)
     ax.sns_kdeplot(
@@ -1167,7 +1283,9 @@ def demo_publication_multi_panel_2x2():
     np.random.seed(42)
     x_scatter = np.random.normal(0, 1, 50)
     y_scatter = x_scatter + np.random.normal(0, 0.5, 50)
-    scatter = axes[0, 1].scatter(x_scatter, y_scatter, alpha=0.6, label="Data", id="panel_b")
+    scatter = axes[0, 1].scatter(
+        x_scatter, y_scatter, alpha=0.6, label="Data", id="panel_b"
+    )
     stx.plt.ax.style_scatter(scatter, size_mm=0.8)
     axes[0, 1].set_xlabel(stx.plt.ax.format_label("x", "a.u."))
     axes[0, 1].set_ylabel(stx.plt.ax.format_label("y", "a.u."))
@@ -1200,7 +1318,7 @@ def demo_publication_multi_panel_2x2():
         label="Count",
         id="panel_d",
     )
-    stx.plt.ax.style_barplot(bars, edge_thickness_mm=0.2, edgecolor='black')
+    stx.plt.ax.style_barplot(bars, edge_thickness_mm=0.2, edgecolor="black")
     axes[1, 1].set_xlabel(stx.plt.ax.format_label("Category", ""))
     axes[1, 1].set_ylabel(stx.plt.ax.format_label("Count", ""))
     axes[1, 1].set_title("D. Comparison", loc="left", fontweight="bold")
@@ -1310,9 +1428,24 @@ def demo_publication_style_override():
     ax.legend(frameon=False)
     ax.grid(True, alpha=0.3)
 
-    # Save in publication formats (PNG, PDF)
+    # Save in publication formats (PNG, PDF) with style overrides
     save_path = os.path.join(OUTPUT_DIR, "style_override.png")
-    png_path, pdf_path, jpg_path = save_multi_format(fig, save_path, dpi=300)
+
+    # Extract only the overridden parameters
+    style_overrides = {
+        "ax_width_mm": custom_style["ax_width_mm"],
+        "ax_thickness_mm": custom_style["ax_thickness_mm"],
+        "tick_length_mm": custom_style["tick_length_mm"],
+    }
+
+    png_path, pdf_path, jpg_path = save_multi_format(
+        fig,
+        save_path,
+        dpi=300,
+        plot_type="line",
+        style_name="SCITEX_STYLE",
+        style_overrides=style_overrides,
+    )
     fig.close()
 
     print(f"- Saved: {png_path}, .pdf, .jpg")
@@ -1338,40 +1471,40 @@ def main(verbose=True):
     demos = [
         # Matplotlib basic plots
         demo_publication_plot,
-        demo_publication_scatter,
-        demo_publication_bar,
-        demo_publication_hist,
-        demo_publication_boxplot,
-        demo_publication_errorbar,
-        demo_publication_barh,
-        demo_publication_fill_between,
-        demo_publication_imshow,
-        demo_publication_contour,
-        demo_publication_violinplot,
-        # Custom scitex plots
-        demo_publication_plot_heatmap,
-        demo_publication_plot_line,
-        demo_publication_plot_shaded_line,
-        demo_publication_plot_violin,
-        demo_publication_plot_ecdf,
-        demo_publication_plot_box,
-        demo_publication_plot_mean_std,
-        # Functional plots
-        demo_publication_plot_kde,
-        # Seaborn integration
-        demo_publication_sns_boxplot,
-        demo_publication_sns_violinplot,
-        demo_publication_sns_scatterplot,
-        demo_publication_sns_lineplot,
-        demo_publication_sns_histplot,
-        demo_publication_sns_barplot,
-        demo_publication_sns_stripplot,
-        demo_publication_sns_kdeplot,
-        # Multi-panel demos
-        demo_publication_multi_panel_2x2,
-        demo_publication_multi_panel_1x3,
-        # Style customization
-        demo_publication_style_override,
+        # demo_publication_scatter,
+        # demo_publication_bar,
+        # demo_publication_hist,
+        # demo_publication_boxplot,
+        # demo_publication_errorbar,
+        # demo_publication_barh,
+        # demo_publication_fill_between,
+        # demo_publication_imshow,
+        # demo_publication_contour,
+        # demo_publication_violinplot,
+        # # Custom scitex plots
+        # demo_publication_plot_heatmap,
+        # demo_publication_plot_line,
+        # demo_publication_plot_shaded_line,
+        # demo_publication_plot_violin,
+        # demo_publication_plot_ecdf,
+        # demo_publication_plot_box,
+        # demo_publication_plot_mean_std,
+        # # Functional plots
+        # demo_publication_plot_kde,
+        # # Seaborn integration
+        # demo_publication_sns_boxplot,
+        # demo_publication_sns_violinplot,
+        # demo_publication_sns_scatterplot,
+        # demo_publication_sns_lineplot,
+        # demo_publication_sns_histplot,
+        # demo_publication_sns_barplot,
+        # demo_publication_sns_stripplot,
+        # demo_publication_sns_kdeplot,
+        # # Multi-panel demos
+        # demo_publication_multi_panel_2x2,
+        # demo_publication_multi_panel_1x3,
+        # # Style customization
+        # demo_publication_style_override,
     ]
 
     for demo in demos:
@@ -1396,13 +1529,21 @@ def main(verbose=True):
         print(f"  Multi-panels: {OUTPUT_DIR_MULTI}/")
         print(f"  Root (style override): {OUTPUT_DIR}/")
         print("\nCoverage:")
-        print("  - Matplotlib basic plots (11): plot, scatter, bar, barh, hist, boxplot,")
+        print(
+            "  - Matplotlib basic plots (11): plot, scatter, bar, barh, hist, boxplot,"
+        )
         print("    errorbar, fill_between, imshow, contour, violinplot")
-        print("  - Custom scitex plots (7): plot_heatmap, plot_line, plot_shaded_line,")
+        print(
+            "  - Custom scitex plots (7): plot_heatmap, plot_line, plot_shaded_line,"
+        )
         print("    plot_violin, plot_ecdf, plot_box, plot_mean_std")
         print("  - Functional plots (1): plot_kde")
-        print("  - Seaborn integration (8): sns_boxplot, sns_violinplot, sns_scatterplot,")
-        print("    sns_lineplot, sns_histplot, sns_barplot, sns_stripplot, sns_kdeplot")
+        print(
+            "  - Seaborn integration (8): sns_boxplot, sns_violinplot, sns_scatterplot,"
+        )
+        print(
+            "    sns_lineplot, sns_histplot, sns_barplot, sns_stripplot, sns_kdeplot"
+        )
         print("  - Multi-panel (2): 2x2 grid, 1x3 with varied widths")
         print("  - Total: 30 publication-ready plot demonstrations")
         print("\nAll figures are publication-ready:")
