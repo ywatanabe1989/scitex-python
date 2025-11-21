@@ -18,6 +18,61 @@ from ._AxesWrapper import AxesWrapper
 from ._AxisWrapper import AxisWrapper
 from ._FigWrapper import FigWrapper
 
+# Register Arial fonts at module import
+import matplotlib.font_manager as fm
+import matplotlib as mpl
+import os
+
+_arial_enabled = False
+
+# Try to find Arial
+try:
+    fm.findfont("Arial", fallback_to_default=False)
+    _arial_enabled = True
+except Exception:
+    # Search for Arial font files and register them
+    arial_paths = [
+        f for f in fm.findSystemFonts()
+        if os.path.basename(f).lower().startswith("arial")
+    ]
+
+    if arial_paths:
+        for path in arial_paths:
+            try:
+                fm.fontManager.addfont(path)
+            except Exception:
+                pass
+
+        # Verify Arial is now available
+        try:
+            fm.findfont("Arial", fallback_to_default=False)
+            _arial_enabled = True
+        except Exception:
+            pass
+
+# Configure matplotlib to use Arial if available
+if _arial_enabled:
+    mpl.rcParams["font.family"] = "Arial"
+    mpl.rcParams["font.sans-serif"] = ["Arial", "Helvetica", "DejaVu Sans", "Liberation Sans"]
+else:
+    # Warn about missing Arial
+    try:
+        from scitex.logging import getLogger
+        _logger = getLogger(__name__)
+        _logger.warning(
+            "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+            "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
+        )
+    except:
+        # If scitex.logging not available, use standard warnings
+        import warnings
+        warnings.warn(
+            "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+            "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv",
+            UserWarning,
+            stacklevel=2
+        )
+
 
 class SubplotsWrapper:
     """
@@ -52,9 +107,14 @@ class SubplotsWrapper:
         trace_thickness_mm=None,
         axis_font_size_pt=None,
         tick_font_size_pt=None,
+        title_font_size_pt=None,
+        legend_font_size_pt=None,
+        suptitle_font_size_pt=None,
+        n_ticks=None,
         mode=None,
         dpi=None,
         styles=None,  # List of style dicts for per-axes control
+        transparent=False,  # Transparent background for publication figures
         **kwargs
     ):
         """
@@ -107,6 +167,9 @@ class SubplotsWrapper:
             Resolution (default: 300 for publication, 100 for display)
         styles : list of dict, optional
             Individual style dicts for each axes
+        transparent : bool, optional
+            Create figure with transparent background (default: False)
+            Useful for publication-ready figures that will be cropped
         **kwargs
             Additional arguments passed to matplotlib.pyplot.subplots
 
@@ -180,9 +243,14 @@ class SubplotsWrapper:
                 trace_thickness_mm=trace_thickness_mm,
                 axis_font_size_pt=axis_font_size_pt,
                 tick_font_size_pt=tick_font_size_pt,
+                title_font_size_pt=title_font_size_pt,
+                legend_font_size_pt=legend_font_size_pt,
+                suptitle_font_size_pt=suptitle_font_size_pt,
+                n_ticks=n_ticks,
                 mode=mode,
                 dpi=dpi,
                 styles=styles,
+                transparent=transparent,
                 **kwargs
             )
 
@@ -249,9 +317,18 @@ class SubplotsWrapper:
         trace_thickness_mm=None,
         axis_font_size_pt=None,
         tick_font_size_pt=None,
+        title_font_size_pt=None,
+        legend_font_size_pt=None,
+        suptitle_font_size_pt=None,
+        label_pad_pt=None,
+        tick_pad_pt=None,
+        title_pad_pt=None,
+        font_family=None,
+        n_ticks=None,
         mode=None,
         dpi=None,
         styles=None,
+        transparent=False,
         **kwargs
     ):
         """Create figure with mm-based control over axes dimensions."""
@@ -330,7 +407,11 @@ class SubplotsWrapper:
 
         # Create figure with calculated size
         figsize_inch = (mm_to_inch(total_width_mm), mm_to_inch(total_height_mm))
-        self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi)
+        if transparent:
+            # Transparent background for publication figures
+            self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi, facecolor='none')
+        else:
+            self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi)
 
         # Create axes array and position each one manually
         axes_mpl_list = []
@@ -353,8 +434,10 @@ class SubplotsWrapper:
                 width = ax_widths_mm[ax_idx] / total_width_mm
                 height = ax_heights_mm[ax_idx] / total_height_mm
 
-                # Create axes at exact position
+                # Create axes at exact position with transparent background
                 ax_mpl = self._fig_mpl.add_axes([left, bottom, width, height])
+                if transparent:
+                    ax_mpl.patch.set_alpha(0.0)  # Make axes background transparent
                 axes_mpl_list.append(ax_mpl)
 
                 # Tag with metadata
@@ -368,6 +451,7 @@ class SubplotsWrapper:
                 ax_idx += 1
 
         # Apply styling to each axes
+        suptitle_font_size_pt = None
         for i, ax_mpl in enumerate(axes_mpl_list):
             # Determine which style dict to use
             if styles is not None:
@@ -392,12 +476,38 @@ class SubplotsWrapper:
                     style_dict['axis_font_size_pt'] = axis_font_size_pt
                 if tick_font_size_pt is not None:
                     style_dict['tick_font_size_pt'] = tick_font_size_pt
+                if title_font_size_pt is not None:
+                    style_dict['title_font_size_pt'] = title_font_size_pt
+                if legend_font_size_pt is not None:
+                    style_dict['legend_font_size_pt'] = legend_font_size_pt
+                if suptitle_font_size_pt is not None:
+                    style_dict['suptitle_font_size_pt'] = suptitle_font_size_pt
+                if label_pad_pt is not None:
+                    style_dict['label_pad_pt'] = label_pad_pt
+                if tick_pad_pt is not None:
+                    style_dict['tick_pad_pt'] = tick_pad_pt
+                if title_pad_pt is not None:
+                    style_dict['title_pad_pt'] = title_pad_pt
+                if font_family is not None:
+                    style_dict['font_family'] = font_family
+                if n_ticks is not None:
+                    style_dict['n_ticks'] = n_ticks
+
+            # Extract suptitle font size if available
+            if 'suptitle_font_size_pt' in style_dict:
+                suptitle_font_size_pt_value = style_dict['suptitle_font_size_pt']
+            else:
+                suptitle_font_size_pt_value = None
 
             # Apply style if not empty
             if style_dict:
                 apply_style_mm(ax_mpl, style_dict)
                 # Add style to metadata
                 ax_mpl._scitex_metadata['style_mm'] = style_dict
+
+        # Store suptitle font size in figure metadata for later use
+        if suptitle_font_size_pt_value is not None:
+            self._fig_mpl._scitex_suptitle_font_size_pt = suptitle_font_size_pt_value
 
         # Wrap the figure
         self._fig_scitex = FigWrapper(self._fig_mpl)

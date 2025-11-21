@@ -93,7 +93,7 @@ def create_figure_ax_mm(
     ...     'trace_thickness_mm': 0.12,
     ...     'tick_length_mm': 0.8,
     ...     'tick_thickness_mm': 0.2,
-    ...     'axis_font_size_pt': 8,
+    ...     'axis_font_size_pt': 7,
     ...     'tick_font_size_pt': 7,
     ... }
     >>> fig, ax = create_figure_ax_mm(
@@ -132,8 +132,11 @@ def create_figure_ax_mm(
     width = axis_width_mm / fig_width_mm
     height = axis_height_mm / fig_height_mm
 
-    # Create axes with exact position
+    # Create axes with exact position and transparent background if requested
     ax = fig.add_axes([left, bottom, width, height])
+    # Make axes background transparent when figure background is transparent
+    if fig.get_facecolor() == (0, 0, 0, 0) or fig.get_facecolor() == 'none':
+        ax.patch.set_alpha(0.0)
 
     # Apply styling if provided
     if style is not None:
@@ -189,8 +192,10 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
         - 'trace_thickness_mm' (float): Plot line width in mm (default: 0.12)
         - 'tick_length_mm' (float): Tick mark length in mm (default: 0.8)
         - 'tick_thickness_mm' (float): Tick mark width in mm (default: 0.2)
+        - 'tick_cap_width_mm' (float): Tick cap width in mm (default: 0.8)
         - 'axis_font_size_pt' (float): Axis label font size in points (default: 8)
         - 'tick_font_size_pt' (float): Tick label font size in points (default: 7)
+        - 'n_ticks' (int): Number of ticks on each axis (default: 4)
 
     Returns
     -------
@@ -205,7 +210,7 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
     ...     'trace_thickness_mm': 0.12,
     ...     'tick_length_mm': 0.8,
     ...     'tick_thickness_mm': 0.2,
-    ...     'axis_font_size_pt': 8,
+    ...     'axis_font_size_pt': 7,
     ...     'tick_font_size_pt': 7,
     ... }
     >>> trace_lw = apply_style_mm(ax, style)
@@ -227,21 +232,63 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
     trace_lw_pt = mm_to_pt(style.get("trace_thickness_mm", 0.12))
 
     # Configure tick parameters (all mm values converted to points)
+    # width = tick line thickness, length = tick line length
+    # pad = distance between ticks and tick labels (Nature-style: 1.5pt)
+    tick_pad_pt = style.get("tick_pad_pt", 1.5)
     ax.tick_params(
         direction="out",
         length=mm_to_pt(style.get("tick_length_mm", 0.8)),
         width=mm_to_pt(style.get("tick_thickness_mm", 0.2)),
+        pad=tick_pad_pt,  # Tight padding for Nature-style figures
     )
 
-    # Apply font sizes (already in points, no conversion needed)
-    axis_fs = style.get("axis_font_size_pt", 8)
+    # Apply font sizes and family (Arial for Nature-style look)
+    axis_fs = style.get("axis_font_size_pt", 7)
     tick_fs = style.get("tick_font_size_pt", 7)
+    title_fs = style.get("title_font_size_pt", 7)
+    legend_fs = style.get("legend_font_size_pt", 6)
+    label_pad_pt = style.get("label_pad_pt", 1.5)  # Nature-style tight padding
+    font_family = style.get("font_family", "Arial")
 
     ax.xaxis.label.set_fontsize(axis_fs)
+    ax.xaxis.label.set_fontfamily(font_family)
+    ax.xaxis.labelpad = label_pad_pt  # Set tight label padding
     ax.yaxis.label.set_fontsize(axis_fs)
+    ax.yaxis.label.set_fontfamily(font_family)
+    ax.yaxis.labelpad = label_pad_pt  # Set tight label padding
 
     for label in ax.get_xticklabels() + ax.get_yticklabels():
         label.set_fontsize(tick_fs)
+        label.set_fontfamily(font_family)
+
+    # Set title font, size, and padding
+    ax.title.set_fontfamily(font_family)
+    ax.title.set_fontsize(title_fs)
+
+    # Set title padding (distance from top of axes box)
+    # Nature-style: 4pt (tighter than matplotlib default ~6pt)
+    title_pad_pt = style.get("title_pad_pt", 4)
+    # Apply padding by re-setting the title with the pad parameter
+    # This works even if title is empty
+    ax.set_title(ax.get_title(), pad=title_pad_pt)
+
+    # Set legend font size if legend exists
+    legend = ax.get_legend()
+    if legend is not None:
+        for text in legend.get_texts():
+            text.set_fontsize(legend_fs)
+            text.set_fontfamily(font_family)
+
+    # Disable grids by default
+    ax.grid(False)
+
+    # Set number of ticks (3-4 ticks enforced)
+    n_ticks = style.get("n_ticks", 4)
+    if n_ticks is not None:
+        from matplotlib.ticker import MaxNLocator
+        # nbins=4 with min_n_ticks=3 will give 3-4 ticks
+        ax.xaxis.set_major_locator(MaxNLocator(nbins=n_ticks, min_n_ticks=3))
+        ax.yaxis.set_major_locator(MaxNLocator(nbins=n_ticks, min_n_ticks=3))
 
     # Return trace linewidth for use in plotting
     return trace_lw_pt

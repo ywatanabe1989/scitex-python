@@ -127,7 +127,8 @@ class AxesWrapper:
             array_compatible[idx] = ax
         return array_compatible.reshape(self._axes_scitex.shape)
 
-    def legend(self, loc="upper left"):
+    def legend(self, loc="best"):
+        """Add legend to all axes with 'best' automatic placement by default."""
         return [ax.legend(loc=loc) for ax in self._axes_scitex.flat]
 
     @property

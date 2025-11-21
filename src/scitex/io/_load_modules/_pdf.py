@@ -60,7 +60,7 @@ except ImportError:
     PANDAS_AVAILABLE = False
 
 
-def _load_pdf(lpath: str, mode: str = "full", **kwargs) -> Any:
+def _load_pdf(lpath: str, mode: str = "full", metadata: bool = False, **kwargs) -> Any:
     """
     Load PDF file with comprehensive extraction capabilities.
 
@@ -75,6 +75,8 @@ def _load_pdf(lpath: str, mode: str = "full", **kwargs) -> Any:
             - 'images': Extract images with metadata
             - 'metadata': PDF metadata only
             - 'pages': Page-by-page extraction
+        metadata: If True, return (result, metadata_dict) tuple for API consistency with images.
+            If False (default), return result only. (default: False)
         **kwargs: Additional arguments
             - backend: 'auto' (default), 'fitz', 'pdfplumber', or 'pypdf2'
             - clean_text: Clean extracted text (default: True)
@@ -84,15 +86,21 @@ def _load_pdf(lpath: str, mode: str = "full", **kwargs) -> Any:
             - table_settings: Dict of pdfplumber table extraction settings
 
     Returns:
-        Extracted content based on mode:
-        - 'text': str
-        - 'sections': Dict[str, str]
-        - 'tables': Dict[int, List[pd.DataFrame]]
-        - 'images': List[Dict] with image metadata
-        - 'metadata': Dict with PDF metadata
-        - 'pages': List[Dict] with page content
-        - 'full': Dict with comprehensive extraction (text, sections, metadata, pages, tables, images, stats)
-        - 'scientific': Dict with scientific paper extraction (text, sections, metadata, tables, images, stats)
+        Extracted content based on mode and metadata parameter:
+
+        When metadata=False (default):
+            - 'text': str
+            - 'sections': Dict[str, str]
+            - 'tables': Dict[int, List[pd.DataFrame]]
+            - 'images': List[Dict] with image metadata
+            - 'metadata': Dict with PDF metadata
+            - 'pages': List[Dict] with page content
+            - 'full': Dict with comprehensive extraction
+            - 'scientific': Dict with scientific paper extraction
+
+        When metadata=True:
+            - Returns: (result, metadata_dict) tuple
+            - metadata_dict contains embedded scitex metadata from PDF Subject field
 
     Examples:
         >>> import scitex.io as stx
@@ -100,25 +108,18 @@ def _load_pdf(lpath: str, mode: str = "full", **kwargs) -> Any:
         >>> # Full extraction (default) - everything included
         >>> data = stx.load("paper.pdf")
         >>> print(data['full_text'])      # Complete text
-        >>> print(data['sections'])       # Parsed sections
-        >>> print(data['tables'])         # All tables as DataFrames
         >>> print(data['metadata'])       # PDF metadata
-        >>> print(data['pages'])          # Page-by-page content
-        >>> print(data['stats'])          # Statistics
 
-        >>> # Scientific mode (recommended for papers) - optimized for research
+        >>> # With metadata tuple (consistent with images)
+        >>> data, meta = stx.load("paper.pdf", metadata=True)
+        >>> print(meta['scitex']['version'])  # Embedded scitex metadata
+
+        >>> # Scientific mode
         >>> paper = stx.load("paper.pdf", mode="scientific")
-        >>> print(paper['text'])          # Full text
-        >>> print(paper['sections'])      # Sections (Abstract, Methods, etc.)
-        >>> print(paper['tables'])        # All tables as DataFrames
-        >>> print(paper['images'])        # Image metadata
-        >>> print(paper['stats'])         # Content statistics
+        >>> print(paper['sections'])
 
-        >>> # Simple text extraction only
+        >>> # Simple text extraction
         >>> text = stx.load("paper.pdf", mode="text")
-
-        >>> # Extract tables only
-        >>> tables = stx.load("paper.pdf", mode="tables")
     """
     mode = kwargs.get("mode", mode)
     backend = kwargs.get("backend", "auto")
@@ -146,26 +147,26 @@ def _load_pdf(lpath: str, mode: str = "full", **kwargs) -> Any:
 
     # Extract based on mode
     if mode == "text":
-        return _extract_text(lpath, backend, clean_text)
+        result = _extract_text(lpath, backend, clean_text)
     elif mode == "sections":
-        return _extract_sections(lpath, backend, clean_text)
+        result = _extract_sections(lpath, backend, clean_text)
     elif mode == "tables":
-        return _extract_tables(lpath, table_settings)
+        result = _extract_tables(lpath, table_settings)
     elif mode == "images":
         save_as_jpg = kwargs.get("save_as_jpg", True)
-        return _extract_images(lpath, output_dir, save_as_jpg)
+        result = _extract_images(lpath, output_dir, save_as_jpg)
     elif mode == "metadata":
-        return _extract_metadata(lpath, backend)
+        result = _extract_metadata(lpath, backend)
     elif mode == "pages":
-        return _extract_pages(lpath, backend, clean_text)
+        result = _extract_pages(lpath, backend, clean_text)
     elif mode == "scientific":
         save_as_jpg = kwargs.get("save_as_jpg", True)
-        return _extract_scientific(
+        result = _extract_scientific(
             lpath, clean_text, output_dir, table_settings, save_as_jpg
         )
     elif mode == "full":
         save_as_jpg = kwargs.get("save_as_jpg", True)
-        return _extract_full(
+        result = _extract_full(
             lpath,
             backend,
             clean_text,
@@ -176,6 +177,19 @@ def _load_pdf(lpath: str, mode: str = "full", **kwargs) -> Any:
         )
     else:
         raise ValueError(f"Unknown extraction mode: {mode}")
+
+    # If metadata parameter is True, return tuple (result, metadata_dict)
+    # This provides API consistency with image loading
+    if metadata:
+        try:
+            from .._metadata import read_metadata
+            metadata_dict = read_metadata(lpath)
+            return result, metadata_dict
+        except Exception:
+            # If metadata extraction fails, return with None
+            return result, None
+
+    return result
 
 
 def _select_backend(mode: str, requested: str) -> str:
@@ -597,6 +611,23 @@ def _extract_metadata(lpath: str, backend: str) -> Dict[str, Any]:
                 }
             )
 
+            # Try to parse scitex metadata from subject field (for consistency with PNG)
+            subject = pdf_metadata.get("subject", "")
+            if subject:
+                try:
+                    import json
+                    # Check if subject is JSON (scitex metadata)
+                    parsed_subject = json.loads(subject)
+                    if isinstance(parsed_subject, dict):
+                        # Merge parsed scitex metadata with standard PDF metadata
+                        # This makes PDF metadata format consistent with PNG
+                        metadata.update(parsed_subject)
+                        # Remove the raw JSON string from subject to avoid duplication
+                        metadata.pop("subject", None)
+                except (json.JSONDecodeError, ValueError):
+                    # Not JSON, keep subject as string
+                    pass
+
             doc.close()
 
         except Exception as e:
@@ -610,6 +641,23 @@ def _extract_metadata(lpath: str, backend: str) -> Dict[str, Any]:
                 metadata["pages"] = len(pdf.pages)
                 if hasattr(pdf, "metadata"):
                     metadata.update(pdf.metadata)
+
+                # Try to parse scitex metadata from subject field (for consistency with PNG)
+                if "Subject" in metadata or "subject" in metadata:
+                    subject = metadata.get("Subject") or metadata.get("subject", "")
+                    if subject:
+                        try:
+                            import json
+                            parsed_subject = json.loads(subject)
+                            if isinstance(parsed_subject, dict):
+                                # Merge parsed scitex metadata with standard PDF metadata
+                                metadata.update(parsed_subject)
+                                # Remove the raw JSON string from subject to avoid duplication
+                                metadata.pop("Subject", None)
+                                metadata.pop("subject", None)
+                        except (json.JSONDecodeError, ValueError):
+                            # Not JSON, keep subject as string
+                            pass
         except Exception as e:
             logger.error(f"Error extracting metadata with pdfplumber: {e}")
 
@@ -636,6 +684,21 @@ def _extract_metadata(lpath: str, backend: str) -> Dict[str, Any]:
 
             metadata["pages"] = len(reader.pages)
             metadata["encrypted"] = reader.is_encrypted
+
+            # Try to parse scitex metadata from subject field (for consistency with PNG)
+            subject = metadata.get("subject", "")
+            if subject:
+                try:
+                    import json
+                    parsed_subject = json.loads(subject)
+                    if isinstance(parsed_subject, dict):
+                        # Merge parsed scitex metadata with standard PDF metadata
+                        metadata.update(parsed_subject)
+                        # Remove the raw JSON string from subject to avoid duplication
+                        metadata.pop("subject", None)
+                except (json.JSONDecodeError, ValueError):
+                    # Not JSON, keep subject as string
+                    pass
 
         except Exception as e:
             logger.error(f"Error extracting metadata with PyPDF2: {e}")

@@ -159,6 +159,7 @@ def save(
     use_caller_path: bool = False,
     auto_crop: bool = False,
     crop_margin_mm: float = 1.0,
+    metadata_extra: dict = None,
     **kwargs,
 ) -> None:
     """
@@ -190,6 +191,17 @@ def save(
         If True, intelligently determine the script path by skipping internal library frames.
         This is useful when stx.io.save is called from within scitex library code.
         Default is False.
+    metadata_extra : dict, optional
+        Additional metadata to merge with auto-collected metadata. Useful for specifying
+        plot_type, style information, etc. Example:
+            metadata_extra = {
+                "plot_type": "line",
+                "style": {
+                    "name": "SCITEX_STYLE",
+                    "overrides": {"ax_width_mm": 50}
+                }
+            }
+        Default is None.
     **kwargs
         Additional keyword arguments to pass to the underlying save function of the specific format.
 
@@ -413,6 +425,7 @@ def save(
             no_csv=no_csv,
             auto_crop=auto_crop,
             crop_margin_mm=crop_margin_mm,
+            metadata_extra=metadata_extra,
             **kwargs,
         )
 
@@ -487,6 +500,7 @@ def _save(
     symlink_to=None,
     auto_crop=False,
     crop_margin_mm=1.0,
+    metadata_extra=None,
     **kwargs,
 ):
     # Don't use object's own save method - use consistent handlers
@@ -519,6 +533,7 @@ def _save(
                 dry_run=dry_run,
                 auto_crop=auto_crop,
                 crop_margin_mm=crop_margin_mm,
+                metadata_extra=metadata_extra,
                 **kwargs,
             )
         elif ext in [".hdf5", ".h5", ".zarr"]:
@@ -631,6 +646,7 @@ def _handle_image_with_csv(
     symlink_to=None,
     auto_crop=True,
     crop_margin_mm=1.0,
+    metadata_extra=None,
     **kwargs,
 ):
     """Handle image file saving with optional CSV export and auto-cropping."""
@@ -638,6 +654,7 @@ def _handle_image_with_csv(
         return
 
     # Auto-collect metadata from scitex figures if not explicitly provided
+    collected_metadata = None
     if 'metadata' not in kwargs or kwargs['metadata'] is None:
         try:
             # Check if this is a matplotlib figure or scitex wrapper
@@ -661,10 +678,15 @@ def _handle_image_with_csv(
                 # Collect metadata using scitex's metadata collector
                 try:
                     from scitex.plt.utils import collect_figure_metadata
-                    auto_metadata = collect_figure_metadata(fig_mpl, ax)
+
+                    # Extract plot_id from filename (e.g., "01_plot.png" -> "01_plot")
+                    plot_id = _os.path.splitext(_os.path.basename(spath))[0]
+
+                    auto_metadata = collect_figure_metadata(fig_mpl, ax, plot_id=plot_id)
 
                     if auto_metadata:
                         kwargs['metadata'] = auto_metadata
+                        collected_metadata = auto_metadata  # Save for JSON export
                         if verbose:
                             logger.info("  • Auto-collected metadata from figure")
                 except ImportError:
@@ -675,6 +697,31 @@ def _handle_image_with_csv(
                         warnings.warn(f"Could not auto-collect metadata: {e}")
         except Exception:
             pass  # Silently continue if auto-collection fails
+    else:
+        # Use explicitly provided metadata
+        collected_metadata = kwargs.get('metadata')
+
+    # Merge metadata_extra with collected_metadata
+    if metadata_extra is not None and collected_metadata is not None:
+        # Deep merge: metadata_extra takes precedence
+        import copy
+        collected_metadata = copy.deepcopy(collected_metadata)
+
+        # If metadata_extra has plot_type and it doesn't exist in collected, add it
+        if 'plot_type' in metadata_extra:
+            collected_metadata['plot_type'] = metadata_extra['plot_type']
+
+        # Merge style information
+        if 'style' in metadata_extra:
+            collected_metadata['style'] = metadata_extra['style']
+
+        # Merge any other fields from metadata_extra
+        for key, value in metadata_extra.items():
+            if key not in ['plot_type', 'style']:
+                collected_metadata[key] = value
+
+        # Update kwargs metadata for image saving
+        kwargs['metadata'] = collected_metadata
 
     save_image(obj, spath, verbose=verbose, **kwargs)
 
@@ -829,6 +876,62 @@ def _handle_image_with_csv(
             warnings.warn(f"CSV export failed: {e}")
             import traceback
 
+            traceback.print_exc()
+
+    # Save metadata as JSON if collected
+    if collected_metadata is not None and not dry_run:
+        try:
+            # Save JSON in same directory as image with .json extension
+            # Example: ./path/to/output/fig.png -> ./path/to/output/fig.json
+            json_path = _os.path.splitext(spath)[0] + ".json"
+
+            # Ensure parent directory exists (should already exist from image save)
+            _os.makedirs(_os.path.dirname(json_path), exist_ok=True)
+
+            # Save metadata as JSON
+            _save(
+                collected_metadata,
+                json_path,
+                verbose=True,
+                symlink_from_cwd=False,  # Will handle symlink manually
+                dry_run=dry_run,
+                no_csv=True,
+            )
+
+            # Create symlink_to for JSON if it was specified for the image
+            if symlink_to:
+                json_symlink_to = _os.path.splitext(symlink_to)[0] + ".json"
+                _symlink_to(json_path, json_symlink_to, True)
+
+            # Create symlink for JSON manually if needed
+            if symlink_from_cwd:
+                # Get the relative path from the original specified path
+                # This preserves the directory structure for the symlink
+                import inspect
+
+                frame_info = inspect.stack()
+                # Find the original specified_path from the parent save() call
+                for frame in frame_info:
+                    if "specified_path" in frame.frame.f_locals:
+                        original_path = frame.frame.f_locals["specified_path"]
+                        if isinstance(original_path, str):
+                            # Replace extension to get JSON path structure
+                            json_relative = original_path.replace(
+                                _os.path.splitext(original_path)[1],
+                                ".json",
+                            )
+                            json_cwd = _os.path.join(_os.getcwd(), json_relative)
+                            _symlink(json_path, json_cwd, True, True)
+                            break
+                else:
+                    # Fallback to basename if we can't find the original path
+                    json_cwd = _os.getcwd() + "/" + _os.path.basename(json_path)
+                    _symlink(json_path, json_cwd, True, True)
+
+        except Exception as e:
+            import warnings
+            warnings.warn(f"JSON metadata export failed: {e}")
+            import traceback
             traceback.print_exc()
 
 

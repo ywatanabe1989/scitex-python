@@ -92,15 +92,25 @@ class MatplotlibPlotMixin:
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
+            # Get line width from kwargs or use default (0.2mm for KDE)
+            from scitex.plt.utils import mm_to_pt
+            if 'linewidth' not in kwargs and 'lw' not in kwargs:
+                kwargs['linewidth'] = mm_to_pt(0.2)  # Default 0.2mm for KDE
+
+            # Set default color to black (customizable via color kwarg)
+            if 'color' not in kwargs and 'c' not in kwargs:
+                kwargs['color'] = 'black'
+
             # Filled Line
             if fill:
                 self._axis_mpl.fill_between(
                     xx,
                     density,
+                    **kwargs,
                 )
             # Simple Line
             else:
-                self._axis_mpl.plot(xx, density)
+                self._axis_mpl.plot(xx, density, **kwargs)
 
         # Tracking
         tracked_dict = {
