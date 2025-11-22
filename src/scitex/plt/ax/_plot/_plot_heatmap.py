@@ -144,9 +144,17 @@ def _mpl_heatmap(
     # Plot the heatmap
     im = ax.imshow(data, **kwargs)
 
-    # Create colorbar
+    # Create colorbar with proper formatting
     cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
     cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
+
+    # Set colorbar border width to match axes spines
+    cbar.outline.set_linewidth(0.2 * 2.83465)  # 0.2mm in points
+
+    # Format colorbar ticks
+    from matplotlib.ticker import MaxNLocator
+    cbar.ax.yaxis.set_major_locator(MaxNLocator(nbins=4, min_n_ticks=3))
+    cbar.ax.tick_params(width=0.2 * 2.83465, length=0.8 * 2.83465)  # Match tick styling
 
     # Show all ticks and label them with the respective list entries.
     ax.set_xticks(
@@ -161,8 +169,11 @@ def _mpl_heatmap(
     # Let the horizontal axes labeling appear on top.
     ax.tick_params(top=False, bottom=True, labeltop=False, labelbottom=True)
 
-    # Turn spines off
-    ax.spines[:].set_visible(False)
+    # Show all 4 spines for heatmap
+    ax.spines[:].set_visible(True)
+
+    # Set aspect ratio to 'equal' for square cells (1:1)
+    ax.set_aspect('equal', adjustable='box')
 
     ax.set_xticks(np.arange(data.shape[1] + 1) - 0.5, minor=True)
     ax.set_yticks(np.arange(data.shape[0] + 1) - 0.5, minor=True)

@@ -830,6 +830,8 @@ flycheck_*.el
 # SigMacro - embedded git repository
 SigMacro/
 **/.claude/settings.local.json
+.claude/
+viewed*.md
 
 # Embedded git repositories (should be submodules)
 examples/**/pip-project-template/
@@ -885,3 +887,4 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+output/

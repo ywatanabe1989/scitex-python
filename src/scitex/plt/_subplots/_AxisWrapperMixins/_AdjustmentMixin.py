@@ -60,7 +60,7 @@ class AdjustmentMixin:
             tight_layout=tight_layout
         )
 
-    def legend(self, *args, loc: str = "upper left", **kwargs) -> None:
+    def legend(self, *args, loc: str = "best", check_overlap: bool = False, **kwargs) -> None:
         """Places legend at specified location, with support for outside positions.
 
         Parameters
@@ -68,13 +68,18 @@ class AdjustmentMixin:
         *args : tuple
             Positional arguments (handles, labels) as in matplotlib
         loc : str
-            Legend position. Standard matplotlib positions plus:
+            Legend position. Default is "best" (matplotlib auto-placement).
+            Standard matplotlib positions plus:
+            - "best": Matplotlib automatic placement (default)
             - "outer": Automatically place legend outside plot area (right side)
             - "separate": Save legend as a separate figure file
             - upper/lower/center variants: e.g. "upper right out", "lower left out"
             - directional shortcuts: "right", "left", "upper", "lower"
             - center variants: "center right out", "center left out"
             - alternative formats: "right upper out", "left lower out" etc.
+        check_overlap : bool
+            If True, checks for overlap between legend and data after placement.
+            Issues warning with suggestion if significant overlap detected.
         **kwargs : dict
             Additional keyword arguments passed to legend()
             For "separate": can include 'filename' (default: 'legend.png')
@@ -202,10 +207,94 @@ class AdjustmentMixin:
             "lower out": ("upper center", (0.5, -0.25)),
         }
 
+        # Place the legend
         if loc in outside_positions:
             location, bbox = outside_positions[loc]
-            return self._axis_mpl.legend(*args, loc=location, bbox_to_anchor=bbox, **kwargs)
-        return self._axis_mpl.legend(*args, loc=loc, **kwargs)
+            legend_obj = self._axis_mpl.legend(*args, loc=location, bbox_to_anchor=bbox, **kwargs)
+        else:
+            legend_obj = self._axis_mpl.legend(*args, loc=loc, **kwargs)
+
+        # Check for overlap if requested
+        if check_overlap and legend_obj is not None:
+            self._check_legend_overlap(legend_obj)
+
+        return legend_obj
+
+    def _check_legend_overlap(self, legend_obj):
+        """Check if legend overlaps with plotted data and issue warning if needed.
+
+        Parameters
+        ----------
+        legend_obj : matplotlib.legend.Legend
+            The legend object to check for overlap
+        """
+        import warnings
+        import matplotlib.transforms as transforms
+
+        try:
+            # Get the legend's bounding box in display coordinates
+            fig = self._axis_mpl.get_figure()
+            fig.canvas.draw()  # Force draw to get accurate bounding boxes
+
+            legend_bbox = legend_obj.get_window_extent(fig.canvas.get_renderer())
+
+            # Convert to axis coordinates for easier comparison
+            inv_transform = self._axis_mpl.transData.inverted()
+            legend_bbox_data = legend_bbox.transformed(inv_transform)
+
+            # Get data bounding boxes for all artists (lines, scatter, etc.)
+            data_bboxes = []
+
+            for line in self._axis_mpl.get_lines():
+                if line.get_visible():
+                    try:
+                        data = line.get_xydata()
+                        if len(data) > 0:
+                            data_bboxes.append(data)
+                    except:
+                        pass
+
+            for collection in self._axis_mpl.collections:
+                if collection.get_visible():
+                    try:
+                        offsets = collection.get_offsets()
+                        if len(offsets) > 0:
+                            data_bboxes.append(offsets)
+                    except:
+                        pass
+
+            # Check for overlap
+            if data_bboxes:
+                import numpy as np
+                all_data = np.vstack(data_bboxes)
+
+                # Count how many data points fall within legend bbox
+                x_overlap = (all_data[:, 0] >= legend_bbox_data.x0) & (all_data[:, 0] <= legend_bbox_data.x1)
+                y_overlap = (all_data[:, 1] >= legend_bbox_data.y0) & (all_data[:, 1] <= legend_bbox_data.y1)
+                overlap_points = np.sum(x_overlap & y_overlap)
+
+                # Calculate overlap percentage
+                overlap_pct = (overlap_points / len(all_data)) * 100
+
+                # Warn if significant overlap (>5% of data points)
+                if overlap_pct > 5:
+                    warnings.warn(
+                        f"Legend overlaps with {overlap_pct:.1f}% of data points. "
+                        f"Consider using:\n"
+                        f"  - ax.legend(loc='outer')  # Place outside plot area\n"
+                        f"  - ax.legend(loc='separate')  # Save as separate file\n"
+                        f"  - Manually adjust with loc='upper left', 'lower right', etc.",
+                        UserWarning,
+                        stacklevel=3
+                    )
+                    return True  # Overlap detected
+
+        except Exception as e:
+            # Silently fail if overlap detection doesn't work
+            # (Some plot types may not support this)
+            pass
+
+        return False  # No significant overlap
 
     def set_xyt(
         self,
