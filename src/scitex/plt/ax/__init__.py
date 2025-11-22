@@ -12,9 +12,11 @@ __DIR__ = os.path.dirname(__FILE__)
 # Adjust
 from ._style._add_marginal_ax import add_marginal_ax
 from ._style._add_panel import add_panel, panel
+from ._style._auto_scale_axis import auto_scale_axis
 from ._style._extend import extend
 from ._style._force_aspect import force_aspect
-from ._style._format_label import format_label
+from ._style._format_label import format_label as format_label_old
+from ._style._format_units import format_label, format_label_auto
 from ._style._hide_spines import hide_spines
 from ._style._show_spines import (
     show_spines,
@@ -48,6 +50,11 @@ from ._style._set_log_scale import (
     smart_log_limits,
     add_log_scale_indicator,
 )
+from ._style._style_boxplot import style_boxplot
+from ._style._style_errorbar import style_errorbar
+from ._style._style_barplot import style_barplot
+from ._style._style_scatter import style_scatter
+from ._style._style_suptitles import style_suptitles
 
 # Plot
 from ._plot._plot_heatmap import plot_heatmap
@@ -69,6 +76,7 @@ from ._plot._plot_statistical_shaded_line import (
     plot_mean_ci,
     plot_median_iqr,
 )
+from ._plot._add_fitted_line import add_fitted_line
 
 
 # ################################################################################

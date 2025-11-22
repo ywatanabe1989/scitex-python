@@ -63,14 +63,108 @@ class FigWrapper:
         attrs.update(dir(self._fig_mpl))
         return sorted(attrs)
 
-    # def savefig(self, fname, *args, **kwargs):
-    #     if not self._called_from_mng_io_save:
-    #         warnings.warn(
-    #             f"Instead of `FigWrapper.savefig({fname})`, use `scitex.io.save(fig, {fname}, symlink_from_cwd=True)` to handle symlink and export as csv.",
-    #             UserWarning,
-    #         )
-    #         self._called_from_mng_io_save = False
-    #     self._fig_mpl.savefig(fname, *args, **kwargs)
+    def savefig(self, fname, *args, embed_metadata=True, metadata=None, **kwargs):
+        """
+        Save figure with automatic metadata embedding.
+
+        Parameters
+        ----------
+        fname : str
+            Output file path
+        embed_metadata : bool, optional
+            Automatically embed dimension/style metadata in PNG/JPEG/TIFF/PDF (default: True)
+        metadata : dict, optional
+            Additional custom metadata to merge with auto-collected metadata
+        *args, **kwargs
+            Passed to scitex.io.save_image or matplotlib savefig
+
+        Notes
+        -----
+        For PNG/JPEG/TIFF/PDF formats, metadata is automatically embedded including:
+        - Software versions (scitex, matplotlib)
+        - Timestamp
+        - Figure/axes dimensions (mm, inch, px)
+        - DPI settings
+        - Styling parameters (if available via _scitex_metadata)
+        - Mode (display/publication)
+
+        For other formats (SVG, etc.), delegates to matplotlib's savefig.
+
+        Examples
+        --------
+        >>> fig, ax = splt.subplots(fig_mm={'width': 35, 'height': 24.5})
+        >>> ax.plot(x, y)
+        >>> fig.savefig('result.png', dpi=300)  # Metadata embedded automatically!
+
+        >>> # Add custom metadata
+        >>> fig.savefig('result.png', dpi=300, metadata={'experiment': 'test_001'})
+
+        >>> # Disable metadata embedding
+        >>> fig.savefig('result.png', embed_metadata=False)
+        """
+        # Check if this is a format that can have metadata (PNG/JPEG/TIFF/PDF)
+        is_image_format = fname.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.tif', '.pdf'))
+
+        if is_image_format and embed_metadata:
+            # Collect automatic metadata
+            auto_metadata = None
+
+            # Get first axes if available
+            ax = None
+            if hasattr(self, 'axes'):
+                try:
+                    # Try to get first axes from various wrapper types
+                    if hasattr(self.axes, '_ax'):  # AxisWrapper
+                        ax = self.axes._ax
+                    elif hasattr(self.axes, '_axis_mpl'):  # Alternative
+                        ax = self.axes._axis_mpl
+                    elif hasattr(self.axes, 'flatten'):  # AxesWrapper
+                        flat = list(self.axes.flatten())
+                        if flat and hasattr(flat[0], '_ax'):
+                            ax = flat[0]._ax
+                        elif flat and hasattr(flat[0], '_axis_mpl'):
+                            ax = flat[0]._axis_mpl
+                except Exception:
+                    pass
+
+            # If still no axes, try from figure
+            if ax is None and hasattr(self._fig_mpl, 'axes') and len(self._fig_mpl.axes) > 0:
+                ax = self._fig_mpl.axes[0]
+
+            # Collect metadata
+            try:
+                from scitex.plt.utils import collect_figure_metadata
+                auto_metadata = collect_figure_metadata(self._fig_mpl, ax)
+
+                # Merge with custom metadata
+                if metadata:
+                    if 'custom' not in auto_metadata:
+                        auto_metadata['custom'] = {}
+                    auto_metadata['custom'].update(metadata)
+            except Exception as e:
+                # If metadata collection fails, warn but continue
+                import warnings
+                warnings.warn(f"Could not collect metadata: {e}")
+                auto_metadata = metadata
+
+            # Use scitex.io.save_image for metadata embedding
+            try:
+                from scitex.io._save_modules import save_image
+                save_image(
+                    self._fig_mpl,
+                    fname,
+                    metadata=auto_metadata,
+                    *args,
+                    **kwargs
+                )
+            except Exception as e:
+                # Fallback to regular matplotlib savefig
+                import warnings
+                warnings.warn(f"Metadata embedding failed, using regular savefig: {e}")
+                self._fig_mpl.savefig(fname, *args, **kwargs)
+        else:
+            # For non-image formats or when metadata disabled, use regular savefig
+            self._fig_mpl.savefig(fname, *args, **kwargs)
 
     def export_as_csv(self):
         """Export plotted data from all axes.
@@ -186,8 +280,8 @@ class FigWrapper:
                     for ax in self.axes:
                         yield ax
 
-    def legend(self, *args, loc="upper left", **kwargs):
-        """Legend with upper left by default for all axes."""
+    def legend(self, *args, loc="best", **kwargs):
+        """Legend with 'best' automatic placement by default for all axes."""
         for ax in self._traverse_axes():
             try:
                 ax.legend(*args, loc=loc, **kwargs)

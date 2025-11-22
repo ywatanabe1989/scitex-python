@@ -54,9 +54,9 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
         # matplotlib
         else:
             try:
-                obj.savefig(spath)
+                obj.savefig(spath, **kwargs)
             except:
-                obj.figure.savefig(spath)
+                obj.figure.savefig(spath, **kwargs)
         del obj
 
     # tiff
@@ -66,10 +66,13 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
             obj.save(spath)
         # matplotlib
         else:
+            # Use kwargs dpi if provided, otherwise default to 300
+            save_kwargs = {'format': 'tiff', 'dpi': kwargs.get('dpi', 300)}
+            save_kwargs.update(kwargs)
             try:
-                obj.savefig(spath, dpi=300, format="tiff")
+                obj.savefig(spath, **save_kwargs)
             except:
-                obj.figure.savefig(spath, dpi=300, format="tiff")
+                obj.figure.savefig(spath, **save_kwargs)
 
         del obj
 
@@ -82,23 +85,27 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
             obj.write_image(buf, format="png")
             buf.seek(0)
             img = Image.open(buf)
-            img.convert("RGB").save(spath, "JPEG")
+            img.convert("RGB").save(spath, "JPEG", quality=100, subsampling=0, optimize=False)
             buf.close()
 
         # PIL image
         elif isinstance(obj, Image.Image):
-            obj.save(spath)
+            # Save with maximum quality for JPEG (quality=100 for daily use)
+            obj.save(spath, quality=100, subsampling=0, optimize=False)
 
         # matplotlib
         else:
+            save_kwargs = {'format': 'png'}
+            save_kwargs.update(kwargs)
             try:
-                obj.savefig(buf, format="png")
+                obj.savefig(buf, **save_kwargs)
             except:
-                obj.figure.savefig(buf, format="png")
+                obj.figure.savefig(buf, **save_kwargs)
 
             buf.seek(0)
             img = Image.open(buf)
-            img.convert("RGB").save(spath, "JPEG")
+            # Save JPEG with very high quality settings for daily use (quality=98 is near-lossless)
+            img.convert("RGB").save(spath, "JPEG", quality=100, subsampling=0, optimize=False)
             buf.close()
         del obj
 
@@ -118,10 +125,12 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
         # matplotlib
         else:
             buf = _io.BytesIO()
+            save_kwargs = {'format': 'png'}
+            save_kwargs.update(kwargs)
             try:
-                obj.savefig(buf, format="png")
+                obj.savefig(buf, **save_kwargs)
             except:
-                obj.figure.savefig(buf, format="png")
+                obj.figure.savefig(buf, **save_kwargs)
             buf.seek(0)
             img = Image.open(buf)
             img.save(spath, "GIF")
@@ -135,10 +144,12 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
             obj.write_image(file=spath, format="svg")
         # Matplotlib
         else:
+            save_kwargs = {'format': 'svg'}
+            save_kwargs.update(kwargs)
             try:
-                obj.savefig(spath, format="svg")
+                obj.savefig(spath, **save_kwargs)
             except AttributeError:
-                obj.figure.savefig(spath, format="svg")
+                obj.figure.savefig(spath, **save_kwargs)
         del obj
 
     # PDF
@@ -157,10 +168,12 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
                 obj.save(spath, "PDF")
         # Matplotlib
         else:
+            save_kwargs = {'format': 'pdf'}
+            save_kwargs.update(kwargs)
             try:
-                obj.savefig(spath, format="pdf")
+                obj.savefig(spath, **save_kwargs)
             except AttributeError:
-                obj.figure.savefig(spath, format="pdf")
+                obj.figure.savefig(spath, **save_kwargs)
         del obj
 
     # Embed metadata if provided
