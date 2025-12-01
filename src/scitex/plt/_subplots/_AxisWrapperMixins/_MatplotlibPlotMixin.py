@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-18 17:51:44 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_AxisWrapperMixins/_MatplotlibPlotMixin.py
+# Timestamp: "2025-12-01 12:00:00 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_AxisWrapperMixins/_MatplotlibPlotMixin.py
 # ----------------------------------------
 import os
 
@@ -19,6 +19,15 @@ from scipy.stats import gaussian_kde
 
 from scitex.pd import to_xyz
 from scitex.types import ArrayLike
+from scitex.plt.utils import mm_to_pt
+
+
+# ============================================================================
+# Constants for default styling (same as styles/_plot_defaults.py)
+# ============================================================================
+DEFAULT_LINE_WIDTH_MM = 0.2
+DEFAULT_MARKER_SIZE_MM = 0.8
+DEFAULT_FILL_ALPHA = 0.3
 
 
 class MatplotlibPlotMixin:
@@ -75,7 +84,7 @@ class MatplotlibPlotMixin:
             kwargs["label"] = f"{kwargs['label']} (n={n_samples})"
 
         # Xlim (kwargs["xlim"] is not accepted in downstream plotters)
-        xlim = kwargs.get("xlim")
+        xlim = kwargs.pop("xlim", None)
         if not xlim:
             xlim = (np.nanmin(data), np.nanmax(data))
 
@@ -100,6 +109,10 @@ class MatplotlibPlotMixin:
             # Set default color to black (customizable via color kwarg)
             if 'color' not in kwargs and 'c' not in kwargs:
                 kwargs['color'] = 'black'
+
+            # Set default linestyle to dashed (customizable via linestyle kwarg)
+            if 'linestyle' not in kwargs and 'ls' not in kwargs:
+                kwargs['linestyle'] = '--'
 
             # Filled Line
             if fill:
@@ -230,7 +243,7 @@ class MatplotlibPlotMixin:
         track: bool = True,
         id: Optional[str] = None,
         **kwargs,
-    ) -> None:
+    ) -> dict:
         # Method Name for downstream csv exporting
         method_name = "plot_box"
 
@@ -242,9 +255,13 @@ class MatplotlibPlotMixin:
         if kwargs.get("label"):
             kwargs["label"] = kwargs["label"] + f" (n={n})"
 
+        # Enable patch_artist for styling (fill colors, edges)
+        if "patch_artist" not in kwargs:
+            kwargs["patch_artist"] = True
+
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl.boxplot(data, **kwargs)
+            result = self._axis_mpl.boxplot(data, **kwargs)
 
         # Tracking
         tracked_dict = {
@@ -253,7 +270,11 @@ class MatplotlibPlotMixin:
         }
         self._track(track, id, method_name, tracked_dict, None)
 
-        return self._axis_mpl
+        # Apply style_boxplot automatically for publication quality
+        from scitex.plt.ax import style_boxplot
+        style_boxplot(result)
+
+        return result
         
     def hist(
         self,
@@ -1026,8 +1047,12 @@ class MatplotlibPlotMixin:
         return result
 
     def plot_boxplot(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
-        """Wrapper for matplotlib boxplot with tracking support."""
+        """Wrapper for matplotlib boxplot with tracking support and auto-styling."""
         method_name = "plot_boxplot"
+
+        # Enable patch_artist for styling (fill colors, edges)
+        if "patch_artist" not in kwargs:
+            kwargs["patch_artist"] = True
 
         with self._no_tracking():
             result = self._axis_mpl.boxplot(*args, **kwargs)
@@ -1040,6 +1065,10 @@ class MatplotlibPlotMixin:
             else:
                 tracked_dict = {"boxplot_df": pd.DataFrame({"data": data})}
             self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply style_boxplot automatically for publication quality
+        from scitex.plt.ax import style_boxplot
+        style_boxplot(result)
 
         return result
 
