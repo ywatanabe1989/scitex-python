@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_25_plot_rectangle.py
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_25_stx_rectangle.py
 
 """ax.stx_rectangle(x, y, w, h) - Rectangle annotation."""
 
 import numpy as np
 
 
-def demo_plot_rectangle(fig, ax, stx):
+def demo_stx_rectangle(fig, ax, stx):
     """ax.stx_rectangle(x, y, w, h) - Rectangle annotation."""
     # Add rectangles (no edge by default for publication figures)
     ax.stx_rectangle(1, 0, 3, 2, id="rect1")

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_03_plot_mean_std.py
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_03_stx_mean_std.py
 
 """ax.stx_mean_std(values_2d) - Mean with standard deviation shading."""
 
 import numpy as np
 
 
-def demo_plot_mean_std(fig, ax, stx):
+def demo_stx_mean_std(fig, ax, stx):
     """ax.stx_mean_std(values_2d) - Mean with standard deviation shading."""
     np.random.seed(42)
     xx = np.linspace(0, 10, 20)
