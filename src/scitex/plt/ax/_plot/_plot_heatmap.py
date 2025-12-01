@@ -1,66 +1,85 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-02 22:21:41 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/ax/_plot/_plot_heatmap.py
-# ----------------------------------------
-import os
+# Timestamp: "2025-12-01 13:00:00 (ywatanabe)"
+# File: ./src/scitex/plt/ax/_plot/_plot_heatmap.py
 
-__FILE__ = "./src/scitex/plt/ax/_plot/_plot_heatmap.py"
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+"""Heatmap plotting with automatic annotation color switching."""
+
+from typing import Any, List, Optional, Tuple, Union
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.colorbar import Colorbar
+from matplotlib.image import AxesImage
 
 
 def plot_heatmap(
-    ax,
-    data,
-    x_labels=None,
-    y_labels=None,
-    cmap="viridis",
-    cbar_label="ColorBar Label",
-    annot_format="{x:.1f}",
-    show_annot=True,
-    annot_color_lighter="black",
-    annot_color_darker="white",
-    **kwargs,
-):
-    """
-    Plot a heatmap on the given axes.
+    ax: Union[Axes, "AxisWrapper"],
+    data: np.ndarray,
+    x_labels: Optional[List[str]] = None,
+    y_labels: Optional[List[str]] = None,
+    cmap: str = "viridis",
+    cbar_label: str = "ColorBar Label",
+    annot_format: str = "{x:.1f}",
+    show_annot: bool = True,
+    annot_color_lighter: str = "black",
+    annot_color_darker: str = "white",
+    **kwargs: Any,
+) -> Tuple[Union[Axes, "AxisWrapper"], AxesImage, Colorbar]:
+    """Plot a heatmap on the given axes with automatic annotation colors.
+
+    Creates a heatmap visualization with optional cell annotations. Annotation
+    text colors are automatically switched based on background brightness for
+    optimal readability.
 
     Parameters
     ----------
-    ax : matplotlib.axes.Axes
-        The axes to plot on
-    data : array-like
-        The 2D data to display as heatmap
-    x_labels : list, optional
-        Labels for the x-axis
-    y_labels : list, optional
-        Labels for the y-axis
-    cmap : str or matplotlib colormap, optional
-        Colormap to use, default "viridis"
-    cbar_label : str, optional
-        Label for the colorbar, default "ColorBar Label"
-    show_annot : bool, optional
-        Whether to annotate the heatmap with values, default True
-    annot_format : str, optional
-        Format string for annotations, default "{x:.1f}"
-    annot_color_lighter : str, optional
-        Color for annotations on lighter background, default "black"
-    annot_color_darker : str, optional
-        Color for annotations on darker background, default "white"
-    **kwargs
-        Additional keyword arguments passed to matplotlib.axes.Axes.imshow()
+    ax : matplotlib.axes.Axes or AxisWrapper
+        The axes to plot on.
+    data : np.ndarray
+        2D array of data to display as heatmap.
+    x_labels : list of str, optional
+        Labels for the x-axis (columns).
+    y_labels : list of str, optional
+        Labels for the y-axis (rows).
+    cmap : str, default "viridis"
+        Colormap name to use.
+    cbar_label : str, default "ColorBar Label"
+        Label for the colorbar.
+    annot_format : str, default "{x:.1f}"
+        Format string for cell annotations.
+    show_annot : bool, default True
+        Whether to annotate the heatmap with values.
+    annot_color_lighter : str, default "black"
+        Text color for annotations on lighter backgrounds.
+    annot_color_darker : str, default "white"
+        Text color for annotations on darker backgrounds.
+    **kwargs : dict
+        Additional keyword arguments passed to imshow().
 
     Returns
     -------
+    ax : matplotlib.axes.Axes or AxisWrapper
+        The axes with the heatmap.
     im : matplotlib.image.AxesImage
-        The image object created by imshow
+        The image object created by imshow.
     cbar : matplotlib.colorbar.Colorbar
-        The colorbar object
+        The colorbar object.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import scitex as stx
+    >>> data = np.random.rand(5, 10)
+    >>> fig, ax = stx.plt.subplots()
+    >>> ax, im, cbar = stx.plt.ax.plot_heatmap(
+    ...     ax, data,
+    ...     x_labels=[f"X{i}" for i in range(10)],
+    ...     y_labels=[f"Y{i}" for i in range(5)],
+    ...     cmap="Blues"
+    ... )
     """
 
     im, cbar = _mpl_heatmap(
@@ -83,20 +102,39 @@ def plot_heatmap(
     return ax, im, cbar
 
 
-def _switch_annot_colors(cmap, annot_color_lighter, annot_color_darker):
-    # Get colormap
+def _switch_annot_colors(
+    cmap: str,
+    annot_color_lighter: str,
+    annot_color_darker: str,
+) -> Tuple[str, str]:
+    """Determine annotation text colors based on colormap brightness.
+
+    Uses perceived brightness (ITU-R BT.709) to select appropriate text
+    colors for light vs dark backgrounds in the colormap.
+
+    Parameters
+    ----------
+    cmap : str
+        Colormap name.
+    annot_color_lighter : str
+        Color to use on lighter backgrounds.
+    annot_color_darker : str
+        Color to use on darker backgrounds.
+
+    Returns
+    -------
+    tuple of str
+        (color_for_dark_bg, color_for_light_bg) text colors.
+    """
     cmap_obj = plt.cm.get_cmap(cmap)
 
-    # Sample the colormap at its extremes
-    dark_color = cmap_obj(0.1)  # Not using 0.0 to avoid edge effects
-    light_color = cmap_obj(0.9)  # Not using 1.0 to avoid edge effects
+    # Sample colormap at extremes (avoiding edge effects)
+    dark_color = cmap_obj(0.1)
+    light_color = cmap_obj(0.9)
 
-    # Calculate perceived brightness
+    # Calculate perceived brightness using ITU-R BT.709 coefficients
     dark_brightness = (
         0.2126 * dark_color[0] + 0.7152 * dark_color[1] + 0.0722 * dark_color[2]
-    )
-    light_brightness = (
-        0.2126 * light_color[0] + 0.7152 * light_color[1] + 0.0722 * light_color[2]
     )
 
     # Choose text colors based on background brightness
@@ -107,32 +145,39 @@ def _switch_annot_colors(cmap, annot_color_lighter, annot_color_darker):
 
 
 def _mpl_heatmap(
-    data, row_labels, col_labels, ax=None, cbar_kw=None, cbarlabel="", **kwargs
-):
-    """
-    A function to annotate a heatmap.
+    data: np.ndarray,
+    row_labels: Optional[List[str]],
+    col_labels: Optional[List[str]],
+    ax: Optional[Axes] = None,
+    cbar_kw: Optional[dict] = None,
+    cbarlabel: str = "",
+    **kwargs: Any,
+) -> Tuple[AxesImage, Colorbar]:
+    """Create a heatmap with imshow and add a colorbar.
 
     Parameters
     ----------
-    im : matplotlib.image.AxesImage
-        The image to be annotated
-    data : array-like, optional
-        Data used to annotate. If None, the image's array is used
-    valfmt : str or matplotlib.ticker.Formatter, optional
-        Format of the annotations, default "{x:.2f}"
-    textcolors : tuple of str, optional
-        Colors for the annotations. The first is used for values below
-        threshold, the second for those above, default ("lightgray", "black")
-    threshold : float, optional
-        Value in normalized colormap space (0 to 1) above which the
-        second color is used. If None, 0.7*max(data) is used
-    **textkw
-        Additional keyword arguments passed to matplotlib.axes.Axes.text()
+    data : np.ndarray
+        2D array of data to display.
+    row_labels : list of str or None
+        Labels for the rows (y-axis).
+    col_labels : list of str or None
+        Labels for the columns (x-axis).
+    ax : matplotlib.axes.Axes, optional
+        Axes to plot on. If None, uses current axes.
+    cbar_kw : dict, optional
+        Keyword arguments for colorbar creation.
+    cbarlabel : str, default ""
+        Label for the colorbar.
+    **kwargs : dict
+        Additional keyword arguments passed to imshow().
 
     Returns
     -------
-    texts : list of matplotlib.text.Text
-        The annotation text objects
+    im : matplotlib.image.AxesImage
+        The image object.
+    cbar : matplotlib.colorbar.Colorbar
+        The colorbar object.
     """
 
     if ax is None:
@@ -183,37 +228,36 @@ def _mpl_heatmap(
 
 
 def _mpl_annotate_heatmap(
-    im,
-    data=None,
-    valfmt="{x:.2f}",
-    textcolors=("lightgray", "black"),
-    threshold=None,
-    **textkw,
-):
-    """
-    A function to annotate a heatmap.
+    im: AxesImage,
+    data: Optional[np.ndarray] = None,
+    valfmt: str = "{x:.2f}",
+    textcolors: Tuple[str, str] = ("lightgray", "black"),
+    threshold: Optional[float] = None,
+    **textkw: Any,
+) -> List:
+    """Annotate a heatmap with cell values.
 
     Parameters
     ----------
     im : matplotlib.image.AxesImage
-        The image to be annotated
-    data : array-like, optional
-        Data used to annotate. If None, the image's array is used
-    valfmt : str or matplotlib.ticker.Formatter, optional
-        Format of the annotations, default "{x:.2f}"
-    textcolors : tuple of str, optional
-        Colors for the annotations. The first is used for values below
-        threshold, the second for those above, default ("lightgray", "black")
+        The image to be annotated.
+    data : np.ndarray, optional
+        Data used to annotate. If None, uses the image's array.
+    valfmt : str, default "{x:.2f}"
+        Format string for the annotations.
+    textcolors : tuple of str, default ("lightgray", "black")
+        Colors for annotations. First color for values below threshold,
+        second for values above.
     threshold : float, optional
         Value in normalized colormap space (0 to 1) above which the
-        second color is used. If None, 0.7*max(data) is used
-    **textkw
-        Additional keyword arguments passed to matplotlib.axes.Axes.text()
+        second color is used. If None, uses 0.7 * max(data).
+    **textkw : dict
+        Additional keyword arguments passed to ax.text().
 
     Returns
     -------
     texts : list of matplotlib.text.Text
-        The annotation text objects
+        The annotation text objects.
     """
 
     if not isinstance(data, (list, np.ndarray)):
