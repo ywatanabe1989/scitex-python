@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 14:15:00 (ywatanabe)"
+# Timestamp: "2025-12-01 14:30:00 (ywatanabe)"
 # File: ./src/scitex/plt/ax/_style/_style_violinplot.py
 
 """Style violin plot elements with millimeter-based control."""
@@ -14,6 +14,7 @@ def style_violinplot(
     ax: Union[Axes, "AxisWrapper"],
     linewidth_mm: float = 0.2,
     edge_color: str = "black",
+    median_color: str = "black",
     remove_caps: bool = True,
 ) -> Union[Axes, "AxisWrapper"]:
     """Apply publication-quality styling to seaborn violin plots.
@@ -21,6 +22,7 @@ def style_violinplot(
     This function modifies violin plots created by seaborn.violinplot() to:
     - Add borders to the KDE (violin body) edges
     - Remove caps from the internal boxplot whiskers
+    - Set median line to black for better visibility
     - Apply consistent line widths
 
     Parameters
@@ -31,6 +33,8 @@ def style_violinplot(
         Line width in millimeters for violin edges and boxplot elements.
     edge_color : str, default "black"
         Color for the violin body edges.
+    median_color : str, default "black"
+        Color for the median line inside the boxplot.
     remove_caps : bool, default True
         Whether to remove the caps (horizontal lines) from boxplot whiskers.
 
@@ -59,19 +63,32 @@ def style_violinplot(
             collection.set_linewidth(lw_pt)
 
     # Style internal boxplot elements (Line2D objects)
-    for line in ax.lines:
+    # Seaborn violin plot lines: whiskers (vertical), caps (horizontal), median (short horizontal)
+    lines = list(ax.lines)
+    n_violins = len([c for c in ax.collections if hasattr(c, 'get_paths') and len(c.get_paths()) > 0])
+
+    for line in lines:
         # Get line data to identify element type
         xdata = line.get_xdata()
         ydata = line.get_ydata()
 
-        # Caps are horizontal lines (same y-value for both points)
-        is_horizontal = len(ydata) == 2 and ydata[0] == ydata[1]
+        if len(ydata) != 2:
+            continue
 
-        if remove_caps and is_horizontal:
-            # Hide caps by making them invisible
-            line.set_visible(False)
+        # Caps are horizontal lines (same y-value for both points) with wider x-span
+        is_horizontal = ydata[0] == ydata[1]
+        x_span = abs(xdata[1] - xdata[0]) if len(xdata) == 2 else 0
+
+        if is_horizontal:
+            if remove_caps and x_span > 0.05:
+                # This is likely a cap (wider horizontal line at whisker ends)
+                line.set_visible(False)
+            else:
+                # This is likely a median line (short horizontal line)
+                line.set_color(median_color)
+                line.set_linewidth(lw_pt)
         else:
-            # Style other lines (whiskers, median, etc.)
+            # Vertical lines (whiskers)
             line.set_linewidth(lw_pt)
 
     return ax
