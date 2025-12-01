@@ -13,9 +13,10 @@ def demo_plot_line(fig, ax, stx):
     np.random.seed(42)
     values_1d = np.sin(np.linspace(0, 4 * np.pi, 100)) + np.random.normal(0, 0.1, 100)
 
-    ax.plot_line(values_1d, id="line")
+    ax.plot_line(values_1d, id="line", label="Signal")
 
     ax.set_xyt(x="Sample", y="Amplitude [a.u.]", t="ax.plot_line(values_1d)")
+    ax.legend()
 
     return fig, ax
 

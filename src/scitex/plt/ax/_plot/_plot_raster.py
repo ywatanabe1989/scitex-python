@@ -77,6 +77,11 @@ def plot_raster(
     # Format spike_times_list data
     spike_times_list = _ensure_list(spike_times_list)
 
+    # Add sample size (number of trials) to label if provided
+    if kwargs.get("label"):
+        n_trials = len(spike_times_list)
+        kwargs["label"] = f"{kwargs['label']} ($n$={n_trials})"
+
     # Handle colors and labels
     colors = _handle_colors(colors, spike_times_list)
 

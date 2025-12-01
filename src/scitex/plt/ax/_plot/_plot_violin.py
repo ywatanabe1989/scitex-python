@@ -48,6 +48,13 @@ def plot_violin(
     ax : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axes object with the plot
     """
+    # Add sample size to label if provided (show range if variable)
+    if kwargs.get("label"):
+        n_per_group = [len(g) for g in values_list]
+        n_min, n_max = min(n_per_group), max(n_per_group)
+        n_str = str(n_min) if n_min == n_max else f"{n_min}-{n_max}"
+        kwargs["label"] = f"{kwargs['label']} ($n$={n_str})"
+
     # Convert list-style data to DataFrame
     all_values = []
     all_groups = []

@@ -14,9 +14,10 @@ def demo_plot_scatter(fig, ax, stx):
     x = np.random.normal(0, 1, 50)
     y = 2 * x + np.random.normal(0, 0.5, 50)
 
-    ax.plot_scatter(x, y, id="scatter")
+    ax.plot_scatter(x, y, id="scatter", label="Data")
 
     ax.set_xyt(x="X [a.u.]", y="Y [a.u.]", t="ax.plot_scatter(x, y)")
+    ax.legend()
 
     return fig, ax
 

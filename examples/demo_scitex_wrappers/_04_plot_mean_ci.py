@@ -14,9 +14,10 @@ def demo_plot_mean_ci(fig, ax, stx):
     xx = np.linspace(0, 10, 20)
     values_2d = np.sin(xx)[np.newaxis, :] + np.random.normal(0, 0.3, (30, len(xx)))
 
-    ax.plot_mean_ci(values_2d, xx=xx, id="mean_ci")
+    ax.plot_mean_ci(values_2d, xx=xx, id="mean_ci", label="Signal")
 
     ax.set_xyt(x="Time [s]", y="Signal [a.u.]", t="ax.plot_mean_ci(values_2d)")
+    ax.legend()
 
     return fig, ax
 

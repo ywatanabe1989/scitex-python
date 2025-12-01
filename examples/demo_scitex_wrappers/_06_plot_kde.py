@@ -16,9 +16,10 @@ def demo_plot_kde(fig, ax, stx):
         np.random.normal(5, 1, 300),
     ])
 
-    ax.plot_kde(values_1d, id="kde")
+    ax.plot_kde(values_1d, id="kde", label="Mixture")
 
     ax.set_xyt(x="Value [a.u.]", y="Density", t="ax.plot_kde(values_1d)")
+    ax.legend()
 
     return fig, ax
 

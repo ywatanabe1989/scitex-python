@@ -14,9 +14,10 @@ def demo_plot_fill_between(fig, ax, stx):
     y1 = np.sin(x) - 0.2
     y2 = np.sin(x) + 0.2
 
-    ax.plot_fill_between(x, y1, y2, id="fill")
+    ax.plot_fill_between(x, y1, y2, id="fill", label="Uncertainty")
 
     ax.set_xyt(x="Time [s]", y="Signal [a.u.]", t="ax.plot_fill_between(x, y1, y2)")
+    ax.legend()
 
     return fig, ax
 

@@ -44,6 +44,13 @@ def plot_joyplot(ax, arrays, overlap=0.5, fill_alpha=0.7, line_alpha=1.0,
     """
     assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
 
+    # Add sample size per distribution to label if provided (show range if variable)
+    if kwargs.get("label"):
+        n_per_dist = [len(arr) for arr in arrays]
+        n_min, n_max = min(n_per_dist), max(n_per_dist)
+        n_str = str(n_min) if n_min == n_max else f"{n_min}-{n_max}"
+        kwargs["label"] = f"{kwargs['label']} ($n$={n_str})"
+
     # Import scitex colors
     from scitex.plt.color._PARAMS import HEX
 
