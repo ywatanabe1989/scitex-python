@@ -28,18 +28,18 @@ def vizualize_colors(colors):
         xx, yy, ss = gen_rand_sample()
 
         # # Box color plot
-        # ax.plot_rectangle(
+        # ax.stx_rectangle(
         #     xx=ii, yy=0, width=1, height=1, color=rgba, label=color_str
         # )
 
         # Line plot
-        ax.plot_shaded_line(xx, yy - ss, yy, yy + ss, color=rgba, label=color_str)
+        ax.stx_shaded_line(xx, yy - ss, yy, yy + ss, color=rgba, label=color_str)
 
         # # Scatter plot
         # axes[2].scatter(xx, yy, color=rgba, label=color_str)
 
         # # KDE plot
-        # axes[3].plot_kde(yy, color=rgba, label=color_str)
+        # axes[3].stx_kde(yy, color=rgba, label=color_str)
 
     # for ax in axes.flat:
     #     # ax.axis("off")

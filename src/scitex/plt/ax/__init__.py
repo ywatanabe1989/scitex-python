@@ -55,26 +55,27 @@ from ._style._style_errorbar import style_errorbar
 from ._style._style_barplot import style_barplot
 from ._style._style_scatter import style_scatter
 from ._style._style_suptitles import style_suptitles
+from ._style._style_violinplot import style_violinplot
 
 # Plot
-from ._plot._plot_heatmap import plot_heatmap
+from ._plot._stx_heatmap import stx_heatmap
 from ._plot._plot_circular_hist import plot_circular_hist
-from ._plot._plot_conf_mat import plot_conf_mat
+from ._plot._stx_conf_mat import stx_conf_mat
 from ._plot._plot_cube import plot_cube
-from ._plot._plot_ecdf import plot_ecdf
-from ._plot._plot_fillv import plot_fillv
-from ._plot._plot_violin import plot_violin
-from ._plot._plot_image import plot_image
-from ._plot._plot_joyplot import plot_joyplot
-from ._plot._plot_raster import plot_raster
-from ._plot._plot_rectangle import plot_rectangle
-from ._plot._plot_scatter_hist import plot_scatter_hist
-from ._plot._plot_shaded_line import plot_shaded_line
+from ._plot._stx_ecdf import stx_ecdf
+from ._plot._stx_fillv import stx_fillv
+from ._plot._stx_violin import stx_violin
+from ._plot._stx_image import stx_image
+from ._plot._stx_joyplot import stx_joyplot
+from ._plot._stx_raster import stx_raster
+from ._plot._stx_rectangle import stx_rectangle
+from ._plot._stx_scatter_hist import stx_scatter_hist
+from ._plot._stx_shaded_line import stx_shaded_line
 from ._plot._plot_statistical_shaded_line import (
-    plot_line,
-    plot_mean_std,
-    plot_mean_ci,
-    plot_median_iqr,
+    stx_line,
+    stx_mean_std,
+    stx_mean_ci,
+    stx_median_iqr,
 )
 from ._plot._add_fitted_line import add_fitted_line
 

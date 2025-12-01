@@ -6,7 +6,7 @@ but re-exported here for backward compatibility. New code should import directly
 from scitex.ai.metrics instead.
 """
 
-from ._plot_conf_mat import calc_bACC_from_conf_mat, calc_bacc_from_conf_mat, plot_conf_mat, conf_mat
+from ._stx_conf_mat import calc_bACC_from_conf_mat, calc_bacc_from_conf_mat, stx_conf_mat, conf_mat
 from ._plot_learning_curve import (
     plot_learning_curve,
     _prepare_metrics_df,
@@ -37,7 +37,7 @@ vline_at_epochs = _add_epoch_vlines
 
 __all__ = [
     # Plotting functions
-    "plot_conf_mat",
+    "stx_conf_mat",
     "conf_mat",  # backward compat
     "plot_learning_curve",
     "learning_curve",  # backward compat

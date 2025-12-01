@@ -157,7 +157,7 @@ def save(
     dry_run: bool = False,
     no_csv: bool = False,
     use_caller_path: bool = False,
-    auto_crop: bool = False,
+    auto_crop: bool = True,
     crop_margin_mm: float = 1.0,
     metadata_extra: dict = None,
     **kwargs,
@@ -183,7 +183,7 @@ def save(
         If True, simulate the saving process without actually writing files. Default is False.
     auto_crop : bool, optional
         If True, automatically crop the saved image to content area with margin (for PNG/JPEG/TIFF).
-        Vector formats (PDF/SVG) are not cropped. Default is False.
+        Vector formats (PDF/SVG) are not cropped. Default is True.
     crop_margin_mm : float, optional
         Margin in millimeters to add around content when auto_crop=True.
         At 300 DPI: 1mm = ~12 pixels. Default is 1.0mm (Nature Reviews style).
@@ -764,6 +764,13 @@ def _handle_image_with_csv(
         ext = _os.path.splitext(spath)[1].lower()
         ext_wo_dot = ext.replace(".", "")
 
+        # Check if the path contains an image extension directory (e.g., ./png/, ./jpg/)
+        # If so, save CSV in a parallel ./csv/ directory
+        image_extensions = ['png', 'jpg', 'jpeg', 'gif', 'tiff', 'tif', 'svg', 'pdf']
+        parent_dir = _os.path.dirname(spath)
+        parent_name = _os.path.basename(parent_dir)
+        filename_without_ext = _os.path.splitext(_os.path.basename(spath))[0]
+
         try:
             # Get the figure object that may contain plot data
             fig_obj = _get_figure_with_data(obj)
@@ -773,10 +780,18 @@ def _handle_image_with_csv(
                 if hasattr(fig_obj, "export_as_csv"):
                     csv_data = fig_obj.export_as_csv()
                     if csv_data is not None and not csv_data.empty:
-                        # Save CSV in same directory as image with .csv extension
-                        # Example: ./path/to/output/fig.jpg -> ./path/to/output/fig.csv
-                        csv_path = _os.path.splitext(spath)[0] + ".csv"
-                        # Ensure parent directory exists (should already exist from image save)
+                        # Determine CSV path based on parent directory name
+                        if parent_name.lower() in image_extensions:
+                            # Parent directory is named after an image extension (e.g., png/)
+                            # Create parallel csv/ directory
+                            grandparent_dir = _os.path.dirname(parent_dir)
+                            csv_dir = _os.path.join(grandparent_dir, "csv")
+                            csv_path = _os.path.join(csv_dir, filename_without_ext + ".csv")
+                        else:
+                            # Save CSV in same directory as image
+                            csv_path = _os.path.splitext(spath)[0] + ".csv"
+
+                        # Ensure parent directory exists
                         _os.makedirs(_os.path.dirname(csv_path), exist_ok=True)
                         # Save directly using _save to avoid path doubling
                         # Don't pass image-specific kwargs to CSV save
@@ -791,9 +806,19 @@ def _handle_image_with_csv(
 
                         # Create symlink_to for CSV if it was specified for the image
                         if symlink_to:
-                            csv_symlink_to = (
-                                _os.path.splitext(symlink_to)[0] + ".csv"
-                            )
+                            # Apply same directory transformation for symlink
+                            symlink_parent_dir = _os.path.dirname(symlink_to)
+                            symlink_parent_name = _os.path.basename(symlink_parent_dir)
+                            symlink_filename_without_ext = _os.path.splitext(_os.path.basename(symlink_to))[0]
+
+                            if symlink_parent_name.lower() in image_extensions:
+                                symlink_grandparent_dir = _os.path.dirname(symlink_parent_dir)
+                                csv_symlink_to = _os.path.join(
+                                    symlink_grandparent_dir, "csv", symlink_filename_without_ext + ".csv"
+                                )
+                            else:
+                                csv_symlink_to = _os.path.splitext(symlink_to)[0] + ".csv"
+
                             _symlink_to(csv_path, csv_symlink_to, True)
 
                         # Create symlink for CSV manually if needed
@@ -810,13 +835,22 @@ def _handle_image_with_csv(
                                         "specified_path"
                                     ]
                                     if isinstance(original_path, str):
-                                        # Replace extension to get CSV path structure
-                                        csv_relative = original_path.replace(
-                                            _os.path.splitext(original_path)[
-                                                1
-                                            ],
-                                            ".csv",
-                                        )
+                                        # Apply same directory transformation for symlink
+                                        orig_parent_dir = _os.path.dirname(original_path)
+                                        orig_parent_name = _os.path.basename(orig_parent_dir)
+                                        orig_filename_without_ext = _os.path.splitext(_os.path.basename(original_path))[0]
+
+                                        if orig_parent_name.lower() in image_extensions:
+                                            orig_grandparent_dir = _os.path.dirname(orig_parent_dir)
+                                            csv_relative = _os.path.join(
+                                                orig_grandparent_dir, "csv", orig_filename_without_ext + ".csv"
+                                            )
+                                        else:
+                                            csv_relative = original_path.replace(
+                                                _os.path.splitext(original_path)[1],
+                                                ".csv",
+                                            )
+
                                         csv_cwd = _os.path.join(
                                             _os.getcwd(), csv_relative
                                         )
@@ -835,10 +869,18 @@ def _handle_image_with_csv(
                 if hasattr(fig_obj, "export_as_csv_for_sigmaplot"):
                     sigmaplot_data = fig_obj.export_as_csv_for_sigmaplot()
                     if sigmaplot_data is not None and not sigmaplot_data.empty:
-                        # For CSV files, we want them in the same directory as the image
-                        csv_sigmaplot_path = spath.replace(
-                            ext_wo_dot, "csv"
-                        ).replace(".csv", "_for_sigmaplot.csv")
+                        # Determine SigmaPlot CSV path based on parent directory name
+                        if parent_name.lower() in image_extensions:
+                            grandparent_dir = _os.path.dirname(parent_dir)
+                            csv_dir = _os.path.join(grandparent_dir, "csv")
+                            csv_sigmaplot_path = _os.path.join(csv_dir, filename_without_ext + "_for_sigmaplot.csv")
+                        else:
+                            csv_sigmaplot_path = spath.replace(
+                                ext_wo_dot, "csv"
+                            ).replace(".csv", "_for_sigmaplot.csv")
+
+                        # Ensure parent directory exists
+                        _os.makedirs(_os.path.dirname(csv_sigmaplot_path), exist_ok=True)
                         # Save directly using _save to avoid path doubling
                         # Don't pass image-specific kwargs to CSV save
                         _save(
@@ -852,10 +894,21 @@ def _handle_image_with_csv(
 
                         # Create symlink_to for SigmaPlot CSV if it was specified for the image
                         if symlink_to:
-                            csv_sigmaplot_symlink_to = (
-                                _os.path.splitext(symlink_to)[0]
-                                + "_for_sigmaplot.csv"
-                            )
+                            symlink_parent_dir = _os.path.dirname(symlink_to)
+                            symlink_parent_name = _os.path.basename(symlink_parent_dir)
+                            symlink_filename_without_ext = _os.path.splitext(_os.path.basename(symlink_to))[0]
+
+                            if symlink_parent_name.lower() in image_extensions:
+                                symlink_grandparent_dir = _os.path.dirname(symlink_parent_dir)
+                                csv_sigmaplot_symlink_to = _os.path.join(
+                                    symlink_grandparent_dir, "csv", symlink_filename_without_ext + "_for_sigmaplot.csv"
+                                )
+                            else:
+                                csv_sigmaplot_symlink_to = (
+                                    _os.path.splitext(symlink_to)[0]
+                                    + "_for_sigmaplot.csv"
+                                )
+
                             _symlink_to(
                                 csv_sigmaplot_path,
                                 csv_sigmaplot_symlink_to,
@@ -881,11 +934,26 @@ def _handle_image_with_csv(
     # Save metadata as JSON if collected
     if collected_metadata is not None and not dry_run:
         try:
-            # Save JSON in same directory as image with .json extension
-            # Example: ./path/to/output/fig.png -> ./path/to/output/fig.json
-            json_path = _os.path.splitext(spath)[0] + ".json"
+            # Check if the path contains an image extension directory (e.g., ./png/, ./jpg/)
+            # If so, save JSON in a parallel ./json/ directory
+            # Example: ./path/to/output/png/fig.png -> ./path/to/output/json/fig.json
+            # Example: ./path/to/output/fig.png -> ./path/to/output/fig.json (same dir)
+            image_extensions = ['png', 'jpg', 'jpeg', 'gif', 'tiff', 'tif', 'svg', 'pdf']
+            parent_dir = _os.path.dirname(spath)
+            parent_name = _os.path.basename(parent_dir)
+            filename_without_ext = _os.path.splitext(_os.path.basename(spath))[0]
 
-            # Ensure parent directory exists (should already exist from image save)
+            if parent_name.lower() in image_extensions:
+                # Parent directory is named after an image extension (e.g., png/)
+                # Create parallel json/ directory
+                grandparent_dir = _os.path.dirname(parent_dir)
+                json_dir = _os.path.join(grandparent_dir, "json")
+                json_path = _os.path.join(json_dir, filename_without_ext + ".json")
+            else:
+                # Save JSON in same directory as image
+                json_path = _os.path.splitext(spath)[0] + ".json"
+
+            # Ensure parent directory exists
             _os.makedirs(_os.path.dirname(json_path), exist_ok=True)
 
             # Save metadata as JSON
@@ -900,7 +968,19 @@ def _handle_image_with_csv(
 
             # Create symlink_to for JSON if it was specified for the image
             if symlink_to:
-                json_symlink_to = _os.path.splitext(symlink_to)[0] + ".json"
+                # Apply same directory transformation for symlink
+                symlink_parent_dir = _os.path.dirname(symlink_to)
+                symlink_parent_name = _os.path.basename(symlink_parent_dir)
+                symlink_filename_without_ext = _os.path.splitext(_os.path.basename(symlink_to))[0]
+
+                if symlink_parent_name.lower() in image_extensions:
+                    symlink_grandparent_dir = _os.path.dirname(symlink_parent_dir)
+                    json_symlink_to = _os.path.join(
+                        symlink_grandparent_dir, "json", symlink_filename_without_ext + ".json"
+                    )
+                else:
+                    json_symlink_to = _os.path.splitext(symlink_to)[0] + ".json"
+
                 _symlink_to(json_path, json_symlink_to, True)
 
             # Create symlink for JSON manually if needed
@@ -915,11 +995,22 @@ def _handle_image_with_csv(
                     if "specified_path" in frame.frame.f_locals:
                         original_path = frame.frame.f_locals["specified_path"]
                         if isinstance(original_path, str):
-                            # Replace extension to get JSON path structure
-                            json_relative = original_path.replace(
-                                _os.path.splitext(original_path)[1],
-                                ".json",
-                            )
+                            # Apply same directory transformation for symlink
+                            orig_parent_dir = _os.path.dirname(original_path)
+                            orig_parent_name = _os.path.basename(orig_parent_dir)
+                            orig_filename_without_ext = _os.path.splitext(_os.path.basename(original_path))[0]
+
+                            if orig_parent_name.lower() in image_extensions:
+                                orig_grandparent_dir = _os.path.dirname(orig_parent_dir)
+                                json_relative = _os.path.join(
+                                    orig_grandparent_dir, "json", orig_filename_without_ext + ".json"
+                                )
+                            else:
+                                json_relative = original_path.replace(
+                                    _os.path.splitext(original_path)[1],
+                                    ".json",
+                                )
+
                             json_cwd = _os.path.join(_os.getcwd(), json_relative)
                             _symlink(json_path, json_cwd, True, True)
                             break

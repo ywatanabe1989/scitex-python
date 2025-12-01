@@ -116,7 +116,7 @@ For example,
         │   │           ├── stderr.log
         │   │           └── stdout.log
         │   └── RUNNING
-        ├── plot_conf_mat.py
+        ├── stx_conf_mat.py
         ├── plot_digits_out
         │   ├── data
         │   │   └── mnist
