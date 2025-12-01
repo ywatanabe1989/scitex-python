@@ -82,6 +82,10 @@ def plot_ecdf(
     if 'linewidth' not in kwargs and 'lw' not in kwargs:
         kwargs['linewidth'] = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
 
+    # Add sample size to label if provided
+    if "label" in kwargs and kwargs["label"]:
+        kwargs["label"] = f"{kwargs['label']} ($n$={nn})"
+
     # Plot the ECDF using steps (no markers - clean line only)
     axis.plot(x_step, y_step, drawstyle="steps-post", **kwargs)
 

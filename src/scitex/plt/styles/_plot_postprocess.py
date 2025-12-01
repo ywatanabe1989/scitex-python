@@ -186,8 +186,16 @@ def _postprocess_errorbar(result):
 
 def _postprocess_violin(result, ax, kwargs, args):
     """Apply styling for violin plots with optional boxplot overlay."""
+    # Get scitex palette for coloring
+    from scitex.plt.color._PARAMS import HEX
+    palette = [HEX['blue'], HEX['red'], HEX['green'], HEX['yellow'],
+               HEX['purple'], HEX['orange'], HEX['lightblue'], HEX['pink']]
+
     if 'bodies' in result:
-        for body in result['bodies']:
+        for i, body in enumerate(result['bodies']):
+            body.set_facecolor(palette[i % len(palette)])
+            body.set_edgecolor('black')
+            body.set_linewidth(mm_to_pt(DEFAULT_LINE_WIDTH_MM))
             body.set_alpha(1.0)
 
     # Add boxplot overlay by default (disable with boxplot=False)
@@ -210,7 +218,6 @@ def _postprocess_violin(result, ax, kwargs, args):
             boxplot_widths = violin_widths * 0.2
 
             # Draw boxplot overlay with styling
-            from scitex.plt.utils import mm_to_pt
             line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
             marker_size = mm_to_pt(DEFAULT_MARKER_SIZE_MM)
 
@@ -262,42 +269,9 @@ def _postprocess_violin(result, ax, kwargs, args):
 
 def _postprocess_boxplot(result, ax):
     """Apply styling for boxplots (standalone, not violin overlay)."""
-    line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
-    marker_size = mm_to_pt(DEFAULT_MARKER_SIZE_MM)
-
-    # Box styling: keep default color, set alpha and edge
-    if 'boxes' in result:
-        for box in result['boxes']:
-            # Keep default fill color (from color cycle)
-            box.set_edgecolor('black')  # Black edge
-            box.set_alpha(1.0)
-            box.set_linewidth(line_width)
-
-    # Median line: black, 0.2mm
-    if 'medians' in result:
-        for median in result['medians']:
-            median.set_color('black')
-            median.set_linewidth(line_width)
-
-    # Whisker: black, 0.2mm
-    if 'whiskers' in result:
-        for whisker in result['whiskers']:
-            whisker.set_color('black')
-            whisker.set_linewidth(line_width)
-
-    # Cap: black, 0.2mm
-    if 'caps' in result:
-        for cap in result['caps']:
-            cap.set_color('black')
-            cap.set_linewidth(line_width)
-
-    # Outlier markers: 0.8mm size, 0.2mm edge, no fill (open circles)
-    if 'fliers' in result:
-        for flier in result['fliers']:
-            flier.set_markerfacecolor('none')  # No fill (open circles)
-            flier.set_markeredgecolor('black')
-            flier.set_markersize(marker_size)
-            flier.set_markeredgewidth(line_width)
+    # Use the centralized style_boxplot function for consistent styling
+    from scitex.plt.ax import style_boxplot
+    style_boxplot(result)
 
     # Cap width: 33% of box width
     if 'caps' in result and 'boxes' in result and len(result['boxes']) > 0:
@@ -366,7 +340,19 @@ def _postprocess_fill_between(result, kwargs):
 
 
 def _postprocess_bar(result, ax, kwargs):
-    """Apply styling for bar plots with error bars."""
+    """Apply styling for bar plots with colors and error bars."""
+    # Get scitex palette for coloring (only if color not explicitly set)
+    if 'color' not in kwargs and 'c' not in kwargs:
+        from scitex.plt.color._PARAMS import HEX
+        palette = [HEX['blue'], HEX['red'], HEX['green'], HEX['yellow'],
+                   HEX['purple'], HEX['orange'], HEX['lightblue'], HEX['pink']]
+
+        line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+        for i, patch in enumerate(result.patches):
+            patch.set_facecolor(palette[i % len(palette)])
+            patch.set_edgecolor('black')
+            patch.set_linewidth(line_width)
+
     if 'yerr' not in kwargs or kwargs['yerr'] is None:
         return
 
@@ -400,7 +386,19 @@ def _postprocess_bar(result, ax, kwargs):
 
 
 def _postprocess_barh(result, ax, kwargs):
-    """Apply styling for horizontal bar plots with error bars."""
+    """Apply styling for horizontal bar plots with colors and error bars."""
+    # Get scitex palette for coloring (only if color not explicitly set)
+    if 'color' not in kwargs and 'c' not in kwargs:
+        from scitex.plt.color._PARAMS import HEX
+        palette = [HEX['blue'], HEX['red'], HEX['green'], HEX['yellow'],
+                   HEX['purple'], HEX['orange'], HEX['lightblue'], HEX['pink']]
+
+        line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+        for i, patch in enumerate(result.patches):
+            patch.set_facecolor(palette[i % len(palette)])
+            patch.set_edgecolor('black')
+            patch.set_linewidth(line_width)
+
     if 'xerr' not in kwargs or kwargs['xerr'] is None:
         return
 

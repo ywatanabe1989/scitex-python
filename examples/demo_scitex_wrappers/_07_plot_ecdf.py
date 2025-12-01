@@ -13,9 +13,10 @@ def demo_plot_ecdf(fig, ax, stx):
     np.random.seed(42)
     values_1d = np.random.normal(0, 1, 1000)
 
-    ax.plot_ecdf(values_1d, id="ecdf")
+    ax.plot_ecdf(values_1d, id="ecdf", label="Data")
 
     ax.set_xyt(x="Value [a.u.]", y="Cumulative Prob.", t="ax.plot_ecdf(values_1d)")
+    ax.legend()
 
     return fig, ax
 

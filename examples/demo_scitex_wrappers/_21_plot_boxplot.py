@@ -13,9 +13,10 @@ def demo_plot_boxplot(fig, ax, stx):
     np.random.seed(42)
     data = [np.random.normal(i, 1, 100) for i in range(4)]
 
-    ax.plot_boxplot(data, labels=["A", "B", "C", "D"], id="boxplot")
+    ax.plot_boxplot(data, labels=["A", "B", "C", "D"], id="boxplot", label="Data")
 
-    ax.set_xyt(x="Group", y="Value [a.u.]", t="ax.plot_boxplot(data, labels)")
+    ax.set_xyt(x="Group", y="Value [a.u.]", t="ax.boxplot(data)")
+    ax.legend()
 
     return fig, ax
 

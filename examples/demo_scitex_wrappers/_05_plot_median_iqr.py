@@ -14,9 +14,10 @@ def demo_plot_median_iqr(fig, ax, stx):
     xx = np.linspace(0, 10, 20)
     values_2d = np.sin(xx)[np.newaxis, :] + np.random.normal(0, 0.5, (20, len(xx)))
 
-    ax.plot_median_iqr(values_2d, xx=xx, id="median_iqr")
+    ax.plot_median_iqr(values_2d, xx=xx, id="median_iqr", label="Signal")
 
     ax.set_xyt(x="Time [s]", y="Signal [a.u.]", t="ax.plot_median_iqr(values_2d)")
+    ax.legend()
 
     return fig, ax
 

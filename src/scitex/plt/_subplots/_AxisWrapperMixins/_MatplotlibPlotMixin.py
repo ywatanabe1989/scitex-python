@@ -95,7 +95,7 @@ class MatplotlibPlotMixin:
         # Sample count as label
         n_samples = (~np.isnan(values_1d)).sum()
         if kwargs.get("label"):
-            kwargs["label"] = f"{kwargs['label']} (n={n_samples})"
+            kwargs["label"] = f"{kwargs['label']} ($n$={n_samples})"
 
         # Xlim (kwargs["xlim"] is not accepted in downstream plotters)
         xlim = kwargs.pop("xlim", None)
@@ -277,10 +277,12 @@ class MatplotlibPlotMixin:
         # Copy data
         _data = values_list.copy()
 
-        # Sample count as label
-        n = len(values_list)
+        # Sample count per group as label (show range if variable)
         if kwargs.get("label"):
-            kwargs["label"] = kwargs["label"] + f" (n={n})"
+            n_per_group = [len(g) for g in values_list]
+            n_min, n_max = min(n_per_group), max(n_per_group)
+            n_str = str(n_min) if n_min == n_max else f"{n_min}-{n_max}"
+            kwargs["label"] = kwargs["label"] + f" ($n$={n_str})"
 
         # Enable patch_artist for styling (fill colors, edges)
         if "patch_artist" not in kwargs:
@@ -1009,6 +1011,11 @@ class MatplotlibPlotMixin:
         """Wrapper for matplotlib scatter plot with tracking support."""
         method_name = "plot_scatter"
 
+        # Add sample size to label if provided
+        if kwargs.get("label") and len(args) >= 1:
+            n_samples = len(args[0])
+            kwargs["label"] = f"{kwargs['label']} ($n$={n_samples})"
+
         with self._no_tracking():
             result = self._axis_mpl.scatter(*args, **kwargs)
 
@@ -1117,6 +1124,15 @@ class MatplotlibPlotMixin:
         """Wrapper for matplotlib boxplot with tracking support and auto-styling."""
         method_name = "plot_boxplot"
 
+        # Add sample size per group to label if provided (show range if variable)
+        if kwargs.get("label") and len(args) >= 1:
+            data = args[0]
+            if isinstance(data, list):
+                n_per_group = [len(g) for g in data]
+                n_min, n_max = min(n_per_group), max(n_per_group)
+                n_str = str(n_min) if n_min == n_max else f"{n_min}-{n_max}"
+                kwargs["label"] = f"{kwargs['label']} ($n$={n_str})"
+
         # Enable patch_artist for styling (fill colors, edges)
         if "patch_artist" not in kwargs:
             kwargs["patch_artist"] = True
@@ -1146,6 +1162,15 @@ class MatplotlibPlotMixin:
     def plot_violinplot(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
         """Wrapper for matplotlib violinplot with tracking support."""
         method_name = "plot_violinplot"
+
+        # Add sample size per group to label if provided (show range if variable)
+        if kwargs.get("label") and len(args) >= 1:
+            data = args[0]
+            if isinstance(data, list):
+                n_per_group = [len(g) for g in data]
+                n_min, n_max = min(n_per_group), max(n_per_group)
+                n_str = str(n_min) if n_min == n_max else f"{n_min}-{n_max}"
+                kwargs["label"] = f"{kwargs['label']} ($n$={n_str})"
 
         with self._no_tracking():
             result = self._axis_mpl.violinplot(*args, **kwargs)

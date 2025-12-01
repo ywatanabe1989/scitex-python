@@ -17,6 +17,32 @@ from ....plt.utils import assert_valid_axis
 from ._plot_shaded_line import plot_shaded_line as scitex_plt_plot_shaded_line
 
 
+def _format_sample_size(values_2d):
+    """Format sample size string, showing range if variable due to NaN.
+
+    Parameters
+    ----------
+    values_2d : np.ndarray, shape (n_samples, n_points)
+        2D array where sample count may vary per column due to NaN.
+
+    Returns
+    -------
+    str
+        Formatted sample size string, e.g., "20" or "18-20".
+    """
+    if values_2d.ndim == 1:
+        return "1"
+
+    # Count non-NaN values per column (timepoint)
+    n_per_point = np.sum(~np.isnan(values_2d), axis=0)
+    n_min, n_max = int(n_per_point.min()), int(n_per_point.max())
+
+    if n_min == n_max:
+        return str(n_min)
+    else:
+        return f"{n_min}-{n_max}"
+
+
 def plot_line(axis, values_1d, xx=None, **kwargs):
     """
     Plot a simple line.
@@ -49,6 +75,7 @@ def plot_line(axis, values_1d, xx=None, **kwargs):
     assert len(xx) == len(
         values_1d
     ), f"xx length ({len(xx)}) must match values_1d length ({len(values_1d)})"
+
     axis.plot(xx, values_1d, **kwargs)
     return axis, pd.DataFrame({"x": xx, "y": values_1d})
 
@@ -99,10 +126,10 @@ def plot_mean_std(axis, values_2d, xx=None, sd=1, **kwargs):
 
     y_lower = central - error
     y_upper = central + error
-    n_samples = values_2d.shape[0] if values_2d.ndim > 1 else 1
 
     if "label" in kwargs and kwargs["label"]:
-        kwargs["label"] = f"{kwargs['label']} (n={n_samples})"
+        n_str = _format_sample_size(values_2d)
+        kwargs["label"] = f"{kwargs['label']} ($n$={n_str})"
 
     return scitex_plt_plot_shaded_line(axis, xx, y_lower, central, y_upper, **kwargs)
 
@@ -161,10 +188,9 @@ def plot_mean_ci(axis, values_2d, xx=None, perc=95, **kwargs):
         y_lower = np.nanpercentile(values_2d, y_lower_perc, axis=0)
         y_upper = np.nanpercentile(values_2d, y_upper_perc, axis=0)
 
-    n_samples = values_2d.shape[0] if values_2d.ndim > 1 else 1
-
     if "label" in kwargs and kwargs["label"]:
-        kwargs["label"] = f"{kwargs['label']} (n={n_samples}, CI={perc}%)"
+        n_str = _format_sample_size(values_2d)
+        kwargs["label"] = f"{kwargs['label']} ($n$={n_str}, CI={perc}%)"
 
     return scitex_plt_plot_shaded_line(axis, xx, y_lower, central, y_upper, **kwargs)
 
@@ -213,10 +239,9 @@ def plot_median_iqr(axis, values_2d, xx=None, **kwargs):
         y_lower = np.nanpercentile(values_2d, 25, axis=0)
         y_upper = np.nanpercentile(values_2d, 75, axis=0)
 
-    n_samples = values_2d.shape[0] if values_2d.ndim > 1 else 1
-
     if "label" in kwargs and kwargs["label"]:
-        kwargs["label"] = f"{kwargs['label']} (n={n_samples}, IQR)"
+        n_str = _format_sample_size(values_2d)
+        kwargs["label"] = f"{kwargs['label']} ($n$={n_str}, IQR)"
 
     return scitex_plt_plot_shaded_line(axis, xx, y_lower, central, y_upper, **kwargs)
 

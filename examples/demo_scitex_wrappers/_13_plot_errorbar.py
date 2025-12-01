@@ -14,9 +14,10 @@ def demo_plot_errorbar(fig, ax, stx):
     y = np.array([2.3, 3.5, 4.1, 3.8, 2.9])
     yerr = np.array([0.3, 0.4, 0.3, 0.5, 0.4])
 
-    ax.plot_errorbar(x, y, yerr=yerr, id="errorbar")
+    ax.plot_errorbar(x, y, yerr=yerr, id="errorbar", label="Measurement")
 
     ax.set_xyt(x="Time [min]", y="Conc. [µM]", t="ax.plot_errorbar(x, y, yerr)")
+    ax.legend()
 
     return fig, ax
 
