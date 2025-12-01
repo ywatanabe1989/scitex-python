@@ -13,12 +13,12 @@ import pandas as pd
 from scitex.pd import force_df
 
 def _format_plot_joyplot(id, tracked_dict, kwargs):
-    """Format data from a plot_joyplot call.
+    """Format data from a stx_joyplot call.
     
     Args:
         id (str): Identifier for the plot
         tracked_dict (dict): Dictionary containing 'joyplot_data' key with joyplot data
-        kwargs (dict): Keyword arguments passed to plot_joyplot
+        kwargs (dict): Keyword arguments passed to stx_joyplot
         
     Returns:
         pd.DataFrame: Formatted joyplot data

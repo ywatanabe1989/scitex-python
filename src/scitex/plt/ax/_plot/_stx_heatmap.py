@@ -15,7 +15,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.image import AxesImage
 
 
-def plot_heatmap(
+def stx_heatmap(
     ax: Union[Axes, "AxisWrapper"],
     values_2d: np.ndarray,
     x_labels: Optional[List[str]] = None,
@@ -74,7 +74,7 @@ def plot_heatmap(
     >>> import scitex as stx
     >>> data = np.random.rand(5, 10)
     >>> fig, ax = stx.plt.subplots()
-    >>> ax, im, cbar = stx.plt.ax.plot_heatmap(
+    >>> ax, im, cbar = stx.plt.ax.stx_heatmap(
     ...     ax, data,
     ...     x_labels=[f"X{i}" for i in range(10)],
     ...     y_labels=[f"Y{i}" for i in range(5)],
@@ -348,7 +348,7 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots()
 
-    im, cbar = plot_heatmap(
+    im, cbar = stx_heatmap(
         ax,
         data,
         x_labels=x_labels,

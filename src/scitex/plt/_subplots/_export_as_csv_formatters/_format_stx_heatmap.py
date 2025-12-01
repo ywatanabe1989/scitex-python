@@ -12,14 +12,14 @@ import numpy as np
 import pandas as pd
 
 def _format_plot_heatmap(id, tracked_dict, kwargs):
-    """Format data from a plot_heatmap call.
+    """Format data from a stx_heatmap call.
     
     Exports heatmap data in xyz format (x, y, value) for better compatibility.
     
     Args:
         id (str): Identifier for the plot
         tracked_dict (dict): Dictionary containing tracked data
-        kwargs (dict): Keyword arguments passed to plot_heatmap
+        kwargs (dict): Keyword arguments passed to stx_heatmap
         
     Returns:
         pd.DataFrame: Formatted heatmap data in xyz format

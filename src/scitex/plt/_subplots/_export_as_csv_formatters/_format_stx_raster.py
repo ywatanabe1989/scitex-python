@@ -11,12 +11,12 @@ __DIR__ = os.path.dirname(__FILE__)
 import pandas as pd
 
 def _format_plot_raster(id, tracked_dict, kwargs):
-    """Format data from a plot_raster call.
+    """Format data from a stx_raster call.
     
     Args:
         id (str): Identifier for the plot
         tracked_dict (dict): Dictionary containing 'raster_digit_df' key with raster plot data
-        kwargs (dict): Keyword arguments passed to plot_raster
+        kwargs (dict): Keyword arguments passed to stx_raster
         
     Returns:
         pd.DataFrame: Formatted raster plot data

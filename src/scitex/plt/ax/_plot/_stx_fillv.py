@@ -14,7 +14,7 @@ import numpy as np
 from ....plt.utils import assert_valid_axis
 
 
-def plot_fillv(axes, starts_1d, ends_1d, color="red", alpha=0.2):
+def stx_fillv(axes, starts_1d, ends_1d, color="red", alpha=0.2):
     """
     Fill between specified start and end intervals on an axis or array of axes.
 

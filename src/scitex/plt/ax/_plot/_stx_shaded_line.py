@@ -139,7 +139,7 @@ def _plot_shaded_line(
     return axis, results
 
 
-def plot_shaded_line(
+def stx_shaded_line(
     axis: Union[Axes, "AxisWrapper"],
     xs: Union[np.ndarray, List[np.ndarray]],
     ys_lower: Union[np.ndarray, List[np.ndarray]],
@@ -186,7 +186,7 @@ def plot_shaded_line(
     >>> y_mean = np.sin(x)
     >>> y_std = 0.2
     >>> fig, ax = stx.plt.subplots()
-    >>> ax, df = stx.plt.ax.plot_shaded_line(
+    >>> ax, df = stx.plt.ax.stx_shaded_line(
     ...     ax, x, y_mean - y_std, y_mean, y_mean + y_std,
     ...     color='blue', alpha=0.3
     ... )

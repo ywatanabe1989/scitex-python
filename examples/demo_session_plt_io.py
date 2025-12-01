@@ -19,7 +19,7 @@ def demo(filename, verbose=False):
     t = np.linspace(0, 2, 1000)
     signal = np.sin(2 * np.pi * 5 * t) * np.exp(-t / 2)
 
-    ax.plot_line(t, signal)  # Original plot for automatic CSV export
+    ax.stx_line(t, signal)  # Original plot for automatic CSV export
     ax.set_xyt(
         "Time (s)",
         "Amplitude",

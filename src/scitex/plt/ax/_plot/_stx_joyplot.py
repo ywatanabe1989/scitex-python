@@ -15,7 +15,7 @@ from scipy import stats
 from ....plt.utils import assert_valid_axis
 
 
-def plot_joyplot(ax, arrays, overlap=0.5, fill_alpha=0.7, line_alpha=1.0,
+def stx_joyplot(ax, arrays, overlap=0.5, fill_alpha=0.7, line_alpha=1.0,
                  colors=None, **kwargs):
     """
     Create a joyplot (ridgeline plot) on the provided axes.

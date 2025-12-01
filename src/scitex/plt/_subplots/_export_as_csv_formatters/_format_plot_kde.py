@@ -12,14 +12,14 @@ import pandas as pd
 from scitex.pd import force_df
 
 def _format_plot_kde(id, tracked_dict, kwargs):
-    """Format data from a plot_kde call.
+    """Format data from a stx_kde call.
     
     Processes kernel density estimation plot data.
     
     Args:
         id (str): Identifier for the plot
         tracked_dict (dict): Dictionary containing 'x', 'kde', and 'n' keys
-        kwargs (dict): Keyword arguments passed to plot_kde
+        kwargs (dict): Keyword arguments passed to stx_kde
         
     Returns:
         pd.DataFrame: Formatted KDE data

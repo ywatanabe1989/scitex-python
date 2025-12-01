@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-10-02 07:15:10 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/ml/plt/plot_conf_mat.py
+# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/ml/plt/stx_conf_mat.py
 # ----------------------------------------
 from __future__ import annotations
 import os
@@ -28,7 +28,7 @@ from scitex.ai.metrics import calc_bacc_from_conf_mat
 calc_bACC_from_conf_mat = calc_bacc_from_conf_mat
 
 
-def plot_conf_mat(
+def stx_conf_mat(
     cm=None,
     y_true=None,
     y_pred=None,
@@ -270,7 +270,7 @@ def plot_conf_mat(
 
 
 # Backward compatibility alias
-conf_mat = plot_conf_mat
+conf_mat = stx_conf_mat
 
 
 # Metric calculation functions have been moved to scitex.ai.metrics

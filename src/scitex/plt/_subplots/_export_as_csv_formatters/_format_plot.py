@@ -49,7 +49,7 @@ def _format_plot(
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
-    # For plot_line, we expect a 'plot_df' key
+    # For stx_line, we expect a 'plot_df' key
     if 'plot_df' in tracked_dict:
         plot_df = tracked_dict['plot_df']
         if isinstance(plot_df, pd.DataFrame):

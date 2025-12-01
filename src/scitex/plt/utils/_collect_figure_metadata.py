@@ -346,24 +346,24 @@ def _detect_plot_type(ax) -> tuple:
     if hasattr(ax, 'history') and len(ax.history) > 0:
         # Get the first plotting command
         first_cmd = ax.history[0].get('command', '')
-        if 'plot_heatmap' in first_cmd:
-            return "heatmap", "plot_heatmap"
-        elif 'plot_kde' in first_cmd:
-            return "kde", "plot_kde"
-        elif 'plot_ecdf' in first_cmd:
-            return "ecdf", "plot_ecdf"
-        elif 'plot_violin' in first_cmd:
-            return "violin", "plot_violin"
-        elif 'plot_box' in first_cmd or 'boxplot' in first_cmd:
-            return "boxplot", "plot_box"
-        elif 'plot_line' in first_cmd:
-            return "line", "plot_line"
+        if 'stx_heatmap' in first_cmd:
+            return "heatmap", "stx_heatmap"
+        elif 'stx_kde' in first_cmd:
+            return "kde", "stx_kde"
+        elif 'stx_ecdf' in first_cmd:
+            return "ecdf", "stx_ecdf"
+        elif 'stx_violin' in first_cmd:
+            return "violin", "stx_violin"
+        elif 'stx_box' in first_cmd or 'boxplot' in first_cmd:
+            return "boxplot", "stx_box"
+        elif 'stx_line' in first_cmd:
+            return "line", "stx_line"
         elif 'plot_scatter' in first_cmd:
             return "scatter", "plot_scatter"
-        elif 'plot_mean_std' in first_cmd:
-            return "line", "plot_mean_std"
-        elif 'plot_shaded_line' in first_cmd:
-            return "line", "plot_shaded_line"
+        elif 'stx_mean_std' in first_cmd:
+            return "line", "stx_mean_std"
+        elif 'stx_shaded_line' in first_cmd:
+            return "line", "stx_shaded_line"
         elif 'sns_boxplot' in first_cmd:
             return "boxplot", "sns_boxplot"
         elif 'sns_violinplot' in first_cmd:

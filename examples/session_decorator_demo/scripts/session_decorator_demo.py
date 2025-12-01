@@ -82,7 +82,7 @@ def visualize_data(x, y):
     coeffs = np.polyfit(x, y, 1)
     line_x = np.linspace(x.min(), x.max(), 100)
     line_y = coeffs[0] * line_x + coeffs[1]
-    ax.plot_line(
+    ax.stx_line(
         line_x, line_y, "r--", label=f"y = {coeffs[0]:.2f}x + {coeffs[1]:.2f}"
     )
 

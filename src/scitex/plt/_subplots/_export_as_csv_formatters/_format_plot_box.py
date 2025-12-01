@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 def _format_plot_box(id, tracked_dict, kwargs):
-    """Format data from a plot_box call."""
+    """Format data from a stx_box call."""
     # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()

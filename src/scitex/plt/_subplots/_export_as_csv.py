@@ -27,12 +27,12 @@ _METHOD_ALTERNATIVES = {
     'bar': 'plot_bar',  # already tracked
     'barh': 'plot_barh',  # already tracked
     'hist': 'hist',  # already tracked
-    'boxplot': 'plot_box or plot_boxplot',
-    'violinplot': 'plot_violin or plot_violinplot',
+    'boxplot': 'stx_box or plot_boxplot',
+    'violinplot': 'stx_violin or plot_violinplot',
     'fill_between': 'plot_fill_between',
     'errorbar': 'plot_errorbar',
     'contour': 'plot_contour',
-    'heatmap': 'plot_heatmap',
+    'heatmap': 'stx_heatmap',
 
     # Seaborn methods (accessed via ax.sns_*)
     'scatterplot': 'sns_scatterplot',
@@ -114,25 +114,25 @@ _FORMATTER_REGISTRY = {
     "violin": _format_violin,
     "violinplot": _format_violinplot,
     # Custom scitex methods
-    "plot_box": _format_plot_box,
-    "plot_conf_mat": _format_plot_conf_mat,
-    "plot_ecdf": _format_plot_ecdf,
-    "plot_fillv": _format_plot_fillv,
-    "plot_heatmap": _format_plot_heatmap,
-    "plot_image": _format_plot_image,
+    "stx_box": _format_plot_box,
+    "stx_conf_mat": _format_plot_conf_mat,
+    "stx_ecdf": _format_plot_ecdf,
+    "stx_fillv": _format_plot_fillv,
+    "stx_heatmap": _format_plot_heatmap,
+    "stx_image": _format_plot_image,
     "plot_imshow": _format_plot_imshow,
-    "plot_joyplot": _format_plot_joyplot,
-    "plot_kde": _format_plot_kde,
-    "plot_line": _format_plot_line,
-    "plot_mean_ci": _format_plot_mean_ci,
-    "plot_mean_std": _format_plot_mean_std,
-    "plot_median_iqr": _format_plot_median_iqr,
-    "plot_raster": _format_plot_raster,
-    "plot_rectangle": _format_plot_rectangle,
+    "stx_joyplot": _format_plot_joyplot,
+    "stx_kde": _format_plot_kde,
+    "stx_line": _format_plot_line,
+    "stx_mean_ci": _format_plot_mean_ci,
+    "stx_mean_std": _format_plot_mean_std,
+    "stx_median_iqr": _format_plot_median_iqr,
+    "stx_raster": _format_plot_raster,
+    "stx_rectangle": _format_plot_rectangle,
     "plot_scatter": _format_plot_scatter,
-    "plot_scatter_hist": _format_plot_scatter_hist,
-    "plot_shaded_line": _format_plot_shaded_line,
-    "plot_violin": _format_plot_violin,
+    "stx_scatter_hist": _format_plot_scatter_hist,
+    "stx_shaded_line": _format_plot_shaded_line,
+    "stx_violin": _format_plot_violin,
     # Seaborn methods
     "sns_barplot": _format_sns_barplot,
     "sns_boxplot": _format_sns_boxplot,
@@ -218,7 +218,7 @@ def export_as_csv(history_records):
             else:
                 message = (
                     f"Method '{method}()' does not support data tracking for CSV export. "
-                    f"Consider using scitex plot methods (e.g., plot_image, plot_imshow) for data export support."
+                    f"Consider using scitex plot methods (e.g., stx_image, plot_imshow) for data export support."
                 )
             _warn_once(message)
         return pd.DataFrame()
@@ -310,43 +310,43 @@ def format_record(record):
         return _format_annotate(id, tracked_dict, kwargs)
 
     # Custom plotting functions
-    elif method == "plot_box":
+    elif method == "stx_box":
         return _format_plot_box(id, tracked_dict, kwargs)
-    elif method == "plot_conf_mat":
+    elif method == "stx_conf_mat":
         return _format_plot_conf_mat(id, tracked_dict, kwargs)
-    elif method == "plot_ecdf":
+    elif method == "stx_ecdf":
         return _format_plot_ecdf(id, tracked_dict, kwargs)
-    elif method == "plot_fillv":
+    elif method == "stx_fillv":
         return _format_plot_fillv(id, tracked_dict, kwargs)
-    elif method == "plot_heatmap":
+    elif method == "stx_heatmap":
         return _format_plot_heatmap(id, tracked_dict, kwargs)
-    elif method == "plot_image":
+    elif method == "stx_image":
         return _format_plot_image(id, tracked_dict, kwargs)
     elif method == "plot_imshow":
         return _format_plot_imshow(id, tracked_dict, kwargs)
-    elif method == "plot_joyplot":
+    elif method == "stx_joyplot":
         return _format_plot_joyplot(id, tracked_dict, kwargs)
-    elif method == "plot_kde":
+    elif method == "stx_kde":
         return _format_plot_kde(id, tracked_dict, kwargs)
-    elif method == "plot_line":
+    elif method == "stx_line":
         return _format_plot_line(id, tracked_dict, kwargs)
-    elif method == "plot_mean_ci":
+    elif method == "stx_mean_ci":
         return _format_plot_mean_ci(id, tracked_dict, kwargs)
-    elif method == "plot_mean_std":
+    elif method == "stx_mean_std":
         return _format_plot_mean_std(id, tracked_dict, kwargs)
-    elif method == "plot_median_iqr":
+    elif method == "stx_median_iqr":
         return _format_plot_median_iqr(id, tracked_dict, kwargs)
-    elif method == "plot_raster":
+    elif method == "stx_raster":
         return _format_plot_raster(id, tracked_dict, kwargs)
-    elif method == "plot_rectangle":
+    elif method == "stx_rectangle":
         return _format_plot_rectangle(id, tracked_dict, kwargs)
     elif method == "plot_scatter":
         return _format_plot_scatter(id, tracked_dict, kwargs)
-    elif method == "plot_scatter_hist":
+    elif method == "stx_scatter_hist":
         return _format_plot_scatter_hist(id, tracked_dict, kwargs)
-    elif method == "plot_shaded_line":
+    elif method == "stx_shaded_line":
         return _format_plot_shaded_line(id, tracked_dict, kwargs)
-    elif method == "plot_violin":
+    elif method == "stx_violin":
         return _format_plot_violin(id, tracked_dict, kwargs)
 
     # Seaborn functions

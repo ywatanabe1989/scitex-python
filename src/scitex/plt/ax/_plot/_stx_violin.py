@@ -17,7 +17,7 @@ import seaborn as sns
 from ....plt.utils import assert_valid_axis
 
 
-def plot_violin(
+def stx_violin(
     ax,
     values_list,
     labels=None,

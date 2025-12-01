@@ -316,7 +316,7 @@ class SeabornMixin:
         id=None,
         **kwargs,
     ):
-        # Remove hue from kwargs before passing to plot_kde
+        # Remove hue from kwargs before passing to stx_kde
         hue_col = kwargs.pop("hue", None)
 
         if hue_col:
@@ -326,20 +326,20 @@ class SeabornMixin:
                 lim = xlim
                 for hue in np.unique(hues):
                     _data = data.loc[hues == hue, x]
-                    self.plot_kde(_data, xlim=lim, label=hue, id=hue, **kwargs)
+                    self.stx_kde(_data, xlim=lim, label=hue, id=hue, **kwargs)
 
             if y is not None:
                 lim = ylim
                 for hue in np.unique(hues):
                     _data = data.loc[hues == hue, y]
-                    self.plot_kde(_data, xlim=lim, label=hue, id=hue, **kwargs)
+                    self.stx_kde(_data, xlim=lim, label=hue, id=hue, **kwargs)
 
         else:
             if x is not None:
                 _data, lim = data[x], xlim
             if y is not None:
                 _data, lim = data[y], ylim
-            self.plot_kde(_data, xlim=lim, **kwargs)
+            self.stx_kde(_data, xlim=lim, **kwargs)
 
     @sns_copy_doc
     def sns_pairplot(self, *args, track=True, id=None, **kwargs):

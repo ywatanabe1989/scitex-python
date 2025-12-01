@@ -22,7 +22,7 @@ from scitex.plt.utils import assert_valid_axis
 from .._style._extend import extend as scitex_plt_extend
 
 
-def plot_conf_mat(
+def stx_conf_mat(
     axis: plt.Axes,
     conf_mat_2d: Union[np.ndarray, pd.DataFrame],
     x_labels: Optional[List[str]] = None,
@@ -75,7 +75,7 @@ def plot_conf_mat(
     -------
     >>> data = np.array([[10, 2, 0], [1, 15, 3], [0, 2, 20]])
     >>> fig, ax = plt.subplots()
-    >>> ax, bacc = plot_conf_mat(ax, data, x_labels=['A','B','C'],
+    >>> ax, bacc = stx_conf_mat(ax, data, x_labels=['A','B','C'],
     ...                     y_labels=['X','Y','Z'], calc_bacc=True)
     >>> print(f"Balanced Accuracy: {bacc:.3f}")
     Balanced Accuracy: 0.889

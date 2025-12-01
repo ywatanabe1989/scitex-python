@@ -13,7 +13,7 @@ import matplotlib
 from scitex.plt.utils import assert_valid_axis
 
 
-def plot_image(
+def stx_image(
     ax,
     arr_2d,
     cbar=True,

@@ -18,7 +18,7 @@ import pandas as pd
 from ....plt.utils import assert_valid_axis
 
 
-def plot_raster(
+def stx_raster(
     ax,
     spike_times_list,
     time=None,

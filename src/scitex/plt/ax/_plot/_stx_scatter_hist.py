@@ -12,7 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 import numpy as np
 
 
-def plot_scatter_hist(
+def stx_scatter_hist(
     ax,
     x,
     y,

@@ -12,14 +12,14 @@ import numpy as np
 import pandas as pd
 
 def _format_plot_violin(id, tracked_dict, kwargs):
-    """Format data from a plot_violin call.
+    """Format data from a stx_violin call.
     
     Formats data in a long-format for better compatibility.
     
     Args:
         id (str): Identifier for the plot
         tracked_dict (dict): Dictionary containing tracked data
-        kwargs (dict): Keyword arguments passed to plot_violin
+        kwargs (dict): Keyword arguments passed to stx_violin
         
     Returns:
         pd.DataFrame: Formatted violin plot data in long format
