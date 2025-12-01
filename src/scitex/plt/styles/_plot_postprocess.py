@@ -65,6 +65,10 @@ def apply_plot_postprocess(method_name, result, ax, kwargs, args=None):
         _postprocess_barh(result, ax, kwargs)
     elif method_name == 'errorbar' and result is not None:
         _postprocess_errorbar(result)
+    elif method_name == 'hist' and result is not None:
+        _postprocess_hist(result, ax)
+    elif method_name == 'fill_between' and result is not None:
+        _postprocess_fill_between(result, kwargs)
 
     return result
 
@@ -307,6 +311,53 @@ def _postprocess_scatter(result, kwargs):
         size_pt = mm_to_pt(DEFAULT_MARKER_SIZE_MM)
         marker_area = size_pt ** 2
         result.set_sizes([marker_area])
+
+
+def _postprocess_hist(result, ax):
+    """Apply styling for histogram plots.
+
+    Ensures histogram bars have proper edge color and alpha for visibility.
+    """
+    line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+
+    # result is (n, bins, patches) tuple
+    if len(result) >= 3:
+        patches = result[2]
+        # Handle both single histogram and stacked histograms
+        if hasattr(patches, '__iter__'):
+            for patch_group in patches:
+                if hasattr(patch_group, '__iter__'):
+                    for patch in patch_group:
+                        patch.set_edgecolor('black')
+                        patch.set_linewidth(line_width)
+                        # Ensure alpha is at least 0.7 for visibility
+                        if patch.get_alpha() is None or patch.get_alpha() < 0.7:
+                            patch.set_alpha(1.0)
+                else:
+                    # Single patch
+                    patch_group.set_edgecolor('black')
+                    patch_group.set_linewidth(line_width)
+                    if patch_group.get_alpha() is None or patch_group.get_alpha() < 0.7:
+                        patch_group.set_alpha(1.0)
+
+
+def _postprocess_fill_between(result, kwargs):
+    """Apply styling for fill_between plots.
+
+    Ensures shaded regions have proper alpha for visibility.
+    """
+    # result is a PolyCollection
+    if result is not None:
+        # Set edge color to match face color or black
+        line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+
+        # Only set edge if not already specified
+        if 'edgecolor' not in kwargs and 'ec' not in kwargs:
+            result.set_edgecolor('none')
+
+        # Ensure alpha is reasonable (default 0.3 is common for fill_between)
+        if 'alpha' not in kwargs:
+            result.set_alpha(0.3)
 
 
 def _postprocess_bar(result, ax, kwargs):
