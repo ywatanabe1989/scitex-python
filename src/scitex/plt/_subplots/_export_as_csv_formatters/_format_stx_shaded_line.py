@@ -11,12 +11,12 @@ __DIR__ = os.path.dirname(__FILE__)
 import pandas as pd
 
 def _format_plot_shaded_line(id, tracked_dict, kwargs):
-    """Format data from a plot_shaded_line call.
+    """Format data from a stx_shaded_line call.
     
     Args:
         id (str): Identifier for the plot
         tracked_dict (dict): Dictionary containing tracked data
-        kwargs (dict): Keyword arguments passed to plot_shaded_line
+        kwargs (dict): Keyword arguments passed to stx_shaded_line
         
     Returns:
         pd.DataFrame: Formatted shaded line data

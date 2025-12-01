@@ -12,7 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 def _format_plot_image(id, tracked_dict, kwargs):
-    """Format data from a plot_image call.
+    """Format data from a stx_image call.
     
     Exports image data in long-format xyz format for better compatibility.
     Also saves channel data for RGB/RGBA images.
@@ -20,7 +20,7 @@ def _format_plot_image(id, tracked_dict, kwargs):
     Args:
         id (str or int): Identifier for the plot
         tracked_dict (dict): Dictionary containing tracked data
-        kwargs (dict): Keyword arguments passed to plot_image
+        kwargs (dict): Keyword arguments passed to stx_image
         
     Returns:
         pd.DataFrame: Formatted image data in xyz format

@@ -534,7 +534,7 @@ def demo_violinplot_csv_export():
 
 
 def demo_plot_line_csv_export():
-    """Demo that plot_line data is correctly exported to CSV."""
+    """Demo that stx_line data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -543,7 +543,7 @@ def demo_plot_line_csv_export():
     y = np.sin(x)
 
     # Plot with ID for tracking
-    ax.plot_line(y, label="Sine Wave", id="plot_line_demo")
+    ax.stx_line(y, label="Sine Wave", id="plot_line_demo")
 
     # Style the plot
     ax.set_xyt("X", "Y", "Line Plot Demo")
@@ -571,7 +571,7 @@ def demo_plot_line_csv_export():
 
 
 def demo_plot_box_csv_export():
-    """Demo that plot_box data is correctly exported to CSV."""
+    """Demo that stx_box data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -580,7 +580,7 @@ def demo_plot_box_csv_export():
     data = np.random.normal(0, 1, 100)
 
     # Plot with ID for tracking
-    ax.plot_box(data, label="Box Data", id="plot_box_demo")
+    ax.stx_box(data, label="Box Data", id="plot_box_demo")
 
     # Style the plot
     ax.set_xyt("", "Value", "Box Plot Demo")
@@ -602,7 +602,7 @@ def demo_plot_box_csv_export():
 
 
 def demo_plot_mean_std_csv_export():
-    """Demo that plot_mean_std data is correctly exported to CSV."""
+    """Demo that stx_mean_std data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -615,7 +615,7 @@ def demo_plot_mean_std_csv_export():
     std_value = 0.2  # Use a fixed standard deviation value
 
     # Plot with ID for tracking
-    ax.plot_mean_std(
+    ax.stx_mean_std(
         y_mean, xx=x, sd=std_value, label="Mean±Std", id="plot_mean_std_demo"
     )
 
@@ -640,7 +640,7 @@ def demo_plot_mean_std_csv_export():
 
 
 def demo_plot_mean_ci_csv_export():
-    """Demo that plot_mean_ci data is correctly exported to CSV."""
+    """Demo that stx_mean_ci data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -654,7 +654,7 @@ def demo_plot_mean_ci_csv_export():
 
     # Plot with ID for tracking
     try:
-        ax.plot_mean_ci(
+        ax.stx_mean_ci(
             y_mean, xx=x, ci=ci_value, label="Mean±CI", id="plot_mean_ci_demo"
         )
 
@@ -679,14 +679,14 @@ def demo_plot_mean_ci_csv_export():
             ), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except (AttributeError, TypeError, ValueError) as e:
-        print(f"Error with plot_mean_ci: {e}")
+        print(f"Error with stx_mean_ci: {e}")
         # Function might not exist or have different signature
         # Skip this demo
         scitex.plt.close(fig)
 
 
 def demo_plot_median_iqr_csv_export():
-    """Demo that plot_median_iqr data is correctly exported to CSV."""
+    """Demo that stx_median_iqr data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -700,7 +700,7 @@ def demo_plot_median_iqr_csv_export():
 
     # Plot with ID for tracking
     try:
-        ax.plot_median_iqr(
+        ax.stx_median_iqr(
             y_median,
             xx=x,
             iqr=iqr_value,
@@ -729,14 +729,14 @@ def demo_plot_median_iqr_csv_export():
             ), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except (AttributeError, TypeError, ValueError) as e:
-        print(f"Error with plot_median_iqr: {e}")
+        print(f"Error with stx_median_iqr: {e}")
         # Function might not exist or have different signature
         # Skip this demo
         scitex.plt.close(fig)
 
 
 def demo_plot_raster_csv_export():
-    """Demo that plot_raster data is correctly exported to CSV."""
+    """Demo that stx_raster data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -751,7 +751,7 @@ def demo_plot_raster_csv_export():
 
     # Plot with ID for tracking
     try:
-        ax.plot_raster(
+        ax.stx_raster(
             positions,
             labels=[f"Neuron {i+1}" for i in range(n_neurons)],
             id="plot_raster_demo",
@@ -774,12 +774,12 @@ def demo_plot_raster_csv_export():
         scitex.plt.close(fig)
     except AttributeError:
         print(
-            "plot_raster method not found or implementation is incomplete, skipping demo"
+            "stx_raster method not found or implementation is incomplete, skipping demo"
         )
 
 
 def demo_plot_fillv_csv_export():
-    """Demo that plot_fillv data is correctly exported to CSV."""
+    """Demo that stx_fillv data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -788,7 +788,7 @@ def demo_plot_fillv_csv_export():
     ends = [1.5, 3.5, 5.5, 7.5]
 
     # Plot with ID for tracking
-    ax.plot_fillv(starts, ends, color="red", alpha=0.3, id="plot_fillv_demo")
+    ax.stx_fillv(starts, ends, color="red", alpha=0.3, id="plot_fillv_demo")
 
     # Add a base line for context
     ax.plot(np.linspace(0, 10, 100), np.sin(np.linspace(0, 10, 100)), "b-")
@@ -813,12 +813,12 @@ def demo_plot_fillv_csv_export():
 
 
 def demo_plot_rectangle_csv_export():
-    """Demo that plot_rectangle data is correctly exported to CSV."""
+    """Demo that stx_rectangle data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
     # Plot a rectangle
-    ax.plot_rectangle(
+    ax.stx_rectangle(
         1, 1, 2, 1, facecolor="red", alpha=0.3, id="plot_rectangle_demo"
     )
 
@@ -846,7 +846,7 @@ def demo_plot_rectangle_csv_export():
 
 
 def demo_plot_joyplot_csv_export():
-    """Demo that plot_joyplot data is correctly exported to CSV."""
+    """Demo that stx_joyplot data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots(figsize=(8, 6))
 
@@ -860,7 +860,7 @@ def demo_plot_joyplot_csv_export():
 
     # Plot with ID for tracking
     try:
-        ax.plot_joyplot(
+        ax.stx_joyplot(
             data,
             labels=[f"Dist {i+1}" for i in range(n_dists)],
             id="plot_joyplot_demo",
@@ -886,11 +886,11 @@ def demo_plot_joyplot_csv_export():
             ), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
-        print("plot_joyplot method not found, skipping demo")
+        print("stx_joyplot method not found, skipping demo")
 
 
 def demo_plot_conf_mat_csv_export():
-    """Demo that plot_conf_mat data is correctly exported to CSV."""
+    """Demo that stx_conf_mat data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -900,7 +900,7 @@ def demo_plot_conf_mat_csv_export():
 
     # Plot with ID for tracking
     try:
-        ax.plot_conf_mat(conf_mat, id="conf_mat_demo")
+        ax.stx_conf_mat(conf_mat, id="conf_mat_demo")
 
         # Style the plot
         ax.set_title("Confusion Matrix Demo")
@@ -922,7 +922,7 @@ def demo_plot_conf_mat_csv_export():
             ), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
-        print("plot_conf_mat method not found, skipping demo")
+        print("stx_conf_mat method not found, skipping demo")
 
 
 # -------------------------------------------------
@@ -931,7 +931,7 @@ def demo_plot_conf_mat_csv_export():
 
 
 def demo_kde_plot_csv_export():
-    """Demo that plot_kde data is correctly exported to CSV."""
+    """Demo that stx_kde data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -942,7 +942,7 @@ def demo_kde_plot_csv_export():
     )
 
     # Plot with ID for tracking
-    ax.plot_kde(data, label="Bimodal Distribution", id="kde_demo")
+    ax.stx_kde(data, label="Bimodal Distribution", id="kde_demo")
 
     # Style the plot
     ax.set_xyt("Value", "Density", "KDE Demo")
@@ -971,7 +971,7 @@ def demo_kde_plot_csv_export():
 
 
 def demo_plot_image_csv_export():
-    """Demo that plot_image correctly exports the PNG without requiring CSV."""
+    """Demo that stx_image correctly exports the PNG without requiring CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -980,7 +980,7 @@ def demo_plot_image_csv_export():
     data = np.random.rand(20, 20)
 
     # Plot with ID for tracking
-    ax.plot_image(data, cmap="viridis", id="image_demo")
+    ax.stx_image(data, cmap="viridis", id="image_demo")
 
     # Style the plot
     ax.set_xyt("X", "Y", "Image Demo")
@@ -1007,7 +1007,7 @@ def demo_plot_image_csv_export():
 
 
 def demo_plot_shaded_line_csv_export():
-    """Demo that plot_shaded_line data is correctly exported to CSV."""
+    """Demo that stx_shaded_line data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -1019,7 +1019,7 @@ def demo_plot_shaded_line_csv_export():
     y_upper = y_middle + 0.2
 
     # Plot with ID for tracking
-    ax.plot_shaded_line(
+    ax.stx_shaded_line(
         x,
         y_lower,
         y_middle,
@@ -1049,7 +1049,7 @@ def demo_plot_shaded_line_csv_export():
 
 
 def demo_plot_scatter_hist_csv_export():
-    """Demo that plot_scatter_hist data is correctly exported to CSV."""
+    """Demo that stx_scatter_hist data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots(figsize=(8, 8))
 
@@ -1059,7 +1059,7 @@ def demo_plot_scatter_hist_csv_export():
     y = x + np.random.normal(0, 0.5, 500)
 
     # Plot with ID for tracking
-    ax.plot_scatter_hist(
+    ax.stx_scatter_hist(
         x, y, hist_bins=30, scatter_alpha=0.7, id="scatter_hist_demo"
     )
 
@@ -1083,7 +1083,7 @@ def demo_plot_scatter_hist_csv_export():
 
 
 def demo_plot_violin_csv_export():
-    """Demo that plot_violin data is correctly exported to CSV."""
+    """Demo that stx_violin data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -1097,7 +1097,7 @@ def demo_plot_violin_csv_export():
     labels = ["Group A", "Group B", "Group C"]
 
     # Plot with ID for tracking
-    ax.plot_violin(
+    ax.stx_violin(
         data, labels=labels, colors=["red", "blue", "green"], id="violin_demo"
     )
 
@@ -1121,7 +1121,7 @@ def demo_plot_violin_csv_export():
 
 
 def demo_plot_heatmap_csv_export():
-    """Demo that plot_heatmap data is correctly exported to CSV."""
+    """Demo that stx_heatmap data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -1132,7 +1132,7 @@ def demo_plot_heatmap_csv_export():
     y_labels = [f"Y{ii+1}" for ii in range(10)]
 
     # Plot with ID for tracking
-    ax.plot_heatmap(
+    ax.stx_heatmap(
         data,
         x_labels=x_labels,
         y_labels=y_labels,
@@ -1163,7 +1163,7 @@ def demo_plot_heatmap_csv_export():
 
 
 def demo_plot_ecdf_csv_export():
-    """Demo that plot_ecdf data is correctly exported to CSV."""
+    """Demo that stx_ecdf data is correctly exported to CSV."""
     # Create figure
     fig, ax = scitex.plt.subplots()
 
@@ -1172,7 +1172,7 @@ def demo_plot_ecdf_csv_export():
     data = np.random.normal(0, 1, 1000)
 
     # Plot with ID for tracking
-    ax.plot_ecdf(data, label="Normal Distribution", id="ecdf_demo")
+    ax.stx_ecdf(data, label="Normal Distribution", id="ecdf_demo")
 
     # Style the plot
     ax.set_xyt("Value", "Cumulative Probability", "ECDF Demo")
@@ -1206,8 +1206,8 @@ def demo_multiple_plots_csv_export():
     y2 = np.cos(x)
 
     # Create multiple plots with different IDs
-    ax.plot_line(y1, label="Sine", id="multi_demo_sine")
-    ax.plot_line(y2, label="Cosine", id="multi_demo_cosine")
+    ax.stx_line(y1, label="Sine", id="multi_demo_sine")
+    ax.stx_line(y2, label="Cosine", id="multi_demo_cosine")
 
     # Style the plot
     ax.set_xyt("X", "Y", "Multiple Plots Demo")

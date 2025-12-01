@@ -20,7 +20,7 @@ from ....plt.utils import assert_valid_axis, mm_to_pt
 DEFAULT_LINE_WIDTH_MM = 0.2
 
 
-def plot_ecdf(
+def stx_ecdf(
     axis: Union[Axes, "AxisWrapper"],
     values_1d: np.ndarray,
     **kwargs: Any,
@@ -57,7 +57,7 @@ def plot_ecdf(
     >>> import scitex as stx
     >>> data = np.random.randn(100)
     >>> fig, ax = stx.plt.subplots()
-    >>> ax, df = stx.plt.ax.plot_ecdf(ax, data)
+    >>> ax, df = stx.plt.ax.stx_ecdf(ax, data)
     """
     assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
 

@@ -49,7 +49,7 @@ class MatplotlibPlotMixin:
             method_name, result, self._axis_mpl, kwargs or {}, args
         )
 
-    def plot_image(
+    def stx_image(
         self,
         arr_2d: ArrayLike,
         track: bool = True,
@@ -57,11 +57,11 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_image"
+        method_name = "stx_image"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl = self._get_ax_module().plot_image(self._axis_mpl, arr_2d, **kwargs)
+            self._axis_mpl = self._get_ax_module().stx_image(self._axis_mpl, arr_2d, **kwargs)
 
         # Tracking
         tracked_dict = {"image_df": pd.DataFrame(arr_2d)}
@@ -80,7 +80,7 @@ class MatplotlibPlotMixin:
 
         return self._axis_mpl
 
-    def plot_kde(
+    def stx_kde(
         self,
         values_1d: ArrayLike,
         cumulative=False,
@@ -90,7 +90,7 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_kde"
+        method_name = "stx_kde"
 
         # Sample count as label
         n_samples = (~np.isnan(values_1d)).sum()
@@ -158,7 +158,7 @@ class MatplotlibPlotMixin:
 
         return self._axis_mpl
 
-    def plot_conf_mat(
+    def stx_conf_mat(
         self,
         conf_mat_2d: ArrayLike,
         x_labels: Optional[List[str]] = None,
@@ -176,11 +176,11 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_conf_mat"
+        method_name = "stx_conf_mat"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, bacc_val = self._get_ax_module().plot_conf_mat(
+            self._axis_mpl, bacc_val = self._get_ax_module().stx_conf_mat(
                 self._axis_mpl,
                 conf_mat_2d,
                 x_labels=x_labels,
@@ -206,7 +206,7 @@ class MatplotlibPlotMixin:
         return self._axis_mpl, bacc_val
 
     # @wraps removed to avoid circular import
-    def plot_rectangle(
+    def stx_rectangle(
         self,
         xx: float,
         yy: float,
@@ -217,11 +217,11 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_rectangle"
+        method_name = "stx_rectangle"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl = self._get_ax_module().plot_rectangle(
+            self._axis_mpl = self._get_ax_module().stx_rectangle(
                 self._axis_mpl, xx, yy, width, height, **kwargs
             )
 
@@ -235,7 +235,7 @@ class MatplotlibPlotMixin:
         return self._axis_mpl
 
     # @wraps removed to avoid circular import
-    def plot_fillv(
+    def stx_fillv(
         self,
         starts_1d: ArrayLike,
         ends_1d: ArrayLike,
@@ -246,11 +246,11 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_fillv"
+        method_name = "stx_fillv"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl = self._get_ax_module().plot_fillv(
+            self._axis_mpl = self._get_ax_module().stx_fillv(
                 self._axis_mpl, starts_1d, ends_1d, color=color, alpha=alpha
             )
 
@@ -263,7 +263,7 @@ class MatplotlibPlotMixin:
 
         return self._axis_mpl
 
-    def plot_box(
+    def stx_box(
         self,
         values_list: ArrayLike,
         colors: Optional[List] = None,
@@ -272,7 +272,7 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> dict:
         # Method Name for downstream csv exporting
-        method_name = "plot_box"
+        method_name = "stx_box"
 
         # Copy data
         _data = values_list.copy()
@@ -292,10 +292,11 @@ class MatplotlibPlotMixin:
         with self._no_tracking():
             result = self._axis_mpl.boxplot(values_list, **kwargs)
 
-        # Tracking
+        # Tracking - calculate sample size per group
+        n_per_group = [len(g) for g in values_list]
         tracked_dict = {
             "data": _data,
-            "n": [n for ii in range(len(values_list))],
+            "n": n_per_group,
         }
         self._track(track, id, method_name, tracked_dict, None)
 
@@ -373,7 +374,7 @@ class MatplotlibPlotMixin:
         return hist_data
 
     # @wraps removed to avoid circular import
-    def plot_raster(
+    def stx_raster(
         self,
         spike_times_list: List[ArrayLike],
         time: Optional[ArrayLike] = None,
@@ -384,11 +385,11 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_raster"
+        method_name = "stx_raster"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, raster_digit_df = self._get_ax_module().plot_raster(
+            self._axis_mpl, raster_digit_df = self._get_ax_module().stx_raster(
                 self._axis_mpl, spike_times_list, time=time
             )
 
@@ -402,7 +403,7 @@ class MatplotlibPlotMixin:
         return self._axis_mpl, raster_digit_df
 
     # @wraps removed to avoid circular import
-    def plot_ecdf(
+    def stx_ecdf(
         self,
         values_1d: ArrayLike,
         track: bool = True,
@@ -410,11 +411,11 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_ecdf"
+        method_name = "stx_ecdf"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, ecdf_df = self._get_ax_module().plot_ecdf(
+            self._axis_mpl, ecdf_df = self._get_ax_module().stx_ecdf(
                 self._axis_mpl, values_1d, **kwargs
             )
 
@@ -428,7 +429,7 @@ class MatplotlibPlotMixin:
         return self._axis_mpl, ecdf_df
 
     # @wraps removed to avoid circular import
-    def plot_joyplot(
+    def stx_joyplot(
         self,
         arrays: ArrayLike,
         track: bool = True,
@@ -436,11 +437,11 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_joyplot"
+        method_name = "stx_joyplot"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl = self._get_ax_module().plot_joyplot(
+            self._axis_mpl = self._get_ax_module().stx_joyplot(
                 self._axis_mpl, arrays, **kwargs
             )
 
@@ -454,7 +455,7 @@ class MatplotlibPlotMixin:
         return self._axis_mpl
 
     # @wraps removed to avoid circular import
-    def plot_scatter_hist(
+    def stx_scatter_hist(
         self,
         x: ArrayLike,
         y: ArrayLike,
@@ -472,11 +473,11 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot a scatter plot with marginal histograms."""
         # Method Name for downstream csv exporting
-        method_name = "plot_scatter_hist"
+        method_name = "stx_scatter_hist"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, ax_histx, ax_histy, hist_data = self._get_ax_module().plot_scatter_hist(
+            self._axis_mpl, ax_histx, ax_histy, hist_data = self._get_ax_module().stx_scatter_hist(
                 self._axis_mpl,
                 x,
                 y,
@@ -508,7 +509,7 @@ class MatplotlibPlotMixin:
         return self._axis_mpl, ax_histx, ax_histy, hist_data
 
     # @wraps removed to avoid circular import
-    def plot_heatmap(
+    def stx_heatmap(
         self,
         values_2d: ArrayLike,
         x_labels: Optional[List[str]] = None,
@@ -525,11 +526,11 @@ class MatplotlibPlotMixin:
     ) -> Tuple[matplotlib.image.AxesImage, matplotlib.colorbar.Colorbar]:
         """Plot a heatmap on the axes."""
         # Method Name for downstream csv exporting
-        method_name = "plot_heatmap"
+        method_name = "stx_heatmap"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            ax, im, cbar = self._get_ax_module().plot_heatmap(
+            ax, im, cbar = self._get_ax_module().stx_heatmap(
                 self._axis_mpl,
                 values_2d,
                 x_labels=x_labels,
@@ -557,7 +558,7 @@ class MatplotlibPlotMixin:
         return ax, im, cbar
 
     # @wraps removed to avoid circular import
-    def plot_violin(
+    def stx_violin(
         self,
         values_list: Union[pd.DataFrame, List, ArrayLike],
         x=None,
@@ -572,7 +573,7 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot a violin plot."""
         # Method Name for downstream csv exporting
-        method_name = "plot_violin"
+        method_name = "stx_violin"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
@@ -580,7 +581,7 @@ class MatplotlibPlotMixin:
             if isinstance(values_list, list) and all(
                 isinstance(item, (list, np.ndarray)) for item in values_list
             ):
-                self._axis_mpl = self._get_ax_module().plot_violin(
+                self._axis_mpl = self._get_ax_module().stx_violin(
                     self._axis_mpl,
                     values_list=values_list,
                     labels=labels,
@@ -590,7 +591,7 @@ class MatplotlibPlotMixin:
                 )
             # Handle DataFrame or other inputs
             else:
-                self._axis_mpl = self._get_ax_module().plot_violin(
+                self._axis_mpl = self._get_ax_module().stx_violin(
                     self._axis_mpl,
                     data=values_list,
                     x=x,
@@ -820,7 +821,7 @@ class MatplotlibPlotMixin:
     #     return self._axis_mpl
 
     # @wraps removed to avoid circular import
-    def plot_line(
+    def stx_line(
         self,
         values_1d: ArrayLike,
         xx: Optional[ArrayLike] = None,
@@ -830,11 +831,11 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot a simple line."""
         # Method Name for downstream csv exporting
-        method_name = "plot_line"
+        method_name = "stx_line"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, plot_df = self._get_ax_module().plot_line(
+            self._axis_mpl, plot_df = self._get_ax_module().stx_line(
                 self._axis_mpl, values_1d, xx=xx, **kwargs
             )
 
@@ -848,7 +849,7 @@ class MatplotlibPlotMixin:
         return self._axis_mpl, plot_df
 
     # @wraps removed to avoid circular import
-    def plot_mean_std(
+    def stx_mean_std(
         self,
         values_2d: ArrayLike,
         xx: Optional[ArrayLike] = None,
@@ -859,11 +860,11 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot mean line with standard deviation shading."""
         # Method Name for downstream csv exporting
-        method_name = "plot_mean_std"
+        method_name = "stx_mean_std"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, plot_df = self._get_ax_module().plot_mean_std(
+            self._axis_mpl, plot_df = self._get_ax_module().stx_mean_std(
                 self._axis_mpl, values_2d, xx=xx, sd=sd, **kwargs
             )
 
@@ -877,7 +878,7 @@ class MatplotlibPlotMixin:
         return self._axis_mpl, plot_df
 
     # @wraps removed to avoid circular import
-    def plot_mean_ci(
+    def stx_mean_ci(
         self,
         values_2d: ArrayLike,
         xx: Optional[ArrayLike] = None,
@@ -888,11 +889,11 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot mean line with confidence interval shading."""
         # Method Name for downstream csv exporting
-        method_name = "plot_mean_ci"
+        method_name = "stx_mean_ci"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, plot_df = self._get_ax_module().plot_mean_ci(
+            self._axis_mpl, plot_df = self._get_ax_module().stx_mean_ci(
                 self._axis_mpl, values_2d, xx=xx, perc=perc, **kwargs
             )
 
@@ -906,7 +907,7 @@ class MatplotlibPlotMixin:
         return self._axis_mpl, plot_df
 
     # @wraps removed to avoid circular import
-    def plot_median_iqr(
+    def stx_median_iqr(
         self,
         values_2d: ArrayLike,
         xx: Optional[ArrayLike] = None,
@@ -916,11 +917,11 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot median line with interquartile range shading."""
         # Method Name for downstream csv exporting
-        method_name = "plot_median_iqr"
+        method_name = "stx_median_iqr"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, plot_df = self._get_ax_module().plot_median_iqr(
+            self._axis_mpl, plot_df = self._get_ax_module().stx_median_iqr(
                 self._axis_mpl, values_2d, xx=xx, **kwargs
             )
 
@@ -934,7 +935,7 @@ class MatplotlibPlotMixin:
         return self._axis_mpl, plot_df
 
     # @wraps removed to avoid circular import
-    def plot_shaded_line(
+    def stx_shaded_line(
         self,
         xs: ArrayLike,
         ys_lower: ArrayLike,
@@ -948,11 +949,11 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot a line with shaded area between lower and upper bounds."""
         # Method Name for downstream csv exporting
-        method_name = "plot_shaded_line"
+        method_name = "stx_shaded_line"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, plot_df = self._get_ax_module().plot_shaded_line(
+            self._axis_mpl, plot_df = self._get_ax_module().stx_shaded_line(
                 self._axis_mpl,
                 xs,
                 ys_lower,

@@ -12,12 +12,12 @@ import numpy as np
 import pandas as pd
 
 def _format_plot_scatter_hist(id, tracked_dict, kwargs):
-    """Format data from a plot_scatter_hist call.
+    """Format data from a stx_scatter_hist call.
     
     Args:
         id (str): Identifier for the plot
         tracked_dict (dict): Dictionary containing tracked data
-        kwargs (dict): Keyword arguments passed to plot_scatter_hist
+        kwargs (dict): Keyword arguments passed to stx_scatter_hist
         
     Returns:
         pd.DataFrame: Formatted scatter histogram data

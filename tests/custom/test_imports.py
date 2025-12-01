@@ -91,8 +91,8 @@ class TestCoreImports:
     def test_scitex_plt_ax_import(self):
         """Test that scitex.plt.ax submodule imports correctly."""
         from scitex.plt import ax
-        assert hasattr(ax, 'plot_heatmap')
-        assert hasattr(ax, 'plot_joyplot')
+        assert hasattr(ax, 'stx_heatmap')
+        assert hasattr(ax, 'stx_joyplot')
 
     def test_scitex_session_import(self):
         """Test that scitex.session module imports without circular imports."""
@@ -175,17 +175,17 @@ class TestIsArrayLike:
 
 
 class TestPlotJoyplotLazyImport:
-    """Test that plot_joyplot function works with lazy joypy import."""
+    """Test that stx_joyplot function works with lazy joypy import."""
 
-    def test_plot_joyplot_import(self):
-        """Test that plot_joyplot can be imported."""
-        from scitex.plt.ax._plot import plot_joyplot
-        assert callable(plot_joyplot)
+    def test_stx_joyplot_import(self):
+        """Test that stx_joyplot can be imported."""
+        from scitex.plt.ax._plot import stx_joyplot
+        assert callable(stx_joyplot)
 
-    def test_plot_joyplot_function_callable(self):
-        """Test that plot_joyplot is callable."""
-        from scitex.plt.ax._plot._plot_joyplot import plot_joyplot
-        assert callable(plot_joyplot)
+    def test_stx_joyplot_function_callable(self):
+        """Test that stx_joyplot is callable."""
+        from scitex.plt.ax._plot._stx_joyplot import stx_joyplot
+        assert callable(stx_joyplot)
 
 
 # ==============================================================================
@@ -472,8 +472,8 @@ def run_tests():
     print("\n=== Testing is_array_like Function ===")
     run_test_class(TestIsArrayLike, "TestIsArrayLike")
 
-    # Test plot_joyplot lazy import
-    print("\n=== Testing plot_joyplot Lazy Import ===")
+    # Test stx_joyplot lazy import
+    print("\n=== Testing stx_joyplot Lazy Import ===")
     run_test_class(TestPlotJoyplotLazyImport, "TestPlotJoyplotLazyImport")
 
     # Test top-level imports

@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 def _format_plot_rectangle(id, tracked_dict, kwargs):
-    """Format data from a plot_rectangle call."""
+    """Format data from a stx_rectangle call."""
     # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()

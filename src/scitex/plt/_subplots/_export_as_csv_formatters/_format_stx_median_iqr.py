@@ -11,14 +11,14 @@ __DIR__ = os.path.dirname(__FILE__)
 import pandas as pd
 
 def _format_plot_median_iqr(id, tracked_dict, kwargs):
-    """Format data from a plot_median_iqr call.
+    """Format data from a stx_median_iqr call.
     
     Processes median with interquartile range band plot data for CSV export.
     
     Args:
         id (str): Identifier for the plot
         tracked_dict (dict): Contains 'plot_df' (pandas DataFrame with median and IQR data)
-        kwargs (dict): Keyword arguments passed to plot_median_iqr
+        kwargs (dict): Keyword arguments passed to stx_median_iqr
         
     Returns:
         pd.DataFrame: Formatted median and IQR data

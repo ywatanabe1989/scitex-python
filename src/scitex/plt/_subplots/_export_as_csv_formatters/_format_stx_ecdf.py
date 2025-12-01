@@ -11,12 +11,12 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 def _format_plot_ecdf(id, tracked_dict, kwargs):
-    """Format data from a plot_ecdf call.
+    """Format data from a stx_ecdf call.
     
     Args:
         id (str): Identifier for the plot
         tracked_dict (dict): Dictionary containing 'ecdf_df' key with ECDF data
-        kwargs (dict): Keyword arguments passed to plot_ecdf
+        kwargs (dict): Keyword arguments passed to stx_ecdf
         
     Returns:
         pd.DataFrame: Formatted ECDF data

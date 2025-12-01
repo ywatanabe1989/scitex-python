@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from ....plt.utils import assert_valid_axis
 
-from ._plot_shaded_line import plot_shaded_line as scitex_plt_plot_shaded_line
+from ._stx_shaded_line import stx_shaded_line as scitex_plt_plot_shaded_line
 
 
 def _format_sample_size(values_2d):
@@ -43,7 +43,7 @@ def _format_sample_size(values_2d):
         return f"{n_min}-{n_max}"
 
 
-def plot_line(axis, values_1d, xx=None, **kwargs):
+def stx_line(axis, values_1d, xx=None, **kwargs):
     """
     Plot a simple line.
 
@@ -80,7 +80,7 @@ def plot_line(axis, values_1d, xx=None, **kwargs):
     return axis, pd.DataFrame({"x": xx, "y": values_1d})
 
 
-def plot_mean_std(axis, values_2d, xx=None, sd=1, **kwargs):
+def stx_mean_std(axis, values_2d, xx=None, sd=1, **kwargs):
     """
     Plot mean line with standard deviation shading.
 
@@ -96,7 +96,7 @@ def plot_mean_std(axis, values_2d, xx=None, sd=1, **kwargs):
     sd : float, optional
         Number of standard deviations for the shaded region. Default is 1
     **kwargs
-        Additional keyword arguments passed to plot_shaded_line()
+        Additional keyword arguments passed to stx_shaded_line()
 
     Returns
     -------
@@ -134,7 +134,7 @@ def plot_mean_std(axis, values_2d, xx=None, sd=1, **kwargs):
     return scitex_plt_plot_shaded_line(axis, xx, y_lower, central, y_upper, **kwargs)
 
 
-def plot_mean_ci(axis, values_2d, xx=None, perc=95, **kwargs):
+def stx_mean_ci(axis, values_2d, xx=None, perc=95, **kwargs):
     """
     Plot mean line with confidence interval shading.
 
@@ -150,7 +150,7 @@ def plot_mean_ci(axis, values_2d, xx=None, perc=95, **kwargs):
     perc : float, optional
         Confidence interval percentage (0-100). Default is 95
     **kwargs
-        Additional keyword arguments passed to plot_shaded_line()
+        Additional keyword arguments passed to stx_shaded_line()
 
     Returns
     -------
@@ -195,7 +195,7 @@ def plot_mean_ci(axis, values_2d, xx=None, perc=95, **kwargs):
     return scitex_plt_plot_shaded_line(axis, xx, y_lower, central, y_upper, **kwargs)
 
 
-def plot_median_iqr(axis, values_2d, xx=None, **kwargs):
+def stx_median_iqr(axis, values_2d, xx=None, **kwargs):
     """
     Plot median line with interquartile range shading.
 
@@ -209,7 +209,7 @@ def plot_median_iqr(axis, values_2d, xx=None, **kwargs):
     xx : array-like, shape (n_points,), optional
         X coordinates for the data. If None, will use np.arange(n_points)
     **kwargs
-        Additional keyword arguments passed to plot_shaded_line()
+        Additional keyword arguments passed to stx_shaded_line()
 
     Returns
     -------

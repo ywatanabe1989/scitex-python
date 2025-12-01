@@ -12,7 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 from matplotlib.patches import Rectangle
 
 
-def plot_rectangle(ax, xx, yy, ww, hh, **kwargs):
+def stx_rectangle(ax, xx, yy, ww, hh, **kwargs):
     """Add a rectangle patch to an axes.
 
     Convenience function for adding rectangular patches to plots, useful for
@@ -50,10 +50,10 @@ def plot_rectangle(ax, xx, yy, ww, hh, **kwargs):
     >>> fig, ax = plt.subplots()
     >>> ax.plot([0, 10], [0, 10])
     >>> # Highlight a region (no border by default)
-    >>> plot_rectangle(ax, 2, 3, 4, 3, facecolor='yellow', alpha=0.3)
+    >>> stx_rectangle(ax, 2, 3, 4, 3, facecolor='yellow', alpha=0.3)
 
     >>> # Draw a box with explicit edge
-    >>> plot_rectangle(ax, 5, 5, 2, 2, facecolor='none', edgecolor='red', linewidth=2)
+    >>> stx_rectangle(ax, 5, 5, 2, 2, facecolor='none', edgecolor='red', linewidth=2)
 
     See Also
     --------
