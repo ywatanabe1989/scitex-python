@@ -55,6 +55,7 @@ from ._style._style_errorbar import style_errorbar
 from ._style._style_barplot import style_barplot
 from ._style._style_scatter import style_scatter
 from ._style._style_suptitles import style_suptitles
+from ._style._style_violinplot import style_violinplot
 
 # Plot
 from ._plot._plot_heatmap import plot_heatmap
