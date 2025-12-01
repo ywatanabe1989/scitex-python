@@ -200,6 +200,7 @@ web = [
     "fastapi",
     "flask",
     "streamlit",
+    "celery",
 ]
 
 # Scholar Module - Paper Management & Browser

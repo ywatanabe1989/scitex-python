@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-18 14:52:34 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_save_modules/_save_image.py
-# ----------------------------------------
+# Timestamp: "2025-12-01 12:23:32 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_image.py
+
 import os
+
 __FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
 import io as _io
 import logging
@@ -17,15 +16,23 @@ from PIL import Image
 logger = logging.getLogger(__name__)
 
 
-def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-right', verbose=False, **kwargs):
+def save_image(
+    obj,
+    spath,
+    metadata=None,
+    add_qr=False,
+    qr_position="bottom-right",
+    verbose=False,
+    **kwargs,
+):
     # Add URL to metadata if not present
     if metadata is not None:
         if verbose:
             logger.info(f"📝 Saving figure with metadata to: {spath}")
 
-        if 'url' not in metadata:
+        if "url" not in metadata:
             metadata = dict(metadata)
-            metadata['url'] = 'https://scitex.ai'
+            metadata["url"] = "https://scitex.ai"
             if verbose:
                 logger.info("  • Auto-added URL: https://scitex.ai")
 
@@ -35,12 +42,16 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
                 logger.info(f"  • Adding QR code at position: {qr_position}")
             try:
                 from .._qr_utils import add_qr_to_figure
+
                 # Only add QR for matplotlib figures
-                if hasattr(obj, 'savefig') or (hasattr(obj, 'figure') and hasattr(obj.figure, 'savefig')):
-                    fig = obj if hasattr(obj, 'savefig') else obj.figure
+                if hasattr(obj, "savefig") or (
+                    hasattr(obj, "figure") and hasattr(obj.figure, "savefig")
+                ):
+                    fig = obj if hasattr(obj, "savefig") else obj.figure
                     obj = add_qr_to_figure(fig, metadata, position=qr_position)
             except Exception as e:
                 import warnings
+
                 warnings.warn(f"Failed to add QR code: {e}")
 
     # png
@@ -67,7 +78,7 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
         # matplotlib
         else:
             # Use kwargs dpi if provided, otherwise default to 300
-            save_kwargs = {'format': 'tiff', 'dpi': kwargs.get('dpi', 300)}
+            save_kwargs = {"format": "tiff", "dpi": kwargs.get("dpi", 300)}
             save_kwargs.update(kwargs)
             try:
                 obj.savefig(spath, **save_kwargs)
@@ -85,7 +96,9 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
             obj.write_image(buf, format="png")
             buf.seek(0)
             img = Image.open(buf)
-            img.convert("RGB").save(spath, "JPEG", quality=100, subsampling=0, optimize=False)
+            img.convert("RGB").save(
+                spath, "JPEG", quality=100, subsampling=0, optimize=False
+            )
             buf.close()
 
         # PIL image
@@ -95,7 +108,7 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
 
         # matplotlib
         else:
-            save_kwargs = {'format': 'png'}
+            save_kwargs = {"format": "png"}
             save_kwargs.update(kwargs)
             try:
                 obj.savefig(buf, **save_kwargs)
@@ -105,7 +118,9 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
             buf.seek(0)
             img = Image.open(buf)
             # Save JPEG with very high quality settings for daily use (quality=98 is near-lossless)
-            img.convert("RGB").save(spath, "JPEG", quality=100, subsampling=0, optimize=False)
+            img.convert("RGB").save(
+                spath, "JPEG", quality=100, subsampling=0, optimize=False
+            )
             buf.close()
         del obj
 
@@ -125,7 +140,7 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
         # matplotlib
         else:
             buf = _io.BytesIO()
-            save_kwargs = {'format': 'png'}
+            save_kwargs = {"format": "png"}
             save_kwargs.update(kwargs)
             try:
                 obj.savefig(buf, **save_kwargs)
@@ -144,7 +159,7 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
             obj.write_image(file=spath, format="svg")
         # Matplotlib
         else:
-            save_kwargs = {'format': 'svg'}
+            save_kwargs = {"format": "svg"}
             save_kwargs.update(kwargs)
             try:
                 obj.savefig(spath, **save_kwargs)
@@ -160,15 +175,15 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
         # PIL Image - convert to PDF
         elif isinstance(obj, Image.Image):
             # Convert RGBA to RGB if needed
-            if obj.mode == 'RGBA':
-                rgb_img = Image.new('RGB', obj.size, (255, 255, 255))
+            if obj.mode == "RGBA":
+                rgb_img = Image.new("RGB", obj.size, (255, 255, 255))
                 rgb_img.paste(obj, mask=obj.split()[3])
                 rgb_img.save(spath, "PDF")
             else:
                 obj.save(spath, "PDF")
         # Matplotlib
         else:
-            save_kwargs = {'format': 'pdf'}
+            save_kwargs = {"format": "pdf"}
             save_kwargs.update(kwargs)
             try:
                 obj.savefig(spath, **save_kwargs)
@@ -179,12 +194,14 @@ def save_image(obj, spath, metadata=None, add_qr=False, qr_position='bottom-righ
     # Embed metadata if provided
     if metadata is not None:
         from .._metadata import embed_metadata
+
         try:
             embed_metadata(spath, metadata)
             if verbose:
-                logger.info(f"  • Embedded metadata: {metadata}")
+                logger.debug(f"  • Embedded metadata: {metadata}")
         except Exception as e:
             import warnings
+
             warnings.warn(f"Failed to embed metadata: {e}")
 
 # EOF

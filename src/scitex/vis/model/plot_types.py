@@ -288,7 +288,7 @@ class ViolinPlotConfig:
 
 @dataclass
 class HeatmapConfig:
-    """Heatmap configuration (scitex.plt.ax.plot_heatmap)."""
+    """Heatmap configuration (scitex.plt.ax.stx_heatmap)."""
 
     # Data (required)
     data: Any  # 2D array
@@ -313,7 +313,7 @@ class HeatmapConfig:
 
 @dataclass
 class PlotLineConfig:
-    """Plot line configuration (scitex.plt.ax.plot_line)."""
+    """Plot line configuration (scitex.plt.ax.stx_line)."""
 
     # Data (required - single array)
     y: List[float]
@@ -333,7 +333,7 @@ class PlotLineConfig:
 
 @dataclass
 class ShadedLineConfig:
-    """Shaded line configuration (scitex.plt.ax.plot_shaded_line)."""
+    """Shaded line configuration (scitex.plt.ax.stx_shaded_line)."""
 
     # Data (required)
     x: List[float]
@@ -355,7 +355,7 @@ class ShadedLineConfig:
 
 @dataclass
 class ViolinConfig:
-    """Violin plot configuration (scitex.plt.ax.plot_violin)."""
+    """Violin plot configuration (scitex.plt.ax.stx_violin)."""
 
     # Data (required)
     data: List[List[float]]
@@ -370,7 +370,7 @@ class ViolinConfig:
 
 @dataclass
 class ECDFConfig:
-    """ECDF configuration (scitex.plt.ax.plot_ecdf)."""
+    """ECDF configuration (scitex.plt.ax.stx_ecdf)."""
 
     # Data (required)
     data: List[float]
@@ -388,7 +388,7 @@ class ECDFConfig:
 
 @dataclass
 class BoxConfig:
-    """Box plot configuration (scitex.plt.ax.plot_box)."""
+    """Box plot configuration (scitex.plt.ax.stx_box)."""
 
     # Data (required)
     data: List[float]
@@ -406,7 +406,7 @@ class BoxConfig:
 
 @dataclass
 class MeanStdConfig:
-    """Mean±Std configuration (scitex.plt.ax.plot_mean_std)."""
+    """Mean±Std configuration (scitex.plt.ax.stx_mean_std)."""
 
     # Data (required)
     y_mean: List[float]
@@ -426,7 +426,7 @@ class MeanStdConfig:
 
 @dataclass
 class KDEConfig:
-    """KDE configuration (scitex.plt.ax.plot_kde)."""
+    """KDE configuration (scitex.plt.ax.stx_kde)."""
 
     # Data (required)
     data: List[float]
@@ -609,13 +609,13 @@ PLOT_TYPE_CONFIGS = {
     "violinplot": ViolinPlotConfig,
     # Custom scitex
     "heatmap": HeatmapConfig,
-    "plot_line": PlotLineConfig,
-    "plot_shaded_line": ShadedLineConfig,
-    "plot_violin": ViolinConfig,
-    "plot_ecdf": ECDFConfig,
-    "plot_box": BoxConfig,
-    "plot_mean_std": MeanStdConfig,
-    "plot_kde": KDEConfig,
+    "stx_line": PlotLineConfig,
+    "stx_shaded_line": ShadedLineConfig,
+    "stx_violin": ViolinConfig,
+    "stx_ecdf": ECDFConfig,
+    "stx_box": BoxConfig,
+    "stx_mean_std": MeanStdConfig,
+    "stx_kde": KDEConfig,
     # Seaborn
     "sns_boxplot": SeabornBoxplotConfig,
     "sns_violinplot": SeabornViolinplotConfig,

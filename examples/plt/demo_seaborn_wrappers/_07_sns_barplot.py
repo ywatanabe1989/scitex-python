@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Timestamp: "2025-12-01 09:55:00 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_seaborn_wrappers/_07_sns_barplot.py
+
+"""ax.sns_barplot() - Seaborn bar plot with statistical test."""
+
+import numpy as np
+import pandas as pd
+from scipy import stats as sp_stats
+
+
+def format_pvalue(p):
+    """Format p-value with significance stars."""
+    if p < 0.001:
+        return f"p < 0.001 ***"
+    elif p < 0.01:
+        return f"p = {p:.3f} **"
+    elif p < 0.05:
+        return f"p = {p:.3f} *"
+    else:
+        return f"p = {p:.3f} (ns)"
+
+
+def demo_sns_barplot(fig, ax, stx):
+    """ax.sns_barplot() - Seaborn bar plot with statistical test."""
+    np.random.seed(42)
+    df = pd.DataFrame({
+        "category": np.repeat(["Control", "Low Dose", "High Dose"], 30),
+        "value": np.concatenate([
+            np.random.normal(10, 2, 30),
+            np.random.normal(15, 2, 30),
+            np.random.normal(20, 3, 30),
+        ]),
+    })
+
+    ax.sns_barplot(x="category", y="value", data=df, id="sns_bar")
+
+    # Statistical test: One-way ANOVA
+    groups = [df[df["category"] == cat]["value"].values for cat in ["Control", "Low Dose", "High Dose"]]
+    f_stat, p_val = sp_stats.f_oneway(*groups)
+
+    stats_text = f"ANOVA: F = {f_stat:.2f}, {format_pvalue(p_val)}"
+    ax.text(0.95, 0.95, stats_text, transform=ax.transAxes, ha="right", va="top", fontsize=5)
+
+    ax.set_xyt( x="Treatment", y="Response [a.u.]", t="ax.sns_barplot(x, y, data)")
+
+    return fig, ax
+
+
+# EOF

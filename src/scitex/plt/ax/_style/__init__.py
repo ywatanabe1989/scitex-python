@@ -35,5 +35,8 @@ from ._share_axes import (
     set_ylims,
 )
 from ._shift import shift
+from ._show_spines import show_spines
+from ._style_boxplot import style_boxplot
+from ._style_violinplot import style_violinplot
 
 # EOF

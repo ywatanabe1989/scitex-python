@@ -193,6 +193,7 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
         - 'tick_length_mm' (float): Tick mark length in mm (default: 0.8)
         - 'tick_thickness_mm' (float): Tick mark width in mm (default: 0.2)
         - 'tick_cap_width_mm' (float): Tick cap width in mm (default: 0.8)
+        - 'marker_size_mm' (float): Default marker size in mm (default: 0.8)
         - 'axis_font_size_pt' (float): Axis label font size in points (default: 8)
         - 'tick_font_size_pt' (float): Tick label font size in points (default: 7)
         - 'n_ticks' (int): Number of ticks on each axis (default: 4)
@@ -230,6 +231,14 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
 
     # Convert trace thickness from mm to points
     trace_lw_pt = mm_to_pt(style.get("trace_thickness_mm", 0.12))
+
+    # Convert marker size from mm to points and set as default
+    # Marker size in matplotlib is specified in points
+    marker_size_mm = style.get("marker_size_mm")
+    if marker_size_mm is not None:
+        marker_size_pt = mm_to_pt(marker_size_mm)
+        import matplotlib as mpl
+        mpl.rcParams["lines.markersize"] = marker_size_pt
 
     # Configure tick parameters (all mm values converted to points)
     # width = tick line thickness, length = tick line length
@@ -282,13 +291,18 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
     # Disable grids by default
     ax.grid(False)
 
-    # Set number of ticks (3-4 ticks enforced)
-    n_ticks = style.get("n_ticks", 4)
-    if n_ticks is not None:
-        from matplotlib.ticker import MaxNLocator
-        # nbins=4 with min_n_ticks=3 will give 3-4 ticks
-        ax.xaxis.set_major_locator(MaxNLocator(nbins=n_ticks, min_n_ticks=3))
-        ax.yaxis.set_major_locator(MaxNLocator(nbins=n_ticks, min_n_ticks=3))
+    # Ensure axes spines are in front of plot elements (e.g., histogram bars)
+    # Set high zorder on spines so they appear on top
+    for spine in ax.spines.values():
+        spine.set_zorder(1000)
+    # Also ensure ticks are on top
+    ax.tick_params(zorder=1000)
+
+    # Note: n_ticks is NOT applied here at figure creation time
+    # because we don't know yet if axes will be categorical or numerical.
+    # MaxNLocator will be applied in post-processing after plotting,
+    # only to numerical (non-categorical) axes.
+    # See _AxisWrapper.py for the implementation.
 
     # Return trace linewidth for use in plotting
     return trace_lw_pt

@@ -44,7 +44,7 @@ try:
 
     # Import scitex plotting functions
     import scitex as stx
-    from scitex.ai.plt.plot_conf_mat import plot_conf_mat as conf_mat
+    from scitex.ai.plt.stx_conf_mat import stx_conf_mat as conf_mat
     from scitex.ai.plt.plot_roc_curve import plot_roc_curve as roc_auc
     from scitex.ai.plt.plot_pre_rec_curve import plot_pre_rec_curve as pre_rec_auc
 

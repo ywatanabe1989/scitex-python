@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-18 17:51:44 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_AxisWrapperMixins/_MatplotlibPlotMixin.py
+# Timestamp: "2025-12-01 12:00:00 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_AxisWrapperMixins/_MatplotlibPlotMixin.py
 # ----------------------------------------
 import os
 
@@ -19,17 +19,37 @@ from scipy.stats import gaussian_kde
 
 from scitex.pd import to_xyz
 from scitex.types import ArrayLike
+from scitex.plt.utils import mm_to_pt
+
+
+# ============================================================================
+# Constants for default styling (same as styles/_plot_defaults.py)
+# ============================================================================
+DEFAULT_LINE_WIDTH_MM = 0.2
+DEFAULT_MARKER_SIZE_MM = 0.8
+DEFAULT_FILL_ALPHA = 0.3
 
 
 class MatplotlibPlotMixin:
     """Mixin class for basic plotting operations."""
-    
+
     def _get_ax_module(self):
         """Lazy import ax module to avoid circular imports."""
         from ....plt import ax as ax_module
         return ax_module
 
-    def plot_image(
+    def _apply_scitex_postprocess(self, method_name, result=None, kwargs=None, args=None):
+        """Apply scitex post-processing styling after plotting.
+
+        This ensures all scitex wrapper methods get the same styling
+        as matplotlib methods going through __getattr__ (tick locator, spines, etc.).
+        """
+        from scitex.plt.styles import apply_plot_postprocess
+        apply_plot_postprocess(
+            method_name, result, self._axis_mpl, kwargs or {}, args
+        )
+
+    def stx_image(
         self,
         arr_2d: ArrayLike,
         track: bool = True,
@@ -37,11 +57,11 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_image"
+        method_name = "stx_image"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl = self._get_ax_module().plot_image(self._axis_mpl, arr_2d, **kwargs)
+            self._axis_mpl = self._get_ax_module().stx_image(self._axis_mpl, arr_2d, **kwargs)
 
         # Tracking
         tracked_dict = {"image_df": pd.DataFrame(arr_2d)}
@@ -55,11 +75,14 @@ class MatplotlibPlotMixin:
             None,
         )
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl
 
-    def plot_kde(
+    def stx_kde(
         self,
-        data: ArrayLike,
+        values_1d: ArrayLike,
         cumulative=False,
         fill=False,
         track: bool = True,
@@ -67,23 +90,23 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_kde"
+        method_name = "stx_kde"
 
         # Sample count as label
-        n_samples = (~np.isnan(data)).sum()
+        n_samples = (~np.isnan(values_1d)).sum()
         if kwargs.get("label"):
-            kwargs["label"] = f"{kwargs['label']} (n={n_samples})"
+            kwargs["label"] = f"{kwargs['label']} ($n$={n_samples})"
 
         # Xlim (kwargs["xlim"] is not accepted in downstream plotters)
-        xlim = kwargs.get("xlim")
+        xlim = kwargs.pop("xlim", None)
         if not xlim:
-            xlim = (np.nanmin(data), np.nanmax(data))
+            xlim = (np.nanmin(values_1d), np.nanmax(values_1d))
 
         # X
         xx = np.linspace(xlim[0], xlim[1], int(1e3))
 
         # Y
-        density = gaussian_kde(data)(xx)
+        density = gaussian_kde(values_1d)(xx)
         density /= density.sum()
 
         # Cumulative
@@ -100,6 +123,10 @@ class MatplotlibPlotMixin:
             # Set default color to black (customizable via color kwarg)
             if 'color' not in kwargs and 'c' not in kwargs:
                 kwargs['color'] = 'black'
+
+            # Set default linestyle to dashed (customizable via linestyle kwarg)
+            if 'linestyle' not in kwargs and 'ls' not in kwargs:
+                kwargs['linestyle'] = '--'
 
             # Filled Line
             if fill:
@@ -126,11 +153,14 @@ class MatplotlibPlotMixin:
             None,
         )
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl
 
-    def plot_conf_mat(
+    def stx_conf_mat(
         self,
-        data: ArrayLike,
+        conf_mat_2d: ArrayLike,
         x_labels: Optional[List[str]] = None,
         y_labels: Optional[List[str]] = None,
         title: str = "Confusion Matrix",
@@ -146,13 +176,13 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_conf_mat"
+        method_name = "stx_conf_mat"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, bacc_val = self._get_ax_module().plot_conf_mat(
+            self._axis_mpl, bacc_val = self._get_ax_module().stx_conf_mat(
                 self._axis_mpl,
-                data,
+                conf_mat_2d,
                 x_labels=x_labels,
                 y_labels=y_labels,
                 title=title,
@@ -170,10 +200,13 @@ class MatplotlibPlotMixin:
         # Tracking
         self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl, bacc_val
 
     # @wraps removed to avoid circular import
-    def plot_rectangle(
+    def stx_rectangle(
         self,
         xx: float,
         yy: float,
@@ -184,11 +217,11 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_rectangle"
+        method_name = "stx_rectangle"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl = self._get_ax_module().plot_rectangle(
+            self._axis_mpl = self._get_ax_module().stx_rectangle(
                 self._axis_mpl, xx, yy, width, height, **kwargs
             )
 
@@ -196,13 +229,16 @@ class MatplotlibPlotMixin:
         tracked_dict = {"xx": xx, "yy": yy, "width": width, "height": height}
         self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl
 
     # @wraps removed to avoid circular import
-    def plot_fillv(
+    def stx_fillv(
         self,
-        starts: ArrayLike,
-        ends: ArrayLike,
+        starts_1d: ArrayLike,
+        ends_1d: ArrayLike,
         color: str = "red",
         alpha: float = 0.2,
         track: bool = True,
@@ -210,51 +246,70 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_fillv"
+        method_name = "stx_fillv"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl = self._get_ax_module().plot_fillv(
-                self._axis_mpl, starts, ends, color=color, alpha=alpha
+            self._axis_mpl = self._get_ax_module().stx_fillv(
+                self._axis_mpl, starts_1d, ends_1d, color=color, alpha=alpha
             )
 
         # Tracking
-        tracked_dict = {"starts": starts, "ends": ends}
+        tracked_dict = {"starts": starts_1d, "ends": ends_1d}
         self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
 
         return self._axis_mpl
 
-    def plot_box(
+    def stx_box(
         self,
-        data: ArrayLike,
+        values_list: ArrayLike,
+        colors: Optional[List] = None,
         track: bool = True,
         id: Optional[str] = None,
         **kwargs,
-    ) -> None:
+    ) -> dict:
         # Method Name for downstream csv exporting
-        method_name = "plot_box"
+        method_name = "stx_box"
 
         # Copy data
-        _data = data.copy()
+        _data = values_list.copy()
 
-        # Sample count as label
-        n = len(data)
+        # Sample count per group as label (show range if variable)
         if kwargs.get("label"):
-            kwargs["label"] = kwargs["label"] + f" (n={n})"
+            n_per_group = [len(g) for g in values_list]
+            n_min, n_max = min(n_per_group), max(n_per_group)
+            n_str = str(n_min) if n_min == n_max else f"{n_min}-{n_max}"
+            kwargs["label"] = kwargs["label"] + f" ($n$={n_str})"
+
+        # Enable patch_artist for styling (fill colors, edges)
+        if "patch_artist" not in kwargs:
+            kwargs["patch_artist"] = True
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl.boxplot(data, **kwargs)
+            result = self._axis_mpl.boxplot(values_list, **kwargs)
 
-        # Tracking
+        # Tracking - calculate sample size per group
+        n_per_group = [len(g) for g in values_list]
         tracked_dict = {
             "data": _data,
-            "n": [n for ii in range(len(data))],
+            "n": n_per_group,
         }
         self._track(track, id, method_name, tracked_dict, None)
 
-        return self._axis_mpl
-        
+        # Apply style_boxplot automatically for publication quality
+        # Uses scitex palette by default, or custom colors if provided
+        from scitex.plt.ax import style_boxplot
+        style_boxplot(result, colors=colors)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
+        return result
+
     def hist(
         self,
         x: ArrayLike,
@@ -312,13 +367,16 @@ class MatplotlibPlotMixin:
         }
         
         self._track(track, id, method_name, tracked_dict, kwargs)
-        
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, hist_data)
+
         return hist_data
 
     # @wraps removed to avoid circular import
-    def plot_raster(
+    def stx_raster(
         self,
-        positions: List[ArrayLike],
+        spike_times_list: List[ArrayLike],
         time: Optional[ArrayLike] = None,
         labels: Optional[List[str]] = None,
         colors: Optional[List[str]] = None,
@@ -327,90 +385,77 @@ class MatplotlibPlotMixin:
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_raster"
+        method_name = "stx_raster"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, raster_digit_df = self._get_ax_module().plot_raster(
-                self._axis_mpl, positions, time=time
+            self._axis_mpl, raster_digit_df = self._get_ax_module().stx_raster(
+                self._axis_mpl, spike_times_list, time=time
             )
 
         # Tracking
         tracked_dict = {"raster_digit_df": raster_digit_df}
         self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl, raster_digit_df
 
     # @wraps removed to avoid circular import
-    def plot_ecdf(
+    def stx_ecdf(
         self,
-        data: ArrayLike,
+        values_1d: ArrayLike,
         track: bool = True,
         id: Optional[str] = None,
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_ecdf"
+        method_name = "stx_ecdf"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, ecdf_df = self._get_ax_module().plot_ecdf(
-                self._axis_mpl, data, **kwargs
+            self._axis_mpl, ecdf_df = self._get_ax_module().stx_ecdf(
+                self._axis_mpl, values_1d, **kwargs
             )
 
         # Tracking
         tracked_dict = {"ecdf_df": ecdf_df}
         self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl, ecdf_df
 
     # @wraps removed to avoid circular import
-    def plot_joyplot(
+    def stx_joyplot(
         self,
-        data: ArrayLike,
-        orientation: str = "vertical",
+        arrays: ArrayLike,
         track: bool = True,
         id: Optional[str] = None,
         **kwargs,
     ) -> None:
         # Method Name for downstream csv exporting
-        method_name = "plot_joyplot"
+        method_name = "stx_joyplot"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl = self._get_ax_module().plot_joyplot(
-                self._axis_mpl, data, orientation=orientation, **kwargs
+            self._axis_mpl = self._get_ax_module().stx_joyplot(
+                self._axis_mpl, arrays, **kwargs
             )
 
         # Tracking
-        tracked_dict = {"joyplot_data": data}
+        tracked_dict = {"joyplot_arrays": arrays}
         self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
 
         return self._axis_mpl
 
     # @wraps removed to avoid circular import
-    def plot_joyplot(
-        self,
-        data: ArrayLike,
-        track: bool = True,
-        id: Optional[str] = None,
-        **kwargs,
-    ) -> None:
-        # Method Name for downstream csv exporting
-        method_name = "plot_joyplot"
-
-        # Plotting with pure matplotlib methods under non-tracking context
-        with self._no_tracking():
-            self._axis_mpl = self._get_ax_module().plot_joyplot(self._axis_mpl, data, **kwargs)
-
-        # Tracking
-        tracked_dict = {"joyplot_data": data}
-        self._track(track, id, method_name, tracked_dict, None)
-
-        return self._axis_mpl
-
-    # @wraps removed to avoid circular import
-    def plot_scatter_hist(
+    def stx_scatter_hist(
         self,
         x: ArrayLike,
         y: ArrayLike,
@@ -428,11 +473,11 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot a scatter plot with marginal histograms."""
         # Method Name for downstream csv exporting
-        method_name = "plot_scatter_hist"
+        method_name = "stx_scatter_hist"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, ax_histx, ax_histy, hist_data = self._get_ax_module().plot_scatter_hist(
+            self._axis_mpl, ax_histx, ax_histy, hist_data = self._get_ax_module().stx_scatter_hist(
                 self._axis_mpl,
                 x,
                 y,
@@ -458,12 +503,15 @@ class MatplotlibPlotMixin:
         }
         self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl, ax_histx, ax_histy, hist_data
 
     # @wraps removed to avoid circular import
-    def plot_heatmap(
+    def stx_heatmap(
         self,
-        data: ArrayLike,
+        values_2d: ArrayLike,
         x_labels: Optional[List[str]] = None,
         y_labels: Optional[List[str]] = None,
         cmap: str = "viridis",
@@ -478,13 +526,13 @@ class MatplotlibPlotMixin:
     ) -> Tuple[matplotlib.image.AxesImage, matplotlib.colorbar.Colorbar]:
         """Plot a heatmap on the axes."""
         # Method Name for downstream csv exporting
-        method_name = "plot_heatmap"
+        method_name = "stx_heatmap"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            ax, im, cbar = self._get_ax_module().plot_heatmap(
+            ax, im, cbar = self._get_ax_module().stx_heatmap(
                 self._axis_mpl,
-                data,
+                values_2d,
                 x_labels=x_labels,
                 y_labels=y_labels,
                 cmap=cmap,
@@ -498,18 +546,21 @@ class MatplotlibPlotMixin:
 
         # Tracking
         tracked_dict = {
-            "data": data,
+            "data": values_2d,
             "x_labels": x_labels,
             "y_labels": y_labels,
         }
         self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return ax, im, cbar
 
     # @wraps removed to avoid circular import
-    def plot_violin(
+    def stx_violin(
         self,
-        data: Union[pd.DataFrame, List, ArrayLike],
+        values_list: Union[pd.DataFrame, List, ArrayLike],
         x=None,
         y=None,
         hue=None,
@@ -522,17 +573,17 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot a violin plot."""
         # Method Name for downstream csv exporting
-        method_name = "plot_violin"
+        method_name = "stx_violin"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
             # Handle the list-style input case
-            if isinstance(data, list) and all(
-                isinstance(item, (list, np.ndarray)) for item in data
+            if isinstance(values_list, list) and all(
+                isinstance(item, (list, np.ndarray)) for item in values_list
             ):
-                self._axis_mpl = self._get_ax_module().plot_violin(
+                self._axis_mpl = self._get_ax_module().stx_violin(
                     self._axis_mpl,
-                    data_list=data,
+                    values_list=values_list,
                     labels=labels,
                     colors=colors,
                     half=half,
@@ -540,9 +591,9 @@ class MatplotlibPlotMixin:
                 )
             # Handle DataFrame or other inputs
             else:
-                self._axis_mpl = self._get_ax_module().plot_violin(
+                self._axis_mpl = self._get_ax_module().stx_violin(
                     self._axis_mpl,
-                    data=data,
+                    data=values_list,
                     x=x,
                     y=y,
                     hue=hue,
@@ -552,7 +603,7 @@ class MatplotlibPlotMixin:
 
         # Tracking
         tracked_dict = {
-            "data": data,
+            "data": values_list,
             "x": x,
             "y": y,
             "hue": hue,
@@ -561,6 +612,10 @@ class MatplotlibPlotMixin:
             "colors": colors,
         }
         self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl
 
     # def plot_area(
@@ -766,9 +821,9 @@ class MatplotlibPlotMixin:
     #     return self._axis_mpl
 
     # @wraps removed to avoid circular import
-    def plot_line(
+    def stx_line(
         self,
-        data: ArrayLike,
+        values_1d: ArrayLike,
         xx: Optional[ArrayLike] = None,
         track: bool = True,
         id: Optional[str] = None,
@@ -776,24 +831,27 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot a simple line."""
         # Method Name for downstream csv exporting
-        method_name = "plot_line"
+        method_name = "stx_line"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, plot_df = self._get_ax_module().plot_line(
-                self._axis_mpl, data, xx=xx, **kwargs
+            self._axis_mpl, plot_df = self._get_ax_module().stx_line(
+                self._axis_mpl, values_1d, xx=xx, **kwargs
             )
 
         # Tracking
         tracked_dict = {"plot_df": plot_df}
         self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl, plot_df
 
     # @wraps removed to avoid circular import
-    def plot_mean_std(
+    def stx_mean_std(
         self,
-        data: ArrayLike,
+        values_2d: ArrayLike,
         xx: Optional[ArrayLike] = None,
         sd: float = 1,
         track: bool = True,
@@ -802,24 +860,27 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot mean line with standard deviation shading."""
         # Method Name for downstream csv exporting
-        method_name = "plot_mean_std"
+        method_name = "stx_mean_std"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, plot_df = self._get_ax_module().plot_mean_std(
-                self._axis_mpl, data, xx=xx, sd=sd, **kwargs
+            self._axis_mpl, plot_df = self._get_ax_module().stx_mean_std(
+                self._axis_mpl, values_2d, xx=xx, sd=sd, **kwargs
             )
 
         # Tracking
         tracked_dict = {"plot_df": plot_df}
         self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl, plot_df
 
     # @wraps removed to avoid circular import
-    def plot_mean_ci(
+    def stx_mean_ci(
         self,
-        data: ArrayLike,
+        values_2d: ArrayLike,
         xx: Optional[ArrayLike] = None,
         perc: float = 95,
         track: bool = True,
@@ -828,24 +889,27 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot mean line with confidence interval shading."""
         # Method Name for downstream csv exporting
-        method_name = "plot_mean_ci"
+        method_name = "stx_mean_ci"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, plot_df = self._get_ax_module().plot_mean_ci(
-                self._axis_mpl, data, xx=xx, perc=perc, **kwargs
+            self._axis_mpl, plot_df = self._get_ax_module().stx_mean_ci(
+                self._axis_mpl, values_2d, xx=xx, perc=perc, **kwargs
             )
 
         # Tracking
         tracked_dict = {"plot_df": plot_df}
         self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl, plot_df
 
     # @wraps removed to avoid circular import
-    def plot_median_iqr(
+    def stx_median_iqr(
         self,
-        data: ArrayLike,
+        values_2d: ArrayLike,
         xx: Optional[ArrayLike] = None,
         track: bool = True,
         id: Optional[str] = None,
@@ -853,22 +917,25 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot median line with interquartile range shading."""
         # Method Name for downstream csv exporting
-        method_name = "plot_median_iqr"
+        method_name = "stx_median_iqr"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, plot_df = self._get_ax_module().plot_median_iqr(
-                self._axis_mpl, data, xx=xx, **kwargs
+            self._axis_mpl, plot_df = self._get_ax_module().stx_median_iqr(
+                self._axis_mpl, values_2d, xx=xx, **kwargs
             )
 
         # Tracking
         tracked_dict = {"plot_df": plot_df}
         self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
+
         return self._axis_mpl, plot_df
 
     # @wraps removed to avoid circular import
-    def plot_shaded_line(
+    def stx_shaded_line(
         self,
         xs: ArrayLike,
         ys_lower: ArrayLike,
@@ -882,11 +949,11 @@ class MatplotlibPlotMixin:
     ) -> None:
         """Plot a line with shaded area between lower and upper bounds."""
         # Method Name for downstream csv exporting
-        method_name = "plot_shaded_line"
+        method_name = "stx_shaded_line"
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, plot_df = self._get_ax_module().plot_shaded_line(
+            self._axis_mpl, plot_df = self._get_ax_module().stx_shaded_line(
                 self._axis_mpl,
                 xs,
                 ys_lower,
@@ -900,6 +967,9 @@ class MatplotlibPlotMixin:
         # Tracking
         tracked_dict = {"plot_df": plot_df}
         self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name)
 
         return self._axis_mpl, plot_df
 
@@ -916,6 +986,9 @@ class MatplotlibPlotMixin:
             tracked_dict = {"bar_df": pd.DataFrame({"x": args[0], "height": args[1]})}
             self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
         return result
 
     def plot_barh(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
@@ -930,11 +1003,19 @@ class MatplotlibPlotMixin:
             tracked_dict = {"barh_df": pd.DataFrame({"y": args[0], "width": args[1]})}
             self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
         return result
 
     def plot_scatter(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
         """Wrapper for matplotlib scatter plot with tracking support."""
         method_name = "plot_scatter"
+
+        # Add sample size to label if provided
+        if kwargs.get("label") and len(args) >= 1:
+            n_samples = len(args[0])
+            kwargs["label"] = f"{kwargs['label']} ($n$={n_samples})"
 
         with self._no_tracking():
             result = self._axis_mpl.scatter(*args, **kwargs)
@@ -943,6 +1024,9 @@ class MatplotlibPlotMixin:
         if len(args) >= 2:
             tracked_dict = {"scatter_df": pd.DataFrame({"x": args[0], "y": args[1]})}
             self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
 
         return result
 
@@ -963,6 +1047,9 @@ class MatplotlibPlotMixin:
             tracked_dict = {"errorbar_df": pd.DataFrame(df_dict)}
             self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
         return result
 
     def plot_fill_between(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
@@ -980,6 +1067,9 @@ class MatplotlibPlotMixin:
                 "y2": args[2] if len(args) > 2 else 0
             })}
             self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
 
         return result
 
@@ -1000,6 +1090,9 @@ class MatplotlibPlotMixin:
                 "Z": np.ravel(Z)
             })}
             self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
 
         return result
 
@@ -1023,11 +1116,27 @@ class MatplotlibPlotMixin:
             tracked_dict = {"imshow_df": df}
             self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
         return result
 
-    def plot_boxplot(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
-        """Wrapper for matplotlib boxplot with tracking support."""
+    def plot_boxplot(self, *args, colors: Optional[List] = None, track: bool = True, id: Optional[str] = None, **kwargs):
+        """Wrapper for matplotlib boxplot with tracking support and auto-styling."""
         method_name = "plot_boxplot"
+
+        # Add sample size per group to label if provided (show range if variable)
+        if kwargs.get("label") and len(args) >= 1:
+            data = args[0]
+            if isinstance(data, list):
+                n_per_group = [len(g) for g in data]
+                n_min, n_max = min(n_per_group), max(n_per_group)
+                n_str = str(n_min) if n_min == n_max else f"{n_min}-{n_max}"
+                kwargs["label"] = f"{kwargs['label']} ($n$={n_str})"
+
+        # Enable patch_artist for styling (fill colors, edges)
+        if "patch_artist" not in kwargs:
+            kwargs["patch_artist"] = True
 
         with self._no_tracking():
             result = self._axis_mpl.boxplot(*args, **kwargs)
@@ -1041,11 +1150,28 @@ class MatplotlibPlotMixin:
                 tracked_dict = {"boxplot_df": pd.DataFrame({"data": data})}
             self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply style_boxplot automatically for publication quality
+        # Uses scitex palette by default, or custom colors if provided
+        from scitex.plt.ax import style_boxplot
+        style_boxplot(result, colors=colors)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
         return result
 
     def plot_violinplot(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
         """Wrapper for matplotlib violinplot with tracking support."""
         method_name = "plot_violinplot"
+
+        # Add sample size per group to label if provided (show range if variable)
+        if kwargs.get("label") and len(args) >= 1:
+            data = args[0]
+            if isinstance(data, list):
+                n_per_group = [len(g) for g in data]
+                n_min, n_max = min(n_per_group), max(n_per_group)
+                n_str = str(n_min) if n_min == n_max else f"{n_min}-{n_max}"
+                kwargs["label"] = f"{kwargs['label']} ($n$={n_str})"
 
         with self._no_tracking():
             result = self._axis_mpl.violinplot(*args, **kwargs)
@@ -1059,6 +1185,10 @@ class MatplotlibPlotMixin:
                 tracked_dict = {"violinplot_df": pd.DataFrame({"data": data})}
             self._track(track, id, method_name, tracked_dict, None)
 
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result, kwargs, args)
+
         return result
+
 
 # EOF
