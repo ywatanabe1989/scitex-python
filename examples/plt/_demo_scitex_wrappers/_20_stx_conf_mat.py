@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_20_plot_conf_mat.py
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_20_stx_conf_mat.py
 
 """ax.stx_conf_mat(data, x_labels, y_labels) - Confusion matrix."""
 
 import numpy as np
 
 
-def demo_plot_conf_mat(fig, ax, stx):
+def demo_stx_conf_mat(fig, ax, stx):
     """ax.stx_conf_mat(data, x_labels, y_labels) - Confusion matrix."""
     # Create confusion matrix data
     data = np.array([

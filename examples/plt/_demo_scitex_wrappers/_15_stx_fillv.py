@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_15_plot_fillv.py
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_15_stx_fillv.py
 
 """ax.stx_fillv(starts_1d, ends_1d) - Vertical fill regions."""
 
 import numpy as np
 
 
-def demo_plot_fillv(fig, ax, stx):
+def demo_stx_fillv(fig, ax, stx):
     """ax.stx_fillv(starts_1d, ends_1d) - Vertical fill regions."""
     # Highlight regions
     starts_1d = [1, 4, 7]
