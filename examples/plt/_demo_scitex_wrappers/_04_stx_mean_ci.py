@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_04_plot_mean_ci.py
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_04_stx_mean_ci.py
 
 """ax.stx_mean_ci(values_2d) - Mean with confidence interval."""
 
 import numpy as np
 
 
-def demo_plot_mean_ci(fig, ax, stx):
+def demo_stx_mean_ci(fig, ax, stx):
     """ax.stx_mean_ci(values_2d) - Mean with confidence interval."""
     np.random.seed(42)
     xx = np.linspace(0, 10, 20)

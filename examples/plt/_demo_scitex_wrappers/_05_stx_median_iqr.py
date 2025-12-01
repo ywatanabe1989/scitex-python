@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_05_plot_median_iqr.py
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_05_stx_median_iqr.py
 
 """ax.stx_median_iqr(values_2d) - Median with interquartile range."""
 
 import numpy as np
 
 
-def demo_plot_median_iqr(fig, ax, stx):
+def demo_stx_median_iqr(fig, ax, stx):
     """ax.stx_median_iqr(values_2d) - Median with interquartile range."""
     np.random.seed(42)
     xx = np.linspace(0, 10, 20)

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_18_plot_image.py
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_18_stx_image.py
 
 """ax.stx_image(data) - Image file display."""
 
 import numpy as np
 
 
-def demo_plot_image(fig, ax, stx):
+def demo_stx_image(fig, ax, stx):
     """ax.stx_image(data) - Image file display."""
     # Create a sample 2D grayscale image array (stx_image requires 2D)
     np.random.seed(42)

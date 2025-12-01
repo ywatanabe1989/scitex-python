@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_06_plot_kde.py
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_06_stx_kde.py
 
 """ax.stx_kde(values_1d) - Kernel density estimate."""
 
 import numpy as np
 
 
-def demo_plot_kde(fig, ax, stx):
+def demo_stx_kde(fig, ax, stx):
     """ax.stx_kde(values_1d) - Kernel density estimate."""
     np.random.seed(42)
     values_1d = np.concatenate([
