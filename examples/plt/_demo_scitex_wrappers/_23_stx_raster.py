@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_23_plot_raster.py
+# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_23_stx_raster.py
 
 """ax.stx_raster(spike_times_list) - Raster/spike plot."""
 
 import numpy as np
 
 
-def demo_plot_raster(fig, ax, stx):
+def demo_stx_raster(fig, ax, stx):
     """ax.stx_raster(spike_times_list) - Raster/spike plot."""
     np.random.seed(42)
     # Create spike train data (list of spike times for each trial)

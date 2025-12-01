@@ -973,6 +973,311 @@ class MatplotlibPlotMixin:
 
         return self._axis_mpl, plot_df
 
+    # =========================================================================
+    # stx_ aliases for standard matplotlib methods
+    # These provide a consistent stx_ prefix for all scitex wrapper methods
+    # =========================================================================
+
+    def stx_bar(self, x, height, track: bool = True, id: Optional[str] = None, **kwargs):
+        """Bar plot with scitex styling and tracking.
+
+        Parameters
+        ----------
+        x : array-like
+            The x coordinates of the bars
+        height : array-like
+            The heights of the bars
+        track : bool
+            Whether to track data for CSV export
+        id : str, optional
+            Identifier for tracking
+        **kwargs
+            Additional arguments passed to matplotlib bar
+        """
+        method_name = "stx_bar"
+
+        # Add sample size to label if provided
+        if kwargs.get("label"):
+            n_samples = len(x)
+            kwargs["label"] = f"{kwargs['label']} ($n$={n_samples})"
+
+        with self._no_tracking():
+            result = self._axis_mpl.bar(x, height, **kwargs)
+
+        # Track bar data
+        tracked_dict = {"bar_df": pd.DataFrame({"x": x, "height": height})}
+        self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply style_barplot automatically for publication quality
+        from scitex.plt.ax import style_barplot
+        style_barplot(result)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
+        return result
+
+    def stx_barh(self, y, width, track: bool = True, id: Optional[str] = None, **kwargs):
+        """Horizontal bar plot with scitex styling and tracking.
+
+        Parameters
+        ----------
+        y : array-like
+            The y coordinates of the bars
+        width : array-like
+            The widths of the bars
+        track : bool
+            Whether to track data for CSV export
+        id : str, optional
+            Identifier for tracking
+        **kwargs
+            Additional arguments passed to matplotlib barh
+        """
+        method_name = "stx_barh"
+
+        # Add sample size to label if provided
+        if kwargs.get("label"):
+            n_samples = len(y)
+            kwargs["label"] = f"{kwargs['label']} ($n$={n_samples})"
+
+        with self._no_tracking():
+            result = self._axis_mpl.barh(y, width, **kwargs)
+
+        # Track bar data
+        tracked_dict = {"barh_df": pd.DataFrame({"y": y, "width": width})}
+        self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
+        return result
+
+    def stx_scatter(self, x, y, track: bool = True, id: Optional[str] = None, **kwargs):
+        """Scatter plot with scitex styling and tracking.
+
+        Parameters
+        ----------
+        x : array-like
+            The x coordinates of the points
+        y : array-like
+            The y coordinates of the points
+        track : bool
+            Whether to track data for CSV export
+        id : str, optional
+            Identifier for tracking
+        **kwargs
+            Additional arguments passed to matplotlib scatter
+        """
+        method_name = "stx_scatter"
+
+        # Add sample size to label if provided
+        if kwargs.get("label"):
+            n_samples = len(x)
+            kwargs["label"] = f"{kwargs['label']} ($n$={n_samples})"
+
+        with self._no_tracking():
+            result = self._axis_mpl.scatter(x, y, **kwargs)
+
+        # Track scatter data
+        tracked_dict = {"scatter_df": pd.DataFrame({"x": x, "y": y})}
+        self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply style_scatter automatically for publication quality
+        from scitex.plt.ax import style_scatter
+        style_scatter(result)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
+        return result
+
+    def stx_errorbar(self, x, y, yerr=None, xerr=None, track: bool = True, id: Optional[str] = None, **kwargs):
+        """Error bar plot with scitex styling and tracking.
+
+        Parameters
+        ----------
+        x : array-like
+            The x coordinates of the data points
+        y : array-like
+            The y coordinates of the data points
+        yerr : array-like, optional
+            The y error values
+        xerr : array-like, optional
+            The x error values
+        track : bool
+            Whether to track data for CSV export
+        id : str, optional
+            Identifier for tracking
+        **kwargs
+            Additional arguments passed to matplotlib errorbar
+        """
+        method_name = "stx_errorbar"
+
+        # Add sample size to label if provided
+        if kwargs.get("label"):
+            n_samples = len(x)
+            kwargs["label"] = f"{kwargs['label']} ($n$={n_samples})"
+
+        with self._no_tracking():
+            result = self._axis_mpl.errorbar(x, y, yerr=yerr, xerr=xerr, **kwargs)
+
+        # Track errorbar data
+        df_dict = {"x": x, "y": y}
+        if yerr is not None:
+            df_dict["yerr"] = yerr
+        if xerr is not None:
+            df_dict["xerr"] = xerr
+        tracked_dict = {"errorbar_df": pd.DataFrame(df_dict)}
+        self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply style_errorbar automatically for publication quality
+        from scitex.plt.ax import style_errorbar
+        style_errorbar(result)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
+        return result
+
+    def stx_fill_between(self, x, y1, y2=0, track: bool = True, id: Optional[str] = None, **kwargs):
+        """Fill between plot with scitex styling and tracking.
+
+        Parameters
+        ----------
+        x : array-like
+            The x coordinates
+        y1 : array-like
+            The first y boundary
+        y2 : array-like or scalar, optional
+            The second y boundary (default 0)
+        track : bool
+            Whether to track data for CSV export
+        id : str, optional
+            Identifier for tracking
+        **kwargs
+            Additional arguments passed to matplotlib fill_between
+        """
+        method_name = "stx_fill_between"
+
+        with self._no_tracking():
+            result = self._axis_mpl.fill_between(x, y1, y2, **kwargs)
+
+        # Track fill_between data
+        tracked_dict = {"fill_between_df": pd.DataFrame({
+            "x": x,
+            "y1": y1,
+            "y2": y2 if hasattr(y2, '__len__') else [y2] * len(x)
+        })}
+        self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
+        return result
+
+    def stx_contour(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
+        """Contour plot with scitex styling and tracking.
+
+        Parameters
+        ----------
+        *args
+            Positional arguments passed to matplotlib contour (X, Y, Z)
+        track : bool
+            Whether to track data for CSV export
+        id : str, optional
+            Identifier for tracking
+        **kwargs
+            Additional arguments passed to matplotlib contour
+        """
+        method_name = "stx_contour"
+
+        with self._no_tracking():
+            result = self._axis_mpl.contour(*args, **kwargs)
+
+        # Track contour data
+        if len(args) >= 3:
+            X, Y, Z = args[0], args[1], args[2]
+            tracked_dict = {"contour_df": pd.DataFrame({
+                "X": np.ravel(X),
+                "Y": np.ravel(Y),
+                "Z": np.ravel(Z)
+            })}
+            self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
+        return result
+
+    def stx_imshow(self, data, track: bool = True, id: Optional[str] = None, **kwargs):
+        """Image display with scitex styling and tracking.
+
+        Parameters
+        ----------
+        data : array-like
+            2D array of image data
+        track : bool
+            Whether to track data for CSV export
+        id : str, optional
+            Identifier for tracking
+        **kwargs
+            Additional arguments passed to matplotlib imshow
+        """
+        method_name = "stx_imshow"
+
+        with self._no_tracking():
+            result = self._axis_mpl.imshow(data, **kwargs)
+
+        # Track image data
+        if hasattr(data, 'shape') and len(data.shape) == 2:
+            n_rows, n_cols = data.shape
+            df = pd.DataFrame(data, columns=[f"col_{i}" for i in range(n_cols)])
+        else:
+            df = pd.DataFrame(data)
+        tracked_dict = {"imshow_df": df}
+        self._track(track, id, method_name, tracked_dict, None)
+
+        # Apply post-processing (tick locator, spines, etc.)
+        self._apply_scitex_postprocess(method_name, result)
+
+        return result
+
+    def stx_boxplot(self, data, colors: Optional[List] = None, track: bool = True, id: Optional[str] = None, **kwargs):
+        """Boxplot with scitex styling and tracking (alias for stx_box).
+
+        Parameters
+        ----------
+        data : list of array-like
+            List of data arrays for each box
+        colors : list, optional
+            Colors for each box
+        track : bool
+            Whether to track data for CSV export
+        id : str, optional
+            Identifier for tracking
+        **kwargs
+            Additional arguments passed to matplotlib boxplot
+        """
+        return self.stx_box(data, colors=colors, track=track, id=id, **kwargs)
+
+    def stx_violinplot(self, data, colors: Optional[List] = None, track: bool = True, id: Optional[str] = None, **kwargs):
+        """Violinplot with scitex styling and tracking (alias for stx_violin).
+
+        Parameters
+        ----------
+        data : list of array-like or DataFrame
+            Data for violin plot
+        colors : list, optional
+            Colors for each violin
+        track : bool
+            Whether to track data for CSV export
+        id : str, optional
+            Identifier for tracking
+        **kwargs
+            Additional arguments passed to stx_violin
+        """
+        return self.stx_violin(data, colors=colors, track=track, id=id, **kwargs)
+
     # Standard matplotlib plot methods with plot_ prefix
     def plot_bar(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
         """Wrapper for matplotlib bar plot with tracking support."""
