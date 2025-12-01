@@ -21,7 +21,7 @@ from scitex.plt.utils import mm_to_pt
 # ============================================================================
 DEFAULT_LINE_WIDTH_MM = 0.2
 DEFAULT_MARKER_SIZE_MM = 0.8
-DEFAULT_N_TICKS = 4
+DEFAULT_N_TICKS = 3  # nbins=3 gives 3-4 ticks for publication figures
 SPINE_ZORDER = 1000
 CAP_WIDTH_RATIO = 1 / 3  # 33% of bar/box width
 
@@ -107,7 +107,11 @@ def _ensure_spines_on_top(ax):
 
 
 def _apply_tick_locator(ax):
-    """Apply MaxNLocator only to numerical (non-categorical) axes."""
+    """Apply MaxNLocator only to numerical (non-categorical) axes.
+
+    Target: 3-4 ticks per axis for clean publication figures.
+    MaxNLocator's nbins=3 gives approximately 3-4 tick marks.
+    """
     try:
         def is_categorical_axis(axis):
             if isinstance(axis.converter, StrCategoryConverter):
@@ -120,12 +124,12 @@ def _apply_tick_locator(ax):
 
         if not is_categorical_axis(ax.xaxis):
             ax.xaxis.set_major_locator(
-                MaxNLocator(nbins=DEFAULT_N_TICKS, min_n_ticks=3)
+                MaxNLocator(nbins=DEFAULT_N_TICKS, min_n_ticks=2, integer=False, prune=None)
             )
 
         if not is_categorical_axis(ax.yaxis):
             ax.yaxis.set_major_locator(
-                MaxNLocator(nbins=DEFAULT_N_TICKS, min_n_ticks=3)
+                MaxNLocator(nbins=DEFAULT_N_TICKS, min_n_ticks=2, integer=False, prune=None)
             )
     except Exception:
         pass
