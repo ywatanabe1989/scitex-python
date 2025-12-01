@@ -27,6 +27,7 @@ def plot_raster(
     orientation="horizontal",
     y_offset=None,
     lineoffsets=None,
+    linelengths=None,
     apply_set_n_ticks=True,
     n_xticks=4,
     n_yticks=None,
@@ -50,9 +51,11 @@ def plot_raster(
     orientation: str, optional
         Orientation of raster plot (default: horizontal).
     y_offset : float, optional
-        Vertical spacing between trials/channels.
+        Vertical spacing between trials/channels (default: 1.0).
     lineoffsets : array-like, optional
         Y-positions for each trial/channel (overrides automatic positioning).
+    linelengths : float, optional
+        Height of each spike mark (default: 0.8, slightly less than y_offset to prevent overlap).
     apply_set_n_ticks : bool, optional
         Whether to apply set_n_ticks for cleaner axis (default: True).
     n_xticks : int, optional
@@ -76,13 +79,17 @@ def plot_raster(
 
     # Handle colors and labels
     colors = _handle_colors(colors, event_times_list)
-    
+
     # Handle lineoffsets for positioning between trials/channels
+    if y_offset is None:
+        y_offset = 1.0  # Default spacing
     if lineoffsets is None:
-        if y_offset is None:
-            y_offset = 1.0  # Default spacing
         lineoffsets = np.arange(len(event_times_list)) * y_offset
-    
+
+    # Set linelengths to prevent overlap (80% of y_offset by default)
+    if linelengths is None:
+        linelengths = y_offset * 0.8
+
     # Ensure lineoffsets is iterable and matches event_times_list length
     if np.isscalar(lineoffsets):
         lineoffsets = [lineoffsets]
@@ -92,8 +99,8 @@ def plot_raster(
     # Plotting as eventplot using event_times_list with proper positioning
     for ii, (pos, color, offset) in enumerate(zip(event_times_list, colors, lineoffsets)):
         label = _define_label(labels, ii)
-        ax.eventplot(pos, lineoffsets=offset, orientation=orientation, 
-                    colors=color, label=label, **kwargs)
+        ax.eventplot(pos, lineoffsets=offset, linelengths=linelengths,
+                    orientation=orientation, colors=color, label=label, **kwargs)
 
     # Apply set_n_ticks for cleaner axes if requested
     if apply_set_n_ticks:

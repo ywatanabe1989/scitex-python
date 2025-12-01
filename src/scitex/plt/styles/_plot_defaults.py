@@ -18,7 +18,7 @@ from scitex.plt.utils import mm_to_pt
 DEFAULT_LINE_WIDTH_MM = 0.2
 DEFAULT_MARKER_SIZE_MM = 0.8
 DEFAULT_CAP_SIZE_MM = 0.8
-DEFAULT_FILL_ALPHA = 0.3
+DEFAULT_FILL_ALPHA = 1.0  # Solid fill for publication figures
 
 
 # ============================================================================

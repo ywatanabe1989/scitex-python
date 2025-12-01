@@ -111,6 +111,7 @@ def _apply_tick_locator(ax):
 
     Target: 3-4 ticks per axis for clean publication figures.
     MaxNLocator's nbins=3 gives approximately 3-4 tick marks.
+    min_n_ticks=3 ensures at least 3 ticks (never 2).
     """
     try:
         def is_categorical_axis(axis):
@@ -124,12 +125,12 @@ def _apply_tick_locator(ax):
 
         if not is_categorical_axis(ax.xaxis):
             ax.xaxis.set_major_locator(
-                MaxNLocator(nbins=DEFAULT_N_TICKS, min_n_ticks=2, integer=False, prune=None)
+                MaxNLocator(nbins=DEFAULT_N_TICKS, min_n_ticks=3, integer=False, prune=None)
             )
 
         if not is_categorical_axis(ax.yaxis):
             ax.yaxis.set_major_locator(
-                MaxNLocator(nbins=DEFAULT_N_TICKS, min_n_ticks=2, integer=False, prune=None)
+                MaxNLocator(nbins=DEFAULT_N_TICKS, min_n_ticks=3, integer=False, prune=None)
             )
     except Exception:
         pass

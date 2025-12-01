@@ -60,42 +60,93 @@ def _warn_once(message, category=UserWarning):
         _warning_registry.add(message)
         warnings.warn(message, category, stacklevel=3)
 
-from ._export_as_csv_formatters import (_format_annotate, _format_bar,
-                                        _format_barh, _format_boxplot,
-                                        _format_contour, _format_errorbar,
-                                        _format_eventplot, _format_fill,
-                                        _format_fill_between, _format_hist,
-                                        _format_imshow, _format_imshow2d,
-                                        _format_plot, _format_plot_box,
-                                        _format_plot_conf_mat,
-                                        _format_plot_ecdf, _format_plot_fillv,
-                                        _format_plot_heatmap,
-                                        _format_plot_image,
-                                        _format_plot_imshow,
-                                        _format_plot_joyplot, _format_plot_kde,
-                                        _format_plot_line,
-                                        _format_plot_mean_ci,
-                                        _format_plot_mean_std,
-                                        _format_plot_median_iqr,
-                                        _format_plot_raster,
-                                        _format_plot_rectangle,
-                                        _format_plot_scatter,
-                                        _format_plot_scatter_hist,
-                                        _format_plot_shaded_line,
-                                        _format_plot_violin, _format_scatter,
-                                        _format_sns_barplot,
-                                        _format_sns_boxplot,
-                                        _format_sns_heatmap,
-                                        _format_sns_histplot,
-                                        _format_sns_jointplot,
-                                        _format_sns_kdeplot,
-                                        _format_sns_lineplot,
-                                        _format_sns_pairplot,
-                                        _format_sns_scatterplot,
-                                        _format_sns_stripplot,
-                                        _format_sns_swarmplot,
-                                        _format_sns_violinplot, _format_text,
-                                        _format_violin, _format_violinplot)
+from ._export_as_csv_formatters import (
+    # Standard matplotlib formatters
+    _format_annotate, _format_bar, _format_barh, _format_boxplot,
+    _format_contour, _format_contourf, _format_errorbar, _format_eventplot,
+    _format_fill, _format_fill_between, _format_hexbin, _format_hist,
+    _format_hist2d, _format_imshow, _format_imshow2d, _format_matshow,
+    _format_pie, _format_plot, _format_quiver, _format_scatter, _format_stem,
+    _format_step, _format_streamplot, _format_text, _format_violin,
+    _format_violinplot,
+    # Custom scitex formatters
+    _format_plot_box, _format_plot_conf_mat, _format_plot_ecdf,
+    _format_plot_fillv, _format_plot_heatmap, _format_plot_image,
+    _format_plot_imshow, _format_plot_joyplot, _format_plot_kde,
+    _format_plot_line, _format_plot_mean_ci, _format_plot_mean_std,
+    _format_plot_median_iqr, _format_plot_raster, _format_plot_rectangle,
+    _format_plot_scatter, _format_plot_scatter_hist, _format_plot_shaded_line,
+    _format_plot_violin,
+    # Seaborn formatters
+    _format_sns_barplot, _format_sns_boxplot, _format_sns_heatmap,
+    _format_sns_histplot, _format_sns_jointplot, _format_sns_kdeplot,
+    _format_sns_lineplot, _format_sns_pairplot, _format_sns_scatterplot,
+    _format_sns_stripplot, _format_sns_swarmplot, _format_sns_violinplot,
+)
+
+# Registry mapping method names to their formatter functions
+_FORMATTER_REGISTRY = {
+    # Standard matplotlib methods
+    "annotate": _format_annotate,
+    "bar": _format_bar,
+    "barh": _format_barh,
+    "boxplot": _format_boxplot,
+    "contour": _format_contour,
+    "contourf": _format_contourf,
+    "errorbar": _format_errorbar,
+    "eventplot": _format_eventplot,
+    "fill": _format_fill,
+    "fill_between": _format_fill_between,
+    "hexbin": _format_hexbin,
+    "hist": _format_hist,
+    "hist2d": _format_hist2d,
+    "imshow": _format_imshow,
+    "imshow2d": _format_imshow2d,
+    "matshow": _format_matshow,
+    "pie": _format_pie,
+    "plot": _format_plot,
+    "quiver": _format_quiver,
+    "scatter": _format_scatter,
+    "stem": _format_stem,
+    "step": _format_step,
+    "streamplot": _format_streamplot,
+    "text": _format_text,
+    "violin": _format_violin,
+    "violinplot": _format_violinplot,
+    # Custom scitex methods
+    "plot_box": _format_plot_box,
+    "plot_conf_mat": _format_plot_conf_mat,
+    "plot_ecdf": _format_plot_ecdf,
+    "plot_fillv": _format_plot_fillv,
+    "plot_heatmap": _format_plot_heatmap,
+    "plot_image": _format_plot_image,
+    "plot_imshow": _format_plot_imshow,
+    "plot_joyplot": _format_plot_joyplot,
+    "plot_kde": _format_plot_kde,
+    "plot_line": _format_plot_line,
+    "plot_mean_ci": _format_plot_mean_ci,
+    "plot_mean_std": _format_plot_mean_std,
+    "plot_median_iqr": _format_plot_median_iqr,
+    "plot_raster": _format_plot_raster,
+    "plot_rectangle": _format_plot_rectangle,
+    "plot_scatter": _format_plot_scatter,
+    "plot_scatter_hist": _format_plot_scatter_hist,
+    "plot_shaded_line": _format_plot_shaded_line,
+    "plot_violin": _format_plot_violin,
+    # Seaborn methods
+    "sns_barplot": _format_sns_barplot,
+    "sns_boxplot": _format_sns_boxplot,
+    "sns_heatmap": _format_sns_heatmap,
+    "sns_histplot": _format_sns_histplot,
+    "sns_jointplot": _format_sns_jointplot,
+    "sns_kdeplot": _format_sns_kdeplot,
+    "sns_lineplot": _format_sns_lineplot,
+    "sns_pairplot": _format_sns_pairplot,
+    "sns_scatterplot": _format_sns_scatterplot,
+    "sns_stripplot": _format_sns_stripplot,
+    "sns_swarmplot": _format_sns_swarmplot,
+    "sns_violinplot": _format_sns_violinplot,
+}
 
 
 def _to_numpy(data):
@@ -219,6 +270,8 @@ def format_record(record):
         return _format_boxplot(id, tracked_dict, kwargs)
     elif method == "contour":
         return _format_contour(id, tracked_dict, kwargs)
+    elif method == "contourf":
+        return _format_contourf(id, tracked_dict, kwargs)
     elif method == "errorbar":
         return _format_errorbar(id, tracked_dict, kwargs)
     elif method == "eventplot":
@@ -227,10 +280,26 @@ def format_record(record):
         return _format_fill(id, tracked_dict, kwargs)
     elif method == "fill_between":
         return _format_fill_between(id, tracked_dict, kwargs)
+    elif method == "hexbin":
+        return _format_hexbin(id, tracked_dict, kwargs)
+    elif method == "hist2d":
+        return _format_hist2d(id, tracked_dict, kwargs)
     elif method == "imshow":
         return _format_imshow(id, tracked_dict, kwargs)
     elif method == "imshow2d":
         return _format_imshow2d(id, tracked_dict, kwargs)
+    elif method == "matshow":
+        return _format_matshow(id, tracked_dict, kwargs)
+    elif method == "pie":
+        return _format_pie(id, tracked_dict, kwargs)
+    elif method == "quiver":
+        return _format_quiver(id, tracked_dict, kwargs)
+    elif method == "stem":
+        return _format_stem(id, tracked_dict, kwargs)
+    elif method == "step":
+        return _format_step(id, tracked_dict, kwargs)
+    elif method == "streamplot":
+        return _format_streamplot(id, tracked_dict, kwargs)
     elif method == "violin":
         return _format_violin(id, tracked_dict, kwargs)
     elif method == "violinplot":

@@ -168,16 +168,25 @@ def collect_figure_metadata(fig, ax=None, plot_id=None) -> Dict:
     if ax is not None and hasattr(ax, "_scitex_metadata"):
         scitex_meta = ax._scitex_metadata
 
+        # Extract stats separately for top-level access
+        if 'stats' in scitex_meta:
+            metadata['stats'] = scitex_meta['stats']
+
         # Merge into scitex section
         for key, value in scitex_meta.items():
-            if key not in metadata["scitex"]:
+            if key not in metadata["scitex"] and key != 'stats':  # Don't duplicate stats
                 metadata["scitex"][key] = value
 
     # Alternative: check figure for metadata (for multi-axes cases)
     elif hasattr(fig, "_scitex_metadata"):
         scitex_meta = fig._scitex_metadata
+
+        # Extract stats separately for top-level access
+        if 'stats' in scitex_meta:
+            metadata['stats'] = scitex_meta['stats']
+
         for key, value in scitex_meta.items():
-            if key not in metadata["scitex"]:
+            if key not in metadata["scitex"] and key != 'stats':  # Don't duplicate stats
                 metadata["scitex"][key] = value
 
     # Add actual font information

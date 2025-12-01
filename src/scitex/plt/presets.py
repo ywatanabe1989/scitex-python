@@ -45,6 +45,7 @@ SCITEX_STYLE = {
     "bar_edge_thickness_mm": 0.2,  # Bar plot edge thickness
     "kde_line_thickness_mm": 0.2,  # KDE line thickness
     "scatter_size_mm": 0.8,  # Scatter marker size
+    "marker_size_mm": 0.8,   # General marker size (stem, plot markers, etc.)
     "axis_font_size_pt": 7,
     "tick_font_size_pt": 7,
     "title_font_size_pt": 8,  # Slightly larger than axis labels (Nature-style)
@@ -84,11 +85,7 @@ NATURE_STYLE = {
     "bar_edge_thickness_mm": 0.2,  # Bar plot edge thickness
     "kde_line_thickness_mm": 0.2,  # KDE line thickness
     "scatter_size_mm": 0.8,  # Scatter marker size
-    "errorbar_thickness_mm": 0.2,  # Error bar line thickness
-    "errorbar_cap_width_mm": 0.8,  # Error bar cap width (0.8mm)
-    "bar_edge_thickness_mm": 0.2,  # Bar plot edge thickness
-    "kde_line_thickness_mm": 0.2,  # KDE line thickness
-    "scatter_size_mm": 0.8,  # Scatter marker size
+    "marker_size_mm": 0.8,   # General marker size (stem, plot markers, etc.)
     "axis_font_size_pt": 7,
     "tick_font_size_pt": 7,
     "title_font_size_pt": 8,  # Slightly larger than axis labels (Nature-style)
@@ -126,6 +123,7 @@ SCIENCE_STYLE = {
     "bar_edge_thickness_mm": 0.2,  # Bar plot edge thickness
     "kde_line_thickness_mm": 0.2,  # KDE line thickness
     "scatter_size_mm": 0.8,  # Scatter marker size
+    "marker_size_mm": 0.8,   # General marker size (stem, plot markers, etc.)
     "axis_font_size_pt": 7,
     "tick_font_size_pt": 7,
     "title_font_size_pt": 8,  # Slightly larger than axis labels (Nature-style)
@@ -163,6 +161,7 @@ CELL_STYLE = {
     "bar_edge_thickness_mm": 0.2,  # Bar plot edge thickness
     "kde_line_thickness_mm": 0.2,  # KDE line thickness
     "scatter_size_mm": 0.8,  # Scatter marker size
+    "marker_size_mm": 0.8,   # General marker size (stem, plot markers, etc.)
     "axis_font_size_pt": 7,
     "tick_font_size_pt": 7,
     "title_font_size_pt": 8,  # Slightly larger than axis labels (Nature-style)
@@ -200,6 +199,7 @@ PNAS_STYLE = {
     "bar_edge_thickness_mm": 0.2,  # Bar plot edge thickness
     "kde_line_thickness_mm": 0.2,  # KDE line thickness
     "scatter_size_mm": 0.8,  # Scatter marker size
+    "marker_size_mm": 0.8,   # General marker size (stem, plot markers, etc.)
     "axis_font_size_pt": 7,
     "tick_font_size_pt": 7,
     "title_font_size_pt": 8,  # Slightly larger than axis labels (Nature-style)

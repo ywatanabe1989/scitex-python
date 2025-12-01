@@ -18,12 +18,21 @@ from ._format_barh import _format_barh
 from ._format_hist import _format_hist
 from ._format_boxplot import _format_boxplot
 from ._format_contour import _format_contour
+from ._format_contourf import _format_contourf
 from ._format_errorbar import _format_errorbar
 from ._format_eventplot import _format_eventplot
 from ._format_fill import _format_fill
 from ._format_fill_between import _format_fill_between
+from ._format_hexbin import _format_hexbin
+from ._format_hist2d import _format_hist2d
 from ._format_imshow import _format_imshow
 from ._format_imshow2d import _format_imshow2d
+from ._format_matshow import _format_matshow
+from ._format_pie import _format_pie
+from ._format_quiver import _format_quiver
+from ._format_stem import _format_stem
+from ._format_step import _format_step
+from ._format_streamplot import _format_streamplot
 from ._format_violin import _format_violin
 from ._format_violinplot import _format_violinplot
 

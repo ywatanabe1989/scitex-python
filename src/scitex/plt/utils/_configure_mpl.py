@@ -25,7 +25,7 @@ def configure_mpl(
     n_ticks=4,
     hide_top_right_spines=True,
     line_width=1.0,  # Increased from 0.5 for better visibility
-    alpha=0.85,  # Adjusted for better contrast
+    alpha=1.0,  # Full opacity for publication-quality plots
     enable_latex=False,  # Disable LaTeX, use Arial font instead
     latex_preamble=None,  # Custom LaTeX preamble
     verbose=False,

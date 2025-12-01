@@ -10,14 +10,13 @@ import numpy as np
 
 def demo_plot_rectangle(fig, ax, stx):
     """ax.plot_rectangle(x, y, w, h) - Rectangle annotation."""
-    # Base plot
-    x = np.linspace(0, 10, 100)
-    ax.plot(x, np.sin(x), id="signal")
+    # Add rectangles (no edge by default for publication figures)
+    ax.plot_rectangle(1, 0, 3, 2, id="rect1")
+    ax.plot_rectangle(5, 1, 2, 3, id="rect2")
+    ax.plot_rectangle(3, 2.5, 4, 1.5, id="rect3")
 
-    # Add rectangles to highlight regions
-    ax.plot_rectangle(2, -0.5, 2, 1, id="rect1")
-    ax.plot_rectangle(6, -0.5, 2, 1, id="rect2")
-
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 5)
     ax.set_xyt(x="X", y="Y", t="ax.plot_rectangle(x, y, w, h)")
 
     return fig, ax
