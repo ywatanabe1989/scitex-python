@@ -237,6 +237,7 @@ def collect_figure_metadata(fig, ax=None, plot_id=None) -> Dict:
                 "label": x_label,
                 "unit": x_unit,
                 "scale": ax.get_xscale(),
+                "lim": list(ax.get_xlim()),
             }
 
             # Y-axis
@@ -246,6 +247,7 @@ def collect_figure_metadata(fig, ax=None, plot_id=None) -> Dict:
                 "label": y_label,
                 "unit": y_unit,
                 "scale": ax.get_yscale(),
+                "lim": list(ax.get_ylim()),
             }
 
             # Add n_ticks if available from style
@@ -256,6 +258,11 @@ def collect_figure_metadata(fig, ax=None, plot_id=None) -> Dict:
                     axes_info["y"]["n_ticks"] = n_ticks
 
             metadata["axes"] = axes_info
+
+            # Extract title
+            title = ax.get_title()
+            if title:
+                metadata["title"] = title
 
             # Detect plot type and method from axes history or lines
             plot_type, method = _detect_plot_type(ax)
@@ -269,6 +276,16 @@ def collect_figure_metadata(fig, ax=None, plot_id=None) -> Dict:
                 metadata["style_preset"] = ax._scitex_metadata["style_preset"]
             elif hasattr(fig, "_scitex_metadata") and "style_preset" in fig._scitex_metadata:
                 metadata["style_preset"] = fig._scitex_metadata["style_preset"]
+
+            # Phase 2: Extract traces (lines) with their properties and CSV column mapping
+            traces = _extract_traces(ax)
+            if traces:
+                metadata["traces"] = traces
+
+            # Phase 2: Extract legend info
+            legend_info = _extract_legend_info(ax)
+            if legend_info:
+                metadata["legend"] = legend_info
 
         except Exception as e:
             # If Phase 1 extraction fails, continue without it
@@ -314,6 +331,122 @@ def _parse_label_unit(label_text: str) -> tuple:
 
     # No unit found
     return label_text.strip(), ""
+
+
+def _extract_traces(ax) -> list:
+    """
+    Extract trace (line) information including properties and CSV column mapping.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes to extract traces from
+
+    Returns
+    -------
+    list
+        List of trace dictionaries with id, label, color, linestyle, linewidth,
+        and csv_columns mapping
+    """
+    import matplotlib.colors as mcolors
+
+    traces = []
+
+    # Get axes position for CSV column naming
+    ax_pos = "00"  # Default for single axes
+    if hasattr(ax, '_scitex_metadata') and 'position_in_grid' in ax._scitex_metadata:
+        pos = ax._scitex_metadata['position_in_grid']
+        ax_pos = f"{pos[0]}{pos[1]}"
+
+    for i, line in enumerate(ax.lines):
+        trace = {}
+
+        # Get ID from _scitex_id attribute (set by scitex plotting functions)
+        # This matches the id= kwarg passed to ax.plot()
+        scitex_id = getattr(line, '_scitex_id', None)
+
+        # Get label for legend
+        label = line.get_label()
+
+        # Determine trace_id for CSV column matching
+        if scitex_id:
+            trace_id = scitex_id
+        elif not label.startswith('_'):
+            trace_id = label
+        else:
+            trace_id = f"line_{i}"
+
+        trace["id"] = trace_id
+
+        # Label (for legend) - use label if not internal
+        if not label.startswith('_'):
+            trace["label"] = label
+
+        # Color - always convert to hex for consistent JSON storage
+        color = line.get_color()
+        try:
+            # mcolors.to_hex handles strings, RGB tuples, RGBA tuples
+            color_hex = mcolors.to_hex(color, keep_alpha=False)
+            trace["color"] = color_hex
+        except (ValueError, TypeError):
+            # Fallback: store as-is
+            trace["color"] = color
+
+        # Line style
+        trace["linestyle"] = line.get_linestyle()
+
+        # Line width
+        trace["linewidth"] = line.get_linewidth()
+
+        # Marker
+        marker = line.get_marker()
+        if marker and marker != 'None':
+            trace["marker"] = marker
+            trace["markersize"] = line.get_markersize()
+
+        # CSV column mapping - this is how we'll reconstruct from CSV
+        # Format matches what _export_as_csv generates: ax_{row}{col}_{id}_plot_x/y
+        # The id should match the id= kwarg passed to ax.plot()
+        trace["csv_columns"] = {
+            "x": f"ax_{ax_pos}_{trace_id}_plot_x",
+            "y": f"ax_{ax_pos}_{trace_id}_plot_y",
+        }
+
+        traces.append(trace)
+
+    return traces
+
+
+def _extract_legend_info(ax) -> Optional[dict]:
+    """
+    Extract legend information from axes.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes to extract legend from
+
+    Returns
+    -------
+    dict or None
+        Legend info dictionary or None if no legend
+    """
+    legend = ax.get_legend()
+    if legend is None:
+        return None
+
+    legend_info = {
+        "visible": legend.get_visible(),
+        "loc": legend._loc if hasattr(legend, '_loc') else "best",
+        "frameon": legend.get_frame_on() if hasattr(legend, 'get_frame_on') else True,
+    }
+
+    # Extract legend entries (labels)
+    texts = legend.get_texts()
+    if texts:
+        legend_info["labels"] = [t.get_text() for t in texts]
+
+    return legend_info
 
 
 def _detect_plot_type(ax) -> tuple:

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-11-19 12:01:10 (ywatanabe)"
+# Timestamp: "2025-12-02 12:00:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_configure_mpl.py
 
 
 from typing import Any
 from typing import Dict
+from typing import Optional
 from typing import Tuple
 
 import matplotlib.pyplot as plt
@@ -16,51 +17,48 @@ from scitex.dict import DotDict
 
 def configure_mpl(
     plt,
-    fig_size_mm=(160, 100),
-    fig_scale=1.0,
-    dpi_display=100,
-    dpi_save=300,
-    # fontsize="medium",
-    autolayout=True,
-    n_ticks=4,
-    hide_top_right_spines=True,
-    line_width=1.0,  # Increased from 0.5 for better visibility
-    alpha=1.0,  # Full opacity for publication-quality plots
-    enable_latex=False,  # Disable LaTeX, use Arial font instead
-    latex_preamble=None,  # Custom LaTeX preamble
-    verbose=False,
+    fig_size_mm: Optional[Tuple[float, float]] = None,
+    fig_scale: float = 1.0,
+    dpi_display: Optional[int] = None,
+    dpi_save: Optional[int] = None,
+    autolayout: bool = True,
+    n_ticks: Optional[int] = None,
+    hide_top_right_spines: Optional[bool] = None,
+    line_width: Optional[float] = None,
+    alpha: float = 1.0,
+    enable_latex: bool = False,
+    latex_preamble: Optional[str] = None,
+    verbose: bool = False,
     **kwargs,
 ) -> Tuple[Any, Dict]:
     """Configures Matplotlib settings for publication-quality plots.
+
+    All default values are loaded from SCITEX_STYLE.yaml. Parameters passed
+    directly to this function override the YAML values.
 
     Parameters
     ----------
     plt : matplotlib.pyplot
         Matplotlib pyplot module
-    fig_size_mm : tuple of int, optional
-        Figure width and height in millimeters, by default (160, 100)
+    fig_size_mm : tuple of float, optional
+        Figure width and height in millimeters. If None, calculated from
+        YAML axes dimensions + margins.
     fig_scale : float, optional
         Scaling factor for figure size, by default 1.0
     dpi_display : int, optional
-        Display resolution in DPI, by default 100
+        Display resolution in DPI. If None, uses YAML output.dpi / 3.
     dpi_save : int, optional
-        Saving resolution in DPI, by default 300
-    # fontsize : Union[str, int, float], optional
-    #     Base font size ('xx-small' to 'xx-large' or points), by default 'medium'
-    #     Other sizes are derived from this:
-    #     - Title: 125% of base
-    #     - Labels: 100% of base
-    #     - Ticks/Legend: 85% of base
+        Saving resolution in DPI. If None, uses YAML output.dpi.
     autolayout : bool, optional
         Whether to enable automatic tight layout, by default True
     hide_top_right_spines : bool, optional
-        Whether to hide top and right spines, by default True
+        Whether to hide top and right spines. If None, uses YAML behavior settings.
     line_width : float, optional
-        Default line width, by default 1.0
+        Default line width in points. If None, converts YAML lines.trace_mm to pt.
     alpha : float, optional
-        Color transparency, by default 0.85
+        Color transparency, by default 1.0
     n_ticks : int, optional
-        Number of ticks on each axis, by default 4
+        Number of ticks on each axis. If None, uses YAML ticks.n_ticks.
     verbose : bool, optional
         Whether to print configuration details, by default False
 
@@ -68,14 +66,72 @@ def configure_mpl(
     -------
     tuple
         (plt, DotDict of RGBA colors) - Access as COLORS.blue or COLORS['blue']
-    """
-    # # Convert base font size
-    # base_size = _convert_font_size(fontsize)
 
-    # # Ensure minimum sizes for different elements with better proportions
-    # title_size = max(base_size * 1.25, 10.0)  # Increased for better hierarchy
-    # label_size = max(base_size * 1.0, 9.0)  # Minimum 9pt for good readability
-    # small_size = max(base_size * 0.85, 8.0)  # Increased ratio for better legibility
+    Notes
+    -----
+    Style values are resolved from SCITEX_STYLE.yaml located at:
+    scitex/plt/styles/SCITEX_STYLE.yaml
+
+    The YAML file contains all default values for:
+    - Axes dimensions (width_mm, height_mm, thickness_mm)
+    - Margins and spacing
+    - Font sizes (axis_label_pt, tick_label_pt, title_pt, legend_pt)
+    - Line thicknesses (trace_mm, errorbar_mm, etc.)
+    - Tick settings (length_mm, thickness_mm, direction, n_ticks)
+    - Output settings (dpi, transparent)
+    - Behavior flags (hide_top_spine, hide_right_spine, grid)
+    """
+    # Load style from YAML
+    from scitex.plt.styles import load_style, resolve_style_value
+
+    style = load_style()
+
+    # mm to pt conversion factor
+    mm_to_pt = 2.83465
+
+    # Resolve values with priority: direct → env → yaml → default
+    # If parameter is None, use YAML value; otherwise use the passed value
+
+    # Figure size: calculate from axes + margins if not specified
+    if fig_size_mm is None:
+        axes_w = resolve_style_value("axes.width_mm", None, 40)
+        axes_h = resolve_style_value("axes.height_mm", None, 28)
+        margin_l = resolve_style_value("margins.left_mm", None, 20)
+        margin_r = resolve_style_value("margins.right_mm", None, 20)
+        margin_b = resolve_style_value("margins.bottom_mm", None, 20)
+        margin_t = resolve_style_value("margins.top_mm", None, 20)
+        fig_size_mm = (axes_w + margin_l + margin_r, axes_h + margin_b + margin_t)
+
+    # DPI
+    yaml_dpi = int(resolve_style_value("output.dpi", None, 300))
+    if dpi_save is None:
+        dpi_save = yaml_dpi
+    if dpi_display is None:
+        dpi_display = max(100, yaml_dpi // 3)  # Lower DPI for display
+
+    # Line width: convert from mm to pt if using YAML value
+    if line_width is None:
+        trace_mm = resolve_style_value("lines.trace_mm", None, 0.2)
+        line_width = trace_mm * mm_to_pt
+
+    # Ticks
+    if n_ticks is None:
+        n_ticks = int(resolve_style_value("ticks.n_ticks", None, 4))
+
+    # Spines
+    if hide_top_right_spines is None:
+        hide_top = resolve_style_value("behavior.hide_top_spine", None, True, bool)
+        hide_right = resolve_style_value("behavior.hide_right_spine", None, True, bool)
+        hide_top_right_spines = hide_top and hide_right
+
+    # Font sizes from YAML
+    font_size = resolve_style_value("fonts.axis_label_pt", None, 7)
+    title_size = resolve_style_value("fonts.title_pt", None, 8)
+    tick_size = resolve_style_value("fonts.tick_label_pt", None, 7)
+    legend_size = resolve_style_value("fonts.legend_pt", None, 6)
+
+    # Axis thickness from YAML
+    axes_linewidth = resolve_style_value("axes.thickness_mm", None, 0.2) * mm_to_pt
 
     # Colors
     RGBA = {
@@ -99,39 +155,39 @@ def configure_mpl(
         fig_size_mm[1] / 25.4 * fig_scale,
     )
 
-    # Prepare matplotlib configuration
+    # Prepare matplotlib configuration using YAML-derived values
     mpl_config = {
         # Resolution
         "figure.dpi": dpi_display,
         "savefig.dpi": dpi_save,
         # Figure Size
         "figure.figsize": figsize_inch,
-        # Font Sizes (7pt for titles/labels, 6pt for legend)
-        "font.size": 7,  # Base font size
-        "axes.titlesize": 7,  # Title size (prevent "large" default)
-        "axes.labelsize": 7,  # Axis label size
-        "xtick.labelsize": 7,  # Tick label size
-        "ytick.labelsize": 7,  # Tick label size
-        # Legend configuration
-        "legend.fontsize": 6,  # 6pt for legend labels
-        "legend.frameon": False,  # No frame by default
-        "legend.loc": "best",  # Auto-position to avoid overlap
+        # Font Sizes from YAML
+        "font.size": font_size,
+        "axes.titlesize": title_size,
+        "axes.labelsize": font_size,
+        "xtick.labelsize": tick_size,
+        "ytick.labelsize": tick_size,
+        # Legend configuration from YAML
+        "legend.fontsize": legend_size,
+        "legend.frameon": False,
+        "legend.loc": "best",
         # Auto Layout
         "figure.autolayout": autolayout,
-        # Top and Right Axes
+        # Top and Right Axes from YAML
         "axes.spines.top": not hide_top_right_spines,
         "axes.spines.right": not hide_top_right_spines,
-        # Spine width
-        "axes.linewidth": 0.8,  # Slightly thicker axes lines
+        # Spine width from YAML (converted from mm to pt)
+        "axes.linewidth": axes_linewidth,
         # Custom color cycle
         "axes.prop_cycle": plt.cycler(
             color=list(RGBA_NORM_FOR_CYCLE.values())
         ),
-        # Line
+        # Line width from YAML (converted from mm to pt)
         "lines.linewidth": line_width,
-        "lines.markersize": 6.0,  # Better default marker size
+        "lines.markersize": 6.0,
         # Grid (if used)
-        "grid.linewidth": 0.6,
+        "grid.linewidth": axes_linewidth,
         "grid.alpha": 0.3,
     }
 

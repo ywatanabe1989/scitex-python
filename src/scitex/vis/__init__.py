@@ -54,6 +54,7 @@ from . import model
 from . import backend
 from . import io
 from . import utils
+from . import editor
 
 # Convenient top-level imports for common use cases
 from .model import FigureModel, AxesModel, PlotModel, GuideModel, AnnotationModel
@@ -79,12 +80,17 @@ from .utils import (
     NATURE_DOUBLE_COLUMN_MM,
 )
 
+from .editor import edit
+
 __all__ = [
     # Submodules
     "model",
     "backend",
     "io",
     "utils",
+    "editor",
+    # Editor
+    "edit",
     # Models
     "FigureModel",
     "AxesModel",

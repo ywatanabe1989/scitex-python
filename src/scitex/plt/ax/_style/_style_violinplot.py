@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 14:30:00 (ywatanabe)"
+# Timestamp: "2025-12-01 20:00:00 (ywatanabe)"
 # File: ./src/scitex/plt/ax/_style/_style_violinplot.py
 
-"""Style violin plot elements with millimeter-based control."""
+"""Style violin plot elements with millimeter-based control.
+
+Default values are loaded from SCITEX_STYLE.yaml via presets.py.
+"""
 
 from typing import Optional, Union
 
 from matplotlib.axes import Axes
 
+from scitex.plt.styles.presets import SCITEX_STYLE
+
+# Get defaults from centralized config
+_DEFAULT_LINEWIDTH_MM = SCITEX_STYLE.get("trace_thickness_mm", 0.2)
+
 
 def style_violinplot(
     ax: Union[Axes, "AxisWrapper"],
-    linewidth_mm: float = 0.2,
+    linewidth_mm: float = None,
     edge_color: str = "black",
     median_color: str = "black",
     remove_caps: bool = True,
@@ -52,6 +60,10 @@ def style_violinplot(
     >>> stx.plt.ax.style_violinplot(ax)
     """
     from scitex.plt.utils import mm_to_pt
+
+    # Use centralized default if not specified
+    if linewidth_mm is None:
+        linewidth_mm = _DEFAULT_LINEWIDTH_MM
 
     lw_pt = mm_to_pt(linewidth_mm)
 

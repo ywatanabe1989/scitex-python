@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-11-19 14:30:00 (ywatanabe)"
+# Timestamp: "2025-12-01 20:00:00 (ywatanabe)"
 # File: ./src/scitex/plt/ax/_style/_style_boxplot.py
 
 """
 Style boxplot elements with millimeter-based control.
+
+Default values are loaded from SCITEX_STYLE.yaml via presets.py.
 """
 
 from typing import Dict, Optional
 import matplotlib.pyplot as plt
 
+from scitex.plt.styles.presets import SCITEX_STYLE
+
+# Get defaults from centralized config
+_DEFAULT_LINEWIDTH_MM = SCITEX_STYLE.get("trace_thickness_mm", 0.2)
+_DEFAULT_FLIER_SIZE_MM = SCITEX_STYLE.get("marker_size_mm", 0.8)
+
 
 def style_boxplot(
     boxplot_dict,
-    linewidth_mm: float = 0.2,
-    flier_size_mm: float = 0.8,
+    linewidth_mm: float = None,
+    flier_size_mm: float = None,
     median_color: str = "black",
     edge_color: str = "black",
     colors: Optional[list] = None,
@@ -65,6 +73,12 @@ def style_boxplot(
     """
     from scitex.plt.utils import mm_to_pt
     from scitex.plt.color._PARAMS import HEX
+
+    # Use centralized defaults if not specified
+    if linewidth_mm is None:
+        linewidth_mm = _DEFAULT_LINEWIDTH_MM
+    if flier_size_mm is None:
+        flier_size_mm = _DEFAULT_FLIER_SIZE_MM
 
     # Convert mm to points
     lw_pt = mm_to_pt(linewidth_mm)

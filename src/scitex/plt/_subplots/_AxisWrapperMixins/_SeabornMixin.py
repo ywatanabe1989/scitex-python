@@ -24,6 +24,7 @@ def sns_copy_doc(func):
     def wrapper(self, *args, **kwargs):
         return func(self, *args, **kwargs)
 
+    # Extract the seaborn method name (e.g., sns_boxplot -> boxplot)
     wrapper.__doc__ = getattr(sns, func.__name__.split("sns_")[-1]).__doc__
     return wrapper
 
@@ -33,6 +34,7 @@ class SeabornMixin:
     def _sns_base(
         self, method_name, *args, track=True, track_obj=None, id=None, **kwargs
     ):
+        # Extract seaborn method name (e.g., sns_boxplot -> boxplot)
         sns_method_name = method_name.split("sns_")[-1]
 
         with self._no_tracking():
@@ -95,7 +97,7 @@ class SeabornMixin:
         """Formats data passed to sns functions with (data=data, x=x, y=y) keyword arguments"""
         df = kwargs.get("data")
         x, y, hue = kwargs.get("x"), kwargs.get("y"), kwargs.get("hue")
-        
+
         track_obj = self._sns_prepare_xyhue(df, x, y, hue) if df is not None else None
         self._sns_base(
             method_name,

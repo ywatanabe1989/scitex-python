@@ -44,7 +44,7 @@ def demo_sns_stripplot(fig, ax, stx):
     stats_text = f"Mann-Whitney: U = {u_stat:.1f}, {format_pvalue(p_val)}"
     ax.text(0.95, 0.95, stats_text, transform=ax.transAxes, ha="right", va="top", fontsize=5)
 
-    ax.set_xyt( x="Category", y="Value [a.u.]", t="Strip Plot with Mann-Whitney")
+    ax.set_xyt( x="Category", y="Value [a.u.]", t="ax.sns_stripplot(x, y, data)")
 
     return fig, ax
 

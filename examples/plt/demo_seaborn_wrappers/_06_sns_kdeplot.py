@@ -42,7 +42,7 @@ def demo_sns_kdeplot(fig, ax, stx):
     stats_text = f"Shapiro: W = {w_stat:.3f}, {format_pvalue(p_val)}"
     ax.text(0.95, 0.95, stats_text, transform=ax.transAxes, ha="right", va="top", fontsize=5)
 
-    ax.set_xyt( x="Value [a.u.]", y="Density", t="KDE with Normality Test")
+    ax.set_xyt( x="Value [a.u.]", y="Density", t="ax.sns_kdeplot(x, hue, data)")
     ax.legend(frameon=False, title="", fontsize=6)
 
     return fig, ax

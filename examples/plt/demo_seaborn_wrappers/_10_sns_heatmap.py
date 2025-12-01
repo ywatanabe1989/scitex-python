@@ -17,7 +17,7 @@ def demo_sns_heatmap(fig, ax, stx):
 
     ax.sns_heatmap(corr_matrix, annot=True, id="sns_heatmap")
 
-    ax.set_xyt( t="Correlation Heatmap")
+    ax.set_xyt( t="ax.sns_heatmap(data, annot)")
 
     return fig, ax
 

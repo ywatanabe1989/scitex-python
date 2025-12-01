@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 09:55:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_seaborn_wrappers.py
+# Timestamp: "2025-12-01 20:47:36 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/examples/plt/demo_seaborn_wrappers.py
+
 
 """Demo: Seaborn wrapper methods (ax.sns_xxx)."""
 
 # Imports
 import scitex as stx
-from scitex.plt.presets import SCITEX_STYLE
+from scitex.plt.styles.presets import SCITEX_STYLE
 
 from demo_seaborn_wrappers import demo_sns_boxplot
 from demo_seaborn_wrappers import demo_sns_violinplot

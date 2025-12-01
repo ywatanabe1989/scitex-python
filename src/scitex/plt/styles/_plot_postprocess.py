@@ -7,6 +7,8 @@
 
 This module centralizes all styling applied AFTER matplotlib methods
 are called. Each function modifies the plot result or axes in-place.
+
+All default values are loaded from SCITEX_STYLE.yaml via presets.py.
 """
 
 import numpy as np
@@ -14,14 +16,15 @@ from matplotlib.ticker import MaxNLocator, FixedLocator
 from matplotlib.category import StrCategoryConverter, UnitData
 
 from scitex.plt.utils import mm_to_pt
+from scitex.plt.styles.presets import SCITEX_STYLE
 
 
 # ============================================================================
-# Constants
+# Constants (loaded from centralized SCITEX_STYLE.yaml)
 # ============================================================================
-DEFAULT_LINE_WIDTH_MM = 0.2
-DEFAULT_MARKER_SIZE_MM = 0.8
-DEFAULT_N_TICKS = 3  # nbins=3 gives 3-4 ticks for publication figures
+DEFAULT_LINE_WIDTH_MM = SCITEX_STYLE.get("trace_thickness_mm", 0.2)
+DEFAULT_MARKER_SIZE_MM = SCITEX_STYLE.get("marker_size_mm", 0.8)
+DEFAULT_N_TICKS = SCITEX_STYLE.get("n_ticks", 4) - 1  # nbins = n_ticks - 1
 SPINE_ZORDER = 1000
 CAP_WIDTH_RATIO = 1 / 3  # 33% of bar/box width
 

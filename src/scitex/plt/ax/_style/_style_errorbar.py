@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-11-19 14:50:00 (ywatanabe)"
+# Timestamp: "2025-12-01 20:00:00 (ywatanabe)"
 # File: ./src/scitex/plt/ax/_style/_style_errorbar.py
 
 """
 Style error bar elements with millimeter-based control.
+
+Default values are loaded from SCITEX_STYLE.yaml via presets.py.
 """
 
 from typing import Optional
 
+from scitex.plt.styles.presets import SCITEX_STYLE
+
+# Get defaults from centralized config
+_DEFAULT_THICKNESS_MM = SCITEX_STYLE.get("trace_thickness_mm", 0.2)
+_DEFAULT_CAP_WIDTH_MM = SCITEX_STYLE.get("errorbar_cap_width_mm", 0.8)
+
 
 def style_errorbar(
     errorbar_container,
-    thickness_mm: float = 0.2,
-    cap_width_mm: float = 0.8,
+    thickness_mm: float = None,
+    cap_width_mm: float = None,
 ):
     """
     Apply consistent styling to matplotlib errorbar elements.
@@ -39,6 +47,12 @@ def style_errorbar(
     >>> stx.plt.ax.style_errorbar(eb, thickness_mm=0.2, cap_width_mm=0.8)
     """
     from scitex.plt.utils import mm_to_pt
+
+    # Use centralized defaults if not specified
+    if thickness_mm is None:
+        thickness_mm = _DEFAULT_THICKNESS_MM
+    if cap_width_mm is None:
+        cap_width_mm = _DEFAULT_CAP_WIDTH_MM
 
     # Convert mm to points
     lw_pt = mm_to_pt(thickness_mm)
