@@ -17,21 +17,21 @@ from ....plt.utils import assert_valid_axis
 from ._plot_shaded_line import plot_shaded_line as scitex_plt_plot_shaded_line
 
 
-def plot_line(axis, data, xx=None, **kwargs):
+def plot_line(axis, values_1d, xx=None, **kwargs):
     """
     Plot a simple line.
-    
+
     Parameters
     ----------
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axis to plot on
-    data : array-like
-        Data to plot
-    xx : array-like, optional
-        X coordinates for the data. If None, will use np.arange(len(data))
+    values_1d : array-like, shape (n_points,)
+        1D array of y-values to plot
+    xx : array-like, shape (n_points,), optional
+        X coordinates for the data. If None, will use np.arange(len(values_1d))
     **kwargs
         Additional keyword arguments passed to axis.plot()
-        
+
     Returns
     -------
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
@@ -40,36 +40,37 @@ def plot_line(axis, data, xx=None, **kwargs):
         DataFrame with x and y values
     """
     assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
-    data = np.asarray(data)
-    assert data.ndim <= 2, f"Data must be 1D or 2D, got {data.ndim}D"
+    values_1d = np.asarray(values_1d)
+    assert values_1d.ndim <= 2, f"Data must be 1D or 2D, got {values_1d.ndim}D"
     if xx is None:
-        xx = np.arange(len(data))
+        xx = np.arange(len(values_1d))
     else:
         xx = np.asarray(xx)
     assert len(xx) == len(
-        data
-    ), f"xx length ({len(xx)}) must match data length ({len(data)})"
-    axis.plot(xx, data, **kwargs)
-    return axis, pd.DataFrame({"x": xx, "y": data})
+        values_1d
+    ), f"xx length ({len(xx)}) must match values_1d length ({len(values_1d)})"
+    axis.plot(xx, values_1d, **kwargs)
+    return axis, pd.DataFrame({"x": xx, "y": values_1d})
 
 
-def plot_mean_std(axis, data, xx=None, sd=1, **kwargs):
+def plot_mean_std(axis, values_2d, xx=None, sd=1, **kwargs):
     """
     Plot mean line with standard deviation shading.
-    
+
     Parameters
     ----------
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axis to plot on
-    data : array-like
-        Data to plot, can be 1D or 2D. If 2D, mean and std are calculated across the first dimension
-    xx : array-like, optional
-        X coordinates for the data. If None, will use np.arange(len(data))
+    values_2d : array-like, shape (n_samples, n_points) or (n_points,)
+        2D array where mean and std are calculated across axis=0 (samples).
+        Can also be 1D for a single line without shading.
+    xx : array-like, shape (n_points,), optional
+        X coordinates for the data. If None, will use np.arange(n_points)
     sd : float, optional
         Number of standard deviations for the shaded region. Default is 1
     **kwargs
         Additional keyword arguments passed to plot_shaded_line()
-        
+
     Returns
     -------
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
@@ -78,27 +79,27 @@ def plot_mean_std(axis, data, xx=None, sd=1, **kwargs):
     assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
     assert isinstance(sd, (int, float)), f"sd must be a number, got {type(sd)}"
     assert sd >= 0, f"sd must be non-negative, got {sd}"
-    data = np.asarray(data)
-    assert data.ndim <= 2, f"Data must be 1D or 2D, got {data.ndim}D"
+    values_2d = np.asarray(values_2d)
+    assert values_2d.ndim <= 2, f"Data must be 1D or 2D, got {values_2d.ndim}D"
     if xx is None:
-        xx = np.arange(data.shape[1] if data.ndim > 1 else len(data))
+        xx = np.arange(values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d))
     else:
         xx = np.asarray(xx)
-    expected_len = data.shape[1] if data.ndim > 1 else len(data)
+    expected_len = values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d)
     assert (
         len(xx) == expected_len
-    ), f"xx length ({len(xx)}) must match data length ({expected_len})"
+    ), f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
 
-    if data.ndim == 1:
-        central = data
+    if values_2d.ndim == 1:
+        central = values_2d
         error = np.zeros_like(central)
     else:
-        central = np.nanmean(data, axis=0)
-        error = np.nanstd(data, axis=0) * sd
+        central = np.nanmean(values_2d, axis=0)
+        error = np.nanstd(values_2d, axis=0) * sd
 
     y_lower = central - error
     y_upper = central + error
-    n_samples = data.shape[0] if data.ndim > 1 else 1
+    n_samples = values_2d.shape[0] if values_2d.ndim > 1 else 1
 
     if "label" in kwargs and kwargs["label"]:
         kwargs["label"] = f"{kwargs['label']} (n={n_samples})"
@@ -106,23 +107,24 @@ def plot_mean_std(axis, data, xx=None, sd=1, **kwargs):
     return scitex_plt_plot_shaded_line(axis, xx, y_lower, central, y_upper, **kwargs)
 
 
-def plot_mean_ci(axis, data, xx=None, perc=95, **kwargs):
+def plot_mean_ci(axis, values_2d, xx=None, perc=95, **kwargs):
     """
     Plot mean line with confidence interval shading.
-    
+
     Parameters
     ----------
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axis to plot on
-    data : array-like
-        Data to plot, can be 1D or 2D. If 2D, mean and percentiles are calculated across the first dimension
-    xx : array-like, optional
-        X coordinates for the data. If None, will use np.arange(len(data))
+    values_2d : array-like, shape (n_samples, n_points) or (n_points,)
+        2D array where mean and percentiles are calculated across axis=0 (samples).
+        Can also be 1D for a single line without shading.
+    xx : array-like, shape (n_points,), optional
+        X coordinates for the data. If None, will use np.arange(n_points)
     perc : float, optional
         Confidence interval percentage (0-100). Default is 95
     **kwargs
         Additional keyword arguments passed to plot_shaded_line()
-        
+
     Returns
     -------
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
@@ -133,33 +135,33 @@ def plot_mean_ci(axis, data, xx=None, perc=95, **kwargs):
         perc, (int, float)
     ), f"perc must be a number, got {type(perc)}"
     assert 0 <= perc <= 100, f"perc must be between 0 and 100, got {perc}"
-    data = np.asarray(data)
-    assert data.ndim <= 2, f"Data must be 1D or 2D, got {data.ndim}D"
+    values_2d = np.asarray(values_2d)
+    assert values_2d.ndim <= 2, f"Data must be 1D or 2D, got {values_2d.ndim}D"
 
     if xx is None:
-        xx = np.arange(data.shape[1] if data.ndim > 1 else len(data))
+        xx = np.arange(values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d))
     else:
         xx = np.asarray(xx)
 
-    expected_len = data.shape[1] if data.ndim > 1 else len(data)
+    expected_len = values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d)
     assert (
         len(xx) == expected_len
-    ), f"xx length ({len(xx)}) must match data length ({expected_len})"
+    ), f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
 
-    if data.ndim == 1:
-        central = data
+    if values_2d.ndim == 1:
+        central = values_2d
         y_lower = central
         y_upper = central
     else:
-        central = np.nanmean(data, axis=0)
+        central = np.nanmean(values_2d, axis=0)
         # Calculate CI bounds
         alpha = 1 - perc / 100
         y_lower_perc = alpha / 2 * 100
         y_upper_perc = (1 - alpha / 2) * 100
-        y_lower = np.nanpercentile(data, y_lower_perc, axis=0)
-        y_upper = np.nanpercentile(data, y_upper_perc, axis=0)
+        y_lower = np.nanpercentile(values_2d, y_lower_perc, axis=0)
+        y_upper = np.nanpercentile(values_2d, y_upper_perc, axis=0)
 
-    n_samples = data.shape[0] if data.ndim > 1 else 1
+    n_samples = values_2d.shape[0] if values_2d.ndim > 1 else 1
 
     if "label" in kwargs and kwargs["label"]:
         kwargs["label"] = f"{kwargs['label']} (n={n_samples}, CI={perc}%)"
@@ -167,50 +169,51 @@ def plot_mean_ci(axis, data, xx=None, perc=95, **kwargs):
     return scitex_plt_plot_shaded_line(axis, xx, y_lower, central, y_upper, **kwargs)
 
 
-def plot_median_iqr(axis, data, xx=None, **kwargs):
+def plot_median_iqr(axis, values_2d, xx=None, **kwargs):
     """
     Plot median line with interquartile range shading.
-    
+
     Parameters
     ----------
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axis to plot on
-    data : array-like
-        Data to plot, can be 1D or 2D. If 2D, median and IQR are calculated across the first dimension
-    xx : array-like, optional
-        X coordinates for the data. If None, will use np.arange(len(data))
+    values_2d : array-like, shape (n_samples, n_points) or (n_points,)
+        2D array where median and IQR are calculated across axis=0 (samples).
+        Can also be 1D for a single line without shading.
+    xx : array-like, shape (n_points,), optional
+        X coordinates for the data. If None, will use np.arange(n_points)
     **kwargs
         Additional keyword arguments passed to plot_shaded_line()
-        
+
     Returns
     -------
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axis with the plot
     """
     assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
-    data = np.asarray(data)
-    assert data.ndim <= 2, f"Data must be 1D or 2D, got {data.ndim}D"
+    values_2d = np.asarray(values_2d)
+    assert values_2d.ndim <= 2, f"Data must be 1D or 2D, got {values_2d.ndim}D"
 
     if xx is None:
-        xx = np.arange(data.shape[1] if data.ndim > 1 else len(data))
+        xx = np.arange(values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d))
     else:
         xx = np.asarray(xx)
 
-    expected_len = data.shape[1] if data.ndim > 1 else len(data)
+    expected_len = values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d)
     assert (
         len(xx) == expected_len
-    ), f"xx length ({len(xx)}) must match data length ({expected_len})"
+    ), f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
 
-    if data.ndim == 1:
-        central = data
+    if values_2d.ndim == 1:
+        central = values_2d
         y_lower = central
         y_upper = central
     else:
-        central = np.nanmedian(data, axis=0)
-        y_lower = np.nanpercentile(data, 25, axis=0)
-        y_upper = np.nanpercentile(data, 75, axis=0)
+        central = np.nanmedian(values_2d, axis=0)
+        y_lower = np.nanpercentile(values_2d, 25, axis=0)
+        y_upper = np.nanpercentile(values_2d, 75, axis=0)
 
-    n_samples = data.shape[0] if data.ndim > 1 else 1
+    n_samples = values_2d.shape[0] if values_2d.ndim > 1 else 1
 
     if "label" in kwargs and kwargs["label"]:
         kwargs["label"] = f"{kwargs['label']} (n={n_samples}, IQR)"

@@ -17,7 +17,7 @@ from matplotlib.image import AxesImage
 
 def plot_heatmap(
     ax: Union[Axes, "AxisWrapper"],
-    data: np.ndarray,
+    values_2d: np.ndarray,
     x_labels: Optional[List[str]] = None,
     y_labels: Optional[List[str]] = None,
     cmap: str = "viridis",
@@ -38,7 +38,7 @@ def plot_heatmap(
     ----------
     ax : matplotlib.axes.Axes or AxisWrapper
         The axes to plot on.
-    data : np.ndarray
+    values_2d : np.ndarray, shape (n_rows, n_cols)
         2D array of data to display as heatmap.
     x_labels : list of str, optional
         Labels for the x-axis (columns).
@@ -83,7 +83,7 @@ def plot_heatmap(
     """
 
     im, cbar = _mpl_heatmap(
-        data,
+        values_2d,
         x_labels,
         y_labels,
         ax=ax,

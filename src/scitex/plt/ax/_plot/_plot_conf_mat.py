@@ -24,7 +24,7 @@ from .._style._extend import extend as scitex_plt_extend
 
 def plot_conf_mat(
     axis: plt.Axes,
-    data: Union[np.ndarray, pd.DataFrame],
+    conf_mat_2d: Union[np.ndarray, pd.DataFrame],
     x_labels: Optional[List[str]] = None,
     y_labels: Optional[List[str]] = None,
     title: str = "Confusion Matrix",
@@ -43,8 +43,8 @@ def plot_conf_mat(
     ----------
     axis : plt.Axes or scitex.plt._subplots._AxisWrapper.AxisWrapper
         Matplotlib axes or scitex axis wrapper to plot on
-    data : Union[np.ndarray, pd.DataFrame]
-        Confusion matrix data
+    conf_mat_2d : Union[np.ndarray, pd.DataFrame], shape (n_classes, n_classes)
+        2D confusion matrix data (true labels × predicted labels)
     x_labels : Optional[List[str]], optional
         Labels for predicted classes
     y_labels : Optional[List[str]], optional
@@ -83,14 +83,14 @@ def plot_conf_mat(
 
     assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
 
-    if not isinstance(data, pd.DataFrame):
-        data = pd.DataFrame(data)
+    if not isinstance(conf_mat_2d, pd.DataFrame):
+        conf_mat_2d = pd.DataFrame(conf_mat_2d)
 
-    bacc_val = calc_bacc_from_conf_mat(data.values)
+    bacc_val = calc_bacc_from_conf_mat(conf_mat_2d.values)
     title = f"{title} (bACC = {bacc_val:.3f})"
 
     res = sns.heatmap(
-        data,
+        conf_mat_2d,
         ax=axis,
         cmap=cmap,
         annot=True,
@@ -115,7 +115,7 @@ def plot_conf_mat(
         axis.set_yticklabels(y_labels)
 
     axis = scitex_plt_extend(axis, x_extend_ratio, y_extend_ratio)
-    if data.shape[0] == data.shape[1]:
+    if conf_mat_2d.shape[0] == conf_mat_2d.shape[1]:
         axis.set_box_aspect(1)
         axis.set_xticklabels(
             axis.get_xticklabels(),

@@ -20,7 +20,7 @@ from ....plt.utils import assert_valid_axis
 
 def plot_raster(
     ax,
-    event_times,
+    spike_times_list,
     time=None,
     labels=None,
     colors=None,
@@ -40,8 +40,8 @@ def plot_raster(
     ----------
     ax : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axes on which to draw the raster plot.
-    event_times : Array-like or list of lists
-        Time points of events by channels/trials
+    spike_times_list : list of array-like, shape (n_trials,) where each element is (n_spikes,)
+        List of spike/event time arrays, one per trial/channel
     time : array-like, optional
         The time indices for the events (default: np.linspace(0, max(event_times))).
     labels : list, optional
@@ -74,30 +74,30 @@ def plot_raster(
     """
     assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
 
-    # Format event_times data
-    event_times_list = _ensure_list(event_times)
+    # Format spike_times_list data
+    spike_times_list = _ensure_list(spike_times_list)
 
     # Handle colors and labels
-    colors = _handle_colors(colors, event_times_list)
+    colors = _handle_colors(colors, spike_times_list)
 
     # Handle lineoffsets for positioning between trials/channels
     if y_offset is None:
         y_offset = 1.0  # Default spacing
     if lineoffsets is None:
-        lineoffsets = np.arange(len(event_times_list)) * y_offset
+        lineoffsets = np.arange(len(spike_times_list)) * y_offset
 
     # Set linelengths to prevent overlap (80% of y_offset by default)
     if linelengths is None:
         linelengths = y_offset * 0.8
 
-    # Ensure lineoffsets is iterable and matches event_times_list length
+    # Ensure lineoffsets is iterable and matches spike_times_list length
     if np.isscalar(lineoffsets):
         lineoffsets = [lineoffsets]
-    if len(lineoffsets) < len(event_times_list):
-        lineoffsets = list(lineoffsets) + list(range(len(lineoffsets), len(event_times_list)))
+    if len(lineoffsets) < len(spike_times_list):
+        lineoffsets = list(lineoffsets) + list(range(len(lineoffsets), len(spike_times_list)))
 
-    # Plotting as eventplot using event_times_list with proper positioning
-    for ii, (pos, color, offset) in enumerate(zip(event_times_list, colors, lineoffsets)):
+    # Plotting as eventplot using spike_times_list with proper positioning
+    for ii, (pos, color, offset) in enumerate(zip(spike_times_list, colors, lineoffsets)):
         label = _define_label(labels, ii)
         ax.eventplot(pos, lineoffsets=offset, linelengths=linelengths,
                     orientation=orientation, colors=color, label=label, **kwargs)
@@ -105,10 +105,10 @@ def plot_raster(
     # Apply set_n_ticks for cleaner axes if requested
     if apply_set_n_ticks:
         from scitex.plt.ax._style._set_n_ticks import set_n_ticks
-        
+
         # For categorical y-axis (trials/channels), use appropriate tick count
         if n_yticks is None:
-            n_yticks = min(len(event_times_list), 8)  # Max 8 ticks for readability
+            n_yticks = min(len(spike_times_list), 8)  # Max 8 ticks for readability
         
         # Only apply if we have reasonable numeric ranges
         try:
@@ -131,10 +131,10 @@ def plot_raster(
     if labels is not None:
         ax.legend()
 
-    # Return event_times in a useful format
-    event_times_digital_df = _event_times_to_digital_df(event_times_list, time, lineoffsets)
+    # Return spike_times in a useful format
+    spike_times_digital_df = _event_times_to_digital_df(spike_times_list, time, lineoffsets)
 
-    return ax, event_times_digital_df
+    return ax, spike_times_digital_df
 
 
 def _ensure_list(event_times):
