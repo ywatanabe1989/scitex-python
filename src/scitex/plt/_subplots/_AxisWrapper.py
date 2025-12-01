@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-01 17:11:28 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_AxisWrapper.py
+# Timestamp: "2025-12-01 10:00:00 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_AxisWrapper.py
 # ----------------------------------------
 import os
 
@@ -21,6 +21,7 @@ from ._AxisWrapperMixins import (
     TrackingMixin,
     UnitAwareMixin,
 )
+from scitex.plt.styles import apply_plot_defaults, apply_plot_postprocess
 
 
 class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMixin, UnitAwareMixin):
@@ -93,12 +94,27 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
             if callable(orig_attr):
 
                 @wraps(orig_attr)
-                def wrapper(*args, **kwargs):
+                def wrapper(*args, __method_name__=name, **kwargs):
                     id_value = kwargs.pop("id", None)
                     track_override = kwargs.pop("track", None)
 
+                    # Apply pre-processing defaults from styles module
+                    apply_plot_defaults(__method_name__, kwargs, id_value, self._axes_mpl)
+
+                    # Pop scitex-specific kwargs before calling matplotlib
+                    # These are handled in post-processing
+                    scitex_kwargs = {}
+                    if __method_name__ == 'violinplot':
+                        scitex_kwargs['boxplot'] = kwargs.pop('boxplot', True)
+
                     # Call the original matplotlib method
                     result = orig_attr(*args, **kwargs)
+
+                    # Restore scitex kwargs for post-processing
+                    kwargs.update(scitex_kwargs)
+
+                    # Apply post-processing styling from styles module
+                    apply_plot_postprocess(__method_name__, result, self._axes_mpl, kwargs, args)
 
                     # Determine if tracking should occur
                     should_track = (
