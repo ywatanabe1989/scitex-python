@@ -13,65 +13,89 @@ import matplotlib.pyplot as plt
 
 def style_boxplot(
     boxplot_dict,
-    linewidth_mm: float = 0.8,
+    linewidth_mm: float = 0.2,
+    flier_size_mm: float = 0.8,
+    median_color: str = "black",
+    edge_color: str = "black",
     colors: Optional[list] = None,
     add_legend: bool = False,
     labels: Optional[list] = None,
 ):
-    """
-    Apply consistent styling to matplotlib boxplot elements.
+    """Apply publication-quality styling to matplotlib boxplot elements.
+
+    This function modifies boxplots to:
+    - Set consistent line widths for all elements
+    - Set median line to black for visibility
+    - Set edge colors to black
+    - Apply consistent outlier marker styling
 
     Parameters
     ----------
     boxplot_dict : dict
-        Dictionary returned by ax.boxplot()
-    linewidth_mm : float, optional
-        Line width in millimeters (default: 0.8mm for balanced appearance)
+        Dictionary returned by ax.boxplot().
+    linewidth_mm : float, default 0.2
+        Line width in millimeters for all elements.
+    flier_size_mm : float, default 0.8
+        Outlier (flier) marker size in millimeters.
+    median_color : str, default "black"
+        Color for the median line inside boxes.
+    edge_color : str, default "black"
+        Color for box edges, whiskers, and caps.
     colors : list, optional
-        List of colors for each box. If None, uses default matplotlib colors.
-    add_legend : bool, optional
-        Whether to add a legend (default: False)
+        List of colors for each box fill. If None, uses default matplotlib colors.
+    add_legend : bool, default False
+        Whether to add a legend.
     labels : list, optional
-        Labels for legend entries (required if add_legend=True)
+        Labels for legend entries (required if add_legend=True).
 
     Returns
     -------
     boxplot_dict : dict
-        The styled boxplot dictionary
+        The styled boxplot dictionary.
 
     Examples
     --------
-    >>> fig, ax = stx.plt.subplots(**stx.plt.presets.NATURE_STYLE)
+    >>> import scitex as stx
+    >>> import numpy as np
+    >>> fig, ax = stx.plt.subplots()
     >>> box_data = [np.random.normal(0, 1, 100) for _ in range(4)]
-    >>> bp = ax.boxplot(box_data)
-    >>> stx.ax.style_boxplot(bp, linewidth_mm=0.8, colors=['blue', 'red', 'green', 'orange'])
+    >>> bp = ax.boxplot(box_data, patch_artist=True)
+    >>> stx.plt.ax.style_boxplot(bp, median_color="black")
     """
     from scitex.plt.utils import mm_to_pt
 
     # Convert mm to points
     lw_pt = mm_to_pt(linewidth_mm)
+    flier_size_pt = mm_to_pt(flier_size_mm)
 
-    # Style box elements
-    for element_name in ['boxes', 'whiskers', 'caps', 'medians', 'fliers']:
+    # Style box elements with line width
+    for element_name in ['boxes', 'whiskers', 'caps']:
         if element_name in boxplot_dict:
             for element in boxplot_dict[element_name]:
                 element.set_linewidth(lw_pt)
+                element.set_color(edge_color)
 
-    # Apply colors if provided
+    # Style medians with specified color
+    if 'medians' in boxplot_dict:
+        for median in boxplot_dict['medians']:
+            median.set_linewidth(lw_pt)
+            median.set_color(median_color)
+
+    # Style fliers (outliers) with marker size
+    if 'fliers' in boxplot_dict:
+        for flier in boxplot_dict['fliers']:
+            flier.set_markersize(flier_size_pt)
+            flier.set_markeredgewidth(lw_pt)
+            flier.set_markeredgecolor(edge_color)
+            flier.set_markerfacecolor('none')  # Open circles
+
+    # Apply fill colors if provided
     if colors is not None:
-        n_boxes = len(boxplot_dict.get('boxes', []))
         for i, box in enumerate(boxplot_dict.get('boxes', [])):
             color = colors[i % len(colors)]
-            box.set_edgecolor(color)
-            # Also color the associated whiskers, caps, and median
-            if 'whiskers' in boxplot_dict:
-                boxplot_dict['whiskers'][i*2].set_color(color)
-                boxplot_dict['whiskers'][i*2+1].set_color(color)
-            if 'caps' in boxplot_dict:
-                boxplot_dict['caps'][i*2].set_color(color)
-                boxplot_dict['caps'][i*2+1].set_color(color)
-            if 'medians' in boxplot_dict and i < len(boxplot_dict['medians']):
-                boxplot_dict['medians'][i].set_color(color)
+            if hasattr(box, 'set_facecolor'):
+                box.set_facecolor(color)
+            box.set_edgecolor(edge_color)
 
     # Add legend if requested
     if add_legend and labels is not None:

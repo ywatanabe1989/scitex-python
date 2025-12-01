@@ -54,18 +54,33 @@ class SeabornMixin:
             
             try:
                 with warnings.catch_warnings():
-                    warnings.filterwarnings('ignore', 
+                    warnings.filterwarnings('ignore',
                                           message='.*categorical units.*parsable as floats or dates.*',
                                           category=UserWarning)
                     warnings.filterwarnings('ignore',
                                           message='.*Using categorical units.*',
                                           module='matplotlib.*')
                     warnings.simplefilter('ignore', UserWarning)
-                    
+
                     self._axis_mpl = sns_plot_fn(ax=self._axis_mpl, *args, **kwargs)
             finally:
                 # Restore original logging level
                 mpl_logger.setLevel(original_level)
+
+            # Post-processing: Set KDE line style for histplot with kde=True
+            if sns_method_name == 'histplot' and kwargs.get('kde', False):
+                from scitex.plt.utils import mm_to_pt
+                kde_lw = mm_to_pt(0.2)  # 0.2mm for KDE lines
+                # KDE lines are added as Line2D objects after the histogram
+                for line in self._axis_mpl.get_lines():
+                    line.set_linewidth(kde_lw)
+                    line.set_color('black')  # Black KDE line
+                    line.set_linestyle('--')  # Dashed line
+
+            # Post-processing: Set alpha to 1.0 for histplot bars if not specified
+            if sns_method_name == 'histplot' and 'alpha' not in kwargs:
+                for patch in self._axis_mpl.patches:
+                    patch.set_alpha(1.0)
 
         # Track the plot if required
         track_obj = track_obj if track_obj is not None else args
@@ -160,6 +175,27 @@ class SeabornMixin:
         self._sns_base_xyhue(
             "sns_boxplot", data=data, x=x, y=y, track=track, id=id, **kwargs
         )
+
+        # Post-processing: Style boxplot with black medians
+        from scitex.plt.utils import mm_to_pt
+        lw_pt = mm_to_pt(0.2)
+
+        # Find and style boxplot lines (medians are typically the lines inside boxes)
+        for line in self._axis_mpl.get_lines():
+            # Style all lines to have consistent width
+            line.set_linewidth(lw_pt)
+            # Medians in seaborn boxplots are colored by default
+            # Check if this is a median line (horizontal, short)
+            xdata = line.get_xdata()
+            ydata = line.get_ydata()
+            if len(xdata) == 2 and len(ydata) == 2:
+                # Horizontal line (median or whisker cap)
+                if ydata[0] == ydata[1]:
+                    x_span = abs(xdata[1] - xdata[0])
+                    # Medians have smaller span than whisker caps
+                    if x_span < 0.4:  # Typical median line span
+                        line.set_color('black')
+
         if strip:
             strip_kwargs = kwargs.copy()
             strip_kwargs.pop("notch", None)  # Remove boxplot-specific kwargs
@@ -280,8 +316,11 @@ class SeabornMixin:
         id=None,
         **kwargs,
     ):
-        if kwargs.get("hue"):
-            hues = data[kwargs["hue"]]
+        # Remove hue from kwargs before passing to plot_kde
+        hue_col = kwargs.pop("hue", None)
+
+        if hue_col:
+            hues = data[hue_col]
 
             if x is not None:
                 lim = xlim

@@ -17,6 +17,7 @@ def plot_rectangle(ax, xx, yy, ww, hh, **kwargs):
 
     Convenience function for adding rectangular patches to plots, useful for
     highlighting regions, creating box annotations, or drawing geometric shapes.
+    By default, rectangles have no edge (border) for cleaner publication figures.
 
     Parameters
     ----------
@@ -34,7 +35,7 @@ def plot_rectangle(ax, xx, yy, ww, hh, **kwargs):
         Additional keyword arguments passed to matplotlib.patches.Rectangle.
         Common options include:
         - facecolor/fc : fill color
-        - edgecolor/ec : edge color
+        - edgecolor/ec : edge color (default: 'none')
         - linewidth/lw : edge line width
         - alpha : transparency (0-1)
         - linestyle/ls : edge line style
@@ -48,20 +49,20 @@ def plot_rectangle(ax, xx, yy, ww, hh, **kwargs):
     --------
     >>> fig, ax = plt.subplots()
     >>> ax.plot([0, 10], [0, 10])
-    >>> # Highlight a region
+    >>> # Highlight a region (no border by default)
     >>> plot_rectangle(ax, 2, 3, 4, 3, facecolor='yellow', alpha=0.3)
 
-    >>> # Draw a box annotation
+    >>> # Draw a box with explicit edge
     >>> plot_rectangle(ax, 5, 5, 2, 2, facecolor='none', edgecolor='red', linewidth=2)
-
-    >>> # Create a filled rectangle
-    >>> plot_rectangle(ax, 0, 0, 1, 1, facecolor='blue', edgecolor='black')
 
     See Also
     --------
     matplotlib.patches.Rectangle : The underlying Rectangle class
     matplotlib.axes.Axes.add_patch : Method used to add the patch
     """
+    # Default to no edge for cleaner publication figures
+    if 'edgecolor' not in kwargs and 'ec' not in kwargs:
+        kwargs['edgecolor'] = 'none'
     ax.add_patch(Rectangle((xx, yy), ww, hh, **kwargs))
     return ax
 
