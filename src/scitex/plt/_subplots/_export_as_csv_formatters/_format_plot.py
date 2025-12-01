@@ -1,28 +1,49 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-18 18:14:26 (ywatanabe)"
-# File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_plot.py
-# ----------------------------------------
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+# Timestamp: "2025-12-01 13:30:00 (ywatanabe)"
+# File: ./src/scitex/plt/_subplots/_export_as_csv_formatters/_format_plot.py
+
+"""CSV formatter for matplotlib plot() calls."""
 
 from collections import OrderedDict
+from typing import Any, Dict, Optional
+
 import numpy as np
 import pandas as pd
 import xarray as xr
 
-def _format_plot(id, tracked_dict, kwargs):
-    """Format data from a plot call.
 
-    Args:
-        id (str): Identifier for the plot
-        tracked_dict (dict): Dictionary containing tracked data
-        kwargs (dict): Keyword arguments passed to plot
+def _format_plot(
+    id: str,
+    tracked_dict: Optional[Dict[str, Any]],
+    kwargs: Dict[str, Any],
+) -> pd.DataFrame:
+    """Format data from a plot() call for CSV export.
 
-    Returns:
-        pd.DataFrame: Formatted data from plot
+    Handles various input formats including:
+    - Pre-formatted plot_df from scitex wrappers
+    - Raw args from __getattr__ proxied matplotlib calls
+    - Single array: plot(y) generates x from indices
+    - Two arrays: plot(x, y)
+    - 2D arrays: creates multiple x/y column pairs
+
+    Parameters
+    ----------
+    id : str
+        Identifier prefix for the output columns (e.g., "ax_00").
+    tracked_dict : dict or None
+        Dictionary containing tracked data. May include:
+        - 'plot_df': Pre-formatted DataFrame from wrapper
+        - 'args': Raw positional arguments (x, y) from plot()
+    kwargs : dict
+        Keyword arguments passed to plot (currently unused).
+
+    Returns
+    -------
+    pd.DataFrame
+        Formatted data with columns prefixed by id.
+        For 1D data: {id}_plot_x, {id}_plot_y
+        For 2D data: {id}_plot_x00, {id}_plot_y00, {id}_plot_x01, ...
     """
     # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict or not isinstance(tracked_dict, dict):

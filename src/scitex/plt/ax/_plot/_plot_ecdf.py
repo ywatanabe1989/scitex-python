@@ -1,42 +1,59 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-01 20:17:59 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/ax/_plot/_plot_ecdf.py
-# ----------------------------------------
-import os
+# Timestamp: "2025-12-01 13:10:00 (ywatanabe)"
+# File: ./src/scitex/plt/ax/_plot/_plot_ecdf.py
 
-__FILE__ = "./src/scitex/plt/ax/_plot/_plot_ecdf.py"
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+"""Empirical Cumulative Distribution Function (ECDF) plotting."""
 
 import warnings
+from typing import Any, Tuple, Union
 
-import matplotlib
 import numpy as np
+import pandas as pd
+from matplotlib.axes import Axes
 
 from scitex.pd._force_df import force_df as scitex_pd_force_df
 from ....plt.utils import assert_valid_axis
 
 
-def plot_ecdf(axis, data, **kwargs):
+def plot_ecdf(
+    axis: Union[Axes, "AxisWrapper"],
+    data: np.ndarray,
+    **kwargs: Any,
+) -> Tuple[Union[Axes, "AxisWrapper"], pd.DataFrame]:
     """Plot Empirical Cumulative Distribution Function (ECDF).
 
-    The ECDF shows the proportion of data points less than or equal to each value,
-    representing the empirical estimate of the cumulative distribution function.
+    The ECDF shows the proportion of data points less than or equal to each
+    value, representing the empirical estimate of the cumulative distribution
+    function.
 
     Parameters
     ----------
-    axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
-        Matplotlib axis or scitex axis wrapper to plot on
+    axis : matplotlib.axes.Axes or AxisWrapper
+        Matplotlib axis or scitex axis wrapper to plot on.
     data : array-like
-        Data to compute and plot ECDF for. NaN values are ignored.
+        Data to compute and plot ECDF for. NaN values are automatically ignored.
     **kwargs : dict
-        Additional arguments to pass to plot function
+        Additional arguments passed to plot function.
 
     Returns
     -------
-    tuple
-        (axis, DataFrame) containing the plot and data
+    axis : matplotlib.axes.Axes or AxisWrapper
+        The axes with the ECDF plot.
+    df : pd.DataFrame
+        DataFrame containing ECDF data with columns:
+        - x: sorted data values
+        - y: cumulative percentages (0-100)
+        - n: total number of data points
+        - x_step, y_step: step plot coordinates
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import scitex as stx
+    >>> data = np.random.randn(100)
+    >>> fig, ax = stx.plt.subplots()
+    >>> ax, df = stx.plt.ax.plot_ecdf(ax, data)
     """
     assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
 
