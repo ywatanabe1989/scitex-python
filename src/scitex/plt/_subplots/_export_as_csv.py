@@ -133,7 +133,7 @@ _FORMATTER_REGISTRY = {
     "stx_scatter_hist": _format_plot_scatter_hist,
     "stx_shaded_line": _format_plot_shaded_line,
     "stx_violin": _format_plot_violin,
-    # Seaborn methods
+    # Seaborn methods (sns_ prefix)
     "sns_barplot": _format_sns_barplot,
     "sns_boxplot": _format_sns_boxplot,
     "sns_heatmap": _format_sns_heatmap,
@@ -349,7 +349,7 @@ def format_record(record):
     elif method == "stx_violin":
         return _format_plot_violin(id, tracked_dict, kwargs)
 
-    # Seaborn functions
+    # Seaborn functions (sns_ prefix)
     elif method == "sns_barplot":
         return _format_sns_barplot(id, tracked_dict, kwargs)
     elif method == "sns_boxplot":

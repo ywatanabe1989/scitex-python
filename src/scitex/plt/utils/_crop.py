@@ -42,21 +42,35 @@ def find_content_area(image_path: str) -> Tuple[int, int, int, int]:
     img_array = np.array(img)
 
     # Check if image has alpha channel (RGBA)
-    if img_array.shape[2] == 4:
+    if len(img_array.shape) == 3 and img_array.shape[2] == 4:
         # Use alpha channel to find content (non-transparent pixels)
         alpha = img_array[:, :, 3]
         # Find non-transparent pixels
         rows = np.any(alpha > 0, axis=1)
         cols = np.any(alpha > 0, axis=0)
     else:
-        # For RGB images, find non-white pixels
-        # Consider pixels as content if they differ from white background
+        # For RGB images, detect background color from corners and find non-background pixels
         if len(img_array.shape) == 3:
-            # Check if pixel is not white (255, 255, 255)
-            is_content = np.any(img_array < 250, axis=2)
+            # Sample background color from corners (more robust than assuming white)
+            h, w = img_array.shape[:2]
+            corners = [
+                img_array[0, 0],           # top-left
+                img_array[0, w-1],         # top-right
+                img_array[h-1, 0],         # bottom-left
+                img_array[h-1, w-1],       # bottom-right
+            ]
+            # Use median of corners as background color (robust to one corner having content)
+            bg_color = np.median(corners, axis=0).astype(np.uint8)
+
+            # Find pixels that differ significantly from background (threshold: 10 per channel)
+            diff = np.abs(img_array.astype(np.int16) - bg_color.astype(np.int16))
+            is_content = np.any(diff > 10, axis=2)
         else:
-            # Grayscale: check if not white
-            is_content = img_array < 250
+            # Grayscale: detect background from corners
+            h, w = img_array.shape
+            corners = [img_array[0, 0], img_array[0, w-1], img_array[h-1, 0], img_array[h-1, w-1]]
+            bg_value = np.median(corners)
+            is_content = np.abs(img_array.astype(np.int16) - bg_value) > 10
 
         rows = np.any(is_content, axis=1)
         cols = np.any(is_content, axis=0)

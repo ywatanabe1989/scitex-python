@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 09:55:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers.py
+# Timestamp: "2025-12-01 20:47:26 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/examples/plt/demo_scitex_wrappers.py
+
 
 """Demo: SciTeX custom wrapper methods (ax.plot_xxx)."""
 
 # Imports
 import scitex as stx
-from scitex.plt.presets import SCITEX_STYLE
+from scitex.plt.styles.presets import SCITEX_STYLE
 
 from demo_scitex_wrappers import demo_plot_line
 from demo_scitex_wrappers import demo_plot_shaded_line

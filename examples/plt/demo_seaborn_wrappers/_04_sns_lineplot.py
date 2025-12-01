@@ -20,7 +20,7 @@ def demo_sns_lineplot(fig, ax, stx):
 
     ax.sns_lineplot(x="x", y="y", hue="group", data=df, id="sns_line")
 
-    ax.set_xyt( x="Time [s]", y="Signal [a.u.]", t="Line Plot with CI")
+    ax.set_xyt( x="Time [s]", y="Signal [a.u.]", t="ax.sns_lineplot(x, y, hue, data)")
     ax.legend(frameon=False, title="", fontsize=6)
 
     return fig, ax

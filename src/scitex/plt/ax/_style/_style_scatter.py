@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-11-19 15:00:00 (ywatanabe)"
+# Timestamp: "2025-12-01 20:00:00 (ywatanabe)"
 # File: ./src/scitex/plt/ax/_style/_style_scatter.py
 
 """
 Style scatter plot elements with millimeter-based control.
+
+Default values are loaded from SCITEX_STYLE.yaml via presets.py.
 """
 
 from typing import Optional
 
+from scitex.plt.styles.presets import SCITEX_STYLE
+
+# Get defaults from centralized config
+_DEFAULT_SIZE_MM = SCITEX_STYLE.get("scatter_size_mm", 0.8)
+_DEFAULT_EDGE_THICKNESS_MM = SCITEX_STYLE.get("marker_edge_width_mm", 0.0)
+
 
 def style_scatter(
     path_collection,
-    size_mm: float = 0.8,
-    edge_thickness_mm: float = 0.0,
+    size_mm: float = None,
+    edge_thickness_mm: float = None,
 ):
     """
     Apply consistent styling to matplotlib scatter plot elements.
@@ -45,6 +53,12 @@ def style_scatter(
     By default, no border is applied (edge_thickness_mm=0).
     """
     from scitex.plt.utils import mm_to_pt
+
+    # Use centralized defaults if not specified
+    if size_mm is None:
+        size_mm = _DEFAULT_SIZE_MM
+    if edge_thickness_mm is None:
+        edge_thickness_mm = _DEFAULT_EDGE_THICKNESS_MM
 
     # Convert mm to points
     size_pt = mm_to_pt(size_mm)

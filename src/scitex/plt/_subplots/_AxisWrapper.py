@@ -117,6 +117,27 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
                         # Call the original matplotlib method
                         result = orig_attr(*args, **kwargs)
 
+                        # Store the scitex id on the result for later retrieval
+                        # This is used by _collect_figure_metadata to map traces to CSV columns
+                        if id_value is not None:
+                            if isinstance(result, list):
+                                # plot() returns list of Line2D objects
+                                for item in result:
+                                    item._scitex_id = id_value
+                            elif hasattr(result, '__iter__') and not isinstance(result, str):
+                                # Other containers (e.g., bar containers)
+                                try:
+                                    for item in result:
+                                        item._scitex_id = id_value
+                                except (TypeError, AttributeError):
+                                    pass
+                            else:
+                                # Single object
+                                try:
+                                    result._scitex_id = id_value
+                                except AttributeError:
+                                    pass
+
                         # Restore scitex kwargs for post-processing
                         kwargs.update(scitex_kwargs)
 

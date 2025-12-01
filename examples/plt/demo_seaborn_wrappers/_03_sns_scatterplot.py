@@ -28,7 +28,7 @@ def demo_sns_scatterplot(fig, ax, stx):
     ax.text(0.05, 0.95, stats_result.format_text("compact"),
             transform=ax.transAxes, ha="left", va="top", fontsize=5)
 
-    ax.set_xyt( x="X [a.u.]", y="Y [a.u.]", t="Scatter with Pearson Correlation")
+    ax.set_xyt( x="X [a.u.]", y="Y [a.u.]", t="ax.sns_scatterplot(x, y, hue, data)")
     ax.legend(frameon=False, title="", fontsize=6)
 
     return fig, ax

@@ -57,7 +57,7 @@ from ._format_stx_scatter_hist import _format_plot_scatter_hist
 from ._format_stx_shaded_line import _format_plot_shaded_line
 from ._format_stx_violin import _format_plot_violin
 
-# Seaborn formatters
+# Seaborn formatters (sns_ prefix)
 from ._format_sns_barplot import _format_sns_barplot
 from ._format_sns_boxplot import _format_sns_boxplot
 from ._format_sns_heatmap import _format_sns_heatmap

@@ -7,18 +7,64 @@
 
 This module centralizes all default styling applied BEFORE matplotlib
 methods are called. Each function modifies kwargs in-place.
+
+Priority: direct kwarg → env var → YAML config → default
+
+Style values use the key format from YAML (e.g., 'lines.trace_mm').
+Env vars: SCITEX_PLT_LINES_TRACE_MM (prefix + dots→underscores + uppercase)
 """
 
 from scitex.plt.utils import mm_to_pt
+from scitex.plt.styles.presets import resolve_style_value
+
+# Default alpha for fill regions (0.3 = semi-transparent)
+DEFAULT_FILL_ALPHA = 0.3
 
 
 # ============================================================================
-# Constants
+# Style helper function
 # ============================================================================
-DEFAULT_LINE_WIDTH_MM = 0.2
-DEFAULT_MARKER_SIZE_MM = 0.8
-DEFAULT_CAP_SIZE_MM = 0.8
-DEFAULT_FILL_ALPHA = 1.0  # Solid fill for publication figures
+def _get_style_value(key, default, style_dict=None):
+    """Get style value with priority: style_dict → active_style → env → yaml → default.
+
+    Args:
+        key: YAML-style key (e.g., 'lines.trace_mm')
+        default: Fallback default value
+        style_dict: Optional user-provided style dict (overrides all)
+
+    Returns:
+        Resolved style value
+    """
+    flat_key = _yaml_key_to_flat(key)
+
+    # Priority 1: User passed explicit style dict
+    if style_dict is not None and flat_key in style_dict:
+        return style_dict[flat_key]
+
+    # Priority 2: Check active style set via set_style()
+    from scitex.plt.styles.presets import _active_style
+    if _active_style is not None and flat_key in _active_style:
+        return _active_style[flat_key]
+
+    # Priority 3: Use resolve_style_value for: env → yaml → default
+    return resolve_style_value(key, None, default)
+
+
+def _yaml_key_to_flat(key):
+    """Convert YAML key to flat SCITEX_STYLE key.
+
+    Examples:
+        'lines.trace_mm' -> 'trace_thickness_mm'
+        'markers.size_mm' -> 'marker_size_mm'
+    """
+    # Mapping from YAML keys to flat keys used in SCITEX_STYLE
+    mapping = {
+        'lines.trace_mm': 'trace_thickness_mm',
+        'lines.errorbar_mm': 'errorbar_thickness_mm',
+        'lines.errorbar_cap_mm': 'errorbar_cap_width_mm',
+        'markers.size_mm': 'marker_size_mm',
+    }
+    return mapping.get(key, key)
 
 
 # ============================================================================
@@ -35,18 +81,25 @@ def apply_plot_defaults(method_name, kwargs, id_value=None, ax=None):
 
     Returns:
         Modified kwargs dict
+
+    Note:
+        Priority: direct kwarg → style dict → env var → yaml → default
+        Users can pass `style=dict` kwarg to override env/yaml defaults.
     """
+    # Extract optional style dict (removes 'style' key from kwargs)
+    style_dict = kwargs.pop("style", None)
+
     # Dispatch to method-specific defaults
     if method_name == 'plot':
-        _apply_plot_line_defaults(kwargs, id_value)
+        _apply_plot_line_defaults(kwargs, id_value, style_dict)
     elif method_name in ('bar', 'barh'):
-        _apply_bar_defaults(kwargs)
+        _apply_bar_defaults(kwargs, style_dict)
     elif method_name == 'errorbar':
-        _apply_errorbar_defaults(kwargs)
+        _apply_errorbar_defaults(kwargs, style_dict)
     elif method_name in ('fill_between', 'fill_betweenx'):
         _apply_fill_defaults(kwargs)
     elif method_name in ('quiver', 'streamplot'):
-        _apply_vector_field_defaults(method_name, kwargs, ax)
+        _apply_vector_field_defaults(method_name, kwargs, ax, style_dict)
     elif method_name == 'boxplot':
         _apply_boxplot_defaults(kwargs)
     elif method_name == 'violinplot':
@@ -55,11 +108,13 @@ def apply_plot_defaults(method_name, kwargs, id_value=None, ax=None):
     return kwargs
 
 
-def _apply_plot_line_defaults(kwargs, id_value=None):
+def _apply_plot_line_defaults(kwargs, id_value=None, style_dict=None):
     """Apply defaults for ax.plot() method."""
-    # Default line width: 0.2mm
+    line_width_mm = _get_style_value('lines.trace_mm', 0.2, style_dict)
+
+    # Default line width
     if 'linewidth' not in kwargs and 'lw' not in kwargs:
-        kwargs['linewidth'] = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+        kwargs['linewidth'] = mm_to_pt(line_width_mm)
 
     # KDE-specific styling when id contains "kde"
     if id_value and 'kde' in str(id_value).lower():
@@ -69,28 +124,33 @@ def _apply_plot_line_defaults(kwargs, id_value=None):
             kwargs['color'] = 'black'
 
 
-def _apply_bar_defaults(kwargs):
+def _apply_bar_defaults(kwargs, style_dict=None):
     """Apply defaults for ax.bar() and ax.barh() methods."""
-    # Set error bar line thickness to 0.2mm
+    line_width_mm = _get_style_value('lines.trace_mm', 0.2, style_dict)
+
+    # Set error bar line thickness
     if 'error_kw' not in kwargs:
         kwargs['error_kw'] = {}
     if 'elinewidth' not in kwargs.get('error_kw', {}):
-        kwargs['error_kw']['elinewidth'] = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+        kwargs['error_kw']['elinewidth'] = mm_to_pt(line_width_mm)
     if 'capthick' not in kwargs.get('error_kw', {}):
-        kwargs['error_kw']['capthick'] = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+        kwargs['error_kw']['capthick'] = mm_to_pt(line_width_mm)
     # Set a temporary capsize that will be adjusted in post-processing
     if 'capsize' not in kwargs:
         kwargs['capsize'] = 5  # Placeholder, adjusted later to 33% of bar width
 
 
-def _apply_errorbar_defaults(kwargs):
+def _apply_errorbar_defaults(kwargs, style_dict=None):
     """Apply defaults for ax.errorbar() method."""
+    line_width_mm = _get_style_value('lines.trace_mm', 0.2, style_dict)
+    cap_size_mm = _get_style_value('lines.errorbar_cap_mm', 0.8, style_dict)
+
     if 'capsize' not in kwargs:
-        kwargs['capsize'] = mm_to_pt(DEFAULT_CAP_SIZE_MM)
+        kwargs['capsize'] = mm_to_pt(cap_size_mm)
     if 'capthick' not in kwargs:
-        kwargs['capthick'] = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+        kwargs['capthick'] = mm_to_pt(line_width_mm)
     if 'elinewidth' not in kwargs:
-        kwargs['elinewidth'] = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+        kwargs['elinewidth'] = mm_to_pt(line_width_mm)
 
 
 def _apply_fill_defaults(kwargs):
@@ -99,18 +159,21 @@ def _apply_fill_defaults(kwargs):
         kwargs['alpha'] = DEFAULT_FILL_ALPHA  # Transparent to see overlapping data
 
 
-def _apply_vector_field_defaults(method_name, kwargs, ax):
+def _apply_vector_field_defaults(method_name, kwargs, ax, style_dict=None):
     """Apply defaults for ax.quiver() and ax.streamplot() methods."""
+    line_width_mm = _get_style_value('lines.trace_mm', 0.2, style_dict)
+    marker_size_mm = _get_style_value('markers.size_mm', 0.8, style_dict)
+
     # Set equal aspect ratio for proper vector display
     if ax is not None:
         ax.set_aspect('equal', adjustable='datalim')
 
     if method_name == 'streamplot':
         if 'arrowsize' not in kwargs:
-            # arrowsize is a scaling factor; 0.8mm ~ 2.27pt, scale relative to default
-            kwargs['arrowsize'] = mm_to_pt(DEFAULT_MARKER_SIZE_MM) / 3
+            # arrowsize is a scaling factor; scale relative to default
+            kwargs['arrowsize'] = mm_to_pt(marker_size_mm) / 3
         if 'linewidth' not in kwargs:
-            kwargs['linewidth'] = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+            kwargs['linewidth'] = mm_to_pt(line_width_mm)
 
     elif method_name == 'quiver':
         if 'width' not in kwargs:

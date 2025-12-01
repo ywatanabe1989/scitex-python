@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 09:45:00 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/demo_matplotlib_basic/_01_plot.py
+# Timestamp: "2025-12-01 20:06:03 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/examples/plt/demo_matplotlib_basic/_01_plot.py
+
 
 """ax.plot() - Basic line plot."""
 
@@ -18,6 +19,5 @@ def demo_plot(fig, ax, stx):
     ax.legend(frameon=False, fontsize=6)
 
     return fig, ax
-
 
 # EOF

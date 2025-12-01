@@ -43,7 +43,7 @@ def demo_sns_violinplot(fig, ax, stx):
     stats_text = f"Kruskal: H = {h_stat:.2f}, {format_pvalue(p_val)}"
     ax.text(0.95, 0.95, stats_text, transform=ax.transAxes, ha="right", va="top", fontsize=5)
 
-    ax.set_xyt( x="Category", y="Value [a.u.]", t="Violin Plot with Kruskal-Wallis")
+    ax.set_xyt( x="Category", y="Value [a.u.]", t="ax.sns_violinplot(x, y, data)")
 
     return fig, ax
 
