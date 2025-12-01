@@ -227,12 +227,50 @@ def _mpl_heatmap(
     return im, cbar
 
 
+def _calc_annot_fontsize(n_rows: int, n_cols: int) -> float:
+    """Calculate dynamic annotation font size based on cell count.
+
+    Uses a base size of 6pt for small heatmaps and scales down for larger ones.
+
+    Parameters
+    ----------
+    n_rows : int
+        Number of rows in the heatmap.
+    n_cols : int
+        Number of columns in the heatmap.
+
+    Returns
+    -------
+    float
+        Font size in points.
+    """
+    # Base font size for small heatmaps (e.g., 5x5)
+    BASE_FONTSIZE = 6.0
+    BASE_CELLS = 5  # Reference dimension
+
+    # Use the larger dimension to scale
+    max_dim = max(n_rows, n_cols)
+
+    if max_dim <= BASE_CELLS:
+        return BASE_FONTSIZE
+    elif max_dim <= 10:
+        # Linear interpolation: 6pt at 5 cells, 5pt at 10 cells
+        return BASE_FONTSIZE - (max_dim - BASE_CELLS) * 0.2
+    elif max_dim <= 20:
+        # 5pt at 10 cells, 4pt at 20 cells
+        return 5.0 - (max_dim - 10) * 0.1
+    else:
+        # Minimum 3pt for very large heatmaps
+        return max(3.0, 4.0 - (max_dim - 20) * 0.05)
+
+
 def _mpl_annotate_heatmap(
     im: AxesImage,
     data: Optional[np.ndarray] = None,
     valfmt: str = "{x:.2f}",
     textcolors: Tuple[str, str] = ("lightgray", "black"),
     threshold: Optional[float] = None,
+    fontsize: Optional[float] = None,
     **textkw: Any,
 ) -> List:
     """Annotate a heatmap with cell values.
@@ -251,6 +289,9 @@ def _mpl_annotate_heatmap(
     threshold : float, optional
         Value in normalized colormap space (0 to 1) above which the
         second color is used. If None, uses 0.7 * max(data).
+    fontsize : float, optional
+        Font size in points. If None, dynamically calculated based on
+        cell count (6pt base, scaling down for larger heatmaps).
     **textkw : dict
         Additional keyword arguments passed to ax.text().
 
@@ -263,6 +304,10 @@ def _mpl_annotate_heatmap(
     if not isinstance(data, (list, np.ndarray)):
         data = im.get_array()
 
+    # Calculate dynamic font size if not specified
+    if fontsize is None:
+        fontsize = _calc_annot_fontsize(data.shape[0], data.shape[1])
+
     # Normalize the threshold to the images color range.
     if threshold is not None:
         threshold = im.norm(threshold)
@@ -272,7 +317,7 @@ def _mpl_annotate_heatmap(
 
     # Set default alignment to center, but allow it to be
     # overwritten by textkw.
-    kw = dict(horizontalalignment="center", verticalalignment="center")
+    kw = dict(horizontalalignment="center", verticalalignment="center", fontsize=fontsize)
     kw.update(textkw)
 
     # Get the formatter in case a string is supplied
