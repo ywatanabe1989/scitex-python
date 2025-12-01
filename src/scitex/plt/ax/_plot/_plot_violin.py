@@ -19,7 +19,7 @@ from ....plt.utils import assert_valid_axis
 
 def plot_violin(
     ax,
-    data_list,
+    values_list,
     labels=None,
     colors=None,
     half=False,
@@ -32,10 +32,10 @@ def plot_violin(
     ----------
     ax : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axes to plot on
-    data_list : list
-        List of arrays to plot as violins
+    values_list : list of array-like, shape (n_groups,) where each element is (n_samples,)
+        List of 1D arrays to plot as violins, one per group
     labels : list, optional
-        Labels for each array in data_list
+        Labels for each array in values_list
     colors : list, optional
         Colors for each violin
     half : bool, optional
@@ -52,7 +52,7 @@ def plot_violin(
     all_values = []
     all_groups = []
 
-    for idx, values in enumerate(data_list):
+    for idx, values in enumerate(values_list):
         all_values.extend(values)
         group_label = labels[idx] if labels and idx < len(labels) else f"x {idx}"
         all_groups.extend([group_label] * len(values))

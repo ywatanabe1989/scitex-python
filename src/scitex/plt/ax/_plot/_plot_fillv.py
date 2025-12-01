@@ -14,7 +14,7 @@ import numpy as np
 from ....plt.utils import assert_valid_axis
 
 
-def plot_fillv(axes, starts, ends, color="red", alpha=0.2):
+def plot_fillv(axes, starts_1d, ends_1d, color="red", alpha=0.2):
     """
     Fill between specified start and end intervals on an axis or array of axes.
 
@@ -22,10 +22,10 @@ def plot_fillv(axes, starts, ends, color="red", alpha=0.2):
     ----------
     axes : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper or numpy.ndarray of axes
         The axis object(s) to fill intervals on.
-    starts : array-like
-        Array-like of start positions.
-    ends : array-like
-        Array-like of end positions.
+    starts_1d : array-like, shape (n_regions,)
+        1D array of start x-positions for vertical fill regions.
+    ends_1d : array-like, shape (n_regions,)
+        1D array of end x-positions for vertical fill regions.
     color : str, optional
         The color to use for the filled regions. Default is "red".
     alpha : float, optional
@@ -43,7 +43,7 @@ def plot_fillv(axes, starts, ends, color="red", alpha=0.2):
 
     for ax in axes:
         assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
-        for start, end in zip(starts, ends):
+        for start, end in zip(starts_1d, ends_1d):
             ax.axvspan(start, end, facecolor=color, edgecolor='none', alpha=alpha)
 
     if not is_axes:

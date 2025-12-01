@@ -3,25 +3,25 @@
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_19_plot_heatmap.py
 
-"""ax.plot_heatmap(data, x_labels, y_labels) - Heatmap with annotations."""
+"""ax.plot_heatmap(values_2d) - Heatmap with annotations."""
 
 import numpy as np
 
 
 def demo_plot_heatmap(fig, ax, stx):
-    """ax.plot_heatmap(data, x_labels, y_labels) - Heatmap with annotations."""
+    """ax.plot_heatmap(values_2d) - Heatmap with annotations."""
     np.random.seed(42)
-    data = np.random.rand(5, 5)  # Square matrix for cleaner display
+    values_2d = np.random.rand(5, 5)  # Square matrix for cleaner display
     labels = ["A", "B", "C", "D", "E"]
 
     ax.plot_heatmap(
-        data,
+        values_2d,
         x_labels=labels,
         y_labels=labels,
         id="heatmap",
     )
 
-    ax.set_xyt(t="ax.plot_heatmap(data, x_labels, y_labels)")
+    ax.set_xyt(t="ax.plot_heatmap(values_2d)")
 
     return fig, ax
 

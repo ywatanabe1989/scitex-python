@@ -3,19 +3,19 @@
 # Timestamp: "2025-12-01 09:50:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/examples/demo_scitex_wrappers/_01_plot_line.py
 
-"""ax.plot_line(y) - Simple line plot wrapper."""
+"""ax.plot_line(values_1d) - Simple line plot wrapper."""
 
 import numpy as np
 
 
 def demo_plot_line(fig, ax, stx):
-    """ax.plot_line(y) - Simple line plot wrapper."""
+    """ax.plot_line(values_1d) - Simple line plot wrapper."""
     np.random.seed(42)
-    y = np.sin(np.linspace(0, 4 * np.pi, 100)) + np.random.normal(0, 0.1, 100)
+    values_1d = np.sin(np.linspace(0, 4 * np.pi, 100)) + np.random.normal(0, 0.1, 100)
 
-    ax.plot_line(y, id="line")
+    ax.plot_line(values_1d, id="line")
 
-    ax.set_xyt(x="Sample", y="Amplitude [a.u.]", t="ax.plot_line(y)")
+    ax.set_xyt(x="Sample", y="Amplitude [a.u.]", t="ax.plot_line(values_1d)")
 
     return fig, ax
 

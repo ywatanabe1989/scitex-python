@@ -82,7 +82,7 @@ class MatplotlibPlotMixin:
 
     def plot_kde(
         self,
-        data: ArrayLike,
+        values_1d: ArrayLike,
         cumulative=False,
         fill=False,
         track: bool = True,
@@ -93,20 +93,20 @@ class MatplotlibPlotMixin:
         method_name = "plot_kde"
 
         # Sample count as label
-        n_samples = (~np.isnan(data)).sum()
+        n_samples = (~np.isnan(values_1d)).sum()
         if kwargs.get("label"):
             kwargs["label"] = f"{kwargs['label']} (n={n_samples})"
 
         # Xlim (kwargs["xlim"] is not accepted in downstream plotters)
         xlim = kwargs.pop("xlim", None)
         if not xlim:
-            xlim = (np.nanmin(data), np.nanmax(data))
+            xlim = (np.nanmin(values_1d), np.nanmax(values_1d))
 
         # X
         xx = np.linspace(xlim[0], xlim[1], int(1e3))
 
         # Y
-        density = gaussian_kde(data)(xx)
+        density = gaussian_kde(values_1d)(xx)
         density /= density.sum()
 
         # Cumulative
@@ -160,7 +160,7 @@ class MatplotlibPlotMixin:
 
     def plot_conf_mat(
         self,
-        data: ArrayLike,
+        conf_mat_2d: ArrayLike,
         x_labels: Optional[List[str]] = None,
         y_labels: Optional[List[str]] = None,
         title: str = "Confusion Matrix",
@@ -182,7 +182,7 @@ class MatplotlibPlotMixin:
         with self._no_tracking():
             self._axis_mpl, bacc_val = self._get_ax_module().plot_conf_mat(
                 self._axis_mpl,
-                data,
+                conf_mat_2d,
                 x_labels=x_labels,
                 y_labels=y_labels,
                 title=title,
@@ -237,8 +237,8 @@ class MatplotlibPlotMixin:
     # @wraps removed to avoid circular import
     def plot_fillv(
         self,
-        starts: ArrayLike,
-        ends: ArrayLike,
+        starts_1d: ArrayLike,
+        ends_1d: ArrayLike,
         color: str = "red",
         alpha: float = 0.2,
         track: bool = True,
@@ -251,11 +251,11 @@ class MatplotlibPlotMixin:
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
             self._axis_mpl = self._get_ax_module().plot_fillv(
-                self._axis_mpl, starts, ends, color=color, alpha=alpha
+                self._axis_mpl, starts_1d, ends_1d, color=color, alpha=alpha
             )
 
         # Tracking
-        tracked_dict = {"starts": starts, "ends": ends}
+        tracked_dict = {"starts": starts_1d, "ends": ends_1d}
         self._track(track, id, method_name, tracked_dict, None)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -265,7 +265,7 @@ class MatplotlibPlotMixin:
 
     def plot_box(
         self,
-        data: ArrayLike,
+        values_list: ArrayLike,
         colors: Optional[List] = None,
         track: bool = True,
         id: Optional[str] = None,
@@ -275,10 +275,10 @@ class MatplotlibPlotMixin:
         method_name = "plot_box"
 
         # Copy data
-        _data = data.copy()
+        _data = values_list.copy()
 
         # Sample count as label
-        n = len(data)
+        n = len(values_list)
         if kwargs.get("label"):
             kwargs["label"] = kwargs["label"] + f" (n={n})"
 
@@ -288,12 +288,12 @@ class MatplotlibPlotMixin:
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            result = self._axis_mpl.boxplot(data, **kwargs)
+            result = self._axis_mpl.boxplot(values_list, **kwargs)
 
         # Tracking
         tracked_dict = {
             "data": _data,
-            "n": [n for ii in range(len(data))],
+            "n": [n for ii in range(len(values_list))],
         }
         self._track(track, id, method_name, tracked_dict, None)
 
@@ -373,7 +373,7 @@ class MatplotlibPlotMixin:
     # @wraps removed to avoid circular import
     def plot_raster(
         self,
-        positions: List[ArrayLike],
+        spike_times_list: List[ArrayLike],
         time: Optional[ArrayLike] = None,
         labels: Optional[List[str]] = None,
         colors: Optional[List[str]] = None,
@@ -387,7 +387,7 @@ class MatplotlibPlotMixin:
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
             self._axis_mpl, raster_digit_df = self._get_ax_module().plot_raster(
-                self._axis_mpl, positions, time=time
+                self._axis_mpl, spike_times_list, time=time
             )
 
         # Tracking
@@ -402,7 +402,7 @@ class MatplotlibPlotMixin:
     # @wraps removed to avoid circular import
     def plot_ecdf(
         self,
-        data: ArrayLike,
+        values_1d: ArrayLike,
         track: bool = True,
         id: Optional[str] = None,
         **kwargs,
@@ -413,7 +413,7 @@ class MatplotlibPlotMixin:
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
             self._axis_mpl, ecdf_df = self._get_ax_module().plot_ecdf(
-                self._axis_mpl, data, **kwargs
+                self._axis_mpl, values_1d, **kwargs
             )
 
         # Tracking
@@ -508,7 +508,7 @@ class MatplotlibPlotMixin:
     # @wraps removed to avoid circular import
     def plot_heatmap(
         self,
-        data: ArrayLike,
+        values_2d: ArrayLike,
         x_labels: Optional[List[str]] = None,
         y_labels: Optional[List[str]] = None,
         cmap: str = "viridis",
@@ -529,7 +529,7 @@ class MatplotlibPlotMixin:
         with self._no_tracking():
             ax, im, cbar = self._get_ax_module().plot_heatmap(
                 self._axis_mpl,
-                data,
+                values_2d,
                 x_labels=x_labels,
                 y_labels=y_labels,
                 cmap=cmap,
@@ -543,7 +543,7 @@ class MatplotlibPlotMixin:
 
         # Tracking
         tracked_dict = {
-            "data": data,
+            "data": values_2d,
             "x_labels": x_labels,
             "y_labels": y_labels,
         }
@@ -557,7 +557,7 @@ class MatplotlibPlotMixin:
     # @wraps removed to avoid circular import
     def plot_violin(
         self,
-        data: Union[pd.DataFrame, List, ArrayLike],
+        values_list: Union[pd.DataFrame, List, ArrayLike],
         x=None,
         y=None,
         hue=None,
@@ -575,12 +575,12 @@ class MatplotlibPlotMixin:
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
             # Handle the list-style input case
-            if isinstance(data, list) and all(
-                isinstance(item, (list, np.ndarray)) for item in data
+            if isinstance(values_list, list) and all(
+                isinstance(item, (list, np.ndarray)) for item in values_list
             ):
                 self._axis_mpl = self._get_ax_module().plot_violin(
                     self._axis_mpl,
-                    data_list=data,
+                    values_list=values_list,
                     labels=labels,
                     colors=colors,
                     half=half,
@@ -590,7 +590,7 @@ class MatplotlibPlotMixin:
             else:
                 self._axis_mpl = self._get_ax_module().plot_violin(
                     self._axis_mpl,
-                    data=data,
+                    data=values_list,
                     x=x,
                     y=y,
                     hue=hue,
@@ -600,7 +600,7 @@ class MatplotlibPlotMixin:
 
         # Tracking
         tracked_dict = {
-            "data": data,
+            "data": values_list,
             "x": x,
             "y": y,
             "hue": hue,
@@ -820,7 +820,7 @@ class MatplotlibPlotMixin:
     # @wraps removed to avoid circular import
     def plot_line(
         self,
-        data: ArrayLike,
+        values_1d: ArrayLike,
         xx: Optional[ArrayLike] = None,
         track: bool = True,
         id: Optional[str] = None,
@@ -833,7 +833,7 @@ class MatplotlibPlotMixin:
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
             self._axis_mpl, plot_df = self._get_ax_module().plot_line(
-                self._axis_mpl, data, xx=xx, **kwargs
+                self._axis_mpl, values_1d, xx=xx, **kwargs
             )
 
         # Tracking
@@ -848,7 +848,7 @@ class MatplotlibPlotMixin:
     # @wraps removed to avoid circular import
     def plot_mean_std(
         self,
-        data: ArrayLike,
+        values_2d: ArrayLike,
         xx: Optional[ArrayLike] = None,
         sd: float = 1,
         track: bool = True,
@@ -862,7 +862,7 @@ class MatplotlibPlotMixin:
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
             self._axis_mpl, plot_df = self._get_ax_module().plot_mean_std(
-                self._axis_mpl, data, xx=xx, sd=sd, **kwargs
+                self._axis_mpl, values_2d, xx=xx, sd=sd, **kwargs
             )
 
         # Tracking
@@ -877,7 +877,7 @@ class MatplotlibPlotMixin:
     # @wraps removed to avoid circular import
     def plot_mean_ci(
         self,
-        data: ArrayLike,
+        values_2d: ArrayLike,
         xx: Optional[ArrayLike] = None,
         perc: float = 95,
         track: bool = True,
@@ -891,7 +891,7 @@ class MatplotlibPlotMixin:
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
             self._axis_mpl, plot_df = self._get_ax_module().plot_mean_ci(
-                self._axis_mpl, data, xx=xx, perc=perc, **kwargs
+                self._axis_mpl, values_2d, xx=xx, perc=perc, **kwargs
             )
 
         # Tracking
@@ -906,7 +906,7 @@ class MatplotlibPlotMixin:
     # @wraps removed to avoid circular import
     def plot_median_iqr(
         self,
-        data: ArrayLike,
+        values_2d: ArrayLike,
         xx: Optional[ArrayLike] = None,
         track: bool = True,
         id: Optional[str] = None,
@@ -919,7 +919,7 @@ class MatplotlibPlotMixin:
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
             self._axis_mpl, plot_df = self._get_ax_module().plot_median_iqr(
-                self._axis_mpl, data, xx=xx, **kwargs
+                self._axis_mpl, values_2d, xx=xx, **kwargs
             )
 
         # Tracking

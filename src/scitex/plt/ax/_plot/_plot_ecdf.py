@@ -22,7 +22,7 @@ DEFAULT_LINE_WIDTH_MM = 0.2
 
 def plot_ecdf(
     axis: Union[Axes, "AxisWrapper"],
-    data: np.ndarray,
+    values_1d: np.ndarray,
     **kwargs: Any,
 ) -> Tuple[Union[Axes, "AxisWrapper"], pd.DataFrame]:
     """Plot Empirical Cumulative Distribution Function (ECDF).
@@ -35,8 +35,8 @@ def plot_ecdf(
     ----------
     axis : matplotlib.axes.Axes or AxisWrapper
         Matplotlib axis or scitex axis wrapper to plot on.
-    data : array-like
-        Data to compute and plot ECDF for. NaN values are automatically ignored.
+    values_1d : array-like, shape (n_samples,)
+        1D array of values to compute and plot ECDF for. NaN values are automatically ignored.
     **kwargs : dict
         Additional arguments passed to plot function.
 
@@ -62,16 +62,16 @@ def plot_ecdf(
     assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
 
     # Flatten and remove NaN values
-    data = np.hstack(data)
+    values_1d = np.hstack(values_1d)
 
     # Warnings
-    if np.isnan(data).any():
+    if np.isnan(values_1d).any():
         warnings.warn("NaN value are ignored for ECDF plot.")
-    data = data[~np.isnan(data)]
-    nn = len(data)
+    values_1d = values_1d[~np.isnan(values_1d)]
+    nn = len(values_1d)
 
     # Sort the data and compute the ECDF values
-    data_sorted = np.sort(data)
+    data_sorted = np.sort(values_1d)
     ecdf_perc = 100 * np.arange(1, len(data_sorted) + 1) / len(data_sorted)
 
     # Create the pseudo x-axis for step plotting
