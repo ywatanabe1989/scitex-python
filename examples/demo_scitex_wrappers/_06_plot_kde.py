@@ -16,11 +16,9 @@ def demo_plot_kde(fig, ax, stx):
         np.random.normal(5, 1, 300),
     ])
 
-    ax.plot_kde(data, label="Density", id="kde")
+    ax.plot_kde(data, id="kde")
 
     ax.set_xyt(x="Value [a.u.]", y="Density", t="ax.plot_kde(data)")
-    ax.legend(frameon=False, fontsize=6)
-    stx.plt.ax.auto_scale_axis(ax, axis="y")
 
     return fig, ax
 

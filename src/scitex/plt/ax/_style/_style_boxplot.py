@@ -28,6 +28,7 @@ def style_boxplot(
     - Set median line to black for visibility
     - Set edge colors to black
     - Apply consistent outlier marker styling
+    - Use scitex color palette by default for box fills
 
     Parameters
     ----------
@@ -42,7 +43,7 @@ def style_boxplot(
     edge_color : str, default "black"
         Color for box edges, whiskers, and caps.
     colors : list, optional
-        List of colors for each box fill. If None, uses default matplotlib colors.
+        List of colors for each box fill. If None, uses scitex color palette.
     add_legend : bool, default False
         Whether to add a legend.
     labels : list, optional
@@ -63,10 +64,18 @@ def style_boxplot(
     >>> stx.plt.ax.style_boxplot(bp, median_color="black")
     """
     from scitex.plt.utils import mm_to_pt
+    from scitex.plt.color._PARAMS import HEX
 
     # Convert mm to points
     lw_pt = mm_to_pt(linewidth_mm)
     flier_size_pt = mm_to_pt(flier_size_mm)
+
+    # Use scitex color palette by default
+    if colors is None:
+        colors = [
+            HEX["blue"], HEX["red"], HEX["green"], HEX["yellow"],
+            HEX["purple"], HEX["orange"], HEX["lightblue"], HEX["pink"],
+        ]
 
     # Style box elements with line width
     for element_name in ['boxes', 'whiskers', 'caps']:
@@ -89,13 +98,12 @@ def style_boxplot(
             flier.set_markeredgecolor(edge_color)
             flier.set_markerfacecolor('none')  # Open circles
 
-    # Apply fill colors if provided
-    if colors is not None:
-        for i, box in enumerate(boxplot_dict.get('boxes', [])):
-            color = colors[i % len(colors)]
-            if hasattr(box, 'set_facecolor'):
-                box.set_facecolor(color)
-            box.set_edgecolor(edge_color)
+    # Apply fill colors to boxes
+    for i, box in enumerate(boxplot_dict.get('boxes', [])):
+        color = colors[i % len(colors)]
+        if hasattr(box, 'set_facecolor'):
+            box.set_facecolor(color)
+        box.set_edgecolor(edge_color)
 
     # Add legend if requested
     if add_legend and labels is not None:

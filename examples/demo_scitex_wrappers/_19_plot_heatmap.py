@@ -18,10 +18,6 @@ def demo_plot_heatmap(fig, ax, stx):
         data,
         x_labels=labels,
         y_labels=labels,
-        cbar_label="Values",
-        show_annot=True,
-        annot_format="{x:.2f}",
-        cmap="viridis",
         id="heatmap",
     )
 

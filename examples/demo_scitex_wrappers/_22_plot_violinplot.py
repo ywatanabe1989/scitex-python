@@ -13,9 +13,7 @@ def demo_plot_violinplot(fig, ax, stx):
     np.random.seed(42)
     data = [np.random.normal(i, 1, 100) for i in range(4)]
 
-    ax.plot_violinplot(data, positions=[1, 2, 3, 4], showextrema=False, id="violinplot")
-    ax.set_xticks([1, 2, 3, 4])
-    ax.set_xticklabels(["A", "B", "C", "D"])
+    ax.plot_violinplot(data, id="violinplot")
 
     ax.set_xyt(x="Group", y="Value [a.u.]", t="ax.plot_violinplot(data)")
 

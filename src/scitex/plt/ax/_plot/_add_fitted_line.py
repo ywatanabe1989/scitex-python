@@ -8,7 +8,7 @@ Add fitted regression line to scatter plots.
 """
 
 import numpy as np
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 
 
 def add_fitted_line(
@@ -20,9 +20,12 @@ def add_fitted_line(
     linewidth_mm: float = 0.2,
     label: Optional[str] = None,
     degree: int = 1,
+    show_stats: bool = True,
+    stats_position: float = 0.75,
+    stats_fontsize: int = 6,
 ) -> Tuple:
     """
-    Add a fitted polynomial line to a scatter plot.
+    Add a fitted polynomial line to a scatter plot with optional R² and p-value.
 
     Parameters
     ----------
@@ -42,6 +45,13 @@ def add_fitted_line(
         Label for the fitted line (default: None)
     degree : int, optional
         Polynomial degree for fitting (default: 1 for linear)
+    show_stats : bool, optional
+        Whether to display R² and p-value near the line (default: True)
+        Only applicable for linear fits (degree=1)
+    stats_position : float, optional
+        Position along x-axis (0-1 scale) for stats text (default: 0.75)
+    stats_fontsize : int, optional
+        Font size for statistics text in points (default: 6)
 
     Returns
     -------
@@ -49,19 +59,24 @@ def add_fitted_line(
         The fitted line object
     coeffs : np.ndarray
         Polynomial coefficients from np.polyfit
+    stats : StatResult or None
+        StatResult instance with correlation statistics (only for degree=1).
+        Use .to_dict() for dictionary format.
 
     Examples
     --------
     >>> fig, ax = stx.plt.subplots(**stx.plt.presets.SCITEX_STYLE)
     >>> scatter = ax.scatter(x, y)
-    >>> stx.plt.ax.add_fitted_line(ax, x, y)
+    >>> stx.plt.ax.add_fitted_line(ax, x, y)  # Auto-shows R² and p
 
-    >>> # With custom styling
-    >>> line, coeffs = stx.plt.ax.add_fitted_line(
-    ...     ax, x, y,
-    ...     color='blue',
-    ...     linestyle='-',
-    ...     label='Linear fit'
+    >>> # Without statistics
+    >>> line, coeffs, stats = stx.plt.ax.add_fitted_line(
+    ...     ax, x, y, show_stats=False
+    ... )
+
+    >>> # Custom position for stats
+    >>> line, coeffs, stats = stx.plt.ax.add_fitted_line(
+    ...     ax, x, y, stats_position=0.5
     ... )
     """
     from scitex.plt.utils import mm_to_pt
@@ -91,7 +106,46 @@ def add_fitted_line(
         label=label,
     )[0]
 
-    return line, coeffs
+    # Calculate and display statistics for linear regression (degree=1)
+    stats_result = None
+    if degree == 1 and show_stats:
+        # Import scitex.stats correlation test
+        from scitex.stats.tests.correlation import test_pearson
+
+        # Calculate correlation statistics using scitex.stats
+        stats_result = test_pearson(x, y)
+
+        # Position for text annotation
+        x_pos = x.min() + stats_position * (x.max() - x.min())
+        y_pos = poly_fn(x_pos)
+
+        # Format statistics text with R² and significance stars
+        r_squared = stats_result.effect_size['value']  # r_squared from effect_size
+        stars = stats_result.stars
+
+        if stars and stars != 'ns':  # Only show if significant
+            stats_text = f"$R^2$ = {r_squared:.3f}{stars}"
+        else:  # Not significant
+            stats_text = f"$R^2$ = {r_squared:.3f} (ns)"
+
+        # Add text annotation near the line
+        ax.text(
+            x_pos, y_pos,
+            stats_text,
+            verticalalignment='bottom',
+            fontsize=stats_fontsize
+        )
+
+        # Store stats in axes metadata for embedding in saved figures
+        if not hasattr(ax, '_scitex_metadata'):
+            ax._scitex_metadata = {}
+        if 'stats' not in ax._scitex_metadata:
+            ax._scitex_metadata['stats'] = []
+
+        # Add this StatResult to the stats list
+        ax._scitex_metadata['stats'].append(stats_result.to_dict())
+
+    return line, coeffs, stats_result
 
 
 # EOF

@@ -44,7 +44,7 @@ def plot_fillv(axes, starts, ends, color="red", alpha=0.2):
     for ax in axes:
         assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
         for start, end in zip(starts, ends):
-            ax.axvspan(start, end, color=color, alpha=alpha)
+            ax.axvspan(start, end, facecolor=color, edgecolor='none', alpha=alpha)
 
     if not is_axes:
         return axes[0]

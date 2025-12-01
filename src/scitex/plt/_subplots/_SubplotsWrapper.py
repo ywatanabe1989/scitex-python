@@ -105,6 +105,7 @@ class SubplotsWrapper:
         tick_length_mm=None,
         tick_thickness_mm=None,
         trace_thickness_mm=None,
+        marker_size_mm=None,
         axis_font_size_pt=None,
         tick_font_size_pt=None,
         title_font_size_pt=None,
@@ -241,6 +242,7 @@ class SubplotsWrapper:
                 tick_length_mm=tick_length_mm,
                 tick_thickness_mm=tick_thickness_mm,
                 trace_thickness_mm=trace_thickness_mm,
+                marker_size_mm=marker_size_mm,
                 axis_font_size_pt=axis_font_size_pt,
                 tick_font_size_pt=tick_font_size_pt,
                 title_font_size_pt=title_font_size_pt,
@@ -315,6 +317,7 @@ class SubplotsWrapper:
         tick_length_mm=None,
         tick_thickness_mm=None,
         trace_thickness_mm=None,
+        marker_size_mm=None,
         axis_font_size_pt=None,
         tick_font_size_pt=None,
         title_font_size_pt=None,
@@ -472,6 +475,8 @@ class SubplotsWrapper:
                     style_dict['tick_thickness_mm'] = tick_thickness_mm
                 if trace_thickness_mm is not None:
                     style_dict['trace_thickness_mm'] = trace_thickness_mm
+                if marker_size_mm is not None:
+                    style_dict['marker_size_mm'] = marker_size_mm
                 if axis_font_size_pt is not None:
                     style_dict['axis_font_size_pt'] = axis_font_size_pt
                 if tick_font_size_pt is not None:

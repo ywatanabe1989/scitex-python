@@ -15,7 +15,7 @@ def demo_plot_contour(fig, ax, stx):
     X, Y = np.meshgrid(x, y)
     Z = np.sin(X) * np.cos(Y)
 
-    ax.plot_contour(X, Y, Z, levels=8, id="contour")
+    ax.plot_contour(X, Y, Z, id="contour")
 
     ax.set_xyt(x="X", y="Y", t="ax.plot_contour(X, Y, Z)")
 

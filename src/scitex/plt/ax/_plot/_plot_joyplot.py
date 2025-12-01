@@ -9,69 +9,98 @@ __FILE__ = "./src/scitex/plt/ax/_plot/_plot_joyplot.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
-import warnings
+import numpy as np
+from scipy import stats
 
-from .._style._set_xyt import set_xyt as scitex_plt_set_xyt
+from ....plt.utils import assert_valid_axis
 
 
-def plot_joyplot(ax, data, orientation="vertical", **kwargs):
+def plot_joyplot(ax, arrays, overlap=0.5, fill_alpha=0.7, line_alpha=1.0,
+                 colors=None, **kwargs):
     """
-    Create a joyplot (ridgeline plot) with proper orientation handling.
+    Create a joyplot (ridgeline plot) on the provided axes.
 
     Parameters
     ----------
     ax : matplotlib.axes.Axes
         The axes to plot on
-    data : pandas.DataFrame or array-like
-        The data to plot
-    orientation : str, default "vertical"
-        Plot orientation. Either "vertical" or "horizontal"
+    arrays : list of array-like
+        List of 1D arrays for each ridge
+    overlap : float, default 0.5
+        Amount of overlap between ridges (0 = no overlap, 1 = full overlap)
+    fill_alpha : float, default 0.7
+        Alpha for the filled KDE area
+    line_alpha : float, default 1.0
+        Alpha for the KDE line
+    colors : list, optional
+        Colors for each ridge. If None, uses scitex palette.
     **kwargs
-        Additional keyword arguments passed to joypy.joyplot()
+        Additional keyword arguments
 
     Returns
     -------
     matplotlib.axes.Axes
         The axes with the joyplot
-
-    Raises
-    ------
-    ValueError
-        If orientation is not "vertical" or "horizontal"
     """
-    # Lazy import to avoid scipy circular import on startup
-    import joypy
+    assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
 
-    if orientation not in ["vertical", "horizontal"]:
-        raise ValueError("orientation must be either 'vertical' or 'horizontal'")
+    # Import scitex colors
+    from scitex.plt.color._PARAMS import HEX
 
-    # Handle orientation by setting appropriate joypy parameters
-    if orientation == "horizontal":
-        # For horizontal orientation, we need to transpose the data display
-        # joypy doesn't have direct horizontal support, so we work with the result
-        kwargs.setdefault("kind", "kde")  # Ensure we're using KDE plots
+    # Default colors from scitex palette
+    if colors is None:
+        colors = [
+            HEX["blue"], HEX["red"], HEX["green"], HEX["yellow"],
+            HEX["purple"], HEX["orange"], HEX["lightblue"], HEX["pink"],
+        ]
 
-    fig, axes = joypy.joyplot(
-        data=data,
-        **kwargs,
-    )
+    n_ridges = len(arrays)
 
-    # Set appropriate labels based on orientation
-    if orientation == "vertical":
-        ax = scitex_plt_set_xyt(ax, None, "Density", "Joyplot")
-    elif orientation == "horizontal":
-        ax = scitex_plt_set_xyt(ax, "Density", None, "Joyplot")
-        # For horizontal plots, we might need additional transformations
-        # This is a limitation of joypy which primarily supports vertical plots
+    # Calculate global x range
+    all_data = np.concatenate([np.asarray(arr) for arr in arrays])
+    x_min, x_max = np.min(all_data), np.max(all_data)
+    x_range = x_max - x_min
+    x_padding = x_range * 0.1
+    x = np.linspace(x_min - x_padding, x_max + x_padding, 200)
+
+    # Calculate KDEs and find max density for scaling
+    kdes = []
+    max_density = 0
+    for arr in arrays:
+        arr = np.asarray(arr)
+        if len(arr) > 1:
+            kde = stats.gaussian_kde(arr)
+            density = kde(x)
+            kdes.append(density)
+            max_density = max(max_density, np.max(density))
+        else:
+            kdes.append(np.zeros_like(x))
+
+    # Scale factor for ridge height
+    ridge_height = 1.0 / (1.0 - overlap * 0.5) if overlap < 1 else 2.0
+
+    # Plot each ridge from back to front
+    for i in range(n_ridges - 1, -1, -1):
+        color = colors[i % len(colors)]
+        baseline = i * (1.0 - overlap)
+
+        # Scale density to fit nicely
+        scaled_density = kdes[i] / max_density * ridge_height if max_density > 0 else kdes[i]
+
+        # Fill
+        ax.fill_between(x, baseline, baseline + scaled_density,
+                       facecolor=color, edgecolor='none', alpha=fill_alpha)
+        # Line on top
+        ax.plot(x, baseline + scaled_density, color=color, alpha=line_alpha,
+               linewidth=1.0)
+
+    # Set y limits
+    ax.set_ylim(-0.1, n_ridges * (1.0 - overlap) + ridge_height)
+
+    # Hide y-axis ticks for cleaner look (joyplots typically don't show y values)
+    ax.set_yticks([])
 
     return ax
 
-
-# def plot_vertical_joyplot(ax, data, **kwargs):
-#     return _plot_joyplot(ax, data, "vertical", **kwargs)
-
-
-# def plot_horizontal_joyplot(ax, data, **kwargs):
-#     return _plot_joyplot(ax, data, "horizontal", **kwargs)
 
 # EOF

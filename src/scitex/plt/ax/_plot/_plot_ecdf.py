@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 13:10:00 (ywatanabe)"
+# Timestamp: "2025-12-01 14:00:00 (ywatanabe)"
 # File: ./src/scitex/plt/ax/_plot/_plot_ecdf.py
 
 """Empirical Cumulative Distribution Function (ECDF) plotting."""
@@ -13,7 +13,11 @@ import pandas as pd
 from matplotlib.axes import Axes
 
 from scitex.pd._force_df import force_df as scitex_pd_force_df
-from ....plt.utils import assert_valid_axis
+from ....plt.utils import assert_valid_axis, mm_to_pt
+
+
+# Default line width (0.2mm for publication)
+DEFAULT_LINE_WIDTH_MM = 0.2
 
 
 def plot_ecdf(
@@ -74,15 +78,15 @@ def plot_ecdf(
     x_step = np.repeat(data_sorted, 2)[1:]
     y_step = np.repeat(ecdf_perc, 2)[:-1]
 
-    # Plot the ECDF using steps
+    # Apply default linewidth if not specified
+    if 'linewidth' not in kwargs and 'lw' not in kwargs:
+        kwargs['linewidth'] = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+
+    # Plot the ECDF using steps (no markers - clean line only)
     axis.plot(x_step, y_step, drawstyle="steps-post", **kwargs)
 
-    # Scatter the original data points
-    axis.plot(data_sorted, ecdf_perc, marker=".", linestyle="none")
-
-    # Set ylim, xlim, and aspect ratio
+    # Set ylim (xlim is auto-scaled based on data)
     axis.set_ylim(0, 100)
-    axis.set_xlim(0, 1.0)
 
     # Create a DataFrame to hold the ECDF data
     df = scitex_pd_force_df(

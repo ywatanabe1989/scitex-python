@@ -15,10 +15,9 @@ def demo_plot_mean_std(fig, ax, stx):
     # Create 2D data: (n_samples, n_timepoints)
     y_data = np.sin(x)[np.newaxis, :] + np.random.normal(0, 0.3, (10, len(x)))
 
-    ax.plot_mean_std(y_data, xx=x, sd=1, label="Mean ± SD", id="mean_std")
+    ax.plot_mean_std(y_data, xx=x, id="mean_std")
 
     ax.set_xyt(x="Time [s]", y="Signal [a.u.]", t="ax.plot_mean_std(data, xx)")
-    ax.legend(frameon=False, fontsize=6)
 
     return fig, ax
 

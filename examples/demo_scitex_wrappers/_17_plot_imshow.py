@@ -13,8 +13,7 @@ def demo_plot_imshow(fig, ax, stx):
     np.random.seed(42)
     data = np.random.rand(20, 30)
 
-    ax.plot_imshow(data, cmap="viridis", aspect="auto", id="imshow")
-    ax.spines[:].set_visible(True)
+    ax.plot_imshow(data, id="imshow")
 
     ax.set_xyt(t="ax.plot_imshow(data)")
 

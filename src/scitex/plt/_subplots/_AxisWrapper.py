@@ -52,6 +52,7 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
         self.track = track
         self.id = 0
         self._counter_part = matplotlib.axes.Axes
+        self._tracking_depth = 0  # Depth counter to prevent tracking internal calls
         
         # Initialize unit awareness
         UnitAwareMixin.__init__(self)
@@ -98,68 +99,78 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
                     id_value = kwargs.pop("id", None)
                     track_override = kwargs.pop("track", None)
 
-                    # Apply pre-processing defaults from styles module
-                    apply_plot_defaults(__method_name__, kwargs, id_value, self._axes_mpl)
+                    # Increment tracking depth to detect internal calls
+                    # Internal calls (depth > 1) won't be tracked
+                    self._tracking_depth += 1
+                    is_top_level_call = (self._tracking_depth == 1)
 
-                    # Pop scitex-specific kwargs before calling matplotlib
-                    # These are handled in post-processing
-                    scitex_kwargs = {}
-                    if __method_name__ == 'violinplot':
-                        scitex_kwargs['boxplot'] = kwargs.pop('boxplot', True)
+                    try:
+                        # Apply pre-processing defaults from styles module
+                        apply_plot_defaults(__method_name__, kwargs, id_value, self._axes_mpl)
 
-                    # Call the original matplotlib method
-                    result = orig_attr(*args, **kwargs)
+                        # Pop scitex-specific kwargs before calling matplotlib
+                        # These are handled in post-processing
+                        scitex_kwargs = {}
+                        if __method_name__ == 'violinplot':
+                            scitex_kwargs['boxplot'] = kwargs.pop('boxplot', True)
 
-                    # Restore scitex kwargs for post-processing
-                    kwargs.update(scitex_kwargs)
+                        # Call the original matplotlib method
+                        result = orig_attr(*args, **kwargs)
 
-                    # Apply post-processing styling from styles module
-                    apply_plot_postprocess(__method_name__, result, self._axes_mpl, kwargs, args)
+                        # Restore scitex kwargs for post-processing
+                        kwargs.update(scitex_kwargs)
 
-                    # Determine if tracking should occur
-                    should_track = (
-                        track_override if track_override is not None else self.track
-                    )
+                        # Apply post-processing styling from styles module
+                        apply_plot_postprocess(__method_name__, result, self._axes_mpl, kwargs, args)
 
-                    # Track the method call if tracking enabled
-                    # Expanded list of matplotlib plotting methods to track
-                    tracking_methods = {
-                        # Basic plots
-                        'plot', 'scatter', 'bar', 'barh', 'hist', 'boxplot', 'violinplot',
-                        # Line plots
-                        'fill_between', 'fill_betweenx', 'errorbar', 'step', 'stem',
-                        # Statistical plots  
-                        'hist2d', 'hexbin', 'pie',
-                        # Contour plots
-                        'contour', 'contourf', 'tricontour', 'tricontourf',
-                        # Image plots
-                        'imshow', 'matshow', 'spy',
-                        # Quiver plots
-                        'quiver', 'streamplot',
-                        # 3D-related (if axes3d)
-                        'plot3D', 'scatter3D', 'bar3d', 'plot_surface', 'plot_wireframe',
-                        # Text and annotations (data-containing)
-                        'annotate', 'text'
-                    }
-                    if should_track and name in tracking_methods:
-                        # Use the _track method from TrackingMixin
-                        # If no id provided, it will auto-generate one
-                        try:
-                            # Convert args to tracked_dict for consistency with other tracking
-                            tracked_dict = {"args": args}
-                            self._track(
-                                should_track, id_value, name, tracked_dict, kwargs
-                            )
-                        except AttributeError:
-                            warnings.warn(
-                                f"Tracking setup incomplete for AxisWrapper ({name}).",
-                                UserWarning,
-                                stacklevel=2,
-                            )
-                        except Exception as e:
-                            # Silently continue if tracking fails to not break plotting
-                            pass
-                    return result  # Return the result of the original call
+                        # Determine if tracking should occur
+                        # Only track top-level calls (depth == 1), not internal matplotlib calls
+                        should_track = (
+                            track_override if track_override is not None else self.track
+                        ) and is_top_level_call
+
+                        # Track the method call if tracking enabled
+                        # Expanded list of matplotlib plotting methods to track
+                        tracking_methods = {
+                            # Basic plots
+                            'plot', 'scatter', 'bar', 'barh', 'hist', 'boxplot', 'violinplot',
+                            # Line plots
+                            'fill_between', 'fill_betweenx', 'errorbar', 'step', 'stem',
+                            # Statistical plots
+                            'hist2d', 'hexbin', 'pie',
+                            # Contour plots
+                            'contour', 'contourf', 'tricontour', 'tricontourf',
+                            # Image plots
+                            'imshow', 'matshow', 'spy',
+                            # Quiver plots
+                            'quiver', 'streamplot',
+                            # 3D-related (if axes3d)
+                            'plot3D', 'scatter3D', 'bar3d', 'plot_surface', 'plot_wireframe',
+                            # Text and annotations (data-containing)
+                            'annotate', 'text'
+                        }
+                        if should_track and __method_name__ in tracking_methods:
+                            # Use the _track method from TrackingMixin
+                            # If no id provided, it will auto-generate one
+                            try:
+                                # Convert args to tracked_dict for consistency with other tracking
+                                tracked_dict = {"args": args}
+                                self._track(
+                                    should_track, id_value, __method_name__, tracked_dict, kwargs
+                                )
+                            except AttributeError:
+                                warnings.warn(
+                                    f"Tracking setup incomplete for AxisWrapper ({__method_name__}).",
+                                    UserWarning,
+                                    stacklevel=2,
+                                )
+                            except Exception as e:
+                                # Silently continue if tracking fails to not break plotting
+                                pass
+                        return result  # Return the result of the original call
+                    finally:
+                        # Always decrement depth, even if exception occurs
+                        self._tracking_depth -= 1
 
                 return wrapper
             else:

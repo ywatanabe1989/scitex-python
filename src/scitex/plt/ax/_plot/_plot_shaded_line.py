@@ -58,9 +58,7 @@ def _plot_single_shaded_line(
         len(xx) == len(y_middle) == len(y_lower) == len(y_upper)
     ), "All arrays must have the same length"
 
-    label = kwargs.get("label")
-    if kwargs.get("label"):
-        del kwargs["label"]
+    label = kwargs.pop("label", None)
     axis.plot(xx, y_middle, color=color, alpha=alpha, label=label, **kwargs)
     kwargs["linewidth"] = 0
     kwargs["edgecolor"] = "none"  # Remove edge line
