@@ -54,6 +54,7 @@ timeout: 60
 # ----------------------------------------
 semantic_scholar_api_key: ${SCITEX_SCHOLAR_SEMANTIC_SCHOLAR_API_KEY:-null}
 crossref_api_key: ${SCITEX_SCHOLAR_CROSSREF_API_KEY:-null}
+crossref_api_url: ${SCITEX_SCHOLAR_CROSSREF_API_URL:-"http://127.0.0.1:3333"}
 pubmed_api_key: ${SCITEX_SCHOLAR_PUBMED_API_KEY:-null}
 twocaptcha_api_key: ${SCITEX_SCHOLAR_2CAPTCHA_API_KEY:-null}
 
