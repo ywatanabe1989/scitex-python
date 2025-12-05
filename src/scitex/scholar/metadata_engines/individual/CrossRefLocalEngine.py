@@ -23,7 +23,14 @@ logger = logging.getLogger(__name__)
 
 
 class CrossRefLocalEngine(BaseDOIEngine):
-    """CrossRef Local Engine using local Django API"""
+    """CrossRef Local Engine using local Django API or external public API
+
+    Supports both:
+    - Internal API: http://crossref:3333 (Docker network)
+    - External API: https://scitex.ai/scholar/api/crossref (Public internet)
+
+    Automatically detects API format and adjusts endpoints accordingly.
+    """
 
     def __init__(
         self,
@@ -33,6 +40,9 @@ class CrossRefLocalEngine(BaseDOIEngine):
         super().__init__(email)
         self.api_url = api_url.rstrip("/")
 
+        # Detect API type: external (public) vs internal (Docker/local)
+        self._is_external_api = "/api/crossref" in self.api_url or "scitex.ai" in self.api_url
+
     @property
     def name(self) -> str:
         return "CrossRefLocal"
@@ -40,6 +50,26 @@ class CrossRefLocalEngine(BaseDOIEngine):
     @property
     def rate_limit_delay(self) -> float:
         return 0.01
+
+    def _build_endpoint_url(self, endpoint: str) -> str:
+        """Build the correct endpoint URL based on API type
+
+        Args:
+            endpoint: Endpoint name (e.g., 'search', 'health', 'stats')
+
+        Returns:
+            Full URL for the endpoint
+
+        Examples:
+            Internal: http://crossref:3333/api/search/
+            External: https://scitex.ai/scholar/api/crossref/search/
+        """
+        if self._is_external_api:
+            # External API: base URL already includes /scholar/api/crossref
+            return f"{self.api_url}/{endpoint}/"
+        else:
+            # Internal API: need to add /api/ prefix
+            return f"{self.api_url}/api/{endpoint}/"
 
     def search(
         self,
@@ -80,8 +110,8 @@ class CrossRefLocalEngine(BaseDOIEngine):
     def _make_search_request(
         self, params: dict, return_as: str
     ) -> Optional[Dict]:
-        """Make search request to local API"""
-        url = f"{self.api_url}/api/search/"
+        """Make search request to local or external API"""
+        url = self._build_endpoint_url("search")
 
         try:
             assert return_as in [
@@ -129,7 +159,7 @@ class CrossRefLocalEngine(BaseDOIEngine):
         doi = doi.replace("https://doi.org/", "").replace(
             "http://doi.org/", ""
         )
-        url = f"{self.api_url}/api/search/"
+        url = self._build_endpoint_url("search")
         params = {"doi": doi}
 
         try:
@@ -242,22 +272,53 @@ if __name__ == "__main__":
     from scitex.scholar.metadata_engines.individual import CrossRefLocalEngine
 
     TITLE = "deep learning"
-    DOI = "10.1001/.387"
+    DOI = "10.1038/nature12373"
 
-    engine = CrossRefLocalEngine("test@example.com")
-    outputs = {}
+    # Example 1: Internal API (Docker network or localhost)
+    print("\n" + "=" * 60)
+    print("INTERNAL API EXAMPLE")
+    print("=" * 60)
+    engine_internal = CrossRefLocalEngine(
+        "test@example.com",
+        api_url="http://crossref:3333"
+    )
+    print(f"API URL: {engine_internal.api_url}")
+    print(f"Is External: {engine_internal._is_external_api}")
+    print(f"Search endpoint: {engine_internal._build_endpoint_url('search')}")
 
-    outputs["metadata_by_title_dict"] = engine.search(title=TITLE)
-    outputs["metadata_by_doi_dict"] = engine.search(doi=DOI)
+    # Example 2: External API (public internet)
+    print("\n" + "=" * 60)
+    print("EXTERNAL API EXAMPLE")
+    print("=" * 60)
+    engine_external = CrossRefLocalEngine(
+        "test@example.com",
+        api_url="https://scitex.ai/scholar/api/crossref"
+    )
+    print(f"API URL: {engine_external.api_url}")
+    print(f"Is External: {engine_external._is_external_api}")
+    print(f"Search endpoint: {engine_external._build_endpoint_url('search')}")
 
-    for k, v in outputs.items():
-        print("----------------------------------------")
-        print(k)
-        print("----------------------------------------")
-        pprint(v)
-        time.sleep(1)
+    # Test search (use external for demo)
+    print("\n" + "=" * 60)
+    print("SEARCH TEST")
+    print("=" * 60)
+    result = engine_external.search(doi=DOI)
+    if result:
+        print(f"Title: {result.get('basic', {}).get('title')}")
+        print(f"DOI: {result.get('id', {}).get('doi')}")
+        print(f"Year: {result.get('basic', {}).get('year')}")
+    else:
+        print("No results found")
 
 
-# python -m scitex.scholar.engines.individual.CrossRefLocalEngine
+# Usage examples:
+#
+# Internal API (from NAS Docker):
+#   export SCITEX_SCHOLAR_CROSSREF_API_URL=http://crossref:3333
+#   python -m scitex.scholar.metadata_engines.individual.CrossRefLocalEngine
+#
+# External API (from anywhere):
+#   export SCITEX_SCHOLAR_CROSSREF_API_URL=https://scitex.ai/scholar/api/crossref
+#   python -m scitex.scholar.metadata_engines.individual.CrossRefLocalEngine
 
 # EOF
