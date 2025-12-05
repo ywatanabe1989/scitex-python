@@ -49,6 +49,7 @@ class ScholarPipelineSearchParallel:
         max_workers: int = 5,
         timeout_per_engine: float = 30.0,
         use_cache: bool = True,
+        email: str = None,
     ):
         """Initialize parallel search pipeline.
 
@@ -56,19 +57,21 @@ class ScholarPipelineSearchParallel:
             max_workers: Maximum number of parallel engine queries
             timeout_per_engine: Timeout for each engine in seconds
             use_cache: Whether to use caching for API results
+            email: User email for API rate limit benefits (PubMed, CrossRef, OpenAlex)
         """
         self.name = self.__class__.__name__
         self.max_workers = max_workers
         self.timeout_per_engine = timeout_per_engine
         self.use_cache = use_cache
+        self.email = email or "research@scitex.io"
 
-        # Initialize search engines
+        # Initialize search engines with email for rate limit benefits
         self.engines = {
-            'PubMed': PubMedSearchEngine(),
-            'CrossRef': CrossRefSearchEngine(),
-            'arXiv': ArXivSearchEngine(),
-            'Semantic_Scholar': SemanticScholarSearchEngine(),
-            'OpenAlex': OpenAlexSearchEngine(),
+            'PubMed': PubMedSearchEngine(email=self.email),
+            'CrossRef': CrossRefSearchEngine(email=self.email),
+            'arXiv': ArXivSearchEngine(email=self.email),
+            'Semantic_Scholar': SemanticScholarSearchEngine(email=self.email),
+            'OpenAlex': OpenAlexSearchEngine(email=self.email),
         }
 
         # Statistics

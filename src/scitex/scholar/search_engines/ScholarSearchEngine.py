@@ -45,26 +45,31 @@ class ScholarSearchEngine:
         self,
         default_mode: Literal['parallel', 'single'] = 'parallel',
         use_cache: bool = True,
+        email: str = None,
     ):
         """Initialize unified search engine.
 
         Args:
             default_mode: Default search mode ('parallel' or 'single')
             use_cache: Whether to use caching for API results
+            email: User email for API rate limit benefits (PubMed, CrossRef, OpenAlex)
         """
         self.name = self.__class__.__name__
         self.default_mode = default_mode
         self.use_cache = use_cache
+        self.email = email
 
-        # Initialize both pipeline modes
+        # Initialize both pipeline modes with email for rate limit benefits
         self.parallel_pipeline = ScholarPipelineSearchParallel(
             max_workers=5,
             timeout_per_engine=30.0,
             use_cache=use_cache,
+            email=email,
         )
 
         self.single_pipeline = ScholarPipelineSearchSingle(
             use_cache=use_cache,
+            email=email,
         )
 
         # Statistics
