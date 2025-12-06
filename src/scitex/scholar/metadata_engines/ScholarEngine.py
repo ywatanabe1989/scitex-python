@@ -240,6 +240,13 @@ class ScholarEngine:
             if name in engine_classes:
                 if name == "url_doi_engine":
                     self._engine_instances[name] = engine_classes[name]()
+                elif name == "CrossRefLocal":
+                    # Get API URL from config (supports SCITEX_SCHOLAR_CROSSREF_API_URL env var)
+                    api_url = self.config.resolve("crossref_api_url", "http://127.0.0.1:3333")
+                    self._engine_instances[name] = engine_classes[name](
+                        "research@example.com",
+                        api_url=api_url
+                    )
                 else:
                     self._engine_instances[name] = engine_classes[name](
                         "research@example.com"
@@ -483,7 +490,8 @@ class ScholarEngine:
         """Merge two metadata structures with engine priority."""
         merged = base.copy()
         engine_priority = {
-            "URL": 5,
+            "URL": 6,
+            "CrossRefLocal": 5,
             "CrossRef": 4,
             "OpenAlex": 3,
             "Semantic_Scholar": 2,
