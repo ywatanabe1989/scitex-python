@@ -26,12 +26,17 @@ from .shared_session import SharedBrowserSession, SessionConfig
 from .visual_feedback import VisualFeedback
 from .credential_manager import CredentialManager
 
+# Re-export auth helpers for convenience
+from scitex.browser.auth import GoogleAuthHelper, google_login
+
 # Exports
 __all__ = [
     "SharedBrowserSession",
     "SessionConfig",
     "VisualFeedback",
     "CredentialManager",
+    "GoogleAuthHelper",
+    "google_login",
 ]
 
 # Compatibility check - ensure we don't break existing code

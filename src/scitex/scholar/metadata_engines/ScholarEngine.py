@@ -490,7 +490,8 @@ class ScholarEngine:
         """Merge two metadata structures with engine priority."""
         merged = base.copy()
         engine_priority = {
-            "URL": 5,
+            "URL": 6,
+            "CrossRefLocal": 5,
             "CrossRef": 4,
             "OpenAlex": 3,
             "Semantic_Scholar": 2,
