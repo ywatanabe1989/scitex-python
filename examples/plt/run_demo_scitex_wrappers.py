@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-02 05:54:57 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/plt/demo_scitex_wrappers.py
+# Timestamp: "2025-12-02 06:15:00 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/examples/plt/run_demo_scitex_wrappers.py
 
 
 """Demo: SciTeX custom wrapper methods (ax.stx_xxx)."""
