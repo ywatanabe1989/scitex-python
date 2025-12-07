@@ -29,8 +29,22 @@ logger = getLogger(__name__)
 
 
 class ScholarConfig:
-    def __init__(self, config_path: Optional[Union[str, Path]] = None):
+    def __init__(
+        self,
+        config_path: Optional[Union[str, Path]] = None,
+        scholar_dir: Optional[Union[str, Path]] = None,
+    ):
+        """Initialize ScholarConfig.
+
+        Args:
+            config_path: Path to custom config YAML file
+            scholar_dir: Direct path to scholar directory (e.g., /data/users/alice/.scitex)
+                        This bypasses SCITEX_DIR env var for thread-safe multi-user usage.
+                        Use this in Django/multi-user environments to avoid race conditions.
+        """
         self.name = self.__class__.__name__
+        self._explicit_scholar_dir = scholar_dir  # Store for thread-safe access
+
         if config_path and Path(config_path).exists():
             config_data = self.load_yaml(config_path)
         else:
@@ -114,8 +128,14 @@ class ScholarConfig:
 
     # Path Management ----------------------------------------
     def _setup_path_manager(self, scholar_dir=None):
-        scholar_dir = self.cascade.resolve("scholar_dir", default="~/.scitex")
-        base_path = Path(scholar_dir).expanduser() / "scholar"
+        # Priority: explicit parameter > env var > config > default
+        if self._explicit_scholar_dir:
+            # Use explicitly provided path (thread-safe for multi-user)
+            base_path = Path(self._explicit_scholar_dir).expanduser() / "scholar"
+        else:
+            # Fall back to cascade resolution (uses SCITEX_DIR env var)
+            scholar_dir = self.cascade.resolve("scholar_dir", default="~/.scitex")
+            base_path = Path(scholar_dir).expanduser() / "scholar"
         self.path_manager = PathManager(scholar_dir=base_path)
 
     @property
