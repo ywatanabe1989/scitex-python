@@ -38,6 +38,16 @@ timeout: 60
 # Note: Download directory is fixed at {scholar_dir}/library/downloads/
 # Use get_library_downloads_dir() to access it
 
+# Open Access & Paywall Options
+# ----------------------------------------
+# Prefer Open Access versions when available
+prefer_open_access: ${SCITEX_SCHOLAR_PREFER_OPEN_ACCESS:-true}
+# Allow attempting paywalled journal downloads (requires authentication)
+# Only enable for local/personal use with valid institutional access
+enable_paywall_access: ${SCITEX_SCHOLAR_ENABLE_PAYWALL_ACCESS:-false}
+# Track paywall bypass attempts in metadata (for transparency)
+track_paywall_attempts: ${SCITEX_SCHOLAR_TRACK_PAYWALL_ATTEMPTS:-true}
+
 # ----------------------------------------
 # cache
 # ----------------------------------------
