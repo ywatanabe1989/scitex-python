@@ -32,6 +32,7 @@ from datetime import datetime
 
 from scitex import logging
 from scitex.scholar.core import Paper
+from scitex.scholar.core import normalize_journal_name
 from scitex.scholar.search_engines.individual.PubMedSearchEngine import PubMedSearchEngine
 from scitex.scholar.search_engines.individual.CrossRefSearchEngine import CrossRefSearchEngine
 from scitex.scholar.search_engines.individual.ArXivSearchEngine import ArXivSearchEngine
@@ -739,7 +740,8 @@ class ScholarPipelineSearchParallel:
 
         # Publication info
         if hasattr(meta, 'publication'):
-            result['journal'] = meta.publication.journal or ''
+            journal_raw = meta.publication.journal or ''
+            result['journal'] = normalize_journal_name(journal_raw) if journal_raw else ''
             result['impact_factor'] = meta.publication.impact_factor
 
         # Metrics

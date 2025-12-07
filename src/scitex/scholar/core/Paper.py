@@ -522,6 +522,75 @@ class Paper(BaseModel):
         """
         return self.model_dump()
 
+    def detect_open_access(
+        self,
+        use_unpaywall: bool = False,
+        update_metadata: bool = True,
+    ) -> "OAResult":
+        """
+        Detect open access status for this paper.
+
+        Uses identifiers (DOI, arXiv ID, PMCID) and known OA sources
+        to determine if the paper is freely available.
+
+        Args:
+            use_unpaywall: If True, query Unpaywall API for uncertain cases
+            update_metadata: If True, update self.metadata.access with results
+
+        Returns:
+            OAResult with detection results
+        """
+        from .open_access import check_oa_status, OAResult
+
+        result = check_oa_status(
+            doi=self.metadata.id.doi,
+            arxiv_id=self.metadata.id.arxiv_id,
+            pmcid=None,  # Not currently in IDMetadata
+            source=None,  # Source tracking not in Paper
+            journal=self.metadata.publication.journal,
+            is_open_access_flag=self.metadata.access.is_open_access,
+            use_unpaywall=use_unpaywall,
+        )
+
+        if update_metadata:
+            self.metadata.access.is_open_access = result.is_open_access
+            self.metadata.access.is_open_access_engines.append(
+                f"detect_oa:{result.source}"
+            )
+            if result.status:
+                self.metadata.access.oa_status = result.status.value
+                self.metadata.access.oa_status_engines.append(
+                    f"detect_oa:{result.source}"
+                )
+            if result.oa_url:
+                self.metadata.access.oa_url = result.oa_url
+                self.metadata.access.oa_url_engines.append(
+                    f"detect_oa:{result.source}"
+                )
+            if result.license:
+                self.metadata.access.license = result.license
+                self.metadata.access.license_engines.append(
+                    f"detect_oa:{result.source}"
+                )
+
+        return result
+
+    @property
+    def is_open_access(self) -> bool:
+        """Check if paper is open access (quick check without API calls)."""
+        if self.metadata.access.is_open_access is not None:
+            return self.metadata.access.is_open_access
+
+        # Quick detection from identifiers
+        from .open_access import detect_oa_from_identifiers
+
+        result = detect_oa_from_identifiers(
+            doi=self.metadata.id.doi,
+            arxiv_id=self.metadata.id.arxiv_id,
+            journal=self.metadata.publication.journal,
+        )
+        return result.is_open_access
+
 
 if __name__ == "__main__":
     import json
