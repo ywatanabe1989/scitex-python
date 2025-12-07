@@ -11,6 +11,10 @@ from .chrome_pdf_viewer import try_download_chrome_pdf_viewer_async
 from .direct_download import try_download_direct_async
 from .response_body import try_download_response_body_async
 from .manual_download_fallback import try_download_manual_async
+from .open_access_download import (
+    try_download_open_access_async,
+    try_download_open_access_sync,
+)
 
 # Manual download utilities
 from .manual_download_utils import (
@@ -27,6 +31,8 @@ __all__ = [
     "try_download_direct_async",
     "try_download_response_body_async",
     "try_download_manual_async",
+    "try_download_open_access_async",
+    "try_download_open_access_sync",
     # Manual download utilities
     "DownloadMonitorAndSync",
     "FlexibleFilenameGenerator",

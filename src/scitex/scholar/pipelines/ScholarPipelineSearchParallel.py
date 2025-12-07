@@ -32,6 +32,7 @@ from datetime import datetime
 
 from scitex import logging
 from scitex.scholar.core import Paper
+from scitex.scholar.core import normalize_journal_name
 from scitex.scholar.search_engines.individual.PubMedSearchEngine import PubMedSearchEngine
 from scitex.scholar.search_engines.individual.CrossRefSearchEngine import CrossRefSearchEngine
 from scitex.scholar.search_engines.individual.ArXivSearchEngine import ArXivSearchEngine
@@ -331,12 +332,18 @@ class ScholarPipelineSearchParallel:
                 if 'metrics' in result:
                     if result['metrics'].get('citation_count'):
                         paper.metadata.citation_count.total = result['metrics']['citation_count']
-                    # Note: is_open_access not in Paper structure
+                    if 'is_open_access' in result['metrics']:
+                        paper.metadata.access.is_open_access = result['metrics']['is_open_access']
+                        paper.metadata.access.is_open_access_engines = [engine_name]
 
                 if 'urls' in result:
                     if result['urls'].get('pdf'):
                         # pdfs is a list of dicts with url/source keys
                         paper.metadata.url.pdfs = [{'url': result['urls']['pdf'], 'source': 'search'}]
+                        # If this is an open access paper, also store the PDF URL as oa_url
+                        if paper.metadata.access.is_open_access:
+                            paper.metadata.access.oa_url = result['urls']['pdf']
+                            paper.metadata.access.oa_url_engines = [engine_name]
                     if result['urls'].get('publisher'):
                         paper.metadata.url.publisher = result['urls']['publisher']
                     if result['urls'].get('doi_url'):
@@ -733,13 +740,21 @@ class ScholarPipelineSearchParallel:
 
         # Publication info
         if hasattr(meta, 'publication'):
-            result['journal'] = meta.publication.journal or ''
+            journal_raw = meta.publication.journal or ''
+            result['journal'] = normalize_journal_name(journal_raw) if journal_raw else ''
             result['impact_factor'] = meta.publication.impact_factor
 
         # Metrics
         if hasattr(meta, 'citation_count'):
             result['citation_count'] = meta.citation_count.total or 0
-        result['is_open_access'] = False  # Not stored in current Paper structure
+
+        # Access metadata
+        if hasattr(meta, 'access'):
+            result['is_open_access'] = meta.access.is_open_access or False
+            result['oa_status'] = meta.access.oa_status
+            result['oa_url'] = meta.access.oa_url
+        else:
+            result['is_open_access'] = False
 
         # URLs
         if hasattr(meta, 'url'):

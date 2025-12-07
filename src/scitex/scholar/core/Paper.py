@@ -284,6 +284,37 @@ class PathMetadata(BaseModel):
         validate_assignment = True  # Validate on attribute assignment too
 
 
+class AccessMetadata(BaseModel):
+    """Open access and licensing metadata with source tracking.
+
+    Tracks whether a paper is open access and provides URLs for OA versions.
+    Also includes license information when available.
+    """
+
+    is_open_access: Optional[bool] = None
+    is_open_access_engines: List[str] = Field(default_factory=list)
+
+    oa_status: Optional[str] = None  # gold, green, bronze, hybrid, closed
+    oa_status_engines: List[str] = Field(default_factory=list)
+
+    oa_url: Optional[str] = None  # URL to open access version
+    oa_url_engines: List[str] = Field(default_factory=list)
+
+    license: Optional[str] = None  # CC-BY, CC-BY-NC, etc.
+    license_engines: List[str] = Field(default_factory=list)
+
+    license_url: Optional[str] = None
+    license_url_engines: List[str] = Field(default_factory=list)
+
+    # For paywalled journals - opt-in for local/personal users
+    paywall_bypass_attempted: Optional[bool] = None
+    paywall_bypass_success: Optional[bool] = None
+
+    class Config:
+        populate_by_name = True
+        validate_assignment = True
+
+
 class SystemMetadata(BaseModel):
     """System tracking metadata (which engines were used to search)."""
 
@@ -313,6 +344,7 @@ class PaperMetadataStructure(BaseModel):
     )
     url: URLMetadata = Field(default_factory=URLMetadata)
     path: PathMetadata = Field(default_factory=PathMetadata)
+    access: AccessMetadata = Field(default_factory=AccessMetadata)
     system: SystemMetadata = Field(default_factory=SystemMetadata)
 
     class Config:
@@ -418,6 +450,7 @@ class PaperMetadataStructure(BaseModel):
             ),
             "url": self.url.model_dump(by_alias=True, **kwargs),
             "path": self.path.model_dump(by_alias=True, **kwargs),
+            "access": self.access.model_dump(by_alias=True, **kwargs),
             "system": self.system.model_dump(by_alias=True, **kwargs),
         }
 
@@ -488,6 +521,75 @@ class Paper(BaseModel):
         Alias for model_dump() for backward compatibility.
         """
         return self.model_dump()
+
+    def detect_open_access(
+        self,
+        use_unpaywall: bool = False,
+        update_metadata: bool = True,
+    ) -> "OAResult":
+        """
+        Detect open access status for this paper.
+
+        Uses identifiers (DOI, arXiv ID, PMCID) and known OA sources
+        to determine if the paper is freely available.
+
+        Args:
+            use_unpaywall: If True, query Unpaywall API for uncertain cases
+            update_metadata: If True, update self.metadata.access with results
+
+        Returns:
+            OAResult with detection results
+        """
+        from .open_access import check_oa_status, OAResult
+
+        result = check_oa_status(
+            doi=self.metadata.id.doi,
+            arxiv_id=self.metadata.id.arxiv_id,
+            pmcid=None,  # Not currently in IDMetadata
+            source=None,  # Source tracking not in Paper
+            journal=self.metadata.publication.journal,
+            is_open_access_flag=self.metadata.access.is_open_access,
+            use_unpaywall=use_unpaywall,
+        )
+
+        if update_metadata:
+            self.metadata.access.is_open_access = result.is_open_access
+            self.metadata.access.is_open_access_engines.append(
+                f"detect_oa:{result.source}"
+            )
+            if result.status:
+                self.metadata.access.oa_status = result.status.value
+                self.metadata.access.oa_status_engines.append(
+                    f"detect_oa:{result.source}"
+                )
+            if result.oa_url:
+                self.metadata.access.oa_url = result.oa_url
+                self.metadata.access.oa_url_engines.append(
+                    f"detect_oa:{result.source}"
+                )
+            if result.license:
+                self.metadata.access.license = result.license
+                self.metadata.access.license_engines.append(
+                    f"detect_oa:{result.source}"
+                )
+
+        return result
+
+    @property
+    def is_open_access(self) -> bool:
+        """Check if paper is open access (quick check without API calls)."""
+        if self.metadata.access.is_open_access is not None:
+            return self.metadata.access.is_open_access
+
+        # Quick detection from identifiers
+        from .open_access import detect_oa_from_identifiers
+
+        result = detect_oa_from_identifiers(
+            doi=self.metadata.id.doi,
+            arxiv_id=self.metadata.id.arxiv_id,
+            journal=self.metadata.publication.journal,
+        )
+        return result.is_open_access
 
 
 if __name__ == "__main__":
