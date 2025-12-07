@@ -44,9 +44,16 @@ class CitationDatabase:
             read_only: If True, open in read-only mode (default)
         """
         if read_only:
-            self.conn = sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)
+            self.conn = sqlite3.connect(
+                f"file:{self.db_path}?mode=ro",
+                uri=True,
+                check_same_thread=False  # Allow multi-threaded access (e.g., Django)
+            )
         else:
-            self.conn = sqlite3.connect(self.db_path)
+            self.conn = sqlite3.connect(
+                self.db_path,
+                check_same_thread=False
+            )
 
         self.conn.row_factory = sqlite3.Row
 

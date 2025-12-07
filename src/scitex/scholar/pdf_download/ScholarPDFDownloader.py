@@ -33,6 +33,7 @@ from scitex.scholar.pdf_download.strategies import (
     try_download_direct_async,
     try_download_manual_async,
     try_download_response_body_async,
+    try_download_open_access_async,
 )
 
 logger = logging.getLogger(__name__)
@@ -64,6 +65,17 @@ class ScholarPDFDownloader:
         self.config = config if config else ScholarConfig()
         self.context = context
         self.output_dir = self.config.get_library_downloads_dir()
+
+        # Load access preferences from config
+        self.prefer_open_access = self.config.resolve(
+            "prefer_open_access", default=True, type=bool
+        )
+        self.enable_paywall_access = self.config.resolve(
+            "enable_paywall_access", default=False, type=bool
+        )
+        self.track_paywall_attempts = self.config.resolve(
+            "track_paywall_attempts", default=True, type=bool
+        )
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
@@ -129,6 +141,131 @@ class ScholarPDFDownloader:
             f"{self.name}: Downloaded {len(saved_paths)}/{len(pdf_urls)} PDFs suffcessfully"
         )
         return saved_paths
+
+    async def download_open_access(
+        self,
+        oa_url: str,
+        output_path: Union[str, Path],
+        metadata: Optional[dict] = None,
+    ) -> Optional[Path]:
+        """Download PDF from an Open Access URL.
+
+        This is a simpler path for known OA papers - no browser automation needed.
+        Uses direct HTTP download with appropriate handling for different OA sources
+        (arXiv, PMC, OpenAlex OA URLs, etc.).
+
+        Args:
+            oa_url: Open Access URL (from paper.metadata.access.oa_url)
+            output_path: Path to save the downloaded PDF
+            metadata: Optional paper metadata for logging
+
+        Returns:
+            Path to downloaded PDF if successful, None otherwise
+        """
+        if not oa_url:
+            logger.debug(f"{self.name}: No OA URL provided")
+            return None
+
+        if isinstance(output_path, str):
+            output_path = Path(output_path)
+        if not str(output_path).endswith(".pdf"):
+            output_path = Path(str(output_path) + ".pdf")
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        logger.info(f"{self.name}: Attempting OA download from {oa_url[:60]}...")
+
+        result = await try_download_open_access_async(
+            oa_url=oa_url,
+            output_path=output_path,
+            metadata=metadata,
+            func_name=self.name,
+        )
+
+        if result:
+            logger.info(f"{self.name}: Successfully downloaded OA PDF to {result}")
+        else:
+            logger.debug(f"{self.name}: OA download failed, may need browser-based download")
+
+        return result
+
+    async def download_smart(
+        self,
+        paper,
+        output_path: Union[str, Path],
+    ) -> Optional[Path]:
+        """Smart download method that chooses the best strategy based on paper metadata.
+
+        Priority order:
+        1. Try Open Access URL if available and prefer_open_access is True
+        2. Try regular PDF URLs if available
+        3. Try paywall access if enable_paywall_access is True and OA failed
+
+        Args:
+            paper: Paper object with metadata (from scitex.scholar.core.Paper)
+            output_path: Path to save the downloaded PDF
+
+        Returns:
+            Path to downloaded PDF if successful, None otherwise
+        """
+        from scitex.scholar.core.Paper import Paper
+
+        if isinstance(output_path, str):
+            output_path = Path(output_path)
+        if not str(output_path).endswith(".pdf"):
+            output_path = Path(str(output_path) + ".pdf")
+
+        # Extract metadata
+        meta = paper.metadata if hasattr(paper, 'metadata') else paper
+        access = getattr(meta, 'access', None)
+        url_meta = getattr(meta, 'url', None)
+        id_meta = getattr(meta, 'id', None)
+
+        is_open_access = getattr(access, 'is_open_access', False) if access else False
+        oa_url = getattr(access, 'oa_url', None) if access else None
+        pdf_urls = getattr(url_meta, 'pdfs', []) if url_meta else []
+        doi = getattr(id_meta, 'doi', None) if id_meta else None
+
+        logger.info(f"{self.name}: Smart download for DOI={doi}, OA={is_open_access}")
+
+        # Strategy 1: Try Open Access if available
+        if self.prefer_open_access and oa_url:
+            logger.info(f"{self.name}: Trying Open Access URL first")
+            result = await self.download_open_access(oa_url, output_path)
+            if result:
+                # Update access metadata to record successful OA download
+                if access and self.track_paywall_attempts:
+                    access.paywall_bypass_attempted = False
+                return result
+
+        # Strategy 2: Try available PDF URLs
+        for pdf_entry in pdf_urls:
+            pdf_url = pdf_entry.get('url') if isinstance(pdf_entry, dict) else pdf_entry
+            if pdf_url:
+                logger.info(f"{self.name}: Trying PDF URL: {pdf_url[:60]}...")
+                result = await self.download_from_url(pdf_url, output_path, doi=doi)
+                if result:
+                    return result
+
+        # Strategy 3: Try paywall access if enabled
+        if self.enable_paywall_access and not is_open_access:
+            logger.info(f"{self.name}: Attempting paywall access (opt-in enabled)")
+            if access and self.track_paywall_attempts:
+                access.paywall_bypass_attempted = True
+
+            # Use DOI-based URL if available
+            if doi:
+                doi_url = f"https://doi.org/{doi}"
+                result = await self.download_from_url(doi_url, output_path, doi=doi)
+                if result:
+                    if access and self.track_paywall_attempts:
+                        access.paywall_bypass_success = True
+                    return result
+                else:
+                    if access and self.track_paywall_attempts:
+                        access.paywall_bypass_success = False
+
+        logger.warning(f"{self.name}: All download strategies exhausted for DOI={doi}")
+        return None
 
     async def download_from_url(
         self,

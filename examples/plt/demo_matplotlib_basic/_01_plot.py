@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 20:06:03 (ywatanabe)"
+# Timestamp: "2025-12-02 21:42:53 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/examples/plt/demo_matplotlib_basic/_01_plot.py
 
 

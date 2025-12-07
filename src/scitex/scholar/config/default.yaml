@@ -38,6 +38,61 @@ timeout: 60
 # Note: Download directory is fixed at {scholar_dir}/library/downloads/
 # Use get_library_downloads_dir() to access it
 
+# Open Access & Paywall Options
+# ----------------------------------------
+# Prefer Open Access versions when available
+prefer_open_access: ${SCITEX_SCHOLAR_PREFER_OPEN_ACCESS:-true}
+# Allow attempting paywalled journal downloads (requires authentication)
+# Only enable for local/personal use with valid institutional access
+enable_paywall_access: ${SCITEX_SCHOLAR_ENABLE_PAYWALL_ACCESS:-false}
+# Track paywall bypass attempts in metadata (for transparency)
+track_paywall_attempts: ${SCITEX_SCHOLAR_TRACK_PAYWALL_ATTEMPTS:-true}
+
+# Open Access Sources (repositories that are always free to download)
+OPENACCESS_SOURCES:
+  - arxiv
+  - pmc
+  - pubmed_central
+  - biorxiv
+  - medrxiv
+  - chemrxiv
+  - doaj
+  - plos
+  - peerj
+  - frontiers
+  - mdpi
+  - hindawi
+  - nature_communications  # Most articles are OA
+
+# Open Access Journals (partial list, DOAJ has full list)
+# These are journal name patterns (case-insensitive substring match)
+OPENACCESS_JOURNALS:
+  - "plos one"
+  - "plos biology"
+  - "plos medicine"
+  - "plos computational biology"
+  - "plos genetics"
+  - "plos pathogens"
+  - "plos neglected tropical diseases"
+  - "scientific reports"
+  - "nature communications"
+  - "elife"
+  - "peerj"
+  - "frontiers in"  # All Frontiers journals
+  - "bmc "          # All BMC journals
+  - "journal of open source software"
+  - "f1000research"
+  - "gigascience"
+  - "cell reports"
+  - "science advances"
+  - "iscience"
+  - "heliyon"
+  - "cureus"
+  - "jmir"          # Journal of Medical Internet Research
+
+# Unpaywall API email (required for polite access)
+unpaywall_email: ${SCITEX_SCHOLAR_UNPAYWALL_EMAIL:-"research@scitex.io"}
+
 # ----------------------------------------
 # cache
 # ----------------------------------------
