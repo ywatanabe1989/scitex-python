@@ -81,35 +81,37 @@ class SilverchairTranslator(BaseTranslator):
         def is_supplementary_material(url: str) -> bool:
             """Check if URL points to supplementary material."""
             supp_patterns = [
-                r'/mmc\d+\.pdf',  # Multimedia component (Lancet, Elsevier)
-                r'/attachment/',  # Generic attachment
-                r'/supplement',   # Supplementary material
-                r'/supp',         # Supplementary material (short)
-                r'supplementary', # Supplementary in filename
-                r'appendix',      # Appendix
-                r'SI\.pdf',       # Supporting Information
+                r"/mmc\d+\.pdf",  # Multimedia component (Lancet, Elsevier)
+                r"/attachment/",  # Generic attachment
+                r"/supplement",  # Supplementary material
+                r"/supp",  # Supplementary material (short)
+                r"supplementary",  # Supplementary in filename
+                r"appendix",  # Appendix
+                r"SI\.pdf",  # Supporting Information
             ]
-            return any(re.search(pattern, url, re.IGNORECASE) for pattern in supp_patterns)
+            return any(
+                re.search(pattern, url, re.IGNORECASE) for pattern in supp_patterns
+            )
 
         try:
             # Method 1: Extract from standard Silverchair PDF link (JS line 121)
             # JavaScript: let pdfURL = attr(doc, 'a.article-pdfLink', 'href');
             # Get ALL article-pdfLink elements to filter out supplementary materials
-            all_links = await page.locator('a.article-pdfLink').all()
+            all_links = await page.locator("a.article-pdfLink").all()
 
             for link in all_links:
                 try:
-                    pdf_url = await link.get_attribute('href', timeout=1000)
+                    pdf_url = await link.get_attribute("href", timeout=1000)
                     if not pdf_url:
                         continue
 
                     # Make absolute URL if needed
-                    if pdf_url.startswith('/'):
-                        base_url = await page.evaluate('window.location.origin')
+                    if pdf_url.startswith("/"):
+                        base_url = await page.evaluate("window.location.origin")
                         pdf_url = f"{base_url}{pdf_url}"
-                    elif not pdf_url.startswith('http'):
-                        base_url = await page.evaluate('window.location.href')
-                        base_url = re.sub(r'/[^/]*$', '', base_url)
+                    elif not pdf_url.startswith("http"):
+                        base_url = await page.evaluate("window.location.href")
+                        base_url = re.sub(r"/[^/]*$", "", base_url)
                         pdf_url = f"{base_url}/{pdf_url}"
 
                     # Skip supplementary materials - we want the main article PDF
@@ -129,16 +131,18 @@ class SilverchairTranslator(BaseTranslator):
         try:
             # Method 2: JAMA Network journals (JS line 123)
             # JavaScript: if (!pdfURL) pdfURL = attr(doc, 'a#pdf-link', 'data-article-url');
-            pdf_url = await page.locator('a#pdf-link').first.get_attribute('data-article-url', timeout=2000)
+            pdf_url = await page.locator("a#pdf-link").first.get_attribute(
+                "data-article-url", timeout=2000
+            )
 
             if pdf_url:
                 # Make absolute URL if needed
-                if pdf_url.startswith('/'):
-                    base_url = await page.evaluate('window.location.origin')
+                if pdf_url.startswith("/"):
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_url = f"{base_url}{pdf_url}"
-                elif not pdf_url.startswith('http'):
-                    base_url = await page.evaluate('window.location.href')
-                    base_url = re.sub(r'/[^/]*$', '', base_url)
+                elif not pdf_url.startswith("http"):
+                    base_url = await page.evaluate("window.location.href")
+                    base_url = re.sub(r"/[^/]*$", "", base_url)
                     pdf_url = f"{base_url}/{pdf_url}"
 
                 pdf_urls.append(pdf_url)
@@ -151,12 +155,12 @@ class SilverchairTranslator(BaseTranslator):
             # Method 3: Alternative PDF link selector
             # Some Silverchair sites use different selectors
             alternative_selectors = [
-                'a.pdf-download',
+                "a.pdf-download",
                 'a[href*="/pdf/"]',
                 'a[href*=".pdf"]',
                 '.article-tools a[href*="pdf"]',
                 'a:has-text("Download PDF")',
-                'a[data-article-url*="pdf"]'
+                'a[data-article-url*="pdf"]',
             ]
 
             for selector in alternative_selectors:
@@ -166,19 +170,25 @@ class SilverchairTranslator(BaseTranslator):
 
                     for link in all_links:
                         try:
-                            pdf_link = await link.get_attribute('href', timeout=500)
+                            pdf_link = await link.get_attribute("href", timeout=500)
                             if not pdf_link:
                                 # Try data-article-url attribute
-                                pdf_link = await link.get_attribute('data-article-url', timeout=500)
+                                pdf_link = await link.get_attribute(
+                                    "data-article-url", timeout=500
+                                )
 
                             if pdf_link:
                                 # Make absolute URL
-                                if pdf_link.startswith('/'):
-                                    base_url = await page.evaluate('window.location.origin')
+                                if pdf_link.startswith("/"):
+                                    base_url = await page.evaluate(
+                                        "window.location.origin"
+                                    )
                                     pdf_link = f"{base_url}{pdf_link}"
-                                elif not pdf_link.startswith('http'):
-                                    base_url = await page.evaluate('window.location.href')
-                                    base_url = re.sub(r'/[^/]*$', '', base_url)
+                                elif not pdf_link.startswith("http"):
+                                    base_url = await page.evaluate(
+                                        "window.location.href"
+                                    )
+                                    base_url = re.sub(r"/[^/]*$", "", base_url)
                                     pdf_link = f"{base_url}/{pdf_link}"
 
                                 # Skip supplementary materials
@@ -198,13 +208,15 @@ class SilverchairTranslator(BaseTranslator):
         # Method 3.5: Lancet-specific PDF URL construction
         try:
             # Lancet uses /action/showPdf?pii=<PII> pattern
-            current_url = await page.evaluate('window.location.href')
-            if 'thelancet.com' in current_url:
+            current_url = await page.evaluate("window.location.href")
+            if "thelancet.com" in current_url:
                 # Extract PII from URL like /article/PIIS1474-4422(13)70075-9/fulltext
-                pii_match = re.search(r'/article/(PII[A-Z0-9\-()]+)', current_url, re.IGNORECASE)
+                pii_match = re.search(
+                    r"/article/(PII[A-Z0-9\-()]+)", current_url, re.IGNORECASE
+                )
                 if pii_match:
                     pii = pii_match.group(1)
-                    base_url = await page.evaluate('window.location.origin')
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_url = f"{base_url}/action/showPdf?pii={pii}"
                     pdf_urls.append(pdf_url)
                     return pdf_urls
@@ -214,16 +226,18 @@ class SilverchairTranslator(BaseTranslator):
         # Method 4: Extract from meta tags (common fallback)
         try:
             # Many Silverchair sites use citation_pdf_url meta tag
-            pdf_url = await page.locator('meta[name="citation_pdf_url"]').first.get_attribute('content', timeout=2000)
+            pdf_url = await page.locator(
+                'meta[name="citation_pdf_url"]'
+            ).first.get_attribute("content", timeout=2000)
 
             if pdf_url:
                 # Make absolute URL if needed
-                if pdf_url.startswith('/'):
-                    base_url = await page.evaluate('window.location.origin')
+                if pdf_url.startswith("/"):
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_url = f"{base_url}{pdf_url}"
-                elif not pdf_url.startswith('http'):
-                    base_url = await page.evaluate('window.location.href')
-                    base_url = re.sub(r'/[^/]*$', '', base_url)
+                elif not pdf_url.startswith("http"):
+                    base_url = await page.evaluate("window.location.href")
+                    base_url = re.sub(r"/[^/]*$", "", base_url)
                     pdf_url = f"{base_url}/{pdf_url}"
 
                 pdf_urls.append(pdf_url)
@@ -235,14 +249,16 @@ class SilverchairTranslator(BaseTranslator):
         # Method 5: Construct PDF URL from DOI (for Oxford and similar)
         try:
             # Get DOI from meta tag
-            doi = await page.locator('meta[name="citation_doi"]').first.get_attribute('content', timeout=2000)
+            doi = await page.locator('meta[name="citation_doi"]').first.get_attribute(
+                "content", timeout=2000
+            )
 
             if doi:
                 # Clean DOI (remove prefix if present)
-                doi = re.sub(r'^(doi:|https?://doi\.org/)', '', doi)
+                doi = re.sub(r"^(doi:|https?://doi\.org/)", "", doi)
 
                 # Try common Silverchair PDF URL patterns
-                base_url = await page.evaluate('window.location.origin')
+                base_url = await page.evaluate("window.location.origin")
 
                 # Pattern 1: /article-pdf/DOI
                 pdf_url = f"{base_url}/article-pdf/{doi}"
@@ -256,21 +272,23 @@ class SilverchairTranslator(BaseTranslator):
         try:
             # Some publishers have a download center
             download_selectors = [
-                'a.downloadsLink',
+                "a.downloadsLink",
                 'a:has-text("Download")',
-                '.article-navigation a[href*="download"]'
+                '.article-navigation a[href*="download"]',
             ]
 
             for selector in download_selectors:
                 try:
-                    download_link = await page.locator(selector).first.get_attribute('href', timeout=1000)
-                    if download_link and 'pdf' in download_link.lower():
-                        if download_link.startswith('/'):
-                            base_url = await page.evaluate('window.location.origin')
+                    download_link = await page.locator(selector).first.get_attribute(
+                        "href", timeout=1000
+                    )
+                    if download_link and "pdf" in download_link.lower():
+                        if download_link.startswith("/"):
+                            base_url = await page.evaluate("window.location.origin")
                             download_link = f"{base_url}{download_link}"
-                        elif not download_link.startswith('http'):
-                            base_url = await page.evaluate('window.location.href')
-                            base_url = re.sub(r'/[^/]*$', '', base_url)
+                        elif not download_link.startswith("http"):
+                            base_url = await page.evaluate("window.location.href")
+                            base_url = re.sub(r"/[^/]*$", "", base_url)
                             download_link = f"{base_url}/{download_link}"
 
                         pdf_urls.append(download_link)

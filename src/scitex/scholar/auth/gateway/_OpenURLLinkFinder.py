@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/auth/gateway/_OpenURLLinkFinder.py"
-)
+
+__FILE__ = "./src/scitex/scholar/auth/gateway/_OpenURLLinkFinder.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -47,9 +46,7 @@ class OpenURLLinkFinder:
             for pattern in openurl_available_from_patterns:
                 publisher = pattern[len("Available from ") :]
                 try:
-                    link_element = page.locator(
-                        f'a:has-text("{publisher}")'
-                    ).first
+                    link_element = page.locator(f'a:has-text("{publisher}")').first
                     if await link_element.count() > 0:
                         href = await link_element.get_attribute("href")
                         if href not in seen_hrefs:
@@ -63,23 +60,17 @@ class OpenURLLinkFinder:
                             )
                             seen_hrefs.add(href)
                 except Exception as e:
-                    logger.debug(
-                        f"{self.name}: Could not find {publisher}: {e}"
-                    )
+                    logger.debug(f"{self.name}: Could not find {publisher}: {e}")
 
             if found_links:
-                publishers = [
-                    found_link.get("publisher") for found_link in found_links
-                ]
+                publishers = [found_link.get("publisher") for found_link in found_links]
                 logger.info(
                     f"{self.name}: Found {len(publishers)} link elements for: {', '.join(publishers)}"
                 )
                 return found_links
 
         except Exception as e:
-            logger.fail(
-                f"{self.name}: Did not find any urls from {page.url}: {e}"
-            )
+            logger.fail(f"{self.name}: Did not find any urls from {page.url}: {e}")
             return []
 
 
@@ -98,18 +89,17 @@ if __name__ == "__main__":
             browser_mode="interactive",
             chrome_profile_name="system",
         )
-        browser, context = (
-            await browser_manager.get_authenticated_browser_and_context_async()
-        )
+        (
+            browser,
+            context,
+        ) = await browser_manager.get_authenticated_browser_and_context_async()
         page = await context.new_page()
         url = "https://unimelb.hosted.exlibrisgroup.com/sfxlcl41?doi=10.1126/science.aao0702"
         await page.goto(url, wait_until="networkidle", timeout=30_000)
         await page.wait_for_timeout(3000)
 
         finder = OpenURLLinkFinder()
-        links = await finder.find_link_elements(
-            page, "10.1126/science.aao0702"
-        )
+        links = await finder.find_link_elements(page, "10.1126/science.aao0702")
 
         result = await click_and_wait(links[0].get("link_element"))
 

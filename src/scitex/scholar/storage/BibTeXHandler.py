@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -40,9 +41,7 @@ class BibTeXHandler:
         # Return primitive types as-is
         return value
 
-    def papers_from_bibtex(
-        self, bibtex_input: Union[str, Path]
-    ) -> List["Paper"]:
+    def papers_from_bibtex(self, bibtex_input: Union[str, Path]) -> List["Paper"]:
         """Create Papers from BibTeX file or content."""
         is_path = False
         input_str = str(bibtex_input)
@@ -67,9 +66,7 @@ class BibTeXHandler:
         else:
             return self._papers_from_bibtex_text(input_str)
 
-    def _papers_from_bibtex_file(
-        self, file_path: Union[str, Path]
-    ) -> List["Paper"]:
+    def _papers_from_bibtex_file(self, file_path: Union[str, Path]) -> List["Paper"]:
         """Create Papers from a BibTeX file."""
         bibtex_path = Path(os.path.expanduser(str(file_path)))
         if not bibtex_path.exists():
@@ -90,9 +87,7 @@ class BibTeXHandler:
 
     def _papers_from_bibtex_text(self, bibtex_content: str) -> List["Paper"]:
         """Create Papers from BibTeX content string."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".bib", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".bib", delete=False) as f:
             f.write(bibtex_content)
             temp_path = f.name
 
@@ -112,9 +107,7 @@ class BibTeXHandler:
         logger.info(f"Created {len(papers)} papers from BibTeX text")
         return papers
 
-    def paper_from_bibtex_entry(
-        self, entry: Dict[str, Any]
-    ) -> Optional["Paper"]:
+    def paper_from_bibtex_entry(self, entry: Dict[str, Any]) -> Optional["Paper"]:
         """Convert BibTeX entry to Paper."""
         from ..core.Paper import Paper
 
@@ -138,9 +131,7 @@ class BibTeXHandler:
             "year": int(fields.get("year")) if fields.get("year") else None,
             "year_source": "input" if fields.get("year") else None,
             "keywords": (
-                fields.get("keywords", "").split(", ")
-                if fields.get("keywords")
-                else []
+                fields.get("keywords", "").split(", ") if fields.get("keywords") else []
             ),
         }
 
@@ -149,6 +140,7 @@ class BibTeXHandler:
         url_field = fields.get("url", "")
         if url_field and "CorpusId" in url_field:
             import re
+
             match = re.search(r"CorpusId:(\d+)", url_field)
             if match:
                 corpus_id = match.group(1)
@@ -161,8 +153,9 @@ class BibTeXHandler:
             volume_field = fields.get("volume", "")
             if volume_field:
                 import re
+
                 # Match patterns like "abs/2503.04921" or "2503.04921"
-                match = re.search(r'(?:abs/)?(\d{4}\.\d+)', volume_field)
+                match = re.search(r"(?:abs/)?(\d{4}\.\d+)", volume_field)
                 if match:
                     arxiv_id = match.group(1)
                     arxiv_id_source = "volume"
@@ -189,6 +182,7 @@ class BibTeXHandler:
             try:
                 # Try parsing as JSON first (for enriched BibTeX files)
                 import json
+
                 cc_raw = fields["citation_count"]
                 if isinstance(cc_raw, str) and cc_raw.strip().startswith("{"):
                     citation_count_data = json.loads(cc_raw)
@@ -199,7 +193,7 @@ class BibTeXHandler:
                     # Simple integer format
                     citation_count_data = {
                         "total": int(cc_raw),
-                        "total_source": "input"
+                        "total_source": "input",
                     }
             except (ValueError, TypeError, json.JSONDecodeError):
                 pass
@@ -224,7 +218,9 @@ class BibTeXHandler:
         paper.metadata.id.pmid = id_data.get("pmid")
         if id_data.get("arxiv_id"):
             paper.metadata.id.arxiv_id = id_data["arxiv_id"]
-            paper.metadata.id.arxiv_id_engines = [id_data.get("arxiv_id_source", "input")]
+            paper.metadata.id.arxiv_id_engines = [
+                id_data.get("arxiv_id_source", "input")
+            ]
         if id_data.get("corpus_id"):
             paper.metadata.id.corpus_id = id_data["corpus_id"]
             paper.metadata.id.corpus_id_engines = ["url"]
@@ -261,9 +257,7 @@ class BibTeXHandler:
 
         return paper
 
-    def _handle_enriched_metadata(
-        self, paper: "Paper", fields: Dict[str, Any]
-    ) -> None:
+    def _handle_enriched_metadata(self, paper: "Paper", fields: Dict[str, Any]) -> None:
         """Handle enriched metadata from BibTeX fields."""
         if "citation_count" in fields:
             try:
@@ -381,14 +375,12 @@ class BibTeXHandler:
                 if k not in fields:  # Don't override updated fields
                     fields[k] = v
 
-        return {
-            "entry_type": entry_type,
-            "key": key,
-            "fields": fields
-        }
+        return {"entry_type": entry_type, "key": key, "fields": fields}
 
     def papers_to_bibtex(
-        self, papers: Union[List["Paper"], "Papers"], output_path: Optional[Union[str, Path]] = None
+        self,
+        papers: Union[List["Paper"], "Papers"],
+        output_path: Optional[Union[str, Path]] = None,
     ) -> str:
         """Convert Papers collection to BibTeX format.
 
@@ -441,7 +433,7 @@ class BibTeXHandler:
         file_paths: List[Union[str, Path]],
         output_path: Optional[Union[str, Path]] = None,
         dedup_strategy: str = "smart",
-        return_details: bool = False
+        return_details: bool = False,
     ) -> Union["Papers", Dict[str, Any]]:
         """Merge multiple BibTeX files intelligently handling duplicates.
 
@@ -459,11 +451,11 @@ class BibTeXHandler:
         all_papers = []
         file_papers = {}  # Track which papers came from which file
         duplicate_stats = {
-            'total_input': 0,
-            'duplicates_found': 0,
-            'duplicates_merged': 0,
-            'unique_papers': 0,
-            'files_processed': []
+            "total_input": 0,
+            "duplicates_found": 0,
+            "duplicates_merged": 0,
+            "unique_papers": 0,
+            "files_processed": [],
         }
 
         # Load all papers from files
@@ -473,8 +465,8 @@ class BibTeXHandler:
                 papers = self.papers_from_bibtex(file_path)
                 all_papers.extend(papers)
                 file_papers[file_path.stem] = papers  # Store papers by source file
-                duplicate_stats['total_input'] += len(papers)
-                duplicate_stats['files_processed'].append(file_path)
+                duplicate_stats["total_input"] += len(papers)
+                duplicate_stats["files_processed"].append(file_path)
                 logger.info(f"Loaded {len(papers)} papers from {file_path}")
             except Exception as e:
                 logger.warning(f"Failed to load {file_path}: {e}")
@@ -484,9 +476,7 @@ class BibTeXHandler:
         else:
             # Deduplicate papers
             unique_papers = self._deduplicate_papers(
-                all_papers,
-                strategy=dedup_strategy,
-                stats=duplicate_stats
+                all_papers, strategy=dedup_strategy, stats=duplicate_stats
             )
             merged_papers = Papers(unique_papers)
 
@@ -495,21 +485,23 @@ class BibTeXHandler:
             self.papers_to_bibtex_with_sources(
                 merged_papers,
                 output_path,
-                source_files=duplicate_stats['files_processed'],
+                source_files=duplicate_stats["files_processed"],
                 file_papers=file_papers,
-                stats=duplicate_stats
+                stats=duplicate_stats,
             )
 
         # Log statistics
-        logger.info(f"Merge complete: {duplicate_stats['unique_papers']} unique papers "
-                   f"from {duplicate_stats['total_input']} total "
-                   f"({duplicate_stats['duplicates_found']} duplicates)")
+        logger.info(
+            f"Merge complete: {duplicate_stats['unique_papers']} unique papers "
+            f"from {duplicate_stats['total_input']} total "
+            f"({duplicate_stats['duplicates_found']} duplicates)"
+        )
 
         if return_details:
             return {
                 "papers": merged_papers,
                 "file_papers": file_papers,
-                "stats": duplicate_stats
+                "stats": duplicate_stats,
             }
         else:
             return merged_papers
@@ -518,7 +510,7 @@ class BibTeXHandler:
         self,
         papers: List["Paper"],
         strategy: str = "smart",
-        stats: Optional[Dict] = None
+        stats: Optional[Dict] = None,
     ) -> List["Paper"]:
         """Deduplicate a list of papers based on strategy.
 
@@ -531,7 +523,7 @@ class BibTeXHandler:
             List of unique papers
         """
         if not stats:
-            stats = {'duplicates_found': 0, 'duplicates_merged': 0}
+            stats = {"duplicates_found": 0, "duplicates_merged": 0}
 
         unique_papers = []
         paper_index = {}  # Track papers by DOI and title
@@ -559,7 +551,7 @@ class BibTeXHandler:
                     merge_with = existing
 
             if is_duplicate and merge_with:
-                stats['duplicates_found'] += 1
+                stats["duplicates_found"] += 1
 
                 if strategy == "smart":
                     # Merge metadata from both papers
@@ -572,7 +564,7 @@ class BibTeXHandler:
                         paper_index[doi_key] = merged
                     if title_key:
                         paper_index[title_key] = merged
-                    stats['duplicates_merged'] += 1
+                    stats["duplicates_merged"] += 1
                 # else: keep_first - do nothing
 
             else:
@@ -583,7 +575,7 @@ class BibTeXHandler:
                 if title_key:
                     paper_index[title_key] = paper
 
-        stats['unique_papers'] = len(unique_papers)
+        stats["unique_papers"] = len(unique_papers)
         return unique_papers
 
     def _normalize_title(self, title: str) -> str:
@@ -592,8 +584,9 @@ class BibTeXHandler:
             return ""
         # Remove punctuation, lowercase, collapse whitespace
         import re
-        normalized = re.sub(r'[^\w\s]', '', title.lower())
-        normalized = ' '.join(normalized.split())
+
+        normalized = re.sub(r"[^\w\s]", "", title.lower())
+        normalized = " ".join(normalized.split())
         return normalized
 
     def _are_same_paper(self, paper1: "Paper", paper2: "Paper") -> bool:
@@ -629,22 +622,34 @@ class BibTeXHandler:
         from copy import deepcopy
 
         # Calculate completeness score for each paper
-        score1 = sum([
-            1 for field in [
-                paper1.metadata.id.doi, paper1.metadata.basic.abstract,
-                paper1.metadata.publication.journal,
-                paper1.metadata.citation_count.total,
-                paper1.metadata.url.pdfs, paper1.metadata.basic.authors
-            ] if field
-        ])
-        score2 = sum([
-            1 for field in [
-                paper2.metadata.id.doi, paper2.metadata.basic.abstract,
-                paper2.metadata.publication.journal,
-                paper2.metadata.citation_count.total,
-                paper2.metadata.url.pdfs, paper2.metadata.basic.authors
-            ] if field
-        ])
+        score1 = sum(
+            [
+                1
+                for field in [
+                    paper1.metadata.id.doi,
+                    paper1.metadata.basic.abstract,
+                    paper1.metadata.publication.journal,
+                    paper1.metadata.citation_count.total,
+                    paper1.metadata.url.pdfs,
+                    paper1.metadata.basic.authors,
+                ]
+                if field
+            ]
+        )
+        score2 = sum(
+            [
+                1
+                for field in [
+                    paper2.metadata.id.doi,
+                    paper2.metadata.basic.abstract,
+                    paper2.metadata.publication.journal,
+                    paper2.metadata.citation_count.total,
+                    paper2.metadata.url.pdfs,
+                    paper2.metadata.basic.authors,
+                ]
+                if field
+            ]
+        )
 
         # Start with the more complete paper
         if score1 >= score2:
@@ -659,9 +664,15 @@ class BibTeXHandler:
             merged.metadata.set_doi(donor.metadata.id.doi)
         if not merged.metadata.basic.abstract and donor.metadata.basic.abstract:
             merged.metadata.basic.abstract = donor.metadata.basic.abstract
-        if not merged.metadata.publication.journal and donor.metadata.publication.journal:
+        if (
+            not merged.metadata.publication.journal
+            and donor.metadata.publication.journal
+        ):
             merged.metadata.publication.journal = donor.metadata.publication.journal
-        if not merged.metadata.publication.publisher and donor.metadata.publication.publisher:
+        if (
+            not merged.metadata.publication.publisher
+            and donor.metadata.publication.publisher
+        ):
             merged.metadata.publication.publisher = donor.metadata.publication.publisher
         if not merged.metadata.publication.volume and donor.metadata.publication.volume:
             merged.metadata.publication.volume = donor.metadata.publication.volume
@@ -671,7 +682,9 @@ class BibTeXHandler:
             merged.metadata.publication.pages = donor.metadata.publication.pages
         # Merge PDF URLs (union)
         for donor_pdf in donor.metadata.url.pdfs:
-            if not any(p.get("url") == donor_pdf.get("url") for p in merged.metadata.url.pdfs):
+            if not any(
+                p.get("url") == donor_pdf.get("url") for p in merged.metadata.url.pdfs
+            ):
                 merged.metadata.url.pdfs.append(donor_pdf)
         if not merged.metadata.url.publisher and donor.metadata.url.publisher:
             merged.metadata.url.publisher = donor.metadata.url.publisher
@@ -710,7 +723,7 @@ class BibTeXHandler:
         output_path: Union[str, Path],
         source_files: List[Path] = None,
         file_papers: Dict[str, List["Paper"]] = None,
-        stats: Dict = None
+        stats: Dict = None,
     ) -> str:
         """Save papers to BibTeX with source file comments and SciTeX header.
 
@@ -736,11 +749,17 @@ class BibTeXHandler:
 
         # Generate header
         bibtex_lines = []
-        bibtex_lines.append("% ============================================================")
+        bibtex_lines.append(
+            "% ============================================================"
+        )
         bibtex_lines.append("% SciTeX Scholar - Merged BibTeX File")
-        bibtex_lines.append(f"% Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        bibtex_lines.append(
+            f"% Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         bibtex_lines.append("% Author: Yusuke Watanabe (ywatanabe@scitex.ai)")
-        bibtex_lines.append("% ============================================================")
+        bibtex_lines.append(
+            "% ============================================================"
+        )
 
         if source_files:
             bibtex_lines.append("%")
@@ -751,13 +770,23 @@ class BibTeXHandler:
         if stats:
             bibtex_lines.append("%")
             bibtex_lines.append("% Merge Statistics:")
-            bibtex_lines.append(f"%   Total entries loaded: {stats.get('total_input', 0)}")
-            bibtex_lines.append(f"%   Unique entries: {stats.get('unique_papers', len(paper_list))}")
-            bibtex_lines.append(f"%   Duplicates found: {stats.get('duplicates_found', 0)}")
-            if stats.get('duplicates_merged'):
-                bibtex_lines.append(f"%   Duplicates merged: {stats['duplicates_merged']}")
+            bibtex_lines.append(
+                f"%   Total entries loaded: {stats.get('total_input', 0)}"
+            )
+            bibtex_lines.append(
+                f"%   Unique entries: {stats.get('unique_papers', len(paper_list))}"
+            )
+            bibtex_lines.append(
+                f"%   Duplicates found: {stats.get('duplicates_found', 0)}"
+            )
+            if stats.get("duplicates_merged"):
+                bibtex_lines.append(
+                    f"%   Duplicates merged: {stats['duplicates_merged']}"
+                )
 
-        bibtex_lines.append("% ============================================================")
+        bibtex_lines.append(
+            "% ============================================================"
+        )
         bibtex_lines.append("")
 
         # Group papers by source file if available
@@ -765,10 +794,14 @@ class BibTeXHandler:
             for source_name, source_papers in file_papers.items():
                 # Add section comment
                 bibtex_lines.append("")
-                bibtex_lines.append(f"% ============================================================")
+                bibtex_lines.append(
+                    f"% ============================================================"
+                )
                 bibtex_lines.append(f"% Source: {source_name}.bib")
                 bibtex_lines.append(f"% Entries: {len(source_papers)}")
-                bibtex_lines.append(f"% ============================================================")
+                bibtex_lines.append(
+                    f"% ============================================================"
+                )
                 bibtex_lines.append("")
 
                 # Add papers from this source
@@ -788,15 +821,28 @@ class BibTeXHandler:
             # Add any papers not assigned to a source (e.g., merged duplicates)
             all_source_titles = set()
             for source_papers in file_papers.values():
-                all_source_titles.update(p.metadata.basic.title for p in source_papers if p.metadata.basic.title)
+                all_source_titles.update(
+                    p.metadata.basic.title
+                    for p in source_papers
+                    if p.metadata.basic.title
+                )
 
-            unassigned = [p for p in paper_list if not p.metadata.basic.title or p.metadata.basic.title not in all_source_titles]
+            unassigned = [
+                p
+                for p in paper_list
+                if not p.metadata.basic.title
+                or p.metadata.basic.title not in all_source_titles
+            ]
             if unassigned:
                 bibtex_lines.append("")
-                bibtex_lines.append(f"% ============================================================")
+                bibtex_lines.append(
+                    f"% ============================================================"
+                )
                 bibtex_lines.append(f"% Merged/Unassigned Entries")
                 bibtex_lines.append(f"% Entries: {len(unassigned)}")
-                bibtex_lines.append(f"% ============================================================")
+                bibtex_lines.append(
+                    f"% ============================================================"
+                )
                 bibtex_lines.append("")
                 for paper in unassigned:
                     entry = self.paper_to_bibtex_entry(paper)
@@ -909,7 +955,8 @@ class BibTeXHandler:
 
         # Find all BibTeX files (excluding combined.bib itself)
         bib_files = [
-            f for f in bib_dir.glob("*.bib")
+            f
+            for f in bib_dir.glob("*.bib")
             if f.name not in ["combined.bib", "merged.bib"]
         ]
 
@@ -922,9 +969,7 @@ class BibTeXHandler:
         # Merge files
         combined_path = bib_dir / "combined.bib"
         merged_papers = self.merge_bibtex_files(
-            bib_files,
-            output_path=combined_path,
-            dedup_strategy="smart"
+            bib_files, output_path=combined_path, dedup_strategy="smart"
         )
 
         logger.success(
@@ -938,7 +983,7 @@ class BibTeXHandler:
         self,
         project: str,
         output_path: Optional[Union[str, Path]] = None,
-        include_all_entries: bool = True
+        include_all_entries: bool = True,
     ) -> Path:
         """Export all papers from project library to BibTeX file.
 
@@ -972,6 +1017,7 @@ class BibTeXHandler:
 
         # Collect all papers from project symlinks
         from ..core.Paper import Paper
+
         papers = []
 
         for item in project_dir.iterdir():
@@ -1020,13 +1066,21 @@ class BibTeXHandler:
 
         # Save with project info header
         bibtex_content = []
-        bibtex_content.append("% ============================================================")
+        bibtex_content.append(
+            "% ============================================================"
+        )
         bibtex_content.append(f"% SciTeX Scholar - Project Library Export")
         bibtex_content.append(f"% Project: {project}")
-        bibtex_content.append(f"% Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        bibtex_content.append(
+            f"% Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         bibtex_content.append(f"% Entries: {len(papers)}")
-        bibtex_content.append(f"% Filter: {'All papers' if include_all_entries else 'Papers with PDFs only'}")
-        bibtex_content.append("% ============================================================")
+        bibtex_content.append(
+            f"% Filter: {'All papers' if include_all_entries else 'Papers with PDFs only'}"
+        )
+        bibtex_content.append(
+            "% ============================================================"
+        )
         bibtex_content.append("")
 
         # Add papers
@@ -1044,5 +1098,6 @@ class BibTeXHandler:
         self.update_combined_bibliography(project)
 
         return output_path
+
 
 # EOF

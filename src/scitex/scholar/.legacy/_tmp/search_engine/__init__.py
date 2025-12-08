@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -28,33 +29,25 @@ from .local._LocalSearchEngine import LocalSearchEngine
 from .local._VectorSearchEngine import VectorSearchEngine
 
 # Import unified searcher
-from ._UnifiedSearcher import (
-    UnifiedSearcher,
-    search_async,
-    search_sync,
-    build_index
-)
+from ._UnifiedSearcher import UnifiedSearcher, search_async, search_sync, build_index
 
 __all__ = [
     # Base class
-    'BaseSearchEngine',
-
+    "BaseSearchEngine",
     # Concrete search engines
-    'PubMedSearchEngine',
-    'ArxivSearchEngine',
-    'SemanticScholarSearchEngine',
-    'CrossRefSearchEngine',
-    'GoogleScholarSearchEngine',
-    'LocalSearchEngine',
-    'VectorSearchEngine',
-
+    "PubMedSearchEngine",
+    "ArxivSearchEngine",
+    "SemanticScholarSearchEngine",
+    "CrossRefSearchEngine",
+    "GoogleScholarSearchEngine",
+    "LocalSearchEngine",
+    "VectorSearchEngine",
     # Unified searcher
-    'UnifiedSearcher',
-
+    "UnifiedSearcher",
     # Convenience functions
-    'search_async',
-    'search_sync',
-    'build_index'
+    "search_async",
+    "search_sync",
+    "build_index",
 ]
 
 # EOF

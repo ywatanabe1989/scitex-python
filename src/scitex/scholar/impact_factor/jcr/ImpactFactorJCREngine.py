@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/impact_factor/jcr/ImpactFactorJCREngine.py"
-)
+
+__FILE__ = "./src/scitex/scholar/impact_factor/jcr/ImpactFactorJCREngine.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -57,12 +56,8 @@ columns = {
     "nlm_id": Column(String, comment="the unique ID of NLM", default="."),
     "factor": Column(Float(3), comment="the IF of journal"),
     "jcr": Column(String, comment="the partition of JCR", default="."),
-    "journal": Column(
-        String, comment="the title of journal", primary_key=True
-    ),
-    "journal_abbr": Column(
-        String, comment="the abbreviation of journal", default="."
-    ),
+    "journal": Column(String, comment="the title of journal", primary_key=True),
+    "journal_abbr": Column(String, comment="the abbreviation of journal", default="."),
     "issn": Column(String, comment="the ISSN of journal", default="."),
     "eissn": Column(String, comment="the eISSN of journal", default="."),
 }
@@ -124,13 +119,10 @@ class ImpactFactorJCREngine:
         with suppress_output():
             for field in keys:
                 if "%" in value:
-                    result = self.query.filter(
-                        FactorData.__dict__[field].like(value)
-                    )
+                    result = self.query.filter(FactorData.__dict__[field].like(value))
                 else:
                     result = self.query.filter(
-                        func.lower(FactorData.__dict__[field])
-                        == func.lower(value)
+                        func.lower(FactorData.__dict__[field]) == func.lower(value)
                     )
 
                 if result.count():

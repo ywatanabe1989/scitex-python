@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/storage/_LibraryManager.py"
-)
+
+__FILE__ = "./src/scitex/scholar/storage/_LibraryManager.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -78,7 +77,7 @@ class LibraryManager:
 
         metadata_file = self.library_master_dir / paper_id / "metadata.json"
         try:
-            with open(metadata_file, 'r') as f:
+            with open(metadata_file, "r") as f:
                 data = json.load(f)
 
             # Check nested structure: metadata.url.pdfs
@@ -121,7 +120,7 @@ class LibraryManager:
             return None
 
         try:
-            with open(metadata_file, 'r') as f:
+            with open(metadata_file, "r") as f:
                 data = json.load(f)
 
             # Use Paper.from_dict() which handles Pydantic validation
@@ -151,7 +150,7 @@ class LibraryManager:
         existing_data = {}
         if metadata_file.exists():
             try:
-                with open(metadata_file, 'r') as f:
+                with open(metadata_file, "r") as f:
                     existing_data = json.load(f)
             except Exception:
                 pass
@@ -168,7 +167,7 @@ class LibraryManager:
         merged_data["container"]["updated_at"] = datetime.now().isoformat()
 
         # Save to file
-        with open(metadata_file, 'w') as f:
+        with open(metadata_file, "w") as f:
             json.dump(merged_data, f, indent=2, ensure_ascii=False)
 
         logger.debug(f"Saved paper {paper_id} to storage")
@@ -217,9 +216,7 @@ class LibraryManager:
         if source and source not in engines_list:
             engines_list.append(source)
 
-    def _convert_to_standardized_metadata(
-        self, flat_metadata: Dict
-    ) -> OrderedDict:
+    def _convert_to_standardized_metadata(self, flat_metadata: Dict) -> OrderedDict:
         """Convert flat metadata dict to standardized nested structure with _engines tracking."""
         standardized = copy.deepcopy(BASE_STRUCTURE)
 
@@ -289,9 +286,7 @@ class LibraryManager:
                         standardized["citation_count"][year] = cc_value[year]
                         if f"{year}_source" in cc_value:
                             self._add_engine_to_list(
-                                standardized["citation_count"][
-                                    f"{year}_engines"
-                                ],
+                                standardized["citation_count"][f"{year}_engines"],
                                 cc_value.get(f"{year}_source"),
                             )
             else:
@@ -331,9 +326,7 @@ class LibraryManager:
                 standardized["publication"]["first_page"] = first.strip()
                 standardized["publication"]["last_page"] = last.strip()
         if "publisher" in flat_metadata:
-            standardized["publication"]["publisher"] = flat_metadata[
-                "publisher"
-            ]
+            standardized["publication"]["publisher"] = flat_metadata["publisher"]
 
         # URL section
         if "url_doi" in flat_metadata:
@@ -344,9 +337,7 @@ class LibraryManager:
                 standardized["url"]["publisher_engines"], "ScholarURLFinder"
             )
         if "url_openurl_query" in flat_metadata:
-            standardized["url"]["openurl_query"] = flat_metadata[
-                "url_openurl_query"
-            ]
+            standardized["url"]["openurl_query"] = flat_metadata["url_openurl_query"]
         if "url_openurl_resolved" in flat_metadata:
             standardized["url"]["openurl_resolved"] = flat_metadata[
                 "url_openurl_resolved"
@@ -421,9 +412,7 @@ class LibraryManager:
                         stored_year = metadata.get("year")
                         stored_doi = metadata.get("doi")
 
-                        title_match = self._is_title_similar(
-                            title, stored_title
-                        )
+                        title_match = self._is_title_similar(title, stored_title)
                         year_match = (
                             not year
                             or not stored_year
@@ -506,12 +495,9 @@ class LibraryManager:
                 year = year or paper_data.metadata.basic.year
                 journal = journal or paper_data.metadata.publication.journal
                 abstract = abstract or paper_data.metadata.basic.abstract
-                publisher = (
-                    publisher or paper_data.metadata.publication.publisher
-                )
+                publisher = publisher or paper_data.metadata.publication.publisher
                 impact_factor = (
-                    impact_factor
-                    or paper_data.metadata.publication.impact_factor
+                    impact_factor or paper_data.metadata.publication.impact_factor
                 )
                 library_id = library_id or paper_data.container.library_id
             elif isinstance(paper_data, dict):
@@ -523,9 +509,7 @@ class LibraryManager:
                 journal = journal or paper_data.get("journal")
                 abstract = abstract or paper_data.get("abstract")
                 publisher = publisher or paper_data.get("publisher")
-                impact_factor = impact_factor or paper_data.get(
-                    "impact_factor"
-                )
+                impact_factor = impact_factor or paper_data.get("impact_factor")
                 library_id = (
                     library_id
                     or paper_data.get("scitex_id")
@@ -566,9 +550,7 @@ class LibraryManager:
             "authors": authors or [],
             "year": year,
         }
-        existing_paper_dir = self.dedup_manager.check_for_existing_paper(
-            check_metadata
-        )
+        existing_paper_dir = self.dedup_manager.check_for_existing_paper(check_metadata)
 
         if existing_paper_dir:
             logger.info(f"Found existing paper: {existing_paper_dir.name}")
@@ -614,9 +596,7 @@ class LibraryManager:
         if abstract:
             clean_abstract = TextNormalizer.clean_metadata_text(abstract)
         elif metadata and metadata.get("abstract"):
-            clean_abstract = TextNormalizer.clean_metadata_text(
-                metadata["abstract"]
-            )
+            clean_abstract = TextNormalizer.clean_metadata_text(metadata["abstract"])
         elif existing_metadata.get("abstract"):
             clean_abstract = TextNormalizer.clean_metadata_text(
                 existing_metadata["abstract"]
@@ -649,45 +629,31 @@ class LibraryManager:
             or existing_metadata.get("year_source", "input" if year else None),
             "authors": existing_metadata.get("authors", authors or []),
             "authors_source": authors_source
-            or existing_metadata.get(
-                "authors_source", "input" if authors else None
-            ),
+            or existing_metadata.get("authors_source", "input" if authors else None),
             "journal": existing_metadata.get("journal", journal),
             "journal_source": journal_source
-            or existing_metadata.get(
-                "journal_source", "input" if journal else None
-            ),
+            or existing_metadata.get("journal_source", "input" if journal else None),
             # Additional bibliographic fields from explicit parameters
             "volume": existing_metadata.get("volume", volume),
             "issue": existing_metadata.get("issue", issue),
             "pages": existing_metadata.get("pages", pages),
             "publisher": existing_metadata.get("publisher", publisher),
             "issn": existing_metadata.get("issn", issn),
-            "short_journal": existing_metadata.get(
-                "short_journal", short_journal
-            ),
+            "short_journal": existing_metadata.get("short_journal", short_journal),
             # Abstract with source tracking
             "abstract": existing_metadata.get("abstract", clean_abstract),
             "abstract_source": abstract_source
-            or existing_metadata.get(
-                "abstract_source", "input" if abstract else None
-            ),
+            or existing_metadata.get("abstract_source", "input" if abstract else None),
             # Enrichment fields
-            "citation_count": existing_metadata.get(
-                "citation_count", citation_count
-            ),
-            "impact_factor": existing_metadata.get(
-                "impact_factor", impact_factor
-            ),
+            "citation_count": existing_metadata.get("citation_count", citation_count),
+            "impact_factor": existing_metadata.get("impact_factor", impact_factor),
             "scitex_id": existing_metadata.get(
                 "scitex_id", existing_metadata.get("scholar_id", paper_id)
             ),
             "created_at": existing_metadata.get(
                 "created_at", datetime.now().isoformat()
             ),
-            "created_by": existing_metadata.get(
-                "created_by", "SciTeX Scholar"
-            ),
+            "created_by": existing_metadata.get("created_by", "SciTeX Scholar"),
             "updated_at": datetime.now().isoformat(),
             "projects": existing_metadata.get(
                 "projects", [] if self.project == "master" else [self.project]
@@ -698,9 +664,7 @@ class LibraryManager:
         }
 
         # Store plain dict version for JSON serialization
-        comprehensive_metadata_plain = self._dotdict_to_dict(
-            comprehensive_metadata
-        )
+        comprehensive_metadata_plain = self._dotdict_to_dict(comprehensive_metadata)
 
         # Convert to standardized format before saving
         standardized_metadata = self._convert_to_standardized_metadata(
@@ -734,24 +698,18 @@ class LibraryManager:
                             ),
                             (
                                 "projects",
-                                comprehensive_metadata_plain.get(
-                                    "projects", []
-                                ),
+                                comprehensive_metadata_plain.get("projects", []),
                             ),
                             ("master_storage_path", str(master_storage_path)),
                             ("readable_name", readable_name),
                             ("metadata_file", str(master_metadata_file)),
                             (
                                 "pdf_downloaded_at",
-                                comprehensive_metadata_plain.get(
-                                    "pdf_downloaded_at"
-                                ),
+                                comprehensive_metadata_plain.get("pdf_downloaded_at"),
                             ),
                             (
                                 "pdf_size_bytes",
-                                comprehensive_metadata_plain.get(
-                                    "pdf_size_bytes"
-                                ),
+                                comprehensive_metadata_plain.get("pdf_size_bytes"),
                             ),
                         ]
                     ),
@@ -782,9 +740,7 @@ class LibraryManager:
                     readable_name=readable_name,
                 )
             except Exception as exc_:
-                logger.error(
-                    f"Failed to create symlink for {paper_id}: {exc_}"
-                )
+                logger.error(f"Failed to create symlink for {paper_id}: {exc_}")
 
         return paper_id
 
@@ -797,9 +753,7 @@ class LibraryManager:
         bibtex_source: Optional[str] = None,
     ) -> None:
         """Save paper that couldn't be resolved to unresolved directory."""
-        clean_title = (
-            TextNormalizer.clean_metadata_text(title) if title else ""
-        )
+        clean_title = TextNormalizer.clean_metadata_text(title) if title else ""
         unresolved_info = {
             "title": clean_title,
             "year": year,
@@ -836,9 +790,7 @@ class LibraryManager:
     ) -> Dict[str, Dict[str, str]]:
         """Resolve DOIs and create full Scholar library structure with proper paths."""
         if not self.single_doi_resolver:
-            raise ValueError(
-                "SingleDOIResolver is required for resolving DOIs"
-            )
+            raise ValueError("SingleDOIResolver is required for resolving DOIs")
 
         results = {}
         for paper in papers:
@@ -857,9 +809,7 @@ class LibraryManager:
                     sources=sources,
                 )
 
-                enhanced_metadata = self._extract_enhanced_metadata(
-                    doi_result, paper
-                )
+                enhanced_metadata = self._extract_enhanced_metadata(doi_result, paper)
                 paper_info = {**paper, **enhanced_metadata}
 
                 storage_paths = self._call_path_manager_get_storage_paths(
@@ -886,9 +836,7 @@ class LibraryManager:
                     readable_name=storage_paths["readable_name"],
                 )
 
-                bibtex_source_filename = getattr(
-                    self, "_source_filename", "papers"
-                )
+                bibtex_source_filename = getattr(self, "_source_filename", "papers")
                 info_dir = self._create_bibtex_info_structure(
                     project=project,
                     paper_info={**paper, **enhanced_metadata},
@@ -902,9 +850,7 @@ class LibraryManager:
                     "doi": complete_metadata.get("doi"),
                     "master_storage_path": str(storage_path),
                     "project_symlink_path": (
-                        str(project_symlink_path)
-                        if project_symlink_path
-                        else None
+                        str(project_symlink_path) if project_symlink_path else None
                     ),
                     "readable_name": storage_paths["readable_name"],
                     "metadata_file": str(metadata_file),
@@ -963,14 +909,10 @@ class LibraryManager:
                     or doi_result.get("abstract"),
                     "publisher": metadata_source.get("publisher")
                     or doi_result.get("publisher"),
-                    "volume": metadata_source.get("volume")
-                    or doi_result.get("volume"),
-                    "issue": metadata_source.get("issue")
-                    or doi_result.get("issue"),
-                    "pages": metadata_source.get("pages")
-                    or doi_result.get("pages"),
-                    "issn": metadata_source.get("issn")
-                    or doi_result.get("issn"),
+                    "volume": metadata_source.get("volume") or doi_result.get("volume"),
+                    "issue": metadata_source.get("issue") or doi_result.get("issue"),
+                    "pages": metadata_source.get("pages") or doi_result.get("pages"),
+                    "issn": metadata_source.get("issn") or doi_result.get("issn"),
                     "short_journal": metadata_source.get("short_journal")
                     or doi_result.get("short_journal"),
                 }
@@ -992,9 +934,7 @@ class LibraryManager:
     ) -> Dict[str, Any]:
         """Create complete metadata dictionary with source tracking."""
         raw_title = enhanced_metadata.get("title") or paper.get("title")
-        clean_title = (
-            TextNormalizer.clean_metadata_text(raw_title) if raw_title else ""
-        )
+        clean_title = TextNormalizer.clean_metadata_text(raw_title) if raw_title else ""
         raw_abstract = None
         if enhanced_metadata.get("abstract"):
             raw_abstract = TextNormalizer.clean_metadata_text(
@@ -1022,8 +962,7 @@ class LibraryManager:
                 if enhanced_metadata.get("title") != paper.get("title")
                 else "manual"
             ),
-            "authors": enhanced_metadata.get("authors")
-            or paper.get("authors"),
+            "authors": enhanced_metadata.get("authors") or paper.get("authors"),
             "authors_source": (
                 doi_source_value
                 if enhanced_metadata.get("authors") != paper.get("authors")
@@ -1035,8 +974,7 @@ class LibraryManager:
                 if enhanced_metadata.get("year") != paper.get("year")
                 else ("manual" if paper.get("year") else None)
             ),
-            "journal": enhanced_metadata.get("journal")
-            or paper.get("journal"),
+            "journal": enhanced_metadata.get("journal") or paper.get("journal"),
             "journal_source": (
                 doi_source_value
                 if enhanced_metadata.get("journal") != paper.get("journal")
@@ -1099,10 +1037,7 @@ class LibraryManager:
 
         missing_fields = []
         for field, default_value in standard_fields.items():
-            if (
-                field not in complete_metadata
-                or complete_metadata[field] is None
-            ):
+            if field not in complete_metadata or complete_metadata[field] is None:
                 complete_metadata[field] = default_value
                 missing_fields.append(field)
 
@@ -1145,18 +1080,16 @@ class LibraryManager:
             first_author = (
                 author_parts[-1] if len(author_parts) > 1 else author_parts[0]
             )
-            first_author = "".join(
-                c for c in first_author if c.isalnum() or c == "-"
-            )[:20]
+            first_author = "".join(c for c in first_author if c.isalnum() or c == "-")[
+                :20
+            ]
 
         # Format year (handle DotDict and other non-int types)
         from scitex.dict import DotDict
 
         if isinstance(year, DotDict):
             # Extract value if it's a DotDict
-            year = (
-                None  # Can't extract year from DotDict structure, use Unknown
-            )
+            year = None  # Can't extract year from DotDict structure, use Unknown
 
         # Convert to int if it's a string representation
         if isinstance(year, str) and year.isdigit():
@@ -1204,9 +1137,7 @@ class LibraryManager:
             if_val = (
                 comprehensive_metadata.get("journal_impact_factor")
                 or comprehensive_metadata.get("impact_factor")
-                or comprehensive_metadata.get("publication", {}).get(
-                    "impact_factor"
-                )
+                or comprehensive_metadata.get("publication", {}).get("impact_factor")
             )
             if isinstance(if_val, dict):
                 if_val = if_val.get("value", 0.0) or 0.0
@@ -1216,9 +1147,7 @@ class LibraryManager:
         # Check PDF status with more granular states
         pdf_files = list(master_storage_path.glob("*.pdf"))
         screenshot_dir = master_storage_path / "screenshots"
-        has_screenshots = screenshot_dir.exists() and any(
-            screenshot_dir.iterdir()
-        )
+        has_screenshots = screenshot_dir.exists() and any(screenshot_dir.iterdir())
         downloading_marker = master_storage_path / ".downloading"
         attempted_marker = master_storage_path / ".download_attempted"
 
@@ -1226,11 +1155,7 @@ class LibraryManager:
         doi = None
         if "metadata" in comprehensive_metadata:
             # Nested structure from file
-            doi = (
-                comprehensive_metadata.get("metadata", {})
-                .get("id", {})
-                .get("doi")
-            )
+            doi = comprehensive_metadata.get("metadata", {}).get("id", {}).get("doi")
         else:
             # Flat structure (during initial save)
             doi = comprehensive_metadata.get("doi")
@@ -1260,9 +1185,7 @@ class LibraryManager:
             "f": 2,
             "s": 3,
         }
-        pdf_status_str = (
-            f"{pdf_status_id_map[pdf_status_letter]}{pdf_status_letter}"
-        )
+        pdf_status_str = f"{pdf_status_id_map[pdf_status_letter]}{pdf_status_letter}"
         # Format: CC_000000-PDF_s-IF_032-2016-Author-Journal
         # PDF status: r=running, s=successful, f=failed, p=pending
         # readable_name = f"CC_{cc:06d}-PDF_{pdf_status_letter}-IF_{int(if_val):03d}-{year_str}-{first_author}-{journal_clean}"
@@ -1300,9 +1223,7 @@ class LibraryManager:
                     with open(metadata_file, "r") as f:
                         metadata = json.load(f)
                 else:
-                    logger.warning(
-                        f"No metadata found for {master_storage_path.name}"
-                    )
+                    logger.warning(f"No metadata found for {master_storage_path.name}")
                     return None
 
             # Extract metadata from nested structure if needed
@@ -1368,27 +1289,18 @@ class LibraryManager:
                 # Check if this symlink points to the same master entry
                 try:
                     target = existing_link.resolve()
-                    if (
-                        target.name == master_id
-                        and existing_link.name != readable_name
-                    ):
+                    if target.name == master_id and existing_link.name != readable_name:
                         # This is an old symlink for the same paper
-                        logger.debug(
-                            f"Removing old symlink: {existing_link.name}"
-                        )
+                        logger.debug(f"Removing old symlink: {existing_link.name}")
                         existing_link.unlink()
                 except Exception as e:
                     # Handle broken symlinks
-                    logger.debug(
-                        f"Skipping broken symlink {existing_link.name}: {e}"
-                    )
+                    logger.debug(f"Skipping broken symlink {existing_link.name}: {e}")
                     continue
 
             # Create new symlink
             if not symlink_path.exists():
-                relative_path = os.path.relpath(
-                    master_storage_path, project_dir
-                )
+                relative_path = os.path.relpath(master_storage_path, project_dir)
                 symlink_path.symlink_to(relative_path)
                 logger.success(
                     f"Created project symlink: {symlink_path} -> {relative_path}"
@@ -1430,9 +1342,7 @@ class LibraryManager:
             year = complete_metadata.get("year", "unknown")
             entry_key = f"{first_author}{year}"
 
-            bibtex_entry = self._generate_bibtex_entry(
-                complete_metadata, entry_key
-            )
+            bibtex_entry = self._generate_bibtex_entry(complete_metadata, entry_key)
 
             if bibtex_file.exists():
                 with open(bibtex_file, "a", encoding="utf-8") as file_:
@@ -1463,9 +1373,7 @@ class LibraryManager:
             logger.warning(f"Failed to create BibTeX info structure: {exc_}")
             return None
 
-    def _generate_bibtex_entry(
-        self, metadata: Dict[str, Any], entry_key: str
-    ) -> str:
+    def _generate_bibtex_entry(self, metadata: Dict[str, Any], entry_key: str) -> str:
         """Generate BibTeX entry from metadata."""
         entry_type = "article"
         if metadata.get("journal"):
@@ -1496,24 +1404,16 @@ class LibraryManager:
             if value:
                 if isinstance(value, list):
                     value = " and ".join(str(val_) for val_ in value)
-                value_escaped = (
-                    str(value).replace("{", "\\{").replace("}", "\\}")
-                )
+                value_escaped = str(value).replace("{", "\\{").replace("}", "\\}")
                 bibtex += f"  {bibtex_field} = {{{value_escaped}}},\n"
 
                 source_field = f"{meta_field}_source"
                 if source_field in metadata:
                     bibtex += f"  % {bibtex_field}_source = {metadata[source_field]}\n"
 
-        bibtex += (
-            f"  % scholar_id = {metadata.get('scholar_id', 'unknown')},\n"
-        )
-        bibtex += (
-            f"  % created_at = {metadata.get('created_at', 'unknown')},\n"
-        )
-        bibtex += (
-            f"  % created_by = {metadata.get('created_by', 'unknown')},\n"
-        )
+        bibtex += f"  % scholar_id = {metadata.get('scholar_id', 'unknown')},\n"
+        bibtex += f"  % created_at = {metadata.get('created_at', 'unknown')},\n"
+        bibtex += f"  % created_by = {metadata.get('created_by', 'unknown')},\n"
         bibtex += "}\n"
 
         return bibtex
@@ -1566,14 +1466,12 @@ class LibraryManager:
         paper_id: str = None,
         master_storage_path: Path = None,
     ) -> None:
-
         try:
             if not paper_id or not master_storage_path:
                 return
 
             project_lib_path = (
-                self.config.path_manager.get_scholar_library_path()
-                / self.project
+                self.config.path_manager.get_scholar_library_path() / self.project
             )
             project_lib_path.mkdir(parents=True, exist_ok=True)
 
@@ -1666,14 +1564,10 @@ class LibraryManager:
             return True
 
         except Exception as exc_:
-            logger.error(
-                f"Error updating library metadata for {paper_id}: {exc_}"
-            )
+            logger.error(f"Error updating library metadata for {paper_id}: {exc_}")
             return False
 
-    def create_writer_directory_structure(
-        self, paper_id: str, project: str
-    ) -> Path:
+    def create_writer_directory_structure(self, paper_id: str, project: str) -> Path:
         """Create basic paper directory structure."""
         library_path = self.config.path_manager.library_dir
         paper_dir = library_path / project / paper_id
@@ -1728,9 +1622,7 @@ class LibraryManager:
     ) -> Dict[str, str]:
         """Resolve DOIs and update Scholar library metadata.json files."""
         if not self.single_doi_resolver:
-            raise ValueError(
-                "SingleDOIResolver is required for resolving DOIs"
-            )
+            raise ValueError("SingleDOIResolver is required for resolving DOIs")
 
         results = {}
         for paper in papers_with_ids:
@@ -1769,9 +1661,7 @@ class LibraryManager:
                             "title": title,
                             "title_source": "input",
                             "year": paper.get("year"),
-                            "year_source": (
-                                "input" if paper.get("year") else None
-                            ),
+                            "year_source": ("input" if paper.get("year") else None),
                             "authors": paper.get("authors"),
                             "authors_source": (
                                 "input" if paper.get("authors") else None

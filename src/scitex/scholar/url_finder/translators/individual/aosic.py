@@ -11,7 +11,9 @@ from ..core.base import BaseTranslator
 class AOSICTranslator(BaseTranslator):
     """Archive Ouverte en Sciences de l'Information et de la Communication (AOSIC)."""
 
-    LABEL = "Archive Ouverte en Sciences de l'Information et de la Communication (AOSIC)"
+    LABEL = (
+        "Archive Ouverte en Sciences de l'Information et de la Communication (AOSIC)"
+    )
     URL_TARGET_PATTERN = r"^https?://archivesic\.ccsd\.cnrs\.fr/"
 
     @classmethod

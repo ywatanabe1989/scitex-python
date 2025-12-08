@@ -70,7 +70,9 @@ class AtyponJournalsTranslator(BaseTranslator):
     NEED_BYPASS_EMBEDDED_READER = re.compile(r"^https?://www\.embopress\.org/")
 
     # URL pattern for replacing article view paths with PDF paths
-    REPL_URL_REGEXP = re.compile(r"/doi/((?:abs|abstract|full|figure|ref|citedby|book)/)?")
+    REPL_URL_REGEXP = re.compile(
+        r"/doi/((?:abs|abstract|full|figure|ref|citedby|book)/)?"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:
@@ -85,7 +87,9 @@ class AtyponJournalsTranslator(BaseTranslator):
         return bool(re.match(cls.URL_TARGET_PATTERN, url))
 
     @classmethod
-    def _build_pdf_url(cls, url: str, has_pdf_link: bool, pdf_path: str) -> Optional[str]:
+    def _build_pdf_url(
+        cls, url: str, has_pdf_link: bool, pdf_path: str
+    ) -> Optional[str]:
         """Build PDF URL from article URL.
 
         Based on JavaScript buildPdfUrl() function (lines 194-223).
@@ -108,8 +112,8 @@ class AtyponJournalsTranslator(BaseTranslator):
 
         # Special case: EMBO Press needs embedded reader bypass
         if cls.NEED_BYPASS_EMBEDDED_READER.match(url):
-            pdf_url = re.sub(r'/e?pdf/', '/pdfdirect/', pdf_url)
-            separator = '&' if '?' in pdf_url else '?'
+            pdf_url = re.sub(r"/e?pdf/", "/pdfdirect/", pdf_url)
+            separator = "&" if "?" in pdf_url else "?"
             pdf_url = f"{pdf_url}{separator}download=true"
 
         return pdf_url
@@ -140,7 +144,7 @@ class AtyponJournalsTranslator(BaseTranslator):
             pass
 
         # PDF paths to try (line 197 + pdfdirect for Neurology and similar)
-        pdf_paths = ['/doi/pdfdirect/', '/doi/pdf/', '/doi/epdf/', '/doi/pdfplus/']
+        pdf_paths = ["/doi/pdfdirect/", "/doi/pdf/", "/doi/epdf/", "/doi/pdfplus/"]
 
         # Try each PDF path pattern
         for pdf_path in pdf_paths:
@@ -150,14 +154,14 @@ class AtyponJournalsTranslator(BaseTranslator):
 
                 if pdf_link:
                     # Try to get href directly from link
-                    href = await pdf_link.get_attribute('href')
+                    href = await pdf_link.get_attribute("href")
                     if href:
                         # Make absolute URL if needed
-                        if href.startswith('http'):
+                        if href.startswith("http"):
                             pdf_urls.append(href)
                         else:
                             # Construct absolute URL
-                            base_url = re.match(r'^https?://[^/]+', url)
+                            base_url = re.match(r"^https?://[^/]+", url)
                             if base_url:
                                 abs_url = base_url.group(0) + href
                                 pdf_urls.append(abs_url)
@@ -178,7 +182,7 @@ class AtyponJournalsTranslator(BaseTranslator):
                 # Check for citation_pdf_url meta tag
                 pdf_meta = await page.query_selector('meta[name="citation_pdf_url"]')
                 if pdf_meta:
-                    content = await pdf_meta.get_attribute('content')
+                    content = await pdf_meta.get_attribute("content")
                     if content:
                         pdf_urls.append(content)
             except Exception:
@@ -211,7 +215,9 @@ if __name__ == "__main__":
 
         for test_url in test_urls:
             print(f"\nTesting AtyponJournalsTranslator with URL: {test_url}")
-            print(f"URL matches pattern: {AtyponJournalsTranslator.matches_url(test_url)}")
+            print(
+                f"URL matches pattern: {AtyponJournalsTranslator.matches_url(test_url)}"
+            )
 
             if not AtyponJournalsTranslator.matches_url(test_url):
                 print("  URL doesn't match Atypon pattern, skipping...")
@@ -228,7 +234,9 @@ if __name__ == "__main__":
                     await page.wait_for_load_state("domcontentloaded")
 
                     print("  Extracting PDF URLs...")
-                    pdf_urls = await AtyponJournalsTranslator.extract_pdf_urls_async(page)
+                    pdf_urls = await AtyponJournalsTranslator.extract_pdf_urls_async(
+                        page
+                    )
 
                     print(f"  Found {len(pdf_urls)} PDF URL(s)")
                     for url in pdf_urls:

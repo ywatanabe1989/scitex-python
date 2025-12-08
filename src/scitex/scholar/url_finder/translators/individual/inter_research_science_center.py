@@ -85,7 +85,9 @@ if __name__ == "__main__":
         test_url = "http://www.int-res.com/abstracts/meps/v403/p13-27/"
 
         print(f"Testing InterResearchScienceCenterTranslator with URL: {test_url}")
-        print(f"URL matches pattern: {InterResearchScienceCenterTranslator.matches_url(test_url)}\n")
+        print(
+            f"URL matches pattern: {InterResearchScienceCenterTranslator.matches_url(test_url)}\n"
+        )
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
@@ -97,7 +99,9 @@ if __name__ == "__main__":
             await page.wait_for_load_state("domcontentloaded")
 
             print("Extracting PDF URLs...")
-            pdf_urls = await InterResearchScienceCenterTranslator.extract_pdf_urls_async(page)
+            pdf_urls = (
+                await InterResearchScienceCenterTranslator.extract_pdf_urls_async(page)
+            )
 
             print(f"\nResults:")
             print(f"  Found {len(pdf_urls)} PDF URL(s)")

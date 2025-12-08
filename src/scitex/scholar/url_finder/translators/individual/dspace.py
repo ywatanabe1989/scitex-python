@@ -31,7 +31,7 @@ class DSpaceTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 1,  # Import
-        "lastUpdated": "2022-12-24 19:29:02"
+        "lastUpdated": "2022-12-24 19:29:02",
     }
 
     def detect_import(self, text: str) -> bool:
@@ -100,7 +100,7 @@ class DSpaceTranslator:
             "itemType": "journalArticle",  # default
             "creators": [],
             "tags": [],
-            "attachments": []
+            "attachments": [],
         }
 
         # Extract fields from dim:field elements

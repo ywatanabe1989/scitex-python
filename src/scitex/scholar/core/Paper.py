@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/core/Paper.py"
-)
+
+__FILE__ = "./src/scitex/scholar/core/Paper.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -81,9 +80,7 @@ class BasicMetadata(BaseModel):
     def validate_year(cls, v):
         """Validate year is reasonable."""
         if v is not None and (v < 1900 or v > 2100):
-            raise ValueError(
-                f"Year {v} is outside reasonable range (1900-2100)"
-            )
+            raise ValueError(f"Year {v} is outside reasonable range (1900-2100)")
         return v
 
     class Config:
@@ -99,59 +96,37 @@ class CitationCountMetadata(BaseModel):
 
     # Yearly counts - use Field(alias=...) to map JSON "2025" to Python y2025
     y2025: Optional[int] = Field(None, alias="2025")
-    y2025_engines: List[str] = Field(
-        default_factory=list, alias="2025_engines"
-    )
+    y2025_engines: List[str] = Field(default_factory=list, alias="2025_engines")
 
     y2024: Optional[int] = Field(None, alias="2024")
-    y2024_engines: List[str] = Field(
-        default_factory=list, alias="2024_engines"
-    )
+    y2024_engines: List[str] = Field(default_factory=list, alias="2024_engines")
 
     y2023: Optional[int] = Field(None, alias="2023")
-    y2023_engines: List[str] = Field(
-        default_factory=list, alias="2023_engines"
-    )
+    y2023_engines: List[str] = Field(default_factory=list, alias="2023_engines")
 
     y2022: Optional[int] = Field(None, alias="2022")
-    y2022_engines: List[str] = Field(
-        default_factory=list, alias="2022_engines"
-    )
+    y2022_engines: List[str] = Field(default_factory=list, alias="2022_engines")
 
     y2021: Optional[int] = Field(None, alias="2021")
-    y2021_engines: List[str] = Field(
-        default_factory=list, alias="2021_engines"
-    )
+    y2021_engines: List[str] = Field(default_factory=list, alias="2021_engines")
 
     y2020: Optional[int] = Field(None, alias="2020")
-    y2020_engines: List[str] = Field(
-        default_factory=list, alias="2020_engines"
-    )
+    y2020_engines: List[str] = Field(default_factory=list, alias="2020_engines")
 
     y2019: Optional[int] = Field(None, alias="2019")
-    y2019_engines: List[str] = Field(
-        default_factory=list, alias="2019_engines"
-    )
+    y2019_engines: List[str] = Field(default_factory=list, alias="2019_engines")
 
     y2018: Optional[int] = Field(None, alias="2018")
-    y2018_engines: List[str] = Field(
-        default_factory=list, alias="2018_engines"
-    )
+    y2018_engines: List[str] = Field(default_factory=list, alias="2018_engines")
 
     y2017: Optional[int] = Field(None, alias="2017")
-    y2017_engines: List[str] = Field(
-        default_factory=list, alias="2017_engines"
-    )
+    y2017_engines: List[str] = Field(default_factory=list, alias="2017_engines")
 
     y2016: Optional[int] = Field(None, alias="2016")
-    y2016_engines: List[str] = Field(
-        default_factory=list, alias="2016_engines"
-    )
+    y2016_engines: List[str] = Field(default_factory=list, alias="2016_engines")
 
     y2015: Optional[int] = Field(None, alias="2015")
-    y2015_engines: List[str] = Field(
-        default_factory=list, alias="2015_engines"
-    )
+    y2015_engines: List[str] = Field(default_factory=list, alias="2015_engines")
 
     @field_validator(
         "total",
@@ -336,12 +311,8 @@ class PaperMetadataStructure(BaseModel):
 
     id: IDMetadata = Field(default_factory=IDMetadata)
     basic: BasicMetadata = Field(default_factory=BasicMetadata)
-    citation_count: CitationCountMetadata = Field(
-        default_factory=CitationCountMetadata
-    )
-    publication: PublicationMetadata = Field(
-        default_factory=PublicationMetadata
-    )
+    citation_count: CitationCountMetadata = Field(default_factory=CitationCountMetadata)
+    publication: PublicationMetadata = Field(default_factory=PublicationMetadata)
     url: URLMetadata = Field(default_factory=URLMetadata)
     path: PathMetadata = Field(default_factory=PathMetadata)
     access: AccessMetadata = Field(default_factory=AccessMetadata)
@@ -363,16 +334,26 @@ class PaperMetadataStructure(BaseModel):
         # DOI sync
         if self.id.doi and not self.url.doi:
             self.url.doi = f"https://doi.org/{self.id.doi}"
-            if self.id.doi_engines and "PaperMetadataStructure" not in self.url.doi_engines:
-                self.url.doi_engines = self.id.doi_engines.copy() if self.id.doi_engines else []
+            if (
+                self.id.doi_engines
+                and "PaperMetadataStructure" not in self.url.doi_engines
+            ):
+                self.url.doi_engines = (
+                    self.id.doi_engines.copy() if self.id.doi_engines else []
+                )
                 if "PaperMetadataStructure" not in self.url.doi_engines:
                     self.url.doi_engines.append("PaperMetadataStructure")
         elif self.url.doi and not self.id.doi:
             url = self.url.doi
             if "doi.org/" in url:
                 self.id.doi = url.split("doi.org/")[-1]
-                if self.url.doi_engines and "PaperMetadataStructure" not in self.id.doi_engines:
-                    self.id.doi_engines = self.url.doi_engines.copy() if self.url.doi_engines else []
+                if (
+                    self.url.doi_engines
+                    and "PaperMetadataStructure" not in self.id.doi_engines
+                ):
+                    self.id.doi_engines = (
+                        self.url.doi_engines.copy() if self.url.doi_engines else []
+                    )
                     if "PaperMetadataStructure" not in self.id.doi_engines:
                         self.id.doi_engines.append("PaperMetadataStructure")
         elif self.id.doi and self.url.doi:
@@ -385,33 +366,65 @@ class PaperMetadataStructure(BaseModel):
         # arXiv sync
         if self.id.arxiv_id and not self.url.arxiv:
             self.url.arxiv = f"https://arxiv.org/abs/{self.id.arxiv_id}"
-            if self.id.arxiv_id_engines and "PaperMetadataStructure" not in self.url.arxiv_engines:
-                self.url.arxiv_engines = self.id.arxiv_id_engines.copy() if self.id.arxiv_id_engines else []
+            if (
+                self.id.arxiv_id_engines
+                and "PaperMetadataStructure" not in self.url.arxiv_engines
+            ):
+                self.url.arxiv_engines = (
+                    self.id.arxiv_id_engines.copy() if self.id.arxiv_id_engines else []
+                )
                 if "PaperMetadataStructure" not in self.url.arxiv_engines:
                     self.url.arxiv_engines.append("PaperMetadataStructure")
         elif self.url.arxiv and not self.id.arxiv_id:
             url = self.url.arxiv
             if "arxiv.org/abs/" in url:
-                self.id.arxiv_id = url.split("arxiv.org/abs/")[-1].split("?")[0].split("#")[0]
-                if self.url.arxiv_engines and "PaperMetadataStructure" not in self.id.arxiv_id_engines:
-                    self.id.arxiv_id_engines = self.url.arxiv_engines.copy() if self.url.arxiv_engines else []
+                self.id.arxiv_id = (
+                    url.split("arxiv.org/abs/")[-1].split("?")[0].split("#")[0]
+                )
+                if (
+                    self.url.arxiv_engines
+                    and "PaperMetadataStructure" not in self.id.arxiv_id_engines
+                ):
+                    self.id.arxiv_id_engines = (
+                        self.url.arxiv_engines.copy() if self.url.arxiv_engines else []
+                    )
                     if "PaperMetadataStructure" not in self.id.arxiv_id_engines:
                         self.id.arxiv_id_engines.append("PaperMetadataStructure")
 
         # Corpus ID sync
         if self.id.corpus_id and not self.url.corpus_id:
             corpus_id_clean = str(self.id.corpus_id).replace("CorpusId:", "")
-            self.url.corpus_id = f"https://www.semanticscholar.org/paper/{corpus_id_clean}"
-            if self.id.corpus_id_engines and "PaperMetadataStructure" not in self.url.corpus_id_engines:
-                self.url.corpus_id_engines = self.id.corpus_id_engines.copy() if self.id.corpus_id_engines else []
+            self.url.corpus_id = (
+                f"https://www.semanticscholar.org/paper/{corpus_id_clean}"
+            )
+            if (
+                self.id.corpus_id_engines
+                and "PaperMetadataStructure" not in self.url.corpus_id_engines
+            ):
+                self.url.corpus_id_engines = (
+                    self.id.corpus_id_engines.copy()
+                    if self.id.corpus_id_engines
+                    else []
+                )
                 if "PaperMetadataStructure" not in self.url.corpus_id_engines:
                     self.url.corpus_id_engines.append("PaperMetadataStructure")
         elif self.url.corpus_id and not self.id.corpus_id:
             url = self.url.corpus_id
             if "semanticscholar.org/paper/" in url:
-                self.id.corpus_id = url.split("semanticscholar.org/paper/")[-1].split("?")[0].split("#")[0]
-                if self.url.corpus_id_engines and "PaperMetadataStructure" not in self.id.corpus_id_engines:
-                    self.id.corpus_id_engines = self.url.corpus_id_engines.copy() if self.url.corpus_id_engines else []
+                self.id.corpus_id = (
+                    url.split("semanticscholar.org/paper/")[-1]
+                    .split("?")[0]
+                    .split("#")[0]
+                )
+                if (
+                    self.url.corpus_id_engines
+                    and "PaperMetadataStructure" not in self.id.corpus_id_engines
+                ):
+                    self.id.corpus_id_engines = (
+                        self.url.corpus_id_engines.copy()
+                        if self.url.corpus_id_engines
+                        else []
+                    )
                     if "PaperMetadataStructure" not in self.id.corpus_id_engines:
                         self.id.corpus_id_engines.append("PaperMetadataStructure")
 
@@ -442,12 +455,8 @@ class PaperMetadataStructure(BaseModel):
         return {
             "id": self.id.model_dump(by_alias=True, **kwargs),
             "basic": self.basic.model_dump(by_alias=True, **kwargs),
-            "citation_count": self.citation_count.model_dump(
-                by_alias=True, **kwargs
-            ),
-            "publication": self.publication.model_dump(
-                by_alias=True, **kwargs
-            ),
+            "citation_count": self.citation_count.model_dump(by_alias=True, **kwargs),
+            "publication": self.publication.model_dump(by_alias=True, **kwargs),
             "url": self.url.model_dump(by_alias=True, **kwargs),
             "path": self.path.model_dump(by_alias=True, **kwargs),
             "access": self.access.model_dump(by_alias=True, **kwargs),
@@ -486,9 +495,7 @@ class ContainerMetadata(BaseModel):
 class Paper(BaseModel):
     """Complete paper with metadata and container."""
 
-    metadata: PaperMetadataStructure = Field(
-        default_factory=PaperMetadataStructure
-    )
+    metadata: PaperMetadataStructure = Field(default_factory=PaperMetadataStructure)
     container: ContainerMetadata = Field(default_factory=ContainerMetadata)
 
     class Config:
@@ -564,9 +571,7 @@ class Paper(BaseModel):
                 )
             if result.oa_url:
                 self.metadata.access.oa_url = result.oa_url
-                self.metadata.access.oa_url_engines.append(
-                    f"detect_oa:{result.source}"
-                )
+                self.metadata.access.oa_url_engines.append(f"detect_oa:{result.source}")
             if result.license:
                 self.metadata.access.license = result.license
                 self.metadata.access.license_engines.append(
@@ -687,12 +692,8 @@ if __name__ == "__main__":
     print("\n8. Serialize to JSON with field aliases:")
     paper_dict = paper.to_dict()
     print("   Year fields use numeric keys in JSON:")
-    print(
-        f"     '2024': {paper_dict['metadata']['citation_count'].get('2024')}"
-    )
-    print(
-        f"     '2023': {paper_dict['metadata']['citation_count'].get('2023')}"
-    )
+    print(f"     '2024': {paper_dict['metadata']['citation_count'].get('2024')}")
+    print(f"     '2023': {paper_dict['metadata']['citation_count'].get('2023')}")
 
     # 9. Create from dictionary
     print("\n9. Load from dictionary (from_dict):")

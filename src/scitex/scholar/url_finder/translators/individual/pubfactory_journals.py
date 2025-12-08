@@ -12,7 +12,9 @@ class PubFactoryJournalsTranslator(BaseTranslator):
     """PubFactory Journals."""
 
     LABEL = "PubFactory Journals"
-    URL_TARGET_PATTERN = r"^https://([^/]+/view/journals/.+\.xml|[^.]*journals\.[^/]+/search)\b"
+    URL_TARGET_PATTERN = (
+        r"^https://([^/]+/view/journals/.+\.xml|[^.]*journals\.[^/]+/search)\b"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

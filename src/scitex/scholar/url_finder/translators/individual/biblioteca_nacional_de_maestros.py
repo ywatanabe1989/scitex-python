@@ -34,7 +34,7 @@ class BibliotecaNacionalDeMaestrosTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2020-06-22 00:23:44"
+        "lastUpdated": "2020-06-22 00:23:44",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -48,13 +48,15 @@ class BibliotecaNacionalDeMaestrosTranslator:
         Returns:
             'book' for single record, 'multiple' for search results, empty string otherwise
         """
-        if re.search(r'/Record/\d+', url):
-            return 'book'
+        if re.search(r"/Record/\d+", url):
+            return "book"
         elif self._get_search_results(doc, check_only=True):
-            return 'multiple'
-        return ''
+            return "multiple"
+        return ""
 
-    def _get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Dict[str, str]:
+    def _get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Dict[str, str]:
         """
         Get search results from the page.
 
@@ -66,15 +68,17 @@ class BibliotecaNacionalDeMaestrosTranslator:
             Dictionary mapping URLs to titles
         """
         items = {}
-        rows = doc.select('.result div[class*="resultItemLine"]>a.title[href*="/Record/"]')
+        rows = doc.select(
+            '.result div[class*="resultItemLine"]>a.title[href*="/Record/"]'
+        )
 
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text(strip=True)
             if not href or not title:
                 continue
             if check_only:
-                return {'found': True}
+                return {"found": True}
             items[href] = title
 
         return items if items else {}
@@ -92,14 +96,14 @@ class BibliotecaNacionalDeMaestrosTranslator:
         """
         page_type = self.detect_web(doc, url)
 
-        if page_type == 'multiple':
+        if page_type == "multiple":
             # For multiple items, return list of URLs for processing
             items = self._get_search_results(doc, check_only=False)
-            return [{'url': url} for url in items.keys()]
+            return [{"url": url} for url in items.keys()]
         else:
             # For single item, construct MARC URL and return
             marc_url = self._construct_marc_url(url)
-            return [{'_marc_url': marc_url, 'url': url}]
+            return [{"_marc_url": marc_url, "url": url}]
 
     def _construct_marc_url(self, url: str) -> str:
         """
@@ -112,8 +116,8 @@ class BibliotecaNacionalDeMaestrosTranslator:
             MARC XML export URL
         """
         # Remove panels like /Details or /Holdings
-        url = re.sub(r'/(Details|Holdings)([#?].*)?', '', url)
-        return url + '/Export?style=MARCXML'
+        url = re.sub(r"/(Details|Holdings)([#?].*)?", "", url)
+        return url + "/Export?style=MARCXML"
 
     def scrape(self, marc_text: str, url: str) -> Dict[str, Any]:
         """
@@ -129,12 +133,12 @@ class BibliotecaNacionalDeMaestrosTranslator:
         # This would typically call the MARC XML translator
         # For now, return a minimal structure
         item = {
-            'itemType': 'book',
-            'libraryCatalog': 'Biblioteca Nacional de Maestros',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": "book",
+            "libraryCatalog": "Biblioteca Nacional de Maestros",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         return item

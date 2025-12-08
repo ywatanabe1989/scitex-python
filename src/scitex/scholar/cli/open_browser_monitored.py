@@ -36,7 +36,9 @@ logger = getLogger(__name__)
 class DownloadMonitor(FileSystemEventHandler):
     """Monitor downloads folder and link PDFs to library."""
 
-    def __init__(self, paper_id_map: Dict[str, str], library_manager, config: ScholarConfig):
+    def __init__(
+        self, paper_id_map: Dict[str, str], library_manager, config: ScholarConfig
+    ):
         """
         Args:
             paper_id_map: Maps download filenames to paper_ids
@@ -57,7 +59,7 @@ class DownloadMonitor(FileSystemEventHandler):
         file_path = Path(event.src_path)
 
         # Only process PDF files
-        if file_path.suffix.lower() != '.pdf':
+        if file_path.suffix.lower() != ".pdf":
             return
 
         # Avoid processing the same file twice
@@ -103,11 +105,12 @@ class DownloadMonitor(FileSystemEventHandler):
         # Strategy 3: Extract and match metadata from PDF
         try:
             from PyPDF2 import PdfReader
+
             reader = PdfReader(pdf_path)
 
             # Check PDF metadata
             if reader.metadata:
-                pdf_title = reader.metadata.get('/Title', '').lower()
+                pdf_title = reader.metadata.get("/Title", "").lower()
 
                 # Match against paper titles
                 for paper_id, title in self.paper_id_map.items():
@@ -121,7 +124,8 @@ class DownloadMonitor(FileSystemEventHandler):
 
                 # Look for DOI pattern
                 import re
-                doi_match = re.search(r'10\.\d{4,}/[^\s]+', first_page)
+
+                doi_match = re.search(r"10\.\d{4,}/[^\s]+", first_page)
                 if doi_match:
                     doi = doi_match.group()
                     for paper_id, paper_doi in self.paper_id_map.items():
@@ -159,7 +163,9 @@ class DownloadMonitor(FileSystemEventHandler):
                 journal = basic.get("journal", "Unknown")
 
                 # Clean filename
-                journal_clean = "".join(c for c in journal if c.isalnum() or c in (' ', '-', '_'))[:50]
+                journal_clean = "".join(
+                    c for c in journal if c.isalnum() or c in (" ", "-", "_")
+                )[:50]
                 proper_name = f"{first_author}-{year}-{journal_clean}.pdf"
             else:
                 # Fallback to original name
@@ -174,6 +180,7 @@ class DownloadMonitor(FileSystemEventHandler):
 
             # Update symlinks to reflect PDF_s status
             from scitex.scholar.storage._LibraryManager import LibraryManager
+
             # Trigger symlink update by touching metadata
             if metadata_file.exists():
                 metadata_file.touch()
@@ -185,12 +192,14 @@ class DownloadMonitor(FileSystemEventHandler):
 def get_failed_papers(project: str, config: ScholarConfig) -> List[Dict]:
     """Get papers with failed downloads - reuse from open_browser.py"""
     from scitex.scholar.cli.open_browser import get_failed_papers as _get_failed
+
     return _get_failed(project, config)
 
 
 def get_pending_papers(project: str, config: ScholarConfig) -> List[Dict]:
     """Get papers with pending downloads - reuse from open_browser.py"""
     from scitex.scholar.cli.open_browser import get_pending_papers as _get_pending
+
     return _get_pending(project, config)
 
 
@@ -199,7 +208,7 @@ def open_browser_with_monitoring(
     project: str,
     config: ScholarConfig,
     profile: str = None,
-    downloads_dir: Path = None
+    downloads_dir: Path = None,
 ) -> None:
     """Open browser and monitor downloads for auto-linking.
 
@@ -264,6 +273,7 @@ def open_browser_with_monitoring(
 
     # Setup download monitor
     from scitex.scholar.storage._LibraryManager import LibraryManager
+
     library_manager = LibraryManager(config)
 
     event_handler = DownloadMonitor(paper_id_map, library_manager, config)
@@ -288,9 +298,9 @@ def open_browser_with_monitoring(
                 str(profile_dir),
                 headless=False,  # Always visible for manual downloads
                 args=[
-                    '--disable-blink-features=AutomationControlled',
-                    '--disable-features=UserAgentClientHint',
-                ]
+                    "--disable-blink-features=AutomationControlled",
+                    "--disable-features=UserAgentClientHint",
+                ],
             )
 
             # Open URLs in tabs
@@ -310,12 +320,12 @@ def open_browser_with_monitoring(
                 new_page.goto(url)
                 logger.success(f"[{paper_id}] {url[:80]}...")
 
-            logger.info(f"\n{'='*60}")
+            logger.info(f"\n{'=' * 60}")
             logger.info(f"Browser opened with {len(urls_to_open)} tabs")
             logger.info("Download monitoring active - PDFs will be auto-linked")
             logger.info("Use Zotero connector or save PDFs manually")
             logger.info("Press Ctrl+C when done")
-            logger.info(f"{'='*60}\n")
+            logger.info(f"{'=' * 60}\n")
 
             try:
                 # Keep browser open
@@ -336,28 +346,21 @@ def main():
         description="Open browser with download monitoring and auto-linking"
     )
     parser.add_argument(
-        "--project",
-        required=True,
-        help="Project name (e.g., neurovista, pac)"
+        "--project", required=True, help="Project name (e.g., neurovista, pac)"
     )
     parser.add_argument(
-        "--all",
-        action="store_true",
-        help="Open both failed and pending PDFs"
+        "--all", action="store_true", help="Open both failed and pending PDFs"
     )
     parser.add_argument(
-        "--pending",
-        action="store_true",
-        help="Open only pending (not attempted) PDFs"
+        "--pending", action="store_true", help="Open only pending (not attempted) PDFs"
     )
     parser.add_argument(
-        "--profile",
-        help="Browser profile name to use (default: system)"
+        "--profile", help="Browser profile name to use (default: system)"
     )
     parser.add_argument(
         "--downloads-dir",
         type=Path,
-        help="Downloads directory to monitor (default: ~/Downloads)"
+        help="Downloads directory to monitor (default: ~/Downloads)",
     )
 
     args = parser.parse_args()
@@ -396,7 +399,7 @@ def main():
         args.project,
         config,
         profile=args.profile,
-        downloads_dir=args.downloads_dir
+        downloads_dir=args.downloads_dir,
     )
 
 

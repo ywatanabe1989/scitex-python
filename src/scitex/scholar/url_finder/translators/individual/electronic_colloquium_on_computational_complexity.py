@@ -12,7 +12,9 @@ class ElectronicColloquiumOnComputationalComplexityTranslator(BaseTranslator):
     """Electronic Colloquium on Computational Complexity."""
 
     LABEL = "Electronic Colloquium on Computational Complexity"
-    URL_TARGET_PATTERN = r"^https?://eccc\.weizmann\.ac\.il/(title|year|keyword|report|search)"
+    URL_TARGET_PATTERN = (
+        r"^https?://eccc\.weizmann\.ac\.il/(title|year|keyword|report|search)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

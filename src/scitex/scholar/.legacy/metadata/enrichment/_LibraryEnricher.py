@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -89,9 +90,7 @@ if __name__ == "__main__":
         # 2. Enrich entire project library
         library_enricher = LibraryEnricher()
         results = await library_enricher.enrich_project_async("hippocampus")
-        pprint(
-            f"Enriched {results['enriched']} of {results['processed']} papers"
-        )
+        pprint(f"Enriched {results['enriched']} of {results['processed']} papers")
 
     asyncio.run(main_async())
 

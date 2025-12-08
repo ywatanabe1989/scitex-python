@@ -31,7 +31,7 @@ class DarAlmandumahTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 4,  # Web
-        "lastUpdated": "2021-07-30 23:08:33"
+        "lastUpdated": "2021-07-30 23:08:33",
     }
 
     def detect_web(self, doc, url: str) -> Optional[str]:
@@ -88,7 +88,9 @@ class DarAlmandumahTranslator:
             return {}
 
         # Construct EndNote export URL
-        export_url = f"https://search.mandumah.com/Record/{record_id}/Export?style=EndNote"
+        export_url = (
+            f"https://search.mandumah.com/Record/{record_id}/Export?style=EndNote"
+        )
 
         # Fetch EndNote data
         # In real implementation, would fetch and parse
@@ -103,11 +105,13 @@ class DarAlmandumahTranslator:
         # Add PDF if available
         pdf_url = self._get_pdf_url(doc)
         if pdf_url:
-            item["attachments"].append({
-                "url": pdf_url,
-                "title": "Full Text PDF",
-                "mimeType": "application/pdf"
-            })
+            item["attachments"].append(
+                {
+                    "url": pdf_url,
+                    "title": "Full Text PDF",
+                    "mimeType": "application/pdf",
+                }
+            )
 
         return item
 
@@ -145,11 +149,11 @@ class DarAlmandumahTranslator:
             "itemType": "journalArticle",
             "creators": [],
             "tags": [],
-            "attachments": []
+            "attachments": [],
         }
 
         # Clean Arabic commas in author names
-        text = re.sub(r'^(\s*%[AEY].*)،', r'\1,', text, flags=re.MULTILINE)
+        text = re.sub(r"^(\s*%[AEY].*)،", r"\1,", text, flags=re.MULTILINE)
 
         # Would use Refer/BibIX translator
 

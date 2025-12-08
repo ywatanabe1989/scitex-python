@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -81,9 +82,7 @@ class BibTeXDOIResolver:
         logger.info(f"Loaded {total} bibtex_entries from {bibtex_input_path}")
 
         # Copy to library for future reference
-        self._library_cache_manager.copy_bibtex_to_library(
-            bibtex_input_path, project
-        )
+        self._library_cache_manager.copy_bibtex_to_library(bibtex_input_path, project)
 
         pending_bibtex_entries = []
         for bibtex_entry in bibtex_entries:
@@ -91,9 +90,7 @@ class BibTeXDOIResolver:
 
             if "doi" in bibtex_entry and bibtex_entry["doi"]:
                 if bibtex_entry_id not in self.progress["processed"]:
-                    self.progress["processed"][bibtex_entry_id] = bibtex_entry[
-                        "doi"
-                    ]
+                    self.progress["processed"][bibtex_entry_id] = bibtex_entry["doi"]
                 self.results["existing"].append(
                     {
                         "bibtex_entry_id": bibtex_entry_id,
@@ -141,17 +138,12 @@ class BibTeXDOIResolver:
 
             if bibtex_entry_id in self.progress["processed"]:
                 if self.progress["processed"][bibtex_entry_id] != "not_found":
-                    bibtex_entry["doi"] = self.progress["processed"][
-                        bibtex_entry_id
-                    ]
+                    bibtex_entry["doi"] = self.progress["processed"][bibtex_entry_id]
                     bibtex_entry["doi_source"] = "cache"
                 continue
 
             if bibtex_entry_id in self.progress["failed"]:
-                if (
-                    self.progress["failed"][bibtex_entry_id].get("attempts", 0)
-                    >= 3
-                ):
+                if self.progress["failed"][bibtex_entry_id].get("attempts", 0) >= 3:
                     continue
 
             pending_bibtex_entries.append(bibtex_entry)
@@ -212,9 +204,7 @@ class BibTeXDOIResolver:
                         title=title,
                         doi=doi,
                         year=int(year) if year and year.isdigit() else None,
-                        authors=(
-                            normalized_authors if normalized_authors else None
-                        ),
+                        authors=(normalized_authors if normalized_authors else None),
                         source=source,
                         metadata=result.get("metadata"),
                         bibtex_source="bibtex",
@@ -235,18 +225,14 @@ class BibTeXDOIResolver:
                             "journal": journal,
                         }
                     )
-                    logger.debug(
-                        f"Resolved DOI for '{title}': {doi} (via {source})"
-                    )
+                    logger.debug(f"Resolved DOI for '{title}': {doi} (via {source})")
                 else:
                     # Save unresolved entry to library
                     self.single_doi_resolver._library_cache_manager.save_entry(
                         title=title,
                         doi=None,
                         year=int(year) if year and year.isdigit() else None,
-                        authors=(
-                            normalized_authors if normalized_authors else None
-                        ),
+                        authors=(normalized_authors if normalized_authors else None),
                         source=None,
                         metadata=None,
                         bibtex_source="bibtex",
@@ -305,9 +291,7 @@ class BibTeXDOIResolver:
             logger.success(f"Summary CSV generated: {summary_path}")
 
         resolved_count = sum(
-            1
-            for val_ in self.progress["processed"].values()
-            if val_ != "not_found"
+            1 for val_ in self.progress["processed"].values() if val_ != "not_found"
         )
         failed_count = len(self.progress["failed"])
 
@@ -392,9 +376,7 @@ class BibTeXDOIResolver:
                     }
                 )
 
-            with open(
-                summary_path, "w", newline="", encoding="utf-8"
-            ) as csvfile:
+            with open(summary_path, "w", newline="", encoding="utf-8") as csvfile:
                 fieldnames = [
                     "bibtex_entry_id",
                     "title",
@@ -418,20 +400,14 @@ class BibTeXDOIResolver:
 
     def print_summary(self, bibtex_input_path, bibtex_output_path):
         """Print summary of resolution results."""
-        self.progress_file = (
-            self.cache_dir / f"{bibtex_input_path.stem}_progress.json"
-        )
+        self.progress_file = self.cache_dir / f"{bibtex_input_path.stem}_progress.json"
         self.progress = self._load_progress(bibtex_input_path)
         total = len(self.progress["processed"]) + len(self.progress["failed"])
         resolved = sum(
-            1
-            for val_ in self.progress["processed"].values()
-            if val_ != "not_found"
+            1 for val_ in self.progress["processed"].values() if val_ != "not_found"
         )
         not_found = sum(
-            1
-            for val_ in self.progress["processed"].values()
-            if val_ == "not_found"
+            1 for val_ in self.progress["processed"].values() if val_ == "not_found"
         )
         failed = len(self.progress["failed"])
 
@@ -439,9 +415,9 @@ class BibTeXDOIResolver:
         print("DOI Resolution Summary")
         print("=" * 60)
         print(f"Total bibtex_entries:    {total}")
-        print(f"DOIs resolved:    {resolved} ({resolved/total*100:.1f}%)")
-        print(f"DOIs not found:   {not_found} ({not_found/total*100:.1f}%)")
-        print(f"Failed bibtex_entries:   {failed} ({failed/total*100:.1f}%)")
+        print(f"DOIs resolved:    {resolved} ({resolved / total * 100:.1f}%)")
+        print(f"DOIs not found:   {not_found} ({not_found / total * 100:.1f}%)")
+        print(f"Failed bibtex_entries:   {failed} ({failed / total * 100:.1f}%)")
 
         if self.progress["started_at"]:
             started = datetime.fromisoformat(self.progress["started_at"])
@@ -458,9 +434,7 @@ class BibTeXDOIResolver:
 
     def _load_progress(self, bibtex_input_path) -> Dict[str, any]:
         """Load progress from cache file."""
-        self.progress_file = (
-            self.cache_dir / f"{bibtex_input_path.stem}_progress.json"
-        )
+        self.progress_file = self.cache_dir / f"{bibtex_input_path.stem}_progress.json"
         if self.progress_file.exists():
             try:
                 with open(self.progress_file, "r") as file_:
@@ -476,9 +450,7 @@ class BibTeXDOIResolver:
 
     def _save_progress(self, bibtex_input_path):
         """Save progress to cache file."""
-        self.progress_file = (
-            self.cache_dir / f"{bibtex_input_path.stem}_progress.json"
-        )
+        self.progress_file = self.cache_dir / f"{bibtex_input_path.stem}_progress.json"
         self.progress = self._load_progress(bibtex_input_path)
         self.progress["last_updated"] = datetime.now().isoformat()
         try:
@@ -533,9 +505,7 @@ class BibTeXDOIResolver:
             hours = seconds / 3600
             return f"{hours:.1f}h"
 
-    def _print_progress(
-        self, current: int, total: int, bibtex_entry_title: str = ""
-    ):
+    def _print_progress(self, current: int, total: int, bibtex_entry_title: str = ""):
         """Print progress with ETA like rsync."""
         if self.start_time is None:
             return

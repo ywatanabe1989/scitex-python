@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -74,9 +75,7 @@ class BatchDOIResolver:
         """
         # Initialize configuration manager first
         self.config = config or ScholarConfig()
-        self.source_stats_manager = SourceStatsManagerForBatchDOIResolution(
-            config
-        )
+        self.source_stats_manager = SourceStatsManagerForBatchDOIResolution(config)
 
         # Use SingleDOIResolver composition for core DOI resolution
         self.single_doi_resolver = SingleDOIResolver(
@@ -93,10 +92,8 @@ class BatchDOIResolver:
         self.metadata_handler = MetadataHandlerForBatchDOIResolution()
 
         # Initialize progress manager
-        doi_resolution_progress_path = (
-            self.config.get_doi_resolution_progress_path(
-                doi_resolution_progress_file
-            )
+        doi_resolution_progress_path = self.config.get_doi_resolution_progress_path(
+            doi_resolution_progress_file
         )
 
         self.progress_manager = ProgressManagerForBatchDOIResolution(
@@ -119,9 +116,7 @@ class BatchDOIResolver:
         self._start_time = self.progress_manager._start_time
 
         # Performance tracking (delegated to config manager)
-        self._source_success_rates = (
-            self.source_stats_manager._source_success_rates
-        )
+        self._source_success_rates = self.source_stats_manager._source_success_rates
 
     # def bibtex2dois(
     #     self, bibtex_path: Path, sources: Optional[List[str]] = None
@@ -193,9 +188,7 @@ class BatchDOIResolver:
                         f"DOI resolution for '{title_50}' was already resolved"
                     )
                 else:
-                    logger.success(
-                        f"Skipping already resolved paper: {title_50}..."
-                    )
+                    logger.success(f"Skipping already resolved paper: {title_50}...")
                 continue
 
             papers_to_process.append(paper)
@@ -225,9 +218,7 @@ class BatchDOIResolver:
                 == self.metadata_handler.get_paper_key(paper)
             ]
             if len(similar_papers) > 1:
-                logger.warning(
-                    f"Potential duplicate: {paper.get('title', '')[:50]}..."
-                )
+                logger.warning(f"Potential duplicate: {paper.get('title', '')[:50]}...")
 
             tasks.append((paper, ii_, len(papers_to_process)))
 
@@ -292,15 +283,11 @@ class BatchDOIResolver:
 
         # Use historical performance if available
         journal = paper.get("journal", "").lower()
-        success_rate = self.source_stats_manager.get_source_success_rate(
-            journal
-        )
+        success_rate = self.source_stats_manager.get_source_success_rate(journal)
         if success_rate > 0:
             # Sort by success rate for this journal
             sources.sort(
-                key=lambda s: self.source_stats_manager.get_source_success_rate(
-                    s
-                ),
+                key=lambda s: self.source_stats_manager.get_source_success_rate(s),
                 reverse=True,
             )
 
@@ -589,9 +576,7 @@ if __name__ == "__main__":
         print(f"\nConfig Summary:\n{config_summary}")
 
         # Show progress summary
-        progress_summary = (
-            batch_doi_resolver.progress_manager.get_progress_summary()
-        )
+        progress_summary = batch_doi_resolver.progress_manager.get_progress_summary()
         print(f"\nProgress Summary:\n{progress_summary}")
 
     asyncio.run(main())

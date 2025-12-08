@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -106,7 +107,7 @@ class Scholar:
 
         # Set workspace directory using path manager
         self.workspace_dir = self.config.path_manager.workspace_dir
-        
+
         # Initialize components with config system
         self._searcher = UnifiedSearcher(config=self.config)
 
@@ -193,7 +194,7 @@ class Scholar:
             logger.info(f"Found {len(papers)} papers for query: '{query}'")
 
         # Auto-enrich if enabled
-        if self.config.resolve('enable_auto_enrich', None, True, bool) and papers:
+        if self.config.resolve("enable_auto_enrich", None, True, bool) and papers:
             logger.info("Auto-enriching papers...")
             # Only try Semantic Scholar for citations if it was in the search sources
             use_semantic_scholar = "semantic_scholar" in (sources or [])
@@ -207,12 +208,10 @@ class Scholar:
             collection._enriched = True
 
         # Auto-download if enabled
-        if self.config.resolve('enable_auto_download', None, False, bool) and papers:
+        if self.config.resolve("enable_auto_download", None, False, bool) and papers:
             open_access = [p for p in papers if p.pdf_url]
             if open_access:
-                logger.info(
-                    f"Auto-downloading {len(open_access)} open-access PDFs..."
-                )
+                logger.info(f"Auto-downloading {len(open_access)} open-access PDFs...")
                 # Download PDFs for open access papers
                 dois = [p.doi for p in open_access if p.doi]
                 if dois:
@@ -351,13 +350,11 @@ class Scholar:
             }
 
         # Update ScholarPDFDownloader settings
-        self._pdf_downloader.acknowledge_ethical_usage = (
-            acknowledge_ethical_usage
-        )
+        self._pdf_downloader.acknowledge_ethical_usage = acknowledge_ethical_usage
         self._pdf_downloader.max_concurrent = max_worker
 
         # Check OpenAthens authentication first if enabled
-        if self.config.resolve('openathens_enabled', None, True, bool):
+        if self.config.resolve("openathens_enabled", None, True, bool):
             logger.info("Checking OpenAthens authentication status...")
             try:
                 # First try a quick local check
@@ -388,9 +385,7 @@ class Scholar:
                         print("\n🌐 Opening browser for authentication...")
 
                         # Now try with UI
-                        auth_success = self.authenticate_async_openathens(
-                            force=False
-                        )
+                        auth_success = self.authenticate_async_openathens(force=False)
 
                         if auth_success:
                             print(
@@ -398,18 +393,14 @@ class Scholar:
                             )
                             # Continue with download after successful auth
                         else:
-                            print(
-                                "\n❌ Authentication failed or was cancelled."
-                            )
+                            print("\n❌ Authentication failed or was cancelled.")
                             return {
                                 "successful": 0,
                                 "failed": len(dois),
                                 "results": [
                                     {
                                         "doi": (
-                                            doi
-                                            if isinstance(doi, str)
-                                            else doi.doi
+                                            doi if isinstance(doi, str) else doi.doi
                                         ),
                                         "success": False,
                                         "error": "OpenAthens authentication failed",
@@ -477,9 +468,7 @@ class Scholar:
                 import concurrent.futures
 
                 with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(
-                        asyncio.run, download_batch_async()
-                    )
+                    future = executor.submit(asyncio.run, download_batch_async())
                     results = future.result()
             else:
                 results = loop.run_until_complete(download_batch_async())
@@ -633,9 +622,7 @@ class Scholar:
                 papers.append(paper)
                 # Store original fields for preservation
                 if preserve_original_fields:
-                    original_fields_map[paper.get_identifier()] = entry[
-                        "fields"
-                    ]
+                    original_fields_map[paper.get_identifier()] = entry["fields"]
 
         logger.info(f"Parsed {len(papers)} papers from BibTeX file")
 
@@ -644,9 +631,7 @@ class Scholar:
 
         # Enrich papers with impact factors and citations
         if papers:
-            logger.info(
-                "Enriching papers with impact factors and citations..."
-            )
+            logger.info("Enriching papers with impact factors and citations...")
             self._enricher.enrich_all(
                 papers,
                 enrich_impact_factors=True,  # Always enrich with impact factors
@@ -658,18 +643,14 @@ class Scholar:
             logger.info(
                 "Fetching missing DOIs and other information from online sources..."
             )
-            self._fetch_missing_fields(
-                papers, add_missing_abstracts, add_missing_urls
-            )
+            self._fetch_missing_fields(papers, add_missing_abstracts, add_missing_urls)
 
         # Merge original fields if preserving
         if preserve_original_fields:
             for paper in papers:
                 paper_id = paper.get_identifier()
                 if paper_id in original_fields_map:
-                    paper._original_bibtex_fields = original_fields_map[
-                        paper_id
-                    ]
+                    paper._original_bibtex_fields = original_fields_map[paper_id]
 
         # Save enriched BibTeX
         collection.save(str(output_path))
@@ -718,9 +699,7 @@ class Scholar:
                 arxiv_id=fields.get("arxiv", ""),
                 abstract=fields.get("abstract", ""),
                 pdf_url=fields.get("url", ""),
-                keywords=self._parse_bibtex_keywords(
-                    fields.get("keywords", "")
-                ),
+                keywords=self._parse_bibtex_keywords(fields.get("keywords", "")),
                 source=f"bibtex:{entry.get('key', 'unknown')}",
             )
 
@@ -807,15 +786,11 @@ class Scholar:
         if not papers_to_update:
             return
 
-        logger.info(
-            f"Fetching missing fields for {len(papers_to_update)} papers..."
-        )
+        logger.info(f"Fetching missing fields for {len(papers_to_update)} papers...")
 
         # Use batch processing for efficiency
         if len(papers_to_update) > 1:
-            logger.info(
-                "Using batch processing for efficient DOI resolution..."
-            )
+            logger.info("Using batch processing for efficient DOI resolution...")
 
             # Extract titles and years for batch resolution
             titles = []
@@ -858,9 +833,7 @@ class Scholar:
                     abstract = self._doi_resolver.get_abstract(paper.doi)
                     if abstract:
                         paper.abstract = abstract
-                        logger.info(
-                            f"  ✓ Found abstract for: {paper.title[:50]}..."
-                        )
+                        logger.info(f"  ✓ Found abstract for: {paper.title[:50]}...")
 
         else:
             # Single paper - use regular resolver
@@ -878,9 +851,7 @@ class Scholar:
 
                 # If still no DOI, try title-based search
                 if not paper.doi:
-                    authors_tuple = (
-                        tuple(paper.authors) if paper.authors else None
-                    )
+                    authors_tuple = tuple(paper.authors) if paper.authors else None
 
                     doi = self._doi_resolver.resolve(
                         title=paper.title,
@@ -1073,26 +1044,26 @@ class Scholar:
 
         # Reinitialize PDF downloader with OpenAthens
         openathens_config = {
-            "email": self.config.resolve('openathens_email', None, None, str),
-            "debug_mode": self.config.resolve('debug_mode', None, False, bool),
+            "email": self.config.resolve("openathens_email", None, None, str),
+            "debug_mode": self.config.resolve("debug_mode", None, False, bool),
         }
 
         # Update to use ScholarPDFDownloader with new configuration
         self._pdf_downloader = ScholarPDFDownloader(
             download_dir=(
-                Path(self.config.resolve('pdf_dir', None, None, str)).expanduser()
-                if self.config.resolve('pdf_dir', None, None, str)
+                Path(self.config.resolve("pdf_dir", None, None, str)).expanduser()
+                if self.config.resolve("pdf_dir", None, None, str)
                 else None
             ),
             use_translators=True,
             use_playwright=True,
             use_openathens=True,  # OpenAthens is now configured
             openathens_config=openathens_config,
-            use_lean_library=self.config.resolve('use_lean_library', None, True, bool),
+            use_lean_library=self.config.resolve("use_lean_library", None, True, bool),
             timeout=30,
             max_retries=3,
-            max_concurrent=self.config.resolve('max_parallel_requests', None, 3, int),
-            debug_mode=self.config.resolve('debug_mode', None, False, bool),
+            max_concurrent=self.config.resolve("max_parallel_requests", None, 3, int),
+            debug_mode=self.config.resolve("debug_mode", None, False, bool),
         )
 
         logger.info("OpenAthens configured")
@@ -1119,7 +1090,7 @@ class Scholar:
         Returns:
             True if authentication successful
         """
-        if not self.config.resolve('openathens_enabled', None, True, bool):
+        if not self.config.resolve("openathens_enabled", None, True, bool):
             raise ScholarError(
                 "OpenAthens not configured. Call configure_openathens() first."
             )
@@ -1127,10 +1098,8 @@ class Scholar:
         if not self._pdf_downloader.openathens_authenticator:
             raise ScholarError("OpenAthens authenticator not initialized")
 
-        return (
-            await self._pdf_downloader.openathens_authenticator.authenticate_async(
-                force=force
-            )
+        return await self._pdf_downloader.openathens_authenticator.authenticate_async(
+            force=force
         )
 
     def is_openathens_authenticate_async(self) -> bool:
@@ -1149,15 +1118,13 @@ class Scholar:
         Returns:
             True if authenticate_async and session is valid
         """
-        if not self.config.resolve('openathens_enabled', None, True, bool):
+        if not self.config.resolve("openathens_enabled", None, True, bool):
             return False
 
         if not self._pdf_downloader.openathens_authenticator:
             return False
 
-        return (
-            await self._pdf_downloader.openathens_authenticator.is_authenticate_async_async()
-        )
+        return await self._pdf_downloader.openathens_authenticator.is_authenticate_async_async()
 
     def ensure_authenticate_async(self, force: bool = False) -> bool:
         """
@@ -1180,7 +1147,7 @@ class Scholar:
             ...     papers = scholar.search("quantum")
             ...     scholar.download_pdf_asyncs(papers)
         """
-        if not self.config.resolve('openathens_enabled', None, True, bool):
+        if not self.config.resolve("openathens_enabled", None, True, bool):
             return True  # No auth needed
 
         # Check current status
@@ -1369,29 +1336,31 @@ class Scholar:
         """Initialize or reinitialize the PDF downloader with current configuration."""
         # Prepare OpenAthens config if enabled
         openathens_config = None
-        if self.config.resolve('openathens_enabled', None, True, bool):
+        if self.config.resolve("openathens_enabled", None, True, bool):
             openathens_config = {
-                "email": self.config.resolve('openathens_email', None, None, str),
-                "debug_mode": self.config.resolve('debug_mode', None, False, bool),
+                "email": self.config.resolve("openathens_email", None, None, str),
+                "debug_mode": self.config.resolve("debug_mode", None, False, bool),
             }
 
         # Initialize ScholarPDFDownloader with config
         self._pdf_downloader = ScholarPDFDownloader(
             download_dir=(
-                Path(self.config.resolve('pdf_dir', None, None, str)).expanduser()
-                if self.config.resolve('pdf_dir', None, None, str)
+                Path(self.config.resolve("pdf_dir", None, None, str)).expanduser()
+                if self.config.resolve("pdf_dir", None, None, str)
                 else None
             ),
             use_translators=True,
             use_playwright=True,
-            use_openathens=self.config.resolve('openathens_enabled', None, True, bool),
+            use_openathens=self.config.resolve("openathens_enabled", None, True, bool),
             openathens_config=openathens_config,
-            use_lean_library=self.config.resolve('use_lean_library', None, True, bool),
-            zenrows_api_key=self.config.resolve('zenrows_api_key', None, None, str),  # Auto-enables if present
+            use_lean_library=self.config.resolve("use_lean_library", None, True, bool),
+            zenrows_api_key=self.config.resolve(
+                "zenrows_api_key", None, None, str
+            ),  # Auto-enables if present
             timeout=30,
             max_retries=3,
-            max_concurrent=self.config.resolve('max_parallel_requests', None, 3, int),
-            debug_mode=self.config.resolve('debug_mode', None, False, bool),
+            max_concurrent=self.config.resolve("max_parallel_requests", None, 3, int),
+            debug_mode=self.config.resolve("debug_mode", None, False, bool),
         )
 
         # Pass config to downloader for EZProxy support
@@ -1415,9 +1384,9 @@ class Scholar:
 
         # API Keys status
         print("\n📚 API Keys:")
-        
+
         # Semantic Scholar API
-        semantic_key = self.config.resolve('semantic_scholar_api_key', None, None, str)
+        semantic_key = self.config.resolve("semantic_scholar_api_key", None, None, str)
         if semantic_key:
             masked_key = mask_sensitive(semantic_key)
             print(f"  • Semantic Scholar: ✓ Configured ({masked_key})")
@@ -1425,7 +1394,7 @@ class Scholar:
             print("  • Semantic Scholar: ✗ Not set (citations via CrossRef only)")
 
         # CrossRef API
-        crossref_key = self.config.resolve('crossref_api_key', None, None, str)
+        crossref_key = self.config.resolve("crossref_api_key", None, None, str)
         if crossref_key:
             masked_key = mask_sensitive(crossref_key)
             print(f"  • CrossRef: ✓ Configured ({masked_key})")
@@ -1433,7 +1402,7 @@ class Scholar:
             print("  • CrossRef: ✗ Not set (works without key)")
 
         # PubMed Email
-        pubmed_email = self.config.resolve('pubmed_email', None, None, str)
+        pubmed_email = self.config.resolve("pubmed_email", None, None, str)
         if pubmed_email:
             # Mask email but show_async domain
             parts = pubmed_email.split("@")
@@ -1447,21 +1416,23 @@ class Scholar:
 
         # Features
         print("\n⚙️  Features:")
-        
+
         # Auto-enrichment
-        auto_enrich = self.config.resolve('enable_auto_enrich', None, True, bool)
+        auto_enrich = self.config.resolve("enable_auto_enrich", None, True, bool)
         print(f"  • Auto-enrichment: {'✓ Enabled' if auto_enrich else '✗ Disabled'}")
-        
+
         print("  • Impact factors: ✓ Using JCR package (2024 data)")
-        
+
         # Auto-download
-        auto_download = self.config.resolve('enable_auto_download', None, False, bool)
-        print(f"  • Auto-download PDFs: {'✓ Enabled' if auto_download else '✗ Disabled'}")
+        auto_download = self.config.resolve("enable_auto_download", None, False, bool)
+        print(
+            f"  • Auto-download PDFs: {'✓ Enabled' if auto_download else '✗ Disabled'}"
+        )
 
         # OpenAthens status
-        openathens_enabled = self.config.resolve('openathens_enabled', None, True, bool)
+        openathens_enabled = self.config.resolve("openathens_enabled", None, True, bool)
         if openathens_enabled:
-            openathens_email = self.config.resolve('openathens_email', None, None, str)
+            openathens_email = self.config.resolve("openathens_email", None, None, str)
             if openathens_email:
                 # Mask email but show_async domain
                 parts = openathens_email.split("@")
@@ -1478,11 +1449,11 @@ class Scholar:
         # Settings
         print("\n📁 Settings:")
         print(f"  • Workspace: {self.workspace_dir}")
-        
-        default_limit = self.config.resolve('default_search_limit', None, 20, int)
+
+        default_limit = self.config.resolve("default_search_limit", None, 20, int)
         print(f"  • Default search limit: {default_limit}")
-        
-        default_sources = self.config.resolve('default_search_sources', None, [], list)
+
+        default_sources = self.config.resolve("default_search_sources", None, [], list)
         if default_sources:
             print(f"  • Default sources: {', '.join(default_sources)}")
         else:
@@ -1604,9 +1575,7 @@ class Scholar:
         """
         if not self._pdf_downloader.ezproxy_authenticator:
             return False
-        return (
-            await self._pdf_downloader.ezproxy_authenticator.is_authenticate_async()
-        )
+        return await self._pdf_downloader.ezproxy_authenticator.is_authenticate_async()
 
     def is_ezproxy_authenticate_async(self) -> bool:
         """
@@ -1677,10 +1646,8 @@ class Scholar:
                 "Shibboleth not configured. Call configure_shibboleth() first."
             )
 
-        result = (
-            await self._pdf_downloader.shibboleth_authenticator.authenticate_async(
-                force=force
-            )
+        result = await self._pdf_downloader.shibboleth_authenticator.authenticate_async(
+            force=force
         )
         return bool(result.get("cookies"))
 

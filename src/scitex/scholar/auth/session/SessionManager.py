@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/auth/library/_SessionManager.py"
-)
+
+__FILE__ = "./src/scitex/scholar/auth/library/_SessionManager.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -98,9 +97,7 @@ class SessionManager:
             "has_cookies": bool(self._cookies),
             "cookie_count": len(self._cookies),
             "expiry": (
-                self._session_expiry.isoformat()
-                if self._session_expiry
-                else None
+                self._session_expiry.isoformat() if self._session_expiry else None
             ),
             "expired": self.is_session_expired(),
             "time_remaining": self._get_time_remaining(),
@@ -155,5 +152,6 @@ class SessionManager:
             "simple_cookies": self._cookies,
             "expiry": self._session_expiry,
         }
+
 
 # EOF

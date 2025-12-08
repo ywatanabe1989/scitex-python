@@ -12,7 +12,9 @@ class CambridgeTranslator(BaseTranslator):
     """Cambridge Core."""
 
     LABEL = "Cambridge Core"
-    URL_TARGET_PATTERN = r"^https?://www\.cambridge\.org/core/(search\?|journals/|books/|.+/listing?)"
+    URL_TARGET_PATTERN = (
+        r"^https?://www\.cambridge\.org/core/(search\?|journals/|books/|.+/listing?)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

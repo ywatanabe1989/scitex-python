@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -131,8 +132,7 @@ class TextNormalizer:
 
         # Compile regex patterns for efficiency
         self.compiled_patterns = {
-            pattern: re.compile(pattern)
-            for pattern in self.LATEX_TO_UNICODE.keys()
+            pattern: re.compile(pattern) for pattern in self.LATEX_TO_UNICODE.keys()
         }
 
     def normalize_latex(self, text: str) -> str:
@@ -188,9 +188,7 @@ class TextNormalizer:
         if self.ascii_fallback:
             # Remove combining characters (accents)
             normalized = "".join(
-                char
-                for char in normalized
-                if unicodedata.category(char) != "Mn"
+                char for char in normalized if unicodedata.category(char) != "Mn"
             )
 
         return normalized
@@ -345,13 +343,9 @@ class TextNormalizer:
         if not entries:
             return entries
 
-        normalized_entries = [
-            self.normalize_bibtex_entry(entry) for entry in entries
-        ]
+        normalized_entries = [self.normalize_bibtex_entry(entry) for entry in entries]
 
-        logger.info(
-            f"TextNormalizer: Normalized {len(normalized_entries)} entries"
-        )
+        logger.info(f"TextNormalizer: Normalized {len(normalized_entries)} entries")
 
         return normalized_entries
 
@@ -384,9 +378,7 @@ class TextNormalizer:
         # ASCII fallback (if enabled)
         if self.ascii_fallback:
             ascii_normalizer = TextNormalizer(ascii_fallback=True)
-            ascii_normalized = ascii_normalizer.normalize_unicode(
-                unicode_normalized
-            )
+            ascii_normalized = ascii_normalizer.normalize_unicode(unicode_normalized)
             variants.add(ascii_normalized)
 
         # Remove duplicates and empty strings
@@ -394,9 +386,7 @@ class TextNormalizer:
 
         return sorted(list(set(variants)))
 
-    def is_title_match(
-        self, title1: str, title2: str, threshold: float = 0.6
-    ) -> bool:
+    def is_title_match(self, title1: str, title2: str, threshold: float = 0.6) -> bool:
         """
         Check if two titles match using advanced normalization and similarity.
 
@@ -575,7 +565,7 @@ def main():
         variants = normalizer.create_search_variants(name)
         print(f"   {name}:")
         for i, variant in enumerate(variants):
-            print(f"     {i+1}. {variant}")
+            print(f"     {i + 1}. {variant}")
 
     print("\n" + "=" * 60)
     print("✅ TextNormalizer test completed!")

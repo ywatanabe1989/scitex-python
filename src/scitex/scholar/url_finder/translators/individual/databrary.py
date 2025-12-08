@@ -34,7 +34,7 @@ class DatabaryTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2023-04-19 16:49:05"
+        "lastUpdated": "2023-04-19 16:49:05",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -48,16 +48,18 @@ class DatabaryTranslator:
         Returns:
             'dataset' for volume pages, 'multiple' for search, empty string otherwise
         """
-        if '/volume/' in url:
-            return 'dataset'
-        elif '/search?q=' in url:
+        if "/volume/" in url:
+            return "dataset"
+        elif "/search?q=" in url:
             # Check if there are search results
-            rows = doc.select('h3.search-volume-result-title>a')
+            rows = doc.select("h3.search-volume-result-title>a")
             if rows:
-                return 'multiple'
-        return ''
+                return "multiple"
+        return ""
 
-    def get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Optional[Dict[str, str]]:
+    def get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Optional[Dict[str, str]]:
         """
         Extract search results from the page.
 
@@ -69,17 +71,17 @@ class DatabaryTranslator:
             Dictionary mapping URLs to titles, or None if none found
         """
         items = {}
-        rows = doc.select('h3.search-volume-result-title>a')
+        rows = doc.select("h3.search-volume-result-title>a")
 
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text(strip=True)
 
             if not href or not title:
                 continue
 
             if check_only:
-                return {'found': 'true'}
+                return {"found": "true"}
 
             items[href] = title
 
@@ -98,7 +100,7 @@ class DatabaryTranslator:
         """
         page_type = self.detect_web(doc, url)
 
-        if page_type == 'multiple':
+        if page_type == "multiple":
             return self.get_search_results(doc, check_only=False)
         else:
             return self.scrape(doc, url)
@@ -114,32 +116,29 @@ class DatabaryTranslator:
         Returns:
             Dictionary containing dataset metadata
         """
-        item = {
-            'itemType': 'dataset',
-            'creators': [],
-            'tags': [],
-            'attachments': []
-        }
+        item = {"itemType": "dataset", "creators": [], "tags": [], "attachments": []}
 
         # Extract DOI from the citation panel
-        doi_link = doc.select_one('p.panel-overview-volume-citation>a')
+        doi_link = doc.select_one("p.panel-overview-volume-citation>a")
         if doi_link:
-            doi = doi_link.get('href', '').replace('https://doi.org/', '').replace('http://doi.org/', '')
+            doi = (
+                doi_link.get("href", "")
+                .replace("https://doi.org/", "")
+                .replace("http://doi.org/", "")
+            )
             if doi:
-                item['DOI'] = doi
+                item["DOI"] = doi
                 # Set repository info
-                item['repository'] = 'Databrary'
-                item['libraryCatalog'] = 'Databrary'
+                item["repository"] = "Databrary"
+                item["libraryCatalog"] = "Databrary"
 
                 # Note: In the original JS, this fetches RIS data from DataCite
                 # For Python implementation, we'd extract DOI and let the DOI resolver handle it
                 # or we could implement RIS fetching here
 
                 # Add snapshot attachment
-                item['attachments'].append({
-                    'title': 'Snapshot',
-                    'url': url,
-                    'mimeType': 'text/html'
-                })
+                item["attachments"].append(
+                    {"title": "Snapshot", "url": url, "mimeType": "text/html"}
+                )
 
         return item

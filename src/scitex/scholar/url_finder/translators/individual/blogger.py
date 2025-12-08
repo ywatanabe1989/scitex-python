@@ -34,26 +34,28 @@ class BloggerTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2016-09-05 23:14:05"
+        "lastUpdated": "2016-09-05 23:14:05",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
         """Detect page type."""
-        entries = doc.select('h3.post-title.entry-title')
+        entries = doc.select("h3.post-title.entry-title")
 
         if len(entries) > 1:
-            return 'multiple'
+            return "multiple"
         elif len(entries) == 1:
-            return 'blogPost'
-        return ''
+            return "blogPost"
+        return ""
 
     def _get_search_results(self, doc: BeautifulSoup) -> Dict[str, str]:
         """Get search results."""
         items = {}
-        rows = doc.select('h3.post-title.entry-title a, li.archivedate.expanded ul.posts li a')
+        rows = doc.select(
+            "h3.post-title.entry-title a, li.archivedate.expanded ul.posts li a"
+        )
 
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text(strip=True)
             if href and title:
                 items[href] = title
@@ -64,72 +66,70 @@ class BloggerTranslator:
         """Extract data from the page."""
         page_type = self.detect_web(doc, url)
 
-        if page_type == 'multiple':
+        if page_type == "multiple":
             items = self._get_search_results(doc)
-            return [{'url': u} for u in items.keys()]
+            return [{"url": u} for u in items.keys()]
         else:
             return [self.scrape(doc, url)]
 
     def scrape(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """Scrape blog post data from the document."""
         item = {
-            'itemType': 'blogPost',
-            'libraryCatalog': 'Blogger',
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": "blogPost",
+            "libraryCatalog": "Blogger",
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Extract title
-        title_elem = doc.select_one('h3.post-title.entry-title a')
+        title_elem = doc.select_one("h3.post-title.entry-title a")
         if title_elem:
-            item['title'] = title_elem.get_text(strip=True)
+            item["title"] = title_elem.get_text(strip=True)
         else:
-            item['title'] = doc.title.string if doc.title else ''
+            item["title"] = doc.title.string if doc.title else ""
 
         # Extract author
-        author_elem = doc.select_one('span.post-author.vcard span.fn')
+        author_elem = doc.select_one("span.post-author.vcard span.fn")
         if author_elem:
             author = author_elem.get_text(strip=True).lower()
 
             # Remove "by " prefix if present
-            if ' by ' in author:
-                author = author[author.index(' by') + 3:].strip()
+            if " by " in author:
+                author = author[author.index(" by") + 3 :].strip()
 
             # Capitalize words
             words = author.split()
-            author = ' '.join(word.capitalize() for word in words)
+            author = " ".join(word.capitalize() for word in words)
 
-            item['creators'].append(self._clean_author(author, 'author'))
+            item["creators"].append(self._clean_author(author, "author"))
 
         # Extract date
-        date_elem = doc.select_one('h2.date-header')
+        date_elem = doc.select_one("h2.date-header")
         if date_elem:
-            item['date'] = date_elem.get_text(strip=True)
+            item["date"] = date_elem.get_text(strip=True)
 
         # Extract tags
-        tag_elems = doc.select('span.post-labels a')
+        tag_elems = doc.select("span.post-labels a")
         for tag_elem in tag_elems:
             tag_text = tag_elem.get_text(strip=True)
             if tag_text:
-                item['tags'].append({'tag': tag_text})
+                item["tags"].append({"tag": tag_text})
 
         # Extract blog title
         if doc.title:
-            blog_parts = doc.title.string.split(':')
+            blog_parts = doc.title.string.split(":")
             if blog_parts:
-                item['blogTitle'] = blog_parts[0]
+                item["blogTitle"] = blog_parts[0]
 
         # Clean URL (remove query and fragment)
-        clean_url = re.sub(r'[?#].+', '', url)
-        item['url'] = clean_url
+        clean_url = re.sub(r"[?#].+", "", url)
+        item["url"] = clean_url
 
         # Add snapshot
-        item['attachments'].append({
-            'url': clean_url,
-            'title': 'Blogspot Snapshot',
-            'mimeType': 'text/html'
-        })
+        item["attachments"].append(
+            {"url": clean_url, "title": "Blogspot Snapshot", "mimeType": "text/html"}
+        )
 
         return item
 
@@ -140,13 +140,9 @@ class BloggerTranslator:
 
         if len(parts) >= 2:
             return {
-                'firstName': ' '.join(parts[:-1]),
-                'lastName': parts[-1],
-                'creatorType': creator_type
+                "firstName": " ".join(parts[:-1]),
+                "lastName": parts[-1],
+                "creatorType": creator_type,
             }
         else:
-            return {
-                'firstName': '',
-                'lastName': name,
-                'creatorType': creator_type
-            }
+            return {"firstName": "", "lastName": name, "creatorType": creator_type}

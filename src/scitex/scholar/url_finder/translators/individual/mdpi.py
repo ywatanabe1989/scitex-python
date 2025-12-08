@@ -29,7 +29,9 @@ class MDPITranslator(BaseTranslator):
 
         # Method 1: citation_pdf_url meta tag (primary method for MDPI)
         try:
-            pdf_url = await page.locator('meta[name="citation_pdf_url"]').first.get_attribute('content', timeout=2000)
+            pdf_url = await page.locator(
+                'meta[name="citation_pdf_url"]'
+            ).first.get_attribute("content", timeout=2000)
             if pdf_url:
                 pdf_urls.append(pdf_url)
                 return pdf_urls
@@ -39,11 +41,13 @@ class MDPITranslator(BaseTranslator):
         # Method 2: Direct PDF download link
         try:
             # MDPI typically has a download link with specific class
-            pdf_link = await page.locator('a.download[href*="/pdf"]').first.get_attribute('href', timeout=2000)
+            pdf_link = await page.locator(
+                'a.download[href*="/pdf"]'
+            ).first.get_attribute("href", timeout=2000)
             if pdf_link:
                 # Make absolute URL if needed
-                if pdf_link.startswith('/'):
-                    base_url = await page.evaluate('window.location.origin')
+                if pdf_link.startswith("/"):
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_link = f"{base_url}{pdf_link}"
                 pdf_urls.append(pdf_link)
                 return pdf_urls
@@ -53,8 +57,10 @@ class MDPITranslator(BaseTranslator):
         # Method 3: Construct PDF URL from article URL
         # MDPI pattern: https://www.mdpi.com/2076-3425/9/7/156 -> https://www.mdpi.com/2076-3425/9/7/156/pdf
         try:
-            current_url = await page.evaluate('window.location.href')
-            if '/article/' not in current_url:  # Not an article page with /article/ prefix
+            current_url = await page.evaluate("window.location.href")
+            if (
+                "/article/" not in current_url
+            ):  # Not an article page with /article/ prefix
                 # Try appending /pdf to current URL
                 pdf_url = f"{current_url.rstrip('/')}/pdf"
                 pdf_urls.append(pdf_url)

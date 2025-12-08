@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/zotero_translators_python/individual/ssrn.py"
-)
+
+__FILE__ = "./src/zotero_translators_python/individual/ssrn.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 """SSRN translator."""
@@ -59,5 +58,6 @@ class SSRNTranslator(BaseTranslator):
             pass
 
         return pdf_urls
+
 
 # EOF

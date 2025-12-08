@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/examples/06_find_and_download.py"
-)
+
+__FILE__ = "./src/scitex/scholar/examples/06_find_and_download.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -60,9 +59,10 @@ async def find_and_download_pdf(
         browser_mode=browser_mode,
         chrome_profile_name="system",
     )
-    browser, context = (
-        await browser_manager.get_authenticated_browser_and_context_async()
-    )
+    (
+        browser,
+        context,
+    ) = await browser_manager.get_authenticated_browser_and_context_async()
 
     # Find PDF URLs
     logger.info(f"{func_name}: Finding PDF URLs...")

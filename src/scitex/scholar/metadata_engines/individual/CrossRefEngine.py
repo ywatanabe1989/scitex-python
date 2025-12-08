@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -56,9 +57,7 @@ class CrossRefEngine(BaseDOIEngine):
 
     def _search_by_doi(self, doi: str, return_as: str) -> Optional[Dict]:
         """Search by DOI directly"""
-        doi = doi.replace("https://doi.org/", "").replace(
-            "http://doi.org/", ""
-        )
+        doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
         url = f"{self.base_url}/{doi}"
 
         try:
@@ -106,9 +105,7 @@ class CrossRefEngine(BaseDOIEngine):
                 "dict",
                 "json",
             ], "return_as must be either of 'dict' or 'json'"
-            response = self.session.get(
-                self.base_url, params=params, timeout=30
-            )
+            response = self.session.get(self.base_url, params=params, timeout=30)
             response.raise_for_status()
             data = response.json()
 
@@ -145,9 +142,7 @@ class CrossRefEngine(BaseDOIEngine):
                 return_as=return_as,
             )
 
-    def _extract_metadata_from_item(
-        self, item, return_as: str
-    ) -> Optional[Dict]:
+    def _extract_metadata_from_item(self, item, return_as: str) -> Optional[Dict]:
         """Extract metadata from CrossRef item"""
         item_title = " ".join(item.get("title", []))
         if item_title.endswith("."):
@@ -171,9 +166,7 @@ class CrossRefEngine(BaseDOIEngine):
         container_titles = item.get("container-title", [])
         short_container_titles = item.get("short-container-title", [])
         journal = container_titles[0] if container_titles else None
-        short_journal = (
-            short_container_titles[0] if short_container_titles else None
-        )
+        short_journal = short_container_titles[0] if short_container_titles else None
         issn_list = item.get("ISSN", [])
         issn = issn_list[0] if issn_list else None
 
@@ -190,12 +183,8 @@ class CrossRefEngine(BaseDOIEngine):
                 "title_engines": [self.name] if item_title else None,
                 "year": pub_year if pub_year else None,
                 "year_engines": [self.name] if pub_year else None,
-                "abstract": (
-                    item.get("abstract") if item.get("abstract") else None
-                ),
-                "abstract_engines": (
-                    [self.name] if item.get("abstract") else None
-                ),
+                "abstract": (item.get("abstract") if item.get("abstract") else None),
+                "abstract_engines": ([self.name] if item.get("abstract") else None),
                 "authors": extracted_authors if extracted_authors else None,
                 "authors_engines": [self.name] if extracted_authors else None,
             },
@@ -207,15 +196,9 @@ class CrossRefEngine(BaseDOIEngine):
                 "journal": journal if journal else None,
                 "journal_engines": [self.name] if journal else None,
                 "short_journal": short_journal if short_journal else None,
-                "short_journal_engines": (
-                    [self.name] if short_journal else None
-                ),
-                "publisher": (
-                    item.get("publisher") if item.get("publisher") else None
-                ),
-                "publisher_engines": (
-                    [self.name] if item.get("publisher") else None
-                ),
+                "short_journal_engines": ([self.name] if short_journal else None),
+                "publisher": (item.get("publisher") if item.get("publisher") else None),
+                "publisher_engines": ([self.name] if item.get("publisher") else None),
                 "volume": item.get("volume") if item.get("volume") else None,
                 "volume_engines": [self.name] if item.get("volume") else None,
                 "issue": item.get("issue") if item.get("issue") else None,
@@ -225,9 +208,7 @@ class CrossRefEngine(BaseDOIEngine):
             },
             "url": {
                 "doi": (
-                    "https://doi.org/" + item.get("DOI")
-                    if item.get("DOI")
-                    else None
+                    "https://doi.org/" + item.get("DOI") if item.get("DOI") else None
                 ),
                 "doi_engines": [self.name] if item.get("DOI") else None,
             },
@@ -259,23 +240,15 @@ if __name__ == "__main__":
 
         # Search by title
         outputs["metadata_by_title_dict"] = engine.search(title=TITLE)
-        outputs["metadata_by_title_json"] = engine.search(
-            title=TITLE, return_as="json"
-        )
+        outputs["metadata_by_title_json"] = engine.search(title=TITLE, return_as="json")
 
         # Search by DOI
         outputs["metadata_by_doi_dict"] = engine.search(doi=DOI)
-        outputs["metadata_by_doi_json"] = engine.search(
-            doi=DOI, return_as="json"
-        )
+        outputs["metadata_by_doi_json"] = engine.search(doi=DOI, return_as="json")
 
         # Empty Result
-        outputs["empty_dict"] = engine._create_minimal_metadata(
-            return_as="dict"
-        )
-        outputs["empty_json"] = engine._create_minimal_metadata(
-            return_as="json"
-        )
+        outputs["empty_dict"] = engine._create_minimal_metadata(return_as="dict")
+        outputs["empty_json"] = engine._create_minimal_metadata(return_as="json")
 
         for k, v in outputs.items():
             print("----------------------------------------")

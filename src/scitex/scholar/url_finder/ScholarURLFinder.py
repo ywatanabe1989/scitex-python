@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/url_finder/ScholarURLFinder.py"
-)
+
+__FILE__ = "./src/scitex/scholar/url_finder/ScholarURLFinder.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -125,10 +124,7 @@ class ScholarURLFinder:
         for i_strategy, strategy in enumerate(STRATEGIES, 1):
             # Check if strategy should run for this URL
             publisher_filter = strategy.get("publisher_filter")
-            if (
-                publisher_filter
-                and publisher_filter.lower() not in base_url.lower()
-            ):
+            if publisher_filter and publisher_filter.lower() not in base_url.lower():
                 # logger.debug(
                 #     f"{self.name}: Skipping {strategy['name']} (filtered)"
                 # )
@@ -212,13 +208,9 @@ class ScholarURLFinder:
         if doi:
             logger.info(f"{self.name}: Detected DOI: {doi}")
             async with self._managed_page() as page:
-                resolved_url = await self.openurl_resolver.resolve_doi(
-                    doi, page
-                )
+                resolved_url = await self.openurl_resolver.resolve_doi(doi, page)
                 if resolved_url:
-                    logger.info(
-                        f"{self.name}: Resolved DOI to: {resolved_url}"
-                    )
+                    logger.info(f"{self.name}: Resolved DOI to: {resolved_url}")
                     url = resolved_url
                 else:
                     # Fallback to direct DOI URL (works for open access papers like arXiv)
@@ -246,9 +238,7 @@ class ScholarURLFinder:
                 return pdfs
             except Exception as e:
                 # logger.warning(f"{self.name}: Failed to load page: {e}")
-                await browser_logger.error(
-                    page, f"{self.name}: Navigation Error {e}"
-                )
+                await browser_logger.error(page, f"{self.name}: Navigation Error {e}")
                 return []
 
     async def _find_from_page(
@@ -259,16 +249,12 @@ class ScholarURLFinder:
             pdfs = await self._find_pdf_urls_with_strategies(page, base_url)
 
             if not pdfs:
-                await browser_logger.warning(
-                    page, f"{self.name}: No PDFs on page"
-                )
+                await browser_logger.warning(page, f"{self.name}: No PDFs on page")
 
             return pdfs
         except Exception as e:
             # logger.error(f"{self.name}: Error finding PDFs: {e}")
-            await browser_logger.error(
-                page, f"{self.name}: PDF Search Error {e}"
-            )
+            await browser_logger.error(page, f"{self.name}: PDF Search Error {e}")
             return []
 
     # ==========================================================================
@@ -335,9 +321,7 @@ if __name__ == "__main__":
             browser_mode=args.browser_mode,
             chrome_profile_name=args.chrome_profile,
         )
-        _, context = (
-            await browser_manager.get_authenticated_browser_and_context_async()
-        )
+        _, context = await browser_manager.get_authenticated_browser_and_context_async()
         # time.sleep(1)
 
         # Find PDFs

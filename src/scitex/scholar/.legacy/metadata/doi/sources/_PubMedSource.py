@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -85,9 +86,7 @@ class PubMedSource(BaseDOISource):
             query_parts.append(f"{year}[pdat]")
         query = " AND ".join(query_parts)
 
-        search_url = (
-            "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-        )
+        search_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
         search_params = {
             "db": "pubmed",
             "term": query,
@@ -95,9 +94,7 @@ class PubMedSource(BaseDOISource):
             "retmax": 5,
             "email": self.email,
         }
-        response = self.session.get(
-            search_url, params=search_params, timeout=30
-        )
+        response = self.session.get(search_url, params=search_params, timeout=30)
         response.raise_for_status()
         data = response.json()
         pmids = data.get("esearchresult", {}).get("idlist", [])
@@ -109,9 +106,7 @@ class PubMedSource(BaseDOISource):
                 metadata
                 and metadata.get("basic")
                 and metadata.get("basic").get("title")
-                and self._is_title_match(
-                    title, metadata.get("basic").get("title")
-                )
+                and self._is_title_match(title, metadata.get("basic").get("title"))
             ):
                 if return_as == "dict":
                     return metadata
@@ -124,13 +119,9 @@ class PubMedSource(BaseDOISource):
         return_as: Optional[str] = "dict",
     ) -> Optional[Dict[str, Any]]:
         """Search by DOI using PubMed database"""
-        doi = doi.replace("https://doi.org/", "").replace(
-            "http://doi.org/", ""
-        )
+        doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
 
-        search_url = (
-            "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-        )
+        search_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
         search_params = {
             "db": "pubmed",
             "term": f'"{doi}"[doi]',
@@ -139,9 +130,7 @@ class PubMedSource(BaseDOISource):
             "email": self.email,
         }
 
-        response = self.session.get(
-            search_url, params=search_params, timeout=30
-        )
+        response = self.session.get(search_url, params=search_params, timeout=30)
         response.raise_for_status()
         data = response.json()
         pmids = data.get("esearchresult", {}).get("idlist", [])
@@ -252,9 +241,7 @@ class PubMedSource(BaseDOISource):
                 "journal": journal,
                 "journal_sources": [self.name] if journal else None,
                 "short_journal": short_journal,
-                "short_journal_sources": (
-                    [self.name] if short_journal else None
-                ),
+                "short_journal_sources": ([self.name] if short_journal else None),
                 "issn": issn,
                 "issn_sources": [self.name] if issn else None,
                 "volume": volume,
@@ -293,9 +280,7 @@ if __name__ == "__main__":
 
     # Search by title
     outputs["metadata_by_title_dict"] = source.search(title=TITLE)
-    outputs["metadata_by_title_json"] = source.search(
-        title=TITLE, return_as="json"
-    )
+    outputs["metadata_by_title_json"] = source.search(title=TITLE, return_as="json")
 
     # Search by DOI
     outputs["metadata_by_doi_dict"] = source.search(doi=DOI)
@@ -303,9 +288,7 @@ if __name__ == "__main__":
 
     # Search by PubMed ID
     outputs["metadata_by_pmid_dict"] = source.search(pmid=PMID)
-    outputs["metadata_by_pmid_json"] = source.search(
-        pmid=PMID, return_as="json"
-    )
+    outputs["metadata_by_pmid_json"] = source.search(pmid=PMID, return_as="json")
 
     for k, v in outputs.items():
         print("----------------------------------------")

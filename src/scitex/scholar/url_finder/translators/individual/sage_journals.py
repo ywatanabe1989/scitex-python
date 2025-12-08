@@ -84,12 +84,14 @@ class SAGEJournalsTranslator(BaseTranslator):
         try:
             # Method 1: Extract DOI from meta tag (JavaScript line 83)
             # JavaScript: var doi = ZU.xpathText(doc, '//meta[@name="dc.Identifier" and @scheme="doi"]/@content');
-            doi = await page.locator('meta[name="dc.Identifier"][scheme="doi"]').first.get_attribute('content', timeout=3000)
+            doi = await page.locator(
+                'meta[name="dc.Identifier"][scheme="doi"]'
+            ).first.get_attribute("content", timeout=3000)
 
             if doi:
                 # Construct PDF URL (JavaScript line 88)
                 # JavaScript: let pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
-                base_url = await page.evaluate('window.location.origin')
+                base_url = await page.evaluate("window.location.origin")
                 pdf_url = f"{base_url}/doi/pdf/{doi}"
                 pdf_urls.append(pdf_url)
                 return pdf_urls
@@ -101,11 +103,11 @@ class SAGEJournalsTranslator(BaseTranslator):
         # JavaScript: doi = url.match(/10\.[^?#]+/)[0];
         try:
             current_url = page.url
-            doi_match = re.search(r'(10\.[^?#]+)', current_url)
+            doi_match = re.search(r"(10\.[^?#]+)", current_url)
 
             if doi_match:
                 doi = doi_match.group(1)
-                base_url = await page.evaluate('window.location.origin')
+                base_url = await page.evaluate("window.location.origin")
                 pdf_url = f"{base_url}/doi/pdf/{doi}"
                 pdf_urls.append(pdf_url)
                 return pdf_urls
@@ -118,25 +120,27 @@ class SAGEJournalsTranslator(BaseTranslator):
         try:
             # Common selectors for SAGE PDF download links
             selectors = [
-                'a.show-pdf',
+                "a.show-pdf",
                 'a[href*="/doi/pdf/"]',
-                'a.pdf-download',
+                "a.pdf-download",
                 'a[title*="PDF"]',
                 '.epub-section__access-options a[href*="pdf"]',
-                'a.download-pdf-link'
+                "a.download-pdf-link",
             ]
 
             for selector in selectors:
                 try:
-                    pdf_link = await page.locator(selector).first.get_attribute('href', timeout=1000)
+                    pdf_link = await page.locator(selector).first.get_attribute(
+                        "href", timeout=1000
+                    )
                     if pdf_link:
                         # Make absolute URL if needed
-                        if pdf_link.startswith('/'):
-                            base_url = await page.evaluate('window.location.origin')
+                        if pdf_link.startswith("/"):
+                            base_url = await page.evaluate("window.location.origin")
                             pdf_link = f"{base_url}{pdf_link}"
-                        elif not pdf_link.startswith('http'):
-                            base_url = await page.evaluate('window.location.href')
-                            base_url = re.sub(r'/[^/]*$', '', base_url)
+                        elif not pdf_link.startswith("http"):
+                            base_url = await page.evaluate("window.location.href")
+                            base_url = re.sub(r"/[^/]*$", "", base_url)
                             pdf_link = f"{base_url}/{pdf_link}"
 
                         pdf_urls.append(pdf_link)
@@ -151,7 +155,7 @@ class SAGEJournalsTranslator(BaseTranslator):
         # If URL contains /doi/pdf/, it's already a PDF URL
         try:
             current_url = page.url
-            if '/doi/pdf/' in current_url:
+            if "/doi/pdf/" in current_url:
                 pdf_urls.append(current_url)
                 return pdf_urls
         except Exception:
@@ -161,11 +165,15 @@ class SAGEJournalsTranslator(BaseTranslator):
         # Convert /doi/abs/ or /doi/full/ to /doi/pdf/
         try:
             current_url = page.url
-            if '/doi/abs/' in current_url or '/doi/full/' in current_url or re.search(r'/doi/10\.', current_url):
+            if (
+                "/doi/abs/" in current_url
+                or "/doi/full/" in current_url
+                or re.search(r"/doi/10\.", current_url)
+            ):
                 # Replace view type with pdf
-                pdf_url = re.sub(r'/doi/(abs|full)/', '/doi/pdf/', current_url)
+                pdf_url = re.sub(r"/doi/(abs|full)/", "/doi/pdf/", current_url)
                 # If URL is /doi/10.xxx without view prefix, insert pdf
-                pdf_url = re.sub(r'/doi/(10\.)', r'/doi/pdf/\1', pdf_url)
+                pdf_url = re.sub(r"/doi/(10\.)", r"/doi/pdf/\1", pdf_url)
 
                 pdf_urls.append(pdf_url)
                 return pdf_urls

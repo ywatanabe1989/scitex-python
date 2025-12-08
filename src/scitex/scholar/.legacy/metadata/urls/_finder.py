@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -237,9 +238,7 @@ def _get_publisher_pdf_patterns(url: str) -> List[str]:
         pdf_urls.append(url.replace("/full", "/pdf"))
 
     # Springer
-    elif (
-        "springer.com" in url or "link.springer.com" in url
-    ) and "/article/" in url:
+    elif ("springer.com" in url or "link.springer.com" in url) and "/article/" in url:
         if not url.endswith(".pdf"):
             pdf_urls.append(url.rstrip("/") + ".pdf")
 
@@ -263,9 +262,7 @@ def _get_publisher_pdf_patterns(url: str) -> List[str]:
             f"Publisher-specific pattern matching found {len(pdf_urls)} PDF URLs"
         )
     else:
-        logger.warning(
-            f"Publisher-specific patterns did not match any PDF URLs"
-        )
+        logger.warning(f"Publisher-specific patterns did not match any PDF URLs")
 
     return pdf_urls
 
@@ -317,5 +314,6 @@ async def find_all_urls(page: Page) -> Dict[str, List[Dict]]:
         "pdf": await find_pdf_urls(page),
         "supplementary": await find_supplementary_urls(page),
     }
+
 
 # EOF

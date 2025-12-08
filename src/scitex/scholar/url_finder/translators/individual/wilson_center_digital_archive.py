@@ -12,7 +12,9 @@ class WilsonCenterDigitalArchiveTranslator(BaseTranslator):
     """Wilson Center Digital Archive."""
 
     LABEL = "Wilson Center Digital Archive"
-    URL_TARGET_PATTERN = r"^https?://digitalarchive\.wilsoncenter\.org/(document|search-results)/"
+    URL_TARGET_PATTERN = (
+        r"^https?://digitalarchive\.wilsoncenter\.org/(document|search-results)/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

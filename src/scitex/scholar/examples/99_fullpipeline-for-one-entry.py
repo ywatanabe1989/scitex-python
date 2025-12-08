@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -45,15 +46,17 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
+
+
 async def run_full_pipeline(
     title: str,
     use_cache: bool = False,
     browser_mode: str = "interactive",
     chrome_profile: str = "system",
-    output_dir: str = "/tmp/scholar_pipeline"
+    output_dir: str = "/tmp/scholar_pipeline",
 ) -> list:
     """Run complete Scholar pipeline for a single paper.
-    
+
     Parameters
     ----------
     title : str
@@ -66,7 +69,7 @@ async def run_full_pipeline(
         Chrome profile to use
     output_dir : str, default="/tmp/scholar_pipeline"
         Directory to save downloaded PDFs
-        
+
     Returns
     -------
     list
@@ -80,15 +83,18 @@ async def run_full_pipeline(
         ScholarURLFinder,
     )
 
-    print(f"🌐 Initializing browser ({browser_mode} mode, profile: {chrome_profile})...")
+    print(
+        f"🌐 Initializing browser ({browser_mode} mode, profile: {chrome_profile})..."
+    )
     browser_manager = ScholarBrowserManager(
         chrome_profile_name=chrome_profile,
         browser_mode=browser_mode,
         auth_manager=ScholarAuthManager(),
     )
-    browser, context = (
-        await browser_manager.get_authenticated_browser_and_context_async()
-    )
+    (
+        browser,
+        context,
+    ) = await browser_manager.get_authenticated_browser_and_context_async()
 
     print("🔧 Initializing Scholar components...")
     engine = ScholarEngine()
@@ -99,20 +105,20 @@ async def run_full_pipeline(
     print("🔍 1. Searching for metadata...")
     print("=" * 50)
     print(f"📝 Query title: {title}")
-    
+
     metadata = await engine.search_async(title=title)
     doi = metadata.get("id", {}).get("doi")
-    
+
     if not doi:
         print("❌ No DOI found for the paper")
         return []
-    
+
     print(f"🆔 Found DOI: {doi}")
 
     print("=" * 50)
     print("🔗 2. Finding URLs...")
     print("=" * 50)
-    
+
     urls = await url_finder.find_urls(doi=doi)
     print("📊 URL Finding Results:")
     pprint(urls)
@@ -124,29 +130,31 @@ async def run_full_pipeline(
     print("=" * 50)
     print("📥 3. Downloading PDFs...")
     print("=" * 50)
-    
+
     # Ensure output directory exists
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
-    
+
     urls_pdf = [url_info["url"] for url_info in urls["urls_pdf"]]
     print(f"📄 Found {len(urls_pdf)} PDF URLs to download")
-    
+
     downloaded_paths = []
     for i_pdf_url, pdf_url in enumerate(urls_pdf):
         output_file = output_path / f"paper_{i_pdf_url:02d}.pdf"
-        
+
         print(f"📥 Downloading PDF {i_pdf_url + 1}/{len(urls_pdf)}: {pdf_url}")
-        
+
         saved_path = await pdf_downloader.download_from_url(pdf_url, output_file)
-        
+
         if saved_path:
             downloaded_paths.append(saved_path)
             print(f"✅ Downloaded: {saved_path}")
         else:
             print(f"❌ Failed to download: {pdf_url}")
-    
-    print(f"\n📊 Download Summary: {len(downloaded_paths)}/{len(urls_pdf)} PDFs downloaded")
+
+    print(
+        f"\n📊 Download Summary: {len(downloaded_paths)}/{len(urls_pdf)} PDFs downloaded"
+    )
     return downloaded_paths
 
 
@@ -165,21 +173,21 @@ async def main_async(args) -> list:
     """
     print("🚀 Scholar Full Pipeline Demonstration")
     print("=" * 40)
-    
+
     results = await run_full_pipeline(
         title=args.title,
         use_cache=args.use_cache,
         browser_mode=args.browser_mode,
         chrome_profile=args.chrome_profile,
-        output_dir=args.output_dir
+        output_dir=args.output_dir,
     )
-    
+
     if results:
         print("✅ Full pipeline completed successfully")
         print(f"📁 Downloaded files: {results}")
     else:
         print("❌ No files were downloaded")
-    
+
     return results
 
 

@@ -12,7 +12,9 @@ class BrillTranslator(BaseTranslator):
     """Brill."""
 
     LABEL = "Brill"
-    URL_TARGET_PATTERN = r"^https?://(www\.|referenceworks\.|bibliographies\.)?brill(online)?\.com/"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.|referenceworks\.|bibliographies\.)?brill(online)?\.com/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

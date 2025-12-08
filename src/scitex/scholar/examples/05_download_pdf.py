@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -42,6 +43,8 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
+
+
 async def demonstrate_pdf_download(
     pdf_url: str = None, output_path: str = None, browser_mode: str = "stealth"
 ) -> str:
@@ -68,7 +71,9 @@ async def demonstrate_pdf_download(
     )
 
     # Default parameters
-    default_url = "https://www.science.org/cms/asset/b9925b7f-c841-48d1-a90c-1631b7cff596/pap.pdf"
+    default_url = (
+        "https://www.science.org/cms/asset/b9925b7f-c841-48d1-a90c-1631b7cff596/pap.pdf"
+    )
     default_output = "/tmp/hippocampal_ripples-downloaded.pdf"
 
     download_url = pdf_url or default_url
@@ -80,9 +85,10 @@ async def demonstrate_pdf_download(
         browser_mode=browser_mode,
         auth_manager=ScholarAuthManager(),
     )
-    browser, context = (
-        await browser_manager.get_authenticated_browser_and_context_async()
-    )
+    (
+        browser,
+        context,
+    ) = await browser_manager.get_authenticated_browser_and_context_async()
 
     print("📥 Initializing PDF downloader...")
     pdf_downloader = ScholarPDFDownloader(context)

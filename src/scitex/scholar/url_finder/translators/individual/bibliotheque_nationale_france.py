@@ -34,7 +34,7 @@ class BibliothequeNationaleFranceTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2024-01-09 03:40:58"
+        "lastUpdated": "2024-01-09 03:40:58",
     }
 
     TYPE_MAPPING = {
@@ -51,49 +51,49 @@ class BibliothequeNationaleFranceTranslator:
         "modern manuscript or archive": "manuscript",
         "coin or medal": "document",
         "physical object": "document",
-        "three dimensional object": "document"
+        "three dimensional object": "document",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
         """Detect page type."""
-        result_regexp = re.compile(r'ark:/12148/cb[0-9]+', re.IGNORECASE)
+        result_regexp = re.compile(r"ark:/12148/cb[0-9]+", re.IGNORECASE)
 
         if result_regexp.search(url):
             # Single result - check item type
-            dc_type_tag = doc.find('meta', {'name': 'DC.type', 'lang': 'eng'})
+            dc_type_tag = doc.find("meta", {"name": "DC.type", "lang": "eng"})
             if dc_type_tag:
-                item_type = dc_type_tag.get('content', '')
-                return self.TYPE_MAPPING.get(item_type, 'document')
-            return 'document'
+                item_type = dc_type_tag.get("content", "")
+                return self.TYPE_MAPPING.get(item_type, "document")
+            return "document"
         elif self._get_results_table(doc):
-            return 'multiple'
+            return "multiple"
 
-        return ''
+        return ""
 
     def _get_results_table(self, doc: BeautifulSoup) -> bool:
         """Check if results table exists."""
-        results = doc.select('div.liste-notices')
+        results = doc.select("div.liste-notices")
         return len(results) > 0
 
     def _get_selected_items(self, doc: BeautifulSoup) -> Dict[str, str]:
         """Get selected items from search results."""
         items = {}
-        rows = doc.select('div.liste-notices div.notice-item div.notice-contenu')
+        rows = doc.select("div.liste-notices div.notice-item div.notice-contenu")
 
         for row in rows:
-            title_link = row.select_one('div.notice-synthese a')
+            title_link = row.select_one("div.notice-synthese a")
             if not title_link:
                 continue
 
-            href = title_link.get('href')
+            href = title_link.get("href")
             title = title_link.get_text(strip=True)
 
             # Add document year if available
-            year_elem = row.select_one('span.notice-ordre')
+            year_elem = row.select_one("span.notice-ordre")
             if year_elem:
                 year = year_elem.get_text(strip=True)
                 if len(year) == 6:
-                    title += ' / ' + year
+                    title += " / " + year
 
             if href and title:
                 items[href] = title
@@ -102,18 +102,18 @@ class BibliothequeNationaleFranceTranslator:
 
     def _reform_url(self, url: str) -> str:
         """Convert URL to UNIMARC format."""
-        url = re.sub(r'(^.*\/ark:\/12148\/cb[0-9]+[a-z]*)(.*$)', r'\1.unimarc', url)
+        url = re.sub(r"(^.*\/ark:\/12148\/cb[0-9]+[a-z]*)(.*$)", r"\1.unimarc", url)
         return url
 
     def do_web(self, doc: BeautifulSoup, url: str) -> List[Dict[str, Any]]:
         """Extract data from the page."""
         page_type = self.detect_web(doc, url)
 
-        if page_type == 'multiple':
+        if page_type == "multiple":
             items = self._get_selected_items(doc)
-            return [{'url': self._reform_url(u)} for u in items.keys()]
+            return [{"url": self._reform_url(u)} for u in items.keys()]
         else:
-            return [{'url': self._reform_url(url), '_unimarc': True}]
+            return [{"url": self._reform_url(url), "_unimarc": True}]
 
     def scrape(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """
@@ -129,33 +129,35 @@ class BibliothequeNationaleFranceTranslator:
             Dictionary containing item metadata
         """
         item = {
-            'itemType': self.detect_web(doc, url) or 'document',
-            'libraryCatalog': 'BnF Catalogue général (http://catalogue.bnf.fr)',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": self.detect_web(doc, url) or "document",
+            "libraryCatalog": "BnF Catalogue général (http://catalogue.bnf.fr)",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Extract title from meta tags
-        title_tag = doc.find('meta', {'property': 'og:title'})
+        title_tag = doc.find("meta", {"property": "og:title"})
         if title_tag:
-            item['title'] = title_tag.get('content', '')
+            item["title"] = title_tag.get("content", "")
 
         # Add attachment for catalog record
-        ark_match = re.search(r'ark:/12148/cb[0-9]+[a-z]*', url)
+        ark_match = re.search(r"ark:/12148/cb[0-9]+[a-z]*", url)
         if ark_match:
-            permalink = 'http://catalogue.bnf.fr/' + ark_match.group()
-            item['attachments'].append({
-                'title': 'Lien vers la notice du catalogue',
-                'url': permalink,
-                'mimeType': 'text/html',
-                'snapshot': False
-            })
+            permalink = "http://catalogue.bnf.fr/" + ark_match.group()
+            item["attachments"].append(
+                {
+                    "title": "Lien vers la notice du catalogue",
+                    "url": permalink,
+                    "mimeType": "text/html",
+                    "snapshot": False,
+                }
+            )
 
         # Check for Gallica URL (digital version)
-        gallica_link = doc.find('a', href=re.compile(r'gallica\.bnf\.fr'))
+        gallica_link = doc.find("a", href=re.compile(r"gallica\.bnf\.fr"))
         if gallica_link:
-            item['url'] = gallica_link.get('href')
+            item["url"] = gallica_link.get("href")
 
         return item

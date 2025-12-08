@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/browser/utils/close_unwanted_pages.py"
-)
+
+__FILE__ = "./src/scitex/scholar/browser/utils/close_unwanted_pages.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -63,10 +62,7 @@ async def close_unwanted_pages(
             # Get a valid page for browser_logger (prefer non-extension pages)
             valid_page = None
             for page in current_pages:
-                if (
-                    "chrome-extension://" not in page.url
-                    and not page.is_closed()
-                ):
+                if "chrome-extension://" not in page.url and not page.is_closed():
                     valid_page = page
                     break
 
@@ -136,5 +132,6 @@ async def close_unwanted_pages(
                     valid_page,
                     f"{func_name}: Cleanup attempt {attempt + 1} failed",
                 )
+
 
 # EOF

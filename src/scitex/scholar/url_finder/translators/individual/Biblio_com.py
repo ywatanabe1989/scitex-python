@@ -33,7 +33,7 @@ class BiblioComTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2021-07-14 21:52:42"
+        "lastUpdated": "2021-07-14 21:52:42",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -47,11 +47,11 @@ class BiblioComTranslator:
         Returns:
             'book' for single item, 'multiple' for list, empty string otherwise
         """
-        if '/book/' in url:
-            return 'book'
+        if "/book/" in url:
+            return "book"
         elif self._get_search_results(doc, check_only=True):
-            return 'multiple'
-        return ''
+            return "multiple"
+        return ""
 
     def do_web(self, doc: BeautifulSoup, url: str) -> List[Dict[str, Any]]:
         """
@@ -64,9 +64,9 @@ class BiblioComTranslator:
         Returns:
             List of dictionaries containing book metadata
         """
-        if self.detect_web(doc, url) == 'multiple':
+        if self.detect_web(doc, url) == "multiple":
             results = self._get_search_results(doc, check_only=False)
-            return [{'itemType': 'multiple', 'urls': results}]
+            return [{"itemType": "multiple", "urls": results}]
         else:
             return [self.scrape(doc, url)]
 
@@ -81,59 +81,60 @@ class BiblioComTranslator:
         Returns:
             Dictionary containing book metadata
         """
-        item = {
-            'itemType': 'book',
-            'creators': [],
-            'tags': [],
-            'attachments': []
-        }
+        item = {"itemType": "book", "creators": [], "tags": [], "attachments": []}
 
         # Extract data from book details section
-        detail_keys = doc.select('#d-book-details dt')
+        detail_keys = doc.select("#d-book-details dt")
 
         for key_elem in detail_keys:
             key = key_elem.get_text().strip()
-            value_elem = key_elem.find_next_sibling('dd')
+            value_elem = key_elem.find_next_sibling("dd")
             if not value_elem:
                 continue
 
             value = value_elem.get_text().strip()
 
-            if key == 'Title':
+            if key == "Title":
                 # Remove trailing period
-                item['title'] = value.rstrip('.')
-            elif key == 'Author':
+                item["title"] = value.rstrip(".")
+            elif key == "Author":
                 # Authors are separated by semicolons
-                authors = value.split(';')
+                authors = value.split(";")
                 for author in authors:
                     author = author.strip()
                     if author:
-                        item['creators'].append(self._clean_author(author))
-            elif key == 'Edition':
-                item['edition'] = value
-            elif key == 'Publisher':
-                item['publisher'] = value
-            elif key == 'Place of Publication':
-                item['place'] = value
-            elif key in ['Date published', 'First published', 'This edition first published']:
+                        item["creators"].append(self._clean_author(author))
+            elif key == "Edition":
+                item["edition"] = value
+            elif key == "Publisher":
+                item["publisher"] = value
+            elif key == "Place of Publication":
+                item["place"] = value
+            elif key in [
+                "Date published",
+                "First published",
+                "This edition first published",
+            ]:
                 # Convert to ISO date format if possible
-                item['date'] = self._parse_date(value)
-            elif key in ['ISBN 10', 'ISBN 13']:
-                item['ISBN'] = self._clean_isbn(value)
-            elif 'published' in key.lower() and 'date' not in item:
+                item["date"] = self._parse_date(value)
+            elif key in ["ISBN 10", "ISBN 13"]:
+                item["ISBN"] = self._clean_isbn(value)
+            elif "published" in key.lower() and "date" not in item:
                 # Handle odd date labels
-                item['date'] = self._parse_date(value)
+                item["date"] = self._parse_date(value)
 
         # Extract URL from canonical link
         canonical = doc.select_one('link[rel="canonical"]')
-        if canonical and canonical.get('href'):
-            item['url'] = canonical['href']
+        if canonical and canonical.get("href"):
+            item["url"] = canonical["href"]
         else:
-            item['url'] = url
+            item["url"] = url
 
         return item
 
-    def _get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Optional[Dict[str, str]]:
+    def _get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Optional[Dict[str, str]]:
         """
         Get search results from a page.
 
@@ -154,7 +155,7 @@ class BiblioComTranslator:
 
         items = {}
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text().strip()
             if href and title:
                 items[href] = title
@@ -174,28 +175,24 @@ class BiblioComTranslator:
         name = name.strip()
 
         # Check if name has comma (Last, First format)
-        if ',' in name:
-            parts = name.split(',', 1)
+        if "," in name:
+            parts = name.split(",", 1)
             return {
-                'lastName': parts[0].strip(),
-                'firstName': parts[1].strip(),
-                'creatorType': 'author'
+                "lastName": parts[0].strip(),
+                "firstName": parts[1].strip(),
+                "creatorType": "author",
             }
         else:
             # Space-separated name
             parts = name.split()
             if len(parts) >= 2:
                 return {
-                    'firstName': ' '.join(parts[:-1]),
-                    'lastName': parts[-1],
-                    'creatorType': 'author'
+                    "firstName": " ".join(parts[:-1]),
+                    "lastName": parts[-1],
+                    "creatorType": "author",
                 }
             else:
-                return {
-                    'lastName': name,
-                    'creatorType': 'author',
-                    'fieldMode': True
-                }
+                return {"lastName": name, "creatorType": "author", "fieldMode": True}
 
     def _parse_date(self, date_str: str) -> str:
         """
@@ -222,4 +219,4 @@ class BiblioComTranslator:
             Cleaned ISBN
         """
         # Remove hyphens and spaces
-        return isbn.replace('-', '').replace(' ', '').strip()
+        return isbn.replace("-", "").replace(" ", "").strip()

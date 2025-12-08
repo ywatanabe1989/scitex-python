@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -23,17 +24,16 @@ from ._handler import URLHandler
 from ._URLMetadataHandler import (
     URLMetadataHandler,
     add_urls_to_paper,
-    get_papers_for_download
+    get_papers_for_download,
 )
 
 __all__ = [
     # Main abstracted interface
     "URLHandler",
-
     # Backward compatibility
     "URLMetadataHandler",
     "add_urls_to_paper",
-    "get_papers_for_download"
+    "get_papers_for_download",
 ]
 
 # EOF

@@ -98,7 +98,7 @@ class JournalNormalizer:
     Data is cached locally with daily refresh from OpenAlex.
     """
 
-    _instance: Optional['JournalNormalizer'] = None
+    _instance: Optional["JournalNormalizer"] = None
 
     def __init__(self, cache_dir: Optional[Path] = None):
         self._cache_dir = cache_dir or _get_default_cache_dir()
@@ -118,7 +118,7 @@ class JournalNormalizer:
         self._journal_count = 0
 
     @classmethod
-    def get_instance(cls, cache_dir: Optional[Path] = None) -> 'JournalNormalizer':
+    def get_instance(cls, cache_dir: Optional[Path] = None) -> "JournalNormalizer":
         """Get singleton instance."""
         if cls._instance is None:
             cls._instance = cls(cache_dir)
@@ -129,9 +129,9 @@ class JournalNormalizer:
         if not self._cache_file.exists():
             return False
         try:
-            with open(self._cache_file, 'r') as f:
+            with open(self._cache_file, "r") as f:
                 data = json.load(f)
-            cached_time = data.get('timestamp', 0)
+            cached_time = data.get("timestamp", 0)
             return (time.time() - cached_time) < CACHE_TTL_SECONDS
         except (json.JSONDecodeError, IOError):
             return False
@@ -141,14 +141,14 @@ class JournalNormalizer:
         if not self._cache_file.exists():
             return False
         try:
-            with open(self._cache_file, 'r') as f:
+            with open(self._cache_file, "r") as f:
                 data = json.load(f)
 
-            self._issn_l_data = data.get('issn_l_data', {})
-            self._name_to_issn_l = data.get('name_to_issn_l', {})
-            self._issn_to_issn_l = data.get('issn_to_issn_l', {})
-            self._abbrev_to_issn_l = data.get('abbrev_to_issn_l', {})
-            self._last_updated = data.get('timestamp', 0)
+            self._issn_l_data = data.get("issn_l_data", {})
+            self._name_to_issn_l = data.get("name_to_issn_l", {})
+            self._issn_to_issn_l = data.get("issn_to_issn_l", {})
+            self._abbrev_to_issn_l = data.get("abbrev_to_issn_l", {})
+            self._last_updated = data.get("timestamp", 0)
             self._journal_count = len(self._issn_l_data)
             self._loaded = True
 
@@ -163,14 +163,14 @@ class JournalNormalizer:
         try:
             self._cache_dir.mkdir(parents=True, exist_ok=True)
             data = {
-                'timestamp': time.time(),
-                'journal_count': len(self._issn_l_data),
-                'issn_l_data': self._issn_l_data,
-                'name_to_issn_l': self._name_to_issn_l,
-                'issn_to_issn_l': self._issn_to_issn_l,
-                'abbrev_to_issn_l': self._abbrev_to_issn_l,
+                "timestamp": time.time(),
+                "journal_count": len(self._issn_l_data),
+                "issn_l_data": self._issn_l_data,
+                "name_to_issn_l": self._name_to_issn_l,
+                "issn_to_issn_l": self._issn_to_issn_l,
+                "abbrev_to_issn_l": self._abbrev_to_issn_l,
             }
-            with open(self._cache_file, 'w') as f:
+            with open(self._cache_file, "w") as f:
                 json.dump(data, f)
             logger.info(f"Saved {len(self._issn_l_data)} journals to normalizer cache")
         except IOError as e:
@@ -183,25 +183,25 @@ class JournalNormalizer:
         Args:
             source_data: OpenAlex source object with display_name, issn_l, etc.
         """
-        issn_l = source_data.get('issn_l')
+        issn_l = source_data.get("issn_l")
         if not issn_l:
             return
 
         issn_l = _normalize_issn(issn_l)
-        display_name = source_data.get('display_name', '')
-        abbreviated_title = source_data.get('abbreviated_title', '')
-        alternate_titles = source_data.get('alternate_titles', []) or []
-        issns = source_data.get('issn', []) or []
-        is_oa = source_data.get('is_oa', False)
+        display_name = source_data.get("display_name", "")
+        abbreviated_title = source_data.get("abbreviated_title", "")
+        alternate_titles = source_data.get("alternate_titles", []) or []
+        issns = source_data.get("issn", []) or []
+        is_oa = source_data.get("is_oa", False)
 
         # Store full metadata
         self._issn_l_data[issn_l] = {
-            'canonical_name': display_name,
-            'abbreviated_title': abbreviated_title,
-            'alternate_titles': alternate_titles,
-            'issns': [_normalize_issn(i) for i in issns if i],
-            'is_oa': is_oa,
-            'publisher': source_data.get('host_organization_name', ''),
+            "canonical_name": display_name,
+            "abbreviated_title": abbreviated_title,
+            "alternate_titles": alternate_titles,
+            "issns": [_normalize_issn(i) for i in issns if i],
+            "is_oa": is_oa,
+            "publisher": source_data.get("host_organization_name", ""),
         }
 
         # Build lookup indexes
@@ -231,7 +231,9 @@ class JournalNormalizer:
                 self._issn_to_issn_l[norm_issn] = issn_l
         self._issn_to_issn_l[issn_l] = issn_l  # Self-reference
 
-    async def _fetch_journals_async(self, max_pages: int = 500, filter_oa_only: bool = False) -> None:
+    async def _fetch_journals_async(
+        self, max_pages: int = 500, filter_oa_only: bool = False
+    ) -> None:
         """
         Fetch journal data from OpenAlex API.
 
@@ -260,13 +262,15 @@ class JournalNormalizer:
                 )
 
                 try:
-                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as resp:
+                    async with session.get(
+                        url, timeout=aiohttp.ClientTimeout(total=30)
+                    ) as resp:
                         if resp.status != 200:
                             logger.warning(f"OpenAlex API returned {resp.status}")
                             break
 
                         data = await resp.json()
-                        results = data.get('results', [])
+                        results = data.get("results", [])
 
                         if not results:
                             break
@@ -275,8 +279,8 @@ class JournalNormalizer:
                             self._add_journal(source)
 
                         # Get next cursor
-                        meta = data.get('meta', {})
-                        next_cursor = meta.get('next_cursor')
+                        meta = data.get("meta", {})
+                        next_cursor = meta.get("next_cursor")
                         if not next_cursor or next_cursor == cursor:
                             break
                         cursor = next_cursor
@@ -284,7 +288,9 @@ class JournalNormalizer:
 
                         # Progress log
                         if pages_fetched % 20 == 0:
-                            logger.info(f"Fetched {pages_fetched} pages, {len(self._issn_l_data)} journals...")
+                            logger.info(
+                                f"Fetched {pages_fetched} pages, {len(self._issn_l_data)} journals..."
+                            )
 
                 except asyncio.TimeoutError:
                     logger.warning("OpenAlex API timeout")
@@ -301,7 +307,9 @@ class JournalNormalizer:
             self._save_to_cache()
             logger.info(f"Fetched {self._journal_count} journals from OpenAlex")
 
-    def _fetch_journals_sync(self, max_pages: int = 500, filter_oa_only: bool = False) -> None:
+    def _fetch_journals_sync(
+        self, max_pages: int = 500, filter_oa_only: bool = False
+    ) -> None:
         """Synchronous wrapper for fetching journals."""
         try:
             loop = asyncio.get_event_loop()
@@ -348,7 +356,7 @@ class JournalNormalizer:
             return None
 
         # Check if it's an ISSN
-        if re.match(r'^\d{4}-?\d{3}[\dXx]$', journal_name.replace(" ", "")):
+        if re.match(r"^\d{4}-?\d{3}[\dXx]$", journal_name.replace(" ", "")):
             norm_issn = _normalize_issn(journal_name)
             if norm_issn in self._issn_to_issn_l:
                 return self._issn_to_issn_l[norm_issn]
@@ -378,7 +386,7 @@ class JournalNormalizer:
         """
         issn_l = self.get_issn_l(journal_name)
         if issn_l and issn_l in self._issn_l_data:
-            return self._issn_l_data[issn_l].get('canonical_name', journal_name)
+            return self._issn_l_data[issn_l].get("canonical_name", journal_name)
         return journal_name
 
     def get_abbreviation(self, journal_name: str) -> Optional[str]:
@@ -393,7 +401,7 @@ class JournalNormalizer:
         """
         issn_l = self.get_issn_l(journal_name)
         if issn_l and issn_l in self._issn_l_data:
-            return self._issn_l_data[issn_l].get('abbreviated_title')
+            return self._issn_l_data[issn_l].get("abbreviated_title")
         return None
 
     def get_journal_info(self, journal_name: str) -> Optional[Dict[str, Any]]:
@@ -408,10 +416,7 @@ class JournalNormalizer:
         """
         issn_l = self.get_issn_l(journal_name)
         if issn_l and issn_l in self._issn_l_data:
-            return {
-                'issn_l': issn_l,
-                **self._issn_l_data[issn_l]
-            }
+            return {"issn_l": issn_l, **self._issn_l_data[issn_l]}
         return None
 
     def is_same_journal(self, name1: str, name2: str) -> bool:
@@ -446,7 +451,7 @@ class JournalNormalizer:
         """
         issn_l = self.get_issn_l(journal_name)
         if issn_l and issn_l in self._issn_l_data:
-            return self._issn_l_data[issn_l].get('is_oa', False)
+            return self._issn_l_data[issn_l].get("is_oa", False)
         return False
 
     def search(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
@@ -471,10 +476,7 @@ class JournalNormalizer:
         for norm_name, issn_l in self._name_to_issn_l.items():
             if norm_query in norm_name:
                 if issn_l in self._issn_l_data:
-                    results.append({
-                        'issn_l': issn_l,
-                        **self._issn_l_data[issn_l]
-                    })
+                    results.append({"issn_l": issn_l, **self._issn_l_data[issn_l]})
                     if len(results) >= limit:
                         break
 
@@ -490,11 +492,12 @@ class JournalNormalizer:
     def cache_age_hours(self) -> float:
         """Get cache age in hours."""
         if self._last_updated == 0:
-            return float('inf')
+            return float("inf")
         return (time.time() - self._last_updated) / 3600
 
 
 # ==================== Convenience Functions ====================
+
 
 def get_journal_normalizer(cache_dir: Optional[Path] = None) -> JournalNormalizer:
     """Get the journal normalizer singleton."""

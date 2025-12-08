@@ -80,7 +80,9 @@ if __name__ == "__main__":
         test_url = "https://www.egms.de/static/de/journals/gms/2017-15/000242.shtml"
 
         print(f"Testing GMSGermanMedicalScienceTranslator with URL: {test_url}")
-        print(f"URL matches pattern: {GMSGermanMedicalScienceTranslator.matches_url(test_url)}\n")
+        print(
+            f"URL matches pattern: {GMSGermanMedicalScienceTranslator.matches_url(test_url)}\n"
+        )
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
@@ -92,7 +94,9 @@ if __name__ == "__main__":
             await page.wait_for_load_state("domcontentloaded")
 
             print("Extracting PDF URLs...")
-            pdf_urls = await GMSGermanMedicalScienceTranslator.extract_pdf_urls_async(page)
+            pdf_urls = await GMSGermanMedicalScienceTranslator.extract_pdf_urls_async(
+                page
+            )
 
             print(f"\nResults:")
             print(f"  Found {len(pdf_urls)} PDF URL(s)")

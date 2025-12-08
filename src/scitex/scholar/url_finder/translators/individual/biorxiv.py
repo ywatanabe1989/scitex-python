@@ -26,7 +26,9 @@ class BioRxivTranslator(BaseTranslator):
     """
 
     LABEL = "bioRxiv/medRxiv"
-    URL_TARGET_PATTERN = r"^https?://(www\.)?(biorxiv|medrxiv)\.org/(content|search|collection)/"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.)?(biorxiv|medrxiv)\.org/(content|search|collection)/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:
@@ -65,7 +67,7 @@ class BioRxivTranslator(BaseTranslator):
         try:
             pdf_url = await page.locator(
                 'meta[name="citation_pdf_url"]'
-            ).first.get_attribute('content', timeout=3000)
+            ).first.get_attribute("content", timeout=3000)
             if pdf_url:
                 pdf_urls.append(pdf_url)
                 return pdf_urls
@@ -77,11 +79,11 @@ class BioRxivTranslator(BaseTranslator):
         try:
             pdf_link = await page.locator(
                 'a.article-dl-pdf-link, a[href*=".full.pdf"]'
-            ).first.get_attribute('href', timeout=2000)
+            ).first.get_attribute("href", timeout=2000)
             if pdf_link:
                 # Make absolute URL if needed
-                if pdf_link.startswith('/'):
-                    base_url = await page.evaluate('window.location.origin')
+                if pdf_link.startswith("/"):
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_link = f"{base_url}{pdf_link}"
                 pdf_urls.append(pdf_link)
                 return pdf_urls
@@ -94,12 +96,14 @@ class BioRxivTranslator(BaseTranslator):
             try:
                 # Extract DOI from URL
                 # Pattern: /content/10.1101/YYYY.MM.DD.NNNNNNvN
-                match = re.search(r'/content/([^?#]+)', url)
+                match = re.search(r"/content/([^?#]+)", url)
                 if match:
                     doi_version = match.group(1)
                     # Determine base URL (biorxiv or medrxiv)
-                    base_domain = 'biorxiv.org' if 'biorxiv' in url else 'medrxiv.org'
-                    pdf_url = f"https://www.{base_domain}/content/{doi_version}.full.pdf"
+                    base_domain = "biorxiv.org" if "biorxiv" in url else "medrxiv.org"
+                    pdf_url = (
+                        f"https://www.{base_domain}/content/{doi_version}.full.pdf"
+                    )
                     pdf_urls.append(pdf_url)
                     return pdf_urls
             except Exception:
@@ -109,16 +113,25 @@ class BioRxivTranslator(BaseTranslator):
         if any(x in url for x in ["/search", "/collection"]):
             try:
                 # Find all DOI metadata elements in search results
-                doi_elements = await page.query_selector_all('.highwire-cite-metadata-doi')
+                doi_elements = await page.query_selector_all(
+                    ".highwire-cite-metadata-doi"
+                )
 
                 for doi_elem in doi_elements:
                     doi_text = await doi_elem.inner_text()
                     # Extract DOI, removing "doi:" prefix and "https://doi.org/" if present
-                    doi = doi_text.strip().replace('doi:', '').replace('https://doi.org/', '').strip()
+                    doi = (
+                        doi_text.strip()
+                        .replace("doi:", "")
+                        .replace("https://doi.org/", "")
+                        .strip()
+                    )
 
-                    if doi.startswith('10.1101/'):
+                    if doi.startswith("10.1101/"):
                         # Determine base URL (biorxiv or medrxiv)
-                        base_domain = 'biorxiv.org' if 'biorxiv' in url else 'medrxiv.org'
+                        base_domain = (
+                            "biorxiv.org" if "biorxiv" in url else "medrxiv.org"
+                        )
                         # bioRxiv search results don't include version, so use bare DOI
                         pdf_url = f"https://www.{base_domain}/content/{doi}.full.pdf"
                         pdf_urls.append(pdf_url)

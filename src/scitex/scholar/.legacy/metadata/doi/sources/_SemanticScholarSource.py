@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -34,9 +35,7 @@ logger = logging.getLogger(__name__)
 class SemanticScholarSource(BaseDOISource):
     """Combined Semantic Scholar source with enhanced features."""
 
-    def __init__(
-        self, email: str = "research@example.com", api_key: str = None
-    ):
+    def __init__(self, email: str = "research@example.com", api_key: str = None):
         super().__init__(email)
         self.api_key = api_key or os.getenv("SEMANTIC_SCHOLAR_API_KEY")
         self.base_url = "https://api.semanticscholar.org/graph/v1"
@@ -105,13 +104,9 @@ class SemanticScholarSource(BaseDOISource):
         """Search by DOI directly"""
         self._handle_rate_limit()
 
-        doi = doi.replace("https://doi.org/", "").replace(
-            "http://doi.org/", ""
-        )
+        doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
         url = f"{self.base_url}/paper/{doi}"
-        params = {
-            "fields": "title,year,authors,externalIds,url,venue,abstract"
-        }
+        params = {"fields": "title,year,authors,externalIds,url,venue,abstract"}
 
         try:
             assert return_as in [
@@ -179,8 +174,7 @@ class SemanticScholarSource(BaseDOISource):
                 paper_title = paper.get("title", "")
                 paper_year = paper.get("year")
                 paper_authors = [
-                    author.get("name", "")
-                    for author in paper.get("authors", [])
+                    author.get("name", "") for author in paper.get("authors", [])
                 ]
 
                 # Check title match
@@ -219,9 +213,7 @@ class SemanticScholarSource(BaseDOISource):
         wait=wait_exponential(multiplier=2, min=4, max=20),
         retry=retry_if_exception_type((requests.ConnectionError,)),
     )
-    def _search_by_corpus_id(
-        self, corpus_id: str, return_as: str
-    ) -> Optional[Dict]:
+    def _search_by_corpus_id(self, corpus_id: str, return_as: str) -> Optional[Dict]:
         """Search by Corpus ID directly"""
         if not corpus_id.isdigit():
             corpus_id = corpus_id.replace("CorpusId:", "")
@@ -229,9 +221,7 @@ class SemanticScholarSource(BaseDOISource):
         self._handle_rate_limit()
 
         url = f"{self.base_url}/paper/CorpusId:{corpus_id}"
-        params = {
-            "fields": "title,year,authors,externalIds,url,venue,abstract"
-        }
+        params = {"fields": "title,year,authors,externalIds,url,venue,abstract"}
 
         try:
             assert return_as in [
@@ -244,9 +234,7 @@ class SemanticScholarSource(BaseDOISource):
                 raise requests.ConnectionError("Rate limit exceeded")
 
             if response.status_code == 404:
-                logger.warn(
-                    f"Semantic Scholar Corpus ID not found: {corpus_id}"
-                )
+                logger.warn(f"Semantic Scholar Corpus ID not found: {corpus_id}")
                 return None
 
             response.raise_for_status()
@@ -285,12 +273,8 @@ class SemanticScholarSource(BaseDOISource):
                 "title_sources": [self.name] if paper_title else None,
                 "year": paper_year if paper_year else None,
                 "year_sources": [self.name] if paper_year else None,
-                "abstract": (
-                    paper.get("abstract") if paper.get("abstract") else None
-                ),
-                "abstract_sources": (
-                    [self.name] if paper.get("abstract") else None
-                ),
+                "abstract": (paper.get("abstract") if paper.get("abstract") else None),
+                "abstract_sources": ([self.name] if paper.get("abstract") else None),
                 "authors": extracted_authors if extracted_authors else None,
                 "authors_sources": [self.name] if extracted_authors else None,
             },
@@ -332,9 +316,7 @@ if __name__ == "__main__":
 
     # Search by title
     outputs["metadata_by_title_dict"] = source.search(title=TITLE)
-    outputs["metadata_by_title_json"] = source.search(
-        title=TITLE, return_as="json"
-    )
+    outputs["metadata_by_title_json"] = source.search(title=TITLE, return_as="json")
 
     # # Search by DOI
     # outputs["metadata_by_doi_dict"] = source.search(doi=DOI)

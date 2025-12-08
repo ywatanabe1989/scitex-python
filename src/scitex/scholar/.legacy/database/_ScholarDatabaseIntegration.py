@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -49,9 +50,7 @@ class ScholarDatabaseIntegration:
         self.analyzer = PDFQualityAnalyzer()
 
         # Workflow state tracking
-        self.workflow_state_file = (
-            self.database.database_dir / "workflow_state.json"
-        )
+        self.workflow_state_file = self.database.database_dir / "workflow_state.json"
         self.workflow_state = self._load_workflow_state()
 
     def _load_workflow_state(self) -> Dict[str, Any]:
@@ -130,9 +129,7 @@ class ScholarDatabaseIntegration:
 
                 # Download PDF if requested
                 if download_pdf_asyncs and paper.doi:
-                    pdf_path = await self._download_pdf_async_for_entry(
-                        entry_id, paper
-                    )
+                    pdf_path = await self._download_pdf_async_for_entry(entry_id, paper)
                     if pdf_path:
                         results["pdfs_download"] += 1
 
@@ -250,13 +247,9 @@ class ScholarDatabaseIntegration:
 
         # Generate filename
         first_author = (
-            entry.authors[0].split(",")[0].split()[-1]
-            if entry.authors
-            else "Unknown"
+            entry.authors[0].split(",")[0].split()[-1] if entry.authors else "Unknown"
         )
-        filename = (
-            f"{first_author}_{entry.year or '0000'}_{entry.entry_id}.pdf"
-        )
+        filename = f"{first_author}_{entry.year or '0000'}_{entry.entry_id}.pdf"
         target_path = journal_dir / filename
 
         # Move file
@@ -283,9 +276,7 @@ class ScholarDatabaseIntegration:
             quality = self.analyzer.analyze_pdf_quality(pdf_path)
 
             # Update database
-            entry.validation_status = (
-                "valid" if validation["valid"] else "invalid"
-            )
+            entry.validation_status = "valid" if validation["valid"] else "invalid"
             entry.validation_reason = validation["reason"]
             entry.quality_score = quality.get("quality_score", 0)
             entry.page_count = quality.get("page_count", 0)
@@ -310,20 +301,12 @@ class ScholarDatabaseIntegration:
 
         # Count workflow progress
         workflow_stats = {
-            "bibtex_entries": len(
-                self.workflow_state.get("bibtex_loaded", {})
-            ),
+            "bibtex_entries": len(self.workflow_state.get("bibtex_loaded", {})),
             "dois_resolved": len(self.workflow_state.get("dois_resolved", {})),
             "urls_resolved": len(self.workflow_state.get("urls_resolved", {})),
-            "metadata_enriched": len(
-                self.workflow_state.get("metadata_enriched", {})
-            ),
-            "pdfs_download": len(
-                self.workflow_state.get("pdfs_download", {})
-            ),
-            "pdfs_validated": len(
-                self.workflow_state.get("pdfs_validated", {})
-            ),
+            "metadata_enriched": len(self.workflow_state.get("metadata_enriched", {})),
+            "pdfs_download": len(self.workflow_state.get("pdfs_download", {})),
+            "pdfs_validated": len(self.workflow_state.get("pdfs_validated", {})),
         }
 
         # Combine
@@ -333,9 +316,7 @@ class ScholarDatabaseIntegration:
             "last_updated": datetime.now().isoformat(),
         }
 
-    def export_validated_papers(
-        self, output_path: Path, format: str = "bibtex"
-    ):
+    def export_validated_papers(self, output_path: Path, format: str = "bibtex"):
         """Export validated papers to file."""
         # Get validated entries
         validated_entries = self.database.search_entries(
@@ -353,9 +334,7 @@ class ScholarDatabaseIntegration:
             f"Exported {len(validated_entries)} validated papers to {output_path}"
         )
 
-    def _export_to_bibtex(
-        self, entries: List[DatabaseEntry], output_path: Path
-    ):
+    def _export_to_bibtex(self, entries: List[DatabaseEntry], output_path: Path):
         """Export entries to BibTeX."""
         import bibtexparser
         from bibtexparser.bibdatabase import BibDatabase
@@ -400,14 +379,13 @@ class ScholarDatabaseIntegration:
                 "reason": entry.validation_reason,
                 "quality_score": entry.quality_score,
                 "validated_at": (
-                    entry.validated_at.isoformat()
-                    if entry.validated_at
-                    else None
+                    entry.validated_at.isoformat() if entry.validated_at else None
                 ),
             }
             data.append(entry_dict)
 
         with open(output_path, "w") as f:
             json.dump(data, f, indent=2, default=str)
+
 
 # EOF

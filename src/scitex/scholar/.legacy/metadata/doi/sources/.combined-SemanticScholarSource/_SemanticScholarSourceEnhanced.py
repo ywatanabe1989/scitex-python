@@ -46,10 +46,12 @@ class SemanticScholarSourceEnhanced(BaseDOISource):
         """Lazy load session with proper headers."""
         if self._session is None:
             self._session = requests.Session()
-            self._session.headers.update({
-                "User-Agent": f"SciTeX/1.0 (mailto:{self.email})",
-                "Accept": "application/json"
-            })
+            self._session.headers.update(
+                {
+                    "User-Agent": f"SciTeX/1.0 (mailto:{self.email})",
+                    "Accept": "application/json",
+                }
+            )
         return self._session
 
     @property
@@ -60,16 +62,20 @@ class SemanticScholarSourceEnhanced(BaseDOISource):
     def rate_limit_delay(self) -> float:
         return 1.2  # Slightly more conservative than original
 
-    def _is_title_match(self, query_title: str, paper_title: str, threshold: float = 0.8) -> bool:
+    def _is_title_match(
+        self, query_title: str, paper_title: str, threshold: float = 0.8
+    ) -> bool:
         """Enhanced title matching using TextNormalizer utility."""
         # Use the advanced TextNormalizer from utils
-        is_match = self.text_normalizer.is_title_match(query_title, paper_title, threshold)
-        
+        is_match = self.text_normalizer.is_title_match(
+            query_title, paper_title, threshold
+        )
+
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug(f"Title match result: {is_match} (threshold: {threshold})")
             logger.debug(f"Query: {query_title}")
             logger.debug(f"Paper: {paper_title}")
-        
+
         return is_match
 
     @retry(
@@ -89,9 +95,9 @@ class SemanticScholarSourceEnhanced(BaseDOISource):
         """Enhanced search with better DOI extraction."""
         if not title:
             return None
-            
+
         logger.debug(f"Searching Semantic Scholar for: {title}")
-        
+
         url = f"{self.base_url}/paper/search"
         params = {
             "query": title,
@@ -101,81 +107,87 @@ class SemanticScholarSourceEnhanced(BaseDOISource):
 
         try:
             response = self.session.get(url, params=params, timeout=30)
-            
+
             if response.status_code == 429:
                 raise requests.HTTPError("Rate limited", response=response)
-            
+
             response.raise_for_status()
             data = response.json()
-            
-            logger.debug(f"Semantic Scholar returned {len(data.get('data', []))} results")
-            
+
+            logger.debug(
+                f"Semantic Scholar returned {len(data.get('data', []))} results"
+            )
+
             papers = data.get("data", [])
-            
+
             # Try multiple matching strategies
             for paper in papers:
                 doi = self._extract_doi_from_paper(paper, title, year, authors)
                 if doi:
                     logger.info(f"Found DOI via enhanced Semantic Scholar: {doi}")
                     return doi
-            
+
             logger.debug("No DOI found in Semantic Scholar results")
             return None
-            
+
         except requests.RequestException as e:
             logger.debug(f"Semantic Scholar API error: {e}")
             return None
 
     def _extract_doi_from_paper(
-        self, 
-        paper: dict, 
-        query_title: str, 
-        query_year: Optional[int], 
-        query_authors: Optional[List[str]]
+        self,
+        paper: dict,
+        query_title: str,
+        query_year: Optional[int],
+        query_authors: Optional[List[str]],
     ) -> Optional[str]:
         """Extract DOI from paper with multiple validation strategies."""
-        
+
         paper_title = paper.get("title", "")
         paper_year = paper.get("year")
-        
+
         # Title matching
         if not self._is_title_match(query_title, paper_title):
             logger.debug(f"Title mismatch: '{paper_title}' vs '{query_title}'")
             return None
-        
+
         # Year validation (if provided)
         if query_year and paper_year:
             try:
-                paper_year_int = int(paper_year) if isinstance(paper_year, str) else paper_year
-                query_year_int = int(query_year) if isinstance(query_year, str) else query_year
-                
+                paper_year_int = (
+                    int(paper_year) if isinstance(paper_year, str) else paper_year
+                )
+                query_year_int = (
+                    int(query_year) if isinstance(query_year, str) else query_year
+                )
+
                 if abs(paper_year_int - query_year_int) > 2:  # Allow 2 year difference
                     logger.debug(f"Year mismatch: {paper_year_int} vs {query_year_int}")
                     return None
             except (ValueError, TypeError):
                 pass  # Skip year validation if conversion fails
-        
+
         # Extract DOI from multiple possible fields
         external_ids = paper.get("externalIds", {})
-        
+
         # Primary DOI field
         if external_ids and "DOI" in external_ids:
             doi = external_ids["DOI"]
             if doi:
                 return self._clean_doi(doi)
-        
+
         # Alternative DOI sources
         for field in ["doi", "DOI"]:
             if field in paper and paper[field]:
                 return self._clean_doi(paper[field])
-        
+
         # Extract from URL field if present using utility
         paper_url = paper.get("url", "")
         if paper_url:
             doi = self.url_doi_extractor.extract_doi_from_url(paper_url)
             if doi:
                 return doi
-        
+
         logger.debug(f"No DOI found in paper: {paper_title}")
         return None
 
@@ -194,10 +206,10 @@ class SemanticScholarSourceEnhanced(BaseDOISource):
         try:
             response = self.session.get(url, params=params, timeout=30)
             response.raise_for_status()
-            
+
             data = response.json()
             return data.get("abstract")
-            
+
         except requests.RequestException as e:
             logger.debug(f"Error fetching abstract for DOI {doi}: {e}")
             return None

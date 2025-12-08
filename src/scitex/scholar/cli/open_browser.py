@@ -74,15 +74,17 @@ def get_failed_papers(project: str, config: ScholarConfig) -> List[Dict]:
         if not pdf_files and has_screenshots:
             # Failed download
             meta = metadata.get("metadata", {})
-            failed_papers.append({
-                "paper_id": paper_dir.name,
-                "doi": meta.get("id", {}).get("doi"),
-                "title": meta.get("basic", {}).get("title"),
-                "url_doi": meta.get("url", {}).get("doi"),
-                "url_publisher": meta.get("url", {}).get("publisher"),
-                "openurl_resolved": meta.get("url", {}).get("openurl_resolved", []),
-                "pdf_urls": meta.get("url", {}).get("pdfs", []),
-            })
+            failed_papers.append(
+                {
+                    "paper_id": paper_dir.name,
+                    "doi": meta.get("id", {}).get("doi"),
+                    "title": meta.get("basic", {}).get("title"),
+                    "url_doi": meta.get("url", {}).get("doi"),
+                    "url_publisher": meta.get("url", {}).get("publisher"),
+                    "openurl_resolved": meta.get("url", {}).get("openurl_resolved", []),
+                    "pdf_urls": meta.get("url", {}).get("pdfs", []),
+                }
+            )
 
     return failed_papers
 
@@ -125,23 +127,23 @@ def get_pending_papers(project: str, config: ScholarConfig) -> List[Dict]:
         if not pdf_files and not has_screenshots:
             # Pending download
             meta = metadata.get("metadata", {})
-            pending_papers.append({
-                "paper_id": paper_dir.name,
-                "doi": meta.get("id", {}).get("doi"),
-                "title": meta.get("basic", {}).get("title"),
-                "url_doi": meta.get("url", {}).get("doi"),
-                "url_publisher": meta.get("url", {}).get("publisher"),
-                "openurl_resolved": meta.get("url", {}).get("openurl_resolved", []),
-                "pdf_urls": meta.get("url", {}).get("pdfs", []),
-            })
+            pending_papers.append(
+                {
+                    "paper_id": paper_dir.name,
+                    "doi": meta.get("id", {}).get("doi"),
+                    "title": meta.get("basic", {}).get("title"),
+                    "url_doi": meta.get("url", {}).get("doi"),
+                    "url_publisher": meta.get("url", {}).get("publisher"),
+                    "openurl_resolved": meta.get("url", {}).get("openurl_resolved", []),
+                    "pdf_urls": meta.get("url", {}).get("pdfs", []),
+                }
+            )
 
     return pending_papers
 
 
 def open_browser_with_urls(
-    papers: List[Dict],
-    profile: str = None,
-    headless: bool = False
+    papers: List[Dict], profile: str = None, headless: bool = False
 ) -> None:
     """Open browser with URL tabs for papers.
 
@@ -163,13 +165,15 @@ def open_browser_with_urls(
             openurl_resolved=paper.get("openurl_resolved"),
             url_publisher=paper.get("url_publisher"),
             url_doi=paper.get("url_doi"),
-            doi=paper.get("doi")
+            doi=paper.get("doi"),
         )
 
         if url:
             urls_to_open.append(url)
         else:
-            logger.warning(f"No valid URL found for paper: {paper.get('title', 'Unknown')[:50]}...")
+            logger.warning(
+                f"No valid URL found for paper: {paper.get('title', 'Unknown')[:50]}..."
+            )
 
     if not urls_to_open:
         logger.warning("No URLs to open")
@@ -179,6 +183,7 @@ def open_browser_with_urls(
 
     # Get cache directory for browser profile
     from scitex.scholar.config import ScholarConfig
+
     config = ScholarConfig()
 
     if profile:
@@ -194,9 +199,11 @@ def open_browser_with_urls(
             str(profile_dir),
             headless=headless,
             args=[
-                '--disable-blink-features=AutomationControlled',
-                '--disable-features=UserAgentClientHint',
-            ] if not headless else []
+                "--disable-blink-features=AutomationControlled",
+                "--disable-features=UserAgentClientHint",
+            ]
+            if not headless
+            else [],
         )
 
         # Open first URL in first tab
@@ -233,28 +240,21 @@ def main():
         description="Open browser with failed/pending PDF URLs for manual download"
     )
     parser.add_argument(
-        "--project",
-        required=True,
-        help="Project name (e.g., neurovista, pac)"
+        "--project", required=True, help="Project name (e.g., neurovista, pac)"
     )
     parser.add_argument(
-        "--all",
-        action="store_true",
-        help="Open both failed and pending PDFs"
+        "--all", action="store_true", help="Open both failed and pending PDFs"
     )
     parser.add_argument(
         "--pending",
         action="store_true",
-        help="Open only pending (not attempted) PDFs instead of failed"
+        help="Open only pending (not attempted) PDFs instead of failed",
     )
     parser.add_argument(
-        "--profile",
-        help="Browser profile name to use (default: system)"
+        "--profile", help="Browser profile name to use (default: system)"
     )
     parser.add_argument(
-        "--headless",
-        action="store_true",
-        help="Run in headless mode (for testing)"
+        "--headless", action="store_true", help="Run in headless mode (for testing)"
     )
 
     args = parser.parse_args()
@@ -276,7 +276,9 @@ def main():
         papers.extend(failed)
 
     if not papers:
-        logger.warning(f"No {'pending' if args.pending else 'failed'} papers found for project: {args.project}")
+        logger.warning(
+            f"No {'pending' if args.pending else 'failed'} papers found for project: {args.project}"
+        )
         return
 
     # Show summary

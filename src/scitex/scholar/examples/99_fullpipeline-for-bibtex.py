@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -47,6 +48,8 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
+
+
 async def process_bibtex_entries(
     bibtex_path: str,
     n_samples: int = None,
@@ -103,16 +106,15 @@ async def process_bibtex_entries(
         auth_manager=ScholarAuthManager(config=config),
         config=config,
     )
-    browser, context = (
-        await browser_manager.get_authenticated_browser_and_context_async()
-    )
+    (
+        browser,
+        context,
+    ) = await browser_manager.get_authenticated_browser_and_context_async()
 
     # Initialize components
     engine = ScholarEngine(config=config, use_cache=use_cache)
     url_finder = ScholarURLFinder(context, config=config, use_cache=use_cache)
-    pdf_downloader = ScholarPDFDownloader(
-        context, config=config, use_cache=False
-    )
+    pdf_downloader = ScholarPDFDownloader(context, config=config, use_cache=False)
 
     results = {}
 
@@ -122,9 +124,7 @@ async def process_bibtex_entries(
     print("=" * 50)
     batched_metadata = await engine.search_batch_async(titles=query_titles)
     results["metadata"] = batched_metadata
-    print(
-        f"Found metadata for {len([m for m in batched_metadata if m])} papers"
-    )
+    print(f"Found metadata for {len([m for m in batched_metadata if m])} papers")
 
     # Step 2: Find URLs
     print("=" * 50)
@@ -140,9 +140,7 @@ async def process_bibtex_entries(
     batched_urls = await url_finder.find_urls_batch(dois=dois)
     results["urls"] = batched_urls
 
-    pdf_urls_found = sum(
-        len(urls.get("urls_pdf", [])) for urls in batched_urls if urls
-    )
+    pdf_urls_found = sum(len(urls.get("urls_pdf", [])) for urls in batched_urls if urls)
     print(f"Found {pdf_urls_found} PDF URLs")
 
     # Step 3: Download PDFs
@@ -176,9 +174,10 @@ async def process_bibtex_entries(
             auth_manager=ScholarAuthManager(config=config),
             config=config,
         )
-        browser_dl, context_dl = (
-            await browser_manager_download.get_authenticated_browser_and_context_async()
-        )
+        (
+            browser_dl,
+            context_dl,
+        ) = await browser_manager_download.get_authenticated_browser_and_context_async()
         pdf_downloader_dl = ScholarPDFDownloader(
             context_dl, config=config, use_cache=False
         )

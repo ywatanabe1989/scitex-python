@@ -12,7 +12,9 @@ class ProjectMUSETranslator(BaseTranslator):
     """Project MUSE."""
 
     LABEL = "Project MUSE"
-    URL_TARGET_PATTERN = r"^https?://[^/]*muse\.jhu\.edu/(book/|pub/|article/|issue/|search\?)"
+    URL_TARGET_PATTERN = (
+        r"^https?://[^/]*muse\.jhu\.edu/(book/|pub/|article/|issue/|search\?)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

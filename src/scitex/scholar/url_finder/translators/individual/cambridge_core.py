@@ -26,7 +26,9 @@ class CambridgeCoreTranslator(BaseTranslator):
     """
 
     LABEL = "Cambridge Core"
-    URL_TARGET_PATTERN = r"^https?://www\.cambridge\.org/core/(search\?|journals/|books/|.+/listing?)"
+    URL_TARGET_PATTERN = (
+        r"^https?://www\.cambridge\.org/core/(search\?|journals/|books/|.+/listing?)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:
@@ -82,18 +84,18 @@ class CambridgeCoreTranslator(BaseTranslator):
             # This is the most reliable method for both books and articles
             citation_pdf = await page.locator(
                 'meta[name="citation_pdf_url"], meta[name="citation_ pdf_url"]'
-            ).first.get_attribute('content', timeout=2000)
+            ).first.get_attribute("content", timeout=2000)
 
             if citation_pdf:
                 # Make absolute URL if needed
-                if not citation_pdf.startswith('http'):
-                    if citation_pdf.startswith('/'):
-                        base_url = await page.evaluate('window.location.origin')
+                if not citation_pdf.startswith("http"):
+                    if citation_pdf.startswith("/"):
+                        base_url = await page.evaluate("window.location.origin")
                         citation_pdf = f"{base_url}{citation_pdf}"
                     else:
-                        base_url = await page.evaluate('window.location.href')
+                        base_url = await page.evaluate("window.location.href")
                         # Remove trailing path
-                        base_url = re.sub(r'/[^/]*$', '', base_url)
+                        base_url = re.sub(r"/[^/]*$", "", base_url)
                         citation_pdf = f"{base_url}/{citation_pdf}"
 
                 pdf_urls.append(citation_pdf)
@@ -107,17 +109,17 @@ class CambridgeCoreTranslator(BaseTranslator):
             # Pattern: .actions a[target="_blank"][href*=".pdf"]
             pdf_link = await page.locator(
                 '.actions a[target="_blank"][href*=".pdf"]'
-            ).first.get_attribute('href', timeout=2000)
+            ).first.get_attribute("href", timeout=2000)
 
             if pdf_link:
                 # Make absolute URL if needed
-                if not pdf_link.startswith('http'):
-                    if pdf_link.startswith('/'):
-                        base_url = await page.evaluate('window.location.origin')
+                if not pdf_link.startswith("http"):
+                    if pdf_link.startswith("/"):
+                        base_url = await page.evaluate("window.location.origin")
                         pdf_link = f"{base_url}{pdf_link}"
                     else:
-                        base_url = await page.evaluate('window.location.href')
-                        base_url = re.sub(r'/[^/]*$', '', base_url)
+                        base_url = await page.evaluate("window.location.href")
+                        base_url = re.sub(r"/[^/]*$", "", base_url)
                         pdf_link = f"{base_url}/{pdf_link}"
 
                 pdf_urls.append(pdf_link)
@@ -131,17 +133,17 @@ class CambridgeCoreTranslator(BaseTranslator):
             # Cambridge Core often has a "PDF" button or link
             pdf_button = await page.locator(
                 'a[href*=".pdf"], a[data-track-label="pdf"], a:has-text("PDF")'
-            ).first.get_attribute('href', timeout=2000)
+            ).first.get_attribute("href", timeout=2000)
 
-            if pdf_button and '.pdf' in pdf_button.lower():
+            if pdf_button and ".pdf" in pdf_button.lower():
                 # Make absolute URL if needed
-                if not pdf_button.startswith('http'):
-                    if pdf_button.startswith('/'):
-                        base_url = await page.evaluate('window.location.origin')
+                if not pdf_button.startswith("http"):
+                    if pdf_button.startswith("/"):
+                        base_url = await page.evaluate("window.location.origin")
                         pdf_button = f"{base_url}{pdf_button}"
                     else:
-                        base_url = await page.evaluate('window.location.href')
-                        base_url = re.sub(r'/[^/]*$', '', base_url)
+                        base_url = await page.evaluate("window.location.href")
+                        base_url = re.sub(r"/[^/]*$", "", base_url)
                         pdf_button = f"{base_url}/{pdf_button}"
 
                 pdf_urls.append(pdf_button)
@@ -153,15 +155,19 @@ class CambridgeCoreTranslator(BaseTranslator):
         try:
             # Method 4: Extract DOI and construct PDF URL
             # Cambridge Core PDF URLs often follow pattern: /core/services/aop-cambridge-core/content/view/{DOI}
-            doi_meta = await page.locator('meta[name="citation_doi"]').first.get_attribute('content', timeout=2000)
+            doi_meta = await page.locator(
+                'meta[name="citation_doi"]'
+            ).first.get_attribute("content", timeout=2000)
 
             if doi_meta:
                 # Remove any prefix like "doi:" or "https://doi.org/"
-                doi = re.sub(r'^(doi:|https?://doi\.org/)', '', doi_meta)
+                doi = re.sub(r"^(doi:|https?://doi\.org/)", "", doi_meta)
 
                 # Try constructing PDF URL from DOI
-                base_url = await page.evaluate('window.location.origin')
-                pdf_url = f"{base_url}/core/services/aop-cambridge-core/content/view/{doi}"
+                base_url = await page.evaluate("window.location.origin")
+                pdf_url = (
+                    f"{base_url}/core/services/aop-cambridge-core/content/view/{doi}"
+                )
 
                 pdf_urls.append(pdf_url)
                 return pdf_urls

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -46,6 +47,8 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
+
+
 async def process_bibtex_urls(
     bibtex_path: str,
     use_cache_engine: bool = True,
@@ -103,9 +106,10 @@ async def process_bibtex_urls(
         auth_manager=ScholarAuthManager(config=config),
         config=config,
     )
-    browser, context = (
-        await browser_manager.get_authenticated_browser_and_context_async()
-    )
+    (
+        browser,
+        context,
+    ) = await browser_manager.get_authenticated_browser_and_context_async()
 
     print("🔧 Initializing components...")
     engine = ScholarEngine(config=config, use_cache=use_cache_engine)

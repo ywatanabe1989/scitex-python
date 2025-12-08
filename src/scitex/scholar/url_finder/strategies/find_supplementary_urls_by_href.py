@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/url/strategies/find_supplementary_urls_by_href.py"
-)
+
+__FILE__ = "./src/scitex/scholar/url/strategies/find_supplementary_urls_by_href.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -66,5 +65,6 @@ async def find_supplementary_urls_by_href(
     except Exception as e:
         logger.error(f"Error finding supplementary URLs: {e}")
         return []
+
 
 # EOF

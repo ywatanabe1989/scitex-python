@@ -12,7 +12,9 @@ class OzonRuTranslator(BaseTranslator):
     """OZON.ru."""
 
     LABEL = "OZON.ru"
-    URL_TARGET_PATTERN = r"^https?://www\.ozon\.ru/(context/detail/id/|\?context=search)"
+    URL_TARGET_PATTERN = (
+        r"^https?://www\.ozon\.ru/(context/detail/id/|\?context=search)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

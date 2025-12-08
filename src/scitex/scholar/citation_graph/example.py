@@ -24,9 +24,9 @@ def main():
         print("Please update the db_path in this script.")
         return 1
 
-    print("="*70)
+    print("=" * 70)
     print("  Citation Graph Example")
-    print("="*70)
+    print("=" * 70)
     print(f"\nDatabase: {db_path}")
 
     # Initialize builder
@@ -61,20 +61,15 @@ def main():
     # Show top papers by similarity
     print(f"\nTop 10 most similar papers:")
     print(f"{'Rank':<5} {'Score':<7} {'Year':<6} {'Title':<60}")
-    print("-"*85)
+    print("-" * 85)
 
-    sorted_nodes = sorted(
-        graph.nodes,
-        key=lambda n: n.similarity_score,
-        reverse=True
-    )
+    sorted_nodes = sorted(graph.nodes, key=lambda n: n.similarity_score, reverse=True)
 
     for i, node in enumerate(sorted_nodes[:11], 1):
         if node.doi.lower() == seed_doi.lower():
             continue
         print(
-            f"{i:<5} {node.similarity_score:<7.1f} "
-            f"{node.year:<6} {node.title[:60]:<60}"
+            f"{i:<5} {node.similarity_score:<7.1f} {node.year:<6} {node.title[:60]:<60}"
         )
 
     # Export to JSON

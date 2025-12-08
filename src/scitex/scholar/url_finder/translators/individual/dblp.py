@@ -31,7 +31,7 @@ class DBLPTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 4,  # Web
-        "lastUpdated": "2023-04-20 13:37:43"
+        "lastUpdated": "2023-04-20 13:37:43",
     }
 
     def detect_web(self, doc, url: str) -> Optional[str]:
@@ -130,15 +130,11 @@ class DBLPTranslator:
         Returns:
             Item dictionary
         """
-        item = {
-            "creators": [],
-            "tags": [],
-            "attachments": []
-        }
+        item = {"creators": [], "tags": [], "attachments": []}
 
         # Extract entry type and fields
         # This is a simplified implementation
-        entry_match = re.search(r'@(\w+)\{([^,]+),', bibtex)
+        entry_match = re.search(r"@(\w+)\{([^,]+),", bibtex)
         if entry_match:
             entry_type = entry_match.group(1).lower()
 
@@ -148,7 +144,7 @@ class DBLPTranslator:
                 "inproceedings": "conferencePaper",
                 "incollection": "bookSection",
                 "book": "book",
-                "phdthesis": "thesis"
+                "phdthesis": "thesis",
             }
             item["itemType"] = type_map.get(entry_type, "journalArticle")
 

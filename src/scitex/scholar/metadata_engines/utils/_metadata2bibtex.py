@@ -5,9 +5,11 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
+
 
 def metadata2bibtex(metadata, key=None):
     """Convert complete metadata structure to BibTeX entry."""
@@ -99,5 +101,6 @@ def _format_pages(publication_data):
     elif first_page:
         return first_page
     return None
+
 
 # EOF

@@ -8,4 +8,4 @@ Kept for backward compatibility with existing registry imports.
 
 from .acm_digital_library import ACMDigitalLibraryTranslator as ACMTranslator
 
-__all__ = ['ACMTranslator']
+__all__ = ["ACMTranslator"]

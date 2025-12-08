@@ -255,9 +255,7 @@ async def run_parallel_pipeline(args):
         project=args.project,
     )
 
-    logger.success(
-        f"Parallel pipeline completed: {len(papers)} papers processed"
-    )
+    logger.success(f"Parallel pipeline completed: {len(papers)} papers processed")
     return 0
 
 

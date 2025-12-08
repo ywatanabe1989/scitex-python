@@ -50,7 +50,7 @@ class FrontiersTranslator(BaseTranslator):
         # Pattern: https://[subdomain].frontiersin.org/[journals/name/]articles/(DOI)
         match = re.search(
             r"https://[^/]+\.frontiersin\.org/(?:journals/[^/]+/)?articles?/(10\.\d{4,}/[^/]+)",
-            url
+            url,
         )
         return match.group(1) if match else ""
 

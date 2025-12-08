@@ -16,8 +16,8 @@ class AccessPattern(Enum):
 
 
 PATTERN_RULES = [
-    (r'\.pdf(\?.*)?$', AccessPattern.DIRECT_PDF, None),
-    (r'\.pdf[},\s]*$', AccessPattern.DIRECT_PDF, None),
+    (r"\.pdf(\?.*)?$", AccessPattern.DIRECT_PDF, None),
+    (r"\.pdf[},\s]*$", AccessPattern.DIRECT_PDF, None),
 ]
 
 
@@ -28,11 +28,13 @@ def detect_pattern(url: str) -> tuple[AccessPattern, Optional[str]]:
     return AccessPattern.WEB_SCRAPE, None
 
 
-async def extract_pdf_urls_by_pattern(url: str, page: Optional[Page] = None) -> List[str]:
+async def extract_pdf_urls_by_pattern(
+    url: str, page: Optional[Page] = None
+) -> List[str]:
     pattern_type, handler = detect_pattern(url)
 
     if pattern_type == AccessPattern.DIRECT_PDF:
-        clean_url = re.sub(r'[},\s]+$', '', url)
+        clean_url = re.sub(r"[},\s]+$", "", url)
         return [clean_url]
 
     return []

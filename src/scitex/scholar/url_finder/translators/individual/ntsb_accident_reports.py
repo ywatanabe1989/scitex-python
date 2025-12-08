@@ -12,7 +12,9 @@ class NtsbAccidentReportsTranslator(BaseTranslator):
     """NTSB Accident Reports."""
 
     LABEL = "NTSB Accident Reports"
-    URL_TARGET_PATTERN = r"^https?://(www\.)?ntsb\.gov/investigations/AccidentReports/Pages/"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.)?ntsb\.gov/investigations/AccidentReports/Pages/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

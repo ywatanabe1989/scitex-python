@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 # Load OA config from default.yaml (single source of truth)
 _config = None
 
+
 def _get_config() -> ScholarConfig:
     """Get or create singleton config instance."""
     global _config
@@ -58,17 +59,19 @@ def _get_unpaywall_email() -> str:
 
 class OAStatus(Enum):
     """Open Access status categories (aligned with Unpaywall)."""
-    GOLD = "gold"        # Published in OA journal (DOAJ listed)
-    GREEN = "green"      # Available in repository (arXiv, PMC, etc.)
-    HYBRID = "hybrid"    # OA article in subscription journal
-    BRONZE = "bronze"    # Free to read on publisher site, but no license
-    CLOSED = "closed"    # Paywalled
+
+    GOLD = "gold"  # Published in OA journal (DOAJ listed)
+    GREEN = "green"  # Available in repository (arXiv, PMC, etc.)
+    HYBRID = "hybrid"  # OA article in subscription journal
+    BRONZE = "bronze"  # Free to read on publisher site, but no license
+    CLOSED = "closed"  # Paywalled
     UNKNOWN = "unknown"  # Status not determined
 
 
 @dataclass
 class OAResult:
     """Result of open access detection."""
+
     is_open_access: bool
     status: OAStatus
     oa_url: Optional[str] = None
@@ -84,7 +87,7 @@ class OAResult:
 # arXiv ID patterns
 ARXIV_PATTERNS = [
     re.compile(r"^\d{4}\.\d{4,5}(v\d+)?$"),  # New format: 2301.12345
-    re.compile(r"^[a-z-]+/\d{7}(v\d+)?$"),   # Old format: hep-th/9901001
+    re.compile(r"^[a-z-]+/\d{7}(v\d+)?$"),  # Old format: hep-th/9901001
     re.compile(r"^arxiv:\d{4}\.\d{4,5}(v\d+)?$", re.IGNORECASE),
 ]
 
@@ -135,6 +138,7 @@ def is_open_access_journal(journal_name: str, use_cache: bool = True) -> bool:
     if use_cache:
         try:
             from .oa_cache import is_oa_journal_cached
+
             if is_oa_journal_cached(journal_name):
                 return True
         except ImportError:
@@ -144,6 +148,7 @@ def is_open_access_journal(journal_name: str, use_cache: bool = True) -> bool:
     if use_cache:
         try:
             from .journal_normalizer import get_journal_normalizer
+
             normalizer = get_journal_normalizer()
             if normalizer.is_open_access(journal_name):
                 return True
@@ -212,7 +217,9 @@ def detect_oa_from_identifiers(
     if source and is_open_access_source(source):
         return OAResult(
             is_open_access=True,
-            status=OAStatus.GREEN if source.lower() in ["arxiv", "pmc", "biorxiv", "medrxiv"] else OAStatus.GOLD,
+            status=OAStatus.GREEN
+            if source.lower() in ["arxiv", "pmc", "biorxiv", "medrxiv"]
+            else OAStatus.GOLD,
             source=f"source_{source}",
             confidence=0.95,
         )
@@ -285,7 +292,9 @@ async def check_oa_status_unpaywall(
 
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=timeout)) as resp:
+            async with session.get(
+                url, timeout=aiohttp.ClientTimeout(total=timeout)
+            ) as resp:
                 if resp.status == 404:
                     return OAResult(
                         is_open_access=False,

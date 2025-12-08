@@ -27,7 +27,7 @@ def cmd_import(args):
         library_id=args.library_id or os.getenv("ZOTERO_LIBRARY_ID"),
         library_type=args.library_type,
         api_key=args.api_key or os.getenv("ZOTERO_API_KEY"),
-        project=args.project
+        project=args.project,
     )
 
     if args.collection:
@@ -35,7 +35,7 @@ def cmd_import(args):
             collection_name=args.collection,
             limit=args.limit,
             include_pdfs=args.include_pdfs,
-            include_annotations=args.include_annotations
+            include_annotations=args.include_annotations,
         )
     elif args.tags:
         tags = args.tags.split(",")
@@ -44,13 +44,13 @@ def cmd_import(args):
             match_all=args.match_all,
             limit=args.limit,
             include_pdfs=args.include_pdfs,
-            include_annotations=args.include_annotations
+            include_annotations=args.include_annotations,
         )
     else:
         papers = importer.import_all(
             limit=args.limit,
             include_pdfs=args.include_pdfs,
-            include_annotations=args.include_annotations
+            include_annotations=args.include_annotations,
         )
 
     if args.save_to_library:
@@ -67,7 +67,7 @@ def cmd_export(args):
         library_id=args.library_id or os.getenv("ZOTERO_LIBRARY_ID"),
         library_type=args.library_type,
         api_key=args.api_key or os.getenv("ZOTERO_API_KEY"),
-        project=args.project
+        project=args.project,
     )
 
     papers = Papers.from_project(args.project)
@@ -77,7 +77,7 @@ def cmd_export(args):
             papers,
             collection_name=args.collection,
             create_collection=args.create_collection,
-            update_existing=args.update_existing
+            update_existing=args.update_existing,
         )
         logger.success(f"Exported {len(results)} papers to Zotero")
 
@@ -97,14 +97,14 @@ def cmd_sync(args):
         library_type=args.library_type,
         api_key=args.api_key or os.getenv("ZOTERO_API_KEY"),
         project=args.project,
-        sync_interval=args.interval
+        sync_interval=args.interval,
     )
 
     if args.once:
         stats = linker.sync_once(
             bidirectional=args.bidirectional,
             auto_import=args.auto_import,
-            auto_export=args.auto_export
+            auto_export=args.auto_export,
         )
         logger.success(f"Sync stats: {stats}")
     else:
@@ -112,7 +112,7 @@ def cmd_sync(args):
         linker.start_sync(
             bidirectional=args.bidirectional,
             auto_import=args.auto_import,
-            auto_export=args.auto_export
+            auto_export=args.auto_export,
         )
 
 
@@ -122,23 +122,19 @@ def main():
         description="SciTeX Scholar - Zotero Integration CLI"
     )
     parser.add_argument(
-        "--library-id",
-        help="Zotero library ID (or set ZOTERO_LIBRARY_ID env var)"
+        "--library-id", help="Zotero library ID (or set ZOTERO_LIBRARY_ID env var)"
     )
     parser.add_argument(
         "--library-type",
         default="user",
         choices=["user", "group"],
-        help="Library type (default: user)"
+        help="Library type (default: user)",
     )
     parser.add_argument(
-        "--api-key",
-        help="Zotero API key (or set ZOTERO_API_KEY env var)"
+        "--api-key", help="Zotero API key (or set ZOTERO_API_KEY env var)"
     )
     parser.add_argument(
-        "--project",
-        default="default",
-        help="Scholar project name (default: default)"
+        "--project", default="default", help="Scholar project name (default: default)"
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Command")
@@ -148,27 +144,23 @@ def main():
     import_parser.add_argument("--collection", help="Collection name")
     import_parser.add_argument("--tags", help="Comma-separated tags")
     import_parser.add_argument(
-        "--match-all",
-        action="store_true",
-        help="Require all tags (AND logic)"
+        "--match-all", action="store_true", help="Require all tags (AND logic)"
     )
     import_parser.add_argument("--limit", type=int, help="Maximum items to import")
     import_parser.add_argument(
         "--no-pdfs",
         dest="include_pdfs",
         action="store_false",
-        help="Skip PDF attachments"
+        help="Skip PDF attachments",
     )
     import_parser.add_argument(
         "--no-annotations",
         dest="include_annotations",
         action="store_false",
-        help="Skip PDF annotations"
+        help="Skip PDF annotations",
     )
     import_parser.add_argument(
-        "--save-to-library",
-        action="store_true",
-        help="Save to Scholar library"
+        "--save-to-library", action="store_true", help="Save to Scholar library"
     )
     import_parser.set_defaults(include_pdfs=True, include_annotations=True)
 
@@ -178,18 +170,16 @@ def main():
         "--format",
         default="zotero",
         choices=["zotero", "bibtex", "ris"],
-        help="Export format (default: zotero)"
+        help="Export format (default: zotero)",
     )
     export_parser.add_argument("--collection", help="Zotero collection name")
     export_parser.add_argument(
         "--create-collection",
         action="store_true",
-        help="Create collection if not exists"
+        help="Create collection if not exists",
     )
     export_parser.add_argument(
-        "--update-existing",
-        action="store_true",
-        help="Update existing items"
+        "--update-existing", action="store_true", help="Update existing items"
     )
     export_parser.add_argument("--output", help="Output file path (for bibtex/ris)")
 
@@ -199,28 +189,20 @@ def main():
         "--interval",
         type=int,
         default=60,
-        help="Sync interval in seconds (default: 60)"
+        help="Sync interval in seconds (default: 60)",
     )
+    sync_parser.add_argument("--once", action="store_true", help="Sync once and exit")
     sync_parser.add_argument(
-        "--once",
-        action="store_true",
-        help="Sync once and exit"
-    )
-    sync_parser.add_argument(
-        "--bidirectional",
-        action="store_true",
-        help="Sync both directions"
+        "--bidirectional", action="store_true", help="Sync both directions"
     )
     sync_parser.add_argument(
         "--auto-import",
         action="store_true",
         default=True,
-        help="Auto-import from Zotero"
+        help="Auto-import from Zotero",
     )
     sync_parser.add_argument(
-        "--auto-export",
-        action="store_true",
-        help="Auto-export to Zotero"
+        "--auto-export", action="store_true", help="Auto-export to Zotero"
     )
 
     args = parser.parse_args()
@@ -256,6 +238,7 @@ def main():
     except Exception as e:
         logger.error(f"Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

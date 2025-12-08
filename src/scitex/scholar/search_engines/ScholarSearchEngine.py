@@ -31,8 +31,12 @@ from typing import List, Dict, Any, Optional, Literal
 from datetime import datetime
 
 from scitex import logging
-from scitex.scholar.pipelines.ScholarPipelineSearchParallel import ScholarPipelineSearchParallel
-from scitex.scholar.pipelines.ScholarPipelineSearchSingle import ScholarPipelineSearchSingle
+from scitex.scholar.pipelines.ScholarPipelineSearchParallel import (
+    ScholarPipelineSearchParallel,
+)
+from scitex.scholar.pipelines.ScholarPipelineSearchSingle import (
+    ScholarPipelineSearchSingle,
+)
 from scitex.scholar.pipelines.SearchQueryParser import SearchQueryParser
 
 logger = logging.getLogger(__name__)
@@ -43,7 +47,7 @@ class ScholarSearchEngine:
 
     def __init__(
         self,
-        default_mode: Literal['parallel', 'single'] = 'parallel',
+        default_mode: Literal["parallel", "single"] = "parallel",
         use_cache: bool = True,
         email: str = None,
     ):
@@ -74,11 +78,11 @@ class ScholarSearchEngine:
 
         # Statistics
         self.stats = {
-            'total_searches': 0,
-            'parallel_searches': 0,
-            'single_searches': 0,
-            'total_results': 0,
-            'avg_search_time': 0.0,
+            "total_searches": 0,
+            "parallel_searches": 0,
+            "single_searches": 0,
+            "total_results": 0,
+            "avg_search_time": 0.0,
         }
 
         logger.info(
@@ -89,7 +93,7 @@ class ScholarSearchEngine:
     async def search(
         self,
         query: str,
-        mode: Optional[Literal['parallel', 'single']] = None,
+        mode: Optional[Literal["parallel", "single"]] = None,
         filters: Optional[Dict[str, Any]] = None,
         max_results: int = 100,
         parse_query: bool = True,
@@ -125,7 +129,7 @@ class ScholarSearchEngine:
             )
         """
         start_time = datetime.now()
-        self.stats['total_searches'] += 1
+        self.stats["total_searches"] += 1
 
         # Determine search mode
         search_mode = mode or self.default_mode
@@ -139,7 +143,7 @@ class ScholarSearchEngine:
             combined_filters = {**parsed_filters, **(filters or {})}
 
             # Build clean query from positive keywords
-            clean_query = ' '.join(parsed_filters.get('positive_keywords', [query]))
+            clean_query = " ".join(parsed_filters.get("positive_keywords", [query]))
 
             logger.info(
                 f"{self.name}: Parsed query '{query}' -> "
@@ -150,13 +154,13 @@ class ScholarSearchEngine:
             combined_filters = filters or {}
 
         # Select pipeline
-        if search_mode == 'parallel':
+        if search_mode == "parallel":
             pipeline = self.parallel_pipeline
-            self.stats['parallel_searches'] += 1
+            self.stats["parallel_searches"] += 1
             logger.info(f"{self.name}: Using parallel search mode")
         else:
             pipeline = self.single_pipeline
-            self.stats['single_searches'] += 1
+            self.stats["single_searches"] += 1
             logger.info(f"{self.name}: Using single (sequential) search mode")
 
         # Execute search
@@ -169,16 +173,16 @@ class ScholarSearchEngine:
 
             # Update statistics
             search_time = (datetime.now() - start_time).total_seconds()
-            n = self.stats['total_searches']
-            self.stats['avg_search_time'] = (
-                (self.stats['avg_search_time'] * (n - 1) + search_time) / n
-            )
-            self.stats['total_results'] += len(result.get('results', []))
+            n = self.stats["total_searches"]
+            self.stats["avg_search_time"] = (
+                self.stats["avg_search_time"] * (n - 1) + search_time
+            ) / n
+            self.stats["total_results"] += len(result.get("results", []))
 
             # Add search engine metadata
-            result['metadata']['search_mode'] = search_mode
-            result['metadata']['parsed_query'] = clean_query if parse_query else None
-            result['metadata']['original_query'] = query
+            result["metadata"]["search_mode"] = search_mode
+            result["metadata"]["parsed_query"] = clean_query if parse_query else None
+            result["metadata"]["original_query"] = query
 
             logger.success(
                 f"{self.name}: Search completed in {search_time:.2f}s, "
@@ -194,7 +198,7 @@ class ScholarSearchEngine:
     async def search_by_doi(
         self,
         doi: str,
-        mode: Optional[Literal['parallel', 'single']] = None,
+        mode: Optional[Literal["parallel", "single"]] = None,
     ) -> Dict[str, Any]:
         """Search for a paper by DOI.
 
@@ -217,7 +221,7 @@ class ScholarSearchEngine:
     async def search_by_title(
         self,
         title: str,
-        mode: Optional[Literal['parallel', 'single']] = None,
+        mode: Optional[Literal["parallel", "single"]] = None,
         max_results: int = 10,
     ) -> Dict[str, Any]:
         """Search for papers by title.
@@ -246,9 +250,9 @@ class ScholarSearchEngine:
             Dict with statistics from engine and pipelines
         """
         return {
-            'engine_stats': self.stats,
-            'parallel_pipeline_stats': self.parallel_pipeline.get_statistics(),
-            'single_pipeline_stats': self.single_pipeline.get_statistics(),
+            "engine_stats": self.stats,
+            "parallel_pipeline_stats": self.parallel_pipeline.get_statistics(),
+            "single_pipeline_stats": self.single_pipeline.get_statistics(),
         }
 
     def get_supported_engines(self) -> List[str]:

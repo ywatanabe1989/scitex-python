@@ -12,7 +12,9 @@ class WebOfScienceNextgenTranslator(BaseTranslator):
     """Web of Science Nextgen."""
 
     LABEL = "Web of Science Nextgen"
-    URL_TARGET_PATTERN = r"^https://(www\.webofscience\.com|webofscience\.clarivate\.cn)/"
+    URL_TARGET_PATTERN = (
+        r"^https://(www\.webofscience\.com|webofscience\.clarivate\.cn)/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

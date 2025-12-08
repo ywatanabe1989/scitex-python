@@ -8,10 +8,14 @@ from playwright.async_api import Page
 from ..core.base import BaseTranslator
 
 
-class ArchiveOuverteEnSciencesDeLInformationEtDeLaCommunicationAosicTranslator(BaseTranslator):
+class ArchiveOuverteEnSciencesDeLInformationEtDeLaCommunicationAosicTranslator(
+    BaseTranslator
+):
     """Archive Ouverte en Sciences de l'Information et de la Communication  (AOSIC)."""
 
-    LABEL = "Archive Ouverte en Sciences de l'Information et de la Communication  (AOSIC)"
+    LABEL = (
+        "Archive Ouverte en Sciences de l'Information et de la Communication  (AOSIC)"
+    )
     URL_TARGET_PATTERN = r"^https?://archivesic\.ccsd\.cnrs\.fr/"
 
     @classmethod

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -41,7 +42,9 @@ class CrossRefLocalEngine(BaseDOIEngine):
         self.api_url = api_url.rstrip("/")
 
         # Detect API type: external (public) vs internal (Docker/local)
-        self._is_external_api = "/api/crossref" in self.api_url or "scitex.ai" in self.api_url
+        self._is_external_api = (
+            "/api/crossref" in self.api_url or "scitex.ai" in self.api_url
+        )
 
     @property
     def name(self) -> str:
@@ -85,9 +88,7 @@ class CrossRefLocalEngine(BaseDOIEngine):
         params = {}
 
         if doi:
-            doi = doi.replace("https://doi.org/", "").replace(
-                "http://doi.org/", ""
-            )
+            doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
             params["doi"] = doi
 
         if title:
@@ -107,9 +108,7 @@ class CrossRefLocalEngine(BaseDOIEngine):
 
         return self._make_search_request(params, return_as)
 
-    def _make_search_request(
-        self, params: dict, return_as: str
-    ) -> Optional[Dict]:
+    def _make_search_request(self, params: dict, return_as: str) -> Optional[Dict]:
         """Make search request to local or external API"""
         url = self._build_endpoint_url("search")
 
@@ -123,42 +122,32 @@ class CrossRefLocalEngine(BaseDOIEngine):
             response.raise_for_status()
             data = response.json()
 
-            if (
-                "doi" in params
-                and isinstance(data, dict)
-                and not data.get("error")
-            ):
-                return self._extract_metadata_from_crossref_data(
-                    data, return_as
-                )
+            if "doi" in params and isinstance(data, dict) and not data.get("error"):
+                return self._extract_metadata_from_crossref_data(data, return_as)
 
             elif "results" in data and data["results"]:
                 first_result = data["results"][0]
                 if first_result.get("doi"):
-                    return self._search_by_doi_only(
-                        first_result["doi"], return_as
-                    )
+                    return self._search_by_doi_only(first_result["doi"], return_as)
 
             elif isinstance(data, dict) and not data.get("error"):
-                return self._extract_metadata_from_crossref_data(
-                    data, return_as
-                )
+                return self._extract_metadata_from_crossref_data(data, return_as)
 
             return self._create_minimal_metadata(return_as=return_as)
 
         except Exception as e:
             # Shorten verbose connection error messages
             if "Connection refused" in str(e) or "Max retries exceeded" in str(e):
-                logger.warning(f"CrossRef Local server not available at {self.api_url} (connection refused)")
+                logger.warning(
+                    f"CrossRef Local server not available at {self.api_url} (connection refused)"
+                )
             else:
                 logger.warning(f"CrossRef Local search error: {e}")
             return self._create_minimal_metadata(return_as=return_as)
 
     def _search_by_doi_only(self, doi: str, return_as: str) -> Optional[Dict]:
         """Get full metadata for DOI"""
-        doi = doi.replace("https://doi.org/", "").replace(
-            "http://doi.org/", ""
-        )
+        doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
         url = self._build_endpoint_url("search")
         params = {"doi": doi}
 
@@ -170,7 +159,9 @@ class CrossRefLocalEngine(BaseDOIEngine):
         except Exception as exc:
             # Shorten verbose connection error messages
             if "Connection refused" in str(exc) or "Max retries exceeded" in str(exc):
-                logger.warning(f"CrossRef Local server not available at {self.api_url} (connection refused)")
+                logger.warning(
+                    f"CrossRef Local server not available at {self.api_url} (connection refused)"
+                )
             else:
                 logger.warning(f"CrossRef Local DOI lookup error: {exc}")
             return self._create_minimal_metadata(doi=doi, return_as=return_as)
@@ -205,9 +196,7 @@ class CrossRefLocalEngine(BaseDOIEngine):
         container_titles = data.get("container-title", [])
         short_container_titles = data.get("short-container-title", [])
         journal = container_titles[0] if container_titles else None
-        short_journal = (
-            short_container_titles[0] if short_container_titles else None
-        )
+        short_journal = short_container_titles[0] if short_container_titles else None
 
         issn_list = data.get("ISSN", [])
         issn = issn_list[0] if issn_list else None
@@ -229,15 +218,9 @@ class CrossRefLocalEngine(BaseDOIEngine):
                 "journal": journal if journal else None,
                 "journal_engines": [self.name] if journal else None,
                 "short_journal": short_journal if short_journal else None,
-                "short_journal_engines": (
-                    [self.name] if short_journal else None
-                ),
-                "publisher": (
-                    data.get("publisher") if data.get("publisher") else None
-                ),
-                "publisher_engines": (
-                    [self.name] if data.get("publisher") else None
-                ),
+                "short_journal_engines": ([self.name] if short_journal else None),
+                "publisher": (data.get("publisher") if data.get("publisher") else None),
+                "publisher_engines": ([self.name] if data.get("publisher") else None),
                 "volume": data.get("volume") if data.get("volume") else None,
                 "volume_engines": [self.name] if data.get("volume") else None,
                 "issue": data.get("issue") if data.get("issue") else None,
@@ -247,9 +230,7 @@ class CrossRefLocalEngine(BaseDOIEngine):
             },
             "url": {
                 "doi": (
-                    f"https://doi.org/{data.get('DOI')}"
-                    if data.get("DOI")
-                    else None
+                    f"https://doi.org/{data.get('DOI')}" if data.get("DOI") else None
                 ),
                 "doi_engines": [self.name] if data.get("DOI") else None,
             },
@@ -279,8 +260,7 @@ if __name__ == "__main__":
     print("INTERNAL API EXAMPLE")
     print("=" * 60)
     engine_internal = CrossRefLocalEngine(
-        "test@example.com",
-        api_url="http://crossref:3333"
+        "test@example.com", api_url="http://crossref:3333"
     )
     print(f"API URL: {engine_internal.api_url}")
     print(f"Is External: {engine_internal._is_external_api}")
@@ -291,8 +271,7 @@ if __name__ == "__main__":
     print("EXTERNAL API EXAMPLE")
     print("=" * 60)
     engine_external = CrossRefLocalEngine(
-        "test@example.com",
-        api_url="https://scitex.ai/scholar/api/crossref"
+        "test@example.com", api_url="https://scitex.ai/scholar/api/crossref"
     )
     print(f"API URL: {engine_external.api_url}")
     print(f"Is External: {engine_external._is_external_api}")

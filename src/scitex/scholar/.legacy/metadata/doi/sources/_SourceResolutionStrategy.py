@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -75,13 +76,9 @@ class SourceResolutionStrategy:
         self.sources = self.config.resolve("sources", sources)
 
         # Emails
-        self.crossref_email = self.config.resolve(
-            "crossref_email", email_crossref
-        )
+        self.crossref_email = self.config.resolve("crossref_email", email_crossref)
         self.pubmed_email = self.config.resolve("pubmed_email", email_pubmed)
-        self.openalex_email = self.config.resolve(
-            "openalex_email", email_openalex
-        )
+        self.openalex_email = self.config.resolve("openalex_email", email_openalex)
         self.semantic_scholar_email = self.config.resolve(
             "semantic_scholar_email",
             email_semantic_scholar,
@@ -89,14 +86,10 @@ class SourceResolutionStrategy:
         self.arxiv_email = self.config.resolve("arxiv_email", email_arxiv)
 
         # Rate Limit Handler
-        self.rate_limit_handler = rate_limit_handler or RateLimitHandler(
-            config
-        )
+        self.rate_limit_handler = rate_limit_handler or RateLimitHandler(config)
 
         # Source Rotation Manager
-        self.source_rotation_manager = SourceRotationManager(
-            self.rate_limit_handler
-        )
+        self.source_rotation_manager = SourceRotationManager(self.rate_limit_handler)
 
         # Initialize source instances cache
         self._source_instances: Dict[str, BaseDOISource] = {}
@@ -132,9 +125,7 @@ class SourceResolutionStrategy:
         """
 
         # Try CorpusID resolution if URL contains CorpusID
-        corpus_result = await self._corpusid2metadata_async(
-            url, title, year, authors
-        )
+        corpus_result = await self._corpusid2metadata_async(url, title, year, authors)
         if corpus_result:
             return corpus_result
 
@@ -146,14 +137,12 @@ class SourceResolutionStrategy:
 
         # Get available sources (not rate limited)
         if self.rate_limit_handler:
-            available_sources = self.rate_limit_handler.get_available_sources(
-                sources
-            )
+            available_sources = self.rate_limit_handler.get_available_sources(sources)
 
             if not available_sources:
                 # All sources are rate limited - get wait time for earliest available
-                next_available_time = (
-                    self.rate_limit_handler.get_next_available_time(sources)
+                next_available_time = self.rate_limit_handler.get_next_available_time(
+                    sources
                 )
                 wait_time = max(0, next_available_time - time.time())
 
@@ -165,24 +154,20 @@ class SourceResolutionStrategy:
                         wait_time, "any source"
                     )
                     # Retry with updated availability
-                    available_sources = (
-                        self.rate_limit_handler.get_available_sources(sources)
+                    available_sources = self.rate_limit_handler.get_available_sources(
+                        sources
                     )
 
                 if not available_sources:
-                    logger.error(
-                        "No sources available after waiting for rate limits"
-                    )
+                    logger.error("No sources available after waiting for rate limits")
                     return None
         else:
             available_sources = sources
 
         # Get optimal source order using intelligent selection
         if self.source_rotation_manager:
-            optimal_sources = (
-                self.source_rotation_manager.get_optimal_source_order(
-                    paper_info, available_sources, max_sources=3
-                )
+            optimal_sources = self.source_rotation_manager.get_optimal_source_order(
+                paper_info, available_sources, max_sources=3
             )
         else:
             # Fallback to first 3 sources
@@ -207,10 +192,8 @@ class SourceResolutionStrategy:
         # Try fallback sources if primary sources failed
         if self.source_rotation_manager:
             tried_sources = optimal_sources
-            fallback_sources = (
-                self.source_rotation_manager.get_fallback_sources(
-                    tried_sources, sources
-                )
+            fallback_sources = self.source_rotation_manager.get_fallback_sources(
+                tried_sources, sources
             )
 
             if fallback_sources:
@@ -259,15 +242,11 @@ class SourceResolutionStrategy:
 
         # Add rate limiting stats if available
         if self.rate_limit_handler:
-            stats["rate_limit_stats"] = (
-                self.rate_limit_handler.get_statistics()
-            )
+            stats["rate_limit_stats"] = self.rate_limit_handler.get_statistics()
 
         # Add source rotation stats if available
         if self.source_rotation_manager:
-            stats["rotation_stats"] = (
-                self.source_rotation_manager.get_statistics()
-            )
+            stats["rotation_stats"] = self.source_rotation_manager.get_statistics()
 
         # Add individual source stats
         source_details = {}
@@ -300,9 +279,7 @@ class SourceResolutionStrategy:
 
                 # Inject rate limit handler into source
                 if self.rate_limit_handler:
-                    source_instance.set_rate_limit_handler(
-                        self.rate_limit_handler
-                    )
+                    source_instance.set_rate_limit_handler(self.rate_limit_handler)
 
                 self._source_instances[name] = source_instance
         return self._source_instances.get(name)
@@ -358,9 +335,7 @@ class SourceResolutionStrategy:
                         },
                     }
             except Exception as e:
-                logger.debug(
-                    f"CorpusID resolution failed for {corpus_id}: {e}"
-                )
+                logger.debug(f"CorpusID resolution failed for {corpus_id}: {e}")
         else:
             logger.warning(
                 "Semantic Scholar source not available for CorpusID resolution"
@@ -453,15 +428,11 @@ class SourceResolutionStrategy:
 
                 # Check if this was a rate limit error
                 if self.rate_limit_handler:
-                    rate_limit_info = (
-                        self.rate_limit_handler.detect_rate_limit(
-                            source_name, exception=e
-                        )
+                    rate_limit_info = self.rate_limit_handler.detect_rate_limit(
+                        source_name, exception=e
                     )
                     if rate_limit_info:
-                        self.rate_limit_handler.record_rate_limit(
-                            rate_limit_info
-                        )
+                        self.rate_limit_handler.record_rate_limit(rate_limit_info)
                         logger.warning(
                             f"Rate limit detected for {source_name}, skipping to next source"
                         )
@@ -529,9 +500,7 @@ class SourceResolutionStrategy:
                     logger.debug(f"  Journal: {metadata['journal']}")
                 return metadata
             else:
-                logger.debug(
-                    f"No comprehensive metadata found via {source.name}"
-                )
+                logger.debug(f"No comprehensive metadata found via {source.name}")
                 return None
 
         except Exception as e:

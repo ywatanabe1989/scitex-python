@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/core/Scholar.py"
-)
+
+__FILE__ = "./src/scitex/scholar/core/Scholar.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -136,15 +135,11 @@ class Scholar:
 
         # Initialize service components (lazy loading for better performance)
         # Use mangled names for private properties
-        self._Scholar__scholar_engine = (
-            None  # Replaces DOIResolver and LibraryEnricher
-        )
+        self._Scholar__scholar_engine = None  # Replaces DOIResolver and LibraryEnricher
         self._Scholar__auth_manager = None
         self._Scholar__browser_manager = None
         self._Scholar__library_manager = None
-        self._Scholar__library = (
-            None  # ScholarLibrary for high-level operations
-        )
+        self._Scholar__library = None  # ScholarLibrary for high-level operations
 
         # Show user-friendly initialization message with library location
         library_path = self.config.get_library_project_dir()
@@ -154,9 +149,7 @@ class Scholar:
                 f"Scholar initialized with project '{project}' at {project_path}"
             )
         else:
-            logger.info(
-                f"{self.name}: Scholar initialized (library: {library_path})"
-            )
+            logger.info(f"{self.name}: Scholar initialized (library: {library_path})")
 
     # ----------------------------------------
     # Enrichers
@@ -196,9 +189,7 @@ class Scholar:
                 logger.warning(
                     f"{self.name}: Failed to enrich paper '{title[:50]}...': {e}"
                 )
-                enriched_list.append(
-                    paper
-                )  # Keep original if enrichment fails
+                enriched_list.append(paper)  # Keep original if enrichment fails
 
         enriched_papers = Papers(enriched_list, project=self.project)
 
@@ -256,9 +247,7 @@ class Scholar:
                 logger.warning(
                     f"{self.name}: Failed to enrich paper '{title[:50]}...': {e}"
                 )
-                enriched_list.append(
-                    paper
-                )  # Keep original if enrichment fails
+                enriched_list.append(paper)  # Keep original if enrichment fails
 
         enriched_papers = Papers(enriched_list, project=self.project)
 
@@ -309,10 +298,7 @@ class Scholar:
                 enriched.metadata.set_doi(results["id"]["doi"])
             if results["id"].get("pmid") and not enriched.metadata.id.pmid:
                 enriched.metadata.id.pmid = results["id"]["pmid"]
-            if (
-                results["id"].get("arxiv_id")
-                and not enriched.metadata.id.arxiv_id
-            ):
+            if results["id"].get("arxiv_id") and not enriched.metadata.id.arxiv_id:
                 enriched.metadata.id.arxiv_id = results["id"]["arxiv_id"]
             # Note: corpus_id, semantic_id, ieee_id are in results but not in Paper dataclass
 
@@ -330,17 +316,11 @@ class Scholar:
                     enriched.metadata.basic.title = new_title
 
             # Update authors if found
-            if (
-                results["basic"].get("authors")
-                and not enriched.metadata.basic.authors
-            ):
+            if results["basic"].get("authors") and not enriched.metadata.basic.authors:
                 enriched.metadata.basic.authors = results["basic"]["authors"]
 
             # Update year if found
-            if (
-                results["basic"].get("year")
-                and not enriched.metadata.basic.year
-            ):
+            if results["basic"].get("year") and not enriched.metadata.basic.year:
                 enriched.metadata.basic.year = results["basic"]["year"]
 
             # Update keywords if found
@@ -363,30 +343,24 @@ class Scholar:
                 results["publication"].get("publisher")
                 and not enriched.metadata.publication.publisher
             ):
-                enriched.metadata.publication.publisher = results[
-                    "publication"
-                ]["publisher"]
+                enriched.metadata.publication.publisher = results["publication"][
+                    "publisher"
+                ]
             if (
                 results["publication"].get("volume")
                 and not enriched.metadata.publication.volume
             ):
-                enriched.metadata.publication.volume = results["publication"][
-                    "volume"
-                ]
+                enriched.metadata.publication.volume = results["publication"]["volume"]
             if (
                 results["publication"].get("issue")
                 and not enriched.metadata.publication.issue
             ):
-                enriched.metadata.publication.issue = results["publication"][
-                    "issue"
-                ]
+                enriched.metadata.publication.issue = results["publication"]["issue"]
             if (
                 results["publication"].get("pages")
                 and not enriched.metadata.publication.pages
             ):
-                enriched.metadata.publication.pages = results["publication"][
-                    "pages"
-                ]
+                enriched.metadata.publication.pages = results["publication"]["pages"]
 
         # Citation metadata
         if "citation_count" in results:
@@ -406,16 +380,11 @@ class Scholar:
             if results["url"].get("pdf"):
                 # Check if this PDF is not already in the list
                 pdf_url = results["url"]["pdf"]
-                if not any(
-                    p.get("url") == pdf_url for p in enriched.metadata.url.pdfs
-                ):
+                if not any(p.get("url") == pdf_url for p in enriched.metadata.url.pdfs):
                     enriched.metadata.url.pdfs.append(
                         {"url": pdf_url, "source": "enrichment"}
                     )
-            if (
-                results["url"].get("url")
-                and not enriched.metadata.url.publisher
-            ):
+            if results["url"].get("url") and not enriched.metadata.url.publisher:
                 enriched.metadata.url.publisher = results["url"]["url"]
 
         # Note: Metrics section (journal_impact_factor, h_index) not stored in Paper dataclass
@@ -446,8 +415,7 @@ class Scholar:
         enriched_count = sum(
             1
             for i, p in enumerate(enriched_papers)
-            if p.abstract
-            and not papers[i].abstract  # Check if abstract was added
+            if p.abstract and not papers[i].abstract  # Check if abstract was added
         )
 
         # Save enriched papers back to library
@@ -463,9 +431,7 @@ class Scholar:
     # ----------------------------------------
     # URL Finding (Orchestration)
     # ----------------------------------------
-    async def _find_urls_for_doi_async(
-        self, doi: str, context
-    ) -> Dict[str, Any]:
+    async def _find_urls_for_doi_async(self, doi: str, context) -> Dict[str, Any]:
         """Find all URLs for a DOI (orchestration layer).
 
         Workflow:
@@ -495,10 +461,8 @@ class Scholar:
         # Step 1: Resolve publisher URL
         page = await context.new_page()
         try:
-            url_publisher = (
-                await resolve_publisher_url_by_navigating_to_doi_page(
-                    doi, page
-                )
+            url_publisher = await resolve_publisher_url_by_navigating_to_doi_page(
+                doi, page
             )
             urls["url_publisher"] = url_publisher
         finally:
@@ -516,22 +480,16 @@ class Scholar:
             openurl_resolver = OpenURLResolver(config=self.config)
             page = await context.new_page()
             try:
-                url_openurl_resolved = await openurl_resolver.resolve_doi(
-                    doi, page
-                )
+                url_openurl_resolved = await openurl_resolver.resolve_doi(doi, page)
                 urls["url_openurl_resolved"] = url_openurl_resolved
 
                 if url_openurl_resolved and url_openurl_resolved != "skipped":
-                    urls_pdf = await url_finder.find_pdf_urls(
-                        url_openurl_resolved
-                    )
+                    urls_pdf = await url_finder.find_pdf_urls(url_openurl_resolved)
             finally:
                 await page.close()
 
         # Deduplicate and store
-        urls["urls_pdf"] = (
-            self._deduplicate_pdf_urls(urls_pdf) if urls_pdf else []
-        )
+        urls["urls_pdf"] = self._deduplicate_pdf_urls(urls_pdf) if urls_pdf else []
 
         return urls
 
@@ -576,9 +534,10 @@ class Scholar:
             return {"downloaded": 0, "failed": 0, "errors": 0}
 
         # Get authenticated browser context
-        browser, context = (
-            await self._browser_manager.get_authenticated_browser_and_context_async()
-        )
+        (
+            browser,
+            context,
+        ) = await self._browser_manager.get_authenticated_browser_and_context_async()
 
         try:
             # Initialize PDF downloader with browser context
@@ -613,14 +572,14 @@ class Scholar:
                         temp_pdf_path = downloaded_paths[0]
 
                         # Generate paper ID and create storage
-                        paper_id = self.config.path_manager._generate_paper_id(
-                            doi=doi
-                        )
+                        paper_id = self.config.path_manager._generate_paper_id(doi=doi)
                         storage_path = master_dir / paper_id
                         storage_path.mkdir(parents=True, exist_ok=True)
 
                         # Move PDF to MASTER library
-                        pdf_filename = f"DOI_{doi.replace('/', '_').replace(':', '_')}.pdf"
+                        pdf_filename = (
+                            f"DOI_{doi.replace('/', '_').replace(':', '_')}.pdf"
+                        )
                         master_pdf_path = storage_path / pdf_filename
                         shutil.move(str(temp_pdf_path), str(master_pdf_path))
 
@@ -641,18 +600,12 @@ class Scholar:
                         metadata["pdf_path"] = str(
                             master_pdf_path.relative_to(library_dir)
                         )
-                        metadata["pdf_downloaded_at"] = (
-                            datetime.now().isoformat()
-                        )
-                        metadata["pdf_size_bytes"] = (
-                            master_pdf_path.stat().st_size
-                        )
+                        metadata["pdf_downloaded_at"] = datetime.now().isoformat()
+                        metadata["pdf_size_bytes"] = master_pdf_path.stat().st_size
                         metadata["updated_at"] = datetime.now().isoformat()
 
                         with open(metadata_file, "w") as f:
-                            json.dump(
-                                metadata, f, indent=2, ensure_ascii=False
-                            )
+                            json.dump(metadata, f, indent=2, ensure_ascii=False)
 
                         # Update symlink using LibraryManager
                         if self.project not in ["master", "MASTER"]:
@@ -666,15 +619,11 @@ class Scholar:
                         )
                         stats["downloaded"] += 1
                     else:
-                        logger.warning(
-                            f"{self.name}: No PDF downloaded for DOI: {doi}"
-                        )
+                        logger.warning(f"{self.name}: No PDF downloaded for DOI: {doi}")
                         stats["failed"] += 1
 
                 except Exception as e:
-                    logger.error(
-                        f"{self.name}: Failed to organize PDF for {doi}: {e}"
-                    )
+                    logger.error(f"{self.name}: Failed to organize PDF for {doi}: {e}")
                     stats["errors"] += 1
                     stats["failed"] += 1
 
@@ -691,9 +640,10 @@ class Scholar:
         results = {"downloaded": 0, "failed": 0, "errors": 0}
 
         # Get authenticated browser context
-        browser, context = (
-            await self._browser_manager.get_authenticated_browser_and_context_async()
-        )
+        (
+            browser,
+            context,
+        ) = await self._browser_manager.get_authenticated_browser_and_context_async()
 
         # Initialize authentication gateway (NEW)
         auth_gateway = AuthenticationGateway(
@@ -731,9 +681,7 @@ class Scholar:
                 pdf_urls = urls.get("urls_pdf", [])
 
                 if not pdf_urls:
-                    logger.warning(
-                        f"{self.name}: No PDF URLs found for DOI: {doi}"
-                    )
+                    logger.warning(f"{self.name}: No PDF URLs found for DOI: {doi}")
                     results["failed"] += 1
                     continue
 
@@ -752,8 +700,7 @@ class Scholar:
 
                     # Download to temp location first
                     temp_output = (
-                        Path("/tmp")
-                        / f"{doi.replace('/', '_').replace(':', '_')}.pdf"
+                        Path("/tmp") / f"{doi.replace('/', '_').replace(':', '_')}.pdf"
                     )
 
                     # Download PDF using simple downloader
@@ -769,9 +716,7 @@ class Scholar:
                     # Step 4: Store PDF in MASTER library with proper organization
 
                     # Generate unique ID from DOI using PathManager
-                    paper_id = self.config.path_manager._generate_paper_id(
-                        doi=doi
-                    )
+                    paper_id = self.config.path_manager._generate_paper_id(doi=doi)
 
                     # Create MASTER storage directory
                     storage_path = master_dir / paper_id
@@ -817,23 +762,17 @@ class Scholar:
                                 journal_clean = "Unknown"
 
                         # Format: Author-Year-Journal
-                        readable_name = (
-                            f"{first_author}-{year_str}-{journal_clean}"
-                        )
+                        readable_name = f"{first_author}-{year_str}-{journal_clean}"
                     except:
                         pass
 
                     # Fallback to DOI if metadata extraction failed
                     if not readable_name:
-                        readable_name = (
-                            f"DOI_{doi.replace('/', '_').replace(':', '_')}"
-                        )
+                        readable_name = f"DOI_{doi.replace('/', '_').replace(':', '_')}"
 
                     # Copy PDF to MASTER storage with ORIGINAL filename to track how downloaded
                     # The PDF filename preserves the DOI format for tracking
-                    pdf_filename = (
-                        f"DOI_{doi.replace('/', '_').replace(':', '_')}.pdf"
-                    )
+                    pdf_filename = f"DOI_{doi.replace('/', '_').replace(':', '_')}.pdf"
                     master_pdf_path = storage_path / pdf_filename
                     shutil.copy2(downloaded_path, master_pdf_path)
 
@@ -868,9 +807,7 @@ class Scholar:
                                     metadata[key] = value
 
                     # Add PDF information
-                    metadata["pdf_path"] = str(
-                        master_pdf_path.relative_to(library_dir)
-                    )
+                    metadata["pdf_path"] = str(master_pdf_path.relative_to(library_dir))
                     metadata["pdf_downloaded_at"] = datetime.now().isoformat()
                     metadata["pdf_size_bytes"] = master_pdf_path.stat().st_size
                     metadata["updated_at"] = datetime.now().isoformat()
@@ -922,9 +859,7 @@ class Scholar:
         """
         import asyncio
 
-        return asyncio.run(
-            self.download_pdfs_from_dois_async(dois, output_dir)
-        )
+        return asyncio.run(self.download_pdfs_from_dois_async(dois, output_dir))
 
     def download_pdfs_from_bibtex(
         self,
@@ -947,14 +882,10 @@ class Scholar:
             papers = self.load_bibtex(bibtex_input)
 
         # Extract DOIs from papers
-        dois = [
-            paper.metadata.id.doi for paper in papers if paper.metadata.id.doi
-        ]
+        dois = [paper.metadata.id.doi for paper in papers if paper.metadata.id.doi]
 
         if not dois:
-            logger.warning(
-                f"{self.name}: No papers with DOIs found in BibTeX input"
-            )
+            logger.warning(f"{self.name}: No papers with DOIs found in BibTeX input")
             return {"downloaded": 0, "failed": 0, "errors": 0}
 
         logger.info(
@@ -985,9 +916,7 @@ class Scholar:
         from ..core.Paper import Paper
         import json
 
-        logger.info(
-            f"{self.name}: Loading papers from project: {project_name}"
-        )
+        logger.info(f"{self.name}: Loading papers from project: {project_name}")
 
         library_dir = self.config.get_library_project_dir()
         project_dir = library_dir / project_name
@@ -1044,21 +973,15 @@ class Scholar:
         # Convert to Papers collection
         from .Papers import Papers
 
-        papers_collection = Papers(
-            papers, config=self.config, project=self.project
-        )
-        papers_collection.library = (
-            self._library
-        )  # Attach library for save operations
+        papers_collection = Papers(papers, config=self.config, project=self.project)
+        papers_collection.library = self._library  # Attach library for save operations
 
         return papers_collection
 
     # ----------------------------------------
     # Searchers
     # ----------------------------------------
-    def search_library(
-        self, query: str, project: Optional[str] = None
-    ) -> Papers:
+    def search_library(self, query: str, project: Optional[str] = None) -> Papers:
         """
         Search papers in local library.
 
@@ -1114,9 +1037,7 @@ class Scholar:
                 ]
                 all_papers.extend(matching_papers)
             except Exception as e:
-                logger.debug(
-                    f"{self.name}: Failed to search project {project}: {e}"
-                )
+                logger.debug(f"{self.name}: Failed to search project {project}: {e}")
 
         return Papers(all_papers, config=self.config, project="search_results")
 
@@ -1159,9 +1080,7 @@ class Scholar:
         """
         from ..storage.BibTeXHandler import BibTeXHandler
 
-        bibtex_handler = BibTeXHandler(
-            project=self.project, config=self.config
-        )
+        bibtex_handler = BibTeXHandler(project=self.project, config=self.config)
         return bibtex_handler.papers_to_bibtex(papers, output_path)
 
     # ----------------------------------------
@@ -1185,25 +1104,19 @@ class Scholar:
         # Create project and info directories
         if not project_dir.exists():
             project_dir.mkdir(parents=True, exist_ok=True)
-            logger.info(
-                f"{self.name}: Auto-created project directory: {project}"
-            )
+            logger.info(f"{self.name}: Auto-created project directory: {project}")
 
         # Ensure info directory exists
         info_dir.mkdir(parents=True, exist_ok=True)
 
         # Create/move metadata file to info directory
-        old_metadata_file = (
-            project_dir / "project_metadata.json"
-        )  # Old location
+        old_metadata_file = project_dir / "project_metadata.json"  # Old location
         metadata_file = info_dir / "project_metadata.json"  # New location
 
         # Move existing metadata file if it exists in old location
         if old_metadata_file.exists() and not metadata_file.exists():
             shutil.move(str(old_metadata_file), str(metadata_file))
-            logger.info(
-                f"{self.name}: Moved project metadata to info directory"
-            )
+            logger.info(f"{self.name}: Moved project metadata to info directory")
 
         # Create metadata file if it doesn't exist
         if not metadata_file.exists():
@@ -1268,9 +1181,7 @@ class Scholar:
                             metadata = json.load(f)
                         project_info.update(metadata)
                     except Exception as e:
-                        logger.debug(
-                            f"Failed to load metadata for {item.name}: {e}"
-                        )
+                        logger.debug(f"Failed to load metadata for {item.name}: {e}")
 
                 projects.append(project_info)
 
@@ -1399,13 +1310,13 @@ class Scholar:
 
         project = project or self.project
 
-        logger.info(f"{'='*60}")
+        logger.info(f"{'=' * 60}")
         logger.info(f"Processing paper")
         if title:
             logger.info(f"Title: {title[:50]}...")
         if doi:
             logger.info(f"DOI: {doi}")
-        logger.info(f"{'='*60}")
+        logger.info(f"{'=' * 60}")
 
         # Stage 0: Resolve DOI from title (if needed)
         if not doi and title:
@@ -1452,9 +1363,10 @@ class Scholar:
         logger.info(f"\nStage 2: Checking/finding PDF URLs...")
         if not self._library_manager.has_urls(paper_id):
             logger.info(f"Finding PDF URLs for DOI: {doi}")
-            browser, context = (
-                await self._browser_manager.get_authenticated_browser_and_context_async()
-            )
+            (
+                browser,
+                context,
+            ) = await self._browser_manager.get_authenticated_browser_and_context_async()
             try:
                 url_finder = ScholarURLFinder(context, config=self.config)
                 urls = await url_finder.find_pdf_urls(doi)
@@ -1474,13 +1386,12 @@ class Scholar:
         if not self._library_manager.has_pdf(paper_id):
             logger.info(f"Downloading PDF...")
             if paper.metadata.url.pdfs:
-                browser, context = (
-                    await self._browser_manager.get_authenticated_browser_and_context_async()
-                )
+                (
+                    browser,
+                    context,
+                ) = await self._browser_manager.get_authenticated_browser_and_context_async()
                 try:
-                    downloader = ScholarPDFDownloader(
-                        context, config=self.config
-                    )
+                    downloader = ScholarPDFDownloader(context, config=self.config)
 
                     pdf_url = (
                         paper.metadata.url.pdfs[0]["url"]
@@ -1494,39 +1405,29 @@ class Scholar:
                     )
                     if result and result.exists():
                         paper.metadata.path.pdfs.append(str(result))
-                        self._library_manager.save_paper_incremental(
-                            paper_id, paper
-                        )
-                        logger.success(
-                            f"{self.name}: Downloaded PDF, saved to storage"
-                        )
+                        self._library_manager.save_paper_incremental(paper_id, paper)
+                        logger.success(f"{self.name}: Downloaded PDF, saved to storage")
                     else:
                         logger.warning(f"{self.name}: Failed to download PDF")
                 finally:
                     await self._browser_manager.close()
             else:
-                logger.warning(
-                    f"{self.name}: No PDF URLs available for download"
-                )
+                logger.warning(f"{self.name}: No PDF URLs available for download")
         else:
             logger.info(f"{self.name}: PDF already in storage")
 
         # Stage 4: Update project symlinks
         if project and project not in ["master", "MASTER"]:
-            logger.info(
-                f"{self.name}: \nStage 4: Updating project symlinks..."
-            )
+            logger.info(f"{self.name}: \nStage 4: Updating project symlinks...")
             self._library_manager.update_symlink(
                 master_storage_path=storage_path,
                 project=project,
             )
-            logger.success(
-                f"{self.name}: Updated symlink in project: {project}"
-            )
+            logger.success(f"{self.name}: Updated symlink in project: {project}")
 
-        logger.info(f"\n{'='*60}")
+        logger.info(f"\n{'=' * 60}")
         logger.success(f"{self.name}: Paper processing complete")
-        logger.info(f"{'='*60}\n")
+        logger.info(f"{'=' * 60}\n")
 
         return paper
 
@@ -1601,12 +1502,12 @@ class Scholar:
             papers = Papers(papers_list, project=project, config=self.config)
 
         total = len(papers)
-        logger.info(f"{self.name}: \n{'='*60}")
+        logger.info(f"{self.name}: \n{'=' * 60}")
         logger.info(
             f"{self.name}: Processing {total} papers (max_concurrent={max_concurrent})"
         )
         logger.info(f"{self.name}: Project: {project}")
-        logger.info(f"{self.name}: {'='*60}\n")
+        logger.info(f"{self.name}: {'=' * 60}\n")
 
         # Use semaphore for controlled parallelism
         semaphore = asyncio.Semaphore(max_concurrent)
@@ -1614,9 +1515,7 @@ class Scholar:
         async def process_with_semaphore(paper, index):
             """Process one paper with semaphore control."""
             async with semaphore:
-                logger.info(
-                    f"{self.name}: \n[{index}/{total}] Starting paper..."
-                )
+                logger.info(f"{self.name}: \n[{index}/{total}] Starting paper...")
                 try:
                     result = await self.process_paper_async(
                         title=paper.metadata.basic.title,
@@ -1630,10 +1529,7 @@ class Scholar:
                     return None
 
         # Create tasks for all papers
-        tasks = [
-            process_with_semaphore(paper, i + 1)
-            for i, paper in enumerate(papers)
-        ]
+        tasks = [process_with_semaphore(paper, i + 1) for i, paper in enumerate(papers)]
 
         # Process with controlled parallelism
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -1643,21 +1539,19 @@ class Scholar:
         errors = 0
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                logger.error(
-                    f"{self.name}: Paper {i+1} raised exception: {result}"
-                )
+                logger.error(f"{self.name}: Paper {i + 1} raised exception: {result}")
                 errors += 1
             elif result is not None:
                 processed_papers.append(result)
 
         # Summary
-        logger.info(f"{self.name}: \n{'='*60}")
+        logger.info(f"{self.name}: \n{'=' * 60}")
         logger.info(f"{self.name}: Batch Processing Complete")
         logger.info(f"{self.name}:   Total: {total}")
         logger.info(f"{self.name}:   Successful: {len(processed_papers)}")
         logger.info(f"{self.name}:   Failed: {total - len(processed_papers)}")
         logger.info(f"{self.name}:   Errors: {errors}")
-        logger.info(f"{self.name}: {'='*60}\n")
+        logger.info(f"{self.name}: {'=' * 60}\n")
 
         return Papers(processed_papers, project=project, config=self.config)
 
@@ -1697,10 +1591,7 @@ class Scholar:
     @property
     def _scholar_engine(self) -> ScholarEngine:
         """Get Scholar engine for search and enrichment (PRIVATE)."""
-        if (
-            not hasattr(self, "__scholar_engine")
-            or self.__scholar_engine is None
-        ):
+        if not hasattr(self, "__scholar_engine") or self.__scholar_engine is None:
             self.__scholar_engine = ScholarEngine(config=self.config)
         return self.__scholar_engine
 
@@ -1714,10 +1605,7 @@ class Scholar:
     @property
     def _browser_manager(self) -> ScholarBrowserManager:
         """Get browser manager service (PRIVATE)."""
-        if (
-            not hasattr(self, "__browser_manager")
-            or self.__browser_manager is None
-        ):
+        if not hasattr(self, "__browser_manager") or self.__browser_manager is None:
             self.__browser_manager = ScholarBrowserManager(
                 auth_manager=self._auth_manager,
                 chrome_profile_name="system",
@@ -1728,10 +1616,7 @@ class Scholar:
     @property
     def _library_manager(self) -> LibraryManager:
         """Get library manager service - low-level operations (PRIVATE)."""
-        if (
-            not hasattr(self, "__library_manager")
-            or self.__library_manager is None
-        ):
+        if not hasattr(self, "__library_manager") or self.__library_manager is None:
             self.__library_manager = LibraryManager(
                 project=self.project, config=self.config
             )
@@ -1741,9 +1626,7 @@ class Scholar:
     def _library(self) -> ScholarLibrary:
         """Get Scholar library service - high-level operations (PRIVATE)."""
         if not hasattr(self, "__library") or self.__library is None:
-            self.__library = ScholarLibrary(
-                project=self.project, config=self.config
-            )
+            self.__library = ScholarLibrary(project=self.project, config=self.config)
         return self.__library
 
 
@@ -1817,9 +1700,7 @@ if __name__ == "__main__":
 
         # Create some sample papers with Pydantic structure
         p1 = Paper()
-        p1.metadata.basic.title = (
-            "Vision Transformer: An Image Is Worth 16x16 Words"
-        )
+        p1.metadata.basic.title = "Vision Transformer: An Image Is Worth 16x16 Words"
         p1.metadata.basic.authors = ["Dosovitskiy, Alexey", "Beyer, Lucas"]
         p1.metadata.basic.year = 2021
         p1.metadata.basic.keywords = [
@@ -1881,9 +1762,7 @@ if __name__ == "__main__":
                         f"   📂 Loaded {len(project_papers)} papers from current project"
                     )
                 except:
-                    print(
-                        f"   📂 Current project is empty or doesn't exist yet"
-                    )
+                    print(f"   📂 Current project is empty or doesn't exist yet")
 
         except Exception as e:
             print(f"   ⚠️  Workflow demo partially skipped: {e}")
@@ -1900,9 +1779,7 @@ if __name__ == "__main__":
 
             # Search in current library (existing papers)
             library_search = scholar.search_library("vision")
-            print(
-                f"   🔍 Library search for 'vision': {len(library_search)} results"
-            )
+            print(f"   🔍 Library search for 'vision': {len(library_search)} results")
 
         except Exception as e:
             print(f"   ⚠️  Search demo skipped: {e}")
@@ -1911,9 +1788,7 @@ if __name__ == "__main__":
         # Demonstrate configuration access
         print("7. Configuration Management:")
         print(f"   ⚙️  Scholar directory: {scholar.config.paths.scholar_dir}")
-        print(
-            f"   ⚙️  Library directory: {scholar.config.get_library_project_dir()}"
-        )
+        print(f"   ⚙️  Library directory: {scholar.config.get_library_project_dir()}")
         print(
             f"   ⚙️  Debug mode: {scholar.config.resolve('debug_mode', default=False)}"
         )
@@ -1921,16 +1796,10 @@ if __name__ == "__main__":
 
         # Demonstrate service access (internal components)
         print("8. Service Components (Internal):")
-        print(
-            f"   🔧 Scholar Engine: {type(scholar._scholar_engine).__name__}"
-        )
+        print(f"   🔧 Scholar Engine: {type(scholar._scholar_engine).__name__}")
         print(f"   🔧 Auth Manager: {type(scholar._auth_manager).__name__}")
-        print(
-            f"   🔧 Browser Manager: {type(scholar._browser_manager).__name__}"
-        )
-        print(
-            f"   🔧 Library Manager: {type(scholar._library_manager).__name__}"
-        )
+        print(f"   🔧 Browser Manager: {type(scholar._browser_manager).__name__}")
+        print(f"   🔧 Library Manager: {type(scholar._library_manager).__name__}")
         print()
 
         # Demonstrate backup capabilities

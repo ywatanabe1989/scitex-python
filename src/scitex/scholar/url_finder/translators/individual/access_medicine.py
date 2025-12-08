@@ -81,10 +81,10 @@ class AccessMedicineTranslator(BaseTranslator):
             "bookSection" for content pages,
             None otherwise
         """
-        if re.search(r'/searchresults', url, re.IGNORECASE):
+        if re.search(r"/searchresults", url, re.IGNORECASE):
             return "multiple"
 
-        if re.search(r'/content', url, re.IGNORECASE):
+        if re.search(r"/content", url, re.IGNORECASE):
             return "bookSection"
 
         return None
@@ -133,16 +133,13 @@ class AccessMedicineTranslator(BaseTranslator):
         }
 
         if content_type == "bookSection":
-            section_id_match = re.search(
-                r'sectionid=([^&]+)',
-                url.lower()
-            )
+            section_id_match = re.search(r"sectionid=([^&]+)", url.lower())
             if section_id_match:
                 metadata["section_id"] = section_id_match.group(1)
 
             try:
                 chapter_element = await page.query_selector(
-                    '#pageContent_lblChapterTitle1'
+                    "#pageContent_lblChapterTitle1"
                 )
                 if chapter_element:
                     chapter_text = await chapter_element.inner_html()
@@ -150,7 +147,7 @@ class AccessMedicineTranslator(BaseTranslator):
             except Exception:
                 pass
 
-            base_url = re.sub(r'/content.*', '', url, flags=re.IGNORECASE)
+            base_url = re.sub(r"/content.*", "", url, flags=re.IGNORECASE)
             if "section_id" in metadata:
                 citation_url = (
                     f"{base_url}/downloadCitation.aspx?"
@@ -161,52 +158,49 @@ class AccessMedicineTranslator(BaseTranslator):
         elif content_type == "multiple":
             try:
                 entries = await page.query_selector_all(
-                    'div.search-entries > div.row-fluid.bordered-bottom > div.span10'
+                    "div.search-entries > div.row-fluid.bordered-bottom > div.span10"
                 )
 
                 results = []
                 for entry in entries:
                     try:
-                        title_element = await entry.query_selector('h3')
+                        title_element = await entry.query_selector("h3")
                         if not title_element:
                             continue
                         title = await title_element.text_content()
                         title = title.strip()
 
-                        book_element = await entry.query_selector('p')
+                        book_element = await entry.query_selector("p")
                         book_title = ""
                         if book_element:
                             book_title = await book_element.text_content()
                             book_title = book_title.strip()
 
-                        link_element = await title_element.query_selector('a')
+                        link_element = await title_element.query_selector("a")
                         if link_element:
-                            href = await link_element.get_attribute('href')
+                            href = await link_element.get_attribute("href")
                             if href:
-                                begin_cut = href.find('=')
-                                end_cut = href.find('&')
+                                begin_cut = href.find("=")
+                                end_cut = href.find("&")
                                 if begin_cut != -1:
                                     if end_cut != -1:
-                                        section_id = href[begin_cut + 1:end_cut]
+                                        section_id = href[begin_cut + 1 : end_cut]
                                     else:
-                                        section_id = href[begin_cut + 1:]
+                                        section_id = href[begin_cut + 1 :]
 
                                     combined_title = f"{title} ({book_title})"
-                                    results.append({
-                                        "title": combined_title,
-                                        "section_id": section_id,
-                                    })
+                                    results.append(
+                                        {
+                                            "title": combined_title,
+                                            "section_id": section_id,
+                                        }
+                                    )
                     except Exception:
                         continue
 
                 metadata["search_results"] = results
 
-                base_url = re.sub(
-                    r'/searchresults.*',
-                    '',
-                    url,
-                    flags=re.IGNORECASE
-                )
+                base_url = re.sub(r"/searchresults.*", "", url, flags=re.IGNORECASE)
                 metadata["base_citation_url"] = (
                     f"{base_url}/downloadCitation.aspx?format=ris&sectionid="
                 )
@@ -227,8 +221,8 @@ class AccessMedicineTranslator(BaseTranslator):
         Returns:
             Cleaned abstract text
         """
-        cleaned = abstract.replace('.', '. ')
-        cleaned = re.sub(r'\s+', ' ', cleaned)
+        cleaned = abstract.replace(".", ". ")
+        cleaned = re.sub(r"\s+", " ", cleaned)
         return cleaned.strip()
 
     @classmethod
@@ -243,16 +237,16 @@ class AccessMedicineTranslator(BaseTranslator):
         Returns:
             Tuple of (cleaned_book_title, edition_number)
         """
-        if ',' not in book_title:
+        if "," not in book_title:
             return book_title, None
 
-        parts = book_title.split(',')
+        parts = book_title.split(",")
         last_part = parts[-1].strip()
 
-        edition_match = re.match(r'(\d+)e?$', last_part)
+        edition_match = re.match(r"(\d+)e?$", last_part)
         if edition_match:
             edition = edition_match.group(1)
-            new_title = ','.join(parts[:-1])
+            new_title = ",".join(parts[:-1])
             return new_title, edition
 
         return book_title, None

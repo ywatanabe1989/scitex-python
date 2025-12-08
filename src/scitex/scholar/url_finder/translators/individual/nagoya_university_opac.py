@@ -12,7 +12,9 @@ class NagoyaUniversityOpacTranslator(BaseTranslator):
     """Nagoya University OPAC."""
 
     LABEL = "Nagoya University OPAC"
-    URL_TARGET_PATTERN = r"^https?://opac\.nul\.nagoya-u\.ac\.jp/webopac/(catdbl\.do|ctlsrh\.do)"
+    URL_TARGET_PATTERN = (
+        r"^https?://opac\.nul\.nagoya-u\.ac\.jp/webopac/(catdbl\.do|ctlsrh\.do)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:
