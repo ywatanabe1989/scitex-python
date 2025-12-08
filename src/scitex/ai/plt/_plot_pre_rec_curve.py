@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -69,7 +70,7 @@ def plot_pre_rec_curve(true_class, pred_proba, labels, ax=None, spath=None):
         pred_proba = np.column_stack([1 - pred_proba, pred_proba])
 
     # Convert string labels to integer indices if needed
-    if true_class.dtype.kind in ('U', 'S', 'O'):  # Unicode, bytes, or object (string)
+    if true_class.dtype.kind in ("U", "S", "O"):  # Unicode, bytes, or object (string)
         label_to_idx = {label: idx for idx, label in enumerate(labels)}
         true_class_idx = np.array([label_to_idx[tc] for tc in true_class])
     else:
@@ -91,9 +92,7 @@ def plot_pre_rec_curve(true_class, pred_proba, labels, ax=None, spath=None):
                 true_class_i_onehot,
                 pred_proba_i,
             )
-            pre_rec_auc[i] = average_precision_score(
-                true_class_i_onehot, pred_proba_i
-            )
+            pre_rec_auc[i] = average_precision_score(true_class_i_onehot, pred_proba_i)
         except Exception as e:
             print(e)
             precision[i], recall[i], threshold[i], pre_rec_auc[i] = (
@@ -106,8 +105,8 @@ def plot_pre_rec_curve(true_class, pred_proba, labels, ax=None, spath=None):
     ## Average precision: micro and macro
 
     # A "micro-average": quantifying score on all classes jointly
-    precision["micro"], recall["micro"], threshold["micro"] = (
-        precision_recall_curve(true_class_onehot.ravel(), pred_proba.ravel())
+    precision["micro"], recall["micro"], threshold["micro"] = precision_recall_curve(
+        true_class_onehot.ravel(), pred_proba.ravel()
     )
     pre_rec_auc["micro"] = average_precision_score(
         true_class_onehot, pred_proba, average="micro"
@@ -157,9 +156,7 @@ def plot_pre_rec_curve(true_class, pred_proba, labels, ax=None, spath=None):
 
         # ax.annotate("f1={0:0.1f}".format(f_score), xy=(0.9, y[45] + 0.02))
         x_f, y_f = _solve_intersection(f_score, 0.5, 0.5)
-        ax.annotate(
-            "f1={0:0.1f}".format(f_score), xy=(x_f - 0.1, y_f - 0.1 * 0.5)
-        )
+        ax.annotate("f1={0:0.1f}".format(f_score), xy=(x_f - 0.1, y_f - 0.1 * 0.5))
         # ax.annotate("f1={0:0.1f}".format(f_score), xy=(y[35] - 0.02 * (3 - i_f), 0.85))
 
     lines.append(l)
@@ -176,9 +173,7 @@ def plot_pre_rec_curve(true_class, pred_proba, labels, ax=None, spath=None):
     for i in range(n_classes):
         (l,) = ax.plot(recall[i], precision[i], color=colors[i], lw=2)
         lines.append(l)
-        legends.append(
-            "{0} (AUC = {1:0.2f})" "".format(labels[i], pre_rec_auc[i])
-        )
+        legends.append("{0} (AUC = {1:0.2f})".format(labels[i], pre_rec_auc[i]))
 
     # fig = plt.gcf()
     fig.subplots_adjust(bottom=0.25)
@@ -201,6 +196,7 @@ def plot_pre_rec_curve(true_class, pred_proba, labels, ax=None, spath=None):
     # Save figure if spath is provided
     if spath is not None:
         from pathlib import Path
+
         # Resolve to absolute path to prevent _out directory creation
         spath_abs = Path(spath).resolve() if isinstance(spath, (str, Path)) else spath
         stx.io.save(fig, str(spath_abs), use_caller_path=False)
@@ -246,9 +242,7 @@ def main(args):
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Demo Precision-Recall curve plotting"
-    )
+    parser = argparse.ArgumentParser(description="Demo Precision-Recall curve plotting")
     return parser.parse_args()
 
 

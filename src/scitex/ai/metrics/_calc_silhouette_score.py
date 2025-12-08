@@ -452,7 +452,7 @@ def _nearest_cluster_distance_block(X, labels, metric, n_jobs=1, **kwds):
             X[_np.where(labels == label_a)[0]],
             X[_np.where(labels == label_b)[0]],
             metric,
-            **kwds
+            **kwds,
         )
         for label_a, label_b in _combinations(unique_labels, 2)
     )
@@ -460,7 +460,6 @@ def _nearest_cluster_distance_block(X, labels, metric, n_jobs=1, **kwds):
     for (label_a, label_b), (values_a, values_b) in zip(
         _combinations(unique_labels, 2), values
     ):
-
         indices_a = _np.where(labels == label_a)[0]
         inter_dist[indices_a] = _np.minimum(values_a, inter_dist[indices_a])
         del indices_a
@@ -491,7 +490,6 @@ if __name__ == "__main__":
     s = calc_silhouette_score_block(X, y, n_jobs=2)
     t = time.time() - t0
     print("Block silhouette parallel (%fs): %f" % (t, s))
-
 
 
 # Backward compatibility aliases (deprecated, will be removed in future)

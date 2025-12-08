@@ -10,6 +10,7 @@ from scitex.types import ArrayLike
 
 try:
     from imblearn.under_sampling import RandomUnderSampler
+
     IMBLEARN_AVAILABLE = True
 except ImportError:
     IMBLEARN_AVAILABLE = False
@@ -25,7 +26,7 @@ def undersample(
         y: Labels array-like of shape (n_samples,)
     Returns:
         Resampled X, y of same type as input
-        
+
     Raises:
         ImportError: If imblearn is not installed
     """
@@ -34,7 +35,7 @@ def undersample(
             "The undersample function requires the imbalanced-learn package. "
             "Install it with: pip install imbalanced-learn"
         )
-    
+
     rus = RandomUnderSampler(random_state=random_state)
     X_resampled, y_resampled = rus.fit_resample(X, y)
     return X_resampled, y_resampled

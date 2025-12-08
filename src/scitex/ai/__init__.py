@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ai/__init__.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -22,6 +23,7 @@ from . import activation
 from . import classification
 from . import clustering
 from . import feature_extraction
+
 # from . import layer
 from . import loss
 from . import metrics
@@ -32,12 +34,15 @@ from . import sklearn
 from . import training
 from . import utils
 
+
 # Lazy import for GenAI (heavy anthropic dependency)
 def __getattr__(name):
     if name == "GenAI":
         from ._gen_ai import GenAI
+
         return GenAI
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     # "Classifiers",  # Moved to .old directory

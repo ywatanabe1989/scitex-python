@@ -3,7 +3,9 @@
 # Time-stamp: "2024-11-20 10:53:22 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/ai/feature_extraction/__init__.py
 
-THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/ai/feature_extraction/__init__.py"
+THIS_FILE = (
+    "/home/ywatanabe/proj/scitex_repo/src/scitex/ai/feature_extraction/__init__.py"
+)
 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -24,7 +26,7 @@ for filename in __os.listdir(current_dir):
         module_name = filename[:-3]  # Remove .py extension
         try:
             module = __importlib.import_module(f".{module_name}", package=__name__)
-            
+
             # Import only functions and classes from the module
             for name, obj in __inspect.getmembers(module):
                 if __inspect.isfunction(obj) or __inspect.isclass(obj):
@@ -37,20 +39,20 @@ for filename in __os.listdir(current_dir):
                 f"Some functionality may be unavailable. "
                 f"Consider installing missing dependencies if you need this module.",
                 ImportWarning,
-                stacklevel=2
+                stacklevel=2,
             )
 
 # Clean up temporary variables
 del __os, __importlib, __inspect, __warnings, current_dir
-if 'filename' in locals():
+if "filename" in locals():
     del filename
-if 'module_name' in locals():
+if "module_name" in locals():
     del module_name
-if 'module' in locals():
+if "module" in locals():
     del module
-if 'name' in locals():
+if "name" in locals():
     del name
-if 'obj' in locals():
+if "obj" in locals():
     del obj
 
 # EOF

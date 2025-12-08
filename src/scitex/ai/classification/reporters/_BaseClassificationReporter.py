@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -277,5 +278,6 @@ class ReporterConfig:
             "precision": self.precision,
             "required_metrics": self.required_metrics,
         }
+
 
 # EOF

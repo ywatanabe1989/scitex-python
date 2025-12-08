@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/ml/classification/reporters/reporter_utils/_Plotter.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -189,8 +190,10 @@ class Plotter:
             return fig
         except Exception as e:
             import sys
+
             print(f"ERROR in create_roc_curve: {e}", file=sys.stderr)
             import traceback
+
             traceback.print_exc()
             if self.verbose:
                 warnings.warn(f"Failed to create ROC curve: {e}", UserWarning)
@@ -242,8 +245,10 @@ class Plotter:
             return fig
         except Exception as e:
             import sys
+
             print(f"ERROR in create_precision_recall_curve: {e}", file=sys.stderr)
             import traceback
+
             traceback.print_exc()
             if self.verbose:
                 warnings.warn(f"Failed to create PR curve: {e}", UserWarning)
@@ -336,11 +341,18 @@ class Plotter:
                     from scitex.io import save as stx_io_save
 
                     # Resolve to absolute path to prevent _out directory creation
-                    save_path_abs = Path(save_path).resolve() if isinstance(save_path, (str, Path)) else save_path
-                    stx_io_save(fig, str(save_path_abs), verbose=True, use_caller_path=False)
+                    save_path_abs = (
+                        Path(save_path).resolve()
+                        if isinstance(save_path, (str, Path))
+                        else save_path
+                    )
+                    stx_io_save(
+                        fig, str(save_path_abs), verbose=True, use_caller_path=False
+                    )
                 except Exception as save_error:
                     print(f"ERROR: Failed to save ROC curve: {save_error}")
                     import traceback
+
                     traceback.print_exc()
 
             plt.close(fig)  # Clean up
@@ -349,10 +361,9 @@ class Plotter:
         except Exception as e:
             print(f"ERROR in create_overall_roc_curve: {e}")
             import traceback
+
             traceback.print_exc()
-            warnings.warn(
-                f"Failed to create overall ROC curve: {e}", UserWarning
-            )
+            warnings.warn(f"Failed to create overall ROC curve: {e}", UserWarning)
             return None
 
     def create_overall_pr_curve(
@@ -395,8 +406,7 @@ class Plotter:
             return None
 
         try:
-            from sklearn.metrics import (average_precision_score,
-                                         precision_recall_curve)
+            from sklearn.metrics import average_precision_score, precision_recall_curve
 
             # Handle binary classification
             if y_proba.ndim == 1 or y_proba.shape[1] == 2:
@@ -405,9 +415,7 @@ class Plotter:
                 else:
                     y_proba_pos = y_proba
 
-                precision, recall, _ = precision_recall_curve(
-                    y_true, y_proba_pos
-                )
+                precision, recall, _ = precision_recall_curve(y_true, y_proba_pos)
                 avg_precision = average_precision_score(y_true, y_proba_pos)
 
                 fig, ax = plt.subplots(figsize=(8, 8))  # Square figure
@@ -437,18 +445,24 @@ class Plotter:
                 from scitex.io import save as stx_io_save
 
                 # Resolve to absolute path to prevent _out directory creation
-                save_path_abs = Path(save_path).resolve() if isinstance(save_path, (str, Path)) else save_path
-                stx_io_save(fig, str(save_path_abs), verbose=verbose or self.verbose, use_caller_path=False)
+                save_path_abs = (
+                    Path(save_path).resolve()
+                    if isinstance(save_path, (str, Path))
+                    else save_path
+                )
+                stx_io_save(
+                    fig,
+                    str(save_path_abs),
+                    verbose=verbose or self.verbose,
+                    use_caller_path=False,
+                )
 
             plt.close(fig)  # Clean up
             return fig
 
         except Exception as e:
-            warnings.warn(
-                f"Failed to create overall PR curve: {e}", UserWarning
-            )
+            warnings.warn(f"Failed to create overall PR curve: {e}", UserWarning)
             return None
-
 
     def create_metrics_visualization(
         self,
@@ -542,7 +556,7 @@ class Plotter:
 
             # Set overall title
             fold_suffix = f" (Fold {fold})" if fold is not None else ""
-            fig.suptitle(f"{title}{fold_suffix}", fontsize=16, fontweight='bold')
+            fig.suptitle(f"{title}{fold_suffix}", fontsize=16, fontweight="bold")
 
             plot_idx = 0
 
@@ -552,33 +566,32 @@ class Plotter:
                 plot_idx += 1
 
                 # Get confusion matrix from metrics or calculate
-                cm = metrics.get('confusion_matrix')
+                cm = metrics.get("confusion_matrix")
                 if cm is not None:
-                    if isinstance(cm, dict) and 'value' in cm:
-                        cm = cm['value']
+                    if isinstance(cm, dict) and "value" in cm:
+                        cm = cm["value"]
 
                     if sns is not None:
                         sns.heatmap(
                             cm,
                             annot=True,
-                            fmt='d',
-                            cmap='Blues',
+                            fmt="d",
+                            cmap="Blues",
                             xticklabels=labels,
                             yticklabels=labels,
                             ax=ax,
-                            cbar_kws={'label': 'Count'}
+                            cbar_kws={"label": "Count"},
                         )
                     else:
-                        im = ax.imshow(cm, cmap='Blues')
+                        im = ax.imshow(cm, cmap="Blues")
                         # Add annotations
                         for i in range(cm.shape[0]):
                             for j in range(cm.shape[1]):
-                                ax.text(j, i, str(cm[i, j]),
-                                       ha='center', va='center')
+                                ax.text(j, i, str(cm[i, j]), ha="center", va="center")
 
-                    ax.set_xlabel('Predicted Label')
-                    ax.set_ylabel('True Label')
-                    ax.set_title('Confusion Matrix')
+                    ax.set_xlabel("Predicted Label")
+                    ax.set_ylabel("True Label")
+                    ax.set_title("Confusion Matrix")
 
             # Plot 2: ROC Curve
             if has_roc:
@@ -603,25 +616,25 @@ class Plotter:
                     fpr, tpr, _ = roc_curve(y_true, y_proba_pos, pos_label=pos_label)
                     roc_auc = auc(fpr, tpr)
 
-                    ax.plot(fpr, tpr, label=f'AUC = {roc_auc:.3f}', linewidth=2)
-                    ax.plot([0, 1], [0, 1], 'k--', label='Random', alpha=0.5)
+                    ax.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}", linewidth=2)
+                    ax.plot([0, 1], [0, 1], "k--", label="Random", alpha=0.5)
                 else:
                     # Multiclass - plot each class
                     for i in range(y_proba.shape[1]):
                         y_true_binary = (y_true == i).astype(int)
                         fpr, tpr, _ = roc_curve(y_true_binary, y_proba[:, i])
                         roc_auc = auc(fpr, tpr)
-                        class_label = labels[i] if labels else f'Class {i}'
-                        ax.plot(fpr, tpr, label=f'{class_label} (AUC={roc_auc:.3f})')
+                        class_label = labels[i] if labels else f"Class {i}"
+                        ax.plot(fpr, tpr, label=f"{class_label} (AUC={roc_auc:.3f})")
 
-                    ax.plot([0, 1], [0, 1], 'k--', label='Random', alpha=0.5)
+                    ax.plot([0, 1], [0, 1], "k--", label="Random", alpha=0.5)
 
-                ax.set_xlabel('False Positive Rate')
-                ax.set_ylabel('True Positive Rate')
-                ax.set_title('ROC Curve')
+                ax.set_xlabel("False Positive Rate")
+                ax.set_ylabel("True Positive Rate")
+                ax.set_title("ROC Curve")
                 ax.set_xlim([0, 1])
                 ax.set_ylim([0, 1])
-                ax.legend(loc='lower right')
+                ax.legend(loc="lower right")
                 ax.grid(True, alpha=0.3)
 
             # Plot 3: Precision-Recall Curve
@@ -629,8 +642,10 @@ class Plotter:
                 ax = fig.add_subplot(gs[positions[plot_idx]])
                 plot_idx += 1
 
-                from sklearn.metrics import (average_precision_score,
-                                           precision_recall_curve)
+                from sklearn.metrics import (
+                    average_precision_score,
+                    precision_recall_curve,
+                )
 
                 if y_proba.ndim == 2:
                     y_proba_pos = y_proba[:, 1]
@@ -639,31 +654,40 @@ class Plotter:
 
                 # Convert string labels to integer indices if needed
                 y_true_for_pr = y_true
-                if y_true.dtype.kind in ('U', 'S', 'O'):  # Unicode, bytes, or object (string)
+                if y_true.dtype.kind in (
+                    "U",
+                    "S",
+                    "O",
+                ):  # Unicode, bytes, or object (string)
                     if labels:
                         label_to_idx = {label: idx for idx, label in enumerate(labels)}
                         y_true_for_pr = np.array([label_to_idx[yt] for yt in y_true])
                     else:
                         unique_labels = np.unique(y_true)
-                        label_to_idx = {label: idx for idx, label in enumerate(unique_labels)}
+                        label_to_idx = {
+                            label: idx for idx, label in enumerate(unique_labels)
+                        }
                         y_true_for_pr = np.array([label_to_idx[yt] for yt in y_true])
 
-                precision, recall, _ = precision_recall_curve(y_true_for_pr, y_proba_pos)
+                precision, recall, _ = precision_recall_curve(
+                    y_true_for_pr, y_proba_pos
+                )
                 avg_precision = average_precision_score(y_true_for_pr, y_proba_pos)
 
-                ax.plot(recall, precision,
-                       label=f'AP = {avg_precision:.3f}', linewidth=2)
-                ax.set_xlabel('Recall')
-                ax.set_ylabel('Precision')
-                ax.set_title('Precision-Recall Curve')
+                ax.plot(
+                    recall, precision, label=f"AP = {avg_precision:.3f}", linewidth=2
+                )
+                ax.set_xlabel("Recall")
+                ax.set_ylabel("Precision")
+                ax.set_title("Precision-Recall Curve")
                 ax.set_xlim([0, 1])
                 ax.set_ylim([0, 1])
-                ax.legend(loc='lower left')
+                ax.legend(loc="lower left")
                 ax.grid(True, alpha=0.3)
 
             # Plot 4: Metrics Summary Table
             ax = fig.add_subplot(gs[positions[plot_idx]])
-            ax.axis('off')
+            ax.axis("off")
 
             # Prepare metrics table
             metric_names = []
@@ -671,27 +695,27 @@ class Plotter:
 
             # Standard metrics to display
             display_metrics = {
-                'balanced_accuracy': 'Balanced Accuracy',
-                'mcc': 'Matthews Corr Coef',
-                'roc_auc': 'ROC AUC',
-                'pr_auc': 'PR AUC',
-                'pre_rec_auc': 'PR AUC',
-                'accuracy': 'Accuracy',
-                'precision': 'Precision',
-                'recall': 'Recall',
-                'f1_score': 'F1 Score',
+                "balanced_accuracy": "Balanced Accuracy",
+                "mcc": "Matthews Corr Coef",
+                "roc_auc": "ROC AUC",
+                "pr_auc": "PR AUC",
+                "pre_rec_auc": "PR AUC",
+                "accuracy": "Accuracy",
+                "precision": "Precision",
+                "recall": "Recall",
+                "f1_score": "F1 Score",
             }
 
             for key, display_name in display_metrics.items():
                 if key in metrics:
                     value = metrics[key]
                     # Extract value if wrapped in dict
-                    if isinstance(value, dict) and 'value' in value:
-                        value = value['value']
+                    if isinstance(value, dict) and "value" in value:
+                        value = value["value"]
                     if value is not None:
                         metric_names.append(display_name)
                         if isinstance(value, (int, float)):
-                            metric_values.append(f'{value:.4f}')
+                            metric_values.append(f"{value:.4f}")
                         else:
                             metric_values.append(str(value))
 
@@ -700,10 +724,10 @@ class Plotter:
                 table_data = list(zip(metric_names, metric_values))
                 table = ax.table(
                     cellText=table_data,
-                    colLabels=['Metric', 'Value'],
-                    cellLoc='left',
-                    loc='center',
-                    colWidths=[0.6, 0.4]
+                    colLabels=["Metric", "Value"],
+                    cellLoc="left",
+                    loc="center",
+                    colWidths=[0.6, 0.4],
                 )
                 table.auto_set_font_size(False)
                 table.set_fontsize(10)
@@ -711,36 +735,43 @@ class Plotter:
 
                 # Style header
                 for i in range(2):
-                    table[(0, i)].set_facecolor('#40466e')
-                    table[(0, i)].set_text_props(weight='bold', color='white')
+                    table[(0, i)].set_facecolor("#40466e")
+                    table[(0, i)].set_text_props(weight="bold", color="white")
 
                 # Alternate row colors
                 for i in range(1, len(metric_names) + 1):
                     if i % 2 == 0:
                         for j in range(2):
-                            table[(i, j)].set_facecolor('#f0f0f0')
+                            table[(i, j)].set_facecolor("#f0f0f0")
 
-            ax.set_title('Performance Metrics', fontweight='bold', pad=20)
+            ax.set_title("Performance Metrics", fontweight="bold", pad=20)
 
             # Save figure
             if save_path:
                 from pathlib import Path
                 from scitex.io import save as stx_io_save
+
                 # Resolve to absolute path to prevent _out directory creation
-                save_path_abs = Path(save_path).resolve() if isinstance(save_path, (str, Path)) else save_path
-                stx_io_save(fig, str(save_path_abs), verbose=verbose or self.verbose, use_caller_path=False)
+                save_path_abs = (
+                    Path(save_path).resolve()
+                    if isinstance(save_path, (str, Path))
+                    else save_path
+                )
+                stx_io_save(
+                    fig,
+                    str(save_path_abs),
+                    verbose=verbose or self.verbose,
+                    use_caller_path=False,
+                )
 
             return fig
 
         except Exception as e:
-            warnings.warn(
-                f"Failed to create metrics visualization: {e}",
-                UserWarning
-            )
+            warnings.warn(f"Failed to create metrics visualization: {e}", UserWarning)
             import traceback
+
             traceback.print_exc()
             return None
-
 
     def create_feature_importance_plot(
         self,
@@ -780,9 +811,13 @@ class Plotter:
         try:
             # Extract importance values if wrapped in dict
             if isinstance(feature_importance, dict):
-                importance = feature_importance.get('importance', feature_importance.get('value'))
+                importance = feature_importance.get(
+                    "importance", feature_importance.get("value")
+                )
                 if importance is None:
-                    importance = feature_importance  # Assume dict is {feature: importance}
+                    importance = (
+                        feature_importance  # Assume dict is {feature: importance}
+                    )
             else:
                 importance = feature_importance
 
@@ -801,13 +836,14 @@ class Plotter:
         except Exception as e:
             warnings.warn(f"Failed to create feature importance plot: {e}", UserWarning)
             import traceback
+
             traceback.print_exc()
             return None
 
     def create_cv_aggregation_plot(
         self,
         fold_predictions: List[Dict[str, Any]],
-        curve_type: str = 'roc',
+        curve_type: str = "roc",
         class_labels: Optional[List[str]] = None,
         save_path: Optional[Union[str, Path]] = None,
         verbose: bool = True,
@@ -871,16 +907,20 @@ class Plotter:
             return None
 
         try:
-            if curve_type not in ['roc', 'pr']:
+            if curve_type not in ["roc", "pr"]:
                 raise ValueError("curve_type must be 'roc' or 'pr'")
 
-            from sklearn.metrics import (auc, average_precision_score,
-                                       precision_recall_curve, roc_curve)
+            from sklearn.metrics import (
+                auc,
+                average_precision_score,
+                precision_recall_curve,
+                roc_curve,
+            )
 
             fig, ax = plt.subplots(figsize=(8, 8))
 
             # Storage for interpolated curves
-            if curve_type == 'roc':
+            if curve_type == "roc":
                 mean_fpr = np.linspace(0, 1, 100)
                 tprs = []
                 aucs = []
@@ -891,20 +931,30 @@ class Plotter:
 
             # Plot individual fold curves (faded)
             for fold_data in fold_predictions:
-                y_true = fold_data['y_true']
-                y_proba = fold_data['y_proba']
-                fold_idx = fold_data.get('fold', 0)
+                y_true = fold_data["y_true"]
+                y_proba = fold_data["y_proba"]
+                fold_idx = fold_data.get("fold", 0)
 
                 # Convert string labels to integer indices if needed
                 y_true_numeric = y_true
-                if y_true.dtype.kind in ('U', 'S', 'O'):  # Unicode, bytes, or object (string)
+                if y_true.dtype.kind in (
+                    "U",
+                    "S",
+                    "O",
+                ):  # Unicode, bytes, or object (string)
                     if class_labels and len(class_labels) >= 2:
-                        label_to_idx = {label: idx for idx, label in enumerate(class_labels)}
-                        y_true_numeric = np.array([label_to_idx.get(yt, 0) for yt in y_true])
+                        label_to_idx = {
+                            label: idx for idx, label in enumerate(class_labels)
+                        }
+                        y_true_numeric = np.array(
+                            [label_to_idx.get(yt, 0) for yt in y_true]
+                        )
                     else:
                         # Infer labels from unique values
                         unique_labels = np.unique(y_true)
-                        label_to_idx = {label: idx for idx, label in enumerate(unique_labels)}
+                        label_to_idx = {
+                            label: idx for idx, label in enumerate(unique_labels)
+                        }
                         y_true_numeric = np.array([label_to_idx[yt] for yt in y_true])
 
                 # Handle binary classification
@@ -918,14 +968,19 @@ class Plotter:
                     y_proba_pos = y_proba[:, 0]
                     y_true_numeric = (y_true_numeric == 0).astype(int)
 
-                if curve_type == 'roc':
+                if curve_type == "roc":
                     fpr, tpr, _ = roc_curve(y_true_numeric, y_proba_pos)
                     roc_auc = auc(fpr, tpr)
                     aucs.append(roc_auc)
 
                     if show_individual_folds:
-                        ax.plot(fpr, tpr, alpha=fold_alpha, color='gray',
-                               label=f'Fold {fold_idx}' if fold_idx == 0 else None)
+                        ax.plot(
+                            fpr,
+                            tpr,
+                            alpha=fold_alpha,
+                            color="gray",
+                            label=f"Fold {fold_idx}" if fold_idx == 0 else None,
+                        )
 
                     # Interpolate for mean calculation
                     interp_tpr = np.interp(mean_fpr, fpr, tpr)
@@ -933,82 +988,120 @@ class Plotter:
                     tprs.append(interp_tpr)
 
                 else:  # pr
-                    precision, recall, _ = precision_recall_curve(y_true_numeric, y_proba_pos)
+                    precision, recall, _ = precision_recall_curve(
+                        y_true_numeric, y_proba_pos
+                    )
                     ap = average_precision_score(y_true_numeric, y_proba_pos)
                     aps.append(ap)
 
                     if show_individual_folds:
-                        ax.plot(recall, precision, alpha=fold_alpha, color='gray',
-                               label=f'Fold {fold_idx}' if fold_idx == 0 else None)
+                        ax.plot(
+                            recall,
+                            precision,
+                            alpha=fold_alpha,
+                            color="gray",
+                            label=f"Fold {fold_idx}" if fold_idx == 0 else None,
+                        )
 
                     # Interpolate for mean calculation (reverse recall for interpolation)
-                    interp_precision = np.interp(mean_recall, recall[::-1], precision[::-1])
+                    interp_precision = np.interp(
+                        mean_recall, recall[::-1], precision[::-1]
+                    )
                     precisions.append(interp_precision)
 
             # Plot mean curve
             if show_mean:
-                if curve_type == 'roc':
+                if curve_type == "roc":
                     mean_tpr = np.mean(tprs, axis=0)
                     mean_tpr[-1] = 1.0
                     mean_auc = np.mean(aucs)
                     std_auc = np.std(aucs)
 
-                    ax.plot(mean_fpr, mean_tpr, color='b', linewidth=2,
-                           label=f'Mean ROC (AUC = {mean_auc:.3f} ± {std_auc:.3f})')
+                    ax.plot(
+                        mean_fpr,
+                        mean_tpr,
+                        color="b",
+                        linewidth=2,
+                        label=f"Mean ROC (AUC = {mean_auc:.3f} ± {std_auc:.3f})",
+                    )
 
                     # Optional: Add confidence interval
                     std_tpr = np.std(tprs, axis=0)
                     tpr_upper = np.minimum(mean_tpr + std_tpr, 1)
                     tpr_lower = np.maximum(mean_tpr - std_tpr, 0)
-                    ax.fill_between(mean_fpr, tpr_lower, tpr_upper,
-                                   color='b', alpha=0.2, label='± 1 std. dev.')
+                    ax.fill_between(
+                        mean_fpr,
+                        tpr_lower,
+                        tpr_upper,
+                        color="b",
+                        alpha=0.2,
+                        label="± 1 std. dev.",
+                    )
 
                     # Chance line
-                    ax.plot([0, 1], [0, 1], 'k--', alpha=0.5, label='Chance')
+                    ax.plot([0, 1], [0, 1], "k--", alpha=0.5, label="Chance")
 
-                    ax.set_xlabel('False Positive Rate', fontsize=12)
-                    ax.set_ylabel('True Positive Rate', fontsize=12)
+                    ax.set_xlabel("False Positive Rate", fontsize=12)
+                    ax.set_ylabel("True Positive Rate", fontsize=12)
                     if title is None:
-                        title = f'ROC Curves - Cross Validation (n={len(fold_predictions)} folds)'
+                        title = f"ROC Curves - Cross Validation (n={len(fold_predictions)} folds)"
 
                 else:  # pr
                     mean_precision = np.mean(precisions, axis=0)
                     mean_ap = np.mean(aps)
                     std_ap = np.std(aps)
 
-                    ax.plot(mean_recall, mean_precision, color='b', linewidth=2,
-                           label=f'Mean PR (AP = {mean_ap:.3f} ± {std_ap:.3f})')
+                    ax.plot(
+                        mean_recall,
+                        mean_precision,
+                        color="b",
+                        linewidth=2,
+                        label=f"Mean PR (AP = {mean_ap:.3f} ± {std_ap:.3f})",
+                    )
 
                     # Optional: Add confidence interval
                     std_precision = np.std(precisions, axis=0)
                     precision_upper = np.minimum(mean_precision + std_precision, 1)
                     precision_lower = np.maximum(mean_precision - std_precision, 0)
-                    ax.fill_between(mean_recall, precision_lower, precision_upper,
-                                   color='b', alpha=0.2, label='± 1 std. dev.')
+                    ax.fill_between(
+                        mean_recall,
+                        precision_lower,
+                        precision_upper,
+                        color="b",
+                        alpha=0.2,
+                        label="± 1 std. dev.",
+                    )
 
-                    ax.set_xlabel('Recall', fontsize=12)
-                    ax.set_ylabel('Precision', fontsize=12)
+                    ax.set_xlabel("Recall", fontsize=12)
+                    ax.set_ylabel("Precision", fontsize=12)
                     if title is None:
-                        title = f'Precision-Recall Curves - Cross Validation (n={len(fold_predictions)} folds)'
+                        title = f"Precision-Recall Curves - Cross Validation (n={len(fold_predictions)} folds)"
 
             ax.set_xlim([0.0, 1.0])
             ax.set_ylim([0.0, 1.05])
-            ax.set_title(title, fontsize=14, fontweight='bold')
-            ax.legend(loc='best', fontsize=10)
+            ax.set_title(title, fontsize=14, fontweight="bold")
+            ax.legend(loc="best", fontsize=10)
             ax.grid(True, alpha=0.3)
-            ax.set_aspect('equal')
+            ax.set_aspect("equal")
 
             plt.tight_layout()
 
             if save_path:
                 from scitex.io import save as stx_io_save
-                stx_io_save(fig, save_path, verbose=verbose or self.verbose, use_caller_path=False)
+
+                stx_io_save(
+                    fig,
+                    save_path,
+                    verbose=verbose or self.verbose,
+                    use_caller_path=False,
+                )
 
             return fig
 
         except Exception as e:
             warnings.warn(f"Failed to create CV aggregation plot: {e}", UserWarning)
             import traceback
+
             traceback.print_exc()
             return None
 
@@ -1024,5 +1117,6 @@ def safe_plot_wrapper(func):
             return None
 
     return wrapper
+
 
 # EOF

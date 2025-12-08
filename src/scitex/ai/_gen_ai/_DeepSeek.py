@@ -166,7 +166,7 @@ if __name__ == "__main__":
         response = client.complete(prompt)
         print(response)
         return 0
-    
+
     exit_status = main()
 
     # -----------------------------------

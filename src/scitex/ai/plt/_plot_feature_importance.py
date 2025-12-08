@@ -100,9 +100,7 @@ def plot_feature_importance(
     )
 
     # Format feature names (replace underscores, title case)
-    formatted_names = [
-        name.replace("_", " ").title() for name in sorted_names
-    ]
+    formatted_names = [name.replace("_", " ").title() for name in sorted_names]
 
     ax.set_yticks(y_pos)
     ax.set_yticklabels(formatted_names, fontsize=9)

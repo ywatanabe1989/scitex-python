@@ -116,7 +116,6 @@ class VitFeatureExtractor:
         batch_size=None,
         device="cuda",
     ):
-
         processed_arr, batch_shape = self._preprocess_array(
             arr,
             axis,

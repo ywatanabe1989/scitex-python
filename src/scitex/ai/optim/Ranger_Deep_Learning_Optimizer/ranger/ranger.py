@@ -27,7 +27,6 @@ from torch.optim.optimizer import Optimizer, required
 
 
 class Ranger(Optimizer):
-
     def __init__(
         self,
         params,
@@ -42,7 +41,6 @@ class Ranger(Optimizer):
         use_gc=True,
         gc_conv_only=False,
     ):
-
         # parameter checks
         if not 0.0 <= alpha <= 1.0:
             raise ValueError(f"Invalid slow update rate: {alpha}")
@@ -110,7 +108,6 @@ class Ranger(Optimizer):
 
         # Evaluate averages and grad, update param tensors
         for group in self.param_groups:
-
             for p in group["params"]:
                 if p.grad is None:
                     continue

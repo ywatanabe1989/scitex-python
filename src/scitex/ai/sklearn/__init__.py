@@ -11,7 +11,7 @@ except ImportError as e:
         f"Some functionality may be unavailable. "
         f"Consider installing missing dependencies if you need this module.",
         ImportWarning,
-        stacklevel=2
+        stacklevel=2,
     )
 
 try:
@@ -22,5 +22,5 @@ except ImportError as e:
         f"Some functionality may be unavailable. "
         f"Consider installing missing dependencies if you need this module.",
         ImportWarning,
-        stacklevel=2
+        stacklevel=2,
     )
