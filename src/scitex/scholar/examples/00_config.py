@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -45,6 +46,8 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
+
+
 def demonstrate_basic_paths(config) -> None:
     """Show basic directory paths and creation.
 
@@ -79,15 +82,13 @@ def demonstrate_library_system(config) -> None:
     print(f"Project library: {config.get_library_project_dir('my_project')}")
     print(f"Master storage: {config.get_library_master_dir()}")
 
-    storage_path, readable_name, paper_id = (
-        config.paths.get_paper_storage_paths(
-            doi="10.1038/nature12373",
-            title="Attention Is All You Need",
-            authors=["Vaswani, Ashish", "Shazeer, Noam"],
-            journal="Nature",
-            year=2017,
-            project="transformer_papers",
-        )
+    storage_path, readable_name, paper_id = config.paths.get_paper_storage_paths(
+        doi="10.1038/nature12373",
+        title="Attention Is All You Need",
+        authors=["Vaswani, Ashish", "Shazeer, Noam"],
+        journal="Nature",
+        year=2017,
+        project="transformer_papers",
     )
 
     print(f"Paper storage example:")

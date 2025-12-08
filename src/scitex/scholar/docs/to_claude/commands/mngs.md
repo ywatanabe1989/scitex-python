@@ -1,16 +1,16 @@
 <!-- ---
 !-- Timestamp: 2025-06-04 07:43:16
 !-- Author: ywatanabe
-!-- File: /ssh:ywatanabe@sp:/home/ywatanabe/.dotfiles/.claude/commands/mngs.md
+!-- File: /ssh:ywatanabe@sp:/home/ywatanabe/.dotfiles/.claude/commands/scitex.md
 !-- --- -->
 
 $ARGUMENTS
 
-1. Understand the mngs guidelines. 
-   `./docs/to_claude/guidelines/python/*mngs*.py`
-2. Check and revise the codebase to STRICTLY FOLLOW THE MNGS RULES.
+1. Understand the scitex guidelines. 
+   `./docs/to_claude/guidelines/python/*scitex*.py`
+2. Check and revise the codebase to STRICTLY FOLLOW THE SciTeX RULES.
 
-## MNGS Checklist
+## SciTeX Checklist
 - In .py file
   - [ ] Added heading docstring
         Example:
@@ -24,30 +24,30 @@ $ARGUMENTS
 
         Dependencies:
           - scripts: None
-          - packages: numpy, torch, matplotlib, gpac, mngs
+          - packages: numpy, torch, matplotlib, gpac, scitex
 
         IO:
           - input-files: None (generates synthetic signal with theta-gamma PAC)
           - output-files: hilbert_transform_example.png
         """
         ```
-  - [ ] Imported `mngs` and `argparse`
-  - [ ] Added `CONFIG = mngs.io.load_configs()`
+  - [ ] Imported `scitex` and `argparse`
+  - [ ] Added `CONFIG = scitex.io.load_configs()`
   - [ ] Created functions with separated concerns
   - [ ] Plotting functions
-    - [ ] Used `mngs.plt.subplots(...)` instead of pure matplotlib
+    - [ ] Used `scitex.plt.subplots(...)` instead of pure matplotlib
     - [ ] Returned `fig`
-    - [ ] Returned `fig` object is saved in `main` function using `mngs.io.save(fig, "./relative/save/path.jpg")`
+    - [ ] Returned `fig` object is saved in `main` function using `scitex.io.save(fig, "./relative/save/path.jpg")`
   - [ ] Did not create any directory
-    - [ ] NOT USED `os.path.makedirs` <- THIS IS HANDLED BY `mngs.io.save`
-  - [ ] Saved with `mngs.io.save(obj, ./relative/save/path.ext)`
+    - [ ] NOT USED `os.path.makedirs` <- THIS IS HANDLED BY `scitex.io.save`
+  - [ ] Saved with `scitex.io.save(obj, ./relative/save/path.ext)`
     - [ ] relpath starts from `./` or `../`
     - [ ] If script path is `/path/to/script.py`:
-      - [ ] `mngs.io.save(opbj, relpath)` will save to `/path/to/script_out/./relative/save/path.ext`
-      - [ ] `mngs.io.save` prints "Saved to: {saved_path}" so that NEVER INCLUDE SUCH A MESSAGE - Keep code clean
+      - [ ] `scitex.io.save(opbj, relpath)` will save to `/path/to/script_out/./relative/save/path.ext`
+      - [ ] `scitex.io.save` prints "Saved to: {saved_path}" so that NEVER INCLUDE SUCH A MESSAGE - Keep code clean
       - [ ] `/path/to/script_out/` is automatically creatd
       - [ ] `/path/to/script_out/{RUNNING,FINISHED_SUCCESS,FINISHED_FAILED}/YYYYY-MMM-DDD-HHhmmmsss_<4-digit-ID>/logs/{stderr.log,stdout.log}`
-  - [ ] Loaded with `mngs.io.load`
+  - [ ] Loaded with `scitex.io.load`
   - [ ] main function: 
     - [ ] Requires argparser object and return exit codes
           Example:
@@ -86,25 +86,25 @@ $ARGUMENTS
                   help="Use GPU acceleration if available",
               )
               args = parser.parse_args()
-              mngs.str.printc(args, c="yellow")
+              scitex.str.printc(args, c="yellow")
               return args
           ```
 
   - [ ] Implemented run_main() without editing anything
         ```python
         def run_main() -> None:
-            """Initialize mngs framework, run main function, and cleanup."""
+            """Initialize scitex framework, run main function, and cleanup."""
             global CONFIG, CC, sys, plt
      
             import sys
      
             import matplotlib.pyplot as plt
-            import mngs
+            import scitex
      
             args = parse_args()
      
-            # Start mngs framework
-            CONFIG, sys.stdout, sys.stderr, plt, CC = mngs.gen.start(
+            # Start scitex framework
+            CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(
                 sys,
                 plt,
                 args=args,
@@ -116,8 +116,8 @@ $ARGUMENTS
             # Main
             exit_status = main(args)
      
-            # Close the mngs framework
-            mngs.gen.close(
+            # Close the scitex framework
+            scitex.gen.close(
                 CONFIG,
                 verbose=False,
                 notify=False,

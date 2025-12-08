@@ -12,7 +12,9 @@ class SemanticsVisualLibraryTranslator(BaseTranslator):
     """semantics Visual Library."""
 
     LABEL = "semantics Visual Library"
-    URL_TARGET_PATTERN = r"^https?://www\.(blldb-online\.de/blldb|bdsl-online\.de/BDSL-DB)/suche/"
+    URL_TARGET_PATTERN = (
+        r"^https?://www\.(blldb-online\.de/blldb|bdsl-online\.de/BDSL-DB)/suche/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

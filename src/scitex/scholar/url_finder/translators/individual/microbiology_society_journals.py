@@ -12,7 +12,9 @@ class MicrobiologySocietyJournalsTranslator(BaseTranslator):
     """Microbiology Society Journals."""
 
     LABEL = "Microbiology Society Journals"
-    URL_TARGET_PATTERN = r"^https?://(www\.)?(\w)+\.microbiologyresearch\.org/(content/journal/|search?)"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.)?(\w)+\.microbiologyresearch\.org/(content/journal/|search?)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

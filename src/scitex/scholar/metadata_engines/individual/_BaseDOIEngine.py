@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -101,9 +102,7 @@ class BaseDOIEngine(ABC):
     def session(self):
         if self._session is None:
             self._session = requests.Session()
-            self._session.headers.update(
-                {"User-Agent": self._get_user_agent()}
-            )
+            self._session.headers.update({"User-Agent": self._get_user_agent()})
         return self._session
 
     def _get_user_agent(self) -> str:
@@ -132,10 +131,10 @@ class BaseDOIEngine(ABC):
         # Remove common meta characters but keep alphanumeric, spaces, and basic punctuation
         # Keep: letters, numbers, spaces, hyphens, periods, commas
         # Remove: ()[]{}!@#$%^&*+=<>?/\|~`"':;
-        cleaned = re.sub(r'[()[\]{}!@#$%^&*+=<>?/\\|~`"\':;]', ' ', query)
+        cleaned = re.sub(r'[()[\]{}!@#$%^&*+=<>?/\\|~`"\':;]', " ", query)
 
         # Collapse multiple spaces into one
-        cleaned = re.sub(r'\s+', ' ', cleaned)
+        cleaned = re.sub(r"\s+", " ", cleaned)
 
         return cleaned.strip()
 
@@ -176,16 +175,12 @@ class BaseDOIEngine(ABC):
 
                 # Check for rate limits
                 if self.rate_limit_handler:
-                    rate_limit_info = (
-                        self.rate_limit_handler.detect_rate_limit(
-                            engine=self.name.lower(), response=response
-                        )
+                    rate_limit_info = self.rate_limit_handler.detect_rate_limit(
+                        engine=self.name.lower(), response=response
                     )
 
                     if rate_limit_info:
-                        self.rate_limit_handler.record_rate_limit(
-                            rate_limit_info
-                        )
+                        self.rate_limit_handler.record_rate_limit(rate_limit_info)
 
                         # If this isn't the last attempt, wait and retry
                         if attempt < max_retries:
@@ -204,9 +199,7 @@ class BaseDOIEngine(ABC):
                 # Check for successful response
                 if response.status_code == 200:
                     if self.rate_limit_handler:
-                        self.rate_limit_handler.record_success(
-                            self.name.lower()
-                        )
+                        self.rate_limit_handler.record_success(self.name.lower())
                         # Record success for adaptive rate limiting
                         self.rate_limit_handler.record_request_outcome(
                             self.name.lower(), success=True
@@ -215,9 +208,7 @@ class BaseDOIEngine(ABC):
                 elif response.status_code in [429, 503, 502, 504]:
                     # Server errors that might be temporary
                     if attempt < max_retries:
-                        wait_time = min(
-                            2**attempt, 30
-                        )  # Exponential backoff, max 30s
+                        wait_time = min(2**attempt, 30)  # Exponential backoff, max 30s
                         logger.info(
                             f"Server error {response.status_code} on attempt {attempt + 1}, "
                             f"waiting {wait_time}s before retry"
@@ -231,22 +222,16 @@ class BaseDOIEngine(ABC):
                         return response  # Return for caller to handle
                 else:
                     # Other HTTP errors
-                    logger.debug(
-                        f"HTTP {response.status_code} from {self.name}: {url}"
-                    )
+                    logger.debug(f"HTTP {response.status_code} from {self.name}: {url}")
                     return response
 
             except requests.exceptions.Timeout as e:
                 if self.rate_limit_handler:
-                    rate_limit_info = (
-                        self.rate_limit_handler.detect_rate_limit(
-                            engine=self.name.lower(), exception=e
-                        )
+                    rate_limit_info = self.rate_limit_handler.detect_rate_limit(
+                        engine=self.name.lower(), exception=e
                     )
                     if rate_limit_info and attempt < max_retries:
-                        self.rate_limit_handler.record_rate_limit(
-                            rate_limit_info
-                        )
+                        self.rate_limit_handler.record_rate_limit(rate_limit_info)
                         logger.info(
                             f"Timeout on attempt {attempt + 1}, waiting {rate_limit_info.wait_time:.1f}s"
                         )
@@ -265,9 +250,7 @@ class BaseDOIEngine(ABC):
                         f"Timeout after {max_retries + 1} attempts for {self.name}"
                     )
                     if self.rate_limit_handler:
-                        self.rate_limit_handler.record_failure(
-                            self.name.lower(), e
-                        )
+                        self.rate_limit_handler.record_failure(self.name.lower(), e)
                         # Record failure for adaptive rate limiting
                         self.rate_limit_handler.record_request_outcome(
                             self.name.lower(), success=False
@@ -287,9 +270,7 @@ class BaseDOIEngine(ABC):
                         f"Request failed after {max_retries + 1} attempts: {e}"
                     )
                     if self.rate_limit_handler:
-                        self.rate_limit_handler.record_failure(
-                            self.name.lower(), e
-                        )
+                        self.rate_limit_handler.record_failure(self.name.lower(), e)
                         # Record failure for adaptive rate limiting
                         self.rate_limit_handler.record_request_outcome(
                             self.name.lower(), success=False
@@ -299,9 +280,7 @@ class BaseDOIEngine(ABC):
             except Exception as e:
                 logger.error(f"Unexpected error in {self.name}: {e}")
                 if self.rate_limit_handler:
-                    self.rate_limit_handler.record_failure(
-                        self.name.lower(), e
-                    )
+                    self.rate_limit_handler.record_failure(self.name.lower(), e)
                     # Record failure for adaptive rate limiting
                     self.rate_limit_handler.record_request_outcome(
                         self.name.lower(), success=False
@@ -319,13 +298,9 @@ class BaseDOIEngine(ABC):
             return
 
         # Use advanced rate limiting with adaptive delays
-        wait_time = self.rate_limit_handler.get_wait_time_for_engine(
-            self.name.lower()
-        )
+        wait_time = self.rate_limit_handler.get_wait_time_for_engine(self.name.lower())
         if wait_time > 0:
-            logger.debug(
-                f"Rate limiting {self.name}: waiting {wait_time:.1f}s"
-            )
+            logger.debug(f"Rate limiting {self.name}: waiting {wait_time:.1f}s")
             time.sleep(wait_time)
 
     async def _apply_rate_limiting_async(self):
@@ -337,9 +312,7 @@ class BaseDOIEngine(ABC):
             return
 
         # Use advanced rate limiting with countdown and adaptive delays
-        wait_time = self.rate_limit_handler.get_wait_time_for_engine(
-            self.name.lower()
-        )
+        wait_time = self.rate_limit_handler.get_wait_time_for_engine(self.name.lower())
         if wait_time > 0:
             await self.rate_limit_handler.wait_with_countdown_async(
                 wait_time, self.name
@@ -358,9 +331,7 @@ class BaseDOIEngine(ABC):
         # Run sync search in executor
         loop = asyncio.get_event_loop()
         try:
-            result = await loop.run_in_executor(
-                None, self.search, title, year, authors
-            )
+            result = await loop.run_in_executor(None, self.search, title, year, authors)
             return result
         except Exception as e:
             logger.error(f"Error in async search for {self.name}: {e}")

@@ -12,7 +12,9 @@ class PolygonTranslator(BaseTranslator):
     """Polygon."""
 
     LABEL = "Polygon"
-    URL_TARGET_PATTERN = r"^https?://(www\.)?(polygon|heroesneverdie|riftherald|theflyingcourier)\.com"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.)?(polygon|heroesneverdie|riftherald|theflyingcourier)\.com"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

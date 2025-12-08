@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/browser/utils/click_and_wait.py"
-)
+
+__FILE__ = "./src/scitex/scholar/browser/utils/click_and_wait.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -73,7 +72,7 @@ async def click_and_wait(
     initial_url = page.url
     href = await link.get_attribute("href") or ""
     text = await link.inner_text() or ""
-    logger.debug(f"{func_name,} Clicking: '{text[:30]}' -> {href[:50]}")
+    logger.debug(f"{(func_name,)} Clicking: '{text[:30]}' -> {href[:50]}")
 
     try:
         # Handle potential new page opening

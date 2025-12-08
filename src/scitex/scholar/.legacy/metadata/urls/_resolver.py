@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -51,9 +52,7 @@ async def doi_to_url_publisher(
         page = await context.new_page()
         try:
             logger.info(f"Resolving DOI: {doi}")
-            await page.goto(
-                url_doi, wait_until="domcontentloaded", timeout=30000
-            )
+            await page.goto(url_doi, wait_until="domcontentloaded", timeout=30000)
             await asyncio.sleep(2)  # Let redirects settle
 
             url_publisher = page.url
@@ -142,9 +141,7 @@ def generate_openurl_query(
                 if first_author.get("lastName"):
                     params.append(f"aulast={quote(first_author['lastName'])}")
                 if first_author.get("firstName"):
-                    params.append(
-                        f"aufirst={quote(first_author['firstName'])}"
-                    )
+                    params.append(f"aufirst={quote(first_author['firstName'])}")
 
     # Add ISSN if available
     if metadata.get("issn"):
@@ -156,9 +153,7 @@ def generate_openurl_query(
     return None
 
 
-async def resolve_openurl(
-    openurl_query: str, context: BrowserContext
-) -> Optional[str]:
+async def resolve_openurl(openurl_query: str, context: BrowserContext) -> Optional[str]:
     """
     Resolve OpenURL query to final authenticated URL.
 
@@ -271,9 +266,7 @@ async def resolve_all_urls(
 
         # Resolve to publisher
         if context:
-            url_publisher = await doi_to_url_publisher(
-                metadata["doi"], context
-            )
+            url_publisher = await doi_to_url_publisher(metadata["doi"], context)
             if url_publisher:
                 urls["url_publisher"] = url_publisher
 
@@ -289,5 +282,6 @@ async def resolve_all_urls(
                 urls["url_openurl_resolved"] = resolved
 
     return urls
+
 
 # EOF

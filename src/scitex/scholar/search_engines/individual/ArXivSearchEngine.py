@@ -68,10 +68,12 @@ class ArXivSearchEngine(ArXivEngine, BaseSearchEngine):
             root = ET.fromstring(response.content)
 
             # Namespace handling
-            ns = {'atom': 'http://www.w3.org/2005/Atom',
-                  'arxiv': 'http://arxiv.org/schemas/atom'}
+            ns = {
+                "atom": "http://www.w3.org/2005/Atom",
+                "arxiv": "http://arxiv.org/schemas/atom",
+            }
 
-            entries = root.findall('atom:entry', ns)
+            entries = root.findall("atom:entry", ns)
 
             if not entries:
                 logger.info(f"{self.name}: No results found")
@@ -97,73 +99,89 @@ class ArXivSearchEngine(ArXivEngine, BaseSearchEngine):
             logger.error(f"{self.name}: Search failed: {e}")
             return []
 
-    def _arxiv_entry_to_standard_format(self, entry: ET.Element, ns: dict) -> Dict[str, Any]:
+    def _arxiv_entry_to_standard_format(
+        self, entry: ET.Element, ns: dict
+    ) -> Dict[str, Any]:
         """Convert arXiv XML entry to standard metadata format."""
         # Extract arXiv ID
-        arxiv_id = entry.find('atom:id', ns).text.split('/abs/')[-1] if entry.find('atom:id', ns) is not None else None
+        arxiv_id = (
+            entry.find("atom:id", ns).text.split("/abs/")[-1]
+            if entry.find("atom:id", ns) is not None
+            else None
+        )
 
         # Extract title
-        title_elem = entry.find('atom:title', ns)
-        title = title_elem.text.strip().replace('\n', ' ') if title_elem is not None else None
+        title_elem = entry.find("atom:title", ns)
+        title = (
+            title_elem.text.strip().replace("\n", " ")
+            if title_elem is not None
+            else None
+        )
 
         # Extract authors
         authors = []
-        for author_elem in entry.findall('atom:author', ns):
-            name_elem = author_elem.find('atom:name', ns)
+        for author_elem in entry.findall("atom:author", ns):
+            name_elem = author_elem.find("atom:name", ns)
             if name_elem is not None:
                 authors.append(name_elem.text)
 
         # Extract abstract
-        summary_elem = entry.find('atom:summary', ns)
-        abstract = summary_elem.text.strip().replace('\n', ' ') if summary_elem is not None else None
+        summary_elem = entry.find("atom:summary", ns)
+        abstract = (
+            summary_elem.text.strip().replace("\n", " ")
+            if summary_elem is not None
+            else None
+        )
 
         # Extract published date
-        published_elem = entry.find('atom:published', ns)
+        published_elem = entry.find("atom:published", ns)
         year = None
         if published_elem is not None:
             date_str = published_elem.text  # Format: 2024-01-15T12:00:00Z
             year = int(date_str[:4])
 
         # Extract DOI if available
-        doi_elem = entry.find('arxiv:doi', ns)
+        doi_elem = entry.find("arxiv:doi", ns)
         doi = doi_elem.text if doi_elem is not None else None
 
         # Build metadata dict
         metadata = {
-            'id': {
-                'arxiv': arxiv_id,
-                'arxiv_engines': [self.name] if arxiv_id else None,
-                'doi': doi,
-                'doi_engines': [self.name] if doi else None,
+            "id": {
+                "arxiv": arxiv_id,
+                "arxiv_engines": [self.name] if arxiv_id else None,
+                "doi": doi,
+                "doi_engines": [self.name] if doi else None,
             },
-            'basic': {
-                'title': title,
-                'title_engines': [self.name] if title else None,
-                'authors': authors if authors else None,
-                'authors_engines': [self.name] if authors else None,
-                'abstract': abstract,
-                'abstract_engines': [self.name] if abstract else None,
+            "basic": {
+                "title": title,
+                "title_engines": [self.name] if title else None,
+                "authors": authors if authors else None,
+                "authors_engines": [self.name] if authors else None,
+                "abstract": abstract,
+                "abstract_engines": [self.name] if abstract else None,
             },
-            'publication': {
-                'year': year,
-                'year_engines': [self.name] if year else None,
+            "publication": {
+                "year": year,
+                "year_engines": [self.name] if year else None,
             },
-            'urls': {
-                'pdf': f"http://arxiv.org/pdf/{arxiv_id}.pdf" if arxiv_id else None,
-                'publisher': f"http://arxiv.org/abs/{arxiv_id}" if arxiv_id else None,
+            "urls": {
+                "pdf": f"http://arxiv.org/pdf/{arxiv_id}.pdf" if arxiv_id else None,
+                "publisher": f"http://arxiv.org/abs/{arxiv_id}" if arxiv_id else None,
             },
         }
 
         return metadata
 
-    def _passes_year_filter(self, metadata: Dict[str, Any], filters: Dict[str, Any]) -> bool:
+    def _passes_year_filter(
+        self, metadata: Dict[str, Any], filters: Dict[str, Any]
+    ) -> bool:
         """Check if paper passes year filter."""
-        year = metadata.get('publication', {}).get('year')
+        year = metadata.get("publication", {}).get("year")
         if year is None:
             return True
 
-        year_start = filters.get('year_start')
-        year_end = filters.get('year_end')
+        year_start = filters.get("year_start")
+        year_end = filters.get("year_end")
 
         if year_start and year < year_start:
             return False

@@ -44,9 +44,7 @@ async def find_pdf_urls_by_href(
         # Get deny patterns from config file
         config_deny_selectors = config.resolve("deny_selectors", default=[])
         config_deny_classes = config.resolve("deny_classes", default=[])
-        config_deny_text_patterns = config.resolve(
-            "deny_text_patterns", default=[]
-        )
+        config_deny_text_patterns = config.resolve("deny_text_patterns", default=[])
 
         # Merge with publisher-specific patterns
         current_url = page.url
@@ -64,12 +62,8 @@ async def find_pdf_urls_by_href(
         deny_text_patterns = merged_config["deny_text_patterns"]
 
         # Use merged download selectors (config + publisher-specific)
-        config_download_selectors = config.resolve(
-            "download_selectors", default=[]
-        )
-        publisher_download_selectors = merged_config.get(
-            "download_selectors", []
-        )
+        config_download_selectors = config.resolve("download_selectors", default=[])
+        publisher_download_selectors = merged_config.get("download_selectors", [])
 
         # Combine selectors (config first, then publisher-specific)
         all_download_selectors = list(config_download_selectors)
@@ -193,7 +187,9 @@ async def find_pdf_urls_by_href(
         )
 
         if static_urls:
-            logger.debug(f"{func_name}: Found {len(static_urls)} URLs from href attributes")
+            logger.debug(
+                f"{func_name}: Found {len(static_urls)} URLs from href attributes"
+            )
 
         return static_urls
     except Exception as e:

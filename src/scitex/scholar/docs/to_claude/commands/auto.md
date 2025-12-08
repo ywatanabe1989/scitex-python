@@ -33,7 +33,7 @@
     - `feature-request.md`
     - `feature-request-solved.md`
     - `git.md`
-    - `mngs.md`
+    - `scitex.md`
     - `plan.md`
     - `progress.md`
     - `refactor.md`

@@ -32,24 +32,24 @@ class BibliothequeArchivesNationaleQuebecPistardTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 4,
-        "lastUpdated": "2008-08-06 17:00:00"
+        "lastUpdated": "2008-08-06 17:00:00",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
         """Detect page type."""
-        title = doc.title.string if doc.title else ''
+        title = doc.title.string if doc.title else ""
 
-        if 'Liste détaillée des fonds' in title:
-            return 'multiple'
-        elif 'Description fonds' in title:
-            return 'book'
-        return ''
+        if "Liste détaillée des fonds" in title:
+            return "multiple"
+        elif "Description fonds" in title:
+            return "book"
+        return ""
 
     def do_web(self, doc: BeautifulSoup, url: str) -> List[Dict[str, Any]]:
         """Extract data from the page."""
         page_type = self.detect_web(doc, url)
 
-        if page_type == 'multiple':
+        if page_type == "multiple":
             return self._get_search_results(doc)
         else:
             return [self.scrape(doc, url)]
@@ -60,76 +60,75 @@ class BibliothequeArchivesNationaleQuebecPistardTranslator:
         links = doc.select('td:nth-of-type(2) a[href*="description_fonds"]')
 
         for link in links:
-            href = link.get('href')
+            href = link.get("href")
             title = link.get_text(strip=True)
             if href and title:
-                items.append({'url': href, 'title': title})
+                items.append({"url": href, "title": title})
 
         return items
 
     def scrape(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """Scrape item data from the document."""
         item = {
-            'itemType': 'book',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": "book",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Extract data fields
         data_tags = {}
-        headers = doc.select('strong')
-        content_elem = doc.select_one('div#Content div table')
+        headers = doc.select("strong")
+        content_elem = doc.select_one("div#Content div table")
 
         if content_elem:
             contents = content_elem.get_text()
 
             # Process headers and associate with content
             for i, header in enumerate(headers):
-                field_title = header.get_text().strip().replace(' ', '')
+                field_title = header.get_text().strip().replace(" ", "")
                 # Extract corresponding content
                 # This is a simplified version
-                data_tags[field_title] = ''
+                data_tags[field_title] = ""
 
         # Extract title
-        if 'Titre,Dates,Quantité' in data_tags:
-            title_data = data_tags['Titre,Dates,Quantité']
-            lines = title_data.split('\n')
+        if "Titre,Dates,Quantité" in data_tags:
+            title_data = data_tags["Titre,Dates,Quantité"]
+            lines = title_data.split("\n")
             if lines:
-                item['title'] = lines[0].strip()
+                item["title"] = lines[0].strip()
 
                 # Extract creators
                 for line in lines:
-                    if line.strip().startswith('/ '):
+                    if line.strip().startswith("/ "):
                         author = line.strip()[2:]
-                        item['creators'].append({
-                            'lastName': author,
-                            'creatorType': 'creator'
-                        })
+                        item["creators"].append(
+                            {"lastName": author, "creatorType": "creator"}
+                        )
         else:
-            item['title'] = doc.title.string if doc.title else ''
+            item["title"] = doc.title.string if doc.title else ""
 
         # Extract other fields
-        if 'Languedesdocuments' in data_tags:
-            item['language'] = data_tags['Languedesdocuments']
+        if "Languedesdocuments" in data_tags:
+            item["language"] = data_tags["Languedesdocuments"]
 
-        if 'Cote:' in data_tags:
-            item['callNumber'] = data_tags['Cote:']
+        if "Cote:" in data_tags:
+            item["callNumber"] = data_tags["Cote:"]
 
-        if 'Collation' in data_tags:
-            item['pages'] = data_tags['Collation']
+        if "Collation" in data_tags:
+            item["pages"] = data_tags["Collation"]
 
-        if 'Centre:' in data_tags:
-            item['place'] = data_tags['Centre:']
+        if "Centre:" in data_tags:
+            item["place"] = data_tags["Centre:"]
 
-        if 'Portéeetcontenu' in data_tags:
-            item['abstractNote'] = data_tags['Portéeetcontenu']
+        if "Portéeetcontenu" in data_tags:
+            item["abstractNote"] = data_tags["Portéeetcontenu"]
 
         # Extract tags
-        if 'Termesrattachés' in data_tags:
-            tags_text = data_tags['Termesrattachés']
-            tag_list = [t.strip() for t in tags_text.split('\n') if t.strip()]
-            item['tags'] = [{'tag': t} for t in tag_list]
+        if "Termesrattachés" in data_tags:
+            tags_text = data_tags["Termesrattachés"]
+            tag_list = [t.strip() for t in tags_text.split("\n") if t.strip()]
+            item["tags"] = [{"tag": t} for t in tag_list]
 
         return item

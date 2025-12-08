@@ -66,7 +66,7 @@ class SpringerTranslator(BaseTranslator):
         try:
             # Method 1: Extract DOI from current URL (JS line 238)
             current_url = page.url
-            doi_match = re.search(r'/(10\.[^#?]+)', current_url)
+            doi_match = re.search(r"/(10\.[^#?]+)", current_url)
 
             if doi_match:
                 doi = doi_match.group(1)
@@ -75,7 +75,7 @@ class SpringerTranslator(BaseTranslator):
                 pdf_url = f"/content/pdf/{quote(doi, safe='')}.pdf"
 
                 # Make absolute URL
-                base_url = await page.evaluate('window.location.origin')
+                base_url = await page.evaluate("window.location.origin")
                 pdf_url = f"{base_url}{pdf_url}"
                 return [pdf_url]
 
@@ -84,13 +84,15 @@ class SpringerTranslator(BaseTranslator):
 
         # Method 2: Fallback to meta tag DOI (JS line 131)
         try:
-            doi = await page.locator('meta[name="citation_doi"]').first.get_attribute('content', timeout=2000)
+            doi = await page.locator('meta[name="citation_doi"]').first.get_attribute(
+                "content", timeout=2000
+            )
             if doi:
                 # Remove any prefix like "doi:" or "https://doi.org/"
-                doi = re.sub(r'^(doi:|https?://doi\.org/)', '', doi)
+                doi = re.sub(r"^(doi:|https?://doi\.org/)", "", doi)
                 pdf_url = f"/content/pdf/{quote(doi, safe='')}.pdf"
 
-                base_url = await page.evaluate('window.location.origin')
+                base_url = await page.evaluate("window.location.origin")
                 pdf_url = f"{base_url}{pdf_url}"
                 return [pdf_url]
         except Exception:
@@ -99,16 +101,18 @@ class SpringerTranslator(BaseTranslator):
         # Method 3: Look for direct PDF link on page
         try:
             # Some Springer pages have direct PDF download links
-            pdf_link = await page.locator('a[data-track-action="download pdf"], a.c-pdf-download__link').first.get_attribute('href', timeout=2000)
+            pdf_link = await page.locator(
+                'a[data-track-action="download pdf"], a.c-pdf-download__link'
+            ).first.get_attribute("href", timeout=2000)
             if pdf_link:
                 # Make absolute URL if needed
-                if pdf_link.startswith('/'):
-                    base_url = await page.evaluate('window.location.origin')
+                if pdf_link.startswith("/"):
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_link = f"{base_url}{pdf_link}"
-                elif not pdf_link.startswith('http'):
-                    base_url = await page.evaluate('window.location.href')
+                elif not pdf_link.startswith("http"):
+                    base_url = await page.evaluate("window.location.href")
                     # Remove trailing path
-                    base_url = re.sub(r'/[^/]*$', '', base_url)
+                    base_url = re.sub(r"/[^/]*$", "", base_url)
                     pdf_link = f"{base_url}/{pdf_link}"
                 return [pdf_link]
         except Exception:

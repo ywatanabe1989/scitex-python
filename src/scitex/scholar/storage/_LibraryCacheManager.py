@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -79,9 +80,7 @@ class LibraryCacheManager:
                         try:
                             with open(metadata_file, "r") as f:
                                 metadata = json.load(f)
-                            stored_title = (
-                                metadata.get("title", "").lower().strip()
-                            )
+                            stored_title = metadata.get("title", "").lower().strip()
                             stored_year = metadata.get("year")
                             stored_doi = metadata.get("doi")
 
@@ -372,9 +371,7 @@ class LibraryCacheManager:
                 "title": title,
                 "title_source": bibtex_source if bibtex_source else "input",
                 "year": year,
-                "year_source": (
-                    bibtex_source if bibtex_source and year else "input"
-                ),
+                "year_source": (bibtex_source if bibtex_source and year else "input"),
                 "authors": authors or [],
                 "authors_source": (
                     bibtex_source if bibtex_source and authors else "input"
@@ -392,9 +389,7 @@ class LibraryCacheManager:
             with open(metadata_file, "w") as file_:
                 json.dump(unresolved_metadata, file_, indent=2)
 
-            logger.info(
-                f"Saved unresolved entry: {paper_id} ({title[:50]}...)"
-            )
+            logger.info(f"Saved unresolved entry: {paper_id} ({title[:50]}...)")
 
             self._ensure_project_symlink(
                 title,
@@ -464,21 +459,15 @@ class LibraryCacheManager:
     ) -> bool:
         try:
             if not paper_id:
-                _, _, paper_id = (
-                    self.config.path_manager.get_paper_storage_paths(
-                        title=title,
-                        year=year,
-                        authors=authors,
-                        project="MASTER",
-                    )
+                _, _, paper_id = self.config.path_manager.get_paper_storage_paths(
+                    title=title,
+                    year=year,
+                    authors=authors,
+                    project="MASTER",
                 )
 
-            readable_name = self._generate_readable_name(
-                authors, year, journal
-            )
-            project_dir = self.config.path_manager.get_library_project_dir(
-                self.project
-            )
+            readable_name = self._generate_readable_name(authors, year, journal)
+            project_dir = self.config.path_manager.get_library_project_dir(self.project)
             symlink_path = project_dir / readable_name
             relative_path = f"../MASTER/{paper_id}"
 
@@ -492,9 +481,7 @@ class LibraryCacheManager:
                 symlink_path.unlink()
 
             symlink_path.symlink_to(relative_path)
-            logger.success(
-                f"Created symlink:\n{symlink_path} -> {relative_path}"
-            )
+            logger.success(f"Created symlink:\n{symlink_path} -> {relative_path}")
             return True
 
         except Exception as exc_:
@@ -533,9 +520,7 @@ class LibraryCacheManager:
         # Journal (clean up for filename usage)
         if journal:
             # Clean journal name for filename usage, keep it as-is but remove problematic chars
-            journal_cleaned = "".join(
-                c for c in journal if c.isalnum() or c in "._-"
-            )
+            journal_cleaned = "".join(c for c in journal if c.isalnum() or c in "._-")
             journal = journal_cleaned if journal_cleaned else "Unknown"
         else:
             journal = "Unknown"
@@ -544,14 +529,10 @@ class LibraryCacheManager:
         readable_name = f"{first_author}-{year_str}-{journal}"
 
         # Clean up filename
-        readable_name = "".join(
-            c for c in readable_name if c.isalnum() or c in "._-"
-        )
+        readable_name = "".join(c for c in readable_name if c.isalnum() or c in "._-")
         return readable_name
 
-    def get_unresolved_entries(
-        self, project_name: Optional[str] = None
-    ) -> List[Dict]:
+    def get_unresolved_entries(self, project_name: Optional[str] = None) -> List[Dict]:
         """Get list of unresolved entries from Scholar library.
 
         Args:
@@ -583,27 +564,19 @@ class LibraryCacheManager:
                                 # Check if entry is unresolved
                                 if (
                                     metadata.get("doi_resolution_failed")
-                                    or metadata.get("resolution_status")
-                                    == "unresolved"
+                                    or metadata.get("resolution_status") == "unresolved"
                                     or not metadata.get("doi")
                                 ):
-
                                     unresolved_entries.append(
                                         {
                                             "paper_id": paper_dir.name,
-                                            "title": metadata.get(
-                                                "title", "Unknown"
-                                            ),
+                                            "title": metadata.get("title", "Unknown"),
                                             "year": metadata.get("year"),
-                                            "authors": metadata.get(
-                                                "authors", []
-                                            ),
+                                            "authors": metadata.get("authors", []),
                                             "last_attempt": metadata.get(
                                                 "doi_last_attempt"
                                             ),
-                                            "metadata_file": str(
-                                                metadata_file
-                                            ),
+                                            "metadata_file": str(metadata_file),
                                         }
                                     )
 

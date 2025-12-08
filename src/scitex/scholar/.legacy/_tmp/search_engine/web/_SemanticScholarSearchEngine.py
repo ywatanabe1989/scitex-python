@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -64,9 +65,7 @@ class SemanticScholarSearchEngine(BaseSearchEngine):
 
         self.base_url = "https://api.semanticscholar.org/graph/v1"
 
-    async def search_async(
-        self, query: str, limit: int = 20, **kwargs
-    ) -> List[Paper]:
+    async def search_async(self, query: str, limit: int = 20, **kwargs) -> List[Paper]:
         """Search Semantic Scholar for papers.
 
         Parameters
@@ -88,9 +87,7 @@ class SemanticScholarSearchEngine(BaseSearchEngine):
         # Check if query is for a specific paper ID
         if query.startswith("CorpusId:"):
             corpus_id = query.replace("CorpusId:", "").strip()
-            paper = await self._fetch_paper_by_id_async(
-                f"CorpusId:{corpus_id}"
-            )
+            paper = await self._fetch_paper_by_id_async(f"CorpusId:{corpus_id}")
             return [paper] if paper else []
 
         headers = {}
@@ -133,9 +130,7 @@ class SemanticScholarSearchEngine(BaseSearchEngine):
 
                         if response.status == 429:
                             # Rate limiting
-                            logger.warning(
-                                "Semantic Scholar rate limit reached"
-                            )
+                            logger.warning("Semantic Scholar rate limit reached")
                             raise SearchError(
                                 query=query,
                                 source="semantic_scholar",
@@ -181,9 +176,7 @@ class SemanticScholarSearchEngine(BaseSearchEngine):
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    url, params=params, headers=headers
-                ) as response:
+                async with session.get(url, params=params, headers=headers) as response:
                     if response.status == 200:
                         data = await response.json()
                         return self._parse_paper(data)

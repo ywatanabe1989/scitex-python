@@ -19,7 +19,7 @@ TRANSLATOR_INFO = {
     "in_repository": True,
     "translator_type": 4,
     "browser_support": "gcsibv",
-    "last_updated": "2024-11-21 18:54:11"
+    "last_updated": "2024-11-21 18:54:11",
 }
 
 
@@ -36,30 +36,30 @@ JURISDICTION_ABBREV = {
     "TAS": "Tas",
     "Victoria": "Vic",
     "VIC": "Vic",
-    "Western Australia": "WA"
+    "Western Australia": "WA",
 }
 
 
 def detect_web(doc: Any, url: str) -> Optional[str]:
     """Detect if the page is a case, statute, journal article or multiple items"""
-    body = doc.select_one('body')
+    body = doc.select_one("body")
     if body:
-        classes = body.get('class', [])
+        classes = body.get("class", [])
         if isinstance(classes, str):
             classes = classes.split()
 
-        if 'case' in classes:
+        if "case" in classes:
             return "case"
-        if 'legislation' in classes:
+        if "legislation" in classes:
             return "statute"
-        if 'journals' in classes:
+        if "journals" in classes:
             return "journalArticle"
 
-    if 'nzlii.org/nz/cases/' in url and url.endswith('.html'):
+    if "nzlii.org/nz/cases/" in url and url.endswith(".html"):
         return "case"
-    if 'austlii.edu.au/cgi-bin/sinodisp/au/cases/' in url and url.endswith('.html'):
+    if "austlii.edu.au/cgi-bin/sinodisp/au/cases/" in url and url.endswith(".html"):
         return "case"
-    if 'classic.austlii.edu.au' in url and url.endswith('.html'):
+    if "classic.austlii.edu.au" in url and url.endswith(".html"):
         return "case"
 
     if get_search_results(doc, check_only=True):
@@ -71,12 +71,12 @@ def detect_web(doc: Any, url: str) -> Optional[str]:
 def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str, str]]:
     """Get search results from a multiple item page"""
     items = {}
-    rows = doc.select('#page-main ul > li > a')
+    rows = doc.select("#page-main ul > li > a")
 
     for row in rows:
-        href = row.get('href')
+        href = row.get("href")
         title = row.get_text(strip=True)
-        if href and title and '.html' in href:
+        if href and title and ".html" in href:
             if check_only:
                 return True
             items[href] = title
@@ -86,7 +86,7 @@ def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str,
 
 def capitalize_with_punctuation(text: str) -> str:
     """Capitalize text while preserving parenthetical structures"""
-    act_name_delim_regex = re.compile(r'( \(|\) )')
+    act_name_delim_regex = re.compile(r"( \(|\) )")
     words = act_name_delim_regex.split(text)
 
     result = []
@@ -97,12 +97,12 @@ def capitalize_with_punctuation(text: str) -> str:
             # Simple title case
             result.append(word.lower().title())
 
-    return ''.join(result)
+    return "".join(result)
 
 
 def parse_act_name(name_of_act: str) -> Dict[str, str]:
     """Parse act name to extract name and year"""
-    parts = re.split(r'\s(\d{4})', name_of_act)
+    parts = re.split(r"\s(\d{4})", name_of_act)
     if len(parts) >= 2:
         act_name = capitalize_with_punctuation(parts[0])
         act_year = parts[1]
@@ -120,15 +120,17 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
         "itemType": item_type,
         "title": "",
         "creators": [],
-        "url": url.replace('http://', 'https://').replace(re.compile(r'^(https://www)\d'), r'\1'),
+        "url": url.replace("http://", "https://").replace(
+            re.compile(r"^(https://www)\d"), r"\1"
+        ),
         "attachments": [{"title": "Snapshot", "mimeType": "text/html"}],
         "tags": [],
         "notes": [],
-        "seeAlso": []
+        "seeAlso": [],
     }
 
     # Get jurisdiction
-    jurisdiction_elem = doc.select_one('li.ribbon-jurisdiction > a > span')
+    jurisdiction_elem = doc.select_one("li.ribbon-jurisdiction > a > span")
     if jurisdiction_elem:
         full_jurisdiction = jurisdiction_elem.get_text(strip=True)
         jurisdiction = JURISDICTION_ABBREV.get(full_jurisdiction, full_jurisdiction)
@@ -136,40 +138,40 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
             item["code"] = jurisdiction
 
     # Get citation
-    citation_elem = doc.select_one('li.ribbon-citation > a > span')
+    citation_elem = doc.select_one("li.ribbon-citation > a > span")
     citation = citation_elem.get_text(strip=True) if citation_elem else ""
 
-    ribbon = doc.select_one('#ribbon')
+    ribbon = doc.select_one("#ribbon")
     if ribbon:
         if item_type == "case":
-            title_tag = doc.select_one('head > title')
+            title_tag = doc.select_one("head > title")
             if title_tag:
                 vol_iss = title_tag.get_text(strip=True)
                 # Remove everything after the bracket and date
-                item["caseName"] = re.sub(r'\s?\[.*$', '', vol_iss)
+                item["caseName"] = re.sub(r"\s?\[.*$", "", vol_iss)
                 item["title"] = item["caseName"]
 
                 # Extract date
-                last_paren = re.search(r'\(([^)]*)\)$', vol_iss)
+                last_paren = re.search(r"\(([^)]*)\)$", vol_iss)
                 if last_paren:
                     item["dateDecided"] = last_paren.group(1)
                 else:
-                    year_elem = doc.select_one('li.ribbon-year > a > span')
+                    year_elem = doc.select_one("li.ribbon-year > a > span")
                     if year_elem:
                         item["dateDecided"] = year_elem.get_text(strip=True)
 
             # Get court
-            court_match = re.search(r'/cases/[^/]+/([^/]+)/', url)
+            court_match = re.search(r"/cases/[^/]+/([^/]+)/", url)
             if court_match:
                 item["court"] = court_match.group(1)
             else:
-                court_elem = doc.select_one('li.ribbon-database > a > span')
+                court_elem = doc.select_one("li.ribbon-database > a > span")
                 if court_elem:
                     item["court"] = court_elem.get_text(strip=True)
 
             # Get docket number
             if citation:
-                last_number = re.search(r'(\d+)$', citation)
+                last_number = re.search(r"(\d+)$", citation)
                 if last_number:
                     item["docketNumber"] = last_number.group(1)
 
@@ -180,51 +182,53 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
                 item["dateEnacted"] = act_info["actYear"]
 
             # Get section
-            section_elem = doc.select_one('li.ribbon-subject > a > span')
+            section_elem = doc.select_one("li.ribbon-subject > a > span")
             if section_elem:
                 section = section_elem.get_text(strip=True)
-                item["section"] = section.replace('SECT ', '')
+                item["section"] = section.replace("SECT ", "")
 
         elif item_type == "journalArticle":
-            title_tag = doc.select_one('title')
+            title_tag = doc.select_one("title")
             if title_tag:
                 title_text = title_tag.get_text(strip=True)
                 match = re.search(r'(.*) --- "([^"]*)"', title_text)
                 if match:
                     item["title"] = match.group(2)
-                    authors = match.group(1).split(';')
+                    authors = match.group(1).split(";")
                     for author in authors:
                         parts = author.strip().split()
                         if len(parts) > 1:
-                            item["creators"].append({
-                                "firstName": " ".join(parts[:-1]),
-                                "lastName": parts[-1],
-                                "creatorType": "author"
-                            })
+                            item["creators"].append(
+                                {
+                                    "firstName": " ".join(parts[:-1]),
+                                    "lastName": parts[-1],
+                                    "creatorType": "author",
+                                }
+                            )
                 else:
                     item["title"] = title_text
 
-            pub_elem = doc.select_one('li.ribbon-database > a > span')
+            pub_elem = doc.select_one("li.ribbon-database > a > span")
             if pub_elem:
                 item["publicationTitle"] = pub_elem.get_text(strip=True)
 
-            date_elem = doc.select_one('li.ribbon-year > a > span')
+            date_elem = doc.select_one("li.ribbon-year > a > span")
             if date_elem:
                 item["date"] = date_elem.get_text(strip=True)
 
     else:
         # Old format pages
-        title_tag = doc.select_one('head > title')
+        title_tag = doc.select_one("head > title")
         if title_tag:
             vol_iss = title_tag.get_text(strip=True)
-            match = re.search(r'^([^[]*)\[(\d+)\](.*)\(([^)]*)\)$', vol_iss)
+            match = re.search(r"^([^[]*)\[(\d+)\](.*)\(([^)]*)\)$", vol_iss)
             if match:
                 item["title"] = match.group(1).strip()
                 item["dateDecided"] = match.group(4)
                 court_number = match.group(3).strip().split()
                 if len(court_number) >= 2:
                     item["court"] = court_number[0]
-                    item["docketNumber"] = re.sub(r'[^\w]*$', '', court_number[1])
+                    item["docketNumber"] = re.sub(r"[^\w]*$", "", court_number[1])
             else:
                 item["title"] = vol_iss
 
@@ -240,8 +244,8 @@ def do_web(doc: Any, url: str) -> List[Dict[str, Any]]:
         return []
     else:
         # Handle classic.austlii.edu.au redirect
-        if 'classic.austlii.edu.au' in url:
+        if "classic.austlii.edu.au" in url:
             parsed = urlparse(url)
-            url = url.replace('classic.austlii.edu.au', 'www.austlii.edu.au')
+            url = url.replace("classic.austlii.edu.au", "www.austlii.edu.au")
 
         return [scrape(doc, url)]

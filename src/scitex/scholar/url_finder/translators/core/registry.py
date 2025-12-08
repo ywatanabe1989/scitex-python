@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/zotero_translators_python/core/registry.py"
-)
+
+__FILE__ = "./src/zotero_translators_python/core/registry.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -58,6 +57,7 @@ from ..individual.aps_physics import APSPhysicsTranslator
 from ..individual.arxiv import ArXivTranslator
 from ..individual.arxiv_org import ArXivOrgTranslator
 from ..individual.asce import ASCETranslator
+
 # from ..individual.atypon import AtyponTranslator  # Deprecated - use AtyponJournalsTranslator
 from ..individual.atypon_journals import AtyponJournalsTranslator
 from ..individual.biomed_central import BioMedCentralTranslator
@@ -289,9 +289,7 @@ class TranslatorRegistry:
         self.name = self.__class__.__name__
 
     @classmethod
-    def get_translator_for_url(
-        cls, url: str
-    ) -> Optional[Type[BaseTranslator]]:
+    def get_translator_for_url(cls, url: str) -> Optional[Type[BaseTranslator]]:
         """Find the appropriate translator for a given URL.
 
         Args:
@@ -335,9 +333,7 @@ class TranslatorRegistry:
             if pdf_urls:
                 return pdf_urls
         except Exception as e:
-            logger.debug(
-                f"{self.name}: Pattern extraction failed for {url}: {e}"
-            )
+            logger.debug(f"{self.name}: Pattern extraction failed for {url}: {e}")
 
         # Fall back to translator-based approach
         translator = cls.get_translator_for_url(url)
@@ -371,5 +367,6 @@ class TranslatorRegistry:
             List of translator classes
         """
         return cls._translators.copy()
+
 
 # EOF

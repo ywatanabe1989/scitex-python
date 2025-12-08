@@ -45,22 +45,22 @@ class OpenAlexSearchEngine(OpenAlexEngine, BaseSearchEngine):
 
         # Build OpenAlex API parameters
         params = {
-            'search': query,
-            'per-page': min(max_results, 200),  # OpenAlex max per page
-            'mailto': self.email,
+            "search": query,
+            "per-page": min(max_results, 200),  # OpenAlex max per page
+            "mailto": self.email,
         }
 
         # Add filters
         filter_parts = []
-        if filters.get('year_start'):
-            filter_parts.append(f"publication_year:>{filters['year_start']-1}")
-        if filters.get('year_end'):
-            filter_parts.append(f"publication_year:<{filters['year_end']+1}")
-        if filters.get('open_access'):
+        if filters.get("year_start"):
+            filter_parts.append(f"publication_year:>{filters['year_start'] - 1}")
+        if filters.get("year_end"):
+            filter_parts.append(f"publication_year:<{filters['year_end'] + 1}")
+        if filters.get("open_access"):
             filter_parts.append("is_oa:true")
 
         if filter_parts:
-            params['filter'] = ','.join(filter_parts)
+            params["filter"] = ",".join(filter_parts)
 
         logger.info(f"{self.name}: Searching OpenAlex with query: {query[:50]}...")
 
@@ -70,7 +70,7 @@ class OpenAlexSearchEngine(OpenAlexEngine, BaseSearchEngine):
             response.raise_for_status()
             data = response.json()
 
-            results_data = data.get('results', [])
+            results_data = data.get("results", [])
 
             if not results_data:
                 logger.info(f"{self.name}: No results found")
@@ -93,6 +93,7 @@ class OpenAlexSearchEngine(OpenAlexEngine, BaseSearchEngine):
         except Exception as e:
             logger.error(f"{self.name}: Search failed: {e}")
             import traceback
+
             logger.error(traceback.format_exc())
             return []
 
@@ -100,69 +101,73 @@ class OpenAlexSearchEngine(OpenAlexEngine, BaseSearchEngine):
         """Convert OpenAlex work to standard metadata format."""
         # Extract authors
         authors = []
-        for authorship in item.get('authorships', []):
-            author = authorship.get('author', {})
-            display_name = author.get('display_name')
+        for authorship in item.get("authorships", []):
+            author = authorship.get("author", {})
+            display_name = author.get("display_name")
             if display_name:
                 authors.append(display_name)
 
         # Extract identifiers
-        doi = item.get('doi', '').replace('https://doi.org/', '') if item.get('doi') else None
+        doi = (
+            item.get("doi", "").replace("https://doi.org/", "")
+            if item.get("doi")
+            else None
+        )
         pmid = None
-        for ext_id, value in item.get('ids', {}).items():
-            if ext_id == 'pmid':
-                pmid = value.replace('https://pubmed.ncbi.nlm.nih.gov/', '')
+        for ext_id, value in item.get("ids", {}).items():
+            if ext_id == "pmid":
+                pmid = value.replace("https://pubmed.ncbi.nlm.nih.gov/", "")
 
         # Extract publication info
-        year = item.get('publication_year')
+        year = item.get("publication_year")
         journal_name = None
         issn = None
 
-        primary_location = item.get('primary_location', {})
+        primary_location = item.get("primary_location", {})
         if primary_location:
-            source = primary_location.get('source')
+            source = primary_location.get("source")
             if source:
-                journal_name = source.get('display_name')
-                issn_list = source.get('issn_l')
+                journal_name = source.get("display_name")
+                issn_list = source.get("issn_l")
                 if issn_list:
                     issn = issn_list[0] if isinstance(issn_list, list) else issn_list
 
         # Open access info
-        open_access = item.get('open_access', {})
-        is_oa = open_access.get('is_oa', False)
-        oa_url = open_access.get('oa_url')
+        open_access = item.get("open_access", {})
+        is_oa = open_access.get("is_oa", False)
+        oa_url = open_access.get("oa_url")
 
         # Build metadata dict
         metadata = {
-            'id': {
-                'doi': doi,
-                'doi_engines': [self.name] if doi else None,
-                'pmid': pmid,
-                'pmid_engines': [self.name] if pmid else None,
-                'openalex': item.get('id'),
+            "id": {
+                "doi": doi,
+                "doi_engines": [self.name] if doi else None,
+                "pmid": pmid,
+                "pmid_engines": [self.name] if pmid else None,
+                "openalex": item.get("id"),
             },
-            'basic': {
-                'title': item.get('title'),
-                'title_engines': [self.name] if item.get('title') else None,
-                'authors': authors if authors else None,
-                'authors_engines': [self.name] if authors else None,
-                'abstract': None,  # OpenAlex doesn't always provide abstracts
+            "basic": {
+                "title": item.get("title"),
+                "title_engines": [self.name] if item.get("title") else None,
+                "authors": authors if authors else None,
+                "authors_engines": [self.name] if authors else None,
+                "abstract": None,  # OpenAlex doesn't always provide abstracts
             },
-            'publication': {
-                'year': year,
-                'year_engines': [self.name] if year else None,
-                'journal': journal_name,
-                'journal_engines': [self.name] if journal_name else None,
-                'issn': issn,
+            "publication": {
+                "year": year,
+                "year_engines": [self.name] if year else None,
+                "journal": journal_name,
+                "journal_engines": [self.name] if journal_name else None,
+                "issn": issn,
             },
-            'metrics': {
-                'citation_count': item.get('cited_by_count', 0),
-                'is_open_access': is_oa,
+            "metrics": {
+                "citation_count": item.get("cited_by_count", 0),
+                "is_open_access": is_oa,
             },
-            'urls': {
-                'doi_url': f"https://doi.org/{doi}" if doi else None,
-                'pdf': oa_url if is_oa else None,
-                'publisher': item.get('primary_location', {}).get('landing_page_url'),
+            "urls": {
+                "doi_url": f"https://doi.org/{doi}" if doi else None,
+                "pdf": oa_url if is_oa else None,
+                "publisher": item.get("primary_location", {}).get("landing_page_url"),
             },
         }
 

@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/utils/_cleanup.py"
-)
+
+__FILE__ = "./src/scitex/scholar/utils/_cleanup.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -23,9 +22,7 @@ def cleanup_scholar_processes(signal_num=None, frame=None):
     import sys
 
     if signal_num:
-        logger.info(
-            f"Received signal {signal_num}, cleaning up Scholar processes..."
-        )
+        logger.info(f"Received signal {signal_num}, cleaning up Scholar processes...")
 
     try:
         import subprocess
@@ -62,9 +59,7 @@ def cleanup_scholar_processes(signal_num=None, frame=None):
 def cleanup_scholar_processes(signal_num=None, frame=None):
     """Cleanup function to stop all Scholar browser processes gracefully."""
     if signal_num:
-        logger.info(
-            f"Received signal {signal_num}, cleaning up Scholar processes..."
-        )
+        logger.info(f"Received signal {signal_num}, cleaning up Scholar processes...")
 
     try:
         import subprocess
@@ -92,5 +87,6 @@ def cleanup_scholar_processes(signal_num=None, frame=None):
         )
     except Exception as e:
         logger.debug(f"Cleanup error: {e}")
+
 
 # EOF

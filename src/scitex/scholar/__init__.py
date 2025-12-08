@@ -35,11 +35,9 @@ __all__ = [
     "ScholarURLFinder",
     "ScholarAuthManager",
     "ScholarBrowserManager",
-
     "Paper",
     "Papers",
     "Scholar",
-
     "utils",
 ]
 

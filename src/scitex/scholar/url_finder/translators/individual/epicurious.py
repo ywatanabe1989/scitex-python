@@ -12,7 +12,9 @@ class EpicuriousTranslator(BaseTranslator):
     """Epicurious."""
 
     LABEL = "Epicurious"
-    URL_TARGET_PATTERN = r"^https?://www\.epicurious\.com/(tools/searchresults|recipes/food/views)"
+    URL_TARGET_PATTERN = (
+        r"^https?://www\.epicurious\.com/(tools/searchresults|recipes/food/views)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

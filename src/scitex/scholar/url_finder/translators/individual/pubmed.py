@@ -56,37 +56,37 @@ class PubMedTranslator(BaseTranslator):
         """
         try:
             content = await page.content()
-            soup = BeautifulSoup(content, 'html.parser')
+            soup = BeautifulSoup(content, "html.parser")
 
             # Strategy 1: meta tags
-            for meta_name in ['ncbi_uidlist', 'ncbi_article_id', 'uid']:
-                meta = soup.find('meta', attrs={'name': meta_name})
-                if meta and meta.get('content'):
-                    pmid = meta['content'].strip()
+            for meta_name in ["ncbi_uidlist", "ncbi_article_id", "uid"]:
+                meta = soup.find("meta", attrs={"name": meta_name})
+                if meta and meta.get("content"):
+                    pmid = meta["content"].strip()
                     if pmid.isdigit():
                         return pmid
 
             # Strategy 2: input element
-            input_elem = soup.find('input', attrs={'id': 'absid'})
-            if input_elem and input_elem.get('value'):
-                pmid = input_elem['value'].strip()
+            input_elem = soup.find("input", attrs={"id": "absid"})
+            if input_elem and input_elem.get("value"):
+                pmid = input_elem["value"].strip()
                 if pmid.isdigit():
                     return pmid
 
             # Strategy 3: link href patterns
-            for rel in ['canonical', 'handheld']:
-                link = soup.find('link', attrs={'rel': rel})
-                if link and link.get('href'):
-                    match = re.search(r'/(\d+)(?:/|$)', link['href'])
+            for rel in ["canonical", "handheld"]:
+                link = soup.find("link", attrs={"rel": rel})
+                if link and link.get("href"):
+                    match = re.search(r"/(\d+)(?:/|$)", link["href"])
                     if match:
                         return match.group(1)
 
             # Strategy 4: bookshelf PubMed record links
-            maincontent = soup.find(id='maincontent')
+            maincontent = soup.find(id="maincontent")
             if maincontent:
-                pubmed_link = maincontent.find('a', attrs={
-                    'title': re.compile(r'PubMed record')
-                })
+                pubmed_link = maincontent.find(
+                    "a", attrs={"title": re.compile(r"PubMed record")}
+                )
                 if pubmed_link:
                     pmid = pubmed_link.get_text(strip=True)
                     if pmid.isdigit():
@@ -94,11 +94,11 @@ class PubMedTranslator(BaseTranslator):
 
             # Strategy 5: URL extraction
             url = page.url
-            match = re.search(r'/pubmed/(\d+)', url)
+            match = re.search(r"/pubmed/(\d+)", url)
             if match:
                 return match.group(1)
 
-            match = re.search(r'pubmed\.ncbi\.nlm\.nih\.gov/(\d+)', url)
+            match = re.search(r"pubmed\.ncbi\.nlm\.nih\.gov/(\d+)", url)
             if match:
                 return match.group(1)
 
@@ -119,11 +119,11 @@ class PubMedTranslator(BaseTranslator):
         """
         try:
             params = {
-                'db': 'PubMed',
-                'tool': 'ZoteroTranslatorsPython',
-                'retmode': 'xml',
-                'rettype': 'citation',
-                'id': pmid
+                "db": "PubMed",
+                "tool": "ZoteroTranslatorsPython",
+                "retmode": "xml",
+                "rettype": "citation",
+                "id": pmid,
             }
 
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -132,13 +132,16 @@ class PubMedTranslator(BaseTranslator):
                 xml_text = response.text
 
                 # Check if valid PubMed data was returned (case-insensitive)
-                if 'pubmedarticle' not in xml_text.lower() and 'pubmedbookarticle' not in xml_text.lower():
+                if (
+                    "pubmedarticle" not in xml_text.lower()
+                    and "pubmedbookarticle" not in xml_text.lower()
+                ):
                     logger.warning(f"No PubMed data found for PMID {pmid}")
                     return None
 
                 # Parse XML to extract metadata
                 metadata = cls._parse_pubmed_xml(xml_text)
-                metadata['pmid'] = pmid
+                metadata["pmid"] = pmid
                 return metadata
 
         except Exception as e:
@@ -155,54 +158,56 @@ class PubMedTranslator(BaseTranslator):
         Returns:
             Dictionary containing parsed metadata
         """
-        soup = BeautifulSoup(xml_text, 'xml')
+        soup = BeautifulSoup(xml_text, "xml")
         metadata = {}
 
         try:
             # Extract article title
-            article_title = soup.find('ArticleTitle')
+            article_title = soup.find("ArticleTitle")
             if article_title:
-                metadata['title'] = article_title.get_text(strip=True)
+                metadata["title"] = article_title.get_text(strip=True)
 
             # Extract authors
             authors = []
-            for author in soup.find_all('Author'):
-                last_name = author.find('LastName')
-                fore_name = author.find('ForeName')
+            for author in soup.find_all("Author"):
+                last_name = author.find("LastName")
+                fore_name = author.find("ForeName")
                 if last_name:
                     author_name = last_name.get_text(strip=True)
                     if fore_name:
                         author_name = f"{fore_name.get_text(strip=True)} {author_name}"
                     authors.append(author_name)
-            metadata['authors'] = authors
+            metadata["authors"] = authors
 
             # Extract DOI
-            article_ids = soup.find_all('ArticleId', attrs={'IdType': 'doi'})
+            article_ids = soup.find_all("ArticleId", attrs={"IdType": "doi"})
             if article_ids:
-                metadata['doi'] = article_ids[0].get_text(strip=True)
+                metadata["doi"] = article_ids[0].get_text(strip=True)
 
             # Extract abstract
-            abstract = soup.find('AbstractText')
+            abstract = soup.find("AbstractText")
             if abstract:
-                metadata['abstract'] = abstract.get_text(strip=True)
+                metadata["abstract"] = abstract.get_text(strip=True)
 
             # Extract journal information
-            journal = soup.find('Journal')
+            journal = soup.find("Journal")
             if journal:
-                journal_title = journal.find('Title')
+                journal_title = journal.find("Title")
                 if journal_title:
-                    metadata['journal'] = journal_title.get_text(strip=True)
+                    metadata["journal"] = journal_title.get_text(strip=True)
 
-                journal_abbrev = journal.find('ISOAbbreviation')
+                journal_abbrev = journal.find("ISOAbbreviation")
                 if journal_abbrev:
-                    metadata['journal_abbreviation'] = journal_abbrev.get_text(strip=True)
+                    metadata["journal_abbreviation"] = journal_abbrev.get_text(
+                        strip=True
+                    )
 
             # Extract publication date
-            pub_date = soup.find('PubDate')
+            pub_date = soup.find("PubDate")
             if pub_date:
-                year = pub_date.find('Year')
-                month = pub_date.find('Month')
-                day = pub_date.find('Day')
+                year = pub_date.find("Year")
+                month = pub_date.find("Month")
+                day = pub_date.find("Day")
                 date_parts = []
                 if year:
                     date_parts.append(year.get_text(strip=True))
@@ -210,21 +215,21 @@ class PubMedTranslator(BaseTranslator):
                     date_parts.append(month.get_text(strip=True))
                 if day:
                     date_parts.append(day.get_text(strip=True))
-                metadata['date'] = '-'.join(date_parts)
+                metadata["date"] = "-".join(date_parts)
 
             # Extract volume and issue
-            volume = soup.find('Volume')
+            volume = soup.find("Volume")
             if volume:
-                metadata['volume'] = volume.get_text(strip=True)
+                metadata["volume"] = volume.get_text(strip=True)
 
-            issue = soup.find('Issue')
+            issue = soup.find("Issue")
             if issue:
-                metadata['issue'] = issue.get_text(strip=True)
+                metadata["issue"] = issue.get_text(strip=True)
 
             # Extract pages
-            medline_pgn = soup.find('MedlinePgn')
+            medline_pgn = soup.find("MedlinePgn")
             if medline_pgn:
-                metadata['pages'] = medline_pgn.get_text(strip=True)
+                metadata["pages"] = medline_pgn.get_text(strip=True)
 
         except Exception as e:
             logger.error(f"Error parsing PubMed XML: {e}")
@@ -242,31 +247,31 @@ class PubMedTranslator(BaseTranslator):
 
         try:
             content = await page.content()
-            soup = BeautifulSoup(content, 'html.parser')
+            soup = BeautifulSoup(content, "html.parser")
 
             # Look for "Full Text Links" section
-            full_text_section = soup.find('div', class_=re.compile(r'full-text-links'))
+            full_text_section = soup.find("div", class_=re.compile(r"full-text-links"))
             if full_text_section:
-                links = full_text_section.find_all('a', href=True)
+                links = full_text_section.find_all("a", href=True)
                 for link in links:
-                    href = link['href']
+                    href = link["href"]
                     # Filter for likely PDF links
-                    if any(x in href.lower() for x in ['.pdf', 'download', 'pdf']):
+                    if any(x in href.lower() for x in [".pdf", "download", "pdf"]):
                         pdf_urls.append(href)
 
             # Look for LinkOut resources
-            linkout_section = soup.find('div', attrs={'id': 'link-out'})
+            linkout_section = soup.find("div", attrs={"id": "link-out"})
             if linkout_section:
-                links = linkout_section.find_all('a', href=True)
+                links = linkout_section.find_all("a", href=True)
                 for link in links:
-                    href = link['href']
-                    if 'pdf' in href.lower():
+                    href = link["href"]
+                    if "pdf" in href.lower():
                         pdf_urls.append(href)
 
             # PMC (PubMed Central) link - free full text
-            pmc_link = soup.find('a', attrs={'data-ga-action': 'PMC article'})
-            if pmc_link and pmc_link.get('href'):
-                pdf_urls.append(pmc_link['href'])
+            pmc_link = soup.find("a", attrs={"data-ga-action": "PMC article"})
+            if pmc_link and pmc_link.get("href"):
+                pdf_urls.append(pmc_link["href"])
 
         except Exception as e:
             logger.error(f"Error extracting PDF URLs: {e}")
@@ -292,7 +297,7 @@ async def main():
             page = await browser.new_page()
 
             try:
-                await page.goto(test_url, wait_until='domcontentloaded', timeout=30000)
+                await page.goto(test_url, wait_until="domcontentloaded", timeout=30000)
 
                 # Extract PMID
                 pmid = await PubMedTranslator.extract_pmid_from_page(page)
@@ -321,4 +326,5 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

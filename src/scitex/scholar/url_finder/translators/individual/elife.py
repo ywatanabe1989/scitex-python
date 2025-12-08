@@ -12,7 +12,9 @@ class ELifeTranslator(BaseTranslator):
     """eLife."""
 
     LABEL = "eLife"
-    URL_TARGET_PATTERN = r"^https?://(elife\.)?elifesciences\.org/(articles|search|subjects|archive)"
+    URL_TARGET_PATTERN = (
+        r"^https?://(elife\.)?elifesciences\.org/(articles|search|subjects|archive)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

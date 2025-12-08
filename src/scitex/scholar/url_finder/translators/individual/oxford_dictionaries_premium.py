@@ -12,7 +12,9 @@ class OxfordDictionariesPremiumTranslator(BaseTranslator):
     """Oxford Dictionaries Premium."""
 
     LABEL = "Oxford Dictionaries Premium"
-    URL_TARGET_PATTERN = r"^https?://premium\.oxforddictionaries\.com/(translate|definition)/"
+    URL_TARGET_PATTERN = (
+        r"^https?://premium\.oxforddictionaries\.com/(translate|definition)/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

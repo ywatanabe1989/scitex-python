@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/auth/gateway/_resolve_functions.py"
-)
+
+__FILE__ = "./src/scitex/scholar/auth/gateway/_resolve_functions.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -97,5 +96,6 @@ def extract_doi_from_url(url: str) -> Optional[str]:
     if match:
         return match.group(0)
     return None
+
 
 # EOF

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -43,9 +44,9 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
-async def demonstrate_url_finding(
-    doi: str = None, use_cache: bool = False
-) -> dict:
+
+
+async def demonstrate_url_finding(doi: str = None, use_cache: bool = False) -> dict:
     """Demonstrate URL finding capabilities.
 
     Parameters
@@ -75,9 +76,10 @@ async def demonstrate_url_finding(
         browser_mode="interactive",
         chrome_profile_name="system",
     )
-    browser, context = (
-        await browser_manager.get_authenticated_browser_and_context_async()
-    )
+    (
+        browser,
+        context,
+    ) = await browser_manager.get_authenticated_browser_and_context_async()
 
     print(f"🔍 Creating URL finder (cache: {use_cache})...")
     url_finder = ScholarURLFinder(context, use_cache=use_cache)
@@ -108,9 +110,7 @@ async def main_async(args) -> dict:
     print("🔗 Scholar URL Finder Demonstration")
     print("=" * 40)
 
-    results = await demonstrate_url_finding(
-        doi=args.doi, use_cache=not args.no_cache
-    )
+    results = await demonstrate_url_finding(doi=args.doi, use_cache=not args.no_cache)
 
     print("✅ URL finding demonstration completed")
     return results

@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/impact_factor/jcr/build_database.py"
-)
+
+__FILE__ = "./src/scitex/scholar/impact_factor/jcr/build_database.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -50,6 +49,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent  # scholar/
 DATA_DIR = BASE_DIR / "data" / "impact_factor"
 
 """Functions & Classes"""
+
+
 def parse_jcr_excel(excel_path: Path) -> Iterator[Dict]:
     """
     Parse JCR Excel file and yield journal records.

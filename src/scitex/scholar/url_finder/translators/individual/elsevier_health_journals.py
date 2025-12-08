@@ -12,7 +12,9 @@ class ElsevierHealthJournalsTranslator(BaseTranslator):
     """Elsevier Health Journals."""
 
     LABEL = "Elsevier Health Journals"
-    URL_TARGET_PATTERN = r"/action/doSearch\?|/article/[^/]+/(abstract|fulltext|references|images)"
+    URL_TARGET_PATTERN = (
+        r"/action/doSearch\?|/article/[^/]+/(abstract|fulltext|references|images)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

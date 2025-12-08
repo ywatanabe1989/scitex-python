@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/engines/individual/ArXivEngine.py"
-)
+
+__FILE__ = "./src/scitex/scholar/engines/individual/ArXivEngine.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -75,18 +74,15 @@ class ArXivEngine(BaseDOIEngine):
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type(
-            (requests.HTTPError, requests.ConnectionError)
-        ),
+        retry=retry_if_exception_type((requests.HTTPError, requests.ConnectionError)),
     )
     def _search_by_doi(self, doi: str, return_as: str) -> Optional[Dict]:
         """Search solely on doi"""
-        doi = doi.replace("https://doi.org/", "").replace(
-            "http://doi.org/", ""
-        )
+        doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
         # Extract arXiv ID - handle both "arXiv." and "arxiv." (case-insensitive)
         import re
-        match = re.search(r'arxiv\.(\d+\.\d+)', doi, re.IGNORECASE)
+
+        match = re.search(r"arxiv\.(\d+\.\d+)", doi, re.IGNORECASE)
         arxiv_id = match.group(1) if match else doi.split("arXiv.")[-1]
 
         params = {
@@ -102,9 +98,7 @@ class ArXivEngine(BaseDOIEngine):
                 "dict",
                 "json",
             ], "return_as must be either of 'dict' or 'json'"
-            response = self.session.get(
-                self.base_url, params=params, timeout=30
-            )
+            response = self.session.get(self.base_url, params=params, timeout=30)
             response.raise_for_status()
 
             feed = feedparser.parse(response.text)
@@ -162,18 +156,14 @@ class ArXivEngine(BaseDOIEngine):
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type(
-            (requests.HTTPError, requests.ConnectionError)
-        ),
+        retry=retry_if_exception_type((requests.HTTPError, requests.ConnectionError)),
     )
     def _search_by_metadata(
         self,
         title: str,
         year: Optional[Union[int, str]] = None,
         authors: Optional[List[str]] = None,
-        max_results: Optional[
-            int
-        ] = 5,  # Increased from 1 to get more candidates
+        max_results: Optional[int] = 5,  # Increased from 1 to get more candidates
         return_as: Optional[str] = "dict",
     ) -> Optional[Dict]:
         """Search by metadata other than doi"""
@@ -201,9 +191,7 @@ class ArXivEngine(BaseDOIEngine):
                 "dict",
                 "json",
             ], "return_as must be either of 'dict' or 'json'"
-            response = self.session.get(
-                self.base_url, params=params, timeout=30
-            )
+            response = self.session.get(self.base_url, params=params, timeout=30)
             response.raise_for_status()
 
             feed = feedparser.parse(response.text)
@@ -230,17 +218,13 @@ class ArXivEngine(BaseDOIEngine):
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type(
-            (requests.HTTPError, requests.ConnectionError)
-        ),
+        retry=retry_if_exception_type((requests.HTTPError, requests.ConnectionError)),
     )
     def _scrape_doi(self, url_publisher):
         try:
             response = requests.get(url_publisher)
             soup = BeautifulSoup(response.content, "html.parser")
-            doi_link = soup.find(
-                "a", href=lambda href: href and "doi.org" in href
-            )
+            doi_link = soup.find("a", href=lambda href: href and "doi.org" in href)
             doi = doi_link.get("href").split("doi.org/")[-1]
             return doi
         except Exception as e:
@@ -249,13 +233,9 @@ class ArXivEngine(BaseDOIEngine):
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type(
-            (requests.HTTPError, requests.ConnectionError)
-        ),
+        retry=retry_if_exception_type((requests.HTTPError, requests.ConnectionError)),
     )
-    def _extract_metadata_from_entry(
-        self, entry, return_as: str
-    ) -> Optional[Dict]:
+    def _extract_metadata_from_entry(self, entry, return_as: str) -> Optional[Dict]:
         """Extract metadata from ArXiv entry"""
         arxiv_id = entry.id.split("/abs/")[-1].split("v")[0]
         year = entry.get("published", "")[:4]
@@ -377,9 +357,7 @@ if __name__ == "__main__":
 
     # Search by title
     outputs["metadata_by_title_dict"] = engine.search(title=TITLE)
-    outputs["metadata_by_title_json"] = engine.search(
-        title=TITLE, return_as="json"
-    )
+    outputs["metadata_by_title_json"] = engine.search(title=TITLE, return_as="json")
 
     # Search by DOI
     outputs["metadata_by_doi_dict"] = engine.search(doi=DOI)

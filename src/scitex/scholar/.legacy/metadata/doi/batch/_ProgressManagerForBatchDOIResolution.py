@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -32,9 +33,7 @@ class ProgressManagerForBatchDOIResolution:
     - Atomic file operations for progress persistence
     """
 
-    def __init__(
-        self, doi_resolution_progress_file: Path, title_normalizer=None
-    ):
+    def __init__(self, doi_resolution_progress_file: Path, title_normalizer=None):
         """Initialize progress manager.
 
         Args:
@@ -44,9 +43,7 @@ class ProgressManagerForBatchDOIResolution:
         self.doi_resolution_progress_file = Path(doi_resolution_progress_file)
         self.progress_data = self._load_progress()
         self._start_time = time.time()
-        self._title_normalizer = (
-            title_normalizer or self._default_normalize_title
-        )
+        self._title_normalizer = title_normalizer or self._default_normalize_title
 
     def _default_normalize_title(self, title: str) -> str:
         """Default title normalization for backward compatibility."""
@@ -64,9 +61,7 @@ class ProgressManagerForBatchDOIResolution:
             try:
                 with open(self.doi_resolution_progress_file, "r") as f:
                     data = json.load(f)
-                logger.info(
-                    f"Resuming from: {self.doi_resolution_progress_file}"
-                )
+                logger.info(f"Resuming from: {self.doi_resolution_progress_file}")
 
                 # Migrate old format if needed
                 if "source_performance" not in data:
@@ -135,9 +130,7 @@ class ProgressManagerForBatchDOIResolution:
         self.progress_data["statistics"]["failed"] += 1
         self.progress_data["statistics"]["processed"] += 1
 
-    def update_progress_skipped(
-        self, title: str, reason: str = "already_resolved"
-    ):
+    def update_progress_skipped(self, title: str, reason: str = "already_resolved"):
         """Update progress for skipped resolution."""
         paper_key = self._title_normalizer(title)
         self.progress_data["papers"][paper_key] = {
@@ -193,9 +186,9 @@ class ProgressManagerForBatchDOIResolution:
         if eta_seconds < 60:
             return f"{eta_seconds:.0f}s"
         elif eta_seconds < 3600:
-            return f"{eta_seconds/60:.1f}m"
+            return f"{eta_seconds / 60:.1f}m"
         else:
-            return f"{eta_seconds/3600:.1f}h"
+            return f"{eta_seconds / 3600:.1f}h"
 
     def get_progress_summary(self) -> Dict[str, Any]:
         """Get comprehensive progress summary."""
@@ -210,14 +203,10 @@ class ProgressManagerForBatchDOIResolution:
             "skipped": stats["skipped"],
             "rate_limited": stats["rate_limited"],
             "success_rate": (
-                stats["resolved"] / stats["processed"]
-                if stats["processed"] > 0
-                else 0
+                stats["resolved"] / stats["processed"] if stats["processed"] > 0 else 0
             ),
             "eta": eta,
-            "doi_resolution_progress_file": str(
-                self.doi_resolution_progress_file
-            ),
+            "doi_resolution_progress_file": str(self.doi_resolution_progress_file),
         }
 
     def mark_completed(self):
@@ -286,9 +275,7 @@ if __name__ == "__main__":
         from pathlib import Path
 
         doi_resolution_progress_file = Path("/tmp/test_progress.json")
-        manager = ProgressManagerForBatchDOIResolution(
-            doi_resolution_progress_file
-        )
+        manager = ProgressManagerForBatchDOIResolution(doi_resolution_progress_file)
 
         # Simulate batch processing
         manager.set_total_papers(5)

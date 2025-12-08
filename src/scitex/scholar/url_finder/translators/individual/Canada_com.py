@@ -34,16 +34,16 @@ class CanadaComTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2021-12-28 04:34:11"
+        "lastUpdated": "2021-12-28 04:34:11",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
         """Detect if page is an article or search results."""
-        if 'story' in url:
-            return 'newspaperArticle'
-        elif 'search' in url:
-            return 'multiple'
-        return ''
+        if "story" in url:
+            return "newspaperArticle"
+        elif "search" in url:
+            return "multiple"
+        return ""
 
     def do_web(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """Extract article data."""
@@ -61,54 +61,54 @@ class CanadaComTranslator:
             Dictionary containing article metadata
         """
         item = {
-            'itemType': 'newspaperArticle',
-            'creators': [],
-            'tags': [],
-            'attachments': [],
-            'url': url
+            "itemType": "newspaperArticle",
+            "creators": [],
+            "tags": [],
+            "attachments": [],
+            "url": url,
         }
 
         # Title
-        item['title'] = doc.title.string if doc.title else ''
+        item["title"] = doc.title.string if doc.title else ""
 
         # Abstract
-        abstract_elem = doc.select_one('.storyheader h4')
+        abstract_elem = doc.select_one(".storyheader h4")
         if abstract_elem:
-            item['abstractNote'] = abstract_elem.get_text().strip()
-        elif doc.select_one('.storyheader h2'):
-            item['abstractNote'] = doc.select_one('.storyheader h2').get_text().strip()
+            item["abstractNote"] = abstract_elem.get_text().strip()
+        elif doc.select_one(".storyheader h2"):
+            item["abstractNote"] = doc.select_one(".storyheader h2").get_text().strip()
 
         # Author
-        author_meta = doc.find('meta', attrs={'name': 'Author'})
-        if author_meta and author_meta.get('content'):
-            author_text = author_meta['content']
+        author_meta = doc.find("meta", attrs={"name": "Author"})
+        if author_meta and author_meta.get("content"):
+            author_text = author_meta["content"]
 
             # Handle multiple authors separated by newlines or "and"
-            if '\n' in author_text:
-                author_parts = author_text.split('\n')
+            if "\n" in author_text:
+                author_parts = author_text.split("\n")
                 author_text = author_parts[0]
 
-            if ' and ' in author_text:
-                authors = author_text.split(' and ')
+            if " and " in author_text:
+                authors = author_text.split(" and ")
                 for author in authors:
-                    item['creators'].append(self._clean_author(author.strip()))
+                    item["creators"].append(self._clean_author(author.strip()))
             else:
-                item['creators'].append(self._clean_author(author_text.strip()))
+                item["creators"].append(self._clean_author(author_text.strip()))
 
         # Date
-        date_meta = doc.find('meta', attrs={'name': 'PubDate'})
-        if date_meta and date_meta.get('content'):
-            item['date'] = date_meta['content'].strip()
+        date_meta = doc.find("meta", attrs={"name": "PubDate"})
+        if date_meta and date_meta.get("content"):
+            item["date"] = date_meta["content"].strip()
 
         # Publication title
-        pub_title_elem = doc.select_one('ul.home li a span')
+        pub_title_elem = doc.select_one("ul.home li a span")
         if pub_title_elem:
             pub_title = pub_title_elem.get_text().strip()
-            if pub_title.endswith('Home'):
+            if pub_title.endswith("Home"):
                 pub_title = pub_title[:-4].strip()
-            item['publicationTitle'] = pub_title
+            item["publicationTitle"] = pub_title
         else:
-            item['publicationTitle'] = 'Canada.com'
+            item["publicationTitle"] = "Canada.com"
 
         return item
 
@@ -119,13 +119,9 @@ class CanadaComTranslator:
 
         if len(parts) >= 2:
             return {
-                'firstName': ' '.join(parts[:-1]),
-                'lastName': parts[-1],
-                'creatorType': 'author'
+                "firstName": " ".join(parts[:-1]),
+                "lastName": parts[-1],
+                "creatorType": "author",
             }
         else:
-            return {
-                'lastName': name,
-                'creatorType': 'author',
-                'fieldMode': True
-            }
+            return {"lastName": name, "creatorType": "author", "fieldMode": True}

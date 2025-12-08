@@ -27,7 +27,9 @@ class BioMedCentralTranslator(BaseTranslator):
     """
 
     LABEL = "BioMed Central"
-    URL_TARGET_PATTERN = r"^https?://[^\.]+\.(biomedcentral|springeropen)\.com/(articles|search)"
+    URL_TARGET_PATTERN = (
+        r"^https?://[^\.]+\.(biomedcentral|springeropen)\.com/(articles|search)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:
@@ -74,7 +76,9 @@ class BioMedCentralTranslator(BaseTranslator):
         # Method 1: citation_pdf_url meta tag (JS line 92)
         # This is the most reliable method for BioMed Central
         try:
-            pdf_url = await page.locator('meta[name="citation_pdf_url"]').first.get_attribute('content', timeout=2000)
+            pdf_url = await page.locator(
+                'meta[name="citation_pdf_url"]'
+            ).first.get_attribute("content", timeout=2000)
             if pdf_url:
                 pdf_urls.append(pdf_url)
                 return pdf_urls
@@ -87,22 +91,24 @@ class BioMedCentralTranslator(BaseTranslator):
             # Try common BMC PDF link patterns
             selectors = [
                 'a[data-track-action="download pdf"]',
-                'a.c-pdf-download__link',
+                "a.c-pdf-download__link",
                 'a[href*="/track/pdf"]',
-                'a.download-article-pdf-link',
+                "a.download-article-pdf-link",
             ]
 
             for selector in selectors:
                 try:
-                    pdf_link = await page.locator(selector).first.get_attribute('href', timeout=1000)
+                    pdf_link = await page.locator(selector).first.get_attribute(
+                        "href", timeout=1000
+                    )
                     if pdf_link:
                         # Make absolute URL if needed
-                        if pdf_link.startswith('/'):
-                            base_url = await page.evaluate('window.location.origin')
+                        if pdf_link.startswith("/"):
+                            base_url = await page.evaluate("window.location.origin")
                             pdf_link = f"{base_url}{pdf_link}"
-                        elif not pdf_link.startswith('http'):
-                            current_url = await page.evaluate('window.location.href')
-                            base_url = re.sub(r'/[^/]*$', '', current_url)
+                        elif not pdf_link.startswith("http"):
+                            current_url = await page.evaluate("window.location.href")
+                            base_url = re.sub(r"/[^/]*$", "", current_url)
                             pdf_link = f"{base_url}/{pdf_link}"
                         pdf_urls.append(pdf_link)
                         return pdf_urls
@@ -115,13 +121,13 @@ class BioMedCentralTranslator(BaseTranslator):
         # Extract DOI pattern: /10.1186/...
         try:
             current_url = page.url
-            doi_match = re.search(r'/(10\.1186/[^#?]+)', current_url)
+            doi_match = re.search(r"/(10\.1186/[^#?]+)", current_url)
 
             if doi_match:
                 doi = doi_match.group(1)
                 # BMC PDFs are typically available at the article URL with /pdf suffix
                 # or via direct DOI-based URL
-                base_url = await page.evaluate('window.location.origin')
+                base_url = await page.evaluate("window.location.origin")
                 pdf_url = f"{base_url}/track/pdf/{doi}"
                 pdf_urls.append(pdf_url)
                 return pdf_urls
@@ -130,10 +136,12 @@ class BioMedCentralTranslator(BaseTranslator):
 
         # Method 4: Look for PDF in link elements
         try:
-            pdf_link_elem = await page.locator('link[type="application/pdf"]').first.get_attribute('href', timeout=1000)
+            pdf_link_elem = await page.locator(
+                'link[type="application/pdf"]'
+            ).first.get_attribute("href", timeout=1000)
             if pdf_link_elem:
-                if pdf_link_elem.startswith('/'):
-                    base_url = await page.evaluate('window.location.origin')
+                if pdf_link_elem.startswith("/"):
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_link_elem = f"{base_url}{pdf_link_elem}"
                 pdf_urls.append(pdf_link_elem)
                 return pdf_urls

@@ -40,7 +40,9 @@ logger = logging.getLogger(__name__)
 class ScholarPipelineMetadataSingle:
     """Process single paper for metadata enrichment only (API-based, no browser)."""
 
-    def __init__(self, config: Optional[ScholarConfig] = None, validate_dois: bool = False):
+    def __init__(
+        self, config: Optional[ScholarConfig] = None, validate_dois: bool = False
+    ):
         """Initialize metadata pipeline.
 
         Args:
@@ -82,16 +84,26 @@ class ScholarPipelineMetadataSingle:
             # Use arXiv ID to generate DOI for arXiv engine
             arxiv_doi = f"10.48550/arxiv.{paper.metadata.id.arxiv_id}"
             search_query["doi"] = arxiv_doi
-            logger.info(f"{self.name}: Searching by arXiv ID: {paper.metadata.id.arxiv_id} (DOI: {arxiv_doi})")
+            logger.info(
+                f"{self.name}: Searching by arXiv ID: {paper.metadata.id.arxiv_id} (DOI: {arxiv_doi})"
+            )
         elif paper.metadata.id.corpus_id:
             # Pass corpus_id directly to engines (especially SemanticScholarEngine)
             # Also pass URL for URLDOIEngine to extract DOI
             search_query["corpus_id"] = paper.metadata.id.corpus_id
-            search_query["url"] = f"https://api.semanticscholar.org/CorpusId:{paper.metadata.id.corpus_id}"
-            logger.info(f"{self.name}: Searching by Corpus ID: {paper.metadata.id.corpus_id}")
+            search_query["url"] = (
+                f"https://api.semanticscholar.org/CorpusId:{paper.metadata.id.corpus_id}"
+            )
+            logger.info(
+                f"{self.name}: Searching by Corpus ID: {paper.metadata.id.corpus_id}"
+            )
         elif paper.metadata.url.pdfs and len(paper.metadata.url.pdfs) > 0:
             # Try to extract DOI from URL
-            url = paper.metadata.url.pdfs[0].get("url") if isinstance(paper.metadata.url.pdfs[0], dict) else paper.metadata.url.pdfs[0]
+            url = (
+                paper.metadata.url.pdfs[0].get("url")
+                if isinstance(paper.metadata.url.pdfs[0], dict)
+                else paper.metadata.url.pdfs[0]
+            )
             if url:
                 search_query["url"] = url
                 logger.info(f"{self.name}: Searching by URL: {url[:50]}...")
@@ -101,7 +113,9 @@ class ScholarPipelineMetadataSingle:
                 f"{self.name}: Searching by title: {paper.metadata.basic.title[:50]}..."
             )
         else:
-            logger.warning(f"{self.name}: Paper has no DOI, Corpus ID, URL or title, skipping")
+            logger.warning(
+                f"{self.name}: Paper has no DOI, Corpus ID, URL or title, skipping"
+            )
             return paper
 
         try:
@@ -130,18 +144,26 @@ class ScholarPipelineMetadataSingle:
                 # do a second search using the DOI to get full metadata
                 has_doi = bool(paper.metadata.id.doi)
                 has_abstract = bool(paper.metadata.basic.abstract)
-                was_url_search = 'url' in search_query or 'corpus_id' in search_query
+                was_url_search = "url" in search_query or "corpus_id" in search_query
 
                 if has_doi and not has_abstract and was_url_search:
-                    logger.info(f"{self.name}: Phase 2: DOI found but no abstract, searching with DOI: {paper.metadata.id.doi}")
+                    logger.info(
+                        f"{self.name}: Phase 2: DOI found but no abstract, searching with DOI: {paper.metadata.id.doi}"
+                    )
 
                     # Search again with the DOI
-                    metadata_dict_phase2 = await engine.search_async(doi=paper.metadata.id.doi)
+                    metadata_dict_phase2 = await engine.search_async(
+                        doi=paper.metadata.id.doi
+                    )
 
                     if metadata_dict_phase2:
                         # Log what Phase 2 provides
-                        phase2_abstract = metadata_dict_phase2.get("basic", {}).get("abstract")
-                        phase2_citations = metadata_dict_phase2.get("citation_count", {}).get("total")
+                        phase2_abstract = metadata_dict_phase2.get("basic", {}).get(
+                            "abstract"
+                        )
+                        phase2_citations = metadata_dict_phase2.get(
+                            "citation_count", {}
+                        ).get("total")
 
                         # Merge Phase 2 metadata (this will add abstract, citations, etc.)
                         paper = self._merge_metadata(paper, metadata_dict_phase2)
@@ -156,7 +178,9 @@ class ScholarPipelineMetadataSingle:
                             f"Citations: {has_citations} ({phase2_citations if phase2_citations else 0})"
                         )
                     else:
-                        logger.warning(f"{self.name}: Phase 2 returned no additional metadata for DOI: {paper.metadata.id.doi}")
+                        logger.warning(
+                            f"{self.name}: Phase 2 returned no additional metadata for DOI: {paper.metadata.id.doi}"
+                        )
 
                 # Log final enrichment status
                 final_status = []
@@ -168,25 +192,36 @@ class ScholarPipelineMetadataSingle:
                     final_status.append("⚠️  NO CITATIONS")
 
                 if final_status:
-                    logger.warning(f"{self.name}: Missing metadata: {', '.join(final_status)}")
+                    logger.warning(
+                        f"{self.name}: Missing metadata: {', '.join(final_status)}"
+                    )
             else:
                 logger.warning(
                     f"{self.name}: ✗ No metadata found for query: {search_query}"
                 )
-                logger.warning(f"{self.name}: ⚠️  Paper will have: NO DOI, NO ABSTRACT, NO CITATIONS")
+                logger.warning(
+                    f"{self.name}: ⚠️  Paper will have: NO DOI, NO ABSTRACT, NO CITATIONS"
+                )
 
             # Enrich impact factor if journal is available
             if paper.metadata.publication.journal:
-                logger.info(f"{self.name}: Journal found: {paper.metadata.publication.journal}, enriching impact factor...")
+                logger.info(
+                    f"{self.name}: Journal found: {paper.metadata.publication.journal}, enriching impact factor..."
+                )
                 paper = self._enrich_impact_factor(paper)
             else:
-                logger.debug(f"{self.name}: No journal name found, skipping impact factor enrichment")
+                logger.debug(
+                    f"{self.name}: No journal name found, skipping impact factor enrichment"
+                )
 
         except Exception as e:
             import traceback
+
             logger.error(f"{self.name}: ❌ Error during enrichment: {e}")
             logger.error(f"{self.name}: Traceback: {traceback.format_exc()}")
-            logger.warning(f"{self.name}: Paper will be returned with minimal enrichment")
+            logger.warning(
+                f"{self.name}: Paper will be returned with minimal enrichment"
+            )
 
         return paper
 
@@ -268,13 +303,19 @@ class ScholarPipelineMetadataSingle:
 
                 # Validate DOI if enabled
                 if self.validate_dois and self.doi_validator:
-                    is_valid, message, status_code, resolved_url = self.doi_validator.validate_doi(doi_candidate)
+                    is_valid, message, status_code, resolved_url = (
+                        self.doi_validator.validate_doi(doi_candidate)
+                    )
                     if is_valid:
                         paper.metadata.id.doi = doi_candidate
                         paper.metadata.id.doi_engines = ids.get("doi_engines", [])
-                        logger.debug(f"{self.name}: DOI validated: {doi_candidate} -> {message}")
+                        logger.debug(
+                            f"{self.name}: DOI validated: {doi_candidate} -> {message}"
+                        )
                     else:
-                        logger.warning(f"{self.name}: DOI validation failed for '{doi_candidate}': {message}")
+                        logger.warning(
+                            f"{self.name}: DOI validation failed for '{doi_candidate}': {message}"
+                        )
                         # Don't set the invalid DOI
                 else:
                     # No validation, accept DOI as-is
@@ -332,9 +373,7 @@ class ScholarPipelineMetadataSingle:
 
             if metrics:
                 # Update impact factor in publication metadata
-                paper.metadata.publication.impact_factor = metrics.get(
-                    "impact_factor"
-                )
+                paper.metadata.publication.impact_factor = metrics.get("impact_factor")
                 paper.metadata.publication.impact_factor_engines = [
                     metrics.get("source", "ImpactFactorEngine")
                 ]

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -42,13 +43,15 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
+
+
 def demonstrate_bibtex_parsing(
     openaccess_path: str = "./data/scholar/openaccess.bib",
     paywalled_path: str = "./data/scholar/paywalled.bib",
-    n_samples: int = 3
+    n_samples: int = 3,
 ) -> dict:
     """Demonstrate BibTeX parsing capabilities.
-    
+
     Parameters
     ----------
     openaccess_path : str, default="./data/scholar/openaccess.bib"
@@ -57,7 +60,7 @@ def demonstrate_bibtex_parsing(
         Path to paywalled BibTeX file
     n_samples : int, default=3
         Number of sample entries to display
-        
+
     Returns
     -------
     dict
@@ -66,28 +69,25 @@ def demonstrate_bibtex_parsing(
     from scitex.scholar.utils import parse_bibtex
 
     results = {}
-    
+
     print(f"📚 Parsing OpenAccess BibTeX file: {openaccess_path}")
     openaccess_parsed = parse_bibtex(openaccess_path)
     print(f"📊 Found {len(openaccess_parsed)} OpenAccess papers")
-    
+
     print(f"\n📋 Sample OpenAccess entries (first {n_samples}):")
     print("=" * 50)
     pprint(openaccess_parsed[:n_samples])
-    
+
     print(f"\n📚 Parsing Paywalled BibTeX file: {paywalled_path}")
     paywalled_parsed = parse_bibtex(paywalled_path)
     print(f"📊 Found {len(paywalled_parsed)} Paywalled papers")
-    
+
     print(f"\n📋 Sample Paywalled entries (first {n_samples}):")
     print("=" * 50)
     pprint(paywalled_parsed[:n_samples])
-    
-    results = {
-        "openaccess": openaccess_parsed,
-        "paywalled": paywalled_parsed
-    }
-    
+
+    results = {"openaccess": openaccess_parsed, "paywalled": paywalled_parsed}
+
     return results
 
 
@@ -106,18 +106,18 @@ def main(args) -> int:
     """
     print("📚 Scholar BibTeX Parser Demonstration")
     print("=" * 40)
-    
+
     try:
         results = demonstrate_bibtex_parsing(
             openaccess_path=args.openaccess_path,
             paywalled_path=args.paywalled_path,
-            n_samples=args.n_samples
+            n_samples=args.n_samples,
         )
-        
+
         total_entries = len(results["openaccess"]) + len(results["paywalled"])
         print(f"\n✅ Successfully parsed {total_entries} total BibTeX entries")
         return 0
-        
+
     except Exception as e:
         print(f"❌ Error: {e}")
         return 1

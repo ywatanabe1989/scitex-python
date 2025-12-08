@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -44,9 +45,7 @@ def parse_bibtex(bibtex_path):
         logger.info(f"Parsing {bibtex_path} using Regular Expressions...")
         entries = []
         pattern = r"@(article|inproceedings|book)\s*\{\s*([^,\s]+)\s*,(.*?)(?=\n@|\Z)"
-        matches = re.findall(
-            pattern, cleaned_content, re.DOTALL | re.IGNORECASE
-        )
+        matches = re.findall(pattern, cleaned_content, re.DOTALL | re.IGNORECASE)
 
         for entry_type, entry_id, entry_content in matches:
             entry = {"ENTRYTYPE": entry_type.lower(), "ID": entry_id.strip()}
@@ -67,5 +66,6 @@ def parse_bibtex(bibtex_path):
         return entries
     except Exception as e:
         logger.fail(f"Parsing with REgular Expressions failed {str(e)}")
+
 
 # EOF

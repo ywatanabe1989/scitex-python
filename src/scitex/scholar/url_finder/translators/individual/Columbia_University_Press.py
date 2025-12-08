@@ -34,7 +34,7 @@ class ColumbiaUniversityPressTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2016-09-10 11:35:07"
+        "lastUpdated": "2016-09-10 11:35:07",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -54,7 +54,9 @@ class ColumbiaUniversityPressTranslator:
             return "multiple"
         return ""
 
-    def _get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Dict[str, str]:
+    def _get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Dict[str, str]:
         """
         Get search results from the page.
 
@@ -67,10 +69,10 @@ class ColumbiaUniversityPressTranslator:
         """
         items = {}
         found = False
-        rows = doc.select('div.search-list h2 > a')
+        rows = doc.select("div.search-list h2 > a")
 
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text(strip=True)
             if not href or not title:
                 continue
@@ -111,31 +113,33 @@ class ColumbiaUniversityPressTranslator:
             Dictionary containing book metadata
         """
         item = {
-            'itemType': 'book',
-            'creators': [],
-            'tags': [],
-            'attachments': [],
-            'notes': [],
-            'seeAlso': []
+            "itemType": "book",
+            "creators": [],
+            "tags": [],
+            "attachments": [],
+            "notes": [],
+            "seeAlso": [],
         }
 
         # Extract title
-        title_elem = doc.select_one('div.book-header h1.title')
+        title_elem = doc.select_one("div.book-header h1.title")
         if title_elem:
-            item['title'] = title_elem.get_text(strip=True)
+            item["title"] = title_elem.get_text(strip=True)
 
         # Extract book details
-        book_details = doc.select('div.book-header.pc-only p[class], div.book-details p[class]')
+        book_details = doc.select(
+            "div.book-header.pc-only p[class], div.book-details p[class]"
+        )
 
         for detail in book_details:
-            class_name = ' '.join(detail.get('class', []))
+            class_name = " ".join(detail.get("class", []))
             content = detail.get_text(strip=True)
 
-            if class_name == 'subtitle':
-                if 'title' in item:
-                    item['title'] = f"{item['title']}: {content}"
+            if class_name == "subtitle":
+                if "title" in item:
+                    item["title"] = f"{item['title']}: {content}"
 
-            elif class_name == 'author':
+            elif class_name == "author":
                 # Parse creators (authors, editors, translators)
                 creator_string = content
 
@@ -149,54 +153,58 @@ class ColumbiaUniversityPressTranslator:
                     pos_translators = len(creator_string)
 
                 # Extract authors
-                authors_str = creator_string[:min(pos_editors, pos_translators)]
-                authors = re.split(r'\band\b|,', authors_str)
+                authors_str = creator_string[: min(pos_editors, pos_translators)]
+                authors = re.split(r"\band\b|,", authors_str)
                 for author in authors:
                     author = author.strip()
                     if author:
-                        item['creators'].append(self._clean_author(author, "author"))
+                        item["creators"].append(self._clean_author(author, "author"))
 
                 # Extract editors
                 if pos_editors < len(creator_string):
                     editors_str = creator_string[pos_editors:pos_translators]
-                    editors_str = re.sub(r'Edited\s*(by)?', '', editors_str)
-                    editors = re.split(r'\band\b|,', editors_str)
+                    editors_str = re.sub(r"Edited\s*(by)?", "", editors_str)
+                    editors = re.split(r"\band\b|,", editors_str)
                     for editor in editors:
                         editor = editor.strip()
                         if editor:
-                            item['creators'].append(self._clean_author(editor, "editor"))
+                            item["creators"].append(
+                                self._clean_author(editor, "editor")
+                            )
 
                 # Extract translators
                 if pos_translators < len(creator_string):
                     translators_str = creator_string[pos_translators:]
-                    translators_str = re.sub(r'Translated\s*(by)?', '', translators_str)
-                    translators = re.split(r'\band\b|,', translators_str)
+                    translators_str = re.sub(r"Translated\s*(by)?", "", translators_str)
+                    translators = re.split(r"\band\b|,", translators_str)
                     for translator in translators:
                         translator = translator.strip()
                         if translator:
-                            item['creators'].append(self._clean_author(translator, "translator"))
+                            item["creators"].append(
+                                self._clean_author(translator, "translator")
+                            )
 
-            elif class_name == 'pubdate':
+            elif class_name == "pubdate":
                 # Convert date to ISO format
-                item['date'] = content
+                item["date"] = content
 
-            elif class_name == 'publisher':
-                item['publisher'] = content
+            elif class_name == "publisher":
+                item["publisher"] = content
 
-            elif class_name == 'isbn':
-                item['ISBN'] = content
+            elif class_name == "isbn":
+                item["ISBN"] = content
 
-            elif class_name == 'pages':
-                item['pages'] = content
+            elif class_name == "pages":
+                item["pages"] = content
 
         # If there is no publisher field, assume it's published by CUP
-        if 'publisher' not in item:
-            item['publisher'] = "Columbia University Press"
+        if "publisher" not in item:
+            item["publisher"] = "Columbia University Press"
 
         # Extract abstract
-        abstract_elem = doc.select_one('div.sp__the-description')
+        abstract_elem = doc.select_one("div.sp__the-description")
         if abstract_elem:
-            item['abstractNote'] = abstract_elem.get_text(strip=True)
+            item["abstractNote"] = abstract_elem.get_text(strip=True)
 
         return item
 
@@ -216,13 +224,9 @@ class ColumbiaUniversityPressTranslator:
 
         if len(parts) >= 2:
             return {
-                'firstName': ' '.join(parts[:-1]),
-                'lastName': parts[-1],
-                'creatorType': creator_type
+                "firstName": " ".join(parts[:-1]),
+                "lastName": parts[-1],
+                "creatorType": creator_type,
             }
         else:
-            return {
-                'lastName': name,
-                'creatorType': creator_type,
-                'fieldMode': True
-            }
+            return {"lastName": name, "creatorType": creator_type, "fieldMode": True}

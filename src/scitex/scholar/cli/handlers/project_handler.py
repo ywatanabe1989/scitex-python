@@ -34,9 +34,7 @@ async def handle_project_operations(args, scholar):
         if args.has_pdf is False:
             cmd.append("--all")
 
-        logger.info(
-            f"Opening browser with auto-tracking for project: {args.project}"
-        )
+        logger.info(f"Opening browser with auto-tracking for project: {args.project}")
         result = subprocess.run(cmd)
         return result.returncode
 
@@ -52,18 +50,12 @@ async def handle_project_operations(args, scholar):
             # Check if DOI exists (non-empty string)
             if paper.metadata.id.doi and paper.metadata.id.doi.strip():
                 # Check if PDF already exists
-                has_pdf = (
-                    paper.metadata.path.pdfs
-                    and len(paper.metadata.path.pdfs) > 0
-                )
+                has_pdf = paper.metadata.path.pdfs and len(paper.metadata.path.pdfs) > 0
 
                 # Download if: no PDF OR download_force flag is set
                 if not has_pdf or args.download_force:
                     dois_to_download.append(paper.metadata.id.doi)
-            elif (
-                not paper.metadata.path.pdfs
-                or len(paper.metadata.path.pdfs) == 0
-            ):
+            elif not paper.metadata.path.pdfs or len(paper.metadata.path.pdfs) == 0:
                 # Paper has no DOI and no PDF - mark as failed with explanation
                 from scitex.scholar.storage._LibraryManager import (
                     LibraryManager,
@@ -74,9 +66,7 @@ async def handle_project_operations(args, scholar):
                 )
 
                 paper_id = paper.container.scitex_id
-                master_dir = (
-                    scholar.config.path_manager.get_library_master_dir()
-                )
+                master_dir = scholar.config.path_manager.get_library_master_dir()
                 paper_dir = master_dir / paper_id
                 paper_dir.mkdir(parents=True, exist_ok=True)
 
@@ -118,9 +108,7 @@ async def handle_project_operations(args, scholar):
                 logger.info(
                     f"Downloading PDFs for {len(dois_to_download)} papers without PDFs..."
                 )
-            results = await scholar.download_pdfs_from_dois_async(
-                dois_to_download
-            )
+            results = await scholar.download_pdfs_from_dois_async(dois_to_download)
             logger.info(
                 f"Download complete: {results['downloaded']} downloaded, {results['failed']} failed"
             )
@@ -257,9 +245,7 @@ async def handle_project_operations(args, scholar):
             import json
 
             with open(output_path, "w") as f:
-                json.dump(
-                    [p.to_dict() for p in papers], f, indent=2, default=str
-                )
+                json.dump([p.to_dict() for p in papers], f, indent=2, default=str)
         else:
             logger.error(f"Unsupported export format: {extension}")
             logger.info(

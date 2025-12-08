@@ -12,7 +12,9 @@ class EurogamerusgamerTranslator(BaseTranslator):
     """EurogamerUSgamer."""
 
     LABEL = "EurogamerUSgamer"
-    URL_TARGET_PATTERN = r"^https?://(www\.)?(eurogamer|usgamer)\.(net|cz|de|es|it|nl|pl|pt)"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.)?(eurogamer|usgamer)\.(net|cz|de|es|it|nl|pl|pt)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

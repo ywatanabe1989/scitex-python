@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/url/strategies/publisher_patterns.py"
-)
+
+__FILE__ = "./src/scitex/scholar/url/strategies/publisher_patterns.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -23,7 +22,7 @@ async def find_pdf_urls_by_publisher_patterns(
     page,
     url: str = None,
     config=None,
-    func_name: str = "find_pdf_urls_by_publisher_patterns"
+    func_name: str = "find_pdf_urls_by_publisher_patterns",
 ) -> List[str]:
     """
     Generate PDF URLs based on publisher-specific URL patterns.
@@ -64,9 +63,7 @@ async def find_pdf_urls_by_publisher_patterns(
         urls_pdf.append(url.replace("/full", "/pdf"))
 
     # Springer
-    elif (
-        "springer.com" in url or "link.springer.com" in url
-    ) and "/article/" in url:
+    elif ("springer.com" in url or "link.springer.com" in url) and "/article/" in url:
         if not url.endswith(".pdf"):
             urls_pdf.append(url.rstrip("/") + ".pdf")
 
@@ -90,9 +87,7 @@ async def find_pdf_urls_by_publisher_patterns(
             doi = doi_match.group(1)
             # Alternative PDF locations for IOP
             urls_pdf.append(f"https://iopscience.iop.org/article/{doi}/pdf")
-            urls_pdf.append(
-                f"https://iopscience.iop.org/article/{doi}/pdf/metrics"
-            )
+            urls_pdf.append(f"https://iopscience.iop.org/article/{doi}/pdf/metrics")
 
     # MDPI
     elif "mdpi.com" in url and "/htm" in url:
@@ -107,9 +102,7 @@ async def find_pdf_urls_by_publisher_patterns(
         if "?id=" in url:
             article_id = url.split("?id=")[-1].split("&")[0]
             base_url = url.split("/article")[0]
-            urls_pdf.append(
-                f"{base_url}/article/file?id={article_id}&type=printable"
-            )
+            urls_pdf.append(f"{base_url}/article/file?id={article_id}&type=printable")
         elif "/article/" in url:
             urls_pdf.append(
                 url.replace("/article/", "/article/file?id=").split("?")[0]
@@ -156,10 +149,10 @@ async def find_pdf_urls_by_publisher_patterns(
 
     if urls_pdf:
         await browser_logger.debug(
-            page,
-            f"{func_name}: Pattern matching found {len(urls_pdf)} URLs"
+            page, f"{func_name}: Pattern matching found {len(urls_pdf)} URLs"
         )
 
     return urls_pdf
+
 
 # EOF

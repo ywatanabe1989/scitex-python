@@ -12,7 +12,9 @@ class DagensNyheterTranslator(BaseTranslator):
     """Dagens Nyheter."""
 
     LABEL = "Dagens Nyheter"
-    URL_TARGET_PATTERN = r"^https?://www\.dn\.se/(nyheter|ekonomi|kultur-noje|sport|sok)/"
+    URL_TARGET_PATTERN = (
+        r"^https?://www\.dn\.se/(nyheter|ekonomi|kultur-noje|sport|sok)/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

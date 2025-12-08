@@ -83,12 +83,12 @@ class JSTORTranslator(BaseTranslator):
         jid = urllib.parse.unquote(match.group(1))
 
         # Remove .pdf extension if present
-        if jid.lower().endswith('.pdf'):
+        if jid.lower().endswith(".pdf"):
             jid = jid[:-4]
 
         # If not already a DOI (starting with 10.), convert to JSTOR DOI
-        if not jid.startswith('10.'):
-            jid = f'10.2307/{jid}'
+        if not jid.startswith("10."):
+            jid = f"10.2307/{jid}"
 
         return jid
 
@@ -104,21 +104,21 @@ class JSTORTranslator(BaseTranslator):
         """
         try:
             # Check for book indicators
-            book_button = await page.query_selector('.book_info_button')
+            book_button = await page.query_selector(".book_info_button")
             if book_button:
-                return 'book'
+                return "book"
 
             # Check for book chapter indicators
-            analytics = await page.query_selector('script[data-analytics-provider]')
+            analytics = await page.query_selector("script[data-analytics-provider]")
             if analytics:
                 content = await analytics.inner_text()
-                if 'chapter view' in content:
-                    return 'bookSection'
+                if "chapter view" in content:
+                    return "bookSection"
         except Exception:
             pass
 
         # Default to journal article
-        return 'journalArticle'
+        return "journalArticle"
 
     @classmethod
     async def _check_pdf_access(cls, page: Page) -> bool:
@@ -142,7 +142,7 @@ class JSTORTranslator(BaseTranslator):
                 'a[href*="pdfplus"]',
                 'a[href*=".pdf"]',
                 'button:has-text("Download PDF")',
-                '.download-pdf'
+                ".download-pdf",
             ]
 
             for selector in pdf_selectors:
@@ -187,7 +187,7 @@ class JSTORTranslator(BaseTranslator):
             item_type = await cls._detect_item_type(page)
 
             # Books don't have PDFs
-            if item_type == 'book':
+            if item_type == "book":
                 return pdf_urls
 
             # Check if PDF access is available
@@ -196,7 +196,9 @@ class JSTORTranslator(BaseTranslator):
             if has_access:
                 # Construct PDF URL
                 # JSTOR uses pdfplus for enhanced PDFs
-                pdf_url = f"https://www.jstor.org/stable/pdfplus/{jid}.pdf?acceptTC=true"
+                pdf_url = (
+                    f"https://www.jstor.org/stable/pdfplus/{jid}.pdf?acceptTC=true"
+                )
                 pdf_urls.append(pdf_url)
 
         except Exception as e:

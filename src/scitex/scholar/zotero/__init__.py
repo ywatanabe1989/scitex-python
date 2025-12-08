@@ -19,7 +19,7 @@ warnings.warn(
     "Importing from scitex.scholar.zotero is deprecated. "
     "Please use: from scitex.scholar.integration.zotero import ...",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 # Import from new location for backward compatibility

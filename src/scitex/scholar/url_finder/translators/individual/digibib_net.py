@@ -12,7 +12,9 @@ class DigibibNetTranslator(BaseTranslator):
     """digibib.net."""
 
     LABEL = "digibib.net"
-    URL_TARGET_PATTERN = r"^https?://.*\.digibib\.net/(Digibib|jumpto|metasearch|opensearch|template)"
+    URL_TARGET_PATTERN = (
+        r"^https?://.*\.digibib\.net/(Digibib|jumpto|metasearch|opensearch|template)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

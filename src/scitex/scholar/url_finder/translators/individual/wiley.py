@@ -80,21 +80,23 @@ class WileyTranslator(BaseTranslator):
         try:
             # Method 1: Extract from meta tag citation_pdf_url (JS line 183-186, 345-354)
             # JavaScript: var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
-            pdf_url = await page.locator('meta[name="citation_pdf_url"]').first.get_attribute('content', timeout=3000)
+            pdf_url = await page.locator(
+                'meta[name="citation_pdf_url"]'
+            ).first.get_attribute("content", timeout=3000)
 
             if pdf_url:
                 # Convert /pdf/ to /pdfdirect/ for better access (JS line 185, 347)
                 # JavaScript: pdfURL = pdfURL.replace('/pdf/', '/pdfdirect/');
-                pdf_url = pdf_url.replace('/pdf/', '/pdfdirect/')
+                pdf_url = pdf_url.replace("/pdf/", "/pdfdirect/")
 
                 # Make absolute URL if needed
-                if pdf_url.startswith('/'):
-                    base_url = await page.evaluate('window.location.origin')
+                if pdf_url.startswith("/"):
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_url = f"{base_url}{pdf_url}"
-                elif not pdf_url.startswith('http'):
+                elif not pdf_url.startswith("http"):
                     # Relative URL
-                    base_url = await page.evaluate('window.location.href')
-                    base_url = re.sub(r'/[^/]*$', '', base_url)
+                    base_url = await page.evaluate("window.location.href")
+                    base_url = re.sub(r"/[^/]*$", "", base_url)
                     pdf_url = f"{base_url}/{pdf_url}"
 
                 pdf_urls.append(pdf_url)
@@ -108,28 +110,30 @@ class WileyTranslator(BaseTranslator):
             # Some Wiley pages have direct PDF download links
             # Common selectors for PDF download buttons/links
             selectors = [
-                'a.article-pdfLink',
+                "a.article-pdfLink",
                 'a[title*="PDF"]',
                 'a[href*="/pdf/"]',
                 'a[href*="/pdfdirect/"]',
-                'a.pdf-download',
-                '.article__header a[href*=".pdf"]'
+                "a.pdf-download",
+                '.article__header a[href*=".pdf"]',
             ]
 
             for selector in selectors:
                 try:
-                    pdf_link = await page.locator(selector).first.get_attribute('href', timeout=1000)
+                    pdf_link = await page.locator(selector).first.get_attribute(
+                        "href", timeout=1000
+                    )
                     if pdf_link:
                         # Convert /pdf/ to /pdfdirect/
-                        pdf_link = pdf_link.replace('/pdf/', '/pdfdirect/')
+                        pdf_link = pdf_link.replace("/pdf/", "/pdfdirect/")
 
                         # Make absolute URL
-                        if pdf_link.startswith('/'):
-                            base_url = await page.evaluate('window.location.origin')
+                        if pdf_link.startswith("/"):
+                            base_url = await page.evaluate("window.location.origin")
                             pdf_link = f"{base_url}{pdf_link}"
-                        elif not pdf_link.startswith('http'):
-                            base_url = await page.evaluate('window.location.href')
-                            base_url = re.sub(r'/[^/]*$', '', base_url)
+                        elif not pdf_link.startswith("http"):
+                            base_url = await page.evaluate("window.location.href")
+                            base_url = re.sub(r"/[^/]*$", "", base_url)
                             pdf_link = f"{base_url}/{pdf_link}"
 
                         pdf_urls.append(pdf_link)
@@ -142,14 +146,16 @@ class WileyTranslator(BaseTranslator):
         # Method 3: Construct PDF URL from DOI if present
         try:
             # Extract DOI from meta tag
-            doi = await page.locator('meta[name="citation_doi"]').first.get_attribute('content', timeout=2000)
+            doi = await page.locator('meta[name="citation_doi"]').first.get_attribute(
+                "content", timeout=2000
+            )
             if doi:
                 # Clean DOI (remove prefix if present)
-                doi = re.sub(r'^(doi:|https?://doi\.org/)', '', doi)
+                doi = re.sub(r"^(doi:|https?://doi\.org/)", "", doi)
 
                 # Construct PDF URL
                 # Wiley PDF URLs follow pattern: /doi/pdfdirect/{DOI}
-                base_url = await page.evaluate('window.location.origin')
+                base_url = await page.evaluate("window.location.origin")
                 pdf_url = f"{base_url}/doi/pdfdirect/{doi}"
                 pdf_urls.append(pdf_url)
                 return pdf_urls
@@ -161,17 +167,17 @@ class WileyTranslator(BaseTranslator):
         # JavaScript: if (/\/e?pdf(direct)?\//.test(url))
         try:
             current_url = page.url
-            if re.search(r'/e?pdf(direct)?/', current_url):
+            if re.search(r"/e?pdf(direct)?/", current_url):
                 # Convert PDF URL to abstract page URL
-                abstract_url = re.sub(r'/e?pdf(direct)?/', '/doi/abs/', current_url)
+                abstract_url = re.sub(r"/e?pdf(direct)?/", "/doi/abs/", current_url)
                 # In the actual scraper, we would navigate to the abstract page
                 # For now, we'll try to construct the PDF URL
-                doi_match = re.search(r'/doi/[^/]+/(.+)$', abstract_url)
+                doi_match = re.search(r"/doi/[^/]+/(.+)$", abstract_url)
                 if doi_match:
                     doi = doi_match.group(1)
                     # Remove any fragment or query
-                    doi = re.sub(r'[?#].*$', '', doi)
-                    base_url = await page.evaluate('window.location.origin')
+                    doi = re.sub(r"[?#].*$", "", doi)
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_url = f"{base_url}/doi/pdfdirect/{doi}"
                     pdf_urls.append(pdf_url)
                     return pdf_urls

@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/auth/core/StrategyResolver.py"
-)
+
+__FILE__ = "./src/scitex/scholar/auth/core/StrategyResolver.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -106,9 +105,7 @@ class AuthenticationStrategyResolver:
 
         # Get email from config if not provided
         if not openathens_email:
-            openathens_email = self.config.resolve(
-                "openathens_email", None, None, str
-            )
+            openathens_email = self.config.resolve("openathens_email", None, None, str)
 
         if not openathens_email:
             logger.warning(
@@ -155,18 +152,14 @@ class AuthenticationStrategyResolver:
         """Resolve strategy for known institution."""
 
         institution_name = institution_config["name"]
-        sso_automator_available = (
-            institution_config.get("sso_automator") is not None
-        )
+        sso_automator_available = institution_config.get("sso_automator") is not None
 
         logger.info(
             f"{self.name}: Resolving strategy for known institution: {institution_name}"
         )
 
         # Determine primary method based on preferences and capabilities
-        if prefer_openathens and institution_config.get(
-            "openathens_supported", False
-        ):
+        if prefer_openathens and institution_config.get("openathens_supported", False):
             if institution_config.get("openathens_redirects_to_sso", False):
                 # OpenAthens → SSO flow
                 method = AuthenticationMethod.OPENATHENS_TO_SSO
@@ -188,9 +181,7 @@ class AuthenticationStrategyResolver:
         else:
             # Direct SSO
             method = AuthenticationMethod.DIRECT_SSO
-            primary_url = institution_config.get(
-                "direct_sso_url", target_url or ""
-            )
+            primary_url = institution_config.get("direct_sso_url", target_url or "")
             confidence = 0.8 if sso_automator_available else 0.5
             fallback_methods = (
                 [
@@ -232,9 +223,7 @@ class AuthenticationStrategyResolver:
             fallback_methods = [AuthenticationMethod.MANUAL]
         else:
             method = AuthenticationMethod.MANUAL
-            primary_url = (
-                target_url or "https://my.openathens.net/?passiveLogin=false"
-            )
+            primary_url = target_url or "https://my.openathens.net/?passiveLogin=false"
             confidence = 0.3
             fallback_methods = []
 
@@ -269,9 +258,7 @@ class AuthenticationStrategyResolver:
             "openathens_redirects_to_sso": openathens_redirects_to_sso,
             "sso_automator": sso_automator,
         }
-        logger.info(
-            f"{self.name}: Added institution configuration: {name} ({domain})"
-        )
+        logger.info(f"{self.name}: Added institution configuration: {name} ({domain})")
 
 
 if __name__ == "__main__":
@@ -281,17 +268,13 @@ if __name__ == "__main__":
         resolver = AuthenticationStrategyResolver()
 
         # Test known institution
-        strategy = resolver.resolve_strategy(
-            openathens_email="test@unimelb.edu.au"
-        )
+        strategy = resolver.resolve_strategy(openathens_email="test@unimelb.edu.au")
         print(
             f"UniMelb Strategy: {strategy.method.value}, URL: {strategy.primary_url}, Confidence: {strategy.confidence}"
         )
 
         # Test unknown institution
-        strategy = resolver.resolve_strategy(
-            openathens_email="test@unknown.edu"
-        )
+        strategy = resolver.resolve_strategy(openathens_email="test@unknown.edu")
         print(
             f"Unknown Strategy: {strategy.method.value}, URL: {strategy.primary_url}, Confidence: {strategy.confidence}"
         )

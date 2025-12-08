@@ -12,7 +12,9 @@ class LaTimesTranslator(BaseTranslator):
     """LA Times."""
 
     LABEL = "LA Times"
-    URL_TARGET_PATTERN = r"^https?://(www\.|travel\.|articles\.|latimesblogs\.)?latimes\.com"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.|travel\.|articles\.|latimesblogs\.)?latimes\.com"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

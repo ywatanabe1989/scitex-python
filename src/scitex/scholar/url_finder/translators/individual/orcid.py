@@ -40,7 +40,7 @@ class ORCIDTranslator:
     # XML namespaces used in ORCID API responses
     NAMESPACES = {
         "work": "http://www.orcid.org/ns/work",
-        "activities": "http://www.orcid.org/ns/activities"
+        "activities": "http://www.orcid.org/ns/activities",
     }
 
     @classmethod
@@ -71,7 +71,7 @@ class ORCIDTranslator:
             return None
 
         # Check for work list
-        works = await page.query_selector_all('ul#body-work-list > li')
+        works = await page.query_selector_all("ul#body-work-list > li")
         if works:
             return "multiple"
 
@@ -96,12 +96,13 @@ class ORCIDTranslator:
             return None
 
         # Remove URL prefix if present and clean extra UI text
-        orcid = orcid_text.replace('https://orcid.org/', '').strip()
+        orcid = orcid_text.replace("https://orcid.org/", "").strip()
 
         # Extract just the ORCID ID pattern (0000-0000-0000-0000)
         # Remove any extra text like "content_copyprint" that might be from UI elements
         import re
-        match = re.search(r'\d{4}-\d{4}-\d{4}-\d{3}[\dX]', orcid)
+
+        match = re.search(r"\d{4}-\d{4}-\d{4}-\d{3}[\dX]", orcid)
         if match:
             return match.group(0)
 
@@ -129,12 +130,12 @@ class ORCIDTranslator:
         put_codes = {}
 
         # Find all work groups
-        for group in root.findall('.//activities:group', cls.NAMESPACES):
+        for group in root.findall(".//activities:group", cls.NAMESPACES):
             # Get first work summary in the group
-            work_summary = group.find('./work:work-summary', cls.NAMESPACES)
+            work_summary = group.find("./work:work-summary", cls.NAMESPACES)
             if work_summary is not None:
-                code = work_summary.get('put-code')
-                title_elem = work_summary.find('.//work:title', cls.NAMESPACES)
+                code = work_summary.get("put-code")
+                title_elem = work_summary.find(".//work:title", cls.NAMESPACES)
                 if code and title_elem is not None and title_elem.text:
                     put_codes[code] = title_elem.text.strip()
 
@@ -153,9 +154,7 @@ class ORCIDTranslator:
         """
         url = f"{cls.API_BASE}/{orcid}/work/{put_code}"
 
-        headers = {
-            "Accept": "application/vnd.citationstyles.csl+json"
-        }
+        headers = {"Accept": "application/vnd.citationstyles.csl+json"}
 
         try:
             async with httpx.AsyncClient() as client:
@@ -266,14 +265,16 @@ if __name__ == "__main__":
                     # Fetch metadata for first work
                     first_code = list(works.keys())[0]
                     print(f"\nFetching metadata for work {first_code}...")
-                    metadata = await ORCIDTranslator.fetch_work_metadata(orcid, first_code)
+                    metadata = await ORCIDTranslator.fetch_work_metadata(
+                        orcid, first_code
+                    )
 
                     if metadata:
                         print(f"Metadata keys: {list(metadata.keys())}")
-                        if 'title' in metadata:
+                        if "title" in metadata:
                             print(f"Title: {metadata['title']}")
-                        if 'author' in metadata:
-                            authors = metadata['author']
+                        if "author" in metadata:
+                            authors = metadata["author"]
                             if isinstance(authors, list) and authors:
                                 print(f"First author: {authors[0]}")
 

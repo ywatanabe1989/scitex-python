@@ -31,7 +31,7 @@ class DPLATranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 4,  # Web
-        "lastUpdated": "2016-09-12 06:17:30"
+        "lastUpdated": "2016-09-12 06:17:30",
     }
 
     # Type mapping
@@ -44,7 +44,7 @@ class DPLATranslator:
         "interactive resource": "webpage",
         "dataset": "webpage",
         "software": "computerProgram",
-        "sound": "audioRecording"
+        "sound": "audioRecording",
     }
 
     API_KEY = "910de961922b85c6e95ee1311938ece6"
@@ -66,15 +66,15 @@ class DPLATranslator:
             # Get type from page
             type_text = self._get_type_text(doc)
             if type_text:
-                if re.search(r'^(image|physical)', type_text):
+                if re.search(r"^(image|physical)", type_text):
                     return "artwork"
-                elif re.search(r'^sound', type_text):
+                elif re.search(r"^sound", type_text):
                     return "audioRecording"
-                elif re.search(r'^moving', type_text):
+                elif re.search(r"^moving", type_text):
                     return "film"
-                elif re.search(r'^software', type_text):
+                elif re.search(r"^software", type_text):
                     return "computerProgram"
-                elif re.search(r'^(dataset|interactive)', type_text):
+                elif re.search(r"^(dataset|interactive)", type_text):
                     return "webpage"
                 else:
                     return "book"
@@ -100,7 +100,8 @@ class DPLATranslator:
         else:
             # Extract ID from URL
             import re
-            match = re.search(r'item/([^\?]+)', url)
+
+            match = re.search(r"item/([^\?]+)", url)
             if match:
                 item_id = match.group(1)
                 return self.fetch_from_api([item_id])
@@ -157,7 +158,7 @@ class DPLATranslator:
             "creators": [],
             "tags": [],
             "attachments": [],
-            "libraryCatalog": "DPLA"
+            "libraryCatalog": "DPLA",
         }
 
         # Extract title
@@ -178,11 +179,9 @@ class DPLATranslator:
             creators = [creators]
 
         for creator in creators:
-            item["creators"].append({
-                "lastName": creator,
-                "creatorType": "author",
-                "fieldMode": True
-            })
+            item["creators"].append(
+                {"lastName": creator, "creatorType": "author", "fieldMode": True}
+            )
 
         # Extract type
         item_type = source.get("type")

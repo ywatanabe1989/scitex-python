@@ -30,7 +30,7 @@ class DBpiaTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 4,  # Web
-        "lastUpdated": "2021-09-14 00:23:40"
+        "lastUpdated": "2021-09-14 00:23:40",
     }
 
     def detect_web(self, doc, url: str) -> Optional[str]:
@@ -46,7 +46,9 @@ class DBpiaTranslator:
         """
         if "/journal/articleDetail" in url:
             return "journalArticle"
-        elif ("/search/" in url or "/journal/articleList/" in url) and self._has_search_results(doc):
+        elif (
+            "/search/" in url or "/journal/articleList/" in url
+        ) and self._has_search_results(doc):
             return "multiple"
         return None
 
@@ -86,7 +88,7 @@ class DBpiaTranslator:
             "tags": [],
             "attachments": [],
             "libraryCatalog": "www.dbpia.co.kr",
-            "url": url
+            "url": url,
         }
 
         # Uses embedded metadata translator in JavaScript version

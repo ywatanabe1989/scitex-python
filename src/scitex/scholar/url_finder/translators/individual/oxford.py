@@ -71,21 +71,23 @@ class OxfordTranslator(BaseTranslator):
                 'a[href*="/pdf/"]',
                 'a:has-text("Download PDF")',
                 'a:has-text("PDF")',
-                '.download-pdf a',
-                'a.pdf-link'
+                ".download-pdf a",
+                "a.pdf-link",
             ]
 
             for selector in pdf_selectors:
                 try:
-                    pdf_link = await page.locator(selector).first.get_attribute('href', timeout=1000)
+                    pdf_link = await page.locator(selector).first.get_attribute(
+                        "href", timeout=1000
+                    )
                     if pdf_link:
                         # Make absolute URL if needed
-                        if pdf_link.startswith('/'):
-                            base_url = await page.evaluate('window.location.origin')
+                        if pdf_link.startswith("/"):
+                            base_url = await page.evaluate("window.location.origin")
                             pdf_link = f"{base_url}{pdf_link}"
-                        elif not pdf_link.startswith('http'):
-                            base_url = await page.evaluate('window.location.href')
-                            base_url = re.sub(r'/[^/]*$', '', base_url)
+                        elif not pdf_link.startswith("http"):
+                            base_url = await page.evaluate("window.location.href")
+                            base_url = re.sub(r"/[^/]*$", "", base_url)
                             pdf_link = f"{base_url}/{pdf_link}"
 
                         pdf_urls.append(pdf_link)
@@ -102,19 +104,21 @@ class OxfordTranslator(BaseTranslator):
                 'a[href*="lookinside"]',
                 'a:has-text("Look Inside")',
                 'a:has-text("Preview")',
-                '.book-preview a'
+                ".book-preview a",
             ]
 
             for selector in preview_selectors:
                 try:
-                    preview_link = await page.locator(selector).first.get_attribute('href', timeout=1000)
-                    if preview_link and '.pdf' in preview_link.lower():
-                        if preview_link.startswith('/'):
-                            base_url = await page.evaluate('window.location.origin')
+                    preview_link = await page.locator(selector).first.get_attribute(
+                        "href", timeout=1000
+                    )
+                    if preview_link and ".pdf" in preview_link.lower():
+                        if preview_link.startswith("/"):
+                            base_url = await page.evaluate("window.location.origin")
                             preview_link = f"{base_url}{preview_link}"
-                        elif not preview_link.startswith('http'):
-                            base_url = await page.evaluate('window.location.href')
-                            base_url = re.sub(r'/[^/]*$', '', base_url)
+                        elif not preview_link.startswith("http"):
+                            base_url = await page.evaluate("window.location.href")
+                            base_url = re.sub(r"/[^/]*$", "", base_url)
                             preview_link = f"{base_url}/{preview_link}"
 
                         pdf_urls.append(preview_link)
@@ -127,13 +131,15 @@ class OxfordTranslator(BaseTranslator):
         # Method 3: Extract ISBN and attempt to construct PDF URL
         # (Usually doesn't work for OUP, but worth trying)
         try:
-            isbn_text = await page.locator('p:has-text("ISBN:")').first.inner_text(timeout=2000)
-            isbn_match = re.search(r'ISBN:\s*(\d{10,13})', isbn_text)
+            isbn_text = await page.locator('p:has-text("ISBN:")').first.inner_text(
+                timeout=2000
+            )
+            isbn_match = re.search(r"ISBN:\s*(\d{10,13})", isbn_text)
             if isbn_match:
                 isbn = isbn_match.group(1)
                 # Some academic publishers provide PDFs via ISBN
                 # This is speculative and may not work
-                base_url = await page.evaluate('window.location.origin')
+                base_url = await page.evaluate("window.location.origin")
                 potential_pdf = f"{base_url}/academic/pdf/{isbn}.pdf"
                 # We don't add this speculatively without verification
         except Exception:

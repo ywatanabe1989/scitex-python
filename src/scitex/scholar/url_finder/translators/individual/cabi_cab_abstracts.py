@@ -34,7 +34,7 @@ class CABICABAbstractsTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2017-06-14 03:41:30"
+        "lastUpdated": "2017-06-14 03:41:30",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -48,13 +48,15 @@ class CABICABAbstractsTranslator:
         Returns:
             'journalArticle' for articles, 'multiple' for search, empty string otherwise
         """
-        if 'cabdirect/abstract/' in url or 'cabdirect/FullTextPDF/' in url:
-            return 'journalArticle'
-        if 'cabdirect/search' in url and self.get_search_results(doc, True):
-            return 'multiple'
-        return ''
+        if "cabdirect/abstract/" in url or "cabdirect/FullTextPDF/" in url:
+            return "journalArticle"
+        if "cabdirect/search" in url and self.get_search_results(doc, True):
+            return "multiple"
+        return ""
 
-    def get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Dict[str, str]:
+    def get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Dict[str, str]:
         """
         Get search results from the page.
 
@@ -69,12 +71,12 @@ class CABICABAbstractsTranslator:
         rows = doc.select('div.list-content h2 a[href*="/abstract/"]')
 
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text(strip=True)
             if not href or not title:
                 continue
             if check_only:
-                return {'found': 'true'}
+                return {"found": "true"}
             items[href] = title
 
         return items
@@ -90,7 +92,7 @@ class CABICABAbstractsTranslator:
         Returns:
             Dictionary containing article metadata or search results
         """
-        if self.detect_web(doc, url) == 'multiple':
+        if self.detect_web(doc, url) == "multiple":
             return self.get_search_results(doc)
         return self.scrape(doc, url)
 
@@ -106,51 +108,51 @@ class CABICABAbstractsTranslator:
             Dictionary containing article metadata
         """
         item = {
-            'itemType': 'journalArticle',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'attachments': [],
-            'libraryCatalog': 'CABI - CAB Abstracts',
-            'archive': ''  # We don't want CAB in archive field
+            "itemType": "journalArticle",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
+            "libraryCatalog": "CABI - CAB Abstracts",
+            "archive": "",  # We don't want CAB in archive field
         }
 
         # Extract PDF URL
         pdf_elem = doc.select_one('p.btnabstract a[href$=".pdf"]')
         if pdf_elem:
-            pdf_url = pdf_elem.get('href')
+            pdf_url = pdf_elem.get("href")
             if pdf_url:
-                item['attachments'].append({
-                    'title': 'Full Text PDF',
-                    'mimeType': 'application/pdf',
-                    'url': pdf_url
-                })
+                item["attachments"].append(
+                    {
+                        "title": "Full Text PDF",
+                        "mimeType": "application/pdf",
+                        "url": pdf_url,
+                    }
+                )
 
         # Extract abstract
-        abstract_elem = doc.select_one('div.abstract')
+        abstract_elem = doc.select_one("div.abstract")
         if abstract_elem:
-            item['abstractNote'] = abstract_elem.get_text(strip=True)
+            item["abstractNote"] = abstract_elem.get_text(strip=True)
 
         # Extract editors
         editor_elems = doc.select('p[id*="ulEditors"] a')
         for editor in editor_elems:
             editor_text = editor.get_text(strip=True)
             if editor_text:
-                item['creators'].append(self._clean_author(editor_text, 'editor'))
+                item["creators"].append(self._clean_author(editor_text, "editor"))
 
         # Add snapshot attachment
-        item['attachments'].append({
-            'title': 'Snapshot',
-            'mimeType': 'text/html',
-            'url': url
-        })
+        item["attachments"].append(
+            {"title": "Snapshot", "mimeType": "text/html", "url": url}
+        )
 
         # Note: The actual translator uses RIS import which we can't fully replicate here
         # This is a simplified version that extracts what we can from the HTML
 
         return item
 
-    def _clean_author(self, name: str, creator_type: str = 'author') -> Dict[str, Any]:
+    def _clean_author(self, name: str, creator_type: str = "author") -> Dict[str, Any]:
         """
         Parse author name into first and last name.
 
@@ -166,13 +168,9 @@ class CABICABAbstractsTranslator:
 
         if len(parts) >= 2:
             return {
-                'firstName': ' '.join(parts[:-1]),
-                'lastName': parts[-1],
-                'creatorType': creator_type
+                "firstName": " ".join(parts[:-1]),
+                "lastName": parts[-1],
+                "creatorType": creator_type,
             }
         else:
-            return {
-                'lastName': name,
-                'creatorType': creator_type,
-                'fieldMode': True
-            }
+            return {"lastName": name, "creatorType": creator_type, "fieldMode": True}

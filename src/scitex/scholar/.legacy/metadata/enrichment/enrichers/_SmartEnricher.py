@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -100,9 +101,7 @@ class SmartEnricher:
         needs_api = any(field in missing_fields for field in api_fields)
 
         if needs_api:
-            comprehensive_data = (
-                self.unified_source.get_comprehensive_metadata(doi)
-            )
+            comprehensive_data = self.unified_source.get_comprehensive_metadata(doi)
             if comprehensive_data:
                 logger.info(
                     f"Got comprehensive data with keys: {list(comprehensive_data.keys())}"
@@ -110,14 +109,9 @@ class SmartEnricher:
 
                 # Only update missing fields with non-null values
                 for field in missing_fields:
-                    if (
-                        field in comprehensive_data
-                        and comprehensive_data[field]
-                    ):
+                    if field in comprehensive_data and comprehensive_data[field]:
                         metadata[field] = comprehensive_data[field]
-                        logger.debug(
-                            f"Updated {field}: {comprehensive_data[field]}"
-                        )
+                        logger.debug(f"Updated {field}: {comprehensive_data[field]}")
 
         # Add impact factor only if journal is present and impact_factor is missing
         if "impact_factor" in missing_fields and metadata.get("journal"):
@@ -165,5 +159,6 @@ class SmartEnricher:
                 json.dump(enriched, f, indent=2)
             return True
         return False
+
 
 # EOF

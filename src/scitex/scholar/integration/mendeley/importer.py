@@ -62,7 +62,7 @@ class MendeleyImporter(BaseImporter):
 
                 mendeley = Mendeley(
                     client_id=self.credentials["app_id"],
-                    client_secret=self.credentials["app_secret"]
+                    client_secret=self.credentials["app_secret"],
                 )
 
                 if self.credentials.get("access_token"):
@@ -142,7 +142,7 @@ class MendeleyImporter(BaseImporter):
                             pdf_entry = {
                                 "url": file.file_url,
                                 "source": "mendeley",
-                                "mendeley_file_id": file.id
+                                "mendeley_file_id": file.id,
                             }
                             paper.metadata.url.pdfs.append(pdf_entry)
 
@@ -213,7 +213,7 @@ class MendeleyImporter(BaseImporter):
                             pdf_entry = {
                                 "url": file.file_url,
                                 "source": "mendeley",
-                                "mendeley_file_id": file.id
+                                "mendeley_file_id": file.id,
                             }
                             paper.metadata.url.pdfs.append(pdf_entry)
 

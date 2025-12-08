@@ -48,7 +48,7 @@ class NaturePublishingGroupTranslator(BaseTranslator):
             True if URL matches Nature Publishing Group pattern
         """
         # Exclude PDF files (JS line 477)
-        if url.endswith('.pdf'):
+        if url.endswith(".pdf"):
             return False
 
         # Basic nature.com check
@@ -57,16 +57,26 @@ class NaturePublishingGroupTranslator(BaseTranslator):
 
         # More specific checks based on JavaScript detectWeb (lines 478-500)
         # Single article patterns (JS line 478)
-        if re.search(r'/(full|abs)/[^/]+($|\?|#)|/fp/.+?[?&]lang=ja(?:&|$)|/articles/', url):
+        if re.search(
+            r"/(full|abs)/[^/]+($|\?|#)|/fp/.+?[?&]lang=ja(?:&|$)|/articles/", url
+        ):
             return True
 
         # Multiple items patterns (JS lines 481-489)
-        if ('/research/' in url or '/topten/' in url or '/most.htm' in url or
-            '/search?' in url or 'sp-q=' in url or '/archive/' in url):
+        if (
+            "/research/" in url
+            or "/topten/" in url
+            or "/most.htm" in url
+            or "/search?" in url
+            or "sp-q=" in url
+            or "/archive/" in url
+        ):
             return True
 
         # Issue table of contents patterns
-        if re.search(r'journal/v\d+/n\d+/', url) or re.search(r'volumes/\d+/issues/\d+', url):
+        if re.search(r"journal/v\d+/n\d+/", url) or re.search(
+            r"volumes/\d+/issues/\d+", url
+        ):
             return True
 
         return False
@@ -102,8 +112,7 @@ class NaturePublishingGroupTranslator(BaseTranslator):
 
             # Pattern: https://www.nature.com/.../full/article_id.html -> .../pdf/article_id.pdf
             url_match = re.match(
-                r'(^[^#?]+/)(?:full|abs)(\/[^#?]+?\.)[a-zA-Z]+(?=$|\?|#)',
-                current_url
+                r"(^[^#?]+/)(?:full|abs)(\/[^#?]+?\.)[a-zA-Z]+(?=$|\?|#)", current_url
             )
 
             if url_match:
@@ -118,18 +127,20 @@ class NaturePublishingGroupTranslator(BaseTranslator):
         # Method 2: Look for download PDF link (JS line 273)
         # JS: return attr(doc, 'a[data-track-action="download pdf"]', 'href');
         try:
-            pdf_link = await page.locator('a[data-track-action="download pdf"]').first.get_attribute('href', timeout=2000)
+            pdf_link = await page.locator(
+                'a[data-track-action="download pdf"]'
+            ).first.get_attribute("href", timeout=2000)
             if pdf_link:
                 # Make absolute URL if needed
-                if pdf_link.startswith('/'):
-                    base_url = await page.evaluate('window.location.origin')
+                if pdf_link.startswith("/"):
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_link = f"{base_url}{pdf_link}"
-                elif not pdf_link.startswith('http'):
+                elif not pdf_link.startswith("http"):
                     current_url = page.url
                     # Remove query params and fragments
-                    base_url = re.sub(r'[?#].*$', '', current_url)
+                    base_url = re.sub(r"[?#].*$", "", current_url)
                     # Remove trailing path
-                    base_url = re.sub(r'/[^/]*$', '', base_url)
+                    base_url = re.sub(r"/[^/]*$", "", base_url)
                     pdf_link = f"{base_url}/{pdf_link}"
                 return [pdf_link]
         except Exception:
@@ -139,13 +150,13 @@ class NaturePublishingGroupTranslator(BaseTranslator):
         # e.g., https://www.nature.com/articles/onc2011282
         try:
             current_url = page.url
-            if '/articles/' in current_url:
+            if "/articles/" in current_url:
                 # Extract article ID
-                article_match = re.search(r'/articles/([^/?#]+)', current_url)
+                article_match = re.search(r"/articles/([^/?#]+)", current_url)
                 if article_match:
                     article_id = article_match.group(1)
                     # Try different PDF URL patterns
-                    base_url = await page.evaluate('window.location.origin')
+                    base_url = await page.evaluate("window.location.origin")
 
                     # Pattern 1: /articles/article_id.pdf
                     pdf_url = f"{base_url}/articles/{article_id}.pdf"
@@ -155,9 +166,9 @@ class NaturePublishingGroupTranslator(BaseTranslator):
                     if pdf_links:
                         for link in pdf_links[:3]:  # Check first 3 PDF links
                             try:
-                                href = await link.get_attribute('href', timeout=1000)
+                                href = await link.get_attribute("href", timeout=1000)
                                 if href and article_id in href:
-                                    if href.startswith('/'):
+                                    if href.startswith("/"):
                                         href = f"{base_url}{href}"
                                     return [href]
                             except Exception:
@@ -171,7 +182,9 @@ class NaturePublishingGroupTranslator(BaseTranslator):
         # Method 4: Meta tag fallback
         try:
             # Some Nature pages have PDF URL in meta tags
-            pdf_url = await page.locator('meta[name="citation_pdf_url"]').first.get_attribute('content', timeout=2000)
+            pdf_url = await page.locator(
+                'meta[name="citation_pdf_url"]'
+            ).first.get_attribute("content", timeout=2000)
             if pdf_url:
                 return [pdf_url]
         except Exception:

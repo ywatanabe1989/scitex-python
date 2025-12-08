@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -92,9 +93,7 @@ class BaseSSOAutomator(ABC):
         )
 
         # Session management
-        self._session_dir = (
-            Path.home() / ".scitex" / "scholar" / "sso_sessions"
-        )
+        self._session_dir = Path.home() / ".scitex" / "scholar" / "sso_sessions"
         self._session_dir.mkdir(parents=True, exist_ok=True)
 
         self.logger = logger
@@ -135,9 +134,7 @@ class BaseSSOAutomator(ABC):
             if not self.is_sso_page(current_url):
                 return True
 
-            self.logger.info(
-                f"Detected {self.get_institution_name()} SSO page"
-            )
+            self.logger.info(f"Detected {self.get_institution_name()} SSO page")
 
             # Try to restore session first
             if self.use_persistent_session:
@@ -250,9 +247,7 @@ class BaseSSOAutomator(ABC):
             if success:
                 self.logger.info(f"User notification sent: {event_type}")
             else:
-                self.logger.warning(
-                    f"Failed to send user notification: {event_type}"
-                )
+                self.logger.warning(f"Failed to send user notification: {event_type}")
 
         except Exception as e:
             self.logger.warning(f"Failed to send user notification: {str(e)}")
@@ -287,16 +282,14 @@ Action Required:
 System: SciTeX Scholar Module
 Institution: {institution}
 Status: Awaiting 2FA approval
-Timeout: {kwargs.get('timeout', 'Unknown')} seconds
+Timeout: {kwargs.get("timeout", "Unknown")} seconds
 
 This is an automated notification from the SciTeX Scholar authentication system.
             """.strip()
             priority = "high"
 
         elif event_type == "authentication_success":
-            subject = (
-                f"SciTeX Scholar: Authentication Successful - {institution}"
-            )
+            subject = f"SciTeX Scholar: Authentication Successful - {institution}"
             message = f"""
 {institution} SSO Authentication Complete
 
@@ -304,8 +297,8 @@ Your authentication has been completed successfully.
 
 Details:
 - Institution: {institution}
-- Session expires: {kwargs.get('expires_at', 'Unknown')}
-- Cookies saved: {kwargs.get('cookie_count', 'Unknown')}
+- Session expires: {kwargs.get("expires_at", "Unknown")}
+- Cookies saved: {kwargs.get("cookie_count", "Unknown")}
 
 System: SciTeX Scholar Module
 Status: Authenticated
@@ -323,7 +316,7 @@ Authentication was not completed successfully.
 
 Details:
 - Institution: {institution}
-- Error: {kwargs.get('error', 'Unknown error')}
+- Error: {kwargs.get("error", "Unknown error")}
 - Retry available: Yes
 
 System: SciTeX Scholar Module
@@ -342,8 +335,8 @@ Your authentication session has expired and will need to be renewed.
 
 Details:
 - Institution: {institution}
-- Expired at: {kwargs.get('expired_at', 'Unknown')}
-- Auto-renewal: {kwargs.get('auto_renewal', 'Disabled')}
+- Expired at: {kwargs.get("expired_at", "Unknown")}
+- Auto-renewal: {kwargs.get("auto_renewal", "Disabled")}
 
 System: SciTeX Scholar Module
 Status: Session expired
@@ -358,7 +351,7 @@ Authentication will be required for the next access.
             message = f"""
 {institution} SSO Notification
 
-Event: {event_type.replace('_', ' ').title()}
+Event: {event_type.replace("_", " ").title()}
 Institution: {institution}
 Context: {kwargs}
 
@@ -369,5 +362,6 @@ This is an automated notification from the SciTeX Scholar authentication system.
             priority = "normal"
 
         return subject, message, priority
+
 
 # EOF

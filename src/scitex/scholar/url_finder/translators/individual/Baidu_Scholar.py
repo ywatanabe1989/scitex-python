@@ -34,7 +34,7 @@ class BaiduScholarTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2021-06-16 17:43:54"
+        "lastUpdated": "2021-06-16 17:43:54",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -48,11 +48,11 @@ class BaiduScholarTranslator:
         Returns:
             'journalArticle' for single item, 'multiple' for list, empty string otherwise
         """
-        if 'paperid=' in url:
-            return 'journalArticle'
+        if "paperid=" in url:
+            return "journalArticle"
         elif self._get_search_results(doc, check_only=True):
-            return 'multiple'
-        return ''
+            return "multiple"
+        return ""
 
     def do_web(self, doc: BeautifulSoup, url: str) -> List[Dict[str, Any]]:
         """
@@ -65,9 +65,9 @@ class BaiduScholarTranslator:
         Returns:
             List of dictionaries containing paper metadata
         """
-        if self.detect_web(doc, url) == 'multiple':
+        if self.detect_web(doc, url) == "multiple":
             results = self._get_search_results(doc, check_only=False)
-            return [{'itemType': 'multiple', 'urls': results}]
+            return [{"itemType": "multiple", "urls": results}]
         else:
             return [self.scrape(doc, url)]
 
@@ -83,85 +83,85 @@ class BaiduScholarTranslator:
             Dictionary containing paper metadata
         """
         item = {
-            'itemType': 'journalArticle',
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": "journalArticle",
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Extract paper ID from URL
-        paper_id_match = re.search(r'paperid=([a-z0-9]+)', url, re.IGNORECASE)
+        paper_id_match = re.search(r"paperid=([a-z0-9]+)", url, re.IGNORECASE)
         if not paper_id_match:
             return item
 
         paper_id = paper_id_match.group(1)
 
         # Extract title - remove "百度学术" suffix
-        title_elem = doc.find('title')
+        title_elem = doc.find("title")
         if title_elem:
-            title = title_elem.get_text().replace('_百度学术', '').strip()
-            item['title'] = title
+            title = title_elem.get_text().replace("_百度学术", "").strip()
+            item["title"] = title
 
         # Extract tags/keywords
-        keyword_elems = doc.select('p.kw_main span a')
+        keyword_elems = doc.select("p.kw_main span a")
         for elem in keyword_elems:
             tag_text = elem.get_text().strip()
             if tag_text:
-                item['tags'].append({'tag': tag_text})
+                item["tags"].append({"tag": tag_text})
 
         # Extract data URL (actual paper URL)
-        data_url_elem = doc.select_one('i.reqdata')
-        if data_url_elem and data_url_elem.get('url'):
-            item['url'] = data_url_elem['url']
+        data_url_elem = doc.select_one("i.reqdata")
+        if data_url_elem and data_url_elem.get("url"):
+            item["url"] = data_url_elem["url"]
 
         # Extract DOI from link
         doi_link = doc.select_one('a.dl_item[data-url*="doi.org/"]')
-        if doi_link and doi_link.get('data-url'):
-            doi_url = doi_link['data-url']
-            doi_start = doi_url.find('doi.org/') + 8
+        if doi_link and doi_link.get("data-url"):
+            doi_url = doi_link["data-url"]
+            doi_start = doi_url.find("doi.org/") + 8
             if doi_start > 7:
-                item['DOI'] = doi_url[doi_start:]
+                item["DOI"] = doi_url[doi_start:]
 
         # Extract abstract
-        abstract_elem = doc.select_one('div.sc_abstract')
+        abstract_elem = doc.select_one("div.sc_abstract")
         if not abstract_elem:
-            abstract_elem = doc.select_one('p.abstract')
+            abstract_elem = doc.select_one("p.abstract")
         if abstract_elem:
-            item['abstractNote'] = abstract_elem.get_text().strip()
+            item["abstractNote"] = abstract_elem.get_text().strip()
 
         # Extract authors
-        author_elems = doc.select('p.author_text a')
+        author_elems = doc.select("p.author_text a")
         for author_elem in author_elems:
             author_name = author_elem.get_text().strip()
             creator = self._clean_author(author_name)
-            item['creators'].append(creator)
+            item["creators"].append(creator)
 
         # Extract publication title
-        journal_elem = doc.select_one('a.journal_title')
-        if journal_elem and journal_elem.get('title'):
-            item['publicationTitle'] = journal_elem['title']
+        journal_elem = doc.select_one("a.journal_title")
+        if journal_elem and journal_elem.get("title"):
+            item["publicationTitle"] = journal_elem["title"]
 
         # Extract date
-        date_elem = doc.select_one('div.year_wr p.kw_main')
+        date_elem = doc.select_one("div.year_wr p.kw_main")
         if date_elem:
-            item['date'] = date_elem.get_text().strip()
+            item["date"] = date_elem.get_text().strip()
 
         # Extract DOI from text if not already found
-        if 'DOI' not in item:
-            doi_elem = doc.select_one('div.doi_wr p.kw_main')
+        if "DOI" not in item:
+            doi_elem = doc.select_one("div.doi_wr p.kw_main")
             if doi_elem:
-                item['DOI'] = doi_elem.get_text().strip()
+                item["DOI"] = doi_elem.get_text().strip()
 
         # Add snapshot attachment
-        item['attachments'].append({
-            'title': 'Snapshot',
-            'mimeType': 'text/html',
-            'url': url
-        })
+        item["attachments"].append(
+            {"title": "Snapshot", "mimeType": "text/html", "url": url}
+        )
 
         return item
 
-    def _get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Optional[Dict[str, str]]:
+    def _get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Optional[Dict[str, str]]:
         """
         Get search results from a page.
 
@@ -182,7 +182,7 @@ class BaiduScholarTranslator:
 
         items = {}
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text().strip()
             if href and title:
                 items[href] = title
@@ -203,35 +203,27 @@ class BaiduScholarTranslator:
         name = name.strip()
 
         # Check if name contains Latin characters or spaces
-        has_latin = bool(re.search(r'[A-Za-z]', name))
-        has_space = ' ' in name
+        has_latin = bool(re.search(r"[A-Za-z]", name))
+        has_space = " " in name
 
         if has_latin or has_space:
             # Western name format
             parts = name.split()
             if len(parts) >= 2:
                 return {
-                    'firstName': ' '.join(parts[:-1]),
-                    'lastName': parts[-1],
-                    'creatorType': 'author'
+                    "firstName": " ".join(parts[:-1]),
+                    "lastName": parts[-1],
+                    "creatorType": "author",
                 }
             else:
-                return {
-                    'lastName': name,
-                    'creatorType': 'author',
-                    'fieldMode': True
-                }
+                return {"lastName": name, "creatorType": "author", "fieldMode": True}
         else:
             # Chinese name: first character is last name, rest is first name
             if len(name) > 1:
                 return {
-                    'firstName': name[1:],
-                    'lastName': name[0],
-                    'creatorType': 'author'
+                    "firstName": name[1:],
+                    "lastName": name[0],
+                    "creatorType": "author",
                 }
             else:
-                return {
-                    'lastName': name,
-                    'creatorType': 'author',
-                    'fieldMode': True
-                }
+                return {"lastName": name, "creatorType": "author", "fieldMode": True}

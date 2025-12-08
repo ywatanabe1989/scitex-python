@@ -18,7 +18,7 @@ from typing import List
 from playwright.async_api import Page, Error as PlaywrightError
 
 # Explicit public API - only export the translator class
-__all__ = ['OpenEditionJournalsTranslator']
+__all__ = ["OpenEditionJournalsTranslator"]
 
 # Private module-level logger - not exported
 _logger = logging.getLogger(__name__)
@@ -102,7 +102,7 @@ class OpenEditionJournalsTranslator:
             # Validate and filter URLs
             if urls and isinstance(urls, list):
                 for url in urls:
-                    if url and isinstance(url, str) and url.startswith('http'):
+                    if url and isinstance(url, str) and url.startswith("http"):
                         pdf_urls.append(url)
                     else:
                         _logger.warning(f"OpenEdition: Invalid URL format: {url}")
@@ -130,7 +130,9 @@ if __name__ == "__main__":
 
         for test_url in test_urls:
             print(f"\nTesting OpenEditionJournalsTranslator with URL: {test_url}")
-            print(f"URL matches pattern: {OpenEditionJournalsTranslator.matches_url(test_url)}")
+            print(
+                f"URL matches pattern: {OpenEditionJournalsTranslator.matches_url(test_url)}"
+            )
 
             async with async_playwright() as p:
                 browser = await p.chromium.launch(headless=True)
@@ -142,7 +144,9 @@ if __name__ == "__main__":
                 await page.wait_for_load_state("domcontentloaded")
 
                 print("Extracting PDF URLs...")
-                pdf_urls = await OpenEditionJournalsTranslator.extract_pdf_urls_async(page)
+                pdf_urls = await OpenEditionJournalsTranslator.extract_pdf_urls_async(
+                    page
+                )
 
                 print(f"\nResults:")
                 print(f"  Found {len(pdf_urls)} PDF URL(s)")

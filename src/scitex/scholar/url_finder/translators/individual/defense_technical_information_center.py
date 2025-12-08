@@ -33,24 +33,26 @@ class DefenseTechnicalInformationCenterTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2013-01-09 15:36:32"
+        "lastUpdated": "2013-01-09 15:36:32",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
         """Detect if page is DTIC report or index."""
         if "DTIC OAI Index for" in doc.title.string if doc.title else "":
-            return 'multiple'
-        elif 'verb=getRecord' in url:
-            return 'report'
-        return ''
+            return "multiple"
+        elif "verb=getRecord" in url:
+            return "report"
+        return ""
 
-    def get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Optional[Dict[str, str]]:
+    def get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Optional[Dict[str, str]]:
         """Extract search results."""
         items = {}
         links = doc.select('a[href*="verb=getRecord"]')
 
         for link in links:
-            href = link.get('href', '')
+            href = link.get("href", "")
             # Get preceding text as title
             title_text = link.find_previous(text=True)
             if title_text:
@@ -62,10 +64,10 @@ class DefenseTechnicalInformationCenterTranslator:
                 continue
 
             if check_only:
-                return {'found': 'true'}
+                return {"found": "true"}
 
             # Replace HTML metadata with Dublin Core
-            href = href.replace('&metadataPrefix=html', '&metadataPrefix=oai_dc')
+            href = href.replace("&metadataPrefix=html", "&metadataPrefix=oai_dc")
             items[href] = title
 
         return items if items else None
@@ -74,7 +76,7 @@ class DefenseTechnicalInformationCenterTranslator:
         """Main extraction method."""
         page_type = self.detect_web(doc, url)
 
-        if page_type == 'multiple':
+        if page_type == "multiple":
             return self.get_search_results(doc, check_only=False)
         else:
             return self.scrape(doc, url)
@@ -82,29 +84,29 @@ class DefenseTechnicalInformationCenterTranslator:
     def scrape(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """Scrape report metadata."""
         item = {
-            'itemType': 'report',
-            'libraryCatalog': 'Defense Technical Information Center',
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": "report",
+            "libraryCatalog": "Defense Technical Information Center",
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Find PDF URL
-        pdf_link = doc.find('a', href=lambda x: x and 'doc=GetTRDoc.pdf' in x)
+        pdf_link = doc.find("a", href=lambda x: x and "doc=GetTRDoc.pdf" in x)
         if pdf_link:
-            pdf_url = pdf_link.get('href')
-            item['attachments'].append({
-                'url': pdf_url,
-                'title': 'DTIC Full Text PDF',
-                'mimeType': 'application/pdf'
-            })
+            pdf_url = pdf_link.get("href")
+            item["attachments"].append(
+                {
+                    "url": pdf_url,
+                    "title": "DTIC Full Text PDF",
+                    "mimeType": "application/pdf",
+                }
+            )
 
         # Add snapshot
-        item['attachments'].append({
-            'title': 'DTIC Snapshot',
-            'mimeType': 'text/html',
-            'url': url
-        })
+        item["attachments"].append(
+            {"title": "DTIC Snapshot", "mimeType": "text/html", "url": url}
+        )
 
         # Note: Full implementation would fetch OAI-DC XML and parse it
         # For now, returning basic structure

@@ -105,14 +105,13 @@ class DeduplicationManager:
                                 paper_groups[main_fp].append(path)
 
         # Filter to only groups with duplicates
-        duplicates = {
-            fp: paths for fp, paths in paper_groups.items()
-            if len(paths) > 1
-        }
+        duplicates = {fp: paths for fp, paths in paper_groups.items() if len(paths) > 1}
 
         if duplicates:
             total_dups = sum(len(paths) - 1 for paths in duplicates.values())
-            logger.warning(f"Found {len(duplicates)} groups with {total_dups} duplicate papers")
+            logger.warning(
+                f"Found {len(duplicates)} groups with {total_dups} duplicate papers"
+            )
         else:
             logger.info("No duplicates found")
 
@@ -166,12 +165,24 @@ class DeduplicationManager:
         if not title:
             return ""
         # Remove special characters and normalize whitespace
-        title = re.sub(r'[^\w\s]', '', title.lower())
-        title = ' '.join(title.split())
+        title = re.sub(r"[^\w\s]", "", title.lower())
+        title = " ".join(title.split())
         # Remove common words
-        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for'}
+        stop_words = {
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+        }
         words = [w for w in title.split() if w not in stop_words]
-        return ' '.join(words)
+        return " ".join(words)
 
     def _normalize_author(self, author: str) -> str:
         """Normalize author name for comparison."""
@@ -179,18 +190,16 @@ class DeduplicationManager:
             return ""
         # Extract last name
         author = author.strip()
-        if ',' in author:
+        if "," in author:
             # Last, First format
-            return author.split(',')[0].strip().lower()
+            return author.split(",")[0].strip().lower()
         else:
             # First Last format
             parts = author.split()
             return parts[-1].lower() if parts else ""
 
     def merge_duplicate_papers(
-        self,
-        paper_dirs: List[Path],
-        strategy: str = "best_metadata"
+        self, paper_dirs: List[Path], strategy: str = "best_metadata"
     ) -> Tuple[Path, List[Path]]:
         """Merge duplicate papers into one canonical entry.
 
@@ -234,13 +243,16 @@ class DeduplicationManager:
 
         # Save merged metadata
         metadata_file = keep_dir / "metadata.json"
-        metadata_backup = keep_dir / f"metadata.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        metadata_backup = (
+            keep_dir
+            / f"metadata.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
 
         # Backup original
         shutil.copy2(metadata_file, metadata_backup)
 
         # Write merged metadata
-        with open(metadata_file, 'w') as f:
+        with open(metadata_file, "w") as f:
             json.dump(merged_metadata, f, indent=2)
 
         # Merge any PDFs or other files
@@ -263,6 +275,7 @@ class DeduplicationManager:
         citation_count = metadata.get("citation_count", 0)
         if citation_count:
             import math
+
             score += min(int(math.log10(citation_count + 1) * 100), 500)
 
         # Impact factor
@@ -315,7 +328,7 @@ class DeduplicationManager:
         merged["_deduplication"] = {
             "merged_from": [str(p[1].name) for p in scored_papers],
             "merge_timestamp": datetime.now().isoformat(),
-            "scores": {str(p[1].name): p[0] for p in scored_papers}
+            "scores": {str(p[1].name): p[0] for p in scored_papers},
         }
 
         # Merge from other papers
@@ -332,14 +345,18 @@ class DeduplicationManager:
             old_cc = merged.get("citation_count", 0) or 0
             if new_cc > old_cc:
                 merged["citation_count"] = metadata["citation_count"]
-                merged["citation_count_source"] = metadata.get("citation_count_source", "merged")
+                merged["citation_count_source"] = metadata.get(
+                    "citation_count_source", "merged"
+                )
 
             # Take highest impact factor
             new_if = metadata.get("impact_factor", 0) or 0
             old_if = merged.get("impact_factor", 0) or 0
             if new_if > old_if:
                 merged["impact_factor"] = metadata["impact_factor"]
-                merged["impact_factor_source"] = metadata.get("impact_factor_source", "merged")
+                merged["impact_factor_source"] = metadata.get(
+                    "impact_factor_source", "merged"
+                )
 
             # Take DOI if missing
             if not merged.get("doi") and metadata.get("doi"):
@@ -400,7 +417,7 @@ class DeduplicationManager:
             "duplicates_merged": 0,
             "dirs_removed": 0,
             "broken_symlinks_removed": 0,
-            "errors": 0
+            "errors": 0,
         }
 
         # Find all duplicates
@@ -434,7 +451,11 @@ class DeduplicationManager:
                     # Remove duplicate directories
                     for remove_dir in remove_dirs:
                         # Move to .deduplicated directory instead of deleting
-                        dedup_dir = self.master_dir / ".deduplicated" / datetime.now().strftime("%Y%m%d_%H%M%S")
+                        dedup_dir = (
+                            self.master_dir
+                            / ".deduplicated"
+                            / datetime.now().strftime("%Y%m%d_%H%M%S")
+                        )
                         dedup_dir.mkdir(parents=True, exist_ok=True)
 
                         target = dedup_dir / remove_dir.name
@@ -482,13 +503,17 @@ class DeduplicationManager:
                         target = item.resolve(strict=True)
                     except (OSError, RuntimeError):
                         # Symlink is broken
-                        logger.info(f"Removing broken symlink: {project_dir.name}/{item.name}")
+                        logger.info(
+                            f"Removing broken symlink: {project_dir.name}/{item.name}"
+                        )
                         item.unlink()
                         removed_count += 1
 
         return removed_count
 
-    def _update_project_symlinks(self, fingerprint: str, keep_dir: Path, remove_dirs: List[Path]):
+    def _update_project_symlinks(
+        self, fingerprint: str, keep_dir: Path, remove_dirs: List[Path]
+    ):
         """Update project symlinks after deduplication."""
         removed_ids = {d.name for d in remove_dirs}
 
@@ -537,7 +562,9 @@ class DeduplicationManager:
                 with open(metadata_file) as f:
                     existing_metadata = json.load(f)
 
-                existing_fingerprint = self._generate_paper_fingerprint(existing_metadata)
+                existing_fingerprint = self._generate_paper_fingerprint(
+                    existing_metadata
+                )
 
                 if fingerprint == existing_fingerprint:
                     return paper_dir
