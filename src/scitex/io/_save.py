@@ -61,6 +61,7 @@ from ._save_modules import save_torch
 from ._save_modules import save_yaml
 from ._save_modules import save_zarr
 from ._save_modules._bibtex import save_bibtex
+from ._save_modules._canvas import save_canvas
 
 logger = logging.getLogger()
 
@@ -509,6 +510,11 @@ def _save(
 
     # Get file extension
     ext = _os.path.splitext(spath)[1].lower()
+
+    # Handle .canvas directories (special case - path ends with .canvas)
+    if spath.endswith(".canvas"):
+        save_canvas(obj, spath, **kwargs)
+        return
 
     # Try dispatch dictionary first for O(1) lookup
     if ext in _FILE_HANDLERS:
@@ -1028,6 +1034,8 @@ def _handle_image_with_csv(
 
 # Dispatch dictionary for O(1) file format lookup
 _FILE_HANDLERS = {
+    # Canvas directory format (scitex.vis)
+    ".canvas": save_canvas,
     # Excel formats
     ".xlsx": save_excel,
     ".xls": save_excel,
