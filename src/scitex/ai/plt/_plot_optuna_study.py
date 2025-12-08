@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -143,6 +144,8 @@ optuna_study = plot_optuna_study
 
 
 """Functions & Classes"""
+
+
 def main(args):
     """
     Demonstrate Optuna study visualization.
@@ -158,9 +161,7 @@ def main(args):
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Visualize Optuna study results"
-    )
+    parser = argparse.ArgumentParser(description="Visualize Optuna study results")
     parser.add_argument(
         "--lpath",
         type=str,

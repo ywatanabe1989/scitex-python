@@ -544,7 +544,6 @@ if __name__ == "__main__":
 # This script does XYZ.
 # """
 # 
-# 
 # """
 # Imports
 # """
@@ -695,7 +694,7 @@ if __name__ == "__main__":
 #             axes[0].get_figure()
 #             # axes
 #             if isinstance(
-#                 axes, (np.ndarray, scitex.plt._subplots._AxesWrapper.AxesWrapper)
+#                 axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
 #             )
 #             # axis
 #             else axes.get_figure()

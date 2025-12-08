@@ -6,7 +6,12 @@ but re-exported here for backward compatibility. New code should import directly
 from scitex.ai.metrics instead.
 """
 
-from ._stx_conf_mat import calc_bACC_from_conf_mat, calc_bacc_from_conf_mat, stx_conf_mat, conf_mat
+from ._stx_conf_mat import (
+    calc_bACC_from_conf_mat,
+    calc_bacc_from_conf_mat,
+    stx_conf_mat,
+    conf_mat,
+)
 from ._plot_learning_curve import (
     plot_learning_curve,
     _prepare_metrics_df,

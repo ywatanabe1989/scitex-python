@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -114,6 +115,7 @@ class MetricStorage:
 
             if verbose or self.verbose:
                 import scitex.logging as logging
+
                 logger = logging.getLogger(__name__)
                 logger.info(f"Saved to: {full_path}")
 
@@ -121,10 +123,10 @@ class MetricStorage:
 
         except Exception as e:
             import scitex.logging as logging
+
             logger = logging.getLogger(__name__)
             logger.warning(f"Failed to save {relative_path}: {e}")
             return full_path.absolute()
-
 
 
 def save_metric(
@@ -217,5 +219,6 @@ def create_directory_structure_lazy(
     }
 
     return structure
+
 
 # EOF

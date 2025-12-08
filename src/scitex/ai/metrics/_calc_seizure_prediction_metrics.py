@@ -21,6 +21,7 @@ Clinical Targets (FDA guidelines):
   - FP/h ≤ 0.2
   - Time in warning ≤ 20%
 """
+
 from __future__ import annotations
 from typing import Dict
 import numpy as np
@@ -112,9 +113,7 @@ def calc_seizure_window_prediction_metrics(
     # False positives per hour
     n_interictal = interictal_mask.sum()
     total_interictal_hours = (n_interictal * window_duration_min) / 60.0
-    fp_per_hour = (
-        fp / total_interictal_hours if total_interictal_hours > 0 else 0.0
-    )
+    fp_per_hour = fp / total_interictal_hours if total_interictal_hours > 0 else 0.0
 
     # Time in warning (% of total time in alarm state)
     total_windows = len(y_pred)
@@ -252,9 +251,7 @@ def calc_seizure_event_prediction_metrics(
     # False positives per hour
     n_interictal = interictal_mask.sum()
     total_interictal_hours = (n_interictal * window_duration_min) / 60.0
-    fp_per_hour = (
-        fp / total_interictal_hours if total_interictal_hours > 0 else 0.0
-    )
+    fp_per_hour = fp / total_interictal_hours if total_interictal_hours > 0 else 0.0
 
     # Time in warning (% of total time in alarm state)
     total_windows = len(y_pred)
@@ -336,10 +333,12 @@ def main(args):
     # Create labels and metadata with seizure_id for event-based metrics
     y_true = np.array(["interictal_control"] * n_windows)
     y_pred = np.array(["interictal_control"] * n_windows)
-    metadata = pd.DataFrame({
-        "seizure_type": ["interictal_control"] * n_windows,
-        "seizure_id": [None] * n_windows  # seizure_id for event-based metrics
-    })
+    metadata = pd.DataFrame(
+        {
+            "seizure_type": ["interictal_control"] * n_windows,
+            "seizure_id": [None] * n_windows,  # seizure_id for event-based metrics
+        }
+    )
 
     # Add TWO seizure events (event 1: 100-119, event 2: 500-529)
     event1_indices = list(range(100, 120))  # 20 windows
@@ -353,7 +352,9 @@ def main(args):
     metadata.loc[event2_indices, "seizure_type"] = "seizure"
     metadata.loc[event2_indices, "seizure_id"] = "sz_002"
 
-    logger.info(f"Created 2 seizure events spanning {len(seizure_indices)} windows total")
+    logger.info(
+        f"Created 2 seizure events spanning {len(seizure_indices)} windows total"
+    )
     logger.info(f"  Event 1 (sz_001): 20 windows")
     logger.info(f"  Event 2 (sz_002): 30 windows")
 
@@ -361,12 +362,14 @@ def main(args):
     # For event-based demo: detect only 1 window from event 1, most of event 2
     n_detect = int(len(seizure_indices) * args.sensitivity)
     # Detect 1 window from event 1, rest from event 2
-    detected_indices = [event1_indices[0]] + event2_indices[:n_detect-1]
+    detected_indices = [event1_indices[0]] + event2_indices[: n_detect - 1]
     y_pred[detected_indices] = "seizure"
 
-    logger.info(f"Simulating detection of {n_detect}/{len(seizure_indices)} seizure windows")
+    logger.info(
+        f"Simulating detection of {n_detect}/{len(seizure_indices)} seizure windows"
+    )
     logger.info(f"  Event 1: 1/20 windows detected")
-    logger.info(f"  Event 2: {n_detect-1}/30 windows detected")
+    logger.info(f"  Event 2: {n_detect - 1}/30 windows detected")
 
     # Add some false positives
     fp_indices = [200, 300, 400, 600, 700]
@@ -402,7 +405,9 @@ def main(args):
         f"  Meets sensitivity target (≥90%): {metrics_window['meets_sensitivity_target']}"
     )
     logger.info(f"  Meets FP/h target (≤0.2): {metrics_window['meets_fp_target']}")
-    logger.info(f"  Meets time in warning target (≤20%): {metrics_window['meets_tiw_target']}")
+    logger.info(
+        f"  Meets time in warning target (≤20%): {metrics_window['meets_tiw_target']}"
+    )
     logger.info("=" * 70)
 
     # Calculate EVENT-BASED metrics
@@ -433,7 +438,9 @@ def main(args):
         f"  Meets sensitivity target (≥90%): {metrics_event['meets_sensitivity_target']}"
     )
     logger.info(f"  Meets FP/h target (≤0.2): {metrics_event['meets_fp_target']}")
-    logger.info(f"  Meets time in warning target (≤20%): {metrics_event['meets_tiw_target']}")
+    logger.info(
+        f"  Meets time in warning target (≤20%): {metrics_event['meets_tiw_target']}"
+    )
     logger.info("=" * 70)
 
     # Comparison summary
@@ -441,12 +448,20 @@ def main(args):
     logger.info("=" * 70)
     logger.info("KEY DIFFERENCE DEMONSTRATION")
     logger.info("=" * 70)
-    logger.info(f"Window-based sensitivity: {metrics_window['seizure_sensitivity']:.1f}% (detected {metrics_window['n_true_positives']}/{metrics_window['n_seizure_windows']} windows)")
-    logger.info(f"Event-based sensitivity:  {metrics_event['seizure_sensitivity']:.1f}% (detected {metrics_event['n_detected_events']}/{metrics_event['n_seizure_events']} events)")
+    logger.info(
+        f"Window-based sensitivity: {metrics_window['seizure_sensitivity']:.1f}% (detected {metrics_window['n_true_positives']}/{metrics_window['n_seizure_windows']} windows)"
+    )
+    logger.info(
+        f"Event-based sensitivity:  {metrics_event['seizure_sensitivity']:.1f}% (detected {metrics_event['n_detected_events']}/{metrics_event['n_seizure_events']} events)"
+    )
     logger.info("")
     logger.info("Interpretation:")
-    logger.info("  - Window-based: Detected only 1 window from Event 1 → Low sensitivity")
-    logger.info("  - Event-based: Detected at least 1 window from BOTH events → 100% sensitivity!")
+    logger.info(
+        "  - Window-based: Detected only 1 window from Event 1 → Low sensitivity"
+    )
+    logger.info(
+        "  - Event-based: Detected at least 1 window from BOTH events → 100% sensitivity!"
+    )
     logger.info("  - Clinical relevance: One timely alarm per seizure is sufficient")
     logger.info("=" * 70)
 

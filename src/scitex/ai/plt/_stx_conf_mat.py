@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -242,13 +243,13 @@ def stx_conf_mat(
 
     if colorbar:
         # Extract underlying matplotlib axes if wrapped by SciTeX
-        ax_mpl = ax._axis_mpl if hasattr(ax, '_axis_mpl') else ax
+        ax_mpl = ax._axis_mpl if hasattr(ax, "_axis_mpl") else ax
 
         divider = make_axes_locatable(ax_mpl)
         cax = divider.append_axes("right", size="5%", pad=0.15)
 
         # Get the underlying figure
-        fig_mpl = fig._fig_mpl if hasattr(fig, '_fig_mpl') else fig
+        fig_mpl = fig._fig_mpl if hasattr(fig, "_fig_mpl") else fig
 
         vmax = np.array(cm).max().astype(int)
         norm = matplotlib.colors.Normalize(vmin=0, vmax=vmax)
@@ -262,6 +263,7 @@ def stx_conf_mat(
 
     if spath is not None:
         from pathlib import Path
+
         # Resolve to absolute path to prevent _out directory creation
         spath_abs = Path(spath).resolve() if isinstance(spath, (str, Path)) else spath
         scitex.io.save(fig, str(spath_abs), use_caller_path=False)
@@ -291,9 +293,7 @@ def main(args):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
 
-    classifier = svm.SVC(kernel="linear", C=0.01, random_state=42).fit(
-        X_train, y_train
-    )
+    classifier = svm.SVC(kernel="linear", C=0.01, random_state=42).fit(X_train, y_train)
 
     y_pred = classifier.predict(X_test)
     cm_data = sklearn.metrics.confusion_matrix(y_test, y_pred)
@@ -321,7 +321,8 @@ def main(args):
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     import argparse
-    parser = argparse.ArgumentParser(description='Demo confusion matrix plotting')
+
+    parser = argparse.ArgumentParser(description="Demo confusion matrix plotting")
     return parser.parse_args()
 
 
@@ -359,124 +360,122 @@ def run_main() -> None:
 if __name__ == "__main__":
     run_main()
 
-# EOF
+    # EOF
 
-# #!/usr/bin/env python3
-# import matplotlib
-# import scitex
-# import numpy as np
-# import pandas as pd
-# import seaborn as sns
-# from matplotlib import ticker
-# from mpl_toolkits.axes_grid1 import make_axes_locatable
-# from sklearn.metrics import balanced_accuracy_score
-# from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix
+    # #!/usr/bin/env python3
+    # import matplotlib
+    # import scitex
+    # import numpy as np
+    # import pandas as pd
+    # import seaborn as sns
+    # from matplotlib import ticker
+    # from mpl_toolkits.axes_grid1 import make_axes_locatable
+    # from sklearn.metrics import balanced_accuracy_score
+    # from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix
 
+    # def conf_mat(
+    #     plt,
+    #     cm=None,
+    #     y_true=None,
+    #     y_pred=None,
+    #     y_pred_proba=None,
+    #     labels=None,
+    #     sorted_labels=None,
+    #     pred_labels=None,
+    #     sorted_pred_labels=None,
+    #     true_labels=None,
+    #     sorted_true_labels=None,
+    #     label_rotation_xy=(15, 15),
+    #     title="Confuxion Matrix",
+    #     colorbar=True,
+    #     x_extend_ratio=1.0,
+    #     y_extend_ratio=1.0,
+    #     spath=None,
+    # ):
+    #     """
+    #     Inverse the y-axis and plot the confusion matrix as a heatmap.
+    #     The predicted labels (in x-axis) is symboled with hat (^).
+    #     The plt object is passed to adjust the figure size
 
-# def conf_mat(
-#     plt,
-#     cm=None,
-#     y_true=None,
-#     y_pred=None,
-#     y_pred_proba=None,
-#     labels=None,
-#     sorted_labels=None,
-#     pred_labels=None,
-#     sorted_pred_labels=None,
-#     true_labels=None,
-#     sorted_true_labels=None,
-#     label_rotation_xy=(15, 15),
-#     title="Confuxion Matrix",
-#     colorbar=True,
-#     x_extend_ratio=1.0,
-#     y_extend_ratio=1.0,
-#     spath=None,
-# ):
-#     """
-#     Inverse the y-axis and plot the confusion matrix as a heatmap.
-#     The predicted labels (in x-axis) is symboled with hat (^).
-#     The plt object is passed to adjust the figure size
+    #     cm = sklearn.metrics.confusion_matrix(y_test, y_pred)
 
-#     cm = sklearn.metrics.confusion_matrix(y_test, y_pred)
+    #     cm = np.random.randint(low=0, high=10, size=[3,4])
+    #     x: predicted labels
+    #     y: true_labels
 
+    #     kwargs:
 
-#     cm = np.random.randint(low=0, high=10, size=[3,4])
-#     x: predicted labels
-#     y: true_labels
+    #         "extend_ratio":
+    #             Determines how much the axes objects (not the fig object) are extended
+    #             in the vertical direction.
 
+    #     """
 
-#     kwargs:
+    #     if (y_pred_proba is not None) and (y_pred is None):
+    #         y_pred = y_pred_proba.argmax(axis=-1)
 
-#         "extend_ratio":
-#             Determines how much the axes objects (not the fig object) are extended
-#             in the vertical direction.
+    #     assert (cm is not None) or ((y_true is not None) and (y_pred is not None))
 
-#     """
+    #     if cm is None:
+    #         with scitex.context.suppress_output():
+    #             cm = sklearn_confusion_matrix(y_true, y_pred, labels=labels)
+    #             # cm = sklearn_confusion_matrix(y_true, y_pred)
 
-#     if (y_pred_proba is not None) and (y_pred is None):
-#         y_pred = y_pred_proba.argmax(axis=-1)
+    #     bacc = calc_bACC_from_conf_mat(cm)
 
-#     assert (cm is not None) or ((y_true is not None) and (y_pred is not None))
+    #     title = f"{title} (bACC = {bacc})"
 
-#     if cm is None:
-#         with scitex.context.suppress_output():
-#             cm = sklearn_confusion_matrix(y_true, y_pred, labels=labels)
-#             # cm = sklearn_confusion_matrix(y_true, y_pred)
+    #     # Ensure all labels are present in the confusion matrix
+    #     if labels is not None:
+    #         full_cm = np.zeros((len(labels), len(labels)))
+    #         unique_true = np.unique(y_true)
+    #         unique_pred = np.unique(y_pred)
+    #         for i, true_label in enumerate(labels):
+    #             for j, pred_label in enumerate(labels):
+    #                 if true_label in unique_true and pred_label in unique_pred:
+    #                     full_cm[i, j] = cm[
+    #                         np.where(unique_true == true_label)[0][0],
+    #                         np.where(unique_pred == pred_label)[0][0],
+    #                     ]
+    #         cm = full_cm
 
-#     bacc = calc_bACC_from_conf_mat(cm)
+    #     # Dataframe
+    #     cm = pd.DataFrame(
+    #         data=cm,
+    #     ).copy()
 
-#     title = f"{title} (bACC = {bacc})"
+    #     # To LaTeX styles
+    #     if pred_labels is not None:
+    #         pred_labels = [scitex.str.to_latex_style(l) for l in pred_labels]
+    #     if true_labels is not None:
+    #         true_labels = [scitex.str.to_latex_style(l) for l in true_labels]
+    #     if labels is not None:
+    #         labels = [scitex.str.to_latex_style(l) for l in labels]
+    #     if sorted_labels is not None:
+    #         sorted_labels = [scitex.str.to_latex_style(l) for l in sorted_labels]
 
-#     # Ensure all labels are present in the confusion matrix
-#     if labels is not None:
-#         full_cm = np.zeros((len(labels), len(labels)))
-#         unique_true = np.unique(y_true)
-#         unique_pred = np.unique(y_pred)
-#         for i, true_label in enumerate(labels):
-#             for j, pred_label in enumerate(labels):
-#                 if true_label in unique_true and pred_label in unique_pred:
-#                     full_cm[i, j] = cm[
-#                         np.where(unique_true == true_label)[0][0],
-#                         np.where(unique_pred == pred_label)[0][0],
-#                     ]
-#         cm = full_cm
+    #     # Prediction Labels: columns
+    #     if pred_labels is not None:
+    #         cm.columns = pred_labels
+    #     elif (pred_labels is None) and (labels is not None):
+    #         cm.columns = labels
 
-#     # Dataframe
-#     cm = pd.DataFrame(
-#         data=cm,
-#     ).copy()
+    #     # Ground Truth Labels: index
+    #     if true_labels is not None:
+    #         cm.index = true_labels
+    #     elif (true_labels is None) and (labels is not None):
+    #         cm.index = labels
 
-#     # To LaTeX styles
-#     if pred_labels is not None:
-#         pred_labels = [scitex.str.to_latex_style(l) for l in pred_labels]
-#     if true_labels is not None:
-#         true_labels = [scitex.str.to_latex_style(l) for l in true_labels]
-#     if labels is not None:
-#         labels = [scitex.str.to_latex_style(l) for l in labels]
-#     if sorted_labels is not None:
-#         sorted_labels = [scitex.str.to_latex_style(l) for l in sorted_labels]
+    #     # Sort based on sorted_labels here
+    #     if sorted_labels is not None:
+    #         assert set(sorted_labels) == set(labels)
+    #         cm = cm.reindex(index=sorted_labels, columns=sorted_labels)
 
-#     # Prediction Labels: columns
-#     if pred_labels is not None:
-#         cm.columns = pred_labels
-#     elif (pred_labels is None) and (labels is not None):
-#         cm.columns = labels
-
-#     # Ground Truth Labels: index
-#     if true_labels is not None:
-#         cm.index = true_labels
-#     elif (true_labels is None) and (labels is not None):
-#         cm.index = labels
-
-#     # Sort based on sorted_labels here
-#     if sorted_labels is not None:
-#         assert set(sorted_labels) == set(labels)
-#         cm = cm.reindex(index=sorted_labels, columns=sorted_labels)
-
-#     # Main
-#     # Use stx.plt.subplots for advanced CSV export and SciTeX Viz integration
+    #     # Main
+    #     # Use stx.plt.subplots for advanced CSV export and SciTeX Viz integration
     import matplotlib.pyplot as mpl_plt
     import scitex as stx
+
     fig, ax = stx.plt.subplots()
 #     res = sns.heatmap(
 #         cm,

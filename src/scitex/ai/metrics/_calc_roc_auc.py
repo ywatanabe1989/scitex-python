@@ -82,8 +82,10 @@ def calc_roc_auc(
             "labels": label_names,
         }
 
-        if return_curve and y_proba.ndim <= 2 and (
-            y_proba.ndim == 1 or y_proba.shape[1] == 2
+        if (
+            return_curve
+            and y_proba.ndim <= 2
+            and (y_proba.ndim == 1 or y_proba.shape[1] == 2)
         ):
             # Only for binary classification
             try:

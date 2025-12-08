@@ -451,7 +451,6 @@ if __name__ == "__main__":
 #         batch_size=None,
 #         device="cuda",
 #     ):
-# 
 #         processed_arr, batch_shape = self._preprocess_array(
 #             arr,
 #             axis,

@@ -24,7 +24,6 @@ import itertools as it
 
 
 class RangerVA(Optimizer):
-
     def __init__(
         self,
         params,
@@ -109,7 +108,6 @@ class RangerVA(Optimizer):
 
         # Evaluate averages and grad, update param tensors
         for group in self.param_groups:
-
             for p in group["params"]:
                 if p.grad is None:
                     continue
@@ -195,7 +193,6 @@ class RangerVA(Optimizer):
                     p_data_fp32.addcdiv_(-step_size, exp_avg, denomf)
 
                 else:
-
                     denom = exp_avg_sq.sqrt().add_(group["eps"])
                     p_data_fp32.addcdiv_(-step_size * group["lr"], exp_avg, denom)
 

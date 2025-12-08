@@ -28,7 +28,6 @@ from time import sleep
 
 
 def check_params(model, tgt_name=None, show=False):
-
     out_dict = {}
 
     for name, param in model.named_parameters():

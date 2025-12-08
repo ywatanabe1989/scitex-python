@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/ml/classification/timeseries/_TimeSeriesSlidingWindowSplit.py"
-)
+
+__FILE__ = "./src/scitex/ml/classification/timeseries/_TimeSeriesSlidingWindowSplit.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -186,9 +185,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
         train_labels = y[train_indices]
 
         # Find unique classes and their counts
-        unique_classes, class_counts = np.unique(
-            train_labels, return_counts=True
-        )
+        unique_classes, class_counts = np.unique(train_labels, return_counts=True)
 
         if len(unique_classes) < 2:
             # Only one class, no undersampling needed
@@ -273,16 +270,12 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                 available_for_test = (
                     n_samples - min_window_size - (self._n_splits * self.gap)
                 )
-                calculated_test_size = max(
-                    1, available_for_test // self._n_splits
-                )
+                calculated_test_size = max(1, available_for_test // self._n_splits)
 
                 # Set calculated values
                 self.window_size = min_window_size
                 self.test_size = calculated_test_size
-                self.step_size = (
-                    calculated_test_size  # Non-overlapping by default
-                )
+                self.step_size = calculated_test_size  # Non-overlapping by default
 
                 logger.info(
                     f"n_splits={self._n_splits} with expanding_window: "
@@ -293,17 +286,13 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                 # We want: n_samples = window_size + (n_splits * (test_size + gap))
                 # Let's make window_size same as test_size for simplicity
                 available = n_samples - (self._n_splits * self.gap)
-                calculated_test_size = max(
-                    1, available // (self._n_splits + 1)
-                )
+                calculated_test_size = max(1, available // (self._n_splits + 1))
                 calculated_window_size = calculated_test_size
 
                 # Set calculated values
                 self.window_size = calculated_window_size
                 self.test_size = calculated_test_size
-                self.step_size = (
-                    calculated_test_size  # Non-overlapping by default
-                )
+                self.step_size = calculated_test_size  # Non-overlapping by default
 
                 logger.info(
                     f"n_splits={self._n_splits} with fixed window: "
@@ -340,9 +329,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                         train_indices, y, timestamps
                     )
 
-                assert (
-                    len(train_indices) > 0 and len(test_indices) > 0
-                ), "Empty window"
+                assert len(train_indices) > 0 and len(test_indices) > 0, "Empty window"
 
                 yield train_indices, test_indices
 
@@ -353,9 +340,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
             # Fixed sliding window: window slides through data
             total_window = self.window_size + self.gap + self.test_size
 
-            for start in range(
-                0, n_samples - total_window + 1, self.step_size
-            ):
+            for start in range(0, n_samples - total_window + 1, self.step_size):
                 # These positions are in the sorted (temporal) domain
                 train_end = start + self.window_size
                 test_start = train_end + self.gap
@@ -374,9 +359,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                         train_indices, y, timestamps
                     )
 
-                assert (
-                    len(train_indices) > 0 and len(test_indices) > 0
-                ), "Empty window"
+                assert len(train_indices) > 0 and len(test_indices) > 0, "Empty window"
 
                 yield train_indices, test_indices
 
@@ -430,26 +413,20 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                 available_for_test = (
                     n_samples - min_window_size - (self._n_splits * self.gap)
                 )
-                calculated_test_size = max(
-                    1, available_for_test // self._n_splits
-                )
+                calculated_test_size = max(1, available_for_test // self._n_splits)
                 self.window_size = min_window_size
                 self.test_size = calculated_test_size
                 self.step_size = calculated_test_size
             else:
                 available = n_samples - (self._n_splits * self.gap)
-                calculated_test_size = max(
-                    1, available // (self._n_splits + 1)
-                )
+                calculated_test_size = max(1, available // (self._n_splits + 1))
                 calculated_window_size = calculated_test_size
                 self.window_size = calculated_window_size
                 self.test_size = calculated_test_size
                 self.step_size = calculated_test_size
 
         # Calculate validation size from training window
-        val_size = (
-            int(self.window_size * self.val_ratio) if self.val_ratio > 0 else 0
-        )
+        val_size = int(self.window_size * self.val_ratio) if self.val_ratio > 0 else 0
         actual_train_size = self.window_size - val_size
 
         if self.expanding_window:
@@ -477,9 +454,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                 if val_size > 0:
                     train_end_pos = train_val_end_pos - val_size
                     train_indices = sorted_indices[0:train_end_pos]
-                    val_indices = sorted_indices[
-                        train_end_pos:train_val_end_pos
-                    ]
+                    val_indices = sorted_indices[train_end_pos:train_val_end_pos]
                 else:
                     train_indices = sorted_indices[0:train_val_end_pos]
                     val_indices = np.array([])
@@ -497,9 +472,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                             val_indices, y, timestamps
                         )
 
-                assert (
-                    len(train_indices) > 0 and len(test_indices) > 0
-                ), "Empty window"
+                assert len(train_indices) > 0 and len(test_indices) > 0, "Empty window"
 
                 yield train_indices, val_indices, test_indices
 
@@ -510,9 +483,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
             # Fixed sliding window with validation
             total_window = self.window_size + self.gap + self.test_size
 
-            for start in range(
-                0, n_samples - total_window + 1, self.step_size
-            ):
+            for start in range(0, n_samples - total_window + 1, self.step_size):
                 # These positions are in the sorted (temporal) domain
                 train_end = start + actual_train_size
 
@@ -522,9 +493,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
 
                 # Test comes after validation with gap
                 test_start = (
-                    val_end + self.gap
-                    if val_size > 0
-                    else train_end + self.gap
+                    val_end + self.gap if val_size > 0 else train_end + self.gap
                 )
                 test_end = test_start + self.test_size
 
@@ -534,9 +503,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                 # Extract indices from the temporally sorted sequence
                 train_indices = sorted_indices[start:train_end]
                 val_indices = (
-                    sorted_indices[val_start:val_end]
-                    if val_size > 0
-                    else np.array([])
+                    sorted_indices[val_start:val_end] if val_size > 0 else np.array([])
                 )
                 test_indices = sorted_indices[test_start:test_end]
 
@@ -552,9 +519,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                         )
 
                 # Ensure temporal order is preserved
-                assert (
-                    len(train_indices) > 0 and len(test_indices) > 0
-                ), "Empty window"
+                assert len(train_indices) > 0 and len(test_indices) > 0, "Empty window"
 
                 yield train_indices, val_indices, test_indices
 
@@ -589,9 +554,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
         n_windows = (n_samples - total_window) // self.step_size + 1
         return max(0, n_windows)
 
-    def plot_splits(
-        self, X, y=None, timestamps=None, figsize=(12, 6), save_path=None
-    ):
+    def plot_splits(self, X, y=None, timestamps=None, figsize=(12, 6), save_path=None):
         """
         Visualize the sliding window splits as rectangles.
 
@@ -642,9 +605,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
             original_undersample = self.undersample
             self.undersample = False  # Temporarily disable
             if self.val_ratio > 0:
-                splits_no_undersample = list(
-                    self.split_with_val(X, y, timestamps)
-                )[:10]
+                splits_no_undersample = list(self.split_with_val(X, y, timestamps))[:10]
             else:
                 splits_no_undersample = list(self.split(X, y, timestamps))[:10]
             self.undersample = original_undersample  # Restore
@@ -792,17 +753,14 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                 split_indices_us = splits[fold]
 
                 if len(split_indices_no_us) == 3:  # train, val, test
-                    train_idx_no_us, val_idx_no_us, test_idx_no_us = (
-                        split_indices_no_us
-                    )
+                    train_idx_no_us, val_idx_no_us, test_idx_no_us = split_indices_no_us
                     train_idx_us, val_idx_us, test_idx_us = split_indices_us
 
                     # Find dropped train samples
                     dropped_train = np.setdiff1d(train_idx_no_us, train_idx_us)
                     if len(dropped_train) > 0:
                         dropped_train_positions = [
-                            np.where(time_order == idx)[0][0]
-                            for idx in dropped_train
+                            np.where(time_order == idx)[0][0] for idx in dropped_train
                         ]
                         dropped_train_jitter = np.random.normal(
                             0, jitter_strength, len(dropped_train_positions)
@@ -822,8 +780,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     dropped_val = np.setdiff1d(val_idx_no_us, val_idx_us)
                     if len(dropped_val) > 0:
                         dropped_val_positions = [
-                            np.where(time_order == idx)[0][0]
-                            for idx in dropped_val
+                            np.where(time_order == idx)[0][0] for idx in dropped_val
                         ]
                         dropped_val_jitter = np.random.normal(
                             0, jitter_strength, len(dropped_val_positions)
@@ -847,8 +804,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     dropped_train = np.setdiff1d(train_idx_no_us, train_idx_us)
                     if len(dropped_train) > 0:
                         dropped_train_positions = [
-                            np.where(time_order == idx)[0][0]
-                            for idx in dropped_train
+                            np.where(time_order == idx)[0][0] for idx in dropped_train
                         ]
                         dropped_train_jitter = np.random.normal(
                             0, jitter_strength, len(dropped_train_positions)
@@ -896,7 +852,9 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         train_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["blue"] if y[idx] == 0 else stx.plt.color.PARAMS["RGBA_NORM"]["lightblue"]
+                            stx.plt.color.PARAMS["RGBA_NORM"]["blue"]
+                            if y[idx] == 0
+                            else stx.plt.color.PARAMS["RGBA_NORM"]["lightblue"]
                             for idx in train_idx
                         ]
                         ax.plot_scatter(
@@ -928,7 +886,9 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         val_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["yellow"] if y[idx] == 0 else stx.plt.color.PARAMS["RGBA_NORM"]["orange"]
+                            stx.plt.color.PARAMS["RGBA_NORM"]["yellow"]
+                            if y[idx] == 0
+                            else stx.plt.color.PARAMS["RGBA_NORM"]["orange"]
                             for idx in val_idx
                         ]
                         ax.plot_scatter(
@@ -960,7 +920,9 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         test_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["red"] if y[idx] == 0 else stx.plt.color.PARAMS["RGBA_NORM"]["brown"]
+                            stx.plt.color.PARAMS["RGBA_NORM"]["red"]
+                            if y[idx] == 0
+                            else stx.plt.color.PARAMS["RGBA_NORM"]["brown"]
                             for idx in test_idx
                         ]
                         ax.plot_scatter(
@@ -990,14 +952,10 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
 
                 # Get actual timestamps for train and test indices
                 train_times = (
-                    timestamps[train_idx]
-                    if timestamps is not None
-                    else train_idx
+                    timestamps[train_idx] if timestamps is not None else train_idx
                 )
                 test_times = (
-                    timestamps[test_idx]
-                    if timestamps is not None
-                    else test_idx
+                    timestamps[test_idx] if timestamps is not None else test_idx
                 )
 
                 # Find temporal positions for scatter plot
@@ -1019,7 +977,9 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         train_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["blue"] if y[idx] == 0 else stx.plt.color.PARAMS["RGBA_NORM"]["lightblue"]
+                            stx.plt.color.PARAMS["RGBA_NORM"]["blue"]
+                            if y[idx] == 0
+                            else stx.plt.color.PARAMS["RGBA_NORM"]["lightblue"]
                             for idx in train_idx
                         ]
                         ax.plot_scatter(
@@ -1051,7 +1011,9 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         test_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["red"] if y[idx] == 0 else stx.plt.color.PARAMS["RGBA_NORM"]["brown"]
+                            stx.plt.color.PARAMS["RGBA_NORM"]["red"]
+                            if y[idx] == 0
+                            else stx.plt.color.PARAMS["RGBA_NORM"]["brown"]
                             for idx in test_idx
                         ]
                         ax.plot_scatter(
@@ -1082,9 +1044,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
         ax.set_xlabel("Temporal Position (sorted by timestamp)")
         ax.set_ylabel("Fold")
         gap_text = f", Gap: {self.gap}" if self.gap > 0 else ""
-        val_text = (
-            f", Val ratio: {self.val_ratio:.1%}" if self.val_ratio > 0 else ""
-        )
+        val_text = f", Val ratio: {self.val_ratio:.1%}" if self.val_ratio > 0 else ""
         ax.set_title(
             f"Sliding Window Split Visualization ({split_type})\\n"
             f"Window: {self.window_size}, Step: {self.step_size}, Test: {self.test_size}{gap_text}{val_text}\\n"
@@ -1113,9 +1073,7 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                 fold_info = f"Fold 0: Train n={len(train_idx)}, Val n={len(val_idx)}, Test n={len(test_idx)}"
             else:  # train, test
                 train_idx, test_idx = first_split
-                fold_info = (
-                    f"Fold 0: Train n={len(train_idx)}, Test n={len(test_idx)}"
-                )
+                fold_info = f"Fold 0: Train n={len(train_idx)}, Test n={len(test_idx)}"
 
             # Add legend with class information
             handles, labels = ax.get_legend_handles_labels()
@@ -1134,6 +1092,8 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
 
 
 """Functions & Classes"""
+
+
 def main(args) -> int:
     """Demonstrate TimeSeriesSlidingWindowSplit functionality.
 
@@ -1172,9 +1132,7 @@ def main(args) -> int:
             )
 
         fig = splitter.plot_splits(X, y, timestamps)
-        stx.io.save(
-            fig, "./01_sliding_window_fixed.jpg", symlink_from_cwd=True
-        )
+        stx.io.save(fig, "./01_sliding_window_fixed.jpg", symlink_from_cwd=True)
         logger.info("")
 
         return splits
@@ -1209,9 +1167,7 @@ def main(args) -> int:
             )
 
         fig = splitter.plot_splits(X, y, timestamps)
-        stx.io.save(
-            fig, "./02_sliding_window_expanding.jpg", symlink_from_cwd=True
-        )
+        stx.io.save(fig, "./02_sliding_window_expanding.jpg", symlink_from_cwd=True)
         logger.info("")
 
         return splits
@@ -1225,9 +1181,7 @@ def main(args) -> int:
         logger.info("=" * 70)
         logger.info("DEMO 3: Fixed Window + Overlapping Tests")
         logger.info("=" * 70)
-        logger.info(
-            "Best for: Maximum evaluation points (like K-fold for training)"
-        )
+        logger.info("Best for: Maximum evaluation points (like K-fold for training)")
 
         splitter = TimeSeriesSlidingWindowSplit(
             window_size=args.window_size,
@@ -1242,14 +1196,10 @@ def main(args) -> int:
         logger.info(f"Generated {len(splits)} splits")
 
         for fold, (train_idx, test_idx) in enumerate(splits):
-            logger.info(
-                f"  Fold {fold}: Train={len(train_idx)}, Test={len(test_idx)}"
-            )
+            logger.info(f"  Fold {fold}: Train={len(train_idx)}, Test={len(test_idx)}")
 
         fig = splitter.plot_splits(X, y, timestamps)
-        stx.io.save(
-            fig, "./03_sliding_window_overlapping.jpg", symlink_from_cwd=True
-        )
+        stx.io.save(fig, "./03_sliding_window_overlapping.jpg", symlink_from_cwd=True)
         logger.info("")
 
         return splits
@@ -1278,15 +1228,13 @@ def main(args) -> int:
             undersample=False,
         )
 
-        splits_no_us = list(
-            splitter_no_undersample.split(X, y_imbalanced, timestamps)
-        )[:3]
+        splits_no_us = list(splitter_no_undersample.split(X, y_imbalanced, timestamps))[
+            :3
+        ]
         logger.info(f"WITHOUT undersampling: {len(splits_no_us)} splits")
         for fold, (train_idx, test_idx) in enumerate(splits_no_us):
             train_labels = y_imbalanced[train_idx]
-            train_unique, train_counts = np.unique(
-                train_labels, return_counts=True
-            )
+            train_unique, train_counts = np.unique(train_labels, return_counts=True)
             logger.info(
                 f"  Fold {fold}: Train size={len(train_idx)}, "
                 f"Class dist={dict(zip(train_unique, train_counts))}"
@@ -1302,15 +1250,11 @@ def main(args) -> int:
             random_state=42,
         )
 
-        splits_us = list(
-            splitter_undersample.split(X, y_imbalanced, timestamps)
-        )[:3]
+        splits_us = list(splitter_undersample.split(X, y_imbalanced, timestamps))[:3]
         logger.info(f"WITH undersampling: {len(splits_us)} splits")
         for fold, (train_idx, test_idx) in enumerate(splits_us):
             train_labels = y_imbalanced[train_idx]
-            train_unique, train_counts = np.unique(
-                train_labels, return_counts=True
-            )
+            train_unique, train_counts = np.unique(train_labels, return_counts=True)
             logger.info(
                 f"  Fold {fold}: Train size={len(train_idx)} (balanced!), "
                 f"Class dist={dict(zip(train_unique, train_counts))}"
@@ -1318,9 +1262,7 @@ def main(args) -> int:
 
         # Save visualization for undersampling
         fig = splitter_undersample.plot_splits(X, y_imbalanced, timestamps)
-        stx.io.save(
-            fig, "./04_sliding_window_undersample.jpg", symlink_from_cwd=True
-        )
+        stx.io.save(fig, "./04_sliding_window_undersample.jpg", symlink_from_cwd=True)
         logger.info("")
 
         return splits_us
@@ -1354,9 +1296,7 @@ def main(args) -> int:
             )
 
         fig = splitter.plot_splits(X, y, timestamps)
-        stx.io.save(
-            fig, "./05_sliding_window_validation.jpg", symlink_from_cwd=True
-        )
+        stx.io.save(fig, "./05_sliding_window_validation.jpg", symlink_from_cwd=True)
         logger.info("")
 
         return splits
@@ -1425,9 +1365,7 @@ def main(args) -> int:
 
         for fold, (train_idx, val_idx, test_idx) in enumerate(splits):
             train_labels = y_imbalanced[train_idx]
-            train_unique, train_counts = np.unique(
-                train_labels, return_counts=True
-            )
+            train_unique, train_counts = np.unique(train_labels, return_counts=True)
             logger.info(
                 f"  Fold {fold}: Train={len(train_idx)} (balanced!), Val={len(val_idx)}, Test={len(test_idx)}, "
                 f"Class dist={dict(zip(train_unique, train_counts))}"
@@ -1450,9 +1388,7 @@ def main(args) -> int:
         Shows all features working together.
         """
         logger.info("=" * 70)
-        logger.info(
-            "DEMO 8: Expanding + Undersampling + Validation (ALL OPTIONS)"
-        )
+        logger.info("DEMO 8: Expanding + Undersampling + Validation (ALL OPTIONS)")
         logger.info("=" * 70)
         logger.info("Best for: Comprehensive time series CV with all features")
 
@@ -1472,18 +1408,14 @@ def main(args) -> int:
 
         for fold, (train_idx, val_idx, test_idx) in enumerate(splits):
             train_labels = y_imbalanced[train_idx]
-            train_unique, train_counts = np.unique(
-                train_labels, return_counts=True
-            )
+            train_unique, train_counts = np.unique(train_labels, return_counts=True)
             logger.info(
                 f"  Fold {fold}: Train={len(train_idx)} (growing & balanced!), Val={len(val_idx)}, Test={len(test_idx)}, "
                 f"Class dist={dict(zip(train_unique, train_counts))}"
             )
 
         fig = splitter.plot_splits(X, y_imbalanced, timestamps)
-        stx.io.save(
-            fig, "./08_sliding_window_all_options.jpg", symlink_from_cwd=True
-        )
+        stx.io.save(fig, "./08_sliding_window_all_options.jpg", symlink_from_cwd=True)
         logger.info("")
 
         return splits
@@ -1571,21 +1503,15 @@ def main(args) -> int:
     # Create imbalanced labels (80% class 0, 20% class 1)
     y_imbalanced = np.zeros(n_samples, dtype=int)
     n_minority = int(n_samples * 0.2)
-    minority_indices = np.random.choice(
-        n_samples, size=n_minority, replace=False
-    )
+    minority_indices = np.random.choice(n_samples, size=n_minority, replace=False)
     y_imbalanced[minority_indices] = 1
 
-    logger.info(
-        f"Generated test data: {n_samples} samples, {X.shape[1]} features"
-    )
+    logger.info(f"Generated test data: {n_samples} samples, {X.shape[1]} features")
     logger.info("")
 
     # Run demos
     splits_fixed = demo_01_fixed_window_non_overlapping_tests(X, y, timestamps)
-    splits_expanding = demo_02_expanding_window_non_overlapping_tests(
-        X, y, timestamps
-    )
+    splits_expanding = demo_02_expanding_window_non_overlapping_tests(X, y, timestamps)
     splits_overlap = demo_03_fixed_window_overlapping_tests(X, y, timestamps)
     splits_undersample = demo_04_undersample_imbalanced_data(
         X, y_imbalanced, timestamps
@@ -1595,9 +1521,7 @@ def main(args) -> int:
     splits_undersample_val = demo_07_undersample_with_validation(
         X, y_imbalanced, timestamps
     )
-    splits_all_options = demo_08_all_options_combined(
-        X, y_imbalanced, timestamps
-    )
+    splits_all_options = demo_08_all_options_combined(X, y_imbalanced, timestamps)
 
     # Print summary
     print_summary(

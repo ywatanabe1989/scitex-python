@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -26,8 +27,7 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 # Import base class and improved single reporter
-from ._BaseClassificationReporter import (BaseClassificationReporter,
-                                          ReporterConfig)
+from ._BaseClassificationReporter import BaseClassificationReporter, ReporterConfig
 from ._SingleClassificationReporter import SingleTaskClassificationReporter
 from .reporter_utils.storage import MetricStorage
 
@@ -71,9 +71,7 @@ class MultipleTasksClassificationReporter(BaseClassificationReporter):
             config = ReporterConfig()
 
         # Initialize base class
-        super().__init__(
-            output_dir=output_dir, precision=config.precision, **kwargs
-        )
+        super().__init__(output_dir=output_dir, precision=config.precision, **kwargs)
 
         self.config = config
         self.storage = MetricStorage(self.output_dir, precision=self.precision)
@@ -92,12 +90,12 @@ class MultipleTasksClassificationReporter(BaseClassificationReporter):
 
         # Print initialization info if verbose
         if self.verbose:
-            print(f"\n{'='*70}")
+            print(f"\n{'=' * 70}")
             print(f"Multi-Task Classification Reporter Initialized")
-            print(f"{'='*70}")
+            print(f"{'=' * 70}")
             print(f"Output Directory: {self.output_dir.absolute()}")
             print(f"Tasks: {self.tasks}")
-            print(f"{'='*70}\n")
+            print(f"{'=' * 70}\n")
 
     def _create_single_reporter(self, task: str) -> None:
         """Create a single task reporter."""
@@ -272,9 +270,7 @@ class MultipleTasksClassificationReporter(BaseClassificationReporter):
         summary = self.get_summary()
         return self.storage.save(summary, filename)
 
-    def get_reporter_for_target(
-        self, target: str
-    ) -> SingleTaskClassificationReporter:
+    def get_reporter_for_target(self, target: str) -> SingleTaskClassificationReporter:
         """
         Get the individual reporter for a specific target.
 
@@ -402,5 +398,6 @@ def create_multi_task_reporter(
     return MultipleTasksClassificationReporter(
         tasks=tasks, output_dir=output_dir, **kwargs
     )
+
 
 # EOF

@@ -72,9 +72,7 @@ def calc_pre_rec_auc(
 
             n_classes = y_proba.shape[1]
             y_true_bin = label_binarize(y_true_norm, classes=range(n_classes))
-            auc_score = average_precision_score(
-                y_true_bin, y_proba, average="weighted"
-            )
+            auc_score = average_precision_score(y_true_bin, y_proba, average="weighted")
         else:
             # 1D array
             auc_score = average_precision_score(y_true_norm, y_proba)
@@ -86,8 +84,10 @@ def calc_pre_rec_auc(
             "labels": label_names,
         }
 
-        if return_curve and y_proba.ndim <= 2 and (
-            y_proba.ndim == 1 or y_proba.shape[1] == 2
+        if (
+            return_curve
+            and y_proba.ndim <= 2
+            and (y_proba.ndim == 1 or y_proba.shape[1] == 2)
         ):
             # Only for binary classification
             try:

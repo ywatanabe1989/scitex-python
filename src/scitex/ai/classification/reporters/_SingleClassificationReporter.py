@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/ml/classification/reporters/_SingleClassificationReporter.py"
-)
+
+__FILE__ = "./src/scitex/ml/classification/reporters/_SingleClassificationReporter.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -34,16 +33,24 @@ import pandas as pd
 from scitex.logging import getLogger
 
 # Import base class and utilities
-from ._BaseClassificationReporter import (BaseClassificationReporter,
-                                          ReporterConfig)
+from ._BaseClassificationReporter import BaseClassificationReporter, ReporterConfig
+
 # Import original metric calculation functions (these are good)
-from .reporter_utils import (calc_bacc, calc_clf_report, calc_conf_mat,
-                             calc_mcc, calc_pre_rec_auc, calc_roc_auc)
+from .reporter_utils import (
+    calc_bacc,
+    calc_clf_report,
+    calc_conf_mat,
+    calc_mcc,
+    calc_pre_rec_auc,
+    calc_roc_auc,
+)
 from .reporter_utils._Plotter import Plotter
-from .reporter_utils.reporting import (create_summary_statistics,
-                                       generate_latex_report,
-                                       generate_markdown_report,
-                                       generate_org_report)
+from .reporter_utils.reporting import (
+    create_summary_statistics,
+    generate_latex_report,
+    generate_markdown_report,
+    generate_org_report,
+)
 from .reporter_utils.storage import MetricStorage, save_metric
 
 logger = getLogger(__name__)
@@ -51,9 +58,7 @@ logger = getLogger(__name__)
 
 # Fold directory and filename prefixes for consistent naming
 FOLD_DIR_PREFIX_PATTERN = "fold_{fold:02d}"  # Directory: fold_00, fold_01, ...
-FOLD_FILE_PREFIX_PATTERN = (
-    "fold-{fold:02d}"  # Filename prefix: fold-00_, fold-01_, ...
-)
+FOLD_FILE_PREFIX_PATTERN = "fold-{fold:02d}"  # Filename prefix: fold-00_, fold-01_, ...
 
 # Filename patterns for consistent naming across the reporter
 # Note: fold-{fold:02d} comes first to group files by fold when sorted
@@ -181,9 +186,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         )
 
         self.config = config
-        self.session_config = (
-            None  # Will store SciTeX session CONFIG if provided
-        )
+        self.session_config = None  # Will store SciTeX session CONFIG if provided
         self.storage = MetricStorage(self.output_dir, precision=self.precision)
         self.plotter = Plotter(enable_plotting=True)
 
@@ -348,8 +351,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         # Handle feature importance automatically if model provided
         if model is not None and feature_names is not None:
             try:
-                from scitex.ai.feature_selection import \
-                    extract_feature_importance
+                from scitex.ai.feature_selection import extract_feature_importance
 
                 importance_dict = extract_feature_importance(
                     model, feature_names, method="auto"
@@ -357,23 +359,17 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 if importance_dict:
                     # Store in fold metrics for cross-fold aggregation
                     metrics["feature-importance"] = importance_dict
-                    self.fold_metrics[fold][
-                        "feature-importance"
-                    ] = importance_dict
+                    self.fold_metrics[fold]["feature-importance"] = importance_dict
 
                     # Save feature importance
                     fold_dir = FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
-                    filename = FILENAME_PATTERNS[
-                        "feature_importance_json"
-                    ].format(fold=fold)
-                    self.storage.save(
-                        importance_dict, f"{fold_dir}/{filename}"
+                    filename = FILENAME_PATTERNS["feature_importance_json"].format(
+                        fold=fold
                     )
+                    self.storage.save(importance_dict, f"{fold_dir}/{filename}")
 
                     if verbose:
-                        logger.info(
-                            f"  Feature importance extracted and saved"
-                        )
+                        logger.info(f"  Feature importance extracted and saved")
             except Exception as e:
                 logger.warning(f"Could not extract feature importance: {e}")
 
@@ -403,21 +399,17 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             if store_y_true:
                 filename = FILENAME_PATTERNS["y_true"].format(fold=fold)
                 # Convert to DataFrame for CSV format with index
-                df_y_true = pd.DataFrame({
-                    "sample_index": sample_indices,
-                    "fold": fold,
-                    "y_true": y_true
-                })
+                df_y_true = pd.DataFrame(
+                    {"sample_index": sample_indices, "fold": fold, "y_true": y_true}
+                )
                 self.storage.save(df_y_true, f"{fold_dir}/{filename}")
 
             if store_y_pred:
                 filename = FILENAME_PATTERNS["y_pred"].format(fold=fold)
                 # Convert to DataFrame for CSV format with index
-                df_y_pred = pd.DataFrame({
-                    "sample_index": sample_indices,
-                    "fold": fold,
-                    "y_pred": y_pred
-                })
+                df_y_pred = pd.DataFrame(
+                    {"sample_index": sample_indices, "fold": fold, "y_pred": y_pred}
+                )
                 self.storage.save(df_y_pred, f"{fold_dir}/{filename}")
 
             if store_y_proba and y_proba is not None:
@@ -425,11 +417,13 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 # Convert to DataFrame for CSV format with index
                 # Handle both 1D (binary) and 2D (multiclass) probability arrays
                 if y_proba.ndim == 1:
-                    df_y_proba = pd.DataFrame({
-                        "sample_index": sample_indices,
-                        "fold": fold,
-                        "y_proba": y_proba
-                    })
+                    df_y_proba = pd.DataFrame(
+                        {
+                            "sample_index": sample_indices,
+                            "fold": fold,
+                            "y_proba": y_proba,
+                        }
+                    )
                 else:
                     # Create column names for each class
                     data = {"sample_index": sample_indices, "fold": fold}
@@ -447,9 +441,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         fold_dir = FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
 
         # Extract metric values for filenames
-        balanced_acc = self._extract_metric_value(
-            metrics.get("balanced-accuracy")
-        )
+        balanced_acc = self._extract_metric_value(metrics.get("balanced-accuracy"))
         mcc_value = self._extract_metric_value(metrics.get("mcc"))
         roc_auc_value = self._extract_metric_value(metrics.get("roc-auc"))
         pr_auc_value = self._extract_metric_value(metrics.get("pr-auc"))
@@ -486,38 +478,32 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 if cm_df is not None:
                     # Create filename with balanced accuracy
                     if balanced_acc is not None:
-                        cm_filename = FILENAME_PATTERNS[
-                            "confusion_matrix_csv"
-                        ].format(fold=fold, bacc=balanced_acc)
+                        cm_filename = FILENAME_PATTERNS["confusion_matrix_csv"].format(
+                            fold=fold, bacc=balanced_acc
+                        )
                     else:
                         cm_filename = FILENAME_PATTERNS[
                             "confusion_matrix_csv_no_bacc"
                         ].format(fold=fold)
 
                     # Save with index=True to preserve row labels
-                    self.storage.save(
-                        cm_df, f"{fold_dir}/{cm_filename}", index=True
-                    )
+                    self.storage.save(cm_df, f"{fold_dir}/{cm_filename}", index=True)
 
             elif metric_name == "classification_report":
                 # Save classification report with consistent naming
-                report_filename = FILENAME_PATTERNS[
-                    "classification_report"
-                ].format(fold=fold)
+                report_filename = FILENAME_PATTERNS["classification_report"].format(
+                    fold=fold
+                )
                 if isinstance(actual_value, pd.DataFrame):
                     # Reset index to make it an ordinary column with name
                     report_df = actual_value.reset_index()
                     report_df = report_df.rename(columns={"index": "class"})
-                    self.storage.save(
-                        report_df, f"{fold_dir}/{report_filename}"
-                    )
+                    self.storage.save(report_df, f"{fold_dir}/{report_filename}")
                 elif isinstance(actual_value, dict):
                     # Try to create DataFrame from dict
                     try:
                         report_df = pd.DataFrame(actual_value).transpose()
-                        self.storage.save(
-                            report_df, f"{fold_dir}/{report_filename}"
-                        )
+                        self.storage.save(report_df, f"{fold_dir}/{report_filename}")
                     except:
                         # Save as JSON if DataFrame conversion fails
                         report_filename = FILENAME_PATTERNS[
@@ -532,13 +518,9 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                     report_filename = FILENAME_PATTERNS[
                         "classification_report_txt"
                     ].format(fold=fold)
-                    self.storage.save(
-                        actual_value, f"{fold_dir}/{report_filename}"
-                    )
+                    self.storage.save(actual_value, f"{fold_dir}/{report_filename}")
 
-            elif (
-                metric_name == "balanced-accuracy" and balanced_acc is not None
-            ):
+            elif metric_name == "balanced-accuracy" and balanced_acc is not None:
                 # Save with value in filename
                 filename = FILENAME_PATTERNS["fold_metric_with_value"].format(
                     fold=fold,
@@ -606,8 +588,12 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         if y_proba is None:
             return
 
-        from sklearn.metrics import (auc, average_precision_score,
-                                     precision_recall_curve, roc_curve)
+        from sklearn.metrics import (
+            auc,
+            average_precision_score,
+            precision_recall_curve,
+            roc_curve,
+        )
 
         fold_dir = FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
 
@@ -638,9 +624,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             self.storage.save(roc_df, f"{fold_dir}/{roc_filename}")
 
             # PR curve data
-            precision, recall, _ = precision_recall_curve(
-                y_true_norm, y_proba_pos
-            )
+            precision, recall, _ = precision_recall_curve(y_true_norm, y_proba_pos)
             avg_precision = average_precision_score(y_true_norm, y_proba_pos)
 
             # Create PR curve DataFrame with Recall and Precision columns
@@ -695,9 +679,9 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 )
             else:
                 title = f"Confusion Matrix (Fold {fold:02d})"
-                filename = FILENAME_PATTERNS[
-                    "confusion_matrix_jpg_no_bacc"
-                ].format(fold=fold)
+                filename = FILENAME_PATTERNS["confusion_matrix_jpg_no_bacc"].format(
+                    fold=fold
+                )
 
             self.plotter.create_confusion_matrix_plot(
                 cm_data,
@@ -716,9 +700,9 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                     fold=fold, auc=roc_auc_val
                 )
             else:
-                roc_filename = FILENAME_PATTERNS[
-                    "roc_curve_jpg_no_auc"
-                ].format(fold=fold)
+                roc_filename = FILENAME_PATTERNS["roc_curve_jpg_no_auc"].format(
+                    fold=fold
+                )
 
             self.plotter.create_roc_curve(
                 y_true,
@@ -736,9 +720,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                     fold=fold, ap=pr_auc_val
                 )
             else:
-                pr_filename = FILENAME_PATTERNS["pr_curve_jpg_no_ap"].format(
-                    fold=fold
-                )
+                pr_filename = FILENAME_PATTERNS["pr_curve_jpg_no_ap"].format(fold=fold)
 
             self.plotter.create_precision_recall_curve(
                 y_true,
@@ -750,9 +732,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
 
         # NEW: Create comprehensive metrics visualization dashboard
         # This automatically creates a 4-panel figure with confusion matrix, ROC, PR curve, and metrics table
-        summary_filename = FILENAME_PATTERNS["metrics_summary"].format(
-            fold=fold
-        )
+        summary_filename = FILENAME_PATTERNS["metrics_summary"].format(fold=fold)
         self.plotter.create_metrics_visualization(
             metrics=metrics,
             y_true=y_true,
@@ -801,8 +781,8 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
 
             # Also calculate normalized version (as percentages)
             overall_cm_normalized = overall_cm / overall_cm.sum()
-            summary["overall_confusion_matrix_normalized"] = (
-                self._round_numeric(overall_cm_normalized.tolist())
+            summary["overall_confusion_matrix_normalized"] = self._round_numeric(
+                overall_cm_normalized.tolist()
             )
 
         # Calculate summary statistics for scalar metrics
@@ -833,14 +813,13 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         feature_importances_list = []
         for fold_metrics in self.fold_metrics.values():
             if "feature-importance" in fold_metrics:
-                feature_importances_list.append(
-                    fold_metrics["feature-importance"]
-                )
+                feature_importances_list.append(fold_metrics["feature-importance"])
 
         if feature_importances_list:
             from scitex.ai.feature_selection import (
                 aggregate_feature_importances,
-                create_feature_importance_dataframe)
+                create_feature_importance_dataframe,
+            )
 
             aggregated_importances = aggregate_feature_importances(
                 feature_importances_list
@@ -873,9 +852,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             Transparency for individual fold curves (0-1)
         """
         if not self.all_predictions:
-            logger.warning(
-                "No predictions stored for CV aggregation visualizations"
-            )
+            logger.warning("No predictions stored for CV aggregation visualizations")
             return
 
         if output_dir is None:
@@ -937,9 +914,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         from scitex.ai.metrics import calc_feature_importance
 
         try:
-            importance_dict, importances = calc_feature_importance(
-                model, feature_names
-            )
+            importance_dict, importances = calc_feature_importance(model, feature_names)
         except ValueError as e:
             logger.warning(f"Could not extract feature importance: {e}")
             return {}
@@ -953,17 +928,11 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             if fold is not None
             else "cv_summary"
         )
-        json_filename = FILENAME_PATTERNS["feature_importance_json"].format(
-            fold=fold
-        )
-        self.storage.save(
-            dict(sorted_importances), f"{fold_subdir}/{json_filename}"
-        )
+        json_filename = FILENAME_PATTERNS["feature_importance_json"].format(fold=fold)
+        self.storage.save(dict(sorted_importances), f"{fold_subdir}/{json_filename}")
 
         # Create visualization using FILENAME_PATTERNS
-        jpg_filename = FILENAME_PATTERNS["feature_importance_jpg"].format(
-            fold=fold
-        )
+        jpg_filename = FILENAME_PATTERNS["feature_importance_jpg"].format(fold=fold)
         save_path = self.output_dir / fold_subdir / jpg_filename
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -1022,9 +991,9 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
 
         # Save as JSON using FILENAME_PATTERNS
         n_folds = len(all_importances)
-        json_filename = FILENAME_PATTERNS[
-            "cv_summary_feature_importance_json"
-        ].format(n_folds=n_folds)
+        json_filename = FILENAME_PATTERNS["cv_summary_feature_importance_json"].format(
+            n_folds=n_folds
+        )
         self.storage.save(
             dict(sorted_features),
             f"cv_summary/{json_filename}",
@@ -1033,9 +1002,9 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         # Create visualization using centralized plotting function
         from scitex.ai.plt import plot_feature_importance_cv_summary
 
-        jpg_filename = FILENAME_PATTERNS[
-            "cv_summary_feature_importance_jpg"
-        ].format(n_folds=n_folds)
+        jpg_filename = FILENAME_PATTERNS["cv_summary_feature_importance_jpg"].format(
+            n_folds=n_folds
+        )
         save_path = self.output_dir / "cv_summary" / jpg_filename
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -1055,12 +1024,8 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             return
 
         # Aggregate all predictions
-        all_y_true = np.concatenate(
-            [p["y_true"] for p in self.all_predictions]
-        )
-        all_y_proba = np.concatenate(
-            [p["y_proba"] for p in self.all_predictions]
-        )
+        all_y_true = np.concatenate([p["y_true"] for p in self.all_predictions])
+        all_y_proba = np.concatenate([p["y_proba"] for p in self.all_predictions])
 
         # Get per-fold metrics for mean and std
         roc_values = []
@@ -1119,9 +1084,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         # Normalize labels to integers for sklearn curve functions in plotter
         from scitex.ai.metrics import _normalize_labels
 
-        all_y_true_norm, _, label_names, _ = _normalize_labels(
-            all_y_true, all_y_true
-        )
+        all_y_true_norm, _, label_names, _ = _normalize_labels(all_y_true, all_y_true)
 
         # ROC Curve with mean±std and n_folds in filename
         roc_title = f"ROC Curve (CV Summary) - AUC: {roc_mean:.3f} ± {roc_std:.3f} (n={n_folds})"
@@ -1173,8 +1136,12 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         n_folds: int,
     ) -> None:
         """Save CV summary ROC and PR curve data as CSV files with metric values in filenames."""
-        from sklearn.metrics import (auc, average_precision_score,
-                                     precision_recall_curve, roc_curve)
+        from sklearn.metrics import (
+            auc,
+            average_precision_score,
+            precision_recall_curve,
+            roc_curve,
+        )
 
         cv_summary_dir = "cv_summary"
 
@@ -1199,15 +1166,13 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             roc_df = pd.DataFrame({"FPR": fpr, "TPR": tpr})
 
             # Save with mean±std and n_folds in filename
-            roc_filename = FILENAME_PATTERNS[
-                "cv_summary_roc_curve_csv"
-            ].format(mean=roc_mean, std=roc_std, n_folds=n_folds)
+            roc_filename = FILENAME_PATTERNS["cv_summary_roc_curve_csv"].format(
+                mean=roc_mean, std=roc_std, n_folds=n_folds
+            )
             self.storage.save(roc_df, f"{cv_summary_dir}/{roc_filename}")
 
             # PR curve data
-            precision, recall, _ = precision_recall_curve(
-                y_true_norm, y_proba_pos
-            )
+            precision, recall, _ = precision_recall_curve(y_true_norm, y_proba_pos)
             avg_precision = average_precision_score(y_true_norm, y_proba_pos)
 
             # Create PR curve DataFrame with Recall and Precision columns
@@ -1219,9 +1184,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             )
             self.storage.save(pr_df, f"{cv_summary_dir}/{pr_filename}")
 
-    def save_cv_summary_confusion_matrix(
-        self, summary: Dict[str, Any]
-    ) -> None:
+    def save_cv_summary_confusion_matrix(self, summary: Dict[str, Any]) -> None:
         """
         Save and plot the CV summary confusion matrix.
 
@@ -1271,17 +1234,13 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         n_folds = len(self.fold_metrics)
         if "metrics_summary" in summary:
             if "balanced-accuracy" in summary["metrics_summary"]:
-                balanced_acc_stats = summary["metrics_summary"][
-                    "balanced-accuracy"
-                ]
+                balanced_acc_stats = summary["metrics_summary"]["balanced-accuracy"]
                 balanced_acc_mean = balanced_acc_stats.get("mean")
                 balanced_acc_std = balanced_acc_stats.get("std")
 
         # Create filename with mean±std and n_folds
         if balanced_acc_mean is not None and balanced_acc_std is not None:
-            cm_filename = FILENAME_PATTERNS[
-                "cv_summary_confusion_matrix_csv"
-            ].format(
+            cm_filename = FILENAME_PATTERNS["cv_summary_confusion_matrix_csv"].format(
                 mean=balanced_acc_mean, std=balanced_acc_std, n_folds=n_folds
             )
         else:
@@ -1318,9 +1277,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         # Create title with balanced accuracy stats and filename with mean±std and n_folds
         if balanced_acc_mean is not None and balanced_acc_std is not None:
             title = f"Confusion Matrix (CV Summary) - Balanced Acc: {balanced_acc_mean:.3f} ± {balanced_acc_std:.3f} (n={n_folds})"
-            filename = FILENAME_PATTERNS[
-                "cv_summary_confusion_matrix_jpg"
-            ].format(
+            filename = FILENAME_PATTERNS["cv_summary_confusion_matrix_jpg"].format(
                 mean=balanced_acc_mean, std=balanced_acc_std, n_folds=n_folds
             )
         else:
@@ -1367,9 +1324,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
 
         # Add feature importance if available
         if "feature-importance" in summary:
-            results["summary"]["feature-importance"] = summary[
-                "feature-importance"
-            ]
+            results["summary"]["feature-importance"] = summary["feature-importance"]
 
         # Add per-fold results
         for fold, fold_data in self.fold_metrics.items():
@@ -1430,9 +1385,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
         if cv_summary_dir.exists():
             for plot_file in cv_summary_dir.glob("*.jpg"):
                 plot_key = f"cv_summary_{plot_file.stem}"
-                results["plots"][plot_key] = str(
-                    plot_file.relative_to(self.output_dir)
-                )
+                results["plots"][plot_key] = str(plot_file.relative_to(self.output_dir))
 
         # Per-fold plots in fold directories
         for fold_dir in sorted(self.output_dir.glob("fold_*")):
@@ -1442,9 +1395,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 # Use just the stem as the plot key since filename already contains fold info
                 # e.g., "fold-00_confusion-matrix_bacc-0.500" becomes plot key "fold_00_confusion-matrix"
                 plot_key = f"fold_{fold_num}_{plot_file.stem}"
-                results["plots"][plot_key] = str(
-                    plot_file.relative_to(self.output_dir)
-                )
+                results["plots"][plot_key] = str(plot_file.relative_to(self.output_dir))
 
         # Generate reports
         reports_dir = self._create_subdir_if_needed("reports")
@@ -1452,9 +1403,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
 
         # Org-mode report (primary format) - will generate other formats via pandoc
         org_path = reports_dir / "classification_report.org"
-        generate_org_report(
-            results, org_path, include_plots=True, convert_formats=True
-        )
+        generate_org_report(results, org_path, include_plots=True, convert_formats=True)
         generated_files["org"] = org_path
         logger.info(f"Generated org-mode report: {org_path}")
 
@@ -1494,9 +1443,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
 
                         # Clean up LaTeX auxiliary files
                         for ext in [".aux", ".log", ".out", ".toc"]:
-                            aux_file = (
-                                reports_dir / f"classification_report{ext}"
-                            )
+                            aux_file = reports_dir / f"classification_report{ext}"
                             if aux_file.exists():
                                 aux_file.unlink()
                 finally:
@@ -1539,9 +1486,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 self.output_dir.parent.parent
                 / "CONFIGS"
                 / "CONFIG.yaml",  # ../../CONFIGS/CONFIG.yaml
-                self.output_dir
-                / "CONFIGS"
-                / "CONFIG.yaml",  # ./CONFIGS/CONFIG.yaml
+                self.output_dir / "CONFIGS" / "CONFIG.yaml",  # ./CONFIGS/CONFIG.yaml
             ]
 
             config_path = None
@@ -1617,9 +1562,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 # Save metric statistics
                 self.storage.save(stats, f"{cv_summary_dir}/{filename}")
 
-    def _save_cv_summary_classification_report(
-        self, summary: Dict[str, Any]
-    ) -> None:
+    def _save_cv_summary_classification_report(self, summary: Dict[str, Any]) -> None:
         """
         Save CV summary classification report with mean ± std (n_folds=X) format.
         """
@@ -1702,20 +1645,20 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                         std_support = np.std(values)
                         if std_support > 0:
                             # Show mean±std if there's variability across folds
-                            summary_report[cls][
-                                metric
-                            ] = f"{mean_support:.1f} ± {std_support:.1f} (total={total_support})"
+                            summary_report[cls][metric] = (
+                                f"{mean_support:.1f} ± {std_support:.1f} (total={total_support})"
+                            )
                         else:
                             # If constant across folds, just show the value
-                            summary_report[cls][
-                                metric
-                            ] = f"{int(mean_support)} per fold (total={total_support})"
+                            summary_report[cls][metric] = (
+                                f"{int(mean_support)} per fold (total={total_support})"
+                            )
                     else:
                         mean_val = np.mean(values)
                         std_val = np.std(values)
-                        summary_report[cls][
-                            metric
-                        ] = f"{mean_val:.3f} ± {std_val:.3f} (n={n_folds})"
+                        summary_report[cls][metric] = (
+                            f"{mean_val:.3f} ± {std_val:.3f} (n={n_folds})"
+                        )
 
         # Process summary rows (macro avg, weighted avg)
         for avg_type in ["macro avg", "weighted avg"]:
@@ -1725,9 +1668,7 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                 if avg_type in report:
                     for metric in ["precision", "recall", "f1-score"]:
                         if metric in report[avg_type]:
-                            avg_metrics[metric].append(
-                                report[avg_type][metric]
-                            )
+                            avg_metrics[metric].append(report[avg_type][metric])
 
             if any(avg_metrics.values()):
                 summary_report[avg_type] = {}
@@ -1735,9 +1676,9 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
                     if values:
                         mean_val = np.mean(values)
                         std_val = np.std(values)
-                        summary_report[avg_type][
-                            metric
-                        ] = f"{mean_val:.3f} ± {std_val:.3f} (n={n_folds})"
+                        summary_report[avg_type][metric] = (
+                            f"{mean_val:.3f} ± {std_val:.3f} (n={n_folds})"
+                        )
 
         # Convert to DataFrame for better visualization
         if summary_report:
@@ -1747,9 +1688,9 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             report_df = report_df.rename(columns={"index": "class"})
 
             # Save as CSV
-            filename = FILENAME_PATTERNS[
-                "cv_summary_classification_report"
-            ].format(n_folds=n_folds)
+            filename = FILENAME_PATTERNS["cv_summary_classification_report"].format(
+                n_folds=n_folds
+            )
             self.storage.save(
                 report_df,
                 f"{cv_summary_dir}/{filename}",
@@ -1818,7 +1759,9 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             if parent and str(parent) != ".":
                 relative_path = f"{FOLD_DIR_PREFIX_PATTERN.format(fold=fold)}/{parent}/{prefixed_filename}"
             else:
-                relative_path = f"{FOLD_DIR_PREFIX_PATTERN.format(fold=fold)}/{prefixed_filename}"
+                relative_path = (
+                    f"{FOLD_DIR_PREFIX_PATTERN.format(fold=fold)}/{prefixed_filename}"
+                )
 
         # Use the existing storage.save method which already handles everything
         return self.storage.save(data, relative_path)
@@ -1830,5 +1773,6 @@ class SingleTaskClassificationReporter(BaseClassificationReporter):
             f"folds={fold_count}, "
             f"output_dir='{self.output_dir}')"
         )
+
 
 # EOF
