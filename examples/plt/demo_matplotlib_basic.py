@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-02 04:34:29 (ywatanabe)"
+# Timestamp: "2025-12-08 15:41:14 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/examples/plt/demo_matplotlib_basic.py
 
 
@@ -58,42 +58,20 @@ DEMOS = [
     (demo_streamplot, "./png/21_streamplot.png"),
 ]
 
-
-# @stx.session
-# def main(
-#     CONFIG=stx.INJECTED,
-#     plt=stx.INJECTED,
-#     COLORS=stx.INJECTED,
-#     rng_manager=stx.INJECTED,
-#     logger=stx.INJECTED,
-# ):
-#     """Demo: Pure Matplotlib methods through SciTeX wrapper (21 types)."""
-#     STYLE = SCITEX_STYLE.copy()
-
-#     logger.info("=" * 70)
-#     logger.info("Demo: Pure Matplotlib Methods through SciTeX")
-#     logger.info("=" * 70)
-
-#     for idx, (demo_func, filename) in enumerate(DEMOS, 1):
-#         logger.info(f"\n[{idx:02d}] {demo_func.__doc__}")
-
-#         fig, ax = stx.plt.subplots(**STYLE)
-#         demo_func(fig, ax, stx)
-#         stx.io.save(fig, filename)
-#         fig.close()
-
-#     logger.info("\n" + "=" * 70)
-#     logger.info("All demos completed")
-#     logger.info("=" * 70)
-
-#     return 0
+# Flat design
+DEMOS = [(demo[0], demo[1].replace("./png/", "./")) for demo in DEMOS]
 
 
-def main():
+@stx.session
+def main(
+    CONFIG=stx.INJECTED,
+    plt=stx.INJECTED,
+    COLORS=stx.INJECTED,
+    rng_manager=stx.INJECTED,
+    logger=stx.INJECTED,
+):
     """Demo: Pure Matplotlib methods through SciTeX wrapper (21 types)."""
-    from scitex.logging import getLogger
 
-    logger = getLogger(__name__)
     STYLE = SCITEX_STYLE.copy()
 
     logger.info("=" * 70)
