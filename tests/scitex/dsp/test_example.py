@@ -474,7 +474,6 @@ if __name__ == "__main__":
 #     i_batch = 0
 #     i_ch = 0
 #     for ax, (i_col, col) in zip(axes, enumerate(sigs.columns)):
-# 
 #         if col == "hilbert_amp":  # add the original signal to the ax
 #             _col = "orig"
 #             (
@@ -515,7 +514,6 @@ if __name__ == "__main__":
 # 
 # 
 # def plot_wavelet(plt, sigs, sig_col, sig_type):
-# 
 #     xx, tt, fs = sigs[sig_col]
 #     # if sig_type == "tensorpac":
 #     #     xx = xx[:, :, 0]
@@ -560,7 +558,6 @@ if __name__ == "__main__":
 # 
 # 
 # def plot_psd(plt, sigs, sig_col, sig_type):
-# 
 #     xx, tt, fs = sigs[sig_col]
 # 
 #     # if sig_type == "tensorpac":
@@ -600,7 +597,6 @@ if __name__ == "__main__":
 # 
 # 
 # if __name__ == "__main__":
-# 
 #     # Parameters
 #     T_SEC = 4
 #     SIG_TYPES = [
@@ -637,7 +633,6 @@ if __name__ == "__main__":
 # 
 #         # Plots wavelet coefficients and PSD
 #         for sig_col in sigs.columns:
-# 
 #             if "hilbert" in sig_col:
 #                 continue
 # 

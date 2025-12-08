@@ -234,9 +234,8 @@ if __name__ == "__main__":
 #     str
 #         A string representation of the input dictionary.
 #     """
-#     return delimiter.join(
-#         f"{key}-{value}" for key, value in dictionary.items()
-#     )
+#     return delimiter.join(f"{key}-{value}" for key, value in dictionary.items())
+# 
 # 
 # # EOF
 

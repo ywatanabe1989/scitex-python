@@ -236,7 +236,6 @@ if __name__ == "__main__":
 # 
 # """scitex.dsp.wavelet function"""
 # 
-# 
 # from scitex.decorators import batch_fn, signal_fn
 # from scitex.nn._Wavelet import Wavelet
 # import scitex

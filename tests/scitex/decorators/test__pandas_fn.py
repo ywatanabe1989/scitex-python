@@ -170,9 +170,9 @@ if __name__ == "__main__":
 #                 except:
 #                     # If list can't be converted to DataFrame, return as is
 #                     return data
-#             elif hasattr(data, '__class__') and data.__class__.__name__ == 'Tensor':
+#             elif hasattr(data, "__class__") and data.__class__.__name__ == "Tensor":
 #                 return pd.DataFrame(data.detach().cpu().numpy())
-#             elif hasattr(data, '__class__') and data.__class__.__name__ == 'DataArray':
+#             elif hasattr(data, "__class__") and data.__class__.__name__ == "DataArray":
 #                 return pd.DataFrame(data.values)
 #             elif isinstance(data, (int, float, str)):
 #                 # Don't convert scalars to DataFrames
@@ -189,6 +189,7 @@ if __name__ == "__main__":
 # 
 #         # Skip strict assertion for certain types
 #         import pandas as pd
+# 
 #         validated_args = []
 #         for arg_index, arg in enumerate(converted_args):
 #             if isinstance(arg, pd.DataFrame):
@@ -196,7 +197,9 @@ if __name__ == "__main__":
 #             elif isinstance(arg, (int, float, str, type(None), pd.Series)):
 #                 # Pass through scalars, strings, Series, and None unchanged
 #                 validated_args.append(arg)
-#             elif isinstance(arg, list) and all(isinstance(item, pd.DataFrame) for item in arg):
+#             elif isinstance(arg, list) and all(
+#                 isinstance(item, pd.DataFrame) for item in arg
+#             ):
 #                 # List of DataFrames - pass through as is
 #                 validated_args.append(arg)
 #             else:
@@ -211,14 +214,19 @@ if __name__ == "__main__":
 # 
 #         # Convert results back to original input types
 #         import pandas as pd
+# 
 #         if isinstance(results, pd.DataFrame):
 #             if original_object is not None:
 #                 if isinstance(original_object, list):
 #                     return results.values.tolist()
 #                 elif isinstance(original_object, np.ndarray):
 #                     return results.values
-#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Tensor':
+#                 elif (
+#                     hasattr(original_object, "__class__")
+#                     and original_object.__class__.__name__ == "Tensor"
+#                 ):
 #                     import torch
+# 
 #                     return torch.tensor(results.values)
 #                 elif isinstance(original_object, pd.Series):
 #                     return (
@@ -226,8 +234,12 @@ if __name__ == "__main__":
 #                         if results.shape[1] > 0
 #                         else pd.Series()
 #                     )
-#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataArray':
+#                 elif (
+#                     hasattr(original_object, "__class__")
+#                     and original_object.__class__.__name__ == "DataArray"
+#                 ):
 #                     import xarray as xr
+# 
 #                     return xr.DataArray(results.values)
 #             return results
 # 

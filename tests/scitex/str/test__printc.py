@@ -623,6 +623,7 @@ if __name__ == "__main__":
 # # File: /ssh:sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/str/_printc.py
 # # ----------------------------------------
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -675,6 +676,7 @@ if __name__ == "__main__":
 #         text = color_text(text, c)
 # 
 #     print(text)
+# 
 # 
 # # EOF
 

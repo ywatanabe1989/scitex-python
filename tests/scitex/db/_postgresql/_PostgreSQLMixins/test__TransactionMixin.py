@@ -241,9 +241,7 @@ if __name__ == "__main__":
 # # Timestamp: "2025-02-27 22:15:42 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_dev/src/scitex/db/_PostgreSQLMixins/_TransactionMixin.py
 # 
-# THIS_FILE = (
-#     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_TransactionMixin.py"
-# )
+# THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_TransactionMixin.py"
 # 
 # import psycopg2
 # from ..._BaseMixins._BaseTransactionMixin import _BaseTransactionMixin

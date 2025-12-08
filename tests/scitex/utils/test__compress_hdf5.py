@@ -260,7 +260,7 @@ if __name__ == "__main__":
 #         import h5py
 #     except ImportError:
 #         raise ImportError("h5py is required for HDF5 compression but not installed")
-#     
+# 
 #     # Import tqdm if available
 #     try:
 #         from tqdm import tqdm
@@ -329,8 +329,8 @@ if __name__ == "__main__":
 #         src.visititems(copy_dataset)
 # 
 #     print(
-#         f"Compression complete. Original size: {os.path.getsize(input_file)/1e9:.2f} GB, "
-#         f"New size: {os.path.getsize(output_file)/1e9:.2f} GB"
+#         f"Compression complete. Original size: {os.path.getsize(input_file) / 1e9:.2f} GB, "
+#         f"New size: {os.path.getsize(output_file) / 1e9:.2f} GB"
 #     )
 # 
 #     return output_file

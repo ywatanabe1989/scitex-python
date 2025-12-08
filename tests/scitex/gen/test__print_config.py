@@ -288,7 +288,6 @@ if __name__ == "__main__":
 #     python _print_config.py PATH.TITAN.MAT
 # """
 # 
-# 
 # import sys
 # import os
 # import argparse
@@ -297,7 +296,6 @@ if __name__ == "__main__":
 # 
 # 
 # def print_config(key):
-# 
 #     CONFIG = scitex.io.load_configs()
 # 
 #     if key is None:
@@ -309,7 +307,6 @@ if __name__ == "__main__":
 #         keys = key.split(".")
 #         value = CONFIG
 #         for k in keys:
-# 
 #             if isinstance(value, (dict, scitex.gen.utils._DotDict.DotDict)):
 #                 value = value.get(k)
 # 
