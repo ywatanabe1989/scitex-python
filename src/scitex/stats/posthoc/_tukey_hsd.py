@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -76,7 +77,7 @@ def posthoc_tukey(
     groups: List[Union[np.ndarray, pd.Series]],
     group_names: Optional[List[str]] = None,
     alpha: float = 0.05,
-    return_as: str = 'dataframe'
+    return_as: str = "dataframe",
 ) -> Union[pd.DataFrame, List[dict]]:
     """
     Perform Tukey HSD post-hoc test for pairwise comparisons.
@@ -189,7 +190,7 @@ def posthoc_tukey(
 
     # Group names
     if group_names is None:
-        group_names = [f'Group {i+1}' for i in range(k)]
+        group_names = [f"Group {i + 1}" for i in range(k)]
 
     if len(group_names) != k:
         raise ValueError(f"Expected {k} group names, got {len(group_names)}")
@@ -226,7 +227,7 @@ def posthoc_tukey(
             mean_diff = mean_i - mean_j
 
             # Standard error for unequal sample sizes (Tukey-Kramer)
-            se = np.sqrt(ms_error * (1/n_i + 1/n_j) / 2)
+            se = np.sqrt(ms_error * (1 / n_i + 1 / n_j) / 2)
 
             # Studentized range statistic
             q_stat = abs(mean_diff) / se
@@ -245,27 +246,29 @@ def posthoc_tukey(
             ci_lower = mean_diff - margin
             ci_upper = mean_diff + margin
 
-            results.append({
-                'group_i': group_names[i],
-                'group_j': group_names[j],
-                'n_i': n_i,
-                'n_j': n_j,
-                'mean_i': round(float(mean_i), 3),
-                'mean_j': round(float(mean_j), 3),
-                'mean_diff': round(float(mean_diff), 3),
-                'std_error': round(float(se), 3),
-                'q_statistic': round(float(q_stat), 3),
-                'q_critical': round(float(q_crit), 3),
-                'pvalue': round(float(pvalue), 4),
-                'significant': bool(significant),
-                'pstars': p2stars(pvalue),
-                'ci_lower': round(float(ci_lower), 3),
-                'ci_upper': round(float(ci_upper), 3),
-                'alpha': alpha,
-            })
+            results.append(
+                {
+                    "group_i": group_names[i],
+                    "group_j": group_names[j],
+                    "n_i": n_i,
+                    "n_j": n_j,
+                    "mean_i": round(float(mean_i), 3),
+                    "mean_j": round(float(mean_j), 3),
+                    "mean_diff": round(float(mean_diff), 3),
+                    "std_error": round(float(se), 3),
+                    "q_statistic": round(float(q_stat), 3),
+                    "q_critical": round(float(q_crit), 3),
+                    "pvalue": round(float(pvalue), 4),
+                    "significant": bool(significant),
+                    "pstars": p2stars(pvalue),
+                    "ci_lower": round(float(ci_lower), 3),
+                    "ci_upper": round(float(ci_upper), 3),
+                    "alpha": alpha,
+                }
+            )
 
     # Return format
-    if return_as == 'dataframe':
+    if return_as == "dataframe":
         return pd.DataFrame(results)
     else:
         return results
@@ -309,20 +312,24 @@ if __name__ == "__main__":
 
     anova_result = test_anova(
         [control, treatment1, treatment2, treatment3],
-        var_names=['Control', 'Treat1', 'Treat2', 'Treat3']
+        var_names=["Control", "Treat1", "Treat2", "Treat3"],
     )
 
-    logger.info(f"ANOVA: F = {anova_result['statistic']:.3f}, p = {anova_result['pvalue']:.4f}")
+    logger.info(
+        f"ANOVA: F = {anova_result['statistic']:.3f}, p = {anova_result['pvalue']:.4f}"
+    )
 
-    if anova_result['significant']:
+    if anova_result["significant"]:
         logger.info("\nANOVA significant, conducting Tukey HSD...")
 
         results = posthoc_tukey(
             [control, treatment1, treatment2, treatment3],
-            group_names=['Control', 'Treat1', 'Treat2', 'Treat3']
+            group_names=["Control", "Treat1", "Treat2", "Treat3"],
         )
 
-        logger.info(f"\n{results[['group_i', 'group_j', 'mean_diff', 'pvalue', 'significant']].to_string()}")
+        logger.info(
+            f"\n{results[['group_i', 'group_j', 'mean_diff', 'pvalue', 'significant']].to_string()}"
+        )
 
     # Example 2: Unbalanced design (Tukey-Kramer)
     logger.info("\n[Example 2] Unbalanced design (different sample sizes)")
@@ -333,8 +340,7 @@ if __name__ == "__main__":
     group_c = np.random.normal(55, 10, 20)
 
     results_unbalanced = posthoc_tukey(
-        [group_a, group_b, group_c],
-        group_names=['A', 'B', 'C']
+        [group_a, group_b, group_c], group_names=["A", "B", "C"]
     )
 
     logger.info(f"Sample sizes: A={len(group_a)}, B={len(group_b)}, C={len(group_c)}")
@@ -345,16 +351,18 @@ if __name__ == "__main__":
     logger.info("-" * 70)
 
     for _, row in results.iterrows():
-        if row['significant']:
-            logger.info(f"{row['group_i']} vs {row['group_j']}: "
-                       f"Diff = {row['mean_diff']:.2f}, "
-                       f"95% CI [{row['ci_lower']:.2f}, {row['ci_upper']:.2f}] {row['pstars']}")
+        if row["significant"]:
+            logger.info(
+                f"{row['group_i']} vs {row['group_j']}: "
+                f"Diff = {row['mean_diff']:.2f}, "
+                f"95% CI [{row['ci_lower']:.2f}, {row['ci_upper']:.2f}] {row['pstars']}"
+            )
 
     # Example 4: Export results
     logger.info("\n[Example 4] Export results")
     logger.info("-" * 70)
 
-    convert_results(results, return_as='excel', path='./tukey_hsd_results.xlsx')
+    convert_results(results, return_as="excel", path="./tukey_hsd_results.xlsx")
     logger.info("Saved to: ./tukey_hsd_results.xlsx")
 
     stx.session.close(

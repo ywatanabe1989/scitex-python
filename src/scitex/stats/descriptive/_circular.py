@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -50,6 +51,8 @@ from scitex.decorators import batch_fn, torch_fn
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
+
+
 # @batch_fn
 @torch_fn
 def describe_circular(
@@ -110,17 +113,15 @@ def describe_circular(
     else:
         _funcs = [func_candidates[ff] for ff in func_names]
 
-    calculated = [
-        ff(angles, values, dim=dim, keepdims=keepdims) for ff in _funcs
-    ]
+    calculated = [ff(angles, values, dim=dim, keepdims=keepdims) for ff in _funcs]
 
     return torch.stack(calculated, dim=-1), func_names
 
 
 def _ensure_more_than_2d(data: torch.Tensor) -> None:
-    assert (
-        data.ndim >= 2
-    ), f"Input tensor must be more than 2 dimensional with batch dimension as first axis, got {data.ndim}"
+    assert data.ndim >= 2, (
+        f"Input tensor must be more than 2 dimensional with batch dimension as first axis, got {data.ndim}"
+    )
 
 
 def _check_angle_units(angles: torch.Tensor) -> None:
@@ -174,9 +175,9 @@ def circular_mean(
 
     _ensure_more_than_2d(angles)
     _check_angle_units(angles)
-    assert (
-        angles.shape == values.shape
-    ), f"angles shape {angles.shape} must match values shape {values.shape}"
+    assert angles.shape == values.shape, (
+        f"angles shape {angles.shape} must match values shape {values.shape}"
+    )
 
     dim = axis if dim is None else dim
     cos_angles = torch.cos(angles)
@@ -189,9 +190,7 @@ def circular_mean(
     sin_component = sin_component / value_sum
 
     mean_angle = torch.atan2(sin_component, cos_component)
-    mean_angle = torch.where(
-        mean_angle < 0, mean_angle + 2 * np.pi, mean_angle
-    )
+    mean_angle = torch.where(mean_angle < 0, mean_angle + 2 * np.pi, mean_angle)
 
     return mean_angle if keepdims else mean_angle.squeeze(dim)
 
@@ -230,9 +229,9 @@ def circular_concentration(
     """
     _ensure_more_than_2d(angles)
     _check_angle_units(angles)
-    assert (
-        angles.shape == values.shape
-    ), f"angles shape {angles.shape} must match values shape {values.shape}"
+    assert angles.shape == values.shape, (
+        f"angles shape {angles.shape} must match values shape {values.shape}"
+    )
 
     dim = axis if dim is None else dim
     cos_angles = torch.cos(angles)
@@ -280,9 +279,9 @@ def circular_skewness(
     """
     _ensure_more_than_2d(angles)
     _check_angle_units(angles)
-    assert (
-        angles.shape == values.shape
-    ), f"angles shape {angles.shape} must match values shape {values.shape}"
+    assert angles.shape == values.shape, (
+        f"angles shape {angles.shape} must match values shape {values.shape}"
+    )
 
     dim = axis if dim is None else dim
     cos_angles = torch.cos(angles)
@@ -334,9 +333,9 @@ def circular_kurtosis(
     """
     _ensure_more_than_2d(angles)
     _check_angle_units(angles)
-    assert (
-        angles.shape == values.shape
-    ), f"angles shape {angles.shape} must match values shape {values.shape}"
+    assert angles.shape == values.shape, (
+        f"angles shape {angles.shape} must match values shape {values.shape}"
+    )
 
     dim = axis if dim is None else dim
     cos_angles = torch.cos(angles)

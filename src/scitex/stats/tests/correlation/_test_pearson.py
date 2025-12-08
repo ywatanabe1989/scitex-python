@@ -40,8 +40,8 @@ def test_pearson(
     var_y: Optional[str] = None,
     alpha: float = 0.05,
     plot: bool = False,
-    **plot_kwargs
-) -> Union['StatResult', Tuple['StatResult', 'matplotlib.figure.Figure']]:
+    **plot_kwargs,
+) -> Union["StatResult", Tuple["StatResult", "matplotlib.figure.Figure"]]:
     """
     Pearson correlation test for linear relationship between two continuous variables.
 
@@ -150,7 +150,7 @@ def test_pearson(
     # Calculate confidence interval using Fisher's z-transformation
     z = np.arctanh(r)  # Fisher's z = 0.5 * ln((1+r)/(1-r))
     se = 1 / np.sqrt(n - 3)  # Standard error of z
-    z_crit = scipy_stats.norm.ppf(1 - alpha/2)  # Critical value for two-tailed test
+    z_crit = scipy_stats.norm.ppf(1 - alpha / 2)  # Critical value for two-tailed test
 
     ci_lower_z = z - z_crit * se
     ci_upper_z = z + z_crit * se
@@ -162,10 +162,10 @@ def test_pearson(
     # Convert p-value to stars
     stars = p2stars(p_value, ns_symbol=False)
     if not stars:
-        stars = 'ns'
+        stars = "ns"
 
     # Calculate R²
-    r_squared = r ** 2
+    r_squared = r**2
 
     # Interpret effect size
     r_abs = abs(r)
@@ -180,37 +180,32 @@ def test_pearson(
 
     # Set variable names
     if var_x is None:
-        var_x = 'X'
+        var_x = "X"
     if var_y is None:
-        var_y = 'Y'
+        var_y = "Y"
 
     # Build StatResult instance
     result = StatResult(
-        test_type='pearson',
-        test_category='correlation',
-        statistic={'name': 'r', 'value': r},
+        test_type="pearson",
+        test_category="correlation",
+        statistic={"name": "r", "value": r},
         p_value=p_value,
         stars=stars,
         effect_size={
-            'name': 'r_squared',
-            'value': r_squared,
-            'interpretation': interpretation,
-            'ci_95': [ci_lower, ci_upper]
+            "name": "r_squared",
+            "value": r_squared,
+            "interpretation": interpretation,
+            "ci_95": [ci_lower, ci_upper],
         },
-        samples={
-            'n_total': n,
-            'n_valid': n,
-            'var_x': var_x,
-            'var_y': var_y
-        },
+        samples={"n_total": n, "n_valid": n, "var_x": var_x, "var_y": var_y},
         ci_95=[ci_lower, ci_upper],
         extra={
-            'test': 'Pearson correlation',
-            'ci_level': 1 - alpha,
-            'method': 'pearson',
-            'alpha': alpha
+            "test": "Pearson correlation",
+            "ci_level": 1 - alpha,
+            "method": "pearson",
+            "alpha": alpha,
         },
-        software_version=stx.__version__
+        software_version=stx.__version__,
     )
 
     # Create plot if requested
@@ -222,11 +217,8 @@ def test_pearson(
 
 
 def _plot_pearson(
-    x: np.ndarray,
-    y: np.ndarray,
-    result: 'StatResult',
-    **kwargs
-) -> 'matplotlib.figure.Figure':
+    x: np.ndarray, y: np.ndarray, result: "StatResult", **kwargs
+) -> "matplotlib.figure.Figure":
     """
     Create scatter plot with regression line for Pearson correlation.
 
@@ -241,19 +233,17 @@ def _plot_pearson(
 
     # Add fitted line with statistics
     stx.plt.ax.add_fitted_line(
-        ax, x, y,
-        color='black',
-        linestyle='--',
-        label='Fit',
-        show_stats=True
+        ax, x, y, color="black", linestyle="--", label="Fit", show_stats=True
     )
 
     # Labels
-    var_x = result.samples.get('var_x', 'X')
-    var_y = result.samples.get('var_y', 'Y')
+    var_x = result.samples.get("var_x", "X")
+    var_y = result.samples.get("var_y", "Y")
     ax.set_xlabel(stx.plt.ax.format_label(var_x, ""))
     ax.set_ylabel(stx.plt.ax.format_label(var_y, ""))
-    ax.set_title(f"Pearson Correlation (r = {result.statistic['value']:.3f}{result.stars})")
+    ax.set_title(
+        f"Pearson Correlation (r = {result.statistic['value']:.3f}{result.stars})"
+    )
     ax.legend(frameon=False, fontsize=6)
 
     return fig

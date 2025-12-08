@@ -7,14 +7,14 @@
 def _save_text(obj, spath):
     """
     Save text content to a file.
-    
+
     Parameters
     ----------
     obj : str
         The text content to save.
     spath : str
         Path where the text file will be saved.
-        
+
     Returns
     -------
     None

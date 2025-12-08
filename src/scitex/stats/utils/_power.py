@@ -31,14 +31,16 @@ from scitex.logging import getLogger
 logger = getLogger(__name__)
 
 """Functions"""
+
+
 def power_ttest(
     effect_size: float,
     n: Optional[int] = None,
     n1: Optional[int] = None,
     n2: Optional[int] = None,
     alpha: float = 0.05,
-    alternative: Literal['two-sided', 'greater', 'less'] = 'two-sided',
-    test_type: Literal['one-sample', 'two-sample', 'paired'] = 'two-sample'
+    alternative: Literal["two-sided", "greater", "less"] = "two-sided",
+    test_type: Literal["one-sample", "two-sample", "paired"] = "two-sample",
 ) -> float:
     """
     Compute statistical power for t-test.
@@ -112,11 +114,11 @@ def power_ttest(
     0.628...
     """
     # Validate inputs
-    if test_type in ['one-sample', 'paired']:
+    if test_type in ["one-sample", "paired"]:
         if n is None:
             raise ValueError(f"n must be specified for {test_type} test")
         sample_size = n
-    elif test_type == 'two-sample':
+    elif test_type == "two-sample":
         if n1 is None or n2 is None:
             raise ValueError("n1 and n2 must be specified for two-sample test")
         # Use harmonic mean for unequal sample sizes
@@ -125,23 +127,23 @@ def power_ttest(
         raise ValueError(f"Unknown test_type: {test_type}")
 
     # Determine degrees of freedom
-    if test_type == 'two-sample':
+    if test_type == "two-sample":
         df = n1 + n2 - 2
     else:
         df = sample_size - 1
 
     # Determine critical value based on alternative hypothesis
-    if alternative == 'two-sided':
+    if alternative == "two-sided":
         t_crit = stats.t.ppf(1 - alpha / 2, df)
-    elif alternative == 'greater':
+    elif alternative == "greater":
         t_crit = stats.t.ppf(1 - alpha, df)
-    elif alternative == 'less':
+    elif alternative == "less":
         t_crit = stats.t.ppf(alpha, df)
     else:
         raise ValueError(f"Unknown alternative: {alternative}")
 
     # Compute non-centrality parameter
-    if test_type == 'two-sample':
+    if test_type == "two-sample":
         # For two-sample, ncp = d * sqrt(n_eff / 2)
         ncp = effect_size * np.sqrt(sample_size / 2)
     else:
@@ -149,10 +151,10 @@ def power_ttest(
         ncp = effect_size * np.sqrt(sample_size)
 
     # Compute power using non-central t-distribution
-    if alternative == 'two-sided':
+    if alternative == "two-sided":
         # For two-sided, power = P(|T| > t_crit | ncp)
         power = 1 - stats.nct.cdf(t_crit, df, ncp) + stats.nct.cdf(-t_crit, df, ncp)
-    elif alternative == 'greater':
+    elif alternative == "greater":
         # For greater, power = P(T > t_crit | ncp)
         power = 1 - stats.nct.cdf(t_crit, df, ncp)
     else:  # less
@@ -166,9 +168,9 @@ def sample_size_ttest(
     effect_size: float,
     power: float = 0.80,
     alpha: float = 0.05,
-    alternative: Literal['two-sided', 'greater', 'less'] = 'two-sided',
-    test_type: Literal['one-sample', 'two-sample', 'paired'] = 'two-sample',
-    ratio: float = 1.0
+    alternative: Literal["two-sided", "greater", "less"] = "two-sided",
+    test_type: Literal["one-sample", "two-sample", "paired"] = "two-sample",
+    ratio: float = 1.0,
 ) -> Union[int, tuple]:
     """
     Determine required sample size for t-test with desired power.
@@ -213,7 +215,7 @@ def sample_size_ttest(
     n_min = 2
     n_max = 10000
 
-    if test_type == 'two-sample':
+    if test_type == "two-sample":
         # Search for n1
         while n_max - n_min > 1:
             n1_mid = (n_min + n_max) // 2
@@ -225,7 +227,7 @@ def sample_size_ttest(
                 n2=n2_mid,
                 alpha=alpha,
                 alternative=alternative,
-                test_type=test_type
+                test_type=test_type,
             )
 
             if current_power < power:
@@ -246,7 +248,7 @@ def sample_size_ttest(
                 n=n_mid,
                 alpha=alpha,
                 alternative=alternative,
-                test_type=test_type
+                test_type=test_type,
             )
 
             if current_power < power:
@@ -258,6 +260,8 @@ def sample_size_ttest(
 
 
 """Main function"""
+
+
 def main(args):
     """Demonstrate power analysis functionality."""
     logger.info("Demonstrating statistical power analysis")
@@ -272,7 +276,7 @@ def main(args):
     for d in effect_sizes:
         power = power_ttest(effect_size=d, n1=n_per_group, n2=n_per_group)
         logger.info(f"d = {d:.1f}, n = {n_per_group} per group → Power = {power:.3f}")
-        results.append({'effect_size': d, 'power': power})
+        results.append({"effect_size": d, "power": power})
 
     # Example 2: Sample size vs power
     logger.info("\n=== Example 2: Sample Size vs Power ===")
@@ -284,7 +288,7 @@ def main(args):
     for n in sample_sizes:
         power = power_ttest(effect_size=d, n1=n, n2=n)
         logger.info(f"n = {n} per group, d = {d} → Power = {power:.3f}")
-        power_results.append({'n': n, 'power': power})
+        power_results.append({"n": n, "power": power})
 
     # Example 3: Required sample size
     logger.info("\n=== Example 3: Required Sample Size ===")
@@ -302,12 +306,12 @@ def main(args):
 
     d = 0.5
     n = 30
-    power_two = power_ttest(effect_size=d, n1=n, n2=n, alternative='two-sided')
-    power_one = power_ttest(effect_size=d, n1=n, n2=n, alternative='greater')
+    power_two = power_ttest(effect_size=d, n1=n, n2=n, alternative="two-sided")
+    power_one = power_ttest(effect_size=d, n1=n, n2=n, alternative="greater")
 
     logger.info(f"Two-sided test: Power = {power_two:.3f}")
     logger.info(f"One-sided test:  Power = {power_one:.3f}")
-    logger.info(f"One-sided power is {power_one/power_two:.2f}x higher")
+    logger.info(f"One-sided power is {power_one / power_two:.2f}x higher")
 
     # Create visualizations
     logger.info("\n=== Creating visualizations ===")
@@ -317,11 +321,11 @@ def main(args):
     # Plot 1: Effect size vs power
     ax = axes[0, 0]
     df_es = pd.DataFrame(results)
-    ax.plot(df_es['effect_size'], df_es['power'], 'o-', linewidth=2, markersize=8)
-    ax.axhline(0.80, color='red', linestyle='--', alpha=0.5, label='80% power')
-    ax.set_xlabel('Effect Size (Cohen\'s d)')
-    ax.set_ylabel('Statistical Power')
-    ax.set_title(f'Effect Size vs Power (n={n_per_group}/group)')
+    ax.plot(df_es["effect_size"], df_es["power"], "o-", linewidth=2, markersize=8)
+    ax.axhline(0.80, color="red", linestyle="--", alpha=0.5, label="80% power")
+    ax.set_xlabel("Effect Size (Cohen's d)")
+    ax.set_ylabel("Statistical Power")
+    ax.set_title(f"Effect Size vs Power (n={n_per_group}/group)")
     ax.legend()
     ax.grid(True, alpha=0.3)
     ax.set_ylim(0, 1)
@@ -329,14 +333,14 @@ def main(args):
     # Plot 2: Sample size vs power
     ax = axes[0, 1]
     df_ss = pd.DataFrame(power_results)
-    ax.plot(df_ss['n'], df_ss['power'], 'o-', linewidth=2, markersize=8)
-    ax.axhline(0.80, color='red', linestyle='--', alpha=0.5, label='80% power')
-    ax.set_xlabel('Sample Size (per group)')
-    ax.set_ylabel('Statistical Power')
-    ax.set_title(f'Sample Size vs Power (d={d})')
+    ax.plot(df_ss["n"], df_ss["power"], "o-", linewidth=2, markersize=8)
+    ax.axhline(0.80, color="red", linestyle="--", alpha=0.5, label="80% power")
+    ax.set_xlabel("Sample Size (per group)")
+    ax.set_ylabel("Statistical Power")
+    ax.set_title(f"Sample Size vs Power (d={d})")
     ax.legend()
     ax.grid(True, alpha=0.3)
-    ax.set_xscale('log')
+    ax.set_xscale("log")
     ax.set_ylim(0, 1)
 
     # Plot 3: Power curves for different effect sizes
@@ -344,12 +348,12 @@ def main(args):
     ns = np.arange(5, 201, 5)
     for d_val in [0.2, 0.5, 0.8]:
         powers = [power_ttest(effect_size=d_val, n1=n, n2=n) for n in ns]
-        ax.plot(ns, powers, linewidth=2, label=f'd = {d_val}')
+        ax.plot(ns, powers, linewidth=2, label=f"d = {d_val}")
 
-    ax.axhline(0.80, color='black', linestyle='--', alpha=0.3)
-    ax.set_xlabel('Sample Size (per group)')
-    ax.set_ylabel('Statistical Power')
-    ax.set_title('Power Curves for Different Effect Sizes')
+    ax.axhline(0.80, color="black", linestyle="--", alpha=0.3)
+    ax.set_xlabel("Sample Size (per group)")
+    ax.set_ylabel("Statistical Power")
+    ax.set_title("Power Curves for Different Effect Sizes")
     ax.legend()
     ax.grid(True, alpha=0.3)
     ax.set_ylim(0, 1)
@@ -364,24 +368,24 @@ def main(args):
         required_ns.append(n1)
 
     ax.plot(effect_sizes_range, required_ns, linewidth=2)
-    ax.set_xlabel('Effect Size (Cohen\'s d)')
-    ax.set_ylabel('Required Sample Size (per group)')
-    ax.set_title('Sample Size Required for 80% Power')
+    ax.set_xlabel("Effect Size (Cohen's d)")
+    ax.set_ylabel("Required Sample Size (per group)")
+    ax.set_title("Sample Size Required for 80% Power")
     ax.grid(True, alpha=0.3)
-    ax.set_yscale('log')
+    ax.set_yscale("log")
 
     # Add reference lines
-    ax.axvline(0.2, color='gray', linestyle='--', alpha=0.3)
-    ax.axvline(0.5, color='gray', linestyle='--', alpha=0.3)
-    ax.axvline(0.8, color='gray', linestyle='--', alpha=0.3)
-    ax.text(0.2, ax.get_ylim()[1] * 0.9, 'Small', ha='center', fontsize=9)
-    ax.text(0.5, ax.get_ylim()[1] * 0.9, 'Medium', ha='center', fontsize=9)
-    ax.text(0.8, ax.get_ylim()[1] * 0.9, 'Large', ha='center', fontsize=9)
+    ax.axvline(0.2, color="gray", linestyle="--", alpha=0.3)
+    ax.axvline(0.5, color="gray", linestyle="--", alpha=0.3)
+    ax.axvline(0.8, color="gray", linestyle="--", alpha=0.3)
+    ax.text(0.2, ax.get_ylim()[1] * 0.9, "Small", ha="center", fontsize=9)
+    ax.text(0.5, ax.get_ylim()[1] * 0.9, "Medium", ha="center", fontsize=9)
+    ax.text(0.8, ax.get_ylim()[1] * 0.9, "Large", ha="center", fontsize=9)
 
     plt.tight_layout()
 
     # Save
-    stx.io.save(fig, './power_analysis_demo.jpg')
+    stx.io.save(fig, "./power_analysis_demo.jpg")
     logger.info("Visualization saved")
 
     return 0
@@ -390,13 +394,9 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description='Demonstrate statistical power analysis for t-tests'
+        description="Demonstrate statistical power analysis for t-tests"
     )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose output'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
@@ -427,7 +427,7 @@ def run_main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
 
 # EOF

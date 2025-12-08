@@ -319,12 +319,12 @@ if __name__ == "__main__":
 # def _convert_paths_to_strings(obj):
 #     """
 #     Recursively convert pathlib.Path objects to strings and DotDict objects to regular dicts in a data structure.
-#     
+# 
 #     Parameters
 #     ----------
 #     obj : any
 #         The object to process. Can be dict, list, tuple, DotDict, Path, or any other type.
-#         
+# 
 #     Returns
 #     -------
 #     any
@@ -332,7 +332,7 @@ if __name__ == "__main__":
 #     """
 #     if isinstance(obj, Path):
 #         return str(obj)
-#     elif hasattr(obj, 'to_dict') and callable(getattr(obj, 'to_dict')):
+#     elif hasattr(obj, "to_dict") and callable(getattr(obj, "to_dict")):
 #         # Handle DotDict or similar objects with to_dict() method
 #         dict_obj = obj.to_dict()
 #         return _convert_paths_to_strings(dict_obj)
@@ -348,11 +348,11 @@ if __name__ == "__main__":
 # def _save_yaml(obj, spath):
 #     """
 #     Save a Python object as a YAML file.
-#     
-#     Automatically converts any pathlib.Path objects and DotDict objects within 
-#     the data structure before serialization, as YAML cannot directly serialize 
+# 
+#     Automatically converts any pathlib.Path objects and DotDict objects within
+#     the data structure before serialization, as YAML cannot directly serialize
 #     these complex objects.
-#     
+# 
 #     Parameters
 #     ----------
 #     obj : dict or DotDict
@@ -361,14 +361,14 @@ if __name__ == "__main__":
 #         regular dicts respectively.
 #     spath : str
 #         Path where the YAML file will be saved.
-#         
+# 
 #     Returns
 #     -------
 #     None
 #     """
 #     # Convert any Path objects to strings before YAML serialization
 #     obj_with_strings = _convert_paths_to_strings(obj)
-#     
+# 
 #     yaml = YAML()
 #     yaml.preserve_quotes = True
 #     yaml.indent(mapping=4, sequence=4, offset=4)

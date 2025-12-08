@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/stats/effect_sizes/_eta_squared.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -38,10 +39,7 @@ logger = getLogger(__name__)
 """Functions"""
 
 
-def eta_squared(
-    groups: List[Union[np.ndarray, pd.Series]],
-    ddof: int = 1
-) -> float:
+def eta_squared(groups: List[Union[np.ndarray, pd.Series]], ddof: int = 1) -> float:
     """
     Compute eta-squared (η²) effect size for ANOVA.
 
@@ -160,13 +158,13 @@ def interpret_eta_squared(eta2: float) -> str:
     'large'
     """
     if eta2 < 0.01:
-        return 'negligible'
+        return "negligible"
     elif eta2 < 0.06:
-        return 'small'
+        return "small"
     elif eta2 < 0.14:
-        return 'medium'
+        return "medium"
     else:
-        return 'large'
+        return "large"
 
 
 """Main function"""
@@ -212,7 +210,9 @@ def main(args):
     groups = [np.random.normal(i * 0.3, 1, 25) for i in range(5)]
     eta2_many = eta_squared(groups)
 
-    logger.info(f"Five groups: η² = {eta2_many:.3f} ({interpret_eta_squared(eta2_many)})")
+    logger.info(
+        f"Five groups: η² = {eta2_many:.3f} ({interpret_eta_squared(eta2_many)})"
+    )
 
     # Visualization
     logger.info("\n=== Creating visualization ===")
@@ -225,14 +225,14 @@ def main(args):
     data_viz = [group1, group2, group3]
 
     bp = ax.boxplot(data_viz, positions=positions, widths=0.6, patch_artist=True)
-    for patch in bp['boxes']:
-        patch.set_facecolor('lightblue')
+    for patch in bp["boxes"]:
+        patch.set_facecolor("lightblue")
 
-    ax.set_xlabel('Group')
-    ax.set_ylabel('Value')
-    ax.set_title(f'Three Groups (η² = {eta2:.2f})')
-    ax.set_xticklabels(['Group 1', 'Group 2', 'Group 3'])
-    ax.grid(True, alpha=0.3, axis='y')
+    ax.set_xlabel("Group")
+    ax.set_ylabel("Value")
+    ax.set_title(f"Three Groups (η² = {eta2:.2f})")
+    ax.set_xticklabels(["Group 1", "Group 2", "Group 3"])
+    ax.grid(True, alpha=0.3, axis="y")
 
     # Plot 2: Effect size vs number of groups
     ax = axes[1]
@@ -243,14 +243,14 @@ def main(args):
         groups_test = [np.random.normal(i * 0.4, 1, 30) for i in range(n_groups)]
         eta2_values.append(eta_squared(groups_test))
 
-    ax.plot(n_groups_list, eta2_values, 'o-', linewidth=2, markersize=8)
-    ax.set_xlabel('Number of Groups')
-    ax.set_ylabel('Eta-squared')
-    ax.set_title('Effect Size vs Number of Groups')
+    ax.plot(n_groups_list, eta2_values, "o-", linewidth=2, markersize=8)
+    ax.set_xlabel("Number of Groups")
+    ax.set_ylabel("Eta-squared")
+    ax.set_title("Effect Size vs Number of Groups")
     ax.grid(True, alpha=0.3)
 
     stx.plt.tight_layout()
-    stx.io.save(fig, './eta_squared_demo.jpg')
+    stx.io.save(fig, "./eta_squared_demo.jpg")
     logger.info("Visualization saved")
 
     return 0
@@ -261,11 +261,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Demonstrate eta-squared effect size calculation"
     )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose output'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
@@ -296,7 +292,7 @@ def run_main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
 
 # EOF

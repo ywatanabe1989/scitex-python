@@ -69,23 +69,17 @@ def _load_canvas(
 
     # Validate path
     if not str(lpath).endswith(".canvas"):
-        raise ValueError(
-            f"Canvas path must end with .canvas extension: {lpath}"
-        )
+        raise ValueError(f"Canvas path must end with .canvas extension: {lpath}")
 
     if not lpath.exists():
         raise FileNotFoundError(f"Canvas directory not found: {lpath}")
 
     if not lpath.is_dir():
-        raise ValueError(
-            f"Canvas path must be a directory: {lpath}"
-        )
+        raise ValueError(f"Canvas path must be a directory: {lpath}")
 
     json_path = lpath / "canvas.json"
     if not json_path.exists():
-        raise FileNotFoundError(
-            f"canvas.json not found in canvas directory: {lpath}"
-        )
+        raise FileNotFoundError(f"canvas.json not found in canvas directory: {lpath}")
 
     # Load canvas.json
     with open(json_path, "r") as f:
@@ -107,6 +101,7 @@ def _load_canvas(
     if not as_dict:
         try:
             from scitex.vis.canvas import Canvas
+
             canvas_obj = Canvas.from_dict(canvas_dict)
             # Store reference to original directory for copying
             canvas_obj._canvas_dir = str(lpath)

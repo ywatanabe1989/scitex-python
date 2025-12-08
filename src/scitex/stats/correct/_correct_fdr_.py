@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -164,9 +165,7 @@ def correct_fdr(
     from scitex.stats.utils._normalizers import force_dataframe, to_dict
 
     if verbose:
-        method_name = (
-            "Benjamini-Hochberg" if method == "bh" else "Benjamini-Yekutieli"
-        )
+        method_name = "Benjamini-Hochberg" if method == "bh" else "Benjamini-Yekutieli"
         logger.info(f"Applying FDR correction ({method_name})")
 
     # Store original input type
@@ -210,9 +209,7 @@ def correct_fdr(
         # c(m) = sum(1/i) for i in 1:m ≈ ln(m) + γ (Euler-Mascheroni constant)
         c_m = np.sum(1.0 / np.arange(1, m + 1))
         ranks = np.arange(1, m + 1)
-        q_values = np.minimum.accumulate((pvalues * m * c_m / ranks)[::-1])[
-            ::-1
-        ]
+        q_values = np.minimum.accumulate((pvalues * m * c_m / ranks)[::-1])[::-1]
         q_values = np.minimum(q_values, 1.0)
 
     else:
@@ -263,9 +260,7 @@ def correct_fdr(
     # Log results summary
     if verbose:
         rejections = df_result["rejected"].sum()
-        logger.info(
-            f"FDR correction complete: {rejections}/{m} hypotheses rejected"
-        )
+        logger.info(f"FDR correction complete: {rejections}/{m} hypotheses rejected")
 
         # Log detailed results if not too many tests
         if m <= 10:
@@ -293,6 +288,7 @@ def correct_fdr(
     if plot:
         if ax is None:
             import matplotlib.pyplot as plt
+
             fig, ax = plt.subplots(figsize=(10, 6))
         _plot_fdr(df_result, alpha, method, ax)
 
@@ -321,23 +317,40 @@ def _plot_fdr(df, alpha, method, ax):
 
     # Plot original p-values and q-values
     ax.scatter(x, df["pvalue"], label="Original p-values", alpha=0.7, s=100, color="C0")
-    ax.scatter(x, df["pvalue_adjusted"], label="Q-values (FDR-adjusted)", alpha=0.7, s=100, color="C1", marker="s")
+    ax.scatter(
+        x,
+        df["pvalue_adjusted"],
+        label="Q-values (FDR-adjusted)",
+        alpha=0.7,
+        s=100,
+        color="C1",
+        marker="s",
+    )
 
     # Connect original to adjusted with lines
     for i in range(m):
-        ax.plot([i, i], [df["pvalue"].iloc[i], df["pvalue_adjusted"].iloc[i]],
-                "k-", alpha=0.3, linewidth=0.5)
+        ax.plot(
+            [i, i],
+            [df["pvalue"].iloc[i], df["pvalue_adjusted"].iloc[i]],
+            "k-",
+            alpha=0.3,
+            linewidth=0.5,
+        )
 
     # Add significance threshold
-    ax.axhline(alpha, color="red", linestyle="--", linewidth=2, alpha=0.5, label=f"α = {alpha}")
+    ax.axhline(
+        alpha, color="red", linestyle="--", linewidth=2, alpha=0.5, label=f"α = {alpha}"
+    )
 
     # Formatting
     method_name = "Benjamini-Hochberg" if method == "bh" else "Benjamini-Yekutieli"
     ax.set_xlabel("Test Index")
     ax.set_ylabel("P-value / Q-value")
     rejections = df["rejected"].sum()
-    ax.set_title(f"FDR Correction ({method_name}, m={m} tests)\n"
-                 f"{rejections}/{m} hypotheses rejected")
+    ax.set_title(
+        f"FDR Correction ({method_name}, m={m} tests)\n"
+        f"{rejections}/{m} hypotheses rejected"
+    )
     ax.set_yscale("log")
     ax.grid(True, alpha=0.3)
     ax.legend()
@@ -353,7 +366,7 @@ def _plot_fdr(df, alpha, method, ax):
             elif "comparison" in row:
                 labels.append(row["comparison"])
             else:
-                labels.append(f"Test {len(labels)+1}")
+                labels.append(f"Test {len(labels) + 1}")
         ax.set_xticks(x)
         ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
     else:
@@ -406,9 +419,7 @@ def main(args):
 
     from ._correct_bonferroni import correct_bonferroni
 
-    corrected_bonf = correct_bonferroni(
-        multiple_results, alpha=0.05, verbose=False
-    )
+    corrected_bonf = correct_bonferroni(multiple_results, alpha=0.05, verbose=False)
 
     n_rejected_bonf = sum(r["rejected"] for r in corrected_bonf)
     n_rejected_fdr = sum(r["rejected"] for r in corrected_bh)
@@ -455,24 +466,16 @@ def main(args):
     # Calculate confusion metrics
     def calc_metrics(corrected, truth_col="truth"):
         tp = sum(
-            1
-            for r in corrected
-            if r["rejected"] and r.get(truth_col) == "positive"
+            1 for r in corrected if r["rejected"] and r.get(truth_col) == "positive"
         )
         fp = sum(
-            1
-            for r in corrected
-            if r["rejected"] and r.get(truth_col) == "negative"
+            1 for r in corrected if r["rejected"] and r.get(truth_col) == "negative"
         )
         fn = sum(
-            1
-            for r in corrected
-            if not r["rejected"] and r.get(truth_col) == "positive"
+            1 for r in corrected if not r["rejected"] and r.get(truth_col) == "positive"
         )
         tn = sum(
-            1
-            for r in corrected
-            if not r["rejected"] and r.get(truth_col) == "negative"
+            1 for r in corrected if not r["rejected"] and r.get(truth_col) == "negative"
         )
         return tp, fp, fn, tn
 
@@ -535,9 +538,7 @@ def main(args):
     alpha_fdr = alpha  # FDR maintains similar threshold
 
     ax.plot(m_vals, alpha_bonf, label="Bonferroni", linewidth=2)
-    ax.axhline(
-        alpha_fdr, color="green", linestyle="--", linewidth=2, label="FDR (BH)"
-    )
+    ax.axhline(alpha_fdr, color="green", linestyle="--", linewidth=2, label="FDR (BH)")
     ax.set_xlabel("Number of Tests (m)")
     ax.set_ylabel("Effective α")
     ax.set_title("FDR Maintains Power vs Bonferroni")
@@ -557,9 +558,7 @@ def main(args):
 
     for a in alphas:
         corr_bonf = correct_bonferroni(many_results, alpha=a, verbose=False)
-        corr_fdr = correct_fdr(
-            many_results, alpha=a, method="bh", verbose=False
-        )
+        corr_fdr = correct_fdr(many_results, alpha=a, method="bh", verbose=False)
 
         tp_b, fp_b, _, _ = calc_metrics(corr_bonf)
         tp_f, fp_f, _, _ = calc_metrics(corr_fdr)
@@ -569,12 +568,8 @@ def main(args):
         fdr_tps.append(tp_f / 20)
         fdr_fps.append(fp_f / 80)
 
-    ax.plot(
-        bonf_fps, bonf_tps, "o-", linewidth=2, markersize=8, label="Bonferroni"
-    )
-    ax.plot(
-        fdr_fps, fdr_tps, "s-", linewidth=2, markersize=8, label="FDR (BH)"
-    )
+    ax.plot(bonf_fps, bonf_tps, "o-", linewidth=2, markersize=8, label="Bonferroni")
+    ax.plot(fdr_fps, fdr_tps, "s-", linewidth=2, markersize=8, label="FDR (BH)")
     ax.plot([0, 1], [0, 1], "k--", alpha=0.3)
     ax.set_xlabel("False Positive Rate")
     ax.set_ylabel("True Positive Rate (Power)")
@@ -594,9 +589,7 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Demonstrate FDR correction")
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 

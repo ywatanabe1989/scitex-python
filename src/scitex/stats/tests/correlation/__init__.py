@@ -9,5 +9,5 @@ Available tests:
 from ._test_pearson import test_pearson
 
 __all__ = [
-    'test_pearson',
+    "test_pearson",
 ]

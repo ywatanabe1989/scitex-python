@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -42,7 +43,7 @@ def cohens_d(
     x: Union[np.ndarray, pd.Series],
     y: Optional[Union[np.ndarray, pd.Series]] = None,
     paired: bool = False,
-    correction: Literal['hedges', 'glass', None] = None
+    correction: Literal["hedges", "glass", None] = None,
 ) -> float:
     """
     Compute Cohen's d effect size.
@@ -136,7 +137,7 @@ def cohens_d(
         n1, n2 = len(x), len(y)
         mean_diff = np.mean(x) - np.mean(y)
 
-        if correction == 'glass':
+        if correction == "glass":
             # Glass's delta: use only control group (y) SD
             d = mean_diff / np.std(y, ddof=1)
         else:
@@ -147,7 +148,7 @@ def cohens_d(
             d = mean_diff / pooled_std
 
         # Apply Hedges' correction for small samples
-        if correction == 'hedges':
+        if correction == "hedges":
             # Hedges' g correction factor
             correction_factor = 1 - (3 / (4 * (n1 + n2) - 9))
             d = d * correction_factor
@@ -181,13 +182,13 @@ def interpret_cohens_d(d: float) -> str:
     d_abs = abs(d)
 
     if d_abs < 0.2:
-        return 'negligible'
+        return "negligible"
     elif d_abs < 0.5:
-        return 'small'
+        return "small"
     elif d_abs < 0.8:
-        return 'medium'
+        return "medium"
     else:
-        return 'large'
+        return "large"
 
 
 """Main function"""
@@ -220,11 +221,13 @@ def main(args):
             f"Interpretation: {interpretation}"
         )
 
-        results.append({
-            'true_d': true_d,
-            'computed_d': computed_d,
-            'interpretation': interpretation
-        })
+        results.append(
+            {
+                "true_d": true_d,
+                "computed_d": computed_d,
+                "interpretation": interpretation,
+            }
+        )
 
     # Example 2: Paired vs independent
     logger.info("\n=== Example 2: Paired vs Independent ===")
@@ -249,8 +252,8 @@ def main(args):
     y_small = np.random.normal(0.5, 1, small_n)
 
     d_standard = cohens_d(x_small, y_small)
-    d_hedges = cohens_d(x_small, y_small, correction='hedges')
-    d_glass = cohens_d(x_small, y_small, correction='glass')
+    d_hedges = cohens_d(x_small, y_small, correction="hedges")
+    d_glass = cohens_d(x_small, y_small, correction="glass")
 
     logger.info(f"Standard Cohen's d = {d_standard:.3f}")
     logger.info(f"Hedges' g = {d_hedges:.3f} (corrected for small n)")
@@ -266,31 +269,31 @@ def main(args):
     control_demo = np.random.normal(0, 1, 1000)
     treatment_demo = np.random.normal(0.8, 1, 1000)
 
-    ax.hist(control_demo, bins=30, alpha=0.5, label='Control', density=True)
-    ax.hist(treatment_demo, bins=30, alpha=0.5, label='Treatment', density=True)
+    ax.hist(control_demo, bins=30, alpha=0.5, label="Control", density=True)
+    ax.hist(treatment_demo, bins=30, alpha=0.5, label="Treatment", density=True)
 
     d_demo = cohens_d(control_demo, treatment_demo)
-    ax.axvline(np.mean(control_demo), color='blue', linestyle='--', alpha=0.7)
-    ax.axvline(np.mean(treatment_demo), color='orange', linestyle='--', alpha=0.7)
+    ax.axvline(np.mean(control_demo), color="blue", linestyle="--", alpha=0.7)
+    ax.axvline(np.mean(treatment_demo), color="orange", linestyle="--", alpha=0.7)
 
-    ax.set_xlabel('Value')
-    ax.set_ylabel('Density')
+    ax.set_xlabel("Value")
+    ax.set_ylabel("Density")
     ax.set_title(f"Distributions (Cohen's d = {d_demo:.2f})")
     ax.legend()
 
     # Plot 2: Effect size comparison
     ax = axes[1]
     df_results = pd.DataFrame(results)
-    ax.scatter(df_results['true_d'], df_results['computed_d'], s=100)
-    ax.plot([-0.5, 1.5], [-0.5, 1.5], 'k--', alpha=0.5, label='Perfect agreement')
-    ax.set_xlabel('True Effect Size')
+    ax.scatter(df_results["true_d"], df_results["computed_d"], s=100)
+    ax.plot([-0.5, 1.5], [-0.5, 1.5], "k--", alpha=0.5, label="Perfect agreement")
+    ax.set_xlabel("True Effect Size")
     ax.set_ylabel("Computed Cohen's d")
-    ax.set_title('True vs Computed Effect Sizes')
+    ax.set_title("True vs Computed Effect Sizes")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
     stx.plt.tight_layout()
-    stx.io.save(fig, './cohens_d_demo.jpg')
+    stx.io.save(fig, "./cohens_d_demo.jpg")
     logger.info("Visualization saved")
 
     return 0
@@ -301,11 +304,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Demonstrate Cohen's d effect size calculation"
     )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose output'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
@@ -336,7 +335,7 @@ def run_main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
 
 # EOF

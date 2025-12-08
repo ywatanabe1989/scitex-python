@@ -167,14 +167,14 @@ if __name__ == "__main__":
 # def _save_plotly_html(obj, spath):
 #     """
 #     Save a Plotly figure as an HTML file.
-#     
+# 
 #     Parameters
 #     ----------
 #     obj : plotly.graph_objs.Figure
 #         The Plotly figure to save.
 #     spath : str
 #         Path where the HTML file will be saved.
-#         
+# 
 #     Returns
 #     -------
 #     None
@@ -183,6 +183,7 @@ if __name__ == "__main__":
 #         obj.write_html(file=spath)
 #     else:
 #         raise TypeError("Object must be a plotly.graph_objs.Figure")
+
 # --------------------------------------------------------------------------------
 # End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_plotly.py
 # --------------------------------------------------------------------------------

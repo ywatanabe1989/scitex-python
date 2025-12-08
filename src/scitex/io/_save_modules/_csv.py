@@ -65,9 +65,9 @@ def _save_csv(obj, spath: str, **kwargs) -> None:
                 pass
 
     # Set default index=False if not explicitly specified in kwargs
-    if 'index' not in kwargs:
-        kwargs['index'] = False
-        
+    if "index" not in kwargs:
+        kwargs["index"] = False
+
     # Save the file based on type
     if isinstance(obj, (pd.Series, pd.DataFrame)):
         obj.to_csv(spath, **kwargs)
@@ -86,7 +86,7 @@ def _save_csv(obj, spath: str, **kwargs) -> None:
         pd.DataFrame.from_dict(obj).to_csv(spath, **kwargs)
     else:
         # Check if it's a PaperCollection or similar object with to_dataframe method
-        if hasattr(obj, 'to_dataframe') and callable(getattr(obj, 'to_dataframe')):
+        if hasattr(obj, "to_dataframe") and callable(getattr(obj, "to_dataframe")):
             obj.to_dataframe().to_csv(spath, **kwargs)
         else:
             try:

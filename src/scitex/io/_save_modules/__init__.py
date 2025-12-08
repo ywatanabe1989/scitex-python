@@ -21,7 +21,10 @@ to that specific format.
 from ._csv import _save_csv as save_csv
 from ._excel import save_excel
 from ._numpy import _save_npy as save_npy, _save_npz as save_npz
-from ._pickle import _save_pickle as save_pickle, _save_pickle_gz as save_pickle_compressed
+from ._pickle import (
+    _save_pickle as save_pickle,
+    _save_pickle_gz as save_pickle_compressed,
+)
 from ._joblib import _save_joblib as save_joblib
 from ._torch import _save_torch as save_torch
 from ._json import _save_json as save_json
@@ -39,7 +42,9 @@ from ._bibtex import save_bibtex
 
 # Import additional save utilities
 from ._listed_dfs_as_csv import _save_listed_dfs_as_csv as save_listed_dfs_as_csv
-from ._listed_scalars_as_csv import _save_listed_scalars_as_csv as save_listed_scalars_as_csv
+from ._listed_scalars_as_csv import (
+    _save_listed_scalars_as_csv as save_listed_scalars_as_csv,
+)
 from ._optuna_study_as_csv_and_pngs import save_optuna_study_as_csv_and_pngs
 
 # Define what gets imported with "from scitex.io._save_modules import *"

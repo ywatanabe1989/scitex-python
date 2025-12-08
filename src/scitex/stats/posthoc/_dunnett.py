@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -33,8 +34,9 @@ from scitex.stats.utils._formatters import p2stars
 from scitex.stats.utils._normalizers import convert_results
 
 
-def dunnett_critical_value(k: int, df: int, alpha: float = 0.05,
-                          alternative: str = 'two-sided') -> float:
+def dunnett_critical_value(
+    k: int, df: int, alpha: float = 0.05, alternative: str = "two-sided"
+) -> float:
     """
     Get critical value for Dunnett's test.
 
@@ -61,7 +63,7 @@ def dunnett_critical_value(k: int, df: int, alpha: float = 0.05,
     or software (R, SAS) would be needed.
     """
     # Conservative approximation using Bonferroni adjustment
-    if alternative == 'two-sided':
+    if alternative == "two-sided":
         alpha_adj = alpha / (2 * k)
     else:
         alpha_adj = alpha / k
@@ -79,10 +81,10 @@ def posthoc_dunnett(
     control: Union[np.ndarray, pd.Series],
     treatments: List[Union[np.ndarray, pd.Series]],
     treatment_names: Optional[List[str]] = None,
-    control_name: str = 'Control',
+    control_name: str = "Control",
     alpha: float = 0.05,
-    alternative: Literal['two-sided', 'less', 'greater'] = 'two-sided',
-    return_as: str = 'dataframe'
+    alternative: Literal["two-sided", "less", "greater"] = "two-sided",
+    return_as: str = "dataframe",
 ) -> Union[pd.DataFrame, List[dict]]:
     """
     Perform Dunnett's test for comparing treatments vs control.
@@ -214,7 +216,7 @@ def posthoc_dunnett(
 
     # Treatment names
     if treatment_names is None:
-        treatment_names = [f'Treatment {i+1}' for i in range(k)]
+        treatment_names = [f"Treatment {i + 1}" for i in range(k)]
 
     if len(treatment_names) != k:
         raise ValueError(f"Expected {k} treatment names, got {len(treatment_names)}")
@@ -243,12 +245,14 @@ def posthoc_dunnett(
     # Perform comparisons vs control
     results = []
 
-    for i, (treatment, n_t, mean_t) in enumerate(zip(treatments, n_treatments, means_treatments)):
+    for i, (treatment, n_t, mean_t) in enumerate(
+        zip(treatments, n_treatments, means_treatments)
+    ):
         # Mean difference
         mean_diff = mean_t - mean_control
 
         # Standard error
-        se = np.sqrt(ms_error * (1/n_t + 1/n_control))
+        se = np.sqrt(ms_error * (1 / n_t + 1 / n_control))
 
         # t-statistic
         if se == 0:
@@ -257,9 +261,9 @@ def posthoc_dunnett(
             t_stat = mean_diff / se
 
         # p-value (conservative approximation)
-        if alternative == 'two-sided':
+        if alternative == "two-sided":
             pvalue = 2 * (1 - stats.t.cdf(abs(t_stat), df_error))
-        elif alternative == 'greater':
+        elif alternative == "greater":
             pvalue = 1 - stats.t.cdf(t_stat, df_error)
         else:  # less
             pvalue = stats.t.cdf(t_stat, df_error)
@@ -268,47 +272,53 @@ def posthoc_dunnett(
         pvalue = min(pvalue * k, 1.0)
 
         # Determine significance
-        if alternative == 'two-sided':
+        if alternative == "two-sided":
             significant = abs(t_stat) > d_crit
-        elif alternative == 'greater':
+        elif alternative == "greater":
             significant = t_stat > d_crit
         else:  # less
             significant = t_stat < -d_crit
 
         # Confidence interval
         margin = d_crit * se
-        if alternative == 'two-sided':
+        if alternative == "two-sided":
             ci_lower = mean_diff - margin
             ci_upper = mean_diff + margin
-        elif alternative == 'greater':
+        elif alternative == "greater":
             ci_lower = mean_diff - margin
             ci_upper = np.inf
         else:  # less
             ci_lower = -np.inf
             ci_upper = mean_diff + margin
 
-        results.append({
-            'treatment': treatment_names[i],
-            'control': control_name,
-            'n_treatment': n_t,
-            'n_control': n_control,
-            'mean_treatment': round(float(mean_t), 3),
-            'mean_control': round(float(mean_control), 3),
-            'mean_diff': round(float(mean_diff), 3),
-            'std_error': round(float(se), 3),
-            't_statistic': round(float(t_stat), 3),
-            'd_critical': round(float(d_crit), 3),
-            'pvalue': round(float(pvalue), 4),
-            'significant': bool(significant),
-            'pstars': p2stars(pvalue),
-            'ci_lower': round(float(ci_lower), 3) if not np.isinf(ci_lower) else '-inf',
-            'ci_upper': round(float(ci_upper), 3) if not np.isinf(ci_upper) else 'inf',
-            'alpha': alpha,
-            'alternative': alternative,
-        })
+        results.append(
+            {
+                "treatment": treatment_names[i],
+                "control": control_name,
+                "n_treatment": n_t,
+                "n_control": n_control,
+                "mean_treatment": round(float(mean_t), 3),
+                "mean_control": round(float(mean_control), 3),
+                "mean_diff": round(float(mean_diff), 3),
+                "std_error": round(float(se), 3),
+                "t_statistic": round(float(t_stat), 3),
+                "d_critical": round(float(d_crit), 3),
+                "pvalue": round(float(pvalue), 4),
+                "significant": bool(significant),
+                "pstars": p2stars(pvalue),
+                "ci_lower": round(float(ci_lower), 3)
+                if not np.isinf(ci_lower)
+                else "-inf",
+                "ci_upper": round(float(ci_upper), 3)
+                if not np.isinf(ci_upper)
+                else "inf",
+                "alpha": alpha,
+                "alternative": alternative,
+            }
+        )
 
     # Return format
-    if return_as == 'dataframe':
+    if return_as == "dataframe":
         return pd.DataFrame(results)
     else:
         return results
@@ -355,11 +365,13 @@ if __name__ == "__main__":
     results = posthoc_dunnett(
         control=placebo,
         treatments=[dose_low, dose_med, dose_high],
-        treatment_names=['Low Dose', 'Med Dose', 'High Dose'],
-        control_name='Placebo'
+        treatment_names=["Low Dose", "Med Dose", "High Dose"],
+        control_name="Placebo",
     )
 
-    logger.info(f"\n{results[['treatment', 'mean_diff', 't_statistic', 'pvalue', 'significant']].to_string()}")
+    logger.info(
+        f"\n{results[['treatment', 'mean_diff', 't_statistic', 'pvalue', 'significant']].to_string()}"
+    )
 
     # Example 2: One-sided test (treatments > control)
     logger.info("\n[Example 2] One-sided test (greater than control)")
@@ -368,12 +380,14 @@ if __name__ == "__main__":
     results_greater = posthoc_dunnett(
         control=placebo,
         treatments=[dose_low, dose_med, dose_high],
-        treatment_names=['Low Dose', 'Med Dose', 'High Dose'],
-        control_name='Placebo',
-        alternative='greater'
+        treatment_names=["Low Dose", "Med Dose", "High Dose"],
+        control_name="Placebo",
+        alternative="greater",
     )
 
-    logger.info(f"\n{results_greater[['treatment', 'mean_diff', 'pvalue', 'significant']].to_string()}")
+    logger.info(
+        f"\n{results_greater[['treatment', 'mean_diff', 'pvalue', 'significant']].to_string()}"
+    )
 
     # Example 3: Baseline comparison
     logger.info("\n[Example 3] Baseline vs interventions")
@@ -386,8 +400,8 @@ if __name__ == "__main__":
     results_baseline = posthoc_dunnett(
         control=baseline,
         treatments=[intervention_a, intervention_b],
-        treatment_names=['Intervention A', 'Intervention B'],
-        control_name='Baseline'
+        treatment_names=["Intervention A", "Intervention B"],
+        control_name="Baseline",
     )
 
     logger.info(f"\n{results_baseline.to_string()}")
@@ -400,21 +414,23 @@ if __name__ == "__main__":
 
     # All groups for Tukey
     all_groups = [placebo, dose_low, dose_med, dose_high]
-    group_names = ['Placebo', 'Low Dose', 'Med Dose', 'High Dose']
+    group_names = ["Placebo", "Low Dose", "Med Dose", "High Dose"]
 
     results_tukey = posthoc_tukey(all_groups, group_names)
 
     # Filter Tukey results for comparisons vs placebo
     tukey_vs_placebo = results_tukey[
-        (results_tukey['group_i'] == 'Placebo') |
-        (results_tukey['group_j'] == 'Placebo')
+        (results_tukey["group_i"] == "Placebo")
+        | (results_tukey["group_j"] == "Placebo")
     ]
 
     logger.info("\nDunnett's test (designed for control comparisons):")
     logger.info(f"{results[['treatment', 'pvalue', 'significant']].to_string()}")
 
     logger.info("\nTukey HSD (all pairwise, less power for control comparisons):")
-    logger.info(f"{tukey_vs_placebo[['group_i', 'group_j', 'pvalue', 'significant']].to_string()}")
+    logger.info(
+        f"{tukey_vs_placebo[['group_i', 'group_j', 'pvalue', 'significant']].to_string()}"
+    )
 
     logger.info("\nNote: Dunnett is more powerful for control comparisons")
 
@@ -430,11 +446,13 @@ if __name__ == "__main__":
     results_unbal = posthoc_dunnett(
         control=control_unbal,
         treatments=[treat1_unbal, treat2_unbal, treat3_unbal],
-        treatment_names=['T1', 'T2', 'T3']
+        treatment_names=["T1", "T2", "T3"],
     )
 
-    logger.info(f"Sample sizes: Control={len(control_unbal)}, T1={len(treat1_unbal)}, "
-               f"T2={len(treat2_unbal)}, T3={len(treat3_unbal)}")
+    logger.info(
+        f"Sample sizes: Control={len(control_unbal)}, T1={len(treat1_unbal)}, "
+        f"T2={len(treat2_unbal)}, T3={len(treat3_unbal)}"
+    )
     logger.info(f"\n{results_unbal.to_string()}")
 
     # Example 6: With confidence intervals
@@ -442,15 +460,17 @@ if __name__ == "__main__":
     logger.info("-" * 70)
 
     for _, row in results.iterrows():
-        logger.info(f"{row['treatment']} vs {row['control']}: "
-                   f"Diff = {row['mean_diff']:.2f}, "
-                   f"95% CI [{row['ci_lower']}, {row['ci_upper']}] {row['pstars']}")
+        logger.info(
+            f"{row['treatment']} vs {row['control']}: "
+            f"Diff = {row['mean_diff']:.2f}, "
+            f"95% CI [{row['ci_lower']}, {row['ci_upper']}] {row['pstars']}"
+        )
 
     # Example 7: Export results
     logger.info("\n[Example 7] Export results")
     logger.info("-" * 70)
 
-    convert_results(results, return_as='excel', path='./dunnett_results.xlsx')
+    convert_results(results, return_as="excel", path="./dunnett_results.xlsx")
     logger.info("Saved to: ./dunnett_results.xlsx")
 
     stx.session.close(

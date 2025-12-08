@@ -13,7 +13,7 @@ from ._games_howell import posthoc_games_howell
 from ._dunnett import posthoc_dunnett
 
 __all__ = [
-    'posthoc_tukey',
-    'posthoc_games_howell',
-    'posthoc_dunnett',
+    "posthoc_tukey",
+    "posthoc_games_howell",
+    "posthoc_dunnett",
 ]

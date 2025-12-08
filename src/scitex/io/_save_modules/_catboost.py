@@ -7,14 +7,14 @@
 def _save_catboost(obj, spath):
     """
     Save a CatBoost model.
-    
+
     Parameters
     ----------
     obj : catboost.CatBoost
         The CatBoost model to save.
     spath : str
         Path where the CatBoost model file will be saved.
-        
+
     Returns
     -------
     None

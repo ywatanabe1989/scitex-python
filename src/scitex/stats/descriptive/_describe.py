@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -40,13 +41,26 @@ import torch
 from scitex import logging
 
 from scitex.decorators import batch_fn, torch_fn
-from ._nan import (nancount, nankurtosis, nanmax, nanmean, nanmin, nanq25,
-                   nanq50, nanq75, nanskewness, nanstd, nanvar)
+from ._nan import (
+    nancount,
+    nankurtosis,
+    nanmax,
+    nanmean,
+    nanmin,
+    nanq25,
+    nanq50,
+    nanq75,
+    nanskewness,
+    nanstd,
+    nanvar,
+)
 from ._real import kurtosis, mean, q25, q50, q75, skewness, std
 
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
+
+
 def verify_non_leakage(
     x: torch.Tensor,
     dim: Optional[Union[int, Tuple[int, ...]]] = None,
@@ -56,9 +70,9 @@ def verify_non_leakage(
     x_first = x[:1]
     described_first, _ = describe(x_first, dim=dim)
 
-    assert (
-        described_first.shape == described[:1].shape
-    ), f"Shape mismatch: {described_first.shape} != {described[:1].shape}"
+    assert described_first.shape == described[:1].shape, (
+        f"Shape mismatch: {described_first.shape} != {described[:1].shape}"
+    )
 
     torch.testing.assert_close(
         described_first,

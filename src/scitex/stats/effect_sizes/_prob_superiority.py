@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/stats/effect_sizes/_prob_superiority.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -39,8 +40,7 @@ logger = getLogger(__name__)
 
 
 def prob_superiority(
-    x: Union[np.ndarray, pd.Series],
-    y: Union[np.ndarray, pd.Series]
+    x: Union[np.ndarray, pd.Series], y: Union[np.ndarray, pd.Series]
 ) -> float:
     """
     Compute probability of superiority P(X > Y).
@@ -170,13 +170,13 @@ def interpret_prob_superiority(prob: float) -> str:
     distance = abs(prob - 0.5)
 
     if distance < 0.06:
-        return 'negligible'
+        return "negligible"
     elif distance < 0.14:
-        return 'small'
+        return "small"
     elif distance < 0.21:
-        return 'medium'
+        return "medium"
     else:
-        return 'large'
+        return "large"
 
 
 """Main function"""
@@ -196,6 +196,7 @@ def main(args):
     y = np.array([3, 4, 5, 6, 7, 8, 9, 10])
 
     from ._cliffs_delta import cliffs_delta
+
     prob = prob_superiority(x, y)
     delta = cliffs_delta(x, y)
 
@@ -231,20 +232,20 @@ def main(args):
         control = np.random.normal(0, 1, 100)
         probs.append(prob_superiority(treatment, control))
 
-    ax.plot(shifts, probs, 'o-', linewidth=2, markersize=8)
-    ax.axhline(0.5, color='red', linestyle='--', alpha=0.5, label='Chance level')
-    ax.axhline(0.56, color='orange', linestyle='--', alpha=0.5, label='Small effect')
-    ax.axhline(0.64, color='yellow', linestyle='--', alpha=0.5, label='Medium effect')
-    ax.axhline(0.71, color='green', linestyle='--', alpha=0.5, label='Large effect')
+    ax.plot(shifts, probs, "o-", linewidth=2, markersize=8)
+    ax.axhline(0.5, color="red", linestyle="--", alpha=0.5, label="Chance level")
+    ax.axhline(0.56, color="orange", linestyle="--", alpha=0.5, label="Small effect")
+    ax.axhline(0.64, color="yellow", linestyle="--", alpha=0.5, label="Medium effect")
+    ax.axhline(0.71, color="green", linestyle="--", alpha=0.5, label="Large effect")
 
-    ax.set_xlabel('Mean Shift (Cohen\'s d)')
-    ax.set_ylabel('P(Treatment > Control)')
-    ax.set_title('Probability of Superiority vs Effect Size')
+    ax.set_xlabel("Mean Shift (Cohen's d)")
+    ax.set_ylabel("P(Treatment > Control)")
+    ax.set_title("Probability of Superiority vs Effect Size")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
     stx.plt.tight_layout()
-    stx.io.save(fig, './prob_superiority_demo.jpg')
+    stx.io.save(fig, "./prob_superiority_demo.jpg")
     logger.info("Visualization saved")
 
     return 0
@@ -255,11 +256,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Demonstrate probability of superiority calculation"
     )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose output'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
@@ -290,7 +287,7 @@ def run_main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
 
 # EOF

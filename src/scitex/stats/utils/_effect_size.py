@@ -30,11 +30,13 @@ from scitex.logging import getLogger
 logger = getLogger(__name__)
 
 """Functions"""
+
+
 def cohens_d(
     x: Union[np.ndarray, pd.Series],
     y: Optional[Union[np.ndarray, pd.Series]] = None,
     paired: bool = False,
-    correction: Literal['hedges', 'glass', None] = None
+    correction: Literal["hedges", "glass", None] = None,
 ) -> float:
     """
     Compute Cohen's d effect size.
@@ -128,7 +130,7 @@ def cohens_d(
         n1, n2 = len(x), len(y)
         mean_diff = np.mean(x) - np.mean(y)
 
-        if correction == 'glass':
+        if correction == "glass":
             # Glass's delta: use only control group (y) SD
             d = mean_diff / np.std(y, ddof=1)
         else:
@@ -139,7 +141,7 @@ def cohens_d(
             d = mean_diff / pooled_std
 
         # Apply Hedges' correction for small samples
-        if correction == 'hedges':
+        if correction == "hedges":
             # Hedges' g correction factor
             correction_factor = 1 - (3 / (4 * (n1 + n2) - 9))
             d = d * correction_factor
@@ -148,8 +150,7 @@ def cohens_d(
 
 
 def cliffs_delta(
-    x: Union[np.ndarray, pd.Series],
-    y: Union[np.ndarray, pd.Series]
+    x: Union[np.ndarray, pd.Series], y: Union[np.ndarray, pd.Series]
 ) -> float:
     """
     Compute Cliff's delta non-parametric effect size.
@@ -250,8 +251,7 @@ def cliffs_delta(
 
 
 def prob_superiority(
-    x: Union[np.ndarray, pd.Series],
-    y: Union[np.ndarray, pd.Series]
+    x: Union[np.ndarray, pd.Series], y: Union[np.ndarray, pd.Series]
 ) -> float:
     """
     Compute probability of superiority P(X > Y).
@@ -381,13 +381,13 @@ def interpret_prob_superiority(prob: float) -> str:
     distance = abs(prob - 0.5)
 
     if distance < 0.06:
-        return 'negligible'
+        return "negligible"
     elif distance < 0.14:
-        return 'small'
+        return "small"
     elif distance < 0.21:
-        return 'medium'
+        return "medium"
     else:
-        return 'large'
+        return "large"
 
 
 def interpret_cliffs_delta(delta: float) -> str:
@@ -418,19 +418,16 @@ def interpret_cliffs_delta(delta: float) -> str:
     delta_abs = abs(delta)
 
     if delta_abs < 0.147:
-        return 'negligible'
+        return "negligible"
     elif delta_abs < 0.33:
-        return 'small'
+        return "small"
     elif delta_abs < 0.474:
-        return 'medium'
+        return "medium"
     else:
-        return 'large'
+        return "large"
 
 
-def eta_squared(
-    groups: List[Union[np.ndarray, pd.Series]],
-    ddof: int = 1
-) -> float:
+def eta_squared(groups: List[Union[np.ndarray, pd.Series]], ddof: int = 1) -> float:
     """
     Compute eta-squared (η²) effect size for ANOVA.
 
@@ -549,13 +546,13 @@ def interpret_eta_squared(eta2: float) -> str:
     'large'
     """
     if eta2 < 0.01:
-        return 'negligible'
+        return "negligible"
     elif eta2 < 0.06:
-        return 'small'
+        return "small"
     elif eta2 < 0.14:
-        return 'medium'
+        return "medium"
     else:
-        return 'large'
+        return "large"
 
 
 def epsilon_squared(groups):
@@ -675,13 +672,13 @@ def interpret_epsilon_squared(epsilon2: float) -> str:
     'large'
     """
     if epsilon2 < 0.01:
-        return 'negligible'
+        return "negligible"
     elif epsilon2 < 0.06:
-        return 'small'
+        return "small"
     elif epsilon2 < 0.14:
-        return 'medium'
+        return "medium"
     else:
-        return 'large'
+        return "large"
 
 
 def interpret_cohens_d(d: float) -> str:
@@ -710,16 +707,18 @@ def interpret_cohens_d(d: float) -> str:
     d_abs = abs(d)
 
     if d_abs < 0.2:
-        return 'negligible'
+        return "negligible"
     elif d_abs < 0.5:
-        return 'small'
+        return "small"
     elif d_abs < 0.8:
-        return 'medium'
+        return "medium"
     else:
-        return 'large'
+        return "large"
 
 
 """Main function"""
+
+
 def main(args):
     """Demonstrate effect size computation (Cohen's d, Cliff's delta, eta-squared)."""
     logger.info("Demonstrating effect size calculations")
@@ -750,11 +749,13 @@ def main(args):
             f"Interpretation: {interpretation}"
         )
 
-        results.append({
-            'true_d': true_d,
-            'computed_d': computed_d,
-            'interpretation': interpretation
-        })
+        results.append(
+            {
+                "true_d": true_d,
+                "computed_d": computed_d,
+                "interpretation": interpretation,
+            }
+        )
 
     # Example 2: Paired vs independent
     logger.info("\n=== Example 2: Paired vs Independent ===")
@@ -780,8 +781,8 @@ def main(args):
     y_small = np.random.normal(0.5, 1, small_n)
 
     d_standard = cohens_d(x_small, y_small)
-    d_hedges = cohens_d(x_small, y_small, correction='hedges')
-    d_glass = cohens_d(x_small, y_small, correction='glass')
+    d_hedges = cohens_d(x_small, y_small, correction="hedges")
+    d_glass = cohens_d(x_small, y_small, correction="glass")
 
     logger.info(f"Standard Cohen's d = {d_standard:.3f}")
     logger.info(f"Hedges' g = {d_hedges:.3f} (corrected for small n)")
@@ -816,8 +817,12 @@ def main(args):
     d_normal = cohens_d(x_normal, y_normal)
     d_outlier = cohens_d(x_outlier, y_outlier)
 
-    logger.info(f"Without outlier: Cliff's δ = {delta_normal:.3f}, Cohen's d = {d_normal:.3f}")
-    logger.info(f"With outlier:    Cliff's δ = {delta_outlier:.3f}, Cohen's d = {d_outlier:.3f}")
+    logger.info(
+        f"Without outlier: Cliff's δ = {delta_normal:.3f}, Cohen's d = {d_normal:.3f}"
+    )
+    logger.info(
+        f"With outlier:    Cliff's δ = {delta_outlier:.3f}, Cohen's d = {d_outlier:.3f}"
+    )
     logger.info("Cliff's delta is stable, Cohen's d is inflated by outlier")
 
     # Example 6: Eta-squared for ANOVA
@@ -848,7 +853,9 @@ def main(args):
     logger.info(f"Cohen's d:     {d:.3f} ({interpret_cohens_d(d)})")
     logger.info(f"Cliff's delta: {delta:.3f} ({interpret_cliffs_delta(delta)})")
     logger.info(f"P(X > Y):      {prob:.3f} ({interpret_prob_superiority(prob)})")
-    logger.info(f"Eta-squared:   {eta2_groups:.3f} ({interpret_eta_squared(eta2_groups)})")
+    logger.info(
+        f"Eta-squared:   {eta2_groups:.3f} ({interpret_eta_squared(eta2_groups)})"
+    )
 
     # Create visualization
     logger.info("\n=== Creating visualization ===")
@@ -858,11 +865,11 @@ def main(args):
     # Plot 1: Effect size comparison
     ax = axes[0, 0]
     df_results = pd.DataFrame(results)
-    ax.scatter(df_results['true_d'], df_results['computed_d'], s=100)
-    ax.plot([-0.5, 1.5], [-0.5, 1.5], 'k--', alpha=0.5, label='Perfect agreement')
-    ax.set_xlabel('True Effect Size')
-    ax.set_ylabel('Computed Cohen\'s d')
-    ax.set_title('True vs Computed Effect Sizes')
+    ax.scatter(df_results["true_d"], df_results["computed_d"], s=100)
+    ax.plot([-0.5, 1.5], [-0.5, 1.5], "k--", alpha=0.5, label="Perfect agreement")
+    ax.set_xlabel("True Effect Size")
+    ax.set_ylabel("Computed Cohen's d")
+    ax.set_title("True vs Computed Effect Sizes")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
@@ -871,16 +878,16 @@ def main(args):
     control_demo = np.random.normal(0, 1, 1000)
     treatment_demo = np.random.normal(0.8, 1, 1000)
 
-    ax.hist(control_demo, bins=30, alpha=0.5, label='Control', density=True)
-    ax.hist(treatment_demo, bins=30, alpha=0.5, label='Treatment', density=True)
+    ax.hist(control_demo, bins=30, alpha=0.5, label="Control", density=True)
+    ax.hist(treatment_demo, bins=30, alpha=0.5, label="Treatment", density=True)
 
     d_demo = cohens_d(control_demo, treatment_demo)
-    ax.axvline(np.mean(control_demo), color='blue', linestyle='--', alpha=0.7)
-    ax.axvline(np.mean(treatment_demo), color='orange', linestyle='--', alpha=0.7)
+    ax.axvline(np.mean(control_demo), color="blue", linestyle="--", alpha=0.7)
+    ax.axvline(np.mean(treatment_demo), color="orange", linestyle="--", alpha=0.7)
 
-    ax.set_xlabel('Value')
-    ax.set_ylabel('Density')
-    ax.set_title(f'Distributions (Cohen\'s d = {d_demo:.2f})')
+    ax.set_xlabel("Value")
+    ax.set_ylabel("Density")
+    ax.set_title(f"Distributions (Cohen's d = {d_demo:.2f})")
     ax.legend()
 
     # Plot 3: Effect size interpretation
@@ -889,24 +896,28 @@ def main(args):
     interpretations = [interpret_cohens_d(d) for d in d_values]
 
     # Color map
-    color_map = {'negligible': 'lightgray', 'small': 'yellow',
-                 'medium': 'orange', 'large': 'red'}
+    color_map = {
+        "negligible": "lightgray",
+        "small": "yellow",
+        "medium": "orange",
+        "large": "red",
+    }
     colors = [color_map[i] for i in interpretations]
 
     ax.scatter(d_values, [0] * len(d_values), c=colors, s=50, alpha=0.7)
-    ax.set_xlabel('Cohen\'s d')
+    ax.set_xlabel("Cohen's d")
     ax.set_yticks([])
-    ax.set_title('Effect Size Interpretation')
-    ax.axvline(0, color='black', linestyle='-', alpha=0.3)
-    ax.axvline(0.2, color='black', linestyle='--', alpha=0.3)
-    ax.axvline(0.5, color='black', linestyle='--', alpha=0.3)
-    ax.axvline(0.8, color='black', linestyle='--', alpha=0.3)
+    ax.set_title("Effect Size Interpretation")
+    ax.axvline(0, color="black", linestyle="-", alpha=0.3)
+    ax.axvline(0.2, color="black", linestyle="--", alpha=0.3)
+    ax.axvline(0.5, color="black", linestyle="--", alpha=0.3)
+    ax.axvline(0.8, color="black", linestyle="--", alpha=0.3)
 
     # Add labels
-    ax.text(0.1, 0.5, 'Negligible', ha='center', fontsize=9)
-    ax.text(0.35, 0.5, 'Small', ha='center', fontsize=9)
-    ax.text(0.65, 0.5, 'Medium', ha='center', fontsize=9)
-    ax.text(1.15, 0.5, 'Large', ha='center', fontsize=9)
+    ax.text(0.1, 0.5, "Negligible", ha="center", fontsize=9)
+    ax.text(0.35, 0.5, "Small", ha="center", fontsize=9)
+    ax.text(0.65, 0.5, "Medium", ha="center", fontsize=9)
+    ax.text(1.15, 0.5, "Large", ha="center", fontsize=9)
 
     # Plot 4: Sample size vs precision
     ax = axes[1, 1]
@@ -923,17 +934,17 @@ def main(args):
 
         precisions.append(np.std(ds))
 
-    ax.plot(sample_sizes, precisions, 'o-', linewidth=2)
-    ax.set_xlabel('Sample Size (per group)')
-    ax.set_ylabel('Std Dev of Cohen\'s d')
-    ax.set_title('Effect Size Precision vs Sample Size')
+    ax.plot(sample_sizes, precisions, "o-", linewidth=2)
+    ax.set_xlabel("Sample Size (per group)")
+    ax.set_ylabel("Std Dev of Cohen's d")
+    ax.set_title("Effect Size Precision vs Sample Size")
     ax.grid(True, alpha=0.3)
-    ax.set_xscale('log')
+    ax.set_xscale("log")
 
     plt.tight_layout()
 
     # Save
-    stx.io.save(fig, './cohens_d_demo.jpg')
+    stx.io.save(fig, "./cohens_d_demo.jpg")
     logger.info("Visualization saved")
 
     return 0
@@ -942,13 +953,9 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description='Demonstrate Cohen\'s d effect size calculation'
+        description="Demonstrate Cohen's d effect size calculation"
     )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose output'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
@@ -979,7 +986,7 @@ def run_main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
 
 # EOF

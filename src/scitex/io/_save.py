@@ -296,9 +296,7 @@ def save(
                         elif var in frame.f_globals:
                             format_dict[var] = frame.f_globals[var]
                     else:
-                        raise ValueError(
-                            f"Invalid variable name in f-string: {var}"
-                        )
+                        raise ValueError(f"Invalid variable name in f-string: {var}")
 
                 # Use str.format() which is safe
                 specified_path = path_content.format(**format_dict)
@@ -370,7 +368,7 @@ def save(
                     or ("<stdin>" in script_path)
                     or env_type in ["ipython", "interactive"]
                 ):
-                    script_path = f'/tmp/{_os.getenv("USER")}'
+                    script_path = f"/tmp/{_os.getenv('USER')}"
                     sdir = script_path
                 else:
                     # Unknown environment, use current directory
@@ -471,9 +469,7 @@ def _symlink_to(spath_final, symlink_to, verbose):
 
         # Ensure the symlink directory exists (only if there is a directory component)
         symlink_dir = _os.path.dirname(symlink_to)
-        if (
-            symlink_dir
-        ):  # Only create directory if there's a directory component
+        if symlink_dir:  # Only create directory if there's a directory component
             _os.makedirs(symlink_dir, exist_ok=True)
 
         # Remove existing symlink or file
@@ -484,9 +480,7 @@ def _symlink_to(spath_final, symlink_to, verbose):
 
         if verbose:
             symlink_to_full = (
-                os.path.realpath(symlink_to)
-                + "/"
-                + os.path.basename(spath_final)
+                os.path.realpath(symlink_to) + "/" + os.path.basename(spath_final)
             )
             logger.success(f"Symlinked: {spath_final} -> {symlink_to_full}")
 
@@ -569,9 +563,7 @@ def _save(
             logger.success(f"Saved to: ./{rel_path} ({file_size})")
 
 
-def _save_separate_legends(
-    obj, spath, symlink_from_cwd=False, dry_run=False, **kwargs
-):
+def _save_separate_legends(obj, spath, symlink_from_cwd=False, dry_run=False, **kwargs):
     """Save separate legend files if ax.legend('separate') was used."""
     if dry_run:
         return
@@ -661,7 +653,7 @@ def _handle_image_with_csv(
 
     # Auto-collect metadata from scitex figures if not explicitly provided
     collected_metadata = None
-    if 'metadata' not in kwargs or kwargs['metadata'] is None:
+    if "metadata" not in kwargs or kwargs["metadata"] is None:
         try:
             # Check if this is a matplotlib figure or scitex wrapper
             import matplotlib.figure
@@ -669,16 +661,18 @@ def _handle_image_with_csv(
             fig_mpl = None
             if isinstance(obj, matplotlib.figure.Figure):
                 fig_mpl = obj
-            elif hasattr(obj, '_fig_mpl'):  # FigWrapper
+            elif hasattr(obj, "_fig_mpl"):  # FigWrapper
                 fig_mpl = obj._fig_mpl
-            elif hasattr(obj, 'figure') and isinstance(obj.figure, matplotlib.figure.Figure):
+            elif hasattr(obj, "figure") and isinstance(
+                obj.figure, matplotlib.figure.Figure
+            ):
                 fig_mpl = obj.figure
 
             # If we have a figure, try to collect metadata
             if fig_mpl is not None:
                 # Get first axes if available
                 ax = None
-                if hasattr(fig_mpl, 'axes') and len(fig_mpl.axes) > 0:
+                if hasattr(fig_mpl, "axes") and len(fig_mpl.axes) > 0:
                     ax = fig_mpl.axes[0]
 
                 # Collect metadata using scitex's metadata collector
@@ -688,10 +682,12 @@ def _handle_image_with_csv(
                     # Extract plot_id from filename (e.g., "01_plot.png" -> "01_plot")
                     plot_id = _os.path.splitext(_os.path.basename(spath))[0]
 
-                    auto_metadata = collect_figure_metadata(fig_mpl, ax, plot_id=plot_id)
+                    auto_metadata = collect_figure_metadata(
+                        fig_mpl, ax, plot_id=plot_id
+                    )
 
                     if auto_metadata:
-                        kwargs['metadata'] = auto_metadata
+                        kwargs["metadata"] = auto_metadata
                         collected_metadata = auto_metadata  # Save for JSON export
                         if verbose:
                             logger.info("  • Auto-collected metadata from figure")
@@ -700,34 +696,36 @@ def _handle_image_with_csv(
                 except Exception as e:
                     if verbose:
                         import warnings
+
                         warnings.warn(f"Could not auto-collect metadata: {e}")
         except Exception:
             pass  # Silently continue if auto-collection fails
     else:
         # Use explicitly provided metadata
-        collected_metadata = kwargs.get('metadata')
+        collected_metadata = kwargs.get("metadata")
 
     # Merge metadata_extra with collected_metadata
     if metadata_extra is not None and collected_metadata is not None:
         # Deep merge: metadata_extra takes precedence
         import copy
+
         collected_metadata = copy.deepcopy(collected_metadata)
 
         # If metadata_extra has plot_type and it doesn't exist in collected, add it
-        if 'plot_type' in metadata_extra:
-            collected_metadata['plot_type'] = metadata_extra['plot_type']
+        if "plot_type" in metadata_extra:
+            collected_metadata["plot_type"] = metadata_extra["plot_type"]
 
         # Merge style information
-        if 'style' in metadata_extra:
-            collected_metadata['style'] = metadata_extra['style']
+        if "style" in metadata_extra:
+            collected_metadata["style"] = metadata_extra["style"]
 
         # Merge any other fields from metadata_extra
         for key, value in metadata_extra.items():
-            if key not in ['plot_type', 'style']:
+            if key not in ["plot_type", "style"]:
                 collected_metadata[key] = value
 
         # Update kwargs metadata for image saving
-        kwargs['metadata'] = collected_metadata
+        kwargs["metadata"] = collected_metadata
 
     save_image(obj, spath, verbose=verbose, **kwargs)
 
@@ -738,23 +736,32 @@ def _handle_image_with_csv(
 
         # Only crop raster formats (PNG, JPEG, TIFF)
         # Skip vector formats (PDF, SVG) as they don't benefit from cropping
-        if ext.endswith(('.png', '.jpg', '.jpeg', '.tiff', '.tif')):
+        if ext.endswith((".png", ".jpg", ".jpeg", ".tiff", ".tif")):
             try:
                 from scitex.plt.utils._crop import crop
 
                 # Convert mm to pixels (assuming 300 DPI)
                 # 1mm at 300 DPI = 11.81 pixels ≈ 12 pixels
-                dpi = kwargs.get('dpi', 300)
+                dpi = kwargs.get("dpi", 300)
                 margin_px = int(crop_margin_mm * dpi / 25.4)  # 25.4mm per inch
 
                 # Crop the saved image in place
-                crop(spath, output_path=spath, margin=margin_px, overwrite=True, verbose=False)
+                crop(
+                    spath,
+                    output_path=spath,
+                    margin=margin_px,
+                    overwrite=True,
+                    verbose=False,
+                )
 
                 if verbose:
-                    logger.info(f"  • Auto-cropped with {crop_margin_mm}mm margin ({margin_px}px at {dpi} DPI)")
+                    logger.info(
+                        f"  • Auto-cropped with {crop_margin_mm}mm margin ({margin_px}px at {dpi} DPI)"
+                    )
 
             except Exception as e:
                 import warnings
+
                 warnings.warn(f"Auto-crop failed: {e}. Image saved without cropping.")
 
     # Handle separate legend saving
@@ -772,7 +779,7 @@ def _handle_image_with_csv(
 
         # Check if the path contains an image extension directory (e.g., ./png/, ./jpg/)
         # If so, save CSV in a parallel ./csv/ directory
-        image_extensions = ['png', 'jpg', 'jpeg', 'gif', 'tiff', 'tif', 'svg', 'pdf']
+        image_extensions = ["png", "jpg", "jpeg", "gif", "tiff", "tif", "svg", "pdf"]
         parent_dir = _os.path.dirname(spath)
         parent_name = _os.path.basename(parent_dir)
         filename_without_ext = _os.path.splitext(_os.path.basename(spath))[0]
@@ -792,7 +799,9 @@ def _handle_image_with_csv(
                             # Create parallel csv/ directory
                             grandparent_dir = _os.path.dirname(parent_dir)
                             csv_dir = _os.path.join(grandparent_dir, "csv")
-                            csv_path = _os.path.join(csv_dir, filename_without_ext + ".csv")
+                            csv_path = _os.path.join(
+                                csv_dir, filename_without_ext + ".csv"
+                            )
                         else:
                             # Save CSV in same directory as image
                             csv_path = _os.path.splitext(spath)[0] + ".csv"
@@ -810,20 +819,50 @@ def _handle_image_with_csv(
                             no_csv=True,
                         )
 
+                        # Update metadata with actual CSV columns (after export)
+                        # This ensures column names match exactly, including any
+                        # deduplication suffixes added by pandas
+                        if collected_metadata is not None:
+                            try:
+                                from scitex.plt.utils._collect_figure_metadata import (
+                                    _compute_csv_hash,
+                                )
+
+                                # Get actual column names from exported DataFrame
+                                actual_columns = list(csv_data.columns)
+
+                                # Update csv_columns to use flat list of actual columns
+                                collected_metadata["csv_columns_actual"] = actual_columns
+
+                                # Compute hash of actual CSV data
+                                collected_metadata["csv_hash"] = _compute_csv_hash(
+                                    csv_data
+                                )
+                            except Exception:
+                                pass  # Silently continue if update fails
+
                         # Create symlink_to for CSV if it was specified for the image
                         if symlink_to:
                             # Apply same directory transformation for symlink
                             symlink_parent_dir = _os.path.dirname(symlink_to)
                             symlink_parent_name = _os.path.basename(symlink_parent_dir)
-                            symlink_filename_without_ext = _os.path.splitext(_os.path.basename(symlink_to))[0]
+                            symlink_filename_without_ext = _os.path.splitext(
+                                _os.path.basename(symlink_to)
+                            )[0]
 
                             if symlink_parent_name.lower() in image_extensions:
-                                symlink_grandparent_dir = _os.path.dirname(symlink_parent_dir)
+                                symlink_grandparent_dir = _os.path.dirname(
+                                    symlink_parent_dir
+                                )
                                 csv_symlink_to = _os.path.join(
-                                    symlink_grandparent_dir, "csv", symlink_filename_without_ext + ".csv"
+                                    symlink_grandparent_dir,
+                                    "csv",
+                                    symlink_filename_without_ext + ".csv",
                                 )
                             else:
-                                csv_symlink_to = _os.path.splitext(symlink_to)[0] + ".csv"
+                                csv_symlink_to = (
+                                    _os.path.splitext(symlink_to)[0] + ".csv"
+                                )
 
                             _symlink_to(csv_path, csv_symlink_to, True)
 
@@ -842,14 +881,24 @@ def _handle_image_with_csv(
                                     ]
                                     if isinstance(original_path, str):
                                         # Apply same directory transformation for symlink
-                                        orig_parent_dir = _os.path.dirname(original_path)
-                                        orig_parent_name = _os.path.basename(orig_parent_dir)
-                                        orig_filename_without_ext = _os.path.splitext(_os.path.basename(original_path))[0]
+                                        orig_parent_dir = _os.path.dirname(
+                                            original_path
+                                        )
+                                        orig_parent_name = _os.path.basename(
+                                            orig_parent_dir
+                                        )
+                                        orig_filename_without_ext = _os.path.splitext(
+                                            _os.path.basename(original_path)
+                                        )[0]
 
                                         if orig_parent_name.lower() in image_extensions:
-                                            orig_grandparent_dir = _os.path.dirname(orig_parent_dir)
+                                            orig_grandparent_dir = _os.path.dirname(
+                                                orig_parent_dir
+                                            )
                                             csv_relative = _os.path.join(
-                                                orig_grandparent_dir, "csv", orig_filename_without_ext + ".csv"
+                                                orig_grandparent_dir,
+                                                "csv",
+                                                orig_filename_without_ext + ".csv",
                                             )
                                         else:
                                             csv_relative = original_path.replace(
@@ -865,9 +914,7 @@ def _handle_image_with_csv(
                             else:
                                 # Fallback to basename if we can't find the original path
                                 csv_cwd = (
-                                    _os.getcwd()
-                                    + "/"
-                                    + _os.path.basename(csv_path)
+                                    _os.getcwd() + "/" + _os.path.basename(csv_path)
                                 )
                                 _symlink(csv_path, csv_cwd, True, True)
 
@@ -879,14 +926,18 @@ def _handle_image_with_csv(
                         if parent_name.lower() in image_extensions:
                             grandparent_dir = _os.path.dirname(parent_dir)
                             csv_dir = _os.path.join(grandparent_dir, "csv")
-                            csv_sigmaplot_path = _os.path.join(csv_dir, filename_without_ext + "_for_sigmaplot.csv")
+                            csv_sigmaplot_path = _os.path.join(
+                                csv_dir, filename_without_ext + "_for_sigmaplot.csv"
+                            )
                         else:
                             csv_sigmaplot_path = spath.replace(
                                 ext_wo_dot, "csv"
                             ).replace(".csv", "_for_sigmaplot.csv")
 
                         # Ensure parent directory exists
-                        _os.makedirs(_os.path.dirname(csv_sigmaplot_path), exist_ok=True)
+                        _os.makedirs(
+                            _os.path.dirname(csv_sigmaplot_path), exist_ok=True
+                        )
                         # Save directly using _save to avoid path doubling
                         # Don't pass image-specific kwargs to CSV save
                         _save(
@@ -902,12 +953,18 @@ def _handle_image_with_csv(
                         if symlink_to:
                             symlink_parent_dir = _os.path.dirname(symlink_to)
                             symlink_parent_name = _os.path.basename(symlink_parent_dir)
-                            symlink_filename_without_ext = _os.path.splitext(_os.path.basename(symlink_to))[0]
+                            symlink_filename_without_ext = _os.path.splitext(
+                                _os.path.basename(symlink_to)
+                            )[0]
 
                             if symlink_parent_name.lower() in image_extensions:
-                                symlink_grandparent_dir = _os.path.dirname(symlink_parent_dir)
+                                symlink_grandparent_dir = _os.path.dirname(
+                                    symlink_parent_dir
+                                )
                                 csv_sigmaplot_symlink_to = _os.path.join(
-                                    symlink_grandparent_dir, "csv", symlink_filename_without_ext + "_for_sigmaplot.csv"
+                                    symlink_grandparent_dir,
+                                    "csv",
+                                    symlink_filename_without_ext + "_for_sigmaplot.csv",
                                 )
                             else:
                                 csv_sigmaplot_symlink_to = (
@@ -944,7 +1001,16 @@ def _handle_image_with_csv(
             # If so, save JSON in a parallel ./json/ directory
             # Example: ./path/to/output/png/fig.png -> ./path/to/output/json/fig.json
             # Example: ./path/to/output/fig.png -> ./path/to/output/fig.json (same dir)
-            image_extensions = ['png', 'jpg', 'jpeg', 'gif', 'tiff', 'tif', 'svg', 'pdf']
+            image_extensions = [
+                "png",
+                "jpg",
+                "jpeg",
+                "gif",
+                "tiff",
+                "tif",
+                "svg",
+                "pdf",
+            ]
             parent_dir = _os.path.dirname(spath)
             parent_name = _os.path.basename(parent_dir)
             filename_without_ext = _os.path.splitext(_os.path.basename(spath))[0]
@@ -977,12 +1043,16 @@ def _handle_image_with_csv(
                 # Apply same directory transformation for symlink
                 symlink_parent_dir = _os.path.dirname(symlink_to)
                 symlink_parent_name = _os.path.basename(symlink_parent_dir)
-                symlink_filename_without_ext = _os.path.splitext(_os.path.basename(symlink_to))[0]
+                symlink_filename_without_ext = _os.path.splitext(
+                    _os.path.basename(symlink_to)
+                )[0]
 
                 if symlink_parent_name.lower() in image_extensions:
                     symlink_grandparent_dir = _os.path.dirname(symlink_parent_dir)
                     json_symlink_to = _os.path.join(
-                        symlink_grandparent_dir, "json", symlink_filename_without_ext + ".json"
+                        symlink_grandparent_dir,
+                        "json",
+                        symlink_filename_without_ext + ".json",
                     )
                 else:
                     json_symlink_to = _os.path.splitext(symlink_to)[0] + ".json"
@@ -1004,12 +1074,16 @@ def _handle_image_with_csv(
                             # Apply same directory transformation for symlink
                             orig_parent_dir = _os.path.dirname(original_path)
                             orig_parent_name = _os.path.basename(orig_parent_dir)
-                            orig_filename_without_ext = _os.path.splitext(_os.path.basename(original_path))[0]
+                            orig_filename_without_ext = _os.path.splitext(
+                                _os.path.basename(original_path)
+                            )[0]
 
                             if orig_parent_name.lower() in image_extensions:
                                 orig_grandparent_dir = _os.path.dirname(orig_parent_dir)
                                 json_relative = _os.path.join(
-                                    orig_grandparent_dir, "json", orig_filename_without_ext + ".json"
+                                    orig_grandparent_dir,
+                                    "json",
+                                    orig_filename_without_ext + ".json",
                                 )
                             else:
                                 json_relative = original_path.replace(
@@ -1027,8 +1101,10 @@ def _handle_image_with_csv(
 
         except Exception as e:
             import warnings
+
             warnings.warn(f"JSON metadata export failed: {e}")
             import traceback
+
             traceback.print_exc()
 
 

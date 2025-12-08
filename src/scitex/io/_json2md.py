@@ -5,15 +5,15 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/io/_json2md.py"
-)
+
+__FILE__ = "./src/scitex/io/_json2md.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import json
 import sys
 import argparse
+
 
 def json2md(obj, level=1):
     output = []

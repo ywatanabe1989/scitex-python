@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -215,11 +216,11 @@ def correct_sidak(
             logger.info("\nDetailed results:")
             for r in corrected_results:
                 comparison = ""
-                if 'var_x' in r and 'var_y' in r:
+                if "var_x" in r and "var_y" in r:
                     comparison = f"{r['var_x']} vs {r['var_y']}: "
-                elif 'test_method' in r:
+                elif "test_method" in r:
                     comparison = f"{r['test_method']}: "
-                elif 'comparison' in r:
+                elif "comparison" in r:
                     comparison = f"{r['comparison']}: "
 
                 logger.info(
@@ -236,6 +237,7 @@ def correct_sidak(
     if plot:
         if ax is None:
             import matplotlib.pyplot as plt
+
             fig, ax = plt.subplots(figsize=(10, 6))
         _plot_sidak(corrected_results, alpha, alpha_adj, m, ax)
 
@@ -257,23 +259,40 @@ def _plot_sidak(corrected_results, alpha, alpha_adj, m, ax):
 
     # Plot original and adjusted p-values
     ax.scatter(x, pvalues, label="Original p-values", alpha=0.7, s=100, color="C0")
-    ax.scatter(x, pvalues_adj, label="Adjusted p-values", alpha=0.7, s=100, color="C1", marker="s")
+    ax.scatter(
+        x,
+        pvalues_adj,
+        label="Adjusted p-values",
+        alpha=0.7,
+        s=100,
+        color="C1",
+        marker="s",
+    )
 
     # Connect original to adjusted with lines
     for i in range(m):
         ax.plot([i, i], [pvalues[i], pvalues_adj[i]], "k-", alpha=0.3, linewidth=0.5)
 
     # Add significance thresholds
-    ax.axhline(alpha, color="red", linestyle="--", linewidth=2, alpha=0.5, label=f"α = {alpha}")
-    ax.axhline(alpha_adj, color="orange", linestyle="--", linewidth=2, alpha=0.5,
-               label=f"α_adj = {alpha_adj:.4f}")
+    ax.axhline(
+        alpha, color="red", linestyle="--", linewidth=2, alpha=0.5, label=f"α = {alpha}"
+    )
+    ax.axhline(
+        alpha_adj,
+        color="orange",
+        linestyle="--",
+        linewidth=2,
+        alpha=0.5,
+        label=f"α_adj = {alpha_adj:.4f}",
+    )
 
     # Formatting
     ax.set_xlabel("Test Index")
     ax.set_ylabel("P-value")
     rejections = sum(r["rejected"] for r in corrected_results)
-    ax.set_title(f"Šidák Correction (m={m} tests)\n"
-                 f"{rejections}/{m} hypotheses rejected")
+    ax.set_title(
+        f"Šidák Correction (m={m} tests)\n{rejections}/{m} hypotheses rejected"
+    )
     ax.set_yscale("log")
     ax.grid(True, alpha=0.3)
     ax.legend()
@@ -289,7 +308,7 @@ def _plot_sidak(corrected_results, alpha, alpha_adj, m, ax):
             elif "comparison" in r:
                 labels.append(r["comparison"])
             else:
-                labels.append(f"Test {len(labels)+1}")
+                labels.append(f"Test {len(labels) + 1}")
         ax.set_xticks(x)
         ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
     else:
@@ -309,7 +328,9 @@ def main():
 
     # Parse empty args for session
     parser = argparse.ArgumentParser()
-    parser.add_argument('--verbose', action='store_true', default=True, help='Enable verbose output')
+    parser.add_argument(
+        "--verbose", action="store_true", default=True, help="Enable verbose output"
+    )
     args = parser.parse_args([])
 
     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
@@ -326,9 +347,7 @@ def main():
     logger.info("=" * 70)
 
     # Example 1: Basic usage with 5 independent tests
-    logger.info(
-        "\n[Example 1] Basic Šidák correction with 5 independent t-tests"
-    )
+    logger.info("\n[Example 1] Basic Šidák correction with 5 independent t-tests")
     logger.info("-" * 70)
 
     np.random.seed(42)
@@ -410,9 +429,7 @@ def main():
         logger.info(f"Output type: {type(df_corrected)}")
         logger.info(f"\nCorrected DataFrame (first 3 rows):")
         logger.info(
-            df_corrected[
-                ["var_x", "var_y", "pvalue", "pvalue_adjusted", "rejected"]
-            ]
+            df_corrected[["var_x", "var_y", "pvalue", "pvalue_adjusted", "rejected"]]
             .head(3)
             .to_string()
         )
@@ -437,7 +454,7 @@ def main():
 
     for i, (orig, corr) in enumerate(zip(edge_results, edge_corrected)):
         logger.info(
-            f"Test {i+1}: p = {orig['pvalue']:.4f} -> "
+            f"Test {i + 1}: p = {orig['pvalue']:.4f} -> "
             f"p_adj = {corr['pvalue_adjusted']:.4f}"
         )
 
@@ -478,9 +495,7 @@ def main():
         bonf_alpha = alpha / m
         sidak_alpha = 1.0 - (1.0 - alpha) ** (1.0 / m)
         ratio = sidak_alpha / bonf_alpha
-        logger.info(
-            f"{m:<5} {bonf_alpha:.6f}     {sidak_alpha:.6f}     {ratio:.4f}"
-        )
+        logger.info(f"{m:<5} {bonf_alpha:.6f}     {sidak_alpha:.6f}     {ratio:.4f}")
 
     logger.info("\nNote: Šidák is always ≥ Bonferroni (more powerful)")
     logger.info("Difference increases with larger m")
