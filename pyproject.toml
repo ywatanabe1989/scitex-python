@@ -203,6 +203,13 @@ web = [
     "celery",
 ]
 
+# GUI Editors (stx.vis.edit)
+gui = [
+    "flask",           # Web editor backend
+    "dearpygui",       # GPU-accelerated desktop editor
+    "PyQt6",           # Qt desktop editor (alternative: PyQt5, PySide6, PySide2)
+]
+
 # Scholar Module - Paper Management & Browser
 scholar = [
     "selenium",
@@ -342,6 +349,9 @@ all = [
     "fastapi",
     "flask",
     "streamlit",
+    # gui
+    "dearpygui",
+    "PyQt6",
     # writer
     "yq",
     # jupyter
