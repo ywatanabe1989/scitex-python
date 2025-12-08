@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/dataclasses/tree/_ConfigTree.py"
-)
+
+__FILE__ = "./src/scitex/writer/dataclasses/tree/_ConfigTree.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -72,7 +71,11 @@ class ConfigTree:
         missing = []
         for name, section in required:
             if not section.path.exists():
-                expected_path = section.path.relative_to(self.git_root) if self.git_root else section.path
+                expected_path = (
+                    section.path.relative_to(self.git_root)
+                    if self.git_root
+                    else section.path
+                )
                 missing.append(f"{name} (expected at: {expected_path})")
 
         return len(missing) == 0, missing

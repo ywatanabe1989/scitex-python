@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -60,18 +61,14 @@ def check_health(
             results["accessible"] = True
 
             # Integrity check
-            integrity_result = cursor.execute(
-                "PRAGMA integrity_check"
-            ).fetchall()
+            integrity_result = cursor.execute("PRAGMA integrity_check").fetchall()
             results["integrity"] = (
                 "OK" if integrity_result[0][0] == "ok" else "CORRUPTED"
             )
 
             if results["integrity"] == "CORRUPTED":
                 results["issues"].append("Database integrity check failed")
-                results["recommendations"].append(
-                    "Run VACUUM or restore from backup"
-                )
+                results["recommendations"].append("Run VACUUM or restore from backup")
 
             # Get table information
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
@@ -83,20 +80,14 @@ def check_health(
                 cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
                 row_count = cursor.fetchone()[0]
                 total_rows += row_count
-                results["tables"].append(
-                    {"name": table_name, "row_count": row_count}
-                )
+                results["tables"].append({"name": table_name, "row_count": row_count})
 
             results["stats"]["total_rows"] = total_rows
 
             # Check for empty tables
-            empty_tables = [
-                t for t in results["tables"] if t["row_count"] == 0
-            ]
+            empty_tables = [t for t in results["tables"] if t["row_count"] == 0]
             if empty_tables:
-                results["issues"].append(
-                    f"{len(empty_tables)} empty tables found"
-                )
+                results["issues"].append(f"{len(empty_tables)} empty tables found")
 
             # Check database settings
             cursor.execute("PRAGMA journal_mode")
@@ -115,18 +106,12 @@ def check_health(
             cursor.execute("PRAGMA foreign_key_check")
             fk_violations = cursor.fetchall()
             if fk_violations:
-                results["issues"].append(
-                    f"{len(fk_violations)} foreign key violations"
-                )
-                results["recommendations"].append(
-                    "Fix foreign key constraints"
-                )
+                results["issues"].append(f"{len(fk_violations)} foreign key violations")
+                results["recommendations"].append("Fix foreign key constraints")
 
             # Performance recommendations
             if results["stats"]["total_rows"] > 10000:
-                cursor.execute(
-                    "SELECT COUNT(*) FROM sqlite_master WHERE type='index'"
-                )
+                cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='index'")
                 index_count = cursor.fetchone()[0]
                 if index_count < len(table_names):
                     results["recommendations"].append(
@@ -162,12 +147,8 @@ def check_health(
 
     # Test loadability
     results["loadability"]["rows"] = is_rows_loadable(db_path, verbose=verbose)
-    results["loadability"]["arrays"] = is_arrays_loadable(
-        db_path, verbose=verbose
-    )
-    results["loadability"]["blobs"] = is_blobs_loadable(
-        db_path, verbose=verbose
-    )
+    results["loadability"]["arrays"] = is_arrays_loadable(db_path, verbose=verbose)
+    results["loadability"]["blobs"] = is_blobs_loadable(db_path, verbose=verbose)
 
     # Add loadability issues
     if not results["loadability"]["rows"]:
@@ -186,7 +167,9 @@ def check_health(
     results["status"] = (
         "HEALTHY"
         if health_score >= 80
-        else "ISSUES_FOUND" if health_score >= 50 else "CRITICAL"
+        else "ISSUES_FOUND"
+        if health_score >= 50
+        else "CRITICAL"
     )
 
     if verbose:
@@ -377,5 +360,6 @@ def batch_health_check(
     print(f"  Critical: {critical}")
 
     return results
+
 
 # EOF

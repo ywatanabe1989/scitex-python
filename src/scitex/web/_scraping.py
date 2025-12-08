@@ -19,6 +19,7 @@ from tqdm import tqdm
 try:
     from PIL import Image
     from io import BytesIO
+
     PILLOW_AVAILABLE = True
 except ImportError:
     PILLOW_AVAILABLE = False
@@ -30,7 +31,7 @@ logger = getLogger(__name__)
 
 def _get_default_download_dir() -> str:
     """Get default download directory using SCITEX_DIR if available."""
-    scitex_root = os.environ.get('SCITEX_DIR')
+    scitex_root = os.environ.get("SCITEX_DIR")
     if scitex_root is None:
         scitex_root = os.path.expanduser("~/.scitex")
     return os.path.join(scitex_root, "web", "downloads")
@@ -68,7 +69,7 @@ def get_urls(
         logger.error(f"Failed to fetch URL {url}: {e}")
         return []
 
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(response.text, "html.parser")
     urls_found: Set[str] = set()
 
     # Parse the base domain
@@ -76,8 +77,8 @@ def get_urls(
     base_domain = f"{parsed_base.scheme}://{parsed_base.netloc}"
 
     # Find all links
-    for link in soup.find_all('a', href=True):
-        href = link['href']
+    for link in soup.find_all("a", href=True):
+        href = link["href"]
 
         # Convert to absolute URL if requested
         if absolute:
@@ -146,7 +147,7 @@ def download_images(
     # Set default output directory
     if output_dir is None:
         # Check SCITEX_WEB_DOWNLOADS_DIR first
-        output_dir = os.environ.get('SCITEX_WEB_DOWNLOADS_DIR')
+        output_dir = os.environ.get("SCITEX_WEB_DOWNLOADS_DIR")
         if output_dir is None:
             # Fall back to SCITEX_DIR/web/downloads
             output_dir = _get_default_download_dir()
@@ -166,21 +167,21 @@ def download_images(
         logger.error(f"Failed to fetch URL {url}: {e}")
         return []
 
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(response.text, "html.parser")
     image_urls: Set[str] = set()
 
     # Parse the base domain
     parsed_base = urllib.parse.urlparse(url)
 
     # Find all image tags
-    for img in soup.find_all('img', src=True):
-        img_url = img['src']
+    for img in soup.find_all("img", src=True):
+        img_url = img["src"]
 
         # Convert to absolute URL
         img_url = urllib.parse.urljoin(url, img_url)
 
         # Skip SVG files (vector graphics, not raster images)
-        if img_url.lower().endswith(('.svg', '.svgz')):
+        if img_url.lower().endswith((".svg", ".svgz")):
             continue
 
         # Filter by domain if requested
@@ -220,16 +221,16 @@ def download_images(
             filename = Path(parsed_url.path).name
 
             # If filename is empty or doesn't have extension, generate one
-            if not filename or '.' not in filename:
-                ext = '.jpg'  # default extension
-                if 'content-type' in img_response.headers:
-                    content_type = img_response.headers['content-type']
-                    if 'png' in content_type:
-                        ext = '.png'
-                    elif 'gif' in content_type:
-                        ext = '.gif'
-                    elif 'webp' in content_type:
-                        ext = '.webp'
+            if not filename or "." not in filename:
+                ext = ".jpg"  # default extension
+                if "content-type" in img_response.headers:
+                    content_type = img_response.headers["content-type"]
+                    if "png" in content_type:
+                        ext = ".png"
+                    elif "gif" in content_type:
+                        ext = ".gif"
+                    elif "webp" in content_type:
+                        ext = ".webp"
                 filename = f"image_{hash(img_url)}{ext}"
 
             # Save image
@@ -242,7 +243,7 @@ def download_images(
                 file_path = output_path / f"{original_stem}_{counter}{file_path.suffix}"
                 counter += 1
 
-            with open(file_path, 'wb') as f:
+            with open(file_path, "wb") as f:
                 f.write(img_response.content)
 
             return str(file_path)
@@ -253,12 +254,15 @@ def download_images(
 
     # Download images concurrently
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_url = {executor.submit(download_image, img_url): img_url
-                         for img_url in image_urls}
+        future_to_url = {
+            executor.submit(download_image, img_url): img_url for img_url in image_urls
+        }
 
-        for future in tqdm(as_completed(future_to_url),
-                          total=len(image_urls),
-                          desc="Downloading images"):
+        for future in tqdm(
+            as_completed(future_to_url),
+            total=len(image_urls),
+            desc="Downloading images",
+        ):
             result = future.result()
             if result:
                 downloaded_paths.append(result)
@@ -298,21 +302,21 @@ def get_image_urls(
         logger.error(f"Failed to fetch URL {url}: {e}")
         return []
 
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(response.text, "html.parser")
     image_urls: Set[str] = set()
 
     # Parse the base domain
     parsed_base = urllib.parse.urlparse(url)
 
     # Find all image tags
-    for img in soup.find_all('img', src=True):
-        img_url = img['src']
+    for img in soup.find_all("img", src=True):
+        img_url = img["src"]
 
         # Convert to absolute URL
         img_url = urllib.parse.urljoin(url, img_url)
 
         # Skip SVG files (vector graphics, not raster images)
-        if img_url.lower().endswith(('.svg', '.svgz')):
+        if img_url.lower().endswith((".svg", ".svgz")):
             continue
 
         # Filter by domain if requested
@@ -338,13 +342,23 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Web scraping utilities")
     parser.add_argument("url", type=str, help="URL to scrape")
-    parser.add_argument("--mode", "-m", choices=["urls", "images", "image_urls"],
-                       default="urls", help="Scraping mode")
+    parser.add_argument(
+        "--mode",
+        "-m",
+        choices=["urls", "images", "image_urls"],
+        default="urls",
+        help="Scraping mode",
+    )
     parser.add_argument("--output", "-o", type=str, help="Output directory for images")
-    parser.add_argument("--pattern", "-p", type=str, help="Regex pattern to filter URLs")
-    parser.add_argument("--same-domain", action="store_true",
-                       help="Only include URLs from same domain")
-    parser.add_argument("--min-size", type=str, help="Minimum image size as WIDTHxHEIGHT")
+    parser.add_argument(
+        "--pattern", "-p", type=str, help="Regex pattern to filter URLs"
+    )
+    parser.add_argument(
+        "--same-domain", action="store_true", help="Only include URLs from same domain"
+    )
+    parser.add_argument(
+        "--min-size", type=str, help="Minimum image size as WIDTHxHEIGHT"
+    )
 
     args = parser.parse_args()
 
@@ -355,7 +369,7 @@ if __name__ == "__main__":
     elif args.mode == "images":
         min_size = None
         if args.min_size:
-            width, height = map(int, args.min_size.split('x'))
+            width, height = map(int, args.min_size.split("x"))
             min_size = (width, height)
 
         paths = download_images(
@@ -368,6 +382,8 @@ if __name__ == "__main__":
         for path in paths:
             print(path)
     elif args.mode == "image_urls":
-        img_urls = get_image_urls(args.url, pattern=args.pattern, same_domain=args.same_domain)
+        img_urls = get_image_urls(
+            args.url, pattern=args.pattern, same_domain=args.same_domain
+        )
         for img_url in img_urls:
             print(img_url)

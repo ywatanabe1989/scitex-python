@@ -34,7 +34,7 @@ def mk_spath(sfname, makedirs=False):
     """
     THIS_FILE = inspect.stack()[1].filename
     if "ipython" in __file__:  # for ipython
-        THIS_FILE = f'/tmp/fake-{os.getenv("USER")}.py'
+        THIS_FILE = f"/tmp/fake-{os.getenv('USER')}.py"
 
     ## spath
     fpath = __file__

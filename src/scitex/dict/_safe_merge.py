@@ -49,4 +49,5 @@ def safe_merge(*dicts: Dict[_Any, _Any]) -> Dict[_Any, _Any]:
     except Exception as error:
         raise ValueError(f"Dictionary merge failed: {str(error)}")
 
+
 # EOF

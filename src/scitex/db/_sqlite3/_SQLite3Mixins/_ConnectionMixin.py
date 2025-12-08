@@ -5,13 +5,16 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 # Time-stamp: "2024-11-29 04:33:58 (ywatanabe)"
 
-THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_SQLite3Mixins/_ConnectionMixin.py"
+THIS_FILE = (
+    "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_SQLite3Mixins/_ConnectionMixin.py"
+)
 
 """
 1. Functionality:
@@ -54,9 +57,7 @@ class _ConnectionMixin:
     def _create_temp_copy(self, db_path: str) -> str:
         """Creates temporary copy of database."""
         temp_dir = tempfile.gettempdir()
-        self.temp_path = os.path.join(
-            temp_dir, f"temp_{os.path.basename(db_path)}"
-        )
+        self.temp_path = os.path.join(temp_dir, f"temp_{os.path.basename(db_path)}")
         shutil.copy2(db_path, self.temp_path)
         return self.temp_path
 
@@ -64,9 +65,7 @@ class _ConnectionMixin:
         if self.conn:
             self.close()
 
-        path_to_connect = (
-            self._create_temp_copy(db_path) if use_temp_db else db_path
-        )
+        path_to_connect = self._create_temp_copy(db_path) if use_temp_db else db_path
 
         self.conn = sqlite3.connect(path_to_connect, timeout=60.0)
         self.cursor = self.conn.cursor()
@@ -79,9 +78,7 @@ class _ConnectionMixin:
             self.cursor.execute("PRAGMA mmap_size = 30000000000")
             self.cursor.execute("PRAGMA temp_store = MEMORY")
             self.cursor.execute("PRAGMA cache_size = -2000")
-            self.cursor.execute(
-                "PRAGMA wal_autocheckpoint = 1000"
-            )  # Auto-checkpoint
+            self.cursor.execute("PRAGMA wal_autocheckpoint = 1000")  # Auto-checkpoint
             self.conn.commit()
 
     def close(self) -> None:
@@ -120,5 +117,6 @@ class _ConnectionMixin:
         """
         if not self.cursor or not self.conn:
             self.reconnect()
+
 
 # EOF

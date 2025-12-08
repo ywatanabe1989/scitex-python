@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/interaction/fill_with_fallbacks.py"
-)
+
+__FILE__ = "./src/scitex/browser/interaction/fill_with_fallbacks.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -62,7 +61,9 @@ async def fill_with_fallbacks_async(
                 logger.debug(f"Fill successful with {method_name}: {selector}")
                 if verbose:
                     await browser_logger.debug(
-                        page, f"✓ Fill successful ({method_name}): {selector}", verbose=verbose
+                        page,
+                        f"✓ Fill successful ({method_name}): {selector}",
+                        verbose=verbose,
                     )
                 return True
 
@@ -142,7 +143,7 @@ def main(args):
                 page,
                 "textarea[name='q']",  # Google search box
                 "SciTeX browser automation",
-                verbose=True
+                verbose=True,
             )
 
             if success:
@@ -150,9 +151,7 @@ def main(args):
             else:
                 logger.warning("Fill demonstration: no input element found")
 
-            await browser_logger.debug(
-                page, "✓ Demo complete", verbose=True
-            )
+            await browser_logger.debug(page, "✓ Demo complete", verbose=True)
 
             await asyncio.sleep(2)
             await browser.close()
@@ -164,6 +163,7 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     import argparse
+
     parser = argparse.ArgumentParser(description="Fill with fallbacks demo")
     return parser.parse_args()
 

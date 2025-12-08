@@ -286,18 +286,16 @@ if __name__ == "__main__":
 # def parse_args():
 #     """Parse command line arguments."""
 #     import argparse
+# 
 #     parser = argparse.ArgumentParser(description="Demonstrate ID generation")
 #     parser.add_argument(
 #         "--format",
 #         type=str,
 #         default="%YY-%mM-%dD-%Hh%Mm%Ss",
-#         help="Time format (default: %%YY-%%mM-%%dD-%%Hh%%Mm%%Ss)"
+#         help="Time format (default: %%YY-%%mM-%%dD-%%Hh%%Mm%%Ss)",
 #     )
 #     parser.add_argument(
-#         "--length",
-#         type=int,
-#         default=8,
-#         help="Random string length (default: 8)"
+#         "--length", type=int, default=8, help="Random string length (default: 8)"
 #     )
 #     return parser.parse_args()
 # 
@@ -307,9 +305,9 @@ if __name__ == "__main__":
 # 
 #     Demonstrates ID generation with different formats.
 #     """
-#     print(f"\n{'='*60}")
+#     print(f"\n{'=' * 60}")
 #     print("ID Generation Demo")
-#     print(f"{'='*60}")
+#     print(f"{'=' * 60}")
 # 
 #     # Generate with default format
 #     print(f"\n{'Default Format':-^60}")
@@ -329,9 +327,9 @@ if __name__ == "__main__":
 #     for i, id_str in enumerate(ids, 1):
 #         print(f"{i}. {id_str}")
 # 
-#     print(f"\n{'='*60}")
+#     print(f"\n{'=' * 60}")
 #     print("Demo completed successfully!")
-#     print(f"{'='*60}\n")
+#     print(f"{'=' * 60}\n")
 # 
 #     return 0
 # 

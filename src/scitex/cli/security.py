@@ -34,18 +34,13 @@ def security():
 
 @security.command()
 @click.option(
-    '--repo',
-    help='Repository in format "owner/repo" (default: current repo)'
+    "--repo", help='Repository in format "owner/repo" (default: current repo)'
 )
+@click.option("--save", is_flag=True, help="Save report to file")
 @click.option(
-    '--save',
-    is_flag=True,
-    help='Save report to file'
-)
-@click.option(
-    '--output-dir',
+    "--output-dir",
     type=click.Path(),
-    help='Output directory (default: ./logs/security)'
+    help="Output directory (default: ./logs/security)",
 )
 def check(repo, save, output_dir):
     """Check GitHub security alerts."""
@@ -55,8 +50,7 @@ def check(repo, save, output_dir):
 
         # Count open alerts
         total = sum(
-            len([a for a in alerts[key] if a.get("state") == "open"])
-            for key in alerts
+            len([a for a in alerts[key] if a.get("state") == "open"]) for key in alerts
         )
 
         if save:
@@ -70,23 +64,23 @@ def check(repo, save, output_dir):
 
         # Exit with error code if alerts found
         if total > 0:
-            click.secho(f"\n❌ Found {total} open security alert(s)", fg='red')
+            click.secho(f"\n❌ Found {total} open security alert(s)", fg="red")
             sys.exit(1)
         else:
-            click.secho("\n✓ No security alerts found", fg='green')
+            click.secho("\n✓ No security alerts found", fg="green")
             sys.exit(0)
 
     except GitHubSecurityError as e:
-        click.secho(f"ERROR: {e}", fg='red', err=True)
+        click.secho(f"ERROR: {e}", fg="red", err=True)
         sys.exit(1)
 
 
 @security.command()
 @click.option(
-    '--dir',
-    'security_dir',
+    "--dir",
+    "security_dir",
     type=click.Path(),
-    help='Security directory (default: ./logs/security)'
+    help="Security directory (default: ./logs/security)",
 )
 def latest(security_dir):
     """Show the latest security alerts file."""
@@ -97,13 +91,13 @@ def latest(security_dir):
         if latest_file:
             click.echo(latest_file.read_text())
         else:
-            click.secho("No security alerts files found", fg='yellow')
+            click.secho("No security alerts files found", fg="yellow")
             sys.exit(1)
 
     except Exception as e:
-        click.secho(f"ERROR: {e}", fg='red', err=True)
+        click.secho(f"ERROR: {e}", fg="red", err=True)
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     security()

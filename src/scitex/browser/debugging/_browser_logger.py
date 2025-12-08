@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-11 01:18:11 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/browser/debugging/_browser_logger.py
+# Timestamp: "2025-12-09 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/browser/debugging/_browser_logger.py
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/debugging/_browser_logger.py"
-)
+
+__FILE__ = "./src/scitex/browser/debugging/_browser_logger.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -26,7 +25,7 @@ IO:
   - input-files:
     - None
   - output-files:
-    - ~/.scitex/browser/screenshots/{category}/{timestamp}_{message}.png
+    - $SCITEX_DIR/browser/screenshots/{category}/{timestamp}_{message}.png
 """
 
 """Imports"""
@@ -35,6 +34,7 @@ from datetime import datetime
 from pathlib import Path
 
 from scitex import logging
+from scitex.config import get_paths
 
 logger = logging.getLogger(__name__)
 
@@ -152,7 +152,7 @@ async def log_page_async(
         # Only show popup if level is high enough
         if should_show_popup:
             await page.evaluate(
-            f"""
+                f"""
 () => {{
     if (!window._scitexMessages) {{
         window._scitexMessages = [];
@@ -251,7 +251,7 @@ async def log_page_async(
                                 "domcontentloaded", timeout=5000
                             )
                             await page.evaluate(
-                            """
+                                """
 () => {
     if (window._scitexMessages && window._scitexMessages.length > 0) {
         if (!document.getElementById('_scitex_popup_container')) {
@@ -340,12 +340,9 @@ async def log_page_async(
 
                 await page.wait_for_timeout(100)
 
-                if screenshot_dir is None:
-                    screenshot_path = (
-                        Path.home() / ".scitex" / "browser" / "screenshots"
-                    )
-                else:
-                    screenshot_path = Path(screenshot_dir).expanduser()
+                screenshot_path = get_paths().resolve(
+                    "browser_screenshots", screenshot_dir
+                )
 
                 screenshot_path.mkdir(parents=True, exist_ok=True)
 
@@ -353,8 +350,7 @@ async def log_page_async(
                 clean_message = "".join(
                     (
                         c
-                        if c.isascii()
-                        and (c.isalnum() or c in (" ", "-", "_", "."))
+                        if c.isascii() and (c.isalnum() or c in (" ", "-", "_", "."))
                         else "_"
                     )
                     for c in message
@@ -368,9 +364,7 @@ async def log_page_async(
 
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
                 level_upper = level.upper()
-                screenshot_filename = (
-                    f"{timestamp}-{level_upper}-{clean_message}.png"
-                )
+                screenshot_filename = f"{timestamp}-{level_upper}-{clean_message}.png"
                 screenshot_full_path = screenshot_path / screenshot_filename
 
                 await page.screenshot(
@@ -447,9 +441,7 @@ class BrowserLogger:
             message,
             duration_ms=duration_ms or self.duration_ms,
             take_screenshot=(
-                take_screenshot
-                if take_screenshot is not None
-                else self.take_screenshot
+                take_screenshot if take_screenshot is not None else self.take_screenshot
             ),
             screenshot_dir=screenshot_dir or self.screenshot_dir,
             verbose=self.verbose,
@@ -601,9 +593,7 @@ browser_logger = BrowserLogger()
 
 
 def main(args):
-    logger.info(
-        "Popup and capture utility - use browser_logger.info() in your code"
-    )
+    logger.info("Popup and capture utility - use browser_logger.info() in your code")
     return 0
 
 

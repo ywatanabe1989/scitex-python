@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/utils/_verify_scitex_format.py"
-)
+
+__FILE__ = "./src/scitex/utils/_verify_scitex_format.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 """Analyze template compliance from document text."""
@@ -94,10 +93,7 @@ def parse_document(doc_text: str) -> Dict[str, FileInfo]:
         content = match.group(5)
 
         # Only process .py files, skip template.py
-        if (
-            relative_path.endswith(".py")
-            and "template.py" not in relative_path
-        ):
+        if relative_path.endswith(".py") and "template.py" not in relative_path:
             files[relative_path] = FileInfo(
                 relative_path=relative_path,
                 content=content,
@@ -113,9 +109,7 @@ def check_compliance(content: str) -> TemplateCompliance:
     compliance = TemplateCompliance()
 
     # Check for main function
-    compliance.has_main = bool(
-        re.search(r"^def main\(", content, re.MULTILINE)
-    )
+    compliance.has_main = bool(re.search(r"^def main\(", content, re.MULTILINE))
 
     # Check for parse_args function
     compliance.has_parse_args = bool(
@@ -123,14 +117,10 @@ def check_compliance(content: str) -> TemplateCompliance:
     )
 
     # Check for run_main function
-    compliance.has_run_main = bool(
-        re.search(r"^def run_main\(", content, re.MULTILINE)
-    )
+    compliance.has_run_main = bool(re.search(r"^def run_main\(", content, re.MULTILINE))
 
     # Check for main guard
-    compliance.has_main_guard = bool(
-        re.search(r'if __name__ == "__main__":', content)
-    )
+    compliance.has_main_guard = bool(re.search(r'if __name__ == "__main__":', content))
 
     # Check for module docstring
     compliance.has_docstring = bool(re.search(r'"""[\s\S]*?"""', content))
@@ -142,9 +132,7 @@ def check_compliance(content: str) -> TemplateCompliance:
     )
 
     # Check for scitex session usage
-    compliance.uses_scitex_session = bool(
-        re.search(r"stx\.session\.start", content)
-    )
+    compliance.uses_scitex_session = bool(re.search(r"stx\.session\.start", content))
 
     # Check for verbose parameter
     compliance.has_verbose_param = bool(
@@ -173,7 +161,7 @@ def generate_report(results: Dict[str, tuple]) -> str:
 
     lines.append(f"Total Python files analyzed: {total_files}")
     lines.append(
-        f"Fully compliant files: {compliant_files} ({compliant_files/total_files*100:.1f}%)"
+        f"Fully compliant files: {compliant_files} ({compliant_files / total_files * 100:.1f}%)"
     )
     lines.append(f"Average compliance score: {avg_score:.1%}")
     lines.append("")
@@ -201,9 +189,7 @@ def generate_report(results: Dict[str, tuple]) -> str:
             status = "✗ NON-COMPLIANT"
 
         lines.append(f"{status} [{score:.0%}] {filepath}")
-        lines.append(
-            f"  Lines: {file_info.lines}, Size: {file_info.size} bytes"
-        )
+        lines.append(f"  Lines: {file_info.lines}, Size: {file_info.size} bytes")
 
         # Show missing components
         if not compliance.is_compliant:
@@ -234,9 +220,7 @@ def generate_report(results: Dict[str, tuple]) -> str:
             optional_missing.append("verbose parameter")
 
         if optional_missing:
-            lines.append(
-                f"  ⚠️  OPTIONAL Missing: {', '.join(optional_missing)}"
-            )
+            lines.append(f"  ⚠️  OPTIONAL Missing: {', '.join(optional_missing)}")
 
         lines.append("")
 
@@ -273,11 +257,7 @@ def generate_report(results: Dict[str, tuple]) -> str:
         ),
         (
             "  'Functions & Classes'",
-            sum(
-                1
-                for _, c in results.values()
-                if c.has_functions_classes_section
-            ),
+            sum(1 for _, c in results.values() if c.has_functions_classes_section),
         ),
         (
             "  scitex session",
@@ -337,9 +317,7 @@ def generate_report(results: Dict[str, tuple]) -> str:
 def main():
     """Main function."""
     # Read the document
-    with open(
-        "/mnt/user-data/uploads/document_1.txt", "r", encoding="utf-8"
-    ) as f:
+    with open("/mnt/user-data/uploads/document_1.txt", "r", encoding="utf-8") as f:
         doc_text = f.read()
 
     print("Parsing document...")

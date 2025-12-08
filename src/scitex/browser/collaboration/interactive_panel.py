@@ -67,13 +67,13 @@ class InteractivePanel:
     def _load_persistent_memory(self):
         """Load persistent memory from disk."""
         if self.persistent_memory_file.exists():
-            with open(self.persistent_memory_file, 'r') as f:
+            with open(self.persistent_memory_file, "r") as f:
                 self.session_memory = json.load(f)
 
     def _save_persistent_memory(self):
         """Save persistent memory to disk."""
         if self.enable_persistence:
-            with open(self.persistent_memory_file, 'w') as f:
+            with open(self.persistent_memory_file, "w") as f:
                 json.dump(self.session_memory, f, indent=2)
 
     async def initialize(self):

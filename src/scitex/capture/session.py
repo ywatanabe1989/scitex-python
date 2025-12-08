@@ -5,11 +5,11 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/capture/session.py"
-)
+
+__FILE__ = "./src/scitex/capture/session.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
+
 
 class Session:
     """Context manager for CAM session with automatic start/stop."""
@@ -66,5 +66,6 @@ class Session:
 def session(**kwargs):
     """Create a new session context manager."""
     return Session(**kwargs)
+
 
 # EOF

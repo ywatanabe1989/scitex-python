@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/debugging/_show_grid.py"
-)
+
+__FILE__ = "./src/scitex/browser/debugging/_show_grid.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -39,6 +38,8 @@ from scitex import logging
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
+
+
 async def show_grid_async(page, func_name: str = "show_grid_async"):
     from ._browser_logger import browser_logger
 
@@ -108,9 +109,7 @@ def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     import scitex as stx
 
-    parser = argparse.ArgumentParser(
-        description="Grid overlay utility for debugging"
-    )
+    parser = argparse.ArgumentParser(description="Grid overlay utility for debugging")
     args = parser.parse_args()
     return args
 

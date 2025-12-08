@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/template/_customize.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -88,9 +89,7 @@ def update_references(
     int
         Number of files updated
     """
-    logger.debug(
-        f"Updating references from {template_package_name} to {new_name}"
-    )
+    logger.debug(f"Updating references from {template_package_name} to {new_name}")
 
     # Files that typically contain package name references
     files_to_update = [
@@ -106,9 +105,7 @@ def update_references(
     updated_count = 0
     for file_path in files_to_update:
         if update_file_references(file_path, template_package_name, new_name):
-            logger.debug(
-                f"Updated references in {file_path.relative_to(target_path)}"
-            )
+            logger.debug(f"Updated references in {file_path.relative_to(target_path)}")
             updated_count += 1
 
     return updated_count

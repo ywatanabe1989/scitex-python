@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/template/_copy.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------

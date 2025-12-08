@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/types/tree/_SharedTree.py"
-)
+
+__FILE__ = "./src/scitex/writer/types/tree/_SharedTree.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -48,17 +47,11 @@ class SharedTree:
     def __post_init__(self):
         """Initialize all DocumentSection and Path instances."""
         if self.authors is None:
-            self.authors = DocumentSection(
-                self.root / "authors.tex", self.git_root
-            )
+            self.authors = DocumentSection(self.root / "authors.tex", self.git_root)
         if self.title is None:
-            self.title = DocumentSection(
-                self.root / "title.tex", self.git_root
-            )
+            self.title = DocumentSection(self.root / "title.tex", self.git_root)
         if self.keywords is None:
-            self.keywords = DocumentSection(
-                self.root / "keywords.tex", self.git_root
-            )
+            self.keywords = DocumentSection(self.root / "keywords.tex", self.git_root)
         if self.journal_name is None:
             self.journal_name = DocumentSection(
                 self.root / "journal_name.tex", self.git_root
@@ -92,7 +85,11 @@ class SharedTree:
         missing = []
         for name, section in required:
             if not section.path.exists():
-                expected_path = section.path.relative_to(self.git_root) if self.git_root else section.path
+                expected_path = (
+                    section.path.relative_to(self.git_root)
+                    if self.git_root
+                    else section.path
+                )
                 missing.append(f"{name} (expected at: {expected_path})")
 
         return len(missing) == 0, missing

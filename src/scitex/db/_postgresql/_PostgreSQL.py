@@ -38,7 +38,6 @@ class PostgreSQL(
     _TransactionMixin,
     _BlobMixin,
 ):
-
     def __init__(
         self,
         dbname: Optional[str] = None,

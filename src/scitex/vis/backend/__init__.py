@@ -8,7 +8,7 @@ This module bridges the gap between JSON specifications and
 actual matplotlib figures using scitex.plt.
 """
 
-from .parser import (
+from ._parser import (
     parse_figure_json,
     parse_axes_json,
     parse_plot_json,
@@ -17,7 +17,7 @@ from .parser import (
     validate_figure_json,
 )
 
-from .render import (
+from ._render import (
     render_figure,
     render_axes,
     render_plot,
@@ -26,7 +26,7 @@ from .render import (
     build_figure_from_json,
 )
 
-from .export import (
+from ._export import (
     export_figure,
     export_figure_from_file,
     export_multiple_formats,

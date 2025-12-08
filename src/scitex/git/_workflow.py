@@ -37,7 +37,9 @@ def setup_branches(repo_path: Path, template_name: str, verbose: bool = True) ->
     if not git_add_all(repo_path, verbose=verbose):
         return False
 
-    if not git_commit(repo_path, f"Initial commit from {template_name}", verbose=verbose):
+    if not git_commit(
+        repo_path, f"Initial commit from {template_name}", verbose=verbose
+    ):
         return False
 
     if not git_branch_rename(repo_path, "main", verbose=verbose):
@@ -70,9 +72,7 @@ def _rollback_commit(repo_path: Path, verbose: bool = True) -> None:
 
     with _in_directory(repo_path):
         result = sh(
-            ["git", "reset", "--soft", "HEAD~1"],
-            verbose=verbose,
-            return_as="dict"
+            ["git", "reset", "--soft", "HEAD~1"], verbose=verbose, return_as="dict"
         )
         if result["success"]:
             logger.info("Rolled back commit due to workflow failure")

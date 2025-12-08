@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/capture/gif.py"
-)
+
+__FILE__ = "./src/scitex/capture/gif.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -150,9 +149,7 @@ class GifCreator:
             target_size = images[0].size
             for i in range(1, len(images)):
                 if images[i].size != target_size:
-                    images[i] = images[i].resize(
-                        target_size, Image.Resampling.LANCZOS
-                    )
+                    images[i] = images[i].resize(target_size, Image.Resampling.LANCZOS)
 
             # Create output directory if it doesn't exist
             output_path = Path(output_path)
@@ -260,9 +257,7 @@ class GifCreator:
                 return []
 
             # Find all monitoring session files (format: SESSIONID_NNNN_timestamp.ext)
-            session_pattern = re.compile(
-                r"^(\d{8}_\d{6})_\d{4}_.*\.(jpg|png)$"
-            )
+            session_pattern = re.compile(r"^(\d{8}_\d{6})_\d{4}_.*\.(jpg|png)$")
 
             sessions = set()
             for file in screenshot_dir.iterdir():
@@ -340,5 +335,6 @@ def create_gif_from_latest_session(**kwargs) -> Optional[str]:
     """Create GIF from the most recent monitoring session."""
     creator = GifCreator()
     return creator.create_gif_from_recent_session(**kwargs)
+
 
 # EOF

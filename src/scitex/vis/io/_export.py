@@ -42,8 +42,8 @@ def export_canvas_to_file(
     Path
         Path to exported file in exports/ directory
     """
-    from .directory import get_canvas_directory_path
-    from .canvas import load_canvas_json
+    from ._directory import get_canvas_directory_path
+    from ._canvas import load_canvas_json
 
     canvas_dir = get_canvas_directory_path(project_dir, canvas_name)
     canvas_json = load_canvas_json(project_dir, canvas_name, verify_data_hashes=False)
@@ -130,7 +130,7 @@ def list_canvas_exports(
     List[Path]
         List of paths in exports/ directory
     """
-    from .directory import get_canvas_directory_path
+    from ._directory import get_canvas_directory_path
 
     canvas_dir = get_canvas_directory_path(project_dir, canvas_name)
     exports_dir = canvas_dir / "exports"
@@ -179,10 +179,7 @@ def _compose_and_export(
         fig.patch.set_facecolor(bg_color)
 
     # Sort panels by z_index
-    panels = sorted(
-        canvas_json.get("panels", []),
-        key=lambda p: p.get("z_index", 0)
-    )
+    panels = sorted(canvas_json.get("panels", []), key=lambda p: p.get("z_index", 0))
 
     # Place each panel
     for panel in panels:
@@ -361,11 +358,14 @@ def _add_panel_label(ax, label: Dict[str, Any]) -> None:
     x, y, ha, va = pos_map.get(position, pos_map["top-left"])
 
     ax.text(
-        x, y, text,
+        x,
+        y,
+        text,
         transform=ax.transAxes,
         fontsize=fontsize,
         fontweight=fontweight,
-        ha=ha, va=va,
+        ha=ha,
+        va=va,
     )
 
 
@@ -385,7 +385,8 @@ def _add_annotations(
             y = 1 - pos.get("y_mm", 0) / canvas_height_mm
 
             fig.text(
-                x, y,
+                x,
+                y,
                 ann.get("content", ""),
                 fontsize=ann.get("fontsize", 10),
                 color=ann.get("color", "#000000"),
@@ -406,7 +407,8 @@ def _add_title(
     y = 1 - pos.get("y_mm", 5) / canvas_height_mm
 
     fig.text(
-        x, y,
+        x,
+        y,
         title_config.get("text", ""),
         fontsize=title_config.get("fontsize", 14),
         ha="center",
@@ -448,7 +450,8 @@ def _add_caption(
     wrapped_text = textwrap.fill(text, width=wrap_width)
 
     fig.text(
-        x, y_norm,
+        x,
+        y_norm,
         wrapped_text,
         fontsize=fontsize,
         ha="left",

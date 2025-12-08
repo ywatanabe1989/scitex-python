@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/pdf/detect_chrome_pdf_viewer.py"
-)
+
+__FILE__ = "./src/scitex/browser/pdf/detect_chrome_pdf_viewer.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -39,9 +38,7 @@ async def detect_chrome_pdf_viewer_async(
     """
 
     if verbose:
-        await browser_logger.debug(
-            page, f"{func_name}: Detecting Chrome PDF Viewer..."
-        )
+        await browser_logger.debug(page, f"{func_name}: Detecting Chrome PDF Viewer...")
 
     # Try multiple detection methods
     detected = await page.evaluate(

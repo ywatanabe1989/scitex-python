@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/git/retry.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -81,11 +82,7 @@ def git_retry(
             stderr = (
                 e.stderr
                 if isinstance(e.stderr, str)
-                else (
-                    e.stderr.decode("utf-8", errors="ignore")
-                    if e.stderr
-                    else ""
-                )
+                else (e.stderr.decode("utf-8", errors="ignore") if e.stderr else "")
             )
 
             if "index.lock" in stderr and attempt < max_retries - 1:

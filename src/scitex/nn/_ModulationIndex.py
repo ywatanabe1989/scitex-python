@@ -170,7 +170,9 @@ if __name__ == "__main__":
     import scitex
 
     # Start
-    CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, fig_scale=3)
+    CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
+        sys, plt, fig_scale=3
+    )
 
     # Parameters
     FS = 512

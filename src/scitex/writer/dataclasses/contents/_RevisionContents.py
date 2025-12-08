@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/dataclasses/_RevisionContents.py"
-)
+
+__FILE__ = "./src/scitex/writer/dataclasses/_RevisionContents.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -68,17 +67,11 @@ class RevisionContents:
                 self.root / "references.tex", self.git_root
             )
         if self.title is None:
-            self.title = DocumentSection(
-                self.root / "title.tex", self.git_root
-            )
+            self.title = DocumentSection(self.root / "title.tex", self.git_root)
         if self.authors is None:
-            self.authors = DocumentSection(
-                self.root / "authors.tex", self.git_root
-            )
+            self.authors = DocumentSection(self.root / "authors.tex", self.git_root)
         if self.keywords is None:
-            self.keywords = DocumentSection(
-                self.root / "keywords.tex", self.git_root
-            )
+            self.keywords = DocumentSection(self.root / "keywords.tex", self.git_root)
         if self.journal_name is None:
             self.journal_name = DocumentSection(
                 self.root / "journal_name.tex", self.git_root
@@ -111,16 +104,28 @@ class RevisionContents:
 
         # Check required directories
         if not self.figures.exists():
-            expected_path = self.figures.relative_to(self.git_root) if self.git_root else self.figures
+            expected_path = (
+                self.figures.relative_to(self.git_root)
+                if self.git_root
+                else self.figures
+            )
             issues.append(f"Missing figures/ (expected at: {expected_path})")
         if not self.tables.exists():
-            expected_path = self.tables.relative_to(self.git_root) if self.git_root else self.tables
+            expected_path = (
+                self.tables.relative_to(self.git_root) if self.git_root else self.tables
+            )
             issues.append(f"Missing tables/ (expected at: {expected_path})")
         if not self.latex_styles.exists():
-            expected_path = self.latex_styles.relative_to(self.git_root) if self.git_root else self.latex_styles
+            expected_path = (
+                self.latex_styles.relative_to(self.git_root)
+                if self.git_root
+                else self.latex_styles
+            )
             issues.append(f"Missing latex_styles/ (expected at: {expected_path})")
         if not self.editor.exists():
-            expected_path = self.editor.relative_to(self.git_root) if self.git_root else self.editor
+            expected_path = (
+                self.editor.relative_to(self.git_root) if self.git_root else self.editor
+            )
             issues.append(f"Missing editor/ (expected at: {expected_path})")
 
         return len(issues) == 0, issues

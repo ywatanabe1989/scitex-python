@@ -53,26 +53,40 @@ def signal_fn(func: Callable) -> Callable:
 
         # Convert results back to original input types
         import torch
+
         if isinstance(results, torch.Tensor):
             if original_object is not None:
                 if isinstance(original_object, list):
                     return results.detach().cpu().numpy().tolist()
                 elif isinstance(original_object, np.ndarray):
                     return results.detach().cpu().numpy()
-                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataFrame':
+                elif (
+                    hasattr(original_object, "__class__")
+                    and original_object.__class__.__name__ == "DataFrame"
+                ):
                     import pandas as pd
+
                     return pd.DataFrame(results.detach().cpu().numpy())
-                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Series':
+                elif (
+                    hasattr(original_object, "__class__")
+                    and original_object.__class__.__name__ == "Series"
+                ):
                     import pandas as pd
+
                     return pd.Series(results.detach().cpu().numpy().flatten())
-                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataArray':
+                elif (
+                    hasattr(original_object, "__class__")
+                    and original_object.__class__.__name__ == "DataArray"
+                ):
                     import xarray as xr
+
                     return xr.DataArray(results.detach().cpu().numpy())
             return results
 
         # Handle tuple returns (e.g., (signal, frequencies))
         elif isinstance(results, tuple):
             import torch
+
             converted_results = []
             for r in results:
                 if isinstance(r, torch.Tensor):

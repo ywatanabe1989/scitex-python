@@ -66,13 +66,13 @@ def git_branch_rename(repo_path: Path, new_name: str, verbose: bool = True) -> b
 
     with _in_directory(repo_path):
         result = sh(
-            ["git", "branch", "-M", new_name],
-            verbose=verbose,
-            return_as="dict"
+            ["git", "branch", "-M", new_name], verbose=verbose, return_as="dict"
         )
 
         if not result["success"]:
-            error_msg = result['stderr'].strip() if result['stderr'] else "Unknown error"
+            error_msg = (
+                result["stderr"].strip() if result["stderr"] else "Unknown error"
+            )
             logger.error(f"Failed to rename branch in {repo_path}: {error_msg}")
             return False
 
@@ -81,7 +81,9 @@ def git_branch_rename(repo_path: Path, new_name: str, verbose: bool = True) -> b
         return True
 
 
-def git_checkout_new_branch(repo_path: Path, branch_name: str, verbose: bool = True) -> bool:
+def git_checkout_new_branch(
+    repo_path: Path, branch_name: str, verbose: bool = True
+) -> bool:
     """
     Create and checkout a new branch.
 
@@ -123,14 +125,16 @@ def git_checkout_new_branch(repo_path: Path, branch_name: str, verbose: bool = T
 
     with _in_directory(repo_path):
         result = sh(
-            ["git", "checkout", "-b", branch_name],
-            verbose=verbose,
-            return_as="dict"
+            ["git", "checkout", "-b", branch_name], verbose=verbose, return_as="dict"
         )
 
         if not result["success"]:
-            error_msg = result['stderr'].strip() if result['stderr'] else "Unknown error"
-            logger.error(f"Failed to create branch {branch_name} in {repo_path}: {error_msg}")
+            error_msg = (
+                result["stderr"].strip() if result["stderr"] else "Unknown error"
+            )
+            logger.error(
+                f"Failed to create branch {branch_name} in {repo_path}: {error_msg}"
+            )
             return False
 
         if verbose:
@@ -142,7 +146,9 @@ def main(args):
     if args.action == "rename":
         success = git_branch_rename(args.repo_path, args.branch_name, args.verbose)
     elif args.action == "checkout":
-        success = git_checkout_new_branch(args.repo_path, args.branch_name, args.verbose)
+        success = git_checkout_new_branch(
+            args.repo_path, args.branch_name, args.verbose
+        )
     else:
         return EXIT_FAILURE
     return EXIT_SUCCESS if success else EXIT_FAILURE
@@ -151,6 +157,7 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-path", type=Path, required=True)
     parser.add_argument("--action", choices=["rename", "checkout"], required=True)
@@ -162,6 +169,7 @@ def parse_args():
 def run_session():
     """Initialize scitex framework, run main function, and cleanup."""
     from ._session import run_with_session
+
     run_with_session(parse_args, main)
 
 

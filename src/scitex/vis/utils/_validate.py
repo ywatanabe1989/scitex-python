@@ -44,9 +44,7 @@ def validate_json_structure(fig_json: Dict[str, Any]) -> bool:
         raise ValueError(f"width_mm must be positive, got {fig_json['width_mm']}")
 
     if fig_json["height_mm"] <= 0:
-        raise ValueError(
-            f"height_mm must be positive, got {fig_json['height_mm']}"
-        )
+        raise ValueError(f"height_mm must be positive, got {fig_json['height_mm']}")
 
     # Optional fields validation
     if "nrows" in fig_json:
@@ -103,9 +101,7 @@ def validate_plot_data(plot_data: Dict[str, Any]) -> bool:
         y_len = len(data["y"]) if hasattr(data["y"], "__len__") else 1
 
         if x_len != y_len:
-            raise ValueError(
-                f"x and y data must have same length: {x_len} != {y_len}"
-            )
+            raise ValueError(f"x and y data must have same length: {x_len} != {y_len}")
 
     elif plot_type in ["bar", "barh"]:
         if "x" not in data:
@@ -170,9 +166,7 @@ def validate_color(color: str) -> bool:
     return True
 
 
-def validate_axes_layout(
-    nrows: int, ncols: int, num_axes: int
-) -> bool:
+def validate_axes_layout(nrows: int, ncols: int, num_axes: int) -> bool:
     """
     Validate axes layout is consistent.
 

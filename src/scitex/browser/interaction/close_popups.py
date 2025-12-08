@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -33,11 +34,11 @@ logger = logging.getLogger(__name__)
 
 class PopupHandler:
     """Handle various types of popups on web pages."""
-    
+
     # Common selectors for different popup types
     COOKIE_SELECTORS = [
-        'button#onetrust-accept-btn-handler',
-        'button#onetrust-pc-btn-handler',
+        "button#onetrust-accept-btn-handler",
+        "button#onetrust-pc-btn-handler",
         'button[id*="accept-cookie"]',
         'button[id*="accept-all"]',
         'button[aria-label*="accept cookie"]',
@@ -47,10 +48,10 @@ class PopupHandler:
         'button:has-text("I agree")',
         'button:has-text("I Agree")',
         'button:has-text("Accept")',
-        '.cookie-notice button.accept',
+        ".cookie-notice button.accept",
         '[class*="cookie"] button[class*="accept"]',
     ]
-    
+
     CLOSE_SELECTORS = [
         'button[aria-label="Close"]',
         'button[aria-label="close"]',
@@ -58,14 +59,14 @@ class PopupHandler:
         'button[aria-label*="close"]',
         'button[aria-label*="dismiss"]',
         'button[aria-label*="Dismiss"]',
-        'button.close',
-        'button.close-button',
-        'button.modal-close',
-        'button.popup-close',
-        'button.dialog-close',
-        'a.close',
-        'a.close-button',
-        'span.close',
+        "button.close",
+        "button.close-button",
+        "button.modal-close",
+        "button.popup-close",
+        "button.dialog-close",
+        "a.close",
+        "a.close-button",
+        "span.close",
         '[class*="close-button"]',
         '[class*="close-icon"]',
         'svg[class*="close"]',
@@ -78,14 +79,14 @@ class PopupHandler:
         'button:has-text("Not now")',
         'button:has-text("Not Now")',
     ]
-    
+
     MODAL_SELECTORS = [
-        '.modal',
-        '.overlay',
+        ".modal",
+        ".overlay",
         '[role="dialog"]',
-        '.popup',
-        '#onetrust-banner-sdk',
-        '.onetrust-pc-dark-filter',
+        ".popup",
+        "#onetrust-banner-sdk",
+        ".onetrust-pc-dark-filter",
         '[class*="modal"]',
         '[class*="popup"]',
         '[class*="overlay"]',
@@ -102,15 +103,16 @@ class PopupHandler:
     async def detect_popups(self) -> List[Dict]:
         """
         Detect all visible popups on the page.
-        
+
         Returns:
             List of detected popups with their details
         """
         detected = []
-        
+
         try:
             # Check for visible modal/popup elements
-            popup_info = await self.page.evaluate('''
+            popup_info = await self.page.evaluate(
+                """
                 () => {
                     const modalSelectors = %s;
                     const found = [];
@@ -174,18 +176,22 @@ class PopupHandler:
                     
                     return found;
                 }
-            ''' % str(self.MODAL_SELECTORS))
-            
+            """
+                % str(self.MODAL_SELECTORS)
+            )
+
             detected = popup_info
-            
+
             if detected:
                 logger.debug(f"Detected {len(detected)} popup(s)")
                 for popup in detected[:3]:  # Log first 3
-                    logger.debug(f"  - Type: {popup['type']}, Text preview: {popup['text'][:50]}...")
-            
+                    logger.debug(
+                        f"  - Type: {popup['type']}, Text preview: {popup['text'][:50]}..."
+                    )
+
         except Exception as e:
             logger.debug(f"Error detecting popups: {e}")
-        
+
         return detected
 
     async def handle_cookie_popup(self) -> bool:
@@ -200,7 +206,9 @@ class PopupHandler:
                 button = await self.page.query_selector(selector)
                 if button and await button.is_visible():
                     # IMPORTANT: Skip SciTeX manual control buttons
-                    is_scitex_control = await button.get_attribute('data-scitex-no-auto-click')
+                    is_scitex_control = await button.get_attribute(
+                        "data-scitex-no-auto-click"
+                    )
                     if is_scitex_control:
                         logger.debug(f"Skipping SciTeX control button: {selector}")
                         continue
@@ -208,7 +216,7 @@ class PopupHandler:
                     await button.click()
                     logger.success(f"Accepted cookies with selector: {selector}")
                     await self.page.wait_for_timeout(1000)
-                    self.handled_popups.append(('cookie', selector))
+                    self.handled_popups.append(("cookie", selector))
                     return True
             except Exception as e:
                 logger.debug(f"Cookie selector {selector} failed: {e}")
@@ -232,7 +240,9 @@ class PopupHandler:
                 button = await self.page.query_selector(selector)
                 if button and await button.is_visible():
                     # IMPORTANT: Skip SciTeX manual control buttons
-                    is_scitex_control = await button.get_attribute('data-scitex-no-auto-click')
+                    is_scitex_control = await button.get_attribute(
+                        "data-scitex-no-auto-click"
+                    )
                     if is_scitex_control:
                         logger.debug(f"Skipping SciTeX control button: {selector}")
                         continue
@@ -240,16 +250,16 @@ class PopupHandler:
                     await button.click()
                     logger.success(f"Closed popup with selector: {selector}")
                     await self.page.wait_for_timeout(500)
-                    self.handled_popups.append(('close', selector))
+                    self.handled_popups.append(("close", selector))
                     return True
             except Exception:
                 continue
-        
+
         # Try ESC key as fallback
         try:
-            await self.page.keyboard.press('Escape')
+            await self.page.keyboard.press("Escape")
             await self.page.wait_for_timeout(500)
-            
+
             # Check if popup is gone
             if popup_info:
                 still_visible = await self.page.evaluate(
@@ -257,92 +267,94 @@ class PopupHandler:
                 )
                 if not still_visible:
                     logger.success("Closed popup with ESC key")
-                    self.handled_popups.append(('escape', popup_info['selector']))
+                    self.handled_popups.append(("escape", popup_info["selector"]))
                     return True
         except Exception as e:
             logger.debug(f"ESC key failed: {e}")
-        
+
         return False
 
-    async def handle_all_popups(self, max_attempts: int = 3, delay_ms: int = 1000) -> int:
+    async def handle_all_popups(
+        self, max_attempts: int = 3, delay_ms: int = 1000
+    ) -> int:
         """
         Detect and handle all popups on the page.
-        
+
         Args:
             max_attempts: Maximum number of attempts to clear popups
             delay_ms: Delay between attempts in milliseconds
-            
+
         Returns:
             Number of popups handled
         """
         total_handled = 0
-        
+
         for attempt in range(max_attempts):
             # Detect popups
             popups = await self.detect_popups()
-            
+
             if not popups:
                 if attempt == 0:
                     logger.debug("No popups detected")
                 break
-            
+
             logger.debug(f"Attempt {attempt + 1}: Found {len(popups)} popup(s)")
-            
+
             # Handle each popup
             for popup in popups:
                 handled = False
-                
+
                 # Try cookie handling first if it's a cookie popup
-                if popup['type'] == 'cookie':
+                if popup["type"] == "cookie":
                     handled = await self.handle_cookie_popup()
-                
+
                 # Otherwise try to close it
                 if not handled:
                     handled = await self.close_popup(popup)
-                
+
                 if handled:
                     total_handled += 1
                     await self.page.wait_for_timeout(delay_ms)
                 else:
                     logger.warning(f"Could not handle popup: {popup['type']}")
-            
+
             # Small delay before next detection
             await self.page.wait_for_timeout(500)
-        
+
         if total_handled > 0:
             logger.success(f"Successfully handled {total_handled} popup(s)")
-        
+
         return total_handled
 
     async def wait_and_handle_popups(self, timeout_ms: int = 5000) -> int:
         """
         Wait for popups to appear and handle them.
-        
+
         Args:
             timeout_ms: Maximum time to wait for popups
-            
+
         Returns:
             Number of popups handled
         """
         start_time = asyncio.get_event_loop().time()
         total_handled = 0
-        
+
         while (asyncio.get_event_loop().time() - start_time) * 1000 < timeout_ms:
             popups = await self.detect_popups()
-            
+
             if popups:
                 for popup in popups:
-                    if popup['type'] == 'cookie':
+                    if popup["type"] == "cookie":
                         if await self.handle_cookie_popup():
                             total_handled += 1
                     elif await self.close_popup(popup):
                         total_handled += 1
-                
+
                 if total_handled > 0:
                     break
-            
+
             await self.page.wait_for_timeout(500)
-        
+
         return total_handled
 
 
@@ -352,11 +364,11 @@ async def close_popups_async(
     close_others: bool = True,
     max_attempts: int = 3,
     wait_first: bool = True,
-    wait_ms: int = 2000
+    wait_ms: int = 2000,
 ) -> Tuple[int, List]:
     """
     Convenience function to handle all popups on a page.
-    
+
     Args:
         page: Playwright page object
         handle_cookies: Whether to accept cookie popups
@@ -364,19 +376,19 @@ async def close_popups_async(
         max_attempts: Maximum attempts to clear popups
         wait_first: Whether to wait for popups to appear first
         wait_ms: Time to wait for popups to appear
-        
+
     Returns:
         Tuple of (number handled, list of handled popups)
     """
     handler = PopupHandler(page)
-    
+
     # Wait for popups to appear if requested
     if wait_first:
         await page.wait_for_timeout(wait_ms)
-    
+
     # Handle all popups
     total = await handler.handle_all_popups(max_attempts=max_attempts)
-    
+
     return total, handler.handled_popups
 
 
@@ -453,6 +465,7 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     import argparse
+
     parser = argparse.ArgumentParser(description="Popup handler demo")
     return parser.parse_args()
 

@@ -3,7 +3,7 @@
 # File: ./src/scitex/vis/editor/flask_editor/templates/scripts.py
 """JavaScript for the Flask editor UI."""
 
-JS_SCRIPTS = '''
+JS_SCRIPTS = """
 let overrides = {{ overrides|safe }};
 let traces = overrides.traces || [];
 let elementBboxes = {};
@@ -608,7 +608,7 @@ function setAutoUpdateInterval() {
         }, intervalMs);
     }
 }
-'''
+"""
 
 
 # EOF

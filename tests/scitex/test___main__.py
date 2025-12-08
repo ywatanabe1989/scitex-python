@@ -187,6 +187,7 @@ if __name__ == "__main__":
 #     """Main entry point for scitex CLI"""
 #     try:
 #         from scitex.cli.main import cli
+# 
 #         cli()
 #     except ImportError:
 #         # CLI not available (click not installed)
@@ -195,7 +196,7 @@ if __name__ == "__main__":
 #         sys.exit(1)
 # 
 # 
-# if __name__ == '__main__':
+# if __name__ == "__main__":
 #     main()
 
 # --------------------------------------------------------------------------------

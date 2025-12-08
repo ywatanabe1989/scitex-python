@@ -60,7 +60,12 @@ class Canvas:
             "author": "",
             "description": "",
         }
-        self._caption: Dict[str, Any] = {"text": "", "render": False, "fontsize": 10, "width_mm": None}
+        self._caption: Dict[str, Any] = {
+            "text": "",
+            "render": False,
+            "fontsize": 10,
+            "width_mm": None,
+        }
         self._source_files: Dict[str, Path] = {}  # panel_name -> source_path
 
     @property
@@ -148,7 +153,11 @@ class Canvas:
 
         # Apply any additional kwargs to nested dicts
         for key, value in kwargs.items():
-            if key in panel_entry and isinstance(panel_entry[key], dict) and isinstance(value, dict):
+            if (
+                key in panel_entry
+                and isinstance(panel_entry[key], dict)
+                and isinstance(value, dict)
+            ):
                 panel_entry[key].update(value)
             elif key not in ["rotation_deg", "opacity", "flip_h", "flip_v", "visible"]:
                 panel_entry[key] = value
@@ -287,7 +296,9 @@ class Canvas:
 
         return self
 
-    def set_title(self, text: str, position: tuple = None, fontsize: int = 14) -> "Canvas":
+    def set_title(
+        self, text: str, position: tuple = None, fontsize: int = 14
+    ) -> "Canvas":
         """
         Set canvas title.
 
@@ -405,6 +416,7 @@ class Canvas:
         >>> canvas.save("/output/fig1.canvas", bundle=True)  # Copies files
         """
         import scitex as stx
+
         return stx.io.save(self, path, bundle=bundle, **kwargs)
 
     def __repr__(self) -> str:

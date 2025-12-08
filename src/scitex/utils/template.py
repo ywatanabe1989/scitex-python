@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/utils/template.py"
-)
+
+__FILE__ = "./src/scitex/utils/template.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -55,6 +54,8 @@ logger = logging.getLogger(__name__)
 # CONFIG = stx.io.load_configs()
 
 """Functions & Classes"""
+
+
 def main(args):
     return 0
 

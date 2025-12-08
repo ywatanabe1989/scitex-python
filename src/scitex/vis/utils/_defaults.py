@@ -313,8 +313,7 @@ def get_template(name: str, **kwargs) -> Dict[str, Any]:
     """
     if name not in TEMPLATES:
         raise ValueError(
-            f"Unknown template: {name}. "
-            f"Available: {list(TEMPLATES.keys())}"
+            f"Unknown template: {name}. Available: {list(TEMPLATES.keys())}"
         )
 
     return TEMPLATES[name](**kwargs)

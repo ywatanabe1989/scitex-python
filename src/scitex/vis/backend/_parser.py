@@ -69,9 +69,7 @@ def parse_axes_json(axes_json: Dict[str, Any]) -> AxesModel:
 
     # Parse nested annotations
     annotations_data = axes_json.get("annotations", [])
-    parsed_annotations = [
-        parse_annotation_json(ann) for ann in annotations_data
-    ]
+    parsed_annotations = [parse_annotation_json(ann) for ann in annotations_data]
 
     # Parse nested guides
     guides_data = axes_json.get("guides", [])

@@ -109,7 +109,6 @@ if __name__ == "__main__":
 #         sequence_orig = self.sequence
 # 
 #         if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
-# 
 #             if node.name not in self.skip_functions:
 #                 # Track all function definitions
 #                 self.execution_flow.append((depth, node.name, self.sequence))
@@ -170,7 +169,6 @@ if __name__ == "__main__":
 #         filtered_flow = []
 # 
 #         for depth, call, seq in self.execution_flow:
-# 
 #             # Start skipping when encountering private method
 #             if call.startswith(("_", "self._")):
 #                 skip_until_depth = depth

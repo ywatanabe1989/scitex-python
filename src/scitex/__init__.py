@@ -15,23 +15,26 @@ Modules are imported on-demand to avoid circular dependencies.
 """
 
 import warnings
+
 # Always show our own deprecation warnings first
-warnings.filterwarnings(
-    "always", category=DeprecationWarning, module="scitex.*"
-)
+warnings.filterwarnings("always", category=DeprecationWarning, module="scitex.*")
 # Then ignore others
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # Version
 from .__version__ import __version__
 
+
 # Sentinel object for decorator-injected parameters
 class _InjectedSentinel:
     """Sentinel value indicating a parameter will be injected by a decorator"""
+
     def __repr__(self):
         return "<INJECTED>"
 
+
 INJECTED = _InjectedSentinel()
+
 
 # Lazy loading for all modules
 class _LazyModule:
@@ -43,9 +46,7 @@ class _LazyModule:
         if self._module is None:
             import importlib
 
-            self._module = importlib.import_module(
-                f".{self._name}", package="scitex"
-            )
+            self._module = importlib.import_module(f".{self._name}", package="scitex")
         return getattr(self._module, attr)
 
 
@@ -69,7 +70,7 @@ class _CallableModuleWrapper:
         scitex.session.start(...)  # Access other functions
     """
 
-    def __init__(self, module_name, main_decorator_name='session'):
+    def __init__(self, module_name, main_decorator_name="session"):
         self._module_name = module_name
         self._main_decorator_name = main_decorator_name
         self._module = None
@@ -159,10 +160,18 @@ session._setup_persistence("scitex", "session")
 capture = _LazyModule("capture")
 template = _LazyModule("template")
 cloud = _LazyModule("cloud")
+config = _LazyModule("config")
+
+# Centralized path configuration - eager loaded for convenience
+# Usage: scitex.PATHS.logs, scitex.PATHS.cache, etc.
+from .config import ScitexPaths as _ScitexPaths
+
+PATHS = _ScitexPaths()
 
 # Auto-load cloud hooks if in cloud environment
 import os as _os
-if _os.environ.get('SCITEX_CLOUD_CODE_WORKSPACE') == 'true':
+
+if _os.environ.get("SCITEX_CLOUD_CODE_WORKSPACE") == "true":
     try:
         from .cloud import _matplotlib_hook
     except Exception:
@@ -211,6 +220,8 @@ __all__ = [
     "dev",
     "gists",
     "cloud",
+    "config",
+    "PATHS",
     "INJECTED",
 ]
 

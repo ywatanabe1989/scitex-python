@@ -6,7 +6,7 @@
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass, field, asdict
 
-from .styles import PlotStyle
+from ._styles import PlotStyle
 
 
 @dataclass
@@ -104,9 +104,7 @@ class PlotModel:
         # Type-specific validation
         if self.plot_type in ["heatmap", "imshow"]:
             if "z" not in self.data and "img" not in self.data:
-                raise ValueError(
-                    f"{self.plot_type} requires 'z' or 'img' in data"
-                )
+                raise ValueError(f"{self.plot_type} requires 'z' or 'img' in data")
 
         elif self.plot_type in ["line", "scatter", "errorbar"]:
             if "x" not in self.data or "y" not in self.data:

@@ -236,6 +236,7 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -248,13 +249,13 @@ if __name__ == "__main__":
 # 
 # class SessionManager:
 #     """Manages experiment sessions with tracking and lifecycle management."""
-#     
+# 
 #     def __init__(self):
 #         self.active_sessions = {}
-#     
+# 
 #     def create_session(self, session_id: str, config: Dict[str, Any]) -> None:
 #         """Register a new session.
-#         
+# 
 #         Parameters
 #         ----------
 #         session_id : str
@@ -263,51 +264,53 @@ if __name__ == "__main__":
 #             Session configuration dictionary
 #         """
 #         self.active_sessions[session_id] = {
-#             'config': config,
-#             'start_time': datetime.now(),
-#             'status': 'running'
+#             "config": config,
+#             "start_time": datetime.now(),
+#             "status": "running",
 #         }
-#     
+# 
 #     def close_session(self, session_id: str) -> None:
 #         """Mark a session as closed.
-#         
+# 
 #         Parameters
 #         ----------
 #         session_id : str
 #             Unique identifier for the session to close
 #         """
 #         if session_id in self.active_sessions:
-#             self.active_sessions[session_id]['status'] = 'closed'
-#             self.active_sessions[session_id]['end_time'] = datetime.now()
-#     
+#             self.active_sessions[session_id]["status"] = "closed"
+#             self.active_sessions[session_id]["end_time"] = datetime.now()
+# 
 #     def get_active_sessions(self) -> Dict[str, Any]:
 #         """Get all active sessions.
-#         
+# 
 #         Returns
 #         -------
 #         Dict[str, Any]
 #             Dictionary of active session information
 #         """
-#         return {k: v for k, v in self.active_sessions.items() if v['status'] == 'running'}
-#     
+#         return {
+#             k: v for k, v in self.active_sessions.items() if v["status"] == "running"
+#         }
+# 
 #     def get_session(self, session_id: str) -> Dict[str, Any]:
 #         """Get specific session information.
-#         
+# 
 #         Parameters
 #         ----------
 #         session_id : str
 #             Session ID to retrieve
-#             
+# 
 #         Returns
 #         -------
 #         Dict[str, Any]
 #             Session information dictionary
 #         """
 #         return self.active_sessions.get(session_id, {})
-#     
+# 
 #     def list_sessions(self) -> Dict[str, Any]:
 #         """Get all sessions (active and closed).
-#         
+# 
 #         Returns
 #         -------
 #         Dict[str, Any]
@@ -322,7 +325,7 @@ if __name__ == "__main__":
 # 
 # def get_global_session_manager() -> SessionManager:
 #     """Get the global session manager instance.
-#     
+# 
 #     Returns
 #     -------
 #     SessionManager
@@ -330,7 +333,9 @@ if __name__ == "__main__":
 #     """
 #     return _session_manager
 # 
+# 
 # # EOF
+
 # --------------------------------------------------------------------------------
 # End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/session/_manager.py
 # --------------------------------------------------------------------------------

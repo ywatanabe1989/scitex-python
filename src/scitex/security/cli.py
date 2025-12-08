@@ -42,8 +42,7 @@ def check_command(
 
         # Count open alerts
         total = sum(
-            len([a for a in alerts[key] if a.get("state") == "open"])
-            for key in alerts
+            len([a for a in alerts[key] if a.get("state") == "open"]) for key in alerts
         )
 
         if save:
@@ -96,33 +95,21 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
     # Check command
-    check_parser = subparsers.add_parser(
-        "check",
-        help="Check GitHub security alerts"
-    )
+    check_parser = subparsers.add_parser("check", help="Check GitHub security alerts")
     check_parser.add_argument(
-        "--repo",
-        help="Repository in format 'owner/repo' (default: current repo)"
+        "--repo", help="Repository in format 'owner/repo' (default: current repo)"
     )
+    check_parser.add_argument("--save", action="store_true", help="Save report to file")
     check_parser.add_argument(
-        "--save",
-        action="store_true",
-        help="Save report to file"
-    )
-    check_parser.add_argument(
-        "--output-dir",
-        help="Output directory (default: ./logs/security)"
+        "--output-dir", help="Output directory (default: ./logs/security)"
     )
 
     # Latest command
-    latest_parser = subparsers.add_parser(
-        "latest",
-        help="Show latest security alerts"
-    )
+    latest_parser = subparsers.add_parser("latest", help="Show latest security alerts")
     latest_parser.add_argument(
         "--dir",
         dest="security_dir",
-        help="Security directory (default: ./logs/security)"
+        help="Security directory (default: ./logs/security)",
     )
 
     args = parser.parse_args()

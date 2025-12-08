@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/dataclasses/_ManuscriptContents.py"
-)
+
+__FILE__ = "./src/scitex/writer/dataclasses/_ManuscriptContents.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -60,37 +59,25 @@ class ManuscriptContents:
     def __post_init__(self):
         """Initialize all DocumentSection instances."""
         if self.abstract is None:
-            self.abstract = DocumentSection(
-                self.root / "abstract.tex", self.git_root
-            )
+            self.abstract = DocumentSection(self.root / "abstract.tex", self.git_root)
         if self.introduction is None:
             self.introduction = DocumentSection(
                 self.root / "introduction.tex", self.git_root
             )
         if self.methods is None:
-            self.methods = DocumentSection(
-                self.root / "methods.tex", self.git_root
-            )
+            self.methods = DocumentSection(self.root / "methods.tex", self.git_root)
         if self.results is None:
-            self.results = DocumentSection(
-                self.root / "results.tex", self.git_root
-            )
+            self.results = DocumentSection(self.root / "results.tex", self.git_root)
         if self.discussion is None:
             self.discussion = DocumentSection(
                 self.root / "discussion.tex", self.git_root
             )
         if self.title is None:
-            self.title = DocumentSection(
-                self.root / "title.tex", self.git_root
-            )
+            self.title = DocumentSection(self.root / "title.tex", self.git_root)
         if self.authors is None:
-            self.authors = DocumentSection(
-                self.root / "authors.tex", self.git_root
-            )
+            self.authors = DocumentSection(self.root / "authors.tex", self.git_root)
         if self.keywords is None:
-            self.keywords = DocumentSection(
-                self.root / "keywords.tex", self.git_root
-            )
+            self.keywords = DocumentSection(self.root / "keywords.tex", self.git_root)
         if self.journal_name is None:
             self.journal_name = DocumentSection(
                 self.root / "journal_name.tex", self.git_root
@@ -112,9 +99,7 @@ class ManuscriptContents:
                 self.root / "additional_info.tex", self.git_root
             )
         if self.wordcount is None:
-            self.wordcount = DocumentSection(
-                self.root / "wordcount.tex", self.git_root
-            )
+            self.wordcount = DocumentSection(self.root / "wordcount.tex", self.git_root)
         if self.figures is None:
             self.figures = self.root / "figures"
         if self.tables is None:
@@ -144,7 +129,11 @@ class ManuscriptContents:
         missing = []
         for name, section in required:
             if not section.path.exists():
-                expected_path = section.path.relative_to(self.git_root) if self.git_root else section.path
+                expected_path = (
+                    section.path.relative_to(self.git_root)
+                    if self.git_root
+                    else section.path
+                )
                 missing.append(f"{name} (expected at: {expected_path})")
 
         return len(missing) == 0, missing

@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/capture/mcp_server.py"
-)
+
+__FILE__ = "./src/scitex/capture/mcp_server.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -382,11 +381,7 @@ class CaptureServer:
                 category = (
                     "stdout"
                     if "-stdout.jpg" in img_file.name
-                    else (
-                        "stderr"
-                        if "-stderr.jpg" in img_file.name
-                        else "unknown"
-                    )
+                    else ("stderr" if "-stderr.jpg" in img_file.name else "unknown")
                 )
 
                 mtime = datetime.fromtimestamp(img_file.stat().st_mtime)
@@ -614,13 +609,9 @@ class CaptureServer:
 
             # Filter by category if specified
             if category == "stdout":
-                screenshots = [
-                    s for s in screenshots if "-stdout.jpg" in s.name
-                ]
+                screenshots = [s for s in screenshots if "-stdout.jpg" in s.name]
             elif category == "stderr":
-                screenshots = [
-                    s for s in screenshots if "-stderr.jpg" in s.name
-                ]
+                screenshots = [s for s in screenshots if "-stderr.jpg" in s.name]
 
             # Sort by modification time (newest first)
             screenshots.sort(key=lambda p: p.stat().st_mtime, reverse=True)
@@ -631,9 +622,7 @@ class CaptureServer:
             # Build result
             result_list = []
             for screenshot in screenshots:
-                cat = (
-                    "stderr" if "-stderr.jpg" in screenshot.name else "stdout"
-                )
+                cat = "stderr" if "-stderr.jpg" in screenshot.name else "stdout"
                 result_list.append(
                     {
                         "filename": screenshot.name,
@@ -690,9 +679,7 @@ class CaptureServer:
                 )
 
                 # Get new cache size
-                total_size = sum(
-                    f.stat().st_size for f in cache_dir.glob("*.jpg")
-                )
+                total_size = sum(f.stat().st_size for f in cache_dir.glob("*.jpg"))
 
                 return {
                     "success": True,

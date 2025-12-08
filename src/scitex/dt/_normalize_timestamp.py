@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -44,7 +45,7 @@ import scitex as stx
 CONFIG = stx.io.load_configs()
 
 # Get standard format from config
-STANDARD_FORMAT = CONFIG.FORMATS.TIMESTAMP or ... fixme
+STANDARD_FORMAT = CONFIG.FORMATS.TIMESTAMP or "%Y-%m-%d %H:%M:%S"
 
 
 # Common alternative formats to try when parsing
@@ -67,6 +68,8 @@ ALTERNATIVE_FORMATS = [
 ]
 
 """Functions & Classes"""
+
+
 def normalize_timestamp(
     timestamp: Union[datetime, str, int, float],
     return_as: str = "str",

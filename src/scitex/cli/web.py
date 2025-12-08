@@ -45,25 +45,25 @@ def web():
 
 
 @web.command()
-@click.argument('url')
+@click.argument("url")
 @click.option(
-    '--pattern', '-p',
-    help='Regex pattern to filter URLs (e.g., "\\.pdf$" for PDF files)'
+    "--pattern",
+    "-p",
+    help='Regex pattern to filter URLs (e.g., "\\.pdf$" for PDF files)',
 )
 @click.option(
-    '--same-domain',
+    "--same-domain", is_flag=True, help="Only include URLs from the same domain"
+)
+@click.option(
+    "--relative",
     is_flag=True,
-    help='Only include URLs from the same domain'
+    help="Keep URLs as relative instead of converting to absolute",
 )
 @click.option(
-    '--relative',
-    is_flag=True,
-    help='Keep URLs as relative instead of converting to absolute'
-)
-@click.option(
-    '--output', '-o',
+    "--output",
+    "-o",
     type=click.Path(),
-    help='Save URLs to file instead of printing to stdout'
+    help="Save URLs to file instead of printing to stdout",
 )
 def get_urls_cmd(url, pattern, same_domain, relative, output):
     """Extract all URLs from a webpage."""
@@ -71,23 +71,20 @@ def get_urls_cmd(url, pattern, same_domain, relative, output):
         click.echo(f"Extracting URLs from: {url}")
 
         urls = get_urls(
-            url,
-            pattern=pattern,
-            absolute=not relative,
-            same_domain=same_domain
+            url, pattern=pattern, absolute=not relative, same_domain=same_domain
         )
 
         if not urls:
-            click.secho("No URLs found", fg='yellow')
+            click.secho("No URLs found", fg="yellow")
             sys.exit(0)
 
-        click.secho(f"Found {len(urls)} URLs", fg='green')
+        click.secho(f"Found {len(urls)} URLs", fg="green")
 
         if output:
             output_path = Path(output)
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, 'w') as f:
-                f.write('\n'.join(urls))
+            with open(output_path, "w") as f:
+                f.write("\n".join(urls))
             click.echo(f"URLs saved to: {output_path}")
         else:
             click.echo()
@@ -97,48 +94,42 @@ def get_urls_cmd(url, pattern, same_domain, relative, output):
         sys.exit(0)
 
     except Exception as e:
-        click.secho(f"ERROR: {e}", fg='red', err=True)
+        click.secho(f"ERROR: {e}", fg="red", err=True)
         sys.exit(1)
 
 
 @web.command()
-@click.argument('url')
+@click.argument("url")
 @click.option(
-    '--pattern', '-p',
-    help='Regex pattern to filter image URLs (e.g., "\\.jpg$")'
+    "--pattern", "-p", help='Regex pattern to filter image URLs (e.g., "\\.jpg$")'
 )
 @click.option(
-    '--same-domain',
-    is_flag=True,
-    help='Only include images from the same domain'
+    "--same-domain", is_flag=True, help="Only include images from the same domain"
 )
 @click.option(
-    '--output', '-o',
+    "--output",
+    "-o",
     type=click.Path(),
-    help='Save image URLs to file instead of printing to stdout'
+    help="Save image URLs to file instead of printing to stdout",
 )
 def get_image_urls_cmd(url, pattern, same_domain, output):
     """Extract image URLs from a webpage without downloading them."""
     try:
         click.echo(f"Extracting image URLs from: {url}")
 
-        img_urls = get_image_urls(
-            url,
-            pattern=pattern,
-            same_domain=same_domain
-        )
+        img_urls = get_image_urls(url, pattern=pattern, same_domain=same_domain)
 
         if not img_urls:
-            click.secho("No image URLs found", fg='yellow')
+            click.secho("No image URLs found", fg="yellow")
             sys.exit(0)
 
-        click.secho(f"Found {len(img_urls)} image URLs", fg='green')
+        click.secho(f"Found {len(img_urls)} image URLs", fg="green")
 
         if output:
             output_path = Path(output)
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, 'w') as f:
-                f.write('\n'.join(img_urls))
+            with open(output_path, "w") as f:
+                f.write("\n".join(img_urls))
             click.echo(f"Image URLs saved to: {output_path}")
         else:
             click.echo()
@@ -148,36 +139,34 @@ def get_image_urls_cmd(url, pattern, same_domain, output):
         sys.exit(0)
 
     except Exception as e:
-        click.secho(f"ERROR: {e}", fg='red', err=True)
+        click.secho(f"ERROR: {e}", fg="red", err=True)
         sys.exit(1)
 
 
 @web.command()
-@click.argument('url')
+@click.argument("url")
 @click.option(
-    '--output', '-o',
+    "--output",
+    "-o",
     type=click.Path(),
-    help='Output directory (default: $SCITEX_WEB_DOWNLOADS_DIR or $SCITEX_DIR/web/downloads)'
+    help="Output directory (default: $SCITEX_WEB_DOWNLOADS_DIR or $SCITEX_DIR/web/downloads)",
 )
 @click.option(
-    '--pattern', '-p',
-    help='Regex pattern to filter image URLs (e.g., "\\.jpg$")'
+    "--pattern", "-p", help='Regex pattern to filter image URLs (e.g., "\\.jpg$")'
 )
 @click.option(
-    '--min-size',
-    default='100x100',
-    help='Minimum image size as WIDTHxHEIGHT (default: 100x100)'
+    "--min-size",
+    default="100x100",
+    help="Minimum image size as WIDTHxHEIGHT (default: 100x100)",
 )
 @click.option(
-    '--same-domain',
-    is_flag=True,
-    help='Only download images from the same domain'
+    "--same-domain", is_flag=True, help="Only download images from the same domain"
 )
 @click.option(
-    '--max-workers',
+    "--max-workers",
     type=int,
     default=5,
-    help='Number of concurrent download threads (default: 5)'
+    help="Number of concurrent download threads (default: 5)",
 )
 def download_images_cmd(url, output, pattern, min_size, same_domain, max_workers):
     """
@@ -202,13 +191,13 @@ def download_images_cmd(url, output, pattern, min_size, same_domain, max_workers
         min_size_tuple = None
         if min_size:
             try:
-                width, height = map(int, min_size.split('x'))
+                width, height = map(int, min_size.split("x"))
                 min_size_tuple = (width, height)
             except ValueError:
                 click.secho(
                     f"ERROR: Invalid min-size format. Use WIDTHxHEIGHT (e.g., '100x100')",
-                    fg='red',
-                    err=True
+                    fg="red",
+                    err=True,
                 )
                 sys.exit(1)
 
@@ -218,11 +207,11 @@ def download_images_cmd(url, output, pattern, min_size, same_domain, max_workers
             pattern=pattern,
             min_size=min_size_tuple,
             max_workers=max_workers,
-            same_domain=same_domain
+            same_domain=same_domain,
         )
 
         if not paths:
-            click.secho("No images downloaded", fg='yellow')
+            click.secho("No images downloaded", fg="yellow")
             sys.exit(0)
 
         # Show where images were saved (get actual directory from first path)
@@ -231,37 +220,34 @@ def download_images_cmd(url, output, pattern, min_size, same_domain, max_workers
         else:
             actual_output = output or _get_default_download_dir()
 
-        click.secho(f"Successfully downloaded {len(paths)} images", fg='green')
+        click.secho(f"Successfully downloaded {len(paths)} images", fg="green")
         click.echo(f"Images saved to: {actual_output}")
 
         sys.exit(0)
 
     except Exception as e:
-        click.secho(f"ERROR: {e}", fg='red', err=True)
+        click.secho(f"ERROR: {e}", fg="red", err=True)
         sys.exit(1)
 
 
 @web.command()
-@click.argument('url')
+@click.argument("url")
 @click.option(
-    '--output', '-o',
+    "--output",
+    "-o",
     type=click.Path(),
-    help='Output directory for the screenshot (default: ~/.scitex/capture)'
+    help="Output directory for the screenshot (default: ~/.scitex/capture)",
 )
 @click.option(
-    '--message', '-m',
-    help='Optional message to include in the screenshot filename'
+    "--message", "-m", help="Optional message to include in the screenshot filename"
 )
 @click.option(
-    '--quality', '-q',
-    type=int,
-    default=85,
-    help='JPEG quality 1-100 (default: 85)'
+    "--quality", "-q", type=int, default=85, help="JPEG quality 1-100 (default: 85)"
 )
 @click.option(
-    '--full-page',
+    "--full-page",
     is_flag=True,
-    help='Capture the full page (scrolling) instead of just viewport'
+    help="Capture the full page (scrolling) instead of just viewport",
 )
 def take_screenshot_cmd(url, output, message, quality, full_page):
     """
@@ -309,11 +295,7 @@ def take_screenshot_cmd(url, output, message, quality, full_page):
 
         # Use playwright MCP server to take screenshot
         # We'll use a simple approach: navigate to URL and take screenshot
-        cmd = [
-            'playwright', 'screenshot',
-            url,
-            str(output_file)
-        ]
+        cmd = ["playwright", "screenshot", url, str(output_file)]
 
         # Try using the MCP approach first, fall back to direct playwright if available
         try:
@@ -329,15 +311,18 @@ def take_screenshot_cmd(url, output, message, quality, full_page):
                     await page.screenshot(
                         path=str(output_file),
                         full_page=full_page,
-                        type='png' if str(output_file).endswith('.png') else 'jpeg',
-                        quality=quality if str(output_file).endswith('.jpg') or str(output_file).endswith('.jpeg') else None
+                        type="png" if str(output_file).endswith(".png") else "jpeg",
+                        quality=quality
+                        if str(output_file).endswith(".jpg")
+                        or str(output_file).endswith(".jpeg")
+                        else None,
                     )
                     await browser.close()
 
             asyncio.run(capture())
 
             if output_file.exists():
-                click.secho(f"Screenshot saved successfully", fg='green')
+                click.secho(f"Screenshot saved successfully", fg="green")
                 click.echo(f"Location: {output_file}")
                 sys.exit(0)
             else:
@@ -345,15 +330,17 @@ def take_screenshot_cmd(url, output, message, quality, full_page):
 
         except ImportError:
             # Fall back to using playwright CLI if the Python package is not available
-            click.secho("Playwright Python package not found, trying CLI...", fg='yellow')
+            click.secho(
+                "Playwright Python package not found, trying CLI...", fg="yellow"
+            )
             result = subprocess.run(
-                ['playwright', 'screenshot', url, str(output_file)],
+                ["playwright", "screenshot", url, str(output_file)],
                 capture_output=True,
-                text=True
+                text=True,
             )
 
             if result.returncode == 0 and output_file.exists():
-                click.secho(f"Screenshot saved successfully", fg='green')
+                click.secho(f"Screenshot saved successfully", fg="green")
                 click.echo(f"Location: {output_file}")
                 sys.exit(0)
             else:
@@ -361,17 +348,24 @@ def take_screenshot_cmd(url, output, message, quality, full_page):
 
     except Exception as e:
         error_msg = str(e)
-        click.secho(f"ERROR: {error_msg}", fg='red', err=True)
+        click.secho(f"ERROR: {error_msg}", fg="red", err=True)
         click.echo()
 
         # Provide context-specific troubleshooting
         if "ERR_CONNECTION_REFUSED" in error_msg or "Connection refused" in error_msg:
             click.echo("Troubleshooting - Connection Refused:")
             click.echo("  1. Make sure a web server is running at the specified URL")
-            click.echo("  2. Check if the port is correct (e.g., http://127.0.0.1:8000/)")
+            click.echo(
+                "  2. Check if the port is correct (e.g., http://127.0.0.1:8000/)"
+            )
             click.echo("  3. Verify the server is accessible: curl <url>")
-            click.echo("  4. If using WSL, you may need to use the WSL IP instead of 127.0.0.1")
-        elif "ERR_NAME_NOT_RESOLVED" in error_msg or "Name or service not known" in error_msg:
+            click.echo(
+                "  4. If using WSL, you may need to use the WSL IP instead of 127.0.0.1"
+            )
+        elif (
+            "ERR_NAME_NOT_RESOLVED" in error_msg
+            or "Name or service not known" in error_msg
+        ):
             click.echo("Troubleshooting - DNS Resolution Failed:")
             click.echo("  1. Check if the domain name is correct")
             click.echo("  2. Verify internet connection")
@@ -385,7 +379,10 @@ def take_screenshot_cmd(url, output, message, quality, full_page):
             click.echo("Troubleshooting - Playwright Not Installed:")
             click.echo("  1. Install Playwright: pip install playwright")
             click.echo("  2. Install browsers: playwright install chromium")
-        elif "Executable doesn't exist" in error_msg or "browser executable" in error_msg.lower():
+        elif (
+            "Executable doesn't exist" in error_msg
+            or "browser executable" in error_msg.lower()
+        ):
             click.echo("Troubleshooting - Browser Not Installed:")
             click.echo("  1. Install Chromium browser: playwright install chromium")
             click.echo("  2. Or install all browsers: playwright install")
@@ -399,11 +396,11 @@ def take_screenshot_cmd(url, output, message, quality, full_page):
 
 
 # Register command aliases
-web.add_command(get_urls_cmd, name='get-urls')
-web.add_command(get_image_urls_cmd, name='get-image-urls')
-web.add_command(download_images_cmd, name='download-images')
-web.add_command(take_screenshot_cmd, name='take-screenshot')
+web.add_command(get_urls_cmd, name="get-urls")
+web.add_command(get_image_urls_cmd, name="get-image-urls")
+web.add_command(download_images_cmd, name="download-images")
+web.add_command(take_screenshot_cmd, name="take-screenshot")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     web()

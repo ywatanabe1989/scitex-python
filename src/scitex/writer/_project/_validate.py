@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/writer/_project/_validate.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -52,9 +53,7 @@ def validate_structure(project_dir: Path) -> None:
                 f"Project structure invalid: missing {dir_path.name} directory (expected at: {dir_path})"
             )
 
-    logger.success(
-        f"Project structure verified at {project_dir.absolute()}"
-    )
+    logger.success(f"Project structure verified at {project_dir.absolute()}")
 
 
 __all__ = ["validate_structure"]

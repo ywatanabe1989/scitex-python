@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/template/_clone_project.py"
-)
+
+__FILE__ = "./src/scitex/template/_clone_project.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -95,9 +94,7 @@ def _rename_template_package(
         tests_template_dir.rename(tests_new_dir)
 
     # Update file contents
-    logger.info(
-        f"Updating references from {template_package_name} to {project_name}"
-    )
+    logger.info(f"Updating references from {template_package_name} to {project_name}")
 
     # Files that typically contain package name references
     files_to_update = [
@@ -119,9 +116,7 @@ def _rename_template_package(
                 content = f.read()
 
             # Replace template package name with project name
-            updated_content = content.replace(
-                template_package_name, project_name
-            )
+            updated_content = content.replace(template_package_name, project_name)
 
             # Only write if content changed
             if updated_content != content:
@@ -184,9 +179,7 @@ def clone_project(
             )
             return False
 
-        logger.info(
-            f"Creating new project from {template_name}: {project_name}"
-        )
+        logger.info(f"Creating new project from {template_name}: {project_name}")
         logger.info(f"Target directory: {target_path}")
 
         # Create temporary directory for cloning
@@ -205,7 +198,9 @@ def clone_project(
             # Handle git directory based on strategy
             git_dir = temp_path / ".git"
             if git_strategy == "origin" and git_dir.exists():
-                logger.info("Using 'origin' git strategy, preserving template git history...")
+                logger.info(
+                    "Using 'origin' git strategy, preserving template git history..."
+                )
             else:
                 if git_dir.exists():
                     shutil.rmtree(git_dir)
@@ -267,5 +262,6 @@ def clone_project(
     except Exception as e:
         logger.error(f"Failed to create project: {str(e)}")
         return False
+
 
 # EOF

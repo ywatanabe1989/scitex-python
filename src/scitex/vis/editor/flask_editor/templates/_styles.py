@@ -3,7 +3,7 @@
 # File: ./src/scitex/vis/editor/flask_editor/templates/styles.py
 """CSS styles for the Flask editor UI."""
 
-CSS_STYLES = '''
+CSS_STYLES = """
 /* =============================================================================
  * SciTeX Color System - Based on scitex-cloud/static/shared/css
  * ============================================================================= */
@@ -543,7 +543,7 @@ body {
 .annotations-list::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
 }
-'''
+"""
 
 
 # EOF

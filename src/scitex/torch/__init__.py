@@ -2,7 +2,17 @@
 """Scitex torch module."""
 
 from ._apply_to import apply_to
-from ._nan_funcs import nanargmax, nanargmin, nancumprod, nancumsum, nanmax, nanmin, nanprod, nanstd, nanvar
+from ._nan_funcs import (
+    nanargmax,
+    nanargmin,
+    nancumprod,
+    nancumsum,
+    nanmax,
+    nanmin,
+    nanprod,
+    nanstd,
+    nanvar,
+)
 
 __all__ = [
     "apply_to",

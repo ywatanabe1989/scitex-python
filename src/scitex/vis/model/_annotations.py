@@ -6,7 +6,7 @@
 from typing import Optional, Dict, Any, Tuple
 from dataclasses import dataclass, field, asdict
 
-from .styles import TextStyle
+from ._styles import TextStyle
 
 
 @dataclass
@@ -94,9 +94,7 @@ class AnnotationModel:
         # Type-specific validation
         if self.annotation_type in ["text", "annotate"]:
             if not self.text:
-                raise ValueError(
-                    f"{self.annotation_type} requires 'text' parameter"
-                )
+                raise ValueError(f"{self.annotation_type} requires 'text' parameter")
 
         if self.annotation_type == "annotate":
             if self.xytext is None:

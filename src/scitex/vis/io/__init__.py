@@ -18,7 +18,7 @@ The .canvas extension makes directories self-documenting, portable, and detectab
 Schema Version: 2.0.0
 """
 
-from .directory import (
+from ._directory import (
     SCHEMA_VERSION,
     CANVAS_EXTENSION,
     ensure_canvas_directory,
@@ -28,14 +28,14 @@ from .directory import (
     canvas_directory_exists,
 )
 
-from .canvas import (
+from ._canvas import (
     save_canvas_json,
     load_canvas_json,
     update_canvas_json,
     get_canvas_schema_version,
 )
 
-from .panel import (
+from ._panel import (
     add_panel_from_scitex,
     add_panel_from_image,
     remove_panel,
@@ -45,7 +45,7 @@ from .panel import (
     reorder_panels,
 )
 
-from .data import (
+from ._data import (
     HashMismatchError,
     compute_file_hash,
     verify_data_hash,
@@ -54,7 +54,7 @@ from .data import (
     list_data_files,
 )
 
-from .export import (
+from ._export import (
     export_canvas_to_file,
     export_canvas_to_multiple_formats,
     list_canvas_exports,

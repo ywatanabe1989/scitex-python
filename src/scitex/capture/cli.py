@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/capture/cli.py"
-)
+
+__FILE__ = "./src/scitex/capture/cli.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -41,36 +40,18 @@ Examples:
     )
 
     # Capture options
-    parser.add_argument(
-        "message", nargs="?", help="Optional message for filename"
-    )
-    parser.add_argument(
-        "--all", action="store_true", help="Capture all monitors"
-    )
-    parser.add_argument(
-        "--app", type=str, help="App name to capture (e.g., chrome)"
-    )
-    parser.add_argument(
-        "--url", type=str, help="URL to capture (e.g., 127.0.0.1:8000)"
-    )
-    parser.add_argument(
-        "--monitor", type=int, default=0, help="Monitor ID (0-based)"
-    )
-    parser.add_argument(
-        "--quality", type=int, default=85, help="JPEG quality (1-100)"
-    )
+    parser.add_argument("message", nargs="?", help="Optional message for filename")
+    parser.add_argument("--all", action="store_true", help="Capture all monitors")
+    parser.add_argument("--app", type=str, help="App name to capture (e.g., chrome)")
+    parser.add_argument("--url", type=str, help="URL to capture (e.g., 127.0.0.1:8000)")
+    parser.add_argument("--monitor", type=int, default=0, help="Monitor ID (0-based)")
+    parser.add_argument("--quality", type=int, default=85, help="JPEG quality (1-100)")
     parser.add_argument("-o", "--output", type=str, help="Output path")
 
     # Actions
-    parser.add_argument(
-        "--list", action="store_true", help="List available windows"
-    )
-    parser.add_argument(
-        "--info", action="store_true", help="Show display info"
-    )
-    parser.add_argument(
-        "--start", action="store_true", help="Start monitoring"
-    )
+    parser.add_argument("--list", action="store_true", help="List available windows")
+    parser.add_argument("--info", action="store_true", help="Show display info")
+    parser.add_argument("--start", action="store_true", help="Start monitoring")
     parser.add_argument("--stop", action="store_true", help="Stop monitoring")
     parser.add_argument(
         "--gif", action="store_true", help="Create GIF from latest session"
@@ -84,9 +65,7 @@ Examples:
         default=1.0,
         help="Monitoring interval in seconds",
     )
-    parser.add_argument(
-        "-q", "--quiet", action="store_true", help="Quiet mode"
-    )
+    parser.add_argument("-q", "--quiet", action="store_true", help="Quiet mode")
 
     args = parser.parse_args()
 
@@ -122,15 +101,11 @@ Examples:
                 bounds = mon.get("Bounds", {})
                 print(f"\n   Monitor {i}:")
                 print(f"     Device: {mon.get('DeviceName')}")
-                print(
-                    f"     Resolution: {bounds.get('Width')}x{bounds.get('Height')}"
-                )
+                print(f"     Resolution: {bounds.get('Width')}x{bounds.get('Height')}")
                 print(f"     Primary: {mon.get('IsPrimary')}")
 
             print(f"\n🪟 Windows: {windows.get('VisibleCount')}")
-            print(
-                f"   On current virtual desktop: {len(windows.get('Details', []))}"
-            )
+            print(f"   On current virtual desktop: {len(windows.get('Details', []))}")
 
             print(f"\n🖥️  Virtual Desktops:")
             print(f"   Supported: {vd.get('Supported')}")

@@ -85,9 +85,9 @@ class SyncBrowserSession:
                 # Get the browser process
                 browser = self.page.context.browser
                 # Browser PID is available via internal _impl
-                if hasattr(browser, '_impl'):
+                if hasattr(browser, "_impl"):
                     impl = browser._impl
-                    if hasattr(impl, '_process'):
+                    if hasattr(impl, "_process"):
                         self._browser_pid = impl._process.pid
         except Exception:
             pass  # PID tracking is best-effort
@@ -147,6 +147,7 @@ class SyncBrowserSession:
 
         # Give it a moment
         import time
+
         time.sleep(0.5)
 
         # Force kill if still running
@@ -177,7 +178,7 @@ class SyncBrowserSession:
                 text=True,
             )
             if result.returncode == 0:
-                pids = result.stdout.strip().split('\n')
+                pids = result.stdout.strip().split("\n")
                 for pid in pids:
                     if pid:
                         try:

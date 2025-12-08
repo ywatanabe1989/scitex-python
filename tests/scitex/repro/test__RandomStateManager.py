@@ -317,11 +317,12 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# # Timestamp: "2025-09-14 11:00:03 (ywatanabe)"
-# # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/rng/_RandomStateManager.py
+# # Timestamp: "2025-12-09 (ywatanabe)"
+# # File: /home/ywatanabe/proj/scitex-code/src/scitex/repro/_RandomStateManager.py
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -341,6 +342,8 @@ if __name__ == "__main__":
 # from contextlib import contextmanager
 # from pathlib import Path
 # from typing import Any
+# 
+# from scitex.config import get_paths
 # 
 # # Global singleton instance
 # _GLOBAL_INSTANCE = None
@@ -371,7 +374,7 @@ if __name__ == "__main__":
 #         self.seed = seed
 #         self.verbose = verbose
 #         self._generators = {}
-#         self._cache_dir = Path.home() / ".scitex" / "rng"
+#         self._cache_dir = get_paths().rng
 #         self._cache_dir.mkdir(parents=True, exist_ok=True)
 #         self._jax_key = None  # Initialize to None, will be set if jax is available
 # 
@@ -485,28 +488,30 @@ if __name__ == "__main__":
 #             self._generators[name] = self._np.random.default_rng(seed)
 # 
 #         return self._generators[name]
-#     
+# 
 #     def __call__(self, name: str, verbose: bool = None):
 #         """
 #         Get or create a named NumPy random generator.
-#         
+# 
 #         This is a backward compatibility wrapper for get_np_generator().
 #         Consider using get_np_generator() directly for clarity.
-#         
+# 
 #         Parameters
 #         ----------
 #         name : str
 #             Generator name
 #         verbose : bool, optional
 #             Whether to show deprecation warning
-#         
+# 
 #         Returns
 #         -------
 #         numpy.random.Generator
 #             NumPy random generator with deterministic seed
 #         """
 #         if verbose:
-#             print(f"Note: rng('{name}') is deprecated. Use rng.get_np_generator('{name}') instead.")
+#             print(
+#                 f"Note: rng('{name}') is deprecated. Use rng.get_np_generator('{name}') instead."
+#             )
 #         return self.get_np_generator(name)
 # 
 #     def verify(self, obj: Any, name: str = None, verbose: bool = True) -> bool:
@@ -549,9 +554,7 @@ if __name__ == "__main__":
 #             name = f"{filename}_L{lineno}"
 # 
 #         # Sanitize name
-#         safe_name = "".join(
-#             c if c.isalnum() or c in "-_" else "_" for c in name
-#         )
+#         safe_name = "".join(c if c.isalnum() or c in "-_" else "_" for c in name)
 #         cache_file = self._cache_dir / f"{safe_name}.json"
 # 
 #         # Compute hash based on object type
@@ -571,9 +574,7 @@ if __name__ == "__main__":
 #                 print(f"⚠️  Reproducibility broken for '{name}'!")
 #                 print(f"   Expected: {cached['hash'][:16]}...")
 #                 print(f"   Got:      {obj_hash[:16]}...")
-#                 raise ValueError(
-#                     f"Reproducibility verification failed for '{name}'"
-#                 )
+#                 raise ValueError(f"Reproducibility verification failed for '{name}'")
 #             elif matches and verbose:
 #                 print(f"✓ Reproducibility verified for '{name}'")
 # 
@@ -581,9 +582,7 @@ if __name__ == "__main__":
 #         else:
 #             # First call - cache it
 #             with open(cache_file, "w") as f:
-#                 json.dump(
-#                     {"name": name, "hash": obj_hash, "seed": self.seed}, f
-#                 )
+#                 json.dump({"name": name, "hash": obj_hash, "seed": self.seed}, f)
 #             return True
 # 
 #     def _compute_hash(self, obj: Any) -> str:
@@ -794,11 +793,11 @@ if __name__ == "__main__":
 #     def get_generator(self, name: str):
 #         """Alias for get_np_generator for compatibility."""
 #         return self.get_np_generator(name)
-#     
+# 
 #     def clear_cache(self, patterns: str | list[str] = None) -> int:
 #         """
 #         Clear verification cache files.
-#         
+# 
 #         Parameters
 #         ----------
 #         patterns : str or list of str, optional
@@ -808,12 +807,12 @@ if __name__ == "__main__":
 #             - List of names: ["data1", "data2"]
 #             - Glob pattern: "experiment_*"
 #             - None: clear all cache files
-#         
+# 
 #         Returns
 #         -------
 #         int
 #             Number of cache files removed
-#         
+# 
 #         Examples
 #         --------
 #         >>> rng_manager = RandomStateManager(42)
@@ -823,12 +822,12 @@ if __name__ == "__main__":
 #         >>> rng.clear_cache("experiment_*")  # Clear pattern
 #         """
 #         import glob
-#         
+# 
 #         if not self._cache_dir.exists():
 #             return 0
-#         
+# 
 #         removed_count = 0
-#         
+# 
 #         if patterns is None:
 #             # Clear all .json files
 #             cache_files = list(self._cache_dir.glob("*.json"))
@@ -839,7 +838,7 @@ if __name__ == "__main__":
 #             # Ensure patterns is a list
 #             if isinstance(patterns, str):
 #                 patterns = [patterns]
-#             
+# 
 #             for pattern in patterns:
 #                 # Handle glob patterns
 #                 if "*" in pattern or "?" in pattern:
@@ -848,11 +847,11 @@ if __name__ == "__main__":
 #                     # Exact match
 #                     cache_file = self._cache_dir / f"{pattern}.json"
 #                     cache_files = [cache_file] if cache_file.exists() else []
-#                 
+# 
 #                 for cache_file in cache_files:
 #                     cache_file.unlink()
 #                     removed_count += 1
-#         
+# 
 #         return removed_count
 # 
 # 
@@ -916,14 +915,10 @@ if __name__ == "__main__":
 # def parse_args():
 #     """Parse command line arguments."""
 #     import argparse
-#     parser = argparse.ArgumentParser(
-#         description="Demonstrate RandomStateManager usage"
-#     )
+# 
+#     parser = argparse.ArgumentParser(description="Demonstrate RandomStateManager usage")
 #     parser.add_argument(
-#         "--seed",
-#         type=int,
-#         default=42,
-#         help="Random seed (default: 42)"
+#         "--seed", type=int, default=42, help="Random seed (default: 42)"
 #     )
 #     return parser.parse_args()
 # 
@@ -939,9 +934,9 @@ if __name__ == "__main__":
 #     import numpy as np
 # 
 #     # Create RandomStateManager (already created by session.start)
-#     print(f"\n{'='*60}")
+#     print(f"\n{'=' * 60}")
 #     print("RandomStateManager Demo")
-#     print(f"{'='*60}")
+#     print(f"{'=' * 60}")
 #     print(f"Seed: {args.seed}")
 # 
 #     # Get named generators
@@ -963,9 +958,9 @@ if __name__ == "__main__":
 #     rng_manager.verify(data, "demo_data")
 #     print("✓ Data reproducibility verified")
 # 
-#     print(f"\n{'='*60}")
+#     print(f"\n{'=' * 60}")
 #     print("Demo completed successfully!")
-#     print(f"{'='*60}\n")
+#     print(f"{'=' * 60}\n")
 # 
 #     return 0
 # 
