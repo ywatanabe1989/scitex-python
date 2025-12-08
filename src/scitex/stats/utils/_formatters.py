@@ -29,11 +29,13 @@ from scitex.logging import getLogger
 logger = getLogger(__name__)
 
 """Functions"""
+
+
 def p2stars(
     pvalue: Union[float, np.ndarray, pd.Series, pd.DataFrame],
     thresholds: tuple = (0.001, 0.01, 0.05),
-    symbols: tuple = ('***', '**', '*', 'ns'),
-    ns_symbol: bool = True
+    symbols: tuple = ("***", "**", "*", "ns"),
+    ns_symbol: bool = True,
 ) -> Union[str, np.ndarray, pd.Series, pd.DataFrame]:
     """
     Convert p-values to significance stars.
@@ -94,13 +96,15 @@ def p2stars(
             f"(one more than thresholds)"
         )
 
-    if not all(thresholds[i] < thresholds[i+1] for i in range(len(thresholds)-1)):
+    if not all(thresholds[i] < thresholds[i + 1] for i in range(len(thresholds) - 1)):
         raise ValueError("thresholds must be in ascending order")
 
     # Handle different input types
     if isinstance(pvalue, (pd.DataFrame, pd.Series)):
         # Apply to DataFrame/Series
-        return pvalue.apply(lambda p: _p2stars_scalar(p, thresholds, symbols, ns_symbol))
+        return pvalue.apply(
+            lambda p: _p2stars_scalar(p, thresholds, symbols, ns_symbol)
+        )
     elif isinstance(pvalue, np.ndarray):
         # Vectorized for numpy arrays
         return np.vectorize(
@@ -112,31 +116,30 @@ def p2stars(
 
 
 def _p2stars_scalar(
-    pvalue: float,
-    thresholds: tuple,
-    symbols: tuple,
-    ns_symbol: bool
+    pvalue: float, thresholds: tuple, symbols: tuple, ns_symbol: bool
 ) -> str:
     """Convert single p-value to stars (internal function)."""
     # Handle NaN
     if pd.isna(pvalue):
-        return 'NaN'
+        return "NaN"
 
     # Handle invalid p-values
     if pvalue < 0 or pvalue > 1:
         logger.warning(f"Invalid p-value: {pvalue}. Should be between 0 and 1.")
-        return 'invalid'
+        return "invalid"
 
-    # Find appropriate symbol
+    # Find appropriate symbol (use <= to include boundary values)
     for i, threshold in enumerate(thresholds):
-        if pvalue < threshold:
+        if pvalue <= threshold:
             return symbols[i]
 
     # Non-significant
-    return symbols[-1] if ns_symbol else ''
+    return symbols[-1] if ns_symbol else ""
 
 
 """Main function"""
+
+
 def main(args):
     """Demonstrate p2stars functionality."""
     logger.info("Demonstrating p2stars functionality")
@@ -159,20 +162,20 @@ def main(args):
 
     # Example 3: DataFrame
     logger.info("\n=== Example 3: DataFrame ===")
-    df = pd.DataFrame({
-        'test': ['Test 1', 'Test 2', 'Test 3', 'Test 4'],
-        'pvalue': [0.0001, 0.023, 0.051, 0.15]
-    })
+    df = pd.DataFrame(
+        {
+            "test": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "pvalue": [0.0001, 0.023, 0.051, 0.15],
+        }
+    )
 
-    df['pstars'] = p2stars(df['pvalue'])
+    df["pstars"] = p2stars(df["pvalue"])
     logger.info(f"\n{df}")
 
     # Example 4: Custom thresholds
     logger.info("\n=== Example 4: Custom thresholds (more stringent) ===")
     custom_stars = p2stars(
-        0.01,
-        thresholds=(0.0001, 0.001, 0.01),
-        symbols=('****', '***', '**', 'ns')
+        0.01, thresholds=(0.0001, 0.001, 0.01), symbols=("****", "***", "**", "ns")
     )
     logger.info(f"p = 0.01 with custom thresholds → {custom_stars}")
 
@@ -191,34 +194,41 @@ def main(args):
     stars = p2stars(pvals)
 
     # Color map for stars
-    color_map = {'***': 'red', '**': 'orange', '*': 'yellow', 'ns': 'lightgray'}
-    colors = [color_map.get(s, 'gray') for s in stars]
+    color_map = {"***": "red", "**": "orange", "*": "yellow", "ns": "lightgray"}
+    colors = [color_map.get(s, "gray") for s in stars]
 
     # Plot
     ax.scatter(pvals, range(len(pvals)), c=colors, alpha=0.6, s=50)
-    ax.set_xscale('log')
-    ax.set_xlabel('P-value')
-    ax.set_ylabel('Test index')
-    ax.set_title('P-value to Stars Conversion')
+    ax.set_xscale("log")
+    ax.set_xlabel("P-value")
+    ax.set_ylabel("Test index")
+    ax.set_title("P-value to Stars Conversion")
 
     # Add vertical lines for thresholds
     for threshold in [0.001, 0.01, 0.05]:
-        ax.axvline(threshold, color='black', linestyle='--', alpha=0.3)
-        ax.text(threshold, len(pvals) * 0.95, f'{threshold}',
-                ha='center', va='bottom', fontsize=10)
+        ax.axvline(threshold, color="black", linestyle="--", alpha=0.3)
+        ax.text(
+            threshold,
+            len(pvals) * 0.95,
+            f"{threshold}",
+            ha="center",
+            va="bottom",
+            fontsize=10,
+        )
 
     # Add legend
     from matplotlib.patches import Patch
+
     legend_elements = [
-        Patch(facecolor='red', label='p < 0.001 (***)'),
-        Patch(facecolor='orange', label='p < 0.01 (**)'),
-        Patch(facecolor='yellow', label='p < 0.05 (*)'),
-        Patch(facecolor='lightgray', label='p ≥ 0.05 (ns)')
+        Patch(facecolor="red", label="p < 0.001 (***)"),
+        Patch(facecolor="orange", label="p < 0.01 (**)"),
+        Patch(facecolor="yellow", label="p < 0.05 (*)"),
+        Patch(facecolor="lightgray", label="p ≥ 0.05 (ns)"),
     ]
-    ax.legend(handles=legend_elements, loc='upper left')
+    ax.legend(handles=legend_elements, loc="upper left")
 
     # Save
-    stx.io.save(fig, './p2stars_demo.jpg')
+    stx.io.save(fig, "./p2stars_demo.jpg")
     logger.info("Visualization saved")
 
     return 0
@@ -227,13 +237,9 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description='Demonstrate p-value to stars conversion'
+        description="Demonstrate p-value to stars conversion"
     )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose output'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
@@ -264,7 +270,7 @@ def run_main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
 
 # EOF

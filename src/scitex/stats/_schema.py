@@ -21,7 +21,9 @@ import numpy as np
 # Type aliases for clarity
 PositionMode = Literal["absolute", "relative_to_plot", "above_whisker", "auto"]
 UnitType = Literal["mm", "px", "inch", "data"]
-SymbolStyle = Literal["asterisk", "text", "bracket", "compact", "detailed", "publication"]
+SymbolStyle = Literal[
+    "asterisk", "text", "bracket", "compact", "detailed", "publication"
+]
 
 
 @dataclass
@@ -47,11 +49,11 @@ class Position:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Position':
+    def from_dict(cls, data: Dict[str, Any]) -> "Position":
         """Create from dictionary."""
         return cls(**data)
 
-    def to_mm(self, dpi: float = 300.0) -> 'Position':
+    def to_mm(self, dpi: float = 300.0) -> "Position":
         """Convert position to mm (for matplotlib)."""
         if self.unit == "mm":
             return self
@@ -63,7 +65,7 @@ class Position:
                 y=self.y * mm_per_px,
                 unit="mm",
                 relative_to=self.relative_to,
-                offset=self.offset
+                offset=self.offset,
             )
         elif self.unit == "inch":
             # Convert inch to mm
@@ -72,11 +74,11 @@ class Position:
                 y=self.y * 25.4,
                 unit="mm",
                 relative_to=self.relative_to,
-                offset=self.offset
+                offset=self.offset,
             )
         return self
 
-    def to_px(self, dpi: float = 300.0) -> 'Position':
+    def to_px(self, dpi: float = 300.0) -> "Position":
         """Convert position to px (for Fabric.js canvas)."""
         mm_pos = self.to_mm(dpi)
         px_per_mm = dpi / 25.4
@@ -85,7 +87,7 @@ class Position:
             y=mm_pos.y * px_per_mm,
             unit="px",
             relative_to=self.relative_to,
-            offset=self.offset
+            offset=self.offset,
         )
 
 
@@ -113,7 +115,7 @@ class StatStyling:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'StatStyling':
+    def from_dict(cls, data: Dict[str, Any]) -> "StatStyling":
         """Create from dictionary."""
         return cls(**data)
 
@@ -155,7 +157,7 @@ class StatPositioning:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'StatPositioning':
+    def from_dict(cls, data: Dict[str, Any]) -> "StatPositioning":
         """Create from dictionary."""
         data_copy = data.copy()
         if data_copy.get("position"):
@@ -301,7 +303,7 @@ class StatResult:
         return json.dumps(self.to_dict(), indent=indent)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'StatResult':
+    def from_dict(cls, data: Dict[str, Any]) -> "StatResult":
         """
         Create from dictionary.
 
@@ -329,7 +331,7 @@ class StatResult:
         return cls(**data_copy)
 
     @classmethod
-    def from_json(cls, json_str: str) -> 'StatResult':
+    def from_json(cls, json_str: str) -> "StatResult":
         """
         Create from JSON string.
 
@@ -451,7 +453,11 @@ class StatResult:
             else:
                 strength = "Very weak"
 
-            sig = "significant" if self.stars and self.stars != "ns" else "non-significant"
+            sig = (
+                "significant"
+                if self.stars and self.stars != "ns"
+                else "non-significant"
+            )
 
             return (
                 f"{strength} {direction} correlation "
@@ -459,7 +465,11 @@ class StatResult:
             )
 
         elif "test" in self.test_type.lower():
-            sig = "Significant" if self.stars and self.stars != "ns" else "Non-significant"
+            sig = (
+                "Significant"
+                if self.stars and self.stars != "ns"
+                else "Non-significant"
+            )
             return (
                 f"{sig} difference "
                 f"({self.statistic['name']}={self.statistic['value']:.2f}, "
@@ -491,18 +501,28 @@ class StatResult:
             "id": self.plot_id or f"stat_{id(self)}",
             "type": "stat",
             "label": f"{self.test_type} result",
-            "content": self.format_text(style=self.styling.symbol_style if self.styling else "compact"),
-            "position": self.positioning.position.to_dict() if self.positioning and self.positioning.position else None,
+            "content": self.format_text(
+                style=self.styling.symbol_style if self.styling else "compact"
+            ),
+            "position": self.positioning.position.to_dict()
+            if self.positioning and self.positioning.position
+            else None,
             "statResult": {
                 "id": self.plot_id or f"stat_{id(self)}",
                 "test_name": self.test_type,
                 "p_value": self.p_value,
-                "effect_size": self.effect_size.get("value") if self.effect_size else None,
-                "group1": self.samples.get("group1", {}).get("name") if self.samples else None,
-                "group2": self.samples.get("group2", {}).get("name") if self.samples else None,
+                "effect_size": self.effect_size.get("value")
+                if self.effect_size
+                else None,
+                "group1": self.samples.get("group1", {}).get("name")
+                if self.samples
+                else None,
+                "group2": self.samples.get("group2", {}).get("name")
+                if self.samples
+                else None,
                 "statistic": self.statistic.get("value"),
                 "method": self.test_type,
-                "formatted_output": self.format_text(style=self.styling.symbol_style if self.styling else "compact"),
+                "formatted_output": self.format_text(style="compact"),
             },
             "positioning": self.positioning.to_dict() if self.positioning else None,
             "styling": self.styling.to_dict() if self.styling else None,
@@ -515,7 +535,7 @@ def create_stat_result(
     statistic_name: str,
     statistic_value: float,
     p_value: float,
-    **kwargs
+    **kwargs,
 ) -> StatResult:
     """
     Create a StatResult with minimal required fields.
@@ -571,7 +591,7 @@ def create_stat_result(
         statistic={"name": statistic_name, "value": statistic_value},
         p_value=p_value,
         stars=stars,
-        **kwargs
+        **kwargs,
     )
 
 
