@@ -1,9 +1,9 @@
-.. MNGS documentation master file
+.. SciTeX documentation master file
 
-MNGS - Python Utilities for Scientific Computing
-=================================================
+SciTeX - Scientific Computing and Visualization
+================================================
 
-**MNGS** (pronounced "monogusa", meaning "lazy" in Japanese) is a comprehensive Python package designed to streamline scientific computing workflows. It provides a unified interface for common tasks in data science, machine learning, and signal processing.
+**SciTeX** is a comprehensive Python package designed to streamline scientific computing workflows. It provides a unified interface for common tasks in data science, machine learning, and signal processing.
 
 .. toctree::
    :maxdepth: 2
@@ -12,6 +12,7 @@ MNGS - Python Utilities for Scientific Computing
    installation
    quickstart
    core_concepts
+   gallery
 
 .. toctree::
    :maxdepth: 2

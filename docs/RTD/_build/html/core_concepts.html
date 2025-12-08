@@ -59,7 +59,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-mngs">Installing MNGS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-scitex">Installing SciTeX</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="installation.html#from-pypi-recommended">From PyPI (Recommended)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation.html#from-source">From Source</a></li>
 </ul>
@@ -191,16 +191,16 @@
              
   <section id="core-concepts">
 <h1>Core Concepts<a class="headerlink" href="#core-concepts" title="Link to this heading"></a></h1>
-<p>Understanding these core concepts will help you use MNGS effectively.</p>
+<p>Understanding these core concepts will help you use SciTeX effectively.</p>
 <section id="philosophy">
 <h2>Philosophy<a class="headerlink" href="#philosophy" title="Link to this heading"></a></h2>
-<p>MNGS (monogusa - “lazy” in Japanese) embodies the principle of making scientific computing as effortless as possible while maintaining rigor and reproducibility.</p>
+<p>SciTeX (monogusa - “lazy” in Japanese) embodies the principle of making scientific computing as effortless as possible while maintaining rigor and reproducibility.</p>
 </section>
 <section id="key-principles">
 <h2>Key Principles<a class="headerlink" href="#key-principles" title="Link to this heading"></a></h2>
 <section id="automatic-everything">
 <h3>1. Automatic Everything<a class="headerlink" href="#automatic-everything" title="Link to this heading"></a></h3>
-<p>MNGS automates common tasks that researchers often forget:</p>
+<p>SciTeX automates common tasks that researchers often forget:</p>
 <ul class="simple">
 <li><p><strong>Logging</strong>: All output is automatically logged with timestamps</p></li>
 <li><p><strong>Data Export</strong>: Plots automatically save their underlying data</p></li>
@@ -210,7 +210,7 @@
 </section>
 <section id="consistent-interface">
 <h3>2. Consistent Interface<a class="headerlink" href="#consistent-interface" title="Link to this heading"></a></h3>
-<p>All MNGS modules follow similar patterns:</p>
+<p>All SciTeX modules follow similar patterns:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Loading any file type</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">scitex</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;file.ext&quot;</span><span class="p">)</span>  <span class="c1"># Works for .pkl, .npy, .csv, .mat, etc.</span>
 
@@ -242,7 +242,7 @@
 </section>
 <section id="data-preservation">
 <h3>4. Data Preservation<a class="headerlink" href="#data-preservation" title="Link to this heading"></a></h3>
-<p>MNGS prioritizes data preservation:</p>
+<p>SciTeX prioritizes data preservation:</p>
 <ul class="simple">
 <li><p><strong>Plots</strong>: Every plot saves its data to CSV</p></li>
 <li><p><strong>Logs</strong>: All console output is preserved</p></li>
@@ -259,7 +259,7 @@
 </section>
 <section id="scientific-workflow-integration">
 <h3>5. Scientific Workflow Integration<a class="headerlink" href="#scientific-workflow-integration" title="Link to this heading"></a></h3>
-<p>MNGS is designed for typical scientific workflows:</p>
+<p>SciTeX is designed for typical scientific workflows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Load experimental data</span>
 <span class="n">raw_data</span> <span class="o">=</span> <span class="n">scitex</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;experiment_001.mat&quot;</span><span class="p">)</span>
 
@@ -286,7 +286,7 @@
 <h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
 <section id="module-organization">
 <h3>Module Organization<a class="headerlink" href="#module-organization" title="Link to this heading"></a></h3>
-<p>MNGS is organized into focused modules:</p>
+<p>SciTeX is organized into focused modules:</p>
 <ul class="simple">
 <li><p><strong>Core</strong>: <code class="docutils literal notranslate"><span class="pre">gen</span></code>, <code class="docutils literal notranslate"><span class="pre">io</span></code> - Essential functionality</p></li>
 <li><p><strong>Analysis</strong>: <code class="docutils literal notranslate"><span class="pre">stats</span></code>, <code class="docutils literal notranslate"><span class="pre">pd</span></code> - Data analysis tools</p></li>
@@ -306,7 +306,7 @@
 </section>
 <section id="error-handling">
 <h3>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
-<p>MNGS uses defensive programming:</p>
+<p>SciTeX uses defensive programming:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Automatic format detection with fallbacks</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">scitex</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;file.unknown&quot;</span><span class="p">)</span>  <span class="c1"># Tries multiple loaders</span>
 

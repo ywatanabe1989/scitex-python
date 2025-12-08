@@ -1,7 +1,7 @@
 Module Overview
 ===============
 
-MNGS is organized into specialized modules, each focusing on a specific domain of scientific computing.
+SciTeX is organized into specialized modules, each focusing on a specific domain of scientific computing.
 
 Core Modules
 ------------

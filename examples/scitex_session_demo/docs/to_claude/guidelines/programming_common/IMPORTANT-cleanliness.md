@@ -6,7 +6,7 @@
 
 
 ## Code Organization
-- src and tests: no mngs dependency
+- src and tests: no scitex dependency
 - src, tests, and examples: 
   - strictly mirror structure to link each other
   - Understand different roles
