@@ -6,7 +6,7 @@ SciTeX Visual Editor Module
 
 Provides interactive GUI for editing figure styles and annotations.
 Supports multiple backends with graceful degradation:
-  - web: Browser-based (Flask/FastAPI) - modern UI
+  - flask: Browser-based (Flask) - modern UI
   - dearpygui: GPU-accelerated desktop (fast)
   - qt: Rich desktop (PyQt/PySide)
   - tkinter: Built-in Python (works everywhere)
