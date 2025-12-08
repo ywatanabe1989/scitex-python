@@ -495,6 +495,7 @@ def _add_argument(
         type_hints: Type hints dictionary
         short_form: Optional short form (e.g., 'a' for -a)
     """
+    from typing import get_origin, get_args, Literal
 
     # Get type
     param_type = type_hints.get(param_name, param.annotation)
@@ -513,6 +514,13 @@ def _add_argument(
     if short_form:
         arg_names.insert(0, f"-{short_form}")
 
+    # Check for Literal type (choices)
+    choices = None
+    origin = get_origin(param_type)
+    if origin is Literal:
+        choices = list(get_args(param_type))
+        param_type = type(choices[0]) if choices else str
+
     # Handle different types
     if param_type == bool:
         # Boolean flags
@@ -524,10 +532,14 @@ def _add_argument(
         )
     else:
         # Regular arguments
+        choices_str = f", choices: {choices}" if choices else ""
         kwargs = {
             'type': param_type,
-            'help': f"(default: {default})" if has_default else "(required)",
+            'help': f"(default: {default}{choices_str})" if has_default else f"(required{choices_str})",
         }
+
+        if choices:
+            kwargs['choices'] = choices
 
         if has_default:
             kwargs['default'] = default

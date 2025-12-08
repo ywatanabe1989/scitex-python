@@ -7,11 +7,46 @@ from pathlib import Path
 from typing import Union, Optional, Literal
 import hashlib
 import json
+import warnings
+
+
+def _print_available_backends():
+    """Print available backends status."""
+    backends = {
+        "flask": ["flask"],
+        "dearpygui": ["dearpygui"],
+        "qt": ["PyQt6", "PyQt5", "PySide6", "PySide2"],
+        "tkinter": ["tkinter"],
+        "mpl": ["matplotlib"],
+    }
+
+    print("\n" + "=" * 50)
+    print("SciTeX Visual Editor - Available Backends")
+    print("=" * 50)
+
+    for backend, packages in backends.items():
+        available = False
+        available_pkg = None
+        for pkg in packages:
+            try:
+                __import__(pkg)
+                available = True
+                available_pkg = pkg
+                break
+            except ImportError:
+                pass
+
+        status = f"[OK] {available_pkg}" if available else "[NOT INSTALLED]"
+        print(f"  {backend:12s}: {status}")
+
+    print("=" * 50)
+    print("Install: pip install scitex[gui]")
+    print("=" * 50 + "\n")
 
 
 def edit(
     path: Union[str, Path],
-    backend: Literal["auto", "web", "dearpygui", "qt", "tkinter", "mpl"] = "auto",
+    backend: Literal["auto", "flask", "dearpygui", "qt", "tkinter", "mpl"] = "auto",
     apply_manual: bool = True,
 ) -> None:
     """
@@ -28,8 +63,8 @@ def edit(
     backend : str, optional
         GUI backend to use (default: "auto"):
         - "auto": Pick best available with graceful degradation
-          (web -> dearpygui -> qt -> tkinter -> mpl)
-        - "web": Browser-based editor (Flask/FastAPI, modern UI)
+          (flask -> dearpygui -> qt -> tkinter -> mpl)
+        - "flask": Browser-based editor (Flask, modern UI)
         - "dearpygui": GPU-accelerated modern GUI (fast, requires dearpygui)
         - "qt": Rich desktop editor (requires PyQt5/6 or PySide2/6)
         - "tkinter": Built-in Python GUI (works everywhere)
@@ -46,7 +81,7 @@ def edit(
     --------
     >>> import scitex as stx
     >>> stx.vis.edit("output/figure.json")  # Auto-select best backend
-    >>> stx.vis.edit("output/figure.png", backend="web")  # Force web editor
+    >>> stx.vis.edit("output/figure.png", backend="flask")  # Force flask editor
     >>> stx.vis.edit("output/figure.json", backend="tkinter")  # Force tkinter
 
     Notes
@@ -54,7 +89,7 @@ def edit(
     - Changes are saved to `{basename}.manual.json` alongside the original
     - Manual JSON includes hash of base JSON for staleness detection
     - Original JSON/CSV files are never modified
-    - Backend auto-detection order: web > dearpygui > qt > tkinter > mpl
+    - Backend auto-detection order: flask > dearpygui > qt > tkinter > mpl
     """
     path = Path(path)
 
@@ -82,10 +117,14 @@ def edit(
     if backend == "auto":
         backend = _detect_best_backend()
 
+    # Print status
+    _print_available_backends()
+    print(f"Launching {backend} editor for: {json_path}")
+
     # Launch appropriate backend
-    if backend == "web":
+    if backend == "flask":
         try:
-            from ._web_editor import WebEditor
+            from ._flask_editor import WebEditor
             editor = WebEditor(
                 json_path=json_path,
                 metadata=metadata,
@@ -96,7 +135,7 @@ def edit(
             editor.run()
         except ImportError as e:
             raise ImportError(
-                "Web backend requires Flask or FastAPI. "
+                "Flask backend requires Flask. "
                 "Install with: pip install flask"
             ) from e
     elif backend == "dearpygui":
@@ -106,6 +145,7 @@ def edit(
                 json_path=json_path,
                 metadata=metadata,
                 csv_data=csv_data,
+                png_path=png_path,
                 manual_overrides=manual_overrides,
             )
             editor.run()
@@ -121,6 +161,7 @@ def edit(
                 json_path=json_path,
                 metadata=metadata,
                 csv_data=csv_data,
+                png_path=png_path,
                 manual_overrides=manual_overrides,
             )
             editor.run()
@@ -150,7 +191,7 @@ def edit(
     else:
         raise ValueError(
             f"Unknown backend: {backend}. "
-            "Use 'auto', 'web', 'dearpygui', 'qt', 'tkinter', or 'mpl'."
+            "Use 'auto', 'flask', 'dearpygui', 'qt', 'tkinter', or 'mpl'."
         )
 
 
@@ -158,20 +199,15 @@ def _detect_best_backend() -> str:
     """
     Detect the best available GUI backend with graceful degradation.
 
-    Order: web > dearpygui > qt > tkinter > mpl
+    Order: flask > dearpygui > qt > tkinter > mpl
     Shows warnings when falling back to less capable backends.
     """
     import warnings
 
-    # Try Web (Flask/FastAPI) - best for modern UI
+    # Try Flask - best for modern UI
     try:
         import flask
-        return "web"
-    except ImportError:
-        pass
-    try:
-        import fastapi
-        return "web"
+        return "flask"
     except ImportError:
         pass
 
@@ -181,7 +217,7 @@ def _detect_best_backend() -> str:
         return "dearpygui"
     except ImportError:
         warnings.warn(
-            "Web/Flask not available. Consider: pip install flask\n"
+            "Flask not available. Consider: pip install flask\n"
             "Trying DearPyGui..."
         )
 

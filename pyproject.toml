@@ -11,7 +11,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scitex"
-version = "2.4.3"
+version = "2.5.0"
 description = "A comprehensive Python library for scientific computing and data analysis"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -203,6 +203,13 @@ web = [
     "celery",
 ]
 
+# GUI Editors (stx.vis.edit)
+gui = [
+    "flask",           # Web editor backend
+    "dearpygui",       # GPU-accelerated desktop editor
+    "PyQt6",           # Qt desktop editor (alternative: PyQt5, PySide6, PySide2)
+]
+
 # Scholar Module - Paper Management & Browser
 scholar = [
     "selenium",
@@ -342,6 +349,9 @@ all = [
     "fastapi",
     "flask",
     "streamlit",
+    # gui
+    "dearpygui",
+    "PyQt6",
     # writer
     "yq",
     # jupyter

@@ -22,6 +22,12 @@ from ._figure_from_axes_mm import (
 )
 from ._units import inch_to_mm, mm_to_inch, mm_to_pt, pt_to_mm
 from ._collect_figure_metadata import collect_figure_metadata
+from ._csv_column_naming import (
+    get_csv_column_name,
+    get_csv_column_prefix,
+    parse_csv_column_name,
+    sanitize_trace_id,
+)
 
 __all__ = [
     "HistogramBinManager",
@@ -47,6 +53,8 @@ __all__ = [
     "cross_ref",
     "enhance_scitex_save_with_captions",
     "export_captions",
+    "get_csv_column_name",
+    "get_csv_column_prefix",
     "get_dimension_info",
     "get_scitex_config",
     "histogram_bin_manager",
@@ -57,9 +65,11 @@ __all__ = [
     "mk_patches",
     "mm_to_inch",
     "mm_to_pt",
+    "parse_csv_column_name",
     "print_dimension_info",
     "pt_to_mm",
     "quick_caption",
+    "sanitize_trace_id",
     "save_with_caption",
     "view_dimensions",
 ]
