@@ -30,7 +30,6 @@ def sns_copy_doc(func):
 
 
 class SeabornMixin:
-
     def _sns_base(
         self, method_name, *args, track=True, track_obj=None, id=None, **kwargs
     ):
@@ -48,21 +47,25 @@ class SeabornMixin:
             # Suppress matplotlib's categorical units warning and info messages
             import warnings
             from scitex import logging
-            
+
             # Temporarily suppress matplotlib's INFO level logging
-            mpl_logger = logging.getLogger('matplotlib')
+            mpl_logger = logging.getLogger("matplotlib")
             original_level = mpl_logger.level
             mpl_logger.setLevel(logging.WARNING)
-            
+
             try:
                 with warnings.catch_warnings():
-                    warnings.filterwarnings('ignore',
-                                          message='.*categorical units.*parsable as floats or dates.*',
-                                          category=UserWarning)
-                    warnings.filterwarnings('ignore',
-                                          message='.*Using categorical units.*',
-                                          module='matplotlib.*')
-                    warnings.simplefilter('ignore', UserWarning)
+                    warnings.filterwarnings(
+                        "ignore",
+                        message=".*categorical units.*parsable as floats or dates.*",
+                        category=UserWarning,
+                    )
+                    warnings.filterwarnings(
+                        "ignore",
+                        message=".*Using categorical units.*",
+                        module="matplotlib.*",
+                    )
+                    warnings.simplefilter("ignore", UserWarning)
 
                     self._axis_mpl = sns_plot_fn(ax=self._axis_mpl, *args, **kwargs)
             finally:
@@ -70,17 +73,18 @@ class SeabornMixin:
                 mpl_logger.setLevel(original_level)
 
             # Post-processing: Set KDE line style for histplot with kde=True
-            if sns_method_name == 'histplot' and kwargs.get('kde', False):
+            if sns_method_name == "histplot" and kwargs.get("kde", False):
                 from scitex.plt.utils import mm_to_pt
+
                 kde_lw = mm_to_pt(0.2)  # 0.2mm for KDE lines
                 # KDE lines are added as Line2D objects after the histogram
                 for line in self._axis_mpl.get_lines():
                     line.set_linewidth(kde_lw)
-                    line.set_color('black')  # Black KDE line
-                    line.set_linestyle('--')  # Dashed line
+                    line.set_color("black")  # Black KDE line
+                    line.set_linestyle("--")  # Dashed line
 
             # Post-processing: Set alpha to 1.0 for histplot bars if not specified
-            if sns_method_name == 'histplot' and 'alpha' not in kwargs:
+            if sns_method_name == "histplot" and "alpha" not in kwargs:
                 for patch in self._axis_mpl.patches:
                     patch.set_alpha(1.0)
 
@@ -88,8 +92,8 @@ class SeabornMixin:
         track_obj = track_obj if track_obj is not None else args
         # Create a tracked_dict with appropriate structure
         tracked_dict = {
-            'data': track_obj,  # Use 'data' key for consistency with formatters
-            'args': args        # Keep args for backward compatibility
+            "data": track_obj,  # Use 'data' key for consistency with formatters
+            "args": args,  # Keep args for backward compatibility
         }
         self._track(track, id, method_name, tracked_dict, kwargs)
 
@@ -114,10 +118,8 @@ class SeabornMixin:
 
         if hue is not None:
             if x is None and y is None:
-
                 return data
             elif x is None:
-
                 agg_dict = {}
                 for hh in data[hue].unique():
                     agg_dict[hh] = data.loc[data[hue] == hh, y]
@@ -125,7 +127,6 @@ class SeabornMixin:
                 return df
 
             elif y is None:
-
                 df = pd.concat(
                     [data.loc[data[hue] == hh, x] for hh in data[hue].unique()],
                     axis=1,
@@ -180,6 +181,7 @@ class SeabornMixin:
 
         # Post-processing: Style boxplot with black medians
         from scitex.plt.utils import mm_to_pt
+
         lw_pt = mm_to_pt(0.2)
 
         # Find and style boxplot lines (medians are typically the lines inside boxes)
@@ -196,7 +198,7 @@ class SeabornMixin:
                     x_span = abs(xdata[1] - xdata[0])
                     # Medians have smaller span than whisker caps
                     if x_span < 0.4:  # Typical median line span
-                        line.set_color('black')
+                        line.set_color("black")
 
         if strip:
             strip_kwargs = kwargs.copy()
@@ -221,14 +223,22 @@ class SeabornMixin:
 
     @sns_copy_doc
     def sns_histplot(
-        self, data=None, x=None, y=None, bins=10, align_bins=True, track=True, id=None, **kwargs
+        self,
+        data=None,
+        x=None,
+        y=None,
+        bins=10,
+        align_bins=True,
+        track=True,
+        id=None,
+        **kwargs,
     ):
         """
         Plot a histogram using seaborn with bin alignment support.
-        
+
         This method enhances the seaborn histplot with the ability to align
         bins across multiple histograms on the same axis and export bin data.
-        
+
         Args:
             data: Input data (DataFrame, array, or series)
             x: Column name for x-axis data
@@ -241,42 +251,47 @@ class SeabornMixin:
         """
         # Method Name for downstream csv exporting
         method_name = "sns_histplot"
-        
+
         # Get the data to plot for bin alignment
         plot_data = None
         if data is not None and x is not None:
-            plot_data = data[x].values if hasattr(data, 'columns') and x in data.columns else None
-        
+            plot_data = (
+                data[x].values
+                if hasattr(data, "columns") and x in data.columns
+                else None
+            )
+
         # Get axis and histogram IDs for bin alignment
         axis_id = str(hash(self._axis_mpl))
         hist_id = id if id is not None else str(self.id)
-        
+
         # Calculate range from data if needed
-        range_value = kwargs.get('binrange', None)
-        
+        range_value = kwargs.get("binrange", None)
+
         # Align bins if requested and data is available
         if align_bins and plot_data is not None:
             from ....plt.utils import histogram_bin_manager
+
             bins_val, range_val = histogram_bin_manager.register_histogram(
                 axis_id, hist_id, plot_data, bins, range_value
             )
-            
+
             # Update bins in kwargs
-            kwargs['bins'] = bins_val
-            
+            kwargs["bins"] = bins_val
+
             # Update range in kwargs if it was provided
             if range_value is not None:
-                kwargs['binrange'] = range_val
-        
+                kwargs["binrange"] = range_val
+
         # Plotting with seaborn
         with self._no_tracking():
             # Execute the seaborn histplot function
             # Don't pass bins as a separate parameter since it may already be in kwargs
             sns_plot = sns.histplot(data=data, x=x, y=y, ax=self._axis_mpl, **kwargs)
-            
+
             # Extract bin information from the plotted artists
             hist_result = None
-            if hasattr(sns_plot, 'patches') and sns_plot.patches:
+            if hasattr(sns_plot, "patches") and sns_plot.patches:
                 # Get bin information from the plot patches
                 patches = sns_plot.patches
                 if patches:
@@ -288,22 +303,22 @@ class SeabornMixin:
                     # Add the rightmost edge
                     if patches:
                         bin_edges.append(patches[-1].get_x() + patches[-1].get_width())
-                        
+
                     hist_result = (counts, np.array(bin_edges))
-        
+
         # Create a track object for the formatter
         track_obj = self._sns_prepare_xyhue(data, x, y, kwargs.get("hue"))
-        
+
         # Enhanced tracked dict with histogram result
         tracked_dict = {
-            'data': track_obj,
-            'args': (data, x, y),
-            'hist_result': hist_result
+            "data": track_obj,
+            "args": (data, x, y),
+            "hist_result": hist_result,
         }
-        
+
         # Track the operation
         self._track(track, id, method_name, tracked_dict, kwargs)
-        
+
         return sns_plot
 
     @sns_copy_doc
@@ -427,5 +442,6 @@ class SeabornMixin:
     @sns_copy_doc
     def sns_jointplot(self, *args, track=True, id=None, **kwargs):
         self._sns_base("sns_jointplot", *args, track=track, id=id, **kwargs)
+
 
 # EOF

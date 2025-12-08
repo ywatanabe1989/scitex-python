@@ -31,7 +31,7 @@ def stx_raster(
     apply_set_n_ticks=True,
     n_xticks=4,
     n_yticks=None,
-    **kwargs
+    **kwargs,
 ):
     """
     Create a raster plot using eventplot with custom labels and colors.
@@ -72,7 +72,9 @@ def stx_raster(
     df : pandas.DataFrame
         DataFrame with time indices and channel events.
     """
-    assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        ax, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
 
     # Format spike_times_list data
     spike_times_list = _ensure_list(spike_times_list)
@@ -99,13 +101,24 @@ def stx_raster(
     if np.isscalar(lineoffsets):
         lineoffsets = [lineoffsets]
     if len(lineoffsets) < len(spike_times_list):
-        lineoffsets = list(lineoffsets) + list(range(len(lineoffsets), len(spike_times_list)))
+        lineoffsets = list(lineoffsets) + list(
+            range(len(lineoffsets), len(spike_times_list))
+        )
 
     # Plotting as eventplot using spike_times_list with proper positioning
-    for ii, (pos, color, offset) in enumerate(zip(spike_times_list, colors, lineoffsets)):
+    for ii, (pos, color, offset) in enumerate(
+        zip(spike_times_list, colors, lineoffsets)
+    ):
         label = _define_label(labels, ii)
-        ax.eventplot(pos, lineoffsets=offset, linelengths=linelengths,
-                    orientation=orientation, colors=color, label=label, **kwargs)
+        ax.eventplot(
+            pos,
+            lineoffsets=offset,
+            linelengths=linelengths,
+            orientation=orientation,
+            colors=color,
+            label=label,
+            **kwargs,
+        )
 
     # Apply set_n_ticks for cleaner axes if requested
     if apply_set_n_ticks:
@@ -114,20 +127,20 @@ def stx_raster(
         # For categorical y-axis (trials/channels), use appropriate tick count
         if n_yticks is None:
             n_yticks = min(len(spike_times_list), 8)  # Max 8 ticks for readability
-        
+
         # Only apply if we have reasonable numeric ranges
         try:
             x_range = ax.get_xlim()
             y_range = ax.get_ylim()
-            
+
             # Apply x-ticks if we have a reasonable numeric range
             if x_range[1] - x_range[0] > 0:
                 set_n_ticks(ax, n_xticks=n_xticks, n_yticks=None)
-            
+
             # Apply y-ticks only if we don't have categorical labels
             if labels is None and y_range[1] - y_range[0] > 0:
                 set_n_ticks(ax, n_xticks=None, n_yticks=n_yticks)
-                
+
         except Exception:
             # Skip set_n_ticks if there are issues (e.g., categorical data)
             pass
@@ -137,7 +150,9 @@ def stx_raster(
         ax.legend()
 
     # Return spike_times in a useful format
-    spike_times_digital_df = _event_times_to_digital_df(spike_times_list, time, lineoffsets)
+    spike_times_digital_df = _event_times_to_digital_df(
+        spike_times_list, time, lineoffsets
+    )
 
     return ax, spike_times_digital_df
 

@@ -197,13 +197,13 @@ def test_gen_interpolate_zero_points():
 
 
 def test_gen_interpolate_negative_points():
-    """Test gen_interpolate with negative number of points."""
+    """Test gen_interpolate with negative number of points raises ValueError."""
     from scitex.plt.color import gen_interpolate
-    
-    # NumPy linspace should handle this gracefully
-    colors = gen_interpolate("red", "blue", -5)
-    assert len(colors) == 0
-    assert colors == []
+    import pytest
+
+    # NumPy linspace raises ValueError for negative points
+    with pytest.raises(ValueError):
+        gen_interpolate("red", "blue", -5)
 
 
 def test_gen_interpolate_grayscale():

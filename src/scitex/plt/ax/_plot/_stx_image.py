@@ -31,10 +31,10 @@ def stx_image(
     Imshows an two-dimensional array with theese two conditions:
     1) The first dimension represents the x dim, from left to right.
     2) The second dimension represents the y dim, from bottom to top
-    
+
     Parameters
     ----------
-    ax : matplotlib.axes.Axes or scitex.plt._subplots._AxisWrapper.AxisWrapper
+    ax : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axis to plot on
     arr_2d : numpy.ndarray
         The 2D array to display
@@ -58,13 +58,15 @@ def stx_image(
         Maximum data value for colormap scaling, by default None
     **kwargs
         Additional keyword arguments passed to ax.imshow()
-        
+
     Returns
     -------
-    matplotlib.axes.Axes or scitex.plt._subplots._AxisWrapper.AxisWrapper
+    matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axis with the image plotted
     """
-    assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        ax, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
     assert arr_2d.ndim == 2, "Input array must be 2-dimensional"
 
     if kwargs.get("xyz"):

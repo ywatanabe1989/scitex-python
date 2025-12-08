@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -20,7 +21,7 @@ def _make_column_name(id, suffix, method="text"):
     - id="plot_5", suffix="x" -> "plot_5_text_x"
     """
     # Check if method name is already in the ID
-    id_parts = id.rsplit('_', 1)
+    id_parts = id.rsplit("_", 1)
     if len(id_parts) == 2 and id_parts[0].endswith(method):
         # Method already in ID, don't duplicate
         return f"{id}_{suffix}"
@@ -43,10 +44,7 @@ def _format_text(id, tracked_dict, kwargs):
         x, y = args[0], args[1]
         text_content = args[2] if len(args) >= 3 else None
 
-        data = {
-            _make_column_name(id, "x"): [x],
-            _make_column_name(id, "y"): [y]
-        }
+        data = {_make_column_name(id, "x"): [x], _make_column_name(id, "y"): [y]}
 
         if text_content is not None:
             data[_make_column_name(id, "content")] = [text_content]
@@ -56,5 +54,6 @@ def _format_text(id, tracked_dict, kwargs):
         return df
 
     return pd.DataFrame()
+
 
 # EOF

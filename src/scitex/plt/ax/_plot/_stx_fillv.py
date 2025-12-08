@@ -42,9 +42,11 @@ def stx_fillv(axes, starts_1d, ends_1d, color="red", alpha=0.2):
     axes = axes if isinstance(axes, np.ndarray) else [axes]
 
     for ax in axes:
-        assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
+        assert_valid_axis(
+            ax, "First argument must be a matplotlib axis or scitex axis wrapper"
+        )
         for start, end in zip(starts_1d, ends_1d):
-            ax.axvspan(start, end, facecolor=color, edgecolor='none', alpha=alpha)
+            ax.axvspan(start, end, facecolor=color, edgecolor="none", alpha=alpha)
 
     if not is_axes:
         return axes[0]

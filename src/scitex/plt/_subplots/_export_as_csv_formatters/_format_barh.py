@@ -4,11 +4,13 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_barh.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import pandas as pd
+
 
 def _make_column_name(id, suffix, method="barh"):
     """Create column name with method descriptor, avoiding duplication.
@@ -18,7 +20,7 @@ def _make_column_name(id, suffix, method="barh"):
     - id="plot_5", suffix="x" -> "plot_5_barh_x"
     """
     # Check if method name is already in the ID
-    id_parts = id.rsplit('_', 1)
+    id_parts = id.rsplit("_", 1)
     if len(id_parts) == 2 and id_parts[0].endswith(method):
         # Method already in ID, don't duplicate
         return f"{id}_{suffix}"
@@ -26,23 +28,24 @@ def _make_column_name(id, suffix, method="barh"):
         # Method not in ID, add it for clarity
         return f"{id}_{method}_{suffix}"
 
+
 def _format_barh(id, tracked_dict, kwargs):
     """Format data from a barh call."""
     # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
-    
+
     # Get the args from tracked_dict
-    args = tracked_dict.get('args', [])
-    
+    args = tracked_dict.get("args", [])
+
     # Extract x and y data if available
     if len(args) >= 2:
         # Note: in barh, x is height, y is width (visually transposed from bar)
         x, y = args[0], args[1]
-        
+
         # Get xerr from kwargs
         xerr = kwargs.get("xerr")
-        
+
         # Convert single values to Series
         if isinstance(x, (int, float)):
             x = pd.Series(x, name="x")

@@ -29,6 +29,25 @@ from ._plot_statistical_shaded_line import (
 )
 from ._add_fitted_line import add_fitted_line
 
+from scitex.decorators import deprecated
+
+# Backward-compatible aliases for renamed functions with deprecation warnings
+@deprecated(reason="Use stx_line instead", forward_to="scitex.plt.ax._plot.stx_line")
+def plot_line(*args, **kwargs):
+    pass
+
+@deprecated(reason="Use stx_mean_std instead", forward_to="scitex.plt.ax._plot.stx_mean_std")
+def plot_mean_std(*args, **kwargs):
+    pass
+
+@deprecated(reason="Use stx_mean_ci instead", forward_to="scitex.plt.ax._plot.stx_mean_ci")
+def plot_mean_ci(*args, **kwargs):
+    pass
+
+@deprecated(reason="Use stx_median_iqr instead", forward_to="scitex.plt.ax._plot.stx_median_iqr")
+def plot_median_iqr(*args, **kwargs):
+    pass
+
 __all__ = [
     "stx_scatter_hist",
     "stx_heatmap",
@@ -50,6 +69,11 @@ __all__ = [
     "stx_mean_ci",
     "stx_median_iqr",
     "add_fitted_line",
+    # Backward-compatible aliases
+    "plot_line",
+    "plot_mean_std",
+    "plot_mean_ci",
+    "plot_median_iqr",
 ]
 
 # EOF

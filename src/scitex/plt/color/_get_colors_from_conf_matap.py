@@ -101,7 +101,9 @@ def get_colors_from_conf_matap(
     else:
         values = np.linspace(value_range[0], value_range[1], n_colors)
 
-    return [get_color_from_conf_matap(cmap_name, val, value_range, alpha) for val in values]
+    return [
+        get_color_from_conf_matap(cmap_name, val, value_range, alpha) for val in values
+    ]
 
 
 def get_categorical_colors_from_conf_matap(

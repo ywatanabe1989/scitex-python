@@ -11,7 +11,6 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import matplotlib
 import matplotlib.pyplot as plt
-import scitex.plt as scitex_plt
 
 
 def close(obj):
@@ -57,8 +56,14 @@ def close(obj):
     """
     if isinstance(obj, matplotlib.figure.Figure):
         plt.close(obj)
-    elif isinstance(obj, scitex_plt._subplots._FigWrapper.FigWrapper):
-        plt.close(obj.figure)
+    elif hasattr(obj, "_fig_mpl"):
+        # SciTeX FigWrapper object
+        plt.close(obj._fig_mpl)
+    elif hasattr(obj, "figure"):
+        # Alternative attribute name (backward compatibility)
+        fig = obj.figure
+        if fig is not None:
+            plt.close(fig)
     else:
         raise TypeError(
             f"Cannot close object of type {type(obj).__name__}. Expected FigWrapper or Figure object."

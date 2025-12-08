@@ -26,8 +26,8 @@ def _format_imshow(id, tracked_dict, kwargs):
         return tracked_dict.get("image_df")
 
     # Handle raw args from __getattr__ proxied calls
-    if 'args' in tracked_dict:
-        args = tracked_dict['args']
+    if "args" in tracked_dict:
+        args = tracked_dict["args"]
         if isinstance(args, tuple) and len(args) > 0:
             img = np.asarray(args[0])
 
@@ -60,7 +60,7 @@ def _format_imshow(id, tracked_dict, kwargs):
                 }
 
                 # Add channel data (R, G, B, A)
-                channel_names = ['R', 'G', 'B', 'A'][:channels]
+                channel_names = ["R", "G", "B", "A"][:channels]
                 for c, name in enumerate(channel_names):
                     data[f"{id}_imshow_{name}"] = img[:, :, c].flatten()
 

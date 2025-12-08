@@ -13,7 +13,6 @@ import numpy as np
 
 
 def vizualize_colors(colors):
-
     def gen_rand_sample(size=100):
         x = np.linspace(-1, 1, size)
         y = np.random.normal(size=size)

@@ -50,7 +50,7 @@ def style_suptitles(
     All are set to the same font size (default 7pt for publication).
     """
     # Unwrap FigWrapper if needed
-    if hasattr(fig, '_fig_mpl'):
+    if hasattr(fig, "_fig_mpl"):
         fig_mpl = fig._fig_mpl
     else:
         fig_mpl = fig
@@ -61,12 +61,12 @@ def style_suptitles(
         fig_mpl._suptitle.set_fontfamily(font_family)
 
     # Style supxlabel (if it exists)
-    if hasattr(fig_mpl, '_supxlabel') and fig_mpl._supxlabel is not None:
+    if hasattr(fig_mpl, "_supxlabel") and fig_mpl._supxlabel is not None:
         fig_mpl._supxlabel.set_fontsize(suptitle_font_size_pt)
         fig_mpl._supxlabel.set_fontfamily(font_family)
 
     # Style supylabel (if it exists)
-    if hasattr(fig_mpl, '_supylabel') and fig_mpl._supylabel is not None:
+    if hasattr(fig_mpl, "_supylabel") and fig_mpl._supylabel is not None:
         fig_mpl._supylabel.set_fontsize(suptitle_font_size_pt)
         fig_mpl._supylabel.set_fontfamily(font_family)
 

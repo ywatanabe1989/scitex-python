@@ -258,7 +258,7 @@ if __name__ == "__main__":
 # 
 #     def _track(self, track, id, method_name, tracked_dict, kwargs=None):
 #         """Track plotting operation with auto-generated IDs.
-#         
+# 
 #         Args:
 #             track: Whether to track this operation
 #             id: Identifier for the plot (can be None)
@@ -269,7 +269,7 @@ if __name__ == "__main__":
 #         # Extract id from kwargs and remove it before passing to matplotlib
 #         if kwargs is not None and hasattr(kwargs, "get") and "id" in kwargs:
 #             id = kwargs.pop("id")
-#         
+# 
 #         # Default kwargs to empty dict if None
 #         if kwargs is None:
 #             kwargs = {}
@@ -281,19 +281,19 @@ if __name__ == "__main__":
 #             # If no ID was provided, generate one using method_name + counter
 #             if id is None:
 #                 # Initialize method counters if not exist
-#                 if not hasattr(self, '_method_counters'):
+#                 if not hasattr(self, "_method_counters"):
 #                     self._method_counters = {}
-#                 
+# 
 #                 # Get current counter value for this method and increment it
 #                 counter = self._method_counters.get(method_name, 0)
 #                 self._method_counters[method_name] = counter + 1
-#                 
+# 
 #                 # Format ID as method_name_counter (e.g., bar_1, plot_3)
 #                 id = f"{method_name}_{counter}"
-#             
+# 
 #             # For backward compatibility
 #             self.id += 1
-#             
+# 
 #             # Store the tracking record
 #             self._ax_history[id] = (id, method_name, tracked_dict, kwargs)
 # 
@@ -328,22 +328,22 @@ if __name__ == "__main__":
 #         df = _export_as_csv(self.history)
 # 
 #         return df if df is not None else pd.DataFrame()
-#     
+# 
 #     def export_as_csv_for_sigmaplot(self, include_visual_params=True):
 #         """
 #         Export tracked plotting data to a DataFrame in SigmaPlot format.
-#         
+# 
 #         Parameters
 #         ----------
 #         include_visual_params : bool, optional
 #             Whether to include visual parameters (xlabel, ylabel, scales, etc.)
 #             at the top of the CSV. Default is True.
-#             
+# 
 #         Returns
 #         -------
 #         pandas.DataFrame
 #             DataFrame containing the plotted data formatted for SigmaPlot.
-#             
+# 
 #         Examples
 #         --------
 #         >>> fig, ax = scitex.plt.subplots()
@@ -353,7 +353,7 @@ if __name__ == "__main__":
 #         >>> df.to_csv('for_sigmaplot.csv', index=False)
 #         """
 #         df = _export_as_csv(self.history)
-#         
+# 
 #         return df if df is not None else pd.DataFrame()
 # 
 #     # def _track(

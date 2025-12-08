@@ -32,7 +32,8 @@ try:
 except Exception:
     # Search for Arial font files and register them
     arial_paths = [
-        f for f in fm.findSystemFonts()
+        f
+        for f in fm.findSystemFonts()
         if os.path.basename(f).lower().startswith("arial")
     ]
 
@@ -53,11 +54,17 @@ except Exception:
 # Configure matplotlib to use Arial if available
 if _arial_enabled:
     mpl.rcParams["font.family"] = "Arial"
-    mpl.rcParams["font.sans-serif"] = ["Arial", "Helvetica", "DejaVu Sans", "Liberation Sans"]
+    mpl.rcParams["font.sans-serif"] = [
+        "Arial",
+        "Helvetica",
+        "DejaVu Sans",
+        "Liberation Sans",
+    ]
 else:
     # Warn about missing Arial
     try:
         from scitex.logging import getLogger
+
         _logger = getLogger(__name__)
         _logger.warning(
             "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
@@ -66,11 +73,12 @@ else:
     except:
         # If scitex.logging not available, use standard warnings
         import warnings
+
         warnings.warn(
             "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
             "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv",
             UserWarning,
-            stacklevel=2
+            stacklevel=2,
         )
 
 
@@ -116,7 +124,7 @@ class SubplotsWrapper:
         dpi=None,
         styles=None,  # List of style dicts for per-axes control
         transparent=None,  # Transparent background (default: from SCITEX_STYLE.yaml)
-        **kwargs
+        **kwargs,
     ):
         """
         Create figure and axes with optional millimeter-based control.
@@ -216,34 +224,69 @@ class SubplotsWrapper:
         """
 
         # Use resolve_style_value for priority: direct → yaml → env → default
-        from scitex.plt.styles import resolve_style_value as _resolve, SCITEX_STYLE as _S
+        from scitex.plt.styles import (
+            resolve_style_value as _resolve,
+            SCITEX_STYLE as _S,
+        )
 
         # Resolve all style values with proper priority chain
-        axes_width_mm = _resolve('axes.width_mm', axes_width_mm, _S.get('axes_width_mm'))
-        axes_height_mm = _resolve('axes.height_mm', axes_height_mm, _S.get('axes_height_mm'))
-        margin_left_mm = _resolve('margins.left_mm', margin_left_mm, _S.get('margin_left_mm'))
-        margin_right_mm = _resolve('margins.right_mm', margin_right_mm, _S.get('margin_right_mm'))
-        margin_bottom_mm = _resolve('margins.bottom_mm', margin_bottom_mm, _S.get('margin_bottom_mm'))
-        margin_top_mm = _resolve('margins.top_mm', margin_top_mm, _S.get('margin_top_mm'))
-        space_w_mm = _resolve('spacing.horizontal_mm', space_w_mm, _S.get('space_w_mm'))
-        space_h_mm = _resolve('spacing.vertical_mm', space_h_mm, _S.get('space_h_mm'))
-        axes_thickness_mm = _resolve('axes.thickness_mm', axes_thickness_mm, _S.get('axes_thickness_mm'))
-        tick_length_mm = _resolve('ticks.length_mm', tick_length_mm, _S.get('tick_length_mm'))
-        tick_thickness_mm = _resolve('ticks.thickness_mm', tick_thickness_mm, _S.get('tick_thickness_mm'))
-        trace_thickness_mm = _resolve('lines.trace_mm', trace_thickness_mm, _S.get('trace_thickness_mm'))
-        marker_size_mm = _resolve('markers.size_mm', marker_size_mm, _S.get('marker_size_mm'))
-        axis_font_size_pt = _resolve('fonts.axis_label_pt', axis_font_size_pt, _S.get('axis_font_size_pt'))
-        tick_font_size_pt = _resolve('fonts.tick_label_pt', tick_font_size_pt, _S.get('tick_font_size_pt'))
-        title_font_size_pt = _resolve('fonts.title_pt', title_font_size_pt, _S.get('title_font_size_pt'))
-        legend_font_size_pt = _resolve('fonts.legend_pt', legend_font_size_pt, _S.get('legend_font_size_pt'))
-        suptitle_font_size_pt = _resolve('fonts.suptitle_pt', suptitle_font_size_pt, _S.get('suptitle_font_size_pt'))
-        n_ticks = _resolve('ticks.n_ticks', n_ticks, _S.get('n_ticks'), int)
-        dpi = _resolve('output.dpi', dpi, _S.get('dpi'), int)
+        axes_width_mm = _resolve(
+            "axes.width_mm", axes_width_mm, _S.get("axes_width_mm")
+        )
+        axes_height_mm = _resolve(
+            "axes.height_mm", axes_height_mm, _S.get("axes_height_mm")
+        )
+        margin_left_mm = _resolve(
+            "margins.left_mm", margin_left_mm, _S.get("margin_left_mm")
+        )
+        margin_right_mm = _resolve(
+            "margins.right_mm", margin_right_mm, _S.get("margin_right_mm")
+        )
+        margin_bottom_mm = _resolve(
+            "margins.bottom_mm", margin_bottom_mm, _S.get("margin_bottom_mm")
+        )
+        margin_top_mm = _resolve(
+            "margins.top_mm", margin_top_mm, _S.get("margin_top_mm")
+        )
+        space_w_mm = _resolve("spacing.horizontal_mm", space_w_mm, _S.get("space_w_mm"))
+        space_h_mm = _resolve("spacing.vertical_mm", space_h_mm, _S.get("space_h_mm"))
+        axes_thickness_mm = _resolve(
+            "axes.thickness_mm", axes_thickness_mm, _S.get("axes_thickness_mm")
+        )
+        tick_length_mm = _resolve(
+            "ticks.length_mm", tick_length_mm, _S.get("tick_length_mm")
+        )
+        tick_thickness_mm = _resolve(
+            "ticks.thickness_mm", tick_thickness_mm, _S.get("tick_thickness_mm")
+        )
+        trace_thickness_mm = _resolve(
+            "lines.trace_mm", trace_thickness_mm, _S.get("trace_thickness_mm")
+        )
+        marker_size_mm = _resolve(
+            "markers.size_mm", marker_size_mm, _S.get("marker_size_mm")
+        )
+        axis_font_size_pt = _resolve(
+            "fonts.axis_label_pt", axis_font_size_pt, _S.get("axis_font_size_pt")
+        )
+        tick_font_size_pt = _resolve(
+            "fonts.tick_label_pt", tick_font_size_pt, _S.get("tick_font_size_pt")
+        )
+        title_font_size_pt = _resolve(
+            "fonts.title_pt", title_font_size_pt, _S.get("title_font_size_pt")
+        )
+        legend_font_size_pt = _resolve(
+            "fonts.legend_pt", legend_font_size_pt, _S.get("legend_font_size_pt")
+        )
+        suptitle_font_size_pt = _resolve(
+            "fonts.suptitle_pt", suptitle_font_size_pt, _S.get("suptitle_font_size_pt")
+        )
+        n_ticks = _resolve("ticks.n_ticks", n_ticks, _S.get("n_ticks"), int)
+        dpi = _resolve("output.dpi", dpi, _S.get("dpi"), int)
         # Resolve transparent from YAML (default: True in SCITEX_STYLE.yaml)
         if transparent is None:
-            transparent = _S.get('transparent', True)
+            transparent = _S.get("transparent", True)
         if mode is None:
-            mode = _S.get('mode', 'publication')
+            mode = _S.get("mode", "publication")
 
         # Always use mm-control pathway with SCITEX_STYLE defaults
         if True:
@@ -276,7 +319,7 @@ class SubplotsWrapper:
                 dpi=dpi,
                 styles=styles,
                 transparent=transparent,
-                **kwargs
+                **kwargs,
             )
 
     def _create_with_mm_control(
@@ -312,7 +355,7 @@ class SubplotsWrapper:
         dpi=None,
         styles=None,
         transparent=None,  # Resolved from caller
-        **kwargs
+        **kwargs,
     ):
         """Create figure with mm-based control over axes dimensions."""
         from scitex.plt.utils import mm_to_inch, apply_style_mm
@@ -327,7 +370,7 @@ class SubplotsWrapper:
         n_axes = nrows * ncols
 
         # Apply mode-specific defaults
-        if mode == 'display':
+        if mode == "display":
             scale_factor = 3.0
             dpi = dpi or 100
         else:  # publication or None
@@ -337,18 +380,26 @@ class SubplotsWrapper:
         # Set defaults - if value is provided, apply scaling; if not, use scaled default
         if axes_width_mm is None:
             axes_width_mm = 30.0 * scale_factor
-        elif mode == 'display':
+        elif mode == "display":
             axes_width_mm = axes_width_mm * scale_factor
 
         if axes_height_mm is None:
             axes_height_mm = 21.0 * scale_factor
-        elif mode == 'display':
+        elif mode == "display":
             axes_height_mm = axes_height_mm * scale_factor
 
-        margin_left_mm = margin_left_mm if margin_left_mm is not None else (5.0 * scale_factor)
-        margin_right_mm = margin_right_mm if margin_right_mm is not None else (2.0 * scale_factor)
-        margin_bottom_mm = margin_bottom_mm if margin_bottom_mm is not None else (5.0 * scale_factor)
-        margin_top_mm = margin_top_mm if margin_top_mm is not None else (2.0 * scale_factor)
+        margin_left_mm = (
+            margin_left_mm if margin_left_mm is not None else (5.0 * scale_factor)
+        )
+        margin_right_mm = (
+            margin_right_mm if margin_right_mm is not None else (2.0 * scale_factor)
+        )
+        margin_bottom_mm = (
+            margin_bottom_mm if margin_bottom_mm is not None else (5.0 * scale_factor)
+        )
+        margin_top_mm = (
+            margin_top_mm if margin_top_mm is not None else (2.0 * scale_factor)
+        )
         space_w_mm = space_w_mm if space_w_mm is not None else (3.0 * scale_factor)
         space_h_mm = space_h_mm if space_h_mm is not None else (3.0 * scale_factor)
 
@@ -356,14 +407,18 @@ class SubplotsWrapper:
         if isinstance(axes_width_mm, (list, tuple)):
             ax_widths_mm = list(axes_width_mm)
             if len(ax_widths_mm) != n_axes:
-                raise ValueError(f"axes_width_mm list length ({len(ax_widths_mm)}) must match nrows*ncols ({n_axes})")
+                raise ValueError(
+                    f"axes_width_mm list length ({len(ax_widths_mm)}) must match nrows*ncols ({n_axes})"
+                )
         else:
             ax_widths_mm = [axes_width_mm] * n_axes
 
         if isinstance(axes_height_mm, (list, tuple)):
             ax_heights_mm = list(axes_height_mm)
             if len(ax_heights_mm) != n_axes:
-                raise ValueError(f"axes_height_mm list length ({len(ax_heights_mm)}) must match nrows*ncols ({n_axes})")
+                raise ValueError(
+                    f"axes_height_mm list length ({len(ax_heights_mm)}) must match nrows*ncols ({n_axes})"
+                )
         else:
             ax_heights_mm = [axes_height_mm] * n_axes
 
@@ -392,7 +447,7 @@ class SubplotsWrapper:
         figsize_inch = (mm_to_inch(total_width_mm), mm_to_inch(total_height_mm))
         if transparent:
             # Transparent background for publication figures
-            self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi, facecolor='none')
+            self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi, facecolor="none")
         else:
             self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi)
 
@@ -404,12 +459,18 @@ class SubplotsWrapper:
             for col in range(ncols):
                 # Calculate position for this axes
                 # Left position: left margin + sum of previous column widths + spacing
-                left_mm = margin_left_mm + max_widths_per_col[:col].sum() + col * space_w_mm
+                left_mm = (
+                    margin_left_mm + max_widths_per_col[:col].sum() + col * space_w_mm
+                )
 
                 # Bottom position: bottom margin + sum of heights above this row + spacing
                 # (rows are counted from top in matplotlib)
                 rows_below = nrows - row - 1
-                bottom_mm = margin_bottom_mm + max_heights_per_row[row+1:].sum() + rows_below * space_h_mm
+                bottom_mm = (
+                    margin_bottom_mm
+                    + max_heights_per_row[row + 1 :].sum()
+                    + rows_below * space_h_mm
+                )
 
                 # Convert to figure coordinates [0-1]
                 left = left_mm / total_width_mm
@@ -425,10 +486,10 @@ class SubplotsWrapper:
 
                 # Tag with metadata
                 ax_mpl._scitex_metadata = {
-                    'created_with': 'scitex.plt.subplots (mm-control)',
-                    'mode': mode or 'publication',
-                    'axes_size_mm': (ax_widths_mm[ax_idx], ax_heights_mm[ax_idx]),
-                    'position_in_grid': (row, col),
+                    "created_with": "scitex.plt.subplots (mm-control)",
+                    "mode": mode or "publication",
+                    "axes_size_mm": (ax_widths_mm[ax_idx], ax_heights_mm[ax_idx]),
+                    "position_in_grid": (row, col),
                 }
 
                 ax_idx += 1
@@ -440,7 +501,9 @@ class SubplotsWrapper:
             if styles is not None:
                 if isinstance(styles, list):
                     if len(styles) != n_axes:
-                        raise ValueError(f"styles list length ({len(styles)}) must match nrows*ncols ({n_axes})")
+                        raise ValueError(
+                            f"styles list length ({len(styles)}) must match nrows*ncols ({n_axes})"
+                        )
                     style_dict = styles[i]
                 else:
                     style_dict = styles
@@ -448,39 +511,39 @@ class SubplotsWrapper:
                 # Build style dict from individual parameters
                 style_dict = {}
                 if axes_thickness_mm is not None:
-                    style_dict['axis_thickness_mm'] = axes_thickness_mm
+                    style_dict["axis_thickness_mm"] = axes_thickness_mm
                 if tick_length_mm is not None:
-                    style_dict['tick_length_mm'] = tick_length_mm
+                    style_dict["tick_length_mm"] = tick_length_mm
                 if tick_thickness_mm is not None:
-                    style_dict['tick_thickness_mm'] = tick_thickness_mm
+                    style_dict["tick_thickness_mm"] = tick_thickness_mm
                 if trace_thickness_mm is not None:
-                    style_dict['trace_thickness_mm'] = trace_thickness_mm
+                    style_dict["trace_thickness_mm"] = trace_thickness_mm
                 if marker_size_mm is not None:
-                    style_dict['marker_size_mm'] = marker_size_mm
+                    style_dict["marker_size_mm"] = marker_size_mm
                 if axis_font_size_pt is not None:
-                    style_dict['axis_font_size_pt'] = axis_font_size_pt
+                    style_dict["axis_font_size_pt"] = axis_font_size_pt
                 if tick_font_size_pt is not None:
-                    style_dict['tick_font_size_pt'] = tick_font_size_pt
+                    style_dict["tick_font_size_pt"] = tick_font_size_pt
                 if title_font_size_pt is not None:
-                    style_dict['title_font_size_pt'] = title_font_size_pt
+                    style_dict["title_font_size_pt"] = title_font_size_pt
                 if legend_font_size_pt is not None:
-                    style_dict['legend_font_size_pt'] = legend_font_size_pt
+                    style_dict["legend_font_size_pt"] = legend_font_size_pt
                 if suptitle_font_size_pt is not None:
-                    style_dict['suptitle_font_size_pt'] = suptitle_font_size_pt
+                    style_dict["suptitle_font_size_pt"] = suptitle_font_size_pt
                 if label_pad_pt is not None:
-                    style_dict['label_pad_pt'] = label_pad_pt
+                    style_dict["label_pad_pt"] = label_pad_pt
                 if tick_pad_pt is not None:
-                    style_dict['tick_pad_pt'] = tick_pad_pt
+                    style_dict["tick_pad_pt"] = tick_pad_pt
                 if title_pad_pt is not None:
-                    style_dict['title_pad_pt'] = title_pad_pt
+                    style_dict["title_pad_pt"] = title_pad_pt
                 if font_family is not None:
-                    style_dict['font_family'] = font_family
+                    style_dict["font_family"] = font_family
                 if n_ticks is not None:
-                    style_dict['n_ticks'] = n_ticks
+                    style_dict["n_ticks"] = n_ticks
 
             # Extract suptitle font size if available
-            if 'suptitle_font_size_pt' in style_dict:
-                suptitle_font_size_pt_value = style_dict['suptitle_font_size_pt']
+            if "suptitle_font_size_pt" in style_dict:
+                suptitle_font_size_pt_value = style_dict["suptitle_font_size_pt"]
             else:
                 suptitle_font_size_pt_value = None
 
@@ -488,7 +551,7 @@ class SubplotsWrapper:
             if style_dict:
                 apply_style_mm(ax_mpl, style_dict)
                 # Add style to metadata
-                ax_mpl._scitex_metadata['style_mm'] = style_dict
+                ax_mpl._scitex_metadata["style_mm"] = style_dict
 
         # Store suptitle font size in figure metadata for later use
         if suptitle_font_size_pt_value is not None:
@@ -505,13 +568,17 @@ class SubplotsWrapper:
             ax_mpl_scalar = axes_array_mpl.item()
             self._axis_scitex = AxisWrapper(self._fig_scitex, ax_mpl_scalar, track)
             self._fig_scitex.axes = self._axis_scitex
+            # Store reference to scitex wrapper on matplotlib axes for metadata collection
+            ax_mpl_scalar._scitex_wrapper = self._axis_scitex
             return self._fig_scitex, self._axis_scitex
 
         # Handle multiple axes case
-        axes_flat_scitex_list = [
-            AxisWrapper(self._fig_scitex, ax_mpl, track)
-            for ax_mpl in axes_mpl_list
-        ]
+        axes_flat_scitex_list = []
+        for ax_mpl in axes_mpl_list:
+            ax_scitex = AxisWrapper(self._fig_scitex, ax_mpl, track)
+            # Store reference to scitex wrapper on matplotlib axes for metadata collection
+            ax_mpl._scitex_wrapper = ax_scitex
+            axes_flat_scitex_list.append(ax_scitex)
 
         axes_array_scitex = np.array(axes_flat_scitex_list).reshape(nrows, ncols)
         self._axes_scitex = AxesWrapper(self._fig_scitex, axes_array_scitex)

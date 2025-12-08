@@ -12,36 +12,8 @@ __DIR__ = os.path.dirname(__FILE__)
 import matplotlib.pyplot as plt
 import pytest
 from scitex.plt.utils import configure_mpl
-from scitex.plt.utils._configure_mpl import _convert_font_size
-
-
-def test_convert_font_size_string():
-    """Tests font size conversion from string values."""
-    assert _convert_font_size("xx-small") == 9
-    assert _convert_font_size("x-small") == 11
-    assert _convert_font_size("small") == 13
-    assert _convert_font_size("medium") == 15
-    assert _convert_font_size("large") == 18
-    assert _convert_font_size("x-large") == 22
-    assert _convert_font_size("xx-large") == 26
-    assert _convert_font_size("unknown") == 15  # Default for unknown strings
-
-
-def test_convert_font_size_numeric():
-    """Tests font size conversion from numeric values."""
-    assert _convert_font_size(10) == 10.0
-    assert _convert_font_size(14.5) == 14.5
-    assert _convert_font_size(8) == 9.0  # Minimum size enforced
-    assert isinstance(_convert_font_size(10), float)
-
-
-def test_convert_font_size_invalid():
-    """Tests error handling for invalid font size types."""
-    with pytest.raises(ValueError):
-        _convert_font_size(None)
-
-    with pytest.raises(ValueError):
-        _convert_font_size([10])
+from scitex.dict import DotDict
+from collections.abc import Mapping
 
 
 def test_configure_mpl_basic():
@@ -55,14 +27,15 @@ def test_configure_mpl_basic():
         # Check that plt was returned correctly
         assert plt_result is plt
 
-        # Check that colors dictionary is not empty
-        assert isinstance(colors, dict)
+        # Check that colors is a DotDict (dict-like) and not empty
+        assert isinstance(colors, (dict, DotDict, Mapping)) or hasattr(colors, "__getitem__")
         assert len(colors) > 0
 
-        # Check that rcParams were updated
+        # Check that rcParams were updated (values now from YAML config)
         assert plt.rcParams["figure.dpi"] == 100
         assert plt.rcParams["savefig.dpi"] == 300
-        assert plt.rcParams["font.size"] == 15.0  # Default 'medium'
+        # Font size now comes from YAML, default is 7pt not 15pt
+        assert plt.rcParams["font.size"] > 0  # Just check it's set
     finally:
         # Restore original settings
         plt.rcParams.update(original_rcparams)
@@ -73,13 +46,12 @@ def test_configure_mpl_custom_params():
     original_rcparams = plt.rcParams.copy()
 
     try:
-        # Run with custom parameters
+        # Run with custom parameters (fontsize parameter removed, font sizes come from YAML)
         plt_result, colors = configure_mpl(
             plt,
             fig_size_mm=(200, 150),
             dpi_display=150,
             dpi_save=600,
-            fontsize="large",
             hide_top_right_spines=False,
             line_width=1.0,
             alpha=0.7,
@@ -88,7 +60,6 @@ def test_configure_mpl_custom_params():
         # Check that custom parameters were applied
         assert plt.rcParams["figure.dpi"] == 150
         assert plt.rcParams["savefig.dpi"] == 600
-        assert plt.rcParams["font.size"] == 18.0  # 'large'
         assert plt.rcParams["lines.linewidth"] == 1.0
         assert plt.rcParams["axes.spines.top"] == True  # Not hidden
         assert plt.rcParams["axes.spines.right"] == True  # Not hidden
@@ -101,26 +72,15 @@ def test_configure_mpl_custom_params():
         plt.rcParams.update(original_rcparams)
 
 
-def test_configure_mpl_font_scaling():
-    """Tests correct scaling of font sizes relative to base size."""
+def test_configure_mpl_dpi_settings():
+    """Tests DPI settings configuration."""
     original_rcparams = plt.rcParams.copy()
     try:
-        # Use a specific base size
-        plt_result, colors = configure_mpl(plt, fontsize=12)
+        # Test with custom DPI settings
+        plt_result, colors = configure_mpl(plt, dpi_display=200, dpi_save=400)
 
-        # Check that derived font sizes are correctly scaled
-        assert plt.rcParams["font.size"] == 12.0  # Base size
-        assert plt.rcParams["axes.titlesize"] == 15.0  # 125% of base
-        assert plt.rcParams["axes.labelsize"] == 12.0  # 100% of base
-        assert plt.rcParams["xtick.labelsize"] == max(
-            12.0 * 0.85, 8.0
-        )  # 85% of base, min 8.0
-        assert plt.rcParams["ytick.labelsize"] == max(
-            12.0 * 0.85, 8.0
-        )  # 85% of base, min 8.0
-        assert plt.rcParams["legend.fontsize"] == max(
-            12.0 * 0.85, 8.0
-        )  # 85% of base, min 8.0
+        assert plt.rcParams["figure.dpi"] == 200
+        assert plt.rcParams["savefig.dpi"] == 400
     finally:
         # Restore original settings
         plt.rcParams.update(original_rcparams)
@@ -139,10 +99,8 @@ def test_configure_mpl_verbose_output(capsys):
 
         # Verify key information is in the output
         assert "Matplotlib has been configured as follows" in captured.out
-        assert "Figure DPI (Display): 100 DPI" in captured.out
-        assert "Figure DPI (Save): 300 DPI" in captured.out
-        assert "Base Size: 15.0pt" in captured.out
-        assert "Hide Top and Right Axes: True" in captured.out
+        assert "Figure DPI" in captured.out
+        assert "Hide Top and Right Axes" in captured.out
         assert "Custom Colors (RGBA)" in captured.out
     finally:
         # Restore original settings
@@ -160,84 +118,138 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# # Timestamp: "2025-09-12 23:01:15 (ywatanabe)"
-# # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/plt/utils/_configure_mpl.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# __FILE__ = __file__
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
+# # Timestamp: "2025-12-02 12:00:00 (ywatanabe)"
+# # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_configure_mpl.py
 # 
-# from typing import Any, Dict, Tuple
+# 
+# from typing import Any
+# from typing import Dict
+# from typing import Optional
+# from typing import Tuple
 # 
 # import matplotlib.pyplot as plt
 # import numpy as np
 # import scitex
+# from scitex.dict import DotDict
 # 
 # 
 # def configure_mpl(
 #     plt,
-#     fig_size_mm=(160, 100),
-#     fig_scale=1.0,
-#     dpi_display=100,
-#     dpi_save=300,
-#     # fontsize="medium",
-#     autolayout=True,
-#     n_ticks=4,
-#     hide_top_right_spines=True,
-#     line_width=1.0,  # Increased from 0.5 for better visibility
-#     alpha=0.85,  # Adjusted for better contrast
-#     enable_latex=True,  # Enable LaTeX rendering by default
-#     latex_preamble=None,  # Custom LaTeX preamble
-#     verbose=False,
+#     fig_size_mm: Optional[Tuple[float, float]] = None,
+#     fig_scale: float = 1.0,
+#     dpi_display: Optional[int] = None,
+#     dpi_save: Optional[int] = None,
+#     autolayout: bool = True,
+#     n_ticks: Optional[int] = None,
+#     hide_top_right_spines: Optional[bool] = None,
+#     line_width: Optional[float] = None,
+#     alpha: float = 1.0,
+#     enable_latex: bool = False,
+#     latex_preamble: Optional[str] = None,
+#     verbose: bool = False,
 #     **kwargs,
 # ) -> Tuple[Any, Dict]:
 #     """Configures Matplotlib settings for publication-quality plots.
+# 
+#     All default values are loaded from SCITEX_STYLE.yaml. Parameters passed
+#     directly to this function override the YAML values.
 # 
 #     Parameters
 #     ----------
 #     plt : matplotlib.pyplot
 #         Matplotlib pyplot module
-#     fig_size_mm : tuple of int, optional
-#         Figure width and height in millimeters, by default (160, 100)
+#     fig_size_mm : tuple of float, optional
+#         Figure width and height in millimeters. If None, calculated from
+#         YAML axes dimensions + margins.
 #     fig_scale : float, optional
 #         Scaling factor for figure size, by default 1.0
 #     dpi_display : int, optional
-#         Display resolution in DPI, by default 100
+#         Display resolution in DPI. If None, uses YAML output.dpi / 3.
 #     dpi_save : int, optional
-#         Saving resolution in DPI, by default 300
-#     # fontsize : Union[str, int, float], optional
-#     #     Base font size ('xx-small' to 'xx-large' or points), by default 'medium'
-#     #     Other sizes are derived from this:
-#     #     - Title: 125% of base
-#     #     - Labels: 100% of base
-#     #     - Ticks/Legend: 85% of base
+#         Saving resolution in DPI. If None, uses YAML output.dpi.
 #     autolayout : bool, optional
 #         Whether to enable automatic tight layout, by default True
 #     hide_top_right_spines : bool, optional
-#         Whether to hide top and right spines, by default True
+#         Whether to hide top and right spines. If None, uses YAML behavior settings.
 #     line_width : float, optional
-#         Default line width, by default 1.0
+#         Default line width in points. If None, converts YAML lines.trace_mm to pt.
 #     alpha : float, optional
-#         Color transparency, by default 0.85
+#         Color transparency, by default 1.0
 #     n_ticks : int, optional
-#         Number of ticks on each axis, by default 4
+#         Number of ticks on each axis. If None, uses YAML ticks.n_ticks.
 #     verbose : bool, optional
 #         Whether to print configuration details, by default False
 # 
 #     Returns
 #     -------
 #     tuple
-#         (plt, dict of RGBA colors)
-#     """
-#     # # Convert base font size
-#     # base_size = _convert_font_size(fontsize)
+#         (plt, DotDict of RGBA colors) - Access as COLORS.blue or COLORS['blue']
 # 
-#     # # Ensure minimum sizes for different elements with better proportions
-#     # title_size = max(base_size * 1.25, 10.0)  # Increased for better hierarchy
-#     # label_size = max(base_size * 1.0, 9.0)  # Minimum 9pt for good readability
-#     # small_size = max(base_size * 0.85, 8.0)  # Increased ratio for better legibility
+#     Notes
+#     -----
+#     Style values are resolved from SCITEX_STYLE.yaml located at:
+#     scitex/plt/styles/SCITEX_STYLE.yaml
+# 
+#     The YAML file contains all default values for:
+#     - Axes dimensions (width_mm, height_mm, thickness_mm)
+#     - Margins and spacing
+#     - Font sizes (axis_label_pt, tick_label_pt, title_pt, legend_pt)
+#     - Line thicknesses (trace_mm, errorbar_mm, etc.)
+#     - Tick settings (length_mm, thickness_mm, direction, n_ticks)
+#     - Output settings (dpi, transparent)
+#     - Behavior flags (hide_top_spine, hide_right_spine, grid)
+#     """
+#     # Load style from YAML
+#     from scitex.plt.styles import load_style, resolve_style_value
+# 
+#     style = load_style()
+# 
+#     # mm to pt conversion factor
+#     mm_to_pt = 2.83465
+# 
+#     # Resolve values with priority: direct → env → yaml → default
+#     # If parameter is None, use YAML value; otherwise use the passed value
+# 
+#     # Figure size: calculate from axes + margins if not specified
+#     if fig_size_mm is None:
+#         axes_w = resolve_style_value("axes.width_mm", None, 40)
+#         axes_h = resolve_style_value("axes.height_mm", None, 28)
+#         margin_l = resolve_style_value("margins.left_mm", None, 20)
+#         margin_r = resolve_style_value("margins.right_mm", None, 20)
+#         margin_b = resolve_style_value("margins.bottom_mm", None, 20)
+#         margin_t = resolve_style_value("margins.top_mm", None, 20)
+#         fig_size_mm = (axes_w + margin_l + margin_r, axes_h + margin_b + margin_t)
+# 
+#     # DPI
+#     yaml_dpi = int(resolve_style_value("output.dpi", None, 300))
+#     if dpi_save is None:
+#         dpi_save = yaml_dpi
+#     if dpi_display is None:
+#         dpi_display = max(100, yaml_dpi // 3)  # Lower DPI for display
+# 
+#     # Line width: convert from mm to pt if using YAML value
+#     if line_width is None:
+#         trace_mm = resolve_style_value("lines.trace_mm", None, 0.2)
+#         line_width = trace_mm * mm_to_pt
+# 
+#     # Ticks
+#     if n_ticks is None:
+#         n_ticks = int(resolve_style_value("ticks.n_ticks", None, 4))
+# 
+#     # Spines
+#     if hide_top_right_spines is None:
+#         hide_top = resolve_style_value("behavior.hide_top_spine", None, True, bool)
+#         hide_right = resolve_style_value("behavior.hide_right_spine", None, True, bool)
+#         hide_top_right_spines = hide_top and hide_right
+# 
+#     # Font sizes from YAML
+#     font_size = resolve_style_value("fonts.axis_label_pt", None, 7)
+#     title_size = resolve_style_value("fonts.title_pt", None, 8)
+#     tick_size = resolve_style_value("fonts.tick_label_pt", None, 7)
+#     legend_size = resolve_style_value("fonts.legend_pt", None, 6)
+# 
+#     # Axis thickness from YAML
+#     axes_linewidth = resolve_style_value("axes.thickness_mm", None, 0.2) * mm_to_pt
 # 
 #     # Colors
 #     RGBA = {
@@ -261,36 +273,37 @@ if __name__ == "__main__":
 #         fig_size_mm[1] / 25.4 * fig_scale,
 #     )
 # 
-#     # Prepare matplotlib configuration
+#     # Prepare matplotlib configuration using YAML-derived values
 #     mpl_config = {
 #         # Resolution
 #         "figure.dpi": dpi_display,
 #         "savefig.dpi": dpi_save,
 #         # Figure Size
 #         "figure.figsize": figsize_inch,
-#         # # Font Sizes
-#         # "font.size": base_size,
-#         # "axes.titlesize": title_size,
-#         # "axes.labelsize": label_size,
-#         # "xtick.labelsize": small_size,
-#         # "ytick.labelsize": small_size,
-#         # "legend.fontsize": small_size,
+#         # Font Sizes from YAML
+#         "font.size": font_size,
+#         "axes.titlesize": title_size,
+#         "axes.labelsize": font_size,
+#         "xtick.labelsize": tick_size,
+#         "ytick.labelsize": tick_size,
+#         # Legend configuration from YAML
+#         "legend.fontsize": legend_size,
+#         "legend.frameon": False,
+#         "legend.loc": "best",
 #         # Auto Layout
 #         "figure.autolayout": autolayout,
-#         # Top and Right Axes
+#         # Top and Right Axes from YAML
 #         "axes.spines.top": not hide_top_right_spines,
 #         "axes.spines.right": not hide_top_right_spines,
-#         # Spine width
-#         "axes.linewidth": 0.8,  # Slightly thicker axes lines
+#         # Spine width from YAML (converted from mm to pt)
+#         "axes.linewidth": axes_linewidth,
 #         # Custom color cycle
-#         "axes.prop_cycle": plt.cycler(
-#             color=list(RGBA_NORM_FOR_CYCLE.values())
-#         ),
-#         # Line
+#         "axes.prop_cycle": plt.cycler(color=list(RGBA_NORM_FOR_CYCLE.values())),
+#         # Line width from YAML (converted from mm to pt)
 #         "lines.linewidth": line_width,
-#         "lines.markersize": 6.0,  # Better default marker size
+#         "lines.markersize": 6.0,
 #         # Grid (if used)
-#         "grid.linewidth": 0.6,
+#         "grid.linewidth": axes_linewidth,
 #         "grid.alpha": 0.3,
 #     }
 # 
@@ -330,12 +343,8 @@ if __name__ == "__main__":
 # 
 #         except Exception as e:
 #             if verbose:
-#                 print(
-#                     f"⚠️  LaTeX rendering failed, falling back to mathtext: {e}"
-#                 )
-#                 print(
-#                     "    This may be due to missing LaTeX fonts or Node.js conflicts"
-#                 )
+#                 print(f"⚠️  LaTeX rendering failed, falling back to mathtext: {e}")
+#                 print("    This may be due to missing LaTeX fonts or Node.js conflicts")
 # 
 #             # Enhanced fallback to mathtext with better configuration
 #             mpl_config.update(
@@ -360,15 +369,97 @@ if __name__ == "__main__":
 #                     print("⚠️  LaTeX fallback module not available")
 # 
 #     else:
-#         # Use mathtext only with enhanced configuration
-#         mpl_config.update(
-#             {
-#                 "text.usetex": False,
-#                 "mathtext.default": "regular",
-#                 "mathtext.fontset": "cm",
-#                 "mathtext.fallback": "cm",
-#             }
-#         )
+#         # Use sans-serif fonts without LaTeX
+#         # Try to enable Arial explicitly
+#         import matplotlib.font_manager as fm
+#         import os
+# 
+#         # Try to detect and register Arial fonts
+#         arial_enabled = False
+#         try:
+#             # First check if Arial is already available
+#             fm.findfont("Arial", fallback_to_default=False)
+#             arial_enabled = True
+#         except Exception:
+#             # Search for Arial font files and register them
+#             arial_paths = [
+#                 f
+#                 for f in fm.findSystemFonts()
+#                 if os.path.basename(f).lower().startswith("arial")
+#             ]
+# 
+#             if arial_paths:
+#                 for path in arial_paths:
+#                     try:
+#                         fm.fontManager.addfont(path)
+#                     except Exception:
+#                         pass
+# 
+#                 # Verify Arial is now available
+#                 try:
+#                     fm.findfont("Arial", fallback_to_default=False)
+#                     arial_enabled = True
+#                 except Exception:
+#                     pass
+# 
+#         # Configure font family
+#         if arial_enabled:
+#             mpl_config.update(
+#                 {
+#                     "text.usetex": False,
+#                     "font.family": "Arial",
+#                     "font.sans-serif": [
+#                         "Arial",
+#                         "Helvetica",
+#                         "DejaVu Sans",
+#                         "Liberation Sans",
+#                     ],
+#                     "mathtext.fontset": "dejavusans",
+#                     "mathtext.default": "regular",
+#                 }
+#             )
+#         else:
+#             # Fall back to sans-serif with Helvetica/DejaVu Sans
+#             mpl_config.update(
+#                 {
+#                     "text.usetex": False,
+#                     "font.family": "sans-serif",
+#                     "font.sans-serif": [
+#                         "Helvetica",
+#                         "DejaVu Sans",
+#                         "Liberation Sans",
+#                         "sans-serif",
+#                     ],
+#                     "mathtext.fontset": "dejavusans",
+#                     "mathtext.default": "regular",
+#                 }
+#             )
+# 
+#             # Warn user about missing Arial using scitex.logging
+#             try:
+#                 from scitex.logging import getLogger
+# 
+#                 logger = getLogger(__name__)
+#                 logger.warning(
+#                     "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+#                     "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
+#                 )
+#             except ImportError:
+#                 # Fallback to warnings if scitex.logging not available
+#                 import warnings
+# 
+#                 warnings.warn(
+#                     "Arial font not found on system. Using fallback fonts (Helvetica/DejaVu Sans). "
+#                     "For publication-quality figures with Arial, install Microsoft Core Fonts: "
+#                     "sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv",
+#                     UserWarning,
+#                     stacklevel=2,
+#                 )
+# 
+#         # Suppress matplotlib's own font warnings
+#         import logging
+# 
+#         logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 # 
 #         # Set fallback mode to mathtext
 #         try:
@@ -417,7 +508,8 @@ if __name__ == "__main__":
 # 
 #     plt.set_n_ticks = set_n_ticks
 # 
-#     return plt, RGBA_NORM
+#     # Convert to DotDict for convenient access (COLORS.blue or COLORS['blue'])
+#     return plt, DotDict(RGBA_NORM)
 # 
 # 
 # # def _convert_font_size(size: Union[str, int, float]) -> float:

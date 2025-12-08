@@ -577,7 +577,7 @@ if __name__ == "__main__":
 #     labels: bool = True,
 #     restore_defaults: bool = True,
 #     spine_width: float = None,
-#     spine_color: str = None
+#     spine_color: str = None,
 # ):
 #     """
 #     Shows the specified spines of a matplotlib Axes object and optionally restores ticks and labels.
@@ -636,31 +636,26 @@ if __name__ == "__main__":
 #     that hide_spines(top=False, right=False) shows top and right spines.
 #     """
 #     # Handle both matplotlib axes and scitex AxisWrapper
-#     if hasattr(axis, '_axis_mpl'):
+#     if hasattr(axis, "_axis_mpl"):
 #         # This is an scitex AxisWrapper, get the underlying matplotlib axis
 #         axis = axis._axis_mpl
-#     
-#     assert isinstance(
-#         axis, matplotlib.axes._axes.Axes
-#     ), "First argument must be a matplotlib axis or scitex AxisWrapper"
+# 
+#     assert isinstance(axis, matplotlib.axes._axes.Axes), (
+#         "First argument must be a matplotlib axis or scitex AxisWrapper"
+#     )
 # 
 #     # Define which spines to show
-#     spine_settings = {
-#         "top": top,
-#         "bottom": bottom,
-#         "left": left,
-#         "right": right
-#     }
+#     spine_settings = {"top": top, "bottom": bottom, "left": left, "right": right}
 # 
 #     for spine_name, should_show in spine_settings.items():
 #         # Set spine visibility
 #         axis.spines[spine_name].set_visible(should_show)
-#         
+# 
 #         if should_show:
 #             # Set spine width if specified
 #             if spine_width is not None:
 #                 axis.spines[spine_name].set_linewidth(spine_width)
-#             
+# 
 #             # Set spine color if specified
 #             if spine_color is not None:
 #                 axis.spines[spine_name].set_color(spine_color)
@@ -669,18 +664,18 @@ if __name__ == "__main__":
 #     if ticks and restore_defaults:
 #         # Determine tick positions based on which spines are shown
 #         if bottom and not top:
-#             axis.xaxis.set_ticks_position('bottom')
+#             axis.xaxis.set_ticks_position("bottom")
 #         elif top and not bottom:
-#             axis.xaxis.set_ticks_position('top')
+#             axis.xaxis.set_ticks_position("top")
 #         elif bottom and top:
-#             axis.xaxis.set_ticks_position('both')
-#         
+#             axis.xaxis.set_ticks_position("both")
+# 
 #         if left and not right:
-#             axis.yaxis.set_ticks_position('left')
+#             axis.yaxis.set_ticks_position("left")
 #         elif right and not left:
-#             axis.yaxis.set_ticks_position('right')
+#             axis.yaxis.set_ticks_position("right")
 #         elif left and right:
-#             axis.yaxis.set_ticks_position('both')
+#             axis.yaxis.set_ticks_position("both")
 # 
 #     # Restore labels if requested and restore_defaults is True
 #     if labels and restore_defaults:
@@ -688,15 +683,15 @@ if __name__ == "__main__":
 #         # This preserves any custom tick labels that might have been set
 #         current_xticks = axis.get_xticks()
 #         current_yticks = axis.get_yticks()
-#         
+# 
 #         if len(current_xticks) > 0 and (bottom or top):
 #             # Generate default labels for x-axis
-#             if not hasattr(axis, '_original_xticklabels'):
+#             if not hasattr(axis, "_original_xticklabels"):
 #                 axis.set_xticks(current_xticks)
-#         
+# 
 #         if len(current_yticks) > 0 and (left or right):
-#             # Generate default labels for y-axis  
-#             if not hasattr(axis, '_original_yticklabels'):
+#             # Generate default labels for y-axis
+#             if not hasattr(axis, "_original_yticklabels"):
 #                 axis.set_yticks(current_yticks)
 # 
 #     return axis
@@ -707,11 +702,11 @@ if __name__ == "__main__":
 #     spine_width: float = None,
 #     spine_color: str = None,
 #     ticks: bool = True,
-#     labels: bool = True
+#     labels: bool = True,
 # ):
 #     """
 #     Convenience function to show all spines with optional styling.
-#     
+# 
 #     Parameters
 #     ----------
 #     axis : matplotlib.axes.Axes
@@ -724,21 +719,26 @@ if __name__ == "__main__":
 #         Whether to show ticks. Defaults to True.
 #     labels : bool, optional
 #         Whether to show labels. Defaults to True.
-#         
+# 
 #     Returns
 #     -------
 #     matplotlib.axes.Axes
 #         The modified Axes object.
-#         
+# 
 #     Examples
 #     --------
 #     >>> show_all_spines(ax, spine_width=1.2, spine_color='gray')
 #     """
 #     return show_spines(
 #         axis,
-#         top=True, bottom=True, left=True, right=True,
-#         ticks=ticks, labels=labels,
-#         spine_width=spine_width, spine_color=spine_color
+#         top=True,
+#         bottom=True,
+#         left=True,
+#         right=True,
+#         ticks=ticks,
+#         labels=labels,
+#         spine_width=spine_width,
+#         spine_color=spine_color,
 #     )
 # 
 # 
@@ -747,11 +747,11 @@ if __name__ == "__main__":
 #     spine_width: float = None,
 #     spine_color: str = None,
 #     ticks: bool = True,
-#     labels: bool = True
+#     labels: bool = True,
 # ):
 #     """
 #     Show only bottom and left spines (classic scientific plot style).
-#     
+# 
 #     Parameters
 #     ----------
 #     axis : matplotlib.axes.Axes
@@ -764,21 +764,26 @@ if __name__ == "__main__":
 #         Whether to show ticks. Defaults to True.
 #     labels : bool, optional
 #         Whether to show labels. Defaults to True.
-#         
+# 
 #     Returns
 #     -------
 #     matplotlib.axes.Axes
 #         The modified Axes object.
-#         
+# 
 #     Examples
 #     --------
 #     >>> show_classic_spines(ax)  # Shows only bottom and left spines
 #     """
 #     return show_spines(
 #         axis,
-#         top=False, bottom=True, left=True, right=False,
-#         ticks=ticks, labels=labels,
-#         spine_width=spine_width, spine_color=spine_color
+#         top=False,
+#         bottom=True,
+#         left=True,
+#         right=False,
+#         ticks=ticks,
+#         labels=labels,
+#         spine_width=spine_width,
+#         spine_color=spine_color,
 #     )
 # 
 # 
@@ -787,14 +792,14 @@ if __name__ == "__main__":
 #     spine_width: float = None,
 #     spine_color: str = None,
 #     ticks: bool = True,
-#     labels: bool = True
+#     labels: bool = True,
 # ):
 #     """
 #     Show all four spines to create a box around the plot.
-#     
+# 
 #     This is an alias for show_all_spines but with more descriptive naming
 #     for when you specifically want a boxed appearance.
-#     
+# 
 #     Parameters
 #     ----------
 #     axis : matplotlib.axes.Axes
@@ -807,12 +812,12 @@ if __name__ == "__main__":
 #         Whether to show ticks. Defaults to True.
 #     labels : bool, optional
 #         Whether to show labels. Defaults to True.
-#         
+# 
 #     Returns
 #     -------
 #     matplotlib.axes.Axes
 #         The modified Axes object.
-#         
+# 
 #     Examples
 #     --------
 #     >>> show_box_spines(ax, spine_width=1.0, spine_color='black')
@@ -821,15 +826,11 @@ if __name__ == "__main__":
 # 
 # 
 # def toggle_spines(
-#     axis,
-#     top: bool = None,
-#     bottom: bool = None,
-#     left: bool = None,
-#     right: bool = None
+#     axis, top: bool = None, bottom: bool = None, left: bool = None, right: bool = None
 # ):
 #     """
 #     Toggle the visibility of spines (show if hidden, hide if shown).
-#     
+# 
 #     Parameters
 #     ----------
 #     axis : matplotlib.axes.Axes
@@ -842,20 +843,20 @@ if __name__ == "__main__":
 #         If specified, sets left spine visibility. If None, toggles current state.
 #     right : bool, optional
 #         If specified, sets right spine visibility. If None, toggles current state.
-#         
+# 
 #     Returns
 #     -------
 #     matplotlib.axes.Axes
 #         The modified Axes object.
-#         
+# 
 #     Examples
 #     --------
 #     >>> toggle_spines(ax)  # Toggles all spines
 #     >>> toggle_spines(ax, top=True, right=True)  # Shows top and right, toggles others
 #     """
-#     spine_names = ['top', 'bottom', 'left', 'right']
+#     spine_names = ["top", "bottom", "left", "right"]
 #     spine_params = [top, bottom, left, right]
-#     
+# 
 #     for spine_name, param in zip(spine_names, spine_params):
 #         if param is None:
 #             # Toggle current state
@@ -864,7 +865,7 @@ if __name__ == "__main__":
 #         else:
 #             # Set specific state
 #             axis.spines[spine_name].set_visible(param)
-#     
+# 
 #     return axis
 # 
 # 
@@ -880,6 +881,7 @@ if __name__ == "__main__":
 # 
 # 
 # # EOF
+
 # --------------------------------------------------------------------------------
 # End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/plt/ax/_style/_show_spines.py
 # --------------------------------------------------------------------------------

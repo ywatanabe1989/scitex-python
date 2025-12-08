@@ -4,12 +4,14 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_sns_lineplot.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import numpy as np
 import pandas as pd
+
 
 def _format_sns_lineplot(id, tracked_dict, kwargs):
     """Format data from a sns_lineplot call."""
@@ -42,9 +44,7 @@ def _format_sns_lineplot(id, tracked_dict, kwargs):
             and isinstance(args[1], (np.ndarray, list))
         ):
             x_data, y_data = args[0], args[1]
-            return pd.DataFrame(
-                {f"{id}_line_x": x_data, f"{id}_line_y": y_data}
-            )
+            return pd.DataFrame({f"{id}_line_x": x_data, f"{id}_line_y": y_data})
 
         # Handle DataFrame input without x, y specified
         elif isinstance(data, pd.DataFrame):

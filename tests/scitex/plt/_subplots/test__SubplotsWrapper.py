@@ -21,7 +21,7 @@ class TestSubplotsWrapper:
         fig, ax = scitex.plt.subplots()
         assert hasattr(ax, "plot"), "Single axis should have plot method"
         assert hasattr(ax, "export_as_csv"), "Should have export_as_csv method"
-        plt.close(fig)
+        scitex.plt.close(fig)
 
     def test_1d_array_single_row(self):
         """Test that single row multiple columns returns 1D array."""
@@ -31,7 +31,7 @@ class TestSubplotsWrapper:
         # Test individual axis access
         for i in range(3):
             assert hasattr(axes[i], "plot"), f"axes[{i}] should have plot method"
-        plt.close(fig)
+        scitex.plt.close(fig)
 
     def test_1d_array_single_column(self):
         """Test that multiple rows single column returns 1D array."""
@@ -41,7 +41,7 @@ class TestSubplotsWrapper:
         # Test individual axis access
         for i in range(3):
             assert hasattr(axes[i], "plot"), f"axes[{i}] should have plot method"
-        plt.close(fig)
+        scitex.plt.close(fig)
 
     def test_2d_array_indexing(self):
         """Test that 2D grid allows 2D indexing (the main bug fix)."""
@@ -61,7 +61,7 @@ class TestSubplotsWrapper:
                 # Test that we can actually plot
                 ax.plot([1, 2, 3], [1, 2, 3])
 
-        plt.close(fig)
+        scitex.plt.close(fig)
 
     def test_2d_array_row_access(self):
         """Test accessing entire rows from 2D array."""
@@ -75,7 +75,7 @@ class TestSubplotsWrapper:
         for i, ax in enumerate(row_axes):
             assert hasattr(ax, "plot"), f"Row axis [{i}] should have plot method"
 
-        plt.close(fig)
+        scitex.plt.close(fig)
 
     def test_2d_array_slice_access(self):
         """Test slice access on 2D array."""
@@ -86,7 +86,7 @@ class TestSubplotsWrapper:
         assert hasattr(slice_axes, "shape"), "Slice should return AxesWrapper"
         assert slice_axes.shape == (2, 3), "Slice shape should be (2, 3)"
 
-        plt.close(fig)
+        scitex.plt.close(fig)
 
     def test_backward_compatibility_flat_iteration(self):
         """Test that flat iteration still works for backward compatibility."""
@@ -100,7 +100,7 @@ class TestSubplotsWrapper:
         for i, ax in enumerate(axes):
             assert hasattr(ax, "plot"), f"Iterated axis {i} should have plot method"
 
-        plt.close(fig)
+        scitex.plt.close(fig)
 
     def test_export_as_csv_multi_axes(self):
         """Test export_as_csv functionality with multiple axes."""
@@ -117,7 +117,7 @@ class TestSubplotsWrapper:
         assert df is not None, "Should return a DataFrame"
         assert len(df.columns) > 0, "DataFrame should have columns"
 
-        plt.close(fig)
+        scitex.plt.close(fig)
 
     def test_matplotlib_compatibility(self):
         """Test that the behavior matches matplotlib's for common use cases."""
@@ -137,7 +137,7 @@ class TestSubplotsWrapper:
                 assert hasattr(scitex_ax, "plot"), "scitex axis should have plot method"
 
         plt.close(mpl_fig)
-        plt.close(scitex_fig)
+        scitex.plt.close(scitex_fig)
 
 if __name__ == "__main__":
     import os
@@ -169,6 +169,69 @@ if __name__ == "__main__":
 # from ._AxisWrapper import AxisWrapper
 # from ._FigWrapper import FigWrapper
 # 
+# # Register Arial fonts at module import
+# import matplotlib.font_manager as fm
+# import matplotlib as mpl
+# import os
+# 
+# _arial_enabled = False
+# 
+# # Try to find Arial
+# try:
+#     fm.findfont("Arial", fallback_to_default=False)
+#     _arial_enabled = True
+# except Exception:
+#     # Search for Arial font files and register them
+#     arial_paths = [
+#         f
+#         for f in fm.findSystemFonts()
+#         if os.path.basename(f).lower().startswith("arial")
+#     ]
+# 
+#     if arial_paths:
+#         for path in arial_paths:
+#             try:
+#                 fm.fontManager.addfont(path)
+#             except Exception:
+#                 pass
+# 
+#         # Verify Arial is now available
+#         try:
+#             fm.findfont("Arial", fallback_to_default=False)
+#             _arial_enabled = True
+#         except Exception:
+#             pass
+# 
+# # Configure matplotlib to use Arial if available
+# if _arial_enabled:
+#     mpl.rcParams["font.family"] = "Arial"
+#     mpl.rcParams["font.sans-serif"] = [
+#         "Arial",
+#         "Helvetica",
+#         "DejaVu Sans",
+#         "Liberation Sans",
+#     ]
+# else:
+#     # Warn about missing Arial
+#     try:
+#         from scitex.logging import getLogger
+# 
+#         _logger = getLogger(__name__)
+#         _logger.warning(
+#             "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+#             "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
+#         )
+#     except:
+#         # If scitex.logging not available, use standard warnings
+#         import warnings
+# 
+#         warnings.warn(
+#             "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+#             "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv",
+#             UserWarning,
+#             stacklevel=2,
+#         )
+# 
 # 
 # class SubplotsWrapper:
 #     """
@@ -181,48 +244,497 @@ if __name__ == "__main__":
 #         self._fig_scitex = None
 #         self._counter_part = plt.subplots
 # 
-#     def __call__(self, *args, track=True, sharex=False, sharey=False, constrained_layout=None, **kwargs):
+#     def __call__(
+#         self,
+#         *args,
+#         track=True,
+#         sharex=False,
+#         sharey=False,
+#         constrained_layout=None,
+#         # MM-control parameters (unified style system)
+#         axes_width_mm=None,
+#         axes_height_mm=None,
+#         margin_left_mm=None,
+#         margin_right_mm=None,
+#         margin_bottom_mm=None,
+#         margin_top_mm=None,
+#         space_w_mm=None,
+#         space_h_mm=None,
+#         axes_thickness_mm=None,
+#         tick_length_mm=None,
+#         tick_thickness_mm=None,
+#         trace_thickness_mm=None,
+#         marker_size_mm=None,
+#         axis_font_size_pt=None,
+#         tick_font_size_pt=None,
+#         title_font_size_pt=None,
+#         legend_font_size_pt=None,
+#         suptitle_font_size_pt=None,
+#         n_ticks=None,
+#         mode=None,
+#         dpi=None,
+#         styles=None,  # List of style dicts for per-axes control
+#         transparent=None,  # Transparent background (default: from SCITEX_STYLE.yaml)
+#         **kwargs,
+#     ):
+#         """
+#         Create figure and axes with optional millimeter-based control.
 # 
-#         # If constrained_layout is not specified, use it by default for better colorbar handling
-#         if constrained_layout is None and 'layout' not in kwargs:
-#             # Use a dict to set padding parameters for better spacing
-#             # Increased w_pad to prevent colorbar overlap
-#             kwargs['constrained_layout'] = {'w_pad': 0.1, 'h_pad': 0.1, 'wspace': 0.05, 'hspace': 0.05}
-#             
-#         # Start from the original matplotlib figure and axes
-#         self._fig_mpl, self._axes_mpl = self._counter_part(
-#             *args, sharex=sharex, sharey=sharey, **kwargs
+#         Parameters
+#         ----------
+#         *args : int
+#             nrows, ncols passed to matplotlib.pyplot.subplots
+#         track : bool, optional
+#             Track plotting operations for CSV export (default: True)
+#         sharex, sharey : bool, optional
+#             Share axes (default: False)
+#         constrained_layout : dict or None, optional
+#             Layout engine parameters
+# 
+#         MM-Control Parameters (Unified Style System)
+#         ---------------------------------------------
+#         axes_width_mm : float or list, optional
+#             Axes width in mm (single value for all, or list for each)
+#         axes_height_mm : float or list, optional
+#             Axes height in mm (single value for all, or list for each)
+#         margin_left_mm : float, optional
+#             Left margin in mm (default: 5.0)
+#         margin_right_mm : float, optional
+#             Right margin in mm (default: 2.0)
+#         margin_bottom_mm : float, optional
+#             Bottom margin in mm (default: 5.0)
+#         margin_top_mm : float, optional
+#             Top margin in mm (default: 2.0)
+#         space_w_mm : float, optional
+#             Horizontal spacing between axes in mm (default: 3.0)
+#         space_h_mm : float, optional
+#             Vertical spacing between axes in mm (default: 3.0)
+#         axes_thickness_mm : float, optional
+#             Axes spine thickness in mm
+#         tick_length_mm : float, optional
+#             Tick length in mm
+#         tick_thickness_mm : float, optional
+#             Tick thickness in mm
+#         trace_thickness_mm : float, optional
+#             Plot line thickness in mm
+#         axis_font_size_pt : float, optional
+#             Axis label font size in points
+#         tick_font_size_pt : float, optional
+#             Tick label font size in points
+#         mode : str, optional
+#             'publication' or 'display' (default: None, uses standard matplotlib)
+#         dpi : int, optional
+#             Resolution (default: 300 for publication, 100 for display)
+#         styles : list of dict, optional
+#             Individual style dicts for each axes
+#         transparent : bool, optional
+#             Create figure with transparent background (default: False)
+#             Useful for publication-ready figures that will be cropped
+#         **kwargs
+#             Additional arguments passed to matplotlib.pyplot.subplots
+# 
+#         Returns
+#         -------
+#         fig : FigWrapper
+#             Wrapped matplotlib Figure
+#         ax or axes : AxisWrapper or AxesWrapper
+#             Wrapped matplotlib Axes
+# 
+#         Examples
+#         --------
+#         Single axes with style:
+# 
+#         >>> fig, ax = stx.plt.subplots(
+#         ...     axes_width_mm=30,
+#         ...     axes_height_mm=21,
+#         ...     axes_thickness_mm=0.2,
+#         ...     tick_length_mm=0.8,
+#         ...     mode='publication'
+#         ... )
+# 
+#         Multiple axes with uniform style:
+# 
+#         >>> fig, axes = stx.plt.subplots(
+#         ...     nrows=2, ncols=3,
+#         ...     axes_width_mm=30,
+#         ...     axes_height_mm=21,
+#         ...     space_w_mm=3,
+#         ...     space_h_mm=3,
+#         ...     mode='publication'
+#         ... )
+# 
+#         Using style preset:
+# 
+#         >>> NATURE_STYLE = {
+#         ...     'axes_width_mm': 30,
+#         ...     'axes_height_mm': 21,
+#         ...     'axes_thickness_mm': 0.2,
+#         ...     'tick_length_mm': 0.8,
+#         ... }
+#         >>> fig, ax = stx.plt.subplots(**NATURE_STYLE)
+#         """
+# 
+#         # Use resolve_style_value for priority: direct → yaml → env → default
+#         from scitex.plt.styles import (
+#             resolve_style_value as _resolve,
+#             SCITEX_STYLE as _S,
 #         )
+# 
+#         # Resolve all style values with proper priority chain
+#         axes_width_mm = _resolve(
+#             "axes.width_mm", axes_width_mm, _S.get("axes_width_mm")
+#         )
+#         axes_height_mm = _resolve(
+#             "axes.height_mm", axes_height_mm, _S.get("axes_height_mm")
+#         )
+#         margin_left_mm = _resolve(
+#             "margins.left_mm", margin_left_mm, _S.get("margin_left_mm")
+#         )
+#         margin_right_mm = _resolve(
+#             "margins.right_mm", margin_right_mm, _S.get("margin_right_mm")
+#         )
+#         margin_bottom_mm = _resolve(
+#             "margins.bottom_mm", margin_bottom_mm, _S.get("margin_bottom_mm")
+#         )
+#         margin_top_mm = _resolve(
+#             "margins.top_mm", margin_top_mm, _S.get("margin_top_mm")
+#         )
+#         space_w_mm = _resolve("spacing.horizontal_mm", space_w_mm, _S.get("space_w_mm"))
+#         space_h_mm = _resolve("spacing.vertical_mm", space_h_mm, _S.get("space_h_mm"))
+#         axes_thickness_mm = _resolve(
+#             "axes.thickness_mm", axes_thickness_mm, _S.get("axes_thickness_mm")
+#         )
+#         tick_length_mm = _resolve(
+#             "ticks.length_mm", tick_length_mm, _S.get("tick_length_mm")
+#         )
+#         tick_thickness_mm = _resolve(
+#             "ticks.thickness_mm", tick_thickness_mm, _S.get("tick_thickness_mm")
+#         )
+#         trace_thickness_mm = _resolve(
+#             "lines.trace_mm", trace_thickness_mm, _S.get("trace_thickness_mm")
+#         )
+#         marker_size_mm = _resolve(
+#             "markers.size_mm", marker_size_mm, _S.get("marker_size_mm")
+#         )
+#         axis_font_size_pt = _resolve(
+#             "fonts.axis_label_pt", axis_font_size_pt, _S.get("axis_font_size_pt")
+#         )
+#         tick_font_size_pt = _resolve(
+#             "fonts.tick_label_pt", tick_font_size_pt, _S.get("tick_font_size_pt")
+#         )
+#         title_font_size_pt = _resolve(
+#             "fonts.title_pt", title_font_size_pt, _S.get("title_font_size_pt")
+#         )
+#         legend_font_size_pt = _resolve(
+#             "fonts.legend_pt", legend_font_size_pt, _S.get("legend_font_size_pt")
+#         )
+#         suptitle_font_size_pt = _resolve(
+#             "fonts.suptitle_pt", suptitle_font_size_pt, _S.get("suptitle_font_size_pt")
+#         )
+#         n_ticks = _resolve("ticks.n_ticks", n_ticks, _S.get("n_ticks"), int)
+#         dpi = _resolve("output.dpi", dpi, _S.get("dpi"), int)
+#         # Resolve transparent from YAML (default: True in SCITEX_STYLE.yaml)
+#         if transparent is None:
+#             transparent = _S.get("transparent", True)
+#         if mode is None:
+#             mode = _S.get("mode", "publication")
+# 
+#         # Always use mm-control pathway with SCITEX_STYLE defaults
+#         if True:
+#             # Use mm-control pathway
+#             return self._create_with_mm_control(
+#                 *args,
+#                 track=track,
+#                 sharex=sharex,
+#                 sharey=sharey,
+#                 axes_width_mm=axes_width_mm,
+#                 axes_height_mm=axes_height_mm,
+#                 margin_left_mm=margin_left_mm,
+#                 margin_right_mm=margin_right_mm,
+#                 margin_bottom_mm=margin_bottom_mm,
+#                 margin_top_mm=margin_top_mm,
+#                 space_w_mm=space_w_mm,
+#                 space_h_mm=space_h_mm,
+#                 axes_thickness_mm=axes_thickness_mm,
+#                 tick_length_mm=tick_length_mm,
+#                 tick_thickness_mm=tick_thickness_mm,
+#                 trace_thickness_mm=trace_thickness_mm,
+#                 marker_size_mm=marker_size_mm,
+#                 axis_font_size_pt=axis_font_size_pt,
+#                 tick_font_size_pt=tick_font_size_pt,
+#                 title_font_size_pt=title_font_size_pt,
+#                 legend_font_size_pt=legend_font_size_pt,
+#                 suptitle_font_size_pt=suptitle_font_size_pt,
+#                 n_ticks=n_ticks,
+#                 mode=mode,
+#                 dpi=dpi,
+#                 styles=styles,
+#                 transparent=transparent,
+#                 **kwargs,
+#             )
+# 
+#     def _create_with_mm_control(
+#         self,
+#         *args,
+#         track=True,
+#         sharex=False,
+#         sharey=False,
+#         axes_width_mm=None,
+#         axes_height_mm=None,
+#         margin_left_mm=None,
+#         margin_right_mm=None,
+#         margin_bottom_mm=None,
+#         margin_top_mm=None,
+#         space_w_mm=None,
+#         space_h_mm=None,
+#         axes_thickness_mm=None,
+#         tick_length_mm=None,
+#         tick_thickness_mm=None,
+#         trace_thickness_mm=None,
+#         marker_size_mm=None,
+#         axis_font_size_pt=None,
+#         tick_font_size_pt=None,
+#         title_font_size_pt=None,
+#         legend_font_size_pt=None,
+#         suptitle_font_size_pt=None,
+#         label_pad_pt=None,
+#         tick_pad_pt=None,
+#         title_pad_pt=None,
+#         font_family=None,
+#         n_ticks=None,
+#         mode=None,
+#         dpi=None,
+#         styles=None,
+#         transparent=None,  # Resolved from caller
+#         **kwargs,
+#     ):
+#         """Create figure with mm-based control over axes dimensions."""
+#         from scitex.plt.utils import mm_to_inch, apply_style_mm
+# 
+#         # Parse nrows, ncols from args (like matplotlib.pyplot.subplots)
+#         nrows, ncols = 1, 1
+#         if len(args) >= 1:
+#             nrows = args[0]
+#         if len(args) >= 2:
+#             ncols = args[1]
+# 
+#         n_axes = nrows * ncols
+# 
+#         # Apply mode-specific defaults
+#         if mode == "display":
+#             scale_factor = 3.0
+#             dpi = dpi or 100
+#         else:  # publication or None
+#             scale_factor = 1.0
+#             dpi = dpi or 300
+# 
+#         # Set defaults - if value is provided, apply scaling; if not, use scaled default
+#         if axes_width_mm is None:
+#             axes_width_mm = 30.0 * scale_factor
+#         elif mode == "display":
+#             axes_width_mm = axes_width_mm * scale_factor
+# 
+#         if axes_height_mm is None:
+#             axes_height_mm = 21.0 * scale_factor
+#         elif mode == "display":
+#             axes_height_mm = axes_height_mm * scale_factor
+# 
+#         margin_left_mm = (
+#             margin_left_mm if margin_left_mm is not None else (5.0 * scale_factor)
+#         )
+#         margin_right_mm = (
+#             margin_right_mm if margin_right_mm is not None else (2.0 * scale_factor)
+#         )
+#         margin_bottom_mm = (
+#             margin_bottom_mm if margin_bottom_mm is not None else (5.0 * scale_factor)
+#         )
+#         margin_top_mm = (
+#             margin_top_mm if margin_top_mm is not None else (2.0 * scale_factor)
+#         )
+#         space_w_mm = space_w_mm if space_w_mm is not None else (3.0 * scale_factor)
+#         space_h_mm = space_h_mm if space_h_mm is not None else (3.0 * scale_factor)
+# 
+#         # Handle list vs scalar for axes_width_mm and axes_height_mm
+#         if isinstance(axes_width_mm, (list, tuple)):
+#             ax_widths_mm = list(axes_width_mm)
+#             if len(ax_widths_mm) != n_axes:
+#                 raise ValueError(
+#                     f"axes_width_mm list length ({len(ax_widths_mm)}) must match nrows*ncols ({n_axes})"
+#                 )
+#         else:
+#             ax_widths_mm = [axes_width_mm] * n_axes
+# 
+#         if isinstance(axes_height_mm, (list, tuple)):
+#             ax_heights_mm = list(axes_height_mm)
+#             if len(ax_heights_mm) != n_axes:
+#                 raise ValueError(
+#                     f"axes_height_mm list length ({len(ax_heights_mm)}) must match nrows*ncols ({n_axes})"
+#                 )
+#         else:
+#             ax_heights_mm = [axes_height_mm] * n_axes
+# 
+#         # Calculate figure size from axes grid
+#         # For simplicity, use max width per column and max height per row
+#         ax_widths_2d = np.array(ax_widths_mm).reshape(nrows, ncols)
+#         ax_heights_2d = np.array(ax_heights_mm).reshape(nrows, ncols)
+# 
+#         max_widths_per_col = ax_widths_2d.max(axis=0)  # Max width in each column
+#         max_heights_per_row = ax_heights_2d.max(axis=1)  # Max height in each row
+# 
+#         total_width_mm = (
+#             margin_left_mm
+#             + max_widths_per_col.sum()
+#             + (ncols - 1) * space_w_mm
+#             + margin_right_mm
+#         )
+#         total_height_mm = (
+#             margin_bottom_mm
+#             + max_heights_per_row.sum()
+#             + (nrows - 1) * space_h_mm
+#             + margin_top_mm
+#         )
+# 
+#         # Create figure with calculated size
+#         figsize_inch = (mm_to_inch(total_width_mm), mm_to_inch(total_height_mm))
+#         if transparent:
+#             # Transparent background for publication figures
+#             self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi, facecolor="none")
+#         else:
+#             self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi)
+# 
+#         # Create axes array and position each one manually
+#         axes_mpl_list = []
+#         ax_idx = 0
+# 
+#         for row in range(nrows):
+#             for col in range(ncols):
+#                 # Calculate position for this axes
+#                 # Left position: left margin + sum of previous column widths + spacing
+#                 left_mm = (
+#                     margin_left_mm + max_widths_per_col[:col].sum() + col * space_w_mm
+#                 )
+# 
+#                 # Bottom position: bottom margin + sum of heights above this row + spacing
+#                 # (rows are counted from top in matplotlib)
+#                 rows_below = nrows - row - 1
+#                 bottom_mm = (
+#                     margin_bottom_mm
+#                     + max_heights_per_row[row + 1 :].sum()
+#                     + rows_below * space_h_mm
+#                 )
+# 
+#                 # Convert to figure coordinates [0-1]
+#                 left = left_mm / total_width_mm
+#                 bottom = bottom_mm / total_height_mm
+#                 width = ax_widths_mm[ax_idx] / total_width_mm
+#                 height = ax_heights_mm[ax_idx] / total_height_mm
+# 
+#                 # Create axes at exact position with transparent background
+#                 ax_mpl = self._fig_mpl.add_axes([left, bottom, width, height])
+#                 if transparent:
+#                     ax_mpl.patch.set_alpha(0.0)  # Make axes background transparent
+#                 axes_mpl_list.append(ax_mpl)
+# 
+#                 # Tag with metadata
+#                 ax_mpl._scitex_metadata = {
+#                     "created_with": "scitex.plt.subplots (mm-control)",
+#                     "mode": mode or "publication",
+#                     "axes_size_mm": (ax_widths_mm[ax_idx], ax_heights_mm[ax_idx]),
+#                     "position_in_grid": (row, col),
+#                 }
+# 
+#                 ax_idx += 1
+# 
+#         # Apply styling to each axes
+#         suptitle_font_size_pt = None
+#         for i, ax_mpl in enumerate(axes_mpl_list):
+#             # Determine which style dict to use
+#             if styles is not None:
+#                 if isinstance(styles, list):
+#                     if len(styles) != n_axes:
+#                         raise ValueError(
+#                             f"styles list length ({len(styles)}) must match nrows*ncols ({n_axes})"
+#                         )
+#                     style_dict = styles[i]
+#                 else:
+#                     style_dict = styles
+#             else:
+#                 # Build style dict from individual parameters
+#                 style_dict = {}
+#                 if axes_thickness_mm is not None:
+#                     style_dict["axis_thickness_mm"] = axes_thickness_mm
+#                 if tick_length_mm is not None:
+#                     style_dict["tick_length_mm"] = tick_length_mm
+#                 if tick_thickness_mm is not None:
+#                     style_dict["tick_thickness_mm"] = tick_thickness_mm
+#                 if trace_thickness_mm is not None:
+#                     style_dict["trace_thickness_mm"] = trace_thickness_mm
+#                 if marker_size_mm is not None:
+#                     style_dict["marker_size_mm"] = marker_size_mm
+#                 if axis_font_size_pt is not None:
+#                     style_dict["axis_font_size_pt"] = axis_font_size_pt
+#                 if tick_font_size_pt is not None:
+#                     style_dict["tick_font_size_pt"] = tick_font_size_pt
+#                 if title_font_size_pt is not None:
+#                     style_dict["title_font_size_pt"] = title_font_size_pt
+#                 if legend_font_size_pt is not None:
+#                     style_dict["legend_font_size_pt"] = legend_font_size_pt
+#                 if suptitle_font_size_pt is not None:
+#                     style_dict["suptitle_font_size_pt"] = suptitle_font_size_pt
+#                 if label_pad_pt is not None:
+#                     style_dict["label_pad_pt"] = label_pad_pt
+#                 if tick_pad_pt is not None:
+#                     style_dict["tick_pad_pt"] = tick_pad_pt
+#                 if title_pad_pt is not None:
+#                     style_dict["title_pad_pt"] = title_pad_pt
+#                 if font_family is not None:
+#                     style_dict["font_family"] = font_family
+#                 if n_ticks is not None:
+#                     style_dict["n_ticks"] = n_ticks
+# 
+#             # Extract suptitle font size if available
+#             if "suptitle_font_size_pt" in style_dict:
+#                 suptitle_font_size_pt_value = style_dict["suptitle_font_size_pt"]
+#             else:
+#                 suptitle_font_size_pt_value = None
+# 
+#             # Apply style if not empty
+#             if style_dict:
+#                 apply_style_mm(ax_mpl, style_dict)
+#                 # Add style to metadata
+#                 ax_mpl._scitex_metadata["style_mm"] = style_dict
+# 
+#         # Store suptitle font size in figure metadata for later use
+#         if suptitle_font_size_pt_value is not None:
+#             self._fig_mpl._scitex_suptitle_font_size_pt = suptitle_font_size_pt_value
 # 
 #         # Wrap the figure
 #         self._fig_scitex = FigWrapper(self._fig_mpl)
 # 
-#         # Ensure axes_mpl is always an array
-#         axes_array_mpl = np.atleast_1d(self._axes_mpl)
-#         axes_shape_mpl = axes_array_mpl.shape
+#         # Reshape axes list to match grid shape
+#         axes_array_mpl = np.array(axes_mpl_list).reshape(nrows, ncols)
 # 
 #         # Handle single axis case
-#         if axes_array_mpl.size == 1:
-#             # Use squeeze() to get the scalar Axes object if it's a 0-d array
-#             ax_mpl_scalar = (
-#                 axes_array_mpl.item() if axes_array_mpl.ndim == 0 else axes_array_mpl[0]
-#             )
+#         if n_axes == 1:
+#             ax_mpl_scalar = axes_array_mpl.item()
 #             self._axis_scitex = AxisWrapper(self._fig_scitex, ax_mpl_scalar, track)
-#             self._fig_scitex.axes = np.atleast_1d([self._axis_scitex])
+#             self._fig_scitex.axes = self._axis_scitex
+#             # Store reference to scitex wrapper on matplotlib axes for metadata collection
+#             ax_mpl_scalar._scitex_wrapper = self._axis_scitex
 #             return self._fig_scitex, self._axis_scitex
 # 
 #         # Handle multiple axes case
-#         axes_flat_mpl = axes_array_mpl.ravel()
-#         axes_flat_scitex_list = [
-#             AxisWrapper(self._fig_scitex, ax_, track) for ax_ in axes_flat_mpl
-#         ]
+#         axes_flat_scitex_list = []
+#         for ax_mpl in axes_mpl_list:
+#             ax_scitex = AxisWrapper(self._fig_scitex, ax_mpl, track)
+#             # Store reference to scitex wrapper on matplotlib axes for metadata collection
+#             ax_mpl._scitex_wrapper = ax_scitex
+#             axes_flat_scitex_list.append(ax_scitex)
 # 
-#         # Reshape the axes_flat_scitex_list axes to match the original layout
-#         axes_array_scitex = np.array(axes_flat_scitex_list).reshape(axes_shape_mpl)
-# 
-#         # Wrap the array of axes
+#         axes_array_scitex = np.array(axes_flat_scitex_list).reshape(nrows, ncols)
 #         self._axes_scitex = AxesWrapper(self._fig_scitex, axes_array_scitex)
 #         self._fig_scitex.axes = self._axes_scitex
+# 
 #         return self._fig_scitex, self._axes_scitex
 # 
 #     # def __getattr__(self, name):

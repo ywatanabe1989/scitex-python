@@ -4,11 +4,13 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_plot_scatter.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import pandas as pd
+
 
 def _format_plot_scatter(id, tracked_dict, kwargs):
     """Format data from a plot_scatter call.
@@ -21,15 +23,15 @@ def _format_plot_scatter(id, tracked_dict, kwargs):
         return pd.DataFrame()
 
     # Get the scatter_df from tracked_dict
-    scatter_df = tracked_dict.get('scatter_df')
+    scatter_df = tracked_dict.get("scatter_df")
 
     if scatter_df is not None and isinstance(scatter_df, pd.DataFrame):
         # Rename columns to include the id
-        return scatter_df.rename(columns={
-            'x': f'{id}_scatter_x',
-            'y': f'{id}_scatter_y'
-        })
+        return scatter_df.rename(
+            columns={"x": f"{id}_scatter_x", "y": f"{id}_scatter_y"}
+        )
 
     return pd.DataFrame()
+
 
 # EOF

@@ -21,15 +21,15 @@ def _format_pie(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
-    if 'args' in tracked_dict:
-        args = tracked_dict['args']
+    if "args" in tracked_dict:
+        args = tracked_dict["args"]
         if isinstance(args, tuple) and len(args) > 0:
             x = np.asarray(args[0])
 
             data = {f"{id}_pie_values": x}
 
             # Add labels if provided
-            labels = kwargs.get('labels', None)
+            labels = kwargs.get("labels", None)
             if labels is not None:
                 data[f"{id}_pie_labels"] = labels
 
