@@ -25,7 +25,6 @@ df_processed = df.groupby('category').mean()
 # Save results
 df_processed.to_csv('results/processed_data.csv', index=False)
 """,
-    
     "matplotlib_visualization": """
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -47,7 +46,6 @@ ax2.set_title('Signal Distribution')
 plt.tight_layout()
 plt.savefig('signal_analysis.png', dpi=300)
 """,
-    
     "numpy_operations": """
 import numpy as np
 import pickle
@@ -69,7 +67,6 @@ model = {'X': X_normalized, 'y': y, 'corr': correlation_matrix}
 with open('model.pkl', 'wb') as f:
     pickle.dump(model, f)
 """,
-    
     "mixed_io_operations": """
 import pandas as pd
 import numpy as np
@@ -109,7 +106,6 @@ plt.imshow(embeddings[:100], aspect='auto')
 plt.title('Embeddings')
 plt.savefig('analysis_results.pdf')
 """,
-    
     "absolute_paths": """
 import pandas as pd
 import os
@@ -126,69 +122,69 @@ df2.to_csv('../../outputs/processed.csv')
 import numpy as np
 arr = np.load('C:\\Users\\Name\\Documents\\data.npy')
 np.save('/tmp/output.npy', arr)
-"""
+""",
 }
 
 
 def print_translation_result(name: str, result: dict):
     """Pretty print translation results."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"TRANSLATION: {name}")
-    print(f"{'='*60}")
-    
-    if result.get('success'):
+    print(f"{'=' * 60}")
+
+    if result.get("success"):
         print("\n✓ Translation successful!")
-        
-        if 'translated_code' in result:
+
+        if "translated_code" in result:
             print("\n--- Translated Code ---")
-            print(result['translated_code'])
-        
-        if 'validation' in result:
-            val = result['validation']
+            print(result["translated_code"])
+
+        if "validation" in result:
+            val = result["validation"]
             print(f"\n--- Validation ---")
             print(f"Errors: {len(val.get('errors', []))}")
             print(f"Warnings: {len(val.get('warnings', []))}")
             print(f"Suggestions: {len(val.get('suggestions', []))}")
-            
-            if val.get('errors'):
+
+            if val.get("errors"):
                 print("\nErrors:")
-                for err in val['errors']:
+                for err in val["errors"]:
                     print(f"  • {err}")
-            
-            if val.get('warnings'):
+
+            if val.get("warnings"):
                 print("\nWarnings:")
-                for warn in val['warnings']:
+                for warn in val["warnings"]:
                     print(f"  • {warn}")
-            
-            if val.get('suggestions'):
+
+            if val.get("suggestions"):
                 print("\nSuggestions:")
-                for sug in val['suggestions']:
+                for sug in val["suggestions"]:
                     print(f"  • {sug}")
-        
-        if 'config_files' in result and result['config_files']:
+
+        if "config_files" in result and result["config_files"]:
             print("\n--- Generated Config Files ---")
-            for filename, content in result['config_files'].items():
+            for filename, content in result["config_files"].items():
                 print(f"\n{filename}:")
                 print(content)
-        
-        if 'changes_made' in result:
+
+        if "changes_made" in result:
             print(f"\n--- Changes Summary ---")
-            for key, value in result['changes_made'].items():
+            for key, value in result["changes_made"].items():
                 print(f"{key}: {value}")
-    
+
     else:
         print(f"\n✗ Translation failed: {result.get('error')}")
 
 
 async def demonstrate_translations():
     """Demonstrate various translation scenarios."""
-    
+
     # Note: In real usage, these would be called through the MCP protocol
     # This is a simulation to show expected inputs/outputs
-    
+
     print("SciTeX IO Translator MCP Server - Comprehensive Demo")
     print("=" * 60)
-    
+
     # Simulate translation calls
     for name, code in SAMPLE_CODES.items():
         # Simulate translate_to_scitex call
@@ -198,26 +194,26 @@ async def demonstrate_translations():
                 "source_code": code,
                 "target_modules": ["io"],
                 "preserve_comments": True,
-                "add_config_support": name == "mixed_io_operations"
-            }
+                "add_config_support": name == "mixed_io_operations",
+            },
         }
-        
-        print(f"\n\n{'#'*60}")
+
+        print(f"\n\n{'#' * 60}")
         print(f"# Testing: {name}")
-        print(f"{'#'*60}")
-        
+        print(f"{'#' * 60}")
+
         print("\n--- Original Code ---")
         print(code)
-        
+
         print("\n--- MCP Request ---")
         print(json.dumps(result, indent=2))
-        
+
         # Show what the expected translation would look like
         # (In real usage, this would come from the MCP server)
         print("\n--- Expected SciTeX Translation ---")
-        
+
         if name == "basic_pandas":
-            expected = """#!/usr/bin/env python3
+            expected = '''#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-07-02 06:48:00 (ywatanabe)"
 # File: ./script.py
@@ -234,7 +230,7 @@ def main():
     # Read data
     df = stx.io.load('./data/raw_data.csv')
     df_processed = df.groupby('category').mean()
-    
+
     # Save results
     stx.io.save(df_processed, './results/processed_data.csv', index=False, symlink_from_cwd=True)
     return 0
@@ -249,9 +245,9 @@ def run_main():
     stx.gen.close(CONFIG, verbose=True)
 
 if __name__ == "__main__":
-    run_main()"""
+    run_main()'''
             print(expected)
-        
+
         elif name == "absolute_paths":
             print("(Paths converted to relative, organized by type)")
             print("• /home/user/project/data/input.csv → ./data/input.csv")
@@ -262,11 +258,11 @@ if __name__ == "__main__":
 
 def demonstrate_reverse_translation():
     """Show reverse translation from SciTeX to standard Python."""
-    
-    print("\n\n" + "="*60)
+
+    print("\n\n" + "=" * 60)
     print("REVERSE TRANSLATION DEMO")
-    print("="*60)
-    
+    print("=" * 60)
+
     scitex_code = """import scitex as stx
 
 def main():
@@ -283,21 +279,21 @@ def main():
     stx.io.save(processed, './results/rolling_avg.csv', symlink_from_cwd=True)
     stx.io.save(fig, './figures/rolling_plot.png', symlink_from_cwd=True)
 """
-    
+
     print("\n--- SciTeX Code ---")
     print(scitex_code)
-    
+
     print("\n--- MCP Request ---")
     request = {
         "tool": "translate_from_scitex",
         "arguments": {
             "scitex_code": scitex_code,
             "target_style": "pandas",
-            "include_dependencies": True
-        }
+            "include_dependencies": True,
+        },
     }
     print(json.dumps(request, indent=2))
-    
+
     print("\n--- Expected Standard Python ---")
     expected = """import pandas as pd
 import matplotlib.pyplot as plt
@@ -327,11 +323,11 @@ def main():
 
 def demonstrate_validation():
     """Show validation capabilities."""
-    
-    print("\n\n" + "="*60)
+
+    print("\n\n" + "=" * 60)
     print("VALIDATION DEMO")
-    print("="*60)
-    
+    print("=" * 60)
+
     code_to_validate = """import scitex as stx
 import pandas as pd
 
@@ -343,20 +339,17 @@ plt.savefig('/tmp/plot.png')  # Absolute path
 result = stx.io.load('./input.csv')
 stx.io.save(result, './output/result.csv')
 """
-    
+
     print("\n--- Code to Validate ---")
     print(code_to_validate)
-    
+
     print("\n--- MCP Request ---")
     request = {
         "tool": "validate_scitex_compliance",
-        "arguments": {
-            "code": code_to_validate,
-            "strict_mode": True
-        }
+        "arguments": {"code": code_to_validate, "strict_mode": True},
     }
     print(json.dumps(request, indent=2))
-    
+
     print("\n--- Expected Validation Results ---")
     print("Errors:")
     print("  • Missing shebang: #!/usr/bin/env python3")
@@ -378,11 +371,11 @@ if __name__ == "__main__":
     asyncio.run(demonstrate_translations())
     demonstrate_reverse_translation()
     demonstrate_validation()
-    
-    print("\n\n" + "="*60)
+
+    print("\n\n" + "=" * 60)
     print("Demo completed!")
     print("\nTo use these translations in practice:")
     print("1. Install the MCP server: pip install -e .")
     print("2. Configure in Claude Desktop or your MCP client")
     print("3. Call the tools through the MCP protocol")
-    print("="*60)
+    print("=" * 60)

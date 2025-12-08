@@ -6,15 +6,15 @@
 """Validation utilities for unified translator."""
 
 from .base_validator import (
-    BaseValidator, 
-    ModuleSpecificValidator, 
+    BaseValidator,
+    ModuleSpecificValidator,
     TranslationValidator,
-    ValidationResult
+    ValidationResult,
 )
 
 __all__ = [
     "BaseValidator",
-    "ModuleSpecificValidator", 
+    "ModuleSpecificValidator",
     "TranslationValidator",
-    "ValidationResult"
+    "ValidationResult",
 ]

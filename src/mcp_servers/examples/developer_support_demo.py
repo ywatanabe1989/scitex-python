@@ -210,6 +210,6 @@ The result: Faster, more maintainable, well-tested code!
 """)
 
 if __name__ == "__main__":
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SciTeX Developer MCP Server - Your AI Development Partner")
-    print("="*60)
+    print("=" * 60)
