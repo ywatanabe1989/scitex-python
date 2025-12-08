@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_save_modules/_save_listed_scalars_as_csv.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -12,7 +13,6 @@ __DIR__ = os.path.dirname(__FILE__)
 import numpy as np
 
 from .._mv_to_tmp import _mv_to_tmp
-
 
 
 def _save_listed_scalars_as_csv(
@@ -37,5 +37,6 @@ def _save_listed_scalars_as_csv(
     df.to_csv(spath_csv)
     if verbose:
         print("\nSaved to: {}\n".format(spath_csv))
+
 
 # EOF

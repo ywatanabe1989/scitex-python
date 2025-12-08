@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_load_modules/_txt.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -87,6 +88,7 @@ def _load_txt(lpath, strip=True, as_lines=True):
     """
     # Convert Path object to string if needed
     from pathlib import Path
+
     if isinstance(lpath, Path):
         lpath = str(lpath)
 

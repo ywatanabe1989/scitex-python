@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -183,6 +184,7 @@ def _load_pdf(lpath: str, mode: str = "full", metadata: bool = False, **kwargs) 
     if metadata:
         try:
             from .._metadata import read_metadata
+
             metadata_dict = read_metadata(lpath)
             return result, metadata_dict
         except Exception:
@@ -293,9 +295,7 @@ def _extract_text_pdfplumber(lpath: str, clean: bool) -> str:
         return full_text
 
     except Exception as e:
-        logger.error(
-            f"Error extracting text with pdfplumber from {lpath}: {e}"
-        )
+        logger.error(f"Error extracting text with pdfplumber from {lpath}: {e}")
         raise
 
 
@@ -363,9 +363,7 @@ def _extract_tables(
                         if table and len(table) > 0:
                             # First row as header if it looks like headers
                             if len(table) > 1 and all(
-                                isinstance(cell, str)
-                                for cell in table[0]
-                                if cell
+                                isinstance(cell, str) for cell in table[0] if cell
                             ):
                                 df = pd.DataFrame(table[1:], columns=table[0])
                             else:
@@ -453,26 +451,37 @@ def _extract_images(
                             img_pil = Image.open(io.BytesIO(image_bytes))
 
                             # Convert RGBA to RGB if necessary
-                            if img_pil.mode in ('RGBA', 'LA', 'P'):
+                            if img_pil.mode in ("RGBA", "LA", "P"):
                                 # Create a white background
-                                background = Image.new('RGB', img_pil.size, (255, 255, 255))
-                                if img_pil.mode == 'P':
-                                    img_pil = img_pil.convert('RGBA')
-                                background.paste(img_pil, mask=img_pil.split()[-1] if img_pil.mode == 'RGBA' else None)
+                                background = Image.new(
+                                    "RGB", img_pil.size, (255, 255, 255)
+                                )
+                                if img_pil.mode == "P":
+                                    img_pil = img_pil.convert("RGBA")
+                                background.paste(
+                                    img_pil,
+                                    mask=img_pil.split()[-1]
+                                    if img_pil.mode == "RGBA"
+                                    else None,
+                                )
                                 img_pil = background
-                            elif img_pil.mode != 'RGB':
-                                img_pil = img_pil.convert('RGB')
+                            elif img_pil.mode != "RGB":
+                                img_pil = img_pil.convert("RGB")
 
                             # Save as JPG
                             filename = f"page_{page_num + 1}_img_{img_index}.jpg"
                             filepath = os.path.join(output_dir, filename)
-                            img_pil.save(filepath, 'JPEG', quality=95)
+                            img_pil.save(filepath, "JPEG", quality=95)
 
                             image_info["ext"] = "jpg"
                         except ImportError:
-                            logger.warning("PIL not available for image conversion. Install with: pip install Pillow")
+                            logger.warning(
+                                "PIL not available for image conversion. Install with: pip install Pillow"
+                            )
                             # Fall back to original format
-                            filename = f"page_{page_num + 1}_img_{img_index}.{original_ext}"
+                            filename = (
+                                f"page_{page_num + 1}_img_{img_index}.{original_ext}"
+                            )
                             filepath = os.path.join(output_dir, filename)
                             with open(filepath, "wb") as img_file:
                                 img_file.write(image_bytes)
@@ -616,6 +625,7 @@ def _extract_metadata(lpath: str, backend: str) -> Dict[str, Any]:
             if subject:
                 try:
                     import json
+
                     # Check if subject is JSON (scitex metadata)
                     parsed_subject = json.loads(subject)
                     if isinstance(parsed_subject, dict):
@@ -648,6 +658,7 @@ def _extract_metadata(lpath: str, backend: str) -> Dict[str, Any]:
                     if subject:
                         try:
                             import json
+
                             parsed_subject = json.loads(subject)
                             if isinstance(parsed_subject, dict):
                                 # Merge parsed scitex metadata with standard PDF metadata
@@ -673,12 +684,8 @@ def _extract_metadata(lpath: str, backend: str) -> Dict[str, Any]:
                         "subject": reader.metadata.get("/Subject", ""),
                         "creator": reader.metadata.get("/Creator", ""),
                         "producer": reader.metadata.get("/Producer", ""),
-                        "creation_date": str(
-                            reader.metadata.get("/CreationDate", "")
-                        ),
-                        "modification_date": str(
-                            reader.metadata.get("/ModDate", "")
-                        ),
+                        "creation_date": str(reader.metadata.get("/CreationDate", "")),
+                        "modification_date": str(reader.metadata.get("/ModDate", "")),
                     }
                 )
 
@@ -690,6 +697,7 @@ def _extract_metadata(lpath: str, backend: str) -> Dict[str, Any]:
             if subject:
                 try:
                     import json
+
                     parsed_subject = json.loads(subject)
                     if isinstance(parsed_subject, dict):
                         # Merge parsed scitex metadata with standard PDF metadata
@@ -709,9 +717,7 @@ def _extract_metadata(lpath: str, backend: str) -> Dict[str, Any]:
     return metadata
 
 
-def _extract_pages(
-    lpath: str, backend: str, clean: bool
-) -> List[Dict[str, Any]]:
+def _extract_pages(lpath: str, backend: str, clean: bool) -> List[Dict[str, Any]]:
     """Extract content page by page."""
     pages = []
 
@@ -774,7 +780,11 @@ def _extract_pages(
 
 
 def _extract_scientific(
-    lpath: str, clean_text: bool, output_dir: str, table_settings: Dict, save_as_jpg: bool = True
+    lpath: str,
+    clean_text: bool,
+    output_dir: str,
+    table_settings: Dict,
+    save_as_jpg: bool = True,
 ) -> DotDict:
     """
     Optimized extraction for scientific papers.
@@ -823,9 +833,7 @@ def _extract_scientific(
             "total_words": len(result["text"].split()),
             "total_pages": result["metadata"].get("pages", 0),
             "num_sections": len(result["sections"]),
-            "num_tables": sum(
-                len(tables) for tables in result["tables"].values()
-            ),
+            "num_tables": sum(len(tables) for tables in result["tables"].values()),
             "num_images": len(result["images"]),
         }
 
@@ -945,5 +953,6 @@ def _calculate_file_hash(lpath: str) -> str:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
+
 
 # EOF

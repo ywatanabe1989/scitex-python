@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -195,7 +196,7 @@ def correct_bonferroni(
         logger.info(
             f"Bonferroni correction complete: {rejections}/{m} hypotheses rejected"
         )
-        logger.info(f"Adjusted alpha threshold: {alpha/m:.6f}")
+        logger.info(f"Adjusted alpha threshold: {alpha / m:.6f}")
 
         # Log detailed results if not too many tests
         if m <= 10:
@@ -223,6 +224,7 @@ def correct_bonferroni(
     if plot:
         if ax is None:
             import matplotlib.pyplot as plt
+
             fig, ax = plt.subplots(figsize=(10, 6))
         _plot_bonferroni(df, alpha, ax)
 
@@ -251,23 +253,46 @@ def _plot_bonferroni(df, alpha, ax):
 
     # Plot original and adjusted p-values
     ax.scatter(x, df["pvalue"], label="Original p-values", alpha=0.7, s=100, color="C0")
-    ax.scatter(x, df["pvalue_adjusted"], label="Adjusted p-values", alpha=0.7, s=100, color="C1", marker="s")
+    ax.scatter(
+        x,
+        df["pvalue_adjusted"],
+        label="Adjusted p-values",
+        alpha=0.7,
+        s=100,
+        color="C1",
+        marker="s",
+    )
 
     # Connect original to adjusted with lines
     for i in range(m):
-        ax.plot([i, i], [df["pvalue"].iloc[i], df["pvalue_adjusted"].iloc[i]],
-                "k-", alpha=0.3, linewidth=0.5)
+        ax.plot(
+            [i, i],
+            [df["pvalue"].iloc[i], df["pvalue_adjusted"].iloc[i]],
+            "k-",
+            alpha=0.3,
+            linewidth=0.5,
+        )
 
     # Add significance thresholds
-    ax.axhline(alpha, color="red", linestyle="--", linewidth=2, alpha=0.5, label=f"α = {alpha}")
-    ax.axhline(alpha/m, color="orange", linestyle="--", linewidth=2, alpha=0.5,
-               label=f"α_adj = {alpha/m:.4f}")
+    ax.axhline(
+        alpha, color="red", linestyle="--", linewidth=2, alpha=0.5, label=f"α = {alpha}"
+    )
+    ax.axhline(
+        alpha / m,
+        color="orange",
+        linestyle="--",
+        linewidth=2,
+        alpha=0.5,
+        label=f"α_adj = {alpha / m:.4f}",
+    )
 
     # Formatting
     ax.set_xlabel("Test Index")
     ax.set_ylabel("P-value")
-    ax.set_title(f"Bonferroni Correction (m={m} tests)\n"
-                 f'{df["rejected"].sum()}/{m} hypotheses rejected')
+    ax.set_title(
+        f"Bonferroni Correction (m={m} tests)\n"
+        f"{df['rejected'].sum()}/{m} hypotheses rejected"
+    )
     ax.set_yscale("log")
     ax.grid(True, alpha=0.3)
     ax.legend()
@@ -283,7 +308,7 @@ def _plot_bonferroni(df, alpha, ax):
             elif "comparison" in row:
                 labels.append(row["comparison"])
             else:
-                labels.append(f"Test {idx+1}")
+                labels.append(f"Test {idx + 1}")
         ax.set_xticks(x)
         ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
     else:
@@ -331,9 +356,7 @@ def main(args):
     for i in range(20):
         # Mix of significant and non-significant
         p = np.random.uniform(0.001, 0.1)
-        many_results.append(
-            {"var_x": f"Var_{i}", "var_y": "Control", "pvalue": p}
-        )
+        many_results.append({"var_x": f"Var_{i}", "var_y": "Control", "pvalue": p})
 
     corrected_many = correct_bonferroni(many_results, verbose=args.verbose)
 
@@ -394,9 +417,7 @@ def main(args):
         ax.scatter(m, p_adj, s=100, label=f"m = {m}")
 
     ax.axhline(0.05, color="red", linestyle="--", alpha=0.5, label="α = 0.05")
-    ax.axhline(
-        p_orig, color="blue", linestyle="--", alpha=0.5, label="Original p"
-    )
+    ax.axhline(p_orig, color="blue", linestyle="--", alpha=0.5, label="Original p")
     ax.set_xlabel("Number of Tests (m)")
     ax.set_ylabel("Adjusted P-value")
     ax.set_title(f"Bonferroni Adjustment (p_original = {p_orig})")
@@ -411,9 +432,7 @@ def main(args):
     alpha_adj = alpha / m_range
 
     ax.plot(m_range, alpha_adj, linewidth=2)
-    ax.axhline(
-        0.05, color="red", linestyle="--", alpha=0.5, label="Original α"
-    )
+    ax.axhline(0.05, color="red", linestyle="--", alpha=0.5, label="Original α")
     ax.set_xlabel("Number of Tests (m)")
     ax.set_ylabel("Adjusted α Threshold")
     ax.set_title("Bonferroni: Threshold Decreases Linearly")
@@ -433,12 +452,8 @@ def main(args):
     x_pos = np.arange(n_tests)
     width = 0.35
 
-    bars1 = ax.bar(
-        x_pos - width / 2, p_values, width, label="Original", alpha=0.7
-    )
-    bars2 = ax.bar(
-        x_pos + width / 2, p_adjusted, width, label="Adjusted", alpha=0.7
-    )
+    bars1 = ax.bar(x_pos - width / 2, p_values, width, label="Original", alpha=0.7)
+    bars2 = ax.bar(x_pos + width / 2, p_adjusted, width, label="Adjusted", alpha=0.7)
 
     # Color bars by significance
     for i, (p_orig, p_adj) in enumerate(zip(p_values, p_adjusted)):
@@ -493,9 +508,7 @@ def main(args):
             if i % 2 == 0:
                 table[(i, j)].set_facecolor("#f0f0f0")
 
-    ax.set_title(
-        "Multiple Comparison Methods Comparison", pad=20, fontweight="bold"
-    )
+    ax.set_title("Multiple Comparison Methods Comparison", pad=20, fontweight="bold")
 
     plt.tight_layout()
 
@@ -508,12 +521,8 @@ def main(args):
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Demonstrate Bonferroni correction"
-    )
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
+    parser = argparse.ArgumentParser(description="Demonstrate Bonferroni correction")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 

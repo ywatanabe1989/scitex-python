@@ -18,15 +18,15 @@ def _convert_to_serializable(obj: Any) -> Any:
     - etc.
     """
     # Handle DotDict
-    if hasattr(obj, '__class__') and obj.__class__.__name__ == 'DotDict':
+    if hasattr(obj, "__class__") and obj.__class__.__name__ == "DotDict":
         return _convert_to_serializable(dict(obj))
 
     # Handle pandas DataFrame
-    if hasattr(obj, '__class__') and obj.__class__.__name__ == 'DataFrame':
-        return obj.to_dict('list')
+    if hasattr(obj, "__class__") and obj.__class__.__name__ == "DataFrame":
+        return obj.to_dict("list")
 
     # Handle numpy arrays
-    if hasattr(obj, 'tolist'):
+    if hasattr(obj, "tolist"):
         return obj.tolist()
 
     # Handle dict recursively

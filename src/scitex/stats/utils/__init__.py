@@ -39,24 +39,21 @@ from ._normalizers import (
 
 __all__ = [
     # Effect sizes
-    'cohens_d',
-    'cliffs_delta',
-    'prob_superiority',
-    'eta_squared',
-    'epsilon_squared',
-    'interpret_cohens_d',
-    'interpret_cliffs_delta',
-    'interpret_prob_superiority',
-    'interpret_eta_squared',
-    'interpret_epsilon_squared',
-
+    "cohens_d",
+    "cliffs_delta",
+    "prob_superiority",
+    "eta_squared",
+    "epsilon_squared",
+    "interpret_cohens_d",
+    "interpret_cliffs_delta",
+    "interpret_prob_superiority",
+    "interpret_eta_squared",
+    "interpret_epsilon_squared",
     # Power analysis
-    'power_ttest',
-    'sample_size_ttest',
-
+    "power_ttest",
+    "sample_size_ttest",
     # Formatters
-    'p2stars',
-
+    "p2stars",
     # Normalizers
-    'force_dataframe',
+    "force_dataframe",
 ]

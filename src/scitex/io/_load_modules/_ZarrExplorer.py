@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_ZarrExplorer.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -54,9 +55,7 @@ class ZarrExplorer:
 
             for key in sorted(target.keys()):
                 subpath = f"{path}/{key}".replace("//", "/")
-                self.show(
-                    subpath, max_depth, indent + "  ", _current_depth + 1
-                )
+                self.show(subpath, max_depth, indent + "  ", _current_depth + 1)
 
         else:  # Array
             name = path.split("/")[-1]
@@ -110,5 +109,6 @@ def has_zarr_key(zarr_path: str, key: str) -> bool:
         return True
     except (KeyError, ValueError):
         return False
+
 
 # EOF

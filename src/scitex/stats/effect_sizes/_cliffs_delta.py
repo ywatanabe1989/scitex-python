@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -39,8 +40,7 @@ logger = getLogger(__name__)
 
 
 def cliffs_delta(
-    x: Union[np.ndarray, pd.Series],
-    y: Union[np.ndarray, pd.Series]
+    x: Union[np.ndarray, pd.Series], y: Union[np.ndarray, pd.Series]
 ) -> float:
     """
     Compute Cliff's delta non-parametric effect size.
@@ -168,13 +168,13 @@ def interpret_cliffs_delta(delta: float) -> str:
     delta_abs = abs(delta)
 
     if delta_abs < 0.147:
-        return 'negligible'
+        return "negligible"
     elif delta_abs < 0.33:
-        return 'small'
+        return "small"
     elif delta_abs < 0.474:
-        return 'medium'
+        return "medium"
     else:
-        return 'large'
+        return "large"
 
 
 """Main function"""
@@ -211,11 +211,16 @@ def main(args):
     delta_outlier = cliffs_delta(x_outlier, y_outlier)
 
     from ._cohens_d import cohens_d
+
     d_normal = cohens_d(x_normal, y_normal)
     d_outlier = cohens_d(x_outlier, y_outlier)
 
-    logger.info(f"Without outlier: Cliff's δ = {delta_normal:.3f}, Cohen's d = {d_normal:.3f}")
-    logger.info(f"With outlier:    Cliff's δ = {delta_outlier:.3f}, Cohen's d = {d_outlier:.3f}")
+    logger.info(
+        f"Without outlier: Cliff's δ = {delta_normal:.3f}, Cohen's d = {d_normal:.3f}"
+    )
+    logger.info(
+        f"With outlier:    Cliff's δ = {delta_outlier:.3f}, Cohen's d = {d_outlier:.3f}"
+    )
     logger.info("Cliff's delta is stable, Cohen's d is inflated by outlier")
 
     # Example 3: Different effect sizes
@@ -228,9 +233,7 @@ def main(args):
         delta = cliffs_delta(control, treatment)
         interpretation = interpret_cliffs_delta(delta)
 
-        logger.info(
-            f"Shift = {shift:.1f}: δ = {delta:.3f} ({interpretation})"
-        )
+        logger.info(f"Shift = {shift:.1f}: δ = {delta:.3f} ({interpretation})")
 
     # Visualization
     logger.info("\n=== Creating visualization ===")
@@ -242,12 +245,12 @@ def main(args):
     x_demo = np.random.exponential(2, 200)
     y_demo = np.random.exponential(3, 200)
 
-    ax.hist(x_demo, bins=30, alpha=0.5, label='Group X', density=True)
-    ax.hist(y_demo, bins=30, alpha=0.5, label='Group Y', density=True)
+    ax.hist(x_demo, bins=30, alpha=0.5, label="Group X", density=True)
+    ax.hist(y_demo, bins=30, alpha=0.5, label="Group Y", density=True)
 
     delta_demo = cliffs_delta(x_demo, y_demo)
-    ax.set_xlabel('Value')
-    ax.set_ylabel('Density')
+    ax.set_xlabel("Value")
+    ax.set_ylabel("Density")
     ax.set_title(f"Distributions (Cliff's δ = {delta_demo:.2f})")
     ax.legend()
 
@@ -256,24 +259,28 @@ def main(args):
     delta_values = np.linspace(-1, 1, 100)
     interpretations = [interpret_cliffs_delta(d) for d in delta_values]
 
-    color_map = {'negligible': 'lightgray', 'small': 'yellow',
-                 'medium': 'orange', 'large': 'red'}
+    color_map = {
+        "negligible": "lightgray",
+        "small": "yellow",
+        "medium": "orange",
+        "large": "red",
+    }
     colors = [color_map[i] for i in interpretations]
 
     ax.scatter(delta_values, [0] * len(delta_values), c=colors, s=50, alpha=0.7)
     ax.set_xlabel("Cliff's δ")
     ax.set_yticks([])
-    ax.set_title('Effect Size Interpretation')
-    ax.axvline(0, color='black', linestyle='-', alpha=0.3)
-    ax.axvline(0.147, color='black', linestyle='--', alpha=0.3)
-    ax.axvline(0.33, color='black', linestyle='--', alpha=0.3)
-    ax.axvline(0.474, color='black', linestyle='--', alpha=0.3)
-    ax.axvline(-0.147, color='black', linestyle='--', alpha=0.3)
-    ax.axvline(-0.33, color='black', linestyle='--', alpha=0.3)
-    ax.axvline(-0.474, color='black', linestyle='--', alpha=0.3)
+    ax.set_title("Effect Size Interpretation")
+    ax.axvline(0, color="black", linestyle="-", alpha=0.3)
+    ax.axvline(0.147, color="black", linestyle="--", alpha=0.3)
+    ax.axvline(0.33, color="black", linestyle="--", alpha=0.3)
+    ax.axvline(0.474, color="black", linestyle="--", alpha=0.3)
+    ax.axvline(-0.147, color="black", linestyle="--", alpha=0.3)
+    ax.axvline(-0.33, color="black", linestyle="--", alpha=0.3)
+    ax.axvline(-0.474, color="black", linestyle="--", alpha=0.3)
 
     stx.plt.tight_layout()
-    stx.io.save(fig, './cliffs_delta_demo.jpg')
+    stx.io.save(fig, "./cliffs_delta_demo.jpg")
     logger.info("Visualization saved")
 
     return 0
@@ -284,11 +291,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Demonstrate Cliff's delta effect size calculation"
     )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose output'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
@@ -319,7 +322,7 @@ def run_main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
 
 # EOF

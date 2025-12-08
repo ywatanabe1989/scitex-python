@@ -26,16 +26,15 @@ from ._epsilon_squared import epsilon_squared, interpret_epsilon_squared
 
 __all__ = [
     # Parametric
-    'cohens_d',
-    'interpret_cohens_d',
-    'eta_squared',
-    'interpret_eta_squared',
-
+    "cohens_d",
+    "interpret_cohens_d",
+    "eta_squared",
+    "interpret_eta_squared",
     # Non-parametric
-    'cliffs_delta',
-    'interpret_cliffs_delta',
-    'prob_superiority',
-    'interpret_prob_superiority',
-    'epsilon_squared',
-    'interpret_epsilon_squared',
+    "cliffs_delta",
+    "interpret_cliffs_delta",
+    "prob_superiority",
+    "interpret_prob_superiority",
+    "epsilon_squared",
+    "interpret_epsilon_squared",
 ]

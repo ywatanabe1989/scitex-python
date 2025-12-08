@@ -13,7 +13,7 @@ __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 
 
-def add_qr_to_figure(fig, metadata, position='bottom-right', size=0.08):
+def add_qr_to_figure(fig, metadata, position="bottom-right", size=0.08):
     """
     Add a minimal QR code to a matplotlib figure.
 
@@ -31,13 +31,16 @@ def add_qr_to_figure(fig, metadata, position='bottom-right', size=0.08):
         from PIL import Image as PILImage
     except ImportError:
         import warnings
-        warnings.warn("qrcode library not available. Install with: pip install qrcode[pil]")
+
+        warnings.warn(
+            "qrcode library not available. Install with: pip install qrcode[pil]"
+        )
         return fig
 
     # Ensure metadata has URL
-    if 'url' not in metadata:
+    if "url" not in metadata:
         metadata = dict(metadata)
-        metadata['url'] = 'https://scitex.ai'
+        metadata["url"] = "https://scitex.ai"
 
     # Generate minimal QR code
     metadata_json = json.dumps(metadata, ensure_ascii=False)
@@ -45,7 +48,7 @@ def add_qr_to_figure(fig, metadata, position='bottom-right', size=0.08):
         version=1,  # Start minimal
         error_correction=qrcode.constants.ERROR_CORRECT_L,  # Lowest redundancy
         box_size=2,  # Smallest box
-        border=1,   # Minimal border
+        border=1,  # Minimal border
     )
     qr.add_data(metadata_json)
     qr.make(fit=True)
@@ -53,21 +56,23 @@ def add_qr_to_figure(fig, metadata, position='bottom-right', size=0.08):
 
     # Position mapping
     positions = {
-        'bottom-right': (0.92, 0.02),
-        'bottom-left': (0.02, 0.02),
-        'top-right': (0.92, 0.88),
-        'top-left': (0.02, 0.88),
+        "bottom-right": (0.92, 0.02),
+        "bottom-left": (0.02, 0.02),
+        "top-right": (0.92, 0.88),
+        "top-left": (0.02, 0.88),
     }
 
     if position not in positions:
-        position = 'bottom-right'
+        position = "bottom-right"
 
     x, y = positions[position]
 
     # Add QR code to figure
-    ax_qr = fig.add_axes([x, y, size, size * (fig.get_figheight() / fig.get_figwidth())])
-    ax_qr.imshow(qr_img, cmap='gray')
-    ax_qr.axis('off')
+    ax_qr = fig.add_axes(
+        [x, y, size, size * (fig.get_figheight() / fig.get_figwidth())]
+    )
+    ax_qr.imshow(qr_img, cmap="gray")
+    ax_qr.axis("off")
 
     return fig
 

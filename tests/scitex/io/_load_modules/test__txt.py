@@ -242,6 +242,7 @@ if __name__ == "__main__":
 # # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_load_modules/_txt.py
 # # ----------------------------------------
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -325,6 +326,7 @@ if __name__ == "__main__":
 #     """
 #     # Convert Path object to string if needed
 #     from pathlib import Path
+# 
 #     if isinstance(lpath, Path):
 #         lpath = str(lpath)
 # 

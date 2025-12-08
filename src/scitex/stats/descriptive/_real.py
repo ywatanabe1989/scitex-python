@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -43,6 +44,8 @@ from scitex.decorators import torch_fn
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
+
+
 @torch_fn
 def mean(x, axis=-1, dim=None, keepdims=False):
     return x.mean(dim, keepdims=keepdims)
@@ -75,9 +78,7 @@ def skewness(x, axis=-1, dim=None, keepdims=False):
 @torch_fn
 def kurtosis(x, axis=-1, dim=None, keepdims=False):
     zscores = zscore(x, axis=axis, keepdims=True)
-    return (
-        torch.mean(torch.pow(zscores, 4.0), dim=dim, keepdims=keepdims) - 3.0
-    )
+    return torch.mean(torch.pow(zscores, 4.0), dim=dim, keepdims=keepdims) - 3.0
 
 
 @torch_fn

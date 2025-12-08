@@ -11,7 +11,9 @@ from PIL import Image
 logger = logging.getLogger(__name__)
 
 
-def _load_image(lpath: str, metadata: bool = True, verbose: bool = False, **kwargs) -> Union[Any, Tuple[Any, Optional[Dict]]]:
+def _load_image(
+    lpath: str, metadata: bool = True, verbose: bool = False, **kwargs
+) -> Union[Any, Tuple[Any, Optional[Dict]]]:
     """
     Load image file.
 
@@ -41,6 +43,7 @@ def _load_image(lpath: str, metadata: bool = True, verbose: bool = False, **kwar
 
     try:
         from .._metadata import read_metadata
+
         metadata_dict = read_metadata(lpath)
 
         if verbose:
@@ -56,6 +59,7 @@ def _load_image(lpath: str, metadata: bool = True, verbose: bool = False, **kwar
     except Exception as e:
         # If metadata reading fails, return None
         import warnings
+
         warnings.warn(f"Failed to read metadata: {e}")
         return img, None
 

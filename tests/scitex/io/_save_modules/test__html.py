@@ -297,7 +297,7 @@ if __name__ == "__main__":
 # 
 # def save_html(obj, spath, **kwargs):
 #     """Handle HTML file saving (primarily for Plotly figures).
-#     
+# 
 #     Parameters
 #     ----------
 #     obj : plotly.graph_objs.Figure or str
@@ -306,18 +306,18 @@ if __name__ == "__main__":
 #         Path where HTML file will be saved
 #     **kwargs
 #         Additional keyword arguments passed to plotly.io.write_html()
-#         
+# 
 #     Notes
 #     -----
 #     - Primarily designed for saving Plotly interactive figures
 #     - Can also save raw HTML strings
 #     """
-#     if hasattr(obj, 'write_html'):
+#     if hasattr(obj, "write_html"):
 #         # Plotly figure object
 #         obj.write_html(spath, **kwargs)
 #     elif isinstance(obj, str):
 #         # Raw HTML string
-#         with open(spath, 'w') as f:
+#         with open(spath, "w") as f:
 #             f.write(obj)
 #     else:
 #         # Try to convert to HTML using plotly
@@ -325,6 +325,7 @@ if __name__ == "__main__":
 # 
 # 
 # # EOF
+
 # --------------------------------------------------------------------------------
 # End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_html.py
 # --------------------------------------------------------------------------------

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -194,9 +195,7 @@ def correct_holm(
     for i, (orig_idx, result) in enumerate(sorted_results):
         corrected = result.copy()
         corrected["pvalue_adjusted"] = round(adjusted_pvalues[i], 6)
-        corrected["alpha_adjusted"] = round(
-            alpha / (m - i), 6
-        )  # For reference
+        corrected["alpha_adjusted"] = round(alpha / (m - i), 6)  # For reference
         corrected["rejected"] = adjusted_pvalues[i] <= alpha
 
         # Add original index for restoration
@@ -214,10 +213,8 @@ def correct_holm(
     # Log results summary
     if verbose:
         rejections = sum(r["rejected"] for r in corrected_results)
-        logger.info(
-            f"Holm correction complete: {rejections}/{m} hypotheses rejected"
-        )
-        logger.info(f"Adjusted alpha range: {alpha/m:.6f} to {alpha:.6f}")
+        logger.info(f"Holm correction complete: {rejections}/{m} hypotheses rejected")
+        logger.info(f"Adjusted alpha range: {alpha / m:.6f} to {alpha:.6f}")
 
         # Log detailed results if not too many tests
         if m <= 10:
@@ -263,9 +260,7 @@ def _plot_holm(corrected_results, alpha, m, ax):
     pvalues_adj = [r["pvalue_adjusted"] for r in corrected_results]
 
     # Plot original and adjusted p-values
-    ax.scatter(
-        x, pvalues, label="Original p-values", alpha=0.7, s=100, color="C0"
-    )
+    ax.scatter(x, pvalues, label="Original p-values", alpha=0.7, s=100, color="C0")
     ax.scatter(
         x,
         pvalues_adj,
@@ -301,17 +296,14 @@ def _plot_holm(corrected_results, alpha, m, ax):
         linestyle="--",
         linewidth=2,
         alpha=0.5,
-        label=f"α_min = {alpha/m:.4f}",
+        label=f"α_min = {alpha / m:.4f}",
     )
 
     # Formatting
     ax.set_xlabel("Test Index")
     ax.set_ylabel("P-value")
     rejections = sum(r["rejected"] for r in corrected_results)
-    ax.set_title(
-        f"Holm Correction (m={m} tests)\n"
-        f"{rejections}/{m} hypotheses rejected"
-    )
+    ax.set_title(f"Holm Correction (m={m} tests)\n{rejections}/{m} hypotheses rejected")
     ax.set_yscale("log")
     ax.grid(True, alpha=0.3)
     ax.legend()
@@ -327,7 +319,7 @@ def _plot_holm(corrected_results, alpha, m, ax):
             elif "comparison" in r:
                 labels.append(r["comparison"])
             else:
-                labels.append(f"Test {len(labels)+1}")
+                labels.append(f"Test {len(labels) + 1}")
         ax.set_xticks(x)
         ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
     else:
@@ -368,9 +360,7 @@ def main(args):
     ]
 
     holm_results = correct_holm(results, alpha=0.05, verbose=args.verbose)
-    bonf_results = correct_bonferroni(
-        results, alpha=0.05, verbose=args.verbose
-    )
+    bonf_results = correct_bonferroni(results, alpha=0.05, verbose=args.verbose)
 
     # Count rejections
     holm_rejections = sum(r["rejected"] for r in holm_results)
@@ -381,9 +371,7 @@ def main(args):
     logger.info("Note: Holm is uniformly more powerful than Bonferroni")
 
     # Example 3: Post-hoc after ANOVA
-    logger.info(
-        "\n=== Example 3: Post-hoc pairwise comparisons after ANOVA ==="
-    )
+    logger.info("\n=== Example 3: Post-hoc pairwise comparisons after ANOVA ===")
 
     np.random.seed(42)
 
@@ -461,17 +449,14 @@ def main(args):
 
     # All very small p-values
     small_ps = [
-        {"test_method": f"Test {i}", "pvalue": 0.0001 * (i + 1)}
-        for i in range(5)
+        {"test_method": f"Test {i}", "pvalue": 0.0001 * (i + 1)} for i in range(5)
     ]
     small_corr = correct_holm(small_ps, alpha=0.05, verbose=False)
     rejections = sum(r["rejected"] for r in small_corr)
     logger.info(f"All small p-values: {rejections}/5 rejected")
 
     # All large p-values
-    large_ps = [
-        {"test_method": f"Test {i}", "pvalue": 0.1 + 0.1 * i} for i in range(5)
-    ]
+    large_ps = [{"test_method": f"Test {i}", "pvalue": 0.1 + 0.1 * i} for i in range(5)]
     large_corr = correct_holm(large_ps, alpha=0.05, verbose=False)
     rejections = sum(r["rejected"] for r in large_corr)
     logger.info(f"All large p-values: {rejections}/5 rejected")
@@ -491,8 +476,7 @@ def main(args):
     logger.info("\n=== Example 7: Different alpha levels ===")
 
     results = [
-        {"test_method": f"Test {i}", "pvalue": 0.01 * (i + 1)}
-        for i in range(10)
+        {"test_method": f"Test {i}", "pvalue": 0.01 * (i + 1)} for i in range(10)
     ]
 
     for alpha_level in [0.01, 0.05, 0.10]:
@@ -508,9 +492,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Demonstrate Holm-Bonferroni correction"
     )
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 

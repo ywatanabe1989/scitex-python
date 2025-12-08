@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/stats/effect_sizes/_epsilon_squared.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -154,13 +155,13 @@ def interpret_epsilon_squared(epsilon2: float) -> str:
     'large'
     """
     if epsilon2 < 0.01:
-        return 'negligible'
+        return "negligible"
     elif epsilon2 < 0.06:
-        return 'small'
+        return "small"
     elif epsilon2 < 0.14:
-        return 'medium'
+        return "medium"
     else:
-        return 'large'
+        return "large"
 
 
 """Main function"""
@@ -231,13 +232,13 @@ def main(args):
 
     # Plot 1: Distribution comparison
     ax = axes[0]
-    ax.hist(group1, bins=20, alpha=0.5, label='Group 1', density=True)
-    ax.hist(group2, bins=20, alpha=0.5, label='Group 2', density=True)
-    ax.hist(group3, bins=20, alpha=0.5, label='Group 3', density=True)
+    ax.hist(group1, bins=20, alpha=0.5, label="Group 1", density=True)
+    ax.hist(group2, bins=20, alpha=0.5, label="Group 2", density=True)
+    ax.hist(group3, bins=20, alpha=0.5, label="Group 3", density=True)
 
-    ax.set_xlabel('Value')
-    ax.set_ylabel('Density')
-    ax.set_title(f'Skewed Distributions (ε² = {eps2:.2f})')
+    ax.set_xlabel("Value")
+    ax.set_ylabel("Density")
+    ax.set_title(f"Skewed Distributions (ε² = {eps2:.2f})")
     ax.legend()
 
     # Plot 2: Comparison of methods
@@ -253,17 +254,17 @@ def main(args):
         eps2_values.append(epsilon_squared([g1, g2]))
         eta2_values.append(eta_squared([g1, g2]))
 
-    ax.plot(scales, eps2_values, 'o-', label='Epsilon-squared (ε²)', linewidth=2)
-    ax.plot(scales, eta2_values, 's-', label='Eta-squared (η²)', linewidth=2)
+    ax.plot(scales, eps2_values, "o-", label="Epsilon-squared (ε²)", linewidth=2)
+    ax.plot(scales, eta2_values, "s-", label="Eta-squared (η²)", linewidth=2)
 
-    ax.set_xlabel('Distribution Scale Difference')
-    ax.set_ylabel('Effect Size')
-    ax.set_title('Non-parametric vs Parametric Effect Size')
+    ax.set_xlabel("Distribution Scale Difference")
+    ax.set_ylabel("Effect Size")
+    ax.set_title("Non-parametric vs Parametric Effect Size")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
     stx.plt.tight_layout()
-    stx.io.save(fig, './epsilon_squared_demo.jpg')
+    stx.io.save(fig, "./epsilon_squared_demo.jpg")
     logger.info("Visualization saved")
 
     return 0
@@ -274,11 +275,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Demonstrate epsilon-squared effect size calculation"
     )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose output'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
@@ -309,7 +306,7 @@ def run_main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
 
 # EOF
