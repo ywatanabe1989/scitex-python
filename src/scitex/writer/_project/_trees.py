@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/writer/_project/_trees.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -45,18 +46,12 @@ def create_document_trees(
     tuple
         (manuscript, supplementary, revision, scripts) tree objects
     """
-    manuscript = ManuscriptTree(
-        project_dir / "01_manuscript", git_root=git_root
-    )
+    manuscript = ManuscriptTree(project_dir / "01_manuscript", git_root=git_root)
     supplementary = SupplementaryTree(
         project_dir / "02_supplementary", git_root=git_root
     )
-    revision = RevisionTree(
-        project_dir / "03_revision", git_root=git_root
-    )
-    scripts = ScriptsTree(
-        project_dir / "scripts", git_root=git_root
-    )
+    revision = RevisionTree(project_dir / "03_revision", git_root=git_root)
+    scripts = ScriptsTree(project_dir / "scripts", git_root=git_root)
 
     logger.success("Document trees initialized")
 

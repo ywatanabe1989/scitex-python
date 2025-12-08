@@ -28,19 +28,20 @@ def batch_fn(func: Callable) -> Callable:
 
         # Set the current decorator context
         wrapper._current_decorator = "batch_fn"
-        
+
         # Mark that batch_fn has been applied
-        if not hasattr(wrapper, '_decorator_order'):
+        if not hasattr(wrapper, "_decorator_order"):
             wrapper._decorator_order = []
-        wrapper._decorator_order.append('batch_fn')
+        wrapper._decorator_order.append("batch_fn")
 
         batch_size = int(kwargs.pop("batch_size", 4))
         if len(x) <= batch_size:
             # Only pass batch_size if the function accepts it
             import inspect
+
             try:
                 sig = inspect.signature(func)
-                if 'batch_size' in sig.parameters:
+                if "batch_size" in sig.parameters:
                     return func(x, *args, **kwargs, batch_size=batch_size)
                 else:
                     return func(x, *args, **kwargs)
@@ -57,10 +58,13 @@ def batch_fn(func: Callable) -> Callable:
 
             # Only pass batch_size if the function accepts it
             import inspect
+
             try:
                 sig = inspect.signature(func)
-                if 'batch_size' in sig.parameters:
-                    batch_result = func(x[start:end], *args, **kwargs, batch_size=batch_size)
+                if "batch_size" in sig.parameters:
+                    batch_result = func(
+                        x[start:end], *args, **kwargs, batch_size=batch_size
+                    )
                 else:
                     batch_result = func(x[start:end], *args, **kwargs)
             except:
@@ -68,6 +72,7 @@ def batch_fn(func: Callable) -> Callable:
                 batch_result = func(x[start:end], *args, **kwargs)
 
             import torch
+
             if isinstance(batch_result, torch.Tensor):
                 batch_result = batch_result.cpu()
             elif isinstance(batch_result, tuple):
@@ -79,6 +84,7 @@ def batch_fn(func: Callable) -> Callable:
             results.append(batch_result)
 
         import torch
+
         if isinstance(results[0], tuple):
             n_vars = len(results[0])
             combined_results = []

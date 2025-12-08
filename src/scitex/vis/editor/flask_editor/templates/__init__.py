@@ -3,14 +3,14 @@
 # File: ./src/scitex/vis/editor/flask_editor/templates/__init__.py
 """Template components for Flask editor."""
 
-from .styles import CSS_STYLES
-from .scripts import JS_SCRIPTS
-from .html import HTML_BODY
+from ._styles import CSS_STYLES
+from ._scripts import JS_SCRIPTS
+from ._html import HTML_BODY
 
 
 def build_html_template() -> str:
     """Build the complete HTML template from components."""
-    return f'''<!DOCTYPE html>
+    return f"""<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
@@ -27,7 +27,7 @@ def build_html_template() -> str:
     </script>
 </body>
 </html>
-'''
+"""
 
 
 # EOF

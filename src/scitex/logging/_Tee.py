@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/logging/_Tee.py"
-)
+
+__FILE__ = "./src/scitex/logging/_Tee.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -39,6 +38,8 @@ from scitex.str._clean_path import clean_path
 from scitex.str._printc import printc
 
 """Functions & Classes"""
+
+
 def _get_logger():
     """Get logger lazily to avoid circular import during module initialization."""
     from scitex import logging
@@ -111,10 +112,7 @@ class Tee:
         if hasattr(self, "_log_file") and self._log_file is not None:
             try:
                 # Check if the file object is still valid
-                if (
-                    hasattr(self._log_file, "closed")
-                    and not self._log_file.closed
-                ):
+                if hasattr(self._log_file, "closed") and not self._log_file.closed:
                     self.close()
             except Exception:
                 # Silently ignore exceptions during cleanup

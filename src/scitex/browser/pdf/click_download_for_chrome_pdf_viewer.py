@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/pdf/click_download_for_chrome_pdf_viewer.py"
-)
+
+__FILE__ = "./src/scitex/browser/pdf/click_download_for_chrome_pdf_viewer.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -42,6 +41,8 @@ logger = logging.getLogger(__name__)
 from ..debugging import browser_logger
 
 """Functions & Classes"""
+
+
 async def click_download_for_chrome_pdf_viewer_async(
     page,
     output_path: Path | str,
@@ -114,7 +115,11 @@ async def click_download_for_chrome_pdf_viewer_async(
 
         # Show download completion
         if download_path:
-            temp_size = Path(download_path).stat().st_size if Path(download_path).exists() else 0
+            temp_size = (
+                Path(download_path).stat().st_size
+                if Path(download_path).exists()
+                else 0
+            )
             size_mb = temp_size / (1024 * 1024)
             if verbose:
                 await browser_logger.success(
@@ -131,9 +136,7 @@ async def click_download_for_chrome_pdf_viewer_async(
             # Verify download succeeded
             if output_path.exists() and output_path.stat().st_size > 1024:
                 file_size_mb = output_path.stat().st_size / 1e6
-                logger.success(
-                    f"Downloaded PDF: {output_path} ({file_size_mb:.1f} MB)"
-                )
+                logger.success(f"Downloaded PDF: {output_path} ({file_size_mb:.1f} MB)")
                 return True
 
         return False
@@ -154,9 +157,7 @@ def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     import scitex as stx
 
-    parser = argparse.ArgumentParser(
-        description="Chrome PDF viewer download utility"
-    )
+    parser = argparse.ArgumentParser(description="Chrome PDF viewer download utility")
     args = parser.parse_args()
     return args
 

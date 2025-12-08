@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/dataclasses/_SupplementaryContents.py"
-)
+
+__FILE__ = "./src/scitex/writer/dataclasses/_SupplementaryContents.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -51,25 +50,15 @@ class SupplementaryContents:
     def __post_init__(self):
         """Initialize all DocumentSection instances."""
         if self.methods is None:
-            self.methods = DocumentSection(
-                self.root / "methods.tex", self.git_root
-            )
+            self.methods = DocumentSection(self.root / "methods.tex", self.git_root)
         if self.results is None:
-            self.results = DocumentSection(
-                self.root / "results.tex", self.git_root
-            )
+            self.results = DocumentSection(self.root / "results.tex", self.git_root)
         if self.title is None:
-            self.title = DocumentSection(
-                self.root / "title.tex", self.git_root
-            )
+            self.title = DocumentSection(self.root / "title.tex", self.git_root)
         if self.authors is None:
-            self.authors = DocumentSection(
-                self.root / "authors.tex", self.git_root
-            )
+            self.authors = DocumentSection(self.root / "authors.tex", self.git_root)
         if self.keywords is None:
-            self.keywords = DocumentSection(
-                self.root / "keywords.tex", self.git_root
-            )
+            self.keywords = DocumentSection(self.root / "keywords.tex", self.git_root)
         if self.journal_name is None:
             self.journal_name = DocumentSection(
                 self.root / "journal_name.tex", self.git_root
@@ -85,9 +74,7 @@ class SupplementaryContents:
         if self.latex_styles is None:
             self.latex_styles = self.root / "latex_styles"
         if self.wordcount is None:
-            self.wordcount = DocumentSection(
-                self.root / "wordcount.tex", self.git_root
-            )
+            self.wordcount = DocumentSection(self.root / "wordcount.tex", self.git_root)
 
     def verify_structure(self) -> tuple[bool, list[str]]:
         """
@@ -100,13 +87,23 @@ class SupplementaryContents:
 
         # Check required directories
         if not self.figures.exists():
-            expected_path = self.figures.relative_to(self.git_root) if self.git_root else self.figures
+            expected_path = (
+                self.figures.relative_to(self.git_root)
+                if self.git_root
+                else self.figures
+            )
             issues.append(f"Missing figures/ (expected at: {expected_path})")
         if not self.tables.exists():
-            expected_path = self.tables.relative_to(self.git_root) if self.git_root else self.tables
+            expected_path = (
+                self.tables.relative_to(self.git_root) if self.git_root else self.tables
+            )
             issues.append(f"Missing tables/ (expected at: {expected_path})")
         if not self.latex_styles.exists():
-            expected_path = self.latex_styles.relative_to(self.git_root) if self.git_root else self.latex_styles
+            expected_path = (
+                self.latex_styles.relative_to(self.git_root)
+                if self.git_root
+                else self.latex_styles
+            )
             issues.append(f"Missing latex_styles/ (expected at: {expected_path})")
 
         return len(issues) == 0, issues

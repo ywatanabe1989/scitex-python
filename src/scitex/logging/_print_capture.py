@@ -10,53 +10,53 @@ from io import StringIO
 
 class PrintCapture:
     """Capture print() output and redirect to logging system."""
-    
+
     def __init__(self, logger_name: str = "scitex.print_capture"):
         self.logger = logging.getLogger(logger_name)
         self.original_stdout = sys.stdout
         self.original_stderr = sys.stderr
         self.capturing = False
-        
+
     def start_capture(self):
         """Start capturing print output."""
         if self.capturing:
             return
-            
+
         self.capturing = True
         sys.stdout = self
-        
+
     def stop_capture(self):
         """Stop capturing print output."""
         if not self.capturing:
             return
-            
+
         self.capturing = False
         sys.stdout = self.original_stdout
-        
+
     def write(self, text):
         """Handle write calls from print()."""
         # Also write to original stdout for real-time viewing
         self.original_stdout.write(text)
         self.original_stdout.flush()
-        
+
         # Log the output (strip newlines for cleaner logs)
-        clean_text = text.rstrip('\n')
+        clean_text = text.rstrip("\n")
         if clean_text:  # Only log non-empty text
             self.logger.info(clean_text)
-            
+
     def flush(self):
         """Handle flush calls."""
         self.original_stdout.flush()
-        
+
     def isatty(self):
         """Handle isatty calls."""
         return self.original_stdout.isatty()
-        
+
     def __enter__(self):
         """Context manager entry."""
         self.start_capture()
         return self
-        
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
         self.stop_capture()
@@ -88,8 +88,8 @@ def is_print_capture_enabled():
 
 
 __all__ = [
-    'PrintCapture',
-    'enable_print_capture', 
-    'disable_print_capture',
-    'is_print_capture_enabled'
+    "PrintCapture",
+    "enable_print_capture",
+    "disable_print_capture",
+    "is_print_capture_enabled",
 ]

@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/_parse_script_args.py"
-)
+
+__FILE__ = "./src/scitex/writer/_parse_script_args.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -28,9 +27,9 @@ class ScriptArgument:
     """Represents a single script argument."""
 
     short_flag: Optional[str]  # e.g., "-nf"
-    long_flag: Optional[str]   # e.g., "--no_figs"
-    description: str           # e.g., "Exclude figures for quick compilation"
-    default: Optional[str]     # e.g., "false"
+    long_flag: Optional[str]  # e.g., "--no_figs"
+    description: str  # e.g., "Exclude figures for quick compilation"
+    default: Optional[str]  # e.g., "false"
 
     def __str__(self) -> str:
         """Format as help text."""
@@ -62,11 +61,7 @@ class ScriptArgumentParser:
         content = script_path.read_text()
 
         # Find usage() function
-        usage_match = re.search(
-            r'usage\s*\(\)\s*{(.*?)exit\s+0',
-            content,
-            re.DOTALL
-        )
+        usage_match = re.search(r"usage\s*\(\)\s*{(.*?)exit\s+0", content, re.DOTALL)
 
         if not usage_match:
             return []
@@ -79,18 +74,18 @@ class ScriptArgumentParser:
         args = []
 
         # Parse each line in usage (will contain echo statements)
-        for line in options_text.split('\n'):
+        for line in options_text.split("\n"):
             # Extract content between quotes in echo statements
             quote_match = re.search(r'"([^"]*)"', line)
             if not quote_match:
                 continue
 
             line_content = quote_match.group(1).strip()
-            if not line_content or line_content.startswith('#'):
+            if not line_content or line_content.startswith("#"):
                 continue
 
             # Skip lines without flags
-            if '-' not in line_content:
+            if "-" not in line_content:
                 continue
 
             arg = ScriptArgumentParser._parse_argument_line(line_content)
@@ -107,7 +102,7 @@ class ScriptArgumentParser:
         Format: "-nf,  --no_figs       Description (default: value)"
         """
         # Extract flags and description
-        flags_match = re.match(r'(.*?)\s{2,}(.*)', line)
+        flags_match = re.match(r"(.*?)\s{2,}(.*)", line)
         if not flags_match:
             return None
 
@@ -118,15 +113,17 @@ class ScriptArgumentParser:
         short_flag = None
         long_flag = None
 
-        if ',' in flags_str:
-            parts = flags_str.split(',')
+        if "," in flags_str:
+            parts = flags_str.split(",")
             short_flag = parts[0].strip() if parts[0].strip() else None
-            long_flag = parts[1].strip() if len(parts) > 1 and parts[1].strip() else None
+            long_flag = (
+                parts[1].strip() if len(parts) > 1 and parts[1].strip() else None
+            )
         else:
             # Single flag (short or long)
-            if flags_str.startswith('--'):
+            if flags_str.startswith("--"):
                 long_flag = flags_str
-            elif flags_str.startswith('-'):
+            elif flags_str.startswith("-"):
                 short_flag = flags_str
             else:
                 return None
@@ -135,10 +132,10 @@ class ScriptArgumentParser:
         description = rest
         default = None
 
-        default_match = re.search(r'\(default:\s*([^)]+)\)', rest)
+        default_match = re.search(r"\(default:\s*([^)]+)\)", rest)
         if default_match:
             default = default_match.group(1).strip()
-            description = rest[:default_match.start()].strip()
+            description = rest[: default_match.start()].strip()
 
         if not description:
             return None
@@ -147,7 +144,7 @@ class ScriptArgumentParser:
             short_flag=short_flag,
             long_flag=long_flag,
             description=description,
-            default=default
+            default=default,
         )
 
 

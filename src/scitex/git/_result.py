@@ -26,6 +26,7 @@ class GitResult:
     stderr : Optional[str]
         Standard error from git command
     """
+
     success: bool
     error: Optional[str] = None
     stdout: Optional[str] = None
@@ -42,6 +43,7 @@ class CommitResult(GitResult):
     commit_hash : Optional[str]
         Hash of created commit if successful
     """
+
     commit_hash: Optional[str] = None
 
 
@@ -55,6 +57,7 @@ class BranchResult(GitResult):
     branch_name : Optional[str]
         Name of created or renamed branch if successful
     """
+
     branch_name: Optional[str] = None
 
 

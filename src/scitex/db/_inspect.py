@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -29,9 +30,7 @@ class OptimizedInspector:
         """Context manager for database connection reuse."""
         if self._conn is None:
             self._conn = sqlite3.connect(self.db_path)
-            self._conn.row_factory = (
-                sqlite3.Row
-            )  # Enable column access by name
+            self._conn.row_factory = sqlite3.Row  # Enable column access by name
             self._cursor = self._conn.cursor()
         try:
             yield self._cursor
@@ -60,9 +59,7 @@ class OptimizedInspector:
             )
             return [row[0] for row in cursor.fetchall()]
 
-    def get_table_info_batch(
-        self, table_names: List[str]
-    ) -> Dict[str, List[Dict]]:
+    def get_table_info_batch(self, table_names: List[str]) -> Dict[str, List[Dict]]:
         """Get table info for multiple tables in one go.
 
         Returns:
@@ -125,12 +122,8 @@ class OptimizedInspector:
                 table_stats = {}
 
                 # Get sample data
-                cursor.execute(
-                    f"SELECT * FROM {table_name} LIMIT {sample_size}"
-                )
-                table_stats["columns"] = [
-                    desc[0] for desc in cursor.description
-                ]
+                cursor.execute(f"SELECT * FROM {table_name} LIMIT {sample_size}")
+                table_stats["columns"] = [desc[0] for desc in cursor.description]
                 table_stats["sample_data"] = cursor.fetchall()
 
                 # Get row count (can be slow for large tables)
@@ -187,9 +180,7 @@ class OptimizedInspector:
 
         # Batch operations for efficiency
         table_info = self.get_table_info_batch(table_names)
-        table_stats = self.get_table_stats_batch(
-            table_names, sample_size, skip_count
-        )
+        table_stats = self.get_table_stats_batch(table_names, sample_size, skip_count)
 
         results = []
         for table_name in table_names:
@@ -204,15 +195,11 @@ class OptimizedInspector:
             # Format sample data
             for row in table_stats[table_name]["sample_data"]:
                 formatted_row = {}
-                for i, col_name in enumerate(
-                    table_stats[table_name]["columns"]
-                ):
+                for i, col_name in enumerate(table_stats[table_name]["columns"]):
                     value = row[i]
                     if isinstance(value, bytes):
                         if skip_blob_content:
-                            formatted_row[col_name] = (
-                                f"<BLOB {len(value)} bytes>"
-                            )
+                            formatted_row[col_name] = f"<BLOB {len(value)} bytes>"
                         else:
                             formatted_row[col_name] = value
                     else:
@@ -228,7 +215,7 @@ class OptimizedInspector:
 
     def _print_table_info(self, result: Dict):
         """Pretty print table information."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Table: {result['table_name']}")
         print(
             f"Rows: {result['row_count']}"
@@ -241,7 +228,7 @@ class OptimizedInspector:
         if result["sample_data"]:
             # Get all column names
             all_cols = list(result["sample_data"][0].keys())
-            
+
             # Separate data columns and metadata columns
             data_cols = []
             metadata_cols = []
@@ -252,11 +239,9 @@ class OptimizedInspector:
                     data_cols.append(c)
 
             # Show first row in detail (like df.iloc[0])
-            print(
-                f"\nFirst row (schema + data for all {len(all_cols)} columns):"
-            )
+            print(f"\nFirst row (schema + data for all {len(all_cols)} columns):")
             print(f"  {'Column':<40} | {'Type':<20} | Value")
-            print(f"  {'-'*40}-|-{'-'*20}-|-{'-'*50}")
+            print(f"  {'-' * 40}-|-{'-' * 20}-|-{'-' * 50}")
 
             first_row = result["sample_data"][0]
 
@@ -294,24 +279,24 @@ class OptimizedInspector:
                 display_key = key if len(key) <= 40 else key[:37] + "..."
 
                 # Print in column format
-                print(
-                    f"  {display_key:<40} | {type_display:<20} | {display_value}"
-                )
+                print(f"  {display_key:<40} | {type_display:<20} | {display_value}")
 
             # If there are more rows, show a compact table view
             if len(result["sample_data"]) > 1:
                 max_row = min(3, len(result["sample_data"]))
                 total_samples = len(result["sample_data"])
-                
+
                 # Determine which columns to show - prioritize data cols but include metadata if few data cols
                 if len(data_cols) >= 5:
                     header_cols = data_cols[:5]
                     col_type = "first 5 data columns"
                 else:
                     # Show all data cols plus some metadata cols
-                    header_cols = data_cols + metadata_cols[:max(0, 5-len(data_cols))]
-                    col_type = f"{len(data_cols)} data + {len(header_cols)-len(data_cols)} metadata columns"
-                
+                    header_cols = (
+                        data_cols + metadata_cols[: max(0, 5 - len(data_cols))]
+                    )
+                    col_type = f"{len(data_cols)} data + {len(header_cols) - len(data_cols)} metadata columns"
+
                 print(
                     f"\nAdditional samples (rows 2-{max_row} of {total_samples}, {col_type}):"
                 )
@@ -319,7 +304,7 @@ class OptimizedInspector:
                 # Print header
                 header = " | ".join(f"{col[:12]:<12}" for col in header_cols)
                 print(f"  {header}")
-                print(f"  {'-'*len(header)}")
+                print(f"  {'-' * len(header)}")
 
                 # Print rows 2-3
                 for row in result["sample_data"][1:3]:
@@ -343,9 +328,7 @@ class OptimizedInspector:
                 if col.get("default") is not None:
                     constraints.append(f"DEFAULT {col['default']}")
 
-                constraint_str = (
-                    f" ({', '.join(constraints)})" if constraints else ""
-                )
+                constraint_str = f" ({', '.join(constraints)})" if constraints else ""
                 print(f"  {col['name']}: {col_type}{constraint_str}")
 
 
@@ -380,5 +363,6 @@ def inspect(
             skip_count=skip_count,
             verbose=verbose,
         )
+
 
 # EOF

@@ -49,18 +49,18 @@ def _cloud_show(*args, **kwargs):
                 return None
 
             # Use timestamp for this session's outputs
-            timestamp = time.strftime('%Y%m%d_%H%M%S')
-            output_dir = project_root / 'scitex' / 'temp' / timestamp
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            output_dir = project_root / "scitex" / "temp" / timestamp
             output_dir.mkdir(parents=True, exist_ok=True)
 
             for fignum in fignums:
                 fig = plt.figure(fignum)
 
-                filename = f'figure_{fignum}.png'
+                filename = f"figure_{fignum}.png"
                 output_path = output_dir / filename
 
                 # Save figure
-                fig.savefig(output_path, dpi=150, bbox_inches='tight')
+                fig.savefig(output_path, dpi=150, bbox_inches="tight")
 
                 # Emit inline image marker with project-relative path
                 relative_path = output_path.relative_to(project_root)
@@ -139,8 +139,8 @@ if is_cloud_environment():
 
 
 __all__ = [
-    'install_matplotlib_hook',
-    'uninstall_matplotlib_hook',
+    "install_matplotlib_hook",
+    "uninstall_matplotlib_hook",
 ]
 
 # EOF

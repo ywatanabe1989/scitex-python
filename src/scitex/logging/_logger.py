@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/logging/_logger.py"
-)
+
+__FILE__ = "./src/scitex/logging/_logger.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -56,21 +55,25 @@ class SciTeXLogger(logging.Logger):
             if not isinstance(message, str):
                 # Convert DotDict to regular dict for better pprint support
                 # Exclude private keys (starting with _) by default
-                if hasattr(message, 'to_dict'):
+                if hasattr(message, "to_dict"):
                     message = message.to_dict(include_private=False)
                 message = _pprint.pformat(message, indent=2, width=80, compact=False)
 
             # For multi-line messages, indent all lines after the first
             # to align with the log level prefix (e.g., "INFO: ") plus any indent
-            if '\n' in message:
-                lines = message.split('\n')
+            if "\n" in message:
+                lines = message.split("\n")
                 # Calculate the indent needed:
                 # - 6 chars for "INFO: " or "ERRO: " prefix
                 # - Plus the indent parameter for additional spacing
                 total_indent = 6 + indent
-                prefix_indent = ' ' * total_indent
+                prefix_indent = " " * total_indent
                 # Join lines with proper indentation
-                message = lines[0] + '\n' + '\n'.join(prefix_indent + line for line in lines[1:])
+                message = (
+                    lines[0]
+                    + "\n"
+                    + "\n".join(prefix_indent + line for line in lines[1:])
+                )
 
         # Add separator lines if requested
         if sep is not None:
@@ -88,7 +91,15 @@ class SciTeXLogger(logging.Logger):
         self._log(level, message, args, **kwargs)
 
     def debug(
-        self, message, *args, indent=0, sep=None, n_sep=40, c=None, pprint=False, **kwargs
+        self,
+        message,
+        *args,
+        indent=0,
+        sep=None,
+        n_sep=40,
+        c=None,
+        pprint=False,
+        **kwargs,
     ):
         """Log a debug message with optional indent, separator, color, and pprint."""
         if self.isEnabledFor(logging.DEBUG):
@@ -97,7 +108,15 @@ class SciTeXLogger(logging.Logger):
             )
 
     def info(
-        self, message, *args, indent=0, sep=None, n_sep=40, c=None, pprint=False, **kwargs
+        self,
+        message,
+        *args,
+        indent=0,
+        sep=None,
+        n_sep=40,
+        c=None,
+        pprint=False,
+        **kwargs,
     ):
         """Log an info message with optional indent, separator, color, and pprint."""
         if self.isEnabledFor(logging.INFO):
@@ -106,7 +125,15 @@ class SciTeXLogger(logging.Logger):
             )
 
     def warning(
-        self, message, *args, indent=0, sep=None, n_sep=40, c=None, pprint=False, **kwargs
+        self,
+        message,
+        *args,
+        indent=0,
+        sep=None,
+        n_sep=40,
+        c=None,
+        pprint=False,
+        **kwargs,
     ):
         """Log a warning message with optional indent, separator, color, and pprint."""
         if self.isEnabledFor(logging.WARNING):
@@ -123,7 +150,15 @@ class SciTeXLogger(logging.Logger):
             )
 
     def error(
-        self, message, *args, indent=0, sep=None, n_sep=40, c=None, pprint=False, **kwargs
+        self,
+        message,
+        *args,
+        indent=0,
+        sep=None,
+        n_sep=40,
+        c=None,
+        pprint=False,
+        **kwargs,
     ):
         """Log an error message with optional indent, separator, color, and pprint."""
         if self.isEnabledFor(logging.ERROR):
@@ -132,7 +167,15 @@ class SciTeXLogger(logging.Logger):
             )
 
     def critical(
-        self, message, *args, indent=0, sep=None, n_sep=40, c=None, pprint=False, **kwargs
+        self,
+        message,
+        *args,
+        indent=0,
+        sep=None,
+        n_sep=40,
+        c=None,
+        pprint=False,
+        **kwargs,
     ):
         """Log a critical message with optional indent, separator, color, and pprint."""
         if self.isEnabledFor(logging.CRITICAL):
@@ -149,7 +192,15 @@ class SciTeXLogger(logging.Logger):
             )
 
     def success(
-        self, message, *args, indent=0, sep=None, n_sep=40, c=None, pprint=False, **kwargs
+        self,
+        message,
+        *args,
+        indent=0,
+        sep=None,
+        n_sep=40,
+        c=None,
+        pprint=False,
+        **kwargs,
     ):
         """Log a success message with optional indent, separator, color, and pprint."""
         if self.isEnabledFor(SUCCESS):
@@ -158,7 +209,15 @@ class SciTeXLogger(logging.Logger):
             )
 
     def fail(
-        self, message, *args, indent=0, sep=None, n_sep=40, c=None, pprint=False, **kwargs
+        self,
+        message,
+        *args,
+        indent=0,
+        sep=None,
+        n_sep=40,
+        c=None,
+        pprint=False,
+        **kwargs,
     ):
         """Log a failure message with optional indent, separator, color, and pprint."""
         if self.isEnabledFor(FAIL):

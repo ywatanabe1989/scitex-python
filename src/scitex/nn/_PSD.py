@@ -14,7 +14,6 @@ class PSD(nn.Module):
         self.prob = prob
 
     def forward(self, signal):
-
         is_complex = signal.is_complex()
         if is_complex:
             signal_fft = torch.fft.fft(signal, dim=self.dim)

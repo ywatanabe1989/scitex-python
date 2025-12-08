@@ -8,4 +8,5 @@ def replace(string, dict):
         string = string.replace(k, v)
     return string
 
+
 # EOF

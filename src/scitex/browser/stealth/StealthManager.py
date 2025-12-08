@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/stealth/StealthManager.py"
-)
+
+__FILE__ = "./src/scitex/browser/stealth/StealthManager.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -57,9 +56,7 @@ class StealthManager:
             # "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
         ]
         user_agent = random.choice(user_agents)
-        logger.debug(
-            f"{self.name}: User Agent randomly selected: {user_agent}"
-        )
+        logger.debug(f"{self.name}: User Agent randomly selected: {user_agent}")
         return user_agent
 
     def get_random_viewport(self) -> dict:
@@ -90,9 +87,7 @@ class StealthManager:
                     {"width": 1280, "height": 720},
                 ]
             )
-            logger.debug(
-                f"{self.name}: Viewport randomly selected: {viewport}"
-            )
+            logger.debug(f"{self.name}: Viewport randomly selected: {viewport}")
             return viewport
 
     def get_stealth_options(self) -> dict:
@@ -224,9 +219,7 @@ class StealthManager:
         else:
             config_desc = "Default (1920x1080)"
 
-        logger.debug(
-            f"{self.name}: Browser window configuration: {config_desc}"
-        )
+        logger.debug(f"{self.name}: Browser window configuration: {config_desc}")
         return stealth_args
 
     def get_network_evasion_headers(self) -> dict:
@@ -246,17 +239,15 @@ class StealthManager:
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
             "Upgrade-Insecure-Requests": "1",
-            "X-Forwarded-For": f"{random.randint(1,254)}.{random.randint(1,254)}.{random.randint(1,254)}.{random.randint(1,254)}",
-            "X-Real-IP": f"{random.randint(1,254)}.{random.randint(1,254)}.{random.randint(1,254)}.{random.randint(1,254)}",
+            "X-Forwarded-For": f"{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}",
+            "X-Real-IP": f"{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}",
         }
 
     async def add_human_behavior_async(self, page: Page):
         """Add human-like behavior patterns to avoid detection."""
         # Random delay before starting interactions
         delay = random.uniform(2, 5)
-        logger.debug(
-            f"{self.name}: Adding human behavior delay: {delay:.2f} seconds"
-        )
+        logger.debug(f"{self.name}: Adding human behavior delay: {delay:.2f} seconds")
         await asyncio.sleep(delay)
 
         # Simulate scrolling behavior
@@ -273,9 +264,7 @@ class StealthManager:
         except Exception as e:
             logger.debug(f"{self.name}: Human behavior simulation failed: {e}")
 
-    async def handle_cloudflare_challenge_async(
-        self, page: Page, max_wait: int = 45
-    ):
+    async def handle_cloudflare_challenge_async(self, page: Page, max_wait: int = 45):
         """Enhanced Cloudflare challenge detection and handling."""
         logger.debug(f"{self.name}: Checking for Cloudflare challenge...")
 
@@ -342,9 +331,7 @@ class StealthManager:
             # Additional wait to ensure page is fully loaded
             await asyncio.sleep(random.uniform(2, 4))
 
-            logger.debug(
-                f"{self.name}: Cloudflare challenge passed successfully"
-            )
+            logger.debug(f"{self.name}: Cloudflare challenge passed successfully")
             return True
 
         except Exception as e:
@@ -910,9 +897,7 @@ class StealthManager:
         await element.click()
 
     async def human_mouse_move_async(self, page: Page):
-        await page.mouse.move(
-            random.randint(100, 800), random.randint(100, 600)
-        )
+        await page.mouse.move(random.randint(100, 800), random.randint(100, 600))
 
     async def human_scroll_async(self, page: Page):
         scroll_distance = random.randint(300, 800)

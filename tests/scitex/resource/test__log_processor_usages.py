@@ -557,7 +557,9 @@ if __name__ == "__main__":
 # main = log_processor_usages
 # 
 # if __name__ == "__main__":
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
+#         sys, plt, verbose=False
+#     )
 #     main()
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 

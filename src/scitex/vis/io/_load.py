@@ -47,7 +47,7 @@ def load_figure_json(
 
     # Validate if requested
     if validate:
-        from ..backend.parser import validate_figure_json
+        from ..backend._parser import validate_figure_json
 
         validate_figure_json(fig_json)
 

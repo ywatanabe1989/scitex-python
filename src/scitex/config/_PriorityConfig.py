@@ -1,36 +1,133 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 18:53:13 (ywatanabe)"
+# Timestamp: "2025-12-09 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/config/PriorityConfig.py
 
 
 """
 Priority-based configuration resolver.
 
-Provides clean precedence hierarchy: direct → env → config → default
+Provides clean precedence hierarchy: direct → config_dict → env → default
 
 Based on priority-config by ywatanabe (https://github.com/ywatanabe1989/priority-config)
 Incorporated into scitex for self-contained configuration management.
+
+Note: config_dict values (from YAML or passed dict) take priority over
+environment variables. This follows the Scholar module's CascadeConfig pattern.
 """
 
 import os
+from pathlib import Path
 from typing import Dict
 from typing import List
 from typing import Optional, Type, Any
 
 
+def load_dotenv(dotenv_path: Optional[str] = None) -> bool:
+    """Load environment variables from .env file.
+
+    Searches for .env file in the following order:
+    1. Explicit dotenv_path if provided
+    2. Current working directory
+    3. User home directory
+
+    Parameters
+    ----------
+    dotenv_path : str, optional
+        Path to .env file. If None, searches default locations.
+
+    Returns
+    -------
+    bool
+        True if .env file was found and loaded, False otherwise.
+    """
+    paths_to_try = []
+
+    if dotenv_path:
+        paths_to_try.append(Path(dotenv_path))
+    else:
+        # Default search paths
+        paths_to_try.extend(
+            [
+                Path.cwd() / ".env",
+                Path.home() / ".env",
+            ]
+        )
+
+    for path in paths_to_try:
+        if path.exists() and path.is_file():
+            try:
+                with open(path, "r") as f:
+                    for line in f:
+                        line = line.strip()
+                        # Skip empty lines and comments
+                        if not line or line.startswith("#"):
+                            continue
+                        # Handle export prefix
+                        if line.startswith("export "):
+                            line = line[7:]
+                        # Parse key=value
+                        if "=" in line:
+                            key, _, value = line.partition("=")
+                            key = key.strip()
+                            value = value.strip()
+                            # Remove quotes if present
+                            if (value.startswith('"') and value.endswith('"')) or (
+                                value.startswith("'") and value.endswith("'")
+                            ):
+                                value = value[1:-1]
+                            # Only set if not already in environment (env takes precedence)
+                            if key not in os.environ:
+                                os.environ[key] = value
+                return True
+            except Exception:
+                continue
+    return False
+
+
+def get_scitex_dir(direct_val: Optional[str] = None) -> Path:
+    """Get SCITEX_DIR with priority: direct → env → default.
+
+    This is a convenience function for the most common use case.
+
+    Parameters
+    ----------
+    direct_val : str, optional
+        Direct value (highest precedence)
+
+    Returns
+    -------
+    Path
+        Resolved SCITEX_DIR path
+    """
+    # Try to load .env first (won't override existing env vars)
+    load_dotenv()
+
+    if direct_val is not None:
+        return Path(direct_val).expanduser()
+
+    env_val = os.getenv("SCITEX_DIR")
+    if env_val:
+        return Path(env_val).expanduser()
+
+    return Path.home() / ".scitex"
+
+
 class PriorityConfig:
-    """Universal config resolver with precedence: direct → env → config → default
+    """Universal config resolver with precedence: direct → config_dict → env → default
+
+    Config dict (from YAML or passed dict) takes priority over env variables.
+    This follows the Scholar module's CascadeConfig pattern.
 
     Examples
     --------
     >>> from scitex.config import PriorityConfig
     >>> config = PriorityConfig(config_dict={"port": 3000}, env_prefix="SCITEX_")
     >>> port = config.resolve("port", None, default=8000, type=int)
-    3000  # from config_dict (env not set)
-    >>> # With env: PORT=5000 python script.py
+    3000  # from config_dict (highest after direct)
+    >>> # With env: SCITEX_PORT=5000 python script.py
     >>> port = config.resolve("port", None, default=8000, type=int)
-    5000  # env takes precedence over config
+    3000  # config_dict takes precedence over env
     >>> port = config.resolve("port", 9000, default=8000, type=int)
     9000  # direct value takes highest precedence
     """
@@ -87,7 +184,10 @@ class PriorityConfig:
     ) -> Any:
         """Get value with precedence hierarchy.
 
-        Precedence: direct → env → config → default
+        Precedence: direct → config_dict → env → default
+
+        This follows the Scholar module's CascadeConfig pattern where
+        config dict takes higher priority than environment variables.
 
         Parameters
         ----------
@@ -115,16 +215,16 @@ class PriorityConfig:
         env_key = f"{self.env_prefix}{normalized_key.upper() if self.auto_uppercase else normalized_key}"
         env_val = os.getenv(env_key)
 
-        # Priority: direct → env → config → default
+        # Priority: direct → config_dict → env → default
         if direct_val is not None:
             source = "direct"
             final_value = direct_val
+        elif key in self.config_dict:
+            source = "config_dict"
+            final_value = self.config_dict[key]
         elif env_val:
             source = f"env:{env_key}"
             final_value = self._convert_type(env_val, type)
-        elif key in self.config_dict:
-            source = "config"
-            final_value = self.config_dict[key]
         else:
             source = "default"
             final_value = default
@@ -134,9 +234,7 @@ class PriorityConfig:
         else:
             should_mask = self._is_sensitive(key)
 
-        display_value = (
-            self._mask_value(final_value) if should_mask else final_value
-        )
+        display_value = self._mask_value(final_value) if should_mask else final_value
 
         self.resolution_log.append(
             {
@@ -158,9 +256,7 @@ class PriorityConfig:
         print("Configuration Resolution Log:")
         print("-" * 50)
         for entry in self.resolution_log:
-            print(
-                f"{entry['key']:<20} = {entry['value']:<20} ({entry['source']})"
-            )
+            print(f"{entry['key']:<20} = {entry['value']:<20} ({entry['source']})")
 
     def clear_log(self) -> None:
         """Clear resolution log."""
@@ -191,5 +287,6 @@ class PriorityConfig:
         if len(value_str) <= 4:
             return "****"
         return value_str[:2] + "*" * (len(value_str) - 4) + value_str[-2:]
+
 
 # EOF

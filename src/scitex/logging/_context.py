@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/logging/_context.py"
-)
+
+__FILE__ = "./src/scitex/logging/_context.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -29,7 +28,7 @@ from ._formatters import SciTeXFileFormatter
 def log_to_file(
     file_path: Union[str, Path],
     level: int = _logging.DEBUG,
-    mode: str = 'w',
+    mode: str = "w",
     formatter: Optional[_logging.Formatter] = None,
 ):
     """Context manager to temporarily log all output to a specific file.
@@ -72,6 +71,7 @@ def log_to_file(
     def _log_info():
         try:
             from scitex import logging
+
             logger = logging.getLogger(__name__)
             logger.info(f"Logging to: {file_path}")
         except:
@@ -90,6 +90,7 @@ def log_to_file(
         def _log_saved():
             try:
                 from scitex import logging
+
                 logger = logging.getLogger(__name__)
                 logger.info(f"Log saved: {file_path}")
             except:
@@ -98,6 +99,6 @@ def log_to_file(
         _log_saved()
 
 
-__all__ = ['log_to_file']
+__all__ = ["log_to_file"]
 
 # EOF

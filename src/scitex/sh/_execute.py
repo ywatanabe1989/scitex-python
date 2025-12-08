@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/sh/_execute.py"
-)
+
+__FILE__ = "./src/scitex/sh/_execute.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -28,7 +27,7 @@ def execute(
     command_str_or_list: CommandInput,
     verbose: bool = True,
     timeout: int = None,
-    stream_output: bool = False
+    stream_output: bool = False,
 ) -> ShellResult:
     """
     Executes a shell command safely (list format only).
@@ -84,7 +83,7 @@ def _execute_buffered(
         process.kill()
         stdout_bytes, stderr_bytes = process.communicate()
         timeout_msg = f"Command timed out after {timeout} seconds"
-        stderr_bytes = (stderr_bytes + b"\n" + timeout_msg.encode("utf-8"))
+        stderr_bytes = stderr_bytes + b"\n" + timeout_msg.encode("utf-8")
 
     stdout = stdout_bytes.decode("utf-8").strip()
     stderr = stderr_bytes.decode("utf-8").strip()
@@ -114,7 +113,7 @@ def _execute_with_streaming(
 
     # Set PYTHONUNBUFFERED for Python scripts and unbuffered mode for shell
     env = os.environ.copy()
-    env['PYTHONUNBUFFERED'] = '1'
+    env["PYTHONUNBUFFERED"] = "1"
 
     process = subprocess.Popen(
         command_str_or_list,
@@ -131,6 +130,7 @@ def _execute_with_streaming(
 
     # Use non-blocking reads
     import fcntl
+
     def make_non_blocking(fd):
         flags = fcntl.fcntl(fd, fcntl.F_GETFL)
         fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
@@ -193,7 +193,9 @@ def _execute_with_streaming(
                         stderr_data.append(chunk)
                         if verbose:
                             text = chunk.decode("utf-8", errors="replace")
-                            print(scitex.str.color_text(text, "red"), end="", flush=True)
+                            print(
+                                scitex.str.color_text(text, "red"), end="", flush=True
+                            )
                 except (IOError, BlockingIOError):
                     pass
                 break
@@ -217,5 +219,6 @@ def _execute_with_streaming(
     }
 
     return result
+
 
 # EOF

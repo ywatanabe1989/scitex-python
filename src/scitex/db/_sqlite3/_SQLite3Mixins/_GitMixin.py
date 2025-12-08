@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -74,13 +75,9 @@ class _GitMixin:
         )
 
         # Initialize HEAD if not exists
-        if not self.execute(
-            "SELECT 1 FROM _git_refs WHERE name='HEAD'"
-        ).fetchone():
+        if not self.execute("SELECT 1 FROM _git_refs WHERE name='HEAD'").fetchone():
             self.execute("INSERT INTO _git_refs VALUES ('HEAD', NULL, 'HEAD')")
-            self.execute(
-                "INSERT INTO _git_refs VALUES ('main', NULL, 'branch')"
-            )
+            self.execute("INSERT INTO _git_refs VALUES ('main', NULL, 'branch')")
 
     def git_commit(self, message: str = "", author: str = "unknown") -> str:
         """Create a new commit with current database state.
@@ -109,9 +106,7 @@ class _GitMixin:
 
         # Generate commit hash
         tree_hash = self._git_calculate_tree_hash(changes)
-        commit_data = (
-            f"{parent_hash}:{message}:{author}:{time.time()}:{tree_hash}"
-        )
+        commit_data = f"{parent_hash}:{message}:{author}:{time.time()}:{tree_hash}"
         commit_hash = hashlib.sha256(commit_data.encode()).hexdigest()[:8]
 
         # Store commit
@@ -253,9 +248,7 @@ class _GitMixin:
             """
             ).fetchall()
 
-    def git_log(
-        self, limit: int = 10, oneline: bool = False
-    ) -> List[Dict[str, Any]]:
+    def git_log(self, limit: int = 10, oneline: bool = False) -> List[Dict[str, Any]]:
         """Show commit history.
 
         Parameters
@@ -450,9 +443,7 @@ class _GitMixin:
     def _git_resolve_ref(self, ref: str) -> Optional[str]:
         """Resolve a reference to a commit hash."""
         # Check if it's already a commit hash
-        if self.execute(
-            "SELECT 1 FROM _git_commits WHERE hash = ?", (ref,)
-        ).fetchone():
+        if self.execute("SELECT 1 FROM _git_commits WHERE hash = ?", (ref,)).fetchone():
             return ref
 
         # Check if it's a branch or tag
@@ -461,23 +452,17 @@ class _GitMixin:
         ).fetchone()
         return result[0] if result else None
 
-    def _git_calculate_changes(
-        self, since_commit: Optional[str]
-    ) -> List[Dict]:
+    def _git_calculate_changes(self, since_commit: Optional[str]) -> List[Dict]:
         """Calculate changes since a commit."""
         changes = []
 
         # Get all tracked tables (exclude git tables)
-        tables = [
-            t for t in self.get_table_names() if not t.startswith("_git_")
-        ]
+        tables = [t for t in self.get_table_names() if not t.startswith("_git_")]
 
         for table in tables:
             # This is simplified - real implementation would track actual changes
             # For now, we'll snapshot current state
-            current_data = self.execute(
-                f"SELECT rowid, * FROM {table}"
-            ).fetchall()
+            current_data = self.execute(f"SELECT rowid, * FROM {table}").fetchall()
 
             for row in current_data[:10]:  # Limit for demo
                 changes.append(
@@ -497,18 +482,14 @@ class _GitMixin:
         tree_data = json.dumps(changes, sort_keys=True, default=str)
         return hashlib.sha256(tree_data.encode()).hexdigest()[:8]
 
-    def _git_find_path(
-        self, from_hash: Optional[str], to_hash: str
-    ) -> List[str]:
+    def _git_find_path(self, from_hash: Optional[str], to_hash: str) -> List[str]:
         """Find path between two commits."""
         if not from_hash:
             return [to_hash]
 
         # Build commit graph
         commits = {}
-        for hash, parent in self.execute(
-            "SELECT hash, parent_hash FROM _git_commits"
-        ):
+        for hash, parent in self.execute("SELECT hash, parent_hash FROM _git_commits"):
             commits[hash] = parent
 
         # Find common ancestor and build path
@@ -528,9 +509,7 @@ class _GitMixin:
             current = result[0] if result else None
         return False
 
-    def _git_apply_changes(
-        self, commit_hash: str, reverse: bool = False
-    ) -> None:
+    def _git_apply_changes(self, commit_hash: str, reverse: bool = False) -> None:
         """Apply or reverse changes from a commit."""
         changes = self.execute(
             """
@@ -545,16 +524,12 @@ class _GitMixin:
             if reverse:
                 # Reverse the operation
                 if op == "INSERT":
-                    self.execute(
-                        f"DELETE FROM {table} WHERE rowid = ?", (row_id,)
-                    )
+                    self.execute(f"DELETE FROM {table} WHERE rowid = ?", (row_id,))
                 elif op == "DELETE" and old_data:
                     # Re-insert deleted data
                     data = pickle.loads(old_data)
                     placeholders = ",".join(["?" for _ in data])
-                    self.execute(
-                        f"INSERT INTO {table} VALUES ({placeholders})", data
-                    )
+                    self.execute(f"INSERT INTO {table} VALUES ({placeholders})", data)
                 elif op == "UPDATE" and old_data:
                     # Restore old data
                     data = pickle.loads(old_data)
@@ -564,13 +539,9 @@ class _GitMixin:
                 if op == "INSERT" and new_data:
                     data = pickle.loads(new_data)
                     placeholders = ",".join(["?" for _ in data])
-                    self.execute(
-                        f"INSERT INTO {table} VALUES ({placeholders})", data
-                    )
+                    self.execute(f"INSERT INTO {table} VALUES ({placeholders})", data)
                 elif op == "DELETE":
-                    self.execute(
-                        f"DELETE FROM {table} WHERE rowid = ?", (row_id,)
-                    )
+                    self.execute(f"DELETE FROM {table} WHERE rowid = ?", (row_id,))
                 # UPDATE handling would go here
 
     def _summarize_changes(self, changes: List[Dict]) -> Dict[str, int]:
@@ -579,5 +550,6 @@ class _GitMixin:
         for change in changes:
             summary[change["operation"]] += 1
         return summary
+
 
 # EOF

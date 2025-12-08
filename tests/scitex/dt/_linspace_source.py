@@ -1,1 +1,1 @@
-../../../src/mngs/dt/_linspace.py
+../../../src/scitex/dt/_linspace.py

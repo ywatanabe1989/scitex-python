@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/template/_clone_project.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -84,7 +85,9 @@ def clone_project(
         # Parse project_dir into name and parent directory
         project_path = Path(project_dir)
         project_name = project_path.name
-        target_dir_path = project_path.parent if project_path.parent != Path('.') else Path.cwd()
+        target_dir_path = (
+            project_path.parent if project_path.parent != Path(".") else Path.cwd()
+        )
         target_path = target_dir_path / project_name
 
         # Check if target directory already exists
@@ -116,7 +119,9 @@ def clone_project(
 
                 # Clone the template repository
                 ctx.substep(f"Cloning from {template_url}{ref_info}...")
-                if not scitex.git.clone_repo(template_url, temp_path, branch=branch, tag=tag, verbose=False):
+                if not scitex.git.clone_repo(
+                    template_url, temp_path, branch=branch, tag=tag, verbose=False
+                ):
                     ctx.step(f"Failed to clone to {target_path}", success=False)
                     return False
                 ctx.step(f"Cloned to {target_path}")

@@ -19,14 +19,17 @@ Prerequisites:
 
 try:
     from scitex.str._latex_fallback import safe_latex_render, latex_fallback_decorator
+
     FALLBACK_AVAILABLE = True
 except ImportError:
     FALLBACK_AVAILABLE = False
+
     def latex_fallback_decorator(fallback_strategy="auto", preserve_math=True):
         def decorator(func):
             return func
+
         return decorator
-    
+
     def safe_latex_render(text, fallback_strategy="auto", preserve_math=True):
         return text
 
@@ -54,10 +57,10 @@ def to_vec(v_str, enable_fallback=True, fallback_strategy="auto"):
     --------
     >>> vector = to_vec("AB")
     >>> print(vector)  # LaTeX: \overrightarrow{\mathrm{AB}}
-    
+
     >>> vector = to_vec("AB")  # Falls back to unicode if LaTeX fails
     >>> print(vector)  # Unicode: A⃗B or AB⃗
-    
+
     Notes
     -----
     If LaTeX rendering fails, this function automatically falls back to:
@@ -67,10 +70,10 @@ def to_vec(v_str, enable_fallback=True, fallback_strategy="auto"):
     """
     if not v_str:
         return ""
-    
+
     # Create LaTeX vector notation
     latex_vector = f"\\overrightarrow{{\\mathrm{{{v_str}}}}}"
-    
+
     if enable_fallback and FALLBACK_AVAILABLE:
         # Custom fallback handling for vectors
         if fallback_strategy == "auto":
@@ -94,14 +97,14 @@ def to_vec(v_str, enable_fallback=True, fallback_strategy="auto"):
 def safe_to_vec(v_str, fallback_strategy="auto"):
     """
     Safe version of to_vec with explicit fallback control.
-    
+
     Parameters
     ----------
     v_str : str
         String representation of the vector
     fallback_strategy : str, optional
         Explicit fallback strategy: "auto", "mathtext", "unicode", "plain"
-        
+
     Returns
     -------
     str

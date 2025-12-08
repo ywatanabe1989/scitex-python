@@ -7,7 +7,7 @@ from typing import Dict, Any, Optional
 import numpy as np
 
 from ..model import FigureModel, AxesModel, PlotModel, GuideModel, AnnotationModel
-from .parser import parse_figure_json
+from ._parser import parse_figure_json
 
 
 def render_figure(fig_model: FigureModel):

@@ -235,7 +235,6 @@ def _print_module_contents(df: pd.DataFrame) -> None:
 
 
 if __name__ == "__main__":
-
     sys.setrecursionlimit(10_000)
     df = inspect_module(scitex, docstring=True, print_output=False, columns=["Name"])
     print(scitex.pd.round(df))

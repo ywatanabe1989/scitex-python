@@ -39,6 +39,7 @@ __all__ = [
     "google_login",
 ]
 
+
 # Compatibility check - ensure we don't break existing code
 def _check_compatibility():
     """Verify existing scitex.browser still works."""
@@ -46,12 +47,14 @@ def _check_compatibility():
         from scitex.browser import browser_logger
         from scitex.browser.automation import CookieAutoAcceptor
         from scitex.browser.interaction import click_center_async
+
         return True
     except ImportError as e:
         raise RuntimeError(
             f"❌ Collaboration module broke existing imports: {e}\n"
             "This should never happen! Please report this bug."
         )
+
 
 _check_compatibility()
 

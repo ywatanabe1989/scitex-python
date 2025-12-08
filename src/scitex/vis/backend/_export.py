@@ -6,7 +6,7 @@
 from pathlib import Path
 from typing import Dict, Any, Optional, Union
 
-from .render import build_figure_from_json
+from ._render import build_figure_from_json
 
 
 def export_figure(

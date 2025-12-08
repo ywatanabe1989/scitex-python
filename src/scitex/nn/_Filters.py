@@ -85,7 +85,9 @@ class BaseFilter1D(nn.Module):
             n_chs,
             len(self.kernels),
             seq_len,
-        ), f"The shape of the filtered signal ({x.shape}) does not match the expected shape: ({batch_size}, {n_chs}, {len(self.kernels)}, {seq_len})."
+        ), (
+            f"The shape of the filtered signal ({x.shape}) does not match the expected shape: ({batch_size}, {n_chs}, {len(self.kernels)}, {seq_len})."
+        )
 
         # Edge remove
         x = self.remove_edges(x, edge_len)
@@ -411,7 +413,9 @@ if __name__ == "__main__":
     import scitex
 
     # Start
-    CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, fig_scale=5)
+    CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
+        sys, plt, fig_scale=5
+    )
 
     xx, tt, fs = scitex.dsp.demo_sig(sig_type="chirp", fs=1024)
     xx = torch.tensor(xx).cuda()

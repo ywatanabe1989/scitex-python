@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/stealth/HumanBehavior.py"
-)
+
+__FILE__ = "./src/scitex/browser/stealth/HumanBehavior.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -93,9 +92,7 @@ class HumanBehavior:
         self, page: Page, selector: str = None, element=None
     ) -> None:
         """Hover over element before clicking with human-like timing."""
-        await browser_logger.debug(
-            page, f"{self.name}: Hovering and clicking..."
-        )
+        await browser_logger.debug(page, f"{self.name}: Hovering and clicking...")
         if selector:
             element = page.locator(selector)
 
@@ -111,9 +108,7 @@ class HumanBehavior:
             target_x = box["x"] + box["width"] / 2 + offset_x
             target_y = box["y"] + box["height"] / 2 + offset_y
 
-            await HumanBehavior.mouse_move_async(
-                page, int(target_x), int(target_y)
-            )
+            await HumanBehavior.mouse_move_async(page, int(target_x), int(target_y))
 
         # Hover
         await element.hover()

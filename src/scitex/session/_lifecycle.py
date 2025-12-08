@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/session/_lifecycle.py"
-)
+
+__FILE__ = "./src/scitex/session/_lifecycle.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -48,18 +47,20 @@ import platform
 is_headless = False
 try:
     # Check for WSL
-    if 'microsoft' in platform.uname().release.lower() or 'WSL' in os.environ.get('WSL_DISTRO_NAME', ''):
+    if "microsoft" in platform.uname().release.lower() or "WSL" in os.environ.get(
+        "WSL_DISTRO_NAME", ""
+    ):
         is_headless = True
     # Check for no X11 display
-    elif not os.environ.get('DISPLAY'):
+    elif not os.environ.get("DISPLAY"):
         is_headless = True
 except Exception:
     # Fallback: if on Linux without DISPLAY, assume headless
-    if sys.platform.startswith('linux') and not os.environ.get('DISPLAY'):
+    if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
         is_headless = True
 
 if is_headless:
-    matplotlib.use('Agg')
+    matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt_module
 
@@ -113,7 +114,7 @@ def _print_header(
         Whether to print detailed information, by default True
     """
 
-    if args is not None and hasattr(args, '_get_kwargs'):
+    if args is not None and hasattr(args, "_get_kwargs"):
         args_str = "Arguments:"
         for arg, value in args._get_kwargs():
             args_str += f"\n    {arg}: {value}"
@@ -133,9 +134,9 @@ def _print_header(
 
     sleep(1)
     if verbose:
-        print(f"\n{'-'*40}\n")
+        print(f"\n{'-' * 40}\n")
         pprint(configs.to_dict())
-        print(f"\n{'-'*40}\n")
+        print(f"\n{'-' * 40}\n")
     sleep(1)
 
 
@@ -196,8 +197,8 @@ def _setup_configs(
     if sdir_path:
         # Remove /RUNNING/ID/ to get base output dir
         parts = sdir_path.parts
-        if 'RUNNING' in parts:
-            running_idx = parts.index('RUNNING')
+        if "RUNNING" in parts:
+            running_idx = parts.index("RUNNING")
             sdir_out = Path(*parts[:running_idx])
         else:
             sdir_out = sdir_path.parent
@@ -206,17 +207,20 @@ def _setup_configs(
 
     # Load YAML configs from ./config/*.yaml
     from scitex.io._load_configs import load_configs
+
     CONFIGS = load_configs(IS_DEBUG).to_dict()
 
     # Add session-specific config with clean structure (Path objects only)
-    CONFIGS.update({
-        "ID": ID,
-        "PID": PID,
-        "START_DATETIME": datetime.now(),
-        "FILE": Path(file) if file else None,
-        "SDIR_OUT": sdir_out,
-        "SDIR_RUN": sdir_path,
-    })
+    CONFIGS.update(
+        {
+            "ID": ID,
+            "PID": PID,
+            "START_DATETIME": datetime.now(),
+            "FILE": Path(file) if file else None,
+            "SDIR_OUT": sdir_out,
+            "SDIR_RUN": sdir_path,
+        }
+    )
     return CONFIGS
 
 
@@ -298,6 +302,7 @@ def _get_debug_mode() -> bool:
     """Get debug mode from configuration."""
     try:
         from scitex.io._load import load
+
         IS_DEBUG_PATH = "./config/IS_DEBUG.yaml"
         if _os.path.exists(IS_DEBUG_PATH):
             IS_DEBUG = load(IS_DEBUG_PATH).get("IS_DEBUG", False)
@@ -442,9 +447,7 @@ def start(
             caller_file = _os.path.realpath(caller_file)
 
         # Define sdir
-        sdir = clean_path(
-            _os.path.splitext(caller_file)[0] + f"_out/RUNNING/{ID}/"
-        )
+        sdir = clean_path(_os.path.splitext(caller_file)[0] + f"_out/RUNNING/{ID}/")
 
         # Optional
         if sdir_suffix:
@@ -457,13 +460,12 @@ def start(
     ########################################
 
     # Setup configs after having all necessary parameters
-    CONFIGS = _setup_configs(
-        IS_DEBUG, ID, PID, file, sdir, relative_sdir, verbose
-    )
+    CONFIGS = _setup_configs(IS_DEBUG, ID, PID, file, sdir, relative_sdir, verbose)
 
     # Logging
     if sys is not None:
         from scitex.io._flush import flush
+
         flush(sys)
         # Lazy import to avoid circular dependency
         from scitex.logging._Tee import tee
@@ -594,7 +596,9 @@ def _save_configs(CONFIG):
     from scitex.io._save import save as scitex_io_save
 
     # Convert to dict with all keys (including private ones) for saving
-    config_dict = CONFIG.to_dict(include_private=True) if hasattr(CONFIG, 'to_dict') else CONFIG
+    config_dict = (
+        CONFIG.to_dict(include_private=True) if hasattr(CONFIG, "to_dict") else CONFIG
+    )
 
     scitex_io_save(
         config_dict, str(CONFIG["SDIR_RUN"] / "CONFIGS/CONFIG.pkl"), verbose=False
@@ -635,9 +639,7 @@ def _args_to_str(args_dict):
         return ""
 
 
-def running2finished(
-    CONFIG, exit_status=None, remove_src_dir=True, max_wait=60
-):
+def running2finished(CONFIG, exit_status=None, remove_src_dir=True, max_wait=60):
     """Move session from RUNNING to FINISHED directory.
 
     Parameters
@@ -666,7 +668,6 @@ def running2finished(
     src_dir = str(CONFIG["SDIR_RUN"])
     _os.makedirs(dest_dir, exist_ok=True)
     try:
-
         # Copy files individually
         for item in _os.listdir(src_dir):
             s = _os.path.join(src_dir, item)
@@ -677,13 +678,9 @@ def running2finished(
                 shutil.copy2(s, d)
 
         start_time = time.time()
-        while (
-            not _os.path.exists(dest_dir)
-            and time.time() - start_time < max_wait
-        ):
+        while not _os.path.exists(dest_dir) and time.time() - start_time < max_wait:
             time.sleep(0.1)
         if _os.path.exists(dest_dir):
-
             print()
             logger.success(
                 f"Congratulations! The script completed: {dest_dir}",
@@ -743,7 +740,7 @@ def close(CONFIG, message=":)", notify=False, verbose=True, exit_status=None):
             import atexit
 
             # Close all figures
-            plt.close('all')
+            plt.close("all")
 
             # CRITICAL: Unregister matplotlib's atexit handlers to prevent segfault
             # Matplotlib registers handlers that try to cleanup on exit,
@@ -751,12 +748,13 @@ def close(CONFIG, message=":)", notify=False, verbose=True, exit_status=None):
             try:
                 # Remove matplotlib-related atexit handlers
                 import weakref
+
                 # Matplotlib uses weakref for some cleanup
-                if hasattr(matplotlib, '_pylab_helpers'):
+                if hasattr(matplotlib, "_pylab_helpers"):
                     matplotlib._pylab_helpers.Gcf.destroy_all()
 
                 # Clear any pyplot state
-                if hasattr(plt, 'get_fignums'):
+                if hasattr(plt, "get_fignums"):
                     for fignum in plt.get_fignums():
                         plt.close(fignum)
 
@@ -765,6 +763,7 @@ def close(CONFIG, message=":)", notify=False, verbose=True, exit_status=None):
 
             # Force garbage collection to cleanup matplotlib resources
             import gc
+
             gc.collect()
 
             if verbose:
@@ -825,5 +824,6 @@ def close(CONFIG, message=":)", notify=False, verbose=True, exit_status=None):
             except Exception:
                 # Silent fail to ensure logs are saved even if there's an error
                 pass
+
 
 # EOF

@@ -10,8 +10,8 @@ import json
 import threading
 import webbrowser
 
-from .utils import find_available_port, kill_process_on_port, check_port_available
-from .renderer import render_preview_with_bboxes
+from ._utils import find_available_port, kill_process_on_port, check_port_available
+from ._renderer import render_preview_with_bboxes
 from .templates import build_html_template
 
 
@@ -47,6 +47,7 @@ class WebEditor:
 
         # Get SciTeX defaults and merge with metadata
         from .._defaults import get_scitex_defaults, extract_defaults_from_metadata
+
         self.scitex_defaults = get_scitex_defaults()
         self.metadata_defaults = extract_defaults_from_metadata(metadata)
 
@@ -64,13 +65,16 @@ class WebEditor:
         try:
             from flask import Flask, render_template_string, request, jsonify
         except ImportError:
-            raise ImportError("Flask is required for web editor. Install: pip install flask")
+            raise ImportError(
+                "Flask is required for web editor. Install: pip install flask"
+            )
 
         # Handle port conflicts
         if not check_port_available(self._requested_port):
             print(f"Port {self._requested_port} is in use. Attempting to free it...")
             if kill_process_on_port(self._requested_port):
                 import time
+
                 time.sleep(0.5)
                 self.port = self._requested_port
                 print(f"Successfully freed port {self.port}")
@@ -84,69 +88,75 @@ class WebEditor:
         editor = self
         html_template = build_html_template()
 
-        @app.route('/')
+        @app.route("/")
         def index():
             return render_template_string(
                 html_template,
                 filename=str(editor.json_path.resolve()),
-                overrides=json.dumps(editor.current_overrides)
+                overrides=json.dumps(editor.current_overrides),
             )
 
-        @app.route('/preview')
+        @app.route("/preview")
         def preview():
             """Generate figure preview as base64 PNG with element bboxes."""
             img_data, bboxes, img_size = render_preview_with_bboxes(
                 editor.csv_data, editor.current_overrides
             )
-            return jsonify({'image': img_data, 'bboxes': bboxes, 'img_size': img_size})
+            return jsonify({"image": img_data, "bboxes": bboxes, "img_size": img_size})
 
-        @app.route('/update', methods=['POST'])
+        @app.route("/update", methods=["POST"])
         def update():
             """Update overrides and return new preview."""
             data = request.json
-            editor.current_overrides.update(data.get('overrides', {}))
+            editor.current_overrides.update(data.get("overrides", {}))
             editor._user_modified = True
             img_data, bboxes, img_size = render_preview_with_bboxes(
                 editor.csv_data, editor.current_overrides
             )
-            return jsonify({
-                'image': img_data,
-                'bboxes': bboxes,
-                'img_size': img_size,
-                'status': 'updated'
-            })
+            return jsonify(
+                {
+                    "image": img_data,
+                    "bboxes": bboxes,
+                    "img_size": img_size,
+                    "status": "updated",
+                }
+            )
 
-        @app.route('/save', methods=['POST'])
+        @app.route("/save", methods=["POST"])
         def save():
             """Save to .manual.json."""
             from .._edit import save_manual_overrides
-            try:
-                manual_path = save_manual_overrides(editor.json_path, editor.current_overrides)
-                return jsonify({'status': 'saved', 'path': str(manual_path)})
-            except Exception as e:
-                return jsonify({'status': 'error', 'message': str(e)}), 500
 
-        @app.route('/shutdown', methods=['POST'])
+            try:
+                manual_path = save_manual_overrides(
+                    editor.json_path, editor.current_overrides
+                )
+                return jsonify({"status": "saved", "path": str(manual_path)})
+            except Exception as e:
+                return jsonify({"status": "error", "message": str(e)}), 500
+
+        @app.route("/shutdown", methods=["POST"])
         def shutdown():
             """Shutdown the server."""
-            func = request.environ.get('werkzeug.server.shutdown')
+            func = request.environ.get("werkzeug.server.shutdown")
             if func is None:
-                raise RuntimeError('Not running with Werkzeug Server')
+                raise RuntimeError("Not running with Werkzeug Server")
             func()
-            return jsonify({'status': 'shutdown'})
+            return jsonify({"status": "shutdown"})
 
         # Open browser after short delay
         def open_browser():
             import time
+
             time.sleep(0.5)
-            webbrowser.open(f'http://127.0.0.1:{self.port}')
+            webbrowser.open(f"http://127.0.0.1:{self.port}")
 
         threading.Thread(target=open_browser, daemon=True).start()
 
         print(f"Starting SciTeX Editor at http://127.0.0.1:{self.port}")
         print("Press Ctrl+C to stop")
 
-        app.run(host='127.0.0.1', port=self.port, debug=False, use_reloader=False)
+        app.run(host="127.0.0.1", port=self.port, debug=False, use_reloader=False)
 
 
 # EOF

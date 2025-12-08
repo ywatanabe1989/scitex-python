@@ -7,6 +7,7 @@ from ._alternate_kwarg import alternate_kwarg
 from ._cache import cache
 from ._check_host import check_host, is_host, verify_host
 from ._ci import ci
+
 # _close.py moved to old/ directory - functionality now in scitex.session
 from ._embed import embed
 from ._inspect_module import inspect_module
@@ -31,7 +32,10 @@ from ._src import src
 
 # BACKWARD COMPATIBILITY: Import deprecated wrappers
 from ._deprecated_start import start as _deprecated_start
-from ._deprecated_close import close as _deprecated_close, running2finished as _deprecated_running2finished
+from ._deprecated_close import (
+    close as _deprecated_close,
+    running2finished as _deprecated_running2finished,
+)
 
 # Override the imported functions with deprecated wrappers
 start = _deprecated_start

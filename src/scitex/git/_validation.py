@@ -30,27 +30,27 @@ def validate_branch_name(name: str) -> Tuple[bool, str]:
 
     name = name.strip()
 
-    if name.startswith('-'):
+    if name.startswith("-"):
         return False, "Branch name cannot start with '-'"
 
-    if name.endswith('.lock'):
+    if name.endswith(".lock"):
         return False, "Branch name cannot end with '.lock'"
 
-    if '..' in name:
+    if ".." in name:
         return False, "Branch name cannot contain '..'"
 
-    invalid_chars = ['~', '^', ':', '?', '*', '[', '\\', ' ', '\t']
+    invalid_chars = ["~", "^", ":", "?", "*", "[", "\\", " ", "\t"]
     for char in invalid_chars:
         if char in name:
             return False, f"Branch name cannot contain '{char}'"
 
-    if name.endswith('/'):
+    if name.endswith("/"):
         return False, "Branch name cannot end with '/'"
 
-    if name.startswith('/'):
+    if name.startswith("/"):
         return False, "Branch name cannot start with '/'"
 
-    if '//' in name:
+    if "//" in name:
         return False, "Branch name cannot contain consecutive slashes"
 
     return True, ""
@@ -99,7 +99,7 @@ def validate_path(path: Path, must_exist: bool = False) -> Tuple[bool, str]:
             return False, f"Path does not exist: {path}"
 
         path_str = str(resolved)
-        if '..' in path.parts:
+        if ".." in path.parts:
             return False, "Path contains parent directory references"
 
         return True, ""

@@ -48,13 +48,17 @@ def send_gmail(
 
     # Auto-detect SMTP server based on sender email or use provided server
     if smtp_server is None:
-        if '@gmail.com' in sender_gmail:
-            smtp_server = 'smtp.gmail.com'
+        if "@gmail.com" in sender_gmail:
+            smtp_server = "smtp.gmail.com"
             smtp_port = smtp_port or 587
         else:
             # Use scitex.ai mail server for scitex.ai emails
-            smtp_server = os.getenv('SCITEX_SCHOLAR_FROM_EMAIL_SMTP_SERVER', 'mail1030.onamae.ne.jp')
-            smtp_port = smtp_port or int(os.getenv('SCITEX_SCHOLAR_FROM_EMAIL_SMTP_PORT', '587'))
+            smtp_server = os.getenv(
+                "SCITEX_SCHOLAR_FROM_EMAIL_SMTP_SERVER", "mail1030.onamae.ne.jp"
+            )
+            smtp_port = smtp_port or int(
+                os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_SMTP_PORT", "587")
+            )
 
     smtp_port = smtp_port or 587
 

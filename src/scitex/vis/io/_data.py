@@ -15,6 +15,7 @@ import hashlib
 
 class HashMismatchError(Exception):
     """Raised when a data file hash doesn't match expected value."""
+
     pass
 
 
@@ -92,8 +93,8 @@ def verify_all_data_hashes(
     Dict[str, bool]
         Dictionary mapping file paths to validation results
     """
-    from .directory import get_canvas_directory_path
-    from .canvas import load_canvas_json
+    from ._directory import get_canvas_directory_path
+    from ._canvas import load_canvas_json
 
     canvas_dir = get_canvas_directory_path(project_dir, canvas_name)
 
@@ -103,6 +104,7 @@ def verify_all_data_hashes(
         return {}
 
     import json
+
     with open(json_path, "r") as f:
         canvas_json = json.load(f)
 
@@ -140,8 +142,8 @@ def update_data_hash(
     str
         New hash value
     """
-    from .directory import get_canvas_directory_path
-    from .canvas import load_canvas_json, save_canvas_json
+    from ._directory import get_canvas_directory_path
+    from ._canvas import load_canvas_json, save_canvas_json
 
     canvas_dir = get_canvas_directory_path(project_dir, canvas_name)
     filepath = canvas_dir / rel_path
@@ -161,10 +163,12 @@ def update_data_hash(
     if not found:
         if "data_files" not in canvas_json:
             canvas_json["data_files"] = []
-        canvas_json["data_files"].append({
-            "path": rel_path,
-            "hash": new_hash,
-        })
+        canvas_json["data_files"].append(
+            {
+                "path": rel_path,
+                "hash": new_hash,
+            }
+        )
 
     save_canvas_json(project_dir, canvas_name, canvas_json)
 
@@ -190,7 +194,7 @@ def list_data_files(
     Dict[str, str]
         Dictionary mapping file paths to hash values
     """
-    from .canvas import load_canvas_json
+    from ._canvas import load_canvas_json
 
     canvas_json = load_canvas_json(project_dir, canvas_name, verify_data_hashes=False)
 

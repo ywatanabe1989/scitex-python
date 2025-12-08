@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/capture/__main__.py"
-)
+
+__FILE__ = "./src/scitex/capture/__main__.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 

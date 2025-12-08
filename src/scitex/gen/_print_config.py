@@ -17,7 +17,6 @@ Example:
     python _print_config.py PATH.TITAN.MAT
 """
 
-
 import sys
 import os
 import argparse
@@ -26,7 +25,6 @@ import sys
 
 
 def print_config(key):
-
     CONFIG = scitex.io.load_configs()
 
     if key is None:
@@ -38,7 +36,6 @@ def print_config(key):
         keys = key.split(".")
         value = CONFIG
         for k in keys:
-
             if isinstance(value, (dict, scitex.gen.utils._DotDict.DotDict)):
                 value = value.get(k)
 

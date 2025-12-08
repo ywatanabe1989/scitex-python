@@ -8,7 +8,7 @@ from ._misc import cosine, nannorm, rebase_a_vec, three_line_lengths_to_coords
 __all__ = [
     "euclidean_distance",
     "cdist",
-    "edist", 
+    "edist",
     "geometric_median",
     "cosine",
     "nannorm",

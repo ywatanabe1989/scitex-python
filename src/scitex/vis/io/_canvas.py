@@ -13,7 +13,7 @@ from typing import Dict, Any, Union, Optional
 from datetime import datetime
 import json
 
-from .directory import get_canvas_directory_path, SCHEMA_VERSION
+from ._directory import get_canvas_directory_path, SCHEMA_VERSION
 
 
 def _get_empty_canvas_template(canvas_name: str) -> Dict[str, Any]:
@@ -144,11 +144,13 @@ def load_canvas_json(
 
     # Verify data hashes if requested
     if verify_data_hashes and canvas_json.get("data_files"):
-        from .data import verify_all_data_hashes
+        from ._data import verify_all_data_hashes
+
         hash_results = verify_all_data_hashes(project_dir, canvas_name)
         invalid_files = [f for f, valid in hash_results.items() if not valid]
         if invalid_files:
-            from .data import HashMismatchError
+            from ._data import HashMismatchError
+
             raise HashMismatchError(
                 f"Data file hash mismatch for: {', '.join(invalid_files)}"
             )
@@ -217,7 +219,9 @@ def get_canvas_schema_version(
         Schema version string or None if not found
     """
     try:
-        canvas_json = load_canvas_json(project_dir, canvas_name, verify_data_hashes=False)
+        canvas_json = load_canvas_json(
+            project_dir, canvas_name, verify_data_hashes=False
+        )
         return canvas_json.get("schema_version")
     except FileNotFoundError:
         return None

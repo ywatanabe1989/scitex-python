@@ -36,7 +36,7 @@ def _normalize_canvas_name(canvas_name: str) -> str:
 def _strip_canvas_extension(canvas_name: str) -> str:
     """Remove .canvas extension from canvas_name."""
     if canvas_name.endswith(CANVAS_EXTENSION):
-        return canvas_name[:-len(CANVAS_EXTENSION)]
+        return canvas_name[: -len(CANVAS_EXTENSION)]
     return canvas_name
 
 
@@ -75,8 +75,9 @@ def ensure_canvas_directory(
     # Create empty canvas.json if not exists
     json_path = canvas_dir / "canvas.json"
     if not json_path.exists():
-        from .canvas import _get_empty_canvas_template
+        from ._canvas import _get_empty_canvas_template
         import json
+
         # Use the name without extension for canvas_name in JSON
         base_name = _strip_canvas_extension(canvas_name)
         template = _get_empty_canvas_template(base_name)
@@ -137,9 +138,11 @@ def list_canvas_directories(
     # Find .canvas directories that contain canvas.json
     canvas_names = []
     for item in sorted(parent_dir.iterdir()):
-        if (item.is_dir()
+        if (
+            item.is_dir()
             and item.name.endswith(CANVAS_EXTENSION)
-            and (item / "canvas.json").exists()):
+            and (item / "canvas.json").exists()
+        ):
             if include_extension:
                 canvas_names.append(item.name)
             else:

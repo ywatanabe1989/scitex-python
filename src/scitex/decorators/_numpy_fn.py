@@ -47,7 +47,9 @@ def numpy_fn(func: Callable) -> Callable:
             elif isinstance(arg, (int, float, str, type(None))):
                 # Pass through scalars and strings unchanged
                 validated_args.append(arg)
-            elif isinstance(arg, list) and all(isinstance(item, np.ndarray) for item in arg):
+            elif isinstance(arg, list) and all(
+                isinstance(item, np.ndarray) for item in arg
+            ):
                 # List of arrays - pass through as is
                 validated_args.append(arg)
             else:
@@ -65,14 +67,26 @@ def numpy_fn(func: Callable) -> Callable:
             if original_object is not None:
                 if isinstance(original_object, list):
                     return results.tolist()
-                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Tensor':
+                elif (
+                    hasattr(original_object, "__class__")
+                    and original_object.__class__.__name__ == "Tensor"
+                ):
                     import torch
+
                     return torch.tensor(results)
-                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataFrame':
+                elif (
+                    hasattr(original_object, "__class__")
+                    and original_object.__class__.__name__ == "DataFrame"
+                ):
                     import pandas as pd
+
                     return pd.DataFrame(results)
-                elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Series':
+                elif (
+                    hasattr(original_object, "__class__")
+                    and original_object.__class__.__name__ == "Series"
+                ):
                     import pandas as pd
+
                     return pd.Series(results)
             return results
 

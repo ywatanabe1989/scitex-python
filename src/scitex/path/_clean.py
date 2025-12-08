@@ -5,6 +5,7 @@
 
 import os
 
+
 def clean(path_string):
     """Cleans and normalizes a file system path string.
 
@@ -28,29 +29,30 @@ def clean(path_string):
         Normalized path string
     """
     # Convert Path objects to strings to avoid AttributeError
-    if hasattr(path_string, '__fspath__'):  # Check if it's a path-like object
+    if hasattr(path_string, "__fspath__"):  # Check if it's a path-like object
         path_string = str(path_string)
-        
+
     if not path_string:
         return ""
-    
+
     # Remember if path ends with a slash (indicating a directory)
     is_directory = path_string.endswith("/")
-    
+
     # Replace spaces with underscores
     path_string = path_string.replace(" ", "_")
-    
+
     # Use normpath to handle ../ and ./ references
     cleaned_path = os.path.normpath(path_string)
-    
+
     # Replace multiple slashes with single slash
     while "//" in cleaned_path:
         cleaned_path = cleaned_path.replace("//", "/")
-        
+
     # Restore trailing slash if it was a directory
     if is_directory and not cleaned_path.endswith("/"):
         cleaned_path += "/"
-        
+
     return cleaned_path
+
 
 # EOF

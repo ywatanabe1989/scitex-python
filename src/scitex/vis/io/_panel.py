@@ -13,9 +13,9 @@ from pathlib import Path
 from typing import Dict, Any, Union, List, Optional
 import shutil
 
-from .directory import get_canvas_directory_path
-from .canvas import load_canvas_json, save_canvas_json
-from .data import compute_file_hash
+from ._directory import get_canvas_directory_path
+from ._canvas import load_canvas_json, save_canvas_json
+from ._data import compute_file_hash
 
 
 def _symlink_or_copy(source: Path, dest: Path, bundle: bool = False) -> None:
@@ -142,7 +142,9 @@ def add_panel_from_scitex(
     canvas_json = load_canvas_json(project_dir, canvas_name, verify_data_hashes=False)
 
     # Remove existing panel with same name
-    canvas_json["panels"] = [p for p in canvas_json["panels"] if p.get("name") != panel_name]
+    canvas_json["panels"] = [
+        p for p in canvas_json["panels"] if p.get("name") != panel_name
+    ]
 
     # Add new panel
     canvas_json["panels"].append(panel_entry)
@@ -153,13 +155,14 @@ def add_panel_from_scitex(
         csv_hash = compute_file_hash(panel_dir / "panel.csv")
         # Remove existing reference
         canvas_json["data_files"] = [
-            d for d in canvas_json.get("data_files", [])
-            if d.get("path") != csv_path
+            d for d in canvas_json.get("data_files", []) if d.get("path") != csv_path
         ]
-        canvas_json["data_files"].append({
-            "path": csv_path,
-            "hash": csv_hash,
-        })
+        canvas_json["data_files"].append(
+            {
+                "path": csv_path,
+                "hash": csv_hash,
+            }
+        )
 
     save_canvas_json(project_dir, canvas_name, canvas_json)
 
@@ -222,7 +225,9 @@ def add_panel_from_image(
     canvas_json = load_canvas_json(project_dir, canvas_name, verify_data_hashes=False)
 
     # Remove existing panel with same name
-    canvas_json["panels"] = [p for p in canvas_json["panels"] if p.get("name") != panel_name]
+    canvas_json["panels"] = [
+        p for p in canvas_json["panels"] if p.get("name") != panel_name
+    ]
 
     # Add new panel
     canvas_json["panels"].append(panel_entry)
@@ -261,11 +266,14 @@ def remove_panel(
     canvas_json = load_canvas_json(project_dir, canvas_name, verify_data_hashes=False)
 
     original_count = len(canvas_json["panels"])
-    canvas_json["panels"] = [p for p in canvas_json["panels"] if p.get("name") != panel_name]
+    canvas_json["panels"] = [
+        p for p in canvas_json["panels"] if p.get("name") != panel_name
+    ]
 
     # Remove data file references for this panel
     canvas_json["data_files"] = [
-        d for d in canvas_json.get("data_files", [])
+        d
+        for d in canvas_json.get("data_files", [])
         if not d.get("path", "").startswith(f"panels/{panel_name}/")
     ]
 

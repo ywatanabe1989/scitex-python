@@ -243,7 +243,7 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # def sigmacro_process_figure_s():
 #     """Print a macro for SigmaPlot (v12.0) to format a panel.
-#     
+# 
 #     Please refer to the 'Automating Routine Tasks' section of the official documentation.
 #     """
 #     print(
@@ -366,7 +366,7 @@ if __name__ == "__main__":
 #     warnings.warn(
 #         "SigMacro_processFigure_S is deprecated, use sigmacro_process_figure_s() instead",
 #         DeprecationWarning,
-#         stacklevel=2
+#         stacklevel=2,
 #     )
 #     return sigmacro_process_figure_s()
 

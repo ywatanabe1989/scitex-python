@@ -19,7 +19,7 @@ warnings.warn(
     "'scitex.rng'. This compatibility layer will be removed in a "
     "future version.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 # Import everything from the new module for backward compatibility

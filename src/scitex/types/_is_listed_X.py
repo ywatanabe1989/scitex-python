@@ -54,13 +54,13 @@ def is_listed_X(obj, types):
 def is_list_of_type(obj, types):
     """
     Check if obj is a list where all elements are of one of the specified types.
-    
+
     This is an alias for is_listed_X with a more conventional name.
-    
+
     Args:
         obj: Object to check
         types: Type or list of types to check against
-        
+
     Returns:
         bool: True if obj is a list and all elements are of one of the specified types
     """

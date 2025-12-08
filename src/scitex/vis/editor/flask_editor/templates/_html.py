@@ -3,7 +3,7 @@
 # File: ./src/scitex/vis/editor/flask_editor/templates/html.py
 """HTML structure for the Flask editor UI."""
 
-HTML_BODY = '''
+HTML_BODY = """
 <div class="container">
     <div class="preview">
         <div class="preview-wrapper">
@@ -289,7 +289,7 @@ HTML_BODY = '''
         </div>
     </div>
 </div>
-'''
+"""
 
 
 # EOF

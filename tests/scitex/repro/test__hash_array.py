@@ -312,6 +312,7 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -356,18 +357,13 @@ if __name__ == "__main__":
 # def parse_args():
 #     """Parse command line arguments."""
 #     import argparse
+# 
 #     parser = argparse.ArgumentParser(description="Demonstrate array hashing")
 #     parser.add_argument(
-#         "--size",
-#         type=int,
-#         default=100,
-#         help="Array size (default: 100)"
+#         "--size", type=int, default=100, help="Array size (default: 100)"
 #     )
 #     parser.add_argument(
-#         "--seed",
-#         type=int,
-#         default=42,
-#         help="Random seed (default: 42)"
+#         "--seed", type=int, default=42, help="Random seed (default: 42)"
 #     )
 #     return parser.parse_args()
 # 
@@ -377,9 +373,9 @@ if __name__ == "__main__":
 # 
 #     Demonstrates array hashing for reproducibility verification.
 #     """
-#     print(f"\n{'='*60}")
+#     print(f"\n{'=' * 60}")
 #     print("Array Hashing Demo")
-#     print(f"{'='*60}")
+#     print(f"{'=' * 60}")
 #     print(f"Array size: {args.size}")
 #     print(f"Seed: {args.seed}")
 # 
@@ -412,9 +408,9 @@ if __name__ == "__main__":
 #     print(f"Array 3 hash (reproduced): {hash3}")
 #     print(f"Reproduces original: {hash1 == hash3}")
 # 
-#     print(f"\n{'='*60}")
+#     print(f"\n{'=' * 60}")
 #     print("Demo completed successfully!")
-#     print(f"{'='*60}\n")
+#     print(f"{'=' * 60}\n")
 # 
 #     return 0
 # 

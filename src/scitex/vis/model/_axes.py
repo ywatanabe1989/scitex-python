@@ -6,7 +6,7 @@
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass, field, asdict
 
-from .styles import AxesStyle
+from ._styles import AxesStyle
 
 
 @dataclass
