@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/__init__.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -33,6 +34,7 @@ import matplotlib.pyplot as plt
 # =============================================================================
 # Auto-configure matplotlib with SciTeX style on import
 # =============================================================================
+
 
 def _auto_configure_mpl():
     """Apply SciTeX style configuration automatically on import."""
@@ -114,7 +116,8 @@ try:
 except Exception:
     # Search for Arial font files and register them
     arial_paths = [
-        f for f in fm.findSystemFonts()
+        f
+        for f in fm.findSystemFonts()
         if os.path.basename(f).lower().startswith("arial")
     ]
 
@@ -135,13 +138,24 @@ except Exception:
 # Configure font family
 if _arial_enabled:
     mpl.rcParams["font.family"] = "Arial"
-    mpl.rcParams["font.sans-serif"] = ["Arial", "Helvetica", "DejaVu Sans", "Liberation Sans"]
+    mpl.rcParams["font.sans-serif"] = [
+        "Arial",
+        "Helvetica",
+        "DejaVu Sans",
+        "Liberation Sans",
+    ]
 else:
     mpl.rcParams["font.family"] = "sans-serif"
-    mpl.rcParams["font.sans-serif"] = ["Helvetica", "DejaVu Sans", "Liberation Sans", "sans-serif"]
+    mpl.rcParams["font.sans-serif"] = [
+        "Helvetica",
+        "DejaVu Sans",
+        "Liberation Sans",
+        "sans-serif",
+    ]
     # Suppress font warnings
     import logging
-    logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
+
+    logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 
 # Apply SciTeX style configuration automatically
 _auto_configure_mpl()
@@ -149,12 +163,15 @@ _auto_configure_mpl()
 # Set up color cycle from scitex colors
 try:
     from . import color as _color_module
+
     _rgba_norm_cycle = {
         k: tuple(_color_module.update_alpha(v, 1.0))
         for k, v in _color_module.PARAMS.get("RGBA_NORM_FOR_CYCLE", {}).items()
     }
     if _rgba_norm_cycle:
-        mpl.rcParams["axes.prop_cycle"] = plt.cycler(color=list(_rgba_norm_cycle.values()))
+        mpl.rcParams["axes.prop_cycle"] = plt.cycler(
+            color=list(_rgba_norm_cycle.values())
+        )
 except Exception:
     pass  # Use matplotlib default colors if color module fails
 
@@ -164,31 +181,39 @@ from . import utils
 from . import ax
 from .styles import presets
 from . import styles
+from . import gallery
 
 # Lazy import for subplots to avoid circular dependencies
-_subplots = None
-_figure = None
-_crop = None
+# Note: Use names that don't conflict with submodule names like _subplots
+_subplots_func_cached = None
+_figure_func_cached = None
+_crop_func_cached = None
+
 
 def subplots(*args, **kwargs):
     """Lazy-loaded subplots function."""
-    global _subplots
-    if _subplots is None:
-        from ._subplots._SubplotsWrapper import subplots as _subplots_func
-        _subplots = _subplots_func
-    return _subplots(*args, **kwargs)
+    global _subplots_func_cached
+    if _subplots_func_cached is None:
+        from ._subplots._SubplotsWrapper import subplots as _subplots_impl
+
+        _subplots_func_cached = _subplots_impl
+    return _subplots_func_cached(*args, **kwargs)
+
 
 def figure(*args, **kwargs):
     """Lazy-loaded figure function that returns a FigWrapper."""
-    global _figure
-    if _figure is None:
+    global _figure_func_cached
+    if _figure_func_cached is None:
         import matplotlib.pyplot as plt
         from ._subplots._FigWrapper import FigWrapper
-        def _figure_func(*args, **kwargs):
+
+        def _figure_impl(*args, **kwargs):
             fig_mpl = plt.figure(*args, **kwargs)
             return FigWrapper(fig_mpl)
-        _figure = _figure_func
-    return _figure(*args, **kwargs)
+
+        _figure_func_cached = _figure_impl
+    return _figure_func_cached(*args, **kwargs)
+
 
 def crop(input_path, output_path=None, margin=12, overwrite=False, verbose=False):
     """
@@ -224,11 +249,13 @@ def crop(input_path, output_path=None, margin=12, overwrite=False, verbose=False
     >>> stx.io.save(fig, "figure.png")
     >>> stx.plt.crop("figure.png", "figure_cropped.png")  # 1mm margin
     """
-    global _crop
-    if _crop is None:
-        from .utils._crop import crop as _crop_func
-        _crop = _crop_func
-    return _crop(input_path, output_path, margin, overwrite, verbose)
+    global _crop_func_cached
+    if _crop_func_cached is None:
+        from .utils._crop import crop as _crop_impl
+
+        _crop_func_cached = _crop_impl
+    return _crop_func_cached(input_path, output_path, margin, overwrite, verbose)
+
 
 def load(path, apply_manual=True):
     """
@@ -309,22 +336,22 @@ def load(path, apply_manual=True):
         csv_data = stx.io.load(csv_path)
 
     # Check for manual overrides
-    manual_path = json_path.with_suffix('.manual.json')
+    manual_path = json_path.with_suffix(".manual.json")
     manual_overrides = None
     if apply_manual and manual_path.exists():
         manual_data = stx.io.load(manual_path)
 
         # Validate hash
-        if 'base_hash' in manual_data:
+        if "base_hash" in manual_data:
             current_hash = _compute_file_hash(json_path)
-            if manual_data['base_hash'] != current_hash:
+            if manual_data["base_hash"] != current_hash:
                 warnings.warn(
                     f"Manual overrides may be stale: base data changed since manual edits.\n"
                     f"  Expected hash: {manual_data['base_hash'][:16]}...\n"
                     f"  Current hash:  {current_hash[:16]}...\n"
                     f"  Review: {manual_path}"
                 )
-        manual_overrides = manual_data.get('overrides', {})
+        manual_overrides = manual_data.get("overrides", {})
 
     # Reconstruct figure
     fig, axes = _reconstruct_figure(metadata, csv_data, manual_overrides)
@@ -346,25 +373,25 @@ def _resolve_figure_paths(path):
     parent = path.parent
 
     # Determine base name (remove .manual if present)
-    if stem.endswith('.manual'):
+    if stem.endswith(".manual"):
         stem = stem[:-7]
 
     json_path = None
     csv_path = None
 
-    if suffix == '.json':
+    if suffix == ".json":
         json_path = path
         # Try sibling CSV first
         csv_sibling = parent / f"{stem}.csv"
         if csv_sibling.exists():
             csv_path = csv_sibling
         # Try organized pattern (../csv/)
-        elif parent.name == 'json':
-            csv_organized = parent.parent / 'csv' / f"{stem}.csv"
+        elif parent.name == "json":
+            csv_organized = parent.parent / "csv" / f"{stem}.csv"
             if csv_organized.exists():
                 csv_path = csv_organized
 
-    elif suffix in ('.png', '.jpg', '.jpeg', '.pdf', '.svg'):
+    elif suffix in (".png", ".jpg", ".jpeg", ".pdf", ".svg"):
         # Look for sibling JSON
         json_sibling = parent / f"{stem}.json"
         csv_sibling = parent / f"{stem}.csv"
@@ -374,29 +401,29 @@ def _resolve_figure_paths(path):
             if csv_sibling.exists():
                 csv_path = csv_sibling
         # Try organized pattern (parent has png/, look for json/)
-        elif parent.name in ('png', 'jpg', 'jpeg', 'pdf', 'svg'):
-            json_organized = parent.parent / 'json' / f"{stem}.json"
-            csv_organized = parent.parent / 'csv' / f"{stem}.csv"
+        elif parent.name in ("png", "jpg", "jpeg", "pdf", "svg"):
+            json_organized = parent.parent / "json" / f"{stem}.json"
+            csv_organized = parent.parent / "csv" / f"{stem}.csv"
             if json_organized.exists():
                 json_path = json_organized
             if csv_organized.exists():
                 csv_path = csv_organized
 
-    elif suffix == '.csv':
+    elif suffix == ".csv":
         csv_path = path
         # Try sibling JSON
         json_sibling = parent / f"{stem}.json"
         if json_sibling.exists():
             json_path = json_sibling
         # Try organized pattern (../json/)
-        elif parent.name == 'csv':
-            json_organized = parent.parent / 'json' / f"{stem}.json"
+        elif parent.name == "csv":
+            json_organized = parent.parent / "json" / f"{stem}.json"
             if json_organized.exists():
                 json_path = json_organized
 
     # Fallback: assume it's the JSON path
     if json_path is None:
-        json_path = path if suffix == '.json' else path.with_suffix('.json')
+        json_path = path if suffix == ".json" else path.with_suffix(".json")
 
     return json_path, csv_path
 
@@ -408,8 +435,8 @@ def _compute_file_hash(path):
 
     path = Path(path)
     sha256 = hashlib.sha256()
-    with open(path, 'rb') as f:
-        for chunk in iter(lambda: f.read(8192), b''):
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
             sha256.update(chunk)
     return f"sha256:{sha256.hexdigest()}"
 
@@ -435,33 +462,37 @@ def _reconstruct_figure(metadata, csv_data, manual_overrides=None):
     import numpy as np
 
     # Extract dimensions from metadata
-    dims = metadata.get('dimensions', {})
-    fig_size_mm = dims.get('figure_size_mm', [80, 68])
-    dpi = dims.get('dpi', 300)
+    dims = metadata.get("dimensions", {})
+    fig_size_mm = dims.get("figure_size_mm", [80, 68])
+    dpi = dims.get("dpi", 300)
 
     # Get style from metadata
-    scitex_meta = metadata.get('scitex', {})
-    style_mm = scitex_meta.get('style_mm', {})
+    scitex_meta = metadata.get("scitex", {})
+    style_mm = scitex_meta.get("style_mm", {})
 
     # Create figure with same dimensions
     fig, axes = subplots(
-        axes_width_mm=style_mm.get('axes_width_mm', dims.get('axes_size_mm', [40, 28])[0]),
-        axes_height_mm=style_mm.get('axes_height_mm', dims.get('axes_size_mm', [40, 28])[1]),
+        axes_width_mm=style_mm.get(
+            "axes_width_mm", dims.get("axes_size_mm", [40, 28])[0]
+        ),
+        axes_height_mm=style_mm.get(
+            "axes_height_mm", dims.get("axes_size_mm", [40, 28])[1]
+        ),
         dpi=dpi,
     )
 
     # Handle single vs multiple axes
-    ax = axes if not hasattr(axes, 'flat') else list(axes.flat)[0]
+    ax = axes if not hasattr(axes, "flat") else list(axes.flat)[0]
 
     # Set axis labels from metadata
-    axes_meta = metadata.get('axes', {})
-    x_meta = axes_meta.get('x', {})
-    y_meta = axes_meta.get('y', {})
+    axes_meta = metadata.get("axes", {})
+    x_meta = axes_meta.get("x", {})
+    y_meta = axes_meta.get("y", {})
 
-    xlabel = x_meta.get('label', '')
-    ylabel = y_meta.get('label', '')
-    x_unit = x_meta.get('unit', '')
-    y_unit = y_meta.get('unit', '')
+    xlabel = x_meta.get("label", "")
+    ylabel = y_meta.get("label", "")
+    x_unit = x_meta.get("unit", "")
+    y_unit = y_meta.get("unit", "")
 
     if xlabel:
         full_xlabel = f"{xlabel} [{x_unit}]" if x_unit else xlabel
@@ -491,40 +522,40 @@ def _reconstruct_plots_from_csv(ax, csv_data, metadata):
     import numpy as np
 
     # Group columns by plot type
-    plot_type = metadata.get('plot_type', metadata.get('method', 'line'))
+    plot_type = metadata.get("plot_type", metadata.get("method", "line"))
 
     # Parse column names to find plot data
     columns = csv_data.columns.tolist()
 
     # Find x/y data columns
-    x_cols = [c for c in columns if '_x' in c.lower() and 'text' not in c.lower()]
-    y_cols = [c for c in columns if '_y' in c.lower() and 'text' not in c.lower()]
+    x_cols = [c for c in columns if "_x" in c.lower() and "text" not in c.lower()]
+    y_cols = [c for c in columns if "_y" in c.lower() and "text" not in c.lower()]
 
-    if plot_type == 'line' or plot_type == 'plot':
+    if plot_type == "line" or plot_type == "plot":
         # For line plots, look for paired x/y or just y with index
         if x_cols and y_cols:
             for x_col, y_col in zip(x_cols, y_cols):
                 x = csv_data[x_col].dropna().values
                 y = csv_data[y_col].dropna().values
                 if len(x) > 0 and len(y) > 0:
-                    ax.plot(x[:len(y)], y[:len(x)])
+                    ax.plot(x[: len(y)], y[: len(x)])
         elif y_cols:
             for y_col in y_cols:
                 y = csv_data[y_col].dropna().values
                 if len(y) > 0:
                     ax.plot(y)
 
-    elif plot_type == 'scatter':
+    elif plot_type == "scatter":
         if x_cols and y_cols:
             x = csv_data[x_cols[0]].dropna().values
             y = csv_data[y_cols[0]].dropna().values
-            ax.scatter(x[:min(len(x), len(y))], y[:min(len(x), len(y))])
+            ax.scatter(x[: min(len(x), len(y))], y[: min(len(x), len(y))])
 
     # Add text annotations
-    text_cols = [c for c in columns if 'text' in c.lower() and 'content' in c.lower()]
+    text_cols = [c for c in columns if "text" in c.lower() and "content" in c.lower()]
     for text_col in text_cols:
         # Find corresponding x, y columns
-        prefix = text_col.rsplit('_content', 1)[0]
+        prefix = text_col.rsplit("_content", 1)[0]
         x_col = f"{prefix}_x"
         y_col = f"{prefix}_y"
 
@@ -535,9 +566,13 @@ def _reconstruct_plots_from_csv(ax, csv_data, metadata):
 
             for i in range(min(len(x_vals), len(y_vals), len(text_vals))):
                 ax.text(
-                    x_vals.iloc[i], y_vals.iloc[i], str(text_vals.iloc[i]),
-                    transform=ax.transAxes, fontsize=6,
-                    verticalalignment='top', horizontalalignment='right'
+                    x_vals.iloc[i],
+                    y_vals.iloc[i],
+                    str(text_vals.iloc[i]),
+                    transform=ax.transAxes,
+                    fontsize=6,
+                    verticalalignment="top",
+                    horizontalalignment="right",
                 )
 
 
@@ -557,23 +592,24 @@ def _apply_manual_overrides(fig, axes, overrides):
     # Simple override application - can be extended
     for key, value in overrides.items():
         # Parse key like "axes[0].title" or "style.linewidth"
-        parts = key.split('.')
+        parts = key.split(".")
 
-        if parts[0].startswith('axes['):
+        if parts[0].startswith("axes["):
             # Extract axis index
             import re
-            match = re.match(r'axes\[(\d+)\]', parts[0])
+
+            match = re.match(r"axes\[(\d+)\]", parts[0])
             if match:
                 idx = int(match.group(1))
-                ax = axes if not hasattr(axes, 'flat') else list(axes.flat)[idx]
+                ax = axes if not hasattr(axes, "flat") else list(axes.flat)[idx]
 
                 if len(parts) > 1:
                     attr = parts[1]
-                    if attr == 'title':
+                    if attr == "title":
                         ax.set_title(value)
-                    elif attr == 'xlabel':
+                    elif attr == "xlabel":
                         ax.set_xlabel(value)
-                    elif attr == 'ylabel':
+                    elif attr == "ylabel":
                         ax.set_ylabel(value)
 
 
@@ -597,7 +633,9 @@ def tight_layout(**kwargs):
     import matplotlib.pyplot as plt
 
     with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="The figure layout has changed to tight")
+        warnings.filterwarnings(
+            "ignore", message="The figure layout has changed to tight"
+        )
         try:
             plt.tight_layout(**kwargs)
         except RuntimeError as e:
@@ -637,30 +675,84 @@ def colorbar(mappable=None, cax=None, ax=None, **kwargs):
 
     # Unwrap ax if it's a SciTeX AxisWrapper
     if ax is not None:
-        if hasattr(ax, '__iter__') and not isinstance(ax, str):
+        if hasattr(ax, "__iter__") and not isinstance(ax, str):
             # Handle list/array of axes
-            ax = [a._axis_mpl if hasattr(a, '_axis_mpl') else a for a in ax]
+            ax = [a._axis_mpl if hasattr(a, "_axis_mpl") else a for a in ax]
         else:
             # Single axis
-            ax = ax._axis_mpl if hasattr(ax, '_axis_mpl') else ax
+            ax = ax._axis_mpl if hasattr(ax, "_axis_mpl") else ax
 
     # Unwrap cax if provided
     if cax is not None:
-        cax = cax._axis_mpl if hasattr(cax, '_axis_mpl') else cax
+        cax = cax._axis_mpl if hasattr(cax, "_axis_mpl") else cax
 
     # Call matplotlib's colorbar with unwrapped axes
     return plt.colorbar(mappable=mappable, cax=cax, ax=ax, **kwargs)
 
+
+def close(fig=None):
+    """
+    Close a figure, automatically unwrapping SciTeX FigWrapper objects.
+
+    This function is a drop-in replacement for matplotlib.pyplot.close() that
+    handles both regular matplotlib Figure objects and SciTeX FigWrapper objects.
+
+    Parameters
+    ----------
+    fig : Figure, FigWrapper, int, str, or None
+        The figure to close. Can be:
+        - None: close the current figure
+        - Figure or FigWrapper: close the specified figure
+        - int: close figure with that number
+        - str: close figure with that label, or 'all' to close all figures
+
+    Examples
+    --------
+    >>> import scitex.plt as splt
+    >>> fig, ax = splt.subplots()
+    >>> ax.plot([1, 2, 3])
+    >>> splt.close(fig)  # Works with FigWrapper
+
+    >>> splt.close('all')  # Close all figures
+    >>> splt.close()  # Close current figure
+
+    See Also
+    --------
+    matplotlib.pyplot.close : Standard matplotlib close function
+    """
+    import matplotlib.pyplot as plt
+
+    if fig is None:
+        # Close current figure
+        plt.close()
+    elif isinstance(fig, (int, str)):
+        # Close by figure number or label (including 'all')
+        plt.close(fig)
+    elif hasattr(fig, "_fig_mpl"):
+        # FigWrapper object - unwrap and close
+        plt.close(fig._fig_mpl)
+    elif hasattr(fig, "figure"):
+        # Alternative attribute name (backward compatibility)
+        plt.close(fig.figure)
+    else:
+        # Assume it's a matplotlib Figure
+        plt.close(fig)
+
+
 __all__ = [
-    "termplot",
-    "subplots",
-    "load",
+    "close",
+    "color",
+    "colorbar",
     "figure",
+    "gallery",
+    "load",
+    "presets",
+    "subplots",
+    "termplot",
     "tight_layout",
     "utils",
-    "color",
-    "presets",
 ]
+
 
 def __getattr__(name):
     """
@@ -669,12 +761,16 @@ def __getattr__(name):
     """
     try:
         import matplotlib.pyplot as plt
+
         if hasattr(plt, name):
             return getattr(plt, name)
         else:
             raise AttributeError(f"module 'scitex.plt' has no attribute '{name}'")
     except ImportError:
-        raise AttributeError(f"module 'scitex.plt' has no attribute '{name}' (matplotlib not available)")
+        raise AttributeError(
+            f"module 'scitex.plt' has no attribute '{name}' (matplotlib not available)"
+        )
+
 
 def __dir__():
     """
@@ -686,11 +782,13 @@ def __dir__():
     # Add matplotlib.pyplot attributes
     try:
         import matplotlib.pyplot as plt
-        mpl_attrs = [attr for attr in dir(plt) if not attr.startswith('_')]
+
+        mpl_attrs = [attr for attr in dir(plt) if not attr.startswith("_")]
         local_attrs.extend(mpl_attrs)
     except ImportError:
         pass
 
     return sorted(set(local_attrs))
+
 
 # EOF

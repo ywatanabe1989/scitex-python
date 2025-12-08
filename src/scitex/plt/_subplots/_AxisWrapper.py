@@ -24,10 +24,12 @@ from ._AxisWrapperMixins import (
 from scitex.plt.styles import apply_plot_defaults, apply_plot_postprocess
 
 
-class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMixin, UnitAwareMixin):
+class AxisWrapper(
+    MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMixin, UnitAwareMixin
+):
     def __init__(self, fig_scitex, axis_mpl, track):
         """Initialize the AxisWrapper.
-        
+
         Args:
             fig_scitex: Parent figure wrapper
             axis_mpl: Matplotlib axis to wrap
@@ -53,31 +55,35 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
         self.id = 0
         self._counter_part = matplotlib.axes.Axes
         self._tracking_depth = 0  # Depth counter to prevent tracking internal calls
-        
+
         # Initialize unit awareness
         UnitAwareMixin.__init__(self)
 
     def get_figure(self, root=True):
         """Get the figure, compatible with matplotlib 3.8+"""
         return self._fig_mpl
-    
+
     def twinx(self):
         """Create a twin y-axis and wrap it with AxisWrapper."""
         twin_ax = self._axes_mpl.twinx()
+
         # Create a mock figure wrapper for the twin axis
         class MockFigWrapper:
             def __init__(self, fig_mpl):
                 self._fig_mpl = fig_mpl
+
         mock_fig = MockFigWrapper(self._fig_mpl)
         return AxisWrapper(fig_scitex=mock_fig, axis_mpl=twin_ax, track=self.track)
-    
+
     def twiny(self):
         """Create a twin x-axis and wrap it with AxisWrapper."""
         twin_ax = self._axes_mpl.twiny()
+
         # Create a mock figure wrapper for the twin axis
         class MockFigWrapper:
             def __init__(self, fig_mpl):
                 self._fig_mpl = fig_mpl
+
         mock_fig = MockFigWrapper(self._fig_mpl)
         return AxisWrapper(fig_scitex=mock_fig, axis_mpl=twin_ax, track=self.track)
 
@@ -102,17 +108,19 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
                     # Increment tracking depth to detect internal calls
                     # Internal calls (depth > 1) won't be tracked
                     self._tracking_depth += 1
-                    is_top_level_call = (self._tracking_depth == 1)
+                    is_top_level_call = self._tracking_depth == 1
 
                     try:
                         # Apply pre-processing defaults from styles module
-                        apply_plot_defaults(__method_name__, kwargs, id_value, self._axes_mpl)
+                        apply_plot_defaults(
+                            __method_name__, kwargs, id_value, self._axes_mpl
+                        )
 
                         # Pop scitex-specific kwargs before calling matplotlib
                         # These are handled in post-processing
                         scitex_kwargs = {}
-                        if __method_name__ == 'violinplot':
-                            scitex_kwargs['boxplot'] = kwargs.pop('boxplot', True)
+                        if __method_name__ == "violinplot":
+                            scitex_kwargs["boxplot"] = kwargs.pop("boxplot", True)
 
                         # Call the original matplotlib method
                         result = orig_attr(*args, **kwargs)
@@ -124,7 +132,9 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
                                 # plot() returns list of Line2D objects
                                 for item in result:
                                     item._scitex_id = id_value
-                            elif hasattr(result, '__iter__') and not isinstance(result, str):
+                            elif hasattr(result, "__iter__") and not isinstance(
+                                result, str
+                            ):
                                 # Other containers (e.g., bar containers)
                                 try:
                                     for item in result:
@@ -142,7 +152,9 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
                         kwargs.update(scitex_kwargs)
 
                         # Apply post-processing styling from styles module
-                        apply_plot_postprocess(__method_name__, result, self._axes_mpl, kwargs, args)
+                        apply_plot_postprocess(
+                            __method_name__, result, self._axes_mpl, kwargs, args
+                        )
 
                         # Determine if tracking should occur
                         # Only track top-level calls (depth == 1), not internal matplotlib calls
@@ -154,21 +166,44 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
                         # Expanded list of matplotlib plotting methods to track
                         tracking_methods = {
                             # Basic plots
-                            'plot', 'scatter', 'bar', 'barh', 'hist', 'boxplot', 'violinplot',
+                            "plot",
+                            "scatter",
+                            "bar",
+                            "barh",
+                            "hist",
+                            "boxplot",
+                            "violinplot",
                             # Line plots
-                            'fill_between', 'fill_betweenx', 'errorbar', 'step', 'stem',
+                            "fill_between",
+                            "fill_betweenx",
+                            "errorbar",
+                            "step",
+                            "stem",
                             # Statistical plots
-                            'hist2d', 'hexbin', 'pie',
+                            "hist2d",
+                            "hexbin",
+                            "pie",
                             # Contour plots
-                            'contour', 'contourf', 'tricontour', 'tricontourf',
+                            "contour",
+                            "contourf",
+                            "tricontour",
+                            "tricontourf",
                             # Image plots
-                            'imshow', 'matshow', 'spy',
+                            "imshow",
+                            "matshow",
+                            "spy",
                             # Quiver plots
-                            'quiver', 'streamplot',
+                            "quiver",
+                            "streamplot",
                             # 3D-related (if axes3d)
-                            'plot3D', 'scatter3D', 'bar3d', 'plot_surface', 'plot_wireframe',
+                            "plot3D",
+                            "scatter3D",
+                            "bar3d",
+                            "plot_surface",
+                            "plot_wireframe",
                             # Text and annotations (data-containing)
-                            'annotate', 'text'
+                            "annotate",
+                            "text",
                         }
                         if should_track and __method_name__ in tracking_methods:
                             # Use the _track method from TrackingMixin
@@ -177,7 +212,11 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
                                 # Convert args to tracked_dict for consistency with other tracking
                                 tracked_dict = {"args": args}
                                 self._track(
-                                    should_track, id_value, __method_name__, tracked_dict, kwargs
+                                    should_track,
+                                    id_value,
+                                    __method_name__,
+                                    tracked_dict,
+                                    kwargs,
                                 )
                             except AttributeError:
                                 warnings.warn(
@@ -233,47 +272,69 @@ class AxisWrapper(MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMi
     def __dir__(self):
         # Start with attributes from the class and all parent classes (mixins)
         attrs = set()
-        
+
         # Get attributes from all parent classes including mixins
         for cls in self.__class__.__mro__:
             attrs.update(cls.__dict__.keys())
-        
+
         # Add instance attributes
         attrs.update(self.__dict__.keys())
-        
+
         # Safely get matplotlib axes attributes
         try:
             # Get attributes from the wrapped matplotlib axes
-            if hasattr(self._axes_mpl, '__class__'):
+            if hasattr(self._axes_mpl, "__class__"):
                 # Get class methods from matplotlib.axes.Axes
                 for cls in self._axes_mpl.__class__.__mro__:
-                    attrs.update(name for name in cls.__dict__.keys() if not name.startswith('_'))
-            
+                    attrs.update(
+                        name for name in cls.__dict__.keys() if not name.startswith("_")
+                    )
+
             # Add instance attributes of the matplotlib axes
-            if hasattr(self._axes_mpl, '__dict__'):
-                attrs.update(name for name in self._axes_mpl.__dict__.keys() if not name.startswith('_'))
-                
+            if hasattr(self._axes_mpl, "__dict__"):
+                attrs.update(
+                    name
+                    for name in self._axes_mpl.__dict__.keys()
+                    if not name.startswith("_")
+                )
+
         except Exception:
             # If any error occurs, add common matplotlib methods manually
-            attrs.update(['plot', 'scatter', 'bar', 'barh', 'hist', 'boxplot', 
-                         'set_xlabel', 'set_ylabel', 'set_title', 'legend',
-                         'set_xlim', 'set_ylim', 'grid', 'annotate', 'text'])
-        
+            attrs.update(
+                [
+                    "plot",
+                    "scatter",
+                    "bar",
+                    "barh",
+                    "hist",
+                    "boxplot",
+                    "set_xlabel",
+                    "set_ylabel",
+                    "set_title",
+                    "legend",
+                    "set_xlim",
+                    "set_ylim",
+                    "grid",
+                    "annotate",
+                    "text",
+                ]
+            )
+
         # Remove private attributes
-        attrs = {attr for attr in attrs if not attr.startswith('_')}
-        
+        attrs = {attr for attr in attrs if not attr.startswith("_")}
+
         return sorted(attrs)
-        
+
     def flatten(self):
         """Return a list containing just this axis.
-        
+
         This method makes AxisWrapper compatible with code that calls flatten()
         on an axes collection. It returns a list containing just this single axis
         to maintain consistency with AxesWrapper.flatten().
-        
+
         Returns:
             list: A list containing this axis wrapper
-            
+
         Example:
             # When working with either AxesWrapper or AxisWrapper, this works:
             axes_list = list(axes.flatten())

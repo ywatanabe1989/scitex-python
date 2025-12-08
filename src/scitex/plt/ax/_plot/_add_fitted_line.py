@@ -15,8 +15,8 @@ def add_fitted_line(
     ax,
     x,
     y,
-    color: str = 'black',
-    linestyle: str = '--',
+    color: str = "black",
+    linestyle: str = "--",
     linewidth_mm: float = 0.2,
     label: Optional[str] = None,
     degree: int = 1,
@@ -120,30 +120,31 @@ def add_fitted_line(
         y_pos = poly_fn(x_pos)
 
         # Format statistics text with R² and significance stars
-        r_squared = stats_result.effect_size['value']  # r_squared from effect_size
+        r_squared = stats_result.effect_size["value"]  # r_squared from effect_size
         stars = stats_result.stars
 
-        if stars and stars != 'ns':  # Only show if significant
+        if stars and stars != "ns":  # Only show if significant
             stats_text = f"$R^2$ = {r_squared:.3f}{stars}"
         else:  # Not significant
             stats_text = f"$R^2$ = {r_squared:.3f} (ns)"
 
         # Add text annotation near the line
         ax.text(
-            x_pos, y_pos,
+            x_pos,
+            y_pos,
             stats_text,
-            verticalalignment='bottom',
-            fontsize=stats_fontsize
+            verticalalignment="bottom",
+            fontsize=stats_fontsize,
         )
 
         # Store stats in axes metadata for embedding in saved figures
-        if not hasattr(ax, '_scitex_metadata'):
+        if not hasattr(ax, "_scitex_metadata"):
             ax._scitex_metadata = {}
-        if 'stats' not in ax._scitex_metadata:
-            ax._scitex_metadata['stats'] = []
+        if "stats" not in ax._scitex_metadata:
+            ax._scitex_metadata["stats"] = []
 
         # Add this StatResult to the stats list
-        ax._scitex_metadata['stats'].append(stats_result.to_dict())
+        ax._scitex_metadata["stats"].append(stats_result.to_dict())
 
     return line, coeffs, stats_result
 

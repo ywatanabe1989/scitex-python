@@ -21,8 +21,8 @@ def _format_streamplot(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
-    if 'args' in tracked_dict:
-        args = tracked_dict['args']
+    if "args" in tracked_dict:
+        args = tracked_dict["args"]
         if isinstance(args, tuple) and len(args) >= 4:
             # streamplot(X, Y, U, V) - X, Y are 1D, U, V are 2D
             X = np.asarray(args[0])
@@ -34,12 +34,14 @@ def _format_streamplot(id, tracked_dict, kwargs):
             if X.ndim == 1 and Y.ndim == 1:
                 X, Y = np.meshgrid(X, Y)
 
-            df = pd.DataFrame({
-                f"{id}_streamplot_x": X.flatten(),
-                f"{id}_streamplot_y": Y.flatten(),
-                f"{id}_streamplot_u": U.flatten(),
-                f"{id}_streamplot_v": V.flatten()
-            })
+            df = pd.DataFrame(
+                {
+                    f"{id}_streamplot_x": X.flatten(),
+                    f"{id}_streamplot_y": Y.flatten(),
+                    f"{id}_streamplot_u": U.flatten(),
+                    f"{id}_streamplot_v": V.flatten(),
+                }
+            )
             return df
 
     return pd.DataFrame()

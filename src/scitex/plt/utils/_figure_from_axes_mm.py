@@ -124,9 +124,7 @@ def create_axes_with_size_mm(
         dpi = max(dpi, 300)  # Ensure at least 300 DPI
 
     # Calculate figure size = axes size + margins
-    fig_width_mm = (
-        axes_width_mm + margin_mm.get("left", 0) + margin_mm.get("right", 0)
-    )
+    fig_width_mm = axes_width_mm + margin_mm.get("left", 0) + margin_mm.get("right", 0)
     fig_height_mm = (
         axes_height_mm + margin_mm.get("bottom", 0) + margin_mm.get("top", 0)
     )
@@ -268,13 +266,23 @@ def print_dimension_info(fig, ax):
     print("=" * 60)
 
     print("\n📐 FIGURE (total canvas including margins):")
-    print(f"  • Size (mm):    {info['figure_size_mm'][0]:.2f} × {info['figure_size_mm'][1]:.2f}")
-    print(f"  • Size (inch):  {info['figure_size_inch'][0]:.3f} × {info['figure_size_inch'][1]:.3f}")
-    print(f"  • Size (px):    {info['figure_size_px'][0]} × {info['figure_size_px'][1]}")
+    print(
+        f"  • Size (mm):    {info['figure_size_mm'][0]:.2f} × {info['figure_size_mm'][1]:.2f}"
+    )
+    print(
+        f"  • Size (inch):  {info['figure_size_inch'][0]:.3f} × {info['figure_size_inch'][1]:.3f}"
+    )
+    print(
+        f"  • Size (px):    {info['figure_size_px'][0]} × {info['figure_size_px'][1]}"
+    )
 
     print("\n📊 AXES (actual plot area):")
-    print(f"  • Size (mm):    {info['axes_size_mm'][0]:.2f} × {info['axes_size_mm'][1]:.2f}")
-    print(f"  • Size (inch):  {info['axes_size_inch'][0]:.3f} × {info['axes_size_inch'][1]:.3f}")
+    print(
+        f"  • Size (mm):    {info['axes_size_mm'][0]:.2f} × {info['axes_size_mm'][1]:.2f}"
+    )
+    print(
+        f"  • Size (inch):  {info['axes_size_inch'][0]:.3f} × {info['axes_size_inch'][1]:.3f}"
+    )
     print(f"  • Size (px):    {info['axes_size_px'][0]} × {info['axes_size_px'][1]}")
     print(
         f"  • Position:     left={info['axes_position'][0]:.3f}, bottom={info['axes_position'][1]:.3f}"
@@ -288,11 +296,13 @@ def print_dimension_info(fig, ax):
     print(f"  • pixels = inches × DPI")
     print(f"  • mm = inches × 25.4")
     print(f"  • At {info['dpi']} DPI:")
-    print(f"    - 1 mm = {info['dpi']/25.4:.2f} pixels")
+    print(f"    - 1 mm = {info['dpi'] / 25.4:.2f} pixels")
     print(f"    - 1 inch = {info['dpi']} pixels")
 
     print("\n📝 FOR PUBLICATION:")
-    print(f"  • Save with: fig.savefig('file.tiff', dpi={info['dpi']}, bbox_inches='tight')")
+    print(
+        f"  • Save with: fig.savefig('file.tiff', dpi={info['dpi']}, bbox_inches='tight')"
+    )
     print(
         f"  • Final size will be approximately {info['axes_size_mm'][0]:.1f} × {info['axes_size_mm'][1]:.1f} mm"
     )

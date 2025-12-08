@@ -53,10 +53,12 @@ def _plot_single_shaded_line(
     df : pd.DataFrame
         DataFrame with x, y_lower, y_middle, y_upper columns.
     """
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
-    assert (
-        len(xx) == len(y_middle) == len(y_lower) == len(y_upper)
-    ), "All arrays must have the same length"
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
+    assert len(xx) == len(y_middle) == len(y_lower) == len(y_upper), (
+        "All arrays must have the same length"
+    )
 
     label = kwargs.pop("label", None)
     axis.plot(xx, y_middle, color=color, alpha=alpha, label=label, **kwargs)
@@ -104,10 +106,12 @@ def _plot_shaded_line(
     results : list of pd.DataFrame
         List of DataFrames with plot data.
     """
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
-    assert (
-        len(xs) == len(ys_lower) == len(ys_middle) == len(ys_upper)
-    ), "All input lists must have the same length"
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
+    assert len(xs) == len(ys_lower) == len(ys_middle) == len(ys_upper), (
+        "All input lists must have the same length"
+    )
 
     results = []
     colors = color
@@ -199,9 +203,9 @@ def stx_shaded_line(
     )
 
     if is_single:
-        assert (
-            len(xs) == len(ys_lower) == len(ys_middle) == len(ys_upper)
-        ), "All arrays must have the same length for single line plot"
+        assert len(xs) == len(ys_lower) == len(ys_middle) == len(ys_upper), (
+            "All arrays must have the same length for single line plot"
+        )
 
         return _plot_single_shaded_line(
             axis, xs, ys_lower, ys_middle, ys_upper, color=color, **kwargs

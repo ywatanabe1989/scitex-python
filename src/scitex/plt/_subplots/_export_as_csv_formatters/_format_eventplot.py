@@ -4,6 +4,7 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_eventplot.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -12,15 +13,16 @@ import numpy as np
 import pandas as pd
 import scitex
 
+
 def _format_eventplot(id, tracked_dict, kwargs):
     """Format data from an eventplot call."""
     # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
-    
+
     # Get the args from tracked_dict
-    args = tracked_dict.get('args', [])
-    
+    args = tracked_dict.get("args", [])
+
     # Eventplot displays multiple sets of events as parallel lines
     if len(args) >= 1:
         positions = args[0]
@@ -31,9 +33,9 @@ def _format_eventplot(id, tracked_dict, kwargs):
                 import scitex.pd
 
                 # If positions is a single array
-                if isinstance(
-                    positions, (list, np.ndarray)
-                ) and not isinstance(positions[0], (list, np.ndarray)):
+                if isinstance(positions, (list, np.ndarray)) and not isinstance(
+                    positions[0], (list, np.ndarray)
+                ):
                     return pd.DataFrame({f"{id}_eventplot_events": positions})
 
                 # If positions is a list of arrays (multiple event sets)
@@ -48,9 +50,9 @@ def _format_eventplot(id, tracked_dict, kwargs):
             except (ImportError, AttributeError):
                 # Fall back to pandas with manual Series creation
                 # If positions is a single array
-                if isinstance(
-                    positions, (list, np.ndarray)
-                ) and not isinstance(positions[0], (list, np.ndarray)):
+                if isinstance(positions, (list, np.ndarray)) and not isinstance(
+                    positions[0], (list, np.ndarray)
+                ):
                     return pd.DataFrame({f"{id}_eventplot_events": positions})
 
                 # If positions is a list of arrays (multiple event sets)

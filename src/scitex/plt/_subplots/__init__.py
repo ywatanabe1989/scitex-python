@@ -9,6 +9,16 @@ __FILE__ = "./src/scitex/plt/_subplots/__init__.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
+# Import wrapper classes
+from ._FigWrapper import FigWrapper
+from ._AxisWrapper import AxisWrapper
+from ._AxesWrapper import AxesWrapper
+
+# Backward-compatible aliases
+_FigWrapper = FigWrapper
+_AxisWrapper = AxisWrapper
+_AxesWrapper = AxesWrapper
+
 # Import export_as_csv module functions
 from ._export_as_csv import export_as_csv, format_record
 

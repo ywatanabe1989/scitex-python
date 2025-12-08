@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -21,33 +22,33 @@ _warning_registry = set()
 # Mapping of matplotlib/seaborn methods to their scitex equivalents
 _METHOD_ALTERNATIVES = {
     # Matplotlib methods
-    'imshow': 'plot_imshow',
-    'plot': 'plot',  # already tracked
-    'scatter': 'plot_scatter',  # already tracked
-    'bar': 'plot_bar',  # already tracked
-    'barh': 'plot_barh',  # already tracked
-    'hist': 'hist',  # already tracked
-    'boxplot': 'stx_box or plot_boxplot',
-    'violinplot': 'stx_violin or plot_violinplot',
-    'fill_between': 'plot_fill_between',
-    'errorbar': 'plot_errorbar',
-    'contour': 'plot_contour',
-    'heatmap': 'stx_heatmap',
-
+    "imshow": "plot_imshow",
+    "plot": "plot",  # already tracked
+    "scatter": "plot_scatter",  # already tracked
+    "bar": "plot_bar",  # already tracked
+    "barh": "plot_barh",  # already tracked
+    "hist": "hist",  # already tracked
+    "boxplot": "stx_box or plot_boxplot",
+    "violinplot": "stx_violin or plot_violinplot",
+    "fill_between": "plot_fill_between",
+    "errorbar": "plot_errorbar",
+    "contour": "plot_contour",
+    "heatmap": "stx_heatmap",
     # Seaborn methods (accessed via ax.sns_*)
-    'scatterplot': 'sns_scatterplot',
-    'lineplot': 'sns_lineplot',
-    'barplot': 'sns_barplot',
-    'boxplot_sns': 'sns_boxplot',
-    'violinplot_sns': 'sns_violinplot',
-    'stripplot': 'sns_stripplot',
-    'swarmplot': 'sns_swarmplot',
-    'histplot': 'sns_histplot',
-    'kdeplot': 'sns_kdeplot',
-    'heatmap_sns': 'sns_heatmap',
-    'jointplot': 'sns_jointplot',
-    'pairplot': 'sns_pairplot',
+    "scatterplot": "sns_scatterplot",
+    "lineplot": "sns_lineplot",
+    "barplot": "sns_barplot",
+    "boxplot_sns": "sns_boxplot",
+    "violinplot_sns": "sns_violinplot",
+    "stripplot": "sns_stripplot",
+    "swarmplot": "sns_swarmplot",
+    "histplot": "sns_histplot",
+    "kdeplot": "sns_kdeplot",
+    "heatmap_sns": "sns_heatmap",
+    "jointplot": "sns_jointplot",
+    "pairplot": "sns_pairplot",
 }
+
 
 def _warn_once(message, category=UserWarning):
     """Show a warning only once per runtime.
@@ -60,28 +61,68 @@ def _warn_once(message, category=UserWarning):
         _warning_registry.add(message)
         warnings.warn(message, category, stacklevel=3)
 
+
 from ._export_as_csv_formatters import (
     # Standard matplotlib formatters
-    _format_annotate, _format_bar, _format_barh, _format_boxplot,
-    _format_contour, _format_contourf, _format_errorbar, _format_eventplot,
-    _format_fill, _format_fill_between, _format_hexbin, _format_hist,
-    _format_hist2d, _format_imshow, _format_imshow2d, _format_matshow,
-    _format_pie, _format_plot, _format_quiver, _format_scatter, _format_stem,
-    _format_step, _format_streamplot, _format_text, _format_violin,
+    _format_annotate,
+    _format_bar,
+    _format_barh,
+    _format_boxplot,
+    _format_contour,
+    _format_contourf,
+    _format_errorbar,
+    _format_eventplot,
+    _format_fill,
+    _format_fill_between,
+    _format_hexbin,
+    _format_hist,
+    _format_hist2d,
+    _format_imshow,
+    _format_imshow2d,
+    _format_matshow,
+    _format_pie,
+    _format_plot,
+    _format_quiver,
+    _format_scatter,
+    _format_stem,
+    _format_step,
+    _format_streamplot,
+    _format_text,
+    _format_violin,
     _format_violinplot,
     # Custom scitex formatters
-    _format_plot_box, _format_plot_conf_mat, _format_plot_ecdf,
-    _format_plot_fillv, _format_plot_heatmap, _format_plot_image,
-    _format_plot_imshow, _format_plot_joyplot, _format_plot_kde,
-    _format_plot_line, _format_plot_mean_ci, _format_plot_mean_std,
-    _format_plot_median_iqr, _format_plot_raster, _format_plot_rectangle,
-    _format_plot_scatter, _format_plot_scatter_hist, _format_plot_shaded_line,
+    _format_plot_box,
+    _format_plot_conf_mat,
+    _format_plot_ecdf,
+    _format_plot_fillv,
+    _format_plot_heatmap,
+    _format_plot_image,
+    _format_plot_imshow,
+    _format_plot_joyplot,
+    _format_plot_kde,
+    _format_plot_line,
+    _format_plot_mean_ci,
+    _format_plot_mean_std,
+    _format_plot_median_iqr,
+    _format_plot_raster,
+    _format_plot_rectangle,
+    _format_plot_scatter,
+    _format_plot_scatter_hist,
+    _format_plot_shaded_line,
     _format_plot_violin,
     # Seaborn formatters
-    _format_sns_barplot, _format_sns_boxplot, _format_sns_heatmap,
-    _format_sns_histplot, _format_sns_jointplot, _format_sns_kdeplot,
-    _format_sns_lineplot, _format_sns_pairplot, _format_sns_scatterplot,
-    _format_sns_stripplot, _format_sns_swarmplot, _format_sns_violinplot,
+    _format_sns_barplot,
+    _format_sns_boxplot,
+    _format_sns_heatmap,
+    _format_sns_histplot,
+    _format_sns_jointplot,
+    _format_sns_kdeplot,
+    _format_sns_lineplot,
+    _format_sns_pairplot,
+    _format_sns_scatterplot,
+    _format_sns_stripplot,
+    _format_sns_swarmplot,
+    _format_sns_violinplot,
 )
 
 # Registry mapping method names to their formatter functions
@@ -165,9 +206,7 @@ def _to_numpy(data):
         Data as numpy array
     """
     if hasattr(data, "numpy"):  # torch tensor
-        return (
-            data.detach().numpy() if hasattr(data, "detach") else data.numpy()
-        )
+        return data.detach().numpy() if hasattr(data, "detach") else data.numpy()
     elif hasattr(data, "values"):  # pandas series/dataframe
         return data.values
     else:
@@ -380,5 +419,6 @@ def format_record(record):
             f"CSV export for plot method '{method}' is not yet implemented in the scitex.plt module. "
             f"Check the feature-request-export-as-csv-functions.md for implementation status."
         )
+
 
 # EOF

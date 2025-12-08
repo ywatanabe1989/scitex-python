@@ -41,16 +41,16 @@ from .presets import (
 
 __all__ = [
     # Styling functions
-    'apply_plot_defaults',
-    'apply_plot_postprocess',
+    "apply_plot_defaults",
+    "apply_plot_postprocess",
     # Style configuration
-    'SCITEX_STYLE',
-    'STYLE',
-    'load_style',
-    'save_style',
-    'set_style',
-    'get_style',
-    'resolve_style_value',
+    "SCITEX_STYLE",
+    "STYLE",
+    "load_style",
+    "save_style",
+    "set_style",
+    "get_style",
+    "resolve_style_value",
 ]
 
 

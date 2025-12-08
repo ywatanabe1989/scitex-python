@@ -21,8 +21,8 @@ def _format_quiver(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
-    if 'args' in tracked_dict:
-        args = tracked_dict['args']
+    if "args" in tracked_dict:
+        args = tracked_dict["args"]
         if isinstance(args, tuple):
             # quiver can be called as:
             # quiver(U, V) - positions auto-generated
@@ -39,12 +39,14 @@ def _format_quiver(id, tracked_dict, kwargs):
             else:
                 return pd.DataFrame()
 
-            df = pd.DataFrame({
-                f"{id}_quiver_x": X.flatten(),
-                f"{id}_quiver_y": Y.flatten(),
-                f"{id}_quiver_u": U.flatten(),
-                f"{id}_quiver_v": V.flatten()
-            })
+            df = pd.DataFrame(
+                {
+                    f"{id}_quiver_x": X.flatten(),
+                    f"{id}_quiver_y": Y.flatten(),
+                    f"{id}_quiver_u": U.flatten(),
+                    f"{id}_quiver_v": V.flatten(),
+                }
+            )
             return df
 
     return pd.DataFrame()

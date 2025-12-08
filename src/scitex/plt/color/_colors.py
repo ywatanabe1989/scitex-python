@@ -55,7 +55,6 @@ def cycle_color_rgb(i_color, colors=None):
 
 
 def gradiate_color_rgb(rgb_or_rgba, n=5):
-
     # Separate RGB and alpha if present
     if len(rgb_or_rgba) == 4:  # RGBA format
         rgb = rgb_or_rgba[:3]

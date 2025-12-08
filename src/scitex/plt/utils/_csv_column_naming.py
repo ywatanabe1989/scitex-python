@@ -21,10 +21,10 @@ Where:
 """
 
 __all__ = [
-    'get_csv_column_name',
-    'get_csv_column_prefix',
-    'parse_csv_column_name',
-    'sanitize_trace_id',
+    "get_csv_column_name",
+    "get_csv_column_prefix",
+    "parse_csv_column_name",
+    "sanitize_trace_id",
 ]
 
 
@@ -51,25 +51,27 @@ def sanitize_trace_id(trace_id: str) -> str:
     # Keep alphanumeric, underscore, hyphen; replace others with underscore
     result = []
     for char in sanitized:
-        if char.isalnum() or char in ('_', '-'):
+        if char.isalnum() or char in ("_", "-"):
             result.append(char)
-        elif char in (' ', '(', ')', '[', ']', '{', '}', '/', '\\', '.'):
-            result.append('_')
+        elif char in (" ", "(", ")", "[", "]", "{", "}", "/", "\\", "."):
+            result.append("_")
         # Skip other characters
 
-    sanitized = ''.join(result)
+    sanitized = "".join(result)
 
     # Remove consecutive underscores
-    while '__' in sanitized:
-        sanitized = sanitized.replace('__', '_')
+    while "__" in sanitized:
+        sanitized = sanitized.replace("__", "_")
 
     # Remove leading/trailing underscores
-    sanitized = sanitized.strip('_')
+    sanitized = sanitized.strip("_")
 
     return sanitized if sanitized else "unnamed"
 
 
-def get_csv_column_prefix(ax_row: int = 0, ax_col: int = 0, trace_id: str = None, trace_index: int = None) -> str:
+def get_csv_column_prefix(
+    ax_row: int = 0, ax_col: int = 0, trace_id: str = None, trace_index: int = None
+) -> str:
     """Get CSV column prefix for a trace.
 
     Parameters
@@ -162,17 +164,17 @@ def parse_csv_column_name(column_name: str) -> dict:
     {'ax_row': 0, 'ax_col': 0, 'trace_id': 'sin_x', 'data_type': 'plot_x', 'valid': True}
     """
     result = {
-        'ax_row': 0,
-        'ax_col': 0,
-        'trace_id': '',
-        'data_type': '',
-        'valid': False,
+        "ax_row": 0,
+        "ax_col": 0,
+        "trace_id": "",
+        "data_type": "",
+        "valid": False,
     }
 
-    if not column_name or not column_name.startswith('ax_'):
+    if not column_name or not column_name.startswith("ax_"):
         return result
 
-    parts = column_name.split('_')
+    parts = column_name.split("_")
     if len(parts) < 4:
         return result
 
@@ -180,19 +182,19 @@ def parse_csv_column_name(column_name: str) -> dict:
         # Parse ax position (e.g., "00" from "ax_00_...")
         ax_pos = parts[1]
         if len(ax_pos) >= 2:
-            result['ax_row'] = int(ax_pos[0])
-            result['ax_col'] = int(ax_pos[1])
+            result["ax_row"] = int(ax_pos[0])
+            result["ax_col"] = int(ax_pos[1])
 
         # Last two parts are typically data_type (e.g., "plot_x", "hist_bins")
         # Everything in between is the trace_id
         data_type_parts = parts[-2:]  # e.g., ["plot", "x"]
-        result['data_type'] = '_'.join(data_type_parts)
+        result["data_type"] = "_".join(data_type_parts)
 
         # Trace ID is everything between ax_pos and data_type
         trace_parts = parts[2:-2]
-        result['trace_id'] = '_'.join(trace_parts) if trace_parts else 'plot_0'
+        result["trace_id"] = "_".join(trace_parts) if trace_parts else "plot_0"
 
-        result['valid'] = True
+        result["valid"] = True
 
     except (ValueError, IndexError):
         pass
@@ -200,7 +202,9 @@ def parse_csv_column_name(column_name: str) -> dict:
     return result
 
 
-def get_trace_columns_from_df(df, trace_id: str = None, trace_index: int = None, ax_row: int = 0, ax_col: int = 0) -> dict:
+def get_trace_columns_from_df(
+    df, trace_id: str = None, trace_index: int = None, ax_row: int = 0, ax_col: int = 0
+) -> dict:
     """Find CSV columns for a specific trace in a DataFrame.
 
     Parameters
@@ -228,7 +232,7 @@ def get_trace_columns_from_df(df, trace_id: str = None, trace_index: int = None,
     for col in df.columns:
         if col.startswith(prefix):
             # Extract data_type from column name
-            data_type = col[len(prefix):]
+            data_type = col[len(prefix) :]
             result[data_type] = col
 
     return result

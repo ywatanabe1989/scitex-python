@@ -9,8 +9,17 @@
 import numpy as np
 
 
-def rotate_labels(ax, x=45, y=45, x_ha=None, y_ha=None, x_va=None, y_va=None, 
-                 auto_adjust=True, scientific_convention=True):
+def rotate_labels(
+    ax,
+    x=45,
+    y=45,
+    x_ha=None,
+    y_ha=None,
+    x_va=None,
+    y_va=None,
+    auto_adjust=True,
+    scientific_convention=True,
+):
     """
     Rotate x and y axis labels of a matplotlib Axes object with automatic positioning.
 
@@ -46,7 +55,7 @@ def rotate_labels(ax, x=45, y=45, x_ha=None, y_ha=None, x_va=None, y_va=None,
     ax.plot([1, 2, 3], [1, 2, 3])
     rotate_labels(ax)
     plt.show()
-    
+
     Notes
     -----
     Scientific conventions for label rotation:
@@ -64,9 +73,9 @@ def rotate_labels(ax, x=45, y=45, x_ha=None, y_ha=None, x_va=None, y_va=None,
 
     # Auto-adjust alignment based on rotation angle and scientific conventions
     if auto_adjust:
-        x_ha, x_va = _get_optimal_alignment('x', x, x_ha, x_va, scientific_convention)
-        y_ha, y_va = _get_optimal_alignment('y', y, y_ha, y_va, scientific_convention)
-    
+        x_ha, x_va = _get_optimal_alignment("x", x, x_ha, x_va, scientific_convention)
+        y_ha, y_va = _get_optimal_alignment("y", y, y_ha, y_va, scientific_convention)
+
     # Apply defaults if not auto-adjusting
     if x_ha is None:
         x_ha = "center"
@@ -80,27 +89,27 @@ def rotate_labels(ax, x=45, y=45, x_ha=None, y_ha=None, x_va=None, y_va=None,
     # Check if this axis is part of a shared x-axis configuration
     # If labels are already visible (bottom subplot or not shared), keep them visible
     # This preserves matplotlib's default sharex behavior
-    x_labels_visible = ax.xaxis.get_tick_params()['labelbottom']
-    y_labels_visible = ax.yaxis.get_tick_params()['labelleft']
-    
+    x_labels_visible = ax.xaxis.get_tick_params()["labelbottom"]
+    y_labels_visible = ax.yaxis.get_tick_params()["labelleft"]
+
     # Set labels with rotation and proper alignment
     # Only set labels if they're currently visible (respects sharex/sharey)
     if x_labels_visible:
         ax.set_xticklabels(ax.get_xticklabels(), rotation=x, ha=x_ha, va=x_va)
     if y_labels_visible:
         ax.set_yticklabels(ax.get_yticklabels(), rotation=y, ha=y_ha, va=y_va)
-    
+
     # Auto-adjust subplot parameters for better layout if needed
     if auto_adjust and scientific_convention:
         _adjust_subplot_params(ax, x, y)
-    
+
     return ax
 
 
 def _get_optimal_alignment(axis, angle, ha, va, scientific_convention):
     """
     Determine optimal alignment based on rotation angle and scientific conventions.
-    
+
     Parameters
     ----------
     axis : str
@@ -109,11 +118,11 @@ def _get_optimal_alignment(axis, angle, ha, va, scientific_convention):
         Rotation angle in degrees
     ha : str or None
         Current horizontal alignment
-    va : str or None  
+    va : str or None
         Current vertical alignment
     scientific_convention : bool
         Whether to follow scientific conventions
-        
+
     Returns
     -------
     tuple
@@ -121,76 +130,76 @@ def _get_optimal_alignment(axis, angle, ha, va, scientific_convention):
     """
     # Normalize angle to 0-360 range
     angle = angle % 360
-    
-    if axis == 'x':
+
+    if axis == "x":
         if scientific_convention:
             # Scientific convention for x-axis labels
             if 0 <= angle <= 30:
-                ha = ha or 'center'
-                va = va or 'top'
+                ha = ha or "center"
+                va = va or "top"
             elif 30 < angle <= 60:
-                ha = ha or 'right'
-                va = va or 'top'
+                ha = ha or "right"
+                va = va or "top"
             elif 60 < angle <= 120:
-                ha = ha or 'right'
-                va = va or 'center'
+                ha = ha or "right"
+                va = va or "center"
             elif 120 < angle <= 150:
-                ha = ha or 'right'
-                va = va or 'bottom'
+                ha = ha or "right"
+                va = va or "bottom"
             elif 150 < angle <= 210:
-                ha = ha or 'center'
-                va = va or 'bottom'
+                ha = ha or "center"
+                va = va or "bottom"
             elif 210 < angle <= 240:
-                ha = ha or 'left'
-                va = va or 'bottom'
+                ha = ha or "left"
+                va = va or "bottom"
             elif 240 < angle <= 300:
-                ha = ha or 'left'
-                va = va or 'center'
+                ha = ha or "left"
+                va = va or "center"
             else:  # 300-360
-                ha = ha or 'left'
-                va = va or 'top'
+                ha = ha or "left"
+                va = va or "top"
         else:
-            ha = ha or 'center'
-            va = va or 'top'
-            
+            ha = ha or "center"
+            va = va or "top"
+
     else:  # y-axis
         if scientific_convention:
             # Scientific convention for y-axis labels
             if 0 <= angle <= 30:
-                ha = ha or 'right'
-                va = va or 'center'
+                ha = ha or "right"
+                va = va or "center"
             elif 30 < angle <= 60:
-                ha = ha or 'right'
-                va = va or 'bottom'
+                ha = ha or "right"
+                va = va or "bottom"
             elif 60 < angle <= 120:
-                ha = ha or 'center'
-                va = va or 'bottom'
+                ha = ha or "center"
+                va = va or "bottom"
             elif 120 < angle <= 150:
-                ha = ha or 'left'
-                va = va or 'bottom'
+                ha = ha or "left"
+                va = va or "bottom"
             elif 150 < angle <= 210:
-                ha = ha or 'left'
-                va = va or 'center'
+                ha = ha or "left"
+                va = va or "center"
             elif 210 < angle <= 240:
-                ha = ha or 'left'
-                va = va or 'top'
+                ha = ha or "left"
+                va = va or "top"
             elif 240 < angle <= 300:
-                ha = ha or 'center'
-                va = va or 'top'
+                ha = ha or "center"
+                va = va or "top"
             else:  # 300-360
-                ha = ha or 'right'
-                va = va or 'top'
+                ha = ha or "right"
+                va = va or "top"
         else:
-            ha = ha or 'center'
-            va = va or 'center'
-    
+            ha = ha or "center"
+            va = va or "center"
+
     return ha, va
 
 
 def _adjust_subplot_params(ax, x_angle, y_angle):
     """
     Automatically adjust subplot parameters to accommodate rotated labels.
-    
+
     Parameters
     ----------
     ax : matplotlib.axes.Axes
@@ -201,45 +210,46 @@ def _adjust_subplot_params(ax, x_angle, y_angle):
         Y-axis rotation angle
     """
     fig = ax.get_figure()
-    
+
     # Check if figure is using a layout engine that is incompatible with subplots_adjust
     try:
         # For matplotlib >= 3.6
-        if hasattr(fig, 'get_layout_engine'):
+        if hasattr(fig, "get_layout_engine"):
             layout_engine = fig.get_layout_engine()
             if layout_engine is not None:
                 # If using constrained_layout or tight_layout, don't adjust
                 return
     except AttributeError:
         pass
-    
+
     # Check for constrained_layout (older matplotlib versions)
     try:
-        if hasattr(fig, 'get_constrained_layout'):
+        if hasattr(fig, "get_constrained_layout"):
             if fig.get_constrained_layout():
                 # Constrained layout is active, don't adjust
                 return
     except AttributeError:
         pass
-    
+
     # Calculate required margins based on rotation angles
     x_margin_factor = abs(np.sin(np.radians(x_angle))) * 0.1
     y_margin_factor = abs(np.sin(np.radians(y_angle))) * 0.15
-    
+
     # Get current subplot parameters
     try:
         subplotpars = fig.subplotpars
         current_bottom = subplotpars.bottom
         current_left = subplotpars.left
-        
+
         # Adjust margins if they need to be increased
         new_bottom = max(current_bottom, 0.1 + x_margin_factor)
         new_left = max(current_left, 0.1 + y_margin_factor)
-        
+
         # Only adjust if we're increasing the margins significantly
         if new_bottom > current_bottom + 0.05 or new_left > current_left + 0.05:
             # Suppress warning and try to adjust
             import warnings
+
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 fig.subplots_adjust(bottom=new_bottom, left=new_left)

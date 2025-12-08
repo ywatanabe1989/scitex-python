@@ -4,6 +4,7 @@
 # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/.claude-worktree/scitex_repo/src/scitex/plt/_subplots/_AxisWrapperMixins/_AdjustmentMixin.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -29,11 +30,11 @@ class AdjustmentMixin:
         tight_layout: bool = False,
     ) -> None:
         """Rotate x and y axis labels with automatic positioning.
-        
+
         Parameters
         ----------
         x : float or None, optional
-            Rotation angle for x-axis labels in degrees. 
+            Rotation angle for x-axis labels in degrees.
             If None or 0, x-axis labels are not rotated. Default is None.
         y : float or None, optional
             Rotation angle for y-axis labels in degrees.
@@ -54,13 +55,21 @@ class AdjustmentMixin:
             Whether to apply tight_layout to prevent overlapping. Default is False.
         """
         self._axis_mpl = ax_module.rotate_labels(
-            self._axis_mpl, x=x, y=y, x_ha=x_ha, y_ha=y_ha,
-            x_va=x_va, y_va=y_va, auto_adjust=auto_adjust,
+            self._axis_mpl,
+            x=x,
+            y=y,
+            x_ha=x_ha,
+            y_ha=y_ha,
+            x_va=x_va,
+            y_va=y_va,
+            auto_adjust=auto_adjust,
             scientific_convention=scientific_convention,
-            tight_layout=tight_layout
+            tight_layout=tight_layout,
         )
 
-    def legend(self, *args, loc: str = "best", check_overlap: bool = False, **kwargs) -> None:
+    def legend(
+        self, *args, loc: str = "best", check_overlap: bool = False, **kwargs
+    ) -> None:
         """Places legend at specified location, with support for outside positions.
 
         Parameters
@@ -90,42 +99,41 @@ class AdjustmentMixin:
         if loc == "outer":
             # Place legend outside on the right, adjusting figure to make room
             legend = self._axis_mpl.legend(
-                *args,
-                loc='center left',
-                bbox_to_anchor=(1.02, 0.5),
-                **kwargs
+                *args, loc="center left", bbox_to_anchor=(1.02, 0.5), **kwargs
             )
             # Adjust figure to prevent legend cutoff
-            if hasattr(self, '_figure_wrapper') and self._figure_wrapper:
+            if hasattr(self, "_figure_wrapper") and self._figure_wrapper:
                 self._figure_wrapper._fig_mpl.tight_layout()
                 self._figure_wrapper._fig_mpl.subplots_adjust(right=0.85)
             return legend
-            
+
         elif loc == "separate":
             # Set flag to save legend separately when figure is saved
             import warnings
-            
+
             handles, labels = self._axis_mpl.get_legend_handles_labels()
             if not handles:
-                warnings.warn("No legend handles found. Create plots with labels first.")
+                warnings.warn(
+                    "No legend handles found. Create plots with labels first."
+                )
                 return None
-            
+
             # Store legend params for later use during save
             fig = self._axis_mpl.get_figure()
-            if not hasattr(fig, '_separate_legend_params'):
+            if not hasattr(fig, "_separate_legend_params"):
                 fig._separate_legend_params = []
-            
+
             # Extract separate-specific kwargs
-            figsize = kwargs.pop('figsize', (4, 3))
-            dpi = kwargs.pop('dpi', 150)
-            frameon = kwargs.pop('frameon', True)
-            fancybox = kwargs.pop('fancybox', True)
-            shadow = kwargs.pop('shadow', True)
-            
+            figsize = kwargs.pop("figsize", (4, 3))
+            dpi = kwargs.pop("dpi", 150)
+            frameon = kwargs.pop("frameon", True)
+            fancybox = kwargs.pop("fancybox", True)
+            shadow = kwargs.pop("shadow", True)
+
             # Store parameters for this axes
             # Include axis index or name for unique filenames
             axis_id = None
-            
+
             # Try to find axis index in parent figure
             try:
                 fig_axes = fig.get_axes()
@@ -135,9 +143,9 @@ class AdjustmentMixin:
                         break
             except:
                 pass
-            
+
             # If not found, try subplot spec
-            if axis_id is None and hasattr(self._axis_mpl, 'get_subplotspec'):
+            if axis_id is None and hasattr(self._axis_mpl, "get_subplotspec"):
                 try:
                     spec = self._axis_mpl.get_subplotspec()
                     if spec is not None:
@@ -147,34 +155,40 @@ class AdjustmentMixin:
                         rowspan = spec.rowspan
                         colspan = spec.colspan
                         # Calculate flat index from row/col position
-                        row_start = rowspan.start if hasattr(rowspan, 'start') else rowspan
-                        col_start = colspan.start if hasattr(colspan, 'start') else colspan
+                        row_start = (
+                            rowspan.start if hasattr(rowspan, "start") else rowspan
+                        )
+                        col_start = (
+                            colspan.start if hasattr(colspan, "start") else colspan
+                        )
                         flat_idx = row_start * ncols + col_start
                         axis_id = f"ax_{flat_idx:02d}"
                 except:
                     pass
-            
+
             # Fallback to sequential numbering
             if axis_id is None:
                 axis_id = f"ax_{len(fig._separate_legend_params):02d}"
-                
-            fig._separate_legend_params.append({
-                'axis': self._axis_mpl,
-                'axis_id': axis_id,
-                'handles': handles,
-                'labels': labels,
-                'figsize': figsize,
-                'dpi': dpi,
-                'frameon': frameon,
-                'fancybox': fancybox,
-                'shadow': shadow,
-                'kwargs': kwargs
-            })
-            
+
+            fig._separate_legend_params.append(
+                {
+                    "axis": self._axis_mpl,
+                    "axis_id": axis_id,
+                    "handles": handles,
+                    "labels": labels,
+                    "figsize": figsize,
+                    "dpi": dpi,
+                    "frameon": frameon,
+                    "fancybox": fancybox,
+                    "shadow": shadow,
+                    "kwargs": kwargs,
+                }
+            )
+
             # Remove legend from main figure immediately
             if self._axis_mpl.get_legend():
                 self._axis_mpl.get_legend().remove()
-            
+
             return None
 
         # Original outside positions
@@ -210,7 +224,9 @@ class AdjustmentMixin:
         # Place the legend
         if loc in outside_positions:
             location, bbox = outside_positions[loc]
-            legend_obj = self._axis_mpl.legend(*args, loc=location, bbox_to_anchor=bbox, **kwargs)
+            legend_obj = self._axis_mpl.legend(
+                *args, loc=location, bbox_to_anchor=bbox, **kwargs
+            )
         else:
             legend_obj = self._axis_mpl.legend(*args, loc=loc, **kwargs)
 
@@ -266,11 +282,16 @@ class AdjustmentMixin:
             # Check for overlap
             if data_bboxes:
                 import numpy as np
+
                 all_data = np.vstack(data_bboxes)
 
                 # Count how many data points fall within legend bbox
-                x_overlap = (all_data[:, 0] >= legend_bbox_data.x0) & (all_data[:, 0] <= legend_bbox_data.x1)
-                y_overlap = (all_data[:, 1] >= legend_bbox_data.y0) & (all_data[:, 1] <= legend_bbox_data.y1)
+                x_overlap = (all_data[:, 0] >= legend_bbox_data.x0) & (
+                    all_data[:, 0] <= legend_bbox_data.x1
+                )
+                y_overlap = (all_data[:, 1] >= legend_bbox_data.y0) & (
+                    all_data[:, 1] <= legend_bbox_data.y1
+                )
                 overlap_points = np.sum(x_overlap & y_overlap)
 
                 # Calculate overlap percentage
@@ -285,7 +306,7 @@ class AdjustmentMixin:
                         f"  - ax.legend(loc='separate')  # Save as separate file\n"
                         f"  - Manually adjust with loc='upper left', 'lower right', etc.",
                         UserWarning,
-                        stacklevel=3
+                        stacklevel=3,
                     )
                     return True  # Overlap detected
 
@@ -408,7 +429,7 @@ class AdjustmentMixin:
         experimental_details=None,
         journal_style=None,
         significance=None,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Set comprehensive scientific metadata with YAML export capability.
 
@@ -440,7 +461,7 @@ class AdjustmentMixin:
             experimental_details=experimental_details,
             journal_style=journal_style,
             significance=significance,
-            **kwargs
+            **kwargs,
         )
 
     def set_figure_meta(
@@ -452,7 +473,7 @@ class AdjustmentMixin:
         funding=None,
         conflicts=None,
         data_availability=None,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Set figure-level metadata for multi-panel figures.
 
@@ -484,7 +505,7 @@ class AdjustmentMixin:
             funding=funding,
             conflicts=conflicts,
             data_availability=data_availability,
-            **kwargs
+            **kwargs,
         )
 
     def set_ticks(
@@ -533,5 +554,6 @@ class AdjustmentMixin:
 
     def shift(self, dx: float = 0, dy: float = 0) -> None:
         self._axis_mpl = ax_module.shift(self._axis_mpl, dx=dx, dy=dy)
+
 
 # EOF

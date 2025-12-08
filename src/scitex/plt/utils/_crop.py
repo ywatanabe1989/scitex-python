@@ -54,10 +54,10 @@ def find_content_area(image_path: str) -> Tuple[int, int, int, int]:
             # Sample background color from corners (more robust than assuming white)
             h, w = img_array.shape[:2]
             corners = [
-                img_array[0, 0],           # top-left
-                img_array[0, w-1],         # top-right
-                img_array[h-1, 0],         # bottom-left
-                img_array[h-1, w-1],       # bottom-right
+                img_array[0, 0],  # top-left
+                img_array[0, w - 1],  # top-right
+                img_array[h - 1, 0],  # bottom-left
+                img_array[h - 1, w - 1],  # bottom-right
             ]
             # Use median of corners as background color (robust to one corner having content)
             bg_color = np.median(corners, axis=0).astype(np.uint8)
@@ -68,7 +68,12 @@ def find_content_area(image_path: str) -> Tuple[int, int, int, int]:
         else:
             # Grayscale: detect background from corners
             h, w = img_array.shape
-            corners = [img_array[0, 0], img_array[0, w-1], img_array[h-1, 0], img_array[h-1, w-1]]
+            corners = [
+                img_array[0, 0],
+                img_array[0, w - 1],
+                img_array[h - 1, 0],
+                img_array[h - 1, w - 1],
+            ]
             bg_value = np.median(corners)
             is_content = np.abs(img_array.astype(np.int16) - bg_value) > 10
 
@@ -150,14 +155,16 @@ def crop(
 
     if verbose:
         print(f"Original image dimensions: {original_width}x{original_height}")
-        if 'dpi' in img.info:
+        if "dpi" in img.info:
             print(f"Original DPI: {img.info['dpi']}")
 
     # Find the content area (returns left, upper, right, lower)
     left, upper, right, lower = find_content_area(input_path)
 
     if verbose:
-        print(f"Content area detected at: left={left}, upper={upper}, right={right}, lower={lower}")
+        print(
+            f"Content area detected at: left={left}, upper={upper}, right={right}, lower={lower}"
+        )
 
     # Calculate the coordinates with margin, clamping to the image boundaries
     left = max(left - margin, 0)
@@ -167,7 +174,7 @@ def crop(
 
     if verbose:
         print(f"Cropping to: left={left}, upper={upper}, right={right}, lower={lower}")
-        print(f"New dimensions: {right-left}x{lower-upper}")
+        print(f"New dimensions: {right - left}x{lower - upper}")
 
     # Crop the image using PIL (lossless operation)
     cropped_img = img.crop((left, upper, right, lower))
@@ -176,17 +183,20 @@ def crop(
     save_kwargs = {}
 
     # Preserve DPI if it exists
-    if 'dpi' in img.info:
-        save_kwargs['dpi'] = img.info['dpi']
+    if "dpi" in img.info:
+        save_kwargs["dpi"] = img.info["dpi"]
 
     ext = os.path.splitext(output_path)[1].lower()
-    if ext in ['.png']:
+    if ext in [".png"]:
         # PNG: lossless compression, preserve all metadata including text chunks
-        save_kwargs['compress_level'] = 0  # No compression for maximum quality and speed
-        save_kwargs['optimize'] = False
+        save_kwargs["compress_level"] = (
+            0  # No compression for maximum quality and speed
+        )
+        save_kwargs["optimize"] = False
 
         # Preserve PNG text chunks (tEXt, zTXt, iTXt) where scitex metadata is stored
         from PIL import PngImagePlugin
+
         pnginfo = PngImagePlugin.PngInfo()
 
         # Copy all text chunks from original image
@@ -197,30 +207,30 @@ def crop(
                 except Exception:
                     pass  # Skip if can't add this chunk
 
-        save_kwargs['pnginfo'] = pnginfo
-    elif ext in ['.jpg', '.jpeg']:
+        save_kwargs["pnginfo"] = pnginfo
+    elif ext in [".jpg", ".jpeg"]:
         # JPEG: maximum quality for daily use (quality=100, no compression artifacts)
-        save_kwargs['quality'] = 100
-        save_kwargs['subsampling'] = 0  # No chroma subsampling (best quality)
-        save_kwargs['optimize'] = False
+        save_kwargs["quality"] = 100
+        save_kwargs["subsampling"] = 0  # No chroma subsampling (best quality)
+        save_kwargs["optimize"] = False
 
         # Preserve EXIF metadata where scitex metadata is stored
         try:
             import piexif
 
             # Try to load existing EXIF data
-            if 'exif' in img.info:
+            if "exif" in img.info:
                 # piexif.load() reads the EXIF bytes
-                exif_dict = piexif.load(img.info['exif'])
+                exif_dict = piexif.load(img.info["exif"])
                 # Re-dump to bytes for saving
                 exif_bytes = piexif.dump(exif_dict)
-                save_kwargs['exif'] = exif_bytes
+                save_kwargs["exif"] = exif_bytes
         except ImportError:
             # piexif not available, try PIL's built-in EXIF
-            if hasattr(img, 'getexif'):
+            if hasattr(img, "getexif"):
                 exif = img.getexif()
                 if exif:
-                    save_kwargs['exif'] = exif
+                    save_kwargs["exif"] = exif
         except Exception:
             # If EXIF reading fails, continue without it
             pass
@@ -230,12 +240,16 @@ def crop(
 
     # Calculate space saved
     final_width, final_height = cropped_img.size
-    area_reduction = 1 - ((final_width * final_height) / (original_width * original_height))
+    area_reduction = 1 - (
+        (final_width * final_height) / (original_width * original_height)
+    )
     area_reduction_pct = area_reduction * 100
 
     if verbose:
         print(f"Image processed: {input_path}")
-        print(f"Size changed from {original_width}x{original_height} to {final_width}x{final_height}")
+        print(
+            f"Size changed from {original_width}x{original_height} to {final_width}x{final_height}"
+        )
         print(f"Saved {area_reduction_pct:.1f}% of the original area")
         if output_path != input_path:
             print(f"Saved to: {output_path}")

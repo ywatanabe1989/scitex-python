@@ -42,14 +42,15 @@ def get_actual_font_name():
 
     # Fallback: extract from filename if not found in font list
     import os
+
     font_filename = os.path.basename(actual_font_path)
     # Remove .ttf extension and try to clean up the name
     font_name = os.path.splitext(font_filename)[0]
     # Capitalize common font names for better readability
-    if font_name.lower() == 'arial':
-        return 'Arial'
-    elif font_name.lower().startswith('dejavusans'):
-        return 'DejaVu Sans'
+    if font_name.lower() == "arial":
+        return "Arial"
+    elif font_name.lower().startswith("dejavusans"):
+        return "DejaVu Sans"
     return font_name
 
 

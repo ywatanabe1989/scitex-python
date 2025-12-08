@@ -21,8 +21,8 @@ def _format_step(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
-    if 'args' in tracked_dict:
-        args = tracked_dict['args']
+    if "args" in tracked_dict:
+        args = tracked_dict["args"]
         if isinstance(args, tuple) and len(args) > 0:
             if len(args) == 1:
                 y = np.asarray(args[0])

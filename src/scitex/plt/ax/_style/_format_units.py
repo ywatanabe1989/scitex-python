@@ -89,12 +89,12 @@ def format_label_auto(text: str) -> str:
 
     # Pattern to match units in parentheses at the end of the string
     # e.g., "Time (s)" or "Frequency (Hz)"
-    pattern = r'\s*\(([^)]+)\)\s*$'
+    pattern = r"\s*\(([^)]+)\)\s*$"
 
     match = re.search(pattern, text)
     if match:
         unit = match.group(1)
-        label = text[:match.start()].strip()
+        label = text[: match.start()].strip()
         return f"{label} [{unit}]"
 
     return text

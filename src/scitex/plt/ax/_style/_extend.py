@@ -29,7 +29,9 @@ def extend(axis, x_ratio=1.0, y_ratio=1.0):
         AssertionError: If the first argument is not a valid axis.
     """
 
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
 
     assert x_ratio != 0, "x_ratio must not be 0."
     assert y_ratio != 0, "y_ratio must not be 0."

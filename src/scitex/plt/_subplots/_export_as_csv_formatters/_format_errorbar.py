@@ -4,6 +4,7 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_errorbar.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -11,6 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 import numpy as np
 import pandas as pd
 import scitex
+
 
 def _make_column_name(id, suffix):
     """Create column name, avoiding duplication if method name is already in id.
@@ -20,26 +22,27 @@ def _make_column_name(id, suffix):
     - id="errorbar_0", suffix="errorbar_x" -> "errorbar_0_x" (not errorbar_0_errorbar_x)
     """
     # Extract method name from suffix if present
-    parts = suffix.split('_')
+    parts = suffix.split("_")
     # Get the method name from id (everything before the last underscore+number)
-    id_parts = id.rsplit('_', 1)
+    id_parts = id.rsplit("_", 1)
     if len(id_parts) == 2:
         method_from_id = id_parts[0]
         # If suffix starts with the same method name, remove it
-        if parts[0] == method_from_id.split('_')[-1]:
-            suffix = '_'.join(parts[1:])
+        if parts[0] == method_from_id.split("_")[-1]:
+            suffix = "_".join(parts[1:])
 
     return f"{id}_{suffix}"
+
 
 def _format_errorbar(id, tracked_dict, kwargs):
     """Format data from an errorbar call."""
     # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
-    
+
     # Get the args from tracked_dict
-    args = tracked_dict.get('args', [])
-    
+    args = tracked_dict.get("args", [])
+
     # Typical args: x, y
     # Typical kwargs: xerr, yerr
     if len(args) >= 2:

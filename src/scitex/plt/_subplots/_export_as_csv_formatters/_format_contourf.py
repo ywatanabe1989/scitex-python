@@ -21,8 +21,8 @@ def _format_contourf(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
-    if 'args' in tracked_dict:
-        args = tracked_dict['args']
+    if "args" in tracked_dict:
+        args = tracked_dict["args"]
         if isinstance(args, tuple):
             # contourf can be called as:
             # contourf(Z) - Z is 2D
@@ -41,11 +41,13 @@ def _format_contourf(id, tracked_dict, kwargs):
                 return pd.DataFrame()
 
             # Flatten all arrays
-            df = pd.DataFrame({
-                f"{id}_contourf_x": X.flatten(),
-                f"{id}_contourf_y": Y.flatten(),
-                f"{id}_contourf_z": Z.flatten()
-            })
+            df = pd.DataFrame(
+                {
+                    f"{id}_contourf_x": X.flatten(),
+                    f"{id}_contourf_y": Y.flatten(),
+                    f"{id}_contourf_z": Z.flatten(),
+                }
+            )
             return df
 
     return pd.DataFrame()
