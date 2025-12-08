@@ -26,7 +26,7 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 
 ``` bash
 pip install scitex # ~600 MB, Core + utilities
-pip install scitex[dl,ml,jupyter,neuro,web,scholar,writer,dev] # ~2-5 GB, Complete toolkit
+pip install scitex[dl,ml,jupyter,neuro,web,gui,scholar,writer,dev] # ~2-5 GB, Complete toolkit
 ```
 
 ### Alial
@@ -82,6 +82,7 @@ plt.close(fig)
 | **jupyter** | JupyterLab, papermill                                   | ~100 MB     |
 | **neuro**   | MNE, obspy (EEG/MEG analysis)                           | ~200 MB     |
 | **web**     | FastAPI, Flask, Streamlit                               | ~50 MB      |
+| **gui**     | Flask, DearPyGui, PyQt6 (multi-backend figure editors)  | ~100 MB     |
 | **scholar** | Selenium, PDF tools, paper management                   | ~150 MB     |
 | **writer**  | LaTeX compilation tools                                 | ~10 MB      |
 | **dev**     | Testing, linting (dev only)                             | ~100 MB     |

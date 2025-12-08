@@ -197,9 +197,48 @@ def extract_defaults_from_metadata(metadata):
     if legend:
         defaults['legend_visible'] = legend.get('visible', True)
         defaults['legend_frameon'] = legend.get('frameon', False)
-        defaults['legend_loc'] = legend.get('loc', 'best')
+        loc = legend.get('loc', 'best')
+        # Convert numeric legend loc to string (matplotlib accepts both but GUI needs string)
+        defaults['legend_loc'] = _normalize_legend_loc(loc)
 
     return defaults
+
+
+def _normalize_legend_loc(loc):
+    """Convert legend location to string format for GUI compatibility.
+
+    Matplotlib accepts both numeric codes and string locations for legends.
+    This function ensures consistency by converting numeric codes to strings.
+
+    Parameters
+    ----------
+    loc : int or str
+        Legend location (numeric or string)
+
+    Returns
+    -------
+    str
+        String representation of legend location
+    """
+    if isinstance(loc, str):
+        return loc
+
+    # Numeric to string mapping (matplotlib legend location codes)
+    loc_map = {
+        0: 'best',
+        1: 'upper right',
+        2: 'upper left',
+        3: 'lower left',
+        4: 'lower right',
+        5: 'right',
+        6: 'center left',
+        7: 'center right',
+        8: 'lower center',
+        9: 'upper center',
+        10: 'center',
+    }
+
+    return loc_map.get(loc, 'best')
 
 
 # EOF

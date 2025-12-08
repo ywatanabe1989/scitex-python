@@ -349,14 +349,15 @@ def _extract_traces(ax) -> list:
         and csv_columns mapping
     """
     import matplotlib.colors as mcolors
+    from ._csv_column_naming import get_csv_column_name, sanitize_trace_id
 
     traces = []
 
     # Get axes position for CSV column naming
-    ax_pos = "00"  # Default for single axes
+    ax_row, ax_col = 0, 0  # Default for single axes
     if hasattr(ax, '_scitex_metadata') and 'position_in_grid' in ax._scitex_metadata:
         pos = ax._scitex_metadata['position_in_grid']
-        ax_pos = f"{pos[0]}{pos[1]}"
+        ax_row, ax_col = pos[0], pos[1]
 
     for i, line in enumerate(ax.lines):
         trace = {}
@@ -369,14 +370,16 @@ def _extract_traces(ax) -> list:
         label = line.get_label()
 
         # Determine trace_id for CSV column matching
-        if scitex_id:
-            trace_id = scitex_id
-        elif not label.startswith('_'):
-            trace_id = label
-        else:
-            trace_id = f"line_{i}"
+        # Use index-based ID to match CSV export (single source of truth)
+        trace_id_for_csv = None  # Will use trace_index in get_csv_column_name
 
-        trace["id"] = trace_id
+        # Store display id/label separately
+        if scitex_id:
+            trace["id"] = scitex_id
+        elif not label.startswith('_'):
+            trace["id"] = label
+        else:
+            trace["id"] = f"line_{i}"
 
         # Label (for legend) - use label if not internal
         if not label.startswith('_'):
@@ -404,12 +407,11 @@ def _extract_traces(ax) -> list:
             trace["marker"] = marker
             trace["markersize"] = line.get_markersize()
 
-        # CSV column mapping - this is how we'll reconstruct from CSV
-        # Format matches what _export_as_csv generates: ax_{row}{col}_{id}_plot_x/y
-        # The id should match the id= kwarg passed to ax.plot()
+        # CSV column mapping - use single source of truth
+        # Uses trace_index to match what _export_as_csv generates
         trace["csv_columns"] = {
-            "x": f"ax_{ax_pos}_{trace_id}_plot_x",
-            "y": f"ax_{ax_pos}_{trace_id}_plot_y",
+            "x": get_csv_column_name("plot_x", ax_row, ax_col, trace_index=i),
+            "y": get_csv_column_name("plot_y", ax_row, ax_col, trace_index=i),
         }
 
         traces.append(trace)
