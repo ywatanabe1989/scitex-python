@@ -10,7 +10,7 @@ This demonstrates what the MCP servers can do for code migration.
 """
 
 # Example 1: Standard matplotlib + pandas code
-standard_code = '''
+standard_code = """
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,10 +34,10 @@ ax.legend()
 # Save outputs
 plt.savefig('/home/user/experiments/figures/signal_plot.png')
 data.to_csv('processed_data.csv', index=False)
-'''
+"""
 
 # Expected SciTeX translation
-scitex_code = '''
+scitex_code = """
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -60,7 +60,7 @@ ax.legend()
 # Save outputs
 stx.io.save(fig, './figures/signal_plot.png', symlink_from_cwd=True)
 stx.io.save(data, './processed_data.csv', symlink_from_cwd=True)
-'''
+"""
 
 print("=== Standard Python Code ===")
 print(standard_code)

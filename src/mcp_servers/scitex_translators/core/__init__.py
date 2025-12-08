@@ -9,10 +9,10 @@ from .base_translator import BaseTranslator, TranslationContext, TransformerMixi
 from .context_analyzer import ContextAnalyzer, ModuleContext, CodePattern
 
 __all__ = [
-    "BaseTranslator", 
-    "TranslationContext", 
+    "BaseTranslator",
+    "TranslationContext",
     "TransformerMixin",
-    "ContextAnalyzer", 
-    "ModuleContext", 
-    "CodePattern"
+    "ContextAnalyzer",
+    "ModuleContext",
+    "CodePattern",
 ]
