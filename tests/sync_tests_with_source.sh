@@ -3,24 +3,29 @@
 # Timestamp: "2025-05-03 17:10:43 (ywatanabe)"
 # File: ./tests/sync_tests_with_source.sh
 
+ORIG_DIR="$(pwd)"
 THIS_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
 LOG_PATH="$THIS_DIR/.$(basename $0).log"
-touch "$LOG_PATH" >/dev/null 2>&1
+echo > "$LOG_PATH"
 
+GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
 
-THIS_DIR="./tests"
-ORIG_DIR="$(pwd)"
-ROOT_DIR="$(realpath $THIS_DIR/..)"
-cmd="cd $ROOT_DIR" && echo "$cmd" && eval "$cmd"
-# SRC_DIR="$(realpath "${THIS_DIR}/../src/scitex")"
-# TESTS_DIR="$(realpath "${THIS_DIR}/../tests/scitex")"
-
-# Set up colors for terminal output
-RED='\033[0;31m'
+# Color scheme
+GRAY='\033[0;90m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
-PURPLE='\033[0;35m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
+
+echo_info() { echo -e "${GRAY}INFO: $1${NC}"; }
+echo_success() { echo -e "${GREEN}SUCC: $1${NC}"; }
+echo_warning() { echo -e "${YELLOW}WARN: $1${NC}"; }
+echo_error() { echo -e "${RED}ERRO: $1${NC}"; }
+echo_header() { echo_info "=== $1 ==="; }
+
+THIS_DIR="./tests"
+ROOT_DIR="$(realpath $THIS_DIR/..)"
+cmd="cd $ROOT_DIR" && echo "$cmd" && eval "$cmd"
 
 ########################################
 # Usage & Argument Parser
@@ -29,6 +34,9 @@ NC='\033[0m' # No Color
 DO_MOVE=false
 SRC_DIR="$(realpath "${THIS_DIR}/../src/scitex")"
 TESTS_DIR="$(realpath "${THIS_DIR}/../tests/scitex")"
+# Use half of available CPU cores by default (minimum 1)
+CPU_COUNT=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+PARALLEL_JOBS=$(( CPU_COUNT / 2 > 0 ? CPU_COUNT / 2 : 1 ))
 
 usage() {
     echo "Usage: $0 [options]"
@@ -39,11 +47,13 @@ usage() {
     echo "  -m, --move         Move stale test files to .old directory instead of just reporting (default: $DO_MOVE)"
     echo "  -s, --source DIR   Specify custom source directory (default: $SRC_DIR)"
     echo "  -t, --tests DIR    Specify custom tests directory (default: $TESTS_DIR)"
+    echo "  -j, --jobs N       Number of parallel jobs (default: $PARALLEL_JOBS)"
     echo "  -h, --help         Display this help message"
     echo
     echo "Example:"
     echo "  $0 --move"
     echo "  $0 --source /path/to/src --tests /path/to/tests"
+    echo "  $0 -j \$((CPU_COUNT))  # Use all CPU cores"
     exit 1
 }
 
@@ -59,6 +69,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -t|--tests)
             TESTS_DIR="$2"
+            shift 2
+            ;;
+        -j|--jobs)
+            PARALLEL_JOBS="$2"
             shift 2
             ;;
         -h|--help)
@@ -224,9 +238,12 @@ find_files() {
 ########################################
 move_stale_test_files_to_old() {
     local timestamp="$(date +%Y%m%d_%H%M%S)"
+    local stale_count=0
+    local moved_count=0
+    local stale_files=()
 
-    find "$TESTS_DIR" -name "test_*.py" -not -path "*.old*" | while read -r test_path; do
-
+    # Collect stale files first
+    while IFS= read -r test_path; do
         # Skip files in ./tests/custom
         [[ "$test_path" =~ ^${TESTS_DIR}/custom ]] && continue
 
@@ -240,33 +257,41 @@ move_stale_test_files_to_old() {
         src_rel_path="$src_rel_dir/$src_filename"
         src_path="$SRC_DIR/$src_rel_path"
 
-        if [ ! -f "$src_path" ] && [ ! -f "$test_path" ]; then
-            echo -e "${YELLOW}Source Not Found and Test Not Found${NC}"
-        fi
-
         if [ ! -f "$src_path" ] && [ -f "$test_path" ]; then
-
-            stale_test_path=$test_path
-            stale_test_filename="$(basename $stale_test_path)"
-            stale_test_path_dir="$(dirname $stale_test_path)"
-            old_dir_with_timestamp="$stale_test_path_dir/.old-$timestamp"
-            tgt_path="$old_dir_with_timestamp/$stale_test_filename"
-
-            echo -e "${RED}Stale Test          : $stale_test_path${NC}"
-            # echo -e "${RED}Target Old Directory: $old_dir_with_timestamp${NC}"
-            echo -e "${RED}If you want to remove this stale test file, please run $0 -m${NC}"
-
-            if [ "$DO_MOVE" = "true" ]; then
-                # Ensure target dir exists
-                mkdir -p "$old_dir_with_timestamp"
-                # Move file
-                mv "$stale_test_path" "$tgt_path"
-                echo -e "${GREEN}Moved: $stale_test_path -> $tgt_path${NC}"
-            fi
-
+            stale_files+=("$test_path")
+            ((stale_count++))
         fi
+    done < <(find "$TESTS_DIR" -name "test_*.py" -not -path "*.old*")
 
-    done
+    # Report stale files
+    if [ $stale_count -gt 0 ]; then
+        echo ""
+        echo_header "Stale Test Files ($stale_count found)"
+        echo ""
+        for stale_path in "${stale_files[@]}"; do
+            local rel_path="${stale_path#$TESTS_DIR/}"
+            if [ "$DO_MOVE" = "true" ]; then
+                stale_filename="$(basename $stale_path)"
+                stale_path_dir="$(dirname $stale_path)"
+                old_dir_with_timestamp="$stale_path_dir/.old-$timestamp"
+                tgt_path="$old_dir_with_timestamp/$stale_filename"
+
+                mkdir -p "$old_dir_with_timestamp"
+                mv "$stale_path" "$tgt_path"
+                echo_success "  [MOVED] $rel_path"
+                ((moved_count++))
+            else
+                echo_warning "  [STALE] $rel_path"
+            fi
+        done
+        echo ""
+        if [ "$DO_MOVE" = "false" ]; then
+            echo_info "To move stale files, run: $0 -m"
+        else
+            echo_success "Moved $moved_count stale test files"
+        fi
+        echo ""
+    fi
 }
 
 remove_hidden_test_files_and_dirs() {
@@ -294,43 +319,143 @@ chmod_python_source_scripts_as_executable() {
 }
 
 ########################################
+# Parallel Processing Helper
+########################################
+# Process a single source file (called in parallel)
+process_single_file() {
+    local src_file="$1"
+    local SRC_DIR="$2"
+    local TESTS_DIR="$3"
+
+    # Skip __init__.py files (they cause import conflicts in tests)
+    [[ "$(basename "$src_file")" == "__init__.py" ]] && return
+
+    # derive relative path and parts
+    rel="${src_file#$SRC_DIR/}"
+    rel_dir=$(dirname "$rel")
+    src_base=$(basename "$rel")
+
+    # ensure test subdir exists
+    tests_dir="$TESTS_DIR/$rel_dir"
+    mkdir -p "$tests_dir"
+
+    # build correct test file path
+    test_file="$tests_dir/test_$src_base"
+
+    # Process the file (inline the update logic to avoid export complexity)
+    if [ ! -f "$test_file" ]; then
+        # If file doesn't exist, create it with minimal structure
+        mkdir -p "$(dirname "$test_file")"
+
+        cat > "$test_file" << EOL
+# Add your tests here
+
+if __name__ == "__main__":
+    import os
+
+    import pytest
+
+    pytest.main([os.path.abspath(__file__)])
+EOL
+        # Add source code block
+        {
+            echo ""
+            echo "# --------------------------------------------------------------------------------"
+            echo "# Start of Source Code from: $src_file"
+            echo "# --------------------------------------------------------------------------------"
+            sed 's/^/# /' "$src_file"
+            echo ""
+            echo "# --------------------------------------------------------------------------------"
+            echo "# End of Source Code from: $src_file"
+            echo "# --------------------------------------------------------------------------------"
+        } >> "$test_file"
+    else
+        # File exists, preserve test code
+        local temp_file=$(mktemp)
+
+        # Extract test code (content before source block or pytest guard)
+        local test_code=""
+        if grep -q "# Start of Source Code from:" "$test_file"; then
+            test_code=$(sed -n '/# Start of Source Code from:/q;/if __name__ == "__main__":/q;p' "$test_file")
+        else
+            test_code=$(sed -n '/if __name__ == "__main__":/q;p' "$test_file")
+        fi
+
+        # Write test code or default
+        if [ -n "$test_code" ]; then
+            echo "$test_code" > "$temp_file"
+            [[ "$(tail -c 1 "$temp_file")" != "" ]] && echo "" >> "$temp_file"
+        else
+            echo "# Add your tests here" > "$temp_file"
+            echo "" >> "$temp_file"
+        fi
+
+        # Add pytest guard
+        cat >> "$temp_file" << 'EOL'
+
+if __name__ == "__main__":
+    import os
+
+    import pytest
+
+    pytest.main([os.path.abspath(__file__)])
+EOL
+
+        # Add source code block
+        {
+            echo ""
+            echo "# --------------------------------------------------------------------------------"
+            echo "# Start of Source Code from: $src_file"
+            echo "# --------------------------------------------------------------------------------"
+            sed 's/^/# /' "$src_file"
+            echo ""
+            echo "# --------------------------------------------------------------------------------"
+            echo "# End of Source Code from: $src_file"
+            echo "# --------------------------------------------------------------------------------"
+        } >> "$temp_file"
+
+        mv "$temp_file" "$test_file"
+    fi
+}
+export -f process_single_file
+
+########################################
 # Main
 ########################################
 main() {
     local do_move=${1:-false}
+    local start_time=$(date +%s)
 
-    echo "Using SRC_DIR: $SRC_DIR"
-    echo "Using TESTS_DIR: $TESTS_DIR"
+    echo ""
+    echo_header "Test Synchronization"
+    echo ""
+    echo_info "Source:    $SRC_DIR"
+    echo_info "Tests:     $TESTS_DIR"
+    echo_info "Jobs:      $PARALLEL_JOBS"
+    echo ""
 
+    echo_info "Preparing test structure..."
     remove_hidden_test_files_and_dirs
     prepare_tests_structure_as_source
     chmod_python_source_scripts_as_executable
     cleanup_unnecessary_test_files
 
-    # Update tests with preferred order: test code -> pytest guard -> source comment
-    find_files "$SRC_DIR" f "*.py" | while read -r src_file; do
-        # derive relative path and parts
-        rel="${src_file#$SRC_DIR/}"
-        rel_dir=$(dirname "$rel")
-        src_base=$(basename "$rel")
-
-        # ensure test subdir exists
-        tests_dir="$TESTS_DIR/$rel_dir"
-        mkdir -p "$tests_dir"
-
-        # build correct test file path
-        test_file="$tests_dir/test_$src_base"
-
-        # Process each file
-        update_test_file "$test_file" "$src_file"
-    done
+    echo_info "Synchronizing test files (parallel)..."
+    local file_count=$(find_files "$SRC_DIR" f "*.py" | wc -l)
+    find_files "$SRC_DIR" f "*.py" | \
+        xargs -P "$PARALLEL_JOBS" -I {} bash -c 'process_single_file "$@"' _ {} "$SRC_DIR" "$TESTS_DIR"
+    echo_success "Processed $file_count source files"
 
     remove_hidden_test_files_and_dirs
-    # Uncomment if needed:
-    # cleanup_unnecessary_test_files
     move_stale_test_files_to_old
 
-    # tree "$TESTS_DIR" 2>&1 | tee -a "$LOG_PATH"
+    local end_time=$(date +%s)
+    local elapsed=$((end_time - start_time))
+
+    echo_header "Summary"
+    echo_success "Completed in ${elapsed}s"
+    echo ""
+
     tree "$TESTS_DIR" 2>&1 >> "$LOG_PATH"
 }
 

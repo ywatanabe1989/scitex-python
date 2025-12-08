@@ -66,7 +66,7 @@ usage() {
     echo "  $0 -c              Clean cache before running tests"
     echo "  $0 -n 10           Run tests 10 times in sequence"
     echo "  $0 -j 4            Run tests in parallel with 4 workers"
-    echo "  $0 tests/mngs/core Run only tests in core module"
+    echo "  $0 tests/scitex/core Run only tests in core module"
     exit 1
 }
 

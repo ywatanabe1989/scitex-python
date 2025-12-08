@@ -888,3 +888,4 @@ wheels/
 .installed.cfg
 *.egg
 output/
+tests/results/

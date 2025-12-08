@@ -17,12 +17,16 @@ sys.path.insert(0, os.path.abspath('../../src'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'MNGS'
+project = 'SciTeX'
 copyright = '2025, Yusuke Watanabe'
 author = 'Yusuke Watanabe'
 
-# The full version, including alpha/beta/rc tags
-release = '1.0.0'
+# Version from package
+try:
+    from scitex import __version__
+    release = __version__
+except ImportError:
+    release = '2.5.0'
 
 
 # -- General configuration ---------------------------------------------------

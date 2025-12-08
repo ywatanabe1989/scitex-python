@@ -1,12 +1,12 @@
 Core Concepts
 =============
 
-Understanding these core concepts will help you use MNGS effectively.
+Understanding these core concepts will help you use SciTeX effectively.
 
 Philosophy
 ----------
 
-MNGS (monogusa - "lazy" in Japanese) embodies the principle of making scientific computing as effortless as possible while maintaining rigor and reproducibility.
+SciTeX (monogusa - "lazy" in Japanese) embodies the principle of making scientific computing as effortless as possible while maintaining rigor and reproducibility.
 
 Key Principles
 --------------
@@ -14,7 +14,7 @@ Key Principles
 1. Automatic Everything
 ~~~~~~~~~~~~~~~~~~~~~~
 
-MNGS automates common tasks that researchers often forget:
+SciTeX automates common tasks that researchers often forget:
 
 - **Logging**: All output is automatically logged with timestamps
 - **Data Export**: Plots automatically save their underlying data
@@ -24,7 +24,7 @@ MNGS automates common tasks that researchers often forget:
 2. Consistent Interface
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-All MNGS modules follow similar patterns:
+All SciTeX modules follow similar patterns:
 
 .. code-block:: python
 
@@ -61,7 +61,7 @@ This pattern:
 4. Data Preservation
 ~~~~~~~~~~~~~~~~~~~~
 
-MNGS prioritizes data preservation:
+SciTeX prioritizes data preservation:
 
 - **Plots**: Every plot saves its data to CSV
 - **Logs**: All console output is preserved
@@ -80,7 +80,7 @@ Example with plotting:
 5. Scientific Workflow Integration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MNGS is designed for typical scientific workflows:
+SciTeX is designed for typical scientific workflows:
 
 .. code-block:: python
 
@@ -109,7 +109,7 @@ Architecture
 Module Organization
 ~~~~~~~~~~~~~~~~~~~
 
-MNGS is organized into focused modules:
+SciTeX is organized into focused modules:
 
 - **Core**: ``gen``, ``io`` - Essential functionality
 - **Analysis**: ``stats``, ``pd`` - Data analysis tools
@@ -128,7 +128,7 @@ Dependency Management
 Error Handling
 ~~~~~~~~~~~~~~
 
-MNGS uses defensive programming:
+SciTeX uses defensive programming:
 
 .. code-block:: python
 
