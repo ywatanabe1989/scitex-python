@@ -1,1 +1,1 @@
-../../../src/mngs/utils/_compress_hdf5.py
+../../../src/scitex/utils/_compress_hdf5.py

@@ -479,6 +479,7 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -512,17 +513,21 @@ if __name__ == "__main__":
 # 
 # # matplotlib imports moved to functions that need them
 # 
+# 
 # # Delay logging import to avoid circular dependency
 # # scitex.logging imports _Tee which imports scitex.str which imports this file
 # def _get_logger():
 #     """Get logger lazily to avoid circular import."""
 #     from scitex import logging
+# 
 #     return logging.getLogger(__name__)
+# 
 # 
 # # Use property-like access for logger
 # class _LoggerProxy:
 #     def __getattr__(self, name):
 #         return getattr(_get_logger(), name)
+# 
 # 
 # logger = _LoggerProxy()
 # 
@@ -959,23 +964,16 @@ if __name__ == "__main__":
 #                     "ghostscript",
 #                 ]
 # 
-#                 if any(
-#                     indicator in error_str
-#                     for indicator in latex_error_indicators
-#                 ):
+#                 if any(indicator in error_str for indicator in latex_error_indicators):
 #                     logger.warning(f"LaTeX error in {func.__name__}: {e}")
-#                     logger.warning(
-#                         "Falling back to alternative text rendering"
-#                     )
+#                     logger.warning("Falling back to alternative text rendering")
 # 
 #                     # Try to apply fallback to string arguments
 #                     new_args = []
 #                     for arg in args:
 #                         if isinstance(arg, str):
 #                             new_args.append(
-#                                 safe_latex_render(
-#                                     arg, fallback_strategy, preserve_math
-#                                 )
+#                                 safe_latex_render(arg, fallback_strategy, preserve_math)
 #                             )
 #                         else:
 #                             new_args.append(arg)
@@ -1048,6 +1046,7 @@ if __name__ == "__main__":
 #     check_latex_capability.cache_clear()
 #     global _latex_available
 #     _latex_available = None
+# 
 # 
 # # EOF
 

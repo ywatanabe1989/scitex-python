@@ -344,7 +344,6 @@ if __name__ == "__main__":
 # This script does XYZ.
 # """
 # 
-# 
 # """
 # Imports
 # """
@@ -417,7 +416,9 @@ if __name__ == "__main__":
 # 
 # 
 # if __name__ == "__main__":
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
+#         sys, plt, verbose=False
+#     )
 #     main()
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 

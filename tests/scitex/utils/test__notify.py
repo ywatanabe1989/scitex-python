@@ -362,6 +362,7 @@ if __name__ == "__main__":
 # # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/utils/_notify.py
 # # ----------------------------------------
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -415,12 +416,12 @@ if __name__ == "__main__":
 # def gen_footer(sender, script_name, scitex, branch):
 #     return f"""
 # 
-# {'-'*30}
+# {"-" * 30}
 # Sent via
 # - Host: {sender}
 # - Script: {script_name}
 # - Source: scitex v{scitex.__version__} (github.com/ywatanabe1989/scitex/blob/{branch}/src/scitex/gen/system_ops/_notify.py)
-# {'-'*30}"""
+# {"-" * 30}"""
 # 
 # 
 # # This is an automated system notification. If received outside working hours, please disregard.
@@ -446,9 +447,16 @@ if __name__ == "__main__":
 # 
 #     FAKE_PYTHON_SCRIPT_NAME = "$ python -c ..."
 #     # Use scitex.ai email addresses (not Gmail)
-#     sender_gmail = os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS", os.getenv("SCITEX_EMAIL_AGENT", "agent@scitex.ai"))
-#     sender_password = os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD", os.getenv("SCITEX_EMAIL_PASSWORD", ""))
-#     recipient_email = recipient_email or os.getenv("SCITEX_SCHOLAR_TO_EMAIL_ADDRESS", "ywata1989@gmail.com")
+#     sender_gmail = os.getenv(
+#         "SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS",
+#         os.getenv("SCITEX_EMAIL_AGENT", "agent@scitex.ai"),
+#     )
+#     sender_password = os.getenv(
+#         "SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD", os.getenv("SCITEX_EMAIL_PASSWORD", "")
+#     )
+#     recipient_email = recipient_email or os.getenv(
+#         "SCITEX_SCHOLAR_TO_EMAIL_ADDRESS", "ywata1989@gmail.com"
+#     )
 # 
 #     if file is not None:
 #         script_name = str(file)
@@ -458,9 +466,7 @@ if __name__ == "__main__":
 #         else:
 #             frames = inspect.stack()
 #             script_name = (
-#                 os.path.basename(frames[-1].filename)
-#                 if frames
-#                 else "(Not found)"
+#                 os.path.basename(frames[-1].filename) if frames else "(Not found)"
 #             )
 #         if (script_name == "-c") or (not script_name.endswith(".py")):
 #             script_name = FAKE_PYTHON_SCRIPT_NAME

@@ -159,11 +159,11 @@ if __name__ == "__main__":
 #                 return xr.DataArray(data)
 #             elif isinstance(data, list):
 #                 return xr.DataArray(data)
-#             elif hasattr(data, '__class__') and data.__class__.__name__ == 'Tensor':
+#             elif hasattr(data, "__class__") and data.__class__.__name__ == "Tensor":
 #                 return xr.DataArray(data.detach().cpu().numpy())
-#             elif hasattr(data, '__class__') and data.__class__.__name__ == 'DataFrame':
+#             elif hasattr(data, "__class__") and data.__class__.__name__ == "DataFrame":
 #                 return xr.DataArray(data.values)
-#             elif hasattr(data, '__class__') and data.__class__.__name__ == 'Series':
+#             elif hasattr(data, "__class__") and data.__class__.__name__ == "Series":
 #                 return xr.DataArray(data.values)
 #             else:
 #                 return xr.DataArray([data])
@@ -173,29 +173,43 @@ if __name__ == "__main__":
 # 
 #         # Assertion to ensure all args are converted to xarray DataArrays
 #         import xarray as xr
+# 
 #         for arg_index, arg in enumerate(converted_args):
-#             assert isinstance(
-#                 arg, xr.DataArray
-#             ), f"Argument {arg_index} not converted to DataArray: {type(arg)}"
+#             assert isinstance(arg, xr.DataArray), (
+#                 f"Argument {arg_index} not converted to DataArray: {type(arg)}"
+#             )
 # 
 #         results = func(*converted_args, **converted_kwargs)
 # 
 #         # Convert results back to original input types
 #         import xarray as xr
+# 
 #         if isinstance(results, xr.DataArray):
 #             if original_object is not None:
 #                 if isinstance(original_object, list):
 #                     return results.values.tolist()
 #                 elif isinstance(original_object, np.ndarray):
 #                     return results.values
-#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Tensor':
+#                 elif (
+#                     hasattr(original_object, "__class__")
+#                     and original_object.__class__.__name__ == "Tensor"
+#                 ):
 #                     import torch
+# 
 #                     return torch.tensor(results.values)
-#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'DataFrame':
+#                 elif (
+#                     hasattr(original_object, "__class__")
+#                     and original_object.__class__.__name__ == "DataFrame"
+#                 ):
 #                     import pandas as pd
+# 
 #                     return pd.DataFrame(results.values)
-#                 elif hasattr(original_object, '__class__') and original_object.__class__.__name__ == 'Series':
+#                 elif (
+#                     hasattr(original_object, "__class__")
+#                     and original_object.__class__.__name__ == "Series"
+#                 ):
 #                     import pandas as pd
+# 
 #                     return pd.Series(results.values.flatten())
 #             return results
 # 

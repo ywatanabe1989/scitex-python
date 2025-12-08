@@ -420,9 +420,7 @@ if __name__ == "__main__":
 # 
 #         self.sc = SwapChannels()
 #         self.dc = DropoutChannels(dropout=0.01)
-#         self.fgc = FreqGainChanger(
-#             BNet_config["n_bands"], BNet_config["SAMP_RATE"]
-#         )
+#         self.fgc = FreqGainChanger(BNet_config["n_bands"], BNet_config["SAMP_RATE"])
 #         self.heads = nn.ModuleList(
 #             [
 #                 BHead(n_ch, N_VIRTUAL_CHS).to(self.dummy_param.device)
