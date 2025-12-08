@@ -1,117 +1,177 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Timestamp: 2025-12-08
 # File: ./src/scitex/vis/__init__.py
 """
 SciTeX Visualization Module (scitex.vis)
 
-A structured approach to creating publication-quality figures through JSON specifications.
-This module completes the SciTeX ecosystem as the third pillar alongside scholar and writer.
+Canvas-based composition of publication-quality figures.
 
-Architecture:
-- model: JSON data models (FigureModel, AxesModel, PlotModel, etc.)
-- backend: JSON → matplotlib rendering engine
-- io: Load/save figure JSON with project structure support
-- utils: Validation and publication format templates
+Terminology:
+- Canvas: A paper figure workspace (e.g., "Figure 1" in publication)
+- Panel: A single component on canvas (stx.plt output or image)
+- Figure: Reserved for matplotlib's fig object (see scitex.plt)
 
 Quick Start:
 -----------
 >>> import scitex as stx
 >>>
->>> # Using a template
->>> fig_json = stx.vis.utils.get_template("nature_single", height_mm=100)
->>> fig_json["axes"] = [...]  # Add axes configurations
+>>> # Create canvas and add panels
+>>> stx.vis.create_canvas("/output", "fig1")
+>>> stx.vis.add_panel("/output", "fig1", "panel_a", source="plot.png",
+...                   position=(10, 10), size=(80, 60), label="A")
 >>>
->>> # Save the spec
->>> stx.vis.io.save_figure_json(fig_json, "figure.json")
->>>
->>> # Render to matplotlib
->>> fig, axes = stx.vis.backend.build_figure_from_json(fig_json)
->>>
->>> # Export to image
->>> stx.vis.backend.export_figure(fig_json, "figure.png", dpi=300)
+>>> # Save with stx.io (auto-exports PNG/PDF/SVG)
+>>> canvas = stx.io.load("/output/fig1.canvas")
+>>> stx.io.save(canvas, "/output/fig1_copy.canvas")
 
-With Project Structure:
-----------------------
->>> # Save to project
->>> stx.vis.io.save_figure_json_to_project(
-...     project_dir="/path/to/project",
-...     figure_id="fig-001",
-...     fig_json=fig_json
-... )
->>>
->>> # Load from project
->>> loaded = stx.vis.io.load_figure_json_from_project(
-...     project_dir="/path/to/project",
-...     figure_id="fig-001"
-... )
->>>
->>> # Export from project
->>> stx.vis.backend.export_figure(loaded, "output/fig-001.png")
+Directory Structure:
+-------------------
+{parent_dir}/{canvas_name}.canvas/
+    ├── canvas.json     # Layout, panels, composition
+    ├── panels/         # Panel directories
+    └── exports/        # canvas.png, canvas.pdf, canvas.svg
 """
 
-# Import submodules
+# Submodules for advanced use
+from . import io
 from . import model
 from . import backend
-from . import io
 from . import utils
 from . import editor
 
-# Convenient top-level imports for common use cases
-from .model import FigureModel, AxesModel, PlotModel, GuideModel, AnnotationModel
+# Canvas class
+from .canvas import Canvas
 
-from .backend import (
-    build_figure_from_json,
-    export_figure,
-    export_figure_from_file,
-    export_multiple_formats,
-)
+# =============================================================================
+# Primary API (minimal, reusable, flexible)
+# =============================================================================
 
+# Canvas operations
 from .io import (
-    load_figure_json,
-    save_figure_json,
-    load_figure_json_from_project,
-    save_figure_json_to_project,
+    ensure_canvas_directory as create_canvas,
+    get_canvas_directory_path as get_canvas_path,
+    canvas_directory_exists as canvas_exists,
+    list_canvas_directories as list_canvases,
+    delete_canvas_directory as delete_canvas,
 )
 
-from .utils import (
-    get_template,
-    list_templates,
-    NATURE_SINGLE_COLUMN_MM,
-    NATURE_DOUBLE_COLUMN_MM,
+# Panel operations
+from .io import (
+    add_panel_from_scitex,
+    add_panel_from_image,
+    update_panel,
+    remove_panel,
+    list_panels,
 )
 
+# Export (usually handled by stx.io.save, but available for explicit use)
+from .io import export_canvas_to_file as export_canvas
+
+# Data integrity
+from .io import verify_all_data_hashes as verify_data
+
+# Editor
 from .editor import edit
 
+
+# =============================================================================
+# Convenience wrapper for add_panel
+# =============================================================================
+def add_panel(
+    parent_dir,
+    canvas_name,
+    panel_name,
+    source,
+    position=(0, 0),
+    size=(50, 50),
+    label="",
+    bundle=False,
+    **kwargs,
+):
+    """
+    Add a panel to canvas (auto-detects scitex vs image type).
+
+    Parameters
+    ----------
+    parent_dir : str or Path
+        Parent directory containing canvas
+    canvas_name : str
+        Canvas name
+    panel_name : str
+        Name for the panel
+    source : str or Path
+        Source file (PNG, JPG, SVG)
+    position : tuple
+        (x_mm, y_mm) position on canvas
+    size : tuple
+        (width_mm, height_mm) panel size
+    label : str
+        Panel label (A, B, C...)
+    bundle : bool
+        If True, copy files. If False (default), use symlinks.
+    **kwargs
+        Additional panel properties (rotation_deg, opacity, flip_h, etc.)
+    """
+    from pathlib import Path
+
+    source = Path(source)
+    panel_properties = {
+        "position": {"x_mm": position[0], "y_mm": position[1]},
+        "size": {"width_mm": size[0], "height_mm": size[1]},
+        **kwargs,
+    }
+    if label:
+        panel_properties["label"] = {"text": label, "position": "top-left"}
+
+    # Check if scitex output (has .json/.csv siblings)
+    json_sibling = source.parent / f"{source.stem}.json"
+    if json_sibling.exists():
+        return add_panel_from_scitex(
+            project_dir=parent_dir,
+            canvas_name=canvas_name,
+            panel_name=panel_name,
+            source_png=source,
+            panel_properties=panel_properties,
+            bundle=bundle,
+        )
+    else:
+        return add_panel_from_image(
+            project_dir=parent_dir,
+            canvas_name=canvas_name,
+            panel_name=panel_name,
+            source_image=source,
+            panel_properties=panel_properties,
+            bundle=bundle,
+        )
+
+
 __all__ = [
-    # Submodules
+    # Canvas class
+    "Canvas",
+    # Submodules (advanced)
+    "io",
     "model",
     "backend",
-    "io",
     "utils",
     "editor",
+    # Canvas operations
+    "create_canvas",
+    "get_canvas_path",
+    "canvas_exists",
+    "list_canvases",
+    "delete_canvas",
+    # Panel operations
+    "add_panel",
+    "update_panel",
+    "remove_panel",
+    "list_panels",
+    # Export
+    "export_canvas",
+    # Data integrity
+    "verify_data",
     # Editor
     "edit",
-    # Models
-    "FigureModel",
-    "AxesModel",
-    "PlotModel",
-    "GuideModel",
-    "AnnotationModel",
-    # Backend
-    "build_figure_from_json",
-    "export_figure",
-    "export_figure_from_file",
-    "export_multiple_formats",
-    # I/O
-    "load_figure_json",
-    "save_figure_json",
-    "load_figure_json_from_project",
-    "save_figure_json_to_project",
-    # Utils
-    "get_template",
-    "list_templates",
-    "NATURE_SINGLE_COLUMN_MM",
-    "NATURE_DOUBLE_COLUMN_MM",
 ]
 
 # EOF
