@@ -11,22 +11,8 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import pandas as pd
 
-
-def _make_column_name(id, suffix, method="barh"):
-    """Create column name with method descriptor, avoiding duplication.
-
-    For example:
-    - id="barh_0", suffix="x" -> "barh_0_barh_x"
-    - id="plot_5", suffix="x" -> "plot_5_barh_x"
-    """
-    # Check if method name is already in the ID
-    id_parts = id.rsplit("_", 1)
-    if len(id_parts) == 2 and id_parts[0].endswith(method):
-        # Method already in ID, don't duplicate
-        return f"{id}_{suffix}"
-    else:
-        # Method not in ID, add it for clarity
-        return f"{id}_{method}_{suffix}"
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_barh(id, tracked_dict, kwargs):
@@ -35,33 +21,38 @@ def _format_barh(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
+    # Parse tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     # Get the args from tracked_dict
     args = tracked_dict.get("args", [])
 
     # Extract x and y data if available
     if len(args) >= 2:
-        # Note: in barh, x is height, y is width (visually transposed from bar)
-        x, y = args[0], args[1]
+        # Note: in barh, first arg is y positions, second is widths (x values)
+        y_pos, x_width = args[0], args[1]
 
         # Get xerr from kwargs
         xerr = kwargs.get("xerr")
 
         # Convert single values to Series
-        if isinstance(x, (int, float)):
-            x = pd.Series(x, name="x")
-        if isinstance(y, (int, float)):
-            y = pd.Series(y, name="y")
+        if isinstance(y_pos, (int, float)):
+            y_pos = pd.Series(y_pos, name="y")
+        if isinstance(x_width, (int, float)):
+            x_width = pd.Series(x_width, name="x")
     else:
         # Not enough arguments
         return pd.DataFrame()
 
-    # Use helper to create descriptive column names without duplication
-    df = pd.DataFrame(
-        {_make_column_name(id, "y"): x, _make_column_name(id, "x"): y}
-    )  # Swap x/y for barh
+    # Use structured column naming: ax-row-{row}-col-{col}_trace-id-{id}_variable-{var}
+    col_x = get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)
+    col_y = get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)
+
+    df = pd.DataFrame({col_y: y_pos, col_x: x_width})
 
     if xerr is not None:
         if isinstance(xerr, (int, float)):
             xerr = pd.Series(xerr, name="xerr")
-        df[_make_column_name(id, "xerr")] = xerr
+        col_xerr = get_csv_column_name("xerr", ax_row, ax_col, trace_id=trace_id)
+        df[col_xerr] = xerr
     return df

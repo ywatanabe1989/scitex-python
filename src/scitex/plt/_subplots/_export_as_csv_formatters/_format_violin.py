@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-18 18:14:26 (ywatanabe)"
-# File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_violin.py
-# ----------------------------------------
-import os
-
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+# Timestamp: "2025-12-09 12:00:00 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_violin.py
 
 import numpy as np
 import pandas as pd
+
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_violin(id, tracked_dict, kwargs):
@@ -26,14 +23,14 @@ def _format_violin(id, tracked_dict, kwargs):
     Returns:
         pd.DataFrame: Formatted violin data in long format
     """
-    # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
-    # Get the args from tracked_dict
+    # Parse tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     args = tracked_dict.get("args", [])
 
-    # Similar to boxplot but shows probability density
     if len(args) >= 1:
         data = args[0]
 
@@ -41,16 +38,15 @@ def _format_violin(id, tracked_dict, kwargs):
         if isinstance(data, (list, np.ndarray)) and not isinstance(
             data[0], (list, np.ndarray, dict)
         ):
-            # Convert to long format with group and value columns
             rows = [{"group": "0", "value": val} for val in data]
             df = pd.DataFrame(rows)
-            # Prefix columns with id
-            df.columns = [f"{id}_violin_{col}" for col in df.columns]
+            col_group = get_csv_column_name("group", ax_row, ax_col, trace_id=trace_id)
+            col_value = get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id)
+            df.columns = [col_group, col_value]
             return df
 
         # Handle case when data is a dictionary
         elif isinstance(data, dict):
-            # Convert to long format with group and value columns
             rows = []
             for group, values in data.items():
                 for val in values:
@@ -58,9 +54,12 @@ def _format_violin(id, tracked_dict, kwargs):
 
             if rows:
                 df = pd.DataFrame(rows)
-                # Prefix columns with id
-                df.columns = [f"{id}_violin_{col}" for col in df.columns]
+                col_group = get_csv_column_name("group", ax_row, ax_col, trace_id=trace_id)
+                col_value = get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id)
+                df.columns = [col_group, col_value]
                 return df
 
-    # If we get here, either no data or unsupported format
     return pd.DataFrame()
+
+
+# EOF
