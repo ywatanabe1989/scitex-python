@@ -21,7 +21,7 @@ Usage:
 """
 
 # Schema version for all cross-module specs
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "0.1.0"
 
 # =============================================================================
 # Figure Schemas (re-exported from vis.model for central access)

@@ -24,6 +24,37 @@ from PIL.PngImagePlugin import PngInfo
 
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
+
+
+def _convert_for_json(obj: Any) -> Any:
+    """
+    Convert non-JSON-serializable objects to serializable format.
+
+    Handles FixedFloat objects from figure metadata by converting
+    them to regular floats.
+    """
+    # Handle FixedFloat (from _collect_figure_metadata)
+    if hasattr(obj, 'value') and hasattr(obj, 'precision') and hasattr(obj, '__class__') and obj.__class__.__name__ == 'FixedFloat':
+        return obj.value
+
+    # Handle dict recursively
+    if isinstance(obj, dict):
+        return {key: _convert_for_json(value) for key, value in obj.items()}
+
+    # Handle list recursively
+    if isinstance(obj, list):
+        return [_convert_for_json(item) for item in obj]
+
+    # Handle tuple
+    if isinstance(obj, tuple):
+        return [_convert_for_json(item) for item in obj]
+
+    # Handle numpy arrays
+    if hasattr(obj, "tolist"):
+        return obj.tolist()
+
+    # Default: return as-is
+    return obj
 # ----------------------------------------
 
 
@@ -50,6 +81,9 @@ def embed_metadata(image_path: str, metadata: Dict[str, Any]) -> None:
     """
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"File not found: {image_path}")
+
+    # Convert non-serializable objects (e.g., FixedFloat) to serializable format
+    metadata = _convert_for_json(metadata)
 
     # Serialize metadata to JSON
     try:

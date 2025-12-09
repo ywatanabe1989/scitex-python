@@ -41,114 +41,157 @@ fig.savefig("./png/01_plot.png")
 
 ## JSON Schema (panel.json)
 
+The schema is organized into clear, non-overlapping sections:
+
+| Section   | Purpose                                                    |
+|-----------|------------------------------------------------------------|
+| `runtime` | Software versions and creation metadata                    |
+| `figure`  | Figure-level properties (size, dpi, mode)                  |
+| `axes`    | Per-axes properties nested under `ax_00`, `ax_01`, etc.    |
+| `style`   | Hierarchical styling (axes, ticks, traces, markers, fonts, padding) |
+| `plot`    | Plot content (title, type, traces, legend)                 |
+| `data`    | CSV linkage (path, hash, column names)                     |
+
 ```json
 {
-  "metadata_version": "1.1.0",
-  "scitex": {
-    "version": "2.4.3",
-    "created_at": "2025-12-08T15:40:58.453762",
-    "created_with": "scitex.plt.subplots (mm-control)",
-    "mode": "publication",
-    "axes_size_mm": [40, 28],
-    "position_in_grid": [0, 0],
-    "style_mm": {
-      "axis_thickness_mm": 0.2,
-      "tick_length_mm": 0.8,
-      "tick_thickness_mm": 0.2,
-      "trace_thickness_mm": 0.2,
-      "marker_size_mm": 0.8,
-      "axis_font_size_pt": 7,
-      "tick_font_size_pt": 7,
-      "title_font_size_pt": 8,
-      "legend_font_size_pt": 6,
-      "font_family": "Arial",
-      "n_ticks": 4
-    }
+  "scitex_schema": "scitex.plt.figure",
+  "scitex_schema_version": "0.1.0",
+  "figure_uuid": "a3b8f2c1-7d4e-4a9b-b5c6-8e2f1a9d0c3b",
+
+  "runtime": {
+    "scitex_version": "2.6.0",
+    "matplotlib_version": "3.10.3",
+    "created_at": "2025-12-09T15:40:58.453762",
+    "created_with": "scitex.plt.subplots"
   },
-  "matplotlib": {
-    "version": "3.10.3"
+
+  "figure": {
+    "size_mm": [80.00, 68.00],
+    "size_inch": [3.150, 2.677],
+    "size_px": [944, 803],
+    "dpi": 300,
+    "mode": "publication"
   },
-  "id": "01_plot",
-  "dimensions": {
-    "figure_size_mm": [80.0, 68.0],
-    "figure_size_inch": [3.15, 2.68],
-    "figure_size_px": [944, 803],
-    "axes_size_mm": [40.0, 28.0],
-    "axes_size_inch": [1.57, 1.10],
-    "axes_size_px": [472, 330],
-    "axes_position": [0.25, 0.29, 0.5, 0.41],
-    "dpi": 300
-  },
-  "margins_mm": {
-    "left": 20.0,
-    "bottom": 20.0,
-    "right": 20.0,
-    "top": 20.0
-  },
-  "axes_bbox_px": {
-    "x0": 236,
-    "y0": 236,
-    "x1": 708,
-    "y1": 566,
-    "width": 472,
-    "height": 330
-  },
-  "axes_bbox_mm": {
-    "x0": 20.0,
-    "y0": 20.0,
-    "x1": 60.0,
-    "y1": 48.0,
-    "width": 40.0,
-    "height": 28.0
-  },
+
   "axes": {
-    "x": {
-      "label": "Time",
-      "unit": "s",
-      "scale": "linear",
-      "lim": [-0.31, 6.60],
-      "n_ticks": 4
-    },
-    "y": {
-      "label": "Amplitude",
-      "unit": "a.u.",
-      "scale": "linear",
-      "lim": [-1.10, 1.10],
-      "n_ticks": 4
+    "ax_00": {
+      "size_mm": [40.00, 28.00],
+      "size_inch": [1.575, 1.102],
+      "size_px": [472, 330],
+      "position_ratio": [0.250, 0.294, 0.500, 0.412],
+      "position_in_grid": [0, 0],
+      "margins_mm": {
+        "left": 20.00, "bottom": 20.00, "right": 20.00, "top": 20.00
+      },
+      "margins_inch": {
+        "left": 0.787, "bottom": 0.787, "right": 0.787, "top": 0.787
+      },
+      "bbox_mm": {
+        "x_left": 20.00, "x_right": 60.00, "y_top": 20.00, "y_bottom": 48.00,
+        "width": 40.00, "height": 28.00
+      },
+      "bbox_inch": {
+        "x_left": 0.787, "x_right": 2.362, "y_top": 0.787, "y_bottom": 1.890,
+        "width": 1.575, "height": 1.102
+      },
+      "bbox_px": {
+        "x_left": 236, "x_right": 708, "y_top": 236, "y_bottom": 566,
+        "width": 472, "height": 330
+      },
+      "x_axis_bottom": {
+        "label": "Time",
+        "unit": "s",
+        "scale": "linear",
+        "lim": [-0.31, 6.60],
+        "n_ticks": 4
+      },
+      "y_axis_left": {
+        "label": "Amplitude",
+        "unit": "a.u.",
+        "scale": "linear",
+        "lim": [-1.10, 1.10],
+        "n_ticks": 4
+      }
     }
   },
-  "title": "ax.plot(x, y)",
-  "plot_type": "line",
-  "method": "plot",
-  "traces": [
-    {
-      "id": "sine",
-      "label": "sin(x)",
-      "color": "#0000ff",
-      "linestyle": "-",
-      "linewidth": 0.57,
-      "csv_columns": {
-        "x": "ax_00_sine_plot_x",
-        "y": "ax_00_sine_plot_y"
-      }
+
+  "style": {
+    "axes": {
+      "thickness_mm": 0.20
     },
-    {
-      "id": "cosine",
-      "label": "cos(x)",
-      "color": "#ff0000",
-      "linestyle": "--",
-      "linewidth": 0.57,
-      "csv_columns": {
-        "x": "ax_00_cosine_plot_x",
-        "y": "ax_00_cosine_plot_y"
-      }
+    "ticks": {
+      "length_mm": 0.80,
+      "thickness_mm": 0.20,
+      "n_ticks": 4
+    },
+    "traces": {
+      "thickness_mm": 0.20
+    },
+    "markers": {
+      "size_mm": 0.80
+    },
+    "fonts": {
+      "axis_size_pt": 7.0,
+      "tick_size_pt": 7.0,
+      "title_size_pt": 8.0,
+      "legend_size_pt": 6.0,
+      "family_requested": "Arial",
+      "family_actual": "Arial"
+    },
+    "padding": {
+      "label_pt": 0.5,
+      "tick_pt": 2.0,
+      "title_pt": 1.0
     }
-  ],
-  "legend": {
-    "visible": true,
-    "loc": 0,
-    "frameon": false,
-    "labels": ["sin(x)", "cos(x)"]
+  },
+
+  "plot": {
+    "title": "ax.plot(x, y)",
+    "type": "line",
+    "method": "plot",
+    "traces": [
+      {
+        "id": "sine",
+        "label": "sin(x)",
+        "color": "#0000ff",
+        "linestyle": "-",
+        "linewidth": 0.57,
+        "csv_columns": {
+          "x": "ax_00_plot_0_plot_x",
+          "y": "ax_00_plot_0_plot_y"
+        }
+      },
+      {
+        "id": "cosine",
+        "label": "cos(x)",
+        "color": "#ff0000",
+        "linestyle": "--",
+        "linewidth": 0.57,
+        "csv_columns": {
+          "x": "ax_00_plot_1_plot_x",
+          "y": "ax_00_plot_1_plot_y"
+        }
+      }
+    ],
+    "legend": {
+      "visible": true,
+      "loc": 0,
+      "frameon": false,
+      "labels": ["sin(x)", "cos(x)"]
+    }
+  },
+
+  "data": {
+    "csv_path": "01_plot.csv",
+    "csv_hash": "b6e0de1a9755c201",
+    "columns": [
+      {"id": "sine", "method": "plot", "columns": ["ax_00_plot_0_plot_x", "ax_00_plot_0_plot_y"]},
+      {"id": "cosine", "method": "plot", "columns": ["ax_00_plot_1_plot_x", "ax_00_plot_1_plot_y"]}
+    ],
+    "columns_actual": [
+      "ax_00_plot_0_plot_x", "ax_00_plot_0_plot_y",
+      "ax_00_plot_1_plot_x", "ax_00_plot_1_plot_y"
+    ]
   }
 }
 ```
@@ -243,6 +286,20 @@ canvas/panels/panel_a/
 
 The JSON structure is compatible - canvas.json references the panel data via relative paths with hash verification.
 
+## Numeric Precision
+
+All numeric values in JSON are rounded to appropriate precision:
+
+| Value Type    | Precision | Example              |
+|---------------|-----------|----------------------|
+| mm values     | 2 decimal | `40.0`, `28.0`       |
+| inch values   | 3 decimal | `3.15`, `1.575`      |
+| position      | 3 decimal | `0.25`, `0.294`      |
+| axis limits   | 2 decimal | `-0.31`, `6.6`       |
+| linewidth     | 2 decimal | `0.57`               |
+| px values     | integer   | `944`, `472`         |
+| font sizes    | 1 decimal | `7`, `8`             |
+
 ## Summary
 
 | Aspect      | Description                        |
@@ -252,6 +309,7 @@ The JSON structure is compatible - canvas.json references the panel data via rel
 | Tracking    | All traces tracked with IDs        |
 | Metadata    | Dimensions, styles, axes info      |
 | Data        | CSV with column references in JSON |
+| Precision   | Appropriate rounding per value type|
 | Integration | Direct use as canvas panels        |
 
 <!-- EOF -->
