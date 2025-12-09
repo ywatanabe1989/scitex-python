@@ -217,20 +217,13 @@ class FigWrapper:
 
             # Process the DataFrame if it's not empty
             if df is not None and not df.empty:
-                # Add axis ID prefix to column names if not already present
-                prefix = f"ax_{ii:02d}_"
-                # Make column names unique by appending index if there are duplicates
+                # Column names already include axis position via get_csv_column_name
+                # (single source of truth from _csv_column_naming.py)
+                # Only handle duplicates by adding a counter
                 new_cols = []
                 col_counts = {}
                 for col in df.columns:
-                    # Convert to string and check if already has prefix
-                    col_str = (
-                        str(col)
-                        if not (isinstance(col, str) and col.startswith(prefix))
-                        else col
-                    )
-                    if not col_str.startswith(prefix):
-                        col_str = f"{prefix}{col_str}"
+                    col_str = str(col)
 
                     # Handle duplicates by adding a counter
                     if col_str in col_counts:
