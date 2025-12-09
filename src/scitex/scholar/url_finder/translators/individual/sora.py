@@ -12,7 +12,9 @@ class SoraTranslator(BaseTranslator):
     """SORA."""
 
     LABEL = "SORA"
-    URL_TARGET_PATTERN = r"^https?://sora\.unm\.edu/(node/|search/node/|advancedsearch\?)"
+    URL_TARGET_PATTERN = (
+        r"^https?://sora\.unm\.edu/(node/|search/node/|advancedsearch\?)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

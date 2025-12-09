@@ -32,11 +32,19 @@ from datetime import datetime
 
 from scitex import logging
 from scitex.scholar.core import Paper
-from scitex.scholar.search_engines.individual.PubMedSearchEngine import PubMedSearchEngine
-from scitex.scholar.search_engines.individual.CrossRefSearchEngine import CrossRefSearchEngine
+from scitex.scholar.search_engines.individual.PubMedSearchEngine import (
+    PubMedSearchEngine,
+)
+from scitex.scholar.search_engines.individual.CrossRefSearchEngine import (
+    CrossRefSearchEngine,
+)
 from scitex.scholar.search_engines.individual.ArXivSearchEngine import ArXivSearchEngine
-from scitex.scholar.search_engines.individual.SemanticScholarSearchEngine import SemanticScholarSearchEngine
-from scitex.scholar.search_engines.individual.OpenAlexSearchEngine import OpenAlexSearchEngine
+from scitex.scholar.search_engines.individual.SemanticScholarSearchEngine import (
+    SemanticScholarSearchEngine,
+)
+from scitex.scholar.search_engines.individual.OpenAlexSearchEngine import (
+    OpenAlexSearchEngine,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -61,30 +69,30 @@ class ScholarPipelineSearchSingle:
 
         # Initialize search engines with email for rate limit benefits
         self.engines = {
-            'PubMed': PubMedSearchEngine(email=self.email),
-            'CrossRef': CrossRefSearchEngine(email=self.email),
-            'arXiv': ArXivSearchEngine(email=self.email),
-            'Semantic_Scholar': SemanticScholarSearchEngine(email=self.email),
-            'OpenAlex': OpenAlexSearchEngine(email=self.email),
+            "PubMed": PubMedSearchEngine(email=self.email),
+            "CrossRef": CrossRefSearchEngine(email=self.email),
+            "arXiv": ArXivSearchEngine(email=self.email),
+            "Semantic_Scholar": SemanticScholarSearchEngine(email=self.email),
+            "OpenAlex": OpenAlexSearchEngine(email=self.email),
         }
 
         # Statistics
         self.stats = {
-            'total_searches': 0,
-            'successful_searches': 0,
-            'failed_searches': 0,
-            'cache_hits': 0,
-            'total_time': 0.0,
-            'engine_stats': {
+            "total_searches": 0,
+            "successful_searches": 0,
+            "failed_searches": 0,
+            "cache_hits": 0,
+            "total_time": 0.0,
+            "engine_stats": {
                 name: {
-                    'attempts': 0,
-                    'successes': 0,
-                    'failures': 0,
-                    'avg_response_time': 0.0,
-                    'total_results': 0,
+                    "attempts": 0,
+                    "successes": 0,
+                    "failures": 0,
+                    "avg_response_time": 0.0,
+                    "total_results": 0,
                 }
                 for name in self.engines.keys()
-            }
+            },
         }
 
         logger.info(
@@ -114,7 +122,7 @@ class ScholarPipelineSearchSingle:
                 - metadata: Search metadata (engines used, timing, etc.)
         """
         start_time = datetime.now()
-        self.stats['total_searches'] += 1
+        self.stats["total_searches"] += 1
 
         # Determine search mode
         search_query = query or title or doi
@@ -147,8 +155,10 @@ class ScholarPipelineSearchSingle:
                 if results:
                     all_papers.extend(results)
                     engines_used.append(engine_name)
-                    self.stats['engine_stats'][engine_name]['successes'] += 1
-                    self.stats['engine_stats'][engine_name]['total_results'] += len(results)
+                    self.stats["engine_stats"][engine_name]["successes"] += 1
+                    self.stats["engine_stats"][engine_name]["total_results"] += len(
+                        results
+                    )
 
                     logger.info(
                         f"{self.name}: {engine_name} returned {len(results)} results"
@@ -156,7 +166,7 @@ class ScholarPipelineSearchSingle:
 
             except Exception as e:
                 logger.error(f"{self.name}: {engine_name} search failed: {e}")
-                self.stats['engine_stats'][engine_name]['failures'] += 1
+                self.stats["engine_stats"][engine_name]["failures"] += 1
 
         # Deduplicate by DOI and title
         unique_papers = self._deduplicate_papers(all_papers)
@@ -165,9 +175,11 @@ class ScholarPipelineSearchSingle:
         unique_papers = self._enrich_impact_factors(unique_papers)
 
         # Sort if requested
-        sort_by = filters.get('sort_by', 'relevance')
-        if sort_by and sort_by != 'relevance':
-            unique_papers = self._sort_papers(unique_papers, sort_by, filters.get('sort_order', 'desc'))
+        sort_by = filters.get("sort_by", "relevance")
+        if sort_by and sort_by != "relevance":
+            unique_papers = self._sort_papers(
+                unique_papers, sort_by, filters.get("sort_order", "desc")
+            )
 
         # Limit to max_results
         unique_papers = unique_papers[:max_results]
@@ -178,8 +190,8 @@ class ScholarPipelineSearchSingle:
         # Calculate timing
         end_time = datetime.now()
         search_time = (end_time - start_time).total_seconds()
-        self.stats['total_time'] += search_time
-        self.stats['successful_searches'] += 1
+        self.stats["total_time"] += search_time
+        self.stats["successful_searches"] += 1
 
         logger.success(
             f"{self.name}: Sequential search completed in {search_time:.2f}s, "
@@ -188,17 +200,17 @@ class ScholarPipelineSearchSingle:
         )
 
         return {
-            'results': response_papers,
-            'metadata': {
-                'query': search_query,
-                'filters': filters,
-                'engines_used': engines_used,
-                'total_engines': len(self.engines),
-                'successful_engines': len(engines_used),
-                'total_results': len(response_papers),
-                'search_time': search_time,
-                'timestamp': datetime.now().isoformat(),
-            }
+            "results": response_papers,
+            "metadata": {
+                "query": search_query,
+                "filters": filters,
+                "engines_used": engines_used,
+                "total_engines": len(self.engines),
+                "successful_engines": len(engines_used),
+                "total_results": len(response_papers),
+                "search_time": search_time,
+                "timestamp": datetime.now().isoformat(),
+            },
         }
 
     async def _search_engine(
@@ -210,7 +222,7 @@ class ScholarPipelineSearchSingle:
         max_results: int,
     ) -> List[Paper]:
         """Search a single engine."""
-        self.stats['engine_stats'][engine_name]['attempts'] += 1
+        self.stats["engine_stats"][engine_name]["attempts"] += 1
         engine_start = datetime.now()
 
         try:
@@ -219,81 +231,89 @@ class ScholarPipelineSearchSingle:
 
             # Prepare filters for API
             api_filters = {
-                'year_start': filters.get('year_start'),
-                'year_end': filters.get('year_end'),
-                'open_access': filters.get('open_access'),
+                "year_start": filters.get("year_start"),
+                "year_end": filters.get("year_end"),
+                "open_access": filters.get("open_access"),
             }
 
             # Search with new search_by_keywords method
             results_list = await loop.run_in_executor(
                 None,
                 lambda: engine.search_by_keywords(
-                    query=query,
-                    filters=api_filters,
-                    max_results=max_results
-                )
+                    query=query, filters=api_filters, max_results=max_results
+                ),
             )
 
             # Convert result dicts to Paper objects
             results = []
-            for result in (results_list or []):
+            for result in results_list or []:
                 paper = Paper()
 
                 # Populate paper metadata from result
-                if 'id' in result:
-                    if result['id'].get('doi'):
-                        paper.metadata.id.doi = result['id']['doi']
-                        paper.metadata.id.doi_engines = result['id'].get('doi_engines', [])
-                    if result['id'].get('pmid'):
-                        paper.metadata.id.pmid = result['id']['pmid']
-                    if result['id'].get('arxiv'):
-                        paper.metadata.id.arxiv_id = result['id']['arxiv']
+                if "id" in result:
+                    if result["id"].get("doi"):
+                        paper.metadata.id.doi = result["id"]["doi"]
+                        paper.metadata.id.doi_engines = result["id"].get(
+                            "doi_engines", []
+                        )
+                    if result["id"].get("pmid"):
+                        paper.metadata.id.pmid = result["id"]["pmid"]
+                    if result["id"].get("arxiv"):
+                        paper.metadata.id.arxiv_id = result["id"]["arxiv"]
 
-                if 'basic' in result:
-                    if result['basic'].get('title'):
-                        paper.metadata.basic.title = result['basic']['title']
-                    if result['basic'].get('authors'):
-                        paper.metadata.basic.authors = result['basic']['authors']
-                    if result['basic'].get('abstract'):
-                        paper.metadata.basic.abstract = result['basic']['abstract']
-                    if result['basic'].get('keywords'):
-                        paper.metadata.basic.keywords = result['basic']['keywords']
+                if "basic" in result:
+                    if result["basic"].get("title"):
+                        paper.metadata.basic.title = result["basic"]["title"]
+                    if result["basic"].get("authors"):
+                        paper.metadata.basic.authors = result["basic"]["authors"]
+                    if result["basic"].get("abstract"):
+                        paper.metadata.basic.abstract = result["basic"]["abstract"]
+                    if result["basic"].get("keywords"):
+                        paper.metadata.basic.keywords = result["basic"]["keywords"]
 
-                if 'publication' in result:
-                    if result['publication'].get('year'):
-                        paper.metadata.basic.year = result['publication']['year']
-                    if result['publication'].get('journal'):
-                        paper.metadata.publication.journal = result['publication']['journal']
+                if "publication" in result:
+                    if result["publication"].get("year"):
+                        paper.metadata.basic.year = result["publication"]["year"]
+                    if result["publication"].get("journal"):
+                        paper.metadata.publication.journal = result["publication"][
+                            "journal"
+                        ]
 
-                if 'metrics' in result:
-                    if result['metrics'].get('citation_count'):
-                        paper.metadata.citation_count.total = result['metrics']['citation_count']
-                    if 'is_open_access' in result['metrics']:
-                        paper.metadata.access.is_open_access = result['metrics']['is_open_access']
+                if "metrics" in result:
+                    if result["metrics"].get("citation_count"):
+                        paper.metadata.citation_count.total = result["metrics"][
+                            "citation_count"
+                        ]
+                    if "is_open_access" in result["metrics"]:
+                        paper.metadata.access.is_open_access = result["metrics"][
+                            "is_open_access"
+                        ]
                         paper.metadata.access.is_open_access_engines = [engine_name]
 
-                if 'urls' in result:
-                    if result['urls'].get('pdf'):
+                if "urls" in result:
+                    if result["urls"].get("pdf"):
                         # pdfs is a list of dicts with url/source keys
-                        paper.metadata.url.pdfs = [{'url': result['urls']['pdf'], 'source': 'search'}]
+                        paper.metadata.url.pdfs = [
+                            {"url": result["urls"]["pdf"], "source": "search"}
+                        ]
                         # If this is an open access paper, also store the PDF URL as oa_url
                         if paper.metadata.access.is_open_access:
-                            paper.metadata.access.oa_url = result['urls']['pdf']
+                            paper.metadata.access.oa_url = result["urls"]["pdf"]
                             paper.metadata.access.oa_url_engines = [engine_name]
-                    if result['urls'].get('publisher'):
-                        paper.metadata.url.publisher = result['urls']['publisher']
-                    if result['urls'].get('doi_url'):
-                        paper.metadata.url.doi = result['urls']['doi_url']
+                    if result["urls"].get("publisher"):
+                        paper.metadata.url.publisher = result["urls"]["publisher"]
+                    if result["urls"].get("doi_url"):
+                        paper.metadata.url.doi = result["urls"]["doi_url"]
 
                 results.append(paper)
 
             # Update stats
             response_time = (datetime.now() - engine_start).total_seconds()
-            stats = self.stats['engine_stats'][engine_name]
-            n = stats['attempts']
-            stats['avg_response_time'] = (
-                (stats['avg_response_time'] * (n - 1) + response_time) / n
-            )
+            stats = self.stats["engine_stats"][engine_name]
+            n = stats["attempts"]
+            stats["avg_response_time"] = (
+                stats["avg_response_time"] * (n - 1) + response_time
+            ) / n
 
             logger.info(
                 f"{self.name}: {engine_name} returned {len(results)} results "
@@ -306,7 +326,9 @@ class ScholarPipelineSearchSingle:
             logger.error(f"{self.name}: {engine_name} search failed: {e}")
             return []
 
-    def _sort_papers(self, papers: List[Paper], sort_by: str, sort_order: str = 'desc') -> List[Paper]:
+    def _sort_papers(
+        self, papers: List[Paper], sort_by: str, sort_order: str = "desc"
+    ) -> List[Paper]:
         """Sort papers by specified criteria.
 
         Args:
@@ -317,25 +339,28 @@ class ScholarPipelineSearchSingle:
         Returns:
             Sorted list of papers
         """
+
         def get_sort_key(paper):
-            if sort_by == 'citations':
-                if hasattr(paper.metadata, 'citation_count'):
+            if sort_by == "citations":
+                if hasattr(paper.metadata, "citation_count"):
                     return paper.metadata.citation_count.total or 0
                 return 0
-            elif sort_by == 'year':
-                if hasattr(paper.metadata, 'basic'):
+            elif sort_by == "year":
+                if hasattr(paper.metadata, "basic"):
                     return paper.metadata.basic.year or 0
                 return 0
-            elif sort_by == 'title':
-                if hasattr(paper.metadata, 'basic'):
-                    return paper.metadata.basic.title or ''
-                return ''
+            elif sort_by == "title":
+                if hasattr(paper.metadata, "basic"):
+                    return paper.metadata.basic.title or ""
+                return ""
             return 0
 
-        reverse = (sort_order == 'desc')
+        reverse = sort_order == "desc"
         sorted_papers = sorted(papers, key=get_sort_key, reverse=reverse)
 
-        logger.info(f"{self.name}: Sorted {len(papers)} papers by {sort_by} ({sort_order})")
+        logger.info(
+            f"{self.name}: Sorted {len(papers)} papers by {sort_by} ({sort_order})"
+        )
         return sorted_papers
 
     def _deduplicate_papers(self, papers: List[Paper]) -> List[Paper]:
@@ -347,12 +372,12 @@ class ScholarPipelineSearchSingle:
         for paper in papers:
             # Get DOI
             doi = None
-            if hasattr(paper, 'metadata') and hasattr(paper.metadata, 'id'):
+            if hasattr(paper, "metadata") and hasattr(paper.metadata, "id"):
                 doi = paper.metadata.id.doi
 
             # Get title
             title = None
-            if hasattr(paper, 'metadata') and hasattr(paper.metadata, 'basic'):
+            if hasattr(paper, "metadata") and hasattr(paper.metadata, "basic"):
                 title = paper.metadata.basic.title
 
             # Skip if duplicate
@@ -391,23 +416,33 @@ class ScholarPipelineSearchSingle:
 
         for paper in papers:
             # Skip if already has impact factor
-            if hasattr(paper.metadata, 'publication') and paper.metadata.publication.impact_factor:
+            if (
+                hasattr(paper.metadata, "publication")
+                and paper.metadata.publication.impact_factor
+            ):
                 continue
 
             # Get journal name
             journal = None
-            if hasattr(paper.metadata, 'publication') and paper.metadata.publication.journal:
+            if (
+                hasattr(paper.metadata, "publication")
+                and paper.metadata.publication.journal
+            ):
                 journal = paper.metadata.publication.journal
 
             if journal:
                 try:
                     metrics = engine.get_metrics(journal)
-                    if metrics and metrics.get('impact_factor'):
-                        paper.metadata.publication.impact_factor = metrics['impact_factor']
-                        if not hasattr(paper.metadata.publication, 'impact_factor_engines'):
+                    if metrics and metrics.get("impact_factor"):
+                        paper.metadata.publication.impact_factor = metrics[
+                            "impact_factor"
+                        ]
+                        if not hasattr(
+                            paper.metadata.publication, "impact_factor_engines"
+                        ):
                             paper.metadata.publication.impact_factor_engines = []
                         paper.metadata.publication.impact_factor_engines.append(
-                            metrics.get('source', 'ImpactFactorEngine')
+                            metrics.get("source", "ImpactFactorEngine")
                         )
                         enriched += 1
                 except Exception:
@@ -421,66 +456,66 @@ class ScholarPipelineSearchSingle:
     def _paper_to_dict(self, paper: Paper) -> Dict[str, Any]:
         """Convert Paper object to dictionary for API response."""
         result = {
-            'title': '',
-            'authors': [],
-            'year': None,
-            'abstract': '',
-            'journal': '',
-            'impact_factor': None,
-            'doi': '',
-            'pmid': '',
-            'arxiv_id': '',
-            'citation_count': 0,
-            'is_open_access': False,
-            'pdf_url': '',
-            'external_url': '',
-            'document_type': 'article',
-            'keywords': [],
-            'source_engines': [],
+            "title": "",
+            "authors": [],
+            "year": None,
+            "abstract": "",
+            "journal": "",
+            "impact_factor": None,
+            "doi": "",
+            "pmid": "",
+            "arxiv_id": "",
+            "citation_count": 0,
+            "is_open_access": False,
+            "pdf_url": "",
+            "external_url": "",
+            "document_type": "article",
+            "keywords": [],
+            "source_engines": [],
         }
 
-        if not hasattr(paper, 'metadata'):
+        if not hasattr(paper, "metadata"):
             return result
 
         meta = paper.metadata
 
         # Basic info
-        if hasattr(meta, 'basic'):
-            result['title'] = meta.basic.title or ''
-            result['authors'] = meta.basic.authors or []
-            result['abstract'] = meta.basic.abstract or ''
-            result['keywords'] = meta.basic.keywords or []
-            result['year'] = meta.basic.year
+        if hasattr(meta, "basic"):
+            result["title"] = meta.basic.title or ""
+            result["authors"] = meta.basic.authors or []
+            result["abstract"] = meta.basic.abstract or ""
+            result["keywords"] = meta.basic.keywords or []
+            result["year"] = meta.basic.year
 
         # IDs
-        if hasattr(meta, 'id'):
-            result['doi'] = meta.id.doi or ''
-            result['pmid'] = meta.id.pmid or ''
-            result['arxiv_id'] = meta.id.arxiv_id or ''
-            result['source_engines'] = meta.id.doi_engines or []
+        if hasattr(meta, "id"):
+            result["doi"] = meta.id.doi or ""
+            result["pmid"] = meta.id.pmid or ""
+            result["arxiv_id"] = meta.id.arxiv_id or ""
+            result["source_engines"] = meta.id.doi_engines or []
 
         # Publication info
-        if hasattr(meta, 'publication'):
-            result['journal'] = meta.publication.journal or ''
-            result['impact_factor'] = meta.publication.impact_factor
+        if hasattr(meta, "publication"):
+            result["journal"] = meta.publication.journal or ""
+            result["impact_factor"] = meta.publication.impact_factor
 
         # Metrics
-        if hasattr(meta, 'citation_count'):
-            result['citation_count'] = meta.citation_count.total or 0
+        if hasattr(meta, "citation_count"):
+            result["citation_count"] = meta.citation_count.total or 0
 
         # Access metadata
-        if hasattr(meta, 'access'):
-            result['is_open_access'] = meta.access.is_open_access or False
-            result['oa_status'] = meta.access.oa_status
-            result['oa_url'] = meta.access.oa_url
+        if hasattr(meta, "access"):
+            result["is_open_access"] = meta.access.is_open_access or False
+            result["oa_status"] = meta.access.oa_status
+            result["oa_url"] = meta.access.oa_url
         else:
-            result['is_open_access'] = False
+            result["is_open_access"] = False
 
         # URLs
-        if hasattr(meta, 'url'):
+        if hasattr(meta, "url"):
             # Extract first PDF URL from pdfs list
-            result['pdf_url'] = meta.url.pdfs[0]['url'] if meta.url.pdfs else ''
-            result['external_url'] = meta.url.publisher or meta.url.doi or ''
+            result["pdf_url"] = meta.url.pdfs[0]["url"] if meta.url.pdfs else ""
+            result["external_url"] = meta.url.publisher or meta.url.doi or ""
 
         return result
 
@@ -488,13 +523,15 @@ class ScholarPipelineSearchSingle:
         """Get pipeline statistics."""
         return {
             **self.stats,
-            'success_rate': (
-                100 * self.stats['successful_searches'] / self.stats['total_searches']
-                if self.stats['total_searches'] > 0 else 0
+            "success_rate": (
+                100 * self.stats["successful_searches"] / self.stats["total_searches"]
+                if self.stats["total_searches"] > 0
+                else 0
             ),
-            'average_time': (
-                self.stats['total_time'] / self.stats['successful_searches']
-                if self.stats['successful_searches'] > 0 else 0
+            "average_time": (
+                self.stats["total_time"] / self.stats["successful_searches"]
+                if self.stats["successful_searches"] > 0
+                else 0
             ),
         }
 
@@ -504,12 +541,12 @@ class ScholarPipelineSearchSingle:
             return {}
 
         return {
-            'name': engine_name,
-            'supports_query_search': True,
-            'supports_doi_lookup': True,
-            'supports_filters': True,
-            'max_results': 1000,
-            'stats': self.stats['engine_stats'].get(engine_name, {}),
+            "name": engine_name,
+            "supports_query_search": True,
+            "supports_doi_lookup": True,
+            "supports_filters": True,
+            "max_results": 1000,
+            "stats": self.stats["engine_stats"].get(engine_name, {}),
         }
 
 

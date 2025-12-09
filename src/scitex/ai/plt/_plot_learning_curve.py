@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -48,9 +49,7 @@ def _plot_training_data(ax, metrics_df, metric_key, linewidth=1, color=None):
     if color is None:
         color = str2hex("blue")
 
-    is_training = scitex.str.search(
-        "^[Tt]rain(ing)?", metrics_df.step, as_bool=True
-    )[0]
+    is_training = scitex.str.search("^[Tt]rain(ing)?", metrics_df.step, as_bool=True)[0]
     training_df = metrics_df[is_training]
 
     if len(training_df) > 0:
@@ -127,9 +126,7 @@ def _select_epoch_ticks(metrics_df, max_n_ticks=4):
     """Select representative epoch tick positions and labels."""
     unique_epochs = metrics_df["i_epoch"].drop_duplicates().values
     epoch_starts = (
-        metrics_df[metrics_df["i_batch"] == 0]["i_global"]
-        .drop_duplicates()
-        .values
+        metrics_df[metrics_df["i_batch"] == 0]["i_global"].drop_duplicates().values
     )
 
     if len(epoch_starts) > max_n_ticks:
@@ -215,20 +212,14 @@ def plot_learning_curve(
         ax = _configure_accuracy_axis(ax, metric_key)
 
         # Plot training data (line)
-        ax = _plot_training_data(
-            ax, metrics_df, metric_key, linewidth=linewidth
-        )
+        ax = _plot_training_data(ax, metrics_df, metric_key, linewidth=linewidth)
 
         # Plot validation data (scatter)
-        ax = _plot_validation_data(
-            ax, metrics_df, metric_key, markersize=scattersize
-        )
+        ax = _plot_validation_data(ax, metrics_df, metric_key, markersize=scattersize)
 
         # Plot test data if it exists (scatter)
         if "Test" in metrics_df["step"].values:
-            ax = _plot_test_data(
-                ax, metrics_df, metric_key, markersize=scattersize
-            )
+            ax = _plot_test_data(ax, metrics_df, metric_key, markersize=scattersize)
 
     # Save if path provided
     if spath is not None:
@@ -253,9 +244,7 @@ def main(args):
             loss = 0.7 * np.exp(-i_global / 200) + 0.1 * np.random.rand()
             acc = min(
                 0.95,
-                0.3
-                + 0.6 * (1 - np.exp(-i_global / 300))
-                + 0.05 * np.random.rand(),
+                0.3 + 0.6 * (1 - np.exp(-i_global / 300)) + 0.05 * np.random.rand(),
             )
             data.append(
                 {
@@ -272,9 +261,7 @@ def main(args):
         val_loss = 0.75 * np.exp(-i_global / 200) + 0.15 * np.random.rand()
         val_acc = min(
             0.92,
-            0.25
-            + 0.6 * (1 - np.exp(-i_global / 300))
-            + 0.08 * np.random.rand(),
+            0.25 + 0.6 * (1 - np.exp(-i_global / 300)) + 0.08 * np.random.rand(),
         )
         data.append(
             {
@@ -301,9 +288,7 @@ def main(args):
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Demo learning curve plotting"
-    )
+    parser = argparse.ArgumentParser(description="Demo learning curve plotting")
     return parser.parse_args()
 
 

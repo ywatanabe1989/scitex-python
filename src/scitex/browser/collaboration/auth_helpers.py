@@ -86,7 +86,9 @@ class DjangoAuthHelper:
         is_logged_in = "login" not in current_url.lower()
         return is_logged_in
 
-    async def logout(self, page: Page, logout_url: str = "http://127.0.0.1:8000/auth/logout/"):
+    async def logout(
+        self, page: Page, logout_url: str = "http://127.0.0.1:8000/auth/logout/"
+    ):
         """Logout (navigate to logout URL)."""
         await page.goto(logout_url)
 

@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/dataclasses/tree/_RevisionTree.py"
-)
+
+__FILE__ = "./src/scitex/writer/dataclasses/tree/_RevisionTree.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -47,21 +46,13 @@ class RevisionTree:
     def __post_init__(self):
         """Initialize all instances."""
         if self.contents is None:
-            self.contents = RevisionContents(
-                self.root / "contents", self.git_root
-            )
+            self.contents = RevisionContents(self.root / "contents", self.git_root)
         if self.base is None:
-            self.base = DocumentSection(
-                self.root / "base.tex", self.git_root
-            )
+            self.base = DocumentSection(self.root / "base.tex", self.git_root)
         if self.revision is None:
-            self.revision = DocumentSection(
-                self.root / "revision.tex", self.git_root
-            )
+            self.revision = DocumentSection(self.root / "revision.tex", self.git_root)
         if self.readme is None:
-            self.readme = DocumentSection(
-                self.root / "README.md", self.git_root
-            )
+            self.readme = DocumentSection(self.root / "README.md", self.git_root)
         if self.archive is None:
             self.archive = self.root / "archive"
         if self.docs is None:
@@ -84,10 +75,18 @@ class RevisionTree:
 
         # Check root level files
         if not self.base.path.exists():
-            expected_path = self.base.path.relative_to(self.git_root) if self.git_root else self.base.path
+            expected_path = (
+                self.base.path.relative_to(self.git_root)
+                if self.git_root
+                else self.base.path
+            )
             missing.append(f"base.tex (expected at: {expected_path})")
         if not self.revision.path.exists():
-            expected_path = self.revision.path.relative_to(self.git_root) if self.git_root else self.revision.path
+            expected_path = (
+                self.revision.path.relative_to(self.git_root)
+                if self.git_root
+                else self.revision.path
+            )
             missing.append(f"revision.tex (expected at: {expected_path})")
 
         return len(missing) == 0, missing

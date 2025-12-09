@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/pipelines/ScholarPipelineSingle.py"
-)
+
+__FILE__ = "./src/scitex/scholar/pipelines/ScholarPipelineSingle.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -49,6 +48,8 @@ from scitex.scholar.storage import PaperIO
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
+
+
 class ScholarPipelineSingle:
     """Orchestrates full paper acquisition pipeline"""
 
@@ -103,8 +104,8 @@ class ScholarPipelineSingle:
             paper = await self._step_04_resolve_metadata(paper, io, force)
 
             # Step 5. Find PDF URLs
-            browser_manager, context, auth_gateway = (
-                await self._step_05_setup_browser(paper, io)
+            browser_manager, context, auth_gateway = await self._step_05_setup_browser(
+                paper, io
             )
             if context:
                 # Step 6. Download PDF (with manual mode support)
@@ -182,16 +183,12 @@ class ScholarPipelineSingle:
             from scitex.scholar.metadata_engines import ScholarEngine
 
             engine = ScholarEngine()
-            metadata_dict = await engine.search_async(
-                doi=paper.metadata.id.doi
-            )
+            metadata_dict = await engine.search_async(doi=paper.metadata.id.doi)
             if metadata_dict:
                 self._merge_metadata_into_paper(paper, metadata_dict)
                 self._enrich_impact_factor(paper)
                 io.save_metadata()
-                logger.success(
-                    f"{self.name}: Metadata enriched from search engines"
-                )
+                logger.success(f"{self.name}: Metadata enriched from search engines")
             else:
                 paper.metadata.basic.title = "Pending metadata resolution"
                 paper.metadata.basic.title_engines = ["pending"]
@@ -207,9 +204,7 @@ class ScholarPipelineSingle:
                 from scitex.scholar.metadata_engines import ScholarEngine
 
                 engine = ScholarEngine()
-                metadata_dict = await engine.search_async(
-                    doi=paper.metadata.id.doi
-                )
+                metadata_dict = await engine.search_async(doi=paper.metadata.id.doi)
                 if metadata_dict:
                     self._merge_metadata_into_paper(paper, metadata_dict)
                     self._enrich_impact_factor(paper)
@@ -235,18 +230,17 @@ class ScholarPipelineSingle:
             browser_mode=self.browser_mode,
             auth_manager=auth_manager,
         )
-        browser, context = (
-            await browser_manager.get_authenticated_browser_and_context_async()
-        )
+        (
+            browser,
+            context,
+        ) = await browser_manager.get_authenticated_browser_and_context_async()
         auth_gateway = AuthenticationGateway(
             auth_manager=auth_manager,
             browser_manager=browser_manager,
         )
         return browser_manager, context, auth_gateway
 
-    async def _step_06_find_pdf_urls(
-        self, paper, io, context, auth_gateway, force
-    ):
+    async def _step_06_find_pdf_urls(self, paper, io, context, auth_gateway, force):
         if not paper.metadata.url.pdfs or force:
             logger.info(f"{self.name}: Finding PDF URLs...")
             try:
@@ -295,9 +289,7 @@ class ScholarPipelineSingle:
         )
         return downloaded_file, temp_pdf_path
 
-    def _step_07_handle_downloaded_pdf(
-        self, paper, io, downloaded_file, temp_pdf_path
-    ):
+    def _step_07_handle_downloaded_pdf(self, paper, io, downloaded_file, temp_pdf_path):
         if downloaded_file == temp_pdf_path and temp_pdf_path.exists():
             import shutil
 
@@ -312,9 +304,7 @@ class ScholarPipelineSingle:
         else:
             io.save_pdf(downloaded_file)
             io.save_metadata()
-        logger.info(
-            f"{self.name}: PDF downloaded and saved ({str(downloaded_file)})"
-        )
+        logger.info(f"{self.name}: PDF downloaded and saved ({str(downloaded_file)})")
         logger.info(f"{self.name}: Updated metadata.path.pdfs")
 
     def _step_07_check_manual_download(self, io):
@@ -341,35 +331,25 @@ class ScholarPipelineSingle:
             logger.info(
                 f"{self.name}: Found recent PDF: {latest_pdf.name} ({latest_pdf.stat().st_size / 1e6:.2f} MB)"
             )
-            logger.info(
-                f"{self.name}: Assuming this is the manually downloaded PDF"
-            )
+            logger.info(f"{self.name}: Assuming this is the manually downloaded PDF")
             io.save_pdf(latest_pdf)
             io.save_metadata()
-            logger.success(
-                f"{self.name}: Manually downloaded PDF saved to MASTER"
-            )
+            logger.success(f"{self.name}: Manually downloaded PDF saved to MASTER")
             logger.info(f"{self.name}: Updated metadata.path.pdfs")
         else:
-            logger.warning(
-                f"{self.name}: No recent PDFs found in downloads directory"
-            )
+            logger.warning(f"{self.name}: No recent PDFs found in downloads directory")
             logger.warning(
                 f"{self.name}: PDF download incomplete - manual intervention required"
             )
 
-    async def _step_07_download_pdf(
-        self, paper, io, context, auth_gateway, force
-    ):
+    async def _step_07_download_pdf(self, paper, io, context, auth_gateway, force):
         if (not io.has_pdf() or force) and paper.metadata.url.pdfs:
             logger.info(f"{self.name}: Downloading PDF...")
             from scitex.scholar.pdf_download import ScholarPDFDownloader
 
             downloader = ScholarPDFDownloader(context)
-            downloaded_file, temp_pdf_path = (
-                await self._step_07_download_pdf_from_url(
-                    paper, io, context, auth_gateway, downloader
-                )
+            downloaded_file, temp_pdf_path = await self._step_07_download_pdf_from_url(
+                paper, io, context, auth_gateway, downloader
             )
             if downloaded_file:
                 self._step_07_handle_downloaded_pdf(
@@ -409,9 +389,7 @@ class ScholarPipelineSingle:
     # ----------------------------------------
     # Helper functions
     # ----------------------------------------
-    def _link_to_project(
-        self, paper: Paper, project: str, io: PaperIO
-    ) -> Path:
+    def _link_to_project(self, paper: Paper, project: str, io: PaperIO) -> Path:
         """Create human-readable symlink in project directory."""
         from scitex.scholar import ScholarConfig
 
@@ -464,9 +442,7 @@ class ScholarPipelineSingle:
         content = f"DOI:{doi}"
         return hashlib.md5(content.encode()).hexdigest()[:8].upper()
 
-    def _merge_metadata_into_paper(
-        self, paper: Paper, metadata_dict: dict
-    ) -> None:
+    def _merge_metadata_into_paper(self, paper: Paper, metadata_dict: dict) -> None:
         """Merge metadata dictionary from ScholarEngine into Paper object."""
 
         # Helper to safely update field with engine tracking and type conversion
@@ -629,9 +605,7 @@ class ScholarPipelineSingle:
             metrics = if_engine.get_metrics(journal)
 
             if metrics and metrics.get("impact_factor"):
-                paper.metadata.publication.impact_factor = metrics[
-                    "impact_factor"
-                ]
+                paper.metadata.publication.impact_factor = metrics["impact_factor"]
                 paper.metadata.publication.impact_factor_engines = [
                     metrics.get("source", "JCR")
                 ]

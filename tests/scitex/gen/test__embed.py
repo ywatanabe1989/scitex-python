@@ -246,7 +246,7 @@ if __name__ == "__main__":
 #     import sys
 #     import matplotlib.pyplot as plt
 #     import scitex
-#     
+# 
 #     # Start
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 

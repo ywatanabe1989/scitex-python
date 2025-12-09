@@ -30,7 +30,7 @@ class ArXivTranslator(BaseTranslator):
 
         # Extract arXiv ID from URL
         # Matches: /abs/2308.09312 or /pdf/2308.09312
-        match = re.search(r'/(abs|pdf)/(\d+\.\d+)', url)
+        match = re.search(r"/(abs|pdf)/(\d+\.\d+)", url)
         if match:
             arxiv_id = match.group(2)
             pdf_url = f"https://arxiv.org/pdf/{arxiv_id}.pdf"

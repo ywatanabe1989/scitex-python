@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/dataclasses/_DocumentSection.py"
-)
+
+__FILE__ = "./src/scitex/writer/dataclasses/_DocumentSection.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -89,9 +88,7 @@ class DocumentSection:
             )
             return self._read_plain_text()
         except Exception as e:
-            logger.error(
-                f"Unexpected error reading {self.path}: {e}", exc_info=True
-            )
+            logger.error(f"Unexpected error reading {self.path}: {e}", exc_info=True)
             return None
 
     def _read_plain_text(self):
@@ -99,9 +96,7 @@ class DocumentSection:
         try:
             return self.path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
-            logger.warning(
-                f"UTF-8 decode failed for {self.path}, trying latin-1"
-            )
+            logger.warning(f"UTF-8 decode failed for {self.path}, trying latin-1")
             return self.path.read_text(encoding="latin-1")
         except Exception as e:
             logger.error(f"Failed to read {self.path} as text: {e}")
@@ -142,11 +137,7 @@ class DocumentSection:
                 logger.debug(f"Git log failed: {result.stderr}")
                 return []
 
-            return (
-                result.stdout.strip().split("\n")
-                if result.stdout.strip()
-                else []
-            )
+            return result.stdout.strip().split("\n") if result.stdout.strip() else []
         except subprocess.TimeoutExpired:
             logger.warning(f"Git log timed out for {self.path}")
             return []
@@ -265,9 +256,7 @@ class DocumentSection:
         if spec.lower() == "today":
             from datetime import datetime, timedelta
 
-            today = datetime.now().replace(
-                hour=0, minute=0, second=0, microsecond=0
-            )
+            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             return self._find_commit_at_timestamp(today)
 
         # Handle relative time like "2 days ago", "1 week ago", "24 hours ago"
@@ -310,9 +299,7 @@ class DocumentSection:
         from datetime import datetime, timedelta
 
         # Pattern: "N <unit> ago"
-        match = re.match(
-            r"(\d+)\s*(day|week|hour|minute)s?\s*ago", spec, re.IGNORECASE
-        )
+        match = re.match(r"(\d+)\s*(day|week|hour|minute)s?\s*ago", spec, re.IGNORECASE)
         if not match:
             return None
 
@@ -392,9 +379,7 @@ class DocumentSection:
                 logger.warning(f"No commit found before {timestamp_str}")
                 return None
         except subprocess.TimeoutExpired:
-            logger.warning(
-                f"Git log timed out looking for commit at {target_datetime}"
-            )
+            logger.warning(f"Git log timed out looking for commit at {target_datetime}")
             return None
         except Exception as e:
             logger.error(f"Error finding commit at timestamp: {e}")

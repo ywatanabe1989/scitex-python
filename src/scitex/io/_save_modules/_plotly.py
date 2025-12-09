@@ -9,14 +9,14 @@ import plotly
 def _save_plotly_html(obj, spath):
     """
     Save a Plotly figure as an HTML file.
-    
+
     Parameters
     ----------
     obj : plotly.graph_objs.Figure
         The Plotly figure to save.
     spath : str
         Path where the HTML file will be saved.
-        
+
     Returns
     -------
     None

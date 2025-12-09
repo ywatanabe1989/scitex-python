@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/browser/ScholarBrowserManager.py"
-)
+
+__FILE__ = "./src/scitex/scholar/browser/ScholarBrowserManager.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -124,9 +123,7 @@ class ScholarBrowserManager(BrowserMixin):
         )
 
         # Stealth
-        self.stealth_manager = StealthManager(
-            self.viewport_size, self.spoof_dimension
-        )
+        self.stealth_manager = StealthManager(self.viewport_size, self.spoof_dimension)
 
         # Cookie
         self.cookie_acceptor = CookieAutoAcceptor()
@@ -183,9 +180,7 @@ class ScholarBrowserManager(BrowserMixin):
                 f"{self.name}: Using persistent context with profile and extensions"
             )
         else:
-            logger.warning(
-                f"{self.name}: Falling back to regular context creation"
-            )
+            logger.warning(f"{self.name}: Falling back to regular context creation")
 
             auth_options = await self.auth_manager.get_auth_options()
             context_options.update(auth_options)
@@ -199,18 +194,14 @@ class ScholarBrowserManager(BrowserMixin):
     ) -> BrowserContext:
         """Creates a new browser context with stealth options and invisible mode applied."""
         stealth_options = self.stealth_manager.get_stealth_options()
-        context = await browser.new_context(
-            {**stealth_options, **context_options}
-        )
+        context = await browser.new_context({**stealth_options, **context_options})
 
         # Apply stealth script
         await context.add_init_script(self.stealth_manager.get_init_script())
         await context.add_init_script(
             self.stealth_manager.get_dimension_spoofing_script()
         )
-        await context.add_init_script(
-            self.cookie_acceptor.get_auto_acceptor_script()
-        )
+        await context.add_init_script(self.cookie_acceptor.get_auto_acceptor_script())
         return context
 
     # ########################################
@@ -277,9 +268,7 @@ class ScholarBrowserManager(BrowserMixin):
                     )
 
         if removed_locks > 0:
-            logger.debug(
-                f"{self.name}: Cleaned up {removed_locks} Chrome lock files"
-            )
+            logger.debug(f"{self.name}: Cleaned up {removed_locks} Chrome lock files")
             # Wait a moment for the system to release file handles
             time.sleep(1)
 
@@ -302,13 +291,19 @@ class ScholarBrowserManager(BrowserMixin):
 
         # This show_asyncs a small screen with 4 extensions show_asyncn
         persistent_context_launch_options["headless"] = False
-        self._persistent_context = await self._persistent_playwright.chromium.launch_persistent_context(
-            **persistent_context_launch_options
+        self._persistent_context = (
+            await self._persistent_playwright.chromium.launch_persistent_context(
+                **persistent_context_launch_options
+            )
         )
         # First cleanup run (immediate, non-continuous)
-        await close_unwanted_pages(self._persistent_context, delay_sec=1, continuous=False)
+        await close_unwanted_pages(
+            self._persistent_context, delay_sec=1, continuous=False
+        )
         # Background continuous monitoring task
-        asyncio.create_task(close_unwanted_pages(self._persistent_context, delay_sec=5, continuous=True))
+        asyncio.create_task(
+            close_unwanted_pages(self._persistent_context, delay_sec=5, continuous=True)
+        )
         # await self._close_unwanted_extension_pages_async()
         # asyncio.create_task(self._close_unwanted_extension_pages_async())
         await self._apply_stealth_scripts_to_persistent_context_async()
@@ -325,14 +320,10 @@ class ScholarBrowserManager(BrowserMixin):
                 timeout=5,
             )
             if result.returncode == 0:
-                logger.debug(
-                    f"{self.name}: Xvfb display :{self.display} is running"
-                )
+                logger.debug(f"{self.name}: Xvfb display :{self.display} is running")
                 return True
             else:
-                logger.debug(
-                    f"{self.name}: Starting Xvfb display :{self.display}"
-                )
+                logger.debug(f"{self.name}: Starting Xvfb display :{self.display}")
                 # Kill any existing Xvfb on this display first
                 subprocess.run(
                     ["pkill", "-f", f"Xvfb.*:{self.display}"],
@@ -437,9 +428,7 @@ class ScholarBrowserManager(BrowserMixin):
             "headless": self.headless,
             "args": launch_args,
             "accept_downloads": True,  # Enable download handling
-            "downloads_path": str(
-                downloads_path
-            ),  # Set custom download directory
+            "downloads_path": str(downloads_path),  # Set custom download directory
             "proxy": proxy_config,
             "viewport": {
                 "width": self.viewport_size[0],
@@ -472,9 +461,7 @@ class ScholarBrowserManager(BrowserMixin):
 
         try:
             # Check if we have authentication
-            if await self.auth_manager.is_authenticate_async(
-                verify_live=False
-            ):
+            if await self.auth_manager.is_authenticate_async(verify_live=False):
                 cookies = await self.auth_manager.get_auth_cookies_async()
                 if cookies:
                     await self._persistent_context.add_cookies(cookies)
@@ -482,17 +469,11 @@ class ScholarBrowserManager(BrowserMixin):
                         f"{self.name}: Loaded {len(cookies)} authentication cookies into persistent browser context"
                     )
                 else:
-                    logger.debug(
-                        f"{self.name}: No cookies available from auth manager"
-                    )
+                    logger.debug(f"{self.name}: No cookies available from auth manager")
             else:
-                logger.debug(
-                    f"{self.name}: Not authenticated, skipping cookie loading"
-                )
+                logger.debug(f"{self.name}: Not authenticated, skipping cookie loading")
         except Exception as e:
-            logger.warning(
-                f"{self.name}: Failed to load authentication cookies: {e}"
-            )
+            logger.warning(f"{self.name}: Failed to load authentication cookies: {e}")
 
     async def take_screenshot_async(
         self,
@@ -558,9 +539,7 @@ class ScholarBrowserManager(BrowserMixin):
                         )
                 except Exception as e:
                     if verbose:
-                        logger.debug(
-                            f"{self.name}: Screenshot {step} failed: {e}"
-                        )
+                        logger.debug(f"{self.name}: Screenshot {step} failed: {e}")
 
                 await asyncio.sleep(interval_seconds)
                 elapsed += interval_seconds
@@ -599,10 +578,7 @@ class ScholarBrowserManager(BrowserMixin):
                 await self._persistent_context.close()
                 logger.debug(f"{self.name}: Closed persistent browser context")
 
-            if (
-                self._persistent_browser
-                and self._persistent_browser.is_connected()
-            ):
+            if self._persistent_browser and self._persistent_browser.is_connected():
                 await self._persistent_browser.close()
                 logger.debug(f"{self.name}: Closed persistent browser")
 
@@ -631,9 +607,10 @@ if __name__ == "__main__":
             auth_manager=ScholarAuthManager(),
         )
 
-        browser, context = (
-            await browser_manager.get_authenticated_browser_and_context_async()
-        )
+        (
+            browser,
+            context,
+        ) = await browser_manager.get_authenticated_browser_and_context_async()
         page = await context.new_page()
 
         # Test sites configuration
@@ -686,9 +663,7 @@ if __name__ == "__main__":
 
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="ScholarBrowserManager testing"
-    )
+    parser = argparse.ArgumentParser(description="ScholarBrowserManager testing")
     parser.add_argument(
         "--stealth",
         action="store_true",

@@ -33,8 +33,12 @@ Usage:
 """
 
 __all__ = [
-    "SCITEX_STYLE", "STYLE",
-    "load_style", "save_style", "set_style", "get_style",
+    "SCITEX_STYLE",
+    "STYLE",
+    "load_style",
+    "save_style",
+    "set_style",
+    "get_style",
     "resolve_style_value",
 ]
 
@@ -54,12 +58,19 @@ def _get_config(yaml_path: Optional[Path] = None) -> PriorityConfig:
     global _config
     if _config is None or yaml_path:
         yaml = scitex.io.load(yaml_path or _STYLE_FILE)
-        flat = {f"{k}.{k2}": v2 for k, v in yaml.items() if isinstance(v, dict) and k != "presets" for k2, v2 in v.items()}
+        flat = {
+            f"{k}.{k2}": v2
+            for k, v in yaml.items()
+            if isinstance(v, dict) and k != "presets"
+            for k2, v2 in v.items()
+        }
         _config = PriorityConfig(flat, env_prefix="SCITEX_PLT_", auto_uppercase=True)
     return _config
 
 
-def resolve_style_value(key: str, direct_val: Any = None, default: Any = None, type: type = float) -> Any:
+def resolve_style_value(
+    key: str, direct_val: Any = None, default: Any = None, type: type = float
+) -> Any:
     """Resolve value with priority: direct → env → yaml → default.
 
     Key format: 'axes.width_mm' - dots for YAML hierarchy, underscores for env vars.
@@ -73,25 +84,39 @@ def load_style(path: Optional[Union[str, Path]] = None) -> Dict[str, Any]:
     cfg = _get_config(Path(path) if path else None)
     g = lambda k, d, t=float: cfg.resolve(k, None, d, t)
     return {
-        "axes_width_mm": g("axes.width_mm", 40), "axes_height_mm": g("axes.height_mm", 28),
+        "axes_width_mm": g("axes.width_mm", 40),
+        "axes_height_mm": g("axes.height_mm", 28),
         "axes_thickness_mm": g("axes.thickness_mm", 0.2),
-        "margin_left_mm": g("margins.left_mm", 20), "margin_right_mm": g("margins.right_mm", 20),
-        "margin_bottom_mm": g("margins.bottom_mm", 20), "margin_top_mm": g("margins.top_mm", 20),
-        "space_w_mm": g("spacing.horizontal_mm", 8), "space_h_mm": g("spacing.vertical_mm", 10),
-        "tick_length_mm": g("ticks.length_mm", 0.8), "tick_thickness_mm": g("ticks.thickness_mm", 0.2),
+        "margin_left_mm": g("margins.left_mm", 20),
+        "margin_right_mm": g("margins.right_mm", 20),
+        "margin_bottom_mm": g("margins.bottom_mm", 20),
+        "margin_top_mm": g("margins.top_mm", 20),
+        "space_w_mm": g("spacing.horizontal_mm", 8),
+        "space_h_mm": g("spacing.vertical_mm", 10),
+        "tick_length_mm": g("ticks.length_mm", 0.8),
+        "tick_thickness_mm": g("ticks.thickness_mm", 0.2),
         "n_ticks": g("ticks.n_ticks", 4, int),
-        "trace_thickness_mm": g("lines.trace_mm", 0.2), "errorbar_thickness_mm": g("lines.errorbar_mm", 0.2),
-        "errorbar_cap_width_mm": g("lines.errorbar_cap_mm", 0.8), "bar_edge_thickness_mm": g("lines.bar_edge_mm", 0.2),
+        "trace_thickness_mm": g("lines.trace_mm", 0.2),
+        "errorbar_thickness_mm": g("lines.errorbar_mm", 0.2),
+        "errorbar_cap_width_mm": g("lines.errorbar_cap_mm", 0.8),
+        "bar_edge_thickness_mm": g("lines.bar_edge_mm", 0.2),
         "kde_line_thickness_mm": g("lines.kde_mm", 0.2),
-        "scatter_size_mm": g("markers.scatter_mm", 0.8), "marker_size_mm": g("markers.size_mm", 0.8),
+        "scatter_size_mm": g("markers.scatter_mm", 0.8),
+        "marker_size_mm": g("markers.size_mm", 0.8),
         "font_family": g("fonts.family", "Arial", str),
-        "axis_font_size_pt": g("fonts.axis_label_pt", 7), "tick_font_size_pt": g("fonts.tick_label_pt", 7),
-        "title_font_size_pt": g("fonts.title_pt", 8), "suptitle_font_size_pt": g("fonts.suptitle_pt", 8),
-        "legend_font_size_pt": g("fonts.legend_pt", 6), "annotation_font_size_pt": g("fonts.annotation_pt", 6),
-        "label_pad_pt": g("padding.label_pt", 0.5), "tick_pad_pt": g("padding.tick_pt", 2.0),
+        "axis_font_size_pt": g("fonts.axis_label_pt", 7),
+        "tick_font_size_pt": g("fonts.tick_label_pt", 7),
+        "title_font_size_pt": g("fonts.title_pt", 8),
+        "suptitle_font_size_pt": g("fonts.suptitle_pt", 8),
+        "legend_font_size_pt": g("fonts.legend_pt", 6),
+        "annotation_font_size_pt": g("fonts.annotation_pt", 6),
+        "label_pad_pt": g("padding.label_pt", 0.5),
+        "tick_pad_pt": g("padding.tick_pt", 2.0),
         "title_pad_pt": g("padding.title_pt", 1.0),
-        "dpi": g("output.dpi", 300, int), "transparent": g("output.transparent", True, bool),
-        "auto_scale_axes": g("behavior.auto_scale_axes", True, bool), "mode": "publication",
+        "dpi": g("output.dpi", 300, int),
+        "transparent": g("output.transparent", True, bool),
+        "auto_scale_axes": g("behavior.auto_scale_axes", True, bool),
+        "mode": "publication",
     }
 
 

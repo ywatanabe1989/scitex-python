@@ -34,40 +34,48 @@ class DerFreitagTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2022-04-15 16:29:59"
+        "lastUpdated": "2022-04-15 16:29:59",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
         """Detect if page is article or search results."""
-        ld_json_tag = doc.select_one('script.qa-structured-data[type="application/ld+json"]')
+        ld_json_tag = doc.select_one(
+            'script.qa-structured-data[type="application/ld+json"]'
+        )
         if ld_json_tag and ld_json_tag.string:
             try:
                 data = json.loads(ld_json_tag.string)
-                item_type = data.get('@type', '')
-                if item_type == 'NewsArticle' or (isinstance(item_type, list) and 'NewsArticle' in item_type):
-                    return 'newspaperArticle'
+                item_type = data.get("@type", "")
+                if item_type == "NewsArticle" or (
+                    isinstance(item_type, list) and "NewsArticle" in item_type
+                ):
+                    return "newspaperArticle"
             except json.JSONDecodeError:
                 pass
 
         if self.get_search_results(doc, check_only=True):
-            return 'multiple'
+            return "multiple"
 
-        return ''
+        return ""
 
-    def get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Optional[Dict[str, str]]:
+    def get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Optional[Dict[str, str]]:
         """Extract search results."""
         items = {}
-        rows = doc.select('.o-search-results__container .c-article-card a.js-article-card-url')
+        rows = doc.select(
+            ".o-search-results__container .c-article-card a.js-article-card-url"
+        )
 
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text(strip=True)
 
             if not href or not title:
                 continue
 
             if check_only:
-                return {'found': 'true'}
+                return {"found": "true"}
 
             items[href] = title
 
@@ -77,7 +85,7 @@ class DerFreitagTranslator:
         """Main extraction method."""
         page_type = self.detect_web(doc, url)
 
-        if page_type == 'multiple':
+        if page_type == "multiple":
             return self.get_search_results(doc, check_only=False)
         else:
             return self.scrape(doc, url)
@@ -90,110 +98,117 @@ class DerFreitagTranslator:
             authors = [authors]
 
         for author in authors:
-            if author.get('@type') != 'Person':
+            if author.get("@type") != "Person":
                 continue
 
-            name = author.get('name', '')
+            name = author.get("name", "")
             if not name:
                 continue
 
             # If name contains comma, split into multiple authors
-            if ',' in name:
-                for one_author in name.split(','):
+            if "," in name:
+                for one_author in name.split(","):
                     one_author = one_author.strip()
                     if one_author:
                         names = one_author.split()
                         if len(names) >= 2:
-                            creators.append({
-                                'firstName': ' '.join(names[:-1]),
-                                'lastName': names[-1],
-                                'creatorType': 'author'
-                            })
+                            creators.append(
+                                {
+                                    "firstName": " ".join(names[:-1]),
+                                    "lastName": names[-1],
+                                    "creatorType": "author",
+                                }
+                            )
                         else:
-                            creators.append({
-                                'lastName': one_author,
-                                'creatorType': 'author',
-                                'fieldMode': True
-                            })
+                            creators.append(
+                                {
+                                    "lastName": one_author,
+                                    "creatorType": "author",
+                                    "fieldMode": True,
+                                }
+                            )
             else:
                 names = name.split()
                 if len(names) >= 2:
-                    creators.append({
-                        'firstName': ' '.join(names[:-1]),
-                        'lastName': names[-1],
-                        'creatorType': 'author'
-                    })
+                    creators.append(
+                        {
+                            "firstName": " ".join(names[:-1]),
+                            "lastName": names[-1],
+                            "creatorType": "author",
+                        }
+                    )
                 else:
-                    creators.append({
-                        'lastName': name,
-                        'creatorType': 'author',
-                        'fieldMode': True
-                    })
+                    creators.append(
+                        {"lastName": name, "creatorType": "author", "fieldMode": True}
+                    )
 
         return creators
 
     def scrape(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """Scrape article metadata."""
         item = {
-            'itemType': 'newspaperArticle',
-            'publicationTitle': 'Der Freitag',
-            'ISSN': '0945-2095',
-            'libraryCatalog': 'Der Freitag',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": "newspaperArticle",
+            "publicationTitle": "Der Freitag",
+            "ISSN": "0945-2095",
+            "libraryCatalog": "Der Freitag",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Parse JSON-LD
-        ld_json_tag = doc.select_one('script.qa-structured-data[type="application/ld+json"]')
+        ld_json_tag = doc.select_one(
+            'script.qa-structured-data[type="application/ld+json"]'
+        )
         if ld_json_tag and ld_json_tag.string:
             try:
                 json_data = json.loads(ld_json_tag.string)
 
                 # Extract title
-                if json_data.get('headline'):
-                    item['title'] = json_data['headline']
+                if json_data.get("headline"):
+                    item["title"] = json_data["headline"]
 
                 # Extract authors
-                if json_data.get('author'):
-                    item['creators'] = self._clean_author_objects(json_data['author'])
+                if json_data.get("author"):
+                    item["creators"] = self._clean_author_objects(json_data["author"])
 
                 # Extract date (use the latest date)
-                date = json_data.get('dateModified')
-                if not date or (json_data.get('datePublished') and json_data.get('datePublished') > date):
-                    date = json_data.get('datePublished')
+                date = json_data.get("dateModified")
+                if not date or (
+                    json_data.get("datePublished")
+                    and json_data.get("datePublished") > date
+                ):
+                    date = json_data.get("datePublished")
                 if date:
-                    item['date'] = date
+                    item["date"] = date
 
                 # Extract abstract
-                if json_data.get('description'):
-                    item['abstractNote'] = json_data['description']
+                if json_data.get("description"):
+                    item["abstractNote"] = json_data["description"]
 
                 # Extract language
-                if json_data.get('inLanguage'):
-                    item['language'] = json_data['inLanguage']
+                if json_data.get("inLanguage"):
+                    item["language"] = json_data["inLanguage"]
 
             except json.JSONDecodeError:
                 pass
 
         # Extract section
-        section_elem = doc.select_one('section ul li:nth-child(3) a span')
+        section_elem = doc.select_one("section ul li:nth-child(3) a span")
         if section_elem:
-            item['section'] = section_elem.get_text(strip=True)
+            item["section"] = section_elem.get_text(strip=True)
 
         # Extract tags
-        tag_elems = doc.select('.qa-tags-container .qa-tags-item')
+        tag_elems = doc.select(".qa-tags-container .qa-tags-item")
         for tag_elem in tag_elems:
             tag_text = tag_elem.get_text(strip=True)
             if tag_text:
-                item['tags'].append({'tag': tag_text})
+                item["tags"].append({"tag": tag_text})
 
         # Add snapshot attachment
-        item['attachments'].append({
-            'title': 'Snapshot',
-            'mimeType': 'text/html',
-            'url': url
-        })
+        item["attachments"].append(
+            {"title": "Snapshot", "mimeType": "text/html", "url": url}
+        )
 
         return item

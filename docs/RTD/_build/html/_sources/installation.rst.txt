@@ -7,7 +7,7 @@ Requirements
 - Python 3.8 or higher
 - pip package manager
 
-Installing MNGS
+Installing SciTeX
 ---------------
 
 From PyPI (Recommended)
@@ -31,7 +31,7 @@ Clone the repository and install in development mode:
 Dependencies
 ------------
 
-MNGS has several optional dependencies for specific functionalities:
+SciTeX has several optional dependencies for specific functionalities:
 
 Core Dependencies
 ~~~~~~~~~~~~~~~~~
@@ -83,7 +83,7 @@ To verify your installation:
     
     # Test basic functionality
     CONFIG, sys, _, plt, _ = scitex.gen.start()
-    print("MNGS successfully initialized!")
+    print("SciTeX successfully initialized!")
     scitex.gen.close(CONFIG)
 
 Troubleshooting

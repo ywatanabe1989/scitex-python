@@ -12,7 +12,9 @@ class TreesearchTranslator(BaseTranslator):
     """Treesearch."""
 
     LABEL = "Treesearch"
-    URL_TARGET_PATTERN = r"^https?://([^/]+\.)?treesearch\.fs\.fed\.us/(pubs/\d+$|search\.php)"
+    URL_TARGET_PATTERN = (
+        r"^https?://([^/]+\.)?treesearch\.fs\.fed\.us/(pubs/\d+$|search\.php)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

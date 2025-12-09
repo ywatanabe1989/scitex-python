@@ -34,7 +34,7 @@ class CCfrBnFTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "g",
-        "lastUpdated": "2014-09-18 14:08:05"
+        "lastUpdated": "2014-09-18 14:08:05",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -49,12 +49,14 @@ class CCfrBnFTranslator:
             Item type detected or 'multiple' for search results
         """
         if self.get_search_results(doc, True):
-            return 'multiple'
-        if 'menu=menu_view_grappage' in url:
+            return "multiple"
+        if "menu=menu_view_grappage" in url:
             return self.ccfr_type_doc(doc)
-        return ''
+        return ""
 
-    def get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Dict[str, str]:
+    def get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Dict[str, str]:
         """
         Get search results from the page.
 
@@ -65,7 +67,7 @@ class CCfrBnFTranslator:
         Returns:
             Dictionary mapping record IDs to titles
         """
-        if not doc.select_one('#sourceResultsPane'):
+        if not doc.select_one("#sourceResultsPane"):
             return {}
 
         items = {}
@@ -76,11 +78,11 @@ class CCfrBnFTranslator:
             title_elem = row.select_one('td.Ident span a[title="Voir la Notice"]')
 
             if checkbox and title_elem:
-                record_id = checkbox.get('value')
+                record_id = checkbox.get("value")
                 title = title_elem.get_text(strip=True)
                 if record_id and title:
                     if check_only:
-                        return {'found': 'true'}
+                        return {"found": "true"}
                     items[record_id] = title
 
         return items
@@ -95,34 +97,34 @@ class CCfrBnFTranslator:
         Returns:
             Zotero item type
         """
-        if not doc.select_one('div.notice-contenu'):
-            return ''
-        if not doc.select('div#vueCourante table tbody tr'):
-            return ''
+        if not doc.select_one("div.notice-contenu"):
+            return ""
+        if not doc.select("div#vueCourante table tbody tr"):
+            return ""
 
-        rows = doc.select('div#vueCourante table tbody tr')
+        rows = doc.select("div#vueCourante table tbody tr")
         for row in rows:
-            label_elem = row.select_one('th.view-field-label-ccfr')
+            label_elem = row.select_one("th.view-field-label-ccfr")
             if not label_elem:
                 continue
 
             label = label_elem.get_text(strip=True)
-            if label == 'Type document':
-                value_elem = row.select_one('td.view-field-value-ccfr')
+            if label == "Type document":
+                value_elem = row.select_one("td.view-field-value-ccfr")
                 if value_elem:
                     value_text = value_elem.get_text(strip=True)
 
                     type_mapping = {
-                        'Livre': 'book',
-                        'Document électronique': 'book',
-                        'Document sonore': 'audioRecording',
-                        'Images Animées': 'film',
-                        'Carte': 'map'
+                        "Livre": "book",
+                        "Document électronique": "book",
+                        "Document sonore": "audioRecording",
+                        "Images Animées": "film",
+                        "Carte": "map",
                     }
 
-                    return type_mapping.get(value_text, 'book')
+                    return type_mapping.get(value_text, "book")
 
-        return ''
+        return ""
 
     def do_web(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """
@@ -135,7 +137,7 @@ class CCfrBnFTranslator:
         Returns:
             Dictionary containing metadata or search results
         """
-        if self.detect_web(doc, url) == 'multiple':
+        if self.detect_web(doc, url) == "multiple":
             return self.get_search_results(doc)
         return self.scrape(doc, url)
 
@@ -156,18 +158,18 @@ class CCfrBnFTranslator:
         item_type = self.ccfr_type_doc(doc)
 
         item = {
-            'itemType': item_type if item_type else 'book',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": item_type if item_type else "book",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Extract basic fields from the display
-        rows = doc.select('div#vueCourante table tbody tr')
+        rows = doc.select("div#vueCourante table tbody tr")
         for row in rows:
-            label_elem = row.select_one('th.view-field-label-ccfr')
-            value_elem = row.select_one('td.view-field-value-ccfr')
+            label_elem = row.select_one("th.view-field-label-ccfr")
+            value_elem = row.select_one("td.view-field-value-ccfr")
 
             if not label_elem or not value_elem:
                 continue
@@ -176,24 +178,22 @@ class CCfrBnFTranslator:
             value = value_elem.get_text(strip=True)
 
             # Map common fields
-            if label == 'Titre':
-                item['title'] = value
-            elif label == 'Auteur':
+            if label == "Titre":
+                item["title"] = value
+            elif label == "Auteur":
                 # Parse author
                 author = self._clean_author(value)
                 if author:
-                    item['creators'].append(author)
-            elif label == 'Date de publication':
-                item['date'] = value
-            elif label == 'Editeur':
-                item['publisher'] = value
+                    item["creators"].append(author)
+            elif label == "Date de publication":
+                item["date"] = value
+            elif label == "Editeur":
+                item["publisher"] = value
 
         # Add snapshot attachment
-        item['attachments'].append({
-            'title': 'Snapshot',
-            'mimeType': 'text/html',
-            'url': url
-        })
+        item["attachments"].append(
+            {"title": "Snapshot", "mimeType": "text/html", "url": url}
+        )
 
         return item
 
@@ -215,13 +215,9 @@ class CCfrBnFTranslator:
 
         if len(parts) >= 2:
             return {
-                'firstName': ' '.join(parts[:-1]),
-                'lastName': parts[-1],
-                'creatorType': 'author'
+                "firstName": " ".join(parts[:-1]),
+                "lastName": parts[-1],
+                "creatorType": "author",
             }
         else:
-            return {
-                'lastName': name,
-                'creatorType': 'author',
-                'fieldMode': True
-            }
+            return {"lastName": name, "creatorType": "author", "fieldMode": True}

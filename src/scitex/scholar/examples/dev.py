@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -24,9 +25,7 @@ browser_manager = ScholarBrowserManager(
     browser_mode="interactive",
     chrome_profile_name="system",
 )
-browser, context = (
-    await browser_manager.get_authenticated_browser_and_context_async()
-)
+browser, context = await browser_manager.get_authenticated_browser_and_context_async()
 page = await context.new_page()
 
 await page.goto("https://www.science.org/doi/10.1126/science.aao0702")

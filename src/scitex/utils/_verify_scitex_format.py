@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/utils/_verify_scitex_format.py"
-)
+
+__FILE__ = "./src/scitex/utils/_verify_scitex_format.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -48,6 +47,8 @@ logger = logging.getLogger(__name__)
 
 
 """Functions & Classes"""
+
+
 @dataclass
 class FileInfo:
     """Store file information."""
@@ -104,9 +105,7 @@ class TemplateCompliance:
         return sum(checks) / len(checks)
 
 
-def scan_python_files(
-    paths: list[Path], base_dir: Path = None
-) -> Dict[str, FileInfo]:
+def scan_python_files(paths: list[Path], base_dir: Path = None) -> Dict[str, FileInfo]:
     """Scan Python files from filesystem paths.
 
     Args:
@@ -136,9 +135,7 @@ def scan_python_files(
 
         for py_file in python_files:
             # Skip template.py, __init__.py, and test files
-            if any(
-                skip in py_file.name for skip in ["template.py", "__init__.py"]
-            ):
+            if any(skip in py_file.name for skip in ["template.py", "__init__.py"]):
                 continue
 
             try:
@@ -162,9 +159,7 @@ def check_compliance(content: str) -> TemplateCompliance:
     compliance = TemplateCompliance()
 
     # Check for main function
-    compliance.has_main = bool(
-        re.search(r"^def main\(", content, re.MULTILINE)
-    )
+    compliance.has_main = bool(re.search(r"^def main\(", content, re.MULTILINE))
 
     # Check for parse_args function
     compliance.has_parse_args = bool(
@@ -172,14 +167,10 @@ def check_compliance(content: str) -> TemplateCompliance:
     )
 
     # Check for run_main function
-    compliance.has_run_main = bool(
-        re.search(r"^def run_main\(", content, re.MULTILINE)
-    )
+    compliance.has_run_main = bool(re.search(r"^def run_main\(", content, re.MULTILINE))
 
     # Check for main guard
-    compliance.has_main_guard = bool(
-        re.search(r'if __name__ == "__main__":', content)
-    )
+    compliance.has_main_guard = bool(re.search(r'if __name__ == "__main__":', content))
 
     # Check if run_main follows the exact template format
     compliance.is_run_main_unchanged = _check_run_main_unchanged(content)
@@ -194,9 +185,7 @@ def check_compliance(content: str) -> TemplateCompliance:
     )
 
     # Check for scitex session usage
-    compliance.uses_scitex_session = bool(
-        re.search(r"stx\.session\.start", content)
-    )
+    compliance.uses_scitex_session = bool(re.search(r"stx\.session\.start", content))
 
     # Check for verbose parameter
     compliance.has_verbose_param = bool(
@@ -250,7 +239,7 @@ def generate_report(results: Dict[str, tuple]) -> str:
     lines.append(f"Total Python files analyzed: {total_files}")
     if total_files > 0:
         lines.append(
-            f"Fully compliant files: {compliant_files} ({compliant_files/total_files*100:.1f}%)"
+            f"Fully compliant files: {compliant_files} ({compliant_files / total_files * 100:.1f}%)"
         )
         lines.append(f"Average compliance score: {avg_score:.1%}")
     else:
@@ -280,9 +269,7 @@ def generate_report(results: Dict[str, tuple]) -> str:
             status = "✗ NON-COMPLIANT"
 
         lines.append(f"{status} [{score:.0%}] {filepath}")
-        lines.append(
-            f"  Lines: {file_info.lines}, Size: {file_info.size} bytes"
-        )
+        lines.append(f"  Lines: {file_info.lines}, Size: {file_info.size} bytes")
 
         # Show missing components
         if not compliance.is_compliant:
@@ -315,9 +302,7 @@ def generate_report(results: Dict[str, tuple]) -> str:
             optional_missing.append("verbose parameter")
 
         if optional_missing:
-            lines.append(
-                f"  ⚠️  OPTIONAL Missing: {', '.join(optional_missing)}"
-            )
+            lines.append(f"  ⚠️  OPTIONAL Missing: {', '.join(optional_missing)}")
 
         lines.append("")
 
@@ -358,11 +343,7 @@ def generate_report(results: Dict[str, tuple]) -> str:
         ),
         (
             "  'Functions & Classes'",
-            sum(
-                1
-                for _, c in results.values()
-                if c.has_functions_classes_section
-            ),
+            sum(1 for _, c in results.values() if c.has_functions_classes_section),
         ),
         (
             "  scitex session",
@@ -411,9 +392,7 @@ def generate_report(results: Dict[str, tuple]) -> str:
             if not compliance.has_main_guard:
                 fixes.append("  - Add if __name__ == '__main__': run_main()")
             if not compliance.is_run_main_unchanged:
-                fixes.append(
-                    "  - Update run_main() to match template format exactly"
-                )
+                fixes.append("  - Update run_main() to match template format exactly")
             for fix in fixes:
                 lines.append(fix)
             lines.append("")
@@ -441,9 +420,7 @@ def main(args):
     else:
         # Default to current directory
         paths = [Path.cwd()]
-        base_dir = (
-            Path(args.base_dir).resolve() if args.base_dir else Path.cwd()
-        )
+        base_dir = Path(args.base_dir).resolve() if args.base_dir else Path.cwd()
 
     logger.info(f"Scanning paths: {[str(p) for p in paths]}")
     logger.info(f"Base directory: {base_dir}")
@@ -479,9 +456,7 @@ def main(args):
         logger.success("All files are compliant!")
         return 0
     else:
-        logger.warning(
-            f"{len(results) - compliant_count} files need attention"
-        )
+        logger.warning(f"{len(results) - compliant_count} files need attention")
         return 0  # Still return 0 to avoid breaking pipelines
 
 

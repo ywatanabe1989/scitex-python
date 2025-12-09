@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/dataclasses/_WriterConfig.py"
-)
+
+__FILE__ = "./src/scitex/writer/dataclasses/_WriterConfig.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -78,9 +77,7 @@ class WriterConfig:
             ValueError: If invalid structure
         """
         if not self.project_dir.exists():
-            raise ValueError(
-                f"Project directory not found: {self.project_dir}"
-            )
+            raise ValueError(f"Project directory not found: {self.project_dir}")
 
         # Check for at least one document directory
         doc_dirs = [
@@ -151,9 +148,7 @@ def main(args):
 def parse_args():
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Demonstrate WriterConfig dataclass"
-    )
+    parser = argparse.ArgumentParser(description="Demonstrate WriterConfig dataclass")
     parser.add_argument(
         "--dir",
         type=str,

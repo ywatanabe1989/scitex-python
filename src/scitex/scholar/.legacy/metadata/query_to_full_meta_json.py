@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -112,9 +113,7 @@ async def query_to_full_metadata_json(
     enricher = SmartEnricher()
     # The enricher modifies the dictionary in place
     enriched_metadata = enricher.enrich_metadata_json(metadata)
-    print(
-        "✅ Metadata enriched with abstract, keywords, citation counts, etc."
-    )
+    print("✅ Metadata enriched with abstract, keywords, citation counts, etc.")
 
     # 3. Enriched Metadata -> URLs
     # ============================
@@ -128,9 +127,10 @@ async def query_to_full_metadata_json(
 
     try:
         # Initialize an authenticated browser context
-        browser, context = (
-            await browser_manager.get_authenticated_browser_and_context_async()
-        )
+        (
+            browser,
+            context,
+        ) = await browser_manager.get_authenticated_browser_and_context_async()
         url_handler = URLHandler(context)
 
         # Pass the DOI to get all related URLs
@@ -138,9 +138,7 @@ async def query_to_full_metadata_json(
 
         # Add the found URLs to the main metadata dictionary
         enriched_metadata["urls"] = urls
-        print(
-            f"✅ Found {len(urls.get('url_pdf', []))} PDF URL(s) and other links."
-        )
+        print(f"✅ Found {len(urls.get('url_pdf', []))} PDF URL(s) and other links.")
 
     except Exception as e:
         print(f"⚠️ Could not find URLs due to a browser error: {e}")
@@ -149,9 +147,7 @@ async def query_to_full_metadata_json(
         await browser_manager.close()
 
     # 4. Initialize complete structure with null values
-    complete_metadata = initialize_complete_metadata_structure(
-        enriched_metadata
-    )
+    complete_metadata = initialize_complete_metadata_structure(enriched_metadata)
 
     return complete_metadata
 

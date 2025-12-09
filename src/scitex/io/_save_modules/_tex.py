@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/io/_save_modules/_tex.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -30,7 +31,7 @@ def save_tex(
     document: bool = False,
     longtable: bool = False,
     escape: bool = True,
-    **kwargs
+    **kwargs,
 ) -> None:
     """
     Save object as LaTeX/TeX format.
@@ -105,14 +106,15 @@ def save_tex(
             label=label,
             longtable=longtable,
             escape=escape,
-            **kwargs
+            **kwargs,
         )
 
     elif isinstance(obj, (dict, list)):
         # Try to convert using stats module's convert_results
         try:
             from scitex.stats.utils._normalizers import convert_results
-            tex_content = convert_results(obj, return_as='latex', **kwargs)
+
+            tex_content = convert_results(obj, return_as="latex", **kwargs)
 
             # Add caption and label if provided
             if caption or label:
@@ -127,16 +129,14 @@ def save_tex(
             tex_content = str(obj)
         except Exception as e:
             warnings.warn(
-                f"Failed to convert object to LaTeX: {e}. "
-                f"Converting to string instead."
+                f"Failed to convert object to LaTeX: {e}. Converting to string instead."
             )
             tex_content = str(obj)
 
     else:
         # Fallback: convert to string
         warnings.warn(
-            f"Unsupported type {type(obj)} for LaTeX export. "
-            f"Converting to string."
+            f"Unsupported type {type(obj)} for LaTeX export. Converting to string."
         )
         tex_content = str(obj)
 
@@ -145,17 +145,17 @@ def save_tex(
         tex_content = _wrap_in_document(tex_content)
 
     # Write to file
-    with open(spath, 'w') as f:
+    with open(spath, "w") as f:
         f.write(tex_content)
 
 
 def _dataframe_to_latex(
-    df: 'pd.DataFrame',
+    df: "pd.DataFrame",
     caption: Optional[str] = None,
     label: Optional[str] = None,
     longtable: bool = False,
     escape: bool = True,
-    **kwargs
+    **kwargs,
 ) -> str:
     """
     Convert pandas DataFrame to LaTeX table.
@@ -184,18 +184,18 @@ def _dataframe_to_latex(
 
     # Build to_latex arguments
     latex_kwargs = {
-        'index': False,
-        'escape': escape,
+        "index": False,
+        "escape": escape,
     }
 
     if longtable:
-        latex_kwargs['longtable'] = True
+        latex_kwargs["longtable"] = True
 
     if caption:
-        latex_kwargs['caption'] = caption
+        latex_kwargs["caption"] = caption
 
     if label:
-        latex_kwargs['label'] = label
+        latex_kwargs["label"] = label
 
     # Merge with user kwargs
     latex_kwargs.update(kwargs)
@@ -205,9 +205,7 @@ def _dataframe_to_latex(
 
 
 def _wrap_with_table_env(
-    content: str,
-    caption: Optional[str] = None,
-    label: Optional[str] = None
+    content: str, caption: Optional[str] = None, label: Optional[str] = None
 ) -> str:
     """
     Wrap LaTeX content in table environment with caption and label.
@@ -226,18 +224,18 @@ def _wrap_with_table_env(
     str
         Wrapped LaTeX content
     """
-    lines = ['\\begin{table}[htbp]', '\\centering']
+    lines = ["\\begin{table}[htbp]", "\\centering"]
 
     if caption:
-        lines.append(f'\\caption{{{caption}}}')
+        lines.append(f"\\caption{{{caption}}}")
 
     if label:
-        lines.append(f'\\label{{{label}}}')
+        lines.append(f"\\label{{{label}}}")
 
     lines.append(content)
-    lines.append('\\end{table}')
+    lines.append("\\end{table}")
 
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def _wrap_in_document(content: str) -> str:
@@ -254,7 +252,7 @@ def _wrap_in_document(content: str) -> str:
     str
         Complete LaTeX document
     """
-    document_template = r'''\documentclass{article}
+    document_template = r"""\documentclass{article}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -267,7 +265,7 @@ def _wrap_in_document(content: str) -> str:
 %s
 
 \end{document}
-'''
+"""
     return document_template % content
 
 

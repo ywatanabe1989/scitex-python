@@ -34,7 +34,7 @@ class BibLaTeXTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 2,  # Export translator
-        "lastUpdated": "2024-03-25 14:49:42"
+        "lastUpdated": "2024-03-25 14:49:42",
     }
 
     # Field mappings from Zotero to BibLaTeX
@@ -57,7 +57,7 @@ class BibLaTeXTranslator:
         "version": "version",
         "conferenceName": "eventtitle",
         "pages": "pages",
-        "numPages": "pagetotal"
+        "numPages": "pagetotal",
     }
 
     # Item type mappings from Zotero to BibLaTeX
@@ -95,7 +95,7 @@ class BibLaTeXTranslator:
         "computerProgram": "software",
         "document": "misc",
         "encyclopediaArticle": "inreference",
-        "dictionaryEntry": "inreference"
+        "dictionaryEntry": "inreference",
     }
 
     def __init__(self):
@@ -116,14 +116,14 @@ class BibLaTeXTranslator:
 
         for item in items:
             # Skip notes and attachments
-            if item.get('itemType') in ['note', 'attachment']:
+            if item.get("itemType") in ["note", "attachment"]:
                 continue
 
             entry = self._export_item(item)
             if entry:
                 output.append(entry)
 
-        return '\n\n'.join(output)
+        return "\n\n".join(output)
 
     def _export_item(self, item: Dict[str, Any]) -> str:
         """
@@ -136,8 +136,8 @@ class BibLaTeXTranslator:
             BibLaTeX entry string
         """
         # Determine entry type
-        item_type = item.get('itemType', 'misc')
-        bib_type = self.TYPE_MAP.get(item_type, 'misc')
+        item_type = item.get("itemType", "misc")
+        bib_type = self.TYPE_MAP.get(item_type, "misc")
 
         # Generate cite key
         cite_key = self._build_cite_key(item)
@@ -152,37 +152,44 @@ class BibLaTeXTranslator:
                 lines.append(f",\n\t{biblatex_field} = {{{value}}}")
 
         # Add special handling for publication title
-        if 'publicationTitle' in item and item['publicationTitle']:
-            if item_type in ['bookSection', 'conferencePaper', 'dictionaryEntry', 'encyclopediaArticle']:
-                field_name = 'booktitle'
-            elif item_type in ['magazineArticle', 'newspaperArticle', 'journalArticle']:
-                field_name = 'journaltitle'
+        if "publicationTitle" in item and item["publicationTitle"]:
+            if item_type in [
+                "bookSection",
+                "conferencePaper",
+                "dictionaryEntry",
+                "encyclopediaArticle",
+            ]:
+                field_name = "booktitle"
+            elif item_type in ["magazineArticle", "newspaperArticle", "journalArticle"]:
+                field_name = "journaltitle"
             else:
-                field_name = 'journaltitle'
+                field_name = "journaltitle"
 
-            value = self._escape_value(item['publicationTitle'])
+            value = self._escape_value(item["publicationTitle"])
             lines.append(f",\n\t{field_name} = {{{value}}}")
 
         # Add creators
-        if 'creators' in item and item['creators']:
-            creators_str = self._format_creators(item['creators'])
+        if "creators" in item and item["creators"]:
+            creators_str = self._format_creators(item["creators"])
             if creators_str:
                 lines.append(creators_str)
 
         # Add date
-        if 'date' in item and item['date']:
+        if "date" in item and item["date"]:
             lines.append(f",\n\tdate = {{{item['date']}}}")
 
         # Add tags as keywords
-        if 'tags' in item and item['tags']:
-            keywords = ', '.join(tag.get('tag', '') for tag in item['tags'] if tag.get('tag'))
+        if "tags" in item and item["tags"]:
+            keywords = ", ".join(
+                tag.get("tag", "") for tag in item["tags"] if tag.get("tag")
+            )
             if keywords:
                 lines.append(f",\n\tkeywords = {{{keywords}}}")
 
         # Close entry
         lines.append(",\n}")
 
-        return ''.join(lines)
+        return "".join(lines)
 
     def _build_cite_key(self, item: Dict[str, Any]) -> str:
         """
@@ -198,32 +205,32 @@ class BibLaTeXTranslator:
         parts = []
 
         # Add first author last name
-        if 'creators' in item and item['creators']:
-            first_creator = item['creators'][0]
-            last_name = first_creator.get('lastName', 'noauthor')
+        if "creators" in item and item["creators"]:
+            first_creator = item["creators"][0]
+            last_name = first_creator.get("lastName", "noauthor")
             parts.append(self._clean_cite_key_part(last_name))
         else:
-            parts.append('noauthor')
+            parts.append("noauthor")
 
         # Add first word of title
-        if 'title' in item and item['title']:
-            title_words = item['title'].split()
+        if "title" in item and item["title"]:
+            title_words = item["title"].split()
             if title_words:
                 parts.append(self._clean_cite_key_part(title_words[0]))
         else:
-            parts.append('notitle')
+            parts.append("notitle")
 
         # Add year
-        if 'date' in item and item['date']:
-            year_match = re.search(r'\d{4}', item['date'])
+        if "date" in item and item["date"]:
+            year_match = re.search(r"\d{4}", item["date"])
             if year_match:
                 parts.append(year_match.group(0))
             else:
-                parts.append('nodate')
+                parts.append("nodate")
         else:
-            parts.append('nodate')
+            parts.append("nodate")
 
-        base_key = '_'.join(parts)
+        base_key = "_".join(parts)
 
         # Ensure uniqueness
         cite_key = base_key
@@ -247,7 +254,7 @@ class BibLaTeXTranslator:
         """
         # Remove special characters, keep only alphanumeric and underscore
         text = text.lower()
-        text = re.sub(r'[^a-z0-9_-]', '', text)
+        text = re.sub(r"[^a-z0-9_-]", "", text)
         return text
 
     def _format_creators(self, creators: List[Dict[str, Any]]) -> str:
@@ -264,30 +271,30 @@ class BibLaTeXTranslator:
         editors = []
 
         for creator in creators:
-            creator_type = creator.get('creatorType', 'author')
+            creator_type = creator.get("creatorType", "author")
 
             # Format name
-            if creator.get('firstName') and creator.get('lastName'):
+            if creator.get("firstName") and creator.get("lastName"):
                 name = f"{creator['lastName']}, {creator['firstName']}"
-            elif creator.get('lastName'):
-                name = creator['lastName']
+            elif creator.get("lastName"):
+                name = creator["lastName"]
             else:
                 continue
 
-            if creator_type in ['author', 'inventor', 'artist', 'programmer']:
+            if creator_type in ["author", "inventor", "artist", "programmer"]:
                 authors.append(name)
-            elif creator_type == 'editor':
+            elif creator_type == "editor":
                 editors.append(name)
 
         result = []
         if authors:
-            author_str = ' and '.join(authors)
+            author_str = " and ".join(authors)
             result.append(f",\n\tauthor = {{{author_str}}}")
         if editors:
-            editor_str = ' and '.join(editors)
+            editor_str = " and ".join(editors)
             result.append(f",\n\teditor = {{{editor_str}}}")
 
-        return ''.join(result)
+        return "".join(result)
 
     def _escape_value(self, value: Any) -> str:
         """
@@ -304,16 +311,16 @@ class BibLaTeXTranslator:
 
         # Escape special LaTeX characters
         replacements = {
-            '\\': '\\textbackslash{}',
-            '{': '\\{',
-            '}': '\\}',
-            '#': '\\#',
-            '$': '\\$',
-            '%': '\\%',
-            '&': '\\&',
-            '_': '\\_',
-            '~': '\\textasciitilde{}',
-            '^': '\\textasciicircum{}'
+            "\\": "\\textbackslash{}",
+            "{": "\\{",
+            "}": "\\}",
+            "#": "\\#",
+            "$": "\\$",
+            "%": "\\%",
+            "&": "\\&",
+            "_": "\\_",
+            "~": "\\textasciitilde{}",
+            "^": "\\textasciicircum{}",
         }
 
         for char, replacement in replacements.items():

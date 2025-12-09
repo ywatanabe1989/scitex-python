@@ -33,7 +33,7 @@ def to_even(n):
     -2
     """
     import math
-    
+
     # Handle integers directly to avoid float conversion issues with large numbers
     # Note: bool is a subclass of int, so we need to exclude it
     if isinstance(n, int) and not isinstance(n, bool):
@@ -41,7 +41,7 @@ def to_even(n):
             return int(n)  # Ensure we return int, not bool
         else:
             return int(n - 1)  # Ensure we return int, not bool
-    
+
     # Handle special float values
     if isinstance(n, float):
         if math.isnan(n):
@@ -50,9 +50,9 @@ def to_even(n):
             raise OverflowError("Cannot convert infinity to even")
         # Python can actually convert sys.float_info.max to int, so we don't need this check
         # Only infinity truly can't be converted
-    
+
     # Try to handle custom objects with __int__ (but not float types)
-    if hasattr(n, '__int__') and not isinstance(n, (float, bool)):
+    if hasattr(n, "__int__") and not isinstance(n, (float, bool)):
         try:
             n_int = int(n)
             if n_int % 2 == 0:
@@ -61,20 +61,20 @@ def to_even(n):
                 return int(n_int - 1)
         except:
             pass
-    
+
     # Check for string type explicitly - raise TypeError
     if isinstance(n, str):
         raise TypeError(f"must be real number, not {type(n).__name__}")
-    
+
     # Convert to float for all other cases
     try:
         n_float = float(n)
     except (TypeError, ValueError):
         raise TypeError(f"must be real number, not {type(n).__name__}")
-    
+
     # Use floor for float values
     floored = int(math.floor(n_float))
-    
+
     # If odd, subtract 1 to get the next lower even number
     if floored % 2 != 0:
         return int(floored - 1)  # Ensure we return int, not bool

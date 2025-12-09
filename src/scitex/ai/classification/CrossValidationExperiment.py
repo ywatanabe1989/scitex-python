@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -70,9 +71,7 @@ class CrossValidationExperiment:
     ):
         self.name = name
         self.model_fn = model_fn
-        self.cv = cv or StratifiedKFold(
-            n_splits=5, shuffle=True, random_state=42
-        )
+        self.cv = cv or StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
         self.save_models = save_models
         self.verbose = verbose
 
@@ -87,9 +86,7 @@ class CrossValidationExperiment:
             "start_time": None,
             "end_time": None,
             "n_folds": (
-                self.cv.get_n_splits()
-                if hasattr(self.cv, "get_n_splits")
-                else None
+                self.cv.get_n_splits() if hasattr(self.cv, "get_n_splits") else None
             ),
             "hyperparameters": {},
             "dataset_info": {},
@@ -144,9 +141,7 @@ class CrossValidationExperiment:
         }
 
         # Save dataset info
-        self.reporter.add(
-            self.metadata["dataset_info"], "experiment/dataset_info.json"
-        )
+        self.reporter.add(self.metadata["dataset_info"], "experiment/dataset_info.json")
 
     def run(
         self,
@@ -200,9 +195,7 @@ class CrossValidationExperiment:
             fold_start = time.time()
 
             if self.verbose:
-                print(
-                    f"\n--- Fold {fold + 1}/{self.cv.get_n_splits()} ---"
-                )
+                print(f"\n--- Fold {fold + 1}/{self.cv.get_n_splits()} ---")
 
             # Split data
             X_train, X_test = X[train_idx], X[test_idx]
@@ -279,10 +272,10 @@ class CrossValidationExperiment:
         self.reporter.add(timing_info, "experiment/timing.json")
 
         if self.verbose:
-            print(f"\n{'='*70}")
+            print(f"\n{'=' * 70}")
             print(f"Experiment completed in {total_time:.2f}s")
             print(f"Mean fold time: {np.mean(self.fold_times):.2f}s")
-            print(f"{'='*70}\n")
+            print(f"{'=' * 70}\n")
 
         # Generate final reports
         result_paths = self.reporter.save()
@@ -370,5 +363,6 @@ def quick_experiment(
     results = experiment.run(X, y)
 
     return results
+
 
 # EOF

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -21,10 +22,7 @@ class _QueryMixin:
     def _sanitize_parameters(self, parameters):
         """Convert pandas Timestamp objects to strings"""
         if isinstance(parameters, (list, tuple)):
-            return [
-                str(p) if isinstance(p, pd.Timestamp) else p
-                for p in parameters
-            ]
+            return [str(p) if isinstance(p, pd.Timestamp) else p for p in parameters]
         return parameters
 
     def execute(self, query: str, parameters: Tuple = ()) -> None:
@@ -106,5 +104,6 @@ class _QueryMixin:
             self.conn.commit()
         except sqlite3.Error as err:
             raise sqlite3.Error(f"Script execution failed: {err}")
+
 
 # EOF

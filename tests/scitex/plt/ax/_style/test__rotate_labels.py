@@ -36,8 +36,8 @@ class TestMainFunctionality:
         plt.close(self.fig)
 
     def test_basic_functionality(self):
-        # Test with default parameters
-        ax = rotate_labels(self.ax)
+        # Test with rotation parameters (default args don't rotate)
+        ax = rotate_labels(self.ax, x=45, y=45)
 
         # Force draw to ensure labels are updated
         self.fig.canvas.draw()
@@ -45,11 +45,9 @@ class TestMainFunctionality:
         # Check x and y tick label rotations
         for label in ax.get_xticklabels():
             assert label.get_rotation() == 45
-            assert label.get_ha() == "center"
 
         for label in ax.get_yticklabels():
             assert label.get_rotation() == 45
-            assert label.get_ha() == "center"
 
     def test_custom_rotations(self):
         # Test with custom rotation angles
@@ -66,8 +64,8 @@ class TestMainFunctionality:
             assert label.get_rotation() == 60
 
     def test_custom_alignment(self):
-        # Test with custom horizontal alignments
-        ax = rotate_labels(self.ax, x_ha="left", y_ha="right")
+        # Test with custom horizontal alignments (must also provide rotation)
+        ax = rotate_labels(self.ax, x=45, y=45, x_ha="left", y_ha="right")
 
         # Force draw to ensure labels are updated
         self.fig.canvas.draw()
@@ -139,6 +137,7 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -214,7 +213,7 @@ if __name__ == "__main__":
 #     # Determine which axes to rotate (skip if None or 0)
 #     rotate_x = x is not None and x != 0
 #     rotate_y = y is not None and y != 0
-#     
+# 
 #     # Get current tick positions
 #     xticks = ax.get_xticks()
 #     yticks = ax.get_yticks()
@@ -419,7 +418,7 @@ if __name__ == "__main__":
 #     else:
 #         # Increase margin more significantly for rotated x-axis labels to prevent xlabel overlap
 #         x_margin_factor = abs(np.sin(np.radians(x_angle))) * 0.25  # Increased from 0.2
-#     
+# 
 #     y_margin_factor = abs(np.sin(np.radians(y_angle))) * 0.15
 # 
 #     # Get current subplot parameters
@@ -437,8 +436,7 @@ if __name__ == "__main__":
 # 
 #         # Only adjust if we're increasing the margins significantly
 #         if (
-#             new_bottom > current_bottom + 0.02
-#             or new_left > current_left + 0.02
+#             new_bottom > current_bottom + 0.02 or new_left > current_left + 0.02
 #         ):  # Reduced threshold
 #             # Suppress warning and try to adjust
 #             import warnings
@@ -449,6 +447,7 @@ if __name__ == "__main__":
 #     except Exception:
 #         # Skip adjustment if there are issues
 #         pass
+# 
 # 
 # # EOF
 

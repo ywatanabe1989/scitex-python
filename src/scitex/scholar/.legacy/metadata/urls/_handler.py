@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -99,9 +100,7 @@ class URLHandler:
 
             if self.context:
                 try:
-                    url_publisher = await doi_to_url_publisher(
-                        doi, self.context
-                    )
+                    url_publisher = await doi_to_url_publisher(doi, self.context)
                     if url_publisher:
                         urls["url_publisher"] = url_publisher
 
@@ -118,9 +117,7 @@ class URLHandler:
                             if pdf_urls:
                                 urls["url_pdf"] = pdf_urls
                         except Exception as e:
-                            logger.warning(
-                                f"Failed to navigate to publisher URL: {e}"
-                            )
+                            logger.warning(f"Failed to navigate to publisher URL: {e}")
                             # Try with networkidle instead
                             try:
                                 await page.goto(
@@ -132,9 +129,7 @@ class URLHandler:
                                 if pdf_urls:
                                     urls["url_pdf"] = pdf_urls
                             except Exception as e2:
-                                logger.error(
-                                    f"Could not access publisher page: {e2}"
-                                )
+                                logger.error(f"Could not access publisher page: {e2}")
 
                         # Extract all URLs from page before closing
                         if page:
@@ -147,9 +142,7 @@ class URLHandler:
                                         "supplementary"
                                     ]
                             except Exception as e:
-                                logger.error(
-                                    f"Error extracting URLs from page: {e}"
-                                )
+                                logger.error(f"Error extracting URLs from page: {e}")
 
                         # Now close the page
                         try:
@@ -185,9 +178,7 @@ class URLHandler:
                 )
                 return await find_pdf_urls(page)
             except Exception as e:
-                logger.warning(
-                    f"Failed with domcontentloaded, trying networkidle: {e}"
-                )
+                logger.warning(f"Failed with domcontentloaded, trying networkidle: {e}")
                 try:
                     await page.goto(
                         page_or_url, wait_until="networkidle", timeout=30000
@@ -330,5 +321,6 @@ def update_metadata_urls(metadata_path: Path, urls: Dict) -> bool:
     """
     handler = URLHandler()
     return handler.update_metadata(metadata_path, urls)
+
 
 # EOF

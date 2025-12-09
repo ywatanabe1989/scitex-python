@@ -65,7 +65,6 @@ if __name__ == "__main__":
 # 
 # 
 # class Ranger(Optimizer):
-# 
 #     def __init__(
 #         self,
 #         params,
@@ -81,7 +80,6 @@ if __name__ == "__main__":
 #         gc_conv_only=False,
 #         gc_loc=True,
 #     ):
-# 
 #         # parameter checks
 #         if not 0.0 <= alpha <= 1.0:
 #             raise ValueError(f"Invalid slow update rate: {alpha}")
@@ -150,7 +148,6 @@ if __name__ == "__main__":
 # 
 #         # Evaluate averages and grad, update param tensors
 #         for group in self.param_groups:
-# 
 #             for p in group["params"]:
 #                 if p.grad is None:
 #                     continue

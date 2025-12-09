@@ -15,7 +15,9 @@ This module contains focused, single-responsibility classes for batch DOI resolu
 
 from ._ProgressManagerForBatchDOIResolution import ProgressManagerForBatchDOIResolution
 from ._MetadataHandlerForBatchDOIResolution import MetadataHandlerForBatchDOIResolution
-from ._SourceStatsManagerForBatchDOIResolution import SourceStatsManagerForBatchDOIResolution
+from ._SourceStatsManagerForBatchDOIResolution import (
+    SourceStatsManagerForBatchDOIResolution,
+)
 
 __all__ = [
     "ProgressManagerForBatchDOIResolution",

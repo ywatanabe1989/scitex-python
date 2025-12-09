@@ -310,6 +310,7 @@ if __name__ == "__main__":
 # 
 # 
 # def add_hue_col(df):
+#     df = df.copy()
 #     df["hue"] = 0
 #     dummy_row = pd.DataFrame(
 #         columns=df.columns,

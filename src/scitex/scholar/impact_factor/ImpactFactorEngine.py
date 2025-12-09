@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/extra/JournalMetrics.py"
-)
+
+__FILE__ = "./src/scitex/scholar/extra/JournalMetrics.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -39,6 +38,8 @@ from .jcr.ImpactFactorJCREngine import ImpactFactorJCREngine
 """Parameters"""
 
 """Functions & Classes"""
+
+
 class ImpactFactorEngine:
     """
     Impact factor service - finds journal metrics from JCR database.
@@ -50,9 +51,7 @@ class ImpactFactorEngine:
         """Initialize with optional cache size."""
         self.name = self.__class__.__name__
         self.jcr_engine = ImpactFactorJCREngine()
-        self.get_metrics = lru_cache(maxsize=cache_size)(
-            self._get_metrics_uncached
-        )
+        self.get_metrics = lru_cache(maxsize=cache_size)(self._get_metrics_uncached)
 
     def _get_jcr_year(self) -> str:
         """Extract JCR year from database or package metadata."""
@@ -63,9 +62,7 @@ class ImpactFactorEngine:
                 cursor = conn.cursor()
 
                 # Check if there's a metadata table with year info
-                cursor.execute(
-                    "SELECT name FROM sqlite_master WHERE type='table'"
-                )
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
                 tables = [row[0] for row in cursor.fetchall()]
 
                 if "metadata" in tables:
@@ -79,6 +76,7 @@ class ImpactFactorEngine:
                 # Try to extract year from database filename
                 try:
                     import re
+
                     db_path = str(self.jcr_engine.dbfile)
                     year_match = re.search(r"20\d{2}", db_path)
                     if year_match:

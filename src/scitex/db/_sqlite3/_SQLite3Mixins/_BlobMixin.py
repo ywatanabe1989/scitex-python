@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -229,7 +230,9 @@ class _BlobMixin:
 
         if key:
             # Load specific key
-            query = f"SELECT data, compressed, data_type FROM {table_name} WHERE key = ?"
+            query = (
+                f"SELECT data, compressed, data_type FROM {table_name} WHERE key = ?"
+            )
             params = (key,)
 
             if where:
@@ -256,16 +259,12 @@ class _BlobMixin:
 
         else:
             # Load all or filtered
-            query = (
-                f"SELECT key, data, compressed, data_type FROM {table_name}"
-            )
+            query = f"SELECT key, data, compressed, data_type FROM {table_name}"
             if where:
                 query += f" WHERE {where}"
 
             results = {}
-            for key, data_bytes, is_compressed, data_type in self.execute(
-                query
-            ):
+            for key, data_bytes, is_compressed, data_type in self.execute(query):
                 if is_compressed:
                     data_bytes = zlib.decompress(data_bytes)
 
@@ -277,5 +276,6 @@ class _BlobMixin:
                     results[key] = pickle.loads(data_bytes)
 
             return results
+
 
 # EOF

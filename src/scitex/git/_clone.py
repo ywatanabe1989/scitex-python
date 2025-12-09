@@ -14,7 +14,13 @@ from ._constants import EXIT_SUCCESS, EXIT_FAILURE
 logger = getLogger(__name__)
 
 
-def clone_repo(url: str, target_path: Path, branch: str = None, tag: str = None, verbose: bool = True) -> bool:
+def clone_repo(
+    url: str,
+    target_path: Path,
+    branch: str = None,
+    tag: str = None,
+    verbose: bool = True,
+) -> bool:
     """
     Safely clone a git repository.
 
@@ -47,7 +53,9 @@ def clone_repo(url: str, target_path: Path, branch: str = None, tag: str = None,
 
     # Validate mutual exclusivity
     if branch and tag:
-        raise ValueError("Cannot specify both 'branch' and 'tag' parameters. They are mutually exclusive.")
+        raise ValueError(
+            "Cannot specify both 'branch' and 'tag' parameters. They are mutually exclusive."
+        )
 
     if not _validate_git_url(url):
         logger.error(f"Invalid git URL: {url}")
@@ -63,11 +71,7 @@ def clone_repo(url: str, target_path: Path, branch: str = None, tag: str = None,
         ref_info = f" (tag: {tag})"
     cmd.extend([url, str(target_path)])
 
-    result = sh(
-        cmd,
-        verbose=verbose,
-        return_as="dict"
-    )
+    result = sh(cmd, verbose=verbose, return_as="dict")
 
     if not result["success"]:
         logger.error(f"Failed to clone repository: {result['stderr']}")
@@ -101,11 +105,7 @@ def git_init(repo_path: Path, verbose: bool = True) -> bool:
         return False
 
     with _in_directory(repo_path):
-        result = sh(
-            ["git", "init", "-b", "main"],
-            verbose=verbose,
-            return_as="dict"
-        )
+        result = sh(["git", "init", "-b", "main"], verbose=verbose, return_as="dict")
 
         if not result["success"]:
             logger.warning(f"Failed to initialize git repository: {result['stderr']}")
@@ -121,7 +121,9 @@ def main(args):
         if not args.url:
             logger.error("URL required for clone action")
             return EXIT_FAILURE
-        success = clone_repo(args.url, args.path, branch=args.branch, tag=args.tag, verbose=args.verbose)
+        success = clone_repo(
+            args.url, args.path, branch=args.branch, tag=args.tag, verbose=args.verbose
+        )
         return EXIT_SUCCESS if success else EXIT_FAILURE
     elif args.action == "init":
         success = git_init(args.path, args.verbose)
@@ -131,12 +133,17 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--action", choices=["clone", "init"], required=True)
     parser.add_argument("--url", help="Repository URL for cloning")
     parser.add_argument("--path", type=Path, required=True)
-    parser.add_argument("--branch", help="Branch to clone (mutually exclusive with --tag)")
-    parser.add_argument("--tag", help="Tag/release to clone (mutually exclusive with --branch)")
+    parser.add_argument(
+        "--branch", help="Branch to clone (mutually exclusive with --tag)"
+    )
+    parser.add_argument(
+        "--tag", help="Tag/release to clone (mutually exclusive with --branch)"
+    )
     parser.add_argument("--verbose", action="store_true")
     return parser.parse_args()
 
@@ -144,6 +151,7 @@ def parse_args():
 def run_session():
     """Initialize scitex framework, run main function, and cleanup."""
     from ._session import run_with_session
+
     run_with_session(parse_args, main)
 
 

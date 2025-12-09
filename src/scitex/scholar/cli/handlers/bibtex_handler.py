@@ -26,9 +26,7 @@ async def handle_bibtex_operations(args, scholar):
     # Warn if using both enrich and download together
     if args.enrich and (args.download or args.download_force):
         logger.warning("Using --enrich and --download together")
-        logger.warning(
-            "RECOMMENDED: Run as two separate steps for better reliability:"
-        )
+        logger.warning("RECOMMENDED: Run as two separate steps for better reliability:")
         logger.warning(
             "  Step 1: python -m scitex.scholar --bibtex input.bib --output enriched.bib --project PROJECT --enrich"
         )
@@ -75,9 +73,7 @@ async def handle_bibtex_operations(args, scholar):
             output_path = Path(args.output)
         else:
             # Auto-generate enriched filename
-            output_path = (
-                bibtex_path.parent / f"{bibtex_path.stem}_enriched.bib"
-            )
+            output_path = bibtex_path.parent / f"{bibtex_path.stem}_enriched.bib"
 
         scholar.save_papers_as_bibtex(papers, output_path)
         logger.success(f"Saved enriched BibTeX to: {output_path}")
@@ -86,9 +82,7 @@ async def handle_bibtex_operations(args, scholar):
     if args.project:
         logger.info(f"Saving to project: {args.project}")
         saved_ids = scholar.save_papers_to_library(papers)
-        logger.info(
-            f"Saved {len(saved_ids)} papers to library with symlinks created"
-        )
+        logger.info(f"Saved {len(saved_ids)} papers to library with symlinks created")
 
     # Download PDFs if requested (after library save so symlinks exist)
     if args.download:
@@ -140,9 +134,7 @@ async def handle_bibtex_operations(args, scholar):
         # Create/update merged.bib with all BibTeX files in the project
         from scitex.scholar.storage.BibTeXHandler import BibTeXHandler
 
-        bibtex_handler = BibTeXHandler(
-            project=args.project, config=scholar.config
-        )
+        bibtex_handler = BibTeXHandler(project=args.project, config=scholar.config)
 
         # Get all BibTeX files in the project directory
         bibtex_files = list(project_bibtex_dir.glob("*.bib"))

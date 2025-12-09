@@ -15,9 +15,7 @@ if __name__ == "__main__":
 # # Timestamp: "2025-02-27 22:15:18 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_dev/src/scitex/db/_PostgreSQLMixins/_MaintenanceMixin.py
 # 
-# THIS_FILE = (
-#     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_MaintenanceMixin.py"
-# )
+# THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_MaintenanceMixin.py"
 # 
 # import pandas as pd
 # import contextlib
@@ -135,7 +133,6 @@ if __name__ == "__main__":
 #         verbose: bool = True,
 #         limit: int = 5,
 #     ) -> Dict[str, pd.DataFrame]:
-# 
 #         try:
 #             if table_names is None:
 #                 table_names = self.get_table_names()

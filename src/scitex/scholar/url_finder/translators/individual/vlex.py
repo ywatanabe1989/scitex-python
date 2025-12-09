@@ -12,7 +12,9 @@ class VLexTranslator(BaseTranslator):
     """vLex."""
 
     LABEL = "vLex"
-    URL_TARGET_PATTERN = r"^https?://(www\.)?vlex\.(com|es|com\.mx|co\.uk|fr|de|it|pt|be|cl|co|pe|ar)/"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.)?vlex\.(com|es|com\.mx|co\.uk|fr|de|it|pt|be|cl|co|pe|ar)/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

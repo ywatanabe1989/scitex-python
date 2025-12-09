@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/pipelines/ScholarPipelineParallel.py"
-)
+
+__FILE__ = "./src/scitex/scholar/pipelines/ScholarPipelineParallel.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -50,6 +49,8 @@ from scitex.scholar.pipelines.ScholarPipelineSingle import (
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
+
+
 class ScholarPipelineParallel:
     """Orchestrates parallel paper acquisition using multiple workers"""
 
@@ -100,9 +101,7 @@ class ScholarPipelineParallel:
                 return False
 
         except Exception as e:
-            logger.error(
-                f"{self.name}: Authentication verification failed: {e}"
-            )
+            logger.error(f"{self.name}: Authentication verification failed: {e}")
             return False
 
     def _prepare_worker_profiles(self, num_workers: int = None) -> List[str]:
@@ -129,14 +128,10 @@ class ScholarPipelineParallel:
 
             # Sync from base profile using ChromeProfileManager
             profile_manager = ChromeProfileManager(worker_profile_name)
-            success = profile_manager.sync_from_profile(
-                self.base_chrome_profile
-            )
+            success = profile_manager.sync_from_profile(self.base_chrome_profile)
 
             if success:
-                logger.debug(
-                    f"{self.name}: Worker {i}: Profile synced successfully"
-                )
+                logger.debug(f"{self.name}: Worker {i}: Profile synced successfully")
             else:
                 logger.warning(
                     f"{self.name}: Worker {i}: Profile sync failed, will create fresh profile"
@@ -208,9 +203,7 @@ class ScholarPipelineParallel:
             List of successfully processed Paper objects
         """
         if not doi_or_title_list:
-            logger.warning(
-                f"{self.name}: Empty input list, nothing to process"
-            )
+            logger.warning(f"{self.name}: Empty input list, nothing to process")
             return []
 
         total = len(doi_or_title_list)
@@ -231,9 +224,7 @@ class ScholarPipelineParallel:
             return []
 
         # Step 2: Prepare worker profiles (only as many as needed)
-        worker_profiles = self._prepare_worker_profiles(
-            num_workers=effective_workers
-        )
+        worker_profiles = self._prepare_worker_profiles(num_workers=effective_workers)
 
         # Step 3: Create task queue with semaphore for concurrency control
         semaphore = asyncio.Semaphore(effective_workers)
@@ -271,9 +262,7 @@ class ScholarPipelineParallel:
         errors = 0
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                logger.error(
-                    f"{self.name}: Paper {i + 1} raised exception: {result}"
-                )
+                logger.error(f"{self.name}: Paper {i + 1} raised exception: {result}")
                 errors += 1
             elif result is not None:
                 processed_papers.append(result)
@@ -312,9 +301,7 @@ class ScholarPipelineParallel:
             elif paper.metadata.basic.title:
                 doi_or_title_list.append(paper.metadata.basic.title)
             else:
-                logger.warning(
-                    f"{self.name}: Paper has no DOI or title, skipping"
-                )
+                logger.warning(f"{self.name}: Paper has no DOI or title, skipping")
 
         # Use project from Papers collection if not specified
         if project is None and hasattr(papers, "project"):
@@ -340,9 +327,7 @@ def main(args):
         logger.error("No queries provided. Use --dois or --titles")
         return 1
 
-    logger.info(
-        f"Processing {len(queries)} queries with {args.num_workers} workers"
-    )
+    logger.info(f"Processing {len(queries)} queries with {args.num_workers} workers")
 
     # Create parallel pipeline
     parallel_pipeline = ScholarPipelineParallel(
@@ -359,9 +344,7 @@ def main(args):
         )
     )
 
-    logger.success(
-        f"Parallel processing complete: {len(papers)} papers processed"
-    )
+    logger.success(f"Parallel processing complete: {len(papers)} papers processed")
     return 0
 
 

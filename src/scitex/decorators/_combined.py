@@ -22,63 +22,69 @@ from ._pandas_fn import pandas_fn
 def torch_batch_fn(func: Callable) -> Callable:
     """
     Combined decorator: torch_fn → batch_fn.
-    
+
     Converts inputs to torch tensors, then processes in batches.
     This is the recommended order for PyTorch operations.
-    
+
     Example
     -------
     >>> @torch_batch_fn
     ... def process_data(x, dim=None):
     ...     return x.mean(dim=dim)
     """
+
     @wraps(func)
     @torch_fn
     @batch_fn
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
+
     return wrapper
 
 
 def numpy_batch_fn(func: Callable) -> Callable:
     """
     Combined decorator: numpy_fn → batch_fn.
-    
+
     Converts inputs to numpy arrays, then processes in batches.
     This is the recommended order for NumPy operations.
-    
+
     Example
     -------
     >>> @numpy_batch_fn
     ... def process_data(x, axis=None):
     ...     return np.mean(x, axis=axis)
     """
+
     @wraps(func)
     @numpy_fn
     @batch_fn
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
+
     return wrapper
 
 
 def pandas_batch_fn(func: Callable) -> Callable:
     """
     Combined decorator: pandas_fn → batch_fn.
-    
+
     Converts inputs to pandas DataFrames, then processes in batches.
     This is the recommended order for Pandas operations.
-    
+
     Example
     -------
     >>> @pandas_batch_fn
     ... def process_data(df):
     ...     return df.describe()
     """
+
     @wraps(func)
     @pandas_fn
     @batch_fn
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -89,10 +95,10 @@ batch_pandas_fn = pandas_batch_fn  # Alternative name
 
 
 __all__ = [
-    'torch_batch_fn',
-    'numpy_batch_fn', 
-    'pandas_batch_fn',
-    'batch_torch_fn',
-    'batch_numpy_fn',
-    'batch_pandas_fn',
+    "torch_batch_fn",
+    "numpy_batch_fn",
+    "pandas_batch_fn",
+    "batch_torch_fn",
+    "batch_numpy_fn",
+    "batch_pandas_fn",
 ]

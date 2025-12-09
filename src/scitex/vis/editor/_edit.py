@@ -101,17 +101,18 @@ def edit(
 
     # Load data
     import scitex as stx
+
     metadata = stx.io.load(json_path)
     csv_data = None
     if csv_path and csv_path.exists():
         csv_data = stx.io.load(csv_path)
 
     # Load manual overrides if exists
-    manual_path = json_path.with_suffix('.manual.json')
+    manual_path = json_path.with_suffix(".manual.json")
     manual_overrides = None
     if apply_manual and manual_path.exists():
         manual_data = stx.io.load(manual_path)
-        manual_overrides = manual_data.get('overrides', {})
+        manual_overrides = manual_data.get("overrides", {})
 
     # Resolve backend if "auto"
     if backend == "auto":
@@ -125,6 +126,7 @@ def edit(
     if backend == "flask":
         try:
             from ._flask_editor import WebEditor
+
             editor = WebEditor(
                 json_path=json_path,
                 metadata=metadata,
@@ -135,12 +137,12 @@ def edit(
             editor.run()
         except ImportError as e:
             raise ImportError(
-                "Flask backend requires Flask. "
-                "Install with: pip install flask"
+                "Flask backend requires Flask. Install with: pip install flask"
             ) from e
     elif backend == "dearpygui":
         try:
             from ._dearpygui_editor import DearPyGuiEditor
+
             editor = DearPyGuiEditor(
                 json_path=json_path,
                 metadata=metadata,
@@ -157,6 +159,7 @@ def edit(
     elif backend == "qt":
         try:
             from ._qt_editor import QtEditor
+
             editor = QtEditor(
                 json_path=json_path,
                 metadata=metadata,
@@ -172,6 +175,7 @@ def edit(
             ) from e
     elif backend == "tkinter":
         from ._tkinter_editor import TkinterEditor
+
         editor = TkinterEditor(
             json_path=json_path,
             metadata=metadata,
@@ -181,6 +185,7 @@ def edit(
         editor.run()
     elif backend == "mpl":
         from ._mpl_editor import MplEditor
+
         editor = MplEditor(
             json_path=json_path,
             metadata=metadata,
@@ -207,6 +212,7 @@ def _detect_best_backend() -> str:
     # Try Flask - best for modern UI
     try:
         import flask
+
         return "flask"
     except ImportError:
         pass
@@ -214,16 +220,17 @@ def _detect_best_backend() -> str:
     # Try DearPyGui - GPU-accelerated, modern
     try:
         import dearpygui
+
         return "dearpygui"
     except ImportError:
         warnings.warn(
-            "Flask not available. Consider: pip install flask\n"
-            "Trying DearPyGui..."
+            "Flask not available. Consider: pip install flask\nTrying DearPyGui..."
         )
 
     # Try DearPyGui
     try:
         import dearpygui
+
         return "dearpygui"
     except ImportError:
         pass
@@ -232,24 +239,28 @@ def _detect_best_backend() -> str:
     qt_available = False
     try:
         import PyQt6
+
         qt_available = True
     except ImportError:
         pass
     if not qt_available:
         try:
             import PyQt5
+
             qt_available = True
         except ImportError:
             pass
     if not qt_available:
         try:
             import PySide6
+
             qt_available = True
         except ImportError:
             pass
     if not qt_available:
         try:
             import PySide2
+
             qt_available = True
         except ImportError:
             pass
@@ -264,6 +275,7 @@ def _detect_best_backend() -> str:
     # Try Tkinter (built-in, good features)
     try:
         import tkinter
+
         warnings.warn(
             "Qt not available. Consider: pip install PyQt6\n"
             "Using Tkinter backend (basic features)."
@@ -303,28 +315,28 @@ def _resolve_figure_paths(path: Path) -> tuple:
     parent = path.parent
 
     # Check if this is organized pattern (parent is json/, csv/, png/)
-    if parent.name in ('json', 'csv', 'png'):
+    if parent.name in ("json", "csv", "png"):
         base_dir = parent.parent
-        json_path = base_dir / 'json' / f'{stem}.json'
-        csv_path = base_dir / 'csv' / f'{stem}.csv'
-        png_path = base_dir / 'png' / f'{stem}.png'
+        json_path = base_dir / "json" / f"{stem}.json"
+        csv_path = base_dir / "csv" / f"{stem}.csv"
+        png_path = base_dir / "png" / f"{stem}.png"
     else:
         # Flat pattern - sibling files
-        json_path = parent / f'{stem}.json'
-        csv_path = parent / f'{stem}.csv'
-        png_path = parent / f'{stem}.png'
+        json_path = parent / f"{stem}.json"
+        csv_path = parent / f"{stem}.csv"
+        png_path = parent / f"{stem}.png"
 
     # If input was .manual.json, get base json
-    if stem.endswith('.manual'):
+    if stem.endswith(".manual"):
         base_stem = stem[:-7]  # Remove '.manual'
-        if parent.name == 'json':
-            json_path = parent / f'{base_stem}.json'
-            csv_path = parent.parent / 'csv' / f'{base_stem}.csv'
-            png_path = parent.parent / 'png' / f'{base_stem}.png'
+        if parent.name == "json":
+            json_path = parent / f"{base_stem}.json"
+            csv_path = parent.parent / "csv" / f"{base_stem}.csv"
+            png_path = parent.parent / "png" / f"{base_stem}.png"
         else:
-            json_path = parent / f'{base_stem}.json'
-            csv_path = parent / f'{base_stem}.csv'
-            png_path = parent / f'{base_stem}.png'
+            json_path = parent / f"{base_stem}.json"
+            csv_path = parent / f"{base_stem}.csv"
+            png_path = parent / f"{base_stem}.png"
 
     return (
         json_path,
@@ -335,7 +347,7 @@ def _resolve_figure_paths(path: Path) -> tuple:
 
 def _compute_file_hash(path: Path) -> str:
     """Compute SHA256 hash of file contents."""
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         return hashlib.sha256(f.read()).hexdigest()
 
 
@@ -360,15 +372,15 @@ def save_manual_overrides(
     """
     import scitex as stx
 
-    manual_path = json_path.with_suffix('.manual.json')
+    manual_path = json_path.with_suffix(".manual.json")
 
     # Compute hash of base JSON for staleness detection
     base_hash = _compute_file_hash(json_path)
 
     manual_data = {
-        'base_file': json_path.name,
-        'base_hash': base_hash,
-        'overrides': overrides,
+        "base_file": json_path.name,
+        "base_hash": base_hash,
+        "overrides": overrides,
     }
 
     stx.io.save(manual_data, manual_path)

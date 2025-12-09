@@ -23,8 +23,13 @@ def save_image(
     add_qr=False,
     qr_position="bottom-right",
     verbose=False,
+    save_stats=True,
     **kwargs,
 ):
+    # Auto-save stats BEFORE saving (obj may be deleted during save)
+    if save_stats:
+        _save_stats_from_figure(obj, spath, verbose=verbose)
+
     # Add URL to metadata if not present
     if metadata is not None:
         if verbose:
@@ -203,5 +208,86 @@ def save_image(
             import warnings
 
             warnings.warn(f"Failed to embed metadata: {e}")
+
+def _save_stats_from_figure(obj, spath, verbose=False):
+    """
+    Extract and save statistical annotations from a figure.
+
+    Saves to {basename}_stats.csv if stats are found.
+    """
+    try:
+        from scitex.bridge import extract_stats_from_axes
+    except ImportError:
+        return  # Bridge not available
+
+    # Get the matplotlib figure
+    fig = None
+    if hasattr(obj, "savefig"):
+        fig = obj
+    elif hasattr(obj, "figure") and hasattr(obj.figure, "savefig"):
+        fig = obj.figure
+    elif hasattr(obj, "_fig_mpl"):
+        fig = obj._fig_mpl
+
+    if fig is None:
+        return
+
+    # Extract stats from all axes
+    all_stats = []
+    try:
+        for ax in fig.axes:
+            stats = extract_stats_from_axes(ax)
+            all_stats.extend(stats)
+    except Exception:
+        return  # Silently fail if extraction fails
+
+    if not all_stats:
+        return  # No stats to save
+
+    # Build stats dataframe
+    try:
+        import pandas as pd
+
+        stats_data = []
+        for stat in all_stats:
+            row = {
+                "test_type": stat.test_type,
+                "statistic_name": stat.statistic.get("name", ""),
+                "statistic_value": stat.statistic.get("value", ""),
+                "p_value": stat.p_value,
+                "stars": stat.stars,
+            }
+            # Add effect size if available
+            if stat.effect_size:
+                row["effect_size_name"] = stat.effect_size.get("name", "")
+                row["effect_size_value"] = stat.effect_size.get("value", "")
+            # Add CI if available
+            if stat.ci_95:
+                row["ci_95_lower"] = stat.ci_95[0]
+                row["ci_95_upper"] = stat.ci_95[1]
+            # Add sample/group info if available (for consistent naming with plot CSV)
+            if stat.samples:
+                for group_name, group_info in stat.samples.items():
+                    if isinstance(group_info, dict):
+                        row[f"n_{group_name}"] = group_info.get("n")
+                        row[f"mean_{group_name}"] = group_info.get("mean")
+                        row[f"std_{group_name}"] = group_info.get("std")
+            stats_data.append(row)
+
+        stats_df = pd.DataFrame(stats_data)
+
+        # Save to {basename}_stats.csv
+        import os
+        base, ext = os.path.splitext(spath)
+        stats_path = f"{base}_stats.csv"
+        stats_df.to_csv(stats_path, index=False)
+
+        if verbose:
+            logger.info(f"  • Auto-saved stats to: {stats_path}")
+
+    except Exception as e:
+        import warnings
+        warnings.warn(f"Failed to auto-save stats: {e}")
+
 
 # EOF

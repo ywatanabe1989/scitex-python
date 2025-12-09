@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/capture/capture.py"
-)
+
+__FILE__ = "./src/scitex/capture/capture.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -91,9 +90,7 @@ class ScreenshotWorker:
 
         self.running = True
         self.screenshot_count = 0
-        self.session_id = session_id or datetime.now().strftime(
-            "%Y%m%d_%H%M%S"
-        )
+        self.session_id = session_id or datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # Start worker thread
         self.worker_thread = threading.Thread(
@@ -173,7 +170,9 @@ class ScreenshotWorker:
             now = datetime.now()
             timestamp = now.strftime("%Y%m%d_%H%M%S_%f")[:-3]
             ext = "jpg" if self.use_jpeg else "png"
-            filename = f"{self.session_id}_{self.screenshot_count:04d}_{timestamp}.{ext}"
+            filename = (
+                f"{self.session_id}_{self.screenshot_count:04d}_{timestamp}.{ext}"
+            )
             filepath = self.output_dir / filename
 
             # Try Windows PowerShell method for WSL
@@ -200,10 +199,7 @@ class ScreenshotWorker:
 
     def _is_wsl(self) -> bool:
         """Check if running in WSL."""
-        return (
-            sys.platform == "linux"
-            and "microsoft" in os.uname().release.lower()
-        )
+        return sys.platform == "linux" and "microsoft" in os.uname().release.lower()
 
     def _capture_windows_screen(
         self, filepath: Path, monitor: int = 1, capture_all: bool = False
@@ -225,7 +221,6 @@ class ScreenshotWorker:
 
             # Check if script exists
             if script_path.exists():
-
                 # Find PowerShell executable
                 ps_paths = [
                     "powershell.exe",
@@ -388,9 +383,7 @@ class ScreenshotWorker:
                 try:
                     # Just check if the file exists and is executable
                     test_path = (
-                        Path(path)
-                        if not path.startswith("/mnt/")
-                        else Path(path)
+                        Path(path) if not path.startswith("/mnt/") else Path(path)
                     )
                     if path == "powershell.exe":
                         # In PATH - use it directly
@@ -421,18 +414,14 @@ class ScreenshotWorker:
                 print("🔄 Executing PowerShell script...")
 
             try:
-                result = subprocess.run(
-                    cmd, capture_output=True, text=True, timeout=10
-                )
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
                 if self.verbose:
                     print(f"✓ PowerShell return code: {result.returncode}")
                     if result.stderr:
                         print(f"PowerShell stderr: {result.stderr[:500]}")
                     if result.stdout:
-                        print(
-                            f"✓ PowerShell stdout length: {len(result.stdout)} chars"
-                        )
+                        print(f"✓ PowerShell stdout length: {len(result.stdout)} chars")
             except subprocess.TimeoutExpired as e:
                 if self.verbose:
                     print(f"❌ PowerShell timeout after 10s")
@@ -455,9 +444,7 @@ class ScreenshotWorker:
                         img = Image.open(io.BytesIO(png_data))
                         # Convert RGBA to RGB for JPEG
                         if img.mode == "RGBA":
-                            rgb_img = Image.new(
-                                "RGB", img.size, (255, 255, 255)
-                            )
+                            rgb_img = Image.new("RGB", img.size, (255, 255, 255))
                             rgb_img.paste(img, mask=img.split()[3])
                             img = rgb_img
                         # Save as JPEG with quality
@@ -491,9 +478,7 @@ class ScreenshotWorker:
                 with mss.mss() as sct:
                     # Capture primary monitor
                     monitor = (
-                        sct.monitors[1]
-                        if len(sct.monitors) > 1
-                        else sct.monitors[0]
+                        sct.monitors[1] if len(sct.monitors) > 1 else sct.monitors[0]
                     )
                     screenshot = sct.grab(monitor)
 
@@ -508,9 +493,7 @@ class ScreenshotWorker:
                             "raw",
                             "BGRX",
                         )
-                        img.save(
-                            str(filepath), "JPEG", quality=self.jpeg_quality
-                        )
+                        img.save(str(filepath), "JPEG", quality=self.jpeg_quality)
                     else:
                         mss.tools.to_png(
                             screenshot.rgb,
@@ -695,9 +678,7 @@ class CaptureManager:
                 str(script_path),
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=10
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
             if result.returncode == 0 and result.stdout.strip():
                 # Parse JSON from output (skip non-JSON lines)
@@ -712,9 +693,7 @@ class CaptureManager:
                 return {"error": "No JSON in output"}
             else:
                 return {
-                    "error": (
-                        result.stderr if result.stderr else "Detection failed"
-                    )
+                    "error": (result.stderr if result.stderr else "Detection failed")
                 }
 
         except Exception as e:
@@ -781,9 +760,7 @@ class CaptureManager:
                 str(window_handle),
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=10
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
             if result.returncode == 0 and result.stdout.strip():
                 # Parse JSON from output
@@ -806,9 +783,7 @@ class CaptureManager:
                 if output_path is None:
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     ext = "jpg" if jpeg else "png"
-                    output_path = (
-                        f"/tmp/window_{window_handle}_{timestamp}.{ext}"
-                    )
+                    output_path = f"/tmp/window_{window_handle}_{timestamp}.{ext}"
 
                 # Decode base64 image
                 img_data = base64.b64decode(data.get("Base64Data", ""))
@@ -822,18 +797,14 @@ class CaptureManager:
 
                         img = Image.open(io.BytesIO(img_data))
                         if img.mode == "RGBA":
-                            rgb_img = Image.new(
-                                "RGB", img.size, (255, 255, 255)
-                            )
+                            rgb_img = Image.new("RGB", img.size, (255, 255, 255))
                             rgb_img.paste(img, mask=img.split()[3])
                             img = rgb_img
-                        img.save(
-                            output_path, "JPEG", quality=quality, optimize=True
-                        )
+                        img.save(output_path, "JPEG", quality=quality, optimize=True)
                     except ImportError:
-                        output_path = output_path.replace(
-                            ".jpg", ".png"
-                        ).replace(".jpeg", ".png")
+                        output_path = output_path.replace(".jpg", ".png").replace(
+                            ".jpeg", ".png"
+                        )
                         with open(output_path, "wb") as f:
                             f.write(img_data)
                 else:
@@ -844,5 +815,6 @@ class CaptureManager:
 
         except Exception as e:
             return None
+
 
 # EOF

@@ -276,12 +276,13 @@ if __name__ == "__main__":
 # def parse_args():
 #     """Parse command line arguments."""
 #     import argparse
+# 
 #     parser = argparse.ArgumentParser(description="Demonstrate timestamp generation")
 #     parser.add_argument(
 #         "--count",
 #         type=int,
 #         default=5,
-#         help="Number of timestamps to generate (default: 5)"
+#         help="Number of timestamps to generate (default: 5)",
 #     )
 #     return parser.parse_args()
 # 
@@ -293,9 +294,9 @@ if __name__ == "__main__":
 #     """
 #     import time
 # 
-#     print(f"\n{'='*60}")
+#     print(f"\n{'=' * 60}")
 #     print("Timestamp Generation Demo")
-#     print(f"{'='*60}")
+#     print(f"{'=' * 60}")
 # 
 #     # Generate single timestamp
 #     print(f"\n{'Single Timestamp':-^60}")
@@ -310,12 +311,12 @@ if __name__ == "__main__":
 #     for i in range(args.count):
 #         ts = gen_timestamp()
 #         timestamps.append(ts)
-#         print(f"{i+1}. {ts}")
+#         print(f"{i + 1}. {ts}")
 #         time.sleep(0.5)  # Small delay to show time progression
 # 
-#     print(f"\n{'='*60}")
+#     print(f"\n{'=' * 60}")
 #     print("Demo completed successfully!")
-#     print(f"{'='*60}\n")
+#     print(f"{'=' * 60}\n")
 # 
 #     return 0
 # 

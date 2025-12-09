@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -145,9 +146,7 @@ class SourceRotationManager:
                     perf.specialty_scores[paper_type] * 0.9 + 1.0 * 0.1
                 )
             else:
-                perf.specialty_scores[paper_type] = (
-                    0.8  # Start with decent score
-                )
+                perf.specialty_scores[paper_type] = 0.8  # Start with decent score
         else:
             # Reduce specialty scores on failure
             paper_type = self._classify_paper(paper_info)
@@ -294,9 +293,7 @@ class SourceRotationManager:
         # Calculate scores for each available source
         source_scores = []
         for source in available_sources:
-            score = self._calculate_source_score(
-                source, paper_type, paper_info
-            )
+            score = self._calculate_source_score(source, paper_type, paper_info)
             source_scores.append((source, score))
 
         # Sort by score (descending) and take top max_sources
@@ -321,9 +318,7 @@ class SourceRotationManager:
         rate_limit_state = self.rate_limit_handler.get_source_state(source)
 
         # Base score from source specialties
-        base_score = self.source_specialties.get(source, {}).get(
-            paper_type, 0.5
-        )
+        base_score = self.source_specialties.get(source, {}).get(paper_type, 0.5)
 
         # Adjust for learned performance
         performance_factor = 1.0
@@ -363,9 +358,7 @@ class SourceRotationManager:
         current_time = time.time()
         time_since_last = current_time - rate_limit_state.last_success
         if time_since_last > 300:  # 5 minutes
-            recency_factor = min(
-                1.2, 1.0 + (time_since_last / 3600)
-            )  # Bonus up to 20%
+            recency_factor = min(1.2, 1.0 + (time_since_last / 3600))  # Bonus up to 20%
 
         # Calculate final score
         final_score = (
@@ -379,9 +372,7 @@ class SourceRotationManager:
 
         return final_score
 
-    def should_rotate_sources(
-        self, current_failures: int, total_attempts: int
-    ) -> bool:
+    def should_rotate_sources(self, current_failures: int, total_attempts: int) -> bool:
         """Determine if we should rotate to different sources.
 
         Args:
@@ -437,9 +428,7 @@ class SourceRotationManager:
         for source in available_fallbacks:
             perf = self.get_source_performance(source)
             # Use overall success rate for fallbacks
-            score = (
-                perf.overall_success_rate if perf.total_attempts > 0 else 0.5
-            )
+            score = perf.overall_success_rate if perf.total_attempts > 0 else 0.5
             fallback_scores.append((source, score))
 
         fallback_scores.sort(key=lambda x: x[1], reverse=True)
@@ -567,9 +556,7 @@ if __name__ == "__main__":
             "arxiv",
         ]
         failed_sources = ["crossref", "semantic_scholar"]
-        fallbacks = rotation_manager.get_fallback_sources(
-            failed_sources, all_sources
-        )
+        fallbacks = rotation_manager.get_fallback_sources(failed_sources, all_sources)
         print(f"   Fallback sources after {failed_sources}: {fallbacks}")
 
         # Show statistics

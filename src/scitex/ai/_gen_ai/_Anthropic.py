@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ai/_gen_ai/_Anthropic.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -33,6 +34,8 @@ import matplotlib.pyplot as plt
 from ._BaseGenAI import BaseGenAI
 
 """Functions & Classes"""
+
+
 class Anthropic(BaseGenAI):
     def __init__(
         self,
@@ -46,7 +49,6 @@ class Anthropic(BaseGenAI):
         chat_history: Optional[List[Dict[str, str]]] = None,
         max_tokens: int = 100_000,
     ) -> None:
-
         if model == "claude-3-7-sonnet-2025-0219":
             max_tokens = 128_000
 

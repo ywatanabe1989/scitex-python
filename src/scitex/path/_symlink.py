@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -117,9 +118,7 @@ def symlink(
         else:
             src_for_link = src_path.absolute()
 
-        dst_path.symlink_to(
-            src_for_link, target_is_directory=target_is_directory
-        )
+        dst_path.symlink_to(src_for_link, target_is_directory=target_is_directory)
         logger.success(f"Created symlink: {dst_path} -> {src_for_link}")
 
     except OSError as e:
@@ -249,9 +248,7 @@ def unlink_symlink(path: Union[str, Path], missing_ok: bool = True) -> None:
     # logger.info(f"Removed symlink: {path}")
 
 
-def list_symlinks(
-    directory: Union[str, Path], recursive: bool = False
-) -> list[Path]:
+def list_symlinks(directory: Union[str, Path], recursive: bool = False) -> list[Path]:
     """
     List all symbolic links in a directory.
 
@@ -319,10 +316,7 @@ def fix_broken_symlinks(
         try:
             # Check if target exists
             target = Path(os.readlink(link))
-            if (
-                not link.parent.joinpath(target).exists()
-                and not target.is_absolute()
-            ):
+            if not link.parent.joinpath(target).exists() and not target.is_absolute():
                 # Relative link with non-existent target
                 result["found"].append(link)
             elif target.is_absolute() and not target.exists():
@@ -344,5 +338,6 @@ def fix_broken_symlinks(
             # logger.info(f"Fixed symlink: {link} -> {new_target}")
 
     return result
+
 
 # EOF

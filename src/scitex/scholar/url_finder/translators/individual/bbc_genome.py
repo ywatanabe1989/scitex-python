@@ -18,19 +18,31 @@ TRANSLATOR_INFO = {
     "in_repository": True,
     "translator_type": 4,
     "browser_support": "gcsibv",
-    "last_updated": "2017-09-04 22:38:30"
+    "last_updated": "2017-09-04 22:38:30",
 }
 
 
-TV_PROGRAMS = ["bbcone", "bbctwo", "bbcthree", "bbcfour", "cbbc", "cbeebies",
-               "bbcnews", "bbcparliament", "bbchd", "bbctv", "bbcchoice", "bbcknowledge"]
+TV_PROGRAMS = [
+    "bbcone",
+    "bbctwo",
+    "bbcthree",
+    "bbcfour",
+    "cbbc",
+    "cbeebies",
+    "bbcnews",
+    "bbcparliament",
+    "bbchd",
+    "bbctv",
+    "bbcchoice",
+    "bbcknowledge",
+]
 
 
 def detect_web(doc: Any, url: str) -> Optional[str]:
     """Detect if the page is a magazine article or multiple items"""
-    if '/search/' in url and get_search_results(doc, check_only=True):
+    if "/search/" in url and get_search_results(doc, check_only=True):
         return "multiple"
-    elif doc.select_one('div.programme-details'):
+    elif doc.select_one("div.programme-details"):
         return "magazineArticle"
     return None
 
@@ -38,10 +50,10 @@ def detect_web(doc: Any, url: str) -> Optional[str]:
 def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str, str]]:
     """Get search results from a multiple item page"""
     items = {}
-    rows = doc.select('h2 > a.title')
+    rows = doc.select("h2 > a.title")
 
     for row in rows:
-        href = row.get('href')
+        href = row.get("href")
         title = row.get_text(strip=True)
         if href and title:
             if check_only:
@@ -69,11 +81,11 @@ def scrape(doc: Any, url: str) -> List[Dict[str, Any]]:
         "attachments": [{"title": "Snapshot", "mimeType": "text/html"}],
         "tags": [],
         "notes": [],
-        "seeAlso": []
+        "seeAlso": [],
     }
 
     # Get title
-    title_elem = doc.select_one('h1')
+    title_elem = doc.select_one("h1")
     if title_elem:
         title_text = title_elem.get_text(strip=True)
         # Convert from uppercase if needed
@@ -83,24 +95,24 @@ def scrape(doc: Any, url: str) -> List[Dict[str, Any]]:
             mag_item["title"] = title_text
 
     # Get issue info from aside
-    aside = doc.select_one('aside.issue p')
+    aside = doc.select_one("aside.issue p")
     if aside:
         aside_text = aside.get_text(strip=True)
-        parts = aside_text.split('\n')
+        parts = aside_text.split("\n")
         if len(parts) > 0:
-            mag_item["issue"] = parts[0].replace('Issue', '').strip()
+            mag_item["issue"] = parts[0].replace("Issue", "").strip()
         if len(parts) > 1:
             mag_item["date"] = parts[1].strip()
         if len(parts) > 2:
-            mag_item["pages"] = parts[2].replace('Page', '').strip()
+            mag_item["pages"] = parts[2].replace("Page", "").strip()
 
     # Get aired info
-    aired_elem = doc.select_one('.primary-content a')
-    url_program_elem = doc.select_one('.primary-content a')
-    synopsis_elem = doc.select_one('.synopsis')
+    aired_elem = doc.select_one(".primary-content a")
+    url_program_elem = doc.select_one(".primary-content a")
+    synopsis_elem = doc.select_one(".synopsis")
 
     aired = aired_elem.get_text(strip=True) if aired_elem else ""
-    url_program = url_program_elem.get('href') if url_program_elem else ""
+    url_program = url_program_elem.get("href") if url_program_elem else ""
     synopsis = synopsis_elem.get_text(strip=True) if synopsis_elem else ""
 
     if aired:
@@ -112,7 +124,7 @@ def scrape(doc: Any, url: str) -> List[Dict[str, Any]]:
 
     # Broadcast item (radio or TV)
     if url_program:
-        program = url_program.split('/')[2] if len(url_program.split('/')) > 2 else ""
+        program = url_program.split("/")[2] if len(url_program.split("/")) > 2 else ""
         broadcast_type = "tvBroadcast" if program in TV_PROGRAMS else "radioBroadcast"
 
         broadcast_item = {
@@ -124,29 +136,29 @@ def scrape(doc: Any, url: str) -> List[Dict[str, Any]]:
             "seeAlso": [mag_item["itemID"]],
             "attachments": [],
             "tags": [],
-            "notes": []
+            "notes": [],
         }
 
         # Parse aired text: "BBC Radio 4 FM, 30 September 1967 6.35"
         if aired:
-            pieces = aired.split(',')
+            pieces = aired.split(",")
             if len(pieces) > 0:
                 broadcast_item["programTitle"] = pieces[0].strip()
             if len(pieces) > 1:
-                time_elem = doc.select_one('.primary-content a span.time')
+                time_elem = doc.select_one(".primary-content a span.time")
                 time_text = time_elem.get_text(strip=True) if time_elem else ""
 
                 # Add leading zero if needed
-                if time_text and time_text.find('.') == 1:
-                    time_text = '0' + time_text
+                if time_text and time_text.find(".") == 1:
+                    time_text = "0" + time_text
 
                 # Convert time format
-                time_text = time_text.replace('.', ':')
+                time_text = time_text.replace(".", ":")
 
                 # Extract date
                 date_part = pieces[1].strip()
                 # Remove time from date_part if present
-                date_part = re.sub(r'\s+\d+[\.:]\d+.*$', '', date_part)
+                date_part = re.sub(r"\s+\d+[\.:]\d+.*$", "", date_part)
 
                 if time_text:
                     broadcast_item["date"] = f"{date_part}T{time_text}"

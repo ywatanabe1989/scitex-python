@@ -14,8 +14,8 @@ from ._correct_holm import correct_holm
 from ._correct_sidak import correct_sidak
 
 __all__ = [
-    'correct_bonferroni',
-    'correct_fdr',
-    'correct_holm',
-    'correct_sidak',
+    "correct_bonferroni",
+    "correct_fdr",
+    "correct_holm",
+    "correct_sidak",
 ]

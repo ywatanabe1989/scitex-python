@@ -36,18 +36,20 @@ class MatplotlibPlotMixin:
     def _get_ax_module(self):
         """Lazy import ax module to avoid circular imports."""
         from ....plt import ax as ax_module
+
         return ax_module
 
-    def _apply_scitex_postprocess(self, method_name, result=None, kwargs=None, args=None):
+    def _apply_scitex_postprocess(
+        self, method_name, result=None, kwargs=None, args=None
+    ):
         """Apply scitex post-processing styling after plotting.
 
         This ensures all scitex wrapper methods get the same styling
         as matplotlib methods going through __getattr__ (tick locator, spines, etc.).
         """
         from scitex.plt.styles import apply_plot_postprocess
-        apply_plot_postprocess(
-            method_name, result, self._axis_mpl, kwargs or {}, args
-        )
+
+        apply_plot_postprocess(method_name, result, self._axis_mpl, kwargs or {}, args)
 
     def stx_image(
         self,
@@ -61,7 +63,9 @@ class MatplotlibPlotMixin:
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl = self._get_ax_module().stx_image(self._axis_mpl, arr_2d, **kwargs)
+            self._axis_mpl = self._get_ax_module().stx_image(
+                self._axis_mpl, arr_2d, **kwargs
+            )
 
         # Tracking
         tracked_dict = {"image_df": pd.DataFrame(arr_2d)}
@@ -117,16 +121,17 @@ class MatplotlibPlotMixin:
         with self._no_tracking():
             # Get line width from kwargs or use default (0.2mm for KDE)
             from scitex.plt.utils import mm_to_pt
-            if 'linewidth' not in kwargs and 'lw' not in kwargs:
-                kwargs['linewidth'] = mm_to_pt(0.2)  # Default 0.2mm for KDE
+
+            if "linewidth" not in kwargs and "lw" not in kwargs:
+                kwargs["linewidth"] = mm_to_pt(0.2)  # Default 0.2mm for KDE
 
             # Set default color to black (customizable via color kwarg)
-            if 'color' not in kwargs and 'c' not in kwargs:
-                kwargs['color'] = 'black'
+            if "color" not in kwargs and "c" not in kwargs:
+                kwargs["color"] = "black"
 
             # Set default linestyle to dashed (customizable via linestyle kwarg)
-            if 'linestyle' not in kwargs and 'ls' not in kwargs:
-                kwargs['linestyle'] = '--'
+            if "linestyle" not in kwargs and "ls" not in kwargs:
+                kwargs["linestyle"] = "--"
 
             # Filled Line
             if fill:
@@ -225,8 +230,8 @@ class MatplotlibPlotMixin:
                 self._axis_mpl, xx, yy, width, height, **kwargs
             )
 
-        # Tracking
-        tracked_dict = {"xx": xx, "yy": yy, "width": width, "height": height}
+        # Tracking - use "x", "y" to match formatter expected keys
+        tracked_dict = {"x": xx, "y": yy, "width": width, "height": height}
         self._track(track, id, method_name, tracked_dict, None)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -303,6 +308,7 @@ class MatplotlibPlotMixin:
         # Apply style_boxplot automatically for publication quality
         # Uses scitex palette by default, or custom colors if provided
         from scitex.plt.ax import style_boxplot
+
         style_boxplot(result, colors=colors)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -322,11 +328,11 @@ class MatplotlibPlotMixin:
     ) -> None:
         """
         Plot a histogram.
-        
+
         This is an override of the standard matplotlib hist function to ensure
         that histogram bin data is properly tracked for CSV export and bins are
         aligned for histograms on the same axis.
-        
+
         Args:
             x: Input data
             bins: Bin specification (count, edges, or algorithm)
@@ -335,28 +341,29 @@ class MatplotlibPlotMixin:
             track: Whether to track this operation
             id: Identifier for tracking
             **kwargs: Additional keywords passed to matplotlib hist
-            
+
         Returns:
             Histogram output
         """
         # Method Name for downstream csv exporting
         method_name = "hist"
-        
+
         # Get the axis ID for bin alignment
         axis_id = str(hash(self._axis_mpl))
         hist_id = id if id is not None else str(self.id)
-        
+
         # Align bins if requested and not the first histogram on this axis
         if align_bins:
             from ....plt.utils import histogram_bin_manager
+
             bins, range = histogram_bin_manager.register_histogram(
                 axis_id, hist_id, x, bins, range
             )
-        
+
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
             hist_data = self._axis_mpl.hist(x, bins=bins, range=range, **kwargs)
-        
+
         # Save histogram result for CSV export
         # hist_data[0] = counts, hist_data[1] = bin_edges
         tracked_dict = {
@@ -365,7 +372,7 @@ class MatplotlibPlotMixin:
             "bins": bins,
             "range": range,
         }
-        
+
         self._track(track, id, method_name, tracked_dict, kwargs)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -445,8 +452,8 @@ class MatplotlibPlotMixin:
                 self._axis_mpl, arrays, **kwargs
             )
 
-        # Tracking
-        tracked_dict = {"joyplot_arrays": arrays}
+        # Tracking - use "joyplot_data" to match formatter expected key
+        tracked_dict = {"joyplot_data": arrays}
         self._track(track, id, method_name, tracked_dict, None)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -477,19 +484,21 @@ class MatplotlibPlotMixin:
 
         # Plotting with pure matplotlib methods under non-tracking context
         with self._no_tracking():
-            self._axis_mpl, ax_histx, ax_histy, hist_data = self._get_ax_module().stx_scatter_hist(
-                self._axis_mpl,
-                x,
-                y,
-                hist_bins=hist_bins,
-                scatter_alpha=scatter_alpha,
-                scatter_size=scatter_size,
-                scatter_color=scatter_color,
-                hist_color_x=hist_color_x,
-                hist_color_y=hist_color_y,
-                hist_alpha=hist_alpha,
-                scatter_ratio=scatter_ratio,
-                **kwargs,
+            self._axis_mpl, ax_histx, ax_histy, hist_data = (
+                self._get_ax_module().stx_scatter_hist(
+                    self._axis_mpl,
+                    x,
+                    y,
+                    hist_bins=hist_bins,
+                    scatter_alpha=scatter_alpha,
+                    scatter_size=scatter_size,
+                    scatter_color=scatter_color,
+                    hist_color_x=hist_color_x,
+                    hist_color_y=hist_color_y,
+                    hist_alpha=hist_alpha,
+                    scatter_ratio=scatter_ratio,
+                    **kwargs,
+                )
             )
 
         # Tracking
@@ -978,7 +987,9 @@ class MatplotlibPlotMixin:
     # These provide a consistent stx_ prefix for all scitex wrapper methods
     # =========================================================================
 
-    def stx_bar(self, x, height, track: bool = True, id: Optional[str] = None, **kwargs):
+    def stx_bar(
+        self, x, height, track: bool = True, id: Optional[str] = None, **kwargs
+    ):
         """Bar plot with scitex styling and tracking.
 
         Parameters
@@ -1010,6 +1021,7 @@ class MatplotlibPlotMixin:
 
         # Apply style_barplot automatically for publication quality
         from scitex.plt.ax import style_barplot
+
         style_barplot(result)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -1017,7 +1029,9 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def stx_barh(self, y, width, track: bool = True, id: Optional[str] = None, **kwargs):
+    def stx_barh(
+        self, y, width, track: bool = True, id: Optional[str] = None, **kwargs
+    ):
         """Horizontal bar plot with scitex styling and tracking.
 
         Parameters
@@ -1084,6 +1098,7 @@ class MatplotlibPlotMixin:
 
         # Apply style_scatter automatically for publication quality
         from scitex.plt.ax import style_scatter
+
         style_scatter(result)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -1091,7 +1106,16 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def stx_errorbar(self, x, y, yerr=None, xerr=None, track: bool = True, id: Optional[str] = None, **kwargs):
+    def stx_errorbar(
+        self,
+        x,
+        y,
+        yerr=None,
+        xerr=None,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
         """Error bar plot with scitex styling and tracking.
 
         Parameters
@@ -1132,6 +1156,7 @@ class MatplotlibPlotMixin:
 
         # Apply style_errorbar automatically for publication quality
         from scitex.plt.ax import style_errorbar
+
         style_errorbar(result)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -1139,7 +1164,9 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def stx_fill_between(self, x, y1, y2=0, track: bool = True, id: Optional[str] = None, **kwargs):
+    def stx_fill_between(
+        self, x, y1, y2=0, track: bool = True, id: Optional[str] = None, **kwargs
+    ):
         """Fill between plot with scitex styling and tracking.
 
         Parameters
@@ -1163,11 +1190,15 @@ class MatplotlibPlotMixin:
             result = self._axis_mpl.fill_between(x, y1, y2, **kwargs)
 
         # Track fill_between data
-        tracked_dict = {"fill_between_df": pd.DataFrame({
-            "x": x,
-            "y1": y1,
-            "y2": y2 if hasattr(y2, '__len__') else [y2] * len(x)
-        })}
+        tracked_dict = {
+            "fill_between_df": pd.DataFrame(
+                {
+                    "x": x,
+                    "y1": y1,
+                    "y2": y2 if hasattr(y2, "__len__") else [y2] * len(x),
+                }
+            )
+        }
         self._track(track, id, method_name, tracked_dict, None)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -1175,7 +1206,9 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def stx_contour(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
+    def stx_contour(
+        self, *args, track: bool = True, id: Optional[str] = None, **kwargs
+    ):
         """Contour plot with scitex styling and tracking.
 
         Parameters
@@ -1197,11 +1230,11 @@ class MatplotlibPlotMixin:
         # Track contour data
         if len(args) >= 3:
             X, Y, Z = args[0], args[1], args[2]
-            tracked_dict = {"contour_df": pd.DataFrame({
-                "X": np.ravel(X),
-                "Y": np.ravel(Y),
-                "Z": np.ravel(Z)
-            })}
+            tracked_dict = {
+                "contour_df": pd.DataFrame(
+                    {"X": np.ravel(X), "Y": np.ravel(Y), "Z": np.ravel(Z)}
+                )
+            }
             self._track(track, id, method_name, tracked_dict, None)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -1229,7 +1262,7 @@ class MatplotlibPlotMixin:
             result = self._axis_mpl.imshow(data, **kwargs)
 
         # Track image data
-        if hasattr(data, 'shape') and len(data.shape) == 2:
+        if hasattr(data, "shape") and len(data.shape) == 2:
             n_rows, n_cols = data.shape
             df = pd.DataFrame(data, columns=[f"col_{i}" for i in range(n_cols)])
         else:
@@ -1242,7 +1275,14 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def stx_boxplot(self, data, colors: Optional[List] = None, track: bool = True, id: Optional[str] = None, **kwargs):
+    def stx_boxplot(
+        self,
+        data,
+        colors: Optional[List] = None,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
         """Boxplot with scitex styling and tracking (alias for stx_box).
 
         Parameters
@@ -1260,7 +1300,14 @@ class MatplotlibPlotMixin:
         """
         return self.stx_box(data, colors=colors, track=track, id=id, **kwargs)
 
-    def stx_violinplot(self, data, colors: Optional[List] = None, track: bool = True, id: Optional[str] = None, **kwargs):
+    def stx_violinplot(
+        self,
+        data,
+        colors: Optional[List] = None,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
         """Violinplot with scitex styling and tracking (alias for stx_violin).
 
         Parameters
@@ -1313,7 +1360,9 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def plot_scatter(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
+    def plot_scatter(
+        self, *args, track: bool = True, id: Optional[str] = None, **kwargs
+    ):
         """Wrapper for matplotlib scatter plot with tracking support."""
         method_name = "plot_scatter"
 
@@ -1335,7 +1384,9 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def plot_errorbar(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
+    def plot_errorbar(
+        self, *args, track: bool = True, id: Optional[str] = None, **kwargs
+    ):
         """Wrapper for matplotlib errorbar plot with tracking support."""
         method_name = "plot_errorbar"
 
@@ -1357,7 +1408,9 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def plot_fill_between(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
+    def plot_fill_between(
+        self, *args, track: bool = True, id: Optional[str] = None, **kwargs
+    ):
         """Wrapper for matplotlib fill_between with tracking support."""
         method_name = "plot_fill_between"
 
@@ -1366,11 +1419,11 @@ class MatplotlibPlotMixin:
 
         # Track fill_between data
         if len(args) >= 3:
-            tracked_dict = {"fill_between_df": pd.DataFrame({
-                "x": args[0],
-                "y1": args[1],
-                "y2": args[2] if len(args) > 2 else 0
-            })}
+            tracked_dict = {
+                "fill_between_df": pd.DataFrame(
+                    {"x": args[0], "y1": args[1], "y2": args[2] if len(args) > 2 else 0}
+                )
+            }
             self._track(track, id, method_name, tracked_dict, None)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -1378,7 +1431,9 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def plot_contour(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
+    def plot_contour(
+        self, *args, track: bool = True, id: Optional[str] = None, **kwargs
+    ):
         """Wrapper for matplotlib contour plot with tracking support."""
         method_name = "plot_contour"
 
@@ -1389,11 +1444,11 @@ class MatplotlibPlotMixin:
         if len(args) >= 3:
             # Flatten 2D arrays for CSV export
             X, Y, Z = args[0], args[1], args[2]
-            tracked_dict = {"contour_df": pd.DataFrame({
-                "X": np.ravel(X),
-                "Y": np.ravel(Y),
-                "Z": np.ravel(Z)
-            })}
+            tracked_dict = {
+                "contour_df": pd.DataFrame(
+                    {"X": np.ravel(X), "Y": np.ravel(Y), "Z": np.ravel(Z)}
+                )
+            }
             self._track(track, id, method_name, tracked_dict, None)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -1401,7 +1456,9 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def plot_imshow(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
+    def plot_imshow(
+        self, *args, track: bool = True, id: Optional[str] = None, **kwargs
+    ):
         """Wrapper for matplotlib imshow with tracking support."""
         method_name = "plot_imshow"
 
@@ -1412,7 +1469,7 @@ class MatplotlibPlotMixin:
         if len(args) >= 1:
             # Create DataFrame with unique column names to avoid duplicates
             img_data = args[0]
-            if hasattr(img_data, 'shape') and len(img_data.shape) == 2:
+            if hasattr(img_data, "shape") and len(img_data.shape) == 2:
                 n_rows, n_cols = img_data.shape
                 # Use column names like "col_0", "col_1", etc. instead of just integers
                 df = pd.DataFrame(img_data, columns=[f"col_{i}" for i in range(n_cols)])
@@ -1426,7 +1483,14 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def plot_boxplot(self, *args, colors: Optional[List] = None, track: bool = True, id: Optional[str] = None, **kwargs):
+    def plot_boxplot(
+        self,
+        *args,
+        colors: Optional[List] = None,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
         """Wrapper for matplotlib boxplot with tracking support and auto-styling."""
         method_name = "plot_boxplot"
 
@@ -1458,6 +1522,7 @@ class MatplotlibPlotMixin:
         # Apply style_boxplot automatically for publication quality
         # Uses scitex palette by default, or custom colors if provided
         from scitex.plt.ax import style_boxplot
+
         style_boxplot(result, colors=colors)
 
         # Apply post-processing (tick locator, spines, etc.)
@@ -1465,7 +1530,9 @@ class MatplotlibPlotMixin:
 
         return result
 
-    def plot_violinplot(self, *args, track: bool = True, id: Optional[str] = None, **kwargs):
+    def plot_violinplot(
+        self, *args, track: bool = True, id: Optional[str] = None, **kwargs
+    ):
         """Wrapper for matplotlib violinplot with tracking support."""
         method_name = "plot_violinplot"
 
@@ -1496,4 +1563,47 @@ class MatplotlibPlotMixin:
         return result
 
 
+
 # EOF
+
+
+# =============================================================================
+# Deprecated plot_ aliases for stx_ methods (backward compatibility)
+# These are defined outside the class to use the decorator properly
+# =============================================================================
+from scitex.decorators import deprecated
+
+
+def _add_deprecated_aliases():
+    """Add deprecated plot_ method aliases to MatplotlibPlotMixin."""
+    deprecated_methods = [
+        ("plot_image", "stx_image"),
+        ("plot_kde", "stx_kde"),
+        ("plot_conf_mat", "stx_conf_mat"),
+        ("plot_rectangle", "stx_rectangle"),
+        ("plot_fillv", "stx_fillv"),
+        ("plot_box", "stx_box"),
+        ("plot_raster", "stx_raster"),
+        ("plot_ecdf", "stx_ecdf"),
+        ("plot_joyplot", "stx_joyplot"),
+        ("plot_line", "stx_line"),
+        ("plot_scatter_hist", "stx_scatter_hist"),
+        ("plot_heatmap", "stx_heatmap"),
+        ("plot_violin", "stx_violin"),
+        ("plot_mean_std", "stx_mean_std"),
+        ("plot_mean_ci", "stx_mean_ci"),
+        ("plot_median_iqr", "stx_median_iqr"),
+        ("plot_shaded_line", "stx_shaded_line"),
+    ]
+
+    for old_name, new_name in deprecated_methods:
+        def make_deprecated_method(target_name):
+            @deprecated(reason=f"Use {target_name} instead")
+            def method(self, *args, **kwargs):
+                return getattr(self, target_name)(*args, **kwargs)
+            return method
+
+        setattr(MatplotlibPlotMixin, old_name, make_deprecated_method(new_name))
+
+
+_add_deprecated_aliases()

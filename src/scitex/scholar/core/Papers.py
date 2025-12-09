@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -90,9 +91,7 @@ class Papers:
             Single Paper if integer index, Papers collection if slice
         """
         if isinstance(index, slice):
-            return Papers(
-                self._papers[index], project=self.project, config=self.config
-            )
+            return Papers(self._papers[index], project=self.project, config=self.config)
         return self._papers[index]
 
     def __repr__(self) -> str:
@@ -264,9 +263,7 @@ class Papers:
         # If a lambda/function condition is provided, use it
         if condition is not None and callable(condition):
             filtered = [p for p in self._papers if condition(p)]
-            logger.info(
-                f"Lambda filter: {len(self._papers)} -> {len(filtered)} papers"
-            )
+            logger.info(f"Lambda filter: {len(self._papers)} -> {len(filtered)} papers")
             return Papers(filtered, project=self.project, config=self.config)
 
         # Otherwise use criteria-based filtering
@@ -281,10 +278,8 @@ class Papers:
             has_pdf=has_pdf,
             min_citations=min_citations or kwargs.get("min_citations"),
             max_citations=max_citations or kwargs.get("max_citations"),
-            min_impact_factor=min_impact_factor
-            or kwargs.get("min_impact_factor"),
-            max_impact_factor=max_impact_factor
-            or kwargs.get("max_impact_factor"),
+            min_impact_factor=min_impact_factor or kwargs.get("min_impact_factor"),
+            max_impact_factor=max_impact_factor or kwargs.get("max_impact_factor"),
             journal=journal,
             author=author,
             keyword=keyword,
@@ -356,18 +351,12 @@ class Papers:
                 print(f"{p.citation_count} citations - {p.title[:50]}...")
         """
         if not criteria:
-            return Papers(
-                self._papers, project=self.project, config=self.config
-            )
+            return Papers(self._papers, project=self.project, config=self.config)
 
         # Handle single lambda
         if len(criteria) == 1 and callable(criteria[0]):
-            sorted_papers = sorted(
-                self._papers, key=criteria[0], reverse=reverse
-            )
-            return Papers(
-                sorted_papers, project=self.project, config=self.config
-            )
+            sorted_papers = sorted(self._papers, key=criteria[0], reverse=reverse)
+            return Papers(sorted_papers, project=self.project, config=self.config)
 
         # Handle field names
         from scitex.scholar.utils.papers_utils import sort_papers_multi
@@ -426,9 +415,7 @@ class Papers:
         with open(file_path, "r", encoding="utf-8") as f:
             bib_db = bibtexparser.load(f)
 
-        logger.info(
-            f"Loaded {len(bib_db.entries)} BibTeX entries from {file_path}"
-        )
+        logger.info(f"Loaded {len(bib_db.entries)} BibTeX entries from {file_path}")
 
         papers = []
         for entry in bib_db.entries:
@@ -538,7 +525,9 @@ class Papers:
 
             # Set URL metadata
             if url_data.get("pdf"):
-                paper.metadata.url.pdfs.append({"url": url_data["pdf"], "source": "bibtex"})
+                paper.metadata.url.pdfs.append(
+                    {"url": url_data["pdf"], "source": "bibtex"}
+                )
 
             # Store original BibTeX fields for later reconstruction
             paper._original_bibtex_fields = fields.copy()
@@ -596,9 +585,7 @@ class Papers:
             from scitex.scholar.utils.papers_utils import papers_to_dict
 
             with open(output_path, "w", encoding="utf-8") as f:
-                json.dump(
-                    papers_to_dict(self), f, indent=2, ensure_ascii=False
-                )
+                json.dump(papers_to_dict(self), f, indent=2, ensure_ascii=False)
             logger.success(f"Saved {len(self)} papers to {output_path}")
 
         elif format.lower() == "csv":
@@ -703,7 +690,9 @@ if __name__ == "__main__":
         print(f"   First: {papers[0].metadata.basic.title}")
 
         # Test filtering
-        recent = papers.filter(lambda p: p.metadata.basic.year and p.metadata.basic.year >= 2023)
+        recent = papers.filter(
+            lambda p: p.metadata.basic.year and p.metadata.basic.year >= 2023
+        )
         print(f"\n2. Filtered (year >= 2023): {len(recent)} papers")
 
         # Test sorting

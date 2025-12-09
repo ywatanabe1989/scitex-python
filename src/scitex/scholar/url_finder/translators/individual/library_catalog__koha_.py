@@ -12,7 +12,9 @@ class LibraryCatalogKohaTranslator(BaseTranslator):
     """Library Catalog (Koha)."""
 
     LABEL = "Library Catalog (Koha)"
-    URL_TARGET_PATTERN = r"^https?://[^/]+/cgi-bin/koha/opac-(detail|search|shelves)\.pl\?"
+    URL_TARGET_PATTERN = (
+        r"^https?://[^/]+/cgi-bin/koha/opac-(detail|search|shelves)\.pl\?"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

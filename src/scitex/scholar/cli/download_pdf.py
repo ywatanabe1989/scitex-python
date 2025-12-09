@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -71,9 +72,7 @@ python -m scitex.scholar download info""",
     paper_group = paper_parser.add_mutually_exclusive_group(required=True)
     paper_group.add_argument("--doi", help="DOI of the paper")
     paper_group.add_argument("--url", help="URL of the paper")
-    paper_parser.add_argument(
-        "--title", help="Paper title (for DOI-based downloads)"
-    )
+    paper_parser.add_argument("--title", help="Paper title (for DOI-based downloads)")
     paper_parser.add_argument(
         "--project",
         default="default",
@@ -128,7 +127,7 @@ def main():
 
             print(f"\n✅ Downloaded: {results['downloaded']} PDFs")
             print(f"❌ Failed: {results['failed']}")
-            if results.get('errors'):
+            if results.get("errors"):
                 print(f"⚠️  Errors: {results['errors']}")
 
             return 0
@@ -136,6 +135,7 @@ def main():
         except Exception as e:
             print(f"❌ Error: {e}")
             import traceback
+
             traceback.print_exc()
             return 1
 
@@ -171,7 +171,10 @@ def main():
                     auth_manager=ScholarAuthManager(),
                     use_zenrows_proxy=False,
                 )
-                browser, context = await browser_manager.get_authenticated_browser_and_context_async()
+                (
+                    browser,
+                    context,
+                ) = await browser_manager.get_authenticated_browser_and_context_async()
 
                 # Create downloader with authenticated context
                 downloader = ScholarPDFDownloader(context, config=ScholarConfig())
@@ -179,8 +182,7 @@ def main():
                 # Download based on DOI or URL
                 if args.doi:
                     saved_paths = await downloader.download_from_doi(
-                        args.doi,
-                        output_dir=f"/tmp/scholar_downloads/{args.project}/"
+                        args.doi, output_dir=f"/tmp/scholar_downloads/{args.project}/"
                     )
                     success = bool(saved_paths)
                     pdf_path = saved_paths[0] if saved_paths else None
@@ -188,7 +190,7 @@ def main():
                     title = paper.metadata.basic.title or "untitled"
                     pdf_path = await downloader.download_from_url(
                         args.url,
-                        output_path=f"/tmp/scholar_downloads/{args.project}/{title[:30]}.pdf"
+                        output_path=f"/tmp/scholar_downloads/{args.project}/{title[:30]}.pdf",
                     )
                     success = bool(pdf_path)
 
@@ -203,6 +205,7 @@ def main():
             except Exception as e:
                 print(f"❌ Error: {e}")
                 import traceback
+
                 traceback.print_exc()
                 return 1
 
@@ -217,13 +220,9 @@ def main():
         print(f"Extensions: Accept Cookies, Zotero Connector")
         print(f"Zotero Translators: Enabled")
         print(f"=" * 50)
-        print(
-            f"\n💡 This tool specializes in accessing paywalled academic content"
-        )
+        print(f"\n💡 This tool specializes in accessing paywalled academic content")
         print(f"   that requires institutional authentication.")
-        print(
-            f"\n🏆 Competitive Advantage: Access content others can't reach!"
-        )
+        print(f"\n🏆 Competitive Advantage: Access content others can't reach!")
     else:
         parser.print_help()
         return 1

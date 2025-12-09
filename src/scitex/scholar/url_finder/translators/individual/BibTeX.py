@@ -34,7 +34,7 @@ class BibTeXTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 3,  # Import + Export
-        "lastUpdated": "2024-05-23 02:08:36"
+        "lastUpdated": "2024-05-23 02:08:36",
     }
 
     # Item type mappings (simplified)
@@ -50,7 +50,7 @@ class BibTeXTranslator:
         "report": "techreport",
         "patent": "misc",
         "webpage": "misc",
-        "document": "misc"
+        "document": "misc",
     }
 
     def __init__(self):
@@ -68,7 +68,7 @@ class BibTeXTranslator:
             True if BibTeX format is detected
         """
         # Look for BibTeX entry pattern: @type{key,
-        pattern = r'^\s*@[a-zA-Z]+[\(\{]'
+        pattern = r"^\s*@[a-zA-Z]+[\(\{]"
         return bool(re.search(pattern, text, re.MULTILINE))
 
     def do_import(self, text: str) -> List[Dict[str, Any]]:
@@ -84,7 +84,7 @@ class BibTeXTranslator:
         items = []
 
         # Pattern to match BibTeX entries
-        entry_pattern = r'@(\w+)\s*\{([^,]+),\s*([^}]+)\}'
+        entry_pattern = r"@(\w+)\s*\{([^,]+),\s*([^}]+)\}"
 
         for match in re.finditer(entry_pattern, text, re.DOTALL):
             entry_type, cite_key, fields_text = match.groups()
@@ -108,16 +108,18 @@ class BibTeXTranslator:
         output = []
 
         for item in items:
-            if item.get('itemType') in ['note', 'attachment']:
+            if item.get("itemType") in ["note", "attachment"]:
                 continue
 
             entry = self._export_item(item)
             if entry:
                 output.append(entry)
 
-        return '\n\n'.join(output)
+        return "\n\n".join(output)
 
-    def _parse_entry(self, entry_type: str, cite_key: str, fields_text: str) -> Optional[Dict[str, Any]]:
+    def _parse_entry(
+        self, entry_type: str, cite_key: str, fields_text: str
+    ) -> Optional[Dict[str, Any]]:
         """
         Parse a single BibTeX entry.
 
@@ -133,11 +135,11 @@ class BibTeXTranslator:
         zotero_type = self._bibtex_to_zotero_type(entry_type.lower())
 
         item = {
-            'itemType': zotero_type,
-            'citationKey': cite_key,
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": zotero_type,
+            "citationKey": cite_key,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Parse fields
@@ -158,56 +160,58 @@ class BibTeXTranslator:
     def _bibtex_to_zotero_type(self, bibtex_type: str) -> str:
         """Map BibTeX type to Zotero type."""
         type_map = {
-            'article': 'journalArticle',
-            'book': 'book',
-            'inproceedings': 'conferencePaper',
-            'incollection': 'bookSection',
-            'phdthesis': 'thesis',
-            'mastersthesis': 'thesis',
-            'techreport': 'report',
-            'unpublished': 'manuscript',
-            'misc': 'document'
+            "article": "journalArticle",
+            "book": "book",
+            "inproceedings": "conferencePaper",
+            "incollection": "bookSection",
+            "phdthesis": "thesis",
+            "mastersthesis": "thesis",
+            "techreport": "report",
+            "unpublished": "manuscript",
+            "misc": "document",
         }
-        return type_map.get(bibtex_type, 'document')
+        return type_map.get(bibtex_type, "document")
 
     def _process_field(self, item: Dict[str, Any], field_name: str, field_value: str):
         """Process a BibTeX field and add to item."""
         field_map = {
-            'title': 'title',
-            'journal': 'publicationTitle',
-            'booktitle': 'publicationTitle',
-            'year': 'date',
-            'volume': 'volume',
-            'number': 'issue',
-            'pages': 'pages',
-            'doi': 'DOI',
-            'isbn': 'ISBN',
-            'issn': 'ISSN',
-            'url': 'url',
-            'abstract': 'abstractNote',
-            'publisher': 'publisher',
-            'address': 'place',
-            'edition': 'edition',
-            'series': 'series'
+            "title": "title",
+            "journal": "publicationTitle",
+            "booktitle": "publicationTitle",
+            "year": "date",
+            "volume": "volume",
+            "number": "issue",
+            "pages": "pages",
+            "doi": "DOI",
+            "isbn": "ISBN",
+            "issn": "ISSN",
+            "url": "url",
+            "abstract": "abstractNote",
+            "publisher": "publisher",
+            "address": "place",
+            "edition": "edition",
+            "series": "series",
         }
 
-        if field_name == 'author' or field_name == 'editor':
+        if field_name == "author" or field_name == "editor":
             # Parse authors/editors
             creators = self._parse_creators(field_value, field_name)
-            item['creators'].extend(creators)
-        elif field_name == 'keywords':
+            item["creators"].extend(creators)
+        elif field_name == "keywords":
             # Parse keywords as tags
-            keywords = field_value.split(',')
-            item['tags'].extend({'tag': k.strip()} for k in keywords if k.strip())
+            keywords = field_value.split(",")
+            item["tags"].extend({"tag": k.strip()} for k in keywords if k.strip())
         elif field_name in field_map:
             item[field_map[field_name]] = field_value.strip()
 
-    def _parse_creators(self, creators_text: str, creator_type: str) -> List[Dict[str, Any]]:
+    def _parse_creators(
+        self, creators_text: str, creator_type: str
+    ) -> List[Dict[str, Any]]:
         """Parse BibTeX author/editor field."""
         creators = []
 
         # Split by " and "
-        names = creators_text.split(' and ')
+        names = creators_text.split(" and ")
 
         for name in names:
             name = name.strip()
@@ -215,27 +219,27 @@ class BibTeXTranslator:
                 continue
 
             # Handle "Last, First" format
-            if ',' in name:
-                parts = name.split(',', 1)
+            if "," in name:
+                parts = name.split(",", 1)
                 creator = {
-                    'lastName': parts[0].strip(),
-                    'firstName': parts[1].strip(),
-                    'creatorType': creator_type
+                    "lastName": parts[0].strip(),
+                    "firstName": parts[1].strip(),
+                    "creatorType": creator_type,
                 }
             else:
                 # Handle "First Last" format
                 parts = name.split()
                 if len(parts) >= 2:
                     creator = {
-                        'firstName': ' '.join(parts[:-1]),
-                        'lastName': parts[-1],
-                        'creatorType': creator_type
+                        "firstName": " ".join(parts[:-1]),
+                        "lastName": parts[-1],
+                        "creatorType": creator_type,
                     }
                 else:
                     creator = {
-                        'lastName': name,
-                        'creatorType': creator_type,
-                        'fieldMode': True
+                        "lastName": name,
+                        "creatorType": creator_type,
+                        "fieldMode": True,
                     }
 
             creators.append(creator)
@@ -244,57 +248,57 @@ class BibTeXTranslator:
 
     def _export_item(self, item: Dict[str, Any]) -> str:
         """Export a single item to BibTeX format."""
-        item_type = item.get('itemType', 'misc')
-        bib_type = self.TYPE_MAP.get(item_type, 'misc')
+        item_type = item.get("itemType", "misc")
+        bib_type = self.TYPE_MAP.get(item_type, "misc")
 
         cite_key = self._build_cite_key(item)
 
         lines = [f"@{bib_type}{{{cite_key}"]
 
         # Add fields
-        if 'title' in item:
+        if "title" in item:
             lines.append(f",\n\ttitle = {{{item['title']}}}")
 
-        if 'creators' in item:
-            authors, editors = self._format_creators(item['creators'])
+        if "creators" in item:
+            authors, editors = self._format_creators(item["creators"])
             if authors:
                 lines.append(f",\n\tauthor = {{{authors}}}")
             if editors:
                 lines.append(f",\n\teditor = {{{editors}}}")
 
-        if 'publicationTitle' in item:
-            field = 'journal' if item_type == 'journalArticle' else 'booktitle'
+        if "publicationTitle" in item:
+            field = "journal" if item_type == "journalArticle" else "booktitle"
             lines.append(f",\n\t{field} = {{{item['publicationTitle']}}}")
 
-        if 'date' in item:
-            year_match = re.search(r'\d{4}', item['date'])
+        if "date" in item:
+            year_match = re.search(r"\d{4}", item["date"])
             if year_match:
                 lines.append(f",\n\tyear = {{{year_match.group(0)}}}")
 
-        for field in ['volume', 'pages', 'DOI', 'ISBN', 'ISSN', 'url', 'publisher']:
+        for field in ["volume", "pages", "DOI", "ISBN", "ISSN", "url", "publisher"]:
             if field in item and item[field]:
                 bib_field = field.lower()
                 lines.append(f",\n\t{bib_field} = {{{item[field]}}}")
 
         lines.append("\n}")
-        return ''.join(lines)
+        return "".join(lines)
 
     def _build_cite_key(self, item: Dict[str, Any]) -> str:
         """Build citation key."""
         parts = []
 
-        if 'creators' in item and item['creators']:
-            last_name = item['creators'][0].get('lastName', 'noauthor')
-            parts.append(last_name.lower().replace(' ', ''))
+        if "creators" in item and item["creators"]:
+            last_name = item["creators"][0].get("lastName", "noauthor")
+            parts.append(last_name.lower().replace(" ", ""))
         else:
-            parts.append('noauthor')
+            parts.append("noauthor")
 
-        if 'date' in item:
-            year_match = re.search(r'\d{4}', item['date'])
+        if "date" in item:
+            year_match = re.search(r"\d{4}", item["date"])
             if year_match:
                 parts.append(year_match.group(0))
 
-        base_key = '_'.join(parts) if parts else 'unknown'
+        base_key = "_".join(parts) if parts else "unknown"
 
         cite_key = base_key
         counter = 1
@@ -311,16 +315,16 @@ class BibTeXTranslator:
         editors = []
 
         for creator in creators:
-            if creator.get('firstName') and creator.get('lastName'):
+            if creator.get("firstName") and creator.get("lastName"):
                 name = f"{creator['lastName']}, {creator['firstName']}"
-            elif creator.get('lastName'):
-                name = creator['lastName']
+            elif creator.get("lastName"):
+                name = creator["lastName"]
             else:
                 continue
 
-            if creator.get('creatorType') == 'editor':
+            if creator.get("creatorType") == "editor":
                 editors.append(name)
             else:
                 authors.append(name)
 
-        return (' and '.join(authors), ' and '.join(editors))
+        return (" and ".join(authors), " and ".join(editors))

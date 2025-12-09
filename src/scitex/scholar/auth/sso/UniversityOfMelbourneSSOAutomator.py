@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -16,7 +17,10 @@ from typing import Optional
 from playwright.async_api import Page, TimeoutError
 
 # from scitex.scholar.browser import BrowserUtils
-from scitex.browser.interaction import click_with_fallbacks_async, fill_with_fallbacks_async
+from scitex.browser.interaction import (
+    click_with_fallbacks_async,
+    fill_with_fallbacks_async,
+)
 from scitex.scholar.config import ScholarConfig
 
 from .BaseSSOAutomator import BaseSSOAutomator
@@ -76,9 +80,7 @@ class UniversityOfMelbourneSSOAutomator(BaseSSOAutomator):
             username_success = await self._handle_username_step_async(page)
             if not username_success:
                 # Try generic login as fallback
-                self.logger.info(
-                    "Trying generic login form detection as fallback"
-                )
+                self.logger.info("Trying generic login form detection as fallback")
                 username_success = await self._handle_generic_login_async(page)
                 if not username_success:
                     return False
@@ -189,9 +191,7 @@ class UniversityOfMelbourneSSOAutomator(BaseSSOAutomator):
                 self.logger.info("Filled generic username field")
 
             # Find any password field
-            password_elements = await page.query_selector_all(
-                'input[type="password"]'
-            )
+            password_elements = await page.query_selector_all('input[type="password"]')
             if password_elements:
                 await page.evaluate(
                     '(args) => { args.element.value = args.value; args.element.dispatchEvent(new Event("input", { bubbles: true })); }',
@@ -219,9 +219,7 @@ class UniversityOfMelbourneSSOAutomator(BaseSSOAutomator):
         """Handle Duo 2FA using proven working patterns."""
         try:
             # Quick check for Duo auth elements
-            duo_elements = await page.query_selector_all(
-                ".authenticator-verify-list"
-            )
+            duo_elements = await page.query_selector_all(".authenticator-verify-list")
 
             if not duo_elements:
                 try:
@@ -240,9 +238,7 @@ class UniversityOfMelbourneSSOAutomator(BaseSSOAutomator):
 
             if push_buttons:
                 await push_buttons[0].click()
-                self.logger.info(
-                    "Push notification requested - check your device"
-                )
+                self.logger.info("Push notification requested - check your device")
 
                 # Send notification to user - USER INTERVENTION REQUIRED
                 await self.notify_user_async(
@@ -260,9 +256,7 @@ class UniversityOfMelbourneSSOAutomator(BaseSSOAutomator):
                 )
                 if auth_buttons:
                     await auth_buttons[0].click()
-                    self.logger.info(
-                        "Alternative authentication method selected"
-                    )
+                    self.logger.info("Alternative authentication method selected")
 
                     # Send notification for alternative auth - USER INTERVENTION REQUIRED
                     await self.notify_user_async(
@@ -290,9 +284,7 @@ class UniversityOfMelbourneSSOAutomator(BaseSSOAutomator):
                 try:
                     # Check if moved away from SSO
                     if not self.is_sso_page(page.url):
-                        self.logger.info(
-                            "Login successful - redirected away from SSO"
-                        )
+                        self.logger.info("Login successful - redirected away from SSO")
                         return True
 
                     # Check for success indicators only if context is still valid
@@ -300,9 +292,7 @@ class UniversityOfMelbourneSSOAutomator(BaseSSOAutomator):
                         'input[name="prompt"], .chat-interface, .dashboard, .main-content'
                     )
                     if success_elements:
-                        self.logger.info(
-                            "Login successful - found success elements"
-                        )
+                        self.logger.info("Login successful - found success elements")
                         return True
 
                 except Exception as context_error:
@@ -316,7 +306,7 @@ class UniversityOfMelbourneSSOAutomator(BaseSSOAutomator):
                             return True
 
                 if ii > 0 and ii % 10 == 0:
-                    self.logger.info(f"Still waiting... ({60-ii}s remaining)")
+                    self.logger.info(f"Still waiting... ({60 - ii}s remaining)")
 
             return False
 

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -59,9 +60,10 @@ async def main_async():
         auth_manager=auth_manager,
     )
 
-    browser, context = (
-        await browser_manager.get_authenticated_browser_and_context_async()
-    )
+    (
+        browser,
+        context,
+    ) = await browser_manager.get_authenticated_browser_and_context_async()
     page = await context.new_page()
 
     print(f"args.url: {args.url}")

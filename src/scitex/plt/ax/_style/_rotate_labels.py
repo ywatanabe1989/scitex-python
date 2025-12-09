@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -80,7 +81,7 @@ def rotate_labels(
     # Determine which axes to rotate (skip if None or 0)
     rotate_x = x is not None and x != 0
     rotate_y = y is not None and y != 0
-    
+
     # Get current tick positions
     xticks = ax.get_xticks()
     yticks = ax.get_yticks()
@@ -285,7 +286,7 @@ def _adjust_subplot_params(ax, x_angle, y_angle):
     else:
         # Increase margin more significantly for rotated x-axis labels to prevent xlabel overlap
         x_margin_factor = abs(np.sin(np.radians(x_angle))) * 0.25  # Increased from 0.2
-    
+
     y_margin_factor = abs(np.sin(np.radians(y_angle))) * 0.15
 
     # Get current subplot parameters
@@ -303,8 +304,7 @@ def _adjust_subplot_params(ax, x_angle, y_angle):
 
         # Only adjust if we're increasing the margins significantly
         if (
-            new_bottom > current_bottom + 0.02
-            or new_left > current_left + 0.02
+            new_bottom > current_bottom + 0.02 or new_left > current_left + 0.02
         ):  # Reduced threshold
             # Suppress warning and try to adjust
             import warnings
@@ -315,5 +315,6 @@ def _adjust_subplot_params(ax, x_angle, y_angle):
     except Exception:
         # Skip adjustment if there are issues
         pass
+
 
 # EOF

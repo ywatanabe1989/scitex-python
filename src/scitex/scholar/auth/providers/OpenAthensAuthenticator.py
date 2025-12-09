@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/auth/providers/OpenAthensAuthenticator.py"
-)
+
+__FILE__ = "./src/scitex/scholar/auth/providers/OpenAthensAuthenticator.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -85,12 +84,12 @@ class OpenAthensAuthenticator(BaseAuthenticator):
         # Initialize config first
         if config is None:
             config = ScholarConfig()
-        self.scholar_config = config  # Store ScholarConfig separately from BaseAuthenticator's config
+        self.scholar_config = (
+            config  # Store ScholarConfig separately from BaseAuthenticator's config
+        )
 
         # Use config resolution for email and debug_mode
-        self.email = self.scholar_config.resolve(
-            "openathens_email", email, None, str
-        )
+        self.email = self.scholar_config.resolve("openathens_email", email, None, str)
         self.debug_mode = self.scholar_config.resolve(
             "debug_mode", debug_mode, False, bool
         )
@@ -169,9 +168,7 @@ class OpenAthensAuthenticator(BaseAuthenticator):
             # Check if another process authenticated while we were waiting
             await self._ensure_session_loaded_async()
             if await self.is_authenticated_async():
-                logger.info(
-                    f"{self.name}: Another process authenticated successfully"
-                )
+                logger.info(f"{self.name}: Another process authenticated successfully")
                 return self.session_manager.create_auth_response()
             raise
 
@@ -213,17 +210,14 @@ class OpenAthensAuthenticator(BaseAuthenticator):
     async def _handle_successful_authentication_async(self, page) -> dict:
         """Handle successful authentication by extracting and saving session."""
         # Extract session cookies
-        simple_cookies, full_cookies = (
-            await self.browser_authenticator.extract_session_cookies_async(
-                page
-            )
-        )
+        (
+            simple_cookies,
+            full_cookies,
+        ) = await self.browser_authenticator.extract_session_cookies_async(page)
 
         # Update session manager
         expiry = datetime.now() + timedelta(hours=8)
-        self.session_manager.set_session_data(
-            simple_cookies, full_cookies, expiry
-        )
+        self.session_manager.set_session_data(simple_cookies, full_cookies, expiry)
 
         # Save to cache
         await self.cache_manager.save_session_async(self.session_manager)
@@ -357,7 +351,7 @@ The SciTeX Scholar system requires your intervention to complete OpenAthens auth
 Details:
 - System: SciTeX Scholar Module
 - Service: OpenAthens Single Sign-On
-- Account: {self.email or 'Not specified'}
+- Account: {self.email or "Not specified"}
 - Timeout: {self.timeout} seconds
 - Login URL: {self.MYATHENS_URL}
 
@@ -374,7 +368,7 @@ If the browser didn't open or you missed it, you can manually navigate to:
 {self.MYATHENS_URL}
 
 This is an automated notification from the SciTeX Scholar authentication system.
-Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             """.strip()
 
             success = await send_email_async(
@@ -385,9 +379,7 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             )
 
             if success:
-                logger.info(
-                    f"User intervention notification sent to {to_email}"
-                )
+                logger.info(f"User intervention notification sent to {to_email}")
             else:
                 logger.debug(
                     f"{self.name}: Failed to send user intervention notification"
@@ -424,7 +416,7 @@ Your OpenAthens authentication has been completed successfully.
 Details:
 - System: SciTeX Scholar Module
 - Service: OpenAthens Single Sign-On
-- Account: {self.email or 'Not specified'}
+- Account: {self.email or "Not specified"}
 - Session expires: {expiry_info}
 - Verification URL: {self.VERIFICATION_URL}
 
@@ -434,7 +426,7 @@ You can now access institutional resources through SciTeX Scholar.
 The system will use this session for automatic PDF downloads and research access.
 
 This is an automated notification from the SciTeX Scholar authentication system.
-Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             """.strip()
 
             await send_email_async(
@@ -444,18 +436,12 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 message=message,
             )
 
-            logger.info(
-                f"Authentication success notification sent to {to_email}"
-            )
+            logger.info(f"Authentication success notification sent to {to_email}")
 
         except Exception as e:
-            logger.debug(
-                f"Failed to send authentication success notification: {e}"
-            )
+            logger.debug(f"Failed to send authentication success notification: {e}")
 
-    async def _notify_authentication_failed_async(
-        self, error_details: str
-    ) -> None:
+    async def _notify_authentication_failed_async(self, error_details: str) -> None:
         """Send email notification that OpenAthens authentication failed."""
         try:
             from scitex.utils._email import send_email_async
@@ -480,7 +466,7 @@ The OpenAthens authentication process was not completed successfully.
 Details:
 - System: SciTeX Scholar Module
 - Service: OpenAthens Single Sign-On
-- Account: {self.email or 'Not specified'}
+- Account: {self.email or "Not specified"}
 - Error: {error_details}
 - Timeout: {self.timeout} seconds
 
@@ -495,7 +481,7 @@ Next Steps:
 Manual login URL: {self.MYATHENS_URL}
 
 This is an automated notification from the SciTeX Scholar authentication system.
-Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             """.strip()
 
             await send_email_async(
@@ -505,14 +491,10 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 message=message,
             )
 
-            logger.info(
-                f"Authentication failure notification sent to {to_email}"
-            )
+            logger.info(f"Authentication failure notification sent to {to_email}")
 
         except Exception as e:
-            logger.debug(
-                f"Failed to send authentication failure notification: {e}"
-            )
+            logger.debug(f"Failed to send authentication failure notification: {e}")
 
 
 if __name__ == "__main__":
@@ -532,9 +514,7 @@ if __name__ == "__main__":
             action="store_true",
             help="Skip automation and require manual intervention",
         )
-        parser.add_argument(
-            "--email", type=str, help="Override institutional email"
-        )
+        parser.add_argument("--email", type=str, help="Override institutional email")
         args = parser.parse_args()
 
         # Create authenticator
@@ -545,9 +525,7 @@ if __name__ == "__main__":
             try:
                 is_authenticated = await auth.is_authenticated_async()
                 if is_authenticated:
-                    logger.info(
-                        "Already authenticated! Using cached session."
-                    )
+                    logger.info("Already authenticated! Using cached session.")
                     session_info = await auth.get_session_info_async()
                     logger.info(f"{self.name}: Current session details:")
                     for key, value in session_info.items():
@@ -574,9 +552,7 @@ if __name__ == "__main__":
             result = await auth.authenticate_async(force=args.force)
 
             if result:
-                logger.info(
-                    f"{self.name}: Authentication completed successfully!"
-                )
+                logger.info(f"{self.name}: Authentication completed successfully!")
                 logger.info(f"{self.name}: Session details:")
                 session_info = await auth.get_session_info_async()
                 for key, value in session_info.items():
@@ -594,18 +570,14 @@ if __name__ == "__main__":
 
             # Show helpful information for debugging
             logger.info(f"{self.name}: Troubleshooting tips:")
-            logger.info(
-                f"{self.name}: 1. Check your institutional email configuration"
-            )
+            logger.info(f"{self.name}: 1. Check your institutional email configuration")
             logger.info(
                 f"{self.name}: 2. Verify your institution has OpenAthens access"
             )
             logger.info(
                 f"{self.name}: 3. Try with --manual flag for manual authentication"
             )
-            logger.info(
-                f"{self.name}: 4. Try with --force flag to ignore cache"
-            )
+            logger.info(f"{self.name}: 4. Try with --force flag to ignore cache")
 
             return 1
 

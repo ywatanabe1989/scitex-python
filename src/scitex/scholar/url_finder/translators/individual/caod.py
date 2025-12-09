@@ -33,7 +33,7 @@ class CAODTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2018-09-08 13:38:50"
+        "lastUpdated": "2018-09-08 13:38:50",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -47,14 +47,16 @@ class CAODTranslator:
         Returns:
             'journalArticle' for articles, 'multiple' for search, empty string otherwise
         """
-        if 'articles/found.htm?' in url:
+        if "articles/found.htm?" in url:
             if self.get_search_results(doc, True):
-                return 'multiple'
+                return "multiple"
         else:
-            return 'journalArticle'
-        return ''
+            return "journalArticle"
+        return ""
 
-    def get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Dict[str, str]:
+    def get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Dict[str, str]:
         """
         Get search results from the page.
 
@@ -66,15 +68,15 @@ class CAODTranslator:
             Dictionary mapping URLs to titles, or empty dict
         """
         items = {}
-        rows = doc.select('div.searchlist a:has(b)')
+        rows = doc.select("div.searchlist a:has(b)")
 
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text(strip=True)
             if not href or not title:
                 continue
             if check_only:
-                return {'found': 'true'}
+                return {"found": "true"}
             items[href] = title
 
         return items
@@ -90,7 +92,7 @@ class CAODTranslator:
         Returns:
             Dictionary containing article metadata or search results
         """
-        if self.detect_web(doc, url) == 'multiple':
+        if self.detect_web(doc, url) == "multiple":
             return self.get_search_results(doc)
         return self.scrape(doc, url)
 
@@ -106,12 +108,12 @@ class CAODTranslator:
             Dictionary containing article metadata
         """
         item = {
-            'itemType': 'journalArticle',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'attachments': [],
-            'libraryCatalog': 'caod.oriprobe.com'
+            "itemType": "journalArticle",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
+            "libraryCatalog": "caod.oriprobe.com",
         }
 
         # Extract title
@@ -119,9 +121,13 @@ class CAODTranslator:
         if not title_elem:
             title_elem = doc.select_one('meta[itemprop="headline"]')
         if title_elem:
-            content = title_elem.get('content') if title_elem.name == 'meta' else title_elem.get_text(strip=True)
+            content = (
+                title_elem.get("content")
+                if title_elem.name == "meta"
+                else title_elem.get_text(strip=True)
+            )
             if content:
-                item['title'] = content
+                item["title"] = content
 
         # Extract authors - surname comes first and is often capitalized
         author_elems = doc.select('span[itemprop="author"] a')
@@ -132,64 +138,66 @@ class CAODTranslator:
                 parts = author_text.split()
                 if parts:
                     # Capitalize first char and lowercase rest of surname
-                    parts[0] = parts[0][0] + parts[0][1:].lower() if len(parts[0]) > 1 else parts[0]
+                    parts[0] = (
+                        parts[0][0] + parts[0][1:].lower()
+                        if len(parts[0]) > 1
+                        else parts[0]
+                    )
                     # Reverse to put given name first
-                    reversed_name = ' '.join(reversed(parts))
-                    item['creators'].append(self._clean_author(reversed_name))
+                    reversed_name = " ".join(reversed(parts))
+                    item["creators"].append(self._clean_author(reversed_name))
 
         # Extract publication details
         pub_elem = doc.select_one('span[itemprop="name"]')
         if pub_elem:
-            item['publicationTitle'] = pub_elem.get_text(strip=True)
+            item["publicationTitle"] = pub_elem.get_text(strip=True)
 
         # Extract date
         date_elem = doc.select_one('meta[itemprop="datePublished"]')
         if date_elem:
-            date_content = date_elem.get('content')
+            date_content = date_elem.get("content")
             if date_content:
-                item['date'] = date_content
+                item["date"] = date_content
 
         # Extract volume
         volume_elem = doc.select_one('meta[itemprop="volumeNumber"]')
         if volume_elem:
-            volume_content = volume_elem.get('content')
+            volume_content = volume_elem.get("content")
             if volume_content:
-                item['volume'] = volume_content
+                item["volume"] = volume_content
 
         # Extract issue
         issue_elem = doc.select_one('meta[itemprop="issueNumber"]')
         if issue_elem:
-            issue_content = issue_elem.get('content')
+            issue_content = issue_elem.get("content")
             if issue_content:
-                item['issue'] = issue_content
+                item["issue"] = issue_content
 
         # Extract pages
         pages_elem = doc.select_one('meta[itemprop="pagination"]')
         if pages_elem:
-            pages_content = pages_elem.get('content')
+            pages_content = pages_elem.get("content")
             if pages_content:
-                item['pages'] = pages_content
+                item["pages"] = pages_content
 
         # Extract abstract
         abstract_elem = doc.select_one('meta[itemprop="description"]')
         if abstract_elem:
-            abstract_content = abstract_elem.get('content')
+            abstract_content = abstract_elem.get("content")
             if abstract_content:
-                item['abstractNote'] = abstract_content
+                item["abstractNote"] = abstract_content
 
         # Extract keywords
         keyword_elems = doc.select('span[itemprop="headline"] a')
         for keyword in keyword_elems:
             keyword_text = keyword.get_text(strip=True)
             if keyword_text:
-                item['tags'].append({'tag': keyword_text})
+                item["tags"].append({"tag": keyword_text})
 
         # Add snapshot attachment
-        item['attachments'].append({
-            'title': 'Snapshot',
-            'mimeType': 'text/html',
-            'url': url
-        })
+        item["attachments"].append(
+            {"title": "Snapshot", "mimeType": "text/html", "url": url}
+        )
 
         return item
 
@@ -208,13 +216,9 @@ class CAODTranslator:
 
         if len(parts) >= 2:
             return {
-                'firstName': ' '.join(parts[:-1]),
-                'lastName': parts[-1],
-                'creatorType': 'author'
+                "firstName": " ".join(parts[:-1]),
+                "lastName": parts[-1],
+                "creatorType": "author",
             }
         else:
-            return {
-                'lastName': name,
-                'creatorType': 'author',
-                'fieldMode': True
-            }
+            return {"lastName": name, "creatorType": "author", "fieldMode": True}

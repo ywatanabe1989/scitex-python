@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -53,6 +54,8 @@ import pandas as pd
 # CONFIG = load_configs()
 
 """Functions & Classes"""
+
+
 def split_metadata(metadata_json_path):
     metadata = stx.io.load(metadata_json_path)
     print(len(metadata))

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/writer/_project/_create.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -62,40 +63,24 @@ def ensure_project_exists(
         If project creation fails
     """
     if project_dir.exists():
-        logger.info(
-            f"Attached to existing project at {project_dir.absolute()}"
-        )
+        logger.info(f"Attached to existing project at {project_dir.absolute()}")
         return project_dir
 
-    logger.info(
-        f"Creating new project '{project_name}' at {project_dir.absolute()}"
-    )
+    logger.info(f"Creating new project '{project_name}' at {project_dir.absolute()}")
 
     # Initialize project directory structure
-    success = _clone_writer_project(
-        str(project_dir), git_strategy, branch, tag
-    )
+    success = _clone_writer_project(str(project_dir), git_strategy, branch, tag)
 
     if not success:
-        logger.error(
-            f"Failed to initialize project directory for {project_name}"
-        )
-        raise RuntimeError(
-            f"Could not create project directory at {project_dir}"
-        )
+        logger.error(f"Failed to initialize project directory for {project_name}")
+        raise RuntimeError(f"Could not create project directory at {project_dir}")
 
     # Verify project directory was created
     if not project_dir.exists():
-        logger.error(
-            f"Project directory {project_dir} was not created"
-        )
-        raise RuntimeError(
-            f"Project directory {project_dir} was not created"
-        )
+        logger.error(f"Project directory {project_dir} was not created")
+        raise RuntimeError(f"Project directory {project_dir} was not created")
 
-    logger.success(
-        f"Successfully created project at {project_dir.absolute()}"
-    )
+    logger.success(f"Successfully created project at {project_dir.absolute()}")
     return project_dir
 
 

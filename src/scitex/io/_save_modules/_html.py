@@ -18,7 +18,7 @@ import plotly
 
 def save_html(obj, spath, **kwargs):
     """Handle HTML file saving (primarily for Plotly figures).
-    
+
     Parameters
     ----------
     obj : plotly.graph_objs.Figure or str
@@ -27,18 +27,18 @@ def save_html(obj, spath, **kwargs):
         Path where HTML file will be saved
     **kwargs
         Additional keyword arguments passed to plotly.io.write_html()
-        
+
     Notes
     -----
     - Primarily designed for saving Plotly interactive figures
     - Can also save raw HTML strings
     """
-    if hasattr(obj, 'write_html'):
+    if hasattr(obj, "write_html"):
         # Plotly figure object
         obj.write_html(spath, **kwargs)
     elif isinstance(obj, str):
         # Raw HTML string
-        with open(spath, 'w') as f:
+        with open(spath, "w") as f:
             f.write(obj)
     else:
         # Try to convert to HTML using plotly

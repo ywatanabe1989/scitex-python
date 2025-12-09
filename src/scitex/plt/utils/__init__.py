@@ -12,7 +12,22 @@ from ._im2grid import im2grid
 from ._is_valid_axis import assert_valid_axis, is_valid_axis
 from ._mk_colorbar import mk_colorbar
 from ._mk_patches import mk_patches
-from ._scientific_captions import ScientificCaption, add_figure_caption, add_panel_captions, caption_manager, create_figure_list, cross_ref, enhance_scitex_save_with_captions, export_captions, quick_caption, save_with_caption
+from ._scientific_captions import (
+    ScientificCaption,
+    _escape_latex,
+    _format_caption_for_md,
+    _format_caption_for_tex,
+    _format_caption_for_txt,
+    add_figure_caption,
+    add_panel_captions,
+    caption_manager,
+    create_figure_list,
+    cross_ref,
+    enhance_scitex_save_with_captions,
+    export_captions,
+    quick_caption,
+    save_with_caption,
+)
 from ._scitex_config import SciTeXConfig, configure_scitex_ecosystem, get_scitex_config
 from ._dimension_viewer import compare_modes, view_dimensions
 from ._figure_from_axes_mm import (
@@ -21,7 +36,11 @@ from ._figure_from_axes_mm import (
     print_dimension_info,
 )
 from ._units import inch_to_mm, mm_to_inch, mm_to_pt, pt_to_mm
-from ._collect_figure_metadata import collect_figure_metadata
+from ._collect_figure_metadata import (
+    assert_csv_json_consistency,
+    collect_figure_metadata,
+    verify_csv_json_consistency,
+)
 from ._csv_column_naming import (
     get_csv_column_name,
     get_csv_column_prefix,
@@ -32,7 +51,12 @@ from ._csv_column_naming import (
 __all__ = [
     "HistogramBinManager",
     "SciTeXConfig",
+    "assert_csv_json_consistency",
     "ScientificCaption",
+    "_escape_latex",
+    "_format_caption_for_md",
+    "_format_caption_for_tex",
+    "_format_caption_for_txt",
     "add_figure_caption",
     "add_panel_captions",
     "add_shared_colorbar",
@@ -71,5 +95,6 @@ __all__ = [
     "quick_caption",
     "sanitize_trace_id",
     "save_with_caption",
+    "verify_csv_json_consistency",
     "view_dimensions",
 ]

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-11 20:30:56 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_cache_disk_async.py
+# Timestamp: "2025-12-09 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_cache_disk_async.py
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/decorators/_cache_disk_async.py"
-)
+
+__FILE__ = "./src/scitex/decorators/_cache_disk_async.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 """Async disk caching decorator using joblib.Memory."""
@@ -16,6 +15,8 @@ import asyncio
 import functools
 
 from joblib import Memory as _Memory
+
+from scitex.config import get_paths
 
 
 def cache_disk_async(func):
@@ -27,8 +28,7 @@ def cache_disk_async(func):
             await asyncio.sleep(1)
             return x ** 2
     """
-    scitex_dir = os.getenv("SCITEX_DIR", os.path.expanduser("~/.scitex"))
-    cache_dir = os.path.join(scitex_dir, "cache", "functions")
+    cache_dir = str(get_paths().function_cache)
     memory = _Memory(cache_dir, verbose=0)
 
     # Create sync wrapper for joblib
@@ -45,5 +45,6 @@ def cache_disk_async(func):
         return result
 
     return async_wrapper
+
 
 # EOF

@@ -45,20 +45,20 @@ class CrossRefSearchEngine(CrossRefEngine, BaseSearchEngine):
 
         # Build CrossRef API parameters
         params = {
-            'query.bibliographic': query,
-            'rows': min(max_results, 1000),
-            'mailto': self.email,
+            "query.bibliographic": query,
+            "rows": min(max_results, 1000),
+            "mailto": self.email,
         }
 
         # Add filters - only get articles, not journals or issues
-        filter_parts = ['type:journal-article']  # Only journal articles
+        filter_parts = ["type:journal-article"]  # Only journal articles
 
-        if filters.get('year_start'):
+        if filters.get("year_start"):
             filter_parts.append(f"from-pub-date:{filters['year_start']}")
-        if filters.get('year_end'):
+        if filters.get("year_end"):
             filter_parts.append(f"until-pub-date:{filters['year_end']}")
 
-        params['filter'] = ','.join(filter_parts)
+        params["filter"] = ",".join(filter_parts)
 
         logger.info(f"{self.name}: Searching CrossRef with query: {query[:50]}...")
 
@@ -68,7 +68,7 @@ class CrossRefSearchEngine(CrossRefEngine, BaseSearchEngine):
             response.raise_for_status()
             data = response.json()
 
-            items = data.get('message', {}).get('items', [])
+            items = data.get("message", {}).get("items", [])
 
             if not items:
                 logger.info(f"{self.name}: No results found")
@@ -96,53 +96,60 @@ class CrossRefSearchEngine(CrossRefEngine, BaseSearchEngine):
         """Convert CrossRef item to standard metadata format."""
         # Extract authors
         authors = []
-        for author in item.get('author', []):
-            if 'given' in author and 'family' in author:
+        for author in item.get("author", []):
+            if "given" in author and "family" in author:
                 authors.append(f"{author['given']} {author['family']}")
-            elif 'family' in author:
-                authors.append(author['family'])
+            elif "family" in author:
+                authors.append(author["family"])
 
         # Extract year
         year = None
-        if 'published-print' in item:
-            date_parts = item['published-print'].get('date-parts', [[]])[0]
+        if "published-print" in item:
+            date_parts = item["published-print"].get("date-parts", [[]])[0]
             if date_parts:
                 year = date_parts[0]
-        elif 'published-online' in item:
-            date_parts = item['published-online'].get('date-parts', [[]])[0]
+        elif "published-online" in item:
+            date_parts = item["published-online"].get("date-parts", [[]])[0]
             if date_parts:
                 year = date_parts[0]
 
         # Build metadata dict
         metadata = {
-            'id': {
-                'doi': item.get('DOI'),
-                'doi_engines': [self.name] if item.get('DOI') else None,
+            "id": {
+                "doi": item.get("DOI"),
+                "doi_engines": [self.name] if item.get("DOI") else None,
             },
-            'basic': {
-                'title': item.get('title', [''])[0] if item.get('title') else None,
-                'title_engines': [self.name] if item.get('title') else None,
-                'authors': authors if authors else None,
-                'authors_engines': [self.name] if authors else None,
-                'abstract': item.get('abstract'),
-                'abstract_engines': [self.name] if item.get('abstract') else None,
+            "basic": {
+                "title": item.get("title", [""])[0] if item.get("title") else None,
+                "title_engines": [self.name] if item.get("title") else None,
+                "authors": authors if authors else None,
+                "authors_engines": [self.name] if authors else None,
+                "abstract": item.get("abstract"),
+                "abstract_engines": [self.name] if item.get("abstract") else None,
             },
-            'publication': {
-                'year': year,
-                'year_engines': [self.name] if year else None,
-                'journal': item.get('container-title', [''])[0] if item.get('container-title') else None,
-                'journal_engines': [self.name] if item.get('container-title') else None,
-                'volume': item.get('volume'),
-                'issue': item.get('issue'),
-                'issn': item.get('ISSN', [None])[0] if item.get('ISSN') else None,
+            "publication": {
+                "year": year,
+                "year_engines": [self.name] if year else None,
+                "journal": item.get("container-title", [""])[0]
+                if item.get("container-title")
+                else None,
+                "journal_engines": [self.name] if item.get("container-title") else None,
+                "volume": item.get("volume"),
+                "issue": item.get("issue"),
+                "issn": item.get("ISSN", [None])[0] if item.get("ISSN") else None,
             },
-            'metrics': {
-                'citation_count': item.get('is-referenced-by-count', 0),
-                'is_open_access': item.get('link', [{}])[0].get('content-type') == 'unspecified' if item.get('link') else False,
+            "metrics": {
+                "citation_count": item.get("is-referenced-by-count", 0),
+                "is_open_access": item.get("link", [{}])[0].get("content-type")
+                == "unspecified"
+                if item.get("link")
+                else False,
             },
-            'urls': {
-                'doi_url': f"https://doi.org/{item['DOI']}" if item.get('DOI') else None,
-                'publisher': item.get('URL'),
+            "urls": {
+                "doi_url": f"https://doi.org/{item['DOI']}"
+                if item.get("DOI")
+                else None,
+                "publisher": item.get("URL"),
             },
         }
 

@@ -60,7 +60,7 @@ class PLoSTranslator(BaseTranslator):
         try:
             pdf_url = await page.locator(
                 'meta[name="citation_pdf_url"]'
-            ).first.get_attribute('content', timeout=3000)
+            ).first.get_attribute("content", timeout=3000)
             if pdf_url:
                 pdf_urls.append(pdf_url)
                 return pdf_urls
@@ -72,11 +72,11 @@ class PLoSTranslator(BaseTranslator):
         try:
             pdf_link = await page.locator(
                 'a[href*="/article/file"][href*="type=printable"]'
-            ).first.get_attribute('href', timeout=2000)
+            ).first.get_attribute("href", timeout=2000)
             if pdf_link:
                 # Make absolute URL if needed
-                if pdf_link.startswith('/'):
-                    base_url = await page.evaluate('window.location.origin')
+                if pdf_link.startswith("/"):
+                    base_url = await page.evaluate("window.location.origin")
                     pdf_link = f"{base_url}{pdf_link}"
                 pdf_urls.append(pdf_link)
                 return pdf_urls
@@ -86,18 +86,15 @@ class PLoSTranslator(BaseTranslator):
         # Method 3: Construct PDF URL from DOI if present
         # Pattern: https://journals.plos.org/journal/article/file?id=DOI&type=printable
         try:
-            doi = await page.locator(
-                'meta[name="citation_doi"]'
-            ).first.get_attribute('content', timeout=2000)
-            current_url = await page.evaluate('window.location.href')
+            doi = await page.locator('meta[name="citation_doi"]').first.get_attribute(
+                "content", timeout=2000
+            )
+            current_url = await page.evaluate("window.location.href")
 
             if doi:
                 # Extract journal name from URL
                 # Pattern: journals.plos.org/{journal}/article?id=...
-                journal_match = re.search(
-                    r'journals\.plos\.org/([^/]+)/',
-                    current_url
-                )
+                journal_match = re.search(r"journals\.plos\.org/([^/]+)/", current_url)
                 if journal_match:
                     journal = journal_match.group(1)
                     pdf_url = f"https://journals.plos.org/{journal}/article/file?id={doi}&type=printable"

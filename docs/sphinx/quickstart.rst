@@ -1,7 +1,7 @@
 Quick Start Guide
 =================
 
-This guide will help you get started with MNGS in just a few minutes.
+This guide will help you get started with SciTeX in just a few minutes.
 
 Basic Usage
 -----------
@@ -49,7 +49,7 @@ Basic Usage
 Complete Example
 ----------------
 
-Here's a complete example of a typical MNGS workflow:
+Here's a complete example of a typical SciTeX workflow:
 
 .. code-block:: python
 
@@ -58,7 +58,7 @@ Here's a complete example of a typical MNGS workflow:
     import sys
     import matplotlib.pyplot as plt
     
-    # Initialize MNGS
+    # Initialize SciTeX
     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
     
     try:

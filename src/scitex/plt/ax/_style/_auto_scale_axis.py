@@ -18,7 +18,9 @@ import numpy as np
 from typing import Optional, Tuple
 
 
-def detect_scale_factor(values: np.ndarray, threshold: float = 1e-2) -> Tuple[int, bool]:
+def detect_scale_factor(
+    values: np.ndarray, threshold: float = 1e-2
+) -> Tuple[int, bool]:
     """
     Detect appropriate power of 10 to factor out from axis values.
 
@@ -97,7 +99,7 @@ def format_scale_factor(power: int) -> str:
     return f"×10$^{{{power}}}$"
 
 
-def auto_scale_axis(ax, axis: str = 'both', threshold: float = 1e-2) -> None:
+def auto_scale_axis(ax, axis: str = "both", threshold: float = 1e-2) -> None:
     """
     Automatically scale axis to factor out common powers of 10.
 
@@ -155,16 +157,16 @@ def auto_scale_axis(ax, axis: str = 'both', threshold: float = 1e-2) -> None:
             return
 
         # Create scaling factor
-        scale_factor = 10 ** power
+        scale_factor = 10**power
 
         # Update tick formatter to show scaled values
         def format_func(value, pos):
             scaled_value = value / scale_factor
             # Format with appropriate precision
             if abs(scaled_value) < 10:
-                return f'{scaled_value:.1f}'
+                return f"{scaled_value:.1f}"
             else:
-                return f'{scaled_value:.0f}'
+                return f"{scaled_value:.0f}"
 
         set_formatter(ticker.FuncFormatter(format_func))
 
@@ -173,22 +175,24 @@ def auto_scale_axis(ax, axis: str = 'both', threshold: float = 1e-2) -> None:
         scale_str = format_scale_factor(power)
 
         # Check if label already has units in brackets
-        if '[' in current_label and ']' in current_label:
+        if "[" in current_label and "]" in current_label:
             # Insert scale factor before the closing bracket
             # e.g., "Density [a.u.]" → "Density [×10⁻³ a.u.]"
-            label_parts = current_label.rsplit(']', 1)
+            label_parts = current_label.rsplit("]", 1)
             new_label = f"{label_parts[0]} {scale_str}]{label_parts[1]}"
         else:
             # Append scale factor in brackets
             # e.g., "Density" → "Density [×10⁻³]"
-            new_label = f"{current_label} [{scale_str}]" if current_label else f"[{scale_str}]"
+            new_label = (
+                f"{current_label} [{scale_str}]" if current_label else f"[{scale_str}]"
+            )
 
         set_label(new_label)
 
     # Apply to requested axes
-    if axis in ['x', 'both']:
+    if axis in ["x", "both"]:
         scale_axis_impl(ax, is_x_axis=True)
-    if axis in ['y', 'both']:
+    if axis in ["y", "both"]:
         scale_axis_impl(ax, is_x_axis=False)
 
 

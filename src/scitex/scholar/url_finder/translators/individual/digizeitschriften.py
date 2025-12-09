@@ -12,7 +12,9 @@ class DigiZeitschriftenTranslator(BaseTranslator):
     """DigiZeitschriften."""
 
     LABEL = "DigiZeitschriften"
-    URL_TARGET_PATTERN = r"^https?://www\.digizeitschriften\.de/((en/)?dms/|index\.php\?id=27[24])"
+    URL_TARGET_PATTERN = (
+        r"^https?://www\.digizeitschriften\.de/((en/)?dms/|index\.php\?id=27[24])"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

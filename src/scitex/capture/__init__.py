@@ -27,16 +27,12 @@ Usage:
     capture.stop()
 """
 
-from .utils import (
-    capture,
-    start_monitor,
-    stop_monitor
-)
+from .utils import capture, start_monitor, stop_monitor
 from .gif import (
     create_gif_from_session,
     create_gif_from_files,
     create_gif_from_pattern,
-    create_gif_from_latest_session
+    create_gif_from_latest_session,
 )
 from .session import session
 from .capture import CaptureManager
@@ -44,14 +40,17 @@ from .capture import CaptureManager
 # Global manager for monitor enumeration
 _manager = CaptureManager()
 
+
 def get_info():
     """Get comprehensive display info (monitors, windows, virtual desktops)."""
     return _manager.get_info()
 
+
 # Simpler, clearer aliases
-get_info = get_info      # Primary: simple and clear
+get_info = get_info  # Primary: simple and clear
 list_windows = get_info  # Alternative: focus on windows
 get_display_info = get_info  # Legacy
+
 
 def capture_window(window_handle: int, output_path: str = None):
     """
@@ -74,10 +73,11 @@ def capture_window(window_handle: int, output_path: str = None):
     """
     return _manager.capture_window(window_handle, output_path)
 
+
 # Convenience aliases - these are the main public API
-snap = capture     # Primary: natural camera action
-take = capture     # Alternative: "take a picture"
-cpt = capture      # Legacy: backwards compatibility
+snap = capture  # Primary: natural camera action
+take = capture  # Alternative: "take a picture"
+cpt = capture  # Legacy: backwards compatibility
 start = start_monitor
 stop = stop_monitor
 
@@ -92,19 +92,19 @@ __email__ = "Yusuke.Watanabe@scitex.ai"
 # Only expose the essential functions
 __all__ = [
     "capture",
-    "snap",        # Primary API
-    "take",        # Alternative API
-    "cpt",         # Legacy
+    "snap",  # Primary API
+    "take",  # Alternative API
+    "cpt",  # Legacy
     "start",
     "stop",
     "session",
-    "get_info",          # Primary: get all display info
-    "list_windows",      # Alternative: focus on windows
-    "get_info", # Legacy
+    "get_info",  # Primary: get all display info
+    "list_windows",  # Alternative: focus on windows
+    "get_info",  # Legacy
     "get_display_info",  # Legacy
     "capture_window",
     "create_gif_from_session",
     "create_gif_from_files",
     "create_gif_from_pattern",
-    "create_gif_from_latest_session"
+    "create_gif_from_latest_session",
 ]

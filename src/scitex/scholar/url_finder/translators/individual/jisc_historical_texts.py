@@ -12,7 +12,9 @@ class JiscHistoricalTextsTranslator(BaseTranslator):
     """JISC Historical Texts."""
 
     LABEL = "JISC Historical Texts"
-    URL_TARGET_PATTERN = r"^https?://(data\.)?[^/]*historicaltexts\.jisc\.ac\.uk/(view|results)\?"
+    URL_TARGET_PATTERN = (
+        r"^https?://(data\.)?[^/]*historicaltexts\.jisc\.ac\.uk/(view|results)\?"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

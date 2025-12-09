@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -45,10 +46,7 @@ class BrowserMixin:
     @classmethod
     async def get_shared_browser_async(cls) -> Browser:
         """Get or create shared browser instance (deprecated - use get_browser_async)."""
-        if (
-            cls._shared_browser is None
-            or cls._shared_browser.is_connected() is False
-        ):
+        if cls._shared_browser is None or cls._shared_browser.is_connected() is False:
             if cls._shared_playwright is None:
                 cls._shared_playwright = await async_playwright().start()
             cls._shared_browser = await cls._shared_playwright.chromium.launch(
@@ -69,10 +67,7 @@ class BrowserMixin:
 
     async def get_browser_async(self) -> Browser:
         """Get or create a local browser instance with the current mode setting."""
-        if (
-            self._shared_browser is None
-            or self._shared_browser.is_connected() is False
-        ):
+        if self._shared_browser is None or self._shared_browser.is_connected() is False:
             if self._shared_playwright is None:
                 self._shared_playwright = await async_playwright().start()
 
@@ -108,11 +103,9 @@ class BrowserMixin:
 
             # Always run in visible mode (never headless)
             # This is safer for bot detection while providing flexibility via viewport sizing
-            self._shared_browser = (
-                await self._shared_playwright.chromium.launch(
-                    headless=False,
-                    args=stealth_args,
-                )
+            self._shared_browser = await self._shared_playwright.chromium.launch(
+                headless=False,
+                args=stealth_args,
             )
         return self._shared_browser
 
@@ -120,9 +113,7 @@ class BrowserMixin:
         """Create new page/tab and optionally navigate to URL."""
         browser = await self.get_browser_async()
         context = await browser.new_context()
-        await context.add_init_script(
-            self.cookie_acceptor.get_auto_acceptor_script()
-        )
+        await context.add_init_script(self.cookie_acceptor.get_auto_acceptor_script())
         # await self.cookie_acceptor.inject_auto_acceptor_async(context)
         page = await context.new_page()
         self.contexts.append(context)
@@ -151,9 +142,7 @@ class BrowserMixin:
         """Create browser context with cookie auto-acceptance."""
         # Use headless mode for stealth, visible for interactive
         is_headless = self.mode == "stealth"
-        browser = await playwright_instance.chromium.launch(
-            headless=is_headless
-        )
+        browser = await playwright_instance.chromium.launch(headless=is_headless)
 
         # # Smart viewport sizing based on mode
         # if "viewport" not in context_options:
@@ -165,15 +154,11 @@ class BrowserMixin:
         #         context_options["viewport"] = {"width": 1280, "height": 720}
 
         context = await browser.new_context(**context_options)
-        await context.add_init_script(
-            self.cookie_acceptor.get_auto_acceptor_script()
-        )
+        await context.add_init_script(self.cookie_acceptor.get_auto_acceptor_script())
         # await self.cookie_acceptor.inject_auto_acceptor_async(context)
         return browser, context
 
-    async def get_session_async(
-        self, timeout: int = 30
-    ) -> aiohttp.ClientSession:
+    async def get_session_async(self, timeout: int = 30) -> aiohttp.ClientSession:
         """Get or create basic aiohttp session."""
         if (
             not hasattr(self, "_session")
@@ -189,11 +174,7 @@ class BrowserMixin:
 
     async def close_session(self):
         """Close the aiohttp session."""
-        if (
-            hasattr(self, "_session")
-            and self._session
-            and not self._session.closed
-        ):
+        if hasattr(self, "_session") and self._session and not self._session.closed:
             await self._session.close()
             self._session = None
 
@@ -281,6 +262,7 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     import argparse
+
     parser = argparse.ArgumentParser(description="BrowserMixin demo")
     return parser.parse_args()
 

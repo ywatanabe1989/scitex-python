@@ -135,7 +135,7 @@ def create_figure_ax_mm(
     # Create axes with exact position and transparent background if requested
     ax = fig.add_axes([left, bottom, width, height])
     # Make axes background transparent when figure background is transparent
-    if fig.get_facecolor() == (0, 0, 0, 0) or fig.get_facecolor() == 'none':
+    if fig.get_facecolor() == (0, 0, 0, 0) or fig.get_facecolor() == "none":
         ax.patch.set_alpha(0.0)
 
     # Apply styling if provided
@@ -238,6 +238,7 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
     if marker_size_mm is not None:
         marker_size_pt = mm_to_pt(marker_size_mm)
         import matplotlib as mpl
+
         mpl.rcParams["lines.markersize"] = marker_size_pt
 
     # Configure tick parameters (all mm values converted to points)
@@ -351,6 +352,6 @@ if __name__ == "__main__":
     output_path = "/tmp/test_mm_control.png"
     fig.savefig(output_path, dpi=300, bbox_inches="tight")
     print(f"Figure saved to: {output_path}")
-    print(f"Physical size: 35 mm × {35*0.7:.1f} mm")
+    print(f"Physical size: 35 mm × {35 * 0.7:.1f} mm")
 
 # EOF

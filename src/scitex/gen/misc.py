@@ -216,7 +216,6 @@ def is_later_or_equal(package, tgt_version, format="MAJOR.MINOR.PATCH"):
         return False
 
     if imp_major == tgt_major:
-
         ## Minor
         if imp_minor > tgt_minor:
             return True
@@ -225,7 +224,6 @@ def is_later_or_equal(package, tgt_version, format="MAJOR.MINOR.PATCH"):
             return False
 
         if imp_minor == tgt_minor:
-
             ## Patch
             if imp_patch > tgt_patch:
                 return True
@@ -264,7 +262,6 @@ def _copy_a_file(src, dst, allow_overwrite=False):
         print(f"\n/dev/null was not copied.\n")
 
     else:
-
         if dst.endswith("/"):
             _, src_fname, src_ext = scitex.path.split(src)
             # src_fname = src + src_ext

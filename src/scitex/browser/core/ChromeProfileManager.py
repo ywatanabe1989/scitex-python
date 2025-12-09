@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/core/ChromeProfileManager.py"
-)
+
+__FILE__ = "./src/scitex/browser/core/ChromeProfileManager.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -56,9 +55,7 @@ class ChromeProfileManager:
 
     AVAILABLE_PROFILE_NAMES = ["system", "extension", "auth", "stealth"]
 
-    def __init__(
-        self, profile_name: str, config: Optional[ScholarConfig] = None
-    ):
+    def __init__(self, profile_name: str, config: Optional[ScholarConfig] = None):
         self.name = self.__class__.__name__
         self.config = config or ScholarConfig()
         # Allow dynamic profile names (e.g., worker_0, worker_1) for parallel downloads
@@ -171,9 +168,7 @@ class ChromeProfileManager:
 
         return extension_args
 
-    async def install_extensions_manually_if_not_installed_async(
-        self, verbose=False
-    ):
+    async def install_extensions_manually_if_not_installed_async(self, verbose=False):
         """Open Chrome for manual extension installation."""
         if self.check_extensions_installed(verbose=verbose):
             return True
@@ -223,9 +218,7 @@ class ChromeProfileManager:
         print("\n" + "=" * 60)
         print("Chrome Extension Installation")
         print("=" * 60)
-        print(
-            "Install extensions from the opened Chrome tabs, then press Enter"
-        )
+        print("Install extensions from the opened Chrome tabs, then press Enter")
 
         try:
             input("Press Enter when done...")
@@ -280,22 +273,16 @@ class ChromeProfileManager:
         """
         import time
 
-        source_profile_dir = self.config.get_cache_chrome_dir(
-            source_profile_name
-        )
+        source_profile_dir = self.config.get_cache_chrome_dir(source_profile_name)
 
         if not source_profile_dir.exists():
-            logger.error(
-                f"Source profile does not exist: {source_profile_dir}"
-            )
+            logger.error(f"Source profile does not exist: {source_profile_dir}")
             return False
 
         # Create target profile directory if needed
         self.profile_dir.mkdir(parents=True, exist_ok=True)
 
-        logger.debug(
-            f"Syncing profile: {self.profile_name} ← {source_profile_name}"
-        )
+        logger.debug(f"Syncing profile: {self.profile_name} ← {source_profile_name}")
         logger.debug(f"  Source: {source_profile_dir}")
         logger.debug(f"  Target: {self.profile_dir}")
 
@@ -356,9 +343,7 @@ class ChromeProfileManager:
             return True
 
         except subprocess.CalledProcessError as e:
-            logger.error(
-                f"rsync failed (exit code {e.returncode}): {e.stderr}"
-            )
+            logger.error(f"rsync failed (exit code {e.returncode}): {e.stderr}")
             return False
         except FileNotFoundError:
             logger.error("rsync command not found - please install rsync")

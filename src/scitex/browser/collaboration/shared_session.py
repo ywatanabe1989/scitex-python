@@ -100,7 +100,9 @@ class SharedBrowserSession:
             user_data_dir = self.config.user_data_dir
         else:
             scitex_dir = Path(os.getenv("SCITEX_DIR", Path.home() / ".scitex"))
-            user_data_dir = str(scitex_dir / "browser" / "sessions" / self.config.session_id)
+            user_data_dir = str(
+                scitex_dir / "browser" / "sessions" / self.config.session_id
+            )
 
         # Start playwright
         self.playwright = await async_playwright().start()
@@ -124,10 +126,13 @@ class SharedBrowserSession:
         self.start_time = time.time()
 
         # Log event
-        self._log_event("session_started", {
-            "session_id": self.config.session_id,
-            "user_data_dir": user_data_dir,
-        })
+        self._log_event(
+            "session_started",
+            {
+                "session_id": self.config.session_id,
+                "user_data_dir": user_data_dir,
+            },
+        )
 
         print(f"✅ Shared browser session started: {self.config.session_id}")
         print(f"   User data: {user_data_dir}")
@@ -137,7 +142,9 @@ class SharedBrowserSession:
         if self.config.screenshot_interval:
             asyncio.create_task(self._auto_screenshot_loop())
 
-    async def navigate(self, url: str, wait_until: str = "load", timeout: int = 60000) -> str:
+    async def navigate(
+        self, url: str, wait_until: str = "load", timeout: int = 60000
+    ) -> str:
         """
         Navigate to URL.
 
@@ -225,10 +232,13 @@ class SharedBrowserSession:
 
         duration = time.time() - self.start_time if self.start_time else 0
 
-        self._log_event("session_closed", {
-            "duration": duration,
-            "screenshot_count": len(self.screenshots),
-        })
+        self._log_event(
+            "session_closed",
+            {
+                "duration": duration,
+                "screenshot_count": len(self.screenshots),
+            },
+        )
 
         print(f"✅ Shared browser session closed: {self.config.session_id}")
         print(f"   Duration: {duration:.1f}s")
@@ -380,4 +390,3 @@ class SharedBrowserSession:
 
 
 # EOF
-

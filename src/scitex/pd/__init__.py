@@ -6,7 +6,10 @@ from ._find_pval import find_pval, _find_pval_col
 from ._force_df import force_df
 from ._from_xyz import from_xyz
 from ._get_unique import get_unique
-from ._ignore_SettingWithCopyWarning import ignore_SettingWithCopyWarning, ignore_setting_with_copy_warning
+from ._ignore_SettingWithCopyWarning import (
+    ignore_SettingWithCopyWarning,
+    ignore_setting_with_copy_warning,
+)
 from ._melt_cols import melt_cols
 from ._merge_columns import merge_cols, merge_columns
 from ._mv import mv, mv_to_first, mv_to_last

@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/config/ScholarConfig.py"
-)
+
+__FILE__ = "./src/scitex/scholar/config/ScholarConfig.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -68,8 +67,7 @@ class ScholarConfig:
         path_manager_get_methods = [
             attr
             for attr in dir(self.path_manager)
-            if attr.startswith("get_")
-            and callable(getattr(self.path_manager, attr))
+            if attr.startswith("get_") and callable(getattr(self.path_manager, attr))
         ]
         return list(own_attrs) + path_manager_get_methods
 
@@ -107,9 +105,7 @@ class ScholarConfig:
                     return value
                 elif value == "null":
                     return "null"
-                elif value and not (
-                    value.startswith('"') and value.endswith('"')
-                ):
+                elif value and not (value.startswith('"') and value.endswith('"')):
                     return f'"{value}"'
                 else:
                     return value or "null"
@@ -142,5 +138,6 @@ class ScholarConfig:
     def paths(self):
         """Access to path manager for organized directory structure"""
         return self.path_manager
+
 
 # EOF

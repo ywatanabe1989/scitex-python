@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/_compile_async.py"
-)
+
+__FILE__ = "./src/scitex/writer/_compile_async.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -50,9 +49,7 @@ def _make_async_wrapper(sync_func: Callable) -> Callable:
     @wraps(sync_func)
     async def async_wrapper(*args: Any, **kwargs: Any) -> CompilationResult:
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            _executor, sync_func, *args, **kwargs
-        )
+        return await loop.run_in_executor(_executor, sync_func, *args, **kwargs)
 
     return async_wrapper
 
@@ -88,17 +85,13 @@ async def compile_all_async(
         ...     else:
         ...         print(f"{doc_type}: FAILED")
     """
-    logger.info(
-        f"Starting concurrent compilation of all documents in {project_dir}"
-    )
+    logger.info(f"Starting concurrent compilation of all documents in {project_dir}")
 
     try:
         results = await asyncio.gather(
             compile_manuscript_async(project_dir, timeout=timeout),
             compile_supplementary_async(project_dir, timeout=timeout),
-            compile_revision_async(
-                project_dir, track_changes, timeout=timeout
-            ),
+            compile_revision_async(project_dir, track_changes, timeout=timeout),
             return_exceptions=True,
         )
     except Exception as e:

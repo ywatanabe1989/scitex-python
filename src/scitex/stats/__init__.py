@@ -25,7 +25,13 @@ from . import _schema
 
 # Export commonly used functions and classes for convenience
 from .descriptive import describe
-from ._schema import StatResult, Position, StatStyling, StatPositioning, create_stat_result
+from ._schema import (
+    StatResult,
+    Position,
+    StatStyling,
+    StatPositioning,
+    create_stat_result,
+)
 
 __all__ = [
     # Main submodules

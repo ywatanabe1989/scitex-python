@@ -12,7 +12,9 @@ class LandesbibliographieBadenWurttembergTranslator(BaseTranslator):
     """Landesbibliographie Baden-Wurttemberg."""
 
     LABEL = "Landesbibliographie Baden-Wurttemberg"
-    URL_TARGET_PATTERN = r"^https?://(www\.)?(statistik\.baden-wuerttemberg|statistik-bw)\.de/LABI"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.)?(statistik\.baden-wuerttemberg|statistik-bw)\.de/LABI"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

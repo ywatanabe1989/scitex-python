@@ -281,14 +281,14 @@ if __name__ == "__main__":
 # def _save_matlab(obj, spath):
 #     """
 #     Save a Python dictionary to a MATLAB .mat file.
-#     
+# 
 #     Parameters
 #     ----------
 #     obj : dict
 #         Dictionary of arrays to save in MATLAB format.
 #     spath : str
 #         Path where the MATLAB file will be saved.
-#         
+# 
 #     Returns
 #     -------
 #     None

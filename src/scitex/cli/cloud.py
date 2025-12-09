@@ -28,18 +28,21 @@ def run_tea(*args):
     Returns:
         subprocess.CompletedProcess
     """
-    tea_path = Path.home() / '.local' / 'bin' / 'tea'
+    tea_path = Path.home() / ".local" / "bin" / "tea"
 
     if not tea_path.exists():
         click.echo("Error: tea CLI not found", err=True)
-        click.echo("Install: wget https://dl.gitea.com/tea/0.9.2/tea-0.9.2-linux-amd64 -O ~/.local/bin/tea && chmod +x ~/.local/bin/tea", err=True)
+        click.echo(
+            "Install: wget https://dl.gitea.com/tea/0.9.2/tea-0.9.2-linux-amd64 -O ~/.local/bin/tea && chmod +x ~/.local/bin/tea",
+            err=True,
+        )
         sys.exit(1)
 
     try:
         result = subprocess.run(
             [str(tea_path)] + list(args),
             capture_output=False,  # Show output directly
-            text=True
+            text=True,
         )
         return result
     except Exception as e:
@@ -55,16 +58,16 @@ def is_in_workspace():
         bool: True if running in workspace, False otherwise
     """
     # Method A: Environment variable
-    if os.environ.get('SCITEX_WORKSPACE'):
+    if os.environ.get("SCITEX_WORKSPACE"):
         return True
 
     # Method B: Check hostname pattern
     hostname = socket.gethostname()
-    if hostname.startswith('scitex-workspace-'):
+    if hostname.startswith("scitex-workspace-"):
         return True
 
     # Method C: Check special marker file
-    if Path('/.scitex-workspace').exists():
+    if Path("/.scitex-workspace").exists():
         return True
 
     return False
@@ -111,10 +114,10 @@ def check_workspace_sync_status():
     try:
         # Check for uncommitted changes
         result = subprocess.run(
-            ['git', 'status', '--porcelain'],
+            ["git", "status", "--porcelain"],
             capture_output=True,
             text=True,
-            cwd=os.getcwd()
+            cwd=os.getcwd(),
         )
 
         if result.stdout.strip():
@@ -122,10 +125,10 @@ def check_workspace_sync_status():
 
         # Check for unpushed commits
         result = subprocess.run(
-            ['git', 'rev-list', '--count', 'origin/main..HEAD'],
+            ["git", "rev-list", "--count", "origin/main..HEAD"],
             capture_output=True,
             text=True,
-            cwd=os.getcwd()
+            cwd=os.getcwd(),
         )
 
         if result.returncode == 0 and int(result.stdout.strip()) > 0:
@@ -153,13 +156,15 @@ def check_large_files(threshold_mb=100):
     try:
         # Get all tracked and untracked files
         result = subprocess.run(
-            ['git', 'ls-files', '--others', '--exclude-standard'],
+            ["git", "ls-files", "--others", "--exclude-standard"],
             capture_output=True,
             text=True,
-            cwd=os.getcwd()
+            cwd=os.getcwd(),
         )
 
-        untracked_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
+        untracked_files = (
+            result.stdout.strip().split("\n") if result.stdout.strip() else []
+        )
 
         # Check sizes
         for filepath in untracked_files:
@@ -179,14 +184,14 @@ def check_large_files(threshold_mb=100):
 class SyncLock:
     """File-based lock for preventing concurrent sync operations."""
 
-    def __init__(self, lock_path='/tmp/scitex-workspace-sync.lock', timeout=30):
+    def __init__(self, lock_path="/tmp/scitex-workspace-sync.lock", timeout=30):
         self.lock_path = lock_path
         self.timeout = timeout
         self.lock_file = None
 
     def __enter__(self):
         """Acquire lock."""
-        self.lock_file = open(self.lock_path, 'w')
+        self.lock_file = open(self.lock_path, "w")
         start_time = time.time()
 
         while True:
@@ -200,7 +205,9 @@ class SyncLock:
             except IOError:
                 # Lock held by another process
                 if time.time() - start_time > self.timeout:
-                    raise TimeoutError("Could not acquire sync lock - another sync in progress")
+                    raise TimeoutError(
+                        "Could not acquire sync lock - another sync in progress"
+                    )
                 click.echo("⏳ Waiting for ongoing sync to complete...", err=True)
                 time.sleep(1)
 
@@ -219,7 +226,7 @@ class SyncLock:
 # Workspace files are backed up via rsync snapshots (not auto-git-sync)
 
 
-@click.group(context_settings={'help_option_names': ['-h', '--help']})
+@click.group(context_settings={"help_option_names": ["-h", "--help"]})
 def cloud():
     """
     Cloud/Git operations (wraps tea for Gitea)
@@ -239,8 +246,8 @@ def cloud():
 
 
 @cloud.command()
-@click.option('--url', default='http://localhost:3001', help='Gitea instance URL')
-@click.option('--token', help='API token')
+@click.option("--url", default="http://localhost:3001", help="Gitea instance URL")
+@click.option("--token", help="API token")
 def login(url, token):
     """
     Login to SciTeX Cloud (Gitea)
@@ -249,17 +256,17 @@ def login(url, token):
         scitex cloud login
         scitex cloud login --url https://git.scitex.ai --token YOUR_TOKEN
     """
-    args = ['login', 'add', '--name', 'scitex', '--url', url]
+    args = ["login", "add", "--name", "scitex", "--url", url]
     if token:
-        args.extend(['--token', token])
+        args.extend(["--token", token])
 
     run_tea(*args)
 
 
 @cloud.command()
-@click.argument('repository')
-@click.argument('destination', required=False)
-@click.option('--login', '-l', default='scitex-dev', help='Tea login to use')
+@click.argument("repository")
+@click.argument("destination", required=False)
+@click.option("--login", "-l", default="scitex-dev", help="Tea login to use")
 def clone(repository, destination, login):
     """
     Clone a repository from SciTeX Cloud
@@ -276,38 +283,52 @@ def clone(repository, destination, login):
         scitex cloud clone my-research ./local-dir
     """
     # If repository doesn't contain '/', try to find it in the repo list
-    if '/' not in repository:
+    if "/" not in repository:
         # Get list of repos to find the matching one
         try:
             result = subprocess.run(
-                [str(Path.home() / '.local' / 'bin' / 'tea'), 'repos', 'ls', '--login', login, '--fields', 'name,owner'],
+                [
+                    str(Path.home() / ".local" / "bin" / "tea"),
+                    "repos",
+                    "ls",
+                    "--login",
+                    login,
+                    "--fields",
+                    "name,owner",
+                ],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
 
             # Parse the output to find matching repo
-            for line in result.stdout.split('\n'):
+            for line in result.stdout.split("\n"):
                 if repository in line:
                     # Extract owner from the line
-                    parts = line.split('|')
+                    parts = line.split("|")
                     if len(parts) >= 2:
                         owner = parts[1].strip()
-                        if owner and owner != 'OWNER':  # Skip header
+                        if owner and owner != "OWNER":  # Skip header
                             repository = f"{owner}/{repository}"
                             break
 
             # If still no '/', it means we didn't find it
-            if '/' not in repository:
-                click.echo(f"Error: Repository '{repository}' not found. Please use format 'username/repo'", err=True)
+            if "/" not in repository:
+                click.echo(
+                    f"Error: Repository '{repository}' not found. Please use format 'username/repo'",
+                    err=True,
+                )
                 sys.exit(1)
 
         except subprocess.CalledProcessError:
-            click.echo(f"Error: Could not list repositories. Please use format 'username/repo'", err=True)
+            click.echo(
+                f"Error: Could not list repositories. Please use format 'username/repo'",
+                err=True,
+            )
             sys.exit(1)
 
     # Use tea clone command
-    args = ['clone', '--login', login, repository]
+    args = ["clone", "--login", login, repository]
     if destination:
         args.append(destination)
 
@@ -315,10 +336,10 @@ def clone(repository, destination, login):
 
 
 @cloud.command()
-@click.argument('name')
-@click.option('--description', '-d', help='Repository description')
-@click.option('--private', is_flag=True, help='Make repository private')
-@click.option('--login', '-l', default='scitex-dev', help='Tea login to use')
+@click.argument("name")
+@click.option("--description", "-d", help="Repository description")
+@click.option("--private", is_flag=True, help="Make repository private")
+@click.option("--login", "-l", default="scitex-dev", help="Tea login to use")
 def create(name, description, private, login):
     """
     Create a new repository
@@ -328,21 +349,21 @@ def create(name, description, private, login):
         scitex cloud create my-new-project
         scitex cloud create my-project --description "My research" --private
     """
-    args = ['repo', 'create', '--name', name, '--login', login]
+    args = ["repo", "create", "--name", name, "--login", login]
 
     if description:
-        args.extend(['--description', description])
+        args.extend(["--description", description])
     if private:
-        args.append('--private')
+        args.append("--private")
 
     run_tea(*args)
 
 
-@cloud.command(name='list')
-@click.option('--user', '-u', help='List repos for specific user')
-@click.option('--login', '-l', default='scitex-dev', help='Tea login to use')
-@click.option('--starred', '-s', is_flag=True, help='List starred repos')
-@click.option('--watched', '-w', is_flag=True, help='List watched repos')
+@cloud.command(name="list")
+@click.option("--user", "-u", help="List repos for specific user")
+@click.option("--login", "-l", default="scitex-dev", help="Tea login to use")
+@click.option("--starred", "-s", is_flag=True, help="List starred repos")
+@click.option("--watched", "-w", is_flag=True, help="List watched repos")
 def list_repos(user, login, starred, watched):
     """
     List repositories
@@ -354,12 +375,12 @@ def list_repos(user, login, starred, watched):
         scitex cloud list --starred
         scitex cloud list --watched
     """
-    args = ['repos', '--login', login, '--output', 'table']
+    args = ["repos", "--login", login, "--output", "table"]
 
     if starred:
-        args.append('--starred')
+        args.append("--starred")
     if watched:
-        args.append('--watched')
+        args.append("--watched")
     if user:
         args.append(user)
 
@@ -367,9 +388,9 @@ def list_repos(user, login, starred, watched):
 
 
 @cloud.command()
-@click.argument('query')
-@click.option('--login', '-l', default='scitex-dev', help='Tea login to use')
-@click.option('--limit', type=int, default=10, help='Maximum results to show')
+@click.argument("query")
+@click.option("--login", "-l", default="scitex-dev", help="Tea login to use")
+@click.option("--limit", type=int, default=10, help="Maximum results to show")
 def search(query, login, limit):
     """
     Search for repositories
@@ -383,14 +404,14 @@ def search(query, login, limit):
         scitex cloud search neural
         scitex cloud search "machine learning" --limit 20
     """
-    args = ['repos', 'search', '--login', login, '--limit', str(limit), query]
+    args = ["repos", "search", "--login", login, "--limit", str(limit), query]
     run_tea(*args)
 
 
 @cloud.command()
-@click.argument('repository')
-@click.option('--login', '-l', default='scitex-dev', help='Tea login to use')
-@click.confirmation_option(prompt='Are you sure you want to delete this repository?')
+@click.argument("repository")
+@click.option("--login", "-l", default="scitex-dev", help="Tea login to use")
+@click.confirmation_option(prompt="Are you sure you want to delete this repository?")
 def delete(repository, login):
     """
     Delete a repository (DANGEROUS!)
@@ -411,20 +432,21 @@ def delete(repository, login):
     import json
 
     # Read tea config to get token and URL
-    config_path = Path.home() / '.config' / 'tea' / 'config.yml'
+    config_path = Path.home() / ".config" / "tea" / "config.yml"
     if not config_path.exists():
         click.echo("Error: Tea configuration not found", err=True)
         sys.exit(1)
 
     try:
         import yaml
+
         with open(config_path) as f:
             config = yaml.safe_load(f)
 
         # Find the login
         login_config = None
-        for l in config.get('logins', []):
-            if l['name'] == login:
+        for l in config.get("logins", []):
+            if l["name"] == login:
                 login_config = l
                 break
 
@@ -432,19 +454,19 @@ def delete(repository, login):
             click.echo(f"Error: Login '{login}' not found", err=True)
             sys.exit(1)
 
-        url = login_config['url']
-        token = login_config['token']
+        url = login_config["url"]
+        token = login_config["token"]
 
         # Parse repository
-        if '/' not in repository:
+        if "/" not in repository:
             click.echo("Error: Repository must be in format 'username/repo'", err=True)
             sys.exit(1)
 
-        owner, repo = repository.split('/', 1)
+        owner, repo = repository.split("/", 1)
 
         # Delete via API
         api_url = f"{url}/api/v1/repos/{owner}/{repo}"
-        headers = {'Authorization': f'token {token}'}
+        headers = {"Authorization": f"token {token}"}
 
         response = requests.delete(api_url, headers=headers)
 
@@ -454,7 +476,10 @@ def delete(repository, login):
             click.echo(f"Error: Repository '{repository}' not found", err=True)
             sys.exit(1)
         else:
-            click.echo(f"Error: Failed to delete repository (status {response.status_code})", err=True)
+            click.echo(
+                f"Error: Failed to delete repository (status {response.status_code})",
+                err=True,
+            )
             sys.exit(1)
 
     except ImportError:
@@ -466,7 +491,7 @@ def delete(repository, login):
 
 
 @cloud.command()
-@click.argument('repository')
+@click.argument("repository")
 def fork(repository):
     """
     Fork a repository
@@ -479,7 +504,7 @@ def fork(repository):
     Example:
         scitex cloud fork lab-pi/shared-project
     """
-    run_tea('repo', 'fork', repository)
+    run_tea("repo", "fork", repository)
 
 
 @cloud.group()
@@ -488,11 +513,11 @@ def pr():
     pass
 
 
-@pr.command(name='create')
-@click.option('--title', '-t', help='PR title')
-@click.option('--description', '-d', help='PR description')
-@click.option('--base', '-b', default='main', help='Base branch')
-@click.option('--head', '-h', help='Head branch')
+@pr.command(name="create")
+@click.option("--title", "-t", help="PR title")
+@click.option("--description", "-d", help="PR description")
+@click.option("--base", "-b", default="main", help="Base branch")
+@click.option("--head", "-h", help="Head branch")
 def pr_create(title, description, base, head):
     """
     Create a pull request
@@ -501,24 +526,24 @@ def pr_create(title, description, base, head):
     Example:
         scitex cloud pr create --title "Add analysis" --base main --head feature
     """
-    args = ['pr', 'create']
+    args = ["pr", "create"]
 
     if title:
-        args.extend(['--title', title])
+        args.extend(["--title", title])
     if description:
-        args.extend(['--description', description])
+        args.extend(["--description", description])
     if base:
-        args.extend(['--base', base])
+        args.extend(["--base", base])
     if head:
-        args.extend(['--head', head])
+        args.extend(["--head", head])
 
     run_tea(*args)
 
 
-@pr.command(name='list')
+@pr.command(name="list")
 def pr_list():
     """List pull requests"""
-    run_tea('pr', 'list')
+    run_tea("pr", "list")
 
 
 @cloud.group()
@@ -527,9 +552,9 @@ def issue():
     pass
 
 
-@issue.command(name='create')
-@click.option('--title', '-t', required=True, help='Issue title')
-@click.option('--body', '-b', help='Issue body')
+@issue.command(name="create")
+@click.option("--title", "-t", required=True, help="Issue title")
+@click.option("--body", "-b", help="Issue body")
 def issue_create(title, body):
     """
     Create an issue
@@ -538,17 +563,17 @@ def issue_create(title, body):
     Example:
         scitex cloud issue create --title "Bug in analysis" --body "Details here"
     """
-    args = ['issue', 'create', '--title', title]
+    args = ["issue", "create", "--title", title]
     if body:
-        args.extend(['--body', body])
+        args.extend(["--body", body])
 
     run_tea(*args)
 
 
-@issue.command(name='list')
+@issue.command(name="list")
 def issue_list():
     """List issues"""
-    run_tea('issue', 'list')
+    run_tea("issue", "list")
 
 
 @cloud.command()
@@ -565,10 +590,10 @@ def push():
     try:
         # Get current branch
         result = subprocess.run(
-            ['git', 'branch', '--show-current'],
+            ["git", "branch", "--show-current"],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         branch = result.stdout.strip()
 
@@ -578,7 +603,7 @@ def push():
 
         # Push to workspace
         click.echo("📤 Pushing to workspace...")
-        subprocess.run(['git', 'push', 'origin', branch], check=True)
+        subprocess.run(["git", "push", "origin", branch], check=True)
         click.echo(f"✓ Pushed to workspace (origin/{branch})")
 
     except subprocess.CalledProcessError as e:
@@ -600,10 +625,10 @@ def pull():
     try:
         # Get current branch
         result = subprocess.run(
-            ['git', 'branch', '--show-current'],
+            ["git", "branch", "--show-current"],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         branch = result.stdout.strip()
 
@@ -613,7 +638,7 @@ def pull():
 
         # Pull from workspace
         click.echo("📥 Pulling from workspace...")
-        subprocess.run(['git', 'pull', 'origin', branch], check=True)
+        subprocess.run(["git", "pull", "origin", branch], check=True)
         click.echo(f"✓ Pulled from workspace (origin/{branch})")
 
     except subprocess.CalledProcessError as e:
@@ -632,15 +657,34 @@ def status():
     ensure_not_in_workspace()
 
     # Show regular git status
-    subprocess.run(['git', 'status'])
+    subprocess.run(["git", "status"])
 
 
 @cloud.command()
-@click.option('-i', '--input', 'input_file', required=True, type=click.Path(exists=True), help='Input BibTeX file')
-@click.option('-o', '--output', 'output_file', required=True, type=click.Path(), help='Output BibTeX file')
-@click.option('-a', '--api-key', envvar='SCITEX_API_KEY', help='SciTeX API key (or set SCITEX_API_KEY env var)')
-@click.option('--no-cache', is_flag=True, help='Disable cache (force fresh metadata)')
-@click.option('--url', default='https://scitex.cloud', help='SciTeX Cloud URL')
+@click.option(
+    "-i",
+    "--input",
+    "input_file",
+    required=True,
+    type=click.Path(exists=True),
+    help="Input BibTeX file",
+)
+@click.option(
+    "-o",
+    "--output",
+    "output_file",
+    required=True,
+    type=click.Path(),
+    help="Output BibTeX file",
+)
+@click.option(
+    "-a",
+    "--api-key",
+    envvar="SCITEX_API_KEY",
+    help="SciTeX API key (or set SCITEX_API_KEY env var)",
+)
+@click.option("--no-cache", is_flag=True, help="Disable cache (force fresh metadata)")
+@click.option("--url", default="https://scitex.cloud", help="SciTeX Cloud URL")
 def enrich(input_file, output_file, api_key, no_cache, url):
     """
     Enrich BibTeX file with metadata
@@ -660,16 +704,16 @@ def enrich(input_file, output_file, api_key, no_cache, url):
     click.echo(f"Enriching: {input_file}")
 
     # Upload
-    with open(input_file, 'rb') as f:
-        files = {'bibtex_file': f}
-        data = {'use_cache': 'false' if no_cache else 'true'}
-        headers = {'Authorization': f'Bearer {api_key}', 'X-Requested-With': 'XMLHttpRequest'}
+    with open(input_file, "rb") as f:
+        files = {"bibtex_file": f}
+        data = {"use_cache": "false" if no_cache else "true"}
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "X-Requested-With": "XMLHttpRequest",
+        }
 
         response = requests.post(
-            f'{url}/scholar/bibtex/upload/',
-            headers=headers,
-            files=files,
-            data=data
+            f"{url}/scholar/bibtex/upload/", headers=headers, files=files, data=data
         )
 
     if response.status_code != 200:
@@ -677,27 +721,26 @@ def enrich(input_file, output_file, api_key, no_cache, url):
         sys.exit(1)
 
     result = response.json()
-    if not result.get('success'):
+    if not result.get("success"):
         click.echo(f"Error: {result.get('error', 'Upload failed')}", err=True)
         sys.exit(1)
 
-    job_id = result['job_id']
+    job_id = result["job_id"]
     click.echo(f"Job ID: {job_id}")
     click.echo("Processing", nl=False)
 
     # Poll status
     while True:
         response = requests.get(
-            f'{url}/scholar/api/bibtex/job/{job_id}/status/',
-            headers=headers
+            f"{url}/scholar/api/bibtex/job/{job_id}/status/", headers=headers
         )
         data = response.json()
-        status = data['status']
+        status = data["status"]
 
-        if status == 'completed':
+        if status == "completed":
             click.echo(" Done!")
             break
-        elif status in ('failed', 'cancelled'):
+        elif status in ("failed", "cancelled"):
             click.echo(f" {status.capitalize()}!", err=True)
             sys.exit(1)
 
@@ -706,12 +749,11 @@ def enrich(input_file, output_file, api_key, no_cache, url):
 
     # Download
     response = requests.get(
-        f'{url}/scholar/api/bibtex/job/{job_id}/download/',
-        headers=headers
+        f"{url}/scholar/api/bibtex/job/{job_id}/download/", headers=headers
     )
 
     if response.status_code == 200:
-        with open(output_file, 'wb') as f:
+        with open(output_file, "wb") as f:
             f.write(response.content)
         click.echo(f"✓ Saved: {output_file}")
     else:

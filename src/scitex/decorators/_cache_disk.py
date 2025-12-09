@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-11 20:31:13 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_cache_disk.py
+# Timestamp: "2025-12-09 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/decorators/_cache_disk.py
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/decorators/_cache_disk.py"
-)
+
+__FILE__ = "./src/scitex/decorators/_cache_disk.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
-
-# Time-stamp: "2024-11-07 06:08:45 (ywatanabe)"
 
 import functools
 
 from joblib import Memory as _Memory
+
+from scitex.config import get_paths
 
 
 def cache_disk(func):
@@ -26,8 +25,7 @@ def cache_disk(func):
         def expensive_function(x):
             return x ** 2
     """
-    scitex_dir = os.getenv("SCITEX_DIR", "~/.scitex")
-    cache_dir = os.path.join(scitex_dir, "cache", "functions")
+    cache_dir = str(get_paths().function_cache)
     memory = _Memory(cache_dir, verbose=0)
 
     @functools.wraps(func)
@@ -36,5 +34,6 @@ def cache_disk(func):
         return cached_func(*args, **kwargs)
 
     return wrapper
+
 
 # EOF

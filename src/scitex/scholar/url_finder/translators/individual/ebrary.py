@@ -12,7 +12,9 @@ class EbraryTranslator(BaseTranslator):
     """ebrary."""
 
     LABEL = "ebrary"
-    URL_TARGET_PATTERN = r"^https?://site\.ebrary\.com/.+(docDetail|search|detail)\.action\?"
+    URL_TARGET_PATTERN = (
+        r"^https?://site\.ebrary\.com/.+(docDetail|search|detail)\.action\?"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

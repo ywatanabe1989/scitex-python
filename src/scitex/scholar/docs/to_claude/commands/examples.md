@@ -21,10 +21,10 @@ $ARGUMENTS
    Remove obsolete example files, contents
    Rename to reflect the current version
 07. Examples MUST include at least one figure for demonstration
-08. Figures saved via `mngs.io.save` in gif format with numbering: 
+08. Figures saved via `scitex.io.save` in gif format with numbering: 
    `./examples/category/example_xxx_out/01_figure_name.gif`
 09.  GIF files MUST not be movies but a static image unless user requests
-10. Run the implemented examples to save the figures using the mngs framework
+10. Run the implemented examples to save the figures using the scitex framework
     Figures must be clean. Always check figures "visually"
     - [ ] Are figures beautiful?
     - [ ] Are figures show what the example want to claim?

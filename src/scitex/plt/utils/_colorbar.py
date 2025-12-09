@@ -47,9 +47,7 @@ def style_colorbar(cbar):
 
     # Style the ticks
     cbar.ax.tick_params(
-        width=line_width,
-        length=tick_length,
-        labelsize=COLORBAR_TICK_FONTSIZE
+        width=line_width, length=tick_length, labelsize=COLORBAR_TICK_FONTSIZE
     )
 
     # Style the colorbar axis spines
@@ -85,9 +83,9 @@ def colorbar(mappable, ax=None, n_ticks=4, **kwargs):
 
     # Set better defaults for colorbar placement
     defaults = {
-        'fraction': 0.046,  # Fraction of axes to use for colorbar
-        'pad': 0.04,        # Padding between axes and colorbar
-        'aspect': 20,       # Aspect ratio of colorbar
+        "fraction": 0.046,  # Fraction of axes to use for colorbar
+        "pad": 0.04,  # Padding between axes and colorbar
+        "aspect": 20,  # Aspect ratio of colorbar
     }
 
     # Update defaults with any user-provided kwargs
@@ -99,7 +97,7 @@ def colorbar(mappable, ax=None, n_ticks=4, **kwargs):
     cbar = plt.colorbar(mappable, ax=ax, **kwargs)
 
     # Limit number of ticks to match main axes style (3-4 ticks)
-    cbar.locator = MaxNLocator(nbins=n_ticks, min_n_ticks=2, prune='both')
+    cbar.locator = MaxNLocator(nbins=n_ticks, min_n_ticks=2, prune="both")
     cbar.update_ticks()
 
     # Apply publication-quality styling
@@ -107,17 +105,17 @@ def colorbar(mappable, ax=None, n_ticks=4, **kwargs):
 
     # If using constrained_layout, ensure the figure updates
     if ax is not None:
-        fig = ax.figure if hasattr(ax, 'figure') else ax[0].figure
-        if hasattr(fig, 'get_constrained_layout') and fig.get_constrained_layout():
+        fig = ax.figure if hasattr(ax, "figure") else ax[0].figure
+        if hasattr(fig, "get_constrained_layout") and fig.get_constrained_layout():
             # Force a layout update
             fig.canvas.draw_idle()
 
     return cbar
 
 
-def add_shared_colorbar(fig, axes, mappable, location='right', **kwargs):
+def add_shared_colorbar(fig, axes, mappable, location="right", **kwargs):
     """Add a single colorbar shared by multiple axes.
-    
+
     Parameters
     ----------
     fig : matplotlib.figure.Figure
@@ -130,22 +128,22 @@ def add_shared_colorbar(fig, axes, mappable, location='right', **kwargs):
         Where to place the colorbar (default: 'right')
     **kwargs : dict
         Additional keyword arguments passed to fig.colorbar
-        
+
     Returns
     -------
     colorbar : matplotlib.colorbar.Colorbar
         The colorbar instance
     """
     defaults = {
-        'shrink': 0.8,      # Shrink colorbar to match axes height
-        'aspect': 30,       # Make it thinner for shared colorbars
+        "shrink": 0.8,  # Shrink colorbar to match axes height
+        "aspect": 30,  # Make it thinner for shared colorbars
     }
-    
+
     # Update defaults with any user-provided kwargs
     for key, value in defaults.items():
         if key not in kwargs:
             kwargs[key] = value
-    
+
     # Create the shared colorbar
     cbar = fig.colorbar(mappable, ax=axes, location=location, **kwargs)
 

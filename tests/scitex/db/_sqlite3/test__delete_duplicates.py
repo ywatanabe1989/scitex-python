@@ -451,6 +451,7 @@ if __name__ == "__main__":
 # # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/db/_sqlite3/_delete_duplicates.py
 # # ----------------------------------------
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -476,9 +477,7 @@ if __name__ == "__main__":
 # """
 # 
 # 
-# def _sort_db(
-#     cursor: sqlite3.Cursor, table_name: str, columns: List[str]
-# ) -> None:
+# def _sort_db(cursor: sqlite3.Cursor, table_name: str, columns: List[str]) -> None:
 #     """
 #     Sorts the database table based on the specified columns.
 # 
@@ -538,6 +537,7 @@ if __name__ == "__main__":
 # 
 # #     return columns
 # 
+# 
 # def _determine_columns(
 #     cursor: sqlite3.Cursor,
 #     table_name: str,
@@ -564,6 +564,7 @@ if __name__ == "__main__":
 # 
 #     return columns
 # 
+# 
 # def _fetch_as_df(
 #     cursor: sqlite3.Cursor, columns: List[str], table_name: str
 # ) -> pd.DataFrame:
@@ -578,9 +579,7 @@ if __name__ == "__main__":
 # def _find_duplicated(df: pd.DataFrame) -> pd.DataFrame:
 #     df_duplicated = df[df.duplicated(keep="first")].copy()
 #     duplication_rate = len(df_duplicated) / (len(df) - len(df_duplicated))
-#     print(
-#         f"\n{100*duplication_rate:.2f}% of data was duplicated. Cleaning up..."
-#     )
+#     print(f"\n{100 * duplication_rate:.2f}% of data was duplicated. Cleaning up...")
 #     print(f"\nOriginal entries:\n{df.head()}")
 #     print(f"\nDuplicated entries:\n{df_duplicated.head()}")
 #     return df_duplicated
@@ -632,9 +631,7 @@ if __name__ == "__main__":
 #             cursor.execute(delete_query, tuple(duplicated_row))
 #             print(f"Deleted entry:\n{duplicated_row}")
 #     else:
-#         print(
-#             f"Skipping entry (not found or already deleted):\n{duplicated_row}"
-#         )
+#         print(f"Skipping entry (not found or already deleted):\n{duplicated_row}")
 # 
 # 
 # def delete_sqlite3_duplicates(
@@ -668,7 +665,9 @@ if __name__ == "__main__":
 #         all_cols_str = ", ".join(all_cols)
 # 
 #         # Create temp table with same structure
-#         cursor.execute(f"CREATE TABLE {temp_table} AS SELECT {all_cols_str} FROM {table_name} LIMIT 0")
+#         cursor.execute(
+#             f"CREATE TABLE {temp_table} AS SELECT {all_cols_str} FROM {table_name} LIMIT 0"
+#         )
 # 
 #         # Get total row count
 #         total_rows = cursor.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
@@ -692,7 +691,9 @@ if __name__ == "__main__":
 #             conn.commit()
 # 
 #         # Count unique rows
-#         total_unique = cursor.execute(f"SELECT COUNT(*) FROM {temp_table}").fetchone()[0]
+#         total_unique = cursor.execute(f"SELECT COUNT(*) FROM {temp_table}").fetchone()[
+#             0
+#         ]
 #         total_duplicates = total_rows - total_unique
 # 
 #         if not dry_run:
@@ -717,6 +718,7 @@ if __name__ == "__main__":
 # 
 #     finally:
 #         conn.close()
+# 
 # 
 # # EOF
 

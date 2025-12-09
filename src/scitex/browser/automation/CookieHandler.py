@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/automation/CookieHandler.py"
-)
+
+__FILE__ = "./src/scitex/browser/automation/CookieHandler.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 

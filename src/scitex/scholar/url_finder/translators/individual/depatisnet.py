@@ -31,7 +31,7 @@ class DEPATISnetTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 4,  # Web
-        "lastUpdated": "2019-12-07 20:44:27"
+        "lastUpdated": "2019-12-07 20:44:27",
     }
 
     # Label mapping
@@ -87,19 +87,16 @@ class DEPATISnetTranslator:
         Returns:
             Scraped item data
         """
-        item = {
-            "itemType": "patent",
-            "creators": [],
-            "tags": [],
-            "attachments": []
-        }
+        item = {"itemType": "patent", "creators": [], "tags": [], "attachments": []}
 
         # Extract patent number from URL
-        pn_match = re.search(r'docid=([^&#]*)', url)
+        pn_match = re.search(r"docid=([^&#]*)", url)
         if pn_match:
             pn = pn_match.group(1)
-            item["patentNumber"] = re.sub(r'^([A-Z]{2})[0]*(.*)$', r'\1\2', pn)
-            item["url"] = f"http://depatisnet.dpma.de/DepatisNet/depatisnet?action=bibdat&docid={pn}"
+            item["patentNumber"] = re.sub(r"^([A-Z]{2})[0]*(.*)$", r"\1\2", pn)
+            item["url"] = (
+                f"http://depatisnet.dpma.de/DepatisNet/depatisnet?action=bibdat&docid={pn}"
+            )
 
         # Parse detailed fields from table.tab_detail
         # This would extract: title, inventors, assignee, IPC, dates, etc.

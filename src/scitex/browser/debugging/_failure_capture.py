@@ -277,7 +277,12 @@ def save_failure_artifacts(
         Dict with paths to saved artifacts
     """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    safe_test_name = test_name.replace("::", "_").replace("[", "_").replace("]", "").replace("/", "_")
+    safe_test_name = (
+        test_name.replace("::", "_")
+        .replace("[", "_")
+        .replace("]", "")
+        .replace("/", "_")
+    )
 
     # Create artifacts directory with timestamp
     artifacts_path = Path(artifacts_dir) / timestamp
@@ -354,7 +359,9 @@ def create_failure_capture_fixture(artifacts_dir: Path | str):
         yield
         if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
             console_logs = collect_console_logs(page)
-            save_failure_artifacts(page, request.node.nodeid, artifacts_dir, console_logs)
+            save_failure_artifacts(
+                page, request.node.nodeid, artifacts_dir, console_logs
+            )
 
     return capture_on_failure
 

@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/engines/utils/_standardize_metadata.py"
-)
+
+__FILE__ = "./src/scitex/scholar/engines/utils/_standardize_metadata.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 

@@ -322,9 +322,7 @@ if __name__ == "__main__":
 # # Timestamp: "2025-02-27 22:14:52 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_dev/src/scitex/db/_PostgreSQLMixins/_ConnectionMixin.py
 # 
-# THIS_FILE = (
-#     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_ConnectionMixin.py"
-# )
+# THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_ConnectionMixin.py"
 # 
 # from typing import Any, Tuple
 # import psycopg2

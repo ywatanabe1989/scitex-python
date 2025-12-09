@@ -43,7 +43,7 @@ def get_optimizer(name: str):
 
     if name not in optimizers:
         raise ValueError(
-            f"Unknown optimizer: {name}. " f"Available: {list(optimizers.keys())}"
+            f"Unknown optimizer: {name}. Available: {list(optimizers.keys())}"
         )
 
     return optimizers[name]

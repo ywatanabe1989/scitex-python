@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/auth/library/_EZProxyAuthenticator.py"
-)
+
+__FILE__ = "./src/scitex/scholar/auth/library/_EZProxyAuthenticator.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -104,8 +103,7 @@ class EZProxyAuthenticator(BaseAuthenticator):
 
         # Session cache directory
         self.cache_dir = (
-            cache_dir
-            or Path.home() / ".scitex" / "scholar" / "ezproxy_sessions"
+            cache_dir or Path.home() / ".scitex" / "scholar" / "ezproxy_sessions"
         )
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -239,9 +237,7 @@ class EZProxyAuthenticator(BaseAuthenticator):
                         if not self.password:
                             import getpass
 
-                            self.password = getpass.getpass(
-                                "EZProxy password: "
-                            )
+                            self.password = getpass.getpass("EZProxy password: ")
 
                         # Fill credentials
                         await username_field.fill(self.username)
@@ -352,9 +348,7 @@ class EZProxyAuthenticator(BaseAuthenticator):
 
                     # Try to access a proxied resource
                     test_url = f"{self.proxy_url}/menu"
-                    response = await page.goto(
-                        test_url, wait_until="networkidle"
-                    )
+                    response = await page.goto(test_url, wait_until="networkidle")
 
                     # Check if we're still logged in
                     if response and response.status == 200:
@@ -416,9 +410,7 @@ class EZProxyAuthenticator(BaseAuthenticator):
             "institution": self.institution,
             "proxy_url": self.proxy_url,
             "session_expiry": (
-                self._session_expiry.isoformat()
-                if self._session_expiry
-                else None
+                self._session_expiry.isoformat() if self._session_expiry else None
             ),
             "cookies_count": len(self._cookies),
         }
@@ -480,5 +472,6 @@ class EZProxyAuthenticator(BaseAuthenticator):
         await context.add_cookies(self._full_cookies)
 
         return browser, context
+
 
 # EOF

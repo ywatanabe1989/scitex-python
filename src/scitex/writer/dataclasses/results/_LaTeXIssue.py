@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/dataclasses/_LaTeXIssue.py"
-)
+
+__FILE__ = "./src/scitex/writer/dataclasses/_LaTeXIssue.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -74,9 +73,7 @@ def main(args):
 def parse_args():
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Demonstrate LaTeXIssue dataclass"
-    )
+    parser = argparse.ArgumentParser(description="Demonstrate LaTeXIssue dataclass")
     parser.add_argument(
         "--type",
         type=str,

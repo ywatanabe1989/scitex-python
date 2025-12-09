@@ -372,6 +372,7 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -427,7 +428,7 @@ if __name__ == "__main__":
 #     PANDAS_AVAILABLE = False
 # 
 # 
-# def _load_pdf(lpath: str, mode: str = "full", **kwargs) -> Any:
+# def _load_pdf(lpath: str, mode: str = "full", metadata: bool = False, **kwargs) -> Any:
 #     """
 #     Load PDF file with comprehensive extraction capabilities.
 # 
@@ -442,6 +443,8 @@ if __name__ == "__main__":
 #             - 'images': Extract images with metadata
 #             - 'metadata': PDF metadata only
 #             - 'pages': Page-by-page extraction
+#         metadata: If True, return (result, metadata_dict) tuple for API consistency with images.
+#             If False (default), return result only. (default: False)
 #         **kwargs: Additional arguments
 #             - backend: 'auto' (default), 'fitz', 'pdfplumber', or 'pypdf2'
 #             - clean_text: Clean extracted text (default: True)
@@ -451,15 +454,21 @@ if __name__ == "__main__":
 #             - table_settings: Dict of pdfplumber table extraction settings
 # 
 #     Returns:
-#         Extracted content based on mode:
-#         - 'text': str
-#         - 'sections': Dict[str, str]
-#         - 'tables': Dict[int, List[pd.DataFrame]]
-#         - 'images': List[Dict] with image metadata
-#         - 'metadata': Dict with PDF metadata
-#         - 'pages': List[Dict] with page content
-#         - 'full': Dict with comprehensive extraction (text, sections, metadata, pages, tables, images, stats)
-#         - 'scientific': Dict with scientific paper extraction (text, sections, metadata, tables, images, stats)
+#         Extracted content based on mode and metadata parameter:
+# 
+#         When metadata=False (default):
+#             - 'text': str
+#             - 'sections': Dict[str, str]
+#             - 'tables': Dict[int, List[pd.DataFrame]]
+#             - 'images': List[Dict] with image metadata
+#             - 'metadata': Dict with PDF metadata
+#             - 'pages': List[Dict] with page content
+#             - 'full': Dict with comprehensive extraction
+#             - 'scientific': Dict with scientific paper extraction
+# 
+#         When metadata=True:
+#             - Returns: (result, metadata_dict) tuple
+#             - metadata_dict contains embedded scitex metadata from PDF Subject field
 # 
 #     Examples:
 #         >>> import scitex.io as stx
@@ -467,25 +476,18 @@ if __name__ == "__main__":
 #         >>> # Full extraction (default) - everything included
 #         >>> data = stx.load("paper.pdf")
 #         >>> print(data['full_text'])      # Complete text
-#         >>> print(data['sections'])       # Parsed sections
-#         >>> print(data['tables'])         # All tables as DataFrames
 #         >>> print(data['metadata'])       # PDF metadata
-#         >>> print(data['pages'])          # Page-by-page content
-#         >>> print(data['stats'])          # Statistics
 # 
-#         >>> # Scientific mode (recommended for papers) - optimized for research
+#         >>> # With metadata tuple (consistent with images)
+#         >>> data, meta = stx.load("paper.pdf", metadata=True)
+#         >>> print(meta['scitex']['version'])  # Embedded scitex metadata
+# 
+#         >>> # Scientific mode
 #         >>> paper = stx.load("paper.pdf", mode="scientific")
-#         >>> print(paper['text'])          # Full text
-#         >>> print(paper['sections'])      # Sections (Abstract, Methods, etc.)
-#         >>> print(paper['tables'])        # All tables as DataFrames
-#         >>> print(paper['images'])        # Image metadata
-#         >>> print(paper['stats'])         # Content statistics
+#         >>> print(paper['sections'])
 # 
-#         >>> # Simple text extraction only
+#         >>> # Simple text extraction
 #         >>> text = stx.load("paper.pdf", mode="text")
-# 
-#         >>> # Extract tables only
-#         >>> tables = stx.load("paper.pdf", mode="tables")
 #     """
 #     mode = kwargs.get("mode", mode)
 #     backend = kwargs.get("backend", "auto")
@@ -513,26 +515,26 @@ if __name__ == "__main__":
 # 
 #     # Extract based on mode
 #     if mode == "text":
-#         return _extract_text(lpath, backend, clean_text)
+#         result = _extract_text(lpath, backend, clean_text)
 #     elif mode == "sections":
-#         return _extract_sections(lpath, backend, clean_text)
+#         result = _extract_sections(lpath, backend, clean_text)
 #     elif mode == "tables":
-#         return _extract_tables(lpath, table_settings)
+#         result = _extract_tables(lpath, table_settings)
 #     elif mode == "images":
 #         save_as_jpg = kwargs.get("save_as_jpg", True)
-#         return _extract_images(lpath, output_dir, save_as_jpg)
+#         result = _extract_images(lpath, output_dir, save_as_jpg)
 #     elif mode == "metadata":
-#         return _extract_metadata(lpath, backend)
+#         result = _extract_metadata(lpath, backend)
 #     elif mode == "pages":
-#         return _extract_pages(lpath, backend, clean_text)
+#         result = _extract_pages(lpath, backend, clean_text)
 #     elif mode == "scientific":
 #         save_as_jpg = kwargs.get("save_as_jpg", True)
-#         return _extract_scientific(
+#         result = _extract_scientific(
 #             lpath, clean_text, output_dir, table_settings, save_as_jpg
 #         )
 #     elif mode == "full":
 #         save_as_jpg = kwargs.get("save_as_jpg", True)
-#         return _extract_full(
+#         result = _extract_full(
 #             lpath,
 #             backend,
 #             clean_text,
@@ -543,6 +545,20 @@ if __name__ == "__main__":
 #         )
 #     else:
 #         raise ValueError(f"Unknown extraction mode: {mode}")
+# 
+#     # If metadata parameter is True, return tuple (result, metadata_dict)
+#     # This provides API consistency with image loading
+#     if metadata:
+#         try:
+#             from .._metadata import read_metadata
+# 
+#             metadata_dict = read_metadata(lpath)
+#             return result, metadata_dict
+#         except Exception:
+#             # If metadata extraction fails, return with None
+#             return result, None
+# 
+#     return result
 # 
 # 
 # def _select_backend(mode: str, requested: str) -> str:
@@ -646,9 +662,7 @@ if __name__ == "__main__":
 #         return full_text
 # 
 #     except Exception as e:
-#         logger.error(
-#             f"Error extracting text with pdfplumber from {lpath}: {e}"
-#         )
+#         logger.error(f"Error extracting text with pdfplumber from {lpath}: {e}")
 #         raise
 # 
 # 
@@ -716,9 +730,7 @@ if __name__ == "__main__":
 #                         if table and len(table) > 0:
 #                             # First row as header if it looks like headers
 #                             if len(table) > 1 and all(
-#                                 isinstance(cell, str)
-#                                 for cell in table[0]
-#                                 if cell
+#                                 isinstance(cell, str) for cell in table[0] if cell
 #                             ):
 #                                 df = pd.DataFrame(table[1:], columns=table[0])
 #                             else:
@@ -806,26 +818,37 @@ if __name__ == "__main__":
 #                             img_pil = Image.open(io.BytesIO(image_bytes))
 # 
 #                             # Convert RGBA to RGB if necessary
-#                             if img_pil.mode in ('RGBA', 'LA', 'P'):
+#                             if img_pil.mode in ("RGBA", "LA", "P"):
 #                                 # Create a white background
-#                                 background = Image.new('RGB', img_pil.size, (255, 255, 255))
-#                                 if img_pil.mode == 'P':
-#                                     img_pil = img_pil.convert('RGBA')
-#                                 background.paste(img_pil, mask=img_pil.split()[-1] if img_pil.mode == 'RGBA' else None)
+#                                 background = Image.new(
+#                                     "RGB", img_pil.size, (255, 255, 255)
+#                                 )
+#                                 if img_pil.mode == "P":
+#                                     img_pil = img_pil.convert("RGBA")
+#                                 background.paste(
+#                                     img_pil,
+#                                     mask=img_pil.split()[-1]
+#                                     if img_pil.mode == "RGBA"
+#                                     else None,
+#                                 )
 #                                 img_pil = background
-#                             elif img_pil.mode != 'RGB':
-#                                 img_pil = img_pil.convert('RGB')
+#                             elif img_pil.mode != "RGB":
+#                                 img_pil = img_pil.convert("RGB")
 # 
 #                             # Save as JPG
 #                             filename = f"page_{page_num + 1}_img_{img_index}.jpg"
 #                             filepath = os.path.join(output_dir, filename)
-#                             img_pil.save(filepath, 'JPEG', quality=95)
+#                             img_pil.save(filepath, "JPEG", quality=95)
 # 
 #                             image_info["ext"] = "jpg"
 #                         except ImportError:
-#                             logger.warning("PIL not available for image conversion. Install with: pip install Pillow")
+#                             logger.warning(
+#                                 "PIL not available for image conversion. Install with: pip install Pillow"
+#                             )
 #                             # Fall back to original format
-#                             filename = f"page_{page_num + 1}_img_{img_index}.{original_ext}"
+#                             filename = (
+#                                 f"page_{page_num + 1}_img_{img_index}.{original_ext}"
+#                             )
 #                             filepath = os.path.join(output_dir, filename)
 #                             with open(filepath, "wb") as img_file:
 #                                 img_file.write(image_bytes)
@@ -964,6 +987,24 @@ if __name__ == "__main__":
 #                 }
 #             )
 # 
+#             # Try to parse scitex metadata from subject field (for consistency with PNG)
+#             subject = pdf_metadata.get("subject", "")
+#             if subject:
+#                 try:
+#                     import json
+# 
+#                     # Check if subject is JSON (scitex metadata)
+#                     parsed_subject = json.loads(subject)
+#                     if isinstance(parsed_subject, dict):
+#                         # Merge parsed scitex metadata with standard PDF metadata
+#                         # This makes PDF metadata format consistent with PNG
+#                         metadata.update(parsed_subject)
+#                         # Remove the raw JSON string from subject to avoid duplication
+#                         metadata.pop("subject", None)
+#                 except (json.JSONDecodeError, ValueError):
+#                     # Not JSON, keep subject as string
+#                     pass
+# 
 #             doc.close()
 # 
 #         except Exception as e:
@@ -977,6 +1018,24 @@ if __name__ == "__main__":
 #                 metadata["pages"] = len(pdf.pages)
 #                 if hasattr(pdf, "metadata"):
 #                     metadata.update(pdf.metadata)
+# 
+#                 # Try to parse scitex metadata from subject field (for consistency with PNG)
+#                 if "Subject" in metadata or "subject" in metadata:
+#                     subject = metadata.get("Subject") or metadata.get("subject", "")
+#                     if subject:
+#                         try:
+#                             import json
+# 
+#                             parsed_subject = json.loads(subject)
+#                             if isinstance(parsed_subject, dict):
+#                                 # Merge parsed scitex metadata with standard PDF metadata
+#                                 metadata.update(parsed_subject)
+#                                 # Remove the raw JSON string from subject to avoid duplication
+#                                 metadata.pop("Subject", None)
+#                                 metadata.pop("subject", None)
+#                         except (json.JSONDecodeError, ValueError):
+#                             # Not JSON, keep subject as string
+#                             pass
 #         except Exception as e:
 #             logger.error(f"Error extracting metadata with pdfplumber: {e}")
 # 
@@ -992,17 +1051,29 @@ if __name__ == "__main__":
 #                         "subject": reader.metadata.get("/Subject", ""),
 #                         "creator": reader.metadata.get("/Creator", ""),
 #                         "producer": reader.metadata.get("/Producer", ""),
-#                         "creation_date": str(
-#                             reader.metadata.get("/CreationDate", "")
-#                         ),
-#                         "modification_date": str(
-#                             reader.metadata.get("/ModDate", "")
-#                         ),
+#                         "creation_date": str(reader.metadata.get("/CreationDate", "")),
+#                         "modification_date": str(reader.metadata.get("/ModDate", "")),
 #                     }
 #                 )
 # 
 #             metadata["pages"] = len(reader.pages)
 #             metadata["encrypted"] = reader.is_encrypted
+# 
+#             # Try to parse scitex metadata from subject field (for consistency with PNG)
+#             subject = metadata.get("subject", "")
+#             if subject:
+#                 try:
+#                     import json
+# 
+#                     parsed_subject = json.loads(subject)
+#                     if isinstance(parsed_subject, dict):
+#                         # Merge parsed scitex metadata with standard PDF metadata
+#                         metadata.update(parsed_subject)
+#                         # Remove the raw JSON string from subject to avoid duplication
+#                         metadata.pop("subject", None)
+#                 except (json.JSONDecodeError, ValueError):
+#                     # Not JSON, keep subject as string
+#                     pass
 # 
 #         except Exception as e:
 #             logger.error(f"Error extracting metadata with PyPDF2: {e}")
@@ -1013,9 +1084,7 @@ if __name__ == "__main__":
 #     return metadata
 # 
 # 
-# def _extract_pages(
-#     lpath: str, backend: str, clean: bool
-# ) -> List[Dict[str, Any]]:
+# def _extract_pages(lpath: str, backend: str, clean: bool) -> List[Dict[str, Any]]:
 #     """Extract content page by page."""
 #     pages = []
 # 
@@ -1078,7 +1147,11 @@ if __name__ == "__main__":
 # 
 # 
 # def _extract_scientific(
-#     lpath: str, clean_text: bool, output_dir: str, table_settings: Dict, save_as_jpg: bool = True
+#     lpath: str,
+#     clean_text: bool,
+#     output_dir: str,
+#     table_settings: Dict,
+#     save_as_jpg: bool = True,
 # ) -> DotDict:
 #     """
 #     Optimized extraction for scientific papers.
@@ -1127,9 +1200,7 @@ if __name__ == "__main__":
 #             "total_words": len(result["text"].split()),
 #             "total_pages": result["metadata"].get("pages", 0),
 #             "num_sections": len(result["sections"]),
-#             "num_tables": sum(
-#                 len(tables) for tables in result["tables"].values()
-#             ),
+#             "num_tables": sum(len(tables) for tables in result["tables"].values()),
 #             "num_images": len(result["images"]),
 #         }
 # 
@@ -1249,6 +1320,7 @@ if __name__ == "__main__":
 #         for chunk in iter(lambda: f.read(4096), b""):
 #             hash_md5.update(chunk)
 #     return hash_md5.hexdigest()
+# 
 # 
 # # EOF
 

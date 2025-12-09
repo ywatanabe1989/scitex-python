@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -43,12 +44,13 @@ warnings.warn(
     "scitex.logging is deprecated. Use scitex.logging instead. "
     "The scitex.logging module will be removed in a future version.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 import logging as _logging
 
 from ._Tee import Tee, tee
+
 # Import modular components
 from ._levels import SUCCESS, FAIL, DEBUG, INFO, WARNING, ERROR, CRITICAL
 from ._logger import SciTeXLogger, setup_logger_class
@@ -60,13 +62,13 @@ from ._config import (
     enable_file_logging,
     is_file_logging_enabled,
     configure,
-    get_log_path
+    get_log_path,
 )
 from ._print_capture import (
     PrintCapture,
     enable_print_capture,
     disable_print_capture,
-    is_print_capture_enabled
+    is_print_capture_enabled,
 )
 from ._context import log_to_file
 
@@ -98,25 +100,22 @@ configure(level=level, enable_file=True, enable_console=True, capture_prints=Fal
 # Export only essential public functions - minimal API
 __all__ = [
     # Core logging functions (most commonly used)
-    'getLogger',
-
+    "getLogger",
     # Log levels
-    'DEBUG',
-    'INFO',
-    'WARNING',
-    'ERROR',
-    'CRITICAL',
-    'SUCCESS',
-    'FAIL',
-
+    "DEBUG",
+    "INFO",
+    "WARNING",
+    "ERROR",
+    "CRITICAL",
+    "SUCCESS",
+    "FAIL",
     # Configuration (minimal set)
-    'configure',
-    'get_log_path',
-    'Tee',
-    'tee',
-
+    "configure",
+    "get_log_path",
+    "Tee",
+    "tee",
     # Context managers
-    'log_to_file',
+    "log_to_file",
 ]
 
 # EOF

@@ -46,6 +46,7 @@ class GitResult:
     ...     print(f"Error: {result.message}")
     ...     print(f"Details: {result.stderr}")
     """
+
     success: bool
     message: Optional[str] = None
     stdout: Optional[str] = None
@@ -73,6 +74,7 @@ class CommitResult(GitResult):
     >>> if result.success:
     ...     print(f"Created commit {result.commit_hash}")
     """
+
     commit_hash: Optional[str] = None
 
 
@@ -96,6 +98,7 @@ class CloneResult(GitResult):
     >>> if result.success:
     ...     print(f"Cloned to {result.repo_path}")
     """
+
     repo_path: Optional[str] = None
 
 
@@ -119,6 +122,7 @@ class BranchResult(GitResult):
     >>> if result.success:
     ...     print(f"Branch: {result.branch_name}")
     """
+
     branch_name: Optional[str] = None
 
 

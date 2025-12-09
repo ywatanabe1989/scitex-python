@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_H5Explorer.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -59,9 +60,7 @@ class H5Explorer:
         if hasattr(self, "file") and self.file:
             self.file.close()
 
-    def explore(
-        self, path: str = "/", max_depth: Optional[int] = None
-    ) -> None:
+    def explore(self, path: str = "/", max_depth: Optional[int] = None) -> None:
         """Explore HDF5 file structure interactively."""
         self.show(path, max_depth)
 
@@ -90,9 +89,7 @@ class H5Explorer:
                 print(f"{indent}[{path.split('/')[-1]}]")
             for key in sorted(item.keys()):
                 subpath = f"{path}/{key}".replace("//", "/")
-                self.show(
-                    subpath, max_depth, indent + "  ", _current_depth + 1
-                )
+                self.show(subpath, max_depth, indent + "  ", _current_depth + 1)
         elif isinstance(item, h5py.Dataset):
             name = path.split("/")[-1]
             shape = item.shape
@@ -208,9 +205,7 @@ class H5Explorer:
         matches = []
 
         def _search(current_path):
-            item = (
-                self.file[current_path] if current_path != "/" else self.file
-            )
+            item = self.file[current_path] if current_path != "/" else self.file
 
             if isinstance(item, h5py.Group):
                 for key in item.keys():
@@ -327,9 +322,7 @@ def has_h5_key(h5_path, key, max_retries=3, action_on_corrupted="delete"):
                 else:
                     return False
 
-            elif any(
-                indicator in error_msg for indicator in corruption_indicators
-            ):
+            elif any(indicator in error_msg for indicator in corruption_indicators):
                 if action_on_corrupted == "delete":
                     if _delete_corrupted_entry(h5_path, key):
                         return False
@@ -351,5 +344,6 @@ def _delete_corrupted_entry(h5_path, key):
     except:
         pass
     return False
+
 
 # EOF

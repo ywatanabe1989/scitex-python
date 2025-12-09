@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/browser/utils/wait_redirects.py"
-)
+
+__FILE__ = "./src/scitex/scholar/browser/utils/wait_redirects.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -243,7 +242,7 @@ async def wait_redirects(
     if show_progress:
         await browser_logger.info(
             page,
-            f"{func_name}: Waiting for redirects (max {timeout/1000:.0f}s)...",
+            f"{func_name}: Waiting for redirects (max {timeout / 1000:.0f}s)...",
             duration_ms=timeout,
         )
 
@@ -347,9 +346,7 @@ async def wait_redirects(
         if 300 <= status < 400:
             redirect_count += 1
             if redirect_count >= max_redirects:
-                logger.warning(
-                    f"{func_name}: Max redirects ({max_redirects}) reached"
-                )
+                logger.warning(f"{func_name}: Max redirects ({max_redirects}) reached")
                 navigation_complete.set()
 
         elif 200 <= status < 300:
@@ -425,9 +422,7 @@ async def wait_redirects(
 
                 # Check page load state
                 try:
-                    load_state = await page.evaluate(
-                        "() => document.readyState"
-                    )
+                    load_state = await page.evaluate("() => document.readyState")
                     page_loaded = load_state == "complete"
                 except:
                     page_loaded = False
@@ -457,9 +452,7 @@ async def wait_redirects(
 
                 # Check if URL changed
                 if current_url != last_checked_url:
-                    logger.debug(
-                        f"{func_name}: URL changed: {current_url[:80]}"
-                    )
+                    logger.debug(f"{func_name}: URL changed: {current_url[:80]}")
                     last_checked_url = current_url
                     stable_count = 0
                     dom_stable_count = 0
@@ -470,9 +463,7 @@ async def wait_redirects(
                         logger.info(
                             f"{func_name}: Article URL detected: {current_url[:80]}"
                         )
-                        await asyncio.sleep(
-                            1
-                        )  # Short wait for final resources
+                        await asyncio.sleep(1)  # Short wait for final resources
                         navigation_complete.set()
                         break
                 else:
@@ -484,9 +475,7 @@ async def wait_redirects(
                 # CAPTCHA path: Wait much longer for CAPTCHA solver extension
                 if captcha_detected:
                     captcha_wait_time = (
-                        current_time - captcha_wait_start
-                        if captcha_wait_start
-                        else 0
+                        current_time - captcha_wait_start if captcha_wait_start else 0
                     )
 
                     # Check if CAPTCHA is still present
@@ -509,9 +498,7 @@ async def wait_redirects(
                                     duration_ms=2000,
                                 )
                             )
-                        await asyncio.sleep(
-                            3
-                        )  # Wait for redirect after CAPTCHA
+                        await asyncio.sleep(3)  # Wait for redirect after CAPTCHA
                         captcha_detected = False
                         captcha_wait_start = None
                         stable_count = 0
@@ -520,10 +507,7 @@ async def wait_redirects(
 
                     # Give CAPTCHA solver up to 60 seconds
                     if captcha_wait_time < 60:
-                        if (
-                            int(captcha_wait_time) % 10 == 0
-                            and captcha_wait_time > 0
-                        ):
+                        if int(captcha_wait_time) % 10 == 0 and captcha_wait_time > 0:
                             logger.info(
                                 f"{func_name}: CAPTCHA solver working... ({int(60 - captcha_wait_time)}s remaining)"
                             )
@@ -563,9 +547,7 @@ async def wait_redirects(
                 # Medium path: URL and network stable for longer
                 elif stable_count >= 3 and time_since_activity >= 3:
                     if not is_auth_endpoint(current_url) or found_article:
-                        logger.debug(
-                            f"{func_name}: Complete: URL+network stable (3s)"
-                        )
+                        logger.debug(f"{func_name}: Complete: URL+network stable (3s)")
                         navigation_complete.set()
                         break
 
@@ -608,14 +590,10 @@ async def wait_redirects(
     try:
         # Wait for navigation to complete
         try:
-            await asyncio.wait_for(
-                navigation_complete.wait(), timeout=timeout / 1000
-            )
+            await asyncio.wait_for(navigation_complete.wait(), timeout=timeout / 1000)
         except asyncio.TimeoutError:
             timed_out = True
-            logger.warning(
-                f"{func_name}: Redirect wait timeout after {timeout}ms"
-            )
+            logger.warning(f"{func_name}: Redirect wait timeout after {timeout}ms")
             if show_progress:
                 await browser_logger.info(
                     page,
@@ -631,9 +609,7 @@ async def wait_redirects(
         if wait_for_idle and not timed_out:
             try:
                 idle_timeout = min(5000, timeout // 4)
-                await page.wait_for_load_state(
-                    "networkidle", timeout=idle_timeout
-                )
+                await page.wait_for_load_state("networkidle", timeout=idle_timeout)
             except:
                 logger.debug(f"{func_name}: Network idle wait failed")
 
@@ -656,8 +632,7 @@ async def wait_redirects(
             "total_time_ms": round(total_time_ms, 2),
             "timed_out": timed_out,
             "found_article": found_article,
-            "stopped_at_auth": is_auth_endpoint(final_url)
-            and not found_article,
+            "stopped_at_auth": is_auth_endpoint(final_url) and not found_article,
         }
 
         if track_chain:

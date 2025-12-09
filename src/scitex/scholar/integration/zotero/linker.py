@@ -61,14 +61,14 @@ class ZoteroLinker:
             library_type=library_type,
             api_key=api_key,
             project=project,
-            config=config
+            config=config,
         )
         self.exporter = ZoteroExporter(
             library_id=library_id,
             library_type=library_type,
             api_key=api_key,
             project=project,
-            config=config
+            config=config,
         )
         self.mapper = ZoteroMapper(config=config)
         self.library_manager = LibraryManager(project=project, config=config)
@@ -158,12 +158,7 @@ class ZoteroLinker:
         Returns:
             Dict with sync statistics
         """
-        stats = {
-            "imported": 0,
-            "exported": 0,
-            "updated": 0,
-            "errors": 0
-        }
+        stats = {"imported": 0, "exported": 0, "updated": 0, "errors": 0}
 
         try:
             if auto_import:
@@ -223,12 +218,13 @@ class ZoteroLinker:
                     paper = self.mapper.zotero_to_paper(item)
 
                     # Determine if new or updated
-                    event_type = "added" if item_key not in self._synced_items else "updated"
+                    event_type = (
+                        "added" if item_key not in self._synced_items else "updated"
+                    )
 
                     # Save to library
                     paper_id = self.library_manager.save_resolved_paper(
-                        paper_data=paper,
-                        project=self.project
+                        paper_data=paper, project=self.project
                     )
 
                     # Track synced item
@@ -408,7 +404,7 @@ class ZoteroLinker:
             "last_sync_version": self._last_sync_version,
             "synced_items_count": len(self._synced_items),
             "sync_interval": self.sync_interval,
-            "callbacks_registered": len(self._callbacks)
+            "callbacks_registered": len(self._callbacks),
         }
 
 

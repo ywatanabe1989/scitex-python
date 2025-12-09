@@ -584,7 +584,6 @@ if __name__ == "__main__":
 # 
 # @torch_fn
 # def geometric_median(xx, dim=-1):
-# 
 #     # Ensure dim is a positive index
 #     if dim < 0:
 #         dim = xx.ndim + dim
@@ -613,7 +612,7 @@ if __name__ == "__main__":
 #     import sys
 #     import matplotlib.pyplot as plt
 #     import scitex
-#     
+# 
 #     # # Argument Parser
 #     # import argparse
 #     # parser = argparse.ArgumentParser(description='')
@@ -622,7 +621,9 @@ if __name__ == "__main__":
 #     # args = parser.parse_args()
 # 
 #     # Main
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
+#         sys, plt, verbose=False
+#     )
 #     main()
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 

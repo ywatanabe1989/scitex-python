@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -230,16 +231,12 @@ class UnifiedSource:
 
         return True
 
-    def _validate_against_query(
-        self, metadata: Dict, query_title: str
-    ) -> bool:
+    def _validate_against_query(self, metadata: Dict, query_title: str) -> bool:
         """Validate metadata matches the original query with strict title matching."""
         if not query_title or not metadata:
             return True
 
-        paper_title = (
-            metadata.get("basic", {}).get("title", "").lower().strip()
-        )
+        paper_title = metadata.get("basic", {}).get("title", "").lower().strip()
         query_title = query_title.lower().strip()
 
         if not paper_title:
@@ -288,9 +285,7 @@ class UnifiedSource:
         query_title = getattr(self, "_last_query_title", None)
         valid_sources = {}
         for source_name, metadata in source_results.items():
-            if metadata and self._validate_against_query(
-                metadata, query_title
-            ):
+            if metadata and self._validate_against_query(metadata, query_title):
                 valid_sources[source_name] = metadata
 
         if not valid_sources:
@@ -301,9 +296,7 @@ class UnifiedSource:
 
         # Merge all other valid sources
         for source_name, metadata in list(valid_sources.items())[1:]:
-            base_metadata = self.merge_metadata_structures(
-                base_metadata, metadata
-            )
+            base_metadata = self.merge_metadata_structures(base_metadata, metadata)
 
         # Track all attempted searches
         if "system" not in base_metadata:
@@ -345,9 +338,7 @@ class UnifiedSource:
 
                 # Initialize source lists if needed
                 if not isinstance(current_sources, list):
-                    current_sources = (
-                        [current_sources] if current_sources else []
-                    )
+                    current_sources = [current_sources] if current_sources else []
                     merged[section][f"{key}_sources"] = current_sources
 
                 # Convert single source to list
@@ -357,15 +348,11 @@ class UnifiedSource:
                 should_replace = False
                 if current_value is None:
                     should_replace = True
-                elif source_priority.get(
-                    new_sources[0], 0
-                ) > source_priority.get(
+                elif source_priority.get(new_sources[0], 0) > source_priority.get(
                     current_sources[0] if current_sources else "", 0
                 ):
                     should_replace = True
-                elif isinstance(value, list) and isinstance(
-                    current_value, list
-                ):
+                elif isinstance(value, list) and isinstance(current_value, list):
                     if len(value) > len(current_value):
                         should_replace = True
                 elif isinstance(value, str) and isinstance(current_value, str):
@@ -388,7 +375,6 @@ if __name__ == "__main__":
     from pprint import pprint
 
     async def main_async():
-
         TITLE = "Attention is All You Need"
         DOI = "10.1038/nature14539"
         # DOI = "https://doi.org/10.48550/arXiv.1706.03762"

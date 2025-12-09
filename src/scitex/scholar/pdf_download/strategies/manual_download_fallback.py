@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/pdf_download/strategies/manual_download_fallback.py"
-)
+
+__FILE__ = "./src/scitex/scholar/pdf_download/strategies/manual_download_fallback.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 """Manual Download Fallback Strategy"""
@@ -163,5 +162,6 @@ async def try_download_manual_async(
             except Exception:
                 pass
         return None
+
 
 # EOF

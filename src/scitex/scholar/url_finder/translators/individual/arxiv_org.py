@@ -57,8 +57,8 @@ class ArXivOrgTranslator(BaseTranslator):
         # Handle direct PDF pages
         if "/pdf/" in url:
             # Already on a PDF page - ensure it has .pdf extension
-            if not url.endswith('.pdf'):
-                url = url + '.pdf'
+            if not url.endswith(".pdf"):
+                url = url + ".pdf"
             pdf_urls.append(url)
             return pdf_urls
 
@@ -90,14 +90,18 @@ class ArXivOrgTranslator(BaseTranslator):
                         href = await link_elem.get_attribute("href")
                         if href:
                             # Extract arXiv ID
-                            arxiv_id = href.strip().replace("arXiv:", "").replace("/abs/", "")
+                            arxiv_id = (
+                                href.strip().replace("arXiv:", "").replace("/abs/", "")
+                            )
                             pdf_url = f"https://arxiv.org/pdf/{arxiv_id}.pdf"
                             pdf_urls.append(pdf_url)
 
             # Legacy search, listings, and catchup pages
             elif any(pattern in url for pattern in ["/find/", "/list/", "/catchup"]):
                 # Find all abstract links in <dt> elements
-                dt_elements = await page.query_selector_all("#dlpage dt a[title='Abstract']")
+                dt_elements = await page.query_selector_all(
+                    "#dlpage dt a[title='Abstract']"
+                )
                 for link_elem in dt_elements:
                     href = await link_elem.get_attribute("href")
                     if href:

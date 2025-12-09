@@ -90,8 +90,8 @@ class GoogleAuthHelper:
                 alternatives = [
                     'button:has-text("Google")',
                     '[data-testid="google-login"]',
-                    'button >> text=Continue with Google',
-                    'button >> text=Sign in with Google',
+                    "button >> text=Continue with Google",
+                    "button >> text=Sign in with Google",
                 ]
                 for selector in alternatives:
                     try:
@@ -178,14 +178,16 @@ class GoogleAuthHelper:
         """Fill email on Google login page."""
         try:
             # Wait for email input
-            await popup.wait_for_selector('input[type="email"]', state="visible", timeout=10000)
+            await popup.wait_for_selector(
+                'input[type="email"]', state="visible", timeout=10000
+            )
 
             self._log(f"Filling email: {self.email}")
             await popup.fill('input[type="email"]', self.email)
             await popup.wait_for_timeout(500)
 
             # Click Next button
-            next_btn = await popup.query_selector('#identifierNext')
+            next_btn = await popup.query_selector("#identifierNext")
             if not next_btn:
                 next_btn = await popup.query_selector('button:has-text("Next")')
 
@@ -210,9 +212,7 @@ class GoogleAuthHelper:
 
             # Wait for password input to become visible
             await popup.wait_for_selector(
-                'input[type="password"]',
-                state="visible",
-                timeout=15000
+                'input[type="password"]', state="visible", timeout=15000
             )
 
             self._log("Filling password")
@@ -220,7 +220,7 @@ class GoogleAuthHelper:
             await popup.wait_for_timeout(500)
 
             # Click Next button
-            next_btn = await popup.query_selector('#passwordNext')
+            next_btn = await popup.query_selector("#passwordNext")
             if not next_btn:
                 next_btn = await popup.query_selector('button:has-text("Next")')
 
@@ -253,7 +253,7 @@ class GoogleAuthHelper:
             continue_selectors = [
                 'button:has-text("Continue")',
                 'button:has-text("Allow")',
-                '#submit_approve_access',
+                "#submit_approve_access",
                 'button[data-idom-class*="continue"]',
             ]
 
@@ -295,7 +295,9 @@ class GoogleAuthHelper:
                 "Check your phone",
             ]
 
-            is_2fa = any(indicator.lower() in page_text.lower() for indicator in twofa_indicators)
+            is_2fa = any(
+                indicator.lower() in page_text.lower() for indicator in twofa_indicators
+            )
 
             if is_2fa:
                 self._log("2FA detected - waiting for user approval...")
@@ -311,7 +313,10 @@ class GoogleAuthHelper:
                     # Check if popup closed
                     try:
                         current_url = popup.url
-                        if current_url != start_url and "accounts.google.com" not in current_url:
+                        if (
+                            current_url != start_url
+                            and "accounts.google.com" not in current_url
+                        ):
                             self._log("2FA completed - redirected")
                             return True
                     except:

@@ -84,10 +84,14 @@ if __name__ == "__main__":
 
     async def main():
         """Demonstration of IEEEComputerSocietyTranslator usage."""
-        test_url = "https://www.computer.org/csdl/trans/ta/2012/01/tta2012010003-abs.html"
+        test_url = (
+            "https://www.computer.org/csdl/trans/ta/2012/01/tta2012010003-abs.html"
+        )
 
         print(f"Testing IEEEComputerSocietyTranslator with URL: {test_url}")
-        print(f"URL matches pattern: {IEEEComputerSocietyTranslator.matches_url(test_url)}\n")
+        print(
+            f"URL matches pattern: {IEEEComputerSocietyTranslator.matches_url(test_url)}\n"
+        )
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)

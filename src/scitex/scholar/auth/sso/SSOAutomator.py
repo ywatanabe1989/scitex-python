@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -61,9 +62,7 @@ class SSOAutomator:
             return None
 
     @classmethod
-    def create_from_email(
-        cls, email: str, **kwargs
-    ) -> Optional[BaseSSOAutomator]:
+    def create_from_email(cls, email: str, **kwargs) -> Optional[BaseSSOAutomator]:
         """Create SSO automator based on email domain."""
         if not email:
             return None
@@ -84,9 +83,7 @@ class SSOAutomator:
 
         for pattern, automator_name in cls.URL_PATTERN_MAP.items():
             if pattern in url_lower:
-                logger.info(
-                    f"Detected {automator_name.replace('Of', ' of ')} from URL"
-                )
+                logger.info(f"Detected {automator_name.replace('Of', ' of ')} from URL")
                 return cls._create_automator(automator_name, **kwargs)
 
         logger.debug(f"No SSO automator found for URL: {url}")
@@ -103,9 +100,7 @@ class SSOAutomator:
             if key in name_lower:
                 return cls._create_automator(automator_name, **kwargs)
 
-        logger.warning(
-            f"No SSO automator found for institution: {institution_name}"
-        )
+        logger.warning(f"No SSO automator found for institution: {institution_name}")
         return None
 
     @classmethod
@@ -118,9 +113,9 @@ class SSOAutomator:
             return None
 
         try:
-            module_path, class_name = cls.AUTOMATOR_CLASS_MAP[
-                automator_name
-            ].rsplit(".", 1)
+            module_path, class_name = cls.AUTOMATOR_CLASS_MAP[automator_name].rsplit(
+                ".", 1
+            )
             from importlib import import_module
 
             module = import_module(f".{module_path}", package=__package__)
@@ -151,9 +146,7 @@ if __name__ == "__main__":
 
         async def test_automator():
             # automator = UniversityOfMelbourneSSOAutomator()
-            automator = SSOAutomator(
-                email=os.getenv("SCITEX_SCHOLAR_SSO_EMAIL")
-            )
+            automator = SSOAutomator(email=os.getenv("SCITEX_SCHOLAR_SSO_EMAIL"))
 
             async with async_playwright() as p:
                 browser = await p.chromium.launch(headless=False)

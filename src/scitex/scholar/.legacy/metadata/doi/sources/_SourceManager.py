@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -69,13 +70,9 @@ class SourceManager:
         self.config = config or ScholarConfig()
         self.sources = self.config.resolve("sources", sources)
         # Emails
-        self.crossref_email = self.config.resolve(
-            "crossref_email", email_crossref
-        )
+        self.crossref_email = self.config.resolve("crossref_email", email_crossref)
         self.pubmed_email = self.config.resolve("pubmed_email", email_pubmed)
-        self.openalex_email = self.config.resolve(
-            "openalex_email", email_openalex
-        )
+        self.openalex_email = self.config.resolve("openalex_email", email_openalex)
         self.semantic_scholar_email = self.config.resolve(
             "semantic_scholar_email",
             email_semantic_scholar,
@@ -105,9 +102,7 @@ class SourceManager:
 
         return self._source_instances.get(name)
 
-    def _create_source_instance(
-        self, source_name: str
-    ) -> Optional[BaseDOISource]:
+    def _create_source_instance(self, source_name: str) -> Optional[BaseDOISource]:
         """Create a new source instance with proper configuration.
 
         Args:
@@ -134,9 +129,7 @@ class SourceManager:
                 source_instance.set_rate_limit_handler(self.rate_limit_handler)
 
             # Configure source-specific rate limiting parameters
-            self._configure_source_specific_settings(
-                source_instance, source_name
-            )
+            self._configure_source_specific_settings(source_instance, source_name)
 
             logger.debug(f"Created source instance: {source_name}")
             return source_instance
@@ -179,14 +172,10 @@ class SourceManager:
         # Configure source-specific rate limiting parameters
         if source_name.lower() == "pubmed":
             # NCBI requires max 3 requests per second (0.35s delay)
-            state = self.rate_limit_handler.get_source_state(
-                source_name.lower()
-            )
+            state = self.rate_limit_handler.get_source_state(source_name.lower())
             state.base_delay = 0.35
             state.adaptive_delay = 0.35
-            logger.debug(
-                f"Configured PubMed-specific rate limiting: 0.35s delay"
-            )
+            logger.debug(f"Configured PubMed-specific rate limiting: 0.35s delay")
 
     def get_all_sources(self) -> List[BaseDOISource]:
         """Get all configured source instances.
@@ -279,9 +268,7 @@ class SourceManager:
                 if source:
                     validation["source_status"][name] = "available"
                 else:
-                    validation["warnings"].append(
-                        f"Could not create source: {name}"
-                    )
+                    validation["warnings"].append(f"Could not create source: {name}")
                     validation["source_status"][name] = "creation_failed"
             except Exception as e:
                 validation["errors"].append(f"Error with source {name}: {e}")

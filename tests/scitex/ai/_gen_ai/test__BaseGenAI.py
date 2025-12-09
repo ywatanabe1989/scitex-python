@@ -416,7 +416,6 @@ if __name__ == "__main__":
 #         format_output: bool = False,
 #         return_stream: bool = False,
 #     ) -> Union[str, Generator]:
-# 
 #         # ----------------------------------------
 #         # Handles Prompt and Prompt File
 #         if (not prompt) and (not prompt_file):
@@ -633,7 +632,9 @@ if __name__ == "__main__":
 # if __name__ == "__main__":
 #     import scitex
 # 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
+#         sys, plt, verbose=False
+#     )
 #     main()
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 

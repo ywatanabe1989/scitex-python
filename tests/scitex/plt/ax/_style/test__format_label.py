@@ -297,14 +297,16 @@ class TestFormatLabelIntegration:
         # Mock the enhanced functionality
         def enhanced_format(label):
             if isinstance(label, str):
+                # Check if already uppercase BEFORE transforming
+                is_upper = label.isupper()
+                if is_upper:
+                    return label
                 label = label.replace("_", " ")
                 label = " ".join(word.capitalize() for word in label.split())
-                if label.isupper():
-                    return label
             return label
-        
+
         mock_format.side_effect = enhanced_format
-        
+
         # Test enhanced behavior
         assert mock_format("test_label") == "Test Label"
         assert mock_format("UPPERCASE") == "UPPERCASE"

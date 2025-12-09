@@ -61,8 +61,8 @@ def stx_rectangle(ax, xx, yy, ww, hh, **kwargs):
     matplotlib.axes.Axes.add_patch : Method used to add the patch
     """
     # Default to no edge for cleaner publication figures
-    if 'edgecolor' not in kwargs and 'ec' not in kwargs:
-        kwargs['edgecolor'] = 'none'
+    if "edgecolor" not in kwargs and "ec" not in kwargs:
+        kwargs["edgecolor"] = "none"
     ax.add_patch(Rectangle((xx, yy), ww, hh, **kwargs))
     return ax
 

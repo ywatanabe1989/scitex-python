@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = (
     "./src/scitex/scholar/url_finder/strategies/find_pdf_urls_by_zotero_translators.py"
 )
@@ -113,9 +114,7 @@ async def find_pdf_urls_by_zotero_translators(
                     f"{func_name}: {matching_translator.LABEL} found {len(pdf_urls)} PDF URL(s)",
                 )
                 for i_pdf, pdf_url in enumerate(pdf_urls, 1):
-                    await browser_logger.debug(
-                        page, f"{func_name}  {i_pdf}. {pdf_url}"
-                    )
+                    await browser_logger.debug(page, f"{func_name}  {i_pdf}. {pdf_url}")
 
                 all_pdf_urls.extend(pdf_urls)
             else:
@@ -160,5 +159,6 @@ async def find_pdf_urls_by_zotero_translators(
             f"{func_name}: Zotero strategy failed: {e}",
         )
         return []
+
 
 # EOF

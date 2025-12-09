@@ -133,7 +133,9 @@ def get_global_xlim(*multiple_axes):
     xmin, xmax = np.inf, -np.inf
     for axes in multiple_axes:
         # axes
-        if isinstance(axes, (np.ndarray, scitex.plt._subplots._AxesWrapper.AxesWrapper)):
+        if isinstance(
+            axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
+        ):
             for ax in axes.flat:
                 _xmin, _xmax = ax.get_xlim()  # Fixed: was get_ylim()
                 xmin = min(xmin, _xmin)
@@ -185,7 +187,9 @@ def get_global_ylim(*multiple_axes):
     ymin, ymax = np.inf, -np.inf
     for axes in multiple_axes:
         # axes
-        if isinstance(axes, (np.ndarray, scitex.plt._subplots._AxesWrapper.AxesWrapper)):
+        if isinstance(
+            axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
+        ):
             for ax in axes.flat:
                 _ymin, _ymax = ax.get_ylim()
                 ymin = min(ymin, _ymin)
@@ -206,7 +210,9 @@ def set_xlims(*multiple_axes, xlim=None):
 
     for axes in multiple_axes:
         # axes
-        if isinstance(axes, (np.ndarray, scitex.plt._subplots._AxesWrapper.AxesWrapper)):
+        if isinstance(
+            axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
+        ):
             for ax in axes.flat:
                 ax.set_xlim(xlim)
         # axis
@@ -227,7 +233,9 @@ def set_ylims(*multiple_axes, ylim=None):
 
     for axes in multiple_axes:
         # axes
-        if isinstance(axes, (np.ndarray, scitex.plt._subplots._AxesWrapper.AxesWrapper)):
+        if isinstance(
+            axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
+        ):
             for ax in axes.flat:
                 ax.set_ylim(ylim)
 
@@ -257,7 +265,9 @@ if __name__ == "__main__":
     # parser.add_argument('--flag', '-f', action='store_true', default=False, help='')
     # args = parser.parse_args()
     # Main
-    CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
+    CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
+        sys, plt, verbose=False
+    )
     main()
     scitex.session.close(CONFIG, verbose=False, notify=False)
 

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -56,9 +57,7 @@ class OpenAlexEngine(BaseDOIEngine):
 
     def _search_by_doi(self, doi: str, return_as: str) -> Optional[Dict]:
         """Search by DOI directly"""
-        doi = doi.replace("https://doi.org/", "").replace(
-            "http://doi.org/", ""
-        )
+        doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
 
         params = {
             "filter": f"doi:{doi}",
@@ -70,9 +69,7 @@ class OpenAlexEngine(BaseDOIEngine):
                 "dict",
                 "json",
             ], "return_as must be either of 'dict' or 'json'"
-            response = self.session.get(
-                self.base_url, params=params, timeout=30
-            )
+            response = self.session.get(self.base_url, params=params, timeout=30)
             response.raise_for_status()
 
             data = response.json()
@@ -121,9 +118,7 @@ class OpenAlexEngine(BaseDOIEngine):
                 "dict",
                 "json",
             ], "return_as must be either of 'dict' or 'json'"
-            response = self.session.get(
-                self.base_url, params=params, timeout=30
-            )
+            response = self.session.get(self.base_url, params=params, timeout=30)
             response.raise_for_status()
 
             data = response.json()
@@ -151,9 +146,7 @@ class OpenAlexEngine(BaseDOIEngine):
                 return_as=return_as,
             )
 
-    def _extract_metadata_from_work(
-        self, work, return_as: str
-    ) -> Optional[Dict]:
+    def _extract_metadata_from_work(self, work, return_as: str) -> Optional[Dict]:
         """Extract metadata from OpenAlex work"""
         work_title = work.get("title", "")
         if work_title and work_title.endswith("."):
@@ -223,8 +216,7 @@ class OpenAlexEngine(BaseDOIEngine):
         citation_count_by_year = work.get("counts_by_year")
         if citation_count_by_year:
             citation_count_by_year = {
-                str(dd["year"]): dd["cited_by_count"]
-                for dd in citation_count_by_year
+                str(dd["year"]): dd["cited_by_count"] for dd in citation_count_by_year
             }
             citation_counts = {
                 "total": citation_count,
@@ -262,9 +254,7 @@ class OpenAlexEngine(BaseDOIEngine):
                     if work.get("publication_year")
                     else None
                 ),
-                "year_engines": (
-                    [self.name] if work.get("publication_year") else None
-                ),
+                "year_engines": ([self.name] if work.get("publication_year") else None),
                 "authors": extracted_authors if extracted_authors else None,
                 "authors_engines": [self.name] if extracted_authors else None,
                 "keywords": keywords if keywords else None,
@@ -299,7 +289,9 @@ class OpenAlexEngine(BaseDOIEngine):
                 "publisher": url_publisher if url_publisher else None,
                 "publisher_engines": [self.name] if url_publisher else None,
             },
-            "citation_count": citation_counts if citation_count_by_year else {
+            "citation_count": citation_counts
+            if citation_count_by_year
+            else {
                 "count": citation_count if citation_count else None,
                 "count_engines": [self.name] if citation_count else None,
             },
@@ -326,9 +318,7 @@ if __name__ == "__main__":
 
     # Search by title
     outputs["metadata_by_title_dict"] = engine.search(title=TITLE)
-    outputs["metadata_by_title_json"] = engine.search(
-        title=TITLE, return_as="json"
-    )
+    outputs["metadata_by_title_json"] = engine.search(title=TITLE, return_as="json")
 
     # Search by DOI
     outputs["metadata_by_doi_dict"] = engine.search(doi=DOI)

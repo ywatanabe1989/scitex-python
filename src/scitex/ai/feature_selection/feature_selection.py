@@ -77,8 +77,7 @@ def extract_feature_importance(
         elif method == "coef":
             if not hasattr(model, "coef_"):
                 raise ValueError(
-                    f"Model {type(model).__name__} does not have "
-                    f"coef_ attribute"
+                    f"Model {type(model).__name__} does not have coef_ attribute"
                 )
             # Use absolute values for multi-class or single coefficient vector
             coef = model.coef_
@@ -225,12 +224,8 @@ def analyze_feature_consistency(
     )
 
     # Identify stable and unstable features
-    stable_features = [
-        f for f, count in feature_frequency.items() if count == n_folds
-    ]
-    unstable_features = [
-        f for f, count in feature_frequency.items() if count == 1
-    ]
+    stable_features = [f for f, count in feature_frequency.items() if count == n_folds]
+    unstable_features = [f for f, count in feature_frequency.items() if count == 1]
 
     # Calculate consistency score (average selection frequency)
     consistency_score = (

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -69,6 +70,8 @@ ALTERNATIVE_FORMATS = [
 ]
 
 """Functions & Classes"""
+
+
 def normalize_timestamp(
     timestamp: Union[datetime, str, int, float],
     return_as: str = "str",

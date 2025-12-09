@@ -3,7 +3,9 @@
 # Time-stamp: "2024-11-24 22:21:17 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/db/_Basemodules/_BaseTableMixin.py
 
-THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_Basemodules/_BaseTableMixin.py"
+THIS_FILE = (
+    "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_Basemodules/_BaseTableMixin.py"
+)
 
 
 #!/usr/bin/env python3

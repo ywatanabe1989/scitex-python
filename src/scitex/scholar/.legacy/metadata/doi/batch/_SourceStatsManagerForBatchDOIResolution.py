@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -50,9 +51,7 @@ class SourceStatsManagerForBatchDOIResolution:
         """
         self.config = config or ScholarConfig()
         self.max_worker = self.config.resolve("max_worker", max_worker)
-        self.progress_path = self.config.get_doi_resolution_progress_path(
-            progress_path
-        )
+        self.progress_path = self.config.get_doi_resolution_progress_path(progress_path)
         self._source_success_rates: Dict[str, Dict[str, float]] = {}
         self._load_source_stats()
 
@@ -94,9 +93,7 @@ class SourceStatsManagerForBatchDOIResolution:
             "adaptive_enabled": self.config.resolve(
                 "rate_limit_adaptive", None, True, bool
             ),
-            "max_retries": self.config.resolve(
-                "rate_limit_max_retries", None, 3, int
-            ),
+            "max_retries": self.config.resolve("rate_limit_max_retries", None, 3, int),
         }
 
     def validate_configuration(self) -> Dict[str, Any]:
@@ -201,9 +198,7 @@ class SourceStatsManagerForBatchDOIResolution:
         Returns:
             Success rate (0.0 to 1.0)
         """
-        return self._source_success_rates.get(source, {}).get(
-            "success_rate", 0.0
-        )
+        return self._source_success_rates.get(source, {}).get("success_rate", 0.0)
 
     def update_source_stats(self, source: str, success: bool):
         """Update source performance statistics.

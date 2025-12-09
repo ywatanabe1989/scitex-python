@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 12:40:00 (ywatanabe)"
+# Timestamp: "2025-12-09 12:00:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_imshow.py
 
 import numpy as np
 import pandas as pd
+
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_imshow(id, tracked_dict, kwargs):
@@ -21,13 +24,16 @@ def _format_imshow(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
+    # Parse tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     # Check for pre-formatted image_df (from plot_imshow wrapper)
     if tracked_dict.get("image_df") is not None:
         return tracked_dict.get("image_df")
 
     # Handle raw args from __getattr__ proxied calls
-    if 'args' in tracked_dict:
-        args = tracked_dict['args']
+    if "args" in tracked_dict:
+        args = tracked_dict["args"]
         if isinstance(args, tuple) and len(args) > 0:
             img = np.asarray(args[0])
 
@@ -38,11 +44,16 @@ def _format_imshow(id, tracked_dict, kwargs):
                     range(rows), range(cols), indexing="ij"
                 )
 
+                # Get column names from single source of truth
+                col_row = get_csv_column_name("row", ax_row, ax_col, trace_id=trace_id)
+                col_col = get_csv_column_name("col", ax_row, ax_col, trace_id=trace_id)
+                col_value = get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id)
+
                 df = pd.DataFrame(
                     {
-                        f"{id}_imshow_row": row_indices.flatten(),
-                        f"{id}_imshow_col": col_indices.flatten(),
-                        f"{id}_imshow_value": img.flatten(),
+                        col_row: row_indices.flatten(),
+                        col_col: col_indices.flatten(),
+                        col_value: img.flatten(),
                     }
                 )
                 return df
@@ -54,15 +65,20 @@ def _format_imshow(id, tracked_dict, kwargs):
                     range(rows), range(cols), indexing="ij"
                 )
 
+                # Get column names from single source of truth
+                col_row = get_csv_column_name("row", ax_row, ax_col, trace_id=trace_id)
+                col_col = get_csv_column_name("col", ax_row, ax_col, trace_id=trace_id)
+
                 data = {
-                    f"{id}_imshow_row": row_indices.flatten(),
-                    f"{id}_imshow_col": col_indices.flatten(),
+                    col_row: row_indices.flatten(),
+                    col_col: col_indices.flatten(),
                 }
 
                 # Add channel data (R, G, B, A)
-                channel_names = ['R', 'G', 'B', 'A'][:channels]
+                channel_names = ["r", "g", "b", "a"][:channels]
                 for c, name in enumerate(channel_names):
-                    data[f"{id}_imshow_{name}"] = img[:, :, c].flatten()
+                    col_channel = get_csv_column_name(name, ax_row, ax_col, trace_id=trace_id)
+                    data[col_channel] = img[:, :, c].flatten()
 
                 return pd.DataFrame(data)
 

@@ -64,9 +64,7 @@ def save_canvas(
 
     # Validate extension
     if not str(spath).endswith(".canvas"):
-        raise ValueError(
-            f"Canvas path must end with .canvas extension: {spath}"
-        )
+        raise ValueError(f"Canvas path must end with .canvas extension: {spath}")
 
     # Handle different object types
     if isinstance(obj, (str, Path)):
@@ -143,6 +141,7 @@ def _export_canvas_figures(
     except Exception as e:
         # Log but don't fail save if export fails
         import sys
+
         print(f"Warning: Canvas export failed: {e}", file=sys.stderr)
 
 
@@ -152,9 +151,7 @@ def _copy_canvas_directory(source: Path, dest: Path) -> None:
         raise FileNotFoundError(f"Source canvas directory not found: {source}")
 
     if not (source / "canvas.json").exists():
-        raise ValueError(
-            f"Invalid canvas directory (missing canvas.json): {source}"
-        )
+        raise ValueError(f"Invalid canvas directory (missing canvas.json): {source}")
 
     # Remove destination if exists
     if dest.exists():
@@ -306,6 +303,7 @@ def _link_or_copy(source: Path, dest: Path, bundle: bool = False) -> None:
         try:
             # Use relative symlink for portability
             import os
+
             rel_path = os.path.relpath(source.resolve(), dest.parent.resolve())
             dest.symlink_to(rel_path)
         except (OSError, ValueError):
@@ -342,6 +340,7 @@ def _extract_embedded_panels(canvas_dict: Dict[str, Any], dest: Path) -> None:
         # Check for embedded JSON data (scitex type panels)
         if "panel_json" in panel:
             import json
+
             json_path = panel_dir / "panel.json"
             with open(json_path, "w") as f:
                 json.dump(panel["panel_json"], f, indent=2, default=str)

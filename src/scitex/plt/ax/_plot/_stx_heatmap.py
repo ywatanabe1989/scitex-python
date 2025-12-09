@@ -198,6 +198,7 @@ def _mpl_heatmap(
 
     # Format colorbar ticks
     from matplotlib.ticker import MaxNLocator
+
     cbar.ax.yaxis.set_major_locator(MaxNLocator(nbins=4, min_n_ticks=3))
     cbar.ax.tick_params(width=0.2 * 2.83465, length=0.8 * 2.83465)  # Match tick styling
 
@@ -218,7 +219,7 @@ def _mpl_heatmap(
     ax.spines[:].set_visible(True)
 
     # Set aspect ratio to 'equal' for square cells (1:1)
-    ax.set_aspect('equal', adjustable='box')
+    ax.set_aspect("equal", adjustable="box")
 
     ax.set_xticks(np.arange(data.shape[1] + 1) - 0.5, minor=True)
     ax.set_yticks(np.arange(data.shape[0] + 1) - 0.5, minor=True)
@@ -317,7 +318,9 @@ def _mpl_annotate_heatmap(
 
     # Set default alignment to center, but allow it to be
     # overwritten by textkw.
-    kw = dict(horizontalalignment="center", verticalalignment="center", fontsize=fontsize)
+    kw = dict(
+        horizontalalignment="center", verticalalignment="center", fontsize=fontsize
+    )
     kw.update(textkw)
 
     # Get the formatter in case a string is supplied
@@ -343,8 +346,8 @@ if __name__ == "__main__":
     import numpy as np
 
     data = np.random.rand(5, 10)
-    x_labels = [f"X{ii+1}" for ii in range(5)]
-    y_labels = [f"Y{ii+1}" for ii in range(10)]
+    x_labels = [f"X{ii + 1}" for ii in range(5)]
+    y_labels = [f"Y{ii + 1}" for ii in range(10)]
 
     fig, ax = plt.subplots()
 

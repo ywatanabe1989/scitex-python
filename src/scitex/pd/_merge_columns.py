@@ -18,7 +18,7 @@ def merge_columns(
     sep: str = None,
     sep1: str = "_",
     sep2: str = "-",
-    name: str = "merged"
+    name: str = "merged",
 ) -> pd.DataFrame:
     """Creates a new column by joining specified columns.
 

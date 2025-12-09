@@ -9,5 +9,5 @@ Submodules:
 from . import correlation
 
 __all__ = [
-    'correlation',
+    "correlation",
 ]

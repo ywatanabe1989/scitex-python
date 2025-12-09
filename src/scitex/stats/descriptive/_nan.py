@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -43,6 +44,8 @@ from scitex.decorators import batch_fn, torch_fn
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
+
+
 @torch_fn
 @batch_fn
 def nanmax(x, axis=-1, dim=None, batch_size=None, keepdims=False):
@@ -155,10 +158,7 @@ def nanzscore(x, axis=-1, dim=None, batch_size=None, keepdims=True):
 @batch_fn
 def nankurtosis(x, axis=-1, dim=None, batch_size=None, keepdims=False):
     zscores = nanzscore(x, axis=axis, keepdims=True)
-    return (
-        torch.nanmean(torch.pow(zscores, 4.0), dim=dim, keepdims=keepdims)
-        - 3.0
-    )
+    return torch.nanmean(torch.pow(zscores, 4.0), dim=dim, keepdims=keepdims) - 3.0
 
 
 @torch_fn
@@ -239,9 +239,7 @@ def nanquantile(x, q, axis=-1, dim=None, batch_size=None, keepdims=False):
         dim_list = [d if d >= 0 else len(original_shape) + d for d in dim_list]
 
         # Determine which dimensions to keep
-        keep_dims = [
-            i for i in range(len(original_shape)) if i not in dim_list
-        ]
+        keep_dims = [i for i in range(len(original_shape)) if i not in dim_list]
 
         # Permute tensor to move dims to reduce to the end
         perm_dims = keep_dims + dim_list

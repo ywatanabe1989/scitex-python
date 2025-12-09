@@ -57,42 +57,44 @@ def validate_library_dois(
     validator = DOIValidator()
 
     results = {
-        'total_papers': 0,
-        'papers_with_doi': 0,
-        'valid_dois': 0,
-        'invalid_dois': 0,
-        'empty_dois': 0,
-        'invalid_details': []
+        "total_papers": 0,
+        "papers_with_doi": 0,
+        "valid_dois": 0,
+        "invalid_dois": 0,
+        "empty_dois": 0,
+        "invalid_details": [],
     }
 
     # Find all metadata.json files
     metadata_files = sorted(library_path.glob("*/metadata.json"))
-    results['total_papers'] = len(metadata_files)
+    results["total_papers"] = len(metadata_files)
 
     logger.info(f"Found {len(metadata_files)} papers to validate")
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("DOI VALIDATION REPORT")
-    print("="*80)
+    print("=" * 80)
     print(f"Library: {library_path}")
     print(f"Papers: {len(metadata_files)}")
-    print("="*80)
+    print("=" * 80)
 
     for i, metadata_file in enumerate(metadata_files, 1):
         paper_id = metadata_file.parent.name
 
         # Load metadata
-        with open(metadata_file, 'r') as f:
+        with open(metadata_file, "r") as f:
             metadata = json.load(f)
 
-        doi = metadata.get('metadata', {}).get('id', {}).get('doi', '')
-        title = metadata.get('metadata', {}).get('basic', {}).get('title', 'No title')[:60]
+        doi = metadata.get("metadata", {}).get("id", {}).get("doi", "")
+        title = (
+            metadata.get("metadata", {}).get("basic", {}).get("title", "No title")[:60]
+        )
 
         if not doi:
-            results['empty_dois'] += 1
+            results["empty_dois"] += 1
             continue
 
-        results['papers_with_doi'] += 1
+        results["papers_with_doi"] += 1
 
         print(f"\n[{i}/{len(metadata_files)}] {title}...")
         print(f"  Paper ID: {paper_id}")
@@ -102,32 +104,34 @@ def validate_library_dois(
         is_valid, message, status_code, resolved_url = validator.validate_doi(doi)
 
         if is_valid:
-            results['valid_dois'] += 1
+            results["valid_dois"] += 1
             logger.success(f"  ✓ {message}")
             if resolved_url:
                 print(f"  Resolved to: {resolved_url[:70]}...")
         else:
-            results['invalid_dois'] += 1
+            results["invalid_dois"] += 1
             logger.error(f"  ✗ {message}")
 
-            results['invalid_details'].append({
-                'paper_id': paper_id,
-                'title': title,
-                'doi': doi,
-                'reason': message,
-                'status_code': status_code,
-                'metadata_file': str(metadata_file)
-            })
+            results["invalid_details"].append(
+                {
+                    "paper_id": paper_id,
+                    "title": title,
+                    "doi": doi,
+                    "reason": message,
+                    "status_code": status_code,
+                    "metadata_file": str(metadata_file),
+                }
+            )
 
             # Fix invalid DOI if requested
             if fix_invalid:
                 logger.warning(f"  Removing invalid DOI from {metadata_file}")
-                metadata['metadata']['id']['doi'] = ''
-                metadata['metadata']['id']['doi_engines'] = []
-                metadata['metadata']['url']['doi'] = None
-                metadata['metadata']['url']['doi_engines'] = []
+                metadata["metadata"]["id"]["doi"] = ""
+                metadata["metadata"]["id"]["doi_engines"] = []
+                metadata["metadata"]["url"]["doi"] = None
+                metadata["metadata"]["url"]["doi_engines"] = []
 
-                with open(metadata_file, 'w') as f:
+                with open(metadata_file, "w") as f:
                     json.dump(metadata, f, indent=2, ensure_ascii=False)
 
                 logger.info(f"  ✓ Removed invalid DOI from metadata")
@@ -137,22 +141,26 @@ def validate_library_dois(
             time.sleep(delay_between_requests)
 
     # Summary
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("VALIDATION SUMMARY")
-    print("="*80)
+    print("=" * 80)
     print(f"Total papers: {results['total_papers']}")
     print(f"Papers with DOI: {results['papers_with_doi']}")
-    if results['papers_with_doi'] > 0:
-        print(f"  ✓ Valid DOIs: {results['valid_dois']} ({results['valid_dois']*100/results['papers_with_doi']:.1f}%)")
-        print(f"  ✗ Invalid DOIs: {results['invalid_dois']} ({results['invalid_dois']*100/results['papers_with_doi']:.1f}%)")
+    if results["papers_with_doi"] > 0:
+        print(
+            f"  ✓ Valid DOIs: {results['valid_dois']} ({results['valid_dois'] * 100 / results['papers_with_doi']:.1f}%)"
+        )
+        print(
+            f"  ✗ Invalid DOIs: {results['invalid_dois']} ({results['invalid_dois'] * 100 / results['papers_with_doi']:.1f}%)"
+        )
     print(f"Papers without DOI: {results['empty_dois']}")
 
     # Invalid DOI details
-    if results['invalid_details']:
-        print("\n" + "="*80)
+    if results["invalid_details"]:
+        print("\n" + "=" * 80)
         print(f"INVALID DOI DETAILS ({len(results['invalid_details'])} papers)")
-        print("="*80)
-        for item in results['invalid_details']:
+        print("=" * 80)
+        for item in results["invalid_details"]:
             print(f"\nTitle: {item['title']}")
             print(f"  Paper ID: {item['paper_id']}")
             print(f"  DOI: {item['doi']}")
@@ -161,7 +169,7 @@ def validate_library_dois(
 
     # Save results to file if requested
     if output_file:
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
         logger.success(f"\n✓ Validation results saved to: {output_file}")
 
@@ -171,32 +179,28 @@ def validate_library_dois(
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Validate DOIs in scitex.scholar library')
+    parser = argparse.ArgumentParser(
+        description="Validate DOIs in scitex.scholar library"
+    )
     parser.add_argument(
-        '--library-path',
+        "--library-path",
         type=Path,
-        help='Path to MASTER library directory (default: from config)'
+        help="Path to MASTER library directory (default: from config)",
     )
+    parser.add_argument("--project", type=str, help="Validate specific project only")
     parser.add_argument(
-        '--project',
-        type=str,
-        help='Validate specific project only'
-    )
-    parser.add_argument(
-        '--delay',
+        "--delay",
         type=float,
         default=0.5,
-        help='Delay between DOI checks in seconds (default: 0.5)'
+        help="Delay between DOI checks in seconds (default: 0.5)",
     )
     parser.add_argument(
-        '--fix',
-        action='store_true',
-        help='Remove invalid DOIs from metadata.json files'
+        "--fix",
+        action="store_true",
+        help="Remove invalid DOIs from metadata.json files",
     )
     parser.add_argument(
-        '--output',
-        type=Path,
-        help='Save validation report to JSON file'
+        "--output", type=Path, help="Save validation report to JSON file"
     )
 
     args = parser.parse_args()
@@ -213,7 +217,7 @@ if __name__ == "__main__":
     logger.success("\n✓ DOI validation complete!")
 
     # Exit with error code if invalid DOIs found
-    if results['invalid_dois'] > 0:
+    if results["invalid_dois"] > 0:
         exit(1)
     else:
         exit(0)

@@ -67,7 +67,7 @@ def style_scatter(
     # For a marker of diameter d, area = (d/2)^2 * pi
     # But matplotlib's 's' parameter is already area-like
     # So we use size_pt^2 to get the right visual size
-    marker_area = size_pt ** 2
+    marker_area = size_pt**2
 
     # Set marker size
     path_collection.set_sizes([marker_area])

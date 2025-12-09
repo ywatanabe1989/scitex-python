@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/auth/ScholarAuthManager.py"
-)
+
+__FILE__ = "./src/scitex/scholar/auth/ScholarAuthManager.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -45,15 +44,9 @@ class ScholarAuthManager:
 
     def __init__(
         self,
-        email_openathens: Optional[str] = os.getenv(
-            "SCITEX_SCHOLAR_OPENATHENS_EMAIL"
-        ),
-        email_ezproxy: Optional[str] = os.getenv(
-            "SCITEX_SCHOLAR_EZPROXY_EMAIL"
-        ),
-        email_shibboleth: Optional[str] = os.getenv(
-            "SCITEX_SCHOLAR_SHIBBOLETH_EMAIL"
-        ),
+        email_openathens: Optional[str] = os.getenv("SCITEX_SCHOLAR_OPENATHENS_EMAIL"),
+        email_ezproxy: Optional[str] = os.getenv("SCITEX_SCHOLAR_EZPROXY_EMAIL"),
+        email_shibboleth: Optional[str] = os.getenv("SCITEX_SCHOLAR_SHIBBOLETH_EMAIL"),
         config: Optional[ScholarConfig] = None,
     ):
         """Initialize the authentication manager.
@@ -102,9 +95,7 @@ class ScholarAuthManager:
         if await self.is_authenticate_async(verify_live=verify_live):
             return True
 
-        if await self.authenticate_async(
-            provider_name=provider_name, **kwargs
-        ):
+        if await self.authenticate_async(provider_name=provider_name, **kwargs):
             return True
 
         raise AuthenticationError("Authentication not ensured")
@@ -133,9 +124,7 @@ class ScholarAuthManager:
         """Authenticate with specified or active provider."""
         if provider_name:
             if provider_name not in self.providers:
-                raise AuthenticationError(
-                    f"Provider '{provider_name}' not found"
-                )
+                raise AuthenticationError(f"Provider '{provider_name}' not found")
             provider = self.providers[provider_name]
         elif self.active_provider:
             provider = self.providers[self.active_provider]
@@ -146,9 +135,7 @@ class ScholarAuthManager:
         if self.auth_session and provider_name:
             self.active_provider = provider_name
 
-        logger.info(
-            f"{self.name}: Authentication succeeded by {provider_name}."
-        )
+        logger.info(f"{self.name}: Authentication succeeded by {provider_name}.")
 
         return self.auth_session
 
@@ -228,9 +215,7 @@ class ScholarAuthManager:
         )
         return filtered_cookies
 
-    def _register_provider(
-        self, name: str, provider: BaseAuthenticator
-    ) -> None:
+    def _register_provider(self, name: str, provider: BaseAuthenticator) -> None:
         """Register an authentication provider with email context."""
         if not isinstance(provider, BaseAuthenticator):
             raise TypeError(
@@ -239,9 +224,7 @@ class ScholarAuthManager:
         self.providers[name] = provider
         if not self.active_provider:
             self.active_provider = name
-        logger.debug(
-            f"{self.name}: Registered authentication provider: {name}"
-        )
+        logger.debug(f"{self.name}: Registered authentication provider: {name}")
 
     def set_active_provider(self, name: str) -> None:
         """Set the active authentication provider."""
@@ -251,18 +234,14 @@ class ScholarAuthManager:
                 f"Available providers: {list(self.providers.keys())}"
             )
         self.active_provider = name
-        logger.debug(
-            f"{self.name}: Set active authentication provider: {name}"
-        )
+        logger.debug(f"{self.name}: Set active authentication provider: {name}")
 
     def get_active_provider(self) -> Optional[BaseAuthenticator]:
         """Get the currently active provider."""
         if self.active_provider:
             return self.providers.get(self.active_provider)
         else:
-            raise ValueError(
-                f"Active provider not found. Please set active provider"
-            )
+            raise ValueError(f"Active provider not found. Please set active provider")
 
     async def logout_async(self) -> None:
         """Log out from all providers."""
@@ -271,9 +250,7 @@ class ScholarAuthManager:
                 await provider.logout_async()
                 logger.info(f"{self.name}: Logged out from {provider}")
             except Exception as e:
-                logger.warning(
-                    f"{self.name}: Error logging out from {provider}: {e}"
-                )
+                logger.warning(f"{self.name}: Error logging out from {provider}: {e}")
 
         self.active_provider = None
         self.auth_session = None

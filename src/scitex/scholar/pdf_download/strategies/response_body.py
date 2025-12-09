@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/pdf_download/strategies/response_body.py"
-)
+
+__FILE__ = "./src/scitex/scholar/pdf_download/strategies/response_body.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -32,10 +31,7 @@ async def try_download_response_body_async(
 ) -> Optional[Path]:
     """Download PDF from HTTP response body."""
     # Check if manual mode is active - skip immediately
-    if (
-        hasattr(context, "_scitex_is_manual_mode")
-        and context._scitex_is_manual_mode
-    ):
+    if hasattr(context, "_scitex_is_manual_mode") and context._scitex_is_manual_mode:
         logger.info(f"{func_name}: Skipping because manual mode is active...")
         return None
 
@@ -63,9 +59,7 @@ async def try_download_response_body_async(
                 hasattr(context, "_scitex_is_manual_mode")
                 and context._scitex_is_manual_mode
             ):
-                logger.info(
-                    f"{func_name}: Ignoring download (manual mode active)"
-                )
+                logger.info(f"{func_name}: Ignoring download (manual mode active)")
                 return
 
             if download_handler_active:
@@ -90,9 +84,7 @@ async def try_download_response_body_async(
             ):
                 logger.info(f"{func_name}: Manual mode activated, aborting")
                 download_handler_active = False  # Disable handler
-                page.remove_listener(
-                    "download", handle_download
-                )  # Remove listener
+                page.remove_listener("download", handle_download)  # Remove listener
                 await page.close()
                 return None
 
@@ -192,16 +184,13 @@ async def try_download_response_body_async(
                 )
                 await page.wait_for_timeout(2000)
             except Exception as popup_error:
-                logger.debug(
-                    f"{func_name}: Could not show error popup: {popup_error}"
-                )
+                logger.debug(f"{func_name}: Could not show error popup: {popup_error}")
             finally:
                 try:
                     await page.close()
                 except Exception as close_error:
-                    logger.debug(
-                        f"{func_name}: Error closing page: {close_error}"
-                    )
+                    logger.debug(f"{func_name}: Error closing page: {close_error}")
         return None
+
 
 # EOF

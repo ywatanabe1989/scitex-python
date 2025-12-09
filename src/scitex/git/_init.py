@@ -29,9 +29,7 @@ def find_parent_git(project_dir: Path) -> Optional[Path]:
         Path to parent git root, or None if not found
     """
     try:
-        repo_parent = Repo(
-            project_dir.parent, search_parent_directories=True
-        )
+        repo_parent = Repo(project_dir.parent, search_parent_directories=True)
         return Path(repo_parent.git_dir).parent
     except InvalidGitRepositoryError:
         return None
@@ -58,19 +56,16 @@ def remove_child_git(project_dir: Path) -> bool:
 
     try:
         import shutil
+
         logger.info(f"Removing child .git to use parent repository...")
         shutil.rmtree(child_git)
         logger.success(f"Removed child .git from {project_dir}")
         return True
     except PermissionError as e:
-        logger.error(
-            f"Permission denied removing .git from {project_dir}: {e}"
-        )
+        logger.error(f"Permission denied removing .git from {project_dir}: {e}")
         return False
     except Exception as e:
-        logger.error(
-            f"Failed to remove child .git from {project_dir}: {e}"
-        )
+        logger.error(f"Failed to remove child .git from {project_dir}: {e}")
         return False
 
 
@@ -89,46 +84,34 @@ def create_child_git(project_dir: Path) -> Optional[Path]:
     try:
         try:
             repo = Repo(project_dir)
-            logger.info(
-                f"Project is already a git repository at {project_dir}"
-            )
+            logger.info(f"Project is already a git repository at {project_dir}")
             # Validate project structure even if repo already exists
             from scitex.writer._validate_tree_structures import validate_tree_structures
+
             validate_tree_structures(project_dir)
             return project_dir
         except InvalidGitRepositoryError:
-            logger.info(
-                f"Initializing new git repository at {project_dir}"
-            )
+            logger.info(f"Initializing new git repository at {project_dir}")
             repo = Repo.init(project_dir)
 
         repo.index.add(["."])
         repo.index.commit("Initial commit from scitex template")
 
-        logger.success(
-            f"Git repository initialized at {project_dir}"
-        )
+        logger.success(f"Git repository initialized at {project_dir}")
         return project_dir
     except PermissionError as e:
-        logger.error(
-            f"Permission denied creating git repository at {project_dir}: {e}"
-        )
+        logger.error(f"Permission denied creating git repository at {project_dir}: {e}")
         return None
     except OSError as e:
-        logger.error(
-            f"IO error creating git repository at {project_dir}: {e}"
-        )
+        logger.error(f"IO error creating git repository at {project_dir}: {e}")
         return None
     except Exception as e:
-        logger.error(
-            f"Failed to create child git repository at {project_dir}: {e}"
-        )
+        logger.error(f"Failed to create child git repository at {project_dir}: {e}")
         return None
 
 
 def init_git_repo(
-    project_dir: Path,
-    git_strategy: Optional[str] = "child"
+    project_dir: Path, git_strategy: Optional[str] = "child"
 ) -> Optional[Path]:
     """
     Initialize or detect git repository based on git_strategy.
@@ -149,9 +132,7 @@ def init_git_repo(
         return None
 
     if git_strategy == "parent":
-        logger.info(
-            "Using 'parent' git strategy, searching for parent repository..."
-        )
+        logger.info("Using 'parent' git strategy, searching for parent repository...")
         parent_git = find_parent_git(project_dir)
 
         if parent_git:
@@ -166,15 +147,11 @@ def init_git_repo(
         return create_child_git(project_dir)
 
     if git_strategy == "child":
-        logger.info(
-            "Using 'child' git strategy, creating isolated repository..."
-        )
+        logger.info("Using 'child' git strategy, creating isolated repository...")
         return create_child_git(project_dir)
 
     if git_strategy == "origin":
-        logger.info(
-            "Using 'origin' git strategy, template git history preserved..."
-        )
+        logger.info("Using 'origin' git strategy, template git history preserved...")
         try:
             repo = Repo(project_dir)
             logger.info(f"Found git repository at {project_dir}")

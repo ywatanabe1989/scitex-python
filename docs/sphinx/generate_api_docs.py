@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate API documentation files for MNGS modules."""
+"""Generate API documentation files for SciTeX modules."""
 
 from pathlib import Path
 

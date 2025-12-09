@@ -34,7 +34,7 @@ class DaumNewsTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2021-06-07 16:41:08"
+        "lastUpdated": "2021-06-07 16:41:08",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -48,10 +48,10 @@ class DaumNewsTranslator:
         Returns:
             'newspaperArticle' if detected, empty string otherwise
         """
-        og_type = doc.find('meta', {'property': 'og:type'})
-        if og_type and og_type.get('content') == 'article':
-            return 'newspaperArticle'
-        return ''
+        og_type = doc.find("meta", {"property": "og:type"})
+        if og_type and og_type.get("content") == "article":
+            return "newspaperArticle"
+        return ""
 
     def do_web(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """
@@ -78,56 +78,56 @@ class DaumNewsTranslator:
             Dictionary containing article metadata
         """
         item = {
-            'itemType': 'newspaperArticle',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": "newspaperArticle",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Extract title
-        title_tag = doc.find('meta', {'property': 'og:title'})
-        if title_tag and title_tag.get('content'):
-            item['title'] = title_tag['content']
+        title_tag = doc.find("meta", {"property": "og:title"})
+        if title_tag and title_tag.get("content"):
+            item["title"] = title_tag["content"]
 
         # Extract author
-        author_elem = doc.select_one('.info_view .txt_info')
+        author_elem = doc.select_one(".info_view .txt_info")
         if author_elem and author_elem.get_text(strip=True):
-            item['creators'].append({
-                'lastName': author_elem.get_text(strip=True),
-                'creatorType': 'author',
-                'fieldMode': True
-            })
+            item["creators"].append(
+                {
+                    "lastName": author_elem.get_text(strip=True),
+                    "creatorType": "author",
+                    "fieldMode": True,
+                }
+            )
 
         # Extract publication
-        pub_elem = doc.select_one('.link_cp .thumb_g')
-        if pub_elem and pub_elem.get('alt'):
-            item['publicationTitle'] = pub_elem['alt']
+        pub_elem = doc.select_one(".link_cp .thumb_g")
+        if pub_elem and pub_elem.get("alt"):
+            item["publicationTitle"] = pub_elem["alt"]
 
         # Extract abstract and clean it
-        abstract_tag = doc.find('meta', {'property': 'og:description'})
-        if abstract_tag and abstract_tag.get('content'):
-            abstract = abstract_tag['content']
+        abstract_tag = doc.find("meta", {"property": "og:description"})
+        if abstract_tag and abstract_tag.get("content"):
+            abstract = abstract_tag["content"]
             # Remove Korean journalist prefix patterns
-            abstract = re.sub(r'^\[[^\]]+\]', '', abstract)
-            abstract = re.sub(r'^.+ 기자 =', '', abstract)
-            item['abstractNote'] = abstract.strip()
+            abstract = re.sub(r"^\[[^\]]+\]", "", abstract)
+            abstract = re.sub(r"^.+ 기자 =", "", abstract)
+            item["abstractNote"] = abstract.strip()
 
         # Extract language
-        lang_tag = doc.find('meta', {'property': 'og:locale'})
-        if lang_tag and lang_tag.get('content'):
-            item['language'] = lang_tag['content']
+        lang_tag = doc.find("meta", {"property": "og:locale"})
+        if lang_tag and lang_tag.get("content"):
+            item["language"] = lang_tag["content"]
         else:
-            item['language'] = 'ko'  # Default to Korean
+            item["language"] = "ko"  # Default to Korean
 
         # Set library catalog
-        item['libraryCatalog'] = 'news.v.daum.net'
+        item["libraryCatalog"] = "news.v.daum.net"
 
         # Add snapshot attachment
-        item['attachments'].append({
-            'title': 'Snapshot',
-            'mimeType': 'text/html',
-            'url': url
-        })
+        item["attachments"].append(
+            {"title": "Snapshot", "mimeType": "text/html", "url": url}
+        )
 
         return item

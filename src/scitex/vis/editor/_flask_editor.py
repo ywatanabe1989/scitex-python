@@ -22,15 +22,15 @@ _kill_process_on_port = kill_process_on_port
 
 
 __all__ = [
-    'WebEditor',
-    'find_available_port',
-    'kill_process_on_port',
-    'check_port_available',
-    'render_preview_with_bboxes',
-    'plot_from_csv',
+    "WebEditor",
+    "find_available_port",
+    "kill_process_on_port",
+    "check_port_available",
+    "render_preview_with_bboxes",
+    "plot_from_csv",
     # Legacy aliases
-    '_find_available_port',
-    '_kill_process_on_port',
+    "_find_available_port",
+    "_kill_process_on_port",
 ]
 
 

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/scholar/utils/validation/DOIValidator.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -80,7 +81,7 @@ class DOIValidator:
                     url,
                     timeout=self.timeout,
                     allow_redirects=True,
-                    headers={'User-Agent': self.user_agent}
+                    headers={"User-Agent": self.user_agent},
                 )
 
                 # DOI service returns 404 for invalid DOIs
@@ -93,14 +94,19 @@ class DOIValidator:
                         url,
                         timeout=self.timeout,
                         allow_redirects=True,
-                        headers={'User-Agent': self.user_agent}
+                        headers={"User-Agent": self.user_agent},
                     )
 
                 # Success codes (200-399, including redirects)
                 if 200 <= response.status_code < 400:
                     resolved_url = response.url
                     if resolved_url != url:
-                        return True, "Valid (resolved)", response.status_code, resolved_url
+                        return (
+                            True,
+                            "Valid (resolved)",
+                            response.status_code,
+                            resolved_url,
+                        )
                     return True, "Valid", response.status_code, resolved_url
 
                 # Other error codes
@@ -108,7 +114,9 @@ class DOIValidator:
 
             except requests.exceptions.Timeout:
                 if self.retry_on_timeout and attempt < self.max_retries:
-                    logger.warning(f"DOI validation timeout (attempt {attempt}/{self.max_retries}), retrying...")
+                    logger.warning(
+                        f"DOI validation timeout (attempt {attempt}/{self.max_retries}), retrying..."
+                    )
                     time.sleep(1)  # Brief delay before retry
                     continue
                 return False, "Timeout", 0, None
@@ -145,7 +153,7 @@ class DOIValidator:
 
         for prefix in prefixes:
             if doi.startswith(prefix):
-                doi = doi[len(prefix):]
+                doi = doi[len(prefix) :]
 
         return doi.strip()
 
@@ -201,7 +209,7 @@ class DOIValidator:
         self,
         dois: list[str],
         delay: float = 0.5,
-        progress_callback: Optional[callable] = None
+        progress_callback: Optional[callable] = None,
     ) -> dict:
         """Validate multiple DOIs with rate limiting.
 
@@ -219,30 +227,25 @@ class DOIValidator:
                 'results': [{'doi': str, 'is_valid': bool, 'message': str, ...}, ...]
             }
         """
-        results = {
-            'total': len(dois),
-            'valid': 0,
-            'invalid': 0,
-            'results': []
-        }
+        results = {"total": len(dois), "valid": 0, "invalid": 0, "results": []}
 
         for i, doi in enumerate(dois, 1):
             is_valid, message, status_code, resolved_url = self.validate_doi(doi)
 
             result_entry = {
-                'doi': doi,
-                'is_valid': is_valid,
-                'message': message,
-                'status_code': status_code,
-                'resolved_url': resolved_url
+                "doi": doi,
+                "is_valid": is_valid,
+                "message": message,
+                "status_code": status_code,
+                "resolved_url": resolved_url,
             }
 
-            results['results'].append(result_entry)
+            results["results"].append(result_entry)
 
             if is_valid:
-                results['valid'] += 1
+                results["valid"] += 1
             else:
-                results['invalid'] += 1
+                results["invalid"] += 1
 
             # Call progress callback if provided
             if progress_callback:
@@ -262,15 +265,15 @@ if __name__ == "__main__":
     # Test cases
     test_dois = [
         "10.1038/s41598-023-12345-6",  # Invalid (example)
-        "10.1186/1751-0473-8-7",       # Valid (Git reproducibility paper)
-        "10.1371/journal.pcbi.1007128", # Valid (Manubot paper)
-        "",                             # Empty
-        "invalid-doi",                  # Invalid format
+        "10.1186/1751-0473-8-7",  # Valid (Git reproducibility paper)
+        "10.1371/journal.pcbi.1007128",  # Valid (Manubot paper)
+        "",  # Empty
+        "invalid-doi",  # Invalid format
     ]
 
-    print("="*80)
+    print("=" * 80)
     print("DOI Validator Demo")
-    print("="*80)
+    print("=" * 80)
 
     for doi in test_dois:
         print(f"\nTesting: {doi or '(empty)'}")
@@ -282,8 +285,8 @@ if __name__ == "__main__":
         if resolved_url:
             print(f"  Resolved URL: {resolved_url[:80]}...")
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("Demo complete")
-    print("="*80)
+    print("=" * 80)
 
 # EOF

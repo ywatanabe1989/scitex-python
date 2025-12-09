@@ -20,25 +20,25 @@ TRANSLATOR_INFO = {
     "in_repository": True,
     "translator_type": 4,
     "browser_support": "gcsibv",
-    "last_updated": "2019-06-10 21:51:43"
+    "last_updated": "2019-06-10 21:51:43",
 }
 
 
 def detect_web(doc: Any, url: str) -> Optional[str]:
     """Detect if the page is a newspaper article, blog post, video, or multiple items"""
-    url = re.sub(r'[?#].+', '', url)
+    url = re.sub(r"[?#].+", "", url)
 
-    if re.search(r'\d{8}$', url) or re.search(r'\d{7}\.(stm)$', url):
-        page_node = doc.select_one('#page')
+    if re.search(r"\d{8}$", url) or re.search(r"\d{7}\.(stm)$", url):
+        page_node = doc.select_one("#page")
         if page_node:
-            classes = page_node.get('class', [])
+            classes = page_node.get("class", [])
             if isinstance(classes, str):
                 classes = classes.split()
-            if any(cls in classes for cls in ['media-asset-page', 'vxp-headlines']):
+            if any(cls in classes for cls in ["media-asset-page", "vxp-headlines"]):
                 return "videoRecording"
         return "newspaperArticle"
 
-    if '/newsbeat/article' in url:
+    if "/newsbeat/article" in url:
         return "blogPost"
 
     if get_search_results(doc, check_only=True):
@@ -50,14 +50,14 @@ def detect_web(doc: Any, url: str) -> Optional[str]:
 def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str, str]]:
     """Get search results from a multiple item page"""
     items = {}
-    rows = doc.select('a:has(h3)')
+    rows = doc.select("a:has(h3)")
 
     # For NewsBeat
     if not rows:
         rows = doc.select('article div h1[itemprop="headline"] a')
 
     for row in rows:
-        href = row.get('href')
+        href = row.get("href")
         title = row.get_text(strip=True)
         if href and title:
             if check_only:
@@ -69,7 +69,7 @@ def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str,
 
 def scrape(doc: Any, url: str) -> Dict[str, Any]:
     """Scrape a single item page"""
-    url = re.sub(r'[?#].+', '', url)
+    url = re.sub(r"[?#].+", "", url)
     item_type = detect_web(doc, url)
     if not item_type or item_type == "multiple":
         return {}
@@ -85,7 +85,7 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
         "attachments": [{"title": "Snapshot", "mimeType": "text/html"}],
         "tags": [],
         "notes": [],
-        "seeAlso": []
+        "seeAlso": [],
     }
 
     # Try to get data from JSON-LD
@@ -102,7 +102,7 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
     if not item["date"]:
         seconds_elem = doc.select_one('div:has(h1, h2) *[class*="date"][data-seconds]')
         if seconds_elem:
-            seconds = seconds_elem.get('data-seconds')
+            seconds = seconds_elem.get("data-seconds")
             if seconds:
                 try:
                     timestamp = int(seconds)
@@ -115,88 +115,92 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
     if not item["date"]:
         date_meta = doc.select_one('meta[property="rnews:datePublished"]')
         if date_meta:
-            item["date"] = date_meta.get('content', '')
+            item["date"] = date_meta.get("content", "")
         else:
-            timestamp_elem = doc.select_one('p.timestamp')
+            timestamp_elem = doc.select_one("p.timestamp")
             if timestamp_elem:
                 item["date"] = timestamp_elem.get_text(strip=True)
             else:
                 date_meta2 = doc.select_one('meta[name="OriginalPublicationDate"]')
                 if date_meta2:
-                    item["date"] = date_meta2.get('content', '')
+                    item["date"] = date_meta2.get("content", "")
 
     # Get title from embedded metadata
     title_meta = doc.select_one('meta[property="og:title"]')
     if title_meta:
-        item["title"] = title_meta.get('content', '')
+        item["title"] = title_meta.get("content", "")
     else:
-        h1 = doc.select_one('h1')
+        h1 = doc.select_one("h1")
         if h1:
             item["title"] = h1.get_text(strip=True)
 
     # For old .stm pages
-    if url.endswith('.stm'):
+    if url.endswith(".stm"):
         headline_meta = doc.select_one('meta[name="Headline"]')
         if headline_meta:
-            item["title"] = headline_meta.get('content', '')
+            item["title"] = headline_meta.get("content", "")
 
     # Get authors from byline
-    byline_elem = doc.select_one('span.byline__name')
+    byline_elem = doc.select_one("span.byline__name")
     if byline_elem:
         author_string = byline_elem.get_text(strip=True)
-        author_string = author_string.replace('By', '').replace('...', '').strip()
+        author_string = author_string.replace("By", "").replace("...", "").strip()
 
         # Check if author is real or just webpage title
-        h1_elem = doc.select_one('h1')
+        h1_elem = doc.select_one("h1")
         webpage_title = h1_elem.get_text(strip=True).lower() if h1_elem else ""
 
-        authors = author_string.split('&')
+        authors = author_string.split("&")
         for author in authors:
             author = author.strip()
             if webpage_title and author.lower() in webpage_title:
                 continue
             parts = author.split()
             if len(parts) > 1:
-                item["creators"].append({
-                    "firstName": " ".join(parts[:-1]),
-                    "lastName": parts[-1],
-                    "creatorType": "author"
-                })
+                item["creators"].append(
+                    {
+                        "firstName": " ".join(parts[:-1]),
+                        "lastName": parts[-1],
+                        "creatorType": "author",
+                    }
+                )
     else:
         # Try old format
-        byline_p = doc.select_one('p.byline')
+        byline_p = doc.select_one("p.byline")
         if byline_p:
             author_string = byline_p.get_text(strip=True)
-            title_em = doc.select_one('em.title')
+            title_em = doc.select_one("em.title")
             if title_em:
-                author_string = author_string.replace(title_em.get_text(), '')
-            author_string = author_string.replace('By', '').strip()
-            authors = author_string.split('&')
+                author_string = author_string.replace(title_em.get_text(), "")
+            author_string = author_string.replace("By", "").strip()
+            authors = author_string.split("&")
             for author in authors:
                 author = author.strip()
                 parts = author.split()
                 if len(parts) > 1:
-                    item["creators"].append({
-                        "firstName": " ".join(parts[:-1]),
-                        "lastName": parts[-1],
-                        "creatorType": "author"
-                    })
+                    item["creators"].append(
+                        {
+                            "firstName": " ".join(parts[:-1]),
+                            "lastName": parts[-1],
+                            "creatorType": "author",
+                        }
+                    )
 
     # Get abstract
     desc_meta = doc.select_one('meta[property="og:description"]')
     if desc_meta:
-        item["abstractNote"] = desc_meta.get('content', '')
+        item["abstractNote"] = desc_meta.get("content", "")
     else:
         desc_meta2 = doc.select_one('meta[name="Description"]')
         if desc_meta2:
-            item["abstractNote"] = desc_meta2.get('content', '')
+            item["abstractNote"] = desc_meta2.get("content", "")
 
     # Get publication title and section
     if item_type == "newspaperArticle":
         item["publicationTitle"] = "BBC News"
         section_meta = doc.select_one('meta[property="article:section"]')
         if section_meta:
-            item["section"] = section_meta.get('content', '')
+            item["section"] = section_meta.get("content", "")
 
     elif item_type == "blogPost":
         item["blogTitle"] = "BBC Newsbeat"
@@ -207,7 +211,7 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
     # Get tags
     tags_meta = doc.select('meta[property="article:tag"]')
     for tag_meta in tags_meta:
-        tag_content = tag_meta.get('content', '')
+        tag_content = tag_meta.get("content", "")
         if tag_content:
             # Capitalize first letter
             item["tags"].append(tag_content[0].upper() + tag_content[1:])

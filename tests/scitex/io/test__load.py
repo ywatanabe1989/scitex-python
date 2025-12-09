@@ -246,6 +246,7 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -285,6 +286,7 @@ if __name__ == "__main__":
 # from ._load_modules._xml import _load_xml
 # from ._load_modules._yaml import _load_yaml
 # from ._load_modules._zarr import _load_zarr
+# from ._load_modules._canvas import _load_canvas
 # 
 # 
 # def load(
@@ -293,6 +295,7 @@ if __name__ == "__main__":
 #     show: bool = False,
 #     verbose: bool = False,
 #     cache: bool = True,
+#     metadata: bool = None,  # None = auto-detect (True for images)
 #     **kwargs,
 # ) -> Any:
 #     """
@@ -314,13 +317,29 @@ if __name__ == "__main__":
 #         If True, print verbose output during loading. Default is False.
 #     cache : bool, optional
 #         If True, enable caching for faster repeated loads. Default is True.
+#     metadata : bool or None, optional
+#         If True, return tuple (data, metadata_dict) for images and PDFs.
+#         If False, return data only.
+#         If None (default), automatically True for images, False for PDFs and other formats.
+#         Works for image files (.png, .jpg, .jpeg, .tiff, .tif) and PDF files.
+#         For PDFs, metadata_dict contains embedded scitex metadata from PDF Subject field.
 #     **kwargs : dict
 #         Additional keyword arguments to be passed to the specific loading function.
+#         For PDFs, can include: mode='full'|'text'|'scientific', etc.
 # 
 #     Returns
 #     -------
 #     object
 #         The loaded data object, which can be of various types depending on the input file format.
+# 
+#         For images with metadata=True (default):
+#             Returns tuple (image, metadata_dict). metadata_dict is None if no metadata found.
+# 
+#         For PDFs with metadata=False (default):
+#             Returns dict with keys: 'full_text', 'sections', 'metadata', 'pages', etc.
+# 
+#         For PDFs with metadata=True:
+#             Returns tuple (pdf_data_dict, metadata_dict). Enables consistent API with images.
 # 
 #     Raises
 #     ------
@@ -341,9 +360,27 @@ if __name__ == "__main__":
 # 
 #     Examples
 #     --------
+#     >>> # Load CSV data
 #     >>> data = load('data.csv')
-#     >>> image = load('image.png')
-#     >>> model = load('model.pth')
+# 
+#     >>> # Load image with metadata (default behavior)
+#     >>> img, meta = load('figure.png')
+#     >>> print(meta['scitex']['version'])
+# 
+#     >>> # Load image without metadata
+#     >>> img = load('figure.png', metadata=False)
+# 
+#     >>> # Load PDF with default extraction (no metadata tuple)
+#     >>> pdf = load('paper.pdf')
+#     >>> print(pdf['full_text'])
+# 
+#     >>> # Load PDF with metadata tuple (consistent API with images)
+#     >>> pdf, meta = load('paper.pdf', metadata=True)
+#     >>> print(meta['scitex']['version'])
+# 
+#     >>> # Load PDF with specific mode
+#     >>> text = load('paper.pdf', mode='text')
+# 
 #     >>> # Load file without extension (e.g., UUID PDF)
 #     >>> pdf = load('f2694ccb-1b6f-4994-add8-5111fd4d52f1', ext='pdf')
 #     """
@@ -357,20 +394,20 @@ if __name__ == "__main__":
 #         if verbose:
 #             print(f"[DEBUG] After Path conversion: {lpath}")
 # 
+#     # Handle .canvas directories (special case - directory not file)
+#     if lpath.endswith(".canvas"):
+#         return _load_canvas(lpath, verbose=verbose, **kwargs)
+# 
 #     # Check if it's a glob pattern
 #     if "*" in lpath or "?" in lpath or "[" in lpath:
 #         # Handle glob pattern
 #         matched_files = sorted(glob.glob(lpath))
 #         if not matched_files:
-#             raise FileNotFoundError(
-#                 f"No files found matching pattern: {lpath}"
-#             )
+#             raise FileNotFoundError(f"No files found matching pattern: {lpath}")
 #         # Load all matched files
 #         results = []
 #         for file_path in matched_files:
-#             results.append(
-#                 load(file_path, show=show, verbose=verbose, **kwargs)
-#             )
+#             results.append(load(file_path, show=show, verbose=verbose, **kwargs))
 #         return results
 # 
 #     # Handle broken symlinks - os.path.exists() returns False for broken symlinks
@@ -381,7 +418,7 @@ if __name__ == "__main__":
 #             target = os.readlink(lpath)
 #             resolved_target = os.path.join(symlink_dir, target)
 #             resolved_target = os.path.abspath(resolved_target)
-#             
+# 
 #             if os.path.exists(resolved_target):
 #                 lpath = resolved_target
 #             else:
@@ -397,8 +434,8 @@ if __name__ == "__main__":
 #             except Exception:
 #                 raise FileNotFoundError(f"File not found: {lpath}")
 # 
-#     # Try to get from cache first
-#     if cache:
+#     # Try to get from cache first (skip cache if metadata is requested for images)
+#     if cache and not metadata:
 #         cached_data = get_cached_data(lpath)
 #         if cached_data is not None:
 #             if verbose:
@@ -469,10 +506,18 @@ if __name__ == "__main__":
 #     # Determine extension: use explicit ext parameter or detect from filename
 #     if ext is not None:
 #         # Use explicitly provided extension (strip leading dot if present)
-#         detected_ext = ext.lstrip('.')
+#         detected_ext = ext.lstrip(".")
 #     else:
 #         # Auto-detect from filename
 #         detected_ext = lpath.split(".")[-1] if "." in lpath else ""
+# 
+#     # Auto-detect metadata for images and PDFs
+#     is_image = detected_ext in ["jpg", "jpeg", "png", "tiff", "tif"]
+#     is_pdf = detected_ext == "pdf"
+# 
+#     if metadata is None:
+#         # Default: True for images, False for other formats (PDFs default to False for backward compatibility)
+#         metadata = is_image
 # 
 #     # Special handling for numpy files with caching
 #     if cache and detected_ext in ["npy", "npz"]:
@@ -481,10 +526,17 @@ if __name__ == "__main__":
 #     loader = preserve_doc(loaders_dict.get(detected_ext, _load_txt))
 # 
 #     try:
-#         result = loader(lpath, **kwargs)
+#         # Pass metadata parameter for images and PDFs
+#         if is_image:
+#             result = loader(lpath, metadata=metadata, verbose=verbose, **kwargs)
+#         elif is_pdf:
+#             # Pass metadata parameter to PDF loader for API consistency
+#             result = loader(lpath, metadata=metadata, **kwargs)
+#         else:
+#             result = loader(lpath, **kwargs)
 # 
-#         # Cache the result if caching is enabled
-#         if cache:
+#         # Cache the result if caching is enabled (skip if metadata was used)
+#         if cache and not metadata:
 #             cache_data(lpath, result)
 #             if verbose:
 #                 print(f"[Cache STORED] Cached data for: {lpath}")
@@ -492,6 +544,7 @@ if __name__ == "__main__":
 #         return result
 #     except (ValueError, FileNotFoundError) as e:
 #         raise ValueError(f"Error loading file {lpath}: {str(e)}")
+# 
 # 
 # # EOF
 

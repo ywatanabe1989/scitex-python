@@ -12,7 +12,9 @@ class StanfordEncyclopediaOfPhilosophyTranslator(BaseTranslator):
     """Stanford Encyclopedia of Philosophy."""
 
     LABEL = "Stanford Encyclopedia of Philosophy"
-    URL_TARGET_PATTERN = r"^https?://plato\.stanford\.edu/(archives/[a-z]{3}\d{4}/)?(entries|search)"
+    URL_TARGET_PATTERN = (
+        r"^https?://plato\.stanford\.edu/(archives/[a-z]{3}\d{4}/)?(entries|search)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

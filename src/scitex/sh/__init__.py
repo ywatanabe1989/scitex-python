@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 
@@ -17,7 +18,7 @@ def sh(
     verbose: bool = True,
     return_as: ReturnFormat = "dict",
     timeout: int = None,
-    stream_output: bool = False
+    stream_output: bool = False,
 ) -> Union[str, ShellResult]:
     """
     Executes a shell command safely (list format only).
@@ -54,7 +55,7 @@ def sh(
         command_str_or_list,
         verbose=verbose,
         timeout=timeout,
-        stream_output=stream_output
+        stream_output=stream_output,
     )
 
     if return_as == "dict":
@@ -87,6 +88,6 @@ def sh_run(command: CommandInput, verbose: bool = True) -> ShellResult:
     return execute(command, verbose=verbose)
 
 
-__all__ = ['sh', 'sh_run', 'quote']
+__all__ = ["sh", "sh_run", "quote"]
 
 # EOF

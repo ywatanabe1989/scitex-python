@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -33,9 +34,7 @@ class ZoteroTranslatorRunner:
 
     def __init__(self, translator_dir: Optional[Path] = None):
         """Initialize with translator directory."""
-        self.translator_dir = translator_dir or (
-            Path(__DIR__) / "zotero_translators"
-        )
+        self.translator_dir = translator_dir or (Path(__DIR__) / "zotero_translators")
         self._translators = self._load_translators()
 
     def _load_translators(self) -> Dict[str, Dict]:
@@ -43,9 +42,7 @@ class ZoteroTranslatorRunner:
         translators = {}
 
         if not self.translator_dir.exists():
-            logger.warning(
-                f"Translator directory not found: {self.translator_dir}"
-            )
+            logger.warning(f"Translator directory not found: {self.translator_dir}")
             return translators
 
         for js_file in self.translator_dir.glob("*.js"):
@@ -58,34 +55,32 @@ class ZoteroTranslatorRunner:
 
                 # Extract metadata JSON - it's always at the beginning and ends with }\n
                 # Find the first line that's just "}" after the opening "{"
-                lines = content.split('\n')
+                lines = content.split("\n")
                 json_end_idx = -1
                 brace_count = 0
-                
+
                 for i, line in enumerate(lines):
-                    if line.strip() == '{':
+                    if line.strip() == "{":
                         brace_count = 1
                     elif brace_count > 0:
-                        brace_count += line.count('{') - line.count('}')
+                        brace_count += line.count("{") - line.count("}")
                         if brace_count == 0:
                             json_end_idx = i
                             break
-                
+
                 if json_end_idx == -1:
                     continue
-                
+
                 # Extract and parse metadata
-                metadata_str = '\n'.join(lines[:json_end_idx + 1])
+                metadata_str = "\n".join(lines[: json_end_idx + 1])
                 # Remove trailing commas before closing braces
-                metadata_str = re.sub(r',(\s*})', r'\1', metadata_str)
+                metadata_str = re.sub(r",(\s*})", r"\1", metadata_str)
                 metadata = json.loads(metadata_str)
 
                 # Only keep web translators
-                if metadata.get("translatorType", 0) & 4 and metadata.get(
-                    "target"
-                ):
+                if metadata.get("translatorType", 0) & 4 and metadata.get("target"):
                     # Extract JavaScript code (after metadata)
-                    js_code = '\n'.join(lines[json_end_idx + 1:]).lstrip()
+                    js_code = "\n".join(lines[json_end_idx + 1 :]).lstrip()
 
                     # Remove test cases section
                     test_idx = js_code.find("/** BEGIN TEST CASES **/")
@@ -109,9 +104,7 @@ class ZoteroTranslatorRunner:
         for name, translator in self._translators.items():
             try:
                 if re.match(translator["target_regex"], url):
-                    logger.debug(
-                        f"URL matches translator: {translator['label']}"
-                    )
+                    logger.debug(f"URL matches translator: {translator['label']}")
                     return translator
             except:
                 continue
@@ -296,5 +289,6 @@ async def find_pdf_urls_with_translator(page: Page) -> List[str]:
     """
     runner = ZoteroTranslatorRunner()
     return await runner.extract_pdf_urls_async(page)
+
 
 # EOF

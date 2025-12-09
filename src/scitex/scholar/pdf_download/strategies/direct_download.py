@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/pdf_download/strategies/direct_download.py"
-)
+
+__FILE__ = "./src/scitex/scholar/pdf_download/strategies/direct_download.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 """Direct Download Strategy"""
@@ -116,16 +115,13 @@ async def try_download_direct_async(
                 )
                 await page.wait_for_timeout(2000)
             except Exception as popup_error:
-                logger.debug(
-                    f"{func_name}: Could not show error popup: {popup_error}"
-                )
+                logger.debug(f"{func_name}: Could not show error popup: {popup_error}")
             finally:
                 try:
                     await page.close()
                 except Exception as close_error:
-                    logger.debug(
-                        f"{func_name}: Error closing page: {close_error}"
-                    )
+                    logger.debug(f"{func_name}: Error closing page: {close_error}")
         return None
+
 
 # EOF

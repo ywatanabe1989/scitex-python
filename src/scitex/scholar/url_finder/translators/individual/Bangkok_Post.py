@@ -33,7 +33,7 @@ class BangkokPostTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2024-06-18 20:46:45"
+        "lastUpdated": "2024-06-18 20:46:45",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -47,7 +47,7 @@ class BangkokPostTranslator:
         Returns:
             'newspaperArticle' if detected, empty string otherwise
         """
-        return 'newspaperArticle'
+        return "newspaperArticle"
 
     def do_web(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """
@@ -74,60 +74,58 @@ class BangkokPostTranslator:
             Dictionary containing article metadata
         """
         item = {
-            'itemType': 'newspaperArticle',
-            'publicationTitle': 'Bangkok Post',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": "newspaperArticle",
+            "publicationTitle": "Bangkok Post",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Extract title from meta tags
-        title_tag = doc.find('meta', {'property': 'og:title'})
-        if title_tag and title_tag.get('content'):
-            item['title'] = title_tag['content']
+        title_tag = doc.find("meta", {"property": "og:title"})
+        if title_tag and title_tag.get("content"):
+            item["title"] = title_tag["content"]
 
         # Extract author - try multiple sources
-        author_tag = doc.find('meta', {'name': 'lead:author'})
-        if author_tag and author_tag.get('content'):
-            author_name = author_tag['content']
-            item['creators'].append(self._clean_author(author_name))
+        author_tag = doc.find("meta", {"name": "lead:author"})
+        if author_tag and author_tag.get("content"):
+            author_name = author_tag["content"]
+            item["creators"].append(self._clean_author(author_name))
         else:
             # Try alternate source
-            author_elem = doc.select_one('.info-opinion .columnnist-name a')
+            author_elem = doc.select_one(".info-opinion .columnnist-name a")
             if author_elem and author_elem.get_text():
                 author_name = author_elem.get_text().strip()
-                item['creators'].append(self._clean_author(author_name))
+                item["creators"].append(self._clean_author(author_name))
 
         # Extract date - format like 2020-09-07T17:37:00+07:00
-        date_tag = doc.find('meta', {'name': 'lead:published_at'})
-        if date_tag and date_tag.get('content'):
-            date_str = date_tag['content']
+        date_tag = doc.find("meta", {"name": "lead:published_at"})
+        if date_tag and date_tag.get("content"):
+            date_str = date_tag["content"]
             # Extract YYYY-MM-DD from the timestamp
-            item['date'] = date_str[:10] if len(date_str) >= 10 else date_str
+            item["date"] = date_str[:10] if len(date_str) >= 10 else date_str
 
         # Extract abstract
-        abstract_tag = doc.find('meta', {'property': 'og:description'})
-        if abstract_tag and abstract_tag.get('content'):
-            item['abstractNote'] = abstract_tag['content']
+        abstract_tag = doc.find("meta", {"property": "og:description"})
+        if abstract_tag and abstract_tag.get("content"):
+            item["abstractNote"] = abstract_tag["content"]
 
         # Extract language
-        lang_tag = doc.find('meta', {'property': 'og:locale'})
-        if lang_tag and lang_tag.get('content'):
-            item['language'] = lang_tag['content']
+        lang_tag = doc.find("meta", {"property": "og:locale"})
+        if lang_tag and lang_tag.get("content"):
+            item["language"] = lang_tag["content"]
 
         # Extract tags from keywords
-        keywords_tag = doc.find('meta', {'name': 'keywords'})
-        if keywords_tag and keywords_tag.get('content'):
-            keywords = keywords_tag['content'].split(',')
-            item['tags'] = [{'tag': k.strip()} for k in keywords if k.strip()]
+        keywords_tag = doc.find("meta", {"name": "keywords"})
+        if keywords_tag and keywords_tag.get("content"):
+            keywords = keywords_tag["content"].split(",")
+            item["tags"] = [{"tag": k.strip()} for k in keywords if k.strip()]
 
         # Add snapshot attachment
-        item['attachments'].append({
-            'title': 'Snapshot',
-            'mimeType': 'text/html',
-            'url': url
-        })
+        item["attachments"].append(
+            {"title": "Snapshot", "mimeType": "text/html", "url": url}
+        )
 
         return item
 
@@ -146,13 +144,9 @@ class BangkokPostTranslator:
 
         if len(parts) >= 2:
             return {
-                'firstName': ' '.join(parts[:-1]),
-                'lastName': parts[-1],
-                'creatorType': 'author'
+                "firstName": " ".join(parts[:-1]),
+                "lastName": parts[-1],
+                "creatorType": "author",
             }
         else:
-            return {
-                'lastName': name,
-                'creatorType': 'author',
-                'fieldMode': True
-            }
+            return {"lastName": name, "creatorType": "author", "fieldMode": True}

@@ -84,11 +84,9 @@ __all__ = [
     "SyncBrowserSession",
     "sync_browser_session",
     "create_browser_session_fixture",
-
     # PDF
     "detect_chrome_pdf_viewer_async",
     "click_download_for_chrome_pdf_viewer_async",
-
     # Interaction
     "click_center_async",
     "click_with_fallbacks_async",

@@ -105,7 +105,6 @@ def session(
     """
 
     def decorator(func: Callable) -> Callable:
-
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             # If called with arguments (not CLI), run directly
@@ -150,17 +149,16 @@ def _run_with_session(
     # Get calling file
     frame = inspect.currentframe()
     caller_frame = frame.f_back.f_back  # Go up two levels
-    caller_file = caller_frame.f_globals.get('__file__', 'unknown.py')
+    caller_file = caller_frame.f_globals.get("__file__", "unknown.py")
 
     # Generate argparse from function signature
     parser = _create_parser(func)
     args = parser.parse_args()
 
     # Clean up INJECTED sentinels from args before passing to session
-    cleaned_args = argparse.Namespace(**{
-        k: v for k, v in vars(args).items()
-        if not isinstance(v, type(INJECTED))
-    })
+    cleaned_args = argparse.Namespace(
+        **{k: v for k, v in vars(args).items() if not isinstance(v, type(INJECTED))}
+    )
 
     # Start session
     import matplotlib.pyplot as plt
@@ -181,11 +179,11 @@ def _run_with_session(
 
     # Store session variables in function globals
     func_globals = func.__globals__
-    func_globals['CONFIG'] = CONFIG
-    func_globals['plt'] = plt
-    func_globals['COLORS'] = COLORS
-    func_globals['rng_manager'] = rng_manager
-    func_globals['logger'] = script_logger
+    func_globals["CONFIG"] = CONFIG
+    func_globals["plt"] = plt
+    func_globals["COLORS"] = COLORS
+    func_globals["rng_manager"] = rng_manager
+    func_globals["logger"] = script_logger
 
     # Log injected globals for user awareness
     _decorator_logger.info("=" * 60)
@@ -214,11 +212,11 @@ def _run_with_session(
 
         # Map of injected variable names to their actual objects
         injection_map = {
-            'CONFIG': CONFIG,
-            'plt': plt,
-            'COLORS': COLORS,
-            'rng_manager': rng_manager,
-            'logger': script_logger,
+            "CONFIG": CONFIG,
+            "plt": plt,
+            "COLORS": COLORS,
+            "rng_manager": rng_manager,
+            "logger": script_logger,
         }
 
         # Build filtered_kwargs with user args and injected values
@@ -282,7 +280,8 @@ def _run_with_session(
         # Final matplotlib cleanup (belt and suspenders approach)
         try:
             import matplotlib.pyplot as plt
-            plt.close('all')
+
+            plt.close("all")
         except:
             pass
 
@@ -311,12 +310,13 @@ def _create_parser(func: Callable) -> argparse.ArgumentParser:
 
     # Get actual values for deterministic items
     # Get calling file from the decorated function's module
-    caller_file = func.__globals__.get('__file__', 'unknown.py')
+    caller_file = func.__globals__.get("__file__", "unknown.py")
 
     # Calculate SDIR_OUT (base output directory)
     import os
-    sdir_out = Path(os.path.splitext(caller_file)[0] + '_out')
-    sdir_run_example = sdir_out / 'RUNNING' / '<SESSION_ID>'
+
+    sdir_out = Path(os.path.splitext(caller_file)[0] + "_out")
+    sdir_run_example = sdir_out / "RUNNING" / "<SESSION_ID>"
 
     # Get current PID
     current_pid = os.getpid()
@@ -333,9 +333,10 @@ def _create_parser(func: Callable) -> argparse.ArgumentParser:
                 # Load and list all config variables with their values
                 try:
                     import yaml
+
                     all_vars = []
                     for yaml_file in yaml_files:
-                        with open(yaml_file, 'r') as f:
+                        with open(yaml_file, "r") as f:
                             data = yaml.safe_load(f)
                             if isinstance(data, dict):
                                 namespace = yaml_file.stem.upper()
@@ -344,30 +345,37 @@ def _create_parser(func: Callable) -> argparse.ArgumentParser:
                                     value_str = str(value)
                                     if len(value_str) > 50:
                                         value_str = value_str[:47] + "..."
-                                    all_vars.append(f"        - CONFIG.{namespace}.{key} (from ./config/{yaml_file.name})\n            {value_str}")
+                                    all_vars.append(
+                                        f"        - CONFIG.{namespace}.{key} (from ./config/{yaml_file.name})\n            {value_str}"
+                                    )
 
                     if all_vars:
-                        config_status += '\n'.join(all_vars)
+                        config_status += "\n".join(all_vars)
                     else:
                         config_status = "        CONFIG from YAML files:\n        (no variables found)"
                 except Exception as e:
                     # If we can't load the YAML files, just show error
                     config_status = "        CONFIG from YAML files:\n        (unable to load at help-time, will be available at runtime)"
             else:
-                config_status = "        CONFIG from YAML files:\n        (no .yaml files found)"
+                config_status = (
+                    "        CONFIG from YAML files:\n        (no .yaml files found)"
+                )
         else:
             config_status = "        CONFIG from YAML files:\n        (./config/ directory not found)"
     except:
-        config_status = "        CONFIG from YAML files:\n        (unable to check at help-time)"
+        config_status = (
+            "        CONFIG from YAML files:\n        (unable to check at help-time)"
+        )
 
     # Get available color keys
     try:
         from scitex.plt.utils._configure_mpl import configure_mpl
         import matplotlib.pyplot as plt_temp
+
         _, colors_dict = configure_mpl(plt_temp)
         # Show all color keys
         sorted_keys = sorted(colors_dict.keys())
-        color_keys = ', '.join(f"'{k}'" for k in sorted_keys)
+        color_keys = ", ".join(f"'{k}'" for k in sorted_keys)
     except Exception as e:
         # Fallback if configure_mpl fails
         color_keys = "'blue', 'red', 'green', 'yellow', 'purple', 'orange', ..."
@@ -424,7 +432,7 @@ Global Variables Injected by @session Decorator:
 
     # Add arguments from function signature (skip injected parameters)
     # Track used short forms to avoid conflicts
-    used_short_forms = {'h'}  # Reserve -h for help
+    used_short_forms = {"h"}  # Reserve -h for help
 
     for param_name, param in sig.parameters.items():
         # Skip parameters with INJECTED as default (these are injected by decorator)
@@ -458,9 +466,9 @@ def _generate_short_form(param_name: str, used_short_forms: set) -> str:
         return first_letter
 
     # Strategy 2: Try first letter of each word (for snake_case or camelCase)
-    words = param_name.replace('_', ' ').replace('-', ' ').split()
+    words = param_name.replace("_", " ").replace("-", " ").split()
     if len(words) > 1:
-        acronym = ''.join(w[0].lower() for w in words)
+        acronym = "".join(w[0].lower() for w in words)
         if len(acronym) == 1 and acronym not in used_short_forms:
             return acronym
 
@@ -526,7 +534,7 @@ def _add_argument(
         # Boolean flags
         parser.add_argument(
             *arg_names,
-            action='store_true' if not default else 'store_false',
+            action="store_true" if not default else "store_false",
             default=default,
             help=f"(default: {default})",
         )
@@ -534,26 +542,24 @@ def _add_argument(
         # Regular arguments
         choices_str = f", choices: {choices}" if choices else ""
         kwargs = {
-            'type': param_type,
-            'help': f"(default: {default}{choices_str})" if has_default else f"(required{choices_str})",
+            "type": param_type,
+            "help": f"(default: {default}{choices_str})"
+            if has_default
+            else f"(required{choices_str})",
         }
 
         if choices:
-            kwargs['choices'] = choices
+            kwargs["choices"] = choices
 
         if has_default:
-            kwargs['default'] = default
+            kwargs["default"] = default
         else:
-            kwargs['required'] = True
+            kwargs["required"] = True
 
         parser.add_argument(*arg_names, **kwargs)
 
 
-def run(
-    func: Callable,
-    parse_args: Callable = None,
-    **session_kwargs
-) -> Any:
+def run(func: Callable, parse_args: Callable = None, **session_kwargs) -> Any:
     """Run function with session management.
 
     Alternative to decorator for more explicit control.
@@ -583,7 +589,7 @@ def run(
     # Get file
     frame = inspect.currentframe()
     caller_frame = frame.f_back
-    caller_file = caller_frame.f_globals.get('__file__', 'unknown.py')
+    caller_file = caller_frame.f_globals.get("__file__", "unknown.py")
 
     # Start session
     import matplotlib.pyplot as plt
@@ -598,7 +604,7 @@ def run(
 
     # Run
     try:
-        if hasattr(args, '__dict__'):
+        if hasattr(args, "__dict__"):
             exit_status = func(args)
         else:
             exit_status = func()
@@ -618,5 +624,6 @@ def run(
         )
 
     return exit_status
+
 
 # EOF

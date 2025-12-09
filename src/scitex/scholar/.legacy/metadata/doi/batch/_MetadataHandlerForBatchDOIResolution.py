@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -58,9 +59,7 @@ class MetadataHandlerForBatchDOIResolution:
         normalized = re.sub(r"\s+", " ", normalized)  # Normalize whitespace
         return normalized
 
-    def find_similar_papers(
-        self, papers: List[Dict[str, Any]]
-    ) -> Dict[str, List[int]]:
+    def find_similar_papers(self, papers: List[Dict[str, Any]]) -> Dict[str, List[int]]:
         """Find potentially duplicate papers based on title similarity.
 
         Args:
@@ -181,9 +180,7 @@ class MetadataHandlerForBatchDOIResolution:
             result["valid"] = False
             result["warnings"].append("Missing or empty title")
         else:
-            result["enhanced"]["normalized_title"] = self.normalize_title(
-                title
-            )
+            result["enhanced"]["normalized_title"] = self.normalize_title(title)
 
         # Parse and validate year
         year_str = paper.get("year", "")
@@ -213,9 +210,7 @@ class MetadataHandlerForBatchDOIResolution:
 
         return result
 
-    def enhance_paper_batch(
-        self, papers: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def enhance_paper_batch(self, papers: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Enhance a batch of papers with metadata processing.
 
         Args:

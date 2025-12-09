@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -23,15 +24,11 @@ logger = logging.getLogger(__name__)
 
 
 class ImpactFactorEnricher:
-    def __init__(
-        self, config: Optional[ScholarConfig] = None, cache_size: int = 1000
-    ):
+    def __init__(self, config: Optional[ScholarConfig] = None, cache_size: int = 1000):
         self.config = config or ScholarConfig()
         self._factor_instance = None
         self._init_package()
-        self._get_metrics = lru_cache(maxsize=cache_size)(
-            self._get_metrics_uncached
-        )
+        self._get_metrics = lru_cache(maxsize=cache_size)(self._get_metrics_uncached)
 
     def _init_package(self) -> None:
         """Initialize impact_factor package."""
@@ -64,15 +61,11 @@ class ImpactFactorEnricher:
             if "enriched_at" not in metadata:
                 metadata["enriched_at"] = datetime.now().isoformat()
 
-            logger.info(
-                f"Found impact factor {metrics['impact_factor']} for {journal}"
-            )
+            logger.info(f"Found impact factor {metrics['impact_factor']} for {journal}")
 
         return metadata
 
-    def _get_metrics_uncached(
-        self, journal_name: str
-    ) -> Optional[Dict[str, Any]]:
+    def _get_metrics_uncached(self, journal_name: str) -> Optional[Dict[str, Any]]:
         """Get journal metrics."""
         try:
             with suppress_db_logs():
@@ -109,5 +102,6 @@ def suppress_db_logs():
         yield
     finally:
         logging.getLogger("sqlalchemy.engine").setLevel(old_level)
+
 
 # EOF

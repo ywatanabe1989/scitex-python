@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/pdf_download/ScholarPDFDownloader.py"
-)
+
+__FILE__ = "./src/scitex/scholar/pdf_download/ScholarPDFDownloader.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -184,7 +183,9 @@ class ScholarPDFDownloader:
         if result:
             logger.info(f"{self.name}: Successfully downloaded OA PDF to {result}")
         else:
-            logger.debug(f"{self.name}: OA download failed, may need browser-based download")
+            logger.debug(
+                f"{self.name}: OA download failed, may need browser-based download"
+            )
 
         return result
 
@@ -215,15 +216,15 @@ class ScholarPDFDownloader:
             output_path = Path(str(output_path) + ".pdf")
 
         # Extract metadata
-        meta = paper.metadata if hasattr(paper, 'metadata') else paper
-        access = getattr(meta, 'access', None)
-        url_meta = getattr(meta, 'url', None)
-        id_meta = getattr(meta, 'id', None)
+        meta = paper.metadata if hasattr(paper, "metadata") else paper
+        access = getattr(meta, "access", None)
+        url_meta = getattr(meta, "url", None)
+        id_meta = getattr(meta, "id", None)
 
-        is_open_access = getattr(access, 'is_open_access', False) if access else False
-        oa_url = getattr(access, 'oa_url', None) if access else None
-        pdf_urls = getattr(url_meta, 'pdfs', []) if url_meta else []
-        doi = getattr(id_meta, 'doi', None) if id_meta else None
+        is_open_access = getattr(access, "is_open_access", False) if access else False
+        oa_url = getattr(access, "oa_url", None) if access else None
+        pdf_urls = getattr(url_meta, "pdfs", []) if url_meta else []
+        doi = getattr(id_meta, "doi", None) if id_meta else None
 
         logger.info(f"{self.name}: Smart download for DOI={doi}, OA={is_open_access}")
 
@@ -239,7 +240,7 @@ class ScholarPDFDownloader:
 
         # Strategy 2: Try available PDF URLs
         for pdf_entry in pdf_urls:
-            pdf_url = pdf_entry.get('url') if isinstance(pdf_entry, dict) else pdf_entry
+            pdf_url = pdf_entry.get("url") if isinstance(pdf_entry, dict) else pdf_entry
             if pdf_url:
                 logger.info(f"{self.name}: Trying PDF URL: {pdf_url[:60]}...")
                 result = await self.download_from_url(pdf_url, output_path, doi=doi)
@@ -280,9 +281,7 @@ class ScholarPDFDownloader:
         """
 
         if not pdf_url:
-            logger.warning(
-                f"{self.name}: PDF URL passed but not valid: {pdf_url}"
-            )
+            logger.warning(f"{self.name}: PDF URL passed but not valid: {pdf_url}")
             return None
 
         if isinstance(output_path, str):
@@ -302,9 +301,7 @@ class ScholarPDFDownloader:
         stop_event = asyncio.Event()
 
         # Add manual mode flag to context (shared across all strategies)
-        self.context._scitex_is_manual_mode = (
-            False  # Flag strategies can check
-        )
+        self.context._scitex_is_manual_mode = False  # Flag strategies can check
         self.context._scitex_manual_mode_event = (
             stop_event  # Event for internal monitoring
         )
@@ -333,9 +330,7 @@ class ScholarPDFDownloader:
             )
 
         async def direct_download_wrapper(url, path):
-            return await try_download_direct_async(
-                self.context, url, path, self.name
-            )
+            return await try_download_direct_async(self.context, url, path, self.name)
 
         async def response_body_wrapper(url, path):
             return await try_download_response_body_async(
@@ -398,12 +393,8 @@ class ScholarPDFDownloader:
                         f"{self.name}: {method_name} returned None (failed or not applicable)"
                     )
             except Exception as e:
-                logger.warning(
-                    f"{self.name}: {method_name} raised exception: {e}"
-                )
-                logger.debug(
-                    f"{self.name}: Traceback: {traceback.format_exc()}"
-                )
+                logger.warning(f"{self.name}: {method_name} raised exception: {e}")
+                logger.debug(f"{self.name}: Traceback: {traceback.format_exc()}")
 
         # If user chose manual download or all automation failed
         if stop_event.is_set():
@@ -560,9 +551,10 @@ async def main_async(args):
         auth_manager=auth_manager,
         use_zenrows_proxy=False,
     )
-    browser, context = (
-        await browser_manager.get_authenticated_browser_and_context_async()
-    )
+    (
+        browser,
+        context,
+    ) = await browser_manager.get_authenticated_browser_and_context_async()
 
     # Authentication Gateway
     auth_gateway = AuthenticationGateway(
@@ -581,15 +573,11 @@ async def main_async(args):
     # Use the resolved URL from auth_gateway to avoid duplicate OpenURL resolution
     resolved_url = url_context.url if url_context else None
     if resolved_url:
-        logger.info(
-            f"{__name__}: Using resolved URL from auth_gateway: {resolved_url}"
-        )
+        logger.info(f"{__name__}: Using resolved URL from auth_gateway: {resolved_url}")
         urls = await url_finder.find_pdf_urls(resolved_url)
     else:
         logger.info(f"{__name__}: No resolved URL, using DOI: {args.doi}")
-        urls = await url_finder.find_pdf_urls(
-            args.doi
-        )  # Will resolve DOI internally
+        urls = await url_finder.find_pdf_urls(args.doi)  # Will resolve DOI internally
 
     # Extract URL strings from list of dicts
     pdf_urls = []

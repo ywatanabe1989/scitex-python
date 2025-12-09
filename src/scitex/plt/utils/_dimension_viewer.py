@@ -23,9 +23,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def view_dimensions(
-    fig, ax, show_rulers=True, show_grid=True, output_path=None
-):
+def view_dimensions(fig, ax, show_rulers=True, show_grid=True, output_path=None):
     """
     Create a visual representation of figure/axes dimensions.
 
@@ -242,9 +240,7 @@ def view_dimensions(
             ax_diag.plot([mm, mm], [ruler_y, ruler_y - 1], "k-", lw=0.5)
             if mm % 10 == 0:
                 ax_diag.plot([mm, mm], [ruler_y, ruler_y - 2], "k-", lw=1)
-                ax_diag.text(
-                    mm, ruler_y - 3, f"{mm}", ha="center", fontsize=8
-                )
+                ax_diag.text(mm, ruler_y - 3, f"{mm}", ha="center", fontsize=8)
 
         # Vertical ruler (left)
         ruler_x = -10
@@ -252,9 +248,7 @@ def view_dimensions(
             ax_diag.plot([ruler_x, ruler_x - 1], [mm, mm], "k-", lw=0.5)
             if mm % 10 == 0:
                 ax_diag.plot([ruler_x, ruler_x - 2], [mm, mm], "k-", lw=1)
-                ax_diag.text(
-                    ruler_x - 3, mm, f"{mm}", ha="right", fontsize=8
-                )
+                ax_diag.text(ruler_x - 3, mm, f"{mm}", ha="right", fontsize=8)
 
     # Grid
     if show_grid:
@@ -293,9 +287,7 @@ def view_dimensions(
     return fig_diag
 
 
-def compare_modes(
-    axes_width_mm=30, axes_height_mm=21, output_path=None
-):
+def compare_modes(axes_width_mm=30, axes_height_mm=21, output_path=None):
     """
     Compare publication vs display modes side-by-side.
 
@@ -370,13 +362,11 @@ def compare_modes(
     ax2 = fig_comp.add_subplot(122)
     view_disp = view_dimensions(fig_disp, ax_disp, show_rulers=False)
     ax2.set_title(
-        f"Display Mode\n{axes_width_mm*3}×{axes_height_mm*3} mm @ 100 DPI (3x scaled)",
+        f"Display Mode\n{axes_width_mm * 3}×{axes_height_mm * 3} mm @ 100 DPI (3x scaled)",
         fontweight="bold",
     )
 
-    plt.suptitle(
-        "Mode Comparison: Publication vs Display", fontsize=14, y=0.98
-    )
+    plt.suptitle("Mode Comparison: Publication vs Display", fontsize=14, y=0.98)
     plt.tight_layout()
 
     # Close original figures
@@ -421,9 +411,7 @@ if __name__ == "__main__":
 
     # View dimensions
     print("\n2. Viewing dimensions")
-    fig_diag = view_dimensions(
-        fig, ax, output_path="/tmp/dimension_viewer_demo.png"
-    )
+    fig_diag = view_dimensions(fig, ax, output_path="/tmp/dimension_viewer_demo.png")
 
     # Compare modes
     print("\n3. Comparing publication vs display modes")

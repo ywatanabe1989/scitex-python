@@ -4,12 +4,14 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_sns_kdeplot.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import numpy as np
 import pandas as pd
+
 
 def _format_sns_kdeplot(id, tracked_dict, kwargs):
     """Format data from a sns_kdeplot call."""
@@ -41,9 +43,7 @@ def _format_sns_kdeplot(id, tracked_dict, kwargs):
             )
 
             if y_data is not None:  # Bivariate KDE
-                return pd.DataFrame(
-                    {f"{id}_kde_x": data, f"{id}_kde_y": y_data}
-                )
+                return pd.DataFrame({f"{id}_kde_x": data, f"{id}_kde_y": y_data})
             else:  # Univariate KDE
                 return pd.DataFrame({f"{id}_kde_x": data})
 

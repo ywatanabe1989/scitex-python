@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -79,13 +80,9 @@ class SingleDOIResolver:
         self.sources = self.config.resolve("sources", sources)
 
         # Emails
-        self.crossref_email = self.config.resolve(
-            "crossref_email", email_crossref
-        )
+        self.crossref_email = self.config.resolve("crossref_email", email_crossref)
         self.pubmed_email = self.config.resolve("pubmed_email", email_pubmed)
-        self.openalex_email = self.config.resolve(
-            "openalex_email", email_openalex
-        )
+        self.openalex_email = self.config.resolve("openalex_email", email_openalex)
         self.semantic_scholar_email = self.config.resolve(
             "semantic_scholar_email",
             email_semantic_scholar,
@@ -107,9 +104,7 @@ class SingleDOIResolver:
 
         # Initialize classes
         self._rate_limit_handler = RateLimitHandler()
-        self._source_rotation_manager = SourceRotationManager(
-            self._rate_limit_handler
-        )
+        self._source_rotation_manager = SourceRotationManager(self._rate_limit_handler)
         self._source_manager = SourceManager(
             sources=self.sources,
             email_crossref=email_crossref,
@@ -235,18 +230,14 @@ class SingleDOIResolver:
         except RuntimeError:
             # No event loop, create one
             return asyncio.run(
-                self.metadata2doi_async(
-                    title, year, authors, bibtex_entry, skip_cache
-                )
+                self.metadata2doi_async(title, year, authors, bibtex_entry, skip_cache)
             )
 
     def text2dois(self, text: str) -> List[str]:
         """Extract DOIs from text using URL extractor source."""
         try:
             url_doi_source = self._source_manager.get_source("url_doi_source")
-            if url_doi_source and hasattr(
-                url_doi_source, "extract_dois_from_text"
-            ):
+            if url_doi_source and hasattr(url_doi_source, "extract_dois_from_text"):
                 return url_doi_source.extract_dois_from_text(text)
             return []
         except Exception as e:
@@ -302,8 +293,7 @@ class SingleDOIResolver:
         normalized_authors = None
         if authors:
             normalized_authors = [
-                self.text_normalizer.normalize_author_name(author)
-                for author in authors
+                self.text_normalizer.normalize_author_name(author) for author in authors
             ]
 
         # Log if changes were made
@@ -311,9 +301,7 @@ class SingleDOIResolver:
             logger.debug(f"Title normalized: '{title}' → '{normalized_title}'")
 
         if authors and normalized_authors and normalized_authors != authors:
-            logger.debug(
-                f"Authors normalized: {authors} → {normalized_authors}"
-            )
+            logger.debug(f"Authors normalized: {authors} → {normalized_authors}")
 
         return normalized_title, normalized_authors
 

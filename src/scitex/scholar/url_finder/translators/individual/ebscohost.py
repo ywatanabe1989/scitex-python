@@ -12,7 +12,9 @@ class EBSCOhostTranslator(BaseTranslator):
     """EBSCOhost."""
 
     LABEL = "EBSCOhost"
-    URL_TARGET_PATTERN = r"^https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer)"
+    URL_TARGET_PATTERN = (
+        r"^https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

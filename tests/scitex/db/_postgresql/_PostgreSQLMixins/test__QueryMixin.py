@@ -57,8 +57,8 @@ if __name__ == "__main__":
 # 
 #         query = f"""
 #             INSERT INTO {table}
-#             ({', '.join(columns)})
-#             VALUES ({', '.join(placeholders)})
+#             ({", ".join(columns)})
+#             VALUES ({", ".join(placeholders)})
 #         """
 # 
 #         self.execute(query, tuple(values))
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 # 
 #         query = f"""
 #             UPDATE {table}
-#             SET {', '.join(set_items)}
+#             SET {", ".join(set_items)}
 #             WHERE {where}
 #         """
 # 

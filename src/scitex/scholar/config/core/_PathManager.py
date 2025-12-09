@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/config/core/_PathManager.py"
-)
+
+__FILE__ = "./src/scitex/scholar/config/core/_PathManager.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -167,15 +166,13 @@ class PathManager:
 
     def get_cache_auth_json_lock(self, auth_name) -> Path:
         """cache/auth/{auth_name}.json.lock"""
-        return self.scholar_dir / PATH_STRUCTURE[
-            "cache_auth_json_lock"
-        ].format(auth_name=auth_name)
+        return self.scholar_dir / PATH_STRUCTURE["cache_auth_json_lock"].format(
+            auth_name=auth_name
+        )
 
     def get_cache_chrome_dir(self, profile_name: str) -> Path:
         """cache/chrome/{profile_name}"""
-        return self._ensure_directory(
-            self.dirs["cache_chrome_dir"] / profile_name
-        )
+        return self._ensure_directory(self.dirs["cache_chrome_dir"] / profile_name)
 
     def get_cache_engine_dir(self) -> Path:
         """cache/engine"""
@@ -297,9 +294,7 @@ class PathManager:
             journal_name=journal_name,
         )
 
-    def get_library_project_entry_dir(
-        self, project: str, entry_dir_name: str
-    ) -> Path:
+    def get_library_project_entry_dir(self, project: str, entry_dir_name: str) -> Path:
         """library/{project_name}/{entry_dir_name}"""
         project = self._sanitize_collection_name(project)
         path_template = PATH_STRUCTURE["library_project_entry_dir"]
@@ -337,21 +332,15 @@ class PathManager:
         """workspace/logs"""
         return self._ensure_directory(self.dirs["workspace_logs_dir"])
 
-    def get_workspace_screenshots_dir(
-        self, category: Optional[str] = None
-    ) -> Path:
+    def get_workspace_screenshots_dir(self, category: Optional[str] = None) -> Path:
         """workspace/screenshots or workspace/screenshots/{category}"""
         if category:
             category = self._sanitize_filename(category)
-            path_template = PATH_STRUCTURE[
-                "workspace_screenshots_category_dir"
-            ]
+            path_template = PATH_STRUCTURE["workspace_screenshots_category_dir"]
             relative_path = path_template.format(category=category)
             return self._ensure_directory(self.scholar_dir / relative_path)
         else:
-            return self._ensure_directory(
-                self.dirs["workspace_screenshots_dir"]
-            )
+            return self._ensure_directory(self.dirs["workspace_screenshots_dir"])
 
     # ========================================
     # Helper Methods
@@ -414,9 +403,7 @@ class PathManager:
 
         return collection_name
 
-    def _generate_paper_id(
-        self, doi=None, title=None, authors=None, year=None
-    ) -> str:
+    def _generate_paper_id(self, doi=None, title=None, authors=None, year=None) -> str:
         """Generate unique 8-digit paper ID."""
         doi = doi.strip() if isinstance(doi, str) and doi else None
         title = title.strip() if isinstance(title, str) and title else ""
@@ -469,7 +456,9 @@ class PathManager:
             Tuple of (storage_path, readable_name, paper_id)
         """
         # Generate unique paper ID
-        paper_id = self._generate_paper_id(doi=doi, title=title, authors=authors, year=year)
+        paper_id = self._generate_paper_id(
+            doi=doi, title=title, authors=authors, year=year
+        )
 
         # Get storage path (always in MASTER directory)
         storage_path = self.get_library_master_paper_dir(paper_id)
@@ -529,9 +518,7 @@ class PathManager:
         try:
             for file_path in directory.rglob("*"):
                 if file_path.is_file():
-                    file_time = datetime.fromtimestamp(
-                        file_path.stat().st_mtime
-                    )
+                    file_time = datetime.fromtimestamp(file_path.stat().st_mtime)
                     if file_time < cutoff_date:
                         file_path.unlink()
                         cleaned_count += 1
@@ -539,5 +526,6 @@ class PathManager:
             logger.warning(f"Error during cleanup: {e}")
 
         return cleaned_count
+
 
 # EOF

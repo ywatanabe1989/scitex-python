@@ -16,11 +16,14 @@ import re
 from typing import List, Optional
 from playwright.async_api import Page
 
+
 class DBLPTranslator:
     """DBLP Computer Science Bibliography translator."""
 
     LABEL = "DBLP Computer Science Bibliography"
-    URL_TARGET_PATTERN = r"^https?://(www\.)?(dblp\d?(\.org|\.uni-trier\.de/|\.dagstuhl\.de/))"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.)?(dblp\d?(\.org|\.uni-trier\.de/|\.dagstuhl\.de/))"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:
@@ -53,11 +56,13 @@ class DBLPTranslator:
         if bibtex_data:
             # Look for ee (electronic edition) or url fields
             # ee = {http://...} or url = {http://...}
-            url_match = re.search(r'(?:ee|url)\s*=\s*\{([^}]+)\}', bibtex_data, re.IGNORECASE)
+            url_match = re.search(
+                r"(?:ee|url)\s*=\s*\{([^}]+)\}", bibtex_data, re.IGNORECASE
+            )
             if url_match:
                 url = url_match.group(1).strip()
                 # Check if it's a PDF
-                if '.pdf' in url.lower():
+                if ".pdf" in url.lower():
                     pdf_urls.append(url)
 
         return pdf_urls

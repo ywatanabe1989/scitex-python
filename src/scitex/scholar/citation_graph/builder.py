@@ -92,9 +92,7 @@ class CitationGraphBuilder:
 
             return graph
 
-    def _create_paper_node(
-        self, doi: str, similarity_score: float
-    ) -> PaperNode:
+    def _create_paper_node(self, doi: str, similarity_score: float) -> PaperNode:
         """
         Create a PaperNode with metadata from database.
 
@@ -111,8 +109,7 @@ class CitationGraphBuilder:
             # Extract author names
             authors = metadata.get("author", [])
             author_names = [
-                f"{a.get('family', '')} {a.get('given', '')[:1]}"
-                for a in authors[:3]
+                f"{a.get('family', '')} {a.get('given', '')[:1]}" for a in authors[:3]
             ]
 
             # Extract year
@@ -202,8 +199,7 @@ class CitationGraphBuilder:
             return {
                 "doi": doi,
                 "title": metadata.get("title", ["Unknown"])[0],
-                "year": metadata.get("published", {})
-                .get("date-parts", [[0]])[0][0],
+                "year": metadata.get("published", {}).get("date-parts", [[0]])[0][0],
                 "authors": [
                     f"{a.get('family', '')} {a.get('given', '')}"
                     for a in metadata.get("author", [])[:5]

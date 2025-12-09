@@ -17,6 +17,7 @@ from typing import Dict, List, Optional
 
 class GitHubSecurityError(Exception):
     """Raised when GitHub security operations fail."""
+
     pass
 
 
@@ -68,15 +69,19 @@ def get_secret_alerts(repo: Optional[str] = None) -> List[Dict]:
             owner, repo_name = repo.split("/")
             api_path = f"/repos/{owner}/{repo_name}/secret-scanning/alerts"
 
-        output = _run_gh_command([
-            "api", api_path, "--paginate",
-            "--jq",
-            ".[] | {state, secretType: .secret_type_display_name, "
-            "url: .html_url, "
-            "createdAt: .created_at, "
-            "path: .first_location_detected.path, "
-            "line: .first_location_detected.start_line}"
-        ])
+        output = _run_gh_command(
+            [
+                "api",
+                api_path,
+                "--paginate",
+                "--jq",
+                ".[] | {state, secretType: .secret_type_display_name, "
+                "url: .html_url, "
+                "createdAt: .created_at, "
+                "path: .first_location_detected.path, "
+                "line: .first_location_detected.start_line}",
+            ]
+        )
 
         if not output.strip():
             return []
@@ -108,16 +113,20 @@ def get_dependabot_alerts(repo: Optional[str] = None) -> List[Dict]:
             owner, repo_name = repo.split("/")
             api_path = f"/repos/{owner}/{repo_name}/dependabot/alerts"
 
-        output = _run_gh_command([
-            "api", api_path, "--paginate",
-            "--jq",
-            ".[] | {state, severity: .security_advisory.severity, "
-            "summary: .security_advisory.summary, "
-            "package: .dependency.package.name, "
-            "cve: .security_advisory.cve_id, "
-            "url: .html_url, "
-            "created_at: .created_at}"
-        ])
+        output = _run_gh_command(
+            [
+                "api",
+                api_path,
+                "--paginate",
+                "--jq",
+                ".[] | {state, severity: .security_advisory.severity, "
+                "summary: .security_advisory.summary, "
+                "package: .dependency.package.name, "
+                "cve: .security_advisory.cve_id, "
+                "url: .html_url, "
+                "created_at: .created_at}",
+            ]
+        )
 
         if not output.strip():
             return []
@@ -149,16 +158,20 @@ def get_code_scanning_alerts(repo: Optional[str] = None) -> List[Dict]:
             owner, repo_name = repo.split("/")
             api_path = f"/repos/{owner}/{repo_name}/code-scanning/alerts"
 
-        output = _run_gh_command([
-            "api", api_path, "--paginate",
-            "--jq",
-            ".[] | {state, severity: .rule.severity, "
-            "description: .rule.description, "
-            "location: .most_recent_instance.location.path, "
-            "line: .most_recent_instance.location.start_line, "
-            "url: .html_url, "
-            "created_at: .created_at}"
-        ])
+        output = _run_gh_command(
+            [
+                "api",
+                api_path,
+                "--paginate",
+                "--jq",
+                ".[] | {state, severity: .rule.severity, "
+                "description: .rule.description, "
+                "location: .most_recent_instance.location.path, "
+                "line: .most_recent_instance.location.start_line, "
+                "url: .html_url, "
+                "created_at: .created_at}",
+            ]
+        )
 
         if not output.strip():
             return []
@@ -222,9 +235,9 @@ def format_alerts_report(alerts: Dict[str, List[Dict]]) -> str:
     if secrets:
         for alert in secrets:
             lines.append(f"- [{alert['state']}] {alert['secretType']}")
-            path = alert.get('path', 'N/A')
-            line_num = alert.get('line', '')
-            if path != 'N/A' and line_num:
+            path = alert.get("path", "N/A")
+            line_num = alert.get("line", "")
+            if path != "N/A" and line_num:
                 lines.append(f"  Location: {path}:{line_num}")
             lines.append(f"  Created: {alert.get('createdAt', 'N/A')}")
             lines.append(f"  URL: {alert['url']}")

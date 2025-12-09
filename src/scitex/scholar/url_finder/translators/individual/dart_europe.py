@@ -30,7 +30,7 @@ class DARTEuropeTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 4,  # Web
-        "lastUpdated": "2022-05-04 03:09:28"
+        "lastUpdated": "2022-05-04 03:09:28",
     }
 
     def detect_web(self, doc, url: str) -> Optional[str]:
@@ -80,12 +80,7 @@ class DARTEuropeTranslator:
         Returns:
             Scraped item data
         """
-        item = {
-            "itemType": "thesis",
-            "creators": [],
-            "tags": [],
-            "attachments": []
-        }
+        item = {"itemType": "thesis", "creators": [], "tags": [], "attachments": []}
 
         # Extract title
         title = self._get_field_value(doc, "Title")
@@ -125,11 +120,9 @@ class DARTEuropeTranslator:
         # Extract author
         author = self._get_field_value(doc, "Author")
         if author:
-            item["creators"].append({
-                "firstName": "",
-                "lastName": author,
-                "creatorType": "author"
-            })
+            item["creators"].append(
+                {"firstName": "", "lastName": author, "creatorType": "author"}
+            )
 
         # Extract subjects as tags
         subjects = self._get_field_value(doc, "Subject(s)")
@@ -142,17 +135,21 @@ class DARTEuropeTranslator:
         if fulltext:
             fulltext = fulltext.strip()
             if ".pdf" in fulltext.lower():
-                item["attachments"].append({
-                    "url": fulltext,
-                    "title": "Dart-Europe Full Text PDF",
-                    "mimeType": "application/pdf"
-                })
+                item["attachments"].append(
+                    {
+                        "url": fulltext,
+                        "title": "Dart-Europe Full Text PDF",
+                        "mimeType": "application/pdf",
+                    }
+                )
             elif fulltext.startswith("http"):
-                item["attachments"].append({
-                    "url": fulltext,
-                    "title": "DART-Europe Thesis Page",
-                    "mimeType": "text/html"
-                })
+                item["attachments"].append(
+                    {
+                        "url": fulltext,
+                        "title": "DART-Europe Thesis Page",
+                        "mimeType": "text/html",
+                    }
+                )
 
         item["url"] = url
         item["libraryCatalog"] = "DART-Europe"

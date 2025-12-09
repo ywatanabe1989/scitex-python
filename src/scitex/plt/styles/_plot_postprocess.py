@@ -52,25 +52,25 @@ def apply_plot_postprocess(method_name, result, ax, kwargs, args=None):
     _apply_tick_locator(ax)
 
     # Method-specific post-processing
-    if method_name == 'pie' and result is not None:
+    if method_name == "pie" and result is not None:
         _postprocess_pie(result)
-    elif method_name == 'stem' and result is not None:
+    elif method_name == "stem" and result is not None:
         _postprocess_stem(result)
-    elif method_name == 'violinplot' and result is not None:
+    elif method_name == "violinplot" and result is not None:
         _postprocess_violin(result, ax, kwargs, args)
-    elif method_name == 'boxplot' and result is not None:
+    elif method_name == "boxplot" and result is not None:
         _postprocess_boxplot(result, ax)
-    elif method_name == 'scatter' and result is not None:
+    elif method_name == "scatter" and result is not None:
         _postprocess_scatter(result, kwargs)
-    elif method_name == 'bar' and result is not None:
+    elif method_name == "bar" and result is not None:
         _postprocess_bar(result, ax, kwargs)
-    elif method_name == 'barh' and result is not None:
+    elif method_name == "barh" and result is not None:
         _postprocess_barh(result, ax, kwargs)
-    elif method_name == 'errorbar' and result is not None:
+    elif method_name == "errorbar" and result is not None:
         _postprocess_errorbar(result)
-    elif method_name == 'hist' and result is not None:
+    elif method_name == "hist" and result is not None:
         _postprocess_hist(result, ax)
-    elif method_name == 'fill_between' and result is not None:
+    elif method_name == "fill_between" and result is not None:
         _postprocess_fill_between(result, kwargs)
 
     return result
@@ -117,10 +117,11 @@ def _apply_tick_locator(ax):
     min_n_ticks=3 ensures at least 3 ticks (never 2).
     """
     try:
+
         def is_categorical_axis(axis):
             if isinstance(axis.converter, StrCategoryConverter):
                 return True
-            if hasattr(axis, 'units') and isinstance(axis.units, UnitData):
+            if hasattr(axis, "units") and isinstance(axis.units, UnitData):
                 return True
             if isinstance(axis.get_major_locator(), FixedLocator):
                 return True
@@ -128,12 +129,16 @@ def _apply_tick_locator(ax):
 
         if not is_categorical_axis(ax.xaxis):
             ax.xaxis.set_major_locator(
-                MaxNLocator(nbins=DEFAULT_N_TICKS, min_n_ticks=3, integer=False, prune=None)
+                MaxNLocator(
+                    nbins=DEFAULT_N_TICKS, min_n_ticks=3, integer=False, prune=None
+                )
             )
 
         if not is_categorical_axis(ax.yaxis):
             ax.yaxis.set_major_locator(
-                MaxNLocator(nbins=DEFAULT_N_TICKS, min_n_ticks=3, integer=False, prune=None)
+                MaxNLocator(
+                    nbins=DEFAULT_N_TICKS, min_n_ticks=3, integer=False, prune=None
+                )
             )
     except Exception:
         pass
@@ -155,8 +160,8 @@ def _postprocess_stem(result):
     """Apply styling for stem plots."""
     baseline = result.baseline
     if baseline is not None:
-        baseline.set_color('black')
-        baseline.set_linestyle('--')
+        baseline.set_color("black")
+        baseline.set_linestyle("--")
 
 
 def _postprocess_errorbar(result):
@@ -170,16 +175,31 @@ def _postprocess_errorbar(result):
 
     # Custom handler that shows only a simple line for errorbar
     class SimpleLineHandler(HandlerErrorbar):
-        def create_artists(self, legend, orig_handle, xdescent, ydescent,
-                          width, height, fontsize, trans):
+        def create_artists(
+            self,
+            legend,
+            orig_handle,
+            xdescent,
+            ydescent,
+            width,
+            height,
+            fontsize,
+            trans,
+        ):
             # Use HandlerLine2D to create just a line
             line_handler = HandlerLine2D()
             # Get the data line from the ErrorbarContainer
             data_line = orig_handle[0]
             if data_line is not None:
                 return line_handler.create_artists(
-                    legend, data_line, xdescent, ydescent,
-                    width, height, fontsize, trans
+                    legend,
+                    data_line,
+                    xdescent,
+                    ydescent,
+                    width,
+                    height,
+                    fontsize,
+                    trans,
                 )
             return []
 
@@ -191,31 +211,40 @@ def _postprocess_violin(result, ax, kwargs, args):
     """Apply styling for violin plots with optional boxplot overlay."""
     # Get scitex palette for coloring
     from scitex.plt.color._PARAMS import HEX
-    palette = [HEX['blue'], HEX['red'], HEX['green'], HEX['yellow'],
-               HEX['purple'], HEX['orange'], HEX['lightblue'], HEX['pink']]
 
-    if 'bodies' in result:
-        for i, body in enumerate(result['bodies']):
+    palette = [
+        HEX["blue"],
+        HEX["red"],
+        HEX["green"],
+        HEX["yellow"],
+        HEX["purple"],
+        HEX["orange"],
+        HEX["lightblue"],
+        HEX["pink"],
+    ]
+
+    if "bodies" in result:
+        for i, body in enumerate(result["bodies"]):
             body.set_facecolor(palette[i % len(palette)])
-            body.set_edgecolor('black')
+            body.set_edgecolor("black")
             body.set_linewidth(mm_to_pt(DEFAULT_LINE_WIDTH_MM))
             body.set_alpha(1.0)
 
     # Add boxplot overlay by default (disable with boxplot=False)
-    add_boxplot = kwargs.pop('boxplot', True)
+    add_boxplot = kwargs.pop("boxplot", True)
     if add_boxplot and args:
         try:
             # Get data from first positional argument
             data = args[0]
             # Get positions if specified, otherwise use default
-            positions = kwargs.get('positions', None)
+            positions = kwargs.get("positions", None)
             if positions is None:
                 positions = range(1, len(data) + 1)
 
             # Calculate boxplot width dynamically from violin width
             # Get violin width from kwargs or use matplotlib default (0.5)
-            violin_widths = kwargs.get('widths', 0.5)
-            if hasattr(violin_widths, '__iter__'):
+            violin_widths = kwargs.get("widths", 0.5)
+            if hasattr(violin_widths, "__iter__"):
                 violin_widths = violin_widths[0] if len(violin_widths) > 0 else 0.5
             # Boxplot width = 20% of violin width
             boxplot_widths = violin_widths * 0.2
@@ -226,7 +255,7 @@ def _postprocess_violin(result, ax, kwargs, args):
 
             # Call matplotlib's boxplot directly to avoid recursive post-processing
             # which would override our gray styling with the default blue
-            if hasattr(ax, '_axes_mpl'):
+            if hasattr(ax, "_axes_mpl"):
                 mpl_ax = ax._axes_mpl
             else:
                 mpl_ax = ax
@@ -241,28 +270,29 @@ def _postprocess_violin(result, ax, kwargs, args):
             # Style the boxplot: scitex gray fill with black edges for visibility
             # Set high z-order so boxplot appears on top of violin bodies
             from scitex.plt.color._PARAMS import HEX
+
             boxplot_zorder = 10
-            for box in bp.get('boxes', []):
-                box.set_facecolor(HEX['gray'])  # Scitex gray fill
-                box.set_edgecolor('black')
+            for box in bp.get("boxes", []):
+                box.set_facecolor(HEX["gray"])  # Scitex gray fill
+                box.set_edgecolor("black")
                 box.set_alpha(1.0)
                 box.set_linewidth(line_width)
                 box.set_zorder(boxplot_zorder)
-            for median in bp.get('medians', []):
-                median.set_color('black')  # Black median line
+            for median in bp.get("medians", []):
+                median.set_color("black")  # Black median line
                 median.set_linewidth(line_width)  # 0.2mm thickness
                 median.set_zorder(boxplot_zorder + 1)
-            for whisker in bp.get('whiskers', []):
-                whisker.set_color('black')
+            for whisker in bp.get("whiskers", []):
+                whisker.set_color("black")
                 whisker.set_linewidth(line_width)
                 whisker.set_zorder(boxplot_zorder)
-            for cap in bp.get('caps', []):
-                cap.set_color('black')
+            for cap in bp.get("caps", []):
+                cap.set_color("black")
                 cap.set_linewidth(line_width)
                 cap.set_zorder(boxplot_zorder)
-            for flier in bp.get('fliers', []):
-                flier.set_markerfacecolor('none')  # No fill (open circles)
-                flier.set_markeredgecolor('black')
+            for flier in bp.get("fliers", []):
+                flier.set_markerfacecolor("none")  # No fill (open circles)
+                flier.set_markeredgecolor("black")
                 flier.set_markersize(marker_size)  # 0.8mm
                 flier.set_markeredgewidth(line_width)  # 0.2mm
                 flier.set_zorder(boxplot_zorder + 2)
@@ -274,13 +304,14 @@ def _postprocess_boxplot(result, ax):
     """Apply styling for boxplots (standalone, not violin overlay)."""
     # Use the centralized style_boxplot function for consistent styling
     from scitex.plt.ax import style_boxplot
+
     style_boxplot(result)
 
     # Cap width: 33% of box width
-    if 'caps' in result and 'boxes' in result and len(result['boxes']) > 0:
+    if "caps" in result and "boxes" in result and len(result["boxes"]) > 0:
         try:
-            cap_width_pts = _calculate_cap_width_from_box(result['boxes'][0], ax)
-            for cap in result['caps']:
+            cap_width_pts = _calculate_cap_width_from_box(result["boxes"][0], ax)
+            for cap in result["caps"]:
                 cap.set_markersize(cap_width_pts)
         except Exception:
             pass
@@ -289,9 +320,9 @@ def _postprocess_boxplot(result, ax):
 def _postprocess_scatter(result, kwargs):
     """Apply styling for scatter plots."""
     # Apply default 0.8mm marker size if 's' not specified
-    if 's' not in kwargs:
+    if "s" not in kwargs:
         size_pt = mm_to_pt(DEFAULT_MARKER_SIZE_MM)
-        marker_area = size_pt ** 2
+        marker_area = size_pt**2
         result.set_sizes([marker_area])
 
 
@@ -306,18 +337,18 @@ def _postprocess_hist(result, ax):
     if len(result) >= 3:
         patches = result[2]
         # Handle both single histogram and stacked histograms
-        if hasattr(patches, '__iter__'):
+        if hasattr(patches, "__iter__"):
             for patch_group in patches:
-                if hasattr(patch_group, '__iter__'):
+                if hasattr(patch_group, "__iter__"):
                     for patch in patch_group:
-                        patch.set_edgecolor('black')
+                        patch.set_edgecolor("black")
                         patch.set_linewidth(line_width)
                         # Ensure alpha is at least 0.7 for visibility
                         if patch.get_alpha() is None or patch.get_alpha() < 0.7:
                             patch.set_alpha(1.0)
                 else:
                     # Single patch
-                    patch_group.set_edgecolor('black')
+                    patch_group.set_edgecolor("black")
                     patch_group.set_linewidth(line_width)
                     if patch_group.get_alpha() is None or patch_group.get_alpha() < 0.7:
                         patch_group.set_alpha(1.0)
@@ -334,29 +365,38 @@ def _postprocess_fill_between(result, kwargs):
         line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
 
         # Only set edge if not already specified
-        if 'edgecolor' not in kwargs and 'ec' not in kwargs:
-            result.set_edgecolor('none')
+        if "edgecolor" not in kwargs and "ec" not in kwargs:
+            result.set_edgecolor("none")
 
         # Ensure alpha is reasonable (default 0.3 is common for fill_between)
-        if 'alpha' not in kwargs:
+        if "alpha" not in kwargs:
             result.set_alpha(0.3)
 
 
 def _postprocess_bar(result, ax, kwargs):
     """Apply styling for bar plots with colors and error bars."""
     # Get scitex palette for coloring (only if color not explicitly set)
-    if 'color' not in kwargs and 'c' not in kwargs:
+    if "color" not in kwargs and "c" not in kwargs:
         from scitex.plt.color._PARAMS import HEX
-        palette = [HEX['blue'], HEX['red'], HEX['green'], HEX['yellow'],
-                   HEX['purple'], HEX['orange'], HEX['lightblue'], HEX['pink']]
+
+        palette = [
+            HEX["blue"],
+            HEX["red"],
+            HEX["green"],
+            HEX["yellow"],
+            HEX["purple"],
+            HEX["orange"],
+            HEX["lightblue"],
+            HEX["pink"],
+        ]
 
         line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
         for i, patch in enumerate(result.patches):
             patch.set_facecolor(palette[i % len(palette)])
-            patch.set_edgecolor('black')
+            patch.set_edgecolor("black")
             patch.set_linewidth(line_width)
 
-    if 'yerr' not in kwargs or kwargs['yerr'] is None:
+    if "yerr" not in kwargs or kwargs["yerr"] is None:
         return
 
     try:
@@ -376,14 +416,14 @@ def _postprocess_bar(result, ax, kwargs):
             # Adjust cap width to 33% of bar width
             if len(result.patches) > 0:
                 cap_width_pts = _calculate_cap_width_from_bar(
-                    result.patches[0], ax, 'width'
+                    result.patches[0], ax, "width"
                 )
                 for cap in caplines[1:]:
                     cap.set_markersize(cap_width_pts)
 
         # Make error bar lines one-sided
         barlinecols = lines[2]
-        _make_errorbar_one_sided(barlinecols, 'vertical')
+        _make_errorbar_one_sided(barlinecols, "vertical")
     except Exception:
         pass
 
@@ -391,18 +431,27 @@ def _postprocess_bar(result, ax, kwargs):
 def _postprocess_barh(result, ax, kwargs):
     """Apply styling for horizontal bar plots with colors and error bars."""
     # Get scitex palette for coloring (only if color not explicitly set)
-    if 'color' not in kwargs and 'c' not in kwargs:
+    if "color" not in kwargs and "c" not in kwargs:
         from scitex.plt.color._PARAMS import HEX
-        palette = [HEX['blue'], HEX['red'], HEX['green'], HEX['yellow'],
-                   HEX['purple'], HEX['orange'], HEX['lightblue'], HEX['pink']]
+
+        palette = [
+            HEX["blue"],
+            HEX["red"],
+            HEX["green"],
+            HEX["yellow"],
+            HEX["purple"],
+            HEX["orange"],
+            HEX["lightblue"],
+            HEX["pink"],
+        ]
 
         line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
         for i, patch in enumerate(result.patches):
             patch.set_facecolor(palette[i % len(palette)])
-            patch.set_edgecolor('black')
+            patch.set_edgecolor("black")
             patch.set_linewidth(line_width)
 
-    if 'xerr' not in kwargs or kwargs['xerr'] is None:
+    if "xerr" not in kwargs or kwargs["xerr"] is None:
         return
 
     try:
@@ -422,14 +471,14 @@ def _postprocess_barh(result, ax, kwargs):
             # Adjust cap width to 33% of bar height
             if len(result.patches) > 0:
                 cap_width_pts = _calculate_cap_width_from_bar(
-                    result.patches[0], ax, 'height'
+                    result.patches[0], ax, "height"
                 )
                 for cap in caplines[1:]:
                     cap.set_markersize(cap_width_pts)
 
         # Make error bar lines one-sided
         barlinecols = lines[2]
-        _make_errorbar_one_sided(barlinecols, 'horizontal')
+        _make_errorbar_one_sided(barlinecols, "horizontal")
     except Exception:
         pass
 
@@ -440,36 +489,36 @@ def _postprocess_barh(result, ax, kwargs):
 def _calculate_cap_width_from_box(box, ax):
     """Calculate cap width as 33% of box width in points."""
     # Get box width from path
-    if hasattr(box, 'get_path'):
+    if hasattr(box, "get_path"):
         path = box.get_path()
         vertices = path.vertices
         x_coords = vertices[:, 0]
         box_width_data = x_coords.max() - x_coords.min()
-    elif hasattr(box, 'get_xdata'):
+    elif hasattr(box, "get_xdata"):
         x_data = box.get_xdata()
         box_width_data = max(x_data) - min(x_data)
     else:
         box_width_data = 0.5  # Default
 
-    return _data_width_to_points(box_width_data, ax, 'x') * CAP_WIDTH_RATIO
+    return _data_width_to_points(box_width_data, ax, "x") * CAP_WIDTH_RATIO
 
 
 def _calculate_cap_width_from_bar(patch, ax, dimension):
     """Calculate cap width as 33% of bar width/height in points."""
-    if dimension == 'width':
+    if dimension == "width":
         bar_size = patch.get_width()
-        return _data_width_to_points(bar_size, ax, 'x') * CAP_WIDTH_RATIO
+        return _data_width_to_points(bar_size, ax, "x") * CAP_WIDTH_RATIO
     else:  # height
         bar_size = patch.get_height()
-        return _data_width_to_points(bar_size, ax, 'y') * CAP_WIDTH_RATIO
+        return _data_width_to_points(bar_size, ax, "y") * CAP_WIDTH_RATIO
 
 
-def _data_width_to_points(data_size, ax, axis='x'):
+def _data_width_to_points(data_size, ax, axis="x"):
     """Convert a data-space size to points."""
     fig = ax.get_figure()
     bbox = ax.get_position()
 
-    if axis == 'x':
+    if axis == "x":
         ax_size_inches = bbox.width * fig.get_figwidth()
         lim = ax.get_xlim()
     else:
@@ -487,7 +536,7 @@ def _make_errorbar_one_sided(barlinecols, direction):
         return
 
     for lc in barlinecols:
-        if not hasattr(lc, 'get_segments'):
+        if not hasattr(lc, "get_segments"):
             continue
 
         segs = lc.get_segments()
@@ -496,7 +545,7 @@ def _make_errorbar_one_sided(barlinecols, direction):
             if len(seg) < 2:
                 continue
 
-            if direction == 'vertical':
+            if direction == "vertical":
                 # Keep upper half
                 bottom_y = min(seg[0][1], seg[1][1])
                 top_y = max(seg[0][1], seg[1][1])

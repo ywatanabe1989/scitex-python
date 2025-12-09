@@ -24,14 +24,14 @@ def map_ticks(ax, src, tgt, axis="x"):
     final axis, enhancing the clarity and readability of plots.
 
     Parameters:
-    - ax (matplotlib.axes.Axes or scitex.plt._subplots._AxisWrapper.AxisWrapper): The Axes object to modify.
+    - ax (matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper): The Axes object to modify.
     - src (list of str or numeric): Source positions (if numeric) or labels (if str) to map from.
       When using string labels, ensure they match the current tick labels on the axis.
     - tgt (list of str): New target labels to apply to the axis. Must have the same length as 'src'.
     - axis (str): Specifies which axis to apply the tick modifications ('x' or 'y').
 
     Returns:
-    - ax (matplotlib.axes.Axes or scitex.plt._subplots._AxisWrapper.AxisWrapper): The modified Axes object with adjusted tick labels.
+    - ax (matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper): The modified Axes object with adjusted tick labels.
 
     Examples:
     --------
@@ -55,7 +55,9 @@ def map_ticks(ax, src, tgt, axis="x"):
         map_ticks(ax, src, tgt, axis="x")  # Apply the mapping
         plt.show()
     """
-    assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        ax, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
 
     if len(src) != len(tgt):
         raise ValueError(

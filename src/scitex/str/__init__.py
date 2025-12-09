@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/str/__init__.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------

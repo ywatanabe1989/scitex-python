@@ -14,26 +14,26 @@ print("=== SciTeX MCP Servers: From Translators to Development Partners ===\n")
 # 1. Basic Translation (Original Capability)
 print("1. BASIC TRANSLATION")
 print("-" * 50)
-standard_code = '''
+standard_code = """
 import pandas as pd
 data = pd.read_csv('data.csv')
 data.to_excel('output.xlsx')
-'''
+"""
 print("Standard Python:")
 print(standard_code)
 print("\nTranslates to SciTeX:")
-print('''
+print("""
 import scitex as stx
 data = stx.io.load('./data.csv')
 stx.io.save(data, './output.xlsx', symlink_from_cwd=True)
-''')
+""")
 
 # 2. Project Generation (New Capability)
 print("\n2. PROJECT GENERATION")
 print("-" * 50)
 print("Command: create_scitex_project('my_research', 'research', ['io', 'plt'])")
 print("\nGenerates complete project structure:")
-print('''
+print("""
 my_research/
 ├── config/
 │   ├── PATH.yaml        # Centralized paths
@@ -50,7 +50,7 @@ my_research/
 ├── .gitignore          # SciTeX-specific
 ├── README.md           # Documentation
 └── requirements.txt    # Dependencies
-''')
+""")
 
 # 3. Template Generation (New Capability)
 print("\n3. TEMPLATE GENERATION")
@@ -157,7 +157,7 @@ print("\n4. CODE ANALYSIS")
 print("-" * 50)
 print("Command: analyze_scitex_project('/path/to/project')")
 print("\nProvides comprehensive analysis:")
-print('''
+print("""
 {
   "project_structure": {
     "total_files": 45,
@@ -192,14 +192,14 @@ print('''
     }
   ]
 }
-''')
+""")
 
 # 5. Pattern Explanation (New Capability)
 print("\n5. PATTERN EXPLANATION")
 print("-" * 50)
 print("Command: explain_scitex_pattern('stx.io.save(data, \"./output.csv\")')")
 print("\nProvides educational response:")
-print('''
+print("""
 {
   "pattern_name": "SciTeX IO Save Pattern",
   "explanation": "stx.io.save() provides unified file saving across 30+ formats. 
@@ -219,14 +219,14 @@ print('''
     "Mixing with pandas.to_csv() or numpy.save()"
   ]
 }
-''')
+""")
 
 # 6. Configuration Generation (New Capability)
 print("\n6. CONFIGURATION GENERATION")
 print("-" * 50)
 print("Command: generate_config_files(detected_paths=['./data/raw.csv'])")
 print("\nGenerates proper config files:")
-print('''
+print("""
 # config/PATH.yaml
 PATH:
   INPUT_DATA: "./data/input.csv"
@@ -248,7 +248,7 @@ PARAMS:
 IS_DEBUG: false
 DEBUG_INPUT_DATA: "./data/sample_input.csv"
 DEBUG_MAX_ITERATIONS: 10
-''')
+""")
 
 print("\n=== Summary ===")
 print("The MCP servers now provide:")

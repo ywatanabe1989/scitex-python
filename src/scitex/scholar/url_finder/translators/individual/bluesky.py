@@ -34,19 +34,21 @@ class BlueskyTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2025-03-26 14:26:25"
+        "lastUpdated": "2025-03-26 14:26:25",
     }
 
-    HANDLE_RE = re.compile(r'(?:/profile/)(([^/]+))')
-    POST_ID_RE = re.compile(r'(?:/post/)([a-zA-Z0-9]+)')
+    HANDLE_RE = re.compile(r"(?:/profile/)(([^/]+))")
+    POST_ID_RE = re.compile(r"(?:/post/)([a-zA-Z0-9]+)")
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
         """Detect page type."""
-        if ('/post/' in url and
-            self.HANDLE_RE.search(url) and
-            self.POST_ID_RE.search(url)):
-            return 'forumPost'
-        return ''
+        if (
+            "/post/" in url
+            and self.HANDLE_RE.search(url)
+            and self.POST_ID_RE.search(url)
+        ):
+            return "forumPost"
+        return ""
 
     def do_web(self, doc: BeautifulSoup, url: str) -> List[Dict[str, Any]]:
         """Extract data from the page using API."""
@@ -68,25 +70,27 @@ class BlueskyTranslator:
         post_id_match = self.POST_ID_RE.search(url)
 
         if not handle_match or not post_id_match:
-            return {'error': 'Could not extract handle or post ID from URL'}
+            return {"error": "Could not extract handle or post ID from URL"}
 
         found_handle = handle_match.group(1)
         found_post_id = post_id_match.group(1)
 
         # Construct API URL
-        api_url = (f'https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread'
-                  f'?uri=at://{found_handle}/app.bsky.feed.post/{found_post_id}')
+        api_url = (
+            f"https://public.api.bsky.app/xrpc/app.bsky.feed.getPostThread"
+            f"?uri=at://{found_handle}/app.bsky.feed.post/{found_post_id}"
+        )
 
         item = {
-            'itemType': 'forumPost',
-            'forumTitle': 'Bluesky',
-            'postType': 'Post',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'notes': [],
-            'attachments': [],
-            '_api_url': api_url  # Signal that API request is needed
+            "itemType": "forumPost",
+            "forumTitle": "Bluesky",
+            "postType": "Post",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "notes": [],
+            "attachments": [],
+            "_api_url": api_url,  # Signal that API request is needed
         }
 
         # Note: In a full implementation, this would make the API request
@@ -103,11 +107,9 @@ class BlueskyTranslator:
         # - thread.replies (for reply count - adds note)
 
         # Add snapshot
-        item['attachments'].append({
-            'title': 'Snapshot',
-            'mimeType': 'text/html',
-            'url': url
-        })
+        item["attachments"].append(
+            {"title": "Snapshot", "mimeType": "text/html", "url": url}
+        )
 
         return item
 
@@ -120,8 +122,8 @@ class BlueskyTranslator:
         if word_boundary:
             # Find last space before max_length
             truncated = text[:max_length]
-            last_space = truncated.rfind(' ')
+            last_space = truncated.rfind(" ")
             if last_space > 0:
-                return truncated[:last_space] + '...'
+                return truncated[:last_space] + "..."
 
-        return text[:max_length] + '...'
+        return text[:max_length] + "..."

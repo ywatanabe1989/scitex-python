@@ -58,7 +58,7 @@ class MendeleyExporter(BaseExporter):
 
                 mendeley = Mendeley(
                     client_id=self.credentials["app_id"],
-                    client_secret=self.credentials["app_secret"]
+                    client_secret=self.credentials["app_secret"],
                 )
 
                 session = mendeley.start_client_credentials_flow().authenticate()
@@ -156,9 +156,7 @@ class MendeleyExporter(BaseExporter):
                 )
                 continue
 
-        logger.success(
-            f"Exported {len(results)}/{len(paper_list)} papers to Mendeley"
-        )
+        logger.success(f"Exported {len(results)}/{len(paper_list)} papers to Mendeley")
 
         return results
 

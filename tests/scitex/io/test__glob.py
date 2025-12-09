@@ -415,7 +415,7 @@ if __name__ == "__main__":
 #     Parameters:
 #     -----------
 #     expression : Union[str, Path]
-#         The glob pattern to match against file paths. Can be a string or pathlib.Path object. 
+#         The glob pattern to match against file paths. Can be a string or pathlib.Path object.
 #         Supports standard glob syntax and curly brace expansion (e.g., 'dir/{a,b}/*.txt').
 #     parse : bool, optional
 #         Whether to parse the matched paths. Default is False.
@@ -448,7 +448,7 @@ if __name__ == "__main__":
 #     # Convert Path objects to strings for consistency
 #     if isinstance(expression, Path):
 #         expression = str(expression)
-#         
+# 
 #     glob_pattern = _re.sub(r"{[^}]*}", "*", expression)
 #     # Enable recursive globbing for ** patterns
 #     recursive = "**" in glob_pattern

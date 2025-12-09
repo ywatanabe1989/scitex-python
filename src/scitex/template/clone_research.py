@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/template/clone_research.py"
-)
+
+__FILE__ = "./src/scitex/template/clone_research.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -20,9 +19,7 @@ from typing import Optional
 
 from ._clone_project import clone_project
 
-TEMPLATE_REPO_URL = (
-    "https://github.com/ywatanabe1989/scitex-research-template.git"
-)
+TEMPLATE_REPO_URL = "https://github.com/ywatanabe1989/scitex-research-template.git"
 
 
 def clone_research(
@@ -84,13 +81,13 @@ def main(args: list = None) -> None:
         args = sys.argv[1:]
 
     if len(args) < 1:
-        print(
-            "Usage: python -m scitex clone_research_project <project-dir>"
-        )
+        print("Usage: python -m scitex clone_research_project <project-dir>")
         print("")
         print("Arguments:")
         print("  project-dir   Path to project directory (will be created)")
-        print("                Can be a simple name like 'my_project' or a full path like './projects/my_project'")
+        print(
+            "                Can be a simple name like 'my_project' or a full path like './projects/my_project'"
+        )
         print("")
         print("Example:")
         print("  python -m scitex clone_research_project my_research_project")

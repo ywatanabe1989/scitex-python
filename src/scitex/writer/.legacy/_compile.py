@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/_compile.py"
-)
+
+__FILE__ = "./src/scitex/writer/_compile.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -58,14 +57,8 @@ def _run_compile(
 
     # Get compile script from scripts/shell/ directory
     script_map = {
-        "manuscript": project_dir
-        / "scripts"
-        / "shell"
-        / "compile_manuscript.sh",
-        "supplementary": project_dir
-        / "scripts"
-        / "shell"
-        / "compile_supplementary.sh",
+        "manuscript": project_dir / "scripts" / "shell" / "compile_manuscript.sh",
+        "supplementary": project_dir / "scripts" / "shell" / "compile_supplementary.sh",
         "revision": project_dir / "scripts" / "shell" / "compile_revision.sh",
     }
 
@@ -92,6 +85,7 @@ def _run_compile(
 
     try:
         import os
+
         cwd_original = Path.cwd()
         os.chdir(project_dir)
 
@@ -103,11 +97,15 @@ def _run_compile(
                 timeout=timeout * 1000,
             )
 
-            result = type('Result', (), {
-                'returncode': result_dict['exit_code'],
-                'stdout': result_dict['stdout'],
-                'stderr': result_dict['stderr']
-            })()
+            result = type(
+                "Result",
+                (),
+                {
+                    "returncode": result_dict["exit_code"],
+                    "stdout": result_dict["stdout"],
+                    "stderr": result_dict["stderr"],
+                },
+            )()
 
             duration = (datetime.now() - start_time).total_seconds()
         finally:
@@ -167,9 +165,7 @@ def _run_compile(
             if output_pdf:
                 logger.info(f"Output PDF: {output_pdf}")
         else:
-            logger.error(
-                f"Compilation failed with exit code {result.returncode}"
-            )
+            logger.error(f"Compilation failed with exit code {result.returncode}")
             if errors:
                 logger.error(f"Found {len(errors)} errors")
 
@@ -187,9 +183,7 @@ def _run_compile(
         )
 
 
-def compile_manuscript(
-    project_dir: Path, timeout: int = 300
-) -> CompilationResult:
+def compile_manuscript(project_dir: Path, timeout: int = 300) -> CompilationResult:
     """
     Compile manuscript document.
 
@@ -211,9 +205,7 @@ def compile_manuscript(
     return _run_compile("manuscript", project_dir, timeout=timeout)
 
 
-def compile_supplementary(
-    project_dir: Path, timeout: int = 300
-) -> CompilationResult:
+def compile_supplementary(project_dir: Path, timeout: int = 300) -> CompilationResult:
     """
     Compile supplementary materials.
 
@@ -285,9 +277,7 @@ def main(args):
         result = compile_supplementary(project_dir, timeout=args.timeout)
     elif args.document == "revision":
         result = compile_revision(
-            project_dir,
-            track_changes=args.track_changes,
-            timeout=args.timeout
+            project_dir, track_changes=args.track_changes, timeout=args.timeout
         )
 
     if result.success:

@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/interaction/click_with_fallbacks.py"
-)
+
+__FILE__ = "./src/scitex/browser/interaction/click_with_fallbacks.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -56,9 +55,7 @@ async def click_with_fallbacks_async(
         if method_name in methods:
             success = await methods[method_name](page, selector)
             if success:
-                logger.debug(
-                    f"Click successful with {method_name}: {selector}"
-                )
+                logger.debug(f"Click successful with {method_name}: {selector}")
                 if verbose:
                     await browser_logger.debug(
                         page,
@@ -138,15 +135,15 @@ def main(args):
 
             # Try to click a common element
             success = await click_with_fallbacks_async(
-                page, "a", verbose=True  # Click first link
+                page,
+                "a",
+                verbose=True,  # Click first link
             )
 
             if success:
                 logger.success("Click demonstration completed successfully")
             else:
-                logger.warning(
-                    "Click demonstration: no clickable element found"
-                )
+                logger.warning("Click demonstration: no clickable element found")
 
             await browser_logger.debug(page, "✓ Demo complete", verbose=True)
 

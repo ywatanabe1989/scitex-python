@@ -8,12 +8,12 @@ This module provides dataclass-based models for representing
 publication-quality figures as JSON structures.
 """
 
-from .figure import FigureModel
-from .axes import AxesModel
-from .plot import PlotModel
-from .guides import GuideModel
-from .annotations import AnnotationModel
-from .styles import (
+from ._figure import FigureModel
+from ._axes import AxesModel
+from ._plot import PlotModel
+from ._guides import GuideModel
+from ._annotations import AnnotationModel
+from ._styles import (
     PlotStyle,
     AxesStyle,
     GuideStyle,
@@ -24,7 +24,7 @@ from .styles import (
     copy_text_style,
     apply_style_to_plots,
 )
-from .plot_types import (
+from ._plot_types import (
     # Registry
     PLOT_TYPE_CONFIGS,
     get_plot_config_class,

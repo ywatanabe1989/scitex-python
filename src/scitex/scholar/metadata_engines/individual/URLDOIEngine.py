@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -78,9 +79,7 @@ class URLDOIEngine(BaseDOIEngine):
 
     def _search_by_doi(self, doi: str, return_as: str) -> Optional[Dict]:
         """Search by DOI directly"""
-        doi = doi.replace("https://doi.org/", "").replace(
-            "http://doi.org/", ""
-        )
+        doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
 
         try:
             assert return_as in [
@@ -184,9 +183,7 @@ class URLDOIEngine(BaseDOIEngine):
                         return metadata
                     if return_as == "json":
                         return json.dumps(metadata, indent=2)
-                return self._create_minimal_metadata(
-                    doi=doi, return_as=return_as
-                )
+                return self._create_minimal_metadata(doi=doi, return_as=return_as)
 
             # Continue with other extractions (IEEE, Semantic Scholar)
             ieee_id = self._extract_ieee_id(url)
@@ -219,9 +216,7 @@ class URLDOIEngine(BaseDOIEngine):
                         return metadata
                     if return_as == "json":
                         return json.dumps(metadata, indent=2)
-                return self._create_minimal_metadata(
-                    doi=doi, return_as=return_as
-                )
+                return self._create_minimal_metadata(doi=doi, return_as=return_as)
 
             semantic_id = self._extract_semantic_corpus_id(url)
             if semantic_id:
@@ -323,22 +318,20 @@ class URLDOIEngine(BaseDOIEngine):
                 if semantic_id.isdigit():
                     url = f"https://api.semanticscholar.org/graph/v1/paper/CorpusId:{semantic_id}"
                 else:
-                    url = f"https://api.semanticscholar.org/graph/v1/paper/{semantic_id}"
+                    url = (
+                        f"https://api.semanticscholar.org/graph/v1/paper/{semantic_id}"
+                    )
 
                 params = {"fields": "externalIds,title,authors"}
                 headers = {"User-Agent": f"SciTeX/1.0 (mailto:{self.email})"}
                 if self.api_key:
                     headers["x-api-key"] = self.api_key
 
-                response = requests.get(
-                    url, params=params, headers=headers, timeout=15
-                )
+                response = requests.get(url, params=params, headers=headers, timeout=15)
 
                 if response.status_code == 429:
                     if attempt < max_retries - 1:
-                        delay = (base_delay * (2**attempt)) + random.uniform(
-                            0.5, 1.5
-                        )
+                        delay = (base_delay * (2**attempt)) + random.uniform(0.5, 1.5)
                         time.sleep(delay)
                         continue
                     return None
@@ -359,14 +352,10 @@ class URLDOIEngine(BaseDOIEngine):
             except requests.HTTPError as exc:
                 if exc.response and exc.response.status_code == 429:
                     continue
-                logger.debug(
-                    f"Semantic Scholar HTTP error for {semantic_id}: {exc}"
-                )
+                logger.debug(f"Semantic Scholar HTTP error for {semantic_id}: {exc}")
                 return None
             except Exception as exc:
-                logger.debug(
-                    f"Semantic Scholar lookup failed for {semantic_id}: {exc}"
-                )
+                logger.debug(f"Semantic Scholar lookup failed for {semantic_id}: {exc}")
                 return None
         return None
 

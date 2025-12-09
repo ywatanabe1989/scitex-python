@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/debugging/highlight_element.py"
-)
+
+__FILE__ = "./src/scitex/browser/debugging/highlight_element.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -41,7 +40,13 @@ from scitex import logging
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
-async def highlight_element_async(element: Locator, duration_ms: int = 1_000, func_name: str = "highlight_element_async"):
+
+
+async def highlight_element_async(
+    element: Locator,
+    duration_ms: int = 1_000,
+    func_name: str = "highlight_element_async",
+):
     """Highlight element with red overlay rectangle.
 
     Args:
@@ -91,7 +96,9 @@ async def highlight_element_async(element: Locator, duration_ms: int = 1_000, fu
 
 
 def main(args):
-    logger.debug("Element highlighting utility - use highlight_element_async() in your code")
+    logger.debug(
+        "Element highlighting utility - use highlight_element_async() in your code"
+    )
     return 0
 
 
@@ -99,7 +106,9 @@ def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     import scitex as stx
 
-    parser = argparse.ArgumentParser(description="Element highlighting utility for debugging")
+    parser = argparse.ArgumentParser(
+        description="Element highlighting utility for debugging"
+    )
     args = parser.parse_args()
     return args
 
