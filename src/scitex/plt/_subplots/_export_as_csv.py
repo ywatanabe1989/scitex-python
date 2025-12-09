@@ -232,9 +232,9 @@ def export_as_csv(history_records):
     dfs = []
     failed_methods = set()  # Track failed methods for helpful warnings
 
-    for record in list(history_records.values()):
+    for record_index, record in enumerate(list(history_records.values())):
         try:
-            formatted_df = format_record(record)
+            formatted_df = format_record(record, record_index=record_index)
             if formatted_df is not None and not formatted_df.empty:
                 dfs.append(formatted_df)
             else:
@@ -283,11 +283,13 @@ def export_as_csv(history_records):
         return meta_df
 
 
-def format_record(record):
+def format_record(record, record_index=0):
     """Route record to the appropriate formatting function based on plot method.
 
     Args:
         record (tuple): Plotting record tuple (id, method, tracked_dict, kwargs).
+        record_index (int): Index of this record in the history (used as fallback
+            for trace_id when user doesn't provide an explicit id= kwarg).
 
     Returns:
         pd.DataFrame: Formatted data for the plot record.
