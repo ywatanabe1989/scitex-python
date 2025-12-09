@@ -20,7 +20,7 @@ from datetime import datetime
 
 
 # Schema version for canvas format
-CANVAS_SCHEMA_VERSION = "2.0.0"
+CANVAS_SCHEMA_VERSION = "0.1.0"
 
 
 @dataclass
@@ -340,7 +340,8 @@ class CanvasSpec:
     """
 
     canvas_name: str
-    schema_version: str = CANVAS_SCHEMA_VERSION
+    scitex_schema: str = "scitex.schema.canvas"
+    scitex_schema_version: str = CANVAS_SCHEMA_VERSION
     size: CanvasSizeSpec = field(default_factory=CanvasSizeSpec)
     background: CanvasBackgroundSpec = field(default_factory=CanvasBackgroundSpec)
     panels: List[PanelSpec] = field(default_factory=list)
@@ -354,7 +355,8 @@ class CanvasSpec:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
-            "schema_version": self.schema_version,
+            "scitex_schema": self.scitex_schema,
+            "scitex_schema_version": self.scitex_schema_version,
             "canvas_name": self.canvas_name,
             "size": self.size.to_dict(),
             "background": self.background.to_dict(),
@@ -372,7 +374,8 @@ class CanvasSpec:
         """Create from dictionary."""
         return cls(
             canvas_name=data.get("canvas_name", ""),
-            schema_version=data.get("schema_version", CANVAS_SCHEMA_VERSION),
+            scitex_schema=data.get("scitex_schema", "scitex.schema.canvas"),
+            scitex_schema_version=data.get("scitex_schema_version", CANVAS_SCHEMA_VERSION),
             size=CanvasSizeSpec.from_dict(data.get("size", {})),
             background=CanvasBackgroundSpec.from_dict(data.get("background", {})),
             panels=[PanelSpec.from_dict(p) for p in data.get("panels", [])],

@@ -679,12 +679,7 @@ def _handle_image_with_csv(
                 try:
                     from scitex.plt.utils import collect_figure_metadata
 
-                    # Extract plot_id from filename (e.g., "01_plot.png" -> "01_plot")
-                    plot_id = _os.path.splitext(_os.path.basename(spath))[0]
-
-                    auto_metadata = collect_figure_metadata(
-                        fig_mpl, ax, plot_id=plot_id
-                    )
+                    auto_metadata = collect_figure_metadata(fig_mpl, ax)
 
                     if auto_metadata:
                         kwargs["metadata"] = auto_metadata
@@ -819,7 +814,7 @@ def _handle_image_with_csv(
                             no_csv=True,
                         )
 
-                        # Update metadata with actual CSV columns (after export)
+                        # Update metadata with actual CSV info (after export)
                         # This ensures column names match exactly, including any
                         # deduplication suffixes added by pandas
                         if collected_metadata is not None:
@@ -828,14 +823,23 @@ def _handle_image_with_csv(
                                     _compute_csv_hash,
                                 )
 
+                                # Ensure data section exists
+                                if "data" not in collected_metadata:
+                                    collected_metadata["data"] = {}
+
                                 # Get actual column names from exported DataFrame
                                 actual_columns = list(csv_data.columns)
 
-                                # Update csv_columns to use flat list of actual columns
-                                collected_metadata["csv_columns_actual"] = actual_columns
+                                # Update data section with csv_path (relative to JSON)
+                                # Since JSON and CSV are in the same or parallel directories,
+                                # use just the filename for simplicity
+                                collected_metadata["data"]["csv_path"] = _os.path.basename(csv_path)
+
+                                # Update columns to use flat list of actual columns
+                                collected_metadata["data"]["columns_actual"] = actual_columns
 
                                 # Compute hash of actual CSV data
-                                collected_metadata["csv_hash"] = _compute_csv_hash(
+                                collected_metadata["data"]["csv_hash"] = _compute_csv_hash(
                                     csv_data
                                 )
                             except Exception:
@@ -1037,6 +1041,13 @@ def _handle_image_with_csv(
                 dry_run=dry_run,
                 no_csv=True,
             )
+
+            # Verify CSV/JSON consistency (data_ref must match columns_actual)
+            if csv_path and not dry_run:
+                from scitex.plt.utils._collect_figure_metadata import (
+                    assert_csv_json_consistency,
+                )
+                assert_csv_json_consistency(csv_path, json_path)
 
             # Create symlink_to for JSON if it was specified for the image
             if symlink_to:

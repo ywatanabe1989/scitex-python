@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# File: ./src/scitex/schema/_stats.py
+# Timestamp: "2025-12-09 20:42:10 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/schema/_stats.py
+
 # Time-stamp: "2024-12-09 09:15:00 (ywatanabe)"
 """
 Statistical Result Schema - Central Source of Truth.
@@ -19,15 +21,17 @@ Note: This is the SOURCE OF TRUTH. Other modules (stats, plt, vis) should
 import from here, not define their own versions.
 """
 
-from dataclasses import dataclass, field, asdict
-from typing import Optional, Dict, Any, List, Literal, Union
+from dataclasses import dataclass
+from dataclasses import field, asdict
+from typing import Optional
+from typing import Dict, Any, List, Literal, Union
 from datetime import datetime
 import json
 import numpy as np
 
 
 # Schema version for statistical result schemas
-STATS_SCHEMA_VERSION = "1.0.0"
+STATS_SCHEMA_VERSION = "0.1.0"
 
 
 # =============================================================================
@@ -370,8 +374,9 @@ class StatResult:
     software_version: Optional[str] = None
     plot_id: Optional[str] = None  # Associated plot in TrackingMixin
 
-    # Schema version for forward/backward compatibility
-    schema_version: str = STATS_SCHEMA_VERSION
+    # Schema identification for forward/backward compatibility
+    scitex_schema: str = "scitex.schema.stats"
+    scitex_schema_version: str = STATS_SCHEMA_VERSION
 
     def __post_init__(self):
         """Initialize default values."""
@@ -629,27 +634,35 @@ class StatResult:
             "content": self.format_text(
                 style=self.styling.symbol_style if self.styling else "compact"
             ),
-            "position": self.positioning.position.to_dict()
-            if self.positioning and self.positioning.position
-            else None,
+            "position": (
+                self.positioning.position.to_dict()
+                if self.positioning and self.positioning.position
+                else None
+            ),
             "statResult": {
                 "id": self.plot_id or f"stat_{id(self)}",
                 "test_name": self.test_type,
                 "p_value": self.p_value,
-                "effect_size": self.effect_size.get("value")
-                if self.effect_size
-                else None,
-                "group1": self.samples.get("group1", {}).get("name")
-                if self.samples
-                else None,
-                "group2": self.samples.get("group2", {}).get("name")
-                if self.samples
-                else None,
+                "effect_size": (
+                    self.effect_size.get("value") if self.effect_size else None
+                ),
+                "group1": (
+                    self.samples.get("group1", {}).get("name")
+                    if self.samples
+                    else None
+                ),
+                "group2": (
+                    self.samples.get("group2", {}).get("name")
+                    if self.samples
+                    else None
+                ),
                 "statistic": self.statistic.get("value"),
                 "method": self.test_type,
                 "formatted_output": self.format_text(style="compact"),
             },
-            "positioning": self.positioning.to_dict() if self.positioning else None,
+            "positioning": (
+                self.positioning.to_dict() if self.positioning else None
+            ),
             "styling": self.styling.to_dict() if self.styling else None,
         }
 
@@ -745,6 +758,5 @@ __all__ = [
     # Convenience function
     "create_stat_result",
 ]
-
 
 # EOF
