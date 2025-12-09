@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # File: ./src/scitex/vis/editor/flask_editor/renderer.py
-"""Figure rendering for Flask editor."""
+"""Figure rendering for Flask editor - supports single and multi-axis figures."""
 
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional, List
 import base64
 import io
 
@@ -13,16 +13,18 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from PIL import Image
+import numpy as np
 
-from ._plotter import plot_from_csv
-from ._bbox import extract_bboxes
+from ._plotter import plot_from_csv, plot_from_recipe
+from ._bbox import extract_bboxes, extract_bboxes_multi
 
 # mm to pt conversion factor
 MM_TO_PT = 2.83465
 
 
 def render_preview_with_bboxes(
-    csv_data, overrides: Dict[str, Any], axis_fontsize: int = 7
+    csv_data, overrides: Dict[str, Any], axis_fontsize: int = 7,
+    metadata: Optional[Dict[str, Any]] = None,
 ) -> Tuple[str, Dict[str, Any], Dict[str, int]]:
     """Render figure and return base64 PNG along with element bounding boxes.
 
@@ -30,10 +32,23 @@ def render_preview_with_bboxes(
         csv_data: DataFrame containing CSV data
         overrides: Dictionary with override settings
         axis_fontsize: Default font size for axis labels
+        metadata: Optional JSON metadata (new schema with axes dict)
 
     Returns:
         tuple: (base64_image_data, bboxes_dict, image_size)
     """
+    # Check if this is a multi-axis figure (new schema)
+    if metadata and "axes" in metadata and isinstance(metadata.get("axes"), dict):
+        return render_multi_axis_preview(csv_data, overrides, metadata)
+
+    # Fall back to single-axis rendering
+    return render_single_axis_preview(csv_data, overrides, axis_fontsize)
+
+
+def render_single_axis_preview(
+    csv_data, overrides: Dict[str, Any], axis_fontsize: int = 7
+) -> Tuple[str, Dict[str, Any], Dict[str, int]]:
+    """Render single-axis figure (legacy mode)."""
     o = overrides
 
     # Dimensions
@@ -123,6 +138,158 @@ def render_preview_with_bboxes(
     plt.close(fig)
 
     return img_data, bboxes, {"width": img_width, "height": img_height}
+
+
+def render_multi_axis_preview(
+    csv_data, overrides: Dict[str, Any], metadata: Dict[str, Any]
+) -> Tuple[str, Dict[str, Any], Dict[str, int]]:
+    """Render multi-axis figure from new schema (scitex.plt.figure.recipe).
+
+    Args:
+        csv_data: DataFrame containing CSV data
+        overrides: Dictionary with override settings
+        metadata: JSON metadata with axes dict
+
+    Returns:
+        tuple: (base64_image_data, bboxes_dict, image_size)
+    """
+    o = overrides
+    axes_spec = metadata.get("axes", {})
+    fig_spec = metadata.get("figure", {})
+
+    # Get grid dimensions from axes positions
+    nrows, ncols = _get_grid_dimensions(axes_spec)
+
+    # Figure dimensions
+    dpi = fig_spec.get("dpi", o.get("dpi", 300))
+    size_mm = fig_spec.get("size_mm", [176, 106])
+    # Convert mm to inches (1 inch = 25.4 mm)
+    fig_size = (size_mm[0] / 25.4, size_mm[1] / 25.4)
+
+    # Font sizes (from overrides)
+    axis_fontsize = o.get("axis_fontsize", 7)
+    tick_fontsize = o.get("tick_fontsize", 7)
+    title_fontsize = o.get("title_fontsize", 8)
+
+    # Line/axis thickness
+    linewidth_pt = o.get("linewidth", 0.57)
+    axis_width_pt = o.get("axis_width", 0.2) * MM_TO_PT
+    tick_length_pt = o.get("tick_length", 0.8) * MM_TO_PT
+    tick_width_pt = o.get("tick_width", 0.2) * MM_TO_PT
+    tick_direction = o.get("tick_direction", "out")
+    x_n_ticks = o.get("x_n_ticks", o.get("n_ticks", 4))
+    y_n_ticks = o.get("y_n_ticks", o.get("n_ticks", 4))
+
+    transparent = o.get("transparent", True)
+
+    # Create multi-axis figure
+    fig, axes_array = plt.subplots(nrows, ncols, figsize=fig_size, dpi=dpi)
+
+    # Handle 1D or 2D array
+    if nrows == 1 and ncols == 1:
+        axes_array = np.array([[axes_array]])
+    elif nrows == 1:
+        axes_array = axes_array.reshape(1, -1)
+    elif ncols == 1:
+        axes_array = axes_array.reshape(-1, 1)
+
+    # Apply background to figure
+    if transparent:
+        fig.patch.set_facecolor("none")
+    elif o.get("facecolor"):
+        fig.patch.set_facecolor(o["facecolor"])
+
+    # Map axes by their ID
+    axes_map = {}
+    for ax_id, ax_spec in axes_spec.items():
+        pos = ax_spec.get("grid_position", {})
+        row = pos.get("row", 0)
+        col = pos.get("col", 0)
+        ax = axes_array[row, col]
+        axes_map[ax_id] = ax
+
+        # Apply background
+        if transparent:
+            ax.patch.set_facecolor("none")
+        elif o.get("facecolor"):
+            ax.patch.set_facecolor(o["facecolor"])
+
+        # Plot data from recipe
+        if csv_data is not None:
+            plot_from_recipe(ax, csv_data, ax_spec, overrides, linewidth_pt)
+
+        # Apply axis labels from spec
+        xaxis = ax_spec.get("xaxis", {})
+        yaxis = ax_spec.get("yaxis", {})
+
+        if xaxis.get("label"):
+            ax.set_xlabel(xaxis["label"], fontsize=axis_fontsize)
+        if yaxis.get("label"):
+            ax.set_ylabel(yaxis["label"], fontsize=axis_fontsize)
+
+        # Apply axis limits
+        if xaxis.get("lim"):
+            ax.set_xlim(xaxis["lim"])
+        if yaxis.get("lim"):
+            ax.set_ylim(yaxis["lim"])
+
+        # Tick styling
+        _apply_tick_styling(
+            ax,
+            tick_fontsize,
+            tick_length_pt,
+            tick_width_pt,
+            tick_direction,
+            x_n_ticks,
+            y_n_ticks,
+            False,  # hide_x_ticks
+            False,  # hide_y_ticks
+        )
+
+        # Apply spines
+        if o.get("hide_top_spine", True):
+            ax.spines["top"].set_visible(False)
+        if o.get("hide_right_spine", True):
+            ax.spines["right"].set_visible(False)
+        for spine in ax.spines.values():
+            spine.set_linewidth(axis_width_pt)
+
+    fig.tight_layout()
+
+    # Get element bounding boxes
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+
+    # Save to buffer
+    buf = io.BytesIO()
+    fig.savefig(
+        buf, format="png", dpi=dpi, bbox_inches="tight", transparent=transparent
+    )
+    buf.seek(0)
+
+    # Get actual saved image dimensions
+    img = Image.open(buf)
+    img_width, img_height = img.size
+    buf.seek(0)
+
+    # Get bboxes for all axes
+    bboxes = extract_bboxes_multi(fig, axes_map, renderer, img_width, img_height)
+
+    img_data = base64.b64encode(buf.read()).decode("utf-8")
+    plt.close(fig)
+
+    return img_data, bboxes, {"width": img_width, "height": img_height}
+
+
+def _get_grid_dimensions(axes_spec: Dict[str, Any]) -> Tuple[int, int]:
+    """Get grid dimensions from axes specifications."""
+    max_row = 0
+    max_col = 0
+    for ax_id, ax_spec in axes_spec.items():
+        pos = ax_spec.get("grid_position", {})
+        max_row = max(max_row, pos.get("row", 0))
+        max_col = max(max_col, pos.get("col", 0))
+    return max_row + 1, max_col + 1
 
 
 def _apply_background(fig, ax, o, transparent):

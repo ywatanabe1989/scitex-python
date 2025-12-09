@@ -11,6 +11,10 @@ let imgSize = {width: 0, height: 0};
 let hoveredElement = null;
 let selectedElement = null;
 
+// Cycle selection state for overlapping elements
+let elementsAtCursor = [];  // All elements at current cursor position
+let currentCycleIndex = 0;  // Current index in cycle
+
 // Hover system - client-side hit testing
 function initHoverSystem() {
     const container = document.getElementById('preview-container');
@@ -41,8 +45,76 @@ function initHoverSystem() {
     });
 
     img.addEventListener('click', (e) => {
-        if (hoveredElement) {
+        const rect = img.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const scaleX = imgSize.width / rect.width;
+        const scaleY = imgSize.height / rect.height;
+        const imgX = x * scaleX;
+        const imgY = y * scaleY;
+
+        // Alt+click or find all overlapping elements
+        if (e.altKey) {
+            // Cycle through overlapping elements
+            const allElements = findAllElementsAt(imgX, imgY);
+            if (allElements.length > 0) {
+                // If cursor moved to different location, reset cycle
+                if (JSON.stringify(allElements) !== JSON.stringify(elementsAtCursor)) {
+                    elementsAtCursor = allElements;
+                    currentCycleIndex = 0;
+                } else {
+                    // Cycle to next element
+                    currentCycleIndex = (currentCycleIndex + 1) % elementsAtCursor.length;
+                }
+                selectedElement = elementsAtCursor[currentCycleIndex];
+                updateOverlay();
+                scrollToSection(selectedElement);
+
+                // Show cycle indicator in status
+                const total = elementsAtCursor.length;
+                const current = currentCycleIndex + 1;
+                console.log(`Cycle selection: ${current}/${total} - ${selectedElement}`);
+            }
+        } else if (hoveredElement) {
+            // Normal click - select hovered element
             selectedElement = hoveredElement;
+            elementsAtCursor = [];  // Reset cycle
+            currentCycleIndex = 0;
+            updateOverlay();
+            scrollToSection(selectedElement);
+        }
+    });
+
+    // Right-click for cycle selection menu
+    img.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+
+        const rect = img.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const scaleX = imgSize.width / rect.width;
+        const scaleY = imgSize.height / rect.height;
+        const imgX = x * scaleX;
+        const imgY = y * scaleY;
+
+        const allElements = findAllElementsAt(imgX, imgY);
+        if (allElements.length > 1) {
+            // Cycle to next element
+            if (JSON.stringify(allElements) !== JSON.stringify(elementsAtCursor)) {
+                elementsAtCursor = allElements;
+                currentCycleIndex = 0;
+            } else {
+                currentCycleIndex = (currentCycleIndex + 1) % elementsAtCursor.length;
+            }
+            selectedElement = elementsAtCursor[currentCycleIndex];
+            updateOverlay();
+            scrollToSection(selectedElement);
+
+            const total = elementsAtCursor.length;
+            const current = currentCycleIndex + 1;
+            console.log(`Right-click cycle: ${current}/${total} - ${selectedElement}`);
+        } else if (allElements.length === 1) {
+            selectedElement = allElements[0];
             updateOverlay();
             scrollToSection(selectedElement);
         }
@@ -54,41 +126,96 @@ function initHoverSystem() {
 }
 
 function findElementAt(x, y) {
-    const matches = [];
-    for (const [name, bbox] of Object.entries(elementBboxes)) {
-        if (!name.startsWith('trace_')) {
-            if (x >= bbox.x0 && x <= bbox.x1 && y >= bbox.y0 && y <= bbox.y1) {
-                const area = (bbox.x1 - bbox.x0) * (bbox.y1 - bbox.y0);
-                matches.push({name, area});
-            }
-        }
-    }
-    if (matches.length > 0) {
-        matches.sort((a, b) => a.area - b.area);
-        return matches[0].name;
-    }
+    // Multi-panel aware hit detection with specificity hierarchy:
+    // 1. Data elements with points (lines, scatter) - proximity detection
+    // 2. Small elements (labels, ticks, legends, bars, fills)
+    // 3. Panel bboxes - lowest priority (fallback)
 
     const PROXIMITY_THRESHOLD = 15;
-    let closestTrace = null;
+    const SCATTER_THRESHOLD = 20;  // Larger threshold for scatter points
+
+    // First: Check for data elements with points (lines, scatter)
+    let closestDataElement = null;
     let minDistance = Infinity;
 
     for (const [name, bbox] of Object.entries(elementBboxes)) {
-        if (name.startsWith('trace_') && bbox.points) {
-            if (x >= bbox.x0 && x <= bbox.x1 && y >= bbox.y0 && y <= bbox.y1) {
-                const dist = distanceToLine(x, y, bbox.points);
+        if (bbox.points && bbox.points.length > 0) {
+            // Check if cursor is within general bbox area first
+            if (x >= bbox.x0 - SCATTER_THRESHOLD && x <= bbox.x1 + SCATTER_THRESHOLD &&
+                y >= bbox.y0 - SCATTER_THRESHOLD && y <= bbox.y1 + SCATTER_THRESHOLD) {
+
+                const elementType = bbox.element_type || 'line';
+                let dist;
+
+                if (elementType === 'scatter') {
+                    // For scatter, find distance to nearest point
+                    dist = distanceToNearestPoint(x, y, bbox.points);
+                } else {
+                    // For lines, find distance to line segments
+                    dist = distanceToLine(x, y, bbox.points);
+                }
+
                 if (dist < minDistance) {
                     minDistance = dist;
-                    closestTrace = name;
+                    closestDataElement = name;
                 }
             }
         }
     }
 
-    if (closestTrace && minDistance <= PROXIMITY_THRESHOLD) {
-        return closestTrace;
+    // Use appropriate threshold based on element type
+    if (closestDataElement) {
+        const bbox = elementBboxes[closestDataElement];
+        const threshold = (bbox.element_type === 'scatter') ? SCATTER_THRESHOLD : PROXIMITY_THRESHOLD;
+        if (minDistance <= threshold) {
+            return closestDataElement;
+        }
+    }
+
+    // Second: Collect all bbox matches, excluding panels and data elements with points
+    const elementMatches = [];
+    const panelMatches = [];
+
+    for (const [name, bbox] of Object.entries(elementBboxes)) {
+        if (x >= bbox.x0 && x <= bbox.x1 && y >= bbox.y0 && y <= bbox.y1) {
+            const area = (bbox.x1 - bbox.x0) * (bbox.y1 - bbox.y0);
+            const isPanel = bbox.is_panel || name.endsWith('_panel');
+            const hasPoints = bbox.points && bbox.points.length > 0;
+
+            if (hasPoints) {
+                // Already handled above with proximity
+                continue;
+            } else if (isPanel) {
+                panelMatches.push({name, area, bbox});
+            } else {
+                elementMatches.push({name, area, bbox});
+            }
+        }
+    }
+
+    // Return smallest non-panel element if any
+    if (elementMatches.length > 0) {
+        elementMatches.sort((a, b) => a.area - b.area);
+        return elementMatches[0].name;
+    }
+
+    // Fallback to panel selection (useful for multi-panel figures)
+    if (panelMatches.length > 0) {
+        panelMatches.sort((a, b) => a.area - b.area);
+        return panelMatches[0].name;
     }
 
     return null;
+}
+
+function distanceToNearestPoint(px, py, points) {
+    // Find distance to nearest point in scatter
+    let minDist = Infinity;
+    for (const [x, y] of points) {
+        const dist = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
+        if (dist < minDist) minDist = dist;
+    }
+    return minDist;
 }
 
 function distanceToLine(px, py, points) {
@@ -120,6 +247,75 @@ function distanceToSegment(px, py, x1, y1, x2, y2) {
     return Math.sqrt((px - projX) ** 2 + (py - projY) ** 2);
 }
 
+function findAllElementsAt(x, y) {
+    // Find all elements at cursor position (for cycle selection)
+    // Returns array sorted by specificity (most specific first)
+    const PROXIMITY_THRESHOLD = 15;
+    const SCATTER_THRESHOLD = 20;
+
+    const results = [];
+
+    for (const [name, bbox] of Object.entries(elementBboxes)) {
+        let match = false;
+        let distance = Infinity;
+        let priority = 0;  // Lower = more specific
+
+        const hasPoints = bbox.points && bbox.points.length > 0;
+        const elementType = bbox.element_type || '';
+        const isPanel = bbox.is_panel || name.endsWith('_panel');
+
+        // Check data elements with points (lines, scatter)
+        if (hasPoints) {
+            if (x >= bbox.x0 - SCATTER_THRESHOLD && x <= bbox.x1 + SCATTER_THRESHOLD &&
+                y >= bbox.y0 - SCATTER_THRESHOLD && y <= bbox.y1 + SCATTER_THRESHOLD) {
+
+                if (elementType === 'scatter') {
+                    distance = distanceToNearestPoint(x, y, bbox.points);
+                    if (distance <= SCATTER_THRESHOLD) {
+                        match = true;
+                        priority = 1;  // Scatter points = high priority
+                    }
+                } else {
+                    distance = distanceToLine(x, y, bbox.points);
+                    if (distance <= PROXIMITY_THRESHOLD) {
+                        match = true;
+                        priority = 2;  // Lines = high priority
+                    }
+                }
+            }
+        }
+
+        // Check bbox containment
+        if (x >= bbox.x0 && x <= bbox.x1 && y >= bbox.y0 && y <= bbox.y1) {
+            const area = (bbox.x1 - bbox.x0) * (bbox.y1 - bbox.y0);
+
+            if (!match) {
+                match = true;
+                distance = 0;
+            }
+
+            if (isPanel) {
+                priority = 100;  // Panels = lowest priority
+            } else if (!hasPoints) {
+                // Small elements like labels, ticks - use area for priority
+                priority = 10 + Math.min(area / 10000, 50);
+            }
+        }
+
+        if (match) {
+            results.push({ name, distance, priority, bbox });
+        }
+    }
+
+    // Sort by priority (lower first), then by distance
+    results.sort((a, b) => {
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        return a.distance - b.distance;
+    });
+
+    return results.map(r => r.name);
+}
+
 function drawTracePath(bbox, scaleX, scaleY, type) {
     if (!bbox.points || bbox.points.length < 2) return '';
 
@@ -138,6 +334,29 @@ function drawTracePath(bbox, scaleX, scaleY, type) {
            `<text class="${labelClass}" x="${labelX}" y="${labelY}">${bbox.label}</text>`;
 }
 
+function drawScatterPoints(bbox, scaleX, scaleY, type) {
+    // Draw scatter points as circles
+    if (!bbox.points || bbox.points.length === 0) return '';
+
+    const className = type === 'hover' ? 'hover-scatter' : 'selected-scatter';
+    const labelClass = type === 'hover' ? 'hover-label' : 'selected-label';
+    const radius = 4;
+
+    let svg = '';
+    for (const [x, y] of bbox.points) {
+        svg += `<circle class="${className}" cx="${x * scaleX}" cy="${y * scaleY}" r="${radius}"/>`;
+    }
+
+    // Add label near first point
+    if (bbox.points.length > 0) {
+        const labelX = bbox.points[0][0] * scaleX;
+        const labelY = bbox.points[0][1] * scaleY - 10;
+        svg += `<text class="${labelClass}" x="${labelX}" y="${labelY}">${bbox.label}</text>`;
+    }
+
+    return svg;
+}
+
 function updateOverlay() {
     const overlay = document.getElementById('hover-overlay');
     const img = document.getElementById('preview-img');
@@ -151,36 +370,40 @@ function updateOverlay() {
 
     let svg = '';
 
-    if (hoveredElement && hoveredElement !== selectedElement) {
-        const bbox = elementBboxes[hoveredElement];
-        if (bbox) {
-            if (hoveredElement.startsWith('trace_') && bbox.points) {
-                svg += drawTracePath(bbox, scaleX, scaleY, 'hover');
-            } else {
-                const x = bbox.x0 * scaleX - 2;
-                const y = bbox.y0 * scaleY - 2;
-                const w = (bbox.x1 - bbox.x0) * scaleX + 4;
-                const h = (bbox.y1 - bbox.y0) * scaleY + 4;
-                svg += `<rect class="hover-rect" x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/>`;
-                svg += `<text class="hover-label" x="${x}" y="${y - 4}">${bbox.label}</text>`;
-            }
+    function drawElement(elementName, type) {
+        const bbox = elementBboxes[elementName];
+        if (!bbox) return '';
+
+        const elementType = bbox.element_type || '';
+        const hasPoints = bbox.points && bbox.points.length > 0;
+
+        // Lines - draw as path
+        if ((elementType === 'line' || elementName.includes('trace_')) && hasPoints) {
+            return drawTracePath(bbox, scaleX, scaleY, type);
+        }
+        // Scatter - draw as circles
+        else if (elementType === 'scatter' && hasPoints) {
+            return drawScatterPoints(bbox, scaleX, scaleY, type);
+        }
+        // Default - draw bbox rectangle
+        else {
+            const rectClass = type === 'hover' ? 'hover-rect' : 'selected-rect';
+            const labelClass = type === 'hover' ? 'hover-label' : 'selected-label';
+            const x = bbox.x0 * scaleX - 2;
+            const y = bbox.y0 * scaleY - 2;
+            const w = (bbox.x1 - bbox.x0) * scaleX + 4;
+            const h = (bbox.y1 - bbox.y0) * scaleY + 4;
+            return `<rect class="${rectClass}" x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/>` +
+                   `<text class="${labelClass}" x="${x}" y="${y - 4}">${bbox.label}</text>`;
         }
     }
 
+    if (hoveredElement && hoveredElement !== selectedElement) {
+        svg += drawElement(hoveredElement, 'hover');
+    }
+
     if (selectedElement) {
-        const bbox = elementBboxes[selectedElement];
-        if (bbox) {
-            if (selectedElement.startsWith('trace_') && bbox.points) {
-                svg += drawTracePath(bbox, scaleX, scaleY, 'selected');
-            } else {
-                const x = bbox.x0 * scaleX - 2;
-                const y = bbox.y0 * scaleY - 2;
-                const w = (bbox.x1 - bbox.x0) * scaleX + 4;
-                const h = (bbox.y1 - bbox.y0) * scaleY + 4;
-                svg += `<rect class="selected-rect" x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/>`;
-                svg += `<text class="selected-label" x="${x}" y="${y - 4}">${bbox.label}</text>`;
-            }
-        }
+        svg += drawElement(selectedElement, 'selected');
     }
 
     overlay.innerHTML = svg;
