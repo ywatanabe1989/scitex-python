@@ -87,9 +87,7 @@ class BaseSearchEngine(ABC):
         pass
 
     def _build_query_with_filters(
-        self,
-        base_query: str,
-        filters: Optional[Dict[str, Any]] = None
+        self, base_query: str, filters: Optional[Dict[str, Any]] = None
     ) -> str:
         """Helper to build engine-specific query with filters.
 
@@ -105,9 +103,7 @@ class BaseSearchEngine(ABC):
         return base_query
 
     def _apply_post_filters(
-        self,
-        results: List[Dict[str, Any]],
-        filters: Optional[Dict[str, Any]] = None
+        self, results: List[Dict[str, Any]], filters: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Any]]:
         """Apply client-side filters that couldn't be pushed to API.
 
@@ -124,47 +120,48 @@ class BaseSearchEngine(ABC):
         filtered = results
 
         # Filter by negative keywords in title/abstract
-        negative_keywords = filters.get('negative_keywords', [])
+        negative_keywords = filters.get("negative_keywords", [])
         if negative_keywords:
             filtered = [
-                paper for paper in filtered
+                paper
+                for paper in filtered
                 if not self._contains_negative_keywords(paper, negative_keywords)
             ]
 
         # Filter by minimum citations
-        min_citations = filters.get('min_citations')
+        min_citations = filters.get("min_citations")
         if min_citations is not None:
             filtered = [
-                paper for paper in filtered
+                paper
+                for paper in filtered
                 if self._get_citation_count(paper) >= min_citations
             ]
 
         # Filter by maximum citations
-        max_citations = filters.get('max_citations')
+        max_citations = filters.get("max_citations")
         if max_citations is not None:
             filtered = [
-                paper for paper in filtered
+                paper
+                for paper in filtered
                 if self._get_citation_count(paper) <= max_citations
             ]
 
         return filtered
 
     def _contains_negative_keywords(
-        self,
-        paper: Dict[str, Any],
-        negative_keywords: List[str]
+        self, paper: Dict[str, Any], negative_keywords: List[str]
     ) -> bool:
         """Check if paper contains any negative keywords."""
         # Get searchable text
         text_parts = []
 
-        if 'basic' in paper:
-            if paper['basic'].get('title'):
-                text_parts.append(paper['basic']['title'].lower())
-            if paper['basic'].get('abstract'):
-                text_parts.append(paper['basic']['abstract'].lower())
+        if "basic" in paper:
+            if paper["basic"].get("title"):
+                text_parts.append(paper["basic"]["title"].lower())
+            if paper["basic"].get("abstract"):
+                text_parts.append(paper["basic"]["abstract"].lower())
 
-        searchable_text = ' '.join(text_parts)
+        searchable_text = " ".join(text_parts)
 
         # Check for negative keywords
         for neg_kw in negative_keywords:
@@ -175,8 +172,8 @@ class BaseSearchEngine(ABC):
 
     def _get_citation_count(self, paper: Dict[str, Any]) -> int:
         """Extract citation count from paper metadata."""
-        if 'metrics' in paper and paper['metrics'].get('citation_count'):
-            return paper['metrics']['citation_count']
+        if "metrics" in paper and paper["metrics"].get("citation_count"):
+            return paper["metrics"]["citation_count"]
         return 0
 
 

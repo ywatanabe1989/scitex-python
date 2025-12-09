@@ -34,7 +34,7 @@ class DABITranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2021-09-10 18:58:10"
+        "lastUpdated": "2021-09-10 18:58:10",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -42,27 +42,29 @@ class DABITranslator:
         if "/vollanzeige.pl?" in url:
             return "journalArticle"
         elif "/suche.pl?" in url and self._get_search_results(doc, True):
-            return 'multiple'
+            return "multiple"
         return ""
 
-    def _get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Dict[str, str]:
+    def _get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Dict[str, str]:
         """Get search results from the page."""
         items = {}
         found = False
-        rows = doc.find_all('tr')[1:]  # Skip header row
+        rows = doc.find_all("tr")[1:]  # Skip header row
 
         for row in rows:
-            tds = row.find_all('td')
+            tds = row.find_all("td")
             if len(tds) < 3:
                 continue
 
-            link = tds[0].find('a')
+            link = tds[0].find("a")
             if not link:
                 continue
 
-            url = link.get('href')
+            url = link.get("href")
             author = tds[1].get_text(strip=True)
-            title = tds[2].get_text(strip=True).replace('<br>', '. ')
+            title = tds[2].get_text(strip=True).replace("<br>", ". ")
 
             if author:
                 item_text = f"{title} ({re.sub(r';.*', ' et al.', author)})"
@@ -88,114 +90,116 @@ class DABITranslator:
     def scrape(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """Scrape article data from the document."""
         item = {
-            'itemType': 'journalArticle',
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": "journalArticle",
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Parse table rows for metadata
         data = {}
-        rows = doc.find_all('tr')
+        rows = doc.find_all("tr")
 
         for row in rows:
-            headers = row.find_all('th')
-            contents = row.find_all('td')
+            headers = row.find_all("th")
+            contents = row.find_all("td")
 
             if headers and contents:
-                header = headers[0].get_text(strip=True).replace(' ', '')
+                header = headers[0].get_text(strip=True).replace(" ", "")
                 content_html = str(contents[0])
                 data[header] = content_html.strip()
 
         # Set URL to fulltext resource if present
-        if 'URL' in data:
-            url_match = re.search(r'<a.*?href="(.*?)"', data['URL'])
+        if "URL" in data:
+            url_match = re.search(r'<a.*?href="(.*?)"', data["URL"])
             if url_match:
                 url_value = url_match.group(1)
 
-                if re.search(r'\.pdf(#.*)?$', url_value):
-                    item['attachments'].append({
-                        'url': url_value,
-                        'title': 'DABI Full Text PDF',
-                        'mimeType': 'application/pdf'
-                    })
+                if re.search(r"\.pdf(#.*)?$", url_value):
+                    item["attachments"].append(
+                        {
+                            "url": url_value,
+                            "title": "DABI Full Text PDF",
+                            "mimeType": "application/pdf",
+                        }
+                    )
                 else:
-                    item['url'] = url_value
+                    item["url"] = url_value
 
         # Handle title fields
-        if 'Titel' not in data and 'Untertitel' in data:
-            data['Titel'] = data['Untertitel']
-            del data['Untertitel']
+        if "Titel" not in data and "Untertitel" in data:
+            data["Titel"] = data["Untertitel"]
+            del data["Untertitel"]
 
-        if 'Titel' in data:
-            item['title'] = data['Titel'].replace('*', '')
+        if "Titel" in data:
+            item["title"] = data["Titel"].replace("*", "")
 
-            if 'Untertitel' in data:
-                subtitle = data['Untertitel']
-                if re.search(r'(\?|!|\.)\W?$', item['title']):
-                    item['title'] += " " + subtitle
+            if "Untertitel" in data:
+                subtitle = data["Untertitel"]
+                if re.search(r"(\?|!|\.)\W?$", item["title"]):
+                    item["title"] += " " + subtitle
                 else:
-                    item['title'] += ": " + subtitle
+                    item["title"] += ": " + subtitle
 
         # Parse authors
-        if 'Autoren' in data:
-            authors = data['Autoren'].split('; ')
+        if "Autoren" in data:
+            authors = data["Autoren"].split("; ")
             for author in authors:
-                item['creators'].append(self._clean_author(author, "author"))
+                item["creators"].append(self._clean_author(author, "author"))
 
         # Parse pages
-        if 'Anfangsseite' in data and int(data.get('Anfangsseite', 0)) > 0:
-            start_page = data['Anfangsseite']
-            end_page = data.get('Endseite', '')
+        if "Anfangsseite" in data and int(data.get("Anfangsseite", 0)) > 0:
+            start_page = data["Anfangsseite"]
+            end_page = data.get("Endseite", "")
             if end_page and int(end_page) > int(start_page):
-                item['pages'] = f"{start_page}-{end_page}"
+                item["pages"] = f"{start_page}-{end_page}"
             else:
-                item['pages'] = start_page
+                item["pages"] = start_page
 
         # Parse tags
-        if 'Schlagwörter' in data:
-            tags = data['Schlagwörter'].split('; ')
-            item['tags'] = [{'tag': tag} for tag in tags if tag]
+        if "Schlagwörter" in data:
+            tags = data["Schlagwörter"].split("; ")
+            item["tags"] = [{"tag": tag} for tag in tags if tag]
 
         # Clean publication title
-        if 'Zeitschrift' in data:
-            item['publicationTitle'] = data['Zeitschrift'].replace(' : ', ': ')
+        if "Zeitschrift" in data:
+            item["publicationTitle"] = data["Zeitschrift"].replace(" : ", ": ")
 
         # Other fields
-        if 'Jahr' in data:
-            item['date'] = data['Jahr']
-        if 'Heft' in data:
-            item['issue'] = data['Heft']
-        if 'Band' in data:
-            item['volume'] = data['Band']
-        if 'Abstract' in data:
-            item['abstractNote'] = data['Abstract']
+        if "Jahr" in data:
+            item["date"] = data["Jahr"]
+        if "Heft" in data:
+            item["issue"] = data["Heft"]
+        if "Band" in data:
+            item["volume"] = data["Band"]
+        if "Abstract" in data:
+            item["abstractNote"] = data["Abstract"]
 
         return item
 
     def _clean_author(self, name: str, creator_type: str) -> Dict[str, Any]:
         """Parse author name into first and last name."""
         name = name.strip()
-        parts = name.split(',')
+        parts = name.split(",")
 
         if len(parts) >= 2:
             # Format: "Last, First"
             return {
-                'firstName': parts[1].strip(),
-                'lastName': parts[0].strip(),
-                'creatorType': creator_type
+                "firstName": parts[1].strip(),
+                "lastName": parts[0].strip(),
+                "creatorType": creator_type,
             }
         else:
             parts = name.split()
             if len(parts) >= 2:
                 return {
-                    'firstName': ' '.join(parts[:-1]),
-                    'lastName': parts[-1],
-                    'creatorType': creator_type
+                    "firstName": " ".join(parts[:-1]),
+                    "lastName": parts[-1],
+                    "creatorType": creator_type,
                 }
             else:
                 return {
-                    'lastName': name,
-                    'creatorType': creator_type,
-                    'fieldMode': True
+                    "lastName": name,
+                    "creatorType": creator_type,
+                    "fieldMode": True,
                 }

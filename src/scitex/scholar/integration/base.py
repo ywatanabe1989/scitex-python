@@ -64,7 +64,8 @@ class BaseMapper(ABC):
             Year as int or None
         """
         import re
-        match = re.search(r'\b(19|20)\d{2}\b', date_str)
+
+        match = re.search(r"\b(19|20)\d{2}\b", date_str)
         if match:
             try:
                 return int(match.group(0))
@@ -111,7 +112,7 @@ class BaseImporter(ABC):
         collection_id: Optional[str] = None,
         collection_name: Optional[str] = None,
         limit: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> Papers:
         """Import items from a collection.
 
@@ -132,7 +133,7 @@ class BaseImporter(ABC):
         tags: List[str],
         match_all: bool = False,
         limit: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> Papers:
         """Import items with specific tags.
 
@@ -157,11 +158,7 @@ class BaseImporter(ABC):
         Returns:
             Papers collection
         """
-        return self.import_collection(
-            collection_id=None,
-            limit=limit,
-            **kwargs
-        )
+        return self.import_collection(collection_id=None, limit=limit, **kwargs)
 
     def import_to_library(
         self,
@@ -187,15 +184,12 @@ class BaseImporter(ABC):
         for i, paper in enumerate(paper_list, 1):
             try:
                 paper_id = self.library_manager.save_resolved_paper(
-                    paper_data=paper,
-                    project=self.project
+                    paper_data=paper, project=self.project
                 )
 
                 results[paper.metadata.basic.title or f"paper_{i}"] = paper_id
 
-                logger.info(
-                    f"[{i}/{len(paper_list)}] Saved: {paper_id}"
-                )
+                logger.info(f"[{i}/{len(paper_list)}] Saved: {paper_id}")
 
             except Exception as e:
                 logger.error(
@@ -247,7 +241,7 @@ class BaseExporter(ABC):
         self,
         papers: Union[Papers, List[Paper]],
         collection_name: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, str]:
         """Export Papers to reference manager.
 
@@ -278,9 +272,7 @@ class BaseExporter(ABC):
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        self.bibtex_handler.papers_to_bibtex(
-            papers, output_path=output_path
-        )
+        self.bibtex_handler.papers_to_bibtex(papers, output_path=output_path)
 
         logger.success(f"Exported BibTeX: {output_path}")
         return output_path

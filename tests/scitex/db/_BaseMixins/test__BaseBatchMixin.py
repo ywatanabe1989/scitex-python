@@ -215,7 +215,9 @@ if __name__ == "__main__":
 # # Time-stamp: "2024-11-25 01:43:41 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/db/_BaseMixins/_BaseBatchMixin.py
 # 
-# THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_BaseMixins/_BaseBatchMixin.py"
+# THIS_FILE = (
+#     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_BaseMixins/_BaseBatchMixin.py"
+# )
 # 
 # from typing import List, Any, Optional, Dict, Union
 # import pandas as pd

@@ -1,142 +1,88 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-18 18:14:26 (ywatanabe)"
-# File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_errorbar.py
-# ----------------------------------------
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+# Timestamp: "2025-12-09 12:00:00 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_errorbar.py
 
 import numpy as np
 import pandas as pd
-import scitex
 
-def _make_column_name(id, suffix):
-    """Create column name, avoiding duplication if method name is already in id.
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
-    For example:
-    - id="errorbar_0", suffix="x" -> "errorbar_0_x"
-    - id="errorbar_0", suffix="errorbar_x" -> "errorbar_0_x" (not errorbar_0_errorbar_x)
-    """
-    # Extract method name from suffix if present
-    parts = suffix.split('_')
-    # Get the method name from id (everything before the last underscore+number)
-    id_parts = id.rsplit('_', 1)
-    if len(id_parts) == 2:
-        method_from_id = id_parts[0]
-        # If suffix starts with the same method name, remove it
-        if parts[0] == method_from_id.split('_')[-1]:
-            suffix = '_'.join(parts[1:])
-
-    return f"{id}_{suffix}"
 
 def _format_errorbar(id, tracked_dict, kwargs):
-    """Format data from an errorbar call."""
-    # Check if tracked_dict is empty or not a dictionary
+    """Format data from an errorbar call.
+
+    Args:
+        id (str): Identifier for the plot
+        tracked_dict (dict): Dictionary containing tracked data
+        kwargs (dict): Keyword arguments passed to errorbar
+
+    Returns:
+        pd.DataFrame: Formatted data from errorbar plot
+    """
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
-    
-    # Get the args from tracked_dict
-    args = tracked_dict.get('args', [])
-    
-    # Typical args: x, y
-    # Typical kwargs: xerr, yerr
+
+    # Parse tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
+    args = tracked_dict.get("args", [])
+
     if len(args) >= 2:
         x, y = args[:2]
         xerr = kwargs.get("xerr")
         yerr = kwargs.get("yerr")
 
-        try:
-            # Try using scitex.pd.force_df if available
-            try:
-                import scitex.pd
+        # Get column names from single source of truth
+        col_x = get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)
+        col_y = get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)
 
-                data = {_make_column_name(id, "x"): x, _make_column_name(id, "y"): y}
+        data = {col_x: x, col_y: y}
 
-                if xerr is not None:
-                    if isinstance(xerr, (list, tuple)) and len(xerr) == 2:
-                        # Asymmetric error
-                        data[_make_column_name(id, "xerr_neg")] = xerr[0]
-                        data[_make_column_name(id, "xerr_pos")] = xerr[1]
-                    else:
-                        # Symmetric error
-                        data[_make_column_name(id, "xerr")] = xerr
+        if xerr is not None:
+            if isinstance(xerr, (list, tuple)) and len(xerr) == 2:
+                col_xerr_neg = get_csv_column_name("xerr-neg", ax_row, ax_col, trace_id=trace_id)
+                col_xerr_pos = get_csv_column_name("xerr-pos", ax_row, ax_col, trace_id=trace_id)
+                data[col_xerr_neg] = xerr[0]
+                data[col_xerr_pos] = xerr[1]
+            else:
+                col_xerr = get_csv_column_name("xerr", ax_row, ax_col, trace_id=trace_id)
+                data[col_xerr] = xerr
 
-                if yerr is not None:
-                    if isinstance(yerr, (list, tuple)) and len(yerr) == 2:
-                        # Asymmetric error
-                        data[_make_column_name(id, "yerr_neg")] = yerr[0]
-                        data[_make_column_name(id, "yerr_pos")] = yerr[1]
-                    else:
-                        # Symmetric error
-                        data[_make_column_name(id, "yerr")] = yerr
+        if yerr is not None:
+            if isinstance(yerr, (list, tuple)) and len(yerr) == 2:
+                col_yerr_neg = get_csv_column_name("yerr-neg", ax_row, ax_col, trace_id=trace_id)
+                col_yerr_pos = get_csv_column_name("yerr-pos", ax_row, ax_col, trace_id=trace_id)
+                data[col_yerr_neg] = yerr[0]
+                data[col_yerr_pos] = yerr[1]
+            else:
+                col_yerr = get_csv_column_name("yerr", ax_row, ax_col, trace_id=trace_id)
+                data[col_yerr] = yerr
 
-                # Use scitex.pd.force_df to handle different length arrays
-                df = scitex.pd.force_df(data)
-                return df
-            except (ImportError, AttributeError):
-                # Fall back to pandas with manual padding
-                max_len = max(
-                    [
-                        len(arr) if hasattr(arr, "__len__") else 1
-                        for arr in [x, y, xerr, yerr]
-                        if arr is not None
-                    ]
+        # Handle different length arrays by padding
+        max_len = max(
+            len(arr) if hasattr(arr, "__len__") else 1
+            for arr in data.values()
+            if arr is not None
+        )
+
+        for key, value in list(data.items()):
+            if value is None:
+                continue
+            if not hasattr(value, "__len__"):
+                data[key] = [value] * max_len
+            elif len(value) < max_len:
+                data[key] = np.pad(
+                    np.asarray(value),
+                    (0, max_len - len(value)),
+                    mode="constant",
+                    constant_values=np.nan,
                 )
 
-                # Function to pad arrays to the same length
-                def pad_to_length(arr, length):
-                    if arr is None:
-                        return None
-                    if not hasattr(arr, "__len__"):
-                        # Handle scalar values
-                        return [arr] * length
-                    if len(arr) >= length:
-                        return arr
-                    # Pad with NaN
-                    return np.pad(
-                        arr,
-                        (0, length - len(arr)),
-                        "constant",
-                        constant_values=np.nan,
-                    )
-
-                # Pad all arrays
-                x_padded = pad_to_length(x, max_len)
-                y_padded = pad_to_length(y, max_len)
-
-                data = {
-                    _make_column_name(id, "x"): x_padded,
-                    _make_column_name(id, "y"): y_padded,
-                }
-
-                if xerr is not None:
-                    if isinstance(xerr, (list, tuple)) and len(xerr) == 2:
-                        xerr_neg_padded = pad_to_length(xerr[0], max_len)
-                        xerr_pos_padded = pad_to_length(xerr[1], max_len)
-                        data[_make_column_name(id, "xerr_neg")] = xerr_neg_padded
-                        data[_make_column_name(id, "xerr_pos")] = xerr_pos_padded
-                    else:
-                        xerr_padded = pad_to_length(xerr, max_len)
-                        data[_make_column_name(id, "xerr")] = xerr_padded
-
-                if yerr is not None:
-                    if isinstance(yerr, (list, tuple)) and len(yerr) == 2:
-                        yerr_neg_padded = pad_to_length(yerr[0], max_len)
-                        yerr_pos_padded = pad_to_length(yerr[1], max_len)
-                        data[_make_column_name(id, "yerr_neg")] = yerr_neg_padded
-                        data[_make_column_name(id, "yerr_pos")] = yerr_pos_padded
-                    else:
-                        yerr_padded = pad_to_length(yerr, max_len)
-                        data[_make_column_name(id, "yerr")] = yerr_padded
-
-                return pd.DataFrame(data)
-        except Exception as e:
-            # If all else fails, return an empty DataFrame
-            import warnings
-
-            warnings.warn(f"Error formatting errorbar data: {str(e)}")
-            return pd.DataFrame()
+        return pd.DataFrame(data)
 
     return pd.DataFrame()
+
+
+# EOF

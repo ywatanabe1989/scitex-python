@@ -159,10 +159,7 @@ async def inject_visual_effects_async(page: "AsyncPage") -> None:
 
 
 def show_cursor_at(
-    page: Union["AsyncPage", "SyncPage"],
-    x: float,
-    y: float,
-    state: str = "normal"
+    page: Union["AsyncPage", "SyncPage"], x: float, y: float, state: str = "normal"
 ) -> None:
     """Move visual cursor to position (sync version).
 
@@ -172,7 +169,8 @@ def show_cursor_at(
         y: Y coordinate
         state: Cursor state - "normal", "clicking", or "dragging"
     """
-    page.evaluate("""
+    page.evaluate(
+        """
     ([x, y, state]) => {
         let cursor = document.getElementById('_scitex_cursor');
         if (!cursor) {
@@ -193,17 +191,17 @@ def show_cursor_at(
             cursor.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.6)';
         }
     }
-    """, [x, y, state])
+    """,
+        [x, y, state],
+    )
 
 
 async def show_cursor_at_async(
-    page: "AsyncPage",
-    x: float,
-    y: float,
-    state: str = "normal"
+    page: "AsyncPage", x: float, y: float, state: str = "normal"
 ) -> None:
     """Move visual cursor to position (async version)."""
-    await page.evaluate("""
+    await page.evaluate(
+        """
     ([x, y, state]) => {
         let cursor = document.getElementById('_scitex_cursor');
         if (!cursor) {
@@ -224,12 +222,15 @@ async def show_cursor_at_async(
             cursor.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.6)';
         }
     }
-    """, [x, y, state])
+    """,
+        [x, y, state],
+    )
 
 
 def show_click_effect(page: Union["AsyncPage", "SyncPage"], x: float, y: float) -> None:
     """Show click ripple effect at position (sync version)."""
-    page.evaluate("""
+    page.evaluate(
+        """
     ([x, y]) => {
         const ripple = document.createElement('div');
         ripple.className = 'scitex-click-ripple';
@@ -244,12 +245,15 @@ def show_click_effect(page: Union["AsyncPage", "SyncPage"], x: float, y: float) 
             setTimeout(() => cursor.classList.remove('clicking'), 150);
         }
     }
-    """, [x, y])
+    """,
+        [x, y],
+    )
 
 
 async def show_click_effect_async(page: "AsyncPage", x: float, y: float) -> None:
     """Show click ripple effect at position (async version)."""
-    await page.evaluate("""
+    await page.evaluate(
+        """
     ([x, y]) => {
         const ripple = document.createElement('div');
         ripple.className = 'scitex-click-ripple';
@@ -264,7 +268,9 @@ async def show_click_effect_async(page: "AsyncPage", x: float, y: float) -> None
             setTimeout(() => cursor.classList.remove('clicking'), 150);
         }
     }
-    """, [x, y])
+    """,
+        [x, y],
+    )
 
 
 def show_step(
@@ -272,7 +278,7 @@ def show_step(
     step: int,
     total: int,
     message: str,
-    level: str = "info"
+    level: str = "info",
 ) -> None:
     """Show numbered step message in browser (sync version).
 
@@ -291,7 +297,8 @@ def show_step(
     }
     color = color_map.get(level, color_map["info"])
 
-    page.evaluate("""
+    page.evaluate(
+        """
     ([step, total, message, color]) => {
         let container = document.getElementById('_scitex_step_messages');
         if (!container) {
@@ -318,16 +325,14 @@ def show_step(
         while (container.children.length > 5) container.removeChild(container.firstChild);
         setTimeout(() => { if (popup.parentNode) popup.parentNode.removeChild(popup); }, 8000);
     }
-    """, [step, total, message, color])
+    """,
+        [step, total, message, color],
+    )
     page.wait_for_timeout(200)
 
 
 async def show_step_async(
-    page: "AsyncPage",
-    step: int,
-    total: int,
-    message: str,
-    level: str = "info"
+    page: "AsyncPage", step: int, total: int, message: str, level: str = "info"
 ) -> None:
     """Show numbered step message in browser (async version)."""
     color_map = {
@@ -338,7 +343,8 @@ async def show_step_async(
     }
     color = color_map.get(level, color_map["info"])
 
-    await page.evaluate("""
+    await page.evaluate(
+        """
     ([step, total, message, color]) => {
         let container = document.getElementById('_scitex_step_messages');
         if (!container) {
@@ -365,7 +371,9 @@ async def show_step_async(
         while (container.children.length > 5) container.removeChild(container.firstChild);
         setTimeout(() => { if (popup.parentNode) popup.parentNode.removeChild(popup); }, 8000);
     }
-    """, [step, total, message, color])
+    """,
+        [step, total, message, color],
+    )
     await page.wait_for_timeout(200)
 
 
@@ -373,7 +381,7 @@ def show_test_result(
     page: Union["AsyncPage", "SyncPage"],
     success: bool,
     message: str = "",
-    delay_ms: int = 3000
+    delay_ms: int = 3000,
 ) -> None:
     """Show test result banner (PASS/FAIL) and wait (sync version).
 
@@ -387,7 +395,8 @@ def show_test_result(
     css_class = "success" if success else "failure"
     display_text = f"{status}" + (f": {message}" if message else "")
 
-    page.evaluate("""
+    page.evaluate(
+        """
     ([displayText, cssClass]) => {
         // Remove existing banner
         const existing = document.getElementById('_scitex_result_banner');
@@ -399,22 +408,22 @@ def show_test_result(
         banner.textContent = displayText;
         document.body.appendChild(banner);
     }
-    """, [display_text, css_class])
+    """,
+        [display_text, css_class],
+    )
     page.wait_for_timeout(delay_ms)
 
 
 async def show_test_result_async(
-    page: "AsyncPage",
-    success: bool,
-    message: str = "",
-    delay_ms: int = 3000
+    page: "AsyncPage", success: bool, message: str = "", delay_ms: int = 3000
 ) -> None:
     """Show test result banner (PASS/FAIL) and wait (async version)."""
     status = "PASS" if success else "FAIL"
     css_class = "success" if success else "failure"
     display_text = f"{status}" + (f": {message}" if message else "")
 
-    await page.evaluate("""
+    await page.evaluate(
+        """
     ([displayText, cssClass]) => {
         const existing = document.getElementById('_scitex_result_banner');
         if (existing) existing.remove();
@@ -425,7 +434,9 @@ async def show_test_result_async(
         banner.textContent = displayText;
         document.body.appendChild(banner);
     }
-    """, [display_text, css_class])
+    """,
+        [display_text, css_class],
+    )
     await page.wait_for_timeout(delay_ms)
 
 

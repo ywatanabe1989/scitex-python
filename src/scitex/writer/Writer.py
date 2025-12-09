@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/_Writer.py"
-)
+
+__FILE__ = "./src/scitex/writer/_Writer.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -96,9 +95,7 @@ class Writer:
         self.git_root = init_git_repo(self.project_dir, self.git_strategy)
 
         # Document accessors (pass git_root for efficiency)
-        self.shared = SharedTree(
-            self.project_dir / "00_shared", git_root=self.git_root
-        )
+        self.shared = SharedTree(self.project_dir / "00_shared", git_root=self.git_root)
         self.manuscript = ManuscriptTree(
             self.project_dir / "01_manuscript", git_root=self.git_root
         )
@@ -108,13 +105,9 @@ class Writer:
         self.revision = RevisionTree(
             self.project_dir / "03_revision", git_root=self.git_root
         )
-        self.scripts = ScriptsTree(
-            self.project_dir / "scripts", git_root=self.git_root
-        )
+        self.scripts = ScriptsTree(self.project_dir / "scripts", git_root=self.git_root)
 
-        logger.success(
-            f"Writer: Initialization complete for {self.project_name}"
-        )
+        logger.success(f"Writer: Initialization complete for {self.project_name}")
 
     def _attach_or_create_project(self, name: Optional[str] = None) -> Path:
         """
@@ -159,21 +152,15 @@ class Writer:
 
         # Verify target directory exists
         if not target_dir.exists():
-            logger.error(
-                f"Writer: Target directory {target_dir} does not exist"
-            )
-            raise RuntimeError(
-                f"Target directory {target_dir} was not created"
-            )
+            logger.error(f"Writer: Target directory {target_dir} does not exist")
+            raise RuntimeError(f"Target directory {target_dir} was not created")
 
         # Verify project directory was created
         if not self.project_dir.exists():
             logger.error(
                 f"Writer: Project directory {self.project_dir} was not created"
             )
-            raise RuntimeError(
-                f"Project directory {self.project_dir} was not created"
-            )
+            raise RuntimeError(f"Project directory {self.project_dir} was not created")
 
         logger.success(
             f"Writer: Successfully created project at {self.project_dir.absolute()}"

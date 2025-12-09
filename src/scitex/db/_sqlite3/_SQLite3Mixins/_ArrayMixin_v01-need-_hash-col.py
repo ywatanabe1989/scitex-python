@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -78,7 +79,7 @@ class _ArrayMixin:
 
                 # Calculate hash from original array data
                 array_hash = hashlib.sha256(arr.tobytes()).hexdigest()[:16]
-                
+
                 binary = arr.tobytes()
                 if compress and len(binary) > 1024:
                     binary = zlib.compress(binary, level=compress_level)
@@ -111,7 +112,9 @@ class _ArrayMixin:
             else:
                 placeholders = ",".join(["?" for _ in all_columns])
                 columns_str = ",".join(all_columns)
-                query = f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
+                query = (
+                    f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
+                )
 
             self.execute(query, tuple(all_values))
 
@@ -205,9 +208,7 @@ class _ArrayMixin:
         self._check_context_manager()
 
         if columns == "all":
-            all_table_columns = self.get_table_schema(table_name)[
-                "name"
-            ].tolist()
+            all_table_columns = self.get_table_schema(table_name)["name"].tolist()
             array_columns = []
             for col in all_table_columns:
                 if (
@@ -223,7 +224,13 @@ class _ArrayMixin:
         query_columns = ["id"]
         for col in array_columns:
             query_columns.extend(
-                [col, f"{col}_dtype", f"{col}_shape", f"{col}_is_compressed", f"{col}_hash"]
+                [
+                    col,
+                    f"{col}_dtype",
+                    f"{col}_shape",
+                    f"{col}_is_compressed",
+                    f"{col}_hash",
+                ]
             )
 
         df = self.get_rows(
@@ -270,9 +277,7 @@ class _ArrayMixin:
                 result[array_col] = None
 
         if verbose:
-            print(
-                f"Loaded {len(array_columns)} array columns from {table_name}"
-            )
+            print(f"Loaded {len(array_columns)} array columns from {table_name}")
 
         return result
 
@@ -384,9 +389,9 @@ class _ArrayMixin:
             binary_data = zlib.decompress(binary_data)
 
         if dtype_str and shape_str:
-            return np.frombuffer(
-                binary_data, dtype=np.dtype(dtype_str)
-            ).reshape(eval(shape_str))
+            return np.frombuffer(binary_data, dtype=np.dtype(dtype_str)).reshape(
+                eval(shape_str)
+            )
         elif dtype and shape:
             return np.frombuffer(binary_data, dtype=dtype).reshape(shape)
         return binary_data
@@ -433,8 +438,7 @@ class _ArrayMixin:
                 ]
             elif dtype and shape:
                 arrays = [
-                    self.binary_to_array(x, dtype=dtype, shape=shape)
-                    for x in df[col]
+                    self.binary_to_array(x, dtype=dtype, shape=shape) for x in df[col]
                 ]
             result[col] = np.stack(arrays)
 
@@ -513,5 +517,6 @@ class _ArrayMixin:
                     lambda x: self.binary_to_array(x, dtype=dtype, shape=shape)
                 )
         return df
+
 
 # EOF

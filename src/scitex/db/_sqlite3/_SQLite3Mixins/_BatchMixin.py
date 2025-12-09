@@ -3,7 +3,9 @@
 # Time-stamp: "2024-11-29 04:36:14 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/db/_SQLite3Mixins/_BatchMixin.py
 
-THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_SQLite3Mixins/_BatchMixin.py"
+THIS_FILE = (
+    "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_SQLite3Mixins/_BatchMixin.py"
+)
 
 """
 Functionality:

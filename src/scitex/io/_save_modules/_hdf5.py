@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_save_modules/_hdf5.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -36,9 +37,7 @@ class SWMRFile:
             try:
                 if self.mode in ["w", "w-"]:
                     # For write mode, create new file
-                    self.file = h5py.File(
-                        self.filepath, self.mode, libver="latest"
-                    )
+                    self.file = h5py.File(self.filepath, self.mode, libver="latest")
                     if self.swmr:
                         self.file.swmr_mode = True
                     return self.file
@@ -64,16 +63,12 @@ class SWMRFile:
                             )
                         else:
                             # Normal append mode
-                            self.file = h5py.File(
-                                self.filepath, "r+", libver="latest"
-                            )
+                            self.file = h5py.File(self.filepath, "r+", libver="latest")
                             if self.swmr:
                                 self.file.swmr_mode = True
                     else:
                         # Create new file
-                        self.file = h5py.File(
-                            self.filepath, "w", libver="latest"
-                        )
+                        self.file = h5py.File(self.filepath, "w", libver="latest")
                         if self.swmr:
                             self.file.swmr_mode = True
                     return self.file
@@ -87,9 +82,7 @@ class SWMRFile:
 
             except (OSError, IOError) as e:
                 if "Resource temporarily unavailable" in str(e):
-                    time.sleep(
-                        0.1 * (2 ** min(5, (time.time() - start_time) / 10))
-                    )
+                    time.sleep(0.1 * (2 ** min(5, (time.time() - start_time) / 10)))
                 else:
                     raise
 
@@ -174,15 +167,11 @@ def _save_hdf5(
 
                             for part in parts[:-1]:
                                 if part:
-                                    current_group = (
-                                        current_group.require_group(part)
-                                    )
+                                    current_group = current_group.require_group(part)
 
                             final_key = parts[-1] if parts else ""
                             if final_key:
-                                target_group = current_group.create_group(
-                                    final_key
-                                )
+                                target_group = current_group.create_group(final_key)
                             else:
                                 target_group = current_group
                         else:
@@ -213,9 +202,7 @@ def _save_hdf5(
             else:
                 raise
 
-    raise RuntimeError(
-        f"Failed to save to {spath} after {max_retries} attempts"
-    )
+    raise RuntimeError(f"Failed to save to {spath} after {max_retries} attempts")
 
 
 def _save_dataset(group, name, data, compression, compression_opts, **kwargs):
@@ -270,5 +257,6 @@ def _save_dataset(group, name, data, compression, compression_opts, **kwargs):
 
     except Exception as e:
         print(f"Warning: Could not save dataset '{name}': {e}")
+
 
 # EOF

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -113,9 +114,7 @@ class Scholar:
         if doi:
             # Update database
             with self.db._get_connection() as conn:
-                conn.execute(
-                    "UPDATE papers SET doi = ? WHERE id = ?", (doi, paper_id)
-                )
+                conn.execute("UPDATE papers SET doi = ? WHERE id = ?", (doi, paper_id))
                 conn.execute(
                     "UPDATE enrichment_status SET doi_resolved = 1 WHERE paper_id = ?",
                     (paper_id,),
@@ -137,9 +136,7 @@ class Scholar:
 
     # ========== PDF Download ==========
 
-    def download_pdf_async(
-        self, paper_id: int, method: str = "browser"
-    ) -> Dict:
+    def download_pdf_async(self, paper_id: int, method: str = "browser") -> Dict:
         """Download PDF for a paper.
 
         Args:
@@ -177,9 +174,7 @@ class Scholar:
 
         if method == "browser":
             # Create browser download session
-            session_id = self.browser_helper.create_download_session(
-                max_papers=1
-            )
+            session_id = self.browser_helper.create_download_session(max_papers=1)
             self.browser_helper.open_download_helper(session_id)
             return {
                 "success": False,
@@ -241,9 +236,7 @@ class Scholar:
         latest_pdf = paper["pdfs"][0]
         storage_key = paper["storage_key"]
 
-        pdf_path = (
-            self.db.storage.storage_dir / storage_key / latest_pdf["filename"]
-        )
+        pdf_path = self.db.storage.storage_dir / storage_key / latest_pdf["filename"]
         return pdf_path if pdf_path.exists() else None
 
     def get_screenshots(self, paper_id: int) -> List[Path]:

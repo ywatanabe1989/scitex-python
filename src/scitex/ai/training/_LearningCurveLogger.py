@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -115,25 +116,32 @@ class LearningCurveLogger:
         all_rows = []
 
         for step, metrics in self.logged_dict.items():
-            n_samples = len(metrics['i_global'])
+            n_samples = len(metrics["i_global"])
 
             for i in range(n_samples):
-                row = {'step': step}
+                row = {"step": step}
                 for key, values in metrics.items():
                     # Only include scalar metrics for the DataFrame
-                    if key.endswith('_plot') or key in ['i_global', 'i_epoch', 'i_batch', 'i_fold']:
+                    if key.endswith("_plot") or key in [
+                        "i_global",
+                        "i_epoch",
+                        "i_batch",
+                        "i_fold",
+                    ]:
                         row[key] = values[i]
                 all_rows.append(row)
 
         df = pd.DataFrame(all_rows)
 
         # Rename _plot columns
-        df.columns = [col.replace('_plot', '') if col.endswith('_plot') else col
-                      for col in df.columns]
+        df.columns = [
+            col.replace("_plot", "") if col.endswith("_plot") else col
+            for col in df.columns
+        ]
 
         # Ensure i_batch exists (create dummy if not logged)
-        if 'i_batch' not in df.columns:
-            df['i_batch'] = df.groupby(['step', 'i_epoch']).cumcount()
+        if "i_batch" not in df.columns:
+            df["i_batch"] = df.groupby(["step", "i_epoch"]).cumcount()
 
         return df
 
@@ -177,8 +185,9 @@ class LearningCurveLogger:
 
         # Find keys to plot (exclude metadata columns)
         keys_to_plot = [
-            col for col in metrics_df.columns
-            if col not in ['step', 'i_global', 'i_epoch', 'i_batch', 'i_fold']
+            col
+            for col in metrics_df.columns
+            if col not in ["step", "i_global", "i_epoch", "i_batch", "i_fold"]
         ]
 
         if len(keys_to_plot) == 0:
@@ -302,6 +311,8 @@ class LearningCurveLogger:
 
 
 """Functions & Classes"""
+
+
 def main(args):
     """Demo learning curve logger with MNIST training."""
     import torch
@@ -496,9 +507,11 @@ def main(args):
 
 
 import argparse
+
+
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description='Demo learning curve logger')
+    parser = argparse.ArgumentParser(description="Demo learning curve logger")
     return parser.parse_args()
 
 

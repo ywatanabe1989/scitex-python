@@ -211,7 +211,6 @@ if __name__ == "__main__":
 # 
 # 
 # def get_spath(sfname=".", makedirs=False):
-# 
 #     # if __IPYTHON__:
 #     #     THIS_FILE = f'/tmp/{os.getenv("USER")}.py'
 #     # else:
@@ -219,7 +218,7 @@ if __name__ == "__main__":
 # 
 #     THIS_FILE = inspect.stack()[1].filename
 #     if "ipython" in __file__:  # for ipython
-#         THIS_FILE = f'/tmp/{os.getenv("USER")}.py'
+#         THIS_FILE = f"/tmp/{os.getenv('USER')}.py"
 # 
 #     ## spath
 #     fpath = __file__

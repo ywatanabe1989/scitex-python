@@ -299,6 +299,7 @@ if __name__ == "__main__":
 # @signal_fn
 # def gauss(x, sigma, t=None):
 #     from scitex.nn._Filters import GaussianFilter
+# 
 #     return GaussianFilter(sigma)(x, t=t)
 # 
 # 
@@ -316,18 +317,21 @@ if __name__ == "__main__":
 # @signal_fn
 # def bandstop(x, fs, bands, t=None):
 #     from scitex.nn._Filters import BandStopFilter
+# 
 #     return BandStopFilter(bands, fs, x.shape[-1])(x, t=t)
 # 
 # 
 # @signal_fn
 # def lowpass(x, fs, cutoffs_hz, t=None):
 #     from scitex.nn._Filters import LowPassFilter
+# 
 #     return LowPassFilter(cutoffs_hz, fs, x.shape[-1])(x, t=t)
 # 
 # 
 # @signal_fn
 # def highpass(x, fs, cutoffs_hz, t=None):
 #     from scitex.nn._Filters import HighPassFilter
+# 
 #     return HighPassFilter(cutoffs_hz, fs, x.shape[-1])(x, t=t)
 # 
 # 

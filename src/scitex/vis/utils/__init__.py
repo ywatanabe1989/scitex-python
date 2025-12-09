@@ -8,7 +8,7 @@ Includes validation functions and default templates for
 common publication formats.
 """
 
-from .validate import (
+from ._validate import (
     validate_json_structure,
     validate_plot_data,
     check_schema_version,
@@ -16,7 +16,7 @@ from .validate import (
     validate_axes_layout,
 )
 
-from .defaults import (
+from ._defaults import (
     # Constants
     NATURE_SINGLE_COLUMN_MM,
     NATURE_DOUBLE_COLUMN_MM,

@@ -33,7 +33,6 @@ def to_xy(data_frame):
     assert data_frame.shape[0] == data_frame.shape[1]
 
     if not data_frame.index.equals(data_frame.columns):
-
         if (data_frame.index == np.array(range(len(data_frame.index)))).all():
             data_frame.columns = data_frame.index
         elif (data_frame.columns == np.array(range(len(data_frame.columns)))).all():

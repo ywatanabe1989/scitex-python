@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -62,7 +63,7 @@ def welch_satterthwaite_df(var_i: float, n_i: int, var_j: float, n_j: int) -> fl
     s_j_sq_n_j = var_j / n_j
 
     numerator = (s_i_sq_n_i + s_j_sq_n_j) ** 2
-    denominator = (s_i_sq_n_i ** 2) / (n_i - 1) + (s_j_sq_n_j ** 2) / (n_j - 1)
+    denominator = (s_i_sq_n_i**2) / (n_i - 1) + (s_j_sq_n_j**2) / (n_j - 1)
 
     if denominator == 0:
         return n_i + n_j - 2
@@ -75,7 +76,7 @@ def posthoc_games_howell(
     groups: List[Union[np.ndarray, pd.Series]],
     group_names: Optional[List[str]] = None,
     alpha: float = 0.05,
-    return_as: str = 'dataframe'
+    return_as: str = "dataframe",
 ) -> Union[pd.DataFrame, List[dict]]:
     """
     Perform Games-Howell post-hoc test for pairwise comparisons.
@@ -191,7 +192,7 @@ def posthoc_games_howell(
 
     # Group names
     if group_names is None:
-        group_names = [f'Group {i+1}' for i in range(k)]
+        group_names = [f"Group {i + 1}" for i in range(k)]
 
     if len(group_names) != k:
         raise ValueError(f"Expected {k} group names, got {len(group_names)}")
@@ -244,29 +245,31 @@ def posthoc_games_howell(
             ci_lower = mean_diff - margin
             ci_upper = mean_diff + margin
 
-            results.append({
-                'group_i': group_names[i],
-                'group_j': group_names[j],
-                'n_i': n_i,
-                'n_j': n_j,
-                'mean_i': round(float(mean_i), 3),
-                'mean_j': round(float(mean_j), 3),
-                'var_i': round(float(var_i), 3),
-                'var_j': round(float(var_j), 3),
-                'mean_diff': round(float(mean_diff), 3),
-                'std_error': round(float(se), 3),
-                't_statistic': round(float(t_stat), 3),
-                'df': round(float(df), 2),
-                'pvalue': round(float(pvalue), 4),
-                'significant': bool(significant),
-                'pstars': p2stars(pvalue),
-                'ci_lower': round(float(ci_lower), 3),
-                'ci_upper': round(float(ci_upper), 3),
-                'alpha': alpha,
-            })
+            results.append(
+                {
+                    "group_i": group_names[i],
+                    "group_j": group_names[j],
+                    "n_i": n_i,
+                    "n_j": n_j,
+                    "mean_i": round(float(mean_i), 3),
+                    "mean_j": round(float(mean_j), 3),
+                    "var_i": round(float(var_i), 3),
+                    "var_j": round(float(var_j), 3),
+                    "mean_diff": round(float(mean_diff), 3),
+                    "std_error": round(float(se), 3),
+                    "t_statistic": round(float(t_stat), 3),
+                    "df": round(float(df), 2),
+                    "pvalue": round(float(pvalue), 4),
+                    "significant": bool(significant),
+                    "pstars": p2stars(pvalue),
+                    "ci_lower": round(float(ci_lower), 3),
+                    "ci_upper": round(float(ci_upper), 3),
+                    "alpha": alpha,
+                }
+            )
 
     # Return format
-    if return_as == 'dataframe':
+    if return_as == "dataframe":
         return pd.DataFrame(results)
     else:
         return results
@@ -300,20 +303,27 @@ if __name__ == "__main__":
     logger.info("-" * 70)
 
     np.random.seed(42)
-    group1 = np.random.normal(10, 1, 20)   # Small variance
-    group2 = np.random.normal(12, 5, 25)   # Large variance
-    group3 = np.random.normal(11, 2, 15)   # Medium variance
+    group1 = np.random.normal(10, 1, 20)  # Small variance
+    group2 = np.random.normal(12, 5, 25)  # Large variance
+    group3 = np.random.normal(11, 2, 15)  # Medium variance
 
-    logger.info(f"Group 1: mean={np.mean(group1):.2f}, var={np.var(group1, ddof=1):.2f}, n={len(group1)}")
-    logger.info(f"Group 2: mean={np.mean(group2):.2f}, var={np.var(group2, ddof=1):.2f}, n={len(group2)}")
-    logger.info(f"Group 3: mean={np.mean(group3):.2f}, var={np.var(group3, ddof=1):.2f}, n={len(group3)}")
-
-    results = posthoc_games_howell(
-        [group1, group2, group3],
-        group_names=['Low Var', 'High Var', 'Med Var']
+    logger.info(
+        f"Group 1: mean={np.mean(group1):.2f}, var={np.var(group1, ddof=1):.2f}, n={len(group1)}"
+    )
+    logger.info(
+        f"Group 2: mean={np.mean(group2):.2f}, var={np.var(group2, ddof=1):.2f}, n={len(group2)}"
+    )
+    logger.info(
+        f"Group 3: mean={np.mean(group3):.2f}, var={np.var(group3, ddof=1):.2f}, n={len(group3)}"
     )
 
-    logger.info(f"\n{results[['group_i', 'group_j', 'mean_diff', 'df', 'pvalue', 'significant']].to_string()}")
+    results = posthoc_games_howell(
+        [group1, group2, group3], group_names=["Low Var", "High Var", "Med Var"]
+    )
+
+    logger.info(
+        f"\n{results[['group_i', 'group_j', 'mean_diff', 'df', 'pvalue', 'significant']].to_string()}"
+    )
 
     # Example 2: Comparison with Tukey HSD
     logger.info("\n[Example 2] Games-Howell vs Tukey HSD")
@@ -325,10 +335,14 @@ if __name__ == "__main__":
     results_tukey = posthoc_tukey([group1, group2, group3])
 
     logger.info("\nGames-Howell results:")
-    logger.info(f"{results_gh[['group_i', 'group_j', 'pvalue', 'significant']].to_string()}")
+    logger.info(
+        f"{results_gh[['group_i', 'group_j', 'pvalue', 'significant']].to_string()}"
+    )
 
     logger.info("\nTukey HSD results:")
-    logger.info(f"{results_tukey[['group_i', 'group_j', 'pvalue', 'significant']].to_string()}")
+    logger.info(
+        f"{results_tukey[['group_i', 'group_j', 'pvalue', 'significant']].to_string()}"
+    )
 
     logger.info("\nNote: Games-Howell is more appropriate with unequal variances")
 
@@ -340,24 +354,28 @@ if __name__ == "__main__":
 
     anova_result = test_anova(
         [group1, group2, group3],
-        var_names=['Low Var', 'High Var', 'Med Var'],
-        check_assumptions=True
+        var_names=["Low Var", "High Var", "Med Var"],
+        check_assumptions=True,
     )
 
-    logger.info(f"ANOVA: F = {anova_result['statistic']:.3f}, p = {anova_result['pvalue']:.4f}")
+    logger.info(
+        f"ANOVA: F = {anova_result['statistic']:.3f}, p = {anova_result['pvalue']:.4f}"
+    )
     logger.info(f"Assumptions met: {anova_result.get('assumptions_met', 'N/A')}")
 
-    is_sig = anova_result.get('significant', anova_result.get('is_significant', False))
+    is_sig = anova_result.get("significant", anova_result.get("is_significant", False))
     if is_sig:
-        logger.info("\nANOVA significant. Using Games-Howell (robust to unequal variances)...")
+        logger.info(
+            "\nANOVA significant. Using Games-Howell (robust to unequal variances)..."
+        )
         logger.info(f"\n{results.to_string()}")
 
     # Example 4: Extreme variance ratios
     logger.info("\n[Example 4] Extreme variance heterogeneity")
     logger.info("-" * 70)
 
-    extreme1 = np.random.normal(50, 1, 20)    # Very small variance
-    extreme2 = np.random.normal(55, 10, 20)   # Very large variance
+    extreme1 = np.random.normal(50, 1, 20)  # Very small variance
+    extreme2 = np.random.normal(55, 10, 20)  # Very large variance
 
     var_ratio = np.var(extreme2, ddof=1) / np.var(extreme1, ddof=1)
     logger.info(f"Variance ratio: {var_ratio:.1f}")
@@ -370,7 +388,7 @@ if __name__ == "__main__":
     logger.info("\n[Example 5] Export results")
     logger.info("-" * 70)
 
-    convert_results(results, return_as='excel', path='./games_howell_results.xlsx')
+    convert_results(results, return_as="excel", path="./games_howell_results.xlsx")
     logger.info("Saved to: ./games_howell_results.xlsx")
 
     stx.session.close(

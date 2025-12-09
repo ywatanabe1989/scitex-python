@@ -4,6 +4,7 @@
 # File: ./mcp_servers/scitex_io_translator/translators/__init__.py
 # ----------------------------------------
 import os
+
 __FILE__ = "./mcp_servers/scitex_io_translator/translators/__init__.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -14,9 +15,4 @@ from .path_translator import PathTranslator
 from .template_translator import TemplateTranslator
 from .validation_engine import ValidationEngine
 
-__all__ = [
-    'IOTranslator',
-    'PathTranslator',
-    'TemplateTranslator',
-    'ValidationEngine'
-]
+__all__ = ["IOTranslator", "PathTranslator", "TemplateTranslator", "ValidationEngine"]

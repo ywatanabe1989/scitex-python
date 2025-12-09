@@ -26,14 +26,12 @@ from ._normalize_timestamp import normalize_timestamp
 __all__ = [
     # Main time series CV splitters
     "TimeSeriesStratifiedSplit",
-    "TimeSeriesBlockingSplit", 
+    "TimeSeriesBlockingSplit",
     "TimeSeriesSlidingWindowSplit",
     "TimeSeriesCalendarSplit",
-    
     # Support classes
     "TimeSeriesStrategy",
     "TimeSeriesMetadata",
-    
     # Timestamp normalizer
     "normalize_timestamp",
 ]

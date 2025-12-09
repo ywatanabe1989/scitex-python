@@ -286,9 +286,8 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# __FILE__ = (
-#     "./src/scitex/context/_suppress_output.py"
-# )
+# 
+# __FILE__ = "./src/scitex/context/_suppress_output.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 

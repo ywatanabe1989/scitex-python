@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -41,6 +42,8 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
+
+
 async def setup_authentication() -> bool:
     """Set up and validate ScholarAuthManager authentication.
 

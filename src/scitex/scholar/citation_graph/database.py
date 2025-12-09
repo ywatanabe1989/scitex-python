@@ -47,13 +47,10 @@ class CitationDatabase:
             self.conn = sqlite3.connect(
                 f"file:{self.db_path}?mode=ro",
                 uri=True,
-                check_same_thread=False  # Allow multi-threaded access (e.g., Django)
+                check_same_thread=False,  # Allow multi-threaded access (e.g., Django)
             )
         else:
-            self.conn = sqlite3.connect(
-                self.db_path,
-                check_same_thread=False
-            )
+            self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
 
         self.conn.row_factory = sqlite3.Row
 
@@ -117,9 +114,7 @@ class CitationDatabase:
         )
         return [(row[0], row[1]) for row in cursor]
 
-    def get_cocited_papers(
-        self, doi: str, limit: int = 50
-    ) -> List[Tuple[str, int]]:
+    def get_cocited_papers(self, doi: str, limit: int = 50) -> List[Tuple[str, int]]:
         """
         Find papers co-cited with this DOI.
 
@@ -187,9 +182,7 @@ class CitationDatabase:
         Returns:
             Dictionary with paper metadata, or None if not found
         """
-        cursor = self.conn.execute(
-            "SELECT metadata FROM works WHERE doi = ?", (doi,)
-        )
+        cursor = self.conn.execute("SELECT metadata FROM works WHERE doi = ?", (doi,))
         row = cursor.fetchone()
 
         if row:

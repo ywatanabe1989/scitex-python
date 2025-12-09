@@ -78,16 +78,19 @@ def test_mk_colorbar_custom_colors():
 def test_mk_colorbar_same_color():
     """Test mk_colorbar when start and end colors are the same."""
     from scitex.plt.utils import mk_colorbar
-    
+
     fig = mk_colorbar(start="blue", end="blue")
-    
+
     assert isinstance(fig, plt.Figure)
     ax = fig.axes[0]
-    
-    # With same color, gradient should be uniform
-    image_data = ax.images[0].get_array()
-    assert image_data.std() < 1e-10  # Should be nearly constant
-    
+
+    # With same color, the colormap should map all values to the same color
+    cmap = ax.images[0].get_cmap()
+    start_color = cmap(0.0)
+    end_color = cmap(1.0)
+    # Both should be approximately the same (blue)
+    np.testing.assert_array_almost_equal(start_color, end_color, decimal=5)
+
     plt.close(fig)
 
 
@@ -314,9 +317,9 @@ if __name__ == "__main__":
 #     # import scitex
 #     from scitex.plt.color._PARAMS import RGB
 # 
-#     # Get RGB values for start and end colors
-#     start_rgb = RGB[start]
-#     end_rgb = RGB[end]
+#     # Get RGB values for start and end colors (normalize 0-255 to 0-1)
+#     start_rgb = np.array(RGB[start]) / 255.0
+#     end_rgb = np.array(RGB[end]) / 255.0
 # 
 #     # Create a colormap
 #     colors = [start_rgb, end_rgb]

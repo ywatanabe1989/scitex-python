@@ -31,42 +31,37 @@ class TestClose:
     @patch('scitex.plt.utils._close.plt.close')
     def test_close_scitex_figwrapper(self, mock_plt_close):
         """Test closing an SciTeX FigWrapper object."""
-        # Create a mock FigWrapper with a figure attribute
+        # Create a mock FigWrapper with _fig_mpl attribute (new implementation)
         mock_figwrapper = MagicMock()
-        mock_figwrapper.figure = Mock(spec=matplotlib.figure.Figure)
-        
-        # Mock the isinstance check for FigWrapper
-        with patch('scitex.plt.utils._close.isinstance') as mock_isinstance:
-            def isinstance_side_effect(obj, cls):
-                if obj is mock_figwrapper and 'FigWrapper' in str(cls):
-                    return True
-                if obj is mock_figwrapper and cls is matplotlib.figure.Figure:
-                    return False
-                return isinstance(obj, cls)
-            mock_isinstance.side_effect = isinstance_side_effect
-            
-            # Call close function
-            close(mock_figwrapper)
-            
-            # Verify plt.close was called with the underlying figure
-            mock_plt_close.assert_called_once_with(mock_figwrapper.figure)
+        mock_figwrapper._fig_mpl = Mock(spec=matplotlib.figure.Figure)
+        # Make sure it doesn't match matplotlib.figure.Figure isinstance
+        mock_figwrapper.__class__ = type("FigWrapper", (), {})
+
+        # Call close function
+        close(mock_figwrapper)
+
+        # Verify plt.close was called with the underlying figure
+        mock_plt_close.assert_called_once_with(mock_figwrapper._fig_mpl)
             
     def test_close_invalid_object_type_error(self):
         """Test that TypeError is raised for invalid object types."""
+        # Create objects that don't have _fig_mpl or figure attributes
+        class PlainObject:
+            pass
+
         invalid_objects = [
             "string",
             123,
             [],
             {},
             None,
-            object(),
-            MagicMock()  # Generic mock without proper spec
+            PlainObject(),
         ]
-        
+
         for invalid_obj in invalid_objects:
             with pytest.raises(TypeError) as exc_info:
                 close(invalid_obj)
-            
+
             # Check error message content
             error_msg = str(exc_info.value)
             assert "Cannot close object of type" in error_msg
@@ -103,19 +98,32 @@ class TestClose:
             
     def test_close_error_message_formatting(self):
         """Test error message formatting for different object types."""
+        # Create plain objects that don't have _fig_mpl or figure attributes
+        class StringWrapper:
+            pass
+
+        class IntWrapper:
+            pass
+
+        class ListWrapper:
+            pass
+
+        class DictWrapper:
+            pass
+
         test_objects = [
-            ("string", str),
-            (42, int),
-            ([1, 2, 3], list),
-            ({"key": "value"}, dict)
+            (StringWrapper(), "StringWrapper"),
+            (IntWrapper(), "IntWrapper"),
+            (ListWrapper(), "ListWrapper"),
+            (DictWrapper(), "DictWrapper"),
         ]
-        
-        for obj, expected_type in test_objects:
+
+        for obj, expected_type_name in test_objects:
             with pytest.raises(TypeError) as exc_info:
                 close(obj)
-            
+
             error_msg = str(exc_info.value)
-            assert f"object of type {expected_type.__name__}" in error_msg
+            assert f"object of type {expected_type_name}" in error_msg
             
     @patch('scitex.plt.utils._close.plt.close')
     def test_close_memory_management_pattern(self, mock_plt_close):
@@ -163,30 +171,21 @@ class TestClose:
         """Test that required imports are available."""
         # Test that the function can access required modules
         import scitex.plt.utils._close as close_module
-        
+
         assert hasattr(close_module, 'matplotlib')
         assert hasattr(close_module, 'plt')
-        assert hasattr(close_module, 'scitex_plt')
         
     @patch('scitex.plt.utils._close.plt.close')
     def test_close_with_none_figure_attribute(self, mock_plt_close):
-        """Test handling when FigWrapper has None figure attribute."""
-        # Create mock FigWrapper with None figure
-        mock_figwrapper = MagicMock()
+        """Test handling when object has None figure attribute."""
+        # Create mock object with figure attribute set to None
+        # (uses the hasattr(obj, "figure") path)
+        mock_figwrapper = MagicMock(spec=[])  # Empty spec to avoid _fig_mpl
         mock_figwrapper.figure = None
-        
-        with patch('scitex.plt.utils._close.isinstance') as mock_isinstance:
-            def isinstance_side_effect(obj, cls):
-                if obj is mock_figwrapper and 'FigWrapper' in str(cls):
-                    return True
-                if obj is mock_figwrapper and cls is matplotlib.figure.Figure:
-                    return False
-                return isinstance(obj, cls)
-            mock_isinstance.side_effect = isinstance_side_effect
-            
-            # Should still call plt.close even with None
-            close(mock_figwrapper)
-            mock_plt_close.assert_called_once_with(None)
+
+        # Should not call plt.close when figure is None
+        close(mock_figwrapper)
+        mock_plt_close.assert_not_called()
             
     def test_close_docstring_content(self):
         """Test that close function has comprehensive docstring."""
@@ -203,29 +202,14 @@ class TestClose:
         
     @patch('scitex.plt.utils._close.plt.close')
     def test_close_integration_with_mock_figwrapper_class(self, mock_plt_close):
-        """Test close with properly mocked FigWrapper class."""
-        # Mock the scitex_plt module and FigWrapper class
-        with patch('scitex.plt.utils._close.scitex_plt') as mock_scitex_plt:
-            # Create a mock FigWrapper class
-            mock_figwrapper_class = MagicMock()
-            mock_scitex_plt._subplots._FigWrapper.FigWrapper = mock_figwrapper_class
-            
-            # Create instance that will be recognized as FigWrapper
-            mock_figwrapper_instance = MagicMock()
-            mock_figwrapper_instance.figure = Mock(spec=matplotlib.figure.Figure)
-            
-            # Make isinstance return True for our mock
-            with patch('scitex.plt.utils._close.isinstance') as mock_isinstance:
-                def isinstance_side_effect(obj, cls):
-                    if obj is mock_figwrapper_instance and cls is mock_figwrapper_class:
-                        return True
-                    if obj is mock_figwrapper_instance and cls is matplotlib.figure.Figure:
-                        return False
-                    return False
-                mock_isinstance.side_effect = isinstance_side_effect
-                
-                close(mock_figwrapper_instance)
-                mock_plt_close.assert_called_once_with(mock_figwrapper_instance.figure)
+        """Test close with object having _fig_mpl attribute (FigWrapper pattern)."""
+        # Create instance with _fig_mpl attribute (new implementation pattern)
+        mock_figwrapper_instance = MagicMock(spec=[])
+        mock_fig = Mock(spec=matplotlib.figure.Figure)
+        mock_figwrapper_instance._fig_mpl = mock_fig
+
+        close(mock_figwrapper_instance)
+        mock_plt_close.assert_called_once_with(mock_fig)
 
 if __name__ == "__main__":
     import os
@@ -250,7 +234,6 @@ if __name__ == "__main__":
 # 
 # import matplotlib
 # import matplotlib.pyplot as plt
-# import scitex.plt as scitex_plt
 # 
 # 
 # def close(obj):
@@ -296,8 +279,14 @@ if __name__ == "__main__":
 #     """
 #     if isinstance(obj, matplotlib.figure.Figure):
 #         plt.close(obj)
-#     elif isinstance(obj, scitex_plt._subplots._FigWrapper.FigWrapper):
-#         plt.close(obj.figure)
+#     elif hasattr(obj, "_fig_mpl"):
+#         # SciTeX FigWrapper object
+#         plt.close(obj._fig_mpl)
+#     elif hasattr(obj, "figure"):
+#         # Alternative attribute name (backward compatibility)
+#         fig = obj.figure
+#         if fig is not None:
+#             plt.close(fig)
 #     else:
 #         raise TypeError(
 #             f"Cannot close object of type {type(obj).__name__}. Expected FigWrapper or Figure object."

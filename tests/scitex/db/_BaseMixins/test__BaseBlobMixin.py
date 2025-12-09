@@ -263,7 +263,9 @@ if __name__ == "__main__":
 # # Time-stamp: "2024-11-25 01:45:48 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/db/_BaseMixins/_BaseBlobMixin.py
 # 
-# THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_BaseMixins/_BaseBlobMixin.py"
+# THIS_FILE = (
+#     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_BaseMixins/_BaseBlobMixin.py"
+# )
 # 
 # from abc import ABC, abstractmethod
 # from typing import Any, Dict, List, Optional, Tuple, Union

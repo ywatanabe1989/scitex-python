@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -41,9 +42,7 @@ class BaseSearchEngine(ABC):
         self._last_request = 0
 
     @abstractmethod
-    async def search_async(
-        self, query: str, limit: int = 20, **kwargs
-    ) -> List[Paper]:
+    async def search_async(self, query: str, limit: int = 20, **kwargs) -> List[Paper]:
         """Search for papers asynchronously.
 
         Parameters
@@ -97,5 +96,6 @@ class BaseSearchEngine(ABC):
     def __repr__(self) -> str:
         """String representation of the search engine."""
         return f"{self.__class__.__name__}(name='{self.name}', rate_limit={self.rate_limit})"
+
 
 # EOF

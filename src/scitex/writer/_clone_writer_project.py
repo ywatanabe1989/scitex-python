@@ -56,9 +56,7 @@ def clone_writer_project(
     from scitex.template import clone_writer_directory
 
     try:
-        result = clone_writer_directory(
-            project_dir, git_strategy, branch, tag
-        )
+        result = clone_writer_directory(project_dir, git_strategy, branch, tag)
         return result
     except Exception as e:
         logger.error(f"Failed to initialize writer directory: {e}")
@@ -114,9 +112,7 @@ def main(args):
 def parse_args():
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Clone scitex writer project template"
-    )
+    parser = argparse.ArgumentParser(description="Clone scitex writer project template")
     parser.add_argument(
         "project_dir",
         type=str,

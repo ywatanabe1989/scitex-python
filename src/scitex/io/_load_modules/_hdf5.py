@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_load_modules/_hdf5.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -67,5 +68,6 @@ def _load_h5_object(h5_obj):
             return data
     else:
         return h5_obj
+
 
 # EOF

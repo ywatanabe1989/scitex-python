@@ -34,7 +34,8 @@ class MplEditor:
     def run(self):
         """Launch the matplotlib editor."""
         import matplotlib
-        matplotlib.use('TkAgg')  # Use interactive backend
+
+        matplotlib.use("TkAgg")  # Use interactive backend
         import matplotlib.pyplot as plt
         from matplotlib.widgets import Button, TextBox
 
@@ -51,15 +52,15 @@ class MplEditor:
         self._add_controls()
 
         # Show instructions
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("SciTeX Matplotlib Editor")
-        print("="*50)
+        print("=" * 50)
         print(f"Editing: {self.json_path.name}")
         print("\nControls:")
         print("  - Use navigation toolbar for zoom/pan")
         print("  - Click buttons below figure for actions")
         print("  - Close window when done")
-        print("="*50 + "\n")
+        print("=" * 50 + "\n")
 
         plt.show()
 
@@ -71,34 +72,40 @@ class MplEditor:
         if self.csv_data is not None:
             self._plot_from_csv()
         else:
-            self.ax.text(0.5, 0.5, "No plot data available\n(CSV not found)",
-                        ha='center', va='center', transform=self.ax.transAxes)
+            self.ax.text(
+                0.5,
+                0.5,
+                "No plot data available\n(CSV not found)",
+                ha="center",
+                va="center",
+                transform=self.ax.transAxes,
+            )
 
         # Apply overrides
-        if self.current_overrides.get('title'):
-            self.ax.set_title(self.current_overrides['title'])
-        if self.current_overrides.get('xlabel'):
-            self.ax.set_xlabel(self.current_overrides['xlabel'])
-        if self.current_overrides.get('ylabel'):
-            self.ax.set_ylabel(self.current_overrides['ylabel'])
-        if self.current_overrides.get('grid'):
+        if self.current_overrides.get("title"):
+            self.ax.set_title(self.current_overrides["title"])
+        if self.current_overrides.get("xlabel"):
+            self.ax.set_xlabel(self.current_overrides["xlabel"])
+        if self.current_overrides.get("ylabel"):
+            self.ax.set_ylabel(self.current_overrides["ylabel"])
+        if self.current_overrides.get("grid"):
             self.ax.grid(True)
-        if self.current_overrides.get('xlim'):
-            self.ax.set_xlim(self.current_overrides['xlim'])
-        if self.current_overrides.get('ylim'):
-            self.ax.set_ylim(self.current_overrides['ylim'])
-        if self.current_overrides.get('facecolor'):
-            self.ax.set_facecolor(self.current_overrides['facecolor'])
+        if self.current_overrides.get("xlim"):
+            self.ax.set_xlim(self.current_overrides["xlim"])
+        if self.current_overrides.get("ylim"):
+            self.ax.set_ylim(self.current_overrides["ylim"])
+        if self.current_overrides.get("facecolor"):
+            self.ax.set_facecolor(self.current_overrides["facecolor"])
 
         # Apply annotations
-        for annot in self.current_overrides.get('annotations', []):
-            if annot.get('type') == 'text':
+        for annot in self.current_overrides.get("annotations", []):
+            if annot.get("type") == "text":
                 self.ax.text(
-                    annot.get('x', 0.5),
-                    annot.get('y', 0.5),
-                    annot.get('text', ''),
+                    annot.get("x", 0.5),
+                    annot.get("y", 0.5),
+                    annot.get("text", ""),
                     transform=self.ax.transAxes,
-                    fontsize=annot.get('fontsize', 10),
+                    fontsize=annot.get("fontsize", 10),
                 )
 
         self.fig.canvas.draw()
@@ -131,54 +138,60 @@ class MplEditor:
 
         # Title text box
         ax_title = self.fig.add_axes([0.15, 0.12, 0.3, 0.04])
-        self.title_box = TextBox(ax_title, 'Title:', initial=self.current_overrides.get('title', ''))
+        self.title_box = TextBox(
+            ax_title, "Title:", initial=self.current_overrides.get("title", "")
+        )
         self.title_box.on_submit(self._on_title_change)
 
         # Grid toggle button
         ax_grid = self.fig.add_axes([0.55, 0.12, 0.1, 0.04])
-        self.grid_btn = Button(ax_grid, 'Toggle Grid')
+        self.grid_btn = Button(ax_grid, "Toggle Grid")
         self.grid_btn.on_clicked(self._toggle_grid)
 
         # Save button
         ax_save = self.fig.add_axes([0.7, 0.12, 0.1, 0.04])
-        self.save_btn = Button(ax_save, 'Save')
+        self.save_btn = Button(ax_save, "Save")
         self.save_btn.on_clicked(self._save)
 
         # Edit labels button
         ax_labels = self.fig.add_axes([0.15, 0.05, 0.15, 0.04])
-        self.labels_btn = Button(ax_labels, 'Edit Labels')
+        self.labels_btn = Button(ax_labels, "Edit Labels")
         self.labels_btn.on_clicked(self._edit_labels)
 
         # Add annotation button
         ax_annot = self.fig.add_axes([0.35, 0.05, 0.15, 0.04])
-        self.annot_btn = Button(ax_annot, 'Add Text')
+        self.annot_btn = Button(ax_annot, "Add Text")
         self.annot_btn.on_clicked(self._add_annotation)
 
         # Export PNG button
         ax_export = self.fig.add_axes([0.55, 0.05, 0.12, 0.04])
-        self.export_btn = Button(ax_export, 'Export PNG')
+        self.export_btn = Button(ax_export, "Export PNG")
         self.export_btn.on_clicked(self._export_png)
 
     def _on_title_change(self, text):
         """Handle title change."""
-        self.current_overrides['title'] = text
+        self.current_overrides["title"] = text
         self._render()
 
     def _toggle_grid(self, event):
         """Toggle grid visibility."""
-        self.current_overrides['grid'] = not self.current_overrides.get('grid', False)
+        self.current_overrides["grid"] = not self.current_overrides.get("grid", False)
         self._render()
 
     def _edit_labels(self, event):
         """Edit axis labels via console."""
         print("\n--- Edit Labels ---")
-        xlabel = input(f"X Label [{self.current_overrides.get('xlabel', '')}]: ").strip()
+        xlabel = input(
+            f"X Label [{self.current_overrides.get('xlabel', '')}]: "
+        ).strip()
         if xlabel:
-            self.current_overrides['xlabel'] = xlabel
+            self.current_overrides["xlabel"] = xlabel
 
-        ylabel = input(f"Y Label [{self.current_overrides.get('ylabel', '')}]: ").strip()
+        ylabel = input(
+            f"Y Label [{self.current_overrides.get('ylabel', '')}]: "
+        ).strip()
         if ylabel:
-            self.current_overrides['ylabel'] = ylabel
+            self.current_overrides["ylabel"] = ylabel
 
         self._render()
         print("Labels updated!")
@@ -197,16 +210,18 @@ class MplEditor:
             print("Invalid position, using defaults")
             x, y = 0.5, 0.5
 
-        if 'annotations' not in self.current_overrides:
-            self.current_overrides['annotations'] = []
+        if "annotations" not in self.current_overrides:
+            self.current_overrides["annotations"] = []
 
-        self.current_overrides['annotations'].append({
-            'type': 'text',
-            'text': text,
-            'x': x,
-            'y': y,
-            'fontsize': 10,
-        })
+        self.current_overrides["annotations"].append(
+            {
+                "type": "text",
+                "text": text,
+                "x": x,
+                "y": y,
+                "fontsize": 10,
+            }
+        )
 
         self._render()
         print("Annotation added!")
@@ -223,8 +238,8 @@ class MplEditor:
 
     def _export_png(self, event):
         """Export current view to PNG."""
-        output_path = self.json_path.with_suffix('.edited.png')
-        self.fig.savefig(output_path, dpi=300, bbox_inches='tight')
+        output_path = self.json_path.with_suffix(".edited.png")
+        self.fig.savefig(output_path, dpi=300, bbox_inches="tight")
         print(f"\nExported: {output_path}")
 
 

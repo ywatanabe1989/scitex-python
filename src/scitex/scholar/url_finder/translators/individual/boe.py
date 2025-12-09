@@ -19,31 +19,33 @@ TRANSLATOR_INFO = {
     "in_repository": True,
     "translator_type": 4,
     "browser_support": "gcsibv",
-    "last_updated": "2021-07-26 17:07:40"
+    "last_updated": "2021-07-26 17:07:40",
 }
 
 
 def detect_web(doc: Any, url: str) -> Optional[str]:
     """Detect if the page is a statute"""
-    if 'diario_boe' in url or 'www.boe.es/eli' in url or '/doc.php' in url:
+    if "diario_boe" in url or "www.boe.es/eli" in url or "/doc.php" in url:
         return "statute"
     return None
 
 
 def get_metadata_uri(doc: Any, url: str) -> Optional[str]:
     """Get the XML metadata URI"""
-    if '/xml' not in url:
+    if "/xml" not in url:
         # Find the XML embodiment
         index = 1
         while True:
             xpath = f'(//meta[@property="http://data.europa.eu/eli/ontology#is_embodied_by"])[{index}]'
-            meta_elem = doc.select_one(f'meta[property="http://data.europa.eu/eli/ontology#is_embodied_by"]')
+            meta_elem = doc.select_one(
+                f'meta[property="http://data.europa.eu/eli/ontology#is_embodied_by"]'
+            )
 
             if not meta_elem:
                 break
 
-            resource = meta_elem.get('resource', '')
-            if '/xml' in resource:
+            resource = meta_elem.get("resource", "")
+            if "/xml" in resource:
                 return resource
 
             index += 1
@@ -56,8 +58,8 @@ def get_metadata_uri(doc: Any, url: str) -> Optional[str]:
 def parse_xml_metadata(xml_text: str) -> Dict[str, str]:
     """Parse XML metadata"""
     # Clean XML
-    xml_text = re.sub(r'<!DOCTYPE[^>]*>', '', xml_text)
-    xml_text = re.sub(r'<\?xml[^>]*\?>', '', xml_text)
+    xml_text = re.sub(r"<!DOCTYPE[^>]*>", "", xml_text)
+    xml_text = re.sub(r"<\?xml[^>]*\?>", "", xml_text)
     xml_text = xml_text.strip()
 
     metadata = {}
@@ -66,51 +68,51 @@ def parse_xml_metadata(xml_text: str) -> Dict[str, str]:
         root = ET.fromstring(xml_text)
 
         # Extract fields
-        departamento = root.find('.//departamento')
+        departamento = root.find(".//departamento")
         if departamento is not None and departamento.text:
-            metadata['author'] = departamento.text
+            metadata["author"] = departamento.text
 
-        fecha_publicacion = root.find('.//fecha_publicacion')
+        fecha_publicacion = root.find(".//fecha_publicacion")
         if fecha_publicacion is not None and fecha_publicacion.text:
             fecha = fecha_publicacion.text
             # Convert from YYYYMMDD to YYYY-MM-DD
             if len(fecha) == 8:
-                metadata['dateEnacted'] = f"{fecha[:4]}-{fecha[4:6]}-{fecha[6:8]}"
+                metadata["dateEnacted"] = f"{fecha[:4]}-{fecha[4:6]}-{fecha[6:8]}"
 
-        titulo = root.find('.//titulo')
+        titulo = root.find(".//titulo")
         if titulo is not None and titulo.text:
             # Remove trailing dot
-            metadata['nameOfAct'] = titulo.text.rstrip('.')
+            metadata["nameOfAct"] = titulo.text.rstrip(".")
 
-        seccion = root.find('.//seccion')
+        seccion = root.find(".//seccion")
         if seccion is not None and seccion.text:
-            metadata['section'] = seccion.text
+            metadata["section"] = seccion.text
 
-        pagina_inicial = root.find('.//pagina_inicial')
-        pagina_final = root.find('.//pagina_final')
+        pagina_inicial = root.find(".//pagina_inicial")
+        pagina_final = root.find(".//pagina_final")
         if pagina_inicial is not None and pagina_final is not None:
             if pagina_inicial.text and pagina_final.text:
-                metadata['pages'] = f"{pagina_inicial.text}-{pagina_final.text}"
+                metadata["pages"] = f"{pagina_inicial.text}-{pagina_final.text}"
 
-        diario = root.find('.//diario')
-        diario_numero = root.find('.//diario_numero')
+        diario = root.find(".//diario")
+        diario_numero = root.find(".//diario_numero")
         if diario is not None and diario_numero is not None:
             if diario.text and diario_numero.text:
-                metadata['session'] = f"{diario.text} núm. {diario_numero.text}"
+                metadata["session"] = f"{diario.text} núm. {diario_numero.text}"
 
-        identificador = root.find('.//identificador')
+        identificador = root.find(".//identificador")
         if identificador is not None and identificador.text:
-            metadata['codeNumber'] = identificador.text
+            metadata["codeNumber"] = identificador.text
 
-        rango = root.find('.//rango')
-        numero_oficial = root.find('.//numero_oficial')
+        rango = root.find(".//rango")
+        numero_oficial = root.find(".//numero_oficial")
         if rango is not None and numero_oficial is not None:
             if rango.text and numero_oficial.text:
-                metadata['publicLawNumber'] = f"{rango.text} {numero_oficial.text}"
+                metadata["publicLawNumber"] = f"{rango.text} {numero_oficial.text}"
 
-        url_eli = root.find('.//url_eli')
+        url_eli = root.find(".//url_eli")
         if url_eli is not None and url_eli.text:
-            metadata['url'] = url_eli.text
+            metadata["url"] = url_eli.text
 
     except ET.ParseError:
         pass
@@ -137,7 +139,7 @@ def scrape(doc: Any, url: str, xml_text: Optional[str] = None) -> Dict[str, Any]
         "attachments": [{"title": "Snapshot", "mimeType": "text/html", "url": url}],
         "tags": [],
         "notes": [],
-        "seeAlso": []
+        "seeAlso": [],
     }
 
     if not xml_text:
@@ -149,36 +151,34 @@ def scrape(doc: Any, url: str, xml_text: Optional[str] = None) -> Dict[str, Any]
     metadata = parse_xml_metadata(xml_text)
 
     # Populate item
-    if 'nameOfAct' in metadata:
-        item["nameOfAct"] = metadata['nameOfAct']
+    if "nameOfAct" in metadata:
+        item["nameOfAct"] = metadata["nameOfAct"]
 
-    if 'author' in metadata:
-        item["creators"].append({
-            "lastName": metadata['author'],
-            "creatorType": "author",
-            "fieldMode": 1
-        })
+    if "author" in metadata:
+        item["creators"].append(
+            {"lastName": metadata["author"], "creatorType": "author", "fieldMode": 1}
+        )
 
-    if 'dateEnacted' in metadata:
-        item["dateEnacted"] = metadata['dateEnacted']
+    if "dateEnacted" in metadata:
+        item["dateEnacted"] = metadata["dateEnacted"]
 
-    if 'section' in metadata:
-        item["section"] = metadata['section']
+    if "section" in metadata:
+        item["section"] = metadata["section"]
 
-    if 'pages' in metadata:
-        item["pages"] = metadata['pages']
+    if "pages" in metadata:
+        item["pages"] = metadata["pages"]
 
-    if 'session' in metadata:
-        item["session"] = metadata['session']
+    if "session" in metadata:
+        item["session"] = metadata["session"]
 
-    if 'codeNumber' in metadata:
-        item["codeNumber"] = metadata['codeNumber']
+    if "codeNumber" in metadata:
+        item["codeNumber"] = metadata["codeNumber"]
 
-    if 'publicLawNumber' in metadata:
-        item["publicLawNumber"] = metadata['publicLawNumber']
+    if "publicLawNumber" in metadata:
+        item["publicLawNumber"] = metadata["publicLawNumber"]
 
-    if 'url' in metadata:
-        item["url"] = metadata['url']
+    if "url" in metadata:
+        item["url"] = metadata["url"]
 
     return item
 

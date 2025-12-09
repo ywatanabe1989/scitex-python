@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/writer/_compile/_runner.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -49,14 +50,8 @@ def _get_compile_script(project_dir: Path, doc_type: str) -> Path:
         Path to compilation script
     """
     script_map = {
-        "manuscript": project_dir
-        / "scripts"
-        / "shell"
-        / "compile_manuscript.sh",
-        "supplementary": project_dir
-        / "scripts"
-        / "shell"
-        / "compile_supplementary.sh",
+        "manuscript": project_dir / "scripts" / "shell" / "compile_manuscript.sh",
+        "supplementary": project_dir / "scripts" / "shell" / "compile_supplementary.sh",
         "revision": project_dir / "scripts" / "shell" / "compile_revision.sh",
     }
     return script_map.get(doc_type)
@@ -131,7 +126,7 @@ def _execute_with_callbacks(
     """
     # Set environment for unbuffered output
     env = os.environ.copy()
-    env['PYTHONUNBUFFERED'] = '1'
+    env["PYTHONUNBUFFERED"] = "1"
 
     process = subprocess.Popen(
         command,
@@ -178,8 +173,8 @@ def _execute_with_callbacks(
                 if chunk:
                     stdout_buffer += chunk
                     # Process complete lines
-                    while b'\n' in stdout_buffer:
-                        line, stdout_buffer = stdout_buffer.split(b'\n', 1)
+                    while b"\n" in stdout_buffer:
+                        line, stdout_buffer = stdout_buffer.split(b"\n", 1)
                         line_str = line.decode("utf-8", errors="replace")
                         stdout_lines.append(line_str)
                         if log_callback:
@@ -193,8 +188,8 @@ def _execute_with_callbacks(
                 if chunk:
                     stderr_buffer += chunk
                     # Process complete lines
-                    while b'\n' in stderr_buffer:
-                        line, stderr_buffer = stderr_buffer.split(b'\n', 1)
+                    while b"\n" in stderr_buffer:
+                        line, stderr_buffer = stderr_buffer.split(b"\n", 1)
                         line_str = line.decode("utf-8", errors="replace")
                         stderr_lines.append(line_str)
                         if log_callback:
@@ -299,14 +294,14 @@ def run_compile(
         logger.info(message)
 
     # Progress: Starting
-    progress(0, 'Starting compilation...')
-    log('[INFO] Starting LaTeX compilation...')
+    progress(0, "Starting compilation...")
+    log("[INFO] Starting LaTeX compilation...")
 
     # Validate project structure before compilation
     try:
-        progress(5, 'Validating project structure...')
+        progress(5, "Validating project structure...")
         validate_before_compile(project_dir)
-        log('[INFO] Project structure validated')
+        log("[INFO] Project structure validated")
     except Exception as e:
         error_msg = f"[ERROR] Validation failed: {e}"
         log(error_msg)
@@ -332,7 +327,7 @@ def run_compile(
         )
 
     # Build command
-    progress(10, 'Preparing compilation command...')
+    progress(10, "Preparing compilation command...")
     script_path = compile_script.absolute()
     cmd = [str(script_path)]
 
@@ -365,15 +360,15 @@ def run_compile(
         if quiet:
             cmd.append("--quiet")
 
-    log(f'[INFO] Running: {" ".join(cmd)}')
-    log(f'[INFO] Working directory: {project_dir}')
+    log(f"[INFO] Running: {' '.join(cmd)}")
+    log(f"[INFO] Working directory: {project_dir}")
 
     try:
         cwd_original = Path.cwd()
         os.chdir(project_dir)
 
         try:
-            progress(15, 'Executing LaTeX compilation...')
+            progress(15, "Executing LaTeX compilation...")
 
             # Use callbacks version if callbacks provided
             if log_callback:
@@ -393,11 +388,15 @@ def run_compile(
                     stream_output=True,
                 )
 
-            result = type('Result', (), {
-                'returncode': result_dict['exit_code'],
-                'stdout': result_dict['stdout'],
-                'stderr': result_dict['stderr']
-            })()
+            result = type(
+                "Result",
+                (),
+                {
+                    "returncode": result_dict["exit_code"],
+                    "stdout": result_dict["stdout"],
+                    "stderr": result_dict["stderr"],
+                },
+            )()
 
             duration = (datetime.now() - start_time).total_seconds()
         finally:
@@ -405,20 +404,18 @@ def run_compile(
 
         # Find output files
         if result.returncode == 0:
-            progress(90, 'Compilation successful, locating output files...')
-            log('[INFO] Compilation succeeded, checking output files...')
+            progress(90, "Compilation successful, locating output files...")
+            log("[INFO] Compilation succeeded, checking output files...")
             output_pdf, diff_pdf, log_file = _find_output_files(project_dir, doc_type)
             if output_pdf:
-                log(f'[SUCCESS] PDF generated: {output_pdf}')
+                log(f"[SUCCESS] PDF generated: {output_pdf}")
         else:
             output_pdf, diff_pdf, log_file = None, None, None
-            log(f'[ERROR] Compilation failed with exit code {result.returncode}')
+            log(f"[ERROR] Compilation failed with exit code {result.returncode}")
 
         # Parse errors and warnings
-        progress(95, 'Parsing compilation logs...')
-        errors, warnings = parse_output(
-            result.stdout, result.stderr, log_file=log_file
-        )
+        progress(95, "Parsing compilation logs...")
+        errors, warnings = parse_output(result.stdout, result.stderr, log_file=log_file)
 
         compilation_result = CompilationResult(
             success=(result.returncode == 0),
@@ -434,12 +431,12 @@ def run_compile(
         )
 
         if compilation_result.success:
-            progress(100, 'Complete!')
-            log(f'[SUCCESS] Compilation succeeded in {duration:.2f}s')
+            progress(100, "Complete!")
+            log(f"[SUCCESS] Compilation succeeded in {duration:.2f}s")
         else:
-            progress(100, 'Compilation failed')
+            progress(100, "Compilation failed")
             if errors:
-                log(f'[ERROR] Found {len(errors)} errors')
+                log(f"[ERROR] Found {len(errors)} errors")
 
         return compilation_result
 

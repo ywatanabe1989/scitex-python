@@ -87,35 +87,41 @@ def style_boxplot(
     # Use scitex color palette by default
     if colors is None:
         colors = [
-            HEX["blue"], HEX["red"], HEX["green"], HEX["yellow"],
-            HEX["purple"], HEX["orange"], HEX["lightblue"], HEX["pink"],
+            HEX["blue"],
+            HEX["red"],
+            HEX["green"],
+            HEX["yellow"],
+            HEX["purple"],
+            HEX["orange"],
+            HEX["lightblue"],
+            HEX["pink"],
         ]
 
     # Style box elements with line width
-    for element_name in ['boxes', 'whiskers', 'caps']:
+    for element_name in ["boxes", "whiskers", "caps"]:
         if element_name in boxplot_dict:
             for element in boxplot_dict[element_name]:
                 element.set_linewidth(lw_pt)
                 element.set_color(edge_color)
 
     # Style medians with specified color
-    if 'medians' in boxplot_dict:
-        for median in boxplot_dict['medians']:
+    if "medians" in boxplot_dict:
+        for median in boxplot_dict["medians"]:
             median.set_linewidth(lw_pt)
             median.set_color(median_color)
 
     # Style fliers (outliers) with marker size
-    if 'fliers' in boxplot_dict:
-        for flier in boxplot_dict['fliers']:
+    if "fliers" in boxplot_dict:
+        for flier in boxplot_dict["fliers"]:
             flier.set_markersize(flier_size_pt)
             flier.set_markeredgewidth(lw_pt)
             flier.set_markeredgecolor(edge_color)
-            flier.set_markerfacecolor('none')  # Open circles
+            flier.set_markerfacecolor("none")  # Open circles
 
     # Apply fill colors to boxes
-    for i, box in enumerate(boxplot_dict.get('boxes', [])):
+    for i, box in enumerate(boxplot_dict.get("boxes", [])):
         color = colors[i % len(colors)]
-        if hasattr(box, 'set_facecolor'):
+        if hasattr(box, "set_facecolor"):
             box.set_facecolor(color)
         box.set_edgecolor(edge_color)
 
@@ -123,19 +129,24 @@ def style_boxplot(
     if add_legend and labels is not None:
         # Create proxy artists for legend
         import matplotlib.patches as mpatches
+
         if colors is not None:
             legend_elements = [
-                mpatches.Patch(facecolor='none', edgecolor=color, linewidth=lw_pt, label=label)
+                mpatches.Patch(
+                    facecolor="none", edgecolor=color, linewidth=lw_pt, label=label
+                )
                 for color, label in zip(colors, labels)
             ]
         else:
             legend_elements = [
-                mpatches.Patch(facecolor='none', edgecolor='C0', linewidth=lw_pt, label=label)
+                mpatches.Patch(
+                    facecolor="none", edgecolor="C0", linewidth=lw_pt, label=label
+                )
                 for label in labels
             ]
         # Get the axes from one of the box elements
-        if boxplot_dict.get('boxes'):
-            ax = boxplot_dict['boxes'][0].axes
+        if boxplot_dict.get("boxes"):
+            ax = boxplot_dict["boxes"][0].axes
             ax.legend(handles=legend_elements)
 
     return boxplot_dict

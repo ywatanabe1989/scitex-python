@@ -65,12 +65,15 @@ class ZoteroImporter:
 
             try:
                 from pyzotero import zotero
+
                 self._zot = zotero.Zotero(
                     library_id=self.library_id,
                     library_type=self.library_type,
-                    api_key=self.api_key
+                    api_key=self.api_key,
                 )
-                logger.info(f"Connected to Zotero {self.library_type} library: {self.library_id}")
+                logger.info(
+                    f"Connected to Zotero {self.library_type} library: {self.library_id}"
+                )
             except ImportError:
                 raise ImportError(
                     "pyzotero not installed. Install with: pip install pyzotero"
@@ -106,7 +109,9 @@ class ZoteroImporter:
             for coll in collections:
                 if coll["data"]["name"] == collection_name:
                     collection_id = coll["key"]
-                    logger.info(f"Found collection '{collection_name}': {collection_id}")
+                    logger.info(
+                        f"Found collection '{collection_name}': {collection_id}"
+                    )
                     break
 
             if not collection_id:
@@ -184,7 +189,7 @@ class ZoteroImporter:
         # Search by tags
         query_parts = []
         for tag in tags:
-            query_parts.append(f'tag:{tag}')
+            query_parts.append(f"tag:{tag}")
 
         operator = " && " if match_all else " || "
         query = operator.join(query_parts)
@@ -274,7 +279,7 @@ class ZoteroImporter:
                 pdf_entry = {
                     "url": attachment_url,
                     "source": "zotero",
-                    "zotero_key": attachment_key
+                    "zotero_key": attachment_key,
                 }
 
                 if pdf_entry not in paper.metadata.url.pdfs:
@@ -346,15 +351,12 @@ class ZoteroImporter:
             try:
                 # Save to library
                 paper_id = self.library_manager.save_resolved_paper(
-                    paper_data=paper,
-                    project=self.project
+                    paper_data=paper, project=self.project
                 )
 
                 results[paper.metadata.basic.title or f"paper_{i}"] = paper_id
 
-                logger.info(
-                    f"[{i}/{len(paper_list)}] Saved to library: {paper_id}"
-                )
+                logger.info(f"[{i}/{len(paper_list)}] Saved to library: {paper_id}")
 
             except Exception as e:
                 logger.error(

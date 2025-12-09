@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -40,10 +41,10 @@ class SemanticScholarSource(BaseDOISource):
     def __init__(self, email: str = "research@example.com", api_key: str = None):
         super().__init__()  # Initialize base class to access utilities
         self.email = email
-        self.api_key = api_key or os.getenv('SEMANTIC_SCHOLAR_API_KEY')
+        self.api_key = api_key or os.getenv("SEMANTIC_SCHOLAR_API_KEY")
         self._session = None
         self.base_url = "https://api.semanticscholar.org/graph/v1"
-        
+
         # Enhanced rate limiting based on API key availability
         self._rate_limit_delay = 0.5 if self.api_key else 2.0  # Faster with API key
 
@@ -55,12 +56,12 @@ class SemanticScholarSource(BaseDOISource):
 
             self._session = requests.Session()
             headers = {"User-Agent": f"SciTeX/1.0 (mailto:{self.email})"}
-            
+
             # Add API key if available
             if self.api_key:
                 headers["x-api-key"] = self.api_key
                 logger.info("Using Semantic Scholar API key for enhanced rate limits")
-            
+
             self._session.headers.update(headers)
         return self._session
 
@@ -109,48 +110,54 @@ class SemanticScholarSource(BaseDOISource):
                 return doi
 
         return None
-        
-    def _extract_doi_from_paper(self, paper: dict, query_title: str, query_year: Optional[int]) -> Optional[str]:
+
+    def _extract_doi_from_paper(
+        self, paper: dict, query_title: str, query_year: Optional[int]
+    ) -> Optional[str]:
         """Enhanced DOI extraction from paper with multiple validation strategies."""
         paper_title = paper.get("title", "")
         paper_year = paper.get("year")
-        
+
         # Title matching
         if not paper_title or not self._is_title_match(query_title, paper_title):
             return None
-            
+
         # Year validation (if provided) - allow 2 year difference for robustness
         if query_year and paper_year:
             try:
-                paper_year_int = int(paper_year) if isinstance(paper_year, str) else paper_year
-                query_year_int = int(query_year) if isinstance(query_year, str) else query_year
-                
+                paper_year_int = (
+                    int(paper_year) if isinstance(paper_year, str) else paper_year
+                )
+                query_year_int = (
+                    int(query_year) if isinstance(query_year, str) else query_year
+                )
+
                 if abs(paper_year_int - query_year_int) > 2:
                     return None
             except (ValueError, TypeError):
                 pass  # Skip year validation if conversion fails
-        
+
         # Extract DOI from multiple possible fields
         external_ids = paper.get("externalIds", {})
-        
+
         # Primary DOI field
         if external_ids and "DOI" in external_ids:
             doi = external_ids["DOI"]
             if doi:
                 return doi.strip()
-        
+
         # Alternative DOI sources
         for field in ["doi", "DOI"]:
             if field in paper and paper[field]:
                 return paper[field].strip()
-        
+
         # Extract from URL field if present using utility
         paper_url = paper.get("url", "")
         if paper_url:
             doi = self.url_doi_extractor.extract_doi_from_url(paper_url)
             if doi:
                 return doi
-        
+
         return None
 
     def get_abstract(self, doi: str) -> Optional[str]:
@@ -164,9 +171,7 @@ class SemanticScholarSource(BaseDOISource):
                 data = response.json()
                 abstract = data.get("abstract")
                 if abstract:
-                    logger.debug(
-                        f"Found abstract from Semantic Scholar for DOI: {doi}"
-                    )
+                    logger.debug(f"Found abstract from Semantic Scholar for DOI: {doi}")
                     return abstract
             elif response.status_code == 404:
                 logger.debug(f"Paper not found in Semantic Scholar: {doi}")
@@ -213,7 +218,7 @@ class SemanticScholarSource(BaseDOISource):
             if doi:
                 paper_title = paper.get("title", "")
                 paper_year = paper.get("year")
-                
+
                 extracted_authors = []
                 for author in paper.get("authors", []):
                     if author.get("name"):
@@ -225,14 +230,10 @@ class SemanticScholarSource(BaseDOISource):
                     "journal": paper.get("venue"),
                     "journal_source": "semantic_scholar",
                     "year": (
-                        paper_year
-                        if isinstance(paper_year, int)
-                        else paper.get("year")
+                        paper_year if isinstance(paper_year, int) else paper.get("year")
                     ),
                     "abstract": paper.get("abstract"),
-                    "authors": (
-                        extracted_authors if extracted_authors else None
-                    ),
+                    "authors": (extracted_authors if extracted_authors else None),
                 }
 
         return None
@@ -249,32 +250,32 @@ class SemanticScholarSource(BaseDOISource):
         """Resolve DOI from CorpusID using Semantic Scholar API."""
         if not corpus_id or not corpus_id.isdigit():
             return None
-            
+
         try:
             url = f"{self.base_url}/paper/CorpusId:{corpus_id}"
             params = {"fields": "externalIds,title"}
-            
+
             response = self.session.get(url, params=params, timeout=15)
-            
+
             if response.status_code == 429:
                 raise requests.HTTPError("Rate limited", response=response)
             elif response.status_code == 404:
                 logger.debug(f"CorpusID {corpus_id} not found in Semantic Scholar")
                 return None
-            
+
             response.raise_for_status()
-            
+
             data = response.json()
-            external_ids = data.get('externalIds', {})
-            doi = external_ids.get('DOI')
-            
+            external_ids = data.get("externalIds", {})
+            doi = external_ids.get("DOI")
+
             if doi:
                 logger.info(f"Resolved CorpusID {corpus_id} → DOI: {doi}")
                 return doi
             else:
                 logger.debug(f"CorpusID {corpus_id} found but no DOI available")
                 return None
-                
+
         except requests.HTTPError as e:
             if e.response and e.response.status_code == 429:
                 raise  # Re-raise for retry logic
@@ -283,5 +284,6 @@ class SemanticScholarSource(BaseDOISource):
         except Exception as e:
             logger.debug(f"CorpusID resolution error for {corpus_id}: {e}")
             return None
+
 
 # EOF

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: 2025-12-08
+# Timestamp: 2025-12-09
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/browser/debugging/_test_monitor.py
 
 """
@@ -31,6 +31,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
+from scitex.config import get_paths
+
 if TYPE_CHECKING:
     from playwright.sync_api import Page
 
@@ -55,13 +57,13 @@ class TestMonitor:
         Initialize test monitor.
 
         Args:
-            output_dir: Directory for screenshots (default: ~/.scitex/test_monitor)
+            output_dir: Directory for screenshots (default: $SCITEX_DIR/test_monitor)
             interval: Seconds between screenshots (default: 2.0)
             quality: JPEG quality 1-100 (default: 70)
             verbose: Print capture messages
             test_name: Optional test name for session identification
         """
-        self.output_dir = Path(output_dir or Path.home() / ".scitex" / "test_monitor")
+        self.output_dir = get_paths().resolve("test_monitor", output_dir)
         self.interval = interval
         self.quality = quality
         self.verbose = verbose
@@ -90,7 +92,9 @@ class TestMonitor:
         # Generate session ID
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         name = test_name or self.test_name or "test"
-        safe_name = name.replace("::", "_").replace("[", "_").replace("]", "").replace("/", "_")
+        safe_name = (
+            name.replace("::", "_").replace("[", "_").replace("]", "").replace("/", "_")
+        )
         self.session_id = f"{timestamp}_{safe_name}"
 
         # Create session directory
@@ -151,11 +155,14 @@ class TestMonitor:
         """
         try:
             from scitex.capture import snap
+
             return snap(message=message, output_dir=str(self.output_dir))
         except ImportError:
             return None
 
-    def create_gif(self, duration: float = 0.5, output_path: str = None) -> Optional[str]:
+    def create_gif(
+        self, duration: float = 0.5, output_path: str = None
+    ) -> Optional[str]:
         """
         Create GIF from captured screenshots.
 
@@ -260,6 +267,7 @@ def monitor_test(
         interval: Seconds between screenshots
         auto_gif: Create GIF on completion
     """
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             monitor = TestMonitor(
@@ -274,6 +282,7 @@ def monitor_test(
                 monitor.stop()
                 if auto_gif:
                     monitor.create_gif()
+
         return wrapper
 
     if test_func is not None:

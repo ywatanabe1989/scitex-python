@@ -123,7 +123,9 @@ class PubMedSearchEngine(PubMedEngine, BaseSearchEngine):
             # Step 3: Apply post-filters (negative keywords, citations, etc.)
             filtered_results = self._apply_post_filters(results, filters)
 
-            logger.info(f"{self.name}: {len(filtered_results)} papers after post-filtering")
+            logger.info(
+                f"{self.name}: {len(filtered_results)} papers after post-filtering"
+            )
 
             return filtered_results
 
@@ -131,11 +133,7 @@ class PubMedSearchEngine(PubMedEngine, BaseSearchEngine):
             logger.error(f"{self.name}: Search failed: {e}")
             return []
 
-    def _build_pubmed_query(
-        self,
-        query: str,
-        filters: Dict[str, Any]
-    ) -> str:
+    def _build_pubmed_query(self, query: str, filters: Dict[str, Any]) -> str:
         """Build PubMed E-utilities query string.
 
         Args:
@@ -159,10 +157,10 @@ class PubMedSearchEngine(PubMedEngine, BaseSearchEngine):
         query = query.strip()
 
         # If query contains explicit NOT, split and handle
-        if ' NOT ' in query.upper():
+        if " NOT " in query.upper():
             # User provided explicit Boolean query
             parts.append(f"({query})[Title/Abstract]")
-        elif ' AND ' in query.upper() or ' OR ' in query.upper():
+        elif " AND " in query.upper() or " OR " in query.upper():
             # User provided Boolean operators
             parts.append(f"({query})[Title/Abstract]")
         else:
@@ -170,8 +168,8 @@ class PubMedSearchEngine(PubMedEngine, BaseSearchEngine):
             parts.append(f"({query})[Title/Abstract]")
 
         # Year range filter
-        year_start = filters.get('year_start')
-        year_end = filters.get('year_end')
+        year_start = filters.get("year_start")
+        year_end = filters.get("year_end")
 
         if year_start and year_end:
             parts.append(f"{year_start}:{year_end}[pdat]")

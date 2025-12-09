@@ -559,6 +559,7 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -698,10 +699,7 @@ if __name__ == "__main__":
 # 
 #     def __del__(self):
 #         """Destructor with context manager usage warning."""
-#         if (
-#             hasattr(self, "_context_manager_used")
-#             and not self._context_manager_used
-#         ):
+#         if hasattr(self, "_context_manager_used") and not self._context_manager_used:
 #             warnings.warn(
 #                 "SQLite3 instance was not used with context manager. "
 #                 "Use 'with SQLite3(...) as db:' to ensure proper resource cleanup.",

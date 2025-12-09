@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/capture/utils.py"
-)
+
+__FILE__ = "./src/scitex/capture/utils.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -149,9 +148,7 @@ def capture(
             if path is None:
                 timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
                 url_slug = (
-                    url.replace("://", "_")
-                    .replace("/", "_")
-                    .replace(":", "_")[:30]
+                    url.replace("://", "_").replace("/", "_").replace(":", "_")[:30]
                 )
                 path = f"~/.scitex/capture/{timestamp_str}-url-{url_slug}.jpg"
 
@@ -178,17 +175,13 @@ def capture(
                         "--disable-blink-features=AutomationControlled",
                         "--window-size=1920,1080",
                     ]
-                    browser = p.chromium.launch(
-                        headless=True, args=stealth_args
-                    )
+                    browser = p.chromium.launch(headless=True, args=stealth_args)
                     context = browser.new_context(
                         viewport={"width": url_width, "height": url_height}
                     )
                     page = context.new_page()
                     # Use domcontentloaded for faster capture, with longer timeout
-                    page.goto(
-                        url, wait_until="domcontentloaded", timeout=30000
-                    )
+                    page.goto(url, wait_until="domcontentloaded", timeout=30000)
                     # Wait additional time for rendering
                     page.wait_for_timeout(url_wait * 1000)
                     page.screenshot(
@@ -220,10 +213,7 @@ def capture(
             pass  # Try PowerShell fallback
 
         # For WSL: Fallback to Windows-side browser
-        if (
-            sys.platform == "linux"
-            and "microsoft" in os.uname().release.lower()
-        ):
+        if sys.platform == "linux" and "microsoft" in os.uname().release.lower():
             try:
                 import base64
                 import json
@@ -233,9 +223,7 @@ def capture(
                 if path is None:
                     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
                     url_slug = (
-                        url.replace("://", "_")
-                        .replace("/", "_")
-                        .replace(":", "_")[:30]
+                        url.replace("://", "_").replace("/", "_").replace(":", "_")[:30]
                     )
                     path = f"~/.scitex/capture/{timestamp_str}-url-{url_slug}.jpg"
 
@@ -307,18 +295,14 @@ def capture(
 
                                             from PIL import Image
 
-                                            img = Image.open(
-                                                io.BytesIO(img_data)
-                                            )
+                                            img = Image.open(io.BytesIO(img_data))
                                             if img.mode == "RGBA":
                                                 rgb_img = Image.new(
                                                     "RGB",
                                                     img.size,
                                                     (255, 255, 255),
                                                 )
-                                                rgb_img.paste(
-                                                    img, mask=img.split()[3]
-                                                )
+                                                rgb_img.paste(img, mask=img.split()[3])
                                                 img = rgb_img
                                             img.save(
                                                 path,
@@ -373,9 +357,7 @@ def capture(
             result_path = _manager.capture_window(handle, path)
 
             if result_path and verbose:
-                print(
-                    f"📸 {matching_window.get('ProcessName')}: {result_path}"
-                )
+                print(f"📸 {matching_window.get('ProcessName')}: {result_path}")
 
             return result_path
         else:
@@ -394,9 +376,7 @@ def capture(
 
     # Take screenshot to temp location
     use_jpeg = (
-        True
-        if path is None or path.lower().endswith((".jpg", ".jpeg"))
-        else False
+        True if path is None or path.lower().endswith((".jpg", ".jpeg")) else False
     )
     worker = ScreenshotWorker(
         output_dir=temp_dir,
@@ -446,13 +426,9 @@ def capture(
         # Remove special chars, keep only alphanumeric and spaces
         import re
 
-        normalized = re.sub(
-            r"[^\w\s-]", "", message.split("\n")[0]
-        )  # First line only
+        normalized = re.sub(r"[^\w\s-]", "", message.split("\n")[0])  # First line only
         normalized = re.sub(r"[-\s]+", "-", normalized).strip("-")
-        normalized_msg = (
-            f"-{normalized[:50]}" if normalized else ""
-        )  # Limit length
+        normalized_msg = f"-{normalized[:50]}" if normalized else ""  # Limit length
 
     # Add category suffix
     category_suffix = f"-{category}"
@@ -460,9 +436,7 @@ def capture(
     # Handle path with category and message
     if path is None:
         # Include monitor/scope info in filename
-        path = (
-            f"~/.scitex/capture/<timestamp><scope><message><category_suffix>.jpg"
-        )
+        path = f"~/.scitex/capture/<timestamp><scope><message><category_suffix>.jpg"
 
     # Expand user home
     path = os.path.expanduser(path)
@@ -488,9 +462,7 @@ def capture(
     # Add message with category as metadata
     if message or category != "stdout":
         metadata = (
-            f"[{category.upper()}] {message}"
-            if message
-            else f"[{category.upper()}]"
+            f"[{category.upper()}] {message}" if message else f"[{category.upper()}]"
         )
         _add_message_metadata(str(final_path), metadata)
 
@@ -641,12 +613,8 @@ def _detect_category(filepath: str) -> str:
         # Red dominant = likely error
         # Yellow/orange dominant = likely warning
         pixels = img.convert("RGB").getdata()
-        red_count = sum(
-            1 for r, g, b in pixels if r > 200 and g < 100 and b < 100
-        )
-        yellow_count = sum(
-            1 for r, g, b in pixels if r > 200 and g > 150 and b < 100
-        )
+        red_count = sum(1 for r, g, b in pixels if r > 200 and g < 100 and b < 100)
+        yellow_count = sum(1 for r, g, b in pixels if r > 200 and g > 150 and b < 100)
 
         total_pixels = len(pixels)
         red_ratio = red_count / total_pixels if total_pixels > 0 else 0
@@ -663,10 +631,7 @@ def _detect_category(filepath: str) -> str:
 
     # Check filename for common error keywords
     filename_lower = str(filepath).lower()
-    if any(
-        word in filename_lower
-        for word in ["error", "fail", "exception", "crash"]
-    ):
+    if any(word in filename_lower for word in ["error", "fail", "exception", "crash"]):
         return "stderr"
     elif any(word in filename_lower for word in ["warn", "alert", "caution"]):
         return "stderr"  # Warnings also go to stderr

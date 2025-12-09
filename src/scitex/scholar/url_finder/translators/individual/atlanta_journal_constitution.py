@@ -19,14 +19,16 @@ TRANSLATOR_INFO = {
     "in_repository": True,
     "translator_type": 4,
     "browser_support": "gcsibv",
-    "last_updated": "2021-07-14 19:41:44"
+    "last_updated": "2021-07-14 19:41:44",
 }
 
 
 def detect_web(doc: Any, url: str) -> Optional[str]:
     """Detect if the page is a single item or multiple items"""
-    if doc.select_one('.c-articleContent') and doc.select_one('script[type="application/ld+json"]'):
-        if 'blog/' in url:
+    if doc.select_one(".c-articleContent") and doc.select_one(
+        'script[type="application/ld+json"]'
+    ):
+        if "blog/" in url:
             return "blogPost"
         else:
             return "newspaperArticle"
@@ -38,10 +40,10 @@ def detect_web(doc: Any, url: str) -> Optional[str]:
 def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str, str]]:
     """Get search results from a multiple item page"""
     items = {}
-    rows = doc.select('a.gs-title')
+    rows = doc.select("a.gs-title")
 
     for row in rows:
-        href = row.get('href')
+        href = row.get("href")
         title = row.get_text(strip=True)
         if href and title:
             if check_only:
@@ -53,13 +55,13 @@ def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str,
 
 def extract_place(lead_text: str) -> str:
     """Extract place from lead text"""
-    place_re = re.compile(r'^\s*([A-Z\-\']{3,})\b')
+    place_re = re.compile(r"^\s*([A-Z\-\']{3,})\b")
     match = place_re.search(lead_text)
     if match:
         place = match.group(1)
         # Capitalize properly
         return place.title()
-    return ''
+    return ""
 
 
 def scrape(doc: Any, url: str) -> Dict[str, Any]:
@@ -73,7 +75,7 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
     except (json.JSONDecodeError, AttributeError):
         return {}
 
-    item_type = "blogPost" if 'blog/' in url else "newspaperArticle"
+    item_type = "blogPost" if "blog/" in url else "newspaperArticle"
 
     item = {
         "itemType": item_type,
@@ -86,13 +88,13 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
         "attachments": [{"title": "Snapshot", "mimeType": "text/html"}],
         "tags": [],
         "notes": [],
-        "seeAlso": []
+        "seeAlso": [],
     }
 
     # Get abstract
     description_tag = doc.select_one('meta[name="description"]')
     item["abstractNote"] = json_data.get("description") or (
-        description_tag.get('content') if description_tag else ""
+        description_tag.get("content") if description_tag else ""
     )
 
     # Extract place from abstract
@@ -100,7 +102,7 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
         item["place"] = extract_place(item["abstractNote"])
 
     # Get section label
-    section_label = doc.select_one('.section-label')
+    section_label = doc.select_one(".section-label")
     section_text = section_label.get_text(strip=True) if section_label else ""
 
     if item_type == "blogPost":
@@ -113,19 +115,21 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
     # Get language
     language_tag = doc.select_one('meta[name="language"]')
     if language_tag:
-        item["language"] = language_tag.get('content', "English")
+        item["language"] = language_tag.get("content", "English")
 
     # Get authors
     if json_data.get("author") and json_data["author"].get("name"):
-        author_names = json_data["author"]["name"].split(', ')
+        author_names = json_data["author"]["name"].split(", ")
         for author_name in author_names:
             parts = author_name.split()
             if len(parts) > 1:
-                item["creators"].append({
-                    "firstName": " ".join(parts[:-1]),
-                    "lastName": parts[-1],
-                    "creatorType": "author"
-                })
+                item["creators"].append(
+                    {
+                        "firstName": " ".join(parts[:-1]),
+                        "lastName": parts[-1],
+                        "creatorType": "author",
+                    }
+                )
 
     return item
 

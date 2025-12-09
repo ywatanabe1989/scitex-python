@@ -12,7 +12,9 @@ class UniversityOfChicagoPressBooksTranslator(BaseTranslator):
     """University of Chicago Press Books."""
 
     LABEL = "University of Chicago Press Books"
-    URL_TARGET_PATTERN = r"^https?://(www\.)?press\.uchicago\.edu/(ucp/books/|press/search.html)"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.)?press\.uchicago\.edu/(ucp/books/|press/search.html)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

@@ -4,6 +4,7 @@
 # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/.claude-worktree/scitex_repo/src/scitex/plt/ax/_style/_hide_spines.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -47,7 +48,9 @@ def hide_spines(
         >>> hide_spines(ax)
         >>> plt.show()
     """
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
 
     tgts = []
     if top:
@@ -78,5 +81,6 @@ def hide_spines(
                 axis.set_yticklabels([])
 
     return axis
+
 
 # EOF

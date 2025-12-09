@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/writer/Writer.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -81,12 +82,11 @@ class Writer:
         self.git_root = initialize_git(self.project_dir, self.git_strategy)
 
         # Create document trees
-        self.manuscript, self.supplementary, self.revision, self.scripts = \
+        self.manuscript, self.supplementary, self.revision, self.scripts = (
             create_document_trees(self.project_dir, self.git_root)
-
-        logger.success(
-            f"Writer: Initialization complete for {self.project_name}"
         )
+
+        logger.success(f"Writer: Initialization complete for {self.project_name}")
 
     def compile_manuscript(self, timeout: int = 300) -> CompilationResult:
         """

@@ -31,7 +31,7 @@ def transpose(arr_like, src_dims, tgt_dims):
     AssertionError
         If source and target dimensions don't contain the same elements.
     """
-    assert set(src_dims) == set(
-        tgt_dims
-    ), "Source and target dimensions must contain the same elements"
+    assert set(src_dims) == set(tgt_dims), (
+        "Source and target dimensions must contain the same elements"
+    )
     return arr_like.transpose(*[np.where(src_dims == dim)[0][0] for dim in tgt_dims])

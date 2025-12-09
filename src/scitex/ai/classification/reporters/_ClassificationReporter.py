@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -22,8 +23,7 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 # Import base class and single reporter for internal use
-from ._BaseClassificationReporter import (BaseClassificationReporter,
-                                          ReporterConfig)
+from ._BaseClassificationReporter import BaseClassificationReporter, ReporterConfig
 from ._SingleClassificationReporter import SingleTaskClassificationReporter
 from .reporter_utils.storage import MetricStorage
 
@@ -159,12 +159,12 @@ class ClassificationReporter(BaseClassificationReporter):
 
         # Print initialization info if verbose
         if self.verbose and self.tasks:
-            print(f"\n{'='*70}")
+            print(f"\n{'=' * 70}")
             print(f"Classification Reporter Initialized")
-            print(f"{'='*70}")
+            print(f"{'=' * 70}")
             print(f"Output Directory: {self.output_dir.absolute()}")
             print(f"Tasks: {self.tasks}")
-            print(f"{'='*70}\n")
+            print(f"{'=' * 70}\n")
 
     def _create_single_reporter(self, task: str) -> None:
         """Create a single task reporter."""
@@ -320,14 +320,10 @@ class ClassificationReporter(BaseClassificationReporter):
                 self.tasks = [task]
                 self._single_reporter = None
                 self._create_single_reporter(task)
-                return self.reporters[task].save(
-                    data, relative_path, fold=fold
-                )
+                return self.reporters[task].save(data, relative_path, fold=fold)
             else:
                 # Use single reporter's save
-                return self._single_reporter.save(
-                    data, relative_path, fold=fold
-                )
+                return self._single_reporter.save(data, relative_path, fold=fold)
 
         # Multi-task mode
         if task is not None:
@@ -392,9 +388,7 @@ class ClassificationReporter(BaseClassificationReporter):
         """
         # Single-task mode - delegate to single reporter
         if not self.tasks and self._single_reporter:
-            return self._single_reporter.save_summary(
-                filename, verbose=verbose
-            )
+            return self._single_reporter.save_summary(filename, verbose=verbose)
 
         # Multi-task mode
         summary = self.get_summary()
@@ -402,9 +396,7 @@ class ClassificationReporter(BaseClassificationReporter):
         if len(self.reporters) == 1:
             # Only one task but in multi-task mode
             task_name = list(self.reporters.keys())[0]
-            return self.reporters[task_name].save_summary(
-                filename, verbose=verbose
-            )
+            return self.reporters[task_name].save_summary(filename, verbose=verbose)
         else:
             # Multiple tasks - save in root directory
             return self.storage.save(summary, filename)
@@ -482,9 +474,7 @@ class ClassificationReporter(BaseClassificationReporter):
 
         # Multi-task mode
         if task is not None and task in self.reporters:
-            return self.reporters[task].save_feature_importance_summary(
-                all_importances
-            )
+            return self.reporters[task].save_feature_importance_summary(all_importances)
 
     def __repr__(self) -> str:
         if not self.tasks:
@@ -530,26 +520,26 @@ def parse_args():
         "--output-dir",
         type=str,
         default="./.dev/classification_reporter_test_out",
-        help="Output directory for test results (default: %(default)s)"
+        help="Output directory for test results (default: %(default)s)",
     )
     parser.add_argument(
         "--n-samples",
         type=int,
         default=100,
-        help="Number of samples to generate (default: %(default)s)"
+        help="Number of samples to generate (default: %(default)s)",
     )
     parser.add_argument(
         "--n-folds",
         type=int,
         default=3,
-        help="Number of CV folds (default: %(default)s)"
+        help="Number of CV folds (default: %(default)s)",
     )
     parser.add_argument(
         "--task-type",
         type=str,
         choices=["binary", "multiclass", "multitask"],
         default="binary",
-        help="Type of classification task (default: %(default)s)"
+        help="Type of classification task (default: %(default)s)",
     )
 
     return parser.parse_args()
@@ -583,7 +573,7 @@ def main(args):
             n_classes=2,
             n_informative=15,
             n_redundant=5,
-            random_state=42
+            random_state=42,
         )
         labels = ["Negative", "Positive"]
 
@@ -602,11 +592,7 @@ def main(args):
             y_proba = model.predict_proba(X_test)
 
             reporter.calculate_metrics(
-                y_true=y_test,
-                y_pred=y_pred,
-                y_proba=y_proba,
-                labels=labels,
-                fold=fold
+                y_true=y_test, y_pred=y_pred, y_proba=y_proba, labels=labels, fold=fold
             )
 
         # Generate reports
@@ -623,7 +609,7 @@ def main(args):
             n_informative=15,
             n_redundant=5,
             n_clusters_per_class=1,
-            random_state=42
+            random_state=42,
         )
         labels = ["Class_A", "Class_B", "Class_C", "Class_D"]
 
@@ -641,15 +627,13 @@ def main(args):
             y_proba = model.predict_proba(X_test)
 
             reporter.calculate_metrics(
-                y_true=y_test,
-                y_pred=y_pred,
-                y_proba=y_proba,
-                labels=labels,
-                fold=fold
+                y_true=y_test, y_pred=y_pred, y_proba=y_proba, labels=labels, fold=fold
             )
 
         reporter.save_summary()
-        print(f"✓ Multiclass classification results saved to: {output_dir / 'multiclass'}")
+        print(
+            f"✓ Multiclass classification results saved to: {output_dir / 'multiclass'}"
+        )
 
     elif args.task_type == "multitask":
         # Multi-task classification
@@ -668,7 +652,7 @@ def main(args):
         reporter = ClassificationReporter(
             output_dir / "multitask",
             tasks=["binary_task", "multiclass_task"],
-            track=True
+            track=True,
         )
 
         cv = StratifiedKFold(n_splits=args.n_folds, shuffle=True, random_state=42)
@@ -689,7 +673,7 @@ def main(args):
                 y_proba=y_proba,
                 labels=["Neg", "Pos"],
                 fold=fold,
-                task="binary_task"
+                task="binary_task",
             )
 
         # Task 2
@@ -708,11 +692,13 @@ def main(args):
                 y_proba=y_proba,
                 labels=["A", "B", "C"],
                 fold=fold,
-                task="multiclass_task"
+                task="multiclass_task",
             )
 
         reporter.save_summary()
-        print(f"✓ Multi-task classification results saved to: {output_dir / 'multitask'}")
+        print(
+            f"✓ Multi-task classification results saved to: {output_dir / 'multitask'}"
+        )
 
     print()
     print("=" * 60)
@@ -722,13 +708,12 @@ def main(args):
 
     # List all created files
     import subprocess
+
     result = subprocess.run(
-        ["find", str(output_dir), "-type", "f"],
-        capture_output=True,
-        text=True
+        ["find", str(output_dir), "-type", "f"], capture_output=True, text=True
     )
     if result.stdout:
-        files = sorted(result.stdout.strip().split('\n'))
+        files = sorted(result.stdout.strip().split("\n"))
         print(f"\nTotal files created: {len(files)}")
         print("\nFile tree:")
         subprocess.run(["tree", str(output_dir)])

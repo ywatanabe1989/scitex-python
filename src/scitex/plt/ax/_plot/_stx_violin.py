@@ -105,7 +105,9 @@ def sns_plot_violin(ax, data=None, x=None, y=None, hue=None, half=False, **kwarg
     ax : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axes object with the plot
     """
-    assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        ax, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
 
     if not half:
         # Standard violin plot

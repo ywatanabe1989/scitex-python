@@ -52,17 +52,17 @@ from ._compile_async import (
 __version__ = "0.1.0"
 
 __all__ = [
-    'Writer',
-    'CompilationResult',
-    'WriterConfig',
-    'LaTeXIssue',
-    'compile_manuscript',
-    'compile_supplementary',
-    'compile_revision',
-    'compile_manuscript_async',
-    'compile_supplementary_async',
-    'compile_revision_async',
-    'compile_all_async',
+    "Writer",
+    "CompilationResult",
+    "WriterConfig",
+    "LaTeXIssue",
+    "compile_manuscript",
+    "compile_supplementary",
+    "compile_revision",
+    "compile_manuscript_async",
+    "compile_supplementary_async",
+    "compile_revision_async",
+    "compile_all_async",
 ]
 
 # EOF

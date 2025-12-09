@@ -12,7 +12,9 @@ class PubMedCentralTranslator(BaseTranslator):
     """PubMed Central."""
 
     LABEL = "PubMed Central"
-    URL_TARGET_PATTERN = r"^https://(www\.)?(pmc\.ncbi\.nlm\.nih\.gov/|ncbi\.nlm\.nih\.gov/pmc)"
+    URL_TARGET_PATTERN = (
+        r"^https://(www\.)?(pmc\.ncbi\.nlm\.nih\.gov/|ncbi\.nlm\.nih\.gov/pmc)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:
@@ -37,7 +39,7 @@ class PubMedCentralTranslator(BaseTranslator):
         current_url = page.url
 
         # Check if already viewing a PDF
-        if re.search(r'/pdf/.+\.pdf', current_url):
+        if re.search(r"/pdf/.+\.pdf", current_url):
             return [current_url]
 
         # Try multiple selectors (from JavaScript translator lines 70-74)
@@ -53,12 +55,12 @@ class PubMedCentralTranslator(BaseTranslator):
             try:
                 elements = await page.query_selector_all(selector)
                 for element in elements:
-                    href = await element.get_attribute('href')
-                    if href and '.pdf' in href.lower():
+                    href = await element.get_attribute("href")
+                    if href and ".pdf" in href.lower():
                         # Make absolute URL if relative
-                        if href.startswith('/'):
+                        if href.startswith("/"):
                             href = f"https://www.ncbi.nlm.nih.gov{href}"
-                        elif not href.startswith('http'):
+                        elif not href.startswith("http"):
                             href = f"https://www.ncbi.nlm.nih.gov/pmc/{href}"
 
                         if href not in pdf_urls:

@@ -4,6 +4,7 @@
 # File: ./scitex_repo/src/scitex/ai/_gen_ai/_Llama.py
 
 """Imports"""
+
 import os
 import sys
 from typing import List, Optional
@@ -54,7 +55,6 @@ class Llama(BaseGenAI):
         chat_history=None,
         **kwargs,
     ):
-
         # Configure environment variables
         os.environ["MASTER_ADDR"] = os.getenv("MASTER_ADDR", "localhost")
         os.environ["MASTER_PORT"] = os.getenv("MASTER_PORT", "12355")
@@ -135,7 +135,9 @@ def main():
 
 if __name__ == "__main__":
     # Main
-    CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
+    CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
+        sys, plt, verbose=False
+    )
     main()
     scitex.session.close(CONFIG, verbose=False, notify=False)
 

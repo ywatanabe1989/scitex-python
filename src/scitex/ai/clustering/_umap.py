@@ -8,7 +8,6 @@
 This script does XYZ.
 """
 
-
 """
 Imports
 """
@@ -159,7 +158,7 @@ def _plot(
             axes[0].get_figure()
             # axes
             if isinstance(
-                axes, (np.ndarray, scitex.plt._subplots._AxesWrapper.AxesWrapper)
+                axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
             )
             # axis
             else axes.get_figure()

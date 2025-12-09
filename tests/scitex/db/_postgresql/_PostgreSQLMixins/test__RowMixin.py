@@ -498,7 +498,9 @@ if __name__ == "__main__":
 # # Timestamp: "2025-02-27 22:15:30 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_dev/src/scitex/db/_PostgreSQLMixins/_RowMixin.py
 # 
-# THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_RowMixin.py"
+# THIS_FILE = (
+#     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_RowMixin.py"
+# )
 # 
 # from typing import List, Optional
 # import pandas as pd

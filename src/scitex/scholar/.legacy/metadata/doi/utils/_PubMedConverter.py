@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -74,8 +75,7 @@ class PubMedConverter:
 
         # Compile patterns
         self.compiled_patterns = [
-            re.compile(pattern, re.IGNORECASE)
-            for pattern in self.PMID_PATTERNS
+            re.compile(pattern, re.IGNORECASE) for pattern in self.PMID_PATTERNS
         ]
 
     @retry(
@@ -333,9 +333,7 @@ class PubMedConverter:
 
         return results
 
-    async def bibtex_entries2dois_async(
-        self, entries: List[Dict]
-    ) -> Dict[str, str]:
+    async def bibtex_entries2dois_async(self, entries: List[Dict]) -> Dict[str, str]:
         """
         Async version of batch PMID to DOI conversion.
 
@@ -386,9 +384,7 @@ class PubMedConverter:
         return converted_dois
 
 
-def pmid2doi(
-    pmid: Union[str, int], pubmed_email=None, api_key=None, config=None
-):
+def pmid2doi(pmid: Union[str, int], pubmed_email=None, api_key=None, config=None):
     config = config or ScholarConfig()
     pubmed_email = config.resolve("pubmed_email", pubmed_email)
     pubmed_api_key = config.resolve("pubmed_api_key", api_key)

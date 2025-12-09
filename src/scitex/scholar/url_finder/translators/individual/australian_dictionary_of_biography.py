@@ -18,13 +18,13 @@ TRANSLATOR_INFO = {
     "in_repository": True,
     "translator_type": 4,
     "browser_support": "gcsibv",
-    "last_updated": "2021-07-14 04:18:08"
+    "last_updated": "2021-07-14 04:18:08",
 }
 
 
 def detect_web(doc: Any, url: str) -> Optional[str]:
     """Detect if the page is a single item or multiple items"""
-    if '/biography/' in url:
+    if "/biography/" in url:
         return "bookSection"
     elif get_search_results(doc, check_only=True):
         return "multiple"
@@ -34,10 +34,10 @@ def detect_web(doc: Any, url: str) -> Optional[str]:
 def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str, str]]:
     """Get search results from a multiple item page"""
     items = {}
-    rows = doc.select('a.name')
+    rows = doc.select("a.name")
 
     for row in rows:
-        href = row.get('href')
+        href = row.get("href")
         title = row.get_text(strip=True)
         if href and title:
             if check_only:
@@ -63,48 +63,52 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
         "attachments": [{"title": "Snapshot", "mimeType": "text/html"}],
         "tags": [],
         "notes": [],
-        "seeAlso": []
+        "seeAlso": [],
     }
 
-    main = doc.select_one('#pageColumnMain')
+    main = doc.select_one("#pageColumnMain")
     if not main:
         return item
 
     # Get title
-    title_elem = main.select_one('h2')
+    title_elem = main.select_one("h2")
     if title_elem:
         item["title"] = title_elem.get_text(strip=True)
 
     # Get abstract
-    abstract_elem = main.select_one('.biographyContent p')
+    abstract_elem = main.select_one(".biographyContent p")
     if abstract_elem:
         item["abstractNote"] = abstract_elem.get_text(strip=True)
 
     # Get volume and date from notice
-    notice_elem = main.select_one('.textNotice')
+    notice_elem = main.select_one(".textNotice")
     if notice_elem:
         notice_text = notice_elem.get_text(strip=True)
         # Try to match: "volume X, (MUP), YYYY"
-        match = re.search(r'([^,]+), \(MUP\), ([^,]+)', notice_text)
+        match = re.search(r"([^,]+), \(MUP\), ([^,]+)", notice_text)
         if match:
             volume_text = match.group(1)
-            item["volume"] = re.sub(r'^\s*volume\s*', '', volume_text, flags=re.IGNORECASE)
+            item["volume"] = re.sub(
+                r"^\s*volume\s*", "", volume_text, flags=re.IGNORECASE
+            )
             item["date"] = match.group(2).strip()
         else:
             # Just use the text as date
             item["date"] = notice_text.strip()
 
     # Get authors
-    author_links = main.select('.authorName a')
+    author_links = main.select(".authorName a")
     for author_link in author_links:
         author_name = author_link.get_text(strip=True)
         parts = author_name.split()
         if len(parts) > 1:
-            item["creators"].append({
-                "firstName": " ".join(parts[:-1]),
-                "lastName": parts[-1],
-                "creatorType": "author"
-            })
+            item["creators"].append(
+                {
+                    "firstName": " ".join(parts[:-1]),
+                    "lastName": parts[-1],
+                    "creatorType": "author",
+                }
+            )
 
     return item
 

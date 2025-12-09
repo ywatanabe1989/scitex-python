@@ -61,9 +61,11 @@ class CollaborativeAgent:
 
     def on_input(self, key: str):
         """Decorator to register handler for input."""
+
         def decorator(func: Callable):
             self.handlers[key] = func
             return func
+
         return decorator
 
     def on_url_change(self, func: Callable):

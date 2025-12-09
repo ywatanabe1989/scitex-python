@@ -164,7 +164,9 @@ if __name__ == "__main__":
 # # Timestamp: "2025-02-27 22:16:38 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_dev/src/scitex/db/_BaseMixins/_BaseBackupMixin.py
 # 
-# THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_BaseMixins/_BaseBackupMixin.py"
+# THIS_FILE = (
+#     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_BaseMixins/_BaseBackupMixin.py"
+# )
 # 
 # from typing import Optional
 # 

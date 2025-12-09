@@ -15,8 +15,9 @@ from scipy import stats
 from ....plt.utils import assert_valid_axis
 
 
-def stx_joyplot(ax, arrays, overlap=0.5, fill_alpha=0.7, line_alpha=1.0,
-                 colors=None, **kwargs):
+def stx_joyplot(
+    ax, arrays, overlap=0.5, fill_alpha=0.7, line_alpha=1.0, colors=None, **kwargs
+):
     """
     Create a joyplot (ridgeline plot) on the provided axes.
 
@@ -42,7 +43,13 @@ def stx_joyplot(ax, arrays, overlap=0.5, fill_alpha=0.7, line_alpha=1.0,
     matplotlib.axes.Axes
         The axes with the joyplot
     """
-    assert_valid_axis(ax, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        ax, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
+
+    # Convert dict to list of arrays (values only)
+    if isinstance(arrays, dict):
+        arrays = list(arrays.values())
 
     # Add sample size per distribution to label if provided (show range if variable)
     if kwargs.get("label"):
@@ -57,8 +64,14 @@ def stx_joyplot(ax, arrays, overlap=0.5, fill_alpha=0.7, line_alpha=1.0,
     # Default colors from scitex palette
     if colors is None:
         colors = [
-            HEX["blue"], HEX["red"], HEX["green"], HEX["yellow"],
-            HEX["purple"], HEX["orange"], HEX["lightblue"], HEX["pink"],
+            HEX["blue"],
+            HEX["red"],
+            HEX["green"],
+            HEX["yellow"],
+            HEX["purple"],
+            HEX["orange"],
+            HEX["lightblue"],
+            HEX["pink"],
         ]
 
     n_ridges = len(arrays)
@@ -92,14 +105,23 @@ def stx_joyplot(ax, arrays, overlap=0.5, fill_alpha=0.7, line_alpha=1.0,
         baseline = i * (1.0 - overlap)
 
         # Scale density to fit nicely
-        scaled_density = kdes[i] / max_density * ridge_height if max_density > 0 else kdes[i]
+        scaled_density = (
+            kdes[i] / max_density * ridge_height if max_density > 0 else kdes[i]
+        )
 
         # Fill
-        ax.fill_between(x, baseline, baseline + scaled_density,
-                       facecolor=color, edgecolor='none', alpha=fill_alpha)
+        ax.fill_between(
+            x,
+            baseline,
+            baseline + scaled_density,
+            facecolor=color,
+            edgecolor="none",
+            alpha=fill_alpha,
+        )
         # Line on top
-        ax.plot(x, baseline + scaled_density, color=color, alpha=line_alpha,
-               linewidth=1.0)
+        ax.plot(
+            x, baseline + scaled_density, color=color, alpha=line_alpha, linewidth=1.0
+        )
 
     # Set y limits
     ax.set_ylim(-0.1, n_ridges * (1.0 - overlap) + ridge_height)

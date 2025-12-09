@@ -12,19 +12,34 @@ This module ensures consistent column naming between:
 - GUI editors (reading CSV data back)
 
 Column naming convention:
-    ax_{row}{col}_{trace_id}_{data_type}
+    {domain-name-value}_{domain-name-value}_...
+
+    - Underscore (_) separates different domains
+    - Hyphen (-) within domain name and between name-value
+
+Format:
+    ax-row-{row}-col-{col}_trace-id-{trace_id}_variable-{variable}
 
 Where:
-    - row, col: axes position in grid (e.g., "00" for single axes)
-    - trace_id: unique identifier for the trace (from label, id kwarg, or index)
-    - data_type: type of data (e.g., "plot_x", "plot_y", "hist_bins", etc.)
+    - ax-row-{row}-col-{col}: axes position in grid
+    - trace-id-{id}: unique identifier for the trace, which can be:
+        * User-provided id kwarg (e.g., "sine", "my-data")
+        * Generated from label (e.g., "sin-x" from "sin(x)")
+        * Auto-generated index (e.g., "0", "1")
+    - variable-{var}: type of data variable (e.g., "x", "y", "bins", "heights")
+
+Examples:
+    ax-row-0-col-0_trace-id-sine_variable-x       (row 0, col 0, id "sine", x)
+    ax-row-0-col-0_trace-id-sine_variable-y       (row 0, col 0, id "sine", y)
+    ax-row-0-col-1_trace-id-0_variable-x          (row 0, col 1, auto id 0, x)
+    ax-row-1-col-0_trace-id-my-data_variable-bins (row 1, col 0, "my-data", bins)
 """
 
 __all__ = [
-    'get_csv_column_name',
-    'get_csv_column_prefix',
-    'parse_csv_column_name',
-    'sanitize_trace_id',
+    "get_csv_column_name",
+    "get_csv_column_prefix",
+    "parse_csv_column_name",
+    "sanitize_trace_id",
 ]
 
 
@@ -32,6 +47,7 @@ def sanitize_trace_id(trace_id: str) -> str:
     """Sanitize trace ID for use in CSV column names.
 
     Removes or replaces characters that could cause issues in column names.
+    Uses hyphen (-) for word separation within values.
 
     Parameters
     ----------
@@ -42,35 +58,47 @@ def sanitize_trace_id(trace_id: str) -> str:
     -------
     str
         Sanitized trace ID safe for CSV column names
+
+    Examples
+    --------
+    >>> sanitize_trace_id("sin(x)")
+    'sin-x'
+    >>> sanitize_trace_id("My Data")
+    'my-data'
     """
     if not trace_id:
         return "unnamed"
 
-    # Replace problematic characters
-    sanitized = str(trace_id)
-    # Keep alphanumeric, underscore, hyphen; replace others with underscore
+    # Replace problematic characters with hyphen (word separator within values)
+    sanitized = str(trace_id).lower()
     result = []
     for char in sanitized:
-        if char.isalnum() or char in ('_', '-'):
+        if char.isalnum():
             result.append(char)
-        elif char in (' ', '(', ')', '[', ']', '{', '}', '/', '\\', '.'):
-            result.append('_')
+        elif char in (" ", "_", "(", ")", "[", "]", "{", "}", "/", "\\", ".", "-"):
+            result.append("-")
         # Skip other characters
 
-    sanitized = ''.join(result)
+    sanitized = "".join(result)
 
-    # Remove consecutive underscores
-    while '__' in sanitized:
-        sanitized = sanitized.replace('__', '_')
+    # Remove consecutive hyphens
+    while "--" in sanitized:
+        sanitized = sanitized.replace("--", "-")
 
-    # Remove leading/trailing underscores
-    sanitized = sanitized.strip('_')
+    # Remove leading/trailing hyphens
+    sanitized = sanitized.strip("-")
 
     return sanitized if sanitized else "unnamed"
 
 
-def get_csv_column_prefix(ax_row: int = 0, ax_col: int = 0, trace_id: str = None, trace_index: int = None) -> str:
+def get_csv_column_prefix(
+    ax_row: int = 0, ax_col: int = 0, trace_id: str = None, trace_index: int = None
+) -> str:
     """Get CSV column prefix for a trace.
+
+    Format: ax-row-{row}-col-{col}_trace-id-{id}_variable-
+    - Underscore (_) separates domains
+    - Hyphen (-) within domain names and between name-value
 
     Parameters
     ----------
@@ -86,22 +114,27 @@ def get_csv_column_prefix(ax_row: int = 0, ax_col: int = 0, trace_id: str = None
     Returns
     -------
     str
-        Column prefix like "ax_00_sin_x_" or "ax_01_plot_0_"
-    """
-    ax_pos = f"{ax_row}{ax_col}"
+        Column prefix like "ax-row-0-col-0_trace-id-sine_variable-"
 
+    Examples
+    --------
+    >>> get_csv_column_prefix(trace_id="sine")
+    'ax-row-0-col-0_trace-id-sine_variable-'
+    >>> get_csv_column_prefix(ax_row=1, ax_col=2, trace_index=0)
+    'ax-row-1-col-2_trace-id-0_variable-'
+    """
     if trace_id:
         safe_id = sanitize_trace_id(trace_id)
     elif trace_index is not None:
-        safe_id = f"plot_{trace_index}"
+        safe_id = str(trace_index)
     else:
-        safe_id = "plot_0"
+        safe_id = "0"
 
-    return f"ax_{ax_pos}_{safe_id}_"
+    return f"ax-row-{ax_row}-col-{ax_col}_trace-id-{safe_id}_variable-"
 
 
 def get_csv_column_name(
-    data_type: str,
+    variable: str,
     ax_row: int = 0,
     ax_col: int = 0,
     trace_id: str = None,
@@ -109,10 +142,14 @@ def get_csv_column_name(
 ) -> str:
     """Get full CSV column name for a data field.
 
+    Format: ax-row-{row}-col-{col}_trace-id-{id}_variable-{var}
+    - Underscore (_) separates domains
+    - Hyphen (-) within domain names and between name-value
+
     Parameters
     ----------
-    data_type : str
-        Type of data (e.g., "plot_x", "plot_y", "hist_bins", "bar_heights")
+    variable : str
+        Variable name (e.g., "x", "y", "bins", "heights")
     ax_row : int
         Row position of axes in grid (default: 0)
     ax_col : int
@@ -125,26 +162,32 @@ def get_csv_column_name(
     Returns
     -------
     str
-        Full column name like "ax_00_sin_x_plot_x" or "ax_01_plot_0_plot_y"
+        Full column name like "ax-row-0-col-0_trace-id-sine_variable-x"
 
     Examples
     --------
-    >>> get_csv_column_name("plot_x", trace_id="sin(x)")
-    'ax_00_sin_x_plot_x'
-    >>> get_csv_column_name("plot_y", ax_row=1, ax_col=2, trace_index=0)
-    'ax_12_plot_0_plot_y'
+    >>> get_csv_column_name("x", trace_id="sin(x)")
+    'ax-row-0-col-0_trace-id-sin-x_variable-x'
+    >>> get_csv_column_name("y", ax_row=1, ax_col=2, trace_index=0)
+    'ax-row-1-col-2_trace-id-0_variable-y'
     """
     prefix = get_csv_column_prefix(ax_row, ax_col, trace_id, trace_index)
-    return f"{prefix}{data_type}"
+    # Variable names are simple (x, y, bins, etc.)
+    safe_variable = variable.lower()
+    return f"{prefix}{safe_variable}"
 
 
 def parse_csv_column_name(column_name: str) -> dict:
     """Parse CSV column name to extract components.
 
+    Format: ax-row-{row}-col-{col}_trace-id-{id}_variable-{var}
+    - Underscore (_) separates domains
+    - Hyphen (-) within domain names and between name-value
+
     Parameters
     ----------
     column_name : str
-        Full column name (e.g., "ax_00_sin_x_plot_x")
+        Full column name (e.g., "ax-row-0-col-0_trace-id-sine_variable-x")
 
     Returns
     -------
@@ -153,46 +196,51 @@ def parse_csv_column_name(column_name: str) -> dict:
         - ax_row: int
         - ax_col: int
         - trace_id: str
-        - data_type: str
+        - variable: str
         - valid: bool (True if parsing succeeded)
 
     Examples
     --------
-    >>> parse_csv_column_name("ax_00_sin_x_plot_x")
-    {'ax_row': 0, 'ax_col': 0, 'trace_id': 'sin_x', 'data_type': 'plot_x', 'valid': True}
+    >>> parse_csv_column_name("ax-row-0-col-0_trace-id-sine_variable-x")
+    {'ax_row': 0, 'ax_col': 0, 'trace_id': 'sine', 'variable': 'x', 'valid': True}
+    >>> parse_csv_column_name("ax-row-1-col-2_trace-id-my-data_variable-bins")
+    {'ax_row': 1, 'ax_col': 2, 'trace_id': 'my-data', 'variable': 'bins', 'valid': True}
     """
     result = {
-        'ax_row': 0,
-        'ax_col': 0,
-        'trace_id': '',
-        'data_type': '',
-        'valid': False,
+        "ax_row": 0,
+        "ax_col": 0,
+        "trace_id": "",
+        "variable": "",
+        "valid": False,
     }
 
-    if not column_name or not column_name.startswith('ax_'):
-        return result
-
-    parts = column_name.split('_')
-    if len(parts) < 4:
+    if not column_name or not column_name.startswith("ax-row-"):
         return result
 
     try:
-        # Parse ax position (e.g., "00" from "ax_00_...")
-        ax_pos = parts[1]
-        if len(ax_pos) >= 2:
-            result['ax_row'] = int(ax_pos[0])
-            result['ax_col'] = int(ax_pos[1])
+        # Split by underscore to get domain groups
+        parts = column_name.split("_")
+        # Expected: ["ax-row-0-col-0", "trace-id-sine", "variable-x"]
 
-        # Last two parts are typically data_type (e.g., "plot_x", "hist_bins")
-        # Everything in between is the trace_id
-        data_type_parts = parts[-2:]  # e.g., ["plot", "x"]
-        result['data_type'] = '_'.join(data_type_parts)
+        for part in parts:
+            if part.startswith("ax-row-"):
+                # Parse ax-row-{row}-col-{col}
+                # Remove "ax-row-" prefix and split by "-col-"
+                rest = part[7:]  # Remove "ax-row-"
+                if "-col-" in rest:
+                    row_str, col_str = rest.split("-col-")
+                    result["ax_row"] = int(row_str)
+                    result["ax_col"] = int(col_str)
+            elif part.startswith("trace-id-"):
+                # Extract trace id (everything after "trace-id-")
+                result["trace_id"] = part[9:]
+            elif part.startswith("variable-"):
+                # Extract variable (everything after "variable-")
+                result["variable"] = part[9:]
 
-        # Trace ID is everything between ax_pos and data_type
-        trace_parts = parts[2:-2]
-        result['trace_id'] = '_'.join(trace_parts) if trace_parts else 'plot_0'
-
-        result['valid'] = True
+        # Validate we got all required fields
+        if result["variable"]:
+            result["valid"] = True
 
     except (ValueError, IndexError):
         pass
@@ -200,7 +248,9 @@ def parse_csv_column_name(column_name: str) -> dict:
     return result
 
 
-def get_trace_columns_from_df(df, trace_id: str = None, trace_index: int = None, ax_row: int = 0, ax_col: int = 0) -> dict:
+def get_trace_columns_from_df(
+    df, trace_id: str = None, trace_index: int = None, ax_row: int = 0, ax_col: int = 0
+) -> dict:
     """Find CSV columns for a specific trace in a DataFrame.
 
     Parameters
@@ -219,17 +269,18 @@ def get_trace_columns_from_df(df, trace_id: str = None, trace_index: int = None,
     Returns
     -------
     dict
-        Dictionary mapping data types to column names, e.g.:
-        {'plot_x': 'ax_00_sin_x_plot_x', 'plot_y': 'ax_00_sin_x_plot_y'}
+        Dictionary mapping variable names to column names, e.g.:
+        {'x': 'ax-row-0-col-0_trace-id-sine_variable-x',
+         'y': 'ax-row-0-col-0_trace-id-sine_variable-y'}
     """
     result = {}
     prefix = get_csv_column_prefix(ax_row, ax_col, trace_id, trace_index)
 
     for col in df.columns:
         if col.startswith(prefix):
-            # Extract data_type from column name
-            data_type = col[len(prefix):]
-            result[data_type] = col
+            # Extract variable from column name
+            variable = col[len(prefix):]
+            result[variable] = col
 
     return result
 

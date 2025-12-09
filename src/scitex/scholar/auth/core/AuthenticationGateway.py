@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/auth/core/AuthenticationGateway.py"
-)
+
+__FILE__ = "./src/scitex/scholar/auth/core/AuthenticationGateway.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -158,9 +157,7 @@ class AuthenticationGateway:
                     f"{self.name}: Direct navigation failed, trying OpenURL: {e}"
                 )
                 try:
-                    publisher_url = await resolver.resolve_doi(
-                        url_context.doi, page
-                    )
+                    publisher_url = await resolver.resolve_doi(url_context.doi, page)
                     url_context.url = publisher_url
                 except Exception as openurl_error:
                     logger.warning(
@@ -204,22 +201,16 @@ class AuthenticationGateway:
         try:
             publisher_url = await resolver.resolve_doi(url_context.doi, page)
             url_context.url = publisher_url
-            logger.debug(
-                f"{self.name}: Resolved {url_context.doi} → {publisher_url}"
-            )
+            logger.debug(f"{self.name}: Resolved {url_context.doi} → {publisher_url}")
         except Exception as e:
-            logger.warning(
-                f"{self.name}: Failed to resolve DOI {url_context.doi}: {e}"
-            )
+            logger.warning(f"{self.name}: Failed to resolve DOI {url_context.doi}: {e}")
             url_context.url = openurl  # Fallback to OpenURL
         finally:
             await page.close()
 
         return url_context
 
-    def _check_auth_requirements_from_doi(
-        self, url_context: URLContext
-    ) -> URLContext:
+    def _check_auth_requirements_from_doi(self, url_context: URLContext) -> URLContext:
         """
         Determine if DOI requires authentication based on DOI prefix patterns.
 
@@ -334,9 +325,7 @@ class AuthenticationGateway:
         gateway_url = url_context.auth_gateway_url
 
         if not gateway_url:
-            logger.warning(
-                f"{self.name}: No gateway URL available for authentication"
-            )
+            logger.warning(f"{self.name}: No gateway URL available for authentication")
             return None
 
         # Check cache - avoid redundant visits
@@ -417,9 +406,7 @@ async def main_async():
     # Initialize components
     config = ScholarConfig()
     auth_manager = ScholarAuthManager(config=config)
-    browser_manager = ScholarBrowserManager(
-        auth_manager=auth_manager, config=config
-    )
+    browser_manager = ScholarBrowserManager(auth_manager=auth_manager, config=config)
 
     # Initialize gateway
     gateway = AuthenticationGateway(
@@ -436,20 +423,19 @@ async def main_async():
     ]
 
     # Get authenticated browser context
-    browser, context = (
-        await browser_manager.get_authenticated_browser_and_context_async()
-    )
+    (
+        browser,
+        context,
+    ) = await browser_manager.get_authenticated_browser_and_context_async()
 
     try:
         for doi in test_dois:
-            logger.info(f"\n{'='*60}")
+            logger.info(f"\n{'=' * 60}")
             logger.info(f"Testing DOI: {doi}")
-            logger.info(f"{'='*60}")
+            logger.info(f"{'=' * 60}")
 
             # Prepare authentication (this is the key operation)
-            url_context = await gateway.prepare_context_async(
-                doi=doi, context=context
-            )
+            url_context = await gateway.prepare_context_async(doi=doi, context=context)
 
             # Show results
             logger.info(f"Publisher URL: {url_context.url}")

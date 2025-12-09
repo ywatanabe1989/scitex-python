@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -37,34 +38,38 @@ def deprecated(reason=None, forward_to=None):
                 )
                 # Dynamic import and call forwarding
                 module_path, function_name = forward_to.rsplit(".", 1)
-                
+
                 # Handle relative imports
                 if module_path.startswith(".."):
                     # Get the module where the function was defined (not the calling module)
                     func_module = func.__module__
-                    
+
                     if func_module:
                         # Convert relative import to absolute based on the function's module
-                        package_parts = func_module.split('.')
+                        package_parts = func_module.split(".")
                         # Count the number of dots to determine how many levels to go up
                         level_count = 0
                         for char in module_path:
-                            if char == '.':
+                            if char == ".":
                                 level_count += 1
                             else:
                                 break
-                        
+
                         # Remove the relative part and create absolute path
                         if level_count > 0:
                             base_package_parts = package_parts[:-level_count]
                             if base_package_parts:
-                                base_package = '.'.join(base_package_parts)
-                                relative_part = module_path.lstrip('.')
-                                module_path = base_package + '.' + relative_part if relative_part else base_package
+                                base_package = ".".join(base_package_parts)
+                                relative_part = module_path.lstrip(".")
+                                module_path = (
+                                    base_package + "." + relative_part
+                                    if relative_part
+                                    else base_package
+                                )
                             else:
                                 # Can't go up that many levels, fallback to absolute
-                                module_path = module_path.lstrip('.')
-                
+                                module_path = module_path.lstrip(".")
+
                 try:
                     target_module = importlib.import_module(module_path)
                     target_function = getattr(target_module, function_name)
@@ -78,45 +83,49 @@ def deprecated(reason=None, forward_to=None):
                         stacklevel=2,
                     )
                     return func(*args, **kwargs)
-            
+
             # Auto-generate docstring for forwarding wrapper with target function's docstring
             original_name = func.__name__
             new_location = forward_to.replace("..", "scitex.").lstrip(".")
-            
+
             # Try to get the target function's docstring
             target_docstring = ""
             try:
                 # Get the same target we'll forward to
                 target_module_path, target_function_name = forward_to.rsplit(".", 1)
-                
+
                 # Handle relative imports for docstring retrieval
                 if target_module_path.startswith(".."):
                     func_module = func.__module__
                     if func_module:
-                        package_parts = func_module.split('.')
+                        package_parts = func_module.split(".")
                         level_count = 0
                         for char in target_module_path:
-                            if char == '.':
+                            if char == ".":
                                 level_count += 1
                             else:
                                 break
-                        
+
                         if level_count > 0:
                             base_package_parts = package_parts[:-level_count]
                             if base_package_parts:
-                                base_package = '.'.join(base_package_parts)
-                                relative_part = target_module_path.lstrip('.')
-                                target_module_path = base_package + '.' + relative_part if relative_part else base_package
+                                base_package = ".".join(base_package_parts)
+                                relative_part = target_module_path.lstrip(".")
+                                target_module_path = (
+                                    base_package + "." + relative_part
+                                    if relative_part
+                                    else base_package
+                                )
                             else:
-                                target_module_path = target_module_path.lstrip('.')
-                
+                                target_module_path = target_module_path.lstrip(".")
+
                 target_module = importlib.import_module(target_module_path)
                 target_function = getattr(target_module, target_function_name)
                 if target_function.__doc__:
                     target_docstring = target_function.__doc__.strip()
             except (ImportError, AttributeError):
                 pass  # Fall back to basic docstring if target can't be imported
-            
+
             # Create comprehensive docstring combining deprecation notice with target docs
             if target_docstring:
                 forwarding_docstring = f"""**DEPRECATED: Use {new_location} instead**
@@ -187,5 +196,6 @@ DeprecationWarning
             return new_func
 
     return decorator
+
 
 # EOF

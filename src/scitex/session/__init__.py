@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -41,16 +42,14 @@ from ._decorator import session, run
 # Export public API
 __all__ = [
     # Session lifecycle (main functions)
-    'start',
-    'close',
-    'running2finished',
-
+    "start",
+    "close",
+    "running2finished",
     # Session decorator (new simplified API)
-    'session',
-    'run',
-
+    "session",
+    "run",
     # Advanced session management
-    'SessionManager',
+    "SessionManager",
 ]
 
 # EOF

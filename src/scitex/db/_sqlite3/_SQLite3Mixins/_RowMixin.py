@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -41,14 +42,14 @@ class _RowMixin:
         if not include_blobs:
             if columns is None:
                 schema = self.get_table_schema(table_name)
-                columns = schema[
-                    ~schema["type"].str.contains("BLOB", case=False)
-                ]["name"].tolist()
+                columns = schema[~schema["type"].str.contains("BLOB", case=False)][
+                    "name"
+                ].tolist()
             else:
                 schema = self.get_table_schema(table_name)
-                blob_columns = schema[
-                    schema["type"].str.contains("BLOB", case=False)
-                ]["name"].tolist()
+                blob_columns = schema[schema["type"].str.contains("BLOB", case=False)][
+                    "name"
+                ].tolist()
                 columns = [col for col in columns if col not in blob_columns]
 
         if columns is None:
@@ -86,9 +87,7 @@ class _RowMixin:
             query = " ".join(query_parts)
             self.cursor.execute(query)
 
-            column_names = [
-                description[0] for description in self.cursor.description
-            ]
+            column_names = [description[0] for description in self.cursor.description]
             data = self.cursor.fetchall()
 
             if return_as == "list":
@@ -111,5 +110,6 @@ class _RowMixin:
 
         self.cursor.execute(query)
         return self.cursor.fetchone()[0]
+
 
 # EOF

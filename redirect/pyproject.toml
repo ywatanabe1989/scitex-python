@@ -1,0 +1,50 @@
+# ============================================
+# scitex-python: Alias package for scitex
+# https://scitex.ai
+# ============================================
+# This is a redirect/alias package. Install either:
+#   pip install scitex
+#   pip install scitex-python
+# Both will give you the same library (import scitex)
+# ============================================
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scitex-python"
+version = "2.5.0"
+description = "Alias for scitex - A comprehensive Python library for scientific computing and data analysis"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Yusuke Watanabe", email = "ywatanabe@scitex.ai" }
+]
+keywords = [
+    "scientific-computing",
+    "data-analysis",
+    "machine-learning",
+    "scitex",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+
+# This package just depends on the main scitex package
+dependencies = [
+    "scitex>=2.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ywatanabe1989/scitex-code"
+Documentation = "https://scitex.readthedocs.io"
+Repository = "https://github.com/ywatanabe1989/scitex-code"
+
+[tool.hatch.build.targets.wheel]
+# Empty package - just a dependency redirect
+packages = []

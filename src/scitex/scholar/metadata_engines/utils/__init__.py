@@ -5,11 +5,13 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 from ._PubMedConverter import PubMedConverter, pmid2doi
+
 # Import TextNormalizer from central location
 from scitex.scholar.utils.text import TextNormalizer
 from ._URLDOIExtractor import URLDOIExtractor

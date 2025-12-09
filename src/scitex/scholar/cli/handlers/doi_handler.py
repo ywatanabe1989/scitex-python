@@ -29,9 +29,7 @@ async def handle_doi_operations(args, scholar):
     # Download PDFs if requested
     if args.download:
         results = await scholar.download_pdfs_from_dois_async(dois)
-        logger.info(
-            f"Downloaded: {results['downloaded']}, Failed: {results['failed']}"
-        )
+        logger.info(f"Downloaded: {results['downloaded']}, Failed: {results['failed']}")
 
     # Enrich if requested (create Papers from DOIs first)
     if args.enrich:

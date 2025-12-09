@@ -12,7 +12,9 @@ class MidasJournalsTranslator(BaseTranslator):
     """MIDAS Journals."""
 
     LABEL = "MIDAS Journals"
-    URL_TARGET_PATTERN = r"^https?://(www\.)?(insight-journal|midasjournal|vtkjournal)\.org/"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.)?(insight-journal|midasjournal|vtkjournal)\.org/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

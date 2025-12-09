@@ -4,9 +4,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/dataclasses/results/_SectionReadResponse.py"
-)
+
+__FILE__ = "./src/scitex/writer/dataclasses/results/_SectionReadResponse.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -65,7 +64,14 @@ class SectionReadResponse:
             return f"Failed to read {self.section_id}: {self.error}"
 
     @classmethod
-    def create_success(cls, content: str, section_name: str, section_id: str, doc_type: str, file_path: Optional[Path] = None) -> SectionReadResponse:
+    def create_success(
+        cls,
+        content: str,
+        section_name: str,
+        section_id: str,
+        doc_type: str,
+        file_path: Optional[Path] = None,
+    ) -> SectionReadResponse:
         """Create a successful response."""
         return cls(
             success=True,
@@ -80,8 +86,8 @@ class SectionReadResponse:
     @classmethod
     def create_failure(cls, section_id: str, error_message: str) -> SectionReadResponse:
         """Create a failed response."""
-        parts = section_id.split('/')
-        doc_type = parts[0] if len(parts) > 1 else 'manuscript'
+        parts = section_id.split("/")
+        doc_type = parts[0] if len(parts) > 1 else "manuscript"
         section_name = parts[1] if len(parts) > 1 else section_id
 
         return cls(
@@ -96,11 +102,19 @@ class SectionReadResponse:
 
     def validate(self) -> None:
         """Validate response data - raises ValueError if invalid."""
-        if self.success and not self.content and self.section_name not in ['compiled_pdf', 'compiled_tex']:
-            raise ValueError(f"SectionReadResponse marked as success but content is empty for {self.section_id}")
+        if (
+            self.success
+            and not self.content
+            and self.section_name not in ["compiled_pdf", "compiled_tex"]
+        ):
+            raise ValueError(
+                f"SectionReadResponse marked as success but content is empty for {self.section_id}"
+            )
 
         if not self.success and not self.error:
-            raise ValueError(f"SectionReadResponse marked as failed but no error message for {self.section_id}")
+            raise ValueError(
+                f"SectionReadResponse marked as failed but no error message for {self.section_id}"
+            )
 
         if not self.section_name:
             raise ValueError("section_name cannot be empty")
@@ -108,7 +122,7 @@ class SectionReadResponse:
         if not self.section_id:
             raise ValueError("section_id cannot be empty")
 
-        if self.doc_type not in ['manuscript', 'supplementary', 'revision', 'shared']:
+        if self.doc_type not in ["manuscript", "supplementary", "revision", "shared"]:
             raise ValueError(f"Invalid doc_type: {self.doc_type}")
 
 

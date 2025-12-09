@@ -5,13 +5,16 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 # Time-stamp: "2024-11-25 01:38:47 (ywatanabe)"
 
-THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_SQLite3Mixins/_TableMixin.py"
+THIS_FILE = (
+    "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_SQLite3Mixins/_TableMixin.py"
+)
 
 # Time-stamp: "2024-11-11 19:13:19 (ywatanabe)"
 
@@ -110,7 +113,9 @@ class _TableMixin:
                 return
 
             try:
-                query = f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}"
+                query = (
+                    f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}"
+                )
                 if default_value is not None:
                     query += f" DEFAULT {default_value}"
                 self.execute(query)
@@ -155,23 +160,26 @@ class _TableMixin:
         This method will be removed in a future version.
         """
         import warnings
+
         warnings.warn(
             "TableMixin.drop_columns is deprecated. Use the enhanced drop_columns method "
             "from DropMixin which handles SQLite version compatibility automatically.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
-        
+
         # Delegate to the new implementation if available
         # Check all classes in MRO for the enhanced drop_columns method
         for cls in self.__class__.__mro__:
-            if (hasattr(cls, 'drop_columns') and 
-                hasattr(cls, '_supports_native_drop_column') and 
-                cls.__name__ == '_DropMixin'):
+            if (
+                hasattr(cls, "drop_columns")
+                and hasattr(cls, "_supports_native_drop_column")
+                and cls.__name__ == "_DropMixin"
+            ):
                 # Call DropMixin's drop_columns directly
                 cls.drop_columns(self, table_name, columns, if_exists)
                 return
-            
+
         # Fallback to original implementation for compatibility
         with self.transaction():
             if isinstance(columns, str):
@@ -188,9 +196,7 @@ class _TableMixin:
                 return
 
             # Drop multiple columns in a single ALTER TABLE statement
-            drop_clause = ", ".join(
-                f"DROP COLUMN {col}" for col in columns_to_drop
-            )
+            drop_clause = ", ".join(f"DROP COLUMN {col}" for col in columns_to_drop)
             self.execute(f"ALTER TABLE {table_name} {drop_clause}")
 
     def get_table_names(self) -> List[str]:
@@ -225,5 +231,6 @@ class _TableMixin:
             }
         except sqlite3.Error as err:
             raise ValueError(f"Failed to get table size: {err}")
+
 
 # EOF

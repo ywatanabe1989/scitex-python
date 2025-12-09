@@ -714,7 +714,6 @@ if __name__ == "__main__":
 #         trainable=False,
 #         fp16=False,
 #     ):
-# 
 #         # A static, gen purpose BandPassFilter
 #         if not trainable:
 #             # First, bands definitions for phase and amplitude are declared
@@ -863,7 +862,9 @@ if __name__ == "__main__":
 #     plt.bar(xx, amp_prob[0])
 #     """
 # 
-#     scitex.gen.print_block(f"PAC calculation time: {ts.delta(-1,-2):.3f} sec", c="yellow")
+#     scitex.gen.print_block(
+#         f"PAC calculation time: {ts.delta(-1, -2):.3f} sec", c="yellow"
+#     )
 #     # 0.17 sec
 #     scitex.gen.print_block(
 #         f"x.shape: {xx.shape}"

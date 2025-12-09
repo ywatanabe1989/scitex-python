@@ -209,14 +209,14 @@ if __name__ == "__main__":
 # def _save_npy(obj, spath):
 #     """
 #     Save a numpy array to .npy format.
-#     
+# 
 #     Parameters
 #     ----------
 #     obj : numpy.ndarray
 #         The numpy array to save.
 #     spath : str
 #         Path where the .npy file will be saved.
-#         
+# 
 #     Returns
 #     -------
 #     None
@@ -227,18 +227,18 @@ if __name__ == "__main__":
 # def _save_npz(obj, spath):
 #     """
 #     Save numpy arrays to .npz format.
-#     
+# 
 #     Parameters
 #     ----------
 #     obj : dict or list/tuple of numpy.ndarray
 #         Either a dictionary of arrays or a list/tuple of arrays.
 #     spath : str
 #         Path where the .npz file will be saved.
-#         
+# 
 #     Returns
 #     -------
 #     None
-#     
+# 
 #     Raises
 #     ------
 #     ValueError
@@ -246,9 +246,7 @@ if __name__ == "__main__":
 #     """
 #     if isinstance(obj, dict):
 #         np.savez_compressed(spath, **obj)
-#     elif isinstance(obj, (list, tuple)) and all(
-#         isinstance(x, np.ndarray) for x in obj
-#     ):
+#     elif isinstance(obj, (list, tuple)) and all(isinstance(x, np.ndarray) for x in obj):
 #         obj = {str(ii): obj[ii] for ii in range(len(obj))}
 #         np.savez_compressed(spath, **obj)
 #     else:

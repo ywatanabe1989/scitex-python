@@ -506,9 +506,9 @@ if __name__ == "__main__":
 # def plot_pac_scitex_vs_tensorpac(pac_scitex, pac_tp, freqs_pha, freqs_amp):
 #     """
 #     Plot comparison between SciTeX and Tensorpac phase-amplitude coupling results.
-#     
+# 
 #     This is an alias for plot_PAC_scitex_vs_tensorpac with snake_case naming.
-#     
+# 
 #     Parameters
 #     ----------
 #     pac_scitex : array-like
@@ -519,7 +519,7 @@ if __name__ == "__main__":
 #         Phase frequencies
 #     freqs_amp : array-like
 #         Amplitude frequencies
-#         
+# 
 #     Returns
 #     -------
 #     fig : matplotlib.figure.Figure

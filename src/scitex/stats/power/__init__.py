@@ -14,6 +14,6 @@ from ._power import (
 )
 
 __all__ = [
-    'power_ttest',
-    'sample_size_ttest',
+    "power_ttest",
+    "sample_size_ttest",
 ]

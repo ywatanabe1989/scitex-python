@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 
-@click.group(context_settings={'help_option_names': ['-h', '--help']})
+@click.group(context_settings={"help_option_names": ["-h", "--help"]})
 def writer():
     """
     Manuscript writing and LaTeX compilation
@@ -27,21 +27,16 @@ def writer():
 
 
 @writer.command()
-@click.argument('project_dir', type=click.Path())
+@click.argument("project_dir", type=click.Path())
 @click.option(
-    '--git-strategy', '-g',
-    type=click.Choice(['child', 'parent', 'origin', 'none'], case_sensitive=False),
-    default='child',
-    help='Git initialization strategy (default: child)'
+    "--git-strategy",
+    "-g",
+    type=click.Choice(["child", "parent", "origin", "none"], case_sensitive=False),
+    default="child",
+    help="Git initialization strategy (default: child)",
 )
-@click.option(
-    '--branch', '-b',
-    help='Specific branch of template to clone'
-)
-@click.option(
-    '--tag', '-t',
-    help='Specific tag/release of template to clone'
-)
+@click.option("--branch", "-b", help="Specific branch of template to clone")
+@click.option("--tag", "-t", help="Specific tag/release of template to clone")
 def clone(project_dir, git_strategy, branch, tag):
     """
     Clone a new writer project from template
@@ -74,7 +69,7 @@ def clone(project_dir, git_strategy, branch, tag):
             sys.exit(1)
 
         # Convert git_strategy 'none' to None
-        if git_strategy and git_strategy.lower() == 'none':
+        if git_strategy and git_strategy.lower() == "none":
             git_strategy = None
 
         click.echo(f"Cloning writer project: {project_dir}")
@@ -90,11 +85,16 @@ def clone(project_dir, git_strategy, branch, tag):
         if result:
             project_path = Path(project_dir)
             click.echo()
-            click.secho(f"✓ Successfully cloned project at {project_path.absolute()}", fg='green')
+            click.secho(
+                f"✓ Successfully cloned project at {project_path.absolute()}",
+                fg="green",
+            )
             click.echo()
             click.echo("Project structure:")
             click.echo(f"  {project_dir}/")
-            click.echo(f"    ├── 00_shared/          # Shared resources (figures, bibliography)")
+            click.echo(
+                f"    ├── 00_shared/          # Shared resources (figures, bibliography)"
+            )
             click.echo(f"    ├── 01_manuscript/      # Main manuscript")
             click.echo(f"    ├── 02_supplementary/   # Supplementary materials")
             click.echo(f"    ├── 03_revision/        # Revision documents")
@@ -105,35 +105,36 @@ def clone(project_dir, git_strategy, branch, tag):
             click.echo(f"  # Edit your manuscript in 01_manuscript/contents/")
             click.echo(f"  scitex writer compile manuscript")
         else:
-            click.secho(f"✗ Failed to clone project", fg='red', err=True)
+            click.secho(f"✗ Failed to clone project", fg="red", err=True)
             sys.exit(1)
 
     except Exception as e:
-        click.secho(f"Error: {e}", fg='red', err=True)
+        click.secho(f"Error: {e}", fg="red", err=True)
         sys.exit(1)
 
 
 @writer.command()
 @click.argument(
-    'document',
-    type=click.Choice(['manuscript', 'supplementary', 'revision'], case_sensitive=False),
-    default='manuscript'
+    "document",
+    type=click.Choice(
+        ["manuscript", "supplementary", "revision"], case_sensitive=False
+    ),
+    default="manuscript",
 )
 @click.option(
-    '--dir', '-d',
+    "--dir",
+    "-d",
     type=click.Path(exists=True),
-    help='Project directory (defaults to current directory)'
+    help="Project directory (defaults to current directory)",
 )
 @click.option(
-    '--track-changes',
-    is_flag=True,
-    help='Enable change tracking (revision only)'
+    "--track-changes", is_flag=True, help="Enable change tracking (revision only)"
 )
 @click.option(
-    '--timeout',
+    "--timeout",
     type=int,
     default=300,
-    help='Compilation timeout in seconds (default: 300)'
+    help="Compilation timeout in seconds (default: 300)",
 )
 def compile(document, dir, track_changes, timeout):
     """
@@ -160,21 +161,24 @@ def compile(document, dir, track_changes, timeout):
         click.echo()
 
         # Compile based on document type
-        if document == 'manuscript':
+        if document == "manuscript":
             result = writer.compile_manuscript(timeout=timeout)
-        elif document == 'supplementary':
+        elif document == "supplementary":
             result = writer.compile_supplementary(timeout=timeout)
-        elif document == 'revision':
+        elif document == "revision":
             result = writer.compile_revision(
-                track_changes=track_changes,
-                timeout=timeout
+                track_changes=track_changes, timeout=timeout
             )
 
         if result.success:
-            click.secho(f"✓ Compilation successful!", fg='green')
+            click.secho(f"✓ Compilation successful!", fg="green")
             click.echo(f"PDF: {result.output_pdf}")
         else:
-            click.secho(f"✗ Compilation failed (exit code {result.exit_code})", fg='red', err=True)
+            click.secho(
+                f"✗ Compilation failed (exit code {result.exit_code})",
+                fg="red",
+                err=True,
+            )
             if result.errors:
                 click.echo()
                 click.echo("Errors:")
@@ -183,15 +187,16 @@ def compile(document, dir, track_changes, timeout):
             sys.exit(result.exit_code)
 
     except Exception as e:
-        click.secho(f"Error: {e}", fg='red', err=True)
+        click.secho(f"Error: {e}", fg="red", err=True)
         sys.exit(1)
 
 
 @writer.command()
 @click.option(
-    '--dir', '-d',
+    "--dir",
+    "-d",
     type=click.Path(exists=True),
-    help='Project directory (defaults to current directory)'
+    help="Project directory (defaults to current directory)",
 )
 def info(dir):
     """
@@ -220,23 +225,24 @@ def info(dir):
 
         # Check for compiled PDFs
         click.echo("Compiled PDFs:")
-        for doc_type in ['manuscript', 'supplementary', 'revision']:
+        for doc_type in ["manuscript", "supplementary", "revision"]:
             pdf = writer.get_pdf(doc_type)
             if pdf:
-                click.secho(f"  ✓ {doc_type}: {pdf}", fg='green')
+                click.secho(f"  ✓ {doc_type}: {pdf}", fg="green")
             else:
                 click.echo(f"  - {doc_type}: not compiled")
 
     except Exception as e:
-        click.secho(f"Error: {e}", fg='red', err=True)
+        click.secho(f"Error: {e}", fg="red", err=True)
         sys.exit(1)
 
 
 @writer.command()
 @click.option(
-    '--dir', '-d',
+    "--dir",
+    "-d",
     type=click.Path(exists=True),
-    help='Project directory (defaults to current directory)'
+    help="Project directory (defaults to current directory)",
 )
 def watch(dir):
     """
@@ -263,7 +269,7 @@ def watch(dir):
         click.echo()
         click.echo("Stopped watching")
     except Exception as e:
-        click.secho(f"Error: {e}", fg='red', err=True)
+        click.secho(f"Error: {e}", fg="red", err=True)
         sys.exit(1)
 
 

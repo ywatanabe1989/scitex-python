@@ -173,6 +173,7 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -261,18 +262,14 @@ if __name__ == "__main__":
 #     wb = load_workbook(spath)
 #     ws = wb.active
 # 
-#     fill_red = PatternFill(
-#         start_color="FF6B6B", end_color="FF6B6B", fill_type="solid"
-#     )
+#     fill_red = PatternFill(start_color="FF6B6B", end_color="FF6B6B", fill_type="solid")
 #     fill_orange = PatternFill(
 #         start_color="FFA500", end_color="FFA500", fill_type="solid"
 #     )
 #     fill_yellow = PatternFill(
 #         start_color="FFE66D", end_color="FFE66D", fill_type="solid"
 #     )
-#     fill_gray = PatternFill(
-#         start_color="E8E8E8", end_color="E8E8E8", fill_type="solid"
-#     )
+#     fill_gray = PatternFill(start_color="E8E8E8", end_color="E8E8E8", fill_type="solid")
 #     font_bold = Font(bold=True)
 # 
 #     PVAL_VARIANTS = _generate_pval_variants()
@@ -368,9 +365,7 @@ if __name__ == "__main__":
 #     elif isinstance(obj, np.ndarray):
 #         df = pd.DataFrame(obj)
 #     else:
-#         raise ValueError(
-#             f"Cannot save object of type {type(obj)} as Excel file"
-#         )
+#         raise ValueError(f"Cannot save object of type {type(obj)} as Excel file")
 # 
 #     # Save to Excel
 #     df.to_excel(spath, index=False, **kwargs)
@@ -378,6 +373,7 @@ if __name__ == "__main__":
 #     # Apply styling if enabled and data contains statistical results
 #     if style and _is_statistical_results(df):
 #         _apply_stats_styling(df, spath)
+# 
 # 
 # # EOF
 

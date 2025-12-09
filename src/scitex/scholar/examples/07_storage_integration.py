@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/examples/07_storage_integration.py"
-)
+
+__FILE__ = "./src/scitex/scholar/examples/07_storage_integration.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -46,6 +45,8 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
+
+
 async def demonstrate_paper_storage() -> None:
     """Demonstrate individual Paper storage capabilities."""
     from pathlib import Path
@@ -66,9 +67,7 @@ async def demonstrate_paper_storage() -> None:
     paper.metadata.publication.journal = "Nature AI Research"
     paper.metadata.publication.impact_factor = 42.778
     paper.metadata.citation_count.total = 1234
-    paper.metadata.set_doi(
-        "10.1038/nature.ai.2025.001"
-    )  # Auto-syncs DOI and URL
+    paper.metadata.set_doi("10.1038/nature.ai.2025.001")  # Auto-syncs DOI and URL
     paper.container.projects = ["storage_demo"]
 
     print(f"Created paper with title: {paper.metadata.basic.title}")
@@ -110,9 +109,7 @@ async def demonstrate_papers_collection() -> None:
 
     # Paper 1
     p1 = Paper()
-    p1.metadata.basic.title = (
-        "Deep Learning for Scientific Literature Analysis"
-    )
+    p1.metadata.basic.title = "Deep Learning for Scientific Literature Analysis"
     p1.metadata.basic.authors = ["Alice Researcher", "Bob Scholar"]
     p1.metadata.basic.year = 2024
     p1.metadata.publication.journal = "AI Journal"

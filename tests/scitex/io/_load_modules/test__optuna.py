@@ -537,7 +537,6 @@ if __name__ == "__main__":
 #     _d = _load_yaml(fpath_yaml)
 # 
 #     for k, v in _d.items():
-# 
 #         dist = v["distribution"]
 # 
 #         if dist == "categorical":

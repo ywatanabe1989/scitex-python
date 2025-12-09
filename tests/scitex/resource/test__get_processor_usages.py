@@ -457,7 +457,9 @@ if __name__ == "__main__":
 # if __name__ == "__main__":
 #     import scitex
 # 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
+#         sys, plt, verbose=False
+#     )
 # 
 #     usage = scitex.resource.get_processor_usages()
 #     scitex.io.save(usage, "usage.csv")

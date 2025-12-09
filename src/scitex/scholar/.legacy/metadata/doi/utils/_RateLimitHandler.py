@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -151,9 +152,7 @@ class RateLimitHandler:
         self.rate_limit_history: List[RateLimitInfo] = []
 
         # Adaptive rate limiting tracking
-        self.recent_rates = deque(
-            maxlen=50
-        )  # Track recent success/failure rates
+        self.recent_rates = deque(maxlen=50)  # Track recent success/failure rates
         self.global_adaptive_delay = 0.1  # Global adaptive delay
 
         # Load existing state if available
@@ -198,9 +197,7 @@ class RateLimitHandler:
             self.state_file.parent.mkdir(parents=True, exist_ok=True)
 
             data = {
-                "sources": [
-                    asdict(state) for state in self.source_states.values()
-                ],
+                "sources": [asdict(state) for state in self.source_states.values()],
                 "global_backoff": self.global_backoff,
                 "global_adaptive_delay": self.global_adaptive_delay,
                 "last_updated": datetime.now().isoformat(),
@@ -252,9 +249,7 @@ class RateLimitHandler:
                 )
 
             # Check for rate limit indicators in response text
-            response_text = (
-                response.text.lower() if hasattr(response, "text") else ""
-            )
+            response_text = response.text.lower() if hasattr(response, "text") else ""
             for error_msg in patterns.get("error_messages", []):
                 if error_msg in response_text:
                     wait_time = self._calculate_backoff_time(source)
@@ -274,9 +269,7 @@ class RateLimitHandler:
                 keyword in error_str
                 for keyword in ["timeout", "connection", "read timeout"]
             ):
-                wait_time = self._calculate_backoff_time(
-                    source, base_multiplier=2.0
-                )
+                wait_time = self._calculate_backoff_time(source, base_multiplier=2.0)
                 return RateLimitInfo(
                     source=source,
                     limit_type=RateLimitType.CONNECTION_TIMEOUT,
@@ -297,9 +290,7 @@ class RateLimitHandler:
 
         return None
 
-    def _extract_retry_after(
-        self, response: requests.Response
-    ) -> Optional[int]:
+    def _extract_retry_after(self, response: requests.Response) -> Optional[int]:
         """Extract retry-after header value."""
         retry_after_header = response.headers.get(
             "Retry-After"
@@ -322,9 +313,7 @@ class RateLimitHandler:
         base_delay = state.base_delay * base_multiplier
 
         # Apply exponential backoff based on consecutive failures
-        backoff_multiplier = min(
-            2**state.consecutive_failures, 64
-        )  # Cap at 64x
+        backoff_multiplier = min(2**state.consecutive_failures, 64)  # Cap at 64x
         calculated_delay = base_delay * backoff_multiplier
 
         # Add jitter to prevent thundering herd
@@ -385,9 +374,7 @@ class RateLimitHandler:
         # Reset failure tracking on success
         if state.consecutive_failures > 0:
             state.consecutive_failures = max(0, state.consecutive_failures - 1)
-            state.current_delay = max(
-                state.base_delay, state.current_delay * 0.8
-            )
+            state.current_delay = max(state.base_delay, state.current_delay * 0.8)
 
         # Clear rate limit if expired
         if state.is_rate_limited and time.time() >= state.rate_limit_until:
@@ -397,9 +384,7 @@ class RateLimitHandler:
 
         self._save_state()
 
-    def record_failure(
-        self, source: str, exception: Optional[Exception] = None
-    ):
+    def record_failure(self, source: str, exception: Optional[Exception] = None):
         """Record a failed request for a source."""
         state = self.get_source_state(source)
         state.total_requests += 1
@@ -471,9 +456,7 @@ class RateLimitHandler:
 
         return max(0.0, state.rate_limit_until - time.time())
 
-    async def wait_with_countdown_async(
-        self, wait_time: float, source: str = "API"
-    ):
+    async def wait_with_countdown_async(self, wait_time: float, source: str = "API"):
         """Wait for specified time with countdown display."""
         if wait_time <= 0:
             return
@@ -492,9 +475,9 @@ class RateLimitHandler:
 
                 # Format remaining time
                 if remaining >= 3600:
-                    time_str = f"{remaining/3600:.1f}h"
+                    time_str = f"{remaining / 3600:.1f}h"
                 elif remaining >= 60:
-                    time_str = f"{remaining/60:.1f}m"
+                    time_str = f"{remaining / 60:.1f}m"
                 else:
                     time_str = f"{remaining:.0f}s"
 
@@ -585,9 +568,7 @@ class RateLimitHandler:
             elif state.total_requests > 10 and state.success_rate > 0.8:
                 recent_success_rate = self.calculate_recent_success_rate()
                 if recent_success_rate > 0.8:
-                    state.adaptive_delay = max(
-                        0.05, state.adaptive_delay * 0.9
-                    )
+                    state.adaptive_delay = max(0.05, state.adaptive_delay * 0.9)
                     logger.debug(
                         f"Decreased adaptive delay for {source}: {state.adaptive_delay:.3f}s"
                     )
@@ -597,24 +578,19 @@ class RateLimitHandler:
             # Global adaptive delay logic
             recent_success_rate = self.calculate_recent_success_rate()
             total_rate_limited = sum(
-                state.rate_limited_count
-                for state in self.source_states.values()
+                state.rate_limited_count for state in self.source_states.values()
             )
 
             # Increase global delay if getting rate limited frequently
             if total_rate_limited > 5:
-                self.global_adaptive_delay = min(
-                    2.0, self.global_adaptive_delay * 1.5
-                )
+                self.global_adaptive_delay = min(2.0, self.global_adaptive_delay * 1.5)
                 logger.debug(
                     f"Increased global adaptive delay: {self.global_adaptive_delay:.3f}s"
                 )
 
             # Decrease global delay if success rate is high
             elif recent_success_rate > 0.8 and len(self.recent_rates) > 10:
-                self.global_adaptive_delay = max(
-                    0.05, self.global_adaptive_delay * 0.9
-                )
+                self.global_adaptive_delay = max(0.05, self.global_adaptive_delay * 0.9)
                 logger.debug(
                     f"Decreased global adaptive delay: {self.global_adaptive_delay:.3f}s"
                 )
@@ -665,9 +641,7 @@ if __name__ == "__main__":
                 self.text = text
 
         response_429 = MockResponse(429, {"Retry-After": "60"})
-        rate_limit = handler.detect_rate_limit(
-            "crossref", response=response_429
-        )
+        rate_limit = handler.detect_rate_limit("crossref", response=response_429)
 
         if rate_limit:
             print(

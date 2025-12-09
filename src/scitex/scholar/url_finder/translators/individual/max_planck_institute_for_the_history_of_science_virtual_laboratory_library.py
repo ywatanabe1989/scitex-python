@@ -8,7 +8,9 @@ from playwright.async_api import Page
 from ..core.base import BaseTranslator
 
 
-class MaxPlanckInstituteForTheHistoryOfScienceVirtualLaboratoryLibraryTranslator(BaseTranslator):
+class MaxPlanckInstituteForTheHistoryOfScienceVirtualLaboratoryLibraryTranslator(
+    BaseTranslator
+):
     """Max Planck Institute for the History of Science Virtual Laboratory Library."""
 
     LABEL = "Max Planck Institute for the History of Science Virtual Laboratory Library"

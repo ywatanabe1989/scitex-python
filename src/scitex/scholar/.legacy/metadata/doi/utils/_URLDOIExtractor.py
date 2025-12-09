@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -53,8 +54,7 @@ class URLDOIExtractor:
     def __init__(self):
         """Initialize the URL DOI extractor."""
         self.compiled_patterns = [
-            re.compile(pattern, re.IGNORECASE)
-            for pattern in self.DOI_URL_PATTERNS
+            re.compile(pattern, re.IGNORECASE) for pattern in self.DOI_URL_PATTERNS
         ]
 
     def extract_doi_from_url(self, url: str) -> Optional[str]:
@@ -85,9 +85,7 @@ class URLDOIExtractor:
 
                 # Validate DOI format
                 if self._is_valid_doi(potential_doi):
-                    logger.debug(
-                        f"Extracted DOI '{potential_doi}' from URL: {url}"
-                    )
+                    logger.debug(f"Extracted DOI '{potential_doi}' from URL: {url}")
                     return potential_doi
 
         return None
@@ -158,9 +156,7 @@ class URLDOIExtractor:
                 results[str(i)] = extracted_doi
 
         if results:
-            logger.info(
-                f"URLDOIExtractor: Extracted DOIs from {len(results)} entries"
-            )
+            logger.info(f"URLDOIExtractor: Extracted DOIs from {len(results)} entries")
 
         return results
 

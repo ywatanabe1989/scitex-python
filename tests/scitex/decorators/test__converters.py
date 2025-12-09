@@ -60,6 +60,7 @@ if __name__ == "__main__":
 # def _try_device(tensor, device: str):
 #     """Try to move tensor to specified device with graceful fallback."""
 #     import torch
+# 
 #     if not isinstance(tensor, torch.Tensor):
 #         return tensor
 # 
@@ -78,6 +79,7 @@ if __name__ == "__main__":
 # def is_torch(*args: _Any, **kwargs: _Any) -> bool:
 #     """Check if any input is a PyTorch tensor."""
 #     import torch
+# 
 #     return any(isinstance(arg, torch.Tensor) for arg in args) or any(
 #         isinstance(val, torch.Tensor) for val in kwargs.values()
 #     )
@@ -86,6 +88,7 @@ if __name__ == "__main__":
 # def is_cuda(*args: _Any, **kwargs: _Any) -> bool:
 #     """Check if any input is a CUDA tensor."""
 #     import torch
+# 
 #     return any((isinstance(arg, torch.Tensor) and arg.is_cuda) for arg in args) or any(
 #         (isinstance(val, torch.Tensor) and val.is_cuda) for val in kwargs.values()
 #     )
@@ -116,6 +119,7 @@ if __name__ == "__main__":
 # ) -> _Any:
 #     """Convert various data types to PyTorch tensors."""
 #     import torch
+# 
 #     if device is None:
 #         device = kwargs.get("device", "cuda" if torch.cuda.is_available() else "cpu")
 # 
@@ -150,7 +154,9 @@ if __name__ == "__main__":
 #                 # If conversion fails, process items individually and return as tensor if possible
 #                 converted_items = [_to_torch(item) for item in data if item is not None]
 #                 # Try to stack if all items are tensors
-#                 if converted_items and all(isinstance(item, torch.Tensor) for item in converted_items):
+#                 if converted_items and all(
+#                     isinstance(item, torch.Tensor) for item in converted_items
+#                 ):
 #                     try:
 #                         # Stack tensors along a new dimension
 #                         return torch.stack(converted_items)
@@ -177,7 +183,12 @@ if __name__ == "__main__":
 # 
 #         # Handle xarray
 #         import xarray
-#         if hasattr(data, '__class__') and data.__class__.__module__ == 'xarray.core.dataarray' and data.__class__.__name__ == 'DataArray':
+# 
+#         if (
+#             hasattr(data, "__class__")
+#             and data.__class__.__module__ == "xarray.core.dataarray"
+#             and data.__class__.__name__ == "DataArray"
+#         ):
 #             new_data = torch.tensor(np.array(data)).float()
 #             new_data = _try_device(new_data, device)
 #             if device == "cuda":
@@ -240,7 +251,9 @@ if __name__ == "__main__":
 #                 # If conversion fails, process items individually
 #                 converted_items = [_to_numpy(item) for item in data if item is not None]
 #                 # Try to stack if all items are numpy arrays
-#                 if converted_items and all(isinstance(item, np.ndarray) for item in converted_items):
+#                 if converted_items and all(
+#                     isinstance(item, np.ndarray) for item in converted_items
+#                 ):
 #                     try:
 #                         # Stack arrays along a new dimension
 #                         return np.stack(converted_items)

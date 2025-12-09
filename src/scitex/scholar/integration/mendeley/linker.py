@@ -48,7 +48,7 @@ class MendeleyLinker(BaseLinker):
             credentials=credentials,
             project=project,
             config=config,
-            sync_interval=sync_interval
+            sync_interval=sync_interval,
         )
 
     def _create_importer(self) -> MendeleyImporter:
@@ -58,7 +58,7 @@ class MendeleyLinker(BaseLinker):
             app_secret=self.credentials["app_secret"],
             access_token=self.credentials["access_token"],
             project=self.project,
-            config=self.config
+            config=self.config,
         )
 
     def _create_exporter(self) -> MendeleyExporter:
@@ -68,7 +68,7 @@ class MendeleyLinker(BaseLinker):
             app_secret=self.credentials["app_secret"],
             access_token=self.credentials["access_token"],
             project=self.project,
-            config=self.config
+            config=self.config,
         )
 
     def _create_mapper(self) -> MendeleyMapper:

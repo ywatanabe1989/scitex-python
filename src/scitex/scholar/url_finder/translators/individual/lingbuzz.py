@@ -18,7 +18,7 @@ from typing import List
 from playwright.async_api import Page, Error as PlaywrightError
 
 # Explicit public API - only export the translator class
-__all__ = ['LingBuzzTranslator']
+__all__ = ["LingBuzzTranslator"]
 
 # Private module-level logger - not exported
 _logger = logging.getLogger(__name__)
@@ -125,7 +125,7 @@ class LingBuzzTranslator:
             # Validate and filter URLs
             if urls and isinstance(urls, list):
                 for url in urls:
-                    if url and isinstance(url, str) and url.startswith('http'):
+                    if url and isinstance(url, str) and url.startswith("http"):
                         pdf_urls.append(url)
                     else:
                         _logger.warning(f"LingBuzz: Invalid URL format: {url}")

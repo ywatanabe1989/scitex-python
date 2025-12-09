@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/str/_printc.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -56,5 +57,6 @@ def printc(message, c="blue", char="-", n=40):
         text = color_text(text, c)
 
     print(text)
+
 
 # EOF

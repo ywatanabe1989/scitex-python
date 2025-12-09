@@ -93,9 +93,7 @@ def calc_feature_importance(
     }
 
     # Sort by importance
-    sorted_items = sorted(
-        importance_dict.items(), key=lambda x: x[1], reverse=True
-    )
+    sorted_items = sorted(importance_dict.items(), key=lambda x: x[1], reverse=True)
 
     # Apply top_n filter if requested
     if top_n is not None:
@@ -162,12 +160,10 @@ def calc_permutation_importance(
 
     # Create dictionaries
     importance_mean = {
-        name: float(imp)
-        for name, imp in zip(feature_names, result.importances_mean)
+        name: float(imp) for name, imp in zip(feature_names, result.importances_mean)
     }
     importance_std = {
-        name: float(imp)
-        for name, imp in zip(feature_names, result.importances_std)
+        name: float(imp) for name, imp in zip(feature_names, result.importances_std)
     }
 
     # Sort by mean importance

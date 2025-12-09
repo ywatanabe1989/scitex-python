@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -88,9 +89,7 @@ class CascadeConfig:
         else:
             should_mask = self._is_sensitive(key)
 
-        display_value = (
-            self._mask_value(final_value) if should_mask else final_value
-        )
+        display_value = self._mask_value(final_value) if should_mask else final_value
 
         self.resolution_log.append(
             {
@@ -152,5 +151,6 @@ class CascadeConfig:
         if len(value_str) <= 4:
             return "****"
         return value_str[:2] + "*" * (len(value_str) - 4) + value_str[-2:]
+
 
 # EOF

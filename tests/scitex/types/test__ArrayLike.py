@@ -376,6 +376,7 @@ if __name__ == "__main__":
 #     """Lazily import torch.Tensor to avoid circular imports."""
 #     try:
 #         import torch
+# 
 #         return torch.Tensor
 #     except (ImportError, RuntimeError):
 #         # If torch is not available or has import issues, return None
@@ -410,6 +411,7 @@ if __name__ == "__main__":
 #     # Check torch tensor lazily to avoid circular imports
 #     try:
 #         import torch
+# 
 #         return torch.is_tensor(obj)
 #     except (ImportError, RuntimeError):
 #         return False

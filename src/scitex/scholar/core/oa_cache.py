@@ -48,8 +48,8 @@ class OASourcesCache:
     - Handles abbreviations, variants, and historical names
     """
 
-    _instance: Optional['OASourcesCache'] = None
-    _lock = asyncio.Lock() if hasattr(asyncio, 'Lock') else None
+    _instance: Optional["OASourcesCache"] = None
+    _lock = asyncio.Lock() if hasattr(asyncio, "Lock") else None
 
     def __init__(self, cache_dir: Optional[Path] = None):
         self._cache_dir = cache_dir or _get_default_cache_dir()
@@ -64,7 +64,7 @@ class OASourcesCache:
         self._loaded = False
 
     @classmethod
-    def get_instance(cls, cache_dir: Optional[Path] = None) -> 'OASourcesCache':
+    def get_instance(cls, cache_dir: Optional[Path] = None) -> "OASourcesCache":
         """Get singleton instance."""
         if cls._instance is None:
             cls._instance = cls(cache_dir)
@@ -75,9 +75,9 @@ class OASourcesCache:
         if not self._cache_file.exists():
             return False
         try:
-            with open(self._cache_file, 'r') as f:
+            with open(self._cache_file, "r") as f:
                 data = json.load(f)
-            cached_time = data.get('timestamp', 0)
+            cached_time = data.get("timestamp", 0)
             return (time.time() - cached_time) < CACHE_TTL_SECONDS
         except (json.JSONDecodeError, IOError):
             return False
@@ -87,12 +87,12 @@ class OASourcesCache:
         if not self._cache_file.exists():
             return False
         try:
-            with open(self._cache_file, 'r') as f:
+            with open(self._cache_file, "r") as f:
                 data = json.load(f)
 
-            self._oa_source_names = set(data.get('source_names', []))
-            self._oa_issns = set(data.get('issns', []))
-            self._last_updated = data.get('timestamp', 0)
+            self._oa_source_names = set(data.get("source_names", []))
+            self._oa_issns = set(data.get("issns", []))
+            self._last_updated = data.get("timestamp", 0)
             self._loaded = True
 
             logger.info(f"Loaded {len(self._oa_source_names)} OA sources from cache")
@@ -106,12 +106,12 @@ class OASourcesCache:
         try:
             self._cache_dir.mkdir(parents=True, exist_ok=True)
             data = {
-                'timestamp': time.time(),
-                'source_names': list(self._oa_source_names),
-                'issns': list(self._oa_issns),
-                'count': len(self._oa_source_names),
+                "timestamp": time.time(),
+                "source_names": list(self._oa_source_names),
+                "issns": list(self._oa_issns),
+                "count": len(self._oa_source_names),
             }
-            with open(self._cache_file, 'w') as f:
+            with open(self._cache_file, "w") as f:
                 json.dump(data, f)
             logger.info(f"Saved {len(self._oa_source_names)} OA sources to cache")
         except IOError as e:
@@ -143,31 +143,33 @@ class OASourcesCache:
                 )
 
                 try:
-                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as resp:
+                    async with session.get(
+                        url, timeout=aiohttp.ClientTimeout(total=30)
+                    ) as resp:
                         if resp.status != 200:
                             logger.warning(f"OpenAlex API returned {resp.status}")
                             break
 
                         data = await resp.json()
-                        results = data.get('results', [])
+                        results = data.get("results", [])
 
                         if not results:
                             break
 
                         for source in results:
-                            name = source.get('display_name', '')
+                            name = source.get("display_name", "")
                             if name:
                                 source_names.add(name.lower())
 
                             # Also store ISSNs for precise matching
-                            source_issns = source.get('issn', []) or []
+                            source_issns = source.get("issn", []) or []
                             for issn in source_issns:
                                 if issn:
                                     issns.add(issn)
 
                         # Get next cursor
-                        meta = data.get('meta', {})
-                        next_cursor = meta.get('next_cursor')
+                        meta = data.get("meta", {})
+                        next_cursor = meta.get("next_cursor")
                         if not next_cursor or next_cursor == cursor:
                             break
                         cursor = next_cursor
@@ -175,7 +177,9 @@ class OASourcesCache:
 
                         # Progress log every 10 pages
                         if pages_fetched % 10 == 0:
-                            logger.info(f"Fetched {pages_fetched} pages, {len(source_names)} sources so far...")
+                            logger.info(
+                                f"Fetched {pages_fetched} pages, {len(source_names)} sources so far..."
+                            )
 
                 except asyncio.TimeoutError:
                     logger.warning("OpenAlex API timeout")
@@ -249,7 +253,7 @@ class OASourcesCache:
         if not issn:
             return False
         # Normalize ISSN format
-        issn = issn.replace('-', '').upper()
+        issn = issn.replace("-", "").upper()
         return issn in self._oa_issns or f"{issn[:4]}-{issn[4:]}" in self._oa_issns
 
     @property
@@ -262,7 +266,7 @@ class OASourcesCache:
     def cache_age_hours(self) -> float:
         """Get cache age in hours."""
         if self._last_updated == 0:
-            return float('inf')
+            return float("inf")
         return (time.time() - self._last_updated) / 3600
 
 

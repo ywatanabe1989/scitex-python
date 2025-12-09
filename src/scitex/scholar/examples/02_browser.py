@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -41,9 +42,11 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
+
+
 async def demonstrate_browser_usage() -> bool:
     """Demonstrate browser manager with authentication.
-    
+
     Returns
     -------
     bool
@@ -51,27 +54,28 @@ async def demonstrate_browser_usage() -> bool:
     """
     from scitex.scholar.auth import ScholarAuthManager
     from scitex.scholar.browser import ScholarBrowserManager
-    
+
     print("🌐 Initializing browser with authentication...")
-    
+
     browser_manager = ScholarBrowserManager(
         chrome_profile_name="system",
         browser_mode="interactive",
         auth_manager=ScholarAuthManager(),
     )
 
-    browser, context = (
-        await browser_manager.get_authenticated_browser_and_context_async()
-    )
+    (
+        browser,
+        context,
+    ) = await browser_manager.get_authenticated_browser_and_context_async()
 
     page = await context.new_page()
-    
+
     print("📖 Navigating to scitex.ai...")
     await page.goto("https://scitex.ai")
-    
+
     print("⏳ Waiting 10 seconds for demonstration...")
     await asyncio.sleep(10)
-    
+
     print("✅ Browser demonstration completed")
     return True
 
@@ -93,7 +97,7 @@ async def main_async(args) -> bool:
     print("=" * 40)
 
     success = await demonstrate_browser_usage()
-    
+
     if success:
         print("✅ Browser workflow completed successfully")
     else:

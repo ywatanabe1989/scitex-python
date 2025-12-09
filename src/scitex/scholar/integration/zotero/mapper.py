@@ -110,7 +110,9 @@ class ZoteroMapper:
             paper.metadata.id.doi_engines = ["zotero"]
 
         # Publication details
-        journal = data.get("publicationTitle", "") or data.get("journalAbbreviation", "")
+        journal = data.get("publicationTitle", "") or data.get(
+            "journalAbbreviation", ""
+        )
         if journal:
             paper.metadata.publication.journal = journal
             paper.metadata.publication.journal_engines = ["zotero"]
@@ -194,17 +196,18 @@ class ZoteroMapper:
                 if len(parts) == 2:
                     last_name = parts[0].strip()
                     first_name = parts[1].strip()
-                    creators.append({
-                        "creatorType": "author",
-                        "firstName": first_name,
-                        "lastName": last_name
-                    })
+                    creators.append(
+                        {
+                            "creatorType": "author",
+                            "firstName": first_name,
+                            "lastName": last_name,
+                        }
+                    )
                 else:
                     # Single name - treat as lastName
-                    creators.append({
-                        "creatorType": "author",
-                        "lastName": author.strip()
-                    })
+                    creators.append(
+                        {"creatorType": "author", "lastName": author.strip()}
+                    )
 
         # Build tags list
         tags = []
@@ -252,7 +255,9 @@ class ZoteroMapper:
         if paper.metadata.citation_count.total:
             extra_lines.append(f"Citation-Count: {paper.metadata.citation_count.total}")
         if paper.metadata.publication.impact_factor:
-            extra_lines.append(f"Impact-Factor: {paper.metadata.publication.impact_factor}")
+            extra_lines.append(
+                f"Impact-Factor: {paper.metadata.publication.impact_factor}"
+            )
 
         if extra_lines:
             zotero_item["extra"] = "\n".join(extra_lines)
@@ -273,7 +278,7 @@ class ZoteroMapper:
         import re
 
         # Try to find 4-digit year
-        match = re.search(r'\b(19|20)\d{2}\b', date_str)
+        match = re.search(r"\b(19|20)\d{2}\b", date_str)
         if match:
             try:
                 return int(match.group(0))

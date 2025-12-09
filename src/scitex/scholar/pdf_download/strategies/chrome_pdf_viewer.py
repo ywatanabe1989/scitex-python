@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/pdf_download/strategies/chrome_pdf_viewer.py"
-)
+
+__FILE__ = "./src/scitex/scholar/pdf_download/strategies/chrome_pdf_viewer.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -232,9 +231,7 @@ async def try_download_chrome_pdf_viewer_async(
         download_duration = time.time() - download_start_time
 
         logger.info(f"{func_name}: Checking download result...")
-        logger.info(
-            f"{func_name}:  is_downloaded (Playwright): {is_downloaded}"
-        )
+        logger.info(f"{func_name}:  is_downloaded (Playwright): {is_downloaded}")
         logger.info(f"{func_name}:  output_path: {output_path}")
         logger.info(f"{func_name}:  Files before: {len(files_before)}")
         logger.info(f"{func_name}:  Files after: {len(files_after)}")
@@ -246,9 +243,7 @@ async def try_download_chrome_pdf_viewer_async(
             file_size = downloaded_file.stat().st_size
             file_size_mb = file_size / (1024 * 1024)
 
-            logger.info(
-                f"{func_name}: Found downloaded file: {downloaded_file.name}"
-            )
+            logger.info(f"{func_name}: Found downloaded file: {downloaded_file.name}")
             logger.info(f"{func_name}:  Size: {file_size_mb:.2f} MB")
             logger.info(f"{func_name}:  Duration: {download_duration:.1f}s")
             logger.info(f"{func_name}:  Location: {downloaded_file}")
@@ -324,9 +319,7 @@ async def try_download_chrome_pdf_viewer_async(
                 await page.close()
                 return output_path
 
-        await browser_logger.warning(
-            page, f"{func_name}: ✗ Download did not complete"
-        )
+        await browser_logger.warning(page, f"{func_name}: ✗ Download did not complete")
         logger.warning(
             f"{func_name}: Download did not complete (is_downloaded={is_downloaded}, exists={output_path.exists()})"
         )
@@ -348,7 +341,9 @@ async def try_download_chrome_pdf_viewer_async(
 
     except Exception as ee:
         # Log error safely without browser popup (avoids recursive errors)
-        error_msg = f"{func_name}: Chrome PDF Viewer failed: {type(ee).__name__}: {str(ee)}"
+        error_msg = (
+            f"{func_name}: Chrome PDF Viewer failed: {type(ee).__name__}: {str(ee)}"
+        )
         logger.error(error_msg)
         logger.debug(f"  URL: {pdf_url}")
         logger.debug(f"  Output: {output_path}")
@@ -361,16 +356,13 @@ async def try_download_chrome_pdf_viewer_async(
                 )
                 await page.wait_for_timeout(2000)  # Show error for 2s
             except Exception as popup_error:
-                logger.debug(
-                    f"{func_name}: Could not show error popup: {popup_error}"
-                )
+                logger.debug(f"{func_name}: Could not show error popup: {popup_error}")
             finally:
                 try:
                     await page.close()
                 except Exception as close_error:
-                    logger.debug(
-                        f"{func_name}: Error closing page: {close_error}"
-                    )
+                    logger.debug(f"{func_name}: Error closing page: {close_error}")
         return None
+
 
 # EOF

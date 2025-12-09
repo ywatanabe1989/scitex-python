@@ -50,12 +50,12 @@ def clean_path(path_string: str) -> str:
     """
     try:
         # Convert Path objects to strings to avoid AttributeError
-        if hasattr(path_string, '__fspath__'):  # Check if it's a path-like object
+        if hasattr(path_string, "__fspath__"):  # Check if it's a path-like object
             path_string = str(path_string)
-        
+
         if not isinstance(path_string, str):
             raise TypeError("Input must be a string")
-            
+
         is_directory = path_string.endswith("/")
 
         if path_string.startswith('f"'):

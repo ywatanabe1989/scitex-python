@@ -83,7 +83,7 @@ class BnFISBNTranslator(BaseTranslator):
             BnF SRU API search URL
         """
         # Clean ISBN (remove hyphens and spaces)
-        clean_isbn = re.sub(r'[-\s]', '', isbn)
+        clean_isbn = re.sub(r"[-\s]", "", isbn)
 
         # BnF SRU API query
         # Line 50: URL template with ISBN query

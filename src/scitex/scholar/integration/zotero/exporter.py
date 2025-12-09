@@ -66,12 +66,15 @@ class ZoteroExporter:
 
             try:
                 from pyzotero import zotero
+
                 self._zot = zotero.Zotero(
                     library_id=self.library_id,
                     library_type=self.library_type,
-                    api_key=self.api_key
+                    api_key=self.api_key,
                 )
-                logger.info(f"Connected to Zotero {self.library_type} library: {self.library_id}")
+                logger.info(
+                    f"Connected to Zotero {self.library_type} library: {self.library_id}"
+                )
             except ImportError:
                 raise ImportError(
                     "pyzotero not installed. Install with: pip install pyzotero"
@@ -125,7 +128,9 @@ class ZoteroExporter:
 
                 if existing_key:
                     # Update existing item
-                    logger.info(f"[{i}/{len(paper_list)}] Updating existing item: {existing_key}")
+                    logger.info(
+                        f"[{i}/{len(paper_list)}] Updating existing item: {existing_key}"
+                    )
                     zotero_item["version"] = self._get_item_version(zot, existing_key)
                     zot.update_item(zotero_item, existing_key)
                     item_key = existing_key
@@ -148,9 +153,7 @@ class ZoteroExporter:
 
                 results[paper.metadata.basic.title or f"paper_{i}"] = item_key
 
-                logger.success(
-                    f"[{i}/{len(paper_list)}] Exported: {item_key}"
-                )
+                logger.success(f"[{i}/{len(paper_list)}] Exported: {item_key}")
 
             except Exception as e:
                 logger.error(
@@ -158,9 +161,7 @@ class ZoteroExporter:
                 )
                 continue
 
-        logger.success(
-            f"Exported {len(results)}/{len(paper_list)} papers to Zotero"
-        )
+        logger.success(f"Exported {len(results)}/{len(paper_list)} papers to Zotero")
 
         return results
 
@@ -314,7 +315,7 @@ class ZoteroExporter:
         """
         # Search by DOI
         if paper.metadata.id.doi:
-            items = zot.items(q=f'doi:{paper.metadata.id.doi}')
+            items = zot.items(q=f"doi:{paper.metadata.id.doi}")
             if items:
                 logger.debug(f"Found existing item by DOI: {items[0]['key']}")
                 return items[0]["key"]
@@ -324,7 +325,10 @@ class ZoteroExporter:
             # Exact title search
             items = zot.items(q=paper.metadata.basic.title)
             for item in items:
-                if item["data"].get("title", "").lower() == paper.metadata.basic.title.lower():
+                if (
+                    item["data"].get("title", "").lower()
+                    == paper.metadata.basic.title.lower()
+                ):
                     logger.debug(f"Found existing item by title: {item['key']}")
                     return item["key"]
 

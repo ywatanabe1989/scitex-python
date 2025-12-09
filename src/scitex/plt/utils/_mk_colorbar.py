@@ -44,9 +44,9 @@ def mk_colorbar(start="white", end="blue"):
     # import scitex
     from scitex.plt.color._PARAMS import RGB
 
-    # Get RGB values for start and end colors
-    start_rgb = RGB[start]
-    end_rgb = RGB[end]
+    # Get RGB values for start and end colors (normalize 0-255 to 0-1)
+    start_rgb = np.array(RGB[start]) / 255.0
+    end_rgb = np.array(RGB[end]) / 255.0
 
     # Create a colormap
     colors = [start_rgb, end_rgb]

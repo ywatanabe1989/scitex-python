@@ -1,180 +1,215 @@
-.PHONY: help \
-	clean \
-	clean-build \
-	clean-pyc \
-	clean-test \
-	build \
-	install \
-	install-dev \
-	test \
-	test-all \
-	test-stats-cov \
-	test-logging-cov \
-	lint \
-	format \
-	check \
-	release \
-	upload \
-	upload-test \
-	tag
+# ============================================
+# SciTeX Makefile
+# https://scitex.ai
+# ============================================
+
+# Use bash for proper echo -e support
+SHELL := /bin/bash
+
+.PHONY: help install install-dev install-all \
+	clean test test-cov lint format check \
+	build release upload upload-test \
+	build-all release-all upload-all upload-test-all \
+	sync-tests sync-examples sync-redirect \
+	show-version tag
+
+# Colors
+GREEN := \033[0;32m
+YELLOW := \033[0;33m
+RED := \033[0;31m
+CYAN := \033[0;36m
+GRAY := \033[0;90m
+NC := \033[0m
+
+# ============================================
+# Default target
+# ============================================
+
+.DEFAULT_GOAL := help
 
 help:
-	@echo "SciTeX Development Makefile"
-	@echo ""
-	@echo "Available targets:"
-	@echo "  make install          - Install package in development mode"
-	@echo "  make install-dev      - Install package with dev dependencies"
-	@echo "  make clean            - Remove all build, test, and Python artifacts"
-	@echo "  make build            - Build source and wheel distributions"
-	@echo "  make test             - Run tests with pytest"
-	@echo "  make test-stats-cov   - Run stats module tests with coverage"
-	@echo "  make test-logging-cov - Run logging module tests with coverage"
-	@echo "  make lint             - Check code style with flake8"
-	@echo "  make format           - Format code with black and isort"
-	@echo "  make check            - Run all checks (lint, format, test)"
-	@echo "  make release          - Build and upload to PyPI (requires version bump)"
-	@echo "  make upload-test      - Upload to TestPyPI"
-	@echo "  make tag              - Create git tag from current version"
+	@echo -e ""
+	@echo -e "$(GREEN)╔═══════════════════════════════════════════════════════╗$(NC)"
+	@echo -e "$(GREEN)║             SciTeX Development Makefile               ║$(NC)"
+	@echo -e "$(GREEN)╚═══════════════════════════════════════════════════════╝$(NC)"
+	@echo -e ""
+	@echo -e "$(CYAN)📦 Installation:$(NC)"
+	@echo -e "  make install           Install package (development mode)"
+	@echo -e "  make install-dev       Install with dev dependencies"
+	@echo -e "  make install-all       Install with all optional dependencies"
+	@echo -e ""
+	@echo -e "$(CYAN)🔧 Development:$(NC)"
+	@echo -e "  make test              Run all tests"
+	@echo -e "  make test MODULE=xxx   Run tests for specific module (e.g., config, stats)"
+	@echo -e "  make test-cov          Run tests with coverage"
+	@echo -e "  make test-cov MODULE=xxx  Run module tests with coverage"
+	@echo -e "  make lint              Check code style (ruff)"
+	@echo -e "  make lint-fix          Auto-fix lint issues"
+	@echo -e "  make format            Format code (ruff)"
+	@echo -e "  make format-check      Check formatting without changes"
+	@echo -e "  make check             Run all checks (format-check + lint + test)"
+	@echo -e ""
+	@echo -e "$(CYAN)🧹 Maintenance:$(NC)"
+	@echo -e "  make clean             Remove build/test/cache artifacts"
+	@echo -e "  make sync-tests        Sync test files with source structure"
+	@echo -e "  make sync-examples     Sync example files with source structure"
+	@echo -e ""
+	@echo -e "$(CYAN)📤 Build & Release (scitex only):$(NC)"
+	@echo -e "  make build             Build package"
+	@echo -e "  make upload-test       Upload to TestPyPI"
+	@echo -e "  make upload            Upload to PyPI"
+	@echo -e "  make release           Build, tag, and upload to PyPI"
+	@echo -e ""
+	@echo -e "$(CYAN)📤 Build & Release (scitex + scitex-python):$(NC)"
+	@echo -e "  make sync-redirect     Sync redirect package version"
+	@echo -e "  make build-all         Build both packages"
+	@echo -e "  make upload-test-all   Upload both to TestPyPI"
+	@echo -e "  make upload-all        Upload both to PyPI"
+	@echo -e "  make release-all       Build, tag, and upload both to PyPI"
+	@echo -e ""
+	@echo -e "$(CYAN)📋 Other:$(NC)"
+	@echo -e "  make show-version      Show current version"
+	@echo -e "  make tag               Create git tag from version"
+	@echo -e ""
 
-clean: clean-build clean-pyc clean-test clean-old clean-claude
-
-clean-claude:
-	@echo "Cleaning Claude files..."
-	rm -rf docs/to_claude
-	rm -rf docs/from_agents
-	rm -rf docs/from_user
-	rm -rf CLAUDE.md
-	rm -rf .claude
-	rm -rf mgmt
-	rm -rf management
-	rm -rf .mcp.json
-
-clean-old:
-	@echo "Cleaning obsolete files..."
-	find . -type d -name '.old' -exec rm -rf {} +
-	find . -type d -name 'legacy' -exec rm -rf {} +
-
-clean-build:
-	@echo "Cleaning build artifacts..."
-	rm -rf build/
-	rm -rf dist/
-	rm -rf .eggs/
-	find . -name '*.egg-info' -exec rm -rf {} +
-	find . -name '*.egg' -exec rm -f {} +
-
-clean-pyc:
-	@echo "Cleaning Python artifacts..."
-	find . -type d -name '__pycache__' -exec rm -rf {} +
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.pyo' -exec rm -f {} +
-	# find . -name '*~' -exec rm -f {} +
-
-
-clean-test:
-	@echo "Cleaning test artifacts..."
-	rm -rf .pytest_cache/
-	rm -rf .coverage
-	rm -rf htmlcov/
-	rm -rf .mypy_cache/
-
-build: clean
-	@echo "Building source and wheel distributions..."
-	python -m build
+# ============================================
+# Installation
+# ============================================
 
 install:
-	@echo "Installing package in development mode..."
-	pip install -e .
+	@echo -e "$(CYAN)📦 Installing scitex in development mode...$(NC)"
+	@pip install -e .
+	@echo -e "$(GREEN)✅ Installation complete$(NC)"
 
 install-dev:
-	@echo "Installing package with dev dependencies..."
-	pip install -e ".[dev]"
+	@echo -e "$(CYAN)📦 Installing scitex with dev dependencies...$(NC)"
+	@pip install -e ".[dev]"
+	@echo -e "$(GREEN)✅ Installation complete$(NC)"
+
+install-all:
+	@echo -e "$(CYAN)📦 Installing scitex with all dependencies...$(NC)"
+	@pip install -e ".[all,dev]"
+	@echo -e "$(GREEN)✅ Installation complete$(NC)"
+
+# ============================================
+# Development
+# ============================================
+
+clean:
+	@./scripts/maintenance/clean.sh
 
 test:
-	@echo "Running tests..."
-	pytest tests/ -v
+ifdef MODULE
+	@./scripts/maintenance/test.sh $(MODULE)
+else
+	@./scripts/maintenance/test.sh
+endif
 
-test-all:
-	@echo "Running all tests with coverage..."
-	pytest tests/ -v --cov=src/scitex --cov-report=html --cov-report=term
-
-test-stats-cov:
-	@echo "Running stats module tests with coverage..."
-	@mkdir -p htmlcov
-	pytest tests/scitex/stats/ \
-		--cov=src/scitex/stats \
-		--cov-report=term-missing \
-		--cov-report=html:htmlcov/stats \
-		--cov-report=json:coverage-stats.json \
-		--cov-report=xml:coverage-stats.xml \
-		-v
-	@echo ""
-	@echo "Coverage reports generated:"
-	@echo "  - HTML: htmlcov/stats/index.html"
-	@echo "  - JSON: coverage-stats.json"
-	@echo "  - XML: coverage-stats.xml"
-
-test-logging-cov:
-	@echo "Running logging module tests with coverage..."
-	@mkdir -p htmlcov
-	pytest tests/scitex/logging/ \
-		--cov=src/scitex/logging \
-		--cov-report=term-missing \
-		--cov-report=html:htmlcov/logging \
-		--cov-report=json:coverage-logging.json \
-		--cov-report=xml:coverage-logging.xml \
-		-v
-	@echo ""
-	@echo "Coverage reports generated:"
-	@echo "  - HTML: htmlcov/logging/index.html"
-	@echo "  - JSON: coverage-logging.json"
-	@echo "  - XML: coverage-logging.xml"
+test-cov:
+ifdef MODULE
+	@./scripts/maintenance/test.sh $(MODULE) --cov
+else
+	@./scripts/maintenance/test.sh --cov
+endif
 
 lint:
-	@echo "Checking code style..."
-	flake8 src/scitex tests/
+	@./scripts/maintenance/lint.sh
+
+lint-fix:
+	@./scripts/maintenance/lint.sh --fix
 
 format:
-	@echo "Formatting code..."
-	black src/scitex tests/
-	isort src/scitex tests/
+	@./scripts/maintenance/format.sh
 
-check: lint test
-	@echo "All checks passed!"
+format-check:
+	@./scripts/maintenance/format.sh --check
 
-tag:
-	@echo "Creating git tag..."
-	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
-	echo "Current version: $$VERSION"; \
-	git tag -a v$$VERSION -m "Release v$$VERSION"; \
-	git push origin v$$VERSION; \
-	echo "Tag v$$VERSION created and pushed"
+check: format-check lint test
+	@echo -e ""
+	@echo -e "$(GREEN)✅ All checks passed!$(NC)"
+
+# ============================================
+# Synchronization
+# ============================================
+
+sync-tests:
+	@echo -e "$(CYAN)🔄 Syncing test files with source...$(NC)"
+	@./tests/sync_tests_with_source.sh
+
+sync-examples:
+	@echo -e "$(CYAN)🔄 Syncing example files with source...$(NC)"
+	@./examples/sync_examples_with_source.sh
+
+# ============================================
+# Build & Release (main package)
+# ============================================
+
+build: clean
+	@echo -e "$(CYAN)🏗️  Building source and wheel distributions...$(NC)"
+	@python -m build
+	@echo -e "$(GREEN)✅ Build complete$(NC)"
 
 upload-test: build
-	@echo "Uploading to TestPyPI..."
-	python -m twine upload --repository testpypi dist/*
+	@echo -e "$(CYAN)📤 Uploading to TestPyPI...$(NC)"
+	@python -m twine upload --repository testpypi dist/*
+	@echo -e "$(GREEN)✅ Upload to TestPyPI complete$(NC)"
 
 upload: build
-	@echo "Uploading to PyPI..."
-	python -m twine upload dist/*
+	@echo -e "$(CYAN)📤 Uploading to PyPI...$(NC)"
+	@python -m twine upload dist/*
+	@echo -e "$(GREEN)✅ Upload to PyPI complete$(NC)"
 
 release: clean build tag upload
-	@echo "Release complete!"
+	@echo -e ""
+	@echo -e "$(GREEN)✅ Release complete!$(NC)"
 	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
-	echo "Version $$VERSION released to PyPI"
+	echo -e "$(CYAN)Version $$VERSION released to PyPI$(NC)"
 
-# Development helpers
-dev-setup: install-dev
-	@echo "Setting up development environment..."
-	pre-commit install
+# ============================================
+# Build & Release (both packages)
+# ============================================
+
+sync-redirect:
+	@echo -e "$(CYAN)🔄 Syncing scitex-python version...$(NC)"
+	@./scripts/release.sh sync
+
+build-all: clean
+	@echo -e "$(CYAN)🏗️  Building both packages...$(NC)"
+	@./scripts/release.sh build
+	@echo -e "$(GREEN)✅ Build complete$(NC)"
+
+upload-test-all: build-all
+	@echo -e "$(CYAN)📤 Uploading both packages to TestPyPI...$(NC)"
+	@./scripts/release.sh upload-test
+	@echo -e "$(GREEN)✅ Upload to TestPyPI complete$(NC)"
+
+upload-all: build-all
+	@echo -e "$(CYAN)📤 Uploading both packages to PyPI...$(NC)"
+	@./scripts/release.sh upload
+	@echo -e "$(GREEN)✅ Upload to PyPI complete$(NC)"
+
+release-all: clean build-all tag
+	@echo -e "$(CYAN)🚀 Releasing both packages to PyPI...$(NC)"
+	@./scripts/release.sh upload
+	@echo -e ""
+	@echo -e "$(GREEN)✅ Release complete!$(NC)"
+	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
+	echo -e "$(CYAN)Version $$VERSION released: scitex and scitex-python$(NC)"
+
+# ============================================
+# Version & Tagging
+# ============================================
 
 show-version:
-	@grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'
+	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
+	echo -e "$(CYAN)Current version: $(GREEN)$$VERSION$(NC)"
 
-bump-patch:
-	@echo "Bumping patch version..."
-	@CURRENT=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
-	echo "Current version: $$CURRENT"; \
-	read -p "Enter new version: " NEW_VERSION; \
-	sed -i "s/__version__ = \".*\"/__version__ = \"$$NEW_VERSION\"/" src/scitex/__version__.py; \
-	sed -i "s/version = \".*\"/version = \"$$NEW_VERSION\"/" pyproject.toml; \
-	echo "Version bumped to $$NEW_VERSION"
+tag:
+	@echo -e "$(CYAN)🏷️  Creating git tag...$(NC)"
+	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
+	echo -e "$(GRAY)Version: $$VERSION$(NC)"; \
+	git tag -a v$$VERSION -m "Release v$$VERSION"; \
+	git push origin v$$VERSION; \
+	echo -e "$(GREEN)✅ Tag v$$VERSION created and pushed$(NC)"
+
+# EOF

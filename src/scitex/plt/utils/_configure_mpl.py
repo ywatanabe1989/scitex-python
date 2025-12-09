@@ -180,9 +180,7 @@ def configure_mpl(
         # Spine width from YAML (converted from mm to pt)
         "axes.linewidth": axes_linewidth,
         # Custom color cycle
-        "axes.prop_cycle": plt.cycler(
-            color=list(RGBA_NORM_FOR_CYCLE.values())
-        ),
+        "axes.prop_cycle": plt.cycler(color=list(RGBA_NORM_FOR_CYCLE.values())),
         # Line width from YAML (converted from mm to pt)
         "lines.linewidth": line_width,
         "lines.markersize": 6.0,
@@ -227,12 +225,8 @@ def configure_mpl(
 
         except Exception as e:
             if verbose:
-                print(
-                    f"⚠️  LaTeX rendering failed, falling back to mathtext: {e}"
-                )
-                print(
-                    "    This may be due to missing LaTeX fonts or Node.js conflicts"
-                )
+                print(f"⚠️  LaTeX rendering failed, falling back to mathtext: {e}")
+                print("    This may be due to missing LaTeX fonts or Node.js conflicts")
 
             # Enhanced fallback to mathtext with better configuration
             mpl_config.update(
@@ -271,7 +265,8 @@ def configure_mpl(
         except Exception:
             # Search for Arial font files and register them
             arial_paths = [
-                f for f in fm.findSystemFonts()
+                f
+                for f in fm.findSystemFonts()
                 if os.path.basename(f).lower().startswith("arial")
             ]
 
@@ -295,7 +290,12 @@ def configure_mpl(
                 {
                     "text.usetex": False,
                     "font.family": "Arial",
-                    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans", "Liberation Sans"],
+                    "font.sans-serif": [
+                        "Arial",
+                        "Helvetica",
+                        "DejaVu Sans",
+                        "Liberation Sans",
+                    ],
                     "mathtext.fontset": "dejavusans",
                     "mathtext.default": "regular",
                 }
@@ -306,7 +306,12 @@ def configure_mpl(
                 {
                     "text.usetex": False,
                     "font.family": "sans-serif",
-                    "font.sans-serif": ["Helvetica", "DejaVu Sans", "Liberation Sans", "sans-serif"],
+                    "font.sans-serif": [
+                        "Helvetica",
+                        "DejaVu Sans",
+                        "Liberation Sans",
+                        "sans-serif",
+                    ],
                     "mathtext.fontset": "dejavusans",
                     "mathtext.default": "regular",
                 }
@@ -315,6 +320,7 @@ def configure_mpl(
             # Warn user about missing Arial using scitex.logging
             try:
                 from scitex.logging import getLogger
+
                 logger = getLogger(__name__)
                 logger.warning(
                     "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
@@ -323,17 +329,19 @@ def configure_mpl(
             except ImportError:
                 # Fallback to warnings if scitex.logging not available
                 import warnings
+
                 warnings.warn(
                     "Arial font not found on system. Using fallback fonts (Helvetica/DejaVu Sans). "
                     "For publication-quality figures with Arial, install Microsoft Core Fonts: "
                     "sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv",
                     UserWarning,
-                    stacklevel=2
+                    stacklevel=2,
                 )
 
         # Suppress matplotlib's own font warnings
         import logging
-        logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
+
+        logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 
         # Set fallback mode to mathtext
         try:

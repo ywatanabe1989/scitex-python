@@ -12,7 +12,9 @@ class PrimoTranslator(BaseTranslator):
     """Primo."""
 
     LABEL = "Primo"
-    URL_TARGET_PATTERN = r"/primo_library/|/nebis/|^https?://www\.recherche-portal\.ch/zbz/"
+    URL_TARGET_PATTERN = (
+        r"/primo_library/|/nebis/|^https?://www\.recherche-portal\.ch/zbz/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

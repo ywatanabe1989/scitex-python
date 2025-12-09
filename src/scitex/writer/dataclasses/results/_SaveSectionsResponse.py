@@ -4,9 +4,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/dataclasses/results/_SaveSectionsResponse.py"
-)
+
+__FILE__ = "./src/scitex/writer/dataclasses/results/_SaveSectionsResponse.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -67,7 +66,9 @@ class SaveSectionsResponse:
         return "\n".join(lines)
 
     @classmethod
-    def create_success(cls, sections_saved: int, message: str = "") -> SaveSectionsResponse:
+    def create_success(
+        cls, sections_saved: int, message: str = ""
+    ) -> SaveSectionsResponse:
         """Create a successful response."""
         return cls(
             success=True,
@@ -77,7 +78,9 @@ class SaveSectionsResponse:
         )
 
     @classmethod
-    def create_failure(cls, error_message: str, errors: List[str] = None, sections_saved: int = 0) -> SaveSectionsResponse:
+    def create_failure(
+        cls, error_message: str, errors: List[str] = None, sections_saved: int = 0
+    ) -> SaveSectionsResponse:
         """Create a failed response."""
         return cls(
             success=False,
@@ -90,16 +93,24 @@ class SaveSectionsResponse:
     def validate(self) -> None:
         """Validate response data - raises ValueError if invalid."""
         if self.success and self.sections_saved == 0:
-            raise ValueError("SaveSectionsResponse marked as success but no sections were saved")
+            raise ValueError(
+                "SaveSectionsResponse marked as success but no sections were saved"
+            )
 
         if not self.success and not self.errors:
-            raise ValueError("SaveSectionsResponse marked as failed but no errors provided")
+            raise ValueError(
+                "SaveSectionsResponse marked as failed but no errors provided"
+            )
 
         if self.sections_saved < 0:
-            raise ValueError(f"Invalid sections_saved: {self.sections_saved} (must be >= 0)")
+            raise ValueError(
+                f"Invalid sections_saved: {self.sections_saved} (must be >= 0)"
+            )
 
         if self.sections_skipped < 0:
-            raise ValueError(f"Invalid sections_skipped: {self.sections_skipped} (must be >= 0)")
+            raise ValueError(
+                f"Invalid sections_skipped: {self.sections_skipped} (must be >= 0)"
+            )
 
 
 __all__ = ["SaveSectionsResponse"]

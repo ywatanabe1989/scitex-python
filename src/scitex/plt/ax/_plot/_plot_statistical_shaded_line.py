@@ -65,16 +65,18 @@ def stx_line(axis, values_1d, xx=None, **kwargs):
     df : pandas.DataFrame
         DataFrame with x and y values
     """
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
     values_1d = np.asarray(values_1d)
     assert values_1d.ndim <= 2, f"Data must be 1D or 2D, got {values_1d.ndim}D"
     if xx is None:
         xx = np.arange(len(values_1d))
     else:
         xx = np.asarray(xx)
-    assert len(xx) == len(
-        values_1d
-    ), f"xx length ({len(xx)}) must match values_1d length ({len(values_1d)})"
+    assert len(xx) == len(values_1d), (
+        f"xx length ({len(xx)}) must match values_1d length ({len(values_1d)})"
+    )
 
     axis.plot(xx, values_1d, **kwargs)
     return axis, pd.DataFrame({"x": xx, "y": values_1d})
@@ -103,7 +105,9 @@ def stx_mean_std(axis, values_2d, xx=None, sd=1, **kwargs):
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axis with the plot
     """
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
     assert isinstance(sd, (int, float)), f"sd must be a number, got {type(sd)}"
     assert sd >= 0, f"sd must be non-negative, got {sd}"
     values_2d = np.asarray(values_2d)
@@ -113,9 +117,9 @@ def stx_mean_std(axis, values_2d, xx=None, sd=1, **kwargs):
     else:
         xx = np.asarray(xx)
     expected_len = values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d)
-    assert (
-        len(xx) == expected_len
-    ), f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
+    assert len(xx) == expected_len, (
+        f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
+    )
 
     if values_2d.ndim == 1:
         central = values_2d
@@ -157,10 +161,10 @@ def stx_mean_ci(axis, values_2d, xx=None, perc=95, **kwargs):
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axis with the plot
     """
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
-    assert isinstance(
-        perc, (int, float)
-    ), f"perc must be a number, got {type(perc)}"
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
+    assert isinstance(perc, (int, float)), f"perc must be a number, got {type(perc)}"
     assert 0 <= perc <= 100, f"perc must be between 0 and 100, got {perc}"
     values_2d = np.asarray(values_2d)
     assert values_2d.ndim <= 2, f"Data must be 1D or 2D, got {values_2d.ndim}D"
@@ -171,9 +175,9 @@ def stx_mean_ci(axis, values_2d, xx=None, perc=95, **kwargs):
         xx = np.asarray(xx)
 
     expected_len = values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d)
-    assert (
-        len(xx) == expected_len
-    ), f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
+    assert len(xx) == expected_len, (
+        f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
+    )
 
     if values_2d.ndim == 1:
         central = values_2d
@@ -216,7 +220,9 @@ def stx_median_iqr(axis, values_2d, xx=None, **kwargs):
     axis : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
         The axis with the plot
     """
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
     values_2d = np.asarray(values_2d)
     assert values_2d.ndim <= 2, f"Data must be 1D or 2D, got {values_2d.ndim}D"
 
@@ -226,9 +232,9 @@ def stx_median_iqr(axis, values_2d, xx=None, **kwargs):
         xx = np.asarray(xx)
 
     expected_len = values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d)
-    assert (
-        len(xx) == expected_len
-    ), f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
+    assert len(xx) == expected_len, (
+        f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
+    )
 
     if values_2d.ndim == 1:
         central = values_2d

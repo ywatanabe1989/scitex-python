@@ -12,7 +12,9 @@ class GaleDatabasesTranslator(BaseTranslator):
     """Gale Databases."""
 
     LABEL = "Gale Databases"
-    URL_TARGET_PATTERN = r"^https?://[^?&]*(?:gale|galegroup|galetesting|ggtest)\.com(?:\:\d+)?/ps/"
+    URL_TARGET_PATTERN = (
+        r"^https?://[^?&]*(?:gale|galegroup|galetesting|ggtest)\.com(?:\:\d+)?/ps/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

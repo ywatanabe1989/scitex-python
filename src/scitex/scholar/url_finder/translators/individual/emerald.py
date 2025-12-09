@@ -12,7 +12,9 @@ class EmeraldTranslator(BaseTranslator):
     """Emerald Insight."""
 
     LABEL = "Emerald Insight"
-    URL_TARGET_PATTERN = r"^https?://www\.emerald\.com/insight/(publication/|content/|search\?)"
+    URL_TARGET_PATTERN = (
+        r"^https?://www\.emerald\.com/insight/(publication/|content/|search\?)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

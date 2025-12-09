@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -46,6 +47,8 @@ import scitex as stx
 """Parameters"""
 
 """Functions & Classes"""
+
+
 async def search_bibtex_metadata(
     bibtex_path: str, use_cache: bool = True, n_samples: int = None
 ) -> list:
@@ -88,9 +91,7 @@ async def main_async(args):
 
     pprint(batched_metadata)
 
-    output_name = selected_path.split("/")[-1].replace(
-        ".bib", "_metadata.json"
-    )
+    output_name = selected_path.split("/")[-1].replace(".bib", "_metadata.json")
     output_path = f"./data/scholar/{output_name}"
 
     stx.io.save(batched_metadata, output_path, symlink_from_cwd=True)

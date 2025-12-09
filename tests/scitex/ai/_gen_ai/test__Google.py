@@ -356,7 +356,6 @@ if __name__ == "__main__":
 #         chat_history: Optional[List[Dict[str, str]]] = None,
 #         max_tokens: int = 32_768,
 #     ) -> None:
-# 
 #         api_key = api_key or os.getenv("GOOGLE_API_KEY")
 # 
 #         if not api_key:
@@ -450,7 +449,9 @@ if __name__ == "__main__":
 # 
 # 
 # if __name__ == "__main__":
-#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
+#     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
+#         sys, plt, verbose=False
+#     )
 #     main()
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
 # 

@@ -127,7 +127,7 @@ def get_best_url(
     openurl_resolved: Optional[list] = None,
     url_publisher: Optional[str] = None,
     url_doi: Optional[str] = None,
-    doi: Optional[str] = None
+    doi: Optional[str] = None,
 ) -> Optional[str]:
     """Get the best available URL from multiple sources.
 

@@ -9,13 +9,13 @@ without relying on proprietary databases or restricted access systems.
 
 Main components:
 - ImpactFactorCalculator: Core calculation engine
-- JournalMatcher: Advanced journal matching across data sources  
+- JournalMatcher: Advanced journal matching across data sources
 - CacheManager: Efficient caching system
 - CLI: Command-line interface
 
 Example usage:
     from impact_factor import ImpactFactorCalculator
-    
+
     calculator = ImpactFactorCalculator()
     result = calculator.calculate_impact_factor("Nature")
     print(f"Impact Factor: {result['impact_factors']['classical_2year']}")
@@ -33,8 +33,8 @@ __email__ = "contact@scitex.ai"
 __all__ = [
     "ImpactFactorCalculator",
     "JournalMatcher",
-    "CacheManager", 
+    "CacheManager",
     "OpenAlexFetcher",
     "CrossrefFetcher",
-    "SemanticScholarFetcher"
+    "SemanticScholarFetcher",
 ]

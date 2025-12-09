@@ -12,7 +12,9 @@ class FachportalPadagogikTranslator(BaseTranslator):
     """Fachportal Pädagogik."""
 
     LABEL = "Fachportal Pädagogik"
-    URL_TARGET_PATTERN = r"^https?://(www\.fachportal-paedagogik\.de/literatur/|www\.pedocs\.de/)"
+    URL_TARGET_PATTERN = (
+        r"^https?://(www\.fachportal-paedagogik\.de/literatur/|www\.pedocs\.de/)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

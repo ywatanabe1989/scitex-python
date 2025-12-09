@@ -15,15 +15,15 @@ from typing import Dict, Any
 
 async def demonstrate_unified_translator():
     """Demonstrate unified translator features."""
-    
+
     print("SciTeX Unified Translator Demo")
     print("=" * 50)
-    
+
     # Example 1: Auto-detect modules and translate
     print("\n1. Auto-detection Translation")
     print("-" * 30)
-    
-    standard_code = '''
+
+    standard_code = """
 import numpy as np
 import pandas as pd
 import json
@@ -41,15 +41,15 @@ df['scaled'] = df['value'] * 1.5
 np.save('processed.npy', processed)
 df.to_excel('output.xlsx', index=False)
 json.dump(config, open('updated_config.json', 'w'))
-'''
-    
+"""
+
     print("Original code:")
     print(standard_code)
-    
+
     # Simulate translator call
     result = {
         "success": True,
-        "translated_code": '''
+        "translated_code": """
 import scitex.io as io
 
 # Load various data formats
@@ -65,29 +65,26 @@ df['scaled'] = df['value'] * 1.5
 io.save(processed, 'processed.npy')
 io.save(df, 'output.xlsx')
 io.save(config, 'updated_config.json')
-''',
+""",
         "modules_used": ["io"],
         "suggestions": ["io", "pd"],
         "validation": {
             "valid": True,
             "warnings": [],
-            "metrics": {
-                "size_change": -156,
-                "line_change": -3
-            }
-        }
+            "metrics": {"size_change": -156, "line_change": -3},
+        },
     }
-    
+
     print("\nTranslated to SciTeX:")
     print(result["translated_code"])
     print(f"\nModules detected: {result['suggestions']}")
     print(f"Modules used: {result['modules_used']}")
-    
+
     # Example 2: Code analysis
     print("\n\n2. Code Analysis")
     print("-" * 30)
-    
-    complex_code = '''
+
+    complex_code = """
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
@@ -110,64 +107,64 @@ model = nn.Sequential(
 # Train model
 optimizer = torch.optim.Adam(model.parameters())
 X_train, X_test = train_test_split(X, test_size=0.2)
-'''
-    
+"""
+
     analysis_result = {
         "imports": [
             "matplotlib.pyplot",
             "seaborn",
             "torch",
             "torch.nn",
-            "sklearn.model_selection"
+            "sklearn.model_selection",
         ],
         "patterns_found": [
             {
                 "name": "matplotlib_plotting",
                 "description": "Matplotlib plotting operations",
                 "module": "plt",
-                "confidence": 1.0
+                "confidence": 1.0,
             },
             {
                 "name": "seaborn_plotting",
                 "description": "Seaborn plotting operations",
                 "module": "plt",
-                "confidence": 1.0
+                "confidence": 1.0,
             },
             {
                 "name": "torch_operations",
                 "description": "PyTorch operations",
                 "module": "ai",
-                "confidence": 1.0
+                "confidence": 1.0,
             },
             {
                 "name": "sklearn_operations",
                 "description": "Scikit-learn operations",
                 "module": "ai",
-                "confidence": 1.0
-            }
+                "confidence": 1.0,
+            },
         ],
         "suggested_modules": ["plt", "ai"],
         "style_hints": {
             "type_hints": False,
             "docstrings": False,
             "string_format": None,
-            "indent": 4
+            "indent": 4,
         },
-        "confidence": 0.95
+        "confidence": 0.95,
     }
-    
+
     print("Code analysis results:")
     print(f"Suggested modules: {analysis_result['suggested_modules']}")
     print(f"Patterns found: {len(analysis_result['patterns_found'])}")
-    for pattern in analysis_result['patterns_found']:
+    for pattern in analysis_result["patterns_found"]:
         print(f"  - {pattern['name']} -> {pattern['module']} module")
     print(f"Confidence: {analysis_result['confidence']:.2f}")
-    
+
     # Example 3: Validation
     print("\n\n3. Code Validation")
     print("-" * 30)
-    
-    code_to_validate = '''
+
+    code_to_validate = """
 def process_data(df):
     # Complex function with multiple branches
     if df.empty:
@@ -187,53 +184,50 @@ def process_data(df):
                 df[col] = df[col].astype(str)
     
     return df
-'''
-    
+"""
+
     validation_result = {
         "syntax": {"valid": True, "error": None},
         "style": {
             "valid": True,
             "warnings": [],
             "suggestions": [],
-            "metrics": {
-                "line_count": 17,
-                "long_lines": 0
-            }
+            "metrics": {"line_count": 17, "long_lines": 0},
         },
         "complexity": {
             "valid": True,
             "warnings": ["Function 'process_data' has high cyclomatic complexity: 11"],
-            "suggestions": ["Consider refactoring 'process_data' into smaller functions"],
-            "metrics": {
-                "complexity_process_data": 11
-            }
-        }
+            "suggestions": [
+                "Consider refactoring 'process_data' into smaller functions"
+            ],
+            "metrics": {"complexity_process_data": 11},
+        },
     }
-    
+
     print("Validation results:")
     print(f"Syntax: {'✓' if validation_result['syntax']['valid'] else '✗'}")
     print(f"Style: {'✓' if validation_result['style']['valid'] else '✗'}")
-    
-    if validation_result['complexity']['warnings']:
+
+    if validation_result["complexity"]["warnings"]:
         print("\nComplexity warnings:")
-        for warning in validation_result['complexity']['warnings']:
+        for warning in validation_result["complexity"]["warnings"]:
             print(f"  ⚠️  {warning}")
-    
-    if validation_result['complexity']['suggestions']:
+
+    if validation_result["complexity"]["suggestions"]:
         print("\nSuggestions:")
-        for suggestion in validation_result['complexity']['suggestions']:
+        for suggestion in validation_result["complexity"]["suggestions"]:
             print(f"  💡 {suggestion}")
-    
+
     # Example 4: Batch translation
     print("\n\n4. Batch Translation")
     print("-" * 30)
-    
+
     snippets = [
         {"code": "data = np.load('file.npy')", "direction": "to_scitex"},
         {"code": "io.save(df, 'output.csv')", "direction": "from_scitex"},
-        {"code": "plt.plot(x, y)", "direction": "to_scitex"}
+        {"code": "plt.plot(x, y)", "direction": "to_scitex"},
     ]
-    
+
     batch_result = {
         "total": 3,
         "successful": 3,
@@ -242,63 +236,65 @@ def process_data(df):
                 "index": 0,
                 "success": True,
                 "translated": "data = io.load('file.npy')",
-                "errors": []
+                "errors": [],
             },
             {
                 "index": 1,
                 "success": True,
                 "translated": "pd.DataFrame.to_csv(df, 'output.csv')",
-                "errors": []
+                "errors": [],
             },
             {
                 "index": 2,
                 "success": True,
                 "translated": "plt.plot(x, y)",  # PLT translator not implemented yet
-                "errors": []
-            }
-        ]
+                "errors": [],
+            },
+        ],
     }
-    
-    print(f"Batch translation: {batch_result['successful']}/{batch_result['total']} successful")
-    for result in batch_result['results']:
+
+    print(
+        f"Batch translation: {batch_result['successful']}/{batch_result['total']} successful"
+    )
+    for result in batch_result["results"]:
         print(f"  [{result['index']}] {result['translated']}")
-    
+
     print("\n" + "=" * 50)
     print("Demo complete!")
 
 
 def show_architecture_benefits():
     """Show benefits of the unified architecture."""
-    
+
     print("\n\nUnified Architecture Benefits")
     print("=" * 50)
-    
+
     benefits = {
         "Previous Architecture": {
             "Servers": "Multiple (one per module)",
             "Code Duplication": "High",
             "Context Awareness": "Limited",
             "Extensibility": "Requires new server",
-            "Validation": "Basic"
+            "Validation": "Basic",
         },
         "Unified Architecture": {
             "Servers": "Single unified server",
             "Code Duplication": "Minimal (shared base)",
             "Context Awareness": "Full analysis",
             "Extensibility": "Just add translator class",
-            "Validation": "Comprehensive"
-        }
+            "Validation": "Comprehensive",
+        },
     }
-    
+
     # Print comparison table
     print(f"{'Feature':<20} {'Previous':<25} {'Unified':<25}")
     print("-" * 70)
-    
+
     for feature in benefits["Previous Architecture"]:
         prev = benefits["Previous Architecture"][feature]
         new = benefits["Unified Architecture"][feature]
         print(f"{feature:<20} {prev:<25} {new:<25}")
-    
+
     print("\n\nKey Improvements:")
     print("1. Single entry point for all translations")
     print("2. Intelligent module detection")
@@ -310,6 +306,6 @@ def show_architecture_benefits():
 if __name__ == "__main__":
     # Run async demo
     asyncio.run(demonstrate_unified_translator())
-    
+
     # Show architecture comparison
     show_architecture_benefits()

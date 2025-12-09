@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -240,9 +241,7 @@ class UnifiedSearcher:
                 if paper.similarity_score(unique_paper) > 0.85:
                     is_duplicate = True
                     # Keep the one with more information
-                    if (paper.citation_count or 0) > (
-                        unique_paper.citation_count or 0
-                    ):
+                    if (paper.citation_count or 0) > (unique_paper.citation_count or 0):
                         unique_papers.remove(unique_paper)
                         unique_papers.append(paper)
                     break
@@ -252,9 +251,7 @@ class UnifiedSearcher:
 
         return unique_papers
 
-    def build_local_index(
-        self, pdf_dirs: List[Union[str, Path]]
-    ) -> Dict[str, Any]:
+    def build_local_index(self, pdf_dirs: List[Union[str, Path]]) -> Dict[str, Any]:
         """Build local search index.
 
         Parameters
@@ -353,9 +350,7 @@ def search_sync(
         Search results
     """
     return asyncio.run(
-        search_async(
-            query, sources, limit, email, semantic_scholar_api_key, **kwargs
-        )
+        search_async(query, sources, limit, email, semantic_scholar_api_key, **kwargs)
     )
 
 

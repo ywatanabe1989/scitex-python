@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/url/strategies/find_pdf_urls_by_navigation.py"
-)
+
+__FILE__ = "./src/scitex/scholar/url/strategies/find_pdf_urls_by_navigation.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -104,9 +103,7 @@ async def find_pdf_urls_by_navigation(
                 continue
 
         if not pdf_href:
-            await browser_logger.debug(
-                page, f"{func_name}: No PDF links found on page"
-            )
+            await browser_logger.debug(page, f"{func_name}: No PDF links found on page")
             return []
 
         # Navigate to PDF URL in a new page to capture final URL
@@ -252,5 +249,6 @@ async def find_pdf_url_from_sciencedirect_api(
         )
 
     return None
+
 
 # EOF

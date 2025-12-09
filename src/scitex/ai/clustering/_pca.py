@@ -22,7 +22,6 @@ def pca(
     add_super_imposed=False,
     palette="viridis",
 ):
-
     assert len(data_all) == len(labels_all)
 
     if isinstance(data_all, list):

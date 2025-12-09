@@ -12,7 +12,9 @@ class LibrariesTasmaniaTranslator(BaseTranslator):
     """Libraries Tasmania."""
 
     LABEL = "Libraries Tasmania"
-    URL_TARGET_PATTERN = r"^https?://librariestas\.ent\.sirsidynix\.net\.au/client/en_AU/"
+    URL_TARGET_PATTERN = (
+        r"^https?://librariestas\.ent\.sirsidynix\.net\.au/client/en_AU/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

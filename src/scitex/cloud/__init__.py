@@ -12,21 +12,23 @@ from typing import Optional
 
 def is_cloud_environment() -> bool:
     """Check if running in SciTeX Cloud environment."""
-    return os.environ.get('SCITEX_CLOUD_CODE_WORKSPACE') == 'true'
+    return os.environ.get("SCITEX_CLOUD_CODE_WORKSPACE") == "true"
 
 
 def get_cloud_backend() -> str:
     """Get the cloud backend type."""
-    return os.environ.get('SCITEX_CLOUD_CODE_BACKEND', 'default')
+    return os.environ.get("SCITEX_CLOUD_CODE_BACKEND", "default")
 
 
 def get_project_root() -> Optional[Path]:
     """Get the project root directory."""
-    project_root = os.environ.get('SCITEX_CLOUD_CODE_PROJECT_ROOT')
+    project_root = os.environ.get("SCITEX_CLOUD_CODE_PROJECT_ROOT")
     return Path(project_root) if project_root else None
 
 
-def emit_inline_image(image_path: str, alt_text: str = "Figure", width: int = 600) -> None:
+def emit_inline_image(
+    image_path: str, alt_text: str = "Figure", width: int = 600
+) -> None:
     """
     Emit inline image marker for terminal display using iTerm2 protocol.
 
@@ -45,7 +47,7 @@ def emit_inline_image(image_path: str, alt_text: str = "Figure", width: int = 60
         return
 
     backend = get_cloud_backend()
-    if backend != 'inline':
+    if backend != "inline":
         return
 
     # Convert to absolute path if relative
@@ -73,11 +75,12 @@ def emit_inline_image(image_path: str, alt_text: str = "Figure", width: int = 60
             display_path = image_path
 
         # Emit marker that terminal consumer will detect
-        print(f'\n[SCITEX_IMAGE:{display_path}:{width}:{alt_text}]\n', flush=True)
+        print(f"\n[SCITEX_IMAGE:{display_path}:{width}:{alt_text}]\n", flush=True)
 
     except Exception as e:
         print(f"Error displaying inline image: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc(file=sys.stderr)
 
 
@@ -113,11 +116,11 @@ def emit_file_link(file_path: str, line_number: Optional[int] = None) -> None:
 
 
 __all__ = [
-    'is_cloud_environment',
-    'get_cloud_backend',
-    'get_project_root',
-    'emit_inline_image',
-    'emit_file_link',
+    "is_cloud_environment",
+    "get_cloud_backend",
+    "get_project_root",
+    "emit_inline_image",
+    "emit_file_link",
 ]
 
 # Auto-import matplotlib hook to enable inline plotting

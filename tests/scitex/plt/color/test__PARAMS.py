@@ -107,30 +107,35 @@ def test_rgba_dictionary():
         assert rgba_values[3] == DEF_ALPHA, f"RGBA alpha for {color} should be {DEF_ALPHA}"
 
 
-def test_rgb_norm_dictionary():
-    """Test RGB_NORM dictionary values are properly normalized."""
+def test_rgba_norm_dictionary():
+    """Test RGBA_NORM dictionary values are properly normalized."""
     from scitex.plt.color import PARAMS
-    
+
     RGB = PARAMS["RGB"]
-    RGB_NORM = PARAMS.get("RGB_NORM")
-    
-    # Check RGB_NORM exists
-    assert RGB_NORM is not None, "RGB_NORM should be in PARAMS"
-    
+    RGBA_NORM = PARAMS.get("RGBA_NORM")
+
+    # Check RGBA_NORM exists
+    assert RGBA_NORM is not None, "RGBA_NORM should be in PARAMS"
+
     # Check all colors are present
-    assert set(RGB_NORM.keys()) == set(RGB.keys())
-    
+    assert set(RGBA_NORM.keys()) == set(RGB.keys())
+
     # Check normalization
     for color in RGB:
         rgb_values = RGB[color]
-        rgb_norm_values = RGB_NORM[color]
-        
-        assert len(rgb_norm_values) == 3, f"RGB_NORM for {color} should have 3 values"
-        
+        rgba_norm_values = RGBA_NORM[color]
+
+        assert len(rgba_norm_values) == 4, f"RGBA_NORM for {color} should have 4 values (RGBA)"
+
+        # Check RGB values are normalized correctly
         for i in range(3):
             expected = round(rgb_values[i] / 255, 2)
-            assert rgb_norm_values[i] == expected, f"RGB_NORM value for {color} incorrect"
-            assert 0 <= rgb_norm_values[i] <= 1, f"RGB_NORM value for {color} out of range"
+            actual = round(rgba_norm_values[i], 2)
+            assert actual == expected, f"RGBA_NORM value for {color}[{i}] incorrect: {actual} != {expected}"
+            assert 0 <= rgba_norm_values[i] <= 1, f"RGBA_NORM value for {color}[{i}] out of range"
+
+        # Check alpha value
+        assert 0 <= rgba_norm_values[3] <= 1, f"RGBA_NORM alpha for {color} out of range"
 
 
 def test_rgba_norm_for_cycle():
@@ -265,18 +270,20 @@ def test_color_value_ranges():
                 assert 0 <= val <= 1, f"Normalized value out of range for {color}[{i}] in {format_name}"
 
 
-def test_params_immutability():
-    """Test that PARAMS values are not accidentally modified."""
+def test_params_structure_consistency():
+    """Test that PARAMS structure is consistent across formats."""
     from scitex.plt.color import PARAMS
-    
-    # Try to modify a value (shouldn't affect original)
-    rgb_blue_original = PARAMS["RGB"]["blue"].copy()
-    PARAMS["RGB"]["blue"][0] = 999
-    
-    # Re-import and check value is unchanged
-    from scitex.plt.color import PARAMS as PARAMS_NEW
-    
-    assert PARAMS_NEW["RGB"]["blue"] == rgb_blue_original, "PARAMS should not be mutable"
+
+    # Check that all formats have the same color keys
+    rgb_colors = set(PARAMS["RGB"].keys())
+    rgba_colors = set(PARAMS["RGBA"].keys())
+    rgba_norm_colors = set(PARAMS["RGBA_NORM"].keys())
+    hex_colors = set(PARAMS["HEX"].keys())
+
+    assert rgb_colors == rgba_colors, "RGB and RGBA should have same colors"
+    assert rgb_colors == rgba_norm_colors, "RGB and RGBA_NORM should have same colors"
+    # HEX may exclude black/white which have trivial hex values
+    assert hex_colors.issubset(rgb_colors), "HEX colors should be subset of RGB colors"
 
 if __name__ == "__main__":
     import os

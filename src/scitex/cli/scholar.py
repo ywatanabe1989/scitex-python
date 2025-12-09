@@ -12,8 +12,10 @@ import sys
 import asyncio
 from pathlib import Path
 
+from scitex.config import get_paths
 
-@click.group(context_settings={'help_option_names': ['-h', '--help']})
+
+@click.group(context_settings={"help_option_names": ["-h", "--help"]})
 def scholar():
     """
     Literature management with browser automation
@@ -26,19 +28,26 @@ def scholar():
     - OpenAthens/institutional access support
 
     \b
-    Storage: ~/.scitex/scholar/library/
+    Storage: $SCITEX_DIR/scholar/library/
     Backend: Browser automation + metadata APIs
     """
     pass
 
 
 @scholar.command()
-@click.option('--doi', help='DOI of the paper (e.g., "10.1038/nature12373")')
-@click.option('--title', help='Paper title (will resolve DOI automatically)')
-@click.option('--project', help='Project name for organizing papers')
-@click.option('--browser-mode', type=click.Choice(['stealth', 'interactive']), default='stealth', help='Browser mode for PDF download')
-@click.option('--chrome-profile', default='system', help='Chrome profile name')
-@click.option('--force', '-f', is_flag=True, help='Force re-download even if files exist')
+@click.option("--doi", help='DOI of the paper (e.g., "10.1038/nature12373")')
+@click.option("--title", help="Paper title (will resolve DOI automatically)")
+@click.option("--project", help="Project name for organizing papers")
+@click.option(
+    "--browser-mode",
+    type=click.Choice(["stealth", "interactive"]),
+    default="stealth",
+    help="Browser mode for PDF download",
+)
+@click.option("--chrome-profile", default="system", help="Chrome profile name")
+@click.option(
+    "--force", "-f", is_flag=True, help="Force re-download even if files exist"
+)
 def single(doi, title, project, browser_mode, chrome_profile, force):
     """
     Process a single paper (DOI or title)
@@ -89,12 +98,25 @@ def single(doi, title, project, browser_mode, chrome_profile, force):
 
 
 @scholar.command()
-@click.option('--dois', multiple=True, help='DOIs to process (can be specified multiple times)')
-@click.option('--titles', multiple=True, help='Paper titles to process (can be specified multiple times)')
-@click.option('--project', help='Project name for organizing papers')
-@click.option('--num-workers', type=int, default=4, help='Number of parallel workers')
-@click.option('--browser-mode', type=click.Choice(['stealth', 'interactive']), default='stealth', help='Browser mode for all workers')
-@click.option('--chrome-profile', default='system', help='Base Chrome profile to sync from')
+@click.option(
+    "--dois", multiple=True, help="DOIs to process (can be specified multiple times)"
+)
+@click.option(
+    "--titles",
+    multiple=True,
+    help="Paper titles to process (can be specified multiple times)",
+)
+@click.option("--project", help="Project name for organizing papers")
+@click.option("--num-workers", type=int, default=4, help="Number of parallel workers")
+@click.option(
+    "--browser-mode",
+    type=click.Choice(["stealth", "interactive"]),
+    default="stealth",
+    help="Browser mode for all workers",
+)
+@click.option(
+    "--chrome-profile", default="system", help="Base Chrome profile to sync from"
+)
 def parallel(dois, titles, project, num_workers, browser_mode, chrome_profile):
     """
     Process multiple papers in parallel
@@ -144,12 +166,21 @@ def parallel(dois, titles, project, num_workers, browser_mode, chrome_profile):
 
 
 @scholar.command()
-@click.argument('bibtex_file', type=click.Path(exists=True))
-@click.option('--project', help='Project name for organizing papers')
-@click.option('--output', help='Output path for enriched BibTeX (default: {input}_processed.bib)')
-@click.option('--num-workers', type=int, default=4, help='Number of parallel workers')
-@click.option('--browser-mode', type=click.Choice(['stealth', 'interactive']), default='stealth', help='Browser mode for all workers')
-@click.option('--chrome-profile', default='system', help='Base Chrome profile to sync from')
+@click.argument("bibtex_file", type=click.Path(exists=True))
+@click.option("--project", help="Project name for organizing papers")
+@click.option(
+    "--output", help="Output path for enriched BibTeX (default: {input}_processed.bib)"
+)
+@click.option("--num-workers", type=int, default=4, help="Number of parallel workers")
+@click.option(
+    "--browser-mode",
+    type=click.Choice(["stealth", "interactive"]),
+    default="stealth",
+    help="Browser mode for all workers",
+)
+@click.option(
+    "--chrome-profile", default="system", help="Base Chrome profile to sync from"
+)
 def bibtex(bibtex_file, project, output, num_workers, browser_mode, chrome_profile):
     """
     Process papers from BibTeX file
@@ -201,7 +232,7 @@ def bibtex(bibtex_file, project, output, num_workers, browser_mode, chrome_profi
 
 
 @scholar.command()
-@click.option('--project', help='Show library for specific project')
+@click.option("--project", help="Show library for specific project")
 def library(project):
     """
     Show your Scholar library
@@ -211,7 +242,7 @@ def library(project):
         scitex scholar library
         scitex scholar library --project neuroscience
     """
-    library_path = Path.home() / '.scitex' / 'scholar' / 'library'
+    library_path = get_paths().scholar_library
 
     if not library_path.exists():
         click.echo("No library found. Process some papers first!")
@@ -233,8 +264,10 @@ def library(project):
                 click.echo(f"  - {item.name}")
     else:
         # List all projects
-        master_path = library_path / 'MASTER'
-        project_dirs = [d for d in library_path.iterdir() if d.is_dir() and d.name != 'MASTER']
+        master_path = library_path / "MASTER"
+        project_dirs = [
+            d for d in library_path.iterdir() if d.is_dir() and d.name != "MASTER"
+        ]
 
         if master_path.exists():
             num_papers = len(list(master_path.iterdir()))
@@ -256,20 +289,20 @@ def config():
 
     Displays library location, browser settings, and authentication status.
     """
-    library_path = Path.home() / '.scitex' / 'scholar' / 'library'
+    library_path = get_paths().scholar_library
 
     click.echo("\n=== SciTeX Scholar Configuration ===\n")
     click.echo(f"Library location: {library_path}")
     click.echo(f"Library exists: {'Yes' if library_path.exists() else 'No'}")
 
     if library_path.exists():
-        master_path = library_path / 'MASTER'
+        master_path = library_path / "MASTER"
         if master_path.exists():
             num_papers = len(list(master_path.iterdir()))
             click.echo(f"Papers in library: {num_papers}")
 
     # Check for Chrome profiles
-    chrome_config_path = Path.home() / '.config' / 'google-chrome'
+    chrome_config_path = Path.home() / ".config" / "google-chrome"
     click.echo(f"\nChrome config: {chrome_config_path}")
     click.echo(f"Chrome available: {'Yes' if chrome_config_path.exists() else 'No'}")
 

@@ -66,7 +66,9 @@ def plot_circular_hist(
         Container of individual artists used to create the histogram
         or list of such containers if there are multiple input datasets.
     """
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
 
     # Wrap angles to [-pi, pi)
     radians = (radians + np.pi) % (2 * np.pi) - np.pi

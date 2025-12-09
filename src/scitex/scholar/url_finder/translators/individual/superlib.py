@@ -12,7 +12,9 @@ class SuperlibTranslator(BaseTranslator):
     """Superlib."""
 
     LABEL = "Superlib"
-    URL_TARGET_PATTERN = r"^https?://(book|jour)\.ucdrs\.superlib\.net/(search|views/specific)"
+    URL_TARGET_PATTERN = (
+        r"^https?://(book|jour)\.ucdrs\.superlib\.net/(search|views/specific)"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

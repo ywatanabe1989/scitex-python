@@ -16,6 +16,7 @@ from playwright.async_api import Page
 
 class UserResponse(Enum):
     """Standardized user responses."""
+
     YES = "yes"
     NO = "no"
     ACCEPT = "accept"

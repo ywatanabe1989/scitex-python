@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -128,7 +129,9 @@ def configure(
 
     # Configure basic logging with our handlers
     logging.basicConfig(
-        level=level, handlers=handlers, force=True  # Force reconfiguration
+        level=level,
+        handlers=handlers,
+        force=True,  # Force reconfiguration
     )
 
     # Enable print capture if requested

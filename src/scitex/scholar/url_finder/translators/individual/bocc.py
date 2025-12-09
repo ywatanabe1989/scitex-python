@@ -18,13 +18,13 @@ TRANSLATOR_INFO = {
     "in_repository": True,
     "translator_type": 4,
     "browser_support": "gcsbv",
-    "last_updated": "2014-04-04 10:08:43"
+    "last_updated": "2014-04-04 10:08:43",
 }
 
 
 def detect_web(doc: Any, url: str) -> Optional[str]:
     """Detect if the page is multiple items"""
-    agenda_td = doc.select_one('table.ag tbody tr td.agenda')
+    agenda_td = doc.select_one("table.ag tbody tr td.agenda")
     if agenda_td:
         return "multiple"
     return None
@@ -32,12 +32,12 @@ def detect_web(doc: Any, url: str) -> Optional[str]:
 
 def get_site_base(url: str) -> str:
     """Extract site base URL"""
-    match = re.match(r'^https?://[^/]*bocc[^/]*/', url)
+    match = re.match(r"^https?://[^/]*bocc[^/]*/", url)
     if match:
         site = match.group(0)
-        site = site.replace('/_esp', '')
-        site = site.replace('/_listas', '')
-        return site.rstrip('/')
+        site = site.replace("/_esp", "")
+        site = site.replace("/_listas", "")
+        return site.rstrip("/")
     return ""
 
 
@@ -45,40 +45,40 @@ def get_tags(doc: Any) -> List[str]:
     """Extract tags from tematica"""
     tags = []
 
-    title_elem = doc.select_one('title')
+    title_elem = doc.select_one("title")
     if not title_elem:
         return tags
 
     title_text = title_elem.get_text(strip=True)
 
-    if 'Temática' not in title_text:
+    if "Temática" not in title_text:
         return tags
 
     # Get tematicas list
-    tematica_links = doc.select('a.tematica')
+    tematica_links = doc.select("a.tematica")
     tematicas = {}
 
     for link in tematica_links:
-        href = link.get('href', '')
+        href = link.get("href", "")
         name = link.get_text(strip=True)
 
         # Extract number from href
-        match = re.search(r'=(\d+)$', href)
+        match = re.search(r"=(\d+)$", href)
         if match:
             num = match.group(1)
             tematicas[num] = name
 
     # Get current tematica number
-    match = re.search(r':\s(\d+)\s-', title_text)
+    match = re.search(r":\s(\d+)\s-", title_text)
     if match and match.group(1) in tematicas:
         tematica_name = tematicas[match.group(1)]
 
         # Split tematica name into tags
-        if ' e ' in tematica_name:
-            parts = tematica_name.split(' e ')
+        if " e " in tematica_name:
+            parts = tematica_name.split(" e ")
             for part in parts:
-                if ',' in part:
-                    sub_parts = part.split(',')
+                if "," in part:
+                    sub_parts = part.split(",")
                     tags.extend([p.strip() for p in sub_parts if p.strip()])
                 else:
                     if part.strip():
@@ -93,20 +93,20 @@ def get_tags(doc: Any) -> List[str]:
 def parse_articles(html_content: str, site_base: str) -> List[Dict[str, Any]]:
     """Parse articles from HTML content"""
     articles = []
-    lines = html_content.split('<br><br>')
+    lines = html_content.split("<br><br>")
 
     re_url = re.compile(r'href="([^"]+)')
     re_autor = re.compile(r'autor.php[^>]+"agenda">([^<]+)', re.IGNORECASE)
-    re_date = re.compile(r'(\d{4})$')
+    re_date = re.compile(r"(\d{4})$")
 
     for line in lines:
         # Get first br-separated part as title
-        parts = line.split('<br>')
+        parts = line.split("<br>")
         if not parts:
             continue
 
         # Clean title
-        title = re.sub(r'<[^>]+>', '', parts[0])
+        title = re.sub(r"<[^>]+>", "", parts[0])
         title = title.strip()
 
         # Get URL
@@ -115,7 +115,7 @@ def parse_articles(html_content: str, site_base: str) -> List[Dict[str, Any]]:
             continue
 
         url = url_match.group(1)
-        if 'autor' in url:
+        if "autor" in url:
             continue
 
         # Get authors
@@ -131,37 +131,39 @@ def parse_articles(html_content: str, site_base: str) -> List[Dict[str, Any]]:
             date = date_match.group(1)
 
         # Determine file type
-        file_url = site_base + url.replace('..', '')
-        if re.search(r'\.(html?|HTML?)$', file_url):
-            file_title = 'Anexo HTML'
-            file_mime = 'text/html'
-        elif re.search(r'\.(pdf|PDF)$', file_url):
-            file_title = 'Anexo PDF'
-            file_mime = 'application/pdf'
+        file_url = site_base + url.replace("..", "")
+        if re.search(r"\.(html?|HTML?)$", file_url):
+            file_title = "Anexo HTML"
+            file_mime = "text/html"
+        elif re.search(r"\.(pdf|PDF)$", file_url):
+            file_title = "Anexo PDF"
+            file_mime = "application/pdf"
         else:
-            file_title = 'Anexo'
-            file_mime = 'application/octet-stream'
+            file_title = "Anexo"
+            file_mime = "application/octet-stream"
 
-        articles.append({
-            'url': url,
-            'title': title,
-            'authors': authors,
-            'date': date,
-            'file_url': file_url,
-            'file_title': file_title,
-            'file_mime': file_mime
-        })
+        articles.append(
+            {
+                "url": url,
+                "title": title,
+                "authors": authors,
+                "date": date,
+                "file_url": file_url,
+                "file_title": file_title,
+                "file_mime": file_mime,
+            }
+        )
 
     return articles
 
 
 def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str, str]]:
     """Get search results from a multiple item page"""
-    agenda_td = doc.select_one('table.ag tbody tr td.agenda')
+    agenda_td = doc.select_one("table.ag tbody tr td.agenda")
     if not agenda_td:
         return None
 
-    site_base = get_site_base(doc.find('base').get('href') if doc.find('base') else '')
+    site_base = get_site_base(doc.find("base").get("href") if doc.find("base") else "")
 
     html_content = str(agenda_td)
     articles = parse_articles(html_content, site_base)
@@ -174,7 +176,7 @@ def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str,
 
     items = {}
     for article in articles:
-        items[article['url']] = article['title']
+        items[article["url"]] = article["title"]
 
     return items if items else None
 
@@ -182,7 +184,7 @@ def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str,
 def scrape(doc: Any, url: str, selected_items: Dict[str, str]) -> List[Dict[str, Any]]:
     """Scrape selected items"""
     site_base = get_site_base(url)
-    agenda_td = doc.select_one('table.ag tbody tr td.agenda')
+    agenda_td = doc.select_one("table.ag tbody tr td.agenda")
     if not agenda_td:
         return []
 
@@ -194,37 +196,41 @@ def scrape(doc: Any, url: str, selected_items: Dict[str, str]) -> List[Dict[str,
 
     results = []
     for article in articles:
-        if article['url'] not in selected_items:
+        if article["url"] not in selected_items:
             continue
 
         item = {
             "itemType": "journalArticle",
-            "title": article['title'],
+            "title": article["title"],
             "creators": [],
-            "date": article['date'],
+            "date": article["date"],
             "publicationTitle": "Biblioteca Online de Ciências da Comunicação",
             "ISSN": "1646-3137",
             "journalAbbreviation": "BOCC",
-            "url": article['file_url'],
-            "attachments": [{
-                "url": article['file_url'],
-                "title": article['file_title'],
-                "mimeType": article['file_mime']
-            }],
+            "url": article["file_url"],
+            "attachments": [
+                {
+                    "url": article["file_url"],
+                    "title": article["file_title"],
+                    "mimeType": article["file_mime"],
+                }
+            ],
             "tags": tags[:],
             "notes": [],
-            "seeAlso": []
+            "seeAlso": [],
         }
 
         # Add authors
-        for author_name in article['authors']:
+        for author_name in article["authors"]:
             parts = author_name.split()
             if len(parts) > 1:
-                item["creators"].append({
-                    "firstName": " ".join(parts[:-1]),
-                    "lastName": parts[-1],
-                    "creatorType": "author"
-                })
+                item["creators"].append(
+                    {
+                        "firstName": " ".join(parts[:-1]),
+                        "lastName": parts[-1],
+                        "creatorType": "author",
+                    }
+                )
 
         results.append(item)
 

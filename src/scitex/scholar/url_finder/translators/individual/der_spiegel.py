@@ -34,7 +34,7 @@ class DerSpiegelTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2021-07-05 17:55:21"
+        "lastUpdated": "2021-07-05 17:55:21",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -45,30 +45,34 @@ class DerSpiegelTranslator:
                 data = json.loads(ld_json_tag.string)
                 if isinstance(data, list) and len(data) > 0:
                     data = data[0]
-                if data.get('@type') == 'NewsArticle':
-                    return 'newspaperArticle'
+                if data.get("@type") == "NewsArticle":
+                    return "newspaperArticle"
             except (json.JSONDecodeError, IndexError):
                 pass
 
         if self.get_search_results(doc, check_only=True):
-            return 'multiple'
+            return "multiple"
 
-        return ''
+        return ""
 
-    def get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Optional[Dict[str, str]]:
+    def get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Optional[Dict[str, str]]:
         """Extract search results."""
         items = {}
-        rows = doc.select('[data-search-results] article h2 > a, [data-area="article-teaser-list"] article h2 > a')
+        rows = doc.select(
+            '[data-search-results] article h2 > a, [data-area="article-teaser-list"] article h2 > a'
+        )
 
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text(strip=True)
 
             if not href or not title:
                 continue
 
             if check_only:
-                return {'found': 'true'}
+                return {"found": "true"}
 
             items[href] = title
 
@@ -78,7 +82,7 @@ class DerSpiegelTranslator:
         """Main extraction method."""
         page_type = self.detect_web(doc, url)
 
-        if page_type == 'multiple':
+        if page_type == "multiple":
             return self.get_search_results(doc, check_only=False)
         else:
             return self.scrape(doc, url)
@@ -91,37 +95,37 @@ class DerSpiegelTranslator:
             authors = [authors]
 
         for author in authors:
-            if author.get('@type') == 'Organization':
+            if author.get("@type") == "Organization":
                 continue
 
-            name = author.get('name', '')
+            name = author.get("name", "")
             if name:
                 names = name.split()
                 if len(names) >= 2:
-                    creators.append({
-                        'firstName': ' '.join(names[:-1]),
-                        'lastName': names[-1],
-                        'creatorType': 'author'
-                    })
+                    creators.append(
+                        {
+                            "firstName": " ".join(names[:-1]),
+                            "lastName": names[-1],
+                            "creatorType": "author",
+                        }
+                    )
                 else:
-                    creators.append({
-                        'lastName': name,
-                        'creatorType': 'author',
-                        'fieldMode': True
-                    })
+                    creators.append(
+                        {"lastName": name, "creatorType": "author", "fieldMode": True}
+                    )
 
         return creators
 
     def scrape(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
         """Scrape article metadata."""
         item = {
-            'itemType': 'newspaperArticle',
-            'publicationTitle': 'Der Spiegel',
-            'ISSN': '2195-1349',
-            'url': url,
-            'creators': [],
-            'tags': [],
-            'attachments': []
+            "itemType": "newspaperArticle",
+            "publicationTitle": "Der Spiegel",
+            "ISSN": "2195-1349",
+            "url": url,
+            "creators": [],
+            "tags": [],
+            "attachments": [],
         }
 
         # Parse JSON-LD
@@ -133,55 +137,53 @@ class DerSpiegelTranslator:
                     json_data = json_data[0]
 
                 # Extract title
-                if json_data.get('headline'):
-                    item['title'] = json_data['headline']
+                if json_data.get("headline"):
+                    item["title"] = json_data["headline"]
 
                 # Extract authors
-                if json_data.get('author'):
-                    item['creators'] = self._clean_author_objects(json_data['author'])
+                if json_data.get("author"):
+                    item["creators"] = self._clean_author_objects(json_data["author"])
 
                 # Extract URL
-                if json_data.get('url'):
-                    item['url'] = json_data['url']
+                if json_data.get("url"):
+                    item["url"] = json_data["url"]
 
                 # Extract section
-                if json_data.get('articleSection'):
-                    item['section'] = json_data['articleSection']
+                if json_data.get("articleSection"):
+                    item["section"] = json_data["articleSection"]
 
                 # Extract date
-                date = json_data.get('dateModified') or json_data.get('dateCreated')
+                date = json_data.get("dateModified") or json_data.get("dateCreated")
                 if date:
                     # Convert to ISO format
-                    item['date'] = date[:10] if len(date) >= 10 else date
+                    item["date"] = date[:10] if len(date) >= 10 else date
 
                 # Extract abstract
-                if json_data.get('description'):
-                    item['abstractNote'] = json_data['description']
+                if json_data.get("description"):
+                    item["abstractNote"] = json_data["description"]
 
                 # Extract language
-                if json_data.get('inLanguage'):
-                    item['language'] = json_data['inLanguage']
+                if json_data.get("inLanguage"):
+                    item["language"] = json_data["inLanguage"]
 
             except (json.JSONDecodeError, IndexError, KeyError):
                 pass
 
         # Extract keywords as tags
-        keywords_meta = doc.find('meta', {'name': 'news_keywords'})
-        if keywords_meta and keywords_meta.get('content'):
-            keywords = keywords_meta['content'].split(', ')
+        keywords_meta = doc.find("meta", {"name": "news_keywords"})
+        if keywords_meta and keywords_meta.get("content"):
+            keywords = keywords_meta["content"].split(", ")
             for kw in keywords:
                 if kw.strip():
-                    item['tags'].append({'tag': kw.strip()})
+                    item["tags"].append({"tag": kw.strip()})
 
         # Set library catalog from domain
-        hostname = url.split('/')[2] if '/' in url else 'www.spiegel.de'
-        item['libraryCatalog'] = hostname
+        hostname = url.split("/")[2] if "/" in url else "www.spiegel.de"
+        item["libraryCatalog"] = hostname
 
         # Add snapshot attachment
-        item['attachments'].append({
-            'title': 'Snapshot',
-            'mimeType': 'text/html',
-            'url': url
-        })
+        item["attachments"].append(
+            {"title": "Snapshot", "mimeType": "text/html", "url": url}
+        )
 
         return item

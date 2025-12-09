@@ -41,7 +41,7 @@ def stx_conf_mat(
 
     Parameters
     ----------
-    axis : plt.Axes or scitex.plt._subplots._AxisWrapper.AxisWrapper
+    axis : plt.Axes or scitex.plt._subplots.AxisWrapper
         Matplotlib axes or scitex axis wrapper to plot on
     conf_mat_2d : Union[np.ndarray, pd.DataFrame], shape (n_classes, n_classes)
         2D confusion matrix data (true labels × predicted labels)
@@ -68,7 +68,7 @@ def stx_conf_mat(
 
     Returns
     -------
-    Union[plt.Axes, Tuple[plt.Axes, float]] or Union[scitex.plt._subplots._AxisWrapper.AxisWrapper, Tuple[scitex.plt._subplots._AxisWrapper.AxisWrapper, float]]
+    Union[plt.Axes, Tuple[plt.Axes, float]] or Union[scitex.plt._subplots.AxisWrapper, Tuple[scitex.plt._subplots.AxisWrapper, float]]
         Axes object and optionally balanced accuracy
 
     Example
@@ -81,7 +81,9 @@ def stx_conf_mat(
     Balanced Accuracy: 0.889
     """
 
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
 
     if not isinstance(conf_mat_2d, pd.DataFrame):
         conf_mat_2d = pd.DataFrame(conf_mat_2d)
@@ -132,5 +134,6 @@ def stx_conf_mat(
         return axis, bacc_val
     else:
         return axis, None
+
 
 # EOF

@@ -4,9 +4,10 @@
 
 import logging
 import logging.handlers
-import os
 from datetime import datetime
 from pathlib import Path
+
+from scitex.config import get_scitex_dir
 
 from ._formatters import SciTeXConsoleFormatter, SciTeXFileFormatter
 
@@ -19,9 +20,11 @@ def create_console_handler(level=logging.INFO):
     return handler
 
 
-def create_file_handler(log_file_path, level=logging.INFO, max_bytes=10*1024*1024, backup_count=5):
+def create_file_handler(
+    log_file_path, level=logging.INFO, max_bytes=10 * 1024 * 1024, backup_count=5
+):
     """Create a rotating file handler for log files.
-    
+
     Args:
         log_file_path: Path to the log file
         level: Log level for the handler
@@ -31,13 +34,10 @@ def create_file_handler(log_file_path, level=logging.INFO, max_bytes=10*1024*102
     # Ensure the log directory exists
     log_dir = Path(log_file_path).parent
     log_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Use RotatingFileHandler to prevent log files from growing too large
     handler = logging.handlers.RotatingFileHandler(
-        log_file_path,
-        maxBytes=max_bytes,
-        backupCount=backup_count,
-        encoding='utf-8'
+        log_file_path, maxBytes=max_bytes, backupCount=backup_count, encoding="utf-8"
     )
     handler.setLevel(level)
     handler.setFormatter(SciTeXFileFormatter())
@@ -45,20 +45,19 @@ def create_file_handler(log_file_path, level=logging.INFO, max_bytes=10*1024*102
 
 
 def get_default_log_path():
-    """Get the default log file path for SciTeX."""
-    # Use ~/.scitex/logs/ directory
-    scitex_dir = Path.home() / '.scitex'
-    logs_dir = scitex_dir / 'logs'
-    
+    """Get the default log file path for SciTeX.
+
+    Uses SCITEX_DIR environment variable with fallback to ~/.scitex.
+    Supports .env file loading for configuration.
+    """
+    scitex_dir = get_scitex_dir()
+    logs_dir = scitex_dir / "logs"
+
     # Create timestamped log file
     timestamp = datetime.now().strftime("%Y-%m-%d")
-    log_file = logs_dir / f'scitex-{timestamp}.log'
-    
+    log_file = logs_dir / f"scitex-{timestamp}.log"
+
     return str(log_file)
 
 
-__all__ = [
-    'create_console_handler',
-    'create_file_handler', 
-    'get_default_log_path'
-]
+__all__ = ["create_console_handler", "create_file_handler", "get_default_log_path"]

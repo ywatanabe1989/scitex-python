@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/pdf_download/strategies/manual_download_utils.py"
-)
+
+__FILE__ = "./src/scitex/scholar/pdf_download/strategies/manual_download_utils.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -78,9 +77,7 @@ class FlexibleFilenameGenerator:
             from urllib.parse import urlparse
 
             parsed = urlparse(url)
-            base = f"{parsed.netloc}_{parsed.path}".replace("/", "_").replace(
-                ".", "_"
-            )
+            base = f"{parsed.netloc}_{parsed.path}".replace("/", "_").replace(".", "_")
             base = re.sub(r'[<>:"|?*]', "", base)
         else:
             # Last resort: timestamp-based
@@ -194,10 +191,7 @@ class DownloadMonitorAndSync:
                 return None
 
             # Report progress periodically
-            if (
-                logger_func
-                and (elapsed - last_progress_time) >= progress_interval
-            ):
+            if logger_func and (elapsed - last_progress_time) >= progress_interval:
                 current_file_count = len(self._get_current_files())
                 logger_func(
                     f"{self.name}: Still waiting for download... ({remaining:.0f}s remaining, "
@@ -571,9 +565,7 @@ async def show_stop_automation_button_async(
         )
 
     except Exception as e:
-        logger.error(
-            f"show_stop_automation_button_async: Failed to inject button: {e}"
-        )
+        logger.error(f"show_stop_automation_button_async: Failed to inject button: {e}")
         return
 
     # Wait for DOUBLE-CLICK (no timeout - always available)
@@ -992,5 +984,6 @@ async def wait_for_manual_mode_activation_async(
 
     except Exception as e:
         pass
+
 
 # EOF

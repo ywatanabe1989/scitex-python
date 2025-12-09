@@ -290,17 +290,17 @@ if __name__ == "__main__":
 #         # Check for numpy arrays first
 #         if isinstance(string_or_pattern, np.ndarray):
 #             return string_or_pattern.tolist()
-#         
+# 
 #         # Check for pandas types if pandas is available
 #         if pd is not None:
 #             if isinstance(string_or_pattern, (pd.Series, pd.Index)):
 #                 return string_or_pattern.tolist()
-#         
+# 
 #         # Check for xarray types if xarray is available
 #         if xr is not None:
 #             if isinstance(string_or_pattern, xr.DataArray):
 #                 return string_or_pattern.tolist()
-#         
+# 
 #         # Check for other iterables
 #         if isinstance(string_or_pattern, abc.KeysView):
 #             return list(string_or_pattern)
@@ -325,9 +325,9 @@ if __name__ == "__main__":
 #     keys_matched = list(np.array(strings)[indices_matched])
 # 
 #     if ensure_one:
-#         assert (
-#             len(indices_matched) == 1
-#         ), "Expected exactly one match, but found {}".format(len(indices_matched))
+#         assert len(indices_matched) == 1, (
+#             "Expected exactly one match, but found {}".format(len(indices_matched))
+#         )
 # 
 #     if as_bool:
 #         bool_matched = np.zeros(len(strings), dtype=bool)

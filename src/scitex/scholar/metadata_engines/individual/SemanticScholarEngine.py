@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -34,9 +35,7 @@ logger = logging.getLogger(__name__)
 class SemanticScholarEngine(BaseDOIEngine):
     """Combined Semantic Scholar engine with enhanced features."""
 
-    def __init__(
-        self, email: str = "research@example.com", api_key: str = None
-    ):
+    def __init__(self, email: str = "research@example.com", api_key: str = None):
         super().__init__(email)
         self.api_key = api_key or os.getenv("SEMANTIC_SCHOLAR_API_KEY")
         self.base_url = "https://api.semanticscholar.org/graph/v1"
@@ -105,13 +104,9 @@ class SemanticScholarEngine(BaseDOIEngine):
         """Search by DOI directly"""
         self._handle_rate_limit()
 
-        doi = doi.replace("https://doi.org/", "").replace(
-            "http://doi.org/", ""
-        )
+        doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
         url = f"{self.base_url}/paper/{doi}"
-        params = {
-            "fields": "title,year,authors,externalIds,url,venue,abstract"
-        }
+        params = {"fields": "title,year,authors,externalIds,url,venue,abstract"}
 
         try:
             assert return_as in [
@@ -181,8 +176,7 @@ class SemanticScholarEngine(BaseDOIEngine):
                 paper_title = paper.get("title", "")
                 paper_year = paper.get("year")
                 paper_authors = [
-                    author.get("name", "")
-                    for author in paper.get("authors", [])
+                    author.get("name", "") for author in paper.get("authors", [])
                 ]
 
                 # Check title match
@@ -226,9 +220,7 @@ class SemanticScholarEngine(BaseDOIEngine):
         wait=wait_exponential(multiplier=2, min=4, max=20),
         retry=retry_if_exception_type((requests.ConnectionError,)),
     )
-    def _search_by_corpus_id(
-        self, corpus_id: str, return_as: str
-    ) -> Optional[Dict]:
+    def _search_by_corpus_id(self, corpus_id: str, return_as: str) -> Optional[Dict]:
         """Search by Corpus ID directly"""
         if not corpus_id.isdigit():
             corpus_id = corpus_id.replace("CorpusId:", "")
@@ -236,9 +228,7 @@ class SemanticScholarEngine(BaseDOIEngine):
         self._handle_rate_limit()
 
         url = f"{self.base_url}/paper/CorpusId:{corpus_id}"
-        params = {
-            "fields": "title,year,authors,externalIds,url,venue,abstract"
-        }
+        params = {"fields": "title,year,authors,externalIds,url,venue,abstract"}
 
         try:
             assert return_as in [
@@ -251,9 +241,7 @@ class SemanticScholarEngine(BaseDOIEngine):
                 raise requests.ConnectionError("Rate limit exceeded")
 
             if response.status_code == 404:
-                logger.warning(
-                    f"Semantic Scholar Corpus ID not found: {corpus_id}"
-                )
+                logger.warning(f"Semantic Scholar Corpus ID not found: {corpus_id}")
                 return None
 
             response.raise_for_status()
@@ -303,12 +291,8 @@ class SemanticScholarEngine(BaseDOIEngine):
                 "title_engines": [self.name] if paper_title else None,
                 "year": paper_year if paper_year else None,
                 "year_engines": [self.name] if paper_year else None,
-                "abstract": (
-                    paper.get("abstract") if paper.get("abstract") else None
-                ),
-                "abstract_engines": (
-                    [self.name] if paper.get("abstract") else None
-                ),
+                "abstract": (paper.get("abstract") if paper.get("abstract") else None),
+                "abstract_engines": ([self.name] if paper.get("abstract") else None),
                 "authors": extracted_authors if extracted_authors else None,
                 "authors_engines": [self.name] if extracted_authors else None,
             },
@@ -323,7 +307,9 @@ class SemanticScholarEngine(BaseDOIEngine):
                 "publisher_engines": [self.name] if paper.get("url") else None,
                 "arxiv": f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else None,
                 "arxiv_engines": [self.name] if arxiv_id else None,
-                "corpus_id": f"https://www.semanticscholar.org/paper/{corpus_id}" if corpus_id else None,
+                "corpus_id": f"https://www.semanticscholar.org/paper/{corpus_id}"
+                if corpus_id
+                else None,
                 "corpus_id_engines": [self.name] if corpus_id else None,
             },
             "system": {
@@ -341,7 +327,9 @@ class SemanticScholarEngine(BaseDOIEngine):
     def _clean_doi(self, doi: str) -> str:
         return doi.strip() if doi else doi
 
-    async def convert_corpus_id_to_doi_async(self, corpus_id: str, page) -> Optional[str]:
+    async def convert_corpus_id_to_doi_async(
+        self, corpus_id: str, page
+    ) -> Optional[str]:
         """Convert Semantic Scholar Corpus ID to DOI by navigating to page and extracting.
 
         Args:
@@ -373,7 +361,9 @@ class SemanticScholarEngine(BaseDOIEngine):
             if doi_meta:
                 doi = await doi_meta.get_attribute("content")
                 if doi:
-                    logger.info(f"Found DOI in meta tag for Corpus ID {corpus_id}: {doi}")
+                    logger.info(
+                        f"Found DOI in meta tag for Corpus ID {corpus_id}: {doi}"
+                    )
                     return doi
 
             # Method 2: Look for DOI link in page
@@ -388,14 +378,19 @@ class SemanticScholarEngine(BaseDOIEngine):
             # Method 3: Search for DOI pattern in page text
             content = await page.content()
             import re
-            doi_pattern = r'10\.\d{4,}/[-._;()/:\w]+'
+
+            doi_pattern = r"10\.\d{4,}/[-._;()/:\w]+"
             matches = re.findall(doi_pattern, content)
             if matches:
                 doi = matches[0]  # Take first match
-                logger.info(f"Found DOI pattern in content for Corpus ID {corpus_id}: {doi}")
+                logger.info(
+                    f"Found DOI pattern in content for Corpus ID {corpus_id}: {doi}"
+                )
                 return doi
 
-            logger.warning(f"No DOI found on Semantic Scholar page for Corpus ID {corpus_id}")
+            logger.warning(
+                f"No DOI found on Semantic Scholar page for Corpus ID {corpus_id}"
+            )
             return None
 
         except Exception as e:
@@ -417,9 +412,7 @@ if __name__ == "__main__":
 
     # Search by title
     outputs["metadata_by_title_dict"] = engine.search(title=TITLE)
-    outputs["metadata_by_title_json"] = engine.search(
-        title=TITLE, return_as="json"
-    )
+    outputs["metadata_by_title_json"] = engine.search(title=TITLE, return_as="json")
 
     # Emptry Result
     outputs["empty_dict"] = engine._create_minimal_metadata(return_as="dict")

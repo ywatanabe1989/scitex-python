@@ -35,7 +35,7 @@ def example_import():
         library_id=library_id,
         library_type="user",
         api_key=api_key,
-        project="zotero_test"
+        project="zotero_test",
     )
 
     # Import specific collection
@@ -44,7 +44,7 @@ def example_import():
         collection_name="Machine Learning",  # Change to your collection name
         limit=5,  # Limit for testing
         include_pdfs=True,
-        include_annotations=True
+        include_annotations=True,
     )
     logger.success(f"Imported {len(papers)} papers from collection")
 
@@ -53,7 +53,7 @@ def example_import():
     papers = importer.import_by_tags(
         tags=["deep learning", "transformers"],
         match_all=False,  # OR logic
-        limit=3
+        limit=3,
     )
     logger.success(f"Imported {len(papers)} papers by tags")
 
@@ -80,7 +80,7 @@ def example_export():
         library_id=library_id,
         library_type="user",
         api_key=api_key,
-        project="zotero_test"
+        project="zotero_test",
     )
 
     # Load papers from Scholar library
@@ -94,7 +94,7 @@ def example_export():
         papers,
         collection_name="From SciTeX Scholar",
         create_collection=True,
-        update_existing=True
+        update_existing=True,
     )
     logger.success(f"Exported {len(results)} papers to Zotero")
 
@@ -104,17 +104,13 @@ def example_export():
     output_dir.mkdir(exist_ok=True)
 
     bibtex_path = exporter.export_as_bibtex(
-        papers,
-        output_path=output_dir / "papers.bib"
+        papers, output_path=output_dir / "papers.bib"
     )
     logger.success(f"Exported BibTeX: {bibtex_path}")
 
     # Export as RIS
     logger.info("\n4. Export as RIS:")
-    ris_path = exporter.export_as_ris(
-        papers,
-        output_path=output_dir / "papers.ris"
-    )
+    ris_path = exporter.export_as_ris(papers, output_path=output_dir / "papers.ris")
     logger.success(f"Exported RIS: {ris_path}")
 
 
@@ -133,7 +129,7 @@ def example_sync():
         library_type="user",
         api_key=api_key,
         project="zotero_test",
-        sync_interval=30  # 30 seconds
+        sync_interval=30,  # 30 seconds
     )
 
     # Register callback
@@ -144,11 +140,7 @@ def example_sync():
 
     # Perform single sync
     logger.info("\n1. Perform single sync:")
-    stats = linker.sync_once(
-        bidirectional=True,
-        auto_import=True,
-        auto_export=False
-    )
+    stats = linker.sync_once(bidirectional=True, auto_import=True, auto_export=False)
     logger.success(f"Sync stats: {stats}")
 
     # Get sync status
@@ -179,7 +171,7 @@ def example_citations():
         library_id=library_id,
         library_type="user",
         api_key=api_key,
-        project="zotero_test"
+        project="zotero_test",
     )
 
     # Load a sample paper
@@ -242,6 +234,7 @@ def main():
     except Exception as e:
         logger.error(f"Example failed: {e}")
         import traceback
+
         traceback.print_exc()
 
     logger.info("\n" + "*" * 80)

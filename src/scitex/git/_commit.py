@@ -59,14 +59,12 @@ def git_add_all(repo_path: Path, verbose: bool = True) -> bool:
         return False
 
     with _in_directory(repo_path):
-        result = sh(
-            ["git", "add", "."],
-            verbose=verbose,
-            return_as="dict"
-        )
+        result = sh(["git", "add", "."], verbose=verbose, return_as="dict")
 
         if not result["success"]:
-            error_msg = result['stderr'].strip() if result['stderr'] else "Unknown error"
+            error_msg = (
+                result["stderr"].strip() if result["stderr"] else "Unknown error"
+            )
             logger.error(f"Failed to add files to {repo_path}: {error_msg}")
             return False
 
@@ -115,14 +113,12 @@ def git_commit(repo_path: Path, message: str, verbose: bool = True) -> bool:
         return False
 
     with _in_directory(repo_path):
-        result = sh(
-            ["git", "commit", "-m", message],
-            verbose=verbose,
-            return_as="dict"
-        )
+        result = sh(["git", "commit", "-m", message], verbose=verbose, return_as="dict")
 
         if not result["success"]:
-            error_msg = result['stderr'].strip() if result['stderr'] else "Unknown error"
+            error_msg = (
+                result["stderr"].strip() if result["stderr"] else "Unknown error"
+            )
             logger.error(f"Failed to commit in {repo_path}: {error_msg}")
             return False
 
@@ -146,6 +142,7 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-path", type=Path, required=True)
     parser.add_argument("--action", choices=["add", "commit"], required=True)
@@ -157,6 +154,7 @@ def parse_args():
 def run_session():
     """Initialize scitex framework, run main function, and cleanup."""
     from ._session import run_with_session
+
     run_with_session(parse_args, main)
 
 

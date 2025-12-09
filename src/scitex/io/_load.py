@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -161,15 +162,11 @@ def load(
         # Handle glob pattern
         matched_files = sorted(glob.glob(lpath))
         if not matched_files:
-            raise FileNotFoundError(
-                f"No files found matching pattern: {lpath}"
-            )
+            raise FileNotFoundError(f"No files found matching pattern: {lpath}")
         # Load all matched files
         results = []
         for file_path in matched_files:
-            results.append(
-                load(file_path, show=show, verbose=verbose, **kwargs)
-            )
+            results.append(load(file_path, show=show, verbose=verbose, **kwargs))
         return results
 
     # Handle broken symlinks - os.path.exists() returns False for broken symlinks
@@ -180,7 +177,7 @@ def load(
             target = os.readlink(lpath)
             resolved_target = os.path.join(symlink_dir, target)
             resolved_target = os.path.abspath(resolved_target)
-            
+
             if os.path.exists(resolved_target):
                 lpath = resolved_target
             else:
@@ -268,7 +265,7 @@ def load(
     # Determine extension: use explicit ext parameter or detect from filename
     if ext is not None:
         # Use explicitly provided extension (strip leading dot if present)
-        detected_ext = ext.lstrip('.')
+        detected_ext = ext.lstrip(".")
     else:
         # Auto-detect from filename
         detected_ext = lpath.split(".")[-1] if "." in lpath else ""
@@ -306,5 +303,6 @@ def load(
         return result
     except (ValueError, FileNotFoundError) as e:
         raise ValueError(f"Error loading file {lpath}: {str(e)}")
+
 
 # EOF

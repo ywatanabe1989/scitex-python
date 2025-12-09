@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -138,9 +139,7 @@ class URLMetadataHandler:
                 with open(metadata_path, "w") as f:
                     json.dump(metadata, f, indent=2, default=str)
 
-                logger.success(
-                    f"Updated URLs in metadata: {metadata_path.name}"
-                )
+                logger.success(f"Updated URLs in metadata: {metadata_path.name}")
                 return True
             else:
                 logger.info("No new URLs to add")
@@ -379,5 +378,6 @@ def get_papers_for_download(project: str = None) -> List[Dict]:
     """
     handler = URLMetadataHandler()
     return handler.get_undownloaded_papers(project)
+
 
 # EOF

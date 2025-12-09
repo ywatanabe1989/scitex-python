@@ -20,7 +20,7 @@ _DEFAULT_EDGE_THICKNESS_MM = SCITEX_STYLE.get("bar_edge_thickness_mm", 0.2)
 def style_barplot(
     bar_container,
     edge_thickness_mm: float = None,
-    edgecolor: Optional[Union[str, List[str]]] = 'black',
+    edgecolor: Optional[Union[str, List[str]]] = "black",
 ):
     """
     Apply consistent styling to matplotlib bar plot elements.

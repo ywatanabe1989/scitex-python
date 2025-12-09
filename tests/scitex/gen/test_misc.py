@@ -767,7 +767,6 @@ if __name__ == "__main__":
 #         return False
 # 
 #     if imp_major == tgt_major:
-# 
 #         ## Minor
 #         if imp_minor > tgt_minor:
 #             return True
@@ -776,7 +775,6 @@ if __name__ == "__main__":
 #             return False
 # 
 #         if imp_minor == tgt_minor:
-# 
 #             ## Patch
 #             if imp_patch > tgt_patch:
 #                 return True
@@ -815,7 +813,6 @@ if __name__ == "__main__":
 #         print(f"\n/dev/null was not copied.\n")
 # 
 #     else:
-# 
 #         if dst.endswith("/"):
 #             _, src_fname, src_ext = scitex.path.split(src)
 #             # src_fname = src + src_ext

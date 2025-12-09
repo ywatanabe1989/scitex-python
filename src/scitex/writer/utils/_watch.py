@@ -21,7 +21,7 @@ def watch_manuscript(
     project_dir: Path,
     interval: int = 2,
     on_compile: Optional[Callable] = None,
-    timeout: Optional[int] = None
+    timeout: Optional[int] = None,
 ) -> None:
     """
     Watch and auto-recompile manuscript on file changes.
@@ -59,16 +59,16 @@ def watch_manuscript(
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            bufsize=1  # Line-buffered
+            bufsize=1,  # Line-buffered
         )
 
         # Stream output
-        for line in iter(process.stdout.readline, ''):
+        for line in iter(process.stdout.readline, ""):
             if line:
                 print(line.rstrip())
 
                 # Call callback on compilation events
-                if on_compile and 'Compilation' in line:
+                if on_compile and "Compilation" in line:
                     try:
                         on_compile()
                     except Exception as e:
@@ -91,6 +91,6 @@ def watch_manuscript(
             process.terminate()
 
 
-__all__ = ['watch_manuscript']
+__all__ = ["watch_manuscript"]
 
 # EOF

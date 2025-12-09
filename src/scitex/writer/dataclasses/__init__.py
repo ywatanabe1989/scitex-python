@@ -29,18 +29,16 @@ from .tree import (
 
 __all__ = [
     # Core document dataclasses
-    'DocumentSection',
-    'Document',
-
+    "DocumentSection",
+    "Document",
     # Document contents
-    'ManuscriptContents',
-    'SupplementaryContents',
-    'RevisionContents',
-
+    "ManuscriptContents",
+    "SupplementaryContents",
+    "RevisionContents",
     # Configuration and results
-    'CompilationResult',
-    'WriterConfig',
-    'LaTeXIssue',
+    "CompilationResult",
+    "WriterConfig",
+    "LaTeXIssue",
 ]
 
 # EOF

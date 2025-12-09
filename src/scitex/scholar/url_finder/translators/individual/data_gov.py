@@ -30,7 +30,7 @@ class DataGovTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 4,  # Web
-        "lastUpdated": "2021-07-21 21:34:07"
+        "lastUpdated": "2021-07-21 21:34:07",
     }
 
     def detect_web(self, doc, url: str) -> Optional[str]:
@@ -88,7 +88,7 @@ class DataGovTranslator:
             "attachments": [],
             "language": "en",
             "url": url,
-            "libraryCatalog": "Data.gov"
+            "libraryCatalog": "Data.gov",
         }
 
         # Extract from Schema.org metadata

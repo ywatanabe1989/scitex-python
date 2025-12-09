@@ -3,32 +3,29 @@
 # Timestamp: "2025-07-14 15:00:41 (ywatanabe)"
 # File: ./examples/sync_examples_with_source.sh
 
+ORIG_DIR="$(pwd)"
 THIS_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
 LOG_PATH="$THIS_DIR/.$(basename $0).log"
 echo > "$LOG_PATH"
 
-BLACK='\033[0;30m'
-LIGHT_GRAY='\033[0;37m'
+GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+
+# Color scheme
+GRAY='\033[0;90m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo_info() { echo -e "${LIGHT_GRAY}$1${NC}"; }
-echo_success() { echo -e "${GREEN}$1${NC}"; }
-echo_warning() { echo -e "${YELLOW}$1${NC}"; }
-echo_error() { echo -e "${RED}$1${NC}"; }
-# ---------------------------------------
-
-touch "$LOG_PATH" >/dev/null 2>&1
+echo_info() { echo -e "${GRAY}INFO: $1${NC}"; }
+echo_success() { echo -e "${GREEN}SUCC: $1${NC}"; }
+echo_warning() { echo -e "${YELLOW}WARN: $1${NC}"; }
+echo_error() { echo -e "${RED}ERRO: $1${NC}"; }
+echo_header() { echo_info "=== $1 ==="; }
 
 THIS_DIR="./examples"
-ORIG_DIR="$(pwd)"
 ROOT_DIR="$(realpath $THIS_DIR/..)"
 cmd="cd $ROOT_DIR" && echo "$cmd" && eval "$cmd"
-
-# Set up colors for terminal output
-PURPLE='\033[0;35m'
 
 ########################################
 # Usage & Argument Parser
@@ -37,6 +34,9 @@ PURPLE='\033[0;35m'
 DO_MOVE=false
 SRC_DIR="$(realpath "${THIS_DIR}/../src/scitex")"
 EXAMPLES_DIR="$(realpath "${THIS_DIR}/../examples/scitex")"
+# Use half of available CPU cores by default (minimum 1)
+CPU_COUNT=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+PARALLEL_JOBS=$(( CPU_COUNT / 2 > 0 ? CPU_COUNT / 2 : 1 ))
 
 usage() {
     echo "Usage: $0 [options]"
@@ -47,11 +47,13 @@ usage() {
     echo "  -m, --move         Move stale example files to .old directory instead of just reporting (default: $DO_MOVE)"
     echo "  -s, --source DIR   Specify custom source directory (default: $SRC_DIR)"
     echo "  -e, --examples DIR Specify custom examples directory (default: $EXAMPLES_DIR)"
+    echo "  -j, --jobs N       Number of parallel jobs (default: $PARALLEL_JOBS)"
     echo "  -h, --help         Display this help message"
     echo
     echo "Example:"
     echo "  $0 --move"
     echo "  $0 --source /path/to/src --examples /path/to/examples"
+    echo "  $0 -j \$((CPU_COUNT))  # Use all CPU cores"
     exit 1
 }
 
@@ -67,6 +69,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -e|--examples)
             EXAMPLES_DIR="$2"
+            shift 2
+            ;;
+        -j|--jobs)
+            PARALLEL_JOBS="$2"
             shift 2
             ;;
         -h|--help)
@@ -163,16 +169,18 @@ find_files() {
 ########################################
 move_stale_example_files_to_old() {
     local timestamp="$(date +%Y%m%d_%H%M%S)"
+    local stale_count=0
+    local moved_count=0
+    local stale_files=()
 
-    find "$EXAMPLES_DIR" -name "example_*.py" -not -path "*.old*" | while read -r example_path; do
-
+    # Collect stale files first
+    while IFS= read -r example_path; do
         # Determine corresponding source file
         example_rel_path="${example_path#$EXAMPLES_DIR/}"
         example_rel_dir="$(dirname $example_rel_path)"
         example_filename="$(basename $example_rel_path)"
 
         # Extract module name from example filename
-        # Assuming pattern: example_ModuleName.py -> _ModuleName.py
         src_filename="${example_filename#example}"
         if [[ ! "$src_filename" =~ ^_ ]]; then
             src_filename="_${src_filename}"
@@ -183,128 +191,117 @@ move_stale_example_files_to_old() {
         src_path="$SRC_DIR/$src_rel_path"
 
         if [ ! -f "$src_path" ] && [ -f "$example_path" ]; then
-            stale_example_path=$example_path
-            stale_example_filename="$(basename $stale_example_path)"
-            stale_example_path_dir="$(dirname $stale_example_path)"
-            old_dir_with_timestamp="$stale_example_path_dir/.old-$timestamp"
-            tgt_path="$old_dir_with_timestamp/$stale_example_filename"
-
-            echo -e "${RED}Stale Example       : $stale_example_path${NC}"
-            echo -e "${RED}If you want to remove this stale example file, please run $0 -m${NC}"
-
-            if [ "$DO_MOVE" = "true" ]; then
-                # Ensure target dir exists
-                mkdir -p "$old_dir_with_timestamp"
-                # Move file
-                mv "$stale_example_path" "$tgt_path"
-                echo -e "${GREEN}Moved: $stale_example_path -> $tgt_path${NC}"
-            fi
+            stale_files+=("$example_path")
+            ((stale_count++))
         fi
-    done
+    done < <(find "$EXAMPLES_DIR" -name "example_*.py" -not -path "*.old*" 2>/dev/null)
+
+    # Report stale files
+    if [ $stale_count -gt 0 ]; then
+        echo ""
+        echo_header "Stale Example Files ($stale_count found)"
+        echo ""
+        for stale_path in "${stale_files[@]}"; do
+            local rel_path="${stale_path#$EXAMPLES_DIR/}"
+            if [ "$DO_MOVE" = "true" ]; then
+                stale_filename="$(basename $stale_path)"
+                stale_path_dir="$(dirname $stale_path)"
+                old_dir_with_timestamp="$stale_path_dir/.old-$timestamp"
+                tgt_path="$old_dir_with_timestamp/$stale_filename"
+
+                mkdir -p "$old_dir_with_timestamp"
+                mv "$stale_path" "$tgt_path"
+                echo_success "  [MOVED] $rel_path"
+                ((moved_count++))
+            else
+                echo_warning "  [STALE] $rel_path"
+            fi
+        done
+        echo ""
+        if [ "$DO_MOVE" = "false" ]; then
+            echo_info "To move stale files, run: $0 -m"
+        else
+            echo_success "Moved $moved_count stale example files"
+        fi
+        echo ""
+    fi
 }
+
+########################################
+# Parallel Processing Helper
+########################################
+# Process a single source file (called in parallel)
+process_single_example() {
+    local src_file="$1"
+    local SRC_DIR="$2"
+    local EXAMPLES_DIR="$3"
+
+    # Skip __init__.py files
+    [[ "$(basename "$src_file")" == "__init__.py" ]] && return
+
+    # Skip if in subdirectory we don't want examples for
+    [[ "$src_file" =~ /PackageHandlers/ ]] && return
+
+    # derive relative path and parts
+    rel="${src_file#$SRC_DIR/}"
+    rel_dir=$(dirname "$rel")
+    src_base=$(basename "$rel")
+
+    # ensure example subdir exists
+    examples_dir="$EXAMPLES_DIR/$rel_dir"
+    mkdir -p "$examples_dir"
+
+    # build correct example file path
+    example_base="example_${src_base}"
+    example_file="$examples_dir/$example_base"
+
+    # Process the file
+    if [ ! -f "$example_file" ]; then
+        mkdir -p "$(dirname "$example_file")"
+        touch "$example_file"
+        chmod +x "$example_file"
+        echo "SUCC: Created: $example_file"
+    fi
+}
+export -f process_single_example
 
 ########################################
 # Main
 ########################################
 main() {
     local do_move=${1:-false}
+    local start_time=$(date +%s)
 
-    echo "Using SRC_DIR: $SRC_DIR"
-    echo "Using EXAMPLES_DIR: $EXAMPLES_DIR"
     echo ""
-    echo "Note: This creates placeholder example files for each source module."
-    echo "Only important modules need actual example implementations."
+    echo_header "Examples Synchronization"
+    echo ""
+    echo_info "Source:    $SRC_DIR"
+    echo_info "Examples:  $EXAMPLES_DIR"
+    echo_info "Jobs:      $PARALLEL_JOBS"
+    echo ""
+    echo_info "Note: Creates placeholder example files for each source module."
     echo ""
 
-    # Create examples/gpac directory if it doesn't exist
+    # Create examples directory if it doesn't exist
     mkdir -p "$EXAMPLES_DIR"
 
-    # # Only create examples for key modules (not every single source file)
-    # local KEY_MODULES=(
-    #     "_PAC.py"
-    #     "_BandPassFilter.py"
-    #     "_Hilbert.py"
-    #     "_ModulationIndex.py"
-    #     "_SyntheticDataGenerator.py"
-    #     "_Profiler.py"
-    # )
-
-    # # Process each key module
-    # for module in "${KEY_MODULES[@]}"; do
-    #     find_files "$SRC_DIR" f "$module" | while read -r src_file; do
-    #         # Skip if in subdirectory we don't want examples for
-    #         [[ "$src_file" =~ /PackageHandlers/ ]] && continue
-
-    #         # derive relative path and parts
-    #         rel="${src_file#$SRC_DIR/}"
-    #         rel_dir=$(dirname "$rel")
-    #         src_base=$(basename "$rel")
-
-    #         # ensure example subdir exists
-    #         examples_dir="$EXAMPLES_DIR/$rel_dir"
-    #         mkdir -p "$examples_dir"
-
-    #         # build correct example file path
-    #         # Convert _ModuleName.py to example_ModuleName.py
-    #         example_base="example${src_base}"
-    #         example_file="$examples_dir/$example_base"
-
-    #         # Process each file
-    #         update_example_file "$example_file" "$src_file"
-    #     done
-    # done
-
-    find_files "$SRC_DIR" f "*.py" | while read -r src_file; do
-        # Skip __init__.py files
-        [[ "$(basename "$src_file")" == "__init__.py" ]] && continue
-
-        # Skip if in subdirectory we don't want examples for
-        [[ "$src_file" =~ /PackageHandlers/ ]] && continue
-
-        # derive relative path and parts
-        rel="${src_file#$SRC_DIR/}"
-        rel_dir=$(dirname "$rel")
-        src_base=$(basename "$rel")
-
-        # ensure example subdir exists
-        examples_dir="$EXAMPLES_DIR/$rel_dir"
-        mkdir -p "$examples_dir"
-
-        # build correct example file path
-        # Convert _ModuleName.py to example_ModuleName.py
-        example_base="example_${src_base}"
-        example_file="$examples_dir/$example_base"
-
-        # Process each file
-        update_example_file "$example_file" "$src_file"
-    done
-
-    # Also create general examples in the root examples directory
-    echo ""
-    echo "Creating/checking general examples..."
-
-    # These are already created, just check they exist
-    local GENERAL_EXAMPLES=(
-        "example_pac_analysis.py"
-        "example_bandpass_filter.py"
-        "example_profiler.py"
-    )
-
-    for example in "${GENERAL_EXAMPLES[@]}"; do
-        if [ -f "${THIS_DIR}/$example" ]; then
-            echo_success "Found: ${THIS_DIR}/$example"
-        else
-            echo_warning "Missing: ${THIS_DIR}/$example"
-        fi
-    done
+    echo_info "Synchronizing example files (parallel)..."
+    local file_count=$(find_files "$SRC_DIR" f "*.py" | wc -l)
+    find_files "$SRC_DIR" f "*.py" | \
+        xargs -P "$PARALLEL_JOBS" -I {} bash -c 'process_single_example "$@"' _ {} "$SRC_DIR" "$EXAMPLES_DIR"
+    echo_success "Processed $file_count source files"
 
     # Clean up stale files
     move_stale_example_files_to_old
 
-    # Show structure
+    local end_time=$(date +%s)
+    local elapsed=$((end_time - start_time))
+
+    echo_header "Summary"
+    echo_success "Completed in ${elapsed}s"
     echo ""
-    echo "Examples structure:"
-    tree "$THIS_DIR" -I "outputs|__pycache__|*.pyc|.old*" 2>&1 | tee -a "$LOG_PATH"
+
+    tree "$THIS_DIR" -I "outputs|__pycache__|*.pyc|.old*" 2>&1 >> "$LOG_PATH"
 }
 
 main "$@"

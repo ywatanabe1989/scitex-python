@@ -34,12 +34,14 @@ logger = getLogger(__name__)
 def get_failed_papers(project: str, config: ScholarConfig) -> List[Dict]:
     """Get papers with failed downloads."""
     from scitex.scholar.cli.open_browser import get_failed_papers as _get_failed
+
     return _get_failed(project, config)
 
 
 def get_pending_papers(project: str, config: ScholarConfig) -> List[Dict]:
     """Get papers with pending downloads."""
     from scitex.scholar.cli.open_browser import get_pending_papers as _get_pending
+
     return _get_pending(project, config)
 
 
@@ -60,7 +62,9 @@ def generate_proper_filename(metadata: dict) -> str:
     journal = basic.get("journal", "Unknown")
 
     # Clean journal name
-    journal_clean = "".join(c for c in journal if c.isalnum() or c in (' ', '-', '_'))[:50]
+    journal_clean = "".join(c for c in journal if c.isalnum() or c in (" ", "-", "_"))[
+        :50
+    ]
     journal_clean = journal_clean.strip()
 
     return f"{first_author}-{year}-{journal_clean}.pdf"
@@ -109,6 +113,7 @@ def handle_download(download, paper_id: str, paper_title: str, config: ScholarCo
         screenshot_dir = paper_dir / "screenshots"
         if screenshot_dir.exists():
             import shutil
+
             shutil.rmtree(screenshot_dir)
             logger.info(f"  Removed screenshots (download succeeded)")
 
@@ -133,10 +138,7 @@ def handle_download(download, paper_id: str, paper_title: str, config: ScholarCo
 
 
 def open_browser_with_auto_tracking(
-    papers: List[Dict],
-    project: str,
-    config: ScholarConfig,
-    profile: str = None
+    papers: List[Dict], project: str, config: ScholarConfig, profile: str = None
 ) -> None:
     """Open browser with automatic download tracking.
 
@@ -167,16 +169,18 @@ def open_browser_with_auto_tracking(
             openurl_resolved=paper.get("openurl_resolved"),
             url_publisher=paper.get("url_publisher"),
             url_doi=paper.get("url_doi"),
-            doi=paper.get("doi")
+            doi=paper.get("doi"),
         )
 
         if url:
-            papers_to_open.append({
-                "paper_id": paper_id,
-                "title": paper.get("title", "Unknown"),
-                "url": url,
-                "doi": paper.get("doi", ""),
-            })
+            papers_to_open.append(
+                {
+                    "paper_id": paper_id,
+                    "title": paper.get("title", "Unknown"),
+                    "url": url,
+                    "doi": paper.get("doi", ""),
+                }
+            )
         else:
             logger.warning(f"No URL for {paper.get('title', 'Unknown')[:50]}...")
 
@@ -201,9 +205,9 @@ def open_browser_with_auto_tracking(
             headless=False,
             accept_downloads=True,  # Enable download tracking
             args=[
-                '--disable-blink-features=AutomationControlled',
-                '--disable-features=UserAgentClientHint',
-            ]
+                "--disable-blink-features=AutomationControlled",
+                "--disable-features=UserAgentClientHint",
+            ],
         )
 
         # Track which page belongs to which paper
@@ -212,6 +216,7 @@ def open_browser_with_auto_tracking(
 
         def create_download_handler(paper_info: dict):
             """Create download handler for specific paper."""
+
             def on_download(download):
                 nonlocal download_count
                 download_count += 1
@@ -221,10 +226,7 @@ def open_browser_with_auto_tracking(
                 logger.info(f"  Paper: {paper_info['title'][:60]}...")
 
                 handle_download(
-                    download,
-                    paper_info["paper_id"],
-                    paper_info["title"],
-                    config
+                    download, paper_info["paper_id"], paper_info["title"], config
                 )
 
             return on_download
@@ -253,7 +255,9 @@ def open_browser_with_auto_tracking(
 
             try:
                 new_page.goto(paper_info["url"], timeout=30000)
-                logger.success(f"[{paper_info['paper_id']}] {paper_info['title'][:60]}...")
+                logger.success(
+                    f"[{paper_info['paper_id']}] {paper_info['title'][:60]}..."
+                )
             except Exception as e:
                 logger.warning(f"Failed to load: {e}")
 
@@ -277,7 +281,7 @@ def open_browser_with_auto_tracking(
         browser.on("page", on_page_created)
 
         # Show instructions
-        logger.info(f"\n{'='*70}")
+        logger.info(f"\n{'=' * 70}")
         logger.info(f"Browser opened with {len(papers_to_open)} papers")
         logger.info("Download tracking ACTIVE - PDFs will auto-link to library")
         logger.info("")
@@ -293,7 +297,7 @@ def open_browser_with_auto_tracking(
         logger.info("  - Multiple downloads per paper are supported")
         logger.info("")
         logger.info("Press Ctrl+C when done")
-        logger.info(f"{'='*70}\n")
+        logger.info(f"{'=' * 70}\n")
 
         try:
             # Keep browser open
@@ -313,23 +317,16 @@ def main():
         description="Open browser with automatic download tracking and linking"
     )
     parser.add_argument(
-        "--project",
-        required=True,
-        help="Project name (e.g., neurovista, pac)"
+        "--project", required=True, help="Project name (e.g., neurovista, pac)"
     )
     parser.add_argument(
-        "--all",
-        action="store_true",
-        help="Open both failed and pending PDFs"
+        "--all", action="store_true", help="Open both failed and pending PDFs"
     )
     parser.add_argument(
-        "--pending",
-        action="store_true",
-        help="Open only pending (not attempted) PDFs"
+        "--pending", action="store_true", help="Open only pending (not attempted) PDFs"
     )
     parser.add_argument(
-        "--profile",
-        help="Browser profile name to use (default: system)"
+        "--profile", help="Browser profile name to use (default: system)"
     )
 
     args = parser.parse_args()
@@ -364,12 +361,7 @@ def main():
         logger.info(f"  ... and {len(papers) - 10} more")
 
     # Open browser with auto-tracking
-    open_browser_with_auto_tracking(
-        papers,
-        args.project,
-        config,
-        profile=args.profile
-    )
+    open_browser_with_auto_tracking(papers, args.project, config, profile=args.profile)
 
 
 if __name__ == "__main__":

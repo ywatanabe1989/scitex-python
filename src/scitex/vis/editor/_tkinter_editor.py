@@ -36,6 +36,7 @@ class TkinterEditor:
 
         # Get SciTeX defaults and merge with metadata
         from ._defaults import get_scitex_defaults, extract_defaults_from_metadata
+
         self.scitex_defaults = get_scitex_defaults()
         self.metadata_defaults = extract_defaults_from_metadata(metadata)
 
@@ -75,7 +76,10 @@ class TkinterEditor:
 
     def _create_canvas_frame(self):
         """Create the matplotlib canvas frame."""
-        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+        from matplotlib.backends.backend_tkagg import (
+            FigureCanvasTkAgg,
+            NavigationToolbar2Tk,
+        )
         from matplotlib.figure import Figure
 
         canvas_frame = ttk.Frame(self.root)
@@ -130,24 +134,24 @@ class TkinterEditor:
         """Create figure-level controls."""
         # Title
         ttk.Label(parent, text="Title:").grid(row=0, column=0, sticky="w", pady=2)
-        self.title_var = tk.StringVar(value=self._get_override('title', ''))
+        self.title_var = tk.StringVar(value=self._get_override("title", ""))
         title_entry = ttk.Entry(parent, textvariable=self.title_var, width=30)
         title_entry.grid(row=0, column=1, sticky="ew", pady=2)
-        title_entry.bind('<Return>', lambda e: self._update_and_render())
+        title_entry.bind("<Return>", lambda e: self._update_and_render())
 
         # X Label
         ttk.Label(parent, text="X Label:").grid(row=1, column=0, sticky="w", pady=2)
-        self.xlabel_var = tk.StringVar(value=self._get_override('xlabel', ''))
+        self.xlabel_var = tk.StringVar(value=self._get_override("xlabel", ""))
         xlabel_entry = ttk.Entry(parent, textvariable=self.xlabel_var, width=30)
         xlabel_entry.grid(row=1, column=1, sticky="ew", pady=2)
-        xlabel_entry.bind('<Return>', lambda e: self._update_and_render())
+        xlabel_entry.bind("<Return>", lambda e: self._update_and_render())
 
         # Y Label
         ttk.Label(parent, text="Y Label:").grid(row=2, column=0, sticky="w", pady=2)
-        self.ylabel_var = tk.StringVar(value=self._get_override('ylabel', ''))
+        self.ylabel_var = tk.StringVar(value=self._get_override("ylabel", ""))
         ylabel_entry = ttk.Entry(parent, textvariable=self.ylabel_var, width=30)
         ylabel_entry.grid(row=2, column=1, sticky="ew", pady=2)
-        ylabel_entry.bind('<Return>', lambda e: self._update_and_render())
+        ylabel_entry.bind("<Return>", lambda e: self._update_and_render())
 
         # Apply button
         ttk.Button(parent, text="Apply", command=self._update_and_render).grid(
@@ -161,25 +165,41 @@ class TkinterEditor:
         # X limits
         ttk.Label(parent, text="X Min:").grid(row=0, column=0, sticky="w", pady=2)
         self.xmin_var = tk.StringVar(value="")
-        ttk.Entry(parent, textvariable=self.xmin_var, width=10).grid(row=0, column=1, pady=2)
+        ttk.Entry(parent, textvariable=self.xmin_var, width=10).grid(
+            row=0, column=1, pady=2
+        )
 
-        ttk.Label(parent, text="X Max:").grid(row=0, column=2, sticky="w", pady=2, padx=(10, 0))
+        ttk.Label(parent, text="X Max:").grid(
+            row=0, column=2, sticky="w", pady=2, padx=(10, 0)
+        )
         self.xmax_var = tk.StringVar(value="")
-        ttk.Entry(parent, textvariable=self.xmax_var, width=10).grid(row=0, column=3, pady=2)
+        ttk.Entry(parent, textvariable=self.xmax_var, width=10).grid(
+            row=0, column=3, pady=2
+        )
 
         # Y limits
         ttk.Label(parent, text="Y Min:").grid(row=1, column=0, sticky="w", pady=2)
         self.ymin_var = tk.StringVar(value="")
-        ttk.Entry(parent, textvariable=self.ymin_var, width=10).grid(row=1, column=1, pady=2)
+        ttk.Entry(parent, textvariable=self.ymin_var, width=10).grid(
+            row=1, column=1, pady=2
+        )
 
-        ttk.Label(parent, text="Y Max:").grid(row=1, column=2, sticky="w", pady=2, padx=(10, 0))
+        ttk.Label(parent, text="Y Max:").grid(
+            row=1, column=2, sticky="w", pady=2, padx=(10, 0)
+        )
         self.ymax_var = tk.StringVar(value="")
-        ttk.Entry(parent, textvariable=self.ymax_var, width=10).grid(row=1, column=3, pady=2)
+        ttk.Entry(parent, textvariable=self.ymax_var, width=10).grid(
+            row=1, column=3, pady=2
+        )
 
         # Grid toggle
-        self.grid_var = tk.BooleanVar(value=self._get_override('grid', False))
-        ttk.Checkbutton(parent, text="Show Grid", variable=self.grid_var,
-                       command=self._update_and_render).grid(row=2, column=0, columnspan=2, pady=5)
+        self.grid_var = tk.BooleanVar(value=self._get_override("grid", False))
+        ttk.Checkbutton(
+            parent,
+            text="Show Grid",
+            variable=self.grid_var,
+            command=self._update_and_render,
+        ).grid(row=2, column=0, columnspan=2, pady=5)
 
         # Apply button
         ttk.Button(parent, text="Apply Limits", command=self._apply_limits).grid(
@@ -190,22 +210,31 @@ class TkinterEditor:
         """Create style controls."""
         # Line width
         ttk.Label(parent, text="Line Width:").grid(row=0, column=0, sticky="w", pady=2)
-        self.linewidth_var = tk.DoubleVar(value=self._get_override('linewidth', 1.5))
-        lw_spin = ttk.Spinbox(parent, from_=0.1, to=10, increment=0.1,
-                              textvariable=self.linewidth_var, width=8)
+        self.linewidth_var = tk.DoubleVar(value=self._get_override("linewidth", 1.5))
+        lw_spin = ttk.Spinbox(
+            parent,
+            from_=0.1,
+            to=10,
+            increment=0.1,
+            textvariable=self.linewidth_var,
+            width=8,
+        )
         lw_spin.grid(row=0, column=1, sticky="w", pady=2)
 
         # Font size
         ttk.Label(parent, text="Font Size:").grid(row=1, column=0, sticky="w", pady=2)
-        self.fontsize_var = tk.IntVar(value=self._get_override('fontsize', 10))
-        fs_spin = ttk.Spinbox(parent, from_=6, to=24, increment=1,
-                              textvariable=self.fontsize_var, width=8)
+        self.fontsize_var = tk.IntVar(value=self._get_override("fontsize", 10))
+        fs_spin = ttk.Spinbox(
+            parent, from_=6, to=24, increment=1, textvariable=self.fontsize_var, width=8
+        )
         fs_spin.grid(row=1, column=1, sticky="w", pady=2)
 
         # Background color
         ttk.Label(parent, text="Background:").grid(row=2, column=0, sticky="w", pady=2)
-        self.bg_color = self._get_override('facecolor', 'white')
-        self.bg_btn = ttk.Button(parent, text="Choose...", command=self._choose_bg_color)
+        self.bg_color = self._get_override("facecolor", "white")
+        self.bg_btn = ttk.Button(
+            parent, text="Choose...", command=self._choose_bg_color
+        )
         self.bg_btn.grid(row=2, column=1, sticky="w", pady=2)
 
         # Color frame to show current color
@@ -219,33 +248,43 @@ class TkinterEditor:
 
     def _create_annotation_controls(self, parent):
         """Create annotation controls."""
-        ttk.Label(parent, text="Add annotations:").grid(row=0, column=0, columnspan=2, sticky="w")
+        ttk.Label(parent, text="Add annotations:").grid(
+            row=0, column=0, columnspan=2, sticky="w"
+        )
 
         # Text annotation
         ttk.Label(parent, text="Text:").grid(row=1, column=0, sticky="w", pady=2)
         self.annot_text_var = tk.StringVar()
-        ttk.Entry(parent, textvariable=self.annot_text_var, width=25).grid(row=1, column=1, pady=2)
+        ttk.Entry(parent, textvariable=self.annot_text_var, width=25).grid(
+            row=1, column=1, pady=2
+        )
 
         ttk.Label(parent, text="X:").grid(row=2, column=0, sticky="w", pady=2)
         self.annot_x_var = tk.StringVar(value="0.5")
-        ttk.Entry(parent, textvariable=self.annot_x_var, width=10).grid(row=2, column=1, sticky="w", pady=2)
+        ttk.Entry(parent, textvariable=self.annot_x_var, width=10).grid(
+            row=2, column=1, sticky="w", pady=2
+        )
 
         ttk.Label(parent, text="Y:").grid(row=3, column=0, sticky="w", pady=2)
         self.annot_y_var = tk.StringVar(value="0.5")
-        ttk.Entry(parent, textvariable=self.annot_y_var, width=10).grid(row=3, column=1, sticky="w", pady=2)
+        ttk.Entry(parent, textvariable=self.annot_y_var, width=10).grid(
+            row=3, column=1, sticky="w", pady=2
+        )
 
         ttk.Button(parent, text="Add Text", command=self._add_text_annotation).grid(
             row=4, column=0, columnspan=2, pady=5
         )
 
         # Annotation list
-        ttk.Label(parent, text="Current annotations:").grid(row=5, column=0, columnspan=2, sticky="w", pady=(10, 2))
+        ttk.Label(parent, text="Current annotations:").grid(
+            row=5, column=0, columnspan=2, sticky="w", pady=(10, 2)
+        )
         self.annot_listbox = tk.Listbox(parent, height=5, width=30)
         self.annot_listbox.grid(row=6, column=0, columnspan=2, sticky="ew")
 
-        ttk.Button(parent, text="Remove Selected", command=self._remove_annotation).grid(
-            row=7, column=0, columnspan=2, pady=5
-        )
+        ttk.Button(
+            parent, text="Remove Selected", command=self._remove_annotation
+        ).grid(row=7, column=0, columnspan=2, pady=5)
 
         self._update_annotation_list()
 
@@ -254,9 +293,15 @@ class TkinterEditor:
         toolbar = ttk.Frame(self.root)
         toolbar.grid(row=1, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
 
-        ttk.Button(toolbar, text="Save", command=self._save_manual).pack(side="left", padx=2)
-        ttk.Button(toolbar, text="Reset", command=self._reset_overrides).pack(side="left", padx=2)
-        ttk.Button(toolbar, text="Export PNG", command=self._export_png).pack(side="left", padx=2)
+        ttk.Button(toolbar, text="Save", command=self._save_manual).pack(
+            side="left", padx=2
+        )
+        ttk.Button(toolbar, text="Reset", command=self._reset_overrides).pack(
+            side="left", padx=2
+        )
+        ttk.Button(toolbar, text="Export PNG", command=self._export_png).pack(
+            side="left", padx=2
+        )
 
         # Status label
         self.status_var = tk.StringVar(value="Ready")
@@ -277,34 +322,40 @@ class TkinterEditor:
             self._plot_from_csv()
         else:
             # Show placeholder
-            self.ax.text(0.5, 0.5, "No plot data available\n(CSV not found)",
-                        ha='center', va='center', transform=self.ax.transAxes)
+            self.ax.text(
+                0.5,
+                0.5,
+                "No plot data available\n(CSV not found)",
+                ha="center",
+                va="center",
+                transform=self.ax.transAxes,
+            )
 
         # Apply overrides
-        if self.current_overrides.get('title'):
-            self.ax.set_title(self.current_overrides['title'])
-        if self.current_overrides.get('xlabel'):
-            self.ax.set_xlabel(self.current_overrides['xlabel'])
-        if self.current_overrides.get('ylabel'):
-            self.ax.set_ylabel(self.current_overrides['ylabel'])
-        if self.current_overrides.get('grid'):
+        if self.current_overrides.get("title"):
+            self.ax.set_title(self.current_overrides["title"])
+        if self.current_overrides.get("xlabel"):
+            self.ax.set_xlabel(self.current_overrides["xlabel"])
+        if self.current_overrides.get("ylabel"):
+            self.ax.set_ylabel(self.current_overrides["ylabel"])
+        if self.current_overrides.get("grid"):
             self.ax.grid(True)
-        if self.current_overrides.get('xlim'):
-            self.ax.set_xlim(self.current_overrides['xlim'])
-        if self.current_overrides.get('ylim'):
-            self.ax.set_ylim(self.current_overrides['ylim'])
-        if self.current_overrides.get('facecolor'):
-            self.ax.set_facecolor(self.current_overrides['facecolor'])
+        if self.current_overrides.get("xlim"):
+            self.ax.set_xlim(self.current_overrides["xlim"])
+        if self.current_overrides.get("ylim"):
+            self.ax.set_ylim(self.current_overrides["ylim"])
+        if self.current_overrides.get("facecolor"):
+            self.ax.set_facecolor(self.current_overrides["facecolor"])
 
         # Apply annotations
-        for annot in self.current_overrides.get('annotations', []):
-            if annot.get('type') == 'text':
+        for annot in self.current_overrides.get("annotations", []):
+            if annot.get("type") == "text":
                 self.ax.text(
-                    annot.get('x', 0.5),
-                    annot.get('y', 0.5),
-                    annot.get('text', ''),
+                    annot.get("x", 0.5),
+                    annot.get("y", 0.5),
+                    annot.get("text", ""),
                     transform=self.ax.transAxes,
-                    fontsize=annot.get('fontsize', 10),
+                    fontsize=annot.get("fontsize", 10),
                 )
 
         self.fig.tight_layout()
@@ -338,18 +389,18 @@ class TkinterEditor:
     def _update_and_render(self):
         """Update overrides from UI and re-render."""
         # Collect values from UI
-        if hasattr(self, 'title_var') and self.title_var.get():
-            self.current_overrides['title'] = self.title_var.get()
-        if hasattr(self, 'xlabel_var') and self.xlabel_var.get():
-            self.current_overrides['xlabel'] = self.xlabel_var.get()
-        if hasattr(self, 'ylabel_var') and self.ylabel_var.get():
-            self.current_overrides['ylabel'] = self.ylabel_var.get()
-        if hasattr(self, 'grid_var'):
-            self.current_overrides['grid'] = self.grid_var.get()
-        if hasattr(self, 'linewidth_var'):
-            self.current_overrides['linewidth'] = self.linewidth_var.get()
-        if hasattr(self, 'fontsize_var'):
-            self.current_overrides['fontsize'] = self.fontsize_var.get()
+        if hasattr(self, "title_var") and self.title_var.get():
+            self.current_overrides["title"] = self.title_var.get()
+        if hasattr(self, "xlabel_var") and self.xlabel_var.get():
+            self.current_overrides["xlabel"] = self.xlabel_var.get()
+        if hasattr(self, "ylabel_var") and self.ylabel_var.get():
+            self.current_overrides["ylabel"] = self.ylabel_var.get()
+        if hasattr(self, "grid_var"):
+            self.current_overrides["grid"] = self.grid_var.get()
+        if hasattr(self, "linewidth_var"):
+            self.current_overrides["linewidth"] = self.linewidth_var.get()
+        if hasattr(self, "fontsize_var"):
+            self.current_overrides["fontsize"] = self.fontsize_var.get()
 
         self._render_figure()
         self.status_var.set("Preview updated")
@@ -358,14 +409,14 @@ class TkinterEditor:
         """Apply axis limits."""
         try:
             if self.xmin_var.get() and self.xmax_var.get():
-                self.current_overrides['xlim'] = [
+                self.current_overrides["xlim"] = [
                     float(self.xmin_var.get()),
-                    float(self.xmax_var.get())
+                    float(self.xmax_var.get()),
                 ]
             if self.ymin_var.get() and self.ymax_var.get():
-                self.current_overrides['ylim'] = [
+                self.current_overrides["ylim"] = [
                     float(self.ymin_var.get()),
-                    float(self.ymax_var.get())
+                    float(self.ymax_var.get()),
                 ]
             self._render_figure()
             self.status_var.set("Limits applied")
@@ -374,11 +425,13 @@ class TkinterEditor:
 
     def _choose_bg_color(self):
         """Open color chooser for background."""
-        color = colorchooser.askcolor(title="Choose Background Color", color=self.bg_color)
+        color = colorchooser.askcolor(
+            title="Choose Background Color", color=self.bg_color
+        )
         if color[1]:
             self.bg_color = color[1]
             self.bg_preview.configure(bg=self.bg_color)
-            self.current_overrides['facecolor'] = self.bg_color
+            self.current_overrides["facecolor"] = self.bg_color
             self._render_figure()
 
     def _add_text_annotation(self):
@@ -394,16 +447,20 @@ class TkinterEditor:
             messagebox.showerror("Error", "Invalid X or Y position")
             return
 
-        if 'annotations' not in self.current_overrides:
-            self.current_overrides['annotations'] = []
+        if "annotations" not in self.current_overrides:
+            self.current_overrides["annotations"] = []
 
-        self.current_overrides['annotations'].append({
-            'type': 'text',
-            'text': text,
-            'x': x,
-            'y': y,
-            'fontsize': self.fontsize_var.get() if hasattr(self, 'fontsize_var') else 10,
-        })
+        self.current_overrides["annotations"].append(
+            {
+                "type": "text",
+                "text": text,
+                "x": x,
+                "y": y,
+                "fontsize": self.fontsize_var.get()
+                if hasattr(self, "fontsize_var")
+                else 10,
+            }
+        )
 
         self.annot_text_var.set("")
         self._update_annotation_list()
@@ -417,7 +474,7 @@ class TkinterEditor:
             return
 
         idx = selection[0]
-        annotations = self.current_overrides.get('annotations', [])
+        annotations = self.current_overrides.get("annotations", [])
         if idx < len(annotations):
             del annotations[idx]
             self._update_annotation_list()
@@ -427,8 +484,8 @@ class TkinterEditor:
     def _update_annotation_list(self):
         """Update the annotation listbox."""
         self.annot_listbox.delete(0, tk.END)
-        for annot in self.current_overrides.get('annotations', []):
-            if annot.get('type') == 'text':
+        for annot in self.current_overrides.get("annotations", []):
+            if annot.get("type") == "text":
                 self.annot_listbox.insert(tk.END, f"Text: {annot.get('text', '')[:20]}")
 
     def _save_manual(self):
@@ -456,10 +513,10 @@ class TkinterEditor:
         filepath = filedialog.asksaveasfilename(
             defaultextension=".png",
             filetypes=[("PNG files", "*.png"), ("All files", "*.*")],
-            initialfile=f"{self.json_path.stem}_edited.png"
+            initialfile=f"{self.json_path.stem}_edited.png",
         )
         if filepath:
-            self.fig.savefig(filepath, dpi=300, bbox_inches='tight')
+            self.fig.savefig(filepath, dpi=300, bbox_inches="tight")
             self.status_var.set(f"Exported: {Path(filepath).name}")
 
 

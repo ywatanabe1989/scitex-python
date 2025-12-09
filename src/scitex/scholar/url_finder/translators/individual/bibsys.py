@@ -18,15 +18,15 @@ TRANSLATOR_INFO = {
     "in_repository": True,
     "translator_type": 4,
     "browser_support": "gcsibv",
-    "last_updated": "2021-12-28 04:44:52"
+    "last_updated": "2021-12-28 04:44:52",
 }
 
 
 def detect_web(doc: Any, url: str) -> Optional[str]:
     """Detect if the page is a book or multiple items"""
-    if re.match(r'^https?://ask\.bibsys\.no/ask/action/result', url):
+    if re.match(r"^https?://ask\.bibsys\.no/ask/action/result", url):
         return "multiple"
-    elif re.match(r'^https?://ask\.bibsys\.no/ask/action/show', url):
+    elif re.match(r"^https?://ask\.bibsys\.no/ask/action/show", url):
         return "book"
     return None
 
@@ -50,7 +50,7 @@ def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str,
             continue
 
         title = title_elem.get_text(strip=True)
-        code = code_input.get('value', '')
+        code = code_input.get("value", "")
 
         if title and code:
             if check_only:
@@ -76,46 +76,50 @@ def scrape_from_ris(ris_text: str) -> Dict[str, Any]:
         "attachments": [],
         "tags": [],
         "notes": [],
-        "seeAlso": []
+        "seeAlso": [],
     }
 
-    lines = ris_text.split('\n')
+    lines = ris_text.split("\n")
     for line in lines:
-        if line.startswith('TI  - '):
+        if line.startswith("TI  - "):
             # Clean up title - remove extra spaces and fix spacing around colons
             title = line[6:].strip()
-            title = re.sub(r'\s\s+', ' ', title)
-            title = re.sub(r'\s:', ':', title)
+            title = re.sub(r"\s\s+", " ", title)
+            title = re.sub(r"\s:", ":", title)
             item["title"] = title
-        elif line.startswith('AU  - '):
+        elif line.startswith("AU  - "):
             author_name = line[6:].strip()
-            parts = author_name.split(',')
+            parts = author_name.split(",")
             if len(parts) >= 2:
-                item["creators"].append({
-                    "firstName": parts[1].strip(),
-                    "lastName": parts[0].strip(),
-                    "creatorType": "author"
-                })
+                item["creators"].append(
+                    {
+                        "firstName": parts[1].strip(),
+                        "lastName": parts[0].strip(),
+                        "creatorType": "author",
+                    }
+                )
             else:
                 parts = author_name.split()
                 if len(parts) > 1:
-                    item["creators"].append({
-                        "firstName": " ".join(parts[:-1]),
-                        "lastName": parts[-1],
-                        "creatorType": "author"
-                    })
-        elif line.startswith('PY  - '):
+                    item["creators"].append(
+                        {
+                            "firstName": " ".join(parts[:-1]),
+                            "lastName": parts[-1],
+                            "creatorType": "author",
+                        }
+                    )
+        elif line.startswith("PY  - "):
             item["date"] = line[6:].strip()
-        elif line.startswith('PB  - '):
+        elif line.startswith("PB  - "):
             item["publisher"] = line[6:].strip()
-        elif line.startswith('CY  - '):
+        elif line.startswith("CY  - "):
             item["place"] = line[6:].strip()
-        elif line.startswith('SN  - '):
+        elif line.startswith("SN  - "):
             item["ISBN"] = line[6:].strip()
-        elif line.startswith('SP  - '):
+        elif line.startswith("SP  - "):
             pages = line[6:].strip()
             item["numPages"] = pages
-        elif line.startswith('N1  - '):
+        elif line.startswith("N1  - "):
             note_text = line[6:].strip()
             if note_text:
                 item["notes"].append({"note": note_text})
@@ -143,7 +147,7 @@ def scrape(doc: Any, url: str) -> Dict[str, Any]:
         "attachments": [],
         "tags": [],
         "notes": [],
-        "seeAlso": []
+        "seeAlso": [],
     }
 
 

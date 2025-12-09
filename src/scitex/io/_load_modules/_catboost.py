@@ -7,12 +7,15 @@ from typing import Union
 
 try:
     from catboost import CatBoostClassifier, CatBoostRegressor
+
     CATBOOST_AVAILABLE = True
 except ImportError:
     CATBOOST_AVAILABLE = False
+
     # Create placeholder classes for testing
     class CatBoostClassifier:
         pass
+
     class CatBoostRegressor:
         pass
 
@@ -50,8 +53,10 @@ def _load_catboost(
     >>> predictions = model.predict(X_test)
     """
     if not CATBOOST_AVAILABLE:
-        raise ImportError("CatBoost is not installed. Please install with: pip install catboost")
-    
+        raise ImportError(
+            "CatBoost is not installed. Please install with: pip install catboost"
+        )
+
     if not (lpath.endswith(".cbm") or lpath.endswith(".CBM")):
         raise ValueError("File must have .cbm extension")
 

@@ -28,10 +28,16 @@ except ImportError:
 
 # Module application order (most specific to most general)
 MODULE_ORDER = [
-    "ai",      # Most specific - AI/ML operations
-    "plt",     # Plotting operations
-    "io",      # I/O operations
-    "gen",     # General utilities (most general)
+    "ai",  # Most specific - AI/ML operations
+    "plt",  # Plotting operations
+    "io",  # I/O operations
+    "gen",  # General utilities (most general)
 ]
 
-__all__ = ["IOTranslator", "PLTTranslator", "AITranslator", "GenTranslator", "MODULE_ORDER"]
+__all__ = [
+    "IOTranslator",
+    "PLTTranslator",
+    "AITranslator",
+    "GenTranslator",
+    "MODULE_ORDER",
+]

@@ -3,7 +3,9 @@
 # Time-stamp: "2024-11-25 01:36:45 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/db/_SQLite3Mixins/_IndexMixin.py
 
-THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_SQLite3Mixins/_IndexMixin.py"
+THIS_FILE = (
+    "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_SQLite3Mixins/_IndexMixin.py"
+)
 
 from typing import List
 from ..._BaseMixins._BaseIndexMixin import _BaseIndexMixin

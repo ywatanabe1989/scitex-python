@@ -141,7 +141,9 @@ class MendeleyMapper(BaseMapper):
         paper._mendeley_profile_id = item.get("profile_id", "")
         paper._mendeley_notes = item.get("notes", "")
 
-        logger.debug(f"Converted Mendeley document '{paper.metadata.basic.title}' to Paper")
+        logger.debug(
+            f"Converted Mendeley document '{paper.metadata.basic.title}' to Paper"
+        )
 
         return paper
 
@@ -160,10 +162,9 @@ class MendeleyMapper(BaseMapper):
             for author in paper.metadata.basic.authors:
                 parts = author.split(",")
                 if len(parts) == 2:
-                    authors.append({
-                        "first_name": parts[1].strip(),
-                        "last_name": parts[0].strip()
-                    })
+                    authors.append(
+                        {"first_name": parts[1].strip(), "last_name": parts[0].strip()}
+                    )
                 else:
                     authors.append({"last_name": author.strip()})
 
@@ -204,7 +205,9 @@ class MendeleyMapper(BaseMapper):
         if websites:
             mendeley_doc["websites"] = websites
 
-        logger.debug(f"Converted Paper '{paper.metadata.basic.title}' to Mendeley document")
+        logger.debug(
+            f"Converted Paper '{paper.metadata.basic.title}' to Mendeley document"
+        )
 
         return mendeley_doc
 

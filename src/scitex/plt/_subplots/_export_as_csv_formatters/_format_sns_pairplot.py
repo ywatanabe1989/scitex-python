@@ -4,21 +4,23 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_sns_pairplot.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import pandas as pd
 
+
 def _format_sns_pairplot(id, tracked_dict, kwargs):
     """Format data from a sns_pairplot call."""
     # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
-    
+
     # Get the args from tracked_dict
-    args = tracked_dict.get('args', [])
-    
+    args = tracked_dict.get("args", [])
+
     # Grid of plots showing pairwise relationships
     if len(args) >= 1:
         data = args[0]

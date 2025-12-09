@@ -16,4 +16,5 @@ def flatten(nested_dict, parent_key="", sep="_"):
             items.append((new_key, value))
     return dict(items)
 
+
 # EOF

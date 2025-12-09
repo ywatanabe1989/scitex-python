@@ -13,24 +13,28 @@ def _get_qt():
     """Get Qt bindings (PyQt6, PyQt5, PySide6, or PySide2)."""
     try:
         from PyQt6 import QtWidgets, QtCore, QtGui
+
         return QtWidgets, QtCore, QtGui, "PyQt6"
     except ImportError:
         pass
 
     try:
         from PyQt5 import QtWidgets, QtCore, QtGui
+
         return QtWidgets, QtCore, QtGui, "PyQt5"
     except ImportError:
         pass
 
     try:
         from PySide6 import QtWidgets, QtCore, QtGui
+
         return QtWidgets, QtCore, QtGui, "PySide6"
     except ImportError:
         pass
 
     try:
         from PySide2 import QtWidgets, QtCore, QtGui
+
         return QtWidgets, QtCore, QtGui, "PySide2"
     except ImportError:
         pass
@@ -70,6 +74,7 @@ class QtEditor:
 
         # Get SciTeX defaults and merge with metadata
         from ._defaults import get_scitex_defaults, extract_defaults_from_metadata
+
         self.scitex_defaults = get_scitex_defaults()
         self.metadata_defaults = extract_defaults_from_metadata(metadata)
 
@@ -99,13 +104,11 @@ class QtEditor:
             self.app = QtWidgets.QApplication([])
 
         # Create main window
-        self.main_window = QtEditorWindow(
-            self, QtWidgets, QtCore, QtGui, qt_version
-        )
+        self.main_window = QtEditorWindow(self, QtWidgets, QtCore, QtGui, qt_version)
         self.main_window.show()
 
         # Start event loop
-        self.app.exec() if hasattr(self.app, 'exec') else self.app.exec_()
+        self.app.exec() if hasattr(self.app, "exec") else self.app.exec_()
 
 
 class QtEditorWindow:
@@ -130,9 +133,11 @@ class QtEditorWindow:
         layout = QtWidgets.QHBoxLayout(central_widget)
 
         # Splitter for resizable panels
-        splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal
-                                       if hasattr(QtCore.Qt, 'Orientation')
-                                       else QtCore.Qt.Horizontal)
+        splitter = QtWidgets.QSplitter(
+            QtCore.Qt.Orientation.Horizontal
+            if hasattr(QtCore.Qt, "Orientation")
+            else QtCore.Qt.Horizontal
+        )
         layout.addWidget(splitter)
 
         # Left panel: Canvas
@@ -237,19 +242,19 @@ class QtEditorWindow:
         layout = self.QtWidgets.QFormLayout(group)
 
         self.title_edit = self.QtWidgets.QLineEdit(
-            self.editor.current_overrides.get('title', '')
+            self.editor.current_overrides.get("title", "")
         )
         self.title_edit.editingFinished.connect(self._on_value_change)
         layout.addRow("Title:", self.title_edit)
 
         self.xlabel_edit = self.QtWidgets.QLineEdit(
-            self.editor.current_overrides.get('xlabel', '')
+            self.editor.current_overrides.get("xlabel", "")
         )
         self.xlabel_edit.editingFinished.connect(self._on_value_change)
         layout.addRow("X Label:", self.xlabel_edit)
 
         self.ylabel_edit = self.QtWidgets.QLineEdit(
-            self.editor.current_overrides.get('ylabel', '')
+            self.editor.current_overrides.get("ylabel", "")
         )
         self.ylabel_edit.editingFinished.connect(self._on_value_change)
         layout.addRow("Y Label:", self.ylabel_edit)
@@ -261,8 +266,8 @@ class QtEditorWindow:
         group = self._create_group_box("Axis Limits")
         layout = self.QtWidgets.QGridLayout(group)
 
-        xlim = self.editor.current_overrides.get('xlim', [0, 1])
-        ylim = self.editor.current_overrides.get('ylim', [0, 1])
+        xlim = self.editor.current_overrides.get("xlim", [0, 1])
+        ylim = self.editor.current_overrides.get("ylim", [0, 1])
 
         layout.addWidget(self.QtWidgets.QLabel("X Min:"), 0, 0)
         self.xmin_spin = self.QtWidgets.QDoubleSpinBox()
@@ -306,7 +311,9 @@ class QtEditorWindow:
         self.linewidth_spin = self.QtWidgets.QDoubleSpinBox()
         self.linewidth_spin.setRange(0.1, 10.0)
         self.linewidth_spin.setSingleStep(0.1)
-        self.linewidth_spin.setValue(self.editor.current_overrides.get('linewidth', 1.0))
+        self.linewidth_spin.setValue(
+            self.editor.current_overrides.get("linewidth", 1.0)
+        )
         self.linewidth_spin.valueChanged.connect(self._on_value_change)
         layout.addRow("Line Width (pt):", self.linewidth_spin)
 
@@ -319,25 +326,33 @@ class QtEditorWindow:
 
         self.title_fontsize_spin = self.QtWidgets.QSpinBox()
         self.title_fontsize_spin.setRange(6, 24)
-        self.title_fontsize_spin.setValue(self.editor.current_overrides.get('title_fontsize', 8))
+        self.title_fontsize_spin.setValue(
+            self.editor.current_overrides.get("title_fontsize", 8)
+        )
         self.title_fontsize_spin.valueChanged.connect(self._on_value_change)
         layout.addRow("Title Font Size:", self.title_fontsize_spin)
 
         self.axis_fontsize_spin = self.QtWidgets.QSpinBox()
         self.axis_fontsize_spin.setRange(6, 24)
-        self.axis_fontsize_spin.setValue(self.editor.current_overrides.get('axis_fontsize', 7))
+        self.axis_fontsize_spin.setValue(
+            self.editor.current_overrides.get("axis_fontsize", 7)
+        )
         self.axis_fontsize_spin.valueChanged.connect(self._on_value_change)
         layout.addRow("Axis Font Size:", self.axis_fontsize_spin)
 
         self.tick_fontsize_spin = self.QtWidgets.QSpinBox()
         self.tick_fontsize_spin.setRange(6, 24)
-        self.tick_fontsize_spin.setValue(self.editor.current_overrides.get('tick_fontsize', 7))
+        self.tick_fontsize_spin.setValue(
+            self.editor.current_overrides.get("tick_fontsize", 7)
+        )
         self.tick_fontsize_spin.valueChanged.connect(self._on_value_change)
         layout.addRow("Tick Font Size:", self.tick_fontsize_spin)
 
         self.legend_fontsize_spin = self.QtWidgets.QSpinBox()
         self.legend_fontsize_spin.setRange(4, 20)
-        self.legend_fontsize_spin.setValue(self.editor.current_overrides.get('legend_fontsize', 6))
+        self.legend_fontsize_spin.setValue(
+            self.editor.current_overrides.get("legend_fontsize", 6)
+        )
         self.legend_fontsize_spin.valueChanged.connect(self._on_value_change)
         layout.addRow("Legend Font Size:", self.legend_fontsize_spin)
 
@@ -350,28 +365,32 @@ class QtEditorWindow:
 
         self.n_ticks_spin = self.QtWidgets.QSpinBox()
         self.n_ticks_spin.setRange(2, 15)
-        self.n_ticks_spin.setValue(self.editor.current_overrides.get('n_ticks', 4))
+        self.n_ticks_spin.setValue(self.editor.current_overrides.get("n_ticks", 4))
         self.n_ticks_spin.valueChanged.connect(self._on_value_change)
         layout.addRow("N Ticks:", self.n_ticks_spin)
 
         self.tick_length_spin = self.QtWidgets.QDoubleSpinBox()
         self.tick_length_spin.setRange(0.1, 5.0)
         self.tick_length_spin.setSingleStep(0.1)
-        self.tick_length_spin.setValue(self.editor.current_overrides.get('tick_length', 0.8))
+        self.tick_length_spin.setValue(
+            self.editor.current_overrides.get("tick_length", 0.8)
+        )
         self.tick_length_spin.valueChanged.connect(self._on_value_change)
         layout.addRow("Tick Length (mm):", self.tick_length_spin)
 
         self.tick_width_spin = self.QtWidgets.QDoubleSpinBox()
         self.tick_width_spin.setRange(0.05, 2.0)
         self.tick_width_spin.setSingleStep(0.05)
-        self.tick_width_spin.setValue(self.editor.current_overrides.get('tick_width', 0.2))
+        self.tick_width_spin.setValue(
+            self.editor.current_overrides.get("tick_width", 0.2)
+        )
         self.tick_width_spin.valueChanged.connect(self._on_value_change)
         layout.addRow("Tick Width (mm):", self.tick_width_spin)
 
         self.tick_direction_combo = self.QtWidgets.QComboBox()
         self.tick_direction_combo.addItems(["out", "in", "inout"])
         self.tick_direction_combo.setCurrentText(
-            self.editor.current_overrides.get('tick_direction', 'out')
+            self.editor.current_overrides.get("tick_direction", "out")
         )
         self.tick_direction_combo.currentTextChanged.connect(self._on_value_change)
         layout.addRow("Tick Direction:", self.tick_direction_combo)
@@ -384,27 +403,27 @@ class QtEditorWindow:
         layout = self.QtWidgets.QFormLayout(group)
 
         self.grid_check = self.QtWidgets.QCheckBox()
-        self.grid_check.setChecked(self.editor.current_overrides.get('grid', False))
+        self.grid_check.setChecked(self.editor.current_overrides.get("grid", False))
         self.grid_check.stateChanged.connect(self._on_value_change)
         layout.addRow("Show Grid:", self.grid_check)
 
         self.hide_top_spine_check = self.QtWidgets.QCheckBox()
         self.hide_top_spine_check.setChecked(
-            self.editor.current_overrides.get('hide_top_spine', True)
+            self.editor.current_overrides.get("hide_top_spine", True)
         )
         self.hide_top_spine_check.stateChanged.connect(self._on_value_change)
         layout.addRow("Hide Top Spine:", self.hide_top_spine_check)
 
         self.hide_right_spine_check = self.QtWidgets.QCheckBox()
         self.hide_right_spine_check.setChecked(
-            self.editor.current_overrides.get('hide_right_spine', True)
+            self.editor.current_overrides.get("hide_right_spine", True)
         )
         self.hide_right_spine_check.stateChanged.connect(self._on_value_change)
         layout.addRow("Hide Right Spine:", self.hide_right_spine_check)
 
         self.transparent_check = self.QtWidgets.QCheckBox()
         self.transparent_check.setChecked(
-            self.editor.current_overrides.get('transparent', True)
+            self.editor.current_overrides.get("transparent", True)
         )
         self.transparent_check.stateChanged.connect(self._on_value_change)
         layout.addRow("Transparent BG:", self.transparent_check)
@@ -412,12 +431,14 @@ class QtEditorWindow:
         self.axis_width_spin = self.QtWidgets.QDoubleSpinBox()
         self.axis_width_spin.setRange(0.05, 2.0)
         self.axis_width_spin.setSingleStep(0.05)
-        self.axis_width_spin.setValue(self.editor.current_overrides.get('axis_width', 0.2))
+        self.axis_width_spin.setValue(
+            self.editor.current_overrides.get("axis_width", 0.2)
+        )
         self.axis_width_spin.valueChanged.connect(self._on_value_change)
         layout.addRow("Axis Width (mm):", self.axis_width_spin)
 
         # Background color button
-        self.bg_color = self.editor.current_overrides.get('facecolor', '#ffffff')
+        self.bg_color = self.editor.current_overrides.get("facecolor", "#ffffff")
         self.bg_color_btn = self.QtWidgets.QPushButton("Choose...")
         self.bg_color_btn.clicked.connect(self._choose_bg_color)
         layout.addRow("Background Color:", self.bg_color_btn)
@@ -431,26 +452,35 @@ class QtEditorWindow:
 
         self.legend_visible_check = self.QtWidgets.QCheckBox()
         self.legend_visible_check.setChecked(
-            self.editor.current_overrides.get('legend_visible', True)
+            self.editor.current_overrides.get("legend_visible", True)
         )
         self.legend_visible_check.stateChanged.connect(self._on_value_change)
         layout.addRow("Show Legend:", self.legend_visible_check)
 
         self.legend_frameon_check = self.QtWidgets.QCheckBox()
         self.legend_frameon_check.setChecked(
-            self.editor.current_overrides.get('legend_frameon', False)
+            self.editor.current_overrides.get("legend_frameon", False)
         )
         self.legend_frameon_check.stateChanged.connect(self._on_value_change)
         layout.addRow("Show Frame:", self.legend_frameon_check)
 
         self.legend_loc_combo = self.QtWidgets.QComboBox()
-        self.legend_loc_combo.addItems([
-            "best", "upper right", "upper left", "lower right",
-            "lower left", "center right", "center left",
-            "upper center", "lower center", "center"
-        ])
+        self.legend_loc_combo.addItems(
+            [
+                "best",
+                "upper right",
+                "upper left",
+                "lower right",
+                "lower left",
+                "center right",
+                "center left",
+                "upper center",
+                "lower center",
+                "center",
+            ]
+        )
         self.legend_loc_combo.setCurrentText(
-            self.editor.current_overrides.get('legend_loc', 'best')
+            self.editor.current_overrides.get("legend_loc", "best")
         )
         self.legend_loc_combo.currentTextChanged.connect(self._on_value_change)
         layout.addRow("Position:", self.legend_loc_combo)
@@ -462,7 +492,7 @@ class QtEditorWindow:
         group = self._create_group_box("Dimensions")
         layout = self.QtWidgets.QFormLayout(group)
 
-        fig_size = self.editor.current_overrides.get('fig_size', [3.15, 2.68])
+        fig_size = self.editor.current_overrides.get("fig_size", [3.15, 2.68])
 
         self.fig_width_spin = self.QtWidgets.QDoubleSpinBox()
         self.fig_width_spin.setRange(1.0, 20.0)
@@ -478,7 +508,7 @@ class QtEditorWindow:
 
         self.dpi_spin = self.QtWidgets.QSpinBox()
         self.dpi_spin.setRange(72, 600)
-        self.dpi_spin.setValue(self.editor.current_overrides.get('dpi', 300))
+        self.dpi_spin.setValue(self.editor.current_overrides.get("dpi", 300))
         self.dpi_spin.valueChanged.connect(self._on_value_change)
         layout.addRow("DPI:", self.dpi_spin)
 
@@ -563,41 +593,41 @@ class QtEditorWindow:
         o = self.editor.current_overrides
 
         # Labels
-        o['title'] = self.title_edit.text()
-        o['xlabel'] = self.xlabel_edit.text()
-        o['ylabel'] = self.ylabel_edit.text()
+        o["title"] = self.title_edit.text()
+        o["xlabel"] = self.xlabel_edit.text()
+        o["ylabel"] = self.ylabel_edit.text()
 
         # Line style
-        o['linewidth'] = self.linewidth_spin.value()
+        o["linewidth"] = self.linewidth_spin.value()
 
         # Font settings
-        o['title_fontsize'] = self.title_fontsize_spin.value()
-        o['axis_fontsize'] = self.axis_fontsize_spin.value()
-        o['tick_fontsize'] = self.tick_fontsize_spin.value()
-        o['legend_fontsize'] = self.legend_fontsize_spin.value()
+        o["title_fontsize"] = self.title_fontsize_spin.value()
+        o["axis_fontsize"] = self.axis_fontsize_spin.value()
+        o["tick_fontsize"] = self.tick_fontsize_spin.value()
+        o["legend_fontsize"] = self.legend_fontsize_spin.value()
 
         # Tick settings
-        o['n_ticks'] = self.n_ticks_spin.value()
-        o['tick_length'] = self.tick_length_spin.value()
-        o['tick_width'] = self.tick_width_spin.value()
-        o['tick_direction'] = self.tick_direction_combo.currentText()
+        o["n_ticks"] = self.n_ticks_spin.value()
+        o["tick_length"] = self.tick_length_spin.value()
+        o["tick_width"] = self.tick_width_spin.value()
+        o["tick_direction"] = self.tick_direction_combo.currentText()
 
         # Style
-        o['grid'] = self.grid_check.isChecked()
-        o['hide_top_spine'] = self.hide_top_spine_check.isChecked()
-        o['hide_right_spine'] = self.hide_right_spine_check.isChecked()
-        o['transparent'] = self.transparent_check.isChecked()
-        o['axis_width'] = self.axis_width_spin.value()
-        o['facecolor'] = self.bg_color
+        o["grid"] = self.grid_check.isChecked()
+        o["hide_top_spine"] = self.hide_top_spine_check.isChecked()
+        o["hide_right_spine"] = self.hide_right_spine_check.isChecked()
+        o["transparent"] = self.transparent_check.isChecked()
+        o["axis_width"] = self.axis_width_spin.value()
+        o["facecolor"] = self.bg_color
 
         # Legend
-        o['legend_visible'] = self.legend_visible_check.isChecked()
-        o['legend_frameon'] = self.legend_frameon_check.isChecked()
-        o['legend_loc'] = self.legend_loc_combo.currentText()
+        o["legend_visible"] = self.legend_visible_check.isChecked()
+        o["legend_frameon"] = self.legend_frameon_check.isChecked()
+        o["legend_loc"] = self.legend_loc_combo.currentText()
 
         # Dimensions
-        o['fig_size'] = [self.fig_width_spin.value(), self.fig_height_spin.value()]
-        o['dpi'] = self.dpi_spin.value()
+        o["fig_size"] = [self.fig_width_spin.value(), self.fig_height_spin.value()]
+        o["dpi"] = self.dpi_spin.value()
 
     def _apply_limits(self):
         """Apply axis limits."""
@@ -607,9 +637,9 @@ class QtEditorWindow:
         ymax = self.ymax_spin.value()
 
         if xmin < xmax:
-            self.editor.current_overrides['xlim'] = [xmin, xmax]
+            self.editor.current_overrides["xlim"] = [xmin, xmax]
         if ymin < ymax:
-            self.editor.current_overrides['ylim'] = [ymin, ymax]
+            self.editor.current_overrides["ylim"] = [ymin, ymax]
 
         self.editor._user_modified = True
         self._render_figure()
@@ -619,7 +649,7 @@ class QtEditorWindow:
         color = self.QtWidgets.QColorDialog.getColor()
         if color.isValid():
             self.bg_color = color.name()
-            self.editor.current_overrides['facecolor'] = self.bg_color
+            self.editor.current_overrides["facecolor"] = self.bg_color
             self._render_figure()
 
     def _add_annotation(self):
@@ -631,16 +661,18 @@ class QtEditorWindow:
         x = self.annot_x_spin.value()
         y = self.annot_y_spin.value()
 
-        if 'annotations' not in self.editor.current_overrides:
-            self.editor.current_overrides['annotations'] = []
+        if "annotations" not in self.editor.current_overrides:
+            self.editor.current_overrides["annotations"] = []
 
-        self.editor.current_overrides['annotations'].append({
-            'type': 'text',
-            'text': text,
-            'x': x,
-            'y': y,
-            'fontsize': self.editor.current_overrides.get('axis_fontsize', 7),
-        })
+        self.editor.current_overrides["annotations"].append(
+            {
+                "type": "text",
+                "text": text,
+                "x": x,
+                "y": y,
+                "fontsize": self.editor.current_overrides.get("axis_fontsize", 7),
+            }
+        )
 
         self.annot_text_edit.clear()
         self._update_annotations_list()
@@ -650,7 +682,7 @@ class QtEditorWindow:
     def _remove_annotation(self):
         """Remove selected annotation."""
         row = self.annot_list.currentRow()
-        annotations = self.editor.current_overrides.get('annotations', [])
+        annotations = self.editor.current_overrides.get("annotations", [])
 
         if row >= 0 and row < len(annotations):
             del annotations[row]
@@ -661,11 +693,11 @@ class QtEditorWindow:
     def _update_annotations_list(self):
         """Update the annotations list widget."""
         self.annot_list.clear()
-        for ann in self.editor.current_overrides.get('annotations', []):
-            if ann.get('type') == 'text':
-                text = ann.get('text', '')[:20]
-                x = ann.get('x', 0)
-                y = ann.get('y', 0)
+        for ann in self.editor.current_overrides.get("annotations", []):
+            if ann.get("type") == "text":
+                text = ann.get("text", "")[:20]
+                x = ann.get("x", 0)
+                y = ann.get("y", 0)
                 self.annot_list.addItem(f"{text} ({x:.2f}, {y:.2f})")
 
     def _render_figure(self):
@@ -677,68 +709,74 @@ class QtEditorWindow:
         mm_to_pt = 2.83465
 
         # Background
-        if o.get('transparent', True):
-            self.fig.patch.set_facecolor('none')
-            self.ax.patch.set_facecolor('none')
+        if o.get("transparent", True):
+            self.fig.patch.set_facecolor("none")
+            self.ax.patch.set_facecolor("none")
         else:
-            self.fig.patch.set_facecolor(o.get('facecolor', '#ffffff'))
-            self.ax.patch.set_facecolor(o.get('facecolor', '#ffffff'))
+            self.fig.patch.set_facecolor(o.get("facecolor", "#ffffff"))
+            self.ax.patch.set_facecolor(o.get("facecolor", "#ffffff"))
 
         # Plot from CSV
         if self.editor.csv_data is not None:
             self._plot_from_csv(o)
         else:
-            self.ax.text(0.5, 0.5, "No plot data available\n(CSV not found)",
-                        ha='center', va='center', transform=self.ax.transAxes)
+            self.ax.text(
+                0.5,
+                0.5,
+                "No plot data available\n(CSV not found)",
+                ha="center",
+                va="center",
+                transform=self.ax.transAxes,
+            )
 
         # Labels
-        if o.get('title'):
-            self.ax.set_title(o['title'], fontsize=o.get('title_fontsize', 8))
-        if o.get('xlabel'):
-            self.ax.set_xlabel(o['xlabel'], fontsize=o.get('axis_fontsize', 7))
-        if o.get('ylabel'):
-            self.ax.set_ylabel(o['ylabel'], fontsize=o.get('axis_fontsize', 7))
+        if o.get("title"):
+            self.ax.set_title(o["title"], fontsize=o.get("title_fontsize", 8))
+        if o.get("xlabel"):
+            self.ax.set_xlabel(o["xlabel"], fontsize=o.get("axis_fontsize", 7))
+        if o.get("ylabel"):
+            self.ax.set_ylabel(o["ylabel"], fontsize=o.get("axis_fontsize", 7))
 
         # Ticks
         self.ax.tick_params(
-            axis='both',
-            labelsize=o.get('tick_fontsize', 7),
-            length=o.get('tick_length', 0.8) * mm_to_pt,
-            width=o.get('tick_width', 0.2) * mm_to_pt,
-            direction=o.get('tick_direction', 'out'),
+            axis="both",
+            labelsize=o.get("tick_fontsize", 7),
+            length=o.get("tick_length", 0.8) * mm_to_pt,
+            width=o.get("tick_width", 0.2) * mm_to_pt,
+            direction=o.get("tick_direction", "out"),
         )
 
-        self.ax.xaxis.set_major_locator(MaxNLocator(nbins=o.get('n_ticks', 4)))
-        self.ax.yaxis.set_major_locator(MaxNLocator(nbins=o.get('n_ticks', 4)))
+        self.ax.xaxis.set_major_locator(MaxNLocator(nbins=o.get("n_ticks", 4)))
+        self.ax.yaxis.set_major_locator(MaxNLocator(nbins=o.get("n_ticks", 4)))
 
         # Grid
-        if o.get('grid'):
-            self.ax.grid(True, linewidth=o.get('axis_width', 0.2) * mm_to_pt, alpha=0.3)
+        if o.get("grid"):
+            self.ax.grid(True, linewidth=o.get("axis_width", 0.2) * mm_to_pt, alpha=0.3)
 
         # Limits
-        if o.get('xlim'):
-            self.ax.set_xlim(o['xlim'])
-        if o.get('ylim'):
-            self.ax.set_ylim(o['ylim'])
+        if o.get("xlim"):
+            self.ax.set_xlim(o["xlim"])
+        if o.get("ylim"):
+            self.ax.set_ylim(o["ylim"])
 
         # Spines
-        if o.get('hide_top_spine', True):
-            self.ax.spines['top'].set_visible(False)
-        if o.get('hide_right_spine', True):
-            self.ax.spines['right'].set_visible(False)
+        if o.get("hide_top_spine", True):
+            self.ax.spines["top"].set_visible(False)
+        if o.get("hide_right_spine", True):
+            self.ax.spines["right"].set_visible(False)
 
         for spine in self.ax.spines.values():
-            spine.set_linewidth(o.get('axis_width', 0.2) * mm_to_pt)
+            spine.set_linewidth(o.get("axis_width", 0.2) * mm_to_pt)
 
         # Annotations
-        for ann in o.get('annotations', []):
-            if ann.get('type') == 'text':
+        for ann in o.get("annotations", []):
+            if ann.get("type") == "text":
                 self.ax.text(
-                    ann.get('x', 0.5),
-                    ann.get('y', 0.5),
-                    ann.get('text', ''),
+                    ann.get("x", 0.5),
+                    ann.get("y", 0.5),
+                    ann.get("text", ""),
                     transform=self.ax.transAxes,
-                    fontsize=ann.get('fontsize', o.get('axis_fontsize', 7)),
+                    fontsize=ann.get("fontsize", o.get("axis_fontsize", 7)),
                 )
 
         self.fig.tight_layout()
@@ -753,43 +791,49 @@ class QtEditorWindow:
             return
 
         df = self.editor.csv_data
-        linewidth = o.get('linewidth', 1.0)
-        legend_visible = o.get('legend_visible', True)
-        legend_fontsize = o.get('legend_fontsize', 6)
-        legend_frameon = o.get('legend_frameon', False)
-        legend_loc = o.get('legend_loc', 'best')
+        linewidth = o.get("linewidth", 1.0)
+        legend_visible = o.get("legend_visible", True)
+        legend_fontsize = o.get("legend_fontsize", 6)
+        legend_frameon = o.get("legend_frameon", False)
+        legend_loc = o.get("legend_loc", "best")
 
-        traces = o.get('traces', [])
+        traces = o.get("traces", [])
 
         if traces:
             for trace in traces:
-                csv_cols = trace.get('csv_columns', {})
-                x_col = csv_cols.get('x')
-                y_col = csv_cols.get('y')
+                csv_cols = trace.get("csv_columns", {})
+                x_col = csv_cols.get("x")
+                y_col = csv_cols.get("y")
 
                 if x_col in df.columns and y_col in df.columns:
                     self.ax.plot(
                         df[x_col],
                         df[y_col],
-                        label=trace.get('label', trace.get('id', '')),
-                        color=trace.get('color'),
-                        linestyle=trace.get('linestyle', '-'),
-                        linewidth=trace.get('linewidth', linewidth),
+                        label=trace.get("label", trace.get("id", "")),
+                        color=trace.get("color"),
+                        linestyle=trace.get("linestyle", "-"),
+                        linewidth=trace.get("linewidth", linewidth),
                     )
 
-            if legend_visible and any(t.get('label') for t in traces):
-                self.ax.legend(fontsize=legend_fontsize, frameon=legend_frameon, loc=legend_loc)
+            if legend_visible and any(t.get("label") for t in traces):
+                self.ax.legend(
+                    fontsize=legend_fontsize, frameon=legend_frameon, loc=legend_loc
+                )
         else:
             cols = df.columns.tolist()
             if len(cols) >= 2:
                 x_col = cols[0]
                 for y_col in cols[1:]:
                     try:
-                        self.ax.plot(df[x_col], df[y_col], label=str(y_col), linewidth=linewidth)
+                        self.ax.plot(
+                            df[x_col], df[y_col], label=str(y_col), linewidth=linewidth
+                        )
                     except Exception:
                         pass
                 if len(cols) > 2 and legend_visible:
-                    self.ax.legend(fontsize=legend_fontsize, frameon=legend_frameon, loc=legend_loc)
+                    self.ax.legend(
+                        fontsize=legend_fontsize, frameon=legend_frameon, loc=legend_loc
+                    )
 
     def _save_manual(self):
         """Save to .manual.json."""
@@ -798,45 +842,49 @@ class QtEditorWindow:
         try:
             self._collect_overrides()
             manual_path = save_manual_overrides(
-                self.editor.json_path,
-                self.editor.current_overrides
+                self.editor.json_path, self.editor.current_overrides
             )
             self.status_bar.showMessage(f"Saved: {manual_path.name}")
             self.QtWidgets.QMessageBox.information(
-                self.window, "Saved",
-                f"Manual overrides saved to:\n{manual_path}"
+                self.window, "Saved", f"Manual overrides saved to:\n{manual_path}"
             )
         except Exception as e:
             self.QtWidgets.QMessageBox.critical(
-                self.window, "Error",
-                f"Failed to save: {e}"
+                self.window, "Error", f"Failed to save: {e}"
             )
 
     def _reset_overrides(self):
         """Reset to initial overrides."""
         reply = self.QtWidgets.QMessageBox.question(
-            self.window, "Reset",
+            self.window,
+            "Reset",
             "Reset all changes to original values?",
-            self.QtWidgets.QMessageBox.StandardButton.Yes |
-            self.QtWidgets.QMessageBox.StandardButton.No
-            if hasattr(self.QtWidgets.QMessageBox, 'StandardButton')
-            else self.QtWidgets.QMessageBox.Yes | self.QtWidgets.QMessageBox.No
+            self.QtWidgets.QMessageBox.StandardButton.Yes
+            | self.QtWidgets.QMessageBox.StandardButton.No
+            if hasattr(self.QtWidgets.QMessageBox, "StandardButton")
+            else self.QtWidgets.QMessageBox.Yes | self.QtWidgets.QMessageBox.No,
         )
 
-        yes_val = (self.QtWidgets.QMessageBox.StandardButton.Yes
-                  if hasattr(self.QtWidgets.QMessageBox, 'StandardButton')
-                  else self.QtWidgets.QMessageBox.Yes)
+        yes_val = (
+            self.QtWidgets.QMessageBox.StandardButton.Yes
+            if hasattr(self.QtWidgets.QMessageBox, "StandardButton")
+            else self.QtWidgets.QMessageBox.Yes
+        )
 
         if reply == yes_val:
-            self.editor.current_overrides = copy.deepcopy(self.editor._initial_overrides)
+            self.editor.current_overrides = copy.deepcopy(
+                self.editor._initial_overrides
+            )
             self.editor._user_modified = False
 
             # Update UI
-            self.title_edit.setText(self.editor.current_overrides.get('title', ''))
-            self.xlabel_edit.setText(self.editor.current_overrides.get('xlabel', ''))
-            self.ylabel_edit.setText(self.editor.current_overrides.get('ylabel', ''))
-            self.linewidth_spin.setValue(self.editor.current_overrides.get('linewidth', 1.0))
-            self.grid_check.setChecked(self.editor.current_overrides.get('grid', False))
+            self.title_edit.setText(self.editor.current_overrides.get("title", ""))
+            self.xlabel_edit.setText(self.editor.current_overrides.get("xlabel", ""))
+            self.ylabel_edit.setText(self.editor.current_overrides.get("ylabel", ""))
+            self.linewidth_spin.setValue(
+                self.editor.current_overrides.get("linewidth", 1.0)
+            )
+            self.grid_check.setChecked(self.editor.current_overrides.get("grid", False))
 
             self._update_annotations_list()
             self._render_figure()
@@ -845,19 +893,22 @@ class QtEditorWindow:
     def _export_png(self):
         """Export current view to PNG."""
         filepath, _ = self.QtWidgets.QFileDialog.getSaveFileName(
-            self.window, "Export PNG",
-            str(self.editor.json_path.with_suffix('.edited.png')),
-            "PNG files (*.png);;All files (*)"
+            self.window,
+            "Export PNG",
+            str(self.editor.json_path.with_suffix(".edited.png")),
+            "PNG files (*.png);;All files (*)",
         )
 
         if filepath:
             self._collect_overrides()
             o = self.editor.current_overrides
-            dpi = o.get('dpi', 300)
+            dpi = o.get("dpi", 300)
 
             self.fig.savefig(
-                filepath, dpi=dpi, bbox_inches='tight',
-                transparent=o.get('transparent', True)
+                filepath,
+                dpi=dpi,
+                bbox_inches="tight",
+                transparent=o.get("transparent", True),
             )
             self.status_bar.showMessage(f"Exported: {Path(filepath).name}")
 

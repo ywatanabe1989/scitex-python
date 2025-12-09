@@ -4,6 +4,7 @@
 # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_AxesWrapper.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -52,8 +53,7 @@ class AxesWrapper:
             @wraps(methods[0])
             def wrapper(*args, **kwargs):
                 return [
-                    getattr(ax, name)(*args, **kwargs)
-                    for ax in self._axes_scitex.flat
+                    getattr(ax, name)(*args, **kwargs) for ax in self._axes_scitex.flat
                 ]
 
             return wrapper
@@ -73,6 +73,19 @@ class AxesWrapper:
     #     return subset
 
     def __getitem__(self, index):
+        # Handle 1D-like arrays (single row or single column)
+        # For (1, n) shape with integer index, return the element from the row
+        # For (n, 1) shape with integer index, return the element from the column
+        if isinstance(index, int):
+            shape = self._axes_scitex.shape
+            if len(shape) == 2:
+                if shape[0] == 1:
+                    # Single row case: axes[i] should return axes[0, i]
+                    return self._axes_scitex[0, index]
+                elif shape[1] == 1:
+                    # Single column case: axes[i] should return axes[i, 0]
+                    return self._axes_scitex[index, 0]
+
         subset = self._axes_scitex[index]
         if isinstance(subset, np.ndarray):
             return AxesWrapper(self._fig_scitex, subset)
@@ -83,7 +96,8 @@ class AxesWrapper:
         self._axes_scitex[index] = value
 
     def __iter__(self):
-        return iter(self._axes_scitex)
+        # Iterate over flattened axes for backward compatibility
+        return iter(self._axes_scitex.flat)
 
     def __len__(self):
         return self._axes_scitex.size
@@ -142,10 +156,10 @@ class AxesWrapper:
     @property
     def flat(self):
         """Return a flat iterator over all axes.
-        
+
         This property provides direct access to the flattened axes array,
         matching numpy array behavior.
-        
+
         Returns:
             Iterator over all axes in row-major (C-style) order
         """
@@ -174,8 +188,10 @@ class AxesWrapper:
         dfs = []
         for ii, ax in enumerate(self._axes_scitex.flat):
             df = ax.export_as_csv()
-            df.columns = [f"ax_{ii:02d}_{col}" for col in df.columns]
+            # Column names already include axis position via get_csv_column_name
+            # No need to add extra prefix
             dfs.append(df)
         return pd.concat(dfs, axis=1) if dfs else pd.DataFrame()
+
 
 # EOF

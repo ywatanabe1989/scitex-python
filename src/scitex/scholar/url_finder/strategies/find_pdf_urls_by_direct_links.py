@@ -50,7 +50,7 @@ async def find_pdf_urls_by_direct_links(
             await browser_logger.debug(
                 page,
                 f"{func_name}: Found {len(all_urls)} URLs "
-                f"({len(href_urls)} href, {len(dropdown_urls)} dropdown)"
+                f"({len(href_urls)} href, {len(dropdown_urls)} dropdown)",
             )
 
         return list(all_urls)

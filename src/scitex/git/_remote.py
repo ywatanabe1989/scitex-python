@@ -16,7 +16,9 @@ from ._constants import EXIT_SUCCESS, EXIT_FAILURE
 logger = getLogger(__name__)
 
 
-def get_remote_url(repo_path: Path, remote_name: str = "origin", verbose: bool = False) -> Optional[str]:
+def get_remote_url(
+    repo_path: Path, remote_name: str = "origin", verbose: bool = False
+) -> Optional[str]:
     """
     Get remote URL for a git repository.
 
@@ -47,7 +49,7 @@ def get_remote_url(repo_path: Path, remote_name: str = "origin", verbose: bool =
         result = sh(
             ["git", "config", "--get", f"remote.{remote_name}.url"],
             verbose=verbose,
-            return_as="dict"
+            return_as="dict",
         )
         if result["success"]:
             return result["stdout"].strip()
@@ -111,7 +113,9 @@ def _normalize_git_url(url: str) -> str:
     return url
 
 
-def is_cloned_from(repo_path: Path, expected_url: str, remote_name: str = "origin") -> bool:
+def is_cloned_from(
+    repo_path: Path, expected_url: str, remote_name: str = "origin"
+) -> bool:
     """
     Check if directory is a git repository cloned from specific URL.
     Handles both HTTPS and SSH URL formats.
@@ -157,6 +161,7 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--action", choices=["get-url", "check-origin"], required=True)
     parser.add_argument("--repo-path", type=Path, required=True)
@@ -169,6 +174,7 @@ def parse_args():
 def run_session():
     """Initialize scitex framework, run main function, and cleanup."""
     from ._session import run_with_session
+
     run_with_session(parse_args, main)
 
 

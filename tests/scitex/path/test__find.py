@@ -385,7 +385,7 @@ if __name__ == "__main__":
 #         import matplotlib.pyplot as plt
 #     except ImportError:
 #         plt = None
-#     
+# 
 #     # Start
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
 # 

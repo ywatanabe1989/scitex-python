@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = "./src/scitex/template/_git_strategy.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -81,9 +82,7 @@ def apply_git_strategy(
         logger.debug("Using 'origin' git strategy, preserving template git history")
         git_dir = project_path / ".git"
         if not git_dir.exists():
-            logger.warning(
-                "No .git directory found, cannot preserve origin history"
-            )
+            logger.warning("No .git directory found, cannot preserve origin history")
         return
 
     # Git initialization group

@@ -12,7 +12,9 @@ class AiritiTranslator(BaseTranslator):
     """Airiti."""
 
     LABEL = "Airiti"
-    URL_TARGET_PATTERN = r"^https?://([^/]+\.)?airitilibrary\.com/Publication/alDetailedMesh"
+    URL_TARGET_PATTERN = (
+        r"^https?://([^/]+\.)?airitilibrary\.com/Publication/alDetailedMesh"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

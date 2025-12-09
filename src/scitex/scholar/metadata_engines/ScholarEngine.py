@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/metadata_engines/ScholarEngine.py"
-)
+
+__FILE__ = "./src/scitex/scholar/metadata_engines/ScholarEngine.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 import json
@@ -114,7 +113,9 @@ class ScholarEngine:
             query_str = (
                 f"title: {title}"
                 if title
-                else f"doi: {doi}" if doi else "unknown query"
+                else f"doi: {doi}"
+                if doi
+                else "unknown query"
             )
             N_PRINT = 50
             if len(query_str) < N_PRINT:
@@ -211,9 +212,7 @@ class ScholarEngine:
                     logger.fail(f"Failed query '{query}': {error}")
 
         if dois:
-            batched_metadata = [
-                await self.search_async(doi=doi) for doi in tqdm(dois)
-            ]
+            batched_metadata = [await self.search_async(doi=doi) for doi in tqdm(dois)]
             _print_stats(dois, batched_metadata)
             return batched_metadata
 
@@ -242,10 +241,11 @@ class ScholarEngine:
                     self._engine_instances[name] = engine_classes[name]()
                 elif name == "CrossRefLocal":
                     # Get API URL from config (supports SCITEX_SCHOLAR_CROSSREF_API_URL env var)
-                    api_url = self.config.resolve("crossref_api_url", "http://127.0.0.1:3333")
+                    api_url = self.config.resolve(
+                        "crossref_api_url", "http://127.0.0.1:3333"
+                    )
                     self._engine_instances[name] = engine_classes[name](
-                        "research@example.com",
-                        api_url=api_url
+                        "research@example.com", api_url=api_url
                     )
                 else:
                     self._engine_instances[name] = engine_classes[name](
@@ -350,9 +350,7 @@ class ScholarEngine:
             return True
 
         first = metadata_list[0]
-        first_title = (
-            (first.get("basic", {}).get("title") or "").lower().strip()
-        )
+        first_title = (first.get("basic", {}).get("title") or "").lower().strip()
         first_year = first.get("basic", {}).get("year")
         first_authors = first.get("basic", {}).get("authors", [])
         first_author_surname = (
@@ -360,16 +358,12 @@ class ScholarEngine:
         )
 
         for metadata in metadata_list[1:]:
-            title = (
-                (metadata.get("basic", {}).get("title") or "").lower().strip()
-            )
+            title = (metadata.get("basic", {}).get("title") or "").lower().strip()
             year = metadata.get("basic", {}).get("year")
             authors = metadata.get("basic", {}).get("authors", [])
             first_author = authors[0]
             if first_author:
-                author_surname = (
-                    authors[0].split()[-1].lower() if authors else ""
-                )
+                author_surname = authors[0].split()[-1].lower() if authors else ""
             else:
                 author_surname = ""
 
@@ -393,16 +387,12 @@ class ScholarEngine:
 
         return True
 
-    def _validate_against_query(
-        self, metadata: Dict, query_title: str
-    ) -> bool:
+    def _validate_against_query(self, metadata: Dict, query_title: str) -> bool:
         """Validate metadata matches the original query with strict title matching."""
         if not query_title or not metadata:
             return True
 
-        paper_title = (
-            (metadata.get("basic", {}).get("title") or "").lower().strip()
-        )
+        paper_title = (metadata.get("basic", {}).get("title") or "").lower().strip()
         if not paper_title:
             return False
 
@@ -449,17 +439,13 @@ class ScholarEngine:
         query_title = getattr(self, "_last_query_title", None)
         valid_engines = {}
         for engine_name, metadata in engine_results.items():
-            if metadata and self._validate_against_query(
-                metadata, query_title
-            ):
+            if metadata and self._validate_against_query(metadata, query_title):
                 valid_engines[engine_name] = metadata
 
         if not valid_engines:
             # Return all engine results without validation if nothing matches
             # This allows partial enrichment even if title validation fails
-            logger.warning(
-                "No engines returned matching metadata, using all results"
-            )
+            logger.warning("No engines returned matching metadata, using all results")
             valid_engines = {k: v for k, v in engine_results.items() if v}
 
         # If still no valid engines, return empty structure
@@ -472,9 +458,7 @@ class ScholarEngine:
 
         # Merge all other valid engines
         for engine_name, metadata in list(valid_engines.items())[1:]:
-            base_metadata = self._merge_metadata_structures(
-                base_metadata, metadata
-            )
+            base_metadata = self._merge_metadata_structures(base_metadata, metadata)
 
         # Track all attempted searches
         if "system" not in base_metadata:
@@ -517,9 +501,7 @@ class ScholarEngine:
 
                 # Initialize engine lists if needed
                 if not isinstance(current_engines, list):
-                    current_engines = (
-                        [current_engines] if current_engines else []
-                    )
+                    current_engines = [current_engines] if current_engines else []
                     merged[section][f"{key}_engines"] = current_engines
 
                 # Convert single engine to list
@@ -529,15 +511,11 @@ class ScholarEngine:
                 should_replace = False
                 if current_value is None:
                     should_replace = True
-                elif engine_priority.get(
-                    new_engines[0], 0
-                ) > engine_priority.get(
+                elif engine_priority.get(new_engines[0], 0) > engine_priority.get(
                     current_engines[0] if current_engines else "", 0
                 ):
                     should_replace = True
-                elif isinstance(value, list) and isinstance(
-                    current_value, list
-                ):
+                elif isinstance(value, list) and isinstance(current_value, list):
                     if len(value) > len(current_value):
                         should_replace = True
                 elif isinstance(value, str) and isinstance(current_value, str):

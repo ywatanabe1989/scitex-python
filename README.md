@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2025-11-19 16:19:32
+!-- Timestamp: 2025-12-09 04:00:22
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -476,7 +476,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+AGPL-3.0.
 
 ## 📧 Contact
 

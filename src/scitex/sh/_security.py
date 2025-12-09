@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/sh/_security.py"
-)
+
+__FILE__ = "./src/scitex/sh/_security.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -63,5 +62,6 @@ def quote(arg: str) -> str:
     >>> sh(f"cat {quote(filename)}")
     """
     return shlex.quote(arg)
+
 
 # EOF

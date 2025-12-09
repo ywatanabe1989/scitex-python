@@ -34,7 +34,7 @@ class DAIZenonTranslator:
         "inRepository": True,
         "translatorType": 4,
         "browserSupport": "gcsibv",
-        "lastUpdated": "2020-10-13 15:24:32"
+        "lastUpdated": "2020-10-13 15:24:32",
     }
 
     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
@@ -45,14 +45,16 @@ class DAIZenonTranslator:
             return "multiple"
         return ""
 
-    def _get_search_results(self, doc: BeautifulSoup, check_only: bool = False) -> Dict[str, str]:
+    def _get_search_results(
+        self, doc: BeautifulSoup, check_only: bool = False
+    ) -> Dict[str, str]:
         """Get search results from the page."""
         items = {}
         found = False
-        rows = doc.select('div.row a.title')
+        rows = doc.select("div.row a.title")
 
         for row in rows:
-            href = row.get('href')
+            href = row.get("href")
             title = row.get_text(strip=True)
             if not href or not title:
                 continue
@@ -76,22 +78,17 @@ class DAIZenonTranslator:
         Note: This is a simplified version. The full translator requires
         MARC processing which is complex in Python.
         """
-        item = {
-            'itemType': 'book',
-            'creators': [],
-            'tags': [],
-            'attachments': []
-        }
+        item = {"itemType": "book", "creators": [], "tags": [], "attachments": []}
 
         # Extract title
-        title_elem = doc.select_one('h1.title, .record-title')
+        title_elem = doc.select_one("h1.title, .record-title")
         if title_elem:
-            item['title'] = title_elem.get_text(strip=True)
+            item["title"] = title_elem.get_text(strip=True)
 
         # Extract metadata from table rows
-        for row in doc.select('table tr'):
-            label_elem = row.find('th')
-            value_elem = row.find('td')
+        for row in doc.select("table tr"):
+            label_elem = row.find("th")
+            value_elem = row.find("td")
 
             if not label_elem or not value_elem:
                 continue
@@ -99,63 +96,65 @@ class DAIZenonTranslator:
             label = label_elem.get_text(strip=True)
             value = value_elem.get_text(strip=True)
 
-            if label == 'Author' or label == 'Creator':
-                parts = value.split(',')
+            if label == "Author" or label == "Creator":
+                parts = value.split(",")
                 if len(parts) >= 2:
-                    item['creators'].append({
-                        'firstName': parts[1].strip(),
-                        'lastName': parts[0].strip(),
-                        'creatorType': 'author'
-                    })
+                    item["creators"].append(
+                        {
+                            "firstName": parts[1].strip(),
+                            "lastName": parts[0].strip(),
+                            "creatorType": "author",
+                        }
+                    )
                 else:
-                    item['creators'].append({
-                        'lastName': value,
-                        'creatorType': 'author',
-                        'fieldMode': True
-                    })
+                    item["creators"].append(
+                        {"lastName": value, "creatorType": "author", "fieldMode": True}
+                    )
 
-            elif label == 'Publication Date' or label == 'Year':
-                item['date'] = value
+            elif label == "Publication Date" or label == "Year":
+                item["date"] = value
 
-            elif label == 'Publisher':
-                item['publisher'] = value
+            elif label == "Publisher":
+                item["publisher"] = value
 
-            elif label == 'Place of Publication' or label == 'Place':
-                item['place'] = value
+            elif label == "Place of Publication" or label == "Place":
+                item["place"] = value
 
-            elif label == 'Series':
-                item['series'] = value
+            elif label == "Series":
+                item["series"] = value
 
-            elif label == 'Pages' or label == 'Extent':
-                item['numPages'] = re.sub(r'\s*p\.?$', '', value)
+            elif label == "Pages" or label == "Extent":
+                item["numPages"] = re.sub(r"\s*p\.?$", "", value)
 
-            elif label == 'ISBN':
-                item['ISBN'] = value
+            elif label == "ISBN":
+                item["ISBN"] = value
 
-            elif label == 'Language':
-                item['language'] = value
+            elif label == "Language":
+                item["language"] = value
 
-            elif label == 'Call Number':
-                item['callNumber'] = value
+            elif label == "Call Number":
+                item["callNumber"] = value
 
         # Extract tags/subjects
-        for tag_elem in doc.select('.subjects a, .tags a'):
+        for tag_elem in doc.select(".subjects a, .tags a"):
             tag_text = tag_elem.get_text(strip=True)
             if tag_text:
-                item['tags'].append({'tag': tag_text})
+                item["tags"].append({"tag": tag_text})
 
         # Extract abstract/description
-        abstract_elem = doc.select_one('.description, .abstract')
+        abstract_elem = doc.select_one(".description, .abstract")
         if abstract_elem:
-            item['abstractNote'] = abstract_elem.get_text(strip=True)
+            item["abstractNote"] = abstract_elem.get_text(strip=True)
 
         # Add attachment
-        clean_url = re.sub(r'#.*', '', url)
-        item['attachments'].append({
-            'url': clean_url,
-            'title': 'DAI Zenon Entry',
-            'mimeType': 'text/html',
-            'snapshot': False
-        })
+        clean_url = re.sub(r"#.*", "", url)
+        item["attachments"].append(
+            {
+                "url": clean_url,
+                "title": "DAI Zenon Entry",
+                "mimeType": "text/html",
+                "snapshot": False,
+            }
+        )
 
         return item

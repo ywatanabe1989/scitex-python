@@ -12,7 +12,9 @@ class KoreanNationalLibraryTranslator(BaseTranslator):
     """Korean National Library."""
 
     LABEL = "Korean National Library"
-    URL_TARGET_PATTERN = r"^https?://www\.nl\.go\.kr/(EN|NL)/contents/(eng)?[sS]earch\.do"
+    URL_TARGET_PATTERN = (
+        r"^https?://www\.nl\.go\.kr/(EN|NL)/contents/(eng)?[sS]earch\.do"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

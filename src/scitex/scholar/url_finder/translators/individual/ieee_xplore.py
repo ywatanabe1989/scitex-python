@@ -73,9 +73,9 @@ class IEEEXploreTranslator(BaseTranslator):
             # Method 1: Extract arnumber from current URL (JS line 135)
             # Match patterns: arnumber=123456 or /document/123456
             current_url = page.url
-            arnumber_match = re.search(r'arnumber=(\d+)', current_url)
+            arnumber_match = re.search(r"arnumber=(\d+)", current_url)
             if not arnumber_match:
-                arnumber_match = re.search(r'/document/(\d+)', current_url)
+                arnumber_match = re.search(r"/document/(\d+)", current_url)
 
             if arnumber_match:
                 arnumber = arnumber_match.group(1)
@@ -94,11 +94,13 @@ class IEEEXploreTranslator(BaseTranslator):
                     # Check for PDF link in the page (JS lines 176-177)
                     try:
                         # Look for iframe with PDF
-                        iframe_src = await page.locator('iframe[src*=".pdf"], iframe[src*="/getPDF.jsp"]').first.get_attribute('src', timeout=2000)
+                        iframe_src = await page.locator(
+                            'iframe[src*=".pdf"], iframe[src*="/getPDF.jsp"]'
+                        ).first.get_attribute("src", timeout=2000)
                         if iframe_src:
-                            if iframe_src.startswith('/'):
+                            if iframe_src.startswith("/"):
                                 pdf_url = f"https://ieeexplore.ieee.org{iframe_src}"
-                            elif not iframe_src.startswith('http'):
+                            elif not iframe_src.startswith("http"):
                                 pdf_url = f"https://ieeexplore.ieee.org/{iframe_src}"
                             else:
                                 pdf_url = iframe_src
@@ -125,12 +127,14 @@ class IEEEXploreTranslator(BaseTranslator):
         # Method 2: Look for PDF download link on the page
         try:
             # Check for direct PDF download links
-            pdf_link = await page.locator('a[href*=".pdf"], a[href*="/getPDF.jsp"], a[href*="/stamp/"]').first.get_attribute('href', timeout=2000)
+            pdf_link = await page.locator(
+                'a[href*=".pdf"], a[href*="/getPDF.jsp"], a[href*="/stamp/"]'
+            ).first.get_attribute("href", timeout=2000)
             if pdf_link:
                 # Make absolute URL if needed
-                if pdf_link.startswith('/'):
+                if pdf_link.startswith("/"):
                     pdf_link = f"https://ieeexplore.ieee.org{pdf_link}"
-                elif not pdf_link.startswith('http'):
+                elif not pdf_link.startswith("http"):
                     pdf_link = f"https://ieeexplore.ieee.org/{pdf_link}"
                 pdf_urls.append(pdf_link)
                 return pdf_urls
@@ -143,7 +147,7 @@ class IEEEXploreTranslator(BaseTranslator):
             script_elements = await page.locator('script[type="text/javascript"]').all()
             for script_element in script_elements:
                 script = await script_element.text_content()
-                if script and 'global.document.metadata' in script:
+                if script and "global.document.metadata" in script:
                     # Try to extract arnumber from metadata
                     arnumber_match = re.search(r'"arnumber"\s*:\s*"(\d+)"', script)
                     if not arnumber_match:
@@ -187,50 +191,50 @@ class IEEEXploreTranslator(BaseTranslator):
         try:
             # Extract arnumber from URL (JS line 135)
             current_url = page.url
-            arnumber_match = re.search(r'arnumber=(\d+)', current_url)
+            arnumber_match = re.search(r"arnumber=(\d+)", current_url)
             if not arnumber_match:
-                arnumber_match = re.search(r'/document/(\d+)', current_url)
+                arnumber_match = re.search(r"/document/(\d+)", current_url)
 
             if not arnumber_match:
                 return None
 
             arnumber = arnumber_match.group(1)
-            metadata['arnumber'] = arnumber
+            metadata["arnumber"] = arnumber
 
             # Extract metadata from script tag (JS lines 138-149)
             script_elements = await page.locator('script[type="text/javascript"]').all()
             for script_element in script_elements:
                 script = await script_element.text_content()
-                if script and 'global.document.metadata' in script:
+                if script and "global.document.metadata" in script:
                     try:
                         # Extract JSON metadata (JS lines 140-148)
                         data_raw = script.split("global.document.metadata")[1]
-                        data_raw = re.sub(r'^=', '', data_raw)
-                        data_raw = re.sub(r'};[\s\S]*$', '}', data_raw)
+                        data_raw = re.sub(r"^=", "", data_raw)
+                        data_raw = re.sub(r"};[\s\S]*$", "}", data_raw)
                         data = json.loads(data_raw)
 
                         # Extract authors (JS lines 220-229)
-                        if 'authors' in data and data['authors']:
+                        if "authors" in data and data["authors"]:
                             authors = []
-                            for author in data['authors']:
+                            for author in data["authors"]:
                                 author_name = {
-                                    'firstName': author.get('firstName', ''),
-                                    'lastName': author.get('lastName', '')
+                                    "firstName": author.get("firstName", ""),
+                                    "lastName": author.get("lastName", ""),
                                 }
                                 authors.append(author_name)
-                            metadata['authors'] = authors
+                            metadata["authors"] = authors
 
                         # Extract other metadata
-                        if 'title' in data:
-                            metadata['title'] = data['title']
-                        if 'doi' in data:
-                            metadata['doi'] = data['doi']
-                        if 'abstract' in data:
-                            metadata['abstract'] = data['abstract']
-                        if 'publicationTitle' in data:
-                            metadata['publicationTitle'] = data['publicationTitle']
-                        if 'issn' in data:
-                            metadata['issn'] = data.get('issn', [])
+                        if "title" in data:
+                            metadata["title"] = data["title"]
+                        if "doi" in data:
+                            metadata["doi"] = data["doi"]
+                        if "abstract" in data:
+                            metadata["abstract"] = data["abstract"]
+                        if "publicationTitle" in data:
+                            metadata["publicationTitle"] = data["publicationTitle"]
+                        if "issn" in data:
+                            metadata["issn"] = data.get("issn", [])
 
                         break
                     except Exception:
@@ -239,16 +243,18 @@ class IEEEXploreTranslator(BaseTranslator):
             # Determine item type (JS lines 44-50)
             # Check breadcrumbs for "Conferences"
             try:
-                first_breadcrumb = await page.locator('div[class*="breadcrumbs"] a').first.text_content(timeout=2000)
+                first_breadcrumb = await page.locator(
+                    'div[class*="breadcrumbs"] a'
+                ).first.text_content(timeout=2000)
                 if first_breadcrumb and "Conference" in first_breadcrumb:
-                    metadata['itemType'] = 'conferencePaper'
+                    metadata["itemType"] = "conferencePaper"
                 else:
-                    metadata['itemType'] = 'journalArticle'
+                    metadata["itemType"] = "journalArticle"
             except Exception:
-                metadata['itemType'] = 'journalArticle'
+                metadata["itemType"] = "journalArticle"
 
             # Clean URL (JS lines 237-239)
-            metadata['url'] = re.sub(r'[?#].*', '', current_url)
+            metadata["url"] = re.sub(r"[?#].*", "", current_url)
 
             return metadata
 

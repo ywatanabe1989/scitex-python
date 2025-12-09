@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/auth/gateway/_OpenURLResolver.py"
-)
+
+__FILE__ = "./src/scitex/scholar/auth/gateway/_OpenURLResolver.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -57,17 +56,13 @@ class OpenURLResolver:
         logger.debug(f"{self.name}: Built query URL: {built_query}")
         return built_query
 
-    async def _resolve_query(
-        self, query: str, page: Page, doi: str
-    ) -> Optional[str]:
+    async def _resolve_query(self, query: str, page: Page, doi: str) -> Optional[str]:
         """Resolve OpenURL query to final authenticated URL with retry."""
         logger.debug(f"{self.name}: Resolving query URL: {query}...")
 
         for attempt in range(3):
             try:
-                await page.goto(
-                    query, wait_until="domcontentloaded", timeout=60000
-                )
+                await page.goto(query, wait_until="domcontentloaded", timeout=60000)
                 await browser_logger.debug(
                     page,
                     f"{self.name}: Loaded resolver page at {page.url[:60]}",
@@ -79,9 +74,7 @@ class OpenURLResolver:
                     f"{self.name}: Waiting for resolver to load (networkidle)...",
                 )
                 try:
-                    await page.wait_for_load_state(
-                        "networkidle", timeout=15_000
-                    )
+                    await page.wait_for_load_state("networkidle", timeout=15_000)
                     await browser_logger.debug(
                         page, f"{self.name}: ✓ Resolver page ready"
                     )
@@ -161,9 +154,7 @@ class OpenURLResolver:
                     await page.wait_for_timeout(wait_time * 1000)
                     continue
                 else:
-                    logger.error(
-                        f"OpenURL resolution failed after 3 attempts: {e}"
-                    )
+                    logger.error(f"OpenURL resolution failed after 3 attempts: {e}")
                     await browser_logger.info(
                         page,
                         f"{self.name}: ✗ FAILED after 3 attempts: {str(e)[:80]}",
@@ -189,9 +180,10 @@ if __name__ == "__main__":
             chrome_profile_name="system",
         )
 
-        browser, context = (
-            await browser_manager.get_authenticated_browser_and_context_async()
-        )
+        (
+            browser,
+            context,
+        ) = await browser_manager.get_authenticated_browser_and_context_async()
         page = await context.new_page()
 
         # Test OpenURL resolver

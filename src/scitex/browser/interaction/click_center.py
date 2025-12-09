@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/browser/interaction/click_center.py"
-)
+
+__FILE__ = "./src/scitex/browser/interaction/click_center.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -36,6 +35,8 @@ from scitex import logging
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
+
+
 async def click_center_async(
     page, verbose: bool = False, func_name="click_center_async"
 ):

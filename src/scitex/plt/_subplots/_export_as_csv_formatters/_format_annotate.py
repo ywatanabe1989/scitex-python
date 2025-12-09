@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -20,7 +21,7 @@ def _make_column_name(id, suffix, method="annotate"):
     - id="plot_5", suffix="x" -> "plot_5_annotate_x"
     """
     # Check if method name is already in the ID
-    id_parts = id.rsplit('_', 1)
+    id_parts = id.rsplit("_", 1)
     if len(id_parts) == 2 and id_parts[0].endswith(method):
         # Method already in ID, don't duplicate
         return f"{id}_{suffix}"
@@ -50,7 +51,7 @@ def _format_annotate(id, tracked_dict, kwargs):
         xy = args[1]
 
         # xy should be a tuple (x, y)
-        if hasattr(xy, '__len__') and len(xy) >= 2:
+        if hasattr(xy, "__len__") and len(xy) >= 2:
             x, y = xy[0], xy[1]
         else:
             return pd.DataFrame()
@@ -58,7 +59,7 @@ def _format_annotate(id, tracked_dict, kwargs):
         data = {
             _make_column_name(id, "x"): [x],
             _make_column_name(id, "y"): [y],
-            _make_column_name(id, "content"): [text_content]
+            _make_column_name(id, "content"): [text_content],
         }
 
         # Check if xytext was provided (either as third arg or in kwargs)
@@ -68,7 +69,7 @@ def _format_annotate(id, tracked_dict, kwargs):
         elif "xytext" in kwargs:
             xytext = kwargs["xytext"]
 
-        if xytext is not None and hasattr(xytext, '__len__') and len(xytext) >= 2:
+        if xytext is not None and hasattr(xytext, "__len__") and len(xytext) >= 2:
             data[_make_column_name(id, "text_x")] = [xytext[0]]
             data[_make_column_name(id, "text_y")] = [xytext[1]]
 
@@ -77,5 +78,6 @@ def _format_annotate(id, tracked_dict, kwargs):
         return df
 
     return pd.DataFrame()
+
 
 # EOF

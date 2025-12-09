@@ -94,7 +94,9 @@ class ScholarPipelineMetadataParallel:
         logger.info(
             f"{self.name}: Enriching {total} papers with {effective_workers} workers"
         )
-        logger.info(f"{self.name}: on_progress callback={'PROVIDED' if on_progress else 'NOT PROVIDED'}")
+        logger.info(
+            f"{self.name}: on_progress callback={'PROVIDED' if on_progress else 'NOT PROVIDED'}"
+        )
 
         # Create semaphore for controlled parallelism
         semaphore = asyncio.Semaphore(effective_workers)
@@ -103,9 +105,7 @@ class ScholarPipelineMetadataParallel:
         completed_count = 0
         progress_lock = asyncio.Lock()
 
-        async def enrich_with_semaphore(
-            paper: Paper, index: int
-        ) -> Paper:
+        async def enrich_with_semaphore(paper: Paper, index: int) -> Paper:
             """Enrich one paper with semaphore control."""
             nonlocal completed_count
 
@@ -116,9 +116,7 @@ class ScholarPipelineMetadataParallel:
                 )
 
                 # Create single pipeline for this paper
-                single_pipeline = ScholarPipelineMetadataSingle(
-                    config=self.config
-                )
+                single_pipeline = ScholarPipelineMetadataSingle(config=self.config)
 
                 # Enrich the paper
                 error_msg = None
@@ -135,40 +133,45 @@ class ScholarPipelineMetadataParallel:
 
                 # Call progress callback if provided
                 if on_progress:
-                    logger.info(f"{self.name}: About to invoke callback for paper {index + 1}/{total}")
+                    logger.info(
+                        f"{self.name}: About to invoke callback for paper {index + 1}/{total}"
+                    )
                     async with progress_lock:
                         completed_count += 1
 
                         # Get paper title safely
                         title = "Untitled"
-                        if hasattr(paper, 'metadata') and hasattr(paper.metadata, 'basic'):
+                        if hasattr(paper, "metadata") and hasattr(
+                            paper.metadata, "basic"
+                        ):
                             if paper.metadata.basic.title:
                                 title = paper.metadata.basic.title
 
                         # Invoke callback (synchronous callback from async context)
                         try:
-                            logger.info(f"{self.name}: Calling on_progress({completed_count}, {total}, title={title[:30]}...)")
+                            logger.info(
+                                f"{self.name}: Calling on_progress({completed_count}, {total}, title={title[:30]}...)"
+                            )
                             on_progress(
                                 completed_count,
                                 total,
                                 {
-                                    'title': title,
-                                    'success': success,
-                                    'error': error_msg,
-                                    'index': index,
-                                }
+                                    "title": title,
+                                    "success": success,
+                                    "error": error_msg,
+                                    "index": index,
+                                },
                             )
                             logger.info(f"{self.name}: Callback completed successfully")
                         except Exception as cb_error:
-                            logger.error(f"{self.name}: Progress callback error: {cb_error}")
+                            logger.error(
+                                f"{self.name}: Progress callback error: {cb_error}"
+                            )
 
                 return enriched_paper
 
         # Create tasks for all papers
-        tasks = [
-            enrich_with_semaphore(paper, i)
-            for i, paper in enumerate(papers)
-        ]
+        tasks = [enrich_with_semaphore(paper, i) for i, paper in enumerate(papers)]
 
         # Process with controlled parallelism
         enriched_papers = await asyncio.gather(*tasks, return_exceptions=True)
@@ -179,9 +182,7 @@ class ScholarPipelineMetadataParallel:
 
         for i, result in enumerate(enriched_papers):
             if isinstance(result, Exception):
-                logger.error(
-                    f"{self.name}: Paper {i + 1} raised exception: {result}"
-                )
+                logger.error(f"{self.name}: Paper {i + 1} raised exception: {result}")
                 errors += 1
                 # Return original paper on error
                 successful.append(papers[i])
@@ -259,9 +260,7 @@ class ScholarPipelineMetadataParallel:
         paper_list = list(papers_collection)
 
         # Enrich all papers
-        enriched_list = await self.enrich_papers_async(
-            paper_list, force=force
-        )
+        enriched_list = await self.enrich_papers_async(paper_list, force=force)
 
         # Return as Papers collection
         return Papers(enriched_list, project=papers_collection.project)

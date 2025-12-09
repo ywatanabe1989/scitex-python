@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/auth/utils/AuthCacheManager.py"
-)
+
+__FILE__ = "./src/scitex/scholar/auth/utils/AuthCacheManager.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -61,13 +60,13 @@ class AuthCacheManager:
             os.chmod(self.cache_dir, 0o700)
         except OSError:
             # Permission denied in WSL or other systems where chmod may not work
-            logger.debug(f"{self.name}: Could not set directory permissions: {self.cache_dir}")
+            logger.debug(
+                f"{self.name}: Could not set directory permissions: {self.cache_dir}"
+            )
 
         self.email = email
 
-    async def save_session_async(
-        self, session_manager: SessionManager
-    ) -> bool:
+    async def save_session_async(self, session_manager: SessionManager) -> bool:
         """Save session data to cache file."""
         try:
             cache_data = self._create_cache_data(session_manager)
@@ -77,23 +76,17 @@ class AuthCacheManager:
 
             # Set secure permissions
             os.chmod(self.cache_json, 0o600)
-            logger.info(
-                f"{self.name}: Session saved to: {self.cache_json}"
-            )
+            logger.info(f"{self.name}: Session saved to: {self.cache_json}")
             return True
 
         except Exception as e:
             logger.error(f"{self.name}: Failed to save session cache: {e}")
             return False
 
-    async def load_session_async(
-        self, session_manager: SessionManager
-    ) -> bool:
+    async def load_session_async(self, session_manager: SessionManager) -> bool:
         """Load session data from cache file."""
         if not Path(self.cache_json).exists():
-            logger.debug(
-                f"{self.name}: No session cache found at {self.cache_json}"
-            )
+            logger.debug(f"{self.name}: No session cache found at {self.cache_json}")
             return False
 
         try:
@@ -121,9 +114,7 @@ class AuthCacheManager:
         try:
             if self.cache_json.exists():
                 self.cache_json.unlink()
-                logger.info(
-                    f"{self.name}: Cleared cache file: {self.cache_json}"
-                )
+                logger.info(f"{self.name}: Cleared cache file: {self.cache_json}")
             return True
         except Exception as e:
             logger.error(f"{self.name}: Failed to clear cache: {e}")
@@ -137,9 +128,7 @@ class AuthCacheManager:
         """Get lock file path."""
         return self.cache_json_lock
 
-    def _create_cache_data(
-        self, session_manager: SessionManager
-    ) -> Dict[str, Any]:
+    def _create_cache_data(self, session_manager: SessionManager) -> Dict[str, Any]:
         """Create cache data dictionary from session manager."""
         expiry = session_manager.get_session_async_expiry()
         return {
@@ -192,5 +181,6 @@ class AuthCacheManager:
             expiry = datetime.fromisoformat(expiry_str)
 
         session_manager.set_session_data(cookies, full_cookies, expiry)
+
 
 # EOF

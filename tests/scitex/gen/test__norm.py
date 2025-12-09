@@ -254,7 +254,7 @@ if __name__ == "__main__":
 #     """
 #     # Use dim if provided, otherwise use axis
 #     dimension = dim if dim is not None else axis
-#     
+# 
 #     if dimension is None:
 #         # Scale entire tensor
 #         x_min = x.min()
@@ -263,7 +263,7 @@ if __name__ == "__main__":
 #         # Scale along specified dimension
 #         x_min = x.min(dim=dimension, keepdim=True)[0]
 #         x_max = x.max(dim=dimension, keepdim=True)[0]
-#     
+# 
 #     # Avoid division by zero
 #     return (x - x_min) / (x_max - x_min + 1e-8)
 # 
@@ -290,7 +290,7 @@ if __name__ == "__main__":
 #     """
 #     # Use dim if provided, otherwise use axis
 #     dimension = dim if dim is not None else axis
-#     
+# 
 #     if dimension is None:
 #         # Scale entire tensor
 #         x_min = torch.nanmin(x)
@@ -299,7 +299,7 @@ if __name__ == "__main__":
 #         # Scale along specified dimension
 #         x_min = torch.nanmin(x, dim=dimension, keepdim=True)[0]
 #         x_max = torch.nanmax(x, dim=dimension, keepdim=True)[0]
-#     
+# 
 #     # Avoid division by zero
 #     return (x - x_min) / (x_max - x_min + 1e-8)
 # 
@@ -334,7 +334,16 @@ if __name__ == "__main__":
 # 
 # 
 # @torch_fn
-# def clip_perc(x, lower_perc=2.5, upper_perc=97.5, low=None, high=None, axis=-1, dim=None, device="cuda"):
+# def clip_perc(
+#     x,
+#     lower_perc=2.5,
+#     upper_perc=97.5,
+#     low=None,
+#     high=None,
+#     axis=-1,
+#     dim=None,
+#     device="cuda",
+# ):
 #     """Clips tensor values between specified percentiles along dimension.
 # 
 #     Parameters
@@ -366,10 +375,10 @@ if __name__ == "__main__":
 #         lower_perc = low
 #     if high is not None:
 #         upper_perc = high
-#         
+# 
 #     # Use dim if provided, otherwise use axis
 #     dimension = dim if dim is not None else axis
-#     
+# 
 #     lower = torch.quantile(x, lower_perc / 100, dim=dimension, keepdim=True)
 #     upper = torch.quantile(x, upper_perc / 100, dim=dimension, keepdim=True)
 #     return torch.clamp(x, min=lower, max=upper)

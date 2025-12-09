@@ -30,7 +30,7 @@ class DagstuhlTranslator:
         "priority": 100,
         "inRepository": True,
         "translatorType": 4,  # Web
-        "lastUpdated": "2024-11-30 08:38:44"
+        "lastUpdated": "2024-11-30 08:38:44",
     }
 
     def detect_web(self, doc, url: str) -> Optional[str]:
@@ -99,17 +99,16 @@ class DagstuhlTranslator:
         # Add PDF attachment if available
         pdf_url = self._get_pdf_url(doc)
         if pdf_url:
-            item["attachments"].append({
-                "url": pdf_url,
-                "title": "Full Text PDF",
-                "mimeType": "application/pdf"
-            })
+            item["attachments"].append(
+                {
+                    "url": pdf_url,
+                    "title": "Full Text PDF",
+                    "mimeType": "application/pdf",
+                }
+            )
 
         # Add snapshot
-        item["attachments"].append({
-            "title": "Snapshot",
-            "mimeType": "text/html"
-        })
+        item["attachments"].append({"title": "Snapshot", "mimeType": "text/html"})
 
         item["libraryCatalog"] = "Dagstuhl Research Online Publication Server"
 
@@ -140,11 +139,7 @@ class DagstuhlTranslator:
         Returns:
             Item dictionary
         """
-        item = {
-            "creators": [],
-            "tags": [],
-            "attachments": []
-        }
+        item = {"creators": [], "tags": [], "attachments": []}
 
         # Would use BibTeX translator
         # Extract keywords from notes

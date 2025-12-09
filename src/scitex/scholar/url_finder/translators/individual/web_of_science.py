@@ -12,7 +12,9 @@ class WebOfScienceTranslator(BaseTranslator):
     """Web of Science."""
 
     LABEL = "Web of Science"
-    URL_TARGET_PATTERN = r"^https?://([^/]+\.)?(webofknowledge|webofscience)\.(com|clarivate\.com)/"
+    URL_TARGET_PATTERN = (
+        r"^https?://([^/]+\.)?(webofknowledge|webofscience)\.(com|clarivate\.com)/"
+    )
 
     @classmethod
     def matches_url(cls, url: str) -> bool:

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -305,9 +306,7 @@ class DataError(SciTeXError):
 class ShapeError(DataError):
     """Raised when data shapes are incompatible."""
 
-    def __init__(
-        self, expected_shape: tuple, actual_shape: tuple, operation: str
-    ):
+    def __init__(self, expected_shape: tuple, actual_shape: tuple, operation: str):
         super().__init__(
             f"Shape mismatch in {operation}",
             context={
@@ -492,9 +491,7 @@ def check_file_exists(filepath: str) -> None:
         raise PathNotFoundError(filepath)
 
 
-def check_shape_compatibility(
-    shape1: tuple, shape2: tuple, operation: str
-) -> None:
+def check_shape_compatibility(shape1: tuple, shape2: tuple, operation: str) -> None:
     """Check if two shapes are compatible for an operation.
 
     Parameters

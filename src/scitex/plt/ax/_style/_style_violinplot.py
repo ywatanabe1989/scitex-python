@@ -70,14 +70,20 @@ def style_violinplot(
     # Style violin bodies (PolyCollection)
     for collection in ax.collections:
         # Check if it's a violin body (PolyCollection with filled area)
-        if hasattr(collection, 'set_edgecolor'):
+        if hasattr(collection, "set_edgecolor"):
             collection.set_edgecolor(edge_color)
             collection.set_linewidth(lw_pt)
 
     # Style internal boxplot elements (Line2D objects)
     # Seaborn violin plot lines: whiskers (vertical), caps (horizontal), median (short horizontal)
     lines = list(ax.lines)
-    n_violins = len([c for c in ax.collections if hasattr(c, 'get_paths') and len(c.get_paths()) > 0])
+    n_violins = len(
+        [
+            c
+            for c in ax.collections
+            if hasattr(c, "get_paths") and len(c.get_paths()) > 0
+        ]
+    )
 
     for line in lines:
         # Get line data to identify element type

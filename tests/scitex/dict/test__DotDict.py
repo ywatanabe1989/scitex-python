@@ -343,6 +343,7 @@ if __name__ == "__main__":
 # 
 # 
 # import json
+# import pprint as _pprint
 # 
 # 
 # class DotDict:
@@ -427,14 +428,20 @@ if __name__ == "__main__":
 #         # Use _data's get method
 #         return self._data.get(key, default)
 # 
-#     def to_dict(self):
+#     def to_dict(self, include_private=False):
 #         """
 #         Recursively converts DotDict and nested DotDict objects back to ordinary dictionaries.
+# 
+#         Args:
+#             include_private: If False, exclude keys starting with '_' (default: False)
 #         """
 #         result = {}
 #         for key, value in self._data.items():
+#             # Skip private keys (starting with _) unless explicitly requested
+#             if not include_private and isinstance(key, str) and key.startswith("_"):
+#                 continue
 #             if isinstance(value, DotDict):
-#                 value = value.to_dict()
+#                 value = value.to_dict(include_private=include_private)
 #             result[key] = value
 #         return result
 # 
@@ -457,9 +464,7 @@ if __name__ == "__main__":
 # 
 #         try:
 #             # Use the internal _data for representation
-#             return json.dumps(
-#                 self.to_dict(), indent=4, default=default_handler
-#             )
+#             return json.dumps(self.to_dict(), indent=4, default=default_handler)
 #         except TypeError as e:
 #             # Fallback if default_handler still fails (e.g., complex recursion)
 #             return f"<DotDict object at {hex(id(self))}, contains: {list(self._data.keys())}> Error: {e}"
@@ -467,10 +472,59 @@ if __name__ == "__main__":
 #     def __repr__(self):
 #         """
 #         Returns a string representation suitable for debugging.
-#         Shows the class name and the internal data representation.
+#         Returns a nicely formatted representation that pprint can display properly.
+#         Private keys (starting with '_') are hidden by default.
 #         """
-#         # Use repr of the internal data for clarity
-#         return f"{type(self).__name__}({repr(self._data)})"
+#         # Use pprint.pformat for nice formatting
+#         # Convert to regular dict recursively, hiding private keys
+#         return _pprint.pformat(
+#             self.to_dict(include_private=False), indent=2, width=80, compact=False
+#         )
+# 
+#     def _repr_pretty_(self, p, cycle):
+#         """
+#         IPython/Jupyter pretty printing support.
+#         This method is called by IPython's pprint when displaying DotDict objects.
+#         Private keys (starting with '_') are hidden by default.
+# 
+#         Args:
+#             p: The pretty printer object
+#             cycle: Boolean indicating if we're in a reference cycle
+#         """
+#         if cycle:
+#             p.text("DotDict(...)")
+#         else:
+#             with p.group(8, "DotDict(", ")"):
+#                 if self._data:
+#                     # Filter out private keys for display
+#                     public_data = self.to_dict(include_private=False)
+#                     p.pretty(public_data)
+#                 else:
+#                     p.text("{}")
+# 
+#     def pformat(
+#         self, indent=2, width=80, depth=None, compact=False, include_private=False
+#     ):
+#         """
+#         Return a pretty-formatted string representation of the DotDict.
+# 
+#         Args:
+#             indent: Number of spaces per indentation level (default: 2)
+#             width: Maximum line width (default: 80)
+#             depth: Maximum depth to print (default: None for unlimited)
+#             compact: If True, use more compact representation (default: False)
+#             include_private: If True, include keys starting with '_' (default: False)
+# 
+#         Returns:
+#             Pretty-formatted string
+#         """
+#         return _pprint.pformat(
+#             self.to_dict(include_private=include_private),
+#             indent=indent,
+#             width=width,
+#             depth=depth,
+#             compact=compact,
+#         )
 # 
 #     def __len__(self):
 #         """
@@ -534,9 +588,7 @@ if __name__ == "__main__":
 #         """
 #         # Mimic dict.pop behavior with optional default
 #         if len(args) > 1:
-#             raise TypeError(
-#                 f"pop expected at most 2 arguments, got {1 + len(args)}"
-#             )
+#             raise TypeError(f"pop expected at most 2 arguments, got {1 + len(args)}")
 #         if key not in self._data:
 #             if args:
 #                 return args[0]  # Return default if provided
@@ -607,9 +659,7 @@ if __name__ == "__main__":
 #             if len(self._data) == 0:
 #                 return 0 < other
 #             # If single numeric value in total field, use it
-#             if "total" in self._data and isinstance(
-#                 self._data["total"], (int, float)
-#             ):
+#             if "total" in self._data and isinstance(self._data["total"], (int, float)):
 #                 return self._data["total"] < other
 #             # Otherwise not comparable
 #             return NotImplemented
@@ -626,9 +676,7 @@ if __name__ == "__main__":
 #             if len(self._data) == 0:
 #                 return 0 > other
 #             # If single numeric value in total field, use it
-#             if "total" in self._data and isinstance(
-#                 self._data["total"], (int, float)
-#             ):
+#             if "total" in self._data and isinstance(self._data["total"], (int, float)):
 #                 return self._data["total"] > other
 #             # Otherwise not comparable
 #             return NotImplemented

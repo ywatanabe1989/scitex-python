@@ -59,7 +59,9 @@ def stx_ecdf(
     >>> fig, ax = stx.plt.subplots()
     >>> ax, df = stx.plt.ax.stx_ecdf(ax, data)
     """
-    assert_valid_axis(axis, "First argument must be a matplotlib axis or scitex axis wrapper")
+    assert_valid_axis(
+        axis, "First argument must be a matplotlib axis or scitex axis wrapper"
+    )
 
     # Flatten and remove NaN values
     values_1d = np.hstack(values_1d)
@@ -79,8 +81,8 @@ def stx_ecdf(
     y_step = np.repeat(ecdf_perc, 2)[:-1]
 
     # Apply default linewidth if not specified
-    if 'linewidth' not in kwargs and 'lw' not in kwargs:
-        kwargs['linewidth'] = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+    if "linewidth" not in kwargs and "lw" not in kwargs:
+        kwargs["linewidth"] = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
 
     # Add sample size to label if provided
     if "label" in kwargs and kwargs["label"]:

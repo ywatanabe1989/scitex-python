@@ -9,7 +9,7 @@ Core Impact Factor Calculation System
 
 This module provides legal impact factor calculations using open APIs:
 - OpenAlex for comprehensive journal data
-- Crossref for publication metadata  
+- Crossref for publication metadata
 - Semantic Scholar for citation metrics
 
 All calculations are based on publicly available data and transparent methodologies.
@@ -19,10 +19,6 @@ from .calculator import ImpactFactorCalculator
 from .journal_matcher import JournalMatcher
 from .cache_manager import CacheManager
 
-__all__ = [
-    "ImpactFactorCalculator",
-    "JournalMatcher", 
-    "CacheManager"
-]
+__all__ = ["ImpactFactorCalculator", "JournalMatcher", "CacheManager"]
 
 # EOF

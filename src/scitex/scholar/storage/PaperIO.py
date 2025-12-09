@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/scholar/storage/PaperIO.py"
-)
+
+__FILE__ = "./src/scitex/scholar/storage/PaperIO.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -407,9 +406,7 @@ def main(args):
     if not io.has_pdf():
         logger.info("No PDF found (would download here)")
     else:
-        logger.success(
-            f"PDF exists: {io.get_pdf_path().stat().st_size / 1e6:.2f} MB"
-        )
+        logger.success(f"PDF exists: {io.get_pdf_path().stat().st_size / 1e6:.2f} MB")
 
     # Status
     status = io.get_all_files()

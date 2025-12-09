@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_src.py
 # ----------------------------------------
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -36,9 +37,7 @@ def src(obj):
         # scitex.gen.less(source_code)
 
         # Open a subprocess to use `less` for displaying the source code
-        process = subprocess.Popen(
-            ["less"], stdin=subprocess.PIPE, encoding="utf8"
-        )
+        process = subprocess.Popen(["less"], stdin=subprocess.PIPE, encoding="utf8")
         process.communicate(input=source_code)
         if process.returncode != 0:
             print(f"Process exited with return code {process.returncode}")

@@ -5,6 +5,7 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -75,9 +76,7 @@ class UnifiedMetadataSource:
                 if hasattr(source, "get_metadata_by_doi"):
                     metadata = source.get_metadata_by_doi(doi)
                     if metadata:
-                        return self._standardize_metadata(
-                            metadata, source.name
-                        )
+                        return self._standardize_metadata(metadata, source.name)
 
                 # Fallback: use abstract getter for specific data
                 if hasattr(source, "get_abstract"):
@@ -102,8 +101,7 @@ class UnifiedMetadataSource:
             "title": metadata.get("title"),
             "abstract": metadata.get("abstract"),
             "citation_count": metadata.get("citation_count"),
-            "keywords": metadata.get("keywords")
-            or metadata.get("fieldsOfStudy"),
+            "keywords": metadata.get("keywords") or metadata.get("fieldsOfStudy"),
             "journal": metadata.get("journal") or metadata.get("venue"),
             "issn": metadata.get("issn"),
             "volume": metadata.get("volume"),
@@ -123,5 +121,6 @@ class UnifiedMetadataSource:
                     result[f"{field}_source"] = source_name.lower()
 
         return result
+
 
 # EOF

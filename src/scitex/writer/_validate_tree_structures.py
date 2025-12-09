@@ -5,9 +5,8 @@
 # ----------------------------------------
 from __future__ import annotations
 import os
-__FILE__ = (
-    "./src/scitex/writer/_validate_tree_structures.py"
-)
+
+__FILE__ = "./src/scitex/writer/_validate_tree_structures.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -87,30 +86,22 @@ def _validate_02_supplementary_structure(project_dir: Path) -> bool:
 
 def _validate_03_revision_structure(project_dir: Path) -> bool:
     """Validates revision structure."""
-    return _validate_tree_structure_base(
-        project_dir, **TREE_VALIDATORS["03_revision"]
-    )
+    return _validate_tree_structure_base(project_dir, **TREE_VALIDATORS["03_revision"])
 
 
 def _validate_config_structure(project_dir: Path) -> bool:
     """Validates config structure."""
-    return _validate_tree_structure_base(
-        project_dir, **TREE_VALIDATORS["config"]
-    )
+    return _validate_tree_structure_base(project_dir, **TREE_VALIDATORS["config"])
 
 
 def _validate_scripts_structure(project_dir: Path) -> bool:
     """Validates scripts structure."""
-    return _validate_tree_structure_base(
-        project_dir, **TREE_VALIDATORS["scripts"]
-    )
+    return _validate_tree_structure_base(project_dir, **TREE_VALIDATORS["scripts"])
 
 
 def _validate_00_shared_structure(project_dir: Path) -> bool:
     """Validates shared structure."""
-    return _validate_tree_structure_base(
-        project_dir, **TREE_VALIDATORS["00_shared"]
-    )
+    return _validate_tree_structure_base(project_dir, **TREE_VALIDATORS["00_shared"])
 
 
 # 4. Helper functions
@@ -133,9 +124,7 @@ def _validate_tree_structure_base(
     project_dir = Path(project_dir)
     target_dir = project_dir / dir_name
     if not target_dir.exists():
-        raise ProjectValidationError(
-            f"Required directory missing: {target_dir}"
-        )
+        raise ProjectValidationError(f"Required directory missing: {target_dir}")
     if tree_class is not None:
         doc = tree_class(target_dir, git_root=project_dir)
         is_valid, issues = doc.verify_structure()
