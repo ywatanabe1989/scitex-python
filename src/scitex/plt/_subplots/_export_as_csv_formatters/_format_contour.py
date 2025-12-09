@@ -1,39 +1,50 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-18 18:14:26 (ywatanabe)"
-# File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_contour.py
-# ----------------------------------------
-import os
+# Timestamp: "2025-12-09 12:00:00 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_contour.py
 
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
-
+import numpy as np
 import pandas as pd
+
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_contour(id, tracked_dict, kwargs):
-    """Format data from a contour call."""
-    # Check if tracked_dict is empty or not a dictionary
+    """Format data from a contour call.
+
+    Args:
+        id (str): Identifier for the plot
+        tracked_dict (dict): Dictionary containing tracked data
+        kwargs (dict): Keyword arguments passed to contour
+
+    Returns:
+        pd.DataFrame: Formatted data from contour plot (flattened X, Y, Z grids)
+    """
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
-    # Get the args from tracked_dict
+    # Parse tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     args = tracked_dict.get("args", [])
 
     # Typical args: X, Y, Z where X and Y are 2D coordinate arrays and Z is the height array
     if len(args) >= 3:
         X, Y, Z = args[:3]
-        # Convert mesh grids to column vectors for export
-        X_flat = X.flatten()
-        Y_flat = Y.flatten()
-        Z_flat = Z.flatten()
-        df = pd.DataFrame(
-            {
-                f"{id}_contour_x": X_flat,
-                f"{id}_contour_y": Y_flat,
-                f"{id}_contour_z": Z_flat,
-            }
-        )
+        X_flat = np.asarray(X).flatten()
+        Y_flat = np.asarray(Y).flatten()
+        Z_flat = np.asarray(Z).flatten()
+
+        # Get column names from single source of truth
+        col_x = get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)
+        col_y = get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)
+        col_z = get_csv_column_name("z", ax_row, ax_col, trace_id=trace_id)
+
+        df = pd.DataFrame({col_x: X_flat, col_y: Y_flat, col_z: Z_flat})
         return df
+
     return pd.DataFrame()
+
+
+# EOF

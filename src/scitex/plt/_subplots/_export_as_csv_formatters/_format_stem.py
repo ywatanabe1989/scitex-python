@@ -6,6 +6,9 @@
 import numpy as np
 import pandas as pd
 
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
+
 
 def _format_stem(id, tracked_dict, kwargs):
     """Format data from a stem plot call.
@@ -21,6 +24,9 @@ def _format_stem(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
+    # Parse tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     if "args" in tracked_dict:
         args = tracked_dict["args"]
         if isinstance(args, tuple) and len(args) > 0:
@@ -33,7 +39,10 @@ def _format_stem(id, tracked_dict, kwargs):
             else:
                 return pd.DataFrame()
 
-            df = pd.DataFrame({f"{id}_stem_x": x, f"{id}_stem_y": y})
+            # Use structured column naming: ax-row-{row}-col-{col}_trace-id-{id}_variable-{var}
+            col_x = get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)
+            col_y = get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)
+            df = pd.DataFrame({col_x: x, col_y: y})
             return df
 
     return pd.DataFrame()

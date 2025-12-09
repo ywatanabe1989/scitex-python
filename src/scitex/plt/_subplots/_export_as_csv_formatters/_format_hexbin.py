@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 12:20:00 (ywatanabe)"
+# Timestamp: "2025-12-09 12:00:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_hexbin.py
 
 import numpy as np
 import pandas as pd
+
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_hexbin(id, tracked_dict, kwargs):
@@ -21,6 +24,9 @@ def _format_hexbin(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
+    # Parse tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     if "args" in tracked_dict:
         args = tracked_dict["args"]
         if isinstance(args, tuple) and len(args) >= 2:
@@ -32,7 +38,11 @@ def _format_hexbin(id, tracked_dict, kwargs):
             x = x[:min_len]
             y = y[:min_len]
 
-            df = pd.DataFrame({f"{id}_hexbin_x": x, f"{id}_hexbin_y": y})
+            # Get column names from single source of truth
+            col_x = get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)
+            col_y = get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)
+
+            df = pd.DataFrame({col_x: x, col_y: y})
             return df
 
     return pd.DataFrame()
