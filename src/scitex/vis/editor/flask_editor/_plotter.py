@@ -5,6 +5,7 @@
 
 from typing import Dict, Any, Optional
 import pandas as pd
+import numpy as np
 
 
 def plot_from_csv(
@@ -63,6 +64,298 @@ def plot_from_csv(
             legend_x,
             legend_y,
         )
+
+
+def plot_from_recipe(
+    ax,
+    csv_data: Optional[pd.DataFrame],
+    ax_spec: Dict[str, Any],
+    overrides: Dict[str, Any],
+    linewidth: float = 1.0,
+):
+    """Plot from new recipe schema (scitex.plt.figure.recipe).
+
+    Args:
+        ax: Matplotlib axes object
+        csv_data: DataFrame containing CSV data
+        ax_spec: Axis specification from recipe JSON (includes 'calls' list)
+        overrides: Dictionary with override settings
+        linewidth: Default line width in points
+    """
+    if csv_data is None or not isinstance(csv_data, pd.DataFrame):
+        return
+
+    df = csv_data
+    calls = ax_spec.get("calls", [])
+
+    for call in calls:
+        method = call.get("method", "")
+        data_ref = call.get("data_ref", {})
+        kwargs = call.get("kwargs", {})
+        call_id = call.get("id", "")
+
+        try:
+            if method == "plot":
+                _render_plot(ax, df, data_ref, kwargs, linewidth)
+            elif method == "scatter":
+                _render_scatter(ax, df, data_ref, kwargs)
+            elif method == "bar":
+                _render_bar(ax, df, data_ref, kwargs)
+            elif method == "fill_between":
+                _render_fill_between(ax, df, data_ref, kwargs)
+            elif method == "errorbar":
+                _render_errorbar(ax, df, data_ref, kwargs, linewidth)
+            elif method == "imshow":
+                _render_imshow(ax, df, data_ref, kwargs)
+            elif method == "contour":
+                _render_contour(ax, df, data_ref, kwargs)
+            elif method in ("stx_shaded_line", "stx_fillv", "stx_violin",
+                           "stx_box", "stx_rectangle", "stx_raster"):
+                _render_stx_method(ax, df, method, data_ref, kwargs)
+            elif method == "hist":
+                _render_hist(ax, df, data_ref, kwargs)
+            elif method == "text":
+                _render_text(ax, df, data_ref, kwargs)
+            else:
+                # Try generic approach for unknown methods
+                _render_generic(ax, df, method, data_ref, kwargs, linewidth)
+        except Exception as e:
+            print(f"Error rendering {method} for {call_id}: {e}")
+
+    # Handle legend
+    legend_fontsize = overrides.get("legend_fontsize", 6)
+    legend_visible = overrides.get("legend_visible", True)
+    legend_frameon = overrides.get("legend_frameon", False)
+
+    if legend_visible:
+        handles, labels = ax.get_legend_handles_labels()
+        if handles:
+            ax.legend(fontsize=legend_fontsize, frameon=legend_frameon)
+
+
+def _get_column_data(df, col_ref: str) -> Optional[np.ndarray]:
+    """Get column data from DataFrame, handling missing columns gracefully.
+
+    Handles the naming mismatch between JSON data_ref and CSV columns:
+    - JSON: ax-row-0-col-0_trace-id-ax_00_ch1_variable-x
+    - CSV:  ax-row-0-col-0_trace-id-ch1_variable-x
+    """
+    if not col_ref:
+        return None
+
+    # Direct match
+    if col_ref in df.columns:
+        return df[col_ref].dropna().values
+
+    # Try removing ax_XX_ prefix from trace-id portion
+    # Pattern: ax-row-X-col-Y_trace-id-ax_XX_NAME_variable-Z
+    # Should become: ax-row-X-col-Y_trace-id-NAME_variable-Z
+    import re
+    simplified = re.sub(r'(trace-id-)ax_\d+_', r'\1', col_ref)
+    if simplified in df.columns:
+        return df[simplified].dropna().values
+
+    # Try case variations (lowercase the trace-id part)
+    simplified_lower = re.sub(r'(trace-id-)[^_]+', lambda m: m.group(0).lower(), simplified)
+    if simplified_lower in df.columns:
+        return df[simplified_lower].dropna().values
+
+    # Try matching by suffix (variable-x, variable-y, etc.)
+    suffix_match = re.search(r'_variable-(\w+)$', col_ref)
+    if suffix_match:
+        var_suffix = suffix_match.group(0)
+        # Extract trace-id pattern
+        trace_match = re.search(r'trace-id-(?:ax_\d+_)?([^_]+)', col_ref)
+        if trace_match:
+            trace_name = trace_match.group(1).lower()
+            for col in df.columns:
+                if f'trace-id-{trace_name}' in col.lower() and col.endswith(var_suffix):
+                    return df[col].dropna().values
+
+    # Last resort: fuzzy match by ending
+    for col in df.columns:
+        # Match if same variable suffix and similar trace pattern
+        if col_ref.split('_variable-')[-1] == col.split('_variable-')[-1]:
+            # Check if trace-id portion is similar
+            ref_trace = re.search(r'trace-id-(?:ax_\d+_)?(.+?)_variable', col_ref)
+            col_trace = re.search(r'trace-id-(.+?)_variable', col)
+            if ref_trace and col_trace:
+                if ref_trace.group(1).lower() == col_trace.group(1).lower():
+                    return df[col].dropna().values
+
+    return None
+
+
+def _render_plot(ax, df, data_ref, kwargs, linewidth):
+    """Render line plot."""
+    x_col = data_ref.get("x", "")
+    y_col = data_ref.get("y", "")
+
+    x = _get_column_data(df, x_col)
+    y = _get_column_data(df, y_col)
+
+    if x is not None and y is not None and len(x) == len(y):
+        lw = kwargs.pop("linewidth", linewidth)
+        ax.plot(x, y, linewidth=lw, **kwargs)
+
+
+def _render_scatter(ax, df, data_ref, kwargs):
+    """Render scatter plot."""
+    x_col = data_ref.get("x", "")
+    y_col = data_ref.get("y", "")
+
+    x = _get_column_data(df, x_col)
+    y = _get_column_data(df, y_col)
+
+    if x is not None and y is not None and len(x) == len(y):
+        ax.scatter(x, y, **kwargs)
+
+
+def _render_bar(ax, df, data_ref, kwargs):
+    """Render bar plot."""
+    x_col = data_ref.get("x", "")
+    y_col = data_ref.get("y", "")
+
+    x = _get_column_data(df, x_col)
+    y = _get_column_data(df, y_col)
+
+    if x is not None and y is not None and len(x) == len(y):
+        ax.bar(x, y, **kwargs)
+
+
+def _render_fill_between(ax, df, data_ref, kwargs):
+    """Render fill_between."""
+    x_col = data_ref.get("x", "")
+    y1_col = data_ref.get("y1", "")
+    y2_col = data_ref.get("y2", "")
+
+    x = _get_column_data(df, x_col)
+    y1 = _get_column_data(df, y1_col)
+    y2 = _get_column_data(df, y2_col)
+
+    if x is not None and y1 is not None and y2 is not None:
+        min_len = min(len(x), len(y1), len(y2))
+        ax.fill_between(x[:min_len], y1[:min_len], y2[:min_len], **kwargs)
+
+
+def _render_errorbar(ax, df, data_ref, kwargs, linewidth):
+    """Render errorbar plot."""
+    x_col = data_ref.get("x", "")
+    y_col = data_ref.get("y", "")
+    yerr_col = data_ref.get("yerr", "")
+
+    x = _get_column_data(df, x_col)
+    y = _get_column_data(df, y_col)
+    yerr = _get_column_data(df, yerr_col) if yerr_col else None
+
+    if x is not None and y is not None and len(x) == len(y):
+        ax.errorbar(x, y, yerr=yerr, linewidth=linewidth, **kwargs)
+
+
+def _render_imshow(ax, df, data_ref, kwargs):
+    """Render imshow (heatmap)."""
+    data_col = data_ref.get("data", "")
+    # For imshow, data is typically in a special format - try to reconstruct
+    # Look for row/col/value columns
+    row_col = data_ref.get("row", "")
+    col_col = data_ref.get("col", "")
+    value_col = data_ref.get("value", "")
+
+    if row_col and col_col and value_col:
+        rows = _get_column_data(df, row_col)
+        cols = _get_column_data(df, col_col)
+        values = _get_column_data(df, value_col)
+
+        if rows is not None and cols is not None and values is not None:
+            # Reconstruct 2D array
+            n_rows = int(rows.max()) + 1
+            n_cols = int(cols.max()) + 1
+            data = np.zeros((n_rows, n_cols))
+            for r, c, v in zip(rows.astype(int), cols.astype(int), values):
+                data[r, c] = v
+            ax.imshow(data, **kwargs)
+
+
+def _render_contour(ax, df, data_ref, kwargs):
+    """Render contour plot."""
+    x_col = data_ref.get("x", "")
+    y_col = data_ref.get("y", "")
+    z_col = data_ref.get("z", "")
+
+    x = _get_column_data(df, x_col)
+    y = _get_column_data(df, y_col)
+    z = _get_column_data(df, z_col)
+
+    if x is not None and y is not None and z is not None:
+        # Assume data is on a grid - reconstruct
+        n = int(np.sqrt(len(x)))
+        if n * n == len(x):
+            X = x.reshape(n, n)
+            Y = y.reshape(n, n)
+            Z = z.reshape(n, n)
+            ax.contour(X, Y, Z, **kwargs)
+
+
+def _render_stx_method(ax, df, method, data_ref, kwargs):
+    """Render scitex-specific methods (shaded_line, fillv, etc.)."""
+    # These are custom methods - for now, skip or implement basic versions
+    if method == "stx_shaded_line":
+        x_col = data_ref.get("x", "")
+        y_lower_col = data_ref.get("y_lower", "")
+        y_middle_col = data_ref.get("y_middle", "")
+        y_upper_col = data_ref.get("y_upper", "")
+
+        x = _get_column_data(df, x_col)
+        y_lower = _get_column_data(df, y_lower_col)
+        y_middle = _get_column_data(df, y_middle_col)
+        y_upper = _get_column_data(df, y_upper_col)
+
+        if all(v is not None for v in [x, y_lower, y_middle, y_upper]):
+            min_len = min(len(x), len(y_lower), len(y_middle), len(y_upper))
+            ax.fill_between(x[:min_len], y_lower[:min_len], y_upper[:min_len],
+                           alpha=0.3, **{k: v for k, v in kwargs.items()
+                                        if k not in ['linewidth']})
+            ax.plot(x[:min_len], y_middle[:min_len], **kwargs)
+
+
+def _render_hist(ax, df, data_ref, kwargs):
+    """Render histogram."""
+    data_col = data_ref.get("data", data_ref.get("x", ""))
+    data = _get_column_data(df, data_col)
+    if data is not None:
+        ax.hist(data, **kwargs)
+
+
+def _render_text(ax, df, data_ref, kwargs):
+    """Render text annotation."""
+    x_col = data_ref.get("x", "")
+    y_col = data_ref.get("y", "")
+    content_col = data_ref.get("content", "")
+
+    x = _get_column_data(df, x_col)
+    y = _get_column_data(df, y_col)
+
+    if x is not None and y is not None and len(x) > 0:
+        # Get text content from CSV or kwargs
+        text = kwargs.pop("text", "")
+        if not text and content_col:
+            content = _get_column_data(df, content_col)
+            if content is not None and len(content) > 0:
+                text = str(content[0])
+        ax.text(x[0], y[0], text, **kwargs)
+
+
+def _render_generic(ax, df, method, data_ref, kwargs, linewidth):
+    """Try to render using generic approach."""
+    # For unknown methods, try to get x/y data and plot as line
+    x_col = data_ref.get("x", "")
+    y_col = data_ref.get("y", "")
+
+    x = _get_column_data(df, x_col)
+    y = _get_column_data(df, y_col)
+
+    if x is not None and y is not None and len(x) == len(y):
+        ax.plot(x, y, linewidth=linewidth, **kwargs)
 
 
 def _plot_with_traces(

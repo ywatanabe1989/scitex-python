@@ -275,8 +275,8 @@ HTML_BODY = """
                             <option value="0">Off</option>
                             <option value="500">Hot (0.5s)</option>
                             <option value="1000">Fast (1s)</option>
-                            <option value="2000" selected>Normal (2s)</option>
-                            <option value="5000">Slow (5s)</option>
+                            <option value="2000">Normal (2s)</option>
+                            <option value="5000" selected>Slow (5s)</option>
                         </select>
                     </div>
                     <button class="btn btn-cta" onclick="updatePreview()" style="flex: 0; margin-left: 8px;">Update Now</button>

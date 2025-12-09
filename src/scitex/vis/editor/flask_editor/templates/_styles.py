@@ -188,6 +188,20 @@ body {
     pointer-events: none;
 }
 
+.hover-scatter {
+    fill: rgba(100, 180, 255, 0.7);
+    stroke: rgba(100, 180, 255, 0.9);
+    stroke-width: 1;
+    pointer-events: none;
+}
+
+.selected-scatter {
+    fill: rgba(255, 200, 80, 0.7);
+    stroke: rgba(255, 200, 80, 0.9);
+    stroke-width: 2;
+    pointer-events: none;
+}
+
 /* =============================================================================
  * Controls Panel
  * ============================================================================= */

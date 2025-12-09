@@ -100,7 +100,8 @@ class WebEditor:
         def preview():
             """Generate figure preview as base64 PNG with element bboxes."""
             img_data, bboxes, img_size = render_preview_with_bboxes(
-                editor.csv_data, editor.current_overrides
+                editor.csv_data, editor.current_overrides,
+                metadata=editor.metadata
             )
             return jsonify({"image": img_data, "bboxes": bboxes, "img_size": img_size})
 
@@ -111,7 +112,8 @@ class WebEditor:
             editor.current_overrides.update(data.get("overrides", {}))
             editor._user_modified = True
             img_data, bboxes, img_size = render_preview_with_bboxes(
-                editor.csv_data, editor.current_overrides
+                editor.csv_data, editor.current_overrides,
+                metadata=editor.metadata
             )
             return jsonify(
                 {
