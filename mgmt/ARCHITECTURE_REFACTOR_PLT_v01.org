@@ -1,0 +1,475 @@
+#+TITLE: Architecture Refactoring Plan - scitex.plt Module
+#+AUTHOR: ArchitectAgent
+#+DATE: 2025-12-10
+#+PROPERTY: header-args :results output :exports both
+
+* Project Overview
+
+** Goal
+Refactor the scitex.plt module to ensure all Python files stay under 256 lines for improved maintainability, while preserving the existing public API and functionality.
+
+** Constraint
+- Target: Maximum 256 lines per file
+- Must maintain backward compatibility
+- Preserve all existing functionality
+- Keep public API unchanged
+
+** Current Status
+31 files exceed the 256-line threshold, with the largest being:
+1. utils/_collect_figure_metadata.py (3352 lines) - ~13x over limit
+2. _subplots/_AxisWrapperMixins/_MatplotlibPlotMixin.py (1609 lines) - ~6x over limit
+3. __init__.py (794 lines) - ~3x over limit
+4. utils/_scientific_captions.py (701 lines)
+5. _subplots/_SubplotsWrapper.py (683 lines)
+
+* Current Architecture Analysis
+
+** Directory Structure
+#+begin_src
+src/scitex/plt/
+├── __init__.py                   (794 lines)
+├── _subplots/
+│   ├── _SubplotsWrapper.py      (683 lines)
+│   ├── _FigWrapper.py           (402 lines)
+│   ├── _AxisWrapper.py          (362 lines)
+│   ├── _AxisWrapperMixins/
+│   │   ├── _MatplotlibPlotMixin.py    (1609 lines)
+│   │   ├── _AdjustmentMixin.py        (559 lines)
+│   │   ├── _SeabornMixin.py           (447 lines)
+│   │   └── _UnitAwareMixin.py         (329 lines)
+│   └── _export_as_csv_formatters/
+│       ├── verify_formatters.py       (359 lines)
+│       └── [many smaller formatters]
+├── utils/
+│   ├── _collect_figure_metadata.py   (3352 lines)
+│   ├── _scientific_captions.py       (701 lines)
+│   ├── _configure_mpl.py             (442 lines)
+│   ├── _dimension_viewer.py          (425 lines)
+│   ├── _figure_from_axes_mm.py       (363 lines)
+│   ├── _figure_mm.py                 (357 lines)
+│   └── _csv_column_naming.py         (288 lines)
+├── ax/
+│   ├── _plot/
+│   │   ├── _stx_heatmap.py           (369 lines)
+│   │   └── _stx_violin.py            (352 lines)
+│   └── _style/
+│       ├── _show_spines.py           (334 lines)
+│       ├── _set_log_scale.py         (334 lines)
+│       ├── _rotate_labels.py         (320 lines)
+│       └── _set_meta.py              (291 lines)
+├── gallery/
+│   └── _plots.py                     (594 lines)
+└── styles/
+    ├── _plot_postprocess.py          (567 lines)
+    └── _style_loader.py              (268 lines)
+#+end_src
+
+** Key Issues Identified
+
+*** 1. Metadata Collection (3352 lines)
+- Single monolithic file handling all metadata extraction
+- Mixes concerns: dimension extraction, style parsing, axes metadata, figure metadata
+- Contains many helper functions that could be separated
+
+*** 2. Matplotlib Plot Mixin (1609 lines)
+- Contains 50+ wrapper methods for matplotlib functions
+- Duplicated patterns for tracking and post-processing
+- Could be split by plot category (line, scatter, distributions, etc.)
+
+*** 3. Module Init (794 lines)
+- Mixes configuration, imports, utility functions
+- Contains large convenience functions (load, crop, etc.)
+- Auto-configuration logic could be separated
+
+*** 4. Scientific Captions (701 lines)
+- Complete caption management system in one file
+- Multiple formatting backends (txt, tex, md)
+- Could separate caption styles, formatting, and export
+
+*** 5. Gallery Plots (594 lines)
+- 50+ individual plot function definitions
+- Each plot is small but adds up
+- Natural grouping by plot type exists
+
+* Proposed Refactoring Architecture
+
+** Phase 1: Metadata Collection Module Split (Priority: CRITICAL)
+
+*** Current: utils/_collect_figure_metadata.py (3352 lines)
+*** Proposed Structure:
+#+begin_src
+utils/metadata/
+├── __init__.py                      (< 100 lines)
+│   └── Public API: collect_figure_metadata()
+├── _core.py                         (< 200 lines)
+│   └── Main orchestration logic
+├── _dimensions.py                   (< 250 lines)
+│   └── Dimension extraction (mm, inch, px)
+├── _axes_metadata.py                (< 250 lines)
+│   └── Per-axes metadata collection
+├── _figure_metadata.py              (< 200 lines)
+│   └── Figure-level metadata
+├── _style_parsing.py                (< 250 lines)
+│   └── Style dict restructuring
+├── _plot_content.py                 (< 250 lines)
+│   └── Plot traces, legends, annotations
+├── _data_linkage.py                 (< 200 lines)
+│   └── CSV column references
+├── _precision.py                    (< 150 lines)
+│   └── Numeric rounding utilities
+└── _label_parsing.py                (< 150 lines)
+    └── Label/unit extraction helpers
+#+end_src
+
+*** Migration Strategy:
+1. Create metadata/ subdirectory with __init__.py
+2. Extract precision utilities to _precision.py (100-150 lines)
+3. Extract label parsing to _label_parsing.py (100-150 lines)
+4. Split dimension logic to _dimensions.py (200-250 lines)
+5. Split axes collection to _axes_metadata.py (200-250 lines)
+6. Split figure collection to _figure_metadata.py (150-200 lines)
+7. Split style parsing to _style_parsing.py (200-250 lines)
+8. Split plot content to _plot_content.py (200-250 lines)
+9. Split data linkage to _data_linkage.py (150-200 lines)
+10. Create orchestrating _core.py (150-200 lines)
+11. Update __init__.py with public API (50-100 lines)
+12. Update imports in utils/__init__.py
+
+*** Acceptance Criteria:
+- All files < 256 lines
+- collect_figure_metadata() works identically
+- All tests pass
+- No change to public API
+
+** Phase 2: Matplotlib Plot Mixin Split (Priority: HIGH)
+
+*** Current: _subplots/_AxisWrapperMixins/_MatplotlibPlotMixin.py (1609 lines)
+*** Proposed Structure:
+#+begin_src
+_subplots/_AxisWrapperMixins/
+├── _MatplotlibPlotMixin.py          (< 150 lines)
+│   └── Base class with shared utilities
+├── _LinePlotsMixin.py               (< 250 lines)
+│   └── plot(), step(), stx_line(), stx_shaded_line()
+├── _StatisticalPlotsMixin.py        (< 250 lines)
+│   └── stx_mean_std(), stx_mean_ci(), stx_median_iqr(), errorbar()
+├── _DistributionPlotsMixin.py       (< 250 lines)
+│   └── hist(), stx_kde(), stx_ecdf(), stx_joyplot()
+├── _CategoricalPlotsMixin.py        (< 250 lines)
+│   └── bar(), barh(), boxplot(), violinplot(), stx_box(), stx_violin()
+├── _ScatterPlotsMixin.py            (< 200 lines)
+│   └── scatter(), stem(), hexbin(), stx_scatter()
+├── _AreaPlotsMixin.py               (< 200 lines)
+│   └── fill_between(), stx_fill_between(), stx_fillv()
+├── _GridPlotsMixin.py               (< 250 lines)
+│   └── imshow(), matshow(), stx_heatmap(), stx_conf_mat()
+└── _SpecialPlotsMixin.py            (< 200 lines)
+    └── contour(), quiver(), pie(), stx_raster(), stx_rectangle()
+#+end_src
+
+*** Migration Strategy:
+1. Create empty mixin files with correct naming
+2. Extract _apply_scitex_postprocess() to base mixin (shared utility)
+3. Extract _get_ax_module() to base mixin
+4. Group methods by plot type and move to appropriate mixin
+5. Update _MatplotlibPlotMixin to inherit from all submixins
+6. Update imports in _AxisWrapper.py
+7. Run tests after each mixin extraction
+
+*** Acceptance Criteria:
+- All mixin files < 256 lines
+- All plot methods work identically
+- Post-processing applies correctly
+- Tests pass
+
+** Phase 3: Module Init Refactoring (Priority: HIGH)
+
+*** Current: __init__.py (794 lines)
+*** Proposed Structure:
+#+begin_src
+plt/
+├── __init__.py                      (< 150 lines)
+│   └── Core imports and __all__
+├── _config.py                       (< 200 lines)
+│   └── _auto_configure_mpl(), font registration
+├── _lazy_imports.py                 (< 100 lines)
+│   └── Lazy loading functions (subplots, figure, crop)
+├── _figure_io.py                    (< 250 lines)
+│   └── load(), _resolve_figure_paths(), _reconstruct_figure()
+├── _plot_reconstruction.py          (< 200 lines)
+│   └── _reconstruct_plots_from_csv(), _apply_manual_overrides()
+└── _utilities.py                    (< 150 lines)
+    └── tight_layout(), colorbar(), close()
+#+end_src
+
+*** Migration Strategy:
+1. Extract auto-configuration to _config.py
+2. Extract figure I/O to _figure_io.py
+3. Extract plot reconstruction to _plot_reconstruction.py
+4. Extract utilities to _utilities.py
+5. Keep lazy imports in __init__.py
+6. Update imports
+7. Test all convenience functions
+
+*** Acceptance Criteria:
+- __init__.py < 150 lines
+- All split files < 256 lines
+- Auto-configuration works on import
+- All utility functions accessible
+
+** Phase 4: Scientific Captions Split (Priority: MEDIUM)
+
+*** Current: utils/_scientific_captions.py (701 lines)
+*** Proposed Structure:
+#+begin_src
+utils/captions/
+├── __init__.py                      (< 100 lines)
+│   └── Public API
+├── _core.py                         (< 200 lines)
+│   └── ScientificCaption class (main logic)
+├── _styles.py                       (< 150 lines)
+│   └── Caption style formatting (scientific, nature, ieee, apa)
+├── _formatters.py                   (< 200 lines)
+│   └── Format functions (_format_caption_for_txt, _tex, _md)
+├── _export.py                       (< 150 lines)
+│   └── File export functions
+└── _integration.py                  (< 150 lines)
+    └── scitex.io.save integration
+#+end_src
+
+*** Migration Strategy:
+1. Create captions/ subdirectory
+2. Extract style formatting to _styles.py
+3. Extract output formatters to _formatters.py
+4. Extract export functions to _export.py
+5. Extract integration helpers to _integration.py
+6. Keep core caption manager in _core.py
+7. Update public API in __init__.py
+
+*** Acceptance Criteria:
+- All files < 256 lines
+- Caption system works identically
+- All export formats work
+- Integration with scitex.io.save preserved
+
+** Phase 5: Gallery Plots Split (Priority: LOW)
+
+*** Current: gallery/_plots.py (594 lines)
+*** Proposed Structure:
+#+begin_src
+gallery/
+├── __init__.py                      (< 50 lines)
+├── _registry.py                     (< 100 lines)
+│   └── PLOT_FUNCTIONS dict
+├── _line_plots.py                   (< 150 lines)
+│   └── plot_plot, plot_step, plot_stx_line, etc.
+├── _statistical_plots.py            (< 150 lines)
+│   └── plot_stx_mean_std, plot_stx_mean_ci, etc.
+├── _distribution_plots.py           (< 150 lines)
+│   └── plot_hist, plot_stx_kde, plot_stx_ecdf, etc.
+├── _categorical_plots.py            (< 200 lines)
+│   └── plot_bar, plot_boxplot, plot_stx_box, etc.
+├── _scatter_plots.py                (< 150 lines)
+│   └── plot_scatter, plot_stem, plot_hexbin, etc.
+├── _area_plots.py                   (< 150 lines)
+│   └── plot_fill_between, plot_stx_fillv, etc.
+├── _grid_plots.py                   (< 150 lines)
+│   └── plot_imshow, plot_stx_heatmap, etc.
+└── _special_plots.py                (< 150 lines)
+    └── plot_contour, plot_quiver, plot_pie, etc.
+#+end_src
+
+*** Migration Strategy:
+1. Create empty category files
+2. Group plot functions by category (matches mixin structure)
+3. Move functions to appropriate files
+4. Build PLOT_FUNCTIONS registry in _registry.py
+5. Update gallery/__init__.py to import from registry
+
+*** Acceptance Criteria:
+- All files < 256 lines
+- Gallery generation works identically
+- All plot examples render correctly
+
+** Phase 6: Additional Refactorings (Priority: MEDIUM-LOW)
+
+*** Subplots Wrapper (683 lines -> < 400 lines)
+#+begin_src
+_subplots/
+├── _SubplotsWrapper.py              (< 250 lines)
+│   └── Main wrapper class
+└── _mm_control.py                   (< 250 lines)
+    └── _create_with_mm_control() extracted
+#+end_src
+
+*** Axes Style Modules (Each > 290 lines)
+- Split by functionality (spine control, scale settings, label rotation)
+- Extract shared utilities to _style_common.py
+
+*** Utils Modules (Various > 256 lines)
+- Apply consistent splitting patterns
+- Group related functionality
+- Extract common utilities
+
+* Implementation Plan
+
+** Priority Order
+1. Phase 1: Metadata Collection (CRITICAL) - Largest file, most complex
+2. Phase 2: Matplotlib Plot Mixin (HIGH) - Second largest, affects many tests
+3. Phase 3: Module Init (HIGH) - User-facing imports
+4. Phase 4: Scientific Captions (MEDIUM) - Standalone system
+5. Phase 5: Gallery Plots (LOW) - Simple grouping
+6. Phase 6: Remaining modules (MEDIUM-LOW) - As time permits
+
+** Per-Phase Workflow
+1. Create new file structure
+2. Extract and move code incrementally
+3. Update imports progressively
+4. Run tests after each extraction
+5. Commit when phase is stable
+6. Document changes in bulletin board
+
+** Testing Strategy
+- Run full test suite after each file extraction
+- Add integration tests for split modules
+- Verify no regression in functionality
+- Check import performance (lazy loading maintained)
+- Validate public API unchanged
+
+** Rollback Plan
+- Each phase committed separately
+- Can revert individual phases via git
+- Keep original files until phase complete and tested
+- Document breaking points in bulletin board
+
+* Success Criteria
+
+** Technical Requirements
+- [ ] All Python files in scitex.plt < 256 lines
+- [ ] All existing tests pass
+- [ ] No change to public API
+- [ ] Import performance maintained
+- [ ] Documentation updated
+
+** Quality Requirements
+- [ ] Code organization improved
+- [ ] Logical groupings clear
+- [ ] Easier to navigate codebase
+- [ ] Reduced cognitive load per file
+- [ ] Better separation of concerns
+
+** Documentation Requirements
+- [ ] Architecture document updated
+- [ ] Module docstrings updated
+- [ ] Migration notes in CHANGELOG
+- [ ] Developer guide updated
+- [ ] Examples still work
+
+* Risk Assessment
+
+** High Risk
+- Metadata collection split (complex interdependencies)
+- Plot mixin split (many method references)
+- Import system changes (circular import risks)
+
+** Medium Risk
+- Style module splits (shared utilities)
+- Subplots wrapper (mm-control logic)
+- CSV formatting (column naming consistency)
+
+** Low Risk
+- Gallery plots split (independent functions)
+- Caption system split (isolated module)
+- Utility helpers (simple extractions)
+
+** Mitigation
+- Test after each file extraction
+- Use git branches for each phase
+- Document dependencies explicitly
+- Run full test suite frequently
+- Keep original files until confident
+
+* Notes
+
+** Design Principles
+1. Single Responsibility: Each file has one clear purpose
+2. Logical Grouping: Related functions stay together
+3. Clear Naming: File names describe contents
+4. Minimal Dependencies: Reduce circular imports
+5. Public API Stability: No breaking changes
+
+** File Size Guidelines
+- Target: 150-200 lines (comfortable)
+- Maximum: 256 lines (hard limit)
+- Minimum: 50 lines (avoid over-splitting)
+
+** Import Strategy
+- Use relative imports within modules
+- Lazy loading for expensive imports
+- Avoid circular dependencies
+- Keep public API in __init__.py
+
+* Bulletin Board Integration
+
+** Status Updates
+- Post phase completion to bulletin board
+- Document any blockers or issues
+- Share progress metrics (files under limit)
+- Request code review between phases
+
+** Collaboration Points
+- DeveloperAgent: Implementation assistance
+- TestingAgent: Verify no regressions
+- ArchitectAgent: Design review
+
+* References
+
+** Current Architecture Docs
+- /home/ywatanabe/proj/scitex-code/src/scitex/plt/docs/FIGURE_ARCHITECTURE.md
+
+** Related Modules
+- scitex.io (saving/loading)
+- scitex.vis (canvas integration)
+- matplotlib, seaborn (wrapped APIs)
+
+** Testing
+- tests/plt/ (unit tests)
+- examples/plt/ (integration tests)
+
+* Appendix A: File Size Summary (Before Refactoring)
+
+| File Path | Lines | Reduction Needed | Priority |
+|-----------|-------|------------------|----------|
+| utils/_collect_figure_metadata.py | 3352 | ~3100 lines | CRITICAL |
+| _subplots/_AxisWrapperMixins/_MatplotlibPlotMixin.py | 1609 | ~1350 lines | HIGH |
+| __init__.py | 794 | ~540 lines | HIGH |
+| utils/_scientific_captions.py | 701 | ~450 lines | MEDIUM |
+| _subplots/_SubplotsWrapper.py | 683 | ~430 lines | MEDIUM |
+| gallery/_plots.py | 594 | ~340 lines | LOW |
+| styles/_plot_postprocess.py | 567 | ~310 lines | MEDIUM |
+| _subplots/_AxisWrapperMixins/_AdjustmentMixin.py | 559 | ~300 lines | MEDIUM |
+| _subplots/_AxisWrapperMixins/_SeabornMixin.py | 447 | ~190 lines | LOW |
+| utils/_configure_mpl.py | 442 | ~190 lines | LOW |
+| utils/_dimension_viewer.py | 425 | ~170 lines | LOW |
+| _subplots/_export_as_csv.py | 426 | ~170 lines | LOW |
+| _subplots/_FigWrapper.py | 402 | ~150 lines | LOW |
+
+* Appendix B: Dependency Graph
+
+#+begin_src
+[User Code]
+    ↓
+[__init__.py] ← _config.py
+    ↓
+[_SubplotsWrapper] ← _mm_control.py
+    ↓
+[_FigWrapper] ← _AxisWrapper
+    ↓
+[_AxisWrapperMixins] ← Multiple mixin files
+    ↓
+[metadata/] ← Multiple metadata modules
+    ↓
+[ax/, utils/, styles/]
+#+end_src
+
+* END
