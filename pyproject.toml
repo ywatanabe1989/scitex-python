@@ -172,6 +172,7 @@ ml = [
     "google-genai",
     "groq",
     "llama-stack",
+    "elevenlabs",
 ]
 # Jupyter & Interactive Development
 jupyter = [

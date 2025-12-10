@@ -161,6 +161,7 @@ capture = _LazyModule("capture")
 template = _LazyModule("template")
 cloud = _LazyModule("cloud")
 config = _LazyModule("config")
+audio = _LazyModule("audio")
 
 # Centralized path configuration - eager loaded for convenience
 # Usage: scitex.PATHS.logs, scitex.PATHS.cache, etc.
@@ -221,6 +222,7 @@ __all__ = [
     "gists",
     "cloud",
     "config",
+    "audio",
     "PATHS",
     "INJECTED",
 ]

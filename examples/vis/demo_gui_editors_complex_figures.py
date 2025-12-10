@@ -1199,6 +1199,225 @@ def create_figure_03_neuroscience(
     return png_path.with_suffix(".json")
 
 
+def create_figure_09_stats_comparison(
+    output_dir: Path, test_geometry: bool = False
+):
+    """Create figure with statistical comparison (3 boxplots + multiple comparison).
+
+    Features:
+    - Three boxplots comparing groups (Control, Treatment A, Treatment B)
+    - Pairwise Brunner-Munzel tests with Bonferroni correction
+    - Stats results accessible via /stats endpoint
+    """
+    from scipy.stats import brunnermunzel
+    from scitex.schema import StatResult
+
+    # Generate sample data with effects
+    rng = np.random.default_rng(42)
+    control = rng.normal(loc=5.0, scale=1.2, size=30)
+    treatment_a = rng.normal(loc=6.2, scale=1.3, size=32)  # Moderate effect
+    treatment_b = rng.normal(loc=7.5, scale=1.4, size=28)  # Larger effect
+
+    groups = [control, treatment_a, treatment_b]
+    group_names = ["Control", "Treatment A", "Treatment B"]
+
+    # Pairwise comparisons (3 comparisons for Bonferroni)
+    comparisons = [
+        (0, 1, "Control vs Treatment A"),
+        (0, 2, "Control vs Treatment B"),
+        (1, 2, "Treatment A vs Treatment B"),
+    ]
+    n_comparisons = len(comparisons)
+    alpha = 0.05
+    bonferroni_alpha = alpha / n_comparisons
+
+    def p_to_stars(p, corrected_alpha):
+        """Convert p-value to significance stars with correction."""
+        if p < corrected_alpha / 10:  # p < 0.005 with correction
+            return "***"
+        elif p < corrected_alpha / 2:  # p < 0.025 with correction
+            return "**"
+        elif p < corrected_alpha:
+            return "*"
+        return "ns"
+
+    # Run pairwise tests
+    stat_results = []
+    pairwise_results = []
+
+    for i, j, comparison_name in comparisons:
+        bm_result = brunnermunzel(groups[i], groups[j])
+        p_raw = bm_result.pvalue
+        p_corrected = min(p_raw * n_comparisons, 1.0)  # Bonferroni correction
+        statistic = bm_result.statistic
+        stars = p_to_stars(p_raw, bonferroni_alpha)
+
+        pairwise_results.append({
+            "comparison": comparison_name,
+            "groups": (group_names[i], group_names[j]),
+            "indices": (i, j),
+            "statistic": float(statistic),
+            "p_raw": float(p_raw),
+            "p_corrected": float(p_corrected),
+            "stars": stars,
+            "significant": bool(p_corrected < alpha),  # Convert numpy.bool_ to Python bool
+        })
+
+        # Create StatResult for each comparison
+        stat_result = StatResult(
+            test_type="brunner_munzel",
+            test_category="non-parametric",
+            statistic={"name": "W", "value": float(statistic)},
+            p_value=float(p_raw),
+            stars=stars,
+            correction={
+                "method": "bonferroni",
+                "n_comparisons": n_comparisons,
+                "corrected_p": float(p_corrected),
+                "alpha": alpha,
+                "corrected_alpha": bonferroni_alpha,
+            },
+            samples={
+                "group1": {
+                    "name": group_names[i],
+                    "n": len(groups[i]),
+                    "mean": float(np.mean(groups[i])),
+                    "std": float(np.std(groups[i])),
+                    "median": float(np.median(groups[i])),
+                },
+                "group2": {
+                    "name": group_names[j],
+                    "n": len(groups[j]),
+                    "mean": float(np.mean(groups[j])),
+                    "std": float(np.std(groups[j])),
+                    "median": float(np.median(groups[j])),
+                },
+            },
+            extra={
+                "alternative": "two-sided",
+                "comparison_id": f"{i}_vs_{j}",
+            },
+        )
+        stat_results.append(stat_result)
+
+    # Create figure
+    fig, axes = stx.plt.subplots(
+        1, 2,
+        figsize_mm=(180, 90),
+        style=SCITEX_STYLE,
+    )
+
+    # Panel A: Boxplots with significance brackets
+    ax = axes[0, 0]
+    bp = ax.boxplot(groups, positions=[1, 2, 3], widths=0.6, patch_artist=True)
+
+    # Style boxplots
+    colors = ["#4C78A8", "#72B7B2", "#E45756"]
+    for i, (patch, color) in enumerate(zip(bp['boxes'], colors)):
+        patch.set_facecolor(color)
+        patch.set_alpha(0.7)
+        patch.set_edgecolor('#333333')
+    for element in ['whiskers', 'caps', 'medians']:
+        for line in bp[element]:
+            line.set_color('#333333')
+            line.set_linewidth(1.0)
+
+    # Add significance brackets
+    y_max = max(g.max() for g in groups)
+    bracket_heights = [y_max + 0.8, y_max + 1.6, y_max + 2.4]
+
+    for idx, result in enumerate(pairwise_results):
+        i, j = result["indices"]
+        y = bracket_heights[idx]
+        stars = result["stars"]
+
+        # Draw bracket
+        ax.plot([i + 1, i + 1, j + 1, j + 1],
+                [y - 0.15, y, y, y - 0.15], 'k-', linewidth=0.8)
+        ax.text((i + j + 2) / 2, y + 0.05, stars, ha='center', va='bottom', fontsize=9)
+
+    ax.set_xticks([1, 2, 3])
+    ax.set_xticklabels(group_names, fontsize=8)
+    ax.set_ylabel('Value')
+    ax.set_title('A) Group Comparison')
+    ax.set_ylim(None, y_max + 3.2)
+
+    # Panel B: Stats summary table
+    ax2 = axes[0, 1]
+    ax2.axis('off')
+
+    # Build stats table text
+    stats_text = (
+        "Statistical Analysis Summary\n"
+        "═══════════════════════════════════\n\n"
+        "Test: Brunner-Munzel (non-parametric)\n"
+        f"Correction: Bonferroni (α={alpha}, n={n_comparisons})\n"
+        f"Corrected α: {bonferroni_alpha:.4f}\n\n"
+        "─────────────────────────────────\n"
+        "Pairwise Comparisons:\n"
+        "─────────────────────────────────\n"
+    )
+
+    for result in pairwise_results:
+        sig_marker = "✓" if result["significant"] else "✗"
+        stats_text += (
+            f"\n{result['comparison']}\n"
+            f"  W = {result['statistic']:.3f}\n"
+            f"  p (raw) = {result['p_raw']:.4f}\n"
+            f"  p (corrected) = {result['p_corrected']:.4f} {result['stars']} {sig_marker}\n"
+        )
+
+    stats_text += (
+        "\n─────────────────────────────────\n"
+        "Group Descriptives:\n"
+        "─────────────────────────────────\n"
+    )
+
+    for name, data in zip(group_names, groups):
+        stats_text += (
+            f"\n{name}: n={len(data)}\n"
+            f"  Mean ± SD: {np.mean(data):.2f} ± {np.std(data):.2f}\n"
+            f"  Median: {np.median(data):.2f}\n"
+        )
+
+    ax2.text(0.02, 0.98, stats_text, transform=ax2.transAxes,
+             fontsize=7, verticalalignment='top', horizontalalignment='left',
+             fontfamily='monospace',
+             bbox=dict(boxstyle='round', facecolor='white', alpha=0.95, edgecolor='#cccccc'))
+
+    ax2.set_title('B) Statistical Summary')
+
+    # Test geometry if requested
+    if test_geometry:
+        test_geometry_extraction(fig, axes, "09_stats_comparison")
+
+    # Save with stats metadata embedded
+    png_path = output_dir / "09_stats_comparison.png"
+
+    stx.io.save(fig, png_path)
+    fig.close()
+
+    # Append stats to JSON after save
+    json_path = png_path.with_suffix(".json")
+    if json_path.exists():
+        import json
+        with open(json_path, 'r') as f:
+            data = json.load(f)
+        data['stats'] = [sr.to_dict() for sr in stat_results]
+        data['stats_summary'] = {
+            "test_type": "brunner_munzel",
+            "correction_method": "bonferroni",
+            "n_comparisons": n_comparisons,
+            "alpha": alpha,
+            "corrected_alpha": bonferroni_alpha,
+            "pairwise_results": pairwise_results,
+        }
+        with open(json_path, 'w') as f:
+            json.dump(data, f, indent=2)
+
+    return json_path
+
+
 # Figure creators registry - maps figure number to (name, creator_function)
 FIGURE_CREATORS = {
     1: ("Multi-type per axis (2x2)", create_figure_01_multi_type),
@@ -1209,6 +1428,7 @@ FIGURE_CREATORS = {
     6: ("Wide format (1x4)", create_figure_06_different_sizes),
     7: ("Tall format (4x1)", create_figure_07_tall),
     8: ("Single panel (1x1)", create_figure_08_single_panel),
+    9: ("Stats comparison (1x2)", create_figure_09_stats_comparison),
 }
 
 

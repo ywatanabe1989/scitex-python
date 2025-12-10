@@ -1188,6 +1188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePreview();
     initHoverSystem();
     setAutoUpdateInterval();
+    refreshStats();  // Load statistical test results
 
     // Setup color sync for selected element property inputs
     setupColorSync('sel-trace-color', 'sel-trace-color-text');
@@ -1397,6 +1398,108 @@ function updateAnnotationsList() {
             <button onclick="removeAnnotation(${i})">Remove</button>
         </div>`
     ).join('');
+}
+
+// =============================================================================
+// Statistics Display
+// =============================================================================
+async function refreshStats() {
+    const container = document.getElementById('stats-container');
+    container.innerHTML = '<div class="stats-loading">Loading statistics...</div>';
+
+    try {
+        const resp = await fetch('/stats');
+        const data = await resp.json();
+
+        if (!data.has_stats) {
+            container.innerHTML = '<div class="stats-empty">No statistical tests in this figure</div>';
+            return;
+        }
+
+        let html = '';
+
+        // Show summary if available
+        if (data.stats_summary) {
+            const summary = data.stats_summary;
+            html += `
+                <div class="stats-summary-header">
+                    ${summary.test_type.replace('_', '-')}
+                    <span class="stats-correction-badge">${summary.correction_method}</span>
+                </div>
+                <div class="stats-summary-body">
+                    <div class="stats-row">
+                        <span class="stats-label">Comparisons:</span>
+                        <span class="stats-value">${summary.n_comparisons}</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="stats-label">α (original):</span>
+                        <span class="stats-value">${summary.alpha}</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="stats-label">α (corrected):</span>
+                        <span class="stats-value">${summary.corrected_alpha.toFixed(4)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show individual test results
+        data.stats.forEach((stat, idx) => {
+            const sigClass = getSigClass(stat.stars);
+            const samples = stat.samples || {};
+            const correction = stat.correction || {};
+
+            html += `
+                <div class="stats-card">
+                    <div class="stats-card-header">
+                        <span class="stats-card-title">
+                            ${samples.group1?.name || 'Group 1'} vs ${samples.group2?.name || 'Group 2'}
+                        </span>
+                        <span class="stats-significance ${sigClass}">${stat.stars}</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="stats-label">${stat.statistic?.name || 'Stat'}:</span>
+                        <span class="stats-value">${(stat.statistic?.value || 0).toFixed(3)}</span>
+                    </div>
+                    <div class="stats-row">
+                        <span class="stats-label">p (raw):</span>
+                        <span class="stats-value">${stat.p_value.toFixed(4)}</span>
+                    </div>
+                    ${correction.corrected_p ? `
+                    <div class="stats-row">
+                        <span class="stats-label">p (corrected):</span>
+                        <span class="stats-value">${correction.corrected_p.toFixed(4)}</span>
+                    </div>` : ''}
+                    <div class="stats-groups">
+                        ${samples.group1 ? renderGroupStats(samples.group1) : ''}
+                        ${samples.group2 ? renderGroupStats(samples.group2) : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    } catch (e) {
+        container.innerHTML = `<div class="stats-empty">Error loading stats: ${e.message}</div>`;
+    }
+}
+
+function getSigClass(stars) {
+    if (stars === '***') return 'sig-high';
+    if (stars === '**') return 'sig-medium';
+    if (stars === '*') return 'sig-low';
+    return 'sig-ns';
+}
+
+function renderGroupStats(group) {
+    return `
+        <div class="stats-group">
+            <div class="stats-group-name">${group.name || 'Group'}</div>
+            <div>n = ${group.n}</div>
+            <div>μ = ${group.mean?.toFixed(2) || '-'}</div>
+            <div>σ = ${group.std?.toFixed(2) || '-'}</div>
+        </div>
+    `;
 }
 
 function setStatus(msg, isError = false) {

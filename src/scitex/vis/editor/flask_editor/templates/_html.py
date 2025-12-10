@@ -568,6 +568,17 @@ HTML_BODY = """
                 </div>
             </div>
 
+            <!-- Statistics Section -->
+            <div class="section" id="section-statistics">
+                <div class="section-header section-toggle" onclick="toggleSection(this)">Statistics</div>
+                <div class="section-content">
+                    <div id="stats-container">
+                        <div class="stats-loading">Loading statistics...</div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="refreshStats()" style="margin-top: 8px;">Refresh Stats</button>
+                </div>
+            </div>
+
             <!-- Annotations Section -->
             <div class="section" id="section-annotations">
                 <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Annotations</div>

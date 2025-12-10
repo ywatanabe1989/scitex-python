@@ -147,6 +147,17 @@ class WebEditor:
             func()
             return jsonify({"status": "shutdown"})
 
+        @app.route("/stats")
+        def stats():
+            """Return statistical test results from figure metadata."""
+            stats_data = editor.metadata.get("stats", [])
+            stats_summary = editor.metadata.get("stats_summary", None)
+            return jsonify({
+                "stats": stats_data,
+                "stats_summary": stats_summary,
+                "has_stats": len(stats_data) > 0,
+            })
+
         # Open browser after short delay
         def open_browser():
             import time
