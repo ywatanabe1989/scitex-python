@@ -637,7 +637,7 @@ if __name__ == "__main__":
 # 
 #                 # Tag with metadata
 #                 ax_mpl._scitex_metadata = {
-#                     "created_with": "scitex.plt.subplots (mm-control)",
+#                     "created_with": "scitex.plt.subplots",
 #                     "mode": mode or "publication",
 #                     "axes_size_mm": (ax_widths_mm[ax_idx], ax_heights_mm[ax_idx]),
 #                     "position_in_grid": (row, col),

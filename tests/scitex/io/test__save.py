@@ -878,6 +878,7 @@ if __name__ == "__main__":
 #     auto_crop: bool = True,
 #     crop_margin_mm: float = 1.0,
 #     metadata_extra: dict = None,
+#     json_schema: str = "recipe",
 #     **kwargs,
 # ) -> None:
 #     """
@@ -920,6 +921,11 @@ if __name__ == "__main__":
 #                 }
 #             }
 #         Default is None.
+#     json_schema : str, optional
+#         Schema type for JSON metadata output. Options:
+#         - "recipe": Minimal schema with method calls + data refs (default, ~95% smaller)
+#         - "verbose": Full schema with all artist details
+#         Default is "recipe".
 #     **kwargs
 #         Additional keyword arguments to pass to the underlying save function of the specific format.
 # 
@@ -1142,6 +1148,7 @@ if __name__ == "__main__":
 #             auto_crop=auto_crop,
 #             crop_margin_mm=crop_margin_mm,
 #             metadata_extra=metadata_extra,
+#             json_schema=json_schema,
 #             **kwargs,
 #         )
 # 
@@ -1151,6 +1158,9 @@ if __name__ == "__main__":
 #         return Path(spath)
 #         # return True
 # 
+#     except AssertionError:
+#         # Re-raise assertion errors - these are validation failures that should stop execution
+#         raise
 #     except Exception as e:
 #         logger.error(
 #             f"Error occurred while saving: {str(e)}\n"
@@ -1213,6 +1223,7 @@ if __name__ == "__main__":
 #     auto_crop=False,
 #     crop_margin_mm=1.0,
 #     metadata_extra=None,
+#     json_schema="recipe",
 #     **kwargs,
 # ):
 #     # Don't use object's own save method - use consistent handlers
@@ -1251,6 +1262,7 @@ if __name__ == "__main__":
 #                 auto_crop=auto_crop,
 #                 crop_margin_mm=crop_margin_mm,
 #                 metadata_extra=metadata_extra,
+#                 json_schema=json_schema,
 #                 **kwargs,
 #             )
 #         elif ext in [".hdf5", ".h5", ".zarr"]:
@@ -1362,6 +1374,7 @@ if __name__ == "__main__":
 #     auto_crop=True,
 #     crop_margin_mm=1.0,
 #     metadata_extra=None,
+#     json_schema="recipe",
 #     **kwargs,
 # ):
 #     """Handle image file saving with optional CSV export and auto-cropping."""
@@ -1387,27 +1400,41 @@ if __name__ == "__main__":
 # 
 #             # If we have a figure, try to collect metadata
 #             if fig_mpl is not None:
-#                 # Get first axes if available
+#                 # Get axes from scitex wrapper if available (for multi-axes support)
+#                 # Priority: FigWrapper.axes (AxesWrapper) > mpl axes with _scitex_wrapper > mpl axes
 #                 ax = None
-#                 if hasattr(fig_mpl, "axes") and len(fig_mpl.axes) > 0:
-#                     ax = fig_mpl.axes[0]
+# 
+#                 # First try to get AxesWrapper from FigWrapper (obj)
+#                 if hasattr(obj, "axes"):
+#                     # obj is FigWrapper, get its axes (could be AxisWrapper or AxesWrapper)
+#                     ax = obj.axes
+#                 elif hasattr(fig_mpl, "axes") and len(fig_mpl.axes) > 0:
+#                     mpl_ax = fig_mpl.axes[0]
+#                     # Try to get scitex wrapper which has history for recipe schema
+#                     if hasattr(mpl_ax, '_scitex_wrapper'):
+#                         ax = mpl_ax._scitex_wrapper
+#                     else:
+#                         ax = mpl_ax
 # 
 #                 # Collect metadata using scitex's metadata collector
 #                 try:
-#                     from scitex.plt.utils import collect_figure_metadata
-# 
-#                     # Extract plot_id from filename (e.g., "01_plot.png" -> "01_plot")
-#                     plot_id = _os.path.splitext(_os.path.basename(spath))[0]
-# 
-#                     auto_metadata = collect_figure_metadata(
-#                         fig_mpl, ax, plot_id=plot_id
-#                     )
+#                     if json_schema == "recipe":
+#                         from scitex.plt.utils import collect_recipe_metadata
+#                         auto_metadata = collect_recipe_metadata(
+#                             fig_mpl, ax,
+#                             auto_crop=auto_crop,
+#                             crop_margin_mm=crop_margin_mm,
+#                         )
+#                     else:
+#                         from scitex.plt.utils import collect_figure_metadata
+#                         auto_metadata = collect_figure_metadata(fig_mpl, ax)
 # 
 #                     if auto_metadata:
 #                         kwargs["metadata"] = auto_metadata
 #                         collected_metadata = auto_metadata  # Save for JSON export
 #                         if verbose:
-#                             logger.info("  • Auto-collected metadata from figure")
+#                             schema_name = "recipe" if json_schema == "recipe" else "verbose"
+#                             logger.info(f"  • Auto-collected metadata ({schema_name} schema)")
 #                 except ImportError:
 #                     pass  # collect_figure_metadata not available
 #                 except Exception as e:
@@ -1447,6 +1474,7 @@ if __name__ == "__main__":
 #     save_image(obj, spath, verbose=verbose, **kwargs)
 # 
 #     # Auto-crop if requested (only for raster formats)
+#     crop_offset = None
 #     if auto_crop and not dry_run:
 #         # Get file extension
 #         ext = spath.lower()
@@ -1462,14 +1490,46 @@ if __name__ == "__main__":
 #                 dpi = kwargs.get("dpi", 300)
 #                 margin_px = int(crop_margin_mm * dpi / 25.4)  # 25.4mm per inch
 # 
-#                 # Crop the saved image in place
-#                 crop(
+#                 # Crop the saved image in place, get crop offset for metadata adjustment
+#                 _, crop_offset = crop(
 #                     spath,
 #                     output_path=spath,
 #                     margin=margin_px,
 #                     overwrite=True,
 #                     verbose=False,
+#                     return_offset=True,
 #                 )
+# 
+#                 # Adjust axes_bbox_px in metadata to account for crop offset
+#                 if crop_offset and collected_metadata:
+#                     if "axes_bbox_px" in collected_metadata:
+#                         bbox = collected_metadata["axes_bbox_px"]
+#                         # Subtract crop offset from all coordinates
+#                         # left/upper is where the crop started
+#                         left_offset = crop_offset["left"]
+#                         upper_offset = crop_offset["upper"]
+#                         bbox["x0"] = bbox.get("x0", 0) - left_offset
+#                         bbox["x1"] = bbox.get("x1", 0) - left_offset
+#                         bbox["y0"] = bbox.get("y0", 0) - upper_offset
+#                         bbox["y1"] = bbox.get("y1", 0) - upper_offset
+#                         # Update width/height to match new image size
+#                         # (bbox width/height shouldn't change, but figure size does)
+# 
+#                     # Also update figure size in metadata
+#                     if "figure" in collected_metadata:
+#                         fig_meta = collected_metadata["figure"]
+#                         if "size_px" in fig_meta:
+#                             fig_meta["size_px"] = [
+#                                 crop_offset["new_width"],
+#                                 crop_offset["new_height"],
+#                             ]
+#                     if "dimensions" in collected_metadata:
+#                         dim_meta = collected_metadata["dimensions"]
+#                         if "figure_size_px" in dim_meta:
+#                             dim_meta["figure_size_px"] = [
+#                                 crop_offset["new_width"],
+#                                 crop_offset["new_height"],
+#                             ]
 # 
 #                 if verbose:
 #                     logger.info(
@@ -1501,6 +1561,7 @@ if __name__ == "__main__":
 #         parent_name = _os.path.basename(parent_dir)
 #         filename_without_ext = _os.path.splitext(_os.path.basename(spath))[0]
 # 
+#         csv_path = None  # Initialize to avoid UnboundLocalError when CSV export is skipped
 #         try:
 #             # Get the figure object that may contain plot data
 #             fig_obj = _get_figure_with_data(obj)
@@ -1536,7 +1597,7 @@ if __name__ == "__main__":
 #                             no_csv=True,
 #                         )
 # 
-#                         # Update metadata with actual CSV columns (after export)
+#                         # Update metadata with actual CSV info (after export)
 #                         # This ensures column names match exactly, including any
 #                         # deduplication suffixes added by pandas
 #                         if collected_metadata is not None:
@@ -1545,14 +1606,23 @@ if __name__ == "__main__":
 #                                     _compute_csv_hash,
 #                                 )
 # 
+#                                 # Ensure data section exists
+#                                 if "data" not in collected_metadata:
+#                                     collected_metadata["data"] = {}
+# 
 #                                 # Get actual column names from exported DataFrame
 #                                 actual_columns = list(csv_data.columns)
 # 
-#                                 # Update csv_columns to use flat list of actual columns
-#                                 collected_metadata["csv_columns_actual"] = actual_columns
+#                                 # Update data section with csv_path (relative to JSON)
+#                                 # Since JSON and CSV are in the same or parallel directories,
+#                                 # use just the filename for simplicity
+#                                 collected_metadata["data"]["csv_path"] = _os.path.basename(csv_path)
+# 
+#                                 # Update columns to use flat list of actual columns
+#                                 collected_metadata["data"]["columns_actual"] = actual_columns
 # 
 #                                 # Compute hash of actual CSV data
-#                                 collected_metadata["csv_hash"] = _compute_csv_hash(
+#                                 collected_metadata["data"]["csv_hash"] = _compute_csv_hash(
 #                                     csv_data
 #                                 )
 #                             except Exception:
@@ -1755,6 +1825,14 @@ if __name__ == "__main__":
 #                 no_csv=True,
 #             )
 # 
+#             # Verify CSV/JSON consistency (data_ref must match columns_actual)
+#             # Only check for verbose schema - recipe schema uses different data_ref structure
+#             if csv_path and not dry_run and json_schema != "recipe":
+#                 from scitex.plt.utils._collect_figure_metadata import (
+#                     assert_csv_json_consistency,
+#                 )
+#                 assert_csv_json_consistency(csv_path, json_path)
+# 
 #             # Create symlink_to for JSON if it was specified for the image
 #             if symlink_to:
 #                 # Apply same directory transformation for symlink
@@ -1816,6 +1894,9 @@ if __name__ == "__main__":
 #                     json_cwd = _os.getcwd() + "/" + _os.path.basename(json_path)
 #                     _symlink(json_path, json_cwd, True, True)
 # 
+#         except AssertionError:
+#             # Re-raise assertion errors - these are validation failures that should stop execution
+#             raise
 #         except Exception as e:
 #             import warnings
 # 

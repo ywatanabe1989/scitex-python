@@ -280,8 +280,19 @@ if __name__ == "__main__":
 #     save_stats=True,
 #     **kwargs,
 # ):
+#     # Determine if spath is a file-like object (e.g., BytesIO)
+#     is_file_like = not isinstance(spath, str)
+# 
+#     # Get format from file extension or kwargs
+#     if is_file_like:
+#         fmt = kwargs.get('format', '').lower()
+#     else:
+#         # Get extension without the leading dot
+#         fmt = spath.lower().rsplit('.', 1)[-1] if '.' in spath else ''
+# 
 #     # Auto-save stats BEFORE saving (obj may be deleted during save)
-#     if save_stats:
+#     # Only for file paths, not file-like objects
+#     if save_stats and not is_file_like:
 #         _save_stats_from_figure(obj, spath, verbose=verbose)
 # 
 #     # Add URL to metadata if not present
@@ -314,7 +325,7 @@ if __name__ == "__main__":
 #                 warnings.warn(f"Failed to add QR code: {e}")
 # 
 #     # png
-#     if spath.endswith(".png"):
+#     if fmt == 'png':
 #         # plotly
 #         if isinstance(obj, plotly.graph_objs.Figure):
 #             obj.write_image(file=spath, format="png")
@@ -330,7 +341,7 @@ if __name__ == "__main__":
 #         del obj
 # 
 #     # tiff
-#     elif spath.endswith(".tiff") or spath.endswith(".tif"):
+#     elif fmt in ('tiff', 'tif'):
 #         # PIL image
 #         if isinstance(obj, Image.Image):
 #             obj.save(spath)
@@ -347,7 +358,7 @@ if __name__ == "__main__":
 #         del obj
 # 
 #     # jpeg
-#     elif spath.endswith(".jpeg") or spath.endswith(".jpg"):
+#     elif fmt in ('jpeg', 'jpg'):
 #         buf = _io.BytesIO()
 # 
 #         # plotly
@@ -384,7 +395,7 @@ if __name__ == "__main__":
 #         del obj
 # 
 #     # GIF
-#     elif spath.endswith(".gif"):
+#     elif fmt == 'gif':
 #         # PIL image
 #         if isinstance(obj, Image.Image):
 #             obj.save(spath, save_all=True)
@@ -412,7 +423,7 @@ if __name__ == "__main__":
 #         del obj
 # 
 #     # SVG
-#     elif spath.endswith(".svg"):
+#     elif fmt == 'svg':
 #         # Plotly
 #         if isinstance(obj, plotly.graph_objs.Figure):
 #             obj.write_image(file=spath, format="svg")
@@ -427,7 +438,7 @@ if __name__ == "__main__":
 #         del obj
 # 
 #     # PDF
-#     elif spath.endswith(".pdf"):
+#     elif fmt == 'pdf':
 #         # Plotly
 #         if isinstance(obj, plotly.graph_objs.Figure):
 #             obj.write_image(file=spath, format="pdf")
@@ -450,8 +461,8 @@ if __name__ == "__main__":
 #                 obj.figure.savefig(spath, **save_kwargs)
 #         del obj
 # 
-#     # Embed metadata if provided
-#     if metadata is not None:
+#     # Embed metadata if provided (only for file paths, not file-like objects)
+#     if metadata is not None and not is_file_like:
 #         from .._metadata import embed_metadata
 # 
 #         try:
