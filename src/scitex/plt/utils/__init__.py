@@ -36,9 +36,10 @@ from ._figure_from_axes_mm import (
     print_dimension_info,
 )
 from ._units import inch_to_mm, mm_to_inch, mm_to_pt, pt_to_mm
-from ._collect_figure_metadata import (
+from .metadata import (
     assert_csv_json_consistency,
     collect_figure_metadata,
+    collect_recipe_metadata,
     verify_csv_json_consistency,
 )
 from ._csv_column_naming import (
@@ -67,6 +68,7 @@ __all__ = [
     "caption_manager",
     "close",
     "collect_figure_metadata",
+    "collect_recipe_metadata",
     "colorbar",
     "compare_modes",
     "configure_mpl",

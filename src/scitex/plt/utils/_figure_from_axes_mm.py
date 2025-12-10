@@ -216,14 +216,38 @@ def get_dimension_info(fig, ax) -> Dict:
     fig_width_px = int(fig_width_inch * dpi)
     fig_height_px = int(fig_height_inch * dpi)
 
-    # Axes position and size
-    pos = ax.get_position()  # [left, bottom, width, height] in figure coords
-    axes_width_inch = fig_width_inch * pos.width
-    axes_height_inch = fig_height_inch * pos.height
+    # Draw the figure to finalize layout (constrained_layout, tight_layout, etc.)
+    # This ensures we get the ACTUAL axes position after all adjustments
+    fig.canvas.draw()
+
+    # Get actual axes position using window_extent (actual pixel coordinates)
+    # This accounts for tight_layout, constrained_layout, and label adjustments
+    bbox = ax.get_window_extent()
+
+    # Convert from display coordinates (bottom-left origin) to figure pixels
+    axes_x0_px = int(round(bbox.x0))
+    axes_x1_px = int(round(bbox.x1))
+    # Convert to top-left origin for web/canvas compatibility
+    axes_y0_px = int(round(fig_height_px - bbox.y1))  # Top edge (flipped for web)
+    axes_y1_px = int(round(fig_height_px - bbox.y0))  # Bottom edge (X-axis position)
+
+    axes_width_px = int(round(bbox.width))
+    axes_height_px = int(round(bbox.height))
+
+    # Convert to inches and mm
+    axes_width_inch = bbox.width / dpi
+    axes_height_inch = bbox.height / dpi
     axes_width_mm = inch_to_mm(axes_width_inch)
     axes_height_mm = inch_to_mm(axes_height_inch)
-    axes_width_px = int(axes_width_inch * dpi)
-    axes_height_px = int(axes_height_inch * dpi)
+
+    # Calculate mm coordinates
+    axes_x0_mm = (bbox.x0 / dpi) * MM_PER_INCH
+    axes_x1_mm = (bbox.x1 / dpi) * MM_PER_INCH
+    axes_y0_mm = ((fig_height_px - bbox.y1) / dpi) * MM_PER_INCH  # Top (flipped)
+    axes_y1_mm = ((fig_height_px - bbox.y0) / dpi) * MM_PER_INCH  # Bottom (flipped)
+
+    # Also get normalized position for reference
+    pos = ax.get_position()
 
     return {
         # Figure dimensions
@@ -235,6 +259,26 @@ def get_dimension_info(fig, ax) -> Dict:
         "axes_size_inch": (axes_width_inch, axes_height_inch),
         "axes_size_mm": (axes_width_mm, axes_height_mm),
         "axes_size_px": (axes_width_px, axes_height_px),
+        # Axes bounding box in pixels (for canvas/web alignment, origin top-left)
+        # x0: left edge (Y-axis position), x1: right edge
+        # y0: top edge, y1: bottom edge (X-axis position)
+        "axes_bbox_px": {
+            "x0": axes_x0_px,
+            "y0": axes_y0_px,
+            "x1": axes_x1_px,
+            "y1": axes_y1_px,
+            "width": axes_width_px,
+            "height": axes_height_px,
+        },
+        # Axes bounding box in mm
+        "axes_bbox_mm": {
+            "x0": axes_x0_mm,
+            "y0": axes_y0_mm,
+            "x1": axes_x1_mm,
+            "y1": axes_y1_mm,
+            "width": axes_width_mm,
+            "height": axes_height_mm,
+        },
         # Settings
         "dpi": dpi,
         "mm_per_inch": MM_PER_INCH,

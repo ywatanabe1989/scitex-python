@@ -63,6 +63,13 @@ class TrackingMixin:
             track = self.track
 
         if track:
+            # Get axes position from _scitex_metadata if available
+            ax_row, ax_col = 0, 0
+            if hasattr(self, "_axis_mpl") and hasattr(self._axis_mpl, "_scitex_metadata"):
+                meta = self._axis_mpl._scitex_metadata
+                if "position_in_grid" in meta:
+                    ax_row, ax_col = meta["position_in_grid"]
+
             # If no ID was provided, generate one using method_name + counter
             if id is None:
                 # Initialize method counters if not exist
@@ -73,8 +80,13 @@ class TrackingMixin:
                 counter = self._method_counters.get(method_name, 0)
                 self._method_counters[method_name] = counter + 1
 
-                # Format ID as method_name_counter (e.g., bar_1, plot_3)
-                id = f"{method_name}_{counter}"
+                # Format ID with axes position: ax_RC_method_counter
+                # e.g., ax_00_plot_0, ax_01_bar_1, ax_10_scatter_2
+                id = f"ax_{ax_row}{ax_col}_{method_name}_{counter}"
+            else:
+                # User-provided ID - prepend axes position
+                # e.g., ax_00_sine, ax_01_my-data
+                id = f"ax_{ax_row}{ax_col}_{id}"
 
             # For backward compatibility
             self.id += 1

@@ -108,9 +108,16 @@ class FigWrapper:
         >>> fig.savefig('result.png', embed_metadata=False)
         """
         # Check if this is a format that can have metadata (PNG/JPEG/TIFF/PDF)
-        is_image_format = fname.lower().endswith(
-            (".png", ".jpg", ".jpeg", ".tiff", ".tif", ".pdf")
-        )
+        # Handle both string paths and file-like objects (e.g., BytesIO)
+        if isinstance(fname, str):
+            is_image_format = fname.lower().endswith(
+                (".png", ".jpg", ".jpeg", ".tiff", ".tif", ".pdf")
+            )
+        else:
+            # For file-like objects, check the 'format' kwarg if provided
+            # Otherwise default to False (no metadata embedding for BytesIO etc.)
+            fmt = kwargs.get('format', '').lower() if kwargs.get('format') else ''
+            is_image_format = fmt in ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'pdf')
 
         if is_image_format and embed_metadata:
             # Collect automatic metadata

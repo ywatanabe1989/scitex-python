@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-18 18:14:26 (ywatanabe)"
-# File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_sns_heatmap.py
-# ----------------------------------------
-import os
+# Timestamp: "2025-12-10 02:30:00 (ywatanabe)"
+# File: ./src/scitex/plt/_subplots/_export_as_csv_formatters/_format_sns_heatmap.py
 
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+"""CSV formatter for sns.heatmap() calls - uses standard column naming."""
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
+from ._format_plot import _parse_tracking_id
 
 
 def _format_sns_heatmap(id, tracked_dict, kwargs):
     """Format data from a sns_heatmap call.
+
+    Uses standard column naming: ax-row-{r}-col-{c}_trace-id-{id}_variable-{var}
 
     Args:
         id (str): Identifier for the plot
@@ -22,68 +24,57 @@ def _format_sns_heatmap(id, tracked_dict, kwargs):
         kwargs (dict): Keyword arguments passed to sns_heatmap
 
     Returns:
-        pd.DataFrame: Formatted data for the plot
+        pd.DataFrame: Formatted data with standard column names
     """
     # Check if tracked_dict is empty
     if not tracked_dict:
         return pd.DataFrame()
 
+    # Parse tracking ID to get axes position
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
+    def _format_dataframe(df):
+        result = pd.DataFrame()
+        for col in df.columns:
+            col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+            result[col_name] = df[col]
+        return result
+
+    def _format_array(arr):
+        rows, cols = arr.shape if len(arr.shape) >= 2 else (arr.shape[0], 1)
+        result = pd.DataFrame()
+        for i in range(cols):
+            col_data = arr[:, i] if len(arr.shape) >= 2 else arr
+            col_name = get_csv_column_name(f"data-col-{i}", ax_row, ax_col, trace_id=trace_id)
+            result[col_name] = col_data
+        return result
+
     # If tracked_dict is a dictionary
     if isinstance(tracked_dict, dict):
-        # If 'data' key is in tracked_dict, use it
         if "data" in tracked_dict:
             data = tracked_dict["data"]
 
-            # Handle pandas DataFrame
             if isinstance(data, pd.DataFrame):
-                df = data.copy()
-                # Add the id prefix to all columns
-                return df.add_prefix(f"{id}_sns_heatmap_")
-
-            # Handle numpy array
+                return _format_dataframe(data)
             elif isinstance(data, np.ndarray):
-                # Create DataFrame from array with simple column names
-                rows, cols = data.shape if len(data.shape) >= 2 else (data.shape[0], 1)
-                df = pd.DataFrame(data, columns=[f"col_{i}" for i in range(cols)])
-                # Add the id prefix to all columns
-                return df.add_prefix(f"{id}_sns_heatmap_")
+                return _format_array(data)
 
         # Legacy handling for args
         args = tracked_dict.get("args", [])
         if len(args) > 0:
-            data = args[0]  # First arg to sns_heatmap is typically the data matrix
+            data = args[0]
 
-            # Handle pandas DataFrame
             if isinstance(data, pd.DataFrame):
-                df = data.copy()
-                # Add the id prefix to all columns
-                return df.add_prefix(f"{id}_sns_heatmap_")
-
-            # Handle numpy array
+                return _format_dataframe(data)
             elif isinstance(data, np.ndarray):
-                # Create DataFrame from array with simple column names
-                rows, cols = data.shape if len(data.shape) >= 2 else (data.shape[0], 1)
-                df = pd.DataFrame(data, columns=[f"col_{i}" for i in range(cols)])
-                # Add the id prefix to all columns
-                return df.add_prefix(f"{id}_sns_heatmap_")
+                return _format_array(data)
 
     # If tracked_dict is a DataFrame directly
     elif isinstance(tracked_dict, pd.DataFrame):
-        df = tracked_dict.copy()
-        # Add the id prefix to all columns
-        return df.add_prefix(f"{id}_sns_heatmap_")
+        return _format_dataframe(tracked_dict)
 
     # If tracked_dict is a numpy array directly
     elif isinstance(tracked_dict, np.ndarray):
-        # Create DataFrame from array with simple column names
-        rows, cols = (
-            tracked_dict.shape
-            if len(tracked_dict.shape) >= 2
-            else (tracked_dict.shape[0], 1)
-        )
-        df = pd.DataFrame(tracked_dict, columns=[f"col_{i}" for i in range(cols)])
-        # Add the id prefix to all columns
-        return df.add_prefix(f"{id}_sns_heatmap_")
+        return _format_array(tracked_dict)
 
-    # Default empty DataFrame if we can't process the input
     return pd.DataFrame()

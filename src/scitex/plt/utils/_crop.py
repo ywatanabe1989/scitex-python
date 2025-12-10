@@ -96,6 +96,7 @@ def crop(
     margin: int = 12,
     overwrite: bool = False,
     verbose: bool = False,
+    return_offset: bool = False,
 ) -> str:
     """
     Crop a figure image to its content area with a specified margin.
@@ -117,11 +118,16 @@ def crop(
         Whether to overwrite the input file (default: False)
     verbose : bool, optional
         Whether to print detailed information (default: False)
+    return_offset : bool, optional
+        If True, also return the crop offset (left, upper) for metadata adjustment.
+        Default is False.
 
     Returns
     -------
-    str
-        Path to the saved cropped image
+    str or tuple
+        Path to the saved cropped image. If return_offset=True, returns
+        (path, offset_dict) where offset_dict has keys 'left', 'upper', 'right', 'lower'
+        representing the crop boundaries.
 
     Raises
     ------
@@ -253,6 +259,19 @@ def crop(
         print(f"Saved {area_reduction_pct:.1f}% of the original area")
         if output_path != input_path:
             print(f"Saved to: {output_path}")
+
+    if return_offset:
+        offset = {
+            'left': left,
+            'upper': upper,
+            'right': right,
+            'lower': lower,
+            'original_width': original_width,
+            'original_height': original_height,
+            'new_width': final_width,
+            'new_height': final_height,
+        }
+        return output_path, offset
 
     return output_path
 

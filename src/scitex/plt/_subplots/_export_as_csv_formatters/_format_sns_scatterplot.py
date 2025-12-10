@@ -1,70 +1,72 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-18 18:14:26 (ywatanabe)"
-# File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_sns_scatterplot.py
-# ----------------------------------------
-import os
+# Timestamp: "2025-12-10 02:30:00 (ywatanabe)"
+# File: ./src/scitex/plt/_subplots/_export_as_csv_formatters/_format_sns_scatterplot.py
 
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+"""CSV formatter for sns.scatterplot() calls - uses standard column naming."""
 
 import numpy as np
 import pandas as pd
+
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
+from ._format_plot import _parse_tracking_id
 
 
 def _format_sns_scatterplot(id, tracked_dict, kwargs=None):
     """Format data from a sns_scatterplot call.
 
+    Uses standard column naming: ax-row-{r}-col-{c}_trace-id-{id}_variable-{var}
+
     Args:
-        id (str): Identifier for the plot (already unpacked from the record tuple)
-        tracked_dict (dict): Tracked data dictionary from the record tuple
+        id (str): Identifier for the plot
+        tracked_dict (dict): Tracked data dictionary
         kwargs (dict): Keyword arguments from the record tuple
 
     Returns:
-        pd.DataFrame: Formatted data for the plot
+        pd.DataFrame: Formatted data with standard column names
     """
+    # Parse tracking ID to get axes position
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     # Look for the DataFrame in the kwargs dictionary if provided
     if kwargs and isinstance(kwargs, dict) and "data" in kwargs:
         data = kwargs["data"]
         if isinstance(data, pd.DataFrame):
-            # Use the DataFrame provided in kwargs
             result = pd.DataFrame()
 
-            # If x and y variables are specified in kwargs, use them to extract columns
+            # If x and y variables are specified in kwargs, use them
             x_var = kwargs.get("x")
             y_var = kwargs.get("y")
 
             if x_var and y_var and x_var in data.columns and y_var in data.columns:
-                # Extract these specific columns
-                result[f"{id}_x"] = data[x_var]
-                result[f"{id}_y"] = data[y_var]
+                result[get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)] = data[x_var]
+                result[get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)] = data[y_var]
 
-                # Also extract hue, size, style if they are specified
+                # Also extract hue, size, style if specified
                 for extra_var in ["hue", "size", "style"]:
                     var_name = kwargs.get(extra_var)
                     if var_name and var_name in data.columns:
-                        result[f"{id}_{extra_var}"] = data[var_name]
+                        result[get_csv_column_name(extra_var, ax_row, ax_col, trace_id=trace_id)] = data[var_name]
 
                 return result
             else:
                 # If columns aren't specified, include all columns
                 for col in data.columns:
-                    result[f"{id}_{col}"] = data[col]
+                    col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                    result[col_name] = data[col]
                 return result
 
     # Alternative: try to find a DataFrame in tracked_dict
     if tracked_dict and isinstance(tracked_dict, dict):
-        # Search for 'data' key
         if "data" in tracked_dict and isinstance(tracked_dict["data"], pd.DataFrame):
             data = tracked_dict["data"]
             result = pd.DataFrame()
 
-            # Just copy all columns from the data
             for col in data.columns:
-                result[f"{id}_{col}"] = data[col]
+                col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                result[col_name] = data[col]
 
             return result
 
-    # If all else fails, return an empty DataFrame
     return pd.DataFrame()
