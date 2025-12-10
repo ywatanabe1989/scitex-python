@@ -211,6 +211,15 @@ gui = [
     "PyQt6",           # Qt desktop editor (alternative: PyQt5, PySide6, PySide2)
 ]
 
+# Audio/TTS Module
+audio = [
+    "pyttsx3",         # System TTS (offline, free)
+    "gTTS",            # Google TTS (free, requires internet)
+    "pydub",           # Audio manipulation (speed control)
+    "elevenlabs",      # ElevenLabs (paid, high quality)
+    "mcp",             # MCP server integration
+]
+
 # Scholar Module - Paper Management & Browser
 scholar = [
     "selenium",
