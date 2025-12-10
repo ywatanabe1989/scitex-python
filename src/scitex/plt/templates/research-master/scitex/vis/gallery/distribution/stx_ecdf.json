@@ -1,0 +1,95 @@
+{
+    "scitex_schema": "scitex.plt.figure.recipe",
+    "scitex_schema_version": "0.2.0",
+    "figure_uuid": "8f7579a8-160d-4602-905a-932a0e5fd4ef",
+    "runtime": {
+        "scitex_version": "2.6.0",
+        "matplotlib_version": "3.10.7",
+        "created_at": "2025-12-09T23:03:27.561991"
+    },
+    "figure": {
+        "size_mm": [
+            80.0,
+            68.0
+        ],
+        "dpi": 300,
+        "auto_crop": true,
+        "crop_margin_mm": 1.0,
+        "mode": "publication"
+    },
+    "axes_bbox_px": {
+        "x0": 164,
+        "y0": 148,
+        "x1": 637,
+        "y1": 479,
+        "width": 472,
+        "height": 331
+    },
+    "axes_bbox_mm": {
+        "x0": 20.0,
+        "y0": 19.99,
+        "x1": 60.0,
+        "y1": 47.99,
+        "width": 40.0,
+        "height": 28.0
+    },
+    "style": {
+        "axis_thickness_mm": 0.2,
+        "tick_length_mm": 0.8,
+        "tick_thickness_mm": 0.2,
+        "trace_thickness_mm": 0.2,
+        "marker_size_mm": 0.8,
+        "axis_font_size_pt": 7,
+        "tick_font_size_pt": 7,
+        "title_font_size_pt": 8,
+        "legend_font_size_pt": 6,
+        "label_pad_pt": 0.5,
+        "tick_pad_pt": 2.0,
+        "title_pad_pt": 1.0,
+        "font_family": "Arial",
+        "n_ticks": 4
+    },
+    "axes": {
+        "ax_00": {
+            "grid_position": {
+                "row": 0,
+                "col": 0
+            },
+            "xaxis": {
+                "label": "Latency [ms]",
+                "lim": [
+                    -12.1257,
+                    260.2208
+                ]
+            },
+            "yaxis": {
+                "label": "Cumulative Probability",
+                "lim": [
+                    0.0,
+                    100.0
+                ]
+            },
+            "calls": [
+                {
+                    "id": "ax_00_latency_cdf",
+                    "method": "stx_ecdf",
+                    "data_ref": {
+                        "x": "ax-row-0-col-0_trace-id-ax_00_latency_cdf_variable-x",
+                        "y": "ax-row-0-col-0_trace-id-ax_00_latency_cdf_variable-y"
+                    }
+                }
+            ]
+        }
+    },
+    "data": {
+        "csv_path": "stx_ecdf.csv",
+        "columns_actual": [
+            "ax_00_latency_cdf_ecdf_x",
+            "ax_00_latency_cdf_ecdf_y",
+            "ax_00_latency_cdf_ecdf_n",
+            "ax_00_latency_cdf_ecdf_x_step",
+            "ax_00_latency_cdf_ecdf_y_step"
+        ],
+        "csv_hash": "f6bd4071ef1baf57"
+    }
+}
