@@ -1,40 +1,44 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-09-21 02:39:14 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_text.py
-# ----------------------------------------
-from __future__ import annotations
-import os
+# Timestamp: "2025-12-10 12:00:00 (ywatanabe)"
+# File: ./src/scitex/plt/_subplots/_export_as_csv_formatters/_format_text.py
 
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+"""CSV formatter for text() calls - uses standard column naming."""
+
+from __future__ import annotations
 
 import pandas as pd
 
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
 
-def _make_column_name(id, suffix, method="text"):
-    """Create column name with method descriptor, avoiding duplication.
-
-    For example:
-    - id="text_0", suffix="x" -> "text_0_x"
-    - id="plot_5", suffix="x" -> "plot_5_text_x"
-    """
-    # Check if method name is already in the ID
-    id_parts = id.rsplit("_", 1)
-    if len(id_parts) == 2 and id_parts[0].endswith(method):
-        # Method already in ID, don't duplicate
-        return f"{id}_{suffix}"
-    else:
-        # Method not in ID, add it for clarity
-        return f"{id}_{method}_{suffix}"
+from ._format_plot import _parse_tracking_id
 
 
 def _format_text(id, tracked_dict, kwargs):
-    """Format data from a text call."""
+    """Format data from a text call.
+
+    Uses standard column naming convention:
+    (ax-row-{r}-col-{c}_trace-id-{id}_variable-{var}).
+
+    Args:
+        id (str): Identifier for the plot
+        tracked_dict (dict): Dictionary containing tracked data
+        kwargs (dict): Keyword arguments passed to text
+
+    Returns:
+        pd.DataFrame: Formatted text position data
+    """
     # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
+
+    # Parse tracking ID to get axes position
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
+    # Get standard column names
+    x_col = get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)
+    y_col = get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)
+    content_col = get_csv_column_name("content", ax_row, ax_col, trace_id=trace_id)
 
     # Get the args from tracked_dict
     args = tracked_dict.get("args", [])
@@ -44,14 +48,12 @@ def _format_text(id, tracked_dict, kwargs):
         x, y = args[0], args[1]
         text_content = args[2] if len(args) >= 3 else None
 
-        data = {_make_column_name(id, "x"): [x], _make_column_name(id, "y"): [y]}
+        data = {x_col: [x], y_col: [y]}
 
         if text_content is not None:
-            data[_make_column_name(id, "content")] = [text_content]
+            data[content_col] = [text_content]
 
-        # Create DataFrame with proper column names (use dict with list values)
-        df = pd.DataFrame(data)
-        return df
+        return pd.DataFrame(data)
 
     return pd.DataFrame()
 

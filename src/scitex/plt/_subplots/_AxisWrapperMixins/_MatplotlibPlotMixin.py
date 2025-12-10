@@ -850,7 +850,7 @@ class MatplotlibPlotMixin:
 
         # Tracking
         tracked_dict = {"plot_df": plot_df}
-        self._track(track, id, method_name, tracked_dict, None)
+        self._track(track, id, method_name, tracked_dict, kwargs)
 
         # Apply post-processing (tick locator, spines, etc.)
         self._apply_scitex_postprocess(method_name)
