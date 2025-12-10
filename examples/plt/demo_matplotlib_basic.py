@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-08 15:41:14 (ywatanabe)"
+# Timestamp: "2025-12-10 02:15:55 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/examples/plt/demo_matplotlib_basic.py
 
 
@@ -58,8 +58,8 @@ DEMOS = [
     (demo_streamplot, "./png/21_streamplot.png"),
 ]
 
-# Flat design
-DEMOS = [(demo[0], demo[1].replace("./png/", "./")) for demo in DEMOS]
+# # Flat design
+# DEMOS = [(demo[0], demo[1].replace("./png/", "./")) for demo in DEMOS]
 
 
 @stx.session
