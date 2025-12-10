@@ -224,26 +224,138 @@ HTML_BODY = """
                         </label>
                     </div>
 
+                    <!-- X-Axis Properties -->
+                    <div id="selected-xaxis-props" class="element-props" style="display: none;">
+                        <div class="field-row">
+                            <div class="field">
+                                <label>Tick Font Size (pt)</label>
+                                <input type="number" id="sel-xaxis-fontsize" value="7" min="4" max="16" step="1">
+                            </div>
+                            <div class="field">
+                                <label>Label Font Size (pt)</label>
+                                <input type="number" id="sel-xaxis-label-fontsize" value="7" min="4" max="16" step="1">
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label>Tick Direction</label>
+                                <select id="sel-xaxis-direction">
+                                    <option value="out">Out</option>
+                                    <option value="in">In</option>
+                                    <option value="inout">Both</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>N Ticks</label>
+                                <input type="number" id="sel-xaxis-nticks" value="5" min="2" max="15" step="1">
+                            </div>
+                        </div>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="sel-xaxis-hide-ticks">
+                            <span>Hide Ticks</span>
+                        </label>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="sel-xaxis-hide-label">
+                            <span>Hide Label</span>
+                        </label>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="sel-xaxis-hide-spine">
+                            <span>Hide Spine</span>
+                        </label>
+                    </div>
+
+                    <!-- Y-Axis Properties -->
+                    <div id="selected-yaxis-props" class="element-props" style="display: none;">
+                        <div class="field-row">
+                            <div class="field">
+                                <label>Tick Font Size (pt)</label>
+                                <input type="number" id="sel-yaxis-fontsize" value="7" min="4" max="16" step="1">
+                            </div>
+                            <div class="field">
+                                <label>Label Font Size (pt)</label>
+                                <input type="number" id="sel-yaxis-label-fontsize" value="7" min="4" max="16" step="1">
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label>Tick Direction</label>
+                                <select id="sel-yaxis-direction">
+                                    <option value="out">Out</option>
+                                    <option value="in">In</option>
+                                    <option value="inout">Both</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>N Ticks</label>
+                                <input type="number" id="sel-yaxis-nticks" value="5" min="2" max="15" step="1">
+                            </div>
+                        </div>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="sel-yaxis-hide-ticks">
+                            <span>Hide Ticks</span>
+                        </label>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="sel-yaxis-hide-label">
+                            <span>Hide Label</span>
+                        </label>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="sel-yaxis-hide-spine">
+                            <span>Hide Spine</span>
+                        </label>
+                    </div>
+
+                    <!-- Statistics (for data elements) -->
+                    <div id="selected-stats" class="element-stats" style="display: none;">
+                        <div class="stats-header">Statistics</div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-label">N points</span>
+                                <span class="stat-value" id="stat-n">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Mean</span>
+                                <span class="stat-value" id="stat-mean">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Std</span>
+                                <span class="stat-value" id="stat-std">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Min</span>
+                                <span class="stat-value" id="stat-min">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Max</span>
+                                <span class="stat-value" id="stat-max">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Range</span>
+                                <span class="stat-value" id="stat-range">-</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <button class="btn btn-primary" onclick="applySelectedElementChanges()" style="margin-top: 10px;">Apply Changes</button>
                 </div>
             </div>
 
-            <!-- Labels Section -->
+            <!-- Labels Section (Global figure labels - for single-panel figures) -->
             <div class="section" id="section-labels">
-                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Labels</div>
+                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Figure Labels</div>
                 <div class="section-content collapsed">
+                    <p class="section-hint">For multi-panel figures, select a panel to edit its labels.</p>
                     <div class="field">
-                        <label>Title</label>
-                        <input type="text" id="title" placeholder="Figure title">
+                        <label>Figure Title</label>
+                        <input type="text" id="title" placeholder="Overall figure title">
                     </div>
                     <div class="field-row">
                         <div class="field">
-                            <label>X Label (Left)</label>
-                            <input type="text" id="xlabel" placeholder="X axis label">
+                            <label>Shared X Label</label>
+                            <input type="text" id="xlabel" placeholder="Shared X axis">
                         </div>
                         <div class="field">
-                            <label>Y Label (Right)</label>
-                            <input type="text" id="ylabel" placeholder="Y axis label">
+                            <label>Shared Y Label</label>
+                            <input type="text" id="ylabel" placeholder="Shared Y axis">
                         </div>
                     </div>
                 </div>
