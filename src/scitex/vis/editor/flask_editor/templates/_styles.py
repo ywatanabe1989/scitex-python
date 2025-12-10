@@ -203,6 +203,85 @@ body {
 }
 
 /* =============================================================================
+ * Selected Element Panel
+ * ============================================================================= */
+#section-selected {
+    border: 2px solid var(--accent-muted);
+    background: var(--bg-secondary);
+}
+
+#section-selected .section-header {
+    background: var(--accent-muted);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.selected-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 8px;
+    background: var(--bg-primary);
+    border-radius: 4px;
+}
+
+.element-type-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.element-type-badge.trace { background: #3498db; color: white; }
+.element-type-badge.scatter { background: #e74c3c; color: white; }
+.element-type-badge.fill { background: #9b59b6; color: white; }
+.element-type-badge.bar { background: #f39c12; color: white; }
+.element-type-badge.label { background: #2ecc71; color: white; }
+.element-type-badge.panel { background: #34495e; color: white; }
+.element-type-badge.legend { background: #1abc9c; color: white; }
+
+.element-axis-info {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.element-props {
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+    margin-top: 8px;
+}
+
+/* Range slider styling */
+input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bg-tertiary);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+}
+
+/* =============================================================================
  * Controls Panel
  * ============================================================================= */
 .controls {
@@ -482,6 +561,103 @@ body {
 
 .btn-cta:hover {
     background: var(--color-cta-hover);
+}
+
+/* =============================================================================
+ * Unit Toggle
+ * ============================================================================= */
+.unit-toggle {
+    display: flex;
+    gap: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+}
+
+.unit-btn {
+    padding: 4px 12px;
+    font-size: 0.8em;
+    font-weight: 500;
+    border: none;
+    background: var(--bg-muted);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.unit-btn:first-child {
+    border-right: 1px solid var(--border-default);
+}
+
+.unit-btn:hover {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+}
+
+.unit-btn.active {
+    background: var(--color-cta);
+    color: white;
+}
+
+/* =============================================================================
+ * Background Type Toggle
+ * ============================================================================= */
+.bg-toggle {
+    display: flex;
+    gap: 6px;
+}
+
+.bg-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    font-size: 0.75em;
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+    background: var(--bg-muted);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    flex: 1;
+}
+
+.bg-btn:hover {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+}
+
+.bg-btn.active {
+    border-color: var(--color-cta);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 1px var(--color-cta);
+}
+
+.bg-preview {
+    width: 20px;
+    height: 14px;
+    border-radius: 2px;
+    border: 1px solid var(--border-default);
+}
+
+.bg-preview.white {
+    background: #ffffff;
+}
+
+.bg-preview.transparent {
+    background: linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+    background-color: #fff;
+}
+
+.bg-preview.black {
+    background: #000000;
 }
 
 /* =============================================================================

@@ -25,6 +25,209 @@ HTML_BODY = """
         </div>
 
         <div class="controls-body">
+            <!-- Selected Element Section (Dynamic) -->
+            <div class="section" id="section-selected" style="display: none;">
+                <div class="section-header section-toggle" onclick="toggleSection(this)">
+                    <span id="selected-element-title">Selected: None</span>
+                </div>
+                <div class="section-content">
+                    <div id="selected-element-info" class="selected-info">
+                        <div class="element-type-badge" id="element-type-badge"></div>
+                        <div class="element-axis-info" id="element-axis-info"></div>
+                    </div>
+
+                    <!-- Trace/Line Properties -->
+                    <div id="selected-trace-props" class="element-props" style="display: none;">
+                        <div class="field">
+                            <label>Label</label>
+                            <input type="text" id="sel-trace-label" placeholder="Trace label">
+                        </div>
+                        <div class="field">
+                            <label>Color</label>
+                            <div class="color-field">
+                                <input type="color" id="sel-trace-color" value="#1f77b4">
+                                <input type="text" id="sel-trace-color-text" value="#1f77b4">
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label>Line Width (pt)</label>
+                                <input type="number" id="sel-trace-linewidth" value="1.0" min="0.1" max="5" step="0.1">
+                            </div>
+                            <div class="field">
+                                <label>Line Style</label>
+                                <select id="sel-trace-linestyle">
+                                    <option value="-">Solid</option>
+                                    <option value="--">Dashed</option>
+                                    <option value="-.">Dash-dot</option>
+                                    <option value=":">Dotted</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label>Marker</label>
+                                <select id="sel-trace-marker">
+                                    <option value="">None</option>
+                                    <option value="o">Circle</option>
+                                    <option value="s">Square</option>
+                                    <option value="^">Triangle</option>
+                                    <option value="D">Diamond</option>
+                                    <option value="x">X</option>
+                                    <option value="+">Plus</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Marker Size</label>
+                                <input type="number" id="sel-trace-markersize" value="4" min="1" max="20" step="0.5">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Alpha (0-1)</label>
+                            <input type="range" id="sel-trace-alpha" min="0" max="1" step="0.1" value="1">
+                        </div>
+                    </div>
+
+                    <!-- Scatter Properties -->
+                    <div id="selected-scatter-props" class="element-props" style="display: none;">
+                        <div class="field">
+                            <label>Color</label>
+                            <div class="color-field">
+                                <input type="color" id="sel-scatter-color" value="#1f77b4">
+                                <input type="text" id="sel-scatter-color-text" value="#1f77b4">
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label>Marker Size</label>
+                                <input type="number" id="sel-scatter-size" value="20" min="1" max="200" step="1">
+                            </div>
+                            <div class="field">
+                                <label>Marker</label>
+                                <select id="sel-scatter-marker">
+                                    <option value="o">Circle</option>
+                                    <option value="s">Square</option>
+                                    <option value="^">Triangle</option>
+                                    <option value="D">Diamond</option>
+                                    <option value="x">X</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Alpha (0-1)</label>
+                            <input type="range" id="sel-scatter-alpha" min="0" max="1" step="0.1" value="0.7">
+                        </div>
+                        <div class="field">
+                            <label>Edge Color</label>
+                            <div class="color-field">
+                                <input type="color" id="sel-scatter-edgecolor" value="#000000">
+                                <input type="text" id="sel-scatter-edgecolor-text" value="#000000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fill Properties -->
+                    <div id="selected-fill-props" class="element-props" style="display: none;">
+                        <div class="field">
+                            <label>Fill Color</label>
+                            <div class="color-field">
+                                <input type="color" id="sel-fill-color" value="#1f77b4">
+                                <input type="text" id="sel-fill-color-text" value="#1f77b4">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Alpha (0-1)</label>
+                            <input type="range" id="sel-fill-alpha" min="0" max="1" step="0.05" value="0.3">
+                        </div>
+                    </div>
+
+                    <!-- Bar Properties -->
+                    <div id="selected-bar-props" class="element-props" style="display: none;">
+                        <div class="field">
+                            <label>Face Color</label>
+                            <div class="color-field">
+                                <input type="color" id="sel-bar-facecolor" value="#1f77b4">
+                                <input type="text" id="sel-bar-facecolor-text" value="#1f77b4">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Edge Color</label>
+                            <div class="color-field">
+                                <input type="color" id="sel-bar-edgecolor" value="#000000">
+                                <input type="text" id="sel-bar-edgecolor-text" value="#000000">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Alpha (0-1)</label>
+                            <input type="range" id="sel-bar-alpha" min="0" max="1" step="0.1" value="1">
+                        </div>
+                    </div>
+
+                    <!-- Label/Text Properties -->
+                    <div id="selected-label-props" class="element-props" style="display: none;">
+                        <div class="field">
+                            <label>Text</label>
+                            <input type="text" id="sel-label-text" placeholder="Label text">
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label>Font Size (pt)</label>
+                                <input type="number" id="sel-label-fontsize" value="7" min="4" max="24" step="1">
+                            </div>
+                            <div class="field">
+                                <label>Font Weight</label>
+                                <select id="sel-label-fontweight">
+                                    <option value="normal">Normal</option>
+                                    <option value="bold">Bold</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Color</label>
+                            <div class="color-field">
+                                <input type="color" id="sel-label-color" value="#000000">
+                                <input type="text" id="sel-label-color-text" value="#000000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel Properties -->
+                    <div id="selected-panel-props" class="element-props" style="display: none;">
+                        <div class="field">
+                            <label>Panel Title</label>
+                            <input type="text" id="sel-panel-title" placeholder="Panel title">
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label>X Label</label>
+                                <input type="text" id="sel-panel-xlabel" placeholder="X axis">
+                            </div>
+                            <div class="field">
+                                <label>Y Label</label>
+                                <input type="text" id="sel-panel-ylabel" placeholder="Y axis">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Background Color</label>
+                            <div class="color-field">
+                                <input type="color" id="sel-panel-facecolor" value="#ffffff">
+                                <input type="text" id="sel-panel-facecolor-text" value="#ffffff">
+                            </div>
+                        </div>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="sel-panel-transparent" checked>
+                            <span>Transparent</span>
+                        </label>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="sel-panel-grid">
+                            <span>Show Grid</span>
+                        </label>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="applySelectedElementChanges()" style="margin-top: 10px;">Apply Changes</button>
+                </div>
+            </div>
+
             <!-- Labels Section -->
             <div class="section" id="section-labels">
                 <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Labels</div>
@@ -204,16 +407,24 @@ HTML_BODY = """
                         </div>
                     </div>
                     <div class="field">
-                        <label>Background Color</label>
-                        <div class="color-field">
-                            <input type="color" id="facecolor" value="#ffffff">
-                            <input type="text" id="facecolor_text" value="#ffffff" placeholder="#ffffff">
+                        <label>Background</label>
+                        <div class="bg-toggle">
+                            <button class="bg-btn" id="bg-white" onclick="setBackgroundType('white')" title="White background">
+                                <span class="bg-preview white"></span>
+                                <span>White</span>
+                            </button>
+                            <button class="bg-btn active" id="bg-transparent" onclick="setBackgroundType('transparent')" title="Transparent background">
+                                <span class="bg-preview transparent"></span>
+                                <span>Transparent</span>
+                            </button>
+                            <button class="bg-btn" id="bg-black" onclick="setBackgroundType('black')" title="Black background">
+                                <span class="bg-preview black"></span>
+                                <span>Black</span>
+                            </button>
                         </div>
                     </div>
-                    <label class="checkbox-field">
-                        <input type="checkbox" id="transparent" checked>
-                        <span>Transparent Background</span>
-                    </label>
+                    <input type="hidden" id="facecolor" value="#ffffff">
+                    <input type="hidden" id="transparent" value="true">
                 </div>
             </div>
 
@@ -221,14 +432,21 @@ HTML_BODY = """
             <div class="section" id="section-dimensions">
                 <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Dimensions</div>
                 <div class="section-content collapsed">
+                    <div class="field" style="margin-bottom: 8px;">
+                        <label>Unit</label>
+                        <div class="unit-toggle">
+                            <button class="unit-btn active" id="unit-mm" onclick="setDimensionUnit('mm')">mm</button>
+                            <button class="unit-btn" id="unit-inch" onclick="setDimensionUnit('inch')">inch</button>
+                        </div>
+                    </div>
                     <div class="field-row">
                         <div class="field">
-                            <label>Width (inch)</label>
-                            <input type="number" id="fig_width" value="3.15" min="1" max="12" step="0.1">
+                            <label id="fig_width_label">Width (mm)</label>
+                            <input type="number" id="fig_width" value="80" min="10" max="300" step="1">
                         </div>
                         <div class="field">
-                            <label>Height (inch)</label>
-                            <input type="number" id="fig_height" value="2.68" min="1" max="12" step="0.1">
+                            <label id="fig_height_label">Height (mm)</label>
+                            <input type="number" id="fig_height" value="68" min="10" max="300" step="1">
                         </div>
                     </div>
                     <div class="field">

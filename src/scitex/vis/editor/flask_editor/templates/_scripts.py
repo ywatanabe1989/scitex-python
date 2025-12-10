@@ -15,6 +15,11 @@ let selectedElement = null;
 let elementsAtCursor = [];  // All elements at current cursor position
 let currentCycleIndex = 0;  // Current index in cycle
 
+// Unit system state (default: mm)
+let dimensionUnit = 'mm';
+const MM_TO_INCH = 1 / 25.4;
+const INCH_TO_MM = 25.4;
+
 // Hover system - client-side hit testing
 function initHoverSystem() {
     const container = document.getElementById('preview-container');
@@ -472,6 +477,301 @@ function scrollToSection(elementName) {
             }, 100);
         }
     }
+
+    // Always show selected element panel
+    showSelectedElementPanel(elementName);
+}
+
+// Selected element panel management
+function showSelectedElementPanel(elementName) {
+    const section = document.getElementById('section-selected');
+    const titleEl = document.getElementById('selected-element-title');
+    const typeBadge = document.getElementById('element-type-badge');
+    const axisInfo = document.getElementById('element-axis-info');
+
+    // Hide all property sections first
+    document.querySelectorAll('.element-props').forEach(el => el.style.display = 'none');
+
+    if (!elementName) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+
+    // Parse element name to extract type and info
+    const elementInfo = parseElementName(elementName);
+    const bbox = elementBboxes[elementName] || {};
+
+    // Update title
+    titleEl.textContent = `Selected: ${elementInfo.displayName}`;
+
+    // Update type badge
+    typeBadge.className = `element-type-badge ${elementInfo.type}`;
+    typeBadge.textContent = elementInfo.type;
+
+    // Update axis info
+    if (elementInfo.axisId) {
+        const row = elementInfo.axisId.match(/ax_(\\d)(\\d)/);
+        if (row) {
+            axisInfo.textContent = `Panel: Row ${parseInt(row[1])+1}, Col ${parseInt(row[2])+1}`;
+        } else {
+            axisInfo.textContent = `Axis: ${elementInfo.axisId}`;
+        }
+    } else {
+        axisInfo.textContent = '';
+    }
+
+    // Show appropriate property panel and populate with current values
+    showPropertiesForElement(elementInfo, bbox);
+}
+
+function parseElementName(name) {
+    // Parse names like: ax_00_scatter_0, ax_11_trace_1, ax_01_xlabel, trace_0, xlabel, etc.
+    const result = {
+        original: name,
+        type: 'unknown',
+        displayName: name,
+        axisId: null,
+        index: null
+    };
+
+    // Check for axis prefix (ax_XX_)
+    const axisMatch = name.match(/^(ax_\\d+)_(.+)$/);
+    if (axisMatch) {
+        result.axisId = axisMatch[1];
+        name = axisMatch[2];  // Rest of the name
+    }
+
+    // Determine element type
+    if (name.includes('scatter')) {
+        result.type = 'scatter';
+        const idx = name.match(/scatter_(\\d+)/);
+        result.index = idx ? parseInt(idx[1]) : 0;
+        result.displayName = `Scatter ${result.index + 1}`;
+    } else if (name.includes('trace')) {
+        result.type = 'trace';
+        const idx = name.match(/trace_(\\d+)/);
+        result.index = idx ? parseInt(idx[1]) : 0;
+        result.displayName = `Line ${result.index + 1}`;
+    } else if (name.includes('fill')) {
+        result.type = 'fill';
+        const idx = name.match(/fill_(\\d+)/);
+        result.index = idx ? parseInt(idx[1]) : 0;
+        result.displayName = `Fill Area ${result.index + 1}`;
+    } else if (name.includes('bar')) {
+        result.type = 'bar';
+        const idx = name.match(/bar_(\\d+)/);
+        result.index = idx ? parseInt(idx[1]) : 0;
+        result.displayName = `Bar ${result.index + 1}`;
+    } else if (name === 'xlabel' || name === 'ylabel' || name === 'title') {
+        result.type = 'label';
+        result.displayName = name.charAt(0).toUpperCase() + name.slice(1);
+    } else if (name === 'legend') {
+        result.type = 'legend';
+        result.displayName = 'Legend';
+    } else if (name.includes('panel')) {
+        result.type = 'panel';
+        result.displayName = 'Panel';
+    }
+
+    return result;
+}
+
+function showPropertiesForElement(elementInfo, bbox) {
+    const type = elementInfo.type;
+
+    if (type === 'trace') {
+        const props = document.getElementById('selected-trace-props');
+        props.style.display = 'block';
+
+        // Try to get current values from overrides
+        const traceOverrides = getTraceOverrides(elementInfo);
+        if (traceOverrides) {
+            document.getElementById('sel-trace-label').value = traceOverrides.label || '';
+            document.getElementById('sel-trace-color').value = traceOverrides.color || '#1f77b4';
+            document.getElementById('sel-trace-color-text').value = traceOverrides.color || '#1f77b4';
+            document.getElementById('sel-trace-linewidth').value = traceOverrides.linewidth || 1.0;
+            document.getElementById('sel-trace-linestyle').value = traceOverrides.linestyle || '-';
+            document.getElementById('sel-trace-marker').value = traceOverrides.marker || '';
+            document.getElementById('sel-trace-markersize').value = traceOverrides.markersize || 4;
+            document.getElementById('sel-trace-alpha').value = traceOverrides.alpha || 1;
+        }
+    } else if (type === 'scatter') {
+        const props = document.getElementById('selected-scatter-props');
+        props.style.display = 'block';
+
+        const scatterOverrides = getScatterOverrides(elementInfo);
+        if (scatterOverrides) {
+            document.getElementById('sel-scatter-color').value = scatterOverrides.color || '#1f77b4';
+            document.getElementById('sel-scatter-color-text').value = scatterOverrides.color || '#1f77b4';
+            document.getElementById('sel-scatter-size').value = scatterOverrides.size || 20;
+            document.getElementById('sel-scatter-marker').value = scatterOverrides.marker || 'o';
+            document.getElementById('sel-scatter-alpha').value = scatterOverrides.alpha || 0.7;
+            document.getElementById('sel-scatter-edgecolor').value = scatterOverrides.edgecolor || '#000000';
+            document.getElementById('sel-scatter-edgecolor-text').value = scatterOverrides.edgecolor || '#000000';
+        }
+    } else if (type === 'fill') {
+        const props = document.getElementById('selected-fill-props');
+        props.style.display = 'block';
+
+        const fillOverrides = getFillOverrides(elementInfo);
+        if (fillOverrides) {
+            document.getElementById('sel-fill-color').value = fillOverrides.color || '#1f77b4';
+            document.getElementById('sel-fill-color-text').value = fillOverrides.color || '#1f77b4';
+            document.getElementById('sel-fill-alpha').value = fillOverrides.alpha || 0.3;
+        }
+    } else if (type === 'bar') {
+        const props = document.getElementById('selected-bar-props');
+        props.style.display = 'block';
+    } else if (type === 'label') {
+        const props = document.getElementById('selected-label-props');
+        props.style.display = 'block';
+
+        // Get label text from global overrides
+        const labelName = elementInfo.displayName.toLowerCase();
+        document.getElementById('sel-label-text').value = overrides[labelName] || '';
+        document.getElementById('sel-label-fontsize').value = overrides.axis_fontsize || 7;
+    } else if (type === 'panel') {
+        const props = document.getElementById('selected-panel-props');
+        props.style.display = 'block';
+
+        // Load existing panel overrides
+        const panelOverrides = getPanelOverrides(elementInfo);
+        document.getElementById('sel-panel-title').value = panelOverrides.title || '';
+        document.getElementById('sel-panel-xlabel').value = panelOverrides.xlabel || '';
+        document.getElementById('sel-panel-ylabel').value = panelOverrides.ylabel || '';
+    } else if (type === 'legend') {
+        // For legend, expand the legend section instead
+        expandSection('section-legend');
+    }
+}
+
+function getTraceOverrides(elementInfo) {
+    // Initialize element overrides storage if not exists
+    if (!overrides.element_overrides) {
+        overrides.element_overrides = {};
+    }
+
+    const key = elementInfo.original;
+    if (!overrides.element_overrides[key]) {
+        // Try to get from traces array
+        if (traces[elementInfo.index]) {
+            overrides.element_overrides[key] = { ...traces[elementInfo.index] };
+        } else {
+            overrides.element_overrides[key] = {};
+        }
+    }
+    return overrides.element_overrides[key];
+}
+
+function getScatterOverrides(elementInfo) {
+    if (!overrides.element_overrides) {
+        overrides.element_overrides = {};
+    }
+    const key = elementInfo.original;
+    if (!overrides.element_overrides[key]) {
+        overrides.element_overrides[key] = {};
+    }
+    return overrides.element_overrides[key];
+}
+
+function getFillOverrides(elementInfo) {
+    if (!overrides.element_overrides) {
+        overrides.element_overrides = {};
+    }
+    const key = elementInfo.original;
+    if (!overrides.element_overrides[key]) {
+        overrides.element_overrides[key] = {};
+    }
+    return overrides.element_overrides[key];
+}
+
+function getPanelOverrides(elementInfo) {
+    if (!overrides.element_overrides) {
+        overrides.element_overrides = {};
+    }
+    const key = elementInfo.original;
+    if (!overrides.element_overrides[key]) {
+        overrides.element_overrides[key] = {};
+    }
+    return overrides.element_overrides[key];
+}
+
+function applySelectedElementChanges() {
+    if (!selectedElement) return;
+
+    const elementInfo = parseElementName(selectedElement);
+    const type = elementInfo.type;
+
+    if (!overrides.element_overrides) {
+        overrides.element_overrides = {};
+    }
+
+    if (type === 'trace') {
+        overrides.element_overrides[selectedElement] = {
+            label: document.getElementById('sel-trace-label').value,
+            color: document.getElementById('sel-trace-color').value,
+            linewidth: parseFloat(document.getElementById('sel-trace-linewidth').value),
+            linestyle: document.getElementById('sel-trace-linestyle').value,
+            marker: document.getElementById('sel-trace-marker').value,
+            markersize: parseFloat(document.getElementById('sel-trace-markersize').value),
+            alpha: parseFloat(document.getElementById('sel-trace-alpha').value)
+        };
+    } else if (type === 'scatter') {
+        overrides.element_overrides[selectedElement] = {
+            color: document.getElementById('sel-scatter-color').value,
+            size: parseFloat(document.getElementById('sel-scatter-size').value),
+            marker: document.getElementById('sel-scatter-marker').value,
+            alpha: parseFloat(document.getElementById('sel-scatter-alpha').value),
+            edgecolor: document.getElementById('sel-scatter-edgecolor').value
+        };
+    } else if (type === 'fill') {
+        overrides.element_overrides[selectedElement] = {
+            color: document.getElementById('sel-fill-color').value,
+            alpha: parseFloat(document.getElementById('sel-fill-alpha').value)
+        };
+    } else if (type === 'label') {
+        const labelName = elementInfo.displayName.toLowerCase();
+        overrides[labelName] = document.getElementById('sel-label-text').value;
+        overrides.axis_fontsize = parseFloat(document.getElementById('sel-label-fontsize').value);
+    } else if (type === 'bar') {
+        overrides.element_overrides[selectedElement] = {
+            facecolor: document.getElementById('sel-bar-facecolor').value,
+            edgecolor: document.getElementById('sel-bar-edgecolor').value,
+            alpha: parseFloat(document.getElementById('sel-bar-alpha').value)
+        };
+    } else if (type === 'panel') {
+        // Panel-specific overrides (per-axis) including title, xlabel, ylabel
+        overrides.element_overrides[selectedElement] = {
+            title: document.getElementById('sel-panel-title').value,
+            xlabel: document.getElementById('sel-panel-xlabel').value,
+            ylabel: document.getElementById('sel-panel-ylabel').value,
+            facecolor: document.getElementById('sel-panel-facecolor').value,
+            transparent: document.getElementById('sel-panel-transparent').checked,
+            grid: document.getElementById('sel-panel-grid').checked
+        };
+    }
+
+    // Trigger update
+    updatePreview();
+    document.getElementById('status').textContent = `Applied changes to ${elementInfo.displayName}`;
+}
+
+// Sync color inputs
+function setupColorSync(colorId, textId) {
+    const colorInput = document.getElementById(colorId);
+    const textInput = document.getElementById(textId);
+    if (colorInput && textInput) {
+        colorInput.addEventListener('input', () => {
+            textInput.value = colorInput.value;
+        });
+        textInput.addEventListener('input', () => {
+            if (/^#[0-9A-Fa-f]{6}$/.test(textInput.value)) {
+                colorInput.value = textInput.value;
+            }
+        });
+    }
 }
 
 // Theme management
@@ -495,6 +795,108 @@ function toggleCustomLegendPosition() {
     const legendLoc = document.getElementById('legend_loc').value;
     const customCoordsDiv = document.getElementById('custom-legend-coords');
     customCoordsDiv.style.display = legendLoc === 'custom' ? 'flex' : 'none';
+}
+
+// Dimension unit toggle
+function setDimensionUnit(unit) {
+    if (unit === dimensionUnit) return;
+
+    const widthInput = document.getElementById('fig_width');
+    const heightInput = document.getElementById('fig_height');
+    const widthLabel = document.getElementById('fig_width_label');
+    const heightLabel = document.getElementById('fig_height_label');
+    const mmBtn = document.getElementById('unit-mm');
+    const inchBtn = document.getElementById('unit-inch');
+
+    // Get current values
+    let width = parseFloat(widthInput.value) || 0;
+    let height = parseFloat(heightInput.value) || 0;
+
+    // Convert values
+    if (unit === 'mm' && dimensionUnit === 'inch') {
+        // inch to mm
+        width = Math.round(width * INCH_TO_MM * 10) / 10;
+        height = Math.round(height * INCH_TO_MM * 10) / 10;
+        widthInput.min = 10;
+        widthInput.max = 300;
+        widthInput.step = 1;
+        heightInput.min = 10;
+        heightInput.max = 300;
+        heightInput.step = 1;
+    } else if (unit === 'inch' && dimensionUnit === 'mm') {
+        // mm to inch
+        width = Math.round(width * MM_TO_INCH * 100) / 100;
+        height = Math.round(height * MM_TO_INCH * 100) / 100;
+        widthInput.min = 0.5;
+        widthInput.max = 12;
+        widthInput.step = 0.05;
+        heightInput.min = 0.5;
+        heightInput.max = 12;
+        heightInput.step = 0.05;
+    }
+
+    // Update values and labels
+    widthInput.value = width;
+    heightInput.value = height;
+    widthLabel.textContent = `Width (${unit})`;
+    heightLabel.textContent = `Height (${unit})`;
+
+    // Update button states
+    if (unit === 'mm') {
+        mmBtn.classList.add('active');
+        inchBtn.classList.remove('active');
+    } else {
+        mmBtn.classList.remove('active');
+        inchBtn.classList.add('active');
+    }
+
+    dimensionUnit = unit;
+}
+
+// Background type management
+let backgroundType = 'transparent';
+let initializingBackground = true;  // Flag to prevent updates during init
+
+function setBackgroundType(type) {
+    backgroundType = type;
+
+    // Update hidden inputs for collectOverrides
+    const facecolorInput = document.getElementById('facecolor');
+    const transparentInput = document.getElementById('transparent');
+
+    if (type === 'white') {
+        facecolorInput.value = '#ffffff';
+        transparentInput.value = 'false';
+    } else if (type === 'black') {
+        facecolorInput.value = '#000000';
+        transparentInput.value = 'false';
+    } else {
+        // transparent
+        facecolorInput.value = '#ffffff';
+        transparentInput.value = 'true';
+    }
+
+    // Update button states
+    document.querySelectorAll('.bg-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`bg-${type}`).classList.add('active');
+
+    // Trigger update only after initialization
+    if (!initializingBackground) {
+        scheduleUpdate();
+    }
+}
+
+// Get figure dimensions in inches (for matplotlib)
+function getFigSizeInches() {
+    let width = parseFloat(document.getElementById('fig_width').value) || 80;
+    let height = parseFloat(document.getElementById('fig_height').value) || 68;
+
+    if (dimensionUnit === 'mm') {
+        width = width * MM_TO_INCH;
+        height = height * MM_TO_INCH;
+    }
+
+    return [Math.round(width * 100) / 100, Math.round(height * 100) / 100];
 }
 
 // Initialize fields
@@ -550,29 +952,49 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('hide_right_spine').checked = overrides.hide_right_spine !== false;
     document.getElementById('axis_width').value = overrides.axis_width || 0.2;
     document.getElementById('axis_fontsize').value = overrides.axis_fontsize || 7;
-    document.getElementById('facecolor').value = overrides.facecolor || '#ffffff';
-    document.getElementById('facecolor_text').value = overrides.facecolor || '#ffffff';
-    document.getElementById('transparent').checked = overrides.transparent !== false;
+    // Initialize background type from overrides
+    const isTransparent = overrides.transparent !== false;
+    const facecolor = overrides.facecolor || '#ffffff';
+    document.getElementById('facecolor').value = facecolor;
 
-    // Dimensions
+    if (isTransparent) {
+        setBackgroundType('transparent');
+    } else if (facecolor === '#000000') {
+        setBackgroundType('black');
+    } else {
+        setBackgroundType('white');
+    }
+
+    // Dimensions (convert from inches in metadata to mm by default)
     if (overrides.fig_size) {
-        document.getElementById('fig_width').value = Math.round(overrides.fig_size[0] * 100) / 100;
-        document.getElementById('fig_height').value = Math.round(overrides.fig_size[1] * 100) / 100;
+        // fig_size is in inches in the JSON - convert to mm for default display
+        const widthMm = Math.round(overrides.fig_size[0] * INCH_TO_MM);
+        const heightMm = Math.round(overrides.fig_size[1] * INCH_TO_MM);
+        document.getElementById('fig_width').value = widthMm;
+        document.getElementById('fig_height').value = heightMm;
     }
     document.getElementById('dpi').value = overrides.dpi || 300;
+    // Default unit is mm, which is already set in HTML and JS state
 
-    // Sync color inputs
-    document.getElementById('facecolor').addEventListener('input', (e) => {
-        document.getElementById('facecolor_text').value = e.target.value;
-    });
-    document.getElementById('facecolor_text').addEventListener('change', (e) => {
-        document.getElementById('facecolor').value = e.target.value;
-    });
+    // Note: facecolor is now managed by background toggle buttons (white/transparent/black)
+    // No text input sync needed
 
     updateAnnotationsList();
     updatePreview();
     initHoverSystem();
     setAutoUpdateInterval();
+
+    // Setup color sync for selected element property inputs
+    setupColorSync('sel-trace-color', 'sel-trace-color-text');
+    setupColorSync('sel-scatter-color', 'sel-scatter-color-text');
+    setupColorSync('sel-scatter-edgecolor', 'sel-scatter-edgecolor-text');
+    setupColorSync('sel-fill-color', 'sel-fill-color-text');
+    setupColorSync('sel-bar-facecolor', 'sel-bar-facecolor-text');
+    setupColorSync('sel-bar-edgecolor', 'sel-bar-edgecolor-text');
+    setupColorSync('sel-panel-facecolor', 'sel-panel-facecolor-text');
+
+    // Mark initialization complete - now background changes will trigger updates
+    initializingBackground = false;
 });
 
 // Traces list management
@@ -663,17 +1085,19 @@ function collectOverrides() {
     o.axis_width = parseFloat(document.getElementById('axis_width').value) || 0.2;
     o.axis_fontsize = parseInt(document.getElementById('axis_fontsize').value) || 7;
     o.facecolor = document.getElementById('facecolor').value;
-    o.transparent = document.getElementById('transparent').checked;
+    o.transparent = document.getElementById('transparent').value === 'true';
 
-    // Dimensions
-    o.fig_size = [
-        parseFloat(document.getElementById('fig_width').value) || 3.15,
-        parseFloat(document.getElementById('fig_height').value) || 2.68
-    ];
+    // Dimensions (always in inches for matplotlib)
+    o.fig_size = getFigSizeInches();
     o.dpi = parseInt(document.getElementById('dpi').value) || 300;
 
     // Annotations
     o.annotations = overrides.annotations || [];
+
+    // Element-specific overrides (per-element styles)
+    if (overrides.element_overrides) {
+        o.element_overrides = overrides.element_overrides;
+    }
 
     return o;
 }

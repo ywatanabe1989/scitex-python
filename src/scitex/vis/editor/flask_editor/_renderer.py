@@ -216,16 +216,30 @@ def render_multi_axis_preview(
 
         # Plot data from recipe
         if csv_data is not None:
-            plot_from_recipe(ax, csv_data, ax_spec, overrides, linewidth_pt)
+            plot_from_recipe(ax, csv_data, ax_spec, overrides, linewidth_pt, ax_id=ax_id)
 
-        # Apply axis labels from spec
+        # Get panel-specific overrides (e.g., ax_00_panel)
+        panel_key = f"{ax_id}_panel"
+        element_overrides = o.get("element_overrides", {})
+        panel_overrides = element_overrides.get(panel_key, {})
+
+        # Apply axis labels from spec, with panel overrides taking precedence
         xaxis = ax_spec.get("xaxis", {})
         yaxis = ax_spec.get("yaxis", {})
 
-        if xaxis.get("label"):
-            ax.set_xlabel(xaxis["label"], fontsize=axis_fontsize)
-        if yaxis.get("label"):
-            ax.set_ylabel(yaxis["label"], fontsize=axis_fontsize)
+        # Panel title (from overrides or spec)
+        panel_title = panel_overrides.get("title")
+        if panel_title:
+            ax.set_title(panel_title, fontsize=title_fontsize)
+
+        # X/Y labels (panel overrides take precedence over spec)
+        xlabel = panel_overrides.get("xlabel") or xaxis.get("label")
+        ylabel = panel_overrides.get("ylabel") or yaxis.get("label")
+
+        if xlabel:
+            ax.set_xlabel(xlabel, fontsize=axis_fontsize)
+        if ylabel:
+            ax.set_ylabel(ylabel, fontsize=axis_fontsize)
 
         # Apply axis limits
         if xaxis.get("lim"):
