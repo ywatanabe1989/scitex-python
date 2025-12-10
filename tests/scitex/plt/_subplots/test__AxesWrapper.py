@@ -318,7 +318,8 @@ if __name__ == "__main__":
 #         dfs = []
 #         for ii, ax in enumerate(self._axes_scitex.flat):
 #             df = ax.export_as_csv()
-#             df.columns = [f"ax_{ii:02d}_{col}" for col in df.columns]
+#             # Column names already include axis position via get_csv_column_name
+#             # No need to add extra prefix
 #             dfs.append(df)
 #         return pd.concat(dfs, axis=1) if dfs else pd.DataFrame()
 # 
