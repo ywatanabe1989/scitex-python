@@ -206,6 +206,8 @@ def plot_from_recipe(
                 _render_imshow(ax, df, data_ref, kwargs)
             elif method == "contour":
                 _render_contour(ax, df, data_ref, kwargs)
+            elif method == "contourf":
+                _render_contourf(ax, df, data_ref, kwargs)
             elif method in ("stx_shaded_line", "stx_fillv", "stx_violin",
                            "stx_box", "stx_rectangle", "stx_raster"):
                 _render_stx_method(ax, df, method, data_ref, kwargs)
@@ -393,6 +395,26 @@ def _render_contour(ax, df, data_ref, kwargs):
             ax.contour(X, Y, Z, **kwargs)
 
 
+def _render_contourf(ax, df, data_ref, kwargs):
+    """Render filled contour plot."""
+    x_col = data_ref.get("x", "")
+    y_col = data_ref.get("y", "")
+    z_col = data_ref.get("z", "")
+
+    x = _get_column_data(df, x_col)
+    y = _get_column_data(df, y_col)
+    z = _get_column_data(df, z_col)
+
+    if x is not None and y is not None and z is not None:
+        # Assume data is on a grid - reconstruct
+        n = int(np.sqrt(len(x)))
+        if n * n == len(x):
+            X = x.reshape(n, n)
+            Y = y.reshape(n, n)
+            Z = z.reshape(n, n)
+            ax.contourf(X, Y, Z, **kwargs)
+
+
 def _render_stx_method(ax, df, method, data_ref, kwargs):
     """Render scitex-specific methods (shaded_line, fillv, etc.)."""
     # These are custom methods - for now, skip or implement basic versions
@@ -452,7 +474,18 @@ def _render_generic(ax, df, method, data_ref, kwargs, linewidth):
     y = _get_column_data(df, y_col)
 
     if x is not None and y is not None and len(x) == len(y):
-        ax.plot(x, y, linewidth=linewidth, **kwargs)
+        # Filter out kwargs that are not valid for ax.plot()
+        invalid_plot_kwargs = {
+            'levels', 'extend', 'origin', 'extent', 'aspect',
+            'norm', 'vmin', 'vmax', 'interpolation', 'filternorm',
+            'filterrad', 'resample', 'bins', 'range', 'density',
+            'weights', 'cumulative', 'bottom', 'histtype', 'align',
+            'orientation', 'rwidth', 'log', 'stacked', 'data',
+            'width', 'height', 'edgecolors', 's', 'c', 'facecolors',
+        }
+        filtered_kwargs = {k: v for k, v in kwargs.items()
+                          if k not in invalid_plot_kwargs}
+        ax.plot(x, y, linewidth=linewidth, **filtered_kwargs)
 
 
 def _plot_with_traces(

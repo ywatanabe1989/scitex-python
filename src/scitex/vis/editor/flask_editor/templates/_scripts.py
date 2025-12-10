@@ -11,6 +11,9 @@ let imgSize = {width: 0, height: 0};
 let hoveredElement = null;
 let selectedElement = null;
 
+// Schema v0.3 metadata for axes-local coordinate transforms
+let schemaMeta = null;
+
 // Cycle selection state for overlapping elements
 let elementsAtCursor = [];  // All elements at current cursor position
 let currentCycleIndex = 0;  // Current index in cycle
@@ -130,20 +133,66 @@ function initHoverSystem() {
     });
 }
 
+// Convert axes-local pixel coordinates to image coordinates
+function axesLocalToImage(axLocalX, axLocalY, axesBbox) {
+    // axesBbox has: x, y, width, height in figure pixel coordinates
+    // The local editor uses tight layout which shifts coordinates
+    // For now we use the existing image coordinates from bboxes
+    return [axLocalX + axesBbox.x, axLocalY + axesBbox.y];
+}
+
+// Get geometry_px points converted to image coordinates
+function getGeometryPoints(bbox) {
+    const geom = bbox.geometry_px;
+    if (!geom) return null;
+
+    // For scatter: use points array directly
+    if (geom.points && geom.points.length > 0) {
+        return {
+            type: 'scatter',
+            points: geom.points,
+            hitRadius: geom.hit_radius_px || 5
+        };
+    }
+
+    // For lines: use path_simplified
+    if (geom.path_simplified && geom.path_simplified.length > 0) {
+        return {
+            type: 'line',
+            points: geom.path_simplified,
+            linewidth: geom.linewidth_px || 1
+        };
+    }
+
+    // For fills/polygons: use polygon
+    if (geom.polygon && geom.polygon.length > 0) {
+        return {
+            type: 'polygon',
+            points: geom.polygon
+        };
+    }
+
+    return null;
+}
+
 function findElementAt(x, y) {
     // Multi-panel aware hit detection with specificity hierarchy:
-    // 1. Data elements with points (lines, scatter) - proximity detection
+    // 1. Data elements with legacy points - proximity detection (correct saved-image coords)
     // 2. Small elements (labels, ticks, legends, bars, fills)
     // 3. Panel bboxes - lowest priority (fallback)
+    // Note: geometry_px (v0.3) uses axes-local coords which need coordinate transformation
 
     const PROXIMITY_THRESHOLD = 15;
     const SCATTER_THRESHOLD = 20;  // Larger threshold for scatter points
 
-    // First: Check for data elements with points (lines, scatter)
+    // First: Check for data elements using legacy points (in saved-image coordinates)
     let closestDataElement = null;
     let minDistance = Infinity;
 
     for (const [name, bbox] of Object.entries(elementBboxes)) {
+        if (name === '_meta') continue;  // Skip metadata entry
+
+        // Prioritize legacy points array (already in correct saved-image coordinates)
         if (bbox.points && bbox.points.length > 0) {
             // Check if cursor is within general bbox area first
             if (x >= bbox.x0 - SCATTER_THRESHOLD && x <= bbox.x1 + SCATTER_THRESHOLD &&
@@ -215,8 +264,11 @@ function findElementAt(x, y) {
 
 function distanceToNearestPoint(px, py, points) {
     // Find distance to nearest point in scatter
+    if (!Array.isArray(points) || points.length === 0) return Infinity;
     let minDist = Infinity;
-    for (const [x, y] of points) {
+    for (const pt of points) {
+        if (!Array.isArray(pt) || pt.length < 2) continue;
+        const [x, y] = pt;
         const dist = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
         if (dist < minDist) minDist = dist;
     }
@@ -224,10 +276,15 @@ function distanceToNearestPoint(px, py, points) {
 }
 
 function distanceToLine(px, py, points) {
+    if (!Array.isArray(points) || points.length < 2) return Infinity;
     let minDist = Infinity;
     for (let i = 0; i < points.length - 1; i++) {
-        const [x1, y1] = points[i];
-        const [x2, y2] = points[i + 1];
+        const pt1 = points[i];
+        const pt2 = points[i + 1];
+        if (!Array.isArray(pt1) || pt1.length < 2) continue;
+        if (!Array.isArray(pt2) || pt2.length < 2) continue;
+        const [x1, y1] = pt1;
+        const [x2, y2] = pt2;
         const dist = distanceToSegment(px, py, x1, y1, x2, y2);
         if (dist < minDist) minDist = dist;
     }
@@ -250,6 +307,27 @@ function distanceToSegment(px, py, x1, y1, x2, y2) {
     const projY = y1 + t * dy;
 
     return Math.sqrt((px - projX) ** 2 + (py - projY) ** 2);
+}
+
+// Point-in-polygon test using ray casting algorithm
+function pointInPolygon(px, py, polygon) {
+    if (!Array.isArray(polygon) || polygon.length < 3) return false;
+
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const ptI = polygon[i];
+        const ptJ = polygon[j];
+        if (!Array.isArray(ptI) || ptI.length < 2) continue;
+        if (!Array.isArray(ptJ) || ptJ.length < 2) continue;
+        const [xi, yi] = ptI;
+        const [xj, yj] = ptJ;
+
+        if (((yi > py) !== (yj > py)) &&
+            (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
+            inside = !inside;
+        }
+    }
+    return inside;
 }
 
 function findAllElementsAt(x, y) {
@@ -322,9 +400,11 @@ function findAllElementsAt(x, y) {
 }
 
 function drawTracePath(bbox, scaleX, scaleY, type) {
-    if (!bbox.points || bbox.points.length < 2) return '';
+    if (!Array.isArray(bbox.points) || bbox.points.length < 2) return '';
 
-    const points = bbox.points;
+    const points = bbox.points.filter(pt => Array.isArray(pt) && pt.length >= 2);
+    if (points.length < 2) return '';
+
     let pathD = `M ${points[0][0] * scaleX} ${points[0][1] * scaleY}`;
     for (let i = 1; i < points.length; i++) {
         pathD += ` L ${points[i][0] * scaleX} ${points[i][1] * scaleY}`;
@@ -336,27 +416,30 @@ function drawTracePath(bbox, scaleX, scaleY, type) {
     const labelClass = type === 'hover' ? 'hover-label' : 'selected-label';
 
     return `<path class="${className}" d="${pathD}"/>` +
-           `<text class="${labelClass}" x="${labelX}" y="${labelY}">${bbox.label}</text>`;
+           `<text class="${labelClass}" x="${labelX}" y="${labelY}">${bbox.label || ''}</text>`;
 }
 
 function drawScatterPoints(bbox, scaleX, scaleY, type) {
     // Draw scatter points as circles
-    if (!bbox.points || bbox.points.length === 0) return '';
+    if (!Array.isArray(bbox.points) || bbox.points.length === 0) return '';
 
     const className = type === 'hover' ? 'hover-scatter' : 'selected-scatter';
     const labelClass = type === 'hover' ? 'hover-label' : 'selected-label';
     const radius = 4;
 
     let svg = '';
-    for (const [x, y] of bbox.points) {
+    for (const pt of bbox.points) {
+        if (!Array.isArray(pt) || pt.length < 2) continue;
+        const [x, y] = pt;
         svg += `<circle class="${className}" cx="${x * scaleX}" cy="${y * scaleY}" r="${radius}"/>`;
     }
 
     // Add label near first point
-    if (bbox.points.length > 0) {
-        const labelX = bbox.points[0][0] * scaleX;
-        const labelY = bbox.points[0][1] * scaleY - 10;
-        svg += `<text class="${labelClass}" x="${labelX}" y="${labelY}">${bbox.label}</text>`;
+    const validPoints = bbox.points.filter(pt => Array.isArray(pt) && pt.length >= 2);
+    if (validPoints.length > 0) {
+        const labelX = validPoints[0][0] * scaleX;
+        const labelY = validPoints[0][1] * scaleY - 10;
+        svg += `<text class="${labelClass}" x="${labelX}" y="${labelY}">${bbox.label || ''}</text>`;
     }
 
     return svg;
@@ -527,7 +610,7 @@ function showSelectedElementPanel(elementName) {
 }
 
 function parseElementName(name) {
-    // Parse names like: ax_00_scatter_0, ax_11_trace_1, ax_01_xlabel, trace_0, xlabel, etc.
+    // Parse names like: ax_00_scatter_0, ax_11_trace_1, ax_01_xlabel, trace_0, xlabel, ax_00_xaxis, etc.
     const result = {
         original: name,
         type: 'unknown',
@@ -570,6 +653,12 @@ function parseElementName(name) {
     } else if (name === 'legend') {
         result.type = 'legend';
         result.displayName = 'Legend';
+    } else if (name === 'xaxis') {
+        result.type = 'xaxis';
+        result.displayName = 'X-Axis';
+    } else if (name === 'yaxis') {
+        result.type = 'yaxis';
+        result.displayName = 'Y-Axis';
     } else if (name.includes('panel')) {
         result.type = 'panel';
         result.displayName = 'Panel';
@@ -636,15 +725,97 @@ function showPropertiesForElement(elementInfo, bbox) {
         const props = document.getElementById('selected-panel-props');
         props.style.display = 'block';
 
-        // Load existing panel overrides
+        // Load existing panel overrides, fall back to actual bbox values
         const panelOverrides = getPanelOverrides(elementInfo);
-        document.getElementById('sel-panel-title').value = panelOverrides.title || '';
-        document.getElementById('sel-panel-xlabel').value = panelOverrides.xlabel || '';
-        document.getElementById('sel-panel-ylabel').value = panelOverrides.ylabel || '';
+        const panelBbox = elementBboxes[selectedElement] || {};
+        document.getElementById('sel-panel-title').value = panelOverrides.title || panelBbox.title || '';
+        document.getElementById('sel-panel-xlabel').value = panelOverrides.xlabel || panelBbox.xlabel || '';
+        document.getElementById('sel-panel-ylabel').value = panelOverrides.ylabel || panelBbox.ylabel || '';
     } else if (type === 'legend') {
         // For legend, expand the legend section instead
         expandSection('section-legend');
+    } else if (type === 'xaxis') {
+        const props = document.getElementById('selected-xaxis-props');
+        props.style.display = 'block';
+
+        // Load existing xaxis overrides
+        const xaxisOverrides = getAxisOverrides(elementInfo, 'xaxis');
+        document.getElementById('sel-xaxis-fontsize').value = xaxisOverrides.tick_fontsize || overrides.tick_fontsize || 7;
+        document.getElementById('sel-xaxis-label-fontsize').value = xaxisOverrides.label_fontsize || overrides.axis_fontsize || 7;
+        document.getElementById('sel-xaxis-direction').value = xaxisOverrides.tick_direction || overrides.tick_direction || 'out';
+        document.getElementById('sel-xaxis-nticks').value = xaxisOverrides.n_ticks || overrides.x_n_ticks || 4;
+        document.getElementById('sel-xaxis-hide-ticks').checked = xaxisOverrides.hide_ticks || false;
+        document.getElementById('sel-xaxis-hide-label').checked = xaxisOverrides.hide_label || false;
+        document.getElementById('sel-xaxis-hide-spine').checked = xaxisOverrides.hide_spine || false;
+    } else if (type === 'yaxis') {
+        const props = document.getElementById('selected-yaxis-props');
+        props.style.display = 'block';
+
+        // Load existing yaxis overrides
+        const yaxisOverrides = getAxisOverrides(elementInfo, 'yaxis');
+        document.getElementById('sel-yaxis-fontsize').value = yaxisOverrides.tick_fontsize || overrides.tick_fontsize || 7;
+        document.getElementById('sel-yaxis-label-fontsize').value = yaxisOverrides.label_fontsize || overrides.axis_fontsize || 7;
+        document.getElementById('sel-yaxis-direction').value = yaxisOverrides.tick_direction || overrides.tick_direction || 'out';
+        document.getElementById('sel-yaxis-nticks').value = yaxisOverrides.n_ticks || overrides.y_n_ticks || 4;
+        document.getElementById('sel-yaxis-hide-ticks').checked = yaxisOverrides.hide_ticks || false;
+        document.getElementById('sel-yaxis-hide-label').checked = yaxisOverrides.hide_label || false;
+        document.getElementById('sel-yaxis-hide-spine').checked = yaxisOverrides.hide_spine || false;
     }
+
+    // Show statistics for data elements (trace, scatter, fill, bar)
+    if (['trace', 'scatter', 'fill', 'bar'].includes(type)) {
+        showElementStatistics(bbox);
+    } else {
+        hideElementStatistics();
+    }
+}
+
+function showElementStatistics(bbox) {
+    const statsDiv = document.getElementById('selected-stats');
+    if (!bbox || !bbox.points || bbox.points.length === 0) {
+        statsDiv.style.display = 'none';
+        return;
+    }
+
+    statsDiv.style.display = 'block';
+
+    // Extract Y values from points (format: [[x,y], [x,y], ...])
+    const yValues = bbox.points.map(pt => pt[1]).filter(v => isFinite(v));
+    const xValues = bbox.points.map(pt => pt[0]).filter(v => isFinite(v));
+
+    if (yValues.length === 0) {
+        statsDiv.style.display = 'none';
+        return;
+    }
+
+    // Calculate statistics
+    const n = yValues.length;
+    const mean = yValues.reduce((a, b) => a + b, 0) / n;
+    const variance = yValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / n;
+    const std = Math.sqrt(variance);
+    const min = Math.min(...yValues);
+    const max = Math.max(...yValues);
+    const range = max - min;
+
+    // Format numbers appropriately
+    const fmt = (v) => {
+        if (Math.abs(v) < 0.01 || Math.abs(v) >= 10000) {
+            return v.toExponential(2);
+        }
+        return v.toFixed(2);
+    };
+
+    // Update display
+    document.getElementById('stat-n').textContent = n;
+    document.getElementById('stat-mean').textContent = fmt(mean);
+    document.getElementById('stat-std').textContent = fmt(std);
+    document.getElementById('stat-min').textContent = fmt(min);
+    document.getElementById('stat-max').textContent = fmt(max);
+    document.getElementById('stat-range').textContent = fmt(range);
+}
+
+function hideElementStatistics() {
+    document.getElementById('selected-stats').style.display = 'none';
 }
 
 function getTraceOverrides(elementInfo) {
@@ -688,6 +859,18 @@ function getFillOverrides(elementInfo) {
 }
 
 function getPanelOverrides(elementInfo) {
+    if (!overrides.element_overrides) {
+        overrides.element_overrides = {};
+    }
+    const key = elementInfo.original;
+    if (!overrides.element_overrides[key]) {
+        overrides.element_overrides[key] = {};
+    }
+    return overrides.element_overrides[key];
+}
+
+function getAxisOverrides(elementInfo, axisType) {
+    // Get overrides for xaxis or yaxis element
     if (!overrides.element_overrides) {
         overrides.element_overrides = {};
     }
@@ -750,6 +933,28 @@ function applySelectedElementChanges() {
             facecolor: document.getElementById('sel-panel-facecolor').value,
             transparent: document.getElementById('sel-panel-transparent').checked,
             grid: document.getElementById('sel-panel-grid').checked
+        };
+    } else if (type === 'xaxis') {
+        // X-Axis specific overrides
+        overrides.element_overrides[selectedElement] = {
+            tick_fontsize: parseFloat(document.getElementById('sel-xaxis-fontsize').value),
+            label_fontsize: parseFloat(document.getElementById('sel-xaxis-label-fontsize').value),
+            tick_direction: document.getElementById('sel-xaxis-direction').value,
+            n_ticks: parseInt(document.getElementById('sel-xaxis-nticks').value),
+            hide_ticks: document.getElementById('sel-xaxis-hide-ticks').checked,
+            hide_label: document.getElementById('sel-xaxis-hide-label').checked,
+            hide_spine: document.getElementById('sel-xaxis-hide-spine').checked
+        };
+    } else if (type === 'yaxis') {
+        // Y-Axis specific overrides
+        overrides.element_overrides[selectedElement] = {
+            tick_fontsize: parseFloat(document.getElementById('sel-yaxis-fontsize').value),
+            label_fontsize: parseFloat(document.getElementById('sel-yaxis-label-fontsize').value),
+            tick_direction: document.getElementById('sel-yaxis-direction').value,
+            n_ticks: parseInt(document.getElementById('sel-yaxis-nticks').value),
+            hide_ticks: document.getElementById('sel-yaxis-hide-ticks').checked,
+            hide_label: document.getElementById('sel-yaxis-hide-label').checked,
+            hide_spine: document.getElementById('sel-yaxis-hide-spine').checked
         };
     }
 
@@ -1116,6 +1321,11 @@ async function updatePreview() {
 
         if (data.bboxes) {
             elementBboxes = data.bboxes;
+            // Store schema v0.3 metadata if available
+            if (data.bboxes._meta) {
+                schemaMeta = data.bboxes._meta;
+                console.log('Schema v0.3 geometry available:', schemaMeta.schema_version);
+            }
         }
         if (data.img_size) {
             imgSize = data.img_size;
