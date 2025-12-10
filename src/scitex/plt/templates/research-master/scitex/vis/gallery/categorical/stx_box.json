@@ -1,0 +1,83 @@
+{
+    "scitex_schema": "scitex.plt.figure.recipe",
+    "scitex_schema_version": "0.2.0",
+    "figure_uuid": "7c158ef8-91ae-41f9-ac35-9a6dff0e4adb",
+    "runtime": {
+        "scitex_version": "2.6.0",
+        "matplotlib_version": "3.10.7",
+        "created_at": "2025-12-09T23:03:31.898591"
+    },
+    "figure": {
+        "size_mm": [
+            80.0,
+            68.0
+        ],
+        "dpi": 300,
+        "auto_crop": true,
+        "crop_margin_mm": 1.0,
+        "mode": "publication"
+    },
+    "axes_bbox_px": {
+        "x0": 163,
+        "y0": 148,
+        "x1": 636,
+        "y1": 479,
+        "width": 472,
+        "height": 331
+    },
+    "axes_bbox_mm": {
+        "x0": 20.0,
+        "y0": 19.99,
+        "x1": 60.0,
+        "y1": 47.99,
+        "width": 40.0,
+        "height": 28.0
+    },
+    "style": {
+        "axis_thickness_mm": 0.2,
+        "tick_length_mm": 0.8,
+        "tick_thickness_mm": 0.2,
+        "trace_thickness_mm": 0.2,
+        "marker_size_mm": 0.8,
+        "axis_font_size_pt": 7,
+        "tick_font_size_pt": 7,
+        "title_font_size_pt": 8,
+        "legend_font_size_pt": 6,
+        "label_pad_pt": 0.5,
+        "tick_pad_pt": 2.0,
+        "title_pad_pt": 1.0,
+        "font_family": "Arial",
+        "n_ticks": 4
+    },
+    "axes": {
+        "ax_00": {
+            "grid_position": {
+                "row": 0,
+                "col": 0
+            },
+            "xaxis": {
+                "label": "Condition",
+                "lim": [
+                    0.5,
+                    4.5
+                ]
+            },
+            "yaxis": {
+                "label": "Score",
+                "lim": [
+                    18.9111,
+                    82.5239
+                ]
+            },
+            "calls": [
+                {
+                    "id": "ax_00_condition_distributions",
+                    "method": "stx_box",
+                    "data_ref": {
+                        "data": "ax-row-0-col-0_trace-id-ax_00_condition_distributions_variable-data"
+                    }
+                }
+            ]
+        }
+    }
+}

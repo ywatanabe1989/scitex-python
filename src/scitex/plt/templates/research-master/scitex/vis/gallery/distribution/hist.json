@@ -1,0 +1,101 @@
+{
+    "scitex_schema": "scitex.plt.figure.recipe",
+    "scitex_schema_version": "0.2.0",
+    "figure_uuid": "4396ab0c-e664-410a-9c4d-5033285d3490",
+    "runtime": {
+        "scitex_version": "2.6.0",
+        "matplotlib_version": "3.10.7",
+        "created_at": "2025-12-09T23:03:25.919775"
+    },
+    "figure": {
+        "size_mm": [
+            80.0,
+            68.0
+        ],
+        "dpi": 300,
+        "auto_crop": true,
+        "crop_margin_mm": 1.0,
+        "mode": "publication"
+    },
+    "axes_bbox_px": {
+        "x0": 163,
+        "y0": 148,
+        "x1": 636,
+        "y1": 479,
+        "width": 472,
+        "height": 331
+    },
+    "axes_bbox_mm": {
+        "x0": 20.0,
+        "y0": 19.99,
+        "x1": 60.0,
+        "y1": 47.99,
+        "width": 40.0,
+        "height": 28.0
+    },
+    "style": {
+        "axis_thickness_mm": 0.2,
+        "tick_length_mm": 0.8,
+        "tick_thickness_mm": 0.2,
+        "trace_thickness_mm": 0.2,
+        "marker_size_mm": 0.8,
+        "axis_font_size_pt": 7,
+        "tick_font_size_pt": 7,
+        "title_font_size_pt": 8,
+        "legend_font_size_pt": 6,
+        "label_pad_pt": 0.5,
+        "tick_pad_pt": 2.0,
+        "title_pad_pt": 1.0,
+        "font_family": "Arial",
+        "n_ticks": 4
+    },
+    "axes": {
+        "ax_00": {
+            "grid_position": {
+                "row": 0,
+                "col": 0
+            },
+            "xaxis": {
+                "label": "Reaction Time [ms]",
+                "lim": [
+                    162.3226,
+                    786.5945
+                ]
+            },
+            "yaxis": {
+                "label": "Count",
+                "lim": [
+                    0.0,
+                    107.1
+                ]
+            },
+            "calls": [
+                {
+                    "id": "ax_00_rt_distribution",
+                    "method": "hist",
+                    "data_ref": {
+                        "raw_data": "ax-row-0-col-0_trace-id-ax_00_rt_distribution_variable-raw-data",
+                        "bin_centers": "ax-row-0-col-0_trace-id-ax_00_rt_distribution_variable-bin-centers",
+                        "bin_counts": "ax-row-0-col-0_trace-id-ax_00_rt_distribution_variable-bin-counts"
+                    },
+                    "kwargs": {
+                        "alpha": 0.7,
+                        "edgecolor": "black"
+                    }
+                }
+            ]
+        }
+    },
+    "data": {
+        "csv_path": "hist.csv",
+        "columns_actual": [
+            "ax-row-0-col-0_trace-id-rt-distribution_variable-raw-data",
+            "ax-row-0-col-0_trace-id-rt-distribution_variable-bin-centers",
+            "ax-row-0-col-0_trace-id-rt-distribution_variable-bin-counts",
+            "ax-row-0-col-0_trace-id-rt-distribution_variable-bin-widths",
+            "ax-row-0-col-0_trace-id-rt-distribution_variable-bin-edges-left",
+            "ax-row-0-col-0_trace-id-rt-distribution_variable-bin-edges-right"
+        ],
+        "csv_hash": "15666bc037096351"
+    }
+}
