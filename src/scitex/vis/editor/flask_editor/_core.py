@@ -86,10 +86,11 @@ class WebEditor:
 
         app = Flask(__name__)
         editor = self
-        html_template = build_html_template()
 
         @app.route("/")
         def index():
+            # Rebuild template each time for hot reload support
+            html_template = build_html_template()
             return render_template_string(
                 html_template,
                 filename=str(editor.json_path.resolve()),
@@ -158,6 +159,9 @@ class WebEditor:
         print(f"Starting SciTeX Editor at http://127.0.0.1:{self.port}")
         print("Press Ctrl+C to stop")
 
+        # Note: use_reloader=False because the reloader re-runs the entire script
+        # which causes infinite loops when the demo generates figures
+        # Templates are rebuilt on each page refresh anyway
         app.run(host="127.0.0.1", port=self.port, debug=False, use_reloader=False)
 
 

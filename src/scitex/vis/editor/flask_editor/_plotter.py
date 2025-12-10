@@ -8,6 +8,80 @@ import pandas as pd
 import numpy as np
 
 
+def _apply_element_overrides(
+    kwargs: Dict[str, Any],
+    element_key: str,
+    element_overrides: Dict[str, Any],
+    element_type: str,
+) -> Dict[str, Any]:
+    """Apply element-specific overrides to kwargs.
+
+    Args:
+        kwargs: Original kwargs dict
+        element_key: Key to look up in element_overrides (e.g., 'ax_00_scatter_0')
+        element_overrides: Dict mapping element keys to their override values
+        element_type: Type of element ('trace', 'scatter', 'fill', 'bar')
+
+    Returns:
+        Updated kwargs dict with overrides applied
+    """
+    if not element_key or element_key not in element_overrides:
+        return kwargs
+
+    overrides = element_overrides[element_key]
+    result = kwargs.copy()
+
+    if element_type == "trace":
+        # Line/trace overrides: color, linewidth, linestyle, marker, markersize, alpha
+        if "color" in overrides:
+            result["color"] = overrides["color"]
+        if "linewidth" in overrides:
+            result["linewidth"] = overrides["linewidth"]
+        if "linestyle" in overrides:
+            result["linestyle"] = overrides["linestyle"]
+        if "marker" in overrides and overrides["marker"]:
+            result["marker"] = overrides["marker"]
+        if "markersize" in overrides:
+            result["markersize"] = overrides["markersize"]
+        if "alpha" in overrides:
+            result["alpha"] = overrides["alpha"]
+        if "label" in overrides and overrides["label"]:
+            result["label"] = overrides["label"]
+
+    elif element_type == "scatter":
+        # Scatter overrides: color (c), size (s), marker, alpha, edgecolor
+        if "color" in overrides:
+            result["c"] = overrides["color"]
+            # Remove facecolors if present (conflicts with c)
+            result.pop("facecolors", None)
+        if "size" in overrides:
+            result["s"] = overrides["size"]
+        if "marker" in overrides:
+            result["marker"] = overrides["marker"]
+        if "alpha" in overrides:
+            result["alpha"] = overrides["alpha"]
+        if "edgecolor" in overrides:
+            result["edgecolors"] = overrides["edgecolor"]
+
+    elif element_type == "fill":
+        # Fill overrides: color, alpha
+        if "color" in overrides:
+            result["color"] = overrides["color"]
+        if "alpha" in overrides:
+            result["alpha"] = overrides["alpha"]
+
+    elif element_type == "bar":
+        # Bar overrides: facecolor (color), edgecolor, alpha
+        if "facecolor" in overrides:
+            result["color"] = overrides["facecolor"]
+        if "edgecolor" in overrides:
+            result["edgecolor"] = overrides["edgecolor"]
+        if "alpha" in overrides:
+            result["alpha"] = overrides["alpha"]
+
+    return result
+
+
 def plot_from_csv(
     ax,
     csv_data: Optional[pd.DataFrame],
@@ -72,6 +146,7 @@ def plot_from_recipe(
     ax_spec: Dict[str, Any],
     overrides: Dict[str, Any],
     linewidth: float = 1.0,
+    ax_id: str = "",
 ):
     """Plot from new recipe schema (scitex.plt.figure.recipe).
 
@@ -81,6 +156,7 @@ def plot_from_recipe(
         ax_spec: Axis specification from recipe JSON (includes 'calls' list)
         overrides: Dictionary with override settings
         linewidth: Default line width in points
+        ax_id: Axis identifier (e.g., 'ax_00') for element override lookup
     """
     if csv_data is None or not isinstance(csv_data, pd.DataFrame):
         return
@@ -88,21 +164,42 @@ def plot_from_recipe(
     df = csv_data
     calls = ax_spec.get("calls", [])
 
+    # Get element overrides from overrides dict
+    element_overrides = overrides.get("element_overrides", {})
+
+    # Track element indices per type for this axis
+    element_counts = {"trace": 0, "scatter": 0, "fill": 0, "bar": 0}
+
     for call in calls:
         method = call.get("method", "")
         data_ref = call.get("data_ref", {})
-        kwargs = call.get("kwargs", {})
+        kwargs = call.get("kwargs", {}).copy()  # Copy to avoid modifying original
         call_id = call.get("id", "")
+
+        # Build element key for override lookup
+        element_key = None
 
         try:
             if method == "plot":
+                element_key = f"{ax_id}_trace_{element_counts['trace']}" if ax_id else f"trace_{element_counts['trace']}"
+                kwargs = _apply_element_overrides(kwargs, element_key, element_overrides, "trace")
                 _render_plot(ax, df, data_ref, kwargs, linewidth)
+                element_counts["trace"] += 1
             elif method == "scatter":
+                element_key = f"{ax_id}_scatter_{element_counts['scatter']}" if ax_id else f"scatter_{element_counts['scatter']}"
+                kwargs = _apply_element_overrides(kwargs, element_key, element_overrides, "scatter")
                 _render_scatter(ax, df, data_ref, kwargs)
+                element_counts["scatter"] += 1
             elif method == "bar":
+                element_key = f"{ax_id}_bar_{element_counts['bar']}" if ax_id else f"bar_{element_counts['bar']}"
+                kwargs = _apply_element_overrides(kwargs, element_key, element_overrides, "bar")
                 _render_bar(ax, df, data_ref, kwargs)
+                element_counts["bar"] += 1
             elif method == "fill_between":
+                element_key = f"{ax_id}_fill_{element_counts['fill']}" if ax_id else f"fill_{element_counts['fill']}"
+                kwargs = _apply_element_overrides(kwargs, element_key, element_overrides, "fill")
                 _render_fill_between(ax, df, data_ref, kwargs)
+                element_counts["fill"] += 1
             elif method == "errorbar":
                 _render_errorbar(ax, df, data_ref, kwargs, linewidth)
             elif method == "imshow":
