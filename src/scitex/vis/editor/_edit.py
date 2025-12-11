@@ -48,6 +48,7 @@ def edit(
     path: Union[str, Path],
     backend: Literal["auto", "flask", "dearpygui", "qt", "tkinter", "mpl"] = "auto",
     apply_manual: bool = True,
+    port: int = 5050,
 ) -> None:
     """
     Launch interactive editor for figure style/annotation editing.
@@ -71,6 +72,9 @@ def edit(
         - "mpl": Minimal matplotlib interactive mode (always works)
     apply_manual : bool, optional
         If True, load .manual.json overrides if exists (default: True)
+    port : int, optional
+        Port number for web-based editors (flask). Default: 5050.
+        If port is in use, will attempt to free it or find an alternative.
 
     Returns
     -------
@@ -133,6 +137,7 @@ def edit(
                 csv_data=csv_data,
                 png_path=png_path,
                 manual_overrides=manual_overrides,
+                port=port,
             )
             editor.run()
         except ImportError as e:

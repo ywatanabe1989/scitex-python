@@ -220,6 +220,12 @@ audio = [
     "mcp",             # MCP server integration
 ]
 
+# MS Word Import/Export Module
+msword = [
+    "python-docx",     # MS Word document manipulation
+    "pypandoc",        # Pandoc integration for conversions
+]
+
 # Scholar Module - Paper Management & Browser
 scholar = [
     "selenium",

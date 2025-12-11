@@ -1,0 +1,235 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage{longtable,booktabs,array}
+\usepackage{multirow}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\section{Title of paper in bold sentence
+case}\label{title-of-paper-in-bold-sentence-case}
+
+First I. LastName\textsuperscript{1,2}, First I.
+LastName\textsuperscript{2}
+
+\textsuperscript{1}University of Illinois, \textsuperscript{2}Shirley
+Ryan AbilityLab (Chicago)
+
+\section{INTRODUCTION}\label{introduction}
+
+This template was created in Microsoft Word. It provides authors with
+the formatting specifications needed to prepare their paper. Margins,
+column widths, line spacing, font and type styles are built-in: you can
+replace the existing text with your own (e.g. copy and paste). Ensure
+that the final version follows the guidelines provided in this document.
+Do not change the formatting in this template.
+
+All submitted papers should include an ``Introduction'' section, as
+shown here, providing background and rationale for the topic addressed.
+The introduction section should conclude with a concrete and specific
+purpose statement. The remaining sections of the paper should be
+appropriate to the content and methodology used, depending upon the type
+of paper being submitted. For many research-based papers, this would
+include Methods, Results, Discussion and Conclusions; an
+Acknowledgements section may also be included. References should be
+included as the final section.
+
+\section{SUBMISSION INSTRUCTIONS}\label{submission-instructions}
+
+Submissions must be a minimum of 2 pages and a maximum of 4 pages in
+total (i.e. including References). Submissions must be in English.
+
+\section{LAYOUT}\label{layout}
+
+All margins are set at 3/4" (1.9 cm). Use an 11-point sans serif font
+(Aptos, Calibri, or Arial) for all text. All text (except the title)
+should be single-spaced and aligned left (not justified). A 6-point
+space should follow each paragraph and heading; do not indent
+paragraphs. The title should be centered, bold font and sentence case
+(i.e. only the first word capitalized).
+
+Two versions of the paper are required: a complete version and a blinded
+version. The complete version should be named according to the title of
+the paper (e.g
+``Measuring\_heart\_rate\_in\_manual\_wheelchair\_users.doc'').
+
+You can shorten this name if your title is very long, but do not include
+the author's name. In the blinded version, delete the author(s) names
+and affiliations, as well as any identifying information. Ensure that
+the paper has no review comments visible that might reveal who the
+author is (i.e. accept or delete all track changes/comments). The
+blinded version should also be named according to the title of the
+paper, but preceded by the word ``Blinded'' (e.g.
+``Blinded\_Measuring\_heart\_rate\_in\_manual\_wheelchair\_users.doc'').
+
+\section{HEADINGS}\label{headings}
+
+Main headings (e.g. Introduction, Methods, Results etc.) should be
+written in bold font and all capital letters. Sub-headings may be used,
+but only if there are at least two sections within that level of
+content. First level sub-headings are written in bold font and sentence
+case. Second level sub-headings, if required, are underlined and written
+in sentence case, as illustrated below. Do not indent headings or
+sub-headings.
+
+\subsection{\texorpdfstring{\textbf{Example of a first level
+sub-heading}}{Example of a first level sub-heading}}\label{example-of-a-first-level-sub-heading}
+
+\subsection{Example of a second level
+sub-heading}\label{example-of-a-second-level-sub-heading}
+
+\section{FIGURES AND TABLES}\label{figures-and-tables}
+
+Figures should be labeled with the figure number and title/description
+in bold font, directly below the figure. Font within a figure should not
+be smaller than 8-point. The figure should be edited so that the main
+text wraps around the image (i.e. Format \textless{} Shape \textless{}
+Layout \textless{} Square). A text box frame is a simple way to insert
+images: use Insert \textgreater{} Text Box; size the text box and then
+drag images into the box. To remove the visible box, select the frame
+and select Format \textgreater{} Text Box \textgreater{} Colors and
+Lines \textgreater{} No Fill and \textgreater{} No Line.
+
+\includegraphics[width=2.19463in,height=0.43458in]{./media/media/image10.png}
+
+\textbf{Figure 1. The RESNA logo}
+
+Table headings should appear immediately above the table in bold font,
+aligned left, and include the table number. Table headings and
+sub-headings should be bold font and centered relative to the row and
+column. Table content/text should be regular font and aligned left. Font
+within the table should be no smaller than 8-point.
+
+\textbf{Table 1. Example of a table heading}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.2656}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3537}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3807}}@{}}
+\toprule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\multirow{2}{=}{Table Column Heading} &
+\multicolumn{2}{>{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.7344} + 2\tabcolsep}@{}}{%
+Table Column Heading} \\
+& Table Subheading & Table Subheading \\
+Table text & Table text & Table text \\
+Table text & 85.5\% & 14.5\% \\
+\end{longtable}
+
+\section{}\label{section}
+
+\section{}\label{section-1}
+
+\section{}\label{section-2}
+
+\section{}\label{section-3}
+
+\section{REFERENCES}\label{references}
+
+In-text citations must be numbered using square brackets as indicated
+here. {[}1{]} Multiple sources are cited in the following manner.
+{[}2,3,4-7{]} References may be presented in either APA or Vancouver
+style format, but must be listed in order of citation and preceded by
+the citation number in square brackets. Each reference is followed by a
+6-point space. Some examples of reference formats are provided below:
+
+Journal articles:
+
+{[}1{]} Jutai JW, Rigby P, Ryan S, Stickel S. Pyschosocial impact of
+electronic aids to daily living. Assist Technol. 2000 12(2):123--131.
+
+Book:
+
+{[}2{]} Portney LG, Watkins MP. Foundations of clinical research:
+applications to practice. 3\textsuperscript{rd} ed. Philadelphia: F.A.
+Davis Company; 2015.
+
+Chapter in a Book:
+
+{[}3{]} Pagel JF, Pegram GV. The role for the primary care physician in
+sleep medicine. In: Pagel JF, Pandi-Perumal SR, editors. Primary care
+sleep medicine. 2nd ed. New York: Springer; 2014.
+
+Conference Proceeding
+
+{[}4{]} Smith RO. Assistive technology outcome assessment prototypes:
+measuring INGO variables of outcomes. In R. Simpson (Ed.), Proceedings
+of the RESNA 25th Annual Conference (239--341). Minneapolis: RESNA
+Press; 2002.
+
+\end{document}

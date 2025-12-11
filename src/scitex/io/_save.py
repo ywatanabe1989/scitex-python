@@ -161,7 +161,7 @@ def save(
     auto_crop: bool = True,
     crop_margin_mm: float = 1.0,
     metadata_extra: dict = None,
-    json_schema: str = "recipe",
+    json_schema: str = "editable",
     **kwargs,
 ) -> None:
     """
@@ -206,9 +206,10 @@ def save(
         Default is None.
     json_schema : str, optional
         Schema type for JSON metadata output. Options:
-        - "recipe": Minimal schema with method calls + data refs (default, ~95% smaller)
+        - "editable": Schema v0.3.0 with element geometry for interactive editing (default)
+        - "recipe": Minimal schema with method calls + data refs
         - "verbose": Full schema with all artist details
-        Default is "recipe".
+        Default is "editable".
     **kwargs
         Additional keyword arguments to pass to the underlying save function of the specific format.
 
@@ -506,7 +507,7 @@ def _save(
     auto_crop=False,
     crop_margin_mm=1.0,
     metadata_extra=None,
-    json_schema="recipe",
+    json_schema="editable",
     **kwargs,
 ):
     # Don't use object's own save method - use consistent handlers
@@ -657,7 +658,7 @@ def _handle_image_with_csv(
     auto_crop=True,
     crop_margin_mm=1.0,
     metadata_extra=None,
-    json_schema="recipe",
+    json_schema="editable",
     **kwargs,
 ):
     """Handle image file saving with optional CSV export and auto-cropping."""
@@ -701,7 +702,10 @@ def _handle_image_with_csv(
 
                 # Collect metadata using scitex's metadata collector
                 try:
-                    if json_schema == "recipe":
+                    if json_schema == "editable":
+                        from scitex.plt.utils.metadata import export_editable_figure
+                        auto_metadata = export_editable_figure(fig_mpl)
+                    elif json_schema == "recipe":
                         from scitex.plt.utils import collect_recipe_metadata
                         auto_metadata = collect_recipe_metadata(
                             fig_mpl, ax,
@@ -716,7 +720,8 @@ def _handle_image_with_csv(
                         kwargs["metadata"] = auto_metadata
                         collected_metadata = auto_metadata  # Save for JSON export
                         if verbose:
-                            schema_name = "recipe" if json_schema == "recipe" else "verbose"
+                            schema_names = {"editable": "editable v0.3", "recipe": "recipe", "verbose": "verbose"}
+                            schema_name = schema_names.get(json_schema, json_schema)
                             logger.info(f"  • Auto-collected metadata ({schema_name} schema)")
                 except ImportError:
                     pass  # collect_figure_metadata not available
@@ -1109,8 +1114,8 @@ def _handle_image_with_csv(
             )
 
             # Verify CSV/JSON consistency (data_ref must match columns_actual)
-            # Only check for verbose schema - recipe schema uses different data_ref structure
-            if csv_path and not dry_run and json_schema != "recipe":
+            # Only check for verbose schema - recipe/editable schemas use different data_ref structure
+            if csv_path and not dry_run and json_schema == "verbose":
                 from scitex.plt.utils._collect_figure_metadata import (
                     assert_csv_json_consistency,
                 )

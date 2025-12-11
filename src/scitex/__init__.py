@@ -162,6 +162,7 @@ template = _LazyModule("template")
 cloud = _LazyModule("cloud")
 config = _LazyModule("config")
 audio = _LazyModule("audio")
+msword = _LazyModule("msword")
 
 # Centralized path configuration - eager loaded for convenience
 # Usage: scitex.PATHS.logs, scitex.PATHS.cache, etc.
@@ -223,6 +224,7 @@ __all__ = [
     "cloud",
     "config",
     "audio",
+    "msword",
     "PATHS",
     "INJECTED",
 ]
