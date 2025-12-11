@@ -197,7 +197,7 @@ class AudioServer:
                             "speed": {
                                 "type": "number",
                                 "description": "Speed multiplier for gtts (1.0=normal, 1.5=faster, 0.7=slower)",
-                                "default": 1.0,
+                                "default": 1.5,
                             },
                             "play": {
                                 "type": "boolean",

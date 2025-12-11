@@ -55,7 +55,7 @@ class GoogleTTS(BaseTTS):
         self,
         lang: str = "en",
         slow: bool = False,
-        speed: float = 1.0,
+        speed: float = 1.5,
         **kwargs,
     ):
         super().__init__(**kwargs)
