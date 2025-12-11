@@ -124,6 +124,7 @@ class SubplotsWrapper:
         dpi=None,
         styles=None,  # List of style dicts for per-axes control
         transparent=None,  # Transparent background (default: from SCITEX_STYLE.yaml)
+        theme=None,  # Color theme: "light" or "dark" (default: "light")
         **kwargs,
     ):
         """
@@ -179,6 +180,9 @@ class SubplotsWrapper:
         transparent : bool, optional
             Create figure with transparent background (default: False)
             Useful for publication-ready figures that will be cropped
+        theme : str, optional
+            Color theme: "light" or "dark" (default: "light")
+            Dark mode uses eye-friendly colors optimized for dark backgrounds
         **kwargs
             Additional arguments passed to matplotlib.pyplot.subplots
 
@@ -287,6 +291,9 @@ class SubplotsWrapper:
             transparent = _S.get("transparent", True)
         if mode is None:
             mode = _S.get("mode", "publication")
+        # Resolve theme from YAML (default: "light")
+        if theme is None:
+            theme = _resolve("theme.mode", None, "light", str)
 
         # Always use mm-control pathway with SCITEX_STYLE defaults
         if True:
@@ -319,6 +326,7 @@ class SubplotsWrapper:
                 dpi=dpi,
                 styles=styles,
                 transparent=transparent,
+                theme=theme,
                 **kwargs,
             )
 
@@ -355,6 +363,7 @@ class SubplotsWrapper:
         dpi=None,
         styles=None,
         transparent=None,  # Resolved from caller
+        theme=None,  # Color theme: "light" or "dark"
         **kwargs,
     ):
         """Create figure with mm-based control over axes dimensions."""
@@ -451,6 +460,10 @@ class SubplotsWrapper:
         else:
             self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi)
 
+        # Store theme on figure for later retrieval (e.g., when saving plot.json)
+        if theme is not None:
+            self._fig_mpl._scitex_theme = theme
+
         # Create axes array and position each one manually
         axes_mpl_list = []
         ax_idx = 0
@@ -540,6 +553,10 @@ class SubplotsWrapper:
                     style_dict["font_family"] = font_family
                 if n_ticks is not None:
                     style_dict["n_ticks"] = n_ticks
+
+            # Always add theme to style_dict (default: "light")
+            if theme is not None:
+                style_dict["theme"] = theme
 
             # Extract suptitle font size if available
             if "suptitle_font_size_pt" in style_dict:

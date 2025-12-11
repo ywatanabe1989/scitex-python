@@ -25,10 +25,12 @@ from matplotlib.figure import Figure
 from ._units import mm_to_inch, mm_to_pt
 
 # Default theme color palettes
-# Dark mode: all text elements (labels, ticks, spines) use same color like light mode
+# Both modes use transparent background by default for flexibility
+# Dark mode: all text elements (labels, ticks, spines) use same soft white color
+# Light mode: all text elements use black
 THEME_COLORS = {
     "dark": {
-        "background": "transparent",   # Keep transparent for flexibility
+        "background": "transparent",   # Transparent for overlay on dark backgrounds
         "axes_bg": "transparent",      # Transparent axes background
         "text": "#e8e8e8",             # Soft white (reduced strain)
         "spine": "#e8e8e8",            # Same as text (like black in light mode)
@@ -36,8 +38,8 @@ THEME_COLORS = {
         "grid": "#3a3a4a",             # Subtle grid
     },
     "light": {
-        "background": "transparent",  # Figure background
-        "axes_bg": "white",            # White axes background
+        "background": "transparent",  # Transparent for overlay on light backgrounds
+        "axes_bg": "transparent",      # Transparent axes background
         "text": "black",               # Black text
         "spine": "black",              # Black spines
         "tick": "black",               # Black ticks
