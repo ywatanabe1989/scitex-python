@@ -10,17 +10,122 @@ This module provides functions to create matplotlib figures and axes with
 precise millimeter-based control over dimensions, margins, and styling.
 This is particularly useful for creating publication-quality figures that
 need to meet specific size requirements (e.g., Nature, Science journals).
+
+Supports dark/light theme modes for eye-friendly visualization.
 """
 
 __FILE__ = __file__
 
-from typing import Dict, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from ._units import mm_to_inch, mm_to_pt
+
+# Default theme color palettes
+# Dark mode: all text elements (labels, ticks, spines) use same color like light mode
+THEME_COLORS = {
+    "dark": {
+        "background": "transparent",   # Keep transparent for flexibility
+        "axes_bg": "transparent",      # Transparent axes background
+        "text": "#e8e8e8",             # Soft white (reduced strain)
+        "spine": "#e8e8e8",            # Same as text (like black in light mode)
+        "tick": "#e8e8e8",             # Same as text
+        "grid": "#3a3a4a",             # Subtle grid
+    },
+    "light": {
+        "background": "transparent",  # Figure background
+        "axes_bg": "white",            # White axes background
+        "text": "black",               # Black text
+        "spine": "black",              # Black spines
+        "tick": "black",               # Black ticks
+        "grid": "#cccccc",             # Light gray grid
+    },
+}
+
+
+def _apply_theme_colors(
+    ax: Axes,
+    theme: str = "light",
+    custom_colors: Optional[Dict[str, str]] = None
+) -> None:
+    """
+    Apply theme colors to axes for dark/light mode support.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Target axes to apply theme to
+    theme : str
+        Color theme: "light" or "dark" (default: "light")
+    custom_colors : dict, optional
+        Custom color overrides. Keys: background, axes_bg, text, spine, tick, grid
+
+    Examples
+    --------
+    >>> fig, ax = plt.subplots()
+    >>> _apply_theme_colors(ax, theme="dark")  # Eye-friendly dark mode
+    """
+    # Get base theme colors
+    colors = THEME_COLORS.get(theme, THEME_COLORS["light"]).copy()
+
+    # Apply custom overrides
+    if custom_colors:
+        colors.update(custom_colors)
+
+    # Apply axes background
+    if colors["axes_bg"] != "transparent":
+        ax.set_facecolor(colors["axes_bg"])
+        ax.patch.set_alpha(1.0)
+    else:
+        ax.patch.set_alpha(0.0)
+
+    # Apply figure background if accessible
+    fig = ax.get_figure()
+    if fig is not None:
+        if colors["background"] != "transparent":
+            fig.patch.set_facecolor(colors["background"])
+            fig.patch.set_alpha(1.0)
+        else:
+            fig.patch.set_alpha(0.0)
+
+    # Apply text colors (labels, titles)
+    ax.xaxis.label.set_color(colors["text"])
+    ax.yaxis.label.set_color(colors["text"])
+    ax.title.set_color(colors["text"])
+
+    # Apply spine colors
+    for spine in ax.spines.values():
+        spine.set_color(colors["spine"])
+
+    # Apply tick colors (both marks and labels)
+    ax.tick_params(colors=colors["tick"], which="both")
+    for label in ax.get_xticklabels() + ax.get_yticklabels():
+        label.set_color(colors["tick"])
+
+    # Apply legend colors if legend exists
+    legend = ax.get_legend()
+    if legend is not None:
+        # Legend text color
+        for text in legend.get_texts():
+            text.set_color(colors["text"])
+        # Legend title if present
+        title = legend.get_title()
+        if title:
+            title.set_color(colors["text"])
+        # Legend frame
+        frame = legend.get_frame()
+        if frame:
+            if colors["axes_bg"] != "transparent":
+                frame.set_facecolor(colors["axes_bg"])
+            frame.set_edgecolor(colors["spine"])
+
+    # Store theme in axes metadata for reference
+    if hasattr(ax, "_scitex_metadata"):
+        ax._scitex_metadata["theme"] = theme
+        ax._scitex_metadata["theme_colors"] = colors
 
 if TYPE_CHECKING:
     from scitex.plt._subplots._FigWrapper import FigWrapper
@@ -197,6 +302,8 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
         - 'axis_font_size_pt' (float): Axis label font size in points (default: 8)
         - 'tick_font_size_pt' (float): Tick label font size in points (default: 7)
         - 'n_ticks' (int): Number of ticks on each axis (default: 4)
+        - 'theme' (str): Color theme "light" or "dark" (default: "light")
+        - 'theme_colors' (dict): Custom theme color overrides
 
     Returns
     -------
@@ -213,6 +320,7 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
     ...     'tick_thickness_mm': 0.2,
     ...     'axis_font_size_pt': 7,
     ...     'tick_font_size_pt': 7,
+    ...     'theme': 'dark',  # Enable dark mode
     ... }
     >>> trace_lw = apply_style_mm(ax, style)
     >>> ax.plot(x, y, lw=trace_lw)
@@ -224,6 +332,11 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
     - The returned trace linewidth should be used when plotting to maintain
       consistent styling across all plot elements
     """
+    # Apply theme colors (dark/light mode)
+    theme = style.get("theme", "light")
+    theme_colors = style.get("theme_colors", None)
+    _apply_theme_colors(ax, theme, theme_colors)
+
     # Convert spine thickness from mm to points
     axis_lw_pt = mm_to_pt(style.get("axis_thickness_mm", 0.2))
     for spine in ax.spines.values():
