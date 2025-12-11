@@ -158,6 +158,15 @@ class BaseTTS(ABC):
         Includes Windows fallback for WSL environments where PulseAudio
         may be unstable.
         """
+        import os
+
+        # Check if we're in WSL - if so, prefer Windows playback directly
+        # to avoid double playback issues with Linux audio hanging
+        if os.path.exists("/mnt/c/Windows"):
+            if self._play_audio_windows(path):
+                return
+            # Fall through to Linux players if Windows playback fails
+
         players = [
             ["ffplay", "-nodisp", "-autoexit", str(path)],
             ["mpv", "--no-video", str(path)],
@@ -176,14 +185,10 @@ class BaseTTS(ABC):
                 )
                 return
             except subprocess.TimeoutExpired:
-                # Audio playback hung (WSL audio issue), try Windows fallback
-                break
+                # Audio playback hung, don't try more players
+                return
             except (subprocess.CalledProcessError, FileNotFoundError):
                 continue
-
-        # Try Windows fallback via PowerShell (for WSL)
-        if self._play_audio_windows(path):
-            return
 
         print(f"Warning: No audio player found. Audio saved to: {path}")
 
