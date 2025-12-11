@@ -49,12 +49,82 @@ def stop_speech() -> None:
     except Exception:
         pass
 
+
+def check_wsl_audio() -> dict:
+    """Check WSL audio status and connectivity.
+
+    Returns:
+        dict with keys:
+        - is_wsl: bool - whether running in WSL
+        - wslg_available: bool - whether WSLg is available
+        - pulse_server_exists: bool - whether PulseServer socket exists
+        - pulse_connected: bool - whether PulseAudio connection works
+        - windows_fallback_available: bool - whether Windows fallback is available
+        - recommended: str - recommended playback method
+    """
+    import os
+    import shutil
+
+    result = {
+        "is_wsl": False,
+        "wslg_available": False,
+        "pulse_server_exists": False,
+        "pulse_connected": False,
+        "windows_fallback_available": False,
+        "recommended": "linux",
+    }
+
+    # Check if in WSL
+    if os.path.exists("/mnt/c/Windows"):
+        result["is_wsl"] = True
+
+        # Check WSLg
+        if os.path.exists("/mnt/wslg"):
+            result["wslg_available"] = True
+
+        # Check PulseServer socket
+        if os.path.exists("/mnt/wslg/PulseServer"):
+            result["pulse_server_exists"] = True
+
+            # Try to connect to PulseAudio
+            try:
+                env = os.environ.copy()
+                env["PULSE_SERVER"] = "unix:/mnt/wslg/PulseServer"
+                proc = subprocess.run(
+                    ["pactl", "info"],
+                    capture_output=True,
+                    timeout=5,
+                    env=env,
+                )
+                if proc.returncode == 0:
+                    result["pulse_connected"] = True
+            except Exception:
+                pass
+
+        # Check Windows fallback
+        if shutil.which("powershell.exe"):
+            result["windows_fallback_available"] = True
+
+        # Determine recommendation
+        if result["pulse_connected"]:
+            result["recommended"] = "linux"
+        elif result["windows_fallback_available"]:
+            result["recommended"] = "windows"
+        else:
+            result["recommended"] = "none"
+    else:
+        # Native Linux
+        result["recommended"] = "linux"
+
+    return result
+
 # Keep legacy TTS import for backwards compatibility
 from ._tts import TTS
 
 __all__ = [
     "speak",
     "stop_speech",
+    "check_wsl_audio",
     "TTS",
     "GoogleTTS",
     "ElevenLabsTTS",

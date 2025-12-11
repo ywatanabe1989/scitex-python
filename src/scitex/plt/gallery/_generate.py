@@ -20,6 +20,7 @@ def generate(
     dpi=150,
     save_csv=True,
     save_png=True,
+    save_svg=True,
     verbose=True,
 ):
     """Generate gallery plots with CSVs.
@@ -42,6 +43,8 @@ def generate(
         Whether to save CSV data files.
     save_png : bool
         Whether to save PNG image files.
+    save_svg : bool
+        Whether to save SVG image files for element selection.
     verbose : bool
         Print progress messages.
 
@@ -69,7 +72,7 @@ def generate(
     if verbose:
         print(f"Generating {len(plots_to_generate)} plots to {output_dir}")
 
-    results = {"png": [], "csv": [], "errors": []}
+    results = {"png": [], "svg": [], "csv": [], "errors": []}
 
     for plot_name in plots_to_generate:
         if plot_name not in PLOT_FUNCTIONS:
@@ -108,6 +111,14 @@ def generate(
                     if verbose:
                         print(f"  [CSV] {csv_path}")
 
+            # Save SVG for element selection (using gid attributes)
+            if save_svg:
+                svg_path = cat_dir / f"{plot_name}.svg"
+                stx.io.save(fig, svg_path)
+                results["svg"].append(str(svg_path))
+                if verbose:
+                    print(f"  [SVG] {svg_path}")
+
             stx.plt.close(fig._fig_mpl if hasattr(fig, "_fig_mpl") else fig)
 
         except Exception as e:
@@ -116,7 +127,7 @@ def generate(
                 print(f"  [ERROR] {plot_name}: {e}")
 
     if verbose:
-        print(f"\nGenerated: {len(results['png'])} PNG, {len(results['csv'])} CSV")
+        print(f"\nGenerated: {len(results['png'])} PNG, {len(results['svg'])} SVG, {len(results['csv'])} CSV")
         if results["errors"]:
             print(f"Errors: {len(results['errors'])}")
 

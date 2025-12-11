@@ -153,7 +153,11 @@ class BaseTTS(ABC):
         return None
 
     def _play_audio(self, path: Path) -> None:
-        """Play audio file using available system player."""
+        """Play audio file using available system player.
+
+        Includes Windows fallback for WSL environments where PulseAudio
+        may be unstable.
+        """
         players = [
             ["ffplay", "-nodisp", "-autoexit", str(path)],
             ["mpv", "--no-video", str(path)],
@@ -168,12 +172,99 @@ class BaseTTS(ABC):
                     check=True,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
+                    timeout=30,
                 )
                 return
+            except subprocess.TimeoutExpired:
+                # Audio playback hung (WSL audio issue), try Windows fallback
+                break
             except (subprocess.CalledProcessError, FileNotFoundError):
                 continue
 
+        # Try Windows fallback via PowerShell (for WSL)
+        if self._play_audio_windows(path):
+            return
+
         print(f"Warning: No audio player found. Audio saved to: {path}")
+
+    def _play_audio_windows(self, path: Path) -> bool:
+        """Play audio via Windows PowerShell SoundPlayer (WSL fallback).
+
+        This is useful when WSLg PulseAudio connection is unstable.
+        Uses System.Media.SoundPlayer which is headless (no GUI).
+
+        Args:
+            path: Path to audio file (in WSL filesystem)
+
+        Returns:
+            True if playback succeeded, False otherwise
+        """
+        import os
+        import shutil
+        import tempfile
+
+        # Check if we're in WSL
+        if not os.path.exists("/mnt/c/Windows"):
+            return False
+
+        # Check if powershell.exe is available
+        powershell = shutil.which("powershell.exe")
+        if not powershell:
+            return False
+
+        try:
+            # SoundPlayer only supports WAV, so convert if needed
+            wav_path = path
+            if path.suffix.lower() in ('.mp3', '.ogg', '.m4a'):
+                try:
+                    from pydub import AudioSegment
+                    # Create temp WAV file
+                    fd, tmp_wav = tempfile.mkstemp(suffix='.wav', prefix='scitex_')
+                    os.close(fd)
+                    wav_path = Path(tmp_wav)
+
+                    audio = AudioSegment.from_file(str(path))
+                    audio.export(str(wav_path), format='wav')
+                except ImportError:
+                    # pydub not available, try direct playback anyway
+                    pass
+
+            # Convert WSL path to Windows path
+            result = subprocess.run(
+                ["wslpath", "-w", str(wav_path)],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode != 0:
+                return False
+
+            windows_path = result.stdout.strip()
+
+            # Play using PowerShell's SoundPlayer (headless, no GUI)
+            ps_command = f'''
+$player = New-Object System.Media.SoundPlayer
+$player.SoundLocation = "{windows_path}"
+$player.PlaySync()
+'''
+            subprocess.run(
+                [powershell, "-NoProfile", "-Command", ps_command],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=60,
+            )
+
+            # Clean up temp WAV if created
+            if wav_path != path and wav_path.exists():
+                try:
+                    wav_path.unlink()
+                except Exception:
+                    pass
+
+            return True
+
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, Exception):
+            return False
 
 
 # EOF
