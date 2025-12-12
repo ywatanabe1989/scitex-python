@@ -3,6 +3,36 @@
 # Timestamp: "2025-05-03 17:10:43 (ywatanabe)"
 # File: ./tests/sync_tests_with_source.sh
 
+# =============================================================================
+# Test Synchronization Script
+# =============================================================================
+#
+# PURPOSE:
+#   Synchronizes test file structure with source code structure, ensuring
+#   every source file has a corresponding test file with embedded source
+#   code for reference.
+#
+# BEHAVIOR:
+#   1. Mirrors src/scitex/ directory structure to tests/scitex/
+#   2. For each source file (e.g., src/scitex/foo/bar.py):
+#      - Creates/updates tests/scitex/foo/test_bar.py
+#      - Preserves existing test code (before source block)
+#      - Updates commented source code block at file end
+#   3. Identifies "stale" tests (tests without matching source files)
+#   4. With -m flag: moves stale tests to .old-{timestamp}/ directories
+#
+# STRUCTURE OF GENERATED TEST FILES:
+#   - User's test code (preserved across syncs)
+#   - pytest __main__ guard
+#   - Commented source code block (auto-updated)
+#
+# USAGE:
+#   ./sync_tests_with_source.sh          # Dry run - report stale files
+#   ./sync_tests_with_source.sh -m       # Move stale files to .old/
+#   ./sync_tests_with_source.sh -j 16    # Use 16 parallel jobs
+#
+# =============================================================================
+
 ORIG_DIR="$(pwd)"
 THIS_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
 LOG_PATH="$THIS_DIR/.$(basename $0).log"
