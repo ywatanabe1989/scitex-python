@@ -482,6 +482,222 @@ def load_bundle(path: Union[str, Path]) -> Dict[str, Any]:
     return result
 
 
+def _generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict):
+    """Generate overview.png showing bundle contents visually.
+
+    Creates a comprehensive overview image with:
+    - CSV statistics (columns, rows, dtypes)
+    - JSON structure as tree
+    - Figures grid (PNG, hitmap, diff overlay)
+
+    Parameters
+    ----------
+    dir_path : Path
+        Bundle directory path.
+    spec : dict
+        Bundle specification.
+    data : dict
+        Bundle data dictionary.
+    """
+    import matplotlib.pyplot as plt
+    import matplotlib.gridspec as gridspec
+    from PIL import Image
+    import numpy as np
+    import io
+
+    # Create figure with custom layout
+    fig = plt.figure(figsize=(16, 10), facecolor='white')
+    gs = gridspec.GridSpec(2, 4, figure=fig, hspace=0.3, wspace=0.3,
+                           left=0.05, right=0.95, top=0.92, bottom=0.05)
+
+    # Title
+    bundle_name = dir_path.name
+    fig.suptitle(f'Bundle Overview: {bundle_name}', fontsize=16, fontweight='bold')
+
+    # === Panel 1: CSV Statistics ===
+    ax_csv = fig.add_subplot(gs[0, 0])
+    ax_csv.set_title('CSV Data', fontweight='bold', fontsize=11)
+    ax_csv.axis('off')
+
+    csv_text = []
+    if 'data' in data and hasattr(data['data'], 'columns'):
+        df = data['data']
+        csv_text.append(f"Rows: {len(df)}")
+        csv_text.append(f"Columns: {len(df.columns)}")
+        csv_text.append("")
+        csv_text.append("Columns:")
+        for col in df.columns[:10]:  # Show first 10 columns
+            dtype = str(df[col].dtype)
+            csv_text.append(f"  • {col} ({dtype})")
+        if len(df.columns) > 10:
+            csv_text.append(f"  ... +{len(df.columns) - 10} more")
+    else:
+        csv_text.append("No CSV data")
+
+    ax_csv.text(0.05, 0.95, '\n'.join(csv_text), transform=ax_csv.transAxes,
+                fontsize=9, verticalalignment='top', fontfamily='monospace',
+                bbox=dict(boxstyle='round', facecolor='#f0f0f0', alpha=0.8))
+
+    # === Panel 2: JSON Tree ===
+    ax_json = fig.add_subplot(gs[0, 1])
+    ax_json.set_title('JSON Structure', fontweight='bold', fontsize=11)
+    ax_json.axis('off')
+
+    def json_to_tree(obj, prefix="", max_depth=4, depth=0, max_keys=6, max_lines=30):
+        """Convert JSON to tree representation with depth control."""
+        lines = []
+        if depth >= max_depth:
+            return []
+
+        if isinstance(obj, dict):
+            items = list(obj.items())[:max_keys]
+            for i, (k, v) in enumerate(items):
+                is_last = i == len(items) - 1 and len(obj) <= max_keys
+                branch = "└─ " if is_last else "├─ "
+                next_prefix = prefix + ("   " if is_last else "│  ")
+
+                if isinstance(v, dict):
+                    if depth < max_depth - 1 and v:
+                        lines.append(prefix + branch + f"{k}:")
+                        lines.extend(json_to_tree(v, next_prefix, max_depth, depth + 1, max_keys, max_lines))
+                    else:
+                        lines.append(prefix + branch + f"{k}: {{{len(v)} keys}}")
+                elif isinstance(v, list):
+                    lines.append(prefix + branch + f"{k}: [{len(v)} items]")
+                else:
+                    val_str = str(v)
+                    if len(val_str) > 25:
+                        val_str = val_str[:22] + "..."
+                    lines.append(prefix + branch + f"{k}: {val_str}")
+
+            if len(obj) > max_keys:
+                lines.append(prefix + f"   ... +{len(obj) - max_keys} more")
+
+        return lines[:max_lines]
+
+    json_lines = json_to_tree(spec, max_depth=4, max_keys=8, max_lines=25)
+    ax_json.text(0.02, 0.98, '\n'.join(json_lines), transform=ax_json.transAxes,
+                 fontsize=7, verticalalignment='top', fontfamily='monospace',
+                 bbox=dict(boxstyle='round', facecolor='#f0f0f0', alpha=0.8))
+
+    # === Panel 3: PNG Image ===
+    ax_png = fig.add_subplot(gs[0, 2])
+    ax_png.set_title('plot.png', fontweight='bold', fontsize=11)
+    png_path = dir_path / "plot.png"
+    if png_path.exists():
+        png_img = Image.open(png_path)
+        ax_png.imshow(png_img)
+        ax_png.set_xlabel(f'{png_img.size[0]}×{png_img.size[1]}', fontsize=9)
+    ax_png.axis('off')
+
+    # === Panel 4: Hitmap PNG ===
+    ax_hitmap = fig.add_subplot(gs[0, 3])
+    ax_hitmap.set_title('plot_hitmap.png', fontweight='bold', fontsize=11)
+    hitmap_path = dir_path / "plot_hitmap.png"
+    if hitmap_path.exists():
+        hitmap_img = Image.open(hitmap_path)
+        ax_hitmap.imshow(hitmap_img)
+        ax_hitmap.set_xlabel(f'{hitmap_img.size[0]}×{hitmap_img.size[1]}', fontsize=9)
+    ax_hitmap.axis('off')
+
+    # === Panel 5: SVG (rendered) ===
+    ax_svg = fig.add_subplot(gs[1, 0])
+    ax_svg.set_title('plot.svg', fontweight='bold', fontsize=11)
+    svg_path = dir_path / "plot.svg"
+    if svg_path.exists():
+        # Just show file info since SVG can't be directly displayed
+        svg_size = svg_path.stat().st_size
+        ax_svg.text(0.5, 0.5, f'SVG File\n{svg_size/1024:.1f} KB',
+                   transform=ax_svg.transAxes, ha='center', va='center',
+                   fontsize=12, bbox=dict(boxstyle='round', facecolor='#e0e0ff'))
+    ax_svg.axis('off')
+
+    # === Panel 6: Hitmap SVG ===
+    ax_hitmap_svg = fig.add_subplot(gs[1, 1])
+    ax_hitmap_svg.set_title('plot_hitmap.svg', fontweight='bold', fontsize=11)
+    hitmap_svg_path = dir_path / "plot_hitmap.svg"
+    if hitmap_svg_path.exists():
+        svg_size = hitmap_svg_path.stat().st_size
+        ax_hitmap_svg.text(0.5, 0.5, f'SVG Hitmap\n{svg_size/1024:.1f} KB',
+                          transform=ax_hitmap_svg.transAxes, ha='center', va='center',
+                          fontsize=12, bbox=dict(boxstyle='round', facecolor='#ffe0e0'))
+    ax_hitmap_svg.axis('off')
+
+    # === Panel 7: PNG vs Hitmap Diff ===
+    ax_diff = fig.add_subplot(gs[1, 2])
+    ax_diff.set_title('PNG vs Hitmap (Overlay)', fontweight='bold', fontsize=11)
+    if png_path.exists() and hitmap_path.exists():
+        png_arr = np.array(Image.open(png_path).convert('RGB'))
+        hitmap_arr = np.array(Image.open(hitmap_path).convert('RGB'))
+
+        if png_arr.shape == hitmap_arr.shape:
+            # Create overlay: PNG in blue channel, hitmap in red channel
+            overlay = np.zeros_like(png_arr)
+            overlay[:, :, 0] = hitmap_arr[:, :, 0]  # Red = hitmap
+            overlay[:, :, 2] = np.mean(png_arr, axis=2).astype(np.uint8)  # Blue = PNG
+            overlay[:, :, 1] = 128  # Green = neutral
+            ax_diff.imshow(overlay)
+            ax_diff.set_xlabel('Red=Hitmap, Blue=PNG', fontsize=9)
+        else:
+            ax_diff.text(0.5, 0.5, 'Size mismatch!', transform=ax_diff.transAxes,
+                        ha='center', va='center', fontsize=14, color='red')
+    ax_diff.axis('off')
+
+    # === Panel 8: Alignment Validation ===
+    ax_valid = fig.add_subplot(gs[1, 3])
+    ax_valid.set_title('Alignment Check', fontweight='bold', fontsize=11)
+    ax_valid.axis('off')
+
+    validation_text = []
+    if png_path.exists() and hitmap_path.exists():
+        png_img = Image.open(png_path)
+        hitmap_img = Image.open(hitmap_path)
+
+        # Size check
+        size_match = png_img.size == hitmap_img.size
+        validation_text.append(f"✓ Size match: {png_img.size}" if size_match
+                               else f"✗ Size mismatch: PNG={png_img.size}, Hitmap={hitmap_img.size}")
+
+        # Content bounds check
+        png_arr = np.array(png_img.convert('RGB'))
+        hitmap_arr = np.array(hitmap_img.convert('RGB'))
+
+        def find_bounds(arr):
+            white = np.array([255, 255, 255])
+            mask = np.any(np.abs(arr.astype(int) - white) > 20, axis=2)
+            rows = np.any(mask, axis=1)
+            cols = np.any(mask, axis=0)
+            if np.any(rows) and np.any(cols):
+                y_min, y_max = np.where(rows)[0][[0, -1]]
+                x_min, x_max = np.where(cols)[0][[0, -1]]
+                return (int(x_min), int(y_min), int(x_max), int(y_max))
+            return (0, 0, arr.shape[1], arr.shape[0])
+
+        png_bounds = find_bounds(png_arr)
+        hitmap_bounds = find_bounds(hitmap_arr)
+
+        bounds_match = png_bounds == hitmap_bounds
+        validation_text.append(f"✓ Content aligned" if bounds_match
+                               else f"✗ Content offset: {hitmap_bounds[0]-png_bounds[0]}, {hitmap_bounds[1]-png_bounds[1]}")
+
+        validation_text.append("")
+        validation_text.append(f"PNG bounds: {png_bounds}")
+        validation_text.append(f"Hitmap bounds: {hitmap_bounds}")
+
+    else:
+        validation_text.append("Files not found")
+
+    color = 'green' if all('✓' in t for t in validation_text if t.startswith('✓') or t.startswith('✗')) else 'red'
+    ax_valid.text(0.05, 0.95, '\n'.join(validation_text), transform=ax_valid.transAxes,
+                  fontsize=9, verticalalignment='top', fontfamily='monospace',
+                  bbox=dict(boxstyle='round', facecolor='#f0fff0' if color == 'green' else '#fff0f0', alpha=0.8))
+
+    # Save overview
+    overview_path = dir_path / "overview.png"
+    fig.savefig(overview_path, dpi=150, bbox_inches='tight', facecolor='white')
+    plt.close(fig)
+
+
 def save_bundle(
     data: Dict[str, Any],
     path: Union[str, Path],
@@ -580,14 +796,34 @@ def save_bundle(
                     logging.getLogger("scitex").debug(f"Could not embed metadata in {out_file}: {e}")
 
     # Save hit map for .pltz bundles (for interactive element selection)
-    if bundle_type == BundleType.PLTZ and 'hitmap_png' in data:
-        hitmap_file = dir_path / "plot_hitmap.png"
-        hitmap_data = data['hitmap_png']
-        if isinstance(hitmap_data, bytes):
-            with open(hitmap_file, 'wb') as f:
-                f.write(hitmap_data)
-        elif isinstance(hitmap_data, (str, Path)) and Path(hitmap_data).exists():
-            shutil.copy(hitmap_data, hitmap_file)
+    if bundle_type == BundleType.PLTZ:
+        # Save hitmap PNG
+        if 'hitmap_png' in data:
+            hitmap_file = dir_path / "plot_hitmap.png"
+            hitmap_data = data['hitmap_png']
+            if isinstance(hitmap_data, bytes):
+                with open(hitmap_file, 'wb') as f:
+                    f.write(hitmap_data)
+            elif isinstance(hitmap_data, (str, Path)) and Path(hitmap_data).exists():
+                shutil.copy(hitmap_data, hitmap_file)
+
+        # Save hitmap SVG
+        if 'hitmap_svg' in data:
+            hitmap_svg_file = dir_path / "plot_hitmap.svg"
+            hitmap_svg_data = data['hitmap_svg']
+            if isinstance(hitmap_svg_data, bytes):
+                with open(hitmap_svg_file, 'wb') as f:
+                    f.write(hitmap_svg_data)
+            elif isinstance(hitmap_svg_data, (str, Path)) and Path(hitmap_svg_data).exists():
+                shutil.copy(hitmap_svg_data, hitmap_svg_file)
+
+    # Generate overview.png for .pltz bundles
+    if bundle_type == BundleType.PLTZ:
+        try:
+            _generate_bundle_overview(dir_path, spec, data)
+        except Exception as e:
+            import logging
+            logging.getLogger("scitex").debug(f"Could not generate overview: {e}")
 
     # Save nested .pltz bundles for .figz
     if bundle_type == BundleType.FIGZ and 'plots' in data:
