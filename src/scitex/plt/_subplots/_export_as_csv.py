@@ -95,11 +95,13 @@ from ._export_as_csv_formatters import (
     # Custom scitex formatters
     _format_plot_box,
     _format_plot_conf_mat,
+    _format_stx_contour,
     _format_plot_ecdf,
     _format_plot_fillv,
     _format_plot_heatmap,
     _format_plot_image,
     _format_plot_imshow,
+    _format_stx_imshow,
     _format_plot_joyplot,
     _format_plot_kde,
     _format_plot_line,
@@ -112,6 +114,11 @@ from ._export_as_csv_formatters import (
     _format_plot_scatter_hist,
     _format_plot_shaded_line,
     _format_plot_violin,
+    # stx_ aliases formatters
+    _format_stx_scatter,
+    _format_stx_bar,
+    _format_stx_barh,
+    _format_stx_errorbar,
     # Seaborn formatters
     _format_sns_barplot,
     _format_sns_boxplot,
@@ -159,11 +166,13 @@ _FORMATTER_REGISTRY = {
     # Custom scitex methods
     "stx_box": _format_plot_box,
     "stx_conf_mat": _format_plot_conf_mat,
+    "stx_contour": _format_stx_contour,
     "stx_ecdf": _format_plot_ecdf,
     "stx_fillv": _format_plot_fillv,
     "stx_heatmap": _format_plot_heatmap,
     "stx_image": _format_plot_image,
     "plot_imshow": _format_plot_imshow,
+    "stx_imshow": _format_stx_imshow,
     "stx_joyplot": _format_plot_joyplot,
     "stx_kde": _format_plot_kde,
     "stx_line": _format_plot_line,
@@ -176,6 +185,11 @@ _FORMATTER_REGISTRY = {
     "stx_scatter_hist": _format_plot_scatter_hist,
     "stx_shaded_line": _format_plot_shaded_line,
     "stx_violin": _format_plot_violin,
+    # stx_ aliases
+    "stx_scatter": _format_stx_scatter,
+    "stx_bar": _format_stx_bar,
+    "stx_barh": _format_stx_barh,
+    "stx_errorbar": _format_stx_errorbar,
     # Seaborn methods (sns_ prefix)
     "sns_barplot": _format_sns_barplot,
     "sns_boxplot": _format_sns_boxplot,
@@ -357,6 +371,8 @@ def format_record(record, record_index=0):
         return _format_plot_box(id, tracked_dict, kwargs)
     elif method == "stx_conf_mat":
         return _format_plot_conf_mat(id, tracked_dict, kwargs)
+    elif method == "stx_contour":
+        return _format_stx_contour(id, tracked_dict, kwargs)
     elif method == "stx_ecdf":
         return _format_plot_ecdf(id, tracked_dict, kwargs)
     elif method == "stx_fillv":
@@ -367,6 +383,8 @@ def format_record(record, record_index=0):
         return _format_plot_image(id, tracked_dict, kwargs)
     elif method == "plot_imshow":
         return _format_plot_imshow(id, tracked_dict, kwargs)
+    elif method == "stx_imshow":
+        return _format_stx_imshow(id, tracked_dict, kwargs)
     elif method == "stx_joyplot":
         return _format_plot_joyplot(id, tracked_dict, kwargs)
     elif method == "stx_kde":
@@ -391,6 +409,16 @@ def format_record(record, record_index=0):
         return _format_plot_shaded_line(id, tracked_dict, kwargs)
     elif method == "stx_violin":
         return _format_plot_violin(id, tracked_dict, kwargs)
+
+    # stx_ aliases
+    elif method == "stx_scatter":
+        return _format_stx_scatter(id, tracked_dict, kwargs)
+    elif method == "stx_bar":
+        return _format_stx_bar(id, tracked_dict, kwargs)
+    elif method == "stx_barh":
+        return _format_stx_barh(id, tracked_dict, kwargs)
+    elif method == "stx_errorbar":
+        return _format_stx_errorbar(id, tracked_dict, kwargs)
 
     # Seaborn functions (sns_ prefix)
     elif method == "sns_barplot":
