@@ -3,13 +3,16 @@
 # Timestamp: "2025-12-13 (ywatanabe)"
 # File: _wrappers.py - Seaborn plot wrappers
 
-"""Seaborn plot wrappers with scitex integration."""
+"""Seaborn plot wrappers with SciTeX integration."""
 
 import os
+from typing import Optional, Union
 
-import scitex
 import numpy as np
+import pandas as pd
 import seaborn as sns
+
+from scitex.types import ArrayLike
 
 from ._base import sns_copy_doc
 
@@ -18,15 +21,54 @@ __DIR__ = os.path.dirname(__FILE__)
 
 
 class SeabornWrappersMixin:
-    """Mixin providing sns_ prefixed seaborn wrappers."""
+    """Mixin providing sns_ prefixed seaborn wrappers.
+
+    All methods use the seaborn DataFrame-centric interface:
+    - data: DataFrame containing the data
+    - x, y: Column names for axes
+    - hue: Column name for color grouping
+
+    These methods integrate with SciTeX tracking and styling.
+    """
 
     def _get_ax_module(self):
         """Lazy import ax module to avoid circular imports."""
         from .....plt import ax as ax_module
+
         return ax_module
 
     @sns_copy_doc
-    def sns_barplot(self, data=None, x=None, y=None, track=True, id=None, **kwargs):
+    def sns_barplot(
+        self,
+        data: Optional[pd.DataFrame] = None,
+        *,
+        x: Optional[str] = None,
+        y: Optional[str] = None,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
+        """Create a bar plot showing point estimates and error bars.
+
+        Parameters
+        ----------
+        data : DataFrame, optional
+            Input data structure.
+        x : str, optional
+            Column name for x-axis categories.
+        y : str, optional
+            Column name for y-axis values.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.barplot`.
+
+        See Also
+        --------
+        stx_bar : Array-based bar plot.
+        """
         self._sns_base_xyhue(
             "sns_barplot", data=data, x=x, y=y, track=track, id=id, **kwargs
         )
@@ -34,20 +76,46 @@ class SeabornWrappersMixin:
     @sns_copy_doc
     def sns_boxplot(
         self,
-        data=None,
-        x=None,
-        y=None,
-        strip=False,
-        track=True,
-        id=None,
+        data: Optional[pd.DataFrame] = None,
+        *,
+        x: Optional[str] = None,
+        y: Optional[str] = None,
+        strip: bool = False,
+        track: bool = True,
+        id: Optional[str] = None,
         **kwargs,
     ):
+        """Create a box plot showing distributions with quartiles.
+
+        Parameters
+        ----------
+        data : DataFrame, optional
+            Input data structure.
+        x : str, optional
+            Column name for x-axis grouping.
+        y : str, optional
+            Column name for y-axis values.
+        strip : bool, default False
+            If True, overlay a stripplot showing individual points.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.boxplot`.
+
+        See Also
+        --------
+        stx_box : Array-based boxplot.
+        sns_violinplot : Violin plot alternative.
+        """
         self._sns_base_xyhue(
             "sns_boxplot", data=data, x=x, y=y, track=track, id=id, **kwargs
         )
 
         # Post-processing: Style boxplot with black medians
         from scitex.plt.utils import mm_to_pt
+
         lw_pt = mm_to_pt(0.2)
 
         for line in self._axis_mpl.get_lines():
@@ -74,26 +142,83 @@ class SeabornWrappersMixin:
             )
 
     @sns_copy_doc
-    def sns_heatmap(self, *args, xyz=False, track=True, id=None, **kwargs):
+    def sns_heatmap(
+        self,
+        data: Union[pd.DataFrame, ArrayLike],
+        *,
+        xyz: bool = False,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
+        """Create a heatmap from rectangular data.
+
+        Parameters
+        ----------
+        data : DataFrame or array-like
+            2D dataset for the heatmap.
+        xyz : bool, default False
+            If True, convert data to XYZ format before plotting.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.heatmap`.
+
+        See Also
+        --------
+        stx_heatmap : Array-based annotated heatmap.
+        stx_image : Simple image display.
+        """
+        import scitex
+
         method_name = "sns_heatmap"
-        df = args[0]
+        df = data
         if xyz:
             df = scitex.pd.to_xyz(df)
-        self._sns_base(method_name, *args, track=track, track_obj=df, id=id, **kwargs)
+        self._sns_base(method_name, df, track=track, track_obj=df, id=id, **kwargs)
 
     @sns_copy_doc
     def sns_histplot(
         self,
-        data=None,
-        x=None,
-        y=None,
-        bins=10,
-        align_bins=True,
-        track=True,
-        id=None,
+        data: Optional[pd.DataFrame] = None,
+        *,
+        x: Optional[str] = None,
+        y: Optional[str] = None,
+        bins: int = 10,
+        align_bins: bool = True,
+        track: bool = True,
+        id: Optional[str] = None,
         **kwargs,
     ):
-        """Plot histogram with bin alignment support."""
+        """Create a histogram with optional kernel density estimate.
+
+        Parameters
+        ----------
+        data : DataFrame, optional
+            Input data structure.
+        x : str, optional
+            Column name for x-axis values.
+        y : str, optional
+            Column name for y-axis values.
+        bins : int, default 10
+            Number of histogram bins.
+        align_bins : bool, default True
+            Align bins across multiple histograms on same axes.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.histplot`.
+            Common options: kde, stat, element, hue.
+
+        See Also
+        --------
+        hist : Array-based histogram.
+        stx_kde : Kernel density estimate.
+        """
         method_name = "sns_histplot"
 
         plot_data = None
@@ -110,6 +235,7 @@ class SeabornWrappersMixin:
 
         if align_bins and plot_data is not None:
             from .....plt.utils import histogram_bin_manager
+
             bins_val, range_val = histogram_bin_manager.register_histogram(
                 axis_id, hist_id, plot_data, bins, range_value
             )
@@ -145,15 +271,42 @@ class SeabornWrappersMixin:
     @sns_copy_doc
     def sns_kdeplot(
         self,
-        data=None,
-        x=None,
-        y=None,
-        xlim=None,
-        ylim=None,
-        track=True,
-        id=None,
+        data: Optional[pd.DataFrame] = None,
+        *,
+        x: Optional[str] = None,
+        y: Optional[str] = None,
+        xlim: Optional[tuple] = None,
+        ylim: Optional[tuple] = None,
+        track: bool = True,
+        id: Optional[str] = None,
         **kwargs,
     ):
+        """Create a kernel density estimate plot.
+
+        Parameters
+        ----------
+        data : DataFrame, optional
+            Input data structure.
+        x : str, optional
+            Column name for x-axis values.
+        y : str, optional
+            Column name for y-axis values.
+        xlim : tuple, optional
+            Limits for x-axis KDE range.
+        ylim : tuple, optional
+            Limits for y-axis KDE range.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to the KDE function.
+
+        See Also
+        --------
+        stx_kde : Array-based KDE plot.
+        sns_histplot : Histogram with optional KDE.
+        """
         hue_col = kwargs.pop("hue", None)
 
         if hue_col:
@@ -176,11 +329,61 @@ class SeabornWrappersMixin:
             self.stx_kde(_data, xlim=lim, **kwargs)
 
     @sns_copy_doc
-    def sns_pairplot(self, *args, track=True, id=None, **kwargs):
+    def sns_pairplot(
+        self,
+        *args,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
+        """Create a grid of pairwise relationships in a dataset.
+
+        Parameters
+        ----------
+        *args
+            Positional arguments passed to `seaborn.pairplot`.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.pairplot`.
+        """
         self._sns_base("sns_pairplot", *args, track=track, id=id, **kwargs)
 
     @sns_copy_doc
-    def sns_scatterplot(self, data=None, x=None, y=None, track=True, id=None, **kwargs):
+    def sns_scatterplot(
+        self,
+        data: Optional[pd.DataFrame] = None,
+        *,
+        x: Optional[str] = None,
+        y: Optional[str] = None,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
+        """Create a scatter plot with semantic mappings.
+
+        Parameters
+        ----------
+        data : DataFrame, optional
+            Input data structure.
+        x : str, optional
+            Column name for x-axis values.
+        y : str, optional
+            Column name for y-axis values.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.scatterplot`.
+            Common options: hue, size, style.
+
+        See Also
+        --------
+        stx_scatter : Array-based scatter plot.
+        """
         self._sns_base_xyhue(
             "sns_scatterplot",
             data=data,
@@ -192,7 +395,39 @@ class SeabornWrappersMixin:
         )
 
     @sns_copy_doc
-    def sns_lineplot(self, data=None, x=None, y=None, track=True, id=None, **kwargs):
+    def sns_lineplot(
+        self,
+        data: Optional[pd.DataFrame] = None,
+        *,
+        x: Optional[str] = None,
+        y: Optional[str] = None,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
+        """Create a line plot with semantic mappings.
+
+        Parameters
+        ----------
+        data : DataFrame, optional
+            Input data structure.
+        x : str, optional
+            Column name for x-axis values.
+        y : str, optional
+            Column name for y-axis values.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.lineplot`.
+            Common options: hue, size, style, estimator.
+
+        See Also
+        --------
+        stx_line : Array-based line plot.
+        stx_mean_std : Line with uncertainty shading.
+        """
         self._sns_base_xyhue(
             "sns_lineplot",
             data=data,
@@ -204,13 +439,75 @@ class SeabornWrappersMixin:
         )
 
     @sns_copy_doc
-    def sns_swarmplot(self, data=None, x=None, y=None, track=True, id=None, **kwargs):
+    def sns_swarmplot(
+        self,
+        data: Optional[pd.DataFrame] = None,
+        *,
+        x: Optional[str] = None,
+        y: Optional[str] = None,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
+        """Create a categorical scatter plot with non-overlapping points.
+
+        Parameters
+        ----------
+        data : DataFrame, optional
+            Input data structure.
+        x : str, optional
+            Column name for x-axis grouping.
+        y : str, optional
+            Column name for y-axis values.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.swarmplot`.
+
+        See Also
+        --------
+        sns_stripplot : Jittered categorical scatter.
+        sns_boxplot : Box plot for distributions.
+        """
         self._sns_base_xyhue(
             "sns_swarmplot", data=data, x=x, y=y, track=track, id=id, **kwargs
         )
 
     @sns_copy_doc
-    def sns_stripplot(self, data=None, x=None, y=None, track=True, id=None, **kwargs):
+    def sns_stripplot(
+        self,
+        data: Optional[pd.DataFrame] = None,
+        *,
+        x: Optional[str] = None,
+        y: Optional[str] = None,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
+        """Create a categorical scatter plot with jittered points.
+
+        Parameters
+        ----------
+        data : DataFrame, optional
+            Input data structure.
+        x : str, optional
+            Column name for x-axis grouping.
+        y : str, optional
+            Column name for y-axis values.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.stripplot`.
+
+        See Also
+        --------
+        sns_swarmplot : Non-overlapping categorical scatter.
+        sns_boxplot : Often combined with stripplot.
+        """
         self._sns_base_xyhue(
             "sns_stripplot", data=data, x=x, y=y, track=track, id=id, **kwargs
         )
@@ -218,14 +515,39 @@ class SeabornWrappersMixin:
     @sns_copy_doc
     def sns_violinplot(
         self,
-        data=None,
-        x=None,
-        y=None,
-        track=True,
-        id=None,
-        half=False,
+        data: Optional[pd.DataFrame] = None,
+        *,
+        x: Optional[str] = None,
+        y: Optional[str] = None,
+        half: bool = False,
+        track: bool = True,
+        id: Optional[str] = None,
         **kwargs,
     ):
+        """Create a violin plot combining box plot with kernel density.
+
+        Parameters
+        ----------
+        data : DataFrame, optional
+            Input data structure.
+        x : str, optional
+            Column name for x-axis grouping.
+        y : str, optional
+            Column name for y-axis values.
+        half : bool, default False
+            If True, draw half-violins (useful for paired comparisons).
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.violinplot`.
+
+        See Also
+        --------
+        stx_violin : Array-based violin plot.
+        sns_boxplot : Box plot alternative.
+        """
         if half:
             with self._no_tracking():
                 self._axis_mpl = self._get_ax_module().plot_half_violin(
@@ -248,7 +570,30 @@ class SeabornWrappersMixin:
         return self._axis_mpl
 
     @sns_copy_doc
-    def sns_jointplot(self, *args, track=True, id=None, **kwargs):
+    def sns_jointplot(
+        self,
+        *args,
+        track: bool = True,
+        id: Optional[str] = None,
+        **kwargs,
+    ):
+        """Create a figure with joint and marginal distributions.
+
+        Parameters
+        ----------
+        *args
+            Positional arguments passed to `seaborn.jointplot`.
+        track : bool, default True
+            Enable data tracking for reproducibility.
+        id : str, optional
+            Unique identifier for this plot element.
+        **kwargs
+            Additional arguments passed to `seaborn.jointplot`.
+
+        See Also
+        --------
+        stx_scatter_hist : Array-based scatter with marginal histograms.
+        """
         self._sns_base("sns_jointplot", *args, track=track, id=id, **kwargs)
 
 
