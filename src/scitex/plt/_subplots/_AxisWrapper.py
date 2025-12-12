@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 from ._AxisWrapperMixins import (
     AdjustmentMixin,
     MatplotlibPlotMixin,
+    RawMatplotlibMixin,
     SeabornMixin,
     TrackingMixin,
     UnitAwareMixin,
@@ -29,7 +30,12 @@ from scitex.plt.styles import apply_plot_defaults, apply_plot_postprocess
 
 
 class AxisWrapper(
-    MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMixin, UnitAwareMixin
+    MatplotlibPlotMixin,
+    SeabornMixin,
+    RawMatplotlibMixin,
+    AdjustmentMixin,
+    TrackingMixin,
+    UnitAwareMixin,
 ):
     def __init__(self, fig_scitex, axis_mpl, track):
         """Initialize the AxisWrapper.
