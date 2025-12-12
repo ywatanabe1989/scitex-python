@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_errorbar(plt, rng):
+def plot_errorbar(plt, rng, ax=None):
     """Error bar plot."""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
 
     x = np.arange(1, 8)
     y1 = rng.uniform(10, 20, len(x))

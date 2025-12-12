@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_pie(plt, rng):
+def plot_pie(plt, rng, ax=None):
     """Pie chart - wedges should be grouped."""
-    fig, ax = plt.subplots(figsize=(8, 8))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 8))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
 
     sizes = rng.uniform(10, 30, 6)
     labels = [

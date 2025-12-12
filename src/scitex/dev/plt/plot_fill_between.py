@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_fill_between(plt, rng):
+def plot_fill_between(plt, rng, ax=None):
     """Fill between areas."""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
     x = np.linspace(0, 10, 100)
 
     y1 = np.sin(x)
