@@ -15,6 +15,7 @@ Handles:
 
 import json
 import shutil
+import warnings
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -366,7 +367,9 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict) -> None:
 
     # Save overview
     overview_path = dir_path / "overview.png"
-    fig.savefig(overview_path, dpi=150, bbox_inches="tight", facecolor="white")
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message=".*tight_layout.*")
+        fig.savefig(overview_path, dpi=150, bbox_inches="tight", facecolor="white")
     plt.close(fig)
 
 

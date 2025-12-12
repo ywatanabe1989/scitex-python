@@ -22,11 +22,14 @@ Reserved colors:
 - Dark gray (#010101, ID=65793): Non-selectable axes elements (spines, labels, ticks)
 """
 
+import warnings
 from typing import Dict, List, Any, Optional, Tuple
 import numpy as np
 
 __all__ = [
     'get_all_artists',
+    'get_all_artists_with_groups',
+    'detect_logical_groups',
     'generate_hitmap_id_colors',
     'extract_path_data',
     'query_hitmap_neighborhood',
@@ -116,6 +119,308 @@ def get_all_artists(fig, include_text: bool = False) -> List[Tuple[Any, int, str
                     artists.append((text, ax_idx, 'text'))
 
     return artists
+
+
+def detect_logical_groups(fig) -> Dict[str, Dict[str, Any]]:
+    """
+    Detect logical groups in a matplotlib figure.
+
+    Logical groups represent high-level plot elements that may consist of
+    multiple physical matplotlib artists. For example:
+    - Histogram: Many Rectangle patches grouped as one "histogram"
+    - Bar series: BarContainer with multiple bars
+    - Box plot: Box, whiskers, caps, median, fliers as one "boxplot"
+    - Error bars: Line + error caps as one "errorbar"
+
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        The figure to analyze.
+
+    Returns
+    -------
+    dict
+        Dictionary mapping group_id to group info:
+        {
+            "histogram_0": {
+                "type": "histogram",
+                "label": "...",
+                "axes_index": 0,
+                "artists": [list of matplotlib artists],
+                "role": "logical"
+            },
+            ...
+        }
+    """
+    groups = {}
+    group_counter = {}  # Track count per type for unique IDs
+
+    def get_group_id(group_type: str, ax_idx: int) -> str:
+        """Generate unique group ID."""
+        key = f"{group_type}_{ax_idx}"
+        if key not in group_counter:
+            group_counter[key] = 0
+        idx = group_counter[key]
+        group_counter[key] += 1
+        return f"{group_type}_{ax_idx}_{idx}"
+
+    for ax_idx, ax in enumerate(fig.axes):
+        # 1. Detect BarContainers (covers bar charts and histograms)
+        # First, count how many BarContainers exist on this axis
+        bar_containers = [c for c in ax.containers if 'BarContainer' in type(c).__name__]
+        n_bar_containers = len(bar_containers)
+
+        for container in ax.containers:
+            container_type = type(container).__name__
+
+            if 'BarContainer' in container_type:
+                # Determine if it's a histogram, grouped bar series, or simple categorical bar
+                patches = list(container.patches) if hasattr(container, 'patches') else []
+                if not patches:
+                    continue
+
+                # Check if bars are adjacent (histogram) or spaced (bar chart)
+                is_histogram = False
+                if len(patches) > 1:
+                    # Check if bars are adjacent (no gaps between them)
+                    widths = [p.get_width() for p in patches]
+                    x_positions = [p.get_x() for p in patches]
+                    if len(x_positions) > 1:
+                        gaps = [x_positions[i+1] - (x_positions[i] + widths[i])
+                                for i in range(len(x_positions)-1)]
+                        # If gaps are very small relative to bar width, it's a histogram
+                        avg_width = sum(widths) / len(widths)
+                        is_histogram = all(abs(g) < avg_width * 0.1 for g in gaps)
+
+                if is_histogram:
+                    # Histogram: group all bins together
+                    group_type = 'histogram'
+                    group_id = get_group_id(group_type, ax_idx)
+
+                    label = ''
+                    if hasattr(container, 'get_label'):
+                        label = container.get_label()
+                    if not label or label.startswith('_'):
+                        label = f"{group_type}_{len([g for g in groups if group_type in g])}"
+
+                    groups[group_id] = {
+                        'type': group_type,
+                        'label': label,
+                        'axes_index': ax_idx,
+                        'artists': patches,
+                        'artist_types': ['rectangle'] * len(patches),
+                        'role': 'logical',
+                        'member_count': len(patches),
+                    }
+
+                elif n_bar_containers > 1:
+                    # Multiple bar containers = grouped bar chart
+                    # Group bars by series (each container is a series)
+                    group_type = 'bar_series'
+                    group_id = get_group_id(group_type, ax_idx)
+
+                    label = ''
+                    if hasattr(container, 'get_label'):
+                        label = container.get_label()
+                    if not label or label.startswith('_'):
+                        label = f"{group_type}_{len([g for g in groups if group_type in g])}"
+
+                    groups[group_id] = {
+                        'type': group_type,
+                        'label': label,
+                        'axes_index': ax_idx,
+                        'artists': patches,
+                        'artist_types': ['rectangle'] * len(patches),
+                        'role': 'logical',
+                        'member_count': len(patches),
+                    }
+
+                # else: Single bar container with spaced bars = simple categorical bar chart
+                # Don't create a group - each bar is standalone and selectable individually
+
+            elif 'ErrorbarContainer' in container_type:
+                # Error bar container
+                group_id = get_group_id('errorbar', ax_idx)
+                artists = []
+                artist_types = []
+
+                if hasattr(container, 'lines'):
+                    data_line, caplines, barlinecols = container.lines
+                    if data_line:
+                        artists.append(data_line)
+                        artist_types.append('line')
+                    artists.extend(caplines)
+                    artist_types.extend(['line'] * len(caplines))
+                    artists.extend(barlinecols)
+                    artist_types.extend(['line_collection'] * len(barlinecols))
+
+                label = container.get_label() if hasattr(container, 'get_label') else ''
+                if not label or label.startswith('_'):
+                    label = f"errorbar_{len([g for g in groups if 'errorbar' in g])}"
+
+                groups[group_id] = {
+                    'type': 'errorbar',
+                    'label': label,
+                    'axes_index': ax_idx,
+                    'artists': artists,
+                    'artist_types': artist_types,
+                    'role': 'logical',
+                    'member_count': len(artists),
+                }
+
+        # 2. Detect box plots (look for specific pattern of artists)
+        # Box plots create: boxes (Rectangle), whiskers (Line2D), caps (Line2D),
+        # medians (Line2D), fliers (Line2D)
+        # They are typically created via ax.bxp() or ax.boxplot()
+        if hasattr(ax, '_boxplot_info'):
+            # Some matplotlib versions store boxplot info
+            pass  # Handle if available
+
+        # 3. Detect pie charts (Wedge patches)
+        wedges = [p for p in ax.patches if type(p).__name__ == 'Wedge']
+        if wedges:
+            group_id = get_group_id('pie', ax_idx)
+            groups[group_id] = {
+                'type': 'pie',
+                'label': 'Pie Chart',
+                'axes_index': ax_idx,
+                'artists': wedges,
+                'artist_types': ['wedge'] * len(wedges),
+                'role': 'logical',
+                'member_count': len(wedges),
+            }
+
+        # 4. Detect contour sets (multiple PolyCollections from same contour call)
+        # Contours typically have collections with increasing/decreasing levels
+        poly_collections = [c for c in ax.collections
+                          if 'PolyCollection' in type(c).__name__
+                          and hasattr(c, 'get_array')
+                          and c.get_array() is not None]
+        if len(poly_collections) > 2:
+            # Likely a contour plot
+            group_id = get_group_id('contour', ax_idx)
+            groups[group_id] = {
+                'type': 'contour',
+                'label': 'Contour Plot',
+                'axes_index': ax_idx,
+                'artists': poly_collections,
+                'artist_types': ['poly_collection'] * len(poly_collections),
+                'role': 'logical',
+                'member_count': len(poly_collections),
+            }
+
+    return groups
+
+
+def get_all_artists_with_groups(
+    fig,
+    include_text: bool = False
+) -> Tuple[List[Tuple[Any, int, str, Optional[str]]], Dict[str, Dict[str, Any]]]:
+    """
+    Extract all selectable artists from a figure with logical group information.
+
+    This is an enhanced version of get_all_artists() that also detects and
+    returns logical groups (e.g., histogram bins grouped as one element).
+
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        The figure to extract artists from.
+    include_text : bool
+        Whether to include text elements.
+
+    Returns
+    -------
+    tuple
+        (artists_list, groups_dict) where:
+        - artists_list: List of (artist, axes_index, artist_type, group_id) tuples
+        - groups_dict: Dictionary of logical groups
+
+    Examples
+    --------
+    >>> artists, groups = get_all_artists_with_groups(fig)
+    >>> for artist, ax_idx, atype, group_id in artists:
+    ...     if group_id:
+    ...         print(f"{atype} belongs to group {group_id}")
+    """
+    # First, detect logical groups
+    groups = detect_logical_groups(fig)
+
+    # Create a mapping from artist to group_id
+    artist_to_group = {}
+    for group_id, group_info in groups.items():
+        for artist in group_info['artists']:
+            artist_to_group[id(artist)] = group_id
+
+    # Now get all artists with group information
+    artists_with_groups = []
+
+    for ax_idx, ax in enumerate(fig.axes):
+        # Lines (Line2D)
+        for line in ax.get_lines():
+            label = line.get_label()
+            if not label.startswith('_'):  # Skip internal lines
+                group_id = artist_to_group.get(id(line))
+                artists_with_groups.append((line, ax_idx, 'line', group_id))
+
+        # Scatter plots (PathCollection)
+        for coll in ax.collections:
+            coll_type = type(coll).__name__
+            group_id = artist_to_group.get(id(coll))
+            if 'PathCollection' in coll_type:
+                artists_with_groups.append((coll, ax_idx, 'scatter', group_id))
+            elif 'PolyCollection' in coll_type or 'FillBetween' in coll_type:
+                artists_with_groups.append((coll, ax_idx, 'fill', group_id))
+            elif 'QuadMesh' in coll_type:
+                artists_with_groups.append((coll, ax_idx, 'mesh', group_id))
+
+        # Bars - handle both container level and individual patches
+        processed_patches = set()
+        for container in ax.containers:
+            if hasattr(container, 'patches') and container.patches:
+                # Check if first patch belongs to a group
+                group_id = artist_to_group.get(id(container.patches[0]))
+
+                if group_id:
+                    # Grouped bars (histogram or bar_series): add container as single element
+                    artists_with_groups.append((container, ax_idx, 'bar', group_id))
+                    # Mark patches as processed
+                    for patch in container.patches:
+                        processed_patches.add(id(patch))
+                else:
+                    # Simple categorical bar: add each patch individually (standalone)
+                    for patch in container.patches:
+                        artists_with_groups.append((patch, ax_idx, 'rectangle', None))
+                        processed_patches.add(id(patch))
+
+        # Individual patches (rectangles, circles, etc.) not in containers
+        for patch in ax.patches:
+            if id(patch) in processed_patches:
+                continue
+            patch_type = type(patch).__name__
+            group_id = artist_to_group.get(id(patch))
+            if patch_type == 'Rectangle':
+                artists_with_groups.append((patch, ax_idx, 'rectangle', group_id))
+            elif patch_type in ('Circle', 'Ellipse'):
+                artists_with_groups.append((patch, ax_idx, 'circle', group_id))
+            elif patch_type == 'Polygon':
+                artists_with_groups.append((patch, ax_idx, 'polygon', group_id))
+            elif patch_type == 'Wedge':
+                artists_with_groups.append((patch, ax_idx, 'wedge', group_id))
+
+        # Images
+        for img in ax.images:
+            group_id = artist_to_group.get(id(img))
+            artists_with_groups.append((img, ax_idx, 'image', group_id))
+
+        # Text (optional)
+        if include_text:
+            for text in ax.texts:
+                if text.get_text():
+                    group_id = artist_to_group.get(id(text))
+                    artists_with_groups.append((text, ax_idx, 'text', group_id))
+
+    return artists_with_groups, groups
 
 
 def _id_to_rgb(element_id: int) -> Tuple[int, int, int]:
@@ -588,7 +893,9 @@ def extract_path_data(
     Performance: ~192ms extraction, ~0.01ms client-side queries
     Supports: resize/zoom (transform coordinates client-side)
     """
-    fig.canvas.draw()  # Ensure transforms are computed
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message=".*tight_layout.*")
+        fig.canvas.draw()  # Ensure transforms are computed
 
     artists = get_all_artists(fig, include_text)
 
@@ -818,13 +1125,16 @@ def save_hitmap_png(hitmap: np.ndarray, path: str, color_map: Dict = None):
 def apply_hitmap_colors(
     fig,
     include_text: bool = False,
-) -> Tuple[List[Dict[str, Any]], Dict[int, Dict[str, Any]]]:
+) -> Tuple[List[Dict[str, Any]], Dict[int, Dict[str, Any]], Dict[str, Dict[str, Any]]]:
     """
     Apply unique ID colors to data elements in a figure.
 
     This function modifies data elements (lines, patches, etc.) to have unique
     RGB colors for hit testing, while keeping axes/spines/labels unchanged.
     This preserves the bbox_inches='tight' bounding box calculation.
+
+    Also detects logical groups (histogram, bar_series, etc.) and assigns
+    group_id to each element for hierarchical selection.
 
     Parameters
     ----------
@@ -836,16 +1146,18 @@ def apply_hitmap_colors(
     Returns
     -------
     tuple
-        (original_props, color_map) where:
+        (original_props, color_map, groups) where:
         - original_props: list of dicts with original artist properties for restoration
-        - color_map: dict mapping ID to element info
+        - color_map: dict mapping ID to element info (includes group_id, role)
+        - groups: dict mapping group_id to logical group info
     """
-    artists = get_all_artists(fig, include_text)
+    # Get artists with group information
+    artists_with_groups, groups = get_all_artists_with_groups(fig, include_text)
 
     original_props = []
     color_map = {}
 
-    for i, (artist, ax_idx, artist_type) in enumerate(artists):
+    for i, (artist, ax_idx, artist_type, group_id) in enumerate(artists_with_groups):
         element_id = i + 1
         r, g, b = _id_to_rgb(element_id)
         hex_color = f"#{r:02x}{g:02x}{b:02x}"
@@ -869,12 +1181,15 @@ def apply_hitmap_colors(
             pass
         original_props.append(props)
 
-        # Build color map entry
+        # Build color map entry with group information
         label = ''
         if hasattr(artist, 'get_label'):
             label = artist.get_label()
             if label.startswith('_'):
                 label = f'{artist_type}_{i}'
+
+        # Determine role based on group membership
+        role = 'physical' if group_id else 'standalone'
 
         color_map[element_id] = {
             'id': element_id,
@@ -882,6 +1197,8 @@ def apply_hitmap_colors(
             'label': label,
             'axes_index': ax_idx,
             'rgb': [r, g, b],
+            'group_id': group_id,  # NEW: logical group this element belongs to
+            'role': role,  # NEW: 'physical' (part of group), 'standalone' (no group), or 'logical' (is a group)
         }
 
         # Apply ID color
@@ -890,7 +1207,32 @@ def apply_hitmap_colors(
         except Exception:
             pass
 
-    return original_props, color_map
+    # Add RGB color to groups for logical selection
+    # Groups get IDs starting after all physical elements
+    group_id_start = len(artists_with_groups) + 1
+    groups_with_colors = {}
+    for i, (gid, ginfo) in enumerate(groups.items()):
+        logical_id = group_id_start + i
+        r, g, b = _id_to_rgb(logical_id)
+
+        # Find member element IDs
+        member_ids = []
+        for elem_id, elem_info in color_map.items():
+            if elem_info.get('group_id') == gid:
+                member_ids.append(elem_id)
+
+        groups_with_colors[gid] = {
+            'id': logical_id,
+            'type': ginfo['type'],
+            'label': ginfo['label'],
+            'axes_index': ginfo['axes_index'],
+            'rgb': [r, g, b],
+            'role': 'logical',
+            'member_ids': member_ids,
+            'member_count': ginfo['member_count'],
+        }
+
+    return original_props, color_map, groups_with_colors
 
 
 def restore_original_colors(original_props: List[Dict[str, Any]]):
