@@ -724,6 +724,15 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
 
     # Save figure to multiple formats
     import warnings
+    from PIL import Image as PILImage
+    from scitex.plt.utils._hitmap import (
+        apply_hitmap_colors, restore_original_colors, extract_path_data,
+        HITMAP_BACKGROUND_COLOR, HITMAP_AXES_COLOR
+    )
+
+    crop_box = None
+    color_map = {}
+
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir)
 
@@ -732,67 +741,151 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
             warnings.filterwarnings('ignore', message='.*tight_layout.*')
 
             # Always use transparent background for SciTeX figures (both light and dark themes)
-            # This allows them to be overlaid on any background color
             use_transparent = True
 
             # Save PNG (raster) - required
             png_path = tmp_path / "plot.png"
             fig.savefig(png_path, dpi=dpi, bbox_inches='tight', format='png', transparent=use_transparent)
-            with open(png_path, 'rb') as f:
-                bundle_data['png'] = f.read()
 
             # Save SVG (vector) - optional
             svg_path = tmp_path / "plot.svg"
             fig.savefig(svg_path, bbox_inches='tight', format='svg')
-            with open(svg_path, 'rb') as f:
-                bundle_data['svg'] = f.read()
 
             # Save PDF (vector) - optional
             pdf_path = tmp_path / "plot.pdf"
             fig.savefig(pdf_path, bbox_inches='tight', format='pdf')
+
+            # Now generate hitmap by applying ID colors to data elements ONLY
+            # Keep axes/spines/labels with original colors to preserve bbox_inches='tight' bounds
+            original_props, color_map = apply_hitmap_colors(fig)
+
+            # Store original background colors and set hitmap colors
+            original_fig_facecolor = fig.patch.get_facecolor()
+            original_ax_facecolors = []
+            original_ax_props = []
+            for ax in fig.axes:
+                original_ax_facecolors.append(ax.get_facecolor())
+                # Store axis element colors for restoration
+                ax_props = {
+                    'ax': ax,
+                    'spine_colors': {k: v.get_edgecolor() for k, v in ax.spines.items()},
+                    'tick_colors': ax.tick_params,  # Will restore later
+                    'xlabel_color': ax.xaxis.label.get_color(),
+                    'ylabel_color': ax.yaxis.label.get_color(),
+                    'title_color': ax.title.get_color(),
+                }
+                original_ax_props.append(ax_props)
+                # Set hitmap colors for non-data elements
+                ax.set_facecolor(HITMAP_BACKGROUND_COLOR)
+                for spine in ax.spines.values():
+                    spine.set_color(HITMAP_AXES_COLOR)
+                ax.tick_params(colors=HITMAP_AXES_COLOR, labelcolor=HITMAP_AXES_COLOR)
+                ax.xaxis.label.set_color(HITMAP_AXES_COLOR)
+                ax.yaxis.label.set_color(HITMAP_AXES_COLOR)
+                ax.title.set_color(HITMAP_AXES_COLOR)
+
+            fig.patch.set_facecolor(HITMAP_BACKGROUND_COLOR)
+
+            # Save hitmap PNG with same bbox_inches='tight'
+            hitmap_path = tmp_path / "plot_hitmap.png"
+            fig.savefig(hitmap_path, dpi=dpi, bbox_inches='tight', format='png', facecolor=HITMAP_BACKGROUND_COLOR)
+
+            # Optimize hitmap PNG size using zlib compression
+            try:
+                hitmap_img = PILImage.open(hitmap_path).convert('RGB')
+                hitmap_img.save(hitmap_path, format='PNG', optimize=True, compress_level=9)
+            except Exception:
+                pass  # Keep original if optimization fails
+
+            # Save hitmap SVG with same bbox_inches='tight'
+            hitmap_svg_path = tmp_path / "plot_hitmap.svg"
+            fig.savefig(hitmap_svg_path, bbox_inches='tight', format='svg')
+
+            # Restore original colors (data elements)
+            restore_original_colors(original_props)
+
+            # Restore original figure and axes colors
+            fig.patch.set_facecolor(original_fig_facecolor)
+            for i, ax in enumerate(fig.axes):
+                ax.set_facecolor(original_ax_facecolors[i])
+                if i < len(original_ax_props):
+                    props = original_ax_props[i]
+                    for spine_name, color in props['spine_colors'].items():
+                        ax.spines[spine_name].set_edgecolor(color)
+                    ax.xaxis.label.set_color(props['xlabel_color'])
+                    ax.yaxis.label.set_color(props['ylabel_color'])
+                    ax.title.set_color(props['title_color'])
+
+            # Now apply auto-crop to BOTH PNG and hitmap with same parameters
+            try:
+                from scitex.plt.utils._crop import crop
+
+                # Crop PNG and get crop coordinates
+                _, crop_offset = crop(
+                    str(png_path),
+                    output_path=str(png_path),
+                    overwrite=True,
+                    margin=12,  # ~1mm at 300 DPI
+                    verbose=False,
+                    return_offset=True,
+                )
+                crop_box = (crop_offset['left'], crop_offset['upper'],
+                           crop_offset['right'], crop_offset['lower'])
+
+                # Apply SAME crop to hitmap PNG
+                crop(
+                    str(hitmap_path),
+                    output_path=str(hitmap_path),
+                    overwrite=True,
+                    crop_box=crop_box,
+                    verbose=False,
+                )
+            except Exception as e:
+                crop_box = None
+                logger.debug(f"Crop failed: {e}")
+
+            # Validate sizes match
+            with PILImage.open(png_path) as png_img, PILImage.open(hitmap_path) as hm_img:
+                if png_img.size != hm_img.size:
+                    logger.warning(f"Size mismatch: PNG={png_img.size}, Hitmap={hm_img.size}")
+
+            with open(png_path, 'rb') as f:
+                bundle_data['png'] = f.read()
+
+            with open(hitmap_path, 'rb') as f:
+                bundle_data['hitmap_png'] = f.read()
+
+            with open(svg_path, 'rb') as f:
+                bundle_data['svg'] = f.read()
+
+            with open(hitmap_svg_path, 'rb') as f:
+                bundle_data['hitmap_svg'] = f.read()
+
             with open(pdf_path, 'rb') as f:
                 bundle_data['pdf'] = f.read()
 
-    # Generate hit map and path data for interactive selection
+    # Add hit_regions to spec
     try:
-        from scitex.plt.utils._hitmap import generate_hitmap_id_colors, extract_path_data, save_hitmap_png
-
-        # Create a copy of the figure for hit map generation (to avoid modifying original)
-        import matplotlib.pyplot as plt
-        import io
-
-        # Save current figure state to buffer and reload for hit map
-        buf = io.BytesIO()
-        fig.savefig(buf, format='png', dpi=dpi)
-        buf.seek(0)
-
-        # Generate hit map using ID colors method (fastest: ~89ms)
-        # Note: This modifies the figure temporarily, so we do it after saving other formats
-        hitmap, color_map = generate_hitmap_id_colors(fig, dpi=dpi)
-
-        # Save hit map as PNG
-        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
-            hitmap_path = f.name
-            save_hitmap_png(hitmap, hitmap_path, color_map)
-            with open(hitmap_path, 'rb') as hf:
-                bundle_data['hitmap_png'] = hf.read()
-            import os
-            os.unlink(hitmap_path)
-
-        # Extract path data for client-side hit testing (supports resize)
         path_data = extract_path_data(fig)
 
-        # Add hit_regions to spec
         spec['hit_regions'] = {
             'strategy': 'hybrid',
             'hit_map': 'plot_hitmap.png',
+            'hit_map_svg': 'plot_hitmap.svg',
             'color_map': {str(k): v for k, v in color_map.items()},
             'path_data': path_data,
         }
 
+        if crop_box is not None:
+            spec['hit_regions']['crop_box'] = {
+                'left': int(crop_box[0]),
+                'upper': int(crop_box[1]),
+                'right': int(crop_box[2]),
+                'lower': int(crop_box[3]),
+            }
+
     except Exception as e:
-        # Hit map generation is optional - don't fail the save
-        logger.debug(f"Hit map generation skipped: {e}")
+        logger.debug(f"Hit regions spec failed: {e}")
 
     # Save the bundle
     save_bundle(bundle_data, p, bundle_type=BundleType.PLTZ, as_zip=as_zip)
