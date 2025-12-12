@@ -6,7 +6,7 @@ from ._calc_nice_ticks import calc_nice_ticks
 from ._close import close
 from ._colorbar import add_shared_colorbar, colorbar
 from ._configure_mpl import configure_mpl
-from ._figure_mm import apply_style_mm, create_figure_ax_mm
+from ._figure_mm import apply_style_mm, create_figure_ax_mm, THEME_COLORS, _apply_theme_colors
 from ._histogram_utils import HistogramBinManager, histogram_bin_manager
 from ._im2grid import im2grid
 from ._is_valid_axis import assert_valid_axis, is_valid_axis
@@ -48,6 +48,13 @@ from ._csv_column_naming import (
     parse_csv_column_name,
     sanitize_trace_id,
 )
+from ._hitmap import (
+    extract_path_data,
+    generate_hitmap_id_colors,
+    get_all_artists,
+    query_hitmap_neighborhood,
+    save_hitmap_png,
+)
 
 __all__ = [
     "HistogramBinManager",
@@ -79,6 +86,9 @@ __all__ = [
     "cross_ref",
     "enhance_scitex_save_with_captions",
     "export_captions",
+    "extract_path_data",
+    "generate_hitmap_id_colors",
+    "get_all_artists",
     "get_csv_column_name",
     "get_csv_column_prefix",
     "get_dimension_info",
@@ -94,8 +104,10 @@ __all__ = [
     "parse_csv_column_name",
     "print_dimension_info",
     "pt_to_mm",
+    "query_hitmap_neighborhood",
     "quick_caption",
     "sanitize_trace_id",
+    "save_hitmap_png",
     "save_with_caption",
     "verify_csv_json_consistency",
     "view_dimensions",
