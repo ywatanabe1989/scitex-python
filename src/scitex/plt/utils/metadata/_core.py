@@ -12,6 +12,10 @@ the collection of all metadata from matplotlib figures and axes.
 from typing import Dict
 import numpy as np
 
+from scitex import logging
+
+logger = logging.getLogger(__name__)
+
 # Import sub-modules
 from ._figure_metadata import _initialize_metadata_structure, _collect_figure_metadata
 from ._axes_metadata import _collect_all_axes_metadata
@@ -87,16 +91,14 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
         try:
             metadata["figure"] = _extract_figure_dimensions(fig)
         except Exception as e:
-            import warnings
-            warnings.warn(f"Could not extract figure dimension info: {e}")
+            logger.warning(f"Could not extract figure dimension info: {e}")
 
     # Collect axes metadata
     if all_axes:
         try:
             metadata["axes"] = _collect_all_axes_metadata(all_axes, fig, grid_shape)
         except Exception as e:
-            import warnings
-            warnings.warn(f"Could not extract axes metadata: {e}")
+            logger.warning(f"Could not extract axes metadata: {e}")
 
     # Extract style metadata
     try:
@@ -136,10 +138,8 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
             metadata["style"]["global"]["fonts"]["family_actual"] = actual_font
             
             if requested_font != actual_font:
-                import warnings
-                warnings.warn(
-                    f"Font mismatch: Requested '{requested_font}' but using '{actual_font}'",
-                    UserWarning,
+                logger.warning(
+                    f"Font mismatch: Requested '{requested_font}' but using '{actual_font}'"
                 )
         else:
             metadata["runtime"]["font_family_actual"] = actual_font
@@ -199,8 +199,7 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
                 pass  # Data hash is optional
 
         except Exception as e:
-            import warnings
-            warnings.warn(f"Could not extract plot content: {e}")
+            logger.warning(f"Could not extract plot content: {e}")
 
     # Apply precision rounding
     metadata = _round_metadata(metadata)

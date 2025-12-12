@@ -8,10 +8,11 @@ import os
 __FILE__ = __file__
 
 import io as _io
-import logging
 
 import plotly
 from PIL import Image
+
+from scitex import logging
 
 logger = logging.getLogger(__name__)
 
@@ -66,9 +67,7 @@ def save_image(
                     fig = obj if hasattr(obj, "savefig") else obj.figure
                     obj = add_qr_to_figure(fig, metadata, position=qr_position)
             except Exception as e:
-                import warnings
-
-                warnings.warn(f"Failed to add QR code: {e}")
+                logger.warning(f"Failed to add QR code: {e}")
 
     # png
     if fmt == 'png':
@@ -216,9 +215,7 @@ def save_image(
             if verbose:
                 logger.debug(f"  • Embedded metadata: {metadata}")
         except Exception as e:
-            import warnings
-
-            warnings.warn(f"Failed to embed metadata: {e}")
+            logger.warning(f"Failed to embed metadata: {e}")
 
 def _save_stats_from_figure(obj, spath, verbose=False):
     """
@@ -297,8 +294,7 @@ def _save_stats_from_figure(obj, spath, verbose=False):
             logger.info(f"  • Auto-saved stats to: {stats_path}")
 
     except Exception as e:
-        import warnings
-        warnings.warn(f"Failed to auto-save stats: {e}")
+        logger.warning(f"Failed to auto-save stats: {e}")
 
 
 # EOF

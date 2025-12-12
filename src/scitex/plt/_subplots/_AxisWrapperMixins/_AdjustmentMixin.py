@@ -11,7 +11,10 @@ __DIR__ = os.path.dirname(__FILE__)
 
 from typing import List, Optional, Union
 
+from scitex import logging
 from ....plt import ax as ax_module
+
+logger = logging.getLogger(__name__)
 
 
 class AdjustmentMixin:
@@ -109,11 +112,9 @@ class AdjustmentMixin:
 
         elif loc == "separate":
             # Set flag to save legend separately when figure is saved
-            import warnings
-
             handles, labels = self._axis_mpl.get_legend_handles_labels()
             if not handles:
-                warnings.warn(
+                logger.warning(
                     "No legend handles found. Create plots with labels first."
                 )
                 return None
@@ -299,14 +300,12 @@ class AdjustmentMixin:
 
                 # Warn if significant overlap (>5% of data points)
                 if overlap_pct > 5:
-                    warnings.warn(
+                    logger.warning(
                         f"Legend overlaps with {overlap_pct:.1f}% of data points. "
                         f"Consider using:\n"
                         f"  - ax.legend(loc='outer')  # Place outside plot area\n"
                         f"  - ax.legend(loc='separate')  # Save as separate file\n"
-                        f"  - Manually adjust with loc='upper left', 'lower right', etc.",
-                        UserWarning,
-                        stacklevel=3,
+                        f"  - Manually adjust with loc='upper left', 'lower right', etc."
                     )
                     return True  # Overlap detected
 

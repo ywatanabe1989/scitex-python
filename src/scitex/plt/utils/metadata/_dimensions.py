@@ -9,8 +9,11 @@ This module provides functions to extract size, position, and bounding box
 information from matplotlib figures and axes in multiple units (mm, inch, px).
 """
 
-import warnings
 from typing import Dict
+
+from scitex import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _extract_axes_dimensions(fig, ax, ax_index: int) -> dict:
@@ -80,7 +83,7 @@ def _extract_axes_dimensions(fig, ax, ax_index: int) -> dict:
             ax_metadata["bbox_inch"] = _normalize_bbox(bbox)
 
     except Exception as e:
-        warnings.warn(f"Could not extract dimension info for axes {ax_index}: {e}")
+        logger.warning(f"Could not extract dimension info for axes {ax_index}: {e}")
 
     return ax_metadata
 
@@ -190,7 +193,7 @@ def _extract_figure_dimensions(fig) -> dict:
         fig_metadata["size_px"] = [width_inch * dpi, height_inch * dpi]
 
     except Exception as e:
-        warnings.warn(f"Could not extract figure dimensions: {e}")
+        logger.warning(f"Could not extract figure dimensions: {e}")
 
     return fig_metadata
 

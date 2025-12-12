@@ -10,11 +10,13 @@ __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
-import warnings
-
 import numpy as np
 import pandas as pd
 from scitex.pd import to_xyz
+
+from scitex import logging
+
+logger = logging.getLogger(__name__)
 
 # Global warning registry to track which warnings have been shown
 _warning_registry = set()
@@ -59,7 +61,7 @@ def _warn_once(message, category=UserWarning):
     """
     if message not in _warning_registry:
         _warning_registry.add(message)
-        warnings.warn(message, category, stacklevel=3)
+        logger.warning(message)
 
 
 from ._export_as_csv_formatters import (
@@ -226,7 +228,7 @@ def export_as_csv(history_records):
         ValueError: If no plotting records are found or they cannot be combined.
     """
     if len(history_records) <= 0:
-        warnings.warn("Plotting records not found. Cannot export empty data.")
+        logger.warning("Plotting records not found. Cannot export empty data.")
         return pd.DataFrame()  # Return empty DataFrame instead of None
 
     dfs = []
@@ -268,7 +270,7 @@ def export_as_csv(history_records):
         df = pd.concat(dfs_reset, axis=1)
         return df
     except Exception as e:
-        warnings.warn(f"Failed to combine plotting records: {e}")
+        logger.warning(f"Failed to combine plotting records: {e}")
         # Return a DataFrame with metadata about what records were attempted
         meta_df = pd.DataFrame(
             {

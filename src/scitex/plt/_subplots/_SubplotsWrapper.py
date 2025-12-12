@@ -62,24 +62,13 @@ if _arial_enabled:
     ]
 else:
     # Warn about missing Arial
-    try:
-        from scitex.logging import getLogger
+    from scitex import logging as _logging
 
-        _logger = getLogger(__name__)
-        _logger.warning(
-            "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
-            "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
-        )
-    except:
-        # If scitex.logging not available, use standard warnings
-        import warnings
-
-        warnings.warn(
-            "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
-            "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv",
-            UserWarning,
-            stacklevel=2,
-        )
+    _logger = _logging.getLogger(__name__)
+    _logger.warning(
+        "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+        "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
+    )
 
 
 class SubplotsWrapper:
