@@ -753,6 +753,47 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
             with open(pdf_path, 'rb') as f:
                 bundle_data['pdf'] = f.read()
 
+    # Generate hit map and path data for interactive selection
+    try:
+        from scitex.plt.utils._hitmap import generate_hitmap_id_colors, extract_path_data, save_hitmap_png
+
+        # Create a copy of the figure for hit map generation (to avoid modifying original)
+        import matplotlib.pyplot as plt
+        import io
+
+        # Save current figure state to buffer and reload for hit map
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', dpi=dpi)
+        buf.seek(0)
+
+        # Generate hit map using ID colors method (fastest: ~89ms)
+        # Note: This modifies the figure temporarily, so we do it after saving other formats
+        hitmap, color_map = generate_hitmap_id_colors(fig, dpi=dpi)
+
+        # Save hit map as PNG
+        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
+            hitmap_path = f.name
+            save_hitmap_png(hitmap, hitmap_path, color_map)
+            with open(hitmap_path, 'rb') as hf:
+                bundle_data['hitmap_png'] = hf.read()
+            import os
+            os.unlink(hitmap_path)
+
+        # Extract path data for client-side hit testing (supports resize)
+        path_data = extract_path_data(fig)
+
+        # Add hit_regions to spec
+        spec['hit_regions'] = {
+            'strategy': 'hybrid',
+            'hit_map': 'plot_hitmap.png',
+            'color_map': {str(k): v for k, v in color_map.items()},
+            'path_data': path_data,
+        }
+
+    except Exception as e:
+        # Hit map generation is optional - don't fail the save
+        logger.debug(f"Hit map generation skipped: {e}")
+
     # Save the bundle
     save_bundle(bundle_data, p, bundle_type=BundleType.PLTZ, as_zip=as_zip)
 
