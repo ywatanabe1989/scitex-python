@@ -534,6 +534,16 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
 
     p = Path(spath)
 
+    # Extract basename from path (e.g., "myplot.pltz" -> "myplot", "myplot.pltz.d" -> "myplot")
+    basename = p.stem  # e.g., "myplot.pltz" or "myplot"
+    if basename.endswith('.pltz'):
+        basename = basename[:-5]  # Remove .pltz suffix
+    elif basename.endswith('.d'):
+        # Handle myplot.pltz.d -> myplot.pltz -> myplot
+        basename = Path(basename).stem
+        if basename.endswith('.pltz'):
+            basename = basename[:-5]
+
     # Extract figure from various matplotlib object types
     import matplotlib.figure
     fig = obj
@@ -551,13 +561,13 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
     fig_width_inch, fig_height_inch = fig.get_size_inches()
     fig_dpi = fig.get_dpi()
 
-    # Build spec according to contract
+    # Build spec according to contract (using basename for file references)
     spec = {
         'schema': {'name': 'scitex.plt.plot', 'version': '1.0.0'},
         'backend': 'mpl',
         'data': {
-            'source': 'plot.csv',
-            'path': 'plot.csv',
+            'source': f'{basename}.csv',
+            'path': f'{basename}.csv',
             'hash': None,  # Will be computed after data extraction
             'columns': [],  # Will be populated after data extraction
         },
@@ -643,7 +653,7 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
         lines_info = []
         for j, line in enumerate(ax.get_lines()):
             label = line.get_label()
-            if label.startswith('_'):
+            if label is None or label.startswith('_'):
                 label = f'series_{j}'
             xdata, ydata = line.get_data()
             if len(xdata) > 0:
@@ -689,8 +699,8 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
             for ax in fig.axes:
                 _apply_theme_colors(ax, theme='dark')
 
-    # Build bundle data
-    bundle_data = {'spec': spec}
+    # Build bundle data (include basename for file naming)
+    bundle_data = {'spec': spec, 'basename': basename}
 
     # Use provided data or extracted data for CSV
     # Priority: 1) explicit data param, 2) export_as_csv method, 3) line extraction fallback
@@ -743,7 +753,7 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
     from PIL import Image as PILImage
     from scitex.plt.utils._hitmap import (
         apply_hitmap_colors, restore_original_colors, extract_path_data,
-        HITMAP_BACKGROUND_COLOR, HITMAP_AXES_COLOR
+        extract_selectable_regions, HITMAP_BACKGROUND_COLOR, HITMAP_AXES_COLOR
     )
 
     crop_box = None
@@ -887,8 +897,8 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
 
         spec['hit_regions'] = {
             'strategy': 'hybrid',
-            'hit_map': 'plot_hitmap.png',
-            'hit_map_svg': 'plot_hitmap.svg',
+            'hit_map': f'{basename}_hitmap.png',
+            'hit_map_svg': f'{basename}_hitmap.svg',
             'color_map': {str(k): v for k, v in color_map.items()},
             'groups': groups,  # Logical groups (histogram, bar_series, etc.)
             'path_data': path_data,
@@ -901,6 +911,12 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
                 'right': int(crop_box[2]),
                 'lower': int(crop_box[3]),
             }
+
+        # Extract selectable regions (bounding boxes for axis/annotation elements)
+        # This complements hitmap color-based selection with bbox-based selection
+        selectable_regions = extract_selectable_regions(fig)
+        if selectable_regions and selectable_regions.get('axes'):
+            spec['selectable_regions'] = selectable_regions
 
     except Exception as e:
         logger.debug(f"Hit regions spec failed: {e}")
@@ -953,6 +969,30 @@ def _save(
             elif bext == ".statsz":
                 import scitex.stats as sstats
                 sstats.save_statsz(obj, spath, as_zip=as_zip, **bundle_kwargs)
+
+            # Log "Saved to:" for bundle formats (consistent with other formats)
+            # For bundles, determine the actual saved path (zip or directory)
+            bundle_path = spath if as_zip else f"{spath}.d" if not spath.endswith(".d") else spath
+
+            if verbose and _os.path.exists(bundle_path):
+                file_size = getsize(bundle_path)
+                file_size = readable_bytes(file_size)
+                try:
+                    rel_path = _os.path.relpath(bundle_path, _os.getcwd())
+                except ValueError:
+                    rel_path = bundle_path
+                logger.success(f"Saved to: ./{rel_path} ({file_size})")
+
+            # Handle symlinks for bundle formats (consistent with other formats)
+            if symlink_from_cwd and _os.path.exists(bundle_path):
+                # Create symlink from cwd to bundle path
+                bundle_basename = _os.path.basename(bundle_path)
+                bundle_cwd = _os.path.join(_os.getcwd(), bundle_basename)
+                _symlink(bundle_path, bundle_cwd, symlink_from_cwd, verbose)
+
+            if symlink_to and _os.path.exists(bundle_path):
+                _symlink_to(bundle_path, symlink_to, verbose)
+
             return
 
     # Try dispatch dictionary first for O(1) lookup
