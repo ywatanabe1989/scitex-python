@@ -13,6 +13,10 @@ import numpy as np
 import pandas as pd
 import scitex
 
+from scitex import logging
+
+logger = logging.getLogger(__name__)
+
 
 def _format_eventplot(id, tracked_dict, kwargs):
     """Format data from an eventplot call."""
@@ -64,9 +68,7 @@ def _format_eventplot(id, tracked_dict, kwargs):
                     return df
         except Exception as e:
             # If all else fails, return an empty DataFrame
-            import warnings
-
-            warnings.warn(f"Error formatting eventplot data: {str(e)}")
+            logger.warning(f"Error formatting eventplot data: {str(e)}")
             return pd.DataFrame()
 
     return pd.DataFrame()

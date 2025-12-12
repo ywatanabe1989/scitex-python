@@ -14,6 +14,10 @@ from functools import wraps
 import numpy as np
 import pandas as pd
 
+from scitex import logging
+
+logger = logging.getLogger(__name__)
+
 
 class AxesWrapper:
     def __init__(self, fig_scitex, axes_scitex):
@@ -124,14 +128,10 @@ class AxesWrapper:
         Returns:
             np.ndarray: Array of wrapped axes with the same shape
         """
-        import warnings
-
         # Show a warning to help users avoid common mistakes
-        warnings.warn(
+        logger.warning(
             "Converting AxesWrapper to numpy array. If you're trying to flatten "
-            "the axes, use 'list(axes.flatten())' instead of 'np.array(axes).flatten()'.",
-            UserWarning,
-            stacklevel=2,
+            "the axes, use 'list(axes.flatten())' instead of 'np.array(axes).flatten()'."
         )
 
         # Convert the underlying axes to a compatible numpy array representation

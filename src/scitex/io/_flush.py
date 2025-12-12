@@ -5,7 +5,10 @@
 
 import os
 import sys
-import warnings
+
+from scitex import logging
+
+logger = logging.getLogger(__name__)
 
 
 def flush(sys=sys):
@@ -14,7 +17,7 @@ def flush(sys=sys):
     This ensures all pending write operations are completed.
     """
     if sys is None:
-        warnings.warn("flush needs sys. Skipping.")
+        logger.warning("flush needs sys. Skipping.")
     else:
         sys.stdout.flush()
         sys.stderr.flush()

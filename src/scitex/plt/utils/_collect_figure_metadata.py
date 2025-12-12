@@ -15,6 +15,10 @@ __FILE__ = __file__
 
 from typing import Dict, Optional, Union, List
 
+from scitex import logging
+
+logger = logging.getLogger(__name__)
+
 # Precision settings for JSON output
 PRECISION = {
     "mm": 2,      # Millimeters: 0.01mm precision (10 microns)
@@ -205,8 +209,7 @@ def _collect_single_axes_metadata(fig, ax, ax_index: int) -> dict:
             }
 
     except Exception as e:
-        import warnings
-        warnings.warn(f"Could not extract dimension info for axes {ax_index}: {e}")
+        logger.warning(f"Could not extract dimension info for axes {ax_index}: {e}")
 
     # Extract axes labels and units
     # X-axis - using matplotlib terminology (xaxis)
@@ -444,8 +447,7 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
             if "axes_bbox_mm" in dim_info:
                 metadata["axes_bbox_mm"] = dim_info["axes_bbox_mm"]
         except Exception as e:
-            import warnings
-            warnings.warn(f"Could not extract figure dimension info: {e}")
+            logger.warning(f"Could not extract figure dimension info: {e}")
 
     # Collect per-axes metadata
     if all_axes:
@@ -461,8 +463,7 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
                     ax_metadata["grid_position"] = {"row": row, "col": col}
                     metadata["axes"][ax_key] = ax_metadata
             except Exception as e:
-                import warnings
-                warnings.warn(f"Could not extract metadata for {ax_key}: {e}")
+                logger.warning(f"Could not extract metadata for {ax_key}: {e}")
 
     # Add scitex-specific metadata if axes was tagged
     scitex_meta = None
@@ -542,11 +543,8 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
                         f"For {requested_font}: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
                     )
                 except ImportError:
-                    import warnings
-
-                    warnings.warn(
-                        f"Font mismatch: Requested '{requested_font}' but using '{actual_font}'",
-                        UserWarning,
+                    logger.warning(
+                        f"Font mismatch: Requested '{requested_font}' but using '{actual_font}'"
                     )
         else:
             # If no style section, add font info to runtime section
@@ -688,9 +686,7 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
 
         except Exception as e:
             # If Phase 1 extraction fails, continue without it
-            import warnings
-
-            warnings.warn(f"Could not extract Phase 1 metadata: {e}")
+            logger.warning(f"Could not extract Phase 1 metadata: {e}")
 
     # Apply precision rounding to all numeric values
     metadata = _round_metadata(metadata)

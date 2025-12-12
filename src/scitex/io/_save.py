@@ -693,25 +693,41 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
     bundle_data = {'spec': spec}
 
     # Use provided data or extracted data for CSV
+    # Priority: 1) explicit data param, 2) export_as_csv method, 3) line extraction fallback
     csv_df = None
     if data is not None:
         csv_df = data
         bundle_data['data'] = data
-    elif extracted_data:
-        try:
-            import pandas as pd
-            # Pad arrays to same length
-            max_len = max(len(v) for v in extracted_data.values())
-            padded = {}
-            for k, v in extracted_data.items():
-                if len(v) < max_len:
-                    padded[k] = np.pad(v, (0, max_len - len(v)), constant_values=np.nan)
-                else:
-                    padded[k] = v
-            csv_df = pd.DataFrame(padded)
-            bundle_data['data'] = csv_df
-        except ImportError:
-            pass
+    else:
+        # Try to use export_as_csv from SciTeX wrapped objects (handles all plot types)
+        csv_source = _get_figure_with_data(obj)
+        if csv_source is not None and hasattr(csv_source, 'export_as_csv'):
+            try:
+                csv_df = csv_source.export_as_csv()
+                if csv_df is not None and not csv_df.empty:
+                    bundle_data['data'] = csv_df
+                    logger.debug(f"CSV data extracted via export_as_csv: {len(csv_df)} rows, {len(csv_df.columns)} cols")
+            except Exception as e:
+                logger.debug(f"export_as_csv failed: {e}")
+                csv_df = None
+
+        # Fallback to line extraction if export_as_csv didn't work
+        if csv_df is None and extracted_data:
+            try:
+                import pandas as pd
+                # Pad arrays to same length
+                max_len = max(len(v) for v in extracted_data.values())
+                padded = {}
+                for k, v in extracted_data.items():
+                    if len(v) < max_len:
+                        padded[k] = np.pad(v, (0, max_len - len(v)), constant_values=np.nan)
+                    else:
+                        padded[k] = v
+                csv_df = pd.DataFrame(padded)
+                bundle_data['data'] = csv_df
+                logger.debug(f"CSV data extracted via line fallback: {len(csv_df)} rows")
+            except ImportError:
+                pass
 
     # Compute hash and columns for data section
     if csv_df is not None:
@@ -757,7 +773,8 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
 
             # Now generate hitmap by applying ID colors to data elements ONLY
             # Keep axes/spines/labels with original colors to preserve bbox_inches='tight' bounds
-            original_props, color_map = apply_hitmap_colors(fig)
+            # Also detects logical groups (histogram, bar_series, etc.)
+            original_props, color_map, groups = apply_hitmap_colors(fig)
 
             # Store original background colors and set hitmap colors
             original_fig_facecolor = fig.patch.get_facecolor()
@@ -873,6 +890,7 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
             'hit_map': 'plot_hitmap.png',
             'hit_map_svg': 'plot_hitmap.svg',
             'color_map': {str(k): v for k, v in color_map.items()},
+            'groups': groups,  # Logical groups (histogram, bar_series, etc.)
             'path_data': path_data,
         }
 
@@ -976,7 +994,7 @@ def _save(
     elif spath.endswith(".pkl.gz"):
         save_pickle_compressed(obj, spath, **kwargs)
     else:
-        warnings.warn(f"Unsupported file format. {spath} was not saved.")
+        logger.warning(f"Unsupported file format. {spath} was not saved.")
 
     if verbose:
         if _os.path.exists(spath):
@@ -1142,9 +1160,7 @@ def _handle_image_with_csv(
                     pass  # collect_figure_metadata not available
                 except Exception as e:
                     if verbose:
-                        import warnings
-
-                        warnings.warn(f"Could not auto-collect metadata: {e}")
+                        logger.warning(f"Could not auto-collect metadata: {e}")
         except Exception:
             pass  # Silently continue if auto-collection fails
     else:
@@ -1240,9 +1256,7 @@ def _handle_image_with_csv(
                     )
 
             except Exception as e:
-                import warnings
-
-                warnings.warn(f"Auto-crop failed: {e}. Image saved without cropping.")
+                logger.warning(f"Auto-crop failed: {e}. Image saved without cropping.")
 
     # Handle separate legend saving
     _save_separate_legends(
@@ -1477,12 +1491,7 @@ def _handle_image_with_csv(
                             )
                             _symlink(csv_sigmaplot_path, csv_cwd, True, True)
         except Exception as e:
-            import warnings
-
-            warnings.warn(f"CSV export failed: {e}")
-            import traceback
-
-            traceback.print_exc()
+            logger.warning(f"CSV export failed: {e}")
 
     # Save metadata as JSON if collected
     if collected_metadata is not None and not dry_run:
@@ -1601,12 +1610,7 @@ def _handle_image_with_csv(
             # Re-raise assertion errors - these are validation failures that should stop execution
             raise
         except Exception as e:
-            import warnings
-
-            warnings.warn(f"JSON metadata export failed: {e}")
-            import traceback
-
-            traceback.print_exc()
+            logger.warning(f"JSON metadata export failed: {e}")
 
 
 # Dispatch dictionary for O(1) file format lookup
