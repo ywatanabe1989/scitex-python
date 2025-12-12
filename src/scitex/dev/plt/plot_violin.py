@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_violin(plt, rng):
+def plot_violin(plt, rng, ax=None):
     """Violin plot."""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
 
     data = [rng.normal(loc, 1, 200) for loc in [0, 1, -0.5, 0.5, -1]]
     vp = ax.violinplot(

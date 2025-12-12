@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_histogram_multiple(plt, rng):
+def plot_histogram_multiple(plt, rng, ax=None):
     """Multiple overlapping histograms."""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
 
     data1 = rng.normal(0, 1, 1000)
     data2 = rng.normal(2, 1.5, 1000)

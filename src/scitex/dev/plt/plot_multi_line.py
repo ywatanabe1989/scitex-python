@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_multi_line(plt, rng):
+def plot_multi_line(plt, rng, ax=None):
     """Create plot with multiple overlapping lines."""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
     x = np.linspace(0, 4 * np.pi, 200)
 
     ax.plot(x, np.sin(x), "-", linewidth=2, label="sin(x)", color="#1f77b4")

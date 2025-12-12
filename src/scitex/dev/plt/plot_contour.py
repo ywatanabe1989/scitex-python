@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_contour(plt, rng):
+def plot_contour(plt, rng, ax=None):
     """Contour plot - levels should be grouped."""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
 
     x = np.linspace(-3, 3, 100)
     y = np.linspace(-3, 3, 100)

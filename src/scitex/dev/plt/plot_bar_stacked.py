@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_bar_stacked(plt, rng):
+def plot_bar_stacked(plt, rng, ax=None):
     """Stacked bar chart."""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
 
     categories = ["Q1", "Q2", "Q3", "Q4"]
     values1 = rng.uniform(10, 20, len(categories))

@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_complex_annotations(plt, rng):
+def plot_complex_annotations(plt, rng, ax=None):
     """Plot with annotations and markers."""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
     x = np.linspace(0, 10, 100)
     y = np.sin(x) * np.exp(-x / 10)
 

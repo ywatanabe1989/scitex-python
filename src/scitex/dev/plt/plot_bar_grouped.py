@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_bar_grouped(plt, rng):
+def plot_bar_grouped(plt, rng, ax=None):
     """Grouped bar chart - bars should be grouped by series."""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
 
     categories = ["A", "B", "C", "D", "E"]
     x = np.arange(len(categories))

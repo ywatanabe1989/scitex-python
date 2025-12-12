@@ -6,9 +6,12 @@ import numpy as np
 import scitex as stx
 
 
-def plot_scatter_sizes(plt, rng):
+def plot_scatter_sizes(plt, rng, ax=None):
     """Scatter plot with varying sizes and colors."""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
+    else:
+        fig = ax.get_figure() if hasattr(ax, 'get_figure') else ax._fig_scitex
 
     n_points = 50
     x = rng.uniform(0, 10, n_points)
