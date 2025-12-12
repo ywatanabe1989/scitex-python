@@ -10,6 +10,8 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import pandas as pd
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_plot_imshow(id, tracked_dict, kwargs):
@@ -29,8 +31,18 @@ def _format_plot_imshow(id, tracked_dict, kwargs):
 
         # Add id prefix to column names if id is provided
         if id is not None:
+            # Parse tracking ID to extract axes position and trace ID
+            ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
+            # Use standardized column naming for each column
             df = df.copy()
-            df.columns = [f"{id}_plot_imshow_{col}" for col in df.columns]
+            renamed_cols = {}
+            for col in df.columns:
+                # Create column name like "plot_imshow_row" or "plot_imshow_col"
+                renamed_cols[col] = get_csv_column_name(
+                    f"plot_imshow_{col}", ax_row, ax_col, trace_id=trace_id
+                )
+            df.rename(columns=renamed_cols, inplace=True)
 
         return df
 

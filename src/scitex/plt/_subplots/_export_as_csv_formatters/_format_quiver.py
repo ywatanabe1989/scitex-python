@@ -6,6 +6,9 @@
 import numpy as np
 import pandas as pd
 
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
+
 
 def _format_quiver(id, tracked_dict, kwargs):
     """Format data from a quiver (vector field) call.
@@ -20,6 +23,9 @@ def _format_quiver(id, tracked_dict, kwargs):
     """
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
+
+    # Parse the tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
 
     if "args" in tracked_dict:
         args = tracked_dict["args"]
@@ -41,10 +47,10 @@ def _format_quiver(id, tracked_dict, kwargs):
 
             df = pd.DataFrame(
                 {
-                    f"{id}_quiver_x": X.flatten(),
-                    f"{id}_quiver_y": Y.flatten(),
-                    f"{id}_quiver_u": U.flatten(),
-                    f"{id}_quiver_v": V.flatten(),
+                    get_csv_column_name("quiver-x", ax_row, ax_col, trace_id=trace_id): X.flatten(),
+                    get_csv_column_name("quiver-y", ax_row, ax_col, trace_id=trace_id): Y.flatten(),
+                    get_csv_column_name("quiver-u", ax_row, ax_col, trace_id=trace_id): U.flatten(),
+                    get_csv_column_name("quiver-v", ax_row, ax_col, trace_id=trace_id): V.flatten(),
                 }
             )
             return df

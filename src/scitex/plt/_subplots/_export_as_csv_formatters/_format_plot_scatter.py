@@ -10,6 +10,8 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import pandas as pd
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_plot_scatter(id, tracked_dict, kwargs):
@@ -26,10 +28,15 @@ def _format_plot_scatter(id, tracked_dict, kwargs):
     scatter_df = tracked_dict.get("scatter_df")
 
     if scatter_df is not None and isinstance(scatter_df, pd.DataFrame):
+        # Parse tracking ID to extract axes position and trace ID
+        ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
+        # Use standardized column naming
+        x_col = get_csv_column_name("scatter_x", ax_row, ax_col, trace_id=trace_id)
+        y_col = get_csv_column_name("scatter_y", ax_row, ax_col, trace_id=trace_id)
+
         # Rename columns to include the id
-        return scatter_df.rename(
-            columns={"x": f"{id}_scatter_x", "y": f"{id}_scatter_y"}
-        )
+        return scatter_df.rename(columns={"x": x_col, "y": y_col})
 
     return pd.DataFrame()
 
