@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 12:20:00 (ywatanabe)"
+# Timestamp: "2025-12-13 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_streamplot.py
 
 import numpy as np
 import pandas as pd
+
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_streamplot(id, tracked_dict, kwargs):
@@ -21,6 +24,9 @@ def _format_streamplot(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
+    # Parse the tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     if "args" in tracked_dict:
         args = tracked_dict["args"]
         if isinstance(args, tuple) and len(args) >= 4:
@@ -36,10 +42,10 @@ def _format_streamplot(id, tracked_dict, kwargs):
 
             df = pd.DataFrame(
                 {
-                    f"{id}_streamplot_x": X.flatten(),
-                    f"{id}_streamplot_y": Y.flatten(),
-                    f"{id}_streamplot_u": U.flatten(),
-                    f"{id}_streamplot_v": V.flatten(),
+                    get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): X.flatten(),
+                    get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): Y.flatten(),
+                    get_csv_column_name("u", ax_row, ax_col, trace_id=trace_id): U.flatten(),
+                    get_csv_column_name("v", ax_row, ax_col, trace_id=trace_id): V.flatten(),
                 }
             )
             return df

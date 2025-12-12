@@ -3,262 +3,270 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/dev/plt/__init__.py
 
 """
-Development plotting utilities.
+Development plotting utilities with three API layers.
 
-Reusable plotting functions for testing, demos, and development.
-Each function takes (plt, rng, ax=None) and returns (fig, ax).
+All plotters follow signature: (plt, rng, ax=None) -> (fig, ax)
+
+API Layers:
+-----------
+stx_*  : SciTeX canonical (ArrayLike input, tracked)
+sns_*  : Seaborn-style (DataFrame input, tracked)
+mpl_*  : Matplotlib-style (raw args, tracked)
 
 Usage:
-    from scitex.dev.plt import plot_histogram, plot_scatter_sizes, PLOTTERS
+    from scitex.dev.plt import PLOTTERS_STX, PLOTTERS_SNS, PLOTTERS_MPL
 
     @stx.session
     def main(plt=stx.INJECTED, rng_manager=stx.INJECTED):
         rng = rng_manager("demo")
 
-        # Direct function call
-        fig, ax = plot_histogram(plt, rng)
-
-        # Registry access
-        for name, plotter in PLOTTERS.items():
+        # stx_* API (ArrayLike)
+        for name, plotter in PLOTTERS_STX.items():
             fig, ax = plotter(plt, rng)
 
-        # Multi-panel usage
-        fig, axes = plt.subplots(2, 2)
-        for ax, name in zip(axes.flatten(), ["histogram", "scatter", "bar_simple", "line"]):
-            PLOTTERS[name](plt, rng, ax=ax)
+        # sns_* API (DataFrame)
+        for name, plotter in PLOTTERS_SNS.items():
+            fig, ax = plotter(plt, rng)
 
-        # 3D plots
-        from scitex.dev.plt import PLOTTERS_3D
-        fig, ax = PLOTTERS_3D["3d_surface"](plt, rng)
-
-        # Animations
-        from scitex.dev.plt import ANIMATIONS
-        fig, anim = ANIMATIONS["line"](plt, rng)
-        anim.save("wave.gif", writer="pillow")
+        # mpl_* API (matplotlib-style)
+        for name, plotter in PLOTTERS_MPL.items():
+            fig, ax = plotter(plt, rng)
 """
 
-# Basic plotters (single-axis, accept ax=None)
-from .plot_bar_grouped import plot_bar_grouped
-from .plot_bar_simple import plot_bar_simple
-from .plot_bar_stacked import plot_bar_stacked
-from .plot_boxplot import plot_boxplot
-from .plot_complex_annotations import plot_complex_annotations
-from .plot_contour import plot_contour
-from .plot_errorbar import plot_errorbar
-from .plot_fill_between import plot_fill_between
-from .plot_heatmap import plot_heatmap
-from .plot_histogram import plot_histogram
-from .plot_histogram_multiple import plot_histogram_multiple
-from .plot_multi_line import plot_multi_line
-from .plot_multi_panel import plot_multi_panel
-from .plot_pie import plot_pie
-from .plot_scatter_sizes import plot_scatter_sizes
-from .plot_step import plot_step
-from .plot_stem import plot_stem
-from .plot_step_stem import plot_step_stem  # Composite (deprecated)
-from .plot_violin import plot_violin
-from .plot_swarm import plot_swarm
-from .plot_raster import plot_raster
-from .plot_joyplot import plot_joyplot
-from .plot_kde2d import plot_kde2d
-from .plot_heatmap_annotated import plot_heatmap_annotated
-from .plot_parallel import plot_parallel
-from .plot_roc import plot_roc, plot_precision_recall
-
-# Composite plotters (create their own multi-panel layout)
-from .plot_gallery import plot_gallery, plot_gallery_quick
-from .plot_clustermap import plot_clustermap
-from .plot_pairplot import plot_pairplot
-from .plot_jointplot import plot_jointplot
-
-# 3D plotters
-from .plot_3d import (
-    plot_3d_line,
-    plot_3d_scatter,
-    plot_3d_surface,
-    plot_3d_wireframe,
-    plot_3d_bar,
-    plot_3d_contour,
-    plot_3d_gallery,
-)
-
-# Animation creators
-from .plot_animation import (
-    create_line_animation,
-    create_scatter_animation,
-    create_bar_animation,
-    create_heatmap_animation,
-    create_3d_rotation_animation,
-    ANIMATIONS,
-    list_animations,
-    get_animation,
-)
-
 # =============================================================================
-# Registry of single-panel plotters (accept ax=None parameter)
+# stx_* API Layer - ArrayLike input (25 plotters)
 # =============================================================================
-PLOTTERS = {
-    # Bar plots
-    "bar_grouped": plot_bar_grouped,
-    "bar_simple": plot_bar_simple,
-    "bar_stacked": plot_bar_stacked,
-    # Statistical plots
-    "boxplot": plot_boxplot,
-    "violin": plot_violin,
-    "swarm": plot_swarm,
-    "errorbar": plot_errorbar,
-    # Line plots
-    "line": plot_multi_line,
-    "step": plot_step,
-    "stem": plot_stem,
-    "fill_between": plot_fill_between,
-    # Scatter plots
-    "scatter": plot_scatter_sizes,
-    # Histograms and density
-    "histogram": plot_histogram,
-    "histogram_multiple": plot_histogram_multiple,
-    "joyplot": plot_joyplot,
-    "kde2d": plot_kde2d,
-    # Heatmaps
-    "heatmap": plot_heatmap,
-    "heatmap_annotated": plot_heatmap_annotated,
-    "contour": plot_contour,
-    # Other
-    "pie": plot_pie,
-    "raster": plot_raster,
-    "parallel": plot_parallel,
-    "complex_annotations": plot_complex_annotations,
-    # Machine learning / classification
-    "roc": plot_roc,
-    "precision_recall": plot_precision_recall,
+from .plot_stx_line import plot_stx_line
+from .plot_stx_mean_std import plot_stx_mean_std
+from .plot_stx_mean_ci import plot_stx_mean_ci
+from .plot_stx_median_iqr import plot_stx_median_iqr
+from .plot_stx_shaded_line import plot_stx_shaded_line
+from .plot_stx_box import plot_stx_box
+from .plot_stx_violin import plot_stx_violin
+from .plot_stx_scatter import plot_stx_scatter
+from .plot_stx_bar import plot_stx_bar
+from .plot_stx_barh import plot_stx_barh
+from .plot_stx_errorbar import plot_stx_errorbar
+from .plot_stx_fill_between import plot_stx_fill_between
+from .plot_stx_kde import plot_stx_kde
+from .plot_stx_ecdf import plot_stx_ecdf
+from .plot_stx_heatmap import plot_stx_heatmap
+from .plot_stx_image import plot_stx_image
+from .plot_stx_imshow import plot_stx_imshow
+from .plot_stx_contour import plot_stx_contour
+from .plot_stx_raster import plot_stx_raster
+from .plot_stx_conf_mat import plot_stx_conf_mat
+from .plot_stx_joyplot import plot_stx_joyplot
+from .plot_stx_rectangle import plot_stx_rectangle
+from .plot_stx_fillv import plot_stx_fillv
+from .plot_stx_boxplot import plot_stx_boxplot
+from .plot_stx_violinplot import plot_stx_violinplot
+
+PLOTTERS_STX = {
+    "stx_line": plot_stx_line,
+    "stx_mean_std": plot_stx_mean_std,
+    "stx_mean_ci": plot_stx_mean_ci,
+    "stx_median_iqr": plot_stx_median_iqr,
+    "stx_shaded_line": plot_stx_shaded_line,
+    "stx_box": plot_stx_box,
+    "stx_violin": plot_stx_violin,
+    "stx_scatter": plot_stx_scatter,
+    "stx_bar": plot_stx_bar,
+    "stx_barh": plot_stx_barh,
+    "stx_errorbar": plot_stx_errorbar,
+    "stx_fill_between": plot_stx_fill_between,
+    "stx_kde": plot_stx_kde,
+    "stx_ecdf": plot_stx_ecdf,
+    "stx_heatmap": plot_stx_heatmap,
+    "stx_image": plot_stx_image,
+    "stx_imshow": plot_stx_imshow,
+    "stx_contour": plot_stx_contour,
+    "stx_raster": plot_stx_raster,
+    "stx_conf_mat": plot_stx_conf_mat,
+    "stx_joyplot": plot_stx_joyplot,
+    "stx_rectangle": plot_stx_rectangle,
+    "stx_fillv": plot_stx_fillv,
+    "stx_boxplot": plot_stx_boxplot,
+    "stx_violinplot": plot_stx_violinplot,
 }
 
 # =============================================================================
-# Composite plotters (create their own multi-panel layout)
+# sns_* API Layer - DataFrame input (10 plotters)
 # =============================================================================
-COMPOSITE_PLOTTERS = {
-    "multi_panel": plot_multi_panel,
-    "step_stem": plot_step_stem,  # Deprecated: use plot_step and plot_stem separately
-    "gallery": plot_gallery,  # 8x6 comprehensive gallery
-    "gallery_quick": plot_gallery_quick,  # 4x4 quick gallery
-    "clustermap": plot_clustermap,
-    "pairplot": plot_pairplot,
-    "jointplot": plot_jointplot,
+from .plot_sns_boxplot import plot_sns_boxplot
+from .plot_sns_violinplot import plot_sns_violinplot
+from .plot_sns_barplot import plot_sns_barplot
+from .plot_sns_histplot import plot_sns_histplot
+from .plot_sns_kdeplot import plot_sns_kdeplot
+from .plot_sns_scatterplot import plot_sns_scatterplot
+from .plot_sns_lineplot import plot_sns_lineplot
+from .plot_sns_swarmplot import plot_sns_swarmplot
+from .plot_sns_stripplot import plot_sns_stripplot
+from .plot_sns_heatmap import plot_sns_heatmap
+
+PLOTTERS_SNS = {
+    "sns_boxplot": plot_sns_boxplot,
+    "sns_violinplot": plot_sns_violinplot,
+    "sns_barplot": plot_sns_barplot,
+    "sns_histplot": plot_sns_histplot,
+    "sns_kdeplot": plot_sns_kdeplot,
+    "sns_scatterplot": plot_sns_scatterplot,
+    "sns_lineplot": plot_sns_lineplot,
+    "sns_swarmplot": plot_sns_swarmplot,
+    "sns_stripplot": plot_sns_stripplot,
+    "sns_heatmap": plot_sns_heatmap,
 }
 
 # =============================================================================
-# 3D plotters (require projection="3d")
+# mpl_* API Layer - Matplotlib-style input (26 plotters)
 # =============================================================================
-PLOTTERS_3D = {
-    "3d_line": plot_3d_line,
-    "3d_scatter": plot_3d_scatter,
-    "3d_surface": plot_3d_surface,
-    "3d_wireframe": plot_3d_wireframe,
-    "3d_bar": plot_3d_bar,
-    "3d_contour": plot_3d_contour,
-    "3d_gallery": plot_3d_gallery,
+from .plot_mpl_plot import plot_mpl_plot
+from .plot_mpl_scatter import plot_mpl_scatter
+from .plot_mpl_bar import plot_mpl_bar
+from .plot_mpl_barh import plot_mpl_barh
+from .plot_mpl_hist import plot_mpl_hist
+from .plot_mpl_hist2d import plot_mpl_hist2d
+from .plot_mpl_hexbin import plot_mpl_hexbin
+from .plot_mpl_boxplot import plot_mpl_boxplot
+from .plot_mpl_violinplot import plot_mpl_violinplot
+from .plot_mpl_errorbar import plot_mpl_errorbar
+from .plot_mpl_step import plot_mpl_step
+from .plot_mpl_stem import plot_mpl_stem
+from .plot_mpl_fill import plot_mpl_fill
+from .plot_mpl_fill_between import plot_mpl_fill_between
+from .plot_mpl_stackplot import plot_mpl_stackplot
+from .plot_mpl_contour import plot_mpl_contour
+from .plot_mpl_contourf import plot_mpl_contourf
+from .plot_mpl_imshow import plot_mpl_imshow
+from .plot_mpl_pcolormesh import plot_mpl_pcolormesh
+from .plot_mpl_pie import plot_mpl_pie
+from .plot_mpl_eventplot import plot_mpl_eventplot
+from .plot_mpl_quiver import plot_mpl_quiver
+from .plot_mpl_axhline import plot_mpl_axhline
+from .plot_mpl_axvline import plot_mpl_axvline
+from .plot_mpl_axhspan import plot_mpl_axhspan
+from .plot_mpl_axvspan import plot_mpl_axvspan
+
+PLOTTERS_MPL = {
+    "mpl_plot": plot_mpl_plot,
+    "mpl_scatter": plot_mpl_scatter,
+    "mpl_bar": plot_mpl_bar,
+    "mpl_barh": plot_mpl_barh,
+    "mpl_hist": plot_mpl_hist,
+    "mpl_hist2d": plot_mpl_hist2d,
+    "mpl_hexbin": plot_mpl_hexbin,
+    "mpl_boxplot": plot_mpl_boxplot,
+    "mpl_violinplot": plot_mpl_violinplot,
+    "mpl_errorbar": plot_mpl_errorbar,
+    "mpl_step": plot_mpl_step,
+    "mpl_stem": plot_mpl_stem,
+    "mpl_fill": plot_mpl_fill,
+    "mpl_fill_between": plot_mpl_fill_between,
+    "mpl_stackplot": plot_mpl_stackplot,
+    "mpl_contour": plot_mpl_contour,
+    "mpl_contourf": plot_mpl_contourf,
+    "mpl_imshow": plot_mpl_imshow,
+    "mpl_pcolormesh": plot_mpl_pcolormesh,
+    "mpl_pie": plot_mpl_pie,
+    "mpl_eventplot": plot_mpl_eventplot,
+    "mpl_quiver": plot_mpl_quiver,
+    "mpl_axhline": plot_mpl_axhline,
+    "mpl_axvline": plot_mpl_axvline,
+    "mpl_axhspan": plot_mpl_axhspan,
+    "mpl_axvspan": plot_mpl_axvspan,
 }
 
 # =============================================================================
-# All plotters combined
+# Combined registry
 # =============================================================================
-ALL_PLOTTERS = {**PLOTTERS, **COMPOSITE_PLOTTERS, **PLOTTERS_3D}
+PLOTTERS = {**PLOTTERS_STX, **PLOTTERS_SNS, **PLOTTERS_MPL}
 
 
 def get_plotter(name):
-    """Get a plotter function by name.
-
-    Parameters
-    ----------
-    name : str
-        Plotter name (e.g., "histogram", "scatter", "bar_simple")
-
-    Returns
-    -------
-    callable
-        Plotter function with signature (plt, rng, ax=None) -> (fig, ax)
-
-    Raises
-    ------
-    KeyError
-        If plotter name not found
-    """
-    if name in ALL_PLOTTERS:
-        return ALL_PLOTTERS[name]
-    raise KeyError(f"Unknown plotter: {name}. Available: {list(ALL_PLOTTERS.keys())}")
+    """Get a plotter function by name."""
+    if name in PLOTTERS:
+        return PLOTTERS[name]
+    raise KeyError(f"Unknown plotter: {name}. Available: {list(PLOTTERS.keys())}")
 
 
 def list_plotters():
-    """List all available plotter names.
-
-    Returns
-    -------
-    list[str]
-        List of plotter names
-    """
-    return list(ALL_PLOTTERS.keys())
+    """List all available plotter names."""
+    return list(PLOTTERS.keys())
 
 
 __all__ = [
-    # Basic plotters
-    "plot_bar_grouped",
-    "plot_bar_simple",
-    "plot_bar_stacked",
-    "plot_boxplot",
-    "plot_complex_annotations",
-    "plot_contour",
-    "plot_errorbar",
-    "plot_fill_between",
-    "plot_heatmap",
-    "plot_heatmap_annotated",
-    "plot_histogram",
-    "plot_histogram_multiple",
-    "plot_joyplot",
-    "plot_kde2d",
-    "plot_multi_line",
-    "plot_multi_panel",
-    "plot_parallel",
-    "plot_pie",
-    "plot_raster",
-    "plot_scatter_sizes",
-    "plot_step",
-    "plot_stem",
-    "plot_step_stem",
-    "plot_swarm",
-    "plot_violin",
-    "plot_roc",
-    "plot_precision_recall",
-    # Composite plotters
-    "plot_gallery",
-    "plot_gallery_quick",
-    "plot_clustermap",
-    "plot_pairplot",
-    "plot_jointplot",
-    # 3D plotters
-    "plot_3d_line",
-    "plot_3d_scatter",
-    "plot_3d_surface",
-    "plot_3d_wireframe",
-    "plot_3d_bar",
-    "plot_3d_contour",
-    "plot_3d_gallery",
-    # Animation creators
-    "create_line_animation",
-    "create_scatter_animation",
-    "create_bar_animation",
-    "create_heatmap_animation",
-    "create_3d_rotation_animation",
+    # stx_* plotters (25)
+    "plot_stx_line",
+    "plot_stx_mean_std",
+    "plot_stx_mean_ci",
+    "plot_stx_median_iqr",
+    "plot_stx_shaded_line",
+    "plot_stx_box",
+    "plot_stx_violin",
+    "plot_stx_scatter",
+    "plot_stx_bar",
+    "plot_stx_barh",
+    "plot_stx_errorbar",
+    "plot_stx_fill_between",
+    "plot_stx_kde",
+    "plot_stx_ecdf",
+    "plot_stx_heatmap",
+    "plot_stx_image",
+    "plot_stx_imshow",
+    "plot_stx_contour",
+    "plot_stx_raster",
+    "plot_stx_conf_mat",
+    "plot_stx_joyplot",
+    "plot_stx_rectangle",
+    "plot_stx_fillv",
+    "plot_stx_boxplot",
+    "plot_stx_violinplot",
+    # sns_* plotters (10)
+    "plot_sns_boxplot",
+    "plot_sns_violinplot",
+    "plot_sns_barplot",
+    "plot_sns_histplot",
+    "plot_sns_kdeplot",
+    "plot_sns_scatterplot",
+    "plot_sns_lineplot",
+    "plot_sns_swarmplot",
+    "plot_sns_stripplot",
+    "plot_sns_heatmap",
+    # mpl_* plotters (26)
+    "plot_mpl_plot",
+    "plot_mpl_scatter",
+    "plot_mpl_bar",
+    "plot_mpl_barh",
+    "plot_mpl_hist",
+    "plot_mpl_hist2d",
+    "plot_mpl_hexbin",
+    "plot_mpl_boxplot",
+    "plot_mpl_violinplot",
+    "plot_mpl_errorbar",
+    "plot_mpl_step",
+    "plot_mpl_stem",
+    "plot_mpl_fill",
+    "plot_mpl_fill_between",
+    "plot_mpl_stackplot",
+    "plot_mpl_contour",
+    "plot_mpl_contourf",
+    "plot_mpl_imshow",
+    "plot_mpl_pcolormesh",
+    "plot_mpl_pie",
+    "plot_mpl_eventplot",
+    "plot_mpl_quiver",
+    "plot_mpl_axhline",
+    "plot_mpl_axvline",
+    "plot_mpl_axhspan",
+    "plot_mpl_axvspan",
     # Registries
+    "PLOTTERS_STX",
+    "PLOTTERS_SNS",
+    "PLOTTERS_MPL",
     "PLOTTERS",
-    "COMPOSITE_PLOTTERS",
-    "PLOTTERS_3D",
-    "ALL_PLOTTERS",
-    "ANIMATIONS",
     # Helper functions
     "get_plotter",
     "list_plotters",
-    "get_animation",
-    "list_animations",
 ]
 
 # EOF

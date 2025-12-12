@@ -12,22 +12,8 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import pandas as pd
 
-
-def _make_column_name(id, suffix, method="annotate"):
-    """Create column name with method descriptor, avoiding duplication.
-
-    For example:
-    - id="annotate_0", suffix="x" -> "annotate_0_x"
-    - id="plot_5", suffix="x" -> "plot_5_annotate_x"
-    """
-    # Check if method name is already in the ID
-    id_parts = id.rsplit("_", 1)
-    if len(id_parts) == 2 and id_parts[0].endswith(method):
-        # Method already in ID, don't duplicate
-        return f"{id}_{suffix}"
-    else:
-        # Method not in ID, add it for clarity
-        return f"{id}_{method}_{suffix}"
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_annotate(id, tracked_dict, kwargs):
@@ -41,6 +27,9 @@ def _format_annotate(id, tracked_dict, kwargs):
     # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
+
+    # Parse the tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
 
     # Get the args from tracked_dict
     args = tracked_dict.get("args", [])
@@ -57,9 +46,9 @@ def _format_annotate(id, tracked_dict, kwargs):
             return pd.DataFrame()
 
         data = {
-            _make_column_name(id, "x"): [x],
-            _make_column_name(id, "y"): [y],
-            _make_column_name(id, "content"): [text_content],
+            get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): [x],
+            get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): [y],
+            get_csv_column_name("content", ax_row, ax_col, trace_id=trace_id): [text_content],
         }
 
         # Check if xytext was provided (either as third arg or in kwargs)
@@ -70,8 +59,8 @@ def _format_annotate(id, tracked_dict, kwargs):
             xytext = kwargs["xytext"]
 
         if xytext is not None and hasattr(xytext, "__len__") and len(xytext) >= 2:
-            data[_make_column_name(id, "text_x")] = [xytext[0]]
-            data[_make_column_name(id, "text_y")] = [xytext[1]]
+            data[get_csv_column_name("text_x", ax_row, ax_col, trace_id=trace_id)] = [xytext[0]]
+            data[get_csv_column_name("text_y", ax_row, ax_col, trace_id=trace_id)] = [xytext[1]]
 
         # Create DataFrame with proper column names (use dict with list values)
         df = pd.DataFrame(data)
