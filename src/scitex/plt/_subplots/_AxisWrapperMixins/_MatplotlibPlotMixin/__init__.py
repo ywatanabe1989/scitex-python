@@ -11,8 +11,21 @@ This package provides plotting functionality split into logical submodules:
 - _scientific: Scientific/specialized plots (stx_image, stx_kde, stx_conf_mat, etc.)
 - _statistical: Statistical plots (stx_line, stx_mean_std, stx_box, stx_violin, hist)
 - _stx_aliases: stx_ prefixed aliases for standard matplotlib methods
-- _plot_wrappers: plot_ prefixed matplotlib wrappers
-- _deprecated: Deprecated method aliases for backward compatibility
+
+API Layer Design:
+-----------------
+stx_* (SciTeX canonical):
+  - Full tracking, metadata, and reproducibility support
+  - Output connects to .pltz / .figz format
+  - Purpose: publication / reproducibility
+
+mpl_* (Matplotlib compatibility - see _RawMatplotlibMixin):
+  - Raw matplotlib API without scitex processing
+  - Purpose: compatibility / low-level control / escape hatch
+
+sns_* (Seaborn - see _SeabornMixin):
+  - DataFrame-centric with data=, x=, y=, hue= interface
+  - Purpose: exploratory / grouped stats
 """
 
 import os
@@ -24,8 +37,6 @@ from ._base import PlotBaseMixin
 from ._scientific import ScientificPlotMixin
 from ._statistical import StatisticalPlotMixin
 from ._stx_aliases import StxAliasesMixin
-from ._plot_wrappers import PlotWrappersMixin
-from ._deprecated import add_deprecated_aliases
 
 
 class MatplotlibPlotMixin(
@@ -33,7 +44,6 @@ class MatplotlibPlotMixin(
     ScientificPlotMixin,
     StatisticalPlotMixin,
     StxAliasesMixin,
-    PlotWrappersMixin,
 ):
     """Mixin class for basic plotting operations.
 
@@ -42,13 +52,8 @@ class MatplotlibPlotMixin(
     - ScientificPlotMixin: Scientific plots (stx_image, stx_kde, stx_conf_mat, etc.)
     - StatisticalPlotMixin: Statistical line plots and distributions
     - StxAliasesMixin: stx_ prefixed matplotlib aliases
-    - PlotWrappersMixin: plot_ prefixed matplotlib wrappers
     """
     pass
-
-
-# Add deprecated aliases
-add_deprecated_aliases(MatplotlibPlotMixin)
 
 
 # EOF
