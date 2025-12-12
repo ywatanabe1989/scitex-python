@@ -75,17 +75,30 @@ def load_pltz_bundle(bundle_dir: Path) -> Dict[str, Any]:
     """
     result = {}
 
-    # Load specification
-    spec_file = bundle_dir / "plot.json"
-    if spec_file.exists():
+    # Find the spec file (could be plot.json or {basename}.json)
+    spec_file = None
+    for f in bundle_dir.glob("*.json"):
+        if not f.name.startswith('.'):  # Skip hidden files
+            spec_file = f
+            break
+
+    if spec_file and spec_file.exists():
         with open(spec_file, "r") as f:
             result["spec"] = json.load(f)
+        # Extract basename from spec filename
+        result["basename"] = spec_file.stem
     else:
         result["spec"] = None
+        result["basename"] = "plot"  # Default
 
-    # Load CSV data
-    csv_file = bundle_dir / "plot.csv"
-    if csv_file.exists():
+    # Find and load CSV data (could be plot.csv or {basename}.csv)
+    csv_file = None
+    for f in bundle_dir.glob("*.csv"):
+        if not f.name.startswith('.'):  # Skip hidden files
+            csv_file = f
+            break
+
+    if csv_file and csv_file.exists():
         try:
             import pandas as pd
             result["data"] = pd.read_csv(csv_file)
@@ -101,18 +114,26 @@ def save_pltz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
     """Save .pltz bundle contents to directory.
 
     Args:
-        data: Bundle data dictionary.
+        data: Bundle data dictionary containing:
+            - spec: JSON specification
+            - data: CSV data (DataFrame or string)
+            - basename: Base filename for all exports (e.g., "myplot")
+            - png, svg, pdf: Export file data
+            - hitmap_png, hitmap_svg: Hitmap file data
         dir_path: Path to the bundle directory.
     """
+    # Get basename from data, fallback to "plot" for backward compatibility
+    basename = data.get("basename", "plot")
+
     # Save specification
     spec = data.get("spec", {})
-    spec_file = dir_path / "plot.json"
+    spec_file = dir_path / f"{basename}.json"
     with open(spec_file, "w") as f:
         json.dump(spec, f, indent=2)
 
     # Save CSV data
     if "data" in data:
-        csv_file = dir_path / "plot.csv"
+        csv_file = dir_path / f"{basename}.csv"
         df = data["data"]
         if hasattr(df, "to_csv"):
             df.to_csv(csv_file, index=False)
@@ -121,20 +142,20 @@ def save_pltz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
                 f.write(str(df))
 
     # Save exports (PNG, SVG, PDF)
-    _save_exports(data, dir_path, spec)
+    _save_exports(data, dir_path, spec, basename)
 
     # Save hitmaps
-    _save_hitmaps(data, dir_path)
+    _save_hitmaps(data, dir_path, basename)
 
     # Generate overview
     try:
-        generate_bundle_overview(dir_path, spec, data)
+        generate_bundle_overview(dir_path, spec, data, basename)
     except Exception as e:
         import logging
         logging.getLogger("scitex").debug(f"Could not generate overview: {e}")
 
 
-def _save_exports(data: Dict[str, Any], dir_path: Path, spec: Dict) -> None:
+def _save_exports(data: Dict[str, Any], dir_path: Path, spec: Dict, basename: str = "plot") -> None:
     """Save export files (PNG, SVG, PDF) with embedded metadata."""
     from scitex.io._metadata import embed_metadata
 
@@ -142,7 +163,7 @@ def _save_exports(data: Dict[str, Any], dir_path: Path, spec: Dict) -> None:
         if fmt not in data:
             continue
 
-        out_file = dir_path / f"plot.{fmt}"
+        out_file = dir_path / f"{basename}.{fmt}"
         export_data = data[fmt]
 
         if isinstance(export_data, bytes):
@@ -181,11 +202,11 @@ def _embed_metadata_in_export(
         embed_metadata(str(file_path), embed_data)
 
 
-def _save_hitmaps(data: Dict[str, Any], dir_path: Path) -> None:
+def _save_hitmaps(data: Dict[str, Any], dir_path: Path, basename: str = "plot") -> None:
     """Save hitmap PNG and SVG files."""
     # Save hitmap PNG
     if "hitmap_png" in data:
-        hitmap_file = dir_path / "plot_hitmap.png"
+        hitmap_file = dir_path / f"{basename}_hitmap.png"
         hitmap_data = data["hitmap_png"]
         if isinstance(hitmap_data, bytes):
             with open(hitmap_file, "wb") as f:
@@ -195,7 +216,7 @@ def _save_hitmaps(data: Dict[str, Any], dir_path: Path) -> None:
 
     # Save hitmap SVG
     if "hitmap_svg" in data:
-        hitmap_svg_file = dir_path / "plot_hitmap.svg"
+        hitmap_svg_file = dir_path / f"{basename}_hitmap.svg"
         hitmap_svg_data = data["hitmap_svg"]
         if isinstance(hitmap_svg_data, bytes):
             with open(hitmap_svg_file, "wb") as f:
@@ -204,8 +225,8 @@ def _save_hitmaps(data: Dict[str, Any], dir_path: Path) -> None:
             shutil.copy(hitmap_svg_data, hitmap_svg_file)
 
 
-def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict) -> None:
-    """Generate overview.png showing bundle contents visually.
+def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: str = "plot") -> None:
+    """Generate overview image showing bundle contents visually.
 
     Creates a comprehensive overview image with:
     - CSV statistics (columns, rows, dtypes)
@@ -220,6 +241,8 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict) -> None:
         Bundle specification.
     data : dict
         Bundle data dictionary.
+    basename : str
+        Base filename for bundle files (e.g., "myplot").
     """
     import matplotlib.pyplot as plt
     import matplotlib.gridspec as gridspec
@@ -278,8 +301,8 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict) -> None:
 
     # === Panel 3: PNG Image ===
     ax_png = fig.add_subplot(gs[0, 2])
-    ax_png.set_title("plot.png", fontweight="bold", fontsize=11)
-    png_path = dir_path / "plot.png"
+    ax_png.set_title(f"{basename}.png", fontweight="bold", fontsize=11)
+    png_path = dir_path / f"{basename}.png"
     if png_path.exists():
         png_img = Image.open(png_path)
         ax_png.imshow(png_img)
@@ -288,8 +311,8 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict) -> None:
 
     # === Panel 4: Hitmap PNG ===
     ax_hitmap = fig.add_subplot(gs[0, 3])
-    ax_hitmap.set_title("plot_hitmap.png", fontweight="bold", fontsize=11)
-    hitmap_path = dir_path / "plot_hitmap.png"
+    ax_hitmap.set_title(f"{basename}_hitmap.png", fontweight="bold", fontsize=11)
+    hitmap_path = dir_path / f"{basename}_hitmap.png"
     if hitmap_path.exists():
         hitmap_img = Image.open(hitmap_path)
         ax_hitmap.imshow(hitmap_img)
@@ -298,8 +321,8 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict) -> None:
 
     # === Panel 5: SVG info ===
     ax_svg = fig.add_subplot(gs[1, 0])
-    ax_svg.set_title("plot.svg", fontweight="bold", fontsize=11)
-    svg_path = dir_path / "plot.svg"
+    ax_svg.set_title(f"{basename}.svg", fontweight="bold", fontsize=11)
+    svg_path = dir_path / f"{basename}.svg"
     if svg_path.exists():
         svg_size = svg_path.stat().st_size
         ax_svg.text(
@@ -311,8 +334,8 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict) -> None:
 
     # === Panel 6: Hitmap SVG ===
     ax_hitmap_svg = fig.add_subplot(gs[1, 1])
-    ax_hitmap_svg.set_title("plot_hitmap.svg", fontweight="bold", fontsize=11)
-    hitmap_svg_path = dir_path / "plot_hitmap.svg"
+    ax_hitmap_svg.set_title(f"{basename}_hitmap.svg", fontweight="bold", fontsize=11)
+    hitmap_svg_path = dir_path / f"{basename}_hitmap.svg"
     if hitmap_svg_path.exists():
         svg_size = hitmap_svg_path.stat().st_size
         ax_hitmap_svg.text(
@@ -366,7 +389,7 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict) -> None:
     )
 
     # Save overview
-    overview_path = dir_path / "overview.png"
+    overview_path = dir_path / f"{basename}_overview.png"
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message=".*tight_layout.*")
         fig.savefig(overview_path, dpi=150, bbox_inches="tight", facecolor="white")
