@@ -1249,12 +1249,16 @@ def merge_layered_bundle(
     if style and "theme" in style:
         merged["theme"] = style["theme"]
 
-    # Merge hit_regions and selectable_regions from geometry
+    # Merge hit_regions, selectable_regions, and figure_px from geometry
     if geometry:
         if "hit_regions" in geometry:
             merged["hit_regions"] = geometry["hit_regions"]
         if "selectable_regions" in geometry:
             merged["selectable_regions"] = geometry["selectable_regions"]
+        if "figure_px" in geometry:
+            merged["figure_px"] = geometry["figure_px"]
+        if "artists" in geometry:
+            merged["artists"] = geometry["artists"]
 
     return merged
 
