@@ -502,11 +502,12 @@ def _plot_with_traces(
 ):
     """Plot using trace information from overrides."""
     for trace in traces:
+        # Support both old format (csv_columns.x/y) and new format (x_col/y_col)
         csv_cols = trace.get("csv_columns", {})
-        x_col = csv_cols.get("x")
-        y_col = csv_cols.get("y")
+        x_col = csv_cols.get("x") or trace.get("x_col")
+        y_col = csv_cols.get("y") or trace.get("y_col")
 
-        if x_col in df.columns and y_col in df.columns:
+        if x_col and y_col and x_col in df.columns and y_col in df.columns:
             ax.plot(
                 df[x_col],
                 df[y_col],

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-13 (ywatanabe)"
+# Timestamp: "2025-12-14 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fig/io/_bundle.py
 
 """
@@ -68,28 +68,63 @@ def validate_figz_spec(spec: Dict[str, Any]) -> List[str]:
 def load_figz_bundle(bundle_dir: Path) -> Dict[str, Any]:
     """Load .figz bundle contents from directory.
 
+    Supports both:
+    - New format: spec.json + style.json (separate semantic/appearance)
+    - Legacy format: {basename}.json (embedded styles)
+
     Args:
         bundle_dir: Path to the bundle directory.
 
     Returns:
-        Dictionary with loaded bundle contents.
+        Dictionary with loaded bundle contents:
+        - spec: Figure specification (semantic)
+        - style: Figure style (appearance)
+        - plots: Dict of nested pltz bundles
+        - basename: Base filename
     """
     result = {}
+    bundle_dir = Path(bundle_dir)
 
-    # Find the spec file (could be figure.json or {basename}.json)
-    spec_file = None
-    for f in bundle_dir.glob("*.json"):
-        if not f.name.startswith('.'):  # Skip hidden files
-            spec_file = f
-            break
+    # Determine basename from directory name
+    basename = bundle_dir.stem.replace(".figz", "")
+    result["basename"] = basename
 
-    if spec_file and spec_file.exists():
+    # Try to load spec.json (new format) first
+    spec_file = bundle_dir / "spec.json"
+    if spec_file.exists():
         with open(spec_file, "r") as f:
             result["spec"] = json.load(f)
-        result["basename"] = spec_file.stem
     else:
-        result["spec"] = None
-        result["basename"] = "figure"
+        # Fallback to {basename}.json (legacy format)
+        legacy_file = bundle_dir / f"{basename}.json"
+        if legacy_file.exists():
+            with open(legacy_file, "r") as f:
+                result["spec"] = json.load(f)
+        else:
+            # Try any .json file
+            for f in bundle_dir.glob("*.json"):
+                if not f.name.startswith('.') and f.name != "style.json":
+                    with open(f, "r") as fp:
+                        result["spec"] = json.load(fp)
+                    break
+            else:
+                result["spec"] = None
+
+    # Load style.json if exists
+    style_file = bundle_dir / "style.json"
+    if style_file.exists():
+        with open(style_file, "r") as f:
+            result["style"] = json.load(f)
+    else:
+        # Extract from embedded styles in spec (legacy)
+        if result.get("spec"):
+            figure = result["spec"].get("figure", {})
+            if "styles" in figure:
+                result["style"] = figure["styles"]
+            else:
+                result["style"] = {}
+        else:
+            result["style"] = {}
 
     # Load nested .pltz bundles
     result["plots"] = {}
@@ -113,43 +148,162 @@ def load_figz_bundle(bundle_dir: Path) -> Dict[str, Any]:
 def save_figz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
     """Save .figz bundle contents to directory.
 
+    Structure:
+        figure.figz.d/
+            spec.json              # Figure-level specification
+            style.json             # Figure-level style (optional)
+            exports/               # Figure-level exports
+                figure.png
+                figure.svg
+                figure_hitmap.png
+                figure_overview.png
+            cache/                 # Figure-level cache
+                geometry_px.json   # Combined geometry for all panels
+                render_manifest.json
+            panels/                # Nested panel bundles (or *.pltz.d at root)
+                A.pltz.d/
+                B.pltz.d/
+            README.md
+
     Args:
         data: Bundle data dictionary.
         dir_path: Path to the bundle directory.
     """
+    import logging
+    logger = logging.getLogger("scitex")
+
     # Get basename from directory name (e.g., "Figure1" from "Figure1.figz.d")
     basename = dir_path.stem.replace(".figz", "")
 
-    # Save specification with proper basename
-    spec = data.get("spec", {})
-    spec_file = dir_path / f"{basename}.json"
-    with open(spec_file, "w") as f:
-        json.dump(spec, f, indent=2)
+    # Create directories
+    exports_dir = dir_path / "exports"
+    cache_dir = dir_path / "cache"
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    cache_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save exports (PNG, SVG, PDF) with proper basename
-    _save_exports(data, dir_path, spec, basename)
+    # Split spec into spec.json (semantic) and style.json (appearance)
+    spec = data.get("spec", {})
+    style = data.get("style", {})
+
+    # Extract style from spec.figure.styles if not provided separately
+    figure_data = spec.get("figure", {})
+    if not style and "styles" in figure_data:
+        style = figure_data.get("styles", {})
+
+    # Build clean spec (semantic data only)
+    clean_spec = {
+        "schema": spec.get("schema", {"name": "scitex.fig.figure", "version": "1.0.0"}),
+        "figure": {
+            "id": figure_data.get("id", "figure"),
+            "title": figure_data.get("title", ""),
+            "caption": figure_data.get("caption", ""),
+        },
+        "panels": spec.get("panels", []),
+    }
+    if "notations" in spec:
+        clean_spec["notations"] = spec["notations"]
+
+    # Build style (appearance data)
+    figz_style = {
+        "schema": {"name": "scitex.fig.style", "version": "1.0.0"},
+        "size": style.get("size", {"width_mm": 180, "height_mm": 120}),
+        "background": style.get("background", "#ffffff"),
+        "theme": style.get("theme", {"mode": "light"}),
+        "panel_labels": style.get("panel_labels", {
+            "visible": True,
+            "fontsize": 12,
+            "fontweight": "bold",
+            "position": "top-left",
+        }),
+    }
+
+    # Save spec.json (semantic)
+    spec_file = dir_path / "spec.json"
+    with open(spec_file, "w") as f:
+        json.dump(clean_spec, f, indent=2)
+
+    # Save style.json (appearance)
+    style_file = dir_path / "style.json"
+    with open(style_file, "w") as f:
+        json.dump(figz_style, f, indent=2)
+
+    # Also save as {basename}.json for backward compatibility (full spec with embedded style)
+    compat_spec = dict(clean_spec)
+    compat_spec["figure"]["styles"] = {
+        "size": figz_style["size"],
+        "background": figz_style["background"],
+    }
+    compat_spec_file = dir_path / f"{basename}.json"
+    with open(compat_spec_file, "w") as f:
+        json.dump(compat_spec, f, indent=2)
+
+    # Save exports to exports/ directory
+    _save_figz_exports(data, exports_dir, spec, basename)
 
     # Copy nested .pltz bundles directly (preserving all files)
     if "plots" in data:
         _copy_nested_pltz_bundles(data["plots"], dir_path)
 
-    # Generate figz overview
+    # Generate composed figure in exports/ (Figure1.png, Figure1.svg)
+    try:
+        _generate_composed_figure(dir_path, spec, basename)
+    except Exception as e:
+        logger.debug(f"Could not generate composed figure: {e}")
+
+    # Generate figz overview in exports/
     try:
         _generate_figz_overview(dir_path, spec, data, basename)
     except Exception as e:
-        import logging
-        logging.getLogger("scitex").debug(f"Could not generate figz overview: {e}")
+        logger.debug(f"Could not generate figz overview: {e}")
+
+    # Generate figure-level geometry cache
+    try:
+        _generate_figz_geometry_cache(dir_path, spec, basename)
+    except Exception as e:
+        logger.debug(f"Could not generate figz geometry cache: {e}")
 
     # Generate README.md
     try:
         _generate_figz_readme(dir_path, spec, data, basename)
     except Exception as e:
-        import logging
-        logging.getLogger("scitex").debug(f"Could not generate figz README: {e}")
+        logger.debug(f"Could not generate figz README: {e}")
+
+
+def _save_figz_exports(data: Dict[str, Any], exports_dir: Path, spec: Dict, basename: str) -> None:
+    """Save figure-level export files to exports/ directory.
+
+    Args:
+        data: Bundle data containing PNG/SVG/PDF bytes or paths.
+        exports_dir: Path to exports/ directory.
+        spec: Figure specification.
+        basename: Base filename for exports.
+    """
+    for fmt in ["png", "svg", "pdf"]:
+        if fmt not in data:
+            continue
+
+        out_file = exports_dir / f"{basename}.{fmt}"
+        export_data = data[fmt]
+
+        if isinstance(export_data, bytes):
+            with open(out_file, "wb") as f:
+                f.write(export_data)
+        elif isinstance(export_data, (str, Path)) and Path(export_data).exists():
+            shutil.copy(export_data, out_file)
+
+        # Embed metadata into PNG and PDF files
+        if out_file.exists() and spec:
+            try:
+                _embed_metadata_in_export(out_file, spec, fmt)
+            except Exception as e:
+                import logging
+                logging.getLogger("scitex").debug(
+                    f"Could not embed metadata in {out_file}: {e}"
+                )
 
 
 def _save_exports(data: Dict[str, Any], dir_path: Path, spec: Dict, basename: str = "figure") -> None:
-    """Save export files (PNG, SVG, PDF) with embedded metadata."""
+    """Save export files (PNG, SVG, PDF) with embedded metadata. (Legacy - root level)"""
     for fmt in ["png", "svg", "pdf"]:
         if fmt not in data:
             continue
@@ -356,8 +510,10 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
                     fontsize=10, fontfamily="monospace", verticalalignment="top",
                     bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5))
 
-    # Save overview
-    overview_path = dir_path / f"{basename}_overview.png"
+    # Save overview to exports/ directory
+    exports_dir = dir_path / "exports"
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    overview_path = exports_dir / f"{basename}_overview.png"
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message=".*tight_layout.*")
         fig.savefig(overview_path, dpi=150, bbox_inches="tight", facecolor="white")
@@ -439,6 +595,210 @@ def _draw_single_bbox(ax, bbox: List, color: str, label: str, lw: int = 2) -> No
     ax.text(x0 + 2, y0 + height / 2, label, fontsize=6, color=color, fontweight="bold")
 
 
+def _generate_composed_figure(dir_path: Path, spec: Dict, basename: str) -> None:
+    """Generate composed figure from panel images.
+
+    Composes all panel PNG images into a single figure based on the layout
+    specified in the figz spec.
+
+    Args:
+        dir_path: Bundle directory path.
+        spec: Bundle specification with panel layout.
+        basename: Base filename for exports.
+    """
+    from PIL import Image
+    import warnings
+
+    exports_dir = dir_path / "exports"
+    exports_dir.mkdir(parents=True, exist_ok=True)
+
+    # Load style from style.json if exists, else from spec
+    style_file = dir_path / "style.json"
+    if style_file.exists():
+        with open(style_file, "r") as f:
+            style = json.load(f)
+        size = style.get("size", {})
+        background = style.get("background", "#ffffff")
+    else:
+        # Fallback to embedded styles in spec
+        figure = spec.get("figure", {})
+        styles = figure.get("styles", {})
+        size = styles.get("size", {})
+        background = styles.get("background", "#ffffff")
+
+    fig_width_mm = size.get("width_mm", 180)
+    fig_height_mm = size.get("height_mm", 120)
+
+    # Use 300 DPI for composition
+    dpi = 300
+    mm_to_inch = 1 / 25.4
+    fig_width_px = int(fig_width_mm * mm_to_inch * dpi)
+    fig_height_px = int(fig_height_mm * mm_to_inch * dpi)
+
+    # Create canvas
+    canvas = Image.new("RGB", (fig_width_px, fig_height_px), background)
+
+    # Get panels from spec
+    panels = spec.get("panels", [])
+
+    for panel in panels:
+        panel_id = panel.get("id", "")
+        plot_ref = panel.get("plot", "")
+
+        # Find the panel's pltz bundle
+        if plot_ref.endswith(".pltz.d"):
+            panel_dir = dir_path / plot_ref
+        else:
+            panel_dir = dir_path / f"{panel_id}.pltz.d"
+
+        if not panel_dir.exists():
+            continue
+
+        # Find panel PNG in exports/
+        panel_png = None
+        exports_subdir = panel_dir / "exports"
+        if exports_subdir.exists():
+            for png_file in exports_subdir.glob("*.png"):
+                if "_hitmap" not in png_file.name and "_overview" not in png_file.name:
+                    panel_png = png_file
+                    break
+
+        # Fallback: look in panel root
+        if not panel_png:
+            for png_file in panel_dir.glob("*.png"):
+                if "_hitmap" not in png_file.name and "_overview" not in png_file.name:
+                    panel_png = png_file
+                    break
+
+        if not panel_png or not panel_png.exists():
+            continue
+
+        # Load panel image
+        panel_img = Image.open(panel_png)
+
+        # Get panel position and size from spec
+        pos = panel.get("position", {})
+        panel_size = panel.get("size", {})
+
+        x_mm = pos.get("x_mm", 0)
+        y_mm = pos.get("y_mm", 0)
+        width_mm = panel_size.get("width_mm", 80)
+        height_mm = panel_size.get("height_mm", 68)
+
+        # Convert to pixels
+        x_px = int(x_mm * mm_to_inch * dpi)
+        y_px = int(y_mm * mm_to_inch * dpi)
+        target_width = int(width_mm * mm_to_inch * dpi)
+        target_height = int(height_mm * mm_to_inch * dpi)
+
+        # Resize panel to fit
+        panel_img = panel_img.resize((target_width, target_height), Image.Resampling.LANCZOS)
+
+        # Convert to RGB if necessary (for transparent PNGs)
+        if panel_img.mode == "RGBA":
+            # Create white background
+            bg = Image.new("RGB", panel_img.size, background)
+            bg.paste(panel_img, mask=panel_img.split()[3])
+            panel_img = bg
+        elif panel_img.mode != "RGB":
+            panel_img = panel_img.convert("RGB")
+
+        # Paste onto canvas
+        canvas.paste(panel_img, (x_px, y_px))
+
+    # Save composed figure
+    png_path = exports_dir / f"{basename}.png"
+    canvas.save(png_path, "PNG", dpi=(dpi, dpi))
+
+    # Also save as SVG (embed PNG in SVG for now)
+    svg_path = exports_dir / f"{basename}.svg"
+    svg_width_in = fig_width_mm * mm_to_inch
+    svg_height_in = fig_height_mm * mm_to_inch
+
+    # Create simple SVG wrapper with embedded image
+    import base64
+    with open(png_path, "rb") as f:
+        png_b64 = base64.b64encode(f.read()).decode("utf-8")
+
+    svg_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="{fig_width_px}" height="{fig_height_px}"
+     viewBox="0 0 {fig_width_px} {fig_height_px}">
+  <image width="{fig_width_px}" height="{fig_height_px}"
+         xlink:href="data:image/png;base64,{png_b64}"/>
+</svg>'''
+
+    with open(svg_path, "w") as f:
+        f.write(svg_content)
+
+
+def _generate_figz_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> None:
+    """Generate figure-level geometry cache combining all panel geometries.
+
+    Creates:
+        cache/geometry_px.json - Combined geometry for all panels
+        cache/render_manifest.json - Figure-level render metadata
+
+    Args:
+        dir_path: Bundle directory path.
+        spec: Bundle specification.
+        basename: Base filename for bundle files.
+    """
+    from datetime import datetime
+
+    cache_dir = dir_path / "cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+
+    # Collect geometry from all panel bundles
+    combined_geometry = {
+        "figure_id": basename,
+        "panels": {},
+        "generated_at": datetime.now().isoformat(),
+    }
+
+    # Find all panel directories
+    panel_dirs = sorted(dir_path.glob("*.pltz.d"))
+
+    for panel_dir in panel_dirs:
+        panel_id = panel_dir.stem.replace(".pltz", "")
+
+        # Load panel geometry
+        panel_geometry_path = panel_dir / "cache" / "geometry_px.json"
+        if panel_geometry_path.exists():
+            with open(panel_geometry_path, "r") as f:
+                panel_geometry = json.load(f)
+            combined_geometry["panels"][panel_id] = panel_geometry
+
+    # Add panel positions from spec
+    panels_spec = spec.get("panels", [])
+    for panel in panels_spec:
+        panel_id = panel.get("id")
+        if panel_id and panel_id in combined_geometry["panels"]:
+            combined_geometry["panels"][panel_id]["position_mm"] = panel.get("position", {})
+            combined_geometry["panels"][panel_id]["size_mm"] = panel.get("size", {})
+
+    # Save combined geometry
+    geometry_path = cache_dir / "geometry_px.json"
+    with open(geometry_path, "w") as f:
+        json.dump(combined_geometry, f, indent=2)
+
+    # Generate render manifest
+    figure_styles = spec.get("figure", {}).get("styles", {})
+    size = figure_styles.get("size", {})
+
+    manifest = {
+        "figure_id": basename,
+        "generated_at": datetime.now().isoformat(),
+        "size_mm": [size.get("width_mm", 0), size.get("height_mm", 0)],
+        "panels_count": len(panel_dirs),
+        "schema": spec.get("schema", {}),
+    }
+
+    manifest_path = cache_dir / "render_manifest.json"
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2)
+
+
 def _embed_metadata_in_export(
     file_path: Path, spec: Dict[str, Any], fmt: str
 ) -> None:
@@ -475,11 +835,21 @@ def _generate_figz_readme(
     figure = spec.get("figure", {})
     title = figure.get("title", basename)
     caption = figure.get("caption", "")
-    styles = figure.get("styles", {})
-    size = styles.get("size", {})
+
+    # Load style from style.json if exists, else from spec.figure.styles
+    style_file = dir_path / "style.json"
+    if style_file.exists():
+        with open(style_file, "r") as f:
+            style = json.load(f)
+        size = style.get("size", {})
+        background = style.get("background", "#ffffff")
+    else:
+        styles = figure.get("styles", {})
+        size = styles.get("size", {})
+        background = styles.get("background", "#ffffff")
+
     width_mm = size.get("width_mm", 0)
     height_mm = size.get("height_mm", 0)
-    background = styles.get("background", "#ffffff")
 
     # Count panels
     panels = spec.get("panels", [])
@@ -509,16 +879,22 @@ def _generate_figz_readme(
 
 ## Overview
 
-![Figure Overview]({basename}_overview.png)
+![Figure Overview](exports/{basename}_overview.png)
 
 ## Bundle Structure
 
 ```
 {basename}.figz.d/
-├── {basename}.json         # Figure specification (panels, layout)
-├── {basename}.png          # Rendered figure (raster)
-├── {basename}.svg          # Rendered figure (vector)
-├── {basename}_overview.png # Visual summary with hitmaps
+├── spec.json              # Figure specification (semantic: what to draw)
+├── style.json             # Figure style (appearance: how it looks)
+├── {basename}.json        # Combined spec+style (legacy compatibility)
+├── exports/               # Figure-level exports
+│   ├── {basename}.png          # Rendered figure (raster)
+│   ├── {basename}.svg          # Rendered figure (vector)
+│   └── {basename}_overview.png # Visual summary with hitmaps
+├── cache/                 # Figure-level cache (regenerable)
+│   ├── geometry_px.json        # Combined geometry for all panels
+│   └── render_manifest.json    # Render metadata
 {panel_dir_list}└── README.md              # This file
 ```
 
@@ -567,14 +943,21 @@ panel_a = plots["A"]        # Get panel A's pltz bundle
 
 ### Editing
 
-Edit `{basename}.json` to change:
+Edit `spec.json` to change semantic content:
 - Panel positions and sizes
 - Figure title and caption
-- Background color
+- Panel layout
 
-Edit individual `*.pltz.d/spec.json` to change:
-- Plot data and axes
-- Trace specifications
+Edit `style.json` to change appearance:
+- Figure size (width_mm, height_mm)
+- Background color
+- Panel label styling
+- Theme (light/dark)
+
+Edit individual `*.pltz.d/spec.json` and `*.pltz.d/style.json` to change:
+- Plot data and axes (spec.json)
+- Trace specifications (spec.json)
+- Colors, fonts, theme (style.json)
 
 ---
 
