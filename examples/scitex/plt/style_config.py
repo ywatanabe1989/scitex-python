@@ -43,7 +43,7 @@ import numpy as np
 import scitex as stx
 from pathlib import Path
 
-OUTPUT_DIR = __file__.replace(".py", "_out")
+OUTPUT_DIR = "./style_config_out"
 
 
 def demo_all_parameters():

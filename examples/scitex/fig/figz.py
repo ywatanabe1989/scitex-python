@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-13 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/examples/bundles/figz_bundle.py
-
+# Timestamp: 2025-12-13
+# File: /home/ywatanabe/proj/scitex-code/examples/scitex/fig/figz.py
 """
 Comprehensive .figz bundle demonstration with various plot types.
 
@@ -11,28 +10,14 @@ Demonstrates:
 2. Various matplotlib plot types with hitmap support
 3. Bundle validation and loading
 
-Plot types: lines, bars, scatter, histogram, errorbar, boxplot, violin,
-            contour, heatmap, fill_between, pie, annotations, step/stem
+Uses PLOTTERS registry from scitex.dev.plt for all plot types.
 """
 
 import scitex as stx
 import scitex.fig as sfig
 import scitex.io as sio
 from scitex.io._bundle import validate_bundle
-
-from scitex.dev.plt import (
-    plot_bar_grouped,
-    plot_bar_simple,
-    plot_boxplot,
-    plot_contour,
-    plot_errorbar,
-    plot_fill_between,
-    plot_heatmap,
-    plot_histogram_multiple,
-    plot_multi_line,
-    plot_scatter_sizes,
-    plot_violin,
-)
+from scitex.dev.plt import PLOTTERS_STX, PLOTTERS_MPL
 
 
 @stx.session
@@ -46,7 +31,7 @@ def main(
     """Comprehensive .figz bundle demonstration."""
     logger.info("Starting .figz bundle demo with various plot types")
 
-    sdir = CONFIG["SDIR_RUN"]
+    sdir = CONFIG["SDIR_OUT"]
     rng = rng_manager("figz_demo")
 
     # -------------------------------------------------------------------------
@@ -54,18 +39,19 @@ def main(
     # -------------------------------------------------------------------------
     logger.info("Creating panel plots (.pltz bundles)")
 
+    # Select a variety of plot types from registries
     plot_configs = [
-        (plot_multi_line, "panel_lines", "A"),
-        (plot_bar_grouped, "panel_bars", "B"),
-        (plot_scatter_sizes, "panel_scatter", "C"),
-        (plot_histogram_multiple, "panel_histogram", "D"),
-        (plot_errorbar, "panel_errorbar", "E"),
-        (plot_boxplot, "panel_boxplot", "F"),
-        (plot_contour, "panel_contour", "G"),
-        (plot_heatmap, "panel_heatmap", "H"),
-        (plot_fill_between, "panel_fill", "I"),
-        (plot_bar_simple, "panel_bar_simple", "J"),
-        (plot_violin, "panel_violin", "K"),
+        (PLOTTERS_STX["stx_line"], "panel_line", "A"),
+        (PLOTTERS_STX["stx_bar"], "panel_bar", "B"),
+        (PLOTTERS_STX["stx_scatter"], "panel_scatter", "C"),
+        (PLOTTERS_MPL["mpl_hist"], "panel_histogram", "D"),
+        (PLOTTERS_STX["stx_errorbar"], "panel_errorbar", "E"),
+        (PLOTTERS_STX["stx_boxplot"], "panel_boxplot", "F"),
+        (PLOTTERS_STX["stx_contour"], "panel_contour", "G"),
+        (PLOTTERS_STX["stx_heatmap"], "panel_heatmap", "H"),
+        (PLOTTERS_STX["stx_fill_between"], "panel_fill", "I"),
+        (PLOTTERS_MPL["mpl_barh"], "panel_barh", "J"),
+        (PLOTTERS_STX["stx_violin"], "panel_violin", "K"),
     ]
 
     panels = {}
@@ -95,12 +81,7 @@ def main(
 
     loaded = sfig.load_figz(sdir / "Figure1.figz.d")
     logger.info(f"Loaded figure with {len(loaded['spec']['panels'])} panels")
-
-    for panel_id, panel_data in loaded.get("panels", {}).items():
-        if isinstance(panel_data, tuple) and panel_data[0] is not None:
-            fig_wrapper = panel_data[0]
-            if hasattr(fig_wrapper, "figure"):
-                plt.close(fig_wrapper.figure)
+    logger.info(f"Panel IDs: {list(loaded['panels'].keys())}")
 
     logger.success("Figure1.figz.d created and verified")
 
