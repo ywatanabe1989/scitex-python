@@ -4,19 +4,20 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_subplots/_AxisWrapperMixins/_RawMatplotlibMixin.py
 
 """
-Raw matplotlib aliases (mpl_xxx) for direct access without scitex processing.
+Matplotlib aliases (mpl_xxx) for explicit matplotlib-style API.
 
 Provides consistent naming convention:
-- stx_xxx: scitex-specific methods with tracking, unit awareness
-- sns_xxx: seaborn wrappers
-- mpl_xxx: raw matplotlib methods (no tracking, no styling, no defaults)
+- stx_xxx: scitex-specific methods (ArrayLike input, tracked)
+- sns_xxx: seaborn wrappers (DataFrame input, tracked)
+- mpl_xxx: matplotlib methods (matplotlib-style input, tracked)
+
+All three API layers track data for reproducibility.
 
 Usage:
-    # With tracking and scitex styling
-    ax.plot(x, y)  # or ax.stx_line(x, y)
-
-    # Raw matplotlib, no scitex processing
-    ax.mpl_plot(x, y)
+    ax.stx_line(y)              # ArrayLike input
+    ax.sns_boxplot(data=df, x="group", y="value")  # DataFrame input
+    ax.mpl_plot(x, y)           # matplotlib-style input
+    ax.plot(x, y)               # Same as mpl_plot
 """
 
 import os
@@ -26,234 +27,234 @@ __DIR__ = os.path.dirname(__FILE__)
 
 
 class RawMatplotlibMixin:
-    """Mixin providing mpl_xxx aliases for raw matplotlib access.
+    """Mixin providing mpl_xxx aliases for matplotlib-style API.
 
-    These methods bypass all scitex processing:
-    - No tracking
-    - No default styling
-    - No unit conversion
-    - No post-processing
+    These methods are identical to calling ax.plot(), ax.scatter(), etc.
+    They go through SciTeX's __getattr__ wrapper and are fully tracked.
 
-    Useful when you need exact matplotlib behavior or performance-critical code.
+    The mpl_* prefix provides:
+    - Explicit naming convention (mpl_* vs stx_* vs sns_*)
+    - Programmatic access via MPL_METHODS registry
+    - Same tracking and styling as regular matplotlib calls
     """
+
+    # =========================================================================
+    # Helper to call through __getattr__ wrapper (enables tracking)
+    # =========================================================================
+    def _mpl_call(self, method_name, *args, **kwargs):
+        """Call matplotlib method through __getattr__ wrapper for tracking."""
+        # Use object.__getattribute__ to get the __getattr__ from AxisWrapper
+        # Then call it with the method name to get the tracked wrapper
+        wrapper_class = type(self)
+        # Walk up MRO to find __getattr__ in AxisWrapper
+        for cls in wrapper_class.__mro__:
+            if "__getattr__" in cls.__dict__:
+                return cls.__getattr__(self, method_name)(*args, **kwargs)
+        # Fallback to direct call if no __getattr__ found
+        return getattr(self._axes_mpl, method_name)(*args, **kwargs)
 
     # =========================================================================
     # Line plots
     # =========================================================================
     def mpl_plot(self, *args, **kwargs):
-        """Raw matplotlib plot() - no scitex processing."""
-        return self._axes_mpl.plot(*args, **kwargs)
+        """Matplotlib plot() - tracked, identical to ax.plot()."""
+        return self._mpl_call("plot", *args, **kwargs)
 
     def mpl_step(self, *args, **kwargs):
-        """Raw matplotlib step() - no scitex processing."""
-        return self._axes_mpl.step(*args, **kwargs)
+        """Matplotlib step() - tracked, identical to ax.step()."""
+        return self._mpl_call("step", *args, **kwargs)
 
     def mpl_stem(self, *args, **kwargs):
-        """Raw matplotlib stem() - no scitex processing."""
-        return self._axes_mpl.stem(*args, **kwargs)
+        """Matplotlib stem() - tracked, identical to ax.stem()."""
+        return self._mpl_call("stem", *args, **kwargs)
 
     # =========================================================================
     # Scatter plots
     # =========================================================================
     def mpl_scatter(self, *args, **kwargs):
-        """Raw matplotlib scatter() - no scitex processing."""
-        return self._axes_mpl.scatter(*args, **kwargs)
+        """Matplotlib scatter() - tracked, identical to ax.scatter()."""
+        return self._mpl_call("scatter", *args, **kwargs)
 
     # =========================================================================
     # Bar plots
     # =========================================================================
     def mpl_bar(self, *args, **kwargs):
-        """Raw matplotlib bar() - no scitex processing."""
-        return self._axes_mpl.bar(*args, **kwargs)
+        """Matplotlib bar() - tracked, identical to ax.bar()."""
+        return self._mpl_call("bar", *args, **kwargs)
 
     def mpl_barh(self, *args, **kwargs):
-        """Raw matplotlib barh() - no scitex processing."""
-        return self._axes_mpl.barh(*args, **kwargs)
+        """Matplotlib barh() - tracked, identical to ax.barh()."""
+        return self._mpl_call("barh", *args, **kwargs)
 
     def mpl_bar3d(self, *args, **kwargs):
-        """Raw matplotlib bar3d() (3D axes) - no scitex processing."""
-        if hasattr(self._axes_mpl, 'bar3d'):
-            return self._axes_mpl.bar3d(*args, **kwargs)
-        raise AttributeError("bar3d is only available on 3D axes")
+        """Matplotlib bar3d() (3D axes) - tracked."""
+        return self._mpl_call("bar3d", *args, **kwargs)
 
     # =========================================================================
     # Histograms
     # =========================================================================
     def mpl_hist(self, *args, **kwargs):
-        """Raw matplotlib hist() - no scitex processing."""
-        return self._axes_mpl.hist(*args, **kwargs)
+        """Matplotlib hist() - tracked, identical to ax.hist()."""
+        return self._mpl_call("hist", *args, **kwargs)
 
     def mpl_hist2d(self, *args, **kwargs):
-        """Raw matplotlib hist2d() - no scitex processing."""
-        return self._axes_mpl.hist2d(*args, **kwargs)
+        """Matplotlib hist2d() - tracked, identical to ax.hist2d()."""
+        return self._mpl_call("hist2d", *args, **kwargs)
 
     def mpl_hexbin(self, *args, **kwargs):
-        """Raw matplotlib hexbin() - no scitex processing."""
-        return self._axes_mpl.hexbin(*args, **kwargs)
+        """Matplotlib hexbin() - tracked, identical to ax.hexbin()."""
+        return self._mpl_call("hexbin", *args, **kwargs)
 
     # =========================================================================
     # Statistical plots
     # =========================================================================
     def mpl_boxplot(self, *args, **kwargs):
-        """Raw matplotlib boxplot() - no scitex processing."""
-        return self._axes_mpl.boxplot(*args, **kwargs)
+        """Matplotlib boxplot() - tracked, identical to ax.boxplot()."""
+        return self._mpl_call("boxplot", *args, **kwargs)
 
     def mpl_violinplot(self, *args, **kwargs):
-        """Raw matplotlib violinplot() - no scitex processing."""
-        return self._axes_mpl.violinplot(*args, **kwargs)
+        """Matplotlib violinplot() - tracked, identical to ax.violinplot()."""
+        return self._mpl_call("violinplot", *args, **kwargs)
 
     def mpl_errorbar(self, *args, **kwargs):
-        """Raw matplotlib errorbar() - no scitex processing."""
-        return self._axes_mpl.errorbar(*args, **kwargs)
+        """Matplotlib errorbar() - tracked, identical to ax.errorbar()."""
+        return self._mpl_call("errorbar", *args, **kwargs)
 
     def mpl_eventplot(self, *args, **kwargs):
-        """Raw matplotlib eventplot() - no scitex processing."""
-        return self._axes_mpl.eventplot(*args, **kwargs)
+        """Matplotlib eventplot() - tracked, identical to ax.eventplot()."""
+        return self._mpl_call("eventplot", *args, **kwargs)
 
     # =========================================================================
     # Fill and area plots
     # =========================================================================
     def mpl_fill(self, *args, **kwargs):
-        """Raw matplotlib fill() - no scitex processing."""
-        return self._axes_mpl.fill(*args, **kwargs)
+        """Matplotlib fill() - tracked, identical to ax.fill()."""
+        return self._mpl_call("fill", *args, **kwargs)
 
     def mpl_fill_between(self, *args, **kwargs):
-        """Raw matplotlib fill_between() - no scitex processing."""
-        return self._axes_mpl.fill_between(*args, **kwargs)
+        """Matplotlib fill_between() - tracked, identical to ax.fill_between()."""
+        return self._mpl_call("fill_between", *args, **kwargs)
 
     def mpl_fill_betweenx(self, *args, **kwargs):
-        """Raw matplotlib fill_betweenx() - no scitex processing."""
-        return self._axes_mpl.fill_betweenx(*args, **kwargs)
+        """Matplotlib fill_betweenx() - tracked, identical to ax.fill_betweenx()."""
+        return self._mpl_call("fill_betweenx", *args, **kwargs)
 
     def mpl_stackplot(self, *args, **kwargs):
-        """Raw matplotlib stackplot() - no scitex processing."""
-        return self._axes_mpl.stackplot(*args, **kwargs)
+        """Matplotlib stackplot() - tracked, identical to ax.stackplot()."""
+        return self._mpl_call("stackplot", *args, **kwargs)
 
     # =========================================================================
     # Contour and heatmap plots
     # =========================================================================
     def mpl_contour(self, *args, **kwargs):
-        """Raw matplotlib contour() - no scitex processing."""
-        return self._axes_mpl.contour(*args, **kwargs)
+        """Matplotlib contour() - tracked, identical to ax.contour()."""
+        return self._mpl_call("contour", *args, **kwargs)
 
     def mpl_contourf(self, *args, **kwargs):
-        """Raw matplotlib contourf() - no scitex processing."""
-        return self._axes_mpl.contourf(*args, **kwargs)
+        """Matplotlib contourf() - tracked, identical to ax.contourf()."""
+        return self._mpl_call("contourf", *args, **kwargs)
 
     def mpl_imshow(self, *args, **kwargs):
-        """Raw matplotlib imshow() - no scitex processing."""
-        return self._axes_mpl.imshow(*args, **kwargs)
+        """Matplotlib imshow() - tracked, identical to ax.imshow()."""
+        return self._mpl_call("imshow", *args, **kwargs)
 
     def mpl_pcolormesh(self, *args, **kwargs):
-        """Raw matplotlib pcolormesh() - no scitex processing."""
-        return self._axes_mpl.pcolormesh(*args, **kwargs)
+        """Matplotlib pcolormesh() - tracked, identical to ax.pcolormesh()."""
+        return self._mpl_call("pcolormesh", *args, **kwargs)
 
     def mpl_pcolor(self, *args, **kwargs):
-        """Raw matplotlib pcolor() - no scitex processing."""
-        return self._axes_mpl.pcolor(*args, **kwargs)
+        """Matplotlib pcolor() - tracked, identical to ax.pcolor()."""
+        return self._mpl_call("pcolor", *args, **kwargs)
 
     def mpl_matshow(self, *args, **kwargs):
-        """Raw matplotlib matshow() - no scitex processing."""
-        if hasattr(self._axes_mpl, 'matshow'):
-            return self._axes_mpl.matshow(*args, **kwargs)
-        return self._fig_mpl.add_subplot().matshow(*args, **kwargs)
+        """Matplotlib matshow() - tracked, identical to ax.matshow()."""
+        return self._mpl_call("matshow", *args, **kwargs)
 
     # =========================================================================
     # Vector field plots
     # =========================================================================
     def mpl_quiver(self, *args, **kwargs):
-        """Raw matplotlib quiver() - no scitex processing."""
-        return self._axes_mpl.quiver(*args, **kwargs)
+        """Matplotlib quiver() - tracked, identical to ax.quiver()."""
+        return self._mpl_call("quiver", *args, **kwargs)
 
     def mpl_streamplot(self, *args, **kwargs):
-        """Raw matplotlib streamplot() - no scitex processing."""
-        return self._axes_mpl.streamplot(*args, **kwargs)
+        """Matplotlib streamplot() - tracked, identical to ax.streamplot()."""
+        return self._mpl_call("streamplot", *args, **kwargs)
 
     def mpl_barbs(self, *args, **kwargs):
-        """Raw matplotlib barbs() - no scitex processing."""
-        return self._axes_mpl.barbs(*args, **kwargs)
+        """Matplotlib barbs() - tracked, identical to ax.barbs()."""
+        return self._mpl_call("barbs", *args, **kwargs)
 
     # =========================================================================
     # Pie and polar plots
     # =========================================================================
     def mpl_pie(self, *args, **kwargs):
-        """Raw matplotlib pie() - no scitex processing."""
-        return self._axes_mpl.pie(*args, **kwargs)
+        """Matplotlib pie() - tracked, identical to ax.pie()."""
+        return self._mpl_call("pie", *args, **kwargs)
 
     # =========================================================================
     # Text and annotations
     # =========================================================================
     def mpl_text(self, *args, **kwargs):
-        """Raw matplotlib text() - no scitex processing."""
-        return self._axes_mpl.text(*args, **kwargs)
+        """Matplotlib text() - tracked, identical to ax.text()."""
+        return self._mpl_call("text", *args, **kwargs)
 
     def mpl_annotate(self, *args, **kwargs):
-        """Raw matplotlib annotate() - no scitex processing."""
-        return self._axes_mpl.annotate(*args, **kwargs)
+        """Matplotlib annotate() - tracked, identical to ax.annotate()."""
+        return self._mpl_call("annotate", *args, **kwargs)
 
     # =========================================================================
     # Lines and spans
     # =========================================================================
     def mpl_axhline(self, *args, **kwargs):
-        """Raw matplotlib axhline() - no scitex processing."""
-        return self._axes_mpl.axhline(*args, **kwargs)
+        """Matplotlib axhline() - tracked, identical to ax.axhline()."""
+        return self._mpl_call("axhline", *args, **kwargs)
 
     def mpl_axvline(self, *args, **kwargs):
-        """Raw matplotlib axvline() - no scitex processing."""
-        return self._axes_mpl.axvline(*args, **kwargs)
+        """Matplotlib axvline() - tracked, identical to ax.axvline()."""
+        return self._mpl_call("axvline", *args, **kwargs)
 
     def mpl_axhspan(self, *args, **kwargs):
-        """Raw matplotlib axhspan() - no scitex processing."""
-        return self._axes_mpl.axhspan(*args, **kwargs)
+        """Matplotlib axhspan() - tracked, identical to ax.axhspan()."""
+        return self._mpl_call("axhspan", *args, **kwargs)
 
     def mpl_axvspan(self, *args, **kwargs):
-        """Raw matplotlib axvspan() - no scitex processing."""
-        return self._axes_mpl.axvspan(*args, **kwargs)
+        """Matplotlib axvspan() - tracked, identical to ax.axvspan()."""
+        return self._mpl_call("axvspan", *args, **kwargs)
 
     # =========================================================================
     # Patches and shapes
     # =========================================================================
     def mpl_add_patch(self, patch, **kwargs):
-        """Raw matplotlib add_patch() - no scitex processing."""
-        return self._axes_mpl.add_patch(patch)
+        """Matplotlib add_patch() - tracked, identical to ax.add_patch()."""
+        return self._mpl_call("add_patch", patch, **kwargs)
 
     def mpl_add_artist(self, artist, **kwargs):
-        """Raw matplotlib add_artist() - no scitex processing."""
-        return self._axes_mpl.add_artist(artist)
+        """Matplotlib add_artist() - tracked, identical to ax.add_artist()."""
+        return self._mpl_call("add_artist", artist, **kwargs)
 
     def mpl_add_collection(self, collection, **kwargs):
-        """Raw matplotlib add_collection() - no scitex processing."""
-        return self._axes_mpl.add_collection(collection)
+        """Matplotlib add_collection() - tracked, identical to ax.add_collection()."""
+        return self._mpl_call("add_collection", collection, **kwargs)
 
     # =========================================================================
     # 3D plotting (if available)
     # =========================================================================
     def mpl_plot_surface(self, *args, **kwargs):
-        """Raw matplotlib plot_surface() (3D axes) - no scitex processing."""
-        if hasattr(self._axes_mpl, 'plot_surface'):
-            return self._axes_mpl.plot_surface(*args, **kwargs)
-        raise AttributeError("plot_surface is only available on 3D axes")
+        """Matplotlib plot_surface() (3D axes) - tracked."""
+        return self._mpl_call("plot_surface", *args, **kwargs)
 
     def mpl_plot_wireframe(self, *args, **kwargs):
-        """Raw matplotlib plot_wireframe() (3D axes) - no scitex processing."""
-        if hasattr(self._axes_mpl, 'plot_wireframe'):
-            return self._axes_mpl.plot_wireframe(*args, **kwargs)
-        raise AttributeError("plot_wireframe is only available on 3D axes")
+        """Matplotlib plot_wireframe() (3D axes) - tracked."""
+        return self._mpl_call("plot_wireframe", *args, **kwargs)
 
     def mpl_contour3D(self, *args, **kwargs):
-        """Raw matplotlib contour3D() (3D axes) - no scitex processing."""
-        if hasattr(self._axes_mpl, 'contour3D'):
-            return self._axes_mpl.contour3D(*args, **kwargs)
-        raise AttributeError("contour3D is only available on 3D axes")
+        """Matplotlib contour3D() (3D axes) - tracked."""
+        return self._mpl_call("contour3D", *args, **kwargs)
 
     def mpl_scatter3D(self, *args, **kwargs):
-        """Raw matplotlib scatter3D() (3D axes) - no scitex processing."""
-        if hasattr(self._axes_mpl, 'scatter3D'):
-            return self._axes_mpl.scatter3D(*args, **kwargs)
-        # Fallback to scatter for 3D axes
-        if hasattr(self._axes_mpl, 'scatter'):
-            return self._axes_mpl.scatter(*args, **kwargs)
-        raise AttributeError("scatter3D is only available on 3D axes")
+        """Matplotlib scatter3D() (3D axes) - tracked."""
+        return self._mpl_call("scatter3D", *args, **kwargs)
 
     # =========================================================================
     # Utility method to get raw axes

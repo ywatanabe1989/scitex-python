@@ -66,6 +66,120 @@ from .auto import (
     p_to_stars,
 )
 
+# =============================================================================
+# .statsz Bundle Support
+# =============================================================================
+
+def save_statsz(
+    comparisons,
+    path,
+    metadata=None,
+    as_zip=False,
+):
+    """
+    Save statistical results as a .statsz bundle.
+
+    Parameters
+    ----------
+    comparisons : list of dict or list of StatResult
+        List of comparison results. Each should have:
+        - name: Comparison name (e.g., "Control vs Treatment")
+        - method: Test method (e.g., "t-test")
+        - p_value: P-value
+        - effect_size: Effect size (optional)
+        - ci95: 95% confidence interval (optional)
+        - formatted: Star notation (optional)
+    path : str or Path
+        Output path (e.g., "comparison.statsz.d" or "comparison.statsz").
+    metadata : dict, optional
+        Additional metadata (n, seed, bootstrap_iters, etc.).
+    as_zip : bool, optional
+        If True, save as ZIP archive (default: False).
+
+    Returns
+    -------
+    Path
+        Path to saved bundle.
+
+    Examples
+    --------
+    >>> import scitex.stats as sstats
+    >>> comparisons = [
+    ...     {
+    ...         "name": "Control vs Treatment",
+    ...         "method": "t-test",
+    ...         "p_value": 0.003,
+    ...         "effect_size": 1.21,
+    ...         "ci95": [0.5, 1.8],
+    ...         "formatted": "**"
+    ...     }
+    ... ]
+    >>> sstats.save_statsz(comparisons, "results.statsz.d")
+    """
+    from pathlib import Path
+    from scitex.io._bundle import save_bundle, BundleType
+
+    p = Path(path)
+
+    # Convert StatResult objects to dicts if needed
+    comp_dicts = []
+    for comp in comparisons:
+        if hasattr(comp, 'to_dict'):
+            comp_dicts.append(comp.to_dict())
+        elif hasattr(comp, '__dict__'):
+            comp_dicts.append(vars(comp))
+        else:
+            comp_dicts.append(comp)
+
+    # Build spec
+    spec = {
+        'schema': {'name': 'scitex.stats.stats', 'version': '1.0.0'},
+        'comparisons': comp_dicts,
+        'metadata': metadata or {},
+    }
+
+    bundle_data = {'spec': spec}
+
+    return save_bundle(bundle_data, p, bundle_type=BundleType.STATSZ, as_zip=as_zip)
+
+
+def load_statsz(path):
+    """
+    Load a .statsz bundle.
+
+    Parameters
+    ----------
+    path : str or Path
+        Path to .statsz bundle (directory or ZIP).
+
+    Returns
+    -------
+    dict
+        Stats data with:
+        - 'comparisons': List of comparison dicts
+        - 'metadata': Metadata dict
+
+    Examples
+    --------
+    >>> stats = scitex.stats.load_statsz("results.statsz.d")
+    >>> for comp in stats['comparisons']:
+    ...     print(f"{comp['name']}: p={comp['p_value']}")
+    """
+    from scitex.io._bundle import load_bundle
+
+    bundle = load_bundle(path)
+
+    if bundle['type'] != 'statsz':
+        raise ValueError(f"Not a .statsz bundle: {path}")
+
+    spec = bundle.get('spec', {})
+
+    return {
+        'comparisons': spec.get('comparisons', []),
+        'metadata': spec.get('metadata', {}),
+    }
+
+
 __all__ = [
     # Main submodules
     "auto",
@@ -95,6 +209,9 @@ __all__ = [
     "get_stat_style",
     "format_test_line",
     "p_to_stars",
+    # .statsz bundle
+    "save_statsz",
+    "load_statsz",
 ]
 
 __version__ = "2.1.0"

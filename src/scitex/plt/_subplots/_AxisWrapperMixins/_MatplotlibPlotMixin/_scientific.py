@@ -252,7 +252,12 @@ class ScientificPlotMixin:
                 **kwargs,
             )
 
-        tracked_dict = {"balanced_accuracy": bacc_val}
+        tracked_dict = {
+            "args": [data],
+            "balanced_accuracy": bacc_val,
+            "x_labels": x_labels,
+            "y_labels": y_labels,
+        }
         self._track(track, id, method_name, tracked_dict, None)
         self._apply_scitex_postprocess(method_name)
 
