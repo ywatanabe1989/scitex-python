@@ -25,48 +25,40 @@ def _format_sns_lineplot(id, tracked_dict, kwargs):
     # Parse the tracking ID to get axes position and trace ID
     ax_row, ax_col, trace_id = _parse_tracking_id(id)
 
-    # Get the args from tracked_dict
+    # Get data from tracked_dict - can be in "data" (from _sns_base_xyhue) or "args"
+    data = tracked_dict.get("data")
     args = tracked_dict.get("args", [])
 
-    # Line plot with potential error bands from seaborn
-    if len(args) >= 1:
+    # If data is None, try to get it from args
+    if data is None and len(args) >= 1:
         data = args[0]
-        x_var = kwargs.get("x")
-        y_var = kwargs.get("y")
 
-        # Handle DataFrame input with x, y variables
-        if isinstance(data, pd.DataFrame) and x_var and y_var:
-            result = pd.DataFrame(
-                {
-                    get_csv_column_name(x_var, ax_row, ax_col, trace_id=trace_id): data[x_var],
-                    get_csv_column_name(y_var, ax_row, ax_col, trace_id=trace_id): data[y_var],
-                }
-            )
+    x_var = kwargs.get("x")
+    y_var = kwargs.get("y")
 
-            # Add grouping variable if present
-            hue_var = kwargs.get("hue")
-            if hue_var and hue_var in data.columns:
-                result[get_csv_column_name(hue_var, ax_row, ax_col, trace_id=trace_id)] = data[hue_var]
+    # Handle DataFrame input with x, y variables
+    if isinstance(data, pd.DataFrame):
+        # If data has been pre-processed by _sns_prepare_xyhue, it may be pivoted
+        # Just export all columns with proper naming
+        if data.empty:
+            return pd.DataFrame()
 
-            return result
+        result = {}
+        for col in data.columns:
+            col_name = str(col) if not isinstance(col, str) else col
+            result[get_csv_column_name(col_name, ax_row, ax_col, trace_id=trace_id)] = data[col].values
+        return pd.DataFrame(result)
 
-        # Handle direct x, y data arrays
-        elif (
-            len(args) > 1
-            and isinstance(args[0], (np.ndarray, list))
-            and isinstance(args[1], (np.ndarray, list))
-        ):
-            x_data, y_data = args[0], args[1]
-            return pd.DataFrame({
-                get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): x_data,
-                get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): y_data
-            })
-
-        # Handle DataFrame input without x, y specified
-        elif isinstance(data, pd.DataFrame):
-            result = {}
-            for col in data.columns:
-                result[get_csv_column_name(col, ax_row, ax_col, trace_id=trace_id)] = data[col]
-            return pd.DataFrame(result)
+    # Handle direct x, y data arrays from args
+    elif (
+        len(args) > 1
+        and isinstance(args[0], (np.ndarray, list))
+        and isinstance(args[1], (np.ndarray, list))
+    ):
+        x_data, y_data = args[0], args[1]
+        return pd.DataFrame({
+            get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): x_data,
+            get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): y_data
+        })
 
     return pd.DataFrame()

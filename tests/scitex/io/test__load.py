@@ -289,6 +289,86 @@ if __name__ == "__main__":
 # from ._load_modules._canvas import _load_canvas
 # 
 # 
+# def _load_bundle(lpath, verbose=False, **kwargs):
+#     """Load a .pltz, .figz, or .statsz bundle.
+# 
+#     Parameters
+#     ----------
+#     lpath : str or Path
+#         Path to the bundle (directory or ZIP).
+#     verbose : bool
+#         If True, print verbose output.
+#     **kwargs
+#         Additional arguments.
+# 
+#     Returns
+#     -------
+#     For .pltz bundles:
+#         tuple: (fig, ax, data) where fig is reconstructed figure,
+#                ax is the axes, data is DataFrame or None.
+#     For .figz bundles:
+#         dict: Figure data with 'spec' and 'panels'.
+#     For .statsz bundles:
+#         dict: Stats data with 'spec' and 'comparisons'.
+#     """
+#     from ._bundle import load_bundle, BundleType
+# 
+#     bundle = load_bundle(lpath)
+#     bundle_type = bundle.get('type')
+# 
+#     if bundle_type == BundleType.PLTZ:
+#         # Return (fig, ax, data) tuple for .pltz bundles
+#         # Note: We return the spec and data, not a reconstructed figure
+#         # as matplotlib figures cannot be perfectly serialized/deserialized
+#         import matplotlib.pyplot as plt
+#         from pathlib import Path
+# 
+#         p = Path(lpath)
+# 
+#         # Find the PNG file in the bundle
+#         if p.is_dir():
+#             png_path = p / "plot.png"
+#         else:
+#             # ZIP - extract first
+#             import tempfile
+#             import zipfile
+#             temp_dir = Path(tempfile.mkdtemp())
+#             with zipfile.ZipFile(p, 'r') as zf:
+#                 zf.extractall(temp_dir)
+#             png_path = temp_dir / "plot.png"
+# 
+#         # Load the PNG as a figure
+#         if png_path.exists():
+#             img = plt.imread(str(png_path))
+#             fig, ax = plt.subplots()
+#             ax.imshow(img)
+#             ax.axis('off')
+# 
+#             # Attach metadata from spec
+#             spec = bundle.get('spec', {})
+#             if 'axes' in spec and spec['axes']:
+#                 for key, val in spec['axes'][0].items():
+#                     setattr(ax, f'_scitex_{key}', val)
+#             if 'theme' in spec:
+#                 fig._scitex_theme = spec['theme'].get('mode')
+# 
+#             data = bundle.get('data')
+#             return fig, ax, data
+#         else:
+#             # No PNG, return spec and data
+#             return bundle.get('spec'), None, bundle.get('data')
+# 
+#     elif bundle_type == BundleType.FIGZ:
+#         # Return figure dict for .figz bundles
+#         return bundle
+# 
+#     elif bundle_type == BundleType.STATSZ:
+#         # Return stats dict for .statsz bundles
+#         return bundle
+# 
+#     return bundle
+# 
+# 
 # def load(
 #     lpath: Union[str, Path],
 #     ext: str = None,
@@ -397,6 +477,12 @@ if __name__ == "__main__":
 #     # Handle .canvas directories (special case - directory not file)
 #     if lpath.endswith(".canvas"):
 #         return _load_canvas(lpath, verbose=verbose, **kwargs)
+# 
+#     # Handle bundle formats (.pltz, .figz, .statsz and their .d variants)
+#     bundle_extensions = (".figz", ".pltz", ".statsz")
+#     for bext in bundle_extensions:
+#         if lpath.endswith(bext) or lpath.endswith(f"{bext}.d"):
+#             return _load_bundle(lpath, verbose=verbose, **kwargs)
 # 
 #     # Check if it's a glob pattern
 #     if "*" in lpath or "?" in lpath or "[" in lpath:

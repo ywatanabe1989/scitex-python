@@ -102,3 +102,29 @@ behavior:
   hide_right_spine: true # Hide right spine
   grid: false            # Show grid
 
+# =============================================================================
+# THEME / COLOR MODE
+# =============================================================================
+# Dark mode uses eye-friendly colors optimized for dark backgrounds
+# Light mode uses standard black on white (default matplotlib behavior)
+theme:
+  mode: "light"          # "light" or "dark"
+
+  # Dark mode color palette (eye-friendly, reduced strain)
+  dark:
+    background: "transparent"  # Figure background (transparent by default)
+    axes_bg: "#1a1a2e"         # Axes background (deep navy-black)
+    text: "#e8e8e8"            # Text, labels, titles (soft white)
+    spine: "#4a4a5a"           # Axis spines (muted gray)
+    tick: "#e8e8e8"            # Tick marks and labels
+    grid: "#3a3a4a"            # Grid lines (subtle)
+
+  # Light mode color palette (publication standard)
+  light:
+    background: "transparent"  # Figure background
+    axes_bg: "white"           # Axes background
+    text: "black"              # Text, labels, titles
+    spine: "black"             # Axis spines
+    tick: "black"              # Tick marks and labels
+    grid: "#cccccc"            # Grid lines
+

@@ -26,7 +26,7 @@ SCHEMA_VERSION = "0.1.0"
 # =============================================================================
 # Figure Schemas (re-exported from vis.model for central access)
 # =============================================================================
-from scitex.vis.model import (
+from scitex.fig.model import (
     # Core models
     FigureModel as FigureSpec,
     AxesModel as AxesSpec,
