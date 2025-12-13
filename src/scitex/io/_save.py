@@ -503,10 +503,18 @@ def _symlink_to(spath_final, symlink_to, verbose):
             logger.success(f"Symlinked: {spath_final} -> {symlink_to_full}")
 
 
-def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
+def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwargs):
     """Save a matplotlib figure as a .pltz bundle.
 
-    Bundle structure (per FIGZ_PLTZ_STATSZ.md spec):
+    Bundle structure v2.0 (layered - default):
+        plot.pltz.d/
+            spec.json           # Semantic: WHAT to plot (canonical)
+            style.json          # Appearance: HOW it looks (canonical)
+            data.csv            # Raw data (immutable)
+            exports/            # PNG, SVG, hitmap
+            cache/              # geometry_px.json, render_manifest.json
+
+    Bundle structure v1.0 (legacy):
         plot.json  - specification (axes, styles, theme, etc.)
         plot.csv   - raw data (immutable)
         plot.png   - raster export (required)
@@ -523,6 +531,9 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
         If True, save as ZIP archive.
     data : pandas.DataFrame, optional
         Data to embed in the bundle as plot.csv.
+    layered : bool
+        If True (default), use new layered format (spec/style/geometry).
+        If False, use legacy single JSON format.
     **kwargs
         Additional arguments passed to savefig.
     """
@@ -556,6 +567,49 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
         raise TypeError(f"Expected matplotlib Figure, got {type(obj).__name__}")
 
     dpi = kwargs.pop('dpi', 300)
+
+    # === Always use layered format ===
+    from scitex.plt.io import save_layered_pltz_bundle
+    import shutil
+    import tempfile
+
+    # Determine bundle directory path
+    if as_zip:
+        # For ZIP: save to temp dir, then compress
+        temp_dir = Path(tempfile.mkdtemp())
+        bundle_dir = temp_dir / f"{basename}.pltz.d"
+        zip_path = p if not str(p).endswith('.d') else Path(str(p)[:-2])
+    else:
+        # For directory: save directly
+        bundle_dir = p if str(p).endswith('.d') else Path(str(p) + '.d')
+
+    # Get CSV data from figure if not provided
+    csv_df = data
+    if csv_df is None:
+        csv_source = _get_figure_with_data(obj)
+        if csv_source is not None and hasattr(csv_source, 'export_as_csv'):
+            try:
+                csv_df = csv_source.export_as_csv()
+            except Exception:
+                pass
+
+    save_layered_pltz_bundle(
+        fig=fig,
+        bundle_dir=bundle_dir,
+        basename=basename,
+        dpi=dpi,
+        csv_df=csv_df,
+    )
+
+    # Compress to ZIP if requested
+    if as_zip:
+        from ._bundle import pack_bundle
+        pack_bundle(bundle_dir, zip_path)
+        shutil.rmtree(temp_dir)  # Clean up temp directory
+
+    return  # Done with layered format
+
+    # === Legacy format below (DEPRECATED - kept for reference) ===
 
     # Calculate size info
     fig_width_inch, fig_height_inch = fig.get_size_inches()

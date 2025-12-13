@@ -350,8 +350,8 @@ def load_bundle(path: Union[str, Path]) -> Dict[str, Any]:
         from scitex.fig.io._bundle import load_figz_bundle
         result.update(load_figz_bundle(bundle_dir))
     elif bundle_type == BundleType.PLTZ:
-        from scitex.plt.io._bundle import load_pltz_bundle
-        result.update(load_pltz_bundle(bundle_dir))
+        from scitex.plt.io import load_layered_pltz_bundle
+        result.update(load_layered_pltz_bundle(bundle_dir))
     elif bundle_type == BundleType.STATSZ:
         from scitex.stats.io._bundle import load_statsz_bundle
         result.update(load_statsz_bundle(bundle_dir))
@@ -407,6 +407,8 @@ def save_bundle(
         from scitex.fig.io._bundle import save_figz_bundle
         save_figz_bundle(data, dir_path)
     elif bundle_type == BundleType.PLTZ:
+        # Note: This path is only reached when calling save_bundle() directly
+        # The main stx.io.save() flow uses _save_pltz_bundle() which handles layered format
         from scitex.plt.io._bundle import save_pltz_bundle
         save_pltz_bundle(data, dir_path)
     elif bundle_type == BundleType.STATSZ:

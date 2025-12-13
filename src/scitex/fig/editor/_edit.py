@@ -436,6 +436,10 @@ def _resolve_pltz_bundle(path: Path) -> tuple:
     """
     Resolve paths from a .pltz bundle (directory or ZIP).
 
+    Supports both:
+    - Legacy format (single {basename}.json)
+    - Layered format v2.0 (spec.json + style.json + cache/)
+
     Parameters
     ----------
     path : Path
@@ -472,6 +476,12 @@ def _resolve_pltz_bundle(path: Path) -> tuple:
         if not bundle_dir.exists():
             raise FileNotFoundError(f"Bundle directory not found: {bundle_dir}")
 
+    # Check if this is a layered bundle (v2.0)
+    spec_path = bundle_dir / "spec.json"
+    if spec_path.exists():
+        return _resolve_layered_pltz_bundle(bundle_dir)
+
+    # === Legacy format below ===
     # Find files by pattern (supports basename-based naming)
     json_path = None
     csv_path = None
@@ -506,6 +516,74 @@ def _resolve_pltz_bundle(path: Path) -> tuple:
 
     return (
         json_path,
+        csv_path if csv_path and csv_path.exists() else None,
+        png_path if png_path and png_path.exists() else None,
+        hitmap_path if hitmap_path and hitmap_path.exists() else None,
+        bundle_spec,
+    )
+
+
+def _resolve_layered_pltz_bundle(bundle_dir: Path) -> tuple:
+    """
+    Resolve paths from a layered .pltz bundle (v2.0 format).
+
+    Layered format structure:
+        plot.pltz.d/
+            spec.json           # Semantic
+            style.json          # Appearance
+            {basename}.csv      # Data
+            exports/            # PNG, SVG, hitmap
+            cache/              # geometry_px.json
+
+    Parameters
+    ----------
+    bundle_dir : Path
+        Path to .pltz.d bundle directory.
+
+    Returns
+    -------
+    tuple
+        (json_path, csv_path, png_path, hitmap_path, bundle_spec)
+    """
+    import json as json_module
+    from scitex.plt.io import load_layered_pltz_bundle, merge_layered_bundle
+
+    # Load layered bundle
+    bundle_data = load_layered_pltz_bundle(bundle_dir)
+    basename = bundle_data.get("basename", "plot")
+
+    # Paths
+    spec_path = bundle_dir / "spec.json"
+    csv_path = None
+    png_path = None
+    hitmap_path = None
+
+    # Find CSV
+    for f in bundle_dir.glob("*.csv"):
+        csv_path = f
+        break
+
+    # Find exports
+    exports_dir = bundle_dir / "exports"
+    if exports_dir.exists():
+        for f in exports_dir.iterdir():
+            name = f.name
+            if name.endswith('_hitmap.png'):
+                hitmap_path = f
+            elif name.endswith('.svg') and '_hitmap' not in name:
+                png_path = f  # Prefer SVG
+            elif name.endswith('.png') and '_hitmap' not in name and png_path is None:
+                png_path = f
+
+    # Merged spec for backward compatibility with editor
+    bundle_spec = bundle_data.get("merged", {})
+
+    # Add hit_regions path reference for editor
+    if hitmap_path and "hit_regions" in bundle_spec:
+        bundle_spec["hit_regions"]["hit_map"] = str(hitmap_path.name)
+
+    return (
+        spec_path,  # Return spec.json as the main JSON path
         csv_path if csv_path and csv_path.exists() else None,
         png_path if png_path and png_path.exists() else None,
         hitmap_path if hitmap_path and hitmap_path.exists() else None,
