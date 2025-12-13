@@ -572,6 +572,66 @@ class SizeSpec:
         )
 
 
+# Valid matplotlib legend location strings
+LegendLocation = Literal[
+    "best", "upper right", "upper left", "lower left", "lower right",
+    "right", "center left", "center right", "lower center", "upper center",
+    "center",
+]
+
+
+@dataclass
+class LegendSpec:
+    """
+    Legend configuration specification.
+
+    Parameters
+    ----------
+    visible : bool
+        Whether to show the legend (default True)
+    location : str
+        Legend location. Valid values:
+        - "best" (auto-placement)
+        - "upper right", "upper left", "lower right", "lower left"
+        - "right", "center left", "center right"
+        - "upper center", "lower center", "center"
+    frameon : bool
+        Whether to draw a frame around the legend
+    fontsize : float, optional
+        Font size for legend text (in points)
+    ncols : int
+        Number of columns in the legend
+    title : str, optional
+        Legend title
+    """
+    visible: bool = True
+    location: str = "best"
+    frameon: bool = True
+    fontsize: Optional[float] = None
+    ncols: int = 1
+    title: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        result = {
+            "visible": self.visible,
+            "location": self.location,
+            "frameon": self.frameon,
+            "ncols": self.ncols,
+        }
+        if self.fontsize is not None:
+            result["fontsize"] = self.fontsize
+        if self.title is not None:
+            result["title"] = self.title
+        return result
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "LegendSpec":
+        # Handle backward compatibility: boolean legend value
+        if isinstance(data, bool):
+            return cls(visible=data)
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
 @dataclass
 class PlotStyle:
     """
@@ -590,15 +650,19 @@ class PlotStyle:
         Font settings
     traces : list of TraceStyleSpec
         Per-trace style overrides
+    legend : LegendSpec
+        Legend configuration (visibility, location, styling)
+    grid : bool
+        Whether to show grid lines
     """
     theme: ThemeSpec = field(default_factory=ThemeSpec)
     size: SizeSpec = field(default_factory=SizeSpec)
     font: FontSpec = field(default_factory=FontSpec)
     traces: List[TraceStyleSpec] = field(default_factory=list)
+    legend: LegendSpec = field(default_factory=LegendSpec)
 
     # Axes-level overrides
     grid: bool = False
-    legend: bool = True
 
     # Schema metadata
     scitex_schema: str = "scitex.plt.style"
@@ -614,8 +678,8 @@ class PlotStyle:
             "size": self.size.to_dict(),
             "font": self.font.to_dict(),
             "traces": [tr.to_dict() for tr in self.traces],
+            "legend": self.legend.to_dict(),
             "grid": self.grid,
-            "legend": self.legend,
         }
 
     def to_json(self, indent: int = 2) -> str:
@@ -623,13 +687,22 @@ class PlotStyle:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "PlotStyle":
+        # Handle backward compatibility: legend can be bool or dict
+        legend_data = data.get("legend", True)
+        if isinstance(legend_data, bool):
+            legend = LegendSpec(visible=legend_data)
+        elif isinstance(legend_data, dict):
+            legend = LegendSpec.from_dict(legend_data)
+        else:
+            legend = LegendSpec()
+
         return cls(
             theme=ThemeSpec.from_dict(data.get("theme", {})),
             size=SizeSpec.from_dict(data.get("size", {})),
             font=FontSpec.from_dict(data.get("font", {})),
             traces=[TraceStyleSpec.from_dict(tr) for tr in data.get("traces", [])],
+            legend=legend,
             grid=data.get("grid", False),
-            legend=data.get("legend", True),
         )
 
     @classmethod
@@ -905,6 +978,7 @@ __all__ = [
     # Type aliases
     "TraceType",
     "CoordinateSpace",
+    "LegendLocation",
     # Bbox classes
     "BboxRatio",
     "BboxPx",
@@ -920,6 +994,7 @@ __all__ = [
     "ThemeSpec",
     "FontSpec",
     "SizeSpec",
+    "LegendSpec",
     "PlotStyle",
     # Geometry classes (cache)
     "RenderedArtist",

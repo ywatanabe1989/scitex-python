@@ -37,7 +37,7 @@ from scitex.schema import (
     PltzSpec, PltzTraceSpec, PltzAxesItem, PltzAxesLimits, PltzAxesLabels,
     PltzDataSource, BboxRatio, BboxPx,
     # Style classes
-    PltzStyle, PltzTheme, PltzFont, PltzSize, PltzTraceStyle,
+    PltzStyle, PltzTheme, PltzFont, PltzSize, PltzTraceStyle, PltzLegendSpec,
     # Geometry classes
     PltzGeometry, PltzRenderedAxes, PltzRenderedArtist, PltzRenderManifest,
     # Version constants
@@ -217,6 +217,64 @@ def save_layered_pltz_bundle(
                     alpha=line.get_alpha(),
                 ))
 
+    # Extract legend configuration from first axes with legend
+    legend_spec = PltzLegendSpec(visible=True, location="best")
+    for ax in fig.axes:
+        legend = ax.get_legend()
+        if legend is not None:
+            # Extract legend location
+            # matplotlib legend._loc can be int or string
+            loc = legend._loc
+            loc_map = {
+                0: "best", 1: "upper right", 2: "upper left", 3: "lower left",
+                4: "lower right", 5: "right", 6: "center left", 7: "center right",
+                8: "lower center", 9: "upper center", 10: "center",
+            }
+            if isinstance(loc, int):
+                location = loc_map.get(loc, "best")
+            else:
+                location = str(loc) if loc else "best"
+
+            # If location is "best", determine actual position from rendered bbox
+            if location == "best":
+                try:
+                    # Get the actual rendered position
+                    bbox = legend.get_window_extent(fig.canvas.get_renderer())
+                    ax_bbox = ax.get_position()
+                    fig_width, fig_height = fig.get_size_inches() * fig.dpi
+
+                    # Calculate legend center relative to axes
+                    legend_center_x = (bbox.x0 + bbox.x1) / 2
+                    legend_center_y = (bbox.y0 + bbox.y1) / 2
+                    ax_center_x = (ax_bbox.x0 + ax_bbox.x1) / 2 * fig_width
+                    ax_center_y = (ax_bbox.y0 + ax_bbox.y1) / 2 * fig_height
+
+                    # Determine quadrant
+                    is_right = legend_center_x > ax_center_x
+                    is_upper = legend_center_y > ax_center_y
+
+                    if is_upper and is_right:
+                        location = "upper right"
+                    elif is_upper and not is_right:
+                        location = "upper left"
+                    elif not is_upper and is_right:
+                        location = "lower right"
+                    else:
+                        location = "lower left"
+                except Exception:
+                    pass  # Keep "best" if we can't determine
+
+            # Extract other legend properties
+            legend_spec = PltzLegendSpec(
+                visible=legend.get_visible(),
+                location=location,
+                frameon=legend.get_frame_on(),
+                fontsize=legend._fontsize if hasattr(legend, '_fontsize') else None,
+                ncols=legend._ncols if hasattr(legend, '_ncols') else 1,
+                title=legend.get_title().get_text() if legend.get_title() else None,
+            )
+            break  # Use first legend found
+
     style = PltzStyle(
         theme=PltzTheme(
             mode=theme_mode,
@@ -234,6 +292,7 @@ def save_layered_pltz_bundle(
         ),
         font=PltzFont(family="sans-serif", size_pt=8.0),
         traces=trace_styles,
+        legend=legend_spec,
     )
 
     # === Save exports and track coordinate transformations ===
@@ -1248,6 +1307,20 @@ def merge_layered_bundle(
     # Merge theme from style
     if style and "theme" in style:
         merged["theme"] = style["theme"]
+
+    # Merge legend from style (for editor compatibility)
+    if style and "legend" in style:
+        legend_style = style["legend"]
+        merged["legend"] = {
+            "visible": legend_style.get("visible", True),
+            # Use "location" key but also provide "loc" for compatibility
+            "loc": legend_style.get("location", "best"),
+            "location": legend_style.get("location", "best"),
+            "frameon": legend_style.get("frameon", False),
+            "fontsize": legend_style.get("fontsize"),
+            "ncols": legend_style.get("ncols", 1),
+            "title": legend_style.get("title"),
+        }
 
     # Merge hit_regions, selectable_regions, and figure_px from geometry
     if geometry:

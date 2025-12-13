@@ -41,6 +41,7 @@ from scitex.schema._plot import (
     # Type aliases
     TraceType,
     CoordinateSpace,
+    LegendLocation,
     # Bbox classes
     BboxRatio,
     BboxPx,
@@ -56,6 +57,7 @@ from scitex.schema._plot import (
     ThemeSpec as PltzTheme,
     FontSpec as PltzFont,
     SizeSpec as PltzSize,
+    LegendSpec as PltzLegendSpec,
     PlotStyle as PltzStyle,
     # Geometry classes (cache)
     RenderedArtist as PltzRenderedArtist,
@@ -150,6 +152,7 @@ __all__ = [
     # Type aliases
     "TraceType",
     "CoordinateSpace",
+    "LegendLocation",
     # Bbox classes
     "BboxRatio",
     "BboxPx",
@@ -165,6 +168,7 @@ __all__ = [
     "PltzTheme",
     "PltzFont",
     "PltzSize",
+    "PltzLegendSpec",
     "PltzStyle",
     # Geometry classes (cache)
     "PltzRenderedArtist",

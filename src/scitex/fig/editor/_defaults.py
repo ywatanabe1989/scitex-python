@@ -222,9 +222,19 @@ def extract_defaults_from_metadata(metadata):
     if legend:
         defaults["legend_visible"] = legend.get("visible", True)
         defaults["legend_frameon"] = legend.get("frameon", False)
-        loc = legend.get("loc", "best")
+        # Support both old format (loc) and new format (location)
+        loc = legend.get("location") or legend.get("loc", "best")
         # Convert numeric legend loc to string (matplotlib accepts both but GUI needs string)
         defaults["legend_loc"] = _normalize_legend_loc(loc)
+        # Extract fontsize if present
+        if "fontsize" in legend:
+            defaults["legend_fontsize"] = legend["fontsize"]
+        # Extract ncols if present
+        if "ncols" in legend:
+            defaults["legend_ncols"] = legend["ncols"]
+        # Extract title if present
+        if "title" in legend:
+            defaults["legend_title"] = legend["title"]
 
         # Extract legend entries if present
         entries = legend.get("entries", [])
