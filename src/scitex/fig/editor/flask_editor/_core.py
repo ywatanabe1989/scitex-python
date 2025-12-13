@@ -302,10 +302,10 @@ def _extract_bboxes_from_metadata(
     Builds bboxes from selectable_regions in the metadata for click detection.
     This allows the editor to highlight elements when clicked.
 
-    Coordinate system:
-    - selectable_regions bbox_px: In high-DPI figure space (e.g., 944x803 @ 300 DPI)
+    Coordinate system (new layered format):
+    - selectable_regions bbox_px: Already in final image space (figure_px)
     - Display size: Actual displayed image size (PNG pixels or SVG viewBox)
-    - Scale = display_size / original_size
+    - Scale = display_size / figure_px (usually 1:1, but may differ for scaled display)
 
     Parameters
     ----------
@@ -323,47 +323,51 @@ def _extract_bboxes_from_metadata(
     """
     bboxes = {}
     selectable = metadata.get("selectable_regions", {})
-    hit_regions = metadata.get("hit_regions", {})
-    path_data = hit_regions.get("path_data", {})
 
-    # Original figure dimensions (high-DPI space where bbox_px are defined)
-    orig_fig = path_data.get("figure", {})
-    orig_width = orig_fig.get("width_px", 944)
-    orig_height = orig_fig.get("height_px", 803)
-    orig_dpi = orig_fig.get("dpi", 300)
+    # Figure dimensions from new layered format (bbox_px are in this space)
+    figure_px = metadata.get("figure_px", [])
+    if isinstance(figure_px, list) and len(figure_px) >= 2:
+        fig_width = figure_px[0]
+        fig_height = figure_px[1]
+    else:
+        # Fallback for old format: try hit_regions.path_data.figure
+        hit_regions = metadata.get("hit_regions", {})
+        path_data = hit_regions.get("path_data", {})
+        orig_fig = path_data.get("figure", {})
+        fig_width = orig_fig.get("width_px", 944)
+        fig_height = orig_fig.get("height_px", 803)
 
-    # Use actual display dimensions if provided, else fall back to metadata
-    size_info = metadata.get("size", {})
-    if display_width is None or display_height is None:
-        display_width = display_width or size_info.get("width_px", 472)
-        display_height = display_height or size_info.get("height_px", 401)
+    # Use actual display dimensions if provided, else use figure_px
+    if display_width is None:
+        display_width = fig_width
+    if display_height is None:
+        display_height = fig_height
 
-    # Scale factor: display / original
-    # For SVG: display is SVG viewBox, original is matplotlib figure
-    # For PNG: display is PNG size, original is matplotlib figure
-    scale_x = display_width / orig_width if orig_width > 0 else 1
-    scale_y = display_height / orig_height if orig_height > 0 else 1
+    # Scale factor: display / figure_px
+    # Usually 1:1 since display is the same PNG, but may differ for scaled display
+    scale_x = display_width / fig_width if fig_width > 0 else 1
+    scale_y = display_height / fig_height if fig_height > 0 else 1
 
-    # Helper to convert original coords to display pixels
-    def to_display_bbox(orig_bbox, is_list=True):
-        """Convert bbox from original high-DPI coords to display pixels.
+    # Helper to convert coords to display pixels
+    def to_display_bbox(bbox, is_list=True):
+        """Convert bbox to display pixels (apply scaling if display != figure_px).
 
         Parameters
         ----------
-        orig_bbox : list or dict
-            Original bbox coordinates [x0, y0, x1, y1] or dict with keys
+        bbox : list or dict
+            Bbox coordinates [x0, y0, x1, y1] or dict with keys
         is_list : bool
-            Whether orig_bbox is a list (True) or dict (False)
+            Whether bbox is a list (True) or dict (False)
         """
         if is_list:
-            x0, y0, x1, y1 = orig_bbox[0], orig_bbox[1], orig_bbox[2], orig_bbox[3]
+            x0, y0, x1, y1 = bbox[0], bbox[1], bbox[2], bbox[3]
         else:
-            x0 = orig_bbox.get("x0", 0)
-            y0 = orig_bbox.get("y0", 0)
-            x1 = orig_bbox.get("x1", 0)
-            y1 = orig_bbox.get("y1", 0)
+            x0 = bbox.get("x0", 0)
+            y0 = bbox.get("y0", 0)
+            x1 = bbox.get("x1", bbox.get("x0", 0) + bbox.get("width", 0))
+            y1 = bbox.get("y1", bbox.get("y0", 0) + bbox.get("height", 0))
 
-        # Scale from original coords to display coords
+        # Scale to display coords (usually 1:1)
         disp_x0 = x0 * scale_x
         disp_x1 = x1 * scale_x
         disp_y0 = y0 * scale_y
@@ -446,8 +450,14 @@ def _extract_bboxes_from_metadata(
                     "type": "yaxis",
                 }
 
-    # Extract traces from hit_regions.path_data.artists
-    artists = path_data.get("artists", [])
+    # Extract traces from artists (top-level in new format, or hit_regions.path_data in old)
+    artists = metadata.get("artists", [])
+    if not artists:
+        # Fallback for old format
+        hit_regions = metadata.get("hit_regions", {})
+        path_data = hit_regions.get("path_data", {})
+        artists = path_data.get("artists", [])
+
     for artist in artists:
         artist_id = artist.get("id", 0)
         artist_type = artist.get("type", "line")
@@ -476,11 +486,12 @@ def _extract_bboxes_from_metadata(
     bboxes["_meta"] = {
         "display_width": display_width,
         "display_height": display_height,
-        "orig_width": orig_width,
-        "orig_height": orig_height,
-        "orig_dpi": orig_dpi,
+        "figure_px_width": fig_width,
+        "figure_px_height": fig_height,
         "scale_x": scale_x,
         "scale_y": scale_y,
+        # Note: With new layered format, bbox_px are already in final image space
+        # so scale is typically 1:1 (unless display is resized)
     }
 
     return bboxes
