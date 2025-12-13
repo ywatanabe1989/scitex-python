@@ -126,12 +126,22 @@ def extract_defaults_from_metadata(metadata):
     if "n_ticks" in style_mm:
         defaults["n_ticks"] = style_mm["n_ticks"]
 
-    # Dimensions from metadata
+    # Dimensions from metadata (support both old and new formats)
     dimensions = metadata.get("dimensions", {})
     if "dpi" in dimensions:
         defaults["dpi"] = dimensions["dpi"]
     if "figure_size_inch" in dimensions:
         defaults["fig_size"] = dimensions["figure_size_inch"]
+
+    # New format: size.width_mm, size.height_mm, size.dpi
+    size = metadata.get("size", {})
+    if "dpi" in size:
+        defaults["dpi"] = size["dpi"]
+    if "width_mm" in size and "height_mm" in size:
+        # Convert mm to inches
+        width_inch = size["width_mm"] / 25.4
+        height_inch = size["height_mm"] / 25.4
+        defaults["fig_size"] = [width_inch, height_inch]
 
     # Axis labels from metadata
     if "xlabel" in metadata:
