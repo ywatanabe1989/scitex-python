@@ -89,20 +89,22 @@ def extract_bboxes(
         }
 
     # Get bboxes for title, labels
+    # Use ax_00_ prefix for consistency with geometry_px.json format
+    ax_prefix = "ax_00_"
     if ax.title.get_text():
-        get_element_bbox(ax.title, "title")
+        get_element_bbox(ax.title, f"{ax_prefix}title")
     if ax.xaxis.label.get_text():
-        get_element_bbox(ax.xaxis.label, "xlabel")
+        get_element_bbox(ax.xaxis.label, f"{ax_prefix}xlabel")
     if ax.yaxis.label.get_text():
-        get_element_bbox(ax.yaxis.label, "ylabel")
+        get_element_bbox(ax.yaxis.label, f"{ax_prefix}ylabel")
 
     # Get axis bboxes
-    _extract_axis_bboxes(ax, renderer, bboxes, bbox_to_img_coords, Bbox)
+    _extract_axis_bboxes(ax, renderer, bboxes, bbox_to_img_coords, Bbox, ax_prefix)
 
     # Get legend bbox
     legend = ax.get_legend()
     if legend:
-        get_element_bbox(legend, "legend")
+        get_element_bbox(legend, f"{ax_prefix}legend")
 
     # Get trace (line) bboxes
     _extract_trace_bboxes(
@@ -550,8 +552,17 @@ def _extract_axis_bboxes_for_axis(ax, ax_id, renderer, bboxes, bbox_to_img_coord
         print(f"Error getting axis bboxes for {ax_id}: {e}")
 
 
-def _extract_axis_bboxes(ax, renderer, bboxes, bbox_to_img_coords, Bbox):
-    """Extract bboxes for X and Y axis elements."""
+def _extract_axis_bboxes(ax, renderer, bboxes, bbox_to_img_coords, Bbox, ax_prefix=""):
+    """Extract bboxes for X and Y axis elements.
+
+    Args:
+        ax: Matplotlib axis.
+        renderer: Figure renderer.
+        bboxes: Dict to store bboxes.
+        bbox_to_img_coords: Coordinate conversion function.
+        Bbox: Matplotlib Bbox class.
+        ax_prefix: Prefix for bbox names (e.g., "ax_00_").
+    """
     try:
         # X-axis: combine spine and tick labels into one bbox
         x_axis_bboxes = []
@@ -583,8 +594,8 @@ def _extract_axis_bboxes(ax, renderer, bboxes, bbox_to_img_coords, Bbox):
                 x_axis_bboxes.append(spine_bbox)
         if x_axis_bboxes:
             combined = Bbox.union(x_axis_bboxes)
-            bboxes["xaxis_ticks"] = bbox_to_img_coords(combined)
-            bboxes["xaxis_ticks"]["label"] = "X Spine & Ticks"
+            bboxes[f"{ax_prefix}xaxis_spine"] = bbox_to_img_coords(combined)
+            bboxes[f"{ax_prefix}xaxis_spine"]["label"] = "X Spine & Ticks"
 
         # Y-axis: combine spine and tick labels into one bbox
         y_axis_bboxes = []
@@ -619,8 +630,8 @@ def _extract_axis_bboxes(ax, renderer, bboxes, bbox_to_img_coords, Bbox):
             padded = Bbox.from_extents(
                 combined.x0 - 10, combined.y0 - 5, combined.x1 + 5, combined.y1 + 5
             )
-            bboxes["yaxis_ticks"] = bbox_to_img_coords(padded)
-            bboxes["yaxis_ticks"]["label"] = "Y Spine & Ticks"
+            bboxes[f"{ax_prefix}yaxis_spine"] = bbox_to_img_coords(padded)
+            bboxes[f"{ax_prefix}yaxis_spine"]["label"] = "Y Spine & Ticks"
 
     except Exception as e:
         print(f"Error getting axis bboxes: {e}")
