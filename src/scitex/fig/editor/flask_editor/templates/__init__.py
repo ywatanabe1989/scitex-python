@@ -15,7 +15,7 @@ def build_html_template() -> str:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciTeX Editor - {{{{ filename }}}}</title>
+    <title>SciTeX Figure Editor - {{{{ filename }}}}</title>
     <style>
 {CSS_STYLES}
     </style>

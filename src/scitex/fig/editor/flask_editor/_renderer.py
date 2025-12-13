@@ -17,6 +17,7 @@ import numpy as np
 
 from ._plotter import plot_from_csv, plot_from_recipe
 from ._bbox import extract_bboxes, extract_bboxes_multi
+from scitex.plt.styles import get_default_dpi
 
 # mm to pt conversion factor
 MM_TO_PT = 2.83465
@@ -25,6 +26,7 @@ MM_TO_PT = 2.83465
 def render_preview_with_bboxes(
     csv_data, overrides: Dict[str, Any], axis_fontsize: int = 7,
     metadata: Optional[Dict[str, Any]] = None,
+    dark_mode: bool = False,
 ) -> Tuple[str, Dict[str, Any], Dict[str, int]]:
     """Render figure and return base64 PNG along with element bounding boxes.
 
@@ -33,26 +35,28 @@ def render_preview_with_bboxes(
         overrides: Dictionary with override settings
         axis_fontsize: Default font size for axis labels
         metadata: Optional JSON metadata (new schema with axes dict)
+        dark_mode: Whether to render with dark mode colors (light text/spines)
 
     Returns:
         tuple: (base64_image_data, bboxes_dict, image_size)
     """
     # Check if this is a multi-axis figure (new schema)
     if metadata and "axes" in metadata and isinstance(metadata.get("axes"), dict):
-        return render_multi_axis_preview(csv_data, overrides, metadata)
+        return render_multi_axis_preview(csv_data, overrides, metadata, dark_mode)
 
     # Fall back to single-axis rendering
-    return render_single_axis_preview(csv_data, overrides, axis_fontsize)
+    return render_single_axis_preview(csv_data, overrides, axis_fontsize, dark_mode)
 
 
 def render_single_axis_preview(
-    csv_data, overrides: Dict[str, Any], axis_fontsize: int = 7
+    csv_data, overrides: Dict[str, Any], axis_fontsize: int = 7,
+    dark_mode: bool = False,
 ) -> Tuple[str, Dict[str, Any], Dict[str, int]]:
     """Render single-axis figure (legacy mode)."""
     o = overrides
 
     # Dimensions
-    dpi = o.get("dpi", 300)
+    dpi = o.get("dpi", get_default_dpi())
     fig_size = o.get("fig_size", [3.15, 2.68])
 
     # Font sizes
@@ -113,6 +117,16 @@ def render_single_axis_preview(
     # Apply annotations
     _apply_annotations(ax, o, axis_fontsize)
 
+    # Apply caption (below figure)
+    caption_artist = _apply_caption(fig, o)
+
+    # Apply dark mode styling if requested
+    if dark_mode:
+        _apply_dark_theme(ax)
+        # Also style caption if present
+        if caption_artist:
+            caption_artist.set_color(DARK_THEME_TEXT_COLOR)
+
     fig.tight_layout()
 
     # Get element bounding boxes BEFORE saving (need renderer)
@@ -141,7 +155,8 @@ def render_single_axis_preview(
 
 
 def render_multi_axis_preview(
-    csv_data, overrides: Dict[str, Any], metadata: Dict[str, Any]
+    csv_data, overrides: Dict[str, Any], metadata: Dict[str, Any],
+    dark_mode: bool = False,
 ) -> Tuple[str, Dict[str, Any], Dict[str, int]]:
     """Render multi-axis figure from new schema (scitex.plt.figure.recipe).
 
@@ -149,6 +164,7 @@ def render_multi_axis_preview(
         csv_data: DataFrame containing CSV data
         overrides: Dictionary with override settings
         metadata: JSON metadata with axes dict
+        dark_mode: Whether to render with dark mode colors
 
     Returns:
         tuple: (base64_image_data, bboxes_dict, image_size)
@@ -161,7 +177,7 @@ def render_multi_axis_preview(
     nrows, ncols = _get_grid_dimensions(axes_spec)
 
     # Figure dimensions
-    dpi = fig_spec.get("dpi", o.get("dpi", 300))
+    dpi = fig_spec.get("dpi", o.get("dpi", get_default_dpi()))
     size_mm = fig_spec.get("size_mm", [176, 106])
     # Convert mm to inches (1 inch = 25.4 mm)
     fig_size = (size_mm[0] / 25.4, size_mm[1] / 25.4)
@@ -275,6 +291,15 @@ def render_multi_axis_preview(
             ax.spines["right"].set_visible(False)
         for spine in ax.spines.values():
             spine.set_linewidth(axis_width_pt)
+
+        # Apply dark mode to this axis
+        if dark_mode:
+            _apply_dark_theme(ax)
+
+    # Apply caption (below figure) - use global overrides
+    caption_artist = _apply_caption(fig, o)
+    if dark_mode and caption_artist:
+        caption_artist.set_color(DARK_THEME_TEXT_COLOR)
 
     fig.tight_layout()
 
@@ -575,12 +600,35 @@ def _apply_background(fig, ax, o, transparent):
 
 def _apply_labels(ax, o, title_fontsize, axis_fontsize):
     """Apply title and axis labels."""
-    if o.get("title"):
+    # Show title only if enabled (default True)
+    if o.get("show_title", True) and o.get("title"):
         ax.set_title(o["title"], fontsize=title_fontsize)
     if o.get("xlabel"):
         ax.set_xlabel(o["xlabel"], fontsize=axis_fontsize)
     if o.get("ylabel"):
         ax.set_ylabel(o["ylabel"], fontsize=axis_fontsize)
+
+
+def _apply_caption(fig, o, caption_fontsize=7):
+    """Apply caption below the figure."""
+    if not o.get("show_caption", False) or not o.get("caption"):
+        return None
+
+    caption_text = o.get("caption", "")
+    fontsize = o.get("caption_fontsize", caption_fontsize)
+
+    # Place caption below the figure
+    # Using fig.text with y position slightly below 0
+    caption_artist = fig.text(
+        0.5, -0.02,  # Centered, below the figure
+        caption_text,
+        ha="center",
+        va="top",
+        fontsize=fontsize,
+        wrap=True,
+        transform=fig.transFigure,
+    )
+    return caption_artist
 
 
 def _apply_tick_styling(
@@ -645,6 +693,47 @@ def _apply_annotations(ax, o, axis_fontsize):
                 transform=ax.transAxes,
                 fontsize=annot.get("fontsize", axis_fontsize),
             )
+
+
+# Dark mode theme colors
+DARK_THEME_TEXT_COLOR = "#e8e8e8"  # Light gray for visibility on dark background
+DARK_THEME_SPINE_COLOR = "#e8e8e8"
+DARK_THEME_TICK_COLOR = "#e8e8e8"
+
+
+def _apply_dark_theme(ax):
+    """Apply dark mode colors to axes for visibility on dark backgrounds.
+
+    Changes title, labels, tick labels, spines, and legend text to light colors.
+    """
+    # Title
+    title = ax.get_title()
+    if title:
+        ax.title.set_color(DARK_THEME_TEXT_COLOR)
+
+    # Axis labels
+    ax.xaxis.label.set_color(DARK_THEME_TEXT_COLOR)
+    ax.yaxis.label.set_color(DARK_THEME_TEXT_COLOR)
+
+    # Tick labels
+    ax.tick_params(axis="both", colors=DARK_THEME_TICK_COLOR, labelcolor=DARK_THEME_TEXT_COLOR)
+
+    # Spines
+    for spine in ax.spines.values():
+        spine.set_color(DARK_THEME_SPINE_COLOR)
+
+    # Legend (if exists)
+    legend = ax.get_legend()
+    if legend:
+        for text in legend.get_texts():
+            text.set_color(DARK_THEME_TEXT_COLOR)
+        # Legend title
+        legend_title = legend.get_title()
+        if legend_title:
+            legend_title.set_color(DARK_THEME_TEXT_COLOR)
+        # Legend frame (make transparent or dark)
+        legend.get_frame().set_facecolor("none")
+        legend.get_frame().set_edgecolor(DARK_THEME_SPINE_COLOR)
 
 
 # EOF

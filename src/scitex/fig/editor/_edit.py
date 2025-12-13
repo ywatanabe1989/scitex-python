@@ -103,9 +103,12 @@ def edit(
     spath = str(path)
     parent_str = str(path.parent) if path.is_file() else ""
 
+    # Panel info for multi-panel figures
+    panel_info = None
+
     # Check if this is a .figz bundle (multi-panel figure)
     if spath.endswith('.figz.d') or spath.endswith('.figz'):
-        json_path, csv_path, png_path, hitmap_path, bundle_spec = _resolve_figz_bundle(path)
+        json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info = _resolve_figz_bundle(path)
     # Check if this is a .pltz bundle (single panel) - either the directory or a file inside it
     elif spath.endswith('.pltz.d') or spath.endswith('.pltz') or parent_str.endswith('.pltz.d'):
         # If it's a file inside .pltz.d, use the parent directory
@@ -115,7 +118,7 @@ def edit(
     elif parent_str.endswith('.figz.d') or (path.parent.parent and str(path.parent.parent).endswith('.figz.d')):
         # File is inside figz bundle, resolve from figz root
         figz_path = path.parent if parent_str.endswith('.figz.d') else path.parent.parent
-        json_path, csv_path, png_path, hitmap_path, bundle_spec = _resolve_figz_bundle(figz_path)
+        json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info = _resolve_figz_bundle(figz_path)
     else:
         # Resolve paths (JSON, CSV, PNG)
         json_path, csv_path, png_path = _resolve_figure_paths(path)
@@ -161,6 +164,7 @@ def edit(
                 hitmap_path=hitmap_path,
                 manual_overrides=manual_overrides,
                 port=port,
+                panel_info=panel_info,
             )
             editor.run()
         except ImportError as e:
@@ -375,21 +379,22 @@ def _resolve_figure_paths(path: Path) -> tuple:
     )
 
 
-def _resolve_figz_bundle(path: Path) -> tuple:
+def _resolve_figz_bundle(path: Path, panel_index: int = 0) -> tuple:
     """
     Resolve paths from a .figz bundle (multi-panel figure).
-
-    For now, opens the first panel. Future: panel selector.
 
     Parameters
     ----------
     path : Path
         Path to .figz bundle (.figz or .figz.d)
+    panel_index : int, optional
+        Index of panel to open (default: 0 for first panel)
 
     Returns
     -------
     tuple
-        (json_path, csv_path, png_path, hitmap_path, bundle_spec)
+        (json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info)
+        panel_info is a dict with keys: panels, current_index, figz_dir
     """
     import json as json_module
     import tempfile
@@ -422,14 +427,26 @@ def _resolve_figz_bundle(path: Path) -> tuple:
     if not pltz_dirs:
         raise FileNotFoundError(f"No .pltz.d panels found in figz bundle: {bundle_dir}")
 
-    # For now, use the first panel (future: panel selector)
-    first_panel = pltz_dirs[0]
-    print(f"Opening panel: {first_panel.name}")
+    # Validate panel index
+    if panel_index < 0 or panel_index >= len(pltz_dirs):
+        panel_index = 0
+
+    selected_panel = pltz_dirs[panel_index]
+    print(f"Opening panel: {selected_panel.name}")
     if len(pltz_dirs) > 1:
         print(f"  (Figz contains {len(pltz_dirs)} panels: {[d.name for d in pltz_dirs]})")
 
+    # Build panel info for editor
+    panel_info = {
+        "panels": [d.name for d in pltz_dirs],
+        "current_index": panel_index,
+        "figz_dir": str(bundle_dir),
+    }
+
     # Delegate to pltz resolver
-    return _resolve_pltz_bundle(first_panel)
+    result = _resolve_pltz_bundle(selected_panel)
+    # Append panel_info to the result
+    return result + (panel_info,)
 
 
 def _resolve_pltz_bundle(path: Path) -> tuple:
@@ -589,6 +606,104 @@ def _resolve_layered_pltz_bundle(bundle_dir: Path) -> tuple:
         hitmap_path if hitmap_path and hitmap_path.exists() else None,
         bundle_spec,
     )
+
+
+def _load_panel_data(panel_dir: Path) -> Optional[dict]:
+    """
+    Load panel data from a .pltz.d directory.
+
+    Used by switch_panel endpoint to load a different panel's data.
+
+    Parameters
+    ----------
+    panel_dir : Path
+        Path to .pltz.d panel directory
+
+    Returns
+    -------
+    dict or None
+        Dictionary with keys: json_path, metadata, csv_data, png_path, hitmap_path
+        Returns None if panel cannot be loaded
+    """
+    import json as json_module
+    import scitex as stx
+
+    if not panel_dir.exists():
+        return None
+
+    # Check for layered vs legacy format
+    spec_path = panel_dir / "spec.json"
+    if spec_path.exists():
+        # Layered format
+        from scitex.plt.io import load_layered_pltz_bundle
+        bundle_data = load_layered_pltz_bundle(panel_dir)
+        metadata = bundle_data.get("merged", {})
+
+        # Find CSV
+        csv_data = None
+        for f in panel_dir.glob("*.csv"):
+            csv_data = stx.io.load(f)
+            break
+
+        # Find exports - prefer PNG over SVG (PIL can't open SVG)
+        png_path = None
+        svg_path = None
+        hitmap_path = None
+        exports_dir = panel_dir / "exports"
+        if exports_dir.exists():
+            for f in exports_dir.iterdir():
+                name = f.name
+                if name.endswith('_hitmap.png'):
+                    hitmap_path = f
+                elif name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+                    png_path = f
+                elif name.endswith('.svg') and '_hitmap' not in name and svg_path is None:
+                    svg_path = f
+        # Fall back to SVG only if no PNG found (though PIL can't open it)
+        if png_path is None:
+            png_path = svg_path
+
+        return {
+            "json_path": spec_path,
+            "metadata": metadata,
+            "csv_data": csv_data,
+            "png_path": png_path,
+            "hitmap_path": hitmap_path,
+        }
+    else:
+        # Legacy format
+        json_path = None
+        csv_data = None
+        png_path = None
+        hitmap_path = None
+
+        for f in panel_dir.iterdir():
+            name = f.name
+            if name.endswith('.json') and not name.endswith('.manual.json'):
+                json_path = f
+            elif name.endswith('.csv'):
+                csv_data = stx.io.load(f)
+            elif name.endswith('_hitmap.png'):
+                hitmap_path = f
+            elif name.endswith('.svg') and '_hitmap' not in name:
+                png_path = f
+            elif name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+                if png_path is None:
+                    png_path = f
+
+        if json_path is None:
+            return None
+
+        with open(json_path, 'r') as f:
+            metadata = json_module.load(f)
+
+        return {
+            "json_path": json_path,
+            "metadata": metadata,
+            "csv_data": csv_data,
+            "png_path": png_path,
+            "hitmap_path": hitmap_path,
+        }
 
 
 def _compute_file_hash(path: Path) -> str:

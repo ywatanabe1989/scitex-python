@@ -3,6 +3,8 @@
 # File: ./src/scitex/vis/editor/_defaults.py
 """Default style settings for SciTeX visual editor."""
 
+from scitex.plt.styles import get_default_dpi, get_preview_dpi
+
 
 def get_scitex_defaults():
     """
@@ -36,7 +38,7 @@ def get_scitex_defaults():
         "grid_linewidth": 0.6,
         "grid_alpha": 0.3,
         # Figure settings
-        "dpi": 300,  # Default DPI
+        "dpi": get_default_dpi(),  # From SCITEX_STYLE.yaml
         "fig_size": [3.15, 2.68],  # Default figure size in inches
         # Colors (SciTeX defaults)
         "facecolor": "#ffffff",  # White background

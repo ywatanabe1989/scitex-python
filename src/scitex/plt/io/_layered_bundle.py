@@ -32,6 +32,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import asdict
 
 from scitex import logging
+from scitex.plt.styles import get_default_dpi, get_preview_dpi
 from scitex.schema import (
     # Spec classes
     PltzSpec, PltzTraceSpec, PltzAxesItem, PltzAxesLimits, PltzAxesLabels,
@@ -63,7 +64,7 @@ def save_layered_pltz_bundle(
     fig,
     bundle_dir: Path,
     basename: str = "plot",
-    dpi: int = 300,
+    dpi: Optional[int] = None,
     csv_df=None,
 ) -> None:
     """
@@ -77,11 +78,14 @@ def save_layered_pltz_bundle(
         Output directory (e.g., plot.pltz.d).
     basename : str
         Base filename for exports.
-    dpi : int
-        DPI for raster exports.
+    dpi : int, optional
+        DPI for raster exports. If None, uses get_default_dpi() from config.
     csv_df : DataFrame, optional
         Data to embed as CSV.
     """
+    # Resolve DPI from config if not specified
+    if dpi is None:
+        dpi = get_default_dpi()
     import numpy as np
     import tempfile
     import warnings
@@ -611,7 +615,7 @@ def _generate_pltz_overview(exports_dir: Path, basename: str) -> None:
                 manifest_data = json.load(f)
 
         # Get DPI and panel size for mm scaler
-        dpi = manifest_data.get("dpi", 300)
+        dpi = manifest_data.get("dpi", get_default_dpi())
         panel_size_mm = manifest_data.get("panel_size_mm", [80, 68])
 
         # Create figure with 2 rows, 3 columns layout
@@ -776,7 +780,7 @@ def _generate_pltz_overview(exports_dir: Path, basename: str) -> None:
         overview_path = exports_dir / f"{basename}_overview.png"
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message=".*tight_layout.*")
-            fig.savefig(overview_path, dpi=150, bbox_inches="tight", facecolor="white")
+            fig.savefig(overview_path, dpi=get_preview_dpi(), bbox_inches="tight", facecolor="white")
         plt.close(fig)
 
     except Exception as e:
@@ -1262,7 +1266,7 @@ def merge_layered_bundle(
         merged["size"] = {
             "width_mm": style["size"].get("width_mm", 80),
             "height_mm": style["size"].get("height_mm", 68),
-            "dpi": geometry.get("dpi", 300) if geometry else 300,
+            "dpi": geometry.get("dpi", get_default_dpi()) if geometry else get_default_dpi(),
         }
 
     # Merge axes from spec + style + geometry

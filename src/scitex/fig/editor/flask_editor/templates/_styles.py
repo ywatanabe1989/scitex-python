@@ -360,7 +360,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .controls-header {
-    padding: 16px 20px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--workspace-border-subtle);
     display: flex;
     justify-content: space-between;
@@ -372,13 +372,13 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .controls-header h1 {
-    font-size: 1.1em;
+    font-size: 1.0em;
     font-weight: 600;
     color: var(--status-success);
 }
 
 .controls-body {
-    padding: 0 20px 20px;
+    padding: 0 14px 14px;
     flex: 1;
 }
 
@@ -420,31 +420,31 @@ input[type="range"]::-moz-range-thumb {
  * Section Headers
  * ============================================================================= */
 .section {
-    margin-top: 16px;
+    margin-top: 10px;
 }
 
 .section-header {
-    font-size: 0.75em;
+    font-size: 0.72em;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-inverse);
     background: var(--status-success);
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: 4px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 /* =============================================================================
  * Form Fields
  * ============================================================================= */
-.field { margin-bottom: 12px; }
+.field { margin-bottom: 8px; }
 
 .field label {
     display: block;
-    font-size: 0.8em;
+    font-size: 0.78em;
     font-weight: 500;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     color: var(--text-secondary);
 }
 
@@ -452,12 +452,12 @@ input[type="range"]::-moz-range-thumb {
 .field input[type="number"],
 .field select {
     width: 100%;
-    padding: 8px 10px;
+    padding: 5px 8px;
     border: 1px solid var(--border-muted);
     border-radius: 4px;
     background: var(--bg-surface);
     color: var(--text-primary);
-    font-size: 0.85em;
+    font-size: 0.82em;
     transition: border-color 0.2s;
 }
 
@@ -479,18 +479,18 @@ input[type="range"]::-moz-range-thumb {
 
 .field-row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
-.field-row .field { flex: 1; }
+.field-row .field { flex: 1; margin-bottom: 0; }
 
 /* Checkbox styling */
 .checkbox-field {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     cursor: pointer;
-    padding: 6px 0;
+    padding: 4px 0;
 }
 
 .checkbox-field input[type="checkbox"] {
@@ -536,6 +536,17 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .trace-item:last-child { border-bottom: none; }
+
+.trace-item-highlight {
+    background: var(--status-success);
+    color: var(--text-inverse);
+    animation: traceHighlightFade 1.5s ease-out forwards;
+}
+
+@keyframes traceHighlightFade {
+    0% { background: var(--status-success); }
+    100% { background: var(--bg-muted); }
+}
 
 .trace-color {
     width: 24px;
@@ -596,8 +607,8 @@ input[type="range"]::-moz-range-thumb {
  * ============================================================================= */
 .btn {
     width: 100%;
-    padding: 10px 16px;
-    margin-top: 8px;
+    padding: 7px 12px;
+    margin-top: 6px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -1007,16 +1018,21 @@ input[type="range"]::-moz-range-thumb {
  * Subsection Headers (for grouped controls like X/Y axis settings)
  * ============================================================================= */
 .subsection-header {
-    font-size: 0.7em;
+    font-size: 0.68em;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
     color: var(--text-secondary);
-    padding: 6px 8px;
-    margin-bottom: 8px;
+    padding: 4px 6px;
+    margin-bottom: 6px;
+    margin-top: 8px;
     background: var(--bg-muted);
-    border-left: 3px solid var(--status-success);
+    border-left: 2px solid var(--status-success);
     border-radius: 0 4px 4px 0;
+}
+
+.subsection-header:first-child {
+    margin-top: 0;
 }
 
 /* =============================================================================
@@ -1024,20 +1040,20 @@ input[type="range"]::-moz-range-thumb {
  * ============================================================================= */
 .axis-tabs {
     display: flex;
-    gap: 4px;
-    margin-bottom: 12px;
+    gap: 3px;
+    margin-bottom: 8px;
     background: var(--bg-muted);
-    padding: 4px;
+    padding: 3px;
     border-radius: 6px;
 }
 
 .axis-tab {
     flex: 1;
-    padding: 6px 12px;
+    padding: 4px 8px;
     border: none;
     background: transparent;
     color: var(--text-secondary);
-    font-size: 0.85em;
+    font-size: 0.8em;
     font-weight: 600;
     cursor: pointer;
     border-radius: 4px;
@@ -1061,6 +1077,268 @@ input[type="range"]::-moz-range-thumb {
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+/* =============================================================================
+ * Loading Spinner Overlay
+ * ============================================================================= */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    border-radius: 8px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--scitex-06);
+    border-top: 3px solid var(--status-success);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* =============================================================================
+ * Panel Grid View (for multi-panel figz bundles)
+ * ============================================================================= */
+.panel-grid-section {
+    width: 100%;
+    margin-bottom: 20px;
+    background: var(--workspace-bg-elevated);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.panel-grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.panel-grid-header h3 {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.panel-card {
+    background: var(--preview-bg);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.panel-card:hover {
+    border-color: var(--color-cta);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.panel-card.active {
+    border-color: var(--status-success);
+    box-shadow: 0 0 0 2px var(--status-success);
+}
+
+.panel-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.panel-card-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.panel-card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.panel-card-label {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+
+.panel-card-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    color: var(--text-muted);
+    font-size: 0.85em;
+}
+
+/* Panel Navigation Header */
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--workspace-bg-elevated);
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid var(--workspace-border-subtle);
+}
+
+#current-panel-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9em;
+}
+
+.panel-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#panel-indicator {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    min-width: 50px;
+    text-align: center;
+}
+
+.btn-sm {
+    padding: 4px 10px;
+    font-size: 0.8em;
+    width: auto;
+    margin: 0;
+}
+
+/* Preview area adjustments when panel header is visible */
+.preview-wrapper:has(.preview-header:not([style*="display: none"])) {
+    border-radius: 0 0 8px 8px;
+}
+
+.preview {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.preview > .preview-wrapper {
+    flex-shrink: 0;
+}
+
+/* =============================================================================
+ * Draggable Panel Canvas
+ * ============================================================================= */
+.panel-canvas {
+    position: relative;
+    min-height: 400px;
+    background: var(--workspace-bg-secondary);
+    border: 2px dashed var(--workspace-border-default);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.panel-canvas-item {
+    position: absolute;
+    cursor: move;
+    user-select: none;
+    transition: box-shadow 0.2s;
+    background: var(--preview-bg);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid transparent;
+}
+
+.panel-canvas-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+.panel-canvas-item.dragging {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    z-index: 100;
+    opacity: 0.9;
+}
+
+.panel-canvas-item.active {
+    border-color: var(--status-success);
+}
+
+.panel-canvas-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.panel-canvas-label {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7em;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.panel-canvas-resize {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    cursor: se-resize;
+    background: linear-gradient(135deg, transparent 50%, var(--color-cta) 50%);
+    border-radius: 0 0 4px 0;
+}
+
+.canvas-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.canvas-controls button {
+    padding: 4px 12px;
+    font-size: 0.8em;
 }
 """
 

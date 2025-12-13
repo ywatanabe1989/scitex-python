@@ -40,6 +40,13 @@ __all__ = [
     "set_style",
     "get_style",
     "resolve_style_value",
+    # DPI utilities
+    "get_default_dpi",
+    "get_display_dpi",
+    "get_preview_dpi",
+    "DPI_SAVE",
+    "DPI_DISPLAY",
+    "DPI_PREVIEW",
 ]
 
 from pathlib import Path
@@ -77,6 +84,77 @@ def resolve_style_value(
     Env var: SCITEX_PLT_AXES_WIDTH_MM (prefix + key with dots→underscores, uppercased)
     """
     return _get_config().resolve(key, direct_val, default, type)
+
+
+# =============================================================================
+# DPI Resolution - Central Source of Truth
+# =============================================================================
+#
+# DPI Priority Chain:
+#   1. Bundle's geometry_px.json (highest - existing figure's actual DPI)
+#   2. User override / session setting
+#   3. SCITEX_STYLE.yaml output.dpi (project default)
+#   4. Hardcoded fallback (only if config missing)
+#
+# Usage:
+#   from scitex.plt.styles import get_default_dpi, DPI_SAVE
+#
+#   # For saving figures (publication quality)
+#   fig.savefig("out.png", dpi=get_default_dpi())
+#
+#   # For display/preview (lower resolution)
+#   fig.savefig("preview.png", dpi=get_display_dpi())
+#
+#   # When loading from bundle, use bundle's DPI:
+#   dpi = bundle.get("geometry", {}).get("dpi") or get_default_dpi()
+#
+
+# Fallback values (only used if config unavailable)
+_FALLBACK_DPI_SAVE = 300
+_FALLBACK_DPI_DISPLAY = 100
+_FALLBACK_DPI_PREVIEW = 150
+
+
+def get_default_dpi() -> int:
+    """Get default DPI for saving/publication from config.
+
+    Priority: SCITEX_STYLE.yaml → env var → fallback 300
+
+    Returns:
+        int: DPI value for publication-quality output
+    """
+    return int(resolve_style_value("output.dpi", None, _FALLBACK_DPI_SAVE, int))
+
+
+def get_display_dpi() -> int:
+    """Get DPI for screen display (lower resolution for speed).
+
+    Returns approximately 1/3 of save DPI, minimum 100.
+
+    Returns:
+        int: DPI value for screen display
+    """
+    save_dpi = get_default_dpi()
+    return max(_FALLBACK_DPI_DISPLAY, save_dpi // 3)
+
+
+def get_preview_dpi() -> int:
+    """Get DPI for editor previews and thumbnails.
+
+    Returns 1/2 of save DPI, clamped between 100-200.
+
+    Returns:
+        int: DPI value for previews
+    """
+    save_dpi = get_default_dpi()
+    return max(_FALLBACK_DPI_DISPLAY, min(200, save_dpi // 2))
+
+
+# Module-level constants (evaluated at import time)
+# Use functions for dynamic resolution, constants for static defaults
+DPI_SAVE = _FALLBACK_DPI_SAVE      # Use get_default_dpi() for dynamic
+DPI_DISPLAY = _FALLBACK_DPI_DISPLAY
+DPI_PREVIEW = _FALLBACK_DPI_PREVIEW
 
 
 def load_style(path: Optional[Union[str, Path]] = None) -> Dict[str, Any]:

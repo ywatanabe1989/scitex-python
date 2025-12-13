@@ -6,10 +6,35 @@
 HTML_BODY = """
 <div class="container">
     <div class="preview">
+        <!-- Panel Grid View (for multi-panel figz bundles) -->
+        <div class="panel-grid-section" id="panel-grid-section" style="display: none;">
+            <div class="panel-grid-header">
+                <h3>All Panels</h3>
+                <div class="canvas-controls">
+                    <button class="btn btn-secondary btn-sm" id="panel-debug-btn" onclick="togglePanelDebugMode()">Show Hit Regions</button>
+                </div>
+            </div>
+            <div class="panel-canvas" id="panel-canvas">
+                <!-- Panels will be rendered here -->
+            </div>
+        </div>
+
         <div class="preview-wrapper">
+            <div class="preview-header" id="preview-header" style="display: none;">
+                <span id="current-panel-name">Panel A</span>
+                <div class="panel-nav">
+                    <button class="btn btn-sm" onclick="prevPanel()" id="prev-panel-btn">&laquo; Prev</button>
+                    <span id="panel-indicator">1 / 6</span>
+                    <button class="btn btn-sm" onclick="nextPanel()" id="next-panel-btn">Next &raquo;</button>
+                    <button class="btn btn-secondary btn-sm" onclick="togglePanelGrid()" id="show-grid-btn">Show All</button>
+                </div>
+            </div>
             <div class="preview-container" id="preview-container">
                 <img id="preview-img" src="" alt="Figure Preview">
                 <svg id="hover-overlay" class="hover-overlay"></svg>
+                <div id="loading-overlay" class="loading-overlay" style="display: none;">
+                    <div class="spinner"></div>
+                </div>
             </div>
             <button id="debug-toggle-btn" class="debug-toggle" onclick="toggleDebugMode()">Show Hit Areas</button>
         </div>
@@ -17,9 +42,9 @@ HTML_BODY = """
     <div class="controls">
         <div class="controls-header">
             <div>
-                <h1>SciTeX Editor</h1>
+                <h1>SciTeX Figure Editor</h1>
                 <div class="filename">{{ filename }}</div>
-                {% if panel_path %}<div class="panel-path">Panel: {{ panel_path }}</div>{% endif %}
+                {% if panel_path %}<div class="panel-path" id="panel-path-display">Panel: {{ panel_path }}</div>{% endif %}
             </div>
             <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
                 <span id="theme-icon">&#9790;</span>
@@ -341,147 +366,147 @@ HTML_BODY = """
                 </div>
             </div>
 
-            <!-- Labels Section (Global figure labels - for single-panel figures) -->
-            <div class="section" id="section-labels">
-                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Figure Labels</div>
+            <!-- Dimensions Section (General - moved higher) -->
+            <div class="section" id="section-dimensions">
+                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Dimensions</div>
                 <div class="section-content collapsed">
-                    <p class="section-hint">For multi-panel figures, select a panel to edit its labels.</p>
-                    <!-- Title -->
+                    <div class="field" style="margin-bottom: 8px;">
+                        <label>Unit</label>
+                        <div class="unit-toggle">
+                            <button class="unit-btn active" id="unit-mm" onclick="setDimensionUnit('mm')">mm</button>
+                            <button class="unit-btn" id="unit-inch" onclick="setDimensionUnit('inch')">inch</button>
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label id="fig_width_label">Width (mm)</label>
+                            <input type="number" id="fig_width" value="80" min="10" max="300" step="1">
+                        </div>
+                        <div class="field">
+                            <label id="fig_height_label">Height (mm)</label>
+                            <input type="number" id="fig_height" value="68" min="10" max="300" step="1">
+                        </div>
+                    </div>
                     <div class="field">
-                        <label>Figure Title</label>
-                        <input type="text" id="title" placeholder="Overall figure title">
-                    </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label class="checkbox-field">
-                                <input type="checkbox" id="show_title" checked>
-                                <span>Show Title</span>
-                            </label>
-                        </div>
-                        <div class="field">
-                            <label>Title Size (pt)</label>
-                            <input type="number" id="title_fontsize" value="8" min="4" max="24" step="1">
-                        </div>
-                    </div>
-                    <!-- Caption -->
-                    <div class="field" style="margin-top: 8px;">
-                        <label>Figure Caption</label>
-                        <textarea id="caption" rows="2" placeholder="Figure caption text..." style="width: 100%; padding: 8px; border: 1px solid var(--border-muted); border-radius: 4px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.85em; resize: vertical;"></textarea>
-                    </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label class="checkbox-field">
-                                <input type="checkbox" id="show_caption">
-                                <span>Show Caption</span>
-                            </label>
-                        </div>
-                        <div class="field">
-                            <label>Caption Size (pt)</label>
-                            <input type="number" id="caption_fontsize" value="7" min="4" max="16" step="1">
-                        </div>
-                    </div>
-                    <!-- Axis Labels -->
-                    <div class="subsection-header" style="margin-top: 12px;">Axis Labels</div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label>Shared X Label</label>
-                            <input type="text" id="xlabel" placeholder="Shared X axis">
-                        </div>
-                        <div class="field">
-                            <label>Shared Y Label</label>
-                            <input type="text" id="ylabel" placeholder="Shared Y axis">
-                        </div>
+                        <label>DPI</label>
+                        <input type="number" id="dpi" value="300" min="72" max="600" step="1">
                     </div>
                 </div>
             </div>
 
-            <!-- Axis Limits Section -->
-            <div class="section" id="section-axis-limits">
-                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Axis Limits</div>
+            <!-- Style Section (General - moved higher) -->
+            <div class="section" id="section-style">
+                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Style</div>
                 <div class="section-content collapsed">
+                    <label class="checkbox-field">
+                        <input type="checkbox" id="grid">
+                        <span>Show Grid</span>
+                    </label>
+                    <div class="field">
+                        <label>Label Size (pt)</label>
+                        <input type="number" id="axis_fontsize" value="7" min="4" max="16" step="1">
+                    </div>
+                    <div class="field">
+                        <label>Background</label>
+                        <div class="bg-toggle">
+                            <button class="bg-btn" id="bg-white" onclick="setBackgroundType('white')" title="White background">
+                                <span class="bg-preview white"></span>
+                                <span>White</span>
+                            </button>
+                            <button class="bg-btn active" id="bg-transparent" onclick="setBackgroundType('transparent')" title="Transparent background">
+                                <span class="bg-preview transparent"></span>
+                                <span>Transparent</span>
+                            </button>
+                            <button class="bg-btn" id="bg-black" onclick="setBackgroundType('black')" title="Black background">
+                                <span class="bg-preview black"></span>
+                                <span>Black</span>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" id="facecolor" value="#ffffff">
+                    <input type="hidden" id="transparent" value="true">
+                </div>
+            </div>
+
+            <!-- Title, Labels & Caption Section -->
+            <div class="section" id="section-labels">
+                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Title, Labels & Caption</div>
+                <div class="section-content collapsed">
+                    <p class="section-hint">For multi-panel figures, select a panel to edit its labels.</p>
+
+                    <!-- Title row in table style -->
+                    <table class="props-table" style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+                        <tr>
+                            <td style="width: 70px; padding: 4px 0;"><label>Title</label></td>
+                            <td style="padding: 4px 0;">
+                                <input type="text" id="title" placeholder="Figure title" style="width: 100%;">
+                            </td>
+                            <td style="width: 50px; padding: 4px 0; text-align: right;">
+                                <input type="number" id="title_fontsize" value="8" min="4" max="24" step="1" style="width: 45px;" title="Font size (pt)">
+                            </td>
+                            <td style="width: 24px; padding: 4px 0;">
+                                <label class="checkbox-field" style="margin: 0;" title="Show title">
+                                    <input type="checkbox" id="show_title" checked>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px 0;"><label>X Label</label></td>
+                            <td style="padding: 4px 0;">
+                                <input type="text" id="xlabel" placeholder="X axis label" style="width: 100%;">
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px 0;"><label>Y Label</label></td>
+                            <td style="padding: 4px 0;">
+                                <input type="text" id="ylabel" placeholder="Y axis label" style="width: 100%;">
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px 0; vertical-align: top;"><label>Caption</label></td>
+                            <td style="padding: 4px 0;">
+                                <textarea id="caption" rows="2" placeholder="Figure caption..." style="width: 100%; padding: 6px; border: 1px solid var(--border-muted); border-radius: 4px; background: var(--bg-surface); color: var(--text-primary); font-size: 0.85em; resize: vertical;"></textarea>
+                            </td>
+                            <td style="padding: 4px 0; text-align: right; vertical-align: top;">
+                                <input type="number" id="caption_fontsize" value="7" min="4" max="16" step="1" style="width: 45px;" title="Font size (pt)">
+                            </td>
+                            <td style="padding: 4px 0; vertical-align: top;">
+                                <label class="checkbox-field" style="margin: 0;" title="Show caption">
+                                    <input type="checkbox" id="show_caption">
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Axis & Ticks Section (merged with Axis Limits) -->
+            <div class="section" id="section-ticks">
+                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Axis & Ticks</div>
+                <div class="section-content collapsed">
+                    <!-- Axis Limits (merged from separate section) -->
+                    <div class="subsection-header">Limits</div>
                     <div class="field-row">
                         <div class="field">
-                            <label>X (Left)</label>
+                            <label>X Range</label>
                             <div class="field-row" style="gap: 4px; margin-top: 4px;">
                                 <input type="number" id="xmin" step="any" placeholder="Min">
                                 <input type="number" id="xmax" step="any" placeholder="Max">
                             </div>
                         </div>
                         <div class="field">
-                            <label>Y (Right)</label>
+                            <label>Y Range</label>
                             <div class="field-row" style="gap: 4px; margin-top: 4px;">
                                 <input type="number" id="ymin" step="any" placeholder="Min">
                                 <input type="number" id="ymax" step="any" placeholder="Max">
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Traces Section -->
-            <div class="section" id="section-traces">
-                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Traces</div>
-                <div class="section-content collapsed">
-                    <div class="traces-list" id="traces-list">
-                        <!-- Dynamically populated -->
-                    </div>
-                    <div class="field" style="margin-top: 10px;">
-                        <label>Default Line Width (pt)</label>
-                        <input type="number" id="linewidth" value="1.0" min="0.1" max="5" step="0.1">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Legend Section -->
-            <div class="section" id="section-legend">
-                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Legend</div>
-                <div class="section-content collapsed">
-                    <label class="checkbox-field">
-                        <input type="checkbox" id="legend_visible" checked>
-                        <span>Show Legend</span>
-                    </label>
-                    <div class="field">
-                        <label>Position</label>
-                        <select id="legend_loc" onchange="toggleCustomLegendPosition()">
-                            <option value="best">Best</option>
-                            <option value="upper right">Upper Right</option>
-                            <option value="upper left">Upper Left</option>
-                            <option value="lower right">Lower Right</option>
-                            <option value="lower left">Lower Left</option>
-                            <option value="center right">Center Right</option>
-                            <option value="center left">Center Left</option>
-                            <option value="upper center">Upper Center</option>
-                            <option value="lower center">Lower Center</option>
-                            <option value="center">Center</option>
-                            <option value="custom">Custom (Drag)</option>
-                        </select>
-                    </div>
-                    <div id="custom-legend-coords" class="field-row" style="display: none;">
-                        <div class="field">
-                            <label>X (0-1)</label>
-                            <input type="number" id="legend_x" value="0.5" min="0" max="1" step="0.01">
-                        </div>
-                        <div class="field">
-                            <label>Y (0-1)</label>
-                            <input type="number" id="legend_y" value="0.5" min="0" max="1" step="0.01">
-                        </div>
-                    </div>
-                    <label class="checkbox-field">
-                        <input type="checkbox" id="legend_frameon">
-                        <span>Show Frame</span>
-                    </label>
-                    <div class="field">
-                        <label>Font Size (pt)</label>
-                        <input type="number" id="legend_fontsize" value="6" min="4" max="16" step="1">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Axis and Ticks Section -->
-            <div class="section" id="section-ticks">
-                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Axis and Ticks</div>
-                <div class="section-content collapsed">
                     <!-- Axis Tabs -->
+                    <div class="subsection-header" style="margin-top: 12px;">Tick Settings</div>
                     <div class="axis-tabs">
                         <button class="axis-tab active" onclick="switchAxisTab('x')" id="axis-tab-x">X</button>
                         <button class="axis-tab" onclick="switchAxisTab('y')" id="axis-tab-y">Y</button>
@@ -675,64 +700,68 @@ HTML_BODY = """
                 </div>
             </div>
 
-            <!-- Style Section -->
-            <div class="section" id="section-style">
-                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Style</div>
+            <!-- Traces Section (Simplified for beta) -->
+            <div class="section" id="section-traces">
+                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Traces</div>
                 <div class="section-content collapsed">
-                    <label class="checkbox-field">
-                        <input type="checkbox" id="grid">
-                        <span>Show Grid</span>
-                    </label>
-                    <div class="field">
-                        <label>Label Size (pt)</label>
-                        <input type="number" id="axis_fontsize" value="7" min="4" max="16" step="1">
+                    <p class="section-hint">Click on a trace in the preview to edit its properties.</p>
+                    <div class="traces-list" id="traces-list">
+                        <!-- Dynamically populated -->
                     </div>
-                    <div class="field">
-                        <label>Background</label>
-                        <div class="bg-toggle">
-                            <button class="bg-btn" id="bg-white" onclick="setBackgroundType('white')" title="White background">
-                                <span class="bg-preview white"></span>
-                                <span>White</span>
-                            </button>
-                            <button class="bg-btn active" id="bg-transparent" onclick="setBackgroundType('transparent')" title="Transparent background">
-                                <span class="bg-preview transparent"></span>
-                                <span>Transparent</span>
-                            </button>
-                            <button class="bg-btn" id="bg-black" onclick="setBackgroundType('black')" title="Black background">
-                                <span class="bg-preview black"></span>
-                                <span>Black</span>
-                            </button>
-                        </div>
-                    </div>
-                    <input type="hidden" id="facecolor" value="#ffffff">
-                    <input type="hidden" id="transparent" value="true">
                 </div>
             </div>
 
-            <!-- Dimensions Section -->
-            <div class="section" id="section-dimensions">
-                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Dimensions</div>
+            <!-- Legend Section (Enhanced) -->
+            <div class="section" id="section-legend">
+                <div class="section-header section-toggle collapsed" onclick="toggleSection(this)">Legend</div>
                 <div class="section-content collapsed">
-                    <div class="field" style="margin-bottom: 8px;">
-                        <label>Unit</label>
-                        <div class="unit-toggle">
-                            <button class="unit-btn active" id="unit-mm" onclick="setDimensionUnit('mm')">mm</button>
-                            <button class="unit-btn" id="unit-inch" onclick="setDimensionUnit('inch')">inch</button>
-                        </div>
-                    </div>
+                    <label class="checkbox-field">
+                        <input type="checkbox" id="legend_visible" checked>
+                        <span>Show Legend</span>
+                    </label>
                     <div class="field-row">
                         <div class="field">
-                            <label id="fig_width_label">Width (mm)</label>
-                            <input type="number" id="fig_width" value="80" min="10" max="300" step="1">
+                            <label>Position</label>
+                            <select id="legend_loc" onchange="toggleCustomLegendPosition()">
+                                <option value="best">Best (auto)</option>
+                                <option value="upper right">Upper Right</option>
+                                <option value="upper left">Upper Left</option>
+                                <option value="lower right">Lower Right</option>
+                                <option value="lower left">Lower Left</option>
+                                <option value="center right">Center Right</option>
+                                <option value="center left">Center Left</option>
+                                <option value="upper center">Upper Center</option>
+                                <option value="lower center">Lower Center</option>
+                                <option value="center">Center</option>
+                                <option value="custom">Custom...</option>
+                            </select>
                         </div>
                         <div class="field">
-                            <label id="fig_height_label">Height (mm)</label>
-                            <input type="number" id="fig_height" value="68" min="10" max="300" step="1">
+                            <label>Columns</label>
+                            <input type="number" id="legend_ncols" value="1" min="1" max="5" step="1" title="Number of columns">
                         </div>
                     </div>
-                    <div class="field">
-                        <label>DPI</label>
-                        <input type="number" id="dpi" value="300" min="72" max="600" step="1">
+                    <div id="custom-legend-coords" class="field-row" style="display: none; margin-top: 8px;">
+                        <div class="field">
+                            <label>X (0-1)</label>
+                            <input type="number" id="legend_x" value="0.95" min="0" max="1.5" step="0.01" title="X coordinate in axes fraction">
+                        </div>
+                        <div class="field">
+                            <label>Y (0-1)</label>
+                            <input type="number" id="legend_y" value="0.95" min="-0.5" max="1.5" step="0.01" title="Y coordinate in axes fraction">
+                        </div>
+                    </div>
+                    <div class="field-row" style="margin-top: 8px;">
+                        <div class="field">
+                            <label class="checkbox-field">
+                                <input type="checkbox" id="legend_frameon">
+                                <span>Show Frame</span>
+                            </label>
+                        </div>
+                        <div class="field">
+                            <label>Font Size (pt)</label>
+                            <input type="number" id="legend_fontsize" value="6" min="4" max="16" step="1">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -785,14 +814,14 @@ HTML_BODY = """
                             <option value="0">Off</option>
                             <option value="500">Hot (0.5s)</option>
                             <option value="1000">Fast (1s)</option>
-                            <option value="2000">Normal (2s)</option>
-                            <option value="5000" selected>Slow (5s)</option>
+                            <option value="2000" selected>Normal (2s)</option>
+                            <option value="5000">Slow (5s)</option>
                         </select>
                     </div>
                     <button class="btn btn-cta" onclick="updatePreview(true)" style="flex: 0; margin-left: 8px;">Update Now</button>
                 </div>
-                <button class="btn btn-primary" onclick="saveManual()" title="Ctrl+S">Save to .manual.json</button>
-                <button class="btn btn-secondary" onclick="resetOverrides()">Reset to Original</button>
+                <button class="btn btn-primary" onclick="saveManual()" title="Ctrl+S">Save</button>
+                <button class="btn btn-secondary" onclick="resetOverrides()" title="Reset to original values">Reset</button>
             </div>
 
             <div class="status-bar" id="status">Ready</div>

@@ -21,6 +21,8 @@ from typing import Any, Dict, List
 
 import numpy as np
 
+from scitex.plt.styles import get_preview_dpi
+
 __all__ = [
     "validate_pltz_spec",
     "load_pltz_bundle",
@@ -392,7 +394,7 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: s
     overview_path = dir_path / f"{basename}_overview.png"
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message=".*tight_layout.*")
-        fig.savefig(overview_path, dpi=150, bbox_inches="tight", facecolor="white")
+        fig.savefig(overview_path, dpi=get_preview_dpi(), bbox_inches="tight", facecolor="white")
     plt.close(fig)
 
 

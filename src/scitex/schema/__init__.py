@@ -38,6 +38,8 @@ from scitex.schema._plot import (
     PLOT_SPEC_VERSION,
     PLOT_STYLE_VERSION,
     PLOT_GEOMETRY_VERSION,
+    # DPI fallback for legacy data
+    DPI_FALLBACK,
     # Type aliases
     TraceType,
     CoordinateSpace,
