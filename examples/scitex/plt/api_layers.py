@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-13 (ywatanabe)"
+# Timestamp: "2025-12-13 10:06:12 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/examples/plt/api_layers.py
+
 
 """Demo: SciTeX Plotting API Layers.
 
@@ -14,13 +15,16 @@ All three layers produce CSV/JSON output for reproducibility.
 """
 
 import scitex as stx
-from scitex.dev.plt import PLOTTERS_STX, PLOTTERS_SNS, PLOTTERS_MPL
+from scitex.dev.plt import PLOTTERS_STX
+from scitex.dev.plt import PLOTTERS_SNS
+from scitex.dev.plt import PLOTTERS_MPL
 
 OUTPUT_DIR = "./api_layers_out"
 
 
 @stx.session
 def main(
+    extension="png",
     plt=stx.INJECTED,
     rng_manager=stx.INJECTED,
     logger=stx.INJECTED,
@@ -35,37 +39,43 @@ def main(
     total = 0
 
     # stx_* API Layer (ArrayLike input)
-    logger.info(f"\n[PLOTTERS_STX] {len(PLOTTERS_STX)} stx_* methods (ArrayLike)")
+    logger.info(
+        f"\n[PLOTTERS_STX] {len(PLOTTERS_STX)} stx_* methods (ArrayLike)"
+    )
     for name, plotter in PLOTTERS_STX.items():
         total += 1
         logger.info(f"  [{total:02d}] {name}")
         try:
             fig, ax = plotter(plt, rng)
-            stx.io.save(fig, f"{OUTPUT_DIR}/{name}.png")
+            stx.io.save(fig, f"{OUTPUT_DIR}/{name}.{extension}")
             fig.close()
         except Exception as e:
             logger.warning(f"    Failed: {e}")
 
     # sns_* API Layer (DataFrame input)
-    logger.info(f"\n[PLOTTERS_SNS] {len(PLOTTERS_SNS)} sns_* methods (DataFrame)")
+    logger.info(
+        f"\n[PLOTTERS_SNS] {len(PLOTTERS_SNS)} sns_* methods (DataFrame)"
+    )
     for name, plotter in PLOTTERS_SNS.items():
         total += 1
         logger.info(f"  [{total:02d}] {name}")
         try:
             fig, ax = plotter(plt, rng)
-            stx.io.save(fig, f"{OUTPUT_DIR}/{name}.png")
+            stx.io.save(fig, f"{OUTPUT_DIR}/{name}.{extension}")
             fig.close()
         except Exception as e:
             logger.warning(f"    Failed: {e}")
 
     # mpl_* API Layer (matplotlib-style)
-    logger.info(f"\n[PLOTTERS_MPL] {len(PLOTTERS_MPL)} mpl_* methods (matplotlib-style)")
+    logger.info(
+        f"\n[PLOTTERS_MPL] {len(PLOTTERS_MPL)} mpl_* methods (matplotlib-style)"
+    )
     for name, plotter in PLOTTERS_MPL.items():
         total += 1
         logger.info(f"  [{total:02d}] {name}")
         try:
             fig, ax = plotter(plt, rng)
-            stx.io.save(fig, f"{OUTPUT_DIR}/{name}.png")
+            stx.io.save(fig, f"{OUTPUT_DIR}/{name}.{extension}")
             fig.close()
         except Exception as e:
             logger.warning(f"    Failed: {e}")
