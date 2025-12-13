@@ -496,6 +496,9 @@ def save_layered_pltz_bundle(
     # Generate overview showing main image and hitmap side by side
     _generate_pltz_overview(exports_dir, basename)
 
+    # Generate dynamic README.md
+    _generate_pltz_readme(bundle_dir, basename, spec, style, geometry, manifest)
+
     logger.debug(f"Saved layered pltz bundle: {bundle_dir}")
 
 
@@ -721,6 +724,146 @@ def _generate_pltz_overview(exports_dir: Path, basename: str) -> None:
         logger.debug(f"Could not generate pltz overview: {e}")
         import traceback
         logger.debug(traceback.format_exc())
+
+
+def _generate_pltz_readme(
+    bundle_dir: Path,
+    basename: str,
+    spec: "PltzSpec",
+    style: "PltzStyle",
+    geometry: "PltzGeometry",
+    manifest: "PltzRenderManifest",
+) -> None:
+    """Generate a dynamic README.md describing the bundle.
+
+    Parameters
+    ----------
+    bundle_dir : Path
+        Path to the bundle directory.
+    basename : str
+        Base filename for the bundle.
+    spec : PltzSpec
+        The plot specification.
+    style : PltzStyle
+        The plot style.
+    geometry : PltzGeometry
+        The rendered geometry.
+    manifest : PltzRenderManifest
+        The render manifest.
+    """
+    from datetime import datetime
+
+    # Count elements
+    n_axes = len(spec.axes) if spec.axes else 0
+    n_traces = len(spec.traces) if spec.traces else 0
+
+    # Get size info
+    width_mm = style.size.width_mm if style.size else 0
+    height_mm = style.size.height_mm if style.size else 0
+    dpi = manifest.dpi
+    render_px = manifest.render_px
+
+    readme_content = f"""# {basename}.pltz.d
+
+> SciTeX Layered Plot Bundle - Auto-generated README
+
+## Overview
+
+![Plot Overview](exports/{basename}_overview.png)
+
+## Bundle Structure
+
+```
+{basename}.pltz.d/
+├── spec.json           # WHAT to plot (semantic, editable)
+├── style.json          # HOW it looks (appearance, editable)
+├── {basename}.csv      # Raw data (immutable)
+├── exports/
+│   ├── {basename}.png          # Main plot image
+│   ├── {basename}.svg          # Vector version
+│   ├── {basename}_hitmap.png   # Hit detection image
+│   └── {basename}_overview.png # Visual summary
+├── cache/
+│   ├── geometry_px.json       # Pixel coordinates (regenerable)
+│   └── render_manifest.json   # Render metadata
+└── README.md           # This file
+```
+
+## Plot Information
+
+| Property | Value |
+|----------|-------|
+| Plot ID | `{spec.plot_id}` |
+| Axes | {n_axes} |
+| Traces | {n_traces} |
+| Size | {width_mm:.1f} × {height_mm:.1f} mm |
+| DPI | {dpi} |
+| Pixels | {render_px[0]} × {render_px[1]} |
+| Theme | {style.theme.mode if style.theme else 'light'} |
+
+## Coordinate System
+
+The bundle uses a layered coordinate system:
+
+1. **spec.json + style.json** = Source of truth (edit these)
+2. **cache/** = Derived data (can be deleted and regenerated)
+
+### Coordinate Transformation Pipeline
+
+```
+Original Figure (at export DPI)
+         │
+         ▼ crop_box offset
+    ┌─────────────────┐
+    │  Final PNG      │  ← bbox_px coordinates are in this space
+    │  ({render_px[0]} × {render_px[1]})  │
+    └─────────────────┘
+```
+
+**Formula**: `final_coords = original_coords - crop_offset`
+
+## Usage
+
+### Python
+
+```python
+import scitex as stx
+
+# Load the bundle
+bundle = stx.plt.io.load_layered_pltz_bundle("{bundle_dir}")
+
+# Access components
+spec = bundle["spec"]       # What to plot
+style = bundle["style"]     # How it looks
+geometry = bundle["geometry"]  # Where in pixels
+```
+
+### Editing
+
+Edit `spec.json` to change:
+- Axis labels, titles, limits
+- Trace data columns
+- Data source
+
+Edit `style.json` to change:
+- Colors, line widths
+- Font sizes
+- Theme (light/dark)
+
+After editing, regenerate cache with:
+```python
+stx.plt.io.regenerate_cache("{bundle_dir}")
+```
+
+---
+
+*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
+*Schema: scitex.plt v{PLOT_SPEC_VERSION}*
+"""
+
+    readme_path = bundle_dir / "README.md"
+    with open(readme_path, "w") as f:
+        f.write(readme_content)
 
 
 def _adjust_coords_for_offset(

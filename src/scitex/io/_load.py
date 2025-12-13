@@ -83,18 +83,23 @@ def _load_bundle(lpath, verbose=False, **kwargs):
         from pathlib import Path
 
         p = Path(lpath)
+        bundle_dir = p
 
-        # Find the PNG file in the bundle
-        if p.is_dir():
-            png_path = p / "plot.png"
-        else:
-            # ZIP - extract first
+        # Handle ZIP extraction
+        if not p.is_dir():
             import tempfile
             import zipfile
             temp_dir = Path(tempfile.mkdtemp())
             with zipfile.ZipFile(p, 'r') as zf:
                 zf.extractall(temp_dir)
-            png_path = temp_dir / "plot.png"
+            bundle_dir = temp_dir
+
+        # Find PNG file - layered format stores in exports/
+        basename = bundle.get('basename', 'plot')
+        png_path = bundle_dir / "exports" / f"{basename}.png"
+        if not png_path.exists():
+            # Fallback to root level (legacy format)
+            png_path = bundle_dir / f"{basename}.png"
 
         # Load the PNG as a figure
         if png_path.exists():
@@ -105,12 +110,19 @@ def _load_bundle(lpath, verbose=False, **kwargs):
 
             # Attach metadata from spec
             spec = bundle.get('spec', {})
-            if 'axes' in spec and spec['axes']:
-                for key, val in spec['axes'][0].items():
-                    setattr(ax, f'_scitex_{key}', val)
-            if 'theme' in spec:
-                fig._scitex_theme = spec['theme'].get('mode')
+            if spec:
+                # Handle both layered and legacy spec formats
+                axes_list = spec.get('axes', [])
+                if axes_list and isinstance(axes_list, list):
+                    for key, val in axes_list[0].items():
+                        setattr(ax, f'_scitex_{key}', val)
+                # Theme from style (layered) or spec (legacy)
+                style = bundle.get('style', {})
+                theme = style.get('theme', {}) if style else spec.get('theme', {})
+                if theme:
+                    fig._scitex_theme = theme.get('mode')
 
+            # Data from bundle (merged in load_layered_pltz_bundle)
             data = bundle.get('data')
             return fig, ax, data
         else:

@@ -201,7 +201,7 @@ def _copy_nested_pltz_bundles(plots: Dict[str, Any], dir_path: Path) -> None:
 
 
 def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: str) -> None:
-    """Generate overview image for figz bundle showing all panels.
+    """Generate overview image for figz bundle showing all panels with hitmaps and overlays.
 
     Args:
         dir_path: Bundle directory path.
@@ -212,6 +212,7 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
     import matplotlib.pyplot as plt
     import matplotlib.gridspec as gridspec
     from PIL import Image
+    import numpy as np
     import warnings
 
     # Find all panel directories
@@ -221,12 +222,12 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
     if n_panels == 0:
         return
 
-    # Determine grid layout
-    n_cols = min(n_panels, 3)
+    # Determine grid layout - 3 columns per panel (image + hitmap + overlay)
+    n_cols = min(n_panels, 2)
     n_rows = (n_panels + n_cols - 1) // n_cols
 
-    # Create figure
-    fig_width = 5 * n_cols
+    # Create figure with 3 sub-columns per panel
+    fig_width = 12 * n_cols
     fig_height = 4 * n_rows + 1
     fig = plt.figure(figsize=(fig_width, fig_height), facecolor="white")
 
@@ -234,28 +235,65 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
     title = spec.get("figure", {}).get("title", basename)
     fig.suptitle(f"Figure Overview: {title}", fontsize=14, fontweight="bold", y=0.98)
 
-    gs = gridspec.GridSpec(n_rows, n_cols, figure=fig, hspace=0.3, wspace=0.2)
+    # Create nested gridspec - each panel gets 3 sub-columns
+    gs = gridspec.GridSpec(n_rows, n_cols * 3, figure=fig, hspace=0.3, wspace=0.1)
 
     # Add each panel
     for idx, panel_dir in enumerate(panel_dirs):
         panel_id = panel_dir.stem.replace(".pltz", "")
         row = idx // n_cols
-        col = idx % n_cols
+        col = (idx % n_cols) * 3  # Triple column index
 
-        ax = fig.add_subplot(gs[row, col])
-        ax.set_title(f"Panel {panel_id}", fontweight="bold", fontsize=11)
+        # Find PNG in panel directory (check exports/ first for layered format, then root)
+        png_files = list(panel_dir.glob("exports/*.png"))
+        if not png_files:
+            png_files = list(panel_dir.glob("*.png"))
+        main_pngs = [f for f in png_files if "_hitmap" not in f.name and "_overview" not in f.name]
 
-        # Find PNG in panel directory
-        png_files = list(panel_dir.glob("*.png"))
-        png_files = [f for f in png_files if "_hitmap" not in f.name and "_overview" not in f.name]
+        # Find hitmap PNG
+        hitmap_files = list(panel_dir.glob("exports/*_hitmap.png"))
+        if not hitmap_files:
+            hitmap_files = list(panel_dir.glob("*_hitmap.png"))
 
-        if png_files:
-            img = Image.open(png_files[0])
-            ax.imshow(img)
+        # Left subplot: main image
+        ax_main = fig.add_subplot(gs[row, col])
+        ax_main.set_title(f"Panel {panel_id}", fontweight="bold", fontsize=11)
+
+        main_img = None
+        if main_pngs:
+            main_img = Image.open(main_pngs[0])
+            ax_main.imshow(main_img)
         else:
-            ax.text(0.5, 0.5, "No image", ha="center", va="center", transform=ax.transAxes)
+            ax_main.text(0.5, 0.5, "No image", ha="center", va="center", transform=ax_main.transAxes)
+        ax_main.axis("off")
 
-        ax.axis("off")
+        # Middle subplot: hitmap
+        ax_hitmap = fig.add_subplot(gs[row, col + 1])
+        ax_hitmap.set_title(f"Hitmap {panel_id}", fontweight="bold", fontsize=11)
+
+        hitmap_img = None
+        if hitmap_files:
+            hitmap_img = Image.open(hitmap_files[0])
+            ax_hitmap.imshow(hitmap_img)
+        else:
+            ax_hitmap.text(0.5, 0.5, "No hitmap", ha="center", va="center", transform=ax_hitmap.transAxes)
+        ax_hitmap.axis("off")
+
+        # Right subplot: overlay
+        ax_overlay = fig.add_subplot(gs[row, col + 2])
+        ax_overlay.set_title(f"Overlay {panel_id}", fontweight="bold", fontsize=11)
+
+        if main_img is not None:
+            ax_overlay.imshow(main_img)
+            if hitmap_img is not None:
+                hitmap_rgba = hitmap_img.convert("RGBA")
+                hitmap_array = np.array(hitmap_rgba)
+                # Create semi-transparent overlay
+                hitmap_array[:, :, 3] = (hitmap_array[:, :, 3] * 0.5).astype(np.uint8)
+                ax_overlay.imshow(hitmap_array, alpha=0.5)
+        else:
+            ax_overlay.text(0.5, 0.5, "No overlay", ha="center", va="center", transform=ax_overlay.transAxes)
+        ax_overlay.axis("off")
 
     # Save overview
     overview_path = dir_path / f"{basename}_overview.png"
