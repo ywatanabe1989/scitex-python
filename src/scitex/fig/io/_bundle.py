@@ -140,6 +140,13 @@ def save_figz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
         import logging
         logging.getLogger("scitex").debug(f"Could not generate figz overview: {e}")
 
+    # Generate README.md
+    try:
+        _generate_figz_readme(dir_path, spec, data, basename)
+    except Exception as e:
+        import logging
+        logging.getLogger("scitex").debug(f"Could not generate figz README: {e}")
+
 
 def _save_exports(data: Dict[str, Any], dir_path: Path, spec: Dict, basename: str = "figure") -> None:
     """Save export files (PNG, SVG, PDF) with embedded metadata."""
@@ -320,6 +327,135 @@ def _embed_metadata_in_export(
 
     if fmt in ("png", "pdf"):
         embed_metadata(str(file_path), embed_data)
+
+
+def _generate_figz_readme(
+    dir_path: Path, spec: Dict, data: Dict, basename: str
+) -> None:
+    """Generate a dynamic README.md for figz bundle.
+
+    Args:
+        dir_path: Bundle directory path.
+        spec: Bundle specification.
+        data: Bundle data dictionary.
+        basename: Base filename for bundle files.
+    """
+    from datetime import datetime
+
+    # Extract figure info
+    figure = spec.get("figure", {})
+    title = figure.get("title", basename)
+    caption = figure.get("caption", "")
+    styles = figure.get("styles", {})
+    size = styles.get("size", {})
+    width_mm = size.get("width_mm", 0)
+    height_mm = size.get("height_mm", 0)
+    background = styles.get("background", "#ffffff")
+
+    # Count panels
+    panels = spec.get("panels", [])
+    n_panels = len(panels)
+
+    # Find panel directories
+    panel_dirs = sorted(dir_path.glob("*.pltz.d"))
+
+    # Build panel table
+    panel_rows = ""
+    for panel in panels:
+        panel_id = panel.get("id", "?")
+        label = panel.get("label", panel_id)
+        plot_ref = panel.get("plot", "")
+        pos = panel.get("position", {})
+        panel_size = panel.get("size", {})
+        panel_rows += f"| {label} | {plot_ref} | ({pos.get('x_mm', 0)}, {pos.get('y_mm', 0)}) | {panel_size.get('width_mm', 0)} × {panel_size.get('height_mm', 0)} mm |\n"
+
+    # Build panel directory list
+    panel_dir_list = ""
+    for pd in panel_dirs:
+        panel_dir_list += f"│   ├── {pd.name}/\n"
+
+    readme_content = f"""# {basename}.figz.d
+
+> SciTeX Figure Bundle - Auto-generated README
+
+## Overview
+
+![Figure Overview]({basename}_overview.png)
+
+## Bundle Structure
+
+```
+{basename}.figz.d/
+├── {basename}.json         # Figure specification (panels, layout)
+├── {basename}.png          # Rendered figure (raster)
+├── {basename}.svg          # Rendered figure (vector)
+├── {basename}_overview.png # Visual summary with hitmaps
+{panel_dir_list}└── README.md              # This file
+```
+
+## Figure Information
+
+| Property | Value |
+|----------|-------|
+| Title | {title or '(none)'} |
+| Panels | {n_panels} |
+| Size | {width_mm:.1f} × {height_mm:.1f} mm |
+| Background | `{background}` |
+
+{f"**Caption**: {caption}" if caption else ""}
+
+## Panel Layout
+
+| Label | Plot Bundle | Position (x, y) | Size |
+|-------|-------------|-----------------|------|
+{panel_rows}
+
+## Nested Bundles
+
+Each panel is stored as a separate `.pltz.d` bundle containing:
+- `spec.json` - What to plot (data, axes, traces)
+- `style.json` - How it looks (colors, fonts, theme)
+- `exports/` - Rendered images (PNG, SVG, hitmap)
+- `cache/` - Computed geometry (regenerable)
+
+## Usage
+
+### Python
+
+```python
+import scitex as stx
+
+# Load the figure bundle
+bundle = stx.load("{dir_path}")
+
+# Access components
+spec = bundle["spec"]       # Figure layout
+plots = bundle["plots"]     # Dict of panel bundles
+
+# Access specific panel
+panel_a = plots["A"]        # Get panel A's pltz bundle
+```
+
+### Editing
+
+Edit `{basename}.json` to change:
+- Panel positions and sizes
+- Figure title and caption
+- Background color
+
+Edit individual `*.pltz.d/spec.json` to change:
+- Plot data and axes
+- Trace specifications
+
+---
+
+*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
+*Schema: {spec.get("schema", {}).get("name", "scitex.fig.figure")} v{spec.get("schema", {}).get("version", "1.0.0")}*
+"""
+
+    readme_path = dir_path / "README.md"
+    with open(readme_path, "w") as f:
+        f.write(readme_content)
 
 
 # EOF
