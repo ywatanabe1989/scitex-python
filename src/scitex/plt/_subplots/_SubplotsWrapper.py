@@ -358,12 +358,16 @@ class SubplotsWrapper:
         """Create figure with mm-based control over axes dimensions."""
         from scitex.plt.utils import mm_to_inch, apply_style_mm
 
-        # Parse nrows, ncols from args (like matplotlib.pyplot.subplots)
+        # Parse nrows, ncols from args or kwargs (like matplotlib.pyplot.subplots)
         nrows, ncols = 1, 1
         if len(args) >= 1:
             nrows = args[0]
+        elif "nrows" in kwargs:
+            nrows = kwargs.pop("nrows")
         if len(args) >= 2:
             ncols = args[1]
+        elif "ncols" in kwargs:
+            ncols = kwargs.pop("ncols")
 
         n_axes = nrows * ncols
 

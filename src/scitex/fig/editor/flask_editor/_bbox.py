@@ -106,6 +106,17 @@ def extract_bboxes(
     if legend:
         get_element_bbox(legend, f"{ax_prefix}legend")
 
+    # Get caption bbox (figure-level text)
+    for text_artist in fig.texts:
+        # Check if this is a caption (positioned below figure)
+        text_content = text_artist.get_text()
+        if text_content:
+            pos = text_artist.get_position()
+            # Caption is typically centered horizontally (x ~= 0.5) and below figure (y < 0.1)
+            if pos[1] < 0.1:
+                get_element_bbox(text_artist, f"{ax_prefix}caption")
+                break  # Only one caption expected
+
     # Get trace (line) bboxes
     _extract_trace_bboxes(
         ax,
@@ -295,6 +306,35 @@ def extract_bboxes_multi(
             scale_y,
             pad_inches,
         )
+
+    # Get caption bbox (figure-level text)
+    # This is outside the per-axis loop since caption is a figure-level element
+    for text_artist in fig.texts:
+        text_content = text_artist.get_text()
+        if text_content:
+            pos = text_artist.get_position()
+            # Caption is typically centered horizontally (x ~= 0.5) and below figure (y < 0.1)
+            if pos[1] < 0.1:
+                try:
+                    bbox = text_artist.get_window_extent(renderer)
+                    x0_inches = bbox.x0 / fig.dpi
+                    x1_inches = bbox.x1 / fig.dpi
+                    y0_inches = bbox.y0 / fig.dpi
+                    y1_inches = bbox.y1 / fig.dpi
+                    x0_rel = x0_inches - tight_x0 + pad_inches
+                    x1_rel = x1_inches - tight_x0 + pad_inches
+                    y0_rel = saved_height_inches - (y1_inches - tight_y0 + pad_inches)
+                    y1_rel = saved_height_inches - (y0_inches - tight_y0 + pad_inches)
+                    bboxes["caption"] = {
+                        "x0": max(0, int(x0_rel * scale_x)),
+                        "y0": max(0, int(y0_rel * scale_y)),
+                        "x1": min(img_width, int(x1_rel * scale_x)),
+                        "y1": min(img_height, int(y1_rel * scale_y)),
+                        "label": "Caption",
+                    }
+                except Exception as e:
+                    print(f"Error getting caption bbox: {e}")
+                break  # Only one caption expected
 
     # Add schema v0.3 metadata if available
     if GEOMETRY_V03_AVAILABLE:
@@ -766,6 +806,471 @@ def _extract_trace_bboxes(
             coll_idx += 1
         except Exception as e:
             print(f"Error getting collection bbox: {e}")
+
+
+def extract_bboxes_from_metadata(
+    metadata: Dict[str, Any],
+    img_width: int,
+    img_height: int,
+) -> Dict[str, Any]:
+    """Extract bounding boxes from pre-computed metadata (without re-rendering).
+
+    This is used when loading actual PNGs from bundles instead of re-rendering.
+    Extracts bbox info from:
+    - hit_regions (if available from v0.3 schema)
+    - elements dict
+    - axes positions
+
+    Args:
+        metadata: JSON metadata from spec.json or panel JSON
+        img_width: Image width in pixels
+        img_height: Image height in pixels
+
+    Returns:
+        Dict with bboxes keyed by element name
+    """
+    bboxes = {}
+
+    # Check for pre-computed hit_regions (v0.3 schema)
+    hit_regions = metadata.get("hit_regions", {})
+    if hit_regions:
+        color_map = hit_regions.get("color_map", {})
+        for element_name, color in color_map.items():
+            # We don't have exact coords from color map, but we can create placeholder
+            bboxes[element_name] = {
+                "label": element_name.replace("_", " ").title(),
+                "element_type": _guess_element_type(element_name),
+            }
+
+    # Check for geometry_px in cache (v0.3 layered bundle)
+    geometry_px = metadata.get("geometry_px", {})
+    if geometry_px:
+        for element_name, geom in geometry_px.items():
+            if isinstance(geom, dict) and "bbox" in geom:
+                bbox = geom["bbox"]
+                bboxes[element_name] = {
+                    "x0": bbox.get("x0", 0),
+                    "y0": bbox.get("y0", 0),
+                    "x1": bbox.get("x1", img_width),
+                    "y1": bbox.get("y1", img_height),
+                    "label": element_name.replace("_", " ").title(),
+                    "element_type": _guess_element_type(element_name),
+                }
+                if "points" in geom:
+                    bboxes[element_name]["points"] = geom["points"]
+
+    # Extract from elements dict if present
+    elements = metadata.get("elements", {})
+    if not isinstance(elements, dict):
+        elements = {}
+    for element_name, element_info in elements.items():
+        if not isinstance(element_info, dict):
+            continue
+        if element_name not in bboxes:
+            bboxes[element_name] = {
+                "label": element_info.get("label", element_name.replace("_", " ").title()),
+                "element_type": element_info.get("type", _guess_element_type(element_name)),
+            }
+
+    # Extract from axes (handle both dict and list formats)
+    axes = metadata.get("axes", [])
+    if isinstance(axes, list):
+        axes_list = axes
+    elif isinstance(axes, dict):
+        axes_list = list(axes.values())
+    else:
+        axes_list = []
+
+    for i, ax_spec in enumerate(axes_list):
+        if not isinstance(ax_spec, dict):
+            continue
+
+        ax_id = ax_spec.get("id", f"ax{i}")
+
+        # Panel bbox - check for "bbox" field (new format) or "position" (old format)
+        bbox_spec = ax_spec.get("bbox", {})
+        pos = ax_spec.get("position", [])
+
+        if bbox_spec and isinstance(bbox_spec, dict):
+            # New format: bbox with x0, y0, width, height in panel fraction
+            x0_frac = bbox_spec.get("x0", 0)
+            y0_frac = bbox_spec.get("y0", 0)
+            w_frac = bbox_spec.get("width", 1)
+            h_frac = bbox_spec.get("height", 1)
+            x0 = int(x0_frac * img_width)
+            y0 = int(y0_frac * img_height)
+            x1 = int((x0_frac + w_frac) * img_width)
+            y1 = int((y0_frac + h_frac) * img_height)
+            bboxes[f"{ax_id}_panel"] = {
+                "x0": x0,
+                "y0": y0,
+                "x1": x1,
+                "y1": y1,
+                "label": f"Panel {ax_id}",
+                "ax_id": ax_id,
+                "is_panel": True,
+            }
+        elif len(pos) >= 4:
+            # Old format: position is in figure fraction [x0, y0, width, height]
+            x0 = int(pos[0] * img_width)
+            y0 = int((1 - pos[1] - pos[3]) * img_height)  # Flip Y
+            x1 = int((pos[0] + pos[2]) * img_width)
+            y1 = int((1 - pos[1]) * img_height)  # Flip Y
+            bboxes[f"{ax_id}_panel"] = {
+                "x0": x0,
+                "y0": y0,
+                "x1": x1,
+                "y1": y1,
+                "label": f"Panel {ax_id}",
+                "ax_id": ax_id,
+                "is_panel": True,
+            }
+
+        # Title/labels from labels dict (new format) or xaxis/yaxis (old format)
+        labels = ax_spec.get("labels", {})
+        xaxis = ax_spec.get("xaxis", {})
+        yaxis = ax_spec.get("yaxis", {})
+
+        xlabel = labels.get("xlabel") or (xaxis.get("label") if isinstance(xaxis, dict) else None)
+        ylabel = labels.get("ylabel") or (yaxis.get("label") if isinstance(yaxis, dict) else None)
+        title = labels.get("title")
+
+        if xlabel:
+            bboxes[f"{ax_id}_xlabel"] = {
+                "label": f"{ax_id}: {xlabel}",
+                "element_type": "xlabel",
+                "ax_id": ax_id,
+            }
+        if ylabel:
+            bboxes[f"{ax_id}_ylabel"] = {
+                "label": f"{ax_id}: {ylabel}",
+                "element_type": "ylabel",
+                "ax_id": ax_id,
+            }
+        if title:
+            bboxes[f"{ax_id}_title"] = {
+                "label": title,
+                "element_type": "title",
+                "ax_id": ax_id,
+            }
+
+    # Extract from traces array (pltz spec format)
+    traces = metadata.get("traces", [])
+    if isinstance(traces, list):
+        for i, trace in enumerate(traces):
+            if not isinstance(trace, dict):
+                continue
+            trace_id = trace.get("id", f"trace_{i}")
+            trace_type = trace.get("type", "line")
+            trace_label = trace.get("label", f"Trace {i}")
+            ax_idx = trace.get("axes_index", 0)
+
+            # Use axes bbox as fallback for trace bbox
+            ax_panel_key = None
+            for key in bboxes:
+                if key.endswith("_panel") and bboxes[key].get("ax_id", "").endswith(str(ax_idx)):
+                    ax_panel_key = key
+                    break
+            if not ax_panel_key:
+                # Find any panel bbox
+                for key in bboxes:
+                    if key.endswith("_panel"):
+                        ax_panel_key = key
+                        break
+
+            trace_bbox = {
+                "label": trace_label,
+                "element_type": trace_type,
+                "trace_idx": i,
+                "ax_id": f"ax{ax_idx}",
+            }
+
+            # Copy panel bbox coordinates if available
+            if ax_panel_key and ax_panel_key in bboxes:
+                panel = bboxes[ax_panel_key]
+                trace_bbox["x0"] = panel.get("x0", 0)
+                trace_bbox["y0"] = panel.get("y0", 0)
+                trace_bbox["x1"] = panel.get("x1", img_width)
+                trace_bbox["y1"] = panel.get("y1", img_height)
+
+            bboxes[f"trace_{i}"] = trace_bbox
+
+    # If no bboxes found, return minimal set
+    if not bboxes:
+        bboxes["panel"] = {
+            "x0": 0,
+            "y0": 0,
+            "x1": img_width,
+            "y1": img_height,
+            "label": "Panel",
+            "is_panel": True,
+        }
+
+    return bboxes
+
+
+def _guess_element_type(name: str) -> str:
+    """Guess element type from element name."""
+    name_lower = name.lower()
+    if "line" in name_lower or "trace" in name_lower:
+        return "line"
+    elif "scatter" in name_lower:
+        return "scatter"
+    elif "bar" in name_lower:
+        return "bar"
+    elif "fill" in name_lower:
+        return "fill"
+    elif "xlabel" in name_lower:
+        return "xlabel"
+    elif "ylabel" in name_lower:
+        return "ylabel"
+    elif "title" in name_lower:
+        return "title"
+    elif "legend" in name_lower:
+        return "legend"
+    elif "xaxis" in name_lower:
+        return "xaxis"
+    elif "yaxis" in name_lower:
+        return "yaxis"
+    elif "panel" in name_lower:
+        return "panel"
+    return "unknown"
+
+
+def extract_bboxes_from_geometry_px(
+    geometry_data: Dict[str, Any],
+    img_width: int,
+    img_height: int,
+) -> Dict[str, Any]:
+    """Extract bounding boxes from geometry_px.json (cached pixel coordinates).
+
+    This provides precise pixel coordinates for interactive element selection.
+
+    Args:
+        geometry_data: JSON data from geometry_px.json
+        img_width: Actual image width in pixels
+        img_height: Actual image height in pixels
+
+    Returns:
+        Dict with bboxes keyed by element name
+    """
+    bboxes = {}
+
+    # Get figure dimensions from geometry to calculate scale
+    figure_px = geometry_data.get("figure_px", [img_width, img_height])
+    if isinstance(figure_px, list) and len(figure_px) >= 2:
+        geom_width, geom_height = figure_px[0], figure_px[1]
+    else:
+        geom_width, geom_height = img_width, img_height
+
+    # Scale factor if image size differs from geometry
+    scale_x = img_width / geom_width if geom_width > 0 else 1
+    scale_y = img_height / geom_height if geom_height > 0 else 1
+
+    # Extract axes bboxes
+    axes = geometry_data.get("axes", [])
+    for i, ax in enumerate(axes):
+        if not isinstance(ax, dict):
+            continue
+        ax_id = ax.get("id", f"ax{i}")
+        bbox_px = ax.get("bbox_px", {})
+        if bbox_px:
+            x0 = float(bbox_px.get("x0", 0)) * scale_x
+            y0 = float(bbox_px.get("y0", 0)) * scale_y
+            w = float(bbox_px.get("width", 0)) * scale_x
+            h = float(bbox_px.get("height", 0)) * scale_y
+            bboxes[f"{ax_id}_panel"] = {
+                "x0": int(x0),
+                "y0": int(y0),
+                "x1": int(x0 + w),
+                "y1": int(y0 + h),
+                "label": f"Axes {ax_id}",
+                "ax_id": ax_id,
+                "is_panel": True,
+            }
+
+    # Helper to safely convert to int (handle inf/nan)
+    def safe_int(val, default=0, max_val=10000):
+        import math
+        if val is None or math.isinf(val) or math.isnan(val):
+            return default
+        return max(0, min(int(val), max_val))
+
+    # Extract artists (lines, scatter, bars, etc.)
+    artists = geometry_data.get("artists", [])
+    for i, artist in enumerate(artists):
+        if not isinstance(artist, dict):
+            continue
+
+        artist_id = artist.get("id", str(i))
+        artist_type = artist.get("type", "unknown")
+        artist_label = artist.get("label") or f"{artist_type}_{i}"
+        axes_index = artist.get("axes_index", 0)
+
+        # Get bbox_px
+        bbox_px = artist.get("bbox_px", {})
+        if bbox_px:
+            x0 = float(bbox_px.get("x0", 0)) * scale_x
+            y0 = float(bbox_px.get("y0", 0)) * scale_y
+            w = float(bbox_px.get("width", 0)) * scale_x
+            h = float(bbox_px.get("height", 0)) * scale_y
+
+            artist_bbox = {
+                "x0": safe_int(x0, 0, img_width),
+                "y0": safe_int(y0, 0, img_height),
+                "x1": safe_int(x0 + w, img_width, img_width),
+                "y1": safe_int(y0 + h, img_height, img_height),
+                "label": artist_label,
+                "element_type": artist_type,
+                "trace_idx": i,
+                "ax_id": f"ax{axes_index}",
+            }
+
+            # Get path_px for lines (for precise hover detection)
+            path_px = artist.get("path_px", [])
+            if path_px and len(path_px) > 0:
+                import math
+                # Scale points to actual image coordinates, filter out inf/nan
+                scaled_points = []
+                for pt in path_px:
+                    if isinstance(pt, (list, tuple)) and len(pt) >= 2:
+                        px, py = pt[0] * scale_x, pt[1] * scale_y
+                        if not (math.isinf(px) or math.isinf(py) or math.isnan(px) or math.isnan(py)):
+                            scaled_points.append([px, py])
+                if scaled_points:
+                    artist_bbox["points"] = scaled_points
+
+            # Get scatter points if available
+            scatter_px = artist.get("scatter_px", [])
+            if scatter_px and len(scatter_px) > 0:
+                import math
+                scaled_points = []
+                for pt in scatter_px:
+                    if isinstance(pt, (list, tuple)) and len(pt) >= 2:
+                        px, py = pt[0] * scale_x, pt[1] * scale_y
+                        if not (math.isinf(px) or math.isinf(py) or math.isnan(px) or math.isnan(py)):
+                            scaled_points.append([px, py])
+                if scaled_points:
+                    artist_bbox["points"] = scaled_points
+                    artist_bbox["element_type"] = "scatter"
+
+            bboxes[f"trace_{i}"] = artist_bbox
+
+    # Extract from selectable_regions (title, xlabel, ylabel, xaxis, yaxis)
+    selectable = geometry_data.get("selectable_regions", {})
+    sel_axes = selectable.get("axes", [])
+    for ax_data in sel_axes:
+        if not isinstance(ax_data, dict):
+            continue
+        ax_idx = ax_data.get("index", 0)
+        ax_id = f"ax{ax_idx}"
+
+        # Title
+        title_data = ax_data.get("title", {})
+        if title_data and "bbox_px" in title_data:
+            bbox = title_data["bbox_px"]
+            if isinstance(bbox, list) and len(bbox) >= 4:
+                bboxes[f"{ax_id}_title"] = {
+                    "x0": safe_int(bbox[0] * scale_x, 0, img_width),
+                    "y0": safe_int(bbox[1] * scale_y, 0, img_height),
+                    "x1": safe_int(bbox[2] * scale_x, img_width, img_width),
+                    "y1": safe_int(bbox[3] * scale_y, img_height, img_height),
+                    "label": title_data.get("text", "Title"),
+                    "element_type": "title",
+                    "ax_id": ax_id,
+                }
+
+        # X Label
+        xlabel_data = ax_data.get("xlabel", {})
+        if xlabel_data and "bbox_px" in xlabel_data:
+            bbox = xlabel_data["bbox_px"]
+            if isinstance(bbox, list) and len(bbox) >= 4:
+                bboxes[f"{ax_id}_xlabel"] = {
+                    "x0": safe_int(bbox[0] * scale_x, 0, img_width),
+                    "y0": safe_int(bbox[1] * scale_y, 0, img_height),
+                    "x1": safe_int(bbox[2] * scale_x, img_width, img_width),
+                    "y1": safe_int(bbox[3] * scale_y, img_height, img_height),
+                    "label": xlabel_data.get("text", "X Label"),
+                    "element_type": "xlabel",
+                    "ax_id": ax_id,
+                }
+
+        # Y Label
+        ylabel_data = ax_data.get("ylabel", {})
+        if ylabel_data and "bbox_px" in ylabel_data:
+            bbox = ylabel_data["bbox_px"]
+            if isinstance(bbox, list) and len(bbox) >= 4:
+                bboxes[f"{ax_id}_ylabel"] = {
+                    "x0": safe_int(bbox[0] * scale_x, 0, img_width),
+                    "y0": safe_int(bbox[1] * scale_y, 0, img_height),
+                    "x1": safe_int(bbox[2] * scale_x, img_width, img_width),
+                    "y1": safe_int(bbox[3] * scale_y, img_height, img_height),
+                    "label": ylabel_data.get("text", "Y Label"),
+                    "element_type": "ylabel",
+                    "ax_id": ax_id,
+                }
+
+        # X Axis spine
+        xaxis_data = ax_data.get("xaxis", {})
+        if xaxis_data:
+            spine = xaxis_data.get("spine", {})
+            if spine and "bbox_px" in spine:
+                bbox = spine["bbox_px"]
+                if isinstance(bbox, list) and len(bbox) >= 4:
+                    bboxes[f"{ax_id}_xaxis"] = {
+                        "x0": safe_int(bbox[0] * scale_x, 0, img_width),
+                        "y0": safe_int(bbox[1] * scale_y, 0, img_height),
+                        "x1": safe_int(bbox[2] * scale_x, img_width, img_width),
+                        "y1": safe_int(bbox[3] * scale_y, img_height, img_height),
+                        "label": "X Axis",
+                        "element_type": "xaxis",
+                        "ax_id": ax_id,
+                    }
+
+        # Y Axis spine
+        yaxis_data = ax_data.get("yaxis", {})
+        if yaxis_data:
+            spine = yaxis_data.get("spine", {})
+            if spine and "bbox_px" in spine:
+                bbox = spine["bbox_px"]
+                if isinstance(bbox, list) and len(bbox) >= 4:
+                    bboxes[f"{ax_id}_yaxis"] = {
+                        "x0": safe_int(bbox[0] * scale_x, 0, img_width),
+                        "y0": safe_int(bbox[1] * scale_y, 0, img_height),
+                        "x1": safe_int(bbox[2] * scale_x, img_width, img_width),
+                        "y1": safe_int(bbox[3] * scale_y, img_height, img_height),
+                        "label": "Y Axis",
+                        "element_type": "yaxis",
+                        "ax_id": ax_id,
+                    }
+
+        # Legend
+        legend_data = ax_data.get("legend", {})
+        if legend_data and "bbox_px" in legend_data:
+            bbox = legend_data["bbox_px"]
+            if isinstance(bbox, list) and len(bbox) >= 4:
+                bboxes[f"{ax_id}_legend"] = {
+                    "x0": safe_int(bbox[0] * scale_x, 0, img_width),
+                    "y0": safe_int(bbox[1] * scale_y, 0, img_height),
+                    "x1": safe_int(bbox[2] * scale_x, img_width, img_width),
+                    "y1": safe_int(bbox[3] * scale_y, img_height, img_height),
+                    "label": "Legend",
+                    "element_type": "legend",
+                    "ax_id": ax_id,
+                }
+
+    # If no bboxes found, return minimal set
+    if not bboxes:
+        bboxes["panel"] = {
+            "x0": 0,
+            "y0": 0,
+            "x1": img_width,
+            "y1": img_height,
+            "label": "Panel",
+            "is_panel": True,
+        }
+
+    return bboxes
 
 
 # EOF

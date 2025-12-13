@@ -18,6 +18,15 @@ let originalImgSize = null;  // Store original img size from /preview
 // Schema v0.3 metadata for axes-local coordinate transforms
 let schemaMeta = null;
 
+// Multi-panel state
+let panelData = null;  // Panel info from /preview
+let currentPanelIndex = 0;
+let showingPanelGrid = false;
+let panelBboxesCache = {};  // Cache bboxes per panel {panelName: {bboxes, imgSize}}
+let activePanelCard = null;  // Currently active panel card for hover/click
+let panelHoveredElement = null;  // Hovered element in panel grid
+let panelDebugMode = false;  // Show hit regions in panel grid
+
 // Cycle selection state for overlapping elements
 let elementsAtCursor = [];  // All elements at current cursor position
 let currentCycleIndex = 0;  // Current index in cycle
@@ -26,6 +35,11 @@ let currentCycleIndex = 0;  // Current index in cycle
 let dimensionUnit = 'mm';
 const MM_TO_INCH = 1 / 25.4;
 const INCH_TO_MM = 25.4;
+
+// Dark mode detection
+function isDarkMode() {
+    return document.documentElement.getAttribute('data-theme') === 'dark';
+}
 
 // Hitmap-based element detection
 let hitmapCanvas = null;
@@ -563,6 +577,12 @@ function updateOverlay() {
         return;
     }
 
+    // Guard against zero imgSize (can cause Infinity scale)
+    if (!imgSize || !imgSize.width || !imgSize.height || imgSize.width === 0 || imgSize.height === 0) {
+        console.log('updateOverlay: imgSize not set or zero', imgSize);
+        return;
+    }
+
     overlay.setAttribute('width', rect.width);
     overlay.setAttribute('height', rect.height);
     overlay.style.width = rect.width + 'px';
@@ -689,10 +709,14 @@ function toggleDebugMode() {
 }
 
 function expandSection(sectionId) {
+    console.log('expandSection called with:', sectionId);
+    let foundSection = null;
     document.querySelectorAll('.section').forEach(section => {
         const header = section.querySelector('.section-header');
         const content = section.querySelector('.section-content');
         if (section.id === sectionId) {
+            foundSection = section;
+            console.log('expandSection: Found section', sectionId, 'header:', header, 'content:', content);
             header?.classList.remove('collapsed');
             content?.classList.remove('collapsed');
         } else if (header?.classList.contains('section-toggle')) {
@@ -700,15 +724,32 @@ function expandSection(sectionId) {
             content?.classList.add('collapsed');
         }
     });
+    if (!foundSection) {
+        console.warn('expandSection: Section not found:', sectionId);
+    } else {
+        // Scroll the section into view
+        setTimeout(() => {
+            foundSection.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }, 50);
+    }
 }
 
 function scrollToSection(elementName) {
+    console.log('scrollToSection called with:', elementName);
+
+    // Map element names to their corresponding sections
+    // Elements with a mapping here will NOT show the "Selected" panel
     const elementToSection = {
         'title': 'section-labels',
         'xlabel': 'section-labels',
         'ylabel': 'section-labels',
+        'caption': 'section-labels',
+        'xaxis': 'section-ticks',
+        'yaxis': 'section-ticks',
         'xaxis_ticks': 'section-ticks',
         'yaxis_ticks': 'section-ticks',
+        'xaxis_spine': 'section-ticks',
+        'yaxis_spine': 'section-ticks',
         'legend': 'section-legend'
     };
 
@@ -716,10 +757,13 @@ function scrollToSection(elementName) {
         'title': 'title',
         'xlabel': 'xlabel',
         'ylabel': 'ylabel',
+        'caption': 'caption',
+        'xaxis': 'xmin',
+        'yaxis': 'ymin',
         'xaxis_ticks': 'x_tick_fontsize',
         'yaxis_ticks': 'y_tick_fontsize',
-        'xaxis': 'x_tick_fontsize',
-        'yaxis': 'y_tick_fontsize',
+        'xaxis_spine': 'axis_width',
+        'yaxis_spine': 'axis_width',
         'legend': 'legend_visible'
     };
 
@@ -727,35 +771,154 @@ function scrollToSection(elementName) {
         expandSection('section-traces');
         const traceIdx = elementBboxes[elementName]?.trace_idx;
         if (traceIdx !== undefined) {
-            const traceColors = document.querySelectorAll('.trace-color');
-            if (traceColors[traceIdx]) {
+            const traceItems = document.querySelectorAll('.trace-item');
+            if (traceItems[traceIdx]) {
                 setTimeout(() => {
-                    traceColors[traceIdx].scrollIntoView({behavior: 'smooth', block: 'center'});
-                    traceColors[traceIdx].click();
+                    // Scroll into view and highlight the trace item
+                    traceItems[traceIdx].scrollIntoView({behavior: 'smooth', block: 'center'});
+                    // Add temporary highlight effect
+                    traceItems[traceIdx].classList.add('trace-item-highlight');
+                    setTimeout(() => {
+                        traceItems[traceIdx].classList.remove('trace-item-highlight');
+                    }, 1500);
                 }, 100);
             }
         }
         return;
     }
 
-    const sectionId = elementToSection[elementName];
-    if (sectionId) {
-        expandSection(sectionId);
+    // Extract base element name from prefixed names like "ax_00_yaxis_spine" or "ax0_title"
+    let baseElementName = elementName;
+    const match = elementName.match(/ax_?\d+_(.+)/);
+    if (match) {
+        baseElementName = match[1];
     }
+    console.log('scrollToSection: baseElementName=', baseElementName, 'from', elementName);
 
-    const fieldId = fieldMap[elementName];
-    if (fieldId) {
+    const sectionId = elementToSection[baseElementName];
+    const fieldId = fieldMap[baseElementName];
+    console.log('scrollToSection: sectionId=', sectionId, 'fieldId=', fieldId);
+
+    if (sectionId) {
+        console.log('scrollToSection: expanding section', sectionId);
+        // Element has a corresponding section - expand it, don't show "Selected" panel
+        expandSection(sectionId);
+
+        if (fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                setTimeout(() => {
+                    field.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    field.focus();
+                }, 100);
+            }
+        }
+
+        // Hide the "Selected" panel since we're using existing section
+        const selectedSection = document.getElementById('section-selected');
+        if (selectedSection) {
+            selectedSection.style.display = 'none';
+        }
+    } else {
+        // No corresponding section - show the "Selected" panel for this element
+        showSelectedElementPanel(elementName);
+    }
+}
+
+// Field to element synchronization - highlight element when field is focused
+function setupFieldToElementSync() {
+    // Map field IDs to element names
+    const fieldToElement = {
+        // Title, Labels & Caption section
+        'title': 'title',
+        'title_fontsize': 'title',
+        'show_title': 'title',
+        'xlabel': 'xlabel',
+        'ylabel': 'ylabel',
+        'caption': 'caption',
+        'caption_fontsize': 'caption',
+        'show_caption': 'caption',
+        // Axis & Ticks section
+        'xmin': 'xaxis',
+        'xmax': 'xaxis',
+        'ymin': 'yaxis',
+        'ymax': 'yaxis',
+        'x_n_ticks': 'xaxis_ticks',
+        'hide_x_ticks': 'xaxis_ticks',
+        'x_tick_fontsize': 'xaxis_ticks',
+        'x_tick_direction': 'xaxis_ticks',
+        'x_tick_length': 'xaxis_ticks',
+        'x_tick_width': 'xaxis_ticks',
+        'y_n_ticks': 'yaxis_ticks',
+        'hide_y_ticks': 'yaxis_ticks',
+        'y_tick_fontsize': 'yaxis_ticks',
+        'y_tick_direction': 'yaxis_ticks',
+        'y_tick_length': 'yaxis_ticks',
+        'y_tick_width': 'yaxis_ticks',
+        // Legend section
+        'legend_visible': 'legend',
+        'legend_loc': 'legend',
+        'legend_frameon': 'legend',
+        'legend_fontsize': 'legend',
+        'legend_ncols': 'legend',
+        'legend_x': 'legend',
+        'legend_y': 'legend'
+    };
+
+    // Add focus listeners to all mapped fields
+    Object.entries(fieldToElement).forEach(([fieldId, elementName]) => {
         const field = document.getElementById(fieldId);
         if (field) {
-            setTimeout(() => {
-                field.scrollIntoView({behavior: 'smooth', block: 'center'});
-                field.focus();
-            }, 100);
-        }
-    }
+            field.addEventListener('focus', () => {
+                // Find the element in bboxes - for multi-panel, check ax_00 first
+                let targetElement = null;
+                if (elementBboxes[elementName]) {
+                    targetElement = elementName;
+                } else {
+                    // Try to find with axis prefix (e.g., ax_00_title)
+                    for (const key of Object.keys(elementBboxes)) {
+                        if (key.endsWith('_' + elementName) || key === elementName) {
+                            targetElement = key;
+                            break;
+                        }
+                    }
+                }
 
-    // Always show selected element panel
-    showSelectedElementPanel(elementName);
+                if (targetElement) {
+                    selectedElement = targetElement;
+                    updateOverlay();
+                    setStatus(`Highlighting: ${targetElement}`, false);
+                }
+            });
+
+            // Also handle mouseenter for hover feedback
+            field.addEventListener('mouseenter', () => {
+                let targetElement = null;
+                if (elementBboxes[elementName]) {
+                    targetElement = elementName;
+                } else {
+                    for (const key of Object.keys(elementBboxes)) {
+                        if (key.endsWith('_' + elementName) || key === elementName) {
+                            targetElement = key;
+                            break;
+                        }
+                    }
+                }
+
+                if (targetElement && targetElement !== selectedElement) {
+                    hoveredElement = targetElement;
+                    updateOverlay();
+                }
+            });
+
+            field.addEventListener('mouseleave', () => {
+                if (hoveredElement && hoveredElement !== selectedElement) {
+                    hoveredElement = null;
+                    updateOverlay();
+                }
+            });
+        }
+    });
 }
 
 // Selected element panel management
@@ -1353,7 +1516,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Traces
-    document.getElementById('linewidth').value = overrides.linewidth || 1.0;
     updateTracesList();
 
     // Legend
@@ -1361,8 +1523,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('legend_loc').value = overrides.legend_loc || 'best';
     document.getElementById('legend_frameon').checked = overrides.legend_frameon || false;
     document.getElementById('legend_fontsize').value = overrides.legend_fontsize || 6;
-    document.getElementById('legend_x').value = overrides.legend_x !== undefined ? overrides.legend_x : 0.5;
-    document.getElementById('legend_y').value = overrides.legend_y !== undefined ? overrides.legend_y : 0.5;
+    document.getElementById('legend_ncols').value = overrides.legend_ncols || 1;
+    document.getElementById('legend_x').value = overrides.legend_x !== undefined ? overrides.legend_x : 0.95;
+    document.getElementById('legend_y').value = overrides.legend_y !== undefined ? overrides.legend_y : 0.95;
     toggleCustomLegendPosition();
 
     // Axis and Ticks - X Axis (Bottom)
@@ -1445,6 +1608,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mark initialization complete - now background changes will trigger updates
     initializingBackground = false;
 
+    // Setup field-to-element synchronization (highlight element when field is focused)
+    setupFieldToElementSync();
+
     // Load initial preview from existing PNG/SVG (no re-render)
     loadInitialPreview();
 
@@ -1463,11 +1629,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// =============================================================================
+// Loading Helpers
+// =============================================================================
+function showLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.style.display = 'flex';
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+// Update form controls from overrides (used when switching panels)
+function updateControlsFromOverrides() {
+    console.log('updateControlsFromOverrides called');
+    console.log('overrides.traces:', overrides.traces);
+    console.log('traces variable:', traces);
+
+    // Update title - try both id and name selectors
+    const titleInput = document.getElementById('title') || document.querySelector('input[name="title"]');
+    if (titleInput) {
+        // Try overrides.title first, then axes[0].title
+        let title = overrides.title;
+        if (title === undefined && overrides.axes && overrides.axes[0]) {
+            title = overrides.axes[0].title || '';
+        }
+        titleInput.value = title || '';
+    }
+
+    // Update figure size
+    const widthInput = document.getElementById('fig-width');
+    const heightInput = document.getElementById('fig-height');
+    if (widthInput && overrides.figure_width !== undefined) {
+        widthInput.value = overrides.figure_width;
+    }
+    if (heightInput && overrides.figure_height !== undefined) {
+        heightInput.value = overrides.figure_height;
+    }
+
+    // Update xlabel, ylabel - try overrides first, then axes[0]
+    const xlabelInput = document.getElementById('xlabel');
+    const ylabelInput = document.getElementById('ylabel');
+    let xlabel = overrides.xlabel;
+    let ylabel = overrides.ylabel;
+    if (overrides.axes && overrides.axes[0]) {
+        xlabel = xlabel || overrides.axes[0].xlabel || '';
+        ylabel = ylabel || overrides.axes[0].ylabel || '';
+    }
+    if (xlabelInput) xlabelInput.value = xlabel || '';
+    if (ylabelInput) ylabelInput.value = ylabel || '';
+
+    // Update traces list
+    updateTracesList();
+}
+
 // Load preview from existing file without re-rendering
 async function loadInitialPreview() {
     setStatus('Loading preview...', false);
     try {
-        const resp = await fetch('/preview');
+        const darkMode = isDarkMode();
+        const resp = await fetch(`/preview?dark_mode=${darkMode}`);
         const data = await resp.json();
 
         console.log('=== PREVIEW DATA RECEIVED ===');
@@ -1539,6 +1762,14 @@ async function loadInitialPreview() {
             drawDebugBboxes();
         }
 
+        // Handle multi-panel figz bundles
+        if (data.panel_info && data.panel_info.panels) {
+            panelData = data.panel_info;
+            currentPanelIndex = data.panel_info.current_index || 0;
+            console.log('Multi-panel figz detected:', panelData.panels.length, 'panels');
+            loadPanelGrid();
+        }
+
         // Start auto-update AFTER initial preview is loaded
         setAutoUpdateInterval();
     } catch (e) {
@@ -1547,6 +1778,880 @@ async function loadInitialPreview() {
         // Start auto-update even on error so the editor works
         setAutoUpdateInterval();
     }
+}
+
+// =============================================================================
+// Multi-Panel Navigation
+// =============================================================================
+async function loadPanelGrid() {
+    if (!panelData || panelData.panels.length <= 1) {
+        // Not a multi-panel bundle or only one panel
+        document.getElementById('panel-grid-section').style.display = 'none';
+        document.getElementById('preview-header').style.display = 'none';
+        return;
+    }
+
+    console.log('Loading panel canvas for', panelData.panels.length, 'panels');
+
+    // Show panel header
+    document.getElementById('preview-header').style.display = 'flex';
+
+    // Fetch all panel images with bboxes
+    try {
+        const resp = await fetch('/panels');
+        const data = await resp.json();
+
+        if (data.error) {
+            console.error('Panel canvas error:', data.error);
+            return;
+        }
+
+        const canvasEl = document.getElementById('panel-canvas');
+        canvasEl.innerHTML = '';
+
+        // Calculate layout - arrange panels in a grid-like canvas
+        const numPanels = data.panels.length;
+        const cols = Math.ceil(Math.sqrt(numPanels));
+        const baseWidth = 220;
+        const baseHeight = 180;
+        const padding = 15;
+
+        data.panels.forEach((panel, idx) => {
+            // Store bboxes and imgSize in cache for interactive hover/click
+            if (panel.bboxes && panel.img_size) {
+                panelBboxesCache[panel.name] = {
+                    bboxes: panel.bboxes,
+                    imgSize: panel.img_size
+                };
+                console.log(`Panel ${panel.name}: ${Object.keys(panel.bboxes).filter(k => k !== '_meta').length} bboxes, img: ${panel.img_size.width}x${panel.img_size.height}`);
+            } else {
+                console.warn(`Panel ${panel.name}: missing bboxes or img_size`, {bboxes: !!panel.bboxes, img_size: !!panel.img_size});
+            }
+
+            // Calculate position
+            const col = idx % cols;
+            const row = Math.floor(idx / cols);
+            if (!panelPositions[panel.name]) {
+                panelPositions[panel.name] = {
+                    x: padding + col * (baseWidth + padding),
+                    y: padding + row * (baseHeight + padding),
+                    width: baseWidth,
+                    height: baseHeight,
+                };
+            }
+            const pos = panelPositions[panel.name];
+
+            const item = document.createElement('div');
+            item.className = 'panel-canvas-item' + (idx === currentPanelIndex ? ' active' : '');
+            item.dataset.panelIndex = idx;
+            item.dataset.panelName = panel.name;
+            item.style.left = pos.x + 'px';
+            item.style.top = pos.y + 'px';
+            item.style.width = pos.width + 'px';
+            item.style.height = pos.height + 'px';
+
+            if (panel.image) {
+                item.innerHTML = `
+                    <span class="panel-canvas-label">Panel ${panel.name}</span>
+                    <div class="panel-card-container">
+                        <img src="data:image/png;base64,${panel.image}" alt="Panel ${panel.name}">
+                        <svg class="panel-card-overlay" id="panel-overlay-${idx}"></svg>
+                    </div>
+                    <div class="panel-canvas-resize"></div>
+                `;
+            } else {
+                item.innerHTML = `
+                    <span class="panel-canvas-label">Panel ${panel.name}</span>
+                    <div style="padding: 20px; color: var(--text-muted);">No preview</div>
+                `;
+            }
+
+            // Add interactive event handlers
+            initCanvasItemInteraction(item, idx, panel.name);
+
+            canvasEl.appendChild(item);
+        });
+
+        // Update canvas height to fit all panels
+        const maxY = Math.max(...Object.values(panelPositions).map(p => p.y + p.height)) + padding;
+        canvasEl.style.minHeight = Math.max(400, maxY) + 'px';
+
+        // Update panel indicator
+        updatePanelIndicator();
+
+        // Show canvas for multi-panel figures
+        if (data.panels.length > 1) {
+            showingPanelGrid = true;
+            document.getElementById('panel-grid-section').style.display = 'block';
+            // Hide single-panel preview for multi-panel bundles
+            const previewWrapper = document.querySelector('.preview-wrapper');
+            if (previewWrapper) {
+                previewWrapper.style.display = 'none';
+            }
+        }
+    } catch (e) {
+        console.error('Error loading panels:', e);
+    }
+}
+
+// Initialize interactive handlers for canvas panel items
+function initCanvasItemInteraction(item, panelIdx, panelName) {
+    const container = item.querySelector('.panel-card-container');
+    if (!container) return;
+
+    const img = container.querySelector('img');
+    const overlay = container.querySelector('svg');
+    if (!img || !overlay) return;
+
+    // Wait for image to load to get dimensions
+    img.addEventListener('load', () => {
+        overlay.setAttribute('width', img.offsetWidth);
+        overlay.setAttribute('height', img.offsetHeight);
+        overlay.style.width = img.offsetWidth + 'px';
+        overlay.style.height = img.offsetHeight + 'px';
+    });
+
+    // Mousemove for hover detection
+    container.addEventListener('mousemove', (e) => {
+        const panelCache = panelBboxesCache[panelName];
+        if (!panelCache) return;
+
+        const rect = img.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const scaleX = panelCache.imgSize.width / rect.width;
+        const scaleY = panelCache.imgSize.height / rect.height;
+        const imgX = x * scaleX;
+        const imgY = y * scaleY;
+
+        const element = findElementInPanelAt(imgX, imgY, panelCache.bboxes);
+        if (element !== panelHoveredElement || activePanelCard !== item) {
+            panelHoveredElement = element;
+            activePanelCard = item;
+            updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, panelHoveredElement, null);
+        }
+    });
+
+    // Mouseleave to clear hover
+    container.addEventListener('mouseleave', () => {
+        panelHoveredElement = null;
+        if (activePanelCard === item) {
+            updatePanelOverlay(overlay, {}, {width: 0, height: 0}, 0, 0, null, null);
+        }
+    });
+
+    // Click to select element
+    container.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        // Recalculate element at click position (in case hover didn't detect it)
+        const panelCache = panelBboxesCache[panelName];
+        let clickedElement = panelHoveredElement;
+
+        if (panelCache && img) {
+            const rect = img.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const scaleX = panelCache.imgSize.width / rect.width;
+            const scaleY = panelCache.imgSize.height / rect.height;
+            const imgX = x * scaleX;
+            const imgY = y * scaleY;
+
+            clickedElement = findElementInPanelAt(imgX, imgY, panelCache.bboxes);
+            console.log(`Click at (${imgX.toFixed(0)}, ${imgY.toFixed(0)}) -> element: ${clickedElement}`);
+        }
+
+        if (clickedElement) {
+            document.querySelectorAll('.panel-canvas-item').forEach((c, i) => {
+                c.classList.toggle('active', i === panelIdx);
+            });
+
+            // If already on this panel, just update selection without server call
+            if (currentPanelIndex === panelIdx && panelCache) {
+                console.log(`Same panel (${panelIdx}), updating selection to: ${clickedElement}`);
+                selectedElement = clickedElement;
+                // Sync elementBboxes with panel cache bboxes
+                elementBboxes = panelCache.bboxes || {};
+                imgSize = panelCache.imgSize || imgSize;
+                console.log('elementBboxes keys:', Object.keys(elementBboxes));
+                updateOverlay();
+                console.log('Calling scrollToSection with:', selectedElement);
+                scrollToSection(selectedElement);
+                setStatus(`Selected: ${clickedElement}`, false);
+            } else {
+                currentPanelIndex = panelIdx;
+                loadPanelForEditing(panelIdx, panelName, clickedElement);
+            }
+        } else {
+            console.log(`No element found, selecting panel ${panelName}`);
+            selectPanel(panelIdx);
+        }
+    });
+
+    // Drag support for repositioning
+    item.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('panel-canvas-resize')) {
+            startResize(e, item, panelName);
+        } else if (!e.target.closest('.panel-card-container')) {
+            startDrag(e, item, panelName);
+        }
+    });
+}
+
+// Initialize interactive hover/click handlers for a panel card
+function initPanelCardInteraction(card, panelIdx, panelName) {
+    const container = card.querySelector('.panel-card-container');
+    if (!container) return;
+
+    const img = container.querySelector('img');
+    const overlay = container.querySelector('svg');
+    if (!img || !overlay) return;
+
+    // Wait for image to load to get dimensions
+    img.addEventListener('load', () => {
+        overlay.setAttribute('width', img.offsetWidth);
+        overlay.setAttribute('height', img.offsetHeight);
+        overlay.style.width = img.offsetWidth + 'px';
+        overlay.style.height = img.offsetHeight + 'px';
+    });
+
+    // Mousemove for hover detection
+    container.addEventListener('mousemove', (e) => {
+        const panelCache = panelBboxesCache[panelName];
+        if (!panelCache) return;
+
+        const rect = img.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const scaleX = panelCache.imgSize.width / rect.width;
+        const scaleY = panelCache.imgSize.height / rect.height;
+        const imgX = x * scaleX;
+        const imgY = y * scaleY;
+
+        // Find element at cursor using panel's bboxes
+        const element = findElementInPanelAt(imgX, imgY, panelCache.bboxes);
+        if (element !== panelHoveredElement || activePanelCard !== card) {
+            panelHoveredElement = element;
+            activePanelCard = card;
+            updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, panelHoveredElement, null);
+        }
+    });
+
+    // Mouseleave to clear hover
+    container.addEventListener('mouseleave', () => {
+        panelHoveredElement = null;
+        if (activePanelCard === card) {
+            updatePanelOverlay(overlay, {}, {width: 0, height: 0}, 0, 0, null, null);
+        }
+    });
+
+    // Click to select element
+    container.addEventListener('click', (e) => {
+        e.stopPropagation();  // Prevent card click from triggering selectPanel
+
+        if (panelHoveredElement) {
+            // Set this panel as current and select the element
+            currentPanelIndex = panelIdx;
+
+            // Update active state in grid
+            document.querySelectorAll('.panel-card').forEach((c, i) => {
+                c.classList.toggle('active', i === panelIdx);
+            });
+
+            // Load this panel's data into the main editor
+            loadPanelForEditing(panelIdx, panelName, panelHoveredElement);
+        } else {
+            // No element hovered, select the panel itself
+            selectPanel(panelIdx);
+        }
+    });
+}
+
+// Find element at position within a panel's bboxes
+function findElementInPanelAt(x, y, bboxes) {
+    const PROXIMITY_THRESHOLD = 15;
+    const SCATTER_THRESHOLD = 20;
+
+    let closestDataElement = null;
+    let minDistance = Infinity;
+
+    for (const [name, bbox] of Object.entries(bboxes)) {
+        if (name === '_meta') continue;
+
+        // Check data elements with points
+        if (bbox.points && bbox.points.length > 0) {
+            if (x >= bbox.x0 - SCATTER_THRESHOLD && x <= bbox.x1 + SCATTER_THRESHOLD &&
+                y >= bbox.y0 - SCATTER_THRESHOLD && y <= bbox.y1 + SCATTER_THRESHOLD) {
+
+                const elementType = bbox.element_type || 'line';
+                let dist;
+
+                if (elementType === 'scatter') {
+                    dist = distanceToNearestPoint(x, y, bbox.points);
+                } else {
+                    dist = distanceToLine(x, y, bbox.points);
+                }
+
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestDataElement = name;
+                }
+            }
+        }
+    }
+
+    if (closestDataElement) {
+        const bbox = bboxes[closestDataElement];
+        const threshold = (bbox.element_type === 'scatter') ? SCATTER_THRESHOLD : PROXIMITY_THRESHOLD;
+        if (minDistance <= threshold) {
+            return closestDataElement;
+        }
+    }
+
+    // Check bbox containment for other elements
+    const elementMatches = [];
+    const panelMatches = [];
+
+    for (const [name, bbox] of Object.entries(bboxes)) {
+        if (name === '_meta') continue;
+        if (x >= bbox.x0 && x <= bbox.x1 && y >= bbox.y0 && y <= bbox.y1) {
+            const area = (bbox.x1 - bbox.x0) * (bbox.y1 - bbox.y0);
+            const isPanel = bbox.is_panel || name.endsWith('_panel');
+            const hasPoints = bbox.points && bbox.points.length > 0;
+
+            if (hasPoints) continue;
+            else if (isPanel) panelMatches.push({name, area, bbox});
+            else elementMatches.push({name, area, bbox});
+        }
+    }
+
+    if (elementMatches.length > 0) {
+        elementMatches.sort((a, b) => a.area - b.area);
+        return elementMatches[0].name;
+    }
+
+    if (panelMatches.length > 0) {
+        panelMatches.sort((a, b) => a.area - b.area);
+        return panelMatches[0].name;
+    }
+
+    return null;
+}
+
+// Toggle debug mode for panel grid
+function togglePanelDebugMode() {
+    panelDebugMode = !panelDebugMode;
+    const btn = document.getElementById('panel-debug-btn');
+    if (btn) {
+        btn.classList.toggle('active', panelDebugMode);
+        btn.textContent = panelDebugMode ? 'Hide Hit Regions' : 'Show Hit Regions';
+    }
+    console.log('Panel debug mode:', panelDebugMode ? 'ON' : 'OFF');
+
+    // Redraw all panel overlays
+    redrawAllPanelOverlays();
+}
+
+// Redraw all panel overlays (useful for debug mode toggle)
+function redrawAllPanelOverlays() {
+    document.querySelectorAll('.panel-canvas-item').forEach((item) => {
+        const panelName = item.dataset.panelName;
+        const panelCache = panelBboxesCache[panelName];
+        if (!panelCache) {
+            console.log('No cache for panel:', panelName);
+            return;
+        }
+
+        const container = item.querySelector('.panel-card-container');
+        if (!container) return;
+
+        const img = container.querySelector('img');
+        const overlay = container.querySelector('svg');
+        if (!img || !overlay) return;
+
+        const rect = img.getBoundingClientRect();
+        console.log(`Redraw panel ${panelName}: rect=${rect.width}x${rect.height}, bboxes=${Object.keys(panelCache.bboxes).length}`);
+        if (rect.width > 0 && rect.height > 0) {
+            updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, null, null);
+        }
+    });
+}
+
+// Update SVG overlay for a panel card
+function updatePanelOverlay(overlay, bboxes, imgSizePanel, displayWidth, displayHeight, hovered, selected) {
+    if (!overlay || displayWidth === 0 || displayHeight === 0 || !imgSizePanel || imgSizePanel.width === 0) {
+        if (overlay) overlay.innerHTML = '';
+        return;
+    }
+
+    overlay.setAttribute('width', displayWidth);
+    overlay.setAttribute('height', displayHeight);
+
+    const scaleX = displayWidth / imgSizePanel.width;
+    const scaleY = displayHeight / imgSizePanel.height;
+
+    let svg = '';
+
+    // Debug mode: draw all bboxes
+    if (panelDebugMode && bboxes) {
+        svg += drawPanelDebugBboxes(bboxes, scaleX, scaleY);
+    }
+
+    function drawPanelElement(elementName, type) {
+        const bbox = bboxes[elementName];
+        if (!bbox) return '';
+
+        const elementType = bbox.element_type || '';
+        const hasPoints = bbox.points && bbox.points.length > 0;
+
+        // Lines - draw as path
+        if ((elementType === 'line' || elementName.includes('trace_')) && hasPoints) {
+            if (bbox.points.length < 2) return '';
+            const points = bbox.points.filter(pt => Array.isArray(pt) && pt.length >= 2);
+            if (points.length < 2) return '';
+
+            let pathD = `M ${points[0][0] * scaleX} ${points[0][1] * scaleY}`;
+            for (let i = 1; i < points.length; i++) {
+                pathD += ` L ${points[i][0] * scaleX} ${points[i][1] * scaleY}`;
+            }
+
+            const className = type === 'hover' ? 'hover-path' : 'selected-path';
+            return `<path class="${className}" d="${pathD}"/>`;
+        }
+        // Scatter - draw as circles
+        else if (elementType === 'scatter' && hasPoints) {
+            const className = type === 'hover' ? 'hover-scatter' : 'selected-scatter';
+            let result = '';
+            for (const pt of bbox.points) {
+                if (!Array.isArray(pt) || pt.length < 2) continue;
+                result += `<circle class="${className}" cx="${pt[0] * scaleX}" cy="${pt[1] * scaleY}" r="3"/>`;
+            }
+            return result;
+        }
+        // Default - draw bbox rectangle
+        else {
+            const rectClass = type === 'hover' ? 'hover-rect' : 'selected-rect';
+            const x = bbox.x0 * scaleX - 1;
+            const y = bbox.y0 * scaleY - 1;
+            const w = (bbox.x1 - bbox.x0) * scaleX + 2;
+            const h = (bbox.y1 - bbox.y0) * scaleY + 2;
+            return `<rect class="${rectClass}" x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/>`;
+        }
+    }
+
+    if (hovered && hovered !== selected) {
+        svg += drawPanelElement(hovered, 'hover');
+    }
+
+    if (selected) {
+        svg += drawPanelElement(selected, 'selected');
+    }
+
+    overlay.innerHTML = svg;
+}
+
+// Draw all bboxes for a panel in debug mode
+function drawPanelDebugBboxes(bboxes, scaleX, scaleY) {
+    let svg = '';
+    let count = 0;
+
+    for (const [name, bbox] of Object.entries(bboxes)) {
+        if (name === '_meta') continue;
+        if (bbox.x0 === undefined || bbox.y0 === undefined) continue;
+
+        count++;
+        const hasPoints = bbox.points && bbox.points.length > 0;
+        const elementType = bbox.element_type || '';
+
+        // Choose color based on element type
+        let rectClass = 'debug-rect';
+        if (name.includes('trace_') || elementType === 'line') {
+            rectClass = 'debug-rect-trace';
+        } else if (name.includes('legend')) {
+            rectClass = 'debug-rect-legend';
+        } else if (elementType === 'scatter') {
+            rectClass = 'debug-rect-trace';
+        }
+
+        // Draw bbox rectangle
+        const x = bbox.x0 * scaleX;
+        const y = bbox.y0 * scaleY;
+        const w = (bbox.x1 - bbox.x0) * scaleX;
+        const h = (bbox.y1 - bbox.y0) * scaleY;
+
+        svg += `<rect class="${rectClass}" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
+
+        // Draw short label (truncated for small panels)
+        const shortName = name.length > 10 ? name.substring(0, 8) + '..' : name;
+        svg += `<text class="debug-label" x="${x + 1}" y="${y + 8}" style="font-size: 6px;">${shortName}</text>`;
+
+        // Draw path points if available
+        if (hasPoints && bbox.points.length > 1) {
+            let pathD = `M ${bbox.points[0][0] * scaleX} ${bbox.points[0][1] * scaleY}`;
+            for (let i = 1; i < bbox.points.length; i++) {
+                const pt = bbox.points[i];
+                if (pt && pt.length >= 2) {
+                    pathD += ` L ${pt[0] * scaleX} ${pt[1] * scaleY}`;
+                }
+            }
+            svg += `<path class="debug-path" d="${pathD}"/>`;
+        }
+    }
+
+    console.log(`Panel debug: ${count} elements with bboxes`);
+    return svg;
+}
+
+// Load panel data and switch to it for editing with a pre-selected element
+async function loadPanelForEditing(panelIdx, panelName, elementToSelect) {
+    showLoading();
+    setStatus(`Loading Panel ${panelName}...`, false);
+
+    try {
+        const resp = await fetch(`/switch_panel/${panelIdx}`);
+        const data = await resp.json();
+
+        if (data.error) {
+            console.error('switch_panel error:', data.error);
+            if (data.traceback) {
+                console.error('Traceback:', data.traceback);
+            }
+            setStatus('Error: ' + data.error, true);
+            hideLoading();
+            return;
+        }
+
+        // Update panel state
+        currentPanelIndex = panelIdx;
+        panelData.current_index = panelIdx;
+        updatePanelIndicator();
+
+        // Update preview image
+        const img = document.getElementById('preview-img');
+        img.src = 'data:image/png;base64,' + data.image;
+
+        // Update bboxes and overlays
+        elementBboxes = data.bboxes || {};
+        if (data.img_size) {
+            imgSize = data.img_size;
+        }
+
+        // Update overrides
+        if (data.overrides) {
+            overrides = data.overrides;
+            traces = overrides.traces || [];
+            updateControlsFromOverrides();
+        }
+
+        // Select the element that was clicked
+        selectedElement = elementToSelect;
+        updateOverlay();
+
+        // Scroll to section and show properties
+        scrollToSection(selectedElement);
+
+        // Show single-panel preview when element selected
+        const previewWrapper = document.querySelector('.preview-wrapper');
+        if (previewWrapper) {
+            previewWrapper.style.display = 'block';
+        }
+
+        // Update panel path display in right panel header
+        const panelPathEl = document.getElementById('panel-path-display');
+        if (panelPathEl) {
+            panelPathEl.textContent = `Panel: ${panelName}.pltz.d/spec.json`;
+        }
+
+        setStatus(`Selected: ${elementToSelect} in Panel ${panelName}`, false);
+    } catch (e) {
+        setStatus('Error: ' + e.message, true);
+        console.error('Panel load error:', e);
+    } finally {
+        hideLoading();
+    }
+}
+
+function togglePanelGrid() {
+    showingPanelGrid = !showingPanelGrid;
+    const gridSection = document.getElementById('panel-grid-section');
+    const showBtn = document.getElementById('show-grid-btn');
+
+    if (showingPanelGrid) {
+        gridSection.style.display = 'block';
+        showBtn.textContent = 'Hide All';
+    } else {
+        gridSection.style.display = 'none';
+        showBtn.textContent = 'Show All';
+    }
+}
+
+async function selectPanel(idx) {
+    if (!panelData || idx < 0 || idx >= panelData.panels.length) return;
+
+    // Show loading state
+    showLoading();
+    setStatus('Switching panel...', false);
+
+    try {
+        const resp = await fetch(`/switch_panel/${idx}`);
+        const data = await resp.json();
+
+        if (data.error) {
+            setStatus('Error: ' + data.error, true);
+            hideLoading();
+            return;
+        }
+
+        // Update panel state
+        currentPanelIndex = idx;
+        panelData.current_index = idx;
+        updatePanelIndicator();
+
+        // Update active state in grid
+        document.querySelectorAll('.panel-card').forEach((card, i) => {
+            card.classList.toggle('active', i === idx);
+        });
+
+        // Update preview image
+        const img = document.getElementById('preview-img');
+        img.src = 'data:image/png;base64,' + data.image;
+
+        // Update bboxes and overlays
+        elementBboxes = data.bboxes || {};
+        if (data.img_size) {
+            imgSize = data.img_size;
+        }
+
+        // Update overrides
+        if (data.overrides) {
+            overrides = data.overrides;
+            traces = overrides.traces || [];
+            updateControlsFromOverrides();
+        }
+
+        updateOverlay();
+        if (debugMode) {
+            drawDebugBboxes();
+        }
+
+        // Update panel path display in right panel header
+        const panelPathEl = document.getElementById('panel-path-display');
+        if (panelPathEl && data.panel_name) {
+            panelPathEl.textContent = `Panel: ${data.panel_name}/spec.json`;
+        }
+
+        setStatus(`Switched to Panel ${data.panel_name.replace('.pltz.d', '')}`, false);
+    } catch (e) {
+        setStatus('Error switching panel: ' + e.message, true);
+        console.error('Panel switch error:', e);
+    } finally {
+        hideLoading();
+    }
+}
+
+function prevPanel() {
+    if (panelData && currentPanelIndex > 0) {
+        selectPanel(currentPanelIndex - 1);
+    }
+}
+
+function nextPanel() {
+    if (panelData && currentPanelIndex < panelData.panels.length - 1) {
+        selectPanel(currentPanelIndex + 1);
+    }
+}
+
+function updatePanelIndicator() {
+    if (!panelData) return;
+
+    const total = panelData.panels.length;
+    const current = currentPanelIndex + 1;
+    const panelName = panelData.panels[currentPanelIndex];
+
+    document.getElementById('panel-indicator').textContent = `${current} / ${total}`;
+    document.getElementById('current-panel-name').textContent = `Panel ${panelName.replace('.pltz.d', '')}`;
+
+    // Update prev/next button states
+    document.getElementById('prev-panel-btn').disabled = currentPanelIndex === 0;
+    document.getElementById('next-panel-btn').disabled = currentPanelIndex === total - 1;
+}
+
+// =============================================================================
+// Canvas Mode (Draggable Panel Layout)
+// =============================================================================
+let canvasMode = 'grid';  // 'grid' or 'canvas'
+let panelPositions = {};  // Store panel positions {name: {x, y, width, height}}
+let draggedPanel = null;
+let dragOffset = {x: 0, y: 0};
+
+function setCanvasMode(mode) {
+    canvasMode = mode;
+    const gridEl = document.getElementById('panel-grid');
+    const canvasEl = document.getElementById('panel-canvas');
+    const gridBtn = document.getElementById('view-grid-btn');
+    const canvasBtn = document.getElementById('view-canvas-btn');
+
+    if (mode === 'grid') {
+        gridEl.style.display = 'grid';
+        canvasEl.style.display = 'none';
+        gridBtn.classList.remove('btn-secondary');
+        gridBtn.classList.add('btn-primary');
+        canvasBtn.classList.add('btn-secondary');
+        canvasBtn.classList.remove('btn-primary');
+    } else {
+        gridEl.style.display = 'none';
+        canvasEl.style.display = 'block';
+        canvasBtn.classList.remove('btn-secondary');
+        canvasBtn.classList.add('btn-primary');
+        gridBtn.classList.add('btn-secondary');
+        gridBtn.classList.remove('btn-primary');
+        renderPanelCanvas();
+    }
+}
+
+async function renderPanelCanvas() {
+    const canvasEl = document.getElementById('panel-canvas');
+    if (!panelData || !canvasEl) return;
+
+    // Fetch panels if not cached
+    try {
+        const resp = await fetch('/panels');
+        const data = await resp.json();
+        if (data.error) return;
+
+        canvasEl.innerHTML = '';
+
+        // Calculate canvas size based on number of panels
+        const numPanels = data.panels.length;
+        const cols = Math.ceil(Math.sqrt(numPanels));
+        const baseWidth = 200;
+        const baseHeight = 150;
+        const padding = 20;
+
+        data.panels.forEach((panel, idx) => {
+            const name = panel.name;
+
+            // Initialize position if not set
+            if (!panelPositions[name]) {
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                panelPositions[name] = {
+                    x: padding + col * (baseWidth + padding),
+                    y: padding + row * (baseHeight + padding),
+                    width: baseWidth,
+                    height: baseHeight,
+                };
+            }
+
+            const pos = panelPositions[name];
+            const item = document.createElement('div');
+            item.className = 'panel-canvas-item' + (idx === currentPanelIndex ? ' active' : '');
+            item.dataset.panelIndex = idx;
+            item.dataset.panelName = name;
+            item.style.left = pos.x + 'px';
+            item.style.top = pos.y + 'px';
+            item.style.width = pos.width + 'px';
+            item.style.height = pos.height + 'px';
+
+            item.innerHTML = `
+                <span class="panel-canvas-label">Panel ${name}</span>
+                ${panel.image ? `<img src="data:image/png;base64,${panel.image}" alt="Panel ${name}">` : '<div style="padding: 20px; color: var(--text-muted);">No preview</div>'}
+                <div class="panel-canvas-resize"></div>
+            `;
+
+            // Double-click to edit
+            item.addEventListener('dblclick', () => selectPanel(idx));
+
+            // Drag start
+            item.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('panel-canvas-resize')) {
+                    startResize(e, item, name);
+                } else {
+                    startDrag(e, item, name);
+                }
+            });
+
+            canvasEl.appendChild(item);
+        });
+
+        // Update canvas height to fit all panels
+        const maxY = Math.max(...Object.values(panelPositions).map(p => p.y + p.height)) + padding;
+        canvasEl.style.minHeight = Math.max(400, maxY) + 'px';
+
+    } catch (e) {
+        console.error('Error rendering canvas:', e);
+    }
+}
+
+function startDrag(e, item, name) {
+    e.preventDefault();
+    draggedPanel = {item, name};
+    dragOffset.x = e.clientX - item.offsetLeft;
+    dragOffset.y = e.clientY - item.offsetTop;
+    item.classList.add('dragging');
+
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+}
+
+function onDrag(e) {
+    if (!draggedPanel) return;
+    const canvasEl = document.getElementById('panel-canvas');
+    const rect = canvasEl.getBoundingClientRect();
+
+    let newX = e.clientX - dragOffset.x;
+    let newY = e.clientY - dragOffset.y;
+
+    // Constrain to canvas bounds
+    newX = Math.max(0, Math.min(newX, canvasEl.offsetWidth - draggedPanel.item.offsetWidth));
+    newY = Math.max(0, newY);
+
+    draggedPanel.item.style.left = newX + 'px';
+    draggedPanel.item.style.top = newY + 'px';
+
+    panelPositions[draggedPanel.name].x = newX;
+    panelPositions[draggedPanel.name].y = newY;
+}
+
+function stopDrag() {
+    if (draggedPanel) {
+        draggedPanel.item.classList.remove('dragging');
+        draggedPanel = null;
+    }
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+}
+
+let resizingPanel = null;
+
+function startResize(e, item, name) {
+    e.preventDefault();
+    e.stopPropagation();
+    resizingPanel = {item, name, startX: e.clientX, startY: e.clientY, startW: item.offsetWidth, startH: item.offsetHeight};
+
+    document.addEventListener('mousemove', onResize);
+    document.addEventListener('mouseup', stopResize);
+}
+
+function onResize(e) {
+    if (!resizingPanel) return;
+    const newW = Math.max(100, resizingPanel.startW + (e.clientX - resizingPanel.startX));
+    const newH = Math.max(80, resizingPanel.startH + (e.clientY - resizingPanel.startY));
+
+    resizingPanel.item.style.width = newW + 'px';
+    resizingPanel.item.style.height = newH + 'px';
+
+    panelPositions[resizingPanel.name].width = newW;
+    panelPositions[resizingPanel.name].height = newH;
+}
+
+function stopResize() {
+    resizingPanel = null;
+    document.removeEventListener('mousemove', onResize);
+    document.removeEventListener('mouseup', stopResize);
 }
 
 // Initialize hover system for a specific element (img or svg)
@@ -1654,7 +2759,6 @@ function collectOverrides() {
     if (ymin !== '' && ymax !== '') o.ylim = [parseFloat(ymin), parseFloat(ymax)];
 
     // Traces
-    o.linewidth = parseFloat(document.getElementById('linewidth').value) || 1.0;
     o.traces = traces;
 
     // Legend
@@ -1662,8 +2766,9 @@ function collectOverrides() {
     o.legend_loc = document.getElementById('legend_loc').value;
     o.legend_frameon = document.getElementById('legend_frameon').checked;
     o.legend_fontsize = parseInt(document.getElementById('legend_fontsize').value) || 6;
-    o.legend_x = parseFloat(document.getElementById('legend_x').value) || 0.5;
-    o.legend_y = parseFloat(document.getElementById('legend_y').value) || 0.5;
+    o.legend_ncols = parseInt(document.getElementById('legend_ncols').value) || 1;
+    o.legend_x = parseFloat(document.getElementById('legend_x').value) || 0.95;
+    o.legend_y = parseFloat(document.getElementById('legend_y').value) || 0.95;
 
     // Axis and Ticks - X Axis (Bottom)
     o.x_n_ticks = parseInt(document.getElementById('x_n_ticks').value) || 4;
@@ -1727,11 +2832,16 @@ async function updatePreview(forceUpdate = false) {
 
     setStatus('Updating...', false);
     overrides = collectOverrides();
+
+    // Preserve current selection to restore after update
+    const previousSelection = selectedElement;
+
     try {
+        const darkMode = isDarkMode();
         const resp = await fetch('/update', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({overrides})
+            body: JSON.stringify({overrides, dark_mode: darkMode})
         });
         const data = await resp.json();
 
@@ -1759,7 +2869,12 @@ async function updatePreview(forceUpdate = false) {
             imgSize = data.img_size;
         }
 
-        selectedElement = null;
+        // Restore selection if the element still exists in the new bboxes
+        if (previousSelection && elementBboxes[previousSelection]) {
+            selectedElement = previousSelection;
+        } else {
+            selectedElement = null;
+        }
         hoveredElement = null;
         updateOverlay();
 
@@ -1942,7 +3057,16 @@ function renderGroupStats(group) {
 
 function setStatus(msg, isError = false) {
     const el = document.getElementById('status');
-    el.textContent = msg;
+    const loadingOverlay = document.getElementById('loading-overlay');
+
+    // Show/hide spinner for loading states
+    if (msg === 'Updating...' || msg === 'Loading preview...') {
+        loadingOverlay.style.display = 'flex';
+        el.textContent = '';  // Clear status text during loading
+    } else {
+        loadingOverlay.style.display = 'none';
+        el.textContent = msg;
+    }
     el.classList.toggle('error', isError);
 }
 

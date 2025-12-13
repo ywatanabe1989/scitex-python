@@ -44,6 +44,11 @@ PLOT_SPEC_VERSION = "1.0.0"
 PLOT_STYLE_VERSION = "1.0.0"
 PLOT_GEOMETRY_VERSION = "1.0.0"
 
+# DPI fallback for legacy data without explicit DPI
+# Note: For dynamic DPI resolution, use scitex.plt.styles.get_default_dpi()
+# This constant is only used as a fallback when parsing data without DPI info
+DPI_FALLBACK = 300
+
 
 # =============================================================================
 # Type Aliases
@@ -884,7 +889,7 @@ class PlotGeometry:
         return cls(
             source_hash=data.get("source_hash", ""),
             figure_px=data.get("figure_px", [944, 803]),
-            dpi=data.get("dpi", 300),
+            dpi=data.get("dpi", DPI_FALLBACK),
             axes=[RenderedAxes.from_dict(ax) for ax in data.get("axes", [])],
             artists=[RenderedArtist.from_dict(ar) for ar in data.get("artists", [])],
             hit_regions=data.get("hit_regions", {}),
@@ -920,7 +925,7 @@ class RenderManifest:
     hitmap_svg: Optional[str] = None
 
     # Render settings
-    dpi: int = 300
+    dpi: int = DPI_FALLBACK  # Use scitex.plt.styles.get_default_dpi() for dynamic resolution
     render_px: Optional[List[int]] = None  # [width, height]
     crop_margin_mm: float = 1.0
 

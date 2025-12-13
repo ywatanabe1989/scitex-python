@@ -37,6 +37,7 @@ class WebEditor:
         hitmap_path: Optional[Path] = None,
         manual_overrides: Optional[Dict[str, Any]] = None,
         port: int = 5050,
+        panel_info: Optional[Dict[str, Any]] = None,
     ):
         self.json_path = Path(json_path)
         self.metadata = metadata
@@ -46,6 +47,7 @@ class WebEditor:
         self.manual_overrides = manual_overrides or {}
         self._requested_port = port
         self.port = port
+        self.panel_info = panel_info  # For multi-panel figz bundles
 
         # Extract hit_regions from metadata for color-based element detection
         self.hit_regions = metadata.get("hit_regions", {})
@@ -75,19 +77,19 @@ class WebEditor:
                 "Flask is required for web editor. Install: pip install flask"
             )
 
-        # Handle port conflicts
-        if not check_port_available(self._requested_port):
-            print(f"Port {self._requested_port} is in use. Attempting to free it...")
-            if kill_process_on_port(self._requested_port):
-                import time
-
-                time.sleep(0.5)
+        # Handle port conflicts - always use port 5050
+        import time
+        max_retries = 3
+        for attempt in range(max_retries):
+            if check_port_available(self._requested_port):
                 self.port = self._requested_port
-                print(f"Successfully freed port {self.port}")
-            else:
-                self.port = find_available_port(self._requested_port + 1)
-                print(f"Using alternative port: {self.port}")
+                break
+            print(f"Port {self._requested_port} in use. Freeing... (attempt {attempt + 1}/{max_retries})")
+            kill_process_on_port(self._requested_port)
+            time.sleep(1.0)  # Wait for port release
         else:
+            # After retries, use requested port anyway (Flask will error if unavailable)
+            print(f"Warning: Port {self._requested_port} may still be in use")
             self.port = self._requested_port
 
         app = Flask(__name__)
@@ -124,81 +126,199 @@ class WebEditor:
 
         @app.route("/preview")
         def preview():
-            """Return existing PNG/SVG from pltz bundle (no re-rendering)."""
+            """Render figure preview with current overrides (same logic as /update)."""
+            from ._renderer import render_preview_with_bboxes
+
+            # Always use renderer for consistency between initial and updated views
+            dark_mode = request.args.get("dark_mode", "false").lower() == "true"
+            img_data, bboxes, img_size = render_preview_with_bboxes(
+                editor.csv_data, editor.current_overrides,
+                metadata=editor.metadata,
+                dark_mode=dark_mode,
+            )
+            return jsonify({
+                "image": img_data,
+                "bboxes": bboxes,
+                "img_size": img_size,
+                "has_hitmap": editor.hitmap_path is not None and editor.hitmap_path.exists(),
+                "format": "png",
+                "panel_info": editor.panel_info,
+            })
+
+        @app.route("/panels")
+        def panels():
+            """Return all panel images with bboxes for interactive grid view (figz bundles only)."""
             from PIL import Image
+            from ._bbox import extract_bboxes_from_metadata, extract_bboxes_from_geometry_px
 
-            if editor.png_path and editor.png_path.exists():
-                path_str = str(editor.png_path)
+            if not editor.panel_info:
+                return jsonify({"error": "Not a multi-panel figz bundle"}), 400
 
-                if path_str.endswith('.svg'):
-                    # Load SVG as text
-                    with open(editor.png_path, "r", encoding="utf-8") as f:
-                        svg_data = f.read()
-                    # Extract viewBox dimensions from SVG
-                    import re
-                    viewbox_match = re.search(r'viewBox="[^"]*\s+(\d+\.?\d*)\s+(\d+\.?\d*)"', svg_data)
-                    width_match = re.search(r'width="(\d+\.?\d*)', svg_data)
-                    height_match = re.search(r'height="(\d+\.?\d*)', svg_data)
+            figz_dir = Path(editor.panel_info["figz_dir"])
+            panel_names = editor.panel_info["panels"]
+            panel_images = []
 
-                    if viewbox_match:
-                        img_width = float(viewbox_match.group(1))
-                        img_height = float(viewbox_match.group(2))
-                    elif width_match and height_match:
-                        img_width = float(width_match.group(1))
-                        img_height = float(height_match.group(1))
-                    else:
-                        img_width, img_height = 800, 600
+            for panel_name in panel_names:
+                panel_dir = figz_dir / panel_name
+                panel_data = {"name": panel_name.replace(".pltz.d", ""), "image": None, "bboxes": None, "img_size": None}
 
-                    # Build bboxes scaled to actual display dimensions
-                    bboxes = _extract_bboxes_from_metadata(
-                        editor.metadata,
-                        display_width=img_width,
-                        display_height=img_height
-                    )
+                # Find PNG in exports/ or root
+                png_path = None
+                exports_dir = panel_dir / "exports"
+                if exports_dir.exists():
+                    for f in exports_dir.glob("*.png"):
+                        if "_hitmap" not in f.name and "_overview" not in f.name:
+                            png_path = f
+                            break
+                if not png_path:
+                    for f in panel_dir.glob("*.png"):
+                        if "_hitmap" not in f.name and "_overview" not in f.name:
+                            png_path = f
+                            break
 
-                    return jsonify({
-                        "svg": svg_data,
-                        "bboxes": bboxes,
-                        "img_size": {"width": int(img_width), "height": int(img_height)},
-                        "has_hitmap": editor.hitmap_path is not None and editor.hitmap_path.exists(),
-                        "format": "svg",
-                    })
-                else:
-                    # Load PNG as base64
-                    with open(editor.png_path, "rb") as f:
-                        img_data = base64.b64encode(f.read()).decode("utf-8")
-                    # Get image dimensions
-                    img = Image.open(editor.png_path)
-                    img_width, img_height = img.size
+                if png_path and png_path.exists():
+                    with open(png_path, "rb") as f:
+                        panel_data["image"] = base64.b64encode(f.read()).decode("utf-8")
+                    img = Image.open(png_path)
+                    panel_data["width"], panel_data["height"] = img.size
+                    panel_data["img_size"] = {"width": img.size[0], "height": img.size[1]}
                     img.close()
 
-                    # Build bboxes scaled to actual display dimensions
-                    bboxes = _extract_bboxes_from_metadata(
+                    # Try to load geometry_px.json from cache (has precise pixel coordinates)
+                    geometry_path = panel_dir / "cache" / "geometry_px.json"
+                    if geometry_path.exists():
+                        import json
+                        with open(geometry_path) as f:
+                            geometry_data = json.load(f)
+                        panel_data["bboxes"] = extract_bboxes_from_geometry_px(
+                            geometry_data,
+                            panel_data["img_size"]["width"],
+                            panel_data["img_size"]["height"]
+                        )
+                    else:
+                        # Fall back to spec.json extraction
+                        spec_path = panel_dir / "spec.json"
+                        if spec_path.exists():
+                            import json
+                            with open(spec_path) as f:
+                                panel_metadata = json.load(f)
+                            panel_data["bboxes"] = extract_bboxes_from_metadata(
+                                panel_metadata,
+                                panel_data["img_size"]["width"],
+                                panel_data["img_size"]["height"]
+                            )
+
+                panel_images.append(panel_data)
+
+            return jsonify({
+                "panels": panel_images,
+                "count": len(panel_images),
+            })
+
+        @app.route("/switch_panel/<int:panel_index>")
+        def switch_panel(panel_index):
+            """Switch to a different panel in the figz bundle.
+
+            Loads the actual PNG from the panel's exports folder instead of re-rendering.
+            """
+            from PIL import Image
+            from .._edit import _load_panel_data
+            from ._bbox import extract_bboxes_from_metadata, extract_bboxes_from_geometry_px
+
+            if not editor.panel_info:
+                return jsonify({"error": "Not a multi-panel figz bundle"}), 400
+
+            panels = editor.panel_info["panels"]
+            if panel_index < 0 or panel_index >= len(panels):
+                return jsonify({"error": f"Invalid panel index: {panel_index}"}), 400
+
+            figz_dir = Path(editor.panel_info["figz_dir"])
+            panel_name = panels[panel_index]
+            panel_dir = figz_dir / panel_name
+
+            # Load the panel's data
+            try:
+                panel_data = _load_panel_data(panel_dir)
+                if not panel_data:
+                    return jsonify({"error": f"Could not load panel: {panel_name}"}), 400
+
+                # Update editor state
+                editor.json_path = panel_data["json_path"]
+                editor.metadata = panel_data["metadata"]
+                editor.csv_data = panel_data.get("csv_data")
+                editor.png_path = panel_data.get("png_path")
+                editor.hitmap_path = panel_data.get("hitmap_path")
+                editor.panel_info["current_index"] = panel_index
+
+                # Re-extract defaults from new metadata
+                from .._defaults import get_scitex_defaults, extract_defaults_from_metadata
+                editor.scitex_defaults = get_scitex_defaults()
+                editor.metadata_defaults = extract_defaults_from_metadata(editor.metadata)
+                editor.current_overrides = copy.deepcopy(editor.scitex_defaults)
+                editor.current_overrides.update(editor.metadata_defaults)
+                editor.current_overrides.update(editor.manual_overrides)
+
+                # Load actual PNG from panel instead of re-rendering
+                img_data = None
+                img_size = {"width": 0, "height": 0}
+                png_path = panel_data.get("png_path")
+
+                if png_path and png_path.exists():
+                    with open(png_path, "rb") as f:
+                        img_data = base64.b64encode(f.read()).decode("utf-8")
+                    img = Image.open(png_path)
+                    img_size = {"width": img.size[0], "height": img.size[1]}
+                    img.close()
+                else:
+                    # Fallback: look for any PNG in exports/
+                    exports_dir = panel_dir / "exports"
+                    if exports_dir.exists():
+                        for f in exports_dir.glob("*.png"):
+                            if "_hitmap" not in f.name and "_overview" not in f.name:
+                                with open(f, "rb") as pf:
+                                    img_data = base64.b64encode(pf.read()).decode("utf-8")
+                                img = Image.open(f)
+                                img_size = {"width": img.size[0], "height": img.size[1]}
+                                img.close()
+                                break
+
+                if not img_data:
+                    return jsonify({"error": f"No PNG found for panel: {panel_name}"}), 400
+
+                # Extract bboxes - prefer geometry_px.json for precise coordinates
+                bboxes = {}
+                geometry_path = panel_dir / "cache" / "geometry_px.json"
+                if geometry_path.exists():
+                    with open(geometry_path) as f:
+                        geometry_data = json.load(f)
+                    bboxes = extract_bboxes_from_geometry_px(
+                        geometry_data,
+                        img_size["width"],
+                        img_size["height"],
+                    )
+                else:
+                    # Fall back to metadata extraction
+                    bboxes = extract_bboxes_from_metadata(
                         editor.metadata,
-                        display_width=img_width,
-                        display_height=img_height
+                        img_size["width"],
+                        img_size["height"],
                     )
 
-                    return jsonify({
-                        "image": img_data,
-                        "bboxes": bboxes,
-                        "img_size": {"width": img_width, "height": img_height},
-                        "has_hitmap": editor.hitmap_path is not None and editor.hitmap_path.exists(),
-                        "format": "png",
-                    })
-            else:
-                # Fallback: render from CSV (legacy mode)
-                from ._renderer import render_preview_with_bboxes
-                img_data, bboxes, img_size = render_preview_with_bboxes(
-                    editor.csv_data, editor.current_overrides,
-                    metadata=editor.metadata
-                )
                 return jsonify({
+                    "success": True,
+                    "panel_name": panel_name,
+                    "panel_index": panel_index,
                     "image": img_data,
                     "bboxes": bboxes,
                     "img_size": img_size,
-                    "format": "png",
+                    "overrides": editor.current_overrides,
                 })
+            except Exception as e:
+                import traceback
+                return jsonify({
+                    "error": f"Failed to switch panel: {str(e)}",
+                    "traceback": traceback.format_exc(),
+                }), 500
 
         @app.route("/hitmap")
         def hitmap():
@@ -229,10 +349,14 @@ class WebEditor:
             editor.current_overrides.update(data.get("overrides", {}))
             editor._user_modified = True
 
+            # Check if dark mode is requested from POST data
+            dark_mode = data.get("dark_mode", False)
+
             # Re-render the figure with updated overrides
             img_data, bboxes, img_size = render_preview_with_bboxes(
                 editor.csv_data, editor.current_overrides,
-                metadata=editor.metadata
+                metadata=editor.metadata,
+                dark_mode=dark_mode,
             )
             return jsonify({
                 "image": img_data,
@@ -283,7 +407,7 @@ class WebEditor:
 
         threading.Thread(target=open_browser, daemon=True).start()
 
-        print(f"Starting SciTeX Editor at http://127.0.0.1:{self.port}")
+        print(f"Starting SciTeX Figure Editor at http://127.0.0.1:{self.port}")
         print("Press Ctrl+C to stop")
 
         # Note: use_reloader=False because the reloader re-runs the entire script
