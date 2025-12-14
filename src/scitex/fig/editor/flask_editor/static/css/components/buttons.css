@@ -32,6 +32,16 @@
     background: var(--workspace-bg-tertiary);
 }
 
+.btn-warning {
+    background: #f59e0b;
+    color: #000;
+    border: 1px solid #d97706;
+}
+
+.btn-warning:hover {
+    background: #fbbf24;
+}
+
 .btn-cta {
     background: var(--color-cta);
     color: white;
@@ -48,9 +58,7 @@
     margin: 0;
 }
 
-/* =============================================================================
- * Unit Toggle
- * ============================================================================= */
+/* Unit Toggle */
 .unit-toggle {
     display: flex;
     gap: 0;
@@ -84,9 +92,7 @@
     color: white;
 }
 
-/* =============================================================================
- * Background Type Toggle
- * ============================================================================= */
+/* Background Type Toggle */
 .bg-toggle {
     display: flex;
     gap: 6px;
@@ -127,8 +133,10 @@
     border: 1px solid var(--border-default);
 }
 
-.bg-preview.white { background: #ffffff; }
-.bg-preview.black { background: #000000; }
+.bg-preview.white {
+    background: #ffffff;
+}
+
 .bg-preview.transparent {
     background: linear-gradient(45deg, #ccc 25%, transparent 25%),
                 linear-gradient(-45deg, #ccc 25%, transparent 25%),
@@ -137,4 +145,73 @@
     background-size: 8px 8px;
     background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
     background-color: #fff;
+}
+
+.bg-preview.black {
+    background: #000000;
+}
+
+/* Axis Tabs (for X/Y/Z axis switching) */
+.axis-tabs {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 8px;
+    background: var(--bg-muted);
+    padding: 3px;
+    border-radius: 6px;
+}
+
+.axis-tab {
+    flex: 1;
+    padding: 4px 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.8em;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+}
+
+.axis-tab:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+.axis-tab.active {
+    background: var(--scitex-01);
+    color: var(--bg-primary);
+}
+
+.axis-panel {
+    animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Debug toggle button */
+.debug-toggle {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1000;
+    padding: 8px 12px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.debug-toggle:hover {
+    background: #555;
+}
+
+.debug-toggle.active {
+    background: #c00;
 }

@@ -92,7 +92,10 @@ class WebEditor:
             print(f"Warning: Port {self._requested_port} may still be in use")
             self.port = self._requested_port
 
-        app = Flask(__name__)
+        # Configure Flask with static folder path
+        import os
+        static_folder = os.path.join(os.path.dirname(__file__), 'static')
+        app = Flask(__name__, static_folder=static_folder, static_url_path='/static')
         editor = self
 
         def _export_composed_figure(editor, formats=["png", "svg"], dpi=150):
@@ -120,12 +123,17 @@ class WebEditor:
                 Path(figz_dir).stem.replace(".figz.d", "") if figz_dir else "figure"
             )
 
-            # Read spec.json for layout
+            # Read spec.json for layout and layout.json for position overrides
             spec = {}
+            layout_overrides = {}
             if bundle_path:
                 try:
                     with ZipBundle(bundle_path, mode="r") as bundle:
                         spec = bundle.read_json("spec.json")
+                        try:
+                            layout_overrides = bundle.read_json("layout.json")
+                        except:
+                            pass
                 except:
                     pass
             elif figz_dir:
@@ -133,6 +141,14 @@ class WebEditor:
                 if spec_path.exists():
                     with open(spec_path) as f:
                         spec = json_module.load(f)
+                layout_path = Path(figz_dir) / "layout.json"
+                if layout_path.exists():
+                    with open(layout_path) as f:
+                        layout_overrides = json_module.load(f)
+
+            # Also check in-memory layout overrides
+            if editor.panel_info and editor.panel_info.get("layout"):
+                layout_overrides = editor.panel_info.get("layout", {})
 
             # Get figure dimensions
             fig_width_mm = 180
@@ -159,19 +175,15 @@ class WebEditor:
                 pos = panel_spec.get("position", {})
                 size = panel_spec.get("size", {})
 
-                x_mm = pos.get("x_mm", 0)
-                y_mm = pos.get("y_mm", 0)
-                w_mm = size.get("width_mm", 60)
-                h_mm = size.get("height_mm", 40)
+                # Skip overview/auxiliary panels (only compose main panels A-Z)
+                panel_id_lower = panel_id.lower()
+                if any(skip in panel_id_lower for skip in ['overview', 'thumb', 'preview', 'aux']):
+                    continue
 
-                x_frac = x_mm / fig_width_mm
-                y_frac = 1 - (y_mm + h_mm) / fig_height_mm
-                w_frac = w_mm / fig_width_mm
-                h_frac = h_mm / fig_height_mm
-
-                # Find panel path
+                # Find panel path first (needed to check layout_overrides)
                 panel_path = None
                 is_zip = False
+                panel_name = None
                 for idx, pp in enumerate(panel_paths):
                     pp_name = Path(pp).stem.replace(".pltz", "")
                     if (pp_name == panel_id or
@@ -179,20 +191,41 @@ class WebEditor:
                         pp_name == f"panel_{panel_id}" or
                         f"_{panel_id}_" in pp_name):
                         panel_path = pp
+                        panel_name = Path(pp).name  # e.g., "panel_A_twinx.pltz"
                         is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else False
                         break
 
                 if not panel_path:
                     continue
 
+                # Check for layout overrides (from layout.json or in-memory)
+                override = layout_overrides.get(panel_name, {})
+                override_pos = override.get("position", {})
+                override_size = override.get("size", {})
+
+                # Use override positions if available, otherwise use spec
+                x_mm = override_pos.get("x_mm", pos.get("x_mm", 0))
+                y_mm = override_pos.get("y_mm", pos.get("y_mm", 0))
+                w_mm = override_size.get("width_mm", size.get("width_mm", 60))
+                h_mm = override_size.get("height_mm", size.get("height_mm", 40))
+
+                x_frac = x_mm / fig_width_mm
+                y_frac = 1 - (y_mm + h_mm) / fig_height_mm
+                w_frac = w_mm / fig_width_mm
+                h_frac = h_mm / fig_height_mm
+
                 # Load panel preview
                 try:
+                    # Exclusion patterns for preview selection
+                    exclude_patterns = ['hitmap', 'overview', 'thumb', 'preview']
+
                     if is_zip:
                         with ZipBundle(panel_path, mode="r") as pltz_bundle:
                             with zipfile.ZipFile(panel_path, 'r') as zf:
                                 png_files = [n for n in zf.namelist()
-                                            if n.endswith('.png') and 'hitmap' not in n.lower()
-                                            and 'exports/' in n]
+                                            if n.endswith('.png')
+                                            and 'exports/' in n
+                                            and not any(p in n.lower() for p in exclude_patterns)]
                                 if png_files:
                                     preview_path = png_files[0]
                                     if '.pltz.d/' in preview_path:
@@ -207,7 +240,8 @@ class WebEditor:
                         exports_dir = pltz_dir / "exports"
                         if exports_dir.exists():
                             for png_file in exports_dir.glob("*.png"):
-                                if "hitmap" not in png_file.name.lower():
+                                name_lower = png_file.name.lower()
+                                if not any(p in name_lower for p in exclude_patterns):
                                     img = Image.open(png_file)
                                     ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
                                     ax.imshow(np.array(img))
@@ -215,6 +249,18 @@ class WebEditor:
                                     break
                 except Exception as e:
                     print(f"Could not load panel {panel_id}: {e}")
+
+                # Draw panel letter
+                if panel_id and len(panel_id) <= 2:  # Only for short IDs like A, B, C...
+                    # Position letter at top-left corner of panel
+                    letter_x = x_frac + 0.01
+                    letter_y = y_frac + h_frac - 0.02
+                    fig.text(letter_x, letter_y, panel_id,
+                            fontsize=14, fontweight='bold', color='black',
+                            ha='left', va='top',
+                            transform=fig.transFigure,
+                            bbox=dict(boxstyle='square,pad=0.1',
+                                     facecolor='white', edgecolor='none', alpha=0.8))
 
             exported = {}
 
@@ -888,12 +934,17 @@ class WebEditor:
                         # Always compose on-demand to ensure current panel state
                         # (existing exports in bundle may be stale or blank)
 
-                        # Read spec.json to get layout info
+                        # Read spec.json and layout.json for position overrides
                         spec = {}
+                        layout_overrides = {}
                         if bundle_path:
                             try:
                                 with ZipBundle(bundle_path, mode="r") as bundle:
                                     spec = bundle.read_json("spec.json")
+                                    try:
+                                        layout_overrides = bundle.read_json("layout.json")
+                                    except:
+                                        pass
                             except:
                                 pass
                         elif figz_dir:
@@ -901,6 +952,14 @@ class WebEditor:
                             if spec_path.exists():
                                 with open(spec_path) as f:
                                     spec = json_module.load(f)
+                            layout_path = Path(figz_dir) / "layout.json"
+                            if layout_path.exists():
+                                with open(layout_path) as f:
+                                    layout_overrides = json_module.load(f)
+
+                        # Also check in-memory layout overrides (most current)
+                        if editor.panel_info and editor.panel_info.get("layout"):
+                            layout_overrides = editor.panel_info.get("layout", {})
 
                         # Get figure dimensions
                         fig_width_mm = 180
@@ -928,19 +987,15 @@ class WebEditor:
                             pos = panel_spec.get("position", {})
                             size = panel_spec.get("size", {})
 
-                            x_mm = pos.get("x_mm", 0)
-                            y_mm = pos.get("y_mm", 0)
-                            w_mm = size.get("width_mm", 60)
-                            h_mm = size.get("height_mm", 40)
+                            # Skip overview/auxiliary panels (only compose main panels A-Z)
+                            panel_id_lower = panel_id.lower()
+                            if any(skip in panel_id_lower for skip in ['overview', 'thumb', 'preview', 'aux']):
+                                continue
 
-                            x_frac = x_mm / fig_width_mm
-                            y_frac = 1 - (y_mm + h_mm) / fig_height_mm
-                            w_frac = w_mm / fig_width_mm
-                            h_frac = h_mm / fig_height_mm
-
-                            # Find panel path by matching id (flexible matching)
+                            # Find panel path first (needed to check layout_overrides)
                             panel_path = None
                             is_zip = False
+                            panel_name = None
                             for idx, pp in enumerate(panel_paths):
                                 pp_name = Path(pp).stem.replace(".pltz", "")
                                 # Match exact name, or name contains panel_id pattern
@@ -953,6 +1008,7 @@ class WebEditor:
                                     f"_{panel_id}_" in pp_name or
                                     pp_name.endswith(f"_{panel_id}")):
                                     panel_path = pp
+                                    panel_name = Path(pp).name  # e.g., "panel_A_twinx.pltz"
                                     is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else False
                                     break
 
@@ -960,19 +1016,39 @@ class WebEditor:
                                 print(f"Could not find panel path for id={panel_id}, available: {[Path(p).stem for p in panel_paths]}")
                                 continue
 
+                            # Check for layout overrides (from layout.json or in-memory)
+                            override = layout_overrides.get(panel_name, {})
+                            override_pos = override.get("position", {})
+                            override_size = override.get("size", {})
+
+                            # Use override positions if available, otherwise use spec
+                            x_mm = override_pos.get("x_mm", pos.get("x_mm", 0))
+                            y_mm = override_pos.get("y_mm", pos.get("y_mm", 0))
+                            w_mm = override_size.get("width_mm", size.get("width_mm", 60))
+                            h_mm = override_size.get("height_mm", size.get("height_mm", 40))
+
+                            x_frac = x_mm / fig_width_mm
+                            y_frac = 1 - (y_mm + h_mm) / fig_height_mm
+                            w_frac = w_mm / fig_width_mm
+                            h_frac = h_mm / fig_height_mm
+
                             # Load panel preview image
                             try:
                                 img_loaded = False
+                                # Exclusion patterns for preview selection
+                                exclude_patterns = ['hitmap', 'overview', 'thumb', 'preview']
+
                                 if is_zip:
                                     with ZipBundle(panel_path, mode="r") as pltz_bundle:
-                                        # Find PNG in exports (not hitmap)
+                                        # Find PNG in exports (exclude hitmap, overview, thumbnails)
                                         import zipfile
                                         with zipfile.ZipFile(panel_path, 'r') as zf:
                                             png_files = [n for n in zf.namelist()
-                                                        if n.endswith('.png') and 'hitmap' not in n.lower()
-                                                        and 'exports/' in n]
+                                                        if n.endswith('.png')
+                                                        and 'exports/' in n
+                                                        and not any(p in n.lower() for p in exclude_patterns)]
                                             if png_files:
-                                                # Use first non-hitmap PNG
+                                                # Use first matching PNG
                                                 preview_path = png_files[0]
                                                 # Extract the path relative to .d directory
                                                 if '.pltz.d/' in preview_path:
@@ -992,7 +1068,8 @@ class WebEditor:
                                     exports_dir = pltz_dir / "exports"
                                     if exports_dir.exists():
                                         for png_file in exports_dir.glob("*.png"):
-                                            if "hitmap" not in png_file.name.lower():
+                                            name_lower = png_file.name.lower()
+                                            if not any(p in name_lower for p in exclude_patterns):
                                                 img = Image.open(png_file)
                                                 ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
                                                 ax.imshow(np.array(img))
@@ -1003,6 +1080,18 @@ class WebEditor:
                                     print(f"No preview found for panel {panel_id}")
                             except Exception as e:
                                 print(f"Could not load panel {panel_id}: {e}")
+
+                            # Draw panel letter
+                            if panel_id and len(panel_id) <= 2:  # Only for short IDs like A, B, C...
+                                # Position letter at top-left corner of panel
+                                letter_x = x_frac + 0.01
+                                letter_y = y_frac + h_frac - 0.02
+                                fig.text(letter_x, letter_y, panel_id,
+                                        fontsize=14, fontweight='bold', color='black',
+                                        ha='left', va='top',
+                                        transform=fig.transFigure,
+                                        bbox=dict(boxstyle='square,pad=0.1',
+                                                 facecolor='white', edgecolor='none', alpha=0.8))
 
                         buf = io.BytesIO()
                         fig.savefig(buf, format=fmt if fmt != "jpg" else "jpeg",
@@ -1069,9 +1158,9 @@ class WebEditor:
                 import traceback
                 return f"Error: {str(e)}\n{traceback.format_exc()}", 500
 
-        @app.route("/download_pltz")
-        def download_pltz():
-            """Download as pltz bundle (re-editable format)."""
+        @app.route("/download_figz")
+        def download_figz():
+            """Download as figz bundle (re-editable format)."""
             try:
                 if not editor.panel_info:
                     return "No panel info available", 404

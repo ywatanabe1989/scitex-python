@@ -1,9 +1,8 @@
 /* =============================================================================
- * Selection and Hover Styles
- * Color-neutral approach: white outline with glow that works with any element color
+ * Selection & Hover States
  * ============================================================================= */
 
-/* Hover: Light outline with subtle glow */
+/* Color-neutral hover/selection: white outline with glow works with any element color */
 .hover-rect {
     fill: none;
     stroke: rgba(255, 255, 255, 0.9);
@@ -12,7 +11,6 @@
     filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.8));
 }
 
-/* Selected: Stronger white outline with prominent glow */
 .selected-rect {
     fill: none;
     stroke: rgba(255, 255, 255, 1);
@@ -36,7 +34,6 @@
     filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.9));
 }
 
-/* Hover path: White outline that shows alongside the original trace */
 .hover-path {
     fill: none;
     stroke: rgba(255, 255, 255, 0.9);
@@ -47,7 +44,6 @@
     filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.6));
 }
 
-/* Selected path: Dashed white outline for clear selection indication */
 .selected-path {
     fill: none;
     stroke: rgba(255, 255, 255, 1);
@@ -78,53 +74,28 @@
     filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.7));
 }
 
-/* =============================================================================
- * Selected Element Panel
- * ============================================================================= */
-#section-selected {
-    border: 2px solid var(--accent-muted);
-    background: var(--bg-secondary);
+/* Panel selection styling */
+.panel-canvas-item.active {
+    outline: 3px solid var(--accent-primary, #4a90d9);
+    outline-offset: 2px;
+    z-index: 100;
 }
 
-#section-selected .section-header {
-    background: var(--accent-muted);
-    color: var(--text-primary);
-    font-weight: 600;
+/* Multi-selection (Ctrl+Click) - same as active but slightly different to distinguish */
+.panel-canvas-item.selected {
+    outline: 3px solid var(--accent-primary, #4a90d9);
+    outline-offset: 2px;
+    z-index: 100;
 }
 
-.selected-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-    padding: 8px;
-    background: var(--bg-primary);
-    border-radius: 4px;
+/* Both active and selected */
+.panel-canvas-item.active.selected {
+    outline: 3px solid var(--accent-primary, #4a90d9);
+    outline-offset: 2px;
+    z-index: 100;
 }
 
-.element-type-badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.element-type-badge.trace { background: #3498db; color: white; }
-.element-type-badge.scatter { background: #e74c3c; color: white; }
-.element-type-badge.fill { background: #9b59b6; color: white; }
-.element-type-badge.bar { background: #f39c12; color: white; }
-.element-type-badge.label { background: #2ecc71; color: white; }
-.element-type-badge.panel { background: #34495e; color: white; }
-.element-type-badge.legend { background: #1abc9c; color: white; }
-
-.element-axis-info {
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.element-props {
-    border-top: 1px solid var(--border-color);
-    padding-top: 12px;
-    margin-top: 8px;
+.panel-canvas-item:hover:not(.active):not(.selected) {
+    outline: 2px dashed var(--accent-secondary, #6ab04c);
+    outline-offset: 2px;
 }

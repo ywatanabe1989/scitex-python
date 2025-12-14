@@ -1,8 +1,6 @@
 /* =============================================================================
- * SciTeX Color System - CSS Variables
- * Based on scitex-cloud/static/shared/css
+ * SciTeX Color System - Based on scitex-cloud/static/shared/css
  * ============================================================================= */
-
 :root, [data-theme="light"] {
     /* Brand colors (light mode) */
     --scitex-01: #1a2a40;

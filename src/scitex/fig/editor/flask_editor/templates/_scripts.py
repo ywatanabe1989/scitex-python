@@ -1,7 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # File: ./src/scitex/vis/editor/flask_editor/templates/scripts.py
-"""JavaScript for the Flask editor UI."""
+"""JavaScript for the Flask editor UI.
+
+DEPRECATED: This inline JavaScript module is kept for fallback compatibility only.
+The JavaScript has been modularized into static/js/ directory:
+- static/js/main.js (main entry point)
+- static/js/core/ (state, api, utils)
+- static/js/canvas/ (canvas, dragging, resize, selection)
+- static/js/editor/ (preview, overlay, bbox, element-drag)
+- static/js/alignment/ (basic, axis, distribute)
+- static/js/shortcuts/ (keyboard, context-menu)
+- static/js/ui/ (controls, download, help, theme)
+
+To use static files (recommended):
+    Set USE_STATIC_FILES = True in templates/__init__.py
+
+To use this inline version (fallback):
+    Set USE_STATIC_FILES = False in templates/__init__.py
+"""
 
 JS_SCRIPTS = """
 let overrides = {{ overrides|safe }};
@@ -3161,13 +3178,54 @@ function initPanelDrag(item, panelName) {
 
 function startPanelDrag(e, item, name) {
     e.preventDefault();
-    draggedPanel = {item, name};
-    dragOffset.x = e.clientX - item.offsetLeft;
-    dragOffset.y = e.clientY - item.offsetTop;
-    item.classList.add('dragging');
-    item.style.cursor = 'grabbing';
 
-    // Show position indicator
+    // Handle selection based on Ctrl key
+    const isCtrlPressed = e.ctrlKey || e.metaKey;
+    const wasAlreadySelected = item.classList.contains('active');
+
+    if (isCtrlPressed) {
+        // Ctrl+Click: toggle this panel's selection
+        item.classList.toggle('active');
+    } else if (!wasAlreadySelected) {
+        // Regular click on unselected panel: select only this one
+        deselectAllPanels();
+        item.classList.add('active');
+    }
+    // If clicking on already-selected panel without Ctrl:
+    // Don't change selection yet - could be start of multi-panel drag
+    // Selection will be finalized in stopPanelDrag based on hasMoved
+
+    // Collect all selected panels for group dragging
+    const selectedPanels = Array.from(document.querySelectorAll('.panel-canvas-item.active'));
+    if (selectedPanels.length === 0) {
+        // If somehow nothing selected, select the clicked item
+        item.classList.add('active');
+        selectedPanels.push(item);
+    }
+
+    // Store drag state for all selected panels
+    draggedPanel = {
+        item,
+        name,
+        hasMoved: false,  // Track if actual drag occurred
+        wasAlreadySelected,  // Track initial selection state for click handling
+        isCtrlPressed,  // Track if Ctrl was pressed
+        selectedPanels: selectedPanels.map(p => ({
+            item: p,
+            name: p.dataset.panelName,
+            startLeft: parseFloat(p.style.left) || 0,
+            startTop: parseFloat(p.style.top) || 0
+        }))
+    };
+    dragOffset.x = e.clientX;
+    dragOffset.y = e.clientY;
+
+    selectedPanels.forEach(p => {
+        p.classList.add('dragging');
+        p.style.cursor = 'grabbing';
+    });
+
+    // Show position indicator for primary panel
     updatePositionIndicator(name, item.offsetLeft, item.offsetTop);
 
     document.addEventListener('mousemove', onPanelDrag);
@@ -3175,36 +3233,54 @@ function startPanelDrag(e, item, name) {
 }
 
 function onPanelDrag(e) {
-    if (!draggedPanel) return;
+    if (!draggedPanel || !draggedPanel.selectedPanels) return;
     const canvasEl = document.getElementById('panel-canvas');
 
-    let newX = e.clientX - dragOffset.x;
-    let newY = e.clientY - dragOffset.y;
+    // Calculate delta from drag start
+    let deltaX = e.clientX - dragOffset.x;
+    let deltaY = e.clientY - dragOffset.y;
 
-    // Constrain to canvas bounds (allow slight negative for edge alignment)
-    newX = Math.max(-5, Math.min(newX, canvasEl.offsetWidth - draggedPanel.item.offsetWidth + 5));
-    newY = Math.max(-5, newY);
+    // Mark as moved if we've actually dragged (threshold: 3px)
+    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+        draggedPanel.hasMoved = true;
+    }
 
     // Snap to grid (optional: 5mm grid)
     const gridSnap = 5 * canvasScale;  // 5mm in pixels
     if (e.shiftKey) {
-        newX = Math.round(newX / gridSnap) * gridSnap;
-        newY = Math.round(newY / gridSnap) * gridSnap;
+        deltaX = Math.round(deltaX / gridSnap) * gridSnap;
+        deltaY = Math.round(deltaY / gridSnap) * gridSnap;
     }
 
-    draggedPanel.item.style.left = newX + 'px';
-    draggedPanel.item.style.top = newY + 'px';
+    // Move all selected panels by the same delta
+    for (const panelInfo of draggedPanel.selectedPanels) {
+        let newX = panelInfo.startLeft + deltaX;
+        let newY = panelInfo.startTop + deltaY;
 
-    // Update pixel positions
-    panelPositions[draggedPanel.name].x = newX;
-    panelPositions[draggedPanel.name].y = newY;
+        // Constrain to canvas bounds (allow slight negative for edge alignment)
+        newX = Math.max(-5, Math.min(newX, canvasEl.offsetWidth - panelInfo.item.offsetWidth + 5));
+        newY = Math.max(-5, newY);
 
-    // Update mm positions
-    panelLayoutMm[draggedPanel.name].x_mm = newX / canvasScale;
-    panelLayoutMm[draggedPanel.name].y_mm = newY / canvasScale;
+        panelInfo.item.style.left = newX + 'px';
+        panelInfo.item.style.top = newY + 'px';
 
-    // Show position indicator
-    updatePositionIndicator(draggedPanel.name, newX, newY);
+        // Update pixel positions
+        if (panelPositions[panelInfo.name]) {
+            panelPositions[panelInfo.name].x = newX;
+            panelPositions[panelInfo.name].y = newY;
+        }
+
+        // Update mm positions
+        if (panelLayoutMm[panelInfo.name]) {
+            panelLayoutMm[panelInfo.name].x_mm = newX / canvasScale;
+            panelLayoutMm[panelInfo.name].y_mm = newY / canvasScale;
+        }
+    }
+
+    // Show position indicator for primary panel
+    const primaryNewX = draggedPanel.selectedPanels[0].startLeft + deltaX;
+    const primaryNewY = draggedPanel.selectedPanels[0].startTop + deltaY;
+    updatePositionIndicator(draggedPanel.name, primaryNewX, primaryNewY);
 
     // Mark layout as modified
     layoutModified = true;
@@ -3212,8 +3288,25 @@ function onPanelDrag(e) {
 
 function stopPanelDrag() {
     if (draggedPanel) {
-        draggedPanel.item.classList.remove('dragging');
-        draggedPanel.item.style.cursor = 'grab';  // Reset cursor
+        // Handle click (no movement) on already-selected panel without Ctrl:
+        // Finalize selection to only the clicked panel
+        if (!draggedPanel.hasMoved && draggedPanel.wasAlreadySelected && !draggedPanel.isCtrlPressed) {
+            // This was a simple click on an already-selected panel
+            // Deselect all others, keep only the clicked panel selected
+            deselectAllPanels();
+            draggedPanel.item.classList.add('active');
+        }
+
+        // Reset cursor for all selected panels
+        if (draggedPanel.selectedPanels) {
+            draggedPanel.selectedPanels.forEach(p => {
+                p.item.classList.remove('dragging');
+                p.item.style.cursor = 'grab';
+            });
+        } else {
+            draggedPanel.item.classList.remove('dragging');
+            draggedPanel.item.style.cursor = 'grab';
+        }
 
         // Update canvas size if panel moved outside
         updateCanvasSize();
@@ -3864,11 +3957,18 @@ document.addEventListener('keydown', (e) => {
     }
 
     // =========================================================================
-    // Multi-key shortcut mode (Alt+A → alignment, Alt+Z → size)
+    // Multi-key shortcut mode (Alt+A → alignment, Alt+Shift+A → axis alignment)
     // =========================================================================
     if (shortcutMode === 'align') {
         e.preventDefault();
         handleAlignShortcut(key, isShift);
+        shortcutMode = null;
+        return;
+    }
+
+    if (shortcutMode === 'alignByAxis') {
+        e.preventDefault();
+        handleAlignByAxisShortcut(key);
         shortcutMode = null;
         return;
     }
@@ -3959,9 +4059,23 @@ document.addEventListener('keydown', (e) => {
     }
 
     // =========================================================================
-    // Alignment Mode (Alt+A → ...)
+    // Alignment Modes (Alt+A → basic, Alt+Shift+A → by axis)
     // =========================================================================
-    if (isAlt && key === 'a') {
+    if (isAlt && isShift && key === 'a') {
+        // Alt+Shift+A: Align by Axis (scientific alignment based on plot axes)
+        e.preventDefault();
+        shortcutMode = 'alignByAxis';
+        setStatus('Align by Axis: L=Y-Axis(left) R=Right T=Top B=X-Axis(bottom) C=Center-H M=Center-V S=Stack', false);
+        setTimeout(() => {
+            if (shortcutMode === 'alignByAxis') {
+                shortcutMode = null;
+                setStatus('Ready', false);
+            }
+        }, 3000);
+        return;
+    }
+    if (isAlt && !isShift && key === 'a') {
+        // Alt+A: Basic alignment (by bounding box)
         e.preventDefault();
         shortcutMode = 'align';
         setStatus('Alignment mode: L=Left R=Right T=Top B=Bottom C=Center H=DistH V=DistV', false);
@@ -3989,6 +4103,35 @@ document.addEventListener('keydown', (e) => {
     }
 
     // =========================================================================
+    // Escape: Deselect/Cancel mode
+    // =========================================================================
+    if (key === 'escape') {
+        e.preventDefault();
+        shortcutMode = null;
+        deselectAllPanels();
+        setStatus('Ready', false);
+        return;
+    }
+
+    // =========================================================================
+    // G: Toggle grid visibility
+    // =========================================================================
+    if (key === 'g' && !isCtrl && !isAlt) {
+        e.preventDefault();
+        toggleGridVisibility();
+        return;
+    }
+
+    // =========================================================================
+    // Ctrl+A: Select all panels
+    // =========================================================================
+    if (isCtrl && key === 'a') {
+        e.preventDefault();
+        selectAllPanels();
+        return;
+    }
+
+    // =========================================================================
     // Help (? or F1)
     // =========================================================================
     if (key === '?' || key === 'f1') {
@@ -3998,7 +4141,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Handle alignment sub-shortcuts
+// Handle alignment sub-shortcuts (basic bounding box alignment)
 function handleAlignShortcut(key, isShift) {
     const panels = document.querySelectorAll('.panel-canvas-item');
     if (panels.length < 2) {
@@ -4020,33 +4163,283 @@ function handleAlignShortcut(key, isShift) {
     }
 }
 
-// Move selected panel by delta in mm
+// Handle axis-based alignment sub-shortcuts (scientific plot alignment)
+function handleAlignByAxisShortcut(key) {
+    const panels = document.querySelectorAll('.panel-canvas-item');
+    if (panels.length < 2) {
+        setStatus('Need multiple panels for axis alignment', true);
+        return;
+    }
+
+    const dirNames = {
+        'l': 'Y-axis (left edge)',
+        'r': 'Right edge',
+        't': 'Top edge',
+        'b': 'X-axis (bottom edge)',
+        'c': 'Center horizontal',
+        'm': 'Center vertical',
+        's': 'Stacked vertically'
+    };
+
+    switch(key) {
+        case 'l': alignPanelsByAxis('left'); break;      // Y-axis left
+        case 'r': alignPanelsByAxis('right'); break;     // Right edge
+        case 't': alignPanelsByAxis('top'); break;       // Top edge
+        case 'b': alignPanelsByAxis('bottom'); break;    // X-axis bottom
+        case 'c': alignPanelsByAxis('center-h'); break;  // Horizontal center
+        case 'm': alignPanelsByAxis('center-v'); break;  // Vertical center
+        case 's': stackPanelsVertically(); break;        // Stack with Y-axis alignment
+        default:
+            setStatus('Unknown axis key: ' + key + '. Use L/R/T/B/C/M/S', true);
+            return;
+    }
+    if (dirNames[key]) {
+        setStatus(`Aligned by axis: ${dirNames[key]}`, false);
+    }
+}
+
+// Get axes bounding box from panel's cached bboxes
+// Returns {x0, y0, x1, y1} in image pixels, or null if not found
+function getAxesBboxForPanel(panelName) {
+    const cache = panelBboxesCache[panelName];
+    if (!cache || !cache.bboxes) return null;
+
+    // Look for ax_00_panel, ax_01_panel, etc.
+    const bboxes = cache.bboxes;
+    for (const key of Object.keys(bboxes)) {
+        if (key.endsWith('_panel') && key.startsWith('ax_')) {
+            const bbox = bboxes[key];
+            if (bbox && bbox.x0 !== undefined) {
+                return {
+                    x0: bbox.x0,
+                    y0: bbox.y0,
+                    x1: bbox.x1,
+                    y1: bbox.y1,
+                    key: key
+                };
+            }
+        }
+    }
+
+    // Fallback: check _meta.axes_bbox_px for single-axes plots
+    if (bboxes._meta && bboxes._meta.axes_bbox_px) {
+        const axBbox = bboxes._meta.axes_bbox_px;
+        return {
+            x0: axBbox.x0 || axBbox.x,
+            y0: axBbox.y0 || axBbox.y,
+            x1: axBbox.x1 || (axBbox.x + axBbox.width),
+            y1: axBbox.y1 || (axBbox.y + axBbox.height),
+            key: '_meta.axes_bbox_px'
+        };
+    }
+
+    return null;
+}
+
+// Calculate panel offset to align by axis edge
+// Returns the axis edge position in canvas pixels relative to panel's top-left
+function getAxisEdgeOffset(panel, axesBbox, edge, imgSize) {
+    if (!axesBbox || !imgSize) return 0;
+
+    // Scale factor from image pixels to displayed panel pixels
+    const panelEl = panel;
+    const displayWidth = panelEl.offsetWidth;
+    const displayHeight = panelEl.offsetHeight;
+    const scaleX = displayWidth / imgSize.width;
+    const scaleY = displayHeight / imgSize.height;
+
+    switch(edge) {
+        case 'left':
+            // Y-axis left edge
+            return axesBbox.x0 * scaleX;
+        case 'right':
+            // Right edge of axes
+            return axesBbox.x1 * scaleX;
+        case 'top':
+            // Top edge of axes
+            return axesBbox.y0 * scaleY;
+        case 'bottom':
+            // X-axis bottom edge
+            return axesBbox.y1 * scaleY;
+        case 'center-h':
+            // Horizontal center of axes
+            return ((axesBbox.x0 + axesBbox.x1) / 2) * scaleX;
+        case 'center-v':
+            // Vertical center of axes
+            return ((axesBbox.y0 + axesBbox.y1) / 2) * scaleY;
+        default:
+            return 0;
+    }
+}
+
+// Align panels by axis edges (scientific alignment for plots)
+function alignPanelsByAxis(edge) {
+    const panels = Array.from(document.querySelectorAll('.panel-canvas-item'));
+    if (panels.length < 2) {
+        setStatus('Need multiple panels for axis alignment', true);
+        return;
+    }
+
+    // Collect panel info with axes bboxes
+    const panelInfos = [];
+    for (const panel of panels) {
+        const panelName = panel.dataset.panelName;
+        const cache = panelBboxesCache[panelName];
+        const axesBbox = getAxesBboxForPanel(panelName);
+        const imgSize = cache ? cache.imgSize : null;
+
+        if (!axesBbox || !imgSize) {
+            console.warn(`Panel ${panelName} has no axes bbox data`);
+            continue;
+        }
+
+        panelInfos.push({
+            el: panel,
+            name: panelName,
+            left: parseFloat(panel.style.left) || 0,
+            top: parseFloat(panel.style.top) || 0,
+            width: panel.offsetWidth,
+            height: panel.offsetHeight,
+            axesBbox: axesBbox,
+            imgSize: imgSize,
+            axisOffset: getAxisEdgeOffset(panel, axesBbox, edge, imgSize)
+        });
+    }
+
+    if (panelInfos.length < 2) {
+        setStatus('Need at least 2 panels with axis data for alignment', true);
+        return;
+    }
+
+    // Calculate target position - use the first panel's axis position as reference
+    const isHorizontal = ['left', 'right', 'center-h'].includes(edge);
+
+    if (isHorizontal) {
+        // Align horizontally (match X positions of axis edges)
+        // Target = first panel's axis X position in canvas coords
+        const refPanel = panelInfos[0];
+        const targetAxisX = refPanel.left + refPanel.axisOffset;
+
+        for (const info of panelInfos) {
+            const newLeft = targetAxisX - info.axisOffset;
+            info.el.style.left = newLeft + 'px';
+        }
+    } else {
+        // Align vertically (match Y positions of axis edges)
+        // Target = first panel's axis Y position in canvas coords
+        const refPanel = panelInfos[0];
+        const targetAxisY = refPanel.top + refPanel.axisOffset;
+
+        for (const info of panelInfos) {
+            const newTop = targetAxisY - info.axisOffset;
+            info.el.style.top = newTop + 'px';
+        }
+    }
+
+    // Update layout data
+    updatePanelLayoutFromDOM();
+    console.log(`Aligned ${panelInfos.length} panels by axis: ${edge}`);
+}
+
+// Stack panels vertically with Y-axis alignment
+function stackPanelsVertically() {
+    const panels = Array.from(document.querySelectorAll('.panel-canvas-item'));
+    if (panels.length < 2) {
+        setStatus('Need multiple panels for stacking', true);
+        return;
+    }
+
+    // Collect panel info with axes bboxes
+    const panelInfos = [];
+    for (const panel of panels) {
+        const panelName = panel.dataset.panelName;
+        const cache = panelBboxesCache[panelName];
+        const axesBbox = getAxesBboxForPanel(panelName);
+        const imgSize = cache ? cache.imgSize : null;
+
+        if (!axesBbox || !imgSize) {
+            console.warn(`Panel ${panelName} has no axes bbox data`);
+            continue;
+        }
+
+        panelInfos.push({
+            el: panel,
+            name: panelName,
+            left: parseFloat(panel.style.left) || 0,
+            top: parseFloat(panel.style.top) || 0,
+            width: panel.offsetWidth,
+            height: panel.offsetHeight,
+            axesBbox: axesBbox,
+            imgSize: imgSize,
+            yAxisOffset: getAxisEdgeOffset(panel, axesBbox, 'left', imgSize)
+        });
+    }
+
+    if (panelInfos.length < 2) {
+        setStatus('Need at least 2 panels with axis data for stacking', true);
+        return;
+    }
+
+    // Sort by current vertical position
+    panelInfos.sort((a, b) => a.top - b.top);
+
+    // Use first panel as reference for Y-axis alignment
+    const refPanel = panelInfos[0];
+    const targetAxisX = refPanel.left + refPanel.yAxisOffset;
+
+    // Stack panels vertically with small gap, aligned by Y-axis
+    const gap = 10; // pixels gap between panels
+    let currentY = refPanel.top;
+
+    for (let i = 0; i < panelInfos.length; i++) {
+        const info = panelInfos[i];
+
+        // Align Y-axis (left edge of axes)
+        const newLeft = targetAxisX - info.yAxisOffset;
+        info.el.style.left = newLeft + 'px';
+
+        // Stack vertically
+        info.el.style.top = currentY + 'px';
+        currentY += info.height + gap;
+    }
+
+    // Update layout data
+    updatePanelLayoutFromDOM();
+    setStatus(`Stacked ${panelInfos.length} panels with Y-axis alignment`, false);
+}
+
+// Move selected panel(s) by delta in mm
 function moveSelectedPanel(direction, amountMm) {
-    const activePanel = document.querySelector('.panel-canvas-item.active');
-    if (!activePanel) {
+    const selectedPanels = document.querySelectorAll('.panel-canvas-item.active');
+    if (selectedPanels.length === 0) {
         setStatus('No panel selected', true);
         return;
     }
 
-    const panelName = activePanel.dataset.panelName;
     const deltaX = direction === 'left' ? -amountMm : (direction === 'right' ? amountMm : 0);
     const deltaY = direction === 'up' ? -amountMm : (direction === 'down' ? amountMm : 0);
 
-    // Update position in pixels (canvasScale = px/mm)
-    const currentLeft = parseFloat(activePanel.style.left) || 0;
-    const currentTop = parseFloat(activePanel.style.top) || 0;
+    selectedPanels.forEach(panel => {
+        const panelName = panel.dataset.panelName;
 
-    activePanel.style.left = (currentLeft + deltaX * canvasScale) + 'px';
-    activePanel.style.top = (currentTop + deltaY * canvasScale) + 'px';
+        // Update position in pixels (canvasScale = px/mm)
+        const currentLeft = parseFloat(panel.style.left) || 0;
+        const currentTop = parseFloat(panel.style.top) || 0;
 
-    // Update layout data
-    if (panelLayoutMm[panelName]) {
-        panelLayoutMm[panelName].x_mm += deltaX;
-        panelLayoutMm[panelName].y_mm += deltaY;
-        layoutModified = true;
-    }
+        panel.style.left = (currentLeft + deltaX * canvasScale) + 'px';
+        panel.style.top = (currentTop + deltaY * canvasScale) + 'px';
 
-    setStatus(`Moved ${panelName} by ${amountMm}mm ${direction}`, false);
+        // Update layout data
+        if (panelLayoutMm[panelName]) {
+            panelLayoutMm[panelName].x_mm += deltaX;
+            panelLayoutMm[panelName].y_mm += deltaY;
+            layoutModified = true;
+        }
+    });
+
+    const count = selectedPanels.length;
+    const panelText = count === 1 ? selectedPanels[0].dataset.panelName : `${count} panels`;
+    setStatus(`Moved ${panelText} by ${amountMm}mm ${direction}`, false);
 }
 
 // Zoom canvas view
@@ -4189,22 +4582,64 @@ function updatePanelLayoutFromDOM() {
     autoSaveLayout();
 }
 
-// Bring panel to front
+// Bring selected panel(s) to front
 function bringPanelToFront() {
-    const activePanel = document.querySelector('.panel-canvas-item.active');
-    if (!activePanel) return;
+    const selectedPanels = document.querySelectorAll('.panel-canvas-item.active');
+    if (selectedPanels.length === 0) return;
     const maxZ = Math.max(...Array.from(document.querySelectorAll('.panel-canvas-item')).map(p => parseInt(p.style.zIndex) || 0));
-    activePanel.style.zIndex = maxZ + 1;
-    setStatus('Brought to front', false);
+    selectedPanels.forEach((panel, i) => {
+        panel.style.zIndex = maxZ + 1 + i;
+    });
+    setStatus(`Brought ${selectedPanels.length > 1 ? selectedPanels.length + ' panels' : 'panel'} to front`, false);
 }
 
-// Send panel to back
+// Send selected panel(s) to back
 function sendPanelToBack() {
-    const activePanel = document.querySelector('.panel-canvas-item.active');
-    if (!activePanel) return;
+    const selectedPanels = document.querySelectorAll('.panel-canvas-item.active');
+    if (selectedPanels.length === 0) return;
     const minZ = Math.min(...Array.from(document.querySelectorAll('.panel-canvas-item')).map(p => parseInt(p.style.zIndex) || 0));
-    activePanel.style.zIndex = minZ - 1;
-    setStatus('Sent to back', false);
+    selectedPanels.forEach((panel, i) => {
+        panel.style.zIndex = minZ - selectedPanels.length + i;
+    });
+    setStatus(`Sent ${selectedPanels.length > 1 ? selectedPanels.length + ' panels' : 'panel'} to back`, false);
+}
+
+// Deselect all panels
+function deselectAllPanels() {
+    document.querySelectorAll('.panel-canvas-item.active').forEach(p => {
+        p.classList.remove('active');
+    });
+    // Also clear element selection in single-panel view
+    if (typeof selectedElement !== 'undefined') {
+        selectedElement = null;
+    }
+}
+
+// Select all panels
+function selectAllPanels() {
+    const panels = document.querySelectorAll('.panel-canvas-item');
+    panels.forEach(p => p.classList.add('active'));
+    setStatus(`Selected ${panels.length} panels`, false);
+}
+
+// Toggle grid visibility
+let gridVisible = true;
+function toggleGridVisibility() {
+    gridVisible = !gridVisible;
+    const gridElements = document.querySelectorAll('.canvas-grid, .grid-lines, .ruler-marks');
+    gridElements.forEach(el => {
+        el.style.opacity = gridVisible ? '1' : '0';
+    });
+    // Also toggle the canvas background grid if using CSS grid
+    const canvasContainer = document.querySelector('.panel-canvas, #canvas-container');
+    if (canvasContainer) {
+        if (gridVisible) {
+            canvasContainer.classList.remove('hide-grid');
+        } else {
+            canvasContainer.classList.add('hide-grid');
+        }
+    }
+    setStatus(gridVisible ? 'Grid visible' : 'Grid hidden', false);
 }
 
 // Undo/Redo stacks
@@ -4267,6 +4702,13 @@ function showShortcutHelp() {
                     <div><kbd>Ctrl+Z</kbd> Undo</div>
                     <div><kbd>Ctrl+Y</kbd> Redo</div>
                     <div><kbd>Del</kbd> Delete override</div>
+                    <div><kbd>Esc</kbd> Deselect / Cancel</div>
+                    <div><kbd>Ctrl+A</kbd> Select all panels</div>
+
+                    <h4 style="color: var(--accent-primary); margin-top: 16px;">Selection</h4>
+                    <div><kbd>Click</kbd> Select panel</div>
+                    <div><kbd>Ctrl+Click</kbd> Multi-select</div>
+                    <div><kbd>Right-Click</kbd> Context menu</div>
 
                     <h4 style="color: var(--accent-primary); margin-top: 16px;">Movement</h4>
                     <div><kbd>↑↓←→</kbd> Move panel 1mm</div>
@@ -4278,6 +4720,7 @@ function showShortcutHelp() {
                     <div><kbd>+</kbd> Zoom in</div>
                     <div><kbd>-</kbd> Zoom out</div>
                     <div><kbd>0</kbd> Fit to window</div>
+                    <div><kbd>G</kbd> Toggle grid</div>
                     <div><kbd>Ctrl++</kbd> Increase canvas</div>
                     <div><kbd>Ctrl+-</kbd> Decrease canvas</div>
 
@@ -4297,6 +4740,18 @@ function showShortcutHelp() {
                 <div><kbd>M</kbd> Center V</div>
                 <div><kbd>H</kbd> Distribute H</div>
                 <div><kbd>V</kbd> Distribute V</div>
+            </div>
+
+            <h4 style="color: var(--accent-primary); margin-top: 16px;">Axis Alignment (Alt+Shift+A → ...)</h4>
+            <p style="font-size: 0.85em; color: var(--text-muted); margin-top: 4px;">Aligns panels by plot axis edges, not bounding boxes</p>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                <div><kbd>L</kbd> Y-axis (left)</div>
+                <div><kbd>R</kbd> Right edge</div>
+                <div><kbd>T</kbd> Top edge</div>
+                <div><kbd>B</kbd> X-axis (bottom)</div>
+                <div><kbd>C</kbd> Axes center H</div>
+                <div><kbd>M</kbd> Axes center V</div>
+                <div><kbd>S</kbd> Stack vertically</div>
             </div>
 
             <div style="margin-top: 20px; text-align: center; color: var(--text-muted);">
@@ -4321,6 +4776,140 @@ kbdStyle.textContent = `
     }
 `;
 document.head.appendChild(kbdStyle);
+
+// =============================================================================
+// Right-Click Context Menu
+// =============================================================================
+let contextMenu = null;
+
+function showContextMenu(e, panelName) {
+    e.preventDefault();
+    hideContextMenu();
+
+    const selectedCount = document.querySelectorAll('.panel-canvas-item.active').length;
+    const hasSelection = selectedCount > 0;
+
+    const menu = document.createElement('div');
+    menu.id = 'canvas-context-menu';
+    menu.className = 'context-menu';
+    menu.innerHTML = `
+        <div class="context-menu-item" onclick="selectAllPanels(); hideContextMenu();">
+            <span class="context-menu-icon">⬚</span> Select All <span class="context-menu-shortcut">Ctrl+A</span>
+        </div>
+        <div class="context-menu-item ${!hasSelection ? 'disabled' : ''}" onclick="${hasSelection ? 'deselectAllPanels(); hideContextMenu();' : ''}">
+            <span class="context-menu-icon">○</span> Deselect All <span class="context-menu-shortcut">Esc</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item ${!hasSelection ? 'disabled' : ''}" onclick="${hasSelection ? 'bringPanelToFront(); hideContextMenu();' : ''}">
+            <span class="context-menu-icon">↑</span> Bring to Front <span class="context-menu-shortcut">Alt+F</span>
+        </div>
+        <div class="context-menu-item ${!hasSelection ? 'disabled' : ''}" onclick="${hasSelection ? 'sendPanelToBack(); hideContextMenu();' : ''}">
+            <span class="context-menu-icon">↓</span> Send to Back <span class="context-menu-shortcut">Alt+B</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-submenu">
+            <div class="context-menu-item">
+                <span class="context-menu-icon">≡</span> Align <span class="context-menu-arrow">▶</span>
+            </div>
+            <div class="context-submenu">
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "alignPanels('left'); hideContextMenu();" : ''}">Left</div>
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "alignPanels('right'); hideContextMenu();" : ''}">Right</div>
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "alignPanels('top'); hideContextMenu();" : ''}">Top</div>
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "alignPanels('bottom'); hideContextMenu();" : ''}">Bottom</div>
+                <div class="context-menu-divider"></div>
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "alignPanels('center-h'); hideContextMenu();" : ''}">Center H</div>
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "alignPanels('center-v'); hideContextMenu();" : ''}">Center V</div>
+            </div>
+        </div>
+        <div class="context-menu-submenu">
+            <div class="context-menu-item">
+                <span class="context-menu-icon">⊞</span> Align by Axis <span class="context-menu-arrow">▶</span>
+            </div>
+            <div class="context-submenu">
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "alignPanelsByAxis('left'); hideContextMenu();" : ''}">Y-Axis (Left)</div>
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "alignPanelsByAxis('bottom'); hideContextMenu();" : ''}">X-Axis (Bottom)</div>
+                <div class="context-menu-divider"></div>
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "stackPanelsVertically(); hideContextMenu();" : ''}">Stack Vertically</div>
+            </div>
+        </div>
+        <div class="context-menu-submenu">
+            <div class="context-menu-item">
+                <span class="context-menu-icon">⇔</span> Distribute <span class="context-menu-arrow">▶</span>
+            </div>
+            <div class="context-submenu">
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "distributePanels('horizontal'); hideContextMenu();" : ''}">Horizontal</div>
+                <div class="context-menu-item ${selectedCount < 2 ? 'disabled' : ''}" onclick="${selectedCount >= 2 ? "distributePanels('vertical'); hideContextMenu();" : ''}">Vertical</div>
+            </div>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" onclick="toggleGridVisibility(); hideContextMenu();">
+            <span class="context-menu-icon">⊞</span> Toggle Grid <span class="context-menu-shortcut">G</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" onclick="showShortcutHelp(); hideContextMenu();">
+            <span class="context-menu-icon">⌨</span> Keyboard Shortcuts <span class="context-menu-shortcut">?</span>
+        </div>
+    `;
+
+    // Position menu at cursor
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+
+    document.body.appendChild(menu);
+    contextMenu = menu;
+
+    // Adjust position if menu goes off screen
+    const rect = menu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+        menu.style.left = (window.innerWidth - rect.width - 5) + 'px';
+    }
+    if (rect.bottom > window.innerHeight) {
+        menu.style.top = (window.innerHeight - rect.height - 5) + 'px';
+    }
+}
+
+function hideContextMenu() {
+    if (contextMenu) {
+        contextMenu.remove();
+        contextMenu = null;
+    }
+}
+
+// Close context menu on click outside
+document.addEventListener('click', (e) => {
+    if (contextMenu && !contextMenu.contains(e.target)) {
+        hideContextMenu();
+    }
+});
+
+// Close context menu on Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && contextMenu) {
+        hideContextMenu();
+    }
+});
+
+// Attach context menu to canvas
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('panel-canvas');
+    if (canvas) {
+        canvas.addEventListener('contextmenu', (e) => {
+            // Check if right-click is on a panel
+            const panel = e.target.closest('.panel-canvas-item');
+            const panelName = panel ? panel.dataset.panelName : null;
+
+            // If clicking on a panel that's not selected, select it
+            if (panel && !panel.classList.contains('active')) {
+                if (!e.ctrlKey && !e.metaKey) {
+                    deselectAllPanels();
+                }
+                panel.classList.add('active');
+            }
+
+            showContextMenu(e, panelName);
+        });
+    }
+});
 
 // Auto-update interval system
 let autoUpdateIntervalId = null;

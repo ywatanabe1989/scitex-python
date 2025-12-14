@@ -25,6 +25,11 @@
     background-size: 24px 24px;
 }
 
+/* Hide grid when toggled off (G key) */
+.panel-canvas.hide-grid {
+    background-image: none !important;
+}
+
 /* Unified canvas - panels appear as single figure matching figz export */
 .panel-canvas-item {
     position: absolute;
@@ -60,6 +65,13 @@
     object-fit: contain;  /* Preserve aspect ratio - never distort figures */
     pointer-events: none;
     display: block;
+}
+
+/* Dark mode: invert plot colors for visibility */
+[data-theme="dark"] .panel-canvas-item img,
+[data-theme="dark"] .panel-card img,
+[data-theme="dark"] .preview-wrapper img {
+    filter: invert(0.88) hue-rotate(180deg);
 }
 
 .panel-canvas-label {
@@ -147,9 +159,18 @@
     display: flex;
     gap: 8px;
     margin-bottom: 8px;
+    align-items: center;
 }
 
 .canvas-controls button {
     padding: 4px 12px;
     font-size: 0.8em;
+}
+
+/* Toolbar separator */
+.toolbar-separator {
+    width: 1px;
+    height: 24px;
+    background: #555;
+    margin: 0 4px;
 }

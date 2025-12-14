@@ -1,7 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # File: ./src/scitex/vis/editor/flask_editor/templates/styles.py
-"""CSS styles for the Flask editor UI."""
+"""CSS styles for the Flask editor UI.
+
+DEPRECATED: This inline CSS module is kept for fallback compatibility only.
+The CSS has been modularized into static/css/ directory:
+- static/css/index.css (main entry point with @imports)
+- static/css/base/ (variables, reset, typography)
+- static/css/layout/ (container, preview, controls)
+- static/css/components/ (buttons, forms, sections, dropdown, modal, context-menu)
+- static/css/features/ (canvas, panel-grid, selection, overlay, loading, statistics)
+
+To use static files (recommended):
+    Set USE_STATIC_FILES = True in templates/__init__.py
+
+To use this inline version (fallback):
+    Set USE_STATIC_FILES = False in templates/__init__.py
+"""
 
 CSS_STYLES = """
 /* =============================================================================
@@ -1336,6 +1351,11 @@ input[type="range"]::-moz-range-thumb {
     background-size: 24px 24px;
 }
 
+/* Hide grid when toggled off (G key) */
+.panel-canvas.hide-grid {
+    background-image: none !important;
+}
+
 /* Unified canvas - panels appear as single figure matching figz export */
 .panel-canvas-item {
     position: absolute;
@@ -1458,11 +1478,179 @@ input[type="range"]::-moz-range-thumb {
     display: flex;
     gap: 8px;
     margin-bottom: 8px;
+    align-items: center;
 }
 
 .canvas-controls button {
     padding: 4px 12px;
     font-size: 0.8em;
+}
+
+/* Toolbar separator */
+.toolbar-separator {
+    width: 1px;
+    height: 24px;
+    background: #555;
+    margin: 0 4px;
+}
+
+/* Download dropdown in toolbar */
+.download-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.download-dropdown #download-btn {
+    background: #4a90d9;
+    border: none;
+    color: white;
+    padding: 4px 12px;
+    font-size: 0.8em;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.download-dropdown #download-btn:hover {
+    background: #5a9fe9;
+}
+
+#download-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    min-width: 160px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    margin-top: 4px;
+    padding: 4px 0;
+}
+
+.download-item {
+    display: block;
+    padding: 8px 12px;
+    color: #ddd;
+    text-decoration: none;
+    font-size: 0.85em;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+
+.download-item:hover {
+    background: #3a3a3a;
+    color: #fff;
+}
+
+.download-divider {
+    height: 1px;
+    background: #444;
+    margin: 4px 0;
+}
+
+/* =============================================================================
+   Context Menu (Right-Click)
+   ============================================================================= */
+.context-menu {
+    position: fixed;
+    background: var(--bg-secondary, #2a2a2a);
+    border: 1px solid var(--border-color, #444);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    min-width: 200px;
+    z-index: 10000;
+    padding: 4px 0;
+    font-size: 13px;
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: var(--text-primary, #ddd);
+    transition: background 0.1s;
+    position: relative;
+}
+
+.context-menu-item:hover:not(.disabled) {
+    background: var(--accent-primary, #4a90d9);
+    color: #fff;
+}
+
+.context-menu-item.disabled {
+    color: var(--text-muted, #666);
+    cursor: not-allowed;
+}
+
+.context-menu-icon {
+    width: 20px;
+    margin-right: 8px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.context-menu-shortcut {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-muted, #888);
+    padding-left: 16px;
+}
+
+.context-menu-item:hover:not(.disabled) .context-menu-shortcut {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.context-menu-arrow {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--text-muted, #888);
+}
+
+.context-menu-divider {
+    height: 1px;
+    background: var(--border-color, #444);
+    margin: 4px 0;
+}
+
+/* Submenu */
+.context-menu-submenu {
+    position: relative;
+}
+
+.context-submenu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background: var(--bg-secondary, #2a2a2a);
+    border: 1px solid var(--border-color, #444);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    min-width: 150px;
+    padding: 4px 0;
+}
+
+.context-menu-submenu:hover > .context-submenu {
+    display: block;
+}
+
+.context-submenu .context-menu-item {
+    padding: 6px 12px;
+}
+
+/* Panel selection styling */
+.panel-canvas-item.active {
+    outline: 3px solid var(--accent-primary, #4a90d9);
+    outline-offset: 2px;
+    z-index: 100;
+}
+
+.panel-canvas-item:hover:not(.active) {
+    outline: 2px dashed var(--accent-secondary, #6ab04c);
+    outline-offset: 2px;
 }
 """
 

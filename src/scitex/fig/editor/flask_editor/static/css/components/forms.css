@@ -1,7 +1,9 @@
 /* =============================================================================
  * Form Fields
  * ============================================================================= */
-.field { margin-bottom: 8px; }
+.field {
+    margin-bottom: 8px;
+}
 
 .field label {
     display: block;
@@ -45,7 +47,10 @@
     gap: 8px;
 }
 
-.field-row .field { flex: 1; margin-bottom: 0; }
+.field-row .field {
+    flex: 1;
+    margin-bottom: 0;
+}
 
 /* Checkbox styling */
 .checkbox-field {
