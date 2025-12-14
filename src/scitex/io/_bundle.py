@@ -307,11 +307,13 @@ def validate_bundle(
     return result
 
 
-def load_bundle(path: Union[str, Path]) -> Dict[str, Any]:
+def load_bundle(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any]:
     """Load bundle from directory or ZIP transparently.
 
     Args:
         path: Path to bundle (directory or ZIP).
+        in_memory: If True, load ZIP contents in-memory without extracting.
+                   If False, extract to temp directory (legacy behavior).
 
     Returns:
         Bundle data as dictionary with:
@@ -335,17 +337,42 @@ def load_bundle(path: Union[str, Path]) -> Dict[str, Any]:
 
     # Handle ZIP vs directory
     if p.is_file() and p.suffix in BUNDLE_EXTENSIONS:
-        # ZIP archive - extract to temp and load
         result["is_zip"] = True
-        import tempfile
-        temp_dir = Path(tempfile.mkdtemp())
-        with zipfile.ZipFile(p, "r") as zf:
-            zf.extractall(temp_dir)
-        bundle_dir = temp_dir
+
+        if in_memory:
+            # In-memory loading using ZipBundle
+            from ._zip_bundle import ZipBundle
+            with ZipBundle(p, mode="r") as zb:
+                result["_zip_bundle"] = zb
+                # Load common files in-memory
+                try:
+                    result["spec"] = zb.read_json("spec.json")
+                except FileNotFoundError:
+                    result["spec"] = None
+                try:
+                    result["style"] = zb.read_json("style.json")
+                except FileNotFoundError:
+                    result["style"] = None
+                try:
+                    result["data"] = zb.read_csv("data.csv")
+                except FileNotFoundError:
+                    result["data"] = None
+
+                # Get file list
+                result["files"] = zb.namelist()
+
+            return result
+        else:
+            # Legacy: extract to temp and load
+            import tempfile
+            temp_dir = Path(tempfile.mkdtemp())
+            with zipfile.ZipFile(p, "r") as zf:
+                zf.extractall(temp_dir)
+            bundle_dir = temp_dir
     else:
         bundle_dir = p
 
-    # Delegate to domain-specific loaders
+    # Delegate to domain-specific loaders (for directory bundles or legacy mode)
     if bundle_type == BundleType.FIGZ:
         from scitex.fig.io._bundle import load_figz_bundle
         result.update(load_figz_bundle(bundle_dir))
@@ -364,6 +391,7 @@ def save_bundle(
     path: Union[str, Path],
     bundle_type: Optional[str] = None,
     as_zip: bool = False,
+    atomic: bool = True,
 ) -> Path:
     """Save data as a bundle.
 
@@ -372,6 +400,7 @@ def save_bundle(
         path: Output path (with or without .d suffix).
         bundle_type: Bundle type ('figz', 'pltz', 'statsz'). Auto-detected if None.
         as_zip: If True, save as ZIP archive.
+        atomic: If True, use atomic write (temp file + rename) for ZIP.
 
     Returns:
         Path to saved bundle.
@@ -399,7 +428,35 @@ def save_bundle(
         else:
             dir_path = p
 
-    # Create directory
+    # For direct ZIP saving with atomic writes, use ZipBundle
+    if save_as_zip and atomic:
+        from ._zip_bundle import ZipBundle
+
+        with ZipBundle(zip_path, mode="w") as zb:
+            # Write spec
+            if "spec" in data:
+                zb.write_json("spec.json", data["spec"])
+
+            # Write style
+            if "style" in data:
+                zb.write_json("style.json", data["style"])
+
+            # Write CSV data
+            if "data" in data and data["data"] is not None:
+                import pandas as pd
+                if isinstance(data["data"], pd.DataFrame):
+                    zb.write_csv("data.csv", data["data"])
+
+            # Write exports (PNG, SVG, etc.)
+            for key in ["png", "svg", "pdf"]:
+                if key in data and data[key] is not None:
+                    export_data = data[key]
+                    if isinstance(export_data, bytes):
+                        zb.write_bytes(f"exports/figure.{key}", export_data)
+
+        return zip_path
+
+    # Create directory for non-ZIP or non-atomic saves
     dir_path.mkdir(parents=True, exist_ok=True)
 
     # Delegate to domain-specific savers
@@ -417,7 +474,7 @@ def save_bundle(
     else:
         raise ValueError(f"Unknown bundle type: {bundle_type}")
 
-    # Pack to ZIP if requested
+    # Pack to ZIP if requested (non-atomic path)
     if save_as_zip:
         pack_bundle(dir_path, zip_path)
         shutil.rmtree(dir_path)  # Remove temp directory

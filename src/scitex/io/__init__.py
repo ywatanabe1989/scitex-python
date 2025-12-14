@@ -85,6 +85,14 @@ except ImportError:
     embed_metadata = None
     has_metadata = None
 
+# Import ZipBundle for in-memory zip access
+try:
+    from ._zip_bundle import ZipBundle, open_bundle, create_bundle
+except ImportError:
+    ZipBundle = None
+    open_bundle = None
+    create_bundle = None
+
 __all__ = [
     # Primary I/O
     "save",
@@ -96,6 +104,10 @@ __all__ = [
     "reload",
     "flush",
     "cache",
+    # Zip bundle access
+    "ZipBundle",
+    "open_bundle",
+    "create_bundle",
 ]
 
 # EOF
