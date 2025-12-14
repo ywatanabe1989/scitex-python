@@ -2065,6 +2065,17 @@ function initCanvasItemInteraction(item, panelIdx, panelName) {
         }
     });
 
+    // Mousedown to start element drag (ONLY for legends and panel letters)
+    container.addEventListener('mousedown', (e) => {
+        const panelCache = panelBboxesCache[panelName];
+        if (!panelCache || !panelHoveredElement) return;
+
+        // Only allow dragging of legends and panel letters (scientific rigor)
+        if (isDraggableElement(panelHoveredElement, panelCache.bboxes)) {
+            startElementDrag(e, panelHoveredElement, panelName, img, panelCache.bboxes);
+        }
+    });
+
     // Click to select element (accounting for object-fit:contain letterboxing)
     container.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2785,6 +2796,325 @@ function isInteractiveElement(target) {
     return false;
 }
 
+// =============================================================================
+// Element Dragging (Legends, Panel Letters)
+// =============================================================================
+let elementDragState = null;  // {element, panelName, startPos, elementType, axId}
+
+// Snap positions for draggable elements (normalized axes coordinates 0-1)
+const SNAP_POSITIONS = {
+    'upper left':    {x: 0.02, y: 0.98},
+    'upper center':  {x: 0.50, y: 0.98},
+    'upper right':   {x: 0.98, y: 0.98},
+    'center left':   {x: 0.02, y: 0.50},
+    'center':        {x: 0.50, y: 0.50},
+    'center right':  {x: 0.98, y: 0.50},
+    'lower left':    {x: 0.02, y: 0.02},
+    'lower center':  {x: 0.50, y: 0.02},
+    'lower right':   {x: 0.98, y: 0.02},
+};
+
+// Check if an element is draggable
+// ONLY panel letters and legends are draggable to maintain scientific rigor
+// Data elements (lines, scatter, bars, etc.) must NOT be movable
+function isDraggableElement(elementName, bboxes) {
+    if (!elementName || !bboxes) return false;
+
+    // Whitelist: ONLY these element types are draggable
+    const DRAGGABLE_TYPES = ['legend', 'panel_letter'];
+
+    // Check by element_type in bbox info
+    const info = bboxes[elementName];
+    if (info && DRAGGABLE_TYPES.includes(info.element_type)) {
+        return true;
+    }
+
+    // Check by naming convention (strict match)
+    if (elementName.match(/_legend$/)) return true;
+    if (elementName.match(/_panel_letter_[A-Z]$/)) return true;
+
+    // Everything else is NOT draggable (data integrity)
+    return false;
+}
+
+// Start element drag (for legends and panel letters)
+function startElementDrag(e, elementName, panelName, img, bboxes) {
+    const info = bboxes[elementName] || {};
+    const elementType = info.element_type || (elementName.includes('legend') ? 'legend' : 'panel_letter');
+
+    // Extract ax_id from element name (e.g., "ax_00_legend" -> "ax_00")
+    const axId = elementName.split('_').slice(0, 2).join('_');
+
+    // Get axes bbox for constraining drag
+    const axesBbox = bboxes[`${axId}_panel`] || null;
+
+    elementDragState = {
+        element: elementName,
+        panelName: panelName,
+        elementType: elementType,
+        axId: axId,
+        axesBbox: axesBbox,
+        bboxes: bboxes,
+        img: img,
+        startMouseX: e.clientX,
+        startMouseY: e.clientY,
+        startBbox: {...info},
+    };
+
+    // Show snap guide overlay
+    showSnapGuides(img, axesBbox, bboxes);
+
+    document.addEventListener('mousemove', onElementDrag);
+    document.addEventListener('mouseup', stopElementDrag);
+
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+// Handle element drag movement
+function onElementDrag(e) {
+    if (!elementDragState) return;
+
+    const {img, bboxes, element, axId, axesBbox, startBbox, startMouseX, startMouseY} = elementDragState;
+    if (!img) return;
+
+    const rect = img.getBoundingClientRect();
+    const dims = getObjectFitContainDimensions(img);
+
+    // Calculate delta in image coordinates
+    const deltaX = e.clientX - startMouseX;
+    const deltaY = e.clientY - startMouseY;
+
+    // Convert to image pixel coordinates
+    const scaleX = dims.renderedWidth / rect.width;
+    const scaleY = dims.renderedHeight / rect.height;
+    const imgDeltaX = deltaX * scaleX * (bboxes._meta?.imgSize?.width || 1) / dims.renderedWidth;
+    const imgDeltaY = deltaY * scaleY * (bboxes._meta?.imgSize?.height || 1) / dims.renderedHeight;
+
+    // Update bbox position (for visual feedback)
+    if (bboxes[element]) {
+        const newX0 = startBbox.x0 + imgDeltaX;
+        const newY0 = startBbox.y0 + imgDeltaY;
+        bboxes[element].x0 = newX0;
+        bboxes[element].y0 = newY0;
+        bboxes[element].x1 = newX0 + (startBbox.x1 - startBbox.x0);
+        bboxes[element].y1 = newY0 + (startBbox.y1 - startBbox.y0);
+    }
+
+    // Calculate normalized axes position (0-1)
+    if (axesBbox) {
+        const axesWidth = axesBbox.x1 - axesBbox.x0;
+        const axesHeight = axesBbox.y1 - axesBbox.y0;
+        const elemCenterX = (bboxes[element].x0 + bboxes[element].x1) / 2;
+        const elemCenterY = (bboxes[element].y0 + bboxes[element].y1) / 2;
+        const normX = (elemCenterX - axesBbox.x0) / axesWidth;
+        const normY = 1 - (elemCenterY - axesBbox.y0) / axesHeight;  // Flip Y
+
+        // Update snap guide highlighting
+        updateSnapHighlight(normX, normY);
+
+        // Show position indicator
+        showElementPositionIndicator(element, normX, normY);
+    }
+
+    // Redraw overlay
+    const overlay = img.parentElement?.querySelector('svg.panel-card-overlay');
+    if (overlay) {
+        const panelCache = panelBboxesCache[elementDragState.panelName];
+        if (panelCache) {
+            updatePanelOverlay(overlay, bboxes, panelCache.imgSize, rect.width, rect.height, element, element, img);
+        }
+    }
+}
+
+// Stop element drag and save position
+function stopElementDrag() {
+    if (!elementDragState) return;
+
+    const {element, panelName, elementType, axId, bboxes, axesBbox} = elementDragState;
+
+    // Calculate final normalized position
+    let finalPosition = null;
+    let snapName = null;
+
+    if (axesBbox && bboxes[element]) {
+        const axesWidth = axesBbox.x1 - axesBbox.x0;
+        const axesHeight = axesBbox.y1 - axesBbox.y0;
+        const elemCenterX = (bboxes[element].x0 + bboxes[element].x1) / 2;
+        const elemCenterY = (bboxes[element].y0 + bboxes[element].y1) / 2;
+        const normX = (elemCenterX - axesBbox.x0) / axesWidth;
+        const normY = 1 - (elemCenterY - axesBbox.y0) / axesHeight;
+
+        // Check for snap to named position
+        snapName = findNearestSnapPosition(normX, normY);
+        finalPosition = snapName ? SNAP_POSITIONS[snapName] : {x: normX, y: normY};
+    }
+
+    // Hide snap guides
+    hideSnapGuides();
+    hideElementPositionIndicator();
+
+    // Save position to server
+    if (finalPosition) {
+        saveElementPosition(element, panelName, elementType, finalPosition, snapName);
+    }
+
+    document.removeEventListener('mousemove', onElementDrag);
+    document.removeEventListener('mouseup', stopElementDrag);
+    elementDragState = null;
+}
+
+// Find nearest snap position if within threshold
+function findNearestSnapPosition(normX, normY, threshold = 0.08) {
+    let nearest = null;
+    let minDist = Infinity;
+
+    for (const [name, pos] of Object.entries(SNAP_POSITIONS)) {
+        const dist = Math.sqrt(Math.pow(normX - pos.x, 2) + Math.pow(normY - pos.y, 2));
+        if (dist < threshold && dist < minDist) {
+            minDist = dist;
+            nearest = name;
+        }
+    }
+    return nearest;
+}
+
+// Show snap guide overlay on axes
+function showSnapGuides(img, axesBbox, bboxes) {
+    if (!img || !axesBbox) return;
+
+    const container = img.parentElement;
+    if (!container) return;
+
+    // Remove existing guides
+    container.querySelectorAll('.snap-guide').forEach(el => el.remove());
+
+    const rect = img.getBoundingClientRect();
+    const dims = getObjectFitContainDimensions(img);
+    const imgSize = bboxes._meta?.imgSize || {width: dims.renderedWidth, height: dims.renderedHeight};
+
+    // Scale factors
+    const scaleX = dims.renderedWidth / imgSize.width;
+    const scaleY = dims.renderedHeight / imgSize.height;
+
+    // Create snap points
+    for (const [name, pos] of Object.entries(SNAP_POSITIONS)) {
+        const axesWidth = axesBbox.x1 - axesBbox.x0;
+        const axesHeight = axesBbox.y1 - axesBbox.y0;
+
+        // Calculate pixel position
+        const imgX = axesBbox.x0 + pos.x * axesWidth;
+        const imgY = axesBbox.y0 + (1 - pos.y) * axesHeight;
+
+        const displayX = dims.offsetX + imgX * scaleX;
+        const displayY = dims.offsetY + imgY * scaleY;
+
+        const guide = document.createElement('div');
+        guide.className = 'snap-guide';
+        guide.dataset.snapName = name;
+        guide.style.cssText = `
+            position: absolute;
+            left: ${displayX - 6}px;
+            top: ${displayY - 6}px;
+            width: 12px;
+            height: 12px;
+            border: 2px dashed rgba(100, 149, 237, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 50;
+            transition: all 0.15s ease;
+        `;
+        container.appendChild(guide);
+    }
+}
+
+// Highlight snap position when near
+function updateSnapHighlight(normX, normY) {
+    const threshold = 0.08;
+    document.querySelectorAll('.snap-guide').forEach(guide => {
+        const name = guide.dataset.snapName;
+        const pos = SNAP_POSITIONS[name];
+        const dist = Math.sqrt(Math.pow(normX - pos.x, 2) + Math.pow(normY - pos.y, 2));
+        if (dist < threshold) {
+            guide.style.borderColor = 'rgba(76, 175, 80, 0.9)';
+            guide.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+            guide.style.transform = 'scale(1.5)';
+        } else {
+            guide.style.borderColor = 'rgba(100, 149, 237, 0.6)';
+            guide.style.backgroundColor = 'transparent';
+            guide.style.transform = 'scale(1)';
+        }
+    });
+}
+
+// Hide snap guides
+function hideSnapGuides() {
+    document.querySelectorAll('.snap-guide').forEach(el => el.remove());
+}
+
+// Show position indicator while dragging element
+function showElementPositionIndicator(element, normX, normY) {
+    let indicator = document.getElementById('element-pos-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'element-pos-indicator';
+        indicator.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #4fc3f7;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+        `;
+        document.body.appendChild(indicator);
+    }
+    const snapName = findNearestSnapPosition(normX, normY);
+    if (snapName) {
+        indicator.innerHTML = `Position: <b>${snapName}</b>`;
+        indicator.style.color = '#4caf50';
+    } else {
+        indicator.innerHTML = `Position: (${normX.toFixed(2)}, ${normY.toFixed(2)})`;
+        indicator.style.color = '#4fc3f7';
+    }
+    indicator.style.display = 'block';
+}
+
+// Hide position indicator
+function hideElementPositionIndicator() {
+    const indicator = document.getElementById('element-pos-indicator');
+    if (indicator) indicator.style.display = 'none';
+}
+
+// Save element position to server
+async function saveElementPosition(element, panelName, elementType, position, snapName) {
+    try {
+        const response = await fetch('/save_element_position', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                element: element,
+                panel: panelName,
+                element_type: elementType,
+                position: position,
+                snap_name: snapName,
+            }),
+        });
+        const data = await response.json();
+        if (data.success) {
+            setStatus(`Saved ${elementType} position: ${snapName || `(${position.x.toFixed(2)}, ${position.y.toFixed(2)})`}`, false);
+        } else {
+            setStatus(`Failed to save position: ${data.error}`, true);
+        }
+    } catch (err) {
+        console.error('Error saving element position:', err);
+        setStatus('Error saving position', true);
+    }
+}
+
 // Initialize drag handler for a panel item
 function initPanelDrag(item, panelName) {
     const dragHandle = item.querySelector('.panel-drag-handle');
@@ -3253,6 +3583,18 @@ async function saveManual() {
         const data = await resp.json();
         if (data.status === 'saved') {
             setStatus('Saved: ' + data.path.split('/').pop(), false);
+
+            // Also export to bundle (png and svg)
+            try {
+                await fetch('/export', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({formats: ['png', 'svg']})
+                });
+                setStatus('Saved and exported to bundle', false);
+            } catch (exportErr) {
+                console.warn('Export failed:', exportErr);
+            }
         } else {
             setStatus('Error: ' + data.message, true);
         }
@@ -3264,6 +3606,47 @@ async function saveManual() {
 function resetOverrides() {
     if (confirm('Reset all changes to original values?')) {
         location.reload();
+    }
+}
+
+// Download menu toggle
+function toggleDownloadMenu() {
+    const menu = document.getElementById('download-menu');
+    if (menu.style.display === 'none') {
+        menu.style.display = 'block';
+        // Close when clicking outside
+        setTimeout(() => {
+            document.addEventListener('click', closeDownloadMenuOnClickOutside);
+        }, 10);
+    } else {
+        menu.style.display = 'none';
+    }
+}
+
+function closeDownloadMenuOnClickOutside(e) {
+    const menu = document.getElementById('download-menu');
+    const btn = document.getElementById('download-btn');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.style.display = 'none';
+        document.removeEventListener('click', closeDownloadMenuOnClickOutside);
+    }
+}
+
+// Export figure to bundle and trigger download
+async function exportAndDownload(format) {
+    setStatus(`Exporting ${format.toUpperCase()}...`, false);
+    try {
+        // First export to bundle
+        await fetch('/export', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({formats: [format]})
+        });
+        // Then trigger download
+        window.location.href = `/download/${format}`;
+        setStatus(`Downloaded ${format.toUpperCase()}`, false);
+    } catch (e) {
+        setStatus('Export error: ' + e.message, true);
     }
 }
 

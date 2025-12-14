@@ -822,6 +822,21 @@ HTML_BODY = """
                 </div>
                 <button class="btn btn-primary" onclick="saveManual()" title="Ctrl+S">Save</button>
                 <button class="btn btn-secondary" onclick="resetOverrides()" title="Reset to original values">Reset</button>
+
+                <!-- Download dropdown -->
+                <div class="download-dropdown" style="position: relative; display: inline-block; margin-left: 8px;">
+                    <button class="btn btn-secondary" onclick="toggleDownloadMenu()" id="download-btn">
+                        ⬇ Download
+                    </button>
+                    <div id="download-menu" class="download-menu" style="display: none; position: absolute; bottom: 100%; left: 0; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 0; min-width: 120px; z-index: 100; margin-bottom: 4px;">
+                        <a href="/download/png" class="download-item" style="display: block; padding: 6px 12px; color: var(--text-primary); text-decoration: none;">PNG (150 DPI)</a>
+                        <a href="/download/jpeg" class="download-item" style="display: block; padding: 6px 12px; color: var(--text-primary); text-decoration: none;">JPEG</a>
+                        <a href="/download/svg" class="download-item" style="display: block; padding: 6px 12px; color: var(--text-primary); text-decoration: none;">SVG (Vector)</a>
+                        <a href="/download/pdf" class="download-item" style="display: block; padding: 6px 12px; color: var(--text-primary); text-decoration: none;">PDF</a>
+                        <hr style="margin: 4px 0; border-color: var(--border-color);">
+                        <a href="/download_pltz" class="download-item" style="display: block; padding: 6px 12px; color: var(--text-primary); text-decoration: none;">PLTZ Bundle</a>
+                    </div>
+                </div>
             </div>
 
             <div class="status-bar" id="status">Ready</div>
