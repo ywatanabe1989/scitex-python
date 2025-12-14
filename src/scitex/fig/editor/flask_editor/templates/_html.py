@@ -19,15 +19,11 @@ HTML_BODY = """
             </div>
         </div>
 
-        <div class="preview-wrapper">
+        <!-- Single-panel preview (hidden for multi-panel figz bundles) -->
+        <div class="preview-wrapper" id="preview-wrapper">
             <div class="preview-header" id="preview-header" style="display: none;">
                 <span id="current-panel-name">Panel A</span>
-                <div class="panel-nav">
-                    <button class="btn btn-sm" onclick="prevPanel()" id="prev-panel-btn">&laquo; Prev</button>
-                    <span id="panel-indicator">1 / 6</span>
-                    <button class="btn btn-sm" onclick="nextPanel()" id="next-panel-btn">Next &raquo;</button>
-                    <button class="btn btn-secondary btn-sm" onclick="togglePanelGrid()" id="show-grid-btn">Show All</button>
-                </div>
+                <span id="panel-indicator"></span>
             </div>
             <div class="preview-container" id="preview-container">
                 <img id="preview-img" src="" alt="Figure Preview">

@@ -80,7 +80,7 @@ def create_complex_figure(output_dir: Path, plt, rng, COLORS) -> Path:
     lines1, labels1 = ax_a.get_legend_handles_labels()
     lines2, labels2 = ax_a2.get_legend_handles_labels()
     ax_a.legend(lines1 + lines2, labels1 + labels2, loc="lower right", framealpha=0.9)
-    pltz_a = output_dir / "panel_A_twinx.pltz.d"
+    pltz_a = output_dir / "panel_A_twinx.pltz"
     stx.io.save(fig_a, pltz_a, dpi=150)
     plt.close(fig_a)
     panels["A"] = str(pltz_a)
@@ -99,7 +99,7 @@ def create_complex_figure(output_dir: Path, plt, rng, COLORS) -> Path:
     ax_b.set_title("Scatter: Size & Color Encoding")
     ax_b.axhline(0, color=COLORS.gray, linewidth=0.5, linestyle="--")
     ax_b.axvline(0, color=COLORS.gray, linewidth=0.5, linestyle="--")
-    pltz_b = output_dir / "panel_B_scatter.pltz.d"
+    pltz_b = output_dir / "panel_B_scatter.pltz"
     stx.io.save(fig_b, pltz_b, dpi=150)
     plt.close(fig_b)
     panels["B"] = str(pltz_b)
@@ -116,7 +116,7 @@ def create_complex_figure(output_dir: Path, plt, rng, COLORS) -> Path:
     ax_c.set_yticks(range(8))
     ax_c.set_xticklabels([f"C{i}" for i in range(10)], fontsize=7)
     ax_c.set_yticklabels([f"S{i}" for i in range(8)], fontsize=7)
-    pltz_c = output_dir / "panel_C_heatmap.pltz.d"
+    pltz_c = output_dir / "panel_C_heatmap.pltz"
     stx.io.save(fig_c, pltz_c, dpi=150)
     plt.close(fig_c)
     panels["C"] = str(pltz_c)
@@ -133,7 +133,7 @@ def create_complex_figure(output_dir: Path, plt, rng, COLORS) -> Path:
     ax_d.set_title("Bar Chart: Comparison with Error")
     ax_d.axhline(np.mean(values), color=COLORS.red, linestyle="--", label="Mean")
     ax_d.legend()
-    pltz_d = output_dir / "panel_D_bar.pltz.d"
+    pltz_d = output_dir / "panel_D_bar.pltz"
     stx.io.save(fig_d, pltz_d, dpi=150)
     plt.close(fig_d)
     panels["D"] = str(pltz_d)
@@ -152,7 +152,7 @@ def create_complex_figure(output_dir: Path, plt, rng, COLORS) -> Path:
     ax_e.set_title("Multi-Line: Mean ± CI")
     ax_e.legend(loc="upper right")
     ax_e.set_xlim(0, 2 * np.pi)
-    pltz_e = output_dir / "panel_E_multiline.pltz.d"
+    pltz_e = output_dir / "panel_E_multiline.pltz"
     stx.io.save(fig_e, pltz_e, dpi=150)
     plt.close(fig_e)
     panels["E"] = str(pltz_e)
@@ -180,13 +180,13 @@ def create_complex_figure(output_dir: Path, plt, rng, COLORS) -> Path:
     ax_f2.set_xticklabels(["G1", "G2", "G3"])
     fig_f.suptitle("Distribution: Violin vs Box", fontsize=10, y=0.98)
     fig_f.tight_layout()
-    pltz_f = output_dir / "panel_F_distribution.pltz.d"
+    pltz_f = output_dir / "panel_F_distribution.pltz"
     stx.io.save(fig_f, pltz_f, dpi=150)
     plt.close(fig_f)
     panels["F"] = str(pltz_f)
 
     # Create figz bundle
-    figz_path = output_dir / "Figure_Complex.figz.d"
+    figz_path = output_dir / "Figure_Complex.figz"
     stx.fig.save_figz(panels, figz_path)
 
     return figz_path
@@ -219,13 +219,13 @@ def create_sample_figure(
     # Create the figure
     fig, ax = plotter(plt, rng)
 
-    # Save as pltz first (temporary)
-    pltz_path = output_dir / f"panel_A_{figure_type}.pltz.d"
+    # Save as pltz (zip format)
+    pltz_path = output_dir / f"panel_A_{figure_type}.pltz"
     stx.io.save(fig, pltz_path, dpi=150)
     plt.close(fig)
 
-    # Create figz bundle with single panel
-    figz_path = output_dir / f"Figure_{figure_type}.figz.d"
+    # Create figz bundle with single panel (zip format)
+    figz_path = output_dir / f"Figure_{figure_type}.figz"
     panels = {"A": str(pltz_path)}
     stx.fig.save_figz(panels, figz_path)
 
@@ -266,11 +266,21 @@ def main(
 
     # List bundle contents
     logger.info("\nFigz bundle contents:")
-    for f in sorted(bundle_path.iterdir()):
-        if f.is_dir():
-            logger.info(f"  {f.name}/")
-        else:
-            logger.info(f"  {f.name}")
+    if bundle_path.is_file() and str(bundle_path).endswith('.figz'):
+        # ZIP format: use zipfile to list contents
+        import zipfile
+        with zipfile.ZipFile(bundle_path, 'r') as zf:
+            for name in sorted(zf.namelist())[:10]:  # Show first 10 entries
+                logger.info(f"  {name}")
+            if len(zf.namelist()) > 10:
+                logger.info(f"  ... and {len(zf.namelist()) - 10} more files")
+    elif bundle_path.is_dir():
+        # Directory format
+        for f in sorted(bundle_path.iterdir()):
+            if f.is_dir():
+                logger.info(f"  {f.name}/")
+            else:
+                logger.info(f"  {f.name}")
 
     # Launch interactive editor
     logger.info("\nLaunching Flask editor...")

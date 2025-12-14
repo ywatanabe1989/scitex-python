@@ -383,6 +383,8 @@ def _resolve_figz_bundle(path: Path, panel_index: int = 0) -> tuple:
     """
     Resolve paths from a .figz bundle (multi-panel figure).
 
+    Uses in-memory zip reading for .pltz panels - no disk extraction.
+
     Parameters
     ----------
     path : Path
@@ -394,19 +396,22 @@ def _resolve_figz_bundle(path: Path, panel_index: int = 0) -> tuple:
     -------
     tuple
         (json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info)
-        panel_info is a dict with keys: panels, current_index, figz_dir
+        panel_info is a dict with keys: panels, panel_paths, panel_is_zip, current_index, figz_dir, figz_is_zip
     """
     import json as json_module
     import tempfile
     import zipfile
 
     spath = str(path)
+    figz_is_zip = False
 
-    # Handle ZIP vs directory
+    # Handle ZIP vs directory for figz
     if spath.endswith('.figz') and not spath.endswith('.figz.d'):
-        # It's a ZIP - extract to temp directory
+        figz_is_zip = True
         if not path.exists():
             raise FileNotFoundError(f"Figz bundle not found: {path}")
+        # For figz zip, we need to extract to access nested pltz
+        # (nested zips inside zip are harder to handle)
         temp_dir = tempfile.mkdtemp(prefix='scitex_edit_figz_')
         with zipfile.ZipFile(path, 'r') as zf:
             zf.extractall(temp_dir)
@@ -420,31 +425,52 @@ def _resolve_figz_bundle(path: Path, panel_index: int = 0) -> tuple:
         if not bundle_dir.exists():
             raise FileNotFoundError(f"Figz bundle directory not found: {bundle_dir}")
 
-    # Find nested pltz bundles
-    pltz_dirs = sorted([d for d in bundle_dir.iterdir()
-                       if d.is_dir() and str(d).endswith('.pltz.d')])
+    # Find nested pltz bundles (both .pltz.d directories and .pltz zip files)
+    # Store paths and flags for whether each is a zip (for in-memory reading)
+    panel_paths = []
+    panel_is_zip = []
 
-    if not pltz_dirs:
-        raise FileNotFoundError(f"No .pltz.d panels found in figz bundle: {bundle_dir}")
+    for item in sorted(bundle_dir.iterdir(), key=lambda x: x.name):
+        if item.is_dir() and str(item).endswith('.pltz.d'):
+            panel_paths.append(str(item))
+            panel_is_zip.append(False)
+        elif item.is_file() and str(item).endswith('.pltz'):
+            # Keep zip path - will read in-memory using ZipBundle
+            panel_paths.append(str(item))
+            panel_is_zip.append(True)
+
+    if not panel_paths:
+        raise FileNotFoundError(f"No .pltz panels found in figz bundle: {bundle_dir}")
 
     # Validate panel index
-    if panel_index < 0 or panel_index >= len(pltz_dirs):
+    if panel_index < 0 or panel_index >= len(panel_paths):
         panel_index = 0
 
-    selected_panel = pltz_dirs[panel_index]
-    print(f"Opening panel: {selected_panel.name}")
-    if len(pltz_dirs) > 1:
-        print(f"  (Figz contains {len(pltz_dirs)} panels: {[d.name for d in pltz_dirs]})")
+    selected_panel_path = panel_paths[panel_index]
+    selected_is_zip = panel_is_zip[panel_index]
+    panel_name = Path(selected_panel_path).name
+    print(f"Opening panel: {panel_name}")
+    if len(panel_paths) > 1:
+        print(f"  (Figz contains {len(panel_paths)} panels)")
 
     # Build panel info for editor
+    # Panel names derived from paths (remove .pltz.d or .pltz suffix for display)
+    panel_names = []
+    for p in panel_paths:
+        name = Path(p).name
+        panel_names.append(name)
+
     panel_info = {
-        "panels": [d.name for d in pltz_dirs],
+        "panels": panel_names,
+        "panel_paths": panel_paths,
+        "panel_is_zip": panel_is_zip,  # Flag for in-memory reading
         "current_index": panel_index,
         "figz_dir": str(bundle_dir),
+        "figz_is_zip": figz_is_zip,
     }
 
-    # Delegate to pltz resolver
-    result = _resolve_pltz_bundle(selected_panel)
+    # Resolve the selected panel (may be zip or directory)
+    result = _resolve_pltz_bundle(Path(selected_panel_path))
     # Append panel_info to the result
     return result + (panel_info,)
 
@@ -608,102 +634,201 @@ def _resolve_layered_pltz_bundle(bundle_dir: Path) -> tuple:
     )
 
 
-def _load_panel_data(panel_dir: Path) -> Optional[dict]:
+def _load_panel_data(panel_path: Union[Path, str], is_zip: bool = None) -> Optional[dict]:
     """
-    Load panel data from a .pltz.d directory.
+    Load panel data from either a .pltz.d directory or a .pltz zip file.
 
-    Used by switch_panel endpoint to load a different panel's data.
+    Handles both formats transparently using in-memory reading for zips.
 
     Parameters
     ----------
-    panel_dir : Path
-        Path to .pltz.d panel directory
+    panel_path : Path or str
+        Path to .pltz.d directory or .pltz zip file
+    is_zip : bool, optional
+        If True, treat as zip file. If False, treat as directory.
+        If None, auto-detect based on path suffix and existence.
 
     Returns
     -------
     dict or None
-        Dictionary with keys: json_path, metadata, csv_data, png_path, hitmap_path
+        Dictionary with keys: metadata, csv_data, png_bytes, hitmap_bytes, img_size
+        For directories, also includes: json_path, png_path, hitmap_path
         Returns None if panel cannot be loaded
     """
+    import io
     import json as json_module
-    import scitex as stx
+    from PIL import Image
 
-    if not panel_dir.exists():
-        return None
+    panel_path = Path(panel_path)
 
-    # Check for layered vs legacy format
-    spec_path = panel_dir / "spec.json"
-    if spec_path.exists():
-        # Layered format
-        from scitex.plt.io import load_layered_pltz_bundle
-        bundle_data = load_layered_pltz_bundle(panel_dir)
-        metadata = bundle_data.get("merged", {})
+    # Auto-detect if not specified
+    if is_zip is None:
+        spath = str(panel_path)
+        if spath.endswith('.pltz') and not spath.endswith('.pltz.d'):
+            is_zip = panel_path.is_file()
+        else:
+            is_zip = False
 
-        # Find CSV
-        csv_data = None
-        for f in panel_dir.glob("*.csv"):
-            csv_data = stx.io.load(f)
-            break
+    if is_zip:
+        # Read from zip in-memory using ZipBundle
+        from scitex.io._zip_bundle import ZipBundle
 
-        # Find exports - prefer PNG over SVG (PIL can't open SVG)
-        png_path = None
-        svg_path = None
-        hitmap_path = None
-        exports_dir = panel_dir / "exports"
-        if exports_dir.exists():
-            for f in exports_dir.iterdir():
-                name = f.name
-                if name.endswith('_hitmap.png'):
-                    hitmap_path = f
-                elif name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
-                    png_path = f
-                elif name.endswith('.svg') and '_hitmap' not in name and svg_path is None:
-                    svg_path = f
-        # Fall back to SVG only if no PNG found (though PIL can't open it)
-        if png_path is None:
-            png_path = svg_path
-
-        return {
-            "json_path": spec_path,
-            "metadata": metadata,
-            "csv_data": csv_data,
-            "png_path": png_path,
-            "hitmap_path": hitmap_path,
-        }
-    else:
-        # Legacy format
-        json_path = None
-        csv_data = None
-        png_path = None
-        hitmap_path = None
-
-        for f in panel_dir.iterdir():
-            name = f.name
-            if name.endswith('.json') and not name.endswith('.manual.json'):
-                json_path = f
-            elif name.endswith('.csv'):
-                csv_data = stx.io.load(f)
-            elif name.endswith('_hitmap.png'):
-                hitmap_path = f
-            elif name.endswith('.svg') and '_hitmap' not in name:
-                png_path = f
-            elif name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
-                if png_path is None:
-                    png_path = f
-
-        if json_path is None:
+        if not panel_path.exists():
             return None
 
-        with open(json_path, 'r') as f:
-            metadata = json_module.load(f)
+        try:
+            with ZipBundle(panel_path, mode="r") as zb:
+                # Load spec.json for metadata
+                try:
+                    metadata = zb.read_json("spec.json")
+                except FileNotFoundError:
+                    metadata = {}
 
-        return {
-            "json_path": json_path,
-            "metadata": metadata,
-            "csv_data": csv_data,
-            "png_path": png_path,
-            "hitmap_path": hitmap_path,
-        }
+                # Load style.json if exists
+                try:
+                    style = zb.read_json("style.json")
+                    metadata["style"] = style
+                except FileNotFoundError:
+                    pass
+
+                # Find and read PNG
+                png_bytes = None
+                for name in zb.namelist():
+                    if name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+                        if 'exports/' in name:
+                            png_bytes = zb.read_bytes(name)
+                            break
+
+                # If no PNG in exports/, try root level
+                if not png_bytes:
+                    for name in zb.namelist():
+                        if name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+                            png_bytes = zb.read_bytes(name)
+                            break
+
+                # Get image size
+                img_size = None
+                if png_bytes:
+                    img = Image.open(io.BytesIO(png_bytes))
+                    img_size = {"width": img.size[0], "height": img.size[1]}
+                    img.close()
+
+                # Find and read hitmap
+                hitmap_bytes = None
+                for name in zb.namelist():
+                    if '_hitmap.png' in name:
+                        hitmap_bytes = zb.read_bytes(name)
+                        break
+
+                # Load geometry_px.json if available
+                geometry_data = None
+                try:
+                    geometry_data = zb.read_json("cache/geometry_px.json")
+                except FileNotFoundError:
+                    pass
+
+                return {
+                    "metadata": metadata,
+                    "png_bytes": png_bytes,
+                    "hitmap_bytes": hitmap_bytes,
+                    "img_size": img_size,
+                    "geometry_data": geometry_data,
+                    "is_zip": True,
+                }
+        except Exception as e:
+            print(f"Error loading panel zip {panel_path}: {e}")
+            return None
+    else:
+        # Read from directory
+        import scitex as stx
+
+        panel_dir = panel_path
+        if not panel_dir.exists():
+            return None
+
+        # Check for layered vs legacy format
+        spec_path = panel_dir / "spec.json"
+        if spec_path.exists():
+            # Layered format
+            from scitex.plt.io import load_layered_pltz_bundle
+            bundle_data = load_layered_pltz_bundle(panel_dir)
+            metadata = bundle_data.get("merged", {})
+
+            # Find CSV
+            csv_data = None
+            for f in panel_dir.glob("*.csv"):
+                csv_data = stx.io.load(f)
+                break
+
+            # Find exports - prefer PNG over SVG (PIL can't open SVG)
+            png_path = None
+            svg_path = None
+            hitmap_path = None
+            exports_dir = panel_dir / "exports"
+            if exports_dir.exists():
+                for f in exports_dir.iterdir():
+                    name = f.name
+                    if name.endswith('_hitmap.png'):
+                        hitmap_path = f
+                    elif name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+                        png_path = f
+                    elif name.endswith('.svg') and '_hitmap' not in name and svg_path is None:
+                        svg_path = f
+            # Fall back to SVG only if no PNG found (though PIL can't open it)
+            if png_path is None:
+                png_path = svg_path
+
+            # Load geometry_px.json if available
+            geometry_data = None
+            geometry_path = panel_dir / "cache" / "geometry_px.json"
+            if geometry_path.exists():
+                with open(geometry_path) as f:
+                    geometry_data = json_module.load(f)
+
+            return {
+                "json_path": spec_path,
+                "metadata": metadata,
+                "csv_data": csv_data,
+                "png_path": png_path,
+                "hitmap_path": hitmap_path,
+                "geometry_data": geometry_data,
+                "is_zip": False,
+            }
+        else:
+            # Legacy format
+            json_path = None
+            csv_data = None
+            png_path = None
+            hitmap_path = None
+
+            for f in panel_dir.iterdir():
+                name = f.name
+                if name.endswith('.json') and not name.endswith('.manual.json'):
+                    json_path = f
+                elif name.endswith('.csv'):
+                    csv_data = stx.io.load(f)
+                elif name.endswith('_hitmap.png'):
+                    hitmap_path = f
+                elif name.endswith('.svg') and '_hitmap' not in name:
+                    png_path = f
+                elif name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+                    if png_path is None:
+                        png_path = f
+
+            if json_path is None:
+                return None
+
+            with open(json_path, 'r') as f:
+                metadata = json_module.load(f)
+
+            return {
+                "json_path": json_path,
+                "metadata": metadata,
+                "csv_data": csv_data,
+                "png_path": png_path,
+                "hitmap_path": hitmap_path,
+                "is_zip": False,
+            }
 
 
 def _compute_file_hash(path: Path) -> str:
