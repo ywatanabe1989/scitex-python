@@ -1891,6 +1891,11 @@ async function loadPanelGrid() {
         // Scale to fit canvas (max width ~700px for good display)
         const canvasMaxWidth = 700;
         const scale = hasLayout && maxX > 0 ? canvasMaxWidth / maxX : 3;  // ~3px per mm fallback
+        canvasScale = scale;  // Store globally for drag conversions
+
+        // Reset layout tracking
+        panelLayoutMm = {};
+        layoutModified = false;
 
         data.panels.forEach((panel, idx) => {
             // Store bboxes and imgSize in cache for interactive hover/click
@@ -1905,14 +1910,19 @@ async function loadPanelGrid() {
             }
 
             // Use figz layout for positioning (unified canvas like export)
-            let pos;
+            let pos, posMm;
             if (panel.layout && panel.layout.position && panel.layout.size) {
+                const x_mm = panel.layout.position.x_mm || 0;
+                const y_mm = panel.layout.position.y_mm || 0;
+                const width_mm = panel.layout.size.width_mm || 80;
+                const height_mm = panel.layout.size.height_mm || 50;
                 pos = {
-                    x: (panel.layout.position.x_mm || 0) * scale,
-                    y: (panel.layout.position.y_mm || 0) * scale,
-                    width: (panel.layout.size.width_mm || 80) * scale,
-                    height: (panel.layout.size.height_mm || 50) * scale,
+                    x: x_mm * scale,
+                    y: y_mm * scale,
+                    width: width_mm * scale,
+                    height: height_mm * scale,
                 };
+                posMm = { x_mm, y_mm, width_mm, height_mm };
             } else {
                 // Fallback grid layout if no figz layout
                 const cols = Math.ceil(Math.sqrt(data.panels.length));
@@ -1925,8 +1935,16 @@ async function loadPanelGrid() {
                     width: baseWidth,
                     height: baseHeight,
                 };
+                // Convert to mm for fallback
+                posMm = {
+                    x_mm: pos.x / scale,
+                    y_mm: pos.y / scale,
+                    width_mm: pos.width / scale,
+                    height_mm: pos.height / scale,
+                };
             }
             panelPositions[panel.name] = pos;
+            panelLayoutMm[panel.name] = posMm;
 
             const item = document.createElement('div');
             item.className = 'panel-canvas-item' + (idx === currentPanelIndex ? ' active' : '');
@@ -1940,6 +1958,8 @@ async function loadPanelGrid() {
             if (panel.image) {
                 item.innerHTML = `
                     <span class="panel-canvas-label">${panel.name}</span>
+                    <span class="panel-position-indicator" id="pos-${panel.name}"></span>
+                    <div class="panel-drag-handle" title="Drag to move panel">⋮⋮</div>
                     <div class="panel-card-container">
                         <img src="data:image/png;base64,${panel.image}" alt="Panel ${panel.name}">
                         <svg class="panel-card-overlay" id="panel-overlay-${idx}"></svg>
@@ -1948,12 +1968,17 @@ async function loadPanelGrid() {
             } else {
                 item.innerHTML = `
                     <span class="panel-canvas-label">${panel.name}</span>
+                    <span class="panel-position-indicator" id="pos-${panel.name}"></span>
+                    <div class="panel-drag-handle" title="Drag to move panel">⋮⋮</div>
                     <div style="padding: 20px; color: var(--text-muted);">No preview</div>
                 `;
             }
 
-            // Add interactive event handlers
+            // Add interactive event handlers (hover, click for element selection)
             initCanvasItemInteraction(item, idx, panel.name);
+
+            // Add drag handler for panel repositioning
+            initPanelDrag(item, panel.name);
 
             canvasEl.appendChild(item);
         });
@@ -2633,9 +2658,12 @@ function updatePanelIndicator() {
 // Canvas Mode (Draggable Panel Layout)
 // =============================================================================
 let canvasMode = 'grid';  // 'grid' or 'canvas'
-let panelPositions = {};  // Store panel positions {name: {x, y, width, height}}
+let panelPositions = {};  // Store panel positions {name: {x, y, width, height}} in pixels
+let panelLayoutMm = {};   // Store panel positions in mm for saving {name: {x_mm, y_mm, width_mm, height_mm}}
+let canvasScale = 3;      // Scale factor: pixels per mm (updated in loadPanelGrid)
 let draggedPanel = null;
 let dragOffset = {x: 0, y: 0};
+let layoutModified = false;  // Track if layout has been modified
 
 function setCanvasMode(mode) {
     canvasMode = mode;
@@ -2736,43 +2764,170 @@ async function renderPanelCanvas() {
     }
 }
 
-function startDrag(e, item, name) {
+// Initialize drag handler for a panel item
+function initPanelDrag(item, panelName) {
+    const dragHandle = item.querySelector('.panel-drag-handle');
+    if (!dragHandle) return;
+
+    // Drag from handle only (so clicking panel content still works for selection)
+    dragHandle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        startPanelDrag(e, item, panelName);
+    });
+
+    // Also allow dragging from panel label
+    const label = item.querySelector('.panel-canvas-label');
+    if (label) {
+        label.style.cursor = 'move';
+        label.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            startPanelDrag(e, item, panelName);
+        });
+    }
+}
+
+function startPanelDrag(e, item, name) {
     e.preventDefault();
     draggedPanel = {item, name};
     dragOffset.x = e.clientX - item.offsetLeft;
     dragOffset.y = e.clientY - item.offsetTop;
     item.classList.add('dragging');
 
-    document.addEventListener('mousemove', onDrag);
-    document.addEventListener('mouseup', stopDrag);
+    // Show position indicator
+    updatePositionIndicator(name, item.offsetLeft, item.offsetTop);
+
+    document.addEventListener('mousemove', onPanelDrag);
+    document.addEventListener('mouseup', stopPanelDrag);
 }
 
-function onDrag(e) {
+function onPanelDrag(e) {
     if (!draggedPanel) return;
     const canvasEl = document.getElementById('panel-canvas');
-    const rect = canvasEl.getBoundingClientRect();
 
     let newX = e.clientX - dragOffset.x;
     let newY = e.clientY - dragOffset.y;
 
-    // Constrain to canvas bounds
-    newX = Math.max(0, Math.min(newX, canvasEl.offsetWidth - draggedPanel.item.offsetWidth));
-    newY = Math.max(0, newY);
+    // Constrain to canvas bounds (allow slight negative for edge alignment)
+    newX = Math.max(-5, Math.min(newX, canvasEl.offsetWidth - draggedPanel.item.offsetWidth + 5));
+    newY = Math.max(-5, newY);
+
+    // Snap to grid (optional: 5mm grid)
+    const gridSnap = 5 * canvasScale;  // 5mm in pixels
+    if (e.shiftKey) {
+        newX = Math.round(newX / gridSnap) * gridSnap;
+        newY = Math.round(newY / gridSnap) * gridSnap;
+    }
 
     draggedPanel.item.style.left = newX + 'px';
     draggedPanel.item.style.top = newY + 'px';
 
+    // Update pixel positions
     panelPositions[draggedPanel.name].x = newX;
     panelPositions[draggedPanel.name].y = newY;
+
+    // Update mm positions
+    panelLayoutMm[draggedPanel.name].x_mm = newX / canvasScale;
+    panelLayoutMm[draggedPanel.name].y_mm = newY / canvasScale;
+
+    // Show position indicator
+    updatePositionIndicator(draggedPanel.name, newX, newY);
+
+    // Mark layout as modified
+    layoutModified = true;
+}
+
+function stopPanelDrag() {
+    if (draggedPanel) {
+        draggedPanel.item.classList.remove('dragging');
+
+        // Update canvas size if panel moved outside
+        updateCanvasSize();
+
+        // Hide position indicator after a delay
+        const name = draggedPanel.name;
+        setTimeout(() => {
+            const indicator = document.getElementById(`pos-${name}`);
+            if (indicator) indicator.style.opacity = '0';
+        }, 1500);
+
+        // Auto-save layout
+        if (layoutModified) {
+            autoSaveLayout();
+        }
+
+        draggedPanel = null;
+    }
+    document.removeEventListener('mousemove', onPanelDrag);
+    document.removeEventListener('mouseup', stopPanelDrag);
+}
+
+// Update position indicator showing mm coordinates
+function updatePositionIndicator(panelName, x, y) {
+    const indicator = document.getElementById(`pos-${panelName}`);
+    if (!indicator) return;
+
+    const x_mm = (x / canvasScale).toFixed(1);
+    const y_mm = (y / canvasScale).toFixed(1);
+    indicator.textContent = `${x_mm}, ${y_mm} mm`;
+    indicator.style.opacity = '1';
+}
+
+// Update canvas size to fit all panels after drag
+function updateCanvasSize() {
+    const canvasEl = document.getElementById('panel-canvas');
+    if (!canvasEl) return;
+
+    const maxY = Math.max(...Object.values(panelPositions).map(p => p.y + p.height)) + 20;
+    const maxX = Math.max(...Object.values(panelPositions).map(p => p.x + p.width)) + 20;
+    canvasEl.style.minHeight = Math.max(400, maxY) + 'px';
+    canvasEl.style.minWidth = Math.max(700, maxX) + 'px';
+}
+
+// Auto-save layout to server
+async function autoSaveLayout() {
+    if (!layoutModified) return;
+
+    try {
+        const resp = await fetch('/save_layout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ layout: panelLayoutMm })
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+            layoutModified = false;
+            setStatus('Layout saved', false);
+            console.log('Layout auto-saved:', panelLayoutMm);
+        } else {
+            console.error('Layout save failed:', data.error);
+            setStatus('Layout save failed: ' + data.error, true);
+        }
+    } catch (e) {
+        console.error('Error saving layout:', e);
+        setStatus('Error saving layout', true);
+    }
+}
+
+// Manual save layout button handler
+function saveLayoutManually() {
+    layoutModified = true;  // Force save
+    autoSaveLayout();
+}
+
+// Legacy drag functions (kept for backward compatibility with canvas mode)
+function startDrag(e, item, name) {
+    startPanelDrag(e, item, name);
+}
+
+function onDrag(e) {
+    onPanelDrag(e);
 }
 
 function stopDrag() {
-    if (draggedPanel) {
-        draggedPanel.item.classList.remove('dragging');
-        draggedPanel = null;
-    }
-    document.removeEventListener('mousemove', onDrag);
-    document.removeEventListener('mouseup', stopDrag);
+    stopPanelDrag();
 }
 
 let resizingPanel = null;
