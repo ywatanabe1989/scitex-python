@@ -1353,6 +1353,8 @@ function toggleTheme() {
     html.setAttribute('data-theme', next);
     document.getElementById('theme-icon').innerHTML = next === 'dark' ? '&#9790;' : '&#9788;';
     localStorage.setItem('scitex-editor-theme', next);
+    // Re-render single panel preview with dark/light mode colors (if visible)
+    updatePreview(true);
 }
 
 // Collapsible sections

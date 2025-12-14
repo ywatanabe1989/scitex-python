@@ -1171,6 +1171,13 @@ input[type="range"]::-moz-range-thumb {
     display: block;
 }
 
+/* Dark mode: invert plot colors for visibility */
+[data-theme="dark"] .panel-card img,
+[data-theme="dark"] .panel-canvas-item img,
+[data-theme="dark"] .preview-wrapper img {
+    filter: invert(0.88) hue-rotate(180deg);
+}
+
 .panel-card-container {
     position: relative;
     display: inline-block;
