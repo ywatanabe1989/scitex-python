@@ -35,20 +35,6 @@
     flex: 1;
 }
 
-.filename {
-    font-size: 0.8em;
-    color: var(--text-muted);
-    margin-top: 4px;
-    word-break: break-all;
-}
-
-.panel-path {
-    font-size: 0.75em;
-    color: var(--text-muted);
-    margin-top: 2px;
-    opacity: 0.8;
-}
-
 /* Theme toggle */
 .theme-toggle {
     background: transparent;

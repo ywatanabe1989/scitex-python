@@ -13,10 +13,6 @@
     overflow-y: auto;
 }
 
-.preview > .preview-wrapper {
-    flex-shrink: 0;
-}
-
 .preview-wrapper {
     background: var(--preview-bg);
     background-size: 20px 20px;
@@ -24,17 +20,13 @@
     border-radius: 8px;
     padding: 10px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    flex-shrink: 0;
 }
 
 .preview img {
     max-width: 100%;
     max-height: calc(100vh - 80px);
     display: block;
-}
-
-/* Preview area adjustments when panel header is visible */
-.preview-wrapper:has(.preview-header:not([style*="display: none"])) {
-    border-radius: 0 0 8px 8px;
 }
 
 /* Hover overlay for interactive selection */
@@ -48,6 +40,11 @@
     top: 0;
     left: 0;
     pointer-events: none;
+}
+
+/* Preview area adjustments when panel header is visible */
+.preview-wrapper:has(.preview-header:not([style*="display: none"])) {
+    border-radius: 0 0 8px 8px;
 }
 
 /* Panel Navigation Header */
