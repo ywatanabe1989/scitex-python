@@ -695,6 +695,80 @@ def _apply_annotations(ax, o, axis_fontsize):
             )
 
 
+def render_panel_preview(
+    panel_dir,
+    dark_mode: bool = False,
+) -> Tuple[Optional[str], Optional[Dict[str, Any]], Optional[Dict[str, int]]]:
+    """Render a panel from its pltz bundle directory with dark mode support.
+
+    Args:
+        panel_dir: Path to the .pltz.d panel directory
+        dark_mode: Whether to render with dark mode colors
+
+    Returns:
+        tuple: (base64_image_data, bboxes_dict, image_size) or (None, None, None) on error
+    """
+    from pathlib import Path
+    import json
+    import pandas as pd
+
+    panel_dir = Path(panel_dir)
+
+    try:
+        # Load spec.json
+        spec_path = panel_dir / "spec.json"
+        if not spec_path.exists():
+            # Try legacy format
+            for f in panel_dir.glob("*.json"):
+                if f.name != "style.json":
+                    spec_path = f
+                    break
+
+        if not spec_path.exists():
+            return None, None, None
+
+        with open(spec_path, "r") as f:
+            metadata = json.load(f)
+
+        # Load CSV data
+        csv_data = None
+        csv_path = panel_dir / "data.csv"
+        if not csv_path.exists():
+            for f in panel_dir.glob("*.csv"):
+                csv_path = f
+                break
+
+        if csv_path.exists():
+            csv_data = pd.read_csv(csv_path)
+
+        # Load style.json for overrides
+        style_path = panel_dir / "style.json"
+        overrides = {}
+        if style_path.exists():
+            with open(style_path, "r") as f:
+                style = json.load(f)
+            # Convert style to overrides format
+            size = style.get("size", {})
+            if size:
+                width_mm = size.get("width_mm", 80)
+                height_mm = size.get("height_mm", 68)
+                overrides["fig_size"] = [width_mm / 25.4, height_mm / 25.4]
+            overrides["transparent"] = True
+
+        # Render with dark mode
+        return render_preview_with_bboxes(
+            csv_data, overrides,
+            metadata=metadata,
+            dark_mode=dark_mode,
+        )
+
+    except Exception as e:
+        import traceback
+        print(f"Error rendering panel {panel_dir}: {e}")
+        traceback.print_exc()
+        return None, None, None
+
+
 # Dark mode theme colors
 DARK_THEME_TEXT_COLOR = "#e8e8e8"  # Light gray for visibility on dark background
 DARK_THEME_SPINE_COLOR = "#e8e8e8"
