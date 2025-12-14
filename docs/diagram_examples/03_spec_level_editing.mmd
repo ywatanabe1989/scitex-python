@@ -1,0 +1,35 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1a2634', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#3a4a5a', 'lineColor': '#5a9fcf', 'secondaryColor': '#2a3644', 'tertiaryColor': '#1a2634'}}}%%
+graph TB
+    subgraph EDITOR["SciTeX Figure Editor"]
+        direction TB
+        subgraph SIDEBAR["Property Panels"]
+            DIM["DIMENSIONS<br/>width, height, position"]
+            STYLE["STYLE<br/>colors, fonts"]
+            AXIS["AXIS & TICKS<br/>limits, labels"]
+            TRACES["TRACES<br/>line, scatter, bar"]
+            STATS["STATISTICS<br/>embedded results"]
+            ANNOT["ANNOTATIONS<br/>markers, text"]
+        end
+        subgraph CANVAS["Canvas View"]
+            FIG["Multi-Panel Figure<br/>A|B<br/>C|D<br/>E|F"]
+        end
+    end
+
+    subgraph SPEC["spec.json (Canonical)"]
+        JSON["{<br/>  axes: {xlim, ylim},<br/>  traces: [...],<br/>  style: {...},<br/>  stats: {...}<br/>}"]
+    end
+
+    subgraph LOOP["Specification-Mediated Loop"]
+        direction LR
+        ACT["User Action"] --> MOD["Modify Spec"]
+        MOD --> RENDER["Re-render"]
+        RENDER --> VIEW["Update View"]
+    end
+
+    SIDEBAR --> |"edit"| JSON
+    JSON --> |"render"| FIG
+    FIG --> |"view of"| JSON
+
+    style EDITOR fill:#1a2634,stroke:#3a4a5a
+    style SPEC fill:#0d4a6b,stroke:#5a9fcf
+    style JSON fill:#0d4a6b,stroke:#5a9fcf

@@ -1,0 +1,41 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1a2634', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#3a4a5a', 'lineColor': '#5a9fcf'}}}%%
+graph TB
+    subgraph FIGZ[".figz Multi-Panel Figure Bundle"]
+        direction TB
+        subgraph PANELS["Panel Composition"]
+            direction LR
+            PA["A: Dual Y-Axis<br/>Signal & Growth"]
+            PB["B: Scatter<br/>Size & Color"]
+            PC["C: Heatmap<br/>Correlation"]
+            PD["D: Bar Chart<br/>Error Bars"]
+            PE["E: Multi-Line<br/>Mean ± CI"]
+            PF["F: Distribution<br/>Violin/Box"]
+        end
+        subgraph CANONICAL["Canonical Data (Embedded)"]
+            SPEC["spec.json<br/>panel layout, axes, traces"]
+            DATA["data.csv<br/>raw values per panel"]
+            STATS["stats.json<br/>t-test, ANOVA results<br/>p-values, CI"]
+        end
+        subgraph DERIVED["Derived (Regenerable)"]
+            PNG["preview.png"]
+            SVG["preview.svg"]
+        end
+    end
+
+    subgraph WORKFLOW["Figure Lifecycle"]
+        CODE["Python Analysis<br/>scitex.plt"] --> SAVE["savefig()"]
+        SAVE --> FIGZ
+        FIGZ --> EDIT["Interactive<br/>Editor"]
+        EDIT --> |"spec changes"| FIGZ
+        FIGZ --> AI["AI Review<br/>format suggestions"]
+        AI --> |"verified diffs"| FIGZ
+        FIGZ --> EXPORT["Export<br/>PDF/PNG/SVG"]
+    end
+
+    PANELS -.-> DATA
+    PANELS -.-> STATS
+    SPEC --> PANELS
+
+    style FIGZ fill:#1a2634,stroke:#5a9fcf,stroke-width:2px
+    style CANONICAL fill:#0d4a6b,stroke:#5a9fcf
+    style PANELS fill:#2a3644,stroke:#3a4a5a
