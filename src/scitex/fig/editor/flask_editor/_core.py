@@ -468,6 +468,232 @@ class WebEditor:
                     "traceback": traceback.format_exc()
                 })
 
+        @app.route("/save_element_position", methods=["POST"])
+        def save_element_position():
+            """Save element position (legend/panel_letter) to figz bundle.
+
+            ONLY legends and panel letters can be repositioned to maintain
+            scientific rigor. Data elements are never moved.
+            """
+            try:
+                data = request.get_json()
+                element = data.get("element", "")
+                panel = data.get("panel", "")
+                element_type = data.get("element_type", "")
+                position = data.get("position", {})
+                snap_name = data.get("snap_name")
+
+                # Validate element type (whitelist for scientific rigor)
+                ALLOWED_TYPES = ["legend", "panel_letter"]
+                if element_type not in ALLOWED_TYPES:
+                    return jsonify({
+                        "success": False,
+                        "error": f"Element type '{element_type}' cannot be repositioned (scientific rigor)"
+                    })
+
+                if not editor.panel_info:
+                    return jsonify({"success": False, "error": "No panel info available"})
+
+                bundle_path = editor.panel_info.get("bundle_path")
+                if not bundle_path:
+                    return jsonify({"success": False, "error": "Bundle path not available"})
+
+                from scitex.fig.io import ZipBundle
+                bundle = ZipBundle(bundle_path)
+
+                # Read or create style.json for element positions
+                try:
+                    style = bundle.read_json("style.json")
+                except:
+                    style = {}
+
+                # Initialize structure
+                if "elements" not in style:
+                    style["elements"] = {}
+                if panel not in style["elements"]:
+                    style["elements"][panel] = {}
+
+                # Save element position
+                style["elements"][panel][element] = {
+                    "type": element_type,
+                    "position": position,
+                    "snap_name": snap_name,
+                }
+
+                # For legends, also update legend_location for matplotlib compatibility
+                if element_type == "legend" and snap_name:
+                    # Convert snap name to matplotlib loc format
+                    loc_map = {
+                        "upper left": "upper left",
+                        "upper center": "upper center",
+                        "upper right": "upper right",
+                        "center left": "center left",
+                        "center": "center",
+                        "center right": "center right",
+                        "lower left": "lower left",
+                        "lower center": "lower center",
+                        "lower right": "lower right",
+                    }
+                    if snap_name in loc_map:
+                        if "legend" not in style:
+                            style["legend"] = {}
+                        style["legend"]["location"] = loc_map[snap_name]
+
+                bundle.write_json("style.json", style)
+
+                return jsonify({
+                    "success": True,
+                    "element": element,
+                    "position": position,
+                    "snap_name": snap_name
+                })
+
+            except Exception as e:
+                import traceback
+                return jsonify({
+                    "success": False,
+                    "error": str(e),
+                    "traceback": traceback.format_exc()
+                })
+
+        @app.route("/export", methods=["POST"])
+        def export_figure():
+            """Export figure to various formats and update figz bundle."""
+            try:
+                data = request.get_json()
+                formats = data.get("formats", ["png", "svg"])
+
+                if not editor.panel_info:
+                    return jsonify({"success": False, "error": "No panel info available"})
+
+                bundle_path = editor.panel_info.get("bundle_path")
+                if not bundle_path:
+                    return jsonify({"success": False, "error": "Bundle path not available"})
+
+                from scitex.fig.io import ZipBundle
+                from pathlib import Path
+                import base64
+                import io
+
+                bundle = ZipBundle(bundle_path)
+                figure_name = Path(bundle_path).stem.replace(".figz", "")
+
+                exported = {}
+
+                # Get merged figure for export
+                if hasattr(editor, "_merged_fig") and editor._merged_fig:
+                    fig = editor._merged_fig
+                else:
+                    # Try to reconstruct from panels
+                    return jsonify({"success": False, "error": "No merged figure available"})
+
+                for fmt in formats:
+                    buf = io.BytesIO()
+                    if fmt in ["png", "jpeg", "jpg"]:
+                        dpi = data.get("dpi", 150)
+                        fig.savefig(buf, format="png" if fmt == "png" else "jpeg",
+                                   dpi=dpi, bbox_inches="tight", facecolor="white")
+                    elif fmt == "svg":
+                        fig.savefig(buf, format="svg", bbox_inches="tight")
+                    elif fmt == "pdf":
+                        fig.savefig(buf, format="pdf", bbox_inches="tight")
+                    else:
+                        continue
+
+                    buf.seek(0)
+                    content = buf.read()
+
+                    # Save to exports/ directory in bundle
+                    export_path = f"exports/{figure_name}.{fmt}"
+                    bundle.write_bytes(export_path, content)
+                    exported[fmt] = export_path
+
+                return jsonify({
+                    "success": True,
+                    "exported": exported,
+                    "bundle_path": str(bundle_path)
+                })
+
+            except Exception as e:
+                import traceback
+                return jsonify({
+                    "success": False,
+                    "error": str(e),
+                    "traceback": traceback.format_exc()
+                })
+
+        @app.route("/download/<fmt>")
+        def download_figure(fmt):
+            """Download figure in specified format."""
+            try:
+                if not editor.panel_info:
+                    return "No panel info available", 404
+
+                from flask import send_file
+                import io
+
+                # Get merged figure
+                if not hasattr(editor, "_merged_fig") or not editor._merged_fig:
+                    return "No figure available", 404
+
+                fig = editor._merged_fig
+                bundle_path = editor.panel_info.get("bundle_path", "figure")
+                from pathlib import Path
+                figure_name = Path(bundle_path).stem.replace(".figz", "")
+
+                buf = io.BytesIO()
+                mime_types = {
+                    "png": "image/png",
+                    "jpeg": "image/jpeg",
+                    "jpg": "image/jpeg",
+                    "svg": "image/svg+xml",
+                    "pdf": "application/pdf",
+                }
+
+                if fmt not in mime_types:
+                    return f"Unsupported format: {fmt}", 400
+
+                dpi = 150 if fmt in ["png", "jpeg", "jpg"] else None
+                fig.savefig(buf, format=fmt if fmt != "jpg" else "jpeg",
+                           dpi=dpi, bbox_inches="tight",
+                           facecolor="white" if fmt in ["png", "jpeg", "jpg"] else None)
+                buf.seek(0)
+
+                return send_file(
+                    buf,
+                    mimetype=mime_types[fmt],
+                    as_attachment=True,
+                    download_name=f"{figure_name}.{fmt}"
+                )
+
+            except Exception as e:
+                return str(e), 500
+
+        @app.route("/download_pltz")
+        def download_pltz():
+            """Download as pltz bundle (re-editable format)."""
+            try:
+                if not editor.panel_info:
+                    return "No panel info available", 404
+
+                bundle_path = editor.panel_info.get("bundle_path")
+                if not bundle_path:
+                    return "Bundle path not available", 404
+
+                from flask import send_file
+                from pathlib import Path
+
+                # Send the figz file directly (it's already a pltz-compatible format)
+                return send_file(
+                    bundle_path,
+                    mimetype="application/zip",
+                    as_attachment=True,
+                    download_name=Path(bundle_path).name
+                )
+
+            except Exception as e:
+                return str(e), 500
+
         @app.route("/shutdown", methods=["POST"])
         def shutdown():
             """Shutdown the server."""

@@ -290,6 +290,29 @@ def extract_bboxes_multi(
         legend = ax.get_legend()
         if legend:
             get_element_bbox(legend, "legend", ax_id, ax)
+            # Add element_type for drag detection
+            if f"{ax_id}_legend" in bboxes:
+                bboxes[f"{ax_id}_legend"]["element_type"] = "legend"
+                bboxes[f"{ax_id}_legend"]["draggable"] = True
+
+        # Get panel letter (text annotations like A, B, C)
+        import re
+        panel_letter_pattern = re.compile(r'^[A-Z]\.?$|^\([A-Za-z]\)$')
+        for idx, text_artist in enumerate(ax.texts):
+            text_content = text_artist.get_text().strip()
+            if text_content and panel_letter_pattern.match(text_content):
+                name = f"panel_letter_{text_content.replace('.', '').replace('(', '').replace(')', '')}"
+                get_element_bbox(text_artist, name, ax_id, ax)
+                full_name = f"{ax_id}_{name}"
+                if full_name in bboxes:
+                    bboxes[full_name]["element_type"] = "panel_letter"
+                    bboxes[full_name]["draggable"] = True
+                    bboxes[full_name]["text"] = text_content
+                    # Get position in axes coordinates (0-1)
+                    pos = text_artist.get_position()
+                    transform = text_artist.get_transform()
+                    if transform == ax.transAxes:
+                        bboxes[full_name]["axes_position"] = {"x": pos[0], "y": pos[1]}
 
         # Get trace (line) bboxes
         _extract_trace_bboxes_for_axis(
