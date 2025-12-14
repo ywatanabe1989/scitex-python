@@ -88,6 +88,7 @@ def resolve_figz_bundle(path: Path, panel_index: int = 0) -> Tuple:
         "current_index": panel_index,
         "figz_dir": str(bundle_dir),
         "figz_is_zip": figz_is_zip,
+        "bundle_path": str(path) if figz_is_zip else None,  # Original figz zip path for export/download
     }
 
     # Resolve the selected panel

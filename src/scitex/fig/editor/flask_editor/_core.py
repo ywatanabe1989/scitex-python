@@ -723,48 +723,160 @@ class WebEditor:
                 if fmt not in mime_types:
                     return f"Unsupported format: {fmt}", 400
 
-                # For figz bundles, try to get existing export or render on-demand
+                # For figz bundles, download the composed figure
                 if editor.panel_info:
                     bundle_path = editor.panel_info.get("bundle_path")
-                    figure_name = Path(bundle_path).stem if bundle_path else "figure"
+                    figz_dir = editor.panel_info.get("figz_dir")
+                    figure_name = Path(bundle_path).stem if bundle_path else (
+                        Path(figz_dir).stem.replace(".figz.d", "") if figz_dir else "figure"
+                    )
 
-                    # Try to read existing export from bundle
-                    if bundle_path:
+                    if bundle_path or figz_dir:
                         from scitex.io import ZipBundle
-                        export_path = f"exports/{figure_name}.{fmt}"
-                        try:
-                            with ZipBundle(bundle_path, mode="r") as bundle:
-                                content = bundle.read_bytes(export_path)
-                            buf = io.BytesIO(content)
-                            return send_file(
-                                buf,
-                                mimetype=mime_types[fmt],
-                                as_attachment=True,
-                                download_name=f"{figure_name}.{fmt}"
-                            )
-                        except Exception as read_err:
-                            print(f"Export not found in bundle: {export_path} - {read_err}")
-                            pass  # Fall through to render on-demand
+                        from PIL import Image
+                        import numpy as np
+                        import matplotlib
+                        matplotlib.use('Agg')
+                        import matplotlib.pyplot as plt
+                        import json as json_module
 
-                # Render figure on-demand using the renderer
+                        # Try to read existing export from bundle (if zip)
+                        if bundle_path:
+                            export_path = f"exports/{figure_name}.{fmt}"
+                            try:
+                                with ZipBundle(bundle_path, mode="r") as bundle:
+                                    content = bundle.read_bytes(export_path)
+                                buf = io.BytesIO(content)
+                                return send_file(
+                                    buf,
+                                    mimetype=mime_types[fmt],
+                                    as_attachment=True,
+                                    download_name=f"{figure_name}.{fmt}"
+                                )
+                            except Exception:
+                                pass  # Export not found, compose on-demand
+
+                        # Read spec.json to get layout info
+                        spec = {}
+                        if bundle_path:
+                            try:
+                                with ZipBundle(bundle_path, mode="r") as bundle:
+                                    spec = bundle.read_json("spec.json")
+                            except:
+                                pass
+                        elif figz_dir:
+                            spec_path = Path(figz_dir) / "spec.json"
+                            if spec_path.exists():
+                                with open(spec_path) as f:
+                                    spec = json_module.load(f)
+
+                        # Get figure dimensions
+                        fig_width_mm = 180
+                        fig_height_mm = 120
+                        if "figure" in spec:
+                            fig_info = spec.get("figure", {})
+                            styles = fig_info.get("styles", {})
+                            size = styles.get("size", {})
+                            fig_width_mm = size.get("width_mm", 180)
+                            fig_height_mm = size.get("height_mm", 120)
+
+                        fig_width_in = fig_width_mm / 25.4
+                        fig_height_in = fig_height_mm / 25.4
+
+                        dpi = 150 if fmt in ["jpeg", "jpg"] else 300
+                        fig = plt.figure(figsize=(fig_width_in, fig_height_in), dpi=dpi, facecolor='white')
+
+                        # Compose panels
+                        panels_spec = spec.get("panels", [])
+                        panel_paths = editor.panel_info.get("panel_paths", [])
+                        panel_is_zip = editor.panel_info.get("panel_is_zip", [])
+
+                        for panel_spec in panels_spec:
+                            panel_id = panel_spec.get("id", "")
+                            pos = panel_spec.get("position", {})
+                            size = panel_spec.get("size", {})
+
+                            x_mm = pos.get("x_mm", 0)
+                            y_mm = pos.get("y_mm", 0)
+                            w_mm = size.get("width_mm", 60)
+                            h_mm = size.get("height_mm", 40)
+
+                            x_frac = x_mm / fig_width_mm
+                            y_frac = 1 - (y_mm + h_mm) / fig_height_mm
+                            w_frac = w_mm / fig_width_mm
+                            h_frac = h_mm / fig_height_mm
+
+                            # Find panel path by matching id
+                            panel_path = None
+                            is_zip = False
+                            for idx, pp in enumerate(panel_paths):
+                                pp_name = Path(pp).stem.replace(".pltz", "")
+                                if pp_name == panel_id:
+                                    panel_path = pp
+                                    is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else False
+                                    break
+
+                            if not panel_path:
+                                continue
+
+                            # Load panel preview image
+                            try:
+                                if is_zip:
+                                    with ZipBundle(panel_path, mode="r") as pltz_bundle:
+                                        for preview_path in ["exports/preview.png", "preview.png"]:
+                                            try:
+                                                img_data = pltz_bundle.read_bytes(preview_path)
+                                                img = Image.open(io.BytesIO(img_data))
+                                                ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                                                ax.imshow(np.array(img))
+                                                ax.axis('off')
+                                                break
+                                            except:
+                                                continue
+                                else:
+                                    # Directory-based pltz
+                                    pltz_dir = Path(panel_path)
+                                    for preview_name in ["exports/preview.png", "preview.png"]:
+                                        preview_file = pltz_dir / preview_name
+                                        if preview_file.exists():
+                                            img = Image.open(preview_file)
+                                            ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                                            ax.imshow(np.array(img))
+                                            ax.axis('off')
+                                            break
+                            except Exception as e:
+                                print(f"Could not load panel {panel_id}: {e}")
+
+                        buf = io.BytesIO()
+                        fig.savefig(buf, format=fmt if fmt != "jpg" else "jpeg",
+                                   dpi=dpi, bbox_inches="tight", facecolor="white",
+                                   pad_inches=0.02)
+                        plt.close(fig)
+                        buf.seek(0)
+
+                        return send_file(
+                            buf,
+                            mimetype=mime_types[fmt],
+                            as_attachment=True,
+                            download_name=f"{figure_name}.{fmt}"
+                        )
+
+                # For single pltz files, render from csv_data
                 from ._renderer import render_preview_with_bboxes
                 import matplotlib
                 matplotlib.use('Agg')
                 import matplotlib.pyplot as plt
 
-                # Get figure name
                 figure_name = "figure"
                 if editor.json_path:
                     figure_name = Path(editor.json_path).stem
 
-                # Render the figure
                 img_data, _, _ = render_preview_with_bboxes(
                     editor.csv_data, editor.current_overrides,
                     metadata=editor.metadata,
                     dark_mode=False,
                 )
 
-                # For PNG, we already have base64 image data
                 if fmt == "png":
                     import base64
                     content = base64.b64decode(img_data)
@@ -776,14 +888,10 @@ class WebEditor:
                         download_name=f"{figure_name}.{fmt}"
                     )
 
-                # For other formats, we need to re-render
-                # Use the plotter to create the figure
-                from ._plotter import plot_with_overrides
-
-                fig, ax = plot_with_overrides(
-                    editor.csv_data, editor.current_overrides,
-                    metadata=editor.metadata,
-                )
+                # For other formats, re-render
+                from ._plotter import plot_from_csv
+                fig, ax = plt.subplots(figsize=(8, 6))
+                plot_from_csv(ax, editor.csv_data, editor.current_overrides)
 
                 buf = io.BytesIO()
                 dpi = 150 if fmt in ["jpeg", "jpg"] else 300
