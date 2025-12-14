@@ -228,7 +228,7 @@ class MplEditor:
 
     def _save(self, event):
         """Save to .manual.json."""
-        from ._edit import save_manual_overrides
+        from .edit import save_manual_overrides
 
         try:
             manual_path = save_manual_overrides(self.json_path, self.current_overrides)

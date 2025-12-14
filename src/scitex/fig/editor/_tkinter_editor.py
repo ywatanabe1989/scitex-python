@@ -490,7 +490,7 @@ class TkinterEditor:
 
     def _save_manual(self):
         """Save current overrides to .manual.json."""
-        from ._edit import save_manual_overrides
+        from .edit import save_manual_overrides
 
         try:
             manual_path = save_manual_overrides(self.json_path, self.current_overrides)
