@@ -139,6 +139,10 @@ if __name__ == "__main__":
 # import numpy as np
 # import pandas as pd
 # 
+# from scitex import logging
+# 
+# logger = logging.getLogger(__name__)
+# 
 # 
 # class FigWrapper:
 #     def __init__(self, fig_mpl):
@@ -294,9 +298,7 @@ if __name__ == "__main__":
 #                     auto_metadata["custom"].update(metadata)
 #             except Exception as e:
 #                 # If metadata collection fails, warn but continue
-#                 import warnings
-# 
-#                 warnings.warn(f"Could not collect metadata: {e}")
+#                 logger.warning(f"Could not collect metadata: {e}")
 #                 auto_metadata = metadata
 # 
 #             # Use scitex.io.save_image for metadata embedding
@@ -308,9 +310,7 @@ if __name__ == "__main__":
 #                 )
 #             except Exception as e:
 #                 # Fallback to regular matplotlib savefig
-#                 import warnings
-# 
-#                 warnings.warn(f"Metadata embedding failed, using regular savefig: {e}")
+#                 logger.warning(f"Metadata embedding failed, using regular savefig: {e}")
 #                 self._fig_mpl.savefig(fname, *args, **kwargs)
 #         else:
 #             # For non-image formats or when metadata disabled, use regular savefig

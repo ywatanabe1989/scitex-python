@@ -1220,10 +1220,18 @@ if __name__ == "__main__":
 #             logger.success(f"Symlinked: {spath_final} -> {symlink_to_full}")
 # 
 # 
-# def _save_pltz_bundle(obj, spath, as_zip=False, data=None, **kwargs):
+# def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwargs):
 #     """Save a matplotlib figure as a .pltz bundle.
 # 
-#     Bundle structure (per FIGZ_PLTZ_STATSZ.md spec):
+#     Bundle structure v2.0 (layered - default):
+#         plot.pltz.d/
+#             spec.json           # Semantic: WHAT to plot (canonical)
+#             style.json          # Appearance: HOW it looks (canonical)
+#             data.csv            # Raw data (immutable)
+#             exports/            # PNG, SVG, hitmap
+#             cache/              # geometry_px.json, render_manifest.json
+# 
+#     Bundle structure v1.0 (legacy):
 #         plot.json  - specification (axes, styles, theme, etc.)
 #         plot.csv   - raw data (immutable)
 #         plot.png   - raster export (required)
@@ -1240,6 +1248,9 @@ if __name__ == "__main__":
 #         If True, save as ZIP archive.
 #     data : pandas.DataFrame, optional
 #         Data to embed in the bundle as plot.csv.
+#     layered : bool
+#         If True (default), use new layered format (spec/style/geometry).
+#         If False, use legacy single JSON format.
 #     **kwargs
 #         Additional arguments passed to savefig.
 #     """
@@ -1250,6 +1261,16 @@ if __name__ == "__main__":
 #     from ._bundle import save_bundle, BundleType
 # 
 #     p = Path(spath)
+# 
+#     # Extract basename from path (e.g., "myplot.pltz" -> "myplot", "myplot.pltz.d" -> "myplot")
+#     basename = p.stem  # e.g., "myplot.pltz" or "myplot"
+#     if basename.endswith('.pltz'):
+#         basename = basename[:-5]  # Remove .pltz suffix
+#     elif basename.endswith('.d'):
+#         # Handle myplot.pltz.d -> myplot.pltz -> myplot
+#         basename = Path(basename).stem
+#         if basename.endswith('.pltz'):
+#             basename = basename[:-5]
 # 
 #     # Extract figure from various matplotlib object types
 #     import matplotlib.figure
@@ -1264,17 +1285,60 @@ if __name__ == "__main__":
 # 
 #     dpi = kwargs.pop('dpi', 300)
 # 
+#     # === Always use layered format ===
+#     from scitex.plt.io import save_layered_pltz_bundle
+#     import shutil
+#     import tempfile
+# 
+#     # Determine bundle directory path
+#     if as_zip:
+#         # For ZIP: save to temp dir, then compress
+#         temp_dir = Path(tempfile.mkdtemp())
+#         bundle_dir = temp_dir / f"{basename}.pltz.d"
+#         zip_path = p if not str(p).endswith('.d') else Path(str(p)[:-2])
+#     else:
+#         # For directory: save directly
+#         bundle_dir = p if str(p).endswith('.d') else Path(str(p) + '.d')
+# 
+#     # Get CSV data from figure if not provided
+#     csv_df = data
+#     if csv_df is None:
+#         csv_source = _get_figure_with_data(obj)
+#         if csv_source is not None and hasattr(csv_source, 'export_as_csv'):
+#             try:
+#                 csv_df = csv_source.export_as_csv()
+#             except Exception:
+#                 pass
+# 
+#     save_layered_pltz_bundle(
+#         fig=fig,
+#         bundle_dir=bundle_dir,
+#         basename=basename,
+#         dpi=dpi,
+#         csv_df=csv_df,
+#     )
+# 
+#     # Compress to ZIP if requested
+#     if as_zip:
+#         from ._bundle import pack_bundle
+#         pack_bundle(bundle_dir, zip_path)
+#         shutil.rmtree(temp_dir)  # Clean up temp directory
+# 
+#     return  # Done with layered format
+# 
+#     # === Legacy format below (DEPRECATED - kept for reference) ===
+# 
 #     # Calculate size info
 #     fig_width_inch, fig_height_inch = fig.get_size_inches()
 #     fig_dpi = fig.get_dpi()
 # 
-#     # Build spec according to contract
+#     # Build spec according to contract (using basename for file references)
 #     spec = {
 #         'schema': {'name': 'scitex.plt.plot', 'version': '1.0.0'},
 #         'backend': 'mpl',
 #         'data': {
-#             'source': 'plot.csv',
-#             'path': 'plot.csv',
+#             'source': f'{basename}.csv',
+#             'path': f'{basename}.csv',
 #             'hash': None,  # Will be computed after data extraction
 #             'columns': [],  # Will be populated after data extraction
 #         },
@@ -1360,7 +1424,7 @@ if __name__ == "__main__":
 #         lines_info = []
 #         for j, line in enumerate(ax.get_lines()):
 #             label = line.get_label()
-#             if label.startswith('_'):
+#             if label is None or label.startswith('_'):
 #                 label = f'series_{j}'
 #             xdata, ydata = line.get_data()
 #             if len(xdata) > 0:
@@ -1406,8 +1470,8 @@ if __name__ == "__main__":
 #             for ax in fig.axes:
 #                 _apply_theme_colors(ax, theme='dark')
 # 
-#     # Build bundle data
-#     bundle_data = {'spec': spec}
+#     # Build bundle data (include basename for file naming)
+#     bundle_data = {'spec': spec, 'basename': basename}
 # 
 #     # Use provided data or extracted data for CSV
 #     # Priority: 1) explicit data param, 2) export_as_csv method, 3) line extraction fallback
@@ -1460,7 +1524,7 @@ if __name__ == "__main__":
 #     from PIL import Image as PILImage
 #     from scitex.plt.utils._hitmap import (
 #         apply_hitmap_colors, restore_original_colors, extract_path_data,
-#         HITMAP_BACKGROUND_COLOR, HITMAP_AXES_COLOR
+#         extract_selectable_regions, HITMAP_BACKGROUND_COLOR, HITMAP_AXES_COLOR
 #     )
 # 
 #     crop_box = None
@@ -1604,8 +1668,8 @@ if __name__ == "__main__":
 # 
 #         spec['hit_regions'] = {
 #             'strategy': 'hybrid',
-#             'hit_map': 'plot_hitmap.png',
-#             'hit_map_svg': 'plot_hitmap.svg',
+#             'hit_map': f'{basename}_hitmap.png',
+#             'hit_map_svg': f'{basename}_hitmap.svg',
 #             'color_map': {str(k): v for k, v in color_map.items()},
 #             'groups': groups,  # Logical groups (histogram, bar_series, etc.)
 #             'path_data': path_data,
@@ -1618,6 +1682,12 @@ if __name__ == "__main__":
 #                 'right': int(crop_box[2]),
 #                 'lower': int(crop_box[3]),
 #             }
+# 
+#         # Extract selectable regions (bounding boxes for axis/annotation elements)
+#         # This complements hitmap color-based selection with bbox-based selection
+#         selectable_regions = extract_selectable_regions(fig)
+#         if selectable_regions and selectable_regions.get('axes'):
+#             spec['selectable_regions'] = selectable_regions
 # 
 #     except Exception as e:
 #         logger.debug(f"Hit regions spec failed: {e}")
@@ -1670,6 +1740,30 @@ if __name__ == "__main__":
 #             elif bext == ".statsz":
 #                 import scitex.stats as sstats
 #                 sstats.save_statsz(obj, spath, as_zip=as_zip, **bundle_kwargs)
+# 
+#             # Log "Saved to:" for bundle formats (consistent with other formats)
+#             # For bundles, determine the actual saved path (zip or directory)
+#             bundle_path = spath if as_zip else f"{spath}.d" if not spath.endswith(".d") else spath
+# 
+#             if verbose and _os.path.exists(bundle_path):
+#                 file_size = getsize(bundle_path)
+#                 file_size = readable_bytes(file_size)
+#                 try:
+#                     rel_path = _os.path.relpath(bundle_path, _os.getcwd())
+#                 except ValueError:
+#                     rel_path = bundle_path
+#                 logger.success(f"Saved to: ./{rel_path} ({file_size})")
+# 
+#             # Handle symlinks for bundle formats (consistent with other formats)
+#             if symlink_from_cwd and _os.path.exists(bundle_path):
+#                 # Create symlink from cwd to bundle path
+#                 bundle_basename = _os.path.basename(bundle_path)
+#                 bundle_cwd = _os.path.join(_os.getcwd(), bundle_basename)
+#                 _symlink(bundle_path, bundle_cwd, symlink_from_cwd, verbose)
+# 
+#             if symlink_to and _os.path.exists(bundle_path):
+#                 _symlink_to(bundle_path, symlink_to, verbose)
+# 
 #             return
 # 
 #     # Try dispatch dictionary first for O(1) lookup
@@ -1711,7 +1805,7 @@ if __name__ == "__main__":
 #     elif spath.endswith(".pkl.gz"):
 #         save_pickle_compressed(obj, spath, **kwargs)
 #     else:
-#         warnings.warn(f"Unsupported file format. {spath} was not saved.")
+#         logger.warning(f"Unsupported file format. {spath} was not saved.")
 # 
 #     if verbose:
 #         if _os.path.exists(spath):
@@ -1877,9 +1971,7 @@ if __name__ == "__main__":
 #                     pass  # collect_figure_metadata not available
 #                 except Exception as e:
 #                     if verbose:
-#                         import warnings
-# 
-#                         warnings.warn(f"Could not auto-collect metadata: {e}")
+#                         logger.warning(f"Could not auto-collect metadata: {e}")
 #         except Exception:
 #             pass  # Silently continue if auto-collection fails
 #     else:
@@ -1975,9 +2067,7 @@ if __name__ == "__main__":
 #                     )
 # 
 #             except Exception as e:
-#                 import warnings
-# 
-#                 warnings.warn(f"Auto-crop failed: {e}. Image saved without cropping.")
+#                 logger.warning(f"Auto-crop failed: {e}. Image saved without cropping.")
 # 
 #     # Handle separate legend saving
 #     _save_separate_legends(
@@ -2212,12 +2302,7 @@ if __name__ == "__main__":
 #                             )
 #                             _symlink(csv_sigmaplot_path, csv_cwd, True, True)
 #         except Exception as e:
-#             import warnings
-# 
-#             warnings.warn(f"CSV export failed: {e}")
-#             import traceback
-# 
-#             traceback.print_exc()
+#             logger.warning(f"CSV export failed: {e}")
 # 
 #     # Save metadata as JSON if collected
 #     if collected_metadata is not None and not dry_run:
@@ -2336,12 +2421,7 @@ if __name__ == "__main__":
 #             # Re-raise assertion errors - these are validation failures that should stop execution
 #             raise
 #         except Exception as e:
-#             import warnings
-# 
-#             warnings.warn(f"JSON metadata export failed: {e}")
-#             import traceback
-# 
-#             traceback.print_exc()
+#             logger.warning(f"JSON metadata export failed: {e}")
 # 
 # 
 # # Dispatch dictionary for O(1) file format lookup

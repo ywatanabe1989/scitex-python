@@ -436,25 +436,13 @@ if __name__ == "__main__":
 #             )
 # 
 #             # Warn user about missing Arial using scitex.logging
-#             try:
-#                 from scitex.logging import getLogger
+#             from scitex import logging as _logging
 # 
-#                 logger = getLogger(__name__)
-#                 logger.warning(
-#                     "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
-#                     "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
-#                 )
-#             except ImportError:
-#                 # Fallback to warnings if scitex.logging not available
-#                 import warnings
-# 
-#                 warnings.warn(
-#                     "Arial font not found on system. Using fallback fonts (Helvetica/DejaVu Sans). "
-#                     "For publication-quality figures with Arial, install Microsoft Core Fonts: "
-#                     "sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv",
-#                     UserWarning,
-#                     stacklevel=2,
-#                 )
+#             _logger = _logging.getLogger(__name__)
+#             _logger.warning(
+#                 "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+#                 "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
+#             )
 # 
 #         # Suppress matplotlib's own font warnings
 #         import logging
