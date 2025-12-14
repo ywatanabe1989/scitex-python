@@ -95,6 +95,144 @@ class WebEditor:
         app = Flask(__name__)
         editor = self
 
+        def _export_composed_figure(editor, formats=["png", "svg"], dpi=150):
+            """Helper to compose and export figure to bundle."""
+            from scitex.io import ZipBundle
+            from PIL import Image
+            import numpy as np
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            import json as json_module
+            import io
+            import zipfile
+
+            if not editor.panel_info:
+                return {"success": False, "error": "No panel info"}
+
+            bundle_path = editor.panel_info.get("bundle_path")
+            figz_dir = editor.panel_info.get("figz_dir")
+
+            if not bundle_path and not figz_dir:
+                return {"success": False, "error": "No bundle path"}
+
+            figure_name = Path(bundle_path).stem if bundle_path else (
+                Path(figz_dir).stem.replace(".figz.d", "") if figz_dir else "figure"
+            )
+
+            # Read spec.json for layout
+            spec = {}
+            if bundle_path:
+                try:
+                    with ZipBundle(bundle_path, mode="r") as bundle:
+                        spec = bundle.read_json("spec.json")
+                except:
+                    pass
+            elif figz_dir:
+                spec_path = Path(figz_dir) / "spec.json"
+                if spec_path.exists():
+                    with open(spec_path) as f:
+                        spec = json_module.load(f)
+
+            # Get figure dimensions
+            fig_width_mm = 180
+            fig_height_mm = 120
+            if "figure" in spec:
+                fig_info = spec.get("figure", {})
+                styles = fig_info.get("styles", {})
+                size = styles.get("size", {})
+                fig_width_mm = size.get("width_mm", 180)
+                fig_height_mm = size.get("height_mm", 120)
+
+            fig_width_in = fig_width_mm / 25.4
+            fig_height_in = fig_height_mm / 25.4
+
+            fig = plt.figure(figsize=(fig_width_in, fig_height_in), dpi=dpi, facecolor='white')
+
+            # Compose panels
+            panels_spec = spec.get("panels", [])
+            panel_paths = editor.panel_info.get("panel_paths", [])
+            panel_is_zip = editor.panel_info.get("panel_is_zip", [])
+
+            for panel_spec in panels_spec:
+                panel_id = panel_spec.get("id", "")
+                pos = panel_spec.get("position", {})
+                size = panel_spec.get("size", {})
+
+                x_mm = pos.get("x_mm", 0)
+                y_mm = pos.get("y_mm", 0)
+                w_mm = size.get("width_mm", 60)
+                h_mm = size.get("height_mm", 40)
+
+                x_frac = x_mm / fig_width_mm
+                y_frac = 1 - (y_mm + h_mm) / fig_height_mm
+                w_frac = w_mm / fig_width_mm
+                h_frac = h_mm / fig_height_mm
+
+                # Find panel path
+                panel_path = None
+                is_zip = False
+                for idx, pp in enumerate(panel_paths):
+                    pp_name = Path(pp).stem.replace(".pltz", "")
+                    if (pp_name == panel_id or
+                        pp_name.startswith(f"panel_{panel_id}_") or
+                        pp_name == f"panel_{panel_id}" or
+                        f"_{panel_id}_" in pp_name):
+                        panel_path = pp
+                        is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else False
+                        break
+
+                if not panel_path:
+                    continue
+
+                # Load panel preview
+                try:
+                    if is_zip:
+                        with ZipBundle(panel_path, mode="r") as pltz_bundle:
+                            with zipfile.ZipFile(panel_path, 'r') as zf:
+                                png_files = [n for n in zf.namelist()
+                                            if n.endswith('.png') and 'hitmap' not in n.lower()
+                                            and 'exports/' in n]
+                                if png_files:
+                                    preview_path = png_files[0]
+                                    if '.pltz.d/' in preview_path:
+                                        preview_path = preview_path.split('.pltz.d/')[-1]
+                                    img_data = pltz_bundle.read_bytes(preview_path)
+                                    img = Image.open(io.BytesIO(img_data))
+                                    ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                                    ax.imshow(np.array(img))
+                                    ax.axis('off')
+                    else:
+                        pltz_dir = Path(panel_path)
+                        exports_dir = pltz_dir / "exports"
+                        if exports_dir.exists():
+                            for png_file in exports_dir.glob("*.png"):
+                                if "hitmap" not in png_file.name.lower():
+                                    img = Image.open(png_file)
+                                    ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                                    ax.imshow(np.array(img))
+                                    ax.axis('off')
+                                    break
+                except Exception as e:
+                    print(f"Could not load panel {panel_id}: {e}")
+
+            exported = {}
+
+            # Save to bundle
+            if bundle_path:
+                with ZipBundle(bundle_path, mode="a") as bundle:
+                    for fmt in formats:
+                        buf = io.BytesIO()
+                        fig.savefig(buf, format=fmt, dpi=dpi, bbox_inches="tight",
+                                   facecolor="white", pad_inches=0.02)
+                        buf.seek(0)
+                        export_path = f"exports/{figure_name}.{fmt}"
+                        bundle.write_bytes(export_path, buf.read())
+                        exported[fmt] = export_path
+
+            plt.close(fig)
+            return {"success": True, "exported": exported}
+
         @app.route("/")
         def index():
             # Rebuild template each time for hot reload support
@@ -458,7 +596,14 @@ class WebEditor:
                 # Update in-memory panel_info
                 editor.panel_info["layout"] = existing_layout
 
-                return jsonify({"success": True, "layout": existing_layout})
+                # Auto-export composed figure to bundle
+                export_result = _export_composed_figure(editor, formats=["png", "svg"])
+
+                return jsonify({
+                    "success": True,
+                    "layout": existing_layout,
+                    "exported": export_result.get("exported", {})
+                })
 
             except Exception as e:
                 import traceback
