@@ -1,0 +1,130 @@
+/* =============================================================================
+ * Selection and Hover Styles
+ * Color-neutral approach: white outline with glow that works with any element color
+ * ============================================================================= */
+
+/* Hover: Light outline with subtle glow */
+.hover-rect {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.9);
+    stroke-width: 2;
+    pointer-events: none;
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.8));
+}
+
+/* Selected: Stronger white outline with prominent glow */
+.selected-rect {
+    fill: none;
+    stroke: rgba(255, 255, 255, 1);
+    stroke-width: 2;
+    stroke-dasharray: 4 2;
+    pointer-events: none;
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 2px rgba(255, 255, 255, 1));
+}
+
+.hover-label {
+    font-size: 10px;
+    fill: rgba(255, 255, 255, 0.9);
+    pointer-events: none;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+}
+
+.selected-label {
+    font-size: 10px;
+    fill: rgba(255, 255, 255, 1);
+    pointer-events: none;
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.9));
+}
+
+/* Hover path: White outline that shows alongside the original trace */
+.hover-path {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.9);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.6));
+}
+
+/* Selected path: Dashed white outline for clear selection indication */
+.selected-path {
+    fill: none;
+    stroke: rgba(255, 255, 255, 1);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 8 4;
+    pointer-events: none;
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.7));
+}
+
+/* Hover scatter: White ring around points */
+.hover-scatter {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.9);
+    stroke-width: 3;
+    pointer-events: none;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.6));
+}
+
+/* Selected scatter: Dashed white ring */
+.selected-scatter {
+    fill: none;
+    stroke: rgba(255, 255, 255, 1);
+    stroke-width: 3;
+    stroke-dasharray: 3 2;
+    pointer-events: none;
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.7));
+}
+
+/* =============================================================================
+ * Selected Element Panel
+ * ============================================================================= */
+#section-selected {
+    border: 2px solid var(--accent-muted);
+    background: var(--bg-secondary);
+}
+
+#section-selected .section-header {
+    background: var(--accent-muted);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.selected-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 8px;
+    background: var(--bg-primary);
+    border-radius: 4px;
+}
+
+.element-type-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.element-type-badge.trace { background: #3498db; color: white; }
+.element-type-badge.scatter { background: #e74c3c; color: white; }
+.element-type-badge.fill { background: #9b59b6; color: white; }
+.element-type-badge.bar { background: #f39c12; color: white; }
+.element-type-badge.label { background: #2ecc71; color: white; }
+.element-type-badge.panel { background: #34495e; color: white; }
+.element-type-badge.legend { background: #1abc9c; color: white; }
+
+.element-axis-info {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.element-props {
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+    margin-top: 8px;
+}

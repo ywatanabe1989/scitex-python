@@ -41,6 +41,56 @@ function isDarkMode() {
     return document.documentElement.getAttribute('data-theme') === 'dark';
 }
 
+// Calculate actual rendered image dimensions when using object-fit: contain
+// Returns: {renderedWidth, renderedHeight, offsetX, offsetY, containerWidth, containerHeight}
+function getObjectFitContainDimensions(img) {
+    const containerWidth = img.offsetWidth;
+    const containerHeight = img.offsetHeight;
+    const naturalWidth = img.naturalWidth;
+    const naturalHeight = img.naturalHeight;
+
+    // Handle edge cases
+    if (!naturalWidth || !naturalHeight || !containerWidth || !containerHeight) {
+        return {
+            renderedWidth: containerWidth,
+            renderedHeight: containerHeight,
+            offsetX: 0,
+            offsetY: 0,
+            containerWidth,
+            containerHeight
+        };
+    }
+
+    // Calculate scale factor for object-fit: contain
+    const containerRatio = containerWidth / containerHeight;
+    const imageRatio = naturalWidth / naturalHeight;
+
+    let renderedWidth, renderedHeight, offsetX, offsetY;
+
+    if (imageRatio > containerRatio) {
+        // Image is wider than container - fit to width, letterbox top/bottom
+        renderedWidth = containerWidth;
+        renderedHeight = containerWidth / imageRatio;
+        offsetX = 0;
+        offsetY = (containerHeight - renderedHeight) / 2;
+    } else {
+        // Image is taller than container - fit to height, letterbox left/right
+        renderedHeight = containerHeight;
+        renderedWidth = containerHeight * imageRatio;
+        offsetX = (containerWidth - renderedWidth) / 2;
+        offsetY = 0;
+    }
+
+    return {
+        renderedWidth,
+        renderedHeight,
+        offsetX,
+        offsetY,
+        containerWidth,
+        containerHeight
+    };
+}
+
 // Hitmap-based element detection
 let hitmapCanvas = null;
 let hitmapCtx = null;
@@ -1634,14 +1684,22 @@ document.addEventListener('DOMContentLoaded', () => {
 // =============================================================================
 // Loading Helpers
 // =============================================================================
-function showLoading() {
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) overlay.style.display = 'flex';
+function showLoading(message = 'Loading...') {
+    const globalOverlay = document.getElementById('global-loading-overlay');
+    const localOverlay = document.getElementById('loading-overlay');
+    if (globalOverlay) {
+        globalOverlay.style.display = 'flex';
+        const loadingText = globalOverlay.querySelector('.loading-text');
+        if (loadingText) loadingText.textContent = message;
+    }
+    if (localOverlay) localOverlay.style.display = 'flex';
 }
 
 function hideLoading() {
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) overlay.style.display = 'none';
+    const globalOverlay = document.getElementById('global-loading-overlay');
+    const localOverlay = document.getElementById('loading-overlay');
+    if (globalOverlay) globalOverlay.style.display = 'none';
+    if (localOverlay) localOverlay.style.display = 'none';
 }
 
 // Update form controls from overrides (used when switching panels)
@@ -1815,12 +1873,24 @@ async function loadPanelGrid() {
         const canvasEl = document.getElementById('panel-canvas');
         canvasEl.innerHTML = '';
 
-        // Calculate layout - arrange panels in a grid-like canvas
-        const numPanels = data.panels.length;
-        const cols = Math.ceil(Math.sqrt(numPanels));
-        const baseWidth = 220;
-        const baseHeight = 180;
-        const padding = 15;
+        // Use figz layout to position panels as unified canvas (matching export)
+        const hasLayout = data.layout && Object.keys(data.layout).length > 0;
+
+        // Calculate scale factor: convert mm to pixels
+        // Find total figure dimensions from layout
+        let maxX = 0, maxY = 0;
+        if (hasLayout) {
+            Object.values(data.layout).forEach(l => {
+                const right = (l.position?.x_mm || 0) + (l.size?.width_mm || 80);
+                const bottom = (l.position?.y_mm || 0) + (l.size?.height_mm || 50);
+                maxX = Math.max(maxX, right);
+                maxY = Math.max(maxY, bottom);
+            });
+        }
+
+        // Scale to fit canvas (max width ~700px for good display)
+        const canvasMaxWidth = 700;
+        const scale = hasLayout && maxX > 0 ? canvasMaxWidth / maxX : 3;  // ~3px per mm fallback
 
         data.panels.forEach((panel, idx) => {
             // Store bboxes and imgSize in cache for interactive hover/click
@@ -1834,18 +1904,29 @@ async function loadPanelGrid() {
                 console.warn(`Panel ${panel.name}: missing bboxes or img_size`, {bboxes: !!panel.bboxes, img_size: !!panel.img_size});
             }
 
-            // Calculate position
-            const col = idx % cols;
-            const row = Math.floor(idx / cols);
-            if (!panelPositions[panel.name]) {
-                panelPositions[panel.name] = {
+            // Use figz layout for positioning (unified canvas like export)
+            let pos;
+            if (panel.layout && panel.layout.position && panel.layout.size) {
+                pos = {
+                    x: (panel.layout.position.x_mm || 0) * scale,
+                    y: (panel.layout.position.y_mm || 0) * scale,
+                    width: (panel.layout.size.width_mm || 80) * scale,
+                    height: (panel.layout.size.height_mm || 50) * scale,
+                };
+            } else {
+                // Fallback grid layout if no figz layout
+                const cols = Math.ceil(Math.sqrt(data.panels.length));
+                const baseWidth = 220, baseHeight = 180, padding = 15;
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                pos = {
                     x: padding + col * (baseWidth + padding),
                     y: padding + row * (baseHeight + padding),
                     width: baseWidth,
                     height: baseHeight,
                 };
             }
-            const pos = panelPositions[panel.name];
+            panelPositions[panel.name] = pos;
 
             const item = document.createElement('div');
             item.className = 'panel-canvas-item' + (idx === currentPanelIndex ? ' active' : '');
@@ -1858,16 +1939,15 @@ async function loadPanelGrid() {
 
             if (panel.image) {
                 item.innerHTML = `
-                    <span class="panel-canvas-label">Panel ${panel.name}</span>
+                    <span class="panel-canvas-label">${panel.name}</span>
                     <div class="panel-card-container">
                         <img src="data:image/png;base64,${panel.image}" alt="Panel ${panel.name}">
                         <svg class="panel-card-overlay" id="panel-overlay-${idx}"></svg>
                     </div>
-                    <div class="panel-canvas-resize"></div>
                 `;
             } else {
                 item.innerHTML = `
-                    <span class="panel-canvas-label">Panel ${panel.name}</span>
+                    <span class="panel-canvas-label">${panel.name}</span>
                     <div style="padding: 20px; color: var(--text-muted);">No preview</div>
                 `;
             }
@@ -1878,9 +1958,11 @@ async function loadPanelGrid() {
             canvasEl.appendChild(item);
         });
 
-        // Update canvas height to fit all panels
-        const maxY = Math.max(...Object.values(panelPositions).map(p => p.y + p.height)) + padding;
-        canvasEl.style.minHeight = Math.max(400, maxY) + 'px';
+        // Update canvas size to fit all panels (unified canvas)
+        const canvasHeight = Math.max(...Object.values(panelPositions).map(p => p.y + p.height)) + 10;
+        const canvasWidth = Math.max(...Object.values(panelPositions).map(p => p.x + p.width)) + 10;
+        canvasEl.style.minHeight = Math.max(400, canvasHeight) + 'px';
+        canvasEl.style.minWidth = canvasWidth + 'px';
 
         // Update panel indicator
         updatePanelIndicator();
@@ -1910,25 +1992,43 @@ function initCanvasItemInteraction(item, panelIdx, panelName) {
         overlay.style.height = img.offsetHeight + 'px';
     });
 
-    // Mousemove for hover detection
+    // Mousemove for hover detection (accounting for object-fit:contain letterboxing)
     container.addEventListener('mousemove', (e) => {
         const panelCache = panelBboxesCache[panelName];
         if (!panelCache) return;
 
         const rect = img.getBoundingClientRect();
+        const dims = getObjectFitContainDimensions(img);
+
+        // Mouse position relative to container
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        const scaleX = panelCache.imgSize.width / rect.width;
-        const scaleY = panelCache.imgSize.height / rect.height;
-        const imgX = x * scaleX;
-        const imgY = y * scaleY;
+        // Adjust for letterbox offset to get position relative to actual rendered image
+        const imgRelX = x - dims.offsetX;
+        const imgRelY = y - dims.offsetY;
+
+        // Check if click is within rendered image bounds
+        if (imgRelX < 0 || imgRelY < 0 || imgRelX > dims.renderedWidth || imgRelY > dims.renderedHeight) {
+            // Outside rendered image area (in letterbox region)
+            if (panelHoveredElement !== null) {
+                panelHoveredElement = null;
+                updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, null, null, img);
+            }
+            return;
+        }
+
+        // Scale to original image coordinates
+        const scaleX = panelCache.imgSize.width / dims.renderedWidth;
+        const scaleY = panelCache.imgSize.height / dims.renderedHeight;
+        const imgX = imgRelX * scaleX;
+        const imgY = imgRelY * scaleY;
 
         const element = findElementInPanelAt(imgX, imgY, panelCache.bboxes);
         if (element !== panelHoveredElement || activePanelCard !== item) {
             panelHoveredElement = element;
             activePanelCard = item;
-            updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, panelHoveredElement, null);
+            updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, panelHoveredElement, null, img);
         }
     });
 
@@ -1936,11 +2036,11 @@ function initCanvasItemInteraction(item, panelIdx, panelName) {
     container.addEventListener('mouseleave', () => {
         panelHoveredElement = null;
         if (activePanelCard === item) {
-            updatePanelOverlay(overlay, {}, {width: 0, height: 0}, 0, 0, null, null);
+            updatePanelOverlay(overlay, {}, {width: 0, height: 0}, 0, 0, null, null, null);
         }
     });
 
-    // Click to select element
+    // Click to select element (accounting for object-fit:contain letterboxing)
     container.addEventListener('click', (e) => {
         e.stopPropagation();
 
@@ -1950,16 +2050,30 @@ function initCanvasItemInteraction(item, panelIdx, panelName) {
 
         if (panelCache && img) {
             const rect = img.getBoundingClientRect();
+            const dims = getObjectFitContainDimensions(img);
+
+            // Mouse position relative to container
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
-            const scaleX = panelCache.imgSize.width / rect.width;
-            const scaleY = panelCache.imgSize.height / rect.height;
-            const imgX = x * scaleX;
-            const imgY = y * scaleY;
+            // Adjust for letterbox offset
+            const imgRelX = x - dims.offsetX;
+            const imgRelY = y - dims.offsetY;
 
-            clickedElement = findElementInPanelAt(imgX, imgY, panelCache.bboxes);
-            console.log(`Click at (${imgX.toFixed(0)}, ${imgY.toFixed(0)}) -> element: ${clickedElement}`);
+            // Check if click is within rendered image bounds
+            if (imgRelX >= 0 && imgRelY >= 0 && imgRelX <= dims.renderedWidth && imgRelY <= dims.renderedHeight) {
+                // Scale to original image coordinates
+                const scaleX = panelCache.imgSize.width / dims.renderedWidth;
+                const scaleY = panelCache.imgSize.height / dims.renderedHeight;
+                const imgX = imgRelX * scaleX;
+                const imgY = imgRelY * scaleY;
+
+                clickedElement = findElementInPanelAt(imgX, imgY, panelCache.bboxes);
+                console.log(`Click at (${imgX.toFixed(0)}, ${imgY.toFixed(0)}) -> element: ${clickedElement}`);
+            } else {
+                clickedElement = null;
+                console.log('Click outside rendered image bounds (in letterbox area)');
+            }
         }
 
         if (clickedElement) {
@@ -2016,26 +2130,44 @@ function initPanelCardInteraction(card, panelIdx, panelName) {
         overlay.style.height = img.offsetHeight + 'px';
     });
 
-    // Mousemove for hover detection
+    // Mousemove for hover detection (accounting for object-fit:contain letterboxing)
     container.addEventListener('mousemove', (e) => {
         const panelCache = panelBboxesCache[panelName];
         if (!panelCache) return;
 
         const rect = img.getBoundingClientRect();
+        const dims = getObjectFitContainDimensions(img);
+
+        // Mouse position relative to container
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
 
-        const scaleX = panelCache.imgSize.width / rect.width;
-        const scaleY = panelCache.imgSize.height / rect.height;
-        const imgX = x * scaleX;
-        const imgY = y * scaleY;
+        // Adjust for letterbox offset to get position relative to actual rendered image
+        const imgRelX = x - dims.offsetX;
+        const imgRelY = y - dims.offsetY;
+
+        // Check if mouse is within rendered image bounds
+        if (imgRelX < 0 || imgRelY < 0 || imgRelX > dims.renderedWidth || imgRelY > dims.renderedHeight) {
+            // Outside rendered image area (in letterbox region)
+            if (panelHoveredElement !== null) {
+                panelHoveredElement = null;
+                updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, null, null, img);
+            }
+            return;
+        }
+
+        // Scale to original image coordinates
+        const scaleX = panelCache.imgSize.width / dims.renderedWidth;
+        const scaleY = panelCache.imgSize.height / dims.renderedHeight;
+        const imgX = imgRelX * scaleX;
+        const imgY = imgRelY * scaleY;
 
         // Find element at cursor using panel's bboxes
         const element = findElementInPanelAt(imgX, imgY, panelCache.bboxes);
         if (element !== panelHoveredElement || activePanelCard !== card) {
             panelHoveredElement = element;
             activePanelCard = card;
-            updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, panelHoveredElement, null);
+            updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, panelHoveredElement, null, img);
         }
     });
 
@@ -2043,7 +2175,7 @@ function initPanelCardInteraction(card, panelIdx, panelName) {
     container.addEventListener('mouseleave', () => {
         panelHoveredElement = null;
         if (activePanelCard === card) {
-            updatePanelOverlay(overlay, {}, {width: 0, height: 0}, 0, 0, null, null);
+            updatePanelOverlay(overlay, {}, {width: 0, height: 0}, 0, 0, null, null, null);
         }
     });
 
@@ -2174,29 +2306,55 @@ function redrawAllPanelOverlays() {
         const rect = img.getBoundingClientRect();
         console.log(`Redraw panel ${panelName}: rect=${rect.width}x${rect.height}, bboxes=${Object.keys(panelCache.bboxes).length}`);
         if (rect.width > 0 && rect.height > 0) {
-            updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, null, null);
+            updatePanelOverlay(overlay, panelCache.bboxes, panelCache.imgSize, rect.width, rect.height, null, null, img);
         }
     });
 }
 
 // Update SVG overlay for a panel card
-function updatePanelOverlay(overlay, bboxes, imgSizePanel, displayWidth, displayHeight, hovered, selected) {
-    if (!overlay || displayWidth === 0 || displayHeight === 0 || !imgSizePanel || imgSizePanel.width === 0) {
+// img: the img element (to calculate object-fit:contain dimensions)
+// OR pass null with displayWidth/displayHeight for backward compatibility
+function updatePanelOverlay(overlay, bboxes, imgSizePanel, displayWidth, displayHeight, hovered, selected, img) {
+    if (!overlay || !imgSizePanel || imgSizePanel.width === 0) {
         if (overlay) overlay.innerHTML = '';
         return;
     }
 
-    overlay.setAttribute('width', displayWidth);
-    overlay.setAttribute('height', displayHeight);
+    // Calculate actual rendered dimensions accounting for object-fit: contain
+    let renderedWidth, renderedHeight, offsetX, offsetY;
+    if (img) {
+        const dims = getObjectFitContainDimensions(img);
+        renderedWidth = dims.renderedWidth;
+        renderedHeight = dims.renderedHeight;
+        offsetX = dims.offsetX;
+        offsetY = dims.offsetY;
+        // Use container dimensions for the overlay size
+        overlay.setAttribute('width', dims.containerWidth);
+        overlay.setAttribute('height', dims.containerHeight);
+        overlay.style.width = dims.containerWidth + 'px';
+        overlay.style.height = dims.containerHeight + 'px';
+    } else {
+        // Fallback for backward compatibility
+        if (displayWidth === 0 || displayHeight === 0) {
+            if (overlay) overlay.innerHTML = '';
+            return;
+        }
+        renderedWidth = displayWidth;
+        renderedHeight = displayHeight;
+        offsetX = 0;
+        offsetY = 0;
+        overlay.setAttribute('width', displayWidth);
+        overlay.setAttribute('height', displayHeight);
+    }
 
-    const scaleX = displayWidth / imgSizePanel.width;
-    const scaleY = displayHeight / imgSizePanel.height;
+    const scaleX = renderedWidth / imgSizePanel.width;
+    const scaleY = renderedHeight / imgSizePanel.height;
 
     let svg = '';
 
-    // Debug mode: draw all bboxes
+    // Debug mode: draw all bboxes (with offset for object-fit:contain letterboxing)
     if (panelDebugMode && bboxes) {
-        svg += drawPanelDebugBboxes(bboxes, scaleX, scaleY);
+        svg += drawPanelDebugBboxes(bboxes, scaleX, scaleY, offsetX, offsetY);
     }
 
     function drawPanelElement(elementName, type) {
@@ -2206,35 +2364,35 @@ function updatePanelOverlay(overlay, bboxes, imgSizePanel, displayWidth, display
         const elementType = bbox.element_type || '';
         const hasPoints = bbox.points && bbox.points.length > 0;
 
-        // Lines - draw as path
+        // Lines - draw as path (with offset)
         if ((elementType === 'line' || elementName.includes('trace_')) && hasPoints) {
             if (bbox.points.length < 2) return '';
             const points = bbox.points.filter(pt => Array.isArray(pt) && pt.length >= 2);
             if (points.length < 2) return '';
 
-            let pathD = `M ${points[0][0] * scaleX} ${points[0][1] * scaleY}`;
+            let pathD = `M ${points[0][0] * scaleX + offsetX} ${points[0][1] * scaleY + offsetY}`;
             for (let i = 1; i < points.length; i++) {
-                pathD += ` L ${points[i][0] * scaleX} ${points[i][1] * scaleY}`;
+                pathD += ` L ${points[i][0] * scaleX + offsetX} ${points[i][1] * scaleY + offsetY}`;
             }
 
             const className = type === 'hover' ? 'hover-path' : 'selected-path';
             return `<path class="${className}" d="${pathD}"/>`;
         }
-        // Scatter - draw as circles
+        // Scatter - draw as circles (with offset)
         else if (elementType === 'scatter' && hasPoints) {
             const className = type === 'hover' ? 'hover-scatter' : 'selected-scatter';
             let result = '';
             for (const pt of bbox.points) {
                 if (!Array.isArray(pt) || pt.length < 2) continue;
-                result += `<circle class="${className}" cx="${pt[0] * scaleX}" cy="${pt[1] * scaleY}" r="3"/>`;
+                result += `<circle class="${className}" cx="${pt[0] * scaleX + offsetX}" cy="${pt[1] * scaleY + offsetY}" r="3"/>`;
             }
             return result;
         }
-        // Default - draw bbox rectangle
+        // Default - draw bbox rectangle (with offset)
         else {
             const rectClass = type === 'hover' ? 'hover-rect' : 'selected-rect';
-            const x = bbox.x0 * scaleX - 1;
-            const y = bbox.y0 * scaleY - 1;
+            const x = bbox.x0 * scaleX + offsetX - 1;
+            const y = bbox.y0 * scaleY + offsetY - 1;
             const w = (bbox.x1 - bbox.x0) * scaleX + 2;
             const h = (bbox.y1 - bbox.y0) * scaleY + 2;
             return `<rect class="${rectClass}" x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/>`;
@@ -2252,10 +2410,13 @@ function updatePanelOverlay(overlay, bboxes, imgSizePanel, displayWidth, display
     overlay.innerHTML = svg;
 }
 
-// Draw all bboxes for a panel in debug mode
-function drawPanelDebugBboxes(bboxes, scaleX, scaleY) {
+// Draw all bboxes for a panel in debug mode (with offset for object-fit:contain)
+function drawPanelDebugBboxes(bboxes, scaleX, scaleY, offsetX, offsetY) {
     let svg = '';
     let count = 0;
+    // Default offset to 0 if not provided
+    offsetX = offsetX || 0;
+    offsetY = offsetY || 0;
 
     for (const [name, bbox] of Object.entries(bboxes)) {
         if (name === '_meta') continue;
@@ -2275,9 +2436,9 @@ function drawPanelDebugBboxes(bboxes, scaleX, scaleY) {
             rectClass = 'debug-rect-trace';
         }
 
-        // Draw bbox rectangle
-        const x = bbox.x0 * scaleX;
-        const y = bbox.y0 * scaleY;
+        // Draw bbox rectangle (with offset for object-fit:contain letterboxing)
+        const x = bbox.x0 * scaleX + offsetX;
+        const y = bbox.y0 * scaleY + offsetY;
         const w = (bbox.x1 - bbox.x0) * scaleX;
         const h = (bbox.y1 - bbox.y0) * scaleY;
 
@@ -2287,13 +2448,13 @@ function drawPanelDebugBboxes(bboxes, scaleX, scaleY) {
         const shortName = name.length > 10 ? name.substring(0, 8) + '..' : name;
         svg += `<text class="debug-label" x="${x + 1}" y="${y + 8}" style="font-size: 6px;">${shortName}</text>`;
 
-        // Draw path points if available
+        // Draw path points if available (with offset)
         if (hasPoints && bbox.points.length > 1) {
-            let pathD = `M ${bbox.points[0][0] * scaleX} ${bbox.points[0][1] * scaleY}`;
+            let pathD = `M ${bbox.points[0][0] * scaleX + offsetX} ${bbox.points[0][1] * scaleY + offsetY}`;
             for (let i = 1; i < bbox.points.length; i++) {
                 const pt = bbox.points[i];
                 if (pt && pt.length >= 2) {
-                    pathD += ` L ${pt[0] * scaleX} ${pt[1] * scaleY}`;
+                    pathD += ` L ${pt[0] * scaleX + offsetX} ${pt[1] * scaleY + offsetY}`;
                 }
             }
             svg += `<path class="debug-path" d="${pathD}"/>`;
@@ -3046,14 +3207,24 @@ function renderGroupStats(group) {
 
 function setStatus(msg, isError = false) {
     const el = document.getElementById('status');
-    const loadingOverlay = document.getElementById('loading-overlay');
+    const globalOverlay = document.getElementById('global-loading-overlay');
+    const localOverlay = document.getElementById('loading-overlay');
 
     // Show/hide spinner for loading states
     if (msg === 'Updating...' || msg === 'Loading preview...') {
-        loadingOverlay.style.display = 'flex';
+        // Show global overlay (visible for both single and multi-panel views)
+        if (globalOverlay) {
+            globalOverlay.style.display = 'flex';
+            const loadingText = globalOverlay.querySelector('.loading-text');
+            if (loadingText) loadingText.textContent = msg;
+        }
+        // Also show local overlay if visible
+        if (localOverlay) localOverlay.style.display = 'flex';
         el.textContent = '';  // Clear status text during loading
     } else {
-        loadingOverlay.style.display = 'none';
+        // Hide both overlays
+        if (globalOverlay) globalOverlay.style.display = 'none';
+        if (localOverlay) localOverlay.style.display = 'none';
         el.textContent = msg;
     }
     el.classList.toggle('error', isError);

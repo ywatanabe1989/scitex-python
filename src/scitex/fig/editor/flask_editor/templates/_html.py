@@ -5,11 +5,15 @@
 
 HTML_BODY = """
 <div class="container">
+    <!-- Global Loading Overlay (visible for both single and multi-panel views) -->
+    <div id="global-loading-overlay" class="global-loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <span class="loading-text">Updating...</span>
+    </div>
     <div class="preview">
         <!-- Panel Grid View (for multi-panel figz bundles) -->
         <div class="panel-grid-section" id="panel-grid-section" style="display: none;">
             <div class="panel-grid-header">
-                <h3>All Panels</h3>
                 <div class="canvas-controls">
                     <button class="btn btn-secondary btn-sm" id="panel-debug-btn" onclick="togglePanelDebugMode()">Show Hit Regions</button>
                 </div>

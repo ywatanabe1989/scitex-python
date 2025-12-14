@@ -150,9 +150,11 @@ class WebEditor:
             """Return all panel images with bboxes for interactive grid view (figz bundles only).
 
             Uses smart load_panel_data helper for transparent zip/directory handling.
+            Returns layout info from figz spec.json for unified canvas positioning.
             """
             from ._bbox import extract_bboxes_from_metadata, extract_bboxes_from_geometry_px
             from ..edit import load_panel_data
+            import json as json_module
 
             if not editor.panel_info:
                 return jsonify({"error": "Not a multi-panel figz bundle"}), 400
@@ -160,10 +162,23 @@ class WebEditor:
             panel_names = editor.panel_info["panels"]
             panel_paths = editor.panel_info.get("panel_paths", [])
             panel_is_zip = editor.panel_info.get("panel_is_zip", [False] * len(panel_names))
+            figz_dir = Path(editor.panel_info["figz_dir"])
 
             if not panel_paths:
-                figz_dir = Path(editor.panel_info["figz_dir"])
                 panel_paths = [str(figz_dir / name) for name in panel_names]
+
+            # Load figz spec.json to get panel layout
+            figz_layout = {}
+            spec_path = figz_dir / "spec.json"
+            if spec_path.exists():
+                with open(spec_path) as f:
+                    figz_spec = json_module.load(f)
+                    for panel_spec in figz_spec.get("panels", []):
+                        panel_id = panel_spec.get("id", "")
+                        figz_layout[panel_id] = {
+                            "position": panel_spec.get("position", {}),
+                            "size": panel_spec.get("size", {}),
+                        }
 
             panel_images = []
 
@@ -176,6 +191,10 @@ class WebEditor:
                 loaded = load_panel_data(panel_path, is_zip=is_zip)
 
                 panel_data = {"name": display_name, "image": None, "bboxes": None, "img_size": None}
+
+                # Add layout info from figz spec
+                if display_name in figz_layout:
+                    panel_data["layout"] = figz_layout[display_name]
 
                 if loaded:
                     # Get image data
@@ -225,6 +244,7 @@ class WebEditor:
             return jsonify({
                 "panels": panel_images,
                 "count": len(panel_images),
+                "layout": figz_layout,
             })
 
         @app.route("/switch_panel/<int:panel_index>")
