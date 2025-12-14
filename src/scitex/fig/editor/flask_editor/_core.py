@@ -570,9 +570,8 @@ class WebEditor:
                 if not bundle_path:
                     return jsonify({"success": False, "error": "Bundle path not available"})
 
-                from scitex.fig.io import ZipBundle
+                from scitex.io import ZipBundle
                 from pathlib import Path
-                import base64
                 import io
                 import matplotlib
                 matplotlib.use('Agg')
@@ -580,90 +579,116 @@ class WebEditor:
                 from PIL import Image
                 import numpy as np
 
-                bundle = ZipBundle(bundle_path)
-                figure_name = Path(bundle_path).stem.replace(".figz", "")
-
-                # Read layout info
-                try:
-                    layout = bundle.read_json("layout.json")
-                except:
-                    layout = {}
-
-                # Read spec for figure size
-                try:
-                    spec = bundle.read_json("spec.json")
-                    fig_width_mm = spec.get("figure", {}).get("width_mm", 180)
-                    fig_height_mm = spec.get("figure", {}).get("height_mm", 120)
-                except:
-                    fig_width_mm, fig_height_mm = 180, 120
-
-                # Convert mm to inches
-                fig_width_in = fig_width_mm / 25.4
-                fig_height_in = fig_height_mm / 25.4
-
-                # Create figure with white background
+                figure_name = Path(bundle_path).stem
                 dpi = data.get("dpi", 150)
-                fig = plt.figure(figsize=(fig_width_in, fig_height_in), dpi=dpi, facecolor='white')
 
-                # Compose panels onto figure
-                panels = editor.panel_info.get("panels", [])
-                for panel in panels:
-                    panel_name = panel.get("name", "")
-                    panel_layout = layout.get(panel_name, {})
-
-                    # Get position and size from layout
-                    pos = panel_layout.get("position", {})
-                    size = panel_layout.get("size", {})
-
-                    x_mm = pos.get("x_mm", 0)
-                    y_mm = pos.get("y_mm", 0)
-                    w_mm = size.get("width_mm", 60)
-                    h_mm = size.get("height_mm", 40)
-
-                    # Convert to figure coordinates (0-1)
-                    x_frac = x_mm / fig_width_mm
-                    y_frac = 1 - (y_mm + h_mm) / fig_height_mm  # Flip Y
-                    w_frac = w_mm / fig_width_mm
-                    h_frac = h_mm / fig_height_mm
-
-                    # Read panel image
+                with ZipBundle(bundle_path, mode="a") as bundle:
+                    # Read spec for figure size and panel positions
                     try:
-                        img_path = f"panels/{panel_name}/preview.png"
-                        img_data = bundle.read_bytes(img_path)
-                        img = Image.open(io.BytesIO(img_data))
-                        img_array = np.array(img)
+                        spec = bundle.read_json("spec.json")
+                    except:
+                        spec = {}
 
-                        # Create axes and add image
-                        ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
-                        ax.imshow(img_array)
-                        ax.axis('off')
-                    except Exception as e:
-                        print(f"Error loading panel {panel_name}: {e}")
+                    # Get figure dimensions
+                    fig_width_mm = 180
+                    fig_height_mm = 120
+                    if "figure" in spec:
+                        fig_info = spec.get("figure", {})
+                        styles = fig_info.get("styles", {})
+                        size = styles.get("size", {})
+                        fig_width_mm = size.get("width_mm", 180)
+                        fig_height_mm = size.get("height_mm", 120)
 
-                exported = {}
+                    # Convert mm to inches
+                    fig_width_in = fig_width_mm / 25.4
+                    fig_height_in = fig_height_mm / 25.4
 
-                for fmt in formats:
-                    buf = io.BytesIO()
-                    if fmt in ["png", "jpeg", "jpg"]:
-                        fig.savefig(buf, format="png" if fmt == "png" else "jpeg",
-                                   dpi=dpi, bbox_inches="tight", facecolor="white",
-                                   pad_inches=0.02)
-                    elif fmt == "svg":
-                        fig.savefig(buf, format="svg", bbox_inches="tight", pad_inches=0.02)
-                    elif fmt == "pdf":
-                        fig.savefig(buf, format="pdf", bbox_inches="tight", pad_inches=0.02)
-                    else:
-                        continue
+                    # Create figure with white background
+                    fig = plt.figure(figsize=(fig_width_in, fig_height_in), dpi=dpi, facecolor='white')
 
-                    buf.seek(0)
-                    content = buf.read()
+                    # Get panels from spec or editor.panel_info
+                    panels_spec = spec.get("panels", [])
 
-                    # Save to exports/ directory in bundle
-                    export_path = f"exports/{figure_name}.{fmt}"
-                    bundle.write_bytes(export_path, content)
-                    exported[fmt] = export_path
+                    # Compose panels onto figure
+                    for panel_spec in panels_spec:
+                        panel_id = panel_spec.get("id", "")
+                        pltz_name = panel_spec.get("plot", "")
 
-                plt.close(fig)
+                        # Get position and size from spec
+                        pos = panel_spec.get("position", {})
+                        size = panel_spec.get("size", {})
+
+                        x_mm = pos.get("x_mm", 0)
+                        y_mm = pos.get("y_mm", 0)
+                        w_mm = size.get("width_mm", 60)
+                        h_mm = size.get("height_mm", 40)
+
+                        # Convert to figure coordinates (0-1)
+                        x_frac = x_mm / fig_width_mm
+                        y_frac = 1 - (y_mm + h_mm) / fig_height_mm  # Flip Y
+                        w_frac = w_mm / fig_width_mm
+                        h_frac = h_mm / fig_height_mm
+
+                        # Try to read panel image from pltz exports
+                        img_loaded = False
+                        for pltz_path in [f"{panel_id}.pltz", pltz_name.replace(".d", "")]:
+                            if img_loaded:
+                                break
+                            try:
+                                # Read pltz as nested bundle
+                                pltz_bytes = bundle.read_bytes(pltz_path)
+                                import tempfile
+                                with tempfile.NamedTemporaryFile(suffix=".pltz", delete=False) as tmp:
+                                    tmp.write(pltz_bytes)
+                                    tmp_path = tmp.name
+                                try:
+                                    with ZipBundle(tmp_path, mode="r") as pltz_bundle:
+                                        # Try various preview paths
+                                        for preview_path in ["exports/preview.png", "preview.png", f"exports/{panel_id}.png"]:
+                                            try:
+                                                img_data = pltz_bundle.read_bytes(preview_path)
+                                                img = Image.open(io.BytesIO(img_data))
+                                                img_array = np.array(img)
+
+                                                # Create axes and add image
+                                                ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                                                ax.imshow(img_array)
+                                                ax.axis('off')
+                                                img_loaded = True
+                                                break
+                                            except:
+                                                continue
+                                finally:
+                                    import os
+                                    os.unlink(tmp_path)
+                            except Exception as e:
+                                print(f"Could not load pltz {pltz_path}: {e}")
+                                continue
+
+                    exported = {}
+
+                    for fmt in formats:
+                        buf = io.BytesIO()
+                        if fmt in ["png", "jpeg", "jpg"]:
+                            fig.savefig(buf, format="png" if fmt == "png" else "jpeg",
+                                       dpi=dpi, bbox_inches="tight", facecolor="white",
+                                       pad_inches=0.02)
+                        elif fmt == "svg":
+                            fig.savefig(buf, format="svg", bbox_inches="tight", pad_inches=0.02)
+                        elif fmt == "pdf":
+                            fig.savefig(buf, format="pdf", bbox_inches="tight", pad_inches=0.02)
+                        else:
+                            continue
+
+                        buf.seek(0)
+                        content = buf.read()
+
+                        # Save to exports/ directory in bundle
+                        export_path = f"exports/{figure_name}.{fmt}"
+                        bundle.write_bytes(export_path, content)
+                        exported[fmt] = export_path
+
+                    plt.close(fig)
 
                 return jsonify({
                     "success": True,
@@ -701,15 +726,15 @@ class WebEditor:
                 # For figz bundles, try to get existing export or render on-demand
                 if editor.panel_info:
                     bundle_path = editor.panel_info.get("bundle_path")
-                    figure_name = Path(bundle_path).stem.replace(".figz", "") if bundle_path else "figure"
+                    figure_name = Path(bundle_path).stem if bundle_path else "figure"
 
                     # Try to read existing export from bundle
                     if bundle_path:
-                        from scitex.fig.io import ZipBundle
-                        bundle = ZipBundle(bundle_path)
+                        from scitex.io import ZipBundle
                         export_path = f"exports/{figure_name}.{fmt}"
                         try:
-                            content = bundle.read_bytes(export_path)
+                            with ZipBundle(bundle_path, mode="r") as bundle:
+                                content = bundle.read_bytes(export_path)
                             buf = io.BytesIO(content)
                             return send_file(
                                 buf,
@@ -717,7 +742,8 @@ class WebEditor:
                                 as_attachment=True,
                                 download_name=f"{figure_name}.{fmt}"
                             )
-                        except:
+                        except Exception as read_err:
+                            print(f"Export not found in bundle: {export_path} - {read_err}")
                             pass  # Fall through to render on-demand
 
                 # Render figure on-demand using the renderer
