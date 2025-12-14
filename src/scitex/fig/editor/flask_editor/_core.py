@@ -404,6 +404,70 @@ class WebEditor:
             except Exception as e:
                 return jsonify({"status": "error", "message": str(e)}), 500
 
+        @app.route("/save_layout", methods=["POST"])
+        def save_layout():
+            """Save panel layout positions to figz bundle."""
+            try:
+                data = request.get_json()
+                layout = data.get("layout", {})
+
+                if not layout:
+                    return jsonify({"success": False, "error": "No layout data provided"})
+
+                # Check if we have panel_info (figz bundle)
+                if not editor.panel_info:
+                    return jsonify({"success": False, "error": "No panel info available (not a figz bundle)"})
+
+                bundle_path = editor.panel_info.get("bundle_path")
+                if not bundle_path:
+                    return jsonify({"success": False, "error": "Bundle path not available"})
+
+                # Update layout in the figz bundle
+                from scitex.fig.io import ZipBundle
+
+                bundle = ZipBundle(bundle_path)
+
+                # Read existing layout or create new one
+                try:
+                    existing_layout = bundle.read_json("layout.json")
+                except:
+                    existing_layout = {}
+
+                # Update layout with new positions
+                for panel_name, pos in layout.items():
+                    if panel_name not in existing_layout:
+                        existing_layout[panel_name] = {}
+                    if "position" not in existing_layout[panel_name]:
+                        existing_layout[panel_name]["position"] = {}
+                    if "size" not in existing_layout[panel_name]:
+                        existing_layout[panel_name]["size"] = {}
+
+                    # Update position
+                    existing_layout[panel_name]["position"]["x_mm"] = pos.get("x_mm", 0)
+                    existing_layout[panel_name]["position"]["y_mm"] = pos.get("y_mm", 0)
+
+                    # Update size if provided
+                    if "width_mm" in pos:
+                        existing_layout[panel_name]["size"]["width_mm"] = pos["width_mm"]
+                    if "height_mm" in pos:
+                        existing_layout[panel_name]["size"]["height_mm"] = pos["height_mm"]
+
+                # Save updated layout
+                bundle.write_json("layout.json", existing_layout)
+
+                # Update in-memory panel_info
+                editor.panel_info["layout"] = existing_layout
+
+                return jsonify({"success": True, "layout": existing_layout})
+
+            except Exception as e:
+                import traceback
+                return jsonify({
+                    "success": False,
+                    "error": str(e),
+                    "traceback": traceback.format_exc()
+                })
+
         @app.route("/shutdown", methods=["POST"])
         def shutdown():
             """Shutdown the server."""
