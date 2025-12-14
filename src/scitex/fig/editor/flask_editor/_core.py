@@ -558,7 +558,7 @@ class WebEditor:
 
         @app.route("/export", methods=["POST"])
         def export_figure():
-            """Export figure to various formats and update figz bundle."""
+            """Export composed figure to various formats and update figz bundle."""
             try:
                 data = request.get_json()
                 formats = data.get("formats", ["png", "svg"])
@@ -574,29 +574,84 @@ class WebEditor:
                 from pathlib import Path
                 import base64
                 import io
+                import matplotlib
+                matplotlib.use('Agg')
+                import matplotlib.pyplot as plt
+                from PIL import Image
+                import numpy as np
 
                 bundle = ZipBundle(bundle_path)
                 figure_name = Path(bundle_path).stem.replace(".figz", "")
 
-                exported = {}
+                # Read layout info
+                try:
+                    layout = bundle.read_json("layout.json")
+                except:
+                    layout = {}
 
-                # Get merged figure for export
-                if hasattr(editor, "_merged_fig") and editor._merged_fig:
-                    fig = editor._merged_fig
-                else:
-                    # Try to reconstruct from panels
-                    return jsonify({"success": False, "error": "No merged figure available"})
+                # Read spec for figure size
+                try:
+                    spec = bundle.read_json("spec.json")
+                    fig_width_mm = spec.get("figure", {}).get("width_mm", 180)
+                    fig_height_mm = spec.get("figure", {}).get("height_mm", 120)
+                except:
+                    fig_width_mm, fig_height_mm = 180, 120
+
+                # Convert mm to inches
+                fig_width_in = fig_width_mm / 25.4
+                fig_height_in = fig_height_mm / 25.4
+
+                # Create figure with white background
+                dpi = data.get("dpi", 150)
+                fig = plt.figure(figsize=(fig_width_in, fig_height_in), dpi=dpi, facecolor='white')
+
+                # Compose panels onto figure
+                panels = editor.panel_info.get("panels", [])
+                for panel in panels:
+                    panel_name = panel.get("name", "")
+                    panel_layout = layout.get(panel_name, {})
+
+                    # Get position and size from layout
+                    pos = panel_layout.get("position", {})
+                    size = panel_layout.get("size", {})
+
+                    x_mm = pos.get("x_mm", 0)
+                    y_mm = pos.get("y_mm", 0)
+                    w_mm = size.get("width_mm", 60)
+                    h_mm = size.get("height_mm", 40)
+
+                    # Convert to figure coordinates (0-1)
+                    x_frac = x_mm / fig_width_mm
+                    y_frac = 1 - (y_mm + h_mm) / fig_height_mm  # Flip Y
+                    w_frac = w_mm / fig_width_mm
+                    h_frac = h_mm / fig_height_mm
+
+                    # Read panel image
+                    try:
+                        img_path = f"panels/{panel_name}/preview.png"
+                        img_data = bundle.read_bytes(img_path)
+                        img = Image.open(io.BytesIO(img_data))
+                        img_array = np.array(img)
+
+                        # Create axes and add image
+                        ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                        ax.imshow(img_array)
+                        ax.axis('off')
+                    except Exception as e:
+                        print(f"Error loading panel {panel_name}: {e}")
+
+                exported = {}
 
                 for fmt in formats:
                     buf = io.BytesIO()
                     if fmt in ["png", "jpeg", "jpg"]:
-                        dpi = data.get("dpi", 150)
                         fig.savefig(buf, format="png" if fmt == "png" else "jpeg",
-                                   dpi=dpi, bbox_inches="tight", facecolor="white")
+                                   dpi=dpi, bbox_inches="tight", facecolor="white",
+                                   pad_inches=0.02)
                     elif fmt == "svg":
-                        fig.savefig(buf, format="svg", bbox_inches="tight")
+                        fig.savefig(buf, format="svg", bbox_inches="tight", pad_inches=0.02)
                     elif fmt == "pdf":
-                        fig.savefig(buf, format="pdf", bbox_inches="tight")
+                        fig.savefig(buf, format="pdf", bbox_inches="tight", pad_inches=0.02)
                     else:
                         continue
 
@@ -607,6 +662,8 @@ class WebEditor:
                     export_path = f"exports/{figure_name}.{fmt}"
                     bundle.write_bytes(export_path, content)
                     exported[fmt] = export_path
+
+                plt.close(fig)
 
                 return jsonify({
                     "success": True,
@@ -626,22 +683,10 @@ class WebEditor:
         def download_figure(fmt):
             """Download figure in specified format."""
             try:
-                if not editor.panel_info:
-                    return "No panel info available", 404
-
                 from flask import send_file
                 import io
-
-                # Get merged figure
-                if not hasattr(editor, "_merged_fig") or not editor._merged_fig:
-                    return "No figure available", 404
-
-                fig = editor._merged_fig
-                bundle_path = editor.panel_info.get("bundle_path", "figure")
                 from pathlib import Path
-                figure_name = Path(bundle_path).stem.replace(".figz", "")
 
-                buf = io.BytesIO()
                 mime_types = {
                     "png": "image/png",
                     "jpeg": "image/jpeg",
@@ -653,10 +698,73 @@ class WebEditor:
                 if fmt not in mime_types:
                     return f"Unsupported format: {fmt}", 400
 
-                dpi = 150 if fmt in ["png", "jpeg", "jpg"] else None
+                # For figz bundles, try to get existing export or render on-demand
+                if editor.panel_info:
+                    bundle_path = editor.panel_info.get("bundle_path")
+                    figure_name = Path(bundle_path).stem.replace(".figz", "") if bundle_path else "figure"
+
+                    # Try to read existing export from bundle
+                    if bundle_path:
+                        from scitex.fig.io import ZipBundle
+                        bundle = ZipBundle(bundle_path)
+                        export_path = f"exports/{figure_name}.{fmt}"
+                        try:
+                            content = bundle.read_bytes(export_path)
+                            buf = io.BytesIO(content)
+                            return send_file(
+                                buf,
+                                mimetype=mime_types[fmt],
+                                as_attachment=True,
+                                download_name=f"{figure_name}.{fmt}"
+                            )
+                        except:
+                            pass  # Fall through to render on-demand
+
+                # Render figure on-demand using the renderer
+                from ._renderer import render_preview_with_bboxes
+                import matplotlib
+                matplotlib.use('Agg')
+                import matplotlib.pyplot as plt
+
+                # Get figure name
+                figure_name = "figure"
+                if editor.json_path:
+                    figure_name = Path(editor.json_path).stem
+
+                # Render the figure
+                img_data, _, _ = render_preview_with_bboxes(
+                    editor.csv_data, editor.current_overrides,
+                    metadata=editor.metadata,
+                    dark_mode=False,
+                )
+
+                # For PNG, we already have base64 image data
+                if fmt == "png":
+                    import base64
+                    content = base64.b64decode(img_data)
+                    buf = io.BytesIO(content)
+                    return send_file(
+                        buf,
+                        mimetype=mime_types[fmt],
+                        as_attachment=True,
+                        download_name=f"{figure_name}.{fmt}"
+                    )
+
+                # For other formats, we need to re-render
+                # Use the plotter to create the figure
+                from ._plotter import plot_with_overrides
+
+                fig, ax = plot_with_overrides(
+                    editor.csv_data, editor.current_overrides,
+                    metadata=editor.metadata,
+                )
+
+                buf = io.BytesIO()
+                dpi = 150 if fmt in ["jpeg", "jpg"] else 300
                 fig.savefig(buf, format=fmt if fmt != "jpg" else "jpeg",
                            dpi=dpi, bbox_inches="tight",
-                           facecolor="white" if fmt in ["png", "jpeg", "jpg"] else None)
+                           facecolor="white" if fmt in ["jpeg", "jpg"] else None)
+                plt.close(fig)
                 buf.seek(0)
 
                 return send_file(
@@ -667,7 +775,8 @@ class WebEditor:
                 )
 
             except Exception as e:
-                return str(e), 500
+                import traceback
+                return f"Error: {str(e)}\n{traceback.format_exc()}", 500
 
         @app.route("/download_pltz")
         def download_pltz():
