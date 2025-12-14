@@ -1343,10 +1343,15 @@ input[type="range"]::-moz-range-thumb {
     background: transparent;
     overflow: visible;
     border: none;
+    cursor: grab;  /* Indicate draggability */
 }
 
 .panel-canvas-item:hover {
     z-index: 10;
+}
+
+.panel-canvas-item:active {
+    cursor: grabbing;
 }
 
 .panel-canvas-item.active {
@@ -1442,6 +1447,7 @@ input[type="range"]::-moz-range-thumb {
     box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     outline: 2px dashed var(--accent-primary);
     outline-offset: 2px;
+    cursor: grabbing;
 }
 
 .panel-canvas-item.dragging .panel-position-indicator {
