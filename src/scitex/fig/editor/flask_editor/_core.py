@@ -740,21 +740,8 @@ class WebEditor:
                         import matplotlib.pyplot as plt
                         import json as json_module
 
-                        # Try to read existing export from bundle (if zip)
-                        if bundle_path:
-                            export_path = f"exports/{figure_name}.{fmt}"
-                            try:
-                                with ZipBundle(bundle_path, mode="r") as bundle:
-                                    content = bundle.read_bytes(export_path)
-                                buf = io.BytesIO(content)
-                                return send_file(
-                                    buf,
-                                    mimetype=mime_types[fmt],
-                                    as_attachment=True,
-                                    download_name=f"{figure_name}.{fmt}"
-                                )
-                            except Exception:
-                                pass  # Export not found, compose on-demand
+                        # Always compose on-demand to ensure current panel state
+                        # (existing exports in bundle may be stale or blank)
 
                         # Read spec.json to get layout info
                         spec = {}
@@ -806,44 +793,69 @@ class WebEditor:
                             w_frac = w_mm / fig_width_mm
                             h_frac = h_mm / fig_height_mm
 
-                            # Find panel path by matching id
+                            # Find panel path by matching id (flexible matching)
                             panel_path = None
                             is_zip = False
                             for idx, pp in enumerate(panel_paths):
                                 pp_name = Path(pp).stem.replace(".pltz", "")
-                                if pp_name == panel_id:
+                                # Match exact name, or name contains panel_id pattern
+                                # e.g., "panel_A_twinx" matches panel_id "A"
+                                if (pp_name == panel_id or
+                                    pp_name.startswith(f"panel_{panel_id}_") or
+                                    pp_name.startswith(f"panel_{panel_id}.") or
+                                    pp_name == f"panel_{panel_id}" or
+                                    pp_name == panel_id or
+                                    f"_{panel_id}_" in pp_name or
+                                    pp_name.endswith(f"_{panel_id}")):
                                     panel_path = pp
                                     is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else False
                                     break
 
                             if not panel_path:
+                                print(f"Could not find panel path for id={panel_id}, available: {[Path(p).stem for p in panel_paths]}")
                                 continue
 
                             # Load panel preview image
                             try:
+                                img_loaded = False
                                 if is_zip:
                                     with ZipBundle(panel_path, mode="r") as pltz_bundle:
-                                        for preview_path in ["exports/preview.png", "preview.png"]:
-                                            try:
-                                                img_data = pltz_bundle.read_bytes(preview_path)
-                                                img = Image.open(io.BytesIO(img_data))
-                                                ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
-                                                ax.imshow(np.array(img))
-                                                ax.axis('off')
-                                                break
-                                            except:
-                                                continue
+                                        # Find PNG in exports (not hitmap)
+                                        import zipfile
+                                        with zipfile.ZipFile(panel_path, 'r') as zf:
+                                            png_files = [n for n in zf.namelist()
+                                                        if n.endswith('.png') and 'hitmap' not in n.lower()
+                                                        and 'exports/' in n]
+                                            if png_files:
+                                                # Use first non-hitmap PNG
+                                                preview_path = png_files[0]
+                                                # Extract the path relative to .d directory
+                                                if '.pltz.d/' in preview_path:
+                                                    preview_path = preview_path.split('.pltz.d/')[-1]
+                                                try:
+                                                    img_data = pltz_bundle.read_bytes(preview_path)
+                                                    img = Image.open(io.BytesIO(img_data))
+                                                    ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                                                    ax.imshow(np.array(img))
+                                                    ax.axis('off')
+                                                    img_loaded = True
+                                                except Exception as e:
+                                                    print(f"Could not read {preview_path}: {e}")
                                 else:
                                     # Directory-based pltz
                                     pltz_dir = Path(panel_path)
-                                    for preview_name in ["exports/preview.png", "preview.png"]:
-                                        preview_file = pltz_dir / preview_name
-                                        if preview_file.exists():
-                                            img = Image.open(preview_file)
-                                            ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
-                                            ax.imshow(np.array(img))
-                                            ax.axis('off')
-                                            break
+                                    exports_dir = pltz_dir / "exports"
+                                    if exports_dir.exists():
+                                        for png_file in exports_dir.glob("*.png"):
+                                            if "hitmap" not in png_file.name.lower():
+                                                img = Image.open(png_file)
+                                                ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                                                ax.imshow(np.array(img))
+                                                ax.axis('off')
+                                                img_loaded = True
+                                                break
+                                if not img_loaded:
+                                    print(f"No preview found for panel {panel_id}")
                             except Exception as e:
                                 print(f"Could not load panel {panel_id}: {e}")
 
