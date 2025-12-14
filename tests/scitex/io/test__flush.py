@@ -307,7 +307,10 @@ if __name__ == "__main__":
 # 
 # import os
 # import sys
-# import warnings
+# 
+# from scitex import logging
+# 
+# logger = logging.getLogger(__name__)
 # 
 # 
 # def flush(sys=sys):
@@ -316,7 +319,7 @@ if __name__ == "__main__":
 #     This ensures all pending write operations are completed.
 #     """
 #     if sys is None:
-#         warnings.warn("flush needs sys. Skipping.")
+#         logger.warning("flush needs sys. Skipping.")
 #     else:
 #         sys.stdout.flush()
 #         sys.stderr.flush()

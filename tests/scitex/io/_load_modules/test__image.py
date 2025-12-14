@@ -412,10 +412,11 @@ if __name__ == "__main__":
 # # Time-stamp: "2024-11-14 07:55:38 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/io/_load_modules/_image.py
 # 
-# import logging
 # from typing import Any, Dict, Optional, Tuple, Union
 # 
 # from PIL import Image
+# 
+# from scitex import logging
 # 
 # logger = logging.getLogger(__name__)
 # 
@@ -467,9 +468,7 @@ if __name__ == "__main__":
 # 
 #     except Exception as e:
 #         # If metadata reading fails, return None
-#         import warnings
-# 
-#         warnings.warn(f"Failed to read metadata: {e}")
+#         logger.warning(f"Failed to read metadata: {e}")
 #         return img, None
 # 
 # 

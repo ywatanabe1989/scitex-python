@@ -213,24 +213,13 @@ if __name__ == "__main__":
 #     ]
 # else:
 #     # Warn about missing Arial
-#     try:
-#         from scitex.logging import getLogger
+#     from scitex import logging as _logging
 # 
-#         _logger = getLogger(__name__)
-#         _logger.warning(
-#             "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
-#             "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
-#         )
-#     except:
-#         # If scitex.logging not available, use standard warnings
-#         import warnings
-# 
-#         warnings.warn(
-#             "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
-#             "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv",
-#             UserWarning,
-#             stacklevel=2,
-#         )
+#     _logger = _logging.getLogger(__name__)
+#     _logger.warning(
+#         "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+#         "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
+#     )
 # 
 # 
 # class SubplotsWrapper:
@@ -520,12 +509,16 @@ if __name__ == "__main__":
 #         """Create figure with mm-based control over axes dimensions."""
 #         from scitex.plt.utils import mm_to_inch, apply_style_mm
 # 
-#         # Parse nrows, ncols from args (like matplotlib.pyplot.subplots)
+#         # Parse nrows, ncols from args or kwargs (like matplotlib.pyplot.subplots)
 #         nrows, ncols = 1, 1
 #         if len(args) >= 1:
 #             nrows = args[0]
+#         elif "nrows" in kwargs:
+#             nrows = kwargs.pop("nrows")
 #         if len(args) >= 2:
 #             ncols = args[1]
+#         elif "ncols" in kwargs:
+#             ncols = kwargs.pop("ncols")
 # 
 #         n_axes = nrows * ncols
 # 

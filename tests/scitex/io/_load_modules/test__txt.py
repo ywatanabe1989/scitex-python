@@ -247,7 +247,9 @@ if __name__ == "__main__":
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
-# import warnings
+# from scitex import logging
+# 
+# logger = logging.getLogger(__name__)
 # 
 # # # UnicodeDecodeError: 'utf-8' codec can't decode byte 0x8a in position 30173: invalid start byte
 # # def _load_txt(lpath, **kwargs):
@@ -331,7 +333,7 @@ if __name__ == "__main__":
 #         lpath = str(lpath)
 # 
 #     if not lpath.endswith((".txt", ".log", ".event", ".py", ".sh", ".tex", ".bib")):
-#         warnings.warn(f"Unexpected extension for file: {lpath}")
+#         logger.warning(f"Unexpected extension for file: {lpath}")
 # 
 #     try:
 #         with open(lpath, "r", encoding="utf-8") as file:
