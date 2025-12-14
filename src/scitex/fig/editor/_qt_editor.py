@@ -1017,7 +1017,7 @@ class QtEditorWindow:
 
     def _save_manual(self):
         """Save to .manual.json."""
-        from ._edit import save_manual_overrides
+        from .edit import save_manual_overrides
 
         try:
             self._collect_overrides()

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# File: ./src/scitex/vis/editor/__init__.py
+# Timestamp: "2025-12-14 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/fig/editor/__init__.py
+
 """
 SciTeX Visual Editor Module
 
@@ -13,11 +15,12 @@ Supports multiple backends with graceful degradation:
   - mpl: Minimal matplotlib (always works)
 """
 
-from ._edit import edit, save_manual_overrides
+from .edit import edit, save_manual_overrides
 
 __all__ = [
     "edit",
     "save_manual_overrides",
 ]
+
 
 # EOF

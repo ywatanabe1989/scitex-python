@@ -1901,7 +1901,7 @@ class DearPyGuiEditor:
     def _save_manual(self, sender=None, app_data=None, user_data=None):
         """Save current overrides to .manual.json."""
         import dearpygui.dearpygui as dpg
-        from ._edit import save_manual_overrides
+        from .edit import save_manual_overrides
 
         try:
             self._collect_overrides(dpg)

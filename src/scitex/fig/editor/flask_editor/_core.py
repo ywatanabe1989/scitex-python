@@ -149,10 +149,10 @@ class WebEditor:
         def panels():
             """Return all panel images with bboxes for interactive grid view (figz bundles only).
 
-            Uses smart _load_panel_data helper for transparent zip/directory handling.
+            Uses smart load_panel_data helper for transparent zip/directory handling.
             """
             from ._bbox import extract_bboxes_from_metadata, extract_bboxes_from_geometry_px
-            from .._edit import _load_panel_data
+            from ..edit import load_panel_data
 
             if not editor.panel_info:
                 return jsonify({"error": "Not a multi-panel figz bundle"}), 400
@@ -173,7 +173,7 @@ class WebEditor:
                 display_name = panel_name.replace(".pltz.d", "").replace(".pltz", "")
 
                 # Use smart helper to load panel data
-                loaded = _load_panel_data(panel_path, is_zip=is_zip)
+                loaded = load_panel_data(panel_path, is_zip=is_zip)
 
                 panel_data = {"name": display_name, "image": None, "bboxes": None, "img_size": None}
 
@@ -231,10 +231,10 @@ class WebEditor:
         def switch_panel(panel_index):
             """Switch to a different panel in the figz bundle.
 
-            Uses smart _load_panel_data helper for transparent zip/directory handling.
+            Uses smart load_panel_data helper for transparent zip/directory handling.
             """
             from ._bbox import extract_bboxes_from_metadata, extract_bboxes_from_geometry_px
-            from .._edit import _load_panel_data
+            from ..edit import load_panel_data
 
             if not editor.panel_info:
                 return jsonify({"error": "Not a multi-panel figz bundle"}), 400
@@ -252,7 +252,7 @@ class WebEditor:
 
             try:
                 # Use smart helper to load panel data
-                loaded = _load_panel_data(panel_path, is_zip=is_zip)
+                loaded = load_panel_data(panel_path, is_zip=is_zip)
 
                 if not loaded:
                     return jsonify({"error": f"Could not load panel: {panel_name}"}), 400
@@ -374,7 +374,7 @@ class WebEditor:
         @app.route("/save", methods=["POST"])
         def save():
             """Save to .manual.json."""
-            from .._edit import save_manual_overrides
+            from ..edit import save_manual_overrides
 
             try:
                 manual_path = save_manual_overrides(
