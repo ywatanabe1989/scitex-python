@@ -1,0 +1,140 @@
+/* =============================================================================
+ * Buttons
+ * ============================================================================= */
+.btn {
+    width: 100%;
+    padding: 7px 12px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--status-success);
+    color: white;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+.btn-secondary {
+    background: var(--bg-muted);
+    color: var(--text-primary);
+    border: 1px solid var(--border-muted);
+}
+
+.btn-secondary:hover {
+    background: var(--workspace-bg-tertiary);
+}
+
+.btn-cta {
+    background: var(--color-cta);
+    color: white;
+}
+
+.btn-cta:hover {
+    background: var(--color-cta-hover);
+}
+
+.btn-sm {
+    padding: 4px 10px;
+    font-size: 0.8em;
+    width: auto;
+    margin: 0;
+}
+
+/* =============================================================================
+ * Unit Toggle
+ * ============================================================================= */
+.unit-toggle {
+    display: flex;
+    gap: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+}
+
+.unit-btn {
+    padding: 4px 12px;
+    font-size: 0.8em;
+    font-weight: 500;
+    border: none;
+    background: var(--bg-muted);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.unit-btn:first-child {
+    border-right: 1px solid var(--border-default);
+}
+
+.unit-btn:hover {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+}
+
+.unit-btn.active {
+    background: var(--color-cta);
+    color: white;
+}
+
+/* =============================================================================
+ * Background Type Toggle
+ * ============================================================================= */
+.bg-toggle {
+    display: flex;
+    gap: 6px;
+}
+
+.bg-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    font-size: 0.75em;
+    border: 1px solid var(--border-default);
+    border-radius: 4px;
+    background: var(--bg-muted);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    flex: 1;
+}
+
+.bg-btn:hover {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+}
+
+.bg-btn.active {
+    border-color: var(--color-cta);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 1px var(--color-cta);
+}
+
+.bg-preview {
+    width: 20px;
+    height: 14px;
+    border-radius: 2px;
+    border: 1px solid var(--border-default);
+}
+
+.bg-preview.white { background: #ffffff; }
+.bg-preview.black { background: #000000; }
+.bg-preview.transparent {
+    background: linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+    background-color: #fff;
+}
