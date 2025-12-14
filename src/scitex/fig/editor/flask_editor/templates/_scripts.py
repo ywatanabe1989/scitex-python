@@ -2764,17 +2764,39 @@ async function renderPanelCanvas() {
     }
 }
 
+// Check if an element is interactive (should not initiate drag)
+function isInteractiveElement(target) {
+    // SVG paths with hover-path class are interactive elements
+    if (target.classList && target.classList.contains('hover-path')) return true;
+    if (target.classList && target.classList.contains('hit-path')) return true;
+
+    // Check parent elements for hover-path (click might be on child)
+    let el = target;
+    while (el && el !== document.body) {
+        if (el.tagName === 'path' || el.tagName === 'PATH') {
+            // Path elements in SVG overlay are interactive
+            const svg = el.closest('svg');
+            if (svg && svg.classList.contains('panel-card-overlay')) {
+                return true;
+            }
+        }
+        el = el.parentElement;
+    }
+    return false;
+}
+
 // Initialize drag handler for a panel item
 function initPanelDrag(item, panelName) {
     const dragHandle = item.querySelector('.panel-drag-handle');
-    if (!dragHandle) return;
 
-    // Drag from handle only (so clicking panel content still works for selection)
-    dragHandle.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        startPanelDrag(e, item, panelName);
-    });
+    // Drag from handle (always works)
+    if (dragHandle) {
+        dragHandle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            startPanelDrag(e, item, panelName);
+        });
+    }
 
     // Also allow dragging from panel label
     const label = item.querySelector('.panel-canvas-label');
@@ -2786,6 +2808,25 @@ function initPanelDrag(item, panelName) {
             startPanelDrag(e, item, panelName);
         });
     }
+
+    // Allow dragging from anywhere on the panel (except interactive elements)
+    // This enables intuitive drag behavior while preserving element selection
+    item.addEventListener('mousedown', (e) => {
+        // Skip if clicking on interactive elements (legends, text paths, etc.)
+        if (isInteractiveElement(e.target)) return;
+
+        // Skip if clicking on drag handle or label (already handled above)
+        if (e.target.closest('.panel-drag-handle')) return;
+        if (e.target.closest('.panel-canvas-label')) return;
+        if (e.target.closest('.panel-position-indicator')) return;
+
+        // Start drag from anywhere else on the panel
+        e.preventDefault();
+        startPanelDrag(e, item, panelName);
+    });
+
+    // Set cursor to indicate draggability
+    item.style.cursor = 'grab';
 }
 
 function startPanelDrag(e, item, name) {
@@ -2794,6 +2835,7 @@ function startPanelDrag(e, item, name) {
     dragOffset.x = e.clientX - item.offsetLeft;
     dragOffset.y = e.clientY - item.offsetTop;
     item.classList.add('dragging');
+    item.style.cursor = 'grabbing';
 
     // Show position indicator
     updatePositionIndicator(name, item.offsetLeft, item.offsetTop);
@@ -2841,6 +2883,7 @@ function onPanelDrag(e) {
 function stopPanelDrag() {
     if (draggedPanel) {
         draggedPanel.item.classList.remove('dragging');
+        draggedPanel.item.style.cursor = 'grab';  // Reset cursor
 
         // Update canvas size if panel moved outside
         updateCanvasSize();
