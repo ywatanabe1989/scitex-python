@@ -3847,13 +3847,480 @@ document.querySelectorAll('input[type="color"]').forEach(el => {
     });
 });
 
-// Ctrl+S keyboard shortcut to save
+// =============================================================================
+// Keyboard Shortcuts (matching SciTeX Cloud vis app)
+// =============================================================================
+let shortcutMode = null;  // For multi-key shortcuts like Alt+A → L
+
 document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    const key = e.key.toLowerCase();
+    const isCtrl = e.ctrlKey || e.metaKey;
+    const isShift = e.shiftKey;
+    const isAlt = e.altKey;
+
+    // Don't capture shortcuts when typing in inputs
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+        return;
+    }
+
+    // =========================================================================
+    // Multi-key shortcut mode (Alt+A → alignment, Alt+Z → size)
+    // =========================================================================
+    if (shortcutMode === 'align') {
+        e.preventDefault();
+        handleAlignShortcut(key, isShift);
+        shortcutMode = null;
+        return;
+    }
+
+    // =========================================================================
+    // Basic Operations
+    // =========================================================================
+
+    // Ctrl+S: Save
+    if (isCtrl && key === 's') {
         e.preventDefault();
         saveManual();
+        return;
+    }
+
+    // Ctrl+Z: Undo
+    if (isCtrl && !isShift && key === 'z') {
+        e.preventDefault();
+        undoLastChange();
+        return;
+    }
+
+    // Ctrl+Y or Ctrl+Shift+Z: Redo
+    if ((isCtrl && key === 'y') || (isCtrl && isShift && key === 'z')) {
+        e.preventDefault();
+        redoLastChange();
+        return;
+    }
+
+    // Delete: Remove selected element override
+    if (key === 'delete' || key === 'backspace') {
+        if (selectedElement && !isCtrl) {
+            e.preventDefault();
+            deleteSelectedOverride();
+            return;
+        }
+    }
+
+    // =========================================================================
+    // Panel/Element Movement (Arrow keys)
+    // =========================================================================
+
+    // Arrow keys: Move selected panel by 1mm (or 5mm with Shift)
+    if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+        e.preventDefault();
+        const amount = isShift ? 5 : 1;  // 5mm or 1mm
+        moveSelectedPanel(key.replace('arrow', ''), amount);
+        return;
+    }
+
+    // =========================================================================
+    // View Controls
+    // =========================================================================
+
+    // + or =: Zoom in
+    if ((key === '+' || key === '=') && !isCtrl) {
+        e.preventDefault();
+        zoomCanvas(1.1);
+        return;
+    }
+
+    // -: Zoom out
+    if (key === '-' && !isCtrl) {
+        e.preventDefault();
+        zoomCanvas(0.9);
+        return;
+    }
+
+    // 0: Fit to window
+    if (key === '0' && !isCtrl) {
+        e.preventDefault();
+        fitCanvasToWindow();
+        return;
+    }
+
+    // Ctrl++ : Increase canvas size
+    if (isCtrl && (key === '+' || key === '=')) {
+        e.preventDefault();
+        resizeCanvas(1.1);
+        return;
+    }
+
+    // Ctrl+- : Decrease canvas size
+    if (isCtrl && key === '-') {
+        e.preventDefault();
+        resizeCanvas(0.9);
+        return;
+    }
+
+    // =========================================================================
+    // Alignment Mode (Alt+A → ...)
+    // =========================================================================
+    if (isAlt && key === 'a') {
+        e.preventDefault();
+        shortcutMode = 'align';
+        setStatus('Alignment mode: L=Left R=Right T=Top B=Bottom C=Center H=DistH V=DistV', false);
+        setTimeout(() => {
+            if (shortcutMode === 'align') {
+                shortcutMode = null;
+                setStatus('Ready', false);
+            }
+        }, 3000);
+        return;
+    }
+
+    // =========================================================================
+    // Arrange (Alt+F, Alt+B)
+    // =========================================================================
+    if (isAlt && key === 'f') {
+        e.preventDefault();
+        bringPanelToFront();
+        return;
+    }
+    if (isAlt && key === 'b') {
+        e.preventDefault();
+        sendPanelToBack();
+        return;
+    }
+
+    // =========================================================================
+    // Help (? or F1)
+    // =========================================================================
+    if (key === '?' || key === 'f1') {
+        e.preventDefault();
+        showShortcutHelp();
+        return;
     }
 });
+
+// Handle alignment sub-shortcuts
+function handleAlignShortcut(key, isShift) {
+    const panels = document.querySelectorAll('.panel-canvas-item');
+    if (panels.length < 2) {
+        setStatus('Need multiple panels for alignment', true);
+        return;
+    }
+
+    switch(key) {
+        case 'l': alignPanels('left'); break;
+        case 'r': alignPanels('right'); break;
+        case 't': alignPanels('top'); break;
+        case 'b': alignPanels('bottom'); break;
+        case 'c': alignPanels('center-h'); break;
+        case 'm': alignPanels('center-v'); break;
+        case 'h': distributePanels('horizontal'); break;
+        case 'v': distributePanels('vertical'); break;
+        default:
+            setStatus('Unknown alignment key: ' + key, true);
+    }
+}
+
+// Move selected panel by delta in mm
+function moveSelectedPanel(direction, amountMm) {
+    const activePanel = document.querySelector('.panel-canvas-item.active');
+    if (!activePanel) {
+        setStatus('No panel selected', true);
+        return;
+    }
+
+    const panelName = activePanel.dataset.panelName;
+    const deltaX = direction === 'left' ? -amountMm : (direction === 'right' ? amountMm : 0);
+    const deltaY = direction === 'up' ? -amountMm : (direction === 'down' ? amountMm : 0);
+
+    // Update position in pixels (canvasScale = px/mm)
+    const currentLeft = parseFloat(activePanel.style.left) || 0;
+    const currentTop = parseFloat(activePanel.style.top) || 0;
+
+    activePanel.style.left = (currentLeft + deltaX * canvasScale) + 'px';
+    activePanel.style.top = (currentTop + deltaY * canvasScale) + 'px';
+
+    // Update layout data
+    if (panelLayoutMm[panelName]) {
+        panelLayoutMm[panelName].x_mm += deltaX;
+        panelLayoutMm[panelName].y_mm += deltaY;
+        layoutModified = true;
+    }
+
+    setStatus(`Moved ${panelName} by ${amountMm}mm ${direction}`, false);
+}
+
+// Zoom canvas view
+let canvasZoom = 1.0;
+function zoomCanvas(factor) {
+    canvasZoom *= factor;
+    canvasZoom = Math.max(0.25, Math.min(4, canvasZoom));  // Limit 25%-400%
+    const canvas = document.getElementById('panel-canvas');
+    if (canvas) {
+        canvas.style.transform = `scale(${canvasZoom})`;
+        canvas.style.transformOrigin = 'top left';
+    }
+    setStatus(`Zoom: ${Math.round(canvasZoom * 100)}%`, false);
+}
+
+// Fit canvas to window
+function fitCanvasToWindow() {
+    canvasZoom = 1.0;
+    const canvas = document.getElementById('panel-canvas');
+    if (canvas) {
+        canvas.style.transform = 'scale(1)';
+    }
+    setStatus('Fit to window', false);
+}
+
+// Resize canvas (actual size, not view)
+function resizeCanvas(factor) {
+    const canvas = document.getElementById('panel-canvas');
+    if (!canvas) return;
+    const currentWidth = canvas.offsetWidth;
+    const currentHeight = canvas.offsetHeight;
+    canvas.style.width = (currentWidth * factor) + 'px';
+    canvas.style.minHeight = (currentHeight * factor) + 'px';
+    setStatus(`Canvas: ${Math.round(currentWidth * factor)}x${Math.round(currentHeight * factor)}px`, false);
+}
+
+// Align panels
+function alignPanels(mode) {
+    const panels = Array.from(document.querySelectorAll('.panel-canvas-item'));
+    if (panels.length < 2) return;
+
+    // Get bounds
+    const bounds = panels.map(p => ({
+        el: p,
+        left: parseFloat(p.style.left) || 0,
+        top: parseFloat(p.style.top) || 0,
+        width: p.offsetWidth,
+        height: p.offsetHeight
+    }));
+
+    let targetValue;
+    switch(mode) {
+        case 'left':
+            targetValue = Math.min(...bounds.map(b => b.left));
+            bounds.forEach(b => { b.el.style.left = targetValue + 'px'; });
+            break;
+        case 'right':
+            targetValue = Math.max(...bounds.map(b => b.left + b.width));
+            bounds.forEach(b => { b.el.style.left = (targetValue - b.width) + 'px'; });
+            break;
+        case 'top':
+            targetValue = Math.min(...bounds.map(b => b.top));
+            bounds.forEach(b => { b.el.style.top = targetValue + 'px'; });
+            break;
+        case 'bottom':
+            targetValue = Math.max(...bounds.map(b => b.top + b.height));
+            bounds.forEach(b => { b.el.style.top = (targetValue - b.height) + 'px'; });
+            break;
+        case 'center-h':
+            targetValue = bounds.reduce((sum, b) => sum + b.left + b.width/2, 0) / bounds.length;
+            bounds.forEach(b => { b.el.style.left = (targetValue - b.width/2) + 'px'; });
+            break;
+        case 'center-v':
+            targetValue = bounds.reduce((sum, b) => sum + b.top + b.height/2, 0) / bounds.length;
+            bounds.forEach(b => { b.el.style.top = (targetValue - b.height/2) + 'px'; });
+            break;
+    }
+
+    // Update layout data
+    updatePanelLayoutFromDOM();
+    setStatus(`Aligned panels: ${mode}`, false);
+}
+
+// Distribute panels evenly
+function distributePanels(direction) {
+    const panels = Array.from(document.querySelectorAll('.panel-canvas-item'));
+    if (panels.length < 3) {
+        setStatus('Need at least 3 panels to distribute', true);
+        return;
+    }
+
+    const bounds = panels.map(p => ({
+        el: p,
+        left: parseFloat(p.style.left) || 0,
+        top: parseFloat(p.style.top) || 0,
+        width: p.offsetWidth,
+        height: p.offsetHeight
+    }));
+
+    if (direction === 'horizontal') {
+        bounds.sort((a, b) => a.left - b.left);
+        const totalWidth = bounds.reduce((sum, b) => sum + b.width, 0);
+        const start = bounds[0].left;
+        const end = bounds[bounds.length - 1].left + bounds[bounds.length - 1].width;
+        const gap = (end - start - totalWidth) / (bounds.length - 1);
+
+        let currentX = start;
+        bounds.forEach(b => {
+            b.el.style.left = currentX + 'px';
+            currentX += b.width + gap;
+        });
+    } else {
+        bounds.sort((a, b) => a.top - b.top);
+        const totalHeight = bounds.reduce((sum, b) => sum + b.height, 0);
+        const start = bounds[0].top;
+        const end = bounds[bounds.length - 1].top + bounds[bounds.length - 1].height;
+        const gap = (end - start - totalHeight) / (bounds.length - 1);
+
+        let currentY = start;
+        bounds.forEach(b => {
+            b.el.style.top = currentY + 'px';
+            currentY += b.height + gap;
+        });
+    }
+
+    updatePanelLayoutFromDOM();
+    setStatus(`Distributed panels: ${direction}`, false);
+}
+
+// Update layout data from DOM positions
+function updatePanelLayoutFromDOM() {
+    document.querySelectorAll('.panel-canvas-item').forEach(panel => {
+        const name = panel.dataset.panelName;
+        if (panelLayoutMm[name]) {
+            panelLayoutMm[name].x_mm = parseFloat(panel.style.left) / canvasScale;
+            panelLayoutMm[name].y_mm = parseFloat(panel.style.top) / canvasScale;
+        }
+    });
+    layoutModified = true;
+    autoSaveLayout();
+}
+
+// Bring panel to front
+function bringPanelToFront() {
+    const activePanel = document.querySelector('.panel-canvas-item.active');
+    if (!activePanel) return;
+    const maxZ = Math.max(...Array.from(document.querySelectorAll('.panel-canvas-item')).map(p => parseInt(p.style.zIndex) || 0));
+    activePanel.style.zIndex = maxZ + 1;
+    setStatus('Brought to front', false);
+}
+
+// Send panel to back
+function sendPanelToBack() {
+    const activePanel = document.querySelector('.panel-canvas-item.active');
+    if (!activePanel) return;
+    const minZ = Math.min(...Array.from(document.querySelectorAll('.panel-canvas-item')).map(p => parseInt(p.style.zIndex) || 0));
+    activePanel.style.zIndex = minZ - 1;
+    setStatus('Sent to back', false);
+}
+
+// Undo/Redo stacks
+let undoStack = [];
+let redoStack = [];
+
+function undoLastChange() {
+    if (undoStack.length === 0) {
+        setStatus('Nothing to undo', true);
+        return;
+    }
+    const state = undoStack.pop();
+    redoStack.push(JSON.stringify(overrides));
+    overrides = JSON.parse(state);
+    updatePreview();
+    setStatus('Undo', false);
+}
+
+function redoLastChange() {
+    if (redoStack.length === 0) {
+        setStatus('Nothing to redo', true);
+        return;
+    }
+    const state = redoStack.pop();
+    undoStack.push(JSON.stringify(overrides));
+    overrides = JSON.parse(state);
+    updatePreview();
+    setStatus('Redo', false);
+}
+
+// Save state for undo before changes
+function saveUndoState() {
+    undoStack.push(JSON.stringify(overrides));
+    if (undoStack.length > 50) undoStack.shift();  // Limit stack size
+    redoStack = [];  // Clear redo on new change
+}
+
+// Delete selected element override
+function deleteSelectedOverride() {
+    if (!selectedElement) return;
+    saveUndoState();
+    if (overrides.element_overrides && overrides.element_overrides[selectedElement]) {
+        delete overrides.element_overrides[selectedElement];
+        updatePreview();
+        setStatus(`Deleted override for ${selectedElement}`, false);
+    }
+}
+
+// Show keyboard shortcuts help
+function showShortcutHelp() {
+    const helpHtml = `
+    <div id="shortcut-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;" onclick="this.remove()">
+        <div style="background: var(--bg-secondary); padding: 24px; border-radius: 8px; max-width: 700px; max-height: 80vh; overflow-y: auto; color: var(--text-primary);" onclick="event.stopPropagation()">
+            <h2 style="margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">⌨️ Keyboard Shortcuts</h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4 style="color: var(--accent-primary);">Basic</h4>
+                    <div><kbd>Ctrl+S</kbd> Save</div>
+                    <div><kbd>Ctrl+Z</kbd> Undo</div>
+                    <div><kbd>Ctrl+Y</kbd> Redo</div>
+                    <div><kbd>Del</kbd> Delete override</div>
+
+                    <h4 style="color: var(--accent-primary); margin-top: 16px;">Movement</h4>
+                    <div><kbd>↑↓←→</kbd> Move panel 1mm</div>
+                    <div><kbd>Shift+↑↓←→</kbd> Move panel 5mm</div>
+                </div>
+
+                <div>
+                    <h4 style="color: var(--accent-primary);">View</h4>
+                    <div><kbd>+</kbd> Zoom in</div>
+                    <div><kbd>-</kbd> Zoom out</div>
+                    <div><kbd>0</kbd> Fit to window</div>
+                    <div><kbd>Ctrl++</kbd> Increase canvas</div>
+                    <div><kbd>Ctrl+-</kbd> Decrease canvas</div>
+
+                    <h4 style="color: var(--accent-primary); margin-top: 16px;">Arrange</h4>
+                    <div><kbd>Alt+F</kbd> Bring to front</div>
+                    <div><kbd>Alt+B</kbd> Send to back</div>
+                </div>
+            </div>
+
+            <h4 style="color: var(--accent-primary); margin-top: 16px;">Alignment (Alt+A → ...)</h4>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                <div><kbd>L</kbd> Left</div>
+                <div><kbd>R</kbd> Right</div>
+                <div><kbd>T</kbd> Top</div>
+                <div><kbd>B</kbd> Bottom</div>
+                <div><kbd>C</kbd> Center H</div>
+                <div><kbd>M</kbd> Center V</div>
+                <div><kbd>H</kbd> Distribute H</div>
+                <div><kbd>V</kbd> Distribute V</div>
+            </div>
+
+            <div style="margin-top: 20px; text-align: center; color: var(--text-muted);">
+                Press <kbd>?</kbd> or <kbd>F1</kbd> anytime to show this help
+            </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', helpHtml);
+}
+
+// Add kbd styling
+const kbdStyle = document.createElement('style');
+kbdStyle.textContent = `
+    kbd {
+        background: var(--bg-tertiary, #333);
+        border: 1px solid var(--border-color, #555);
+        border-radius: 3px;
+        padding: 2px 6px;
+        font-family: monospace;
+        font-size: 0.85em;
+        margin-right: 8px;
+    }
+`;
+document.head.appendChild(kbdStyle);
 
 // Auto-update interval system
 let autoUpdateIntervalId = null;
