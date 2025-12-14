@@ -429,7 +429,9 @@ def save_bundle(
             dir_path = p
 
     # For direct ZIP saving with atomic writes, use ZipBundle
-    if save_as_zip and atomic:
+    # Note: figz bundles need special handling for nested pltz panels,
+    # so they go through the directory-based save_figz_bundle path
+    if save_as_zip and atomic and bundle_type != BundleType.FIGZ:
         from ._zip_bundle import ZipBundle
 
         with ZipBundle(zip_path, mode="w") as zb:

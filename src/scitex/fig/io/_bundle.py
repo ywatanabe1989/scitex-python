@@ -333,31 +333,57 @@ def _copy_nested_pltz_bundles(plots: Dict[str, Any], dir_path: Path) -> None:
 
     Args:
         plots: Dict mapping panel IDs to either:
-            - source_path: Path to existing .pltz.d directory
+            - source_path: Path to existing .pltz.d directory or .pltz zip
             - bundle_data: Dict with spec/data (will use save_bundle)
         dir_path: Target figz directory.
     """
     for panel_id, plot_source in plots.items():
-        target_path = dir_path / f"{panel_id}.pltz.d"
-
         if isinstance(plot_source, (str, Path)):
             # Direct copy from source path
             source_path = Path(plot_source)
-            if source_path.exists() and source_path.is_dir():
+
+            if source_path.is_dir() and str(source_path).endswith('.pltz.d'):
+                # Source is .pltz.d directory - copy as directory
+                target_path = dir_path / f"{panel_id}.pltz.d"
                 if target_path.exists():
                     shutil.rmtree(target_path)
                 shutil.copytree(source_path, target_path)
+
+            elif source_path.is_file() and str(source_path).endswith('.pltz'):
+                # Source is .pltz zip file - copy as zip file (preserving zip format)
+                target_path = dir_path / f"{panel_id}.pltz"
+                if target_path.exists():
+                    target_path.unlink()
+                shutil.copy2(source_path, target_path)
+
+            elif source_path.exists():
+                # Unknown format - try to copy as directory
+                target_path = dir_path / f"{panel_id}.pltz.d"
+                if source_path.is_dir():
+                    if target_path.exists():
+                        shutil.rmtree(target_path)
+                    shutil.copytree(source_path, target_path)
+
         elif isinstance(plot_source, dict):
             # Check if it has source_path for direct copy
             if "source_path" in plot_source:
                 source_path = Path(plot_source["source_path"])
-                if source_path.exists() and source_path.is_dir():
+                if source_path.is_file() and str(source_path).endswith('.pltz'):
+                    # .pltz zip file
+                    target_path = dir_path / f"{panel_id}.pltz"
+                    if target_path.exists():
+                        target_path.unlink()
+                    shutil.copy2(source_path, target_path)
+                elif source_path.exists() and source_path.is_dir():
+                    # .pltz.d directory
+                    target_path = dir_path / f"{panel_id}.pltz.d"
                     if target_path.exists():
                         shutil.rmtree(target_path)
                     shutil.copytree(source_path, target_path)
             else:
                 # Fallback to save_bundle (will lose images)
                 from scitex.io._bundle import save_bundle, BundleType
+                target_path = dir_path / f"{panel_id}.pltz.d"
                 save_bundle(plot_source, target_path, bundle_type=BundleType.PLTZ)
 
 
@@ -376,9 +402,33 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
     from PIL import Image
     import numpy as np
     import warnings
+    import tempfile
+    import zipfile
 
-    # Find all panel directories
-    panel_dirs = sorted(dir_path.glob("*.pltz.d"))
+    # Find all panel bundles (both .pltz.d directories and .pltz zip files)
+    panel_dirs = []
+    temp_dirs_to_cleanup = []
+
+    for item in dir_path.iterdir():
+        if item.is_dir() and str(item).endswith('.pltz.d'):
+            panel_dirs.append(item)
+        elif item.is_file() and str(item).endswith('.pltz'):
+            # Extract .pltz zip to temp directory for overview generation
+            temp_dir = tempfile.mkdtemp(prefix=f'scitex_overview_{item.stem}_')
+            temp_dirs_to_cleanup.append(temp_dir)
+            with zipfile.ZipFile(item, 'r') as zf:
+                zf.extractall(temp_dir)
+            # Find the extracted .pltz.d directory
+            extracted = Path(temp_dir)
+            for subitem in extracted.iterdir():
+                if subitem.is_dir() and str(subitem).endswith('.pltz.d'):
+                    panel_dirs.append(subitem)
+                    break
+            else:
+                # Use temp dir directly if no .pltz.d subfolder
+                panel_dirs.append(extracted)
+
+    panel_dirs = sorted(panel_dirs, key=lambda x: x.name)
     n_panels = len(panel_dirs)
 
     if n_panels == 0:
@@ -518,6 +568,13 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
         warnings.filterwarnings("ignore", message=".*tight_layout.*")
         fig.savefig(overview_path, dpi=150, bbox_inches="tight", facecolor="white")
     plt.close(fig)
+
+    # Cleanup temp directories
+    for temp_dir in temp_dirs_to_cleanup:
+        try:
+            shutil.rmtree(temp_dir)
+        except Exception:
+            pass
 
 
 def _draw_bboxes_from_geometry(ax, geometry_data: Dict) -> None:
@@ -745,6 +802,8 @@ def _generate_figz_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> 
         basename: Base filename for bundle files.
     """
     from datetime import datetime
+    import tempfile
+    import zipfile
 
     cache_dir = dir_path / "cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -756,11 +815,30 @@ def _generate_figz_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> 
         "generated_at": datetime.now().isoformat(),
     }
 
-    # Find all panel directories
-    panel_dirs = sorted(dir_path.glob("*.pltz.d"))
+    # Find all panel bundles (both .pltz.d directories and .pltz zip files)
+    panel_sources = []
+    temp_dirs_to_cleanup = []
 
-    for panel_dir in panel_dirs:
-        panel_id = panel_dir.stem.replace(".pltz", "")
+    for item in dir_path.iterdir():
+        if item.is_dir() and str(item).endswith('.pltz.d'):
+            panel_sources.append((item.stem.replace('.pltz', ''), item))
+        elif item.is_file() and str(item).endswith('.pltz'):
+            # Extract .pltz zip to temp directory
+            temp_dir = tempfile.mkdtemp(prefix=f'scitex_geom_{item.stem}_')
+            temp_dirs_to_cleanup.append(temp_dir)
+            with zipfile.ZipFile(item, 'r') as zf:
+                zf.extractall(temp_dir)
+            extracted = Path(temp_dir)
+            for subitem in extracted.iterdir():
+                if subitem.is_dir() and str(subitem).endswith('.pltz.d'):
+                    panel_sources.append((item.stem, subitem))
+                    break
+            else:
+                panel_sources.append((item.stem, extracted))
+
+    panel_sources = sorted(panel_sources, key=lambda x: x[0])
+
+    for panel_id, panel_dir in panel_sources:
 
         # Load panel geometry
         panel_geometry_path = panel_dir / "cache" / "geometry_px.json"
@@ -790,13 +868,20 @@ def _generate_figz_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> 
         "figure_id": basename,
         "generated_at": datetime.now().isoformat(),
         "size_mm": [size.get("width_mm", 0), size.get("height_mm", 0)],
-        "panels_count": len(panel_dirs),
+        "panels_count": len(panel_sources),
         "schema": spec.get("schema", {}),
     }
 
     manifest_path = cache_dir / "render_manifest.json"
     with open(manifest_path, "w") as f:
         json.dump(manifest, f, indent=2)
+
+    # Cleanup temp directories
+    for temp_dir in temp_dirs_to_cleanup:
+        try:
+            shutil.rmtree(temp_dir)
+        except Exception:
+            pass
 
 
 def _embed_metadata_in_export(

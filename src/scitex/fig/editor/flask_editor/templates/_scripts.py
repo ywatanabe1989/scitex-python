@@ -1795,8 +1795,12 @@ async function loadPanelGrid() {
 
     console.log('Loading panel canvas for', panelData.panels.length, 'panels');
 
-    // Show panel header
-    document.getElementById('preview-header').style.display = 'flex';
+    // Hide single-panel preview completely for multi-panel bundles (unified canvas only)
+    document.getElementById('preview-header').style.display = 'none';
+    const previewWrapper = document.querySelector('.preview-wrapper');
+    if (previewWrapper) {
+        previewWrapper.style.display = 'none';
+    }
 
     // Fetch all panel images with bboxes
     try {
@@ -1881,16 +1885,9 @@ async function loadPanelGrid() {
         // Update panel indicator
         updatePanelIndicator();
 
-        // Show canvas for multi-panel figures
-        if (data.panels.length > 1) {
-            showingPanelGrid = true;
-            document.getElementById('panel-grid-section').style.display = 'block';
-            // Hide single-panel preview for multi-panel bundles
-            const previewWrapper = document.querySelector('.preview-wrapper');
-            if (previewWrapper) {
-                previewWrapper.style.display = 'none';
-            }
-        }
+        // Show unified canvas for multi-panel figures
+        showingPanelGrid = true;
+        document.getElementById('panel-grid-section').style.display = 'block';
     } catch (e) {
         console.error('Error loading panels:', e);
     }
@@ -2355,11 +2352,7 @@ async function loadPanelForEditing(panelIdx, panelName, elementToSelect) {
         // Scroll to section and show properties
         scrollToSection(selectedElement);
 
-        // Show single-panel preview when element selected
-        const previewWrapper = document.querySelector('.preview-wrapper');
-        if (previewWrapper) {
-            previewWrapper.style.display = 'block';
-        }
+        // Keep unified canvas view only - don't show single-panel preview
 
         // Update panel path display in right panel header
         const panelPathEl = document.getElementById('panel-path-display');
@@ -2379,14 +2372,8 @@ async function loadPanelForEditing(panelIdx, panelName, elementToSelect) {
 function togglePanelGrid() {
     showingPanelGrid = !showingPanelGrid;
     const gridSection = document.getElementById('panel-grid-section');
-    const showBtn = document.getElementById('show-grid-btn');
-
-    if (showingPanelGrid) {
-        gridSection.style.display = 'block';
-        showBtn.textContent = 'Hide All';
-    } else {
-        gridSection.style.display = 'none';
-        showBtn.textContent = 'Show All';
+    if (gridSection) {
+        gridSection.style.display = showingPanelGrid ? 'block' : 'none';
     }
 }
 
@@ -2473,12 +2460,12 @@ function updatePanelIndicator() {
     const current = currentPanelIndex + 1;
     const panelName = panelData.panels[currentPanelIndex];
 
-    document.getElementById('panel-indicator').textContent = `${current} / ${total}`;
-    document.getElementById('current-panel-name').textContent = `Panel ${panelName.replace('.pltz.d', '')}`;
+    // Update indicator text (if elements exist)
+    const indicatorEl = document.getElementById('panel-indicator');
+    if (indicatorEl) indicatorEl.textContent = `${current} / ${total}`;
 
-    // Update prev/next button states
-    document.getElementById('prev-panel-btn').disabled = currentPanelIndex === 0;
-    document.getElementById('next-panel-btn').disabled = currentPanelIndex === total - 1;
+    const nameEl = document.getElementById('current-panel-name');
+    if (nameEl) nameEl.textContent = `Panel ${panelName.replace('.pltz.d', '')}`;
 }
 
 // =============================================================================

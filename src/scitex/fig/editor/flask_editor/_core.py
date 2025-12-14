@@ -147,63 +147,75 @@ class WebEditor:
 
         @app.route("/panels")
         def panels():
-            """Return all panel images with bboxes for interactive grid view (figz bundles only)."""
-            from PIL import Image
+            """Return all panel images with bboxes for interactive grid view (figz bundles only).
+
+            Uses smart _load_panel_data helper for transparent zip/directory handling.
+            """
             from ._bbox import extract_bboxes_from_metadata, extract_bboxes_from_geometry_px
+            from .._edit import _load_panel_data
 
             if not editor.panel_info:
                 return jsonify({"error": "Not a multi-panel figz bundle"}), 400
 
-            figz_dir = Path(editor.panel_info["figz_dir"])
             panel_names = editor.panel_info["panels"]
+            panel_paths = editor.panel_info.get("panel_paths", [])
+            panel_is_zip = editor.panel_info.get("panel_is_zip", [False] * len(panel_names))
+
+            if not panel_paths:
+                figz_dir = Path(editor.panel_info["figz_dir"])
+                panel_paths = [str(figz_dir / name) for name in panel_names]
+
             panel_images = []
 
-            for panel_name in panel_names:
-                panel_dir = figz_dir / panel_name
-                panel_data = {"name": panel_name.replace(".pltz.d", ""), "image": None, "bboxes": None, "img_size": None}
+            for idx, panel_name in enumerate(panel_names):
+                panel_path = panel_paths[idx]
+                is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else None
+                display_name = panel_name.replace(".pltz.d", "").replace(".pltz", "")
 
-                # Find PNG in exports/ or root
-                png_path = None
-                exports_dir = panel_dir / "exports"
-                if exports_dir.exists():
-                    for f in exports_dir.glob("*.png"):
-                        if "_hitmap" not in f.name and "_overview" not in f.name:
-                            png_path = f
-                            break
-                if not png_path:
-                    for f in panel_dir.glob("*.png"):
-                        if "_hitmap" not in f.name and "_overview" not in f.name:
-                            png_path = f
-                            break
+                # Use smart helper to load panel data
+                loaded = _load_panel_data(panel_path, is_zip=is_zip)
 
-                if png_path and png_path.exists():
-                    with open(png_path, "rb") as f:
-                        panel_data["image"] = base64.b64encode(f.read()).decode("utf-8")
-                    img = Image.open(png_path)
-                    panel_data["width"], panel_data["height"] = img.size
-                    panel_data["img_size"] = {"width": img.size[0], "height": img.size[1]}
-                    img.close()
+                panel_data = {"name": display_name, "image": None, "bboxes": None, "img_size": None}
 
-                    # Try to load geometry_px.json from cache (has precise pixel coordinates)
-                    geometry_path = panel_dir / "cache" / "geometry_px.json"
-                    if geometry_path.exists():
-                        import json
-                        with open(geometry_path) as f:
-                            geometry_data = json.load(f)
-                        panel_data["bboxes"] = extract_bboxes_from_geometry_px(
-                            geometry_data,
-                            panel_data["img_size"]["width"],
-                            panel_data["img_size"]["height"]
-                        )
+                if loaded:
+                    # Get image data
+                    if loaded.get("is_zip"):
+                        png_bytes = loaded.get("png_bytes")
+                        if png_bytes:
+                            panel_data["image"] = base64.b64encode(png_bytes).decode("utf-8")
                     else:
-                        # Fall back to spec.json extraction
-                        spec_path = panel_dir / "spec.json"
-                        if spec_path.exists():
-                            import json
-                            with open(spec_path) as f:
-                                panel_metadata = json.load(f)
+                        png_path = loaded.get("png_path")
+                        if png_path and png_path.exists():
+                            with open(png_path, "rb") as f:
+                                panel_data["image"] = base64.b64encode(f.read()).decode("utf-8")
+
+                    # Get image size
+                    img_size = loaded.get("img_size")
+                    if img_size:
+                        panel_data["img_size"] = img_size
+                        panel_data["width"] = img_size["width"]
+                        panel_data["height"] = img_size["height"]
+                    elif loaded.get("png_path"):
+                        from PIL import Image
+                        img = Image.open(loaded["png_path"])
+                        panel_data["img_size"] = {"width": img.size[0], "height": img.size[1]}
+                        panel_data["width"], panel_data["height"] = img.size
+                        img.close()
+
+                    # Extract bboxes - prefer geometry_px.json
+                    if panel_data.get("img_size"):
+                        geometry_data = loaded.get("geometry_data")
+                        metadata = loaded.get("metadata", {})
+
+                        if geometry_data:
+                            panel_data["bboxes"] = extract_bboxes_from_geometry_px(
+                                geometry_data,
+                                panel_data["img_size"]["width"],
+                                panel_data["img_size"]["height"]
+                            )
+                        elif metadata:
                             panel_data["bboxes"] = extract_bboxes_from_metadata(
-                                panel_metadata,
+                                metadata,
                                 panel_data["img_size"]["width"],
                                 panel_data["img_size"]["height"]
                             )
@@ -219,90 +231,84 @@ class WebEditor:
         def switch_panel(panel_index):
             """Switch to a different panel in the figz bundle.
 
-            Loads the actual PNG from the panel's exports folder instead of re-rendering.
+            Uses smart _load_panel_data helper for transparent zip/directory handling.
             """
-            from PIL import Image
-            from .._edit import _load_panel_data
             from ._bbox import extract_bboxes_from_metadata, extract_bboxes_from_geometry_px
+            from .._edit import _load_panel_data
 
             if not editor.panel_info:
                 return jsonify({"error": "Not a multi-panel figz bundle"}), 400
 
             panels = editor.panel_info["panels"]
+            panel_paths = editor.panel_info.get("panel_paths", [])
+            panel_is_zip = editor.panel_info.get("panel_is_zip", [False] * len(panels))
+
             if panel_index < 0 or panel_index >= len(panels):
                 return jsonify({"error": f"Invalid panel index: {panel_index}"}), 400
 
-            figz_dir = Path(editor.panel_info["figz_dir"])
             panel_name = panels[panel_index]
-            panel_dir = figz_dir / panel_name
+            panel_path = panel_paths[panel_index] if panel_paths else str(Path(editor.panel_info["figz_dir"]) / panel_name)
+            is_zip = panel_is_zip[panel_index] if panel_index < len(panel_is_zip) else None
 
-            # Load the panel's data
             try:
-                panel_data = _load_panel_data(panel_dir)
-                if not panel_data:
+                # Use smart helper to load panel data
+                loaded = _load_panel_data(panel_path, is_zip=is_zip)
+
+                if not loaded:
                     return jsonify({"error": f"Could not load panel: {panel_name}"}), 400
 
+                # Get image data
+                img_data = None
+                if loaded.get("is_zip"):
+                    png_bytes = loaded.get("png_bytes")
+                    if png_bytes:
+                        img_data = base64.b64encode(png_bytes).decode("utf-8")
+                else:
+                    png_path = loaded.get("png_path")
+                    if png_path and png_path.exists():
+                        with open(png_path, "rb") as f:
+                            img_data = base64.b64encode(f.read()).decode("utf-8")
+
+                if not img_data:
+                    return jsonify({"error": f"No PNG found for panel: {panel_name}"}), 400
+
+                # Get image size
+                img_size = loaded.get("img_size", {"width": 0, "height": 0})
+                if not img_size and loaded.get("png_path"):
+                    from PIL import Image
+                    img = Image.open(loaded["png_path"])
+                    img_size = {"width": img.size[0], "height": img.size[1]}
+                    img.close()
+
+                # Extract bboxes - prefer geometry_px.json
+                bboxes = {}
+                geometry_data = loaded.get("geometry_data")
+                metadata = loaded.get("metadata", {})
+
+                if geometry_data and img_size:
+                    bboxes = extract_bboxes_from_geometry_px(
+                        geometry_data,
+                        img_size["width"],
+                        img_size["height"]
+                    )
+                elif metadata and img_size:
+                    bboxes = extract_bboxes_from_metadata(
+                        metadata,
+                        img_size["width"],
+                        img_size["height"]
+                    )
+
                 # Update editor state
-                editor.json_path = panel_data["json_path"]
-                editor.metadata = panel_data["metadata"]
-                editor.csv_data = panel_data.get("csv_data")
-                editor.png_path = panel_data.get("png_path")
-                editor.hitmap_path = panel_data.get("hitmap_path")
+                editor.metadata = metadata
                 editor.panel_info["current_index"] = panel_index
 
                 # Re-extract defaults from new metadata
                 from .._defaults import get_scitex_defaults, extract_defaults_from_metadata
                 editor.scitex_defaults = get_scitex_defaults()
-                editor.metadata_defaults = extract_defaults_from_metadata(editor.metadata)
+                editor.metadata_defaults = extract_defaults_from_metadata(metadata)
                 editor.current_overrides = copy.deepcopy(editor.scitex_defaults)
                 editor.current_overrides.update(editor.metadata_defaults)
                 editor.current_overrides.update(editor.manual_overrides)
-
-                # Load actual PNG from panel instead of re-rendering
-                img_data = None
-                img_size = {"width": 0, "height": 0}
-                png_path = panel_data.get("png_path")
-
-                if png_path and png_path.exists():
-                    with open(png_path, "rb") as f:
-                        img_data = base64.b64encode(f.read()).decode("utf-8")
-                    img = Image.open(png_path)
-                    img_size = {"width": img.size[0], "height": img.size[1]}
-                    img.close()
-                else:
-                    # Fallback: look for any PNG in exports/
-                    exports_dir = panel_dir / "exports"
-                    if exports_dir.exists():
-                        for f in exports_dir.glob("*.png"):
-                            if "_hitmap" not in f.name and "_overview" not in f.name:
-                                with open(f, "rb") as pf:
-                                    img_data = base64.b64encode(pf.read()).decode("utf-8")
-                                img = Image.open(f)
-                                img_size = {"width": img.size[0], "height": img.size[1]}
-                                img.close()
-                                break
-
-                if not img_data:
-                    return jsonify({"error": f"No PNG found for panel: {panel_name}"}), 400
-
-                # Extract bboxes - prefer geometry_px.json for precise coordinates
-                bboxes = {}
-                geometry_path = panel_dir / "cache" / "geometry_px.json"
-                if geometry_path.exists():
-                    with open(geometry_path) as f:
-                        geometry_data = json.load(f)
-                    bboxes = extract_bboxes_from_geometry_px(
-                        geometry_data,
-                        img_size["width"],
-                        img_size["height"],
-                    )
-                else:
-                    # Fall back to metadata extraction
-                    bboxes = extract_bboxes_from_metadata(
-                        editor.metadata,
-                        img_size["width"],
-                        img_size["height"],
-                    )
 
                 return jsonify({
                     "success": True,

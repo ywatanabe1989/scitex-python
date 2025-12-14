@@ -210,13 +210,22 @@ class ZipBundle:
             return data
         except KeyError:
             # Try with directory prefix (e.g., "bundle.pltz.d/spec.json")
-            dir_name = self.path.stem + ".d"
+            # The path.name includes extension, so "foo.pltz" -> "foo.pltz.d"
+            dir_name = self.path.name + ".d"
             full_name = f"{dir_name}/{name}"
             try:
                 data = self._zipfile.read(full_name)
                 self._cache[name] = data
                 return data
             except KeyError:
+                # Try to find the .d directory dynamically
+                # (handles case where pltz was renamed, e.g., panel_A.pltz -> A.pltz
+                # but internal structure is still panel_A.pltz.d/)
+                for arc_name in self._zipfile.namelist():
+                    if arc_name.endswith('.d/' + name) or arc_name.endswith('.d/' + name.replace('/', '/')):
+                        data = self._zipfile.read(arc_name)
+                        self._cache[name] = data
+                        return data
                 raise FileNotFoundError(f"File not found in bundle: {name}")
 
     def read_text(self, name: str, encoding: str = "utf-8") -> str:
