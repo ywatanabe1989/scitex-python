@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-14 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_zip_bundle.py
+# Timestamp: "2025-12-16 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_zip.py
 
 """
 SciTeX ZipBundle - In-memory zip archive handler with atomic writes.
@@ -21,14 +21,15 @@ import shutil
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, Union
 
 import pandas as pd
 
 __all__ = [
     "ZipBundle",
-    "open_bundle",
-    "create_bundle",
+    "open",
+    "create",
+    "zip_directory",
 ]
 
 
@@ -75,14 +76,14 @@ class ZipBundle:
         self.mode = mode
         self.compression = compression
         self._zipfile: Optional[zipfile.ZipFile] = None
-        self._cache: Dict[str, bytes] = {}  # Cache for read files
-        self._pending_writes: Dict[str, bytes] = {}  # Pending writes for atomic commit
+        self._cache: Dict[str, bytes] = {}
+        self._pending_writes: Dict[str, bytes] = {}
         self._temp_path: Optional[Path] = None
         self._closed = False
 
     def __enter__(self) -> "ZipBundle":
         """Enter context manager."""
-        self.open()
+        self._open()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -91,22 +92,19 @@ class ZipBundle:
             self._atomic_commit()
         self.close()
 
-    def open(self) -> None:
+    def _open(self) -> None:
         """Open the zip bundle."""
         if self.mode == "r":
             if not self.path.exists():
                 raise FileNotFoundError(f"Bundle not found: {self.path}")
             self._zipfile = zipfile.ZipFile(self.path, "r")
         elif self.mode == "w":
-            # Create new archive (write to temp, commit on close)
             self._temp_path = Path(tempfile.mktemp(suffix=self.path.suffix))
             self._zipfile = zipfile.ZipFile(
                 self._temp_path, "w", self.compression
             )
         elif self.mode == "a":
-            # Append mode: read existing, write to temp, commit atomically
             if self.path.exists():
-                # Load existing contents into cache
                 with zipfile.ZipFile(self.path, "r") as zf:
                     for name in zf.namelist():
                         self._cache[name] = zf.read(name)
@@ -122,27 +120,18 @@ class ZipBundle:
         if self._zipfile and not self._closed:
             self._zipfile.close()
             self._closed = True
-            # Clean up temp file if not committed (error case)
             if self._temp_path and self._temp_path.exists():
                 if self.mode in ("w", "a") and not self.path.exists():
-                    # Commit wasn't called, clean up
                     self._temp_path.unlink()
 
     def _atomic_commit(self) -> None:
-        """Atomically commit writes by renaming temp file.
-
-        This ensures the bundle is never in an inconsistent state.
-        Either the old file exists completely, or the new one does.
-        """
+        """Atomically commit writes by renaming temp file."""
         if self._temp_path is None:
             return
 
-        # Write all pending and cached content to the temp zip
         self._zipfile.close()
         self._closed = True
 
-        # Atomic rename (works on same filesystem)
-        # On Windows, we need to remove target first
         if os.name == "nt" and self.path.exists():
             backup_path = self.path.with_suffix(self.path.suffix + ".bak")
             self.path.rename(backup_path)
@@ -150,11 +139,9 @@ class ZipBundle:
                 self._temp_path.rename(self.path)
                 backup_path.unlink()
             except Exception:
-                # Restore backup on failure
                 backup_path.rename(self.path)
                 raise
         else:
-            # Unix: atomic rename
             self._temp_path.rename(self.path)
 
     # =========================================================================
@@ -166,7 +153,6 @@ class ZipBundle:
         if self.mode == "r":
             return self._zipfile.namelist()
         else:
-            # Include both cached and pending writes
             names = set(self._cache.keys())
             names.update(self._pending_writes.keys())
             return sorted(names)
@@ -192,25 +178,19 @@ class ZipBundle:
         Returns:
             File contents as bytes.
         """
-        # Check cache first (for append mode)
         if name in self._pending_writes:
             return self._pending_writes[name]
         if name in self._cache:
             return self._cache[name]
 
-        # Read from zip
         if self._zipfile is None:
             raise RuntimeError("Bundle not opened")
 
-        # Handle files inside .d directory structure
-        # Try direct name first, then with .d prefix
         try:
             data = self._zipfile.read(name)
             self._cache[name] = data
             return data
         except KeyError:
-            # Try with directory prefix (e.g., "bundle.pltz.d/spec.json")
-            # The path.name includes extension, so "foo.pltz" -> "foo.pltz.d"
             dir_name = self.path.name + ".d"
             full_name = f"{dir_name}/{name}"
             try:
@@ -218,11 +198,10 @@ class ZipBundle:
                 self._cache[name] = data
                 return data
             except KeyError:
-                # Try to find the .d directory dynamically
-                # (handles case where pltz was renamed, e.g., panel_A.pltz -> A.pltz
-                # but internal structure is still panel_A.pltz.d/)
                 for arc_name in self._zipfile.namelist():
-                    if arc_name.endswith('.d/' + name) or arc_name.endswith('.d/' + name.replace('/', '/')):
+                    if arc_name.endswith(".d/" + name) or arc_name.endswith(
+                        ".d/" + name.replace("/", "/")
+                    ):
                         data = self._zipfile.read(arc_name)
                         self._cache[name] = data
                         return data
@@ -290,9 +269,7 @@ class ZipBundle:
             raise RuntimeError("Cannot write in read mode")
 
         self._pending_writes[name] = data
-        self._cache[name] = data  # Update cache
-
-        # Write to zip immediately
+        self._cache[name] = data
         self._zipfile.writestr(name, data)
 
     def write_text(self, name: str, text: str, encoding: str = "utf-8") -> None:
@@ -343,7 +320,7 @@ class ZipBundle:
         self.write_bytes(name, data)
 
     # =========================================================================
-    # Convenience methods
+    # Convenience properties
     # =========================================================================
 
     @property
@@ -371,9 +348,7 @@ class ZipBundle:
             return None
 
 
-def open_bundle(
-    path: Union[str, Path], mode: str = "r"
-) -> ZipBundle:
+def open(path: Union[str, Path], mode: str = "r") -> ZipBundle:
     """Open a bundle for reading or writing.
 
     Args:
@@ -384,14 +359,14 @@ def open_bundle(
         ZipBundle instance (use as context manager).
 
     Example:
-        with open_bundle("figure.figz") as bundle:
+        with open("figure.figz") as bundle:
             spec = bundle.spec
             data = bundle.data
     """
     return ZipBundle(path, mode=mode)
 
 
-def create_bundle(
+def create(
     path: Union[str, Path],
     spec: Dict[str, Any],
     data: Optional[pd.DataFrame] = None,
@@ -411,7 +386,7 @@ def create_bundle(
         Path to created bundle.
 
     Example:
-        create_bundle(
+        create(
             "plot.pltz",
             spec={"schema": {"name": "scitex.plt", "version": "1.0"}},
             data=df,
@@ -434,6 +409,79 @@ def create_bundle(
                 bundle.write_bytes(export_path, export_data)
 
     return path
+
+
+def zip_directory(
+    source_dir: Union[str, Path],
+    output_path: Optional[Union[str, Path]] = None,
+) -> Path:
+    """Convert a directory bundle (.pltz.d, .figz.d) to a ZIP bundle (.pltz, .figz).
+
+    Creates a ZIP archive from an existing directory bundle, preserving
+    the internal structure. The ZIP file is created atomically using a temp file.
+
+    Args:
+        source_dir: Path to directory bundle (e.g., "panel_A.pltz.d", "figure.figz.d")
+        output_path: Optional output ZIP path. If not provided, derives from source_dir
+            by replacing .pltz.d -> .pltz or .figz.d -> .figz
+
+    Returns:
+        Path to created ZIP bundle.
+
+    Raises:
+        FileNotFoundError: If source directory doesn't exist.
+        ValueError: If source is not a valid bundle directory.
+
+    Example:
+        # Convert panel_A.pltz.d to panel_A.pltz
+        zip_path = zip_directory("panel_A.pltz.d")
+
+        # Convert with custom output path
+        zip_path = zip_directory("A.pltz.d", "output/A.pltz")
+    """
+    source_dir = Path(source_dir)
+
+    if not source_dir.exists():
+        raise FileNotFoundError(f"Source directory not found: {source_dir}")
+
+    if not source_dir.is_dir():
+        raise ValueError(f"Source is not a directory: {source_dir}")
+
+    if output_path is None:
+        dir_name = source_dir.name
+        if dir_name.endswith(".pltz.d"):
+            zip_name = dir_name.replace(".pltz.d", ".pltz")
+        elif dir_name.endswith(".figz.d"):
+            zip_name = dir_name.replace(".figz.d", ".figz")
+        elif dir_name.endswith(".statsz.d"):
+            zip_name = dir_name.replace(".statsz.d", ".statsz")
+        else:
+            zip_name = dir_name + ".zip"
+        output_path = source_dir.parent / zip_name
+    else:
+        output_path = Path(output_path)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    temp_path = Path(tempfile.mktemp(suffix=output_path.suffix))
+
+    try:
+        with zipfile.ZipFile(temp_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            for file_path in source_dir.rglob("*"):
+                if file_path.is_file():
+                    arcname = file_path.relative_to(source_dir)
+                    zf.write(file_path, arcname)
+
+        if output_path.exists():
+            output_path.unlink()
+        shutil.move(str(temp_path), str(output_path))
+
+    except Exception:
+        if temp_path.exists():
+            temp_path.unlink()
+        raise
+
+    return output_path
 
 
 # EOF

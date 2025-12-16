@@ -132,15 +132,15 @@ def load_figz_bundle(bundle_dir: Path) -> Dict[str, Any]:
     # Load from .pltz.d directories
     for pltz_dir in bundle_dir.glob("*.pltz.d"):
         plot_name = pltz_dir.stem.replace(".pltz", "")
-        from scitex.io._bundle import load_bundle
-        result["plots"][plot_name] = load_bundle(pltz_dir)
+        from scitex.io.bundle import load
+        result["plots"][plot_name] = load(pltz_dir)
 
     # Load from .pltz ZIP files
     for pltz_zip in bundle_dir.glob("*.pltz"):
         if pltz_zip.is_file():
             plot_name = pltz_zip.stem
-            from scitex.io._bundle import load_bundle
-            result["plots"][plot_name] = load_bundle(pltz_zip)
+            from scitex.io.bundle import load
+            result["plots"][plot_name] = load(pltz_zip)
 
     return result
 
@@ -381,10 +381,10 @@ def _copy_nested_pltz_bundles(plots: Dict[str, Any], dir_path: Path) -> None:
                         shutil.rmtree(target_path)
                     shutil.copytree(source_path, target_path)
             else:
-                # Fallback to save_bundle (will lose images)
-                from scitex.io._bundle import save_bundle, BundleType
+                # Fallback to save (will lose images)
+                from scitex.io.bundle import save, BundleType
                 target_path = dir_path / f"{panel_id}.pltz.d"
-                save_bundle(plot_source, target_path, bundle_type=BundleType.PLTZ)
+                save(plot_source, target_path, bundle_type=BundleType.PLTZ)
 
 
 def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: str) -> None:

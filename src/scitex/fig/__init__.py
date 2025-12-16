@@ -191,7 +191,7 @@ def save_figz(
     """
     from pathlib import Path
     import shutil
-    from scitex.io._bundle import save_bundle, BundleType
+    from scitex.io.bundle import save, BundleType
 
     p = Path(path)
     spath = str(path)
@@ -217,7 +217,7 @@ def save_figz(
             # Store source path for direct copying
             bundle_data['plots'][panel_id] = str(pltz_path)
 
-    return save_bundle(bundle_data, p, bundle_type=BundleType.FIGZ, as_zip=as_zip)
+    return save(bundle_data, p, bundle_type=BundleType.FIGZ, as_zip=as_zip)
 
 
 def load_figz(path):
@@ -243,9 +243,9 @@ def load_figz(path):
     >>> panel_a = figure['panels']['A']
     >>> print(panel_a['spec'], panel_a['data'])
     """
-    from scitex.io._bundle import load_bundle
+    from scitex.io.bundle import load
 
-    bundle = load_bundle(path)
+    bundle = load(path)
 
     if bundle['type'] != 'figz':
         raise ValueError(f"Not a .figz bundle: {path}")

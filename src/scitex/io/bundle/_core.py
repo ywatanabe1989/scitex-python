@@ -1,24 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-13 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_bundle.py
+# Timestamp: "2025-12-16 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_core.py
 
 """
-SciTeX Bundle I/O - Shared utilities for .figz, .pltz, and .statsz formats.
+SciTeX Bundle Core Operations.
 
-This module provides common bundle operations. Domain-specific logic is in:
-    - scitex.plt.io._bundle  (pltz: hitmap, CSV, overview)
-    - scitex.fig.io._bundle  (figz: panel composition, nested pltz)
-    - scitex.stats.io._bundle (statsz: comparison metadata)
+Provides load, save, copy, pack, unpack, and validate operations for
+.figz, .pltz, and .statsz bundle formats.
 
-Bundle formats:
-    .figz  - Publication Figure Bundle (panels + layout)
-    .pltz  - Reproducible Plot Bundle (data + spec + exports)
-    .statsz - Statistical Results Bundle (stats + metadata)
-
-Each bundle can be:
-    - Directory form: Figure1.figz.d/
-    - ZIP archive form: Figure1.figz
+Each bundle can exist in two forms:
+    - Directory: Figure1.figz.d/
+    - ZIP archive: Figure1.figz
 """
 
 import json
@@ -27,59 +20,55 @@ import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+from ._types import (
+    EXTENSIONS,
+    BundleNotFoundError,
+    BundleType,
+    BundleValidationError,
+)
+
 __all__ = [
-    "is_bundle",
-    "load_bundle",
-    "save_bundle",
-    "pack_bundle",
-    "unpack_bundle",
-    "validate_bundle",
+    "load",
+    "save",
+    "copy",
+    "pack",
+    "unpack",
+    "validate",
     "validate_spec",
-    "BundleType",
-    "BundleValidationError",
-    "BUNDLE_EXTENSIONS",
-    "get_bundle_type",
+    "is_bundle",
+    "get_type",
     "dir_to_zip_path",
     "zip_to_dir_path",
 ]
 
-# Bundle extensions
-BUNDLE_EXTENSIONS = (".figz", ".pltz", ".statsz")
 
-
-class BundleValidationError(ValueError):
-    """Error raised when bundle validation fails."""
-    pass
-
-
-class BundleType:
-    """Bundle type constants."""
-    FIGZ = "figz"
-    PLTZ = "pltz"
-    STATSZ = "statsz"
-
-
-def get_bundle_type(path: Union[str, Path]) -> Optional[str]:
+def get_type(path: Union[str, Path]) -> Optional[str]:
     """Get bundle type from path.
 
     Args:
         path: Path to bundle (directory or ZIP).
 
     Returns:
-        Bundle type string or None if not a bundle.
+        Bundle type string ('figz', 'pltz', 'statsz') or None if not a bundle.
+
+    Example:
+        >>> get_type("Figure1.figz")
+        'figz'
+        >>> get_type("plot.pltz.d")
+        'pltz'
     """
     p = Path(path)
 
     # Directory bundle: ends with .figz.d, .pltz.d, .statsz.d
     if p.is_dir() and p.suffix == ".d":
         stem = p.stem  # e.g., "Figure1.figz"
-        for ext in BUNDLE_EXTENSIONS:
+        for ext in EXTENSIONS:
             if stem.endswith(ext):
                 return ext[1:]  # Remove leading dot
         return None
 
     # ZIP bundle: ends with .figz, .pltz, .statsz
-    if p.suffix in BUNDLE_EXTENSIONS:
+    if p.suffix in EXTENSIONS:
         return p.suffix[1:]  # Remove leading dot
 
     return None
@@ -93,14 +82,22 @@ def is_bundle(path: Union[str, Path]) -> bool:
 
     Returns:
         True if path is a bundle.
+
+    Example:
+        >>> is_bundle("Figure1.figz")
+        True
+        >>> is_bundle("data.csv")
+        False
     """
-    return get_bundle_type(path) is not None
+    return get_type(path) is not None
 
 
 def dir_to_zip_path(dir_path: Path) -> Path:
     """Convert directory path to ZIP path.
 
-    Example: Figure1.figz.d/ -> Figure1.figz
+    Example:
+        >>> dir_to_zip_path(Path("Figure1.figz.d"))
+        Path('Figure1.figz')
     """
     if dir_path.suffix == ".d":
         return dir_path.with_suffix("")
@@ -110,12 +107,14 @@ def dir_to_zip_path(dir_path: Path) -> Path:
 def zip_to_dir_path(zip_path: Path) -> Path:
     """Convert ZIP path to directory path.
 
-    Example: Figure1.figz -> Figure1.figz.d/
+    Example:
+        >>> zip_to_dir_path(Path("Figure1.figz"))
+        Path('Figure1.figz.d')
     """
     return Path(str(zip_path) + ".d")
 
 
-def pack_bundle(
+def pack(
     dir_path: Union[str, Path], output_path: Optional[Union[str, Path]] = None
 ) -> Path:
     """Pack a bundle directory into a ZIP archive.
@@ -129,6 +128,10 @@ def pack_bundle(
 
     Returns:
         Path to created ZIP archive.
+
+    Example:
+        >>> pack("plot.pltz.d")
+        Path('plot.pltz')
     """
     dir_path = Path(dir_path)
 
@@ -141,15 +144,12 @@ def pack_bundle(
         output_path = Path(output_path)
 
     # Get the directory name to use as top-level folder in ZIP
-    # e.g., "stx_line.pltz.d" for path "/path/to/stx_line.pltz.d"
     dir_name = dir_path.name
 
     # Create ZIP archive with directory structure preserved
     with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for file_path in dir_path.rglob("*"):
             if file_path.is_file():
-                # Include directory name in archive path
-                # e.g., "stx_line.pltz.d/stx_line.csv"
                 rel_path = file_path.relative_to(dir_path)
                 arcname = Path(dir_name) / rel_path
                 zf.write(file_path, arcname)
@@ -157,13 +157,10 @@ def pack_bundle(
     return output_path
 
 
-def unpack_bundle(
+def unpack(
     zip_path: Union[str, Path], output_path: Optional[Union[str, Path]] = None
 ) -> Path:
     """Unpack a bundle ZIP archive into a directory.
-
-    The ZIP archive contains a top-level .d directory, so extraction goes to
-    the parent directory. E.g., stx_line.pltz extracts to create stx_line.pltz.d/
 
     Args:
         zip_path: Path to bundle ZIP (e.g., Figure1.figz).
@@ -171,15 +168,17 @@ def unpack_bundle(
 
     Returns:
         Path to created directory.
+
+    Example:
+        >>> unpack("plot.pltz")
+        Path('plot.pltz.d')
     """
     zip_path = Path(zip_path)
 
     if not zip_path.is_file():
         raise ValueError(f"Not a file: {zip_path}")
 
-    # Determine extraction target
     if output_path is None:
-        # Extract to same directory as ZIP file (ZIP contains .d folder structure)
         extract_to = zip_path.parent
         expected_dir = zip_to_dir_path(zip_path)
     else:
@@ -187,7 +186,6 @@ def unpack_bundle(
         extract_to = output_path.parent
         expected_dir = output_path
 
-    # Extract ZIP archive (contains .d directory structure)
     with zipfile.ZipFile(zip_path, "r") as zf:
         zf.extractall(extract_to)
 
@@ -227,12 +225,15 @@ def validate_spec(
     # Delegate to domain-specific validators
     if bundle_type == BundleType.FIGZ:
         from scitex.fig.io._bundle import validate_figz_spec
+
         errors.extend(validate_figz_spec(spec))
     elif bundle_type == BundleType.PLTZ:
         from scitex.plt.io._bundle import validate_pltz_spec
+
         errors.extend(validate_pltz_spec(spec))
     elif bundle_type == BundleType.STATSZ:
         from scitex.stats.io._bundle import validate_statsz_spec
+
         errors.extend(validate_statsz_spec(spec))
     else:
         errors.append(f"Unknown bundle type: {bundle_type}")
@@ -243,9 +244,7 @@ def validate_spec(
     return errors
 
 
-def validate_bundle(
-    path: Union[str, Path], strict: bool = False
-) -> Dict[str, Any]:
+def validate(path: Union[str, Path], strict: bool = False) -> Dict[str, Any]:
     """Validate a bundle and return validation results.
 
     Args:
@@ -271,8 +270,7 @@ def validate_bundle(
 
     p = Path(path)
 
-    # Check bundle type
-    bundle_type = get_bundle_type(p)
+    bundle_type = get_type(p)
     if bundle_type is None:
         result["valid"] = False
         result["errors"].append(f"Not a valid bundle path: {path}")
@@ -282,9 +280,8 @@ def validate_bundle(
 
     result["bundle_type"] = bundle_type
 
-    # Try to load and validate
     try:
-        bundle = load_bundle(path)
+        bundle = load(path)
         spec = bundle.get("spec")
         result["spec"] = spec
 
@@ -307,7 +304,7 @@ def validate_bundle(
     return result
 
 
-def load_bundle(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any]:
+def load(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any]:
     """Load bundle from directory or ZIP transparently.
 
     Args:
@@ -322,12 +319,19 @@ def load_bundle(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any
         - 'path': Original path
         - 'is_zip': Whether loaded from ZIP
         - Additional fields based on bundle type
+
+    Example:
+        >>> bundle = load("Figure1.figz")
+        >>> bundle['type']
+        'figz'
+        >>> bundle['spec']['schema']['name']
+        'scitex.fig'
     """
     p = Path(path)
-    bundle_type = get_bundle_type(p)
+    bundle_type = get_type(p)
 
     if bundle_type is None:
-        raise ValueError(f"Not a valid bundle: {path}")
+        raise BundleNotFoundError(f"Not a valid bundle: {path}")
 
     result = {
         "type": bundle_type,
@@ -336,15 +340,14 @@ def load_bundle(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any
     }
 
     # Handle ZIP vs directory
-    if p.is_file() and p.suffix in BUNDLE_EXTENSIONS:
+    if p.is_file() and p.suffix in EXTENSIONS:
         result["is_zip"] = True
 
         if in_memory:
-            # In-memory loading using ZipBundle
-            from ._zip_bundle import ZipBundle
+            from ._zip import ZipBundle
+
             with ZipBundle(p, mode="r") as zb:
                 result["_zip_bundle"] = zb
-                # Load common files in-memory
                 try:
                     result["spec"] = zb.read_json("spec.json")
                 except FileNotFoundError:
@@ -358,13 +361,12 @@ def load_bundle(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any
                 except FileNotFoundError:
                     result["data"] = None
 
-                # Get file list
                 result["files"] = zb.namelist()
 
             return result
         else:
-            # Legacy: extract to temp and load
             import tempfile
+
             temp_dir = Path(tempfile.mkdtemp())
             with zipfile.ZipFile(p, "r") as zf:
                 zf.extractall(temp_dir)
@@ -372,21 +374,24 @@ def load_bundle(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any
     else:
         bundle_dir = p
 
-    # Delegate to domain-specific loaders (for directory bundles or legacy mode)
+    # Delegate to domain-specific loaders
     if bundle_type == BundleType.FIGZ:
         from scitex.fig.io._bundle import load_figz_bundle
+
         result.update(load_figz_bundle(bundle_dir))
     elif bundle_type == BundleType.PLTZ:
         from scitex.plt.io import load_layered_pltz_bundle
+
         result.update(load_layered_pltz_bundle(bundle_dir))
     elif bundle_type == BundleType.STATSZ:
         from scitex.stats.io._bundle import load_statsz_bundle
+
         result.update(load_statsz_bundle(bundle_dir))
 
     return result
 
 
-def save_bundle(
+def save(
     data: Dict[str, Any],
     path: Union[str, Path],
     bundle_type: Optional[str] = None,
@@ -404,17 +409,20 @@ def save_bundle(
 
     Returns:
         Path to saved bundle.
+
+    Example:
+        >>> save({"spec": {...}, "data": df}, "plot.pltz", as_zip=True)
+        Path('plot.pltz')
     """
     p = Path(path)
 
-    # Determine bundle type
     if bundle_type is None:
-        bundle_type = get_bundle_type(p)
+        bundle_type = get_type(p)
         if bundle_type is None:
             raise ValueError(f"Cannot determine bundle type from path: {path}")
 
     # Determine if saving as directory or ZIP
-    if as_zip or (p.suffix in BUNDLE_EXTENSIONS and not str(p).endswith(".d")):
+    if as_zip or (p.suffix in EXTENSIONS and not str(p).endswith(".d")):
         save_as_zip = True
         if p.suffix == ".d":
             zip_path = dir_to_zip_path(p)
@@ -428,28 +436,23 @@ def save_bundle(
         else:
             dir_path = p
 
-    # For direct ZIP saving with atomic writes, use ZipBundle
-    # Note: figz bundles need special handling for nested pltz panels,
-    # so they go through the directory-based save_figz_bundle path
+    # For direct ZIP saving with atomic writes
     if save_as_zip and atomic and bundle_type != BundleType.FIGZ:
-        from ._zip_bundle import ZipBundle
+        from ._zip import ZipBundle
 
         with ZipBundle(zip_path, mode="w") as zb:
-            # Write spec
             if "spec" in data:
                 zb.write_json("spec.json", data["spec"])
 
-            # Write style
             if "style" in data:
                 zb.write_json("style.json", data["style"])
 
-            # Write CSV data
             if "data" in data and data["data"] is not None:
                 import pandas as pd
+
                 if isinstance(data["data"], pd.DataFrame):
                     zb.write_csv("data.csv", data["data"])
 
-            # Write exports (PNG, SVG, etc.)
             for key in ["png", "svg", "pdf"]:
                 if key in data and data[key] is not None:
                     export_data = data[key]
@@ -458,36 +461,104 @@ def save_bundle(
 
         return zip_path
 
-    # Create directory for non-ZIP or non-atomic saves
     dir_path.mkdir(parents=True, exist_ok=True)
 
     # Delegate to domain-specific savers
     if bundle_type == BundleType.FIGZ:
         from scitex.fig.io._bundle import save_figz_bundle
+
         save_figz_bundle(data, dir_path)
     elif bundle_type == BundleType.PLTZ:
-        # Note: This path is only reached when calling save_bundle() directly
-        # The main stx.io.save() flow uses _save_pltz_bundle() which handles layered format
         from scitex.plt.io._bundle import save_pltz_bundle
+
         save_pltz_bundle(data, dir_path)
     elif bundle_type == BundleType.STATSZ:
         from scitex.stats.io._bundle import save_statsz_bundle
+
         save_statsz_bundle(data, dir_path)
     else:
         raise ValueError(f"Unknown bundle type: {bundle_type}")
 
-    # Pack to ZIP if requested (non-atomic path)
     if save_as_zip:
-        pack_bundle(dir_path, zip_path)
-        shutil.rmtree(dir_path)  # Remove temp directory
+        pack(dir_path, zip_path)
+        shutil.rmtree(dir_path)
         return zip_path
 
     return dir_path
 
 
-# Backward compatibility aliases
-_get_bundle_type = get_bundle_type
-_dir_to_zip_path = dir_to_zip_path
-_zip_to_dir_path = zip_to_dir_path
+def copy(
+    src: Union[str, Path],
+    dst: Union[str, Path],
+    overwrite: bool = False,
+) -> Path:
+    """Copy a bundle from source to destination.
+
+    Handles both directory (.d) and ZIP formats transparently.
+    If source is ZIP, extracts to destination directory.
+    If source is directory, copies to destination directory.
+
+    Args:
+        src: Source bundle path (directory or ZIP).
+        dst: Destination path (will be created as directory).
+        overwrite: If True, overwrite existing destination.
+
+    Returns:
+        Path to copied bundle (directory form).
+
+    Raises:
+        BundleNotFoundError: If source bundle doesn't exist.
+        FileExistsError: If destination exists and overwrite=False.
+
+    Example:
+        >>> copy("gallery/line/plot.pltz.d", "my_project/A.pltz.d")
+        >>> copy("template.pltz", "output/panel.pltz.d")
+    """
+    src_path = Path(src)
+    dst_path = Path(dst)
+
+    # Validate source exists
+    if not src_path.exists():
+        if src_path.suffix in EXTENSIONS:
+            alt_path = Path(str(src_path) + ".d")
+            if alt_path.exists():
+                src_path = alt_path
+            else:
+                raise BundleNotFoundError(
+                    f"Bundle not found: {src} (also tried {alt_path})"
+                )
+        elif str(src_path).endswith(".d"):
+            alt_path = Path(str(src_path)[:-2])
+            if alt_path.exists():
+                src_path = alt_path
+            else:
+                raise BundleNotFoundError(
+                    f"Bundle not found: {src} (also tried {alt_path})"
+                )
+        else:
+            raise BundleNotFoundError(f"Bundle not found: {src}")
+
+    # Handle destination
+    if dst_path.exists():
+        if overwrite:
+            if dst_path.is_dir():
+                shutil.rmtree(dst_path)
+            else:
+                dst_path.unlink()
+        else:
+            raise FileExistsError(f"Destination exists: {dst}")
+
+    dst_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Copy based on source type
+    if src_path.is_dir():
+        shutil.copytree(src_path, dst_path)
+    elif src_path.suffix in EXTENSIONS or zipfile.is_zipfile(src_path):
+        unpack(src_path, dst_path)
+    else:
+        raise ValueError(f"Unknown bundle format: {src_path}")
+
+    return dst_path
+
 
 # EOF

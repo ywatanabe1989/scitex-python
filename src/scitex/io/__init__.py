@@ -1,25 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-07-12 04:23:59 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/__init__.py
+# Timestamp: "2025-12-16 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/__init__.py
 # ----------------------------------------
 import os
 
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
-"""Scitex IO module with lazy imports to avoid circular dependencies."""
+"""Scitex IO module with lazy imports to avoid circular dependencies.
+
+Bundle I/O is now in scitex.io.bundle submodule:
+    import scitex.io.bundle as bundle
+    bundle.load("Figure1.figz")
+    bundle.save(data, "output.pltz")
+"""
 
 # Import commonly used functions directly
 from ._save import save
 from ._load import load
 
-# Bundle I/O for .figz, .pltz, .statsz
-# Users should use module-specific save/load functions:
-#   - scitex.plt.save_pltz() / load_pltz()
-#   - scitex.fig.save_figz() / load_figz()
-#   - scitex.stats.save_statsz() / load_statsz()
-# Internal bundle functions available via scitex.io._bundle for module implementations
+# Bundle I/O - import the bundle submodule
+from . import bundle
+
 from ._load_configs import load_configs
 from ._glob import glob, parse_glob
 from ._reload import reload
@@ -85,18 +88,12 @@ except ImportError:
     embed_metadata = None
     has_metadata = None
 
-# Import ZipBundle for in-memory zip access
-try:
-    from ._zip_bundle import ZipBundle, open_bundle, create_bundle
-except ImportError:
-    ZipBundle = None
-    open_bundle = None
-    create_bundle = None
-
 __all__ = [
     # Primary I/O
     "save",
     "load",
+    # Bundle submodule
+    "bundle",
     # Config loading
     "load_configs",
     # File utilities
@@ -104,10 +101,6 @@ __all__ = [
     "reload",
     "flush",
     "cache",
-    # Zip bundle access
-    "ZipBundle",
-    "open_bundle",
-    "create_bundle",
 ]
 
 # EOF
