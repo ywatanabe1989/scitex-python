@@ -55,7 +55,7 @@ def load_panel_data(panel_path: Union[Path, str], is_zip: bool = None) -> Option
 def _load_from_zip(panel_path: Path) -> Optional[Dict[str, Any]]:
     """Load panel data from a .pltz zip file."""
     from PIL import Image
-    from scitex.io._zip_bundle import ZipBundle
+    from scitex.io.bundle import ZipBundle
 
     if not panel_path.exists():
         return None

@@ -117,7 +117,7 @@ def save_statsz(
     >>> sstats.save_statsz(comparisons, "results.statsz.d")
     """
     from pathlib import Path
-    from scitex.io._bundle import save_bundle, BundleType
+    from scitex.io.bundle import save, BundleType
 
     p = Path(path)
 
@@ -140,7 +140,7 @@ def save_statsz(
 
     bundle_data = {'spec': spec}
 
-    return save_bundle(bundle_data, p, bundle_type=BundleType.STATSZ, as_zip=as_zip)
+    return save(bundle_data, p, bundle_type=BundleType.STATSZ, as_zip=as_zip)
 
 
 def load_statsz(path):
@@ -165,9 +165,9 @@ def load_statsz(path):
     >>> for comp in stats['comparisons']:
     ...     print(f"{comp['name']}: p={comp['p_value']}")
     """
-    from scitex.io._bundle import load_bundle
+    from scitex.io.bundle import load
 
-    bundle = load_bundle(path)
+    bundle = load(path)
 
     if bundle['type'] != 'statsz':
         raise ValueError(f"Not a .statsz bundle: {path}")
