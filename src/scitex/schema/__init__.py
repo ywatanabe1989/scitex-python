@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # File: ./src/scitex/schema/__init__.py
-# Timestamp: "2025-12-13 (ywatanabe)"
+# Timestamp: "2025-12-17 (ywatanabe)"
 """
 SciTeX Schema Module - Central source of truth for cross-module data structures.
 
 This module provides standardized schemas for data that crosses module boundaries:
-- Plot specifications (plt ↔ fig ↔ cloud) - NEW layered architecture
-- Figure specifications (fig ↔ writer ↔ cloud)
+- Plot specifications (plt ↔ fig ↔ cloud) - Layered architecture for .pltz bundles
+- Figure specifications (fig ↔ writer ↔ cloud) - For .figz bundles
 - Statistical results (stats ↔ plt ↔ fig)
-- Canvas metadata (fig ↔ io ↔ cloud)
 
 Design Principles:
 - Anything serialized to JSON/disk → defined here
@@ -19,11 +18,11 @@ Design Principles:
 - px data is ALWAYS derived/cached, never source of truth
 
 Usage:
-    # New layered plot schema (recommended)
+    # Layered plot schema for .pltz bundles
     from scitex.schema import PltzSpec, PltzStyle, PltzGeometry
 
-    # Legacy figure model
-    from scitex.schema import FigureSpec, StatResult, CanvasSpec
+    # Figure model for .figz bundles
+    from scitex.schema import FigureSpec, StatResult
     from scitex.schema import validate_figure, validate_stat_result
 """
 
@@ -113,19 +112,6 @@ from scitex.schema._stats import (
 )
 
 # =============================================================================
-# Canvas Schemas
-# =============================================================================
-from scitex.schema._canvas import (
-    CanvasSpec,
-    PanelSpec,
-    CanvasAnnotationSpec,
-    CanvasTitleSpec,
-    CanvasCaptionSpec,
-    CanvasMetadataSpec,
-    DataFileSpec,
-)
-
-# =============================================================================
 # Validation Functions
 # =============================================================================
 from scitex.schema._validation import (
@@ -133,7 +119,6 @@ from scitex.schema._validation import (
     validate_axes,
     validate_plot,
     validate_stat_result,
-    validate_canvas,
     validate_color,
     ValidationError,
 )
@@ -212,23 +197,12 @@ __all__ = [
     "Position",
     "create_stat_result",
     # ==========================================================================
-    # Canvas specs
-    # ==========================================================================
-    "CanvasSpec",
-    "PanelSpec",
-    "CanvasAnnotationSpec",
-    "CanvasTitleSpec",
-    "CanvasCaptionSpec",
-    "CanvasMetadataSpec",
-    "DataFileSpec",
-    # ==========================================================================
     # Validation
     # ==========================================================================
     "validate_figure",
     "validate_axes",
     "validate_plot",
     "validate_stat_result",
-    "validate_canvas",
     "validate_color",
     "ValidationError",
 ]

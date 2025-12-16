@@ -45,7 +45,6 @@ from ._load_modules._txt import _load_txt
 from ._load_modules._xml import _load_xml
 from ._load_modules._yaml import _load_yaml
 from ._load_modules._zarr import _load_zarr
-from ._load_modules._canvas import _load_canvas
 
 
 def _load_bundle(lpath, verbose=False, **kwargs):
@@ -244,10 +243,6 @@ def load(
         lpath = str(lpath)
         if verbose:
             print(f"[DEBUG] After Path conversion: {lpath}")
-
-    # Handle .canvas directories (special case - directory not file)
-    if lpath.endswith(".canvas"):
-        return _load_canvas(lpath, verbose=verbose, **kwargs)
 
     # Handle bundle formats (.pltz, .figz, .statsz and their .d variants)
     bundle_extensions = (".figz", ".pltz", ".statsz")
