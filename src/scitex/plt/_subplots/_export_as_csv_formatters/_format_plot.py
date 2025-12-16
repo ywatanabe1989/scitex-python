@@ -21,7 +21,8 @@ def _parse_tracking_id(id: str, record_index: int = 0) -> tuple:
     Parameters
     ----------
     id : str
-        Tracking ID like "ax_00_plot_0", "plot_0", or user-provided like "sine"
+        Tracking ID like "ax_00_plot_0", "ax_00_stim-box", "plot_0",
+        or user-provided like "sine"
     record_index : int
         Index of this record in the history (fallback for trace_id)
 
@@ -36,6 +37,17 @@ def _parse_tracking_id(id: str, record_index: int = 0) -> tuple:
     ----
     When user provides a custom ID like "sine", that ID is preserved in the
     column names for clarity and traceability.
+
+    Examples
+    --------
+    >>> _parse_tracking_id("ax_00_plot_0")
+    (0, 0, 'plot_0')
+    >>> _parse_tracking_id("ax_00_stim-box")
+    (0, 0, 'stim-box')
+    >>> _parse_tracking_id("ax_12_text_0")
+    (1, 2, 'text_0')
+    >>> _parse_tracking_id("ax_10_violin")
+    (1, 0, 'violin')
     """
     ax_row, ax_col = 0, 0
     trace_id = str(record_index)  # Default to record_index as string
@@ -50,10 +62,12 @@ def _parse_tracking_id(id: str, record_index: int = 0) -> tuple:
                     ax_col = int(ax_pos[1])
                 except ValueError:
                     pass
-        # Extract trace ID from the rest (e.g., "plot_0" -> "0", "plot_sine" -> "sine")
-        if len(parts) >= 4:
-            # Join remaining parts as trace_id (handles both "plot_0" and "plot_sine")
-            trace_id = "_".join(parts[3:]) if len(parts) > 3 else parts[3] if len(parts) == 4 else str(record_index)
+        # Extract trace ID from parts[2:] (everything after "ax_XX_")
+        # e.g., "ax_00_stim-box" -> parts = ["ax", "00", "stim-box"] -> trace_id = "stim-box"
+        # e.g., "ax_00_plot_0" -> parts = ["ax", "00", "plot", "0"] -> trace_id = "plot_0"
+        # e.g., "ax_12_text_0" -> parts = ["ax", "12", "text", "0"] -> trace_id = "text_0"
+        if len(parts) >= 3:
+            trace_id = "_".join(parts[2:])
     elif id.startswith("plot_"):
         # Extract everything after "plot_" as the trace_id
         trace_id = id[5:] if len(id) > 5 else str(record_index)

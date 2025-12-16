@@ -11,6 +11,8 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import pandas as pd
 from scitex.pd import force_df
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_plot_kde(id, tracked_dict, kwargs):
@@ -37,13 +39,21 @@ def _format_plot_kde(id, tracked_dict, kwargs):
     if x is None or kde is None:
         return pd.DataFrame()
 
-    df = pd.DataFrame({f"{id}_kde_x": x, f"{id}_kde_density": kde})
+    # Parse tracking ID to extract axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
+    # Use standardized column naming
+    x_col = get_csv_column_name("kde_x", ax_row, ax_col, trace_id=trace_id)
+    density_col = get_csv_column_name("kde_density", ax_row, ax_col, trace_id=trace_id)
+
+    df = pd.DataFrame({x_col: x, density_col: kde})
 
     # Add sample count if available
     if n is not None:
         # If n is a scalar, create a list with the same length as x
         if not hasattr(n, "__len__"):
             n = [n] * len(x)
-        df[f"{id}_kde_n"] = n
+        n_col = get_csv_column_name("kde_n", ax_row, ax_col, trace_id=trace_id)
+        df[n_col] = n
 
     return df

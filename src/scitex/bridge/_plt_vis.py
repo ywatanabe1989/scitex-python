@@ -14,7 +14,7 @@ Provides adapters to:
 from typing import Optional, Dict, Any, List, Tuple, Union
 import warnings
 
-from scitex.vis.model import (
+from scitex.fig.model import (
     FigureModel,
     AxesModel,
     PlotModel,

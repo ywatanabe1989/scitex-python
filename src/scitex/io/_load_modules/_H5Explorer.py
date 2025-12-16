@@ -11,7 +11,6 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import random
 import time
-import warnings
 
 # Time-stamp: "2025-06-13 21:00:00 (ywatanabe)"
 
@@ -21,6 +20,10 @@ from typing import Any, Dict, List, Optional
 
 import h5py
 import numpy as np
+
+from scitex import logging
+
+logger = logging.getLogger(__name__)
 
 
 class H5Explorer:
@@ -262,7 +265,7 @@ def explore_h5(filepath: str) -> None:
         explorer.explore()
         explorer.close()
     else:
-        warnings.warn(f"Warning: File does not exist: {filepath}")
+        logger.warning(f"File does not exist: {filepath}")
 
 
 def has_h5_key(h5_path, key, max_retries=3, action_on_corrupted="delete"):

@@ -12,6 +12,8 @@ __DIR__ = os.path.dirname(__FILE__)
 import numpy as np
 import pandas as pd
 from scitex.pd import force_df
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_plot_joyplot(id, tracked_dict, kwargs):
@@ -29,6 +31,9 @@ def _format_plot_joyplot(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
+    # Parse tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     # Get joyplot_data from tracked_dict
     data = tracked_dict.get("joyplot_data")
 
@@ -39,16 +44,22 @@ def _format_plot_joyplot(id, tracked_dict, kwargs):
     if isinstance(data, pd.DataFrame):
         # Make a copy to avoid modifying original
         result = data.copy()
-        # Add prefix to column names if ID is provided
+        # Add prefix to column names using single source of truth
         if id is not None:
-            result.columns = [f"{id}_joyplot_{col}" for col in result.columns]
+            result.columns = [
+                get_csv_column_name(f"joyplot-{col}", ax_row, ax_col, trace_id=trace_id)
+                for col in result.columns
+            ]
         return result
 
     elif isinstance(data, dict):
         # Convert dictionary to DataFrame
         result = pd.DataFrame()
         for group, values in data.items():
-            result[f"{id}_joyplot_{group}"] = pd.Series(values)
+            col_name = get_csv_column_name(
+                f"joyplot-{group}", ax_row, ax_col, trace_id=trace_id
+            )
+            result[col_name] = pd.Series(values)
         return result
 
     elif isinstance(data, (list, tuple)) and all(
@@ -57,11 +68,17 @@ def _format_plot_joyplot(id, tracked_dict, kwargs):
         # Convert list of arrays to DataFrame
         result = pd.DataFrame()
         for i, values in enumerate(data):
-            result[f"{id}_joyplot_group{i:02d}"] = pd.Series(values)
+            col_name = get_csv_column_name(
+                f"joyplot-group{i:02d}", ax_row, ax_col, trace_id=trace_id
+            )
+            result[col_name] = pd.Series(values)
         return result
 
     # Try to force to DataFrame as a last resort
     try:
-        return force_df({f"{id}_joyplot_data": data})
+        col_name = get_csv_column_name(
+            "joyplot-data", ax_row, ax_col, trace_id=trace_id
+        )
+        return force_df({col_name: data})
     except:
         return pd.DataFrame()

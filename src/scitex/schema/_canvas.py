@@ -327,7 +327,7 @@ class CanvasSpec:
     Complete specification for a SciTeX canvas.
 
     This is the wire format for canvas.json files.
-    The Canvas class in scitex.vis provides the OO interface.
+    The Canvas class in scitex.fig provides the OO interface.
 
     Examples
     --------

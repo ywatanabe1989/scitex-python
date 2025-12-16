@@ -1,3 +1,5 @@
+GITIGNORED
+
 ## Large files
 *.mat
 *.npy

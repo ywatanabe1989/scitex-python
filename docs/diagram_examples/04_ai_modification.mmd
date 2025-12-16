@@ -1,0 +1,32 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#f0f0f0', 'primaryTextColor': '#333', 'primaryBorderColor': '#666', 'lineColor': '#666'}}}%%
+sequenceDiagram
+    participant User as Researcher
+    participant AI as AI Agent
+    participant Spec as spec.json
+    participant Fig as Figure
+
+    User->>AI: "Make this suitable<br/>for presentation"
+
+    AI->>Spec: Parse current state
+    Spec-->>AI: Structure understood
+
+    AI->>AI: Generate modification plan
+
+    Note over AI,Spec: Proposed Changes (Diff)
+
+    rect rgb(230, 243, 255)
+        AI->>User: Present reviewable diff:<br/>title.fontsize: 12→18<br/>xlabel.fontsize: 10→14<br/>legend.fontsize: 9→12
+    end
+
+    alt Accept
+        User->>Spec: Apply changes
+        Spec->>Fig: Re-render
+        Fig-->>User: Updated figure
+    else Reject
+        User->>User: No changes made
+    else Modify
+        User->>Spec: Apply with edits
+        Spec->>Fig: Re-render
+    end
+
+    Note over User,Fig: Human remains in control<br/>All changes auditable<br/>Fully reversible

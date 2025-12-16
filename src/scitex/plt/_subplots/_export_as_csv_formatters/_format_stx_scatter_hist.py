@@ -12,6 +12,9 @@ __DIR__ = os.path.dirname(__FILE__)
 import numpy as np
 import pandas as pd
 
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
+
 
 def _format_plot_scatter_hist(id, tracked_dict, kwargs):
     """Format data from a stx_scatter_hist call.
@@ -28,13 +31,19 @@ def _format_plot_scatter_hist(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
+    # Parse tracking ID to extract axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     # Extract data from tracked_dict
     x = tracked_dict.get("x")
     y = tracked_dict.get("y")
 
     if x is not None and y is not None:
         # Create base DataFrame with x and y values
-        df = pd.DataFrame({f"{id}_scatter_hist_x": x, f"{id}_scatter_hist_y": y})
+        df = pd.DataFrame({
+            get_csv_column_name("scatter_hist_x", ax_row, ax_col, trace_id=trace_id): x,
+            get_csv_column_name("scatter_hist_y", ax_row, ax_col, trace_id=trace_id): y,
+        })
 
         # Add histogram data if available
         hist_x = tracked_dict.get("hist_x")
@@ -50,15 +59,15 @@ def _format_plot_scatter_hist(id, tracked_dict, kwargs):
             # Create a DataFrame for x histogram data
             hist_x_df = pd.DataFrame(
                 {
-                    f"{id}_hist_x_bin_centers": bin_centers_x,
-                    f"{id}_hist_x_counts": hist_x,
+                    get_csv_column_name("hist_x_bin_centers", ax_row, ax_col, trace_id=trace_id): bin_centers_x,
+                    get_csv_column_name("hist_x_counts", ax_row, ax_col, trace_id=trace_id): hist_x,
                 }
             )
 
             # Add it to the main DataFrame using a MultiIndex
             for i, (center, count) in enumerate(zip(bin_centers_x, hist_x)):
-                df.loc[f"hist_x_{i}", f"{id}_hist_x_bin"] = center
-                df.loc[f"hist_x_{i}", f"{id}_hist_x_count"] = count
+                df.loc[f"hist_x_{i}", get_csv_column_name("hist_x_bin", ax_row, ax_col, trace_id=trace_id)] = center
+                df.loc[f"hist_x_{i}", get_csv_column_name("hist_x_count", ax_row, ax_col, trace_id=trace_id)] = count
 
         # If we have y histogram data
         if hist_y is not None and bin_edges_y is not None:
@@ -68,15 +77,15 @@ def _format_plot_scatter_hist(id, tracked_dict, kwargs):
             # Create a DataFrame for y histogram data
             hist_y_df = pd.DataFrame(
                 {
-                    f"{id}_hist_y_bin_centers": bin_centers_y,
-                    f"{id}_hist_y_counts": hist_y,
+                    get_csv_column_name("hist_y_bin_centers", ax_row, ax_col, trace_id=trace_id): bin_centers_y,
+                    get_csv_column_name("hist_y_counts", ax_row, ax_col, trace_id=trace_id): hist_y,
                 }
             )
 
             # Add it to the main DataFrame using a MultiIndex
             for i, (center, count) in enumerate(zip(bin_centers_y, hist_y)):
-                df.loc[f"hist_y_{i}", f"{id}_hist_y_bin"] = center
-                df.loc[f"hist_y_{i}", f"{id}_hist_y_count"] = count
+                df.loc[f"hist_y_{i}", get_csv_column_name("hist_y_bin", ax_row, ax_col, trace_id=trace_id)] = center
+                df.loc[f"hist_y_{i}", get_csv_column_name("hist_y_count", ax_row, ax_col, trace_id=trace_id)] = count
 
         return df
 

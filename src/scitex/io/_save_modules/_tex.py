@@ -20,7 +20,10 @@ Supports multiple input types:
 """
 
 from typing import Union, Optional, Any
-import warnings
+
+from scitex import logging
+
+logger = logging.getLogger(__name__)
 
 
 def save_tex(
@@ -121,21 +124,21 @@ def save_tex(
                 tex_content = _wrap_with_table_env(tex_content, caption, label)
 
         except ImportError:
-            warnings.warn(
+            logger.warning(
                 "Cannot convert dict/list to LaTeX: "
                 "scitex.stats.utils.convert_results not available. "
                 "Converting to string instead."
             )
             tex_content = str(obj)
         except Exception as e:
-            warnings.warn(
+            logger.warning(
                 f"Failed to convert object to LaTeX: {e}. Converting to string instead."
             )
             tex_content = str(obj)
 
     else:
         # Fallback: convert to string
-        warnings.warn(
+        logger.warning(
             f"Unsupported type {type(obj)} for LaTeX export. Converting to string."
         )
         tex_content = str(obj)

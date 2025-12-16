@@ -15,6 +15,10 @@ __FILE__ = __file__
 
 from typing import Dict, Optional, Union, List
 
+from scitex import logging
+
+logger = logging.getLogger(__name__)
+
 # Precision settings for JSON output
 PRECISION = {
     "mm": 2,      # Millimeters: 0.01mm precision (10 microns)
@@ -205,8 +209,7 @@ def _collect_single_axes_metadata(fig, ax, ax_index: int) -> dict:
             }
 
     except Exception as e:
-        import warnings
-        warnings.warn(f"Could not extract dimension info for axes {ax_index}: {e}")
+        logger.warning(f"Could not extract dimension info for axes {ax_index}: {e}")
 
     # Extract axes labels and units
     # X-axis - using matplotlib terminology (xaxis)
@@ -386,20 +389,48 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
     }
 
     # Collect all axes from figure
-    all_axes = []
+    # Keep AxisWrappers for metadata access, but also track grid shape
+    all_axes = []  # List of (ax_wrapper_or_mpl, row, col) tuples
+    grid_shape = (1, 1)  # Default single axes
+
     if ax is not None:
-        # If specific ax provided, use it as the primary
-        all_axes = [ax]
+        # Handle AxesWrapper (multi-axes) - extract individual AxisWrappers with positions
+        if hasattr(ax, "_axes_scitex"):
+            import numpy as np
+            axes_array = ax._axes_scitex
+            if isinstance(axes_array, np.ndarray):
+                grid_shape = axes_array.shape
+                for idx, ax_item in enumerate(axes_array.flat):
+                    row = idx // grid_shape[1]
+                    col = idx % grid_shape[1]
+                    all_axes.append((ax_item, row, col))
+            else:
+                all_axes = [(axes_array, 0, 0)]
+        # Handle AxisWrapper (single axes)
+        elif hasattr(ax, "_axis_mpl"):
+            all_axes = [(ax, 0, 0)]
+        else:
+            # Assume it's a matplotlib axes
+            all_axes = [(ax, 0, 0)]
     elif hasattr(fig, "axes") and len(fig.axes) > 0:
-        all_axes = fig.axes
+        # Fallback to figure axes (linear indexing)
+        for idx, ax_item in enumerate(fig.axes):
+            all_axes.append((ax_item, 0, idx))
+
+    # Helper to unwrap AxisWrapper to matplotlib axes
+    def _unwrap_ax(ax_item):
+        if hasattr(ax_item, "_axis_mpl"):
+            return ax_item._axis_mpl
+        return ax_item
 
     # Add figure-level properties (extracted from first axes for figure dimensions)
     if all_axes:
         try:
             from ._figure_from_axes_mm import get_dimension_info
 
-            first_ax = all_axes[0]
-            dim_info = get_dimension_info(fig, first_ax)
+            first_ax_tuple = all_axes[0]
+            first_ax_mpl = _unwrap_ax(first_ax_tuple[0])
+            dim_info = get_dimension_info(fig, first_ax_mpl)
 
             metadata["figure"] = {
                 "size_mm": dim_info["figure_size_mm"],
@@ -407,22 +438,32 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
                 "size_px": dim_info["figure_size_px"],
                 "dpi": dim_info["dpi"],
             }
+
+            # Add top-level axes_bbox_px for easy access by canvas/web editors
+            # Uses x0/y0/x1/y1 format (origin at top-left for web compatibility)
+            # x0: left edge (Y-axis position), y1: bottom edge (X-axis position)
+            if "axes_bbox_px" in dim_info:
+                metadata["axes_bbox_px"] = dim_info["axes_bbox_px"]
+            if "axes_bbox_mm" in dim_info:
+                metadata["axes_bbox_mm"] = dim_info["axes_bbox_mm"]
         except Exception as e:
-            import warnings
-            warnings.warn(f"Could not extract figure dimension info: {e}")
+            logger.warning(f"Could not extract figure dimension info: {e}")
 
     # Collect per-axes metadata
     if all_axes:
         metadata["axes"] = {}
-        for idx, current_ax in enumerate(all_axes):
-            ax_key = f"ax_{idx:02d}"
+        for ax_item, row, col in all_axes:
+            # Use row-col format: ax_00, ax_01, ax_10, ax_11 for 2x2 grid
+            ax_key = f"ax_{row}{col}"
             try:
-                ax_metadata = _collect_single_axes_metadata(fig, current_ax, idx)
+                ax_mpl = _unwrap_ax(ax_item)
+                ax_metadata = _collect_single_axes_metadata(fig, ax_mpl, row * grid_shape[1] + col)
                 if ax_metadata:
+                    # Add grid position info
+                    ax_metadata["grid_position"] = {"row": row, "col": col}
                     metadata["axes"][ax_key] = ax_metadata
             except Exception as e:
-                import warnings
-                warnings.warn(f"Could not extract metadata for {ax_key}: {e}")
+                logger.warning(f"Could not extract metadata for {ax_key}: {e}")
 
     # Add scitex-specific metadata if axes was tagged
     scitex_meta = None
@@ -502,11 +543,8 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
                         f"For {requested_font}: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
                     )
                 except ImportError:
-                    import warnings
-
-                    warnings.warn(
-                        f"Font mismatch: Requested '{requested_font}' but using '{actual_font}'",
-                        UserWarning,
+                    logger.warning(
+                        f"Font mismatch: Requested '{requested_font}' but using '{actual_font}'"
                     )
         else:
             # If no style section, add font info to runtime section
@@ -516,17 +554,29 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
         pass
 
     # Extract plot content and axes labels
+    # For multi-axes figures, we need to handle AxesWrapper specially
+    primary_ax = ax
     if ax is not None:
+        # Handle AxesWrapper (multi-axes) - use first axis for primary plot info
+        if hasattr(ax, "_axes_scitex"):
+            import numpy as np
+            axes_array = ax._axes_scitex
+            if isinstance(axes_array, np.ndarray) and axes_array.size > 0:
+                primary_ax = axes_array.flat[0]
+            else:
+                primary_ax = axes_array
+
+    if primary_ax is not None:
         try:
             # Try to get scitex AxisWrapper for history access
             # This is needed because matplotlib axes don't have the tracking history
-            ax_for_history = ax
+            ax_for_history = primary_ax
 
             # If ax is a raw matplotlib axes, try to find the scitex wrapper
-            if not hasattr(ax, 'history'):
-                # Check if ax has a scitex wrapper stored on it
-                if hasattr(ax, '_scitex_wrapper'):
-                    ax_for_history = ax._scitex_wrapper
+            if not hasattr(primary_ax, 'history'):
+                # Check if primary_ax has a scitex wrapper stored on it
+                if hasattr(primary_ax, '_scitex_wrapper'):
+                    ax_for_history = primary_ax._scitex_wrapper
                 # Check if figure has scitex axes reference
                 elif hasattr(fig, 'axes') and hasattr(fig.axes, 'history'):
                     ax_for_history = fig.axes
@@ -555,14 +605,15 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
             # Add ax_id to match the axes key in metadata["axes"]
             # This links plot info to the corresponding axes entry
             ax_row, ax_col = 0, 0  # Default for single axes
-            if hasattr(ax, "_scitex_metadata") and "position_in_grid" in ax._scitex_metadata:
-                pos = ax._scitex_metadata["position_in_grid"]
+            if hasattr(primary_ax, "_scitex_metadata") and "position_in_grid" in primary_ax._scitex_metadata:
+                pos = primary_ax._scitex_metadata["position_in_grid"]
                 ax_row, ax_col = pos[0], pos[1]
             # Use same format as axes keys: ax_00, ax_01, etc.
             plot_info["ax_id"] = f"ax_{ax_row:02d}" if ax_row == ax_col == 0 else f"ax_{ax_row * 10 + ax_col:02d}"
 
-            # Extract title
-            title = ax.get_title()
+            # Extract title - use underlying matplotlib axes if needed
+            ax_mpl = primary_ax._axis_mpl if hasattr(primary_ax, '_axis_mpl') else primary_ax
+            title = ax_mpl.get_title()
             if title:
                 plot_info["title"] = title
 
@@ -576,12 +627,12 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
 
             # Extract style preset if available
             if (
-                hasattr(ax, "_scitex_metadata")
-                and "style_preset" in ax._scitex_metadata
+                hasattr(primary_ax, "_scitex_metadata")
+                and "style_preset" in primary_ax._scitex_metadata
             ):
                 if "style" not in metadata:
                     metadata["style"] = {}
-                metadata["style"]["preset"] = ax._scitex_metadata["style_preset"]
+                metadata["style"]["preset"] = primary_ax._scitex_metadata["style_preset"]
             elif (
                 hasattr(fig, "_scitex_metadata")
                 and "style_preset" in fig._scitex_metadata
@@ -593,19 +644,19 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
             # Extract artists and legend - add to axes section (matplotlib terminology)
             # Artists and legend belong to axes, not a separate plot section
             ax_row, ax_col = 0, 0
-            if hasattr(ax, "_scitex_metadata") and "position_in_grid" in ax._scitex_metadata:
-                pos = ax._scitex_metadata["position_in_grid"]
+            if hasattr(primary_ax, "_scitex_metadata") and "position_in_grid" in primary_ax._scitex_metadata:
+                pos = primary_ax._scitex_metadata["position_in_grid"]
                 ax_row, ax_col = pos[0], pos[1]
             ax_key = f"ax_{ax_row:02d}" if ax_row == ax_col == 0 else f"ax_{ax_row * 10 + ax_col:02d}"
 
             if "axes" in metadata and ax_key in metadata["axes"]:
                 # Add artists to axes
-                artists = _extract_artists(ax)
+                artists = _extract_artists(primary_ax)
                 if artists:
                     metadata["axes"][ax_key]["artists"] = artists
 
                 # Add legend to axes
-                legend_info = _extract_legend_info(ax)
+                legend_info = _extract_legend_info(primary_ax)
                 if legend_info:
                     metadata["axes"][ax_key]["legend"] = legend_info
 
@@ -635,9 +686,7 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
 
         except Exception as e:
             # If Phase 1 extraction fails, continue without it
-            import warnings
-
-            warnings.warn(f"Could not extract Phase 1 metadata: {e}")
+            logger.warning(f"Could not extract Phase 1 metadata: {e}")
 
     # Apply precision rounding to all numeric values
     metadata = _round_metadata(metadata)
@@ -1492,10 +1541,18 @@ def _extract_artists(ax) -> list:
 
         # data_ref with row_index for individual bars
         if trace_id_for_bars:
-            artist["data_ref"] = _get_csv_column_names(trace_id_for_bars, ax_row, ax_col)
-            artist["data_ref"]["row_index"] = bar_count
             if is_hist:
-                artist["data_ref"]["bin_index"] = bar_count
+                # Histogram uses specific column names: bin-centers (x), bin-counts (y)
+                prefix = f"ax-row-{ax_row}-col-{ax_col}_trace-id-{trace_id_for_bars}_variable-"
+                artist["data_ref"] = {
+                    "x": f"{prefix}bin-centers",
+                    "y": f"{prefix}bin-counts",
+                    "row_index": bar_count,
+                    "bin_index": bar_count,
+                }
+            else:
+                artist["data_ref"] = _get_csv_column_names(trace_id_for_bars, ax_row, ax_col)
+                artist["data_ref"]["row_index"] = bar_count
 
         bar_count += 1
         artists.append(artist)
@@ -1828,12 +1885,14 @@ def _extract_artists(ax) -> list:
 
         artist["backend"] = backend
 
-        # data_ref for text position (if columns exist in CSV)
-        artist["data_ref"] = {
-            "x": f"text_{text_count}_x",
-            "y": f"text_{text_count}_y",
-            "content": f"text_{text_count}_content"
-        }
+        # data_ref for text position - only if text was explicitly tracked (has _scitex_id)
+        # Auto-generated text (like contour clabels, pie labels) doesn't have CSV data
+        if scitex_id:
+            artist["data_ref"] = {
+                "x": f"text_{text_count}_x",
+                "y": f"text_{text_count}_y",
+                "content": f"text_{text_count}_content"
+            }
 
         text_count += 1
         artists.append(artist)
@@ -2808,13 +2867,18 @@ def verify_csv_json_consistency(csv_path: str, json_path: str = None) -> dict:
         result['json_columns'] = json_columns
 
         # Extract data_ref columns from artists
+        # Skip 'derived_from' key as it contains descriptive text, not CSV column names
+        # Also skip 'row_index' as it's a numeric index, not a column name
         data_ref_columns = []
+        skip_keys = {'derived_from', 'row_index'}
         if 'axes' in metadata:
             for ax_key, ax_data in metadata['axes'].items():
                 if 'artists' in ax_data:
                     for artist in ax_data['artists']:
                         if 'data_ref' in artist:
-                            data_ref_columns.extend(artist['data_ref'].values())
+                            for key, val in artist['data_ref'].items():
+                                if key not in skip_keys and isinstance(val, str):
+                                    data_ref_columns.append(val)
         result['data_ref_columns'] = data_ref_columns
 
     except Exception as e:
@@ -2841,6 +2905,428 @@ def verify_csv_json_consistency(csv_path: str, json_path: str = None) -> dict:
     )
 
     return result
+
+
+def collect_recipe_metadata(
+    fig,
+    ax=None,
+    auto_crop: bool = True,
+    crop_margin_mm: float = 1.0,
+) -> Dict:
+    """
+    Collect minimal "recipe" metadata from figure - method calls + data refs.
+
+    Unlike `collect_figure_metadata()` which captures every rendered artist,
+    this function captures only what's needed to reproduce the figure:
+    - Figure/axes dimensions and limits
+    - Method calls with arguments (from ax.history)
+    - Data column references for CSV linkage
+    - Cropping settings
+
+    This produces much smaller JSON files (e.g., 60 lines vs 1300 for histogram).
+
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        Figure to collect metadata from
+    ax : matplotlib.axes.Axes or AxisWrapper, optional
+        Primary axes to collect from. If not provided, uses first axes.
+    auto_crop : bool, optional
+        Whether auto-cropping is enabled. Default is True.
+    crop_margin_mm : float, optional
+        Margin in mm for auto-cropping. Default is 1.0.
+
+    Returns
+    -------
+    dict
+        Minimal metadata dictionary with structure:
+        - scitex_schema: "scitex.plt.figure.recipe"
+        - scitex_schema_version: "0.2.0"
+        - figure: {size_mm, dpi, mode, auto_crop, crop_margin_mm}
+        - axes: {ax_00: {xaxis, yaxis, calls: [...]}}
+        - data: {csv_path, columns}
+
+    Examples
+    --------
+    >>> fig, ax = scitex.plt.subplots()
+    >>> ax.hist(data, bins=40, id="histogram")
+    >>> metadata = collect_recipe_metadata(fig, ax)
+    >>> # Result has ~60 lines instead of ~1300
+    """
+    import datetime
+    import uuid
+
+    import matplotlib
+    import scitex
+
+    metadata = {
+        "scitex_schema": "scitex.plt.figure.recipe",
+        "scitex_schema_version": "0.2.0",
+        "figure_uuid": str(uuid.uuid4()),
+        "runtime": {
+            "scitex_version": scitex.__version__,
+            "matplotlib_version": matplotlib.__version__,
+            "created_at": datetime.datetime.now().isoformat(),
+        },
+    }
+
+    # Collect axes - handle AxesWrapper (multi-axes) properly
+    all_axes = []  # List of (ax_wrapper, row, col) tuples
+    grid_shape = (1, 1)
+
+    if ax is not None:
+        # Handle AxesWrapper (multi-axes) - extract individual AxisWrappers with positions
+        if hasattr(ax, "_axes_scitex"):
+            import numpy as np
+            axes_array = ax._axes_scitex
+            if isinstance(axes_array, np.ndarray):
+                grid_shape = axes_array.shape
+                for idx, ax_item in enumerate(axes_array.flat):
+                    row = idx // grid_shape[1]
+                    col = idx % grid_shape[1]
+                    all_axes.append((ax_item, row, col))
+            else:
+                all_axes = [(axes_array, 0, 0)]
+        # Handle AxisWrapper (single axes)
+        elif hasattr(ax, "_axis_mpl"):
+            all_axes = [(ax, 0, 0)]
+        else:
+            # Assume it's a matplotlib axes
+            all_axes = [(ax, 0, 0)]
+    elif hasattr(fig, "axes") and len(fig.axes) > 0:
+        # Fallback to figure axes (linear indexing)
+        for idx, ax_item in enumerate(fig.axes):
+            all_axes.append((ax_item, 0, idx))
+
+    # Figure-level properties
+    if all_axes:
+        try:
+            from ._figure_from_axes_mm import get_dimension_info
+            first_ax_tuple = all_axes[0]
+            first_ax = first_ax_tuple[0]
+            # Get underlying matplotlib axis if wrapped
+            mpl_ax = getattr(first_ax, '_axis_mpl', first_ax)
+            dim_info = get_dimension_info(fig, mpl_ax)
+
+            # Convert to plain lists/floats for JSON serialization
+            size_mm = dim_info["figure_size_mm"]
+            if hasattr(size_mm, 'tolist'):
+                size_mm = size_mm.tolist()
+            elif isinstance(size_mm, (list, tuple)):
+                size_mm = [float(v) if hasattr(v, 'value') else v for v in size_mm]
+
+            metadata["figure"] = {
+                "size_mm": size_mm,
+                "dpi": int(dim_info["dpi"]),
+                "auto_crop": auto_crop,
+                "crop_margin_mm": crop_margin_mm,
+            }
+
+            # Add top-level axes_bbox_px for canvas/web alignment (x0/y0/x1/y1 format)
+            # x0: left edge (Y-axis position), y1: bottom edge (X-axis position)
+            if "axes_bbox_px" in dim_info:
+                bbox = dim_info["axes_bbox_px"]
+                metadata["axes_bbox_px"] = {
+                    "x0": int(bbox["x0"]),
+                    "y0": int(bbox["y0"]),
+                    "x1": int(bbox["x1"]),
+                    "y1": int(bbox["y1"]),
+                    "width": int(bbox["width"]),
+                    "height": int(bbox["height"]),
+                }
+            if "axes_bbox_mm" in dim_info:
+                bbox = dim_info["axes_bbox_mm"]
+                metadata["axes_bbox_mm"] = {
+                    "x0": round(float(bbox["x0"]), 2),
+                    "y0": round(float(bbox["y0"]), 2),
+                    "x1": round(float(bbox["x1"]), 2),
+                    "y1": round(float(bbox["y1"]), 2),
+                    "width": round(float(bbox["width"]), 2),
+                    "height": round(float(bbox["height"]), 2),
+                }
+        except Exception:
+            pass
+
+    # Add mode from scitex metadata
+    scitex_meta = None
+    if ax is not None and hasattr(ax, "_scitex_metadata"):
+        scitex_meta = ax._scitex_metadata
+    elif hasattr(fig, "_scitex_metadata"):
+        scitex_meta = fig._scitex_metadata
+
+    if scitex_meta:
+        if "figure" not in metadata:
+            metadata["figure"] = {}
+        if "mode" in scitex_meta:
+            metadata["figure"]["mode"] = scitex_meta["mode"]
+        # Include style_mm for reproducibility (thickness, fonts, etc.)
+        if "style_mm" in scitex_meta:
+            metadata["style"] = scitex_meta["style_mm"]
+
+    # Collect per-axes metadata with calls
+    if all_axes:
+        metadata["axes"] = {}
+        for current_ax, row, col in all_axes:
+            # Use row-col format: ax_00, ax_01, ax_10, ax_11 for 2x2 grid
+            ax_key = f"ax_{row}{col}"
+
+            # Get underlying matplotlib axis if wrapped
+            mpl_ax = getattr(current_ax, '_axis_mpl', current_ax)
+
+            ax_meta = {
+                "grid_position": {"row": row, "col": col}
+            }
+
+            # Additional position info from scitex_metadata if available
+            if hasattr(current_ax, "_scitex_metadata"):
+                pos = current_ax._scitex_metadata.get("position_in_grid")
+                if pos:
+                    ax_meta["grid_position"] = {"row": pos[0], "col": pos[1]}
+
+            # Axis labels and limits (minimal - for axis alignment)
+            try:
+                xlim = mpl_ax.get_xlim()
+                ylim = mpl_ax.get_ylim()
+                ax_meta["xaxis"] = {
+                    "label": mpl_ax.get_xlabel() or "",
+                    "lim": [round(xlim[0], 4), round(xlim[1], 4)],
+                }
+                ax_meta["yaxis"] = {
+                    "label": mpl_ax.get_ylabel() or "",
+                    "lim": [round(ylim[0], 4), round(ylim[1], 4)],
+                }
+            except Exception:
+                pass
+
+            # Method calls from history - the core "recipe"
+            # Pass row and col for proper data_ref column naming
+            ax_index = row * grid_shape[1] + col
+            ax_meta["calls"] = _extract_calls_from_history(current_ax, ax_index)
+
+            metadata["axes"][ax_key] = ax_meta
+
+    return metadata
+
+
+def _extract_calls_from_history(ax, ax_index: int) -> List[dict]:
+    """
+    Extract method call records from axis history.
+
+    Parameters
+    ----------
+    ax : AxisWrapper or matplotlib.axes.Axes
+        Axis to extract history from
+    ax_index : int
+        Index of axis in figure (for CSV column naming)
+
+    Returns
+    -------
+    list
+        List of call records: [{id, method, data_ref, kwargs}, ...]
+    """
+    calls = []
+
+    # Check for scitex wrapper with history
+    if not hasattr(ax, 'history') and not hasattr(ax, '_ax_history'):
+        return calls
+
+    # Get history dict
+    history = getattr(ax, 'history', None)
+    if history is None:
+        history = getattr(ax, '_ax_history', {})
+
+    # Get grid position
+    ax_row = 0
+    ax_col = 0
+    if hasattr(ax, "_scitex_metadata"):
+        pos = ax._scitex_metadata.get("position_in_grid", [0, 0])
+        ax_row, ax_col = pos[0], pos[1]
+
+    for trace_id, record in history.items():
+        # record format: (id, method_name, tracked_dict, kwargs)
+        if not isinstance(record, (list, tuple)) or len(record) < 3:
+            continue
+
+        call_id, method_name, tracked_dict = record[0], record[1], record[2]
+        kwargs = record[3] if len(record) > 3 else {}
+
+        call = {
+            "id": str(call_id),
+            "method": method_name,
+        }
+
+        # Build data_ref from tracked_dict to CSV column names
+        data_ref = _build_data_ref(call_id, method_name, tracked_dict, ax_row, ax_col)
+        if data_ref:
+            call["data_ref"] = data_ref
+
+        # Filter kwargs to only style-relevant ones (not data)
+        style_kwargs = _filter_style_kwargs(kwargs, method_name)
+        if style_kwargs:
+            call["kwargs"] = style_kwargs
+
+        calls.append(call)
+
+    return calls
+
+
+def _build_data_ref(trace_id, method_name: str, tracked_dict: dict,
+                    ax_row: int, ax_col: int) -> dict:
+    """
+    Build data_ref mapping from tracked_dict to CSV column names.
+
+    Parameters
+    ----------
+    trace_id : str
+        Trace identifier
+    method_name : str
+        Name of the method called
+    tracked_dict : dict
+        Data tracked by the method (contains arrays, dataframes)
+    ax_row, ax_col : int
+        Axis position in grid
+
+    Returns
+    -------
+    dict
+        Mapping of variable names to CSV column names
+    """
+    prefix = f"ax-row-{ax_row}-col-{ax_col}_trace-id-{trace_id}_variable-"
+
+    data_ref = {}
+
+    # Method-specific column naming
+    if method_name == 'hist':
+        # Histogram: raw data + computed bins
+        data_ref["raw_data"] = f"{prefix}raw-data"
+        data_ref["bin_centers"] = f"{prefix}bin-centers"
+        data_ref["bin_counts"] = f"{prefix}bin-counts"
+    elif method_name in ('plot', 'scatter', 'step', 'errorbar'):
+        # Standard x, y plots
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+        # Check for error bars in tracked_dict
+        if tracked_dict and 'yerr' in tracked_dict:
+            data_ref["yerr"] = f"{prefix}yerr"
+        if tracked_dict and 'xerr' in tracked_dict:
+            data_ref["xerr"] = f"{prefix}xerr"
+    elif method_name in ('bar', 'barh'):
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+    elif method_name == 'stem':
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+    elif method_name in ('fill_between', 'fill_betweenx'):
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y1"] = f"{prefix}y1"
+        data_ref["y2"] = f"{prefix}y2"
+    elif method_name in ('imshow', 'matshow', 'pcolormesh'):
+        data_ref["data"] = f"{prefix}data"
+    elif method_name in ('contour', 'contourf'):
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+        data_ref["z"] = f"{prefix}z"
+    elif method_name in ('boxplot', 'violinplot'):
+        data_ref["data"] = f"{prefix}data"
+    elif method_name == 'pie':
+        data_ref["x"] = f"{prefix}x"
+    elif method_name in ('quiver', 'streamplot'):
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+        data_ref["u"] = f"{prefix}u"
+        data_ref["v"] = f"{prefix}v"
+    elif method_name == 'hexbin':
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+    elif method_name == 'hist2d':
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+    elif method_name == 'kde':
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+    # SciTeX custom methods (stx_*) - use same naming as matplotlib wrappers
+    elif method_name == 'stx_line':
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+    elif method_name in ('stx_mean_std', 'stx_mean_ci', 'stx_median_iqr', 'stx_shaded_line'):
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y_lower"] = f"{prefix}y-lower"
+        data_ref["y_middle"] = f"{prefix}y-middle"
+        data_ref["y_upper"] = f"{prefix}y-upper"
+    elif method_name in ('stx_box', 'stx_violin'):
+        data_ref["data"] = f"{prefix}data"
+    elif method_name == 'stx_scatter_hist':
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+    elif method_name in ('stx_heatmap', 'stx_conf_mat', 'stx_image', 'stx_raster'):
+        data_ref["data"] = f"{prefix}data"
+    elif method_name in ('stx_kde', 'stx_ecdf'):
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+    elif method_name.startswith('stx_'):
+        # Generic fallback for other stx_ methods
+        data_ref["x"] = f"{prefix}x"
+        data_ref["y"] = f"{prefix}y"
+    else:
+        # Generic fallback for tracked data
+        if tracked_dict:
+            if 'x' in tracked_dict or 'args' in tracked_dict:
+                data_ref["x"] = f"{prefix}x"
+                data_ref["y"] = f"{prefix}y"
+
+    return data_ref
+
+
+def _filter_style_kwargs(kwargs: dict, method_name: str) -> dict:
+    """
+    Filter kwargs to only include style-relevant parameters.
+
+    Removes data arrays and internal parameters, keeps style settings
+    that affect appearance (color, linewidth, etc.).
+
+    Parameters
+    ----------
+    kwargs : dict
+        Original keyword arguments
+    method_name : str
+        Name of the method
+
+    Returns
+    -------
+    dict
+        Filtered kwargs with only style parameters
+    """
+    if not kwargs:
+        return {}
+
+    # Style-relevant kwargs to keep
+    style_keys = {
+        'color', 'c', 'facecolor', 'edgecolor', 'linecolor',
+        'linewidth', 'lw', 'linestyle', 'ls',
+        'marker', 'markersize', 'ms', 'markerfacecolor', 'markeredgecolor',
+        'alpha', 'zorder',
+        'label',
+        'bins', 'density', 'histtype', 'orientation',
+        'width', 'height', 'align',
+        'cmap', 'vmin', 'vmax', 'norm',
+        'levels', 'extend',
+        'scale', 'units',
+        'autopct', 'explode', 'shadow', 'startangle',
+    }
+
+    filtered = {}
+    for key, value in kwargs.items():
+        if key in style_keys:
+            # Skip if value is a large array (data, not style)
+            if hasattr(value, '__len__') and not isinstance(value, str):
+                if len(value) > 10:
+                    continue
+            # Round float values to 4 decimal places for cleaner JSON
+            if isinstance(value, float):
+                value = round(value, 4)
+            filtered[key] = value
+
+    return filtered
 
 
 if __name__ == "__main__":

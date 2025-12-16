@@ -213,24 +213,13 @@ if __name__ == "__main__":
 #     ]
 # else:
 #     # Warn about missing Arial
-#     try:
-#         from scitex.logging import getLogger
+#     from scitex import logging as _logging
 # 
-#         _logger = getLogger(__name__)
-#         _logger.warning(
-#             "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
-#             "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
-#         )
-#     except:
-#         # If scitex.logging not available, use standard warnings
-#         import warnings
-# 
-#         warnings.warn(
-#             "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
-#             "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv",
-#             UserWarning,
-#             stacklevel=2,
-#         )
+#     _logger = _logging.getLogger(__name__)
+#     _logger.warning(
+#         "Arial font not found. Using fallback fonts (Helvetica/DejaVu Sans). "
+#         "For publication figures with Arial: sudo apt-get install ttf-mscorefonts-installer && fc-cache -fv"
+#     )
 # 
 # 
 # class SubplotsWrapper:
@@ -275,6 +264,7 @@ if __name__ == "__main__":
 #         dpi=None,
 #         styles=None,  # List of style dicts for per-axes control
 #         transparent=None,  # Transparent background (default: from SCITEX_STYLE.yaml)
+#         theme=None,  # Color theme: "light" or "dark" (default: "light")
 #         **kwargs,
 #     ):
 #         """
@@ -330,6 +320,9 @@ if __name__ == "__main__":
 #         transparent : bool, optional
 #             Create figure with transparent background (default: False)
 #             Useful for publication-ready figures that will be cropped
+#         theme : str, optional
+#             Color theme: "light" or "dark" (default: "light")
+#             Dark mode uses eye-friendly colors optimized for dark backgrounds
 #         **kwargs
 #             Additional arguments passed to matplotlib.pyplot.subplots
 # 
@@ -438,6 +431,9 @@ if __name__ == "__main__":
 #             transparent = _S.get("transparent", True)
 #         if mode is None:
 #             mode = _S.get("mode", "publication")
+#         # Resolve theme from YAML (default: "light")
+#         if theme is None:
+#             theme = _resolve("theme.mode", None, "light", str)
 # 
 #         # Always use mm-control pathway with SCITEX_STYLE defaults
 #         if True:
@@ -470,6 +466,7 @@ if __name__ == "__main__":
 #                 dpi=dpi,
 #                 styles=styles,
 #                 transparent=transparent,
+#                 theme=theme,
 #                 **kwargs,
 #             )
 # 
@@ -506,17 +503,22 @@ if __name__ == "__main__":
 #         dpi=None,
 #         styles=None,
 #         transparent=None,  # Resolved from caller
+#         theme=None,  # Color theme: "light" or "dark"
 #         **kwargs,
 #     ):
 #         """Create figure with mm-based control over axes dimensions."""
 #         from scitex.plt.utils import mm_to_inch, apply_style_mm
 # 
-#         # Parse nrows, ncols from args (like matplotlib.pyplot.subplots)
+#         # Parse nrows, ncols from args or kwargs (like matplotlib.pyplot.subplots)
 #         nrows, ncols = 1, 1
 #         if len(args) >= 1:
 #             nrows = args[0]
+#         elif "nrows" in kwargs:
+#             nrows = kwargs.pop("nrows")
 #         if len(args) >= 2:
 #             ncols = args[1]
+#         elif "ncols" in kwargs:
+#             ncols = kwargs.pop("ncols")
 # 
 #         n_axes = nrows * ncols
 # 
@@ -602,6 +604,10 @@ if __name__ == "__main__":
 #         else:
 #             self._fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi)
 # 
+#         # Store theme on figure for later retrieval (e.g., when saving plot.json)
+#         if theme is not None:
+#             self._fig_mpl._scitex_theme = theme
+# 
 #         # Create axes array and position each one manually
 #         axes_mpl_list = []
 #         ax_idx = 0
@@ -637,7 +643,7 @@ if __name__ == "__main__":
 # 
 #                 # Tag with metadata
 #                 ax_mpl._scitex_metadata = {
-#                     "created_with": "scitex.plt.subplots (mm-control)",
+#                     "created_with": "scitex.plt.subplots",
 #                     "mode": mode or "publication",
 #                     "axes_size_mm": (ax_widths_mm[ax_idx], ax_heights_mm[ax_idx]),
 #                     "position_in_grid": (row, col),
@@ -691,6 +697,10 @@ if __name__ == "__main__":
 #                     style_dict["font_family"] = font_family
 #                 if n_ticks is not None:
 #                     style_dict["n_ticks"] = n_ticks
+# 
+#             # Always add theme to style_dict (default: "light")
+#             if theme is not None:
+#                 style_dict["theme"] = theme
 # 
 #             # Extract suptitle font size if available
 #             if "suptitle_font_size_pt" in style_dict:

@@ -9,8 +9,12 @@ import json
 import os
 from pathlib import Path
 
+from scitex import logging
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
+
+logger = logging.getLogger(__name__)
 
 
 def add_qr_to_figure(fig, metadata, position="bottom-right", size=0.08):
@@ -30,9 +34,7 @@ def add_qr_to_figure(fig, metadata, position="bottom-right", size=0.08):
         import qrcode
         from PIL import Image as PILImage
     except ImportError:
-        import warnings
-
-        warnings.warn(
+        logger.warning(
             "qrcode library not available. Install with: pip install qrcode[pil]"
         )
         return fig

@@ -1,0 +1,28 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#f0f0f0', 'primaryTextColor': '#333', 'primaryBorderColor': '#666', 'lineColor': '#666', 'secondaryColor': '#e0e0e0', 'tertiaryColor': '#fff'}}}%%
+graph TB
+    subgraph A["(A) Traditional Workflow: Opaque Artifacts"]
+        A1[Python Script] --> A2[matplotlib.savefig]
+        A2 --> A3["PNG/PDF<br/>Terminal Artifact"]
+        A3 --> A4["❌ Data Lost"]
+        A3 --> A5["❌ Stats Lost"]
+        A3 --> A6["❌ Provenance Lost"]
+        A3 --> A7["Pixel Editing<br/>(Illustrator)"]
+        A7 --> A8["❌ Reproducibility<br/>Broken"]
+    end
+
+    subgraph B["(B) Structured Figure: Self-Contained Object"]
+        B1[Python Script] --> B2["scitex.savefig()"]
+        B2 --> B3[".pltz/.figz Bundle"]
+        B3 --> B4["✓ spec.json<br/>(Canonical)"]
+        B3 --> B5["✓ data.csv<br/>(Embedded)"]
+        B3 --> B6["✓ stats.json<br/>(Linked)"]
+        B3 --> B7["preview.png<br/>(Derived)"]
+        B4 --> B8["Spec Editing<br/>(Interactive Editor)"]
+        B8 --> B9["✓ Reproducibility<br/>Preserved"]
+    end
+
+    style A3 fill:#ffcccc,stroke:#cc0000
+    style B3 fill:#ccffcc,stroke:#00cc00
+    style B4 fill:#cceeff,stroke:#0066cc
+    style B5 fill:#cceeff,stroke:#0066cc
+    style B6 fill:#cceeff,stroke:#0066cc

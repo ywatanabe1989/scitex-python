@@ -1,41 +1,90 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # File: ./src/scitex/schema/__init__.py
-# Time-stamp: "2024-12-09 08:15:00 (ywatanabe)"
+# Timestamp: "2025-12-13 (ywatanabe)"
 """
 SciTeX Schema Module - Central source of truth for cross-module data structures.
 
 This module provides standardized schemas for data that crosses module boundaries:
-- Figure specifications (vis ↔ writer ↔ cloud)
-- Statistical results (stats ↔ plt ↔ vis)
-- Canvas metadata (vis ↔ io ↔ cloud)
+- Plot specifications (plt ↔ fig ↔ cloud) - NEW layered architecture
+- Figure specifications (fig ↔ writer ↔ cloud)
+- Statistical results (stats ↔ plt ↔ fig)
+- Canvas metadata (fig ↔ io ↔ cloud)
 
 Design Principles:
 - Anything serialized to JSON/disk → defined here
 - Anything shared across modules → defined here
 - Internal module implementations → stay per-module
+- Canonical units: ratio (0-1) for axes bbox, mm for panel size
+- px data is ALWAYS derived/cached, never source of truth
 
 Usage:
+    # New layered plot schema (recommended)
+    from scitex.schema import PltzSpec, PltzStyle, PltzGeometry
+
+    # Legacy figure model
     from scitex.schema import FigureSpec, StatResult, CanvasSpec
     from scitex.schema import validate_figure, validate_stat_result
 """
 
 # Schema version for all cross-module specs
-SCHEMA_VERSION = "0.1.0"
+SCHEMA_VERSION = "0.2.0"
 
 # =============================================================================
-# Figure Schemas (re-exported from vis.model for central access)
+# Plot Schemas - NEW Layered Architecture (SOURCE OF TRUTH for .pltz files)
 # =============================================================================
-from scitex.vis.model import (
+from scitex.schema._plot import (
+    # Version constants
+    PLOT_SPEC_VERSION,
+    PLOT_STYLE_VERSION,
+    PLOT_GEOMETRY_VERSION,
+    # DPI fallback for legacy data
+    DPI_FALLBACK,
+    # Type aliases
+    TraceType,
+    CoordinateSpace,
+    LegendLocation,
+    # Bbox classes
+    BboxRatio,
+    BboxPx,
+    # Spec classes (canonical) - prefixed with Pltz to avoid collision
+    TraceSpec as PltzTraceSpec,
+    AxesLimits as PltzAxesLimits,
+    AxesLabels as PltzAxesLabels,
+    AxesSpecItem as PltzAxesItem,
+    DataSourceSpec as PltzDataSource,
+    PlotSpec as PltzSpec,
+    # Style classes
+    TraceStyleSpec as PltzTraceStyle,
+    ThemeSpec as PltzTheme,
+    FontSpec as PltzFont,
+    SizeSpec as PltzSize,
+    LegendSpec as PltzLegendSpec,
+    PlotStyle as PltzStyle,
+    # Geometry classes (cache)
+    RenderedArtist as PltzRenderedArtist,
+    RenderedAxes as PltzRenderedAxes,
+    HitRegionEntry as PltzHitRegion,
+    SelectableRegion as PltzSelectableRegion,
+    PlotGeometry as PltzGeometry,
+    # Manifest
+    RenderManifest as PltzRenderManifest,
+)
+
+# =============================================================================
+# Figure Schemas (re-exported from fig.model for central access)
+# These are for figure COMPOSITION (multi-panel), not individual plots
+# =============================================================================
+from scitex.fig.model import (
     # Core models
     FigureModel as FigureSpec,
-    AxesModel as AxesSpec,
-    PlotModel as PlotSpec,
+    AxesModel as FigAxesSpec,
+    PlotModel as FigPlotSpec,
     AnnotationModel as AnnotationSpec,
     GuideModel as GuideSpec,
     # Style models
-    PlotStyle,
-    AxesStyle,
+    PlotStyle as FigPlotStyle,
+    AxesStyle as FigAxesStyle,
     GuideStyle,
     TextStyle,
     # Style utilities
@@ -95,15 +144,53 @@ from scitex.schema._validation import (
 __all__ = [
     # Version
     "SCHEMA_VERSION",
-    # Figure specs
+    # ==========================================================================
+    # NEW: Plot Schemas (layered architecture for .pltz files)
+    # ==========================================================================
+    # Version constants
+    "PLOT_SPEC_VERSION",
+    "PLOT_STYLE_VERSION",
+    "PLOT_GEOMETRY_VERSION",
+    # Type aliases
+    "TraceType",
+    "CoordinateSpace",
+    "LegendLocation",
+    # Bbox classes
+    "BboxRatio",
+    "BboxPx",
+    # Spec classes (canonical)
+    "PltzTraceSpec",
+    "PltzAxesLimits",
+    "PltzAxesLabels",
+    "PltzAxesItem",
+    "PltzDataSource",
+    "PltzSpec",
+    # Style classes
+    "PltzTraceStyle",
+    "PltzTheme",
+    "PltzFont",
+    "PltzSize",
+    "PltzLegendSpec",
+    "PltzStyle",
+    # Geometry classes (cache)
+    "PltzRenderedArtist",
+    "PltzRenderedAxes",
+    "PltzHitRegion",
+    "PltzSelectableRegion",
+    "PltzGeometry",
+    # Manifest
+    "PltzRenderManifest",
+    # ==========================================================================
+    # Figure specs (for multi-panel composition)
+    # ==========================================================================
     "FigureSpec",
-    "AxesSpec",
-    "PlotSpec",
+    "FigAxesSpec",
+    "FigPlotSpec",
     "AnnotationSpec",
     "GuideSpec",
     # Style specs
-    "PlotStyle",
-    "AxesStyle",
+    "FigPlotStyle",
+    "FigAxesStyle",
     "GuideStyle",
     "TextStyle",
     # Style utilities
@@ -112,7 +199,9 @@ __all__ = [
     "copy_guide_style",
     "copy_text_style",
     "apply_style_to_plots",
+    # ==========================================================================
     # Stats type aliases
+    # ==========================================================================
     "PositionMode",
     "UnitType",
     "SymbolStyle",
@@ -122,7 +211,9 @@ __all__ = [
     "StatStyling",
     "Position",
     "create_stat_result",
+    # ==========================================================================
     # Canvas specs
+    # ==========================================================================
     "CanvasSpec",
     "PanelSpec",
     "CanvasAnnotationSpec",
@@ -130,7 +221,9 @@ __all__ = [
     "CanvasCaptionSpec",
     "CanvasMetadataSpec",
     "DataFileSpec",
+    # ==========================================================================
     # Validation
+    # ==========================================================================
     "validate_figure",
     "validate_axes",
     "validate_plot",

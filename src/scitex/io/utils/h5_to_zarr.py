@@ -33,9 +33,9 @@ import numpy as np
 import os
 from pathlib import Path
 from typing import Optional, Union, Dict, Any, List, Tuple
-import warnings
 from tqdm import tqdm
 
+from scitex import logging
 from scitex.errors import (
     IOError as SciTeXIOError,
     FileFormatError,
@@ -45,6 +45,8 @@ from scitex.errors import (
     warn_data_loss,
     warn_performance,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _get_zarr_compressor(
@@ -114,7 +116,7 @@ def _copy_h5_attributes(
 
             zarr_obj.attrs[key] = value
         except Exception as e:
-            warnings.warn(f"Could not copy attribute '{key}': {e}")
+            logger.warning(f"Could not copy attribute '{key}': {e}")
 
 
 def _migrate_dataset(
@@ -132,7 +134,7 @@ def _migrate_dataset(
         if hasattr(h5_dataset, "dtype"):
             test_dtype = h5_dataset.dtype
     except Exception as e:
-        warnings.warn(f"Skipping corrupted dataset '{name}': {e}")
+        logger.warning(f"Skipping corrupted dataset '{name}': {e}")
         return None
 
     # Get dataset info
@@ -241,7 +243,7 @@ def _migrate_dataset(
             else:  # Scalar
                 zarr_array[()] = h5_dataset[()]
         except Exception as e:
-            warnings.warn(
+            logger.warning(
                 f"Error copying data for dataset '{name}': {e}. Leaving empty."
             )
             # The array structure is created but data might be zeros/empty
@@ -268,14 +270,14 @@ def _migrate_group(
     try:
         keys = list(h5_group.keys())
     except Exception as e:
-        warnings.warn(f"Cannot access group keys: {e}")
+        logger.warning(f"Cannot access group keys: {e}")
         return
 
     for key in keys:
         try:
             item = h5_group[key]
         except Exception as e:
-            warnings.warn(f"Cannot access item '{key}': {e}")
+            logger.warning(f"Cannot access item '{key}': {e}")
             continue
 
         if isinstance(item, h5py.Dataset):
@@ -297,7 +299,7 @@ def _migrate_group(
             )
 
         else:
-            warnings.warn(f"Unknown HDF5 object type for '{key}': {type(item)}")
+            logger.warning(f"Unknown HDF5 object type for '{key}': {type(item)}")
 
 
 def migrate_h5_to_zarr(
@@ -418,7 +420,7 @@ def migrate_h5_to_zarr(
     except OSError as e:
         if "Unable to open file" in str(e) or "bad symbol table" in str(e):
             # File is corrupted
-            warnings.warn(f"HDF5 file appears to be corrupted: {h5_path}")
+            logger.warning(f"HDF5 file appears to be corrupted: {h5_path}")
             raise FileFormatError(
                 str(h5_path), expected_format="HDF5", actual_format="corrupted HDF5"
             )
@@ -452,7 +454,7 @@ def _validate_migration(
             # Compare dtypes (approximately)
             if h5_item.dtype.kind != "O" and zarr_item.dtype.kind != "O":
                 if h5_item.dtype != zarr_item.dtype:
-                    warnings.warn(
+                    logger.warning(
                         f"Dtype mismatch at {path}: "
                         f"HDF5={h5_item.dtype}, Zarr={zarr_item.dtype}"
                     )

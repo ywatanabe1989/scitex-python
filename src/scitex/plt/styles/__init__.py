@@ -37,6 +37,13 @@ from .presets import (
     set_style,
     get_style,
     resolve_style_value,
+    # DPI utilities
+    get_default_dpi,
+    get_display_dpi,
+    get_preview_dpi,
+    DPI_SAVE,
+    DPI_DISPLAY,
+    DPI_PREVIEW,
 )
 
 __all__ = [
@@ -51,6 +58,13 @@ __all__ = [
     "set_style",
     "get_style",
     "resolve_style_value",
+    # DPI utilities
+    "get_default_dpi",
+    "get_display_dpi",
+    "get_preview_dpi",
+    "DPI_SAVE",
+    "DPI_DISPLAY",
+    "DPI_PREVIEW",
 ]
 
 

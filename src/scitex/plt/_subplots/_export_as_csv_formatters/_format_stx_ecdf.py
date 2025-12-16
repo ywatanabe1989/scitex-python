@@ -6,6 +6,9 @@
 import os
 import pandas as pd
 
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -37,7 +40,16 @@ def _format_plot_ecdf(id, tracked_dict, kwargs):
 
     # Add prefix to column names if ID is provided
     if id is not None:
-        # Rename columns with ID prefix
-        result.columns = [f"{id}_ecdf_{col}" for col in result.columns]
+        # Parse the tracking ID to get axes position and trace ID
+        ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
+        # Rename columns using single source of truth
+        renamed = {}
+        for col in result.columns:
+            # Use the original column name as the variable (e.g., "ecdf_value", "ecdf_prob")
+            renamed[col] = get_csv_column_name(
+                f"ecdf_{col}", ax_row, ax_col, trace_id=trace_id
+            )
+        result = result.rename(columns=renamed)
 
     return result

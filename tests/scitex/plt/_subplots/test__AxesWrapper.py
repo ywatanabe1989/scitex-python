@@ -144,6 +144,10 @@ if __name__ == "__main__":
 # import numpy as np
 # import pandas as pd
 # 
+# from scitex import logging
+# 
+# logger = logging.getLogger(__name__)
+# 
 # 
 # class AxesWrapper:
 #     def __init__(self, fig_scitex, axes_scitex):
@@ -254,14 +258,10 @@ if __name__ == "__main__":
 #         Returns:
 #             np.ndarray: Array of wrapped axes with the same shape
 #         """
-#         import warnings
-# 
 #         # Show a warning to help users avoid common mistakes
-#         warnings.warn(
+#         logger.warning(
 #             "Converting AxesWrapper to numpy array. If you're trying to flatten "
-#             "the axes, use 'list(axes.flatten())' instead of 'np.array(axes).flatten()'.",
-#             UserWarning,
-#             stacklevel=2,
+#             "the axes, use 'list(axes.flatten())' instead of 'np.array(axes).flatten()'."
 #         )
 # 
 #         # Convert the underlying axes to a compatible numpy array representation
@@ -318,7 +318,8 @@ if __name__ == "__main__":
 #         dfs = []
 #         for ii, ax in enumerate(self._axes_scitex.flat):
 #             df = ax.export_as_csv()
-#             df.columns = [f"ax_{ii:02d}_{col}" for col in df.columns]
+#             # Column names already include axis position via get_csv_column_name
+#             # No need to add extra prefix
 #             dfs.append(df)
 #         return pd.concat(dfs, axis=1) if dfs else pd.DataFrame()
 # 

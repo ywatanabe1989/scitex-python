@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-07-12 04:23:59 (ywatanabe)"
-# File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/__init__.py
+# Timestamp: "2025-12-16 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/__init__.py
 # ----------------------------------------
 import os
 
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
-"""Scitex IO module with lazy imports to avoid circular dependencies."""
+"""Scitex IO module with lazy imports to avoid circular dependencies.
+
+Bundle I/O is now in scitex.io.bundle submodule:
+    import scitex.io.bundle as bundle
+    bundle.load("Figure1.figz")
+    bundle.save(data, "output.pltz")
+"""
 
 # Import commonly used functions directly
 from ._save import save
 from ._load import load
+
+# Bundle I/O - import the bundle submodule
+from . import bundle
+
 from ._load_configs import load_configs
 from ._glob import glob, parse_glob
 from ._reload import reload
@@ -79,39 +89,18 @@ except ImportError:
     has_metadata = None
 
 __all__ = [
+    # Primary I/O
     "save",
     "load",
+    # Bundle submodule
+    "bundle",
+    # Config loading
     "load_configs",
+    # File utilities
     "glob",
-    "parse_glob",
     "reload",
     "flush",
     "cache",
-    "H5Explorer",
-    "explore_h5",
-    "has_h5_key",
-    "path",
-    "mv_to_tmp",
-    "json2md",
-    "save_image",
-    "save_text",
-    "save_mp4",
-    "save_listed_dfs_as_csv",
-    "save_listed_scalars_as_csv",
-    "save_optuna_study_as_csv_and_pngs",
-    "ZarrExplorer",
-    "explore_zarr",
-    "has_zarr_key",
-    "migrate_h5_to_zarr",
-    "migrate_h5_to_zarr_batch",
-    # Load cache control functions
-    "get_cache_info",
-    "configure_cache",
-    "clear_load_cache",
-    # Metadata functions
-    "read_metadata",
-    "embed_metadata",
-    "has_metadata",
 ]
 
 # EOF
