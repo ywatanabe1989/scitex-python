@@ -140,7 +140,7 @@ reproduce = _LazyModule("reproduce")
 rng = _LazyModule("rng")
 scholar = _LazyModule("scholar")
 writer = _LazyModule("writer")
-vis = _LazyModule("vis")
+fig = _LazyModule("fig")
 resource = _LazyModule("resource")
 tex = _LazyModule("tex")
 linalg = _LazyModule("linalg")
@@ -161,6 +161,8 @@ capture = _LazyModule("capture")
 template = _LazyModule("template")
 cloud = _LazyModule("cloud")
 config = _LazyModule("config")
+audio = _LazyModule("audio")
+msword = _LazyModule("msword")
 
 # Centralized path configuration - eager loaded for convenience
 # Usage: scitex.PATHS.logs, scitex.PATHS.cache, etc.
@@ -207,7 +209,7 @@ __all__ = [
     "reproduce",
     "scholar",
     "writer",
-    "vis",
+    "fig",
     "resource",
     "tex",
     "linalg",
@@ -221,6 +223,8 @@ __all__ = [
     "gists",
     "cloud",
     "config",
+    "audio",
+    "msword",
     "PATHS",
     "INJECTED",
 ]

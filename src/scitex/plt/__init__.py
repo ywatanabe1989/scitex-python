@@ -31,6 +31,10 @@ import matplotlib.font_manager as fm
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+from scitex import logging as _logging
+
+_logger = _logging.getLogger(__name__)
+
 # =============================================================================
 # Auto-configure matplotlib with SciTeX style on import
 # =============================================================================
@@ -316,7 +320,6 @@ def load(path, apply_manual=True):
     """
     from pathlib import Path
     import hashlib
-    import warnings
     import scitex as stx
 
     path = Path(path)
@@ -345,7 +348,7 @@ def load(path, apply_manual=True):
         if "base_hash" in manual_data:
             current_hash = _compute_file_hash(json_path)
             if manual_data["base_hash"] != current_hash:
-                warnings.warn(
+                _logger.warning(
                     f"Manual overrides may be stale: base data changed since manual edits.\n"
                     f"  Expected hash: {manual_data['base_hash'][:16]}...\n"
                     f"  Current hash:  {current_hash[:16]}...\n"

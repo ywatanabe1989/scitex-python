@@ -40,6 +40,7 @@ __all__ = [
     "get_csv_column_prefix",
     "parse_csv_column_name",
     "sanitize_trace_id",
+    "get_unique_trace_id",
 ]
 
 
@@ -89,6 +90,59 @@ def sanitize_trace_id(trace_id: str) -> str:
     sanitized = sanitized.strip("-")
 
     return sanitized if sanitized else "unnamed"
+
+
+def get_unique_trace_id(trace_id: str, existing_ids: set) -> str:
+    """Get unique trace ID, adding suffix if collision detected.
+
+    This function ensures trace IDs remain unique even when multiple traces
+    have IDs that sanitize to the same value (e.g., "A" and "a" both become "a").
+    When a collision is detected, suffixes are added: a -> a-1 -> a-2, etc.
+
+    Parameters
+    ----------
+    trace_id : str
+        Raw trace identifier
+    existing_ids : set
+        Set of already-used trace IDs (will be modified in-place)
+
+    Returns
+    -------
+    str
+        Unique sanitized trace ID
+
+    Examples
+    --------
+    >>> ids = set()
+    >>> get_unique_trace_id("A", ids)
+    'a'
+    >>> ids
+    {'a'}
+    >>> get_unique_trace_id("a", ids)  # collision!
+    'a-1'
+    >>> ids
+    {'a', 'a-1'}
+    >>> get_unique_trace_id("A ", ids)  # another collision!
+    'a-2'
+    >>> ids
+    {'a', 'a-1', 'a-2'}
+    >>> get_unique_trace_id("B", ids)  # no collision
+    'b'
+    """
+    base_id = sanitize_trace_id(trace_id)
+
+    if base_id not in existing_ids:
+        existing_ids.add(base_id)
+        return base_id
+
+    # Find unique suffix
+    counter = 1
+    while f"{base_id}-{counter}" in existing_ids:
+        counter += 1
+
+    unique_id = f"{base_id}-{counter}"
+    existing_ids.add(unique_id)
+    return unique_id
 
 
 def get_csv_column_prefix(

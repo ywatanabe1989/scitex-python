@@ -1,0 +1,39 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#f0f0f0', 'primaryTextColor': '#333', 'primaryBorderColor': '#666', 'lineColor': '#666'}}}%%
+graph TB
+    subgraph BUNDLE[".pltz/.figz Bundle Structure"]
+        direction TB
+        subgraph CANONICAL["CANONICAL (Must Preserve)"]
+            direction TB
+            SPEC["spec.json<br/>━━━━━━━━━━━━━━━<br/>FigureModel:<br/>  width_mm, height_mm<br/>  nrows, ncols<br/>  axes: [AxesModel...]<br/><br/>AxesModel:<br/>  row, col, plots[]<br/>  xlabel, ylabel, title<br/>  xlim, ylim, style<br/>  annotations[]"]
+            DATA["data.csv<br/>━━━━━━━━━━━━━━━<br/>• Raw numerical values<br/>• Column labels<br/>• Per-panel data"]
+            STATS["stats.json<br/>━━━━━━━━━━━━━━━<br/>• Test type (t-test, ANOVA)<br/>• p-values, effect sizes<br/>• Confidence intervals<br/>• Linked to annotations"]
+        end
+
+        subgraph DERIVED["DERIVED (Regenerable)"]
+            direction TB
+            PNG["preview.png<br/>(cached render)"]
+            SVG["preview.svg<br/>(vector export)"]
+            GEO["geometry_px.json<br/>(pixel cache)"]
+        end
+    end
+
+    subgraph TREE["Directory Tree (scitex/vis)"]
+        direction TB
+        T1["figures/"]
+        T2["panels/"]
+        T3["metadata/"]
+        T4["previews/"]
+        T5["ai/"]
+    end
+
+    SPEC --> |"defines"| PNG
+    SPEC --> |"defines"| SVG
+    DATA --> |"referenced by"| SPEC
+    STATS --> |"links to<br/>annotations"| SPEC
+    SPEC --> |"compute"| GEO
+
+    style CANONICAL fill:#e6f3ff,stroke:#0066cc,stroke-width:2px
+    style DERIVED fill:#f5f5f5,stroke:#999,stroke-width:1px,stroke-dasharray: 5 5
+    style SPEC fill:#cceeff,stroke:#0066cc
+    style DATA fill:#cceeff,stroke:#0066cc
+    style STATS fill:#cceeff,stroke:#0066cc

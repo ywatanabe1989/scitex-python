@@ -41,10 +41,12 @@ from ._format_violinplot import _format_violinplot
 from ._format_plot_imshow import _format_plot_imshow
 from ._format_plot_box import _format_plot_box
 from ._format_stx_conf_mat import _format_plot_conf_mat
+from ._format_stx_contour import _format_stx_contour
 from ._format_stx_ecdf import _format_plot_ecdf
 from ._format_stx_fillv import _format_plot_fillv
 from ._format_stx_heatmap import _format_plot_heatmap
 from ._format_stx_image import _format_plot_image
+from ._format_stx_imshow import _format_stx_imshow
 from ._format_stx_joyplot import _format_plot_joyplot
 from ._format_plot_kde import _format_plot_kde
 from ._format_stx_line import _format_plot_line
@@ -57,6 +59,12 @@ from ._format_plot_scatter import _format_plot_scatter
 from ._format_stx_scatter_hist import _format_plot_scatter_hist
 from ._format_stx_shaded_line import _format_plot_shaded_line
 from ._format_stx_violin import _format_plot_violin
+
+# stx_ aliases formatters
+from ._format_stx_scatter import _format_stx_scatter
+from ._format_stx_bar import _format_stx_bar
+from ._format_stx_barh import _format_stx_barh
+from ._format_stx_errorbar import _format_stx_errorbar
 
 # Seaborn formatters (sns_ prefix)
 from ._format_sns_barplot import _format_sns_barplot

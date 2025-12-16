@@ -10,6 +10,8 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import pandas as pd
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+from ._format_plot import _parse_tracking_id
 
 
 def _format_plot_raster(id, tracked_dict, kwargs):
@@ -27,6 +29,9 @@ def _format_plot_raster(id, tracked_dict, kwargs):
     if not tracked_dict or not isinstance(tracked_dict, dict):
         return pd.DataFrame()
 
+    # Parse tracking ID to get axes position and trace ID
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
+
     # Get the raster_digit_df from args
     raster_df = tracked_dict.get("raster_digit_df")
 
@@ -36,9 +41,12 @@ def _format_plot_raster(id, tracked_dict, kwargs):
     # Create a copy to avoid modifying the original
     result = raster_df.copy()
 
-    # Add prefix to column names if ID is provided
+    # Add prefix to column names using single source of truth
     if id is not None:
         # Rename columns with ID prefix
-        result.columns = [f"{id}_raster_{col}" for col in result.columns]
+        result.columns = [
+            get_csv_column_name(f"raster-{col}", ax_row, ax_col, trace_id=trace_id)
+            for col in result.columns
+        ]
 
     return result

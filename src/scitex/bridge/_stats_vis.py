@@ -27,7 +27,7 @@ When bridging between plt and vis, coordinate transformation may be needed.
 from typing import Optional, Dict, Any, List, Tuple
 
 from scitex.schema import StatResult, Position, StatPositioning
-from scitex.vis.model import AnnotationModel, FigureModel, AxesModel, TextStyle
+from scitex.fig.model import AnnotationModel, FigureModel, AxesModel, TextStyle
 
 
 def stat_result_to_annotation(

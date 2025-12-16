@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-05-18 18:14:26 (ywatanabe)"
-# File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_sns_boxplot.py
-# ----------------------------------------
-import os
+# Timestamp: "2025-12-10 02:30:00 (ywatanabe)"
+# File: ./src/scitex/plt/_subplots/_export_as_csv_formatters/_format_sns_boxplot.py
 
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
+"""CSV formatter for sns.boxplot() calls - uses standard column naming."""
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
+from ._format_plot import _parse_tracking_id
 
 
 def _format_sns_boxplot(id, tracked_dict, kwargs):
     """Format data from a sns_boxplot call.
+
+    Uses standard column naming: ax-row-{r}-col-{c}_trace-id-{id}_variable-{var}
 
     Args:
         id (str): Identifier for the plot
@@ -22,11 +24,14 @@ def _format_sns_boxplot(id, tracked_dict, kwargs):
         kwargs (dict): Keyword arguments passed to sns_boxplot
 
     Returns:
-        pd.DataFrame: Formatted boxplot data
+        pd.DataFrame: Formatted boxplot data with standard column names
     """
     # Check if tracked_dict is empty or not a dictionary
     if not tracked_dict:
         return pd.DataFrame()
+
+    # Parse tracking ID to get axes position
+    ax_row, ax_col, trace_id = _parse_tracking_id(id)
 
     # If tracked_dict is a dictionary, try to extract the data from it
     if isinstance(tracked_dict, dict):
@@ -34,59 +39,73 @@ def _format_sns_boxplot(id, tracked_dict, kwargs):
         if "data" in tracked_dict:
             data = tracked_dict["data"]
             if isinstance(data, pd.DataFrame):
-                result = data.copy()
-                # Add prefix to column names
-                result.columns = [f"{id}_sns_boxplot_{col}" for col in result.columns]
+                result = pd.DataFrame()
+                for col in data.columns:
+                    col_name = get_csv_column_name(
+                        f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                    )
+                    result[col_name] = data[col]
                 return result
 
         # If no 'data' key, try to get data from args
         args = tracked_dict.get("args", [])
         if len(args) > 0:
-            # First arg is often the data for seaborn plots
             data = args[0]
             if isinstance(data, pd.DataFrame):
-                result = data.copy()
-                # Add prefix to column names
-                result.columns = [f"{id}_sns_boxplot_{col}" for col in result.columns]
+                result = pd.DataFrame()
+                for col in data.columns:
+                    col_name = get_csv_column_name(
+                        f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                    )
+                    result[col_name] = data[col]
                 return result
 
             # Handle list or array data
             elif isinstance(data, (list, np.ndarray)):
-                # Try to convert to DataFrame
                 try:
                     if all(isinstance(item, (list, np.ndarray)) for item in data):
-                        # For list of lists/arrays (multiple groups)
-                        data_dict = {}
+                        result = pd.DataFrame()
                         for i, group_data in enumerate(data):
-                            data_dict[f"{id}_sns_boxplot_group{i:02d}"] = group_data
-                        return pd.DataFrame(data_dict)
+                            col_name = get_csv_column_name(
+                                f"data-{i}", ax_row, ax_col, trace_id=trace_id
+                            )
+                            result[col_name] = pd.Series(group_data)
+                        return result
                     else:
-                        # For a single list/array
-                        return pd.DataFrame({f"{id}_sns_boxplot_values": data})
-                except:
+                        col_name = get_csv_column_name(
+                            "data", ax_row, ax_col, trace_id=trace_id
+                        )
+                        return pd.DataFrame({col_name: data})
+                except Exception:
                     pass
 
     # If tracked_dict is a DataFrame already, use it directly
     elif isinstance(tracked_dict, pd.DataFrame):
-        result = tracked_dict.copy()
-        # Add prefix to column names
-        result.columns = [f"{id}_sns_boxplot_{col}" for col in result.columns]
+        result = pd.DataFrame()
+        for col in tracked_dict.columns:
+            col_name = get_csv_column_name(
+                f"data-{col}", ax_row, ax_col, trace_id=trace_id
+            )
+            result[col_name] = tracked_dict[col]
         return result
 
     # If tracked_dict is list-like, try to convert it to a DataFrame
     elif hasattr(tracked_dict, "__iter__") and not isinstance(tracked_dict, str):
         try:
-            # For list-like data
             if all(isinstance(item, (list, np.ndarray)) for item in tracked_dict):
-                # For list of lists/arrays (multiple groups)
-                data_dict = {}
+                result = pd.DataFrame()
                 for i, group_data in enumerate(tracked_dict):
-                    data_dict[f"{id}_sns_boxplot_group{i:02d}"] = group_data
-                return pd.DataFrame(data_dict)
+                    col_name = get_csv_column_name(
+                        f"data-{i}", ax_row, ax_col, trace_id=trace_id
+                    )
+                    result[col_name] = pd.Series(group_data)
+                return result
             else:
-                # For a single list/array
-                return pd.DataFrame({f"{id}_sns_boxplot_values": tracked_dict})
-        except:
+                col_name = get_csv_column_name(
+                    "data", ax_row, ax_col, trace_id=trace_id
+                )
+                return pd.DataFrame({col_name: tracked_dict})
+        except Exception:
             pass
 
     # Return empty DataFrame if we couldn't extract useful data

@@ -96,6 +96,8 @@ def crop(
     margin: int = 12,
     overwrite: bool = False,
     verbose: bool = False,
+    return_offset: bool = False,
+    crop_box: Optional[Tuple[int, int, int, int]] = None,
 ) -> str:
     """
     Crop a figure image to its content area with a specified margin.
@@ -112,16 +114,26 @@ def crop(
         Path to save the cropped image. If None and overwrite=True,
         overwrites the input. If None and overwrite=False, adds '_cropped' suffix.
     margin : int, optional
-        Margin in pixels to add around the content area (default: 12, ~1mm at 300 DPI)
+        Margin in pixels to add around the content area (default: 12, ~1mm at 300 DPI).
+        Only used when crop_box is None (auto-detection mode).
     overwrite : bool, optional
         Whether to overwrite the input file (default: False)
     verbose : bool, optional
         Whether to print detailed information (default: False)
+    return_offset : bool, optional
+        If True, also return the crop offset (left, upper) for metadata adjustment.
+        Default is False.
+    crop_box : tuple, optional
+        Explicit crop coordinates (left, upper, right, lower). If provided,
+        skips auto-detection and uses these exact coordinates for cropping.
+        This is useful for applying the same crop to multiple images (e.g., hitmap).
 
     Returns
     -------
-    str
-        Path to the saved cropped image
+    str or tuple
+        Path to the saved cropped image. If return_offset=True, returns
+        (path, offset_dict) where offset_dict has keys 'left', 'upper', 'right', 'lower'
+        representing the crop boundaries.
 
     Raises
     ------
@@ -138,6 +150,11 @@ def crop(
 
     >>> # Or crop in place
     >>> stx.plt.crop("figure.png", overwrite=True)
+
+    >>> # Apply explicit crop coordinates (e.g., for hitmap)
+    >>> _, offset = stx.plt.crop("figure.png", return_offset=True)
+    >>> crop_box = (offset['left'], offset['upper'], offset['right'], offset['lower'])
+    >>> stx.plt.crop("hitmap.png", crop_box=crop_box)
     """
     # Determine output path
     if output_path is None:
@@ -158,19 +175,26 @@ def crop(
         if "dpi" in img.info:
             print(f"Original DPI: {img.info['dpi']}")
 
-    # Find the content area (returns left, upper, right, lower)
-    left, upper, right, lower = find_content_area(input_path)
+    # Use explicit crop_box if provided, otherwise auto-detect
+    if crop_box is not None:
+        # Use explicit crop coordinates (no margin adjustment - use as-is)
+        left, upper, right, lower = crop_box
+        if verbose:
+            print(f"Using explicit crop_box: left={left}, upper={upper}, right={right}, lower={lower}")
+    else:
+        # Find the content area (returns left, upper, right, lower)
+        left, upper, right, lower = find_content_area(input_path)
 
-    if verbose:
-        print(
-            f"Content area detected at: left={left}, upper={upper}, right={right}, lower={lower}"
-        )
+        if verbose:
+            print(
+                f"Content area detected at: left={left}, upper={upper}, right={right}, lower={lower}"
+            )
 
-    # Calculate the coordinates with margin, clamping to the image boundaries
-    left = max(left - margin, 0)
-    upper = max(upper - margin, 0)
-    right = min(right + margin, img.width)
-    lower = min(lower + margin, img.height)
+        # Calculate the coordinates with margin, clamping to the image boundaries
+        left = max(left - margin, 0)
+        upper = max(upper - margin, 0)
+        right = min(right + margin, img.width)
+        lower = min(lower + margin, img.height)
 
     if verbose:
         print(f"Cropping to: left={left}, upper={upper}, right={right}, lower={lower}")
@@ -253,6 +277,19 @@ def crop(
         print(f"Saved {area_reduction_pct:.1f}% of the original area")
         if output_path != input_path:
             print(f"Saved to: {output_path}")
+
+    if return_offset:
+        offset = {
+            'left': left,
+            'upper': upper,
+            'right': right,
+            'lower': lower,
+            'original_width': original_width,
+            'original_height': original_height,
+            'new_width': final_width,
+            'new_height': final_height,
+        }
+        return output_path, offset
 
     return output_path
 

@@ -5,15 +5,17 @@
 
 """Empirical Cumulative Distribution Function (ECDF) plotting."""
 
-import warnings
 from typing import Any, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 
+from scitex import logging
 from scitex.pd._force_df import force_df as scitex_pd_force_df
 from ....plt.utils import assert_valid_axis, mm_to_pt
+
+logger = logging.getLogger(__name__)
 
 
 # Default line width (0.2mm for publication)
@@ -68,7 +70,7 @@ def stx_ecdf(
 
     # Warnings
     if np.isnan(values_1d).any():
-        warnings.warn("NaN value are ignored for ECDF plot.")
+        logger.warning("NaN values are ignored for ECDF plot.")
     values_1d = values_1d[~np.isnan(values_1d)]
     nn = len(values_1d)
 

@@ -117,7 +117,7 @@ def _detect_backend(target) -> Literal["plt", "vis"]:
     """
     # Check for vis FigureModel
     try:
-        from scitex.vis.model import FigureModel
+        from scitex.fig.model import FigureModel
         if isinstance(target, FigureModel):
             return "vis"
     except ImportError:

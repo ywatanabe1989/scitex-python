@@ -14,9 +14,14 @@ from functools import wraps
 
 import matplotlib
 
+from scitex import logging
+
+logger = logging.getLogger(__name__)
+
 from ._AxisWrapperMixins import (
     AdjustmentMixin,
     MatplotlibPlotMixin,
+    RawMatplotlibMixin,
     SeabornMixin,
     TrackingMixin,
     UnitAwareMixin,
@@ -25,7 +30,12 @@ from scitex.plt.styles import apply_plot_defaults, apply_plot_postprocess
 
 
 class AxisWrapper(
-    MatplotlibPlotMixin, SeabornMixin, AdjustmentMixin, TrackingMixin, UnitAwareMixin
+    MatplotlibPlotMixin,
+    SeabornMixin,
+    RawMatplotlibMixin,
+    AdjustmentMixin,
+    TrackingMixin,
+    UnitAwareMixin,
 ):
     def __init__(self, fig_scitex, axis_mpl, track):
         """Initialize the AxisWrapper.
@@ -219,10 +229,8 @@ class AxisWrapper(
                                     kwargs,
                                 )
                             except AttributeError:
-                                warnings.warn(
-                                    f"Tracking setup incomplete for AxisWrapper ({__method_name__}).",
-                                    UserWarning,
-                                    stacklevel=2,
+                                logger.warning(
+                                    f"Tracking setup incomplete for AxisWrapper ({__method_name__})."
                                 )
                             except Exception as e:
                                 # Silently continue if tracking fails to not break plotting
@@ -240,11 +248,9 @@ class AxisWrapper(
         # 2. If not found on instance, try the counterpart type (fallback)
         if hasattr(self._counter_part, name):
             counterpart_attr = getattr(self._counter_part, name)
-            warnings.warn(
+            logger.warning(
                 f"SciTeX Axis_MplWrapper: '{name}' not directly handled. "
-                f"Falling back to underlying '{self._counter_part.__name__}' attribute.",
-                UserWarning,
-                stacklevel=2,
+                f"Falling back to underlying '{self._counter_part.__name__}' attribute."
             )
             # If the counterpart attribute is callable (likely a method descriptor)
             if callable(counterpart_attr):
