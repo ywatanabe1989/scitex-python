@@ -440,103 +440,6 @@ def validate_stat_result(stat_data: Dict[str, Any]) -> bool:
 
 
 # =============================================================================
-# Canvas Validation
-# =============================================================================
-
-
-def validate_canvas(canvas_data: Dict[str, Any]) -> bool:
-    """
-    Validate a canvas specification.
-
-    Parameters
-    ----------
-    canvas_data : Dict[str, Any]
-        Canvas specification dictionary
-
-    Returns
-    -------
-    bool
-        True if valid
-
-    Raises
-    ------
-    ValidationError
-        If validation fails
-    """
-    # canvas_name is required
-    if "canvas_name" not in canvas_data:
-        raise ValidationError(
-            "Missing required field: canvas_name",
-            field="canvas_name",
-        )
-
-    # Validate size
-    if "size" in canvas_data:
-        size = canvas_data["size"]
-        if not isinstance(size, dict):
-            raise ValidationError(
-                "size must be a dictionary",
-                field="size",
-                value=type(size).__name__,
-            )
-
-        width = size.get("width_mm", 0)
-        height = size.get("height_mm", 0)
-
-        if width <= 0:
-            raise ValidationError(
-                "width_mm must be positive",
-                field="size.width_mm",
-                value=width,
-            )
-
-        if height <= 0:
-            raise ValidationError(
-                "height_mm must be positive",
-                field="size.height_mm",
-                value=height,
-            )
-
-    # Validate panels
-    if "panels" in canvas_data:
-        if not isinstance(canvas_data["panels"], list):
-            raise ValidationError(
-                "panels must be a list",
-                field="panels",
-                value=type(canvas_data["panels"]).__name__,
-            )
-
-        # Check for duplicate panel names
-        panel_names = set()
-        for i, panel in enumerate(canvas_data["panels"]):
-            name = panel.get("name")
-            if not name:
-                raise ValidationError(
-                    f"Panel at index {i} is missing 'name'",
-                    field=f"panels[{i}].name",
-                )
-
-            if name in panel_names:
-                raise ValidationError(
-                    f"Duplicate panel name: {name}",
-                    field=f"panels[{i}].name",
-                    value=name,
-                )
-            panel_names.add(name)
-
-            # Validate panel type
-            panel_type = panel.get("type", "image")
-            if panel_type not in {"scitex", "image"}:
-                raise ValidationError(
-                    f"Invalid panel type: {panel_type}",
-                    field=f"panels[{i}].type",
-                    value=panel_type,
-                )
-
-    return True
-
-
-# =============================================================================
 # Color Validation
 # =============================================================================
 
@@ -582,7 +485,6 @@ __all__ = [
     "validate_axes",
     "validate_plot",
     "validate_stat_result",
-    "validate_canvas",
     "validate_color",
 ]
 
