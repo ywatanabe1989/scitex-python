@@ -125,24 +125,36 @@ class ZipBundle:
                     self._temp_path.unlink()
 
     def _atomic_commit(self) -> None:
-        """Atomically commit writes by renaming temp file."""
+        """Atomically commit writes by moving temp file.
+
+        Uses shutil.move() instead of rename() to handle cross-device moves
+        (e.g., /tmp to mounted volumes in Docker).
+        """
         if self._temp_path is None:
             return
+
+        # In append mode, write cached files that weren't explicitly overwritten
+        # This preserves files from the original bundle that weren't modified
+        if self.mode == "a":
+            for name, data in self._cache.items():
+                if name not in self._pending_writes:
+                    self._zipfile.writestr(name, data)
 
         self._zipfile.close()
         self._closed = True
 
         if os.name == "nt" and self.path.exists():
             backup_path = self.path.with_suffix(self.path.suffix + ".bak")
-            self.path.rename(backup_path)
+            shutil.move(str(self.path), str(backup_path))
             try:
-                self._temp_path.rename(self.path)
+                shutil.move(str(self._temp_path), str(self.path))
                 backup_path.unlink()
             except Exception:
-                backup_path.rename(self.path)
+                shutil.move(str(backup_path), str(self.path))
                 raise
         else:
-            self._temp_path.rename(self.path)
+            # shutil.move handles cross-device moves (copies then deletes)
+            shutil.move(str(self._temp_path), str(self.path))
 
     # =========================================================================
     # File listing
