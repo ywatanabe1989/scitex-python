@@ -422,10 +422,28 @@ def export_figz_bundle(
                         break
 
             if not panel_png or not panel_png.exists():
-                continue
+                # No pre-rendered PNG found, try to render on-the-fly
+                try:
+                    from scitex.plt import Pltz
 
-            # Load panel image
-            panel_img = Image.open(panel_png)
+                    # Find the original .pltz file
+                    pltz_file = bundle_path / f"{panel_id}.pltz"
+                    if pltz_file.exists():
+                        pltz = Pltz(pltz_file)
+                        png_bytes = pltz.render_preview(format="png", dpi=dpi)
+                        panel_img = Image.open(io.BytesIO(png_bytes))
+                    else:
+                        # Skip panel if can't render
+                        continue
+                except Exception as e:
+                    import logging
+                    logging.getLogger("scitex").debug(
+                        f"Could not render panel {panel_id}: {e}"
+                    )
+                    continue
+            else:
+                # Load panel image from file
+                panel_img = Image.open(panel_png)
 
             # Get panel position and size from spec
             pos = panel.get("position", {})
