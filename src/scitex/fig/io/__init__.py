@@ -21,6 +21,7 @@ from ._bundle import (
     validate_figz_spec,
     load_figz_bundle,
     save_figz_bundle,
+    export_figz_bundle,
     FIGZ_SCHEMA_SPEC,
 )
 
@@ -29,6 +30,7 @@ __all__ = [
     "validate_figz_spec",
     "load_figz_bundle",
     "save_figz_bundle",
+    "export_figz_bundle",
     "FIGZ_SCHEMA_SPEC",
 ]
 
