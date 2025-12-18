@@ -310,7 +310,25 @@ class Pltz:
         """Get cached preview from bundle if available."""
         try:
             with ZipBundle(self.path, mode="r") as zb:
-                return zb.read_bytes("exports/preview.png")
+                # Try multiple possible preview locations
+                preview_files = [
+                    "exports/preview.png",
+                    f"exports/{self.path.stem}.png",  # e.g., exports/plot.png
+                ]
+                # Also check for any .png in exports/
+                for name in zb.namelist():
+                    # Handle nested .d structure: temp.pltz.d/exports/temp.png
+                    if "exports/" in name and name.endswith(".png"):
+                        # Exclude hitmap and overview files
+                        if "_hitmap" not in name and "_overview" not in name:
+                            preview_files.append(name)
+
+                for preview_file in preview_files:
+                    try:
+                        return zb.read_bytes(preview_file)
+                    except FileNotFoundError:
+                        continue
+                return None
         except FileNotFoundError:
             return None
 

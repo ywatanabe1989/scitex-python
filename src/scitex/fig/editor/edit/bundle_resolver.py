@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-14 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fig/editor/edit/bundle_resolver.py
 
@@ -9,9 +8,14 @@ import json as json_module
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Optional, Tuple, Dict, Any
+from typing import Tuple
 
-__all__ = ["resolve_pltz_bundle", "resolve_figz_bundle", "resolve_layered_pltz_bundle"]
+__all__ = [
+    "resolve_pltz_bundle",
+    "resolve_figz_bundle",
+    "resolve_layered_pltz_bundle",
+    "resolve_stx_bundle",
+]
 
 
 def resolve_figz_bundle(path: Path, panel_index: int = 0) -> Tuple:
@@ -36,17 +40,17 @@ def resolve_figz_bundle(path: Path, panel_index: int = 0) -> Tuple:
     figz_is_zip = False
 
     # Handle ZIP vs directory for figz
-    if spath.endswith('.figz') and not spath.endswith('.figz.d'):
+    if spath.endswith(".figz") and not spath.endswith(".figz.d"):
         figz_is_zip = True
         if not path.exists():
             raise FileNotFoundError(f"Figz bundle not found: {path}")
         # For figz zip, extract to access nested pltz
-        temp_dir = tempfile.mkdtemp(prefix='scitex_edit_figz_')
-        with zipfile.ZipFile(path, 'r') as zf:
+        temp_dir = tempfile.mkdtemp(prefix="scitex_edit_figz_")
+        with zipfile.ZipFile(path, "r") as zf:
             zf.extractall(temp_dir)
         bundle_dir = Path(temp_dir)
         for item in bundle_dir.iterdir():
-            if item.is_dir() and str(item).endswith('.figz.d'):
+            if item.is_dir() and str(item).endswith(".figz.d"):
                 bundle_dir = item
                 break
     else:
@@ -59,10 +63,10 @@ def resolve_figz_bundle(path: Path, panel_index: int = 0) -> Tuple:
     panel_is_zip = []
 
     for item in sorted(bundle_dir.iterdir(), key=lambda x: x.name):
-        if item.is_dir() and str(item).endswith('.pltz.d'):
+        if item.is_dir() and str(item).endswith(".pltz.d"):
             panel_paths.append(str(item))
             panel_is_zip.append(False)
-        elif item.is_file() and str(item).endswith('.pltz'):
+        elif item.is_file() and str(item).endswith(".pltz"):
             panel_paths.append(str(item))
             panel_is_zip.append(True)
 
@@ -88,7 +92,9 @@ def resolve_figz_bundle(path: Path, panel_index: int = 0) -> Tuple:
         "current_index": panel_index,
         "figz_dir": str(bundle_dir),
         "figz_is_zip": figz_is_zip,
-        "bundle_path": str(path) if figz_is_zip else None,  # Original figz zip path for export/download
+        "bundle_path": str(path)
+        if figz_is_zip
+        else None,  # Original figz zip path for export/download
     }
 
     # Resolve the selected panel
@@ -117,15 +123,15 @@ def resolve_pltz_bundle(path: Path) -> Tuple:
     spath = str(path)
 
     # Handle ZIP vs directory
-    if spath.endswith('.pltz') and not spath.endswith('.pltz.d'):
+    if spath.endswith(".pltz") and not spath.endswith(".pltz.d"):
         if not path.exists():
             raise FileNotFoundError(f"Bundle not found: {path}")
-        temp_dir = tempfile.mkdtemp(prefix='scitex_edit_')
-        with zipfile.ZipFile(path, 'r') as zf:
+        temp_dir = tempfile.mkdtemp(prefix="scitex_edit_")
+        with zipfile.ZipFile(path, "r") as zf:
             zf.extractall(temp_dir)
         bundle_dir = Path(temp_dir)
         for item in bundle_dir.iterdir():
-            if item.is_dir() and str(item).endswith('.pltz.d'):
+            if item.is_dir() and str(item).endswith(".pltz.d"):
                 bundle_dir = item
                 break
     else:
@@ -148,15 +154,17 @@ def resolve_pltz_bundle(path: Path) -> Tuple:
 
     for f in bundle_dir.iterdir():
         name = f.name
-        if name.endswith('.json') and not name.endswith('.manual.json'):
+        if name.endswith(".json") and not name.endswith(".manual.json"):
             json_path = f
-        elif name.endswith('.csv'):
+        elif name.endswith(".csv"):
             csv_path = f
-        elif name.endswith('_hitmap.png'):
+        elif name.endswith("_hitmap.png"):
             hitmap_path = f
-        elif name.endswith('.svg') and '_hitmap' not in name:
+        elif name.endswith(".svg") and "_hitmap" not in name:
             svg_path = f
-        elif name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+        elif (
+            name.endswith(".png") and "_hitmap" not in name and "_overview" not in name
+        ):
             png_path = f
 
     # Prefer SVG for display
@@ -164,7 +172,7 @@ def resolve_pltz_bundle(path: Path) -> Tuple:
         png_path = svg_path
 
     if json_path and json_path.exists():
-        with open(json_path, 'r') as f:
+        with open(json_path) as f:
             bundle_spec = json_module.load(f)
 
     return (
@@ -216,11 +224,11 @@ def resolve_layered_pltz_bundle(bundle_dir: Path) -> Tuple:
     if exports_dir.exists():
         for f in exports_dir.iterdir():
             name = f.name
-            if name.endswith('_hitmap.png'):
+            if name.endswith("_hitmap.png"):
                 hitmap_path = f
-            elif name.endswith('.svg') and '_hitmap' not in name:
+            elif name.endswith(".svg") and "_hitmap" not in name:
                 png_path = f
-            elif name.endswith('.png') and '_hitmap' not in name and png_path is None:
+            elif name.endswith(".png") and "_hitmap" not in name and png_path is None:
                 png_path = f
 
     bundle_spec = bundle_data.get("merged", {})
@@ -234,6 +242,81 @@ def resolve_layered_pltz_bundle(bundle_dir: Path) -> Tuple:
         png_path if png_path and png_path.exists() else None,
         hitmap_path if hitmap_path and hitmap_path.exists() else None,
         bundle_spec,
+    )
+
+
+def resolve_stx_bundle(path: Path) -> Tuple:
+    """
+    Resolve paths from a .stx bundle (unified element format).
+
+    Parameters
+    ----------
+    path : Path
+        Path to .stx bundle (.stx or .stx.d)
+
+    Returns
+    -------
+    tuple
+        (json_path, csv_path, png_path, hitmap_path, bundle_spec, element_info)
+    """
+    from scitex.fig import Figz
+
+    spath = str(path)
+
+    # Handle ZIP vs directory
+    if spath.endswith(".stx") and not spath.endswith(".stx.d"):
+        if not path.exists():
+            raise FileNotFoundError(f"Bundle not found: {path}")
+        temp_dir = tempfile.mkdtemp(prefix="scitex_edit_stx_")
+        with zipfile.ZipFile(path, "r") as zf:
+            zf.extractall(temp_dir)
+        bundle_dir = Path(temp_dir)
+        for item in bundle_dir.iterdir():
+            if item.is_dir() and str(item).endswith(".stx.d"):
+                bundle_dir = item
+                break
+    else:
+        bundle_dir = Path(path)
+        if not bundle_dir.exists():
+            raise FileNotFoundError(f"Bundle directory not found: {bundle_dir}")
+
+    # Load using Figz class
+    stx = Figz(bundle_dir)
+    spec_path = bundle_dir / "spec.json"
+
+    # Find exports
+    png_path = None
+    hitmap_path = None
+    exports_dir = bundle_dir / "exports"
+    if exports_dir.exists():
+        for f in exports_dir.iterdir():
+            name = f.name
+            if name.endswith("_hitmap.png"):
+                hitmap_path = f
+            elif name.endswith(".svg") and "_hitmap" not in name:
+                png_path = f
+            elif name.endswith(".png") and "_hitmap" not in name and png_path is None:
+                png_path = f
+
+    # Build bundle spec from Figz
+    bundle_spec = stx._spec.copy() if stx._spec else {}
+
+    # Build element info for editor
+    element_info = {
+        "elements": stx.elements,
+        "size_mm": stx.size_mm,
+        "bundle_dir": str(bundle_dir),
+        "bundle_path": str(path),
+        "is_directory": stx.is_directory,
+    }
+
+    return (
+        spec_path,
+        None,  # No CSV for stx bundles
+        png_path if png_path and png_path.exists() else None,
+        hitmap_path if hitmap_path and hitmap_path.exists() else None,
+        bundle_spec,
+        element_info,
     )
 
 

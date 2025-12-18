@@ -1,386 +1,318 @@
 <!-- ---
-!-- Timestamp: 2025-12-08
+!-- Timestamp: 2025-12-19
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/vis/README.md
+!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/fig/README.md
 !-- --- -->
 
-# scitex.vis - Canvas-Based Figure Composition
+# scitex.fig - Unified Figure Bundle Module
 
-**Compose publication-quality figures from multiple panels**
+**Compose publication-quality figures using `.stx` bundles with the Unified Element API**
 
 Schema Version: 2.0.0
 
 ---
 
-## Overview
+## Core Concept: Everything is an Element
 
-`scitex.vis` provides canvas-based composition of publication figures. A **canvas** represents a complete paper figure (e.g., "Figure 1") that can contain multiple **panels** (A, B, C...).
+No special "panel" terminology. All content types use the **same unified API**:
 
-### Terminology
+```python
+from scitex.fig import Figz
 
-| Term | Meaning | Example |
-|------|---------|---------|
-| **Canvas** | Paper figure workspace | "Figure 1" in a publication |
-| **Panel** | Single component on canvas | Panel A, B, C... |
-| **Figure** | Reserved for matplotlib's `fig` object | `stx.plt` output |
+figz = Figz.create("figure.stx", "My Figure")
 
-### The SciTeX Ecosystem
+# All element types use add_element()
+figz.add_element("A", "plot", pltz_bytes, {"x_mm": 10, "y_mm": 10})
+figz.add_element("title", "text", "Figure Title", {"x_mm": 85, "y_mm": 5})
+figz.add_element("arrow", "shape", {"shape_type": "arrow", ...})
+figz.add_element("inset", "figure", child_figz_bytes, {"x_mm": 100, "y_mm": 60})
+
+figz.save()
+```
+
+---
+
+## Bundle Formats
+
+Two storage formats are supported:
+
+| Format | Extension | Description | Use Case |
+|--------|-----------|-------------|----------|
+| ZIP archive | `.stx` | Compressed single file | Storage, transfer, distribution |
+| Directory | `.stx.d` | Uncompressed directory | Editing, development, debugging |
+
+```python
+# Create ZIP format (default)
+figz = Figz.create("figure.stx", "My Figure")
+
+# Create directory format
+figz = Figz.create("figure.stx.d", "My Figure")
+
+# Convert between formats
+packed = figz.pack()      # .stx.d -> .stx
+unpacked = figz.unpack()  # .stx -> .stx.d
+
+# Check format
+figz.is_directory  # True for .stx.d
+```
+
+---
+
+## Coordinate System
+
+**Origin `(0,0)` at top-left.** All positions in millimeters, relative to parent.
 
 ```
-scitex/
-├── scholar/    → Literature & metadata management
-├── writer/     → Document generation (LaTeX/manuscripts)
-├── plt/        → Plotting (matplotlib wrapper, outputs PNG+JSON+CSV)
-└── vis/        → Canvas composition (this module)
+(0,0) ──────────────────────────────► x_mm
+  │
+  │   ┌─────────────────────────────────────┐
+  │   │  Figure Canvas (170mm × 120mm)      │
+  │   │                                     │
+  │   │   Element A at (10, 10)             │
+  │   │   ┌────────────────┐                │
+  │   │   │ (0,0) local    │                │
+  │   │   │   annotation   │                │
+  │   │   │   at (5, 3)    │  ← absolute: (15, 13)
+  │   │   └────────────────┘                │
+  │   │                                     │
+  │   └─────────────────────────────────────┘
+  ▼
+y_mm
 ```
+
+**Key principle**: Child positions are LOCAL to parent. Moving a parent moves all children.
+
+```python
+from scitex.fig import to_absolute
+
+parent_pos = {"x_mm": 10, "y_mm": 10}
+child_local = {"x_mm": 5, "y_mm": 3}
+child_absolute = to_absolute(child_local, parent_pos)
+# Result: {"x_mm": 15.0, "y_mm": 13.0}
+```
+
+---
+
+## Element Types
+
+| Type | Content | Description |
+|------|---------|-------------|
+| `plot` | bytes (.pltz) | Plot bundle |
+| `figure` | bytes (.stx) | Nested figure (self-recursive) |
+| `text` | str or dict | Text annotation |
+| `shape` | dict | Arrow, bracket, line |
+| `image` | bytes | Raster image |
+| `stats` | bytes (.statsz) | Statistics bundle |
 
 ---
 
 ## Quick Start
 
-### Create and Compose a Canvas
+### Create a Figure
 
 ```python
-import scitex as stx
+from scitex.fig import Figz
 
-# 1. Create a canvas
-stx.vis.ensure_canvas_directory(
-    project_dir="/path/to/project",
-    canvas_name="fig1_results"
+# Create bundle
+figz = Figz.create(
+    "output.stx",
+    "Figure 1",
+    size_mm={"width": 170, "height": 120}
 )
 
-# 2. Add panels from stx.plt outputs
-stx.vis.add_panel_from_scitex(
-    project_dir="/path/to/project",
-    canvas_name="fig1_results",
-    panel_name="panel_a",
-    source_png="./output/timeseries.png",
-    panel_properties={
-        "position": {"x_mm": 10, "y_mm": 10},
-        "size": {"width_mm": 80, "height_mm": 60},
-        "label": {"text": "A"}
-    }
-)
+# Add text
+figz.add_element("title", "text", "My Results", {"x_mm": 85, "y_mm": 5})
 
-# 3. Add an image panel
-stx.vis.add_panel_from_image(
-    project_dir="/path/to/project",
-    canvas_name="fig1_results",
-    panel_name="panel_b",
-    source_image="./external/diagram.png",
-    panel_properties={
-        "position": {"x_mm": 100, "y_mm": 10},
-        "size": {"width_mm": 70, "height_mm": 60},
-        "label": {"text": "B"}
-    }
-)
+# Add plot (assuming you have pltz_bytes)
+with open("plot_a.pltz", "rb") as f:
+    pltz_bytes = f.read()
+figz.add_element("A", "plot", pltz_bytes, {"x_mm": 10, "y_mm": 20}, {"width_mm": 70, "height_mm": 50})
 
-# 4. Export composed canvas
-stx.vis.export_canvas_to_file(
-    project_dir="/path/to/project",
-    canvas_name="fig1_results",
-    output_format="png"
-)
+# Add annotation arrow
+figz.add_element("arrow1", "shape", {
+    "shape_type": "arrow",
+    "start": {"x_mm": 50, "y_mm": 40},
+    "end": {"x_mm": 70, "y_mm": 30}
+})
+
+figz.save()
 ```
 
----
-
-## Directory Structure
-
-Canvas directories use `.canvas` extension for portability and distinguishability:
-
-```
-project/scitex/vis/canvases/
-└── fig1_results.canvas/          # .canvas extension for bundle
-    ├── canvas.json               # Layout, panels, composition
-    ├── panels/
-    │   ├── panel_a/              # type: scitex (full stx.plt output)
-    │   │   ├── panel.json
-    │   │   ├── panel.csv
-    │   │   └── panel.png
-    │   └── panel_b/              # type: image (static)
-    │       └── panel.png
-    └── exports/
-        ├── canvas.png            # Final composed output
-        ├── canvas.pdf
-        └── canvas.svg
-```
-
-The `.canvas` extension makes directories self-documenting, portable, and detectable by `scitex.io`.
-
----
-
-## Panel Types
-
-| Type | Contents | Editable | Re-renderable |
-|------|----------|----------|---------------|
-| `scitex` | PNG + JSON + CSV | Full (data, style) | Yes |
-| `image` | PNG/JPG/SVG only | Position/size/transform | No |
-
-### Panel Properties
+### Load and Modify
 
 ```python
-panel_properties = {
-    # Position and size (required)
-    "position": {"x_mm": 10, "y_mm": 10},
-    "size": {"width_mm": 70, "height_mm": 50},
+figz = Figz("existing.stx")
 
-    # Transform
-    "z_index": 0,           # Stacking order
-    "rotation_deg": 0,      # Rotation (clockwise)
-    "opacity": 1.0,         # 0.0 - 1.0
-    "flip_h": False,        # Horizontal flip
-    "flip_v": False,        # Vertical flip
-    "visible": True,
+# Query elements
+print(figz.elements)
+print(figz.list_element_ids("plot"))
 
-    # Clip (crop)
-    "clip": {
-        "enabled": False,
-        "x_mm": 0, "y_mm": 0,
-        "width_mm": None, "height_mm": None
-    },
+# Modify
+figz.update_element_position("A", x_mm=20, y_mm=30)
+figz.remove_element("old_annotation")
 
-    # Label (A, B, C...)
-    "label": {
-        "text": "A",
-        "position": "top-left",
-        "fontsize": 12,
-        "fontweight": "bold"
-    },
-
-    # Border
-    "border": {
-        "visible": False,
-        "color": "#000000",
-        "width_mm": 0.2
-    }
-}
-```
-
----
-
-## canvas.json Schema
-
-```json
-{
-  "schema_version": "2.0.0",
-  "canvas_name": "fig1_results",
-
-  "size": {
-    "width_mm": 180,
-    "height_mm": 240
-  },
-
-  "background": {
-    "color": "#ffffff",
-    "grid": false
-  },
-
-  "panels": [
-    {
-      "name": "panel_a",
-      "type": "scitex",
-      "position": {"x_mm": 10, "y_mm": 10},
-      "size": {"width_mm": 80, "height_mm": 60},
-      "z_index": 0,
-      "label": {"text": "A", "position": "top-left"}
-    },
-    {
-      "name": "panel_b",
-      "type": "image",
-      "source": "panel.png",
-      "position": {"x_mm": 100, "y_mm": 10},
-      "size": {"width_mm": 70, "height_mm": 60},
-      "label": {"text": "B"}
-    }
-  ],
-
-  "annotations": [
-    {"type": "text", "content": "p < 0.05", "position": {"x_mm": 50, "y_mm": 80}}
-  ],
-
-  "data_files": [
-    {"path": "panels/panel_a/panel.csv", "hash": "sha256:abc123..."}
-  ],
-
-  "metadata": {
-    "created_at": "2025-12-08T12:00:00Z",
-    "updated_at": "2025-12-08T15:30:00Z"
-  }
-}
+figz.save()
 ```
 
 ---
 
 ## API Reference
 
-### Directory Operations
+### Creation
 
 ```python
-# Create canvas directory structure
-canvas_dir = stx.vis.ensure_canvas_directory(project_dir, canvas_name)
+# Create new bundle
+figz = Figz.create(path, name, size_mm=None, bundle_type="figure")
 
-# Get canvas path
-path = stx.vis.get_canvas_directory_path(project_dir, canvas_name)
-
-# List all canvases
-canvases = stx.vis.list_canvas_directories(project_dir)
-
-# Check existence
-exists = stx.vis.canvas_directory_exists(project_dir, canvas_name)
-
-# Delete canvas
-deleted = stx.vis.delete_canvas_directory(project_dir, canvas_name)
+# Load existing
+figz = Figz("path/to/bundle.stx")
 ```
 
-### Canvas Operations
+### Element Operations
 
 ```python
-# Save canvas.json
-stx.vis.save_canvas_json(project_dir, canvas_name, canvas_json)
+# Add element
+figz.add_element(
+    element_id,      # Unique ID: "A", "title", "arrow_1"
+    element_type,    # "plot", "figure", "text", "shape", "image", "stats"
+    content,         # bytes, str, or dict (type-dependent)
+    position,        # {"x_mm": float, "y_mm": float}
+    size,            # {"width_mm": float, "height_mm": float}
+    **kwargs         # Additional properties
+)
 
-# Load canvas.json (with hash verification)
-canvas_json = stx.vis.load_canvas_json(project_dir, canvas_name)
+# Query
+elem = figz.get_element(id)
+content = figz.get_element_content(id)  # For embedded bundles
+ids = figz.list_element_ids()           # All IDs
+ids = figz.list_element_ids("plot")     # Filter by type
 
-# Partial update
-stx.vis.update_canvas_json(project_dir, canvas_name, {"size": {"width_mm": 200}})
+# Modify
+figz.update_element_position(id, x_mm, y_mm)
+figz.update_element_size(id, width_mm, height_mm)
+figz.remove_element(id)
 
-# Get schema version
-version = stx.vis.get_canvas_schema_version(project_dir, canvas_name)
+# Save
+figz.save()
 ```
 
-### Panel Operations
+### Layout Utilities
 
 ```python
-# Add panel from stx.plt output
-stx.vis.add_panel_from_scitex(
-    project_dir, canvas_name, panel_name,
-    source_png="plot.png",
-    panel_properties={...}
+from scitex.fig import (
+    to_absolute,
+    to_relative,
+    normalize_position,
+    normalize_size,
+    element_bounds,
+    auto_layout_grid,
 )
 
-# Add panel from image
-stx.vis.add_panel_from_image(
-    project_dir, canvas_name, panel_name,
-    source_image="image.png",
-    panel_properties={...}
-)
+# Coordinate transforms
+abs_pos = to_absolute(local_pos, parent_pos)
+local_pos = to_relative(abs_pos, parent_pos)
 
-# Update panel properties
-stx.vis.update_panel(project_dir, canvas_name, panel_name, {"opacity": 0.8})
+# Normalize formats
+pos = normalize_position({"x": 10, "y": 20})  # → {"x_mm": 10.0, "y_mm": 20.0}
 
-# Remove panel
-stx.vis.remove_panel(project_dir, canvas_name, panel_name)
-
-# List panels
-panels = stx.vis.list_panels(project_dir, canvas_name)
-
-# Get single panel
-panel = stx.vis.get_panel(project_dir, canvas_name, panel_name)
-
-# Reorder panels (z-index)
-stx.vis.reorder_panels(project_dir, canvas_name, ["panel_b", "panel_a"])
+# Auto-layout
+layouts = auto_layout_grid(4, {"width_mm": 170, "height_mm": 120})
+for pos, size in layouts:
+    print(pos, size)
 ```
 
-### Data Operations (Hash Verification)
+### Properties
 
 ```python
-# Compute file hash
-hash_str = stx.vis.compute_file_hash(filepath)  # "sha256:abc123..."
-
-# Verify hash
-is_valid = stx.vis.verify_data_hash(filepath, expected_hash)
-
-# Verify all data files in canvas
-results = stx.vis.verify_all_data_hashes(project_dir, canvas_name)
-# {"panels/panel_a/panel.csv": True, ...}
-```
-
-### Export Operations
-
-```python
-# Export to single format
-export_path = stx.vis.export_canvas_to_file(
-    project_dir, canvas_name,
-    output_format="png",  # png, pdf, svg
-    dpi=300
-)
-
-# Export to multiple formats
-paths = stx.vis.export_canvas_to_multiple_formats(
-    project_dir, canvas_name,
-    formats=["png", "pdf", "svg"]
-)
-
-# List existing exports
-exports = stx.vis.list_canvas_exports(project_dir, canvas_name)
+figz.bundle_id     # UUID
+figz.bundle_type   # "figure", "plot", etc.
+figz.elements      # List of element specs
+figz.size_mm       # {"width": 170, "height": 120}
+figz.constraints   # {"allow_children": True, "max_depth": 3}
+figz.spec          # Full spec dict
+figz.style         # Style dict
 ```
 
 ---
 
-## Integration with stx.plt
+## Self-Recursive Structure
 
-`stx.plt` outputs (PNG + JSON + CSV) can be directly added as panels:
+Figures can contain figures. Depth controlled by `TYPE_DEFAULTS`:
 
 ```python
-# 1. Create figures with stx.plt
-fig, ax = stx.plt.subplots()
-ax.plot(x, y)
-stx.io.save(fig, "./output/timeseries.png")
-# Creates: timeseries.png, timeseries.json, timeseries.csv
+from scitex.io.bundle import TYPE_DEFAULTS
 
-# 2. Add to canvas as panel
-stx.vis.add_panel_from_scitex(
-    project_dir, canvas_name, "panel_a",
-    source_png="./output/timeseries.png"  # Auto-finds .json and .csv
-)
+# TYPE_DEFAULTS = {
+#     "figure": {"allow_children": True, "max_depth": 3},
+#     "plot": {"allow_children": True, "max_depth": 2},
+#     "text": {"allow_children": False, "max_depth": 1},
+#     ...
+# }
+```
+
+### Nested Figure Example
+
+```python
+# Create child figure
+child = Figz.create("/tmp/inset.stx", "Inset")
+child.add_element("detail", "text", "Zoomed view", {"x_mm": 5, "y_mm": 5})
+child.save()
+
+# Add to parent
+with open("/tmp/inset.stx", "rb") as f:
+    child_bytes = f.read()
+
+parent = Figz.create("main.stx", "Main Figure")
+parent.add_element("inset", "figure", child_bytes, {"x_mm": 100, "y_mm": 60})
+parent.save()
+```
+
+---
+
+## Module Structure
+
+```
+scitex/fig/
+├── README.md        # This file
+├── __init__.py      # Main exports
+├── _bundle.py       # Figz class (Unified Element API)
+├── layout.py        # Coordinate system utilities
+├── io/              # Load/save operations
+├── model/           # Data models
+├── backend/         # Rendering backends
+├── utils/           # Validation, defaults
+└── editor/          # Interactive editing
+```
+
+---
+
+## Migration from Legacy API
+
+The old "panel" API still works but emits deprecation warnings:
+
+```python
+# Old (deprecated) → New (recommended)
+figz.add_panel("A", bytes)        → figz.add_element("A", "plot", bytes)
+figz.panels                       → figz.elements
+figz.get_panel("A")               → figz.get_element("A")
+figz.get_panel_pltz("A")          → figz.get_element_content("A")
+figz.list_panel_ids()             → figz.list_element_ids("plot")
 ```
 
 ---
 
 ## Examples
 
-See `examples/vis/` for complete examples:
+See `examples/fig/` for complete examples:
 
-- `demo_canvas.py` - Canvas composition workflow
-- `demo_vis_editor.py` - Interactive editor usage
-- `demo_vis_module.py` - Legacy JSON-based workflow
+- `unified_element_api.py` - Demonstrates the unified element API
 
 ---
 
 ## Related Documentation
 
-- [CANVAS_ARCHITECTURE.md](./docs/CANVAS_ARCHITECTURE.md) - Full architecture details
-- [scitex.plt](../plt/README.md) - Plotting backend
-- [FIGURE_ARCHITECTURE.md](../plt/docs/FIGURE_ARCHITECTURE.md) - Figure output format
-
----
-
-## Integration with stx.io
-
-Canvas directories (`.canvas`) are first-class citizens in the scitex I/O system:
-
-```python
-# Save canvas to a portable directory
-stx.io.save(canvas_dict, "/path/to/fig1_results.canvas")
-
-# Load canvas from directory
-canvas = stx.io.load("/path/to/fig1_results.canvas")
-
-# Access canvas properties
-print(canvas["canvas_name"])
-print(canvas["panels"])
-```
-
----
-
-## Constants
-
-```python
-stx.vis.SCHEMA_VERSION          # "2.0.0"
-stx.vis.CANVAS_EXTENSION        # ".canvas"
-stx.vis.NATURE_SINGLE_COLUMN_MM # 89
-stx.vis.NATURE_DOUBLE_COLUMN_MM # 183
-```
+- [layout.py](./layout.py) - Coordinate system utilities (inline docs)
+- [scitex.io.bundle](../io/bundle/README.md) - Bundle I/O operations
+- [TYPE_DEFAULTS](../io/bundle/_types.py) - Element type constraints
 
 <!-- EOF -->
