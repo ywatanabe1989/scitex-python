@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+# Timestamp: 2025-12-19
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_pltz_stx.py
+
+"""Save matplotlib figures as .stx bundles with plot content type."""
+
+import json
+import tempfile
+import warnings
+from pathlib import Path
+
+from ._figure_utils import get_figure_with_data
+
+
+def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
+    """Save a matplotlib figure as a .stx bundle with plot content type.
+
+    Bundle structure:
+        plot_X.stx.d/
+            spec.json           # Bundle specification
+            style.json          # Visual style configuration
+            data/
+                data.csv        # Plotted data (tidy format)
+                meta.json       # Column meanings, units, dtypes
+            stats/
+                stats.json      # Statistical test results (if any)
+            cache/
+                derived_data.csv        # Binned data, etc. (optional)
+                geometry_px.json        # Hit areas for GUI editing
+                render_manifest.json    # Render metadata
+            exports/
+                plot.svg        # Vector export
+                plot.png        # Raster export
+                plot.pdf        # Publication export
+    """
+    import matplotlib.figure
+
+    from scitex.io.bundle._stx import create_stx_spec
+
+    p = Path(spath)
+
+    if basename is None:
+        basename = p.stem
+        if basename.endswith(".stx"):
+            basename = basename[:-4]
+
+    # Extract figure
+    fig = obj
+    if hasattr(obj, "figure"):
+        fig = obj.figure
+    elif hasattr(obj, "fig"):
+        fig = obj.fig
+
+    if not isinstance(fig, matplotlib.figure.Figure):
+        raise TypeError(f"Expected matplotlib Figure, got {type(obj).__name__}")
+
+    dpi = kwargs.pop("dpi", 300)
+    data = kwargs.pop("data", None)
+
+    # Get CSV data from figure if not provided
+    csv_df = data
+    if csv_df is None:
+        csv_source = get_figure_with_data(obj)
+        if csv_source is not None and hasattr(csv_source, "export_as_csv"):
+            try:
+                csv_df = csv_source.export_as_csv()
+            except Exception:
+                pass
+
+    # Create spec for .stx format
+    fig_width_inch, fig_height_inch = fig.get_size_inches()
+
+    spec = create_stx_spec(
+        bundle_type="plot",
+        title=basename,
+        size={
+            "width_mm": round(fig_width_inch * 25.4, 2),
+            "height_mm": round(fig_height_inch * 25.4, 2),
+            "dpi": dpi,
+        },
+    )
+
+    # Determine paths
+    if as_zip:
+        zip_path = p if not str(p).endswith(".d") else Path(str(p)[:-2])
+        temp_dir = Path(tempfile.mkdtemp())
+        bundle_dir = temp_dir / f"{basename}.stx.d"
+    else:
+        bundle_dir = p if str(p).endswith(".d") else Path(str(p) + ".d")
+        temp_dir = None
+
+    bundle_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save spec.json
+    with open(bundle_dir / "spec.json", "w") as f:
+        json.dump(spec, f, indent=2, default=str)
+
+    # Save style.json (empty default for consistency)
+    with open(bundle_dir / "style.json", "w") as f:
+        json.dump({}, f, indent=2)
+
+    # Create directory structure
+    data_dir = bundle_dir / "data"
+    stats_dir = bundle_dir / "stats"
+    cache_dir = bundle_dir / "cache"
+    exports_dir = bundle_dir / "exports"
+
+    data_dir.mkdir(exist_ok=True)
+    stats_dir.mkdir(exist_ok=True)
+    cache_dir.mkdir(exist_ok=True)
+    exports_dir.mkdir(exist_ok=True)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message=".*tight_layout.*")
+
+        # Save exports with simple names (bundle dir provides context)
+        fig.savefig(
+            exports_dir / "plot.png",
+            dpi=dpi,
+            bbox_inches="tight",
+            format="png",
+            transparent=True,
+        )
+
+        fig.savefig(
+            exports_dir / "plot.svg",
+            bbox_inches="tight",
+            format="svg",
+        )
+
+        fig.savefig(
+            exports_dir / "plot.pdf",
+            bbox_inches="tight",
+            format="pdf",
+        )
+
+    # Save data/data.csv and data/meta.json if available
+    if csv_df is not None:
+        csv_df.to_csv(data_dir / "data.csv", index=False)
+
+        # Generate metadata for the data
+        meta = {
+            "columns": list(csv_df.columns),
+            "dtypes": {col: str(dtype) for col, dtype in csv_df.dtypes.items()},
+            "shape": list(csv_df.shape),
+            "description": "Plotted data (tidy format)",
+        }
+        with open(data_dir / "meta.json", "w") as f:
+            json.dump(meta, f, indent=2)
+
+    # Save cache/geometry_px.json for GUI hit areas
+    try:
+        from scitex.plt.utils._hitmap import (
+            extract_path_data,
+            extract_selectable_regions,
+        )
+
+        geometry = {
+            "path_data": extract_path_data(fig),
+            "selectable_regions": extract_selectable_regions(fig),
+        }
+        with open(cache_dir / "geometry_px.json", "w") as f:
+            json.dump(geometry, f, indent=2)
+    except Exception:
+        pass  # Skip if hitmap extraction fails
+
+    # Save cache/render_manifest.json
+    render_manifest = {
+        "dpi": dpi,
+        "format": ["png", "svg", "pdf"],
+        "bbox_inches": "tight",
+        "size_mm": {
+            "width": round(fig_width_inch * 25.4, 2),
+            "height": round(fig_height_inch * 25.4, 2),
+        },
+    }
+    with open(cache_dir / "render_manifest.json", "w") as f:
+        json.dump(render_manifest, f, indent=2)
+
+    # Save stats/stats.json placeholder (empty by default)
+    with open(stats_dir / "stats.json", "w") as f:
+        json.dump({"comparisons": [], "tests": []}, f, indent=2)
+
+    # Pack to ZIP if requested
+    if as_zip:
+        import shutil
+
+        from scitex.io.bundle import pack as pack_bundle
+
+        pack_bundle(bundle_dir, zip_path)
+        shutil.rmtree(temp_dir)
+
+
+# EOF
