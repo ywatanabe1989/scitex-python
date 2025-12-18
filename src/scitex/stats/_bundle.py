@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-18 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/stats/_bundle.py
 
 """
-Statsz - Object-oriented API for .statsz bundles.
+Statsz - Object-oriented API for stats bundles (.stx and legacy .statsz).
+
+Supports unified .stx format (v2.0.0) with type="stats".
 
 Usage:
     from scitex.stats import Statsz
 
-    statsz = Statsz.create("results.statsz", comparisons=[...])
-    statsz = Statsz("results.statsz")
+    # Create (defaults to .stx)
+    statsz = Statsz.create("results.stx", comparisons=[...])
     statsz.add_comparison("A vs B", method="t-test", p_value=0.03)
     statsz.save()
+
+    # Load (auto-detects format)
+    statsz = Statsz("results.stx")     # Native .stx
+    statsz = Statsz("results.statsz")  # Legacy (auto-normalized)
 """
 
 from __future__ import annotations
@@ -22,37 +27,67 @@ from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
-from scitex.io.bundle import ZipBundle
+from scitex.io.bundle import (
+    SCHEMA_NAME,
+    SCHEMA_VERSION,
+    ZipBundle,
+)
 
 __all__ = ["Statsz"]
 
 
 class Statsz:
-    """High-level API for .statsz bundles (zipped format)."""
+    """High-level API for stats bundles (.stx and legacy .statsz).
 
-    SCHEMA = {"name": "scitex.stats.stats", "version": "1.0.0"}
+    Supports both unified .stx format (v2.0.0) and legacy .statsz format.
+    New bundles are created as .stx by default.
+    """
+
+    # v2.0.0 unified schema
+    SCHEMA = {"name": SCHEMA_NAME, "version": SCHEMA_VERSION}
+    # Legacy schema (for backward compatibility)
+    LEGACY_SCHEMA = {"name": "scitex.stats.stats", "version": "1.0.0"}
+    DEFAULT_CONSTRAINTS = {"allow_children": False, "max_depth": 1}
 
     def __init__(self, path: Union[str, Path]):
-        """Load an existing .statsz bundle."""
+        """Load an existing stats bundle (.stx or .statsz)."""
         self.path = Path(path)
         if not self.path.exists():
             raise FileNotFoundError(f"Bundle not found: {self.path}")
         self._spec: Optional[Dict[str, Any]] = None
         self._data: Optional[pd.DataFrame] = None
         self._modified = False
+        self._is_stx = self.path.suffix == ".stx"
         self._load()
 
     def _load(self) -> None:
-        """Load bundle contents into memory."""
+        """Load bundle contents into memory, normalizing to v2.0.0 format."""
+        from scitex.io.bundle import normalize_spec
+
         with ZipBundle(self.path, mode="r") as zb:
             try:
-                self._spec = zb.read_json("spec.json")
+                spec = zb.read_json("spec.json")
+                # Normalize to v2.0.0 format
+                self._spec = normalize_spec(spec, "stats")
             except FileNotFoundError:
-                self._spec = {"schema": self.SCHEMA, "comparisons": []}
+                self._spec = self._create_default_spec()
             try:
                 self._data = zb.read_csv("data.csv")
             except FileNotFoundError:
                 self._data = None
+
+    def _create_default_spec(self) -> Dict[str, Any]:
+        """Create a default v2.0.0 spec."""
+        from scitex.io.bundle import generate_bundle_id
+
+        return {
+            "schema": self.SCHEMA,
+            "type": "stats",
+            "bundle_id": generate_bundle_id(),
+            "constraints": self.DEFAULT_CONSTRAINTS,
+            "comparisons": [],
+            "provenance": {},
+        }
 
     @classmethod
     def create(
@@ -61,30 +96,61 @@ class Statsz:
         comparisons: Optional[List[Dict[str, Any]]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         data: Optional[pd.DataFrame] = None,
-    ) -> "Statsz":
-        """Create a new .statsz bundle."""
+        use_stx: bool = True,
+    ) -> Statsz:
+        """Create a new stats bundle.
+
+        Args:
+            path: Output path (extension auto-adjusted)
+            comparisons: List of statistical comparison results
+            metadata: Additional metadata (becomes "provenance" in v2.0.0)
+            data: Optional DataFrame with raw data
+            use_stx: If True, create .stx format; if False, create legacy .statsz
+
+        Returns:
+            New Statsz instance
+        """
+        from scitex.io.bundle import generate_bundle_id
+
         path = Path(path)
-        if path.suffix != ".statsz":
-            path = path.with_suffix(".statsz")
+
+        # Determine extension
+        if use_stx:
+            if path.suffix not in (".stx", ".statsz"):
+                path = path.with_suffix(".stx")
+            elif path.suffix == ".statsz":
+                # User explicitly wants .statsz
+                pass
+        else:
+            if path.suffix != ".statsz":
+                path = path.with_suffix(".statsz")
+
         path.parent.mkdir(parents=True, exist_ok=True)
-        spec = cls._build_spec(comparisons or [], metadata)
+
+        spec = {
+            "schema": cls.SCHEMA,
+            "type": "stats",
+            "bundle_id": generate_bundle_id(),
+            "constraints": cls.DEFAULT_CONSTRAINTS,
+            "comparisons": comparisons or [],
+            "provenance": metadata or {},  # v2.0.0: metadata -> provenance
+        }
+
         with ZipBundle(path, mode="w") as zb:
             zb.write_json("spec.json", spec)
             if data is not None:
                 zb.write_csv("data.csv", data)
         return cls(path)
 
-    @classmethod
-    def _build_spec(
-        cls, comparisons: List[Dict[str, Any]], metadata: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """Build spec dictionary."""
-        return {"schema": cls.SCHEMA, "comparisons": comparisons, "metadata": metadata or {}}
-
     @property
     def spec(self) -> Dict[str, Any]:
         """Statistics specification dictionary."""
         return self._spec or {}
+
+    @property
+    def bundle_id(self) -> Optional[str]:
+        """Unique bundle identifier (UUID)."""
+        return self.spec.get("bundle_id")
 
     @spec.setter
     def spec(self, value: Dict[str, Any]) -> None:
@@ -95,6 +161,11 @@ class Statsz:
     def comparisons(self) -> List[Dict[str, Any]]:
         """List of comparison results."""
         return self.spec.get("comparisons", [])
+
+    @property
+    def provenance(self) -> Dict[str, Any]:
+        """Provenance dictionary (v2.0.0 replaces metadata)."""
+        return self.spec.get("provenance", self.spec.get("metadata", {}))
 
     @property
     def metadata(self) -> Dict[str, Any]:
@@ -155,7 +226,9 @@ class Statsz:
         """Remove a comparison by name."""
         if self._spec is None:
             return
-        self._spec["comparisons"] = [c for c in self._spec.get("comparisons", []) if c.get("name") != name]
+        self._spec["comparisons"] = [
+            c for c in self._spec.get("comparisons", []) if c.get("name") != name
+        ]
         self._modified = True
 
     def get_comparison(self, name: str) -> Optional[Dict[str, Any]]:
@@ -206,7 +279,15 @@ class Statsz:
         for comp in self.comparisons:
             name = comp.get("name", "Unknown")
             p = comp.get("p_value", "N/A")
-            sig = "***" if isinstance(p, float) and p < 0.001 else "**" if isinstance(p, float) and p < 0.01 else "*" if isinstance(p, float) and p < 0.05 else ""
+            sig = (
+                "***"
+                if isinstance(p, float) and p < 0.001
+                else "**"
+                if isinstance(p, float) and p < 0.01
+                else "*"
+                if isinstance(p, float) and p < 0.05
+                else ""
+            )
             lines.append(f"- **{name}**: p = {p} {sig}")
         return "\n".join(lines)
 

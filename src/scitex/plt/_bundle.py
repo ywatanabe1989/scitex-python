@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-18 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_bundle.py
 
 """
-Pltz - Object-oriented API for .pltz bundles.
+Pltz - Object-oriented API for plot bundles (.stx and legacy .pltz).
+
+Supports unified .stx format (v2.0.0) with type="plot".
 
 Usage:
     from scitex.plt import Pltz
 
-    pltz = Pltz.create("plot.pltz", plot_type="line", data=df)
-    pltz = Pltz("plot.pltz")
+    # Create (defaults to .stx)
+    pltz = Pltz.create("plot.stx", plot_type="line", data=df)
     pltz.spec["axes"]["xlabel"] = "Time (s)"
     pltz.save()
-    png_bytes = pltz.render_preview()
+
+    # Load (auto-detects format)
+    pltz = Pltz("plot.stx")    # Native .stx
+    pltz = Pltz("plot.pltz")   # Legacy (auto-normalized)
 """
 
 from __future__ import annotations
@@ -24,18 +28,30 @@ from typing import Any, Dict, Optional, Union
 
 import pandas as pd
 
-from scitex.io.bundle import ZipBundle
+from scitex.io.bundle import (
+    SCHEMA_NAME,
+    SCHEMA_VERSION,
+    ZipBundle,
+)
 
 __all__ = ["Pltz"]
 
 
 class Pltz:
-    """High-level API for .pltz bundles (zipped format)."""
+    """High-level API for plot bundles (.stx and legacy .pltz).
 
-    SCHEMA = {"name": "scitex.plt.plot", "version": "1.0.0"}
+    Supports both unified .stx format (v2.0.0) and legacy .pltz format.
+    New bundles are created as .stx by default.
+    """
+
+    # v2.0.0 unified schema
+    SCHEMA = {"name": SCHEMA_NAME, "version": SCHEMA_VERSION}
+    # Legacy schema (for backward compatibility)
+    LEGACY_SCHEMA = {"name": "scitex.plt.plot", "version": "1.0.0"}
+    DEFAULT_CONSTRAINTS = {"allow_children": False, "max_depth": 1}
 
     def __init__(self, path: Union[str, Path]):
-        """Load an existing .pltz bundle."""
+        """Load an existing plot bundle (.stx or .pltz)."""
         self.path = Path(path)
         if not self.path.exists():
             raise FileNotFoundError(f"Bundle not found: {self.path}")
@@ -43,15 +59,20 @@ class Pltz:
         self._style: Optional[Dict[str, Any]] = None
         self._data: Optional[pd.DataFrame] = None
         self._modified = False
+        self._is_stx = self.path.suffix == ".stx"
         self._load()
 
     def _load(self) -> None:
-        """Load bundle contents into memory."""
+        """Load bundle contents into memory, normalizing to v2.0.0 format."""
+        from scitex.io.bundle import normalize_spec
+
         with ZipBundle(self.path, mode="r") as zb:
             try:
-                self._spec = zb.read_json("spec.json")
+                spec = zb.read_json("spec.json")
+                # Normalize to v2.0.0 format
+                self._spec = normalize_spec(spec, "plot")
             except FileNotFoundError:
-                self._spec = {"schema": self.SCHEMA}
+                self._spec = self._create_default_spec("line")
             try:
                 self._style = zb.read_json("style.json")
             except FileNotFoundError:
@@ -61,6 +82,19 @@ class Pltz:
             except FileNotFoundError:
                 self._data = None
 
+    def _create_default_spec(self, plot_type: str) -> Dict[str, Any]:
+        """Create a default v2.0.0 spec."""
+        from scitex.io.bundle import generate_bundle_id
+
+        return {
+            "schema": self.SCHEMA,
+            "type": "plot",
+            "bundle_id": generate_bundle_id(),
+            "constraints": self.DEFAULT_CONSTRAINTS,
+            "plot_type": plot_type,
+            "axes": {"xlabel": "", "ylabel": ""},
+        }
+
     @classmethod
     def create(
         cls,
@@ -68,13 +102,48 @@ class Pltz:
         plot_type: str,
         data: Optional[pd.DataFrame] = None,
         spec_overrides: Optional[Dict[str, Any]] = None,
-    ) -> "Pltz":
-        """Create a new .pltz bundle."""
+        use_stx: bool = True,
+    ) -> Pltz:
+        """Create a new plot bundle.
+
+        Args:
+            path: Output path (extension auto-adjusted)
+            plot_type: Type of plot (e.g., "line", "scatter")
+            data: Optional DataFrame with plot data
+            spec_overrides: Additional spec fields to merge
+            use_stx: If True, create .stx format; if False, create legacy .pltz
+
+        Returns:
+            New Pltz instance
+        """
+        from scitex.io.bundle import generate_bundle_id
+
         path = Path(path)
-        if path.suffix != ".pltz":
-            path = path.with_suffix(".pltz")
+
+        # Determine extension
+        if use_stx:
+            if path.suffix not in (".stx", ".pltz"):
+                path = path.with_suffix(".stx")
+            elif path.suffix == ".pltz":
+                # User explicitly wants .pltz
+                pass
+        else:
+            if path.suffix != ".pltz":
+                path = path.with_suffix(".pltz")
+
         path.parent.mkdir(parents=True, exist_ok=True)
-        spec = cls._build_spec(plot_type, spec_overrides)
+
+        spec = {
+            "schema": cls.SCHEMA,
+            "type": "plot",
+            "bundle_id": generate_bundle_id(),
+            "constraints": cls.DEFAULT_CONSTRAINTS,
+            "plot_type": plot_type,
+            "axes": {"xlabel": "", "ylabel": ""},
+        }
+        if spec_overrides:
+            spec.update(spec_overrides)
+
         with ZipBundle(path, mode="w") as zb:
             zb.write_json("spec.json", spec)
             if data is not None:
@@ -83,16 +152,45 @@ class Pltz:
 
     @classmethod
     def create_from_gallery(
-        cls, path: Union[str, Path], category: str, plot_name: str
-    ) -> "Pltz":
-        """Create a .pltz bundle from gallery template."""
-        from scitex.plt.gallery import get_plot_spec, get_plot_data
+        cls,
+        path: Union[str, Path],
+        category: str,
+        plot_name: str,
+        use_stx: bool = True,
+    ) -> Pltz:
+        """Create a plot bundle from gallery template.
+
+        Args:
+            path: Output path (extension auto-adjusted)
+            category: Gallery category
+            plot_name: Name of plot in gallery
+            use_stx: If True, create .stx format; if False, create legacy .pltz
+
+        Returns:
+            New Pltz instance
+        """
+        from scitex.io.bundle import generate_bundle_id
+        from scitex.plt.gallery import get_plot_data, get_plot_spec
 
         path = Path(path)
-        if path.suffix != ".pltz":
-            path = path.with_suffix(".pltz")
+
+        # Determine extension
+        if use_stx:
+            if path.suffix not in (".stx", ".pltz"):
+                path = path.with_suffix(".stx")
+        else:
+            if path.suffix != ".pltz":
+                path = path.with_suffix(".pltz")
+
         path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Get gallery template and enhance with v2.0.0 fields
         spec = get_plot_spec(category, plot_name)
+        spec["schema"] = cls.SCHEMA
+        spec["type"] = "plot"
+        spec["bundle_id"] = generate_bundle_id()
+        spec["constraints"] = cls.DEFAULT_CONSTRAINTS
+
         data = get_plot_data(category, plot_name)
         with ZipBundle(path, mode="w") as zb:
             zb.write_json("spec.json", spec)
@@ -100,24 +198,15 @@ class Pltz:
                 zb.write_csv("data.csv", data)
         return cls(path)
 
-    @classmethod
-    def _build_spec(
-        cls, plot_type: str, overrides: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """Build spec dictionary for plot type."""
-        spec = {
-            "schema": cls.SCHEMA,
-            "plot_type": plot_type,
-            "axes": {"xlabel": "", "ylabel": ""},
-        }
-        if overrides:
-            spec.update(overrides)
-        return spec
-
     @property
     def spec(self) -> Dict[str, Any]:
         """Plot specification dictionary."""
         return self._spec or {}
+
+    @property
+    def bundle_id(self) -> Optional[str]:
+        """Unique bundle identifier (UUID)."""
+        return self.spec.get("bundle_id")
 
     @spec.setter
     def spec(self, value: Dict[str, Any]) -> None:
@@ -162,8 +251,9 @@ class Pltz:
 
     def render_preview(self, format: str = "png", dpi: int = 150) -> bytes:
         """Render plot preview and return image bytes."""
-        import scitex as stx
         import matplotlib.pyplot as plt_mpl
+
+        import scitex as stx
         from scitex.plt.gallery._plots import PLOT_FUNCTIONS
         from scitex.plt.styles.presets import SCITEX_STYLE
 
@@ -183,7 +273,7 @@ class Pltz:
             # Fallback: basic line plot if data available
             if self._data is not None and not self._data.empty:
                 # Find numeric columns for simple plot
-                numeric_cols = self._data.select_dtypes(include=['number']).columns
+                numeric_cols = self._data.select_dtypes(include=["number"]).columns
                 if len(numeric_cols) >= 2:
                     ax.plot(self._data[numeric_cols[0]], self._data[numeric_cols[1]])
                 elif len(numeric_cols) == 1:
