@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-14 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fig/editor/edit/__init__.py
 
@@ -13,19 +12,20 @@ This module provides the main edit() function and supporting utilities for:
 - Manual override handling (.manual.json)
 """
 
-from .editor_launcher import edit
 from .backend_detector import (
     detect_best_backend,
     print_available_backends,
 )
-from .path_resolver import resolve_figure_paths
 from .bundle_resolver import (
-    resolve_pltz_bundle,
     resolve_figz_bundle,
     resolve_layered_pltz_bundle,
+    resolve_pltz_bundle,
+    resolve_stx_bundle,
 )
-from .panel_loader import load_panel_data
+from .editor_launcher import edit
 from .manual_handler import compute_file_hash, save_manual_overrides
+from .panel_loader import load_panel_data
+from .path_resolver import resolve_figure_paths
 
 __all__ = [
     # Main entry point
@@ -39,6 +39,7 @@ __all__ = [
     "resolve_pltz_bundle",
     "resolve_figz_bundle",
     "resolve_layered_pltz_bundle",
+    "resolve_stx_bundle",
     # Panel loading
     "load_panel_data",
     # Manual overrides

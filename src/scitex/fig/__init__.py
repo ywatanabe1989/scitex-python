@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: 2025-12-17
 # File: ./src/scitex/fig/__init__.py
 """
@@ -35,22 +34,37 @@ Figure1.figz.d/
 """
 
 # Submodules for advanced use
-from . import io
-from . import model
-from . import backend
-from . import utils
-from . import editor
+from . import backend, editor, io, layout, layout_viz, model, utils
+
+# OOP Bundle API (Unified Element Model)
+from ._bundle import Figz
 
 # Editor
 from .editor import edit
 
-# OOP Bundle API
-from ._bundle import Figz
+# Layout utilities
+from .layout import (
+    auto_crop_layout,
+    auto_layout_grid,
+    content_bounds,
+    element_bounds,
+    normalize_position,
+    normalize_size,
+    to_absolute,
+    to_relative,
+)
 
+# Layout visualization (blueprint-style)
+from .layout_viz import (
+    BLUEPRINT_STYLE,
+    plot_auto_crop_comparison,
+    plot_layout,
+)
 
 # =============================================================================
 # .figz Bundle Support
 # =============================================================================
+
 
 def save_figz(
     panels,
@@ -92,7 +106,8 @@ def save_figz(
     >>> sfig.save_figz(panels, "Figure1.figz.d")  # Creates directory
     """
     from pathlib import Path
-    from scitex.io.bundle import save, BundleType
+
+    from scitex.io.bundle import BundleType, save
 
     p = Path(path)
     spath = str(path)
@@ -107,8 +122,8 @@ def save_figz(
 
     # Build bundle data - pass source paths directly for file copying
     bundle_data = {
-        'spec': spec,
-        'plots': {},
+        "spec": spec,
+        "plots": {},
     }
 
     # Pass source paths directly (not loaded data) to preserve all files
@@ -116,7 +131,7 @@ def save_figz(
         pltz_path = Path(pltz_source)
         if pltz_path.exists():
             # Store source path for direct copying
-            bundle_data['plots'][panel_id] = str(pltz_path)
+            bundle_data["plots"][panel_id] = str(pltz_path)
 
     return save(bundle_data, p, bundle_type=BundleType.FIGZ, as_zip=as_zip)
 
@@ -148,19 +163,19 @@ def load_figz(path):
 
     bundle = load(path)
 
-    if bundle['type'] != 'figz':
+    if bundle["type"] != "figz":
         raise ValueError(f"Not a .figz bundle: {path}")
 
     result = {
-        'spec': bundle.get('spec', {}),
-        'panels': {},
+        "spec": bundle.get("spec", {}),
+        "panels": {},
     }
 
     # Return spec and data for each panel (reconstruction is optional)
-    for panel_id, plot_bundle in bundle.get('plots', {}).items():
-        result['panels'][panel_id] = {
-            'spec': plot_bundle.get('spec', {}),
-            'data': plot_bundle.get('data'),
+    for panel_id, plot_bundle in bundle.get("plots", {}).items():
+        result["panels"][panel_id] = {
+            "spec": plot_bundle.get("spec", {}),
+            "data": plot_bundle.get("data"),
         }
 
     return result
@@ -171,17 +186,17 @@ def _generate_figure_spec(panels):
     from pathlib import Path
 
     spec = {
-        'schema': {'name': 'scitex.fig.figure', 'version': '1.0.0'},
-        'figure': {
-            'id': 'figure',
-            'title': '',
-            'caption': '',
-            'styles': {
-                'size': {'width_mm': 180, 'height_mm': 120},
-                'background': '#ffffff',
+        "schema": {"name": "scitex.fig.figure", "version": "1.0.0"},
+        "figure": {
+            "id": "figure",
+            "title": "",
+            "caption": "",
+            "styles": {
+                "size": {"width_mm": 180, "height_mm": 120},
+                "background": "#ffffff",
             },
         },
-        'panels': [],
+        "panels": [],
     }
 
     # Auto-layout panels
@@ -207,14 +222,16 @@ def _generate_figure_spec(panels):
         y = margin + row * (panel_h + margin)
 
         # Note: save_bundle uses panel_id for the directory name (e.g., A.pltz.d)
-        spec['panels'].append({
-            'id': panel_id,
-            'label': panel_id,
-            'caption': '',
-            'plot': f"{panel_id}.pltz.d",
-            'position': {'x_mm': x, 'y_mm': y},
-            'size': {'width_mm': panel_w, 'height_mm': panel_h},
-        })
+        spec["panels"].append(
+            {
+                "id": panel_id,
+                "label": panel_id,
+                "caption": "",
+                "plot": f"{panel_id}.pltz.d",
+                "position": {"x_mm": x, "y_mm": y},
+                "size": {"width_mm": panel_w, "height_mm": panel_h},
+            }
+        )
 
     return spec
 
@@ -226,11 +243,26 @@ __all__ = [
     "backend",
     "utils",
     "editor",
+    "layout",
+    "layout_viz",
     # Editor
     "edit",
-    # OOP Bundle API
+    # OOP Bundle API (Unified Element Model)
     "Figz",
-    # Legacy functions
+    # Layout utilities
+    "to_absolute",
+    "to_relative",
+    "normalize_position",
+    "normalize_size",
+    "element_bounds",
+    "content_bounds",
+    "auto_layout_grid",
+    "auto_crop_layout",
+    # Layout visualization
+    "plot_layout",
+    "plot_auto_crop_comparison",
+    "BLUEPRINT_STYLE",
+    # Legacy functions (deprecated)
     "save_figz",
     "load_figz",
 ]

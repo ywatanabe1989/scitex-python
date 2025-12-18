@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-11-14 08:56:29 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save.py
 
@@ -9,7 +8,6 @@ import os
 __FILE__ = __file__
 
 import warnings
-
 
 """
 1. Functionality:
@@ -28,38 +26,38 @@ import warnings
 import inspect
 import os as _os
 from pathlib import Path
-from typing import Any
-from typing import Union
+from typing import Any, Union
 
 from scitex import logging
-
-from scitex.sh import sh
 from scitex.path._clean import clean
 from scitex.path._getsize import getsize
+from scitex.sh import sh
 from scitex.str._clean_path import clean_path
 from scitex.str._color_text import color_text
 from scitex.str._readable_bytes import readable_bytes
 
 # Import save functions from the new modular structure
-from ._save_modules import save_catboost
-from ._save_modules import save_csv
-from ._save_modules import save_excel
-from ._save_modules import save_hdf5
-from ._save_modules import save_html
-from ._save_modules import save_image
-from ._save_modules import save_joblib
-from ._save_modules import save_json
-from ._save_modules import save_matlab
-from ._save_modules import save_mp4
-from ._save_modules import save_npy
-from ._save_modules import save_npz
-from ._save_modules import save_pickle
-from ._save_modules import save_pickle_compressed
-from ._save_modules import save_tex
-from ._save_modules import save_text
-from ._save_modules import save_torch
-from ._save_modules import save_yaml
-from ._save_modules import save_zarr
+from ._save_modules import (
+    save_catboost,
+    save_csv,
+    save_excel,
+    save_hdf5,
+    save_html,
+    save_image,
+    save_joblib,
+    save_json,
+    save_matlab,
+    save_mp4,
+    save_npy,
+    save_npz,
+    save_pickle,
+    save_pickle_compressed,
+    save_tex,
+    save_text,
+    save_torch,
+    save_yaml,
+    save_zarr,
+)
 from ._save_modules._bibtex import save_bibtex
 
 logger = logging.getLogger()
@@ -219,14 +217,15 @@ def save(
     Notes
     -----
     Supported formats include CSV, NPY, PKL, JOBLIB, PNG, HTML, TIFF, MP4, YAML, JSON, HDF5, PTH, MAT, CBM,
-    and SciTeX bundles (.figz, .pltz, .statsz).
+    and SciTeX bundles (.stx, .figz, .pltz, .statsz).
     The function dynamically selects the appropriate saving mechanism based on the file extension.
 
     Bundle Formats:
-    - .figz: Publication figure bundle (panels dict). Default: ZIP archive.
-    - .pltz: Plot bundle (matplotlib figure). Default: directory bundle.
-    - .statsz: Statistics bundle (comparisons list). Default: directory bundle.
-    - Use .d suffix (e.g., "Figure1.figz.d") to force directory format for .figz.
+    - .stx: Unified SciTeX bundle (auto-detects: figure/plot/stats). Default: ZIP archive.
+    - .figz: Publication figure bundle (panels dict). Default: ZIP archive. (legacy)
+    - .pltz: Plot bundle (matplotlib figure). Default: directory bundle. (legacy)
+    - .statsz: Statistics bundle (comparisons list). Default: directory bundle. (legacy)
+    - Use .d suffix (e.g., "Figure1.stx.d") to force directory format.
 
     Examples
     --------
@@ -502,6 +501,291 @@ def _symlink_to(spath_final, symlink_to, verbose):
             logger.success(f"Symlinked: {spath_final} -> {symlink_to_full}")
 
 
+def _save_stx_bundle(
+    obj, spath, as_zip=True, bundle_type=None, basename=None, **kwargs
+):
+    """Save an object as a unified .stx bundle.
+
+    The .stx format is the unified bundle format that supports:
+    - figure: Publication figures with multiple panels (replaces .figz)
+    - plot: Single matplotlib plots (replaces .pltz)
+    - stats: Statistical results (replaces .statsz)
+
+    The content type is auto-detected from the object:
+    - Figz instance -> delegates to figz.save()
+    - matplotlib.figure.Figure -> plot
+    - dict with 'panels' or 'elements' -> figure
+    - dict with 'comparisons' -> stats
+
+    Bundle structure:
+        output.stx.d/
+            spec.json           # Type, schema, elements/data
+            style.json          # Visual appearance
+            data.csv            # Raw data (if applicable)
+            exports/            # PNG, SVG, PDF exports
+
+    Parameters
+    ----------
+    obj : Any
+        Object to save (Figz, Figure, dict, etc.)
+    spath : str or Path
+        Output path (e.g., "output.stx" or "output.stx.d")
+    as_zip : bool
+        If True (default), save as ZIP archive. Use False for .stx.d directory.
+    bundle_type : str, optional
+        Force bundle type: 'figure', 'plot', or 'stats'. Auto-detected if None.
+    **kwargs
+        Additional arguments passed to format-specific savers.
+    """
+    from pathlib import Path
+
+    # Check if obj is a Figz instance
+    from scitex.fig import Figz
+
+    if isinstance(obj, Figz):
+        # Delegate to Figz.save() - verbose=False since outer _save handles logging
+        obj.save(spath, verbose=False)
+        return
+
+    p = Path(spath)
+
+    # Extract basename from path if not provided
+    if basename is None:
+        basename = p.stem
+        if basename.endswith(".stx"):
+            basename = basename[:-4]
+        elif basename.endswith(".d"):
+            basename = Path(basename).stem
+            if basename.endswith(".stx"):
+                basename = basename[:-4]
+
+    # Auto-detect content type from object
+    content_type = bundle_type
+    if content_type is None:
+        import matplotlib.figure
+
+        if isinstance(obj, matplotlib.figure.Figure):
+            content_type = "plot"
+        elif hasattr(obj, "figure"):
+            content_type = "plot"
+            obj = obj.figure
+        elif isinstance(obj, dict):
+            if "panels" in obj or "elements" in obj:
+                content_type = "figure"
+            elif "comparisons" in obj:
+                content_type = "stats"
+            else:
+                content_type = "figure"  # Default for dicts
+        else:
+            raise ValueError(
+                f"Cannot auto-detect bundle type for {type(obj).__name__}. "
+                "Please specify bundle_type='figure', 'plot', or 'stats'."
+            )
+
+    # Route to appropriate handler based on content type
+    if content_type == "plot":
+        # For plots, use the pltz saver but wrap output as .stx
+        _save_pltz_as_stx(obj, spath, as_zip=as_zip, basename=basename, **kwargs)
+    elif content_type == "figure":
+        # For figures, use the figz saver but wrap output as .stx
+        import scitex.fig as sfig
+
+        sfig.save_figz(obj, spath, as_zip=as_zip, **kwargs)
+    elif content_type == "stats":
+        # For stats, use the statsz saver but wrap output as .stx
+        import scitex.stats as sstats
+
+        sstats.save_statsz(obj, spath, as_zip=as_zip, **kwargs)
+    else:
+        raise ValueError(f"Unknown bundle type: {content_type}")
+
+
+def _save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
+    """Save a matplotlib figure as a .stx bundle with plot content type.
+
+    Bundle structure:
+        plot_X.stx.d/
+            spec.json           # Bundle specification
+            style.json          # Visual style configuration
+            data/
+                data.csv        # Plotted data (tidy format)
+                meta.json       # Column meanings, units, dtypes
+            stats/
+                stats.json      # Statistical test results (if any)
+            cache/
+                derived_data.csv        # Binned data, etc. (optional)
+                geometry_px.json        # Hit areas for GUI editing
+                render_manifest.json    # Render metadata
+            exports/
+                plot.svg        # Vector export
+                plot.png        # Raster export
+                plot.pdf        # Publication export
+
+    Internal function that wraps pltz saving in the unified .stx format.
+    """
+    import tempfile
+    from pathlib import Path
+
+    from .bundle._stx import create_stx_spec
+
+    p = Path(spath)
+
+    if basename is None:
+        basename = p.stem
+        if basename.endswith(".stx"):
+            basename = basename[:-4]
+
+    # Extract figure
+    import matplotlib.figure
+
+    fig = obj
+    if hasattr(obj, "figure"):
+        fig = obj.figure
+    elif hasattr(obj, "fig"):
+        fig = obj.fig
+
+    if not isinstance(fig, matplotlib.figure.Figure):
+        raise TypeError(f"Expected matplotlib Figure, got {type(obj).__name__}")
+
+    dpi = kwargs.pop("dpi", 300)
+    data = kwargs.pop("data", None)
+
+    # Get CSV data from figure if not provided
+    csv_df = data
+    if csv_df is None:
+        csv_source = _get_figure_with_data(obj)
+        if csv_source is not None and hasattr(csv_source, "export_as_csv"):
+            try:
+                csv_df = csv_source.export_as_csv()
+            except Exception:
+                pass
+
+    # Create spec for .stx format
+    fig_width_inch, fig_height_inch = fig.get_size_inches()
+
+    spec = create_stx_spec(
+        bundle_type="plot",
+        title=basename,
+        size={
+            "width_mm": round(fig_width_inch * 25.4, 2),
+            "height_mm": round(fig_height_inch * 25.4, 2),
+            "dpi": dpi,
+        },
+    )
+
+    # Determine paths
+    if as_zip:
+        zip_path = p if not str(p).endswith(".d") else Path(str(p)[:-2])
+        temp_dir = Path(tempfile.mkdtemp())
+        bundle_dir = temp_dir / f"{basename}.stx.d"
+    else:
+        bundle_dir = p if str(p).endswith(".d") else Path(str(p) + ".d")
+        temp_dir = None
+
+    bundle_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save spec.json
+    import json
+
+    with open(bundle_dir / "spec.json", "w") as f:
+        json.dump(spec, f, indent=2, default=str)
+
+    # Save style.json (empty default for consistency)
+    with open(bundle_dir / "style.json", "w") as f:
+        json.dump({}, f, indent=2)
+
+    # Create directory structure
+    data_dir = bundle_dir / "data"
+    stats_dir = bundle_dir / "stats"
+    cache_dir = bundle_dir / "cache"
+    exports_dir = bundle_dir / "exports"
+
+    data_dir.mkdir(exist_ok=True)
+    stats_dir.mkdir(exist_ok=True)
+    cache_dir.mkdir(exist_ok=True)
+    exports_dir.mkdir(exist_ok=True)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message=".*tight_layout.*")
+
+        # Save exports with simple names (bundle dir provides context)
+        fig.savefig(
+            exports_dir / "plot.png",
+            dpi=dpi,
+            bbox_inches="tight",
+            format="png",
+            transparent=True,
+        )
+
+        fig.savefig(
+            exports_dir / "plot.svg",
+            bbox_inches="tight",
+            format="svg",
+        )
+
+        fig.savefig(
+            exports_dir / "plot.pdf",
+            bbox_inches="tight",
+            format="pdf",
+        )
+
+    # Save data/data.csv and data/meta.json if available
+    if csv_df is not None:
+        csv_df.to_csv(data_dir / "data.csv", index=False)
+
+        # Generate metadata for the data
+        meta = {
+            "columns": list(csv_df.columns),
+            "dtypes": {col: str(dtype) for col, dtype in csv_df.dtypes.items()},
+            "shape": list(csv_df.shape),
+            "description": "Plotted data (tidy format)",
+        }
+        with open(data_dir / "meta.json", "w") as f:
+            json.dump(meta, f, indent=2)
+
+    # Save cache/geometry_px.json for GUI hit areas
+    try:
+        from scitex.plt.utils._hitmap import (
+            extract_path_data,
+            extract_selectable_regions,
+        )
+
+        geometry = {
+            "path_data": extract_path_data(fig),
+            "selectable_regions": extract_selectable_regions(fig),
+        }
+        with open(cache_dir / "geometry_px.json", "w") as f:
+            json.dump(geometry, f, indent=2)
+    except Exception:
+        pass  # Skip if hitmap extraction fails
+
+    # Save cache/render_manifest.json
+    render_manifest = {
+        "dpi": dpi,
+        "format": ["png", "svg", "pdf"],
+        "bbox_inches": "tight",
+        "size_mm": {
+            "width": round(fig_width_inch * 25.4, 2),
+            "height": round(fig_height_inch * 25.4, 2),
+        },
+    }
+    with open(cache_dir / "render_manifest.json", "w") as f:
+        json.dump(render_manifest, f, indent=2)
+
+    # Save stats/stats.json placeholder (empty by default)
+    with open(stats_dir / "stats.json", "w") as f:
+        json.dump({"comparisons": [], "tests": []}, f, indent=2)
+
+    # Pack to ZIP if requested
+    if as_zip:
+        import shutil
+
+        from .bundle import pack as pack_bundle
+
+        pack_bundle(bundle_dir, zip_path)
+        shutil.rmtree(temp_dir)
+
+
 def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwargs):
     """Save a matplotlib figure as a .pltz bundle.
 
@@ -536,57 +820,60 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
     **kwargs
         Additional arguments passed to savefig.
     """
-    from pathlib import Path
     import tempfile
-    import json
+    from pathlib import Path
+
     import numpy as np
-    from .bundle import save as save_bundle, BundleType
+
+    from .bundle import BundleType
+    from .bundle import save as save_bundle
 
     p = Path(spath)
 
     # Extract basename from path (e.g., "myplot.pltz" -> "myplot", "myplot.pltz.d" -> "myplot")
     basename = p.stem  # e.g., "myplot.pltz" or "myplot"
-    if basename.endswith('.pltz'):
+    if basename.endswith(".pltz"):
         basename = basename[:-5]  # Remove .pltz suffix
-    elif basename.endswith('.d'):
+    elif basename.endswith(".d"):
         # Handle myplot.pltz.d -> myplot.pltz -> myplot
         basename = Path(basename).stem
-        if basename.endswith('.pltz'):
+        if basename.endswith(".pltz"):
             basename = basename[:-5]
 
     # Extract figure from various matplotlib object types
     import matplotlib.figure
+
     fig = obj
-    if hasattr(obj, 'figure'):
+    if hasattr(obj, "figure"):
         fig = obj.figure
-    elif hasattr(obj, 'fig'):
+    elif hasattr(obj, "fig"):
         fig = obj.fig
 
     if not isinstance(fig, matplotlib.figure.Figure):
         raise TypeError(f"Expected matplotlib Figure, got {type(obj).__name__}")
 
-    dpi = kwargs.pop('dpi', 300)
+    dpi = kwargs.pop("dpi", 300)
 
     # === Always use layered format ===
-    from scitex.plt.io import save_layered_pltz_bundle
     import shutil
-    import tempfile
+
+    from scitex.plt.io import save_layered_pltz_bundle
 
     # Determine bundle directory path
     if as_zip:
         # For ZIP: save to temp dir, then compress
         temp_dir = Path(tempfile.mkdtemp())
         bundle_dir = temp_dir / f"{basename}.pltz.d"
-        zip_path = p if not str(p).endswith('.d') else Path(str(p)[:-2])
+        zip_path = p if not str(p).endswith(".d") else Path(str(p)[:-2])
     else:
         # For directory: save directly
-        bundle_dir = p if str(p).endswith('.d') else Path(str(p) + '.d')
+        bundle_dir = p if str(p).endswith(".d") else Path(str(p) + ".d")
 
     # Get CSV data from figure if not provided
     csv_df = data
     if csv_df is None:
         csv_source = _get_figure_with_data(obj)
-        if csv_source is not None and hasattr(csv_source, 'export_as_csv'):
+        if csv_source is not None and hasattr(csv_source, "export_as_csv"):
             try:
                 csv_df = csv_source.export_as_csv()
             except Exception:
@@ -603,6 +890,7 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
     # Compress to ZIP if requested
     if as_zip:
         from .bundle import pack as pack_bundle
+
         pack_bundle(bundle_dir, zip_path)
         shutil.rmtree(temp_dir)  # Clean up temp directory
 
@@ -616,34 +904,34 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
 
     # Build spec according to contract (using basename for file references)
     spec = {
-        'schema': {'name': 'scitex.plt.plot', 'version': '1.0.0'},
-        'backend': 'mpl',
-        'data': {
-            'source': f'{basename}.csv',
-            'path': f'{basename}.csv',
-            'hash': None,  # Will be computed after data extraction
-            'columns': [],  # Will be populated after data extraction
+        "schema": {"name": "scitex.plt.plot", "version": "1.0.0"},
+        "backend": "mpl",
+        "data": {
+            "source": f"{basename}.csv",
+            "path": f"{basename}.csv",
+            "hash": None,  # Will be computed after data extraction
+            "columns": [],  # Will be populated after data extraction
         },
-        'size': {
-            'width_inch': round(fig_width_inch, 2),
-            'height_inch': round(fig_height_inch, 2),
-            'width_mm': round(fig_width_inch * 25.4, 2),
-            'height_mm': round(fig_height_inch * 25.4, 2),
-            'width_px': int(fig_width_inch * dpi),
-            'height_px': int(fig_height_inch * dpi),
-            'dpi': dpi,
-            'crop_margin_mm': 1.0,
+        "size": {
+            "width_inch": round(fig_width_inch, 2),
+            "height_inch": round(fig_height_inch, 2),
+            "width_mm": round(fig_width_inch * 25.4, 2),
+            "height_mm": round(fig_height_inch * 25.4, 2),
+            "width_px": int(fig_width_inch * dpi),
+            "height_px": int(fig_height_inch * dpi),
+            "dpi": dpi,
+            "crop_margin_mm": 1.0,
         },
-        'axes': [],
-        'theme': {
-            'mode': 'light',
-            'colors': {
-                'background': 'transparent',
-                'axes_bg': 'white',
-                'text': 'black',
-                'spine': 'black',
-                'tick': 'black',
-            }
+        "axes": [],
+        "theme": {
+            "mode": "light",
+            "colors": {
+                "background": "transparent",
+                "axes_bg": "white",
+                "text": "black",
+                "spine": "black",
+                "tick": "black",
+            },
         },
     }
 
@@ -656,62 +944,62 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
         bbox = ax.get_position()
 
         ax_info = {
-            'xlabel': ax.get_xlabel() or None,
-            'ylabel': ax.get_ylabel() or None,
-            'title': ax.get_title() or None,
-            'xlim': [round(v, 2) for v in ax.get_xlim()],
-            'ylim': [round(v, 2) for v in ax.get_ylim()],
-            'plot_type': 'line',  # Default, could be detected
+            "xlabel": ax.get_xlabel() or None,
+            "ylabel": ax.get_ylabel() or None,
+            "title": ax.get_title() or None,
+            "xlim": [round(v, 2) for v in ax.get_xlim()],
+            "ylim": [round(v, 2) for v in ax.get_ylim()],
+            "plot_type": "line",  # Default, could be detected
             # Bounding box in normalized figure coordinates (0-1)
-            'bbox': {
-                'x0': round(bbox.x0, 4),
-                'y0': round(bbox.y0, 4),
-                'x1': round(bbox.x1, 4),
-                'y1': round(bbox.y1, 4),
-                'width': round(bbox.width, 4),
-                'height': round(bbox.height, 4),
+            "bbox": {
+                "x0": round(bbox.x0, 4),
+                "y0": round(bbox.y0, 4),
+                "x1": round(bbox.x1, 4),
+                "y1": round(bbox.y1, 4),
+                "width": round(bbox.width, 4),
+                "height": round(bbox.height, 4),
             },
             # Bounding box in mm
-            'bbox_mm': {
-                'x0': round(bbox.x0 * fig_width_inch * 25.4, 2),
-                'y0': round(bbox.y0 * fig_height_inch * 25.4, 2),
-                'x1': round(bbox.x1 * fig_width_inch * 25.4, 2),
-                'y1': round(bbox.y1 * fig_height_inch * 25.4, 2),
-                'width': round(bbox.width * fig_width_inch * 25.4, 2),
-                'height': round(bbox.height * fig_height_inch * 25.4, 2),
+            "bbox_mm": {
+                "x0": round(bbox.x0 * fig_width_inch * 25.4, 2),
+                "y0": round(bbox.y0 * fig_height_inch * 25.4, 2),
+                "x1": round(bbox.x1 * fig_width_inch * 25.4, 2),
+                "y1": round(bbox.y1 * fig_height_inch * 25.4, 2),
+                "width": round(bbox.width * fig_width_inch * 25.4, 2),
+                "height": round(bbox.height * fig_height_inch * 25.4, 2),
             },
             # Bounding box in pixels
-            'bbox_px': {
-                'x0': int(bbox.x0 * fig_width_inch * dpi),
-                'y0': int(bbox.y0 * fig_height_inch * dpi),
-                'x1': int(bbox.x1 * fig_width_inch * dpi),
-                'y1': int(bbox.y1 * fig_height_inch * dpi),
-                'width': int(bbox.width * fig_width_inch * dpi),
-                'height': int(bbox.height * fig_height_inch * dpi),
+            "bbox_px": {
+                "x0": int(bbox.x0 * fig_width_inch * dpi),
+                "y0": int(bbox.y0 * fig_height_inch * dpi),
+                "x1": int(bbox.x1 * fig_width_inch * dpi),
+                "y1": int(bbox.y1 * fig_height_inch * dpi),
+                "width": int(bbox.width * fig_width_inch * dpi),
+                "height": int(bbox.height * fig_height_inch * dpi),
             },
         }
 
         # SciTeX-specific axis dimensions
-        if hasattr(ax, '_scitex_axes_width_mm'):
-            ax_info['axes_width_mm'] = ax._scitex_axes_width_mm
+        if hasattr(ax, "_scitex_axes_width_mm"):
+            ax_info["axes_width_mm"] = ax._scitex_axes_width_mm
         else:
-            ax_info['axes_width_mm'] = round(bbox.width * fig_width_inch * 25.4, 1)
+            ax_info["axes_width_mm"] = round(bbox.width * fig_width_inch * 25.4, 1)
 
-        if hasattr(ax, '_scitex_axes_height_mm'):
-            ax_info['axes_height_mm'] = ax._scitex_axes_height_mm
+        if hasattr(ax, "_scitex_axes_height_mm"):
+            ax_info["axes_height_mm"] = ax._scitex_axes_height_mm
         else:
-            ax_info['axes_height_mm'] = round(bbox.height * fig_height_inch * 25.4, 1)
+            ax_info["axes_height_mm"] = round(bbox.height * fig_height_inch * 25.4, 1)
 
         # Extract line data for CSV and build lines array
         lines_info = []
         for j, line in enumerate(ax.get_lines()):
             label = line.get_label()
-            if label is None or label.startswith('_'):
-                label = f'series_{j}'
+            if label is None or label.startswith("_"):
+                label = f"series_{j}"
             xdata, ydata = line.get_data()
             if len(xdata) > 0:
-                col_x = f'{label}_x' if i == 0 else f'ax{i}_{label}_x'
-                col_y = f'{label}_y' if i == 0 else f'ax{i}_{label}_y'
+                col_x = f"{label}_x" if i == 0 else f"ax{i}_{label}_x"
+                col_y = f"{label}_y" if i == 0 else f"ax{i}_{label}_y"
                 extracted_data[col_x] = np.array(xdata)
                 extracted_data[col_y] = np.array(ydata)
 
@@ -719,57 +1007,63 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
                 color = line.get_color()
                 if isinstance(color, (list, tuple)):
                     import matplotlib.colors as mcolors
+
                     color = mcolors.to_hex(color)
 
-                lines_info.append({
-                    'label': label,
-                    'x_col': col_x,
-                    'y_col': col_y,
-                    'color': color,
-                    'linewidth': line.get_linewidth(),
-                })
+                lines_info.append(
+                    {
+                        "label": label,
+                        "x_col": col_x,
+                        "y_col": col_y,
+                        "color": color,
+                        "linewidth": line.get_linewidth(),
+                    }
+                )
 
         if lines_info:
-            ax_info['lines'] = lines_info
+            ax_info["lines"] = lines_info
 
-        spec['axes'].append(ax_info)
+        spec["axes"].append(ax_info)
 
     # Handle theme from figure
-    if hasattr(fig, '_scitex_theme'):
+    if hasattr(fig, "_scitex_theme"):
         theme_mode = fig._scitex_theme
-        spec['theme']['mode'] = theme_mode
+        spec["theme"]["mode"] = theme_mode
         # Update colors based on theme mode
-        if theme_mode == 'dark':
-            spec['theme']['colors'] = {
-                'background': 'transparent',
-                'axes_bg': 'transparent',
-                'text': '#e8e8e8',
-                'spine': '#e8e8e8',
-                'tick': '#e8e8e8',
+        if theme_mode == "dark":
+            spec["theme"]["colors"] = {
+                "background": "transparent",
+                "axes_bg": "transparent",
+                "text": "#e8e8e8",
+                "spine": "#e8e8e8",
+                "tick": "#e8e8e8",
             }
             # Re-apply theme colors to ensure legends and other elements get the correct colors
             from scitex.plt.utils._figure_mm import _apply_theme_colors
+
             for ax in fig.axes:
-                _apply_theme_colors(ax, theme='dark')
+                _apply_theme_colors(ax, theme="dark")
 
     # Build bundle data (include basename for file naming)
-    bundle_data = {'spec': spec, 'basename': basename}
+    bundle_data = {"spec": spec, "basename": basename}
 
     # Use provided data or extracted data for CSV
     # Priority: 1) explicit data param, 2) export_as_csv method, 3) line extraction fallback
     csv_df = None
     if data is not None:
         csv_df = data
-        bundle_data['data'] = data
+        bundle_data["data"] = data
     else:
         # Try to use export_as_csv from SciTeX wrapped objects (handles all plot types)
         csv_source = _get_figure_with_data(obj)
-        if csv_source is not None and hasattr(csv_source, 'export_as_csv'):
+        if csv_source is not None and hasattr(csv_source, "export_as_csv"):
             try:
                 csv_df = csv_source.export_as_csv()
                 if csv_df is not None and not csv_df.empty:
-                    bundle_data['data'] = csv_df
-                    logger.debug(f"CSV data extracted via export_as_csv: {len(csv_df)} rows, {len(csv_df.columns)} cols")
+                    bundle_data["data"] = csv_df
+                    logger.debug(
+                        f"CSV data extracted via export_as_csv: {len(csv_df)} rows, {len(csv_df.columns)} cols"
+                    )
             except Exception as e:
                 logger.debug(f"export_as_csv failed: {e}")
                 csv_df = None
@@ -778,35 +1072,46 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
         if csv_df is None and extracted_data:
             try:
                 import pandas as pd
+
                 # Pad arrays to same length
                 max_len = max(len(v) for v in extracted_data.values())
                 padded = {}
                 for k, v in extracted_data.items():
                     if len(v) < max_len:
-                        padded[k] = np.pad(v, (0, max_len - len(v)), constant_values=np.nan)
+                        padded[k] = np.pad(
+                            v, (0, max_len - len(v)), constant_values=np.nan
+                        )
                     else:
                         padded[k] = v
                 csv_df = pd.DataFrame(padded)
-                bundle_data['data'] = csv_df
-                logger.debug(f"CSV data extracted via line fallback: {len(csv_df)} rows")
+                bundle_data["data"] = csv_df
+                logger.debug(
+                    f"CSV data extracted via line fallback: {len(csv_df)} rows"
+                )
             except ImportError:
                 pass
 
     # Compute hash and columns for data section
     if csv_df is not None:
         import hashlib
+
         # Get CSV string for hash computation
         csv_str = csv_df.to_csv(index=False)
         csv_hash = hashlib.sha256(csv_str.encode()).hexdigest()
-        spec['data']['hash'] = f'sha256:{csv_hash[:16]}'
-        spec['data']['columns'] = list(csv_df.columns)
+        spec["data"]["hash"] = f"sha256:{csv_hash[:16]}"
+        spec["data"]["columns"] = list(csv_df.columns)
 
     # Save figure to multiple formats
-    import warnings
+
     from PIL import Image as PILImage
+
     from scitex.plt.utils._hitmap import (
-        apply_hitmap_colors, restore_original_colors, extract_path_data,
-        extract_selectable_regions, HITMAP_BACKGROUND_COLOR, HITMAP_AXES_COLOR
+        HITMAP_AXES_COLOR,
+        HITMAP_BACKGROUND_COLOR,
+        apply_hitmap_colors,
+        extract_path_data,
+        extract_selectable_regions,
+        restore_original_colors,
     )
 
     crop_box = None
@@ -817,22 +1122,28 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
 
         # Suppress tight_layout warnings for SciTeX figures with custom axes
         with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', message='.*tight_layout.*')
+            warnings.filterwarnings("ignore", message=".*tight_layout.*")
 
             # Always use transparent background for SciTeX figures (both light and dark themes)
             use_transparent = True
 
             # Save PNG (raster) - required
             png_path = tmp_path / "plot.png"
-            fig.savefig(png_path, dpi=dpi, bbox_inches='tight', format='png', transparent=use_transparent)
+            fig.savefig(
+                png_path,
+                dpi=dpi,
+                bbox_inches="tight",
+                format="png",
+                transparent=use_transparent,
+            )
 
             # Save SVG (vector) - optional
             svg_path = tmp_path / "plot.svg"
-            fig.savefig(svg_path, bbox_inches='tight', format='svg')
+            fig.savefig(svg_path, bbox_inches="tight", format="svg")
 
             # Save PDF (vector) - optional
             pdf_path = tmp_path / "plot.pdf"
-            fig.savefig(pdf_path, bbox_inches='tight', format='pdf')
+            fig.savefig(pdf_path, bbox_inches="tight", format="pdf")
 
             # Now generate hitmap by applying ID colors to data elements ONLY
             # Keep axes/spines/labels with original colors to preserve bbox_inches='tight' bounds
@@ -847,12 +1158,14 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
                 original_ax_facecolors.append(ax.get_facecolor())
                 # Store axis element colors for restoration
                 ax_props = {
-                    'ax': ax,
-                    'spine_colors': {k: v.get_edgecolor() for k, v in ax.spines.items()},
-                    'tick_colors': ax.tick_params,  # Will restore later
-                    'xlabel_color': ax.xaxis.label.get_color(),
-                    'ylabel_color': ax.yaxis.label.get_color(),
-                    'title_color': ax.title.get_color(),
+                    "ax": ax,
+                    "spine_colors": {
+                        k: v.get_edgecolor() for k, v in ax.spines.items()
+                    },
+                    "tick_colors": ax.tick_params,  # Will restore later
+                    "xlabel_color": ax.xaxis.label.get_color(),
+                    "ylabel_color": ax.yaxis.label.get_color(),
+                    "title_color": ax.title.get_color(),
                 }
                 original_ax_props.append(ax_props)
                 # Set hitmap colors for non-data elements
@@ -868,18 +1181,26 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
 
             # Save hitmap PNG with same bbox_inches='tight'
             hitmap_path = tmp_path / "plot_hitmap.png"
-            fig.savefig(hitmap_path, dpi=dpi, bbox_inches='tight', format='png', facecolor=HITMAP_BACKGROUND_COLOR)
+            fig.savefig(
+                hitmap_path,
+                dpi=dpi,
+                bbox_inches="tight",
+                format="png",
+                facecolor=HITMAP_BACKGROUND_COLOR,
+            )
 
             # Optimize hitmap PNG size using zlib compression
             try:
-                hitmap_img = PILImage.open(hitmap_path).convert('RGB')
-                hitmap_img.save(hitmap_path, format='PNG', optimize=True, compress_level=9)
+                hitmap_img = PILImage.open(hitmap_path).convert("RGB")
+                hitmap_img.save(
+                    hitmap_path, format="PNG", optimize=True, compress_level=9
+                )
             except Exception:
                 pass  # Keep original if optimization fails
 
             # Save hitmap SVG with same bbox_inches='tight'
             hitmap_svg_path = tmp_path / "plot_hitmap.svg"
-            fig.savefig(hitmap_svg_path, bbox_inches='tight', format='svg')
+            fig.savefig(hitmap_svg_path, bbox_inches="tight", format="svg")
 
             # Restore original colors (data elements)
             restore_original_colors(original_props)
@@ -890,11 +1211,11 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
                 ax.set_facecolor(original_ax_facecolors[i])
                 if i < len(original_ax_props):
                     props = original_ax_props[i]
-                    for spine_name, color in props['spine_colors'].items():
+                    for spine_name, color in props["spine_colors"].items():
                         ax.spines[spine_name].set_edgecolor(color)
-                    ax.xaxis.label.set_color(props['xlabel_color'])
-                    ax.yaxis.label.set_color(props['ylabel_color'])
-                    ax.title.set_color(props['title_color'])
+                    ax.xaxis.label.set_color(props["xlabel_color"])
+                    ax.yaxis.label.set_color(props["ylabel_color"])
+                    ax.title.set_color(props["title_color"])
 
             # Now apply auto-crop to BOTH PNG and hitmap with same parameters
             try:
@@ -909,8 +1230,12 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
                     verbose=False,
                     return_offset=True,
                 )
-                crop_box = (crop_offset['left'], crop_offset['upper'],
-                           crop_offset['right'], crop_offset['lower'])
+                crop_box = (
+                    crop_offset["left"],
+                    crop_offset["upper"],
+                    crop_offset["right"],
+                    crop_offset["lower"],
+                )
 
                 # Apply SAME crop to hitmap PNG
                 crop(
@@ -925,51 +1250,55 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
                 logger.debug(f"Crop failed: {e}")
 
             # Validate sizes match
-            with PILImage.open(png_path) as png_img, PILImage.open(hitmap_path) as hm_img:
+            with PILImage.open(png_path) as png_img, PILImage.open(
+                hitmap_path
+            ) as hm_img:
                 if png_img.size != hm_img.size:
-                    logger.warning(f"Size mismatch: PNG={png_img.size}, Hitmap={hm_img.size}")
+                    logger.warning(
+                        f"Size mismatch: PNG={png_img.size}, Hitmap={hm_img.size}"
+                    )
 
-            with open(png_path, 'rb') as f:
-                bundle_data['png'] = f.read()
+            with open(png_path, "rb") as f:
+                bundle_data["png"] = f.read()
 
-            with open(hitmap_path, 'rb') as f:
-                bundle_data['hitmap_png'] = f.read()
+            with open(hitmap_path, "rb") as f:
+                bundle_data["hitmap_png"] = f.read()
 
-            with open(svg_path, 'rb') as f:
-                bundle_data['svg'] = f.read()
+            with open(svg_path, "rb") as f:
+                bundle_data["svg"] = f.read()
 
-            with open(hitmap_svg_path, 'rb') as f:
-                bundle_data['hitmap_svg'] = f.read()
+            with open(hitmap_svg_path, "rb") as f:
+                bundle_data["hitmap_svg"] = f.read()
 
-            with open(pdf_path, 'rb') as f:
-                bundle_data['pdf'] = f.read()
+            with open(pdf_path, "rb") as f:
+                bundle_data["pdf"] = f.read()
 
     # Add hit_regions to spec
     try:
         path_data = extract_path_data(fig)
 
-        spec['hit_regions'] = {
-            'strategy': 'hybrid',
-            'hit_map': f'{basename}_hitmap.png',
-            'hit_map_svg': f'{basename}_hitmap.svg',
-            'color_map': {str(k): v for k, v in color_map.items()},
-            'groups': groups,  # Logical groups (histogram, bar_series, etc.)
-            'path_data': path_data,
+        spec["hit_regions"] = {
+            "strategy": "hybrid",
+            "hit_map": f"{basename}_hitmap.png",
+            "hit_map_svg": f"{basename}_hitmap.svg",
+            "color_map": {str(k): v for k, v in color_map.items()},
+            "groups": groups,  # Logical groups (histogram, bar_series, etc.)
+            "path_data": path_data,
         }
 
         if crop_box is not None:
-            spec['hit_regions']['crop_box'] = {
-                'left': int(crop_box[0]),
-                'upper': int(crop_box[1]),
-                'right': int(crop_box[2]),
-                'lower': int(crop_box[3]),
+            spec["hit_regions"]["crop_box"] = {
+                "left": int(crop_box[0]),
+                "upper": int(crop_box[1]),
+                "right": int(crop_box[2]),
+                "lower": int(crop_box[3]),
             }
 
         # Extract selectable regions (bounding boxes for axis/annotation elements)
         # This complements hitmap color-based selection with bbox-based selection
         selectable_regions = extract_selectable_regions(fig)
-        if selectable_regions and selectable_regions.get('axes'):
-            spec['selectable_regions'] = selectable_regions
+        if selectable_regions and selectable_regions.get("axes"):
+            spec["selectable_regions"] = selectable_regions
 
     except Exception as e:
         logger.debug(f"Hit regions spec failed: {e}")
@@ -999,28 +1328,41 @@ def _save(
     # Get file extension
     ext = _os.path.splitext(spath)[1].lower()
 
-    # Handle bundle formats (.figz, .pltz, .statsz and their .d variants)
-    # These use special naming: file.figz (ZIP) or file.figz.d (directory)
-    # Note: .figz defaults to ZIP (as_zip=True), .pltz/.statsz default to directory
-    bundle_extensions = (".figz", ".pltz", ".statsz")
+    # Handle bundle formats (.stx, .figz, .pltz, .statsz and their .d variants)
+    # These use special naming: file.stx (ZIP) or file.stx.d (directory)
+    # Note: .figz/.stx defaults to ZIP (as_zip=True), .pltz/.statsz default to directory
+    bundle_extensions = (".stx", ".figz", ".pltz", ".statsz")
     for bext in bundle_extensions:
         if spath.endswith(bext) or spath.endswith(f"{bext}.d"):
             # Remove as_zip from kwargs if present to avoid duplicate
-            bundle_kwargs = {k: v for k, v in kwargs.items() if k != 'as_zip'}
-            as_zip = kwargs.get('as_zip', not spath.endswith(".d"))
-            if bext == ".figz":
+            bundle_kwargs = {k: v for k, v in kwargs.items() if k != "as_zip"}
+            as_zip = kwargs.get("as_zip", not spath.endswith(".d"))
+            if bext == ".stx":
+                # Unified .stx format - determine content type from object
+                _save_stx_bundle(obj, spath, as_zip=as_zip, **bundle_kwargs)
+            elif bext == ".figz":
                 import scitex.fig as sfig
-                # figz defaults to ZIP, so always pass as_zip explicitly
-                sfig.save_figz(obj, spath, as_zip=as_zip, **bundle_kwargs)
+                from scitex.fig import Figz
+
+                # Check if obj is a Figz instance
+                if isinstance(obj, Figz):
+                    # Delegate to Figz.save() - verbose=False since outer _save handles logging
+                    obj.save(spath, verbose=False)
+                else:
+                    # figz defaults to ZIP, so always pass as_zip explicitly
+                    sfig.save_figz(obj, spath, as_zip=as_zip, **bundle_kwargs)
             elif bext == ".pltz":
                 _save_pltz_bundle(obj, spath, as_zip=as_zip, **bundle_kwargs)
             elif bext == ".statsz":
                 import scitex.stats as sstats
+
                 sstats.save_statsz(obj, spath, as_zip=as_zip, **bundle_kwargs)
 
             # Log "Saved to:" for bundle formats (consistent with other formats)
             # For bundles, determine the actual saved path (zip or directory)
-            bundle_path = spath if as_zip else f"{spath}.d" if not spath.endswith(".d") else spath
+            bundle_path = (
+                spath if as_zip else f"{spath}.d" if not spath.endswith(".d") else spath
+            )
 
             if verbose and _os.path.exists(bundle_path):
                 file_size = getsize(bundle_path)
@@ -1216,7 +1558,7 @@ def _handle_image_with_csv(
                 elif hasattr(fig_mpl, "axes") and len(fig_mpl.axes) > 0:
                     mpl_ax = fig_mpl.axes[0]
                     # Try to get scitex wrapper which has history for recipe schema
-                    if hasattr(mpl_ax, '_scitex_wrapper'):
+                    if hasattr(mpl_ax, "_scitex_wrapper"):
                         ax = mpl_ax._scitex_wrapper
                     else:
                         ax = mpl_ax
@@ -1225,25 +1567,35 @@ def _handle_image_with_csv(
                 try:
                     if json_schema == "editable":
                         from scitex.plt.utils.metadata import export_editable_figure
+
                         auto_metadata = export_editable_figure(fig_mpl)
                     elif json_schema == "recipe":
                         from scitex.plt.utils import collect_recipe_metadata
+
                         auto_metadata = collect_recipe_metadata(
-                            fig_mpl, ax,
+                            fig_mpl,
+                            ax,
                             auto_crop=auto_crop,
                             crop_margin_mm=crop_margin_mm,
                         )
                     else:
                         from scitex.plt.utils import collect_figure_metadata
+
                         auto_metadata = collect_figure_metadata(fig_mpl, ax)
 
                     if auto_metadata:
                         kwargs["metadata"] = auto_metadata
                         collected_metadata = auto_metadata  # Save for JSON export
                         if verbose:
-                            schema_names = {"editable": "editable v0.3", "recipe": "recipe", "verbose": "verbose"}
+                            schema_names = {
+                                "editable": "editable v0.3",
+                                "recipe": "recipe",
+                                "verbose": "verbose",
+                            }
                             schema_name = schema_names.get(json_schema, json_schema)
-                            logger.info(f"  • Auto-collected metadata ({schema_name} schema)")
+                            logger.info(
+                                f"  • Auto-collected metadata ({schema_name} schema)"
+                            )
                 except ImportError:
                     pass  # collect_figure_metadata not available
                 except Exception as e:
@@ -1366,7 +1718,9 @@ def _handle_image_with_csv(
         parent_name = _os.path.basename(parent_dir)
         filename_without_ext = _os.path.splitext(_os.path.basename(spath))[0]
 
-        csv_path = None  # Initialize to avoid UnboundLocalError when CSV export is skipped
+        csv_path = (
+            None  # Initialize to avoid UnboundLocalError when CSV export is skipped
+        )
         try:
             # Get the figure object that may contain plot data
             fig_obj = _get_figure_with_data(obj)
@@ -1421,14 +1775,18 @@ def _handle_image_with_csv(
                                 # Update data section with csv_path (relative to JSON)
                                 # Since JSON and CSV are in the same or parallel directories,
                                 # use just the filename for simplicity
-                                collected_metadata["data"]["csv_path"] = _os.path.basename(csv_path)
+                                collected_metadata["data"]["csv_path"] = (
+                                    _os.path.basename(csv_path)
+                                )
 
                                 # Update columns to use flat list of actual columns
-                                collected_metadata["data"]["columns_actual"] = actual_columns
+                                collected_metadata["data"]["columns_actual"] = (
+                                    actual_columns
+                                )
 
                                 # Compute hash of actual CSV data
-                                collected_metadata["data"]["csv_hash"] = _compute_csv_hash(
-                                    csv_data
+                                collected_metadata["data"]["csv_hash"] = (
+                                    _compute_csv_hash(csv_data)
                                 )
                             except Exception:
                                 pass  # Silently continue if update fails
@@ -1631,6 +1989,7 @@ def _handle_image_with_csv(
                 from scitex.plt.utils._collect_figure_metadata import (
                     assert_csv_json_consistency,
                 )
+
                 assert_csv_json_consistency(csv_path, json_path)
 
             # Create symlink_to for JSON if it was specified for the image

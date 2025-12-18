@@ -209,4 +209,12 @@ scitex/io/bundle/
 └── README.md        # This documentation
 ```
 
+---
+
+## Related Documentation
+
+- [scitex.fig](../../fig/README.md) - Unified Element API for `.stx` bundles
+- [scitex.fig.layout](../../fig/layout.py) - Coordinate system utilities
+- [TYPE_DEFAULTS](./_types.py) - Element type constraints for self-recursive bundles
+
 <!-- EOF -->
