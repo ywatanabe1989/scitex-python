@@ -42,6 +42,9 @@ from . import descriptive
 from . import tests
 from . import _schema
 
+# OOP Bundle API
+from ._bundle import Statsz
+
 # Export commonly used functions and classes for convenience
 from .descriptive import describe
 from ._schema import (
@@ -191,6 +194,8 @@ __all__ = [
     "descriptive",
     "tests",
     "_schema",
+    # OOP Bundle API
+    "Statsz",
     # Schema exports
     "describe",
     "StatResult",
@@ -209,7 +214,7 @@ __all__ = [
     "get_stat_style",
     "format_test_line",
     "p_to_stars",
-    # .statsz bundle
+    # Legacy functions
     "save_statsz",
     "load_statsz",
 ]
