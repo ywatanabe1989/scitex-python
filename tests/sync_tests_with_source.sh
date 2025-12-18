@@ -27,7 +27,7 @@
 #   - Commented source code block (auto-updated)
 #
 # USAGE:
-#   ./sync_tests_with_source.sh          # Dry run - report stale files
+#   ./sync_tests_with_source.sh          # Dry run - report stale & placeholder files
 #   ./sync_tests_with_source.sh -m       # Move stale files to .old/
 #   ./sync_tests_with_source.sh -j 16    # Use 16 parallel jobs
 #
@@ -72,6 +72,7 @@ usage() {
     echo "Usage: $0 [options]"
     echo
     echo "Synchronizes test files with source files, maintaining test code while updating source references."
+    echo "Reports stale tests and placeholder-only tests by default."
     echo
     echo "Options:"
     echo "  -m, --move         Move stale test files to .old directory instead of just reporting (default: $DO_MOVE)"
@@ -324,6 +325,70 @@ move_stale_test_files_to_old() {
     fi
 }
 
+########################################
+# Placeholder Checker
+########################################
+# Check if a test file only contains placeholder content (no actual tests)
+is_placeholder_only() {
+    local test_file="$1"
+
+    # Extract content before source code block
+    local test_content
+    if grep -q "# Start of Source Code from:" "$test_file"; then
+        test_content=$(sed -n '/# Start of Source Code from:/q;p' "$test_file")
+    else
+        test_content=$(cat "$test_file")
+    fi
+
+    # Check if there are any actual test function definitions
+    if echo "$test_content" | grep -qE "^\s*def test_"; then
+        return 1  # Has actual tests
+    fi
+
+    # Check if there are any test class definitions
+    if echo "$test_content" | grep -qE "^\s*class Test"; then
+        return 1  # Has test classes
+    fi
+
+    return 0  # Is placeholder only
+}
+
+report_placeholder_test_files() {
+    local placeholder_count=0
+    local placeholder_files=()
+
+    # Collect placeholder-only files
+    while IFS= read -r test_path; do
+        # Skip files in .old directories
+        [[ "$test_path" =~ \.old ]] && continue
+        # Skip files in ./tests/custom
+        [[ "$test_path" =~ ^${TESTS_DIR}/custom ]] && continue
+
+        if is_placeholder_only "$test_path"; then
+            placeholder_files+=("$test_path")
+            ((placeholder_count++))
+        fi
+    done < <(find "$TESTS_DIR" -name "test_*.py" -not -path "*.old*")
+
+    # Report placeholder files
+    if [ $placeholder_count -gt 0 ]; then
+        echo ""
+        echo_header "Placeholder Test Files ($placeholder_count found)"
+        echo ""
+        for placeholder_path in "${placeholder_files[@]}"; do
+            local rel_path="${placeholder_path#$TESTS_DIR/}"
+            echo_warning "  [PLACEHOLDER] $rel_path"
+        done
+        echo ""
+        echo_info "These test files have no actual test functions (no 'def test_' or 'class Test')."
+        echo ""
+    else
+        echo ""
+        echo_success "No placeholder-only test files found"
+        echo ""
+    fi
+}
+
 remove_hidden_test_files_and_dirs() {
     find "$TESTS_DIR" -type f -name ".*" -delete 2>/dev/null
     find "$TESTS_DIR" -type d -name ".*" -not -path "$TESTS_DIR/.old" -not -path "$TESTS_DIR/.old/*" -exec rm -rf {} \; 2>/dev/null
@@ -478,6 +543,9 @@ main() {
 
     remove_hidden_test_files_and_dirs
     move_stale_test_files_to_old
+
+    # Always report placeholder files
+    report_placeholder_test_files
 
     local end_time=$(date +%s)
     local elapsed=$((end_time - start_time))
