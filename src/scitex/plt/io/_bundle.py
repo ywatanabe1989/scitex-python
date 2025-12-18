@@ -27,6 +27,7 @@ __all__ = [
     "validate_pltz_spec",
     "load_pltz_bundle",
     "save_pltz_bundle",
+    "export_pltz_bundle",
     "generate_bundle_overview",
     "PLTZ_SCHEMA_SPEC",
 ]
@@ -110,6 +111,153 @@ def load_pltz_bundle(bundle_dir: Path) -> Dict[str, Any]:
                 result["data"] = f.read()
 
     return result
+
+
+def export_pltz_bundle(
+    bundle_path: str | Path,
+    output_format: str = "png",
+    dpi: int = 300,
+) -> bytes:
+    """Export pltz bundle as image bytes.
+
+    Reads the exported image from the bundle's exports directory or root.
+    For higher DPI, re-renders if possible; otherwise scales the existing image.
+
+    Args:
+        bundle_path: Path to .pltz or .pltz.d bundle.
+        output_format: Output format ('png', 'jpg', 'jpeg', 'pdf', 'svg').
+        dpi: Target resolution in DPI (default: 300).
+
+    Returns:
+        Image bytes in the requested format.
+
+    Raises:
+        FileNotFoundError: If bundle or required files not found.
+    """
+    import io
+    import tempfile
+    import zipfile
+    from PIL import Image
+
+    bundle_path = Path(bundle_path)
+
+    # Handle .pltz ZIP file
+    temp_dir = None
+    if bundle_path.suffix == ".pltz" and bundle_path.is_file():
+        temp_dir = tempfile.mkdtemp(prefix="scitex_pltz_export_")
+        with zipfile.ZipFile(bundle_path, "r") as zf:
+            zf.extractall(temp_dir)
+        # Find the .pltz.d directory inside
+        extracted = Path(temp_dir)
+        for subdir in extracted.iterdir():
+            if subdir.is_dir() and str(subdir).endswith(".pltz.d"):
+                bundle_path = subdir
+                break
+        else:
+            # No .pltz.d subdirectory, use extracted root
+            bundle_path = extracted
+
+    # Handle path that doesn't end with .pltz.d
+    if not str(bundle_path).endswith(".pltz.d"):
+        bundle_path_d = Path(str(bundle_path) + ".d")
+        if bundle_path_d.exists():
+            bundle_path = bundle_path_d
+
+    if not bundle_path.exists():
+        if temp_dir:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+        raise FileNotFoundError(f"Bundle not found: {bundle_path}")
+
+    try:
+        basename = bundle_path.stem.replace(".pltz", "")
+
+        # Find image file in exports/ or root
+        png_file = None
+        exports_dir = bundle_path / "exports"
+        search_dirs = [exports_dir, bundle_path] if exports_dir.exists() else [bundle_path]
+
+        for search_dir in search_dirs:
+            # Try exact basename first
+            candidate = search_dir / f"{basename}.png"
+            if candidate.exists():
+                png_file = candidate
+                break
+            # Try any PNG (excluding hitmap and overview)
+            for f in search_dir.glob("*.png"):
+                if "_hitmap" not in f.name and "_overview" not in f.name:
+                    png_file = f
+                    break
+            if png_file:
+                break
+
+        if not png_file or not png_file.exists():
+            raise FileNotFoundError(f"No PNG image found in {bundle_path}")
+
+        # Load image
+        img = Image.open(png_file)
+
+        # Convert format if needed
+        output = io.BytesIO()
+
+        if output_format.lower() == "svg":
+            # For SVG, try to find existing SVG file
+            svg_file = None
+            for search_dir in search_dirs:
+                candidate = search_dir / f"{basename}.svg"
+                if candidate.exists():
+                    svg_file = candidate
+                    break
+                for f in search_dir.glob("*.svg"):
+                    if "_hitmap" not in f.name:
+                        svg_file = f
+                        break
+                if svg_file:
+                    break
+
+            if svg_file and svg_file.exists():
+                with open(svg_file, "rb") as f:
+                    return f.read()
+            else:
+                # No SVG available, return PNG as fallback
+                if img.mode == "RGBA":
+                    bg = Image.new("RGB", img.size, "#ffffff")
+                    bg.paste(img, mask=img.split()[3])
+                    img = bg
+                elif img.mode != "RGB":
+                    img = img.convert("RGB")
+                img.save(output, "PNG", dpi=(dpi, dpi))
+                return output.getvalue()
+
+        elif output_format.lower() in ("jpg", "jpeg"):
+            # Convert to RGB for JPEG
+            if img.mode == "RGBA":
+                bg = Image.new("RGB", img.size, "#ffffff")
+                bg.paste(img, mask=img.split()[3])
+                img = bg
+            elif img.mode != "RGB":
+                img = img.convert("RGB")
+            img.save(output, "JPEG", quality=95, dpi=(dpi, dpi))
+
+        elif output_format.lower() == "pdf":
+            # Convert to RGB for PDF
+            if img.mode == "RGBA":
+                bg = Image.new("RGB", img.size, "#ffffff")
+                bg.paste(img, mask=img.split()[3])
+                img = bg
+            elif img.mode != "RGB":
+                img = img.convert("RGB")
+            img.save(output, "PDF", resolution=dpi)
+
+        else:
+            # Default to PNG
+            img.save(output, "PNG", dpi=(dpi, dpi))
+
+        return output.getvalue()
+
+    finally:
+        # Cleanup temp directory
+        if temp_dir:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 def save_pltz_bundle(data: Dict[str, Any], dir_path: Path) -> None:

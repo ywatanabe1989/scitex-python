@@ -25,6 +25,7 @@ from ._bundle import (
     validate_pltz_spec,
     load_pltz_bundle,
     save_pltz_bundle,
+    export_pltz_bundle,
     generate_bundle_overview,
     PLTZ_SCHEMA_SPEC,
 )
@@ -41,6 +42,7 @@ __all__ = [
     "validate_pltz_spec",
     "load_pltz_bundle",
     "save_pltz_bundle",
+    "export_pltz_bundle",
     "generate_bundle_overview",
     "PLTZ_SCHEMA_SPEC",
     # Layered bundle operations (v2.0)

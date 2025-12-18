@@ -22,6 +22,7 @@ __all__ = [
     "validate_figz_spec",
     "load_figz_bundle",
     "save_figz_bundle",
+    "export_figz_bundle",
     "FIGZ_SCHEMA_SPEC",
 ]
 
@@ -267,6 +268,217 @@ def save_figz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
         _generate_figz_readme(dir_path, spec, data, basename)
     except Exception as e:
         logger.debug(f"Could not generate figz README: {e}")
+
+
+def export_figz_bundle(
+    bundle_path: str | Path,
+    output_format: str = "png",
+    dpi: int = 300,
+) -> bytes:
+    """Export figz bundle as composited image bytes.
+
+    Composes all panel PNG images into a single figure based on the layout
+    specified in the figz spec and returns as bytes.
+
+    Args:
+        bundle_path: Path to .figz or .figz.d bundle.
+        output_format: Output format ('png', 'jpg', 'jpeg', 'pdf').
+        dpi: Resolution in DPI (default: 300).
+
+    Returns:
+        Image bytes in the requested format.
+
+    Raises:
+        FileNotFoundError: If bundle or required files not found.
+        ValueError: If no panels found or invalid format.
+    """
+    import io
+    import tempfile
+    import zipfile
+    from PIL import Image
+
+    bundle_path = Path(bundle_path)
+
+    # Handle .figz ZIP file
+    temp_dir = None
+    if bundle_path.suffix == ".figz" and bundle_path.is_file():
+        temp_dir = tempfile.mkdtemp(prefix="scitex_export_")
+        with zipfile.ZipFile(bundle_path, "r") as zf:
+            zf.extractall(temp_dir)
+        # Find the .figz.d directory inside
+        extracted = Path(temp_dir)
+        for subdir in extracted.iterdir():
+            if subdir.is_dir() and str(subdir).endswith(".figz.d"):
+                bundle_path = subdir
+                break
+        else:
+            # No .figz.d subdirectory, use extracted root
+            bundle_path = extracted
+
+    # Handle path that doesn't end with .figz.d
+    if not str(bundle_path).endswith(".figz.d"):
+        bundle_path_d = Path(str(bundle_path) + ".d")
+        if bundle_path_d.exists():
+            bundle_path = bundle_path_d
+
+    if not bundle_path.exists():
+        if temp_dir:
+            shutil.rmtree(temp_dir, ignore_errors=True)
+        raise FileNotFoundError(f"Bundle not found: {bundle_path}")
+
+    try:
+        # Load spec
+        spec_file = bundle_path / "spec.json"
+        if not spec_file.exists():
+            # Try legacy format
+            basename = bundle_path.stem.replace(".figz", "")
+            spec_file = bundle_path / f"{basename}.json"
+
+        if not spec_file.exists():
+            raise FileNotFoundError(f"No spec.json found in {bundle_path}")
+
+        with open(spec_file, "r") as f:
+            spec = json.load(f)
+
+        basename = bundle_path.stem.replace(".figz", "")
+
+        # Load style
+        style_file = bundle_path / "style.json"
+        if style_file.exists():
+            with open(style_file, "r") as f:
+                style = json.load(f)
+            size = style.get("size", {})
+            background = style.get("background", "#ffffff")
+        else:
+            figure = spec.get("figure", {})
+            styles = figure.get("styles", {})
+            size = styles.get("size", {})
+            background = styles.get("background", "#ffffff")
+
+        fig_width_mm = size.get("width_mm", 180)
+        fig_height_mm = size.get("height_mm", 120)
+
+        # Calculate pixel dimensions
+        mm_to_inch = 1 / 25.4
+        fig_width_px = int(fig_width_mm * mm_to_inch * dpi)
+        fig_height_px = int(fig_height_mm * mm_to_inch * dpi)
+
+        # Create canvas
+        canvas = Image.new("RGB", (fig_width_px, fig_height_px), background)
+
+        # Get panels from spec
+        panels = spec.get("panels", [])
+
+        # Find panel bundles (both .pltz.d directories and .pltz zip files)
+        panel_sources = {}
+        temp_panel_dirs = []
+
+        for item in bundle_path.iterdir():
+            if item.is_dir() and str(item).endswith(".pltz.d"):
+                panel_id = item.stem.replace(".pltz", "")
+                panel_sources[panel_id] = item
+            elif item.is_file() and str(item).endswith(".pltz"):
+                # Extract .pltz zip to temp directory
+                panel_temp = tempfile.mkdtemp(prefix=f"scitex_panel_{item.stem}_")
+                temp_panel_dirs.append(panel_temp)
+                with zipfile.ZipFile(item, "r") as zf:
+                    zf.extractall(panel_temp)
+                extracted = Path(panel_temp)
+                for subitem in extracted.iterdir():
+                    if subitem.is_dir() and str(subitem).endswith(".pltz.d"):
+                        panel_sources[item.stem] = subitem
+                        break
+                else:
+                    panel_sources[item.stem] = extracted
+
+        for panel in panels:
+            panel_id = panel.get("id", "")
+            plot_ref = panel.get("plot", "")
+
+            # Find the panel's pltz bundle
+            panel_dir = None
+            if plot_ref.endswith(".pltz.d"):
+                ref_id = plot_ref.replace(".pltz.d", "")
+                panel_dir = panel_sources.get(ref_id)
+            if not panel_dir:
+                panel_dir = panel_sources.get(panel_id)
+
+            if not panel_dir or not panel_dir.exists():
+                continue
+
+            # Find panel PNG in exports/ or root
+            panel_png = None
+            exports_subdir = panel_dir / "exports"
+            if exports_subdir.exists():
+                for png_file in exports_subdir.glob("*.png"):
+                    if "_hitmap" not in png_file.name and "_overview" not in png_file.name:
+                        panel_png = png_file
+                        break
+
+            if not panel_png:
+                for png_file in panel_dir.glob("*.png"):
+                    if "_hitmap" not in png_file.name and "_overview" not in png_file.name:
+                        panel_png = png_file
+                        break
+
+            if not panel_png or not panel_png.exists():
+                continue
+
+            # Load panel image
+            panel_img = Image.open(panel_png)
+
+            # Get panel position and size from spec
+            pos = panel.get("position", {})
+            panel_size = panel.get("size", {})
+
+            x_mm = pos.get("x_mm", 0)
+            y_mm = pos.get("y_mm", 0)
+            width_mm = panel_size.get("width_mm", 80)
+            height_mm = panel_size.get("height_mm", 68)
+
+            # Convert to pixels
+            x_px = int(x_mm * mm_to_inch * dpi)
+            y_px = int(y_mm * mm_to_inch * dpi)
+            target_width = int(width_mm * mm_to_inch * dpi)
+            target_height = int(height_mm * mm_to_inch * dpi)
+
+            # Resize panel to fit
+            panel_img = panel_img.resize(
+                (target_width, target_height), Image.Resampling.LANCZOS
+            )
+
+            # Convert to RGB if necessary
+            if panel_img.mode == "RGBA":
+                bg = Image.new("RGB", panel_img.size, background)
+                bg.paste(panel_img, mask=panel_img.split()[3])
+                panel_img = bg
+            elif panel_img.mode != "RGB":
+                panel_img = panel_img.convert("RGB")
+
+            # Paste onto canvas
+            canvas.paste(panel_img, (x_px, y_px))
+
+        # Cleanup temp panel directories
+        for td in temp_panel_dirs:
+            shutil.rmtree(td, ignore_errors=True)
+
+        # Export to bytes in requested format
+        output = io.BytesIO()
+
+        if output_format.lower() in ("jpg", "jpeg"):
+            canvas.save(output, "JPEG", quality=95, dpi=(dpi, dpi))
+        elif output_format.lower() == "pdf":
+            canvas.save(output, "PDF", resolution=dpi)
+        else:
+            # Default to PNG
+            canvas.save(output, "PNG", dpi=(dpi, dpi))
+
+        return output.getvalue()
+
+    finally:
+        # Cleanup main temp directory
+        if temp_dir:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 def _save_figz_exports(data: Dict[str, Any], exports_dir: Path, spec: Dict, basename: str) -> None:
