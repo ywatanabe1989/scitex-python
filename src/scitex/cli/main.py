@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 SciTeX CLI Main Entry Point
 """
 
 import os
 import sys
+
 import click
-from . import cloud, config, scholar, security, web, writer
+
+from . import cloud, config, convert, scholar, security, web, writer
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -39,6 +40,7 @@ def cli():
 # Add command groups
 cli.add_command(cloud.cloud)
 cli.add_command(config.config)
+cli.add_command(convert.convert)
 cli.add_command(scholar.scholar)
 cli.add_command(security.security)
 cli.add_command(web.web)
@@ -130,7 +132,7 @@ def completion(shell, show):
 
     # Check if already installed (and not commented out)
     if os.path.exists(rc_file):
-        with open(rc_file, "r") as f:
+        with open(rc_file) as f:
             for line in f:
                 # Check if the line exists and is not commented
                 stripped = line.strip()
@@ -149,7 +151,7 @@ def completion(shell, show):
         os.makedirs(os.path.dirname(rc_file), exist_ok=True)
 
         with open(rc_file, "a") as f:
-            f.write(f"\n# SciTeX tab completion\n")
+            f.write("\n# SciTeX tab completion\n")
             f.write(f"{eval_line}\n")
 
         click.secho(f"Successfully installed tab completion to {rc_file}", fg="green")

@@ -106,13 +106,32 @@ class Statsz:
             metadata: Additional metadata (becomes "provenance" in v2.0.0)
             data: Optional DataFrame with raw data
             use_stx: If True, create .stx format; if False, create legacy .statsz
+                     (deprecated, will be removed in v3.0.0)
 
         Returns:
             New Statsz instance
         """
+        import warnings
+
         from scitex.io.bundle import generate_bundle_id
 
         path = Path(path)
+
+        # Deprecation warnings for legacy format
+        if not use_stx:
+            warnings.warn(
+                "use_stx=False is deprecated. Legacy .statsz format will be "
+                "removed in v3.0.0. Use .stx format instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        elif path.suffix == ".statsz":
+            warnings.warn(
+                ".statsz extension is deprecated. Use .stx extension instead. "
+                "Legacy format support will be removed in v3.0.0.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         # Determine extension
         if use_stx:
@@ -270,9 +289,11 @@ class Statsz:
     def generate_report(self) -> str:
         """Generate summary report."""
         lines = ["# Statistical Results", ""]
-        if self.metadata:
+        # Use provenance (v2.0.0) which falls back to metadata (legacy)
+        prov = self.provenance
+        if prov:
             lines.append("## Metadata")
-            for k, v in self.metadata.items():
+            for k, v in prov.items():
                 lines.append(f"- {k}: {v}")
             lines.append("")
         lines.append("## Comparisons")

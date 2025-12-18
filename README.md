@@ -449,6 +449,56 @@ SciTeX is organized into focused modules for different aspects of scientific com
 | [`scitex.dict`](./src/scitex/dict#readme)             | Dictionary manipulation and nested access           |
 | [`scitex.str`](./src/scitex/str#readme)               | String utilities for scientific text processing     |
 
+## 📦 Bundle System (.stx)
+
+SciTeX v2.0.0 introduces a unified `.stx` bundle format for packaging research outputs:
+
+### Bundle Types
+
+| Type | Description | Self-Recursive |
+|------|-------------|----------------|
+| **Figure** (`.stx`) | Multi-panel publication figures | Yes (max depth: 3) |
+| **Plot** (`.stx`) | Single plot with data | No |
+| **Stats** (`.stx`) | Statistical comparison results | No |
+
+### Quick Example
+
+```python
+from scitex.fig import Figz
+from scitex.plt import Pltz
+from scitex.stats import Statsz
+
+# Create plot bundle
+pltz = Pltz.create("plot.stx", plot_type="line", data=df)
+pltz.save()
+
+# Create figure with panels
+figz = Figz.create("figure.stx", "Figure1")
+with open("plot.stx", "rb") as f:
+    figz.add_panel("A", f.read(), position={"x_mm": 10, "y_mm": 10})
+figz.save()
+
+# Create stats bundle
+statsz = Statsz.create("results.stx", comparisons=[
+    {"name": "A vs B", "method": "t-test", "p_value": 0.03}
+])
+statsz.save()
+```
+
+### CLI Tools
+
+```bash
+# Convert legacy formats to .stx
+scitex convert file old_figure.figz
+scitex convert batch ./figures/*.figz
+
+# Validate and inspect bundles
+scitex convert validate output.stx
+scitex convert info output.stx
+```
+
+See [Migration Guide](docs/STX_MIGRATION_GUIDE.md) for details on migrating from legacy formats.
+
 ## 📖 Documentation
 
 ### Online Documentation

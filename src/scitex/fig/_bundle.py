@@ -111,11 +111,30 @@ class Figz:
             figure_name: Name/ID of the figure
             size_mm: Canvas size {"width": mm, "height": mm}
             use_stx: If True, create .stx format; if False, create legacy .figz
+                     (deprecated, will be removed in v3.0.0)
 
         Returns:
             New Figz instance
         """
+        import warnings
+
         path = Path(path)
+
+        # Deprecation warnings for legacy format
+        if not use_stx:
+            warnings.warn(
+                "use_stx=False is deprecated. Legacy .figz format will be "
+                "removed in v3.0.0. Use .stx format instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        elif path.suffix == ".figz":
+            warnings.warn(
+                ".figz extension is deprecated. Use .stx extension instead. "
+                "Legacy format support will be removed in v3.0.0.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         # Determine extension
         if use_stx:
@@ -369,8 +388,194 @@ class Figz:
         """List all panel IDs."""
         return [p["id"] for p in self.panels]
 
+    # =========================================================================
+    # Self-Recursive Figure Support (v2.0.0)
+    # =========================================================================
+
+    def add_child_figure(
+        self,
+        child_id: str,
+        figz_bytes: bytes,
+        position: Optional[Dict[str, float]] = None,
+        size: Optional[Dict[str, float]] = None,
+        validate: bool = True,
+    ) -> None:
+        """Add a child figure (self-recursive nesting).
+
+        Args:
+            child_id: Unique identifier for child figure
+            figz_bytes: Content of child .stx/.figz bundle as bytes
+            position: Position in mm {"x_mm": float, "y_mm": float}
+            size: Size in mm {"width_mm": float, "height_mm": float}
+            validate: If True, validate depth/circular ref constraints
+
+        Raises:
+            DepthLimitError: If adding child exceeds max_depth
+            CircularReferenceError: If circular reference detected
+            ConstraintError: If parent bundle cannot have children
+        """
+
+        pos = position or {"x_mm": 10, "y_mm": 10}
+        sz = size or {"width_mm": 80, "height_mm": 60}
+
+        if self._spec is None:
+            self._spec = self._create_default_spec("Untitled")
+
+        # Validate constraints before adding
+        if validate:
+            self._validate_can_add_child(figz_bytes, child_id)
+
+        # Store child bundle in children/ directory
+        child_filename = f"children/{child_id}.stx"
+
+        # Create element spec for v2.0.0 format
+        element = {
+            "id": child_id,
+            "type": "figure",
+            "mode": "embed",
+            "ref": child_filename,
+            "position": pos,
+            "size": sz,
+        }
+
+        # Add to elements list
+        self._spec["elements"] = [
+            e for e in self._spec.get("elements", []) if e["id"] != child_id
+        ]
+        self._spec["elements"].append(element)
+
+        # Write to bundle
+        with ZipBundle(self.path, mode="a") as zb:
+            zb.write_json("spec.json", self._spec)
+            zb.write_bytes(child_filename, figz_bytes)
+
+        self._modified = False
+
+    def _validate_can_add_child(self, child_bytes: bytes, child_id: str) -> None:
+        """Validate that a child can be added to this figure.
+
+        Args:
+            child_bytes: Child bundle bytes
+            child_id: Child identifier
+
+        Raises:
+            DepthLimitError: If exceeds max_depth
+            CircularReferenceError: If circular reference detected
+            ConstraintError: If parent cannot have children
+        """
+        import json
+        import tempfile
+        import zipfile
+
+        from scitex.io.bundle import (
+            CircularReferenceError,
+            ConstraintError,
+            DepthLimitError,
+            validate_stx_bundle,
+        )
+
+        # Check if parent allows children
+        constraints = self._spec.get("constraints", self.DEFAULT_CONSTRAINTS)
+        if not constraints.get("allow_children", True):
+            raise ConstraintError(
+                f"Bundle type 'figure' at {self.path} does not allow children"
+            )
+
+        # Get parent depth (current nesting level)
+        parent_depth = self._spec.get("_depth", 0)
+        max_depth = constraints.get("max_depth", 3)
+
+        # Check depth limit
+        child_depth = parent_depth + 1
+        if child_depth > max_depth:
+            raise DepthLimitError(
+                f"Adding child would exceed max_depth={max_depth} "
+                f"(current depth={parent_depth})"
+            )
+
+        # Extract child spec for circular reference check
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".stx", delete=False) as f:
+                f.write(child_bytes)
+                temp_path = f.name
+
+            with zipfile.ZipFile(temp_path, "r") as zf:
+                child_spec = json.loads(zf.read("spec.json"))
+
+            # Check for circular reference
+            parent_id = self._spec.get("bundle_id")
+            child_bundle_id = child_spec.get("bundle_id")
+
+            if parent_id and child_bundle_id == parent_id:
+                raise CircularReferenceError(
+                    f"Cannot add bundle to itself: {parent_id}"
+                )
+
+            # Check if child contains parent (deep circular ref)
+            visited = {parent_id} if parent_id else set()
+            validate_stx_bundle(child_spec, visited=visited, depth=child_depth)
+
+        finally:
+            Path(temp_path).unlink(missing_ok=True)
+
+    def get_child_figure(self, child_id: str) -> Optional[bytes]:
+        """Get child figure content as bytes.
+
+        Args:
+            child_id: Child identifier
+
+        Returns:
+            Child bundle bytes or None if not found
+        """
+        child_path = f"children/{child_id}.stx"
+        try:
+            with ZipBundle(self.path, mode="r") as zb:
+                return zb.read_bytes(child_path)
+        except FileNotFoundError:
+            return None
+
+    def remove_child_figure(self, child_id: str) -> None:
+        """Remove a child figure from this figure.
+
+        Args:
+            child_id: Child identifier to remove
+        """
+        if self._spec is None:
+            return
+
+        # Remove from elements
+        self._spec["elements"] = [
+            e for e in self._spec.get("elements", []) if e["id"] != child_id
+        ]
+        self._modified = True
+
+    def list_child_ids(self) -> List[str]:
+        """List all child figure IDs."""
+        return [
+            e["id"]
+            for e in self.elements
+            if e.get("type") == "figure" and e.get("mode") == "embed"
+        ]
+
+    @property
+    def depth(self) -> int:
+        """Current nesting depth of this figure."""
+        return self._spec.get("_depth", 0) if self._spec else 0
+
+    @property
+    def max_depth(self) -> int:
+        """Maximum allowed nesting depth."""
+        constraints = (
+            self._spec.get("constraints", self.DEFAULT_CONSTRAINTS)
+            if self._spec
+            else self.DEFAULT_CONSTRAINTS
+        )
+        return constraints.get("max_depth", 3)
+
     def __repr__(self) -> str:
-        return f"Figz({self.path.name!r}, panels={self.list_panel_ids()})"
+        children = self.list_child_ids()
+        panels = self.list_panel_ids()
+        return f"Figz({self.path.name!r}, panels={panels}, children={children})"
 
 
 # EOF

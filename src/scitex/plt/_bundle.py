@@ -112,13 +112,32 @@ class Pltz:
             data: Optional DataFrame with plot data
             spec_overrides: Additional spec fields to merge
             use_stx: If True, create .stx format; if False, create legacy .pltz
+                     (deprecated, will be removed in v3.0.0)
 
         Returns:
             New Pltz instance
         """
+        import warnings
+
         from scitex.io.bundle import generate_bundle_id
 
         path = Path(path)
+
+        # Deprecation warnings for legacy format
+        if not use_stx:
+            warnings.warn(
+                "use_stx=False is deprecated. Legacy .pltz format will be "
+                "removed in v3.0.0. Use .stx format instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        elif path.suffix == ".pltz":
+            warnings.warn(
+                ".pltz extension is deprecated. Use .stx extension instead. "
+                "Legacy format support will be removed in v3.0.0.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         # Determine extension
         if use_stx:
