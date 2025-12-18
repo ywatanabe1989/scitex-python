@@ -778,7 +778,6 @@ if __name__ == "__main__":
 # from ._save_modules import save_yaml
 # from ._save_modules import save_zarr
 # from ._save_modules._bibtex import save_bibtex
-# from ._save_modules._canvas import save_canvas
 # 
 # logger = logging.getLogger()
 # 
@@ -1258,7 +1257,7 @@ if __name__ == "__main__":
 #     import tempfile
 #     import json
 #     import numpy as np
-#     from ._bundle import save_bundle, BundleType
+#     from .bundle import save as save_bundle, BundleType
 # 
 #     p = Path(spath)
 # 
@@ -1320,7 +1319,7 @@ if __name__ == "__main__":
 # 
 #     # Compress to ZIP if requested
 #     if as_zip:
-#         from ._bundle import pack_bundle
+#         from .bundle import pack as pack_bundle
 #         pack_bundle(bundle_dir, zip_path)
 #         shutil.rmtree(temp_dir)  # Clean up temp directory
 # 
@@ -1716,11 +1715,6 @@ if __name__ == "__main__":
 # 
 #     # Get file extension
 #     ext = _os.path.splitext(spath)[1].lower()
-# 
-#     # Handle .canvas directories (special case - path ends with .canvas)
-#     if spath.endswith(".canvas"):
-#         save_canvas(obj, spath, **kwargs)
-#         return
 # 
 #     # Handle bundle formats (.figz, .pltz, .statsz and their .d variants)
 #     # These use special naming: file.figz (ZIP) or file.figz.d (directory)
@@ -2426,8 +2420,6 @@ if __name__ == "__main__":
 # 
 # # Dispatch dictionary for O(1) file format lookup
 # _FILE_HANDLERS = {
-#     # Canvas directory format (scitex.fig)
-#     ".canvas": save_canvas,
 #     # Excel formats
 #     ".xlsx": save_excel,
 #     ".xls": save_excel,
