@@ -72,8 +72,8 @@ def save_layered_pltz_bundle(
 
     Parameters
     ----------
-    fig : matplotlib.figure.Figure
-        The figure to save.
+    fig : matplotlib.figure.Figure or FigureWrapper
+        The figure to save. Accepts both wrapped and unwrapped figures.
     bundle_dir : Path
         Output directory (e.g., plot.pltz.d).
     basename : str
@@ -83,6 +83,10 @@ def save_layered_pltz_bundle(
     csv_df : DataFrame, optional
         Data to embed as CSV.
     """
+    # Unwrap figure if it's a FigureWrapper from scitex.plt.subplots()
+    if hasattr(fig, 'fig'):
+        fig = fig.fig
+
     # Resolve DPI from config if not specified
     if dpi is None:
         dpi = get_default_dpi()
@@ -108,7 +112,23 @@ def save_layered_pltz_bundle(
     traces = []
     extracted_data = {}
 
-    for ax_idx, ax in enumerate(fig.axes):
+    # Handle both list of axes and single AxisWrapper
+    # Debug: Check what fig.axes actually is
+    import logging
+    logger.info(f"[save_layered_pltz_bundle] fig type: {type(fig)}")
+    logger.info(f"[save_layered_pltz_bundle] fig.axes type: {type(fig.axes)}")
+    logger.info(f"[save_layered_pltz_bundle] fig.axes value: {fig.axes}")
+    logger.info(f"[save_layered_pltz_bundle] isinstance list: {isinstance(fig.axes, list)}")
+
+    # Convert to list if needed
+    try:
+        axes_list = list(fig.axes) if hasattr(fig.axes, '__iter__') and not isinstance(fig.axes, str) else [fig.axes]
+    except TypeError:
+        axes_list = [fig.axes]
+
+    logger.info(f"[save_layered_pltz_bundle] axes_list: {axes_list}")
+
+    for ax_idx, ax in enumerate(axes_list):
         bbox = ax.get_position()
         ax_id = f"ax{ax_idx}"
 
@@ -203,7 +223,8 @@ def save_layered_pltz_bundle(
         theme_mode = fig._scitex_theme
 
     trace_styles = []
-    for ax_idx, ax in enumerate(fig.axes):
+    # Use the same axes_list we created earlier
+    for ax_idx, ax in enumerate(axes_list):
         for line_idx, line in enumerate(ax.get_lines()):
             label = line.get_label()
             if label and not label.startswith('_'):
@@ -223,7 +244,7 @@ def save_layered_pltz_bundle(
 
     # Extract legend configuration from first axes with legend
     legend_spec = PltzLegendSpec(visible=True, location="best")
-    for ax in fig.axes:
+    for ax in axes_list:
         legend = ax.get_legend()
         if legend is not None:
             # Extract legend location
@@ -376,7 +397,7 @@ def save_layered_pltz_bundle(
             # Store and set hitmap colors for hitmap generation
             saved_fig_facecolor = fig.patch.get_facecolor()
             saved_ax_facecolors = []
-            for ax in fig.axes:
+            for ax in axes_list:
                 saved_ax_facecolors.append(ax.get_facecolor())
                 ax.set_facecolor(HITMAP_BACKGROUND_COLOR)
                 for spine in ax.spines.values():
@@ -392,7 +413,7 @@ def save_layered_pltz_bundle(
             # Restore colors
             restore_original_colors(original_props)
             fig.patch.set_facecolor(saved_fig_facecolor)
-            for i, ax in enumerate(fig.axes):
+            for i, ax in enumerate(axes_list):
                 ax.set_facecolor(saved_ax_facecolors[i])
 
             # Apply additional margin cropping (removes transparent edges)
