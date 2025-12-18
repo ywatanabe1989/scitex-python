@@ -9,7 +9,47 @@ import tempfile
 import warnings
 from pathlib import Path
 
+import numpy as np
+
 from ._figure_utils import get_figure_with_data
+
+
+def _extract_data_from_figure(fig):
+    """Extract plotted data from matplotlib figure lines.
+
+    Returns DataFrame with x/y columns for each trace, or None if no data.
+    """
+    import pandas as pd
+
+    extracted_data = {}
+    axes_list = list(fig.axes) if hasattr(fig.axes, "__iter__") else [fig.axes]
+
+    for ax_idx, ax in enumerate(axes_list):
+        for line_idx, line in enumerate(ax.get_lines()):
+            label = line.get_label()
+            if label is None or label.startswith("_"):
+                label = f"series_{line_idx}"
+
+            xdata, ydata = line.get_data()
+            if len(xdata) > 0:
+                x_col = f"ax{ax_idx}_line{line_idx}_x"
+                y_col = f"ax{ax_idx}_line{line_idx}_y"
+                extracted_data[x_col] = np.array(xdata, dtype=float)
+                extracted_data[y_col] = np.array(ydata, dtype=float)
+
+    if not extracted_data:
+        return None
+
+    # Pad arrays to same length
+    max_len = max(len(v) for v in extracted_data.values())
+    padded = {}
+    for k, v in extracted_data.items():
+        if len(v) < max_len:
+            padded[k] = np.pad(v, (0, max_len - len(v)), constant_values=np.nan)
+        else:
+            padded[k] = v
+
+    return pd.DataFrame(padded)
 
 
 def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
@@ -60,12 +100,16 @@ def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
     # Get CSV data from figure if not provided
     csv_df = data
     if csv_df is None:
+        # Try SciTeX wrapped objects first
         csv_source = get_figure_with_data(obj)
         if csv_source is not None and hasattr(csv_source, "export_as_csv"):
             try:
                 csv_df = csv_source.export_as_csv()
             except Exception:
                 pass
+        # Fall back to extracting from matplotlib lines
+        if csv_df is None:
+            csv_df = _extract_data_from_figure(fig)
 
     # Create spec for .stx format
     fig_width_inch, fig_height_inch = fig.get_size_inches()
@@ -148,11 +192,15 @@ def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
         with open(data_dir / "meta.json", "w") as f:
             json.dump(meta, f, indent=2)
 
-    # Save cache/geometry_px.json for GUI hit areas
+    # Save cache/geometry_px.json and hitmap images for GUI hit areas
     try:
         from scitex.plt.utils._hitmap import (
+            HITMAP_AXES_COLOR,
+            HITMAP_BACKGROUND_COLOR,
+            apply_hitmap_colors,
             extract_path_data,
             extract_selectable_regions,
+            restore_original_colors,
         )
 
         geometry = {
@@ -161,6 +209,42 @@ def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
         }
         with open(cache_dir / "geometry_px.json", "w") as f:
             json.dump(geometry, f, indent=2)
+
+        # Generate hitmap images
+        axes_list = list(fig.axes) if hasattr(fig.axes, "__iter__") else [fig.axes]
+        original_props, color_map, groups = apply_hitmap_colors(fig)
+
+        # Store and set hitmap colors
+        saved_fig_facecolor = fig.patch.get_facecolor()
+        saved_ax_facecolors = []
+        for ax in axes_list:
+            saved_ax_facecolors.append(ax.get_facecolor())
+            ax.set_facecolor(HITMAP_BACKGROUND_COLOR)
+            for spine in ax.spines.values():
+                spine.set_color(HITMAP_AXES_COLOR)
+        fig.patch.set_facecolor(HITMAP_BACKGROUND_COLOR)
+
+        # Save hitmap PNG
+        fig.savefig(
+            cache_dir / "hitmap.png",
+            dpi=dpi,
+            format="png",
+            facecolor=HITMAP_BACKGROUND_COLOR,
+        )
+
+        # Save hitmap SVG
+        fig.savefig(
+            cache_dir / "hitmap.svg",
+            format="svg",
+            facecolor=HITMAP_BACKGROUND_COLOR,
+        )
+
+        # Restore colors
+        restore_original_colors(original_props)
+        fig.patch.set_facecolor(saved_fig_facecolor)
+        for i, ax in enumerate(axes_list):
+            ax.set_facecolor(saved_ax_facecolors[i])
+
     except Exception:
         pass  # Skip if hitmap extraction fails
 
@@ -173,6 +257,8 @@ def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
             "width": round(fig_width_inch * 25.4, 2),
             "height": round(fig_height_inch * 25.4, 2),
         },
+        "hitmap_png": "cache/hitmap.png",
+        "hitmap_svg": "cache/hitmap.svg",
     }
     with open(cache_dir / "render_manifest.json", "w") as f:
         json.dump(render_manifest, f, indent=2)
