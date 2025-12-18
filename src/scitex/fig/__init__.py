@@ -44,6 +44,9 @@ from . import editor
 # Editor
 from .editor import edit
 
+# OOP Bundle API
+from ._bundle import Figz
+
 
 # =============================================================================
 # .figz Bundle Support
@@ -225,7 +228,9 @@ __all__ = [
     "editor",
     # Editor
     "edit",
-    # .figz bundle
+    # OOP Bundle API
+    "Figz",
+    # Legacy functions
     "save_figz",
     "load_figz",
 ]

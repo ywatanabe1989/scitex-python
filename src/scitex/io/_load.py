@@ -69,7 +69,7 @@ def _load_bundle(lpath, verbose=False, **kwargs):
     For .statsz bundles:
         dict: Stats data with 'spec' and 'comparisons'.
     """
-    from ._bundle import load_bundle, BundleType
+    from .bundle import load as load_bundle, BundleType
 
     bundle = load_bundle(lpath)
     bundle_type = bundle.get('type')

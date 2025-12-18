@@ -540,7 +540,7 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
     import tempfile
     import json
     import numpy as np
-    from ._bundle import save_bundle, BundleType
+    from .bundle import save as save_bundle, BundleType
 
     p = Path(spath)
 
@@ -602,7 +602,7 @@ def _save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwarg
 
     # Compress to ZIP if requested
     if as_zip:
-        from ._bundle import pack_bundle
+        from .bundle import pack as pack_bundle
         pack_bundle(bundle_dir, zip_path)
         shutil.rmtree(temp_dir)  # Clean up temp directory
 
