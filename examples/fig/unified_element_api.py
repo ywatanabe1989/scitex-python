@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# Timestamp: "2025-12-19 07:49:55 (ywatanabe)"
+# -*- coding: utf-8 -*-
+# Timestamp: "2025-12-19 09:15:01 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/examples/fig/unified_element_api.py
 
 
@@ -36,7 +37,8 @@ import numpy as np
 
 import scitex as stx
 from scitex import INJECTED
-from scitex.fig import Figz, to_absolute
+from scitex.fig import Figz
+from scitex.fig import to_absolute
 
 # =============================================================================
 # Plot Creation Functions
@@ -396,12 +398,12 @@ def main(
         figz.save(dir_path)
         logger.info(f"Saved .stx.d: {dir_path}")
 
-        # Export as PNG preview
-        png_path = tmpdir / "example_figure.png"
-        png_bytes = figz.render_preview(dpi=150)
-        with open(png_path, "wb") as f:
-            f.write(png_bytes)
-        logger.info(f"Saved PNG: {png_path}")
+        # # Export as PNG preview
+        # png_path = tmpdir / "example_figure.png"
+        # png_bytes = figz.render_preview(dpi=150)
+        # with open(png_path, "wb") as f:
+        #     f.write(png_bytes)
+        # logger.info(f"Saved PNG: {png_path}")
 
     # =========================================================================
     # 7. Verify and Summarize
