@@ -1,34 +1,35 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-12-16 (ywatanabe)"
+# Timestamp: "2025-12-19 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_core.py
 
 """
 SciTeX Bundle Core Operations.
 
 Provides load, save, copy, pack, unpack, and validate operations for
-.figz, .pltz, and .statsz bundle formats.
+both unified .stx format and legacy .figz, .pltz, .statsz bundle formats.
 
 Each bundle can exist in two forms:
-    - Directory: Figure1.figz.d/
-    - ZIP archive: Figure1.figz
+    - Directory: Figure1.stx.d/ or Figure1.figz.d/
+    - ZIP archive: Figure1.stx or Figure1.figz
 """
 
-import json
 import shutil
+import warnings
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 from ._types import (
     EXTENSIONS,
     BundleNotFoundError,
     BundleType,
     BundleValidationError,
+    StxType,
 )
 
 __all__ = [
     "load",
+    "load_stx",
     "save",
     "copy",
     "pack",
@@ -37,6 +38,7 @@ __all__ = [
     "validate_spec",
     "is_bundle",
     "get_type",
+    "get_content_type",
     "dir_to_zip_path",
     "zip_to_dir_path",
 ]
@@ -45,13 +47,20 @@ __all__ = [
 def get_type(path: Union[str, Path]) -> Optional[str]:
     """Get bundle type from path.
 
+    For .stx bundles, returns 'stx'. The actual content type (figure, plot, stats)
+    must be read from spec.json using get_stx_type().
+
+    For legacy bundles, returns the extension-based type.
+
     Args:
         path: Path to bundle (directory or ZIP).
 
     Returns:
-        Bundle type string ('figz', 'pltz', 'statsz') or None if not a bundle.
+        Bundle type string ('stx', 'figz', 'pltz', 'statsz') or None if not a bundle.
 
     Example:
+        >>> get_type("Figure1.stx")
+        'stx'
         >>> get_type("Figure1.figz")
         'figz'
         >>> get_type("plot.pltz.d")
@@ -59,17 +68,62 @@ def get_type(path: Union[str, Path]) -> Optional[str]:
     """
     p = Path(path)
 
-    # Directory bundle: ends with .figz.d, .pltz.d, .statsz.d
+    # Directory bundle: ends with .stx.d, .figz.d, .pltz.d, .statsz.d
     if p.is_dir() and p.suffix == ".d":
-        stem = p.stem  # e.g., "Figure1.figz"
+        stem = p.stem  # e.g., "Figure1.stx" or "Figure1.figz"
         for ext in EXTENSIONS:
             if stem.endswith(ext):
                 return ext[1:]  # Remove leading dot
         return None
 
-    # ZIP bundle: ends with .figz, .pltz, .statsz
+    # ZIP bundle: ends with .stx, .figz, .pltz, .statsz
     if p.suffix in EXTENSIONS:
         return p.suffix[1:]  # Remove leading dot
+
+    return None
+
+
+def get_content_type(path: Union[str, Path]) -> Optional[str]:
+    """Get the content type of a bundle (figure, plot, stats, etc.).
+
+    For .stx bundles, reads spec.json to determine type.
+    For legacy bundles, maps extension to content type.
+
+    Args:
+        path: Path to bundle.
+
+    Returns:
+        Content type string (figure, plot, stats) or None.
+    """
+    bundle_type = get_type(path)
+    if bundle_type is None:
+        return None
+
+    # Legacy types: map extension to content type
+    if bundle_type in StxType.FROM_LEGACY:
+        return StxType.FROM_LEGACY[bundle_type]
+
+    # .stx: read from spec.json
+    if bundle_type == "stx":
+        try:
+            from ._stx import get_stx_type
+            from ._zip import ZipBundle
+
+            p = Path(path)
+            if p.is_file():
+                with ZipBundle(p, mode="r") as zb:
+                    spec = zb.read_json("spec.json")
+                    return get_stx_type(spec)
+            elif p.is_dir():
+                spec_path = p / "spec.json"
+                if spec_path.exists():
+                    import json
+
+                    with open(spec_path) as f:
+                        spec = json.load(f)
+                    return get_stx_type(spec)
+        except Exception:
+            pass
 
     return None
 
@@ -304,8 +358,147 @@ def validate(path: Union[str, Path], strict: bool = False) -> Dict[str, Any]:
     return result
 
 
+def load_stx(
+    path: Union[str, Path],
+    visited: Optional[Set[str]] = None,
+    depth: int = 0,
+    validate: bool = True,
+) -> Dict[str, Any]:
+    """Load a .stx bundle with recursive child loading and safety validation.
+
+    This is the primary loader for unified .stx format bundles.
+    Handles self-recursive figures with cycle detection and depth limits.
+
+    CRITICAL: visited is for CYCLE detection only.
+    depth is a SEPARATE argument for DEPTH limit (NOT len(visited)!).
+
+    Args:
+        path: Path to .stx bundle (directory or ZIP).
+        visited: Set of bundle_ids seen in current path (for cycle detection).
+        depth: Current nesting depth (increments per level).
+        validate: If True, validate bundle constraints.
+
+    Returns:
+        Bundle data dictionary with:
+        - 'type': Extension type ('stx')
+        - 'content_type': Content type ('figure', 'plot', 'stats')
+        - 'spec': Parsed spec.json (normalized to v2.0.0)
+        - 'style': Parsed style.json (if present)
+        - 'data': Parsed data.csv (if present)
+        - 'children': Dict of loaded child bundles (for figures)
+        - 'path': Original path
+        - 'is_zip': Whether loaded from ZIP
+
+    Raises:
+        CircularReferenceError: If cycle detected.
+        DepthLimitError: If depth exceeds max_depth.
+        ConstraintError: If type constraints violated.
+    """
+    from ._stx import get_stx_type, normalize_spec, validate_stx_bundle
+    from ._types import CircularReferenceError, ConstraintError, DepthLimitError
+    from ._zip import ZipBundle
+
+    if visited is None:
+        visited = set()
+
+    p = Path(path)
+
+    result = {
+        "type": "stx",
+        "content_type": None,
+        "path": p,
+        "is_zip": p.is_file(),
+        "spec": None,
+        "style": None,
+        "data": None,
+        "children": {},
+    }
+
+    # Load spec.json
+    if p.is_file():
+        with ZipBundle(p, mode="r") as zb:
+            try:
+                spec = zb.read_json("spec.json")
+            except FileNotFoundError:
+                spec = {}
+            try:
+                result["style"] = zb.read_json("style.json")
+            except FileNotFoundError:
+                pass
+            try:
+                result["data"] = zb.read_csv("data.csv")
+            except FileNotFoundError:
+                pass
+            result["files"] = zb.namelist()
+    elif p.is_dir():
+        import json
+
+        spec_path = p / "spec.json"
+        if spec_path.exists():
+            with open(spec_path) as f:
+                spec = json.load(f)
+        else:
+            spec = {}
+        style_path = p / "style.json"
+        if style_path.exists():
+            with open(style_path) as f:
+                result["style"] = json.load(f)
+    else:
+        raise BundleNotFoundError(f"Bundle not found: {path}")
+
+    # Normalize spec to v2.0.0
+    spec = normalize_spec(spec)
+    result["spec"] = spec
+    result["content_type"] = get_stx_type(spec)
+
+    # Validate if requested
+    if validate:
+        validate_stx_bundle(spec, visited.copy(), depth)
+
+    # Track this bundle
+    bundle_id = spec.get("bundle_id")
+    if bundle_id:
+        visited.add(bundle_id)
+
+    # Load children recursively (for figure types)
+    content_type = result["content_type"]
+    constraints = spec.get("constraints", {})
+    allow_children = constraints.get("allow_children", False)
+
+    if allow_children and content_type == "figure":
+        elements = spec.get("elements", [])
+        for element in elements:
+            ref = element.get("ref")
+            if ref and ref.endswith(".stx"):
+                # Resolve child path
+                if p.is_file():
+                    # For ZIP, extract child path
+                    child_path = p.parent / p.stem / ref
+                else:
+                    child_path = p / ref
+
+                if child_path.exists():
+                    try:
+                        child_bundle = load_stx(
+                            child_path,
+                            visited=visited.copy(),
+                            depth=depth + 1,
+                            validate=validate,
+                        )
+                        element_id = element.get("id", ref)
+                        result["children"][element_id] = child_bundle
+                    except (CircularReferenceError, DepthLimitError, ConstraintError):
+                        raise  # Re-raise safety errors
+                    except Exception as e:
+                        warnings.warn(f"Failed to load child bundle {ref}: {e}")
+
+    return result
+
+
 def load(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any]:
     """Load bundle from directory or ZIP transparently.
+
+    Supports both unified .stx format and legacy .figz, .pltz, .statsz formats.
 
     Args:
         path: Path to bundle (directory or ZIP).
@@ -314,18 +507,23 @@ def load(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any]:
 
     Returns:
         Bundle data as dictionary with:
-        - 'type': Bundle type ('figz', 'pltz', 'statsz')
+        - 'type': Bundle type ('stx', 'figz', 'pltz', 'statsz')
+        - 'content_type': Content type ('figure', 'plot', 'stats') - for .stx
         - 'spec': Parsed JSON specification
         - 'path': Original path
         - 'is_zip': Whether loaded from ZIP
         - Additional fields based on bundle type
 
     Example:
+        >>> bundle = load("Figure1.stx")
+        >>> bundle['type']
+        'stx'
+        >>> bundle['content_type']
+        'figure'
+
         >>> bundle = load("Figure1.figz")
         >>> bundle['type']
         'figz'
-        >>> bundle['spec']['schema']['name']
-        'scitex.fig'
     """
     p = Path(path)
     bundle_type = get_type(p)
@@ -333,8 +531,14 @@ def load(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any]:
     if bundle_type is None:
         raise BundleNotFoundError(f"Not a valid bundle: {path}")
 
+    # Handle .stx bundles with new loader
+    if bundle_type == "stx":
+        return load_stx(p)
+
+    # Handle legacy bundles
     result = {
         "type": bundle_type,
+        "content_type": StxType.FROM_LEGACY.get(bundle_type),
         "path": p,
         "is_zip": False,
     }
