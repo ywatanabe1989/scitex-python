@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./src/scitex/schema/__init__.py
 # Timestamp: "2025-12-17 (ywatanabe)"
 """
@@ -32,42 +31,14 @@ SCHEMA_VERSION = "0.2.0"
 # =============================================================================
 # Plot Schemas - NEW Layered Architecture (SOURCE OF TRUTH for .pltz files)
 # =============================================================================
-from scitex.schema._plot import (
-    # Version constants
-    PLOT_SPEC_VERSION,
-    PLOT_STYLE_VERSION,
-    PLOT_GEOMETRY_VERSION,
-    # DPI fallback for legacy data
-    DPI_FALLBACK,
-    # Type aliases
-    TraceType,
-    CoordinateSpace,
-    LegendLocation,
-    # Bbox classes
-    BboxRatio,
-    BboxPx,
-    # Spec classes (canonical) - prefixed with Pltz to avoid collision
-    TraceSpec as PltzTraceSpec,
-    AxesLimits as PltzAxesLimits,
-    AxesLabels as PltzAxesLabels,
-    AxesSpecItem as PltzAxesItem,
-    DataSourceSpec as PltzDataSource,
-    PlotSpec as PltzSpec,
-    # Style classes
-    TraceStyleSpec as PltzTraceStyle,
-    ThemeSpec as PltzTheme,
-    FontSpec as PltzFont,
-    SizeSpec as PltzSize,
-    LegendSpec as PltzLegendSpec,
-    PlotStyle as PltzStyle,
-    # Geometry classes (cache)
-    RenderedArtist as PltzRenderedArtist,
-    RenderedAxes as PltzRenderedAxes,
-    HitRegionEntry as PltzHitRegion,
-    SelectableRegion as PltzSelectableRegion,
-    PlotGeometry as PltzGeometry,
-    # Manifest
-    RenderManifest as PltzRenderManifest,
+from scitex.fig.model import (
+    AnnotationModel as AnnotationSpec,
+)
+from scitex.fig.model import (
+    AxesModel as FigAxesSpec,
+)
+from scitex.fig.model import (
+    AxesStyle as FigAxesStyle,
 )
 
 # =============================================================================
@@ -77,50 +48,154 @@ from scitex.schema._plot import (
 from scitex.fig.model import (
     # Core models
     FigureModel as FigureSpec,
-    AxesModel as FigAxesSpec,
-    PlotModel as FigPlotSpec,
-    AnnotationModel as AnnotationSpec,
+)
+from scitex.fig.model import (
     GuideModel as GuideSpec,
-    # Style models
-    PlotStyle as FigPlotStyle,
-    AxesStyle as FigAxesStyle,
+)
+from scitex.fig.model import (
     GuideStyle,
     TextStyle,
-    # Style utilities
-    copy_plot_style,
+    apply_style_to_plots,
     copy_axes_style,
     copy_guide_style,
+    # Style utilities
+    copy_plot_style,
     copy_text_style,
-    apply_style_to_plots,
+)
+from scitex.fig.model import (
+    PlotModel as FigPlotSpec,
+)
+from scitex.fig.model import (
+    # Style models
+    PlotStyle as FigPlotStyle,
+)
+
+# =============================================================================
+# Encoding Schemas - Data to Visual Mapping (NEW)
+# =============================================================================
+from scitex.schema._encoding import (
+    ENCODING_VERSION,
+    ChannelBinding,
+    PlotEncoding,
+    TraceEncoding,
+)
+from scitex.schema._plot import (
+    # DPI fallback for legacy data
+    DPI_FALLBACK,
+    PLOT_GEOMETRY_VERSION,
+    # Version constants
+    PLOT_SPEC_VERSION,
+    PLOT_STYLE_VERSION,
+    BboxPx,
+    # Bbox classes
+    BboxRatio,
+    CoordinateSpace,
+    LegendLocation,
+    # Type aliases
+    TraceType,
+)
+from scitex.schema._plot import (
+    AxesLabels as PltzAxesLabels,
+)
+from scitex.schema._plot import (
+    AxesLimits as PltzAxesLimits,
+)
+from scitex.schema._plot import (
+    AxesSpecItem as PltzAxesItem,
+)
+from scitex.schema._plot import (
+    DataSourceSpec as PltzDataSource,
+)
+from scitex.schema._plot import (
+    FontSpec as PltzFont,
+)
+from scitex.schema._plot import (
+    HitRegionEntry as PltzHitRegion,
+)
+from scitex.schema._plot import (
+    LegendSpec as PltzLegendSpec,
+)
+from scitex.schema._plot import (
+    PlotGeometry as PltzGeometry,
+)
+from scitex.schema._plot import (
+    PlotSpec as PltzSpec,
+)
+from scitex.schema._plot import (
+    PlotStyle as PltzStyle,
+)
+from scitex.schema._plot import (
+    # Geometry classes (cache)
+    RenderedArtist as PltzRenderedArtist,
+)
+from scitex.schema._plot import (
+    RenderedAxes as PltzRenderedAxes,
+)
+from scitex.schema._plot import (
+    # Manifest
+    RenderManifest as PltzRenderManifest,
+)
+from scitex.schema._plot import (
+    SelectableRegion as PltzSelectableRegion,
+)
+from scitex.schema._plot import (
+    SizeSpec as PltzSize,
+)
+from scitex.schema._plot import (
+    ThemeSpec as PltzTheme,
+)
+from scitex.schema._plot import (
+    # Spec classes (canonical) - prefixed with Pltz to avoid collision
+    TraceSpec as PltzTraceSpec,
+)
+from scitex.schema._plot import (
+    # Style classes
+    TraceStyleSpec as PltzTraceStyle,
 )
 
 # =============================================================================
 # Statistical Result Schemas (SOURCE OF TRUTH)
 # =============================================================================
 from scitex.schema._stats import (
+    Position,
     # Type aliases
     PositionMode,
-    UnitType,
-    SymbolStyle,
+    StatPositioning,
     # Classes
     StatResult,
-    StatPositioning,
     StatStyling,
-    Position,
+    SymbolStyle,
+    UnitType,
     # Convenience function
     create_stat_result,
+)
+
+# =============================================================================
+# Theme Schemas - Pure Aesthetics (NEW)
+# =============================================================================
+from scitex.schema._theme import (
+    THEME_VERSION,
+    ColorScheme,
+    LegendStyle,
+    LineDefaults,
+    MarkerDefaults,
+    PlotTheme,
+    Typography,
+)
+from scitex.schema._theme import (
+    TraceStyle as ThemeTraceStyle,
 )
 
 # =============================================================================
 # Validation Functions
 # =============================================================================
 from scitex.schema._validation import (
-    validate_figure,
+    ValidationError,
     validate_axes,
+    validate_color,
+    validate_figure,
     validate_plot,
     validate_stat_result,
-    validate_color,
-    ValidationError,
 )
 
 # =============================================================================
@@ -165,6 +240,24 @@ __all__ = [
     "PltzGeometry",
     # Manifest
     "PltzRenderManifest",
+    # ==========================================================================
+    # Encoding Schemas (Data to Visual Mapping)
+    # ==========================================================================
+    "ENCODING_VERSION",
+    "ChannelBinding",
+    "TraceEncoding",
+    "PlotEncoding",
+    # ==========================================================================
+    # Theme Schemas (Pure Aesthetics)
+    # ==========================================================================
+    "THEME_VERSION",
+    "ColorScheme",
+    "Typography",
+    "LineDefaults",
+    "MarkerDefaults",
+    "ThemeTraceStyle",
+    "LegendStyle",
+    "PlotTheme",
     # ==========================================================================
     # Figure specs (for multi-panel composition)
     # ==========================================================================
