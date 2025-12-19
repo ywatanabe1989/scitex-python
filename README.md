@@ -449,7 +449,7 @@ SciTeX is organized into focused modules for different aspects of scientific com
 | [`scitex.dict`](./src/scitex/dict#readme)             | Dictionary manipulation and nested access           |
 | [`scitex.str`](./src/scitex/str#readme)               | String utilities for scientific text processing     |
 
-## 📦 Bundle System (.stx)
+## 📦 Bundle System (.zip)
 
 SciTeX v2.0.0 introduces a unified `.stx` bundle format for packaging research outputs:
 

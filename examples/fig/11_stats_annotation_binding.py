@@ -56,7 +56,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
 
     # Create figure
     fig = Figz(
-        out_dir / "stats_binding.stx.d",
+        out_dir / "stats_binding.zip.d",
         name="Stats Binding Demo",
         size_mm={"width": 120, "height": 80},
     )

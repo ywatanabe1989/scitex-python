@@ -35,7 +35,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
     logger.info("Example 09: Data Swap Same Encoding Demo")
 
     out_dir = CONFIG["SDIR_OUT"]
-    bundle_path = out_dir / "data_swap_demo.stx.d"
+    bundle_path = out_dir / "data_swap_demo.zip.d"
 
     # === Dataset 1: Low amplitude signal ===
     logger.info("\n" + "=" * 60)

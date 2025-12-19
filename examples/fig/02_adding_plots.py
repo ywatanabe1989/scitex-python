@@ -27,7 +27,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
 
     # Create figure bundle (2x2 grid layout)
     fig = Figz(
-        out_dir / "multi_panel.stx.d",
+        out_dir / "multi_panel.zip.d",
         name="Multi-Panel Figure",
         size_mm={"width": 170, "height": 130},
     )

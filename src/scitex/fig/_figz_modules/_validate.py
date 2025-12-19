@@ -66,7 +66,7 @@ def validate_can_add_child(
     # Check circular reference for valid ZIP bundles
     temp_path = None
     try:
-        with tempfile.NamedTemporaryFile(suffix=".stx", delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as f:
             f.write(child_bytes)
             temp_path = f.name
 

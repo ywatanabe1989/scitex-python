@@ -27,7 +27,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
     logger.info("Example 15: Style.json Bridge Demo")
 
     out_dir = CONFIG["SDIR_OUT"]
-    legacy_bundle = out_dir / "legacy_bundle.stx.d"
+    legacy_bundle = out_dir / "legacy_bundle.zip.d"
 
     # Clean up
     if legacy_bundle.exists():

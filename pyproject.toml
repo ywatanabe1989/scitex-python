@@ -15,7 +15,7 @@ version = "2.8.1"
 description = "A comprehensive Python library for scientific computing and data analysis"
 readme = "README.md"
 requires-python = ">=3.8"
-license = { text = "MIT" }
+license = { text = "AGPL-3.0" }
 authors = [
     { name = "Yusuke Watanabe", email = "ywatanabe@scitex.ai" }
 ]
@@ -141,6 +141,11 @@ scitex = "scitex.__main__:main"
 # ============================================
 
 [project.optional-dependencies]
+
+# FSB Bundle Specification (optional)
+fsb = [
+    "fsb>=0.1.2",
+]
 
 # Deep Learning (Heavy - 2-4 GB)
 dl = [

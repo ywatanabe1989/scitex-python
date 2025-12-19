@@ -27,7 +27,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
     logger.info("Example 13: Layout Edit Demo")
 
     out_dir = CONFIG["SDIR_OUT"]
-    bundle_path = out_dir / "layout_edit.stx.d"
+    bundle_path = out_dir / "layout_edit.zip.d"
 
     # === Create initial multi-panel figure ===
     logger.info("\n" + "=" * 60)

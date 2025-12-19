@@ -6,7 +6,7 @@
 
 # scitex.fig Examples
 
-**Examples demonstrating the `.stx` bundle format and Figz API**
+**Examples demonstrating the `.zip` bundle format and Figz API**
 
 ---
 
@@ -58,7 +58,7 @@ cd /path/to/scitex-code
 - Export formats: plain text, LaTeX, Markdown
 
 ### 06. Bundle Structure
-`06_bundle_structure.py` - Understanding `.stx` internals
+`06_bundle_structure.py` - Understanding `.zip` internals
 
 - Canonical files: spec.json, encoding.json, theme.json
 - Cache files: geometry_px.json, hitmap
@@ -116,7 +116,7 @@ cd /path/to/scitex-code
 ### 14. ZIP Portability
 `14_zip_portability.py` - Single-file portability
 
-- .stx.d (directory) ↔ .stx (ZIP) round-trip
+- .zip.d (directory) ↔ .zip (ZIP) round-trip
 - Pack, delete directory, load from ZIP
 - Both formats fully interchangeable
 
@@ -143,7 +143,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
     out_dir = CONFIG["SDIR_OUT"]
 
     fig = Figz(
-        out_dir / "my_figure.stx.d",
+        out_dir / "my_figure.zip.d",
         name="My Figure",
         size_mm={"width": 170, "height": 120},
     )
@@ -182,7 +182,7 @@ y_mm
 ## Bundle Structure
 
 ```
-my_figure.stx.d/
+my_figure.zip.d/
 ├── spec.json           # WHAT to plot (elements, layout)
 ├── encoding.json       # Data -> visual channel bindings
 ├── theme.json          # Aesthetics (colors, fonts)
@@ -199,7 +199,7 @@ my_figure.stx.d/
 │   ├── figure.svg
 │   └── figure.pdf
 └── children/           # Embedded plot bundles
-    └── plot_A.stx.d/
+    └── plot_A.zip.d/
 ```
 
 ---

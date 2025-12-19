@@ -6,9 +6,9 @@
 Example 01: Basic Figure Bundle Creation
 
 Demonstrates:
-- Creating a new .stx figure bundle
+- Creating a new .zip figure bundle
 - Setting figure title and size
-- Saving as ZIP (.stx) or directory (.stx.d)
+- Saving as ZIP (.zip) or directory (.zip.d)
 """
 
 import scitex as stx
@@ -25,7 +25,7 @@ def main(CONFIG=INJECTED, logger=INJECTED):
 
     # Create a new figure bundle
     fig = Figz(
-        out_dir / "my_figure.stx",
+        out_dir / "my_figure.zip",
         name="My First Figure",
         size_mm={"width": 170, "height": 120},
     )
@@ -40,12 +40,12 @@ def main(CONFIG=INJECTED, logger=INJECTED):
     logger.info(f"Saved as ZIP: {fig.path}")
 
     # Save as directory bundle
-    dir_path = out_dir / "my_figure.stx.d"
+    dir_path = out_dir / "my_figure.zip.d"
     fig.save(dir_path)
     logger.info(f"Saved as directory: {dir_path}")
 
     # Reload and verify
-    reloaded = Figz(out_dir / "my_figure.stx")
+    reloaded = Figz(out_dir / "my_figure.zip")
     logger.info(f"Reloaded: {reloaded}")
     logger.info(f"Elements: {reloaded.elements}")
 

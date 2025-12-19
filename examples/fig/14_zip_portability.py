@@ -6,8 +6,8 @@
 Example 14: Single-File Portability (ZIP load/save)
 
 Demonstrates:
-- .stx.d directory bundle ↔ .stx ZIP archive
-- Portability and robustness of .stx as archive
+- .zip.d directory bundle ↔ .zip archive
+- Portability and robustness of .zip as archive
 - Round-trip: dir → zip → delete dir → load zip → export
 """
 
@@ -34,8 +34,8 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
     logger.info("Example 14: ZIP Portability Demo")
 
     out_dir = CONFIG["SDIR_OUT"]
-    dir_bundle = out_dir / "portable_figure.stx.d"
-    zip_bundle = out_dir / "portable_figure.stx"
+    dir_bundle = out_dir / "portable_figure.zip.d"
+    zip_bundle = out_dir / "portable_figure.zip"
 
     # Clean up any existing files
     if dir_bundle.exists():
@@ -45,7 +45,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
 
     # === Step 1: Create directory bundle ===
     logger.info("\n" + "=" * 60)
-    logger.info("STEP 1: Create .stx.d directory bundle")
+    logger.info("STEP 1: Create .zip.d directory bundle")
     logger.info("=" * 60)
 
     fig = Figz(dir_bundle, name="Portable Figure", size_mm={"width": 100, "height": 70})
@@ -79,7 +79,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
 
     # === Step 2: Pack to ZIP ===
     logger.info("\n" + "=" * 60)
-    logger.info("STEP 2: Pack to .stx ZIP archive")
+    logger.info("STEP 2: Pack to .zip archive")
     logger.info("=" * 60)
 
     fig_packed = fig.pack(zip_bundle)
@@ -99,7 +99,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
 
     # === Step 4: Load from ZIP ===
     logger.info("\n" + "=" * 60)
-    logger.info("STEP 4: Load from .stx ZIP")
+    logger.info("STEP 4: Load from .zip")
     logger.info("=" * 60)
 
     fig_from_zip = Figz(zip_bundle)
@@ -138,16 +138,16 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
 
     logger.info("\n" + "-" * 40)
     logger.info("Round-trip workflow:")
-    logger.info("  1. Create .stx.d (directory bundle)")
-    logger.info("  2. Pack to .stx (ZIP archive)")
+    logger.info("  1. Create .zip.d (directory bundle)")
+    logger.info("  2. Pack to .zip (ZIP archive)")
     logger.info("  3. Delete directory, keep only ZIP")
     logger.info("  4. Load from ZIP")
     logger.info("  5. Unpack to directory if needed")
 
     logger.info("\n" + "=" * 60)
     logger.info("Key takeaway:")
-    logger.info("  .stx (ZIP) is portable - share a single file")
-    logger.info("  .stx.d (directory) is editable - inspect/modify files")
+    logger.info("  .zip is portable - share a single file")
+    logger.info("  .zip.d (directory) is editable - inspect/modify files")
     logger.info("  Both are fully interchangeable")
     logger.info("=" * 60)
 

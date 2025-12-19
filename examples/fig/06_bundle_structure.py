@@ -6,7 +6,7 @@
 Example 06: Bundle Structure Inspection
 
 Demonstrates:
-- Understanding .stx bundle directory structure
+- Understanding .zip bundle directory structure
 - Inspecting spec.json, theme.json, encoding.json
 - Viewing cache files (geometry_px.json, hitmap)
 - Understanding canonical vs cache vs export files
@@ -24,14 +24,14 @@ from scitex.fig import Figz
 
 @stx.session(verbose=True, agg=True)
 def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
-    """Inspect .stx bundle structure."""
+    """Inspect .zip bundle structure."""
     logger.info("Example 06: Bundle Structure Inspection")
 
     out_dir = CONFIG["SDIR_OUT"]
 
     # Create a figure with content
     fig = Figz(
-        out_dir / "inspectable.stx.d",
+        out_dir / "inspectable.zip.d",
         name="Inspection Demo",
         size_mm={"width": 170, "height": 80},
     )

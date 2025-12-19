@@ -24,7 +24,7 @@ def main(CONFIG=INJECTED, logger=INJECTED):
     out_dir = CONFIG["SDIR_OUT"]
 
     fig = Figz(
-        out_dir / "annotations.stx.d",
+        out_dir / "annotations.zip.d",
         name="Annotated Figure",
         size_mm={"width": 170, "height": 100},
     )

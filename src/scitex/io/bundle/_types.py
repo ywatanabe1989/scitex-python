@@ -27,6 +27,7 @@ __all__ = [
     "EXTENSIONS",
     "LEGACY_EXTENSIONS",
     "STX_EXTENSION",
+    "LEGACY_STX_EXTENSION",
     "FIGZ",
     "PLTZ",
     "STATSZ",
@@ -37,11 +38,15 @@ __all__ = [
     "SCHEMA_VERSION",
 ]
 
-# Unified .stx extension (v2.0.0)
-STX_EXTENSION: str = ".stx"
+# Unified bundle extension (v2.0.0)
+# Uses .zip for universal portability (replaces .stx)
+STX_EXTENSION: str = ".zip"
 
-# Legacy bundle extensions (v1.0.0)
-LEGACY_EXTENSIONS: Tuple[str, ...] = (".figz", ".pltz", ".statsz")
+# Legacy .stx extension for backward compatibility
+LEGACY_STX_EXTENSION: str = ".stx"
+
+# Legacy bundle extensions (v1.0.0 + .stx from v2.0.0)
+LEGACY_EXTENSIONS: Tuple[str, ...] = (".stx", ".figz", ".pltz", ".statsz")
 
 # All supported extensions
 EXTENSIONS: Tuple[str, ...] = (STX_EXTENSION,) + LEGACY_EXTENSIONS

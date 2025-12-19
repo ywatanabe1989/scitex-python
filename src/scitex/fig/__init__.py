@@ -39,6 +39,9 @@ from . import backend, editor, io, layout, layout_viz, model, utils
 # OOP Bundle API (Unified Element Model)
 from ._bundle import Figz
 
+# FSB Bridge (single source of truth integration)
+from ._fsb_bridge import FigzFSBMixin, from_fsb, to_fsb
+
 # Editor
 from .editor import edit
 
@@ -249,6 +252,10 @@ __all__ = [
     "edit",
     # OOP Bundle API (Unified Element Model)
     "Figz",
+    # FSB Bridge (single source of truth)
+    "to_fsb",
+    "from_fsb",
+    "FigzFSBMixin",
     # Layout utilities
     "to_absolute",
     "to_relative",

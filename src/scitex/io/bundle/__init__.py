@@ -41,6 +41,8 @@ Usage:
 
 # Types and constants
 # Nested bundle access as namespace
+# FSB adapter (single source of truth for bundle spec)
+from . import _fsb as fsb
 from . import _nested as nested
 
 # Core operations
@@ -156,6 +158,8 @@ __all__ = [
     "zip_directory",
     # Nested access namespace
     "nested",
+    # FSB adapter (single source of truth)
+    "fsb",
 ]
 
 # EOF

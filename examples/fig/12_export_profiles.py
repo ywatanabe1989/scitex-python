@@ -59,7 +59,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
     logger.info("Example 12: Export Profiles Demo")
 
     out_dir = CONFIG["SDIR_OUT"]
-    bundle_path = out_dir / "export_profiles.stx.d"
+    bundle_path = out_dir / "export_profiles.zip.d"
 
     # === Create base figure ===
     logger.info("\n" + "=" * 60)
