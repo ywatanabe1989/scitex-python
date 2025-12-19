@@ -16,6 +16,7 @@ def render_preview_internal(
     get_element_content: Callable[[str], bytes],
     fmt: str = "png",
     dpi: int = 150,
+    for_export: bool = False,
 ) -> bytes:
     """Render composed preview in specified format.
 
@@ -25,6 +26,7 @@ def render_preview_internal(
         get_element_content: Function to get element content bytes
         fmt: Output format ("png", "svg", "pdf")
         dpi: Resolution for raster formats
+        for_export: If True, hide editor-only elements (comments)
 
     Returns:
         bytes: Rendered image data
@@ -40,7 +42,7 @@ def render_preview_internal(
     ax.axis("off")
 
     for elem in elements:
-        _render_element(ax, elem, get_element_content, dpi)
+        _render_element(ax, elem, get_element_content, dpi, for_export)
 
     buffer = io.BytesIO()
     fig.savefig(buffer, format=fmt, dpi=dpi, bbox_inches="tight")
@@ -49,8 +51,18 @@ def render_preview_internal(
     return buffer.getvalue()
 
 
-def _render_element(ax, elem: Dict[str, Any], get_element_content: Callable, dpi: int):
-    """Render a single element onto the axes."""
+def _render_element(
+    ax,
+    elem: Dict[str, Any],
+    get_element_content: Callable,
+    dpi: int,
+    for_export: bool = False,
+):
+    """Render a single element onto the axes.
+
+    Args:
+        for_export: If True, skip editor-only elements like comments
+    """
     elem_type = elem.get("type")
     pos = elem.get("position", {})
     sz = elem.get("size", {})
@@ -68,7 +80,9 @@ def _render_element(ax, elem: Dict[str, Any], get_element_content: Callable, dpi
     elif elem_type == "equation":
         _render_equation_element(ax, elem, pos)
     elif elem_type == "comment":
-        _render_comment_element(ax, elem, pos)
+        # Comments are only visible in editor, hidden in exports
+        if not for_export:
+            _render_comment_element(ax, elem, pos)
 
 
 def _render_plot_element(ax, elem, pos, sz, get_element_content, dpi):
