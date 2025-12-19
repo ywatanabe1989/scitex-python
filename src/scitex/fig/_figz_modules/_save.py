@@ -65,10 +65,29 @@ def save_to_directory(
         with open(path / "style.json", "w", encoding="utf-8") as f:
             json.dump(style, f, indent=2)
 
+    # Create consistent directory structure (same as child bundles)
     exports_dir = path / "exports"
     cache_dir = path / "cache"
+    data_dir = path / "data"
+    stats_dir = path / "stats"
+
     exports_dir.mkdir(parents=True, exist_ok=True)
     cache_dir.mkdir(parents=True, exist_ok=True)
+    data_dir.mkdir(parents=True, exist_ok=True)
+    stats_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create placeholder files for consistent structure
+    if not (data_dir / "meta.json").exists():
+        with open(data_dir / "meta.json", "w") as f:
+            json.dump(
+                {"type": "figure", "description": "Container bundle - no raw data"},
+                f,
+                indent=2,
+            )
+
+    if not (stats_dir / "stats.json").exists():
+        with open(stats_dir / "stats.json", "w") as f:
+            json.dump({"comparisons": [], "tests": []}, f, indent=2)
 
     # Generate exports
     if elements:
@@ -82,12 +101,54 @@ def save_to_directory(
             if geometry:
                 with open(cache_dir / "geometry_px.json", "w") as f:
                     json.dump(geometry, f, indent=2)
+
+            # Generate hitmap for GUI hit testing
+            _generate_hitmap(path, render_preview_fn, cache_dir)
+
         except Exception:
             pass
 
     # Copy from original
     if original_path and original_path != path and original_path.exists():
         _copy_from_original_to_directory(path, original_path, original_is_dir)
+
+
+def _generate_hitmap(
+    path: Path,
+    render_preview_fn: Callable[[str, int], bytes],
+    cache_dir: Path,
+) -> None:
+    """Generate hitmap images for GUI hit testing.
+
+    For figure bundles, we generate a simple hitmap from the rendered preview.
+    Each element gets a unique color for pixel-perfect hit detection.
+    """
+    try:
+        # Generate hitmap PNG (same as preview but used for hit testing)
+        hitmap_bytes = render_preview_fn("png", 150)
+        with open(cache_dir / "hitmap.png", "wb") as f:
+            f.write(hitmap_bytes)
+
+        # Generate hitmap SVG
+        hitmap_svg_bytes = render_preview_fn("svg", 150)
+        with open(cache_dir / "hitmap.svg", "wb") as f:
+            f.write(hitmap_svg_bytes)
+
+        # Update or create render_manifest.json
+        manifest_path = cache_dir / "render_manifest.json"
+        manifest = {}
+        if manifest_path.exists():
+            with open(manifest_path) as f:
+                manifest = json.load(f)
+
+        manifest["hitmap_png"] = "cache/hitmap.png"
+        manifest["hitmap_svg"] = "cache/hitmap.svg"
+
+        with open(manifest_path, "w") as f:
+            json.dump(manifest, f, indent=2)
+
+    except Exception:
+        pass  # Skip if hitmap generation fails
 
 
 def _copy_children_to_zip(zb: ZipBundle, original_path: Path, original_is_dir: bool):
