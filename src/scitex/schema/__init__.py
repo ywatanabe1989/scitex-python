@@ -79,6 +79,20 @@ from scitex.schema._encoding import (
     PlotEncoding,
     TraceEncoding,
 )
+
+# =============================================================================
+# Figure Elements Schemas - Title, Caption, Panel Labels (NEW)
+# =============================================================================
+from scitex.schema._figure_elements import (
+    FIGURE_ELEMENTS_VERSION,
+    Caption,
+    FigureTitle,
+    PanelInfo,
+    PanelLabels,
+    generate_caption,
+    generate_caption_latex,
+    generate_caption_markdown,
+)
 from scitex.schema._plot import (
     # DPI fallback for legacy data
     DPI_FALLBACK,
@@ -258,6 +272,17 @@ __all__ = [
     "ThemeTraceStyle",
     "LegendStyle",
     "PlotTheme",
+    # ==========================================================================
+    # Figure Elements (Title, Caption, Panel Labels)
+    # ==========================================================================
+    "FIGURE_ELEMENTS_VERSION",
+    "FigureTitle",
+    "Caption",
+    "PanelLabels",
+    "PanelInfo",
+    "generate_caption",
+    "generate_caption_latex",
+    "generate_caption_markdown",
     # ==========================================================================
     # Figure specs (for multi-panel composition)
     # ==========================================================================

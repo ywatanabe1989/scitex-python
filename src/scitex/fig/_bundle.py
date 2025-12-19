@@ -21,6 +21,7 @@ from scitex.io.bundle import (
 )
 
 from ._figz_modules import (
+    FigzCaptionMixin,
     FigzLegacyMixin,
     extract_geometry,
     figure_to_stx_bytes,
@@ -45,7 +46,7 @@ def _is_stx_path(path: Path) -> bool:
 __all__ = ["Figz"]
 
 
-class Figz(FigzLegacyMixin):
+class Figz(FigzCaptionMixin, FigzLegacyMixin):
     """Unified Element API for .stx bundles."""
 
     SCHEMA = {"name": SCHEMA_NAME, "version": SCHEMA_VERSION}
