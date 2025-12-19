@@ -12,7 +12,12 @@ from ._element_ops import (
     process_image_content,
     process_inline_element,
 )
-from ._geometry import extract_geometry
+from ._geometry import (
+    color_to_element_id,
+    extract_geometry,
+    get_element_color_map,
+    mm_to_px,
+)
 from ._legacy import FigzLegacyMixin
 from ._operations import auto_crop_figz, pack_bundle, unpack_bundle
 from ._render import render_preview_internal
@@ -25,6 +30,9 @@ __all__ = [
     "save_to_directory",
     "validate_can_add_child",
     "extract_geometry",
+    "get_element_color_map",
+    "color_to_element_id",
+    "mm_to_px",
     "FigzLegacyMixin",
     "FigzCaptionMixin",
     "process_content",
