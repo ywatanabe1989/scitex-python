@@ -9,6 +9,7 @@ from ._element_ops import (
     get_content_extension,
     process_content,
     process_image_content,
+    process_inline_element,
 )
 from ._geometry import extract_geometry
 from ._legacy import FigzLegacyMixin
@@ -26,6 +27,7 @@ __all__ = [
     "FigzLegacyMixin",
     "process_content",
     "process_image_content",
+    "process_inline_element",
     "get_content_extension",
     "figure_to_stx_bytes",
     "auto_crop_figz",

@@ -305,13 +305,11 @@ class Figz(FigzLegacyMixin):
                         self.bundle_type,
                         self._spec,
                     )
-        elif element_type == "text":
-            if isinstance(content, str):
-                element["content"] = content
-            elif isinstance(content, dict):
-                element.update(content)
-        elif element_type == "shape" and isinstance(content, dict):
-            element.update(content)
+        else:
+            # Handle inline elements (text, symbol, equation, comment, shape)
+            from ._figz_modules import process_inline_element
+
+            process_inline_element(element_type, content, element)
         self._spec["elements"] = [
             e for e in self._spec.get("elements", []) if e["id"] != element_id
         ]

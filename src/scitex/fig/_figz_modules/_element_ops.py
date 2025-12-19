@@ -6,7 +6,7 @@
 
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 
 def process_content(
@@ -31,9 +31,7 @@ def process_content(
     if element_type == "plot":
         import matplotlib.figure
 
-        if isinstance(content, matplotlib.figure.Figure) or hasattr(
-            content, "figure"
-        ):
+        if isinstance(content, matplotlib.figure.Figure) or hasattr(content, "figure"):
             return figure_to_stx_bytes_fn(content, element_id)
         elif isinstance(content, bytes):
             return content
@@ -125,6 +123,32 @@ def figure_to_stx_bytes(fig, basename: str = "plot") -> bytes:
         io_save(fig, stx_path, verbose=False, basename=basename)
         with open(stx_path, "rb") as f:
             return f.read()
+
+
+def process_inline_element(
+    element_type: str, content: Any, element: Dict[str, Any]
+) -> None:
+    """Process inline element content (text, symbol, equation, comment, shape).
+
+    Args:
+        element_type: Type of element
+        content: The content to process
+        element: Element dictionary (modified in place)
+    """
+    if element_type in ("text", "symbol", "equation", "comment"):
+        if isinstance(content, str):
+            key = "latex" if element_type == "equation" else "content"
+            element[key] = content
+        elif isinstance(content, dict):
+            element.update(content)
+        # Set type-specific defaults
+        if element_type == "symbol" and "symbol_type" not in element:
+            element["symbol_type"] = "asterisk"
+        elif element_type == "comment":
+            element.setdefault("visible", True)
+            element.setdefault("resolved", False)
+    elif element_type == "shape" and isinstance(content, dict):
+        element.update(content)
 
 
 # EOF

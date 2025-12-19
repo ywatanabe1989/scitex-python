@@ -31,7 +31,6 @@ def render_preview_internal(
     """
     import matplotlib.pyplot as plt
 
-
     width_in = size_mm.get("width", 170) / 25.4
     height_in = size_mm.get("height", 120) / 25.4
 
@@ -64,6 +63,12 @@ def _render_element(ax, elem: Dict[str, Any], get_element_content: Callable, dpi
         _render_shape_element(ax, elem)
     elif elem_type == "image":
         _render_image_element(ax, elem, pos, sz, get_element_content)
+    elif elem_type == "symbol":
+        _render_symbol_element(ax, elem, pos)
+    elif elem_type == "equation":
+        _render_equation_element(ax, elem, pos)
+    elif elem_type == "comment":
+        _render_comment_element(ax, elem, pos)
 
 
 def _render_plot_element(ax, elem, pos, sz, get_element_content, dpi):
@@ -172,6 +177,138 @@ def _place_image(ax, img, pos, sz):
         img,
         extent=[x_start, x_start + render_width, y_start + render_height, y_start],
         aspect="auto",
+    )
+
+
+# Predefined symbol mappings
+SYMBOL_MAP = {
+    "star": "★",
+    "asterisk": "*",
+    "dagger": "†",
+    "double_dagger": "‡",
+    "bullet": "•",
+    "checkmark": "✓",
+    "cross": "✗",
+    "arrow_right": "→",
+    "arrow_left": "←",
+    "arrow_up": "↑",
+    "arrow_down": "↓",
+    "plus_minus": "±",
+    "degree": "°",
+    "infinity": "∞",
+    "alpha": "α",
+    "beta": "β",
+    "gamma": "γ",
+    "delta": "δ",
+    "mu": "μ",
+    "sigma": "σ",
+    "omega": "ω",
+    "pi": "π",
+}
+
+
+def _render_symbol_element(ax, elem, pos):
+    """Render a symbol element.
+
+    Schema:
+        symbol_type: str - predefined type (e.g., "star", "dagger") or "custom"
+        content: str - actual symbol character (required if symbol_type="custom")
+        fontsize: float - font size in points (default: 12)
+        color: str - symbol color (default: "black")
+        ha: str - horizontal alignment (default: "center")
+        va: str - vertical alignment (default: "center")
+    """
+    symbol_type = elem.get("symbol_type", "asterisk")
+    content = elem.get("content")
+
+    # Get symbol from map or use content directly
+    if content is None:
+        content = SYMBOL_MAP.get(symbol_type, symbol_type)
+
+    ax.text(
+        pos.get("x_mm", 0),
+        pos.get("y_mm", 0),
+        content,
+        fontsize=elem.get("fontsize", 12),
+        color=elem.get("color", "black"),
+        ha=elem.get("ha", "center"),
+        va=elem.get("va", "center"),
+        fontweight=elem.get("fontweight", "normal"),
+    )
+
+
+def _render_equation_element(ax, elem, pos):
+    """Render an equation element using matplotlib's mathtext.
+
+    Schema:
+        latex: str - LaTeX equation string (e.g., "$E = mc^2$")
+        fontsize: float - font size in points (default: 12)
+        color: str - equation color (default: "black")
+        ha: str - horizontal alignment (default: "center")
+        va: str - vertical alignment (default: "center")
+    """
+    latex = elem.get("latex", elem.get("content", ""))
+
+    # Ensure LaTeX is wrapped in $ signs for mathtext
+    if latex and not latex.startswith("$"):
+        latex = f"${latex}$"
+
+    ax.text(
+        pos.get("x_mm", 0),
+        pos.get("y_mm", 0),
+        latex,
+        fontsize=elem.get("fontsize", 12),
+        color=elem.get("color", "black"),
+        ha=elem.get("ha", "center"),
+        va=elem.get("va", "center"),
+        usetex=False,  # Use matplotlib's built-in mathtext
+    )
+
+
+def _render_comment_element(ax, elem, pos):
+    """Render a comment element (annotation marker).
+
+    Schema:
+        content: str - comment text
+        author: str - comment author (optional)
+        resolved: bool - whether comment is resolved (default: False)
+        visible: bool - whether to render in preview (default: True for editing)
+        marker_color: str - color of comment marker (default: "orange")
+
+    Comments are rendered as small markers in edit mode but hidden in final exports.
+    The visible flag controls whether to show in preview rendering.
+    """
+    visible = elem.get("visible", True)
+    if not visible:
+        return
+
+    resolved = elem.get("resolved", False)
+    marker_color = elem.get("marker_color", "green" if resolved else "orange")
+
+    # Draw comment marker (small filled circle with "C" inside)
+    from matplotlib.patches import Circle
+
+    marker_radius = 3  # mm
+    circle = Circle(
+        (pos.get("x_mm", 0), pos.get("y_mm", 0)),
+        marker_radius,
+        facecolor=marker_color,
+        edgecolor="black",
+        linewidth=0.5,
+        alpha=0.8,
+    )
+    ax.add_patch(circle)
+
+    # Add "C" label inside marker
+    ax.text(
+        pos.get("x_mm", 0),
+        pos.get("y_mm", 0),
+        "C",
+        fontsize=6,
+        color="white",
+        ha="center",
+        va="center",
+        fontweight="bold",
     )
 
 
