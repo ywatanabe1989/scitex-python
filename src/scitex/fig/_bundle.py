@@ -487,17 +487,22 @@ class Figz(FigzCaptionMixin, FigzLegacyMixin):
 
         return content_bounds(self.elements)
 
-    def _extract_geometry(self):
-        return extract_geometry(self.elements, self.size_mm)
+    def _extract_geometry(self, actual_size_px=None):
+        return extract_geometry(
+            self.elements, self.size_mm, actual_size_px=actual_size_px
+        )
 
     def render_preview(self, dpi=150):
-        return render_preview_internal(
-            self.elements, self.size_mm, self.get_element_content, "png", dpi
-        )
+        return self.render_preview_format("png", dpi)
 
     def render_preview_format(self, fmt="png", dpi=150):
         return render_preview_internal(
-            self.elements, self.size_mm, self.get_element_content, fmt, dpi
+            self.elements,
+            self.size_mm,
+            self.get_element_content,
+            fmt,
+            dpi,
+            bundle_path=self.path if self._is_dir else None,
         )
 
     def __repr__(self):

@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import zipfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List
 
@@ -92,16 +91,16 @@ def unpack_bundle(figz: Figz, output_path: Path = None) -> Figz:
         New Figz instance for unpacked bundle
     """
     from scitex.fig._bundle import Figz
+    from scitex.io.bundle import unpack as bundle_unpack
 
     if figz._is_dir:
         raise ValueError("Bundle is already directory")
     output_path = (
         Path(output_path) if output_path else figz.path.parent / f"{figz.path.name}.d"
     )
-    figz.save()
-    output_path.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(figz.path, "r") as zf:
-        zf.extractall(output_path)
+    # Don't save() here - it would add non-prefixed entries to ZIP
+    # Use bundle_unpack which handles the top-level directory in ZIP correctly
+    bundle_unpack(figz.path, output_path)
     return Figz(output_path)
 
 

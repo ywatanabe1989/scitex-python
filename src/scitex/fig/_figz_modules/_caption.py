@@ -248,6 +248,98 @@ class FigzCaptionMixin:
         }
         self._save_theme(theme)
 
+    def add_visual_caption(
+        self,
+        fontsize: float = 9.0,
+        margin_mm: float = 3.0,
+        max_width_mm: Optional[float] = None,
+        wrap: bool = True,
+    ) -> str:
+        """Add visual caption below the figure as a text element.
+
+        This renders the caption text from get_caption() directly on the figure,
+        similar to figure legends in scientific papers. The caption wraps within
+        the figure width - the figure width is NOT expanded.
+
+        Parameters
+        ----------
+        fontsize : float
+            Font size in points (default: 9.0)
+        margin_mm : float
+            Margin between figure content and caption (default: 3.0)
+        max_width_mm : float, optional
+            Maximum width for text wrapping. Defaults to figure width - 10mm.
+        wrap : bool
+            Whether to wrap long text (default: True)
+
+        Returns
+        -------
+        str
+            The caption text that was added
+
+        Example
+        -------
+        >>> fig.set_figure_title("Results", prefix="Figure", number=1)
+        >>> fig.set_panel_info("plot_A", panel_letter="A", description="Raw data")
+        >>> fig.add_visual_caption()  # Renders "Figure 1. Results. (A) Raw data."
+        """
+        import textwrap
+
+        # Get caption text
+        caption_text = self.get_caption()
+        if not caption_text:
+            return ""
+
+        # Calculate dimensions - keep figure width fixed
+        current_size = self.size_mm
+        fig_width = current_size.get("width", 170)
+        fig_height = current_size.get("height", 120)
+
+        if max_width_mm is None:
+            max_width_mm = fig_width - 10  # 5mm margin on each side
+
+        # Calculate chars per line based on font size
+        # Conservative estimate: at 9pt, ~0.5 chars per mm (accounts for variable width)
+        chars_per_mm = 0.5 * (9.0 / fontsize)
+        chars_per_line = max(40, int(max_width_mm * chars_per_mm))  # min 40 chars
+
+        # Wrap text with newlines for proper rendering
+        if wrap and len(caption_text) > chars_per_line:
+            wrapped_lines = textwrap.wrap(caption_text, width=chars_per_line)
+            wrapped_text = "\n".join(wrapped_lines)
+            num_lines = len(wrapped_lines)
+        else:
+            wrapped_text = caption_text
+            num_lines = 1
+
+        # Calculate caption height (line height ≈ 1.4x font size in mm)
+        line_height_mm = fontsize * 0.35 * 1.4
+        caption_height_mm = num_lines * line_height_mm
+
+        # Expand only figure HEIGHT to accommodate caption (width stays same)
+        new_height = fig_height + margin_mm + caption_height_mm + margin_mm
+        self._spec["size_mm"] = {"width": fig_width, "height": new_height}
+
+        # Position caption below existing content
+        caption_y = fig_height + margin_mm
+
+        # Remove existing caption element if present
+        self.remove_element("_visual_caption")
+
+        # Add caption as text element with pre-wrapped text
+        self.add_element(
+            "_visual_caption",
+            "text",
+            wrapped_text,
+            position={"x_mm": 5, "y_mm": caption_y},
+            fontsize=fontsize,
+            ha="left",
+            va="top",
+        )
+
+        self._modified = True
+        return caption_text
+
     def _save_theme(self, theme: Dict[str, Any]) -> None:
         """Save theme.json data."""
         import json

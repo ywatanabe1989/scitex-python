@@ -173,8 +173,7 @@ def pack(
 ) -> Path:
     """Pack a bundle directory into a ZIP archive.
 
-    The ZIP archive includes the .d directory as a top-level folder so that
-    standard unzip extracts to: fname.pltz.d/fname.csv, fname.pltz.d/fname.json, etc.
+    Files are stored without the directory prefix for clean extraction.
 
     Args:
         dir_path: Path to bundle directory (e.g., Figure1.figz.d/).
@@ -197,16 +196,12 @@ def pack(
     else:
         output_path = Path(output_path)
 
-    # Get the directory name to use as top-level folder in ZIP
-    dir_name = dir_path.name
-
-    # Create ZIP archive with directory structure preserved
+    # Create ZIP archive without directory prefix for clean extraction
     with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for file_path in dir_path.rglob("*"):
             if file_path.is_file():
                 rel_path = file_path.relative_to(dir_path)
-                arcname = Path(dir_name) / rel_path
-                zf.write(file_path, arcname)
+                zf.write(file_path, rel_path)
 
     return output_path
 
@@ -233,17 +228,16 @@ def unpack(
         raise ValueError(f"Not a file: {zip_path}")
 
     if output_path is None:
-        extract_to = zip_path.parent
-        expected_dir = zip_to_dir_path(zip_path)
+        output_path = zip_to_dir_path(zip_path)
     else:
         output_path = Path(output_path)
-        extract_to = output_path.parent
-        expected_dir = output_path
 
+    # Extract directly to output directory (ZIP has no prefix)
+    output_path.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(zip_path, "r") as zf:
-        zf.extractall(extract_to)
+        zf.extractall(output_path)
 
-    return expected_dir
+    return output_path
 
 
 def validate_spec(

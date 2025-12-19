@@ -17,6 +17,8 @@ def render_preview_internal(
     fmt: str = "png",
     dpi: int = 150,
     for_export: bool = False,
+    panel_labels_config: Dict[str, Any] = None,
+    bundle_path: Path = None,
 ) -> bytes:
     """Render composed preview in specified format.
 
@@ -27,6 +29,7 @@ def render_preview_internal(
         fmt: Output format ("png", "svg", "pdf")
         dpi: Resolution for raster formats
         for_export: If True, hide editor-only elements (comments)
+        panel_labels_config: Panel label settings from theme.json
 
     Returns:
         bytes: Rendered image data
@@ -43,6 +46,11 @@ def render_preview_internal(
 
     for elem in elements:
         _render_element(ax, elem, get_element_content, dpi, for_export)
+
+    # Render panel labels
+    if panel_labels_config is None:
+        panel_labels_config = _load_panel_labels_config(bundle_path)
+    _render_panel_labels(ax, elements, panel_labels_config)
 
     buffer = io.BytesIO()
     fig.savefig(buffer, format=fmt, dpi=dpi, bbox_inches="tight")
@@ -324,6 +332,104 @@ def _render_comment_element(ax, elem, pos):
         va="center",
         fontweight="bold",
     )
+
+
+def _load_panel_labels_config(bundle_path: Path) -> dict:
+    """Load panel labels config from theme.json or return defaults."""
+    import json
+
+    if bundle_path and bundle_path.exists():
+        theme_path = bundle_path / "theme.json"
+        if theme_path.exists():
+            try:
+                with open(theme_path, encoding="utf-8") as f:
+                    theme = json.load(f)
+                    return theme.get("panel_labels", {})
+            except Exception:
+                pass
+    # Return defaults
+    return {
+        "visible": True,
+        "style": "uppercase",
+        "format": "({letter})",
+        "font_size_pt": 12,
+        "font_weight": "bold",
+        "position": "top-left",
+        "offset_mm": {"x": 2.0, "y": 2.0},
+    }
+
+
+def _render_panel_labels(ax, elements: List[Dict[str, Any]], config: Dict[str, Any]):
+    """Render panel labels (A, B, C, ...) on plot elements.
+
+    Args:
+        ax: Matplotlib axes
+        elements: List of element specifications
+        config: Panel label configuration from theme.json:
+            - style: "uppercase", "lowercase", "roman", "Roman"
+            - format: e.g., "({letter})", "{letter}.", etc.
+            - font_size_pt: Font size
+            - font_weight: "bold", "normal"
+            - position: "top-left", "top-right", "bottom-left", "bottom-right"
+            - offset_mm: {"x": mm, "y": mm}
+            - visible: bool
+    """
+    if not config.get("visible", True):
+        return
+
+    # Get config with defaults
+    font_size = config.get("font_size_pt", 12)
+    font_weight = config.get("font_weight", "bold")
+    position = config.get("position", "top-left")
+    offset = config.get("offset_mm", {"x": 2.0, "y": 2.0})
+    label_format = config.get("format", "({letter})")
+
+    # Get plot elements with panel letters
+    plot_elements = [e for e in elements if e.get("type") == "plot"]
+
+    for elem in plot_elements:
+        panel_letter = elem.get("panel_letter")
+        if not panel_letter:
+            continue
+
+        pos = elem.get("position", {})
+        sz = elem.get("size", {})
+
+        # Calculate label position based on position setting
+        x_mm = pos.get("x_mm", 0)
+        y_mm = pos.get("y_mm", 0)
+        width_mm = sz.get("width_mm", 80)
+        height_mm = sz.get("height_mm", 60)
+
+        if "left" in position:
+            label_x = x_mm + offset.get("x", 2)
+            ha = "left"
+        else:
+            label_x = x_mm + width_mm - offset.get("x", 2)
+            ha = "right"
+
+        if "top" in position:
+            label_y = y_mm + offset.get("y", 2)
+            va = "top"
+        else:
+            label_y = y_mm + height_mm - offset.get("y", 2)
+            va = "bottom"
+
+        # Format the label
+        label_text = label_format.replace("{letter}", panel_letter)
+
+        # Draw the label
+        ax.text(
+            label_x,
+            label_y,
+            label_text,
+            fontsize=font_size,
+            fontweight=font_weight,
+            ha=ha,
+            va=va,
+            color="black",
+            zorder=100,  # Ensure labels are on top
+        )
 
 
 # EOF
