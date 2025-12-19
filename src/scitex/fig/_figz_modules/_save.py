@@ -231,64 +231,53 @@ def _copy_from_original_to_directory(
 
 def _generate_figz_readme(path: Path, spec: Dict, elements: List) -> None:
     """Generate README.md for figure bundle."""
-    from datetime import datetime
 
     title = spec.get("title", path.stem) if spec else path.stem
     bundle_id = spec.get("bundle_id", "N/A") if spec else "N/A"
     size_mm = spec.get("size_mm", {}) if spec else {}
 
+    w, h = size_mm.get("width", 170), size_mm.get("height", 120)
     readme_lines = [
-        f"# {title} Bundle",
-        "",
-        "## Overview",
-        "",
-        "- **Type**: figure",
-        f"- **Created**: {datetime.now().isoformat()}",
-        f"- **Bundle ID**: {bundle_id}",
-        f"- **Size**: {size_mm.get('width', 170)} × {size_mm.get('height', 120)} mm",
-        "",
-        "## Structure",
-        "",
-        "```",
-        f"{path.name}/",
-        "├── spec.json           # Layout and elements (WHAT)",
-        "├── encoding.json       # Data→visual mapping (scientific rigor)",
-        "├── theme.json          # Pure aesthetics (colors, fonts)",
-        "├── style.json          # Backward compat (= encoding + theme)",
-        "├── data/",
-        "│   └── data_info.json  # Container metadata",
-        "├── stats/",
-        "│   ├── stats.json      # Statistical results",
-        "│   └── stats.csv       # Tabular statistics",
-        "├── cache/",
-        "│   ├── geometry_px.json",
-        "│   ├── hitmap.png",
-        "│   └── hitmap.svg",
-        "├── exports/",
-        "│   ├── figure.png",
-        "│   ├── figure.svg",
-        "│   └── figure.pdf",
-        "└── children/           # Embedded plots",
-        "```",
-        "",
+        f"# {title} Bundle\n",
+        f"**Type**: figure | **Size**: {w}×{h}mm | **ID**: {bundle_id}\n",
+        "## Structure\n```",
+        f"{path.name}/ ─ spec.json, encoding.json, theme.json, style.json",
+        "├── data/ (data_info.json) ├── stats/ (stats.json, stats.csv)",
+        "├── cache/ (geometry_px.json, hitmap.png/svg) └── exports/ (figure.png/svg/pdf)",
+        "└── children/ (embedded plots)\n```\n",
     ]
 
     if elements:
-        readme_lines.extend(
-            [
-                "## Elements",
-                "",
-                "| ID | Type | Position (mm) |",
-                "|----|------|---------------|",
-            ]
-        )
-        for elem in elements:
-            pos = elem.get("position", {})
-            pos_str = f"({pos.get('x_mm', 0)}, {pos.get('y_mm', 0)})"
-            readme_lines.append(
-                f"| {elem.get('id', '-')} | {elem.get('type', '-')} | {pos_str} |"
+        # Separate plots (panels) from other elements
+        plot_elems = [e for e in elements if e.get("type") == "plot"]
+        other_elems = [e for e in elements if e.get("type") != "plot"]
+
+        if plot_elems:
+            readme_lines.extend(
+                ["## Panels", "", "| Panel | ID | Description |", "|-------|----|----|"]
             )
-        readme_lines.append("")
+            for idx, elem in enumerate(plot_elems):
+                letter = elem.get("panel_letter", chr(ord("A") + idx))
+                desc = elem.get("description", "-")
+                readme_lines.append(f"| ({letter}) | {elem.get('id', '-')} | {desc} |")
+            readme_lines.append("")
+
+        if other_elems:
+            readme_lines.extend(
+                [
+                    "## Other Elements",
+                    "",
+                    "| ID | Type | Position |",
+                    "|----|------|----------|",
+                ]
+            )
+            for elem in other_elems:
+                pos = elem.get("position", {})
+                pos_str = f"({pos.get('x_mm', 0)}, {pos.get('y_mm', 0)})"
+                readme_lines.append(
+                    f"| {elem.get('id', '-')} | {elem.get('type', '-')} | {pos_str} |"
+                )
+            readme_lines.append("")
 
     readme_lines.extend(
         [
@@ -320,7 +309,7 @@ def _save_encoding_theme_split(
 
     This separates:
     - encoding.json: Data→visual mapping (scientific rigor)
-    - theme.json: Pure aesthetics (colors, fonts)
+    - theme.json: Pure aesthetics (colors, fonts) + title/caption
     """
     from scitex.schema import ENCODING_VERSION, THEME_VERSION
 
@@ -359,20 +348,19 @@ def _save_encoding_theme_split(
     with open(path / "encoding.json", "w", encoding="utf-8") as f:
         json.dump(encoding_data, f, indent=2)
 
-    # Build theme.json from style
+    # Build theme.json from style with figure elements
+    from scitex.schema import Caption, FigureTitle, PanelLabels
+
+    title_text = spec.get("title", "") if spec else ""
     theme_data = {
         "schema": {"name": "scitex.plt.theme", "version": THEME_VERSION},
-        "colors": {
-            "mode": "light",
-            "background": "transparent",
-            "axes_bg": "white",
-        },
-        "typography": {
-            "family": "sans-serif",
-            "size_pt": 7.0,
-        },
+        "colors": {"mode": "light", "background": "transparent", "axes_bg": "white"},
+        "typography": {"family": "sans-serif", "size_pt": 7.0},
         "traces": [],
         "grid": False,
+        "figure_title": FigureTitle(text=title_text).to_dict(),
+        "caption": Caption().to_dict(),
+        "panel_labels": PanelLabels().to_dict(),
     }
 
     # Extract theme info from style if present
@@ -417,7 +405,10 @@ def _build_encoding_theme_for_zip(
 
     Returns tuple of (encoding_data, theme_data).
     """
-    from scitex.schema import ENCODING_VERSION, THEME_VERSION
+    from scitex.schema import (
+        ENCODING_VERSION,
+        THEME_VERSION,
+    )
 
     # Build encoding.json
     encoding_traces = []
@@ -451,13 +442,19 @@ def _build_encoding_theme_for_zip(
         "traces": encoding_traces,
     }
 
-    # Build theme.json
+    # Build theme.json with figure elements
+    from scitex.schema import Caption, FigureTitle, PanelLabels
+
+    title_text = spec.get("title", "") if spec else ""
     theme_data = {
         "schema": {"name": "scitex.plt.theme", "version": THEME_VERSION},
         "colors": {"mode": "light", "background": "transparent", "axes_bg": "white"},
         "typography": {"family": "sans-serif", "size_pt": 7.0},
         "traces": [],
         "grid": False,
+        "figure_title": FigureTitle(text=title_text).to_dict(),
+        "caption": Caption().to_dict(),
+        "panel_labels": PanelLabels().to_dict(),
     }
 
     if style:

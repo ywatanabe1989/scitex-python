@@ -4,6 +4,7 @@
 
 """Figz helper modules for bundle operations."""
 
+from ._caption import FigzCaptionMixin
 from ._element_ops import (
     figure_to_stx_bytes,
     get_content_extension,
@@ -25,6 +26,7 @@ __all__ = [
     "validate_can_add_child",
     "extract_geometry",
     "FigzLegacyMixin",
+    "FigzCaptionMixin",
     "process_content",
     "process_image_content",
     "process_inline_element",
