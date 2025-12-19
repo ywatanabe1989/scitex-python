@@ -263,9 +263,26 @@ def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
     with open(cache_dir / "render_manifest.json", "w") as f:
         json.dump(render_manifest, f, indent=2)
 
-    # Save stats/stats.json placeholder (empty by default)
+    # Save stats/stats.json and stats.csv placeholder (empty by default)
+    stats_data = {"comparisons": [], "tests": []}
     with open(stats_dir / "stats.json", "w") as f:
-        json.dump({"comparisons": [], "tests": []}, f, indent=2)
+        json.dump(stats_data, f, indent=2)
+
+    # Create stats.csv with header for tabular export
+    import pandas as pd
+
+    stats_df = pd.DataFrame(
+        columns=[
+            "test_type",
+            "group1",
+            "group2",
+            "statistic",
+            "p_value",
+            "effect_size",
+            "significant",
+        ]
+    )
+    stats_df.to_csv(stats_dir / "stats.csv", index=False)
 
     # Pack to ZIP if requested
     if as_zip:
