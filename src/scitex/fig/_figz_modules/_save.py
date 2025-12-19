@@ -89,6 +89,22 @@ def save_to_directory(
         with open(stats_dir / "stats.json", "w") as f:
             json.dump({"comparisons": [], "tests": []}, f, indent=2)
 
+    if not (stats_dir / "stats.csv").exists():
+        import pandas as pd
+
+        stats_df = pd.DataFrame(
+            columns=[
+                "test_type",
+                "group1",
+                "group2",
+                "statistic",
+                "p_value",
+                "effect_size",
+                "significant",
+            ]
+        )
+        stats_df.to_csv(stats_dir / "stats.csv", index=False)
+
     # Generate exports
     if elements:
         try:
