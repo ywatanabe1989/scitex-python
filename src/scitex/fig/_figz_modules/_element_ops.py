@@ -87,15 +87,15 @@ def get_content_extension(element_type: str, element: Dict[str, Any]) -> str:
         element: Element dictionary
 
     Returns:
-        File extension including dot (e.g., ".stx")
+        File extension including dot (e.g., ".zip")
     """
     if element_type == "image":
         ext = element.get("image_format", "png")
         return f".{ext}" if not ext.startswith(".") else ext
     return {
-        "plot": ".stx",
-        "figure": ".stx",
-        "stats": ".stx",
+        "plot": ".zip",
+        "figure": ".zip",
+        "stats": ".zip",
     }.get(element_type, ".bin")
 
 
@@ -117,11 +117,11 @@ def figure_to_stx_bytes(fig, basename: str = "plot") -> bytes:
         raise TypeError(f"Expected matplotlib Figure, got {type(fig).__name__}")
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        stx_path = Path(tmpdir) / f"{basename}.stx"
+        zip_path = Path(tmpdir) / f"{basename}.zip"
         from scitex.io import save as io_save
 
-        io_save(fig, stx_path, verbose=False, basename=basename)
-        with open(stx_path, "rb") as f:
+        io_save(fig, zip_path, verbose=False, basename=basename)
+        with open(zip_path, "rb") as f:
             return f.read()
 
 

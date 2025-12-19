@@ -36,7 +36,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
     logger.info("Example 07: Round-Trip Edit Demo")
 
     out_dir = CONFIG["SDIR_OUT"]
-    bundle_path = out_dir / "roundtrip_demo.stx.d"
+    bundle_path = out_dir / "roundtrip_demo.zip.d"
 
     # === Step 1: Create initial bundle ===
     logger.info("\n" + "=" * 60)

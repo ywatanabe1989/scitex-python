@@ -29,7 +29,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
 
     # Create figure with global theme
     fig = Figz(
-        out_dir / "theme_inheritance.stx.d",
+        out_dir / "theme_inheritance.zip.d",
         name="Theme Inheritance Demo",
         size_mm={"width": 170, "height": 100},
     )
@@ -124,8 +124,8 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
     children_dir = fig.path / "children"
     if children_dir.exists():
         for child in sorted(children_dir.iterdir()):
-            if child.is_dir() or child.suffix == ".stx":
-                child_id = child.stem.replace(".stx", "")
+            if child.is_dir() or child.suffix in (".zip", ".stx"):
+                child_id = child.stem.replace(".zip", "").replace(".stx", "")
                 logger.info(f"\n{child_id}:")
 
                 # Check for child theme override

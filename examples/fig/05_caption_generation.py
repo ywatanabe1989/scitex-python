@@ -26,7 +26,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
     out_dir = CONFIG["SDIR_OUT"]
 
     fig = Figz(
-        out_dir / "captioned_figure.stx.d",
+        out_dir / "captioned_figure.zip.d",
         name="Experimental Results",
         size_mm={"width": 170, "height": 130},
     )

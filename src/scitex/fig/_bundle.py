@@ -40,7 +40,9 @@ def _is_directory_bundle(path: Path) -> bool:
 
 
 def _is_stx_path(path: Path) -> bool:
-    return path.suffix == ".stx" or (path.suffix == ".d" and path.stem.endswith(".stx"))
+    return path.suffix in (".zip", ".stx") or (
+        path.suffix == ".d" and path.stem.endswith((".zip", ".stx"))
+    )
 
 
 __all__ = ["Figz"]
@@ -161,17 +163,19 @@ class Figz(FigzCaptionMixin, FigzLegacyMixin):
     def _create_new(self, name, size_mm=None, bundle_type="figure") -> None:
         if isinstance(size_mm, (list, tuple)):
             size_mm = {"width": size_mm[0], "height": size_mm[1]}
-        is_dir = self.path.suffix == ".d" and self.path.stem.endswith((".stx", ".figz"))
-        if self.path.suffix == ".figz" or (
-            self.path.suffix == ".d" and self.path.stem.endswith(".figz")
+        is_dir = self.path.suffix == ".d" and self.path.stem.endswith(
+            (".zip", ".stx", ".figz")
+        )
+        if self.path.suffix in (".stx", ".figz") or (
+            self.path.suffix == ".d" and self.path.stem.endswith((".stx", ".figz"))
         ):
             warnings.warn(
-                ".figz deprecated. Use .stx", DeprecationWarning, stacklevel=3
+                ".stx/.figz deprecated. Use .zip", DeprecationWarning, stacklevel=3
             )
-        if self.path.suffix not in (".stx", ".figz") and not str(self.path).endswith(
-            (".stx.d", ".figz.d")
-        ):
-            self.path = self.path.with_suffix(".stx")
+        if self.path.suffix not in (".zip", ".stx", ".figz") and not str(
+            self.path
+        ).endswith((".zip.d", ".stx.d", ".figz.d")):
+            self.path = self.path.with_suffix(".zip")
         self._is_dir, self._is_stx = is_dir, _is_stx_path(self.path)
         self._spec, self._style, self._modified = (
             self._create_default_spec(name, size_mm, bundle_type),
@@ -205,15 +209,17 @@ class Figz(FigzCaptionMixin, FigzLegacyMixin):
     @classmethod
     def create(cls, path, name, size_mm=None, bundle_type="figure") -> Figz:
         p = Path(path)
-        if p.suffix == ".figz" or (p.suffix == ".d" and p.stem.endswith(".figz")):
-            warnings.warn(
-                ".figz deprecated. Use .stx", DeprecationWarning, stacklevel=2
-            )
-        if p.suffix not in (".stx", ".figz") and not str(p).endswith(
-            (".stx.d", ".figz.d")
+        if p.suffix in (".stx", ".figz") or (
+            p.suffix == ".d" and p.stem.endswith((".stx", ".figz"))
         ):
-            p = p.with_suffix(".stx")
-        is_dir = p.suffix == ".d" and p.stem.endswith((".stx", ".figz"))
+            warnings.warn(
+                ".stx/.figz deprecated. Use .zip", DeprecationWarning, stacklevel=2
+            )
+        if p.suffix not in (".zip", ".stx", ".figz") and not str(p).endswith(
+            (".zip.d", ".stx.d", ".figz.d")
+        ):
+            p = p.with_suffix(".zip")
+        is_dir = p.suffix == ".d" and p.stem.endswith((".zip", ".stx", ".figz"))
         spec = {
             "schema": cls.SCHEMA,
             "type": bundle_type,
@@ -507,6 +513,3 @@ class Figz(FigzCaptionMixin, FigzLegacyMixin):
 
     def __repr__(self):
         return f"Figz({self.path.name!r}, type={self.bundle_type!r}, elements={self.list_element_ids()})"
-
-
-# EOF

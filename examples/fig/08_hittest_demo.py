@@ -31,7 +31,7 @@ def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED):
 
     # Create a multi-panel figure
     fig = Figz(
-        out_dir / "hittest_figure.stx.d",
+        out_dir / "hittest_figure.zip.d",
         name="Hit-Test Demo",
         size_mm={"width": 170, "height": 100},
     )

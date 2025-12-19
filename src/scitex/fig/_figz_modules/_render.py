@@ -103,7 +103,7 @@ def _render_plot_element(ax, elem, pos, sz, get_element_content, dpi):
     if not content:
         return
 
-    with tempfile.NamedTemporaryFile(suffix=".stx", delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as f:
         f.write(content)
         temp_path = f.name
     try:
