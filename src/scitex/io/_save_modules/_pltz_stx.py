@@ -52,22 +52,145 @@ def _extract_data_from_figure(fig):
     return pd.DataFrame(padded)
 
 
+def _build_encoding_from_figure(fig, csv_df):
+    """Build encoding.json data from matplotlib figure.
+
+    Encoding captures data→visual mappings for scientific reproducibility.
+    """
+    from scitex.schema import ENCODING_VERSION
+
+    traces = []
+    axes_list = list(fig.axes) if hasattr(fig.axes, "__iter__") else [fig.axes]
+
+    for ax_idx, ax in enumerate(axes_list):
+        for line_idx, line in enumerate(ax.get_lines()):
+            label = line.get_label()
+            if label is None or label.startswith("_"):
+                label = f"line_{line_idx}"
+
+            trace = {
+                "trace_id": f"ax{ax_idx}_line{line_idx}",
+                "bindings": [],
+            }
+
+            # X binding
+            if csv_df is not None:
+                x_col = f"ax{ax_idx}_line{line_idx}_x"
+                y_col = f"ax{ax_idx}_line{line_idx}_y"
+                if x_col in csv_df.columns:
+                    trace["bindings"].append(
+                        {
+                            "channel": "x",
+                            "column": x_col,
+                            "scale": "linear",
+                        }
+                    )
+                if y_col in csv_df.columns:
+                    trace["bindings"].append(
+                        {
+                            "channel": "y",
+                            "column": y_col,
+                            "scale": "linear",
+                        }
+                    )
+
+            if trace["bindings"]:
+                traces.append(trace)
+
+    return {
+        "schema": {"name": "scitex.plt.encoding", "version": ENCODING_VERSION},
+        "traces": traces,
+    }
+
+
+def _build_theme_from_figure(fig):
+    """Build theme.json data from matplotlib figure.
+
+    Theme captures pure aesthetics without affecting scientific meaning.
+    """
+    from scitex.schema import THEME_VERSION
+
+    # Extract colors from figure
+    fig_facecolor = fig.get_facecolor()
+    axes_list = list(fig.axes) if hasattr(fig.axes, "__iter__") else [fig.axes]
+
+    ax_facecolor = "white"
+    if axes_list:
+        try:
+            ax_facecolor = axes_list[0].get_facecolor()
+            if isinstance(ax_facecolor, (tuple, list)):
+                ax_facecolor = f"#{int(ax_facecolor[0] * 255):02x}{int(ax_facecolor[1] * 255):02x}{int(ax_facecolor[2] * 255):02x}"
+        except Exception:
+            pass
+
+    # Extract trace styles
+    traces = []
+    for ax_idx, ax in enumerate(axes_list):
+        for line_idx, line in enumerate(ax.get_lines()):
+            trace_style = {
+                "trace_id": f"ax{ax_idx}_line{line_idx}",
+            }
+            try:
+                color = line.get_color()
+                if color:
+                    trace_style["color"] = color
+                lw = line.get_linewidth()
+                if lw:
+                    trace_style["linewidth"] = float(lw)
+                ls = line.get_linestyle()
+                if ls:
+                    trace_style["linestyle"] = ls
+                marker = line.get_marker()
+                if marker and marker != "None":
+                    trace_style["marker"] = marker
+                ms = line.get_markersize()
+                if ms:
+                    trace_style["markersize"] = float(ms)
+                alpha = line.get_alpha()
+                if alpha is not None:
+                    trace_style["alpha"] = float(alpha)
+            except Exception:
+                pass
+
+            if len(trace_style) > 1:  # More than just trace_id
+                traces.append(trace_style)
+
+    return {
+        "schema": {"name": "scitex.plt.theme", "version": THEME_VERSION},
+        "colors": {
+            "mode": "light",
+            "background": "transparent",
+            "axes_bg": ax_facecolor if isinstance(ax_facecolor, str) else "white",
+        },
+        "typography": {
+            "family": "sans-serif",
+            "size_pt": 7.0,
+        },
+        "traces": traces,
+        "grid": False,
+    }
+
+
 def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
     """Save a matplotlib figure as a .stx bundle with plot content type.
 
     Bundle structure:
         plot_X.stx.d/
-            spec.json           # Bundle specification
-            style.json          # Visual style configuration
+            spec.json           # Bundle specification (WHAT to plot)
+            encoding.json       # Data→visual mapping (scientific rigor)
+            theme.json          # Pure aesthetics (colors, fonts)
+            style.json          # Backward compat (encoding + theme merged)
             data/
                 data.csv        # Plotted data (tidy format)
-                meta.json       # Column meanings, units, dtypes
+                data_info.json  # Column meanings, units, dtypes
             stats/
                 stats.json      # Statistical test results (if any)
+                stats.csv       # Tabular statistics
             cache/
-                derived_data.csv        # Binned data, etc. (optional)
                 geometry_px.json        # Hit areas for GUI editing
                 render_manifest.json    # Render metadata
+                hitmap.png              # Hit testing image
+                hitmap.svg              # Vector hit testing
             exports/
                 plot.svg        # Vector export
                 plot.png        # Raster export
@@ -139,9 +262,20 @@ def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
     with open(bundle_dir / "spec.json", "w") as f:
         json.dump(spec, f, indent=2, default=str)
 
-    # Save style.json (empty default for consistency)
+    # Save style.json (empty default for backward compatibility)
+    style_data = {}
     with open(bundle_dir / "style.json", "w") as f:
-        json.dump({}, f, indent=2)
+        json.dump(style_data, f, indent=2)
+
+    # Save encoding.json (data→visual mapping for scientific rigor)
+    encoding_data = _build_encoding_from_figure(fig, csv_df)
+    with open(bundle_dir / "encoding.json", "w") as f:
+        json.dump(encoding_data, f, indent=2)
+
+    # Save theme.json (pure aesthetics)
+    theme_data = _build_theme_from_figure(fig)
+    with open(bundle_dir / "theme.json", "w") as f:
+        json.dump(theme_data, f, indent=2)
 
     # Create directory structure
     data_dir = bundle_dir / "data"
@@ -315,7 +449,9 @@ def _generate_readme(bundle_dir, basename, spec, csv_df):
         "```",
         f"{basename}.stx.d/",
         "├── spec.json           # What to plot (data mapping)",
-        "├── style.json          # How it looks (visual style)",
+        "├── encoding.json       # Data→visual mapping (scientific rigor)",
+        "├── theme.json          # Pure aesthetics (colors, fonts)",
+        "├── style.json          # Backward compat (= encoding + theme)",
         "├── data/",
         "│   ├── data.csv        # Raw data",
         "│   └── data_info.json  # Column metadata",
