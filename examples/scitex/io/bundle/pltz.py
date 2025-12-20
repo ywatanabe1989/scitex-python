@@ -1,23 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-13 (ywatanabe)"
+# Timestamp: "2025-12-20 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/examples/scitex/io/bundle/pltz.py
 
 """
-Demonstrates .pltz bundle creation and loading.
+Demonstrates FTS plot bundle creation and loading.
 
-.pltz bundles contain:
-- plot.json: Plot specification (axes, styles, annotations, theme)
-- plot.csv: Raw data (immutable)
-- plot.png/svg/pdf: Exports
-- plot_hitmap.png/svg: Element selection maps
-- overview.png: Bundle preview
-
-Features demonstrated:
-- Bundle creation, validation, loading
-- DataFrame embedding
-- Dark/light theme modes
-- mm-based axis dimensions
+FTS bundles (replacing legacy .pltz) contain:
+- node.json: Bundle metadata
+- encoding.json: Data-to-visual mappings
+- theme.json: Styling
+- data/: Raw data files
+- exports/: PNG/SVG/PDF renders
 """
 
 import numpy as np
@@ -25,8 +19,7 @@ import pandas as pd
 
 import scitex as stx
 import scitex.io as sio
-from scitex.dev.plt import plot_histogram, plot_multi_line, plot_scatter_sizes
-from scitex.io.bundle import validate
+from scitex.dev.plt import plot_mpl_hist, plot_stx_line, plot_stx_scatter
 
 
 @stx.session
@@ -36,24 +29,17 @@ def main(
     rng_manager=stx.INJECTED,
     logger=stx.INJECTED,
 ):
-    """Demonstrates .pltz bundle functionality."""
-    logger.info("Starting .pltz bundle demo")
+    """Demonstrates FTS plot bundle functionality."""
+    logger.info("Starting FTS plot bundle demo")
     sdir = CONFIG["SDIR_RUN"]
     rng = rng_manager("pltz_demo")
 
     # 1. Basic plot bundle
     logger.info("Creating basic plot bundle")
-    fig, ax = plot_multi_line(plt, rng)
-    sio.save(fig, sdir / "multi_line.pltz.d")
+    fig, ax = plot_stx_line(plt, rng)
+    sio.save(fig, sdir / "line_plot.stx")
     plt.close(fig)
-
-    result = validate(sdir / "multi_line.pltz.d")
-    logger.info(f"Bundle valid: {result['valid']}, type: {result['bundle_type']}")
-
-    # Load and verify
-    loaded_fig, loaded_ax, _ = sio.load(sdir / "multi_line.pltz.d")
-    plt.close(loaded_fig.figure)
-    logger.success("Basic bundle created and loaded")
+    logger.success("Basic bundle created")
 
     # 2. Bundle with embedded DataFrame
     logger.info("Creating bundle with DataFrame")
@@ -67,23 +53,20 @@ def main(
     ax.plot(df["time"], df["value_b"], "s-", label="Group B")
     ax.set_xyt("Time", "Value", "Time Series with Data")
     ax.legend()
-    sio.save(fig, sdir / "with_data.pltz.d", data=df)
+    sio.save(fig, sdir / "with_data.stx", data=df)
     plt.close(fig)
-
-    _, _, loaded_df = sio.load(sdir / "with_data.pltz.d")
-    assert loaded_df.shape == df.shape
     logger.success("DataFrame bundle created")
 
     # 3. Scatter plot bundle
     logger.info("Creating scatter bundle")
-    fig, ax = plot_scatter_sizes(plt, rng)
-    sio.save(fig, sdir / "scatter.pltz.d")
+    fig, ax = plot_stx_scatter(plt, rng)
+    sio.save(fig, sdir / "scatter.stx")
     plt.close(fig)
 
     # 4. Histogram bundle
     logger.info("Creating histogram bundle")
-    fig, ax = plot_histogram(plt, rng)
-    sio.save(fig, sdir / "histogram.pltz.d")
+    fig, ax = plot_mpl_hist(plt, rng)
+    sio.save(fig, sdir / "histogram.stx")
     plt.close(fig)
 
     # 5. Dark mode demo
@@ -93,7 +76,7 @@ def main(
     ax.plot(x, np.cos(x), linewidth=2, label="cos(x)")
     ax.set_xyt("x", "y", "Dark Mode Demo")
     ax.legend()
-    sio.save(fig, sdir / "dark_mode.pltz.d")
+    sio.save(fig, sdir / "dark_mode.stx")
     plt.close(fig)
 
     # 6. Custom axis size (mm-based)
@@ -101,7 +84,7 @@ def main(
     fig, ax = plt.subplots(axes_width_mm=60, axes_height_mm=40)
     ax.plot(x, np.sin(2 * x), linewidth=2)
     ax.set_xyt("x", "y", "Custom Size (60mm x 40mm)")
-    sio.save(fig, sdir / "custom_size.pltz.d")
+    sio.save(fig, sdir / "custom_size.stx")
     plt.close(fig)
 
     # 7. ZIP archive
@@ -109,7 +92,7 @@ def main(
     fig, ax = plt.subplots()
     ax.bar(["A", "B", "C"], [10, 20, 15])
     ax.set_xyt(None, "Count", "Bar Chart")
-    sio.save(fig, sdir / "bar_chart.pltz", as_zip=True)
+    sio.save(fig, sdir / "bar_chart.zip", as_zip=True)
     plt.close(fig)
     logger.success("ZIP bundle created")
 

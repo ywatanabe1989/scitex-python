@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-12 (ywatanabe)"
+# Timestamp: "2025-12-20 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/examples/scitex/io/bundle/statsz.py
 
 """
-Demonstrates .statsz bundle creation and loading.
+Demonstrates FTS stats bundle creation and loading.
 
-.statsz bundles contain:
-- stats.json: Statistical results (comparisons, p-values, effect sizes)
-- Metadata (n, seed, bootstrap iterations, etc.)
+FTS bundles (replacing legacy .statsz) contain:
+- stats/stats.json: Statistical results (comparisons, p-values, effect sizes)
+- node.json: Metadata (n, seed, bootstrap iterations, etc.)
 
 Purpose:
 - Store expensive test results (bootstrap, permutation)
-- Reuse stats across multiple .pltz bundles
+- Reuse stats across multiple figure bundles
 - Ensure full reproducibility
 """
 
 # Imports
 import scitex as stx
 import scitex.stats as sstats
-from scitex.io.bundle import validate
 
 
 # Functions and Classes
@@ -109,22 +108,18 @@ def main(
     rng_manager=stx.INJECTED,
     logger=stx.INJECTED,
 ):
-    """Demonstrates .statsz bundle functionality."""
-    logger.info("Starting .statsz bundle demo")
+    """Demonstrates FTS stats bundle functionality."""
+    logger.info("Starting FTS stats bundle demo")
 
     sdir = CONFIG["SDIR_RUN"]
 
     # 1. Create basic statistical comparison
     logger.info("Creating basic comparison bundle")
     comparisons = create_basic_comparisons()
-    sstats.save_statsz(comparisons, sdir / "basic.statsz.d")
-
-    # Validate bundle
-    result = validate(sdir / "basic.statsz.d")
-    logger.info(f"Bundle valid: {result['valid']}, type: {result['bundle_type']}")
+    sstats.save_statsz(comparisons, sdir / "basic.stx")
 
     # Load and verify
-    loaded = sstats.load_statsz(sdir / "basic.statsz.d")
+    loaded = sstats.load_statsz(sdir / "basic.stx")
     logger.info(f"Loaded {len(loaded['comparisons'])} comparisons")
     logger.success("Basic bundle created and verified")
 
@@ -138,10 +133,10 @@ def main(
         "alpha": 0.05,
         "seed": 42,
     }
-    sstats.save_statsz(multi_comparisons, sdir / "longitudinal.statsz.d", metadata=metadata)
+    sstats.save_statsz(multi_comparisons, sdir / "longitudinal.stx", metadata=metadata)
 
     # Load and verify
-    loaded_multi = sstats.load_statsz(sdir / "longitudinal.statsz.d")
+    loaded_multi = sstats.load_statsz(sdir / "longitudinal.stx")
     logger.info(f"Loaded {len(loaded_multi['comparisons'])} comparisons with metadata")
     logger.success("Longitudinal bundle created")
 
@@ -149,13 +144,13 @@ def main(
     logger.info("Creating bootstrap results bundle")
     bootstrap_comps, bootstrap_meta = create_bootstrap_results()
     sstats.save_statsz(
-        bootstrap_comps, sdir / "bootstrap_results.statsz.d", metadata=bootstrap_meta
+        bootstrap_comps, sdir / "bootstrap_results.stx", metadata=bootstrap_meta
     )
     logger.success("Bootstrap bundle created")
 
     # 4. Save as ZIP archive
     logger.info("Creating ZIP archive")
-    sstats.save_statsz(comparisons, sdir / "results.statsz", as_zip=True)
+    sstats.save_statsz(comparisons, sdir / "results.zip", as_zip=True)
     logger.success("ZIP bundle created")
 
     # Summary table
