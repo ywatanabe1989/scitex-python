@@ -5,7 +5,7 @@
 """FTS Bundle - Core bundle functionality."""
 
 # FTS class
-from ._FTS import FTS, create_bundle, load_bundle
+from ._FTS import FTS, create_bundle, from_matplotlib, load_bundle
 
 # Core dataclasses users need
 from ._dataclasses import BBox, DataInfo, Node, SizeMM
@@ -17,10 +17,11 @@ from ._utils import NodeType
 from ._utils import BundleError, BundleNotFoundError, BundleValidationError
 
 __all__ = [
-    # FSB
+    # FTS
     "FTS",
     "load_bundle",
     "create_bundle",
+    "from_matplotlib",
     # Core dataclasses
     "Node",
     "BBox",

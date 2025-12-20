@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_models/__init__.py
 
-"""JSON models for FSB figure specifications."""
+"""JSON models for FTS figure specifications."""
 
 from ._Annotations import AnnotationModel
 from ._Axes import AxesModel

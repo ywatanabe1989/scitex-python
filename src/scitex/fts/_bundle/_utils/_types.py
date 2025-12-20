@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_bundle/_utils/_types.py
 
-"""FSB Node type constants and constraints."""
+"""FTS Node type constants and constraints."""
 
 from typing import Any, Dict
 
@@ -20,7 +20,7 @@ class NodeType:
 
     Note:
         Tables are treated as structured figures in academic contexts.
-        FSB handles figures, tables, and statistics in a unified way.
+        FTS handles figures, tables, and statistics in a unified way.
     """
 
     FIGURE = "figure"

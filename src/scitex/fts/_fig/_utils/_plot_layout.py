@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_utils/_plot_layout.py
 
-"""Blueprint-style visualization for FSB layout and coordinate system.
+"""Blueprint-style visualization for FTS layout and coordinate system.
 
 Provides architectural drawing style visualizations with:
 - Canvas boundaries with dimension annotations

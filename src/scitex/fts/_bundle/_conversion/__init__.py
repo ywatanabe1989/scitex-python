@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_conversion/__init__.py
 
-"""FSB Conversion Utilities."""
+"""FTS Conversion Utilities."""
 
 from .bundle2dict import bundle_to_dict
 from .dict2bundle import dict_to_bundle

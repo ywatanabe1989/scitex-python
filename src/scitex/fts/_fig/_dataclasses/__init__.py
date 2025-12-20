@@ -5,7 +5,7 @@
 """Figure-specific dataclasses for FTS."""
 
 from ._ChannelEncoding import ChannelEncoding
-from ._Encoding import ENCODING_VERSION, Encoding
+from ._Encoding import ENCODING_VERSION, AxesConfig, Encoding
 from ._Theme import (
     THEME_VERSION,
     Colors,
@@ -21,6 +21,7 @@ from ._TraceEncoding import TraceEncoding
 __all__ = [
     # Encoding
     "ENCODING_VERSION",
+    "AxesConfig",
     "ChannelEncoding",
     "TraceEncoding",
     "Encoding",

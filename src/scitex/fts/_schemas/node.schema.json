@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://scitex.ai/schemas/fsb/node.schema.json",
-  "title": "FSB Node Schema",
+  "$id": "https://scitex.ai/schemas/fts/node.schema.json",
+  "title": "FTS Node Schema",
   "description": "Schema for Figure-Statistics Bundle node (plot or figure)",
   "type": "object",
   "required": ["id", "type", "bbox_norm"],

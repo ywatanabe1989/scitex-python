@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_utils/_calc_bounds.py
 
-"""Bounding box calculation utilities for FSB elements."""
+"""Bounding box calculation utilities for FTS elements."""
 
 from typing import Any, Dict, List, Optional
 

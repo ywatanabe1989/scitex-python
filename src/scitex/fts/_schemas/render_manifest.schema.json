@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://scitex.ai/schemas/fsb/render_manifest.schema.json",
-  "title": "FSB Render Manifest Schema",
+  "$id": "https://scitex.ai/schemas/fts/render_manifest.schema.json",
+  "title": "FTS Render Manifest Schema",
   "description": "Schema for render/export settings (cache - regenerable)",
   "type": "object",
   "properties": {
