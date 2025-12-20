@@ -127,10 +127,13 @@ if __name__ == "__main__":
 # from typing import Optional
 # from typing import Tuple
 # 
+# import logging
 # import matplotlib.pyplot as plt
 # import numpy as np
 # import scitex
 # from scitex.dict import DotDict
+# 
+# logger = logging.getLogger(__name__)
 # 
 # 
 # def configure_mpl(
@@ -461,28 +464,22 @@ if __name__ == "__main__":
 #     plt.rcParams.update(mpl_config)
 # 
 #     if verbose:
-#         print("\n" + "-" * 40)
-#         print("Matplotlib has been configured as follows:\n")
-#         print(f"Figure DPI (Display): {dpi_display} DPI")
-#         print(f"Figure DPI (Save): {dpi_save} DPI")
-#         print(
+#         colors_str = "\n".join(f"  {color_str}: {rgba}" for color_str, rgba in RGBA.items())
+#         config_msg = (
+#             f"\n{'-' * 40}\n"
+#             f"Matplotlib has been configured as follows:\n\n"
+#             f"Figure DPI (Display): {dpi_display} DPI\n"
+#             f"Figure DPI (Save): {dpi_save} DPI\n"
 #             f"Figure Size (Not the Axis Size): "
 #             f"{fig_size_mm[0] * fig_scale:.1f} x "
-#             f"{fig_size_mm[1] * fig_scale:.1f} mm (width x height)"
+#             f"{fig_size_mm[1] * fig_scale:.1f} mm (width x height)\n"
+#             f"\nHide Top and Right Axes: {hide_top_right_spines}\n"
+#             f"Line Width: {line_width}\n"
+#             f"\nCustom Colors (RGBA):\n"
+#             f"{colors_str}\n"
+#             f"{'-' * 40}"
 #         )
-#         # print("\nFont Sizes:")
-#         # print(f"  Base Size: {base_size:.1f}pt")
-#         # print(f"  Title: {title_size:.1f}pt (125% of base, min 10pt)")
-#         # print(f"  Axis Labels: {label_size:.1f}pt (100% of base, min 9pt)")
-#         # print(f"  Tick Labels: {small_size:.1f}pt (85% of base, min 8pt)")
-#         # print(f"  Legend: {small_size:.1f}pt (85% of base, min 8pt)")
-#         print(f"\nHide Top and Right Axes: {hide_top_right_spines}")
-#         print(f"Line Width: {line_width}")
-#         # print(f"Number of Ticks: {n_ticks}")
-#         print(f"\nCustom Colors (RGBA):")
-#         for color_str, rgba in RGBA.items():
-#             print(f"  {color_str}: {rgba}")
-#         print("-" * 40)
+#         logger.info(config_msg)
 # 
 #     # Store n_ticks for later use
 #     plt._n_ticks = n_ticks
