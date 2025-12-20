@@ -19,9 +19,111 @@ Features:
 """
 
 from typing import Optional, Dict, Tuple, Union, Any
+import re
 import numpy as np
 from scitex.units import Unit, Q, Units
 from scitex.errors import SciTeXError
+import scitex.logging as logging
+from scitex.logging import UnitWarning, warn as _warn
+
+# Valid dimensionless/special unit markers
+_VALID_DIMENSIONLESS = {"[-]", "[a.u.]", "[arb. units]", "[dimensionless]", "[1]", "[A.U.]"}
+
+
+def _convert_to_negative_exponent(unit: str) -> str:
+    """Convert unit with / to negative exponent format.
+
+    Examples:
+        m/s -> m·s⁻¹
+        kg/m^2 -> kg·m⁻²
+        W/m^2/K -> W·m⁻²·K⁻¹
+    """
+    superscript = str.maketrans("0123456789-", "⁰¹²³⁴⁵⁶⁷⁸⁹⁻")
+
+    parts = unit.split("/")
+    if len(parts) < 2:
+        return unit
+
+    result = parts[0]
+    for part in parts[1:]:
+        exp_match = re.match(r"([a-zA-Z]+)\^?(\d+)?", part)
+        if exp_match:
+            base = exp_match.group(1)
+            exp = exp_match.group(2) or "1"
+            neg_exp = f"-{exp}".translate(superscript)
+            result += f"·{base}{neg_exp}"
+        else:
+            result += f"·{part}⁻¹"
+
+    return result
+
+
+def validate_axis_label(label: str, axis_name: str = "axis") -> str:
+    """Validate and warn about axis label units (educational for scientific standards).
+
+    Checks for:
+    - Missing units
+    - Non-standard format (prefer [] over ())
+    - Suggests ^-1 format over /
+
+    Parameters
+    ----------
+    label : str
+        Axis label to validate
+    axis_name : str
+        Name for warning messages (e.g., "X axis", "Y axis")
+
+    Returns
+    -------
+    str
+        Original label (warnings are educational, not auto-correcting)
+    """
+    if not label:
+        return label
+
+    # Check for units in brackets [] or parentheses ()
+    has_square_brackets = bool(re.search(r"\[.*?\]", label))
+    has_parentheses = bool(re.search(r"\(.*?\)", label))
+
+    unit_match_square = re.search(r"\[(.*?)\]", label)
+    unit_match_paren = re.search(r"\((.*?)\)", label)
+
+    if not has_square_brackets and not has_parentheses:
+        _warn(
+            f"{axis_name} label '{label}' has no units. "
+            f"Consider: '{label} [unit]' or '{label} [-]' for dimensionless",
+            UnitWarning,
+            stacklevel=3,
+        )
+        return label
+
+    if has_parentheses and not has_square_brackets:
+        unit = unit_match_paren.group(1) if unit_match_paren else ""
+        suggested = re.sub(r"\((.*?)\)", f"[{unit}]", label)
+        _warn(
+            f"{axis_name} label '{label}' uses parentheses. "
+            f"SI convention prefers: '{suggested}'",
+            UnitWarning,
+            stacklevel=3,
+        )
+
+    unit_content = None
+    if unit_match_square:
+        unit_content = unit_match_square.group(1)
+    elif unit_match_paren:
+        unit_content = unit_match_paren.group(1)
+
+    if unit_content and "/" in unit_content:
+        suggested_unit = _convert_to_negative_exponent(unit_content)
+        if suggested_unit != unit_content:
+            suggested_label = label.replace(f"[{unit_content}]", f"[{suggested_unit}]")
+            _warn(
+                f"{axis_name} uses '/' in units. Consider: '{suggested_label}'",
+                UnitWarning,
+                stacklevel=3,
+            )
+
+    return label
 
 
 class UnitMismatchError(SciTeXError):
@@ -287,6 +389,9 @@ class UnitAwareMixin:
         if self._x_unit:
             label = f"{label} [{self._x_unit.symbol}]"
 
+        # Validate units (educational warnings for scientific standards)
+        validate_axis_label(label, "X axis")
+
         self._axes_mpl.set_xlabel(label)
 
     def set_ylabel(self, label: str, unit: Optional[Union[str, Unit]] = None) -> None:
@@ -304,6 +409,9 @@ class UnitAwareMixin:
 
         if self._y_unit:
             label = f"{label} [{self._y_unit.symbol}]"
+
+        # Validate units (educational warnings for scientific standards)
+        validate_axis_label(label, "Y axis")
 
         self._axes_mpl.set_ylabel(label)
 
@@ -325,5 +433,8 @@ class UnitAwareMixin:
 
         if self._z_unit:
             label = f"{label} [{self._z_unit.symbol}]"
+
+        # Validate units (educational warnings for scientific standards)
+        validate_axis_label(label, "Z axis")
 
         self._axes_mpl.set_zlabel(label)

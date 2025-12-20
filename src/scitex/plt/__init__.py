@@ -180,7 +180,6 @@ except Exception:
     pass  # Use matplotlib default colors if color module fails
 
 from ._tpl import termplot
-from ._bundle import Pltz
 from . import color
 from . import utils
 from . import ax
@@ -750,7 +749,6 @@ __all__ = [
     "figure",
     "gallery",
     "load",
-    "Pltz",
     "presets",
     "subplots",
     "termplot",

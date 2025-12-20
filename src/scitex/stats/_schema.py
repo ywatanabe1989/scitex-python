@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # File: ./src/scitex/stats/_schema.py
-# Time-stamp: "2024-12-09 09:20:00 (ywatanabe)"
+# Timestamp: 2025-12-20
 """
-Statistical Result Schema - Re-exports from central schema module.
+Statistical Result Schema - DEPRECATED
 
-This module re-exports all schema classes from scitex.schema._stats
-for backward compatibility. The canonical definitions now live in
-scitex.schema._stats as the single source of truth.
-
-Note: New code should import directly from scitex.schema:
-    from scitex.schema import StatResult, Position, StatStyling
-
-This module exists for backward compatibility with existing code that
-imports from scitex.stats._schema.
+This module is deprecated. Import from scitex.fts._stats instead:
+    from scitex.fts._stats import Position, StatStyling, StatPositioning
 """
 
-# Re-export everything from the central schema module
-from scitex.schema._stats import (
+import warnings
+
+warnings.warn(
+    "scitex.stats._schema is deprecated. Import from scitex.fts._stats instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
+# Re-export from FTS (new single source of truth)
+from scitex.fts._stats import (
     # Type aliases
     PositionMode,
     UnitType,
@@ -26,11 +27,29 @@ from scitex.schema._stats import (
     Position,
     StatStyling,
     StatPositioning,
-    # Main result class
-    StatResult,
-    # Convenience function
-    create_stat_result,
 )
+
+# StatResult is no longer a dataclass - use dicts for test results
+StatResult = dict
+
+def create_stat_result(
+    test_type: str,
+    statistic_name: str,
+    statistic_value: float,
+    p_value: float,
+    **kwargs,
+) -> dict:
+    """Create a stat result dict (deprecated, use simple dicts instead)."""
+    from scitex.stats.utils import p2stars
+
+    return {
+        "test_type": test_type,
+        "test_category": kwargs.get("test_category", "other"),
+        "statistic": {"name": statistic_name, "value": statistic_value},
+        "p_value": p_value,
+        "stars": p2stars(p_value, ns_symbol=False),
+        **{k: v for k, v in kwargs.items() if k != "test_category"},
+    }
 
 __all__ = [
     # Type aliases
@@ -41,11 +60,9 @@ __all__ = [
     "Position",
     "StatStyling",
     "StatPositioning",
-    # Main result class
+    # Deprecated
     "StatResult",
-    # Convenience function
     "create_stat_result",
 ]
-
 
 # EOF

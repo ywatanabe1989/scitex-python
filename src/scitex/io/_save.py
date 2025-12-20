@@ -6,7 +6,7 @@
 Save utilities for various data types to different file formats.
 
 Supported formats include CSV, NPY, PKL, JOBLIB, PNG, HTML, TIFF, MP4, YAML,
-JSON, HDF5, PTH, MAT, CBM, and SciTeX bundles (.stx, .figz, .pltz, .statsz).
+JSON, HDF5, PTH, MAT, CBM, and FTS bundles (.zip or directory).
 """
 
 import inspect
@@ -278,12 +278,17 @@ def _save(
     """Core dispatcher for saving objects to various formats."""
     ext = _os.path.splitext(spath)[1].lower()
 
-    # Handle bundle formats
-    bundle_extensions = (".stx", ".figz", ".pltz", ".statsz")
-    for bext in bundle_extensions:
-        if spath.endswith(bext) or spath.endswith(f"{bext}.d"):
-            _save_bundle_format(
-                obj, spath, bext, verbose, symlink_from_cwd, symlink_to, **kwargs
+    # Check if this is a matplotlib figure being saved to FTS bundle format
+    # FTS bundles use .zip (archive) or no extension (directory)
+    if _is_matplotlib_figure(obj):
+        # Save as FTS bundle if:
+        # 1. Path ends with .zip (create ZIP bundle)
+        # 2. Path has no extension and doesn't match other formats (create directory bundle)
+        if ext == ".zip" or (ext == "" and not spath.endswith("/")):
+            # Check if explicitly requesting FTS bundle or just .zip
+            as_zip = ext == ".zip"
+            _save_fts_bundle(
+                obj, spath, as_zip, verbose, symlink_from_cwd, symlink_to, **kwargs
             )
             return
 
@@ -321,33 +326,71 @@ def _save(
         logger.success(f"Saved to: ./{rel_path} ({file_size})")
 
 
-def _save_bundle_format(
-    obj, spath, bext, verbose, symlink_from_cwd, symlink_to_path, **kwargs
+def _is_matplotlib_figure(obj):
+    """Check if object is a matplotlib figure or a wrapped figure.
+
+    Handles both raw matplotlib.figure.Figure and SciTeX FigWrapper objects.
+    """
+    try:
+        import matplotlib.figure
+
+        # Direct matplotlib figure
+        if isinstance(obj, matplotlib.figure.Figure):
+            return True
+
+        # Wrapped figure (e.g., FigWrapper from scitex.plt)
+        if hasattr(obj, "figure") and isinstance(
+            obj.figure, matplotlib.figure.Figure
+        ):
+            return True
+
+        return False
+    except ImportError:
+        return False
+
+
+def _save_fts_bundle(
+    obj, spath, as_zip, verbose, symlink_from_cwd, symlink_to_path, **kwargs
 ):
-    """Handle bundle format saving (.stx, .figz, .pltz, .statsz)."""
-    bundle_kwargs = {k: v for k, v in kwargs.items() if k != "as_zip"}
-    as_zip = kwargs.get("as_zip", not spath.endswith(".d"))
+    """Save matplotlib figure as FTS bundle (.zip or directory).
 
-    if bext == ".stx":
-        _save_stx_bundle(obj, spath, as_zip=as_zip, **bundle_kwargs)
-    elif bext == ".figz":
-        import scitex.fig as sfig
-        from scitex.fig import Figz
+    Delegates to scitex.fts.from_matplotlib as the single source of truth
+    for bundle structure (canonical/artifacts/payload/children).
+    """
+    from scitex.fts import from_matplotlib
 
-        if isinstance(obj, Figz):
-            obj.save(spath, verbose=False)
-        else:
-            sfig.save_figz(obj, spath, as_zip=as_zip, **bundle_kwargs)
-    elif bext == ".pltz":
-        _save_pltz_bundle(obj, spath, as_zip=as_zip, **bundle_kwargs)
-    elif bext == ".statsz":
-        import scitex.stats as sstats
+    from ._save_modules._figure_utils import get_figure_with_data
 
-        sstats.save_statsz(obj, spath, as_zip=as_zip, **bundle_kwargs)
+    # Get the actual matplotlib figure
+    import matplotlib.figure
 
-    bundle_path = (
-        spath if as_zip else f"{spath}.d" if not spath.endswith(".d") else spath
-    )
+    if isinstance(obj, matplotlib.figure.Figure):
+        fig = obj
+    elif hasattr(obj, "figure") and isinstance(obj.figure, matplotlib.figure.Figure):
+        fig = obj.figure
+    else:
+        raise TypeError(f"Expected matplotlib figure, got {type(obj)}")
+
+    # Extract optional parameters
+    # Support both "csv_df" and "data" parameter names for user convenience
+    csv_df = kwargs.get("csv_df") or kwargs.get("data")
+    dpi = kwargs.get("dpi", 300)
+    name = kwargs.get("name") or Path(spath).stem
+
+    # Extract CSV data from scitex.plt tracking if available
+    scitex_source = get_figure_with_data(obj)
+    if csv_df is None and scitex_source is not None:
+        if hasattr(scitex_source, "export_as_csv"):
+            try:
+                csv_df = scitex_source.export_as_csv()
+            except Exception:
+                pass
+
+    # Delegate to FTS (single source of truth)
+    # Encoding is built from CSV columns directly for consistency
+    from_matplotlib(fig, spath, name=name, csv_df=csv_df, dpi=dpi)
+
+    bundle_path = spath
     if verbose and _os.path.exists(bundle_path):
         file_size = readable_bytes(getsize(bundle_path))
         try:

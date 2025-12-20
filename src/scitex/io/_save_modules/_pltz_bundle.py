@@ -102,9 +102,13 @@ def save_pltz_bundle(obj, spath, as_zip=False, data=None, layered=True, **kwargs
 
     # Compress to ZIP if requested
     if as_zip:
-        from scitex.io.bundle import pack as pack_bundle
+        import zipfile
 
-        pack_bundle(bundle_dir, zip_path)
+        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            for file_path in bundle_dir.rglob("*"):
+                if file_path.is_file():
+                    arcname = file_path.relative_to(bundle_dir.parent)
+                    zf.write(file_path, arcname)
         shutil.rmtree(temp_dir)
 
 

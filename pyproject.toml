@@ -142,11 +142,6 @@ scitex = "scitex.__main__:main"
 
 [project.optional-dependencies]
 
-# FSB Bundle Specification (optional)
-fsb = [
-    "fsb>=0.1.2",
-]
-
 # Deep Learning (Heavy - 2-4 GB)
 dl = [
     "torch",

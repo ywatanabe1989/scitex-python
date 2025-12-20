@@ -2,16 +2,44 @@
 # Timestamp: 2025-12-19
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_pltz_stx.py
 
-"""Save matplotlib figures as .stx bundles with plot content type."""
+"""Save matplotlib figures as FTS bundles (ZIP or directory) with plot content type."""
 
 import json
 import tempfile
 import warnings
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
 
 from ._figure_utils import get_figure_with_data
+
+
+def _create_stx_spec(bundle_type, title, size):
+    """Create a spec dictionary for .stx bundle.
+
+    Parameters
+    ----------
+    bundle_type : str
+        Type of bundle ('plot', 'figure', 'stats')
+    title : str
+        Title/name of the bundle
+    size : dict
+        Size info with width_mm, height_mm, dpi
+
+    Returns
+    -------
+    dict
+        Spec dictionary
+    """
+    return {
+        "schema": {"name": f"scitex.{bundle_type}", "version": "1.0.0"},
+        "id": f"{bundle_type}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+        "type": bundle_type,
+        "title": title,
+        "size": size,
+        "created_at": datetime.utcnow().isoformat() + "Z",
+    }
 
 
 def _extract_data_from_figure(fig):
@@ -172,10 +200,10 @@ def _build_theme_from_figure(fig):
 
 
 def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
-    """Save a matplotlib figure as a .stx bundle with plot content type.
+    """Save a matplotlib figure as an FTS bundle (ZIP or directory).
 
     Bundle structure:
-        plot_X.stx.d/
+        plot_name/              # or plot_name.zip (with plot_name/ inside)
             spec.json           # Bundle specification (WHAT to plot)
             encoding.json       # Data→visual mapping (scientific rigor)
             theme.json          # Pure aesthetics (colors, fonts)
@@ -198,14 +226,10 @@ def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
     """
     import matplotlib.figure
 
-    from scitex.io.bundle._stx import create_stx_spec
-
     p = Path(spath)
 
     if basename is None:
         basename = p.stem
-        if basename.endswith(".stx"):
-            basename = basename[:-4]
 
     # Extract figure
     fig = obj
@@ -237,7 +261,7 @@ def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
     # Create spec for .stx format
     fig_width_inch, fig_height_inch = fig.get_size_inches()
 
-    spec = create_stx_spec(
+    spec = _create_stx_spec(
         bundle_type="plot",
         title=basename,
         size={
@@ -249,11 +273,11 @@ def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
 
     # Determine paths
     if as_zip:
-        zip_path = p if not str(p).endswith(".d") else Path(str(p)[:-2])
+        zip_path = p
         temp_dir = Path(tempfile.mkdtemp())
-        bundle_dir = temp_dir / f"{basename}.stx.d"
+        bundle_dir = temp_dir / basename
     else:
-        bundle_dir = p if str(p).endswith(".d") else Path(str(p) + ".d")
+        bundle_dir = p
         temp_dir = None
 
     bundle_dir.mkdir(parents=True, exist_ok=True)
@@ -424,10 +448,13 @@ def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
     # Pack to ZIP if requested
     if as_zip:
         import shutil
+        import zipfile
 
-        from scitex.io.bundle import pack as pack_bundle
-
-        pack_bundle(bundle_dir, zip_path)
+        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            for file_path in bundle_dir.rglob("*"):
+                if file_path.is_file():
+                    arcname = file_path.relative_to(bundle_dir.parent)
+                    zf.write(file_path, arcname)
         shutil.rmtree(temp_dir)
 
 
@@ -436,7 +463,7 @@ def _generate_readme(bundle_dir, basename, spec, csv_df):
     from datetime import datetime
 
     readme_lines = [
-        f"# {basename}.stx Bundle",
+        f"# {basename} FTS Bundle",
         "",
         "## Overview",
         "",
@@ -447,7 +474,7 @@ def _generate_readme(bundle_dir, basename, spec, csv_df):
         "## Structure",
         "",
         "```",
-        f"{basename}.stx.d/",
+        f"{basename}/",
         "├── spec.json           # What to plot (data mapping)",
         "├── encoding.json       # Data→visual mapping (scientific rigor)",
         "├── theme.json          # Pure aesthetics (colors, fonts)",
@@ -490,11 +517,11 @@ def _generate_readme(bundle_dir, basename, spec, csv_df):
             "## Usage",
             "",
             "```python",
-            "from scitex.plt import Pltz",
+            "from scitex.fts import FTS",
             "",
-            f'pltz = Pltz("{basename}.stx")',
-            "pltz.show()  # Display",
-            'pltz.save("output.png")  # Export',
+            f'bundle = FTS("{basename}.zip")  # or "{basename}/" directory',
+            "bundle.show()  # Display",
+            'bundle.export("output.png")  # Export',
             "```",
             "",
             "---",
