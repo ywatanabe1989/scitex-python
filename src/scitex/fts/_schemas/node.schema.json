@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://scitex.ai/schemas/fsb/node.schema.json",
+  "title": "FSB Node Schema",
+  "description": "Schema for Figure-Statistics Bundle node (plot or figure)",
+  "type": "object",
+  "required": ["id", "type", "bbox_norm"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this node"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["figure", "plot", "text", "shape", "image", "stats"],
+      "description": "Type of node"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name"
+    },
+    "bbox_norm": {
+      "type": "object",
+      "description": "Bounding box in normalized coordinates (0-1)",
+      "required": ["x0", "y0", "x1", "y1"],
+      "properties": {
+        "x0": {"type": "number", "minimum": 0, "maximum": 1},
+        "y0": {"type": "number", "minimum": 0, "maximum": 1},
+        "x1": {"type": "number", "minimum": 0, "maximum": 1},
+        "y1": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "size_mm": {
+      "type": "object",
+      "description": "Physical size in millimeters",
+      "properties": {
+        "width": {"type": "number", "minimum": 0},
+        "height": {"type": "number", "minimum": 0}
+      }
+    },
+    "axes": {
+      "type": "object",
+      "description": "Axis configuration (for plot nodes)",
+      "properties": {
+        "xlim": {
+          "type": "array",
+          "items": {"type": "number"},
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "ylim": {
+          "type": "array",
+          "items": {"type": "number"},
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "xscale": {"type": "string", "enum": ["linear", "log", "symlog"]},
+        "yscale": {"type": "string", "enum": ["linear", "log", "symlog"]},
+        "xlabel": {"type": "string"},
+        "ylabel": {"type": "string"}
+      }
+    },
+    "children": {
+      "type": "array",
+      "description": "Child node references (for recursive structure)",
+      "items": {"type": "string"}
+    },
+    "refs": {
+      "type": "object",
+      "description": "References to associated files",
+      "properties": {
+        "encoding": {"type": "string", "description": "Path to encoding.json"},
+        "theme": {"type": "string", "description": "Path to theme.json"},
+        "data": {"type": "string", "description": "Path to data directory or file"},
+        "stats": {"type": "string", "description": "Path to stats.json"}
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "modified_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
