@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://scitex.ai/schemas/fsb/theme.schema.json",
+  "title": "FSB Theme Schema",
+  "description": "Schema for visual aesthetics (decorative properties that don't affect data meaning)",
+  "type": "object",
+  "properties": {
+    "colors": {
+      "type": "object",
+      "description": "Color palette",
+      "properties": {
+        "primary": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+        "secondary": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+        "background": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+        "text": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+        "palette": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"}
+        }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "family": {"type": "string", "default": "sans-serif"},
+        "size_pt": {"type": "number", "minimum": 1, "default": 10},
+        "title_size_pt": {"type": "number", "minimum": 1, "default": 12},
+        "label_size_pt": {"type": "number", "minimum": 1, "default": 10},
+        "tick_size_pt": {"type": "number", "minimum": 1, "default": 8}
+      }
+    },
+    "lines": {
+      "type": "object",
+      "properties": {
+        "width_pt": {"type": "number", "minimum": 0, "default": 1},
+        "axis_width_pt": {"type": "number", "minimum": 0, "default": 0.5},
+        "grid_width_pt": {"type": "number", "minimum": 0, "default": 0.25}
+      }
+    },
+    "markers": {
+      "type": "object",
+      "properties": {
+        "size_pt": {"type": "number", "minimum": 0, "default": 6},
+        "edge_width_pt": {"type": "number", "minimum": 0, "default": 0.5}
+      }
+    },
+    "grid": {
+      "type": "object",
+      "properties": {
+        "show": {"type": "boolean", "default": false},
+        "color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+        "alpha": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "traces": {
+      "type": "array",
+      "description": "Per-trace styling",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trace_id": {"type": "string"},
+          "color": {"type": "string"},
+          "linestyle": {"type": "string", "enum": ["solid", "dashed", "dotted", "dashdot"]},
+          "linewidth_pt": {"type": "number"},
+          "marker": {"type": "string"},
+          "markersize_pt": {"type": "number"},
+          "alpha": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "preset": {
+      "type": "string",
+      "description": "Named preset (e.g., 'nature', 'science', 'dark')"
+    }
+  }
+}

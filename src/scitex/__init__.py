@@ -163,6 +163,8 @@ cloud = _LazyModule("cloud")
 config = _LazyModule("config")
 audio = _LazyModule("audio")
 msword = _LazyModule("msword")
+fts = _LazyModule("fts")  # Figure-Table-Statistics - single source of truth for bundle schemas
+fsb = fts  # Legacy alias (FSB -> FTS)
 
 # Centralized path configuration - eager loaded for convenience
 # Usage: scitex.PATHS.logs, scitex.PATHS.cache, etc.
@@ -225,6 +227,8 @@ __all__ = [
     "config",
     "audio",
     "msword",
+    "fts",
+    "fsb",  # Legacy alias
     "PATHS",
     "INJECTED",
 ]
