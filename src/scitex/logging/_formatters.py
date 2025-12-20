@@ -21,6 +21,10 @@ import sys
 # SCITEX_LOG_FORMAT=debug python script.py
 LOG_FORMAT = os.getenv("SCITEX_LOG_FORMAT", "default")
 
+# Force color output even when stdout is not a TTY (e.g., when piping through tee)
+# SCITEX_FORCE_COLOR=1 python script.py | tee output.log
+FORCE_COLOR = os.getenv("SCITEX_FORCE_COLOR", "").lower() in ("1", "true", "yes")
+
 # Available format templates
 FORMAT_TEMPLATES = {
     "minimal": "%(levelname)s: %(message)s",
@@ -80,6 +84,14 @@ class SciTeXConsoleFormatter(logging.Formatter):
         self.indent_width = indent_width
 
     def format(self, record):
+        # Handle leading newlines: extract and preserve them
+        msg = str(record.msg) if record.msg else ""
+        leading_newlines = ""
+        while msg.startswith("\n"):
+            leading_newlines += "\n"
+            msg = msg[1:]
+        record.msg = msg
+
         # Apply indentation if specified in record
         indent_level = getattr(record, "indent", 0)
         if indent_level > 0:
@@ -89,12 +101,23 @@ class SciTeXConsoleFormatter(logging.Formatter):
         # Use parent formatter to apply template
         formatted = super().format(record)
 
-        # Check if we can use colors (stdout is a tty and not closed)
+        # Handle internal newlines: each line gets the level prefix
+        if "\n" in formatted:
+            lines = formatted.split("\n")
+            # First line already has prefix from parent formatter
+            # Add prefix to each continuation line
+            prefix = f"{record.levelname}: "
+            formatted = lines[0] + "\n" + "\n".join(
+                prefix + line if line.strip() else line
+                for line in lines[1:]
+            )
+
+        # Check if we can use colors (stdout is a tty and not closed, or forced)
         try:
-            use_colors = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+            use_colors = FORCE_COLOR or (hasattr(sys.stdout, "isatty") and sys.stdout.isatty())
         except ValueError:
             # stdout/stderr is closed
-            use_colors = False
+            use_colors = FORCE_COLOR
 
         if use_colors:
             # Check for custom color override
@@ -103,15 +126,15 @@ class SciTeXConsoleFormatter(logging.Formatter):
             if custom_color and custom_color in self.COLOR_NAMES:
                 # Use custom color
                 color = self.COLOR_NAMES[custom_color]
-                return f"{color}{formatted}{self.RESET}"
+                return f"{leading_newlines}{color}{formatted}{self.RESET}"
             else:
                 # Use default color for log level
                 levelname = record.levelname
                 if levelname in self.COLORS:
                     color = self.COLORS[levelname]
-                    return f"{color}{formatted}{self.RESET}"
+                    return f"{leading_newlines}{color}{formatted}{self.RESET}"
 
-        return formatted
+        return f"{leading_newlines}{formatted}"
 
 
 class SciTeXFileFormatter(logging.Formatter):
@@ -129,6 +152,7 @@ __all__ = [
     "SciTeXFileFormatter",
     "LOG_FORMAT",
     "FORMAT_TEMPLATES",
+    "FORCE_COLOR",
 ]
 
 # EOF
