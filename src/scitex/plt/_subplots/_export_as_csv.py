@@ -76,6 +76,8 @@ from ._export_as_csv_formatters import (
     _format_eventplot,
     _format_fill,
     _format_fill_between,
+    _format_stackplot,
+    _format_pcolormesh,
     _format_hexbin,
     _format_hist,
     _format_hist2d,
@@ -147,6 +149,9 @@ _FORMATTER_REGISTRY = {
     "eventplot": _format_eventplot,
     "fill": _format_fill,
     "fill_between": _format_fill_between,
+    "stackplot": _format_stackplot,
+    "pcolormesh": _format_pcolormesh,
+    "pcolor": _format_pcolormesh,
     "hexbin": _format_hexbin,
     "hist": _format_hist,
     "hist2d": _format_hist2d,
@@ -337,6 +342,12 @@ def format_record(record, record_index=0):
         return _format_fill(id, tracked_dict, kwargs)
     elif method == "fill_between":
         return _format_fill_between(id, tracked_dict, kwargs)
+    elif method == "stackplot":
+        return _format_stackplot(id, tracked_dict, kwargs)
+    elif method == "pcolormesh":
+        return _format_pcolormesh(id, tracked_dict, kwargs)
+    elif method == "pcolor":
+        return _format_pcolormesh(id, tracked_dict, kwargs)
     elif method == "hexbin":
         return _format_hexbin(id, tracked_dict, kwargs)
     elif method == "hist2d":
