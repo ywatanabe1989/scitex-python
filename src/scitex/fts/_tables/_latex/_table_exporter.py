@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_tables/_latex/_table_exporter.py
 
-"""Export FSB tables to LaTeX using booktabs."""
+"""Export FTS tables to LaTeX using booktabs."""
 
 import csv
 import json

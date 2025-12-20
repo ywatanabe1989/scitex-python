@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/__init__.py
 
-"""FSB Figure - Encoding and Theme dataclasses."""
+"""FTS Figure - Encoding and Theme dataclasses."""
 
 # Public dataclasses
 from ._dataclasses import (

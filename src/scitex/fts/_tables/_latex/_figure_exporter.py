@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_tables/_latex/_figure_exporter.py
 
-"""Export FSB figures to LaTeX using includegraphics."""
+"""Export FTS figures to LaTeX using includegraphics."""
 
 from dataclasses import dataclass
 from pathlib import Path

@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_utils/_auto_layout.py
 
-"""Auto layout utilities for FSB elements."""
+"""Auto layout utilities for FTS elements."""
 
 from typing import Any, Dict, List, Optional, Tuple
 

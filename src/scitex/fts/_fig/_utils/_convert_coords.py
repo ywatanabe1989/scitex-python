@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_utils/_convert_coords.py
 
-"""Coordinate conversion utilities for FSB layout.
+"""Coordinate conversion utilities for FTS layout.
 
 Coordinate System:
 - Origin (0,0) is at TOP-LEFT corner

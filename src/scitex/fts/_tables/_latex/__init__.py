@@ -4,7 +4,7 @@
 
 """LaTeX export for FTS bundles.
 
-This module provides LaTeX export capabilities for FSB figure and table bundles.
+This module provides LaTeX export capabilities for FTS figure and table bundles.
 
 Usage:
     from scitex.fts._tables._latex import export_to_latex, launch_editor

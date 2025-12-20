@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://scitex.ai/schemas/fsb/stats.schema.json",
-  "title": "FSB Stats Schema",
+  "$id": "https://scitex.ai/schemas/fts/stats.schema.json",
+  "title": "FTS Stats Schema",
   "description": "Schema for statistical analysis results with full reproducibility",
   "type": "object",
   "properties": {

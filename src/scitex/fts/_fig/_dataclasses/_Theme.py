@@ -129,7 +129,12 @@ class Grid:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Grid":
+    def from_dict(cls, data: Any) -> "Grid":
+        # Handle case where grid is a boolean (e.g., grid: true)
+        if isinstance(data, bool):
+            return cls(show=data)
+        if not isinstance(data, dict):
+            return cls()  # Default
         return cls(
             show=data.get("show", True),
             major_width_pt=data.get("major_width_pt", 0.5),

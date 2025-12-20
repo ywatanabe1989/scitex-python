@@ -3,7 +3,7 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_bundle/_validation.py
 
 """
-FSB Multi-Level Validation System.
+FTS Multi-Level Validation System.
 
 Three validation levels:
 1. schema   - Always ON (init/load/save) - Fast, structural checks
@@ -11,12 +11,12 @@ Three validation levels:
 3. strict   - Explicit (CI/publication) - Full scientific rigor
 
 Usage:
-    result = fsb.validate(level="schema")  # Fast, default at init
-    result = fsb.validate(level="semantic")  # Cross-ref checks
-    result = fsb.validate(level="strict")  # Full validation
+    result = fts.validate(level="schema")  # Fast, default at init
+    result = fts.validate(level="semantic")  # Cross-ref checks
+    result = fts.validate(level="strict")  # Full validation
 
     if result.has_errors:
-        raise FSBValidationError(result)
+        raise FTSValidationError(result)
 """
 
 import json
@@ -39,7 +39,7 @@ ValidationLevel = Literal["schema", "semantic", "strict"]
 
 @dataclass
 class ValidationResult:
-    """Result of FSB validation.
+    """Result of FTS validation.
 
     Attributes
     ----------

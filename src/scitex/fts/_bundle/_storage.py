@@ -66,45 +66,79 @@ class Storage(ABC):
 
 
 class ZipStorage(Storage):
-    """Storage implementation for ZIP files."""
+    """Storage implementation for ZIP files.
+
+    ZIP files are structured with a top-level directory named after the bundle.
+    For example, my_figure.zip contains:
+        my_figure/
+            node.json
+            encoding.json
+            theme.json
+    This ensures `unzip my_figure.zip` creates a my_figure/ directory.
+    """
+
+    @property
+    def _prefix(self) -> str:
+        """Top-level directory name inside the ZIP (bundle stem)."""
+        return self._path.stem + "/"
+
+    def _prefixed(self, name: str) -> str:
+        """Add prefix to file path."""
+        return self._prefix + name
+
+    def _unprefixed(self, name: str) -> str:
+        """Remove prefix from file path."""
+        if name.startswith(self._prefix):
+            return name[len(self._prefix) :]
+        return name
 
     def exists(self, name: str) -> bool:
         if not self._path.exists():
             return False
         with zipfile.ZipFile(self._path, "r") as zf:
-            return name in zf.namelist()
+            # Check both prefixed and unprefixed for backwards compatibility
+            return self._prefixed(name) in zf.namelist() or name in zf.namelist()
 
     def read(self, name: str) -> bytes:
         with zipfile.ZipFile(self._path, "r") as zf:
+            # Try prefixed first, fall back to unprefixed for backwards compatibility
+            prefixed = self._prefixed(name)
+            if prefixed in zf.namelist():
+                return zf.read(prefixed)
             return zf.read(name)
 
     def write(self, name: str, data: bytes) -> None:
         # ZIP files need special handling - read existing, add/update, rewrite
         existing = {}
+        prefixed_name = self._prefixed(name)
         if self._path.exists():
             with zipfile.ZipFile(self._path, "r") as zf:
                 for item in zf.namelist():
-                    if item != name:
+                    if item != prefixed_name:
                         existing[item] = zf.read(item)
 
         with zipfile.ZipFile(self._path, "w", zipfile.ZIP_DEFLATED) as zf:
             for item_name, item_data in existing.items():
                 zf.writestr(item_name, item_data)
-            zf.writestr(name, data)
+            zf.writestr(prefixed_name, data)
 
     def list(self) -> List[str]:
         if not self._path.exists():
             return []
         with zipfile.ZipFile(self._path, "r") as zf:
-            return zf.namelist()
+            # Return unprefixed names for API consistency
+            return [self._unprefixed(n) for n in zf.namelist() if not n.endswith("/")]
 
     def write_all(self, files: dict) -> None:
-        """Write multiple files at once (more efficient for ZIP)."""
+        """Write multiple files at once (more efficient for ZIP).
+
+        Files are stored under a top-level directory matching the bundle name.
+        """
         with zipfile.ZipFile(self._path, "w", zipfile.ZIP_DEFLATED) as zf:
             for name, data in files.items():
                 if isinstance(data, str):
                     data = data.encode("utf-8")
-                zf.writestr(name, data)
+                zf.writestr(self._prefixed(name), data)
 
 
 class DirStorage(Storage):

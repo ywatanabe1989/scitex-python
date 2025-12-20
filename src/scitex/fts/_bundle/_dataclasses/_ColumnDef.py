@@ -45,7 +45,12 @@ class ColumnDef:
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ColumnDef":
+    def from_dict(cls, data: Any) -> "ColumnDef":
+        # Handle case where column is just a string (column name)
+        if isinstance(data, str):
+            return cls(name=data, dtype="unknown")
+        if not isinstance(data, dict):
+            return cls(name="", dtype="unknown")  # Default
         return cls(
             name=data.get("name", ""),
             dtype=data.get("dtype", "float64"),

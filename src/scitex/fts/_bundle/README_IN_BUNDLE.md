@@ -1,4 +1,4 @@
-# FSB Bundle (Figure-Statistics Bundle)
+# FTS Bundle (Figure-Table-Statistics)
 
 This is a self-contained scientific figure bundle created with SciTeX.
 
@@ -99,4 +99,4 @@ bundle = fsb.Bundle("this_bundle.zip")
 The figure and data in this bundle are subject to the license terms specified by the original author. Contact information may be found in `spec.json`.
 
 ---
-*Created with [SciTeX](https://scitex.ai) FSB v1.0.0*
+*Created with [SciTeX](https://scitex.ai) FTS v1.0.0*

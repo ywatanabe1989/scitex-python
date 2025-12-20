@@ -4,7 +4,7 @@
 
 from typing import Any, Dict
 
-from ..model import (
+from .._models import (
     AnnotationModel,
     AxesModel,
     FigureModel,

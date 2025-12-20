@@ -188,7 +188,7 @@ def resolve_layered_pltz_bundle(bundle_dir: Path) -> Tuple:
     """
     Resolve paths from a layered FTS bundle.
 
-    FSB format structure:
+    FTS format structure:
         bundle.zip (or bundle.d/)
             canonical/
                 spec.json       # Main specification
@@ -275,7 +275,7 @@ def resolve_layered_pltz_bundle(bundle_dir: Path) -> Tuple:
 
 def resolve_stx_bundle(path: Path) -> Tuple:
     """
-    Resolve paths from a .stx bundle (unified FSB format).
+    Resolve paths from a .stx bundle (unified FTS format).
 
     Parameters
     ----------
@@ -308,8 +308,8 @@ def resolve_stx_bundle(path: Path) -> Tuple:
         if not bundle_dir.exists():
             raise FileNotFoundError(f"Bundle directory not found: {bundle_dir}")
 
-    # Load using FSB class
-    fsb_bundle = FTS(bundle_dir)
+    # Load using FTS class
+    fts_bundle = FTS(bundle_dir)
 
     # Find spec path (canonical/spec.json or spec.json)
     spec_path = bundle_dir / "canonical" / "spec.json"
@@ -341,13 +341,13 @@ def resolve_stx_bundle(path: Path) -> Tuple:
         if csv_path:
             break
 
-    # Build bundle spec from FSB
-    bundle_spec = fsb_bundle.to_dict() if hasattr(fsb_bundle, "to_dict") else {}
+    # Build bundle spec from FTS
+    bundle_spec = fts_bundle.to_dict() if hasattr(fts_bundle, "to_dict") else {}
 
     # Build element info for editor
     element_info = {
-        "elements": getattr(fsb_bundle, "elements", []),
-        "size_mm": fsb_bundle.node.size_mm if fsb_bundle.node else None,
+        "elements": getattr(fts_bundle, "elements", []),
+        "size_mm": fts_bundle.node.size_mm if fts_bundle.node else None,
         "bundle_dir": str(bundle_dir),
         "bundle_path": str(path),
         "is_directory": bundle_dir.is_dir(),

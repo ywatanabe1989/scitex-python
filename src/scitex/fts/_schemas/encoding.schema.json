@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://scitex.ai/schemas/fsb/encoding.schema.json",
-  "title": "FSB Encoding Schema",
+  "$id": "https://scitex.ai/schemas/fts/encoding.schema.json",
+  "title": "FTS Encoding Schema",
   "description": "Schema for data-to-visual channel mappings",
   "type": "object",
   "properties": {

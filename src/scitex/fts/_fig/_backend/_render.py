@@ -6,8 +6,12 @@ from typing import Any, Dict
 
 import numpy as np
 
-from ..model import AnnotationModel, AxesModel, FigureModel, GuideModel, PlotModel
+import scitex.logging as logging
+
+from .._models import AnnotationModel, AxesModel, FigureModel, GuideModel, PlotModel
 from ._parser import parse_figure_json
+
+logger = logging.getLogger(__name__)
 
 
 def render_figure(fig_model: FigureModel):
@@ -380,6 +384,86 @@ def build_figure_from_json(fig_json: Dict[str, Any]):
     """
     fig_model = parse_figure_json(fig_json)
     return render_figure(fig_model)
+
+
+def render_traces(ax, trace, data, theme=None):
+    """
+    Render a TraceEncoding onto an axis.
+
+    Parameters
+    ----------
+    ax : matplotlib Axes
+        Target axis
+    trace : TraceEncoding
+        Trace encoding specification
+    data : pd.DataFrame or None
+        Data to plot
+    theme : Theme, optional
+        Theme for styling
+
+    Raises
+    ------
+    ValueError
+        If data is None or required columns are missing
+    """
+    if data is None:
+        logger.error(f"No data provided for trace '{trace.trace_id}'")
+        raise ValueError(f"No data provided for trace '{trace.trace_id}'")
+
+    # Get style from theme
+    color = None
+    linewidth = 1.0
+    alpha = 1.0
+
+    if theme:
+        # Check for trace-specific theme
+        if hasattr(theme, "traces") and theme.traces:
+            for t in theme.traces:
+                if t.trace_id == trace.trace_id:
+                    color = t.color
+                    if t.line_width_pt:
+                        linewidth = t.line_width_pt
+                    if t.alpha:
+                        alpha = t.alpha
+                    break
+
+        # Fall back to default colors
+        if not color and hasattr(theme, "colors"):
+            palette = theme.colors.palette
+            if palette:
+                color = palette[0]
+
+        if hasattr(theme, "lines"):
+            linewidth = theme.lines.width_pt
+
+    # Default color if none set
+    if not color:
+        color = "#1f77b4"
+
+    # Get column names from encoding
+    x_col = trace.x.column if trace.x else None
+    y_col = trace.y.column if trace.y else None
+
+    if not x_col or not y_col:
+        logger.error(f"Trace '{trace.trace_id}' missing x or y encoding")
+        raise ValueError(f"Trace '{trace.trace_id}' missing x or y encoding")
+
+    if x_col not in data.columns:
+        logger.error(f"Column '{x_col}' not found in data. Available: {list(data.columns)}")
+        raise ValueError(f"Column '{x_col}' not found in data. Available: {list(data.columns)}")
+    if y_col not in data.columns:
+        logger.error(f"Column '{y_col}' not found in data. Available: {list(data.columns)}")
+        raise ValueError(f"Column '{y_col}' not found in data. Available: {list(data.columns)}")
+
+    # Plot the data
+    ax.plot(
+        data[x_col],
+        data[y_col],
+        color=color,
+        linewidth=linewidth,
+        alpha=alpha,
+        label=trace.trace_id,
+    )
 
 
 # EOF

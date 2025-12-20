@@ -4,11 +4,11 @@
 !-- File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/README.md
 !-- --- -->
 
-# SciTeX FSB (Figure-Statistics FSB)
+# SciTeX FTS (Figure-Table-Statistics)
 
-**FSB is the single source of truth for bundle schemas in SciTeX.**
+**FTS is the single source of truth for bundle schemas in SciTeX.**
 
-FSB defines a standardized, self-contained format for reproducible scientific figures with:
+FTS defines a standardized, self-contained format for reproducible scientific figures with:
 - Complete data provenance
 - Statistical analysis results
 - Visual encoding specifications
@@ -18,7 +18,7 @@ FSB defines a standardized, self-contained format for reproducible scientific fi
 
 ### Separation of Concerns
 
-FSB strictly separates:
+FTS strictly separates:
 
 | Layer | File | Purpose | Affects Science? |
 |-------|------|---------|------------------|
@@ -58,10 +58,10 @@ bundle_root/
 ## Quick Start
 
 ```python
-from scitex import fsb
+from scitex import fts
 
 # Create a new bundle
-bundle = fsb.FSB("my_plot.zip", create=True, node_type="plot", name="My Plot")
+bundle = fts.FTS("my_plot.zip", create=True, node_type="plot", name="My Plot")
 
 # Set encoding (data-to-visual mapping)
 bundle.encoding = {
@@ -90,16 +90,16 @@ bundle.save()
 ## Module Structure
 
 ```
-scitex/fsb/
+scitex/fts/
 ├── __init__.py       # Public API exports
-├── _bundle.py        # FSB class
+├── _bundle.py        # FTS class
 ├── _models.py        # Core models (Node, BBox, SizeMM, Axes)
 ├── _encoding.py      # Encoding models (TraceEncoding, ChannelEncoding)
 ├── _theme.py         # Theme models (Theme, Colors, Typography)
 ├── _stats.py         # Stats models (Analysis, StatResult, EffectSize)
 ├── _data_info.py     # Data info models (DataInfo, ColumnDef)
 ├── _validation.py    # JSON schema validation
-├── _conversion.py    # scitex to FSB format conversion
+├── _conversion.py    # scitex to FTS format conversion
 └── schemas/          # JSON Schema definitions
     ├── node.schema.json
     ├── encoding.schema.json
@@ -115,7 +115,7 @@ scitex/fsb/
 Structural metadata for the bundle:
 
 ```python
-from scitex.fsb import Node, BBox, SizeMM
+from scitex.fts import Node, BBox, SizeMM
 
 node = Node(
     id="plot_001",
@@ -132,7 +132,7 @@ node = Node(
 Data-to-visual channel mappings:
 
 ```python
-from scitex.fsb import Encoding, TraceEncoding, ChannelEncoding
+from scitex.fts import Encoding, TraceEncoding, ChannelEncoding
 
 encoding = Encoding(
     traces=[
@@ -152,7 +152,7 @@ encoding = Encoding(
 Pure aesthetics (doesn't affect scientific meaning):
 
 ```python
-from scitex.fsb import Theme, Colors, Typography
+from scitex.fts import Theme, Colors, Typography
 
 theme = Theme(
     colors=Colors(
@@ -174,7 +174,7 @@ theme = Theme(
 Statistical analysis results with full provenance:
 
 ```python
-from scitex.fsb import Stats, Analysis, StatMethod, StatResult, EffectSize
+from scitex.fts import Stats, Analysis, StatMethod, StatResult, EffectSize
 
 stats = Stats(
     analyses=[
@@ -212,7 +212,7 @@ stats = Stats(
 Validate bundles against JSON schemas:
 
 ```python
-from scitex.fsb import validate_bundle, validate_node
+from scitex.fts import validate_bundle, validate_node
 
 # Validate entire bundle
 errors = validate_bundle("my_figure.zip")
@@ -226,29 +226,29 @@ node_errors = validate_node({"id": "test", "type": "plot", "bbox_norm": {...}})
 
 ## Conversion Utilities
 
-Convert between scitex internal format and FSB format:
+Convert between scitex internal format and FTS format:
 
 ```python
-from scitex.fsb import from_scitex_spec, to_scitex_spec
+from scitex.fts import from_scitex_spec, to_scitex_spec
 
-# scitex spec to FSB format
-fsb_data = from_scitex_spec(spec_dict, style_dict)
+# scitex spec to FTS format
+fts_data = from_scitex_spec(spec_dict, style_dict)
 # Returns: {"node": {...}, "encoding": {...}, "theme": {...}}
 
-# FSB bundle to scitex format
+# FTS bundle to scitex format
 spec, style = to_scitex_spec(bundle)
 ```
 
 ## Backward Compatibility
 
-FSB is also available via the legacy import path:
+FTS is also available via the legacy import path:
 
 ```python
 # Old path (still works)
-from scitex.io.bundle import fsb
+from scitex import fsb  # Alias for fts
 
 # New path (preferred)
-from scitex import fsb
+from scitex import fts
 ```
 
 ## Best Practices

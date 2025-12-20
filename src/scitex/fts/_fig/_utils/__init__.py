@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_utils/__init__.py
 
-"""Utilities for FSB figures - layout, defaults, validation."""
+"""Utilities for FTS figures - layout, defaults, validation."""
 
 # Constants
 from ._const_sizes import (

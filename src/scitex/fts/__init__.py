@@ -31,7 +31,7 @@ __version__ = "1.0.0"
 # =============================================================================
 
 # FTS class (main entry point)
-from ._bundle import FTS, create_bundle, load_bundle
+from ._bundle import FTS, create_bundle, from_matplotlib, load_bundle
 
 # Core dataclasses users interact with
 from ._bundle import Node, BBox, SizeMM, DataInfo
@@ -70,6 +70,7 @@ __all__ = [
     "FTS",
     "load_bundle",
     "create_bundle",
+    "from_matplotlib",
     # Core dataclasses
     "Node",
     "Encoding",

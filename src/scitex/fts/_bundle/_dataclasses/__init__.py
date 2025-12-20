@@ -2,7 +2,7 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_bundle/_dataclasses/__init__.py
 
-"""FSB Dataclasses - Core shared data models for bundles."""
+"""FTS Dataclasses - Core shared data models for bundles."""
 
 # Core models (shared between fig and stats)
 from ._Axes import Axes
