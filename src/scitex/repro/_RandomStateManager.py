@@ -27,6 +27,9 @@ from pathlib import Path
 from typing import Any
 
 from scitex.config import get_paths
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Global singleton instance
 _GLOBAL_INSTANCE = None
@@ -62,7 +65,7 @@ class RandomStateManager:
         self._jax_key = None  # Initialize to None, will be set if jax is available
 
         if verbose:
-            print(f"RandomStateManager initialized with seed {seed}")
+            logger.info(f"RandomStateManager initialized with seed {seed}")
 
         # Auto-fix all available seeds
         self._auto_fix_seeds(verbose=verbose)
@@ -138,7 +141,7 @@ class RandomStateManager:
             pass
 
         if verbose and fixed_modules:
-            print(f"Fixed random seeds for: {', '.join(fixed_modules)}")
+            logger.info(f"Fixed random seeds for: {', '.join(fixed_modules)}")
 
     def get_np_generator(self, name: str):
         """

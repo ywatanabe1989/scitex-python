@@ -10,18 +10,15 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 """Scitex IO module with lazy imports to avoid circular dependencies.
 
-Bundle I/O is now in scitex.io.bundle submodule:
-    import scitex.io.bundle as bundle
-    bundle.load("Figure1.figz")
-    bundle.save(data, "output.pltz")
+Bundle I/O is handled via scitex.fts:
+    from scitex.fts import FTS
+    bundle = FTS("Figure1.stx")
+    bundle.save()
 """
 
 # Import commonly used functions directly
 from ._save import save
 from ._load import load
-
-# Bundle I/O - import the bundle submodule
-from . import bundle
 
 from ._load_configs import load_configs
 from ._glob import glob, parse_glob

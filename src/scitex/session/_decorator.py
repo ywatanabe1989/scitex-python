@@ -185,18 +185,19 @@ def _run_with_session(
     func_globals["rng_manager"] = rng_manager
     func_globals["logger"] = script_logger
 
-    # Log injected globals for user awareness
-    _decorator_logger.info("=" * 60)
-    _decorator_logger.info("Injected Global Variables (available in your function):")
-    _decorator_logger.info("  • CONFIG - Session configuration dict")
-    _decorator_logger.info(f"      - CONFIG['ID']: {CONFIG['ID']}")
-    _decorator_logger.info(f"      - CONFIG['SDIR_RUN']: {CONFIG['SDIR_RUN']}")
-    _decorator_logger.info(f"      - CONFIG['PID']: {CONFIG['PID']}")
-    _decorator_logger.info("  • plt - matplotlib.pyplot (configured for session)")
-    _decorator_logger.info("  • COLORS - CustomColors (for consistent plotting)")
-    _decorator_logger.info("  • rng_manager - RandomStateManager (for reproducibility)")
-    _decorator_logger.info("  • logger - SciTeX logger (configured for your script)")
-    _decorator_logger.info("=" * 60)
+    # Log injected globals for user awareness (only in verbose mode)
+    if verbose:
+        _decorator_logger.info("=" * 60)
+        _decorator_logger.info("Injected Global Variables (available in your function):")
+        _decorator_logger.info("  • CONFIG - Session configuration dict")
+        _decorator_logger.info(f"      - CONFIG['ID']: {CONFIG['ID']}")
+        _decorator_logger.info(f"      - CONFIG['SDIR_RUN']: {CONFIG['SDIR_RUN']}")
+        _decorator_logger.info(f"      - CONFIG['PID']: {CONFIG['PID']}")
+        _decorator_logger.info("  • plt - matplotlib.pyplot (configured for session)")
+        _decorator_logger.info("  • COLORS - CustomColors (for consistent plotting)")
+        _decorator_logger.info("  • rng_manager - RandomStateManager (for reproducibility)")
+        _decorator_logger.info("  • logger - SciTeX logger (configured for your script)")
+        _decorator_logger.info("=" * 60)
 
     # Run function
     exit_status = 0
@@ -235,10 +236,11 @@ def _run_with_session(
                     if param_name in injection_map:
                         filtered_kwargs[param_name] = injection_map[param_name]
 
-        # Log injected arguments summary
-        args_summary = {k: type(v).__name__ for k, v in filtered_kwargs.items()}
-        _decorator_logger.info(f"Running {func.__name__} with injected parameters:")
-        _decorator_logger.info(args_summary, pprint=True, indent=2)
+        # Log injected arguments summary (only in verbose mode)
+        if verbose:
+            args_summary = {k: type(v).__name__ for k, v in filtered_kwargs.items()}
+            _decorator_logger.info(f"Running {func.__name__} with injected parameters:")
+            _decorator_logger.info(args_summary, pprint=True, indent=2)
 
         # Execute function
         result = func(**filtered_kwargs)

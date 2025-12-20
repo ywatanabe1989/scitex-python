@@ -2,50 +2,51 @@
 # Timestamp: 2025-12-19
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_stx_bundle.py
 
-"""Save functions for unified .stx bundle format."""
+"""Save functions for FTS bundle format (.zip or directory)."""
 
 from pathlib import Path
 
 
 def save_stx_bundle(obj, spath, as_zip=True, bundle_type=None, basename=None, **kwargs):
-    """Save an object as a unified .stx bundle.
+    """Save an object as an FTS bundle (.zip or directory).
 
-    The .stx format is the unified bundle format that supports:
-    - figure: Publication figures with multiple panels (replaces .figz)
-    - plot: Single matplotlib plots (replaces .pltz)
-    - stats: Statistical results (replaces .statsz)
+    FTS (Figure-Table-Statistics) is the unified bundle format that supports:
+    - figure: Publication figures with multiple panels
+    - plot: Single matplotlib plots
+    - stats: Statistical results
 
     The content type is auto-detected from the object:
-    - Figz instance -> delegates to figz.save()
+    - FTS instance -> delegates to FTS.save()
     - matplotlib.figure.Figure -> plot
     - dict with 'panels' or 'elements' -> figure
     - dict with 'comparisons' -> stats
 
     Bundle structure:
-        output.stx.d/
-            spec.json           # Type, schema, elements/data
-            style.json          # Visual appearance
-            data.csv            # Raw data (if applicable)
+        output/                 # or output.zip
+            node.json           # Bundle metadata
+            encoding.json       # Data-to-visual mappings
+            theme.json          # Visual styling
+            data/               # Raw data files
             exports/            # PNG, SVG, PDF exports
 
     Parameters
     ----------
     obj : Any
-        Object to save (Figz, Figure, dict, etc.)
+        Object to save (FTS, Figure, dict, etc.)
     spath : str or Path
-        Output path (e.g., "output.stx" or "output.stx.d")
+        Output path (e.g., "output.zip" or "output/")
     as_zip : bool
-        If True (default), save as ZIP archive. Use False for .stx.d directory.
+        If True (default), save as ZIP archive. Use False for directory.
     bundle_type : str, optional
         Force bundle type: 'figure', 'plot', or 'stats'. Auto-detected if None.
     **kwargs
         Additional arguments passed to format-specific savers.
     """
-    from scitex.fig import Figz
+    from scitex.fts import FTS
 
-    if isinstance(obj, Figz):
-        # Delegate to Figz.save() - verbose=False since outer _save handles logging
-        obj.save(spath, verbose=False)
+    if isinstance(obj, FTS):
+        # Delegate to FTS.save()
+        obj.save()
         return
 
     p = Path(spath)
@@ -53,12 +54,6 @@ def save_stx_bundle(obj, spath, as_zip=True, bundle_type=None, basename=None, **
     # Extract basename from path if not provided
     if basename is None:
         basename = p.stem
-        if basename.endswith(".stx"):
-            basename = basename[:-4]
-        elif basename.endswith(".d"):
-            basename = Path(basename).stem
-            if basename.endswith(".stx"):
-                basename = basename[:-4]
 
     # Auto-detect content type from object
     content_type = bundle_type
@@ -89,9 +84,15 @@ def save_stx_bundle(obj, spath, as_zip=True, bundle_type=None, basename=None, **
 
         save_pltz_as_stx(obj, spath, as_zip=as_zip, basename=basename, **kwargs)
     elif content_type == "figure":
-        import scitex.fig as sfig
+        from scitex.fts import FTS
 
-        sfig.save_figz(obj, spath, as_zip=as_zip, **kwargs)
+        bundle = FTS(spath, create=True, node_type="figure")
+        if isinstance(obj, dict):
+            if "title" in obj:
+                bundle.node.title = obj["title"]
+            if "description" in obj:
+                bundle.node.description = obj["description"]
+        bundle.save()
     elif content_type == "stats":
         import scitex.stats as sstats
 

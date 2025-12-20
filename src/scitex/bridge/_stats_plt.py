@@ -28,7 +28,11 @@ the caller intends (typically data coordinates unless transform is set).
 from typing import Optional, Dict, Any, Union, List
 import warnings
 
-from scitex.schema import StatResult, Position
+# Import GUI classes from FTS (single source of truth)
+from scitex.fts._stats import Position
+
+# StatResult is now a dict - the GUI-specific StatResult is deprecated
+StatResult = dict
 
 
 def format_stat_for_plot(
@@ -205,9 +209,18 @@ def _parse_stat_annotation(text: str) -> Optional[StatResult]:
     Optional[StatResult]
         Parsed StatResult or None if not parseable
     """
-    from scitex.schema import create_stat_result
-
     text = text.strip()
+
+    def _create_stat_dict(test_type, statistic_name, statistic_value, p_value):
+        """Create a simple stat result dict."""
+        from scitex.stats.utils import p2stars
+        return {
+            "test_type": test_type,
+            "test_category": "other",
+            "statistic": {"name": statistic_name, "value": statistic_value},
+            "p_value": p_value,
+            "stars": p2stars(p_value, ns_symbol=False),
+        }
 
     # Try to detect asterisks pattern
     if text in ["*", "**", "***", "ns", "n.s."]:
@@ -219,7 +232,7 @@ def _parse_stat_annotation(text: str) -> Optional[StatResult]:
             "*": 0.03,
             "ns": 0.5,
         }.get(stars, 0.5)
-        return create_stat_result(
+        return _create_stat_dict(
             test_type="unknown",
             statistic_name="stat",
             statistic_value=0.0,
@@ -241,7 +254,7 @@ def _parse_stat_annotation(text: str) -> Optional[StatResult]:
             "*": 0.03,
             "ns": 0.5,
         }.get(stars, 0.5)
-        return create_stat_result(
+        return _create_stat_dict(
             test_type="unknown",
             statistic_name=stat_name,
             statistic_value=stat_value,

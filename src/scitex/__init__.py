@@ -16,10 +16,8 @@ Modules are imported on-demand to avoid circular dependencies.
 
 import warnings
 
-# Always show our own deprecation warnings first
-warnings.filterwarnings("always", category=DeprecationWarning, module="scitex.*")
-# Then ignore others
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+# Show deprecation warnings from scitex modules (educational for migration)
+warnings.filterwarnings("default", category=DeprecationWarning, module="scitex.*")
 
 # Version
 from .__version__ import __version__
