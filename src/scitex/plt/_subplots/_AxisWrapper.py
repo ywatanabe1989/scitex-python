@@ -189,10 +189,14 @@ class AxisWrapper(
                             "errorbar",
                             "step",
                             "stem",
+                            # Fill and area plots
+                            "fill",
+                            "stackplot",
                             # Statistical plots
                             "hist2d",
                             "hexbin",
                             "pie",
+                            "eventplot",
                             # Contour plots
                             "contour",
                             "contourf",
@@ -202,6 +206,8 @@ class AxisWrapper(
                             "imshow",
                             "matshow",
                             "spy",
+                            "pcolormesh",
+                            "pcolor",
                             # Quiver plots
                             "quiver",
                             "streamplot",

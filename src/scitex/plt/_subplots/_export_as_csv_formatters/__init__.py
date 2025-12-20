@@ -24,6 +24,8 @@ from ._format_errorbar import _format_errorbar
 from ._format_eventplot import _format_eventplot
 from ._format_fill import _format_fill
 from ._format_fill_between import _format_fill_between
+from ._format_stackplot import _format_stackplot
+from ._format_pcolormesh import _format_pcolormesh
 from ._format_hexbin import _format_hexbin
 from ._format_hist2d import _format_hist2d
 from ._format_imshow import _format_imshow
