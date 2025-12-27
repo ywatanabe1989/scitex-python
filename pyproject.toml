@@ -285,6 +285,7 @@ dev = [
     "pytest-env",
     "pytest-asyncio",
     "pytest-testmon",
+    "pytest-json-report",  # For CI test result reporting
     # Code Quality & Formatting
     "ruff",          # Primary linter and formatter (replaces black, isort, flake8)
     "mypy",
