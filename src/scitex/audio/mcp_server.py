@@ -194,6 +194,8 @@ class AudioServer:
                 return await self.speech_queue_status()
             elif name == "check_audio_status":
                 return await check_audio_status_handler()
+            elif name == "announce_context":
+                return await self.announce_context(**arguments)
             else:
                 raise ValueError(f"Unknown tool: {name}")
 
@@ -321,6 +323,52 @@ class AudioServer:
                 and not self._queue_processor_task.done(),
                 "timestamp": datetime.now().isoformat(),
             }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    async def announce_context(self, include_full_path: bool = False):
+        """Announce the current working directory and git branch."""
+        import subprocess
+
+        try:
+            # Get current working directory
+            cwd = Path.cwd()
+            dir_name = str(cwd) if include_full_path else cwd.name
+
+            # Try to get git branch
+            git_branch = None
+            try:
+                result = subprocess.run(
+                    ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                    cwd=str(cwd),
+                )
+                if result.returncode == 0:
+                    git_branch = result.stdout.strip()
+            except Exception:
+                pass
+
+            # Build announcement text
+            if git_branch:
+                text = f"Working in {dir_name}, on branch {git_branch}"
+            else:
+                text = f"Working in {dir_name}"
+
+            # Speak the announcement
+            await self.start_queue_processor()
+            result = await self.speak(text=text)
+
+            return {
+                "success": True,
+                "directory": str(cwd),
+                "directory_name": cwd.name,
+                "git_branch": git_branch,
+                "announced_text": text,
+                "speak_result": result,
+            }
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
