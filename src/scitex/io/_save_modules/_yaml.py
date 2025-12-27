@@ -62,7 +62,7 @@ def _save_yaml(obj, spath):
 
     yaml = YAML()
     yaml.preserve_quotes = True
-    yaml.indent(mapping=4, sequence=4, offset=4)
+    yaml.indent(mapping=4, sequence=4, offset=2)
 
     with open(spath, "w") as f:
         yaml.dump(obj_with_strings, f)

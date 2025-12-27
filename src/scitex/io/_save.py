@@ -286,7 +286,8 @@ def _save(
         # 2. Path has no extension and doesn't match other formats (create directory bundle)
         if ext == ".zip" or (ext == "" and not spath.endswith("/")):
             # Check if explicitly requesting FTS bundle or just .zip
-            as_zip = ext == ".zip"
+            # Pop as_zip from kwargs to avoid duplicate parameter error
+            as_zip = kwargs.pop("as_zip", ext == ".zip")
             _save_fts_bundle(
                 obj, spath, as_zip, verbose, symlink_from_cwd, symlink_to, **kwargs
             )

@@ -24,7 +24,7 @@ from pathlib import Path
 import aiohttp
 
 from scitex import logging
-from scitex.errors import ScholarError
+from scitex.logging import ScholarError
 
 logger = logging.getLogger(__name__)
 

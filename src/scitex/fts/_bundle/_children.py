@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-# Timestamp: 2025-12-20
+# -*- coding: utf-8 -*-
+# Timestamp: "2025-12-21 06:10:24 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_children.py
+
+# Timestamp: 2025-12-20
 
 """Child embedding for FTS composite bundles.
 
@@ -15,13 +18,14 @@ Design principles:
 - Always validate child is valid FTS bundle
 """
 
-import shutil
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Tuple, Union
+from typing import TYPE_CHECKING
+from typing import Dict, Tuple, Union
 
-from ._storage import Storage, get_storage
+from ._storage import Storage
+from ._storage import get_storage
 
 if TYPE_CHECKING:
     from ._FTS import FTS
@@ -130,7 +134,9 @@ def _copy_child_to_storage(
             for item in child_path.rglob("*"):
                 if item.is_file():
                     rel_path = item.relative_to(child_path)
-                    out_zf.writestr(child_prefix + str(rel_path), item.read_bytes())
+                    out_zf.writestr(
+                        child_prefix + str(rel_path), item.read_bytes()
+                    )
 
         container_storage.write(dest_path, buf.getvalue())
 

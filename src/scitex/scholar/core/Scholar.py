@@ -35,7 +35,7 @@ from scitex import logging
 import shutil
 
 # PDF extraction is now handled by scitex.io
-from scitex.errors import ScholarError
+from scitex.logging import ScholarError
 from scitex.scholar.config import ScholarConfig
 
 # Updated imports for current architecture
