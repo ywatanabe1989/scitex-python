@@ -180,6 +180,23 @@ def get_tool_schemas() -> list[types.Tool]:
             description="Check WSL audio connectivity and available playback methods",
             inputSchema={"type": "object", "properties": {}},
         ),
+        types.Tool(
+            name="announce_context",
+            description=(
+                "Announce the current working directory and git branch (if in a git repo). "
+                "Useful for orientation when starting work in a new session."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "include_full_path": {
+                        "type": "boolean",
+                        "description": "Include full path or just directory name",
+                        "default": False,
+                    },
+                },
+            },
+        ),
     ]
 
 
