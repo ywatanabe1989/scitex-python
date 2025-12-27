@@ -8,6 +8,7 @@ SHELL := /bin/bash
 
 .PHONY: help install install-dev install-all \
 	clean test test-cov lint format check \
+	test-stats-cov test-config-cov test-logging-cov \
 	build release upload upload-test \
 	build-all release-all upload-all upload-test-all \
 	sync-tests sync-examples sync-redirect \
@@ -127,6 +128,16 @@ format-check:
 check: format-check lint test
 	@echo -e ""
 	@echo -e "$(GREEN)✅ All checks passed!$(NC)"
+
+# Module-specific coverage targets for CI
+test-stats-cov:
+	@./scripts/maintenance/test.sh stats --cov
+
+test-config-cov:
+	@./scripts/maintenance/test.sh config --cov
+
+test-logging-cov:
+	@./scripts/maintenance/test.sh logging --cov
 
 # ============================================
 # Synchronization
