@@ -46,11 +46,14 @@ fixed_notebooks_*.json
 *_original.ipynb
 *_output.ipynb
 
-## Temporary Python scripts
-fix_*.py
-remove_*.py
-analyze_*.py
-test_*.py
+## Temporary Python scripts (root-level only)
+/fix_*.py
+/remove_*.py
+/analyze_*.py
+/test_*.py
+
+## Exception: Allow test files in tests directory
+!tests/**/test_*.py
 
 #################################################################
 ## Python
