@@ -1,6 +1,6 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-12-21 03:50:48 (ywatanabe)"
+# Timestamp: "2025-12-21 06:21:10 (ywatanabe)"
 # File: ./examples/scitex/fts/run_demos.sh
 
 ORIG_DIR="$(pwd)"
@@ -24,8 +24,14 @@ echo_header() { echo_info "=== $1 ==="; }
 # ---------------------------------------
 
 run_demos() {
+    local pids=()
     for f in "$THIS_DIR"/??_*.py; do
-        python $f
+        python "$f" &
+        pids+=($!)
+    done
+    # Wait for all parallel jobs
+    for pid in "${pids[@]}"; do
+        wait "$pid"
     done
 }
 
@@ -40,9 +46,20 @@ collect_png_files() {
     done
 }
 
+unzip_zip_files() {
+    recursive_depth=3
+    for _ in `seq $recursive_depth`; do
+        for ff in $(find "$THIS_DIR" -type f -name "*.zip"); do
+            target_dir=$(dirname $ff)
+            unzip -o "$ff" -d "$target_dir" > /dev/null
+        done
+    done
+}
+
 main() {
     rm $THIS_DIR/??_*_out -rf
     run_demos
+    unzip_zip_files
     collect_png_files
 }
 

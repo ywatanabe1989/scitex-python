@@ -2,22 +2,32 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://scitex.ai/schemas/fts/node.schema.json",
   "title": "FTS Node Schema",
-  "description": "Schema for Figure-Statistics Bundle node (plot or figure)",
+  "description": "Schema for FTS bundle node specification",
   "type": "object",
-  "required": ["id", "type", "bbox_norm"],
+  "required": ["id", "kind", "bbox_norm"],
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique identifier for this node"
+      "description": "Unique identifier (UUID) for this node"
     },
-    "type": {
+    "kind": {
       "type": "string",
-      "enum": ["figure", "plot", "text", "shape", "image", "stats"],
-      "description": "Type of node"
+      "enum": ["figure", "plot", "table", "stats", "text", "shape", "image"],
+      "description": "Node kind: figure (composite), plot/table/stats/text/shape/image (leaf)"
     },
     "name": {
       "type": "string",
       "description": "Human-readable name"
+    },
+    "scitex_schema": {
+      "type": "string",
+      "description": "Schema identifier",
+      "default": "scitex.fts.spec"
+    },
+    "scitex_schema_version": {
+      "type": "string",
+      "description": "Schema version",
+      "default": "1.0.0"
     },
     "bbox_norm": {
       "type": "object",
@@ -62,17 +72,65 @@
     },
     "children": {
       "type": "array",
-      "description": "Child node references (for recursive structure)",
+      "description": "Child node references (for figure composite kind only)",
       "items": {"type": "string"}
+    },
+    "layout": {
+      "type": "object",
+      "description": "Layout configuration for composite figures",
+      "properties": {
+        "rows": {"type": "integer", "minimum": 1},
+        "cols": {"type": "integer", "minimum": 1},
+        "panels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "child": {"type": "string"},
+              "child_id": {"type": "string"},
+              "label": {"type": "string"},
+              "row": {"type": "integer"},
+              "col": {"type": "integer"},
+              "row_span": {"type": "integer", "default": 1},
+              "col_span": {"type": "integer", "default": 1}
+            }
+          }
+        }
+      }
+    },
+    "payload_schema": {
+      "type": "string",
+      "description": "Payload schema for leaf kinds (e.g., scitex.fts.payload.plot@1)"
+    },
+    "text": {
+      "type": "object",
+      "description": "Text content (for kind=text)",
+      "properties": {
+        "content": {"type": "string"},
+        "fontsize": {"type": "number"},
+        "fontweight": {"type": "string"},
+        "ha": {"type": "string", "enum": ["left", "center", "right"]},
+        "va": {"type": "string", "enum": ["top", "center", "bottom"]}
+      }
+    },
+    "shape": {
+      "type": "object",
+      "description": "Shape parameters (for kind=shape)",
+      "properties": {
+        "shape_type": {"type": "string", "enum": ["rectangle", "ellipse", "arrow", "line"]},
+        "color": {"type": "string"},
+        "linewidth": {"type": "number"},
+        "fill": {"type": "boolean"}
+      }
     },
     "refs": {
       "type": "object",
       "description": "References to associated files",
       "properties": {
-        "encoding": {"type": "string", "description": "Path to encoding.json"},
-        "theme": {"type": "string", "description": "Path to theme.json"},
-        "data": {"type": "string", "description": "Path to data directory or file"},
-        "stats": {"type": "string", "description": "Path to stats.json"}
+        "encoding": {"type": "string"},
+        "theme": {"type": "string"},
+        "data": {"type": "string"},
+        "stats": {"type": "string"}
       }
     },
     "created_at": {

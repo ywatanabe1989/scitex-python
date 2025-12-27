@@ -78,7 +78,7 @@ def verify_bundles(out_dir, logger):
     logger.info("\nReloading bundles...")
     for name in ["title_text.zip", "arrow_shape.zip", "annotated_figure.zip"]:
         bundle = FTS(out_dir / name)
-        logger.info(f"  {name}: type={bundle.node.type}, name={bundle.node.name}")
+        logger.info(f"  {name}: kind={bundle.node.kind}, name={bundle.node.name}")
 
 
 @stx.session(verbose=False, agg=True)

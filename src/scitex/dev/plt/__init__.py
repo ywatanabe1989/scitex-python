@@ -36,31 +36,31 @@ Usage:
 # =============================================================================
 # stx_* API Layer - ArrayLike input (25 plotters)
 # =============================================================================
-from .plot_stx_line import plot_stx_line
-from .plot_stx_mean_std import plot_stx_mean_std
-from .plot_stx_mean_ci import plot_stx_mean_ci
-from .plot_stx_median_iqr import plot_stx_median_iqr
-from .plot_stx_shaded_line import plot_stx_shaded_line
-from .plot_stx_box import plot_stx_box
-from .plot_stx_violin import plot_stx_violin
-from .plot_stx_scatter import plot_stx_scatter
-from .plot_stx_bar import plot_stx_bar
-from .plot_stx_barh import plot_stx_barh
-from .plot_stx_errorbar import plot_stx_errorbar
-from .plot_stx_fill_between import plot_stx_fill_between
-from .plot_stx_kde import plot_stx_kde
-from .plot_stx_ecdf import plot_stx_ecdf
-from .plot_stx_heatmap import plot_stx_heatmap
-from .plot_stx_image import plot_stx_image
-from .plot_stx_imshow import plot_stx_imshow
-from .plot_stx_contour import plot_stx_contour
-from .plot_stx_raster import plot_stx_raster
-from .plot_stx_conf_mat import plot_stx_conf_mat
-from .plot_stx_joyplot import plot_stx_joyplot
-from .plot_stx_rectangle import plot_stx_rectangle
-from .plot_stx_fillv import plot_stx_fillv
-from .plot_stx_boxplot import plot_stx_boxplot
-from .plot_stx_violinplot import plot_stx_violinplot
+from .demo_plotters.plot_stx_line import plot_stx_line
+from .demo_plotters.plot_stx_mean_std import plot_stx_mean_std
+from .demo_plotters.plot_stx_mean_ci import plot_stx_mean_ci
+from .demo_plotters.plot_stx_median_iqr import plot_stx_median_iqr
+from .demo_plotters.plot_stx_shaded_line import plot_stx_shaded_line
+from .demo_plotters.plot_stx_box import plot_stx_box
+from .demo_plotters.plot_stx_violin import plot_stx_violin
+from .demo_plotters.plot_stx_scatter import plot_stx_scatter
+from .demo_plotters.plot_stx_bar import plot_stx_bar
+from .demo_plotters.plot_stx_barh import plot_stx_barh
+from .demo_plotters.plot_stx_errorbar import plot_stx_errorbar
+from .demo_plotters.plot_stx_fill_between import plot_stx_fill_between
+from .demo_plotters.plot_stx_kde import plot_stx_kde
+from .demo_plotters.plot_stx_ecdf import plot_stx_ecdf
+from .demo_plotters.plot_stx_heatmap import plot_stx_heatmap
+from .demo_plotters.plot_stx_image import plot_stx_image
+from .demo_plotters.plot_stx_imshow import plot_stx_imshow
+from .demo_plotters.plot_stx_contour import plot_stx_contour
+from .demo_plotters.plot_stx_raster import plot_stx_raster
+from .demo_plotters.plot_stx_conf_mat import plot_stx_conf_mat
+from .demo_plotters.plot_stx_joyplot import plot_stx_joyplot
+from .demo_plotters.plot_stx_rectangle import plot_stx_rectangle
+from .demo_plotters.plot_stx_fillv import plot_stx_fillv
+from .demo_plotters.plot_stx_boxplot import plot_stx_boxplot
+from .demo_plotters.plot_stx_violinplot import plot_stx_violinplot
 
 PLOTTERS_STX = {
     "stx_line": plot_stx_line,

@@ -5,72 +5,137 @@
   "description": "Schema for visual aesthetics (decorative properties that don't affect data meaning)",
   "type": "object",
   "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["light", "dark"],
+      "default": "light",
+      "description": "Color mode for the theme"
+    },
+    "preset": {
+      "type": "string",
+      "enum": ["nature", "science", "cell", "ieee", "acs", "minimal", "presentation"],
+      "description": "Named preset for journal-specific styling"
+    },
     "colors": {
       "type": "object",
-      "description": "Color palette",
+      "description": "Color palette configuration",
       "properties": {
-        "primary": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
-        "secondary": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
-        "background": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
-        "text": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
         "palette": {
           "type": "array",
-          "items": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"}
-        }
+          "items": {"type": "string"},
+          "description": "Color cycle for multiple traces"
+        },
+        "primary": {"type": "string", "description": "Primary accent color"},
+        "secondary": {"type": "string", "description": "Secondary accent color"},
+        "background": {"type": "string", "default": "#ffffff"},
+        "text": {"type": "string", "default": "#000000"},
+        "axis": {"type": "string", "default": "#333333"},
+        "grid": {"type": "string", "default": "#e0e0e0"}
       }
     },
     "typography": {
       "type": "object",
+      "description": "Font configuration",
       "properties": {
         "family": {"type": "string", "default": "sans-serif"},
-        "size_pt": {"type": "number", "minimum": 1, "default": 10},
-        "title_size_pt": {"type": "number", "minimum": 1, "default": 12},
-        "label_size_pt": {"type": "number", "minimum": 1, "default": 10},
-        "tick_size_pt": {"type": "number", "minimum": 1, "default": 8}
+        "size_pt": {"type": "number", "minimum": 1, "default": 8},
+        "title_size_pt": {"type": "number", "minimum": 1, "default": 10},
+        "label_size_pt": {"type": "number", "minimum": 1, "default": 8},
+        "tick_size_pt": {"type": "number", "minimum": 1, "default": 7}
+      }
+    },
+    "fonts": {
+      "type": "object",
+      "description": "Alternative font configuration (alias for typography)",
+      "properties": {
+        "family": {"type": "string"},
+        "title_size": {"type": "number"},
+        "label_size": {"type": "number"},
+        "tick_size": {"type": "number"}
       }
     },
     "lines": {
       "type": "object",
+      "description": "Line style configuration",
       "properties": {
         "width_pt": {"type": "number", "minimum": 0, "default": 1},
-        "axis_width_pt": {"type": "number", "minimum": 0, "default": 0.5},
-        "grid_width_pt": {"type": "number", "minimum": 0, "default": 0.25}
+        "style": {"type": "string", "enum": ["solid", "dashed", "dotted", "dashdot"], "default": "solid"}
       }
     },
     "markers": {
       "type": "object",
+      "description": "Marker style configuration",
       "properties": {
-        "size_pt": {"type": "number", "minimum": 0, "default": 6},
-        "edge_width_pt": {"type": "number", "minimum": 0, "default": 0.5}
+        "size_pt": {"type": "number", "minimum": 0, "default": 4},
+        "symbol": {"type": "string", "enum": ["circle", "square", "triangle", "cross", "diamond"], "default": "circle"}
       }
     },
     "grid": {
       "type": "object",
+      "description": "Grid line configuration",
       "properties": {
-        "show": {"type": "boolean", "default": false},
-        "color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
-        "alpha": {"type": "number", "minimum": 0, "maximum": 1}
+        "show": {"type": "boolean", "default": true},
+        "major_width_pt": {"type": "number", "default": 0.5},
+        "minor_width_pt": {"type": "number", "default": 0.25},
+        "major_alpha": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.3},
+        "minor_alpha": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.1}
       }
     },
     "traces": {
       "type": "array",
-      "description": "Per-trace styling",
+      "description": "Per-trace style overrides",
       "items": {
         "type": "object",
+        "required": ["trace_id"],
         "properties": {
           "trace_id": {"type": "string"},
           "color": {"type": "string"},
-          "linestyle": {"type": "string", "enum": ["solid", "dashed", "dotted", "dashdot"]},
-          "linewidth_pt": {"type": "number"},
-          "marker": {"type": "string"},
-          "markersize_pt": {"type": "number"},
+          "line_width_pt": {"type": "number"},
+          "marker_size_pt": {"type": "number"},
           "alpha": {"type": "number", "minimum": 0, "maximum": 1}
         }
       }
     },
-    "preset": {
-      "type": "string",
-      "description": "Named preset (e.g., 'nature', 'science', 'dark')"
+    "figure_title": {
+      "type": "object",
+      "description": "Figure title configuration for publications",
+      "properties": {
+        "text": {"type": "string", "description": "Title text"},
+        "prefix": {"type": "string", "default": "Figure", "description": "Prefix (e.g., 'Figure', 'Fig.')"},
+        "number": {"type": "integer", "description": "Figure number"},
+        "fontsize": {"type": "number"},
+        "fontweight": {"type": "string", "enum": ["normal", "bold"]}
+      }
+    },
+    "caption": {
+      "type": "object",
+      "description": "Figure caption for publications",
+      "properties": {
+        "text": {"type": "string", "description": "Main caption text"},
+        "panels": {
+          "type": "array",
+          "description": "Per-panel descriptions",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {"type": "string", "description": "Panel label (A, B, C, etc.)"},
+              "description": {"type": "string", "description": "Panel description"}
+            }
+          }
+        }
+      }
+    },
+    "panel_labels": {
+      "type": "object",
+      "description": "Panel label styling (A, B, C, etc.)",
+      "properties": {
+        "style": {"type": "string", "enum": ["uppercase", "lowercase", "numeric"], "default": "uppercase"},
+        "fontsize": {"type": "number", "default": 12},
+        "fontweight": {"type": "string", "enum": ["normal", "bold"], "default": "bold"},
+        "position": {"type": "string", "enum": ["top-left", "top-right", "bottom-left", "bottom-right"], "default": "top-left"},
+        "offset_x": {"type": "number", "default": 0.02},
+        "offset_y": {"type": "number", "default": 0.98}
+      }
     }
   }
 }

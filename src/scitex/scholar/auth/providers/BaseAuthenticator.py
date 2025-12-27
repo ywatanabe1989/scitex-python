@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional
 
 from scitex import logging
 
-from scitex.errors import AuthenticationError
+from scitex.logging import AuthenticationError
 
 """Logger"""
 logger = logging.getLogger(__name__)

@@ -240,7 +240,7 @@ __all__ = [
 # #         else:
 # #             return Scholar
 
-# #     from scitex.errors import ScholarError
+# #     from scitex.logging import ScholarError
 # #     raise ScholarError(
 # #         f"Module attribute not found: '{name}'",
 # #         context={"module": __name__, "attribute": name},

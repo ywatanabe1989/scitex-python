@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Timestamp: 2025-12-20
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_dataclasses/__init__.py
+# Timestamp: 2025-12-21
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_fig/_dataclasses/__init__.py
 
 """Figure-specific dataclasses for FTS."""
 
@@ -8,10 +8,14 @@ from ._ChannelEncoding import ChannelEncoding
 from ._Encoding import ENCODING_VERSION, AxesConfig, Encoding
 from ._Theme import (
     THEME_VERSION,
+    Caption,
     Colors,
+    FigureTitle,
     Grid,
     Lines,
     Markers,
+    PanelDescription,
+    PanelLabels,
     Theme,
     TraceTheme,
     Typography,
@@ -33,6 +37,10 @@ __all__ = [
     "Markers",
     "Grid",
     "TraceTheme",
+    "FigureTitle",
+    "PanelDescription",
+    "Caption",
+    "PanelLabels",
     "Theme",
 ]
 

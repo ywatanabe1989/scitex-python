@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from ._children import ValidationError, embed_child, load_embedded_children
 from ._dataclasses import DataInfo, Node, SizeMM
 from ._loader import load_bundle_components
+from ._validation import ValidationResult
 from ._saver import compute_canonical_hash, compute_theme_hash, save_bundle_components, save_render_outputs
 from ._storage import Storage, get_storage
 from .._fig import Encoding, Theme
@@ -291,20 +292,42 @@ class FTS:
 
         if self._node.is_composite_kind():
             return self._render_composite()
-        elif self._node.is_leaf_kind():
+        elif self._node.is_data_leaf_kind():
+            # Data kinds (plot, table, stats) need payload data
             return self._render_from_encoding()
+        elif self._node.is_annotation_leaf_kind():
+            # Annotation kinds (text, shape) render from node params
+            return self._render_annotation()
+        elif self._node.is_image_leaf_kind():
+            # Image kinds render from payload image
+            return self._render_image()
 
         return None
 
     def _render_composite(self) -> Optional["MplFigure"]:
         """Render composite figure with children."""
+        import scitex.plt as splt
+
+        size_mm = self._node.size_mm.to_dict() if self._node.size_mm else {"width": 170, "height": 100}
+
+        # Get background color from theme
+        bg_color = "#ffffff"
+        if self._theme and self._theme.colors:
+            bg_color = self._theme.colors.background or "#ffffff"
+
         if not self._node.children:
-            return None  # Empty container
+            # Empty container - render blank figure with specified size and background
+            fig, ax = splt.subplots(
+                figsize_mm=(size_mm.get("width", 170), size_mm.get("height", 100))
+            )
+            fig.set_facecolor(bg_color)
+            ax.set_facecolor(bg_color)
+            ax.set_axis_off()
+            return fig
 
         from .._fig._composite import render_composite
 
         children = self.load_children()
-        size_mm = self._node.size_mm.to_dict() if self._node.size_mm else None
 
         fig, geometry = render_composite(
             children=children,
@@ -359,16 +382,102 @@ class FTS:
         for path in ["payload/data.csv", "data/data.csv"]:
             if self.storage.exists(path):
                 csv_bytes = self.storage.read(path)
+                # Handle empty CSV files
+                if not csv_bytes.strip():
+                    return None
                 return pd.read_csv(StringIO(csv_bytes.decode("utf-8")))
         return None
 
-    def validate(self, level: str = "schema") -> List[str]:
-        """Validate bundle. Returns list of error messages (empty if valid)."""
-        errors = []
+    def _render_annotation(self) -> Optional["MplFigure"]:
+        """Render annotation (text/shape) from node parameters."""
+        import scitex.plt as splt
+
+        size_mm = self._node.size_mm.to_dict() if self._node.size_mm else {"width": 85, "height": 85}
+
+        fig, ax = splt.subplots(
+            figsize_mm=(size_mm.get("width", 85), size_mm.get("height", 85))
+        )
+
+        # Get background color
+        bg_color = "#ffffff"
+        if self._theme and self._theme.colors:
+            bg_color = self._theme.colors.background or "#ffffff"
+        fig.set_facecolor(bg_color)
+        ax.set_facecolor(bg_color)
+        ax.set_axis_off()
+
+        if self._node.kind == "text":
+            # Render text annotation
+            text_obj = self._node.text
+            if text_obj:
+                text_content = text_obj.content or self._node.name or ""
+                kwargs = {"ha": text_obj.ha, "va": text_obj.va}
+                if text_obj.fontsize:
+                    kwargs["fontsize"] = text_obj.fontsize
+                if text_obj.fontweight:
+                    kwargs["fontweight"] = text_obj.fontweight
+            else:
+                text_content = self._node.name or ""
+                kwargs = {"ha": "center", "va": "center"}
+            ax.text(0.5, 0.5, text_content, transform=ax.transAxes, **kwargs)
+
+        elif self._node.kind == "shape":
+            # Render shape annotation
+            from .._kinds._shape import render_shape
+            shape_obj = self._node.shape
+            if shape_obj:
+                render_shape(
+                    ax,
+                    shape_type=shape_obj.shape_type,
+                    x=0.2, y=0.2, width=0.6, height=0.6,
+                    facecolor=shape_obj.color if shape_obj.fill else "none",
+                    edgecolor=shape_obj.color,
+                    linewidth=shape_obj.linewidth,
+                )
+
+        fig.tight_layout()
+        return fig
+
+    def _render_image(self) -> Optional["MplFigure"]:
+        """Render image from payload."""
+        import scitex.plt as splt
+        import numpy as np
+
+        size_mm = self._node.size_mm.to_dict() if self._node.size_mm else {"width": 85, "height": 85}
+
+        fig, ax = splt.subplots(
+            figsize_mm=(size_mm.get("width", 85), size_mm.get("height", 85))
+        )
+        ax.set_axis_off()
+
+        # Try to find image in payload
+        for ext in ["png", "jpg", "jpeg", "gif", "bmp"]:
+            path = f"payload/image.{ext}"
+            if self.storage.exists(path):
+                from PIL import Image
+                from io import BytesIO
+                img_bytes = self.storage.read(path)
+                img = Image.open(BytesIO(img_bytes))
+                ax.imshow(np.array(img))
+                break
+
+        fig.tight_layout()
+        return fig
+
+    def validate(self, level: str = "schema") -> ValidationResult:
+        """Validate bundle.
+
+        Args:
+            level: Validation level - "schema", "semantic", or "strict"
+
+        Returns:
+            ValidationResult with is_valid property and errors list
+        """
+        result = ValidationResult(level=level)
 
         # Node logical validation
         if self._node:
-            errors.extend(self._node.validate())
+            result.errors.extend(self._node.validate())
 
         # Storage-level validation - check required payload files
         if self._node and self._node.is_leaf_kind():
@@ -384,7 +493,7 @@ class FTS:
                 legacy_path = legacy_paths.get(required_file)
                 if not self.storage.exists(required_file):
                     if not legacy_path or not self.storage.exists(legacy_path):
-                        errors.append(f"Missing required payload file: {required_file}")
+                        result.errors.append(f"Missing required payload file: {required_file}")
 
         # NOTE: For composite kinds, do NOT validate payload/ emptiness by listing files.
         # Payload prohibition is enforced purely via payload_schema is None (in Node.validate).
@@ -393,17 +502,18 @@ class FTS:
         if self._node and self._node.is_composite_kind() and self._node.children:
             children = self.load_children()
             for child_name, child in children.items():
-                child_errors = child.validate(level)
-                errors.extend([f"{child_name}: {e}" for e in child_errors])
+                child_result = child.validate(level)
+                result.errors.extend([f"{child_name}: {e}" for e in child_result.errors])
+                result.warnings.extend([f"{child_name}: {w}" for w in child_result.warnings])
 
         # Schema validation for other components
         if level in ("semantic", "strict"):
             # Additional semantic validation
             if self._encoding and self._node:
                 if self._node.is_composite_kind() and self._encoding.traces:
-                    errors.append("Composite kinds should not have encoding traces")
+                    result.errors.append("Composite kinds should not have encoding traces")
 
-        return errors
+        return result
 
     def save(
         self,
@@ -428,9 +538,9 @@ class FTS:
 
         # Validate before saving
         if validate:
-            errors = self.validate(level=validation_level)
-            if errors:
-                raise ValidationError(f"Validation failed: {errors}")
+            result = self.validate(level=validation_level)
+            if not result.is_valid:
+                raise ValidationError(f"Validation failed: {result.errors}")
 
         # Update modified timestamp
         if self._node:
@@ -453,10 +563,17 @@ class FTS:
             if fig:
                 source_hash = compute_canonical_hash(self.storage)
                 theme_hash = compute_theme_hash(self._theme)
+                # Extract figure dimensions in pixels
+                dpi = fig.get_dpi()
+                width_px = int(fig.get_figwidth() * dpi)
+                height_px = int(fig.get_figheight() * dpi)
+                geometry = {
+                    "figure_px": [width_px, height_px],
+                }
                 save_render_outputs(
                     self.storage,
                     fig,
-                    geometry={},  # TODO: Generate proper geometry
+                    geometry=geometry,
                     source_hash=source_hash,
                     theme_hash=theme_hash,
                 )

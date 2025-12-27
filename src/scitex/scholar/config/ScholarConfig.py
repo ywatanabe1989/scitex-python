@@ -18,7 +18,7 @@ from typing import Optional, Union
 
 import yaml
 
-from scitex.errors import ScholarError
+from scitex.logging import ScholarError
 from scitex.logging import getLogger
 
 from .core._CascadeConfig import CascadeConfig

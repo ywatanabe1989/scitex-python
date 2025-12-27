@@ -386,6 +386,66 @@ def build_figure_from_json(fig_json: Dict[str, Any]):
     return render_figure(fig_model)
 
 
+def _find_column(data, col_name):
+    """Find a column in data, supporting prefixed column names.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Data to search
+    col_name : str
+        Column name to find (can be simple like "x" or prefixed)
+
+    Returns
+    -------
+    str or None
+        Actual column name in data, or None if not found
+    """
+    if col_name in data.columns:
+        return col_name
+
+    # Try to find a column that ends with the variable name
+    # e.g., "ax-row-0-col-0_trace-id-plot-0_variable-x" matches "x"
+    suffix = f"_variable-{col_name}"
+    for col in data.columns:
+        if col.endswith(suffix):
+            return col
+
+    # Try partial match at the end
+    for col in data.columns:
+        if col.endswith(f"-{col_name}"):
+            return col
+
+    return None
+
+
+def _is_special_trace(trace_id):
+    """Check if trace is a special type that doesn't require x/y encoding.
+
+    Parameters
+    ----------
+    trace_id : str
+        Trace identifier
+
+    Returns
+    -------
+    bool
+        True if this is a special trace type
+    """
+    special_patterns = [
+        "fill-between",
+        "fill_between",
+        "axhline",
+        "axvline",
+        "axhspan",
+        "axvspan",
+        "text",
+        "annotation",
+    ]
+    trace_lower = trace_id.lower()
+    return any(pattern in trace_lower for pattern in special_patterns)
+
+
 def render_traces(ax, trace, data, theme=None):
     """
     Render a TraceEncoding onto an axis.
@@ -404,11 +464,16 @@ def render_traces(ax, trace, data, theme=None):
     Raises
     ------
     ValueError
-        If data is None or required columns are missing
+        If data is None or required columns are missing (for standard traces)
     """
+    # Skip special traces that don't require standard x/y encoding
+    if _is_special_trace(trace.trace_id):
+        logger.debug(f"Skipping special trace '{trace.trace_id}' (no x/y rendering)")
+        return
+
     if data is None:
-        logger.error(f"No data provided for trace '{trace.trace_id}'")
-        raise ValueError(f"No data provided for trace '{trace.trace_id}'")
+        logger.warning(f"No data provided for trace '{trace.trace_id}', skipping")
+        return
 
     # Get style from theme
     color = None
@@ -441,19 +506,23 @@ def render_traces(ax, trace, data, theme=None):
         color = "#1f77b4"
 
     # Get column names from encoding
-    x_col = trace.x.column if trace.x else None
-    y_col = trace.y.column if trace.y else None
+    x_col_name = trace.x.column if trace.x else None
+    y_col_name = trace.y.column if trace.y else None
 
-    if not x_col or not y_col:
-        logger.error(f"Trace '{trace.trace_id}' missing x or y encoding")
-        raise ValueError(f"Trace '{trace.trace_id}' missing x or y encoding")
+    if not x_col_name or not y_col_name:
+        logger.warning(f"Trace '{trace.trace_id}' missing x or y encoding, skipping")
+        return
 
-    if x_col not in data.columns:
-        logger.error(f"Column '{x_col}' not found in data. Available: {list(data.columns)}")
-        raise ValueError(f"Column '{x_col}' not found in data. Available: {list(data.columns)}")
-    if y_col not in data.columns:
-        logger.error(f"Column '{y_col}' not found in data. Available: {list(data.columns)}")
-        raise ValueError(f"Column '{y_col}' not found in data. Available: {list(data.columns)}")
+    # Find actual columns in data (handles prefixed names)
+    x_col = _find_column(data, x_col_name)
+    y_col = _find_column(data, y_col_name)
+
+    if x_col is None:
+        logger.warning(f"Column '{x_col_name}' not found in data for trace '{trace.trace_id}'. Available: {list(data.columns)[:5]}...")
+        return
+    if y_col is None:
+        logger.warning(f"Column '{y_col_name}' not found in data for trace '{trace.trace_id}'. Available: {list(data.columns)[:5]}...")
+        return
 
     # Plot the data
     ax.plot(

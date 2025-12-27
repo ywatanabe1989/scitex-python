@@ -103,13 +103,18 @@ def generate_caption(bundle, logger):
     caption_parts = []
     if bundle.theme.figure_title:
         ft = bundle.theme.figure_title
-        caption_parts.append(f"{ft.get('prefix', 'Figure')} {ft.get('number', 1)}. {ft.get('text', '')}")
+        prefix = ft.prefix if hasattr(ft, "prefix") else "Figure"
+        number = ft.number if hasattr(ft, "number") and ft.number else 1
+        text = ft.text if hasattr(ft, "text") else ""
+        caption_parts.append(f"{prefix} {number}. {text}")
 
     if bundle.theme.caption:
         cap = bundle.theme.caption
-        caption_parts.append(cap.get("text", ""))
-        for panel in cap.get("panels", []):
-            caption_parts.append(f"({panel['label']}) {panel['description']}.")
+        if hasattr(cap, "text") and cap.text:
+            caption_parts.append(cap.text)
+        if hasattr(cap, "panels"):
+            for panel in cap.panels:
+                caption_parts.append(f"({panel.label}) {panel.description}.")
 
     full_caption = " ".join(caption_parts)
     logger.info(f"\nGenerated caption:\n{full_caption}")

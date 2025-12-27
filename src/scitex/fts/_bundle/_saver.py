@@ -70,11 +70,14 @@ def save_bundle_components(
     # Collect all files to write
     files = {}
 
-    # === ALWAYS create all 4 directories (even if empty) ===
+    # === ALWAYS create all directories and placeholder files ===
     # Use .keep files as directory markers for ZIP compatibility
     files["canonical/.keep"] = ""
     files["payload/.keep"] = ""
+    files["payload/data.csv"] = ""  # Empty CSV for consistency
     files["artifacts/.keep"] = ""
+    files["artifacts/exports/.keep"] = ""
+    files["artifacts/cache/.keep"] = ""
     files["children/.keep"] = ""
 
     # canonical/ - Source of truth
