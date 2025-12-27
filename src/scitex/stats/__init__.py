@@ -31,30 +31,29 @@ Quick Start (Auto Selection):
 """
 
 # Import organized submodules
-from . import auto
-from . import correct
-from . import effect_sizes
-from . import power
-from . import utils
-from . import posthoc
-from . import descriptive
-from . import tests
-
-# Export commonly used functions and classes for convenience
+from . import auto, correct, descriptive, effect_sizes, posthoc, power, tests, utils
 from .descriptive import describe
+
+# Check if torch is available for GPU acceleration
+try:
+    import torch
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
 
 # Export key auto module classes at top level for convenience
 from .auto import (
-    StatContext,
-    TestRule,
     TEST_RULES,
-    check_applicable,
-    recommend_tests,
-    get_menu_items,
+    StatContext,
     StatStyle,
-    get_stat_style,
+    TestRule,
+    check_applicable,
     format_test_line,
+    get_menu_items,
+    get_stat_style,
     p_to_stars,
+    recommend_tests,
 )
 
 # =============================================================================
@@ -64,6 +63,7 @@ from .auto import (
 # For backward compatibility, re-export from fts
 try:
     from scitex.fts import Stats
+
     FTS_AVAILABLE = True
 except ImportError:
     Stats = None
@@ -103,10 +103,16 @@ def test_result_to_stats(result: dict) -> "Stats":
     if not FTS_AVAILABLE:
         raise ImportError("scitex.fts is required for Stats conversion")
 
-    from scitex.fts._stats._dataclasses._Stats import (
-        Analysis, StatMethod, StatResult as FTSStatResult, EffectSize
-    )
     import uuid
+
+    from scitex.fts._stats._dataclasses._Stats import (
+        Analysis,
+        EffectSize,
+        StatMethod,
+    )
+    from scitex.fts._stats._dataclasses._Stats import (
+        StatResult as FTSStatResult,
+    )
 
     # Handle legacy flat format vs new nested format
     method_data = result.get("method", {})
@@ -186,6 +192,7 @@ def test_result_to_stats(result: dict) -> "Stats":
 # .statsz Bundle Support - Using FTS
 # =============================================================================
 
+
 def save_statsz(
     comparisons,
     path,
@@ -212,11 +219,12 @@ def save_statsz(
         Path to saved bundle.
     """
     from pathlib import Path
+
     from scitex.fts import FTS
 
     p = Path(path)
-    if as_zip and not p.suffix == '.zip':
-        p = p.with_suffix('.zip')
+    if as_zip and not p.suffix == ".zip":
+        p = p.with_suffix(".zip")
 
     # Create FTS bundle
     bundle = FTS(p, create=True, node_type="stats")
@@ -290,8 +298,8 @@ def load_statsz(path):
             comparisons.append(flat)
 
     return {
-        'comparisons': comparisons,
-        'metadata': bundle.node.to_dict() if bundle.node else {},
+        "comparisons": comparisons,
+        "metadata": bundle.node.to_dict() if bundle.node else {},
     }
 
 
@@ -299,17 +307,19 @@ __all__ = [
     # Main submodules
     "auto",
     "correct",
+    "descriptive",
     "effect_sizes",
     "power",
     "utils",
     "posthoc",
-    "descriptive",
     "tests",
+    # Descriptive convenience export
+    "describe",
+    # Torch availability flag (for GPU acceleration)
+    "TORCH_AVAILABLE",
     # Stats schema (from FTS)
     "Stats",
     "FTS_AVAILABLE",
-    # Schema exports
-    "describe",
     # Auto module convenience exports
     "StatContext",
     "TestRule",

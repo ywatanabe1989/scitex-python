@@ -142,6 +142,23 @@ scitex = "scitex.__main__:main"
 
 [project.optional-dependencies]
 
+# Statistical Testing (Lightweight - no torch dependency)
+# Use: pip install scitex[stats]
+# Provides: auto test selection, corrections, effect sizes, power analysis, posthoc tests
+# Note: descriptive module uses numpy by default; torch used for GPU acceleration when available
+stats = [
+    "scipy",
+    "statsmodels",
+]
+
+# Statistical Testing with torch support (GPU acceleration for descriptive stats)
+# Use: pip install scitex[stats-torch]
+stats-torch = [
+    "scipy",
+    "statsmodels",
+    "torch",
+]
+
 # Deep Learning (Heavy - 2-4 GB)
 dl = [
     "torch",
