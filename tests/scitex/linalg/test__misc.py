@@ -6,6 +6,7 @@
 """Comprehensive tests for miscellaneous linear algebra functions."""
 
 import pytest
+pytest.importorskip("sympy")
 import numpy as np
 from scipy.linalg import norm
 import sympy

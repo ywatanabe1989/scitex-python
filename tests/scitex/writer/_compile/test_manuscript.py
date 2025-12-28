@@ -18,6 +18,7 @@ Tests compile_manuscript function with various options:
 """
 
 import pytest
+pytest.importorskip("git")
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 from scitex.writer._compile.manuscript import compile_manuscript

@@ -4,6 +4,7 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/.claude-worktree/scitex_repo/tests/scitex/gen/test__mat2py.py
 
 import pytest
+pytest.importorskip("torch")
 import numpy as np
 import tempfile
 import os

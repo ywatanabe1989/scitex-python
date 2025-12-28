@@ -13,6 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+pytest.importorskip("zarr")
 import scitex.plt as splt
 
 matplotlib.use("Agg")  # Use non-interactive backend for testing

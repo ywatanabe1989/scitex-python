@@ -4,6 +4,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 import pytest
+pytest.importorskip("torch")
 
 from scitex.gen import XmlDictConfig, XmlListConfig, xml2dict
 

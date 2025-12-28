@@ -10,6 +10,8 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import matplotlib.pyplot as plt
+import pytest
+pytest.importorskip("zarr")
 from scitex.plt.ax._plot import plot_cube
 
 

@@ -10,6 +10,7 @@ import tempfile
 import datetime
 import yaml
 import pytest
+pytest.importorskip("zarr")
 import matplotlib.pyplot as plt
 from unittest.mock import MagicMock, patch
 

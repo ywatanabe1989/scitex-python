@@ -6,6 +6,7 @@
 """Tests for scitex.ai.utils._under_sample module."""
 
 import pytest
+pytest.importorskip("zarr")
 import numpy as np
 from collections import Counter
 from unittest.mock import patch

@@ -412,6 +412,7 @@ exclude = [
 
 [tool.pytest.ini_options]
 minversion = "6.0"
+pythonpath = ["src"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
@@ -423,6 +424,7 @@ addopts = [
     "--disable-warnings",
     "-p", "no:warnings",
     "--ignore=tests/custom/old/",
+    "--import-mode=importlib",
 ]
 asyncio_mode = "auto"
 markers = [

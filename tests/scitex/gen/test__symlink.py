@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 
 import pytest
+pytest.importorskip("torch")
 
 from scitex.gen import symlink
 

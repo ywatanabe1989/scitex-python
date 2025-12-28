@@ -11,6 +11,7 @@ particularly CSV file handling.
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 from unittest.mock import Mock, patch, mock_open
 from pathlib import Path
 from scitex.db._BaseMixins import _BaseImportExportMixin

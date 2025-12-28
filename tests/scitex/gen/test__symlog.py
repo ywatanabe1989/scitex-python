@@ -4,6 +4,7 @@
 # File: /tests/scitex/gen/test__symlog.py
 
 import pytest
+pytest.importorskip("torch")
 import numpy as np
 from scitex.gen import symlog
 

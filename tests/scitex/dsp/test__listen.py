@@ -4,6 +4,7 @@
 # File: ./scitex_repo/tests/scitex/dsp/test__listen.py
 
 import pytest
+pytest.importorskip("mne")
 import unittest.mock as mock
 from scitex.dsp import list_and_select_device
 

@@ -9,6 +9,7 @@ Testing PostgreSQL-specific backup/restore functionality using pg_dump/pg_restor
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 import subprocess
 import os
 from unittest.mock import MagicMock, patch, call

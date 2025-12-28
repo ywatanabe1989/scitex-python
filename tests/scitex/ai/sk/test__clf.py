@@ -6,6 +6,7 @@
 """Tests for scitex.ai.sk._clf module."""
 
 import pytest
+pytest.importorskip("sktime")
 import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline

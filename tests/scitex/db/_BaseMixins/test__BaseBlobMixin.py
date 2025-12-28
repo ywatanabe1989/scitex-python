@@ -11,6 +11,7 @@ database operations, particularly focused on numpy array storage and retrieval.
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 import numpy as np
 import pandas as pd
 from unittest.mock import Mock, patch

@@ -2,6 +2,7 @@
 """Tests for scitex.gen._print_config module."""
 
 import pytest
+pytest.importorskip("torch")
 import sys
 from unittest.mock import patch, MagicMock, call
 from io import StringIO

@@ -2,6 +2,7 @@
 """Tests for scitex.gen._is_ipython module."""
 
 import pytest
+pytest.importorskip("torch")
 from unittest.mock import patch, MagicMock
 from scitex.gen import is_ipython, is_script
 

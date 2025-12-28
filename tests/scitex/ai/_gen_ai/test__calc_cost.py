@@ -14,6 +14,7 @@ __DIR__ = os.path.dirname(__FILE__)
 """Tests for scitex.ai._gen_ai._calc_cost module."""
 
 import pytest
+pytest.importorskip("zarr")
 import pandas as pd
 from unittest.mock import patch
 from scitex.ai._gen_ai import calc_cost
