@@ -1,19 +1,31 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-08-07 20:04:42 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/browser/local/_BrowserMixin.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
-import aiohttp
-from playwright.async_api import Browser, async_playwright
+# Optional dependencies - browser module requires these
+try:
+    import aiohttp
+except ImportError:
+    aiohttp = None
 
-from scitex.browser.automation import CookieAutoAcceptor
+try:
+    from playwright.async_api import Browser, async_playwright
+except ImportError:
+    Browser = None
+    async_playwright = None
+
+try:
+    from scitex.browser.automation import CookieAutoAcceptor
+except ImportError:
+    CookieAutoAcceptor = None
 
 
 class BrowserMixin:
@@ -236,6 +248,7 @@ class BrowserMixin:
 def main(args):
     """Demonstrate BrowserMixin functionality."""
     import asyncio
+
     from scitex.browser.core import BrowserMixin
 
     class DemoBrowser(BrowserMixin):

@@ -13,21 +13,63 @@ Quick Start:
     scholar = Scholar()
     papers = scholar.search("deep learning")
     papers.save("pac.bib")
+
+Installation:
+    pip install scitex[scholar]
 """
 
-# # Import main class
-# from .core._Scholar import Scholar, search, search_quick, enrich_bibtex
+# Check for missing dependencies and warn user
+from scitex._install_guide import warn_module_deps
 
-# Import configuration
-from scitex.scholar.config import ScholarConfig
-from scitex.scholar.auth import ScholarAuthManager
-from scitex.scholar.browser import ScholarBrowserManager
-from scitex.scholar.metadata_engines import ScholarEngine
-from scitex.scholar.url_finder import ScholarURLFinder
-from scitex.scholar.pdf_download import ScholarPDFDownloader
-from scitex.scholar.storage import ScholarLibrary
-from scitex.scholar.core import Paper, Papers, Scholar
-from . import utils
+_missing = warn_module_deps("scholar")
+
+# Import configuration - wrap all in try/except for graceful degradation
+try:
+    from scitex.scholar.auth import ScholarAuthManager
+except ImportError:
+    ScholarAuthManager = None
+
+try:
+    from scitex.scholar.browser import ScholarBrowserManager
+except ImportError:
+    ScholarBrowserManager = None
+
+try:
+    from scitex.scholar.config import ScholarConfig
+except ImportError:
+    ScholarConfig = None
+
+try:
+    from scitex.scholar.core import Paper, Papers, Scholar
+except ImportError:
+    Paper = None
+    Papers = None
+    Scholar = None
+
+try:
+    from scitex.scholar.metadata_engines import ScholarEngine
+except ImportError:
+    ScholarEngine = None
+
+try:
+    from scitex.scholar.pdf_download import ScholarPDFDownloader
+except ImportError:
+    ScholarPDFDownloader = None
+
+try:
+    from scitex.scholar.storage import ScholarLibrary
+except ImportError:
+    ScholarLibrary = None
+
+try:
+    from scitex.scholar.url_finder import ScholarURLFinder
+except ImportError:
+    ScholarURLFinder = None
+
+try:
+    from . import utils
+except ImportError:
+    utils = None
 
 __all__ = [
     "ScholarConfig",
