@@ -26,10 +26,18 @@ Usage:
     from scitex.audio import GoogleTTS, ElevenLabsTTS, SystemTTS
     tts = SystemTTS()
     tts.speak("Hello!")
+
+Installation:
+    pip install scitex[audio]
 """
 
 import subprocess
 from typing import List, Optional
+
+# Check for missing dependencies and warn user
+from scitex._install_guide import warn_module_deps
+
+_missing = warn_module_deps("audio")
 
 # Import from engines subpackage
 from .engines import (

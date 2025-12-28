@@ -179,7 +179,10 @@ try:
 except Exception:
     pass  # Use matplotlib default colors if color module fails
 
-from ._tpl import termplot
+try:
+    from ._tpl import termplot
+except ImportError:
+    termplot = None
 from . import color
 from . import utils
 from . import ax
