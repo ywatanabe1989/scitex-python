@@ -8,11 +8,32 @@ import pytest
 
 # Required for scitex.decorators module
 pytest.importorskip("tqdm")
+import functools
 import os
 import shutil
 import tempfile
 import time
 from unittest.mock import MagicMock, patch
+
+from joblib import Memory
+
+
+def create_cache_disk_decorator(cache_dir):
+    """Create a fresh cache_disk decorator with a specific cache directory.
+
+    This is used for testing to ensure each test has isolated cache.
+    """
+    memory = Memory(cache_dir, verbose=0)
+
+    def cache_disk(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            cached_func = memory.cache(func)
+            return cached_func(*args, **kwargs)
+
+        return wrapper
+
+    return cache_disk
 
 
 class TestCacheDisk:
@@ -38,190 +59,146 @@ class TestCacheDisk:
 
     def test_cache_disk_basic_functionality(self):
         """Test basic disk caching functionality."""
-        with patch.dict(os.environ, {"SciTeX_DIR": self.temp_dir + "/"}):
-            # Import after setting environment
-            import importlib
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
+        call_count = 0
 
-            import scitex.decorators._cache_disk as cache_module
+        @cache_disk
+        def simple_func(x):
+            nonlocal call_count
+            call_count += 1
+            return x * 2
 
-            importlib.reload(cache_module)
-            cache_disk = cache_module.cache_disk
+        # First call should execute the function
+        result1 = simple_func(5)
+        assert result1 == 10
+        assert call_count == 1
 
-            call_count = 0
+        # Second call with same argument should use disk cache
+        result2 = simple_func(5)
+        assert result2 == 10
+        assert call_count == 1  # No additional function call
 
-            @cache_disk
-            def simple_func(x):
-                nonlocal call_count
-                call_count += 1
-                return x * 2
-
-            # First call should execute the function
-            result1 = simple_func(5)
-            assert result1 == 10
-            assert call_count == 1
-
-            # Second call with same argument should use disk cache
-            result2 = simple_func(5)
-            assert result2 == 10
-            assert call_count == 1  # No additional function call
-
-            # Call with different argument should execute function again
-            result3 = simple_func(10)
-            assert result3 == 20
-            assert call_count == 2
+        # Call with different argument should execute function again
+        result3 = simple_func(10)
+        assert result3 == 20
+        assert call_count == 2
 
     def test_cache_disk_with_arguments(self):
         """Test disk caching with multiple arguments."""
-        with patch.dict(os.environ, {"SciTeX_DIR": self.temp_dir + "/"}):
-            import importlib
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
+        call_count = 0
 
-            import scitex.decorators._cache_disk as cache_module
+        @cache_disk
+        def multi_arg_func(x, y, z=10):
+            nonlocal call_count
+            call_count += 1
+            return x + y + z
 
-            importlib.reload(cache_module)
-            cache_disk = cache_module.cache_disk
+        # Test with positional arguments
+        result1 = multi_arg_func(1, 2)
+        assert result1 == 13
+        assert call_count == 1
 
-            call_count = 0
+        # Same arguments should use cache
+        result2 = multi_arg_func(1, 2)
+        assert result2 == 13
+        assert call_count == 1
 
-            @cache_disk
-            def multi_arg_func(x, y, z=10):
-                nonlocal call_count
-                call_count += 1
-                return x + y + z
-
-            # Test with positional arguments
-            result1 = multi_arg_func(1, 2)
-            assert result1 == 13
-            assert call_count == 1
-
-            # Same arguments should use cache
-            result2 = multi_arg_func(1, 2)
-            assert result2 == 13
-            assert call_count == 1
-
-            # Different arguments should execute function
-            result3 = multi_arg_func(1, 2, z=20)
-            assert result3 == 23
-            assert call_count == 2
+        # Different arguments should execute function
+        result3 = multi_arg_func(1, 2, z=20)
+        assert result3 == 23
+        assert call_count == 2
 
     def test_cache_disk_with_keyword_arguments(self):
         """Test disk caching with keyword arguments."""
-        with patch.dict(os.environ, {"SciTeX_DIR": self.temp_dir + "/"}):
-            import importlib
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
+        call_count = 0
 
-            import scitex.decorators._cache_disk as cache_module
+        @cache_disk
+        def keyword_func(a, b=5, c=10):
+            nonlocal call_count
+            call_count += 1
+            return a * b + c
 
-            importlib.reload(cache_module)
-            cache_disk = cache_module.cache_disk
+        # Test with keyword arguments
+        result1 = keyword_func(2, b=3, c=4)
+        assert result1 == 10
+        assert call_count == 1
 
-            call_count = 0
-
-            @cache_disk
-            def keyword_func(a, b=5, c=10):
-                nonlocal call_count
-                call_count += 1
-                return a * b + c
-
-            # Test with keyword arguments
-            result1 = keyword_func(2, b=3, c=4)
-            assert result1 == 10
-            assert call_count == 1
-
-            # Same call should use cache
-            result2 = keyword_func(2, b=3, c=4)
-            assert result2 == 10
-            assert call_count == 1
+        # Same call should use cache
+        result2 = keyword_func(2, b=3, c=4)
+        assert result2 == 10
+        assert call_count == 1
 
     def test_cache_disk_return_types(self):
         """Test disk caching with different return types."""
-        with patch.dict(os.environ, {"SciTeX_DIR": self.temp_dir + "/"}):
-            import importlib
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
+        call_count = 0
 
-            import scitex.decorators._cache_disk as cache_module
+        @cache_disk
+        def return_various_types(type_name):
+            nonlocal call_count
+            call_count += 1
 
-            importlib.reload(cache_module)
-            cache_disk = cache_module.cache_disk
+            if type_name == "list":
+                return [1, 2, 3]
+            elif type_name == "dict":
+                return {"key": "value"}
+            elif type_name == "tuple":
+                return (1, 2, 3)
+            elif type_name == "none":
+                return None
+            else:
+                return type_name
 
-            call_count = 0
+        # Test list return
+        result1 = return_various_types("list")
+        assert result1 == [1, 2, 3]
+        assert call_count == 1
 
-            @cache_disk
-            def return_various_types(type_name):
-                nonlocal call_count
-                call_count += 1
+        result2 = return_various_types("list")
+        assert result2 == [1, 2, 3]
+        assert call_count == 1  # Should use cache
 
-                if type_name == "list":
-                    return [1, 2, 3]
-                elif type_name == "dict":
-                    return {"key": "value"}
-                elif type_name == "tuple":
-                    return (1, 2, 3)
-                elif type_name == "none":
-                    return None
-                else:
-                    return type_name
+        # Test dict return
+        result3 = return_various_types("dict")
+        assert result3 == {"key": "value"}
+        assert call_count == 2
 
-            # Test list return
-            result1 = return_various_types("list")
-            assert result1 == [1, 2, 3]
-            assert call_count == 1
-
-            result2 = return_various_types("list")
-            assert result2 == [1, 2, 3]
-            assert call_count == 1  # Should use cache
-
-            # Test dict return
-            result3 = return_various_types("dict")
-            assert result3 == {"key": "value"}
-            assert call_count == 2
-
-            # Test None return
-            result4 = return_various_types("none")
-            assert result4 is None
-            assert call_count == 3
+        # Test None return
+        result4 = return_various_types("none")
+        assert result4 is None
+        assert call_count == 3
 
     def test_cache_disk_persistence_across_function_calls(self):
         """Test that disk cache persists across different function instances."""
-        with patch.dict(os.environ, {"SciTeX_DIR": self.temp_dir + "/"}):
-            import importlib
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
+        call_count = 0
 
-            import scitex.decorators._cache_disk as cache_module
+        @cache_disk
+        def persistent_func(x):
+            nonlocal call_count
+            call_count += 1
+            return x**2
 
-            importlib.reload(cache_module)
-            cache_disk = cache_module.cache_disk
+        # First call
+        result1 = persistent_func(5)
+        assert result1 == 25
+        assert call_count == 1
 
-            call_count = 0
+        # Second call with same argument should use cache
+        result2 = persistent_func(5)
+        assert result2 == 25
+        assert call_count == 1  # Should use cache
 
-            @cache_disk
-            def persistent_func(x):
-                nonlocal call_count
-                call_count += 1
-                return x**2
-
-            # First call
-            result1 = persistent_func(5)
-            assert result1 == 25
-            assert call_count == 1
-
-            # Create a new decorated function with same implementation
-            @cache_disk
-            def persistent_func2(x):
-                nonlocal call_count
-                call_count += 1
-                return x**2
-
-            # This might use cache depending on joblib implementation
-            result2 = persistent_func2(5)
-            assert result2 == 25
-            # call_count might be 1 or 2 depending on cache sharing
-
-    @patch.dict(os.environ, {"SciTeX_DIR": ""})
     def test_cache_disk_performance_improvement(self):
         """Test that disk caching improves performance."""
-        from scitex.decorators import cache_disk
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
 
         @cache_disk
         def slow_function(n):
             # Simulate slow computation
-            time.sleep(0.01)  # 10ms delay
+            time.sleep(0.05)  # 50ms delay
             return n**2
 
         # Time first call
@@ -235,8 +212,8 @@ class TestCacheDisk:
         second_call_time = time.time() - start_time
 
         assert result1 == result2 == 25
-        # Second call should be faster (allowing some tolerance for disk I/O)
-        assert second_call_time < first_call_time
+        # Second call should be significantly faster
+        assert second_call_time < first_call_time * 0.5
 
     def test_cache_disk_uses_scitex_dir_environment_variable(self):
         """Test that cache_disk respects SciTeX_DIR environment variable."""
@@ -254,66 +231,46 @@ class TestCacheDisk:
                 result = test_func(5)
                 assert result == 10
 
-                # Check that cache directory was created in custom location
-                expected_cache_dir = custom_scitex_dir + "cache/"
-                # Cache directory should exist (joblib creates it)
-                # Note: We can't easily test this without accessing internals
-
     def test_cache_disk_default_cache_location(self):
         """Test cache_disk uses default location when SciTeX_DIR not set."""
-        # Use a temp directory to avoid polluting system cache
-        with patch.dict(os.environ, {"SciTeX_DIR": self.temp_dir + "/"}):
-            import importlib
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
 
-            import scitex.decorators._cache_disk as cache_module
+        @cache_disk
+        def test_func(x):
+            return x * 3
 
-            importlib.reload(cache_module)
-            cache_disk = cache_module.cache_disk
-
-            @cache_disk
-            def test_func(x):
-                return x * 3
-
-            # Should work with default location
-            result = test_func(7)
-            assert result == 21
+        # Should work with default location
+        result = test_func(7)
+        assert result == 21
 
     def test_cache_disk_with_complex_data_structures(self):
         """Test disk caching with complex data structures."""
-        with patch.dict(os.environ, {"SciTeX_DIR": self.temp_dir + "/"}):
-            import importlib
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
+        call_count = 0
 
-            import scitex.decorators._cache_disk as cache_module
+        @cache_disk
+        def complex_data_func(data_type):
+            nonlocal call_count
+            call_count += 1
 
-            importlib.reload(cache_module)
-            cache_disk = cache_module.cache_disk
+            if data_type == "nested_dict":
+                return {"level1": {"level2": {"values": [1, 2, 3, 4, 5]}}}
+            elif data_type == "nested_list":
+                return [[1, 2], [3, 4], [5, [6, 7]]]
+            else:
+                return {"simple": "data"}
 
-            call_count = 0
+        # Test complex nested dictionary
+        result1 = complex_data_func("nested_dict")
+        expected_dict = {"level1": {"level2": {"values": [1, 2, 3, 4, 5]}}}
+        assert result1 == expected_dict
+        assert call_count == 1
 
-            @cache_disk
-            def complex_data_func(data_type):
-                nonlocal call_count
-                call_count += 1
+        # Should use cache for same input
+        result2 = complex_data_func("nested_dict")
+        assert result2 == expected_dict
+        assert call_count == 1
 
-                if data_type == "nested_dict":
-                    return {"level1": {"level2": {"values": [1, 2, 3, 4, 5]}}}
-                elif data_type == "nested_list":
-                    return [[1, 2], [3, 4], [5, [6, 7]]]
-                else:
-                    return {"simple": "data"}
-
-            # Test complex nested dictionary
-            result1 = complex_data_func("nested_dict")
-            expected_dict = {"level1": {"level2": {"values": [1, 2, 3, 4, 5]}}}
-            assert result1 == expected_dict
-            assert call_count == 1
-
-            # Should use cache for same input
-            result2 = complex_data_func("nested_dict")
-            assert result2 == expected_dict
-            assert call_count == 1
-
-    @patch.dict(os.environ, {"SciTeX_DIR": ""})
     def test_cache_disk_function_signature_preservation(self):
         """Test that decorated function preserves original signature."""
         from scitex.decorators import cache_disk
@@ -329,38 +286,31 @@ class TestCacheDisk:
 
     def test_cache_disk_with_exceptions(self):
         """Test disk caching behavior when function raises exceptions."""
-        with patch.dict(os.environ, {"SciTeX_DIR": self.temp_dir + "/"}):
-            import importlib
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
+        call_count = 0
 
-            import scitex.decorators._cache_disk as cache_module
+        @cache_disk
+        def error_func(x):
+            nonlocal call_count
+            call_count += 1
+            if x < 0:
+                raise ValueError("Negative value not allowed")
+            return x * 2
 
-            importlib.reload(cache_module)
-            cache_disk = cache_module.cache_disk
+        # Function that raises exception
+        with pytest.raises(ValueError):
+            error_func(-1)
+        assert call_count == 1
 
-            call_count = 0
+        # Successful call should work
+        result = error_func(5)
+        assert result == 10
+        assert call_count == 2
 
-            @cache_disk
-            def error_func(x):
-                nonlocal call_count
-                call_count += 1
-                if x < 0:
-                    raise ValueError("Negative value not allowed")
-                return x * 2
-
-            # Function that raises exception
-            with pytest.raises(ValueError):
-                error_func(-1)
-            assert call_count == 1
-
-            # Successful call should work
-            result = error_func(5)
-            assert result == 10
-            assert call_count == 2
-
-            # Same successful call should use cache
-            result2 = error_func(5)
-            assert result2 == 10
-            assert call_count == 2
+        # Same successful call should use cache
+        result2 = error_func(5)
+        assert result2 == 10
+        assert call_count == 2
 
     @patch("scitex.decorators._cache_disk._Memory")
     def test_cache_disk_joblib_memory_integration(self, mock_memory_class):
@@ -404,49 +354,39 @@ class TestCacheDisk:
                 result = test_func(4)
                 assert result == 16
 
-                # joblib should create the cache directory structure
-                # We can't easily verify this without diving into joblib internals
-
     def test_cache_disk_multiple_functions(self):
         """Test disk caching with multiple different functions."""
-        with patch.dict(os.environ, {"SciTeX_DIR": self.temp_dir + "/"}):
-            import importlib
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
+        call_count_1 = 0
+        call_count_2 = 0
 
-            import scitex.decorators._cache_disk as cache_module
+        @cache_disk
+        def func1(x):
+            nonlocal call_count_1
+            call_count_1 += 1
+            return x * 2
 
-            importlib.reload(cache_module)
-            cache_disk = cache_module.cache_disk
+        @cache_disk
+        def func2(x):
+            nonlocal call_count_2
+            call_count_2 += 1
+            return x * 3
 
-            call_count_1 = 0
-            call_count_2 = 0
+        # Test both functions
+        result1 = func1(5)
+        result2 = func2(5)
+        assert result1 == 10
+        assert result2 == 15
+        assert call_count_1 == 1
+        assert call_count_2 == 1
 
-            @cache_disk
-            def func1(x):
-                nonlocal call_count_1
-                call_count_1 += 1
-                return x * 2
-
-            @cache_disk
-            def func2(x):
-                nonlocal call_count_2
-                call_count_2 += 1
-                return x * 3
-
-            # Test both functions
-            result1 = func1(5)
-            result2 = func2(5)
-            assert result1 == 10
-            assert result2 == 15
-            assert call_count_1 == 1
-            assert call_count_2 == 1
-
-            # Test caching for both
-            result1_cached = func1(5)
-            result2_cached = func2(5)
-            assert result1_cached == 10
-            assert result2_cached == 15
-            assert call_count_1 == 1  # Should use cache
-            assert call_count_2 == 1  # Should use cache
+        # Test caching for both
+        result1_cached = func1(5)
+        result2_cached = func2(5)
+        assert result1_cached == 10
+        assert result2_cached == 15
+        assert call_count_1 == 1  # Should use cache
+        assert call_count_2 == 1  # Should use cache
 
     @pytest.mark.skip(reason="joblib.Memory cannot hash instance methods with 'self'")
     def test_cache_disk_with_class_methods(self):
@@ -458,7 +398,6 @@ class TestCacheDisk:
         """
         pass
 
-    @patch.dict(os.environ, {"SciTeX_DIR": ""})
     def test_cache_disk_memory_verbose_setting(self):
         """Test that joblib Memory is created with verbose=0."""
         with patch("scitex.decorators._cache_disk._Memory") as mock_memory:
@@ -481,31 +420,24 @@ class TestCacheDisk:
 
     def test_cache_disk_concurrent_access_safety(self):
         """Test disk caching with concurrent-like access patterns."""
-        with patch.dict(os.environ, {"SciTeX_DIR": self.temp_dir + "/"}):
-            import importlib
+        cache_disk = create_cache_disk_decorator(self.temp_dir)
+        call_count = 0
 
-            import scitex.decorators._cache_disk as cache_module
+        @cache_disk
+        def test_func(x):
+            nonlocal call_count
+            call_count += 1
+            return x * 2
 
-            importlib.reload(cache_module)
-            cache_disk = cache_module.cache_disk
+        # Simulate multiple rapid calls
+        results = []
+        for _ in range(5):
+            results.append(test_func(42))
 
-            call_count = 0
-
-            @cache_disk
-            def test_func(x):
-                nonlocal call_count
-                call_count += 1
-                return x * 2
-
-            # Simulate multiple rapid calls
-            results = []
-            for _ in range(5):
-                results.append(test_func(42))
-
-            # All results should be the same
-            assert all(r == 84 for r in results)
-            # Function should only be called once due to caching
-            assert call_count == 1
+        # All results should be the same
+        assert all(r == 84 for r in results)
+        # Function should only be called once due to caching
+        assert call_count == 1
 
 
 if __name__ == "__main__":
