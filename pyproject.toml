@@ -372,6 +372,12 @@ writer = [
     "matplotlib",
 ]
 
+# Figures Module - Reproducible figure creation
+# Use: pip install scitex[figures]
+figures = [
+    "figrecipe",
+]
+
 # --------------------------------------------
 # Convenience Groups (combinations of modules)
 # --------------------------------------------
@@ -625,6 +631,8 @@ all = [
     "pybids",
     "tensorpac",
     "ripple_detection",
+    # figures
+    "figrecipe",
     # jupyter
     "jupyterlab",
     "jupyter-collaboration",
