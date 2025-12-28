@@ -9,6 +9,7 @@ Testing PostgreSQL-specific BLOB handling for NumPy arrays and binary data.
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 import numpy as np
 import pandas as pd
 import psycopg2

@@ -6,6 +6,7 @@
 """Tests for scitex.ai.clustering._pca module."""
 
 import pytest
+pytest.importorskip("zarr")
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA as SklearnPCA

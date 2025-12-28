@@ -8,6 +8,7 @@ Tests for URL summarization functionality.
 """
 
 import pytest
+pytest.importorskip("aiohttp")
 from unittest.mock import Mock, patch, MagicMock, call
 import json
 from concurrent.futures import Future

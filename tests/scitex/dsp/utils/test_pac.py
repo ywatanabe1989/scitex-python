@@ -6,6 +6,7 @@
 """Tests for PAC (Phase-Amplitude Coupling) functionality."""
 
 import pytest
+pytest.importorskip("mne")
 import numpy as np
 import matplotlib.pyplot as plt
 from unittest.mock import patch, MagicMock, Mock

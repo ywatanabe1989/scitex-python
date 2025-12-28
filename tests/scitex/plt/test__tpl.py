@@ -12,6 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 import matplotlib
 import numpy as np
 import pytest
+pytest.importorskip("termplotlib")
 import termplotlib as tpl
 from unittest.mock import Mock, patch, call
 

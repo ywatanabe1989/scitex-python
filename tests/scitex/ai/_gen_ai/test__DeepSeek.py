@@ -16,6 +16,7 @@ __DIR__ = os.path.dirname(__FILE__)
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+pytest.importorskip("zarr")
 from scitex.ai._gen_ai import DeepSeek
 
 

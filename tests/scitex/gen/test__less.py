@@ -6,6 +6,7 @@
 """Test suite for scitex.gen._less module."""
 
 import pytest
+pytest.importorskip("torch")
 from unittest.mock import patch, MagicMock, call, mock_open
 import tempfile
 import os

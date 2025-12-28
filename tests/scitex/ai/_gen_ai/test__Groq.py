@@ -6,6 +6,7 @@
 """Tests for scitex.ai._gen_ai._Groq module."""
 
 import pytest
+pytest.importorskip("zarr")
 import os
 from unittest.mock import Mock, MagicMock, patch
 from scitex.ai._gen_ai import Groq

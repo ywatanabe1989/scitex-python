@@ -11,6 +11,7 @@ Testing table operations, schema management, and metadata retrieval.
 from typing import Any, Dict, List, Union
 from unittest.mock import MagicMock
 import pytest
+pytest.importorskip("psycopg2")
 from scitex.db._BaseMixins import _BaseTableMixin
 
 

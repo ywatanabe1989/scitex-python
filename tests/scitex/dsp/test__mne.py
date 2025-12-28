@@ -4,6 +4,7 @@
 # File: ./scitex_repo/tests/scitex/dsp/test__mne.py
 
 import pytest
+pytest.importorskip("mne")
 import pandas as pd
 import numpy as np
 import unittest.mock as mock

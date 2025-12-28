@@ -4,6 +4,7 @@
 # File: /tests/scitex/gen/test__embed.py
 
 import pytest
+pytest.importorskip("torch")
 from unittest.mock import patch, MagicMock, call
 import sys
 from io import StringIO

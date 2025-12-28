@@ -9,6 +9,7 @@ Testing PostgreSQL-specific connection handling, transactions, and error cases.
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 from unittest.mock import MagicMock, patch, PropertyMock
 import psycopg2
 from scitex.db._PostgreSQLMixins import _ConnectionMixin

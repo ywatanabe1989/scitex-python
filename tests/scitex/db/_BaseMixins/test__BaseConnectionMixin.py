@@ -11,6 +11,7 @@ Testing initialization, context manager, and abstract method definitions.
 import threading
 from unittest.mock import MagicMock, patch
 import pytest
+pytest.importorskip("psycopg2")
 from scitex.db._BaseMixins import _BaseConnectionMixin
 
 

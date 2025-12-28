@@ -5,6 +5,7 @@
 """Tests for git result types."""
 
 import pytest
+pytest.importorskip("git")
 
 from scitex.git._types import (
     BranchResult,

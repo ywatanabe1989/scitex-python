@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+pytest.importorskip("git")
 from git import Repo
 
 from scitex.git._init import (

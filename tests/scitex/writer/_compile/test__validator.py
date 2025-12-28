@@ -11,6 +11,7 @@ Tests validate_before_compile function for project structure validation.
 """
 
 import pytest
+pytest.importorskip("git")
 from pathlib import Path
 from scitex.writer._compile._validator import validate_before_compile
 

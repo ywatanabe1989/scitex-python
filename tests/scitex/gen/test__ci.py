@@ -10,6 +10,7 @@ for data arrays using the formula: CI = 1.96 * std / sqrt(n)
 """
 
 import pytest
+pytest.importorskip("torch")
 scipy = pytest.importorskip("scipy")
 import numpy as np
 from unittest.mock import patch, MagicMock

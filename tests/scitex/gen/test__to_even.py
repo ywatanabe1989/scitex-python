@@ -4,6 +4,7 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/.claude-worktree/scitex_repo/tests/scitex/gen/test__to_even.py
 
 import pytest
+pytest.importorskip("torch")
 import numpy as np
 import sys
 import math

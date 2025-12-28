@@ -22,6 +22,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+pytest.importorskip("git")
 
 from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
 

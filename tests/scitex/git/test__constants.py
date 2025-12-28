@@ -5,6 +5,7 @@
 """Tests for git constants."""
 
 import pytest
+pytest.importorskip("git")
 
 from scitex.git._constants import EXIT_FAILURE, EXIT_SUCCESS
 
