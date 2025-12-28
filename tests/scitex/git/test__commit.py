@@ -4,6 +4,7 @@
 from pathlib import Path
 
 import pytest
+pytest.importorskip("git")
 
 from scitex.git._commit import git_add_all, git_commit
 

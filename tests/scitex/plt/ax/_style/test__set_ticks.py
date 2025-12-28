@@ -13,6 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+pytest.importorskip("zarr")
 from scitex.plt.ax._style import set_ticks
 from scitex.plt.ax._style._set_ticks import set_x_ticks, set_y_ticks
 

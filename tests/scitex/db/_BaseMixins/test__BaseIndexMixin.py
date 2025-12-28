@@ -11,6 +11,7 @@ including index creation and deletion.
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 from unittest.mock import Mock, patch
 from scitex.db._BaseMixins import _BaseIndexMixin
 

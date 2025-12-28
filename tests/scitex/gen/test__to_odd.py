@@ -13,6 +13,7 @@ This module tests:
 """
 
 import pytest
+pytest.importorskip("torch")
 import numpy as np
 
 from scitex.gen import to_odd

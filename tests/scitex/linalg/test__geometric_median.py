@@ -6,8 +6,8 @@
 """Comprehensive tests for geometric_median function."""
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
-import torch
 from unittest.mock import patch, MagicMock, call
 import warnings
 import tempfile

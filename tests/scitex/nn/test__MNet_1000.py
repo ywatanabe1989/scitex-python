@@ -6,6 +6,9 @@
 """Comprehensive test suite for MNet1000 neural network architecture."""
 
 import pytest
+
+# Required for this module
+pytest.importorskip("torch")
 import torch
 import torch.nn as nn
 import numpy as np

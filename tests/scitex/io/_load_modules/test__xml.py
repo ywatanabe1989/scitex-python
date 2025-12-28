@@ -13,6 +13,10 @@ edge cases, and real-world XML patterns.
 import os
 import tempfile
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 import xml.etree.ElementTree as ET
 from unittest.mock import patch, Mock
 

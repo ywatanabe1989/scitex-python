@@ -5,6 +5,10 @@ import os
 import tempfile
 
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 from PIL import Image
 
 from scitex.io._metadata_modules import embed_metadata, read_metadata

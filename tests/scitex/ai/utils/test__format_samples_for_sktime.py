@@ -6,9 +6,9 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
 import pandas as pd
-import torch
 from scitex.ai.utils import format_samples_for_sktime
 from scitex.ai.utils._format_samples_for_sktime import _format_a_sample_for_sktime
 

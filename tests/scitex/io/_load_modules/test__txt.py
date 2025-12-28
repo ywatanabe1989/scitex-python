@@ -14,6 +14,10 @@ import tempfile
 import warnings
 import pytest
 
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
+
 
 def test_load_txt_basic():
     """Test loading a basic text file."""

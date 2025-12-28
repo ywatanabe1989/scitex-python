@@ -6,6 +6,7 @@ import os
 import sys
 from unittest.mock import Mock, MagicMock, patch, call
 import pytest
+pytest.importorskip("psycopg2")
 import pandas as pd
 import psycopg2
 

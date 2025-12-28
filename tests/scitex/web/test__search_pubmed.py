@@ -8,11 +8,11 @@ Tests for PubMed search functionality.
 """
 
 import pytest
+aiohttp = pytest.importorskip("aiohttp")
 from unittest.mock import Mock, patch, MagicMock, mock_open
 import xml.etree.ElementTree as ET
 import json
 import asyncio
-import aiohttp
 from io import StringIO
 
 from scitex.web import (

@@ -11,6 +11,7 @@ Testing query interface methods and their expected signatures.
 from typing import List, Dict, Any, Optional
 from unittest.mock import MagicMock
 import pytest
+pytest.importorskip("psycopg2")
 from scitex.db._BaseMixins import _BaseQueryMixin
 
 

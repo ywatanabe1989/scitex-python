@@ -11,6 +11,7 @@ including vacuum, analyze, reindex, and size reporting functions.
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 from unittest.mock import Mock, patch
 from scitex.db._BaseMixins import _BaseMaintenanceMixin
 

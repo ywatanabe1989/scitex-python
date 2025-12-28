@@ -11,6 +11,7 @@ Testing transaction management, context managers, and writable state.
 import contextlib
 from unittest.mock import MagicMock, patch, call
 import pytest
+pytest.importorskip("psycopg2")
 from scitex.db._BaseMixins import _BaseTransactionMixin
 
 

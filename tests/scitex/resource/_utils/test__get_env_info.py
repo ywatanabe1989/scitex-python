@@ -8,6 +8,7 @@ Comprehensive tests for system environment information gathering functionality.
 """
 
 import pytest
+pytest.importorskip("zarr")
 import os
 import sys
 from unittest.mock import Mock, patch, MagicMock

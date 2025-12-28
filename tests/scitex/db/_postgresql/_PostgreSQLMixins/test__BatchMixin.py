@@ -9,6 +9,7 @@ Testing PostgreSQL-specific batch operations and DataFrame integration.
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 import pandas as pd
 import numpy as np
 from datetime import datetime

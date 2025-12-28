@@ -3,6 +3,7 @@
 # Test for scitex.ai.utils._label_encoder
 
 import pytest
+pytest.importorskip("zarr")
 import numpy as np
 import pandas as pd
 import sys

@@ -6,6 +6,8 @@
 """Tests for memory caching decorator functionality."""
 
 import pytest
+# Required for scitex.decorators module
+pytest.importorskip("tqdm")
 import time
 from unittest.mock import patch, MagicMock
 

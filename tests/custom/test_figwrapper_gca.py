@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import pytest
+pytest.importorskip("zarr")
 # -*- coding: utf-8 -*-
 # Test for FigWrapper.gca() and add_subplot() functionality
 

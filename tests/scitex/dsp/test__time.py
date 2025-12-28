@@ -4,6 +4,7 @@
 # File: ./scitex_repo/tests/scitex/dsp/test__time.py
 
 import pytest
+pytest.importorskip("mne")
 import numpy as np
 from scitex.dsp import time
 

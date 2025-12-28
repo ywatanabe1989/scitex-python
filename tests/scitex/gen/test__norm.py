@@ -4,7 +4,7 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/.claude-worktree/scitex_repo/tests/scitex/gen/test__norm.py
 
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 import numpy as np
 from scitex.gen import to_z, to_nanz, to_01, to_nan01, unbias, clip_perc
 

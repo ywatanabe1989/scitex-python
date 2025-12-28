@@ -5,8 +5,8 @@
 """Tests for scitex.stats.descriptive._circular module."""
 
 import numpy as np
-import torch
 import pytest
+torch = pytest.importorskip("torch")
 from scitex.stats.descriptive._circular import (
     circular_mean, circular_concentration,
     circular_skewness, circular_kurtosis,

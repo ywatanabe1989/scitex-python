@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pandas as pd
 import pytest
+pytest.importorskip("zarr")
 
 from scitex.resource import get_processor_usages
 from scitex.resource._get_processor_usages import (

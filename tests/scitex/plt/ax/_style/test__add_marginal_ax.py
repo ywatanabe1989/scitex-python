@@ -12,6 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 import matplotlib
 import matplotlib.pyplot as plt
 import pytest
+pytest.importorskip("zarr")
 
 matplotlib.use("Agg")
 

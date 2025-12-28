@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+pytest.importorskip("torch")
 
 from scitex.gen import transpose
 

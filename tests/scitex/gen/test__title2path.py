@@ -1,4 +1,5 @@
 import pytest
+pytest.importorskip("torch")
 from unittest.mock import patch, MagicMock
 
 from scitex.gen import title2path

@@ -11,6 +11,7 @@ Tests parse_output function for extracting errors and warnings.
 """
 
 import pytest
+pytest.importorskip("git")
 from pathlib import Path
 from scitex.writer._compile._parser import parse_output
 

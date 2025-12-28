@@ -6,6 +6,7 @@
 """Tests for scitex.ai._gen_ai._format_output_func module."""
 
 import pytest
+pytest.importorskip("zarr")
 from scitex.ai._gen_ai import format_output_func
 
 

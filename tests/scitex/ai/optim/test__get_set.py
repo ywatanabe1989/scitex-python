@@ -6,7 +6,7 @@
 """Tests for scitex.ai.optim._get_set module (deprecated functions)."""
 
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 import torch.nn as nn
 import torch.optim as optim
 import warnings

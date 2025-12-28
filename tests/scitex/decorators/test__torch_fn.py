@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-04-30 15:49:06 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/tests/scitex/decorators/test__torch_fn.py
 # ----------------------------------------
@@ -9,14 +8,18 @@ __FILE__ = "./tests/scitex/decorators/test__torch_fn.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 from functools import wraps
-
 from unittest.mock import patch
 
 import numpy as np
-import pandas as pd
 import pytest
-import torch
-import xarray as xr
+# Required for scitex.decorators module
+pytest.importorskip("tqdm")
+
+# Optional dependencies
+torch = pytest.importorskip("torch")
+pd = pytest.importorskip("pandas")
+xr = pytest.importorskip("xarray")
+
 from scitex.decorators import torch_fn
 
 
@@ -38,33 +41,36 @@ def test_data():
 
 def test_torch_fn_with_list_input(test_data):
     """Test torch_fn with list input."""
-    
+
     # Skip this test for now - it's failing when run as part of the full suite
     import pytest
+
     pytest.skip("This test needs fixing for full test suite runs")
-    
+
     # Create a dummy test that passes to avoid failing the whole suite
     assert True
 
 
 def test_torch_fn_with_torch_input(test_data):
     """Test torch_fn with torch input."""
-    
+
     # Skip this test for now - it's failing when run as part of the full suite
     import pytest
+
     pytest.skip("This test needs fixing for full test suite runs")
-    
+
     # Create a dummy test that passes to avoid failing the whole suite
     assert True
 
 
 def test_torch_fn_with_numpy_input(test_data):
     """Test torch_fn with numpy input."""
-    
+
     # Skip this test for now - it's failing when run as part of the full suite
     import pytest
+
     pytest.skip("This test needs fixing for full test suite runs")
-    
+
     # Create a dummy test that passes to avoid failing the whole suite
     assert True
 
@@ -97,6 +103,7 @@ def test_torch_fn_nested_decorator(test_data):
         assert isinstance(result, np.ndarray)
         assert np.array_equal(result, test_data["numpy"])
 
+
 if __name__ == "__main__":
     import os
 
@@ -113,26 +120,26 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_torch_fn.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/decorators/_torch_fn.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # from functools import wraps
 # from typing import Any as _Any
 # from typing import Callable
-# 
+#
 # import numpy as np
-# 
+#
 # from ._converters import _return_always, is_nested_decorator, to_torch
-# 
-# 
+#
+#
 # def torch_fn(func: Callable) -> Callable:
 #     """Decorator for PyTorch function compatibility.
-# 
+#
 #     Automatically converts inputs to PyTorch tensors and handles various data types
 #     gracefully. Preserves the original input type in the output.
-# 
+#
 #     Features
 #     --------
 #     - Converts inputs to PyTorch tensors
@@ -142,17 +149,17 @@ if __name__ == "__main__":
 #     - Automatically converts axis to dim for torch functions
 #     - Applies device="cuda" if available
 #     - Returns output in same type as input (numpy->numpy, pandas->pandas, etc.)
-# 
+#
 #     Parameters
 #     ----------
 #     func : Callable
 #         The function to decorate
-# 
+#
 #     Returns
 #     -------
 #     Callable
 #         The decorated function
-# 
+#
 #     Examples
 #     --------
 #     >>> @torch_fn
@@ -167,38 +174,38 @@ if __name__ == "__main__":
 #     >>>
 #     >>> # Preserves dimension tuples
 #     >>> result = mean_squared(data, dim=(0, 1))
-# 
+#
 #     Notes
 #     -----
 #     For optimal performance with batch processing, apply torch_fn before batch_fn:
 #     @batch_fn
 #     @torch_fn
 #     def my_function(x): ...
-# 
+#
 #     Or use auto-ordering to handle this automatically.
 #     """
-# 
+#
 #     @wraps(func)
 #     def wrapper(*args: _Any, **kwargs: _Any) -> _Any:
 #         # Skip conversion if already in a nested decorator context
 #         if is_nested_decorator():
 #             results = func(*args, **kwargs)
 #             return results
-# 
+#
 #         # Set the current decorator context
 #         wrapper._current_decorator = "torch_fn"
-# 
+#
 #         # Store original object for type preservation
 #         original_object = args[0] if args else None
-# 
+#
 #         converted_args, converted_kwargs = to_torch(
 #             *args, return_fn=_return_always, **kwargs
 #         )
-# 
+#
 #         # Skip strict assertion for certain types that may not convert to tensors
 #         # Instead, convert what we can and pass through what we can't
 #         import torch
-# 
+#
 #         validated_args = []
 #         for arg_index, arg in enumerate(converted_args):
 #             if isinstance(arg, torch.Tensor):
@@ -218,12 +225,12 @@ if __name__ == "__main__":
 #                 except:
 #                     # If all else fails, pass through unchanged
 #                     validated_args.append(arg)
-# 
+#
 #         results = func(*validated_args, **converted_kwargs)
-# 
+#
 #         # Convert results back to original input types
 #         import torch
-# 
+#
 #         if isinstance(results, torch.Tensor):
 #             if original_object is not None:
 #                 if isinstance(original_object, list):
@@ -235,32 +242,32 @@ if __name__ == "__main__":
 #                     and original_object.__class__.__name__ == "DataFrame"
 #                 ):
 #                     import pandas as pd
-# 
+#
 #                     return pd.DataFrame(results.detach().cpu().numpy())
 #                 elif (
 #                     hasattr(original_object, "__class__")
 #                     and original_object.__class__.__name__ == "Series"
 #                 ):
 #                     import pandas as pd
-# 
+#
 #                     return pd.Series(results.detach().cpu().numpy().flatten())
 #                 elif (
 #                     hasattr(original_object, "__class__")
 #                     and original_object.__class__.__name__ == "DataArray"
 #                 ):
 #                     import xarray as xr
-# 
+#
 #                     return xr.DataArray(results.detach().cpu().numpy())
 #             return results
-# 
+#
 #         return results
-# 
+#
 #     # Mark as a wrapper for detection
 #     wrapper._is_wrapper = True
 #     wrapper._decorator_type = "torch_fn"
 #     return wrapper
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------
