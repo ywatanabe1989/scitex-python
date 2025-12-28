@@ -22,13 +22,27 @@ from ._catboost import _save_catboost as save_catboost
 from ._csv import _save_csv as save_csv
 from ._excel import save_excel
 from ._figure_utils import get_figure_with_data
-from ._hdf5 import _save_hdf5 as save_hdf5
-from ._html import save_html
-from ._image import save_image
+
+# Optional: image (requires plotly)
+try:
+    from ._image import save_image
+except ImportError:
+    save_image = None
+
+# Optional: HTML (requires plotly)
+try:
+    from ._html import save_html
+except ImportError:
+    save_html = None
+
+# Optional: HDF5 (requires h5py)
+try:
+    from ._hdf5 import _save_hdf5 as save_hdf5
+except ImportError:
+    save_hdf5 = None
 
 # Import extracted utilities
 from ._image_csv import handle_image_with_csv
-from ._joblib import _save_joblib as save_joblib
 from ._json import _save_json as save_json
 from ._legends import save_separate_legends
 
@@ -37,7 +51,6 @@ from ._listed_dfs_as_csv import _save_listed_dfs_as_csv as save_listed_dfs_as_cs
 from ._listed_scalars_as_csv import (
     _save_listed_scalars_as_csv as save_listed_scalars_as_csv,
 )
-from ._matlab import _save_matlab as save_matlab
 from ._mp4 import _mk_mp4 as save_mp4
 from ._numpy import _save_npy as save_npy
 from ._numpy import _save_npz as save_npz
@@ -54,9 +67,31 @@ from ._stx_bundle import save_stx_bundle
 from ._symlink import symlink, symlink_to
 from ._tex import _save_tex as save_tex
 from ._text import _save_text as save_text
-from ._torch import _save_torch as save_torch
 from ._yaml import _save_yaml as save_yaml
-from ._zarr import _save_zarr as save_zarr
+
+# Optional: joblib (requires joblib)
+try:
+    from ._joblib import _save_joblib as save_joblib
+except ImportError:
+    save_joblib = None
+
+# Optional: matlab (requires scipy)
+try:
+    from ._matlab import _save_matlab as save_matlab
+except ImportError:
+    save_matlab = None
+
+# Optional: torch (requires torch)
+try:
+    from ._torch import _save_torch as save_torch
+except ImportError:
+    save_torch = None
+
+# Optional: zarr (requires zarr)
+try:
+    from ._zarr import _save_zarr as save_zarr
+except ImportError:
+    save_zarr = None
 
 # Define what gets imported with "from scitex.io._save_modules import *"
 __all__ = [

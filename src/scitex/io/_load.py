@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-08-11 05:54:51 (ywatanabe)"
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/io/_load.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -15,36 +15,89 @@ from pathlib import Path
 from typing import Any, Union
 
 from scitex.decorators import preserve_doc
-from scitex.str._clean_path import clean_path
+
 from ._load_cache import (
     cache_data,
-    configure_cache,
-    get_cache_info,
     get_cached_data,
     load_npy_cached,
 )
-from ._load_modules._bibtex import _load_bibtex
 
-# from ._load_modules._catboost import _load_catboost
-from ._load_modules._con import _load_con
-from ._load_modules._docx import _load_docx
-from ._load_modules._eeg import _load_eeg_data
-from ._load_modules._hdf5 import _load_hdf5
-from ._load_modules._image import _load_image
-from ._load_modules._joblib import _load_joblib
+# Core loaders (no special dependencies)
+from ._load_modules._bibtex import _load_bibtex
 from ._load_modules._json import _load_json
 from ._load_modules._markdown import _load_markdown
-from ._load_modules._matlab import _load_matlab
 from ._load_modules._numpy import _load_npy
 from ._load_modules._pandas import _load_csv, _load_excel, _load_tsv
-from ._load_modules._pdf import _load_pdf
 from ._load_modules._pickle import _load_pickle
-from ._load_modules._sqlite3 import _load_db_sqlite3
-from ._load_modules._torch import _load_torch
 from ._load_modules._txt import _load_txt
 from ._load_modules._xml import _load_xml
 from ._load_modules._yaml import _load_yaml
-from ._load_modules._zarr import _load_zarr
+
+
+# Optional loaders - wrapped for missing dependencies
+def _unavailable_loader(name):
+    def _loader(*args, **kwargs):
+        raise ImportError(
+            f"Loader for {name} not available. Install required dependencies."
+        )
+
+    return _loader
+
+
+try:
+    from ._load_modules._con import _load_con
+except ImportError:
+    _load_con = _unavailable_loader("con")
+
+try:
+    from ._load_modules._docx import _load_docx
+except ImportError:
+    _load_docx = _unavailable_loader("docx")
+
+try:
+    from ._load_modules._eeg import _load_eeg_data
+except ImportError:
+    _load_eeg_data = _unavailable_loader("eeg")
+
+try:
+    from ._load_modules._hdf5 import _load_hdf5
+except ImportError:
+    _load_hdf5 = _unavailable_loader("hdf5")
+
+try:
+    from ._load_modules._image import _load_image
+except ImportError:
+    _load_image = _unavailable_loader("image")
+
+try:
+    from ._load_modules._joblib import _load_joblib
+except ImportError:
+    _load_joblib = _unavailable_loader("joblib")
+
+try:
+    from ._load_modules._matlab import _load_matlab
+except ImportError:
+    _load_matlab = _unavailable_loader("matlab")
+
+try:
+    from ._load_modules._pdf import _load_pdf
+except ImportError:
+    _load_pdf = _unavailable_loader("pdf")
+
+try:
+    from ._load_modules._sqlite3 import _load_db_sqlite3
+except ImportError:
+    _load_db_sqlite3 = _unavailable_loader("sqlite3")
+
+try:
+    from ._load_modules._torch import _load_torch
+except ImportError:
+    _load_torch = _unavailable_loader("torch")
+
+try:
+    from ._load_modules._zarr import _load_zarr
+except ImportError:
+    _load_zarr = _unavailable_loader("zarr")
 
 
 def _load_bundle(lpath, verbose=False, **kwargs):
@@ -69,17 +122,19 @@ def _load_bundle(lpath, verbose=False, **kwargs):
     For .statsz bundles:
         dict: Stats data with 'spec' and 'comparisons'.
     """
-    from .bundle import load as load_bundle, BundleType
+    from .bundle import BundleType
+    from .bundle import load as load_bundle
 
     bundle = load_bundle(lpath)
-    bundle_type = bundle.get('type')
+    bundle_type = bundle.get("type")
 
     if bundle_type == BundleType.PLTZ:
         # Return (fig, ax, data) tuple for .pltz bundles
         # Note: We return the spec and data, not a reconstructed figure
         # as matplotlib figures cannot be perfectly serialized/deserialized
-        import matplotlib.pyplot as plt
         from pathlib import Path
+
+        import matplotlib.pyplot as plt
 
         p = Path(lpath)
         bundle_dir = p
@@ -88,13 +143,14 @@ def _load_bundle(lpath, verbose=False, **kwargs):
         if not p.is_dir():
             import tempfile
             import zipfile
+
             temp_dir = Path(tempfile.mkdtemp())
-            with zipfile.ZipFile(p, 'r') as zf:
+            with zipfile.ZipFile(p, "r") as zf:
                 zf.extractall(temp_dir)
             bundle_dir = temp_dir
 
         # Find PNG file - layered format stores in exports/
-        basename = bundle.get('basename', 'plot')
+        basename = bundle.get("basename", "plot")
         png_path = bundle_dir / "exports" / f"{basename}.png"
         if not png_path.exists():
             # Fallback to root level (legacy format)
@@ -105,28 +161,28 @@ def _load_bundle(lpath, verbose=False, **kwargs):
             img = plt.imread(str(png_path))
             fig, ax = plt.subplots()
             ax.imshow(img)
-            ax.axis('off')
+            ax.axis("off")
 
             # Attach metadata from spec
-            spec = bundle.get('spec', {})
+            spec = bundle.get("spec", {})
             if spec:
                 # Handle both layered and legacy spec formats
-                axes_list = spec.get('axes', [])
+                axes_list = spec.get("axes", [])
                 if axes_list and isinstance(axes_list, list):
                     for key, val in axes_list[0].items():
-                        setattr(ax, f'_scitex_{key}', val)
+                        setattr(ax, f"_scitex_{key}", val)
                 # Theme from style (layered) or spec (legacy)
-                style = bundle.get('style', {})
-                theme = style.get('theme', {}) if style else spec.get('theme', {})
+                style = bundle.get("style", {})
+                theme = style.get("theme", {}) if style else spec.get("theme", {})
                 if theme:
-                    fig._scitex_theme = theme.get('mode')
+                    fig._scitex_theme = theme.get("mode")
 
             # Data from bundle (merged in load_layered_pltz_bundle)
-            data = bundle.get('data')
+            data = bundle.get("data")
             return fig, ax, data
         else:
             # No PNG, return spec and data
-            return bundle.get('spec'), None, bundle.get('data')
+            return bundle.get("spec"), None, bundle.get("data")
 
     elif bundle_type == BundleType.FIGZ:
         # Return figure dict for .figz bundles
