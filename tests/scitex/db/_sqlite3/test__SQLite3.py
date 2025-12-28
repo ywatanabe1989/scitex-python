@@ -8,6 +8,7 @@ import sys
 import tempfile
 import shutil
 import pytest
+pytest.importorskip("psycopg2")
 import sqlite3
 from unittest.mock import patch, MagicMock, call
 import pandas as pd

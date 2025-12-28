@@ -8,8 +8,8 @@ Test module for scitex.dsp.filt filtering functions.
 """
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
-import torch
 from numpy.testing import assert_allclose
 
 

@@ -14,6 +14,7 @@ This module tests:
 """
 
 import pytest
+pytest.importorskip("torch")
 
 from scitex.gen import title_case
 

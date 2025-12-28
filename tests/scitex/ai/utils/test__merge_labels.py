@@ -6,6 +6,7 @@
 """Tests for scitex.ai.utils._merge_labels module."""
 
 import pytest
+pytest.importorskip("zarr")
 import numpy as np
 from unittest.mock import patch, MagicMock
 from scitex.ai.utils import merge_labels

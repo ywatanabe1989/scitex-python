@@ -4,6 +4,7 @@
 from pathlib import Path
 
 import pytest
+pytest.importorskip("git")
 
 from scitex.git._clone import clone_repo, git_init
 

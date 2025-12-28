@@ -7,6 +7,10 @@ import os
 import json
 import tempfile
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 import numpy as np
 import pandas as pd
 from pathlib import Path

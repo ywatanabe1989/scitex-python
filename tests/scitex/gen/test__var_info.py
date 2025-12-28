@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 import xarray as xr
 
 from scitex.gen import var_info

@@ -4,8 +4,8 @@
 # File: ./scitex_repo/tests/scitex/dsp/test__wavelet.py
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
-import torch
 from scitex.dsp import wavelet
 
 

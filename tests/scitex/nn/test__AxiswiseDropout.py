@@ -16,6 +16,9 @@ This module tests:
 """
 
 import pytest
+
+# Required for this module
+pytest.importorskip("torch")
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

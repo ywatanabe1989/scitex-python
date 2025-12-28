@@ -12,7 +12,7 @@ This test module verifies:
 """
 
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 import torch.nn as nn
 from io import StringIO
 import sys

@@ -4,9 +4,9 @@
 # File: ./scitex_repo/tests/scitex/dsp/test__transform.py
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
 import pandas as pd
-import torch
 from scitex.dsp import to_sktime_df, to_segments
 
 

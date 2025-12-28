@@ -8,6 +8,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+pytest.importorskip("zarr")
 
 from scitex.plt._subplots._export_as_csv_formatters._format_plot import _format_plot
 

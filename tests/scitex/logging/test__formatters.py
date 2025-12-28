@@ -1,13 +1,21 @@
 # Add your tests here
-import logging
-import sys
-import os
 import importlib.util
+import logging
+import os
+import sys
+
 import pytest
 
 # Import _formatters directly without triggering scitex.logging.__init__
 _formatters_path = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "src", "scitex", "logging", "_formatters.py"
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "..",
+    "src",
+    "scitex",
+    "logging",
+    "_formatters.py",
 )
 spec = importlib.util.spec_from_file_location("_formatters", _formatters_path)
 _formatters = importlib.util.module_from_spec(spec)
@@ -192,13 +200,28 @@ class TestFormatTemplates:
 class TestForceColor:
     """Tests for SCITEX_FORCE_COLOR environment variable."""
 
+    @pytest.fixture(autouse=True)
+    def setup_pythonpath(self):
+        """Set up PYTHONPATH for subprocess tests."""
+        project_root = os.path.join(os.path.dirname(__file__), "..", "..", "..")
+        self.project_root = os.path.abspath(project_root)
+        self.src_dir = os.path.join(self.project_root, "src")
+        existing_pythonpath = os.environ.get("PYTHONPATH", "")
+        if existing_pythonpath:
+            self.pythonpath = f"{self.src_dir}:{existing_pythonpath}"
+        else:
+            self.pythonpath = self.src_dir
+
     def test_force_color_env_parsing(self):
         """Test that FORCE_COLOR environment variable values are parsed correctly."""
         import subprocess
 
         # Test that FORCE_COLOR=1 enables colors in piped output
         result = subprocess.run(
-            ["python", "-c", """
+            [
+                "python",
+                "-c",
+                """
 import os
 os.environ['SCITEX_FORCE_COLOR'] = '1'
 import importlib.util
@@ -207,7 +230,8 @@ spec = importlib.util.spec_from_file_location('_formatters',
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 print('FORCE_COLOR:', mod.FORCE_COLOR)
-"""],
+""",
+            ],
             capture_output=True,
             text=True,
             cwd=os.path.join(os.path.dirname(__file__), "..", "..", ".."),
@@ -219,15 +243,23 @@ print('FORCE_COLOR:', mod.FORCE_COLOR)
         import subprocess
 
         result = subprocess.run(
-            ["python", "-c", """
+            [
+                "python",
+                "-c",
+                """
 from scitex import logging
 logger = logging.getLogger('test')
 logger.warning('test warning')
-"""],
-            env={**os.environ, "SCITEX_FORCE_COLOR": "1"},
+""",
+            ],
+            env={
+                **os.environ,
+                "SCITEX_FORCE_COLOR": "1",
+                "PYTHONPATH": self.pythonpath,
+            },
             capture_output=True,
             text=True,
-            cwd=os.path.join(os.path.dirname(__file__), "..", "..", ".."),
+            cwd=self.project_root,
         )
         # ANSI color codes should be present (yellow for warning: \033[33m)
         # Logging output goes to stderr
@@ -238,19 +270,24 @@ logger.warning('test warning')
         """Test that without FORCE_COLOR, piped output has no ANSI codes."""
         import subprocess
 
-        # Create a clean environment without SCITEX_FORCE_COLOR
+        # Create a clean environment without SCITEX_FORCE_COLOR but with PYTHONPATH
         env = {k: v for k, v in os.environ.items() if k != "SCITEX_FORCE_COLOR"}
+        env["PYTHONPATH"] = self.pythonpath
 
         result = subprocess.run(
-            ["python", "-c", """
+            [
+                "python",
+                "-c",
+                """
 from scitex import logging
 logger = logging.getLogger('test')
 logger.warning('test warning')
-"""],
+""",
+            ],
             env=env,
             capture_output=True,
             text=True,
-            cwd=os.path.join(os.path.dirname(__file__), "..", "..", ".."),
+            cwd=self.project_root,
         )
         # ANSI color codes should NOT be present when piped without FORCE_COLOR
         # Logging output goes to stderr
@@ -264,7 +301,10 @@ logger.warning('test warning')
 
         for value in ["1", "true", "TRUE", "yes", "YES"]:
             result = subprocess.run(
-                ["python", "-c", f"""
+                [
+                    "python",
+                    "-c",
+                    f"""
 import os
 os.environ['SCITEX_FORCE_COLOR'] = '{value}'
 import importlib.util
@@ -273,7 +313,8 @@ spec = importlib.util.spec_from_file_location('_formatters',
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 print('FORCE_COLOR:', mod.FORCE_COLOR)
-"""],
+""",
+                ],
                 capture_output=True,
                 text=True,
                 cwd=os.path.join(os.path.dirname(__file__), "..", "..", ".."),
@@ -286,7 +327,10 @@ print('FORCE_COLOR:', mod.FORCE_COLOR)
 
         for value in ["0", "false", "no", ""]:
             result = subprocess.run(
-                ["python", "-c", f"""
+                [
+                    "python",
+                    "-c",
+                    f"""
 import os
 os.environ['SCITEX_FORCE_COLOR'] = '{value}'
 import importlib.util
@@ -295,7 +339,8 @@ spec = importlib.util.spec_from_file_location('_formatters',
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 print('FORCE_COLOR:', mod.FORCE_COLOR)
-"""],
+""",
+                ],
                 capture_output=True,
                 text=True,
                 cwd=os.path.join(os.path.dirname(__file__), "..", "..", ".."),
@@ -320,22 +365,22 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/logging/_formatters.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # __FILE__ = __file__
 # """Custom formatters for SciTeX logging."""
-# 
+#
 # import logging
 # import sys
-# 
+#
 # # Global format configuration via environment variable
 # # Options: default, minimal, detailed, debug, full
 # # SCITEX_LOG_FORMAT=debug python script.py
 # LOG_FORMAT = os.getenv("SCITEX_LOG_FORMAT", "default")
-# 
+#
 # # Available format templates
 # FORMAT_TEMPLATES = {
 #     "minimal": "%(levelname)s: %(message)s",
@@ -344,11 +389,11 @@ if __name__ == "__main__":
 #     "debug": "%(levelname)s: [%(filename)s:%(lineno)d - %(funcName)s()] %(message)s",
 #     "full": "%(asctime)s - %(levelname)s: [%(filename)s:%(lineno)d - %(name)s.%(funcName)s()] %(message)s",
 # }
-# 
-# 
+#
+#
 # class SciTeXConsoleFormatter(logging.Formatter):
 #     """Custom formatter with color support and configurable format."""
-# 
+#
 #     # ANSI color codes for log levels
 #     COLORS = {
 #         "DEBU": "\033[90m",  # Grey
@@ -359,7 +404,7 @@ if __name__ == "__main__":
 #         "ERRO": "\033[31m",  # Red
 #         "CRIT": "\033[35m",  # Magenta
 #     }
-# 
+#
 #     # Color name to ANSI code mapping
 #     COLOR_NAMES = {
 #         "black": "\033[30m",
@@ -378,13 +423,13 @@ if __name__ == "__main__":
 #         "light_magenta": "\033[95m",
 #         "light_cyan": "\033[96m",
 #     }
-# 
+#
 #     RESET = "\033[0m"
-# 
+#
 #     def __init__(self, fmt=None, indent_width=2):
 #         """
 #         Initialize with format from global config.
-# 
+#
 #         Args:
 #             fmt: Format template string
 #             indent_width: Number of spaces per indent level (default: 2)
@@ -393,7 +438,7 @@ if __name__ == "__main__":
 #             fmt = FORMAT_TEMPLATES.get(LOG_FORMAT, FORMAT_TEMPLATES["default"])
 #         super().__init__(fmt)
 #         self.indent_width = indent_width
-# 
+#
 #     def format(self, record):
 #         # Handle leading newlines: extract and preserve them
 #         msg = str(record.msg) if record.msg else ""
@@ -402,16 +447,16 @@ if __name__ == "__main__":
 #             leading_newlines += "\n"
 #             msg = msg[1:]
 #         record.msg = msg
-# 
+#
 #         # Apply indentation if specified in record
 #         indent_level = getattr(record, "indent", 0)
 #         if indent_level > 0:
 #             indent = " " * (indent_level * self.indent_width)
 #             record.msg = f"{indent}{record.msg}"
-# 
+#
 #         # Use parent formatter to apply template
 #         formatted = super().format(record)
-# 
+#
 #         # Handle internal newlines: each line gets the level prefix
 #         if "\n" in formatted:
 #             lines = formatted.split("\n")
@@ -422,18 +467,18 @@ if __name__ == "__main__":
 #                 prefix + line if line.strip() else line
 #                 for line in lines[1:]
 #             )
-# 
+#
 #         # Check if we can use colors (stdout is a tty and not closed)
 #         try:
 #             use_colors = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
 #         except ValueError:
 #             # stdout/stderr is closed
 #             use_colors = False
-# 
+#
 #         if use_colors:
 #             # Check for custom color override
 #             custom_color = getattr(record, "color", None)
-# 
+#
 #             if custom_color and custom_color in self.COLOR_NAMES:
 #                 # Use custom color
 #                 color = self.COLOR_NAMES[custom_color]
@@ -444,27 +489,27 @@ if __name__ == "__main__":
 #                 if levelname in self.COLORS:
 #                     color = self.COLORS[levelname]
 #                     return f"{leading_newlines}{color}{formatted}{self.RESET}"
-# 
+#
 #         return f"{leading_newlines}{formatted}"
-# 
-# 
+#
+#
 # class SciTeXFileFormatter(logging.Formatter):
 #     """Custom formatter for file output without colors."""
-# 
+#
 #     def __init__(self):
 #         super().__init__(
 #             fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 #             datefmt="%Y-%m-%d %H:%M:%S",
 #         )
-# 
-# 
+#
+#
 # __all__ = [
 #     "SciTeXConsoleFormatter",
 #     "SciTeXFileFormatter",
 #     "LOG_FORMAT",
 #     "FORMAT_TEMPLATES",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

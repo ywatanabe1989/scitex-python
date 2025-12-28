@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+pytest.importorskip("git")
 
 from scitex.git._clone import git_init
 from scitex.git._workflow import setup_branches

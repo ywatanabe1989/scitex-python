@@ -11,8 +11,8 @@ signals.
 """
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
-import torch
 from unittest.mock import patch, MagicMock
 import random
 import warnings

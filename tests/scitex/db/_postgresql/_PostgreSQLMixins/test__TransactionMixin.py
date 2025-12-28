@@ -7,6 +7,7 @@
 """Tests for scitex.db._PostgreSQLMixins._TransactionMixin module."""
 
 import pytest
+pytest.importorskip("psycopg2")
 from unittest.mock import MagicMock, patch, call
 import psycopg2
 from scitex.db._PostgreSQLMixins import _TransactionMixin

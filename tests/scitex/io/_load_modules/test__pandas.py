@@ -12,6 +12,10 @@ including _load_csv, _load_tsv, _load_excel, and _load_parquet.
 import os
 import tempfile
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 import pandas as pd
 import numpy as np
 

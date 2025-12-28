@@ -11,6 +11,8 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import matplotlib
 import matplotlib.pyplot as plt
+import pytest
+pytest.importorskip("zarr")
 from scitex.plt.ax._style import set_xyt
 
 matplotlib.use("Agg")

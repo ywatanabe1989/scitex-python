@@ -16,6 +16,7 @@ import numpy as np
 matplotlib.use("Agg")  # Use non-GUI backend for testing
 
 import pytest
+pytest.importorskip("zarr")
 from scitex.plt.ax._style import map_ticks
 
 

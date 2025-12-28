@@ -17,6 +17,7 @@ Tests compile_supplementary function with various options:
 """
 
 import pytest
+pytest.importorskip("git")
 from pathlib import Path
 from unittest.mock import Mock, patch
 from scitex.writer._compile.supplementary import compile_supplementary

@@ -6,6 +6,7 @@ import os
 import sys
 from unittest.mock import Mock, MagicMock, patch, call
 import pytest
+pytest.importorskip("psycopg2")
 import psycopg2
 
 # Add the project root to the Python path

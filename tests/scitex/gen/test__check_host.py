@@ -10,6 +10,7 @@ determine if a hostname contains a specific keyword.
 """
 
 import pytest
+pytest.importorskip("torch")
 import sys
 import os
 import subprocess

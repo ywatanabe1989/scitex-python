@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+pytest.importorskip("git")
 
 from scitex.git._branch import git_branch_rename, git_checkout_new_branch
 

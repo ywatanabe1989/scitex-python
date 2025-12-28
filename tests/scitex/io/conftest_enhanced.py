@@ -17,9 +17,9 @@ import os
 import tempfile
 import shutil
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
 import pandas as pd
-import torch
 from pathlib import Path
 from unittest.mock import MagicMock
 import time

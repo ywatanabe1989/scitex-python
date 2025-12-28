@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2025-11-09"
 # File: ./tests/scitex/session/test__manager.py
 
 """Tests for SessionManager class."""
 
-import pytest
 from datetime import datetime
+
+import pytest
+
+# Required for scitex.session module
+pytest.importorskip("natsort")
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
+
 from scitex.session import SessionManager
 from scitex.session._manager import get_global_session_manager
 
@@ -18,38 +24,38 @@ class TestSessionManagerBasic:
         """Test SessionManager can be initialized."""
         manager = SessionManager()
         assert manager is not None
-        assert hasattr(manager, 'active_sessions')
+        assert hasattr(manager, "active_sessions")
         assert manager.active_sessions == {}
 
     def test_create_session(self):
         """Test creating a new session."""
         manager = SessionManager()
-        config = {'test': 'value'}
+        config = {"test": "value"}
 
-        manager.create_session('test_id', config)
+        manager.create_session("test_id", config)
 
-        assert 'test_id' in manager.active_sessions
-        assert manager.active_sessions['test_id']['config'] == config
-        assert manager.active_sessions['test_id']['status'] == 'running'
-        assert isinstance(manager.active_sessions['test_id']['start_time'], datetime)
+        assert "test_id" in manager.active_sessions
+        assert manager.active_sessions["test_id"]["config"] == config
+        assert manager.active_sessions["test_id"]["status"] == "running"
+        assert isinstance(manager.active_sessions["test_id"]["start_time"], datetime)
 
     def test_close_session(self):
         """Test closing a session."""
         manager = SessionManager()
-        config = {'test': 'value'}
+        config = {"test": "value"}
 
-        manager.create_session('test_id', config)
-        manager.close_session('test_id')
+        manager.create_session("test_id", config)
+        manager.close_session("test_id")
 
-        assert manager.active_sessions['test_id']['status'] == 'closed'
-        assert 'end_time' in manager.active_sessions['test_id']
-        assert isinstance(manager.active_sessions['test_id']['end_time'], datetime)
+        assert manager.active_sessions["test_id"]["status"] == "closed"
+        assert "end_time" in manager.active_sessions["test_id"]
+        assert isinstance(manager.active_sessions["test_id"]["end_time"], datetime)
 
     def test_close_nonexistent_session(self):
         """Test closing non-existent session doesn't raise error."""
         manager = SessionManager()
         # Should not raise
-        manager.close_session('nonexistent')
+        manager.close_session("nonexistent")
 
 
 class TestSessionManagerQueries:
@@ -66,31 +72,31 @@ class TestSessionManagerQueries:
         """Test get_active_sessions returns only running sessions."""
         manager = SessionManager()
 
-        manager.create_session('session1', {'data': '1'})
-        manager.create_session('session2', {'data': '2'})
-        manager.close_session('session1')
+        manager.create_session("session1", {"data": "1"})
+        manager.create_session("session2", {"data": "2"})
+        manager.close_session("session1")
 
         active = manager.get_active_sessions()
 
-        assert 'session2' in active
-        assert 'session1' not in active  # Closed session not returned
+        assert "session2" in active
+        assert "session1" not in active  # Closed session not returned
 
     def test_get_session_exists(self):
         """Test getting specific session."""
         manager = SessionManager()
-        config = {'test': 'value'}
+        config = {"test": "value"}
 
-        manager.create_session('test_id', config)
-        session_info = manager.get_session('test_id')
+        manager.create_session("test_id", config)
+        session_info = manager.get_session("test_id")
 
         assert session_info is not None
-        assert session_info['config'] == config
-        assert session_info['status'] == 'running'
+        assert session_info["config"] == config
+        assert session_info["status"] == "running"
 
     def test_get_session_nonexistent(self):
         """Test getting non-existent session returns empty dict."""
         manager = SessionManager()
-        session_info = manager.get_session('nonexistent')
+        session_info = manager.get_session("nonexistent")
 
         assert session_info == {}
 
@@ -98,16 +104,16 @@ class TestSessionManagerQueries:
         """Test list_sessions returns all sessions."""
         manager = SessionManager()
 
-        manager.create_session('session1', {'data': '1'})
-        manager.create_session('session2', {'data': '2'})
-        manager.close_session('session1')
+        manager.create_session("session1", {"data": "1"})
+        manager.create_session("session2", {"data": "2"})
+        manager.close_session("session1")
 
         all_sessions = manager.list_sessions()
 
-        assert 'session1' in all_sessions
-        assert 'session2' in all_sessions
-        assert all_sessions['session1']['status'] == 'closed'
-        assert all_sessions['session2']['status'] == 'running'
+        assert "session1" in all_sessions
+        assert "session2" in all_sessions
+        assert all_sessions["session1"]["status"] == "closed"
+        assert all_sessions["session2"]["status"] == "running"
 
 
 class TestSessionManagerMultiple:
@@ -119,14 +125,14 @@ class TestSessionManagerMultiple:
 
         # Create multiple sessions
         for i in range(5):
-            manager.create_session(f'session{i}', {'index': i})
+            manager.create_session(f"session{i}", {"index": i})
 
         active = manager.get_active_sessions()
         assert len(active) == 5
 
         # Close some
-        manager.close_session('session0')
-        manager.close_session('session2')
+        manager.close_session("session0")
+        manager.close_session("session2")
 
         active = manager.get_active_sessions()
         assert len(active) == 3
@@ -138,11 +144,11 @@ class TestSessionManagerMultiple:
         """Test that same ID overwrites previous session."""
         manager = SessionManager()
 
-        manager.create_session('test', {'version': 1})
-        manager.create_session('test', {'version': 2})
+        manager.create_session("test", {"version": 1})
+        manager.create_session("test", {"version": 2})
 
-        session_info = manager.get_session('test')
-        assert session_info['config']['version'] == 2
+        session_info = manager.get_session("test")
+        assert session_info["config"]["version"] == 2
 
 
 class TestGlobalSessionManager:
@@ -164,12 +170,12 @@ class TestGlobalSessionManager:
     def test_global_manager_persists_data(self):
         """Test global manager persists data across calls."""
         manager1 = get_global_session_manager()
-        manager1.create_session('persistent', {'data': 'value'})
+        manager1.create_session("persistent", {"data": "value"})
 
         manager2 = get_global_session_manager()
-        session_info = manager2.get_session('persistent')
+        session_info = manager2.get_session("persistent")
 
-        assert session_info['config']['data'] == 'value'
+        assert session_info["config"]["data"] == "value"
 
 
 class TestSessionManagerIntegration:
@@ -180,11 +186,8 @@ class TestSessionManagerIntegration:
         manager = SessionManager()
 
         # Start session
-        session_id = 'exp_001'
-        config = {
-            'experiment': 'test',
-            'seed': 42
-        }
+        session_id = "exp_001"
+        config = {"experiment": "test", "seed": 42}
         manager.create_session(session_id, config)
 
         # Verify running
@@ -201,23 +204,25 @@ class TestSessionManagerIntegration:
         # But still in all sessions
         all_sessions = manager.list_sessions()
         assert session_id in all_sessions
-        assert all_sessions[session_id]['status'] == 'closed'
+        assert all_sessions[session_id]["status"] == "closed"
 
     def test_session_timing(self):
         """Test session timing information."""
         import time
+
         manager = SessionManager()
 
-        manager.create_session('timing_test', {})
-        start_time = manager.active_sessions['timing_test']['start_time']
+        manager.create_session("timing_test", {})
+        start_time = manager.active_sessions["timing_test"]["start_time"]
 
         time.sleep(0.1)  # Small delay
 
-        manager.close_session('timing_test')
-        end_time = manager.active_sessions['timing_test']['end_time']
+        manager.close_session("timing_test")
+        end_time = manager.active_sessions["timing_test"]["end_time"]
 
         # End time should be after start time
         assert end_time > start_time
+
 
 if __name__ == "__main__":
     import os
@@ -236,26 +241,26 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """Session manager for tracking active experiment sessions."""
-# 
+#
 # from datetime import datetime
 # from typing import Any, Dict
-# 
-# 
+#
+#
 # class SessionManager:
 #     """Manages experiment sessions with tracking and lifecycle management."""
-# 
+#
 #     def __init__(self):
 #         self.active_sessions = {}
-# 
+#
 #     def create_session(self, session_id: str, config: Dict[str, Any]) -> None:
 #         """Register a new session.
-# 
+#
 #         Parameters
 #         ----------
 #         session_id : str
@@ -268,10 +273,10 @@ if __name__ == "__main__":
 #             "start_time": datetime.now(),
 #             "status": "running",
 #         }
-# 
+#
 #     def close_session(self, session_id: str) -> None:
 #         """Mark a session as closed.
-# 
+#
 #         Parameters
 #         ----------
 #         session_id : str
@@ -280,10 +285,10 @@ if __name__ == "__main__":
 #         if session_id in self.active_sessions:
 #             self.active_sessions[session_id]["status"] = "closed"
 #             self.active_sessions[session_id]["end_time"] = datetime.now()
-# 
+#
 #     def get_active_sessions(self) -> Dict[str, Any]:
 #         """Get all active sessions.
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
@@ -292,48 +297,48 @@ if __name__ == "__main__":
 #         return {
 #             k: v for k, v in self.active_sessions.items() if v["status"] == "running"
 #         }
-# 
+#
 #     def get_session(self, session_id: str) -> Dict[str, Any]:
 #         """Get specific session information.
-# 
+#
 #         Parameters
 #         ----------
 #         session_id : str
 #             Session ID to retrieve
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
 #             Session information dictionary
 #         """
 #         return self.active_sessions.get(session_id, {})
-# 
+#
 #     def list_sessions(self) -> Dict[str, Any]:
 #         """Get all sessions (active and closed).
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
 #             Dictionary of all session information
 #         """
 #         return self.active_sessions.copy()
-# 
-# 
+#
+#
 # # Global session manager
 # _session_manager = SessionManager()
-# 
-# 
+#
+#
 # def get_global_session_manager() -> SessionManager:
 #     """Get the global session manager instance.
-# 
+#
 #     Returns
 #     -------
 #     SessionManager
 #         Global session manager instance
 #     """
 #     return _session_manager
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -14,6 +14,10 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
+
 
 class TestCacheBasic:
     """Test basic cache functionality."""

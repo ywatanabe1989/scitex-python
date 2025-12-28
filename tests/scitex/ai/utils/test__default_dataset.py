@@ -8,7 +8,7 @@ transformations.
 
 import numpy as np
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 from torch.utils.data import DataLoader
 
 from scitex.ai.utils import DefaultDataset

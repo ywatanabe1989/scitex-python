@@ -6,7 +6,7 @@
 """Tests for scitex.ai.feature_extraction.vit module."""
 
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 import numpy as np
 import os
 from unittest.mock import patch, MagicMock, Mock

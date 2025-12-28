@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-07-24 14:25:00 (ywatanabe)"
 # File: tests/scitex/scholar/conftest.py
 # ----------------------------------------
@@ -11,8 +10,14 @@ Provides common mock configurations and helpers.
 """
 
 import pytest
+
+# Skip all scholar tests if aiohttp is not available
+pytest.importorskip("aiohttp")
+pytest.importorskip("playwright")
+
 from pathlib import Path
 from unittest.mock import Mock
+
 from scitex.scholar import ScholarConfig
 
 

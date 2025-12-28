@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-18 06:07:01 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/tests/scitex/decorators/test__numpy_fn.py
 # ----------------------------------------
@@ -13,9 +12,14 @@ from functools import wraps
 from unittest.mock import patch
 
 import numpy as np
-import pandas as pd
 import pytest
-import torch
+# Required for scitex.decorators module
+pytest.importorskip("tqdm")
+
+# Optional dependencies
+torch = pytest.importorskip("torch")
+pd = pytest.importorskip("pandas")
+
 from scitex.decorators import numpy_fn
 
 
@@ -116,6 +120,7 @@ def test_numpy_fn_nested_decorator(test_data):
         assert isinstance(result, list)
         assert result == test_data["list"]
 
+
 if __name__ == "__main__":
     import os
 
@@ -132,22 +137,22 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_numpy_fn.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/decorators/_numpy_fn.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # import numpy as np
-# 
+#
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_numpy_fn.py"
-# 
+#
 # from functools import wraps
 # from typing import Any as _Any
 # from typing import Callable
-# 
+#
 # from ._converters import _return_always, is_nested_decorator, to_numpy
-# 
-# 
+#
+#
 # def numpy_fn(func: Callable) -> Callable:
 #     @wraps(func)
 #     def wrapper(*args: _Any, **kwargs: _Any) -> _Any:
@@ -155,17 +160,17 @@ if __name__ == "__main__":
 #         if is_nested_decorator():
 #             results = func(*args, **kwargs)
 #             return results
-# 
+#
 #         # Set the current decorator context
 #         wrapper._current_decorator = "numpy_fn"
-# 
+#
 #         # Store original object for type preservation
 #         original_object = args[0] if args else None
-# 
+#
 #         converted_args, converted_kwargs = to_numpy(
 #             *args, return_fn=_return_always, **kwargs
 #         )
-# 
+#
 #         # Skip strict assertion for certain types that may not convert to arrays
 #         # Instead, convert what we can and pass through what we can't
 #         validated_args = []
@@ -187,9 +192,9 @@ if __name__ == "__main__":
 #                 except:
 #                     # If all else fails, pass through unchanged
 #                     validated_args.append(arg)
-# 
+#
 #         results = func(*validated_args, **converted_kwargs)
-# 
+#
 #         # Convert results back to original input types
 #         if isinstance(results, np.ndarray):
 #             if original_object is not None:
@@ -200,32 +205,32 @@ if __name__ == "__main__":
 #                     and original_object.__class__.__name__ == "Tensor"
 #                 ):
 #                     import torch
-# 
+#
 #                     return torch.tensor(results)
 #                 elif (
 #                     hasattr(original_object, "__class__")
 #                     and original_object.__class__.__name__ == "DataFrame"
 #                 ):
 #                     import pandas as pd
-# 
+#
 #                     return pd.DataFrame(results)
 #                 elif (
 #                     hasattr(original_object, "__class__")
 #                     and original_object.__class__.__name__ == "Series"
 #                 ):
 #                     import pandas as pd
-# 
+#
 #                     return pd.Series(results)
 #             return results
-# 
+#
 #         return results
-# 
+#
 #     # Mark as a wrapper for detection
 #     wrapper._is_wrapper = True
 #     wrapper._decorator_type = "numpy_fn"
 #     return wrapper
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

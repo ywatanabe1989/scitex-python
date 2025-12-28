@@ -10,6 +10,9 @@ including multi-band frequency manipulation, gradient flow, and edge cases.
 """
 
 import pytest
+
+# Required for this module
+pytest.importorskip("torch")
 import torch
 import torch.nn as nn
 import numpy as np

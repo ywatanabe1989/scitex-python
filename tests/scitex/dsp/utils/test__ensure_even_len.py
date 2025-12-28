@@ -7,8 +7,8 @@
 
 import os
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
-import torch
 
 
 def test_ensure_even_len_already_even():

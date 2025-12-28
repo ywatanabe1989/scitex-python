@@ -11,6 +11,8 @@ not yet implemented, issues warnings, and prevents execution.
 """
 
 import pytest
+# Required for scitex.decorators module
+pytest.importorskip("tqdm")
 import warnings
 import functools
 from unittest.mock import patch, Mock

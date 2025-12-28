@@ -11,6 +11,7 @@ Tests the plot type detection system, ensuring matplotlib's internal method call
 
 import os
 import pytest
+pytest.importorskip("zarr")
 import numpy as np
 
 __FILE__ = "./tests/scitex/plt/utils/test__collect_figure_metadata.py"

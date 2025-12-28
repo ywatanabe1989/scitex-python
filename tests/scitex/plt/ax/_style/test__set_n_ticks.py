@@ -16,6 +16,7 @@ import numpy as np
 matplotlib.use("Agg")
 
 import pytest
+pytest.importorskip("zarr")
 from scitex.plt.ax._style import set_n_ticks
 
 
