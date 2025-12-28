@@ -6,6 +6,9 @@
 """Comprehensive test suite for Modulation Index computation neural network layer."""
 
 import pytest
+
+# Required for this module
+pytest.importorskip("torch")
 import torch
 import torch.nn as nn
 import numpy as np

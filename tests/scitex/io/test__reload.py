@@ -12,6 +12,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
+
 
 class TestReloadModule:
     """Test module reloading functionality."""

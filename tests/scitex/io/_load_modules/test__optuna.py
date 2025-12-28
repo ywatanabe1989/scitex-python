@@ -8,6 +8,10 @@
 import os
 import tempfile
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 import yaml
 from unittest.mock import patch, MagicMock
 

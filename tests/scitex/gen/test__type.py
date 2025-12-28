@@ -13,9 +13,9 @@ This module tests:
 """
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
 import pandas as pd
-import torch
 import xarray as xr
 from typing import get_args
 

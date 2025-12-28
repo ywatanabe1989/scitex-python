@@ -4,6 +4,10 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/.claude-worktree/scitex_repo/tests/scitex/io/test__load_configs.py
 
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 import os
 import tempfile
 import yaml

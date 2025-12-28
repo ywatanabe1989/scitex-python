@@ -10,9 +10,10 @@ cdist wrapper, and the edist alias, with various array shapes and edge cases.
 """
 
 import pytest
+scipy = pytest.importorskip("scipy")
+torch = pytest.importorskip("torch")
 import os
 import numpy as np
-import torch
 from typing import Union, Tuple, List
 import scipy.spatial.distance as scipy_distance
 from numpy.testing import assert_array_almost_equal, assert_array_equal

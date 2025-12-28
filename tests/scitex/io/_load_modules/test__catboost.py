@@ -20,6 +20,10 @@ import os
 import sys
 import tempfile
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 from unittest.mock import Mock, patch, MagicMock
 import numpy as np
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-13 22:30:12 (ywatanabe)"
 # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/tests/scitex/io/test__save.py
 # ----------------------------------------
@@ -10,16 +9,22 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import os
-import tempfile
 import shutil
+import tempfile
+
 import pytest
-import numpy as np
-import pandas as pd
-import torch
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
+torch = pytest.importorskip("torch")
 import json
 import pickle
 import sys
 from pathlib import Path
+
+import numpy as np
+import pandas as pd
 
 # Optional imports for specific formats
 try:
@@ -106,30 +111,31 @@ def test_save_csv_deduplication():
 def test_save_matplotlib_figure():
     """Test saving matplotlib figures in various formats."""
     import matplotlib.pyplot as plt
+
     from scitex.io import save
-    
+
     # Create a simple figure
     fig, ax = plt.subplots()
     ax.plot([1, 2, 3], [1, 4, 9])
     ax.set_title("Test Plot")
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Test PNG save
         png_path = os.path.join(tmpdir, "figure.png")
         save(fig, png_path, verbose=False)
         assert os.path.exists(png_path)
         assert os.path.getsize(png_path) > 0
-        
+
         # Test PDF save
         pdf_path = os.path.join(tmpdir, "figure.pdf")
         save(fig, pdf_path, verbose=False)
         assert os.path.exists(pdf_path)
-        
+
         # Test SVG save
         svg_path = os.path.join(tmpdir, "figure.svg")
         save(fig, svg_path, verbose=False)
         assert os.path.exists(svg_path)
-    
+
     plt.close(fig)
 
 
@@ -137,11 +143,12 @@ def test_save_plotly_figure():
     """Test saving plotly figures."""
     try:
         import plotly.graph_objects as go
+
         from scitex.io import save
-        
+
         # Create a simple plotly figure
         fig = go.Figure(data=go.Scatter(x=[1, 2, 3], y=[1, 4, 9]))
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             # Test HTML save
             html_path = os.path.join(tmpdir, "plotly_fig.html")
@@ -156,17 +163,17 @@ def test_save_hdf5():
     """Test saving HDF5 files."""
     if h5py is None:
         pytest.skip("h5py not installed")
-        
+
     from scitex.io import save
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Test saving numpy array to HDF5
         data = np.random.rand(10, 20, 30)
         hdf5_path = os.path.join(tmpdir, "data.h5")
         save(data, hdf5_path, verbose=False)
-        
+
         assert os.path.exists(hdf5_path)
-        
+
         # Verify content
         with h5py.File(hdf5_path, 'r') as f:
             assert 'data' in f
@@ -178,9 +185,9 @@ def test_save_matlab():
     """Test saving MATLAB .mat files."""
     if scipy is None:
         pytest.skip("scipy not installed")
-        
+
     from scitex.io import save
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Test saving dict to .mat
         data = {
@@ -190,9 +197,9 @@ def test_save_matlab():
         }
         mat_path = os.path.join(tmpdir, "data.mat")
         save(data, mat_path, verbose=False)
-        
+
         assert os.path.exists(mat_path)
-        
+
         # Verify content
         loaded = scipy.io.loadmat(mat_path)
         np.testing.assert_array_equal(loaded['array'].flatten(), data['array'])
@@ -203,23 +210,23 @@ def test_save_matlab():
 def test_save_compressed_pickle():
     """Test saving compressed pickle files."""
     from scitex.io import save
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Large data that benefits from compression
         data = {
             'large_array': np.random.rand(1000, 1000),
             'metadata': {'compression': True}
         }
-        
+
         # Test .pkl.gz
         gz_path = os.path.join(tmpdir, "data.pkl.gz")
         save(data, gz_path, verbose=False)
         assert os.path.exists(gz_path)
-        
+
         # Verify it's compressed (should be smaller than uncompressed)
         pkl_path = os.path.join(tmpdir, "data_uncompressed.pkl")
         save(data, pkl_path, verbose=False)
-        
+
         assert os.path.getsize(gz_path) < os.path.getsize(pkl_path)
 
 
@@ -227,21 +234,21 @@ def test_save_joblib():
     """Test saving with joblib format."""
     if joblib is None:
         pytest.skip("joblib not installed")
-        
+
     from scitex.io import save
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create complex object
         data = {
             'model': {'weights': np.random.rand(100, 100)},
             'config': {'learning_rate': 0.001}
         }
-        
+
         joblib_path = os.path.join(tmpdir, "model.joblib")
         save(data, joblib_path, verbose=False)
-        
+
         assert os.path.exists(joblib_path)
-        
+
         # Verify content
         loaded = joblib.load(joblib_path)
         np.testing.assert_array_equal(loaded['model']['weights'], data['model']['weights'])
@@ -251,18 +258,19 @@ def test_save_joblib():
 def test_save_pil_image():
     """Test saving PIL images."""
     from PIL import Image
+
     from scitex.io import save
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create a simple PIL image
         img = Image.new('RGB', (100, 100), color='red')
-        
+
         # Test various image formats
         for ext in ['.png', '.jpg', '.tiff']:
             img_path = os.path.join(tmpdir, f"image{ext}")
             save(img, img_path, verbose=False)
             assert os.path.exists(img_path)
-            
+
             # Verify it can be loaded
             loaded_img = Image.open(img_path)
             assert loaded_img.size == (100, 100)
@@ -271,29 +279,30 @@ def test_save_pil_image():
 
 def test_save_with_datetime_path():
     """Test saving with datetime in path."""
-    from scitex.io import save
     from datetime import datetime
-    
+
+    from scitex.io import save
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create path with datetime placeholder
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         data = {"test": "data"}
-        
+
         # Path with datetime
         save_path = os.path.join(tmpdir, f"data_{timestamp}.json")
         save(data, save_path, verbose=False)
-        
+
         assert os.path.exists(save_path)
 
 
 def test_save_verbose_output(capsys):
     """Test verbose output during save."""
     from scitex.io import save
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         data = np.array([1, 2, 3])
         save_path = os.path.join(tmpdir, "data.npy")
-        
+
         # Save with verbose=True
         save(data, save_path, verbose=True)
 
@@ -302,13 +311,13 @@ def test_save_hdf5_with_key_and_override(capsys):
     """Test HDF5 save functionality with key and override parameters."""
     if h5py is None:
         pytest.skip("h5py not installed")
-        
-    from scitex.io import save, has_h5_key
+
+    from scitex.io import has_h5_key, save
     from scitex.io._H5Explorer import H5Explorer
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         h5_path = os.path.join(tmpdir, "test_data.h5")
-        
+
         # Test data
         test_data = {
             'array1': np.random.rand(10, 10),
@@ -317,59 +326,59 @@ def test_save_hdf5_with_key_and_override(capsys):
             'string': 'test_string',
             'metadata': {'test_id': 1, 'description': 'Test HDF5'}
         }
-        
+
         # Test 1: Save with key parameter
         save(test_data, h5_path, key='group1/subgroup/data', verbose=False)
         assert os.path.exists(h5_path)
-        
+
         # Verify structure using H5Explorer
         with H5Explorer(h5_path) as explorer:
             # Check that nested groups were created
             assert 'group1' in explorer.keys('/')
             assert 'subgroup' in explorer.keys('/group1')
             assert 'data' in explorer.keys('/group1/subgroup')
-            
+
             # Load and verify data
             loaded_data = explorer.load('/group1/subgroup/data')
             np.testing.assert_array_equal(loaded_data['array1'], test_data['array1'])
             assert loaded_data['scalar'] == test_data['scalar']
             assert loaded_data['string'] == test_data['string']
-        
+
         # Test 2: has_h5_key function
         assert has_h5_key(h5_path, 'group1/subgroup/data')
         assert not has_h5_key(h5_path, 'nonexistent/key')
-        
+
         # Test 3: Save again without override (should skip)
         # Modify data to check if it's overwritten
         test_data['array1'] = np.ones((5, 5))
         save(test_data, h5_path, key='group1/subgroup/data', override=False, verbose=False)
-        
+
         # Verify data was NOT overwritten
         with H5Explorer(h5_path) as explorer:
             loaded_data = explorer.load('/group1/subgroup/data')
             assert loaded_data['array1'].shape == (10, 10)  # Original shape
             assert not np.array_equal(loaded_data['array1'], np.ones((5, 5)))
-        
+
         # Test 4: Save with override=True
         save(test_data, h5_path, key='group1/subgroup/data', override=True, verbose=False)
-        
+
         # Verify data WAS overwritten
         with H5Explorer(h5_path) as explorer:
             loaded_data = explorer.load('/group1/subgroup/data')
             assert loaded_data['array1'].shape == (5, 5)  # New shape
             np.testing.assert_array_equal(loaded_data['array1'], np.ones((5, 5)))
-        
+
         # Test 5: Save to root (no key)
         root_data = {'root_array': np.random.rand(3, 3)}
         h5_path2 = os.path.join(tmpdir, "test_root.h5")
         save(root_data, h5_path2, verbose=False)
-        
+
         with H5Explorer(h5_path2) as explorer:
             # Data should be at root level
             assert 'root_array' in explorer.keys('/')
             loaded = explorer.load('/root_array')
             np.testing.assert_array_equal(loaded, root_data['root_array'])
-        
+
         # Test 6: Complex nested structure (like PAC data)
         pac_data = {
             'pac_values': np.random.rand(64, 10, 10),
@@ -380,17 +389,17 @@ def test_save_hdf5_with_key_and_override(capsys):
                 'duration_sec': 60.0
             }
         }
-        
+
         pac_key = 'patient_023/seizure_001/pac_analysis'
         save(pac_data, h5_path, key=pac_key, verbose=False)
-        
+
         # Verify complex structure
         assert has_h5_key(h5_path, pac_key)
         with H5Explorer(h5_path) as explorer:
             loaded_pac = explorer.load(f'/{pac_key}')
             np.testing.assert_array_equal(loaded_pac['pac_values'], pac_data['pac_values'])
             assert loaded_pac['metadata']['seizure_id'] == 'S001'
-        
+
         # Check output (commented out since all saves are with verbose=False)
         # captured = capsys.readouterr()
         # assert "Saved to:" in captured.out
@@ -401,45 +410,46 @@ def test_save_hdf5_with_key_and_override(capsys):
 def test_save_figure_with_csv_export():
     """Test saving figure with CSV data export."""
     import matplotlib.pyplot as plt
+
     from scitex.io import save
-    
+
     # Create figure with data
     fig, ax = plt.subplots()
     x = [1, 2, 3, 4, 5]
     y = [2, 4, 6, 8, 10]
     ax.plot(x, y, label="Test Line")
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         fig_path = os.path.join(tmpdir, "figure.png")
-        
+
         # Save figure (CSV export depends on wrapped axes)
         save(fig, fig_path, verbose=False)
         assert os.path.exists(fig_path)
-    
+
     plt.close(fig)
 
 
 def test_save_error_handling(caplog):
     """Test error handling in save function."""
-    from scitex.io import save
     from scitex import logging
-    
+    from scitex.io import save
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Test with None object - should log error
         save(None, os.path.join(tmpdir, "none.txt"), verbose=False)
         assert "Error occurred while saving" in caplog.text
-        
+
         # Test with unsupported extension - should show warning
         data = {"test": "data"}
         save(data, os.path.join(tmpdir, "no_extension"), verbose=False)
         # Check that file wasn't created since format is unsupported
         assert not os.path.exists(os.path.join(tmpdir, "no_extension"))
-        
+
         # Test with read-only directory - should log error
         ro_dir = os.path.join(tmpdir, "readonly")
         os.makedirs(ro_dir)
         os.chmod(ro_dir, 0o444)
-        
+
         try:
             save(data, os.path.join(ro_dir, "data.json"), verbose=False)
             # Should not create file due to permission error
@@ -453,21 +463,22 @@ def test_save_catboost_model():
     """Test saving CatBoost models."""
     try:
         from catboost import CatBoostClassifier
+
         from scitex.io import save
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create simple model
             model = CatBoostClassifier(iterations=10, verbose=False)
-            
+
             # Mock training data
             X = np.random.rand(100, 5)
             y = np.random.randint(0, 2, 100)
             model.fit(X, y, verbose=False)
-            
+
             # Save model
             cbm_path = os.path.join(tmpdir, "model.cbm")
             save(model, cbm_path, verbose=False)
-            
+
             assert os.path.exists(cbm_path)
     except ImportError:
         pytest.skip("CatBoost not installed")
@@ -476,12 +487,12 @@ def test_save_catboost_model():
 def test_save_with_makedirs_false(caplog):
     """Test save behavior when makedirs=False."""
     from scitex.io import save
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Try to save to non-existent directory with makedirs=False
         data = {"test": "data"}
         save_path = os.path.join(tmpdir, "nonexistent", "data.json")
-        
+
         # Should not create the file since directory doesn't exist
         save(data, save_path, verbose=False, makedirs=False)
         assert not os.path.exists(save_path)
@@ -554,7 +565,7 @@ class TestSave:
 
         # Assert
         assert os.path.exists(save_path)
-        with open(save_path, "r") as f:
+        with open(save_path) as f:
             loaded = json.load(f)
         assert loaded == data
 
@@ -604,7 +615,7 @@ class TestSave:
 
         # Assert
         assert os.path.exists(save_path)
-        with open(save_path, "r") as f:
+        with open(save_path) as f:
             loaded = f.read()
         assert loaded == text
 
@@ -658,7 +669,7 @@ class TestSave:
     def test_save_unsupported_format(self, temp_dir):
         """Test saving with unsupported format shows warning."""
         import warnings
-        
+
         # Arrange
         data = {"test": "data"}
         save_path = os.path.join(temp_dir, "data.unknown")
@@ -667,7 +678,7 @@ class TestSave:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             scitex.io.save(data, save_path, verbose=False)
-            
+
             # Assert - warning should be shown and file not created
             assert len(w) == 1
             assert "Unsupported file format" in str(w[0].message)
@@ -694,12 +705,12 @@ class TestSave:
         df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
         scitex.io.save(df, os.path.join(temp_dir, "dataframe.csv"), verbose=False)
         assert os.path.exists(os.path.join(temp_dir, "dataframe.csv"))
-        
+
         # Test numpy array
         arr = np.array([[1, 2], [3, 4]])
         scitex.io.save(arr, os.path.join(temp_dir, "array.csv"), verbose=False)
         assert os.path.exists(os.path.join(temp_dir, "array.csv"))
-        
+
         # Test Series
         series = pd.Series([1, 2, 3], name="values")
         scitex.io.save(series, os.path.join(temp_dir, "series.csv"), verbose=False)
@@ -718,19 +729,19 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-19
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save.py
-# 
+#
 # """
 # Save utilities for various data types to different file formats.
-# 
+#
 # Supported formats include CSV, NPY, PKL, JOBLIB, PNG, HTML, TIFF, MP4, YAML,
 # JSON, HDF5, PTH, MAT, CBM, and FTS bundles (.zip or directory).
 # """
-# 
+#
 # import inspect
 # import os as _os
 # from pathlib import Path
 # from typing import Any, Union
-# 
+#
 # from scitex import logging
 # from scitex.path._clean import clean
 # from scitex.path._getsize import getsize
@@ -738,7 +749,7 @@ if __name__ == "__main__":
 # from scitex.str._clean_path import clean_path
 # from scitex.str._color_text import color_text
 # from scitex.str._readable_bytes import readable_bytes
-# 
+#
 # # Import save functions from the modular structure
 # from ._save_modules import (
 #     get_figure_with_data,
@@ -767,9 +778,9 @@ if __name__ == "__main__":
 #     symlink,
 #     symlink_to,
 # )
-# 
+#
 # logger = logging.getLogger()
-# 
+#
 # # Re-export for backward compatibility
 # _get_figure_with_data = get_figure_with_data
 # _symlink = symlink
@@ -777,8 +788,8 @@ if __name__ == "__main__":
 # _save_stx_bundle = save_stx_bundle
 # _save_pltz_bundle = save_pltz_bundle
 # _handle_image_with_csv = handle_image_with_csv
-# 
-# 
+#
+#
 # def save(
 #     obj: Any,
 #     specified_path: Union[str, Path],
@@ -797,7 +808,7 @@ if __name__ == "__main__":
 # ) -> None:
 #     """
 #     Save an object to a file with the specified format.
-# 
+#
 #     Parameters
 #     ----------
 #     obj : Any
@@ -830,28 +841,28 @@ if __name__ == "__main__":
 #     try:
 #         if isinstance(specified_path, Path):
 #             specified_path = str(specified_path)
-# 
+#
 #         # Handle f-string expressions
 #         specified_path = _parse_fstring_path(specified_path)
-# 
+#
 #         # Determine save path
 #         spath = _determine_save_path(specified_path, use_caller_path)
 #         spath_final = clean(spath)
-# 
+#
 #         # Prepare symlink path from cwd
 #         spath_cwd = _os.getcwd() + "/" + specified_path
 #         spath_cwd = clean(spath_cwd)
-# 
+#
 #         # Remove existing files (skip for CSV/HDF5 with key)
 #         _cleanup_existing_files(spath_final, spath_cwd, kwargs)
-# 
+#
 #         if dry_run:
 #             _handle_dry_run(spath, verbose)
 #             return
-# 
+#
 #         if makedirs:
 #             _os.makedirs(_os.path.dirname(spath_final), exist_ok=True)
-# 
+#
 #         # Main save
 #         _save(
 #             obj,
@@ -867,26 +878,26 @@ if __name__ == "__main__":
 #             json_schema=json_schema,
 #             **kwargs,
 #         )
-# 
+#
 #         # Symbolic links
 #         _symlink(spath, spath_cwd, symlink_from_cwd, verbose)
 #         _symlink_to(spath_final, symlink_to, verbose)
 #         return Path(spath)
-# 
+#
 #     except AssertionError:
 #         raise
 #     except Exception as e:
 #         logger.error(f"Error occurred while saving: {str(e)}")
 #         return False
-# 
-# 
+#
+#
 # def _parse_fstring_path(specified_path):
 #     """Parse f-string expressions in path."""
 #     if not (specified_path.startswith('f"') or specified_path.startswith("f'")):
 #         return specified_path
-# 
+#
 #     import re
-# 
+#
 #     path_content = specified_path[2:-1]
 #     frame = inspect.currentframe().f_back.f_back
 #     try:
@@ -903,18 +914,18 @@ if __name__ == "__main__":
 #         return path_content.format(**format_dict)
 #     finally:
 #         del frame
-# 
-# 
+#
+#
 # def _determine_save_path(specified_path, use_caller_path):
 #     """Determine the full save path based on environment."""
 #     if specified_path.startswith("/"):
 #         return specified_path
-# 
+#
 #     from scitex.gen._detect_environment import detect_environment
 #     from scitex.gen._get_notebook_path import get_notebook_info_simple
-# 
+#
 #     env_type = detect_environment()
-# 
+#
 #     if env_type == "jupyter":
 #         notebook_name, notebook_dir = get_notebook_info_simple()
 #         if notebook_name:
@@ -923,7 +934,7 @@ if __name__ == "__main__":
 #         else:
 #             sdir = _os.path.join(_os.getcwd(), "notebook_out")
 #         return _os.path.join(sdir, specified_path)
-# 
+#
 #     elif env_type == "script":
 #         if use_caller_path:
 #             script_path = _find_caller_script_path()
@@ -931,7 +942,7 @@ if __name__ == "__main__":
 #             script_path = inspect.stack()[2].filename
 #         sdir = clean_path(_os.path.splitext(script_path)[0] + "_out")
 #         return _os.path.join(sdir, specified_path)
-# 
+#
 #     else:
 #         script_path = inspect.stack()[2].filename
 #         if (
@@ -943,8 +954,8 @@ if __name__ == "__main__":
 #         else:
 #             sdir = _os.path.join(_os.getcwd(), "output")
 #         return _os.path.join(sdir, specified_path)
-# 
-# 
+#
+#
 # def _find_caller_script_path():
 #     """Find the first non-scitex frame in the call stack."""
 #     scitex_src_path = _os.path.abspath(
@@ -955,8 +966,8 @@ if __name__ == "__main__":
 #         if not frame_path.startswith(scitex_src_path):
 #             return frame_path
 #     return inspect.stack()[2].filename
-# 
-# 
+#
+#
 # def _cleanup_existing_files(spath_final, spath_cwd, kwargs):
 #     """Remove existing files to prevent circular links."""
 #     should_skip = spath_final.endswith(".csv") or (
@@ -966,8 +977,8 @@ if __name__ == "__main__":
 #     if not should_skip:
 #         for path in [spath_final, spath_cwd]:
 #             sh(["rm", "-f", f"{path}"], verbose=False)
-# 
-# 
+#
+#
 # def _handle_dry_run(spath, verbose):
 #     """Handle dry run mode."""
 #     if verbose:
@@ -976,8 +987,8 @@ if __name__ == "__main__":
 #         except ValueError:
 #             rel_path = spath
 #         logger.success(color_text(f"(dry run) Saved to: ./{rel_path}", c="yellow"))
-# 
-# 
+#
+#
 # def _save(
 #     obj,
 #     spath,
@@ -994,7 +1005,7 @@ if __name__ == "__main__":
 # ):
 #     """Core dispatcher for saving objects to various formats."""
 #     ext = _os.path.splitext(spath)[1].lower()
-# 
+#
 #     # Check if this is a matplotlib figure being saved to FTS bundle format
 #     # FTS bundles use .zip (archive) or no extension (directory)
 #     if _is_matplotlib_figure(obj):
@@ -1008,7 +1019,7 @@ if __name__ == "__main__":
 #                 obj, spath, as_zip, verbose, symlink_from_cwd, symlink_to, **kwargs
 #             )
 #             return
-# 
+#
 #     # Dispatch to format handlers
 #     if ext in _FILE_HANDLERS:
 #         _dispatch_handler(
@@ -1033,7 +1044,7 @@ if __name__ == "__main__":
 #     else:
 #         logger.warning(f"Unsupported file format. {spath} was not saved.")
 #         return
-# 
+#
 #     if verbose and _os.path.exists(spath):
 #         file_size = readable_bytes(getsize(spath))
 #         try:
@@ -1041,59 +1052,59 @@ if __name__ == "__main__":
 #         except ValueError:
 #             rel_path = spath
 #         logger.success(f"Saved to: ./{rel_path} ({file_size})")
-# 
-# 
+#
+#
 # def _is_matplotlib_figure(obj):
 #     """Check if object is a matplotlib figure or a wrapped figure.
-# 
+#
 #     Handles both raw matplotlib.figure.Figure and SciTeX FigWrapper objects.
 #     """
 #     try:
 #         import matplotlib.figure
-# 
+#
 #         # Direct matplotlib figure
 #         if isinstance(obj, matplotlib.figure.Figure):
 #             return True
-# 
+#
 #         # Wrapped figure (e.g., FigWrapper from scitex.plt)
 #         if hasattr(obj, "figure") and isinstance(
 #             obj.figure, matplotlib.figure.Figure
 #         ):
 #             return True
-# 
+#
 #         return False
 #     except ImportError:
 #         return False
-# 
-# 
+#
+#
 # def _save_fts_bundle(
 #     obj, spath, as_zip, verbose, symlink_from_cwd, symlink_to_path, **kwargs
 # ):
 #     """Save matplotlib figure as FTS bundle (.zip or directory).
-# 
+#
 #     Delegates to scitex.fts.from_matplotlib as the single source of truth
 #     for bundle structure (canonical/artifacts/payload/children).
 #     """
 #     from scitex.fts import from_matplotlib
-# 
+#
 #     from ._save_modules._figure_utils import get_figure_with_data
-# 
+#
 #     # Get the actual matplotlib figure
 #     import matplotlib.figure
-# 
+#
 #     if isinstance(obj, matplotlib.figure.Figure):
 #         fig = obj
 #     elif hasattr(obj, "figure") and isinstance(obj.figure, matplotlib.figure.Figure):
 #         fig = obj.figure
 #     else:
 #         raise TypeError(f"Expected matplotlib figure, got {type(obj)}")
-# 
+#
 #     # Extract optional parameters
 #     # Support both "csv_df" and "data" parameter names for user convenience
 #     csv_df = kwargs.get("csv_df") or kwargs.get("data")
 #     dpi = kwargs.get("dpi", 300)
 #     name = kwargs.get("name") or Path(spath).stem
-# 
+#
 #     # Extract CSV data from scitex.plt tracking if available
 #     scitex_source = get_figure_with_data(obj)
 #     if csv_df is None and scitex_source is not None:
@@ -1102,11 +1113,11 @@ if __name__ == "__main__":
 #                 csv_df = scitex_source.export_as_csv()
 #             except Exception:
 #                 pass
-# 
+#
 #     # Delegate to FTS (single source of truth)
 #     # Encoding is built from CSV columns directly for consistency
 #     from_matplotlib(fig, spath, name=name, csv_df=csv_df, dpi=dpi)
-# 
+#
 #     bundle_path = spath
 #     if verbose and _os.path.exists(bundle_path):
 #         file_size = readable_bytes(getsize(bundle_path))
@@ -1115,16 +1126,16 @@ if __name__ == "__main__":
 #         except ValueError:
 #             rel_path = bundle_path
 #         logger.success(f"Saved to: ./{rel_path} ({file_size})")
-# 
+#
 #     if symlink_from_cwd and _os.path.exists(bundle_path):
 #         bundle_basename = _os.path.basename(bundle_path)
 #         bundle_cwd = _os.path.join(_os.getcwd(), bundle_basename)
 #         _symlink(bundle_path, bundle_cwd, symlink_from_cwd, verbose)
-# 
+#
 #     if symlink_to_path and _os.path.exists(bundle_path):
 #         _symlink_to(bundle_path, symlink_to_path, verbose)
-# 
-# 
+#
+#
 # def _dispatch_handler(
 #     ext,
 #     obj,
@@ -1161,8 +1172,8 @@ if __name__ == "__main__":
 #         _FILE_HANDLERS[ext](obj, spath, **kwargs)
 #     else:
 #         _FILE_HANDLERS[ext](obj, spath, **kwargs)
-# 
-# 
+#
+#
 # # Dispatch dictionary for O(1) file format lookup
 # _FILE_HANDLERS = {
 #     ".xlsx": save_excel,
@@ -1201,7 +1212,7 @@ if __name__ == "__main__":
 #     ".svg": handle_image_with_csv,
 #     ".pdf": handle_image_with_csv,
 # }
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

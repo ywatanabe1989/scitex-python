@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 
 from scitex.gen import to_rank
 

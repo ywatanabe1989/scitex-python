@@ -16,7 +16,7 @@ This conftest provides comprehensive fixtures for testing PyTorch utilities:
 """
 
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 import numpy as np
 from typing import Dict, List, Tuple, Optional, Union, Callable
 import time

@@ -6,6 +6,10 @@ import tempfile
 
 import pytest
 
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
+
 from scitex.io._metadata_modules.read_metadata_svg import read_metadata_svg
 
 

@@ -12,9 +12,9 @@ Testing ripple detection algorithm which:
 """
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
 import pandas as pd
-import torch
 from unittest.mock import patch, MagicMock
 
 # Import the function to test

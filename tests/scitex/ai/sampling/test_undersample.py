@@ -6,8 +6,8 @@
 """Tests for scitex.ai.sampling.undersample module."""
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
-import torch
 import pandas as pd
 from unittest.mock import patch, MagicMock
 from typing import Tuple
