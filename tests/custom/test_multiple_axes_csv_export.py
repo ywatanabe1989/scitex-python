@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import pytest
+pytest.importorskip("zarr")
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-05-18 20:30:00"
 # File: test_multiple_axes_csv_export.py

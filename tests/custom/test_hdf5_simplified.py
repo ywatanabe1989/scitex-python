@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import pytest
+pytest.importorskip("zarr")
 # -*- coding: utf-8 -*-
 # Timestamp: "2025-07-01 21:18:00 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/tests/custom/test_hdf5_simplified.py
