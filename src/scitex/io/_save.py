@@ -340,9 +340,7 @@ def _is_matplotlib_figure(obj):
             return True
 
         # Wrapped figure (e.g., FigWrapper from scitex.plt)
-        if hasattr(obj, "figure") and isinstance(
-            obj.figure, matplotlib.figure.Figure
-        ):
+        if hasattr(obj, "figure") and isinstance(obj.figure, matplotlib.figure.Figure):
             return True
 
         return False
@@ -357,18 +355,23 @@ def _save_fts_bundle(
 
     Delegates to scitex.fts.from_matplotlib as the single source of truth
     for bundle structure (canonical/artifacts/payload/children).
+
+    When figrecipe is available and enabled on the figure, also saves
+    recipe.yaml for reproducibility.
     """
+    # Get the actual matplotlib figure
+    import matplotlib.figure
+
     from scitex.fts import from_matplotlib
 
     from ._save_modules._figure_utils import get_figure_with_data
 
-    # Get the actual matplotlib figure
-    import matplotlib.figure
-
     if isinstance(obj, matplotlib.figure.Figure):
         fig = obj
+        fig_wrapper = None
     elif hasattr(obj, "figure") and isinstance(obj.figure, matplotlib.figure.Figure):
         fig = obj.figure
+        fig_wrapper = obj  # Keep wrapper for figrecipe access
     else:
         raise TypeError(f"Expected matplotlib figure, got {type(obj)}")
 
@@ -390,6 +393,16 @@ def _save_fts_bundle(
     # Delegate to FTS (single source of truth)
     # Encoding is built from CSV columns directly for consistency
     from_matplotlib(fig, spath, name=name, csv_df=csv_df, dpi=dpi)
+
+    # Save figrecipe recipe.yaml if available
+    try:
+        from scitex.bridge._figrecipe import _save_recipe_to_path
+
+        bundle_path = Path(spath)
+        if bundle_path.suffix != ".zip":  # Skip zip for now
+            _save_recipe_to_path(fig_wrapper or obj, bundle_path / "recipe.yaml")
+    except (ImportError, Exception):
+        pass  # figrecipe is optional
 
     bundle_path = spath
     if verbose and _os.path.exists(bundle_path):
