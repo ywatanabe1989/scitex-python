@@ -5,7 +5,7 @@
 
 import numpy as np
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 
 from scitex.stats.descriptive._real import (
     kurtosis,

@@ -6,8 +6,8 @@
 """Tests for scitex.ai.utils._verify_n_gpus module."""
 
 import pytest
+torch = pytest.importorskip("torch")
 import warnings
-import torch
 from unittest.mock import patch, MagicMock
 from scitex.ai.utils import verify_n_gpus
 

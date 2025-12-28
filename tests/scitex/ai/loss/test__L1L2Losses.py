@@ -6,7 +6,7 @@
 """Tests for L1/L2 regularization loss functions."""
 
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 import torch.nn as nn
 import numpy as np
 from scitex.ai.loss import l1, l2, elastic

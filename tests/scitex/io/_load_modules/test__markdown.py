@@ -12,6 +12,10 @@ and load_markdown functions with support for HTML and plain text conversion.
 import os
 import tempfile
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 from unittest.mock import patch, Mock, mock_open
 
 

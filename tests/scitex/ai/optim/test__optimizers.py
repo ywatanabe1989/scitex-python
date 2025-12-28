@@ -6,7 +6,7 @@ PyTorch optimizers including Adam, RMSprop, SGD, and the Ranger optimizer.
 """
 
 import pytest
-import torch
+torch = pytest.importorskip("torch")
 import torch.nn as nn
 from unittest.mock import patch, MagicMock
 

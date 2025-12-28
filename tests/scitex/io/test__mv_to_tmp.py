@@ -12,6 +12,10 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
+
 
 class TestMvToTmpBasic:
     """Test basic move to tmp functionality."""

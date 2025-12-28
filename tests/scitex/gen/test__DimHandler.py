@@ -4,8 +4,8 @@
 # File: /tests/scitex/gen/test__DimHandler.py
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
-import torch
 from scitex.gen import DimHandler
 
 

@@ -5,8 +5,8 @@
 """Tests for scitex.stats.descriptive._nan module."""
 
 import numpy as np
-import torch
 import pytest
+torch = pytest.importorskip("torch")
 from scitex.stats.descriptive._nan import (
     nanmean, nanstd, nanvar, nanmax, nanmin,
     nanskewness, nankurtosis, nanq25, nanq50, nanq75,

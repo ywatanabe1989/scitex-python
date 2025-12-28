@@ -6,9 +6,9 @@
 """Tests for scitex.ai.sk._to_sktime module."""
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
 import pandas as pd
-import torch
 from scitex.ai.sk import to_sktime_df
 
 

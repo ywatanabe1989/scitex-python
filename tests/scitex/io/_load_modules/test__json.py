@@ -15,6 +15,10 @@ import tempfile
 from pathlib import Path
 import pytest
 
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
+
 
 def test_load_json_basic():
     """Test loading a basic JSON file."""

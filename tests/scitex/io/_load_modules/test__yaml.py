@@ -12,6 +12,10 @@ which handles loading YAML files with validation and optional key lowercasing.
 import os
 import tempfile
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 import yaml
 
 

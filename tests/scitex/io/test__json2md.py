@@ -12,6 +12,10 @@ from pathlib import Path
 
 import pytest
 
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
+
 
 class TestJson2MdBasic:
     """Test basic JSON to Markdown conversion functionality."""

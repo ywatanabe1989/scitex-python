@@ -12,6 +12,9 @@ __DIR__ = os.path.dirname(__FILE__)
 import time
 
 import pytest
+# Required for scitex.decorators module
+pytest.importorskip("tqdm")
+
 from scitex.decorators import timeout
 
 

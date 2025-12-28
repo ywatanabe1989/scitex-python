@@ -13,6 +13,10 @@ from unittest.mock import Mock, patch, MagicMock
 
 import pytest
 
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
+
 
 class TestFlushBasic:
     """Test basic flush functionality."""
