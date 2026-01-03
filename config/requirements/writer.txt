@@ -1,0 +1,5 @@
+# scitex.writer module dependencies
+# LaTeX compilation and academic writing
+yq
+xlsx2csv
+csv2latex

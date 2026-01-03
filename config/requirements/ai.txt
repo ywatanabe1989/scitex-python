@@ -1,0 +1,7 @@
+# scitex.ai module dependencies
+# Machine learning and AI frameworks
+torch
+torchvision
+scikit-learn
+imbalanced-learn
+optuna

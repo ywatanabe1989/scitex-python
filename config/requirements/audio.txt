@@ -1,0 +1,7 @@
+# scitex.audio module dependencies
+# Text-to-speech and audio processing
+pyttsx3
+gTTS
+pydub
+elevenlabs
+mcp

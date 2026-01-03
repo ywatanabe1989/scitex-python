@@ -1,0 +1,5 @@
+# scitex.torch module dependencies
+# PyTorch utilities
+torch
+torchvision
+torchaudio

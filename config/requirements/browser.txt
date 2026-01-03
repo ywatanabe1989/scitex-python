@@ -1,0 +1,5 @@
+# scitex.browser module dependencies
+# Browser automation
+selenium
+webdriver-manager
+playwright>=1.40.0

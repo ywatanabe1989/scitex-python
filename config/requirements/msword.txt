@@ -1,0 +1,4 @@
+# scitex.msword module dependencies
+# MS Word document manipulation
+python-docx
+pypandoc

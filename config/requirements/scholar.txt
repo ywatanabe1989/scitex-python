@@ -1,0 +1,21 @@
+# scitex.scholar module dependencies
+# Academic paper management
+selenium
+webdriver-manager
+bs4
+html2text
+crawl4ai
+scholarly
+pymed
+python-docx
+PyPDF2
+pdfplumber
+PyMuPDF
+pytesseract
+bibtexparser
+playwright>=1.40.0
+feedparser
+httpx
+tenacity
+pydantic
+watchdog

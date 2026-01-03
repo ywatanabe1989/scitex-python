@@ -141,92 +141,132 @@ scitex = "scitex.__main__:main"
 # ============================================
 
 [project.optional-dependencies]
+# Auto-generated from config/requirements/*.txt
+# Run: python scripts/generate_extras.py --update
 
-# Deep Learning (Heavy - 2-4 GB)
-dl = [
+# ai module
+ai = [
     "torch",
     "torchvision",
-    "torchaudio",
-    "torchsummary",
-    "transformers",
-    "accelerate",
-    "bitsandbytes",
-    "fairscale",
-    "pytorch_pretrained_vit",
-    "pytorch-optimizer",
-    "einops",
+    "scikit-learn",
+    "imbalanced-learn",
+    "optuna",
 ]
 
-# Additional Machine Learning Tools
+# audio module
+audio = [
+    "pyttsx3",
+    "gTTS",
+    "pydub",
+    "elevenlabs",
+    "mcp",
+]
+
+# browser module
+browser = [
+    "selenium",
+    "webdriver-manager",
+    "playwright>=1.40.0",
+]
+
+# capture module
+capture = [
+    "mss",
+]
+
+# cli module
+cli = [
+    "playwright>=1.40.0",
+]
+
+# dev module
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "pytest-timeout",
+    "pytest-mock",
+    "pytest-env",
+    "pytest-asyncio",
+    "pytest-testmon",
+    "pytest-json-report",
+    "ruff",
+    "mypy",
+    "pre-commit",
+    "pyright",
+    "python-lsp-server",
+    "jedi",
+    "rope",
+    "line-profiler",
+    "memory-profiler",
+    "sphinx",
+    "sphinx-rtd-theme",
+    "sphinx-autodoc-typehints",
+    "sphinx-autobuild",
+    "myst-parser",
+    "markdown",
+    "markdown2",
+    "pygments",
+    "build",
+    "twine",
+    "wheel",
+    "setuptools",
+    "types-requests",
+    "types-PyYAML",
+    "types-setuptools",
+]
+
+# dsp module
+dsp = [
+    "torch",
+    "tensorpac",
+    "ipdb",
+]
+
+# fig module
+fig = [
+    "flask",
+    "dearpygui",
+]
+
+# gen module
+gen = [
+    "torch",
+    "openai",
+    "anthropic",
+    "google-genai",
+    "groq",
+]
+
+# ml module
 ml = [
-    "scikit-image",
+    "scikit-learn",
     "imbalanced-learn",
     "umap-learn",
     "sktime",
     "catboost",
     "optuna",
-    "sympy",
     "opencv-python",
-    "openai",
-    "anthropic",
-    "google-genai",
-    "groq",
-    "llama-stack",
-    "elevenlabs",
-]
-# Jupyter & Interactive Development
-jupyter = [
-    "jupyterlab",
-    "jupyter-collaboration",
-    "ipykernel",
-    "ipdb",
-    "papermill",
-    "jupytext",
-    "nbsphinx",
 ]
 
-# Neuroscience & Specialized Scientific
-neuro = [
-    "mne",
-    "obspy",
-    "pyedflib",
-    "pybids",
-    "tensorpac",
-    "ripple_detection",
-    "geom_median",
-]
-
-# Web Frameworks
-web = [
-    "fastapi",
-    "flask",
-    "streamlit",
-    "celery",
-]
-
-# GUI Editors (stx.vis.edit)
-gui = [
-    "flask",           # Web editor backend
-    "dearpygui",       # GPU-accelerated desktop editor
-    "PyQt6",           # Qt desktop editor (alternative: PyQt5, PySide6, PySide2)
-]
-
-# Audio/TTS Module
-audio = [
-    "pyttsx3",         # System TTS (offline, free)
-    "gTTS",            # Google TTS (free, requires internet)
-    "pydub",           # Audio manipulation (speed control)
-    "elevenlabs",      # ElevenLabs (paid, high quality)
-    "mcp",             # MCP server integration
-]
-
-# MS Word Import/Export Module
+# msword module
 msword = [
-    "python-docx",     # MS Word document manipulation
-    "pypandoc",        # Pandoc integration for conversions
+    "python-docx",
+    "pypandoc",
 ]
 
-# Scholar Module - Paper Management & Browser
+# nn module
+nn = [
+    "torch",
+    "torchvision",
+    "torchaudio",
+    "torchsummary",
+    "einops",
+    "pytorch_pretrained_vit",
+    "pytorch-optimizer",
+]
+
+# scholar module
 scholar = [
     "selenium",
     "webdriver-manager",
@@ -247,136 +287,87 @@ scholar = [
     "tenacity",
     "pydantic",
     "watchdog",
-    "natsort",
 ]
 
-# Writer Module - Academic Paper Writing & LaTeX Compilation
+# torch module
+torch = [
+    "torch",
+    "torchvision",
+    "torchaudio",
+]
+
+# web module
+web = [
+    "fastapi",
+    "flask",
+    "streamlit",
+    "celery",
+]
+
+# writer module
 writer = [
-    "yq",  # YAML query tool for compilation script configuration
+    "yq",
     "xlsx2csv",
     "csv2latex",
 ]
 
-# Development Tools
-dev = [
-    # Testing
-    "pytest",
-    "pytest-cov",
-    "pytest-xdist",
-    "pytest-timeout",
-    "pytest-mock",
-    "pytest-env",
-    "pytest-asyncio",
-    "pytest-testmon",
-    # Code Quality & Formatting
-    "ruff",          # Primary linter and formatter (replaces black, isort, flake8)
-    "mypy",
-    "pre-commit",
-    "pyright",
-    "python-lsp-server",
-    "jedi",
-    "rope",
-    # Profiling & Performance
-    "line-profiler",
-    "memory-profiler",
-    # Documentation
-    "sphinx",
-    "sphinx-rtd-theme",
-    "sphinx-autodoc-typehints",
-    "sphinx-autobuild",
-    "myst-parser",
-    "markdown",
-    "markdown2",
-    "pygments",
-    # Build & Distribution
-    "build",
-    "twine",
-    "wheel",
-    "setuptools",
-    # Type Hints
-    "types-requests",
-    "types-PyYAML",
-    "types-setuptools",
-]
-
-# All features except dev
+# All modules (excluding dev)
 all = [
-    # dl
-    "torch",
-    "torchvision",
-    "torchaudio",
-    "torchsummary",
-    "transformers",
-    "accelerate",
-    "bitsandbytes",
-    "fairscale",
-    "pytorch_pretrained_vit",
-    "pytorch-optimizer",
-    "einops",
-    # ml
-    "scikit-image",
-    "imbalanced-learn",
-    "umap-learn",
-    "sktime",
-    "catboost",
-    "optuna",
-    "sympy",
-    "opencv-python",
-    "openai",
+    "PyMuPDF",
+    "PyPDF2",
     "anthropic",
+    "bibtexparser",
+    "bs4",
+    "catboost",
+    "celery",
+    "crawl4ai",
+    "csv2latex",
+    "dearpygui",
+    "einops",
+    "elevenlabs",
+    "fastapi",
+    "feedparser",
+    "flask",
+    "gTTS",
     "google-genai",
     "groq",
-    "llama-stack",    
-    # neuro
-    "mne",
-    "obspy",
-    "pyedflib",
-    "pybids",
-    "tensorpac",
-    "ripple_detection",
-    "geom_median",
-    # scholar
-    "selenium",
-    "webdriver-manager",
-    "bs4",
     "html2text",
-    "crawl4ai",
-    "scholarly",
-    "pymed",
-    "python-docx",
-    "PyPDF2",
-    "pdfplumber",
-    "PyMuPDF",
-    "pytesseract",
-    "bibtexparser",
-    "playwright>=1.40.0",
-    "feedparser",
     "httpx",
-    "tenacity",
-    "pydantic",
-    "watchdog",
-    # web
-    "fastapi",
-    "flask",
-    "streamlit",
-    # gui
-    "dearpygui",
-    "PyQt6",
-    # writer
-    "yq",
-    # jupyter
-    "jupyterlab",
-    "jupyter-collaboration",
-    "ipykernel",
+    "imbalanced-learn",
     "ipdb",
-    "papermill",
-    "jupytext",
-    "nbsphinx",
+    "mcp",
+    "mss",
+    "openai",
+    "opencv-python",
+    "optuna",
+    "pdfplumber",
+    "playwright>=1.40.0",
+    "pydantic",
+    "pydub",
+    "pymed",
+    "pypandoc",
+    "pytesseract",
+    "python-docx",
+    "pytorch-optimizer",
+    "pytorch_pretrained_vit",
+    "pyttsx3",
+    "scholarly",
+    "scikit-learn",
+    "selenium",
+    "sktime",
+    "streamlit",
+    "tenacity",
+    "tensorpac",
+    "torch",
+    "torchaudio",
+    "torchsummary",
+    "torchvision",
+    "umap-learn",
+    "watchdog",
+    "webdriver-manager",
+    "xlsx2csv",
+    "yq",
 ]
-
-# ============================================
-# Tool Configurations
-# ============================================
 
 [tool.hatch.version]
 path = "src/scitex/__version__.py"
@@ -385,11 +376,13 @@ pattern = '__version__ = "(?P<version>[^"]+)"'
 [tool.hatch.build.targets.wheel]
 exclude = [
     "src/scitex/scholar/crossref_local",
+    "src/scitex/scholar/library",
 ]
 
 [tool.hatch.build.targets.sdist]
 exclude = [
     "src/scitex/scholar/crossref_local",
+    "src/scitex/scholar/library",
 ]
 
 [tool.pytest.ini_options]

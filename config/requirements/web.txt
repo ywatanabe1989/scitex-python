@@ -1,0 +1,6 @@
+# scitex.web module dependencies
+# Web frameworks
+fastapi
+flask
+streamlit
+celery

@@ -1,0 +1,7 @@
+# scitex.gen module dependencies
+# Generative AI
+torch
+openai
+anthropic
+google-genai
+groq

@@ -1,0 +1,3 @@
+# scitex.capture module dependencies
+# Screen capture
+mss

@@ -1,0 +1,3 @@
+# scitex.cli module dependencies
+# Command line interface
+playwright>=1.40.0

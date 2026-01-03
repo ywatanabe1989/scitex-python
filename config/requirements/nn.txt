@@ -1,0 +1,9 @@
+# scitex.nn module dependencies
+# Neural networks
+torch
+torchvision
+torchaudio
+torchsummary
+einops
+pytorch_pretrained_vit
+pytorch-optimizer

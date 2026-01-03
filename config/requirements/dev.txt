@@ -1,0 +1,40 @@
+# Development dependencies
+# Testing
+pytest
+pytest-cov
+pytest-xdist
+pytest-timeout
+pytest-mock
+pytest-env
+pytest-asyncio
+pytest-testmon
+pytest-json-report
+# Code Quality
+ruff
+mypy
+pre-commit
+pyright
+python-lsp-server
+jedi
+rope
+# Profiling
+line-profiler
+memory-profiler
+# Documentation
+sphinx
+sphinx-rtd-theme
+sphinx-autodoc-typehints
+sphinx-autobuild
+myst-parser
+markdown
+markdown2
+pygments
+# Build
+build
+twine
+wheel
+setuptools
+# Type stubs
+types-requests
+types-PyYAML
+types-setuptools

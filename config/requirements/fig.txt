@@ -1,0 +1,4 @@
+# scitex.fig module dependencies
+# Figure editing and visualization
+flask
+dearpygui

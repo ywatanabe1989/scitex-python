@@ -1,46 +1,75 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Utility for handling optional dependencies with helpful error messages.
 """
 
-from typing import Optional, Dict, Any
 import importlib
+from typing import Any, Dict, Optional
 
-
-# Mapping of modules to their installation extras
+# Mapping of modules to their installation extras (module-level)
 DEPENDENCY_GROUPS: Dict[str, str] = {
-    # Deep Learning
-    "torch": "dl",
-    "torchvision": "dl",
-    "torchaudio": "dl",
-    "transformers": "dl",
-    "accelerate": "dl",
-    "bitsandbytes": "dl",
-    "fairscale": "dl",
-    # AI APIs
-    "openai": "ai-apis",
-    "anthropic": "ai-apis",
-    "google.generativeai": "ai-apis",
-    "groq": "ai-apis",
-    # Scholar
-    "selenium": "scholar",
-    "playwright": "scholar",
+    # ai module
+    "sklearn": "ai",
+    "imblearn": "ai",
+    "optuna": "ai",
+    # audio module
+    "pyttsx3": "audio",
+    "gtts": "audio",
+    "gTTS": "audio",
+    "pydub": "audio",
+    "elevenlabs": "audio",
+    # browser module
+    "selenium": "browser",
+    "playwright": "browser",
+    # capture module
+    "mss": "capture",
+    # cli module (uses browser deps)
+    # dsp module
+    "tensorpac": "dsp",
+    "ipdb": "dsp",
+    # fig module
+    "flask": "fig",
+    "dearpygui": "fig",
+    # gen module (AI APIs)
+    "openai": "gen",
+    "anthropic": "gen",
+    "google.generativeai": "gen",
+    "groq": "gen",
+    # ml module
+    "skimage": "ml",
+    "umap": "ml",
+    "sktime": "ml",
+    "catboost": "ml",
+    "cv2": "ml",
+    # msword module
+    "docx": "msword",
+    "pypandoc": "msword",
+    # nn module
+    "torch": "nn",
+    "torchvision": "nn",
+    "torchaudio": "nn",
+    "torchsummary": "nn",
+    "einops": "nn",
+    # scholar module
     "crawl4ai": "scholar",
     "bs4": "scholar",
-    # Neuroscience
-    "mne": "neuro",
-    "obspy": "neuro",
-    "pyedflib": "neuro",
-    "tensorpac": "neuro",
-    # Web
+    "PyPDF2": "scholar",
+    "pdfplumber": "scholar",
+    "fitz": "scholar",  # PyMuPDF
+    "pytesseract": "scholar",
+    "bibtexparser": "scholar",
+    "feedparser": "scholar",
+    "httpx": "scholar",
+    "tenacity": "scholar",
+    "pydantic": "scholar",
+    "watchdog": "scholar",
+    # torch module
+    # web module
     "fastapi": "web",
-    "flask": "web",
     "streamlit": "web",
-    # Jupyter
-    "jupyterlab": "jupyter",
-    "IPython": "jupyter",
-    "ipykernel": "jupyter",
+    "celery": "web",
+    # writer module
+    "yq": "writer",
 }
 
 
@@ -108,15 +137,16 @@ def check_optional_deps(*module_names: str) -> Dict[str, bool]:
     return result
 
 
-# Convenience: Check common dependency groups
-def has_deep_learning() -> bool:
-    """Check if deep learning dependencies are available."""
+# Convenience: Check module-level dependency groups
+def has_nn() -> bool:
+    """Check if neural network (nn) dependencies are available."""
     return check_optional_deps("torch")["torch"]
 
 
-def has_transformers() -> bool:
-    """Check if transformers is available."""
-    return check_optional_deps("transformers")["transformers"]
+def has_gen() -> bool:
+    """Check if generative AI (gen) dependencies are available."""
+    deps = check_optional_deps("openai", "anthropic")
+    return any(deps.values())
 
 
 def has_scholar() -> bool:
@@ -125,9 +155,16 @@ def has_scholar() -> bool:
     return all(deps.values())
 
 
-def has_jupyter() -> bool:
-    """Check if Jupyter dependencies are available."""
-    return check_optional_deps("IPython")["IPython"]
+def has_audio() -> bool:
+    """Check if audio dependencies are available."""
+    deps = check_optional_deps("pyttsx3", "gtts")
+    return any(deps.values())
+
+
+def has_browser() -> bool:
+    """Check if browser automation dependencies are available."""
+    deps = check_optional_deps("selenium", "playwright")
+    return any(deps.values())
 
 
 # EOF

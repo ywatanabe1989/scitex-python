@@ -1,0 +1,9 @@
+# scitex.ml module dependencies
+# Machine learning utilities
+scikit-learn
+imbalanced-learn
+umap-learn
+sktime
+catboost
+optuna
+opencv-python

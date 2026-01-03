@@ -1,0 +1,5 @@
+# scitex.dsp module dependencies
+# Digital signal processing
+torch
+tensorpac
+ipdb
