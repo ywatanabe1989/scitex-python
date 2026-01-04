@@ -7,7 +7,7 @@
 SHELL := /bin/bash
 
 .PHONY: help install install-dev install-all \
-	clean test test-fast test-full test-seq test-cov lint format check \
+	clean test test-fast test-full test-cov lint format check \
 	test-stats-cov test-config-cov test-logging-cov \
 	build release upload upload-test \
 	build-all release-all upload-all upload-test-all \
@@ -43,7 +43,6 @@ help:
 	@echo -e "  make test              Run tests (parallel, xdist default)"
 	@echo -e "  make test-fast         Run fast tests only (skip @slow)"
 	@echo -e "  make test-full         Run all tests including slow/integration"
-	@echo -e "  make test-seq          Run tests sequentially (no xdist)"
 	@echo -e "  make test MODULE=plt   Run tests for specific module"
 	@echo -e "  make test-cov          Run tests with coverage"
 	@echo -e "  make lint              Check code style (ruff)"
@@ -121,13 +120,6 @@ ifdef MODULE
 	@./scripts/maintenance/test.sh $(MODULE)
 else
 	@./scripts/maintenance/test.sh
-endif
-
-test-seq:
-ifdef MODULE
-	@./scripts/maintenance/test.sh $(MODULE) --sequential
-else
-	@./scripts/maintenance/test.sh --sequential
 endif
 
 test-cov:
