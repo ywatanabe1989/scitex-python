@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-08-21 21:37:23 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/str/_latex_fallback.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -170,59 +170,65 @@ def latex_to_mathtext(latex_str: str) -> str:
     if text.startswith("$") and text.endswith("$"):
         text = text[1:-1]
 
-    # Common LaTeX to mathtext conversions
-    conversions = {
+    # Simple string replacements (double backslash to single)
+    simple_conversions = {
         # Greek letters
-        r"\\alpha": r"\alpha",
-        r"\\beta": r"\beta",
-        r"\\gamma": r"\gamma",
-        r"\\delta": r"\delta",
-        r"\\epsilon": r"\epsilon",
-        r"\\theta": r"\theta",
-        r"\\lambda": r"\lambda",
-        r"\\mu": r"\mu",
-        r"\\pi": r"\pi",
-        r"\\sigma": r"\sigma",
-        r"\\tau": r"\tau",
-        r"\\phi": r"\phi",
-        r"\\omega": r"\omega",
+        r"\\alpha": "\\alpha",
+        r"\\beta": "\\beta",
+        r"\\gamma": "\\gamma",
+        r"\\delta": "\\delta",
+        r"\\epsilon": "\\epsilon",
+        r"\\theta": "\\theta",
+        r"\\lambda": "\\lambda",
+        r"\\mu": "\\mu",
+        r"\\pi": "\\pi",
+        r"\\sigma": "\\sigma",
+        r"\\tau": "\\tau",
+        r"\\phi": "\\phi",
+        r"\\omega": "\\omega",
         # Mathematical symbols
-        r"\\sum": r"\sum",
-        r"\\int": r"\int",
-        r"\\partial": r"\partial",
-        r"\\infty": r"\infty",
-        r"\\pm": r"\pm",
-        r"\\times": r"\times",
-        r"\\cdot": r"\cdot",
-        r"\\approx": r"\approx",
-        r"\\neq": r"\neq",
-        r"\\leq": r"\leq",
-        r"\\geq": r"\geq",
+        r"\\sum": "\\sum",
+        r"\\int": "\\int",
+        r"\\partial": "\\partial",
+        r"\\infty": "\\infty",
+        r"\\pm": "\\pm",
+        r"\\times": "\\times",
+        r"\\cdot": "\\cdot",
+        r"\\approx": "\\approx",
+        r"\\neq": "\\neq",
+        r"\\leq": "\\leq",
+        r"\\geq": "\\geq",
         # Functions
-        r"\\sin": r"\sin",
-        r"\\cos": r"\cos",
-        r"\\tan": r"\tan",
-        r"\\log": r"\log",
-        r"\\ln": r"\ln",
-        r"\\exp": r"\exp",
-        # Formatting (limited mathtext support)
-        r"\\textbf\{([^}]+)\}": r"\mathbf{\1}",
-        r"\\mathbf\{([^}]+)\}": r"\mathbf{\1}",
-        r"\\textit\{([^}]+)\}": r"\mathit{\1}",
-        r"\\mathit\{([^}]+)\}": r"\mathit{\1}",
-        # Hats and accents
-        r"\\hat\{([^}]+)\}": r"\hat{\1}",
-        r"\\overrightarrow\{([^}]+)\}": r"\vec{\1}",
-        r"\\vec\{([^}]+)\}": r"\vec{\1}",
-        # Fractions (simple ones)
-        r"\\frac\{([^}]+)\}\{([^}]+)\}": r"\frac{\1}{\2}",
-        # Subscripts and superscripts (should work as-is)
-        # Powers and indices are handled naturally by mathtext
+        r"\\sin": "\\sin",
+        r"\\cos": "\\cos",
+        r"\\tan": "\\tan",
+        r"\\log": "\\log",
+        r"\\ln": "\\ln",
+        r"\\exp": "\\exp",
     }
 
-    # Apply conversions
-    for latex_pattern, mathtext_replacement in conversions.items():
-        text = re.sub(latex_pattern, mathtext_replacement, text)
+    # Apply simple string replacements
+    for pattern, replacement in simple_conversions.items():
+        text = text.replace(pattern, replacement)
+
+    # Regex patterns with capture groups
+    regex_conversions = [
+        # Formatting (limited mathtext support)
+        (r"\\textbf\{([^}]+)\}", r"\\mathbf{\1}"),
+        (r"\\mathbf\{([^}]+)\}", r"\\mathbf{\1}"),
+        (r"\\textit\{([^}]+)\}", r"\\mathit{\1}"),
+        (r"\\mathit\{([^}]+)\}", r"\\mathit{\1}"),
+        # Hats and accents
+        (r"\\hat\{([^}]+)\}", r"\\hat{\1}"),
+        (r"\\overrightarrow\{([^}]+)\}", r"\\vec{\1}"),
+        (r"\\vec\{([^}]+)\}", r"\\vec{\1}"),
+        # Fractions (simple ones)
+        (r"\\frac\{([^}]+)\}\{([^}]+)\}", r"\\frac{\1}{\2}"),
+    ]
+
+    # Apply regex conversions
+    for pattern, replacement in regex_conversions:
+        text = re.sub(pattern, replacement, text)
 
     # Wrap in mathtext markers
     return f"${text}$"
