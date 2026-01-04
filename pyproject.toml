@@ -636,7 +636,9 @@ addopts = [
     "--disable-warnings",
     "-p", "no:warnings",
     "--ignore=tests/custom/old/",
+    "--timeout=60",
 ]
+timeout_method = "signal"
 asyncio_mode = "auto"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",

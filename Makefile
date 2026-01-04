@@ -7,10 +7,10 @@
 SHELL := /bin/bash
 
 .PHONY: help install install-dev install-all \
-	clean test test-cov lint format check \
+	clean test test-fast test-full test-seq test-cov lint format check \
 	build release upload upload-test \
 	build-all release-all upload-all upload-test-all \
-	deps-generate sync-tests sync-examples sync-redirect \
+	sync-extras sync-tests sync-examples sync-redirect \
 	show-version tag
 
 # Colors
@@ -39,19 +39,21 @@ help:
 	@echo -e "  make install-all       Install with all optional dependencies"
 	@echo -e ""
 	@echo -e "$(CYAN)🔧 Development:$(NC)"
-	@echo -e "  make test              Run all tests"
-	@echo -e "  make test MODULE=xxx   Run tests for specific module (e.g., config, stats)"
+	@echo -e "  make test              Run tests (parallel, xdist default)"
+	@echo -e "  make test-fast         Run fast tests only (skip @slow)"
+	@echo -e "  make test-full         Run all tests including slow/integration"
+	@echo -e "  make test-seq          Run tests sequentially (no xdist)"
+	@echo -e "  make test MODULE=plt   Run tests for specific module"
 	@echo -e "  make test-cov          Run tests with coverage"
-	@echo -e "  make test-cov MODULE=xxx  Run module tests with coverage"
 	@echo -e "  make lint              Check code style (ruff)"
 	@echo -e "  make lint-fix          Auto-fix lint issues"
 	@echo -e "  make format            Format code (ruff)"
 	@echo -e "  make format-check      Check formatting without changes"
-	@echo -e "  make check             Run all checks (format-check + lint + test)"
+	@echo -e "  make check             Run all checks (format + lint + test-fast)"
 	@echo -e ""
 	@echo -e "$(CYAN)🧹 Maintenance:$(NC)"
 	@echo -e "  make clean             Remove build/test/cache artifacts"
-	@echo -e "  make deps-generate     Generate module-level requirements"
+	@echo -e "  make sync-extras       Sync pyproject.toml extras from imports"
 	@echo -e "  make sync-tests        Sync test files with source structure"
 	@echo -e "  make sync-examples     Sync example files with source structure"
 	@echo -e ""
@@ -106,6 +108,27 @@ else
 	@./scripts/maintenance/test.sh
 endif
 
+test-fast:
+ifdef MODULE
+	@./scripts/maintenance/test.sh $(MODULE) --fast
+else
+	@./scripts/maintenance/test.sh --fast
+endif
+
+test-full:
+ifdef MODULE
+	@./scripts/maintenance/test.sh $(MODULE)
+else
+	@./scripts/maintenance/test.sh
+endif
+
+test-seq:
+ifdef MODULE
+	@./scripts/maintenance/test.sh $(MODULE) --sequential
+else
+	@./scripts/maintenance/test.sh --sequential
+endif
+
 test-cov:
 ifdef MODULE
 	@./scripts/maintenance/test.sh $(MODULE) --cov
@@ -125,7 +148,7 @@ format:
 format-check:
 	@./scripts/maintenance/format.sh --check
 
-check: format-check lint test
+check: format-check lint test-fast
 	@echo -e ""
 	@echo -e "$(GREEN)✅ All checks passed!$(NC)"
 
