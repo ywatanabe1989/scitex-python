@@ -1,118 +1,70 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.results._LaTeXIssue."""
+
+import pytest
+
+from scitex.writer.dataclasses.results._LaTeXIssue import LaTeXIssue
+
+
+class TestLaTeXIssueCreation:
+    """Tests for LaTeXIssue instantiation."""
+
+    def test_creates_error_issue(self):
+        """Verify error issue can be created."""
+        issue = LaTeXIssue(type="error", message="Undefined control sequence")
+        assert issue.type == "error"
+        assert issue.message == "Undefined control sequence"
+
+    def test_creates_warning_issue(self):
+        """Verify warning issue can be created."""
+        issue = LaTeXIssue(type="warning", message="Citation not found")
+        assert issue.type == "warning"
+        assert issue.message == "Citation not found"
+
+
+class TestLaTeXIssueStr:
+    """Tests for LaTeXIssue __str__ method."""
+
+    def test_str_error_format(self):
+        """Verify error string format is uppercase ERROR."""
+        issue = LaTeXIssue(type="error", message="Missing $ inserted")
+        assert str(issue) == "ERROR: Missing $ inserted"
+
+    def test_str_warning_format(self):
+        """Verify warning string format is uppercase WARNING."""
+        issue = LaTeXIssue(type="warning", message="Overfull \\hbox")
+        assert str(issue) == "WARNING: Overfull \\hbox"
+
+    def test_str_preserves_message(self):
+        """Verify message is preserved in string output."""
+        message = "Complex error message with special chars: @#$%"
+        issue = LaTeXIssue(type="error", message=message)
+        assert message in str(issue)
+
+
+class TestLaTeXIssueEquality:
+    """Tests for LaTeXIssue equality comparison."""
+
+    def test_equal_issues(self):
+        """Verify two issues with same data are equal."""
+        issue1 = LaTeXIssue(type="error", message="Same message")
+        issue2 = LaTeXIssue(type="error", message="Same message")
+        assert issue1 == issue2
+
+    def test_different_type_not_equal(self):
+        """Verify issues with different types are not equal."""
+        issue1 = LaTeXIssue(type="error", message="Same message")
+        issue2 = LaTeXIssue(type="warning", message="Same message")
+        assert issue1 != issue2
+
+    def test_different_message_not_equal(self):
+        """Verify issues with different messages are not equal."""
+        issue1 = LaTeXIssue(type="error", message="Message 1")
+        issue2 = LaTeXIssue(type="error", message="Message 2")
+        assert issue1 != issue2
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/results/_LaTeXIssue.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-29 06:08:41 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/_LaTeXIssue.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/_LaTeXIssue.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# LaTeXIssue - dataclass for LaTeX compilation issues.
-# """
-# 
-# from dataclasses import dataclass
-# 
-# 
-# @dataclass
-# class LaTeXIssue:
-#     """Single LaTeX error or warning."""
-# 
-#     type: str  # 'error' or 'warning'
-#     message: str
-# 
-#     def __str__(self) -> str:
-#         """Human-readable string representation."""
-#         return f"{self.type.upper()}: {self.message}"
-# 
-# 
-# def run_session() -> None:
-#     """Initialize scitex framework, run main function, and cleanup."""
-#     global CONFIG, CC, sys, plt, rng
-#     import sys
-#     import matplotlib.pyplot as plt
-#     import scitex as stx
-# 
-#     args = parse_args()
-# 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-#         sys,
-#         plt,
-#         args=args,
-#         file=__FILE__,
-#         sdir_suffix=None,
-#         verbose=False,
-#         agg=True,
-#     )
-# 
-#     exit_status = main(args)
-# 
-#     stx.session.close(
-#         CONFIG,
-#         verbose=False,
-#         notify=False,
-#         message="",
-#         exit_status=exit_status,
-#     )
-# 
-# 
-# def main(args):
-#     issue = LaTeXIssue(
-#         type=args.type,
-#         message=args.message,
-#     )
-# 
-#     print(issue)
-#     print(f"\nFormatted: {issue}")
-#     return 0
-# 
-# 
-# def parse_args():
-#     import argparse
-# 
-#     parser = argparse.ArgumentParser(description="Demonstrate LaTeXIssue dataclass")
-#     parser.add_argument(
-#         "--type",
-#         type=str,
-#         default="error",
-#         choices=["error", "warning"],
-#         help="Issue type (default: error)",
-#     )
-#     parser.add_argument(
-#         "--message",
-#         type=str,
-#         default="Undefined control sequence",
-#         help="Issue message (default: 'Undefined control sequence')",
-#     )
-# 
-#     return parser.parse_args()
-# 
-# 
-# if __name__ == "__main__":
-#     run_session()
-# 
-# 
-# __all__ = ["LaTeXIssue"]
-# 
-# # python -m scitex.writer.dataclasses.results._LaTeXIssue --type warning --message "Citation not found"
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/results/_LaTeXIssue.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

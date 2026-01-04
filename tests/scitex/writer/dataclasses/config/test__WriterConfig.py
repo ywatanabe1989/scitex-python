@@ -1,191 +1,148 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.config._WriterConfig."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.config._WriterConfig import WriterConfig
+
+
+class TestWriterConfigCreation:
+    """Tests for WriterConfig instantiation."""
+
+    def test_dataclass_fields(self):
+        """Verify WriterConfig has required dataclass fields."""
+        config = WriterConfig(
+            project_dir=Path("/tmp"),
+            manuscript_dir=Path("/tmp/01_manuscript"),
+            supplementary_dir=Path("/tmp/02_supplementary"),
+            revision_dir=Path("/tmp/03_revision"),
+            shared_dir=Path("/tmp/00_shared"),
+        )
+        assert config.project_dir == Path("/tmp")
+        assert config.manuscript_dir == Path("/tmp/01_manuscript")
+        assert config.supplementary_dir == Path("/tmp/02_supplementary")
+        assert config.revision_dir == Path("/tmp/03_revision")
+        assert config.shared_dir == Path("/tmp/00_shared")
+
+    def test_compile_script_optional(self):
+        """Verify compile_script defaults to None."""
+        config = WriterConfig(
+            project_dir=Path("/tmp"),
+            manuscript_dir=Path("/tmp/01_manuscript"),
+            supplementary_dir=Path("/tmp/02_supplementary"),
+            revision_dir=Path("/tmp/03_revision"),
+            shared_dir=Path("/tmp/00_shared"),
+        )
+        assert config.compile_script is None
+
+    def test_compile_script_can_be_set(self):
+        """Verify compile_script can be explicitly set."""
+        config = WriterConfig(
+            project_dir=Path("/tmp"),
+            manuscript_dir=Path("/tmp/01_manuscript"),
+            supplementary_dir=Path("/tmp/02_supplementary"),
+            revision_dir=Path("/tmp/03_revision"),
+            shared_dir=Path("/tmp/00_shared"),
+            compile_script=Path("/tmp/compile.sh"),
+        )
+        assert config.compile_script == Path("/tmp/compile.sh")
+
+
+class TestWriterConfigFromDirectory:
+    """Tests for WriterConfig.from_directory factory method."""
+
+    def test_from_directory_creates_config(self):
+        """Verify from_directory creates proper config."""
+        project_dir = Path("/tmp/test_project")
+        config = WriterConfig.from_directory(project_dir)
+
+        assert config.project_dir == project_dir
+
+    def test_from_directory_sets_manuscript_dir(self):
+        """Verify manuscript_dir is set to 01_manuscript subdirectory."""
+        project_dir = Path("/tmp/test_project")
+        config = WriterConfig.from_directory(project_dir)
+
+        assert config.manuscript_dir == project_dir / "01_manuscript"
+
+    def test_from_directory_sets_supplementary_dir(self):
+        """Verify supplementary_dir is set to 02_supplementary subdirectory."""
+        project_dir = Path("/tmp/test_project")
+        config = WriterConfig.from_directory(project_dir)
+
+        assert config.supplementary_dir == project_dir / "02_supplementary"
+
+    def test_from_directory_sets_revision_dir(self):
+        """Verify revision_dir is set to 03_revision subdirectory."""
+        project_dir = Path("/tmp/test_project")
+        config = WriterConfig.from_directory(project_dir)
+
+        assert config.revision_dir == project_dir / "03_revision"
+
+    def test_from_directory_sets_shared_dir(self):
+        """Verify shared_dir is set to 00_shared subdirectory."""
+        project_dir = Path("/tmp/test_project")
+        config = WriterConfig.from_directory(project_dir)
+
+        assert config.shared_dir == project_dir / "00_shared"
+
+    def test_from_directory_accepts_string(self):
+        """Verify from_directory converts string to Path."""
+        config = WriterConfig.from_directory("/tmp/test_project")
+        assert isinstance(config.project_dir, Path)
+
+
+class TestWriterConfigValidation:
+    """Tests for WriterConfig.validate method."""
+
+    def test_validate_nonexistent_project_dir_raises(self, tmp_path):
+        """Verify validate raises for nonexistent project directory."""
+        config = WriterConfig.from_directory(tmp_path / "nonexistent")
+
+        with pytest.raises(ValueError, match="Project directory not found"):
+            config.validate()
+
+    def test_validate_empty_project_dir_raises(self, tmp_path):
+        """Verify validate raises when no document directories exist."""
+        config = WriterConfig.from_directory(tmp_path)
+
+        with pytest.raises(ValueError, match="No document directories found"):
+            config.validate()
+
+    def test_validate_with_manuscript_dir_passes(self, tmp_path):
+        """Verify validate passes with manuscript directory."""
+        (tmp_path / "01_manuscript").mkdir()
+        config = WriterConfig.from_directory(tmp_path)
+
+        assert config.validate() is True
+
+    def test_validate_with_supplementary_dir_passes(self, tmp_path):
+        """Verify validate passes with supplementary directory."""
+        (tmp_path / "02_supplementary").mkdir()
+        config = WriterConfig.from_directory(tmp_path)
+
+        assert config.validate() is True
+
+    def test_validate_with_revision_dir_passes(self, tmp_path):
+        """Verify validate passes with revision directory."""
+        (tmp_path / "03_revision").mkdir()
+        config = WriterConfig.from_directory(tmp_path)
+
+        assert config.validate() is True
+
+    def test_validate_with_all_dirs_passes(self, tmp_path):
+        """Verify validate passes with all document directories."""
+        (tmp_path / "01_manuscript").mkdir()
+        (tmp_path / "02_supplementary").mkdir()
+        (tmp_path / "03_revision").mkdir()
+        config = WriterConfig.from_directory(tmp_path)
+
+        assert config.validate() is True
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/config/_WriterConfig.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-29 06:08:47 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/_WriterConfig.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/_WriterConfig.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# WriterConfig - dataclass for writer configuration.
-# """
-# 
-# from dataclasses import dataclass
-# from pathlib import Path
-# from typing import Optional
-# 
-# 
-# @dataclass
-# class WriterConfig:
-#     """Configuration for scitex.writer."""
-# 
-#     project_dir: Path
-#     """Root directory of writer project"""
-# 
-#     manuscript_dir: Path
-#     """Directory for manuscript (01_manuscript/)"""
-# 
-#     supplementary_dir: Path
-#     """Directory for supplementary (02_supplementary/)"""
-# 
-#     revision_dir: Path
-#     """Directory for revision (03_revision/)"""
-# 
-#     shared_dir: Path
-#     """Directory for shared resources (00_shared/)"""
-# 
-#     compile_script: Optional[Path] = None
-#     """Path to compile script (auto-detected if None)"""
-# 
-#     @classmethod
-#     def from_directory(cls, project_dir: Path) -> "WriterConfig":
-#         """
-#         Create config from project directory.
-# 
-#         Args:
-#             project_dir: Path to writer project root
-# 
-#         Returns:
-#             WriterConfig instance
-# 
-#         Examples:
-#             >>> config = WriterConfig.from_directory(Path("/path/to/project"))
-#             >>> print(config.manuscript_dir)
-#         """
-#         project_dir = Path(project_dir)
-# 
-#         return cls(
-#             project_dir=project_dir,
-#             manuscript_dir=project_dir / "01_manuscript",
-#             supplementary_dir=project_dir / "02_supplementary",
-#             revision_dir=project_dir / "03_revision",
-#             shared_dir=project_dir / "00_shared",
-#         )
-# 
-#     def validate(self) -> bool:
-#         """
-#         Validate that required directories exist.
-# 
-#         Returns:
-#             True if valid writer project structure
-# 
-#         Raises:
-#             ValueError: If invalid structure
-#         """
-#         if not self.project_dir.exists():
-#             raise ValueError(f"Project directory not found: {self.project_dir}")
-# 
-#         # Check for at least one document directory
-#         doc_dirs = [
-#             self.manuscript_dir,
-#             self.supplementary_dir,
-#             self.revision_dir,
-#         ]
-# 
-#         if not any(d.exists() for d in doc_dirs):
-#             raise ValueError(
-#                 f"No document directories found in {self.project_dir}. "
-#                 "Expected: 01_manuscript/, 02_supplementary/, or 03_revision/"
-#             )
-# 
-#         return True
-# 
-# 
-# def run_session() -> None:
-#     """Initialize scitex framework, run main function, and cleanup."""
-#     global CONFIG, CC, sys, plt, rng
-#     import sys
-#     import matplotlib.pyplot as plt
-#     import scitex as stx
-# 
-#     args = parse_args()
-# 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-#         sys,
-#         plt,
-#         args=args,
-#         file=__FILE__,
-#         sdir_suffix=None,
-#         verbose=False,
-#         agg=True,
-#     )
-# 
-#     exit_status = main(args)
-# 
-#     stx.session.close(
-#         CONFIG,
-#         verbose=False,
-#         notify=False,
-#         message="",
-#         exit_status=exit_status,
-#     )
-# 
-# 
-# def main(args):
-#     config = WriterConfig.from_directory(Path(args.dir))
-# 
-#     print(f"Project dir: {config.project_dir}")
-#     print(f"Manuscript dir: {config.manuscript_dir}")
-#     print(f"Supplementary dir: {config.supplementary_dir}")
-#     print(f"Revision dir: {config.revision_dir}")
-#     print(f"Shared dir: {config.shared_dir}")
-# 
-#     if args.validate:
-#         try:
-#             config.validate()
-#             print("\nValidation: PASSED")
-#         except ValueError as ee:
-#             print(f"\nValidation: FAILED - {ee}")
-#             return 1
-# 
-#     return 0
-# 
-# 
-# def parse_args():
-#     import argparse
-# 
-#     parser = argparse.ArgumentParser(description="Demonstrate WriterConfig dataclass")
-#     parser.add_argument(
-#         "--dir",
-#         type=str,
-#         default="./my_paper",
-#         help="Project directory (default: ./my_paper)",
-#     )
-#     parser.add_argument(
-#         "--validate",
-#         action="store_true",
-#         help="Validate directory structure",
-#     )
-# 
-#     return parser.parse_args()
-# 
-# 
-# if __name__ == "__main__":
-#     run_session()
-# 
-# 
-# __all__ = ["WriterConfig"]
-# 
-# # python -m scitex.writer.dataclasses.config._WriterConfig --dir ./my_paper --validate
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/config/_WriterConfig.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

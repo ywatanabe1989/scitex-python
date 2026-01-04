@@ -1,152 +1,138 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.contents._RevisionContents."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.contents._RevisionContents import RevisionContents
+from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+
+
+class TestRevisionContentsCreation:
+    """Tests for RevisionContents instantiation."""
+
+    def test_creates_with_root_path(self, tmp_path):
+        """Verify RevisionContents creates with root path."""
+        contents = RevisionContents(root=tmp_path)
+        assert contents.root == tmp_path
+
+    def test_git_root_optional(self, tmp_path):
+        """Verify git_root defaults to None."""
+        contents = RevisionContents(root=tmp_path)
+        assert contents.git_root is None
+
+    def test_git_root_can_be_set(self, tmp_path):
+        """Verify git_root can be explicitly set."""
+        git_root = tmp_path / "project"
+        contents = RevisionContents(root=tmp_path, git_root=git_root)
+        assert contents.git_root == git_root
+
+
+class TestRevisionContentsPostInit:
+    """Tests for RevisionContents __post_init__ initialization."""
+
+    def test_introduction_initialized(self, tmp_path):
+        """Verify introduction DocumentSection is initialized."""
+        contents = RevisionContents(root=tmp_path)
+        assert isinstance(contents.introduction, DocumentSection)
+        assert contents.introduction.path == tmp_path / "introduction.tex"
+
+    def test_conclusion_initialized(self, tmp_path):
+        """Verify conclusion DocumentSection is initialized."""
+        contents = RevisionContents(root=tmp_path)
+        assert isinstance(contents.conclusion, DocumentSection)
+        assert contents.conclusion.path == tmp_path / "conclusion.tex"
+
+    def test_references_initialized(self, tmp_path):
+        """Verify references DocumentSection is initialized."""
+        contents = RevisionContents(root=tmp_path)
+        assert isinstance(contents.references, DocumentSection)
+        assert contents.references.path == tmp_path / "references.tex"
+
+    def test_metadata_sections_initialized(self, tmp_path):
+        """Verify metadata sections are initialized."""
+        contents = RevisionContents(root=tmp_path)
+        assert contents.title.path == tmp_path / "title.tex"
+        assert contents.authors.path == tmp_path / "authors.tex"
+        assert contents.keywords.path == tmp_path / "keywords.tex"
+        assert contents.journal_name.path == tmp_path / "journal_name.tex"
+
+    def test_reviewer_directories_initialized(self, tmp_path):
+        """Verify reviewer directories are initialized."""
+        contents = RevisionContents(root=tmp_path)
+        assert contents.editor == tmp_path / "editor"
+        assert contents.reviewer1 == tmp_path / "reviewer1"
+        assert contents.reviewer2 == tmp_path / "reviewer2"
+
+    def test_directory_paths_initialized(self, tmp_path):
+        """Verify directory paths are initialized."""
+        contents = RevisionContents(root=tmp_path)
+        assert contents.figures == tmp_path / "figures"
+        assert contents.tables == tmp_path / "tables"
+        assert contents.latex_styles == tmp_path / "latex_styles"
+
+    def test_bibliography_initialized(self, tmp_path):
+        """Verify bibliography DocumentSection is initialized."""
+        contents = RevisionContents(root=tmp_path)
+        assert isinstance(contents.bibliography, DocumentSection)
+        assert contents.bibliography.path == tmp_path / "bibliography.bib"
+
+    def test_git_root_passed_to_sections(self, tmp_path):
+        """Verify git_root is passed to DocumentSection instances."""
+        git_root = tmp_path / "project"
+        contents = RevisionContents(root=tmp_path, git_root=git_root)
+        assert contents.introduction.git_root == git_root
+        assert contents.conclusion.git_root == git_root
+
+
+class TestRevisionContentsVerifyStructure:
+    """Tests for RevisionContents verify_structure method."""
+
+    def test_verify_fails_when_no_dirs_exist(self, tmp_path):
+        """Verify returns False when required directories are missing."""
+        contents = RevisionContents(root=tmp_path)
+        is_valid, issues = contents.verify_structure()
+
+        assert is_valid is False
+        assert len(issues) == 4
+
+    def test_verify_fails_with_partial_dirs(self, tmp_path):
+        """Verify returns False when only some required directories exist."""
+        (tmp_path / "figures").mkdir()
+        (tmp_path / "tables").mkdir()
+
+        contents = RevisionContents(root=tmp_path)
+        is_valid, issues = contents.verify_structure()
+
+        assert is_valid is False
+        assert len(issues) == 2
+
+    def test_verify_passes_with_all_required_dirs(self, tmp_path):
+        """Verify returns True when all required directories exist."""
+        (tmp_path / "figures").mkdir()
+        (tmp_path / "tables").mkdir()
+        (tmp_path / "latex_styles").mkdir()
+        (tmp_path / "editor").mkdir()
+
+        contents = RevisionContents(root=tmp_path)
+        is_valid, issues = contents.verify_structure()
+
+        assert is_valid is True
+        assert len(issues) == 0
+
+    def test_verify_issues_list_contains_dirnames(self, tmp_path):
+        """Verify issues list contains descriptive entries."""
+        contents = RevisionContents(root=tmp_path)
+        _, issues = contents.verify_structure()
+
+        assert any("figures" in issue for issue in issues)
+        assert any("tables" in issue for issue in issues)
+        assert any("latex_styles" in issue for issue in issues)
+        assert any("editor" in issue for issue in issues)
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/contents/_RevisionContents.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-29 06:08:44 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/_RevisionContents.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/_RevisionContents.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# RevisionContents - dataclass for revision contents structure.
-# 
-# Represents the 03_revision/contents/ directory structure.
-# """
-# 
-# from pathlib import Path
-# from typing import Optional
-# from dataclasses import dataclass
-# 
-# from ..core import DocumentSection
-# 
-# 
-# @dataclass
-# class RevisionContents:
-#     """Contents subdirectory of revision (03_revision/contents/)."""
-# 
-#     root: Path
-#     git_root: Optional[Path] = None
-# 
-#     # Core sections
-#     introduction: DocumentSection = None
-#     conclusion: DocumentSection = None
-#     references: DocumentSection = None
-# 
-#     # Metadata
-#     title: DocumentSection = None
-#     authors: DocumentSection = None
-#     keywords: DocumentSection = None
-#     journal_name: DocumentSection = None
-# 
-#     # Reviewer responses (subdirectories)
-#     editor: Path = None
-#     reviewer1: Path = None
-#     reviewer2: Path = None
-# 
-#     # Files/directories
-#     figures: Path = None
-#     tables: Path = None
-#     bibliography: DocumentSection = None
-#     latex_styles: Path = None
-# 
-#     def __post_init__(self):
-#         """Initialize all DocumentSection instances."""
-#         if self.introduction is None:
-#             self.introduction = DocumentSection(
-#                 self.root / "introduction.tex", self.git_root
-#             )
-#         if self.conclusion is None:
-#             self.conclusion = DocumentSection(
-#                 self.root / "conclusion.tex", self.git_root
-#             )
-#         if self.references is None:
-#             self.references = DocumentSection(
-#                 self.root / "references.tex", self.git_root
-#             )
-#         if self.title is None:
-#             self.title = DocumentSection(self.root / "title.tex", self.git_root)
-#         if self.authors is None:
-#             self.authors = DocumentSection(self.root / "authors.tex", self.git_root)
-#         if self.keywords is None:
-#             self.keywords = DocumentSection(self.root / "keywords.tex", self.git_root)
-#         if self.journal_name is None:
-#             self.journal_name = DocumentSection(
-#                 self.root / "journal_name.tex", self.git_root
-#             )
-#         if self.editor is None:
-#             self.editor = self.root / "editor"
-#         if self.reviewer1 is None:
-#             self.reviewer1 = self.root / "reviewer1"
-#         if self.reviewer2 is None:
-#             self.reviewer2 = self.root / "reviewer2"
-#         if self.figures is None:
-#             self.figures = self.root / "figures"
-#         if self.tables is None:
-#             self.tables = self.root / "tables"
-#         if self.bibliography is None:
-#             self.bibliography = DocumentSection(
-#                 self.root / "bibliography.bib", self.git_root
-#             )
-#         if self.latex_styles is None:
-#             self.latex_styles = self.root / "latex_styles"
-# 
-#     def verify_structure(self) -> tuple[bool, list[str]]:
-#         """
-#         Verify revision contents structure.
-# 
-#         Returns:
-#             (is_valid, list_of_issues_with_paths)
-#         """
-#         issues = []
-# 
-#         # Check required directories
-#         if not self.figures.exists():
-#             expected_path = (
-#                 self.figures.relative_to(self.git_root)
-#                 if self.git_root
-#                 else self.figures
-#             )
-#             issues.append(f"Missing figures/ (expected at: {expected_path})")
-#         if not self.tables.exists():
-#             expected_path = (
-#                 self.tables.relative_to(self.git_root) if self.git_root else self.tables
-#             )
-#             issues.append(f"Missing tables/ (expected at: {expected_path})")
-#         if not self.latex_styles.exists():
-#             expected_path = (
-#                 self.latex_styles.relative_to(self.git_root)
-#                 if self.git_root
-#                 else self.latex_styles
-#             )
-#             issues.append(f"Missing latex_styles/ (expected at: {expected_path})")
-#         if not self.editor.exists():
-#             expected_path = (
-#                 self.editor.relative_to(self.git_root) if self.git_root else self.editor
-#             )
-#             issues.append(f"Missing editor/ (expected at: {expected_path})")
-# 
-#         return len(issues) == 0, issues
-# 
-# 
-# __all__ = ["RevisionContents"]
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/contents/_RevisionContents.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

@@ -1,130 +1,130 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.contents._SupplementaryContents."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.contents._SupplementaryContents import (
+    SupplementaryContents,
+)
+from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+
+
+class TestSupplementaryContentsCreation:
+    """Tests for SupplementaryContents instantiation."""
+
+    def test_creates_with_root_path(self, tmp_path):
+        """Verify SupplementaryContents creates with root path."""
+        contents = SupplementaryContents(root=tmp_path)
+        assert contents.root == tmp_path
+
+    def test_git_root_optional(self, tmp_path):
+        """Verify git_root defaults to None."""
+        contents = SupplementaryContents(root=tmp_path)
+        assert contents.git_root is None
+
+    def test_git_root_can_be_set(self, tmp_path):
+        """Verify git_root can be explicitly set."""
+        git_root = tmp_path / "project"
+        contents = SupplementaryContents(root=tmp_path, git_root=git_root)
+        assert contents.git_root == git_root
+
+
+class TestSupplementaryContentsPostInit:
+    """Tests for SupplementaryContents __post_init__ initialization."""
+
+    def test_methods_initialized(self, tmp_path):
+        """Verify methods DocumentSection is initialized."""
+        contents = SupplementaryContents(root=tmp_path)
+        assert isinstance(contents.methods, DocumentSection)
+        assert contents.methods.path == tmp_path / "methods.tex"
+
+    def test_results_initialized(self, tmp_path):
+        """Verify results DocumentSection is initialized."""
+        contents = SupplementaryContents(root=tmp_path)
+        assert isinstance(contents.results, DocumentSection)
+        assert contents.results.path == tmp_path / "results.tex"
+
+    def test_metadata_sections_initialized(self, tmp_path):
+        """Verify metadata sections are initialized."""
+        contents = SupplementaryContents(root=tmp_path)
+        assert contents.title.path == tmp_path / "title.tex"
+        assert contents.authors.path == tmp_path / "authors.tex"
+        assert contents.keywords.path == tmp_path / "keywords.tex"
+        assert contents.journal_name.path == tmp_path / "journal_name.tex"
+
+    def test_directory_paths_initialized(self, tmp_path):
+        """Verify directory paths are initialized."""
+        contents = SupplementaryContents(root=tmp_path)
+        assert contents.figures == tmp_path / "figures"
+        assert contents.tables == tmp_path / "tables"
+        assert contents.latex_styles == tmp_path / "latex_styles"
+
+    def test_bibliography_initialized(self, tmp_path):
+        """Verify bibliography DocumentSection is initialized."""
+        contents = SupplementaryContents(root=tmp_path)
+        assert isinstance(contents.bibliography, DocumentSection)
+        assert contents.bibliography.path == tmp_path / "bibliography.bib"
+
+    def test_wordcount_initialized(self, tmp_path):
+        """Verify wordcount DocumentSection is initialized."""
+        contents = SupplementaryContents(root=tmp_path)
+        assert isinstance(contents.wordcount, DocumentSection)
+        assert contents.wordcount.path == tmp_path / "wordcount.tex"
+
+    def test_git_root_passed_to_sections(self, tmp_path):
+        """Verify git_root is passed to DocumentSection instances."""
+        git_root = tmp_path / "project"
+        contents = SupplementaryContents(root=tmp_path, git_root=git_root)
+        assert contents.methods.git_root == git_root
+        assert contents.results.git_root == git_root
+
+
+class TestSupplementaryContentsVerifyStructure:
+    """Tests for SupplementaryContents verify_structure method."""
+
+    def test_verify_fails_when_no_dirs_exist(self, tmp_path):
+        """Verify returns False when required directories are missing."""
+        contents = SupplementaryContents(root=tmp_path)
+        is_valid, issues = contents.verify_structure()
+
+        assert is_valid is False
+        assert len(issues) == 3
+
+    def test_verify_fails_with_partial_dirs(self, tmp_path):
+        """Verify returns False when only some required directories exist."""
+        (tmp_path / "figures").mkdir()
+
+        contents = SupplementaryContents(root=tmp_path)
+        is_valid, issues = contents.verify_structure()
+
+        assert is_valid is False
+        assert len(issues) == 2
+
+    def test_verify_passes_with_all_required_dirs(self, tmp_path):
+        """Verify returns True when all required directories exist."""
+        (tmp_path / "figures").mkdir()
+        (tmp_path / "tables").mkdir()
+        (tmp_path / "latex_styles").mkdir()
+
+        contents = SupplementaryContents(root=tmp_path)
+        is_valid, issues = contents.verify_structure()
+
+        assert is_valid is True
+        assert len(issues) == 0
+
+    def test_verify_issues_list_contains_dirnames(self, tmp_path):
+        """Verify issues list contains descriptive entries."""
+        contents = SupplementaryContents(root=tmp_path)
+        _, issues = contents.verify_structure()
+
+        assert any("figures" in issue for issue in issues)
+        assert any("tables" in issue for issue in issues)
+        assert any("latex_styles" in issue for issue in issues)
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/contents/_SupplementaryContents.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-29 06:08:46 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/_SupplementaryContents.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/_SupplementaryContents.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# SupplementaryContents - dataclass for supplementary contents structure.
-# 
-# Represents the 02_supplementary/contents/ directory structure.
-# """
-# 
-# from pathlib import Path
-# from typing import Optional
-# from dataclasses import dataclass
-# 
-# from ..core import DocumentSection
-# 
-# 
-# @dataclass
-# class SupplementaryContents:
-#     """Contents subdirectory of supplementary (02_supplementary/contents/)."""
-# 
-#     root: Path
-#     git_root: Optional[Path] = None
-# 
-#     # Core sections
-#     methods: DocumentSection = None
-#     results: DocumentSection = None
-# 
-#     # Metadata
-#     title: DocumentSection = None
-#     authors: DocumentSection = None
-#     keywords: DocumentSection = None
-#     journal_name: DocumentSection = None
-# 
-#     # Files/directories
-#     figures: Path = None
-#     tables: Path = None
-#     bibliography: DocumentSection = None
-#     latex_styles: Path = None
-#     wordcount: DocumentSection = None
-# 
-#     def __post_init__(self):
-#         """Initialize all DocumentSection instances."""
-#         if self.methods is None:
-#             self.methods = DocumentSection(self.root / "methods.tex", self.git_root)
-#         if self.results is None:
-#             self.results = DocumentSection(self.root / "results.tex", self.git_root)
-#         if self.title is None:
-#             self.title = DocumentSection(self.root / "title.tex", self.git_root)
-#         if self.authors is None:
-#             self.authors = DocumentSection(self.root / "authors.tex", self.git_root)
-#         if self.keywords is None:
-#             self.keywords = DocumentSection(self.root / "keywords.tex", self.git_root)
-#         if self.journal_name is None:
-#             self.journal_name = DocumentSection(
-#                 self.root / "journal_name.tex", self.git_root
-#             )
-#         if self.figures is None:
-#             self.figures = self.root / "figures"
-#         if self.tables is None:
-#             self.tables = self.root / "tables"
-#         if self.bibliography is None:
-#             self.bibliography = DocumentSection(
-#                 self.root / "bibliography.bib", self.git_root
-#             )
-#         if self.latex_styles is None:
-#             self.latex_styles = self.root / "latex_styles"
-#         if self.wordcount is None:
-#             self.wordcount = DocumentSection(self.root / "wordcount.tex", self.git_root)
-# 
-#     def verify_structure(self) -> tuple[bool, list[str]]:
-#         """
-#         Verify supplementary contents structure.
-# 
-#         Returns:
-#             (is_valid, list_of_issues_with_paths)
-#         """
-#         issues = []
-# 
-#         # Check required directories
-#         if not self.figures.exists():
-#             expected_path = (
-#                 self.figures.relative_to(self.git_root)
-#                 if self.git_root
-#                 else self.figures
-#             )
-#             issues.append(f"Missing figures/ (expected at: {expected_path})")
-#         if not self.tables.exists():
-#             expected_path = (
-#                 self.tables.relative_to(self.git_root) if self.git_root else self.tables
-#             )
-#             issues.append(f"Missing tables/ (expected at: {expected_path})")
-#         if not self.latex_styles.exists():
-#             expected_path = (
-#                 self.latex_styles.relative_to(self.git_root)
-#                 if self.git_root
-#                 else self.latex_styles
-#             )
-#             issues.append(f"Missing latex_styles/ (expected at: {expected_path})")
-# 
-#         return len(issues) == 0, issues
-# 
-# 
-# __all__ = ["SupplementaryContents"]
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/contents/_SupplementaryContents.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])
