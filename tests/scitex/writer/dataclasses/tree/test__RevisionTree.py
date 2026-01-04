@@ -1,113 +1,93 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.tree._RevisionTree."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.contents._RevisionContents import RevisionContents
+from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+from scitex.writer.dataclasses.tree._RevisionTree import RevisionTree
+
+
+class TestRevisionTreeCreation:
+    """Tests for RevisionTree instantiation."""
+
+    def test_creates_with_root_path(self, tmp_path):
+        """Verify RevisionTree creates with root path."""
+        tree = RevisionTree(root=tmp_path)
+        assert tree.root == tmp_path
+
+    def test_git_root_optional(self, tmp_path):
+        """Verify git_root defaults to None."""
+        tree = RevisionTree(root=tmp_path)
+        assert tree.git_root is None
+
+
+class TestRevisionTreePostInit:
+    """Tests for RevisionTree __post_init__ initialization."""
+
+    def test_contents_initialized(self, tmp_path):
+        """Verify contents RevisionContents is initialized."""
+        tree = RevisionTree(root=tmp_path)
+        assert isinstance(tree.contents, RevisionContents)
+        assert tree.contents.root == tmp_path / "contents"
+
+    def test_base_initialized(self, tmp_path):
+        """Verify base DocumentSection is initialized."""
+        tree = RevisionTree(root=tmp_path)
+        assert isinstance(tree.base, DocumentSection)
+        assert tree.base.path == tmp_path / "base.tex"
+
+    def test_revision_initialized(self, tmp_path):
+        """Verify revision DocumentSection is initialized."""
+        tree = RevisionTree(root=tmp_path)
+        assert isinstance(tree.revision, DocumentSection)
+        assert tree.revision.path == tmp_path / "revision.tex"
+
+    def test_readme_initialized(self, tmp_path):
+        """Verify readme DocumentSection is initialized."""
+        tree = RevisionTree(root=tmp_path)
+        assert isinstance(tree.readme, DocumentSection)
+        assert tree.readme.path == tmp_path / "README.md"
+
+    def test_directory_paths_initialized(self, tmp_path):
+        """Verify directory paths are initialized."""
+        tree = RevisionTree(root=tmp_path)
+        assert tree.archive == tmp_path / "archive"
+        assert tree.docs == tmp_path / "docs"
+
+
+class TestRevisionTreeVerifyStructure:
+    """Tests for RevisionTree verify_structure method."""
+
+    def test_verify_fails_when_empty(self, tmp_path):
+        """Verify returns False when structure is empty."""
+        tree = RevisionTree(root=tmp_path)
+        is_valid, missing = tree.verify_structure()
+
+        assert is_valid is False
+        assert len(missing) > 0
+
+    def test_verify_passes_with_complete_structure(self, tmp_path):
+        """Verify returns True when structure is complete."""
+        contents = tmp_path / "contents"
+        contents.mkdir()
+        (contents / "figures").mkdir()
+        (contents / "tables").mkdir()
+        (contents / "latex_styles").mkdir()
+        (contents / "editor").mkdir()
+        (tmp_path / "base.tex").touch()
+        (tmp_path / "revision.tex").touch()
+
+        tree = RevisionTree(root=tmp_path)
+        is_valid, missing = tree.verify_structure()
+
+        assert is_valid is True
+        assert len(missing) == 0
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_RevisionTree.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-28 17:16:00 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_RevisionTree.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/tree/_RevisionTree.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# RevisionTree - dataclass for revision directory structure.
-# 
-# Represents the 03_revision/ directory with all subdirectories.
-# """
-# 
-# from pathlib import Path
-# from typing import Optional
-# from dataclasses import dataclass
-# 
-# from ..contents import RevisionContents
-# from ..core import DocumentSection
-# 
-# 
-# @dataclass
-# class RevisionTree:
-#     """Revision directory structure (03_revision/)."""
-# 
-#     root: Path
-#     git_root: Optional[Path] = None
-# 
-#     # Contents subdirectory
-#     contents: RevisionContents = None
-# 
-#     # Root level files
-#     base: DocumentSection = None
-#     revision: DocumentSection = None
-#     readme: DocumentSection = None
-# 
-#     # Directories
-#     archive: Path = None
-#     docs: Path = None
-# 
-#     def __post_init__(self):
-#         """Initialize all instances."""
-#         if self.contents is None:
-#             self.contents = RevisionContents(self.root / "contents", self.git_root)
-#         if self.base is None:
-#             self.base = DocumentSection(self.root / "base.tex", self.git_root)
-#         if self.revision is None:
-#             self.revision = DocumentSection(self.root / "revision.tex", self.git_root)
-#         if self.readme is None:
-#             self.readme = DocumentSection(self.root / "README.md", self.git_root)
-#         if self.archive is None:
-#             self.archive = self.root / "archive"
-#         if self.docs is None:
-#             self.docs = self.root / "docs"
-# 
-#     def verify_structure(self) -> tuple[bool, list[str]]:
-#         """
-#         Verify revision structure has required components.
-# 
-#         Returns:
-#             (is_valid, list_of_missing_items_with_paths)
-#         """
-#         missing = []
-# 
-#         # Check contents structure
-#         contents_valid, contents_issues = self.contents.verify_structure()
-#         if not contents_valid:
-#             # Contents already includes full paths, just pass them through
-#             missing.extend(contents_issues)
-# 
-#         # Check root level files
-#         if not self.base.path.exists():
-#             expected_path = (
-#                 self.base.path.relative_to(self.git_root)
-#                 if self.git_root
-#                 else self.base.path
-#             )
-#             missing.append(f"base.tex (expected at: {expected_path})")
-#         if not self.revision.path.exists():
-#             expected_path = (
-#                 self.revision.path.relative_to(self.git_root)
-#                 if self.git_root
-#                 else self.revision.path
-#             )
-#             missing.append(f"revision.tex (expected at: {expected_path})")
-# 
-#         return len(missing) == 0, missing
-# 
-# 
-# __all__ = ["RevisionTree"]
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_RevisionTree.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

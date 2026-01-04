@@ -1,181 +1,151 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.results._CompilationResult."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.results._CompilationResult import CompilationResult
+
+
+class TestCompilationResultCreation:
+    """Tests for CompilationResult instantiation."""
+
+    def test_required_fields(self):
+        """Verify required fields are set correctly."""
+        result = CompilationResult(
+            success=True,
+            exit_code=0,
+            stdout="Output",
+            stderr="",
+        )
+        assert result.success is True
+        assert result.exit_code == 0
+        assert result.stdout == "Output"
+        assert result.stderr == ""
+
+    def test_optional_fields_default_to_none_or_empty(self):
+        """Verify optional fields have proper defaults."""
+        result = CompilationResult(
+            success=True,
+            exit_code=0,
+            stdout="",
+            stderr="",
+        )
+        assert result.output_pdf is None
+        assert result.diff_pdf is None
+        assert result.log_file is None
+        assert result.duration == 0.0
+        assert result.errors == []
+        assert result.warnings == []
+
+    def test_optional_fields_can_be_set(self):
+        """Verify optional fields can be explicitly set."""
+        result = CompilationResult(
+            success=True,
+            exit_code=0,
+            stdout="",
+            stderr="",
+            output_pdf=Path("/tmp/output.pdf"),
+            diff_pdf=Path("/tmp/diff.pdf"),
+            log_file=Path("/tmp/compile.log"),
+            duration=10.5,
+            errors=["Error 1"],
+            warnings=["Warning 1", "Warning 2"],
+        )
+        assert result.output_pdf == Path("/tmp/output.pdf")
+        assert result.diff_pdf == Path("/tmp/diff.pdf")
+        assert result.log_file == Path("/tmp/compile.log")
+        assert result.duration == 10.5
+        assert result.errors == ["Error 1"]
+        assert result.warnings == ["Warning 1", "Warning 2"]
+
+
+class TestCompilationResultStr:
+    """Tests for CompilationResult __str__ method."""
+
+    def test_str_success(self):
+        """Verify string representation for successful compilation."""
+        result = CompilationResult(
+            success=True,
+            exit_code=0,
+            stdout="",
+            stderr="",
+            duration=5.25,
+        )
+        str_result = str(result)
+        assert "SUCCESS" in str_result
+        assert "exit code: 0" in str_result
+        assert "5.25s" in str_result
+
+    def test_str_failure(self):
+        """Verify string representation for failed compilation."""
+        result = CompilationResult(
+            success=False,
+            exit_code=1,
+            stdout="",
+            stderr="Error occurred",
+            duration=2.0,
+        )
+        str_result = str(result)
+        assert "FAILED" in str_result
+        assert "exit code: 1" in str_result
+
+    def test_str_with_output_pdf(self):
+        """Verify string representation includes output PDF."""
+        result = CompilationResult(
+            success=True,
+            exit_code=0,
+            stdout="",
+            stderr="",
+            output_pdf=Path("/tmp/manuscript.pdf"),
+        )
+        str_result = str(result)
+        assert "Output:" in str_result
+        assert "manuscript.pdf" in str_result
+
+    def test_str_with_errors_and_warnings(self):
+        """Verify string representation includes error/warning counts."""
+        result = CompilationResult(
+            success=False,
+            exit_code=1,
+            stdout="",
+            stderr="",
+            errors=["Error 1", "Error 2"],
+            warnings=["Warning 1"],
+        )
+        str_result = str(result)
+        assert "Errors: 2" in str_result
+        assert "Warnings: 1" in str_result
+
+
+class TestCompilationResultTypes:
+    """Tests for CompilationResult type handling."""
+
+    def test_errors_list_is_mutable(self):
+        """Verify errors list can be appended to."""
+        result = CompilationResult(
+            success=False,
+            exit_code=1,
+            stdout="",
+            stderr="",
+        )
+        result.errors.append("New error")
+        assert "New error" in result.errors
+
+    def test_warnings_list_is_mutable(self):
+        """Verify warnings list can be appended to."""
+        result = CompilationResult(
+            success=True,
+            exit_code=0,
+            stdout="",
+            stderr="",
+        )
+        result.warnings.append("New warning")
+        assert "New warning" in result.warnings
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/results/_CompilationResult.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-29 06:08:35 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/_CompilationResult.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/_CompilationResult.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# CompilationResult - dataclass for LaTeX compilation results.
-# """
-# 
-# from dataclasses import dataclass
-# from dataclasses import field
-# from pathlib import Path
-# from typing import Optional
-# from typing import List
-# 
-# 
-# @dataclass
-# class CompilationResult:
-#     """Result of LaTeX compilation."""
-# 
-#     success: bool
-#     """Whether compilation succeeded (exit code 0)"""
-# 
-#     exit_code: int
-#     """Process exit code"""
-# 
-#     stdout: str
-#     """Standard output from compilation"""
-# 
-#     stderr: str
-#     """Standard error from compilation"""
-# 
-#     output_pdf: Optional[Path] = None
-#     """Path to generated PDF (if successful)"""
-# 
-#     diff_pdf: Optional[Path] = None
-#     """Path to diff PDF with tracked changes (if generated)"""
-# 
-#     log_file: Optional[Path] = None
-#     """Path to compilation log file"""
-# 
-#     duration: float = 0.0
-#     """Compilation duration in seconds"""
-# 
-#     errors: List[str] = field(default_factory=list)
-#     """Parsed LaTeX errors (if any)"""
-# 
-#     warnings: List[str] = field(default_factory=list)
-#     """Parsed LaTeX warnings (if any)"""
-# 
-#     def __str__(self):
-#         """Human-readable summary."""
-#         status = "SUCCESS" if self.success else "FAILED"
-#         lines = [
-#             f"Compilation {status} (exit code: {self.exit_code})",
-#             f"Duration: {self.duration:.2f}s",
-#         ]
-#         if self.output_pdf:
-#             lines.append(f"Output: {self.output_pdf}")
-#         if self.errors:
-#             lines.append(f"Errors: {len(self.errors)}")
-#         if self.warnings:
-#             lines.append(f"Warnings: {len(self.warnings)}")
-#         return "\n".join(lines)
-# 
-# 
-# def run_session() -> None:
-#     """Initialize scitex framework, run main function, and cleanup."""
-#     global CONFIG, CC, sys, plt, rng
-#     import sys
-#     import matplotlib.pyplot as plt
-#     import scitex as stx
-# 
-#     args = parse_args()
-# 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-#         sys,
-#         plt,
-#         args=args,
-#         file=__FILE__,
-#         sdir_suffix=None,
-#         verbose=False,
-#         agg=True,
-#     )
-# 
-#     exit_status = main(args)
-# 
-#     stx.session.close(
-#         CONFIG,
-#         verbose=False,
-#         notify=False,
-#         message="",
-#         exit_status=exit_status,
-#     )
-# 
-# 
-# def main(args):
-#     result = CompilationResult(
-#         success=args.success,
-#         exit_code=args.exit_code,
-#         stdout="Sample stdout",
-#         stderr="Sample stderr" if not args.success else "",
-#         output_pdf=Path(args.pdf) if args.pdf else None,
-#         duration=args.duration,
-#         errors=["Error 1", "Error 2"] if not args.success else [],
-#         warnings=["Warning 1"] if args.warnings else [],
-#     )
-# 
-#     print(result)
-#     return 0
-# 
-# 
-# def parse_args():
-#     import argparse
-# 
-#     parser = argparse.ArgumentParser(
-#         description="Demonstrate CompilationResult dataclass"
-#     )
-#     parser.add_argument(
-#         "--success",
-#         action="store_true",
-#         help="Simulate successful compilation",
-#     )
-#     parser.add_argument(
-#         "--exit-code",
-#         type=int,
-#         default=1,
-#         help="Exit code (default: 1)",
-#     )
-#     parser.add_argument(
-#         "--pdf",
-#         type=str,
-#         help="Output PDF path",
-#     )
-#     parser.add_argument(
-#         "--duration",
-#         type=float,
-#         default=5.0,
-#         help="Compilation duration in seconds (default: 5.0)",
-#     )
-#     parser.add_argument(
-#         "--warnings",
-#         action="store_true",
-#         help="Include warnings",
-#     )
-# 
-#     return parser.parse_args()
-# 
-# 
-# if __name__ == "__main__":
-#     run_session()
-# 
-# 
-# __all__ = ["CompilationResult"]
-# 
-# # python -m scitex.writer.dataclasses.results._CompilationResult --success --pdf ./manuscript.pdf --duration 10.5
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/results/_CompilationResult.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

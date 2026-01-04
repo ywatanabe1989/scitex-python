@@ -1,162 +1,142 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.core._Document."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.core._Document import Document
+from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+
+
+class TestDocumentCreation:
+    """Tests for Document instantiation."""
+
+    def test_creates_with_doc_dir(self, tmp_path):
+        """Verify Document creates with doc_dir."""
+        doc = Document(doc_dir=tmp_path)
+        assert doc.dir == tmp_path
+
+    def test_git_root_optional(self, tmp_path):
+        """Verify git_root defaults to None."""
+        doc = Document(doc_dir=tmp_path)
+        assert doc.git_root is None
+
+    def test_git_root_can_be_set(self, tmp_path):
+        """Verify git_root can be explicitly set."""
+        git_root = tmp_path / "project"
+        doc = Document(doc_dir=tmp_path, git_root=git_root)
+        assert doc.git_root == git_root
+
+
+class TestDocumentGetattr:
+    """Tests for Document __getattr__ dynamic attribute lookup."""
+
+    def test_getattr_returns_document_section(self, tmp_path):
+        """Verify attribute access returns DocumentSection."""
+        doc = Document(doc_dir=tmp_path)
+        section = doc.introduction
+
+        assert isinstance(section, DocumentSection)
+
+    def test_getattr_builds_correct_path(self, tmp_path):
+        """Verify attribute access builds correct path."""
+        doc = Document(doc_dir=tmp_path)
+        section = doc.introduction
+
+        expected_path = tmp_path / "contents" / "introduction.tex"
+        assert section.path == expected_path
+
+    def test_getattr_works_for_arbitrary_names(self, tmp_path):
+        """Verify attribute access works for any name."""
+        doc = Document(doc_dir=tmp_path)
+
+        assert doc.methods.path == tmp_path / "contents" / "methods.tex"
+        assert doc.results.path == tmp_path / "contents" / "results.tex"
+        assert doc.discussion.path == tmp_path / "contents" / "discussion.tex"
+        assert doc.custom_section.path == tmp_path / "contents" / "custom_section.tex"
+
+    def test_getattr_passes_git_root(self, tmp_path):
+        """Verify git_root is passed to DocumentSection."""
+        git_root = tmp_path / "project"
+        doc = Document(doc_dir=tmp_path, git_root=git_root)
+        section = doc.introduction
+
+        assert section.git_root == git_root
+
+    def test_getattr_private_attribute_raises(self, tmp_path):
+        """Verify accessing private attributes raises AttributeError."""
+        doc = Document(doc_dir=tmp_path)
+
+        with pytest.raises(AttributeError, match="has no attribute '_private'"):
+            _ = doc._private
+
+    def test_getattr_dunder_attribute_raises(self, tmp_path):
+        """Verify accessing dunder attributes raises AttributeError."""
+        doc = Document(doc_dir=tmp_path)
+
+        # Python's name mangling transforms __attr to _ClassName__attr
+        # So we use getattr to test the actual behavior
+        with pytest.raises(AttributeError):
+            getattr(doc, "__something")
+
+
+class TestDocumentRepr:
+    """Tests for Document __repr__ method."""
+
+    def test_repr_contains_class_name(self, tmp_path):
+        """Verify repr contains class name."""
+        doc = Document(doc_dir=tmp_path)
+        repr_str = repr(doc)
+
+        assert "Document" in repr_str
+
+    def test_repr_contains_dir_name(self, tmp_path):
+        """Verify repr contains directory name."""
+        doc = Document(doc_dir=tmp_path / "01_manuscript")
+        repr_str = repr(doc)
+
+        assert "01_manuscript" in repr_str
+
+
+class TestDocumentWithContents:
+    """Tests for Document with actual contents directory."""
+
+    def test_can_read_existing_file(self, tmp_path):
+        """Verify Document can read existing file through section."""
+        contents_dir = tmp_path / "contents"
+        contents_dir.mkdir()
+
+        intro_file = contents_dir / "introduction.tex"
+        intro_file.write_text("\\section{Introduction}\nThis is the intro.")
+
+        doc = Document(doc_dir=tmp_path)
+        content = doc.introduction.read()
+
+        assert content is not None
+        assert "Introduction" in str(content)
+
+    def test_section_read_nonexistent_returns_none(self, tmp_path):
+        """Verify reading nonexistent section returns None."""
+        doc = Document(doc_dir=tmp_path)
+        content = doc.nonexistent.read()
+
+        assert content is None
+
+    def test_can_write_to_section(self, tmp_path):
+        """Verify Document can write to section."""
+        contents_dir = tmp_path / "contents"
+        contents_dir.mkdir()
+
+        doc = Document(doc_dir=tmp_path)
+        result = doc.methods.write("\\section{Methods}\nNew content.")
+
+        assert result is True
+        assert (contents_dir / "methods.tex").exists()
+        assert "Methods" in (contents_dir / "methods.tex").read_text()
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/core/_Document.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-29 06:08:38 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/_Document.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/_Document.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# Base Document class for document type accessors.
-# 
-# Provides dynamic file access via attribute lookups.
-# """
-# 
-# from pathlib import Path
-# from typing import Optional
-# 
-# from ._DocumentSection import DocumentSection
-# 
-# 
-# class Document:
-#     """
-#     Base document accessor.
-# 
-#     Provides dynamic file access by mapping attribute names to .tex files:
-#     - document.introduction -> introduction.tex
-#     - document.methods -> methods.tex
-#     - Custom: document.custom_section -> custom_section.tex
-#     """
-# 
-#     def __init__(self, doc_dir: Path, git_root: Optional[Path] = None):
-#         """
-#         Initialize document accessor.
-# 
-#         Args:
-#             doc_dir: Path to document directory (contains 'contents/' subdirectory)
-#             git_root: Path to git repository root (optional, for efficiency)
-#         """
-#         self.dir = doc_dir
-#         self.git_root = git_root
-# 
-#     def __getattr__(self, name: str) -> DocumentSection:
-#         """
-#         Get file path by name (e.g., introduction -> introduction.tex).
-# 
-#         Args:
-#             name: Section name without .tex extension
-# 
-#         Returns:
-#             DocumentSection for the requested file
-# 
-#         Example:
-#             >>> manuscript = ManuscriptDocument(Path("01_manuscript"))
-#             >>> manuscript.introduction.read()  # Reads contents/introduction.tex
-#         """
-#         if name.startswith("_"):
-#             # Avoid infinite recursion for private attributes
-#             raise AttributeError(
-#                 f"'{self.__class__.__name__}' has no attribute '{name}'"
-#             )
-# 
-#         file_path = self.dir / "contents" / f"{name}.tex"
-#         return DocumentSection(file_path, git_root=self.git_root)
-# 
-#     def __repr__(self) -> str:
-#         """String representation."""
-#         return f"{self.__class__.__name__}({self.dir.name})"
-# 
-# 
-# def run_session() -> None:
-#     """Initialize scitex framework, run main function, and cleanup."""
-#     global CONFIG, CC, sys, plt, rng
-#     import sys
-#     import matplotlib.pyplot as plt
-#     import scitex as stx
-# 
-#     args = parse_args()
-# 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-#         sys,
-#         plt,
-#         args=args,
-#         file=__FILE__,
-#         sdir_suffix=None,
-#         verbose=False,
-#         agg=True,
-#     )
-# 
-#     exit_status = main(args)
-# 
-#     stx.session.close(
-#         CONFIG,
-#         verbose=False,
-#         notify=False,
-#         message="",
-#         exit_status=exit_status,
-#     )
-# 
-# 
-# def main(args):
-#     doc = Document(Path(args.dir))
-# 
-#     print(f"Document: {doc}")
-#     print(f"Directory: {doc.dir}")
-# 
-#     contents_dir = doc.dir / "contents"
-#     if contents_dir.exists():
-#         tex_files = list(contents_dir.glob("*.tex"))
-#         print(f"\nAvailable sections ({len(tex_files)}):")
-#         for tex_file in sorted(tex_files):
-#             section_name = tex_file.stem
-#             print(f"  - {section_name}")
-# 
-#     return 0
-# 
-# 
-# def parse_args():
-#     import argparse
-# 
-#     parser = argparse.ArgumentParser(
-#         description="Demonstrate Document accessor functionality"
-#     )
-#     parser.add_argument(
-#         "--dir",
-#         "-d",
-#         type=str,
-#         required=True,
-#         help="Path to document directory",
-#     )
-# 
-#     return parser.parse_args()
-# 
-# 
-# if __name__ == "__main__":
-#     run_session()
-# 
-# 
-# __all__ = ["Document"]
-# 
-# # python -m scitex.writer.dataclasses.core._Document --dir ./01_manuscript
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/core/_Document.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

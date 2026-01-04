@@ -1,213 +1,185 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer._validate_tree_structures."""
+
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from scitex.writer._validate_tree_structures import (
+    ProjectValidationError,
+    _validate_tree_structure_base,
+    validate_tree_structures,
+)
+
+
+class TestProjectValidationError:
+    """Tests for ProjectValidationError exception class."""
+
+    def test_inherits_from_exception(self):
+        """Verify ProjectValidationError inherits from Exception."""
+        assert issubclass(ProjectValidationError, Exception)
+
+    def test_can_be_raised(self):
+        """Verify ProjectValidationError can be raised with message."""
+        with pytest.raises(ProjectValidationError, match="test error"):
+            raise ProjectValidationError("test error")
+
+
+class TestValidateTreeStructureBase:
+    """Tests for _validate_tree_structure_base function."""
+
+    def test_raises_when_directory_missing(self, tmp_path):
+        """Verify raises ProjectValidationError when directory is missing."""
+        with pytest.raises(ProjectValidationError, match="Required directory missing"):
+            _validate_tree_structure_base(tmp_path, "nonexistent_dir")
+
+    def test_returns_true_when_directory_exists_no_tree_class(self, tmp_path):
+        """Verify returns True when directory exists and no tree_class."""
+        (tmp_path / "test_dir").mkdir()
+
+        result = _validate_tree_structure_base(tmp_path, "test_dir")
+
+        assert result is True
+
+    def test_calls_tree_class_verify_structure(self, tmp_path):
+        """Verify tree_class.verify_structure is called."""
+        (tmp_path / "test_dir").mkdir()
+
+        mock_tree_class = MagicMock()
+        mock_tree_instance = MagicMock()
+        mock_tree_instance.verify_structure.return_value = (True, [])
+        mock_tree_class.return_value = mock_tree_instance
+
+        result = _validate_tree_structure_base(
+            tmp_path, "test_dir", tree_class=mock_tree_class
+        )
+
+        mock_tree_class.assert_called_once()
+        mock_tree_instance.verify_structure.assert_called_once()
+        assert result is True
+
+    def test_raises_when_structure_invalid(self, tmp_path):
+        """Verify raises when verify_structure returns invalid."""
+        (tmp_path / "test_dir").mkdir()
+
+        mock_tree_class = MagicMock()
+        mock_tree_instance = MagicMock()
+        mock_tree_instance.verify_structure.return_value = (
+            False,
+            ["Missing file", "Missing directory"],
+        )
+        mock_tree_class.return_value = mock_tree_instance
+
+        with pytest.raises(ProjectValidationError, match="structure invalid"):
+            _validate_tree_structure_base(
+                tmp_path, "test_dir", tree_class=mock_tree_class
+            )
+
+
+class TestValidateTreeStructures:
+    """Tests for validate_tree_structures function."""
+
+    def test_validates_all_tree_types(self, tmp_path):
+        """Verify validates all tree structures."""
+        # Create minimal structure for all trees
+        (tmp_path / "config").mkdir()
+        (tmp_path / "00_shared").mkdir()
+        (tmp_path / "01_manuscript").mkdir()
+        (tmp_path / "02_supplementary").mkdir()
+        (tmp_path / "03_revision").mkdir()
+        (tmp_path / "scripts").mkdir()
+
+        # Mock all internal validation functions
+        with patch(
+            "scitex.writer._validate_tree_structures._validate_config_structure",
+            return_value=True,
+        ), patch(
+            "scitex.writer._validate_tree_structures._validate_00_shared_structure",
+            return_value=True,
+        ), patch(
+            "scitex.writer._validate_tree_structures._validate_01_manuscript_structure",
+            return_value=True,
+        ), patch(
+            "scitex.writer._validate_tree_structures._validate_02_supplementary_structure",
+            return_value=True,
+        ), patch(
+            "scitex.writer._validate_tree_structures._validate_03_revision_structure",
+            return_value=True,
+        ), patch(
+            "scitex.writer._validate_tree_structures._validate_scripts_structure",
+            return_value=True,
+        ):
+            result = validate_tree_structures(tmp_path)
+
+            assert result is True
+
+    def test_accepts_path_object(self, tmp_path):
+        """Verify accepts Path object."""
+        # Create minimal structure
+        for dir_name in [
+            "config",
+            "00_shared",
+            "01_manuscript",
+            "02_supplementary",
+            "03_revision",
+            "scripts",
+        ]:
+            (tmp_path / dir_name).mkdir()
+
+        with patch(
+            "scitex.writer._validate_tree_structures._validate_config_structure",
+            return_value=True,
+        ), patch(
+            "scitex.writer._validate_tree_structures._validate_00_shared_structure",
+            return_value=True,
+        ), patch(
+            "scitex.writer._validate_tree_structures._validate_01_manuscript_structure",
+            return_value=True,
+        ), patch(
+            "scitex.writer._validate_tree_structures._validate_02_supplementary_structure",
+            return_value=True,
+        ), patch(
+            "scitex.writer._validate_tree_structures._validate_03_revision_structure",
+            return_value=True,
+        ), patch(
+            "scitex.writer._validate_tree_structures._validate_scripts_structure",
+            return_value=True,
+        ):
+            # Should not raise
+            result = validate_tree_structures(Path(tmp_path))
+
+            assert result is True
+
+
+class TestTreeValidators:
+    """Tests for TREE_VALIDATORS configuration."""
+
+    def test_tree_validators_has_expected_keys(self):
+        """Verify TREE_VALIDATORS has expected keys."""
+        from scitex.writer._validate_tree_structures import TREE_VALIDATORS
+
+        expected_keys = [
+            "config",
+            "00_shared",
+            "01_manuscript",
+            "02_supplementary",
+            "03_revision",
+            "scripts",
+        ]
+        for key in expected_keys:
+            assert key in TREE_VALIDATORS
+
+    def test_tree_validators_have_dir_name_and_tree_class(self):
+        """Verify each validator has dir_name and tree_class."""
+        from scitex.writer._validate_tree_structures import TREE_VALIDATORS
+
+        for key, validator in TREE_VALIDATORS.items():
+            assert "dir_name" in validator
+            assert "tree_class" in validator
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_validate_tree_structures.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-29 06:13:05 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_validate_tree_structures.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/_validate_tree_structures.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# import argparse
-# 
-# """Project structure validation for writer module.
-# 
-# Leverages dataclass verify_structure() methods for validation."""
-# 
-# from pathlib import Path
-# from scitex.logging import getLogger
-# from .dataclasses import ManuscriptTree
-# from .dataclasses import SupplementaryTree
-# from .dataclasses import RevisionTree
-# from .dataclasses import ConfigTree
-# from .dataclasses import ScriptsTree
-# from .dataclasses import SharedTree
-# 
-# logger = getLogger(__name__)
-# 
-# # Parameters
-# TREE_VALIDATORS = {
-#     "config": {"dir_name": "config", "tree_class": ConfigTree},
-#     "00_shared": {"dir_name": "00_shared", "tree_class": SharedTree},
-#     "01_manuscript": {
-#         "dir_name": "01_manuscript",
-#         "tree_class": ManuscriptTree,
-#     },
-#     "02_supplementary": {
-#         "dir_name": "02_supplementary",
-#         "tree_class": SupplementaryTree,
-#     },
-#     "03_revision": {"dir_name": "03_revision", "tree_class": RevisionTree},
-#     "scripts": {"dir_name": "scripts", "tree_class": ScriptsTree},
-# }
-# 
-# 
-# # Exception classes
-# class ProjectValidationError(Exception):
-#     """Raised when project structure is invalid."""
-# 
-#     pass
-# 
-# 
-# # 2. Public validation functions
-# def validate_tree_structures(
-#     project_dir: Path, func_name="validate_tree_structures"
-# ) -> None:
-#     """Validates all tree structures in the project directory."""
-#     logger.info(
-#         f"{func_name}: Validating tree structures: {Path(project_dir).absolute()}..."
-#     )
-#     project_dir = Path(project_dir)
-#     for dir_name, (dir_path, tree_class) in TREE_VALIDATORS.items():
-#         validator_func_name = f"_validate_{dir_name}_structure"
-#         eval(validator_func_name)(project_dir)
-#     logger.success(
-#         f"{func_name}: Validated tree structures: {Path(project_dir).absolute()}"
-#     )
-#     return True
-# 
-# 
-# # 3. Internal validation functions
-# def _validate_01_manuscript_structure(project_dir: Path) -> bool:
-#     """Validates manuscript structure."""
-#     return _validate_tree_structure_base(
-#         project_dir, **TREE_VALIDATORS["01_manuscript"]
-#     )
-# 
-# 
-# def _validate_02_supplementary_structure(project_dir: Path) -> bool:
-#     """Validates supplementary structure."""
-#     return _validate_tree_structure_base(
-#         project_dir, **TREE_VALIDATORS["02_supplementary"]
-#     )
-# 
-# 
-# def _validate_03_revision_structure(project_dir: Path) -> bool:
-#     """Validates revision structure."""
-#     return _validate_tree_structure_base(project_dir, **TREE_VALIDATORS["03_revision"])
-# 
-# 
-# def _validate_config_structure(project_dir: Path) -> bool:
-#     """Validates config structure."""
-#     return _validate_tree_structure_base(project_dir, **TREE_VALIDATORS["config"])
-# 
-# 
-# def _validate_scripts_structure(project_dir: Path) -> bool:
-#     """Validates scripts structure."""
-#     return _validate_tree_structure_base(project_dir, **TREE_VALIDATORS["scripts"])
-# 
-# 
-# def _validate_00_shared_structure(project_dir: Path) -> bool:
-#     """Validates shared structure."""
-#     return _validate_tree_structure_base(project_dir, **TREE_VALIDATORS["00_shared"])
-# 
-# 
-# # 4. Helper functions
-# def _validate_tree_structure_base(
-#     project_dir: Path, dir_name: str, tree_class: type = None
-# ) -> bool:
-#     """Base validation function that checks directory existence and verifies structure using tree class.
-# 
-#     Args:
-#         project_dir: Root project directory
-#         dir_name: Name of directory to validate
-#         tree_class: Tree class with verify_structure method
-# 
-#     Returns:
-#         True if structure is valid
-# 
-#     Raises:
-#         ProjectValidationError: If directory missing or structure invalid
-#     """
-#     project_dir = Path(project_dir)
-#     target_dir = project_dir / dir_name
-#     if not target_dir.exists():
-#         raise ProjectValidationError(f"Required directory missing: {target_dir}")
-#     if tree_class is not None:
-#         doc = tree_class(target_dir, git_root=project_dir)
-#         is_valid, issues = doc.verify_structure()
-#         if not is_valid:
-#             raise ProjectValidationError(
-#                 f"{dir_name} structure invalid:\n"
-#                 + "\n".join(f"  - {issue}" for issue in issues)
-#             )
-#     logger.debug(f"{dir_name} structure valid: {project_dir}")
-#     return True
-# 
-# 
-# # 1. Main entry point
-# def run_session() -> None:
-#     """Initialize scitex framework, run main function, and cleanup."""
-#     global CONFIG, CC, sys, plt, rng
-#     import sys
-#     import matplotlib.pyplot as plt
-#     import scitex as stx
-# 
-#     args = parse_args()
-# 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-#         sys,
-#         plt,
-#         args=args,
-#         file=__FILE__,
-#         sdir_suffix=None,
-#         verbose=False,
-#         agg=True,
-#     )
-# 
-#     exit_status = main(args)
-# 
-#     stx.session.close(
-#         CONFIG,
-#         verbose=False,
-#         notify=False,
-#         message="",
-#         exit_status=exit_status,
-#     )
-# 
-# 
-# def main(args):
-#     project_dir = Path(args.dir) if args.dir else Path.cwd()
-#     validate_tree_structures(project_dir)
-#     return 0
-# 
-# 
-# def parse_args() -> argparse.Namespace:
-#     parser = argparse.ArgumentParser(
-#         description="Validate scitex writer project structure"
-#     )
-#     parser.add_argument(
-#         "--dir",
-#         "-d",
-#         type=str,
-#         default=None,
-#         help="Project directory to validate (default: current directory)",
-#     )
-#     args = parser.parse_args()
-#     return args
-# 
-# 
-# if __name__ == "__main__":
-#     run_session()
-# 
-# # python -m scitex.writer._validate_tree_structures --dir ./my_paper
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_validate_tree_structures.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

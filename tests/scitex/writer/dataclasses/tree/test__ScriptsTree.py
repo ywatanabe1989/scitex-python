@@ -1,134 +1,112 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.tree._ScriptsTree."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+from scitex.writer.dataclasses.tree._ScriptsTree import ScriptsTree
+
+
+class TestScriptsTreeCreation:
+    """Tests for ScriptsTree instantiation."""
+
+    def test_creates_with_root_path(self, tmp_path):
+        """Verify ScriptsTree creates with root path."""
+        tree = ScriptsTree(root=tmp_path)
+        assert tree.root == tmp_path
+
+    def test_git_root_optional(self, tmp_path):
+        """Verify git_root defaults to None."""
+        tree = ScriptsTree(root=tmp_path)
+        assert tree.git_root is None
+
+
+class TestScriptsTreePostInit:
+    """Tests for ScriptsTree __post_init__ initialization."""
+
+    def test_subdirectories_initialized(self, tmp_path):
+        """Verify subdirectory paths are initialized."""
+        tree = ScriptsTree(root=tmp_path)
+        assert tree.examples == tmp_path / "examples"
+        assert tree.installation == tmp_path / "installation"
+        assert tree.powershell == tmp_path / "powershell"
+        assert tree.python == tmp_path / "python"
+        assert tree.shell == tmp_path / "shell"
+
+    def test_compile_manuscript_initialized(self, tmp_path):
+        """Verify compile_manuscript DocumentSection is initialized."""
+        tree = ScriptsTree(root=tmp_path)
+        assert isinstance(tree.compile_manuscript, DocumentSection)
+        assert (
+            tree.compile_manuscript.path == tmp_path / "shell" / "compile_manuscript.sh"
+        )
+
+    def test_compile_supplementary_initialized(self, tmp_path):
+        """Verify compile_supplementary DocumentSection is initialized."""
+        tree = ScriptsTree(root=tmp_path)
+        assert isinstance(tree.compile_supplementary, DocumentSection)
+        assert (
+            tree.compile_supplementary.path
+            == tmp_path / "shell" / "compile_supplementary.sh"
+        )
+
+    def test_compile_revision_initialized(self, tmp_path):
+        """Verify compile_revision DocumentSection is initialized."""
+        tree = ScriptsTree(root=tmp_path)
+        assert isinstance(tree.compile_revision, DocumentSection)
+        assert tree.compile_revision.path == tmp_path / "shell" / "compile_revision.sh"
+
+    def test_watch_compile_initialized(self, tmp_path):
+        """Verify watch_compile DocumentSection is initialized."""
+        tree = ScriptsTree(root=tmp_path)
+        assert isinstance(tree.watch_compile, DocumentSection)
+        assert tree.watch_compile.path == tmp_path / "shell" / "watch_compile.sh"
+
+
+class TestScriptsTreeVerifyStructure:
+    """Tests for ScriptsTree verify_structure method."""
+
+    def test_verify_fails_when_empty(self, tmp_path):
+        """Verify returns False when required directories/files are missing."""
+        tree = ScriptsTree(root=tmp_path)
+        is_valid, missing = tree.verify_structure()
+
+        assert is_valid is False
+        assert len(missing) == 5
+
+    def test_verify_passes_with_complete_structure(self, tmp_path):
+        """Verify returns True when structure is complete."""
+        (tmp_path / "python").mkdir()
+        shell_dir = tmp_path / "shell"
+        shell_dir.mkdir()
+        (shell_dir / "compile_manuscript.sh").touch()
+        (shell_dir / "compile_supplementary.sh").touch()
+        (shell_dir / "compile_revision.sh").touch()
+
+        tree = ScriptsTree(root=tmp_path)
+        is_valid, missing = tree.verify_structure()
+
+        assert is_valid is True
+        assert len(missing) == 0
+
+    def test_verify_watch_compile_not_required(self, tmp_path):
+        """Verify watch_compile.sh is not required."""
+        (tmp_path / "python").mkdir()
+        shell_dir = tmp_path / "shell"
+        shell_dir.mkdir()
+        (shell_dir / "compile_manuscript.sh").touch()
+        (shell_dir / "compile_supplementary.sh").touch()
+        (shell_dir / "compile_revision.sh").touch()
+
+        tree = ScriptsTree(root=tmp_path)
+        is_valid, _ = tree.verify_structure()
+
+        assert is_valid is True
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_ScriptsTree.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-28 17:16:00 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_ScriptsTree.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/tree/_ScriptsTree.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# ScriptsTree - dataclass for scripts directory structure.
-# 
-# Represents the scripts/ directory with compilation and helper scripts.
-# """
-# 
-# from pathlib import Path
-# from typing import Optional
-# from dataclasses import dataclass
-# 
-# from ..core import DocumentSection
-# 
-# 
-# @dataclass
-# class ScriptsTree:
-#     """Scripts directory structure (scripts/)."""
-# 
-#     root: Path
-#     git_root: Optional[Path] = None
-# 
-#     # Subdirectories
-#     examples: Path = None
-#     installation: Path = None
-#     powershell: Path = None
-#     python: Path = None
-#     shell: Path = None
-# 
-#     # Shell compilation scripts
-#     compile_manuscript: DocumentSection = None
-#     compile_supplementary: DocumentSection = None
-#     compile_revision: DocumentSection = None
-#     watch_compile: DocumentSection = None
-# 
-#     def __post_init__(self):
-#         """Initialize all Path and DocumentSection instances."""
-#         if self.examples is None:
-#             self.examples = self.root / "examples"
-#         if self.installation is None:
-#             self.installation = self.root / "installation"
-#         if self.powershell is None:
-#             self.powershell = self.root / "powershell"
-#         if self.python is None:
-#             self.python = self.root / "python"
-#         if self.shell is None:
-#             self.shell = self.root / "shell"
-# 
-#         # Initialize compilation scripts
-#         if self.compile_manuscript is None:
-#             self.compile_manuscript = DocumentSection(
-#                 self.shell / "compile_manuscript.sh", self.git_root
-#             )
-#         if self.compile_supplementary is None:
-#             self.compile_supplementary = DocumentSection(
-#                 self.shell / "compile_supplementary.sh", self.git_root
-#             )
-#         if self.compile_revision is None:
-#             self.compile_revision = DocumentSection(
-#                 self.shell / "compile_revision.sh", self.git_root
-#             )
-#         if self.watch_compile is None:
-#             self.watch_compile = DocumentSection(
-#                 self.shell / "watch_compile.sh", self.git_root
-#             )
-# 
-#     def verify_structure(self) -> tuple[bool, list[str]]:
-#         """
-#         Verify scripts structure has required directories and scripts.
-# 
-#         Returns:
-#             (is_valid, list_of_missing_items_with_paths)
-#         """
-#         missing = []
-# 
-#         # Check required directories
-#         required_dirs = [
-#             ("python", self.python),
-#             ("shell", self.shell),
-#         ]
-#         for name, path in required_dirs:
-#             if not path.exists():
-#                 expected_path = (
-#                     path.relative_to(self.git_root) if self.git_root else path
-#                 )
-#                 missing.append(f"Missing {name}/ (expected at: {expected_path})")
-# 
-#         # Check required compilation scripts
-#         required_scripts = [
-#             ("compile_manuscript.sh", self.compile_manuscript),
-#             ("compile_supplementary.sh", self.compile_supplementary),
-#             ("compile_revision.sh", self.compile_revision),
-#         ]
-#         for name, section in required_scripts:
-#             if not section.path.exists():
-#                 expected_path = (
-#                     section.path.relative_to(self.git_root)
-#                     if self.git_root
-#                     else section.path
-#                 )
-#                 missing.append(f"Missing {name} (expected at: {expected_path})")
-# 
-#         return len(missing) == 0, missing
-# 
-# 
-# __all__ = ["ScriptsTree"]
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_ScriptsTree.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])
