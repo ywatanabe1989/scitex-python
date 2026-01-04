@@ -13,7 +13,7 @@ import psycopg2
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../src')))
 
-from scitex.db._PostgreSQLMixins import _RowMixin
+from scitex.db._postgresql._PostgreSQLMixins import _RowMixin
 
 
 class MockRowMixin(_RowMixin):
