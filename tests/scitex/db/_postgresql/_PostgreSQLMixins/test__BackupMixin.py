@@ -13,7 +13,7 @@ pytest.importorskip("psycopg2")
 import subprocess
 import os
 from unittest.mock import MagicMock, patch, call
-from scitex.db._PostgreSQLMixins import _BackupMixin
+from scitex.db._postgresql._PostgreSQLMixins import _BackupMixin
 
 
 class TestPostgreSQLBackupMixin:

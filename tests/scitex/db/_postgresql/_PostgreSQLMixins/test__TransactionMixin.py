@@ -10,7 +10,7 @@ import pytest
 pytest.importorskip("psycopg2")
 from unittest.mock import MagicMock, patch, call
 import psycopg2
-from scitex.db._PostgreSQLMixins import _TransactionMixin
+from scitex.db._postgresql._PostgreSQLMixins import _TransactionMixin
 
 
 class TestTransactionMixin:
