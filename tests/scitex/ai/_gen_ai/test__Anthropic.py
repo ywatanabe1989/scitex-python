@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-06-13 23:02:31 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/SciTeX-Code/tests/scitex/ai/_gen_ai/test__Anthropic.py
 # ----------------------------------------
 import os
-__FILE__ = (
-    "./tests/scitex/ai/_gen_ai/test__Anthropic.py"
-)
+
+__FILE__ = "./tests/scitex/ai/_gen_ai/test__Anthropic.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -17,6 +15,7 @@ __DIR__ = os.path.dirname(__FILE__)
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+
 pytest.importorskip("zarr")
 from scitex.ai._gen_ai import Anthropic
 
@@ -78,9 +77,7 @@ class TestAnthropic:
 
                 anthropic_ai = Anthropic(model="claude-3-opus-20240229")
 
-                mock_anthropic_class.assert_called_once_with(
-                    api_key="test-api-key"
-                )
+                mock_anthropic_class.assert_called_once_with(api_key="test-api-key")
                 assert anthropic_ai.client == mock_client
 
     def test_max_tokens_for_sonnet_model(self, mock_env_api_key):
@@ -127,10 +124,7 @@ class TestAnthropic:
                 assert len(formatted[0]["content"]) == 2
                 assert formatted[0]["content"][0]["type"] == "text"
                 assert formatted[0]["content"][1]["type"] == "image"
-                assert (
-                    formatted[0]["content"][1]["source"]["data"]
-                    == "base64data"
-                )
+                assert formatted[0]["content"][1]["source"]["data"] == "base64data"
 
     def test_api_call_static(self, mock_env_api_key, mock_anthropic_client):
         """Test static API call."""
@@ -138,9 +132,7 @@ class TestAnthropic:
             with patch.object(
                 Anthropic, "_init_client", return_value=mock_anthropic_client
             ):
-                anthropic_ai = Anthropic(
-                    model="claude-3-opus-20240229", stream=False
-                )
+                anthropic_ai = Anthropic(model="claude-3-opus-20240229", stream=False)
                 anthropic_ai.history = [{"role": "user", "content": "Test"}]
 
                 result = anthropic_ai._api_call_static()
@@ -161,25 +153,32 @@ class TestAnthropic:
         mock_client = Mock()
         mock_stream = MagicMock()
 
-        # Mock stream chunks
-        chunks = [
-            Mock(type="content_block_delta", delta=Mock(text="Hello")),
-            Mock(type="content_block_delta", delta=Mock(text=" world")),
-        ]
-        chunks[0].message.usage.input_tokens = 5
-        chunks[0].message.usage.output_tokens = 10
+        # Mock stream chunks with proper usage metadata
+        # Use Mock with spec to avoid auto-mock creation
+        mock_usage = Mock()
+        mock_usage.input_tokens = 5
+        mock_usage.output_tokens = 10
+        mock_message = Mock()
+        mock_message.usage = mock_usage
+
+        chunk1 = Mock(type="content_block_delta")
+        chunk1.delta = Mock(text="Hello")
+        chunk1.message = mock_message
+
+        chunk2 = Mock(type="content_block_delta")
+        chunk2.delta = Mock(text=" world")
+        # Second chunk doesn't have message attribute (AttributeError will be caught)
+        chunk2.message = Mock(spec=[])  # Empty spec raises AttributeError on .usage
+
+        chunks = [chunk1, chunk2]
 
         mock_stream.__enter__.return_value = iter(chunks)
         mock_stream.__exit__.return_value = None
         mock_client.messages.stream.return_value = mock_stream
 
         with patch("scitex.ai._gen_ai._PARAMS.MODELS", MagicMock()):
-            with patch.object(
-                Anthropic, "_init_client", return_value=mock_client
-            ):
-                anthropic_ai = Anthropic(
-                    model="claude-3-opus-20240229", stream=True
-                )
+            with patch.object(Anthropic, "_init_client", return_value=mock_client):
+                anthropic_ai = Anthropic(model="claude-3-opus-20240229", stream=True)
                 anthropic_ai.history = [{"role": "user", "content": "Test"}]
 
                 result = list(anthropic_ai._api_call_stream())
@@ -188,9 +187,7 @@ class TestAnthropic:
                 assert anthropic_ai.input_tokens == 5
                 assert anthropic_ai.output_tokens == 10
 
-    def test_temperature_setting(
-        self, mock_env_api_key, mock_anthropic_client
-    ):
+    def test_temperature_setting(self, mock_env_api_key, mock_anthropic_client):
         """Test temperature parameter is passed correctly."""
         with patch("scitex.ai._gen_ai._PARAMS.MODELS", MagicMock()):
             with patch.object(
@@ -203,9 +200,7 @@ class TestAnthropic:
                 anthropic_ai._api_call_static()
 
                 # Check temperature was passed
-                call_kwargs = mock_anthropic_client.messages.create.call_args[
-                    1
-                ]
+                call_kwargs = mock_anthropic_client.messages.create.call_args[1]
                 assert call_kwargs["temperature"] == 0.5
 
     def test_model_validation(self, mock_env_api_key):
@@ -225,19 +220,16 @@ class TestAnthropic:
         """Test stream parameter handling."""
         with patch("scitex.ai._gen_ai._PARAMS.MODELS", MagicMock()):
             with patch.object(Anthropic, "_init_client", return_value=Mock()):
-                anthropic_ai = Anthropic(
-                    model="claude-3-opus-20240229", stream=stream
-                )
+                anthropic_ai = Anthropic(model="claude-3-opus-20240229", stream=stream)
                 assert anthropic_ai.stream == stream
 
     def test_n_keep_parameter(self, mock_env_api_key):
         """Test n_keep parameter for history management."""
         with patch("scitex.ai._gen_ai._PARAMS.MODELS", MagicMock()):
             with patch.object(Anthropic, "_init_client", return_value=Mock()):
-                anthropic_ai = Anthropic(
-                    model="claude-3-opus-20240229", n_keep=5
-                )
+                anthropic_ai = Anthropic(model="claude-3-opus-20240229", n_keep=5)
                 assert anthropic_ai.n_keep == 5
+
 
 if __name__ == "__main__":
     import os
@@ -255,11 +247,11 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ai/_gen_ai/_Anthropic.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Functionality:
 #     - Implements Anthropic AI (Claude) interface
@@ -274,19 +266,19 @@ if __name__ == "__main__":
 #     - Anthropic API key (ANTHROPIC_API_KEY environment variable)
 #     - anthropic package
 # """
-# 
+#
 # """Imports"""
 # import sys
 # from typing import Dict, Generator, List, Optional
-# 
+#
 # import anthropic
 # import matplotlib.pyplot as plt
-# 
+#
 # from ._BaseGenAI import BaseGenAI
-# 
+#
 # """Functions & Classes"""
-# 
-# 
+#
+#
 # class Anthropic(BaseGenAI):
 #     def __init__(
 #         self,
@@ -302,12 +294,12 @@ if __name__ == "__main__":
 #     ) -> None:
 #         if model == "claude-3-7-sonnet-2025-0219":
 #             max_tokens = 128_000
-# 
+#
 #         api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
-# 
+#
 #         if not api_key:
 #             raise ValueError("ANTHROPIC_API_KEY environment variable not set")
-# 
+#
 #         super().__init__(
 #             system_setting=system_setting,
 #             model=model,
@@ -319,10 +311,10 @@ if __name__ == "__main__":
 #             chat_history=chat_history,
 #             max_tokens=max_tokens,
 #         )
-# 
+#
 #     def _init_client(self) -> anthropic.Anthropic:
 #         return anthropic.Anthropic(api_key=self.api_key)
-# 
+#
 #     def _api_format_history(self, history):
 #         formatted_history = []
 #         for msg in history:
@@ -350,7 +342,7 @@ if __name__ == "__main__":
 #                 }
 #             formatted_history.append(formatted_msg)
 #         return formatted_history
-# 
+#
 #     def _api_call_static(self) -> str:
 #         output = self.client.messages.create(
 #             model=self.model,
@@ -359,12 +351,12 @@ if __name__ == "__main__":
 #             temperature=self.temperature,
 #         )
 #         out_text = output.content[0].text
-# 
+#
 #         self.input_tokens += output.usage.input_tokens
 #         self.output_tokens += output.usage.output_tokens
-# 
+#
 #         return out_text
-# 
+#
 #     def _api_call_stream(self) -> Generator[str, None, None]:
 #         with self.client.messages.stream(
 #             model=self.model,
@@ -378,14 +370,14 @@ if __name__ == "__main__":
 #                     self.output_tokens += chunk.message.usage.output_tokens
 #                 except AttributeError:
 #                     pass
-# 
+#
 #                 if chunk.type == "content_block_delta":
 #                     yield chunk.delta.text
-# 
-# 
+#
+#
 # def main() -> None:
 #     import scitex
-# 
+#
 #     ai = scitex.ai.GenAI(
 #         model="claude-3-5-sonnet-20241022",
 #         api_key=os.getenv("ANTHROPIC_API_KEY"),
@@ -394,7 +386,7 @@ if __name__ == "__main__":
 #     print(ai("hi"))
 #     print(ai("My name is Yusuke"))
 #     print(ai("do you remember my name?"))
-# 
+#
 #     print(
 #         ai(
 #             "hi, could you tell me what is in the pic?",
@@ -404,23 +396,23 @@ if __name__ == "__main__":
 #         )
 #     )
 #     pass
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     import scitex
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys, plt, verbose=False
 #     )
 #     main()
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
-# 
-# 
+#
+#
 # """
 # python src/scitex/ai/_gen_ai/_Anthropic.py
 # python -m src.scitex.ai._gen_ai._Anthropic
 # """
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

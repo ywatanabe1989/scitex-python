@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-01-22 01:21:11 (ywatanabe)"
 # File: _OpenAI.py
 
@@ -8,7 +7,9 @@ THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/ai/_gen_ai/_OpenAI.py"
 
 """Imports"""
 import os
+
 from openai import OpenAI as _OpenAI
+
 from ._BaseGenAI import BaseGenAI
 
 """Functions & Classes"""
@@ -55,6 +56,7 @@ class OpenAI(BaseGenAI):
             model=model,
             api_key=api_key,
             stream=stream,
+            seed=seed,
             n_keep=n_keep,
             temperature=temperature,
             provider="OpenAI",
@@ -148,7 +150,7 @@ class OpenAI(BaseGenAI):
                         if any(char in ".!?\n " for char in current_text):
                             yield buffer
                             buffer = ""
-                except Exception as e:
+                except Exception:
                     pass
 
         # Yield any remaining text
@@ -216,6 +218,7 @@ if __name__ == "__main__":
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex
 
     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
