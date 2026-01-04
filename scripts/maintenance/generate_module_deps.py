@@ -6,423 +6,59 @@ Scans each scitex submodule for external imports and generates
 requirements files and pyproject.toml extras.
 
 Usage:
-    python scripts/generate_module_deps.py
-    python scripts/generate_module_deps.py --output-dir config/requirements
-    python scripts/generate_module_deps.py --format toml
+    python scripts/maintenance/generate_module_deps.py
+    python scripts/maintenance/generate_module_deps.py --format toml
+    python scripts/maintenance/generate_module_deps.py --update-pyproject
 """
 
 import argparse
 import ast
+import re
 from pathlib import Path
 
-# Standard library modules (Python 3.8+)
-STDLIB_MODULES = {
-    "abc",
-    "aifc",
-    "argparse",
-    "array",
-    "ast",
-    "asynchat",
-    "asyncio",
-    "asyncore",
-    "atexit",
-    "audioop",
-    "base64",
-    "bdb",
-    "binascii",
-    "binhex",
-    "bisect",
-    "builtins",
-    "bz2",
-    "calendar",
-    "cgi",
-    "cgitb",
-    "chunk",
-    "cmath",
-    "cmd",
-    "code",
-    "codecs",
-    "codeop",
-    "collections",
-    "colorsys",
-    "compileall",
-    "concurrent",
-    "configparser",
-    "contextlib",
-    "contextvars",
-    "copy",
-    "copyreg",
-    "cProfile",
-    "crypt",
-    "csv",
-    "ctypes",
-    "curses",
-    "dataclasses",
-    "datetime",
-    "dbm",
-    "decimal",
-    "difflib",
-    "dis",
-    "distutils",
-    "doctest",
-    "email",
-    "encodings",
-    "enum",
-    "errno",
-    "faulthandler",
-    "fcntl",
-    "filecmp",
-    "fileinput",
-    "fnmatch",
-    "fractions",
-    "ftplib",
-    "functools",
-    "gc",
-    "getopt",
-    "getpass",
-    "gettext",
-    "glob",
-    "graphlib",
-    "grp",
-    "gzip",
-    "hashlib",
-    "heapq",
-    "hmac",
-    "html",
-    "http",
-    "idlelib",
-    "imaplib",
-    "imghdr",
-    "imp",
-    "importlib",
-    "inspect",
-    "io",
-    "ipaddress",
-    "itertools",
-    "json",
-    "keyword",
-    "lib2to3",
-    "linecache",
-    "locale",
-    "logging",
-    "lzma",
-    "mailbox",
-    "mailcap",
-    "marshal",
-    "math",
-    "mimetypes",
-    "mmap",
-    "modulefinder",
-    "multiprocessing",
-    "netrc",
-    "nis",
-    "nntplib",
-    "numbers",
-    "operator",
-    "optparse",
-    "os",
-    "ossaudiodev",
-    "parser",
-    "pathlib",
-    "pdb",
-    "pickle",
-    "pickletools",
-    "pipes",
-    "pkgutil",
-    "platform",
-    "plistlib",
-    "poplib",
-    "posix",
-    "posixpath",
-    "pprint",
-    "profile",
-    "pstats",
-    "pty",
-    "pwd",
-    "py_compile",
-    "pyclbr",
-    "pydoc",
-    "queue",
-    "quopri",
-    "random",
-    "re",
-    "readline",
-    "reprlib",
-    "resource",
-    "rlcompleter",
-    "runpy",
-    "sched",
-    "secrets",
-    "select",
-    "selectors",
-    "shelve",
-    "shlex",
-    "shutil",
-    "signal",
-    "site",
-    "smtpd",
-    "smtplib",
-    "sndhdr",
-    "socket",
-    "socketserver",
-    "spwd",
-    "sqlite3",
-    "ssl",
-    "stat",
-    "statistics",
-    "string",
-    "stringprep",
-    "struct",
-    "subprocess",
-    "sunau",
-    "symtable",
-    "sys",
-    "sysconfig",
-    "syslog",
-    "tabnanny",
-    "tarfile",
-    "telnetlib",
-    "tempfile",
-    "termios",
-    "test",
-    "textwrap",
-    "threading",
-    "time",
-    "timeit",
-    "tkinter",
-    "token",
-    "tokenize",
-    "trace",
-    "traceback",
-    "tracemalloc",
-    "tty",
-    "turtle",
-    "turtledemo",
-    "types",
-    "typing",
-    "unicodedata",
-    "unittest",
-    "urllib",
-    "uu",
-    "uuid",
-    "venv",
-    "warnings",
-    "wave",
-    "weakref",
-    "webbrowser",
-    "winreg",
-    "winsound",
-    "wsgiref",
-    "xdrlib",
-    "xml",
-    "xmlrpc",
-    "zipapp",
-    "zipfile",
-    "zipimport",
-    "zlib",
-    "_thread",
-    "__future__",
-    "typing_extensions",
-}
-
-# Known PyPI packages (import name -> pip package name)
-# Only these will be detected as external dependencies
-KNOWN_PACKAGES = {
-    # Core scientific
-    "numpy": "numpy",
-    "scipy": "scipy",
-    "pandas": "pandas",
-    "matplotlib": "matplotlib",
-    "seaborn": "seaborn",
-    "plotly": "plotly",
-    # ML/AI
-    "sklearn": "scikit-learn",
-    "skimage": "scikit-image",
-    "torch": "torch",
-    "torchvision": "torchvision",
-    "torchaudio": "torchaudio",
-    "transformers": "transformers",
-    "accelerate": "accelerate",
-    "einops": "einops",
-    "optuna": "optuna",
-    "catboost": "catboost",
-    "xgboost": "xgboost",
-    "lightgbm": "lightgbm",
-    "imblearn": "imbalanced-learn",
-    "umap": "umap-learn",
-    "faiss": "faiss-cpu",
-    # LLM APIs
-    "openai": "openai",
-    "anthropic": "anthropic",
-    "groq": "groq",
-    "tiktoken": "tiktoken",
-    # Audio/TTS
-    "pyttsx3": "pyttsx3",
-    "gtts": "gTTS",
-    "pydub": "pydub",
-    "elevenlabs": "elevenlabs",
-    "sounddevice": "sounddevice",
-    # Web/Network
-    "requests": "requests",
-    "aiohttp": "aiohttp",
-    "httpx": "httpx",
-    "flask": "flask",
-    "fastapi": "fastapi",
-    "streamlit": "streamlit",
-    "websockets": "websockets",
-    "mcp": "mcp",
-    "fastmcp": "fastmcp",
-    # Browser automation
-    "selenium": "selenium",
-    "playwright": "playwright",
-    "bs4": "beautifulsoup4",
-    "crawl4ai": "crawl4ai",
-    # Data formats
-    "h5py": "h5py",
-    "zarr": "zarr",
-    "xarray": "xarray",
-    "openpyxl": "openpyxl",
-    "xlrd": "xlrd",
-    "yaml": "PyYAML",
-    "ruamel": "ruamel.yaml",
-    "lxml": "lxml",
-    "xmltodict": "xmltodict",
-    "bibtexparser": "bibtexparser",
-    # Image
-    "PIL": "Pillow",
-    "cv2": "opencv-python",
-    "piexif": "piexif",
-    "pypdf": "pypdf",
-    "PyPDF2": "PyPDF2",
-    "fitz": "PyMuPDF",
-    "pdfplumber": "pdfplumber",
-    "pytesseract": "pytesseract",
-    "qrcode": "qrcode",
-    # Document
-    "docx": "python-docx",
-    "pypandoc": "pypandoc",
-    # Database
-    "sqlalchemy": "sqlalchemy",
-    "psycopg2": "psycopg2-binary",
-    # Neuroscience
-    "mne": "mne",
-    "obspy": "obspy",
-    "pyedflib": "pyedflib",
-    "pybids": "pybids",
-    "tensorpac": "tensorpac",
-    # Utilities
-    "tqdm": "tqdm",
-    "click": "click",
-    "rich": "rich",
-    "tabulate": "tabulate",
-    "natsort": "natsort",
-    "joblib": "joblib",
-    "psutil": "psutil",
-    "packaging": "packaging",
-    "pydantic": "pydantic",
-    "watchdog": "watchdog",
-    "tenacity": "tenacity",
-    "chardet": "chardet",
-    "thefuzz": "thefuzz",
-    "pyperclip": "pyperclip",
-    "icecream": "icecream",
-    # Git
-    "git": "GitPython",
-    # Jupyter
-    "IPython": "ipython",
-    "ipykernel": "ipykernel",
-    "jupyterlab": "jupyterlab",
-    # Embeddings
-    "sentence_transformers": "sentence-transformers",
-    # Scholar-specific
-    "scholarly": "scholarly",
-    "pymed": "pymed",
-    "feedparser": "feedparser",
-    "pyzotero": "pyzotero",
-    "impact_factor": "impact-factor",
-    # GUI
-    "dearpygui": "dearpygui",
-    "PyQt6": "PyQt6",
-    "PyQt5": "PyQt5",
-    "pyautogui": "pyautogui",
-    # Stats
-    "statsmodels": "statsmodels",
-    "sympy": "sympy",
-    # DSP
-    "julius": "julius",
-    # Misc
-    "nest_asyncio": "nest-asyncio",
-    "reportlab": "reportlab",
-    "magic": "python-magic",
-    "dotenv": "python-dotenv",
-}
-
-# Modules that are part of scitex (skip these)
-INTERNAL_MODULES = {"scitex", "mngs"}
+from _stdlib_modules import INTERNAL_MODULES, KNOWN_PACKAGES, STDLIB_MODULES
 
 
 def extract_imports(filepath: Path) -> set:
     """Extract all import statements from a Python file."""
     imports = set()
-
     try:
-        with open(filepath, encoding="utf-8", errors="ignore") as f:
-            content = f.read()
-    except Exception:
-        return imports
-
-    try:
+        content = filepath.read_text(encoding="utf-8", errors="ignore")
         tree = ast.parse(content)
-    except SyntaxError:
+    except (SyntaxError, OSError):
         return imports
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                module = alias.name.split(".")[0]
-                imports.add(module)
+                imports.add(alias.name.split(".")[0])
         elif isinstance(node, ast.ImportFrom):
-            # Skip relative imports
-            if node.level > 0:
-                continue
-            if node.module:
-                module = node.module.split(".")[0]
-                imports.add(module)
-
+            if node.level == 0 and node.module:
+                imports.add(node.module.split(".")[0])
     return imports
 
 
 def get_package_name(import_name: str) -> str | None:
     """Convert import name to pip package name."""
-    if import_name in STDLIB_MODULES:
+    if import_name in STDLIB_MODULES or import_name in INTERNAL_MODULES:
         return None
-    if import_name in INTERNAL_MODULES:
-        return None
-    if import_name in KNOWN_PACKAGES:
-        return KNOWN_PACKAGES[import_name]
-    return None  # Only return known packages
+    return KNOWN_PACKAGES.get(import_name)
 
 
 def scan_module(module_path: Path) -> set:
     """Scan a module directory for all external dependencies."""
     deps = set()
-
     for py_file in module_path.rglob("*.py"):
-        # Skip test files and __pycache__
         if "__pycache__" in str(py_file) or "test_" in py_file.name:
             continue
-
-        imports = extract_imports(py_file)
-        for imp in imports:
-            pkg = get_package_name(imp)
-            if pkg:
+        for imp in extract_imports(py_file):
+            if pkg := get_package_name(imp):
                 deps.add(pkg)
-
     return deps
 
 
-def generate_requirements(src_dir: Path, output_dir: Path | None = None):
-    """Generate requirements files for each module."""
+def generate_module_deps(src_dir: Path, include_empty: bool = True) -> dict:
+    """Generate dependencies for each module."""
     modules_dir = src_dir / "scitex"
     module_deps = {}
 
@@ -431,19 +67,8 @@ def generate_requirements(src_dir: Path, output_dir: Path | None = None):
             if item.name == "__pycache__":
                 continue
             deps = scan_module(item)
-            if deps:
+            if deps or include_empty:
                 module_deps[item.name] = sorted(deps)
-
-    if output_dir:
-        output_dir.mkdir(parents=True, exist_ok=True)
-        for module, deps in module_deps.items():
-            req_file = output_dir / f"{module}.txt"
-            with open(req_file, "w") as f:
-                f.write(f"# Dependencies for scitex.{module}\n")
-                f.write("# Auto-generated by scripts/generate_module_deps.py\n\n")
-                for dep in deps:
-                    f.write(f"{dep}\n")
-            print(f"Generated: {req_file}")
 
     return module_deps
 
@@ -454,6 +79,7 @@ def generate_toml_extras(module_deps: dict) -> str:
         "# ============================================",
         "# Module-Level Optional Dependencies",
         "# ============================================",
+        "# Auto-generated by: python scripts/maintenance/generate_module_deps.py",
         "# Install: pip install scitex[module_name]",
         "# Multiple: pip install scitex[audio,scholar,plt]",
         "# All: pip install scitex[all]",
@@ -463,7 +89,10 @@ def generate_toml_extras(module_deps: dict) -> str:
     ]
 
     for module, deps in sorted(module_deps.items()):
-        lines.append(f"# scitex.{module}")
+        if deps:
+            lines.append(f"# scitex.{module}")
+        else:
+            lines.append(f"# scitex.{module} (stdlib only)")
         lines.append(f"{module} = [")
         for dep in deps:
             lines.append(f'    "{dep}",')
@@ -482,25 +111,50 @@ def generate_toml_extras(module_deps: dict) -> str:
     lines.append("]")
     lines.append("")
 
-    # Dev dependencies (separate)
-    lines.extend(
-        [
-            "# Development tools",
-            "dev = [",
-            '    "pytest",',
-            '    "pytest-cov",',
-            '    "pytest-xdist",',
-            '    "pytest-timeout",',
-            '    "pytest-mock",',
-            '    "pytest-asyncio",',
-            '    "ruff",',
-            '    "mypy",',
-            '    "pre-commit",',
-            "]",
-        ]
-    )
+    # Dev dependencies
+    lines.extend([
+        "# Development tools",
+        "dev = [",
+        '    "pytest",',
+        '    "pytest-cov",',
+        '    "pytest-xdist",',
+        '    "pytest-timeout",',
+        '    "pytest-mock",',
+        '    "pytest-asyncio",',
+        '    "ruff",',
+        '    "mypy",',
+        '    "pre-commit",',
+        "]",
+    ])
 
     return "\n".join(lines)
+
+
+def update_pyproject(src_dir: Path, pyproject_path: Path) -> None:
+    """Update pyproject.toml with generated extras."""
+    module_deps = generate_module_deps(src_dir, include_empty=True)
+    extras_content = generate_toml_extras(module_deps)
+
+    content = pyproject_path.read_text()
+
+    # Pattern to match the optional-dependencies section
+    pattern = (
+        r"# =+\n# Module-Level Optional Dependencies\n# =+\n"
+        r".*?"
+        r"(?=\n# =+\n# Tool Configurations)"
+    )
+
+    replacement = extras_content + "\n"
+    new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+    if new_content == content:
+        print("Warning: Pattern not found, appending extras section")
+        return
+
+    pyproject_path.write_text(new_content)
+    print(f"Updated: {pyproject_path}")
+    print(f"  - {len(module_deps)} modules")
+    print(f"  - {sum(len(d) for d in module_deps.values())} total dependencies")
 
 
 def main():
@@ -508,44 +162,56 @@ def main():
         description="Generate module-level dependencies for scitex"
     )
     parser.add_argument(
-        "--src-dir",
-        type=Path,
-        default=Path(__file__).parent.parent / "src",
+        "--src-dir", type=Path, default=Path(__file__).parent.parent.parent / "src",
         help="Source directory containing scitex package",
     )
     parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=None,
+        "--output-dir", type=Path, default=None,
         help="Output directory for requirements files",
     )
     parser.add_argument(
-        "--format",
-        choices=["requirements", "toml", "both"],
-        default="both",
+        "--format", choices=["requirements", "toml", "both"], default="toml",
         help="Output format",
+    )
+    parser.add_argument(
+        "--update-pyproject", action="store_true",
+        help="Update pyproject.toml directly",
+    )
+    parser.add_argument(
+        "--include-empty", action="store_true", default=True,
+        help="Include modules with no external dependencies",
     )
 
     args = parser.parse_args()
 
-    if args.output_dir is None:
-        args.output_dir = args.src_dir.parent / "config" / "requirements"
+    if args.update_pyproject:
+        pyproject = args.src_dir.parent / "pyproject.toml"
+        update_pyproject(args.src_dir, pyproject)
+        return
 
     print(f"Scanning: {args.src_dir}")
+    module_deps = generate_module_deps(args.src_dir, args.include_empty)
 
-    if args.format in ("requirements", "both"):
-        module_deps = generate_requirements(args.src_dir, args.output_dir)
-    else:
-        module_deps = generate_requirements(args.src_dir, None)
+    if args.format in ("requirements", "both") and args.output_dir:
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        for module, deps in module_deps.items():
+            req_file = args.output_dir / f"{module}.txt"
+            with open(req_file, "w") as f:
+                f.write(f"# Dependencies for scitex.{module}\n")
+                f.write("# Auto-generated\n\n")
+                for dep in deps:
+                    f.write(f"{dep}\n")
+            print(f"Generated: {req_file}")
 
     if args.format in ("toml", "both"):
         toml_output = generate_toml_extras(module_deps)
-        toml_file = args.output_dir / "extras.toml"
-        with open(toml_file, "w") as f:
-            f.write(toml_output)
-        print(f"\nGenerated TOML extras: {toml_file}")
+        if args.output_dir:
+            args.output_dir.mkdir(parents=True, exist_ok=True)
+            toml_file = args.output_dir / "extras.toml"
+            toml_file.write_text(toml_output)
+            print(f"\nGenerated: {toml_file}")
         print("\n" + "=" * 60)
-        print("Copy the following to pyproject.toml:")
+        print("TOML extras output:")
         print("=" * 60)
         print(toml_output)
 
