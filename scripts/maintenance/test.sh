@@ -5,8 +5,8 @@
 
 set -e
 
-THIS_DIR="$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)"
-ROOT_DIR="$(realpath $THIS_DIR/../..)"
+THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(realpath "$THIS_DIR"/../..)"
 
 # Color scheme
 GRAY='\033[0;90m'
@@ -38,6 +38,8 @@ usage() {
     echo "  -q, --quiet        Quiet output"
     echo "  -f, --fast         Run only fast tests (exclude slow markers)"
     echo "  -x, --exitfirst    Stop on first failure"
+    echo "  -s, --sequential   Disable parallel testing (run sequentially)"
+    echo "  -n, --parallel N   Number of parallel workers (default: auto)"
     echo "  -k PATTERN         Only run tests matching PATTERN"
     echo "  -h, --help         Show this help"
     echo ""
@@ -69,53 +71,62 @@ main() {
     local fast=""
     local exitfirst=""
     local pattern=""
+    local parallel="auto" # Default to parallel with auto workers
     local extra_args=()
 
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
-            -c|--cov)
-                coverage=true
-                shift
-                ;;
-            -v|--verbose)
-                verbose="-v"
-                shift
-                ;;
-            -q|--quiet)
-                verbose="-q"
-                shift
-                ;;
-            -f|--fast)
-                fast='-m "not slow"'
-                shift
-                ;;
-            -x|--exitfirst)
-                exitfirst="-x"
-                shift
-                ;;
-            -k)
-                pattern="-k $2"
-                shift 2
-                ;;
-            -h|--help)
-                usage
-                exit 0
-                ;;
-            -*)
-                # Pass through other pytest arguments
+        -c | --cov)
+            coverage=true
+            shift
+            ;;
+        -v | --verbose)
+            verbose="-v"
+            shift
+            ;;
+        -q | --quiet)
+            verbose="-q"
+            shift
+            ;;
+        -f | --fast)
+            fast='-m "not slow"'
+            shift
+            ;;
+        -x | --exitfirst)
+            exitfirst="-x"
+            shift
+            ;;
+        -s | --sequential)
+            parallel=""
+            shift
+            ;;
+        -n | --parallel)
+            parallel="$2"
+            shift 2
+            ;;
+        -k)
+            pattern="-k $2"
+            shift 2
+            ;;
+        -h | --help)
+            usage
+            exit 0
+            ;;
+        -*)
+            # Pass through other pytest arguments
+            extra_args+=("$1")
+            shift
+            ;;
+        *)
+            # Module name (first positional argument)
+            if [ -z "$module" ]; then
+                module="$1"
+            else
                 extra_args+=("$1")
-                shift
-                ;;
-            *)
-                # Module name (first positional argument)
-                if [ -z "$module" ]; then
-                    module="$1"
-                else
-                    extra_args+=("$1")
-                fi
-                shift
-                ;;
+            fi
+            shift
+            ;;
         esac
     done
 
@@ -137,7 +148,7 @@ main() {
             echo_error "Test directory not found: $test_path"
             echo ""
             echo_info "Available modules:"
-            ls -1 tests/scitex/ 2>/dev/null | grep -v '__' | head -20
+            find tests/scitex/ -maxdepth 1 -type d ! -name '__*' -printf '%f\n' 2>/dev/null | head -20
             exit 1
         fi
     fi
@@ -145,17 +156,21 @@ main() {
     echo_header "Running Tests"
     echo_info "Test path: $test_path"
     [ -n "$module" ] && echo_info "Module:    $module"
+    [ -n "$parallel" ] && echo_info "Parallel:  $parallel workers"
+    [ -z "$parallel" ] && echo_info "Parallel:  disabled (sequential)"
     echo ""
 
     # Build pytest command
     local cmd="pytest $test_path $verbose --continue-on-collection-errors"
+    [ -n "$parallel" ] && cmd="$cmd -n $parallel"
     [ -n "$fast" ] && cmd="$cmd $fast"
     [ -n "$exitfirst" ] && cmd="$cmd $exitfirst"
     [ -n "$pattern" ] && cmd="$cmd $pattern"
     [ ${#extra_args[@]} -gt 0 ] && cmd="$cmd ${extra_args[*]}"
 
     # Create results directory with timestamp
-    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local timestamp
+    timestamp=$(date +%Y%m%d_%H%M%S)
     local results_dir="tests/results"
     mkdir -p "$results_dir"
 
