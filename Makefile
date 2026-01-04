@@ -10,7 +10,7 @@ SHELL := /bin/bash
 	clean test test-cov lint format check \
 	build release upload upload-test \
 	build-all release-all upload-all upload-test-all \
-	sync-tests sync-examples sync-redirect \
+	deps-generate sync-tests sync-examples sync-redirect \
 	show-version tag
 
 # Colors
@@ -51,6 +51,7 @@ help:
 	@echo -e ""
 	@echo -e "$(CYAN)🧹 Maintenance:$(NC)"
 	@echo -e "  make clean             Remove build/test/cache artifacts"
+	@echo -e "  make deps-generate     Generate module-level requirements"
 	@echo -e "  make sync-tests        Sync test files with source structure"
 	@echo -e "  make sync-examples     Sync example files with source structure"
 	@echo -e ""
@@ -129,8 +130,14 @@ check: format-check lint test
 	@echo -e "$(GREEN)✅ All checks passed!$(NC)"
 
 # ============================================
-# Synchronization
+# Synchronization & Dependencies
 # ============================================
+
+deps-generate:
+	@echo -e "$(CYAN)📋 Generating module-level requirements...$(NC)"
+	@python scripts/maintenance/generate_module_deps.py
+	@echo -e "$(GREEN)✅ Requirements generated in config/requirements/$(NC)"
+	@echo -e "$(YELLOW)Note: Copy config/requirements/extras.toml to pyproject.toml if needed$(NC)"
 
 sync-tests:
 	@echo -e "$(CYAN)🔄 Syncing test files with source...$(NC)"

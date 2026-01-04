@@ -891,3 +891,11 @@ wheels/
 *.egg
 output/
 tests/results/
+/.claude-worktree-symlinks
+# Claude worktree symlink
+/feature-module-timecount
+# Claude worktree symlink
+/feature-fig-recipe-integration
+
+## Test results and coverage
+tests/results/
