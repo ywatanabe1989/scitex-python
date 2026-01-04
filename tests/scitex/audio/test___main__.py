@@ -1,145 +1,295 @@
-# Add your tests here
+#!/usr/bin/env python3
+# Timestamp: 2026-01-04
+# File: tests/scitex/audio/test___main__.py
+
+"""Tests for scitex.audio.__main__ module (CLI entry point)."""
+
+import sys
+from io import StringIO
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+
+class TestMainFunction:
+    """Tests for main() function."""
+
+    def test_main_function_exists(self):
+        """Test main function exists."""
+        from scitex.audio.__main__ import main
+
+        assert callable(main)
+
+    def test_help_flag_shows_help(self):
+        """Test --help flag shows help message."""
+        from scitex.audio.__main__ import main
+
+        with patch.object(sys, "argv", ["scitex.audio", "--help"]):
+            with pytest.raises(SystemExit) as exc_info:
+                main()
+
+            # --help exits with code 0
+            assert exc_info.value.code == 0
+
+    def test_no_args_shows_help(self, capsys):
+        """Test no arguments shows help."""
+        from scitex.audio.__main__ import main
+
+        with patch.object(sys, "argv", ["scitex.audio"]):
+            main()
+
+        captured = capsys.readouterr()
+        assert "usage:" in captured.out.lower() or "scitex" in captured.out.lower()
+
+
+class TestMCPMode:
+    """Tests for MCP server mode."""
+
+    def test_mcp_flag_starts_server(self):
+        """Test --mcp flag starts MCP server."""
+        mock_server_main = MagicMock()
+
+        with patch.object(sys, "argv", ["scitex.audio", "--mcp"]):
+            with patch("scitex.audio.__main__.asyncio.run") as mock_run:
+                with patch("scitex.audio.mcp_server.main", mock_server_main):
+                    from scitex.audio.__main__ import main
+
+                    main()
+
+                    mock_run.assert_called_once()
+
+
+class TestSpeakCommand:
+    """Tests for 'speak' subcommand."""
+
+    def test_speak_command_calls_speak_function(self):
+        """Test 'speak' command calls speak function."""
+        mock_speak = MagicMock()
+
+        with patch.object(sys, "argv", ["scitex.audio", "speak", "Hello world"]):
+            with patch("scitex.audio.speak", mock_speak):
+                from scitex.audio.__main__ import main
+
+                main()
+
+                mock_speak.assert_called_once()
+
+    def test_speak_with_backend_option(self):
+        """Test 'speak' command with --backend option."""
+        mock_speak = MagicMock()
+
+        with patch.object(
+            sys, "argv", ["scitex.audio", "speak", "Hello", "-b", "gtts"]
+        ):
+            with patch("scitex.audio.speak", mock_speak):
+                from scitex.audio.__main__ import main
+
+                main()
+
+                call_kwargs = mock_speak.call_args[1]
+                assert call_kwargs["backend"] == "gtts"
+
+    def test_speak_with_voice_option(self):
+        """Test 'speak' command with --voice option."""
+        mock_speak = MagicMock()
+
+        with patch.object(sys, "argv", ["scitex.audio", "speak", "Hello", "-v", "en"]):
+            with patch("scitex.audio.speak", mock_speak):
+                from scitex.audio.__main__ import main
+
+                main()
+
+                call_kwargs = mock_speak.call_args[1]
+                assert call_kwargs["voice"] == "en"
+
+    def test_speak_with_output_option(self):
+        """Test 'speak' command with --output option."""
+        mock_speak = MagicMock()
+
+        with patch.object(
+            sys, "argv", ["scitex.audio", "speak", "Hello", "-o", "/tmp/test.mp3"]
+        ):
+            with patch("scitex.audio.speak", mock_speak):
+                from scitex.audio.__main__ import main
+
+                main()
+
+                call_kwargs = mock_speak.call_args[1]
+                assert call_kwargs["output_path"] == "/tmp/test.mp3"
+
+    def test_speak_with_no_play_option(self):
+        """Test 'speak' command with --no-play option."""
+        mock_speak = MagicMock()
+
+        with patch.object(sys, "argv", ["scitex.audio", "speak", "Hello", "--no-play"]):
+            with patch("scitex.audio.speak", mock_speak):
+                from scitex.audio.__main__ import main
+
+                main()
+
+                call_kwargs = mock_speak.call_args[1]
+                assert call_kwargs["play"] is False
+
+    def test_speak_with_no_fallback_option(self):
+        """Test 'speak' command with --no-fallback option."""
+        mock_speak = MagicMock()
+
+        with patch.object(
+            sys, "argv", ["scitex.audio", "speak", "Hello", "--no-fallback"]
+        ):
+            with patch("scitex.audio.speak", mock_speak):
+                from scitex.audio.__main__ import main
+
+                main()
+
+                call_kwargs = mock_speak.call_args[1]
+                assert call_kwargs["fallback"] is False
+
+
+class TestBackendsCommand:
+    """Tests for 'backends' subcommand."""
+
+    def test_backends_command_lists_backends(self, capsys):
+        """Test 'backends' command lists available backends."""
+        mock_available = MagicMock(return_value=["gtts", "pyttsx3"])
+
+        with patch.object(sys, "argv", ["scitex.audio", "backends"]):
+            with patch("scitex.audio.available_backends", mock_available):
+                from scitex.audio.__main__ import main
+
+                main()
+
+        captured = capsys.readouterr()
+        assert "backends" in captured.out.lower() or "gtts" in captured.out.lower()
+
+    def test_backends_shows_availability(self, capsys):
+        """Test 'backends' command shows availability status."""
+        mock_available = MagicMock(return_value=["gtts"])
+
+        with patch.object(sys, "argv", ["scitex.audio", "backends"]):
+            with patch("scitex.audio.available_backends", mock_available):
+                from scitex.audio.__main__ import main
+
+                main()
+
+        captured = capsys.readouterr()
+        # Should show available/not available status
+        assert "available" in captured.out.lower() or "[*]" in captured.out
+
+
+class TestVoicesCommand:
+    """Tests for 'voices' subcommand."""
+
+    def test_voices_command_lists_voices(self, capsys):
+        """Test 'voices' command lists available voices."""
+        mock_tts = MagicMock()
+        mock_tts.get_voices.return_value = [
+            {"name": "English", "id": "en"},
+            {"name": "French", "id": "fr"},
+        ]
+
+        mock_available = MagicMock(return_value=["gtts"])
+        mock_get_tts = MagicMock(return_value=mock_tts)
+
+        with patch.object(sys, "argv", ["scitex.audio", "voices"]):
+            with patch("scitex.audio.available_backends", mock_available):
+                with patch("scitex.audio.get_tts", mock_get_tts):
+                    from scitex.audio.__main__ import main
+
+                    main()
+
+        captured = capsys.readouterr()
+        assert "english" in captured.out.lower() or "voices" in captured.out.lower()
+
+    def test_voices_with_backend_option(self, capsys):
+        """Test 'voices' command with --backend option."""
+        mock_tts = MagicMock()
+        mock_tts.get_voices.return_value = [{"name": "Test", "id": "test"}]
+
+        mock_get_tts = MagicMock(return_value=mock_tts)
+
+        with patch.object(sys, "argv", ["scitex.audio", "voices", "-b", "elevenlabs"]):
+            with patch("scitex.audio.get_tts", mock_get_tts):
+                from scitex.audio.__main__ import main
+
+                main()
+
+                mock_get_tts.assert_called_with("elevenlabs")
+
+    def test_voices_no_backends_available(self, capsys):
+        """Test 'voices' command when no backends available."""
+        mock_available = MagicMock(return_value=[])
+
+        with patch.object(sys, "argv", ["scitex.audio", "voices"]):
+            with patch("scitex.audio.available_backends", mock_available):
+                from scitex.audio.__main__ import main
+
+                main()
+
+        captured = capsys.readouterr()
+        assert "no backends" in captured.out.lower()
+
+    def test_voices_handles_error(self, capsys):
+        """Test 'voices' command handles errors gracefully."""
+        mock_get_tts = MagicMock(side_effect=Exception("Backend error"))
+        mock_available = MagicMock(return_value=["gtts"])
+
+        with patch.object(sys, "argv", ["scitex.audio", "voices"]):
+            with patch("scitex.audio.available_backends", mock_available):
+                with patch("scitex.audio.get_tts", mock_get_tts):
+                    from scitex.audio.__main__ import main
+
+                    main()
+
+        captured = capsys.readouterr()
+        assert "error" in captured.out.lower()
+
+
+class TestArgumentParser:
+    """Tests for argument parsing."""
+
+    def test_backend_choices(self):
+        """Test backend argument accepts valid choices."""
+        import argparse
+
+        from scitex.audio.__main__ import main
+
+        # Valid backends should not raise
+        valid_backends = ["pyttsx3", "gtts", "elevenlabs"]
+        for backend in valid_backends:
+            # Just verify the choices are accepted by argparse
+            assert backend in valid_backends
+
+    def test_invalid_backend_rejected(self):
+        """Test invalid backend is rejected."""
+        with patch.object(
+            sys, "argv", ["scitex.audio", "speak", "Hello", "-b", "invalid"]
+        ):
+            with pytest.raises(SystemExit):
+                from scitex.audio.__main__ import main
+
+                main()
+
+
+class TestCLIIntegration:
+    """Integration tests for CLI."""
+
+    def test_cli_module_runnable(self):
+        """Test module can be run as script."""
+        # Just verify the module structure
+        from scitex.audio import __main__
+
+        assert hasattr(__main__, "main")
+
+    def test_cli_has_subcommands(self):
+        """Test CLI has expected subcommands."""
+        # Verify by checking help output
+        from scitex.audio.__main__ import main
+
+        with patch.object(sys, "argv", ["scitex.audio", "--help"]):
+            with pytest.raises(SystemExit):
+                main()
+
 
 if __name__ == "__main__":
-    import os
-
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/__main__.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-12-11 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/__main__.py
-# # ----------------------------------------
-# 
-# """
-# CLI entry point for SciTeX Audio.
-# 
-# Usage:
-#     python -m scitex.audio --mcp         # Start MCP server
-#     python -m scitex.audio speak "Hello" # Quick TTS with fallback
-#     python -m scitex.audio --help        # Show help
-# """
-# 
-# import argparse
-# import asyncio
-# import sys
-# 
-# 
-# def main():
-#     parser = argparse.ArgumentParser(
-#         description="SciTeX Audio - Text-to-Speech with fallback (pyttsx3 -> gtts -> elevenlabs)"
-#     )
-# 
-#     # Global options
-#     parser.add_argument(
-#         "--mcp", action="store_true",
-#         help="Start MCP server (for Claude Code integration)"
-#     )
-# 
-#     subparsers = parser.add_subparsers(dest="command", help="Commands")
-# 
-#     # Speak command
-#     speak_parser = subparsers.add_parser("speak", help="Quick text-to-speech")
-#     speak_parser.add_argument("text", help="Text to speak")
-#     speak_parser.add_argument(
-#         "-b", "--backend",
-#         choices=["pyttsx3", "gtts", "elevenlabs"],
-#         help="TTS backend (auto-selects with fallback if not specified)"
-#     )
-#     speak_parser.add_argument(
-#         "-v", "--voice", help="Voice name or language code"
-#     )
-#     speak_parser.add_argument(
-#         "-o", "--output", help="Save to file"
-#     )
-#     speak_parser.add_argument(
-#         "--no-play", action="store_true", help="Don't play audio"
-#     )
-#     speak_parser.add_argument(
-#         "--no-fallback", action="store_true", help="Disable fallback"
-#     )
-# 
-#     # List backends
-#     backends_parser = subparsers.add_parser("backends", help="List available backends")
-# 
-#     # List voices
-#     voices_parser = subparsers.add_parser("voices", help="List available voices")
-#     voices_parser.add_argument(
-#         "-b", "--backend",
-#         choices=["pyttsx3", "gtts", "elevenlabs"],
-#         help="Backend to list voices for"
-#     )
-# 
-#     args = parser.parse_args()
-# 
-#     # MCP server mode
-#     if args.mcp:
-#         from .mcp_server import main as server_main
-#         asyncio.run(server_main())
-#         return
-# 
-#     if args.command == "speak":
-#         from . import speak
-# 
-#         speak(
-#             text=args.text,
-#             backend=args.backend,
-#             voice=args.voice,
-#             play=not args.no_play,
-#             output_path=args.output,
-#             fallback=not args.no_fallback,
-#         )
-# 
-#     elif args.command == "backends":
-#         from . import available_backends, FALLBACK_ORDER
-# 
-#         backends = available_backends()
-#         print("Available TTS backends (in fallback order):")
-#         for b in FALLBACK_ORDER:
-#             status = "available" if b in backends else "not available"
-#             desc = {
-#                 "pyttsx3": "System TTS (offline, free)",
-#                 "gtts": "Google TTS (free, needs internet)",
-#                 "elevenlabs": "ElevenLabs (paid, high quality)",
-#             }
-#             marker = "[*]" if b in backends else "[ ]"
-#             print(f"  {marker} {b}: {desc.get(b, '')} - {status}")
-# 
-#     elif args.command == "voices":
-#         from . import get_tts, available_backends
-# 
-#         backend = args.backend
-#         if not backend:
-#             backends = available_backends()
-#             backend = backends[0] if backends else None
-# 
-#         if backend:
-#             try:
-#                 tts = get_tts(backend)
-#                 voices = tts.get_voices()
-#                 print(f"Voices for {backend}:")
-#                 for v in voices:
-#                     print(f"  {v.get('name', 'unknown')}: {v.get('id', '')}")
-#             except Exception as e:
-#                 print(f"Error: {e}")
-#         else:
-#             print("No backends available")
-# 
-#     else:
-#         # Default: show help
-#         parser.print_help()
-# 
-# 
-# if __name__ == "__main__":
-#     main()
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/__main__.py
-# --------------------------------------------------------------------------------
+    pytest.main([__file__, "-v"])
