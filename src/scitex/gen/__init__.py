@@ -99,6 +99,7 @@ except ImportError:
     pass  # Already set to None above
 from ._wrap import wrap
 from ._xml2dict import XmlDictConfig, XmlListConfig, xml2dict
+from .misc import float_linspace
 
 __all__ = [
     "ArrayLike",
@@ -116,6 +117,7 @@ __all__ = [
     "close",
     "dir2npy",
     "embed",
+    "float_linspace",
     "inspect_module",
     "is_host",
     "is_ipython",

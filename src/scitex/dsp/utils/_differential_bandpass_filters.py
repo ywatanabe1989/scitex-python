@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-26 22:24:13 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/dsp/utils/_differential_bandpass_filters.py
 
@@ -18,8 +17,16 @@ from scitex.gen._to_odd import to_odd
 
 try:
     from torchaudio.prototype.functional import sinc_impulse_response
-except:
-    pass
+except ImportError:
+    sinc_impulse_response = None
+
+
+def _check_sinc_available():
+    if sinc_impulse_response is None:
+        raise ImportError(
+            "sinc_impulse_response requires torchaudio.prototype.functional. "
+            "Install torchaudio with: pip install torchaudio"
+        )
 
 
 # Functions
@@ -35,6 +42,7 @@ def init_bandpass_filters(
     amp_n_bands=50,
     cycle=3,
 ):
+    _check_sinc_available()
     # Learnable parameters
     pha_mids = nn.Parameter(torch.linspace(pha_low_hz, pha_high_hz, pha_n_bands))
     amp_mids = nn.Parameter(torch.linspace(amp_low_hz, amp_high_hz, amp_n_bands))
@@ -44,13 +52,15 @@ def init_bandpass_filters(
 
 @torch_fn
 def build_bandpass_filters(sig_len, fs, pha_mids, amp_mids, cycle):
+    _check_sinc_available()
+
     def _define_freqs(mids, factor):
         lows = mids - mids / factor
         highs = mids + mids / factor
         return lows, highs
 
     def define_order(low_hz, fs, sig_len, cycle):
-        order = cycle * int((fs // low_hz))
+        order = cycle * int(fs // low_hz)
         order = order if 3 * order >= sig_len else (sig_len - 1) // 3
         order = to_even(order)
         return order
