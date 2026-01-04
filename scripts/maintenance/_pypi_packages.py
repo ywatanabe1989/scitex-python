@@ -1,4 +1,4 @@
-"""Standard library modules (Python 3.8+) for generate_module_deps.py."""
+"""Standard library modules and PyPI package mappings for sync_pyproject_extras.py."""
 
 STDLIB_MODULES = {
     "abc", "aifc", "argparse", "array", "ast", "asynchat", "asyncio",

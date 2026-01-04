@@ -133,11 +133,10 @@ check: format-check lint test
 # Synchronization & Dependencies
 # ============================================
 
-deps-generate:
-	@echo -e "$(CYAN)📋 Generating module-level requirements...$(NC)"
-	@python scripts/maintenance/generate_module_deps.py
-	@echo -e "$(GREEN)✅ Requirements generated in config/requirements/$(NC)"
-	@echo -e "$(YELLOW)Note: Copy config/requirements/extras.toml to pyproject.toml if needed$(NC)"
+sync-extras:
+	@echo -e "$(CYAN)📋 Syncing pyproject.toml extras from imports...$(NC)"
+	@python scripts/maintenance/sync_pyproject_extras.py --update-pyproject --include-empty
+	@echo -e "$(GREEN)✅ pyproject.toml extras updated$(NC)"
 
 sync-tests:
 	@echo -e "$(CYAN)🔄 Syncing test files with source...$(NC)"
