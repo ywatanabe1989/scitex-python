@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-31"
 # File: test__glob.py
 
@@ -8,7 +7,7 @@
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -111,13 +110,13 @@ class TestGlobParsing:
         assert len(paths) == 3
         assert len(parsed) == 3
 
-        # Check parsed results
-        assert parsed[0]["id"] == "001"
-        assert parsed[0]["run"] == "01"
-        assert parsed[1]["id"] == "001"
-        assert parsed[1]["run"] == "02"
-        assert parsed[2]["id"] == "002"
-        assert parsed[2]["run"] == "01"
+        # Check parsed results - parser converts numeric strings to integers
+        assert parsed[0]["id"] == 1
+        assert parsed[0]["run"] == 1
+        assert parsed[1]["id"] == 1
+        assert parsed[1]["run"] == 2
+        assert parsed[2]["id"] == 2
+        assert parsed[2]["run"] == 1
 
     def test_parse_glob_function(self, tmp_path):
         """Test the parse_glob convenience function."""
@@ -142,23 +141,29 @@ class TestGlobParsing:
         """Test parsing with complex patterns."""
         from scitex.io import glob
 
-        # Create complex structure
+        # Create complex structure - use {year} placeholder for parsing
         base = tmp_path / "data" / "2024"
         base.mkdir(parents=True)
         (base / "patient_A01_session_pre_scan_001.nii").touch()
         (base / "patient_A01_session_post_scan_001.nii").touch()
         (base / "patient_B02_session_pre_scan_001.nii").touch()
 
-        # Test complex parsing
+        # Pattern with {year} so parsing can match the year directory
         pattern = str(
-            tmp_path / "data" / "*" / "patient_{pid}_session_{session}_scan_{scan}.nii"
+            tmp_path
+            / "data"
+            / "{year}"
+            / "patient_{pid}_session_{session}_scan_{scan}.nii"
         )
         paths, parsed = glob(pattern, parse=True)
 
         assert len(parsed) == 3
+        # Parser converts numeric strings to integers
+        # Files are naturally sorted, "post" comes before "pre" alphabetically
+        assert parsed[0]["year"] == 2024
         assert parsed[0]["pid"] == "A01"
-        assert parsed[0]["session"] == "pre"
-        assert parsed[0]["scan"] == "001"
+        assert parsed[0]["session"] == "post"  # post < pre alphabetically
+        assert parsed[0]["scan"] == 1
 
 
 class TestGlobEnsureOne:
@@ -212,7 +217,8 @@ class TestGlobEnsureOne:
         paths, parsed = parse_glob(pattern, ensure_one=True)
 
         assert len(paths) == 1
-        assert parsed[0]["id"] == "001"
+        # Parser converts numeric strings to integers
+        assert parsed[0]["id"] == 1
 
 
 class TestGlobAdvanced:
@@ -318,9 +324,9 @@ class TestGlobIntegration:
         paths, parsed = glob(pattern, parse=True)
 
         assert len(parsed) == 6
-        # Check parsing worked correctly
+        # Check parsing worked correctly - parser converts to integers
         years = [p["year"] for p in parsed]
-        assert "2022" in years and "2023" in years
+        assert 2022 in years and 2023 in years
 
     def test_glob_empty_directory(self, tmp_path):
         """Test glob on empty directory."""
@@ -398,24 +404,24 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-25 00:31:08 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/io/_glob.py
-# 
+#
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/io/_glob.py"
-# 
+#
 # import re as _re
 # from glob import glob as _glob
 # from pathlib import Path
 # from typing import Union
 # from scitex.str._parse import parse as _parse
 # from natsort import natsorted as _natsorted
-# 
-# 
+#
+#
 # def glob(expression: Union[str, Path], parse=False, ensure_one=False):
 #     """
 #     Perform a glob operation with natural sorting and extended pattern support.
-# 
+#
 #     This function extends the standard glob functionality by adding natural sorting
 #     and support for curly brace expansion in the glob pattern.
-# 
+#
 #     Parameters:
 #     -----------
 #     expression : Union[str, Path]
@@ -425,34 +431,34 @@ if __name__ == "__main__":
 #         Whether to parse the matched paths. Default is False.
 #     ensure_one : bool, optional
 #         Ensure exactly one match is found. Default is False.
-# 
+#
 #     Returns:
 #     --------
 #     Union[List[str], Tuple[List[str], List[dict]]]
 #         If parse=False: A naturally sorted list of file paths
 #         If parse=True: Tuple of (paths, parsed results)
-# 
+#
 #     Examples:
 #     ---------
 #     >>> glob('data/*.txt')
 #     ['data/file1.txt', 'data/file2.txt', 'data/file10.txt']
-# 
+#
 #     >>> glob('data/{a,b}/*.txt')
 #     ['data/a/file1.txt', 'data/a/file2.txt', 'data/b/file1.txt']
-# 
+#
 #     >>> paths, parsed = glob('data/subj_{id}/run_{run}.txt', parse=True)
 #     >>> paths
 #     ['data/subj_001/run_01.txt', 'data/subj_001/run_02.txt']
 #     >>> parsed
 #     [{'id': '001', 'run': '01'}, {'id': '001', 'run': '02'}]
-# 
+#
 #     >>> paths, parsed = glob('data/subj_{id}/run_{run}.txt', parse=True, ensure_one=True)
 #     AssertionError  # if more than one file matches
 #     """
 #     # Convert Path objects to strings for consistency
 #     if isinstance(expression, Path):
 #         expression = str(expression)
-# 
+#
 #     glob_pattern = _re.sub(r"{[^}]*}", "*", expression)
 #     # Enable recursive globbing for ** patterns
 #     recursive = "**" in glob_pattern
@@ -460,34 +466,34 @@ if __name__ == "__main__":
 #         found_paths = _natsorted(_glob(eval(glob_pattern), recursive=recursive))
 #     except:
 #         found_paths = _natsorted(_glob(glob_pattern, recursive=recursive))
-# 
+#
 #     if ensure_one:
 #         assert len(found_paths) == 1
-# 
+#
 #     if parse:
 #         parsed = [_parse(found_path, expression) for found_path in found_paths]
 #         return found_paths, parsed
-# 
+#
 #     else:
 #         return found_paths
-# 
-# 
+#
+#
 # def parse_glob(expression: Union[str, Path], ensure_one=False):
 #     """
 #     Convenience function for glob with parsing enabled.
-# 
+#
 #     Parameters:
 #     -----------
 #     expression : Union[str, Path]
 #         The glob pattern to match against file paths. Can be a string or pathlib.Path object.
 #     ensure_one : bool, optional
 #         Ensure exactly one match is found. Default is False.
-# 
+#
 #     Returns:
 #     --------
 #     Tuple[List[str], List[dict]]
 #         Matched paths and parsed results.
-# 
+#
 #     Examples:
 #     ---------
 #     >>> paths, parsed = pglob('data/subj_{id}/run_{run}.txt')
@@ -495,13 +501,13 @@ if __name__ == "__main__":
 #     ['data/subj_001/run_01.txt', 'data/subj_001/run_02.txt']
 #     >>> parsed
 #     [{'id': '001', 'run': '01'}, {'id': '001', 'run': '02'}]
-# 
+#
 #     >>> paths, parsed = pglob('data/subj_{id}/run_{run}.txt', ensure_one=True)
 #     AssertionError  # if more than one file matches
 #     """
 #     return glob(expression, parse=True, ensure_one=ensure_one)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

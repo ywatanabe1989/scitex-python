@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-31"
 # File: test__json2md.py
 
@@ -260,8 +259,9 @@ class TestJson2MdMain:
 
     def test_main_with_valid_json_file(self, tmp_path):
         """Test main function with valid JSON file."""
-        from scitex.io import main
         import sys
+
+        from scitex.io._json2md import main
 
         # Create test JSON file
         test_data = {"title": "Test", "items": ["a", "b", "c"]}
@@ -290,8 +290,9 @@ class TestJson2MdMain:
 
     def test_main_with_output_file(self, tmp_path):
         """Test main function with output file option."""
-        from scitex.io import main
         import sys
+
+        from scitex.io._json2md import main
 
         # Create test JSON file
         test_data = {"section": "content"}
@@ -316,8 +317,9 @@ class TestJson2MdMain:
 
     def test_main_with_nonexistent_file(self, tmp_path):
         """Test main function with nonexistent file."""
-        from scitex.io import main
         import sys
+
+        from scitex.io._json2md import main
 
         nonexistent = tmp_path / "does_not_exist.json"
 
@@ -408,16 +410,16 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/io/_json2md.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # import json
 # import sys
 # import argparse
-# 
-# 
+#
+#
 # def json2md(obj, level=1):
 #     output = []
 #     if isinstance(obj, dict):
@@ -436,34 +438,34 @@ if __name__ == "__main__":
 #             else:
 #                 output.append("* " + str(item))
 #     return "\n".join(filter(None, output))
-# 
-# 
+#
+#
 # def main():
 #     parser = argparse.ArgumentParser(description="Convert JSON to Markdown")
 #     parser.add_argument("input", help="Input JSON file")
 #     parser.add_argument("-o", "--output", help="Output file (default: stdout)")
 #     args = parser.parse_args()
-# 
+#
 #     try:
 #         with open(args.input, "r") as f:
 #             data = json.load(f)
-# 
+#
 #         result = json2md(data)
-# 
+#
 #         if args.output:
 #             with open(args.output, "w") as f:
 #                 f.write(result)
 #         else:
 #             print(result)
-# 
+#
 #     except FileNotFoundError:
 #         print(f"Error: File {args.input} not found", file=sys.stderr)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     main()
-# 
+#
 # """
 # python ./Ninja/workspace/formats/json2md.py
 # python -m workspace.formats.json2md
@@ -472,12 +474,12 @@ if __name__ == "__main__":
 # # # -*- coding: utf-8 -*-
 # # # Time-stamp: "2024-12-19 15:29:28 (ywatanabe)"
 # # # File: ./Ninja/workspace/formats/json2md.py
-# 
+#
 # # THIS_FILE = "/home/ywatanabe/.emacs.d/lisp/Ninja/workspace/formats/json2md.py"
-# 
+#
 # # import json
 # # import sys
-# 
+#
 # # def json2md(obj, level=1):
 # #     output = []
 # #     if isinstance(obj, dict):
@@ -496,28 +498,28 @@ if __name__ == "__main__":
 # #             else:
 # #                 output.append("* " + str(item))
 # #     return "\n".join(filter(None, output))
-# 
+#
 # # def main():
 # #     if len(sys.argv) != 2:
 # #         print("Usage: json2md.py <input.json>")
 # #         sys.exit(1)
-# 
+#
 # #     lpath = sys.argv[1].replace("/./", "/")
 # #     with open(lpath, "r") as f:
 # #         data = json.load(f)
-# 
-# 
+#
+#
 # # if __name__ == "__main__":
 # #     main()
-# 
-# 
+#
+#
 # # """
 # # python ./Ninja/workspace/formats/json2md.py
 # # python -m workspace.formats.json2md
 # # """
-# 
+#
 # # # EOF
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------
