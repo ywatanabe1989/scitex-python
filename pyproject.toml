@@ -673,6 +673,7 @@ exclude = [
 minversion = "6.0"
 pythonpath = ["src"]
 testpaths = ["tests"]
+cache_dir = ".pytest_cache"
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]

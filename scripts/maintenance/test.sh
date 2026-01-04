@@ -4,6 +4,7 @@
 # File: ./scripts/maintenance/test.sh
 
 set -e
+set -o pipefail
 
 THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(realpath "$THIS_DIR"/../..)"
@@ -43,6 +44,24 @@ usage() {
     echo "  -k PATTERN         Only run tests matching PATTERN"
     echo "  -h, --help         Show this help"
     echo ""
+    echo "Cache options (speeds up re-runs):"
+    echo "  --lf, --last-failed   Re-run only tests that failed last time"
+    echo "  --ff, --failed-first  Run failed tests first, then rest"
+    echo "  --nf, --new-first     Run new tests first (modified files)"
+    echo "  --sw, --stepwise      Stop on failure, resume from last fail"
+    echo "  --cache-clear         Clear cache before running"
+    echo ""
+    echo "Incremental testing (only affected tests):"
+    echo "  --testmon, --incremental  Run only tests affected by code changes"
+    echo "  --testmon-nocollect       Skip collection, run from testmon db"
+    echo ""
+    echo "Root directory protection:"
+    echo "  --strict-root             Fail if tests create files in project root"
+    echo ""
+    echo "Smart test selection:"
+    echo "  --changed                 Run tests for git-changed source files"
+    echo "  -m, --marker MARKER       Run tests with specific marker (unit, slow, etc)"
+    echo ""
     echo "Module (optional):"
     echo "  Specify a module name to test only that module."
     echo "  Examples: stats, logging, config, plt, io, torch"
@@ -72,6 +91,8 @@ main() {
     local exitfirst=""
     local pattern=""
     local parallel="auto" # Default to parallel with auto workers
+    local cache_opts=""   # Cache-related options
+    local testmon=""      # Incremental testing with testmon
     local extra_args=()
 
     # Parse arguments
@@ -103,6 +124,53 @@ main() {
             ;;
         -n | --parallel)
             parallel="$2"
+            shift 2
+            ;;
+        --lf | --last-failed)
+            cache_opts="--lf"
+            shift
+            ;;
+        --ff | --failed-first)
+            cache_opts="--ff"
+            shift
+            ;;
+        --nf | --new-first)
+            cache_opts="--nf"
+            shift
+            ;;
+        --sw | --stepwise)
+            cache_opts="--sw"
+            shift
+            ;;
+        --cache-clear)
+            cache_opts="--cache-clear"
+            shift
+            ;;
+        --testmon | --incremental)
+            testmon="--testmon --testmon-datafile=tests/.testmondata"
+            parallel="" # testmon doesn't work well with xdist
+            shift
+            ;;
+        --testmon-nocollect)
+            testmon="--testmon-nocollect --testmon-datafile=tests/.testmondata"
+            parallel=""
+            shift
+            ;;
+        --strict-root)
+            extra_args+=("--strict-root")
+            shift
+            ;;
+        --changed)
+            # Run tests for git-changed files
+            while IFS= read -r f; do
+                test_path="tests/scitex/${f#src/scitex/}"
+                test_dir="${test_path%/*}"
+                [ -d "$test_dir" ] && extra_args+=("$test_dir")
+            done < <(git diff --name-only HEAD -- 'src/scitex/*.py' 2>/dev/null)
+            shift
+            ;;
+        -m | --marker)
+            extra_args+=("-m" "$2")
             shift 2
             ;;
         -k)
@@ -166,6 +234,8 @@ main() {
     [ -n "$fast" ] && cmd="$cmd $fast"
     [ -n "$exitfirst" ] && cmd="$cmd $exitfirst"
     [ -n "$pattern" ] && cmd="$cmd $pattern"
+    [ -n "$cache_opts" ] && cmd="$cmd $cache_opts"
+    [ -n "$testmon" ] && cmd="$cmd $testmon"
     [ ${#extra_args[@]} -gt 0 ] && cmd="$cmd ${extra_args[*]}"
 
     # Create results directory with timestamp
@@ -179,15 +249,15 @@ main() {
 
     # Add coverage if requested
     if [ "$coverage" = true ]; then
-        mkdir -p htmlcov
+        mkdir -p tests/htmlcov
         cmd="$cmd --cov=$src_path"
         cmd="$cmd --cov-report=term-missing"
-        cmd="$cmd --cov-report=html:htmlcov/${report_name}"
+        cmd="$cmd --cov-report=html:tests/htmlcov/${report_name}"
         cmd="$cmd --cov-report=json:${results_dir}/coverage-${report_name}-${timestamp}.json"
         cmd="$cmd --cov-report=xml:${results_dir}/coverage-${report_name}-${timestamp}.xml"
 
-        # Also save latest (for badges)
-        cmd="$cmd --cov-report=json:coverage-${report_name}.json"
+        # Also save latest (for badges) - in tests/results/
+        cmd="$cmd --cov-report=json:${results_dir}/coverage-${report_name}.json"
     fi
 
     echo_info "Command: $cmd"
@@ -208,9 +278,9 @@ main() {
         if [ "$coverage" = true ]; then
             echo ""
             echo_info "Coverage reports:"
-            echo_info "  HTML:   htmlcov/${report_name}/index.html"
+            echo_info "  HTML:   tests/htmlcov/${report_name}/index.html"
             echo_info "  JSON:   ${results_dir}/coverage-${report_name}-${timestamp}.json"
-            echo_info "  Latest: coverage-${report_name}.json (for badges)"
+            echo_info "  Latest: ${results_dir}/coverage-${report_name}.json (for badges)"
         fi
 
         echo ""
