@@ -14,7 +14,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from unittest.mock import MagicMock, patch, call
-from scitex.db._PostgreSQLMixins import _BatchMixin
+from scitex.db._postgresql._PostgreSQLMixins import _BatchMixin
 
 
 class TestPostgreSQLBatchMixin:

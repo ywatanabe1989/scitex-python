@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-07-12 12:00:00 (ywatanabe)"
 # File: ./src/scitex/db/_delete_duplicates.py
 # ----------------------------------------
@@ -16,6 +15,7 @@ as it is SQLite3-specific.
 """
 
 from scitex.logging import warn_deprecated
+
 from ._sqlite3._delete_duplicates import delete_sqlite3_duplicates
 
 
@@ -28,8 +28,8 @@ def delete_duplicates(*args, **kwargs):
         Use scitex.db._sqlite3.delete_sqlite3_duplicates() instead.
     """
     warn_deprecated(
-        old_function="scitex.db.delete_duplicates",
-        new_function="scitex.db._sqlite3.delete_sqlite3_duplicates",
+        old_name="scitex.db.delete_duplicates",
+        new_name="scitex.db._sqlite3.delete_sqlite3_duplicates",
         version="3.0.0",
     )
     return delete_sqlite3_duplicates(*args, **kwargs)
