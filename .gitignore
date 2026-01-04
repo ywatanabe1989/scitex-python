@@ -18,7 +18,11 @@ singularity
 slurm_logs/
 coverage_report.txt
 test_comprehensive_fixes.py
-catboost_info
+catboost_info/
+
+## Test artifacts (should not be in root)
+/output/
+/png/
 
 
 ## Exceptions
