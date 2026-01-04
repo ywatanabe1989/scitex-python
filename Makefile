@@ -6,12 +6,13 @@
 # Use bash for proper echo -e support
 SHELL := /bin/bash
 
-.PHONY: help install install-dev install-all \
+.PHONY: help status install install-dev \
 	clean test test-cov lint format check \
 	build release upload upload-test \
 	build-all release-all upload-all upload-test-all \
 	sync-tests sync-examples sync-redirect \
-	show-version tag
+	show-version tag \
+	generate-extras check-extras
 
 # Colors
 GREEN := \033[0;32m
@@ -33,10 +34,13 @@ help:
 	@echo -e "$(GREEN)║             SciTeX Development Makefile               ║$(NC)"
 	@echo -e "$(GREEN)╚═══════════════════════════════════════════════════════╝$(NC)"
 	@echo -e ""
+	@echo -e "$(CYAN)📊 Status:$(NC)"
+	@echo -e "  make status            Show project status, pending tasks, warnings"
+	@echo -e ""
 	@echo -e "$(CYAN)📦 Installation:$(NC)"
 	@echo -e "  make install           Install package (development mode)"
 	@echo -e "  make install-dev       Install with dev dependencies"
-	@echo -e "  make install-all       Install with all optional dependencies"
+	@echo -e "  pip install -e '.[audio]'   Install specific module extras"
 	@echo -e ""
 	@echo -e "$(CYAN)🔧 Development:$(NC)"
 	@echo -e "  make test              Run all tests"
@@ -53,6 +57,8 @@ help:
 	@echo -e "  make clean             Remove build/test/cache artifacts"
 	@echo -e "  make sync-tests        Sync test files with source structure"
 	@echo -e "  make sync-examples     Sync example files with source structure"
+	@echo -e "  make generate-extras   Regenerate pyproject.toml extras from requirements"
+	@echo -e "  make check-extras      Check if extras are in sync with requirements"
 	@echo -e ""
 	@echo -e "$(CYAN)📤 Build & Release (scitex only):$(NC)"
 	@echo -e "  make build             Build package"
@@ -86,10 +92,57 @@ install-dev:
 	@pip install -e ".[dev]"
 	@echo -e "$(GREEN)✅ Installation complete$(NC)"
 
-install-all:
-	@echo -e "$(CYAN)📦 Installing scitex with all dependencies...$(NC)"
-	@pip install -e ".[all,dev]"
-	@echo -e "$(GREEN)✅ Installation complete$(NC)"
+# ============================================
+# Module Extras Management
+# ============================================
+
+generate-extras:
+	@echo -e "$(CYAN)🔄 Regenerating pyproject.toml extras from requirements...$(NC)"
+	@./scripts/maintenance/generate_extras.sh --update
+	@echo -e "$(GREEN)✅ pyproject.toml updated$(NC)"
+
+check-extras:
+	@./scripts/maintenance/generate_extras.sh --check
+
+# ============================================
+# Status (Memory Aid)
+# ============================================
+
+status:
+	@echo -e ""
+	@echo -e "$(GREEN)╔═══════════════════════════════════════════════════════╗$(NC)"
+	@echo -e "$(GREEN)║                   SciTeX Status                       ║$(NC)"
+	@echo -e "$(GREEN)╚═══════════════════════════════════════════════════════╝$(NC)"
+	@echo -e ""
+	@echo -e "$(CYAN)📋 Version:$(NC)"
+	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
+	echo -e "  Current: $(GREEN)$$VERSION$(NC)"
+	@echo -e ""
+	@echo -e "$(CYAN)📂 Git Status:$(NC)"
+	@BRANCH=$$(git branch --show-current); \
+	echo -e "  Branch: $(GREEN)$$BRANCH$(NC)"
+	@AHEAD=$$(git rev-list --count origin/main..HEAD 2>/dev/null || echo "?"); \
+	if [ "$$AHEAD" != "0" ] && [ "$$AHEAD" != "?" ]; then \
+		echo -e "  $(YELLOW)⚠ $$AHEAD commit(s) ahead of main$(NC)"; \
+	fi
+	@DIRTY=$$(git status --porcelain 2>/dev/null | wc -l); \
+	if [ "$$DIRTY" != "0" ]; then \
+		echo -e "  $(YELLOW)⚠ $$DIRTY uncommitted change(s)$(NC)"; \
+	fi
+	@echo -e ""
+	@echo -e "$(CYAN)📦 Module Extras:$(NC)"
+	@EXTRAS=$$(ls config/requirements/*.txt 2>/dev/null | wc -l); \
+	echo -e "  Available: $$EXTRAS modules"; \
+	echo -e "  $(GRAY)See: config/requirements/*.txt$(NC)"
+	@echo -e ""
+	@echo -e "$(CYAN)⚠ Warnings:$(NC)"
+	@if ! ./scripts/maintenance/generate_extras.sh --check >/dev/null 2>&1; then \
+		echo -e "  $(RED)✗ pyproject.toml extras out of sync$(NC)"; \
+		echo -e "    $(GRAY)Run: make generate-extras$(NC)"; \
+	else \
+		echo -e "  $(GREEN)✓ Extras in sync$(NC)"; \
+	fi
+	@echo -e ""
 
 # ============================================
 # Development
