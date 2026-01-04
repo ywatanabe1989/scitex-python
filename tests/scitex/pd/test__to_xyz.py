@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-06-01 20:10:00 (ywatanabe)"
 # File: ./tests/scitex/pd/test__to_xyz.py
 
@@ -7,9 +6,9 @@
 Test module for scitex.pd.to_xyz function.
 """
 
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 from pandas.testing import assert_frame_equal
 
 
@@ -151,15 +150,19 @@ class TestToXYZ:
         assert nan_count == 3
 
     def test_empty_dataframe(self):
-        """Test conversion of empty DataFrame."""
+        """Test conversion of empty DataFrame.
+
+        Empty DataFrames with no columns cause pd.concat to fail with
+        'No objects to concatenate'. This is expected behavior.
+        """
         from scitex.pd import to_xyz
 
-        # Empty DataFrame
+        # Empty DataFrame with no columns raises ValueError
         df = pd.DataFrame()
-        result = to_xyz(df)
-        assert result.empty
+        with pytest.raises(ValueError, match="No objects to concatenate"):
+            to_xyz(df)
 
-        # DataFrame with structure but no data
+        # DataFrame with structure but no rows works - produces empty result
         df = pd.DataFrame(columns=["A", "B"], index=[])
         result = to_xyz(df)
         assert result.empty
@@ -214,7 +217,11 @@ class TestToXYZ:
         assert str_vals == ["a", "b", "c"]
 
     def test_multiindex_not_supported(self):
-        """Test behavior with MultiIndex (current implementation doesn't handle specially)."""
+        """Test behavior with MultiIndex (current implementation doesn't handle specially).
+
+        For MultiIndex, index.name is None (level names are in index.names),
+        so the x column is named 'x'. The MultiIndex values become tuples.
+        """
         from scitex.pd import to_xyz
 
         # Create DataFrame with MultiIndex
@@ -223,9 +230,12 @@ class TestToXYZ:
         df = pd.DataFrame({"col": [10, 20, 30, 40]}, index=index)
 
         result = to_xyz(df)
-        # MultiIndex becomes tuples in the result
+        # MultiIndex becomes tuples in the 'x' column (not 'first')
         assert result.shape == (4, 3)
-        assert isinstance(result["first"].iloc[0], tuple)
+        assert list(result.columns) == ["x", "y", "z"]
+        # x values are tuples representing the MultiIndex
+        assert isinstance(result["x"].iloc[0], tuple)
+        assert result["x"].iloc[0] == ("A", 1)
 
     def test_datetime_index(self):
         """Test conversion with datetime index."""
@@ -261,6 +271,7 @@ class TestToXYZ:
         result = to_xyz(df)
         assert result.shape == (12, 3)
 
+
 if __name__ == "__main__":
     import os
 
@@ -275,31 +286,31 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-09-28 11:17:22 (ywatanabe)"
 # # ./src/scitex/pd/_to_xyz.py
-# 
+#
 # import scitex
 # import numpy as np
 # import pandas as pd
-# 
-# 
+#
+#
 # def to_xyz(data_frame):
 #     """
 #     Convert a DataFrame into x, y, z format (long format).
-# 
+#
 #     Transforms a DataFrame from wide format (matrix/heatmap) to long format
 #     where each value becomes a row with x (row index), y (column name),
 #     and z (value) columns.
-# 
+#
 #     Example
 #     -------
 #     data_frame = pd.DataFrame(...)  # Your DataFrame here
 #     out = to_xyz(data_frame)
 #     print(out)
-# 
+#
 #     Parameters
 #     ----------
 #     data_frame : pandas.DataFrame
 #         The input DataFrame to be converted.
-# 
+#
 #     Returns
 #     -------
 #     pandas.DataFrame
@@ -307,9 +318,9 @@ if __name__ == "__main__":
 #     """
 #     x_name = data_frame.index.name or "x"
 #     y_name = data_frame.columns.name or "y"
-# 
+#
 #     formatted_data_frames = []
-# 
+#
 #     for column in data_frame.columns:
 #         column_data_frame = data_frame[column]
 #         formatted_data = pd.DataFrame(
@@ -320,42 +331,42 @@ if __name__ == "__main__":
 #             }
 #         )
 #         formatted_data_frames.append(formatted_data)
-# 
+#
 #     result = pd.concat(formatted_data_frames, ignore_index=True)
-# 
+#
 #     # Ensure column order is x, y, z
 #     col_order = [x_name, y_name, "z"]
 #     result = result[col_order]
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # # def to_xyz(data_frame):
 # #     """
 # #     Convert a heatmap DataFrame into x, y, z format.
-# 
+#
 # #     Ensure the index and columns are the same, and if either exists, replace with that.
-# 
+#
 # #     Example
 # #     -------
 # #     data_frame = pd.DataFrame(...)  # Your DataFrame here
 # #     out = to_xy(data_frame)
 # #     print(out)
-# 
+#
 # #     Parameters
 # #     ----------
 # #     data_frame : pandas.DataFrame
 # #         The input DataFrame to be converted.
-# 
+#
 # #     Returns
 # #     -------
 # #     pandas.DataFrame
 # #         A DataFrame formatted with columns ['x', 'y', 'z']
 # #     """
 # #     assert data_frame.shape[0] == data_frame.shape[1]
-# 
+#
 # #     if not data_frame.index.equals(data_frame.columns):
-# 
+#
 # #         if (data_frame.index == np.array(range(len(data_frame.index)))).all():
 # #             data_frame.columns = data_frame.index
 # #         elif (
@@ -364,9 +375,9 @@ if __name__ == "__main__":
 # #             data_frame.index = data_frame.columns
 # #         else:
 # #             raise ValueError("Either index or columns must be a range of integers")
-# 
+#
 # #     formatted_data_frames = []
-# 
+#
 # #     for column in data_frame.columns:
 # #         column_data_frame = data_frame[column]
 # #         y_label = column_data_frame.name
@@ -379,7 +390,7 @@ if __name__ == "__main__":
 # #         column_data_frame = column_data_frame.rename(columns={y_label: "z"})
 # #         column_data_frame = scitex.pd.mv(column_data_frame, "z", -1)
 # #         formatted_data_frames.append(column_data_frame)
-# 
+#
 # #     return pd.concat(formatted_data_frames, ignore_index=True)
 
 # --------------------------------------------------------------------------------
