@@ -16,7 +16,7 @@ import ast
 import re
 from pathlib import Path
 
-from _stdlib_modules import INTERNAL_MODULES, KNOWN_PACKAGES, STDLIB_MODULES
+from _pypi_packages import INTERNAL_MODULES, KNOWN_PACKAGES, STDLIB_MODULES
 
 
 def extract_imports(filepath: Path) -> set:
