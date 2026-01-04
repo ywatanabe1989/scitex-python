@@ -186,6 +186,7 @@ from . import ax
 from .styles import presets
 from . import styles
 from . import gallery
+from ._figrecipe import FIGRECIPE_AVAILABLE, save_recipe, load_recipe, reproduce
 
 # Lazy import for subplots to avoid circular dependencies
 # Note: Use names that don't conflict with submodule names like _subplots
@@ -754,6 +755,10 @@ __all__ = [
     "termplot",
     "tight_layout",
     "utils",
+    "FIGRECIPE_AVAILABLE",
+    "save_recipe",
+    "load_recipe",
+    "reproduce",
 ]
 
 
