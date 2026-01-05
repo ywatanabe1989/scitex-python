@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2025-12-09 04:00:22
+!-- Timestamp: 2026-01-05 16:48:43
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -79,15 +79,15 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 pip install scitex  # Full installation with all modules
 ```
 
-**Modular Installation** (optional extras):
+**Modular Installation** (See (./src/scitex)[./src/scitex] for all available modules):
 ``` bash
-pip install scitex[dl]       # Deep learning (PyTorch, transformers)
-pip install scitex[neuro]    # Neuroscience (MNE, EEG/MEG)
-pip install scitex[scholar]  # Academic paper management
-pip install scitex[dev]      # Development tools (testing, linting)
+# Examples
+pip install scitex[ai]
+pip install scitex[ai,audio,writer]
 ```
 
-### Arial Font Setup
+<details>
+<summary><strong>Arial Font Setup</summary></strong>
 
 ``` bash
 # Ubuntu
@@ -131,19 +131,7 @@ fig.savefig("arial_test.png", dpi=300)
 plt.close(fig)
 ```
 
-**Optional Groups**:
-
-| Group       | Packages                                                | Size Impact |
-|-------------|---------------------------------------------------------|-------------|
-| **dl**      | PyTorch, transformers                                   | +2-4 GB     |
-| **ml**      | scikit-image, catboost, optuna, OpenAI, Anthropic, Groq | ~200 MB     |
-| **jupyter** | JupyterLab, papermill                                   | ~100 MB     |
-| **neuro**   | MNE, obspy (EEG/MEG analysis)                           | ~200 MB     |
-| **web**     | FastAPI, Flask, Streamlit                               | ~50 MB      |
-| **gui**     | Flask, DearPyGui, PyQt6 (multi-backend figure editors)  | ~100 MB     |
-| **scholar** | Selenium, PDF tools, paper management                   | ~150 MB     |
-| **writer**  | LaTeX compilation tools                                 | ~10 MB      |
-| **dev**     | Testing, linting (dev only)                             | ~100 MB     |
+</details>
 
 ## 🚀 Quick Start
 
