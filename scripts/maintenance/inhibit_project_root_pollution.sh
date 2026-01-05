@@ -17,7 +17,6 @@ WHITELIST_TRACKED=(
     "data"
     "docs"
     "examples"
-    "externals"
     "GITIGNORED"
     "LICENSE"
     "Makefile"
