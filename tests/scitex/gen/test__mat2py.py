@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-31 19:55:00 (ywatanabe)"
 # File: /data/gpfs/projects/punim2354/ywatanabe/.claude-worktree/scitex_repo/tests/scitex/gen/test__mat2py.py
 
 import pytest
+
 pytest.importorskip("torch")
-import numpy as np
-import tempfile
 import os
-from scipy.io import savemat
+import tempfile
+from unittest.mock import MagicMock, patch
+
 import h5py
-from unittest.mock import patch, MagicMock
-from scitex.gen import mat2dict, public_keys, save_npa, mat2npy
+import numpy as np
+from scipy.io import savemat
+
+from scitex.gen import mat2dict, mat2npy, public_keys, save_npa
 
 
 class TestMat2Py:
@@ -19,13 +21,18 @@ class TestMat2Py:
 
     @pytest.fixture
     def temp_mat_file(self):
-        """Create a temporary .mat file for testing."""
+        """Create a temporary .mat file for testing.
+
+        Note: scipy.savemat ignores keys starting with underscore,
+        so _private variables are not saved to the .mat file.
+        """
         with tempfile.NamedTemporaryFile(suffix=".mat", delete=False) as tmp:
             # Create test data
+            # Note: _private is NOT included because scipy.savemat ignores
+            # keys starting with underscore (shows warning and skips them)
             test_data = {
                 "matrix1": np.array([[1, 2, 3], [4, 5, 6]]),
                 "matrix2": np.array([7, 8, 9]),
-                "_private": np.array([10, 11]),  # Private variable
             }
             savemat(tmp.name, test_data)
             yield tmp.name
@@ -50,16 +57,17 @@ class TestMat2Py:
         # Check that data is loaded
         assert "matrix1" in result
         assert "matrix2" in result
-        assert "_private" in result
+        # Note: _private keys are NOT saved by scipy.savemat (ignores underscore prefix)
 
         # Check __hdf__ flag
-        assert result["__hdf__"] == False
+        assert result["__hdf__"] is False
 
-        # Verify data
+        # Verify data - scipy.loadmat preserves original shapes
         np.testing.assert_array_equal(
             result["matrix1"], np.array([[1, 2, 3], [4, 5, 6]])
         )
-        np.testing.assert_array_equal(result["matrix2"], np.array([7, 8, 9]))
+        # Note: scipy.savemat wraps 1D arrays, so shape becomes (1, 3)
+        np.testing.assert_array_equal(result["matrix2"].flatten(), np.array([7, 8, 9]))
 
     def test_mat2dict_with_hdf5_mat(self, temp_hdf5_file):
         """Test loading HDF5 .mat file into dictionary."""
@@ -169,6 +177,7 @@ class TestMat2Py:
             # Cleanup
             os.unlink(tmp.name)
 
+
 if __name__ == "__main__":
     import os
 
@@ -183,30 +192,30 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-03 18:57:14 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/gen/_mat2py.py
-# 
+#
 # """Helper script for loading .mat files into python.
 # For .mat with multiple variables use mat2dict to get return dictionary with .mat variables.
 # For .mat with 1 matrix use mat2npa to return np.array
 # For .mat with 1 matrix use mat2npy to save np.array to .npy
 # For multiple .mat files with 1 matrix use dir2npy to save 1 np.array of each .mat to .npy
-# 
-# 
+#
+#
 # Examples:
 # mat2py.mat2npa(fname = '/vol/ccnlab-scratch1/julber/chill_nn_regression/data/chill_wav_time_16kHz.mat', typ = np.float32)
 # mat2py.dir2npa(dir = '/vol/ccnlab-scratch1/julber/phoneme_decoding/data/', typ = np.float32, regex = '*xdata')
 # mat2py.dir2npa(dir = '/vol/ccnlab-scratch1/julber/phoneme_decoding/data/', typ = np.int32, regex = '*ylabels')
-# 
-# 
+#
+#
 # September 07, 2017
 # JB"""
-# 
+#
 # import numpy as np
 # import h5py
 # from glob import glob as _glob
 # import os
 # from scipy.io import loadmat
-# 
-# 
+#
+#
 # def mat2dict(fname):
 #     """Function returns a dictionary with .mat variables"""
 #     try:
@@ -219,11 +228,11 @@ if __name__ == "__main__":
 #         d = loadmat(fname)
 #         d["__hdf__"] = False
 #     return d
-# 
-# 
+#
+#
 # def keys2npa(d, typ):
 #     import pdb
-# 
+#
 #     pdb.set_trace()
 #     d2 = {}
 #     for key in public_keys(d):
@@ -233,39 +242,39 @@ if __name__ == "__main__":
 #         assert type(x.flatten()[0]) == typ
 #         d2[key] = x.copy()
 #     return d2
-# 
-# 
+#
+#
 # def public_keys(d):
 #     return [k for k in d.keys() if not k.startswith("_")]
-# 
-# 
+#
+#
 # def mat2npa(fname, typ):
 #     """Function returns np array from 1st entry in .mat file"""
 #     import pdb
-# 
+#
 #     pdb.set_trace()
 #     d = keys2npa(mat2dict(fname), typ)
 #     return d[d.keys()[0]]
-# 
-# 
+#
+#
 # def save_npa(fname, x):
 #     np.save(fname, x)
-# 
-# 
+#
+#
 # def mat2npy(fname, typ):
 #     """Function save np array from 1st entry in .mat file to .npy file"""
 #     x = mat2npa(fname, typ)
 #     save_npa(fname=fname.replace(".mat", ""), x=x)
-# 
-# 
+#
+#
 # def dir2npy(dir, typ, regex="*"):
 #     """Function saves np array from 1st entry in each regex + .mat file in dir"""
 #     os.chdir(dir)
 #     for fname in _glob(regex + ".mat"):
 #         print("File " + fname + " to" + " .npa")
 #         mat2npy(dir + fname, typ)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------
