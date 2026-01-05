@@ -9,7 +9,7 @@ SHELL := /bin/bash
 .PHONY: help install install-dev install-all \
 	clean test test-fast test-full test-lf test-ff test-nf test-inc test-unit test-changed lint format check \
 	test-stats-cov test-config-cov test-logging-cov \
-	build release upload upload-test test-install test-install-pypi \
+	build release upload upload-test test-install test-install-pypi test-install-module test-install-modules \
 	build-all release-all upload-all upload-test-all \
 	sync-extras sync-tests sync-examples sync-redirect \
 	show-version tag
@@ -226,39 +226,44 @@ upload: build
 # Installation Testing (pre-release validation)
 # ============================================
 
-TEST_VENV_DIR := /tmp/scitex-test-install
-
+# Test local build installation
 test-install: build
-	@echo -e "$(CYAN)🧪 Testing installation in isolated venv...$(NC)"
-	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
-	rm -rf $(TEST_VENV_DIR); \
-	python -m venv $(TEST_VENV_DIR); \
-	$(TEST_VENV_DIR)/bin/pip install --upgrade pip > /dev/null; \
-	echo -e "$(GRAY)Installing scitex[all] from local build...$(NC)"; \
-	$(TEST_VENV_DIR)/bin/pip install dist/scitex-$$VERSION-py3-none-any.whl[all] > /dev/null 2>&1 || \
-		(echo -e "$(RED)❌ Installation failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
-	echo -e "$(GRAY)Testing imports...$(NC)"; \
-	$(TEST_VENV_DIR)/bin/python -c "import scitex; print(f'Version: {scitex.__version__}')" || \
-		(echo -e "$(RED)❌ Import failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
-	$(TEST_VENV_DIR)/bin/python -c "from scitex import io, plt, stats" || \
-		(echo -e "$(RED)❌ Core module imports failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
-	rm -rf $(TEST_VENV_DIR); \
-	echo -e "$(GREEN)✅ Installation test passed$(NC)"
+	@./scripts/release/test_install.sh local
 
+# Test PyPI installation
 test-install-pypi:
-	@echo -e "$(CYAN)🧪 Testing PyPI installation in isolated venv...$(NC)"
-	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
-	rm -rf $(TEST_VENV_DIR); \
-	python -m venv $(TEST_VENV_DIR); \
-	$(TEST_VENV_DIR)/bin/pip install --upgrade pip > /dev/null; \
-	echo -e "$(GRAY)Installing scitex[all]==$$VERSION from PyPI...$(NC)"; \
-	$(TEST_VENV_DIR)/bin/pip install "scitex[all]==$$VERSION" > /dev/null 2>&1 || \
-		(echo -e "$(RED)❌ PyPI installation failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
-	echo -e "$(GRAY)Testing imports...$(NC)"; \
-	$(TEST_VENV_DIR)/bin/python -c "import scitex; print(f'Version: {scitex.__version__}')" || \
-		(echo -e "$(RED)❌ Import failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
-	rm -rf $(TEST_VENV_DIR); \
-	echo -e "$(GREEN)✅ PyPI installation test passed$(NC)"
+	@./scripts/release/test_install.sh pypi
+
+# Test specific module: make test-install-module MODULE=io
+test-install-module: build
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make test-install-module MODULE=io"
+	@exit 1
+endif
+	@./scripts/release/test_install.sh local $(MODULE)
+
+# Test all key modules
+test-install-modules: build
+	@./scripts/release/test_install.sh local-all
+
+# Test module + run pytest: make test-module-full MODULE=io
+test-module-full: build
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make test-module-full MODULE=io"
+	@exit 1
+endif
+	@./scripts/release/test_module.sh local $(MODULE)
+
+# Test module from PyPI + run pytest: make test-module-pypi MODULE=io
+test-module-pypi:
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make test-module-pypi MODULE=io"
+	@exit 1
+endif
+	@./scripts/release/test_module.sh pypi $(MODULE)
 
 release: clean build test-install tag upload
 	@echo -e ""
