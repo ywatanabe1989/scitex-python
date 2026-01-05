@@ -1,55 +1,37 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./src/scitex/stats/_schema.py
 # Timestamp: 2025-12-20
 """
 Statistical Result Schema - DEPRECATED
 
-This module is deprecated. Import from scitex.fts._stats instead:
-    from scitex.fts._stats import Position, StatStyling, StatPositioning
+This module is deprecated. Import from scitex.schema._stats instead:
+    from scitex.schema._stats import Position, StatStyling, StatPositioning, StatResult
+
+For the new simplified API, use scitex.fts._stats.
 """
 
 import warnings
 
 warnings.warn(
-    "scitex.stats._schema is deprecated. Import from scitex.fts._stats instead.",
+    "scitex.stats._schema is deprecated. Import from scitex.schema._stats instead.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
-# Re-export from FTS (new single source of truth)
-from scitex.fts._stats import (
-    # Type aliases
-    PositionMode,
-    UnitType,
-    SymbolStyle,
+# Re-export from schema module (the OLD API with full StatResult dataclass)
+from scitex.schema._stats import (
     # Position and styling
     Position,
-    StatStyling,
+    # Type aliases
+    PositionMode,
     StatPositioning,
+    # StatResult dataclass (old API)
+    StatResult,
+    StatStyling,
+    SymbolStyle,
+    UnitType,
+    create_stat_result,
 )
-
-# StatResult is no longer a dataclass - use dicts for test results
-StatResult = dict
-
-def create_stat_result(
-    test_type: str,
-    statistic_name: str,
-    statistic_value: float,
-    p_value: float,
-    **kwargs,
-) -> dict:
-    """Create a stat result dict (deprecated, use simple dicts instead)."""
-    from scitex.stats.utils import p2stars
-
-    return {
-        "test_type": test_type,
-        "test_category": kwargs.get("test_category", "other"),
-        "statistic": {"name": statistic_name, "value": statistic_value},
-        "p_value": p_value,
-        "stars": p2stars(p_value, ns_symbol=False),
-        **{k: v for k, v in kwargs.items() if k != "test_category"},
-    }
 
 __all__ = [
     # Type aliases
@@ -60,7 +42,7 @@ __all__ = [
     "Position",
     "StatStyling",
     "StatPositioning",
-    # Deprecated
+    # Deprecated but functional
     "StatResult",
     "create_stat_result",
 ]

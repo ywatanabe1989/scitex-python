@@ -1,116 +1,81 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.tree._SharedTree."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+from scitex.writer.dataclasses.tree._SharedTree import SharedTree
+
+
+class TestSharedTreeCreation:
+    """Tests for SharedTree instantiation."""
+
+    def test_creates_with_root_path(self, tmp_path):
+        """Verify SharedTree creates with root path."""
+        tree = SharedTree(root=tmp_path)
+        assert tree.root == tmp_path
+
+    def test_git_root_optional(self, tmp_path):
+        """Verify git_root defaults to None."""
+        tree = SharedTree(root=tmp_path)
+        assert tree.git_root is None
+
+
+class TestSharedTreePostInit:
+    """Tests for SharedTree __post_init__ initialization."""
+
+    def test_metadata_sections_initialized(self, tmp_path):
+        """Verify metadata DocumentSections are initialized."""
+        tree = SharedTree(root=tmp_path)
+        assert tree.authors.path == tmp_path / "authors.tex"
+        assert tree.title.path == tmp_path / "title.tex"
+        assert tree.keywords.path == tmp_path / "keywords.tex"
+        assert tree.journal_name.path == tmp_path / "journal_name.tex"
+
+    def test_bibliography_initialized(self, tmp_path):
+        """Verify bibliography DocumentSection is initialized."""
+        tree = SharedTree(root=tmp_path)
+        assert isinstance(tree.bibliography, DocumentSection)
+        assert tree.bibliography.path == tmp_path / "bib_files" / "bibliography.bib"
+
+    def test_directory_paths_initialized(self, tmp_path):
+        """Verify directory paths are initialized."""
+        tree = SharedTree(root=tmp_path)
+        assert tree.bib_files == tmp_path / "bib_files"
+        assert tree.latex_styles == tmp_path / "latex_styles"
+        assert tree.templates == tmp_path / "templates"
+
+
+class TestSharedTreeVerifyStructure:
+    """Tests for SharedTree verify_structure method."""
+
+    def test_verify_fails_when_empty(self, tmp_path):
+        """Verify returns False when required files are missing."""
+        tree = SharedTree(root=tmp_path)
+        is_valid, missing = tree.verify_structure()
+
+        assert is_valid is False
+        assert len(missing) == 5
+
+    def test_verify_passes_with_all_required_files(self, tmp_path):
+        """Verify returns True when all required files exist."""
+        (tmp_path / "authors.tex").touch()
+        (tmp_path / "title.tex").touch()
+        (tmp_path / "keywords.tex").touch()
+        (tmp_path / "journal_name.tex").touch()
+        (tmp_path / "bib_files").mkdir()
+        (tmp_path / "bib_files" / "bibliography.bib").touch()
+
+        tree = SharedTree(root=tmp_path)
+        is_valid, missing = tree.verify_structure()
+
+        assert is_valid is True
+        assert len(missing) == 0
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_SharedTree.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-29 06:13:09 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/types/tree/_SharedTree.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/types/tree/_SharedTree.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# SharedTree - dataclass for shared directory structure.
-# 
-# Represents the 00_shared/ directory with files used across documents.
-# """
-# 
-# from pathlib import Path
-# from typing import Optional
-# from dataclasses import dataclass
-# 
-# from ..core import DocumentSection
-# 
-# 
-# @dataclass
-# class SharedTree:
-#     """Shared directory structure (00_shared/)."""
-# 
-#     root: Path
-#     git_root: Optional[Path] = None
-# 
-#     # Metadata files
-#     authors: DocumentSection = None
-#     title: DocumentSection = None
-#     keywords: DocumentSection = None
-#     journal_name: DocumentSection = None
-# 
-#     # Directories
-#     bib_files: Path = None
-#     latex_styles: Path = None
-#     templates: Path = None
-# 
-#     # Bibliography
-#     bibliography: DocumentSection = None
-# 
-#     def __post_init__(self):
-#         """Initialize all DocumentSection and Path instances."""
-#         if self.authors is None:
-#             self.authors = DocumentSection(self.root / "authors.tex", self.git_root)
-#         if self.title is None:
-#             self.title = DocumentSection(self.root / "title.tex", self.git_root)
-#         if self.keywords is None:
-#             self.keywords = DocumentSection(self.root / "keywords.tex", self.git_root)
-#         if self.journal_name is None:
-#             self.journal_name = DocumentSection(
-#                 self.root / "journal_name.tex", self.git_root
-#             )
-#         if self.bibliography is None:
-#             self.bibliography = DocumentSection(
-#                 self.root / "bib_files" / "bibliography.bib", self.git_root
-#             )
-#         if self.bib_files is None:
-#             self.bib_files = self.root / "bib_files"
-#         if self.latex_styles is None:
-#             self.latex_styles = self.root / "latex_styles"
-#         if self.templates is None:
-#             self.templates = self.root / "templates"
-# 
-#     def verify_structure(self) -> tuple[bool, list[str]]:
-#         """
-#         Verify shared structure has required files.
-# 
-#         Returns:
-#             (is_valid, list_of_missing_files_with_paths)
-#         """
-#         required = [
-#             ("authors.tex", self.authors),
-#             ("title.tex", self.title),
-#             ("keywords.tex", self.keywords),
-#             ("journal_name.tex", self.journal_name),
-#             ("bibliography.bib", self.bibliography),
-#         ]
-# 
-#         missing = []
-#         for name, section in required:
-#             if not section.path.exists():
-#                 expected_path = (
-#                     section.path.relative_to(self.git_root)
-#                     if self.git_root
-#                     else section.path
-#                 )
-#                 missing.append(f"{name} (expected at: {expected_path})")
-# 
-#         return len(missing) == 0, missing
-# 
-# 
-# __all__ = ["SharedTree"]
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_SharedTree.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

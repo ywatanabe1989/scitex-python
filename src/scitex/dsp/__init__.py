@@ -3,20 +3,23 @@
 
 import warnings
 
+# Import example, params, norm, reference, filt, and add_noise modules as submodules
+from . import add_noise, example, filt, norm, params, reference
+
 # Core imports that should always work
 from ._crop import crop
 from ._demo_sig import demo_sig
 from ._detect_ripples import (
-    detect_ripples,
-    _preprocess,
-    _find_events,
-    _drop_ripples_at_edges,
     _calc_relative_peak_position,
+    _drop_ripples_at_edges,
+    _find_events,
+    _preprocess,
     _sort_columns,
+    detect_ripples,
 )
 from ._ensure_3d import ensure_3d
 from ._hilbert import hilbert
-from ._modulation_index import modulation_index, _reshape
+from ._modulation_index import _reshape, modulation_index
 from ._pac import pac
 from ._psd import band_powers, psd
 from ._resample import resample
@@ -24,16 +27,12 @@ from ._time import time
 from ._transform import to_segments, to_sktime_df
 from ._wavelet import wavelet
 
-# Import example and params modules as submodules
-from . import example
-from . import params
-
 # Try to import audio-related functions that require PortAudio
 try:
     from ._listen import list_and_select_device
 
     _audio_available = True
-except (ImportError, OSError) as e:
+except (ImportError, OSError):
     warnings.warn(
         "Audio functionality unavailable: PortAudio library not found. "
         "Install PortAudio to use audio features (e.g., sudo apt-get install portaudio19-dev)",
@@ -62,17 +61,23 @@ __all__ = [
     "_preprocess",
     "_reshape",
     "_sort_columns",
+    "add_noise",
     "band_powers",
     "crop",
     "demo_sig",
     "detect_ripples",
     "ensure_3d",
+    "example",
+    "filt",
     "get_eeg_pos",
     "hilbert",
     "list_and_select_device",
     "modulation_index",
+    "norm",
     "pac",
+    "params",
     "psd",
+    "reference",
     "resample",
     "time",
     "to_segments",

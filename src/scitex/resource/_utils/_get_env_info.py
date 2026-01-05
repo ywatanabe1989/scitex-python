@@ -82,9 +82,7 @@ def get_conda_packages(run_lambda):
     if get_platform() == "win32":
         system_root = os.environ.get("SYSTEMROOT", "C:\\Windows")
         findstr_cmd = os.path.join(system_root, "System32", "findstr")
-        grep_cmd = r'{} /R "torch numpy cudatoolkit soumith mkl magma"'.format(
-            findstr_cmd
-        )
+        grep_cmd = rf'{findstr_cmd} /R "torch numpy cudatoolkit soumith mkl magma"'
     else:
         grep_cmd = r'grep "torch\|numpy\|cudatoolkit\|soumith\|mkl\|magma"'
     conda = os.environ.get("CONDA_EXE", "conda")
@@ -148,7 +146,7 @@ def get_cudnn_version(run_lambda):
         system_root = os.environ.get("SYSTEMROOT", "C:\\Windows")
         cuda_path = os.environ.get("CUDA_PATH", "%CUDA_PATH%")
         where_cmd = os.path.join(system_root, "System32", "where")
-        cudnn_cmd = '{} /R "{}\\bin" cudnn*.dll'.format(where_cmd, cuda_path)
+        cudnn_cmd = f'{where_cmd} /R "{cuda_path}\\bin" cudnn*.dll'
     elif get_platform() == "darwin":
         # CUDA libraries and drivers can be found in /usr/local/cuda/. See
         # https://docs.nvidia.com/cuda/cuda-installation-guide-mac-os-x/index.html#install
@@ -172,11 +170,11 @@ def get_cudnn_version(run_lambda):
     if not files_set:
         return None
     # Alphabetize the result because the order is non-deterministic otherwise
-    files = list(sorted(files_set))
+    files = sorted(files_set)
     if len(files) == 1:
         return files[0]
     result = "\n".join(files)
-    return "Probably one of the following:\n{}".format(result)
+    return f"Probably one of the following:\n{result}"
 
 
 def get_nvidia_smi():
@@ -220,7 +218,7 @@ def get_windows_version(run_lambda):
     findstr_cmd = os.path.join(system_root, "System32", "findstr")
     return run_and_read_all(
         run_lambda,
-        "{} os get Caption | {} /v Caption".format(wmic_cmd, findstr_cmd),
+        f"{wmic_cmd} os get Caption | {findstr_cmd} /v Caption",
     )
 
 
@@ -248,20 +246,20 @@ def get_os(run_lambda):
         version = get_mac_version(run_lambda)
         if version is None:
             return None
-        return "macOS {} ({})".format(version, machine())
+        return f"macOS {version} ({machine()})"
 
     if platform == "linux":
         # Ubuntu/Debian based
         desc = get_lsb_version(run_lambda)
         if desc is not None:
-            return "{} ({})".format(desc, machine())
+            return f"{desc} ({machine()})"
 
         # Try reading /etc/*-release
         desc = check_release_file(run_lambda)
         if desc is not None:
-            return "{} ({})".format(desc, machine())
+            return f"{desc} ({machine()})"
 
-        return "{} ({})".format(platform, machine())
+        return f"{platform} ({machine()})"
 
     # Unknown platform
     return platform
@@ -276,7 +274,7 @@ def get_pip_packages(run_lambda):
         if get_platform() == "win32":
             system_root = os.environ.get("SYSTEMROOT", "C:\\Windows")
             findstr_cmd = os.path.join(system_root, "System32", "findstr")
-            grep_cmd = r'{} /R "numpy torch"'.format(findstr_cmd)
+            grep_cmd = rf'{findstr_cmd} /R "numpy torch"'
         else:
             grep_cmd = r'grep "torch\|numpy"'
         return run_and_read_all(run_lambda, pip + " list --format=freeze | " + grep_cmd)
@@ -329,11 +327,7 @@ def get_env_info():
     return SystemEnv(
         torch_version=version_str,
         is_debug_build=debug_mode_str,
-        python_version="{}.{} ({}-bit runtime)".format(
-            sys.version_info[0],
-            sys.version_info[1],
-            sys.maxsize.bit_length() + 1,
-        ),
+        python_version=f"{sys.version_info[0]}.{sys.version_info[1]} ({sys.maxsize.bit_length() + 1}-bit runtime)",
         is_cuda_available=cuda_available_str,
         cuda_compiled_version=cuda_version_str,
         cuda_runtime_version=get_running_cuda_version(run_lambda),
@@ -408,7 +402,7 @@ def pretty_str(envinfo):
     def maybe_start_on_next_line(string):
         # If `string` is multiline, prepend a \n to it.
         if string is not None and len(string.split("\n")) > 1:
-            return "\n{}\n".format(string)
+            return f"\n{string}\n"
         return string
 
     mutable_dict = envinfo._asdict()
@@ -452,7 +446,7 @@ def pretty_str(envinfo):
     # If they were previously None, they'll show up as ie '[conda] Could not collect'
     if mutable_dict["pip_packages"]:
         mutable_dict["pip_packages"] = prepend(
-            mutable_dict["pip_packages"], "[{}] ".format(envinfo.pip_version)
+            mutable_dict["pip_packages"], f"[{envinfo.pip_version}] "
         )
     if mutable_dict["conda_packages"]:
         mutable_dict["conda_packages"] = prepend(
@@ -473,9 +467,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-def main():
-    print("Collecting environment information...")
-    env_info = get_env_info()
-    print(env_info)

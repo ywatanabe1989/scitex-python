@@ -145,7 +145,8 @@ resource = _LazyModule("resource")
 tex = _LazyModule("tex")
 linalg = _LazyModule("linalg")
 parallel = _LazyModule("parallel")
-dt = _LazyModule("dt")
+datetime = _LazyModule("datetime")
+dt = _LazyModule("dt")  # Alias for datetime (shorter name)
 types = _LazyModule("types")
 utils = _LazyModule("utils")
 etc = _LazyModule("etc")
@@ -218,7 +219,8 @@ __all__ = [
     "tex",
     "linalg",
     "parallel",
-    "dt",
+    "datetime",
+    "dt",  # Alias for datetime (shorter name)
     "types",
     "utils",
     "etc",

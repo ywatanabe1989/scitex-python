@@ -1,102 +1,98 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.tree._ConfigTree."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+from scitex.writer.dataclasses.tree._ConfigTree import ConfigTree
+
+
+class TestConfigTreeCreation:
+    """Tests for ConfigTree instantiation."""
+
+    def test_creates_with_root_path(self, tmp_path):
+        """Verify ConfigTree creates with root path."""
+        tree = ConfigTree(root=tmp_path)
+        assert tree.root == tmp_path
+
+    def test_git_root_optional(self, tmp_path):
+        """Verify git_root defaults to None."""
+        tree = ConfigTree(root=tmp_path)
+        assert tree.git_root is None
+
+    def test_git_root_can_be_set(self, tmp_path):
+        """Verify git_root can be explicitly set."""
+        git_root = tmp_path / "project"
+        tree = ConfigTree(root=tmp_path, git_root=git_root)
+        assert tree.git_root == git_root
+
+
+class TestConfigTreePostInit:
+    """Tests for ConfigTree __post_init__ initialization."""
+
+    def test_config_manuscript_initialized(self, tmp_path):
+        """Verify config_manuscript DocumentSection is initialized."""
+        tree = ConfigTree(root=tmp_path)
+        assert isinstance(tree.config_manuscript, DocumentSection)
+        assert tree.config_manuscript.path == tmp_path / "config_manuscript.yaml"
+
+    def test_config_supplementary_initialized(self, tmp_path):
+        """Verify config_supplementary DocumentSection is initialized."""
+        tree = ConfigTree(root=tmp_path)
+        assert isinstance(tree.config_supplementary, DocumentSection)
+        assert tree.config_supplementary.path == tmp_path / "config_supplementary.yaml"
+
+    def test_config_revision_initialized(self, tmp_path):
+        """Verify config_revision DocumentSection is initialized."""
+        tree = ConfigTree(root=tmp_path)
+        assert isinstance(tree.config_revision, DocumentSection)
+        assert tree.config_revision.path == tmp_path / "config_revision.yaml"
+
+    def test_load_config_initialized(self, tmp_path):
+        """Verify load_config DocumentSection is initialized."""
+        tree = ConfigTree(root=tmp_path)
+        assert isinstance(tree.load_config, DocumentSection)
+        assert tree.load_config.path == tmp_path / "load_config.sh"
+
+
+class TestConfigTreeVerifyStructure:
+    """Tests for ConfigTree verify_structure method."""
+
+    def test_verify_fails_when_no_files_exist(self, tmp_path):
+        """Verify returns False when required files are missing."""
+        tree = ConfigTree(root=tmp_path)
+        is_valid, missing = tree.verify_structure()
+
+        assert is_valid is False
+        assert len(missing) == 3
+
+    def test_verify_passes_with_all_required_files(self, tmp_path):
+        """Verify returns True when all required files exist."""
+        (tmp_path / "config_manuscript.yaml").touch()
+        (tmp_path / "config_supplementary.yaml").touch()
+        (tmp_path / "config_revision.yaml").touch()
+
+        tree = ConfigTree(root=tmp_path)
+        is_valid, missing = tree.verify_structure()
+
+        assert is_valid is True
+        assert len(missing) == 0
+
+    def test_verify_load_config_not_required(self, tmp_path):
+        """Verify load_config.sh is not required for validation."""
+        (tmp_path / "config_manuscript.yaml").touch()
+        (tmp_path / "config_supplementary.yaml").touch()
+        (tmp_path / "config_revision.yaml").touch()
+
+        tree = ConfigTree(root=tmp_path)
+        is_valid, _ = tree.verify_structure()
+
+        assert is_valid is True
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_ConfigTree.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-28 17:16:00 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_ConfigTree.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/tree/_ConfigTree.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# ConfigTree - dataclass for project config directory structure.
-# 
-# Represents the config/ directory with configuration files for different documents.
-# """
-# 
-# from pathlib import Path
-# from typing import Optional
-# from dataclasses import dataclass
-# 
-# from ..core import DocumentSection
-# 
-# 
-# @dataclass
-# class ConfigTree:
-#     """Config directory structure (config/)."""
-# 
-#     root: Path
-#     git_root: Optional[Path] = None
-# 
-#     # Configuration files
-#     config_manuscript: DocumentSection = None
-#     config_supplementary: DocumentSection = None
-#     config_revision: DocumentSection = None
-#     load_config: DocumentSection = None
-# 
-#     def __post_init__(self):
-#         """Initialize all DocumentSection instances."""
-#         if self.config_manuscript is None:
-#             self.config_manuscript = DocumentSection(
-#                 self.root / "config_manuscript.yaml", self.git_root
-#             )
-#         if self.config_supplementary is None:
-#             self.config_supplementary = DocumentSection(
-#                 self.root / "config_supplementary.yaml", self.git_root
-#             )
-#         if self.config_revision is None:
-#             self.config_revision = DocumentSection(
-#                 self.root / "config_revision.yaml", self.git_root
-#             )
-#         if self.load_config is None:
-#             self.load_config = DocumentSection(
-#                 self.root / "load_config.sh", self.git_root
-#             )
-# 
-#     def verify_structure(self) -> tuple[bool, list[str]]:
-#         """
-#         Verify config structure has required files.
-# 
-#         Returns:
-#             (is_valid, list_of_missing_files_with_paths)
-#         """
-#         required = [
-#             ("config_manuscript.yaml", self.config_manuscript),
-#             ("config_supplementary.yaml", self.config_supplementary),
-#             ("config_revision.yaml", self.config_revision),
-#         ]
-# 
-#         missing = []
-#         for name, section in required:
-#             if not section.path.exists():
-#                 expected_path = (
-#                     section.path.relative_to(self.git_root)
-#                     if self.git_root
-#                     else section.path
-#                 )
-#                 missing.append(f"{name} (expected at: {expected_path})")
-# 
-#         return len(missing) == 0, missing
-# 
-# 
-# __all__ = ["ConfigTree"]
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_ConfigTree.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

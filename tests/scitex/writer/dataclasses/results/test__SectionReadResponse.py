@@ -1,147 +1,267 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.results._SectionReadResponse."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.results._SectionReadResponse import SectionReadResponse
+
+
+class TestSectionReadResponseCreation:
+    """Tests for SectionReadResponse instantiation."""
+
+    def test_required_fields(self):
+        """Verify required fields are set correctly."""
+        response = SectionReadResponse(
+            success=True,
+            content="\\section{Introduction}",
+            section_name="introduction",
+            section_id="manuscript/introduction",
+            doc_type="manuscript",
+        )
+        assert response.success is True
+        assert response.content == "\\section{Introduction}"
+        assert response.section_name == "introduction"
+        assert response.section_id == "manuscript/introduction"
+        assert response.doc_type == "manuscript"
+
+    def test_optional_fields_defaults(self):
+        """Verify optional fields have proper defaults."""
+        response = SectionReadResponse(
+            success=True,
+            content="Content",
+            section_name="abstract",
+            section_id="manuscript/abstract",
+            doc_type="manuscript",
+        )
+        assert response.file_path is None
+        assert response.error is None
+
+    def test_file_path_can_be_set(self):
+        """Verify file_path can be explicitly set."""
+        file_path = Path("/tmp/project/01_manuscript/contents/abstract.tex")
+        response = SectionReadResponse(
+            success=True,
+            content="Content",
+            section_name="abstract",
+            section_id="manuscript/abstract",
+            doc_type="manuscript",
+            file_path=file_path,
+        )
+        assert response.file_path == file_path
+
+
+class TestSectionReadResponseFactoryMethods:
+    """Tests for SectionReadResponse factory methods."""
+
+    def test_create_success(self):
+        """Verify create_success factory method."""
+        response = SectionReadResponse.create_success(
+            content="LaTeX content",
+            section_name="methods",
+            section_id="manuscript/methods",
+            doc_type="manuscript",
+        )
+        assert response.success is True
+        assert response.content == "LaTeX content"
+        assert response.error is None
+
+    def test_create_success_with_file_path(self):
+        """Verify create_success with file path."""
+        file_path = Path("/tmp/methods.tex")
+        response = SectionReadResponse.create_success(
+            content="Content",
+            section_name="methods",
+            section_id="manuscript/methods",
+            doc_type="manuscript",
+            file_path=file_path,
+        )
+        assert response.file_path == file_path
+
+    def test_create_failure(self):
+        """Verify create_failure factory method."""
+        response = SectionReadResponse.create_failure(
+            section_id="manuscript/abstract",
+            error_message="File not found",
+        )
+        assert response.success is False
+        assert response.content == ""
+        assert response.error == "File not found"
+        assert response.doc_type == "manuscript"
+        assert response.section_name == "abstract"
+
+    def test_create_failure_parses_section_id(self):
+        """Verify create_failure parses section_id correctly."""
+        response = SectionReadResponse.create_failure(
+            section_id="supplementary/results",
+            error_message="Error",
+        )
+        assert response.doc_type == "supplementary"
+        assert response.section_name == "results"
+
+    def test_create_failure_simple_section_id(self):
+        """Verify create_failure handles simple section_id."""
+        response = SectionReadResponse.create_failure(
+            section_id="abstract",
+            error_message="Error",
+        )
+        assert response.doc_type == "manuscript"
+        assert response.section_name == "abstract"
+
+
+class TestSectionReadResponseToDict:
+    """Tests for SectionReadResponse to_dict method."""
+
+    def test_to_dict_contains_all_fields(self):
+        """Verify to_dict includes all fields."""
+        response = SectionReadResponse(
+            success=True,
+            content="Content",
+            section_name="abstract",
+            section_id="manuscript/abstract",
+            doc_type="manuscript",
+            file_path=Path("/tmp/abstract.tex"),
+            error=None,
+        )
+        result = response.to_dict()
+
+        assert result["success"] is True
+        assert result["content"] == "Content"
+        assert result["section_name"] == "abstract"
+        assert result["section_id"] == "manuscript/abstract"
+        assert result["doc_type"] == "manuscript"
+        assert result["file_path"] == "/tmp/abstract.tex"
+        assert result["error"] is None
+
+    def test_to_dict_none_file_path(self):
+        """Verify to_dict handles None file_path."""
+        response = SectionReadResponse(
+            success=True,
+            content="Content",
+            section_name="abstract",
+            section_id="manuscript/abstract",
+            doc_type="manuscript",
+        )
+        result = response.to_dict()
+        assert result["file_path"] is None
+
+
+class TestSectionReadResponseStr:
+    """Tests for SectionReadResponse __str__ method."""
+
+    def test_str_success(self):
+        """Verify string representation for success."""
+        response = SectionReadResponse.create_success(
+            content="X" * 100,
+            section_name="abstract",
+            section_id="manuscript/abstract",
+            doc_type="manuscript",
+        )
+        str_result = str(response)
+        assert "manuscript/abstract" in str_result
+        assert "100 chars" in str_result
+
+    def test_str_failure(self):
+        """Verify string representation for failure."""
+        response = SectionReadResponse.create_failure(
+            section_id="manuscript/abstract",
+            error_message="File not found",
+        )
+        str_result = str(response)
+        assert "Failed to read" in str_result
+        assert "File not found" in str_result
+
+
+class TestSectionReadResponseValidation:
+    """Tests for SectionReadResponse validate method."""
+
+    def test_validate_success_empty_content_raises(self):
+        """Verify validate raises for success with empty content."""
+        response = SectionReadResponse(
+            success=True,
+            content="",
+            section_name="abstract",
+            section_id="manuscript/abstract",
+            doc_type="manuscript",
+        )
+        with pytest.raises(ValueError, match="content is empty"):
+            response.validate()
+
+    def test_validate_success_empty_content_allowed_for_pdf(self):
+        """Verify validate allows empty content for compiled_pdf."""
+        response = SectionReadResponse(
+            success=True,
+            content="",
+            section_name="compiled_pdf",
+            section_id="manuscript/compiled_pdf",
+            doc_type="manuscript",
+        )
+        response.validate()
+
+    def test_validate_failure_without_error_raises(self):
+        """Verify validate raises for failure without error message."""
+        response = SectionReadResponse(
+            success=False,
+            content="",
+            section_name="abstract",
+            section_id="manuscript/abstract",
+            doc_type="manuscript",
+            error=None,
+        )
+        with pytest.raises(ValueError, match="no error message"):
+            response.validate()
+
+    def test_validate_empty_section_name_raises(self):
+        """Verify validate raises for empty section_name."""
+        response = SectionReadResponse(
+            success=True,
+            content="Content",
+            section_name="",
+            section_id="manuscript/abstract",
+            doc_type="manuscript",
+        )
+        with pytest.raises(ValueError, match="section_name cannot be empty"):
+            response.validate()
+
+    def test_validate_empty_section_id_raises(self):
+        """Verify validate raises for empty section_id."""
+        response = SectionReadResponse(
+            success=True,
+            content="Content",
+            section_name="abstract",
+            section_id="",
+            doc_type="manuscript",
+        )
+        with pytest.raises(ValueError, match="section_id cannot be empty"):
+            response.validate()
+
+    def test_validate_invalid_doc_type_raises(self):
+        """Verify validate raises for invalid doc_type."""
+        response = SectionReadResponse(
+            success=True,
+            content="Content",
+            section_name="abstract",
+            section_id="invalid/abstract",
+            doc_type="invalid",
+        )
+        with pytest.raises(ValueError, match="Invalid doc_type"):
+            response.validate()
+
+    def test_validate_valid_doc_types(self):
+        """Verify validate passes for all valid doc_types."""
+        for doc_type in ["manuscript", "supplementary", "revision", "shared"]:
+            response = SectionReadResponse(
+                success=True,
+                content="Content",
+                section_name="abstract",
+                section_id=f"{doc_type}/abstract",
+                doc_type=doc_type,
+            )
+            response.validate()
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/results/_SectionReadResponse.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/results/_SectionReadResponse.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/results/_SectionReadResponse.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# SectionReadResponse - dataclass for section read operation results.
-# Ensures type safety and prevents silent failures.
-# """
-# 
-# from dataclasses import dataclass
-# from typing import Optional
-# from pathlib import Path
-# 
-# 
-# @dataclass
-# class SectionReadResponse:
-#     """Result of reading a section."""
-# 
-#     success: bool
-#     """Whether the read operation succeeded"""
-# 
-#     content: str
-#     """Section content (LaTeX code)"""
-# 
-#     section_name: str
-#     """Section name (e.g., 'abstract', 'introduction')"""
-# 
-#     section_id: str
-#     """Full hierarchical section ID (e.g., 'manuscript/abstract')"""
-# 
-#     doc_type: str
-#     """Document type: 'manuscript', 'supplementary', 'revision', or 'shared'"""
-# 
-#     file_path: Optional[Path] = None
-#     """Absolute path to the section .tex file"""
-# 
-#     error: Optional[str] = None
-#     """Error message if read failed"""
-# 
-#     def to_dict(self) -> dict:
-#         """Convert to dictionary for JSON serialization."""
-#         return {
-#             "success": self.success,
-#             "content": self.content,
-#             "section_name": self.section_name,
-#             "section_id": self.section_id,
-#             "doc_type": self.doc_type,
-#             "file_path": str(self.file_path) if self.file_path else None,
-#             "error": self.error,
-#         }
-# 
-#     def __str__(self):
-#         """Human-readable summary."""
-#         if self.success:
-#             return f"Read {self.section_id}: {len(self.content)} chars"
-#         else:
-#             return f"Failed to read {self.section_id}: {self.error}"
-# 
-#     @classmethod
-#     def create_success(
-#         cls,
-#         content: str,
-#         section_name: str,
-#         section_id: str,
-#         doc_type: str,
-#         file_path: Optional[Path] = None,
-#     ) -> SectionReadResponse:
-#         """Create a successful response."""
-#         return cls(
-#             success=True,
-#             content=content,
-#             section_name=section_name,
-#             section_id=section_id,
-#             doc_type=doc_type,
-#             file_path=file_path,
-#             error=None,
-#         )
-# 
-#     @classmethod
-#     def create_failure(cls, section_id: str, error_message: str) -> SectionReadResponse:
-#         """Create a failed response."""
-#         parts = section_id.split("/")
-#         doc_type = parts[0] if len(parts) > 1 else "manuscript"
-#         section_name = parts[1] if len(parts) > 1 else section_id
-# 
-#         return cls(
-#             success=False,
-#             content="",
-#             section_name=section_name,
-#             section_id=section_id,
-#             doc_type=doc_type,
-#             file_path=None,
-#             error=error_message,
-#         )
-# 
-#     def validate(self) -> None:
-#         """Validate response data - raises ValueError if invalid."""
-#         if (
-#             self.success
-#             and not self.content
-#             and self.section_name not in ["compiled_pdf", "compiled_tex"]
-#         ):
-#             raise ValueError(
-#                 f"SectionReadResponse marked as success but content is empty for {self.section_id}"
-#             )
-# 
-#         if not self.success and not self.error:
-#             raise ValueError(
-#                 f"SectionReadResponse marked as failed but no error message for {self.section_id}"
-#             )
-# 
-#         if not self.section_name:
-#             raise ValueError("section_name cannot be empty")
-# 
-#         if not self.section_id:
-#             raise ValueError("section_id cannot be empty")
-# 
-#         if self.doc_type not in ["manuscript", "supplementary", "revision", "shared"]:
-#             raise ValueError(f"Invalid doc_type: {self.doc_type}")
-# 
-# 
-# __all__ = ["SectionReadResponse"]
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/results/_SectionReadResponse.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

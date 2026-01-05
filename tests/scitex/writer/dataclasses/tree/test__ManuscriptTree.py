@@ -1,100 +1,96 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for scitex.writer.dataclasses.tree._ManuscriptTree."""
+
+from pathlib import Path
+
+import pytest
+
+from scitex.writer.dataclasses.contents._ManuscriptContents import ManuscriptContents
+from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+from scitex.writer.dataclasses.tree._ManuscriptTree import ManuscriptTree
+
+
+class TestManuscriptTreeCreation:
+    """Tests for ManuscriptTree instantiation."""
+
+    def test_creates_with_root_path(self, tmp_path):
+        """Verify ManuscriptTree creates with root path."""
+        tree = ManuscriptTree(root=tmp_path)
+        assert tree.root == tmp_path
+
+    def test_git_root_optional(self, tmp_path):
+        """Verify git_root defaults to None."""
+        tree = ManuscriptTree(root=tmp_path)
+        assert tree.git_root is None
+
+
+class TestManuscriptTreePostInit:
+    """Tests for ManuscriptTree __post_init__ initialization."""
+
+    def test_contents_initialized(self, tmp_path):
+        """Verify contents ManuscriptContents is initialized."""
+        tree = ManuscriptTree(root=tmp_path)
+        assert isinstance(tree.contents, ManuscriptContents)
+        assert tree.contents.root == tmp_path / "contents"
+
+    def test_base_initialized(self, tmp_path):
+        """Verify base DocumentSection is initialized."""
+        tree = ManuscriptTree(root=tmp_path)
+        assert isinstance(tree.base, DocumentSection)
+        assert tree.base.path == tmp_path / "base.tex"
+
+    def test_readme_initialized(self, tmp_path):
+        """Verify readme DocumentSection is initialized."""
+        tree = ManuscriptTree(root=tmp_path)
+        assert isinstance(tree.readme, DocumentSection)
+        assert tree.readme.path == tmp_path / "README.md"
+
+    def test_archive_initialized(self, tmp_path):
+        """Verify archive path is initialized."""
+        tree = ManuscriptTree(root=tmp_path)
+        assert tree.archive == tmp_path / "archive"
+
+
+class TestManuscriptTreeVerifyStructure:
+    """Tests for ManuscriptTree verify_structure method."""
+
+    def test_verify_fails_when_empty(self, tmp_path):
+        """Verify returns False when structure is empty."""
+        tree = ManuscriptTree(root=tmp_path)
+        is_valid, missing = tree.verify_structure()
+
+        assert is_valid is False
+        assert len(missing) > 0
+
+    def test_verify_passes_with_complete_structure(self, tmp_path):
+        """Verify returns True when structure is complete."""
+        contents = tmp_path / "contents"
+        contents.mkdir()
+        (contents / "abstract.tex").touch()
+        (contents / "introduction.tex").touch()
+        (contents / "methods.tex").touch()
+        (contents / "results.tex").touch()
+        (contents / "discussion.tex").touch()
+        (tmp_path / "base.tex").touch()
+
+        tree = ManuscriptTree(root=tmp_path)
+        is_valid, missing = tree.verify_structure()
+
+        assert is_valid is True
+        assert len(missing) == 0
+
+    def test_verify_includes_contents_issues(self, tmp_path):
+        """Verify missing list includes issues from contents."""
+        (tmp_path / "base.tex").touch()
+        (tmp_path / "contents").mkdir()
+
+        tree = ManuscriptTree(root=tmp_path)
+        _, missing = tree.verify_structure()
+
+        assert any("abstract.tex" in m for m in missing)
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_ManuscriptTree.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-28 17:16:00 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_ManuscriptTree.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/writer/dataclasses/tree/_ManuscriptTree.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# """
-# ManuscriptTree - dataclass for manuscript directory structure.
-# 
-# Represents the 01_manuscript/ directory with all subdirectories.
-# """
-# 
-# from pathlib import Path
-# from typing import Optional
-# from dataclasses import dataclass
-# 
-# from ..contents import ManuscriptContents
-# from ..core import DocumentSection
-# 
-# 
-# @dataclass
-# class ManuscriptTree:
-#     """Manuscript directory structure (01_manuscript/)."""
-# 
-#     root: Path
-#     git_root: Optional[Path] = None
-# 
-#     # Contents subdirectory
-#     contents: ManuscriptContents = None
-# 
-#     # Root level files
-#     base: DocumentSection = None
-#     readme: DocumentSection = None
-# 
-#     # Directories
-#     archive: Path = None
-# 
-#     def __post_init__(self):
-#         """Initialize all instances."""
-#         if self.contents is None:
-#             self.contents = ManuscriptContents(self.root / "contents", self.git_root)
-#         if self.base is None:
-#             self.base = DocumentSection(self.root / "base.tex", self.git_root)
-#         if self.readme is None:
-#             self.readme = DocumentSection(self.root / "README.md", self.git_root)
-#         if self.archive is None:
-#             self.archive = self.root / "archive"
-# 
-#     def verify_structure(self) -> tuple[bool, list[str]]:
-#         """
-#         Verify manuscript structure has required components.
-# 
-#         Returns:
-#             (is_valid, list_of_missing_items_with_paths)
-#         """
-#         missing = []
-# 
-#         # Check contents structure
-#         contents_valid, contents_missing = self.contents.verify_structure()
-#         if not contents_valid:
-#             # Contents already includes full paths, just pass them through
-#             missing.extend(contents_missing)
-# 
-#         # Check root level files
-#         if not self.base.path.exists():
-#             expected_path = (
-#                 self.base.path.relative_to(self.git_root)
-#                 if self.git_root
-#                 else self.base.path
-#             )
-#             missing.append(f"base.tex (expected at: {expected_path})")
-# 
-#         return len(missing) == 0, missing
-# 
-# 
-# __all__ = ["ManuscriptTree"]
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/dataclasses/tree/_ManuscriptTree.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

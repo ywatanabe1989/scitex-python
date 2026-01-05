@@ -6,6 +6,7 @@
 
 import numpy as np
 import pytest
+
 # Required for scitex.decorators module
 pytest.importorskip("tqdm")
 
@@ -59,14 +60,15 @@ class TestAutoOrder:
         """Test that decorators are applied in correct order regardless of how written"""
         enable_auto_order()
 
+        # Must use scitex.decorators.* after enable_auto_order() to get auto-ordering versions
         # Define functions with different decorator orders
-        @batch_fn
-        @torch_fn
+        @scitex.decorators.batch_fn
+        @scitex.decorators.torch_fn
         def func1(x):
             return x.mean()
 
-        @torch_fn
-        @batch_fn
+        @scitex.decorators.torch_fn
+        @scitex.decorators.batch_fn
         def func2(x):
             return x.mean()
 
@@ -82,9 +84,9 @@ class TestAutoOrder:
         """Test handling of multiple type converters"""
         enable_auto_order()
 
-        @batch_fn
-        @numpy_fn
-        @torch_fn
+        @scitex.decorators.batch_fn
+        @scitex.decorators.numpy_fn
+        @scitex.decorators.torch_fn
         def func(x):
             # Should work with torch tensor input
             return x.mean()
@@ -100,8 +102,8 @@ class TestAutoOrder:
         """Test complex decorator stacking scenarios"""
         enable_auto_order()
 
-        @pandas_fn
-        @torch_fn
+        @scitex.decorators.pandas_fn
+        @scitex.decorators.torch_fn
         def complex_func(x):
             # This would normally be problematic, but auto-ordering handles it
             # Need to handle CUDA tensor
@@ -120,14 +122,15 @@ class TestAutoOrder:
 
         call_count = 0
 
-        @batch_fn
-        @torch_fn
+        # Must use scitex.decorators.* after enable_auto_order() for auto-ordering
+        @scitex.decorators.batch_fn
+        @scitex.decorators.torch_fn
         def counting_func(x):
             nonlocal call_count
             call_count += 1
             return x.sum()
 
-        # Function should have pending decorators
+        # Function should have pending decorators (from AutoOrderDecorator)
         assert hasattr(counting_func, "_pending_decorators")
 
         # First call applies decorators
@@ -142,8 +145,8 @@ class TestAutoOrder:
         """Test that function metadata is preserved"""
         enable_auto_order()
 
-        @batch_fn
-        @torch_fn
+        @scitex.decorators.batch_fn
+        @scitex.decorators.torch_fn
         def documented_func(x):
             """This is a documented function"""
             return x * 2
@@ -165,14 +168,14 @@ class TestAutoOrderIntegration:
 
     def test_stats_describe_with_auto_order(self):
         """Test that stats.describe works with auto-ordering"""
-        import scitex.stats.desc
+        from scitex.stats import describe
 
-        # Test case from bug report
+        # Test case with multi-dimensional tensor
         features_pac_z = np.random.randn(87, 5, 50, 30)
         tensor_input = torch.tensor(features_pac_z)
 
         # This should work without errors
-        out = scitex.stats.desc.describe(tensor_input, axis=(1, 2, 3))
+        out = describe(tensor_input, dim=(1, 2, 3))
 
         assert out[0].shape == (87, 7)
         assert len(out[1]) == 7
@@ -180,7 +183,7 @@ class TestAutoOrderIntegration:
     def test_nested_lists_with_auto_order(self):
         """Test nested list handling with auto-ordering"""
 
-        @torch_fn
+        @scitex.decorators.torch_fn
         def process_nested(x):
             return x.mean()
 
@@ -195,7 +198,7 @@ class TestAutoOrderIntegration:
     def test_scalar_preservation_with_auto_order(self):
         """Test that scalars are preserved with auto-ordering"""
 
-        @torch_fn
+        @scitex.decorators.torch_fn
         def scale_tensor(x, scale=2.5):
             assert isinstance(scale, float)
             return x * scale

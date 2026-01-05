@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/dev/plt/__init__.py
 
 """
@@ -36,30 +35,30 @@ Usage:
 # =============================================================================
 # stx_* API Layer - ArrayLike input (25 plotters)
 # =============================================================================
-from .demo_plotters.plot_stx_line import plot_stx_line
-from .demo_plotters.plot_stx_mean_std import plot_stx_mean_std
-from .demo_plotters.plot_stx_mean_ci import plot_stx_mean_ci
-from .demo_plotters.plot_stx_median_iqr import plot_stx_median_iqr
-from .demo_plotters.plot_stx_shaded_line import plot_stx_shaded_line
-from .demo_plotters.plot_stx_box import plot_stx_box
-from .demo_plotters.plot_stx_violin import plot_stx_violin
-from .demo_plotters.plot_stx_scatter import plot_stx_scatter
 from .demo_plotters.plot_stx_bar import plot_stx_bar
 from .demo_plotters.plot_stx_barh import plot_stx_barh
+from .demo_plotters.plot_stx_box import plot_stx_box
+from .demo_plotters.plot_stx_boxplot import plot_stx_boxplot
+from .demo_plotters.plot_stx_conf_mat import plot_stx_conf_mat
+from .demo_plotters.plot_stx_contour import plot_stx_contour
+from .demo_plotters.plot_stx_ecdf import plot_stx_ecdf
 from .demo_plotters.plot_stx_errorbar import plot_stx_errorbar
 from .demo_plotters.plot_stx_fill_between import plot_stx_fill_between
-from .demo_plotters.plot_stx_kde import plot_stx_kde
-from .demo_plotters.plot_stx_ecdf import plot_stx_ecdf
+from .demo_plotters.plot_stx_fillv import plot_stx_fillv
 from .demo_plotters.plot_stx_heatmap import plot_stx_heatmap
 from .demo_plotters.plot_stx_image import plot_stx_image
 from .demo_plotters.plot_stx_imshow import plot_stx_imshow
-from .demo_plotters.plot_stx_contour import plot_stx_contour
-from .demo_plotters.plot_stx_raster import plot_stx_raster
-from .demo_plotters.plot_stx_conf_mat import plot_stx_conf_mat
 from .demo_plotters.plot_stx_joyplot import plot_stx_joyplot
+from .demo_plotters.plot_stx_kde import plot_stx_kde
+from .demo_plotters.plot_stx_line import plot_stx_line
+from .demo_plotters.plot_stx_mean_ci import plot_stx_mean_ci
+from .demo_plotters.plot_stx_mean_std import plot_stx_mean_std
+from .demo_plotters.plot_stx_median_iqr import plot_stx_median_iqr
+from .demo_plotters.plot_stx_raster import plot_stx_raster
 from .demo_plotters.plot_stx_rectangle import plot_stx_rectangle
-from .demo_plotters.plot_stx_fillv import plot_stx_fillv
-from .demo_plotters.plot_stx_boxplot import plot_stx_boxplot
+from .demo_plotters.plot_stx_scatter import plot_stx_scatter
+from .demo_plotters.plot_stx_shaded_line import plot_stx_shaded_line
+from .demo_plotters.plot_stx_violin import plot_stx_violin
 from .demo_plotters.plot_stx_violinplot import plot_stx_violinplot
 
 PLOTTERS_STX = {
@@ -93,16 +92,16 @@ PLOTTERS_STX = {
 # =============================================================================
 # sns_* API Layer - DataFrame input (10 plotters)
 # =============================================================================
-from .plot_sns_boxplot import plot_sns_boxplot
-from .plot_sns_violinplot import plot_sns_violinplot
-from .plot_sns_barplot import plot_sns_barplot
-from .plot_sns_histplot import plot_sns_histplot
-from .plot_sns_kdeplot import plot_sns_kdeplot
-from .plot_sns_scatterplot import plot_sns_scatterplot
-from .plot_sns_lineplot import plot_sns_lineplot
-from .plot_sns_swarmplot import plot_sns_swarmplot
-from .plot_sns_stripplot import plot_sns_stripplot
-from .plot_sns_heatmap import plot_sns_heatmap
+from .demo_plotters.plot_sns_barplot import plot_sns_barplot
+from .demo_plotters.plot_sns_boxplot import plot_sns_boxplot
+from .demo_plotters.plot_sns_heatmap import plot_sns_heatmap
+from .demo_plotters.plot_sns_histplot import plot_sns_histplot
+from .demo_plotters.plot_sns_kdeplot import plot_sns_kdeplot
+from .demo_plotters.plot_sns_lineplot import plot_sns_lineplot
+from .demo_plotters.plot_sns_scatterplot import plot_sns_scatterplot
+from .demo_plotters.plot_sns_stripplot import plot_sns_stripplot
+from .demo_plotters.plot_sns_swarmplot import plot_sns_swarmplot
+from .demo_plotters.plot_sns_violinplot import plot_sns_violinplot
 
 PLOTTERS_SNS = {
     "sns_boxplot": plot_sns_boxplot,
@@ -120,32 +119,32 @@ PLOTTERS_SNS = {
 # =============================================================================
 # mpl_* API Layer - Matplotlib-style input (26 plotters)
 # =============================================================================
-from .plot_mpl_plot import plot_mpl_plot
-from .plot_mpl_scatter import plot_mpl_scatter
-from .plot_mpl_bar import plot_mpl_bar
-from .plot_mpl_barh import plot_mpl_barh
-from .plot_mpl_hist import plot_mpl_hist
-from .plot_mpl_hist2d import plot_mpl_hist2d
-from .plot_mpl_hexbin import plot_mpl_hexbin
-from .plot_mpl_boxplot import plot_mpl_boxplot
-from .plot_mpl_violinplot import plot_mpl_violinplot
-from .plot_mpl_errorbar import plot_mpl_errorbar
-from .plot_mpl_step import plot_mpl_step
-from .plot_mpl_stem import plot_mpl_stem
-from .plot_mpl_fill import plot_mpl_fill
-from .plot_mpl_fill_between import plot_mpl_fill_between
-from .plot_mpl_stackplot import plot_mpl_stackplot
-from .plot_mpl_contour import plot_mpl_contour
-from .plot_mpl_contourf import plot_mpl_contourf
-from .plot_mpl_imshow import plot_mpl_imshow
-from .plot_mpl_pcolormesh import plot_mpl_pcolormesh
-from .plot_mpl_pie import plot_mpl_pie
-from .plot_mpl_eventplot import plot_mpl_eventplot
-from .plot_mpl_quiver import plot_mpl_quiver
-from .plot_mpl_axhline import plot_mpl_axhline
-from .plot_mpl_axvline import plot_mpl_axvline
-from .plot_mpl_axhspan import plot_mpl_axhspan
-from .plot_mpl_axvspan import plot_mpl_axvspan
+from .demo_plotters.plot_mpl_axhline import plot_mpl_axhline
+from .demo_plotters.plot_mpl_axhspan import plot_mpl_axhspan
+from .demo_plotters.plot_mpl_axvline import plot_mpl_axvline
+from .demo_plotters.plot_mpl_axvspan import plot_mpl_axvspan
+from .demo_plotters.plot_mpl_bar import plot_mpl_bar
+from .demo_plotters.plot_mpl_barh import plot_mpl_barh
+from .demo_plotters.plot_mpl_boxplot import plot_mpl_boxplot
+from .demo_plotters.plot_mpl_contour import plot_mpl_contour
+from .demo_plotters.plot_mpl_contourf import plot_mpl_contourf
+from .demo_plotters.plot_mpl_errorbar import plot_mpl_errorbar
+from .demo_plotters.plot_mpl_eventplot import plot_mpl_eventplot
+from .demo_plotters.plot_mpl_fill import plot_mpl_fill
+from .demo_plotters.plot_mpl_fill_between import plot_mpl_fill_between
+from .demo_plotters.plot_mpl_hexbin import plot_mpl_hexbin
+from .demo_plotters.plot_mpl_hist import plot_mpl_hist
+from .demo_plotters.plot_mpl_hist2d import plot_mpl_hist2d
+from .demo_plotters.plot_mpl_imshow import plot_mpl_imshow
+from .demo_plotters.plot_mpl_pcolormesh import plot_mpl_pcolormesh
+from .demo_plotters.plot_mpl_pie import plot_mpl_pie
+from .demo_plotters.plot_mpl_plot import plot_mpl_plot
+from .demo_plotters.plot_mpl_quiver import plot_mpl_quiver
+from .demo_plotters.plot_mpl_scatter import plot_mpl_scatter
+from .demo_plotters.plot_mpl_stackplot import plot_mpl_stackplot
+from .demo_plotters.plot_mpl_stem import plot_mpl_stem
+from .demo_plotters.plot_mpl_step import plot_mpl_step
+from .demo_plotters.plot_mpl_violinplot import plot_mpl_violinplot
 
 PLOTTERS_MPL = {
     "mpl_plot": plot_mpl_plot,
