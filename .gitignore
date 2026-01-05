@@ -21,6 +21,11 @@ coverage_report.txt
 /coverage-*.xml
 /test_output.txt
 htmlcov/
+
+## Sensitive files
+.env.zenrows
+.env.local
+.env.*.local
 test_comprehensive_fixes.py
 catboost_info
 
