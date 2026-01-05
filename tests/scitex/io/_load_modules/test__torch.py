@@ -229,7 +229,6 @@ def test_load_torch_cuda_tensor_to_cpu():
     finally:
         os.unlink(temp_path)
 
-
 if __name__ == "__main__":
     import os
 

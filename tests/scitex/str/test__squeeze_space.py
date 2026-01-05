@@ -315,7 +315,6 @@ class TestSqueezeSpacesPerformance:
         result = squeeze_spaces("a  b", pattern=" +", repl=large_repl)
         assert result == f"a{large_repl}b"
 
-
 if __name__ == "__main__":
     import os
 

@@ -604,7 +604,6 @@ class TestGeometricMedianErrorHandling:
             with pytest.raises(RuntimeError):
                 geometric_median(x)
 
-
 if __name__ == "__main__":
     import os
 

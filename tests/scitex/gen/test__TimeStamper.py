@@ -274,7 +274,6 @@ class TestTimeStamper:
         assert len(ts._df_record) == 10
         assert ts.id == 9
 
-
 if __name__ == "__main__":
     import os
 

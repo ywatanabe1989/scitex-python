@@ -159,7 +159,6 @@ class TestThisPath:
                 assert result == "/has/ipython/in/path.py"
                 assert result != "/custom/fallback.py"
 
-
 if __name__ == "__main__":
     import os
 

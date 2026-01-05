@@ -27,7 +27,11 @@ htmlcov/
 .env.local
 .env.*.local
 test_comprehensive_fixes.py
-catboost_info
+catboost_info/
+
+## Test artifacts (should not be in root)
+/output/
+/png/
 
 
 ## Exceptions

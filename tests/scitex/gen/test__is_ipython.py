@@ -155,7 +155,6 @@ class TestIntegration:
             # Restore
             scitex.gen._is_ipython.is_ipython = original_is_ipython
 
-
 if __name__ == "__main__":
     import os
 

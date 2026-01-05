@@ -337,7 +337,6 @@ def test_integration_with_base_class():
     assert hasattr(Google, "_api_format_history")
     assert hasattr(Google, "_init_client")
 
-
 if __name__ == "__main__":
     import os
 

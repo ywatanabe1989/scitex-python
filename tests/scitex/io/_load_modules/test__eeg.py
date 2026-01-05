@@ -457,7 +457,6 @@ class TestLoadEegData:
         with pytest.raises(ValueError, match="No associated files found for .eeg file"):
             _load_eeg_data("standalone.eeg")
 
-
 if __name__ == "__main__":
     import os
 

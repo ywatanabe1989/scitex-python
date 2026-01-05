@@ -303,7 +303,6 @@ class TestBaseGenAI:
         with pytest.raises(TypeError):
             IncompleteGenAI()
 
-
 if __name__ == "__main__":
     import os
 

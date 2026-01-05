@@ -684,7 +684,6 @@ class TestConfidenceIntervalValidation:
 
         assert np.isclose(result, expected, rtol=1e-10)
 
-
 if __name__ == "__main__":
     import os
 

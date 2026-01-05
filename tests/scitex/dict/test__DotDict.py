@@ -310,7 +310,6 @@ def test_dotdict_edge_cases():
     dd.update({"level1": {"level2": {"data": [1, 2, {"nested": "value"}]}}})
     assert dd.level1.level2.data[2]["nested"] == "value"
 
-
 if __name__ == "__main__":
     import os
 

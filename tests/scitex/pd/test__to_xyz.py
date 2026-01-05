@@ -271,7 +271,6 @@ class TestToXYZ:
         result = to_xyz(df)
         assert result.shape == (12, 3)
 
-
 if __name__ == "__main__":
     import os
 
@@ -286,7 +285,7 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-09-28 11:17:22 (ywatanabe)"
 # # ./src/scitex/pd/_to_xyz.py
-#
+# 
 # import scitex
 # import numpy as np
 # import pandas as pd
@@ -305,12 +304,12 @@ if __name__ == "__main__":
 #     data_frame = pd.DataFrame(...)  # Your DataFrame here
 #     out = to_xyz(data_frame)
 #     print(out)
-#
+# 
 #     Parameters
 #     ----------
 #     data_frame : pandas.DataFrame
 #         The input DataFrame to be converted.
-#
+# 
 #     Returns
 #     -------
 #     pandas.DataFrame
@@ -320,7 +319,7 @@ if __name__ == "__main__":
 #     y_name = data_frame.columns.name or "y"
 #
 #     formatted_data_frames = []
-#
+# 
 #     for column in data_frame.columns:
 #         column_data_frame = data_frame[column]
 #         formatted_data = pd.DataFrame(
@@ -331,7 +330,7 @@ if __name__ == "__main__":
 #             }
 #         )
 #         formatted_data_frames.append(formatted_data)
-#
+# 
 #     result = pd.concat(formatted_data_frames, ignore_index=True)
 #
 #     # Ensure column order is x, y, z
@@ -344,29 +343,29 @@ if __name__ == "__main__":
 # # def to_xyz(data_frame):
 # #     """
 # #     Convert a heatmap DataFrame into x, y, z format.
-#
+# 
 # #     Ensure the index and columns are the same, and if either exists, replace with that.
-#
+# 
 # #     Example
 # #     -------
 # #     data_frame = pd.DataFrame(...)  # Your DataFrame here
 # #     out = to_xy(data_frame)
 # #     print(out)
-#
+# 
 # #     Parameters
 # #     ----------
 # #     data_frame : pandas.DataFrame
 # #         The input DataFrame to be converted.
-#
+# 
 # #     Returns
 # #     -------
 # #     pandas.DataFrame
 # #         A DataFrame formatted with columns ['x', 'y', 'z']
 # #     """
 # #     assert data_frame.shape[0] == data_frame.shape[1]
-#
+# 
 # #     if not data_frame.index.equals(data_frame.columns):
-#
+# 
 # #         if (data_frame.index == np.array(range(len(data_frame.index)))).all():
 # #             data_frame.columns = data_frame.index
 # #         elif (
@@ -375,9 +374,9 @@ if __name__ == "__main__":
 # #             data_frame.index = data_frame.columns
 # #         else:
 # #             raise ValueError("Either index or columns must be a range of integers")
-#
+# 
 # #     formatted_data_frames = []
-#
+# 
 # #     for column in data_frame.columns:
 # #         column_data_frame = data_frame[column]
 # #         y_label = column_data_frame.name
@@ -390,7 +389,7 @@ if __name__ == "__main__":
 # #         column_data_frame = column_data_frame.rename(columns={y_label: "z"})
 # #         column_data_frame = scitex.pd.mv(column_data_frame, "z", -1)
 # #         formatted_data_frames.append(column_data_frame)
-#
+# 
 # #     return pd.concat(formatted_data_frames, ignore_index=True)
 
 # --------------------------------------------------------------------------------

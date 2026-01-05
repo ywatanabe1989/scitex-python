@@ -246,10 +246,10 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-08-25 09:35:39 (ywatanabe)"
 # # ./src/scitex/pd/_sort.py
-#
+# 
 # import pandas as pd
-#
-#
+# 
+# 
 # def sort(
 #     dataframe,
 #     by=None,
@@ -263,7 +263,7 @@ if __name__ == "__main__":
 # ):
 #     """
 #     Sort DataFrame by specified column(s) with optional custom ordering and column reordering.
-#
+# 
 #     Example
 #     -------
 #     import pandas as pd
@@ -271,7 +271,7 @@ if __name__ == "__main__":
 #     custom_order = {'A': ['bar', 'baz', 'foo']}
 #     sorted_df = sort(df, by=None, orders=custom_order)
 #     print(sorted_df)
-#
+# 
 #     Parameters
 #     ----------
 #     dataframe : pandas.DataFrame
@@ -292,7 +292,7 @@ if __name__ == "__main__":
 #         Apply the key function to the values before sorting.
 #     orders : dict, optional
 #         Dictionary of column names and their custom sort orders.
-#
+# 
 #     Returns
 #     -------
 #     pandas.DataFrame
@@ -307,11 +307,11 @@ if __name__ == "__main__":
 #                 if column.name in orders
 #                 else column
 #             )
-#
+# 
 #         key = apply_custom_order
 #     elif isinstance(by, str):
 #         by = [by]
-#
+# 
 #     sorted_df = dataframe.sort_values(
 #         by=by,
 #         ascending=ascending,
@@ -321,12 +321,12 @@ if __name__ == "__main__":
 #         ignore_index=ignore_index,
 #         key=key,
 #     )
-#
+# 
 #     # Reorder columns
 #     if by:
 #         other_columns = [col for col in sorted_df.columns if col not in by]
 #         sorted_df = sorted_df[by + other_columns]
-#
+# 
 #     if inplace:
 #         dataframe.update(sorted_df)
 #         dataframe.reindex(columns=sorted_df.columns)

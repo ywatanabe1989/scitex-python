@@ -621,7 +621,6 @@ class TestPrintcDocumentation:
         ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
         return ansi_escape.sub("", text)
 
-
 if __name__ == "__main__":
     import os
 

@@ -234,7 +234,6 @@ def test_combined_wraps_import():
     assert wraps is not None
     assert Callable is not None
 
-
 if __name__ == "__main__":
     import os
 

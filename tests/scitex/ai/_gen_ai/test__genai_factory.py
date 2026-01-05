@@ -251,7 +251,6 @@ class TestGenAIFactory:
                 call_kwargs = mock_openai.call_args[1]
                 assert call_kwargs["model"] == model_name
 
-
 if __name__ == "__main__":
     import os
 

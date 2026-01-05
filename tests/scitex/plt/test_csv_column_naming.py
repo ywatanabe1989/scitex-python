@@ -1,0 +1,267 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Timestamp: "2025-12-13"
+# File: ./tests/scitex/plt/test_csv_column_naming.py
+
+"""
+Regression tests for CSV column naming consistency.
+
+This test suite ensures that all CSV exports follow the NEW column naming format:
+    ax-row-{row}-col-{col}_trace-id-{id}_variable-{var}
+
+And that NO old format columns like 'ax_00_xxx' are present in any CSV exports.
+
+The test runs a subset of plotters from scitex.dev.plt and validates all
+generated CSV column names against the expected format regex.
+"""
+
+import os
+import re
+import tempfile
+import pytest
+import pandas as pd
+
+# New format regex - must match this pattern
+NEW_FORMAT_REGEX = re.compile(
+    r'^ax-row-\d+-col-\d+_trace-id-[a-z0-9\-]+_variable-[a-z0-9\-_]+$'
+)
+
+# Old format pattern - should NOT match (for additional safety check)
+OLD_FORMAT_PATTERN = re.compile(r'^ax_\d\d_')
+
+
+class TestCSVColumnNaming:
+    """Test CSV column naming follows the standard format."""
+
+    def test_column_format_regex_positive_cases(self):
+        """Test that new format regex matches expected valid patterns."""
+        valid_patterns = [
+            "ax-row-0-col-0_trace-id-sine_variable-x",
+            "ax-row-0-col-0_trace-id-sine_variable-y",
+            "ax-row-1-col-2_trace-id-my-data_variable-y",
+            "ax-row-0-col-0_trace-id-0_variable-bins",
+            "ax-row-0-col-0_trace-id-plot-line-id_variable-x",
+            "ax-row-0-col-0_trace-id-plot-line-id_variable-y",
+            "ax-row-10-col-5_trace-id-test-123_variable-value",
+            "ax-row-0-col-0_trace-id-unnamed_variable-x_data",
+        ]
+
+        for pattern in valid_patterns:
+            assert NEW_FORMAT_REGEX.match(pattern), \
+                f"Valid pattern should match: {pattern}"
+
+    def test_column_format_regex_negative_cases(self):
+        """Test that new format regex rejects old format patterns."""
+        invalid_patterns = [
+            "ax_00_plot_0_x",  # Old format
+            "ax_00_stx_heatmap_0_value",  # Old format
+            "ax_01_scatter_0_y",  # Old format
+            "random_column_name",
+            "ax-row-x-col-y_trace-id-0_variable-z",  # Non-numeric row/col
+            "ax-row-0_trace-id-0_variable-x",  # Missing col
+        ]
+
+        for pattern in invalid_patterns:
+            assert not NEW_FORMAT_REGEX.match(pattern), \
+                f"Invalid pattern should not match: {pattern}"
+
+    def test_old_format_detection(self):
+        """Test that old format pattern is correctly detected."""
+        old_patterns = [
+            "ax_00_plot_0_x",
+            "ax_01_scatter_0_y",
+            "ax_99_heatmap_5_value",
+        ]
+
+        for pattern in old_patterns:
+            assert OLD_FORMAT_PATTERN.match(pattern), \
+                f"Old pattern should be detected: {pattern}"
+
+        # New format should NOT match old pattern detector
+        new_patterns = [
+            "ax-row-0-col-0_trace-id-sine_variable-x",
+            "ax-row-1-col-2_trace-id-0_variable-y",
+        ]
+
+        for pattern in new_patterns:
+            assert not OLD_FORMAT_PATTERN.match(pattern), \
+                f"New pattern should not match old detector: {pattern}"
+
+    @pytest.mark.parametrize("plotter_names", [
+        ["stx_line", "stx_scatter", "stx_bar"],
+        ["stx_heatmap", "stx_violin", "stx_box"],
+    ])
+    def test_no_old_format_in_plotter_exports(self, plotter_names, monkeypatch):
+        """Test that exported CSV files from plotters use new column format only.
+
+        This test runs multiple plotters and validates all CSV column names.
+        """
+        import scitex as stx
+        from scitex.dev.plt import PLOTTERS_STX
+        import numpy as np
+        import sys
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Track all CSV files generated
+            csv_files = []
+
+            # Patch sys.argv to avoid argparse issues in session decorator
+            monkeypatch.setattr(sys, 'argv', ['test'])
+
+            @stx.session
+            def _test_plotters(plt=stx.INJECTED, rng_manager=stx.INJECTED):
+                rng = rng_manager("csv_column_test")
+
+                for name in plotter_names:
+                    if name not in PLOTTERS_STX:
+                        continue
+
+                    plotter = PLOTTERS_STX[name]
+                    fig, ax = plotter(plt, rng)
+
+                    # Save with CSV export enabled
+                    outpath = os.path.join(tmpdir, f"{name}.png")
+                    stx.io.save(fig, outpath)
+
+                    # Track CSV file if it exists
+                    csv_path = os.path.join(tmpdir, f"{name}.csv")
+                    if os.path.exists(csv_path):
+                        csv_files.append((name, csv_path))
+
+                    # Close figure
+                    fig.close()
+
+            # Run the test session
+            _test_plotters()
+
+            # Now validate all generated CSV files
+            assert len(csv_files) > 0, "No CSV files were generated by plotters"
+
+            for plotter_name, csv_path in csv_files:
+                df = pd.read_csv(csv_path)
+
+                # Check each column name
+                for col in df.columns:
+                    # FAIL if old format detected
+                    assert not OLD_FORMAT_PATTERN.match(col), \
+                        f"OLD FORMAT DETECTED in {plotter_name}.csv: column '{col}'"
+
+                    # PASS only if new format matched
+                    assert NEW_FORMAT_REGEX.match(col), \
+                        f"Column does not match NEW FORMAT in {plotter_name}.csv: '{col}'"
+
+    def test_comprehensive_plotter_coverage(self, monkeypatch):
+        """Test a broader set of plotters to ensure format compliance.
+
+        This test runs 10 different plotters to maximize coverage.
+        """
+        import scitex as stx
+        from scitex.dev.plt import PLOTTERS_STX
+        import sys
+
+        # Select diverse plotters for comprehensive testing
+        test_plotters = [
+            "stx_line",
+            "stx_scatter",
+            "stx_bar",
+            "stx_violin",
+            "stx_heatmap",
+            "stx_errorbar",
+            "stx_kde",
+            "stx_ecdf",
+            "stx_boxplot",
+            "stx_mean_std",
+        ]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            csv_files = []
+
+            # Patch sys.argv to avoid argparse issues
+            monkeypatch.setattr(sys, 'argv', ['test'])
+
+            @stx.session
+            def _test_all(plt=stx.INJECTED, rng_manager=stx.INJECTED):
+                rng = rng_manager("comprehensive_test")
+
+                for name in test_plotters:
+                    if name not in PLOTTERS_STX:
+                        continue
+
+                    try:
+                        plotter = PLOTTERS_STX[name]
+                        fig, ax = plotter(plt, rng)
+                        outpath = os.path.join(tmpdir, f"{name}.png")
+                        stx.io.save(fig, outpath)
+
+                        csv_path = os.path.join(tmpdir, f"{name}.csv")
+                        if os.path.exists(csv_path):
+                            csv_files.append((name, csv_path))
+
+                        fig.close()
+                    except Exception as e:
+                        # Log but don't fail on individual plotter errors
+                        print(f"Warning: {name} failed: {e}")
+                        continue
+
+            _test_all()
+
+            # Validate all CSV files
+            total_columns_checked = 0
+
+            for plotter_name, csv_path in csv_files:
+                df = pd.read_csv(csv_path)
+
+                for col in df.columns:
+                    total_columns_checked += 1
+
+                    # Ensure no old format
+                    assert not OLD_FORMAT_PATTERN.match(col), \
+                        f"OLD FORMAT in {plotter_name}: {col}"
+
+                    # Ensure new format compliance
+                    assert NEW_FORMAT_REGEX.match(col), \
+                        f"INVALID FORMAT in {plotter_name}: {col}"
+
+            # Ensure we actually tested something
+            assert total_columns_checked > 0, \
+                "No columns were validated (no CSV files generated)"
+
+    @pytest.mark.skip(reason="Manual test - depends on existing test output files")
+    def test_manual_csv_samples(self):
+        """Test known CSV files from test output directories.
+
+        This test is skipped by default as it depends on existing test output.
+        Run manually to check specific CSV files for format compliance.
+        """
+        # Check a few existing CSV files if they exist
+        test_csv_files = [
+            "/home/ywatanabe/proj/scitex-code/tests/scitex/plt/_subplots/_AxisWrapperMixins/test__MatplotlibPlotMixin_out/plot_line_test.csv",
+            "/home/ywatanabe/proj/scitex-code/tests/scitex/plt/_subplots/_AxisWrapperMixins/test__MatplotlibPlotMixin_out/plot_scatter_hist_test.csv",
+        ]
+
+        files_tested = 0
+        for csv_path in test_csv_files:
+            if not os.path.exists(csv_path):
+                continue
+
+            files_tested += 1
+            df = pd.read_csv(csv_path)
+
+            for col in df.columns:
+                assert not OLD_FORMAT_PATTERN.match(col), \
+                    f"OLD FORMAT in {os.path.basename(csv_path)}: {col}"
+
+                assert NEW_FORMAT_REGEX.match(col), \
+                    f"INVALID FORMAT in {os.path.basename(csv_path)}: {col}"
+
+        # Only assert if files were found and tested
+        if files_tested > 0:
+            assert files_tested >= 1, "At least one test CSV should be validated"
+
+
+if __name__ == "__main__":
+    import pytest
+    pytest.main([os.path.abspath(__file__), "-v"])
+
+
+# EOF

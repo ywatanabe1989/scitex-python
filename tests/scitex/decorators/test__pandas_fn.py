@@ -108,7 +108,6 @@ def test_pandas_fn_nested_decorator(test_data):
         assert isinstance(result, pd.Series)
         pd.testing.assert_series_equal(result, test_data["pandas_series"])
 
-
 if __name__ == "__main__":
     import os
 
@@ -129,18 +128,18 @@ if __name__ == "__main__":
 # __FILE__ = "./src/scitex/decorators/_pandas_fn.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-#
+# 
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_pandas_fn.py"
-#
+# 
 # from functools import wraps
 # from typing import Any as _Any
 # from typing import Callable
-#
+# 
 # import numpy as np
 #
 # from ._converters import is_nested_decorator
-#
-#
+# 
+# 
 # def pandas_fn(func: Callable) -> Callable:
 #     @wraps(func)
 #     def wrapper(*args: _Any, **kwargs: _Any) -> _Any:
@@ -148,13 +147,13 @@ if __name__ == "__main__":
 #         if is_nested_decorator():
 #             results = func(*args, **kwargs)
 #             return results
-#
+# 
 #         # Set the current decorator context
 #         wrapper._current_decorator = "pandas_fn"
-#
+# 
 #         # Store original object for type preservation
 #         original_object = args[0] if args else None
-#
+# 
 #         # Convert args to pandas DataFrames
 #         def to_pandas(data):
 #             import pandas as pd
@@ -247,9 +246,9 @@ if __name__ == "__main__":
 #
 #                     return xr.DataArray(results.values)
 #             return results
-#
+# 
 #         return results
-#
+# 
 #     # Mark as a wrapper for detection
 #     wrapper._is_wrapper = True
 #     wrapper._decorator_type = "pandas_fn"

@@ -108,7 +108,6 @@ def test_xarray_fn_nested_decorator(test_data):
         assert isinstance(result, torch.Tensor)
         torch.testing.assert_close(result, test_data["torch"])
 
-
 if __name__ == "__main__":
     import os
 
@@ -132,12 +131,12 @@ if __name__ == "__main__":
 # from functools import wraps
 # from typing import Any as _Any
 # from typing import Callable
-#
+# 
 # import numpy as np
 #
 # from ._converters import is_nested_decorator
-#
-#
+# 
+# 
 # def xarray_fn(func: Callable) -> Callable:
 #     @wraps(func)
 #     def wrapper(*args: _Any, **kwargs: _Any) -> _Any:
@@ -145,13 +144,13 @@ if __name__ == "__main__":
 #         if is_nested_decorator():
 #             results = func(*args, **kwargs)
 #             return results
-#
+# 
 #         # Set the current decorator context
 #         wrapper._current_decorator = "xarray_fn"
-#
+# 
 #         # Store original object for type preservation
 #         original_object = args[0] if args else None
-#
+# 
 #         # Convert args to xarray DataArrays
 #         def to_xarray(data):
 #             import xarray as xr
@@ -172,10 +171,10 @@ if __name__ == "__main__":
 #                 return xr.DataArray(data.values)
 #             else:
 #                 return xr.DataArray([data])
-#
+# 
 #         converted_args = [to_xarray(arg) for arg in args]
 #         converted_kwargs = {k: to_xarray(v) for k, v in kwargs.items()}
-#
+# 
 #         # Assertion to ensure all args are converted to xarray DataArrays
 #         import xarray as xr
 #
@@ -185,7 +184,7 @@ if __name__ == "__main__":
 #             )
 #
 #         results = func(*converted_args, **converted_kwargs)
-#
+# 
 #         # Convert results back to original input types
 #         import xarray as xr
 #
@@ -217,9 +216,9 @@ if __name__ == "__main__":
 #
 #                     return pd.Series(results.values.flatten())
 #             return results
-#
+# 
 #         return results
-#
+# 
 #     # Mark as a wrapper for detection
 #     wrapper._is_wrapper = True
 #     wrapper._decorator_type = "xarray_fn"

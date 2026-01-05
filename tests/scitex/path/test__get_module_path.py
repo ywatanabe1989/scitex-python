@@ -169,7 +169,6 @@ class TestGetDataPathFromAPackage:
             # Skip if json module structure is different
             pytest.skip("Real package test not applicable in this environment")
 
-
 if __name__ == "__main__":
     import os
 

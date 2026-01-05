@@ -414,7 +414,6 @@ def test_message_conversion_exception():
                             with pytest.raises(TypeError):
                                 notify(subject="Test", message=BadObject())
 
-
 if __name__ == "__main__":
     import os
 

@@ -10,14 +10,16 @@ Test script to demonstrate the issue with export_as_csv for multiple axes.
 """
 
 import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import scitex.plt as mplt
-import scitex.io
 
-# Create output directory if it doesn't exist
-output_dir = "./test_multiple_axes_export_out"
+import scitex.io
+import scitex.plt as mplt
+
+# Create output directory relative to test file
+output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_multiple_axes_csv_export_out")
 os.makedirs(output_dir, exist_ok=True)
 
 # Case 1: Single axis case (should work fine)

@@ -478,7 +478,6 @@ class TestCheckHostDocumentation:
         with pytest.raises(SystemExit):
             verify_host("crest")  # Should fail
 
-
 if __name__ == "__main__":
     import os
 

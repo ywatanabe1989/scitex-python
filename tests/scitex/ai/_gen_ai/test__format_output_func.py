@@ -185,7 +185,6 @@ Line 3 without URL"""
         # Markdown2 should handle HTML escaping
         assert result  # Just ensure it doesn't crash
 
-
 if __name__ == "__main__":
     import os
 

@@ -193,7 +193,6 @@ class TestToSktimeDf:
         assert np.isnan(first_dim_series.iloc[:5]).all()
         assert not np.isnan(first_dim_series.iloc[5:]).any()
 
-
 if __name__ == "__main__":
     import os
 

@@ -358,7 +358,6 @@ class TestSlidingWindowDataAugmentationDocumentation:
             augmented = sliding_window_data_augmentation(sensor_data, window_size)
             assert augmented.shape == (n_sensors, window_size)
 
-
 if __name__ == "__main__":
     import os
 

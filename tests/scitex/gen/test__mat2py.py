@@ -177,7 +177,6 @@ class TestMat2Py:
             # Cleanup
             os.unlink(tmp.name)
 
-
 if __name__ == "__main__":
     import os
 

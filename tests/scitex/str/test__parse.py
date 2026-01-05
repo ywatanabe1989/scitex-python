@@ -229,7 +229,6 @@ class TestParseDocstrings:
         result = parse("./data/Patient_{id}", "./data/Patient_23_002")
         assert result["id"] == "23_002"
 
-
 if __name__ == "__main__":
     import os
 

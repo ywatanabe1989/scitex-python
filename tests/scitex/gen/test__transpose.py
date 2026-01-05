@@ -205,13 +205,13 @@ if __name__ == "__main__":
 #
 # from scitex.decorators import numpy_fn
 # import numpy as np
-#
-#
+# 
+# 
 # @numpy_fn
 # def transpose(arr_like, src_dims, tgt_dims):
 #     """
 #     Transpose an array-like object based on source and target dimensions.
-#
+# 
 #     Parameters
 #     ----------
 #     arr_like : np.array
@@ -220,12 +220,12 @@ if __name__ == "__main__":
 #         List of dimension names in the source order.
 #     tgt_dims : np.array
 #         List of dimension names in the target order.
-#
+# 
 #     Returns
 #     -------
 #     np.array
 #         The transposed array.
-#
+# 
 #     Raises
 #     ------
 #     AssertionError

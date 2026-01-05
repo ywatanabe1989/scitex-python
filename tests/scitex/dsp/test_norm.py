@@ -220,7 +220,6 @@ class TestMinmax:
         assert result[0] == pytest.approx(-1.0)
         assert result[1] == pytest.approx(1.0)
 
-
 if __name__ == "__main__":
     import os
 
@@ -234,7 +233,7 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-04-05 12:15:42 (ywatanabe)"
-#
+# 
 # import torch as _torch
 # from scitex.decorators import signal_fn as _signal_fn
 #

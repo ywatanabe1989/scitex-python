@@ -229,7 +229,6 @@ class TestLoadConfigs:
         finally:
             os.chdir(original_cwd)
 
-
 if __name__ == "__main__":
     import os
 

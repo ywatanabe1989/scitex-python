@@ -427,7 +427,6 @@ def test_load_image_nonexistent():
     test_instance = TestLoadImage()
     test_instance.test_nonexistent_file_error()
 
-
 if __name__ == "__main__":
     import os
 

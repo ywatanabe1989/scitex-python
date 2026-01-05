@@ -326,7 +326,6 @@ class TestListPackages:
                 inspect.Parameter.VAR_KEYWORD,
             )
 
-
 if __name__ == "__main__":
     import os
 

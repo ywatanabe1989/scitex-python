@@ -259,7 +259,6 @@ class TestPrintcIntegration:
         # color_text should not be called
         mock_color_text.assert_not_called()
 
-
 if __name__ == "__main__":
     import os
 

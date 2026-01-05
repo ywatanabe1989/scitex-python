@@ -236,7 +236,6 @@ def test_load_txt_large_file():
     finally:
         os.unlink(temp_path)
 
-
 if __name__ == "__main__":
     import os
 

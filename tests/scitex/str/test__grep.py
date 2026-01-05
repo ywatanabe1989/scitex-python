@@ -463,7 +463,6 @@ class TestGrepComplexPatterns:
 
         assert len(matches) >= 2  # Should match strings starting with "start"
 
-
 if __name__ == "__main__":
     import os
 

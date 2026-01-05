@@ -405,7 +405,6 @@ class TestVarInfoIntegration:
         assert result["type"] == expected_type
         assert ("shape" in result) == has_shape
 
-
 if __name__ == "__main__":
     import os
 

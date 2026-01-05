@@ -647,7 +647,6 @@ class TestRunMain:
                         # Verify close was called with exit_status=1
                         assert mock_close.call_args[1]["exit_status"] == 1
 
-
 if __name__ == "__main__":
     import os
 

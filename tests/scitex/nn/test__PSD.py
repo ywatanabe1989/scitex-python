@@ -435,7 +435,6 @@ class TestPSD:
         peak_freq = freqs[peak_idx]
         assert peak_freq < sample_rate / 2  # Must be below Nyquist
 
-
 if __name__ == "__main__":
     import os
 

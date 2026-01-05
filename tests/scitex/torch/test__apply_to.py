@@ -251,7 +251,6 @@ class TestApplyTo:
             # This is acceptable behavior for invalid dimensions
             pass
 
-
 if __name__ == "__main__":
     import os
 

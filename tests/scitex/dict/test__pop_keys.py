@@ -176,7 +176,6 @@ def test_pop_keys_single_element():
     result2 = pop_keys(keys_list, ["other"])
     assert result2 == ["only"]
 
-
 if __name__ == "__main__":
     import os
 
