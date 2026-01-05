@@ -40,7 +40,7 @@ import aiohttp
 import json
 
 from scitex import logging
-from scitex.errors import ScholarError
+from scitex.logging import ScholarError
 
 logger = logging.getLogger(__name__)
 

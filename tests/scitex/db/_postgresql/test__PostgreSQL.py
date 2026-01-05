@@ -12,6 +12,7 @@ import os
 import tempfile
 from unittest.mock import MagicMock, Mock, patch, call
 import pytest
+pytest.importorskip("psycopg2")
 import pandas as pd
 import psycopg2
 from scitex.db import PostgreSQL

@@ -11,6 +11,7 @@ including row retrieval and counting.
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 import pandas as pd
 from unittest.mock import Mock, patch
 from scitex.db._BaseMixins import _BaseRowMixin

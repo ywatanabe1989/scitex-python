@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-28 02:47:54 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/ai/_gen_ai/_Groq.py
 
@@ -22,11 +21,9 @@ Prerequisites:
 
 """Imports"""
 import os
-import sys
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import Any, Dict, Generator, List, Optional
 
 from groq import Groq as _Groq
-import matplotlib.pyplot as plt
 
 from ._BaseGenAI import BaseGenAI
 
@@ -55,6 +52,7 @@ class Groq(BaseGenAI):
             model=model,
             api_key=api_key,
             stream=stream,
+            seed=seed,
             n_keep=n_keep,
             temperature=temperature,
             provider="Groq",

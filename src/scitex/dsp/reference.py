@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "ywatanabe (2024-11-02 22:48:44)"
 # File: ./scitex_repo/src/scitex/dsp/reference.py
 
 import torch as _torch
+
 from scitex.decorators import torch_fn as _torch_fn
 
 
@@ -29,7 +29,8 @@ def random(x, dim=-2):
 def take_reference(x, tgt_indi, dim=-2):
     idx_all = [slice(None)] * x.ndim
     idx_all[dim] = tgt_indi
-    re_referenced = x - x[tgt_indi]
+    ref = x[tuple(idx_all)].unsqueeze(dim)
+    re_referenced = x - ref
     assert x.shape == re_referenced.shape
     return re_referenced
 

@@ -26,8 +26,22 @@ When bridging between plt and vis, coordinate transformation may be needed.
 
 from typing import Optional, Dict, Any, List, Tuple
 
-from scitex.schema import StatResult, Position, StatPositioning
-from scitex.fig.model import AnnotationModel, FigureModel, AxesModel, TextStyle
+# Import GUI classes from FTS (single source of truth)
+from scitex.fts._stats import Position, StatPositioning
+
+# Legacy model imports - may not be available
+try:
+    from scitex.fig.model import AnnotationModel, FigureModel, AxesModel, TextStyle
+    VIS_MODEL_AVAILABLE = True
+except ImportError:
+    AnnotationModel = None
+    FigureModel = None
+    AxesModel = None
+    TextStyle = None
+    VIS_MODEL_AVAILABLE = False
+
+# StatResult placeholder for type hints (actual usage is through dict)
+StatResult = dict  # Use dict as StatResult is deprecated
 
 
 def stat_result_to_annotation(

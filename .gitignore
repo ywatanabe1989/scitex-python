@@ -17,6 +17,15 @@ singularity
 ## Logs and temporary files
 slurm_logs/
 coverage_report.txt
+/coverage-*.json
+/coverage-*.xml
+/test_output.txt
+htmlcov/
+
+## Sensitive files
+.env.zenrows
+.env.local
+.env.*.local
 test_comprehensive_fixes.py
 catboost_info/
 
@@ -50,11 +59,14 @@ fixed_notebooks_*.json
 *_original.ipynb
 *_output.ipynb
 
-## Temporary Python scripts
-fix_*.py
-remove_*.py
-analyze_*.py
-test_*.py
+## Temporary Python scripts (root-level only)
+/fix_*.py
+/remove_*.py
+/analyze_*.py
+/test_*.py
+
+## Exception: Allow test files in tests directory
+!tests/**/test_*.py
 
 #################################################################
 ## Python
@@ -110,6 +122,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.testmondata
 cover/
 
 # Translations
@@ -351,6 +364,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.testmondata
 cover/
 
 # Translations
@@ -895,11 +909,5 @@ wheels/
 *.egg
 output/
 tests/results/
-/.claude-worktree-symlinks
-# Claude worktree symlink
-/feature-module-timecount
-# Claude worktree symlink
-/feature-fig-recipe-integration
-
-## Test results and coverage
-tests/results/
+mgmt
+.jupyter_ystore.db

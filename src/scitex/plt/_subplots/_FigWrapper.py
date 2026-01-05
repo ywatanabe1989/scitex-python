@@ -304,6 +304,21 @@ class FigWrapper:
                     for ax in self.axes:
                         yield ax
 
+    @property
+    def history(self):
+        """Aggregate tracking history from all axes in the figure.
+
+        Returns a combined OrderedDict of all tracking records from all axes,
+        enabling FTS bundle creation to build encoding from plot operations.
+        """
+        from collections import OrderedDict
+
+        combined = OrderedDict()
+        for ax in self._traverse_axes():
+            if hasattr(ax, "history") and ax.history:
+                combined.update(ax.history)
+        return combined
+
     def legend(self, *args, loc="best", **kwargs):
         """Legend with 'best' automatic placement by default for all axes."""
         for ax in self._traverse_axes():

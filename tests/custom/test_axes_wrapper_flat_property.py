@@ -2,6 +2,7 @@
 """Test the flat property of AxesWrapper"""
 
 import pytest
+pytest.importorskip("zarr")
 import numpy as np
 import matplotlib.pyplot as plt
 from scitex.plt._subplots._AxesWrapper import AxesWrapper

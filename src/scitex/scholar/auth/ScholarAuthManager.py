@@ -23,7 +23,7 @@ interface for authentication operations.
 from typing import Any, Dict, List, Optional
 
 from scitex import logging
-from scitex.errors import AuthenticationError
+from scitex.logging import AuthenticationError
 from scitex.scholar.config import ScholarConfig
 
 from .providers.BaseAuthenticator import BaseAuthenticator

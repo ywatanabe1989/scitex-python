@@ -11,7 +11,8 @@ multiple modules, abstracting away backend-specific details.
 
 from typing import Union, List, Optional, Literal
 
-from scitex.schema import StatResult
+# StatResult is now a dict - the GUI-specific StatResult is deprecated
+StatResult = dict
 
 
 def add_stats_from_results(

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-18 06:07:01 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/tests/scitex/decorators/test__numpy_fn.py
 # ----------------------------------------
@@ -13,9 +12,14 @@ from functools import wraps
 from unittest.mock import patch
 
 import numpy as np
-import pandas as pd
 import pytest
-import torch
+# Required for scitex.decorators module
+pytest.importorskip("tqdm")
+
+# Optional dependencies
+torch = pytest.importorskip("torch")
+pd = pytest.importorskip("pandas")
+
 from scitex.decorators import numpy_fn
 
 
@@ -132,13 +136,13 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_numpy_fn.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/decorators/_numpy_fn.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # 
 # import numpy as np
-# 
+#
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_numpy_fn.py"
 # 
 # from functools import wraps
@@ -165,7 +169,7 @@ if __name__ == "__main__":
 #         converted_args, converted_kwargs = to_numpy(
 #             *args, return_fn=_return_always, **kwargs
 #         )
-# 
+#
 #         # Skip strict assertion for certain types that may not convert to arrays
 #         # Instead, convert what we can and pass through what we can't
 #         validated_args = []
@@ -187,9 +191,9 @@ if __name__ == "__main__":
 #                 except:
 #                     # If all else fails, pass through unchanged
 #                     validated_args.append(arg)
-# 
+#
 #         results = func(*validated_args, **converted_kwargs)
-# 
+#
 #         # Convert results back to original input types
 #         if isinstance(results, np.ndarray):
 #             if original_object is not None:
@@ -200,21 +204,21 @@ if __name__ == "__main__":
 #                     and original_object.__class__.__name__ == "Tensor"
 #                 ):
 #                     import torch
-# 
+#
 #                     return torch.tensor(results)
 #                 elif (
 #                     hasattr(original_object, "__class__")
 #                     and original_object.__class__.__name__ == "DataFrame"
 #                 ):
 #                     import pandas as pd
-# 
+#
 #                     return pd.DataFrame(results)
 #                 elif (
 #                     hasattr(original_object, "__class__")
 #                     and original_object.__class__.__name__ == "Series"
 #                 ):
 #                     import pandas as pd
-# 
+#
 #                     return pd.Series(results)
 #             return results
 # 
@@ -224,8 +228,8 @@ if __name__ == "__main__":
 #     wrapper._is_wrapper = True
 #     wrapper._decorator_type = "numpy_fn"
 #     return wrapper
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

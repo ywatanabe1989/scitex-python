@@ -10,6 +10,8 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 from unittest.mock import patch
+import pytest
+pytest.importorskip("zarr")
 
 from scitex.plt.color import (
     bgr2bgra,

@@ -2,7 +2,10 @@
 """Tests for scitex.gen._is_ipython module."""
 
 import pytest
-from unittest.mock import patch, MagicMock
+
+pytest.importorskip("torch")
+from unittest.mock import MagicMock, patch
+
 from scitex.gen import is_ipython, is_script
 
 
@@ -14,30 +17,23 @@ class TestIsIPython:
         # In normal Python environment, __IPYTHON__ is not defined
         assert is_ipython() is False
 
-    @patch.dict("globals", {"__IPYTHON__": True})
     def test_is_ipython_in_ipython(self):
-        """Test is_ipython returns True when in IPython."""
-        # We need to modify the global namespace of the module
+        """Test is_ipython returns True when in IPython environment.
+
+        Note: We can't directly mock the global __IPYTHON__ variable because
+        is_ipython() checks its own module's globals. Instead, we test the
+        mocking approach that simulates the behavior.
+        """
         import scitex.gen._is_ipython
 
         # Save original function
         original_is_ipython = scitex.gen._is_ipython.is_ipython
 
-        # Create a modified version that has __IPYTHON__ in its globals
-        def mock_is_ipython():
-            try:
-                # This will check a mock global namespace
-                mock_globals = {"__IPYTHON__": True}
-                if "__IPYTHON__" in mock_globals:
-                    return True
-            except NameError:
-                return False
-            return False
-
-        # Temporarily replace the function
-        scitex.gen._is_ipython.is_ipython = mock_is_ipython
+        # Create a mock that simulates being in IPython
+        scitex.gen._is_ipython.is_ipython = lambda: True
 
         try:
+            # Verify our mock works
             assert scitex.gen._is_ipython.is_ipython() is True
         finally:
             # Restore original function
@@ -89,7 +85,9 @@ class TestIsScript:
         scitex.gen._is_ipython.is_ipython = lambda: True
 
         # Redefine is_script to use the mocked is_ipython
-        scitex.gen._is_ipython.is_script = lambda: not scitex.gen._is_ipython.is_ipython()
+        scitex.gen._is_ipython.is_script = (
+            lambda: not scitex.gen._is_ipython.is_ipython()
+        )
 
         try:
             assert scitex.gen._is_ipython.is_script() is False
@@ -173,10 +171,10 @@ if __name__ == "__main__":
 #         ipython_mode = True
 #     except NameError:
 #         ipython_mode = False
-# 
+#
 #     return ipython_mode
-# 
-# 
+#
+#
 # def is_script():
 #     return not is_ipython()
 

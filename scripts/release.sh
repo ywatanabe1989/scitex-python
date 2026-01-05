@@ -10,7 +10,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-REDIRECT_DIR="$PROJECT_ROOT/packages/scitex-python-redirect"
+REDIRECT_DIR="$PROJECT_ROOT/redirect"
 
 # Colors for output
 RED='\033[0;31m'
@@ -31,8 +31,7 @@ get_version() {
 
 # Sync redirect package version
 cmd_sync() {
-    local version
-    version=$(get_version)
+    local version=$(get_version)
     log_info "Syncing redirect package version to $version"
     sed -i "s/^version = \".*\"/version = \"$version\"/" "$REDIRECT_DIR/pyproject.toml"
     sed -i "s/\"scitex>=.*\"/\"scitex>=$version\"/" "$REDIRECT_DIR/pyproject.toml"
@@ -41,8 +40,7 @@ cmd_sync() {
 
 # Build both packages
 cmd_build() {
-    local version
-    version=$(get_version)
+    local version=$(get_version)
     log_info "Building packages (version: $version)"
 
     # Clean redirect builds
@@ -71,8 +69,7 @@ cmd_build() {
 
 # Upload to TestPyPI
 cmd_upload_test() {
-    local version
-    version=$(get_version)
+    local version=$(get_version)
     log_info "Uploading version $version to TestPyPI..."
 
     cd "$PROJECT_ROOT"
@@ -91,8 +88,7 @@ cmd_upload_test() {
 
 # Upload to PyPI
 cmd_upload() {
-    local version
-    version=$(get_version)
+    local version=$(get_version)
     log_info "Uploading version $version to PyPI..."
 
     cd "$PROJECT_ROOT"
@@ -111,10 +107,9 @@ cmd_upload() {
 
 # Full release (build + upload)
 cmd_release() {
-    local version
-    version=$(get_version)
+    local version=$(get_version)
     log_warn "About to release version $version to PyPI (PRODUCTION)"
-    read -r -p "Continue? [y/N] " confirm
+    read -p "Continue? [y/N] " confirm
     if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
         log_warn "Cancelled"
         exit 0
@@ -144,15 +139,15 @@ usage() {
 
 # Main
 case "${1:-}" in
-sync) cmd_sync ;;
-build) cmd_build ;;
-upload-test) cmd_upload_test ;;
-upload) cmd_upload ;;
-release) cmd_release ;;
--h | --help | "") usage ;;
-*)
-    log_error "Unknown command: $1"
-    usage
-    exit 1
-    ;;
+    sync)        cmd_sync ;;
+    build)       cmd_build ;;
+    upload-test) cmd_upload_test ;;
+    upload)      cmd_upload ;;
+    release)     cmd_release ;;
+    -h|--help|"") usage ;;
+    *)
+        log_error "Unknown command: $1"
+        usage
+        exit 1
+        ;;
 esac

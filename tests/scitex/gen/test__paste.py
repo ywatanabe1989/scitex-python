@@ -6,6 +6,7 @@
 """Test suite for scitex.gen._paste module."""
 
 import pytest
+pytest.importorskip("torch")
 from unittest.mock import patch, MagicMock, call
 import textwrap
 from scitex.gen import paste

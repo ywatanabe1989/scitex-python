@@ -728,7 +728,8 @@ if __name__ == "__main__":
 #         if n_axes == 1:
 #             ax_mpl_scalar = axes_array_mpl.item()
 #             self._axis_scitex = AxisWrapper(self._fig_scitex, ax_mpl_scalar, track)
-#             self._fig_scitex.axes = self._axis_scitex
+#             # ALWAYS use list for consistency with matplotlib (fig.axes is always a list)
+#             self._fig_scitex.axes = [self._axis_scitex]
 #             # Store reference to scitex wrapper on matplotlib axes for metadata collection
 #             ax_mpl_scalar._scitex_wrapper = self._axis_scitex
 #             return self._fig_scitex, self._axis_scitex

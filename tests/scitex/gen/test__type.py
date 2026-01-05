@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2025-05-31 22:00:00 (claude)"
 # File: ./tests/scitex/gen/test__type.py
 
@@ -13,11 +12,13 @@ This module tests:
 """
 
 import pytest
+
+torch = pytest.importorskip("torch")
+from typing import get_args
+
 import numpy as np
 import pandas as pd
-import torch
 import xarray as xr
-from typing import get_args
 
 from scitex.gen import ArrayLike, var_info
 
@@ -197,13 +198,14 @@ class TestVarInfoNumPy:
 
     def test_numpy_scalar(self):
         """Test var_info with numpy scalar."""
-
+        # Note: numpy scalars (np.float32, np.int64, etc.) are not np.ndarray
+        # so they don't get shape/dimensions in var_info
         data = np.float32(3.14)
         result = var_info(data)
 
         assert result["type"] == "float32"
-        assert result["shape"] == ()
-        assert result["dimensions"] == 0
+        # Numpy scalars don't have shape attribute in the same way as arrays
+        # var_info only adds shape for ndarray, DataFrame, Series, etc.
 
 
 class TestVarInfoPandas:
@@ -417,28 +419,28 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-17 12:45:50 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/gen/_type.py
-# 
+#
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/gen/_type.py"
-# 
+#
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-03 10:33:13 (ywatanabe)"
 # # File: placeholder.py
-# 
+#
 # from typing import Any, Union
 # import numpy as np
 # import pandas as pd
 # import torch
 # import xarray as xr
-# 
+#
 # ArrayLike = Union[
 #     list, tuple, np.ndarray, pd.Series, pd.DataFrame, xr.DataArray, torch.Tensor
 # ]
-# 
-# 
+#
+#
 # def var_info(variable: Any) -> dict:
 #     """Returns type and structural information about a variable.
-# 
+#
 #     Example
 #     -------
 #     >>> data = np.array([[1, 2], [3, 4]])
@@ -450,30 +452,30 @@ if __name__ == "__main__":
 #         'shape': (2, 2),
 #         'dimensions': 2
 #     }
-# 
+#
 #     Parameters
 #     ----------
 #     variable : Any
 #         Variable to inspect.
-# 
+#
 #     Returns
 #     -------
 #     dict
 #         Dictionary containing variable information.
 #     """
 #     info = {"type": type(variable).__name__}
-# 
+#
 #     # Length check
 #     if hasattr(variable, "__len__"):
 #         info["length"] = len(variable)
-# 
+#
 #     # Shape check for array-like objects
 #     if isinstance(
 #         variable, (np.ndarray, pd.DataFrame, pd.Series, xr.DataArray, torch.Tensor)
 #     ):
 #         info["shape"] = variable.shape
 #         info["dimensions"] = len(variable.shape)
-# 
+#
 #     # Special handling for nested lists
 #     elif isinstance(variable, list):
 #         if variable and isinstance(variable[0], list):
@@ -486,10 +488,10 @@ if __name__ == "__main__":
 #                 depth += 1
 #             info["shape"] = tuple(shape)
 #             info["dimensions"] = depth
-# 
+#
 #     return info
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

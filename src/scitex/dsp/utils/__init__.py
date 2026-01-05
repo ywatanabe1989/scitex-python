@@ -7,9 +7,10 @@ from ._differential_bandpass_filters import (
 )
 from ._ensure_3d import ensure_3d
 from ._ensure_even_len import ensure_even_len
-from ._zero_pad import zero_pad
+from ._zero_pad import _zero_pad_1d, zero_pad
 
 __all__ = [
+    "_zero_pad_1d",
     "build_bandpass_filters",
     "ensure_3d",
     "ensure_even_len",

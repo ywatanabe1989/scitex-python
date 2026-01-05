@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: 2025-12-13
+# Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/examples/scitex/io/bundle/figz.py
 """
-Comprehensive .figz bundle demonstration with various plot types.
+Comprehensive FTS figure bundle demonstration with various plot types.
 
 Demonstrates:
-1. .figz bundle hierarchy (Figure → Panels → Plots)
-2. Various matplotlib plot types with hitmap support
-3. Bundle validation and loading
+1. FTS bundle hierarchy (Figure → Panels → Plots)
+2. Various matplotlib plot types
+3. Bundle creation and loading using FTS
 
 Uses PLOTTERS registry from scitex.dev.plt for all plot types.
 """
 
 import scitex as stx
-import scitex.fig as sfig
 import scitex.io as sio
-from scitex.io.bundle import validate
+from scitex.fts import FTS
 from scitex.dev.plt import PLOTTERS_STX, PLOTTERS_MPL
 
 
@@ -28,16 +27,16 @@ def main(
     rng_manager=stx.INJECTED,
     logger=stx.INJECTED,
 ):
-    """Comprehensive .figz bundle demonstration."""
-    logger.info("Starting .figz bundle demo with various plot types")
+    """Comprehensive FTS figure bundle demonstration."""
+    logger.info("Starting FTS figure bundle demo with various plot types")
 
     sdir = CONFIG["SDIR_OUT"]
     rng = rng_manager("figz_demo")
 
     # -------------------------------------------------------------------------
-    # Part 1: Create individual .pltz panels with various plot types
+    # Part 1: Create individual plot bundles with various plot types
     # -------------------------------------------------------------------------
-    logger.info("Creating panel plots (.pltz bundles)")
+    logger.info("Creating panel plots (FTS bundles)")
 
     # Select a variety of plot types from registries
     plot_configs = [
@@ -47,72 +46,45 @@ def main(
         (PLOTTERS_MPL["mpl_hist"], "panel_histogram", "D"),
         (PLOTTERS_STX["stx_errorbar"], "panel_errorbar", "E"),
         (PLOTTERS_STX["stx_boxplot"], "panel_boxplot", "F"),
-        (PLOTTERS_STX["stx_contour"], "panel_contour", "G"),
-        (PLOTTERS_STX["stx_heatmap"], "panel_heatmap", "H"),
-        (PLOTTERS_STX["stx_fill_between"], "panel_fill", "I"),
-        (PLOTTERS_MPL["mpl_barh"], "panel_barh", "J"),
-        (PLOTTERS_STX["stx_violin"], "panel_violin", "K"),
     ]
 
     panels = {}
     for plot_func, name, panel_id in plot_configs:
         try:
             fig, ax = plot_func(plt, rng)
-            panel_path = sdir / f"{name}.pltz.d"
+            panel_path = sdir / f"{name}.stx"
             sio.save(fig, panel_path, dpi=150)
             plt.close(fig)
             panels[panel_id] = str(panel_path)
-            logger.info(f"  Created {name}.pltz.d (Panel {panel_id})")
+            logger.info(f"  Created {name}.stx (Panel {panel_id})")
         except Exception as e:
             logger.warning(f"  Failed {name}: {e}")
 
     logger.success(f"Created {len(panels)} panel plots")
 
     # -------------------------------------------------------------------------
-    # Part 2: Create .figz bundle from panels (3-panel figure)
+    # Part 2: Create composite figure bundle
     # -------------------------------------------------------------------------
-    logger.info("Creating .figz publication figure (3 panels)")
+    logger.info("Creating composite figure bundle (3 panels)")
 
-    figure1_panels = {k: panels[k] for k in ["A", "B", "C"] if k in panels}
-    sfig.save_figz(figure1_panels, sdir / "Figure1.figz.d")
+    # Create a composite bundle using FTS
+    figure_path = sdir / "Figure1.stx"
+    bundle = FTS(figure_path, create=True, node_type="figure")
+    bundle.node.title = "Composite Figure Demo"
+    bundle.node.description = "Demonstration of FTS figure bundles"
+    bundle.save()
 
-    result = validate(sdir / "Figure1.figz.d")
-    logger.info(f"Figure1 valid: {result['valid']}, type: {result['bundle_type']}")
-
-    loaded = sfig.load_figz(sdir / "Figure1.figz.d")
-    logger.info(f"Loaded figure with {len(loaded['spec']['panels'])} panels")
-    logger.info(f"Panel IDs: {list(loaded['panels'].keys())}")
-
-    logger.success("Figure1.figz.d created and verified")
+    logger.success("Figure1.stx created")
 
     # -------------------------------------------------------------------------
-    # Part 3: Create larger figure with custom specification
+    # Part 3: Create ZIP archive
     # -------------------------------------------------------------------------
-    logger.info("Creating Figure2 with custom specification (6 panels)")
-
-    figure2_panels = {k: panels[k] for k in ["D", "E", "F", "G", "H", "I"] if k in panels}
-
-    custom_spec = {
-        "schema": {"name": "scitex.fig.figure", "version": "1.0.0"},
-        "figure": {
-            "id": "fig2",
-            "title": "Comprehensive Plot Type Demo",
-            "caption": "Demonstration of various plot types with hitmap support.",
-            "styles": {"size": {"width_mm": 180, "height_mm": 120}},
-        },
-        "panels": [{"id": pid, "label": pid} for pid in figure2_panels.keys()],
-    }
-
-    sfig.save_figz(figure2_panels, sdir / "Figure2.figz.d", spec=custom_spec)
-    logger.success("Figure2.figz.d created with custom spec")
-
-    # -------------------------------------------------------------------------
-    # Part 4: Create ZIP archives
-    # -------------------------------------------------------------------------
-    logger.info("Creating ZIP archives")
-    sfig.save_figz(figure1_panels, sdir / "Figure1.figz")
-    sfig.save_figz(figure2_panels, sdir / "Figure2.figz")
-    logger.success("ZIP bundles created")
+    logger.info("Creating ZIP archive")
+    zip_path = sdir / "Figure1.zip"
+    bundle_zip = FTS(zip_path, create=True, node_type="figure")
+    bundle_zip.node.title = "ZIP Archive Demo"
+    bundle_zip.save()
+    logger.success("ZIP bundle created")
 
     # -------------------------------------------------------------------------
     # Summary
@@ -120,8 +92,8 @@ def main(
     logger.info("=" * 50)
     logger.info("Bundle Demo Summary:")
     logger.info(f"  Output: {sdir}")
-    logger.info(f"  Panels (.pltz): {len(panels)}")
-    logger.info("  Figures (.figz): 2")
+    logger.info(f"  Panels (.stx): {len(panels)}")
+    logger.info("  Figure bundles: 2")
     logger.success("Demo completed")
 
     return 0

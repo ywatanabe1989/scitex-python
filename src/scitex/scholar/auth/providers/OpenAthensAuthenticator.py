@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional
 from playwright.async_api import async_playwright
 
 from scitex import logging
-from scitex.errors import ScholarError
+from scitex.logging import ScholarError
 from scitex.scholar.config import ScholarConfig
 
 from ..core.BrowserAuthenticator import BrowserAuthenticator

@@ -36,7 +36,7 @@ from typing import Optional, Union, Dict, Any, List, Tuple
 from tqdm import tqdm
 
 from scitex import logging
-from scitex.errors import (
+from scitex.logging import (
     IOError as SciTeXIOError,
     FileFormatError,
     PathNotFoundError,

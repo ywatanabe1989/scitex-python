@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-04 02:05:47 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/dsp/filt.py
 
-import scitex
 import numpy as np
 
+import scitex
 from scitex.decorators import signal_fn
 
 # No top-level imports from nn module to avoid circular dependency
@@ -24,6 +23,8 @@ def bandpass(x, fs, bands, t=None):
     import torch
     from scitex.nn._Filters import BandPassFilter
 
+    from scitex.nn._Filters import BandPassFilter
+
     # Convert bands to tensor if it's not already
     if not isinstance(bands, torch.Tensor):
         bands = torch.tensor(bands, dtype=torch.float32)
@@ -32,8 +33,13 @@ def bandpass(x, fs, bands, t=None):
 
 @signal_fn
 def bandstop(x, fs, bands, t=None):
+    import torch
+
     from scitex.nn._Filters import BandStopFilter
 
+    # Convert bands to tensor if it's not already
+    if not isinstance(bands, torch.Tensor):
+        bands = torch.tensor(bands, dtype=torch.float32)
     return BandStopFilter(bands, fs, x.shape[-1])(x, t=t)
 
 
@@ -59,7 +65,6 @@ if __name__ == "__main__":
     import sys
 
     import matplotlib.pyplot as plt
-    import torch
 
     # Start
     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)

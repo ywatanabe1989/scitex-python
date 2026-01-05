@@ -37,16 +37,6 @@ Usage:
     log_file = logging.get_log_path()
 """
 
-import warnings
-
-# Issue deprecation warning when module is imported
-warnings.warn(
-    "scitex.logging is deprecated. Use scitex.logging instead. "
-    "The scitex.logging module will be removed in a future version.",
-    DeprecationWarning,
-    stacklevel=2,
-)
-
 import logging as _logging
 
 from ._Tee import Tee, tee
@@ -71,6 +61,61 @@ from ._print_capture import (
     is_print_capture_enabled,
 )
 from ._context import log_to_file
+
+# Warnings (like Python's warnings module)
+from ._warnings import (
+    SciTeXWarning,
+    UnitWarning,
+    StyleWarning,
+    SciTeXDeprecationWarning,
+    PerformanceWarning,
+    DataLossWarning,
+    warn,
+    filterwarnings,
+    resetwarnings,
+    warn_deprecated,
+    warn_performance,
+    warn_data_loss,
+)
+
+# Errors (exceptions)
+from ._errors import (
+    SciTeXError,
+    ConfigurationError,
+    ConfigFileNotFoundError,
+    ConfigKeyError,
+    IOError,
+    FileFormatError,
+    SaveError,
+    LoadError,
+    ScholarError,
+    SearchError,
+    EnrichmentError,
+    PDFDownloadError,
+    DOIResolutionError,
+    PDFExtractionError,
+    BibTeXEnrichmentError,
+    TranslatorError,
+    AuthenticationError,
+    PlottingError,
+    FigureNotFoundError,
+    AxisError,
+    DataError,
+    ShapeError,
+    DTypeError,
+    PathError,
+    InvalidPathError,
+    PathNotFoundError,
+    TemplateError,
+    TemplateViolationError,
+    NNError,
+    ModelError,
+    StatsError,
+    TestError,
+    check_path,
+    check_file_exists,
+    check_shape_compatibility,
+)
 
 # Re-export standard logging functions for compatibility
 getLogger = _logging.getLogger
@@ -97,9 +142,9 @@ level = level_map.get(level_by_env, INFO)
 # Auto-configure logging on import with file logging enabled, print capture disabled by default
 configure(level=level, enable_file=True, enable_console=True, capture_prints=False)
 
-# Export only essential public functions - minimal API
+# Export public API
 __all__ = [
-    # Core logging functions (most commonly used)
+    # Core logging functions
     "getLogger",
     # Log levels
     "DEBUG",
@@ -109,13 +154,63 @@ __all__ = [
     "CRITICAL",
     "SUCCESS",
     "FAIL",
-    # Configuration (minimal set)
+    # Configuration
     "configure",
     "get_log_path",
     "Tee",
     "tee",
     # Context managers
     "log_to_file",
+    # Warnings (like Python's warnings module)
+    "SciTeXWarning",
+    "UnitWarning",
+    "StyleWarning",
+    "SciTeXDeprecationWarning",
+    "PerformanceWarning",
+    "DataLossWarning",
+    "warn",
+    "filterwarnings",
+    "resetwarnings",
+    "warn_deprecated",
+    "warn_performance",
+    "warn_data_loss",
+    # Errors (exceptions)
+    "SciTeXError",
+    "ConfigurationError",
+    "ConfigFileNotFoundError",
+    "ConfigKeyError",
+    "IOError",
+    "FileFormatError",
+    "SaveError",
+    "LoadError",
+    "ScholarError",
+    "SearchError",
+    "EnrichmentError",
+    "PDFDownloadError",
+    "DOIResolutionError",
+    "PDFExtractionError",
+    "BibTeXEnrichmentError",
+    "TranslatorError",
+    "AuthenticationError",
+    "PlottingError",
+    "FigureNotFoundError",
+    "AxisError",
+    "DataError",
+    "ShapeError",
+    "DTypeError",
+    "PathError",
+    "InvalidPathError",
+    "PathNotFoundError",
+    "TemplateError",
+    "TemplateViolationError",
+    "NNError",
+    "ModelError",
+    "StatsError",
+    "TestError",
+    # Validation helpers
+    "check_path",
+    "check_file_exists",
+    "check_shape_compatibility",
 ]
 
 # EOF

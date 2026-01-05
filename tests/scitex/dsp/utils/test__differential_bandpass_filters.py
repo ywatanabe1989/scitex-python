@@ -7,8 +7,8 @@
 
 import os
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
-import torch
 import torch.nn as nn
 from unittest.mock import patch, MagicMock
 

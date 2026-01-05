@@ -179,14 +179,16 @@ try:
 except Exception:
     pass  # Use matplotlib default colors if color module fails
 
-from ._tpl import termplot
+try:
+    from ._tpl import termplot
+except ImportError:
+    termplot = None
 from . import color
 from . import utils
 from . import ax
 from .styles import presets
 from . import styles
 from . import gallery
-from ._figrecipe import FIGRECIPE_AVAILABLE, save_recipe, load_recipe, reproduce
 
 # Lazy import for subplots to avoid circular dependencies
 # Note: Use names that don't conflict with submodule names like _subplots
@@ -755,10 +757,6 @@ __all__ = [
     "termplot",
     "tight_layout",
     "utils",
-    "FIGRECIPE_AVAILABLE",
-    "save_recipe",
-    "load_recipe",
-    "reproduce",
 ]
 
 

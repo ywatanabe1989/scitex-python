@@ -1,7 +1,16 @@
 """Authentication module for Scholar."""
 
-from .ScholarAuthManager import ScholarAuthManager
-from .core.AuthenticationGateway import AuthenticationGateway, URLContext
+# Optional: requires browser dependencies (playwright, aiohttp)
+try:
+    from .ScholarAuthManager import ScholarAuthManager
+except ImportError:
+    ScholarAuthManager = None
+
+try:
+    from .core.AuthenticationGateway import AuthenticationGateway, URLContext
+except ImportError:
+    AuthenticationGateway = None
+    URLContext = None
 
 __all__ = [
     "ScholarAuthManager",

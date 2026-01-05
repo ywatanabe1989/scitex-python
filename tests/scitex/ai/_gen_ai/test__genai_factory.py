@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-06-13 23:04:42 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/SciTeX-Code/tests/scitex/ai/_gen_ai/test__genai_factory.py
 # ----------------------------------------
 import os
-__FILE__ = (
-    "./tests/scitex/ai/_gen_ai/test__genai_factory.py"
-)
+
+__FILE__ = "./tests/scitex/ai/_gen_ai/test__genai_factory.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 # Time-stamp: "2025-06-01 13:50:00 (ywatanabe)"
@@ -17,7 +15,9 @@ from unittest.mock import Mock, patch
 
 import pandas as pd
 import pytest
-from scitex.ai._gen_ai import genai_factory
+
+pytest.importorskip("zarr")
+from scitex.ai._gen_ai._genai_factory import genai_factory
 
 
 class TestGenAIFactory:
@@ -46,16 +46,12 @@ class TestGenAIFactory:
 
     def test_genai_factory_openai(self, mock_models):
         """Test creating OpenAI model instance."""
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
-            with patch(
-                "scitex.ai._gen_ai._genai_factory.OpenAI"
-            ) as mock_openai:
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
+            with patch("scitex.ai._gen_ai._genai_factory.OpenAI") as mock_openai:
                 mock_instance = Mock()
                 mock_openai.return_value = mock_instance
 
-                result = genai_factory(
-                    model="gpt-3.5-turbo", api_key="test-key"
-                )
+                result = genai_factory(model="gpt-3.5-turbo", api_key="test-key")
 
                 mock_openai.assert_called_once_with(
                     model="gpt-3.5-turbo",
@@ -71,39 +67,56 @@ class TestGenAIFactory:
 
     def test_genai_factory_anthropic(self, mock_models):
         """Test creating Anthropic model instance."""
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
-            with patch(
-                "scitex.ai._gen_ai._genai_factory.Anthropic"
-            ) as mock_anthropic:
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
+            with patch("scitex.ai._gen_ai._genai_factory.Anthropic") as mock_anthropic:
                 mock_instance = Mock()
                 mock_anthropic.return_value = mock_instance
 
                 result = genai_factory(
-                    model="claude-3-opus", stream=True, temperature=0.5
+                    model="claude-3-opus",
+                    stream=True,
+                    temperature=0.5,
+                    api_key="test-key",
                 )
 
-                mock_anthropic.assert_called_once()
+                mock_anthropic.assert_called_once_with(
+                    model="claude-3-opus",
+                    stream=True,
+                    api_key="test-key",
+                    seed=None,
+                    temperature=0.5,
+                    n_keep=1,
+                    chat_history=None,
+                    max_tokens=4096,
+                )
                 assert result == mock_instance
 
     def test_genai_factory_google(self, mock_models):
         """Test creating Google model instance."""
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
-            with patch(
-                "scitex.ai._gen_ai._genai_factory.Google"
-            ) as mock_google:
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
+            with patch("scitex.ai._gen_ai._genai_factory.Google") as mock_google:
                 mock_instance = Mock()
                 mock_google.return_value = mock_instance
 
-                result = genai_factory(model="gemini-pro", max_tokens=2048)
+                result = genai_factory(
+                    model="gemini-pro", max_tokens=2048, api_key="test-key"
+                )
 
-                mock_google.assert_called_once()
-                call_kwargs = mock_google.call_args[1]
-                assert call_kwargs["max_tokens"] == 2048
+                mock_google.assert_called_once_with(
+                    model="gemini-pro",
+                    stream=False,
+                    api_key="test-key",
+                    seed=None,
+                    temperature=1.0,
+                    n_keep=1,
+                    chat_history=None,
+                    max_tokens=2048,
+                )
                 assert result == mock_instance
 
     def test_genai_factory_invalid_model(self, mock_models):
         """Test error handling for invalid model name."""
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
             with pytest.raises(
                 ValueError, match='Model "invalid-model" is not available'
             ):
@@ -111,10 +124,8 @@ class TestGenAIFactory:
 
     def test_genai_factory_with_all_parameters(self, mock_models):
         """Test factory with all parameters specified."""
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
-            with patch(
-                "scitex.ai._gen_ai._genai_factory.OpenAI"
-            ) as mock_openai:
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
+            with patch("scitex.ai._gen_ai._genai_factory.OpenAI") as mock_openai:
                 chat_history = [{"role": "user", "content": "Hello"}]
 
                 genai_factory(
@@ -139,13 +150,9 @@ class TestGenAIFactory:
 
     def test_genai_factory_random_api_key_selection(self, mock_models):
         """Test random API key selection from list."""
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
-            with patch(
-                "scitex.ai._gen_ai._genai_factory.OpenAI"
-            ) as mock_openai:
-                with patch(
-                    "random.choice", return_value="selected-key"
-                ) as mock_choice:
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
+            with patch("scitex.ai._gen_ai._genai_factory.OpenAI") as mock_openai:
+                with patch("random.choice", return_value="selected-key") as mock_choice:
                     api_keys = ["key1", "key2", "key3"]
 
                     genai_factory(model="gpt-3.5-turbo", api_key=api_keys)
@@ -156,11 +163,9 @@ class TestGenAIFactory:
 
     def test_genai_factory_tuple_api_keys(self, mock_models):
         """Test API key selection from tuple."""
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
             with patch("scitex.ai._gen_ai._genai_factory.OpenAI"):
-                with patch(
-                    "random.choice", return_value="selected-key"
-                ) as mock_choice:
+                with patch("random.choice", return_value="selected-key") as mock_choice:
                     api_keys = ("key1", "key2", "key3")
 
                     genai_factory(model="gpt-3.5-turbo", api_key=api_keys)
@@ -169,10 +174,8 @@ class TestGenAIFactory:
 
     def test_genai_factory_single_api_key(self, mock_models):
         """Test single API key (no random selection)."""
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
-            with patch(
-                "scitex.ai._gen_ai._genai_factory.OpenAI"
-            ) as mock_openai:
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
+            with patch("scitex.ai._gen_ai._genai_factory.OpenAI") as mock_openai:
                 genai_factory(model="gpt-3.5-turbo", api_key="single-key")
 
                 call_kwargs = mock_openai.call_args[1]
@@ -190,9 +193,7 @@ class TestGenAIFactory:
             ("Groq", "llama3-8b", "Groq"),
         ],
     )
-    def test_genai_factory_all_providers(
-        self, provider, model_name, expected_class
-    ):
+    def test_genai_factory_all_providers(self, provider, model_name, expected_class):
         """Test factory works for all supported providers."""
         mock_models = pd.DataFrame(
             {
@@ -202,24 +203,31 @@ class TestGenAIFactory:
             }
         )
 
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
             with patch(
                 f"scitex.ai._gen_ai._genai_factory.{expected_class}"
             ) as mock_class:
                 mock_instance = Mock()
                 mock_class.return_value = mock_instance
 
-                result = genai_factory(model=model_name)
+                result = genai_factory(model=model_name, api_key="test-key")
 
-                mock_class.assert_called_once()
+                mock_class.assert_called_once_with(
+                    model=model_name,
+                    stream=False,
+                    api_key="test-key",
+                    seed=None,
+                    temperature=1.0,
+                    n_keep=1,
+                    chat_history=None,
+                    max_tokens=4096,
+                )
                 assert result == mock_instance
 
     def test_genai_factory_default_parameters(self, mock_models):
         """Test factory with default parameters."""
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
-            with patch(
-                "scitex.ai._gen_ai._genai_factory.OpenAI"
-            ) as mock_openai:
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
+            with patch("scitex.ai._gen_ai._genai_factory.OpenAI") as mock_openai:
                 genai_factory()  # Using default model="gpt-3.5-turbo"
 
                 call_kwargs = mock_openai.call_args[1]
@@ -236,10 +244,8 @@ class TestGenAIFactory:
         """Test that model name is preserved exactly as provided."""
         model_name = "gpt-3.5-turbo"
 
-        with patch("scitex.ai._gen_ai._PARAMS.MODELS", mock_models):
-            with patch(
-                "scitex.ai._gen_ai._genai_factory.OpenAI"
-            ) as mock_openai:
+        with patch("scitex.ai._gen_ai._genai_factory.MODELS", mock_models):
+            with patch("scitex.ai._gen_ai._genai_factory.OpenAI") as mock_openai:
                 genai_factory(model=model_name)
 
                 call_kwargs = mock_openai.call_args[1]
@@ -261,13 +267,13 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ai/_gen_ai/_genai_factory.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/ai/_gen_ai/_genai_factory.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # import random
-# 
+#
 # from ._Anthropic import Anthropic
 # from ._DeepSeek import DeepSeek
 # from ._Google import Google
@@ -276,8 +282,8 @@ if __name__ == "__main__":
 # from ._OpenAI import OpenAI
 # from ._PARAMS import MODELS
 # from ._Perplexity import Perplexity
-# 
-# 
+#
+#
 # def genai_factory(
 #     model="gpt-3.5-turbo",
 #     stream=False,
@@ -290,14 +296,14 @@ if __name__ == "__main__":
 # ):
 #     """Factory function to create an instance of an AI model handler."""
 #     AVAILABLE_MODELS = MODELS.name.tolist()
-# 
+#
 #     if model not in AVAILABLE_MODELS:
 #         raise ValueError(
 #             f'Model "{model}" is not available. Please choose from:{MODELS.name.tolist()}'
 #         )
-# 
+#
 #     provider = MODELS[MODELS.name == model].provider.iloc[0]
-# 
+#
 #     # model_class = globals()[provider]
 #     model_class = {
 #         "OpenAI": OpenAI,
@@ -308,11 +314,11 @@ if __name__ == "__main__":
 #         "DeepSeek": DeepSeek,
 #         "Groq": Groq,
 #     }[provider]
-# 
+#
 #     # Select a random API key from the list
 #     if isinstance(api_key, (list, tuple)):
 #         api_key = random.choice(api_key)
-# 
+#
 #     return model_class(
 #         model=model,
 #         stream=stream,
@@ -323,8 +329,8 @@ if __name__ == "__main__":
 #         chat_history=chat_history,
 #         max_tokens=max_tokens,
 #     )
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

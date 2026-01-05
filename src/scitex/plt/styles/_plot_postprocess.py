@@ -119,7 +119,9 @@ def _apply_tick_locator(ax):
     try:
 
         def is_categorical_axis(axis):
-            if isinstance(axis.converter, StrCategoryConverter):
+            # Use get_converter() for matplotlib 3.10+ compatibility
+            converter = getattr(axis, 'get_converter', lambda: axis.converter)()
+            if isinstance(converter, StrCategoryConverter):
                 return True
             if hasattr(axis, "units") and isinstance(axis.units, UnitData):
                 return True

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-07-14 15:28:49 (ywatanabe)"
 # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/__init__.py
 # ----------------------------------------
@@ -16,13 +15,14 @@ Modules are imported on-demand to avoid circular dependencies.
 
 import warnings
 
-# Always show our own deprecation warnings first
-warnings.filterwarnings("always", category=DeprecationWarning, module="scitex.*")
-# Then ignore others
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+# Show deprecation warnings from scitex modules (educational for migration)
+warnings.filterwarnings("default", category=DeprecationWarning, module="scitex.*")
 
 # Version
 from .__version__ import __version__
+
+# Installation guide - show users what modules are available
+from ._install_guide import show_install_guide
 
 
 # Sentinel object for decorator-injected parameters
@@ -145,7 +145,8 @@ resource = _LazyModule("resource")
 tex = _LazyModule("tex")
 linalg = _LazyModule("linalg")
 parallel = _LazyModule("parallel")
-dt = _LazyModule("dt")
+datetime = _LazyModule("datetime")
+dt = _LazyModule("dt")  # Alias for datetime (shorter name)
 types = _LazyModule("types")
 utils = _LazyModule("utils")
 etc = _LazyModule("etc")
@@ -163,6 +164,10 @@ cloud = _LazyModule("cloud")
 config = _LazyModule("config")
 audio = _LazyModule("audio")
 msword = _LazyModule("msword")
+fts = _LazyModule(
+    "fts"
+)  # Figure-Table-Statistics - single source of truth for bundle schemas
+fsb = fts  # Legacy alias (FSB -> FTS)
 
 # Centralized path configuration - eager loaded for convenience
 # Usage: scitex.PATHS.logs, scitex.PATHS.cache, etc.
@@ -214,7 +219,8 @@ __all__ = [
     "tex",
     "linalg",
     "parallel",
-    "dt",
+    "datetime",
+    "dt",  # Alias for datetime (shorter name)
     "types",
     "utils",
     "etc",
@@ -225,6 +231,8 @@ __all__ = [
     "config",
     "audio",
     "msword",
+    "fts",
+    "fsb",  # Legacy alias
     "PATHS",
     "INJECTED",
 ]

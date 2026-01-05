@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-09 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/repro/_RandomStateManager.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -21,12 +21,15 @@ Main API:
 
 import hashlib
 import json
+import logging
 import pickle
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 from scitex.config import get_paths
+
+logger = logging.getLogger(__name__)
 
 # Global singleton instance
 _GLOBAL_INSTANCE = None
@@ -62,7 +65,7 @@ class RandomStateManager:
         self._jax_key = None  # Initialize to None, will be set if jax is available
 
         if verbose:
-            print(f"RandomStateManager initialized with seed {seed}")
+            logger.info(f"RandomStateManager initialized with seed {seed}")
 
         # Auto-fix all available seeds
         self._auto_fix_seeds(verbose=verbose)
@@ -138,7 +141,7 @@ class RandomStateManager:
             pass
 
         if verbose and fixed_modules:
-            print(f"Fixed random seeds for: {', '.join(fixed_modules)}")
+            logger.info(f"Fixed random seeds for: {', '.join(fixed_modules)}")
 
     def get_np_generator(self, name: str):
         """
@@ -225,7 +228,6 @@ class RandomStateManager:
         >>> # Next run:
         >>> rng.verify(data, "train_data")  # Verifies match
         """
-        import numpy as np
 
         # Auto-generate name if needed
         if name is None:
@@ -249,7 +251,7 @@ class RandomStateManager:
 
         # Check cache
         if cache_file.exists():
-            with open(cache_file, "r") as f:
+            with open(cache_file) as f:
                 cached = json.load(f)
 
             matches = cached["hash"] == obj_hash
@@ -315,7 +317,10 @@ class RandomStateManager:
             if isinstance(obj, jnp.ndarray):
                 obj_np = np.array(obj)
                 return hashlib.sha256(obj_np.tobytes()).hexdigest()[:32]
-        except ImportError:
+        except (ImportError, AttributeError, RuntimeError):
+            # ImportError: jax not installed
+            # AttributeError: circular import in jax._src.clusters
+            # RuntimeError: other jax initialization errors
             pass
 
         # Pandas DataFrame/Series
@@ -504,7 +509,6 @@ class RandomStateManager:
         >>> rng.clear_cache(["test1", "test2"])  # Clear multiple
         >>> rng.clear_cache("experiment_*")  # Clear pattern
         """
-        import glob
 
         if not self._cache_dir.exists():
             return 0
@@ -614,7 +618,6 @@ def main(args):
     - Reproducible random generation
     - Verification of reproducibility
     """
-    import numpy as np
 
     # Create RandomStateManager (already created by session.start)
     print(f"\n{'=' * 60}")
@@ -650,7 +653,9 @@ def main(args):
 
 if __name__ == "__main__":
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

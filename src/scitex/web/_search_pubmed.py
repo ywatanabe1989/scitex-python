@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-13 14:30:43 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/web/_search_pubmed.py
 
@@ -27,9 +26,9 @@ import xml.etree.ElementTree as ET
 from typing import Any, Dict, List, Optional, Union
 
 import aiohttp
-import scitex
-import pandas as pd
 import requests
+
+import scitex
 
 """Functions & Classes"""
 
@@ -292,7 +291,8 @@ def format_bibtex(paper: Dict[str, Any], pmid: str, abstract_data: tuple) -> str
 
     authors = paper.get("authors", [{"name": "Unknown"}])
     author_names = " and ".join(author["name"] for author in authors)
-    year = paper.get("pubdate", "").split()[0]
+    pubdate = paper.get("pubdate", "")
+    year = pubdate.split()[0] if pubdate.strip() else ""
     title = paper.get("title", "No Title")
 
     # Name formatting
@@ -475,6 +475,7 @@ def run_main() -> None:
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex
 
     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(

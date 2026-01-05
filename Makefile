@@ -7,7 +7,8 @@
 SHELL := /bin/bash
 
 .PHONY: help install install-dev install-all \
-	clean test test-fast test-full test-seq test-cov lint format check \
+	clean test test-fast test-full test-lf test-ff test-nf test-inc test-unit test-changed lint format check \
+	test-stats-cov test-config-cov test-logging-cov \
 	build release upload upload-test \
 	build-all release-all upload-all upload-test-all \
 	sync-extras sync-tests sync-examples sync-redirect \
@@ -38,18 +39,28 @@ help:
 	@echo -e "  make install-dev       Install with dev dependencies"
 	@echo -e "  make install-all       Install with all optional dependencies"
 	@echo -e ""
-	@echo -e "$(CYAN)🔧 Development:$(NC)"
-	@echo -e "  make test              Run tests (parallel, xdist default)"
-	@echo -e "  make test-fast         Run fast tests only (skip @slow)"
-	@echo -e "  make test-full         Run all tests including slow/integration"
-	@echo -e "  make test-seq          Run tests sequentially (no xdist)"
-	@echo -e "  make test MODULE=plt   Run tests for specific module"
-	@echo -e "  make test-cov          Run tests with coverage"
+	@echo -e "$(CYAN)🧪 Testing (fastest first):$(NC)"
+	@echo -e "  make test-lf           Re-run last-failed tests only"
+	@echo -e "  make test-inc          Incremental (only affected by changes)"
+	@echo -e "  make test-changed      Tests for git-changed files"
+	@echo -e "  make test-unit         Only @unit marked tests"
+	@echo -e "  make test MODULE=plt   Single module tests"
+	@echo -e "  make test-fast         Skip @slow tests"
+	@echo -e "  make test-ff           Failed first, then rest"
+	@echo -e "  make test-nf           New tests first"
+	@echo -e "  make test              Full suite with coverage"
+	@echo -e "  make test-full         Including slow/integration"
+	@echo -e ""
+	@echo -e "$(CYAN)🔍 Linting:$(NC)"
 	@echo -e "  make lint              Check code style (ruff)"
 	@echo -e "  make lint-fix          Auto-fix lint issues"
+	@echo -e ""
+	@echo -e "$(CYAN)✨ Formatting:$(NC)"
 	@echo -e "  make format            Format code (ruff)"
 	@echo -e "  make format-check      Check formatting without changes"
-	@echo -e "  make check             Run all checks (format + lint + test-fast)"
+	@echo -e ""
+	@echo -e "$(CYAN)✅ Combined:$(NC)"
+	@echo -e "  make check             format-check + lint + test-fast"
 	@echo -e ""
 	@echo -e "$(CYAN)🧹 Maintenance:$(NC)"
 	@echo -e "  make clean             Remove build/test/cache artifacts"
@@ -103,38 +114,49 @@ clean:
 
 test:
 ifdef MODULE
-	@./scripts/maintenance/test.sh $(MODULE)
+	@./scripts/maintenance/test.sh $(MODULE) --cov
 else
-	@./scripts/maintenance/test.sh
+	@./scripts/maintenance/test.sh --cov
 endif
 
 test-fast:
 ifdef MODULE
-	@./scripts/maintenance/test.sh $(MODULE) --fast
+	@./scripts/maintenance/test.sh $(MODULE) --fast --cov
 else
-	@./scripts/maintenance/test.sh --fast
+	@./scripts/maintenance/test.sh --fast --cov
 endif
 
 test-full:
-ifdef MODULE
-	@./scripts/maintenance/test.sh $(MODULE)
-else
-	@./scripts/maintenance/test.sh
-endif
-
-test-seq:
-ifdef MODULE
-	@./scripts/maintenance/test.sh $(MODULE) --sequential
-else
-	@./scripts/maintenance/test.sh --sequential
-endif
-
-test-cov:
 ifdef MODULE
 	@./scripts/maintenance/test.sh $(MODULE) --cov
 else
 	@./scripts/maintenance/test.sh --cov
 endif
+
+# Cache-based test targets for faster iteration
+test-lf:
+	@echo -e "$(CYAN)🔄 Re-running last-failed tests...$(NC)"
+	@./scripts/maintenance/test.sh --lf
+
+test-ff:
+	@echo -e "$(CYAN)🔄 Running failed tests first...$(NC)"
+	@./scripts/maintenance/test.sh --ff
+
+test-nf:
+	@echo -e "$(CYAN)🔄 Running new tests first...$(NC)"
+	@./scripts/maintenance/test.sh --nf
+
+test-inc:
+	@echo -e "$(CYAN)🔬 Running incremental tests (affected by changes)...$(NC)"
+	@./scripts/maintenance/test.sh --testmon
+
+test-unit:
+	@echo -e "$(CYAN)⚡ Running unit tests only...$(NC)"
+	@./scripts/maintenance/test.sh -m unit
+
+test-changed:
+	@echo -e "$(CYAN)📝 Running tests for git-changed files...$(NC)"
+	@./scripts/maintenance/test.sh --changed
 
 lint:
 	@./scripts/maintenance/lint.sh
@@ -152,13 +174,23 @@ check: format-check lint test-fast
 	@echo -e ""
 	@echo -e "$(GREEN)✅ All checks passed!$(NC)"
 
+# Module-specific coverage targets for CI
+test-stats-cov:
+	@./scripts/maintenance/test.sh stats --cov
+
+test-config-cov:
+	@./scripts/maintenance/test.sh config --cov
+
+test-logging-cov:
+	@./scripts/maintenance/test.sh logging --cov
+
 # ============================================
 # Synchronization & Dependencies
 # ============================================
 
 sync-extras:
 	@echo -e "$(CYAN)📋 Syncing pyproject.toml extras from imports...$(NC)"
-	@python scripts/maintenance/sync_pyproject_extras.py --update-pyproject --include-empty
+	@python scripts/maintenance/generate_module_deps.py --update-pyproject --include-empty 2>/dev/null || echo -e "$(YELLOW)Script not available$(NC)"
 	@echo -e "$(GREEN)✅ pyproject.toml extras updated$(NC)"
 
 sync-tests:

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "ywatanabe (2024-11-02 23:09:49)"
 # File: ./scitex_repo/src/scitex/dsp/add_noise.py
 
 import torch
+
 from scitex.decorators import signal_fn
 
 
@@ -50,9 +50,11 @@ def pink(x, amp=1.0, dim=-1):
 
 @signal_fn
 def brown(x, amp=1.0, dim=-1):
+    from scitex.dsp import norm
+
     noise = _uniform(x.shape, amp=amp)
     noise = torch.cumsum(noise, dim=dim)
-    noise = scitex.dsp.norm.minmax(noise, amp=amp, dim=dim)
+    noise = norm.minmax(noise, amp=amp, dim=dim)
     return x + noise.to(x.device)
 
 
@@ -60,6 +62,7 @@ if __name__ == "__main__":
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex
 
     # Start

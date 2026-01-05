@@ -14,6 +14,7 @@ from unittest.mock import MagicMock, Mock, mock_open, patch
 
 import pandas as pd
 import pytest
+pytest.importorskip("zarr")
 
 from scitex.resource import log_processor_usages
 from scitex.resource._log_processor_usages import (

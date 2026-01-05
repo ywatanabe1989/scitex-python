@@ -4,6 +4,7 @@
 # File: /tests/scitex/gen/test__alternate_kwarg.py
 
 import pytest
+pytest.importorskip("torch")
 from scitex.gen import alternate_kwarg
 
 

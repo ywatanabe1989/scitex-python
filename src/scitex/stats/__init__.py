@@ -13,7 +13,6 @@ Organized submodules:
 - tests: Statistical tests (correlation, etc.)
 - descriptive: Descriptive statistics
 - utils: Formatters and normalizers
-- _schema: Core StatResult schema for standardized test results
 
 Quick Start (Auto Selection):
 ----------------------------
@@ -32,43 +31,167 @@ Quick Start (Auto Selection):
 """
 
 # Import organized submodules
-from . import auto
-from . import correct
-from . import effect_sizes
-from . import power
-from . import utils
-from . import posthoc
-from . import descriptive
-from . import tests
-from . import _schema
-
-# Export commonly used functions and classes for convenience
+from . import auto, correct, descriptive, effect_sizes, posthoc, power, tests, utils
 from .descriptive import describe
-from ._schema import (
-    StatResult,
-    Position,
-    StatStyling,
-    StatPositioning,
-    create_stat_result,
-)
+
+# Check if torch is available for GPU acceleration
+try:
+    import torch
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
 
 # Export key auto module classes at top level for convenience
 from .auto import (
-    StatContext,
-    TestRule,
     TEST_RULES,
-    check_applicable,
-    recommend_tests,
-    get_menu_items,
+    StatContext,
     StatStyle,
-    get_stat_style,
+    TestRule,
+    check_applicable,
     format_test_line,
+    get_menu_items,
+    get_stat_style,
     p_to_stars,
+    recommend_tests,
 )
 
 # =============================================================================
-# .statsz Bundle Support
+# Stats Schema - Use scitex.fts.Stats as single source of truth
 # =============================================================================
+
+# For backward compatibility, re-export from fts
+try:
+    from scitex.fts import Stats
+
+    FTS_AVAILABLE = True
+except ImportError:
+    Stats = None
+    FTS_AVAILABLE = False
+
+
+def test_result_to_stats(result: dict) -> "Stats":
+    """Convert test result dict to FTS Stats schema.
+
+    Parameters
+    ----------
+    result : dict
+        Test result dictionary. Supports both formats:
+
+        Legacy flat format (from examples):
+        - name: "Control vs Treatment"
+        - method: "t-test"  # string
+        - p_value: 0.003
+        - effect_size: 1.21
+        - ci95: [0.5, 1.8]
+
+        New nested format (from test functions):
+        - method: {"name": "t-test", "variant": "independent"}
+        - results: {"statistic": 2.5, "statistic_name": "t", "p_value": 0.01}
+
+    Returns
+    -------
+    Stats
+        FTS Stats object suitable for bundle storage
+
+    Example
+    -------
+    >>> result = stats.t_test(x, y)
+    >>> fts_stats = stats.test_result_to_stats(result)
+    >>> bundle.stats = fts_stats
+    """
+    if not FTS_AVAILABLE:
+        raise ImportError("scitex.fts is required for Stats conversion")
+
+    import uuid
+
+    from scitex.fts._stats._dataclasses._Stats import (
+        Analysis,
+        EffectSize,
+        StatMethod,
+    )
+    from scitex.fts._stats._dataclasses._Stats import (
+        StatResult as FTSStatResult,
+    )
+
+    # Handle legacy flat format vs new nested format
+    method_data = result.get("method", {})
+    if isinstance(method_data, str):
+        # Legacy format: method is a string
+        method = StatMethod(
+            name=method_data,
+            variant=None,
+            parameters={},
+        )
+        # Legacy format has flat p_value, effect_size
+        effect_size = None
+        es_val = result.get("effect_size")
+        if es_val is not None:
+            ci = result.get("ci95", [])
+            effect_size = EffectSize(
+                name="d",
+                value=float(es_val),
+                ci_lower=ci[0] if len(ci) > 0 else None,
+                ci_upper=ci[1] if len(ci) > 1 else None,
+            )
+        stat_result = FTSStatResult(
+            statistic=result.get("statistic", 0.0),
+            statistic_name=result.get("statistic_name", ""),
+            p_value=result.get("p_value", 1.0),
+            df=result.get("df"),
+            effect_size=effect_size,
+            significant=result.get("p_value", 1.0) < 0.05,
+            alpha=0.05,
+        )
+        analysis_name = result.get("name", "comparison")
+    else:
+        # New nested format
+        method = StatMethod(
+            name=method_data.get("name", "unknown"),
+            variant=method_data.get("variant"),
+            parameters=method_data.get("parameters", {}),
+        )
+
+        # Build result
+        results_data = result.get("results", {})
+        effect_size = None
+        if "effect_size" in results_data:
+            es = results_data["effect_size"]
+            effect_size = EffectSize(
+                name=es.get("name", ""),
+                value=es.get("value", 0.0),
+                ci_lower=es.get("ci_lower"),
+                ci_upper=es.get("ci_upper"),
+            )
+
+        stat_result = FTSStatResult(
+            statistic=results_data.get("statistic", 0.0),
+            statistic_name=results_data.get("statistic_name", ""),
+            p_value=results_data.get("p_value", 1.0),
+            df=results_data.get("df"),
+            effect_size=effect_size,
+            significant=results_data.get("significant"),
+            alpha=results_data.get("alpha", 0.05),
+        )
+        analysis_name = result.get("name", "analysis")
+
+    # Build analysis (name stored in inputs for reference)
+    inputs = result.get("inputs", {})
+    inputs["comparison_name"] = analysis_name
+    analysis = Analysis(
+        result_id=str(uuid.uuid4()),
+        method=method,
+        results=stat_result,
+        inputs=inputs,
+    )
+
+    return Stats(analyses=[analysis])
+
+
+# =============================================================================
+# .statsz Bundle Support - Using FTS
+# =============================================================================
+
 
 def save_statsz(
     comparisons,
@@ -77,22 +200,16 @@ def save_statsz(
     as_zip=False,
 ):
     """
-    Save statistical results as a .statsz bundle.
+    Save statistical results as an FTS bundle.
 
     Parameters
     ----------
-    comparisons : list of dict or list of StatResult
-        List of comparison results. Each should have:
-        - name: Comparison name (e.g., "Control vs Treatment")
-        - method: Test method (e.g., "t-test")
-        - p_value: P-value
-        - effect_size: Effect size (optional)
-        - ci95: 95% confidence interval (optional)
-        - formatted: Star notation (optional)
+    comparisons : list of dict
+        List of comparison results.
     path : str or Path
-        Output path (e.g., "comparison.statsz.d" or "comparison.statsz").
+        Output path (e.g., "results.zip").
     metadata : dict, optional
-        Additional metadata (n, seed, bootstrap_iters, etc.).
+        Additional metadata.
     as_zip : bool, optional
         If True, save as ZIP archive (default: False).
 
@@ -100,83 +217,89 @@ def save_statsz(
     -------
     Path
         Path to saved bundle.
-
-    Examples
-    --------
-    >>> import scitex.stats as sstats
-    >>> comparisons = [
-    ...     {
-    ...         "name": "Control vs Treatment",
-    ...         "method": "t-test",
-    ...         "p_value": 0.003,
-    ...         "effect_size": 1.21,
-    ...         "ci95": [0.5, 1.8],
-    ...         "formatted": "**"
-    ...     }
-    ... ]
-    >>> sstats.save_statsz(comparisons, "results.statsz.d")
     """
     from pathlib import Path
-    from scitex.io.bundle import save, BundleType
+
+    from scitex.fts import FTS
 
     p = Path(path)
+    if as_zip and not p.suffix == ".zip":
+        p = p.with_suffix(".zip")
 
-    # Convert StatResult objects to dicts if needed
-    comp_dicts = []
-    for comp in comparisons:
-        if hasattr(comp, 'to_dict'):
-            comp_dicts.append(comp.to_dict())
-        elif hasattr(comp, '__dict__'):
-            comp_dicts.append(vars(comp))
+    # Create FTS bundle
+    bundle = FTS(p, create=True, node_type="stats")
+
+    # Convert comparisons to Stats
+    if comparisons:
+        if isinstance(comparisons[0], dict):
+            # Convert list of dicts to Stats
+            stats = Stats(analyses=[])
+            for comp in comparisons:
+                analysis_stats = test_result_to_stats(comp)
+                stats.analyses.extend(analysis_stats.analyses)
+            bundle.stats = stats
         else:
-            comp_dicts.append(comp)
+            # Already Stats objects
+            bundle.stats = comparisons
 
-    # Build spec
-    spec = {
-        'schema': {'name': 'scitex.stats.stats', 'version': '1.0.0'},
-        'comparisons': comp_dicts,
-        'metadata': metadata or {},
-    }
-
-    bundle_data = {'spec': spec}
-
-    return save(bundle_data, p, bundle_type=BundleType.STATSZ, as_zip=as_zip)
+    bundle.save()
+    return p
 
 
 def load_statsz(path):
     """
-    Load a .statsz bundle.
+    Load a stats bundle using FTS.
 
     Parameters
     ----------
     path : str or Path
-        Path to .statsz bundle (directory or ZIP).
+        Path to bundle.
 
     Returns
     -------
     dict
-        Stats data with:
-        - 'comparisons': List of comparison dicts
-        - 'metadata': Metadata dict
-
-    Examples
-    --------
-    >>> stats = scitex.stats.load_statsz("results.statsz.d")
-    >>> for comp in stats['comparisons']:
-    ...     print(f"{comp['name']}: p={comp['p_value']}")
+        Stats data with 'comparisons' and 'metadata'.
+        Each comparison is a flat dict with:
+        - name, method, p_value, effect_size, ci95, formatted
     """
-    from scitex.io.bundle import load
+    from scitex.fts import FTS
 
-    bundle = load(path)
+    bundle = FTS(path)
 
-    if bundle['type'] != 'statsz':
-        raise ValueError(f"Not a .statsz bundle: {path}")
+    comparisons = []
+    if bundle.stats and bundle.stats.analyses:
+        for analysis in bundle.stats.analyses:
+            # Convert back to flat format for compatibility
+            ad = analysis.to_dict()
+            p_val = ad.get("results", {}).get("p_value", 1.0)
+            es_data = ad.get("results", {}).get("effect_size", {})
+            es_val = es_data.get("value", 0.0) if es_data else 0.0
+            ci = [es_data.get("ci_lower"), es_data.get("ci_upper")] if es_data else []
+            ci = [v for v in ci if v is not None]
 
-    spec = bundle.get('spec', {})
+            # Format p-value as stars
+            if p_val < 0.001:
+                formatted = "***"
+            elif p_val < 0.01:
+                formatted = "**"
+            elif p_val < 0.05:
+                formatted = "*"
+            else:
+                formatted = "ns"
+
+            flat = {
+                "name": ad.get("inputs", {}).get("comparison_name", "comparison"),
+                "method": ad.get("method", {}).get("name", "unknown"),
+                "p_value": p_val,
+                "effect_size": es_val,
+                "ci95": ci,
+                "formatted": formatted,
+            }
+            comparisons.append(flat)
 
     return {
-        'comparisons': spec.get('comparisons', []),
-        'metadata': spec.get('metadata', {}),
+        "comparisons": comparisons,
+        "metadata": bundle.node.to_dict() if bundle.node else {},
     }
 
 
@@ -184,20 +307,19 @@ __all__ = [
     # Main submodules
     "auto",
     "correct",
+    "descriptive",
     "effect_sizes",
     "power",
     "utils",
     "posthoc",
-    "descriptive",
     "tests",
-    "_schema",
-    # Schema exports
+    # Descriptive convenience export
     "describe",
-    "StatResult",
-    "Position",
-    "StatStyling",
-    "StatPositioning",
-    "create_stat_result",
+    # Torch availability flag (for GPU acceleration)
+    "TORCH_AVAILABLE",
+    # Stats schema (from FTS)
+    "Stats",
+    "FTS_AVAILABLE",
     # Auto module convenience exports
     "StatContext",
     "TestRule",
@@ -209,9 +331,11 @@ __all__ = [
     "get_stat_style",
     "format_test_line",
     "p_to_stars",
-    # .statsz bundle
+    # Conversion utilities
+    "test_result_to_stats",
+    # Bundle functions
     "save_statsz",
     "load_statsz",
 ]
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"

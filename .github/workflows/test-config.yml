@@ -1,0 +1,40 @@
+name: Config Module Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/scitex/config/**'
+      - 'tests/scitex/config/**'
+      - '.github/workflows/test-config.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/scitex/config/**'
+      - 'tests/scitex/config/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run config tests
+        run: |
+          PYTHONPATH=./src pytest tests/scitex/config/ -v --tb=short 2>&1 | tee test-results.log
+          tail -10 test-results.log
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: config-test-results
+          path: test-results.log
+          retention-days: 7
