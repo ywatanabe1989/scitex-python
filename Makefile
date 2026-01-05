@@ -9,7 +9,7 @@ SHELL := /bin/bash
 .PHONY: help install install-dev install-all \
 	clean test test-fast test-full test-lf test-ff test-nf test-inc test-unit test-changed lint format check \
 	test-stats-cov test-config-cov test-logging-cov \
-	build release upload upload-test \
+	build release upload upload-test test-install test-install-pypi \
 	build-all release-all upload-all upload-test-all \
 	sync-extras sync-tests sync-examples sync-redirect \
 	show-version tag
@@ -70,9 +70,11 @@ help:
 	@echo -e ""
 	@echo -e "$(CYAN)📤 Build & Release (scitex only):$(NC)"
 	@echo -e "  make build             Build package"
+	@echo -e "  make test-install      Test install in isolated venv (pre-release)"
+	@echo -e "  make test-install-pypi Test PyPI install in isolated venv"
 	@echo -e "  make upload-test       Upload to TestPyPI"
 	@echo -e "  make upload            Upload to PyPI"
-	@echo -e "  make release           Build, tag, and upload to PyPI"
+	@echo -e "  make release           Build, test-install, tag, upload to PyPI"
 	@echo -e ""
 	@echo -e "$(CYAN)📤 Build & Release (scitex + scitex-python):$(NC)"
 	@echo -e "  make sync-redirect     Sync redirect package version"
@@ -220,7 +222,45 @@ upload: build
 	@python -m twine upload dist/*
 	@echo -e "$(GREEN)✅ Upload to PyPI complete$(NC)"
 
-release: clean build tag upload
+# ============================================
+# Installation Testing (pre-release validation)
+# ============================================
+
+TEST_VENV_DIR := /tmp/scitex-test-install
+
+test-install: build
+	@echo -e "$(CYAN)🧪 Testing installation in isolated venv...$(NC)"
+	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
+	rm -rf $(TEST_VENV_DIR); \
+	python -m venv $(TEST_VENV_DIR); \
+	$(TEST_VENV_DIR)/bin/pip install --upgrade pip > /dev/null; \
+	echo -e "$(GRAY)Installing scitex[all] from local build...$(NC)"; \
+	$(TEST_VENV_DIR)/bin/pip install dist/scitex-$$VERSION-py3-none-any.whl[all] > /dev/null 2>&1 || \
+		(echo -e "$(RED)❌ Installation failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
+	echo -e "$(GRAY)Testing imports...$(NC)"; \
+	$(TEST_VENV_DIR)/bin/python -c "import scitex; print(f'Version: {scitex.__version__}')" || \
+		(echo -e "$(RED)❌ Import failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
+	$(TEST_VENV_DIR)/bin/python -c "from scitex import io, plt, stats" || \
+		(echo -e "$(RED)❌ Core module imports failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
+	rm -rf $(TEST_VENV_DIR); \
+	echo -e "$(GREEN)✅ Installation test passed$(NC)"
+
+test-install-pypi:
+	@echo -e "$(CYAN)🧪 Testing PyPI installation in isolated venv...$(NC)"
+	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
+	rm -rf $(TEST_VENV_DIR); \
+	python -m venv $(TEST_VENV_DIR); \
+	$(TEST_VENV_DIR)/bin/pip install --upgrade pip > /dev/null; \
+	echo -e "$(GRAY)Installing scitex[all]==$$VERSION from PyPI...$(NC)"; \
+	$(TEST_VENV_DIR)/bin/pip install "scitex[all]==$$VERSION" > /dev/null 2>&1 || \
+		(echo -e "$(RED)❌ PyPI installation failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
+	echo -e "$(GRAY)Testing imports...$(NC)"; \
+	$(TEST_VENV_DIR)/bin/python -c "import scitex; print(f'Version: {scitex.__version__}')" || \
+		(echo -e "$(RED)❌ Import failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
+	rm -rf $(TEST_VENV_DIR); \
+	echo -e "$(GREEN)✅ PyPI installation test passed$(NC)"
+
+release: clean build test-install tag upload
 	@echo -e ""
 	@echo -e "$(GREEN)✅ Release complete!$(NC)"
 	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
