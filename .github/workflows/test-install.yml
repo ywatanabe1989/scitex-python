@@ -1,0 +1,84 @@
+# Test PyPI installation
+# Triggered on release publication to verify package installs correctly
+
+name: Test Installation
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to test (e.g., 2.10.2)'
+        required: false
+        default: ''
+
+jobs:
+  test-install-core:
+    name: Test Core Install (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Get version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ github.event.release.tag_name }}" | sed 's/v//' >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install scitex (core)
+        run: |
+          pip install --upgrade pip
+          pip install scitex==${{ steps.version.outputs.version }}
+
+      - name: Test core imports
+        run: |
+          python -c "import scitex; print(f'Version: {scitex.__version__}')"
+          python -c "from scitex import io, stats, config, logging"
+          echo "Core imports successful"
+
+  test-install-all:
+    name: Test Full Install (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Get version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ github.event.release.tag_name }}" | sed 's/v//' >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install scitex[all]
+        run: |
+          pip install --upgrade pip
+          pip install "scitex[all]==${{ steps.version.outputs.version }}"
+        timeout-minutes: 15
+
+      - name: Test all imports
+        run: |
+          python -c "import scitex; print(f'Version: {scitex.__version__}')"
+          python -c "from scitex import io, plt, stats, config, logging, path"
+          echo "All imports successful"
