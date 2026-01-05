@@ -8,6 +8,6 @@ __FILE__ = "./src/scitex/__version__.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
-__version__ = "2.10.1"
+__version__ = "2.10.2"
 
 # EOF
