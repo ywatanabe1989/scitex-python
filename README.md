@@ -76,7 +76,8 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 ## 📦 Installation
 
 ``` bash
-pip install scitex  # Full installation with all modules
+pip install scitex[all]   # Recommended: Full installation with all modules
+pip install scitex        # Core only (numpy, pandas, PyYAML, tqdm)
 ```
 
 <details>
@@ -86,9 +87,10 @@ SciTeX is organized into focused modules for different aspects of scientific com
 
 **Modular Installation** (See [./src/scitex](./src/scitex) for all available modules):
 ``` bash
-# Examples
-pip install scitex[ai]
-pip install scitex[ai,audio,writer]
+# Install specific modules
+pip install scitex[ai]              # AI/ML module
+pip install scitex[ai,audio,writer] # Multiple modules
+pip install scitex[all]             # Everything
 ```
 
 ## 📦 Module Overview
