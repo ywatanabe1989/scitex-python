@@ -35,7 +35,7 @@ except ImportError:
     Page = None
     Browser = None
 
-from scitex.errors import ScholarError
+from scitex.logging import ScholarError
 
 from .BaseAuthenticator import BaseAuthenticator
 

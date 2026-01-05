@@ -14,16 +14,29 @@ Provides adapters to:
 from typing import Optional, Dict, Any, List, Tuple, Union
 import warnings
 
-from scitex.fig.model import (
-    FigureModel,
-    AxesModel,
-    PlotModel,
-    AnnotationModel,
-    GuideModel,
-    PlotStyle,
-    AxesStyle,
-    TextStyle,
-)
+# Legacy model imports - may not be available (deleted module)
+try:
+    from scitex.fig.model import (
+        FigureModel,
+        AxesModel,
+        PlotModel,
+        AnnotationModel,
+        GuideModel,
+        PlotStyle,
+        AxesStyle,
+        TextStyle,
+    )
+    VIS_MODEL_AVAILABLE = True
+except ImportError:
+    FigureModel = None
+    AxesModel = None
+    PlotModel = None
+    AnnotationModel = None
+    GuideModel = None
+    PlotStyle = None
+    AxesStyle = None
+    TextStyle = None
+    VIS_MODEL_AVAILABLE = False
 
 
 def figure_to_vis_model(

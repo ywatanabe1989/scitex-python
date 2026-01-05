@@ -9,11 +9,12 @@ Testing PostgreSQL-specific BLOB handling for NumPy arrays and binary data.
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 import numpy as np
 import pandas as pd
 import psycopg2
 from unittest.mock import MagicMock, patch, call
-from scitex.db._PostgreSQLMixins import _BlobMixin
+from scitex.db._postgresql._PostgreSQLMixins import _BlobMixin
 
 
 class TestPostgreSQLBlobMixin:

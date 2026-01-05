@@ -1,0 +1,40 @@
+name: Stats Module Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/scitex/stats/**'
+      - 'tests/scitex/stats/**'
+      - '.github/workflows/test-stats.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/scitex/stats/**'
+      - 'tests/scitex/stats/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run stats tests
+        run: |
+          PYTHONPATH=./src pytest tests/scitex/stats/ -v --tb=short 2>&1 | tee test-results.log
+          tail -10 test-results.log
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stats-test-results
+          path: test-results.log
+          retention-days: 7

@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
+pytest.importorskip("torch")
 
 from scitex.gen import inspect_module
 from scitex.gen._inspect_module import _print_module_contents

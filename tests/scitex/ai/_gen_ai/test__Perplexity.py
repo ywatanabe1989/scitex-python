@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2025-06-01 14:45:00 (ywatanabe)"
 # File: ./tests/scitex/ai/_gen_ai/test__Perplexity.py
 
 """Tests for scitex.ai._gen_ai._Perplexity module."""
 
 import pytest
+
+pytest.importorskip("zarr")
 import os
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
+
 from scitex.ai._gen_ai import Perplexity
 
 
@@ -25,54 +27,50 @@ class TestPerplexity:
         mock_client.chat.completions.create.return_value = mock_response
         return mock_client
 
-    @pytest.fixture
-    def mock_env_api_key(self):
-        """Mock environment variable for API key."""
-        with patch.dict(os.environ, {'PERPLEXITY_API_KEY': 'test-api-key'}):
-            yield
-
-    def test_init_with_api_key(self, mock_env_api_key):
+    def test_init_with_api_key(self):
         """Test initialization with API key from environment."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=Mock()):
-                perplexity_ai = Perplexity(model="llama-3.1-sonar-small-128k-online")
-                assert perplexity_ai.api_key == 'test-api-key'
-                assert perplexity_ai.model == "llama-3.1-sonar-small-128k-online"
-                assert perplexity_ai.provider == "Perplexity"
-                assert perplexity_ai.max_tokens == 128_000  # 128k model
+        with patch.object(Perplexity, '_init_client', return_value=Mock()):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online"
+            )
+            assert perplexity_ai.api_key == 'test-api-key'
+            assert perplexity_ai.model == "llama-3.1-sonar-small-128k-online"
+            assert perplexity_ai.provider == "Perplexity"
+            assert perplexity_ai.max_tokens == 128_000  # 128k model
 
     def test_init_with_explicit_api_key(self):
         """Test initialization with explicitly provided API key."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=Mock()):
-                perplexity_ai = Perplexity(
-                    api_key="explicit-key",
-                    model="llama-3.1-sonar-small-128k-online"
-                )
-                assert perplexity_ai.api_key == "explicit-key"
+        with patch.object(Perplexity, '_init_client', return_value=Mock()):
+            perplexity_ai = Perplexity(
+                api_key="explicit-key",
+                model="llama-3.1-sonar-small-128k-online"
+            )
+            assert perplexity_ai.api_key == "explicit-key"
 
     def test_init_without_api_key(self):
         """Test initialization fails without API key."""
         with patch.dict(os.environ, {}, clear=True):
-            with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-                with pytest.raises(ValueError, match="PERPLEXITY_API_KEY environment variable not set"):
-                    Perplexity(model="llama-3.1-sonar-small-128k-online")
+            with pytest.raises(ValueError, match="PERPLEXITY_API_KEY environment variable not set"):
+                Perplexity(model="llama-3.1-sonar-small-128k-online")
 
-    def test_init_client(self, mock_env_api_key):
+    def test_init_client(self):
         """Test client initialization with Perplexity API endpoint."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch('scitex.ai._gen_ai._Perplexity.OpenAI') as mock_openai_class:
-                mock_client = Mock()
-                mock_openai_class.return_value = mock_client
-                
-                perplexity_ai = Perplexity(model="llama-3.1-sonar-small-128k-online")
-                
-                # Check that OpenAI client is initialized with Perplexity endpoint
-                mock_openai_class.assert_called_once_with(
-                    api_key='test-api-key',
-                    base_url="https://api.perplexity.ai"
-                )
-                assert perplexity_ai.client == mock_client
+        with patch('scitex.ai._gen_ai._Perplexity.OpenAI') as mock_openai_class:
+            mock_client = Mock()
+            mock_openai_class.return_value = mock_client
+
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online"
+            )
+
+            # Check that OpenAI client is initialized with Perplexity endpoint
+            mock_openai_class.assert_called_once_with(
+                api_key='test-api-key',
+                base_url="https://api.perplexity.ai"
+            )
+            assert perplexity_ai.client == mock_client
 
     @pytest.mark.parametrize("model,expected_max_tokens", [
         ("llama-3.1-sonar-small-128k-online", 128_000),
@@ -82,162 +80,172 @@ class TestPerplexity:
         ("llama-3-sonar-large-32k-online", 32_000),
         ("mixtral-8x7b-instruct", 32_000),  # Default for non-128k
     ])
-    def test_max_tokens_by_model(self, mock_env_api_key, model, expected_max_tokens):
+    def test_max_tokens_by_model(self, model, expected_max_tokens):
         """Test that different models get appropriate max tokens."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=Mock()):
-                perplexity_ai = Perplexity(model=model)
-                assert perplexity_ai.max_tokens == expected_max_tokens
+        with patch.object(Perplexity, '_init_client', return_value=Mock()):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model=model
+            )
+            assert perplexity_ai.max_tokens == expected_max_tokens
 
-    def test_api_call_static(self, mock_env_api_key, mock_openai_client):
+    def test_api_call_static(self, mock_openai_client):
         """Test static API call."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=mock_openai_client):
-                perplexity_ai = Perplexity(model="llama-3.1-sonar-small-128k-online", stream=False)
-                perplexity_ai.history = [{"role": "user", "content": "Test"}]
-                
-                # Mock print to suppress output during test
-                with patch('builtins.print'):
-                    result = perplexity_ai._api_call_static()
-                
-                assert result == "Test response"
-                assert perplexity_ai.input_tokens == 10
-                assert perplexity_ai.output_tokens == 20
-                
-                mock_openai_client.chat.completions.create.assert_called_once()
-                call_kwargs = mock_openai_client.chat.completions.create.call_args[1]
-                assert call_kwargs['model'] == "llama-3.1-sonar-small-128k-online"
-                assert call_kwargs['temperature'] == 1.0
-                assert call_kwargs['max_tokens'] == 128_000
-                assert call_kwargs['stream'] == False
+        with patch.object(Perplexity, '_init_client', return_value=mock_openai_client):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online",
+                stream=False
+            )
+            perplexity_ai.history = [{"role": "user", "content": "Test"}]
 
-    def test_api_call_stream(self, mock_env_api_key):
+            # Mock print to suppress output during test
+            with patch('builtins.print'):
+                result = perplexity_ai._api_call_static()
+
+            assert result == "Test response"
+            assert perplexity_ai.input_tokens == 10
+            assert perplexity_ai.output_tokens == 20
+
+            mock_openai_client.chat.completions.create.assert_called_once()
+            call_kwargs = mock_openai_client.chat.completions.create.call_args[1]
+            assert call_kwargs['model'] == "llama-3.1-sonar-small-128k-online"
+            assert call_kwargs['temperature'] == 1.0
+            assert call_kwargs['max_tokens'] == 128_000
+            assert call_kwargs['stream'] == False
+
+    def test_api_call_stream(self):
         """Test streaming API call."""
         mock_client = Mock()
-        
+
         # Mock stream chunks with finish_reason
         chunks = [
             Mock(choices=[Mock(delta=Mock(content="Hello"), finish_reason=None)], usage=None),
             Mock(choices=[Mock(delta=Mock(content=" world"), finish_reason=None)], usage=None),
-            Mock(choices=[Mock(delta=Mock(content="!"), finish_reason="stop")], 
+            Mock(choices=[Mock(delta=Mock(content="!"), finish_reason="stop")],
                  usage=Mock(prompt_tokens=5, completion_tokens=10)),
         ]
-        
+
         # Set up message attribute for the chunk with finish_reason
         chunks[2].message = Mock(usage=Mock(input_tokens=5, output_tokens=10))
-        
-        mock_client.chat.completions.create.return_value = iter(chunks)
-        
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=mock_client):
-                perplexity_ai = Perplexity(model="llama-3.1-sonar-small-128k-online", stream=True)
-                perplexity_ai.history = [{"role": "user", "content": "Test"}]
-                
-                # Mock print to suppress output during test
-                with patch('builtins.print'):
-                    result = list(perplexity_ai._api_call_stream())
-                
-                assert result == ["Hello", " world", "!"]
-                # Token counts might be updated from the finish chunk
 
-    def test_temperature_setting(self, mock_env_api_key, mock_openai_client):
+        mock_client.chat.completions.create.return_value = iter(chunks)
+
+        with patch.object(Perplexity, '_init_client', return_value=mock_client):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online",
+                stream=True
+            )
+            perplexity_ai.history = [{"role": "user", "content": "Test"}]
+
+            # Mock print to suppress output during test
+            with patch('builtins.print'):
+                result = list(perplexity_ai._api_call_stream())
+
+            assert result == ["Hello", " world", "!"]
+            # Token counts might be updated from the finish chunk
+
+    def test_temperature_setting(self, mock_openai_client):
         """Test temperature parameter is passed correctly."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=mock_openai_client):
-                perplexity_ai = Perplexity(
-                    model="llama-3.1-sonar-small-128k-online",
-                    temperature=0.5
-                )
-                perplexity_ai.history = [{"role": "user", "content": "Test"}]
-                
-                with patch('builtins.print'):
-                    perplexity_ai._api_call_static()
-                
-                # Check temperature was passed
-                call_kwargs = mock_openai_client.chat.completions.create.call_args[1]
-                assert call_kwargs['temperature'] == 0.5
+        with patch.object(Perplexity, '_init_client', return_value=mock_openai_client):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online",
+                temperature=0.5
+            )
+            perplexity_ai.history = [{"role": "user", "content": "Test"}]
+
+            with patch('builtins.print'):
+                perplexity_ai._api_call_static()
+
+            # Check temperature was passed
+            call_kwargs = mock_openai_client.chat.completions.create.call_args[1]
+            assert call_kwargs['temperature'] == 0.5
 
     @pytest.mark.parametrize("stream", [True, False])
-    def test_stream_parameter(self, mock_env_api_key, stream):
+    def test_stream_parameter(self, stream):
         """Test stream parameter handling."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=Mock()):
-                perplexity_ai = Perplexity(
-                    model="llama-3.1-sonar-small-128k-online",
-                    stream=stream
-                )
-                assert perplexity_ai.stream == stream
+        with patch.object(Perplexity, '_init_client', return_value=Mock()):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online",
+                stream=stream
+            )
+            assert perplexity_ai.stream == stream
 
-    def test_n_keep_parameter(self, mock_env_api_key):
+    def test_n_keep_parameter(self):
         """Test n_keep parameter for history management."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=Mock()):
-                perplexity_ai = Perplexity(
-                    model="llama-3.1-sonar-small-128k-online",
-                    n_keep=5
-                )
-                assert perplexity_ai.n_keep == 5
+        with patch.object(Perplexity, '_init_client', return_value=Mock()):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online",
+                n_keep=5
+            )
+            assert perplexity_ai.n_keep == 5
 
-    def test_seed_parameter(self, mock_env_api_key):
+    def test_seed_parameter(self):
         """Test seed parameter initialization."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=Mock()):
-                perplexity_ai = Perplexity(
-                    model="llama-3.1-sonar-small-128k-online",
-                    seed=42
-                )
-                assert perplexity_ai.seed == 42
+        with patch.object(Perplexity, '_init_client', return_value=Mock()):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online",
+                seed=42
+            )
+            assert perplexity_ai.seed == 42
 
-    def test_system_setting(self, mock_env_api_key):
+    def test_system_setting(self):
         """Test system setting initialization."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=Mock()):
-                system_msg = "You are a helpful research assistant"
-                perplexity_ai = Perplexity(
-                    model="llama-3.1-sonar-small-128k-online",
-                    system_setting=system_msg
-                )
-                assert perplexity_ai.system_setting == system_msg
+        with patch.object(Perplexity, '_init_client', return_value=Mock()):
+            system_msg = "You are a helpful research assistant"
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online",
+                system_setting=system_msg
+            )
+            assert perplexity_ai.system_setting == system_msg
 
-    def test_chat_history_parameter(self, mock_env_api_key):
+    def test_chat_history_parameter(self):
         """Test chat_history parameter initialization."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=Mock()):
-                history = [{"role": "user", "content": "Previous message"}]
-                perplexity_ai = Perplexity(
-                    model="llama-3.1-sonar-small-128k-online",
-                    chat_history=history
-                )
-                assert perplexity_ai.chat_history == history
+        with patch.object(Perplexity, '_init_client', return_value=Mock()):
+            history = [{"role": "user", "content": "Previous message"}]
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online",
+                chat_history=history
+            )
+            assert perplexity_ai.chat_history == history
 
-    def test_custom_max_tokens(self, mock_env_api_key):
+    def test_custom_max_tokens(self):
         """Test custom max_tokens override."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=Mock()):
-                perplexity_ai = Perplexity(
-                    model="llama-3.1-sonar-small-128k-online",
-                    max_tokens=50000
-                )
-                assert perplexity_ai.max_tokens == 50000  # Custom value
+        with patch.object(Perplexity, '_init_client', return_value=Mock()):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online",
+                max_tokens=50000
+            )
+            assert perplexity_ai.max_tokens == 50000  # Custom value
 
-    def test_get_available_models(self, mock_env_api_key):
+    def test_get_available_models(self):
         """Test _get_available_models method."""
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=Mock()):
-                perplexity_ai = Perplexity(model="llama-3.1-sonar-small-128k-online")
-                
-                models = perplexity_ai._get_available_models()
-                
-                assert isinstance(models, list)
-                assert "llama-3.1-sonar-small-128k-online" in models
-                assert "llama-3.1-sonar-large-128k-online" in models
-                assert "llama-3.1-sonar-huge-128k-online" in models
-                assert "mixtral-8x7b-instruct" in models
+        with patch.object(Perplexity, '_init_client', return_value=Mock()):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online"
+            )
 
-    def test_empty_chunk_handling(self, mock_env_api_key):
+            models = perplexity_ai._get_available_models()
+
+            assert isinstance(models, list)
+            assert "llama-3.1-sonar-small-128k-online" in models
+            assert "llama-3.1-sonar-large-128k-online" in models
+            assert "llama-3.1-sonar-huge-128k-online" in models
+            assert "mixtral-8x7b-instruct" in models
+
+    def test_empty_chunk_handling(self):
         """Test handling of empty chunks in streaming."""
         mock_client = Mock()
-        
+
         # Mock chunks with some empty content
         chunks = [
             Mock(choices=[Mock(delta=Mock(content="Start"), finish_reason=None)], usage=None),
@@ -246,19 +254,22 @@ class TestPerplexity:
             Mock(choices=[], usage=None),  # No choices
             Mock(choices=[Mock(delta=Mock(content="End"), finish_reason="stop")], usage=None),
         ]
-        
+
         mock_client.chat.completions.create.return_value = iter(chunks)
-        
-        with patch('scitex.ai._gen_ai._Perplexity.MODELS', MagicMock()):
-            with patch.object(Perplexity, '_init_client', return_value=mock_client):
-                perplexity_ai = Perplexity(model="llama-3.1-sonar-small-128k-online", stream=True)
-                perplexity_ai.history = [{"role": "user", "content": "Test"}]
-                
-                with patch('builtins.print'):
-                    result = list(perplexity_ai._api_call_stream())
-                
-                # Should only yield non-empty content
-                assert result == ["Start", "End"]
+
+        with patch.object(Perplexity, '_init_client', return_value=mock_client):
+            perplexity_ai = Perplexity(
+                api_key='test-api-key',
+                model="llama-3.1-sonar-small-128k-online",
+                stream=True
+            )
+            perplexity_ai.history = [{"role": "user", "content": "Test"}]
+
+            with patch('builtins.print'):
+                result = list(perplexity_ai._api_call_stream())
+
+            # Should only yield non-empty content
+            assert result == ["Start", "End"]
 
 if __name__ == "__main__":
     import os
@@ -455,13 +466,13 @@ if __name__ == "__main__":
 # 
 # if __name__ == "__main__":
 #     import scitex
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys, plt, verbose=False
 #     )
 #     main()
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

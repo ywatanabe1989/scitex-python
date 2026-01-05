@@ -123,20 +123,18 @@ def _print_header(
 
     _printc(
         (
-            f"SciTeX v{_get_scitex_version()}\n"
-            f"{ID} (PID: {PID})\n\n"
+            f"SciTeX v{_get_scitex_version()} | {ID} (PID: {PID})\n\n"
             f"{file}\n\n"
             f"{args_str}"
-            # f"{args}"
         ),
         char="=",
     )
 
     sleep(1)
     if verbose:
-        print(f"\n{'-' * 40}\n")
-        pprint(configs.to_dict())
-        print(f"\n{'-' * 40}\n")
+        from pprint import pformat
+        config_str = pformat(configs.to_dict())
+        logger.info(f"\n{'-' * 40}\n\n{config_str}\n\n{'-' * 40}\n")
     sleep(1)
 
 
@@ -579,11 +577,11 @@ def _process_timestamp(CONFIG, verbose=True):
             CONFIG["END_DATETIME"] - CONFIG["START_DATETIME"]
         )
         if verbose:
-            print()
-            print(f"START TIME: {CONFIG['START_DATETIME']}")
-            print(f"END TIME: {CONFIG['END_DATETIME']}")
-            print(f"RUN DURATION: {CONFIG['RUN_DURATION']}")
-            print()
+            logger.info(
+                f"\nSTART TIME: {CONFIG['START_DATETIME']}\n"
+                f"END TIME: {CONFIG['END_DATETIME']}\n"
+                f"RUN DURATION: {CONFIG['RUN_DURATION']}\n"
+            )
 
     except Exception as e:
         print(e)

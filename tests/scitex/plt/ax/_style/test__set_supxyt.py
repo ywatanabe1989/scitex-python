@@ -4,6 +4,8 @@
 # File: /home/ywatanabe/proj/scitex_repo/tests/scitex/plt/ax/_adjust/test__set_supxyt.py
 # ----------------------------------------
 import os
+import pytest
+pytest.importorskip("zarr")
 
 __FILE__ = "./tests/scitex/plt/ax/_adjust/test__set_supxyt.py"
 __DIR__ = os.path.dirname(__FILE__)

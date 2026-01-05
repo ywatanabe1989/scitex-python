@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
-import torch
+
+torch = pytest.importorskip("torch")
 
 from scitex.gen import to_rank
 
@@ -92,8 +93,10 @@ class TestToRankDataTypes:
         """Test ranking of integer tensor."""
         tensor = torch.tensor([3, 1, 4, 1, 5])
         ranks = to_rank(tensor)
-        # With ties: [1, 1, 3, 4, 5] -> ranks [3.5, 1.5, 4, 1.5, 5]
-        expected = torch.tensor([3.5, 1.5, 4.0, 1.5, 5.0])
+        # Sorted: [1, 1, 3, 4, 5]
+        # Ranks: 1 appears twice so both get average (1+2)/2=1.5
+        # Expected: pos0(3)->3, pos1(1)->1.5, pos2(4)->4, pos3(1)->1.5, pos4(5)->5
+        expected = torch.tensor([3.0, 1.5, 4.0, 1.5, 5.0])
         assert torch.allclose(ranks, expected)
 
     def test_double_precision(self):
@@ -121,31 +124,41 @@ class TestToRankDataTypes:
 
 
 class TestToRankWithDecorator:
-    """Test that torch_fn decorator works correctly."""
+    """Test that torch_fn decorator works correctly.
+
+    Note: torch_fn preserves input types, so list->list, numpy->numpy.
+    We convert results to tensor or use numpy for comparison.
+    """
 
     def test_list_input(self):
         """Test that list input works via torch_fn decorator."""
         data = [3, 1, 4, 1, 5]
         ranks = to_rank(data)
-        expected = torch.tensor([3.5, 1.5, 4.0, 1.5, 5.0])
-        assert torch.allclose(ranks, expected)
+        # Sorted: [1, 1, 3, 4, 5]
+        # Ranks: 1 appears twice, average (1+2)/2=1.5
+        # pos0(3)->3, pos1(1)->1.5, pos2(4)->4, pos3(1)->1.5, pos4(5)->5
+        expected = [3.0, 1.5, 4.0, 1.5, 5.0]
+        # torch_fn returns same type as input (list)
+        assert np.allclose(ranks, expected)
 
     def test_numpy_input(self):
         """Test that numpy array input works via torch_fn decorator."""
         data = np.array([2.0, 1.0, 3.0, 1.0])
         ranks = to_rank(data)
-        expected = torch.tensor([3.0, 1.5, 4.0, 1.5])
-        assert torch.allclose(ranks, expected)
+        expected = np.array([3.0, 1.5, 4.0, 1.5])
+        # torch_fn returns numpy array for numpy input
+        assert isinstance(ranks, np.ndarray)
+        assert np.allclose(ranks, expected)
 
     def test_mixed_input_types(self):
         """Test conversion of various input types."""
-        # Tuple
+        # Tuple - returns same type as input
         ranks1 = to_rank((1, 2, 3))
-        assert torch.allclose(ranks1, torch.tensor([1.0, 2.0, 3.0]))
+        assert np.allclose(ranks1, [1.0, 2.0, 3.0])
 
         # Nested list
         ranks2 = to_rank([4, 2, 3, 1])
-        assert torch.allclose(ranks2, torch.tensor([4.0, 2.0, 3.0, 1.0]))
+        assert np.allclose(ranks2, [4.0, 2.0, 3.0, 1.0])
 
 
 class TestToRankEdgeCases:
@@ -257,8 +270,8 @@ if __name__ == "__main__":
 # 
 # # from .._converters import
 # from scitex.decorators import torch_fn
-# 
-# 
+#
+#
 # @torch_fn
 # def to_rank(tensor, method="average"):
 #     sorted_tensor, indices = torch.sort(tensor)

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-04-28 15:45:52 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/tests/scitex/decorators/test__wrap.py
 # ----------------------------------------
@@ -12,6 +11,10 @@ __DIR__ = os.path.dirname(__FILE__)
 import inspect
 
 import pytest
+
+# Required for scitex.decorators module
+pytest.importorskip("tqdm")
+
 from scitex.decorators import wrap
 
 
@@ -434,12 +437,12 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_wrap.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/decorators/_wrap.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
-# 
+#
+#
 # def wrap(func):
 #     """Basic function wrapper that preserves function metadata.
 #     Usage:
@@ -464,8 +467,8 @@ if __name__ == "__main__":
 #     # Mark as a wrapper for detection
 #     wrapper._is_wrapper = True
 #     return wrapper
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

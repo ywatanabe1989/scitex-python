@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-04-30 15:59:18 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/tests/scitex/decorators/test__pandas_fn.py
 # ----------------------------------------
@@ -13,10 +12,15 @@ from functools import wraps
 from unittest.mock import patch
 
 import numpy as np
-import pandas as pd
 import pytest
-import torch
-import xarray as xr
+# Required for scitex.decorators module
+pytest.importorskip("tqdm")
+
+# Optional dependencies
+pd = pytest.importorskip("pandas")
+torch = pytest.importorskip("torch")
+xr = pytest.importorskip("xarray")
+
 from scitex.decorators import pandas_fn
 
 
@@ -120,7 +124,7 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_pandas_fn.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/decorators/_pandas_fn.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -132,7 +136,7 @@ if __name__ == "__main__":
 # from typing import Callable
 # 
 # import numpy as np
-# 
+#
 # from ._converters import is_nested_decorator
 # 
 # 
@@ -155,7 +159,7 @@ if __name__ == "__main__":
 #             import pandas as pd
 #             import torch
 #             import xarray as xr
-# 
+#
 #             if data is None:
 #                 return None
 #             elif isinstance(data, pd.DataFrame):
@@ -183,13 +187,13 @@ if __name__ == "__main__":
 #                 except:
 #                     # If conversion fails, return as is
 #                     return data
-# 
+#
 #         converted_args = [to_pandas(arg) for arg in args]
 #         converted_kwargs = {k: to_pandas(v) for k, v in kwargs.items()}
-# 
+#
 #         # Skip strict assertion for certain types
 #         import pandas as pd
-# 
+#
 #         validated_args = []
 #         for arg_index, arg in enumerate(converted_args):
 #             if isinstance(arg, pd.DataFrame):
@@ -209,12 +213,12 @@ if __name__ == "__main__":
 #                 except:
 #                     # If all else fails, pass through unchanged
 #                     validated_args.append(arg)
-# 
+#
 #         results = func(*validated_args, **converted_kwargs)
-# 
+#
 #         # Convert results back to original input types
 #         import pandas as pd
-# 
+#
 #         if isinstance(results, pd.DataFrame):
 #             if original_object is not None:
 #                 if isinstance(original_object, list):
@@ -226,7 +230,7 @@ if __name__ == "__main__":
 #                     and original_object.__class__.__name__ == "Tensor"
 #                 ):
 #                     import torch
-# 
+#
 #                     return torch.tensor(results.values)
 #                 elif isinstance(original_object, pd.Series):
 #                     return (
@@ -239,7 +243,7 @@ if __name__ == "__main__":
 #                     and original_object.__class__.__name__ == "DataArray"
 #                 ):
 #                     import xarray as xr
-# 
+#
 #                     return xr.DataArray(results.values)
 #             return results
 # 
@@ -249,8 +253,8 @@ if __name__ == "__main__":
 #     wrapper._is_wrapper = True
 #     wrapper._decorator_type = "pandas_fn"
 #     return wrapper
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

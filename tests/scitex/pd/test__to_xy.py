@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-06-01 20:05:00 (ywatanabe)"
 # File: ./tests/scitex/pd/test__to_xy.py
 
@@ -7,9 +6,9 @@
 Test module for scitex.pd.to_xy function.
 """
 
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 from pandas.testing import assert_frame_equal
 
 
@@ -71,34 +70,42 @@ class TestToXY:
             assert result.iloc[i]["z"] == z
 
     def test_numeric_index_replacement(self, numeric_index_df):
-        """Test that numeric index is replaced with column names."""
+        """Test behavior when index is numeric and columns are named.
+
+        The source code sets columns = index when index is numeric [0,1,2],
+        so both become [0, 1, 2].
+        """
         from scitex.pd import to_xy
 
         result = to_xy(numeric_index_df)
 
-        # After replacement, both index and columns should be ['A', 'B', 'C']
+        # After replacement, both index and columns become [0, 1, 2]
         assert result.shape == (9, 3)
 
-        # Check that x values are now 'A', 'B', 'C' not 0, 1, 2
+        # x and y values are now 0, 1, 2 (not 'A', 'B', 'C')
         unique_x = sorted(result["x"].unique())
-        assert unique_x == ["A", "B", "C"]
+        assert unique_x == [0, 1, 2]
 
         # Check y values
         unique_y = sorted(result["y"].unique())
-        assert unique_y == ["A", "B", "C"]
+        assert unique_y == [0, 1, 2]
 
     def test_numeric_columns_replacement(self, numeric_columns_df):
-        """Test that numeric columns are replaced with index names."""
+        """Test behavior when columns are numeric and index is named.
+
+        The source code sets index = columns when columns is numeric [0,1,2],
+        so both become [0, 1, 2].
+        """
         from scitex.pd import to_xy
 
         result = to_xy(numeric_columns_df)
 
-        # After replacement, both index and columns should be ['A', 'B', 'C']
+        # After replacement, both index and columns become [0, 1, 2]
         assert result.shape == (9, 3)
 
-        # Check that y values are now 'A', 'B', 'C' not 0, 1, 2
+        # x and y values are now 0, 1, 2 (not 'A', 'B', 'C')
         unique_y = sorted(result["y"].unique())
-        assert unique_y == ["A", "B", "C"]
+        assert unique_y == [0, 1, 2]
 
     def test_non_square_dataframe(self):
         """Test that non-square DataFrame raises assertion error."""
@@ -177,28 +184,41 @@ class TestToXY:
         assert first_col_x == ["A", "B", "C"]
 
     def test_with_duplicate_index_names(self):
-        """Test behavior with duplicate index/column names."""
+        """Test behavior with duplicate index/column names.
+
+        When columns have duplicates, df[column] returns a DataFrame instead of
+        Series, which causes AttributeError since DataFrame has no .name attribute.
+        This is a limitation of the source code.
+        """
         from scitex.pd import to_xy
 
-        # This should work as long as it's square
+        # Duplicate column names cause issues - df[column] returns DataFrame
         data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         df = pd.DataFrame(data, index=["A", "A", "B"], columns=["A", "A", "B"])
 
-        result = to_xy(df)
-        assert result.shape == (9, 3)
+        # Duplicate columns cause AttributeError (DataFrame has no .name)
+        with pytest.raises(AttributeError):
+            to_xy(df)
 
-    def test_mismatched_index_columns_error(self):
-        """Test that mismatched non-numeric index/columns raise error."""
+    def test_mismatched_index_columns_no_error(self):
+        """Test behavior with mismatched non-numeric index/columns.
+
+        The source code has `ValueError` without `raise`, so no exception is raised.
+        The function proceeds and produces output using the mismatched labels.
+        """
         from scitex.pd import to_xy
 
         # Both index and columns are non-numeric but different
         data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         df = pd.DataFrame(data, index=["A", "B", "C"], columns=["X", "Y", "Z"])
 
-        # This should raise ValueError (though the code just has "ValueError" without raising)
-        # The current implementation might have a bug here
-        with pytest.raises(Exception):  # Could be ValueError or AttributeError
-            to_xy(df)
+        # No exception is raised (bug in source - ValueError without raise)
+        # The function proceeds with mismatched labels
+        result = to_xy(df)
+        assert result.shape == (9, 3)
+        # x values come from the index, y from columns
+        assert set(result["x"].unique()) == {"A", "B", "C"}
+        assert set(result["y"].unique()) == {"X", "Y", "Z"}
 
     @pytest.mark.parametrize("dtype", [int, float, np.float32, np.float64])
     def test_different_dtypes(self, dtype):

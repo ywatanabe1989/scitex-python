@@ -1,34 +1,35 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./src/scitex/stats/_schema.py
-# Time-stamp: "2024-12-09 09:20:00 (ywatanabe)"
+# Timestamp: 2025-12-20
 """
-Statistical Result Schema - Re-exports from central schema module.
+Statistical Result Schema - DEPRECATED
 
-This module re-exports all schema classes from scitex.schema._stats
-for backward compatibility. The canonical definitions now live in
-scitex.schema._stats as the single source of truth.
+This module is deprecated. Import from scitex.schema._stats instead:
+    from scitex.schema._stats import Position, StatStyling, StatPositioning, StatResult
 
-Note: New code should import directly from scitex.schema:
-    from scitex.schema import StatResult, Position, StatStyling
-
-This module exists for backward compatibility with existing code that
-imports from scitex.stats._schema.
+For the new simplified API, use scitex.fts._stats.
 """
 
-# Re-export everything from the central schema module
+import warnings
+
+warnings.warn(
+    "scitex.stats._schema is deprecated. Import from scitex.schema._stats instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+# Re-export from schema module (the OLD API with full StatResult dataclass)
 from scitex.schema._stats import (
-    # Type aliases
-    PositionMode,
-    UnitType,
-    SymbolStyle,
     # Position and styling
     Position,
-    StatStyling,
+    # Type aliases
+    PositionMode,
     StatPositioning,
-    # Main result class
+    # StatResult dataclass (old API)
     StatResult,
-    # Convenience function
+    StatStyling,
+    SymbolStyle,
+    UnitType,
     create_stat_result,
 )
 
@@ -41,11 +42,9 @@ __all__ = [
     "Position",
     "StatStyling",
     "StatPositioning",
-    # Main result class
+    # Deprecated but functional
     "StatResult",
-    # Convenience function
     "create_stat_result",
 ]
-
 
 # EOF

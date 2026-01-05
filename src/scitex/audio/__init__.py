@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-11 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/__init__.py
 # ----------------------------------------
@@ -27,18 +26,26 @@ Usage:
     from scitex.audio import GoogleTTS, ElevenLabsTTS, SystemTTS
     tts = SystemTTS()
     tts.speak("Hello!")
+
+Installation:
+    pip install scitex[audio]
 """
 
 import subprocess
 from typing import List, Optional
 
+# Check for missing dependencies and warn user
+from scitex._install_guide import warn_module_deps
+
+_missing = warn_module_deps("audio")
+
 # Import from engines subpackage
 from .engines import (
     BaseTTS,
-    TTSBackend,
-    SystemTTS,
-    GoogleTTS,
     ElevenLabsTTS,
+    GoogleTTS,
+    SystemTTS,
+    TTSBackend,
 )
 
 
@@ -118,6 +125,7 @@ def check_wsl_audio() -> dict:
 
     return result
 
+
 # Keep legacy TTS import for backwards compatibility
 from ._tts import TTS
 
@@ -137,9 +145,8 @@ __all__ = [
     "FALLBACK_ORDER",
 ]
 
-# Fallback order: pyttsx3 (offline, free) -> gtts (free) -> elevenlabs (paid)
-# FALLBACK_ORDER = ["pyttsx3", "gtts", "elevenlabs"]
-FALLBACK_ORDER = ["gtts", "pyttsx3", "elevenlabs"]
+# Fallback order: elevenlabs (best quality) -> gtts (free) -> pyttsx3 (offline)
+FALLBACK_ORDER = ["elevenlabs", "gtts", "pyttsx3"]
 
 
 def available_backends() -> List[str]:
@@ -150,6 +157,7 @@ def available_backends() -> List[str]:
     if SystemTTS:
         try:
             import pyttsx3
+
             # Try to init to check if espeak is available
             engine = pyttsx3.init()
             engine.stop()
@@ -164,7 +172,11 @@ def available_backends() -> List[str]:
     # Check ElevenLabs (requires API key)
     if ElevenLabsTTS:
         import os
-        if os.environ.get("ELEVENLABS_API_KEY"):
+
+        api_key = os.environ.get("ELEVENLABS_API_KEY") or os.environ.get(
+            "ELEVENLABS_API_KEY_SCITEX_AUDIO"
+        )
+        if api_key:
             backends.append("elevenlabs")
 
     return backends
@@ -209,10 +221,7 @@ def get_tts(backend: Optional[str] = None, **kwargs) -> BaseTTS:
     elif backend == "elevenlabs" and ElevenLabsTTS:
         return ElevenLabsTTS(**kwargs)
     else:
-        raise ValueError(
-            f"Backend '{backend}' not available. "
-            f"Available: {backends}"
-        )
+        raise ValueError(f"Backend '{backend}' not available. Available: {backends}")
 
 
 def _try_speak_with_fallback(
@@ -340,9 +349,7 @@ def speak(
             **kwargs,
         )
         if result is None and errors:
-            raise RuntimeError(
-                f"All TTS backends failed:\n" + "\n".join(errors)
-            )
+            raise RuntimeError("All TTS backends failed:\n" + "\n".join(errors))
         return str(result) if result else None
 
     # Specific backend with fallback enabled
@@ -377,7 +384,9 @@ def speak(
 def start_mcp_server():
     """Start the MCP server for audio."""
     import asyncio
+
     from .mcp_server import main
+
     asyncio.run(main())
 
 

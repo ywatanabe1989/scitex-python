@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-31 20:00:00 (ywatanabe)"
 # File: /data/gpfs/projects/punim2354/ywatanabe/.claude-worktree/scitex_repo/tests/scitex/io/test__load_configs.py
 
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 import os
 import tempfile
+from unittest.mock import MagicMock, patch
+
 import yaml
-from unittest.mock import patch, MagicMock
-from scitex.io import load_configs
+
 from scitex.dict import DotDict
+from scitex.io import load_configs
 
 
 class TestLoadConfigs:
@@ -49,10 +54,9 @@ class TestLoadConfigs:
     @patch("scitex.io._load_configs.load")
     def test_load_configs_basic(self, mock_load, mock_glob):
         """Test basic loading of config files."""
-        # Setup mocks
+        # Setup mocks - source namespaces by filename
         mock_glob.return_value = ["./config/config1.yaml", "./config/config2.yaml"]
         mock_load.side_effect = [
-            {"IS_DEBUG": False},  # IS_DEBUG.yaml
             {"param1": "value1", "param2": 123},  # config1.yaml
             {"param3": "value3"},  # config2.yaml
         ]
@@ -60,15 +64,16 @@ class TestLoadConfigs:
         result = load_configs(IS_DEBUG=False)
 
         assert isinstance(result, DotDict)
-        assert result.param1 == "value1"
-        assert result.param2 == 123
-        assert result.param3 == "value3"
+        # Results are namespaced by filename
+        assert result.config1.param1 == "value1"
+        assert result.config1.param2 == 123
+        assert result.config2.param3 == "value3"
 
     @patch("scitex.io._load_configs.glob")
     @patch("scitex.io._load_configs.load")
     def test_load_configs_debug_mode(self, mock_load, mock_glob):
         """Test loading configs with debug mode enabled."""
-        # Setup mocks
+        # Setup mocks - source namespaces by filename
         mock_glob.return_value = ["./config/config1.yaml"]
         mock_load.return_value = {
             "param1": "normal_value",
@@ -78,15 +83,15 @@ class TestLoadConfigs:
 
         result = load_configs(IS_DEBUG=True)
 
-        # Debug values should override normal values
-        assert result.param1 == "debug_value"
-        assert result.param2 == "another_debug_value"
+        # Debug values should override normal values (namespaced by filename)
+        assert result.config1.param1 == "debug_value"
+        assert result.config1.param2 == "another_debug_value"
 
     @patch("scitex.io._load_configs.glob")
     @patch("scitex.io._load_configs.load")
     def test_load_configs_nested_debug(self, mock_load, mock_glob):
         """Test debug value replacement in nested structures."""
-        # Setup mocks
+        # Setup mocks - source namespaces by filename
         mock_glob.return_value = ["./config/config1.yaml"]
         mock_load.return_value = {
             "top_level": {
@@ -98,10 +103,10 @@ class TestLoadConfigs:
 
         result = load_configs(IS_DEBUG=True)
 
-        # Check nested debug value replacement
-        assert result.top_level.special_key == "debug_special_value"
-        assert result.top_level.nested.nested_key == "debug_nested_value"
-        assert result.top_level.normal_key == "normal_value"
+        # Check nested debug value replacement (namespaced by filename)
+        assert result.config1.top_level.special_key == "debug_special_value"
+        assert result.config1.top_level.nested.nested_key == "debug_nested_value"
+        assert result.config1.top_level.normal_key == "normal_value"
 
     @patch("scitex.io._load_configs.os.getenv")
     @patch("scitex.io._load_configs.glob")
@@ -114,25 +119,30 @@ class TestLoadConfigs:
 
         result = load_configs(IS_DEBUG=None)
 
-        # CI should enable debug mode
-        assert result.param == "debug"
+        # CI should enable debug mode (namespaced by filename)
+        assert result.config1.param == "debug"
 
     @patch("scitex.io._load_configs.glob")
     @patch("scitex.io._load_configs.load")
     @patch("scitex.io._load_configs.os.path.exists")
     def test_load_configs_from_is_debug_file(self, mock_exists, mock_load, mock_glob):
         """Test loading debug mode from IS_DEBUG.yaml file."""
-        mock_exists.return_value = True
+
+        # Only return True for IS_DEBUG.yaml, False for categories dir
+        def exists_side_effect(path):
+            return "IS_DEBUG.yaml" in path
+
+        mock_exists.side_effect = exists_side_effect
         mock_glob.return_value = ["./config/config1.yaml"]
         mock_load.side_effect = [
-            {"IS_DEBUG": True},  # IS_DEBUG.yaml
+            {"IS_DEBUG": True},  # IS_DEBUG.yaml (loaded for debug check)
             {"param": "normal", "DEBUG_param": "debug"},  # config1.yaml
         ]
 
         result = load_configs(IS_DEBUG=None)
 
-        # Should read debug mode from file
-        assert result.param == "debug"
+        # Should read debug mode from file (namespaced by filename)
+        assert result.config1.param == "debug"
 
     @patch("scitex.io._load_configs.glob")
     @patch("scitex.io._load_configs.load")
@@ -176,7 +186,7 @@ class TestLoadConfigs:
     @patch("scitex.io._load_configs.glob")
     @patch("scitex.io._load_configs.load")
     def test_load_configs_merge_multiple_files(self, mock_load, mock_glob):
-        """Test merging configs from multiple files."""
+        """Test loading configs from multiple files (namespaced)."""
         mock_glob.return_value = [
             "./config/a.yaml",
             "./config/b.yaml",
@@ -190,12 +200,12 @@ class TestLoadConfigs:
 
         result = load_configs(IS_DEBUG=False)
 
-        # All params should be present
-        assert result.param1 == "value1"
-        assert result.param2 == "value2"
-        assert result.param3 == "value3"
-        # Later files should override earlier ones
-        assert result.shared == "from_b"
+        # All params should be present under their filename namespace
+        assert result.a.param1 == "value1"
+        assert result.a.shared == "from_a"
+        assert result.b.param2 == "value2"
+        assert result.b.shared == "from_b"
+        assert result.c.param3 == "value3"
 
     def test_load_configs_with_real_files(self, temp_config_dir):
         """Test with real config files in temp directory."""
@@ -206,15 +216,15 @@ class TestLoadConfigs:
         try:
             result = load_configs(IS_DEBUG=False)
 
-            # Check loaded values
-            assert result.param1 == "value1"
-            assert result.param2 == 123
-            assert result.param3 == "value3"
-            assert result.nested.key1 == "val1"
+            # Check loaded values (namespaced by filename)
+            assert result.config1.param1 == "value1"
+            assert result.config1.param2 == 123
+            assert result.config2.param3 == "value3"
+            assert result.config1.nested.key1 == "val1"
 
-            # Debug values should not be applied
-            assert "param4" not in result
-            assert "param5" not in result
+            # Debug values should not be applied (check in config2 namespace)
+            assert "param4" not in result.config2
+            assert "param5" not in result.config2
 
         finally:
             os.chdir(original_cwd)
@@ -236,19 +246,19 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/io/_load_configs.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # from pathlib import Path
 # from typing import Optional, Union
-# 
+#
 # from scitex.dict import DotDict
 # from ._glob import glob
 # from ._load import load
-# 
-# 
+#
+#
 # def load_configs(
 #     IS_DEBUG=None,
 #     show=False,
@@ -256,7 +266,7 @@ if __name__ == "__main__":
 #     config_dir: Optional[Union[str, Path]] = None,
 # ):
 #     """Load YAML configuration files from specified directory.
-# 
+#
 #     Parameters
 #     ----------
 #     IS_DEBUG : bool, optional
@@ -268,18 +278,18 @@ if __name__ == "__main__":
 #     config_dir : Union[str, Path], optional
 #         Directory containing configuration files. Can be a string or pathlib.Path object.
 #         Defaults to "./config" if None
-# 
+#
 #     Returns
 #     -------
 #     DotDict
 #         Merged configuration dictionary
 #     """
-# 
+#
 #     def apply_debug_values(config, IS_DEBUG):
 #         """Apply debug values if IS_DEBUG is True."""
 #         if not IS_DEBUG or not isinstance(config, (dict, DotDict)):
 #             return config
-# 
+#
 #         for key, value in list(config.items()):
 #             if key.startswith(("DEBUG_", "debug_")):
 #                 dk_wo_debug_prefix = key.split("_", 1)[1]
@@ -289,14 +299,14 @@ if __name__ == "__main__":
 #             elif isinstance(value, (dict, DotDict)):
 #                 config[key] = apply_debug_values(value, IS_DEBUG)
 #         return config
-# 
+#
 #     try:
 #         # Handle config directory parameter
 #         if config_dir is None:
 #             config_dir = "./config"
 #         elif isinstance(config_dir, Path):
 #             config_dir = str(config_dir)
-# 
+#
 #         # Set debug mode
 #         debug_config_path = f"{config_dir}/IS_DEBUG.yaml"
 #         IS_DEBUG = (
@@ -307,10 +317,10 @@ if __name__ == "__main__":
 #                 and load(debug_config_path).get("IS_DEBUG")
 #             )
 #         )
-# 
+#
 #         # Load and merge configs (namespaced by filename)
 #         CONFIGS = {}
-# 
+#
 #         # Load from main config directory
 #         config_pattern = f"{config_dir}/*.yaml"
 #         for lpath in glob(config_pattern):
@@ -319,7 +329,7 @@ if __name__ == "__main__":
 #                 filename = Path(lpath).stem
 #                 # Apply debug values and namespace under filename
 #                 CONFIGS[filename] = apply_debug_values(config, IS_DEBUG)
-# 
+#
 #         # Load from categories subdirectory if it exists
 #         categories_dir = f"{config_dir}/categories"
 #         if os.path.exists(categories_dir):
@@ -329,18 +339,18 @@ if __name__ == "__main__":
 #                     # Extract filename without extension as namespace
 #                     filename = Path(lpath).stem
 #                     CONFIGS[filename] = apply_debug_values(config, IS_DEBUG)
-# 
+#
 #         return DotDict(CONFIGS)
-# 
+#
 #     except Exception as e:
 #         print(f"Error loading configs: {e}")
 #         return DotDict({})
-# 
-# 
+#
+#
 # # def load_configs(IS_DEBUG=None, show=False, verbose=False):
 # #     """
 # #     Load configuration files from the ./config directory.
-# 
+#
 # #     Parameters:
 # #     -----------
 # #     IS_DEBUG : bool, optional
@@ -349,13 +359,13 @@ if __name__ == "__main__":
 # #         If True, display additional information during loading.
 # #     verbose : bool, optional
 # #         If True, print verbose output during loading.
-# 
+#
 # #     Returns:
 # #     --------
 # #     DotDict
 # #         A dictionary-like object containing the loaded configurations.
 # #     """
-# 
+#
 # #     def apply_debug_values(config, IS_DEBUG):
 # #         if IS_DEBUG:
 # #             if isinstance(config, (dict, DotDict)):
@@ -371,10 +381,10 @@ if __name__ == "__main__":
 # #                     except Exception as e:
 # #                         print(e)
 # #         return config
-# 
+#
 # #     if os.getenv("CI") == "True":
 # #         IS_DEBUG = True
-# 
+#
 # #     try:
 # #         # Check ./config/IS_DEBUG.yaml file if IS_DEBUG argument is not passed
 # #         if IS_DEBUG is None:
@@ -383,7 +393,7 @@ if __name__ == "__main__":
 # #                 IS_DEBUG = load("./config/IS_DEBUG.yaml").get("IS_DEBUG")
 # #             else:
 # #                 IS_DEBUG = False
-# 
+#
 # #         # Main
 # #         CONFIGS = {}
 # #         for lpath in glob("./config/*.yaml"):
@@ -391,18 +401,18 @@ if __name__ == "__main__":
 # #             if config:
 # #                 CONFIG = apply_debug_values(config, IS_DEBUG)
 # #                 CONFIGS.update(CONFIG)
-# 
+#
 # #         CONFIGS = DotDict(CONFIGS)
-# 
+#
 # #     except Exception as e:
 # #         print(e)
 # #         CONFIGS = DotDict({})
-# 
+#
 # #     return CONFIGS
-# 
-# 
+#
+#
 # #
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

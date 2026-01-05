@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-07-16 14:00:04 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/db/_sqlite3/_delete_duplicates.py
 # ----------------------------------------
@@ -177,7 +176,17 @@ def _delete_entry(
         cursor, duplicated_row, table_name, dry_run
     )
     if is_verified:
-        delete_query = select_query.replace("SELECT", "DELETE")
+        # Construct proper DELETE query (delete only one matching row)
+        columns = list(duplicated_row.index)
+        where_conditions = " AND ".join([f"{col} = ?" for col in columns])
+        delete_query = f"""
+            DELETE FROM {table_name}
+            WHERE rowid IN (
+                SELECT rowid FROM {table_name}
+                WHERE {where_conditions}
+                LIMIT 1
+            )
+        """
         if dry_run:
             print(f"[DRY RUN] Would delete entry:\n{duplicated_row}")
         else:

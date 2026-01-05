@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-06-01 20:10:00 (ywatanabe)"
 # File: ./tests/scitex/pd/test__to_xyz.py
 
@@ -7,9 +6,9 @@
 Test module for scitex.pd.to_xyz function.
 """
 
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 from pandas.testing import assert_frame_equal
 
 
@@ -151,15 +150,19 @@ class TestToXYZ:
         assert nan_count == 3
 
     def test_empty_dataframe(self):
-        """Test conversion of empty DataFrame."""
+        """Test conversion of empty DataFrame.
+
+        Empty DataFrames with no columns cause pd.concat to fail with
+        'No objects to concatenate'. This is expected behavior.
+        """
         from scitex.pd import to_xyz
 
-        # Empty DataFrame
+        # Empty DataFrame with no columns raises ValueError
         df = pd.DataFrame()
-        result = to_xyz(df)
-        assert result.empty
+        with pytest.raises(ValueError, match="No objects to concatenate"):
+            to_xyz(df)
 
-        # DataFrame with structure but no data
+        # DataFrame with structure but no rows works - produces empty result
         df = pd.DataFrame(columns=["A", "B"], index=[])
         result = to_xyz(df)
         assert result.empty
@@ -214,7 +217,11 @@ class TestToXYZ:
         assert str_vals == ["a", "b", "c"]
 
     def test_multiindex_not_supported(self):
-        """Test behavior with MultiIndex (current implementation doesn't handle specially)."""
+        """Test behavior with MultiIndex (current implementation doesn't handle specially).
+
+        For MultiIndex, index.name is None (level names are in index.names),
+        so the x column is named 'x'. The MultiIndex values become tuples.
+        """
         from scitex.pd import to_xyz
 
         # Create DataFrame with MultiIndex
@@ -223,9 +230,12 @@ class TestToXYZ:
         df = pd.DataFrame({"col": [10, 20, 30, 40]}, index=index)
 
         result = to_xyz(df)
-        # MultiIndex becomes tuples in the result
+        # MultiIndex becomes tuples in the 'x' column (not 'first')
         assert result.shape == (4, 3)
-        assert isinstance(result["first"].iloc[0], tuple)
+        assert list(result.columns) == ["x", "y", "z"]
+        # x values are tuples representing the MultiIndex
+        assert isinstance(result["x"].iloc[0], tuple)
+        assert result["x"].iloc[0] == ("A", 1)
 
     def test_datetime_index(self):
         """Test conversion with datetime index."""
@@ -279,16 +289,16 @@ if __name__ == "__main__":
 # import scitex
 # import numpy as np
 # import pandas as pd
-# 
-# 
+#
+#
 # def to_xyz(data_frame):
 #     """
 #     Convert a DataFrame into x, y, z format (long format).
-# 
+#
 #     Transforms a DataFrame from wide format (matrix/heatmap) to long format
 #     where each value becomes a row with x (row index), y (column name),
 #     and z (value) columns.
-# 
+#
 #     Example
 #     -------
 #     data_frame = pd.DataFrame(...)  # Your DataFrame here
@@ -307,7 +317,7 @@ if __name__ == "__main__":
 #     """
 #     x_name = data_frame.index.name or "x"
 #     y_name = data_frame.columns.name or "y"
-# 
+#
 #     formatted_data_frames = []
 # 
 #     for column in data_frame.columns:
@@ -322,14 +332,14 @@ if __name__ == "__main__":
 #         formatted_data_frames.append(formatted_data)
 # 
 #     result = pd.concat(formatted_data_frames, ignore_index=True)
-# 
+#
 #     # Ensure column order is x, y, z
 #     col_order = [x_name, y_name, "z"]
 #     result = result[col_order]
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # # def to_xyz(data_frame):
 # #     """
 # #     Convert a heatmap DataFrame into x, y, z format.

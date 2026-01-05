@@ -88,12 +88,12 @@ repos:
       - id: shellcheck
         args: [-x]
 
-# Optional: Local hooks
+  # Optional: Local hooks
   - repo: local
     hooks:
       - id: no-hardcoded-passwords
         name: Check for hardcoded passwords
-        entry: '(?i)(password|passwd|pwd)\s*=\s*["\'][^"\']+["\']'
+        entry: "(?i)(password|passwd|pwd)\\s*=\\s*[\"'][^\"']+[\"']"
         language: pygrep
         types: [python]
         exclude: ^(tests/|examples/)
@@ -104,4 +104,20 @@ repos:
         language: pygrep
         types: [python]
         exclude: ^(\.old/|src/scitex/\.old/)
+        stages: [commit]
+
+      - id: pytest-changed
+        name: Run tests for changed files
+        entry: ./scripts/maintenance/test.sh --changed -x -q
+        language: system
+        pass_filenames: false
+        types: [python]
+        stages: [commit]
+
+      - id: inhibit-root-pollution
+        name: Check for project root pollution
+        entry: ./scripts/maintenance/inhibit_project_root_pollution.sh
+        language: system
+        pass_filenames: false
+        always_run: true
         stages: [commit]

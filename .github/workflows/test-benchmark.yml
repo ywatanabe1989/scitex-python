@@ -1,0 +1,40 @@
+name: Benchmark Module Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/scitex/benchmark/**'
+      - 'tests/scitex/benchmark/**'
+      - '.github/workflows/test-benchmark.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/scitex/benchmark/**'
+      - 'tests/scitex/benchmark/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,ml]"
+      - name: Run benchmark tests
+        run: |
+          PYTHONPATH=./src pytest tests/scitex/benchmark/ -v --tb=short 2>&1 | tee test-results.log
+          tail -10 test-results.log
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-test-results
+          path: test-results.log
+          retention-days: 7

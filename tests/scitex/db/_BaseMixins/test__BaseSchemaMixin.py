@@ -11,6 +11,7 @@ including table/column introspection and index management.
 """
 
 import pytest
+pytest.importorskip("psycopg2")
 from unittest.mock import Mock, patch
 from scitex.db._BaseMixins import _BaseSchemaMixin
 

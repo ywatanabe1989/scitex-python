@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2025-05-31 22:20:00 (claude)"
 # File: ./tests/scitex/gen/test__to_odd.py
 
@@ -13,10 +12,11 @@ This module tests:
 """
 
 import pytest
+
+pytest.importorskip("torch")
 import numpy as np
 
 from scitex.gen import to_odd
-
 
 
 class TestToOddBasic:
@@ -228,13 +228,14 @@ class TestToOddTypeHandling:
     """Test type handling and conversions."""
 
     def test_string_numeric(self):
-        """Test behavior with numeric strings (should raise error)."""
+        """Test behavior with numeric strings."""
+        # Integer strings work via int() conversion
+        assert to_odd("5") == 5
+        assert to_odd("6") == 5
+        assert to_odd("7") == 7
 
-        # String inputs should cause TypeError in int()
-        with pytest.raises(TypeError):
-            to_odd("5")
-
-        with pytest.raises(TypeError):
+        # Float strings raise ValueError (int() can't parse them directly)
+        with pytest.raises(ValueError):
             to_odd("5.5")
 
     def test_none_input(self):
@@ -319,23 +320,23 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-25 23:40:22 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/gen/_to_odd.py
-# 
+#
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/gen/_to_odd.py"
-# 
-# 
+#
+#
 # def to_odd(n):
 #     """Convert a number to the nearest odd number less than or equal to itself.
-# 
+#
 #     Parameters
 #     ----------
 #     n : int or float
 #         The input number to be converted.
-# 
+#
 #     Returns
 #     -------
 #     int
 #         The nearest odd number less than or equal to the input.
-# 
+#
 #     Example
 #     -------
 #     >>> to_odd(6)
@@ -346,8 +347,8 @@ if __name__ == "__main__":
 #     5
 #     """
 #     return int(n) - ((int(n) + 1) % 2)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -7,6 +7,7 @@ import os
 import tempfile
 import shutil
 import pytest
+pytest.importorskip("zarr")
 import numpy as np
 import pandas as pd
 import torch

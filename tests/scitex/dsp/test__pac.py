@@ -4,8 +4,8 @@
 # File: ./scitex_repo/tests/scitex/dsp/test__pac.py
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
-import torch
 import unittest.mock as mock
 from scitex.dsp import pac
 

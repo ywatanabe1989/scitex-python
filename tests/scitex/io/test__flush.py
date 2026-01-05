@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-31"
 # File: test__flush.py
 
@@ -9,9 +8,13 @@ import io
 import os
 import sys
 import warnings
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+
+# Required for scitex.io module
+pytest.importorskip("h5py")
+pytest.importorskip("zarr")
 
 
 class TestFlushBasic:
@@ -45,7 +48,6 @@ class TestFlushBasic:
         with patch("sys.stdout.flush") as mock_stdout_flush, patch(
             "sys.stderr.flush"
         ) as mock_stderr_flush, patch("os.sync") as mock_sync:
-
             # Call flush without parameters (uses default sys)
             flush()
 
@@ -54,20 +56,19 @@ class TestFlushBasic:
             mock_stderr_flush.assert_called_once()
             mock_sync.assert_called_once()
 
-    def test_flush_with_none_sys(self):
+    def test_flush_with_none_sys(self, caplog):
         """Test flush behavior when sys is None."""
+        import logging
+
         from scitex.io import flush
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-
+        with caplog.at_level(logging.WARNING):
             with patch("os.sync") as mock_sync:
                 # Call flush with None
                 flush(sys=None)
 
-                # Should warn but not crash
-                assert len(w) == 1
-                assert "flush needs sys" in str(w[0].message)
+                # Should log warning but not crash
+                assert "flush needs sys" in caplog.text
 
                 # sync should not be called
                 mock_sync.assert_not_called()
@@ -82,7 +83,7 @@ class TestFlushErrorHandling:
 
         # Create mock sys with failing stdout
         mock_sys = Mock()
-        mock_sys.stdout.flush.side_effect = IOError("stdout flush failed")
+        mock_sys.stdout.flush.side_effect = OSError("stdout flush failed")
         mock_sys.stderr = Mock()
 
         with patch("os.sync"):
@@ -97,7 +98,7 @@ class TestFlushErrorHandling:
         # Create mock sys with failing stderr
         mock_sys = Mock()
         mock_sys.stdout = Mock()
-        mock_sys.stderr.flush.side_effect = IOError("stderr flush failed")
+        mock_sys.stderr.flush.side_effect = OSError("stderr flush failed")
 
         with patch("os.sync"):
             # Should raise the error
@@ -261,8 +262,9 @@ class TestFlushIntegration:
 
     def test_flush_thread_safety(self):
         """Test that flush can be called from multiple threads."""
-        from scitex.io import flush
         import threading
+
+        from scitex.io import flush
 
         mock_sys = Mock()
         mock_sys.stdout = Mock()
@@ -304,15 +306,15 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-02 03:23:44 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/io/_flush.py
-# 
+#
 # import os
 # import sys
-# 
+#
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # def flush(sys=sys):
 #     """
 #     Flushes the system's stdout and stderr, and syncs the file system.

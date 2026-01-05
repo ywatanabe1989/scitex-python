@@ -7,6 +7,7 @@
 
 import os
 import pytest
+pytest.importorskip("zarr")
 import matplotlib.pyplot as plt
 from unittest.mock import patch, MagicMock
 import numpy as np

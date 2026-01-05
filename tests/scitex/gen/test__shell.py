@@ -2,6 +2,7 @@
 """Tests for scitex.gen._shell module."""
 
 import pytest
+pytest.importorskip("torch")
 import os
 import tempfile
 import subprocess

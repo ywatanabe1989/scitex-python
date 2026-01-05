@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-11 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/engines/elevenlabs_engine.py
 # ----------------------------------------
@@ -50,7 +49,11 @@ class ElevenLabsTTS(BaseTTS):
         **kwargs,
     ):
         super().__init__(**kwargs)
-        self.api_key = api_key or os.environ.get("ELEVENLABS_API_KEY")
+        self.api_key = (
+            api_key
+            or os.environ.get("ELEVENLABS_API_KEY")
+            or os.environ.get("ELEVENLABS_API_KEY_SCITEX_AUDIO")
+        )
         self.voice = voice
         self.model_id = model_id
         self.stability = stability

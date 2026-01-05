@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2025-06-04 11:08:00 (ywatanabe)"
 # File: ./src/scitex/str/_format_plot_text.py
 
@@ -16,10 +15,10 @@ Prerequisites:
 """
 
 import re
-from typing import Union, Tuple, Optional
+from typing import Optional, Tuple
 
 try:
-    from ._latex_fallback import safe_latex_render, latex_fallback_decorator
+    from ._latex_fallback import latex_fallback_decorator, safe_latex_render
 
     FALLBACK_AVAILABLE = True
 except ImportError:
@@ -102,10 +101,11 @@ def format_plot_text(
 
     if latex_math:
         # Extract and preserve LaTeX math
+        # Use ||| delimiters to avoid being processed by _replace_underscores
         latex_pattern = r"\$[^$]+\$"
         latex_matches = re.findall(latex_pattern, text)
         for i, match in enumerate(latex_matches):
-            placeholder = f"__LATEX_{i}__"
+            placeholder = f"|||LATEX{i}|||"
             latex_sections.append(match)
             text_working = text_working.replace(match, placeholder, 1)
 
@@ -126,7 +126,7 @@ def format_plot_text(
 
     # Restore LaTeX sections with fallback handling
     for i, latex_section in enumerate(latex_sections):
-        placeholder = f"__LATEX_{i}__"
+        placeholder = f"|||LATEX{i}|||"
         if enable_fallback and FALLBACK_AVAILABLE:
             # Apply fallback to LaTeX sections
             safe_latex = safe_latex_render(latex_section, preserve_math=True)

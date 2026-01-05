@@ -8,8 +8,8 @@ Test module for scitex.dsp.ensure_3d function.
 """
 
 import pytest
+torch = pytest.importorskip("torch")
 import numpy as np
-import torch
 
 
 class TestEnsure3D:
