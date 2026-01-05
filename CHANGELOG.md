@@ -5,6 +5,36 @@ All notable changes to SciTeX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.0] - 2026-01-05
+
+### Added
+- **CI/CD Infrastructure**: Separate workflow files for all 41 modules
+- **Datetime Module**: New `datetime` module with `dt` alias for time operations
+- **Comprehensive Test Suites**: Major test improvements across modules
+  - AI module: 577 tests passing
+  - NN module: 498 tests passing
+  - IO module: 506 tests passing
+  - Writer module: 414 tests (expanded from 276)
+  - CLI module: 201 tests
+  - SH module: 149 tests
+  - Scholar module: Core and storage tests
+
+### Changed
+- **License**: Updated to AGPL-3.0
+- Updated README with improved installation section
+- Reorganized project structure (removed unused externals directory)
+
+### Fixed
+- HTML tag order and markdown link syntax in README
+- DSP module test failures (reduced from 154 to 78)
+- Resource module test failures and source bugs
+- Repro module JAX circular import bug
+- Web module tests and source bugs
+- Gen module tests improvements
+
+### Security
+- Added .env.zenrows to .gitignore to prevent credential commits
+
 ## [2.9.0] - 2025-12-28
 
 ### Added
