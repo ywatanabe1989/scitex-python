@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-05 16:48:43
+!-- Timestamp: 2026-01-05 16:58:59
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -79,15 +79,96 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 pip install scitex  # Full installation with all modules
 ```
 
-**Modular Installation** (See (./src/scitex)[./src/scitex] for all available modules):
+<details>
+<summary><strong>Module Overview</strong></summary>
+
+SciTeX is organized into focused modules for different aspects of scientific computing:
+
+**Modular Installation** (See [./src/scitex](./src/scitex) for all available modules):
 ``` bash
 # Examples
 pip install scitex[ai]
 pip install scitex[ai,audio,writer]
 ```
 
+## 📦 Module Overview
+
+### 🔧 Core Utilities
+| Module                                          | Description                                                         |
+|-------------------------------------------------|---------------------------------------------------------------------|
+| [`scitex.gen`](./src/scitex/gen#readme)         | Project setup, session management, and experiment tracking          |
+| [`scitex.io`](./src/scitex/io#readme)           | Universal I/O for 30+ formats (CSV, JSON, HDF5, Zarr, pickle, etc.) |
+| [`scitex.path`](./src/scitex/path#readme)       | Path manipulation and project structure utilities                   |
+| [`scitex.logging`](./src/scitex/logging#readme) | Structured logging with color support and context                   |
+
+### 📊 Data Science & Statistics
+| Module                                      | Description                                                              |
+|---------------------------------------------|--------------------------------------------------------------------------|
+| [`scitex.stats`](./src/scitex/stats#readme) | 16 statistical tests, effect sizes, power analysis, multiple corrections |
+| [`scitex.plt`](./src/scitex/plt#readme)     | Enhanced matplotlib with auto-export and scientific captions             |
+| [`scitex.pd`](./src/scitex/pd#readme)       | Pandas extensions for research workflows                                 |
+
+### 🧠 AI & Machine Learning
+| Module                                      | Description                                             |
+|---------------------------------------------|---------------------------------------------------------|
+| [`scitex.ai`](./src/scitex/ai#readme)       | GenAI (7 providers), classification, training utilities |
+| [`scitex.torch`](./src/scitex/torch#readme) | PyTorch training loops, metrics, and utilities          |
+| [`scitex.nn`](./src/scitex/nn#readme)       | Custom neural network layers                            |
+
+### 🌊 Signal Processing
+| Module                                  | Description                                                   |
+|-----------------------------------------|---------------------------------------------------------------|
+| [`scitex.dsp`](./src/scitex/dsp#readme) | Filtering, spectral analysis, wavelets, PAC, ripple detection |
+
+### 📚 Literature Management
+| Module                                          | Description                                                     |
+|-------------------------------------------------|-----------------------------------------------------------------|
+| [`scitex.scholar`](./src/scitex/scholar#readme) | Paper search, PDF download, BibTeX enrichment with IF/citations |
+
+### 🌐 Web & Browser
+| Module                                          | Description                                                |
+|-------------------------------------------------|------------------------------------------------------------|
+| [`scitex.browser`](./src/scitex/browser#readme) | Playwright automation with debugging, PDF handling, popups |
+
+### 🗄️ Data Management
+| Module                                | Description                         |
+|---------------------------------------|-------------------------------------|
+| [`scitex.db`](./src/scitex/db#readme) | SQLite3 and PostgreSQL abstractions |
+
+### 🛠️ Utilities
+| Module                                                | Description                                         |
+|-------------------------------------------------------|-----------------------------------------------------|
+| [`scitex.decorators`](./src/scitex/decorators#readme) | Function decorators for caching, timing, validation |
+| [`scitex.rng`](./src/scitex/rng#readme)               | Reproducible random number generation               |
+| [`scitex.resource`](./src/scitex/resource#readme)     | System resource monitoring (CPU, memory, GPU)       |
+| [`scitex.dict`](./src/scitex/dict#readme)             | Dictionary manipulation and nested access           |
+| [`scitex.str`](./src/scitex/str#readme)               | String utilities for scientific text processing     |
+
+## 📖 Documentation
+
+### Online Documentation
+- **[Read the Docs](https://scitex.readthedocs.io/)**: Complete API reference and guides
+- **[Interactive Examples](https://scitex.readthedocs.io/en/latest/examples/index.html)**: Browse all tutorial notebooks
+- **[Quick Start Guide](https://scitex.readthedocs.io/en/latest/getting_started.html)**: Get up and running quickly
+
+### Local Resources
+- **[Master Tutorial Index](./examples/00_SCITEX_MASTER_INDEX.ipynb)**: Comprehensive guide to all features
+- **[Examples Directory](./examples/)**: 25+ Jupyter notebooks covering all modules
+- **[Module List](./docs/scitex_modules.csv)**: Complete list of all functions
+- **(Experimental) [MCP Servers Documentation](./mcp_servers/README.md)**
+
+### Key Tutorials
+1. **[I/O Operations](./examples/01_scitex_io.ipynb)**: Essential file handling (start here!)
+2. **[Plotting](./examples/14_scitex_plt.ipynb)**: Publication-ready visualizations
+3. **[Statistics](./examples/11_scitex_stats.ipynb)**: Research-grade statistical analysis
+4. **[Scholar](./examples/16_scitex_scholar.ipynb)**: Literature management with impact factors
+5. **[AI/ML](./examples/16_scitex_ai.ipynb)**: Complete machine learning toolkit
+
+
+</details>
+
 <details>
-<summary><strong>Arial Font Setup</summary></strong>
+<summary><strong>Arial Font Setup</strong></summary>
 
 ``` bash
 # Ubuntu
@@ -202,9 +283,10 @@ if __name__ == "__main__":
     main()
 ```
 
-#### Without SciTeX ([188 Lines of Code](./examples/demo_session_plt_io_pure_python.py))
+
 <details>
-<summary>Click to see the pure Python equivalent requiring 3.3× more code</summary>
+<summary><strong>Equivalent without SciTeX ([188 Lines of Code](./examples/demo_session_plt_io_pure_python.py)), requiring 3.3× more code</strong></summary>
+
 ```python
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -433,137 +515,6 @@ demo_session_plt_io_out/
 - 🌍 **Universal format** - CSV data readable anywhere
 - 📝 **Zero manual work** - Metadata embedded automatically
 - 🎯 **3.3× less code** - Focus on research, not infrastructure
-
-### Try It Yourself
-```bash
-pip install scitex
-python ./examples/demo_session_plt_io.py
-```
-
-## 📦 Module Overview
-
-SciTeX is organized into focused modules for different aspects of scientific computing:
-
-### 🔧 Core Utilities
-| Module                                          | Description                                                         |
-|-------------------------------------------------|---------------------------------------------------------------------|
-| [`scitex.gen`](./src/scitex/gen#readme)         | Project setup, session management, and experiment tracking          |
-| [`scitex.io`](./src/scitex/io#readme)           | Universal I/O for 30+ formats (CSV, JSON, HDF5, Zarr, pickle, etc.) |
-| [`scitex.path`](./src/scitex/path#readme)       | Path manipulation and project structure utilities                   |
-| [`scitex.logging`](./src/scitex/logging#readme) | Structured logging with color support and context                   |
-
-### 📊 Data Science & Statistics
-| Module                                      | Description                                                              |
-|---------------------------------------------|--------------------------------------------------------------------------|
-| [`scitex.stats`](./src/scitex/stats#readme) | 16 statistical tests, effect sizes, power analysis, multiple corrections |
-| [`scitex.plt`](./src/scitex/plt#readme)     | Enhanced matplotlib with auto-export and scientific captions             |
-| [`scitex.pd`](./src/scitex/pd#readme)       | Pandas extensions for research workflows                                 |
-
-### 🧠 AI & Machine Learning
-| Module                                      | Description                                             |
-|---------------------------------------------|---------------------------------------------------------|
-| [`scitex.ai`](./src/scitex/ai#readme)       | GenAI (7 providers), classification, training utilities |
-| [`scitex.torch`](./src/scitex/torch#readme) | PyTorch training loops, metrics, and utilities          |
-| [`scitex.nn`](./src/scitex/nn#readme)       | Custom neural network layers                            |
-
-### 🌊 Signal Processing
-| Module                                  | Description                                                   |
-|-----------------------------------------|---------------------------------------------------------------|
-| [`scitex.dsp`](./src/scitex/dsp#readme) | Filtering, spectral analysis, wavelets, PAC, ripple detection |
-
-### 📚 Literature Management
-| Module                                          | Description                                                     |
-|-------------------------------------------------|-----------------------------------------------------------------|
-| [`scitex.scholar`](./src/scitex/scholar#readme) | Paper search, PDF download, BibTeX enrichment with IF/citations |
-
-### 🌐 Web & Browser
-| Module                                          | Description                                                |
-|-------------------------------------------------|------------------------------------------------------------|
-| [`scitex.browser`](./src/scitex/browser#readme) | Playwright automation with debugging, PDF handling, popups |
-
-### 🗄️ Data Management
-| Module                                | Description                         |
-|---------------------------------------|-------------------------------------|
-| [`scitex.db`](./src/scitex/db#readme) | SQLite3 and PostgreSQL abstractions |
-
-### 🛠️ Utilities
-| Module                                                | Description                                         |
-|-------------------------------------------------------|-----------------------------------------------------|
-| [`scitex.decorators`](./src/scitex/decorators#readme) | Function decorators for caching, timing, validation |
-| [`scitex.rng`](./src/scitex/rng#readme)               | Reproducible random number generation               |
-| [`scitex.resource`](./src/scitex/resource#readme)     | System resource monitoring (CPU, memory, GPU)       |
-| [`scitex.dict`](./src/scitex/dict#readme)             | Dictionary manipulation and nested access           |
-| [`scitex.str`](./src/scitex/str#readme)               | String utilities for scientific text processing     |
-
-## 📦 Bundle System (.zip)
-
-SciTeX v2.0.0 introduces a unified `.stx` bundle format for packaging research outputs:
-
-### Bundle Types
-
-| Type | Description | Self-Recursive |
-|------|-------------|----------------|
-| **Figure** (`.stx`) | Multi-panel publication figures | Yes (max depth: 3) |
-| **Plot** (`.stx`) | Single plot with data | No |
-| **Stats** (`.stx`) | Statistical comparison results | No |
-
-### Quick Example
-
-```python
-from scitex.fig import Figz
-from scitex.plt import Pltz
-from scitex.stats import Statsz
-
-# Create plot bundle
-pltz = Pltz.create("plot.stx", plot_type="line", data=df)
-pltz.save()
-
-# Create figure with panels
-figz = Figz.create("figure.stx", "Figure1")
-with open("plot.stx", "rb") as f:
-    figz.add_panel("A", f.read(), position={"x_mm": 10, "y_mm": 10})
-figz.save()
-
-# Create stats bundle
-statsz = Statsz.create("results.stx", comparisons=[
-    {"name": "A vs B", "method": "t-test", "p_value": 0.03}
-])
-statsz.save()
-```
-
-### CLI Tools
-
-```bash
-# Convert legacy formats to .stx
-scitex convert file old_figure.figz
-scitex convert batch ./figures/*.figz
-
-# Validate and inspect bundles
-scitex convert validate output.stx
-scitex convert info output.stx
-```
-
-See [Migration Guide](docs/STX_MIGRATION_GUIDE.md) for details on migrating from legacy formats.
-
-## 📖 Documentation
-
-### Online Documentation
-- **[Read the Docs](https://scitex.readthedocs.io/)**: Complete API reference and guides
-- **[Interactive Examples](https://scitex.readthedocs.io/en/latest/examples/index.html)**: Browse all tutorial notebooks
-- **[Quick Start Guide](https://scitex.readthedocs.io/en/latest/getting_started.html)**: Get up and running quickly
-
-### Local Resources
-- **[Master Tutorial Index](./examples/00_SCITEX_MASTER_INDEX.ipynb)**: Comprehensive guide to all features
-- **[Examples Directory](./examples/)**: 25+ Jupyter notebooks covering all modules
-- **[Module List](./docs/scitex_modules.csv)**: Complete list of all functions
-- **(Experimental) [MCP Servers Documentation](./mcp_servers/README.md)**
-
-### Key Tutorials
-1. **[I/O Operations](./examples/01_scitex_io.ipynb)**: Essential file handling (start here!)
-2. **[Plotting](./examples/14_scitex_plt.ipynb)**: Publication-ready visualizations
-3. **[Statistics](./examples/11_scitex_stats.ipynb)**: Research-grade statistical analysis
-4. **[Scholar](./examples/16_scitex_scholar.ipynb)**: Literature management with impact factors
-5. **[AI/ML](./examples/16_scitex_ai.ipynb)**: Complete machine learning toolkit
 
 ## 🤝 Contributing
 
