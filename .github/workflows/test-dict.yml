@@ -1,0 +1,40 @@
+name: Dict Module Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/scitex/dict/**'
+      - 'tests/scitex/dict/**'
+      - '.github/workflows/test-dict.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/scitex/dict/**'
+      - 'tests/scitex/dict/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run dict tests
+        run: |
+          PYTHONPATH=./src pytest tests/scitex/dict/ -v --tb=short 2>&1 | tee test-results.log
+          tail -10 test-results.log
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dict-test-results
+          path: test-results.log
+          retention-days: 7

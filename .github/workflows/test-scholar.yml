@@ -1,0 +1,40 @@
+name: Scholar Module Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/scitex/scholar/**'
+      - 'tests/scitex/scholar/**'
+      - '.github/workflows/test-scholar.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/scitex/scholar/**'
+      - 'tests/scitex/scholar/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,ml]"
+      - name: Run scholar tests
+        run: |
+          PYTHONPATH=./src pytest tests/scitex/scholar/ -v --tb=short 2>&1 | tee test-results.log
+          tail -10 test-results.log
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scholar-test-results
+          path: test-results.log
+          retention-days: 7
