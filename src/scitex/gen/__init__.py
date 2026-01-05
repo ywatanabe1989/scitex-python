@@ -101,6 +101,9 @@ from ._wrap import wrap
 from ._xml2dict import XmlDictConfig, XmlListConfig, xml2dict
 from .misc import float_linspace
 
+# Import from misc module
+from .misc import connect_nums
+
 __all__ = [
     "ArrayLike",
     "ArrayLike",
@@ -115,6 +118,7 @@ __all__ = [
     "ci",
     "clip_perc",
     "close",
+    "connect_nums",
     "dir2npy",
     "embed",
     "float_linspace",
