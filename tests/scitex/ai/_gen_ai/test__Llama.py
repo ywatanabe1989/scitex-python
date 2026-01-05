@@ -212,7 +212,6 @@ class TestLlama:
                 assert llama_ai.model == model
                 assert llama_ai.ckpt_dir == expected_ckpt
 
-
 if __name__ == "__main__":
     import os
 

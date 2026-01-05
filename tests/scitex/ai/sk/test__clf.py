@@ -227,7 +227,6 @@ class TestPipelineIntegration:
         assert isinstance(score_gb, float)
         assert 0 <= score_gb <= 1
 
-
 if __name__ == "__main__":
     import os
 

@@ -1,0 +1,102 @@
+"""Standard library modules and PyPI package mappings for sync_pyproject_extras.py."""
+
+STDLIB_MODULES = {
+    "abc", "aifc", "argparse", "array", "ast", "asynchat", "asyncio",
+    "asyncore", "atexit", "audioop", "base64", "bdb", "binascii", "binhex",
+    "bisect", "builtins", "bz2", "calendar", "cgi", "cgitb", "chunk", "cmath",
+    "cmd", "code", "codecs", "codeop", "collections", "colorsys", "compileall",
+    "concurrent", "configparser", "contextlib", "contextvars", "copy", "copyreg",
+    "cProfile", "crypt", "csv", "ctypes", "curses", "dataclasses", "datetime",
+    "dbm", "decimal", "difflib", "dis", "distutils", "doctest", "email",
+    "encodings", "enum", "errno", "faulthandler", "fcntl", "filecmp",
+    "fileinput", "fnmatch", "fractions", "ftplib", "functools", "gc", "getopt",
+    "getpass", "gettext", "glob", "graphlib", "grp", "gzip", "hashlib", "heapq",
+    "hmac", "html", "http", "idlelib", "imaplib", "imghdr", "imp", "importlib",
+    "inspect", "io", "ipaddress", "itertools", "json", "keyword", "lib2to3",
+    "linecache", "locale", "logging", "lzma", "mailbox", "mailcap", "marshal",
+    "math", "mimetypes", "mmap", "modulefinder", "multiprocessing", "netrc",
+    "nis", "nntplib", "numbers", "operator", "optparse", "os", "ossaudiodev",
+    "parser", "pathlib", "pdb", "pickle", "pickletools", "pipes", "pkgutil",
+    "platform", "plistlib", "poplib", "posix", "posixpath", "pprint", "profile",
+    "pstats", "pty", "pwd", "py_compile", "pyclbr", "pydoc", "queue", "quopri",
+    "random", "re", "readline", "reprlib", "resource", "rlcompleter", "runpy",
+    "sched", "secrets", "select", "selectors", "shelve", "shlex", "shutil",
+    "signal", "site", "smtpd", "smtplib", "sndhdr", "socket", "socketserver",
+    "spwd", "sqlite3", "ssl", "stat", "statistics", "string", "stringprep",
+    "struct", "subprocess", "sunau", "symtable", "sys", "sysconfig", "syslog",
+    "tabnanny", "tarfile", "telnetlib", "tempfile", "termios", "test",
+    "textwrap", "threading", "time", "timeit", "tkinter", "token", "tokenize",
+    "trace", "traceback", "tracemalloc", "tty", "turtle", "turtledemo", "types",
+    "typing", "unicodedata", "unittest", "urllib", "uu", "uuid", "venv",
+    "warnings", "wave", "weakref", "webbrowser", "winreg", "winsound", "wsgiref",
+    "xdrlib", "xml", "xmlrpc", "zipapp", "zipfile", "zipimport", "zlib",
+    "_thread", "__future__", "typing_extensions",
+}
+
+# Known PyPI packages (import name -> pip package name)
+KNOWN_PACKAGES = {
+    # Core scientific
+    "numpy": "numpy", "scipy": "scipy", "pandas": "pandas",
+    "matplotlib": "matplotlib", "seaborn": "seaborn", "plotly": "plotly",
+    # ML/AI
+    "sklearn": "scikit-learn", "skimage": "scikit-image", "torch": "torch",
+    "torchvision": "torchvision", "torchaudio": "torchaudio",
+    "transformers": "transformers", "accelerate": "accelerate", "einops": "einops",
+    "optuna": "optuna", "catboost": "catboost", "xgboost": "xgboost",
+    "lightgbm": "lightgbm", "imblearn": "imbalanced-learn", "umap": "umap-learn",
+    "faiss": "faiss-cpu",
+    # LLM APIs
+    "openai": "openai", "anthropic": "anthropic", "groq": "groq", "tiktoken": "tiktoken",
+    # Audio/TTS
+    "pyttsx3": "pyttsx3", "gtts": "gTTS", "pydub": "pydub", "elevenlabs": "elevenlabs",
+    "sounddevice": "sounddevice", "readchar": "readchar",
+    # Web/Network
+    "requests": "requests", "aiohttp": "aiohttp", "httpx": "httpx", "flask": "flask",
+    "fastapi": "fastapi", "streamlit": "streamlit", "websockets": "websockets",
+    "mcp": "mcp", "fastmcp": "fastmcp",
+    # Browser automation
+    "selenium": "selenium", "playwright": "playwright", "bs4": "beautifulsoup4",
+    "crawl4ai": "crawl4ai",
+    # Data formats
+    "h5py": "h5py", "zarr": "zarr", "xarray": "xarray", "openpyxl": "openpyxl",
+    "xlrd": "xlrd", "yaml": "PyYAML", "ruamel": "ruamel.yaml", "lxml": "lxml",
+    "xmltodict": "xmltodict", "bibtexparser": "bibtexparser",
+    # Image
+    "PIL": "Pillow", "cv2": "opencv-python", "piexif": "piexif", "pypdf": "pypdf",
+    "PyPDF2": "PyPDF2", "fitz": "PyMuPDF", "pdfplumber": "pdfplumber",
+    "pytesseract": "pytesseract", "qrcode": "qrcode",
+    # Document
+    "docx": "python-docx", "pypandoc": "pypandoc",
+    # Database
+    "sqlalchemy": "sqlalchemy", "psycopg2": "psycopg2-binary",
+    # Neuroscience
+    "mne": "mne", "obspy": "obspy", "pyedflib": "pyedflib", "pybids": "pybids",
+    "tensorpac": "tensorpac",
+    # Utilities
+    "tqdm": "tqdm", "click": "click", "rich": "rich", "tabulate": "tabulate",
+    "natsort": "natsort", "joblib": "joblib", "psutil": "psutil",
+    "packaging": "packaging", "pydantic": "pydantic", "watchdog": "watchdog",
+    "tenacity": "tenacity", "chardet": "chardet", "thefuzz": "thefuzz",
+    "pyperclip": "pyperclip", "icecream": "icecream",
+    # Git
+    "git": "GitPython",
+    # Jupyter
+    "IPython": "ipython", "ipykernel": "ipykernel", "jupyterlab": "jupyterlab",
+    # Embeddings
+    "sentence_transformers": "sentence-transformers",
+    # Scholar-specific
+    "scholarly": "scholarly", "pymed": "pymed", "feedparser": "feedparser",
+    "pyzotero": "pyzotero", "impact_factor": "impact-factor",
+    # GUI
+    "dearpygui": "dearpygui", "PyQt6": "PyQt6", "PyQt5": "PyQt5", "pyautogui": "pyautogui",
+    # Stats
+    "statsmodels": "statsmodels", "sympy": "sympy",
+    # DSP
+    "julius": "julius",
+    # Misc
+    "nest_asyncio": "nest-asyncio", "reportlab": "reportlab",
+    "magic": "python-magic", "dotenv": "python-dotenv",
+}
+
+# Modules that are part of scitex (skip these)
+INTERNAL_MODULES = {"scitex", "mngs"}

@@ -167,7 +167,6 @@ class TestNormalizationFunctions:
         loss.backward()
         assert tensor.grad is not None
 
-
 if __name__ == "__main__":
     import os
 

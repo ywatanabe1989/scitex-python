@@ -439,7 +439,6 @@ class TestCacheDisk:
         # Function should only be called once due to caching
         assert call_count == 1
 
-
 if __name__ == "__main__":
     import os
 

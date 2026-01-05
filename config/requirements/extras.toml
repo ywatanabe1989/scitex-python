@@ -1,0 +1,492 @@
+# ============================================
+# Module-Level Optional Dependencies
+# ============================================
+# Install: pip install scitex[module_name]
+# Multiple: pip install scitex[audio,scholar,plt]
+# All: pip install scitex[all]
+
+[project.optional-dependencies]
+
+# scitex.ai
+ai = [
+    "Pillow",
+    "PyYAML",
+    "anthropic",
+    "groq",
+    "imbalanced-learn",
+    "joblib",
+    "matplotlib",
+    "natsort",
+    "numpy",
+    "openai",
+    "optuna",
+    "pandas",
+    "requests",
+    "scikit-learn",
+    "scipy",
+    "seaborn",
+    "torch",
+    "torchvision",
+    "umap-learn",
+]
+
+# scitex.audio
+audio = [
+    "elevenlabs",
+    "gTTS",
+    "mcp",
+    "pydub",
+    "pyttsx3",
+]
+
+# scitex.benchmark
+benchmark = [
+    "numpy",
+    "pandas",
+    "psutil",
+]
+
+# scitex.bridge
+bridge = [
+    "matplotlib",
+]
+
+# scitex.browser
+browser = [
+    "aiohttp",
+    "matplotlib",
+    "playwright",
+]
+
+# scitex.capture
+capture = [
+    "Pillow",
+    "mcp",
+    "playwright",
+]
+
+# scitex.cli
+cli = [
+    "PyYAML",
+    "click",
+    "playwright",
+    "requests",
+]
+
+# scitex.cloud
+cloud = [
+    "matplotlib",
+]
+
+# scitex.config
+config = [
+    "PyYAML",
+]
+
+# scitex.db
+db = [
+    "numpy",
+    "pandas",
+    "psycopg2-binary",
+]
+
+# scitex.decorators
+decorators = [
+    "joblib",
+    "numpy",
+    "pandas",
+    "torch",
+    "tqdm",
+    "xarray",
+]
+
+# scitex.dev
+dev = [
+    "matplotlib",
+    "numpy",
+    "pandas",
+]
+
+# scitex.diagram
+diagram = [
+    "PyYAML",
+]
+
+# scitex.dict
+dict = [
+    "numpy",
+]
+
+# scitex.dsp
+dsp = [
+    "matplotlib",
+    "mne",
+    "numpy",
+    "pandas",
+    "scipy",
+    "sounddevice",
+    "tensorpac",
+    "torch",
+    "torchaudio",
+]
+
+# scitex.dt
+dt = [
+    "matplotlib",
+    "numpy",
+]
+
+# scitex.fig
+fig = [
+    "Pillow",
+    "PyQt5",
+    "PyQt6",
+    "dearpygui",
+    "flask",
+    "matplotlib",
+    "numpy",
+    "pandas",
+]
+
+# scitex.fts
+fts = [
+    "Pillow",
+    "matplotlib",
+    "numpy",
+]
+
+# scitex.gen
+gen = [
+    "h5py",
+    "icecream",
+    "ipykernel",
+    "ipython",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "pyperclip",
+    "requests",
+    "scipy",
+    "torch",
+    "xarray",
+]
+
+# scitex.git
+git = [
+    "GitPython",
+    "matplotlib",
+]
+
+# scitex.io
+io = [
+    "GitPython",
+    "Pillow",
+    "PyMuPDF",
+    "PyPDF2",
+    "PyYAML",
+    "catboost",
+    "h5py",
+    "joblib",
+    "matplotlib",
+    "mne",
+    "natsort",
+    "numpy",
+    "openpyxl",
+    "optuna",
+    "pandas",
+    "pdfplumber",
+    "piexif",
+    "plotly",
+    "pypdf",
+    "python-docx",
+    "qrcode",
+    "ruamel.yaml",
+    "scipy",
+    "torch",
+    "tqdm",
+    "zarr",
+]
+
+# scitex.linalg
+linalg = [
+    "matplotlib",
+    "numpy",
+    "scipy",
+    "sympy",
+    "torch",
+]
+
+# scitex.logging
+logging = [
+    "matplotlib",
+]
+
+# scitex.msword
+msword = [
+    "python-docx",
+]
+
+# scitex.nn
+nn = [
+    "julius",
+    "matplotlib",
+    "numpy",
+    "seaborn",
+    "torch",
+    "torchaudio",
+]
+
+# scitex.parallel
+parallel = [
+    "tqdm",
+]
+
+# scitex.path
+path = [
+    "GitPython",
+    "matplotlib",
+    "numpy",
+]
+
+# scitex.pd
+pd = [
+    "numpy",
+    "pandas",
+]
+
+# scitex.plt
+plt = [
+    "Pillow",
+    "PyYAML",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "piexif",
+    "scipy",
+    "seaborn",
+    "xarray",
+]
+
+# scitex.repro
+repro = [
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "torch",
+]
+
+# scitex.resource
+resource = [
+    "PyYAML",
+    "matplotlib",
+    "pandas",
+    "psutil",
+    "torch",
+]
+
+# scitex.schema
+schema = [
+    "numpy",
+]
+
+# scitex.scholar
+scholar = [
+    "Pillow",
+    "PyPDF2",
+    "PyYAML",
+    "aiohttp",
+    "beautifulsoup4",
+    "bibtexparser",
+    "faiss-cpu",
+    "fastmcp",
+    "feedparser",
+    "httpx",
+    "impact-factor",
+    "matplotlib",
+    "nest-asyncio",
+    "numpy",
+    "openpyxl",
+    "pandas",
+    "playwright",
+    "pydantic",
+    "pyzotero",
+    "requests",
+    "scholarly",
+    "scikit-learn",
+    "seaborn",
+    "sentence-transformers",
+    "sqlalchemy",
+    "tenacity",
+    "tiktoken",
+    "torch",
+    "torchvision",
+    "tqdm",
+    "umap-learn",
+    "watchdog",
+]
+
+# scitex.security
+security = [
+    "click",
+]
+
+# scitex.session
+session = [
+    "PyYAML",
+    "matplotlib",
+]
+
+# scitex.stats
+stats = [
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "scipy",
+    "torch",
+]
+
+# scitex.str
+str = [
+    "matplotlib",
+    "natsort",
+    "numpy",
+    "pandas",
+    "xarray",
+]
+
+# scitex.tex
+tex = [
+    "numpy",
+]
+
+# scitex.torch
+torch = [
+    "torch",
+]
+
+# scitex.types
+types = [
+    "numpy",
+    "pandas",
+    "torch",
+    "xarray",
+]
+
+# scitex.utils
+utils = [
+    "h5py",
+    "matplotlib",
+    "natsort",
+    "numpy",
+    "pandas",
+    "tqdm",
+    "xarray",
+]
+
+# scitex.web
+web = [
+    "Pillow",
+    "aiohttp",
+    "beautifulsoup4",
+    "matplotlib",
+    "pandas",
+    "requests",
+    "tqdm",
+]
+
+# scitex.writer
+writer = [
+    "matplotlib",
+]
+
+# All module dependencies
+all = [
+    "GitPython",
+    "Pillow",
+    "PyMuPDF",
+    "PyPDF2",
+    "PyQt5",
+    "PyQt6",
+    "PyYAML",
+    "aiohttp",
+    "anthropic",
+    "beautifulsoup4",
+    "bibtexparser",
+    "catboost",
+    "click",
+    "dearpygui",
+    "elevenlabs",
+    "faiss-cpu",
+    "fastmcp",
+    "feedparser",
+    "flask",
+    "gTTS",
+    "groq",
+    "h5py",
+    "httpx",
+    "icecream",
+    "imbalanced-learn",
+    "impact-factor",
+    "ipykernel",
+    "ipython",
+    "joblib",
+    "julius",
+    "matplotlib",
+    "mcp",
+    "mne",
+    "natsort",
+    "nest-asyncio",
+    "numpy",
+    "openai",
+    "openpyxl",
+    "optuna",
+    "pandas",
+    "pdfplumber",
+    "piexif",
+    "playwright",
+    "plotly",
+    "psutil",
+    "psycopg2-binary",
+    "pydantic",
+    "pydub",
+    "pypdf",
+    "pyperclip",
+    "python-docx",
+    "pyttsx3",
+    "pyzotero",
+    "qrcode",
+    "requests",
+    "ruamel.yaml",
+    "scholarly",
+    "scikit-learn",
+    "scipy",
+    "seaborn",
+    "sentence-transformers",
+    "sounddevice",
+    "sqlalchemy",
+    "sympy",
+    "tenacity",
+    "tensorpac",
+    "tiktoken",
+    "torch",
+    "torchaudio",
+    "torchvision",
+    "tqdm",
+    "umap-learn",
+    "watchdog",
+    "xarray",
+    "zarr",
+]
+
+# Development tools
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "pytest-timeout",
+    "pytest-mock",
+    "pytest-asyncio",
+    "ruff",
+    "mypy",
+    "pre-commit",
+]

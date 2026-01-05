@@ -246,7 +246,6 @@ class TestOpenAI:
             openai_ai = OpenAI(model="gpt-4", max_tokens=1000, api_key="test-key")
             assert openai_ai.max_tokens == 1000  # Custom value, not default 8192
 
-
 if __name__ == "__main__":
     import os
 

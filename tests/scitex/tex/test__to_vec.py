@@ -265,7 +265,6 @@ class TestFallbackAvailability:
         result = to_vec("test", enable_fallback=False)
         assert result == r"\overrightarrow{\mathrm{test}}"
 
-
 if __name__ == "__main__":
     import os
 

@@ -342,9 +342,9 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-25 00:35:31 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/gen/_var_info.py
-#
+# 
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/gen/_var_info.py"
-#
+# 
 # from typing import Any, Union
 # import numpy as np
 # import pandas as pd
@@ -358,7 +358,7 @@ if __name__ == "__main__":
 #
 # def var_info(variable: Any) -> dict:
 #     """Returns type and structural information about a variable.
-#
+# 
 #     Example
 #     -------
 #     >>> data = np.array([[1, 2], [3, 4]])
@@ -370,12 +370,12 @@ if __name__ == "__main__":
 #         'shape': (2, 2),
 #         'dimensions': 2
 #     }
-#
+# 
 #     Parameters
 #     ----------
 #     variable : Any
 #         Variable to inspect.
-#
+# 
 #     Returns
 #     -------
 #     dict
@@ -408,8 +408,8 @@ if __name__ == "__main__":
 #             info["dimensions"] = depth
 #
 #     return info
-#
-#
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

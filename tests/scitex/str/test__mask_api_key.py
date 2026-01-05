@@ -591,7 +591,6 @@ class TestMaskApiKeyComparison:
             param_result = mask_api_param(key, n=4)
             assert fixed_result == param_result
 
-
 if __name__ == "__main__":
     import os
 

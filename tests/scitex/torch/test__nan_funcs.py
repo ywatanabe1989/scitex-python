@@ -354,7 +354,6 @@ class TestNanFunctions:
         result_cpu = self.nanvar(x_cpu)
         assert result_cpu.device.type == "cpu"
 
-
 if __name__ == "__main__":
     import os
 

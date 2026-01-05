@@ -411,7 +411,7 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2023-05-15 16:44:27 (ywatanabe)"
-#
+# 
 # import torch
 # import torch.nn as nn
 # import torch.nn.functional as F
@@ -434,13 +434,13 @@ if __name__ == "__main__":
 #         self.conv11 = nn.Conv1d(
 #             in_channels=n_chs_in, out_channels=n_chs_out, kernel_size=1
 #         )
-#
+# 
 #     def forward(self, x):
 #         x = self.sa(x)
 #         x = self.conv11(x)
 #         return x
-#
-#
+# 
+# 
 # class BNet(nn.Module):
 #     def __init__(self, BNet_config, MNet_config):
 #         super().__init__()
@@ -477,11 +477,11 @@ if __name__ == "__main__":
 #                 for i_head, _ in enumerate(range(len(BNet_config["n_chs"])))
 #             ]
 #         )
-#
+# 
 #     @staticmethod
 #     def _znorm_along_the_last_dim(x):
 #         return (x - x.mean(dim=-1, keepdims=True)) / x.std(dim=-1, keepdims=True)
-#
+# 
 #     def forward(self, x, i_head):
 #         x = self._znorm_along_the_last_dim(x)
 #         # x = self.sc(x)
@@ -496,8 +496,8 @@ if __name__ == "__main__":
 #         x = self.MNet.forward_bb(x)
 #         x = self.fcs[i_head](x)
 #         return x
-#
-#
+# 
+# 
 # # BNet_config = {
 # #     "n_chs": 32,
 # #     "n_bands": 6,
@@ -512,8 +512,8 @@ if __name__ == "__main__":
 #     "n_fc2": 256,
 #     "d_ratio2": 0.85,
 # }
-#
-#
+# 
+# 
 # if __name__ == "__main__":
 #     ## Demo data
 #     # MEG
@@ -522,21 +522,21 @@ if __name__ == "__main__":
 #     # EEG
 #     BS, N_CHS, SEQ_LEN = 16, 19, 1000
 #     x_EEG = torch.rand(BS, N_CHS, SEQ_LEN).cuda()
-#
+# 
 #     # model = MNetBackBorn(scitex.nn.MNet_config).cuda()
 #     # model(x_MEG)
 #     # Model
 #     BNet_config["n_chs"] = [160, 19]
 #     BNet_config["n_classes"] = [2, 4]
 #     model = BNet(BNet_config, scitex.nn.MNet_config).cuda()
-#
+# 
 #     # MEG
 #     y = model(x_MEG, 0)
 #     y = model(x_EEG, 1)
-#
+# 
 #     # # EEG
 #     # y = model(x_EEG)
-#
+# 
 #     y.sum().backward()
 
 # --------------------------------------------------------------------------------

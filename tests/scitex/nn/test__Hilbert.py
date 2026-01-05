@@ -395,7 +395,6 @@ class TestHilbert:
         assert not torch.allclose(y[0], y[1], atol=0.1)
         assert not torch.allclose(y[1], y[2], atol=0.1)
 
-
 if __name__ == "__main__":
     import os
 

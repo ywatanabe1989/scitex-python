@@ -518,7 +518,6 @@ class TestToEvenRobustness:
         # Allow some growth for test infrastructure
         assert final_objects - initial_objects < 100
 
-
 if __name__ == "__main__":
     import os
 

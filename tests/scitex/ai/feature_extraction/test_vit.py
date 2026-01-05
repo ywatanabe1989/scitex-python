@@ -319,7 +319,6 @@ class TestVitFeatureExtractor:
         # Should have 3 channels after processing
         assert processed.shape[1] == 3
 
-
 if __name__ == "__main__":
     import os
 

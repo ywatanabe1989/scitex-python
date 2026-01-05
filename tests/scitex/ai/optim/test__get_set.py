@@ -189,7 +189,6 @@ class TestGetSet:
         assert get_func is get
         assert set_func is set
 
-
 if __name__ == "__main__":
     import os
 

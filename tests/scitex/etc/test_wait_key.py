@@ -388,7 +388,6 @@ class TestWaitKey:
         assert inspect.isfunction(wk.wait_key)
         assert inspect.isfunction(wk.count)
 
-
 if __name__ == "__main__":
     import os
 

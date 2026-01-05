@@ -332,7 +332,6 @@ class TestTitleCaseIntegration:
         assert "EC2" in result
         assert result.startswith("The")
 
-
 if __name__ == "__main__":
     import os
 

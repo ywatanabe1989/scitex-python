@@ -455,7 +455,6 @@ def test_error_handling_in_subsystems():
         with pytest.raises(Exception):
             get_specs(system=True, cpu=True, gpu=False, disk=False, network=False)
 
-
 if __name__ == "__main__":
     import os
 

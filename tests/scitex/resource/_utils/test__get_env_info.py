@@ -1026,7 +1026,6 @@ class TestConstantsAndFormats:
         """Test TORCH_AVAILABLE constant is boolean."""
         assert isinstance(TORCH_AVAILABLE, bool)
 
-
 if __name__ == "__main__":
     import os
 

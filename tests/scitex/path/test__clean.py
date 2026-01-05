@@ -118,7 +118,6 @@ class TestClean:
         assert result.startswith("/home")
         assert result.endswith("file.txt")
 
-
 if __name__ == "__main__":
     import os
 

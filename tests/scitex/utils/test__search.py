@@ -216,7 +216,6 @@ class TestSearchFunctionality:
         assert indices == [1]
         assert matches == [long_string]
 
-
 if __name__ == "__main__":
     import os
 

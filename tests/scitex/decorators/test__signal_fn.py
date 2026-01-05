@@ -271,7 +271,6 @@ def test_signal_fn_conversion_mocking(mock_to_torch):
     # Result should be converted back to numpy
     assert isinstance(result, np.ndarray)
 
-
 if __name__ == "__main__":
     import os
 

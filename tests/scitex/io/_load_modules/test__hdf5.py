@@ -592,7 +592,6 @@ class TestLoadHDF5:
         finally:
             os.unlink(temp_path)
 
-
 if __name__ == "__main__":
     import os
 

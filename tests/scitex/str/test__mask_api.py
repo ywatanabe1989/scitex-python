@@ -416,7 +416,6 @@ class TestMaskApiPerformance:
             assert result.endswith("aa")
             assert "****" in result
 
-
 if __name__ == "__main__":
     import os
 

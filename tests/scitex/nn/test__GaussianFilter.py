@@ -338,7 +338,6 @@ class TestGaussianFilter:
         max_diff_idx = diff.argmax()
         assert abs(max_diff_idx.item() - 24) <= radius
 
-
 if __name__ == "__main__":
     import os
 

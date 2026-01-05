@@ -333,7 +333,6 @@ class TestBatchFnEdgeCases:
 
         assert result.dtype == np.float32
 
-
 if __name__ == "__main__":
     import os
 

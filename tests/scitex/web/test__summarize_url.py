@@ -444,7 +444,6 @@ class TestMain:
             # The Document variable should be None when imports fail
             # (This is handled in the actual module's import section)
 
-
 if __name__ == "__main__":
     import os
 

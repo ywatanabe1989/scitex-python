@@ -552,7 +552,6 @@ class TestDocstringExamples:
         # The projection of [3,4] onto [10,0] (x-axis) should have magnitude 3
         assert np.isclose(result, 3)
 
-
 if __name__ == "__main__":
     import os
 

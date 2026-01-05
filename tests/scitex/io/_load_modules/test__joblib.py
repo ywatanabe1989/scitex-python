@@ -659,7 +659,6 @@ def test_backwards_compatibility():
             if temp_path is not None and os.path.exists(temp_path):
                 os.unlink(temp_path)
 
-
 if __name__ == "__main__":
     import os
 

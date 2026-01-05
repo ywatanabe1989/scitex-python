@@ -164,7 +164,7 @@ def no_root_pollution(request):
 # Test collection optimization
 # ----------------------------------------
 def pytest_collect_file(file_path):
-    # Only load files that have test functions
+    """Only collect test files that actually contain test functions."""
     if str(file_path).endswith(".py") and (
         file_path.name.startswith("test_") or file_path.name.endswith("_test.py")
     ):

@@ -213,7 +213,6 @@ def test_load_yaml_nonexistent_file():
     with pytest.raises(FileNotFoundError):
         _load_yaml("/nonexistent/path/file.yaml")
 
-
 if __name__ == "__main__":
     import os
 

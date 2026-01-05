@@ -227,7 +227,6 @@ class TestPCA:
 
         plt.close(fig)
 
-
 if __name__ == "__main__":
     import os
 

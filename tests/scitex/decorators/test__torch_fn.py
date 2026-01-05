@@ -103,7 +103,6 @@ def test_torch_fn_nested_decorator(test_data):
         assert isinstance(result, np.ndarray)
         assert np.array_equal(result, test_data["numpy"])
 
-
 if __name__ == "__main__":
     import os
 
@@ -124,16 +123,16 @@ if __name__ == "__main__":
 # __FILE__ = "./src/scitex/decorators/_torch_fn.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-#
+# 
 # from functools import wraps
 # from typing import Any as _Any
 # from typing import Callable
-#
+# 
 # import numpy as np
 #
 # from ._converters import _return_always, is_nested_decorator, to_torch
-#
-#
+# 
+# 
 # def torch_fn(func: Callable) -> Callable:
 #     """Decorator for PyTorch function compatibility.
 #
@@ -191,13 +190,13 @@ if __name__ == "__main__":
 #         if is_nested_decorator():
 #             results = func(*args, **kwargs)
 #             return results
-#
+# 
 #         # Set the current decorator context
 #         wrapper._current_decorator = "torch_fn"
-#
+# 
 #         # Store original object for type preservation
 #         original_object = args[0] if args else None
-#
+# 
 #         converted_args, converted_kwargs = to_torch(
 #             *args, return_fn=_return_always, **kwargs
 #         )
@@ -259,9 +258,9 @@ if __name__ == "__main__":
 #
 #                     return xr.DataArray(results.detach().cpu().numpy())
 #             return results
-#
+# 
 #         return results
-#
+# 
 #     # Mark as a wrapper for detection
 #     wrapper._is_wrapper = True
 #     wrapper._decorator_type = "torch_fn"

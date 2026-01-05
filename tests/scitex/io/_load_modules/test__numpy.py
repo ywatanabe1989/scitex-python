@@ -195,7 +195,6 @@ def test_load_npz_compressed():
     finally:
         os.unlink(temp_path)
 
-
 if __name__ == "__main__":
     import os
 

@@ -406,7 +406,6 @@ class TestLoadOptunaFunctions:
         finally:
             os.unlink(temp_yaml_path)
 
-
 if __name__ == "__main__":
     import os
 

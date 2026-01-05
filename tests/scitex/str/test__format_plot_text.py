@@ -591,7 +591,6 @@ class TestEdgeCases:
         except Exception as e:
             pytest.fail(f"Function should handle malformed input gracefully: {e}")
 
-
 if __name__ == "__main__":
     import os
 

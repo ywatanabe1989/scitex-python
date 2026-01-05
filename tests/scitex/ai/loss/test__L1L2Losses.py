@@ -438,7 +438,6 @@ class TestRegularizationIntegration:
             elastic(model, alpha=1.0, l1_ratio=0.5), manual_elastic, rtol=1e-5
         )
 
-
 if __name__ == "__main__":
     import os
 

@@ -381,7 +381,6 @@ class TestFutureReadiness:
             assert isinstance(description, str)
             # Ready for functions following these naming patterns
 
-
 if __name__ == "__main__":
     import os
 

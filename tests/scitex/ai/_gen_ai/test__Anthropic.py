@@ -230,7 +230,6 @@ class TestAnthropic:
                 anthropic_ai = Anthropic(model="claude-3-opus-20240229", n_keep=5)
                 assert anthropic_ai.n_keep == 5
 
-
 if __name__ == "__main__":
     import os
 

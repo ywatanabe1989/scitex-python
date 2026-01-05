@@ -457,11 +457,11 @@ if __name__ == "__main__":
 #     or when you want to ensure function metadata is preserved.
 #     """
 #     import functools
-#
+# 
 #     @functools.wraps(func)
 #     def wrapper(*args, **kwargs):
 #         return func(*args, **kwargs)
-#
+# 
 #     # Store reference to original function
 #     wrapper._original_func = func
 #     # Mark as a wrapper for detection

@@ -442,7 +442,6 @@ class TestReadableBytesDocumentation:
         assert hasattr(readable_bytes, "__name__")
         assert readable_bytes.__name__ == "readable_bytes"
 
-
 if __name__ == "__main__":
     import os
 

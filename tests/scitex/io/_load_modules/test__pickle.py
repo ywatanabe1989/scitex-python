@@ -225,7 +225,6 @@ def test_load_pickle_protocol_versions():
         finally:
             os.unlink(temp_path)
 
-
 if __name__ == "__main__":
     import os
 

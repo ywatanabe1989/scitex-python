@@ -173,6 +173,5 @@ class TestEdgeCases:
         expr = "\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}"
         assert to_latex_style(expr) == f"${expr}$"
 
-
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

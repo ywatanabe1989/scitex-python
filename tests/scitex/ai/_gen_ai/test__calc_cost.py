@@ -162,7 +162,6 @@ class TestCalcCost:
             cost = calc_cost("gpt-4", 100, 100)
             assert isinstance(cost, float)
 
-
 if __name__ == "__main__":
     import os
 

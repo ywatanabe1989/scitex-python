@@ -228,6 +228,22 @@ array:
         symlink_path = os.path.join(temp_dir, "link.txt")
         os.symlink(os.path.relpath(source_path, temp_dir), symlink_path)
 
+    def test_load_symlink(self, temp_dir):
+        """Test loading files through symlinks."""
+        # Arrange
+        text_content = "Symlink test content"
+        
+        # Create source file in subdirectory
+        source_dir = os.path.join(temp_dir, "source")
+        os.makedirs(source_dir)
+        source_path = os.path.join(source_dir, "original.txt")
+        with open(source_path, "w") as f:
+            f.write(text_content)
+        
+        # Create symlink
+        symlink_path = os.path.join(temp_dir, "link.txt")
+        os.symlink(os.path.relpath(source_path, temp_dir), symlink_path)
+        
         # Act
         loaded_text = scitex.io.load(symlink_path)
 
@@ -948,7 +964,7 @@ if __name__ == "__main__":
 #         If the file extension is not supported.
 #     FileNotFoundError
 #         If the specified file does not exist.
-#
+# 
 #     Supported Extensions
 #     -------------------
 #     - Data formats: .csv, .tsv, .xls, .xlsx, .xlsm, .xlsb, .json, .yaml, .yml
@@ -958,7 +974,7 @@ if __name__ == "__main__":
 #     - Images: .jpg, .png, .tiff, .tif
 #     - EEG data: .vhdr, .vmrk, .edf, .bdf, .gdf, .cnt, .egi, .eeg, .set
 #     - Database: .db
-#
+# 
 #     Examples
 #     --------
 #     >>> # Load CSV data

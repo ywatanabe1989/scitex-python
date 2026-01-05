@@ -183,7 +183,6 @@ class TestMergeLabels:
         assert '1.5-2.2' in result
         assert '2.5-3.3' in result
 
-
 if __name__ == "__main__":
     import os
 

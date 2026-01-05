@@ -462,7 +462,6 @@ class TestHelperFunctions:
         stripped_multi = strip_ansi_codes(multi_colored)
         assert stripped_multi == "AB"
 
-
 if __name__ == "__main__":
     import os
 

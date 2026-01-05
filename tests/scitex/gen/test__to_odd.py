@@ -306,7 +306,6 @@ class TestToOddIntegration:
         # Should preserve odd sizes
         assert odd_sizes == [3, 3, 5, 5, 7, 7, 9]
 
-
 if __name__ == "__main__":
     import os
 

@@ -545,7 +545,6 @@ class TestComparison:
         assert_array_almost_equal(dist_cdist[0, 1], 1.0)  # [0,0] to [1,0]
         assert_array_almost_equal(dist_cdist[0, 3], np.sqrt(2))  # [0,0] to [1,1]
 
-
 if __name__ == "__main__":
     import os
 

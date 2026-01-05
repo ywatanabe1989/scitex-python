@@ -120,7 +120,6 @@ def test_numpy_fn_nested_decorator(test_data):
         assert isinstance(result, list)
         assert result == test_data["list"]
 
-
 if __name__ == "__main__":
     import os
 
@@ -141,18 +140,18 @@ if __name__ == "__main__":
 # __FILE__ = "./src/scitex/decorators/_numpy_fn.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-#
+# 
 # import numpy as np
 #
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_numpy_fn.py"
-#
+# 
 # from functools import wraps
 # from typing import Any as _Any
 # from typing import Callable
-#
+# 
 # from ._converters import _return_always, is_nested_decorator, to_numpy
-#
-#
+# 
+# 
 # def numpy_fn(func: Callable) -> Callable:
 #     @wraps(func)
 #     def wrapper(*args: _Any, **kwargs: _Any) -> _Any:
@@ -160,13 +159,13 @@ if __name__ == "__main__":
 #         if is_nested_decorator():
 #             results = func(*args, **kwargs)
 #             return results
-#
+# 
 #         # Set the current decorator context
 #         wrapper._current_decorator = "numpy_fn"
-#
+# 
 #         # Store original object for type preservation
 #         original_object = args[0] if args else None
-#
+# 
 #         converted_args, converted_kwargs = to_numpy(
 #             *args, return_fn=_return_always, **kwargs
 #         )
@@ -222,9 +221,9 @@ if __name__ == "__main__":
 #
 #                     return pd.Series(results)
 #             return results
-#
+# 
 #         return results
-#
+# 
 #     # Mark as a wrapper for detection
 #     wrapper._is_wrapper = True
 #     wrapper._decorator_type = "numpy_fn"

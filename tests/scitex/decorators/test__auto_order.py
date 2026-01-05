@@ -209,7 +209,6 @@ class TestAutoOrderIntegration:
         expected = data * 3.0
         assert torch.allclose(result, expected)
 
-
 if __name__ == "__main__":
     import os
 

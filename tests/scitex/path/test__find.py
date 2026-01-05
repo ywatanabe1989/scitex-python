@@ -285,7 +285,6 @@ class TestFindIntegration:
             all_files = _find(tmpdir, type="f", exp="*")
             assert len(all_files) == 3  # test.txt, data.csv, test.py (not excluded.txt)
 
-
 if __name__ == "__main__":
     import os
 

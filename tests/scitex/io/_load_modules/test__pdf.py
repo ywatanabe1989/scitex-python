@@ -498,7 +498,6 @@ class TestLoadPdf:
         assert isinstance(result_clean, str)
         assert isinstance(result_raw, str)
 
-
 if __name__ == "__main__":
     import os
 
