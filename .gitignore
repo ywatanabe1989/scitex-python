@@ -17,6 +17,10 @@ singularity
 ## Logs and temporary files
 slurm_logs/
 coverage_report.txt
+/coverage-*.json
+/coverage-*.xml
+/test_output.txt
+htmlcov/
 test_comprehensive_fixes.py
 catboost_info
 

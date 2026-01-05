@@ -113,3 +113,11 @@ repos:
         pass_filenames: false
         types: [python]
         stages: [commit]
+
+      - id: inhibit-root-pollution
+        name: Check for project root pollution
+        entry: ./scripts/maintenance/inhibit_project_root_pollution.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]

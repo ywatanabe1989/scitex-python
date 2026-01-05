@@ -14,22 +14,34 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 [![PyPI version](https://badge.fury.io/py/scitex.svg)](https://badge.fury.io/py/scitex)
 [![Python Versions](https://img.shields.io/pypi/pyversions/scitex.svg)](https://pypi.org/project/scitex/)
 [![License](https://img.shields.io/github/license/ywatanabe1989/SciTeX-Code)](https://github.com/ywatanabe1989/SciTeX-Code/blob/main/LICENSE)
-[![Tests](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/ci.yml/badge.svg)](https://github.com/ywatanabe1989/SciTeX-Code/actions)
-[![Coverage](https://codecov.io/gh/ywatanabe1989/SciTeX-Code/branch/main/graph/badge.svg)](https://codecov.io/gh/ywatanabe1989/SciTeX-Code)
-[![Stats Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ywatanabe1989/GIST_ID/raw/scitex-stats-coverage.json)](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/stats-coverage.yml)
-[![Logging Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ywatanabe1989/GIST_ID/raw/scitex-logging-coverage.json)](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/logging-coverage.yml)
+[![CI](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/ci.yml/badge.svg)](https://github.com/ywatanabe1989/SciTeX-Code/actions/workflows/ci.yml)
 [![Documentation](https://readthedocs.org/projects/scitex/badge/?version=latest)](https://scitex.readthedocs.io/en/latest/?badge=latest)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
+<!-- Module Test Status (v2.10.0) -->
+| Core Modules | Extended Modules | Status |
+|:-------------|:-----------------|:-------|
+| io, path, str, dict, types | nn, ai, writer, audio, capture | ✅ 36 modules tested |
+| config, utils, decorators | cli, sh, git, session, diagram | via PR #40-75 |
+| logging, stats, pd, linalg | resource, repro, benchmark | |
+| torch, gen | security, tex, msword, web, dev, dt, scholar | |
+
 ## 📦 Installation
 
 ``` bash
-pip install scitex # ~600 MB, Core + utilities
-pip install scitex[dl,ml,jupyter,neuro,web,gui,scholar,writer,dev] # ~2-5 GB, Complete toolkit
+pip install scitex  # Full installation with all modules
 ```
 
-### Alial
+**Modular Installation** (optional extras):
+``` bash
+pip install scitex[dl]       # Deep learning (PyTorch, transformers)
+pip install scitex[neuro]    # Neuroscience (MNE, EEG/MEG)
+pip install scitex[scholar]  # Academic paper management
+pip install scitex[dev]      # Development tools (testing, linting)
+```
+
+### Arial Font Setup
 
 ``` bash
 # Ubuntu
