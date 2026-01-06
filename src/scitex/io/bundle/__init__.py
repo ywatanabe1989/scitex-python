@@ -56,6 +56,12 @@ from ._core import (
     validate_spec,
     zip_to_dir_path,
 )
+
+# Dataclasses (from deprecated scitex.fts)
+from ._dataclasses import BBox, DataInfo, Node, NodeRefs, SizeMM
+
+# FTS class and factory functions (from deprecated scitex.fts)
+from ._FTS import FTS, create_bundle, from_matplotlib, load_bundle
 from ._types import (
     DIR_EXTENSIONS,
     DIR_EXTENSIONS_LEGACY,
@@ -81,6 +87,9 @@ from ._types import (
 from ._zip import ZipBundle, zip_directory
 from ._zip import create as create_zip
 from ._zip import open as open_zip
+
+# NodeType enum placeholder for backward compat
+NodeType = Node  # Alias for backward compatibility
 
 __all__ = [
     # Types
@@ -124,6 +133,18 @@ __all__ = [
     "zip_directory",
     # Nested access namespace
     "nested",
+    # FTS class and factory functions (backward compat with scitex.fts)
+    "FTS",
+    "load_bundle",
+    "create_bundle",
+    "from_matplotlib",
+    # Dataclasses (backward compat with scitex.fts)
+    "Node",
+    "NodeType",
+    "NodeRefs",
+    "BBox",
+    "SizeMM",
+    "DataInfo",
 ]
 
 # EOF
