@@ -42,7 +42,7 @@ def save_stx_bundle(obj, spath, as_zip=True, bundle_type=None, basename=None, **
     **kwargs
         Additional arguments passed to format-specific savers.
     """
-    from scitex.fts import FTS
+    from scitex.io.bundle import FTS
 
     if isinstance(obj, FTS):
         # Delegate to FTS.save()
@@ -84,7 +84,7 @@ def save_stx_bundle(obj, spath, as_zip=True, bundle_type=None, basename=None, **
 
         save_pltz_as_stx(obj, spath, as_zip=as_zip, basename=basename, **kwargs)
     elif content_type == "figure":
-        from scitex.fts import FTS
+        from scitex.io.bundle import FTS
 
         bundle = FTS(spath, create=True, node_type="figure")
         if isinstance(obj, dict):

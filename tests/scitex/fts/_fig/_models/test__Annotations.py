@@ -12,7 +12,7 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # File: ./src/scitex/vis/model/annotations.py
-# """Annotation JSON model for scitex.fig."""
+# """Annotation JSON model for scitex.canvas."""
 # 
 # from dataclasses import asdict, dataclass, field
 # from typing import Any, Dict, Optional, Tuple

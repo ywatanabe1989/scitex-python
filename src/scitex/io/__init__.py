@@ -9,8 +9,8 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 """Scitex IO module with lazy imports to avoid circular dependencies.
 
-Bundle I/O is handled via scitex.fts:
-    from scitex.fts import FTS
+Bundle I/O is handled via scitex.io.bundle:
+    from scitex.io.bundle import FTS
     bundle = FTS("Figure1.stx")
     bundle.save()
 """

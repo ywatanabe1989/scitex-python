@@ -12,7 +12,7 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # File: ./src/scitex/vis/model/guides.py
-# """Guide elements (lines, spans) JSON model for scitex.fig."""
+# """Guide elements (lines, spans) JSON model for scitex.canvas."""
 # 
 # from dataclasses import asdict, dataclass, field
 # from typing import Any, Dict, Optional

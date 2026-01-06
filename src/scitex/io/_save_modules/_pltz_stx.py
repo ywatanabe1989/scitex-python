@@ -517,7 +517,7 @@ def _generate_readme(bundle_dir, basename, spec, csv_df):
             "## Usage",
             "",
             "```python",
-            "from scitex.fts import FTS",
+            "from scitex.io.bundle import FTS",
             "",
             f'bundle = FTS("{basename}.zip")  # or "{basename}/" directory',
             "bundle.show()  # Display",

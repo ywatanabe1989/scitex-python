@@ -30,7 +30,7 @@ from scitex.bridge import (
     position_stat_annotation,
 )
 from scitex.schema import create_stat_result
-from scitex.fig.model import FigureModel
+from scitex.canvas.model import FigureModel
 
 
 @stx.session

@@ -15,7 +15,7 @@ Uses PLOTTERS registry from scitex.dev.plt for all plot types.
 
 import scitex as stx
 import scitex.io as sio
-from scitex.fts import FTS
+from scitex.io.bundle import FTS
 from scitex.dev.plt import PLOTTERS_STX, PLOTTERS_MPL
 
 

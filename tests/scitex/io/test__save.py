@@ -1527,10 +1527,10 @@ if __name__ == "__main__":
 # ):
 #     """Save matplotlib figure as FTS bundle (.zip or directory).
 #
-#     Delegates to scitex.fts.from_matplotlib as the single source of truth
+#     Delegates to scitex.io.bundle.from_matplotlib as the single source of truth
 #     for bundle structure (canonical/artifacts/payload/children).
 #     """
-#     from scitex.fts import from_matplotlib
+#     from scitex.io.bundle import from_matplotlib
 #
 #     from ._save_modules._figure_utils import get_figure_with_data
 #

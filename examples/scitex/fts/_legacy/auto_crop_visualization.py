@@ -24,7 +24,7 @@ from pathlib import Path
 
 import scitex as stx
 from scitex import INJECTED
-from scitex.fig import (
+from scitex.canvas import (
     Figz,
     auto_crop_layout,
     content_bounds,
