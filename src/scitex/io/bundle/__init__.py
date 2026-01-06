@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-12-16 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/__init__.py
+# Timestamp: 2026-01-07
+# File: src/scitex/io/bundle/__init__.py
 
 """
-SciTeX Bundle I/O - Unified bundle handling for .figz, .pltz, .statsz formats.
+SciTeX Bundle I/O - Unified bundle handling for bundles.
 
 This module provides a clean API for working with SciTeX bundles:
-    - .figz - Publication Figure Bundle (panels + layout)
-    - .pltz - Reproducible Plot Bundle (data + spec + exports)
-    - .statsz - Statistical Results Bundle (stats + metadata)
+    - .figz/.figure.zip - Publication Figure Bundle (panels + layout)
+    - .pltz/.plot.zip - Reproducible Plot Bundle (data + spec + exports)
+    - .statsz/.stats.zip - Statistical Results Bundle (stats + metadata)
 
 Each bundle can exist in two forms:
-    - ZIP archive: Figure1.figz, plot.pltz
-    - Directory: Figure1.figz.d/, plot.pltz.d/
+    - ZIP archive: Figure1.figz, plot.pltz, or Figure1.figure.zip, plot.plot.zip
+    - Directory: Figure1.figz.d/, plot.pltz.d/, or Figure1.figure/, plot.plot/
 
 Usage:
     import scitex.io.bundle as bundle
 
     # Load a bundle
-    data = bundle.load("Figure1.figz")
+    data = bundle.load("Figure1.figz")  # or "Figure1.figure.zip"
 
     # Save a bundle
     bundle.save(data, "output.pltz", as_zip=True)
@@ -35,20 +34,13 @@ Usage:
     # Access nested bundles (pltz inside figz)
     preview = bundle.nested.get_preview("Figure1.figz/A.pltz.d")
     spec = bundle.nested.get_json("Figure1.figz/A.pltz.d/spec.json")
+
+Note: This module now includes functionality from the deprecated scitex.fts module.
 """
 
 # Types and constants
-from ._types import (
-    EXTENSIONS,
-    FIGZ,
-    PLTZ,
-    STATSZ,
-    BundleError,
-    BundleNotFoundError,
-    BundleType,
-    BundleValidationError,
-    NestedBundleNotFoundError,
-)
+# Nested bundle access as namespace
+from . import _nested as nested
 
 # Core operations
 from ._core import (
@@ -65,14 +57,39 @@ from ._core import (
     zip_to_dir_path,
 )
 
+# Dataclasses (from deprecated scitex.fts)
+from ._dataclasses import BBox, DataInfo, Node, NodeRefs, SizeMM
+
+# FTS class and factory functions (from deprecated scitex.fts)
+from ._FTS import FTS, create_bundle, from_matplotlib, load_bundle
+from ._types import (
+    DIR_EXTENSIONS,
+    DIR_EXTENSIONS_LEGACY,
+    DIR_EXTENSIONS_NEW,
+    EXTENSION_MAP,
+    EXTENSIONS,
+    EXTENSIONS_LEGACY,
+    EXTENSIONS_NEW,
+    FIGURE,
+    FIGZ,
+    PLOT,
+    PLTZ,
+    STATS,
+    STATSZ,
+    BundleError,
+    BundleNotFoundError,
+    BundleType,
+    BundleValidationError,
+    NestedBundleNotFoundError,
+)
+
 # ZipBundle class and functions
-from ._zip import ZipBundle
+from ._zip import ZipBundle, zip_directory
 from ._zip import create as create_zip
 from ._zip import open as open_zip
-from ._zip import zip_directory
 
-# Nested bundle access as namespace
-from . import _nested as nested
+# NodeType enum placeholder for backward compat
+NodeType = Node  # Alias for backward compatibility
 
 __all__ = [
     # Types
@@ -81,11 +98,22 @@ __all__ = [
     "BundleValidationError",
     "BundleNotFoundError",
     "NestedBundleNotFoundError",
-    # Constants
+    # Constants - Extensions
     "EXTENSIONS",
+    "EXTENSIONS_LEGACY",
+    "EXTENSIONS_NEW",
+    "DIR_EXTENSIONS",
+    "DIR_EXTENSIONS_LEGACY",
+    "DIR_EXTENSIONS_NEW",
+    "EXTENSION_MAP",
+    # Constants - Type names (legacy)
     "FIGZ",
     "PLTZ",
     "STATSZ",
+    # Constants - Type names (new)
+    "FIGURE",
+    "PLOT",
+    "STATS",
     # Core operations
     "load",
     "save",
@@ -105,6 +133,18 @@ __all__ = [
     "zip_directory",
     # Nested access namespace
     "nested",
+    # FTS class and factory functions (backward compat with scitex.fts)
+    "FTS",
+    "load_bundle",
+    "create_bundle",
+    "from_matplotlib",
+    # Dataclasses (backward compat with scitex.fts)
+    "Node",
+    "NodeType",
+    "NodeRefs",
+    "BBox",
+    "SizeMM",
+    "DataInfo",
 ]
 
 # EOF

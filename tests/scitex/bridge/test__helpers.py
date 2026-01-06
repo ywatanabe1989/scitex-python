@@ -277,7 +277,7 @@ if __name__ == "__main__":
 #     """
 #     # Check for vis FigureModel
 #     try:
-#         from scitex.fig.model import FigureModel
+#         from scitex.canvas.model import FigureModel
 #         if isinstance(target, FigureModel):
 #             return "vis"
 #     except ImportError:

@@ -3,7 +3,7 @@
 # Timestamp: 2025-12-08
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_canvas.py
 """
-Save canvas directory (.canvas) for scitex.fig.
+Save canvas directory (.canvas) for scitex.canvas.
 
 Canvas directories are portable figure bundles containing:
     - canvas.json: Layout, panels, composition settings
@@ -113,7 +113,7 @@ def _export_canvas_figures(
         formats = ["png", "pdf", "svg"]
 
     try:
-        from scitex.fig.io.export import _compose_and_export
+        from scitex.canvas.io.export import _compose_and_export
         import json
 
         # Load canvas.json
@@ -136,7 +136,7 @@ def _export_canvas_figures(
                 transparent=False,
             )
     except ImportError:
-        # scitex.fig not available
+        # scitex.canvas not available
         pass
     except Exception as e:
         # Log but don't fail save if export fails

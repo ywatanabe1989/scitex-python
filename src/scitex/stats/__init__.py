@@ -57,12 +57,12 @@ from .auto import (
 )
 
 # =============================================================================
-# Stats Schema - Use scitex.fts.Stats as single source of truth
+# Stats Schema - Use scitex.io.bundle.Stats as single source of truth
 # =============================================================================
 
 # For backward compatibility, re-export from fts
 try:
-    from scitex.fts import Stats
+    from scitex.io.bundle import Stats
 
     FTS_AVAILABLE = True
 except ImportError:
@@ -101,16 +101,16 @@ def test_result_to_stats(result: dict) -> "Stats":
     >>> bundle.stats = fts_stats
     """
     if not FTS_AVAILABLE:
-        raise ImportError("scitex.fts is required for Stats conversion")
+        raise ImportError("scitex.io.bundle is required for Stats conversion")
 
     import uuid
 
-    from scitex.fts._stats._dataclasses._Stats import (
+    from scitex.io.bundle._stats._dataclasses._Stats import (
         Analysis,
         EffectSize,
         StatMethod,
     )
-    from scitex.fts._stats._dataclasses._Stats import (
+    from scitex.io.bundle._stats._dataclasses._Stats import (
         StatResult as FTSStatResult,
     )
 
@@ -220,7 +220,7 @@ def save_statsz(
     """
     from pathlib import Path
 
-    from scitex.fts import FTS
+    from scitex.io.bundle import FTS
 
     p = Path(path)
     if as_zip and not p.suffix == ".zip":
@@ -262,7 +262,7 @@ def load_statsz(path):
         Each comparison is a flat dict with:
         - name, method, p_value, effect_size, ci95, formatted
     """
-    from scitex.fts import FTS
+    from scitex.io.bundle import FTS
 
     bundle = FTS(path)
 

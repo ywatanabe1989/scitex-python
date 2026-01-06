@@ -242,4 +242,4 @@ if __name__ == "__main__":
     for d in dirs:
         print(f"  {d}")
     print("\nRun Flask editor with:")
-    print("  python -m scitex.fig.editor --port 5555 <path>")
+    print("  python -m scitex.canvas.editor --port 5555 <path>")

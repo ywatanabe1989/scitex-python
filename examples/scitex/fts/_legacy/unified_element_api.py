@@ -37,8 +37,8 @@ import numpy as np
 
 import scitex as stx
 from scitex import INJECTED
-from scitex.fig import Figz
-from scitex.fig import to_absolute
+from scitex.canvas import Figz
+from scitex.canvas import to_absolute
 
 # =============================================================================
 # Plot Creation Functions

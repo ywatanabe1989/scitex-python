@@ -5,10 +5,10 @@
 SciTeX Schema Module - DEPRECATED
 
 This module is scheduled for removal. All schemas are being consolidated
-in scitex.fts as the single source of truth.
+in scitex.io.bundle as the single source of truth.
 
-For new code, import from scitex.fts:
-    from scitex.fts import FTS, Node, Encoding, Theme, Stats
+For new code, import from scitex.io.bundle:
+    from scitex.io.bundle import FTS, Node, Encoding, Theme, Stats
 
 This module exists temporarily for backward compatibility.
 """
@@ -16,7 +16,7 @@ This module exists temporarily for backward compatibility.
 import warnings
 
 warnings.warn(
-    "scitex.schema is deprecated. Import from scitex.fts instead. "
+    "scitex.schema is deprecated. Import from scitex.io.bundle instead. "
     "This module will be removed in a future version.",
     DeprecationWarning,
     stacklevel=2
@@ -26,10 +26,10 @@ warnings.warn(
 SCHEMA_VERSION = "0.2.0"
 
 # =============================================================================
-# Re-export from scitex.fts (new single source of truth)
+# Re-export from scitex.io.bundle (new single source of truth)
 # =============================================================================
 try:
-    from scitex.fts import (
+    from scitex.io.bundle import (
         # Core bundle classes
         FTS,
         Node,
@@ -52,7 +52,7 @@ except ImportError:
 
 # =============================================================================
 # Independent schemas (still defined here temporarily)
-# These will be migrated to scitex.fts in subsequent phases
+# These will be migrated to scitex.io.bundle in subsequent phases
 # =============================================================================
 
 # Stats schema (GUI-focused version - to be merged with FTS Stats)
