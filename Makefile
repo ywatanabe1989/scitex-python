@@ -9,7 +9,7 @@ SHELL := /bin/bash
 .PHONY: help install install-dev install-all \
 	clean test test-fast test-full test-lf test-ff test-nf test-inc test-unit test-changed lint format check \
 	test-stats-cov test-config-cov test-logging-cov \
-	build release upload upload-test test-install test-install-pypi \
+	build release upload upload-test test-install test-install-pypi test-install-module test-install-modules \
 	build-all release-all upload-all upload-test-all \
 	sync-extras sync-tests sync-examples sync-redirect \
 	show-version tag
@@ -45,6 +45,7 @@ help:
 	@echo -e "  make test-changed      Tests for git-changed files"
 	@echo -e "  make test-unit         Only @unit marked tests"
 	@echo -e "  make test MODULE=plt   Single module tests"
+	@echo -e "  make test-isolated MODULE=io  Isolated venv test"
 	@echo -e "  make test-fast         Skip @slow tests"
 	@echo -e "  make test-ff           Failed first, then rest"
 	@echo -e "  make test-nf           New tests first"
@@ -156,6 +157,28 @@ test-unit:
 	@echo -e "$(CYAN)⚡ Running unit tests only...$(NC)"
 	@./scripts/maintenance/test.sh -m unit
 
+# Test module in isolation (temp venv with only module deps)
+test-isolated:
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make test-isolated MODULE=io"
+	@echo "Available modules:"
+	@ls -1 tests/scitex/ | grep -v __pycache__ | column
+	@exit 1
+endif
+	@echo -e "$(CYAN)🔬 Testing $(MODULE) in isolated environment (editable)...$(NC)"
+	@./scripts/test-module.sh editable $(MODULE)
+
+# Test module from PyPI in isolation
+test-isolated-pypi:
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make test-isolated-pypi MODULE=io"
+	@exit 1
+endif
+	@echo -e "$(CYAN)🔬 Testing $(MODULE) in isolated environment (PyPI)...$(NC)"
+	@./scripts/test-module.sh pypi $(MODULE)
+
 test-changed:
 	@echo -e "$(CYAN)📝 Running tests for git-changed files...$(NC)"
 	@./scripts/maintenance/test.sh --changed
@@ -226,39 +249,44 @@ upload: build
 # Installation Testing (pre-release validation)
 # ============================================
 
-TEST_VENV_DIR := /tmp/scitex-test-install
-
+# Test local build installation
 test-install: build
-	@echo -e "$(CYAN)🧪 Testing installation in isolated venv...$(NC)"
-	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
-	rm -rf $(TEST_VENV_DIR); \
-	python -m venv $(TEST_VENV_DIR); \
-	$(TEST_VENV_DIR)/bin/pip install --upgrade pip > /dev/null; \
-	echo -e "$(GRAY)Installing scitex[all] from local build...$(NC)"; \
-	$(TEST_VENV_DIR)/bin/pip install dist/scitex-$$VERSION-py3-none-any.whl[all] > /dev/null 2>&1 || \
-		(echo -e "$(RED)❌ Installation failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
-	echo -e "$(GRAY)Testing imports...$(NC)"; \
-	$(TEST_VENV_DIR)/bin/python -c "import scitex; print(f'Version: {scitex.__version__}')" || \
-		(echo -e "$(RED)❌ Import failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
-	$(TEST_VENV_DIR)/bin/python -c "from scitex import io, plt, stats" || \
-		(echo -e "$(RED)❌ Core module imports failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
-	rm -rf $(TEST_VENV_DIR); \
-	echo -e "$(GREEN)✅ Installation test passed$(NC)"
+	@./scripts/release/test_install.sh local
 
+# Test PyPI installation
 test-install-pypi:
-	@echo -e "$(CYAN)🧪 Testing PyPI installation in isolated venv...$(NC)"
-	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
-	rm -rf $(TEST_VENV_DIR); \
-	python -m venv $(TEST_VENV_DIR); \
-	$(TEST_VENV_DIR)/bin/pip install --upgrade pip > /dev/null; \
-	echo -e "$(GRAY)Installing scitex[all]==$$VERSION from PyPI...$(NC)"; \
-	$(TEST_VENV_DIR)/bin/pip install "scitex[all]==$$VERSION" > /dev/null 2>&1 || \
-		(echo -e "$(RED)❌ PyPI installation failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
-	echo -e "$(GRAY)Testing imports...$(NC)"; \
-	$(TEST_VENV_DIR)/bin/python -c "import scitex; print(f'Version: {scitex.__version__}')" || \
-		(echo -e "$(RED)❌ Import failed$(NC)" && rm -rf $(TEST_VENV_DIR) && exit 1); \
-	rm -rf $(TEST_VENV_DIR); \
-	echo -e "$(GREEN)✅ PyPI installation test passed$(NC)"
+	@./scripts/release/test_install.sh pypi
+
+# Test specific module: make test-install-module MODULE=io
+test-install-module: build
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make test-install-module MODULE=io"
+	@exit 1
+endif
+	@./scripts/release/test_install.sh local $(MODULE)
+
+# Test all key modules
+test-install-modules: build
+	@./scripts/release/test_install.sh local-all
+
+# Test module + run pytest: make test-module-full MODULE=io
+test-module-full: build
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make test-module-full MODULE=io"
+	@exit 1
+endif
+	@./scripts/release/test_module.sh local $(MODULE)
+
+# Test module from PyPI + run pytest: make test-module-pypi MODULE=io
+test-module-pypi:
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make test-module-pypi MODULE=io"
+	@exit 1
+endif
+	@./scripts/release/test_module.sh pypi $(MODULE)
 
 release: clean build test-install tag upload
 	@echo -e ""
@@ -312,5 +340,25 @@ tag:
 	git tag -a v$$VERSION -m "Release v$$VERSION"; \
 	git push origin v$$VERSION; \
 	echo -e "$(GREEN)✅ Tag v$$VERSION created and pushed$(NC)"
+
+# ============================================
+# Dependency Maintenance
+# ============================================
+
+deps-check:
+	@echo -e "$(CYAN)🔍 Checking module dependencies...$(NC)"
+	@python3 scripts/maintenance/detect-module-deps.py --all --missing-only
+
+deps-check-module:
+	@echo -e "$(CYAN)🔍 Checking dependencies for $(MODULE)...$(NC)"
+	@python3 scripts/maintenance/detect-module-deps.py $(MODULE)
+
+deps-fix:
+	@echo -e "$(CYAN)🔧 Fixing missing dependencies (dry-run)...$(NC)"
+	@python3 scripts/maintenance/fix-module-deps.py --dry-run
+
+deps-fix-apply:
+	@echo -e "$(CYAN)🔧 Applying dependency fixes...$(NC)"
+	@python3 scripts/maintenance/fix-module-deps.py --apply
 
 # EOF
