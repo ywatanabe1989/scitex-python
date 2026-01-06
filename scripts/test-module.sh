@@ -35,10 +35,20 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Modules with optional extras in pyproject.toml
 MODULES_WITH_EXTRAS=(
-    ai audio benchmark browser capture cli config db decorators dsp dt fig fts gen
+    ai audio benchmark bridge browser capture cli cloud config db decorators dev dsp dt fig fts gen
     git io linalg msword nn parallel path pd plt repro resource scholar stats str
     torch types utils web writer
 )
+
+# Map module names to extras names (for naming conflicts)
+# e.g., "dev" module uses "devtools" extras (since "dev" is for pytest tools)
+get_extras_name() {
+    local module="$1"
+    case "$module" in
+    dev) echo "devtools" ;;
+    *) echo "$module" ;;
+    esac
+}
 
 # Check if module has extras
 has_extras() {
@@ -53,17 +63,19 @@ has_extras() {
 get_install_cmd() {
     local mode="$1"
     local module="$2"
+    local extras_name
+    extras_name=$(get_extras_name "$module")
 
     if [[ "$mode" == "editable" ]]; then
         if has_extras "$module"; then
-            echo "-e .[${module}]"
+            echo "-e .[${extras_name}]"
         else
             echo "-e ."
         fi
     else
         # PyPI mode
         if has_extras "$module"; then
-            echo "scitex[${module}]"
+            echo "scitex[${extras_name}]"
         else
             echo "scitex"
         fi
