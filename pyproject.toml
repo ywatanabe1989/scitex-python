@@ -109,6 +109,10 @@ ai = [
     "xarray",
     "umap-learn",
     "sktime",
+    "markdown2",
+    "pytorch_pretrained_vit",
+    "torchvision",
+    "imbalanced-learn",
 ]
 
 # Audio Module - Text-to-Speech
@@ -132,6 +136,7 @@ benchmark = [
 # Use: pip install scitex[bridge]
 bridge = [
     "matplotlib",
+    "scipy",
 ]
 
 # Browser Module - Web automation
@@ -218,6 +223,19 @@ dsp = [
     "julius",
     "torchaudio",
     "xarray",
+    "seaborn",
+]
+
+# DevTools Module - scitex.dev code analysis and development tools
+# Use: pip install scitex[devtools]
+# Note: Named "devtools" to avoid conflict with "dev" (testing deps)
+devtools = [
+    "matplotlib",
+    "joblib",
+    "ruamel.yaml",
+    "xarray",
+    "seaborn",
+    "scipy",
 ]
 
 # DT Module - Date/time utilities
@@ -381,6 +399,8 @@ plt = [
     "scipy",
     "xarray",
     "pyyaml",
+    "joblib",
+    "ruamel.yaml",
 ]
 
 # Repro Module - Reproducibility tools
@@ -441,6 +461,8 @@ scholar = [
     "pyyaml",
     "torch",
     "tqdm",
+    "sql-manager",
+    "ruamel.yaml",
 ]
 
 # Session Module - Session management
@@ -516,6 +538,17 @@ web = [
     "joblib",
     "scikit-learn",
     "pytest-asyncio",
+    "ruamel.yaml",
+    "xarray",
+    "seaborn",
+    "scipy",
+    "torch",
+    "umap-learn",
+    "markdown2",
+    "anthropic",
+    "openai",
+    "google-genai",
+    "groq",
 ]
 
 # Writer Module - Academic paper writing
