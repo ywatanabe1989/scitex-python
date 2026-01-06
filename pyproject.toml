@@ -99,6 +99,16 @@ ai = [
     "seaborn",
     "scipy",
     "matplotlib",
+    "natsort",
+    "pillow",
+    "psutil",
+    "pyyaml",
+    "requests",
+    "torch",
+    "ruamel.yaml",
+    "xarray",
+    "umap-learn",
+    "sktime",
 ]
 
 # Audio Module - Text-to-Speech
@@ -109,6 +119,7 @@ audio = [
     "pydub",
     "elevenlabs",
     "mcp",
+    "pytest-asyncio",
 ]
 
 # Benchmark Module - Performance monitoring
@@ -117,11 +128,18 @@ benchmark = [
     "psutil",
 ]
 
+# Bridge Module - External system integration
+# Use: pip install scitex[bridge]
+bridge = [
+    "matplotlib",
+]
+
 # Browser Module - Web automation
 # Use: pip install scitex[browser]
 browser = [
     "playwright>=1.40.0",
     "aiohttp",
+    "matplotlib",
 ]
 
 # Capture Module - Screenshot capture
@@ -138,6 +156,23 @@ capture = [
 cli = [
     "click",
     "requests",
+    "playwright",
+    "pyyaml",
+    "aiohttp",
+    "beautifulsoup4",
+    "GitPython",
+]
+
+# Cloud Module - Cloud service integration
+# Use: pip install scitex[cloud]
+cloud = [
+    "matplotlib",
+]
+
+# Config Module - Configuration management
+# Use: pip install scitex[config]
+config = [
+    "PyYAML",
 ]
 
 # DB Module - Database operations
@@ -151,6 +186,18 @@ db = [
 # Use: pip install scitex[decorators]
 decorators = [
     "joblib",
+    "torch",
+    "tqdm",
+    "xarray",
+    "pytest-asyncio",
+    "matplotlib",
+    "scipy",
+]
+
+# Diagram Module - Diagram generation
+# Use: pip install scitex[diagram]
+diagram = [
+    "PyYAML",
 ]
 
 # DSP Module - Digital Signal Processing
@@ -159,6 +206,35 @@ dsp = [
     "scipy",
     "sounddevice",
     "matplotlib",
+    "mne",
+    "torch",
+    "joblib",
+    "ripple_detection",
+    "tensorpac",
+    "ruamel.yaml",
+    "h5py",
+    "readchar",
+    "torchsummary",
+    "julius",
+    "torchaudio",
+    "xarray",
+]
+
+# DT Module - Date/time utilities
+# Use: pip install scitex[dt]
+dt = [
+    "matplotlib",
+]
+
+# Fig Module - Figure editing with GUI backends
+# Use: pip install scitex[fig]
+fig = [
+    "matplotlib",
+    "Pillow",
+    "flask",
+    "dearpygui",
+    "PyQt6",
+    "pyqt5",
 ]
 
 # FTS Module - Figures, Tables, Statistics
@@ -179,6 +255,9 @@ gen = [
     "scipy",
     "matplotlib",
     "xarray",
+    "requests",
+    "torch",
+    "joblib",
 ]
 
 # Git Module - Git operations
@@ -217,6 +296,14 @@ io = [
     "GitPython",
     "scipy",
     "matplotlib",
+    "mne",
+    "optuna",
+    "catboost",
+    "psutil",
+    "pyarrow",
+    "pyyaml",
+    "torch",
+    "tqdm",
 ]
 
 # Linalg Module - Linear algebra
@@ -225,6 +312,15 @@ linalg = [
     "scipy",
     "sympy",
     "geom_median",
+    "matplotlib",
+    "torch",
+    "joblib",
+    "xarray",
+]
+
+# Logging Module - Enhanced logging
+# Use: pip install scitex[logging]
+logging = [
     "matplotlib",
 ]
 
@@ -245,6 +341,20 @@ nn = [
     "seaborn",
     "ipdb",
     "matplotlib",
+    "joblib",
+    "mne",
+    "ripple_detection",
+    "tensorpac",
+    "ruamel.yaml",
+    "h5py",
+    "readchar",
+    "xarray",
+]
+
+# Parallel Module - Parallel processing
+# Use: pip install scitex[parallel]
+parallel = [
+    "tqdm",
 ]
 
 # Path Module - Path utilities
@@ -252,6 +362,12 @@ nn = [
 path = [
     "GitPython",
     "matplotlib",
+]
+
+# Pd Module - Pandas utilities
+# Use: pip install scitex[pd]
+pd = [
+    "xarray",
 ]
 
 # PLT Module - Plotting utilities
@@ -264,6 +380,7 @@ plt = [
     "termplotlib",
     "scipy",
     "xarray",
+    "pyyaml",
 ]
 
 # Repro Module - Reproducibility tools
@@ -271,6 +388,8 @@ plt = [
 repro = [
     "torch",
     "matplotlib",
+    "jax",
+    "tensorflow",
 ]
 
 # Resource Module - Resource monitoring
@@ -278,6 +397,13 @@ repro = [
 resource = [
     "psutil",
     "matplotlib",
+    "pyyaml",
+    "torch",
+    "joblib",
+    "ruamel.yaml",
+    "h5py",
+    "scipy",
+    "readchar",
 ]
 
 # Scholar Module - Paper management & browser
@@ -312,6 +438,22 @@ scholar = [
     "Pillow",
     "requests",
     "matplotlib",
+    "pyyaml",
+    "torch",
+    "tqdm",
+]
+
+# Session Module - Session management
+# Use: pip install scitex[session]
+session = [
+    "matplotlib",
+    "PyYAML",
+]
+
+# Sh Module - Shell utilities
+# Use: pip install scitex[sh]
+sh = [
+    "matplotlib",
 ]
 
 # Stats Module - Statistical analysis
@@ -320,6 +462,8 @@ stats = [
     "scipy",
     "statsmodels",
     "matplotlib",
+    "torch",
+    "tabulate",
 ]
 
 # Str Module - String utilities
@@ -328,6 +472,12 @@ str = [
     "natsort",
     "matplotlib",
     "xarray",
+]
+
+# Tex Module - LaTeX utilities
+# Use: pip install scitex[tex]
+tex = [
+    "matplotlib",
 ]
 
 # Torch Module - PyTorch support
@@ -350,6 +500,7 @@ utils = [
     "natsort",
     "matplotlib",
     "xarray",
+    "tqdm",
 ]
 
 # Web Module - Web utilities
@@ -361,6 +512,10 @@ web = [
     "requests",
     "Pillow",
     "matplotlib",
+    "tqdm",
+    "joblib",
+    "scikit-learn",
+    "pytest-asyncio",
 ]
 
 # Writer Module - Academic paper writing
@@ -370,104 +525,13 @@ writer = [
     "xlsx2csv",
     "csv2latex",
     "matplotlib",
-]
-
-# Figures Module - Reproducible figure creation
-# Use: pip install scitex[figures]
-figures = [
-    "figrecipe",
+    "GitPython",
+    "pytest-asyncio",
 ]
 
 # --------------------------------------------
-# Convenience Groups (combinations of modules)
+# Development Tools
 # --------------------------------------------
-
-# Scientific computing essentials
-# Use: pip install scitex[science]
-science = [
-    "scipy",
-    "matplotlib",
-    "seaborn",
-    "plotly",
-    "scikit-learn",
-    "statsmodels",
-    "h5py",
-    "xarray",
-    "Pillow",
-]
-
-# Deep Learning (Heavy - 2-4 GB)
-# Use: pip install scitex[dl]
-dl = [
-    "torch",
-    "torchvision",
-    "torchaudio",
-    "torchsummary",
-    "transformers",
-    "accelerate",
-    "bitsandbytes",
-    "fairscale",
-    "pytorch_pretrained_vit",
-    "pytorch-optimizer",
-    "einops",
-]
-
-# Machine Learning extras
-# Use: pip install scitex[ml]
-ml = [
-    "scikit-learn",
-    "scikit-image",
-    "imbalanced-learn",
-    "umap-learn>=0.5.4",
-    "llvmlite>=0.39.0",  # Force Python 3.11+ compatible version (pynndescent pulls old version)
-    "sktime",
-    "catboost",
-    "optuna",
-    "sympy",
-    "opencv-python",
-]
-
-# Jupyter & Interactive Development
-# Use: pip install scitex[jupyter]
-jupyter = [
-    "jupyterlab",
-    "jupyter-collaboration",
-    "ipykernel",
-    "ipdb",
-    "papermill",
-    "jupytext",
-    "nbsphinx",
-    "ipython",
-]
-
-# Neuroscience tools
-# Use: pip install scitex[neuro]
-neuro = [
-    "mne",
-    "obspy",
-    "pyedflib",
-    "pybids",
-    "tensorpac",
-    "ripple_detection",
-    "geom_median",
-]
-
-# Web Frameworks
-# Use: pip install scitex[webdev]
-webdev = [
-    "fastapi",
-    "flask",
-    "streamlit",
-    "celery",
-]
-
-# GUI Editors
-# Use: pip install scitex[gui]
-gui = [
-    "flask",
-    "dearpygui",
-    "PyQt6",
-]
 
 # Development Tools
 # Use: pip install scitex[dev]
@@ -511,6 +575,10 @@ dev = [
     "types-requests",
     "types-PyYAML",
     "types-setuptools",
+    # Maintenance scripts
+    "stdlib-list",
+    "matplotlib",
+    "pyyaml",
 ]
 
 # All features (everything except dev)

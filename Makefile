@@ -45,6 +45,7 @@ help:
 	@echo -e "  make test-changed      Tests for git-changed files"
 	@echo -e "  make test-unit         Only @unit marked tests"
 	@echo -e "  make test MODULE=plt   Single module tests"
+	@echo -e "  make test-isolated MODULE=io  Isolated venv test"
 	@echo -e "  make test-fast         Skip @slow tests"
 	@echo -e "  make test-ff           Failed first, then rest"
 	@echo -e "  make test-nf           New tests first"
@@ -155,6 +156,28 @@ test-inc:
 test-unit:
 	@echo -e "$(CYAN)⚡ Running unit tests only...$(NC)"
 	@./scripts/maintenance/test.sh -m unit
+
+# Test module in isolation (temp venv with only module deps)
+test-isolated:
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make test-isolated MODULE=io"
+	@echo "Available modules:"
+	@ls -1 tests/scitex/ | grep -v __pycache__ | column
+	@exit 1
+endif
+	@echo -e "$(CYAN)🔬 Testing $(MODULE) in isolated environment (editable)...$(NC)"
+	@./scripts/test-module.sh editable $(MODULE)
+
+# Test module from PyPI in isolation
+test-isolated-pypi:
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make test-isolated-pypi MODULE=io"
+	@exit 1
+endif
+	@echo -e "$(CYAN)🔬 Testing $(MODULE) in isolated environment (PyPI)...$(NC)"
+	@./scripts/test-module.sh pypi $(MODULE)
 
 test-changed:
 	@echo -e "$(CYAN)📝 Running tests for git-changed files...$(NC)"
@@ -317,5 +340,25 @@ tag:
 	git tag -a v$$VERSION -m "Release v$$VERSION"; \
 	git push origin v$$VERSION; \
 	echo -e "$(GREEN)✅ Tag v$$VERSION created and pushed$(NC)"
+
+# ============================================
+# Dependency Maintenance
+# ============================================
+
+deps-check:
+	@echo -e "$(CYAN)🔍 Checking module dependencies...$(NC)"
+	@python3 scripts/maintenance/detect-module-deps.py --all --missing-only
+
+deps-check-module:
+	@echo -e "$(CYAN)🔍 Checking dependencies for $(MODULE)...$(NC)"
+	@python3 scripts/maintenance/detect-module-deps.py $(MODULE)
+
+deps-fix:
+	@echo -e "$(CYAN)🔧 Fixing missing dependencies (dry-run)...$(NC)"
+	@python3 scripts/maintenance/fix-module-deps.py --dry-run
+
+deps-fix-apply:
+	@echo -e "$(CYAN)🔧 Applying dependency fixes...$(NC)"
+	@python3 scripts/maintenance/fix-module-deps.py --apply
 
 # EOF
