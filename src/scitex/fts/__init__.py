@@ -1,52 +1,84 @@
 #!/usr/bin/env python3
-# Timestamp: 2025-12-20
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/__init__.py
+# Timestamp: 2026-01-07
+# File: src/scitex/fts/__init__.py
+#
+# DEPRECATED: This module is deprecated. Use scitex.io.bundle instead.
+# This file provides backward compatibility and will be removed in a future version.
 
 """
-SciTeX FTS (Figure-Table-Statistics) - The single source of truth for bundle schemas.
+SciTeX FTS (Figure-Table-Statistics) - DEPRECATED.
 
-FTS defines a standardized format for reproducible scientific figures and tables:
-- Self-contained bundles with data, visualization spec, and stats
-- Clear separation: Node (structure), Encoding (data mapping), Theme (aesthetics)
-- Full provenance tracking for scientific reproducibility
+This module has been merged into scitex.io.bundle.
+Please update your imports:
 
-Usage:
-    from scitex.fts import FTS, Node, Encoding, Theme
+    # Old (deprecated)
+    from scitex.fts import FTS, Node
 
-    # Create new bundle
-    bundle = FTS("my_plot.zip", create=True, node_type="plot")
-    bundle.encoding = {"traces": [{"trace_id": "t1", "x": {"column": "time"}}]}
-    bundle.save()
-
-    # Load existing bundle
-    bundle = FTS("my_plot.zip")
-    print(bundle.node.type)  # "plot"
+    # New (recommended)
+    from scitex.io.bundle import FTS, Node
 """
+
+import warnings
+
+warnings.warn(
+    "scitex.fts is deprecated. Use scitex.io.bundle instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 # Version
 __version__ = "1.0.0"
 
-# =============================================================================
-# Public API - What users need
-# =============================================================================
+# Re-export from io.bundle
+try:
+    from scitex.io.bundle import (
+        FTS,
+        BBox,
+        BundleError,
+        BundleNotFoundError,
+        BundleValidationError,
+        DataInfo,
+        Node,
+        NodeType,
+        SizeMM,
+        create_bundle,
+        from_matplotlib,
+        load_bundle,
+    )
+except ImportError:
+    # Fallback to internal imports during transition
+    from ._bundle import (
+        FTS,
+        BBox,
+        BundleError,
+        BundleNotFoundError,
+        BundleValidationError,
+        DataInfo,
+        Node,
+        NodeType,
+        SizeMM,
+        create_bundle,
+        from_matplotlib,
+        load_bundle,
+    )
 
-# FTS class (main entry point)
-from ._bundle import FTS, create_bundle, from_matplotlib, load_bundle
+# Try to import these from their respective locations
+try:
+    from scitex.io.bundle.kinds._plot import Encoding, Theme
+except ImportError:
+    try:
+        from ._fig import Encoding, Theme
+    except ImportError:
+        Encoding = None
+        Theme = None
 
-# Core dataclasses users interact with
-from ._bundle import Node, BBox, SizeMM, DataInfo
-from ._fig import Encoding, Theme
-from ._stats import Stats
-
-# Type enumeration
-from ._bundle import NodeType
-
-# Error classes for exception handling
-from ._bundle import (
-    BundleError,
-    BundleNotFoundError,
-    BundleValidationError,
-)
+try:
+    from scitex.stats import Stats
+except ImportError:
+    try:
+        from ._stats import Stats
+    except ImportError:
+        Stats = None
 
 # Availability flags
 FTS_AVAILABLE = True

@@ -7,7 +7,7 @@ Statistical Result Schema - DEPRECATED
 This module is deprecated. Import from scitex.schema._stats instead:
     from scitex.schema._stats import Position, StatStyling, StatPositioning, StatResult
 
-For the new simplified API, use scitex.fts._stats.
+For the new simplified API, use scitex.io.bundle._stats.
 """
 
 import warnings

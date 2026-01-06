@@ -229,7 +229,7 @@ def validate_bundles(paths: tuple, verbose: bool):
     """
     # Use FTS instead of deprecated io.bundle
     try:
-        from scitex.fts import FTS as ZipBundle
+        from scitex.io.bundle import FTS as ZipBundle
         def validate_stx_bundle(path):
             try:
                 bundle = ZipBundle(path)
@@ -237,7 +237,7 @@ def validate_bundles(paths: tuple, verbose: bool):
             except Exception as e:
                 return {"valid": False, "errors": [str(e)]}
     except ImportError:
-        click.echo("Error: scitex.fts not available", err=True)
+        click.echo("Error: scitex.io.bundle not available", err=True)
         return
 
     valid = 0
@@ -303,9 +303,9 @@ def bundle_info(path: str):
       scitex convert info figure.stx
     """
     try:
-        from scitex.fts import FTS as ZipBundle
+        from scitex.io.bundle import FTS as ZipBundle
     except ImportError:
-        click.echo("Error: scitex.fts not available", err=True)
+        click.echo("Error: scitex.io.bundle not available", err=True)
         return
 
     bundle_path = Path(path)

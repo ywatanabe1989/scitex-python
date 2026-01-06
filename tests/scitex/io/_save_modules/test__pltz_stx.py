@@ -529,7 +529,7 @@ if __name__ == "__main__":
 #             "## Usage",
 #             "",
 #             "```python",
-#             "from scitex.fts import FTS",
+#             "from scitex.io.bundle import FTS",
 #             "",
 #             f'bundle = FTS("{basename}.zip")  # or "{basename}/" directory',
 #             "bundle.show()  # Display",

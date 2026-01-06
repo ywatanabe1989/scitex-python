@@ -29,7 +29,7 @@ from typing import Optional, Dict, Any, Union, List
 import warnings
 
 # Import GUI classes from FTS (single source of truth)
-from scitex.fts._stats import Position
+from scitex.io.bundle._stats import Position
 
 # StatResult is now a dict - the GUI-specific StatResult is deprecated
 StatResult = dict

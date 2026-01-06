@@ -741,20 +741,20 @@ if __name__ == "__main__":
 # """
 # Statistical Result Schema - DEPRECATED
 # 
-# This module is deprecated. Import from scitex.fts._stats instead:
-#     from scitex.fts._stats import Position, StatStyling, StatPositioning
+# This module is deprecated. Import from scitex.io.bundle._stats instead:
+#     from scitex.io.bundle._stats import Position, StatStyling, StatPositioning
 # """
 # 
 # import warnings
 # 
 # warnings.warn(
-#     "scitex.stats._schema is deprecated. Import from scitex.fts._stats instead.",
+#     "scitex.stats._schema is deprecated. Import from scitex.io.bundle._stats instead.",
 #     DeprecationWarning,
 #     stacklevel=2
 # )
 # 
 # # Re-export from FTS (new single source of truth)
-# from scitex.fts._stats import (
+# from scitex.io.bundle._stats import (
 #     # Type aliases
 #     PositionMode,
 #     UnitType,

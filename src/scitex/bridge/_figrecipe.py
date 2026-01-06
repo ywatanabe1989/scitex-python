@@ -63,7 +63,7 @@ def save_with_recipe(
     dict
         Paths to saved files: {'image': Path, 'csv': Path, 'recipe': Path}
     """
-    from scitex.fts._bundle._storage import get_storage
+    from scitex.io.bundle._bundle._storage import get_storage
 
     path = Path(path)
     result = {}

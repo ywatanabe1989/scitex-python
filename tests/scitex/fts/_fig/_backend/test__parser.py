@@ -173,7 +173,7 @@ if __name__ == "__main__":
 # 
 #     Examples
 #     --------
-#     >>> from scitex.fig.backend import validate_figure_json
+#     >>> from scitex.canvas.backend import validate_figure_json
 #     >>> fig_json = {"width_mm": 180, "height_mm": 120, "axes": []}
 #     >>> validate_figure_json(fig_json)
 #     True
