@@ -13,16 +13,21 @@ Structure (identical for all kinds):
 
 import uuid
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from ._children import ValidationError, embed_child, load_embedded_children
 from ._dataclasses import DataInfo, Node, SizeMM
 from ._loader import load_bundle_components
-from ._validation import ValidationResult
-from ._saver import compute_canonical_hash, compute_theme_hash, save_bundle_components, save_render_outputs
+from ._saver import (
+    compute_canonical_hash,
+    compute_theme_hash,
+    save_bundle_components,
+    save_render_outputs,
+)
 from ._storage import Storage, get_storage
-from .._fig import Encoding, Theme
-from .._stats import Stats
+from ._validation import ValidationResult
+from .kinds._plot import Encoding, Theme
+from .kinds._stats import Stats
 
 if TYPE_CHECKING:
     from matplotlib.figure import Figure as MplFigure
@@ -260,8 +265,12 @@ class FTS:
             self._node.layout = {"rows": 2, "cols": 2, "panels": []}
 
         # Update grid size if needed
-        self._node.layout["rows"] = max(self._node.layout.get("rows", 1), row + row_span)
-        self._node.layout["cols"] = max(self._node.layout.get("cols", 1), col + col_span)
+        self._node.layout["rows"] = max(
+            self._node.layout.get("rows", 1), row + row_span
+        )
+        self._node.layout["cols"] = max(
+            self._node.layout.get("cols", 1), col + col_span
+        )
 
         # Add to layout.panels
         panel_info = {
@@ -308,7 +317,11 @@ class FTS:
         """Render composite figure with children."""
         import scitex.plt as splt
 
-        size_mm = self._node.size_mm.to_dict() if self._node.size_mm else {"width": 170, "height": 100}
+        size_mm = (
+            self._node.size_mm.to_dict()
+            if self._node.size_mm
+            else {"width": 170, "height": 100}
+        )
 
         # Get background color from theme
         bg_color = "#ffffff"
@@ -325,7 +338,7 @@ class FTS:
             ax.set_axis_off()
             return fig
 
-        from .._fig._composite import render_composite
+        from .kinds._figure._composite import render_composite
 
         children = self.load_children()
 
@@ -345,7 +358,11 @@ class FTS:
 
         import scitex.plt as splt
 
-        size_mm = self._node.size_mm.to_dict() if self._node.size_mm else {"width": 85, "height": 85}
+        size_mm = (
+            self._node.size_mm.to_dict()
+            if self._node.size_mm
+            else {"width": 85, "height": 85}
+        )
 
         # Use scitex.plt for proper styling (3-4 ticks, etc.)
         fig, ax = splt.subplots(
@@ -356,7 +373,7 @@ class FTS:
         data = self._load_payload_data()
 
         # Render traces
-        from .._fig._backend._render import render_traces
+        from .kinds._plot._backend._render import render_traces
 
         traces = self._encoding.traces if self._encoding.traces else []
         for trace in traces:
@@ -375,8 +392,9 @@ class FTS:
 
     def _load_payload_data(self) -> Optional["pd.DataFrame"]:
         """Load data from payload/data.csv or legacy data/data.csv."""
-        import pandas as pd
         from io import StringIO
+
+        import pandas as pd
 
         # Try new path first, then legacy
         for path in ["payload/data.csv", "data/data.csv"]:
@@ -392,7 +410,11 @@ class FTS:
         """Render annotation (text/shape) from node parameters."""
         import scitex.plt as splt
 
-        size_mm = self._node.size_mm.to_dict() if self._node.size_mm else {"width": 85, "height": 85}
+        size_mm = (
+            self._node.size_mm.to_dict()
+            if self._node.size_mm
+            else {"width": 85, "height": 85}
+        )
 
         fig, ax = splt.subplots(
             figsize_mm=(size_mm.get("width", 85), size_mm.get("height", 85))
@@ -423,13 +445,17 @@ class FTS:
 
         elif self._node.kind == "shape":
             # Render shape annotation
-            from .._kinds._shape import render_shape
+            from .kinds._shape import render_shape
+
             shape_obj = self._node.shape
             if shape_obj:
                 render_shape(
                     ax,
                     shape_type=shape_obj.shape_type,
-                    x=0.2, y=0.2, width=0.6, height=0.6,
+                    x=0.2,
+                    y=0.2,
+                    width=0.6,
+                    height=0.6,
                     facecolor=shape_obj.color if shape_obj.fill else "none",
                     edgecolor=shape_obj.color,
                     linewidth=shape_obj.linewidth,
@@ -440,10 +466,15 @@ class FTS:
 
     def _render_image(self) -> Optional["MplFigure"]:
         """Render image from payload."""
-        import scitex.plt as splt
         import numpy as np
 
-        size_mm = self._node.size_mm.to_dict() if self._node.size_mm else {"width": 85, "height": 85}
+        import scitex.plt as splt
+
+        size_mm = (
+            self._node.size_mm.to_dict()
+            if self._node.size_mm
+            else {"width": 85, "height": 85}
+        )
 
         fig, ax = splt.subplots(
             figsize_mm=(size_mm.get("width", 85), size_mm.get("height", 85))
@@ -454,8 +485,10 @@ class FTS:
         for ext in ["png", "jpg", "jpeg", "gif", "bmp"]:
             path = f"payload/image.{ext}"
             if self.storage.exists(path):
-                from PIL import Image
                 from io import BytesIO
+
+                from PIL import Image
+
                 img_bytes = self.storage.read(path)
                 img = Image.open(BytesIO(img_bytes))
                 ax.imshow(np.array(img))
@@ -493,7 +526,9 @@ class FTS:
                 legacy_path = legacy_paths.get(required_file)
                 if not self.storage.exists(required_file):
                     if not legacy_path or not self.storage.exists(legacy_path):
-                        result.errors.append(f"Missing required payload file: {required_file}")
+                        result.errors.append(
+                            f"Missing required payload file: {required_file}"
+                        )
 
         # NOTE: For composite kinds, do NOT validate payload/ emptiness by listing files.
         # Payload prohibition is enforced purely via payload_schema is None (in Node.validate).
@@ -503,15 +538,21 @@ class FTS:
             children = self.load_children()
             for child_name, child in children.items():
                 child_result = child.validate(level)
-                result.errors.extend([f"{child_name}: {e}" for e in child_result.errors])
-                result.warnings.extend([f"{child_name}: {w}" for w in child_result.warnings])
+                result.errors.extend(
+                    [f"{child_name}: {e}" for e in child_result.errors]
+                )
+                result.warnings.extend(
+                    [f"{child_name}: {w}" for w in child_result.warnings]
+                )
 
         # Schema validation for other components
         if level in ("semantic", "strict"):
             # Additional semantic validation
             if self._encoding and self._node:
                 if self._node.is_composite_kind() and self._encoding.traces:
-                    result.errors.append("Composite kinds should not have encoding traces")
+                    result.errors.append(
+                        "Composite kinds should not have encoding traces"
+                    )
 
         return result
 
