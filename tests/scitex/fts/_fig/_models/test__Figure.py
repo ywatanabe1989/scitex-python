@@ -12,7 +12,7 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # File: ./src/scitex/vis/model/figure.py
-# """Figure JSON model for scitex.fig."""
+# """Figure JSON model for scitex.canvas."""
 # 
 # from dataclasses import asdict, dataclass, field
 # from typing import Any, Dict, List, Optional

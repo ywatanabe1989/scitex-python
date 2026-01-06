@@ -13,7 +13,7 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # File: ./src/scitex/vis/model/styles.py
 # """
-# Style dataclasses for scitex.fig objects.
+# Style dataclasses for scitex.canvas objects.
 # 
 # Separating style properties from data makes:
 # - UI property panels easy to auto-generate

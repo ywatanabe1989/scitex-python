@@ -16,7 +16,7 @@ import warnings
 
 # Legacy model imports - may not be available (deleted module)
 try:
-    from scitex.fig.model import (
+    from scitex.canvas.model import (
         FigureModel,
         AxesModel,
         PlotModel,

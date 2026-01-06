@@ -3,7 +3,7 @@
 # Timestamp: 2025-12-08
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_modules/_canvas.py
 """
-Load canvas directory (.canvas) for scitex.fig.
+Load canvas directory (.canvas) for scitex.canvas.
 
 Canvas directories are portable figure bundles containing:
     - canvas.json: Layout, panels, composition settings
@@ -100,7 +100,7 @@ def _load_canvas(
     # Return Canvas object by default
     if not as_dict:
         try:
-            from scitex.fig.canvas import Canvas
+            from scitex.canvas.canvas import Canvas
 
             canvas_obj = Canvas.from_dict(canvas_dict)
             # Store reference to original directory for copying

@@ -1,27 +1,28 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-12-16 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_core.py
+# Timestamp: 2026-01-07
+# File: src/scitex/io/bundle/_core.py
 
 """
 SciTeX Bundle Core Operations.
 
 Provides load, save, copy, pack, unpack, and validate operations for
-.figz, .pltz, and .statsz bundle formats.
+.figz, .pltz, and .statsz bundle formats (and new .figure.zip, .plot.zip, .stats.zip).
 
 Each bundle can exist in two forms:
-    - Directory: Figure1.figz.d/
-    - ZIP archive: Figure1.figz
+    - Directory: Figure1.figz.d/ or Figure1.figure/
+    - ZIP archive: Figure1.figz or Figure1.figure.zip
 """
 
-import json
 import shutil
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from ._types import (
+    DIR_EXTENSIONS_NEW,
     EXTENSIONS,
+    EXTENSIONS_LEGACY,
+    EXTENSIONS_NEW,
     BundleNotFoundError,
     BundleType,
     BundleValidationError,
@@ -49,26 +50,43 @@ def get_type(path: Union[str, Path]) -> Optional[str]:
         path: Path to bundle (directory or ZIP).
 
     Returns:
-        Bundle type string ('figz', 'pltz', 'statsz') or None if not a bundle.
+        Bundle type string ('figz', 'pltz', 'statsz', 'figure', 'plot', 'stats')
+        or None if not a bundle.
 
     Example:
         >>> get_type("Figure1.figz")
         'figz'
         >>> get_type("plot.pltz.d")
         'pltz'
+        >>> get_type("Figure1.figure.zip")
+        'figure'
+        >>> get_type("plot.plot")
+        'plot'
     """
     p = Path(path)
+    name = p.name.lower()
+
+    # Check new double extensions first (.figure.zip, .plot.zip, .stats.zip)
+    for ext in EXTENSIONS_NEW:
+        if name.endswith(ext):
+            # Return type without dots: 'figure', 'plot', 'stats'
+            return ext.split(".")[1]
+
+    # Check new directory extensions (.figure, .plot, .stats)
+    for ext in DIR_EXTENSIONS_NEW:
+        if name.endswith(ext) and p.is_dir():
+            return ext[1:]  # Remove leading dot
 
     # Directory bundle: ends with .figz.d, .pltz.d, .statsz.d
     if p.is_dir() and p.suffix == ".d":
         stem = p.stem  # e.g., "Figure1.figz"
-        for ext in EXTENSIONS:
+        for ext in EXTENSIONS_LEGACY:
             if stem.endswith(ext):
                 return ext[1:]  # Remove leading dot
         return None
 
     # ZIP bundle: ends with .figz, .pltz, .statsz
-    if p.suffix in EXTENSIONS:
+    if p.suffix in EXTENSIONS_LEGACY:
         return p.suffix[1:]  # Remove leading dot
 
     return None
@@ -224,7 +242,7 @@ def validate_spec(
 
     # Delegate to domain-specific validators
     if bundle_type == BundleType.FIGZ:
-        from scitex.fig.io._bundle import validate_figz_spec
+        from scitex.canvas.io._bundle import validate_figz_spec
 
         errors.extend(validate_figz_spec(spec))
     elif bundle_type == BundleType.PLTZ:
@@ -325,7 +343,7 @@ def load(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any]:
         >>> bundle['type']
         'figz'
         >>> bundle['spec']['schema']['name']
-        'scitex.fig'
+        'scitex.canvas'
     """
     p = Path(path)
     bundle_type = get_type(p)
@@ -376,7 +394,7 @@ def load(path: Union[str, Path], in_memory: bool = True) -> Dict[str, Any]:
 
     # Delegate to domain-specific loaders
     if bundle_type == BundleType.FIGZ:
-        from scitex.fig.io._bundle import load_figz_bundle
+        from scitex.canvas.io._bundle import load_figz_bundle
 
         result.update(load_figz_bundle(bundle_dir))
     elif bundle_type == BundleType.PLTZ:
@@ -465,7 +483,7 @@ def save(
 
     # Delegate to domain-specific savers
     if bundle_type == BundleType.FIGZ:
-        from scitex.fig.io._bundle import save_figz_bundle
+        from scitex.canvas.io._bundle import save_figz_bundle
 
         save_figz_bundle(data, dir_path)
     elif bundle_type == BundleType.PLTZ:

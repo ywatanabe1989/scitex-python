@@ -158,11 +158,11 @@ if __name__ == "__main__":
 # from typing import Optional, Dict, Any, List, Tuple
 # 
 # # Import GUI classes from FTS (single source of truth)
-# from scitex.fts._stats import Position, StatPositioning
+# from scitex.io.bundle._stats import Position, StatPositioning
 # 
 # # Legacy model imports - may not be available
 # try:
-#     from scitex.fig.model import AnnotationModel, FigureModel, AxesModel, TextStyle
+#     from scitex.canvas.model import AnnotationModel, FigureModel, AxesModel, TextStyle
 #     VIS_MODEL_AVAILABLE = True
 # except ImportError:
 #     AnnotationModel = None
