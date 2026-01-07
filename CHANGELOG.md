@@ -5,6 +5,33 @@ All notable changes to SciTeX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.12.0] - 2026-01-08
+
+### Added
+- **MCP Servers**: Integrated MCP (Model Context Protocol) servers for LLM integration
+  - `scholar`: Literature management with BibTeX operations, DOI resolution (11 tools)
+  - `stats`: Statistical testing with auto-recommendation, power analysis (10 tools)
+  - `template`: Project scaffolding from templates (4 tools)
+  - `plt`: Publication-quality plotting with style management (6 tools)
+  - `canvas`: Multi-panel figure composition (7 tools)
+  - `diagram`: Paper-optimized diagram generation with Mermaid/Graphviz (7 tools)
+- **CLI Commands**: 7 new CLI command groups (113 new tests)
+  - `audio`: Text-to-speech (speak, backends, check, stop)
+  - `capture`: Screenshot/monitoring (snap, start, stop, gif, info, window)
+  - `repro`: Reproducibility tools (gen-id, gen-timestamp, hash, seed)
+  - `resource`: System monitoring (specs, usage, monitor)
+  - `stats`: Statistical analysis (recommend, describe, save, load, tests)
+  - `template`: Project scaffolding (list, clone, info)
+  - `tex`: LaTeX operations (compile, preview, to-vec, check)
+- **Web Module**: New `download_images` function for batch image downloading with size filtering
+
+### Removed
+- **Obsolete MCP Servers**: Removed standalone `src/mcp_servers/` directory (18 servers, ~44K lines)
+  - Replaced by integrated module structure at `src/scitex/<module>/mcp_server.py`
+
+### Changed
+- MCP server entry points now follow pattern: `scitex-<module>` (e.g., `scitex-scholar`, `scitex-stats`)
+
 ## [2.11.0] - 2026-01-08
 
 ### Breaking Changes
