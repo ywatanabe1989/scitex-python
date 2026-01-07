@@ -10,20 +10,18 @@ __DIR__ = os.path.dirname(__FILE__)
 """Scitex IO module with lazy imports to avoid circular dependencies.
 
 Bundle I/O is handled via scitex.io.bundle:
-    from scitex.io.bundle import FTS
-    bundle = FTS("Figure1.stx")
+    from scitex.io.bundle import Bundle
+    bundle = Bundle("Figure1.figure")
     bundle.save()
 """
 
 # Import commonly used functions directly
+# Bundle I/O - import the bundle submodule
+from . import bundle
 from ._cache import cache
 from ._flush import flush
 from ._glob import glob, parse_glob
 from ._load import load
-
-# Bundle I/O - import the bundle submodule
-from . import bundle
-
 from ._load_configs import load_configs
 from ._reload import reload
 from ._save import save
@@ -45,20 +43,10 @@ except ImportError:
     has_zarr_key = None
 
 # Import load cache control functions
-from ._load_cache import (
-    clear_cache as clear_load_cache,
-)
-from ._load_cache import (
-    configure_cache,
-    get_cache_info,
-)
+from ._load_cache import clear_cache as clear_load_cache
+from ._load_cache import configure_cache, get_cache_info
 
 # Import load cache control functions
-from ._load_cache import (
-    get_cache_info,
-    configure_cache,
-    clear_cache as clear_load_cache,
-)
 
 # Import save module functions
 try:

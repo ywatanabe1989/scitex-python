@@ -8,28 +8,28 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_pltz_stx.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_plot_scitex.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-19
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_pltz_stx.py
-# 
+# # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_plot_scitex.py
+#
 # """Save matplotlib figures as FTS bundles (ZIP or directory) with plot content type."""
-# 
+#
 # import json
 # import tempfile
 # import warnings
 # from datetime import datetime
 # from pathlib import Path
-# 
+#
 # import numpy as np
-# 
+#
 # from ._figure_utils import get_figure_with_data
-# 
-# 
+#
+#
 # def _create_stx_spec(bundle_type, title, size):
 #     """Create a spec dictionary for .stx bundle.
-# 
+#
 #     Parameters
 #     ----------
 #     bundle_type : str
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 #         Title/name of the bundle
 #     size : dict
 #         Size info with width_mm, height_mm, dpi
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -52,34 +52,34 @@ if __name__ == "__main__":
 #         "size": size,
 #         "created_at": datetime.utcnow().isoformat() + "Z",
 #     }
-# 
-# 
+#
+#
 # def _extract_data_from_figure(fig):
 #     """Extract plotted data from matplotlib figure lines.
-# 
+#
 #     Returns DataFrame with x/y columns for each trace, or None if no data.
 #     """
 #     import pandas as pd
-# 
+#
 #     extracted_data = {}
 #     axes_list = list(fig.axes) if hasattr(fig.axes, "__iter__") else [fig.axes]
-# 
+#
 #     for ax_idx, ax in enumerate(axes_list):
 #         for line_idx, line in enumerate(ax.get_lines()):
 #             label = line.get_label()
 #             if label is None or label.startswith("_"):
 #                 label = f"series_{line_idx}"
-# 
+#
 #             xdata, ydata = line.get_data()
 #             if len(xdata) > 0:
 #                 x_col = f"ax{ax_idx}_line{line_idx}_x"
 #                 y_col = f"ax{ax_idx}_line{line_idx}_y"
 #                 extracted_data[x_col] = np.array(xdata, dtype=float)
 #                 extracted_data[y_col] = np.array(ydata, dtype=float)
-# 
+#
 #     if not extracted_data:
 #         return None
-# 
+#
 #     # Pad arrays to same length
 #     max_len = max(len(v) for v in extracted_data.values())
 #     padded = {}
@@ -88,31 +88,31 @@ if __name__ == "__main__":
 #             padded[k] = np.pad(v, (0, max_len - len(v)), constant_values=np.nan)
 #         else:
 #             padded[k] = v
-# 
+#
 #     return pd.DataFrame(padded)
-# 
-# 
+#
+#
 # def _build_encoding_from_figure(fig, csv_df):
 #     """Build encoding.json data from matplotlib figure.
-# 
+#
 #     Encoding captures data→visual mappings for scientific reproducibility.
 #     """
 #     from scitex.schema import ENCODING_VERSION
-# 
+#
 #     traces = []
 #     axes_list = list(fig.axes) if hasattr(fig.axes, "__iter__") else [fig.axes]
-# 
+#
 #     for ax_idx, ax in enumerate(axes_list):
 #         for line_idx, line in enumerate(ax.get_lines()):
 #             label = line.get_label()
 #             if label is None or label.startswith("_"):
 #                 label = f"line_{line_idx}"
-# 
+#
 #             trace = {
 #                 "trace_id": f"ax{ax_idx}_line{line_idx}",
 #                 "bindings": [],
 #             }
-# 
+#
 #             # X binding
 #             if csv_df is not None:
 #                 x_col = f"ax{ax_idx}_line{line_idx}_x"
@@ -133,27 +133,27 @@ if __name__ == "__main__":
 #                             "scale": "linear",
 #                         }
 #                     )
-# 
+#
 #             if trace["bindings"]:
 #                 traces.append(trace)
-# 
+#
 #     return {
 #         "schema": {"name": "scitex.plt.encoding", "version": ENCODING_VERSION},
 #         "traces": traces,
 #     }
-# 
-# 
+#
+#
 # def _build_theme_from_figure(fig):
 #     """Build theme.json data from matplotlib figure.
-# 
+#
 #     Theme captures pure aesthetics without affecting scientific meaning.
 #     """
 #     from scitex.schema import THEME_VERSION
-# 
+#
 #     # Extract colors from figure
 #     fig_facecolor = fig.get_facecolor()
 #     axes_list = list(fig.axes) if hasattr(fig.axes, "__iter__") else [fig.axes]
-# 
+#
 #     ax_facecolor = "white"
 #     if axes_list:
 #         try:
@@ -162,7 +162,7 @@ if __name__ == "__main__":
 #                 ax_facecolor = f"#{int(ax_facecolor[0] * 255):02x}{int(ax_facecolor[1] * 255):02x}{int(ax_facecolor[2] * 255):02x}"
 #         except Exception:
 #             pass
-# 
+#
 #     # Extract trace styles
 #     traces = []
 #     for ax_idx, ax in enumerate(axes_list):
@@ -191,10 +191,10 @@ if __name__ == "__main__":
 #                     trace_style["alpha"] = float(alpha)
 #             except Exception:
 #                 pass
-# 
+#
 #             if len(trace_style) > 1:  # More than just trace_id
 #                 traces.append(trace_style)
-# 
+#
 #     return {
 #         "schema": {"name": "scitex.plt.theme", "version": THEME_VERSION},
 #         "colors": {
@@ -209,11 +209,11 @@ if __name__ == "__main__":
 #         "traces": traces,
 #         "grid": False,
 #     }
-# 
-# 
-# def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
+#
+#
+# def save_plot_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
 #     """Save a matplotlib figure as an FTS bundle (ZIP or directory).
-# 
+#
 #     Bundle structure:
 #         plot_name/              # or plot_name.zip (with plot_name/ inside)
 #             spec.json           # Bundle specification (WHAT to plot)
@@ -237,25 +237,25 @@ if __name__ == "__main__":
 #                 plot.pdf        # Publication export
 #     """
 #     import matplotlib.figure
-# 
+#
 #     p = Path(spath)
-# 
+#
 #     if basename is None:
 #         basename = p.stem
-# 
+#
 #     # Extract figure
 #     fig = obj
 #     if hasattr(obj, "figure"):
 #         fig = obj.figure
 #     elif hasattr(obj, "fig"):
 #         fig = obj.fig
-# 
+#
 #     if not isinstance(fig, matplotlib.figure.Figure):
 #         raise TypeError(f"Expected matplotlib Figure, got {type(obj).__name__}")
-# 
+#
 #     dpi = kwargs.pop("dpi", 300)
 #     data = kwargs.pop("data", None)
-# 
+#
 #     # Get CSV data from figure if not provided
 #     csv_df = data
 #     if csv_df is None:
@@ -269,10 +269,10 @@ if __name__ == "__main__":
 #         # Fall back to extracting from matplotlib lines
 #         if csv_df is None:
 #             csv_df = _extract_data_from_figure(fig)
-# 
+#
 #     # Create spec for .stx format
 #     fig_width_inch, fig_height_inch = fig.get_size_inches()
-# 
+#
 #     spec = _create_stx_spec(
 #         bundle_type="plot",
 #         title=basename,
@@ -282,7 +282,7 @@ if __name__ == "__main__":
 #             "dpi": dpi,
 #         },
 #     )
-# 
+#
 #     # Determine paths
 #     if as_zip:
 #         zip_path = p
@@ -291,42 +291,42 @@ if __name__ == "__main__":
 #     else:
 #         bundle_dir = p
 #         temp_dir = None
-# 
+#
 #     bundle_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #     # Save spec.json
 #     with open(bundle_dir / "spec.json", "w") as f:
 #         json.dump(spec, f, indent=2, default=str)
-# 
+#
 #     # Save style.json (empty default for backward compatibility)
 #     style_data = {}
 #     with open(bundle_dir / "style.json", "w") as f:
 #         json.dump(style_data, f, indent=2)
-# 
+#
 #     # Save encoding.json (data→visual mapping for scientific rigor)
 #     encoding_data = _build_encoding_from_figure(fig, csv_df)
 #     with open(bundle_dir / "encoding.json", "w") as f:
 #         json.dump(encoding_data, f, indent=2)
-# 
+#
 #     # Save theme.json (pure aesthetics)
 #     theme_data = _build_theme_from_figure(fig)
 #     with open(bundle_dir / "theme.json", "w") as f:
 #         json.dump(theme_data, f, indent=2)
-# 
+#
 #     # Create directory structure
 #     data_dir = bundle_dir / "data"
 #     stats_dir = bundle_dir / "stats"
 #     cache_dir = bundle_dir / "cache"
 #     exports_dir = bundle_dir / "exports"
-# 
+#
 #     data_dir.mkdir(exist_ok=True)
 #     stats_dir.mkdir(exist_ok=True)
 #     cache_dir.mkdir(exist_ok=True)
 #     exports_dir.mkdir(exist_ok=True)
-# 
+#
 #     with warnings.catch_warnings():
 #         warnings.filterwarnings("ignore", message=".*tight_layout.*")
-# 
+#
 #         # Save exports with simple names (bundle dir provides context)
 #         fig.savefig(
 #             exports_dir / "plot.png",
@@ -335,23 +335,23 @@ if __name__ == "__main__":
 #             format="png",
 #             transparent=True,
 #         )
-# 
+#
 #         fig.savefig(
 #             exports_dir / "plot.svg",
 #             bbox_inches="tight",
 #             format="svg",
 #         )
-# 
+#
 #         fig.savefig(
 #             exports_dir / "plot.pdf",
 #             bbox_inches="tight",
 #             format="pdf",
 #         )
-# 
+#
 #     # Save data/data.csv and data/meta.json if available
 #     if csv_df is not None:
 #         csv_df.to_csv(data_dir / "data.csv", index=False)
-# 
+#
 #         # Generate metadata for the data
 #         meta = {
 #             "columns": list(csv_df.columns),
@@ -361,7 +361,7 @@ if __name__ == "__main__":
 #         }
 #         with open(data_dir / "data_info.json", "w") as f:
 #             json.dump(meta, f, indent=2)
-# 
+#
 #     # Save cache/geometry_px.json and hitmap images for GUI hit areas
 #     try:
 #         from scitex.plt.utils._hitmap import (
@@ -372,18 +372,18 @@ if __name__ == "__main__":
 #             extract_selectable_regions,
 #             restore_original_colors,
 #         )
-# 
+#
 #         geometry = {
 #             "path_data": extract_path_data(fig),
 #             "selectable_regions": extract_selectable_regions(fig),
 #         }
 #         with open(cache_dir / "geometry_px.json", "w") as f:
 #             json.dump(geometry, f, indent=2)
-# 
+#
 #         # Generate hitmap images
 #         axes_list = list(fig.axes) if hasattr(fig.axes, "__iter__") else [fig.axes]
 #         original_props, color_map, groups = apply_hitmap_colors(fig)
-# 
+#
 #         # Store and set hitmap colors
 #         saved_fig_facecolor = fig.patch.get_facecolor()
 #         saved_ax_facecolors = []
@@ -393,7 +393,7 @@ if __name__ == "__main__":
 #             for spine in ax.spines.values():
 #                 spine.set_color(HITMAP_AXES_COLOR)
 #         fig.patch.set_facecolor(HITMAP_BACKGROUND_COLOR)
-# 
+#
 #         # Save hitmap PNG
 #         fig.savefig(
 #             cache_dir / "hitmap.png",
@@ -401,23 +401,23 @@ if __name__ == "__main__":
 #             format="png",
 #             facecolor=HITMAP_BACKGROUND_COLOR,
 #         )
-# 
+#
 #         # Save hitmap SVG
 #         fig.savefig(
 #             cache_dir / "hitmap.svg",
 #             format="svg",
 #             facecolor=HITMAP_BACKGROUND_COLOR,
 #         )
-# 
+#
 #         # Restore colors
 #         restore_original_colors(original_props)
 #         fig.patch.set_facecolor(saved_fig_facecolor)
 #         for i, ax in enumerate(axes_list):
 #             ax.set_facecolor(saved_ax_facecolors[i])
-# 
+#
 #     except Exception:
 #         pass  # Skip if hitmap extraction fails
-# 
+#
 #     # Save cache/render_manifest.json
 #     render_manifest = {
 #         "dpi": dpi,
@@ -432,15 +432,15 @@ if __name__ == "__main__":
 #     }
 #     with open(cache_dir / "render_manifest.json", "w") as f:
 #         json.dump(render_manifest, f, indent=2)
-# 
+#
 #     # Save stats/stats.json and stats.csv placeholder (empty by default)
 #     stats_data = {"comparisons": [], "tests": []}
 #     with open(stats_dir / "stats.json", "w") as f:
 #         json.dump(stats_data, f, indent=2)
-# 
+#
 #     # Create stats.csv with header for tabular export
 #     import pandas as pd
-# 
+#
 #     stats_df = pd.DataFrame(
 #         columns=[
 #             "test_type",
@@ -453,27 +453,27 @@ if __name__ == "__main__":
 #         ]
 #     )
 #     stats_df.to_csv(stats_dir / "stats.csv", index=False)
-# 
+#
 #     # Generate README.md for self-documentation
 #     _generate_readme(bundle_dir, basename, spec, csv_df)
-# 
+#
 #     # Pack to ZIP if requested
 #     if as_zip:
 #         import shutil
 #         import zipfile
-# 
+#
 #         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
 #             for file_path in bundle_dir.rglob("*"):
 #                 if file_path.is_file():
 #                     arcname = file_path.relative_to(bundle_dir.parent)
 #                     zf.write(file_path, arcname)
 #         shutil.rmtree(temp_dir)
-# 
-# 
+#
+#
 # def _generate_readme(bundle_dir, basename, spec, csv_df):
 #     """Generate README.md for self-documentation."""
 #     from datetime import datetime
-# 
+#
 #     readme_lines = [
 #         f"# {basename} FTS Bundle",
 #         "",
@@ -509,7 +509,7 @@ if __name__ == "__main__":
 #         "```",
 #         "",
 #     ]
-# 
+#
 #     if csv_df is not None:
 #         readme_lines.extend(
 #             [
@@ -523,7 +523,7 @@ if __name__ == "__main__":
 #             dtype = str(csv_df[col].dtype)
 #             readme_lines.append(f"| {col} | {dtype} | - |")
 #         readme_lines.append("")
-# 
+#
 #     readme_lines.extend(
 #         [
 #             "## Usage",
@@ -540,13 +540,13 @@ if __name__ == "__main__":
 #             "*Generated by SciTeX*",
 #         ]
 #     )
-# 
+#
 #     with open(bundle_dir / "README.md", "w") as f:
 #         f.write("\n".join(readme_lines))
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_pltz_stx.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_plot_scitex.py
 # --------------------------------------------------------------------------------

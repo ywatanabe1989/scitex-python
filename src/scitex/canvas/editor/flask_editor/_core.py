@@ -3,15 +3,15 @@
 # File: ./src/scitex/vis/editor/flask_editor/core.py
 """Core WebEditor class for Flask-based figure editing."""
 
-from pathlib import Path
-from typing import Dict, Any, Optional
 import base64
 import copy
 import json
 import threading
 import webbrowser
+from pathlib import Path
+from typing import Any, Dict, Optional
 
-from ._utils import find_available_port, kill_process_on_port, check_port_available
+from ._utils import check_port_available, find_available_port, kill_process_on_port
 from .templates import build_html_template
 
 
@@ -20,7 +20,7 @@ class WebEditor:
     Browser-based figure editor using Flask.
 
     Features:
-    - Displays existing PNG from pltz bundle (no re-rendering)
+    - Displays existing PNG from plot bundle (no re-rendering)
     - Hitmap-based element selection for precise clicking
     - Property editors with sliders and color pickers
     - Save to .manual.json
@@ -47,14 +47,14 @@ class WebEditor:
         self.manual_overrides = manual_overrides or {}
         self._requested_port = port
         self.port = port
-        self.panel_info = panel_info  # For multi-panel figz bundles
+        self.panel_info = panel_info  # For multi-panel figure bundles
 
         # Extract hit_regions from metadata for color-based element detection
         self.hit_regions = metadata.get("hit_regions", {})
         self.color_map = self.hit_regions.get("color_map", {})
 
         # Get SciTeX defaults and merge with metadata
-        from .._defaults import get_scitex_defaults, extract_defaults_from_metadata
+        from .._defaults import extract_defaults_from_metadata, get_scitex_defaults
 
         self.scitex_defaults = get_scitex_defaults()
         self.metadata_defaults = extract_defaults_from_metadata(metadata)
@@ -71,7 +71,7 @@ class WebEditor:
     def run(self):
         """Launch the web editor."""
         try:
-            from flask import Flask, render_template_string, request, jsonify
+            from flask import Flask, jsonify, render_template_string, request
         except ImportError:
             raise ImportError(
                 "Flask is required for web editor. Install: pip install flask"
@@ -79,12 +79,15 @@ class WebEditor:
 
         # Handle port conflicts - always use port 5050
         import time
+
         max_retries = 3
         for attempt in range(max_retries):
             if check_port_available(self._requested_port):
                 self.port = self._requested_port
                 break
-            print(f"Port {self._requested_port} in use. Freeing... (attempt {attempt + 1}/{max_retries})")
+            print(
+                f"Port {self._requested_port} in use. Freeing... (attempt {attempt + 1}/{max_retries})"
+            )
             kill_process_on_port(self._requested_port)
             time.sleep(1.0)  # Wait for port release
         else:
@@ -94,33 +97,43 @@ class WebEditor:
 
         # Configure Flask with static folder path
         import os
-        static_folder = os.path.join(os.path.dirname(__file__), 'static')
-        app = Flask(__name__, static_folder=static_folder, static_url_path='/static')
+
+        static_folder = os.path.join(os.path.dirname(__file__), "static")
+        app = Flask(__name__, static_folder=static_folder, static_url_path="/static")
         editor = self
 
         def _export_composed_figure(editor, formats=["png", "svg"], dpi=150):
             """Helper to compose and export figure to bundle."""
-            from scitex.io import ZipBundle
-            from PIL import Image
-            import numpy as np
             import matplotlib
-            matplotlib.use('Agg')
-            import matplotlib.pyplot as plt
-            import json as json_module
+            import numpy as np
+            from PIL import Image
+
+            from scitex.io import ZipBundle
+
+            matplotlib.use("Agg")
             import io
+            import json as json_module
             import zipfile
+
+            import matplotlib.pyplot as plt
 
             if not editor.panel_info:
                 return {"success": False, "error": "No panel info"}
 
             bundle_path = editor.panel_info.get("bundle_path")
-            figz_dir = editor.panel_info.get("figz_dir")
+            figure_dir = editor.panel_info.get("figure_dir")
 
-            if not bundle_path and not figz_dir:
+            if not bundle_path and not figure_dir:
                 return {"success": False, "error": "No bundle path"}
 
-            figure_name = Path(bundle_path).stem if bundle_path else (
-                Path(figz_dir).stem.replace(".figz.d", "") if figz_dir else "figure"
+            figure_name = (
+                Path(bundle_path).stem
+                if bundle_path
+                else (
+                    Path(figure_dir).stem.replace(".figure", "")
+                    if figure_dir
+                    else "figure"
+                )
             )
 
             # Read spec.json for layout and layout.json for position overrides
@@ -136,12 +149,12 @@ class WebEditor:
                             pass
                 except:
                     pass
-            elif figz_dir:
-                spec_path = Path(figz_dir) / "spec.json"
+            elif figure_dir:
+                spec_path = Path(figure_dir) / "spec.json"
                 if spec_path.exists():
                     with open(spec_path) as f:
                         spec = json_module.load(f)
-                layout_path = Path(figz_dir) / "layout.json"
+                layout_path = Path(figure_dir) / "layout.json"
                 if layout_path.exists():
                     with open(layout_path) as f:
                         layout_overrides = json_module.load(f)
@@ -163,7 +176,9 @@ class WebEditor:
             fig_width_in = fig_width_mm / 25.4
             fig_height_in = fig_height_mm / 25.4
 
-            fig = plt.figure(figsize=(fig_width_in, fig_height_in), dpi=dpi, facecolor='white')
+            fig = plt.figure(
+                figsize=(fig_width_in, fig_height_in), dpi=dpi, facecolor="white"
+            )
 
             # Compose panels
             panels_spec = spec.get("panels", [])
@@ -177,7 +192,10 @@ class WebEditor:
 
                 # Skip overview/auxiliary panels (only compose main panels A-Z)
                 panel_id_lower = panel_id.lower()
-                if any(skip in panel_id_lower for skip in ['overview', 'thumb', 'preview', 'aux']):
+                if any(
+                    skip in panel_id_lower
+                    for skip in ["overview", "thumb", "preview", "aux"]
+                ):
                     continue
 
                 # Find panel path first (needed to check layout_overrides)
@@ -185,13 +203,15 @@ class WebEditor:
                 is_zip = False
                 panel_name = None
                 for idx, pp in enumerate(panel_paths):
-                    pp_name = Path(pp).stem.replace(".pltz", "")
-                    if (pp_name == panel_id or
-                        pp_name.startswith(f"panel_{panel_id}_") or
-                        pp_name == f"panel_{panel_id}" or
-                        f"_{panel_id}_" in pp_name):
+                    pp_name = Path(pp).stem.replace(".plot", "")
+                    if (
+                        pp_name == panel_id
+                        or pp_name.startswith(f"panel_{panel_id}_")
+                        or pp_name == f"panel_{panel_id}"
+                        or f"_{panel_id}_" in pp_name
+                    ):
                         panel_path = pp
-                        panel_name = Path(pp).name  # e.g., "panel_A_twinx.pltz"
+                        panel_name = Path(pp).name  # e.g., "panel_A_twinx.plot"
                         is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else False
                         break
 
@@ -217,27 +237,32 @@ class WebEditor:
                 # Load panel preview
                 try:
                     # Exclusion patterns for preview selection
-                    exclude_patterns = ['hitmap', 'overview', 'thumb', 'preview']
+                    exclude_patterns = ["hitmap", "overview", "thumb", "preview"]
 
                     if is_zip:
-                        with ZipBundle(panel_path, mode="r") as pltz_bundle:
-                            with zipfile.ZipFile(panel_path, 'r') as zf:
-                                png_files = [n for n in zf.namelist()
-                                            if n.endswith('.png')
-                                            and 'exports/' in n
-                                            and not any(p in n.lower() for p in exclude_patterns)]
+                        with ZipBundle(panel_path, mode="r") as plot_bundle:
+                            with zipfile.ZipFile(panel_path, "r") as zf:
+                                png_files = [
+                                    n
+                                    for n in zf.namelist()
+                                    if n.endswith(".png")
+                                    and "exports/" in n
+                                    and not any(
+                                        p in n.lower() for p in exclude_patterns
+                                    )
+                                ]
                                 if png_files:
                                     preview_path = png_files[0]
-                                    if '.pltz.d/' in preview_path:
-                                        preview_path = preview_path.split('.pltz.d/')[-1]
-                                    img_data = pltz_bundle.read_bytes(preview_path)
+                                    if ".plot/" in preview_path:
+                                        preview_path = preview_path.split(".plot/")[-1]
+                                    img_data = plot_bundle.read_bytes(preview_path)
                                     img = Image.open(io.BytesIO(img_data))
                                     ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
                                     ax.imshow(np.array(img))
-                                    ax.axis('off')
+                                    ax.axis("off")
                     else:
-                        pltz_dir = Path(panel_path)
-                        exports_dir = pltz_dir / "exports"
+                        plot_dir = Path(panel_path)
+                        exports_dir = plot_dir / "exports"
                         if exports_dir.exists():
                             for png_file in exports_dir.glob("*.png"):
                                 name_lower = png_file.name.lower()
@@ -245,22 +270,35 @@ class WebEditor:
                                     img = Image.open(png_file)
                                     ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
                                     ax.imshow(np.array(img))
-                                    ax.axis('off')
+                                    ax.axis("off")
                                     break
                 except Exception as e:
                     print(f"Could not load panel {panel_id}: {e}")
 
                 # Draw panel letter
-                if panel_id and len(panel_id) <= 2:  # Only for short IDs like A, B, C...
+                if (
+                    panel_id and len(panel_id) <= 2
+                ):  # Only for short IDs like A, B, C...
                     # Position letter at top-left corner of panel
                     letter_x = x_frac + 0.01
                     letter_y = y_frac + h_frac - 0.02
-                    fig.text(letter_x, letter_y, panel_id,
-                            fontsize=14, fontweight='bold', color='black',
-                            ha='left', va='top',
-                            transform=fig.transFigure,
-                            bbox=dict(boxstyle='square,pad=0.1',
-                                     facecolor='white', edgecolor='none', alpha=0.8))
+                    fig.text(
+                        letter_x,
+                        letter_y,
+                        panel_id,
+                        fontsize=14,
+                        fontweight="bold",
+                        color="black",
+                        ha="left",
+                        va="top",
+                        transform=fig.transFigure,
+                        bbox=dict(
+                            boxstyle="square,pad=0.1",
+                            facecolor="white",
+                            edgecolor="none",
+                            alpha=0.8,
+                        ),
+                    )
 
             exported = {}
 
@@ -269,8 +307,14 @@ class WebEditor:
                 with ZipBundle(bundle_path, mode="a") as bundle:
                     for fmt in formats:
                         buf = io.BytesIO()
-                        fig.savefig(buf, format=fmt, dpi=dpi, bbox_inches="tight",
-                                   facecolor="white", pad_inches=0.02)
+                        fig.savefig(
+                            buf,
+                            format=fmt,
+                            dpi=dpi,
+                            bbox_inches="tight",
+                            facecolor="white",
+                            pad_inches=0.02,
+                        )
                         buf.seek(0)
                         export_path = f"exports/{figure_name}.{fmt}"
                         bundle.write_bytes(export_path, buf.read())
@@ -286,24 +330,24 @@ class WebEditor:
 
             # Extract figz and panel paths for display
             json_path_str = str(editor.json_path.resolve())
-            figz_path = ""
+            figure_path = ""
             panel_path = ""
 
-            # Check if this is inside a figz bundle
-            if '.figz.d/' in json_path_str:
-                parts = json_path_str.split('.figz.d/')
-                figz_path = parts[0] + '.figz.d'
+            # Check if this is inside a figure bundle
+            if ".figure/" in json_path_str:
+                parts = json_path_str.split(".figure/")
+                figure_path = parts[0] + ".figure"
                 panel_path = parts[1] if len(parts) > 1 else ""
-            elif '.pltz.d/' in json_path_str:
-                parts = json_path_str.split('.pltz.d/')
-                figz_path = parts[0] + '.pltz.d'
+            elif ".plot/" in json_path_str:
+                parts = json_path_str.split(".plot/")
+                figure_path = parts[0] + ".plot"
                 panel_path = parts[1] if len(parts) > 1 else ""
             else:
-                figz_path = json_path_str
+                figure_path = json_path_str
 
             return render_template_string(
                 html_template,
-                filename=figz_path,
+                filename=figure_path,
                 panel_path=panel_path,
                 overrides=json.dumps(editor.current_overrides),
             )
@@ -316,50 +360,60 @@ class WebEditor:
             # Always use renderer for consistency between initial and updated views
             dark_mode = request.args.get("dark_mode", "false").lower() == "true"
             img_data, bboxes, img_size = render_preview_with_bboxes(
-                editor.csv_data, editor.current_overrides,
+                editor.csv_data,
+                editor.current_overrides,
                 metadata=editor.metadata,
                 dark_mode=dark_mode,
             )
-            return jsonify({
-                "image": img_data,
-                "bboxes": bboxes,
-                "img_size": img_size,
-                "has_hitmap": editor.hitmap_path is not None and editor.hitmap_path.exists(),
-                "format": "png",
-                "panel_info": editor.panel_info,
-            })
+            return jsonify(
+                {
+                    "image": img_data,
+                    "bboxes": bboxes,
+                    "img_size": img_size,
+                    "has_hitmap": editor.hitmap_path is not None
+                    and editor.hitmap_path.exists(),
+                    "format": "png",
+                    "panel_info": editor.panel_info,
+                }
+            )
 
         @app.route("/panels")
         def panels():
-            """Return all panel images with bboxes for interactive grid view (figz bundles only).
+            """Return all panel images with bboxes for interactive grid view (figure bundles only).
 
             Uses smart load_panel_data helper for transparent zip/directory handling.
             Returns layout info from figz spec.json for unified canvas positioning.
             """
-            from ._bbox import extract_bboxes_from_metadata, extract_bboxes_from_geometry_px
-            from ..edit import load_panel_data
             import json as json_module
 
+            from ..edit import load_panel_data
+            from ._bbox import (
+                extract_bboxes_from_geometry_px,
+                extract_bboxes_from_metadata,
+            )
+
             if not editor.panel_info:
-                return jsonify({"error": "Not a multi-panel figz bundle"}), 400
+                return jsonify({"error": "Not a multi-panel figure bundle"}), 400
 
             panel_names = editor.panel_info["panels"]
             panel_paths = editor.panel_info.get("panel_paths", [])
-            panel_is_zip = editor.panel_info.get("panel_is_zip", [False] * len(panel_names))
-            figz_dir = Path(editor.panel_info["figz_dir"])
+            panel_is_zip = editor.panel_info.get(
+                "panel_is_zip", [False] * len(panel_names)
+            )
+            figure_dir = Path(editor.panel_info["figure_dir"])
 
             if not panel_paths:
-                panel_paths = [str(figz_dir / name) for name in panel_names]
+                panel_paths = [str(figure_dir / name) for name in panel_names]
 
             # Load figz spec.json to get panel layout
-            figz_layout = {}
-            spec_path = figz_dir / "spec.json"
+            figure_layout = {}
+            spec_path = figure_dir / "spec.json"
             if spec_path.exists():
                 with open(spec_path) as f:
-                    figz_spec = json_module.load(f)
-                    for panel_spec in figz_spec.get("panels", []):
+                    figure_spec = json_module.load(f)
+                    for panel_spec in figure_spec.get("panels", []):
                         panel_id = panel_spec.get("id", "")
-                        figz_layout[panel_id] = {
+                        figure_layout[panel_id] = {
                             "position": panel_spec.get("position", {}),
                             "size": panel_spec.get("size", {}),
                         }
@@ -369,28 +423,37 @@ class WebEditor:
             for idx, panel_name in enumerate(panel_names):
                 panel_path = panel_paths[idx]
                 is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else None
-                display_name = panel_name.replace(".pltz.d", "").replace(".pltz", "")
+                display_name = panel_name.replace(".plot", "").replace(".plot", "")
 
                 # Use smart helper to load panel data
                 loaded = load_panel_data(panel_path, is_zip=is_zip)
 
-                panel_data = {"name": display_name, "image": None, "bboxes": None, "img_size": None}
+                panel_data = {
+                    "name": display_name,
+                    "image": None,
+                    "bboxes": None,
+                    "img_size": None,
+                }
 
                 # Add layout info from figz spec
-                if display_name in figz_layout:
-                    panel_data["layout"] = figz_layout[display_name]
+                if display_name in figure_layout:
+                    panel_data["layout"] = figure_layout[display_name]
 
                 if loaded:
                     # Get image data
                     if loaded.get("is_zip"):
                         png_bytes = loaded.get("png_bytes")
                         if png_bytes:
-                            panel_data["image"] = base64.b64encode(png_bytes).decode("utf-8")
+                            panel_data["image"] = base64.b64encode(png_bytes).decode(
+                                "utf-8"
+                            )
                     else:
                         png_path = loaded.get("png_path")
                         if png_path and png_path.exists():
                             with open(png_path, "rb") as f:
-                                panel_data["image"] = base64.b64encode(f.read()).decode("utf-8")
+                                panel_data["image"] = base64.b64encode(f.read()).decode(
+                                    "utf-8"
+                                )
 
                     # Get image size
                     img_size = loaded.get("img_size")
@@ -400,8 +463,12 @@ class WebEditor:
                         panel_data["height"] = img_size["height"]
                     elif loaded.get("png_path"):
                         from PIL import Image
+
                         img = Image.open(loaded["png_path"])
-                        panel_data["img_size"] = {"width": img.size[0], "height": img.size[1]}
+                        panel_data["img_size"] = {
+                            "width": img.size[0],
+                            "height": img.size[1],
+                        }
                         panel_data["width"], panel_data["height"] = img.size
                         img.close()
 
@@ -414,34 +481,39 @@ class WebEditor:
                             panel_data["bboxes"] = extract_bboxes_from_geometry_px(
                                 geometry_data,
                                 panel_data["img_size"]["width"],
-                                panel_data["img_size"]["height"]
+                                panel_data["img_size"]["height"],
                             )
                         elif metadata:
                             panel_data["bboxes"] = extract_bboxes_from_metadata(
                                 metadata,
                                 panel_data["img_size"]["width"],
-                                panel_data["img_size"]["height"]
+                                panel_data["img_size"]["height"],
                             )
 
                 panel_images.append(panel_data)
 
-            return jsonify({
-                "panels": panel_images,
-                "count": len(panel_images),
-                "layout": figz_layout,
-            })
+            return jsonify(
+                {
+                    "panels": panel_images,
+                    "count": len(panel_images),
+                    "layout": figure_layout,
+                }
+            )
 
         @app.route("/switch_panel/<int:panel_index>")
         def switch_panel(panel_index):
-            """Switch to a different panel in the figz bundle.
+            """Switch to a different panel in the figure bundle.
 
             Uses smart load_panel_data helper for transparent zip/directory handling.
             """
-            from ._bbox import extract_bboxes_from_metadata, extract_bboxes_from_geometry_px
             from ..edit import load_panel_data
+            from ._bbox import (
+                extract_bboxes_from_geometry_px,
+                extract_bboxes_from_metadata,
+            )
 
             if not editor.panel_info:
-                return jsonify({"error": "Not a multi-panel figz bundle"}), 400
+                return jsonify({"error": "Not a multi-panel figure bundle"}), 400
 
             panels = editor.panel_info["panels"]
             panel_paths = editor.panel_info.get("panel_paths", [])
@@ -451,15 +523,24 @@ class WebEditor:
                 return jsonify({"error": f"Invalid panel index: {panel_index}"}), 400
 
             panel_name = panels[panel_index]
-            panel_path = panel_paths[panel_index] if panel_paths else str(Path(editor.panel_info["figz_dir"]) / panel_name)
-            is_zip = panel_is_zip[panel_index] if panel_index < len(panel_is_zip) else None
+            panel_path = (
+                panel_paths[panel_index]
+                if panel_paths
+                else str(Path(editor.panel_info["figure_dir"]) / panel_name)
+            )
+            is_zip = (
+                panel_is_zip[panel_index] if panel_index < len(panel_is_zip) else None
+            )
 
             try:
                 # Use smart helper to load panel data
                 loaded = load_panel_data(panel_path, is_zip=is_zip)
 
                 if not loaded:
-                    return jsonify({"error": f"Could not load panel: {panel_name}"}), 400
+                    return (
+                        jsonify({"error": f"Could not load panel: {panel_name}"}),
+                        400,
+                    )
 
                 # Get image data
                 img_data = None
@@ -474,12 +555,16 @@ class WebEditor:
                             img_data = base64.b64encode(f.read()).decode("utf-8")
 
                 if not img_data:
-                    return jsonify({"error": f"No PNG found for panel: {panel_name}"}), 400
+                    return (
+                        jsonify({"error": f"No PNG found for panel: {panel_name}"}),
+                        400,
+                    )
 
                 # Get image size
                 img_size = loaded.get("img_size", {"width": 0, "height": 0})
                 if not img_size and loaded.get("png_path"):
                     from PIL import Image
+
                     img = Image.open(loaded["png_path"])
                     img_size = {"width": img.size[0], "height": img.size[1]}
                     img.close()
@@ -491,15 +576,11 @@ class WebEditor:
 
                 if geometry_data and img_size:
                     bboxes = extract_bboxes_from_geometry_px(
-                        geometry_data,
-                        img_size["width"],
-                        img_size["height"]
+                        geometry_data, img_size["width"], img_size["height"]
                     )
                 elif metadata and img_size:
                     bboxes = extract_bboxes_from_metadata(
-                        metadata,
-                        img_size["width"],
-                        img_size["height"]
+                        metadata, img_size["width"], img_size["height"]
                     )
 
                 # Update editor state
@@ -507,28 +588,40 @@ class WebEditor:
                 editor.panel_info["current_index"] = panel_index
 
                 # Re-extract defaults from new metadata
-                from .._defaults import get_scitex_defaults, extract_defaults_from_metadata
+                from .._defaults import (
+                    extract_defaults_from_metadata,
+                    get_scitex_defaults,
+                )
+
                 editor.scitex_defaults = get_scitex_defaults()
                 editor.metadata_defaults = extract_defaults_from_metadata(metadata)
                 editor.current_overrides = copy.deepcopy(editor.scitex_defaults)
                 editor.current_overrides.update(editor.metadata_defaults)
                 editor.current_overrides.update(editor.manual_overrides)
 
-                return jsonify({
-                    "success": True,
-                    "panel_name": panel_name,
-                    "panel_index": panel_index,
-                    "image": img_data,
-                    "bboxes": bboxes,
-                    "img_size": img_size,
-                    "overrides": editor.current_overrides,
-                })
+                return jsonify(
+                    {
+                        "success": True,
+                        "panel_name": panel_name,
+                        "panel_index": panel_index,
+                        "image": img_data,
+                        "bboxes": bboxes,
+                        "img_size": img_size,
+                        "overrides": editor.current_overrides,
+                    }
+                )
             except Exception as e:
                 import traceback
-                return jsonify({
-                    "error": f"Failed to switch panel: {str(e)}",
-                    "traceback": traceback.format_exc(),
-                }), 500
+
+                return (
+                    jsonify(
+                        {
+                            "error": f"Failed to switch panel: {str(e)}",
+                            "traceback": traceback.format_exc(),
+                        }
+                    ),
+                    500,
+                )
 
         @app.route("/hitmap")
         def hitmap():
@@ -536,19 +629,23 @@ class WebEditor:
             if editor.hitmap_path and editor.hitmap_path.exists():
                 with open(editor.hitmap_path, "rb") as f:
                     img_data = base64.b64encode(f.read()).decode("utf-8")
-                return jsonify({
-                    "image": img_data,
-                    "color_map": editor.color_map,
-                })
+                return jsonify(
+                    {
+                        "image": img_data,
+                        "color_map": editor.color_map,
+                    }
+                )
             return jsonify({"error": "No hitmap available"}), 404
 
         @app.route("/color_map")
         def color_map():
             """Return color map for hitmap element identification."""
-            return jsonify({
-                "color_map": editor.color_map,
-                "hit_regions": editor.hit_regions,
-            })
+            return jsonify(
+                {
+                    "color_map": editor.color_map,
+                    "hit_regions": editor.hit_regions,
+                }
+            )
 
         @app.route("/update", methods=["POST"])
         def update():
@@ -564,16 +661,19 @@ class WebEditor:
 
             # Re-render the figure with updated overrides
             img_data, bboxes, img_size = render_preview_with_bboxes(
-                editor.csv_data, editor.current_overrides,
+                editor.csv_data,
+                editor.current_overrides,
                 metadata=editor.metadata,
                 dark_mode=dark_mode,
             )
-            return jsonify({
-                "image": img_data,
-                "bboxes": bboxes,
-                "img_size": img_size,
-                "status": "updated",
-            })
+            return jsonify(
+                {
+                    "image": img_data,
+                    "bboxes": bboxes,
+                    "img_size": img_size,
+                    "status": "updated",
+                }
+            )
 
         @app.route("/save", methods=["POST"])
         def save():
@@ -590,23 +690,32 @@ class WebEditor:
 
         @app.route("/save_layout", methods=["POST"])
         def save_layout():
-            """Save panel layout positions to figz bundle."""
+            """Save panel layout positions to figure bundle."""
             try:
                 data = request.get_json()
                 layout = data.get("layout", {})
 
                 if not layout:
-                    return jsonify({"success": False, "error": "No layout data provided"})
+                    return jsonify(
+                        {"success": False, "error": "No layout data provided"}
+                    )
 
-                # Check if we have panel_info (figz bundle)
+                # Check if we have panel_info (figure bundle)
                 if not editor.panel_info:
-                    return jsonify({"success": False, "error": "No panel info available (not a figz bundle)"})
+                    return jsonify(
+                        {
+                            "success": False,
+                            "error": "No panel info available (not a figure bundle)",
+                        }
+                    )
 
                 bundle_path = editor.panel_info.get("bundle_path")
                 if not bundle_path:
-                    return jsonify({"success": False, "error": "Bundle path not available"})
+                    return jsonify(
+                        {"success": False, "error": "Bundle path not available"}
+                    )
 
-                # Update layout in the figz bundle
+                # Update layout in the figure bundle
                 from scitex.canvas.io import ZipBundle
 
                 bundle = ZipBundle(bundle_path)
@@ -632,9 +741,13 @@ class WebEditor:
 
                     # Update size if provided
                     if "width_mm" in pos:
-                        existing_layout[panel_name]["size"]["width_mm"] = pos["width_mm"]
+                        existing_layout[panel_name]["size"]["width_mm"] = pos[
+                            "width_mm"
+                        ]
                     if "height_mm" in pos:
-                        existing_layout[panel_name]["size"]["height_mm"] = pos["height_mm"]
+                        existing_layout[panel_name]["size"]["height_mm"] = pos[
+                            "height_mm"
+                        ]
 
                 # Save updated layout
                 bundle.write_json("layout.json", existing_layout)
@@ -645,23 +758,28 @@ class WebEditor:
                 # Auto-export composed figure to bundle
                 export_result = _export_composed_figure(editor, formats=["png", "svg"])
 
-                return jsonify({
-                    "success": True,
-                    "layout": existing_layout,
-                    "exported": export_result.get("exported", {})
-                })
+                return jsonify(
+                    {
+                        "success": True,
+                        "layout": existing_layout,
+                        "exported": export_result.get("exported", {}),
+                    }
+                )
 
             except Exception as e:
                 import traceback
-                return jsonify({
-                    "success": False,
-                    "error": str(e),
-                    "traceback": traceback.format_exc()
-                })
+
+                return jsonify(
+                    {
+                        "success": False,
+                        "error": str(e),
+                        "traceback": traceback.format_exc(),
+                    }
+                )
 
         @app.route("/save_element_position", methods=["POST"])
         def save_element_position():
-            """Save element position (legend/panel_letter) to figz bundle.
+            """Save element position (legend/panel_letter) to figure bundle.
 
             ONLY legends and panel letters can be repositioned to maintain
             scientific rigor. Data elements are never moved.
@@ -677,19 +795,26 @@ class WebEditor:
                 # Validate element type (whitelist for scientific rigor)
                 ALLOWED_TYPES = ["legend", "panel_letter"]
                 if element_type not in ALLOWED_TYPES:
-                    return jsonify({
-                        "success": False,
-                        "error": f"Element type '{element_type}' cannot be repositioned (scientific rigor)"
-                    })
+                    return jsonify(
+                        {
+                            "success": False,
+                            "error": f"Element type '{element_type}' cannot be repositioned (scientific rigor)",
+                        }
+                    )
 
                 if not editor.panel_info:
-                    return jsonify({"success": False, "error": "No panel info available"})
+                    return jsonify(
+                        {"success": False, "error": "No panel info available"}
+                    )
 
                 bundle_path = editor.panel_info.get("bundle_path")
                 if not bundle_path:
-                    return jsonify({"success": False, "error": "Bundle path not available"})
+                    return jsonify(
+                        {"success": False, "error": "Bundle path not available"}
+                    )
 
                 from scitex.canvas.io import ZipBundle
+
                 bundle = ZipBundle(bundle_path)
 
                 # Read or create style.json for element positions
@@ -732,43 +857,55 @@ class WebEditor:
 
                 bundle.write_json("style.json", style)
 
-                return jsonify({
-                    "success": True,
-                    "element": element,
-                    "position": position,
-                    "snap_name": snap_name
-                })
+                return jsonify(
+                    {
+                        "success": True,
+                        "element": element,
+                        "position": position,
+                        "snap_name": snap_name,
+                    }
+                )
 
             except Exception as e:
                 import traceback
-                return jsonify({
-                    "success": False,
-                    "error": str(e),
-                    "traceback": traceback.format_exc()
-                })
+
+                return jsonify(
+                    {
+                        "success": False,
+                        "error": str(e),
+                        "traceback": traceback.format_exc(),
+                    }
+                )
 
         @app.route("/export", methods=["POST"])
         def export_figure():
-            """Export composed figure to various formats and update figz bundle."""
+            """Export composed figure to various formats and update figure bundle."""
             try:
                 data = request.get_json()
                 formats = data.get("formats", ["png", "svg"])
 
                 if not editor.panel_info:
-                    return jsonify({"success": False, "error": "No panel info available"})
+                    return jsonify(
+                        {"success": False, "error": "No panel info available"}
+                    )
 
                 bundle_path = editor.panel_info.get("bundle_path")
                 if not bundle_path:
-                    return jsonify({"success": False, "error": "Bundle path not available"})
+                    return jsonify(
+                        {"success": False, "error": "Bundle path not available"}
+                    )
+
+                import io
+                from pathlib import Path
+
+                import matplotlib
 
                 from scitex.io import ZipBundle
-                from pathlib import Path
-                import io
-                import matplotlib
-                matplotlib.use('Agg')
+
+                matplotlib.use("Agg")
                 import matplotlib.pyplot as plt
-                from PIL import Image
                 import numpy as np
+                from PIL import Image
 
                 figure_name = Path(bundle_path).stem
                 dpi = data.get("dpi", 150)
@@ -795,7 +932,11 @@ class WebEditor:
                     fig_height_in = fig_height_mm / 25.4
 
                     # Create figure with white background
-                    fig = plt.figure(figsize=(fig_width_in, fig_height_in), dpi=dpi, facecolor='white')
+                    fig = plt.figure(
+                        figsize=(fig_width_in, fig_height_in),
+                        dpi=dpi,
+                        facecolor="white",
+                    )
 
                     # Get panels from spec or editor.panel_info
                     panels_spec = spec.get("panels", [])
@@ -803,7 +944,7 @@ class WebEditor:
                     # Compose panels onto figure
                     for panel_spec in panels_spec:
                         panel_id = panel_spec.get("id", "")
-                        pltz_name = panel_spec.get("plot", "")
+                        plot_name = panel_spec.get("plot", "")
 
                         # Get position and size from spec
                         pos = panel_spec.get("position", {})
@@ -822,38 +963,53 @@ class WebEditor:
 
                         # Try to read panel image from pltz exports
                         img_loaded = False
-                        for pltz_path in [f"{panel_id}.pltz", pltz_name.replace(".d", "")]:
+                        for plot_path in [
+                            f"{panel_id}.plot",
+                            plot_name.replace(".d", ""),
+                        ]:
                             if img_loaded:
                                 break
                             try:
                                 # Read pltz as nested bundle
-                                pltz_bytes = bundle.read_bytes(pltz_path)
+                                plot_bytes = bundle.read_bytes(plot_path)
                                 import tempfile
-                                with tempfile.NamedTemporaryFile(suffix=".pltz", delete=False) as tmp:
-                                    tmp.write(pltz_bytes)
+
+                                with tempfile.NamedTemporaryFile(
+                                    suffix=".plot", delete=False
+                                ) as tmp:
+                                    tmp.write(plot_bytes)
                                     tmp_path = tmp.name
                                 try:
-                                    with ZipBundle(tmp_path, mode="r") as pltz_bundle:
+                                    with ZipBundle(tmp_path, mode="r") as plot_bundle:
                                         # Try various preview paths
-                                        for preview_path in ["exports/preview.png", "preview.png", f"exports/{panel_id}.png"]:
+                                        for preview_path in [
+                                            "exports/preview.png",
+                                            "preview.png",
+                                            f"exports/{panel_id}.png",
+                                        ]:
                                             try:
-                                                img_data = pltz_bundle.read_bytes(preview_path)
+                                                img_data = plot_bundle.read_bytes(
+                                                    preview_path
+                                                )
                                                 img = Image.open(io.BytesIO(img_data))
                                                 img_array = np.array(img)
 
                                                 # Create axes and add image
-                                                ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                                                ax = fig.add_axes(
+                                                    [x_frac, y_frac, w_frac, h_frac]
+                                                )
                                                 ax.imshow(img_array)
-                                                ax.axis('off')
+                                                ax.axis("off")
                                                 img_loaded = True
                                                 break
                                             except:
                                                 continue
                                 finally:
                                     import os
+
                                     os.unlink(tmp_path)
                             except Exception as e:
-                                print(f"Could not load pltz {pltz_path}: {e}")
+                                print(f"Could not load plot {plot_path}: {e}")
                                 continue
 
                     exported = {}
@@ -861,13 +1017,22 @@ class WebEditor:
                     for fmt in formats:
                         buf = io.BytesIO()
                         if fmt in ["png", "jpeg", "jpg"]:
-                            fig.savefig(buf, format="png" if fmt == "png" else "jpeg",
-                                       dpi=dpi, bbox_inches="tight", facecolor="white",
-                                       pad_inches=0.02)
+                            fig.savefig(
+                                buf,
+                                format="png" if fmt == "png" else "jpeg",
+                                dpi=dpi,
+                                bbox_inches="tight",
+                                facecolor="white",
+                                pad_inches=0.02,
+                            )
                         elif fmt == "svg":
-                            fig.savefig(buf, format="svg", bbox_inches="tight", pad_inches=0.02)
+                            fig.savefig(
+                                buf, format="svg", bbox_inches="tight", pad_inches=0.02
+                            )
                         elif fmt == "pdf":
-                            fig.savefig(buf, format="pdf", bbox_inches="tight", pad_inches=0.02)
+                            fig.savefig(
+                                buf, format="pdf", bbox_inches="tight", pad_inches=0.02
+                            )
                         else:
                             continue
 
@@ -881,27 +1046,33 @@ class WebEditor:
 
                     plt.close(fig)
 
-                return jsonify({
-                    "success": True,
-                    "exported": exported,
-                    "bundle_path": str(bundle_path)
-                })
+                return jsonify(
+                    {
+                        "success": True,
+                        "exported": exported,
+                        "bundle_path": str(bundle_path),
+                    }
+                )
 
             except Exception as e:
                 import traceback
-                return jsonify({
-                    "success": False,
-                    "error": str(e),
-                    "traceback": traceback.format_exc()
-                })
+
+                return jsonify(
+                    {
+                        "success": False,
+                        "error": str(e),
+                        "traceback": traceback.format_exc(),
+                    }
+                )
 
         @app.route("/download/<fmt>")
         def download_figure(fmt):
             """Download figure in specified format."""
             try:
-                from flask import send_file
                 import io
                 from pathlib import Path
+
+                from flask import send_file
 
                 mime_types = {
                     "png": "image/png",
@@ -914,26 +1085,34 @@ class WebEditor:
                 if fmt not in mime_types:
                     return f"Unsupported format: {fmt}", 400
 
-                # For figz bundles, download the composed figure
+                # For figure bundles, download the composed figure
                 if editor.panel_info:
                     bundle_path = editor.panel_info.get("bundle_path")
-                    figz_dir = editor.panel_info.get("figz_dir")
-                    figure_name = Path(bundle_path).stem if bundle_path else (
-                        Path(figz_dir).stem.replace(".figz.d", "") if figz_dir else "figure"
+                    figure_dir = editor.panel_info.get("figure_dir")
+                    figure_name = (
+                        Path(bundle_path).stem
+                        if bundle_path
+                        else (
+                            Path(figure_dir).stem.replace(".figure", "")
+                            if figure_dir
+                            else "figure"
+                        )
                     )
 
-                    if bundle_path or figz_dir:
-                        from scitex.io import ZipBundle
-                        from PIL import Image
-                        import numpy as np
+                    if bundle_path or figure_dir:
                         import matplotlib
-                        matplotlib.use('Agg')
-                        import matplotlib.pyplot as plt
+                        import numpy as np
+                        from PIL import Image
+
+                        from scitex.io import ZipBundle
+
+                        matplotlib.use("Agg")
                         import json as json_module
+
+                        import matplotlib.pyplot as plt
 
                         # Always compose on-demand to ensure current panel state
                         # (existing exports in bundle may be stale or blank)
-
                         # Read spec.json and layout.json for position overrides
                         spec = {}
                         layout_overrides = {}
@@ -942,17 +1121,19 @@ class WebEditor:
                                 with ZipBundle(bundle_path, mode="r") as bundle:
                                     spec = bundle.read_json("spec.json")
                                     try:
-                                        layout_overrides = bundle.read_json("layout.json")
+                                        layout_overrides = bundle.read_json(
+                                            "layout.json"
+                                        )
                                     except:
                                         pass
                             except:
                                 pass
-                        elif figz_dir:
-                            spec_path = Path(figz_dir) / "spec.json"
+                        elif figure_dir:
+                            spec_path = Path(figure_dir) / "spec.json"
                             if spec_path.exists():
                                 with open(spec_path) as f:
                                     spec = json_module.load(f)
-                            layout_path = Path(figz_dir) / "layout.json"
+                            layout_path = Path(figure_dir) / "layout.json"
                             if layout_path.exists():
                                 with open(layout_path) as f:
                                     layout_overrides = json_module.load(f)
@@ -975,7 +1156,11 @@ class WebEditor:
                         fig_height_in = fig_height_mm / 25.4
 
                         dpi = 150 if fmt in ["jpeg", "jpg"] else 300
-                        fig = plt.figure(figsize=(fig_width_in, fig_height_in), dpi=dpi, facecolor='white')
+                        fig = plt.figure(
+                            figsize=(fig_width_in, fig_height_in),
+                            dpi=dpi,
+                            facecolor="white",
+                        )
 
                         # Compose panels
                         panels_spec = spec.get("panels", [])
@@ -989,7 +1174,10 @@ class WebEditor:
 
                             # Skip overview/auxiliary panels (only compose main panels A-Z)
                             panel_id_lower = panel_id.lower()
-                            if any(skip in panel_id_lower for skip in ['overview', 'thumb', 'preview', 'aux']):
+                            if any(
+                                skip in panel_id_lower
+                                for skip in ["overview", "thumb", "preview", "aux"]
+                            ):
                                 continue
 
                             # Find panel path first (needed to check layout_overrides)
@@ -997,23 +1185,33 @@ class WebEditor:
                             is_zip = False
                             panel_name = None
                             for idx, pp in enumerate(panel_paths):
-                                pp_name = Path(pp).stem.replace(".pltz", "")
+                                pp_name = Path(pp).stem.replace(".plot", "")
                                 # Match exact name, or name contains panel_id pattern
                                 # e.g., "panel_A_twinx" matches panel_id "A"
-                                if (pp_name == panel_id or
-                                    pp_name.startswith(f"panel_{panel_id}_") or
-                                    pp_name.startswith(f"panel_{panel_id}.") or
-                                    pp_name == f"panel_{panel_id}" or
-                                    pp_name == panel_id or
-                                    f"_{panel_id}_" in pp_name or
-                                    pp_name.endswith(f"_{panel_id}")):
+                                if (
+                                    pp_name == panel_id
+                                    or pp_name.startswith(f"panel_{panel_id}_")
+                                    or pp_name.startswith(f"panel_{panel_id}.")
+                                    or pp_name == f"panel_{panel_id}"
+                                    or pp_name == panel_id
+                                    or f"_{panel_id}_" in pp_name
+                                    or pp_name.endswith(f"_{panel_id}")
+                                ):
                                     panel_path = pp
-                                    panel_name = Path(pp).name  # e.g., "panel_A_twinx.pltz"
-                                    is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else False
+                                    panel_name = Path(
+                                        pp
+                                    ).name  # e.g., "panel_A_twinx.plot"
+                                    is_zip = (
+                                        panel_is_zip[idx]
+                                        if idx < len(panel_is_zip)
+                                        else False
+                                    )
                                     break
 
                             if not panel_path:
-                                print(f"Could not find panel path for id={panel_id}, available: {[Path(p).stem for p in panel_paths]}")
+                                print(
+                                    f"Could not find panel path for id={panel_id}, available: {[Path(p).stem for p in panel_paths]}"
+                                )
                                 continue
 
                             # Check for layout overrides (from layout.json or in-memory)
@@ -1024,8 +1222,12 @@ class WebEditor:
                             # Use override positions if available, otherwise use spec
                             x_mm = override_pos.get("x_mm", pos.get("x_mm", 0))
                             y_mm = override_pos.get("y_mm", pos.get("y_mm", 0))
-                            w_mm = override_size.get("width_mm", size.get("width_mm", 60))
-                            h_mm = override_size.get("height_mm", size.get("height_mm", 40))
+                            w_mm = override_size.get(
+                                "width_mm", size.get("width_mm", 60)
+                            )
+                            h_mm = override_size.get(
+                                "height_mm", size.get("height_mm", 40)
+                            )
 
                             x_frac = x_mm / fig_width_mm
                             y_frac = 1 - (y_mm + h_mm) / fig_height_mm
@@ -1036,44 +1238,71 @@ class WebEditor:
                             try:
                                 img_loaded = False
                                 # Exclusion patterns for preview selection
-                                exclude_patterns = ['hitmap', 'overview', 'thumb', 'preview']
+                                exclude_patterns = [
+                                    "hitmap",
+                                    "overview",
+                                    "thumb",
+                                    "preview",
+                                ]
 
                                 if is_zip:
-                                    with ZipBundle(panel_path, mode="r") as pltz_bundle:
+                                    with ZipBundle(panel_path, mode="r") as plot_bundle:
                                         # Find PNG in exports (exclude hitmap, overview, thumbnails)
                                         import zipfile
-                                        with zipfile.ZipFile(panel_path, 'r') as zf:
-                                            png_files = [n for n in zf.namelist()
-                                                        if n.endswith('.png')
-                                                        and 'exports/' in n
-                                                        and not any(p in n.lower() for p in exclude_patterns)]
+
+                                        with zipfile.ZipFile(panel_path, "r") as zf:
+                                            png_files = [
+                                                n
+                                                for n in zf.namelist()
+                                                if n.endswith(".png")
+                                                and "exports/" in n
+                                                and not any(
+                                                    p in n.lower()
+                                                    for p in exclude_patterns
+                                                )
+                                            ]
                                             if png_files:
                                                 # Use first matching PNG
                                                 preview_path = png_files[0]
                                                 # Extract the path relative to .d directory
-                                                if '.pltz.d/' in preview_path:
-                                                    preview_path = preview_path.split('.pltz.d/')[-1]
+                                                if ".plot/" in preview_path:
+                                                    preview_path = preview_path.split(
+                                                        ".plot/"
+                                                    )[-1]
                                                 try:
-                                                    img_data = pltz_bundle.read_bytes(preview_path)
-                                                    img = Image.open(io.BytesIO(img_data))
-                                                    ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                                                    img_data = plot_bundle.read_bytes(
+                                                        preview_path
+                                                    )
+                                                    img = Image.open(
+                                                        io.BytesIO(img_data)
+                                                    )
+                                                    ax = fig.add_axes(
+                                                        [x_frac, y_frac, w_frac, h_frac]
+                                                    )
                                                     ax.imshow(np.array(img))
-                                                    ax.axis('off')
+                                                    ax.axis("off")
                                                     img_loaded = True
                                                 except Exception as e:
-                                                    print(f"Could not read {preview_path}: {e}")
+                                                    print(
+                                                        f"Could not read {preview_path}: {e}"
+                                                    )
                                 else:
                                     # Directory-based pltz
-                                    pltz_dir = Path(panel_path)
-                                    exports_dir = pltz_dir / "exports"
+                                    plot_dir = Path(panel_path)
+                                    exports_dir = plot_dir / "exports"
                                     if exports_dir.exists():
                                         for png_file in exports_dir.glob("*.png"):
                                             name_lower = png_file.name.lower()
-                                            if not any(p in name_lower for p in exclude_patterns):
+                                            if not any(
+                                                p in name_lower
+                                                for p in exclude_patterns
+                                            ):
                                                 img = Image.open(png_file)
-                                                ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
+                                                ax = fig.add_axes(
+                                                    [x_frac, y_frac, w_frac, h_frac]
+                                                )
                                                 ax.imshow(np.array(img))
-                                                ax.axis('off')
+                                                ax.axis("off")
                                                 img_loaded = True
                                                 break
                                 if not img_loaded:
@@ -1082,21 +1311,39 @@ class WebEditor:
                                 print(f"Could not load panel {panel_id}: {e}")
 
                             # Draw panel letter
-                            if panel_id and len(panel_id) <= 2:  # Only for short IDs like A, B, C...
+                            if (
+                                panel_id and len(panel_id) <= 2
+                            ):  # Only for short IDs like A, B, C...
                                 # Position letter at top-left corner of panel
                                 letter_x = x_frac + 0.01
                                 letter_y = y_frac + h_frac - 0.02
-                                fig.text(letter_x, letter_y, panel_id,
-                                        fontsize=14, fontweight='bold', color='black',
-                                        ha='left', va='top',
-                                        transform=fig.transFigure,
-                                        bbox=dict(boxstyle='square,pad=0.1',
-                                                 facecolor='white', edgecolor='none', alpha=0.8))
+                                fig.text(
+                                    letter_x,
+                                    letter_y,
+                                    panel_id,
+                                    fontsize=14,
+                                    fontweight="bold",
+                                    color="black",
+                                    ha="left",
+                                    va="top",
+                                    transform=fig.transFigure,
+                                    bbox=dict(
+                                        boxstyle="square,pad=0.1",
+                                        facecolor="white",
+                                        edgecolor="none",
+                                        alpha=0.8,
+                                    ),
+                                )
 
                         buf = io.BytesIO()
-                        fig.savefig(buf, format=fmt if fmt != "jpg" else "jpeg",
-                                   dpi=dpi, bbox_inches="tight", facecolor="white",
-                                   pad_inches=0.02)
+                        fig.savefig(
+                            buf,
+                            format=fmt if fmt != "jpg" else "jpeg",
+                            dpi=dpi,
+                            bbox_inches="tight",
+                            facecolor="white",
+                            pad_inches=0.02,
+                        )
                         plt.close(fig)
                         buf.seek(0)
 
@@ -1104,13 +1351,15 @@ class WebEditor:
                             buf,
                             mimetype=mime_types[fmt],
                             as_attachment=True,
-                            download_name=f"{figure_name}.{fmt}"
+                            download_name=f"{figure_name}.{fmt}",
                         )
 
                 # For single pltz files, render from csv_data
-                from ._renderer import render_preview_with_bboxes
                 import matplotlib
-                matplotlib.use('Agg')
+
+                from ._renderer import render_preview_with_bboxes
+
+                matplotlib.use("Agg")
                 import matplotlib.pyplot as plt
 
                 figure_name = "figure"
@@ -1118,32 +1367,39 @@ class WebEditor:
                     figure_name = Path(editor.json_path).stem
 
                 img_data, _, _ = render_preview_with_bboxes(
-                    editor.csv_data, editor.current_overrides,
+                    editor.csv_data,
+                    editor.current_overrides,
                     metadata=editor.metadata,
                     dark_mode=False,
                 )
 
                 if fmt == "png":
                     import base64
+
                     content = base64.b64decode(img_data)
                     buf = io.BytesIO(content)
                     return send_file(
                         buf,
                         mimetype=mime_types[fmt],
                         as_attachment=True,
-                        download_name=f"{figure_name}.{fmt}"
+                        download_name=f"{figure_name}.{fmt}",
                     )
 
                 # For other formats, re-render
                 from ._plotter import plot_from_csv
+
                 fig, ax = plt.subplots(figsize=(8, 6))
                 plot_from_csv(ax, editor.csv_data, editor.current_overrides)
 
                 buf = io.BytesIO()
                 dpi = 150 if fmt in ["jpeg", "jpg"] else 300
-                fig.savefig(buf, format=fmt if fmt != "jpg" else "jpeg",
-                           dpi=dpi, bbox_inches="tight",
-                           facecolor="white" if fmt in ["jpeg", "jpg"] else None)
+                fig.savefig(
+                    buf,
+                    format=fmt if fmt != "jpg" else "jpeg",
+                    dpi=dpi,
+                    bbox_inches="tight",
+                    facecolor="white" if fmt in ["jpeg", "jpg"] else None,
+                )
                 plt.close(fig)
                 buf.seek(0)
 
@@ -1151,16 +1407,17 @@ class WebEditor:
                     buf,
                     mimetype=mime_types[fmt],
                     as_attachment=True,
-                    download_name=f"{figure_name}.{fmt}"
+                    download_name=f"{figure_name}.{fmt}",
                 )
 
             except Exception as e:
                 import traceback
+
                 return f"Error: {str(e)}\n{traceback.format_exc()}", 500
 
         @app.route("/download_figz")
         def download_figz():
-            """Download as figz bundle (re-editable format)."""
+            """Download as figure bundle (re-editable format)."""
             try:
                 if not editor.panel_info:
                     return "No panel info available", 404
@@ -1169,15 +1426,16 @@ class WebEditor:
                 if not bundle_path:
                     return "Bundle path not available", 404
 
-                from flask import send_file
                 from pathlib import Path
+
+                from flask import send_file
 
                 # Send the figz file directly (it's already a pltz-compatible format)
                 return send_file(
                     bundle_path,
                     mimetype="application/zip",
                     as_attachment=True,
-                    download_name=Path(bundle_path).name
+                    download_name=Path(bundle_path).name,
                 )
 
             except Exception as e:
@@ -1197,11 +1455,13 @@ class WebEditor:
             """Return statistical test results from figure metadata."""
             stats_data = editor.metadata.get("stats", [])
             stats_summary = editor.metadata.get("stats_summary", None)
-            return jsonify({
-                "stats": stats_data,
-                "stats_summary": stats_summary,
-                "has_stats": len(stats_data) > 0,
-            })
+            return jsonify(
+                {
+                    "stats": stats_data,
+                    "stats_summary": stats_summary,
+                    "has_stats": len(stats_data) > 0,
+                }
+            )
 
         # Open browser after short delay
         def open_browser():
@@ -1224,7 +1484,7 @@ class WebEditor:
 def _extract_bboxes_from_metadata(
     metadata: Dict[str, Any],
     display_width: Optional[float] = None,
-    display_height: Optional[float] = None
+    display_height: Optional[float] = None,
 ) -> Dict[str, Any]:
     """Extract element bounding boxes from pltz metadata.
 
@@ -1404,8 +1664,7 @@ def _extract_bboxes_from_metadata(
             path_px = artist.get("path_px", [])
             if path_px:
                 scaled_points = [
-                    [pt[0] * scale_x, pt[1] * scale_y]
-                    for pt in path_px if len(pt) >= 2
+                    [pt[0] * scale_x, pt[1] * scale_y] for pt in path_px if len(pt) >= 2
                 ]
                 trace_entry["points"] = scaled_points
 

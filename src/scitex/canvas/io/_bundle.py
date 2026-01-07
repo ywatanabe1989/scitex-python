@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-14 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fig/io/_bundle.py
 
 """
-SciTeX .figz Bundle I/O - Figure-specific bundle operations.
+SciTeX Figure Bundle I/O - Figure-specific bundle operations.
 
 Handles:
     - Figure specification validation
     - Panel composition and layout
-    - Nested .pltz bundle management
+    - Nested .plot bundle management
     - Export file handling
 """
 
@@ -19,14 +18,14 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 __all__ = [
-    "validate_figz_spec",
-    "load_figz_bundle",
-    "save_figz_bundle",
-    "FIGZ_SCHEMA_SPEC",
+    "validate_figure_spec",
+    "load_figure_bundle",
+    "save_figure_bundle",
+    "FIGURE_SCHEMA_SPEC",
 ]
 
-# Schema specification for .figz bundles
-FIGZ_SCHEMA_SPEC = {
+# Schema specification for .figure bundles
+FIGURE_SCHEMA_SPEC = {
     "name": "scitex.canvas.figure",
     "version": "1.0.0",
     "required_fields": ["schema"],
@@ -34,8 +33,8 @@ FIGZ_SCHEMA_SPEC = {
 }
 
 
-def validate_figz_spec(spec: Dict[str, Any]) -> List[str]:
-    """Validate .figz-specific fields.
+def validate_figure_spec(spec: Dict[str, Any]) -> List[str]:
+    """Validate .figure-specific fields.
 
     Args:
         spec: The specification dictionary to validate.
@@ -65,8 +64,8 @@ def validate_figz_spec(spec: Dict[str, Any]) -> List[str]:
     return errors
 
 
-def load_figz_bundle(bundle_dir: Path) -> Dict[str, Any]:
-    """Load .figz bundle contents from directory.
+def load_figure_bundle(bundle_dir: Path) -> Dict[str, Any]:
+    """Load .figure bundle contents from directory.
 
     Supports both:
     - New format: spec.json + style.json (separate semantic/appearance)
@@ -79,32 +78,32 @@ def load_figz_bundle(bundle_dir: Path) -> Dict[str, Any]:
         Dictionary with loaded bundle contents:
         - spec: Figure specification (semantic)
         - style: Figure style (appearance)
-        - plots: Dict of nested pltz bundles
+        - plots: Dict of nested plot bundles
         - basename: Base filename
     """
     result = {}
     bundle_dir = Path(bundle_dir)
 
     # Determine basename from directory name
-    basename = bundle_dir.stem.replace(".figz", "")
+    basename = bundle_dir.stem.replace(".figure", "")
     result["basename"] = basename
 
     # Try to load spec.json (new format) first
     spec_file = bundle_dir / "spec.json"
     if spec_file.exists():
-        with open(spec_file, "r") as f:
+        with open(spec_file) as f:
             result["spec"] = json.load(f)
     else:
         # Fallback to {basename}.json (legacy format)
         legacy_file = bundle_dir / f"{basename}.json"
         if legacy_file.exists():
-            with open(legacy_file, "r") as f:
+            with open(legacy_file) as f:
                 result["spec"] = json.load(f)
         else:
             # Try any .json file
             for f in bundle_dir.glob("*.json"):
-                if not f.name.startswith('.') and f.name != "style.json":
-                    with open(f, "r") as fp:
+                if not f.name.startswith(".") and f.name != "style.json":
+                    with open(f) as fp:
                         result["spec"] = json.load(fp)
                     break
             else:
@@ -113,7 +112,7 @@ def load_figz_bundle(bundle_dir: Path) -> Dict[str, Any]:
     # Load style.json if exists
     style_file = bundle_dir / "style.json"
     if style_file.exists():
-        with open(style_file, "r") as f:
+        with open(style_file) as f:
             result["style"] = json.load(f)
     else:
         # Extract from embedded styles in spec (legacy)
@@ -126,30 +125,32 @@ def load_figz_bundle(bundle_dir: Path) -> Dict[str, Any]:
         else:
             result["style"] = {}
 
-    # Load nested .pltz bundles
+    # Load nested .plot bundles
     result["plots"] = {}
 
-    # Load from .pltz.d directories
-    for pltz_dir in bundle_dir.glob("*.pltz.d"):
-        plot_name = pltz_dir.stem.replace(".pltz", "")
+    # Load from .plot directories
+    for plot_dir in bundle_dir.glob("*.plot"):
+        plot_name = plot_dir.stem.replace(".plot", "")
         from scitex.io.bundle import load
-        result["plots"][plot_name] = load(pltz_dir)
 
-    # Load from .pltz ZIP files
-    for pltz_zip in bundle_dir.glob("*.pltz"):
-        if pltz_zip.is_file():
-            plot_name = pltz_zip.stem
+        result["plots"][plot_name] = load(plot_dir)
+
+    # Load from .plot.zip files
+    for plot_zip in bundle_dir.glob("*.plot.zip"):
+        if plot_zip.is_file():
+            plot_name = plot_zip.stem.replace(".plot", "")
             from scitex.io.bundle import load
-            result["plots"][plot_name] = load(pltz_zip)
+
+            result["plots"][plot_name] = load(plot_zip)
 
     return result
 
 
-def save_figz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
-    """Save .figz bundle contents to directory.
+def save_figure_bundle(data: Dict[str, Any], dir_path: Path) -> None:
+    """Save .figure bundle contents to directory.
 
     Structure:
-        figure.figz.d/
+        figure.figure/
             spec.json              # Figure-level specification
             style.json             # Figure-level style (optional)
             exports/               # Figure-level exports
@@ -160,9 +161,9 @@ def save_figz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
             cache/                 # Figure-level cache
                 geometry_px.json   # Combined geometry for all panels
                 render_manifest.json
-            panels/                # Nested panel bundles (or *.pltz.d at root)
-                A.pltz.d/
-                B.pltz.d/
+            panels/                # Nested panel bundles (or *.plot at root)
+                A.plot/
+                B.plot/
             README.md
 
     Args:
@@ -170,10 +171,11 @@ def save_figz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
         dir_path: Path to the bundle directory.
     """
     import logging
+
     logger = logging.getLogger("scitex")
 
-    # Get basename from directory name (e.g., "Figure1" from "Figure1.figz.d")
-    basename = dir_path.stem.replace(".figz", "")
+    # Get basename from directory name (e.g., "Figure1" from "Figure1.figure")
+    basename = dir_path.stem.replace(".figure", "")
 
     # Create directories
     exports_dir = dir_path / "exports"
@@ -192,7 +194,9 @@ def save_figz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
 
     # Build clean spec (semantic data only)
     clean_spec = {
-        "schema": spec.get("schema", {"name": "scitex.canvas.figure", "version": "1.0.0"}),
+        "schema": spec.get(
+            "schema", {"name": "scitex.canvas.figure", "version": "1.0.0"}
+        ),
         "figure": {
             "id": figure_data.get("id", "figure"),
             "title": figure_data.get("title", ""),
@@ -204,17 +208,20 @@ def save_figz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
         clean_spec["notations"] = spec["notations"]
 
     # Build style (appearance data)
-    figz_style = {
+    figure_style = {
         "schema": {"name": "scitex.canvas.style", "version": "1.0.0"},
         "size": style.get("size", {"width_mm": 180, "height_mm": 120}),
         "background": style.get("background", "#ffffff"),
         "theme": style.get("theme", {"mode": "light"}),
-        "panel_labels": style.get("panel_labels", {
-            "visible": True,
-            "fontsize": 12,
-            "fontweight": "bold",
-            "position": "top-left",
-        }),
+        "panel_labels": style.get(
+            "panel_labels",
+            {
+                "visible": True,
+                "fontsize": 12,
+                "fontweight": "bold",
+                "position": "top-left",
+            },
+        ),
     }
 
     # Save spec.json (semantic)
@@ -225,24 +232,24 @@ def save_figz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
     # Save style.json (appearance)
     style_file = dir_path / "style.json"
     with open(style_file, "w") as f:
-        json.dump(figz_style, f, indent=2)
+        json.dump(figure_style, f, indent=2)
 
     # Also save as {basename}.json for backward compatibility (full spec with embedded style)
     compat_spec = dict(clean_spec)
     compat_spec["figure"]["styles"] = {
-        "size": figz_style["size"],
-        "background": figz_style["background"],
+        "size": figure_style["size"],
+        "background": figure_style["background"],
     }
     compat_spec_file = dir_path / f"{basename}.json"
     with open(compat_spec_file, "w") as f:
         json.dump(compat_spec, f, indent=2)
 
     # Save exports to exports/ directory
-    _save_figz_exports(data, exports_dir, spec, basename)
+    _save_figure_exports(data, exports_dir, spec, basename)
 
-    # Copy nested .pltz bundles directly (preserving all files)
+    # Copy nested .plot bundles directly (preserving all files)
     if "plots" in data:
-        _copy_nested_pltz_bundles(data["plots"], dir_path)
+        _copy_nested_plot_bundles(data["plots"], dir_path)
 
     # Generate composed figure in exports/ (Figure1.png, Figure1.svg)
     try:
@@ -250,26 +257,28 @@ def save_figz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
     except Exception as e:
         logger.debug(f"Could not generate composed figure: {e}")
 
-    # Generate figz overview in exports/
+    # Generate figure overview in exports/
     try:
-        _generate_figz_overview(dir_path, spec, data, basename)
+        _generate_figure_overview(dir_path, spec, data, basename)
     except Exception as e:
-        logger.debug(f"Could not generate figz overview: {e}")
+        logger.debug(f"Could not generate figure overview: {e}")
 
     # Generate figure-level geometry cache
     try:
-        _generate_figz_geometry_cache(dir_path, spec, basename)
+        _generate_figure_geometry_cache(dir_path, spec, basename)
     except Exception as e:
-        logger.debug(f"Could not generate figz geometry cache: {e}")
+        logger.debug(f"Could not generate figure geometry cache: {e}")
 
     # Generate README.md
     try:
-        _generate_figz_readme(dir_path, spec, data, basename)
+        _generate_figure_readme(dir_path, spec, data, basename)
     except Exception as e:
-        logger.debug(f"Could not generate figz README: {e}")
+        logger.debug(f"Could not generate figure README: {e}")
 
 
-def _save_figz_exports(data: Dict[str, Any], exports_dir: Path, spec: Dict, basename: str) -> None:
+def _save_figure_exports(
+    data: Dict[str, Any], exports_dir: Path, spec: Dict, basename: str
+) -> None:
     """Save figure-level export files to exports/ directory.
 
     Args:
@@ -297,12 +306,15 @@ def _save_figz_exports(data: Dict[str, Any], exports_dir: Path, spec: Dict, base
                 _embed_metadata_in_export(out_file, spec, fmt)
             except Exception as e:
                 import logging
+
                 logging.getLogger("scitex").debug(
                     f"Could not embed metadata in {out_file}: {e}"
                 )
 
 
-def _save_exports(data: Dict[str, Any], dir_path: Path, spec: Dict, basename: str = "figure") -> None:
+def _save_exports(
+    data: Dict[str, Any], dir_path: Path, spec: Dict, basename: str = "figure"
+) -> None:
     """Save export files (PNG, SVG, PDF) with embedded metadata. (Legacy - root level)"""
     for fmt in ["png", "svg", "pdf"]:
         if fmt not in data:
@@ -323,42 +335,43 @@ def _save_exports(data: Dict[str, Any], dir_path: Path, spec: Dict, basename: st
                 _embed_metadata_in_export(out_file, spec, fmt)
             except Exception as e:
                 import logging
+
                 logging.getLogger("scitex").debug(
                     f"Could not embed metadata in {out_file}: {e}"
                 )
 
 
-def _copy_nested_pltz_bundles(plots: Dict[str, Any], dir_path: Path) -> None:
-    """Copy nested .pltz bundles directly, preserving all files.
+def _copy_nested_plot_bundles(plots: Dict[str, Any], dir_path: Path) -> None:
+    """Copy nested .plot bundles directly, preserving all files.
 
     Args:
         plots: Dict mapping panel IDs to either:
-            - source_path: Path to existing .pltz.d directory or .pltz zip
+            - source_path: Path to existing .plot directory or .plot.zip
             - bundle_data: Dict with spec/data (will use save_bundle)
-        dir_path: Target figz directory.
+        dir_path: Target figure directory.
     """
     for panel_id, plot_source in plots.items():
         if isinstance(plot_source, (str, Path)):
             # Direct copy from source path
             source_path = Path(plot_source)
 
-            if source_path.is_dir() and str(source_path).endswith('.pltz.d'):
-                # Source is .pltz.d directory - copy as directory
-                target_path = dir_path / f"{panel_id}.pltz.d"
+            if source_path.is_dir() and str(source_path).endswith(".plot"):
+                # Source is .plot directory - copy as directory
+                target_path = dir_path / f"{panel_id}.plot"
                 if target_path.exists():
                     shutil.rmtree(target_path)
                 shutil.copytree(source_path, target_path)
 
-            elif source_path.is_file() and str(source_path).endswith('.pltz'):
-                # Source is .pltz zip file - copy as zip file (preserving zip format)
-                target_path = dir_path / f"{panel_id}.pltz"
+            elif source_path.is_file() and str(source_path).endswith(".plot.zip"):
+                # Source is .plot.zip file - copy as zip file (preserving zip format)
+                target_path = dir_path / f"{panel_id}.plot.zip"
                 if target_path.exists():
                     target_path.unlink()
                 shutil.copy2(source_path, target_path)
 
             elif source_path.exists():
                 # Unknown format - try to copy as directory
-                target_path = dir_path / f"{panel_id}.pltz.d"
+                target_path = dir_path / f"{panel_id}.plot"
                 if source_path.is_dir():
                     if target_path.exists():
                         shutil.rmtree(target_path)
@@ -368,27 +381,30 @@ def _copy_nested_pltz_bundles(plots: Dict[str, Any], dir_path: Path) -> None:
             # Check if it has source_path for direct copy
             if "source_path" in plot_source:
                 source_path = Path(plot_source["source_path"])
-                if source_path.is_file() and str(source_path).endswith('.pltz'):
-                    # .pltz zip file
-                    target_path = dir_path / f"{panel_id}.pltz"
+                if source_path.is_file() and str(source_path).endswith(".plot.zip"):
+                    # .plot.zip file
+                    target_path = dir_path / f"{panel_id}.plot.zip"
                     if target_path.exists():
                         target_path.unlink()
                     shutil.copy2(source_path, target_path)
                 elif source_path.exists() and source_path.is_dir():
-                    # .pltz.d directory
-                    target_path = dir_path / f"{panel_id}.pltz.d"
+                    # .plot directory
+                    target_path = dir_path / f"{panel_id}.plot"
                     if target_path.exists():
                         shutil.rmtree(target_path)
                     shutil.copytree(source_path, target_path)
             else:
                 # Fallback to save (will lose images)
-                from scitex.io.bundle import save, BundleType
-                target_path = dir_path / f"{panel_id}.pltz.d"
-                save(plot_source, target_path, bundle_type=BundleType.PLTZ)
+                from scitex.io.bundle import BundleType, save
+
+                target_path = dir_path / f"{panel_id}.plot"
+                save(plot_source, target_path, bundle_type=BundleType.PLOT)
 
 
-def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: str) -> None:
-    """Generate overview image for figz bundle showing panels with hitmaps, overlays, and bboxes.
+def _generate_figure_overview(
+    dir_path: Path, spec: Dict, data: Dict, basename: str
+) -> None:
+    """Generate overview image for figure bundle showing panels with hitmaps, overlays, and bboxes.
 
     Args:
         dir_path: Bundle directory path.
@@ -396,36 +412,36 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
         data: Bundle data dictionary.
         basename: Base filename for bundle files.
     """
-    import matplotlib.pyplot as plt
-    import matplotlib.gridspec as gridspec
-    import matplotlib.patches as patches
-    from PIL import Image
-    import numpy as np
-    import warnings
     import tempfile
+    import warnings
     import zipfile
 
-    # Find all panel bundles (both .pltz.d directories and .pltz zip files)
+    import matplotlib.gridspec as gridspec
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from PIL import Image
+
+    # Find all panel bundles (both .plot directories and .plot.zip files)
     panel_dirs = []
     temp_dirs_to_cleanup = []
 
     for item in dir_path.iterdir():
-        if item.is_dir() and str(item).endswith('.pltz.d'):
+        if item.is_dir() and str(item).endswith(".plot"):
             panel_dirs.append(item)
-        elif item.is_file() and str(item).endswith('.pltz'):
-            # Extract .pltz zip to temp directory for overview generation
-            temp_dir = tempfile.mkdtemp(prefix=f'scitex_overview_{item.stem}_')
+        elif item.is_file() and str(item).endswith(".plot.zip"):
+            # Extract .plot.zip to temp directory for overview generation
+            temp_dir = tempfile.mkdtemp(prefix=f"scitex_overview_{item.stem}_")
             temp_dirs_to_cleanup.append(temp_dir)
-            with zipfile.ZipFile(item, 'r') as zf:
+            with zipfile.ZipFile(item, "r") as zf:
                 zf.extractall(temp_dir)
-            # Find the extracted .pltz.d directory
+            # Find the extracted .plot directory
             extracted = Path(temp_dir)
             for subitem in extracted.iterdir():
-                if subitem.is_dir() and str(subitem).endswith('.pltz.d'):
+                if subitem.is_dir() and str(subitem).endswith(".plot"):
                     panel_dirs.append(subitem)
                     break
             else:
-                # Use temp dir directly if no .pltz.d subfolder
+                # Use temp dir directly if no .plot subfolder
                 panel_dirs.append(extracted)
 
     panel_dirs = sorted(panel_dirs, key=lambda x: x.name)
@@ -446,19 +462,29 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
     fig.suptitle(f"Figure Overview: {title}", fontsize=14, fontweight="bold", y=0.99)
 
     # Create gridspec - 2 rows per panel, 3 columns
-    gs = gridspec.GridSpec(n_panels * 2, 3, figure=fig, hspace=0.3, wspace=0.15,
-                          height_ratios=[1, 1] * n_panels)
+    gs = gridspec.GridSpec(
+        n_panels * 2,
+        3,
+        figure=fig,
+        hspace=0.3,
+        wspace=0.15,
+        height_ratios=[1, 1] * n_panels,
+    )
 
     # Add each panel
     for idx, panel_dir in enumerate(panel_dirs):
-        panel_id = panel_dir.stem.replace(".pltz", "")
+        panel_id = panel_dir.stem.replace(".plot", "")
         row_base = idx * 2  # Two rows per panel
 
         # Find PNG in panel directory (check exports/ first for layered format, then root)
         png_files = list(panel_dir.glob("exports/*.png"))
         if not png_files:
             png_files = list(panel_dir.glob("*.png"))
-        main_pngs = [f for f in png_files if "_hitmap" not in f.name and "_overview" not in f.name]
+        main_pngs = [
+            f
+            for f in png_files
+            if "_hitmap" not in f.name and "_overview" not in f.name
+        ]
 
         # Find hitmap PNG
         hitmap_files = list(panel_dir.glob("exports/*_hitmap.png"))
@@ -469,7 +495,7 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
         geometry_data = {}
         geometry_path = panel_dir / "cache" / "geometry_px.json"
         if geometry_path.exists():
-            with open(geometry_path, "r") as f:
+            with open(geometry_path) as f:
                 geometry_data = json.load(f)
 
         # === Row 1: Plot | Hitmap | Overlay ===
@@ -482,7 +508,14 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
             main_img = Image.open(main_pngs[0])
             ax_main.imshow(main_img)
         else:
-            ax_main.text(0.5, 0.5, "No image", ha="center", va="center", transform=ax_main.transAxes)
+            ax_main.text(
+                0.5,
+                0.5,
+                "No image",
+                ha="center",
+                va="center",
+                transform=ax_main.transAxes,
+            )
         ax_main.axis("off")
 
         # Middle subplot: hitmap
@@ -494,7 +527,14 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
             hitmap_img = Image.open(hitmap_files[0])
             ax_hitmap.imshow(hitmap_img)
         else:
-            ax_hitmap.text(0.5, 0.5, "No hitmap", ha="center", va="center", transform=ax_hitmap.transAxes)
+            ax_hitmap.text(
+                0.5,
+                0.5,
+                "No hitmap",
+                ha="center",
+                va="center",
+                transform=ax_hitmap.transAxes,
+            )
         ax_hitmap.axis("off")
 
         # Right subplot: overlay
@@ -510,7 +550,14 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
                 hitmap_array[:, :, 3] = (hitmap_array[:, :, 3] * 0.5).astype(np.uint8)
                 ax_overlay.imshow(hitmap_array, alpha=0.5)
         else:
-            ax_overlay.text(0.5, 0.5, "No overlay", ha="center", va="center", transform=ax_overlay.transAxes)
+            ax_overlay.text(
+                0.5,
+                0.5,
+                "No overlay",
+                ha="center",
+                va="center",
+                transform=ax_overlay.transAxes,
+            )
         ax_overlay.axis("off")
 
         # === Row 2: Bboxes ===
@@ -522,7 +569,14 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
             # Draw bboxes from geometry
             _draw_bboxes_from_geometry(ax_bboxes, geometry_data)
         else:
-            ax_bboxes.text(0.5, 0.5, "No image", ha="center", va="center", transform=ax_bboxes.transAxes)
+            ax_bboxes.text(
+                0.5,
+                0.5,
+                "No image",
+                ha="center",
+                va="center",
+                transform=ax_bboxes.transAxes,
+            )
         ax_bboxes.axis("off")
 
         # Info panel
@@ -536,13 +590,13 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
         info_text = ""
 
         if spec_path.exists():
-            with open(spec_path, "r") as f:
+            with open(spec_path) as f:
                 spec_data = json.load(f)
             info_text += f"Axes: {len(spec_data.get('axes', []))}\n"
             info_text += f"Traces: {len(spec_data.get('traces', []))}\n"
 
         if style_path.exists():
-            with open(style_path, "r") as f:
+            with open(style_path) as f:
                 style_data = json.load(f)
             size = style_data.get("size", {})
             info_text += f"Size: {size.get('width_mm', 0):.1f} × {size.get('height_mm', 0):.1f} mm\n"
@@ -550,15 +604,22 @@ def _generate_figz_overview(dir_path: Path, spec: Dict, data: Dict, basename: st
 
         manifest_path = panel_dir / "cache" / "render_manifest.json"
         if manifest_path.exists():
-            with open(manifest_path, "r") as f:
+            with open(manifest_path) as f:
                 manifest_data = json.load(f)
             info_text += f"DPI: {manifest_data.get('dpi', 300)}\n"
             render_px = manifest_data.get("render_px", [0, 0])
             info_text += f"Pixels: {render_px[0]} × {render_px[1]}\n"
 
-        ax_info.text(0.02, 0.98, info_text, transform=ax_info.transAxes,
-                    fontsize=10, fontfamily="monospace", verticalalignment="top",
-                    bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5))
+        ax_info.text(
+            0.02,
+            0.98,
+            info_text,
+            transform=ax_info.transAxes,
+            fontsize=10,
+            fontfamily="monospace",
+            verticalalignment="top",
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+        )
 
     # Save overview to exports/ directory
     exports_dir = dir_path / "exports"
@@ -584,7 +645,6 @@ def _draw_bboxes_from_geometry(ax, geometry_data: Dict) -> None:
         ax: Matplotlib axes.
         geometry_data: Geometry data dictionary.
     """
-    import matplotlib.patches as patches
 
     colors = ["red", "blue", "green", "orange", "purple", "cyan"]
     selectable = geometry_data.get("selectable_regions", {})
@@ -645,8 +705,9 @@ def _draw_single_bbox(ax, bbox: List, color: str, label: str, lw: int = 2) -> No
     x0, y0, x1, y1 = bbox
     width = x1 - x0
     height = y1 - y0
-    rect = patches.Rectangle((x0, y0), width, height,
-                             linewidth=lw, edgecolor=color, facecolor='none')
+    rect = patches.Rectangle(
+        (x0, y0), width, height, linewidth=lw, edgecolor=color, facecolor="none"
+    )
     ax.add_patch(rect)
     # Add label
     ax.text(x0 + 2, y0 + height / 2, label, fontsize=6, color=color, fontweight="bold")
@@ -663,8 +724,8 @@ def _generate_composed_figure(dir_path: Path, spec: Dict, basename: str) -> None
         spec: Bundle specification with panel layout.
         basename: Base filename for exports.
     """
+
     from PIL import Image
-    import warnings
 
     exports_dir = dir_path / "exports"
     exports_dir.mkdir(parents=True, exist_ok=True)
@@ -672,7 +733,7 @@ def _generate_composed_figure(dir_path: Path, spec: Dict, basename: str) -> None
     # Load style from style.json if exists, else from spec
     style_file = dir_path / "style.json"
     if style_file.exists():
-        with open(style_file, "r") as f:
+        with open(style_file) as f:
             style = json.load(f)
         size = style.get("size", {})
         background = style.get("background", "#ffffff")
@@ -702,11 +763,11 @@ def _generate_composed_figure(dir_path: Path, spec: Dict, basename: str) -> None
         panel_id = panel.get("id", "")
         plot_ref = panel.get("plot", "")
 
-        # Find the panel's pltz bundle
-        if plot_ref.endswith(".pltz.d"):
+        # Find the panel's plot bundle
+        if plot_ref.endswith(".plot"):
             panel_dir = dir_path / plot_ref
         else:
-            panel_dir = dir_path / f"{panel_id}.pltz.d"
+            panel_dir = dir_path / f"{panel_id}.plot"
 
         if not panel_dir.exists():
             continue
@@ -749,7 +810,9 @@ def _generate_composed_figure(dir_path: Path, spec: Dict, basename: str) -> None
         target_height = int(height_mm * mm_to_inch * dpi)
 
         # Resize panel to fit
-        panel_img = panel_img.resize((target_width, target_height), Image.Resampling.LANCZOS)
+        panel_img = panel_img.resize(
+            (target_width, target_height), Image.Resampling.LANCZOS
+        )
 
         # Convert to RGB if necessary (for transparent PNGs)
         if panel_img.mode == "RGBA":
@@ -774,22 +837,23 @@ def _generate_composed_figure(dir_path: Path, spec: Dict, basename: str) -> None
 
     # Create simple SVG wrapper with embedded image
     import base64
+
     with open(png_path, "rb") as f:
         png_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-    svg_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+    svg_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
      width="{fig_width_px}" height="{fig_height_px}"
      viewBox="0 0 {fig_width_px} {fig_height_px}">
   <image width="{fig_width_px}" height="{fig_height_px}"
          xlink:href="data:image/png;base64,{png_b64}"/>
-</svg>'''
+</svg>"""
 
     with open(svg_path, "w") as f:
         f.write(svg_content)
 
 
-def _generate_figz_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> None:
+def _generate_figure_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> None:
     """Generate figure-level geometry cache combining all panel geometries.
 
     Creates:
@@ -801,9 +865,9 @@ def _generate_figz_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> 
         spec: Bundle specification.
         basename: Base filename for bundle files.
     """
-    from datetime import datetime
     import tempfile
     import zipfile
+    from datetime import datetime
 
     cache_dir = dir_path / "cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -815,22 +879,22 @@ def _generate_figz_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> 
         "generated_at": datetime.now().isoformat(),
     }
 
-    # Find all panel bundles (both .pltz.d directories and .pltz zip files)
+    # Find all panel bundles (both .plot directories and .plot.zip files)
     panel_sources = []
     temp_dirs_to_cleanup = []
 
     for item in dir_path.iterdir():
-        if item.is_dir() and str(item).endswith('.pltz.d'):
-            panel_sources.append((item.stem.replace('.pltz', ''), item))
-        elif item.is_file() and str(item).endswith('.pltz'):
-            # Extract .pltz zip to temp directory
-            temp_dir = tempfile.mkdtemp(prefix=f'scitex_geom_{item.stem}_')
+        if item.is_dir() and str(item).endswith(".plot"):
+            panel_sources.append((item.stem.replace(".plot", ""), item))
+        elif item.is_file() and str(item).endswith(".plot.zip"):
+            # Extract .plot.zip to temp directory
+            temp_dir = tempfile.mkdtemp(prefix=f"scitex_geom_{item.stem}_")
             temp_dirs_to_cleanup.append(temp_dir)
-            with zipfile.ZipFile(item, 'r') as zf:
+            with zipfile.ZipFile(item, "r") as zf:
                 zf.extractall(temp_dir)
             extracted = Path(temp_dir)
             for subitem in extracted.iterdir():
-                if subitem.is_dir() and str(subitem).endswith('.pltz.d'):
+                if subitem.is_dir() and str(subitem).endswith(".plot"):
                     panel_sources.append((item.stem, subitem))
                     break
             else:
@@ -839,11 +903,10 @@ def _generate_figz_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> 
     panel_sources = sorted(panel_sources, key=lambda x: x[0])
 
     for panel_id, panel_dir in panel_sources:
-
         # Load panel geometry
         panel_geometry_path = panel_dir / "cache" / "geometry_px.json"
         if panel_geometry_path.exists():
-            with open(panel_geometry_path, "r") as f:
+            with open(panel_geometry_path) as f:
                 panel_geometry = json.load(f)
             combined_geometry["panels"][panel_id] = panel_geometry
 
@@ -852,7 +915,9 @@ def _generate_figz_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> 
     for panel in panels_spec:
         panel_id = panel.get("id")
         if panel_id and panel_id in combined_geometry["panels"]:
-            combined_geometry["panels"][panel_id]["position_mm"] = panel.get("position", {})
+            combined_geometry["panels"][panel_id]["position_mm"] = panel.get(
+                "position", {}
+            )
             combined_geometry["panels"][panel_id]["size_mm"] = panel.get("size", {})
 
     # Save combined geometry
@@ -884,9 +949,7 @@ def _generate_figz_geometry_cache(dir_path: Path, spec: Dict, basename: str) -> 
             pass
 
 
-def _embed_metadata_in_export(
-    file_path: Path, spec: Dict[str, Any], fmt: str
-) -> None:
+def _embed_metadata_in_export(file_path: Path, spec: Dict[str, Any], fmt: str) -> None:
     """Embed bundle spec metadata into exported image files."""
     from scitex.io._metadata import embed_metadata
 
@@ -903,10 +966,10 @@ def _embed_metadata_in_export(
         embed_metadata(str(file_path), embed_data)
 
 
-def _generate_figz_readme(
+def _generate_figure_readme(
     dir_path: Path, spec: Dict, data: Dict, basename: str
 ) -> None:
-    """Generate a dynamic README.md for figz bundle.
+    """Generate a dynamic README.md for figure bundle.
 
     Args:
         dir_path: Bundle directory path.
@@ -924,7 +987,7 @@ def _generate_figz_readme(
     # Load style from style.json if exists, else from spec.figure.styles
     style_file = dir_path / "style.json"
     if style_file.exists():
-        with open(style_file, "r") as f:
+        with open(style_file) as f:
             style = json.load(f)
         size = style.get("size", {})
         background = style.get("background", "#ffffff")
@@ -941,7 +1004,7 @@ def _generate_figz_readme(
     n_panels = len(panels)
 
     # Find panel directories
-    panel_dirs = sorted(dir_path.glob("*.pltz.d"))
+    panel_dirs = sorted(dir_path.glob("*.plot"))
 
     # Build panel table
     panel_rows = ""
@@ -958,7 +1021,7 @@ def _generate_figz_readme(
     for pd in panel_dirs:
         panel_dir_list += f"│   ├── {pd.name}/\n"
 
-    readme_content = f"""# {basename}.figz.d
+    readme_content = f"""# {basename}.figure
 
 > SciTeX Figure Bundle - Auto-generated README
 
@@ -969,10 +1032,10 @@ def _generate_figz_readme(
 ## Bundle Structure
 
 ```
-{basename}.figz.d/
+{basename}.figure/
 ├── spec.json              # Figure specification (semantic: what to draw)
 ├── style.json             # Figure style (appearance: how it looks)
-├── {basename}.json        # Combined spec+style (legacy compatibility)
+├── {basename}.json        # Combined spec+style
 ├── exports/               # Figure-level exports
 │   ├── {basename}.png          # Rendered figure (raster)
 │   ├── {basename}.svg          # Rendered figure (vector)
@@ -987,7 +1050,7 @@ def _generate_figz_readme(
 
 | Property | Value |
 |----------|-------|
-| Title | {title or '(none)'} |
+| Title | {title or "(none)"} |
 | Panels | {n_panels} |
 | Size | {width_mm:.1f} × {height_mm:.1f} mm |
 | Background | `{background}` |
@@ -1002,7 +1065,7 @@ def _generate_figz_readme(
 
 ## Nested Bundles
 
-Each panel is stored as a separate `.pltz.d` bundle containing:
+Each panel is stored as a separate `.plot` bundle containing:
 - `spec.json` - What to plot (data, axes, traces)
 - `style.json` - How it looks (colors, fonts, theme)
 - `exports/` - Rendered images (PNG, SVG, hitmap)
@@ -1023,7 +1086,7 @@ spec = bundle["spec"]       # Figure layout
 plots = bundle["plots"]     # Dict of panel bundles
 
 # Access specific panel
-panel_a = plots["A"]        # Get panel A's pltz bundle
+panel_a = plots["A"]        # Get panel A's plot bundle
 ```
 
 ### Editing
@@ -1039,14 +1102,14 @@ Edit `style.json` to change appearance:
 - Panel label styling
 - Theme (light/dark)
 
-Edit individual `*.pltz.d/spec.json` and `*.pltz.d/style.json` to change:
+Edit individual `*.plot/spec.json` and `*.plot/style.json` to change:
 - Plot data and axes (spec.json)
 - Trace specifications (spec.json)
 - Colors, fonts, theme (style.json)
 
 ---
 
-*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
+*Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}*
 *Schema: {spec.get("schema", {}).get("name", "scitex.canvas.figure")} v{spec.get("schema", {}).get("version", "1.0.0")}*
 """
 

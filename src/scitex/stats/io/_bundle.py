@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-13 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/stats/io/_bundle.py
 
 """
-SciTeX .statsz Bundle I/O - Statistics-specific bundle operations.
+SciTeX .stats Bundle I/O - Statistics-specific bundle operations.
 
 Handles:
     - Statistical results specification validation
@@ -17,14 +16,14 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 __all__ = [
-    "validate_statsz_spec",
-    "load_statsz_bundle",
-    "save_statsz_bundle",
-    "STATSZ_SCHEMA_SPEC",
+    "validate_stats_spec",
+    "load_stats_bundle",
+    "save_stats_bundle",
+    "STATS_SCHEMA_SPEC",
 ]
 
-# Schema specification for .statsz bundles
-STATSZ_SCHEMA_SPEC = {
+# Schema specification for .stats bundles
+STATS_SCHEMA_SPEC = {
     "name": "scitex.stats.stats",
     "version": "1.0.0",
     "required_fields": ["schema"],
@@ -32,8 +31,8 @@ STATSZ_SCHEMA_SPEC = {
 }
 
 
-def validate_statsz_spec(spec: Dict[str, Any]) -> List[str]:
-    """Validate .statsz-specific fields.
+def validate_stats_spec(spec: Dict[str, Any]) -> List[str]:
+    """Validate .stats-specific fields.
 
     Args:
         spec: The specification dictionary to validate.
@@ -91,8 +90,8 @@ def validate_statsz_spec(spec: Dict[str, Any]) -> List[str]:
     return errors
 
 
-def load_statsz_bundle(bundle_dir: Path) -> Dict[str, Any]:
-    """Load .statsz bundle contents from directory.
+def load_stats_bundle(bundle_dir: Path) -> Dict[str, Any]:
+    """Load .stats bundle contents from directory.
 
     Args:
         bundle_dir: Path to the bundle directory.
@@ -105,7 +104,7 @@ def load_statsz_bundle(bundle_dir: Path) -> Dict[str, Any]:
     # Load specification
     spec_file = bundle_dir / "stats.json"
     if spec_file.exists():
-        with open(spec_file, "r") as f:
+        with open(spec_file) as f:
             result["spec"] = json.load(f)
     else:
         result["spec"] = None
@@ -115,16 +114,17 @@ def load_statsz_bundle(bundle_dir: Path) -> Dict[str, Any]:
     if data_file.exists():
         try:
             import pandas as pd
+
             result["data"] = pd.read_csv(data_file)
         except ImportError:
-            with open(data_file, "r") as f:
+            with open(data_file) as f:
                 result["data"] = f.read()
 
     return result
 
 
-def save_statsz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
-    """Save .statsz bundle contents to directory.
+def save_stats_bundle(data: Dict[str, Any], dir_path: Path) -> None:
+    """Save .stats bundle contents to directory.
 
     Args:
         data: Bundle data dictionary.

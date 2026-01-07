@@ -13,18 +13,19 @@ Edit figure properties without launching GUI:
 For interactive GUI editing, see gui_editors.py
 """
 
-from pathlib import Path
 import json
+from pathlib import Path
+
 import scitex as stx
 from scitex.dev.plt import PLOTTERS_STX
 
 
 def create_sample_figure(output_dir: Path, plt, rng) -> Path:
-    """Create a sample figure as .pltz.d bundle for editing."""
+    """Create a sample figure as .plot bundle for editing."""
     plotter = PLOTTERS_STX["stx_line"]
     fig, ax = plotter(plt, rng)
 
-    bundle_path = output_dir / "editable_figure.pltz.d"
+    bundle_path = output_dir / "editable_figure.plot"
     stx.io.save(fig, bundle_path, dpi=150)
     plt.close(fig)
 
@@ -112,7 +113,7 @@ def edit_figure_programmatically(bundle_path: Path, logger) -> None:
         "description": "Programmatic edits from cui_editor.py",
         "overrides": {
             "axes": spec.get("axes", {}),
-        }
+        },
     }
 
     with open(manual_file, "w") as f:

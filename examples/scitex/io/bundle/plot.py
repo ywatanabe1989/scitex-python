@@ -6,7 +6,7 @@
 """
 Demonstrates FTS plot bundle creation and loading.
 
-FTS bundles (replacing legacy .pltz) contain:
+FTS bundles (replacing legacy .plot) contain:
 - node.json: Bundle metadata
 - encoding.json: Data-to-visual mappings
 - theme.json: Styling
@@ -32,7 +32,7 @@ def main(
     """Demonstrates FTS plot bundle functionality."""
     logger.info("Starting FTS plot bundle demo")
     sdir = CONFIG["SDIR_RUN"]
-    rng = rng_manager("pltz_demo")
+    rng = rng_manager("plot_demo")
 
     # 1. Basic plot bundle
     logger.info("Creating basic plot bundle")
@@ -43,11 +43,13 @@ def main(
 
     # 2. Bundle with embedded DataFrame
     logger.info("Creating bundle with DataFrame")
-    df = pd.DataFrame({
-        "time": np.arange(10),
-        "value_a": rng.standard_normal(10),
-        "value_b": rng.standard_normal(10) + 1,
-    })
+    df = pd.DataFrame(
+        {
+            "time": np.arange(10),
+            "value_a": rng.standard_normal(10),
+            "value_b": rng.standard_normal(10) + 1,
+        }
+    )
     fig, ax = plt.subplots()
     ax.plot(df["time"], df["value_a"], "o-", label="Group A")
     ax.plot(df["time"], df["value_b"], "s-", label="Group B")

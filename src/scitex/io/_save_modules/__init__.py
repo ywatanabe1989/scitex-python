@@ -55,14 +55,10 @@ from ._mp4 import _mk_mp4 as save_mp4
 from ._numpy import _save_npy as save_npy
 from ._numpy import _save_npz as save_npz
 from ._optuna_study_as_csv_and_pngs import save_optuna_study_as_csv_and_pngs
-from ._pickle import (
-    _save_pickle as save_pickle,
-)
-from ._pickle import (
-    _save_pickle_gz as save_pickle_compressed,
-)
-from ._pltz_bundle import save_pltz_bundle
-from ._pltz_stx import save_pltz_as_stx
+from ._pickle import _save_pickle as save_pickle
+from ._pickle import _save_pickle_gz as save_pickle_compressed
+from ._plot_bundle import save_plot_bundle
+from ._plot_scitex import save_plot_as_scitex
 from ._stx_bundle import save_stx_bundle
 from ._symlink import symlink, symlink_to
 from ._tex import _save_tex as save_tex
@@ -121,8 +117,8 @@ __all__ = [
     "save_optuna_study_as_csv_and_pngs",
     # Bundle save functions
     "save_stx_bundle",
-    "save_pltz_bundle",
-    "save_pltz_as_stx",
+    "save_plot_bundle",
+    "save_plot_as_scitex",
     "save_separate_legends",
     "handle_image_with_csv",
     # Utilities

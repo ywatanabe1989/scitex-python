@@ -125,10 +125,10 @@ function downloadFile(path, format) {
 // Panel API (Multi-panel figures)
 // ============================================================================
 
-// Helper to normalize panel names for comparison (strip .pltz extensions)
+// Helper to normalize panel names for comparison (strip .plot extensions)
 function normalizePanelName(name) {
     if (typeof name !== 'string') return '';
-    return name.replace('.pltz.d', '').replace('.pltz', '');
+    return name.replace('.plot', '').replace('.plot', '');
 }
 
 function loadPanelForEditing(panelName) {
@@ -136,7 +136,7 @@ function loadPanelForEditing(panelName) {
 
     // Find panel index from panel name
     // Handle both formats: array of strings ["A", "B"] or array of objects [{name: "A"}, ...]
-    // Also handle extension mismatches (e.g., "A" vs "A.pltz")
+    // Also handle extension mismatches (e.g., "A" vs "A.plot")
     let panelIndex = -1;
     const normalizedSearch = normalizePanelName(panelName);
 
@@ -285,4 +285,3 @@ function setAutoUpdateInterval() {
         }, intervalMs);
     }
 }
-

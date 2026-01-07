@@ -41,39 +41,21 @@ from .canvas import Canvas
 # Editor
 from .editor import edit
 
-# Panel operations
-from .io import (
-    add_panel_from_image,
-    add_panel_from_scitex,
-    list_panels,
-    remove_panel,
-    update_panel,
-)
-from .io import (
-    canvas_directory_exists as canvas_exists,
-)
-from .io import (
-    delete_canvas_directory as delete_canvas,
-)
-
+# Data integrity
+# Export (usually handled by stx.io.save, but available for explicit use)
 # =============================================================================
 # Primary API (minimal, reusable, flexible)
 # =============================================================================
 # Canvas operations
-from .io import (
-    ensure_canvas_directory as create_canvas,
-)
-
-# Export (usually handled by stx.io.save, but available for explicit use)
+# Panel operations
+from .io import add_panel_from_image, add_panel_from_scitex
+from .io import canvas_directory_exists as canvas_exists
+from .io import delete_canvas_directory as delete_canvas
+from .io import ensure_canvas_directory as create_canvas
 from .io import export_canvas_to_file as export_canvas
-from .io import (
-    get_canvas_directory_path as get_canvas_path,
-)
-from .io import (
-    list_canvas_directories as list_canvases,
-)
-
-# Data integrity
+from .io import get_canvas_directory_path as get_canvas_path
+from .io import list_canvas_directories as list_canvases
+from .io import list_panels, remove_panel, update_panel
 from .io import verify_all_data_hashes as verify_data
 
 
@@ -149,33 +131,33 @@ def add_panel(
 
 
 # =============================================================================
-# .figz Bundle Support
+# .figure Bundle Support
 # =============================================================================
 
 
-def save_figz(
+def save_figure(
     panels,
     path,
     spec=None,
     as_zip=None,
 ):
     """
-    Save panels as a .figz publication figure bundle.
+    Save panels as a .figure publication figure bundle.
 
     Parameters
     ----------
     panels : dict
-        Dictionary mapping panel IDs to .pltz bundle paths or data.
-        Example: {"A": "timecourse.pltz.d", "B": "barplot.pltz.d"}
+        Dictionary mapping panel IDs to .plot bundle paths or data.
+        Example: {"A": "timecourse.plot", "B": "barplot.plot"}
     path : str or Path
-        Output path (e.g., "Figure1.figz" or "Figure1.figz.d").
-        - Path ending with ".figz" creates ZIP archive (default behavior)
-        - Path ending with ".figz.d" creates directory bundle
+        Output path (e.g., "Figure1.figure.zip" or "Figure1.figure").
+        - Path ending with ".zip" creates ZIP archive
+        - Path ending with ".figure" creates directory bundle
     spec : dict, optional
         Figure specification. Auto-generated if None.
     as_zip : bool, optional
         If True, save as ZIP archive. If False, save as directory.
-        Default: auto-detect from path (ZIP for .figz, directory for .figz.d).
+        Default: auto-detect from path.
 
     Returns
     -------
@@ -186,11 +168,11 @@ def save_figz(
     --------
     >>> import scitex.canvas as sfig
     >>> panels = {
-    ...     "A": "timecourse.pltz.d",
-    ...     "B": "barplot.pltz.d"
+    ...     "A": "timecourse.plot",
+    ...     "B": "barplot.plot"
     ... }
-    >>> sfig.save_figz(panels, "Figure1.figz")    # Creates ZIP
-    >>> sfig.save_figz(panels, "Figure1.figz.d")  # Creates directory
+    >>> sfig.save_figure(panels, "Figure1.figure.zip")  # Creates ZIP
+    >>> sfig.save_figure(panels, "Figure1.figure")      # Creates directory
     """
     import shutil
     from pathlib import Path
@@ -202,7 +184,7 @@ def save_figz(
 
     # Auto-detect as_zip from path suffix if not specified
     if as_zip is None:
-        as_zip = not spath.endswith(".d")
+        as_zip = spath.endswith(".zip")
 
     # Auto-generate spec if not provided
     if spec is None:
@@ -215,23 +197,23 @@ def save_figz(
     }
 
     # Pass source paths directly (not loaded data) to preserve all files
-    for panel_id, pltz_source in panels.items():
-        pltz_path = Path(pltz_source)
-        if pltz_path.exists():
+    for panel_id, plot_source in panels.items():
+        plot_path = Path(plot_source)
+        if plot_path.exists():
             # Store source path for direct copying
-            bundle_data["plots"][panel_id] = str(pltz_path)
+            bundle_data["plots"][panel_id] = str(plot_path)
 
-    return save(bundle_data, p, bundle_type=BundleType.FIGZ, as_zip=as_zip)
+    return save(bundle_data, p, bundle_type=BundleType.FIGURE, as_zip=as_zip)
 
 
-def load_figz(path):
+def load_figure(path):
     """
-    Load a .figz bundle.
+    Load a .figure bundle.
 
     Parameters
     ----------
     path : str or Path
-        Path to .figz bundle (directory or ZIP).
+        Path to .figure bundle (directory or ZIP).
 
     Returns
     -------
@@ -242,7 +224,7 @@ def load_figz(path):
 
     Examples
     --------
-    >>> figure = scitex.canvas.load_figz("Figure1.figz.d")
+    >>> figure = scitex.canvas.load_figure("Figure1.figure")
     >>> print(figure['spec']['figure']['title'])
     >>> panel_a = figure['panels']['A']
     >>> print(panel_a['spec'], panel_a['data'])
@@ -251,8 +233,8 @@ def load_figz(path):
 
     bundle = load(path)
 
-    if bundle["type"] != "figz":
-        raise ValueError(f"Not a .figz bundle: {path}")
+    if bundle["type"] != "figure":
+        raise ValueError(f"Not a .figure bundle: {path}")
 
     result = {
         "spec": bundle.get("spec", {}),
@@ -309,13 +291,13 @@ def _generate_figure_spec(panels):
         x = margin + col * (panel_w + margin)
         y = margin + row * (panel_h + margin)
 
-        # Note: save_bundle uses panel_id for the directory name (e.g., A.pltz.d)
+        # Note: save_bundle uses panel_id for the directory name (e.g., A.plot)
         spec["panels"].append(
             {
                 "id": panel_id,
                 "label": panel_id,
                 "caption": "",
-                "plot": f"{panel_id}.pltz.d",
+                "plot": f"{panel_id}.plot",
                 "position": {"x_mm": x, "y_mm": y},
                 "size": {"width_mm": panel_w, "height_mm": panel_h},
             }
@@ -350,9 +332,9 @@ __all__ = [
     "verify_data",
     # Editor
     "edit",
-    # .figz bundle
-    "save_figz",
-    "load_figz",
+    # .figure bundle
+    "save_figure",
+    "load_figure",
 ]
 
 # EOF

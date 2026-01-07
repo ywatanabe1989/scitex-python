@@ -50,23 +50,23 @@ title: SciTeX Figure Lifecycle
 paper:
   column: single
   mode: publication      # draft | publication
-  emphasize: [figz_bundle, editor]
+  emphasize: [figure_bundle, editor]
   return_edges:          # Hide in publication mode
-    - [editor, figz_bundle]
+    - [editor, figure_bundle]
 
 layout:
   layer_gap: tight
   layers:                # rank=same constraints
     - [python, savefig]
-    - [figz_bundle]
+    - [figure_bundle]
     - [editor, ai_review]
 
 nodes:
   - id: python
     label: Python
     shape: rounded
-  - id: figz_bundle
-    label: .figz Bundle
+  - id: figure_bundle
+    label: .figure Bundle
     shape: stadium
     emphasis: primary
 
@@ -74,7 +74,7 @@ edges:
   - from: python
     to: savefig
   - from: savefig
-    to: figz_bundle
+    to: figure_bundle
 ```
 
 ```python
@@ -98,7 +98,7 @@ d.to_mermaid("workflow.mmd")
 paper:
   mode: publication
   return_edges:
-    - [editor, figz_bundle]  # Will be invisible
+    - [editor, figure_bundle]  # Will be invisible
 ```
 
 ## Auto-Split Large Diagrams

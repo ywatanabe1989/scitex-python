@@ -6,17 +6,18 @@
 Updated to integrate Schema v0.3 geometry extraction for shape-based hit testing.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Try to import schema v0.3 geometry extraction
 try:
     from scitex.plt.utils.metadata._geometry_extraction import (
         extract_axes_bbox_px,
-        extract_line_geometry,
-        extract_scatter_geometry,
-        extract_polygon_geometry,
         extract_bar_group_geometry,
+        extract_line_geometry,
+        extract_polygon_geometry,
+        extract_scatter_geometry,
     )
+
     GEOMETRY_V03_AVAILABLE = True
 except ImportError:
     GEOMETRY_V03_AVAILABLE = False
@@ -182,15 +183,20 @@ def extract_bboxes_multi(
     def get_element_bbox(element, name, ax_id, current_ax=None):
         """Get element bbox in image pixel coordinates."""
         import numpy as np
+
         full_name = f"{ax_id}_{name}"
         try:
             bbox = element.get_window_extent(renderer)
 
             # Check for invalid bbox (infinity or NaN)
-            if not (np.isfinite(bbox.x0) and np.isfinite(bbox.x1) and
-                    np.isfinite(bbox.y0) and np.isfinite(bbox.y1)):
+            if not (
+                np.isfinite(bbox.x0)
+                and np.isfinite(bbox.x1)
+                and np.isfinite(bbox.y0)
+                and np.isfinite(bbox.y1)
+            ):
                 # Try to get bbox from data for scatter/collection elements
-                if hasattr(element, 'get_offsets') and current_ax is not None:
+                if hasattr(element, "get_offsets") and current_ax is not None:
                     offsets = element.get_offsets()
                     if len(offsets) > 0 and np.isfinite(offsets).all():
                         # Use axis transform to get display coordinates
@@ -201,6 +207,7 @@ def extract_bboxes_multi(
                         y1 = display_coords[:, 1].max()
                         if np.isfinite([x0, x1, y0, y1]).all():
                             from matplotlib.transforms import Bbox
+
                             bbox = Bbox.from_extents(x0, y0, x1, y1)
                         else:
                             return  # Skip this element
@@ -284,7 +291,9 @@ def extract_bboxes_multi(
             get_element_bbox(ax.yaxis.label, "ylabel", ax_id, ax)
 
         # Get X-axis bbox (spine + ticks + ticklabels)
-        _extract_axis_bboxes_for_axis(ax, ax_id, renderer, bboxes, bbox_to_img_coords, Bbox)
+        _extract_axis_bboxes_for_axis(
+            ax, ax_id, renderer, bboxes, bbox_to_img_coords, Bbox
+        )
 
         # Get legend bbox
         legend = ax.get_legend()
@@ -297,7 +306,8 @@ def extract_bboxes_multi(
 
         # Get panel letter (text annotations like A, B, C)
         import re
-        panel_letter_pattern = re.compile(r'^[A-Z]\.?$|^\([A-Za-z]\)$')
+
+        panel_letter_pattern = re.compile(r"^[A-Z]\.?$|^\([A-Za-z]\)$")
         for idx, text_artist in enumerate(ax.texts):
             text_content = text_artist.get_text().strip()
             if text_content and panel_letter_pattern.match(text_content):
@@ -475,7 +485,9 @@ def _extract_trace_bboxes_for_axis(
                 get_element_bbox(coll, element_name, ax_id, ax)
 
                 if full_name in bboxes:
-                    bboxes[full_name]["label"] = f"{ax_id}: {label or f'Scatter {coll_idx}'}"
+                    bboxes[full_name][
+                        "label"
+                    ] = f"{ax_id}: {label or f'Scatter {coll_idx}'}"
                     bboxes[full_name]["element_type"] = "scatter"
 
                     # Get scatter point positions
@@ -498,7 +510,9 @@ def _extract_trace_bboxes_for_axis(
                 get_element_bbox(coll, element_name, ax_id, ax)
 
                 if full_name in bboxes:
-                    bboxes[full_name]["label"] = f"{ax_id}: {label or f'Fill {coll_idx}'}"
+                    bboxes[full_name][
+                        "label"
+                    ] = f"{ax_id}: {label or f'Fill {coll_idx}'}"
                     bboxes[full_name]["element_type"] = "fill"
 
                     # Add schema v0.3 geometry_px if available
@@ -527,7 +541,9 @@ def _extract_trace_bboxes_for_axis(
                 get_element_bbox(patch, element_name, ax_id, ax)
 
                 if full_name in bboxes:
-                    bboxes[full_name]["label"] = f"{ax_id}: {label or f'Bar {patch_idx}'}"
+                    bboxes[full_name][
+                        "label"
+                    ] = f"{ax_id}: {label or f'Bar {patch_idx}'}"
                     bboxes[full_name]["element_type"] = "bar"
 
             patch_idx += 1
@@ -535,7 +551,9 @@ def _extract_trace_bboxes_for_axis(
             print(f"Error getting patch bbox for {ax_id}: {e}")
 
 
-def _extract_axis_bboxes_for_axis(ax, ax_id, renderer, bboxes, bbox_to_img_coords, Bbox):
+def _extract_axis_bboxes_for_axis(
+    ax, ax_id, renderer, bboxes, bbox_to_img_coords, Bbox
+):
     """Extract X and Y axis bboxes for a specific axis (multi-axis version)."""
     try:
         # X-axis: combine spine and tick labels into one bbox
@@ -891,8 +909,12 @@ def extract_bboxes_from_metadata(
             continue
         if element_name not in bboxes:
             bboxes[element_name] = {
-                "label": element_info.get("label", element_name.replace("_", " ").title()),
-                "element_type": element_info.get("type", _guess_element_type(element_name)),
+                "label": element_info.get(
+                    "label", element_name.replace("_", " ").title()
+                ),
+                "element_type": element_info.get(
+                    "type", _guess_element_type(element_name)
+                ),
             }
 
     # Extract from axes (handle both dict and list formats)
@@ -954,8 +976,12 @@ def extract_bboxes_from_metadata(
         xaxis = ax_spec.get("xaxis", {})
         yaxis = ax_spec.get("yaxis", {})
 
-        xlabel = labels.get("xlabel") or (xaxis.get("label") if isinstance(xaxis, dict) else None)
-        ylabel = labels.get("ylabel") or (yaxis.get("label") if isinstance(yaxis, dict) else None)
+        xlabel = labels.get("xlabel") or (
+            xaxis.get("label") if isinstance(xaxis, dict) else None
+        )
+        ylabel = labels.get("ylabel") or (
+            yaxis.get("label") if isinstance(yaxis, dict) else None
+        )
         title = labels.get("title")
 
         if xlabel:
@@ -977,7 +1003,7 @@ def extract_bboxes_from_metadata(
                 "ax_id": ax_id,
             }
 
-    # Extract from traces array (pltz spec format)
+    # Extract from traces array (plot spec format)
     traces = metadata.get("traces", [])
     if isinstance(traces, list):
         for i, trace in enumerate(traces):
@@ -991,7 +1017,9 @@ def extract_bboxes_from_metadata(
             # Use axes bbox as fallback for trace bbox
             ax_panel_key = None
             for key in bboxes:
-                if key.endswith("_panel") and bboxes[key].get("ax_id", "").endswith(str(ax_idx)):
+                if key.endswith("_panel") and bboxes[key].get("ax_id", "").endswith(
+                    str(ax_idx)
+                ):
                     ax_panel_key = key
                     break
             if not ax_panel_key:
@@ -1115,6 +1143,7 @@ def extract_bboxes_from_geometry_px(
     # Helper to safely convert to int (handle inf/nan)
     def safe_int(val, default=0, max_val=10000):
         import math
+
         if val is None or math.isinf(val) or math.isnan(val):
             return default
         return max(0, min(int(val), max_val))
@@ -1153,12 +1182,18 @@ def extract_bboxes_from_geometry_px(
             path_px = artist.get("path_px", [])
             if path_px and len(path_px) > 0:
                 import math
+
                 # Scale points to actual image coordinates, filter out inf/nan
                 scaled_points = []
                 for pt in path_px:
                     if isinstance(pt, (list, tuple)) and len(pt) >= 2:
                         px, py = pt[0] * scale_x, pt[1] * scale_y
-                        if not (math.isinf(px) or math.isinf(py) or math.isnan(px) or math.isnan(py)):
+                        if not (
+                            math.isinf(px)
+                            or math.isinf(py)
+                            or math.isnan(px)
+                            or math.isnan(py)
+                        ):
                             scaled_points.append([px, py])
                 if scaled_points:
                     artist_bbox["points"] = scaled_points
@@ -1167,11 +1202,17 @@ def extract_bboxes_from_geometry_px(
             scatter_px = artist.get("scatter_px", [])
             if scatter_px and len(scatter_px) > 0:
                 import math
+
                 scaled_points = []
                 for pt in scatter_px:
                     if isinstance(pt, (list, tuple)) and len(pt) >= 2:
                         px, py = pt[0] * scale_x, pt[1] * scale_y
-                        if not (math.isinf(px) or math.isinf(py) or math.isnan(px) or math.isnan(py)):
+                        if not (
+                            math.isinf(px)
+                            or math.isinf(py)
+                            or math.isnan(px)
+                            or math.isnan(py)
+                        ):
                             scaled_points.append([px, py])
                 if scaled_points:
                     artist_bbox["points"] = scaled_points

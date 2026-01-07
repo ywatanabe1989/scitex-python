@@ -24,10 +24,10 @@ def generate(
     save_csv=True,
     save_png=True,
     save_svg=True,
-    save_pltz=True,
+    save_plot=True,
     verbose=True,
 ):
-    """Generate gallery plots with CSVs and optional .pltz bundles.
+    """Generate gallery plots with CSVs and optional .plot bundles.
 
     Parameters
     ----------
@@ -49,8 +49,8 @@ def generate(
         Whether to save PNG image files.
     save_svg : bool
         Whether to save SVG image files for element selection.
-    save_pltz : bool
-        Whether to save .pltz bundles (reproducible plot packages).
+    save_plot : bool
+        Whether to save .plot bundles (reproducible plot packages).
     verbose : bool
         Print progress messages.
 
@@ -78,7 +78,7 @@ def generate(
     if verbose:
         print(f"Generating {len(plots_to_generate)} plots to {output_dir}")
 
-    results = {"png": [], "svg": [], "csv": [], "pltz": [], "errors": []}
+    results = {"png": [], "svg": [], "csv": [], "plot": [], "errors": []}
 
     for plot_name in plots_to_generate:
         if plot_name not in PLOT_FUNCTIONS:
@@ -102,31 +102,34 @@ def generate(
             # Generate plot
             fig, ax = plot_func(fig, ax, stx)
 
-            # Save as .pltz bundle - this is the single source of truth
+            # Save as .plot bundle - this is the single source of truth
             # All other formats (PNG, SVG, CSV, hitmap) are extracted from the bundle
-            pltz_path = cat_dir / f"{plot_name}.pltz.d"
-            stx.io.save(fig, pltz_path, dpi=dpi)
+            plot_path = cat_dir / f"{plot_name}.plot"
+            stx.io.save(fig, plot_path, dpi=dpi)
 
             if verbose:
-                print(f"  [PLTZ] {pltz_path}")
+                print(f"  [PLTZ] {plot_path}")
 
             # Extract files from bundle to gallery directory
-            # The pltz bundle contains: plot.png, plot.svg, plot.pdf, plot.csv, plot.json, plot_hitmap.png
+            # The plot bundle contains: plot.png, plot.svg, plot.pdf, plot.csv, plot.json, plot_hitmap.png
             import shutil
 
             if save_png:
-                bundle_png = pltz_path / "plot.png"
+                bundle_png = plot_path / "plot.png"
                 gallery_png = cat_dir / f"{plot_name}.png"
                 if bundle_png.exists():
                     shutil.copy(bundle_png, gallery_png)
                     results["png"].append(str(gallery_png))
                     if verbose:
                         from PIL import Image
+
                         with Image.open(gallery_png) as img:
-                            print(f"  [PNG] {gallery_png} ({img.size[0]}x{img.size[1]})")
+                            print(
+                                f"  [PNG] {gallery_png} ({img.size[0]}x{img.size[1]})"
+                            )
 
             if save_csv:
-                bundle_csv = pltz_path / "plot.csv"
+                bundle_csv = plot_path / "plot.csv"
                 gallery_csv = cat_dir / f"{plot_name}.csv"
                 if bundle_csv.exists():
                     shutil.copy(bundle_csv, gallery_csv)
@@ -135,7 +138,7 @@ def generate(
                         print(f"  [CSV] {gallery_csv}")
 
             if save_svg:
-                bundle_svg = pltz_path / "plot.svg"
+                bundle_svg = plot_path / "plot.svg"
                 gallery_svg = cat_dir / f"{plot_name}.svg"
                 if bundle_svg.exists():
                     shutil.copy(bundle_svg, gallery_svg)
@@ -144,28 +147,31 @@ def generate(
                         print(f"  [SVG] {gallery_svg}")
 
             # Copy hitmap from bundle
-            bundle_hitmap = pltz_path / "plot_hitmap.png"
+            bundle_hitmap = plot_path / "plot_hitmap.png"
             gallery_hitmap = cat_dir / f"{plot_name}_hitmap.png"
             if bundle_hitmap.exists():
                 shutil.copy(bundle_hitmap, gallery_hitmap)
                 if verbose:
                     from PIL import Image
+
                     with Image.open(gallery_hitmap) as img:
-                        print(f"  [HITMAP] {gallery_hitmap} ({img.size[0]}x{img.size[1]})")
+                        print(
+                            f"  [HITMAP] {gallery_hitmap} ({img.size[0]}x{img.size[1]})"
+                        )
 
             # Copy and update JSON from bundle
-            bundle_json = pltz_path / "plot.json"
+            bundle_json = plot_path / "plot.json"
             gallery_json = cat_dir / f"{plot_name}.json"
             if bundle_json.exists():
                 shutil.copy(bundle_json, gallery_json)
                 # Add element_bboxes to the copied JSON
                 _add_element_bboxes_to_json(fig, ax, dpi, gallery_json, verbose)
 
-            if save_pltz:
-                results["pltz"].append(str(pltz_path))
+            if save_plot:
+                results["plot"].append(str(plot_path))
             else:
                 # Remove bundle if not requested
-                shutil.rmtree(pltz_path)
+                shutil.rmtree(plot_path)
 
             stx.plt.close(fig._fig_mpl if hasattr(fig, "_fig_mpl") else fig)
 
@@ -175,7 +181,9 @@ def generate(
                 print(f"  [ERROR] {plot_name}: {e}")
 
     if verbose:
-        print(f"\nGenerated: {len(results['png'])} PNG, {len(results['svg'])} SVG, {len(results['csv'])} CSV, {len(results['pltz'])} PLTZ")
+        print(
+            f"\nGenerated: {len(results['png'])} PNG, {len(results['svg'])} SVG, {len(results['csv'])} CSV, {len(results['plot'])} PLTZ"
+        )
         if results["errors"]:
             print(f"Errors: {len(results['errors'])}")
 
@@ -229,11 +237,12 @@ def _add_element_bboxes_to_json(fig, ax, dpi, json_path, verbose=True):
         Print progress messages
     """
     from PIL import Image
+
     from scitex.plt.utils.metadata._geometry_extraction import (
         extract_axes_bbox_px,
         extract_line_geometry,
-        extract_scatter_geometry,
         extract_polygon_geometry,
+        extract_scatter_geometry,
     )
 
     try:
@@ -249,7 +258,7 @@ def _add_element_bboxes_to_json(fig, ax, dpi, json_path, verbose=True):
             renderer = mpl_fig.canvas.get_renderer()
 
         # Get saved image dimensions (needed for coordinate transformation)
-        png_path = json_path.with_suffix('.png')
+        png_path = json_path.with_suffix(".png")
         if png_path.exists():
             with Image.open(png_path) as img:
                 img_width, img_height = img.size
@@ -267,26 +276,28 @@ def _add_element_bboxes_to_json(fig, ax, dpi, json_path, verbose=True):
             return
 
         # Load existing JSON
-        with open(json_path, 'r') as f:
+        with open(json_path, "r") as f:
             metadata = json.load(f)
 
         # Add element_bboxes
-        metadata['element_bboxes'] = element_bboxes
+        metadata["element_bboxes"] = element_bboxes
 
         # Also ensure figure_size_px is present
-        if 'dimensions' not in metadata:
-            metadata['dimensions'] = {}
-        metadata['dimensions']['figure_size_px'] = {
-            'width': img_width,
-            'height': img_height
+        if "dimensions" not in metadata:
+            metadata["dimensions"] = {}
+        metadata["dimensions"]["figure_size_px"] = {
+            "width": img_width,
+            "height": img_height,
         }
 
         # Save updated JSON
-        with open(json_path, 'w') as f:
+        with open(json_path, "w") as f:
             json.dump(metadata, f, indent=4)
 
         if verbose:
-            print(f"  [BBOXES] Added {len(element_bboxes)} element bboxes to {json_path.name}")
+            print(
+                f"  [BBOXES] Added {len(element_bboxes)} element bboxes to {json_path.name}"
+            )
 
     except Exception as e:
         if verbose:
@@ -323,8 +334,12 @@ def _extract_element_bboxes_for_gallery(fig, ax, renderer, img_width, img_height
         """Get element bbox in image pixel coordinates."""
         try:
             bbox = element.get_window_extent(renderer)
-            if not (np.isfinite(bbox.x0) and np.isfinite(bbox.x1) and
-                    np.isfinite(bbox.y0) and np.isfinite(bbox.y1)):
+            if not (
+                np.isfinite(bbox.x0)
+                and np.isfinite(bbox.x1)
+                and np.isfinite(bbox.y0)
+                and np.isfinite(bbox.y1)
+            ):
                 return
 
             elem_x0_inches = bbox.x0 / fig.dpi
@@ -447,7 +462,9 @@ def _extract_element_bboxes_for_gallery(fig, ax, renderer, img_width, img_height
     return bboxes
 
 
-def _generate_and_save_hitmap(fig, dpi, hitmap_path, json_path, verbose=True, crop_box=None):
+def _generate_and_save_hitmap(
+    fig, dpi, hitmap_path, json_path, verbose=True, crop_box=None
+):
     """Generate hitmap PNG and add color_map to JSON.
 
     The hitmap is generated at the same size as the PNG by:
@@ -471,6 +488,7 @@ def _generate_and_save_hitmap(fig, dpi, hitmap_path, json_path, verbose=True, cr
         If provided, applies the same crop to hitmap for exact size matching.
     """
     from PIL import Image
+
     from scitex.plt.utils._hitmap import generate_hitmap_id_colors
 
     try:
@@ -492,10 +510,10 @@ def _generate_and_save_hitmap(fig, dpi, hitmap_path, json_path, verbose=True, cr
         rgb[:, :, 0] = (hitmap_array >> 16) & 0xFF
         rgb[:, :, 1] = (hitmap_array >> 8) & 0xFF
         rgb[:, :, 2] = hitmap_array & 0xFF
-        hitmap_full = Image.fromarray(rgb, mode='RGB')
+        hitmap_full = Image.fromarray(rgb, mode="RGB")
 
         # Save full hitmap first (before cropping)
-        hitmap_full.save(hitmap_path, format='PNG')
+        hitmap_full.save(hitmap_path, format="PNG")
 
         if verbose:
             print(f"  [HITMAP] Full size: {w}x{h}")
@@ -503,6 +521,7 @@ def _generate_and_save_hitmap(fig, dpi, hitmap_path, json_path, verbose=True, cr
         # Apply same crop as PNG if crop_box provided
         if crop_box is not None:
             from scitex.plt.utils._crop import crop
+
             crop(
                 str(hitmap_path),
                 output_path=str(hitmap_path),
@@ -515,45 +534,52 @@ def _generate_and_save_hitmap(fig, dpi, hitmap_path, json_path, verbose=True, cr
                     print(f"  [HITMAP] Cropped to: {cropped.size[0]}x{cropped.size[1]}")
 
         # Validate sizes match
-        png_path = hitmap_path.parent / hitmap_path.name.replace('_hitmap.png', '.png')
+        png_path = hitmap_path.parent / hitmap_path.name.replace("_hitmap.png", ".png")
         if png_path.exists():
             with Image.open(png_path) as png_img, Image.open(hitmap_path) as hitmap_img:
                 png_size = png_img.size
                 hitmap_size = hitmap_img.size
                 if png_size != hitmap_size:
-                    print(f"  [ERROR] Size mismatch! PNG={png_size}, Hitmap={hitmap_size}")
-                    raise ValueError(f"Hitmap size {hitmap_size} doesn't match PNG size {png_size}")
+                    print(
+                        f"  [ERROR] Size mismatch! PNG={png_size}, Hitmap={hitmap_size}"
+                    )
+                    raise ValueError(
+                        f"Hitmap size {hitmap_size} doesn't match PNG size {png_size}"
+                    )
                 elif verbose:
-                    print(f"  [HITMAP] Size validated: {hitmap_size[0]}x{hitmap_size[1]} (matches PNG)")
+                    print(
+                        f"  [HITMAP] Size validated: {hitmap_size[0]}x{hitmap_size[1]} (matches PNG)"
+                    )
 
         if verbose:
             print(f"  [HITMAP] {hitmap_path.name} ({len(color_map)} elements)")
 
         # Add hitmap_color_map to JSON
         if json_path.exists():
-            with open(json_path, 'r') as f:
+            with open(json_path, "r") as f:
                 metadata = json.load(f)
 
             # Store color_map with string keys for JSON compatibility
-            metadata['hitmap_color_map'] = {str(k): v for k, v in color_map.items()}
-            metadata['hitmap_file'] = hitmap_path.name
+            metadata["hitmap_color_map"] = {str(k): v for k, v in color_map.items()}
+            metadata["hitmap_file"] = hitmap_path.name
 
             # Store crop_box in metadata for reference
             if crop_box is not None:
-                metadata['hitmap_crop_box'] = {
-                    'left': int(crop_box[0]),
-                    'upper': int(crop_box[1]),
-                    'right': int(crop_box[2]),
-                    'lower': int(crop_box[3]),
+                metadata["hitmap_crop_box"] = {
+                    "left": int(crop_box[0]),
+                    "upper": int(crop_box[1]),
+                    "right": int(crop_box[2]),
+                    "lower": int(crop_box[3]),
                 }
 
-            with open(json_path, 'w') as f:
+            with open(json_path, "w") as f:
                 json.dump(metadata, f, indent=4)
 
     except Exception as e:
         if verbose:
             print(f"  [WARN] Could not generate hitmap: {e}")
             import traceback
+
             traceback.print_exc()
 
 

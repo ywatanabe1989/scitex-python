@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-14 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/io/_layered_bundle.py
 
 """
-Layered .pltz Bundle I/O - New schema with spec/style/geometry separation.
+Layered .plot Bundle I/O - New schema with spec/style/geometry separation.
 
 Bundle structure:
-    plot.pltz.d/
+    plot.plot/
         spec.json           # Semantic: WHAT to plot (canonical)
         style.json          # Appearance: HOW it looks (canonical)
         data.csv            # Raw data (immutable)
@@ -25,31 +24,43 @@ Design Principles:
 - Canonical units: ratio (0-1) for axes bbox, mm for panel size
 """
 
-import json
 import hashlib
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+import json
 from dataclasses import asdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from scitex import logging
 from scitex.plt.styles import get_default_dpi, get_preview_dpi
 from scitex.schema import (
-    # Spec classes
-    PltzSpec, PltzTraceSpec, PltzAxesItem, PltzAxesLimits, PltzAxesLabels,
-    PltzDataSource, BboxRatio, BboxPx,
-    # Style classes
-    PltzStyle, PltzTheme, PltzFont, PltzSize, PltzTraceStyle, PltzLegendSpec,
-    # Geometry classes
-    PltzGeometry, PltzRenderedAxes, PltzRenderedArtist, PltzRenderManifest,
-    # Version constants
-    PLOT_SPEC_VERSION, PLOT_STYLE_VERSION, PLOT_GEOMETRY_VERSION,
+    PLOT_GEOMETRY_VERSION,
+    PLOT_SPEC_VERSION,
+    PLOT_STYLE_VERSION,
+    AxesLabels,
+    AxesLimits,
+    AxesSpecItem,
+    BboxPx,
+    BboxRatio,
+    DataSourceSpec,
+    FontSpec,
+    LegendSpec,
+    PlotGeometry,
+    PlotSpec,
+    PlotStyle,
+    RenderedArtist,
+    RenderedAxes,
+    RenderManifest,
+    SizeSpec,
+    ThemeSpec,
+    TraceSpec,
+    TraceStyleSpec,
 )
 
 logger = logging.getLogger()
 
 __all__ = [
-    "save_layered_pltz_bundle",
-    "load_layered_pltz_bundle",
+    "save_layered_plot_bundle",
+    "load_layered_plot_bundle",
     "merge_layered_bundle",
     "is_layered_bundle",
 ]
@@ -60,7 +71,7 @@ def is_layered_bundle(bundle_dir: Path) -> bool:
     return (bundle_dir / "spec.json").exists()
 
 
-def save_layered_pltz_bundle(
+def save_layered_plot_bundle(
     fig,
     bundle_dir: Path,
     basename: str = "plot",
@@ -68,14 +79,14 @@ def save_layered_pltz_bundle(
     csv_df=None,
 ) -> None:
     """
-    Save matplotlib figure as layered .pltz bundle.
+    Save matplotlib figure as layered .plot bundle.
 
     Parameters
     ----------
     fig : matplotlib.figure.Figure
         The figure to save.
     bundle_dir : Path
-        Output directory (e.g., plot.pltz.d).
+        Output directory (e.g., plot.plot).
     basename : str
         Base filename for exports.
     dpi : int, optional
@@ -86,9 +97,10 @@ def save_layered_pltz_bundle(
     # Resolve DPI from config if not specified
     if dpi is None:
         dpi = get_default_dpi()
-    import numpy as np
     import tempfile
     import warnings
+
+    import numpy as np
     from PIL import Image as PILImage
 
     bundle_dir = Path(bundle_dir)
@@ -103,7 +115,7 @@ def save_layered_pltz_bundle(
     # Extract figure dimensions
     fig_width_inch, fig_height_inch = fig.get_size_inches()
 
-    # === Build PltzSpec (semantic) ===
+    # === Build PlotSpec (semantic) ===
     axes_items = []
     traces = []
     extracted_data = {}
@@ -113,7 +125,7 @@ def save_layered_pltz_bundle(
         ax_id = f"ax{ax_idx}"
 
         # Create axes item
-        ax_item = PltzAxesItem(
+        ax_item = AxesSpecItem(
             id=ax_id,
             bbox=BboxRatio(
                 x0=round(bbox.x0, 4),
@@ -122,11 +134,11 @@ def save_layered_pltz_bundle(
                 height=round(bbox.height, 4),
                 space="panel",
             ),
-            limits=PltzAxesLimits(
+            limits=AxesLimits(
                 x=list(ax.get_xlim()),
                 y=list(ax.get_ylim()),
             ),
-            labels=PltzAxesLabels(
+            labels=AxesLabels(
                 xlabel=ax.get_xlabel() or None,
                 ylabel=ax.get_ylabel() or None,
                 title=ax.get_title() or None,
@@ -137,8 +149,8 @@ def save_layered_pltz_bundle(
         # Extract traces from lines
         for line_idx, line in enumerate(ax.get_lines()):
             label = line.get_label()
-            if label is None or label.startswith('_'):
-                label = f'series_{line_idx}'
+            if label is None or label.startswith("_"):
+                label = f"series_{line_idx}"
 
             trace_id = f"{ax_id}-line-{line_idx}"
             xdata, ydata = line.get_data()
@@ -149,7 +161,7 @@ def save_layered_pltz_bundle(
                 extracted_data[x_col] = np.array(xdata)
                 extracted_data[y_col] = np.array(ydata)
 
-                trace = PltzTraceSpec(
+                trace = TraceSpec(
                     id=trace_id,
                     type="line",
                     axes_index=ax_idx,
@@ -165,13 +177,16 @@ def save_layered_pltz_bundle(
     if extracted_data:
         # Use extracted data from matplotlib artists (captures axhline, etc.)
         import pandas as pd
+
         max_len = max(len(v) for v in extracted_data.values())
         padded = {}
         for k, v in extracted_data.items():
             # Convert to float for NaN padding compatibility
             v_float = np.array(v, dtype=float)
             if len(v_float) < max_len:
-                padded[k] = np.pad(v_float, (0, max_len - len(v_float)), constant_values=np.nan)
+                padded[k] = np.pad(
+                    v_float, (0, max_len - len(v_float)), constant_values=np.nan
+                )
             else:
                 padded[k] = v_float
         csv_df = pd.DataFrame(padded)
@@ -185,9 +200,9 @@ def save_layered_pltz_bundle(
         csv_hash = f"sha256:{hashlib.sha256(csv_str.encode()).hexdigest()[:16]}"
 
     # Create spec
-    spec = PltzSpec(
+    spec = PlotSpec(
         plot_id=basename,
-        data=PltzDataSource(
+        data=DataSourceSpec(
             csv=f"{basename}.csv",
             format="wide",
             hash=csv_hash,
@@ -196,33 +211,36 @@ def save_layered_pltz_bundle(
         traces=traces,
     )
 
-    # === Build PltzStyle (appearance) ===
+    # === Build PlotStyle (appearance) ===
     # Detect theme from figure
     theme_mode = "light"
-    if hasattr(fig, '_scitex_theme'):
+    if hasattr(fig, "_scitex_theme"):
         theme_mode = fig._scitex_theme
 
     trace_styles = []
     for ax_idx, ax in enumerate(fig.axes):
         for line_idx, line in enumerate(ax.get_lines()):
             label = line.get_label()
-            if label and not label.startswith('_'):
+            if label and not label.startswith("_"):
                 # Get line color
                 import matplotlib.colors as mcolors
+
                 color = line.get_color()
                 if isinstance(color, (list, tuple)):
                     color = mcolors.to_hex(color)
 
                 trace_id = f"ax{ax_idx}-line-{line_idx}"
-                trace_styles.append(PltzTraceStyle(
-                    trace_id=trace_id,
-                    color=color,
-                    linewidth=line.get_linewidth(),
-                    alpha=line.get_alpha(),
-                ))
+                trace_styles.append(
+                    TraceStyleSpec(
+                        trace_id=trace_id,
+                        color=color,
+                        linewidth=line.get_linewidth(),
+                        alpha=line.get_alpha(),
+                    )
+                )
 
     # Extract legend configuration from first axes with legend
-    legend_spec = PltzLegendSpec(visible=True, location="best")
+    legend_spec = LegendSpec(visible=True, location="best")
     for ax in fig.axes:
         legend = ax.get_legend()
         if legend is not None:
@@ -230,9 +248,17 @@ def save_layered_pltz_bundle(
             # matplotlib legend._loc can be int or string
             loc = legend._loc
             loc_map = {
-                0: "best", 1: "upper right", 2: "upper left", 3: "lower left",
-                4: "lower right", 5: "right", 6: "center left", 7: "center right",
-                8: "lower center", 9: "upper center", 10: "center",
+                0: "best",
+                1: "upper right",
+                2: "upper left",
+                3: "lower left",
+                4: "lower right",
+                5: "right",
+                6: "center left",
+                7: "center right",
+                8: "lower center",
+                9: "upper center",
+                10: "center",
             }
             if isinstance(loc, int):
                 location = loc_map.get(loc, "best")
@@ -269,18 +295,18 @@ def save_layered_pltz_bundle(
                     pass  # Keep "best" if we can't determine
 
             # Extract other legend properties
-            legend_spec = PltzLegendSpec(
+            legend_spec = LegendSpec(
                 visible=legend.get_visible(),
                 location=location,
                 frameon=legend.get_frame_on(),
-                fontsize=legend._fontsize if hasattr(legend, '_fontsize') else None,
-                ncols=legend._ncols if hasattr(legend, '_ncols') else 1,
+                fontsize=legend._fontsize if hasattr(legend, "_fontsize") else None,
+                ncols=legend._ncols if hasattr(legend, "_ncols") else 1,
                 title=legend.get_title().get_text() if legend.get_title() else None,
             )
             break  # Use first legend found
 
-    style = PltzStyle(
-        theme=PltzTheme(
+    style = PlotStyle(
+        theme=ThemeSpec(
             mode=theme_mode,
             colors={
                 "background": "transparent",
@@ -290,11 +316,11 @@ def save_layered_pltz_bundle(
                 "tick": "black" if theme_mode == "light" else "#e8e8e8",
             },
         ),
-        size=PltzSize(
+        size=SizeSpec(
             width_mm=round(fig_width_inch * 25.4, 1),
             height_mm=round(fig_height_inch * 25.4, 1),
         ),
-        font=PltzFont(family="sans-serif", size_pt=8.0),
+        font=FontSpec(family="sans-serif", size_pt=8.0),
         traces=trace_styles,
         legend=legend_spec,
     )
@@ -353,22 +379,25 @@ def save_layered_pltz_bundle(
         tmp_path = Path(tmp_dir)
 
         with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', message='.*tight_layout.*')
+            warnings.filterwarnings("ignore", message=".*tight_layout.*")
 
             # Save PNG at full figure size (crop function will handle tight cropping)
             # This ensures coordinate transformations are accurate
             png_path = exports_dir / f"{basename}.png"
-            fig.savefig(png_path, dpi=dpi, format='png', transparent=True)
+            fig.savefig(png_path, dpi=dpi, format="png", transparent=True)
 
             # Save SVG with tight bbox (separate concern, no coord issues)
             svg_path = exports_dir / f"{basename}.svg"
-            fig.savefig(svg_path, bbox_inches='tight', format='svg')
+            fig.savefig(svg_path, bbox_inches="tight", format="svg")
 
             # Generate hitmap
             from scitex.plt.utils._hitmap import (
-                apply_hitmap_colors, restore_original_colors,
-                extract_path_data, extract_selectable_regions,
-                HITMAP_BACKGROUND_COLOR, HITMAP_AXES_COLOR
+                HITMAP_AXES_COLOR,
+                HITMAP_BACKGROUND_COLOR,
+                apply_hitmap_colors,
+                extract_path_data,
+                extract_selectable_regions,
+                restore_original_colors,
             )
 
             original_props, color_map, groups = apply_hitmap_colors(fig)
@@ -386,8 +415,9 @@ def save_layered_pltz_bundle(
 
             # Save hitmap at full figure size (will crop with same box as main PNG)
             hitmap_path = exports_dir / f"{basename}_hitmap.png"
-            fig.savefig(hitmap_path, dpi=dpi, format='png',
-                       facecolor=HITMAP_BACKGROUND_COLOR)
+            fig.savefig(
+                hitmap_path, dpi=dpi, format="png", facecolor=HITMAP_BACKGROUND_COLOR
+            )
 
             # Restore colors
             restore_original_colors(original_props)
@@ -401,17 +431,26 @@ def save_layered_pltz_bundle(
                 from scitex.plt.utils._crop import crop
 
                 _, margin_crop_box = crop(
-                    str(png_path), output_path=str(png_path),
-                    overwrite=True, margin=12, verbose=False, return_offset=True,
+                    str(png_path),
+                    output_path=str(png_path),
+                    overwrite=True,
+                    margin=12,
+                    verbose=False,
+                    return_offset=True,
                 )
 
-                crop(str(hitmap_path), output_path=str(hitmap_path),
-                     overwrite=True, crop_box=(
-                         margin_crop_box['left'],
-                         margin_crop_box['upper'],
-                         margin_crop_box['right'],
-                         margin_crop_box['lower'],
-                     ), verbose=False)
+                crop(
+                    str(hitmap_path),
+                    output_path=str(hitmap_path),
+                    overwrite=True,
+                    crop_box=(
+                        margin_crop_box["left"],
+                        margin_crop_box["upper"],
+                        margin_crop_box["right"],
+                        margin_crop_box["lower"],
+                    ),
+                    verbose=False,
+                )
             except Exception as e:
                 logger.debug(f"Crop failed: {e}")
 
@@ -432,7 +471,7 @@ def save_layered_pltz_bundle(
     total_offset_left = margin_crop_box["left"] if margin_crop_box else 0
     total_offset_upper = margin_crop_box["upper"] if margin_crop_box else 0
 
-    # === Build PltzGeometry (cache) ===
+    # === Build PlotGeometry (cache) ===
     # Extract at export DPI so coords are in full figure space (matches saved PNG before crop)
     path_data = extract_path_data(fig)
     selectable_regions = extract_selectable_regions(fig)
@@ -456,35 +495,51 @@ def save_layered_pltz_bundle(
     rendered_axes = []
     for ax_idx, ax_data in enumerate(path_data.get("axes", [])):
         bbox_data = ax_data.get("bbox_px", {})
-        rendered_axes.append(PltzRenderedAxes(
-            id=f"ax{ax_idx}",
-            xlim=ax_data.get("xlim", [0, 1]),
-            ylim=ax_data.get("ylim", [0, 1]),
-            bbox_px=BboxPx(
-                x0=bbox_data.get("x0", 0),
-                y0=bbox_data.get("y0", 0),
-                width=bbox_data.get("width", bbox_data.get("x1", 0) - bbox_data.get("x0", 0)),
-                height=bbox_data.get("height", bbox_data.get("y1", 0) - bbox_data.get("y0", 0)),
-            ),
-        ))
+        rendered_axes.append(
+            RenderedAxes(
+                id=f"ax{ax_idx}",
+                xlim=ax_data.get("xlim", [0, 1]),
+                ylim=ax_data.get("ylim", [0, 1]),
+                bbox_px=BboxPx(
+                    x0=bbox_data.get("x0", 0),
+                    y0=bbox_data.get("y0", 0),
+                    width=bbox_data.get(
+                        "width", bbox_data.get("x1", 0) - bbox_data.get("x0", 0)
+                    ),
+                    height=bbox_data.get(
+                        "height", bbox_data.get("y1", 0) - bbox_data.get("y0", 0)
+                    ),
+                ),
+            )
+        )
 
     rendered_artists = []
     for artist in path_data.get("artists", []):
         bbox_data = artist.get("bbox_px", {})
-        rendered_artists.append(PltzRenderedArtist(
-            id=str(artist.get("id", "")),
-            type=artist.get("type", "unknown"),
-            axes_index=artist.get("axes_index", 0),
-            bbox_px=BboxPx(
-                x0=bbox_data.get("x0", 0),
-                y0=bbox_data.get("y0", 0),
-                width=bbox_data.get("width", bbox_data.get("x1", 0) - bbox_data.get("x0", 0)),
-                height=bbox_data.get("height", bbox_data.get("y1", 0) - bbox_data.get("y0", 0)),
-            ) if bbox_data else None,
-            path_px=artist.get("path_px"),
-        ))
+        rendered_artists.append(
+            RenderedArtist(
+                id=str(artist.get("id", "")),
+                type=artist.get("type", "unknown"),
+                axes_index=artist.get("axes_index", 0),
+                bbox_px=(
+                    BboxPx(
+                        x0=bbox_data.get("x0", 0),
+                        y0=bbox_data.get("y0", 0),
+                        width=bbox_data.get(
+                            "width", bbox_data.get("x1", 0) - bbox_data.get("x0", 0)
+                        ),
+                        height=bbox_data.get(
+                            "height", bbox_data.get("y1", 0) - bbox_data.get("y0", 0)
+                        ),
+                    )
+                    if bbox_data
+                    else None
+                ),
+                path_px=artist.get("path_px"),
+            )
+        )
 
-    geometry = PltzGeometry(
+    geometry = PlotGeometry(
         source_hash=csv_hash or "",
         figure_px=final_image_size_px,  # Final cropped image size
         dpi=dpi,  # Export DPI (stored for consumers)
@@ -497,7 +552,7 @@ def save_layered_pltz_bundle(
             "groups": groups,
             # Store DPI info for consumers that need to retrieve from data
             "fig_dpi": fig_dpi,  # Original matplotlib fig.dpi
-            "export_dpi": dpi,   # Export DPI used for PNG
+            "export_dpi": dpi,  # Export DPI used for PNG
             "dpi_scale": dpi_scale,  # export_dpi / fig_dpi
         },
         selectable_regions=selectable_regions,
@@ -510,34 +565,55 @@ def save_layered_pltz_bundle(
     # spec.json
     spec_path = bundle_dir / "spec.json"
     with open(spec_path, "w") as f:
-        json.dump({
-            "schema": {"name": "scitex.plt.spec", "version": PLOT_SPEC_VERSION},
-            **asdict(spec),
-        }, f, indent=2, default=str)
+        json.dump(
+            {
+                "schema": {"name": "scitex.plt.spec", "version": PLOT_SPEC_VERSION},
+                **asdict(spec),
+            },
+            f,
+            indent=2,
+            default=str,
+        )
 
     # style.json
     style_path = bundle_dir / "style.json"
     with open(style_path, "w") as f:
-        json.dump({
-            "schema": {"name": "scitex.plt.style", "version": PLOT_STYLE_VERSION},
-            **asdict(style),
-        }, f, indent=2, default=str)
+        json.dump(
+            {
+                "schema": {"name": "scitex.plt.style", "version": PLOT_STYLE_VERSION},
+                **asdict(style),
+            },
+            f,
+            indent=2,
+            default=str,
+        )
 
     # cache/geometry_px.json
     geometry_path = cache_dir / "geometry_px.json"
     with open(geometry_path, "w") as f:
-        json.dump({
-            "schema": {"name": "scitex.plt.geometry", "version": PLOT_GEOMETRY_VERSION},
-            "_comment": "CACHE - can be deleted and regenerated from spec + style",
-            **asdict(geometry),
-        }, f, indent=2, default=str)
+        json.dump(
+            {
+                "schema": {
+                    "name": "scitex.plt.geometry",
+                    "version": PLOT_GEOMETRY_VERSION,
+                },
+                "_comment": "CACHE - can be deleted and regenerated from spec + style",
+                **asdict(geometry),
+            },
+            f,
+            indent=2,
+            default=str,
+        )
 
     # cache/render_manifest.json
     spec_hash = hashlib.sha256(open(spec_path, "rb").read()).hexdigest()[:16]
     style_hash = hashlib.sha256(open(style_path, "rb").read()).hexdigest()[:16]
-    manifest = PltzRenderManifest(
+    manifest = RenderManifest(
         source_hash=f"{spec_hash}:{style_hash}",
-        panel_size_mm=[round(fig_width_inch * 25.4, 1), round(fig_height_inch * 25.4, 1)],
+        panel_size_mm=[
+            round(fig_width_inch * 25.4, 1),
+            round(fig_height_inch * 25.4, 1),
+        ],
         dpi=dpi,
         render_px=final_image_size_px,
         overview_png=f"exports/{basename}.png",
@@ -546,10 +622,18 @@ def save_layered_pltz_bundle(
     )
     manifest_path = cache_dir / "render_manifest.json"
     with open(manifest_path, "w") as f:
-        json.dump({
-            "schema": {"name": "scitex.plt.render_manifest", "version": PLOT_GEOMETRY_VERSION},
-            **asdict(manifest),
-        }, f, indent=2, default=str)
+        json.dump(
+            {
+                "schema": {
+                    "name": "scitex.plt.render_manifest",
+                    "version": PLOT_GEOMETRY_VERSION,
+                },
+                **asdict(manifest),
+            },
+            f,
+            indent=2,
+            default=str,
+        )
 
     # Save CSV
     if csv_df is not None:
@@ -557,26 +641,26 @@ def save_layered_pltz_bundle(
         csv_df.to_csv(csv_path, index=False)
 
     # Generate overview showing main image and hitmap side by side
-    _generate_pltz_overview(exports_dir, basename)
+    _generate_plot_overview(exports_dir, basename)
 
     # Generate dynamic README.md
-    _generate_pltz_readme(bundle_dir, basename, spec, style, geometry, manifest)
+    _generate_plot_readme(bundle_dir, basename, spec, style, geometry, manifest)
 
-    logger.debug(f"Saved layered pltz bundle: {bundle_dir}")
+    logger.debug(f"Saved layered plot bundle: {bundle_dir}")
 
 
-def _generate_pltz_overview(exports_dir: Path, basename: str) -> None:
+def _generate_plot_overview(exports_dir: Path, basename: str) -> None:
     """Generate comprehensive overview with plot, hitmap, overlay, bboxes, and JSON info.
 
     Args:
         exports_dir: Path to exports directory.
         basename: Base filename for the bundle.
     """
-    import matplotlib.pyplot as plt
-    import matplotlib.patches as patches
-    from PIL import Image
     import warnings
+
+    import matplotlib.pyplot as plt
     import numpy as np
+    from PIL import Image
 
     bundle_dir = exports_dir.parent
     png_path = exports_dir / f"{basename}.png"
@@ -602,16 +686,16 @@ def _generate_pltz_overview(exports_dir: Path, basename: str) -> None:
         manifest_path = bundle_dir / "cache" / "render_manifest.json"
 
         if spec_path.exists():
-            with open(spec_path, "r") as f:
+            with open(spec_path) as f:
                 spec_data = json.load(f)
         if style_path.exists():
-            with open(style_path, "r") as f:
+            with open(style_path) as f:
                 style_data = json.load(f)
         if geometry_path.exists():
-            with open(geometry_path, "r") as f:
+            with open(geometry_path) as f:
                 geometry_data = json.load(f)
         if manifest_path.exists():
-            with open(manifest_path, "r") as f:
+            with open(manifest_path) as f:
                 manifest_data = json.load(f)
 
         # Get DPI and panel size for mm scaler
@@ -659,12 +743,28 @@ def _generate_pltz_overview(exports_dir: Path, basename: str) -> None:
                     if color_map_id in color_map:
                         label = color_map[color_map_id].get("label", label)
 
-                    ax_hitmap.text(cx, cy, label, fontsize=8, ha="center", va="center",
-                                  color="white", fontweight="bold",
-                                  bbox=dict(boxstyle="round,pad=0.2", facecolor="black", alpha=0.7))
+                    ax_hitmap.text(
+                        cx,
+                        cy,
+                        label,
+                        fontsize=8,
+                        ha="center",
+                        va="center",
+                        color="white",
+                        fontweight="bold",
+                        bbox=dict(
+                            boxstyle="round,pad=0.2", facecolor="black", alpha=0.7
+                        ),
+                    )
         else:
-            ax_hitmap.text(0.5, 0.5, "No hitmap", ha="center", va="center",
-                          transform=ax_hitmap.transAxes)
+            ax_hitmap.text(
+                0.5,
+                0.5,
+                "No hitmap",
+                ha="center",
+                va="center",
+                transform=ax_hitmap.transAxes,
+            )
         ax_hitmap.axis("off")
 
         # 3. Overlay (plot + hitmap with transparency)
@@ -686,7 +786,7 @@ def _generate_pltz_overview(exports_dir: Path, basename: str) -> None:
         ax_bboxes.imshow(main_img)
 
         # Note: bbox_px coordinates are already in final image space
-        # (adjusted during save_layered_pltz_bundle), so no offset needed
+        # (adjusted during save_layered_plot_bundle), so no offset needed
 
         # Draw bboxes from geometry
         colors = ["red", "blue", "green", "orange", "purple", "cyan"]
@@ -740,12 +840,18 @@ def _generate_pltz_overview(exports_dir: Path, basename: str) -> None:
 
         # Format JSON summary with limited depth
         json_text = _format_json_summary(
-            {"spec": spec_data, "style": style_data},
-            max_depth=2
+            {"spec": spec_data, "style": style_data}, max_depth=2
         )
-        ax_json.text(0.02, 0.98, json_text, transform=ax_json.transAxes,
-                    fontsize=7, fontfamily="monospace", verticalalignment="top",
-                    bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5))
+        ax_json.text(
+            0.02,
+            0.98,
+            json_text,
+            transform=ax_json.transAxes,
+            fontsize=7,
+            fontfamily="monospace",
+            verticalalignment="top",
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+        )
 
         # 6. mm Scaler
         ax_scale = fig.add_subplot(gs[1, 2])
@@ -756,11 +862,11 @@ def _generate_pltz_overview(exports_dir: Path, basename: str) -> None:
 
         # Add grid lines every 10mm
         for x in range(0, int(panel_size_mm[0]) + 1, 10):
-            ax_scale.axvline(x, color='gray', linewidth=0.5, alpha=0.5)
+            ax_scale.axvline(x, color="gray", linewidth=0.5, alpha=0.5)
             if x > 0:
                 ax_scale.text(x, -1, f"{x}", ha="center", fontsize=7)
         for y in range(0, int(panel_size_mm[1]) + 1, 10):
-            ax_scale.axhline(y, color='gray', linewidth=0.5, alpha=0.5)
+            ax_scale.axhline(y, color="gray", linewidth=0.5, alpha=0.5)
             if y > 0:
                 ax_scale.text(-1, y, f"{y}", ha="right", va="center", fontsize=7)
 
@@ -771,31 +877,43 @@ def _generate_pltz_overview(exports_dir: Path, basename: str) -> None:
 
         # Add size text
         size_text = f"Panel: {panel_size_mm[0]:.1f} × {panel_size_mm[1]:.1f} mm\nDPI: {dpi}\nPixels: {img_width} × {img_height}"
-        ax_scale.text(panel_size_mm[0] * 0.95, panel_size_mm[1] * 0.95, size_text,
-                     ha="right", va="bottom", fontsize=8,
-                     bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
+        ax_scale.text(
+            panel_size_mm[0] * 0.95,
+            panel_size_mm[1] * 0.95,
+            size_text,
+            ha="right",
+            va="bottom",
+            fontsize=8,
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+        )
 
         fig.suptitle(f"Overview: {basename}", fontsize=14, fontweight="bold", y=0.98)
 
         overview_path = exports_dir / f"{basename}_overview.png"
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message=".*tight_layout.*")
-            fig.savefig(overview_path, dpi=get_preview_dpi(), bbox_inches="tight", facecolor="white")
+            fig.savefig(
+                overview_path,
+                dpi=get_preview_dpi(),
+                bbox_inches="tight",
+                facecolor="white",
+            )
         plt.close(fig)
 
     except Exception as e:
-        logger.debug(f"Could not generate pltz overview: {e}")
+        logger.debug(f"Could not generate plot overview: {e}")
         import traceback
+
         logger.debug(traceback.format_exc())
 
 
-def _generate_pltz_readme(
+def _generate_plot_readme(
     bundle_dir: Path,
     basename: str,
-    spec: "PltzSpec",
-    style: "PltzStyle",
-    geometry: "PltzGeometry",
-    manifest: "PltzRenderManifest",
+    spec: "PlotSpec",
+    style: "PlotStyle",
+    geometry: "PlotGeometry",
+    manifest: "RenderManifest",
 ) -> None:
     """Generate a dynamic README.md describing the bundle.
 
@@ -805,13 +923,13 @@ def _generate_pltz_readme(
         Path to the bundle directory.
     basename : str
         Base filename for the bundle.
-    spec : PltzSpec
+    spec : PlotSpec
         The plot specification.
-    style : PltzStyle
+    style : PlotStyle
         The plot style.
-    geometry : PltzGeometry
+    geometry : PlotGeometry
         The rendered geometry.
-    manifest : PltzRenderManifest
+    manifest : RenderManifest
         The render manifest.
     """
     from datetime import datetime
@@ -826,7 +944,7 @@ def _generate_pltz_readme(
     dpi = manifest.dpi
     render_px = manifest.render_px
 
-    readme_content = f"""# {basename}.pltz.d
+    readme_content = f"""# {basename}.plot
 
 > SciTeX Layered Plot Bundle - Auto-generated README
 
@@ -837,7 +955,7 @@ def _generate_pltz_readme(
 ## Bundle Structure
 
 ```
-{basename}.pltz.d/
+{basename}.plot/
 ├── spec.json           # WHAT to plot (semantic, editable)
 ├── style.json          # HOW it looks (appearance, editable)
 ├── {basename}.csv      # Raw data (immutable)
@@ -862,7 +980,7 @@ def _generate_pltz_readme(
 | Size | {width_mm:.1f} × {height_mm:.1f} mm |
 | DPI | {dpi} |
 | Pixels | {render_px[0]} × {render_px[1]} |
-| Theme | {style.theme.mode if style.theme else 'light'} |
+| Theme | {style.theme.mode if style.theme else "light"} |
 
 ## Coordinate System
 
@@ -893,7 +1011,7 @@ Original Figure (at export DPI)
 import scitex as stx
 
 # Load the bundle
-bundle = stx.plt.io.load_layered_pltz_bundle("{bundle_dir}")
+bundle = stx.plt.io.load_layered_plot_bundle("{bundle_dir}")
 
 # Access components
 spec = bundle["spec"]       # What to plot
@@ -920,7 +1038,7 @@ stx.plt.io.regenerate_cache("{bundle_dir}")
 
 ---
 
-*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
+*Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}*
 *Schema: scitex.plt v{PLOT_SPEC_VERSION}*
 """
 
@@ -953,6 +1071,7 @@ def _adjust_coords_for_offset(
         selectable_regions with adjusted coordinates.
     """
     import copy
+
     result = copy.deepcopy(selectable_regions)
 
     def adjust_bbox(bbox: List[float]) -> List[float]:
@@ -1030,6 +1149,7 @@ def _adjust_path_data_for_offset(
         path_data with adjusted coordinates.
     """
     import copy
+
     result = copy.deepcopy(path_data)
 
     # Adjust axes bbox_px
@@ -1089,6 +1209,7 @@ def _adjust_path_data_for_crop(
         path_data with adjusted coordinates.
     """
     import copy
+
     result = copy.deepcopy(path_data)
 
     # Adjust axes bbox_px
@@ -1134,12 +1255,22 @@ def _draw_bbox(ax, bbox: List, color: str, label: str, lw: float = 2) -> None:
     x0, y0, x1, y1 = bbox
     width = x1 - x0
     height = y1 - y0
-    rect = patches.Rectangle((x0, y0), width, height,
-                             linewidth=lw, edgecolor=color, facecolor='none')
+    rect = patches.Rectangle(
+        (x0, y0), width, height, linewidth=lw, edgecolor=color, facecolor="none"
+    )
     ax.add_patch(rect)
     # Place label at top-left corner inside the box with background
-    ax.text(x0 + 2, y0 + 2, label, fontsize=6, color="white", va='top', ha='left',
-           fontweight='bold', bbox=dict(boxstyle="round,pad=0.1", facecolor=color, alpha=0.8))
+    ax.text(
+        x0 + 2,
+        y0 + 2,
+        label,
+        fontsize=6,
+        color="white",
+        va="top",
+        ha="left",
+        fontweight="bold",
+        bbox=dict(boxstyle="round,pad=0.1", facecolor=color, alpha=0.8),
+    )
 
 
 def _format_json_summary(data: Dict, max_depth: int = 2, current_depth: int = 0) -> str:
@@ -1184,14 +1315,14 @@ def _format_json_summary(data: Dict, max_depth: int = 2, current_depth: int = 0)
     return "\n".join(lines[:40])  # Limit total lines
 
 
-def load_layered_pltz_bundle(bundle_dir: Path) -> Dict[str, Any]:
+def load_layered_plot_bundle(bundle_dir: Path) -> Dict[str, Any]:
     """
-    Load layered .pltz bundle and return merged spec for editor.
+    Load layered .plot bundle and return merged spec for editor.
 
     Parameters
     ----------
     bundle_dir : Path
-        Path to .pltz.d bundle.
+        Path to .plot bundle.
 
     Returns
     -------
@@ -1211,20 +1342,20 @@ def load_layered_pltz_bundle(bundle_dir: Path) -> Dict[str, Any]:
     # Load spec.json
     spec_path = bundle_dir / "spec.json"
     if spec_path.exists():
-        with open(spec_path, "r") as f:
+        with open(spec_path) as f:
             result["spec"] = json.load(f)
             result["basename"] = result["spec"].get("plot_id", "plot")
 
     # Load style.json
     style_path = bundle_dir / "style.json"
     if style_path.exists():
-        with open(style_path, "r") as f:
+        with open(style_path) as f:
             result["style"] = json.load(f)
 
     # Load geometry from cache
     geometry_path = bundle_dir / "cache" / "geometry_px.json"
     if geometry_path.exists():
-        with open(geometry_path, "r") as f:
+        with open(geometry_path) as f:
             result["geometry"] = json.load(f)
 
     # Create merged view for backward compatibility with editor
@@ -1266,7 +1397,11 @@ def merge_layered_bundle(
         merged["size"] = {
             "width_mm": style["size"].get("width_mm", 80),
             "height_mm": style["size"].get("height_mm", 68),
-            "dpi": geometry.get("dpi", get_default_dpi()) if geometry else get_default_dpi(),
+            "dpi": (
+                geometry.get("dpi", get_default_dpi())
+                if geometry
+                else get_default_dpi()
+            ),
         }
 
     # Merge axes from spec + style + geometry

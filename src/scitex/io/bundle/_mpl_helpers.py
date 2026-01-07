@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# Timestamp: 2025-12-20
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_mpl_helpers.py
+# Timestamp: 2026-01-07
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_mpl_helpers.py
 
-"""Matplotlib helper functions for FTS bundle creation."""
+"""Matplotlib helper functions for bundle creation."""
 
 import warnings
 from typing import TYPE_CHECKING, Any, Optional
@@ -363,7 +363,7 @@ def from_matplotlib(
     csv_df: Optional[Any] = None,
     dpi: int = 300,
 ):
-    """Create FTS bundle from matplotlib figure.
+    """Create Bundle from matplotlib figure.
 
     Args:
         fig: Matplotlib figure object
@@ -380,7 +380,7 @@ def from_matplotlib(
     import json
     from pathlib import Path
 
-    from ._FTS import FTS
+    from ._Bundle import Bundle
     from ._saver import save_bundle_components
 
     path = Path(path)
@@ -391,13 +391,13 @@ def from_matplotlib(
         "height": round(fig_height_inch * 25.4, 2),
     }
 
-    bundle = FTS(path, create=True, kind="plot", name=name, size_mm=size_mm)
+    bundle = Bundle(path, create=True, kind="plot", name=name, size_mm=size_mm)
 
     if csv_df is None:
         csv_df = extract_data_from_mpl_figure(fig)
 
     if csv_df is not None and not csv_df.empty:
-        bundle._node.payload_schema = "scitex.fts.payload.plot@1"
+        bundle._spec.payload_schema = "scitex.io.bundle.payload.plot@1"
 
     # Simplify CSV column names for bundle (figrecipe-style)
     # Converts: ax-row-0-col-0_trace-id-sine_variable-x → sine_x (or just x)

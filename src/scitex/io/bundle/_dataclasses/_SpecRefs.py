@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-# Timestamp: 2025-12-20
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_dataclasses/NodeRefs.py
+# Timestamp: 2025-12-21
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_dataclasses/_SpecRefs.py
 
-"""NodeRefs - References to associated files within the bundle."""
+"""SpecRefs - References to associated files within the bundle."""
 
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 
 @dataclass
-class NodeRefs:
+class SpecRefs:
     """References to associated files within the bundle.
 
     All paths are relative to the bundle root.
@@ -31,7 +31,7 @@ class NodeRefs:
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "NodeRefs":
+    def from_dict(cls, data: Dict[str, Any]) -> "SpecRefs":
         return cls(
             encoding=data.get("encoding", "encoding.json"),
             theme=data.get("theme", "theme.json"),
@@ -40,6 +40,6 @@ class NodeRefs:
         )
 
 
-__all__ = ["NodeRefs"]
+__all__ = ["SpecRefs"]
 
 # EOF

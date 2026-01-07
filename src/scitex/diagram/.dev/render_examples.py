@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """Render example diagrams from YAML specs."""
 
+import subprocess
 import sys
 from pathlib import Path
-import subprocess
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
@@ -36,7 +36,17 @@ def render_from_yaml():
     png_path = OUTPUT_DIR / "scitex_workflow.png"
     print(f"\nRendering to: {png_path}")
     result = subprocess.run(
-        ["mmdc", "-i", str(mmd_path), "-o", str(png_path), "-b", "transparent", "-w", "1200"],
+        [
+            "mmdc",
+            "-i",
+            str(mmd_path),
+            "-o",
+            str(png_path),
+            "-b",
+            "transparent",
+            "-w",
+            "1200",
+        ],
         capture_output=True,
         text=True,
     )
@@ -59,7 +69,7 @@ def render_comparison():
     # SciTeX workflow (B)
     diagram.add_node("b_script", "Python Script", shape="rounded")
     diagram.add_node("b_savefig", "scitex.savefig()", shape="box")
-    diagram.add_node("b_bundle", ".figz Bundle", shape="stadium", emphasis="success")
+    diagram.add_node("b_bundle", ".figure Bundle", shape="stadium", emphasis="success")
     diagram.add_node("b_preserved", "Data Preserved", shape="box", emphasis="success")
 
     # Edges
@@ -72,8 +82,12 @@ def render_comparison():
     diagram.add_edge("b_bundle", "b_preserved")
 
     # Groups
-    diagram.set_group("Traditional Workflow", ["a_script", "a_savefig", "a_png", "a_lost"])
-    diagram.set_group("SciTeX Workflow", ["b_script", "b_savefig", "b_bundle", "b_preserved"])
+    diagram.set_group(
+        "Traditional Workflow", ["a_script", "a_savefig", "a_png", "a_lost"]
+    )
+    diagram.set_group(
+        "SciTeX Workflow", ["b_script", "b_savefig", "b_bundle", "b_preserved"]
+    )
 
     # Paper constraints
     diagram.spec.paper.column = "single"
@@ -87,7 +101,17 @@ def render_comparison():
     # Render
     png_path = OUTPUT_DIR / "comparison.png"
     subprocess.run(
-        ["mmdc", "-i", str(mmd_path), "-o", str(png_path), "-b", "transparent", "-w", "1000"],
+        [
+            "mmdc",
+            "-i",
+            str(mmd_path),
+            "-o",
+            str(png_path),
+            "-b",
+            "transparent",
+            "-w",
+            "1000",
+        ],
         capture_output=True,
     )
     print(f"Rendered: {png_path}")
@@ -99,8 +123,8 @@ def render_decision_tree():
 
     diagram.add_node("start", "New Figure?", shape="diamond")
     diagram.add_node("multipanel", "Multi-panel?", shape="diamond")
-    diagram.add_node("use_figz", "Use .figz", shape="stadium", emphasis="primary")
-    diagram.add_node("use_pltz", "Use .pltz", shape="stadium", emphasis="primary")
+    diagram.add_node("use_figz", "Use .figure", shape="stadium", emphasis="primary")
+    diagram.add_node("use_pltz", "Use .plot", shape="stadium", emphasis="primary")
     diagram.add_node("simple", "Simple plot?", shape="diamond")
     diagram.add_node("use_png", "Use PNG", shape="stadium", emphasis="muted")
     diagram.add_node("use_svg", "Use SVG", shape="stadium", emphasis="success")

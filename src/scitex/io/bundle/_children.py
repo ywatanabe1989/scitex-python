@@ -1,34 +1,29 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-12-21 06:10:24 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_children.py
+# Timestamp: 2026-01-07
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_children.py
 
-# Timestamp: 2025-12-20
+"""Child embedding for composite bundles.
 
-"""Child embedding for FTS composite bundles.
-
-This module handles embedding child bundles into composite FTS containers.
+This module handles embedding child bundles into composite containers.
 Children are stored in the children/ directory with UUID-based names to avoid
 collisions, while labels and positions are stored in layout.panels.
 
 Design principles:
-- Use child's own node.id (from canonical/spec.json) for naming
+- Use child's own spec.id (from canonical/spec.json) for naming
 - Handle collisions with _2, _3, etc. suffixes
 - Return (child_name, child_id) tuple for identity tracking
-- Always validate child is valid FTS bundle
+- Always validate child is valid bundle
 """
 
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import TYPE_CHECKING
-from typing import Dict, Tuple, Union
+from typing import TYPE_CHECKING, Dict, Tuple, Union
 
-from ._storage import Storage
-from ._storage import get_storage
+from ._storage import Storage, get_storage
 
 if TYPE_CHECKING:
-    from ._FTS import FTS
+    from ._Bundle import Bundle
 
 
 class ValidationError(Exception):
@@ -44,13 +39,13 @@ def embed_child(
 ) -> Tuple[str, str]:
     """Embed a child bundle into container's children/ directory.
 
-    Uses the child's own node.id (from canonical/spec.json) for naming to
+    Uses the child's own spec.id (from canonical/spec.json) for naming to
     preserve identity. Handles collisions with _2, _3, etc. suffixes.
 
     Args:
         container_storage: Storage for the container bundle
         child_path: Path to child bundle (.zip or directory)
-        validate: Validate child is valid FTS bundle (default False for WIP)
+        validate: Validate child is valid bundle (default False for WIP)
 
     Returns:
         (child_name, child_id):
@@ -58,25 +53,25 @@ def embed_child(
             child_id: Full UUID from child's spec.json (for identity tracking)
 
     Raises:
-        ValidationError: If validate=True and child is invalid FTS bundle
+        ValidationError: If validate=True and child is invalid bundle
         FileNotFoundError: If child path doesn't exist
     """
     child_path = Path(child_path)
     if not child_path.exists():
         raise FileNotFoundError(f"Child bundle not found: {child_path}")
 
-    # Load child bundle to get its node.id and optionally validate
-    from ._FTS import FTS
+    # Load child bundle to get its spec.id and optionally validate
+    from ._Bundle import Bundle
 
-    child_fts = FTS(child_path)
+    child_bundle = Bundle(child_path)
 
     if validate:
-        errors = child_fts.validate()
+        errors = child_bundle.validate()
         if errors:
             raise ValidationError(f"Invalid child bundle: {errors}")
 
     # Get child's identity
-    full_child_id = child_fts.node.id
+    full_child_id = child_bundle.spec.id
     short_id = full_child_id[:8]
 
     # Determine child filename with collision handling
@@ -134,25 +129,22 @@ def _copy_child_to_storage(
             for item in child_path.rglob("*"):
                 if item.is_file():
                     rel_path = item.relative_to(child_path)
-                    out_zf.writestr(
-                        child_prefix + str(rel_path), item.read_bytes()
-                    )
+                    out_zf.writestr(child_prefix + str(rel_path), item.read_bytes())
 
         container_storage.write(dest_path, buf.getvalue())
 
 
 def load_embedded_children(
     container_path: Union[str, Path],
-) -> Dict[str, "FTS"]:
+) -> Dict[str, "Bundle"]:
     """Load all embedded children from children/ directory.
 
     Args:
         container_path: Path to container bundle
 
     Returns:
-        Dict mapping child_name -> FTS object
+        Dict mapping child_name -> Bundle object
     """
-    from ._FTS import FTS
 
     container_path = Path(container_path)
     storage = get_storage(container_path)
@@ -162,9 +154,9 @@ def load_embedded_children(
         if item.startswith("children/") and item.endswith(".zip"):
             child_name = item.split("/", 1)[1]
             # Extract child to temp and load
-            child_fts = _load_child_from_storage(storage, child_name)
-            if child_fts:
-                children[child_name] = child_fts
+            child_bundle = _load_child_from_storage(storage, child_name)
+            if child_bundle:
+                children[child_name] = child_bundle
 
     return children
 
@@ -172,17 +164,17 @@ def load_embedded_children(
 def _load_child_from_storage(
     storage: Storage,
     child_name: str,
-) -> "FTS":
+) -> "Bundle":
     """Load a single child bundle from storage.
 
-    Extracts child ZIP to temp directory and loads as FTS.
+    Extracts child ZIP to temp directory and loads as Bundle.
     The temp file name matches the prefix inside the ZIP.
 
-    NOTE: Temp files are kept alive because FTS.validate() needs to
+    NOTE: Temp files are kept alive because Bundle.validate() needs to
     access storage for file existence checks. The OS will clean up
     temp files eventually, or they can be cleaned up explicitly.
     """
-    from ._FTS import FTS
+    from ._Bundle import Bundle
 
     child_path = f"children/{child_name}"
 
@@ -200,11 +192,11 @@ def _load_child_from_storage(
     tmp_path = tmp_dir / child_name  # Use same name to match internal prefix
 
     tmp_path.write_bytes(child_data)
-    fts = FTS(tmp_path)
-    # Store temp path reference on FTS object for potential cleanup
-    fts._temp_path = tmp_path
-    fts._temp_dir = tmp_dir
-    return fts
+    bundle = Bundle(tmp_path)
+    # Store temp path reference on Bundle object for potential cleanup
+    bundle._temp_path = tmp_path
+    bundle._temp_dir = tmp_dir
+    return bundle
 
 
 __all__ = [

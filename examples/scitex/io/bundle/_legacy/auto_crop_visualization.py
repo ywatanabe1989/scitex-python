@@ -133,7 +133,7 @@ def demo_multi_element_auto_crop(plt):
     return fig
 
 
-def demo_figz_auto_crop(plt):
+def demo_figure_auto_crop(plt):
     """Demo 3: Auto-crop using Figz class."""
     print("\n" + "=" * 60)
     print("Demo 3: Figz.auto_crop() Method")
@@ -266,14 +266,14 @@ def main(
     demo_names = [
         "demo1_basic_auto_crop",
         "demo2_multi_element",
-        "demo3_figz_auto_crop",
+        "demo3_figure_auto_crop",
         "demo4_layout_only",
     ]
 
     # Run demos
     figs.append(demo_basic_auto_crop(plt))
     figs.append(demo_multi_element_auto_crop(plt))
-    figs.append(demo_figz_auto_crop(plt))
+    figs.append(demo_figure_auto_crop(plt))
     figs.append(demo_layout_only(plt))
 
     # Save figures

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # Timestamp: 2025-12-19
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_pltz_stx.py
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_plot_scitex.py
 
-"""Save matplotlib figures as FTS bundles (ZIP or directory) with plot content type."""
+"""Save matplotlib figures as SciTeX bundles (ZIP or directory) with plot content type."""
 
 import json
 import tempfile
@@ -199,8 +199,8 @@ def _build_theme_from_figure(fig):
     }
 
 
-def save_pltz_as_stx(obj, spath, as_zip=True, basename=None, **kwargs):
-    """Save a matplotlib figure as an FTS bundle (ZIP or directory).
+def save_plot_as_scitex(obj, spath, as_zip=True, basename=None, **kwargs):
+    """Save a matplotlib figure as a SciTeX bundle (ZIP or directory).
 
     Bundle structure:
         plot_name/              # or plot_name.zip (with plot_name/ inside)
@@ -463,7 +463,7 @@ def _generate_readme(bundle_dir, basename, spec, csv_df):
     from datetime import datetime
 
     readme_lines = [
-        f"# {basename} FTS Bundle",
+        f"# {basename} SciTeX Bundle",
         "",
         "## Overview",
         "",
@@ -517,9 +517,9 @@ def _generate_readme(bundle_dir, basename, spec, csv_df):
             "## Usage",
             "",
             "```python",
-            "from scitex.io.bundle import FTS",
+            "from scitex.io.bundle import Bundle",
             "",
-            f'bundle = FTS("{basename}.zip")  # or "{basename}/" directory',
+            f'bundle = Bundle("{basename}.zip")  # or "{basename}/" directory',
             "bundle.show()  # Display",
             'bundle.export("output.png")  # Export',
             "```",

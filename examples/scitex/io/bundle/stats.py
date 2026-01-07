@@ -6,7 +6,7 @@
 """
 Demonstrates FTS stats bundle creation and loading.
 
-FTS bundles (replacing legacy .statsz) contain:
+FTS bundles (replacing legacy .stats) contain:
 - stats/stats.json: Statistical results (comparisons, p-values, effect sizes)
 - node.json: Metadata (n, seed, bootstrap iterations, etc.)
 
@@ -116,10 +116,10 @@ def main(
     # 1. Create basic statistical comparison
     logger.info("Creating basic comparison bundle")
     comparisons = create_basic_comparisons()
-    sstats.save_statsz(comparisons, sdir / "basic.stx")
+    sstats.save_stats(comparisons, sdir / "basic.stx")
 
     # Load and verify
-    loaded = sstats.load_statsz(sdir / "basic.stx")
+    loaded = sstats.load_stats(sdir / "basic.stx")
     logger.info(f"Loaded {len(loaded['comparisons'])} comparisons")
     logger.success("Basic bundle created and verified")
 
@@ -133,24 +133,24 @@ def main(
         "alpha": 0.05,
         "seed": 42,
     }
-    sstats.save_statsz(multi_comparisons, sdir / "longitudinal.stx", metadata=metadata)
+    sstats.save_stats(multi_comparisons, sdir / "longitudinal.stx", metadata=metadata)
 
     # Load and verify
-    loaded_multi = sstats.load_statsz(sdir / "longitudinal.stx")
+    loaded_multi = sstats.load_stats(sdir / "longitudinal.stx")
     logger.info(f"Loaded {len(loaded_multi['comparisons'])} comparisons with metadata")
     logger.success("Longitudinal bundle created")
 
     # 3. Bootstrap results
     logger.info("Creating bootstrap results bundle")
     bootstrap_comps, bootstrap_meta = create_bootstrap_results()
-    sstats.save_statsz(
+    sstats.save_stats(
         bootstrap_comps, sdir / "bootstrap_results.stx", metadata=bootstrap_meta
     )
     logger.success("Bootstrap bundle created")
 
     # 4. Save as ZIP archive
     logger.info("Creating ZIP archive")
-    sstats.save_statsz(comparisons, sdir / "results.zip", as_zip=True)
+    sstats.save_stats(comparisons, sdir / "results.zip", as_zip=True)
     logger.success("ZIP bundle created")
 
     # Summary table

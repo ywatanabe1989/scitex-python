@@ -6,11 +6,11 @@
 """Main edit function for launching visual editor."""
 
 from pathlib import Path
-from typing import Union, Literal
+from typing import Literal, Union
 
-from .backend_detector import print_available_backends, detect_best_backend
+from .backend_detector import detect_best_backend, print_available_backends
+from .bundle_resolver import resolve_figure_bundle, resolve_plot_bundle
 from .path_resolver import resolve_figure_paths
-from .bundle_resolver import resolve_pltz_bundle, resolve_figz_bundle
 
 __all__ = ["edit"]
 
@@ -28,9 +28,9 @@ def edit(
     ----------
     path : str or Path
         Path to figure file. Can be:
-        - .pltz.d directory bundle (recommended for hitmap selection)
-        - .pltz ZIP bundle
-        - .figz or .figz.d multi-panel bundle
+        - .plot directory bundle (recommended for hitmap selection)
+        - .plot ZIP bundle
+        - .figure multi-panel bundle
         - JSON file (figure.json or figure.manual.json)
         - CSV file (figure.csv) - for data-only start
         - PNG file (figure.png)
@@ -60,8 +60,8 @@ def edit(
     panel_info = None
 
     # Resolve paths based on input type
-    json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info = _resolve_paths(
-        path, spath, parent_str
+    json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info = (
+        _resolve_paths(path, spath, parent_str)
     )
 
     if not json_path.exists():
@@ -111,17 +111,31 @@ def _resolve_paths(path: Path, spath: str, parent_str: str) -> tuple:
     hitmap_path = None
     bundle_spec = None
 
-    # Check if this is a .figz bundle (multi-panel figure)
-    if spath.endswith('.figz.d') or spath.endswith('.figz'):
-        json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info = resolve_figz_bundle(path)
-    # Check if this is a .pltz bundle
-    elif spath.endswith('.pltz.d') or spath.endswith('.pltz') or parent_str.endswith('.pltz.d'):
-        bundle_path = path.parent if parent_str.endswith('.pltz.d') else path
-        json_path, csv_path, png_path, hitmap_path, bundle_spec = resolve_pltz_bundle(bundle_path)
-    # Check if file is inside a .figz.d
-    elif parent_str.endswith('.figz.d') or (path.parent.parent and str(path.parent.parent).endswith('.figz.d')):
-        figz_path = path.parent if parent_str.endswith('.figz.d') else path.parent.parent
-        json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info = resolve_figz_bundle(figz_path)
+    # Check if this is a .figure bundle (multi-panel figure)
+    if spath.endswith(".figure") or spath.endswith(".figure"):
+        json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info = (
+            resolve_figure_bundle(path)
+        )
+    # Check if this is a .plot bundle
+    elif (
+        spath.endswith(".plot")
+        or spath.endswith(".plot")
+        or parent_str.endswith(".plot")
+    ):
+        bundle_path = path.parent if parent_str.endswith(".plot") else path
+        json_path, csv_path, png_path, hitmap_path, bundle_spec = resolve_plot_bundle(
+            bundle_path
+        )
+    # Check if file is inside a .figure
+    elif parent_str.endswith(".figure") or (
+        path.parent.parent and str(path.parent.parent).endswith(".figure")
+    ):
+        figure_path = (
+            path.parent if parent_str.endswith(".figure") else path.parent.parent
+        )
+        json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info = (
+            resolve_figure_bundle(figure_path)
+        )
     else:
         # Standard file paths
         json_path, csv_path, png_path = resolve_figure_paths(path)
@@ -143,11 +157,28 @@ def _launch_backend(
 ) -> None:
     """Launch the specified editor backend."""
     if backend == "flask":
-        _launch_flask(json_path, metadata, csv_data, png_path, hitmap_path, manual_overrides, port, panel_info)
+        _launch_flask(
+            json_path,
+            metadata,
+            csv_data,
+            png_path,
+            hitmap_path,
+            manual_overrides,
+            port,
+            panel_info,
+        )
     elif backend == "dearpygui":
         _launch_dearpygui(json_path, metadata, csv_data, png_path, manual_overrides)
     elif backend == "qt":
-        _launch_qt(json_path, metadata, csv_data, png_path, manual_overrides, hitmap_path, bundle_spec)
+        _launch_qt(
+            json_path,
+            metadata,
+            csv_data,
+            png_path,
+            manual_overrides,
+            hitmap_path,
+            bundle_spec,
+        )
     elif backend == "tkinter":
         _launch_tkinter(json_path, metadata, csv_data, manual_overrides)
     elif backend == "mpl":
@@ -159,10 +190,20 @@ def _launch_backend(
         )
 
 
-def _launch_flask(json_path, metadata, csv_data, png_path, hitmap_path, manual_overrides, port, panel_info):
+def _launch_flask(
+    json_path,
+    metadata,
+    csv_data,
+    png_path,
+    hitmap_path,
+    manual_overrides,
+    port,
+    panel_info,
+):
     """Launch Flask web editor."""
     try:
         from .._flask_editor import WebEditor
+
         editor = WebEditor(
             json_path=json_path,
             metadata=metadata,
@@ -175,13 +216,16 @@ def _launch_flask(json_path, metadata, csv_data, png_path, hitmap_path, manual_o
         )
         editor.run()
     except ImportError as e:
-        raise ImportError("Flask backend requires Flask. Install with: pip install flask") from e
+        raise ImportError(
+            "Flask backend requires Flask. Install with: pip install flask"
+        ) from e
 
 
 def _launch_dearpygui(json_path, metadata, csv_data, png_path, manual_overrides):
     """Launch DearPyGui editor."""
     try:
         from .._dearpygui_editor import DearPyGuiEditor
+
         editor = DearPyGuiEditor(
             json_path=json_path,
             metadata=metadata,
@@ -191,13 +235,18 @@ def _launch_dearpygui(json_path, metadata, csv_data, png_path, manual_overrides)
         )
         editor.run()
     except ImportError as e:
-        raise ImportError("DearPyGui backend requires dearpygui. Install with: pip install dearpygui") from e
+        raise ImportError(
+            "DearPyGui backend requires dearpygui. Install with: pip install dearpygui"
+        ) from e
 
 
-def _launch_qt(json_path, metadata, csv_data, png_path, manual_overrides, hitmap_path, bundle_spec):
+def _launch_qt(
+    json_path, metadata, csv_data, png_path, manual_overrides, hitmap_path, bundle_spec
+):
     """Launch Qt editor."""
     try:
         from .._qt_editor import QtEditor
+
         editor = QtEditor(
             json_path=json_path,
             metadata=metadata,
@@ -209,12 +258,15 @@ def _launch_qt(json_path, metadata, csv_data, png_path, manual_overrides, hitmap
         )
         editor.run()
     except ImportError as e:
-        raise ImportError("Qt backend requires PyQt5/PyQt6 or PySide2/PySide6. Install with: pip install PyQt6") from e
+        raise ImportError(
+            "Qt backend requires PyQt5/PyQt6 or PySide2/PySide6. Install with: pip install PyQt6"
+        ) from e
 
 
 def _launch_tkinter(json_path, metadata, csv_data, manual_overrides):
     """Launch Tkinter editor."""
     from .._tkinter_editor import TkinterEditor
+
     editor = TkinterEditor(
         json_path=json_path,
         metadata=metadata,
@@ -227,6 +279,7 @@ def _launch_tkinter(json_path, metadata, csv_data, manual_overrides):
 def _launch_mpl(json_path, metadata, csv_data, manual_overrides):
     """Launch matplotlib editor."""
     from .._mpl_editor import MplEditor
+
     editor = MplEditor(
         json_path=json_path,
         metadata=metadata,

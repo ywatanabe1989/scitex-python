@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # Timestamp: 2025-12-20
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_FTS.py
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_Bundle.py
 
-"""FTS Bundle Class - Main entry point for FTS bundles.
+"""Bundle Class - Main entry point for scitex bundles.
 
 Structure (identical for all kinds):
 - canonical/: Source of truth (spec.json, encoding.json, theme.json)
@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from ._children import ValidationError, embed_child, load_embedded_children
-from ._dataclasses import DataInfo, Node, SizeMM
+from ._dataclasses import DataInfo, SizeMM, Spec
 from ._loader import load_bundle_components
 from ._saver import (
     compute_canonical_hash,
@@ -33,11 +33,11 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure as MplFigure
 
 
-class FTS:
-    """Figure-Table-Statistics Bundle - Self-contained figure/plot/stats package.
+class Bundle:
+    """Scitex Bundle - Self-contained figure/plot/stats package.
 
     Attributes:
-        node: Node metadata (kind, children, layout, payload_schema, etc.)
+        spec: Spec metadata (kind, children, layout, payload_schema, etc.)
         encoding: Encoding specification (traces, channels)
         theme: Theme specification (colors, fonts)
         stats: Statistics (for kind=stats)
@@ -54,7 +54,7 @@ class FTS:
         # Legacy support
         node_type: Optional[str] = None,
     ):
-        """Initialize FTS bundle.
+        """Initialize Bundle.
 
         Args:
             path: Bundle path (directory or .zip file)
@@ -66,7 +66,7 @@ class FTS:
         """
         self._path = Path(path)
         self._is_zip = self._path.suffix == ".zip"
-        self._node: Optional[Node] = None
+        self._spec: Optional[Spec] = None
         self._encoding: Optional[Encoding] = None
         self._theme: Optional[Theme] = None
         self._stats: Optional[Stats] = None
@@ -96,7 +96,7 @@ class FTS:
     @property
     def bundle_type(self) -> str:
         """Bundle kind (figure, plot, table, etc.)."""
-        return self._node.kind if self._node else "unknown"
+        return self._spec.kind if self._spec else "unknown"
 
     @property
     def is_dirty(self) -> bool:
@@ -111,16 +111,16 @@ class FTS:
         return self._storage
 
     @property
-    def node(self) -> Optional[Node]:
-        """Node metadata."""
-        return self._node
+    def spec(self) -> Optional[Spec]:
+        """Bundle specification metadata."""
+        return self._spec
 
-    @node.setter
-    def node(self, value: Union[Node, Dict[str, Any]]):
+    @spec.setter
+    def spec(self, value: Union[Spec, Dict[str, Any]]):
         if isinstance(value, dict):
-            self._node = Node.from_dict(value)
+            self._spec = Spec.from_dict(value)
         else:
-            self._node = value
+            self._spec = value
         self._dirty = True
 
     @property
@@ -200,7 +200,7 @@ class FTS:
         # Note: payload_schema is optional. For plots without data, it's None.
         # For plots with data, from_matplotlib will set it.
         payload_schema = None
-        if kind in Node.LEAF_KINDS and kind != "plot":
+        if kind in Spec.LEAF_KINDS and kind != "plot":
             # Only auto-set for non-plot leaf kinds
             payload_schema_map = {
                 "table": "scitex.io.bundle.payload.table@1",
@@ -208,7 +208,7 @@ class FTS:
             }
             payload_schema = payload_schema_map.get(kind)
 
-        self._node = Node(
+        self._spec = Spec(
             id=bundle_id,
             kind=kind,
             name=name,
@@ -223,10 +223,10 @@ class FTS:
     def _load(self):
         """Load existing bundle."""
         if not self._path.exists():
-            raise FileNotFoundError(f"FTS bundle not found: {self._path}")
+            raise FileNotFoundError(f"Bundle not found: {self._path}")
 
         (
-            self._node,
+            self._spec,
             self._encoding,
             self._theme,
             self._stats,
@@ -235,7 +235,7 @@ class FTS:
 
     def add_child(
         self,
-        child: Union[str, Path, "FTS"],
+        child: Union[str, Path, "Bundle"],
         row: int = 0,
         col: int = 0,
         label: Optional[str] = None,
@@ -244,11 +244,11 @@ class FTS:
         **kwargs,
     ) -> str:
         """Add and embed a child bundle. Returns child_name in children/."""
-        if not self.node.is_composite_kind():
-            raise TypeError(f"kind={self.node.kind} cannot have children")
+        if not self.spec.is_composite_kind():
+            raise TypeError(f"kind={self.spec.kind} cannot have children")
 
         # Get child path
-        if isinstance(child, FTS):
+        if isinstance(child, Bundle):
             child_path = child.path
         else:
             child_path = Path(child)
@@ -257,19 +257,19 @@ class FTS:
         # Returns (child_name, child_id) tuple
         child_name, child_id = embed_child(self.storage, child_path)
 
-        # Add to node.children
-        self._node.children.append(child_name)
+        # Add to spec.children
+        self._spec.children.append(child_name)
 
         # Initialize layout if needed
-        if self._node.layout is None:
-            self._node.layout = {"rows": 2, "cols": 2, "panels": []}
+        if self._spec.layout is None:
+            self._spec.layout = {"rows": 2, "cols": 2, "panels": []}
 
         # Update grid size if needed
-        self._node.layout["rows"] = max(
-            self._node.layout.get("rows", 1), row + row_span
+        self._spec.layout["rows"] = max(
+            self._spec.layout.get("rows", 1), row + row_span
         )
-        self._node.layout["cols"] = max(
-            self._node.layout.get("cols", 1), col + col_span
+        self._spec.layout["cols"] = max(
+            self._spec.layout.get("cols", 1), col + col_span
         )
 
         # Add to layout.panels
@@ -285,29 +285,29 @@ class FTS:
         if label:
             panel_info["label"] = label
 
-        self._node.layout["panels"].append(panel_info)
+        self._spec.layout["panels"].append(panel_info)
         self._dirty = True
 
         return child_name
 
-    def load_children(self) -> Dict[str, "FTS"]:
-        """Load embedded children. Returns dict: child_name -> FTS."""
+    def load_children(self) -> Dict[str, "Bundle"]:
+        """Load embedded children. Returns dict: child_name -> Bundle."""
         return load_embedded_children(self._path)
 
     def render(self) -> Optional["MplFigure"]:
         """Render figure. Composite renders children, leaf renders from encoding."""
-        if self._node is None:
+        if self._spec is None:
             return None
 
-        if self._node.is_composite_kind():
+        if self._spec.is_composite_kind():
             return self._render_composite()
-        elif self._node.is_data_leaf_kind():
+        elif self._spec.is_data_leaf_kind():
             # Data kinds (plot, table, stats) need payload data
             return self._render_from_encoding()
-        elif self._node.is_annotation_leaf_kind():
-            # Annotation kinds (text, shape) render from node params
+        elif self._spec.is_annotation_leaf_kind():
+            # Annotation kinds (text, shape) render from spec params
             return self._render_annotation()
-        elif self._node.is_image_leaf_kind():
+        elif self._spec.is_image_leaf_kind():
             # Image kinds render from payload image
             return self._render_image()
 
@@ -318,8 +318,8 @@ class FTS:
         import scitex.plt as splt
 
         size_mm = (
-            self._node.size_mm.to_dict()
-            if self._node.size_mm
+            self._spec.size_mm.to_dict()
+            if self._spec.size_mm
             else {"width": 170, "height": 100}
         )
 
@@ -328,7 +328,7 @@ class FTS:
         if self._theme and self._theme.colors:
             bg_color = self._theme.colors.background or "#ffffff"
 
-        if not self._node.children:
+        if not self._spec.children:
             # Empty container - render blank figure with specified size and background
             fig, ax = splt.subplots(
                 figsize_mm=(size_mm.get("width", 170), size_mm.get("height", 100))
@@ -344,7 +344,7 @@ class FTS:
 
         fig, geometry = render_composite(
             children=children,
-            layout=self._node.layout or {"rows": 1, "cols": 1, "panels": []},
+            layout=self._spec.layout or {"rows": 1, "cols": 1, "panels": []},
             size_mm=size_mm,
             theme=self._theme,
         )
@@ -359,8 +359,8 @@ class FTS:
         import scitex.plt as splt
 
         size_mm = (
-            self._node.size_mm.to_dict()
-            if self._node.size_mm
+            self._spec.size_mm.to_dict()
+            if self._spec.size_mm
             else {"width": 85, "height": 85}
         )
 
@@ -407,12 +407,12 @@ class FTS:
         return None
 
     def _render_annotation(self) -> Optional["MplFigure"]:
-        """Render annotation (text/shape) from node parameters."""
+        """Render annotation (text/shape) from spec parameters."""
         import scitex.plt as splt
 
         size_mm = (
-            self._node.size_mm.to_dict()
-            if self._node.size_mm
+            self._spec.size_mm.to_dict()
+            if self._spec.size_mm
             else {"width": 85, "height": 85}
         )
 
@@ -428,26 +428,26 @@ class FTS:
         ax.set_facecolor(bg_color)
         ax.set_axis_off()
 
-        if self._node.kind == "text":
+        if self._spec.kind == "text":
             # Render text annotation
-            text_obj = self._node.text
+            text_obj = self._spec.text
             if text_obj:
-                text_content = text_obj.content or self._node.name or ""
+                text_content = text_obj.content or self._spec.name or ""
                 kwargs = {"ha": text_obj.ha, "va": text_obj.va}
                 if text_obj.fontsize:
                     kwargs["fontsize"] = text_obj.fontsize
                 if text_obj.fontweight:
                     kwargs["fontweight"] = text_obj.fontweight
             else:
-                text_content = self._node.name or ""
+                text_content = self._spec.name or ""
                 kwargs = {"ha": "center", "va": "center"}
             ax.text(0.5, 0.5, text_content, transform=ax.transAxes, **kwargs)
 
-        elif self._node.kind == "shape":
+        elif self._spec.kind == "shape":
             # Render shape annotation
             from .kinds._shape import render_shape
 
-            shape_obj = self._node.shape
+            shape_obj = self._spec.shape
             if shape_obj:
                 render_shape(
                     ax,
@@ -471,8 +471,8 @@ class FTS:
         import scitex.plt as splt
 
         size_mm = (
-            self._node.size_mm.to_dict()
-            if self._node.size_mm
+            self._spec.size_mm.to_dict()
+            if self._spec.size_mm
             else {"width": 85, "height": 85}
         )
 
@@ -497,6 +497,62 @@ class FTS:
         fig.tight_layout()
         return fig
 
+    def _validate_manifest(self) -> tuple:
+        """Validate manifest.json existence and structure.
+
+        Returns:
+            Tuple of (errors: List[str], warnings: List[str])
+        """
+        import json
+
+        errors = []
+        warnings = []
+
+        # Check if bundle path exists
+        if not self._path.exists():
+            return errors, warnings  # Can't validate non-existent bundle
+
+        # Check manifest.json exists (required)
+        manifest_path = "manifest.json"
+        if not self.storage.exists(manifest_path):
+            errors.append("Missing required manifest.json")
+            return errors, warnings
+
+        # Validate manifest structure
+        try:
+            content = self.storage.read(manifest_path)
+            manifest = json.loads(content.decode("utf-8"))
+
+            if "scitex" not in manifest:
+                errors.append("manifest.json missing 'scitex' key")
+            else:
+                scitex = manifest["scitex"]
+                if "type" not in scitex:
+                    errors.append("manifest.json missing 'scitex.type'")
+                if "version" not in scitex:
+                    errors.append("manifest.json missing 'scitex.version'")
+
+                # Validate type matches spec kind
+                manifest_type = scitex.get("type")
+                if manifest_type and self._spec:
+                    # Normalize both to compare
+                    from ._types import BundleType
+
+                    normalized_manifest = BundleType.normalize(manifest_type)
+                    normalized_node = BundleType.normalize(self._spec.kind)
+                    if normalized_manifest != normalized_node:
+                        errors.append(
+                            f"Type mismatch: manifest says '{manifest_type}', "
+                            f"spec says '{self._spec.kind}'"
+                        )
+
+        except json.JSONDecodeError as e:
+            errors.append(f"manifest.json is invalid JSON: {e}")
+        except Exception as e:
+            errors.append(f"Error reading manifest.json: {e}")
+
+        return errors, warnings
+
     def validate(self, level: str = "schema") -> ValidationResult:
         """Validate bundle.
 
@@ -508,16 +564,21 @@ class FTS:
         """
         result = ValidationResult(level=level)
 
-        # Node logical validation
-        if self._node:
-            result.errors.extend(self._node.validate())
+        # Manifest validation (returns errors, warnings tuple)
+        manifest_errors, manifest_warnings = self._validate_manifest()
+        result.errors.extend(manifest_errors)
+        result.warnings.extend(manifest_warnings)
+
+        # Spec logical validation
+        if self._spec:
+            result.errors.extend(self._spec.validate())
 
         # Storage-level validation - check required payload files
-        if self._node and self._node.is_leaf_kind():
-            required_file = self._node.get_required_payload_file()
+        if self._spec and self._spec.is_leaf_kind():
+            required_file = self._spec.get_required_payload_file()
             if required_file:
                 # Check both new structure (payload/) and legacy structure (data/)
-                # Legacy sio.save() uses data/data.csv, new FTS uses payload/data.csv
+                # Legacy sio.save() uses data/data.csv, new Bundle uses payload/data.csv
                 legacy_paths = {
                     "payload/data.csv": "data/data.csv",
                     "payload/table.csv": "data/table.csv",
@@ -531,10 +592,10 @@ class FTS:
                         )
 
         # NOTE: For composite kinds, do NOT validate payload/ emptiness by listing files.
-        # Payload prohibition is enforced purely via payload_schema is None (in Node.validate).
+        # Payload prohibition is enforced purely via payload_schema is None (in Spec.validate).
 
         # Recursively validate embedded children
-        if self._node and self._node.is_composite_kind() and self._node.children:
+        if self._spec and self._spec.is_composite_kind() and self._spec.children:
             children = self.load_children()
             for child_name, child in children.items():
                 child_result = child.validate(level)
@@ -548,8 +609,8 @@ class FTS:
         # Schema validation for other components
         if level in ("semantic", "strict"):
             # Additional semantic validation
-            if self._encoding and self._node:
-                if self._node.is_composite_kind() and self._encoding.traces:
+            if self._encoding and self._spec:
+                if self._spec.is_composite_kind() and self._encoding.traces:
                     result.errors.append(
                         "Composite kinds should not have encoding traces"
                     )
@@ -584,13 +645,13 @@ class FTS:
                 raise ValidationError(f"Validation failed: {result.errors}")
 
         # Update modified timestamp
-        if self._node:
-            self._node.touch()
+        if self._spec:
+            self._spec.touch()
 
         # Save canonical files
         save_bundle_components(
             self._path,
-            node=self._node,
+            spec=self._spec,
             encoding=self._encoding,
             theme=self._theme,
             stats=self._stats,
@@ -638,8 +699,8 @@ class FTS:
             "is_zip": self._is_zip,
             "kind": self.bundle_type,
         }
-        if self._node:
-            result["node"] = self._node.to_dict()
+        if self._spec:
+            result["spec"] = self._spec.to_dict()
         if self._encoding:
             result["encoding"] = self._encoding.to_dict()
         if self._theme:
@@ -650,7 +711,7 @@ class FTS:
             result["data_info"] = self._data_info.to_dict()
         return result
 
-    def __enter__(self) -> "FTS":
+    def __enter__(self) -> "Bundle":
         """Enter context manager."""
         return self
 
@@ -662,8 +723,8 @@ class FTS:
 
     def __repr__(self) -> str:
         dirty_marker = "*" if self._dirty else ""
-        kind = self._node.kind if self._node else "unknown"
-        return f"FTS({self._path!r}, kind={kind!r}){dirty_marker}"
+        kind = self._spec.kind if self._spec else "unknown"
+        return f"Bundle({self._path!r}, kind={kind!r}){dirty_marker}"
 
 
 # =============================================================================
@@ -674,9 +735,9 @@ class FTS:
 from ._mpl_helpers import from_matplotlib
 
 
-def load_bundle(path: Union[str, Path]) -> FTS:
-    """Load an existing FTS bundle."""
-    return FTS(path)
+def load_bundle(path: Union[str, Path]) -> Bundle:
+    """Load an existing Bundle."""
+    return Bundle(path)
 
 
 def create_bundle(
@@ -686,13 +747,13 @@ def create_bundle(
     size_mm: Optional[Dict[str, float]] = None,
     # Legacy support
     node_type: Optional[str] = None,
-) -> FTS:
-    """Create a new FTS bundle."""
+) -> Bundle:
+    """Create a new Bundle."""
     if node_type is not None:
         kind = node_type
-    return FTS(path, create=True, kind=kind, name=name, size_mm=size_mm)
+    return Bundle(path, create=True, kind=kind, name=name, size_mm=size_mm)
 
 
-__all__ = ["FTS", "load_bundle", "create_bundle", "from_matplotlib"]
+__all__ = ["Bundle", "load_bundle", "create_bundle", "from_matplotlib"]
 
 # EOF

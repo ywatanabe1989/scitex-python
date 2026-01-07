@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-14 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fig/editor/edit/panel_loader.py
 
@@ -8,21 +7,23 @@
 import io
 import json as json_module
 from pathlib import Path
-from typing import Optional, Union, Dict, Any
+from typing import Any, Dict, Optional, Union
 
 __all__ = ["load_panel_data"]
 
 
-def load_panel_data(panel_path: Union[Path, str], is_zip: bool = None) -> Optional[Dict[str, Any]]:
+def load_panel_data(
+    panel_path: Union[Path, str], is_zip: bool = None
+) -> Optional[Dict[str, Any]]:
     """
-    Load panel data from either a .pltz.d directory or a .pltz zip file.
+    Load panel data from either a .plot directory or a .plot.zip file.
 
     Handles both formats transparently using in-memory reading for zips.
 
     Parameters
     ----------
     panel_path : Path or str
-        Path to .pltz.d directory or .pltz zip file
+        Path to .plot directory or .plot.zip file
     is_zip : bool, optional
         If True, treat as zip file. If False, treat as directory.
         If None, auto-detect based on path suffix and existence.
@@ -34,14 +35,13 @@ def load_panel_data(panel_path: Union[Path, str], is_zip: bool = None) -> Option
         For directories, also includes: json_path, png_path, hitmap_path
         Returns None if panel cannot be loaded
     """
-    from PIL import Image
 
     panel_path = Path(panel_path)
 
     # Auto-detect if not specified
     if is_zip is None:
         spath = str(panel_path)
-        if spath.endswith('.pltz') and not spath.endswith('.pltz.d'):
+        if spath.endswith(".plot.zip"):
             is_zip = panel_path.is_file()
         else:
             is_zip = False
@@ -53,8 +53,9 @@ def load_panel_data(panel_path: Union[Path, str], is_zip: bool = None) -> Option
 
 
 def _load_from_zip(panel_path: Path) -> Optional[Dict[str, Any]]:
-    """Load panel data from a .pltz zip file."""
+    """Load panel data from a .plot.zip file."""
     from PIL import Image
+
     from scitex.io.bundle import ZipBundle
 
     if not panel_path.exists():
@@ -78,15 +79,23 @@ def _load_from_zip(panel_path: Path) -> Optional[Dict[str, Any]]:
             # Find and read PNG
             png_bytes = None
             for name in zb.namelist():
-                if name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
-                    if 'exports/' in name:
+                if (
+                    name.endswith(".png")
+                    and "_hitmap" not in name
+                    and "_overview" not in name
+                ):
+                    if "exports/" in name:
                         png_bytes = zb.read_bytes(name)
                         break
 
             # If no PNG in exports/, try root level
             if not png_bytes:
                 for name in zb.namelist():
-                    if name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+                    if (
+                        name.endswith(".png")
+                        and "_hitmap" not in name
+                        and "_overview" not in name
+                    ):
                         png_bytes = zb.read_bytes(name)
                         break
 
@@ -100,7 +109,7 @@ def _load_from_zip(panel_path: Path) -> Optional[Dict[str, Any]]:
             # Find and read hitmap
             hitmap_bytes = None
             for name in zb.namelist():
-                if '_hitmap.png' in name:
+                if "_hitmap.png" in name:
                     hitmap_bytes = zb.read_bytes(name)
                     break
 
@@ -125,8 +134,7 @@ def _load_from_zip(panel_path: Path) -> Optional[Dict[str, Any]]:
 
 
 def _load_from_directory(panel_path: Path) -> Optional[Dict[str, Any]]:
-    """Load panel data from a .pltz.d directory."""
-    import scitex as stx
+    """Load panel data from a .plot directory."""
 
     panel_dir = panel_path
     if not panel_dir.exists():
@@ -143,9 +151,9 @@ def _load_from_directory(panel_path: Path) -> Optional[Dict[str, Any]]:
 def _load_layered_directory(panel_dir: Path) -> Dict[str, Any]:
     """Load panel data from layered format directory."""
     import scitex as stx
-    from scitex.plt.io import load_layered_pltz_bundle
+    from scitex.plt.io import load_layered_plot_bundle
 
-    bundle_data = load_layered_pltz_bundle(panel_dir)
+    bundle_data = load_layered_plot_bundle(panel_dir)
     metadata = bundle_data.get("merged", {})
 
     # Find CSV
@@ -162,11 +170,15 @@ def _load_layered_directory(panel_dir: Path) -> Dict[str, Any]:
     if exports_dir.exists():
         for f in exports_dir.iterdir():
             name = f.name
-            if name.endswith('_hitmap.png'):
+            if name.endswith("_hitmap.png"):
                 hitmap_path = f
-            elif name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+            elif (
+                name.endswith(".png")
+                and "_hitmap" not in name
+                and "_overview" not in name
+            ):
                 png_path = f
-            elif name.endswith('.svg') and '_hitmap' not in name and svg_path is None:
+            elif name.endswith(".svg") and "_hitmap" not in name and svg_path is None:
                 svg_path = f
 
     if png_path is None:
@@ -201,22 +213,24 @@ def _load_legacy_directory(panel_dir: Path) -> Optional[Dict[str, Any]]:
 
     for f in panel_dir.iterdir():
         name = f.name
-        if name.endswith('.json') and not name.endswith('.manual.json'):
+        if name.endswith(".json") and not name.endswith(".manual.json"):
             json_path = f
-        elif name.endswith('.csv'):
+        elif name.endswith(".csv"):
             csv_data = stx.io.load(f)
-        elif name.endswith('_hitmap.png'):
+        elif name.endswith("_hitmap.png"):
             hitmap_path = f
-        elif name.endswith('.svg') and '_hitmap' not in name:
+        elif name.endswith(".svg") and "_hitmap" not in name:
             png_path = f
-        elif name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+        elif (
+            name.endswith(".png") and "_hitmap" not in name and "_overview" not in name
+        ):
             if png_path is None:
                 png_path = f
 
     if json_path is None:
         return None
 
-    with open(json_path, 'r') as f:
+    with open(json_path) as f:
         metadata = json_module.load(f)
 
     return {

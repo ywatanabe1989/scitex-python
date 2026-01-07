@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# Timestamp: 2025-12-20
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_saver.py
+# Timestamp: 2026-01-07
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_saver.py
 
-"""FTS Bundle saving utilities.
+"""Bundle saving utilities.
 
 Bundle structure (IDENTICAL for all kinds):
     bundle.zip/
@@ -38,14 +38,14 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from ._storage import Storage, get_storage
 
 if TYPE_CHECKING:
-    from .._stats import Stats
-    from ._dataclasses import DataInfo, Node
+    from ._dataclasses import DataInfo, Spec
     from .kinds._plot._dataclasses import Encoding, Theme
+    from .kinds._stats._dataclasses import Stats
 
 
 def save_bundle_components(
     path: Path,
-    node: Optional["Node"] = None,
+    spec: Optional["Spec"] = None,
     encoding: Optional["Encoding"] = None,
     theme: Optional["Theme"] = None,
     stats: Optional["Stats"] = None,
@@ -58,7 +58,7 @@ def save_bundle_components(
 
     Args:
         path: Bundle path (directory or ZIP)
-        node: Node metadata (saved to canonical/spec.json)
+        spec: Spec metadata (saved to canonical/spec.json)
         encoding: Encoding specification (saved to canonical/encoding.json)
         theme: Theme specification (saved to canonical/theme.json)
         stats: Statistics (saved to payload/stats.json for kind=stats)
@@ -81,8 +81,8 @@ def save_bundle_components(
     files["children/.keep"] = ""
 
     # canonical/ - Source of truth
-    if node:
-        files["canonical/spec.json"] = json.dumps(node.to_dict(), indent=2)
+    if spec:
+        files["canonical/spec.json"] = json.dumps(spec.to_dict(), indent=2)
 
     if encoding:
         files["canonical/encoding.json"] = encoding.to_json()
