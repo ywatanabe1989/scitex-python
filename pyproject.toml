@@ -244,25 +244,6 @@ dt = [
     "matplotlib",
 ]
 
-# Fig Module - Figure editing with GUI backends
-# Use: pip install scitex[fig]
-fig = [
-    "matplotlib",
-    "Pillow",
-    "flask",
-    "dearpygui",
-    "PyQt6",
-    "pyqt5",
-]
-
-# FTS Module - Figures, Tables, Statistics
-# Use: pip install scitex[fts]
-fts = [
-    "matplotlib",
-    "Pillow",
-    "flask",
-]
-
 # Gen Module - General utilities
 # Use: pip install scitex[gen]
 gen = [

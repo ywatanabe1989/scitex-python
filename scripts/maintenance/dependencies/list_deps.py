@@ -1,27 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-11-10 23:48:44 (ywatanabe)"
+# Timestamp: "2026-01-08 01:55:07 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/scripts/maintenance/dependencies/list_deps.py
+
 
 """Analyze scitex module dependencies."""
 
+# Imports
 import ast
-from pathlib import Path
 from collections import defaultdict
 
+import scitex as stx
 
+
+# Functions and Classes
 def find_scitex_imports(file_path):
     """Extract scitex.* imports from a Python file."""
     try:
         with open(file_path) as f:
             tree = ast.parse(f.read())
-    except:
+    except Exception:
         return []
 
     imports = []
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
             if node.module and node.module.startswith("scitex."):
-                # Extract the submodule (e.g., 'logging' from 'scitex.logging')
                 parts = node.module.split(".")
                 if len(parts) >= 2:
                     imports.append(parts[1])
@@ -35,30 +39,33 @@ def find_scitex_imports(file_path):
     return imports
 
 
-def analyze_module_dependencies(scitex_root):
+def analyze_module_dependencies(scitex_path):
     """Analyze dependencies for each scitex submodule."""
-    scitex_path = Path(scitex_root)
+    # scitex_path = Path(scitex_root)
     dependencies = defaultdict(set)
 
-    # Iterate through each submodule directory
     for module_dir in scitex_path.iterdir():
         if not module_dir.is_dir() or module_dir.name.startswith("_"):
             continue
 
         module_name = module_dir.name
 
-        # Find all Python files in this module
         for py_file in module_dir.rglob("*.py"):
             imports = find_scitex_imports(py_file)
             for imp in imports:
-                if imp != module_name:  # Don't count self-imports
+                if imp != module_name:
                     dependencies[module_name].add(imp)
 
     return dependencies
 
 
-if __name__ == "__main__":
-    scitex_root = "/home/ywatanabe/proj/scitex-code/src/scitex"
+@stx.session
+def main(
+    CONFIG=stx.INJECTED,
+    logger=stx.INJECTED,
+):
+    """Analyze and print scitex module dependencies."""
+    scitex_root = stx.path.find_git_root() / "src" / "scitex"
     deps = analyze_module_dependencies(scitex_root)
 
     print("Module Dependencies:")
@@ -66,6 +73,12 @@ if __name__ == "__main__":
     for module, imports in sorted(deps.items()):
         print(f"\n{module}:")
         for imp in sorted(imports):
-            print(f"  - scitex-{imp}")
+            print(f"  - scitex.{imp}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    main()
 
 # EOF
