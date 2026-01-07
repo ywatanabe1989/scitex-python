@@ -8,7 +8,22 @@ import sys
 
 import click
 
-from . import cloud, config, convert, scholar, security, web, writer
+from . import (
+    audio,
+    capture,
+    cloud,
+    config,
+    convert,
+    repro,
+    resource,
+    scholar,
+    security,
+    stats,
+    template,
+    tex,
+    web,
+    writer,
+)
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -28,6 +43,10 @@ def cli():
       scitex security check --save
       scitex web get-urls https://example.com
       scitex web download-images https://example.com --output ./downloads
+      scitex audio speak "Hello world"
+      scitex capture snap --output screenshot.jpg
+      scitex resource usage
+      scitex stats recommend --data data.csv
 
     \b
     Enable tab-completion:
@@ -38,11 +57,18 @@ def cli():
 
 
 # Add command groups
+cli.add_command(audio.audio)
+cli.add_command(capture.capture)
 cli.add_command(cloud.cloud)
 cli.add_command(config.config)
 cli.add_command(convert.convert)
+cli.add_command(repro.repro)
+cli.add_command(resource.resource)
 cli.add_command(scholar.scholar)
 cli.add_command(security.security)
+cli.add_command(stats.stats)
+cli.add_command(template.template)
+cli.add_command(tex.tex)
 cli.add_command(web.web)
 cli.add_command(writer.writer)
 
@@ -111,15 +137,12 @@ def completion(shell, show):
 
     # Generate completion script
     if shell == "bash":
-        completion_script = f"_SCITEX_COMPLETE=bash_source {scitex_full}"
         rc_file = os.path.expanduser("~/.bashrc")
         eval_line = f'eval "$(_SCITEX_COMPLETE=bash_source {scitex_full})"'
     elif shell == "zsh":
-        completion_script = f"_SCITEX_COMPLETE=zsh_source {scitex_full}"
         rc_file = os.path.expanduser("~/.zshrc")
         eval_line = f'eval "$(_SCITEX_COMPLETE=zsh_source {scitex_full})"'
     elif shell == "fish":
-        completion_script = f"_SCITEX_COMPLETE=fish_source {scitex_full}"
         rc_file = os.path.expanduser("~/.config/fish/config.fish")
         eval_line = f"eval (env _SCITEX_COMPLETE=fish_source {scitex_full})"
 
