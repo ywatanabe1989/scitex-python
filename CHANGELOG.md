@@ -5,6 +5,22 @@ All notable changes to SciTeX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.0] - 2026-01-08
+
+### Breaking Changes
+- **Removed Modules**: Deprecated `fig`, `fts`, and `compat` modules have been removed
+- **Canvas API**: `position`/`size` parameters renamed to `xy_mm`/`size_mm` for clarity
+
+### Changed
+- Removed legacy `Pltz*` aliases and terminology
+- Reorganized maintenance scripts into `dependencies/` directory
+- Simplified path module implementations
+- Added installation time benchmark scripts
+
+### Documentation
+- Updated README with uv recommendations
+- Consolidated visualization documentation into `docs/visualization/`
+
 ## [2.10.3] - 2026-01-06
 
 ### Fixed
