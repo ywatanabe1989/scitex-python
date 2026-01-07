@@ -911,3 +911,4 @@ output/
 tests/results/
 mgmt
 .jupyter_ystore.db
+docs/visualization/FROM_USER.md
