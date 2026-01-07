@@ -17,6 +17,16 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 
 
+class TestLoadConAvailableFlags:
+    """Test _AVAILABLE flags for optional dependencies."""
+
+    def test_mne_available_flag_exists(self):
+        """Test that MNE_AVAILABLE flag is exported."""
+        from scitex.io._load_modules._con import MNE_AVAILABLE
+
+        assert isinstance(MNE_AVAILABLE, bool)
+
+
 class TestLoadCon:
     """Test suite for _load_con function"""
 
