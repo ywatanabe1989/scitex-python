@@ -1,1 +1,0 @@
-../../../docs/architecture/ATOMIC_BUNDLE_PLAN.md
