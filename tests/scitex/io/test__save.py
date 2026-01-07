@@ -128,9 +128,9 @@ def test_save_csv_deduplication():
         mtime2 = os.path.getmtime(csv_path)
 
         # mtime should be unchanged since file wasn't rewritten
-        assert mtime1 == mtime2, (
-            "File should not be rewritten when content is identical"
-        )
+        assert (
+            mtime1 == mtime2
+        ), "File should not be rewritten when content is identical"
 
         # Third save with different data - should write
         df_new = pd.DataFrame({"a": [7, 8, 9], "b": [10, 11, 12]})
@@ -1213,7 +1213,7 @@ if __name__ == "__main__":
 #     save_npz,
 #     save_pickle,
 #     save_pickle_compressed,
-#     save_pltz_bundle,
+#     save_plot_bundle,
 #     save_stx_bundle,
 #     save_tex,
 #     save_text,
@@ -1231,7 +1231,7 @@ if __name__ == "__main__":
 # _symlink = symlink
 # _symlink_to = symlink_to
 # _save_stx_bundle = save_stx_bundle
-# _save_pltz_bundle = save_pltz_bundle
+# _save_plot_bundle = save_plot_bundle
 # _handle_image_with_csv = handle_image_with_csv
 #
 #

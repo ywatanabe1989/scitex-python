@@ -41,7 +41,7 @@ nodes:
     emphasis: normal
 
   - id: figz_bundle
-    label: .figz
+    label: .figure
     shape: stadium
     emphasis: primary
 

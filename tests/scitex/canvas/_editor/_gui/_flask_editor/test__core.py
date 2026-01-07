@@ -13,7 +13,7 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # File: ./src/scitex/vis/editor/flask_editor/core.py
 # """Core WebEditor class for Flask-based figure editing."""
-# 
+#
 # import base64
 # import copy
 # import json
@@ -21,15 +21,15 @@ if __name__ == "__main__":
 # import webbrowser
 # from pathlib import Path
 # from typing import Any, Dict, Optional
-# 
+#
 # from ._utils import check_port_available, kill_process_on_port
 # from .templates import build_html_template
-# 
-# 
+#
+#
 # class WebEditor:
 #     """
 #     Browser-based figure editor using Flask.
-# 
+#
 #     Features:
 #     - Displays existing PNG from pltz bundle (no re-rendering)
 #     - Hitmap-based element selection for precise clicking
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 #     - SciTeX style defaults pre-filled
 #     - Auto-finds available port if default is in use
 #     """
-# 
+#
 #     def __init__(
 #         self,
 #         json_path: Path,
@@ -59,26 +59,26 @@ if __name__ == "__main__":
 #         self._requested_port = port
 #         self.port = port
 #         self.panel_info = panel_info  # For multi-panel figz bundles
-# 
+#
 #         # Extract hit_regions from metadata for color-based element detection
 #         self.hit_regions = metadata.get("hit_regions", {})
 #         self.color_map = self.hit_regions.get("color_map", {})
-# 
+#
 #         # Get SciTeX defaults and merge with metadata
 #         from .._defaults import extract_defaults_from_metadata, get_scitex_defaults
-# 
+#
 #         self.scitex_defaults = get_scitex_defaults()
 #         self.metadata_defaults = extract_defaults_from_metadata(metadata)
-# 
+#
 #         # Start with defaults, then overlay manual overrides
 #         self.current_overrides = copy.deepcopy(self.scitex_defaults)
 #         self.current_overrides.update(self.metadata_defaults)
 #         self.current_overrides.update(self.manual_overrides)
-# 
+#
 #         # Track initial state to detect modifications
 #         self._initial_overrides = copy.deepcopy(self.current_overrides)
 #         self._user_modified = False
-# 
+#
 #     def run(self):
 #         """Launch the web editor."""
 #         try:
@@ -87,10 +87,10 @@ if __name__ == "__main__":
 #             raise ImportError(
 #                 "Flask is required for web editor. Install: pip install flask"
 #             )
-# 
+#
 #         # Handle port conflicts - always use port 5050
 #         import time
-# 
+#
 #         max_retries = 3
 #         for attempt in range(max_retries):
 #             if check_port_available(self._requested_port):
@@ -105,46 +105,46 @@ if __name__ == "__main__":
 #             # After retries, use requested port anyway (Flask will error if unavailable)
 #             print(f"Warning: Port {self._requested_port} may still be in use")
 #             self.port = self._requested_port
-# 
+#
 #         # Configure Flask with static folder path
 #         import os
-# 
+#
 #         static_folder = os.path.join(os.path.dirname(__file__), "static")
 #         app = Flask(__name__, static_folder=static_folder, static_url_path="/static")
 #         editor = self
-# 
+#
 #         def _export_composed_figure(editor, formats=["png", "svg"], dpi=150):
 #             """Helper to compose and export figure to bundle."""
 #             import matplotlib
 #             import numpy as np
 #             from PIL import Image
-# 
+#
 #             from scitex.fts._bundle._zipbundle import ZipBundle
-# 
+#
 #             matplotlib.use("Agg")
 #             import io
 #             import json as json_module
 #             import zipfile
-# 
+#
 #             import matplotlib.pyplot as plt
-# 
+#
 #             if not editor.panel_info:
 #                 return {"success": False, "error": "No panel info"}
-# 
+#
 #             bundle_path = editor.panel_info.get("bundle_path")
-#             figz_dir = editor.panel_info.get("figz_dir")
-# 
-#             if not bundle_path and not figz_dir:
+#             figure_dir = editor.panel_info.get("figure_dir")
+#
+#             if not bundle_path and not figure_dir:
 #                 return {"success": False, "error": "No bundle path"}
-# 
+#
 #             figure_name = (
 #                 Path(bundle_path).stem
 #                 if bundle_path
 #                 else (
-#                     Path(figz_dir).stem.replace(".figz.d", "") if figz_dir else "figure"
+#                     Path(figure_dir).stem.replace(".figure", "") if figure_dir else "figure"
 #                 )
 #             )
-# 
+#
 #             # Read spec.json for layout and layout.json for position overrides
 #             spec = {}
 #             layout_overrides = {}
@@ -158,20 +158,20 @@ if __name__ == "__main__":
 #                             pass
 #                 except:
 #                     pass
-#             elif figz_dir:
-#                 spec_path = Path(figz_dir) / "spec.json"
+#             elif figure_dir:
+#                 spec_path = Path(figure_dir) / "spec.json"
 #                 if spec_path.exists():
 #                     with open(spec_path) as f:
 #                         spec = json_module.load(f)
-#                 layout_path = Path(figz_dir) / "layout.json"
+#                 layout_path = Path(figure_dir) / "layout.json"
 #                 if layout_path.exists():
 #                     with open(layout_path) as f:
 #                         layout_overrides = json_module.load(f)
-# 
+#
 #             # Also check in-memory layout overrides
 #             if editor.panel_info and editor.panel_info.get("layout"):
 #                 layout_overrides = editor.panel_info.get("layout", {})
-# 
+#
 #             # Get figure dimensions
 #             fig_width_mm = 180
 #             fig_height_mm = 120
@@ -181,24 +181,24 @@ if __name__ == "__main__":
 #                 size = styles.get("size", {})
 #                 fig_width_mm = size.get("width_mm", 180)
 #                 fig_height_mm = size.get("height_mm", 120)
-# 
+#
 #             fig_width_in = fig_width_mm / 25.4
 #             fig_height_in = fig_height_mm / 25.4
-# 
+#
 #             fig = plt.figure(
 #                 figsize=(fig_width_in, fig_height_in), dpi=dpi, facecolor="white"
 #             )
-# 
+#
 #             # Compose panels
 #             panels_spec = spec.get("panels", [])
 #             panel_paths = editor.panel_info.get("panel_paths", [])
 #             panel_is_zip = editor.panel_info.get("panel_is_zip", [])
-# 
+#
 #             for panel_spec in panels_spec:
 #                 panel_id = panel_spec.get("id", "")
 #                 pos = panel_spec.get("position", {})
 #                 size = panel_spec.get("size", {})
-# 
+#
 #                 # Skip overview/auxiliary panels (only compose main panels A-Z)
 #                 panel_id_lower = panel_id.lower()
 #                 if any(
@@ -206,13 +206,13 @@ if __name__ == "__main__":
 #                     for skip in ["overview", "thumb", "preview", "aux"]
 #                 ):
 #                     continue
-# 
+#
 #                 # Find panel path first (needed to check layout_overrides)
 #                 panel_path = None
 #                 is_zip = False
 #                 panel_name = None
 #                 for idx, pp in enumerate(panel_paths):
-#                     pp_name = Path(pp).stem.replace(".pltz", "")
+#                     pp_name = Path(pp).stem.replace(".plot", "")
 #                     if (
 #                         pp_name == panel_id
 #                         or pp_name.startswith(f"panel_{panel_id}_")
@@ -220,36 +220,36 @@ if __name__ == "__main__":
 #                         or f"_{panel_id}_" in pp_name
 #                     ):
 #                         panel_path = pp
-#                         panel_name = Path(pp).name  # e.g., "panel_A_twinx.pltz"
+#                         panel_name = Path(pp).name  # e.g., "panel_A_twinx.plot"
 #                         is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else False
 #                         break
-# 
+#
 #                 if not panel_path:
 #                     continue
-# 
+#
 #                 # Check for layout overrides (from layout.json or in-memory)
 #                 override = layout_overrides.get(panel_name, {})
 #                 override_pos = override.get("position", {})
 #                 override_size = override.get("size", {})
-# 
+#
 #                 # Use override positions if available, otherwise use spec
 #                 x_mm = override_pos.get("x_mm", pos.get("x_mm", 0))
 #                 y_mm = override_pos.get("y_mm", pos.get("y_mm", 0))
 #                 w_mm = override_size.get("width_mm", size.get("width_mm", 60))
 #                 h_mm = override_size.get("height_mm", size.get("height_mm", 40))
-# 
+#
 #                 x_frac = x_mm / fig_width_mm
 #                 y_frac = 1 - (y_mm + h_mm) / fig_height_mm
 #                 w_frac = w_mm / fig_width_mm
 #                 h_frac = h_mm / fig_height_mm
-# 
+#
 #                 # Load panel preview
 #                 try:
 #                     # Exclusion patterns for preview selection
 #                     exclude_patterns = ["hitmap", "overview", "thumb", "preview"]
-# 
+#
 #                     if is_zip:
-#                         with ZipBundle(panel_path, mode="r") as pltz_bundle:
+#                         with ZipBundle(panel_path, mode="r") as plot_bundle:
 #                             with zipfile.ZipFile(panel_path, "r") as zf:
 #                                 png_files = [
 #                                     n
@@ -262,18 +262,18 @@ if __name__ == "__main__":
 #                                 ]
 #                                 if png_files:
 #                                     preview_path = png_files[0]
-#                                     if ".pltz.d/" in preview_path:
-#                                         preview_path = preview_path.split(".pltz.d/")[
+#                                     if ".plot/" in preview_path:
+#                                         preview_path = preview_path.split(".plot/")[
 #                                             -1
 #                                         ]
-#                                     img_data = pltz_bundle.read_bytes(preview_path)
+#                                     img_data = plot_bundle.read_bytes(preview_path)
 #                                     img = Image.open(io.BytesIO(img_data))
 #                                     ax = fig.add_axes([x_frac, y_frac, w_frac, h_frac])
 #                                     ax.imshow(np.array(img))
 #                                     ax.axis("off")
 #                     else:
-#                         pltz_dir = Path(panel_path)
-#                         exports_dir = pltz_dir / "exports"
+#                         plot_dir = Path(panel_path)
+#                         exports_dir = plot_dir / "exports"
 #                         if exports_dir.exists():
 #                             for png_file in exports_dir.glob("*.png"):
 #                                 name_lower = png_file.name.lower()
@@ -285,7 +285,7 @@ if __name__ == "__main__":
 #                                     break
 #                 except Exception as e:
 #                     print(f"Could not load panel {panel_id}: {e}")
-# 
+#
 #                 # Draw panel letter
 #                 if (
 #                     panel_id and len(panel_id) <= 2
@@ -310,9 +310,9 @@ if __name__ == "__main__":
 #                             alpha=0.8,
 #                         ),
 #                     )
-# 
+#
 #             exported = {}
-# 
+#
 #             # Save to bundle
 #             if bundle_path:
 #                 with ZipBundle(bundle_path, mode="a") as bundle:
@@ -330,44 +330,44 @@ if __name__ == "__main__":
 #                         export_path = f"exports/{figure_name}.{fmt}"
 #                         bundle.write_bytes(export_path, buf.read())
 #                         exported[fmt] = export_path
-# 
+#
 #             plt.close(fig)
 #             return {"success": True, "exported": exported}
-# 
+#
 #         @app.route("/")
 #         def index():
 #             # Rebuild template each time for hot reload support
 #             html_template = build_html_template()
-# 
+#
 #             # Extract figz and panel paths for display
 #             json_path_str = str(editor.json_path.resolve())
-#             figz_path = ""
+#             figure_path = ""
 #             panel_path = ""
-# 
+#
 #             # Check if this is inside a figz bundle
-#             if ".figz.d/" in json_path_str:
-#                 parts = json_path_str.split(".figz.d/")
-#                 figz_path = parts[0] + ".figz.d"
+#             if ".figure/" in json_path_str:
+#                 parts = json_path_str.split(".figure/")
+#                 figure_path = parts[0] + ".figure"
 #                 panel_path = parts[1] if len(parts) > 1 else ""
-#             elif ".pltz.d/" in json_path_str:
-#                 parts = json_path_str.split(".pltz.d/")
-#                 figz_path = parts[0] + ".pltz.d"
+#             elif ".plot/" in json_path_str:
+#                 parts = json_path_str.split(".plot/")
+#                 figure_path = parts[0] + ".plot"
 #                 panel_path = parts[1] if len(parts) > 1 else ""
 #             else:
-#                 figz_path = json_path_str
-# 
+#                 figure_path = json_path_str
+#
 #             return render_template_string(
 #                 html_template,
-#                 filename=figz_path,
+#                 filename=figure_path,
 #                 panel_path=panel_path,
 #                 overrides=json.dumps(editor.current_overrides),
 #             )
-# 
+#
 #         @app.route("/preview")
 #         def preview():
 #             """Render figure preview with current overrides (same logic as /update)."""
 #             from ._renderer import render_preview_with_bboxes
-# 
+#
 #             # Always use renderer for consistency between initial and updated views
 #             dark_mode = request.args.get("dark_mode", "false").lower() == "true"
 #             img_data, bboxes, img_size = render_preview_with_bboxes(
@@ -387,69 +387,69 @@ if __name__ == "__main__":
 #                     "panel_info": editor.panel_info,
 #                 }
 #             )
-# 
+#
 #         @app.route("/panels")
 #         def panels():
 #             """Return all panel images with bboxes for interactive grid view (figz bundles only).
-# 
+#
 #             Uses smart load_panel_data helper for transparent zip/directory handling.
 #             Returns layout info from figz spec.json for unified canvas positioning.
 #             """
 #             import json as json_module
-# 
+#
 #             from ..edit import load_panel_data
 #             from ._bbox import (
 #                 extract_bboxes_from_geometry_px,
 #                 extract_bboxes_from_metadata,
 #             )
-# 
+#
 #             if not editor.panel_info:
 #                 return jsonify({"error": "Not a multi-panel figz bundle"}), 400
-# 
+#
 #             panel_names = editor.panel_info["panels"]
 #             panel_paths = editor.panel_info.get("panel_paths", [])
 #             panel_is_zip = editor.panel_info.get(
 #                 "panel_is_zip", [False] * len(panel_names)
 #             )
-#             figz_dir = Path(editor.panel_info["figz_dir"])
-# 
+#             figure_dir = Path(editor.panel_info["figure_dir"])
+#
 #             if not panel_paths:
-#                 panel_paths = [str(figz_dir / name) for name in panel_names]
-# 
+#                 panel_paths = [str(figure_dir / name) for name in panel_names]
+#
 #             # Load figz spec.json to get panel layout
-#             figz_layout = {}
-#             spec_path = figz_dir / "spec.json"
+#             figure_layout = {}
+#             spec_path = figure_dir / "spec.json"
 #             if spec_path.exists():
 #                 with open(spec_path) as f:
-#                     figz_spec = json_module.load(f)
-#                     for panel_spec in figz_spec.get("panels", []):
+#                     figure_spec = json_module.load(f)
+#                     for panel_spec in figure_spec.get("panels", []):
 #                         panel_id = panel_spec.get("id", "")
-#                         figz_layout[panel_id] = {
+#                         figure_layout[panel_id] = {
 #                             "position": panel_spec.get("position", {}),
 #                             "size": panel_spec.get("size", {}),
 #                         }
-# 
+#
 #             panel_images = []
-# 
+#
 #             for idx, panel_name in enumerate(panel_names):
 #                 panel_path = panel_paths[idx]
 #                 is_zip = panel_is_zip[idx] if idx < len(panel_is_zip) else None
-#                 display_name = panel_name.replace(".pltz.d", "").replace(".pltz", "")
-# 
+#                 display_name = panel_name.replace(".plot", "").replace(".plot", "")
+#
 #                 # Use smart helper to load panel data
 #                 loaded = load_panel_data(panel_path, is_zip=is_zip)
-# 
+#
 #                 panel_data = {
 #                     "name": display_name,
 #                     "image": None,
 #                     "bboxes": None,
 #                     "img_size": None,
 #                 }
-# 
+#
 #                 # Add layout info from figz spec
-#                 if display_name in figz_layout:
-#                     panel_data["layout"] = figz_layout[display_name]
-# 
+#                 if display_name in figure_layout:
+#                     panel_data["layout"] = figure_layout[display_name]
+#
 #                 if loaded:
 #                     # Get image data
 #                     if loaded.get("is_zip"):
@@ -465,7 +465,7 @@ if __name__ == "__main__":
 #                                 panel_data["image"] = base64.b64encode(f.read()).decode(
 #                                     "utf-8"
 #                                 )
-# 
+#
 #                     # Get image size
 #                     img_size = loaded.get("img_size")
 #                     if img_size:
@@ -474,7 +474,7 @@ if __name__ == "__main__":
 #                         panel_data["height"] = img_size["height"]
 #                     elif loaded.get("png_path"):
 #                         from PIL import Image
-# 
+#
 #                         img = Image.open(loaded["png_path"])
 #                         panel_data["img_size"] = {
 #                             "width": img.size[0],
@@ -482,12 +482,12 @@ if __name__ == "__main__":
 #                         }
 #                         panel_data["width"], panel_data["height"] = img.size
 #                         img.close()
-# 
+#
 #                     # Extract bboxes - prefer geometry_px.json
 #                     if panel_data.get("img_size"):
 #                         geometry_data = loaded.get("geometry_data")
 #                         metadata = loaded.get("metadata", {})
-# 
+#
 #                         if geometry_data:
 #                             panel_data["bboxes"] = extract_bboxes_from_geometry_px(
 #                                 geometry_data,
@@ -500,21 +500,21 @@ if __name__ == "__main__":
 #                                 panel_data["img_size"]["width"],
 #                                 panel_data["img_size"]["height"],
 #                             )
-# 
+#
 #                 panel_images.append(panel_data)
-# 
+#
 #             return jsonify(
 #                 {
 #                     "panels": panel_images,
 #                     "count": len(panel_images),
-#                     "layout": figz_layout,
+#                     "layout": figure_layout,
 #                 }
 #             )
-# 
+#
 #         @app.route("/switch_panel/<int:panel_index>")
 #         def switch_panel(panel_index):
 #             """Switch to a different panel in the figz bundle.
-# 
+#
 #             Uses smart load_panel_data helper for transparent zip/directory handling.
 #             """
 #             from ..edit import load_panel_data
@@ -522,37 +522,37 @@ if __name__ == "__main__":
 #                 extract_bboxes_from_geometry_px,
 #                 extract_bboxes_from_metadata,
 #             )
-# 
+#
 #             if not editor.panel_info:
 #                 return jsonify({"error": "Not a multi-panel figz bundle"}), 400
-# 
+#
 #             panels = editor.panel_info["panels"]
 #             panel_paths = editor.panel_info.get("panel_paths", [])
 #             panel_is_zip = editor.panel_info.get("panel_is_zip", [False] * len(panels))
-# 
+#
 #             if panel_index < 0 or panel_index >= len(panels):
 #                 return jsonify({"error": f"Invalid panel index: {panel_index}"}), 400
-# 
+#
 #             panel_name = panels[panel_index]
 #             panel_path = (
 #                 panel_paths[panel_index]
 #                 if panel_paths
-#                 else str(Path(editor.panel_info["figz_dir"]) / panel_name)
+#                 else str(Path(editor.panel_info["figure_dir"]) / panel_name)
 #             )
 #             is_zip = (
 #                 panel_is_zip[panel_index] if panel_index < len(panel_is_zip) else None
 #             )
-# 
+#
 #             try:
 #                 # Use smart helper to load panel data
 #                 loaded = load_panel_data(panel_path, is_zip=is_zip)
-# 
+#
 #                 if not loaded:
 #                     return (
 #                         jsonify({"error": f"Could not load panel: {panel_name}"}),
 #                         400,
 #                     )
-# 
+#
 #                 # Get image data
 #                 img_data = None
 #                 if loaded.get("is_zip"):
@@ -564,27 +564,27 @@ if __name__ == "__main__":
 #                     if png_path and png_path.exists():
 #                         with open(png_path, "rb") as f:
 #                             img_data = base64.b64encode(f.read()).decode("utf-8")
-# 
+#
 #                 if not img_data:
 #                     return (
 #                         jsonify({"error": f"No PNG found for panel: {panel_name}"}),
 #                         400,
 #                     )
-# 
+#
 #                 # Get image size
 #                 img_size = loaded.get("img_size", {"width": 0, "height": 0})
 #                 if not img_size and loaded.get("png_path"):
 #                     from PIL import Image
-# 
+#
 #                     img = Image.open(loaded["png_path"])
 #                     img_size = {"width": img.size[0], "height": img.size[1]}
 #                     img.close()
-# 
+#
 #                 # Extract bboxes - prefer geometry_px.json
 #                 bboxes = {}
 #                 geometry_data = loaded.get("geometry_data")
 #                 metadata = loaded.get("metadata", {})
-# 
+#
 #                 if geometry_data and img_size:
 #                     bboxes = extract_bboxes_from_geometry_px(
 #                         geometry_data, img_size["width"], img_size["height"]
@@ -593,23 +593,23 @@ if __name__ == "__main__":
 #                     bboxes = extract_bboxes_from_metadata(
 #                         metadata, img_size["width"], img_size["height"]
 #                     )
-# 
+#
 #                 # Update editor state
 #                 editor.metadata = metadata
 #                 editor.panel_info["current_index"] = panel_index
-# 
+#
 #                 # Re-extract defaults from new metadata
 #                 from .._defaults import (
 #                     extract_defaults_from_metadata,
 #                     get_scitex_defaults,
 #                 )
-# 
+#
 #                 editor.scitex_defaults = get_scitex_defaults()
 #                 editor.metadata_defaults = extract_defaults_from_metadata(metadata)
 #                 editor.current_overrides = copy.deepcopy(editor.scitex_defaults)
 #                 editor.current_overrides.update(editor.metadata_defaults)
 #                 editor.current_overrides.update(editor.manual_overrides)
-# 
+#
 #                 return jsonify(
 #                     {
 #                         "success": True,
@@ -623,7 +623,7 @@ if __name__ == "__main__":
 #                 )
 #             except Exception as e:
 #                 import traceback
-# 
+#
 #                 return (
 #                     jsonify(
 #                         {
@@ -633,7 +633,7 @@ if __name__ == "__main__":
 #                     ),
 #                     500,
 #                 )
-# 
+#
 #         @app.route("/hitmap")
 #         def hitmap():
 #             """Return hitmap PNG for element detection."""
@@ -647,7 +647,7 @@ if __name__ == "__main__":
 #                     }
 #                 )
 #             return jsonify({"error": "No hitmap available"}), 404
-# 
+#
 #         @app.route("/color_map")
 #         def color_map():
 #             """Return color map for hitmap element identification."""
@@ -657,19 +657,19 @@ if __name__ == "__main__":
 #                     "hit_regions": editor.hit_regions,
 #                 }
 #             )
-# 
+#
 #         @app.route("/update", methods=["POST"])
 #         def update():
 #             """Update overrides and re-render with updated properties."""
 #             from ._renderer import render_preview_with_bboxes
-# 
+#
 #             data = request.json
 #             editor.current_overrides.update(data.get("overrides", {}))
 #             editor._user_modified = True
-# 
+#
 #             # Check if dark mode is requested from POST data
 #             dark_mode = data.get("dark_mode", False)
-# 
+#
 #             # Re-render the figure with updated overrides
 #             img_data, bboxes, img_size = render_preview_with_bboxes(
 #                 editor.csv_data,
@@ -685,12 +685,12 @@ if __name__ == "__main__":
 #                     "status": "updated",
 #                 }
 #             )
-# 
+#
 #         @app.route("/save", methods=["POST"])
 #         def save():
 #             """Save to .manual.json."""
 #             from ..edit import save_manual_overrides
-# 
+#
 #             try:
 #                 manual_path = save_manual_overrides(
 #                     editor.json_path, editor.current_overrides
@@ -698,19 +698,19 @@ if __name__ == "__main__":
 #                 return jsonify({"status": "saved", "path": str(manual_path)})
 #             except Exception as e:
 #                 return jsonify({"status": "error", "message": str(e)}), 500
-# 
+#
 #         @app.route("/save_layout", methods=["POST"])
 #         def save_layout():
 #             """Save panel layout positions to figz bundle."""
 #             try:
 #                 data = request.get_json()
 #                 layout = data.get("layout", {})
-# 
+#
 #                 if not layout:
 #                     return jsonify(
 #                         {"success": False, "error": "No layout data provided"}
 #                     )
-# 
+#
 #                 # Check if we have panel_info (figz bundle)
 #                 if not editor.panel_info:
 #                     return jsonify(
@@ -719,24 +719,24 @@ if __name__ == "__main__":
 #                             "error": "No panel info available (not a figz bundle)",
 #                         }
 #                     )
-# 
+#
 #                 bundle_path = editor.panel_info.get("bundle_path")
 #                 if not bundle_path:
 #                     return jsonify(
 #                         {"success": False, "error": "Bundle path not available"}
 #                     )
-# 
+#
 #                 # Update layout in the figz bundle
 #                 from scitex.fts._bundle._zipbundle import ZipBundle
-# 
+#
 #                 bundle = ZipBundle(bundle_path)
-# 
+#
 #                 # Read existing layout or create new one
 #                 try:
 #                     existing_layout = bundle.read_json("layout.json")
 #                 except:
 #                     existing_layout = {}
-# 
+#
 #                 # Update layout with new positions
 #                 for panel_name, pos in layout.items():
 #                     if panel_name not in existing_layout:
@@ -745,11 +745,11 @@ if __name__ == "__main__":
 #                         existing_layout[panel_name]["position"] = {}
 #                     if "size" not in existing_layout[panel_name]:
 #                         existing_layout[panel_name]["size"] = {}
-# 
+#
 #                     # Update position
 #                     existing_layout[panel_name]["position"]["x_mm"] = pos.get("x_mm", 0)
 #                     existing_layout[panel_name]["position"]["y_mm"] = pos.get("y_mm", 0)
-# 
+#
 #                     # Update size if provided
 #                     if "width_mm" in pos:
 #                         existing_layout[panel_name]["size"]["width_mm"] = pos[
@@ -759,16 +759,16 @@ if __name__ == "__main__":
 #                         existing_layout[panel_name]["size"]["height_mm"] = pos[
 #                             "height_mm"
 #                         ]
-# 
+#
 #                 # Save updated layout
 #                 bundle.write_json("layout.json", existing_layout)
-# 
+#
 #                 # Update in-memory panel_info
 #                 editor.panel_info["layout"] = existing_layout
-# 
+#
 #                 # Auto-export composed figure to bundle
 #                 export_result = _export_composed_figure(editor, formats=["png", "svg"])
-# 
+#
 #                 return jsonify(
 #                     {
 #                         "success": True,
@@ -776,10 +776,10 @@ if __name__ == "__main__":
 #                         "exported": export_result.get("exported", {}),
 #                     }
 #                 )
-# 
+#
 #             except Exception as e:
 #                 import traceback
-# 
+#
 #                 return jsonify(
 #                     {
 #                         "success": False,
@@ -787,11 +787,11 @@ if __name__ == "__main__":
 #                         "traceback": traceback.format_exc(),
 #                     }
 #                 )
-# 
+#
 #         @app.route("/save_element_position", methods=["POST"])
 #         def save_element_position():
 #             """Save element position (legend/panel_letter) to figz bundle.
-# 
+#
 #             ONLY legends and panel letters can be repositioned to maintain
 #             scientific rigor. Data elements are never moved.
 #             """
@@ -802,7 +802,7 @@ if __name__ == "__main__":
 #                 element_type = data.get("element_type", "")
 #                 position = data.get("position", {})
 #                 snap_name = data.get("snap_name")
-# 
+#
 #                 # Validate element type (whitelist for scientific rigor)
 #                 ALLOWED_TYPES = ["legend", "panel_letter"]
 #                 if element_type not in ALLOWED_TYPES:
@@ -812,41 +812,41 @@ if __name__ == "__main__":
 #                             "error": f"Element type '{element_type}' cannot be repositioned (scientific rigor)",
 #                         }
 #                     )
-# 
+#
 #                 if not editor.panel_info:
 #                     return jsonify(
 #                         {"success": False, "error": "No panel info available"}
 #                     )
-# 
+#
 #                 bundle_path = editor.panel_info.get("bundle_path")
 #                 if not bundle_path:
 #                     return jsonify(
 #                         {"success": False, "error": "Bundle path not available"}
 #                     )
-# 
+#
 #                 from scitex.fts._bundle._zipbundle import ZipBundle
-# 
+#
 #                 bundle = ZipBundle(bundle_path)
-# 
+#
 #                 # Read or create style.json for element positions
 #                 try:
 #                     style = bundle.read_json("style.json")
 #                 except:
 #                     style = {}
-# 
+#
 #                 # Initialize structure
 #                 if "elements" not in style:
 #                     style["elements"] = {}
 #                 if panel not in style["elements"]:
 #                     style["elements"][panel] = {}
-# 
+#
 #                 # Save element position
 #                 style["elements"][panel][element] = {
 #                     "type": element_type,
 #                     "position": position,
 #                     "snap_name": snap_name,
 #                 }
-# 
+#
 #                 # For legends, also update legend_location for matplotlib compatibility
 #                 if element_type == "legend" and snap_name:
 #                     # Convert snap name to matplotlib loc format
@@ -865,9 +865,9 @@ if __name__ == "__main__":
 #                         if "legend" not in style:
 #                             style["legend"] = {}
 #                         style["legend"]["location"] = loc_map[snap_name]
-# 
+#
 #                 bundle.write_json("style.json", style)
-# 
+#
 #                 return jsonify(
 #                     {
 #                         "success": True,
@@ -876,10 +876,10 @@ if __name__ == "__main__":
 #                         "snap_name": snap_name,
 #                     }
 #                 )
-# 
+#
 #             except Exception as e:
 #                 import traceback
-# 
+#
 #                 return jsonify(
 #                     {
 #                         "success": False,
@@ -887,47 +887,47 @@ if __name__ == "__main__":
 #                         "traceback": traceback.format_exc(),
 #                     }
 #                 )
-# 
+#
 #         @app.route("/export", methods=["POST"])
 #         def export_figure():
 #             """Export composed figure to various formats and update figz bundle."""
 #             try:
 #                 data = request.get_json()
 #                 formats = data.get("formats", ["png", "svg"])
-# 
+#
 #                 if not editor.panel_info:
 #                     return jsonify(
 #                         {"success": False, "error": "No panel info available"}
 #                     )
-# 
+#
 #                 bundle_path = editor.panel_info.get("bundle_path")
 #                 if not bundle_path:
 #                     return jsonify(
 #                         {"success": False, "error": "Bundle path not available"}
 #                     )
-# 
+#
 #                 import io
 #                 from pathlib import Path
-# 
+#
 #                 import matplotlib
-# 
+#
 #                 from scitex.fts._bundle._zipbundle import ZipBundle
-# 
+#
 #                 matplotlib.use("Agg")
 #                 import matplotlib.pyplot as plt
 #                 import numpy as np
 #                 from PIL import Image
-# 
+#
 #                 figure_name = Path(bundle_path).stem
 #                 dpi = data.get("dpi", 150)
-# 
+#
 #                 with ZipBundle(bundle_path, mode="a") as bundle:
 #                     # Read spec for figure size and panel positions
 #                     try:
 #                         spec = bundle.read_json("spec.json")
 #                     except:
 #                         spec = {}
-# 
+#
 #                     # Get figure dimensions
 #                     fig_width_mm = 180
 #                     fig_height_mm = 120
@@ -937,61 +937,61 @@ if __name__ == "__main__":
 #                         size = styles.get("size", {})
 #                         fig_width_mm = size.get("width_mm", 180)
 #                         fig_height_mm = size.get("height_mm", 120)
-# 
+#
 #                     # Convert mm to inches
 #                     fig_width_in = fig_width_mm / 25.4
 #                     fig_height_in = fig_height_mm / 25.4
-# 
+#
 #                     # Create figure with white background
 #                     fig = plt.figure(
 #                         figsize=(fig_width_in, fig_height_in),
 #                         dpi=dpi,
 #                         facecolor="white",
 #                     )
-# 
+#
 #                     # Get panels from spec or editor.panel_info
 #                     panels_spec = spec.get("panels", [])
-# 
+#
 #                     # Compose panels onto figure
 #                     for panel_spec in panels_spec:
 #                         panel_id = panel_spec.get("id", "")
-#                         pltz_name = panel_spec.get("plot", "")
-# 
+#                         plot_name = panel_spec.get("plot", "")
+#
 #                         # Get position and size from spec
 #                         pos = panel_spec.get("position", {})
 #                         size = panel_spec.get("size", {})
-# 
+#
 #                         x_mm = pos.get("x_mm", 0)
 #                         y_mm = pos.get("y_mm", 0)
 #                         w_mm = size.get("width_mm", 60)
 #                         h_mm = size.get("height_mm", 40)
-# 
+#
 #                         # Convert to figure coordinates (0-1)
 #                         x_frac = x_mm / fig_width_mm
 #                         y_frac = 1 - (y_mm + h_mm) / fig_height_mm  # Flip Y
 #                         w_frac = w_mm / fig_width_mm
 #                         h_frac = h_mm / fig_height_mm
-# 
+#
 #                         # Try to read panel image from pltz exports
 #                         img_loaded = False
-#                         for pltz_path in [
-#                             f"{panel_id}.pltz",
-#                             pltz_name.replace(".d", ""),
+#                         for plot_path in [
+#                             f"{panel_id}.plot",
+#                             plot_name.replace(".d", ""),
 #                         ]:
 #                             if img_loaded:
 #                                 break
 #                             try:
 #                                 # Read pltz as nested bundle
-#                                 pltz_bytes = bundle.read_bytes(pltz_path)
+#                                 plot_bytes = bundle.read_bytes(plot_path)
 #                                 import tempfile
-# 
+#
 #                                 with tempfile.NamedTemporaryFile(
-#                                     suffix=".pltz", delete=False
+#                                     suffix=".plot", delete=False
 #                                 ) as tmp:
-#                                     tmp.write(pltz_bytes)
+#                                     tmp.write(plot_bytes)
 #                                     tmp_path = tmp.name
 #                                 try:
-#                                     with ZipBundle(tmp_path, mode="r") as pltz_bundle:
+#                                     with ZipBundle(tmp_path, mode="r") as plot_bundle:
 #                                         # Try various preview paths
 #                                         for preview_path in [
 #                                             "exports/preview.png",
@@ -999,12 +999,12 @@ if __name__ == "__main__":
 #                                             f"exports/{panel_id}.png",
 #                                         ]:
 #                                             try:
-#                                                 img_data = pltz_bundle.read_bytes(
+#                                                 img_data = plot_bundle.read_bytes(
 #                                                     preview_path
 #                                                 )
 #                                                 img = Image.open(io.BytesIO(img_data))
 #                                                 img_array = np.array(img)
-# 
+#
 #                                                 # Create axes and add image
 #                                                 ax = fig.add_axes(
 #                                                     [x_frac, y_frac, w_frac, h_frac]
@@ -1017,14 +1017,14 @@ if __name__ == "__main__":
 #                                                 continue
 #                                 finally:
 #                                     import os
-# 
+#
 #                                     os.unlink(tmp_path)
 #                             except Exception as e:
-#                                 print(f"Could not load pltz {pltz_path}: {e}")
+#                                 print(f"Could not load pltz {plot_path}: {e}")
 #                                 continue
-# 
+#
 #                     exported = {}
-# 
+#
 #                     for fmt in formats:
 #                         buf = io.BytesIO()
 #                         if fmt in ["png", "jpeg", "jpg"]:
@@ -1046,17 +1046,17 @@ if __name__ == "__main__":
 #                             )
 #                         else:
 #                             continue
-# 
+#
 #                         buf.seek(0)
 #                         content = buf.read()
-# 
+#
 #                         # Save to exports/ directory in bundle
 #                         export_path = f"exports/{figure_name}.{fmt}"
 #                         bundle.write_bytes(export_path, content)
 #                         exported[fmt] = export_path
-# 
+#
 #                     plt.close(fig)
-# 
+#
 #                 return jsonify(
 #                     {
 #                         "success": True,
@@ -1064,10 +1064,10 @@ if __name__ == "__main__":
 #                         "bundle_path": str(bundle_path),
 #                     }
 #                 )
-# 
+#
 #             except Exception as e:
 #                 import traceback
-# 
+#
 #                 return jsonify(
 #                     {
 #                         "success": False,
@@ -1075,16 +1075,16 @@ if __name__ == "__main__":
 #                         "traceback": traceback.format_exc(),
 #                     }
 #                 )
-# 
+#
 #         @app.route("/download/<fmt>")
 #         def download_figure(fmt):
 #             """Download figure in specified format."""
 #             try:
 #                 import io
 #                 from pathlib import Path
-# 
+#
 #                 from flask import send_file
-# 
+#
 #                 mime_types = {
 #                     "png": "image/png",
 #                     "jpeg": "image/jpeg",
@@ -1092,39 +1092,39 @@ if __name__ == "__main__":
 #                     "svg": "image/svg+xml",
 #                     "pdf": "application/pdf",
 #                 }
-# 
+#
 #                 if fmt not in mime_types:
 #                     return f"Unsupported format: {fmt}", 400
-# 
+#
 #                 # For figz bundles, download the composed figure
 #                 if editor.panel_info:
 #                     bundle_path = editor.panel_info.get("bundle_path")
-#                     figz_dir = editor.panel_info.get("figz_dir")
+#                     figure_dir = editor.panel_info.get("figure_dir")
 #                     figure_name = (
 #                         Path(bundle_path).stem
 #                         if bundle_path
 #                         else (
-#                             Path(figz_dir).stem.replace(".figz.d", "")
-#                             if figz_dir
+#                             Path(figure_dir).stem.replace(".figure", "")
+#                             if figure_dir
 #                             else "figure"
 #                         )
 #                     )
-# 
-#                     if bundle_path or figz_dir:
+#
+#                     if bundle_path or figure_dir:
 #                         import matplotlib
 #                         import numpy as np
 #                         from PIL import Image
-# 
+#
 #                         from scitex.fts._bundle._zipbundle import ZipBundle
-# 
+#
 #                         matplotlib.use("Agg")
 #                         import json as json_module
-# 
+#
 #                         import matplotlib.pyplot as plt
-# 
+#
 #                         # Always compose on-demand to ensure current panel state
 #                         # (existing exports in bundle may be stale or blank)
-# 
+#
 #                         # Read spec.json and layout.json for position overrides
 #                         spec = {}
 #                         layout_overrides = {}
@@ -1140,20 +1140,20 @@ if __name__ == "__main__":
 #                                         pass
 #                             except:
 #                                 pass
-#                         elif figz_dir:
-#                             spec_path = Path(figz_dir) / "spec.json"
+#                         elif figure_dir:
+#                             spec_path = Path(figure_dir) / "spec.json"
 #                             if spec_path.exists():
 #                                 with open(spec_path) as f:
 #                                     spec = json_module.load(f)
-#                             layout_path = Path(figz_dir) / "layout.json"
+#                             layout_path = Path(figure_dir) / "layout.json"
 #                             if layout_path.exists():
 #                                 with open(layout_path) as f:
 #                                     layout_overrides = json_module.load(f)
-# 
+#
 #                         # Also check in-memory layout overrides (most current)
 #                         if editor.panel_info and editor.panel_info.get("layout"):
 #                             layout_overrides = editor.panel_info.get("layout", {})
-# 
+#
 #                         # Get figure dimensions
 #                         fig_width_mm = 180
 #                         fig_height_mm = 120
@@ -1163,27 +1163,27 @@ if __name__ == "__main__":
 #                             size = styles.get("size", {})
 #                             fig_width_mm = size.get("width_mm", 180)
 #                             fig_height_mm = size.get("height_mm", 120)
-# 
+#
 #                         fig_width_in = fig_width_mm / 25.4
 #                         fig_height_in = fig_height_mm / 25.4
-# 
+#
 #                         dpi = 150 if fmt in ["jpeg", "jpg"] else 300
 #                         fig = plt.figure(
 #                             figsize=(fig_width_in, fig_height_in),
 #                             dpi=dpi,
 #                             facecolor="white",
 #                         )
-# 
+#
 #                         # Compose panels
 #                         panels_spec = spec.get("panels", [])
 #                         panel_paths = editor.panel_info.get("panel_paths", [])
 #                         panel_is_zip = editor.panel_info.get("panel_is_zip", [])
-# 
+#
 #                         for panel_spec in panels_spec:
 #                             panel_id = panel_spec.get("id", "")
 #                             pos = panel_spec.get("position", {})
 #                             size = panel_spec.get("size", {})
-# 
+#
 #                             # Skip overview/auxiliary panels (only compose main panels A-Z)
 #                             panel_id_lower = panel_id.lower()
 #                             if any(
@@ -1191,13 +1191,13 @@ if __name__ == "__main__":
 #                                 for skip in ["overview", "thumb", "preview", "aux"]
 #                             ):
 #                                 continue
-# 
+#
 #                             # Find panel path first (needed to check layout_overrides)
 #                             panel_path = None
 #                             is_zip = False
 #                             panel_name = None
 #                             for idx, pp in enumerate(panel_paths):
-#                                 pp_name = Path(pp).stem.replace(".pltz", "")
+#                                 pp_name = Path(pp).stem.replace(".plot", "")
 #                                 # Match exact name, or name contains panel_id pattern
 #                                 # e.g., "panel_A_twinx" matches panel_id "A"
 #                                 if (
@@ -1212,25 +1212,25 @@ if __name__ == "__main__":
 #                                     panel_path = pp
 #                                     panel_name = Path(
 #                                         pp
-#                                     ).name  # e.g., "panel_A_twinx.pltz"
+#                                     ).name  # e.g., "panel_A_twinx.plot"
 #                                     is_zip = (
 #                                         panel_is_zip[idx]
 #                                         if idx < len(panel_is_zip)
 #                                         else False
 #                                     )
 #                                     break
-# 
+#
 #                             if not panel_path:
 #                                 print(
 #                                     f"Could not find panel path for id={panel_id}, available: {[Path(p).stem for p in panel_paths]}"
 #                                 )
 #                                 continue
-# 
+#
 #                             # Check for layout overrides (from layout.json or in-memory)
 #                             override = layout_overrides.get(panel_name, {})
 #                             override_pos = override.get("position", {})
 #                             override_size = override.get("size", {})
-# 
+#
 #                             # Use override positions if available, otherwise use spec
 #                             x_mm = override_pos.get("x_mm", pos.get("x_mm", 0))
 #                             y_mm = override_pos.get("y_mm", pos.get("y_mm", 0))
@@ -1240,12 +1240,12 @@ if __name__ == "__main__":
 #                             h_mm = override_size.get(
 #                                 "height_mm", size.get("height_mm", 40)
 #                             )
-# 
+#
 #                             x_frac = x_mm / fig_width_mm
 #                             y_frac = 1 - (y_mm + h_mm) / fig_height_mm
 #                             w_frac = w_mm / fig_width_mm
 #                             h_frac = h_mm / fig_height_mm
-# 
+#
 #                             # Load panel preview image
 #                             try:
 #                                 img_loaded = False
@@ -1256,12 +1256,12 @@ if __name__ == "__main__":
 #                                     "thumb",
 #                                     "preview",
 #                                 ]
-# 
+#
 #                                 if is_zip:
-#                                     with ZipBundle(panel_path, mode="r") as pltz_bundle:
+#                                     with ZipBundle(panel_path, mode="r") as plot_bundle:
 #                                         # Find PNG in exports (exclude hitmap, overview, thumbnails)
 #                                         import zipfile
-# 
+#
 #                                         with zipfile.ZipFile(panel_path, "r") as zf:
 #                                             png_files = [
 #                                                 n
@@ -1277,12 +1277,12 @@ if __name__ == "__main__":
 #                                                 # Use first matching PNG
 #                                                 preview_path = png_files[0]
 #                                                 # Extract the path relative to .d directory
-#                                                 if ".pltz.d/" in preview_path:
+#                                                 if ".plot/" in preview_path:
 #                                                     preview_path = preview_path.split(
-#                                                         ".pltz.d/"
+#                                                         ".plot/"
 #                                                     )[-1]
 #                                                 try:
-#                                                     img_data = pltz_bundle.read_bytes(
+#                                                     img_data = plot_bundle.read_bytes(
 #                                                         preview_path
 #                                                     )
 #                                                     img = Image.open(
@@ -1300,8 +1300,8 @@ if __name__ == "__main__":
 #                                                     )
 #                                 else:
 #                                     # Directory-based pltz
-#                                     pltz_dir = Path(panel_path)
-#                                     exports_dir = pltz_dir / "exports"
+#                                     plot_dir = Path(panel_path)
+#                                     exports_dir = plot_dir / "exports"
 #                                     if exports_dir.exists():
 #                                         for png_file in exports_dir.glob("*.png"):
 #                                             name_lower = png_file.name.lower()
@@ -1321,7 +1321,7 @@ if __name__ == "__main__":
 #                                     print(f"No preview found for panel {panel_id}")
 #                             except Exception as e:
 #                                 print(f"Could not load panel {panel_id}: {e}")
-# 
+#
 #                             # Draw panel letter
 #                             if (
 #                                 panel_id and len(panel_id) <= 2
@@ -1346,7 +1346,7 @@ if __name__ == "__main__":
 #                                         alpha=0.8,
 #                                     ),
 #                                 )
-# 
+#
 #                         buf = io.BytesIO()
 #                         fig.savefig(
 #                             buf,
@@ -1358,36 +1358,36 @@ if __name__ == "__main__":
 #                         )
 #                         plt.close(fig)
 #                         buf.seek(0)
-# 
+#
 #                         return send_file(
 #                             buf,
 #                             mimetype=mime_types[fmt],
 #                             as_attachment=True,
 #                             download_name=f"{figure_name}.{fmt}",
 #                         )
-# 
+#
 #                 # For single pltz files, render from csv_data
 #                 import matplotlib
-# 
+#
 #                 from ._renderer import render_preview_with_bboxes
-# 
+#
 #                 matplotlib.use("Agg")
 #                 import matplotlib.pyplot as plt
-# 
+#
 #                 figure_name = "figure"
 #                 if editor.json_path:
 #                     figure_name = Path(editor.json_path).stem
-# 
+#
 #                 img_data, _, _ = render_preview_with_bboxes(
 #                     editor.csv_data,
 #                     editor.current_overrides,
 #                     metadata=editor.metadata,
 #                     dark_mode=False,
 #                 )
-# 
+#
 #                 if fmt == "png":
 #                     import base64
-# 
+#
 #                     content = base64.b64decode(img_data)
 #                     buf = io.BytesIO(content)
 #                     return send_file(
@@ -1396,13 +1396,13 @@ if __name__ == "__main__":
 #                         as_attachment=True,
 #                         download_name=f"{figure_name}.{fmt}",
 #                     )
-# 
+#
 #                 # For other formats, re-render
 #                 from ._plotter import plot_from_csv
-# 
+#
 #                 fig, ax = plt.subplots(figsize=(8, 6))
 #                 plot_from_csv(ax, editor.csv_data, editor.current_overrides)
-# 
+#
 #                 buf = io.BytesIO()
 #                 dpi = 150 if fmt in ["jpeg", "jpg"] else 300
 #                 fig.savefig(
@@ -1414,34 +1414,34 @@ if __name__ == "__main__":
 #                 )
 #                 plt.close(fig)
 #                 buf.seek(0)
-# 
+#
 #                 return send_file(
 #                     buf,
 #                     mimetype=mime_types[fmt],
 #                     as_attachment=True,
 #                     download_name=f"{figure_name}.{fmt}",
 #                 )
-# 
+#
 #             except Exception as e:
 #                 import traceback
-# 
+#
 #                 return f"Error: {str(e)}\n{traceback.format_exc()}", 500
-# 
+#
 #         @app.route("/download_figz")
 #         def download_figz():
 #             """Download as figz bundle (re-editable format)."""
 #             try:
 #                 if not editor.panel_info:
 #                     return "No panel info available", 404
-# 
+#
 #                 bundle_path = editor.panel_info.get("bundle_path")
 #                 if not bundle_path:
 #                     return "Bundle path not available", 404
-# 
+#
 #                 from pathlib import Path
-# 
+#
 #                 from flask import send_file
-# 
+#
 #                 # Send the figz file directly (it's already a pltz-compatible format)
 #                 return send_file(
 #                     bundle_path,
@@ -1449,10 +1449,10 @@ if __name__ == "__main__":
 #                     as_attachment=True,
 #                     download_name=Path(bundle_path).name,
 #                 )
-# 
+#
 #             except Exception as e:
 #                 return str(e), 500
-# 
+#
 #         @app.route("/shutdown", methods=["POST"])
 #         def shutdown():
 #             """Shutdown the server."""
@@ -1461,7 +1461,7 @@ if __name__ == "__main__":
 #                 raise RuntimeError("Not running with Werkzeug Server")
 #             func()
 #             return jsonify({"status": "shutdown"})
-# 
+#
 #         @app.route("/stats")
 #         def stats():
 #             """Return statistical test results from figure metadata."""
@@ -1474,40 +1474,40 @@ if __name__ == "__main__":
 #                     "has_stats": len(stats_data) > 0,
 #                 }
 #             )
-# 
+#
 #         # Open browser after short delay
 #         def open_browser():
 #             import time
-# 
+#
 #             time.sleep(0.5)
 #             webbrowser.open(f"http://127.0.0.1:{self.port}")
-# 
+#
 #         threading.Thread(target=open_browser, daemon=True).start()
-# 
+#
 #         print(f"Starting SciTeX Figure Editor at http://127.0.0.1:{self.port}")
 #         print("Press Ctrl+C to stop")
-# 
+#
 #         # Note: use_reloader=False because the reloader re-runs the entire script
 #         # which causes infinite loops when the demo generates figures
 #         # Templates are rebuilt on each page refresh anyway
 #         app.run(host="127.0.0.1", port=self.port, debug=False, use_reloader=False)
-# 
-# 
+#
+#
 # def _extract_bboxes_from_metadata(
 #     metadata: Dict[str, Any],
 #     display_width: Optional[float] = None,
 #     display_height: Optional[float] = None,
 # ) -> Dict[str, Any]:
 #     """Extract element bounding boxes from pltz metadata.
-# 
+#
 #     Builds bboxes from selectable_regions in the metadata for click detection.
 #     This allows the editor to highlight elements when clicked.
-# 
+#
 #     Coordinate system (new layered format):
 #     - selectable_regions bbox_px: Already in final image space (figure_px)
 #     - Display size: Actual displayed image size (PNG pixels or SVG viewBox)
 #     - Scale = display_size / figure_px (usually 1:1, but may differ for scaled display)
-# 
+#
 #     Parameters
 #     ----------
 #     metadata : dict
@@ -1516,7 +1516,7 @@ if __name__ == "__main__":
 #         Actual display image width (from PNG size or SVG viewBox)
 #     display_height : float, optional
 #         Actual display image height (from PNG size or SVG viewBox)
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -1524,7 +1524,7 @@ if __name__ == "__main__":
 #     """
 #     bboxes = {}
 #     selectable = metadata.get("selectable_regions", {})
-# 
+#
 #     # Figure dimensions from new layered format (bbox_px are in this space)
 #     figure_px = metadata.get("figure_px", [])
 #     if isinstance(figure_px, list) and len(figure_px) >= 2:
@@ -1537,22 +1537,22 @@ if __name__ == "__main__":
 #         orig_fig = path_data.get("figure", {})
 #         fig_width = orig_fig.get("width_px", 944)
 #         fig_height = orig_fig.get("height_px", 803)
-# 
+#
 #     # Use actual display dimensions if provided, else use figure_px
 #     if display_width is None:
 #         display_width = fig_width
 #     if display_height is None:
 #         display_height = fig_height
-# 
+#
 #     # Scale factor: display / figure_px
 #     # Usually 1:1 since display is the same PNG, but may differ for scaled display
 #     scale_x = display_width / fig_width if fig_width > 0 else 1
 #     scale_y = display_height / fig_height if fig_height > 0 else 1
-# 
+#
 #     # Helper to convert coords to display pixels
 #     def to_display_bbox(bbox, is_list=True):
 #         """Convert bbox to display pixels (apply scaling if display != figure_px).
-# 
+#
 #         Parameters
 #         ----------
 #         bbox : list or dict
@@ -1567,13 +1567,13 @@ if __name__ == "__main__":
 #             y0 = bbox.get("y0", 0)
 #             x1 = bbox.get("x1", bbox.get("x0", 0) + bbox.get("width", 0))
 #             y1 = bbox.get("y1", bbox.get("y0", 0) + bbox.get("height", 0))
-# 
+#
 #         # Scale to display coords (usually 1:1)
 #         disp_x0 = x0 * scale_x
 #         disp_x1 = x1 * scale_x
 #         disp_y0 = y0 * scale_y
 #         disp_y1 = y1 * scale_y
-# 
+#
 #         return {
 #             "x0": disp_x0,
 #             "y0": disp_y0,
@@ -1584,12 +1584,12 @@ if __name__ == "__main__":
 #             "width": disp_x1 - disp_x0,
 #             "height": disp_y1 - disp_y0,
 #         }
-# 
+#
 #     # Extract from selectable_regions.axes
 #     axes_regions = selectable.get("axes", [])
 #     for ax_idx, ax in enumerate(axes_regions):
 #         ax_key = f"ax_{ax_idx:02d}"
-# 
+#
 #         # Title
 #         title = ax.get("title", {})
 #         if title and "bbox_px" in title:
@@ -1599,7 +1599,7 @@ if __name__ == "__main__":
 #                 "type": "title",
 #                 "text": title.get("text", ""),
 #             }
-# 
+#
 #         # X label
 #         xlabel = ax.get("xlabel", {})
 #         if xlabel and "bbox_px" in xlabel:
@@ -1609,7 +1609,7 @@ if __name__ == "__main__":
 #                 "type": "xlabel",
 #                 "text": xlabel.get("text", ""),
 #             }
-# 
+#
 #         # Y label
 #         ylabel = ax.get("ylabel", {})
 #         if ylabel and "bbox_px" in ylabel:
@@ -1619,7 +1619,7 @@ if __name__ == "__main__":
 #                 "type": "ylabel",
 #                 "text": ylabel.get("text", ""),
 #             }
-# 
+#
 #         # Legend
 #         legend = ax.get("legend", {})
 #         if legend and "bbox_px" in legend:
@@ -1628,7 +1628,7 @@ if __name__ == "__main__":
 #                 **bbox_disp,
 #                 "type": "legend",
 #             }
-# 
+#
 #         # X-axis spine
 #         xaxis = ax.get("xaxis", {})
 #         if xaxis:
@@ -1639,7 +1639,7 @@ if __name__ == "__main__":
 #                     **bbox_disp,
 #                     "type": "xaxis",
 #                 }
-# 
+#
 #         # Y-axis spine
 #         yaxis = ax.get("yaxis", {})
 #         if yaxis:
@@ -1650,7 +1650,7 @@ if __name__ == "__main__":
 #                     **bbox_disp,
 #                     "type": "yaxis",
 #                 }
-# 
+#
 #     # Extract traces from artists (top-level in new format, or hit_regions.path_data in old)
 #     artists = metadata.get("artists", [])
 #     if not artists:
@@ -1658,7 +1658,7 @@ if __name__ == "__main__":
 #         hit_regions = metadata.get("hit_regions", {})
 #         path_data = hit_regions.get("path_data", {})
 #         artists = path_data.get("artists", [])
-# 
+#
 #     for artist in artists:
 #         artist_id = artist.get("id", 0)
 #         artist_type = artist.get("type", "line")
@@ -1671,7 +1671,7 @@ if __name__ == "__main__":
 #                 "label": artist.get("label", f"Trace {artist_id}"),
 #                 "element_type": artist_type,
 #             }
-# 
+#
 #             # Include scaled path points for line proximity detection
 #             path_px = artist.get("path_px", [])
 #             if path_px:
@@ -1679,9 +1679,9 @@ if __name__ == "__main__":
 #                     [pt[0] * scale_x, pt[1] * scale_y] for pt in path_px if len(pt) >= 2
 #                 ]
 #                 trace_entry["points"] = scaled_points
-# 
+#
 #             bboxes[f"trace_{artist_id}"] = trace_entry
-# 
+#
 #     # Add metadata for JavaScript to understand the coordinate system
 #     bboxes["_meta"] = {
 #         "display_width": display_width,
@@ -1693,10 +1693,10 @@ if __name__ == "__main__":
 #         # Note: With new layered format, bbox_px are already in final image space
 #         # so scale is typically 1:1 (unless display is resized)
 #     }
-# 
+#
 #     return bboxes
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

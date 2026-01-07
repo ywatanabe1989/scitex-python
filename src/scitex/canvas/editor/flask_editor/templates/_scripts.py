@@ -1097,12 +1097,12 @@ function showPropertiesForElement(elementInfo, bbox) {
         const props = document.getElementById('selected-trace-props');
         props.style.display = 'block';
 
-        // Get values from: 1) element_overrides, 2) traces array (pltz metadata), 3) bbox data
+        // Get values from: 1) element_overrides, 2) traces array (plot metadata), 3) bbox data
         const traceOverrides = getTraceOverrides(elementInfo);
         const traceIdx = elementInfo.index || 0;
         const traceFromMeta = traces[traceIdx] || {};
 
-        // Label: prefer user override, then pltz metadata, then bbox label
+        // Label: prefer user override, then plot metadata, then bbox label
         const label = traceOverrides.label || traceFromMeta.label || bbox.label?.replace(/.*:\s*/, '') || '';
         const color = traceOverrides.color || traceFromMeta.color || '#1f77b4';
         const linewidth = traceOverrides.linewidth || traceFromMeta.linewidth || 1.0;
@@ -1839,11 +1839,11 @@ async function loadInitialPreview() {
             drawDebugBboxes();
         }
 
-        // Handle multi-panel figz bundles
+        // Handle multi-panel figure bundles
         if (data.panel_info && data.panel_info.panels) {
             panelData = data.panel_info;
             currentPanelIndex = data.panel_info.current_index || 0;
-            console.log('Multi-panel figz detected:', panelData.panels.length, 'panels');
+            console.log('Multi-panel figure detected:', panelData.panels.length, 'panels');
             loadPanelGrid();
         }
 
@@ -1890,7 +1890,7 @@ async function loadPanelGrid() {
         const canvasEl = document.getElementById('panel-canvas');
         canvasEl.innerHTML = '';
 
-        // Use figz layout to position panels as unified canvas (matching export)
+        // Use figure layout to position panels as unified canvas (matching export)
         const hasLayout = data.layout && Object.keys(data.layout).length > 0;
 
         // Calculate scale factor: convert mm to pixels
@@ -1926,7 +1926,7 @@ async function loadPanelGrid() {
                 console.warn(`Panel ${panel.name}: missing bboxes or img_size`, {bboxes: !!panel.bboxes, img_size: !!panel.img_size});
             }
 
-            // Use figz layout for positioning (unified canvas like export)
+            // Use figure layout for positioning (unified canvas like export)
             let pos, posMm;
             if (panel.layout && panel.layout.position && panel.layout.size) {
                 const x_mm = panel.layout.position.x_mm || 0;
@@ -1941,7 +1941,7 @@ async function loadPanelGrid() {
                 };
                 posMm = { x_mm, y_mm, width_mm, height_mm };
             } else {
-                // Fallback grid layout if no figz layout
+                // Fallback grid layout if no figure layout
                 const cols = Math.ceil(Math.sqrt(data.panels.length));
                 const baseWidth = 220, baseHeight = 180, padding = 15;
                 const col = idx % cols;
@@ -2571,7 +2571,7 @@ async function loadPanelForEditing(panelIdx, panelName, elementToSelect) {
         // Update panel path display in right panel header
         const panelPathEl = document.getElementById('panel-path-display');
         if (panelPathEl) {
-            panelPathEl.textContent = `Panel: ${panelName}.pltz.d/spec.json`;
+            panelPathEl.textContent = `Panel: ${panelName}.plot/spec.json`;
         }
 
         setStatus(`Selected: ${elementToSelect} in Panel ${panelName}`, false);
@@ -2646,7 +2646,7 @@ async function selectPanel(idx) {
             panelPathEl.textContent = `Panel: ${data.panel_name}/spec.json`;
         }
 
-        setStatus(`Switched to Panel ${data.panel_name.replace('.pltz.d', '')}`, false);
+        setStatus(`Switched to Panel ${data.panel_name.replace('.plot', '')}`, false);
     } catch (e) {
         setStatus('Error switching panel: ' + e.message, true);
         console.error('Panel switch error:', e);
@@ -2679,7 +2679,7 @@ function updatePanelIndicator() {
     if (indicatorEl) indicatorEl.textContent = `${current} / ${total}`;
 
     const nameEl = document.getElementById('current-panel-name');
-    if (nameEl) nameEl.textContent = `Panel ${panelName.replace('.pltz.d', '')}`;
+    if (nameEl) nameEl.textContent = `Panel ${panelName.replace('.plot', '')}`;
 }
 
 // =============================================================================

@@ -2,10 +2,10 @@
 # Timestamp: 2025-12-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_loader.py
 
-"""FTS Bundle loading utilities.
+"""SciTeX Bundle loading utilities.
 
 Loads bundles using the new canonical/artifacts/payload/children structure.
-Supports backwards compatibility with old flat structure (node.json at root).
+Supports backwards compatibility with old flat structure (spec.json at root).
 
 New structure:
     canonical/spec.json     (was node.json)
@@ -21,15 +21,15 @@ from typing import TYPE_CHECKING, Optional, Tuple
 from ._storage import get_storage
 
 if TYPE_CHECKING:
-    from .._stats import Stats
-    from ._dataclasses import DataInfo, Node
+    from ._dataclasses import DataInfo, Spec
     from .kinds._plot._dataclasses import Encoding, Theme
+    from .kinds._stats._dataclasses import Stats
 
 
 def load_bundle_components(
     path: Path,
 ) -> Tuple[
-    Optional["Node"],
+    Optional["Spec"],
     Optional["Encoding"],
     Optional["Theme"],
     Optional["Stats"],
@@ -43,15 +43,15 @@ def load_bundle_components(
         path: Bundle path (directory or ZIP)
 
     Returns:
-        Tuple of (node, encoding, theme, stats, data_info)
+        Tuple of (spec, encoding, theme, stats, data_info)
     """
-    from .._stats import Stats
-    from ._dataclasses import DataInfo, Node
+    from ._dataclasses import DataInfo, Spec
     from .kinds._plot._dataclasses import Encoding, Theme
+    from .kinds._stats._dataclasses import Stats
 
     storage = get_storage(path)
 
-    node = None
+    spec = None
     encoding = None
     theme = None
     stats = None
@@ -59,7 +59,7 @@ def load_bundle_components(
 
     # Detect structure: new (canonical/) or legacy (flat)
     # - New: canonical/spec.json
-    # - Legacy FTS: node.json at root
+    # - Legacy v1: node.json at root
     # - Legacy sio.save(): spec.json at root
     if storage.exists("canonical/spec.json"):
         structure = "v2"  # New canonical/ structure
@@ -69,15 +69,15 @@ def load_bundle_components(
         structure = "v1"  # Legacy node.json structure
     is_new_structure = structure == "v2"
 
-    # Node / spec.json
+    # Spec / spec.json
     if structure == "v2":
-        node_data = storage.read_json("canonical/spec.json")
+        spec_data = storage.read_json("canonical/spec.json")
     elif structure == "sio":
-        node_data = storage.read_json("spec.json")
+        spec_data = storage.read_json("spec.json")
     else:
-        node_data = storage.read_json("node.json")
-    if node_data:
-        node = Node.from_dict(node_data)
+        spec_data = storage.read_json("node.json")
+    if spec_data:
+        spec = Spec.from_dict(spec_data)
 
     # Encoding
     if is_new_structure:
@@ -111,7 +111,7 @@ def load_bundle_components(
     if data_info_data:
         data_info = DataInfo.from_dict(data_info_data)
 
-    return node, encoding, theme, stats, data_info
+    return spec, encoding, theme, stats, data_info
 
 
 def get_bundle_structure_version(path: Path) -> str:

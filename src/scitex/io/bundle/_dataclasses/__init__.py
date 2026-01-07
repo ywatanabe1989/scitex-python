@@ -11,17 +11,17 @@ from ._ColumnDef import ColumnDef
 from ._DataFormat import DataFormat
 from ._DataInfo import DATA_INFO_VERSION, DataInfo
 from ._DataSource import DataSource
-from ._Node import Node, ShapeParams, TextContent
-from ._NodeRefs import NodeRefs
 from ._SizeMM import SizeMM
+from ._Spec import ShapeParams, Spec, TextContent
+from ._SpecRefs import SpecRefs
 
 __all__ = [
     # Core models
     "BBox",
     "SizeMM",
     "Axes",
-    "NodeRefs",
-    "Node",
+    "Spec",
+    "SpecRefs",
     "TextContent",
     "ShapeParams",
     # Data Info

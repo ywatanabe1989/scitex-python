@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-13 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/io/__init__.py
 
 """
-I/O operations for scitex.plt - Plot bundles (.pltz).
+I/O operations for scitex.plt - Plot bundles (.plot).
 
 This module handles:
-    - .pltz bundle load/save operations (legacy and layered formats)
+    - .plot bundle load/save operations (legacy and layered formats)
     - CSV data export/import
     - Hitmap generation and storage
     - Bundle overview generation
 
 Layered Format (v2.0):
-    plot.pltz.d/
+    plot.plot/
         spec.json           # Semantic: WHAT to plot
         style.json          # Appearance: HOW it looks
         data.csv            # Raw data
@@ -22,30 +21,29 @@ Layered Format (v2.0):
 """
 
 from ._bundle import (
-    validate_pltz_spec,
-    load_pltz_bundle,
-    save_pltz_bundle,
+    PLOT_SCHEMA_SPEC,
     generate_bundle_overview,
-    PLTZ_SCHEMA_SPEC,
+    load_plot_bundle,
+    save_plot_bundle,
+    validate_plot_spec,
 )
-
 from ._layered_bundle import (
-    save_layered_pltz_bundle,
-    load_layered_pltz_bundle,
-    merge_layered_bundle,
     is_layered_bundle,
+    load_layered_plot_bundle,
+    merge_layered_bundle,
+    save_layered_plot_bundle,
 )
 
 __all__ = [
-    # Legacy bundle operations
-    "validate_pltz_spec",
-    "load_pltz_bundle",
-    "save_pltz_bundle",
+    # Bundle operations
+    "validate_plot_spec",
+    "load_plot_bundle",
+    "save_plot_bundle",
     "generate_bundle_overview",
-    "PLTZ_SCHEMA_SPEC",
+    "PLOT_SCHEMA_SPEC",
     # Layered bundle operations (v2.0)
-    "save_layered_pltz_bundle",
-    "load_layered_pltz_bundle",
+    "save_layered_plot_bundle",
+    "load_layered_plot_bundle",
     "merge_layered_bundle",
     "is_layered_bundle",
 ]

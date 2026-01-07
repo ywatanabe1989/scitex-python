@@ -167,9 +167,9 @@ class TestExtensionAliases:
         )
 
         # Legacy extensions
-        assert ".figz" in EXTENSIONS_LEGACY
-        assert ".pltz" in EXTENSIONS_LEGACY
-        assert ".statsz" in EXTENSIONS_LEGACY
+        assert ".figure" in EXTENSIONS_LEGACY
+        assert ".plot" in EXTENSIONS_LEGACY
+        assert ".stats" in EXTENSIONS_LEGACY
 
         # New extensions
         assert ".figure.zip" in EXTENSIONS_NEW
@@ -177,22 +177,22 @@ class TestExtensionAliases:
         assert ".stats.zip" in EXTENSIONS_NEW
 
         # All extensions combined
-        assert ".figz" in EXTENSIONS
+        assert ".figure" in EXTENSIONS
         assert ".figure.zip" in EXTENSIONS
 
         # Extension mapping
-        assert EXTENSION_MAP[".figz"] == ".figure.zip"
-        assert EXTENSION_MAP[".pltz"] == ".plot.zip"
-        assert EXTENSION_MAP[".statsz"] == ".stats.zip"
+        assert EXTENSION_MAP[".figure"] == ".figure.zip"
+        assert EXTENSION_MAP[".plot"] == ".plot.zip"
+        assert EXTENSION_MAP[".stats"] == ".stats.zip"
 
     def test_get_type_legacy_extensions(self):
         """get_type should work with legacy extensions."""
         from scitex.io.bundle import get_type
 
         # Legacy extensions return short type names
-        assert get_type("test.figz") == "figz"
-        assert get_type("test.pltz") == "pltz"
-        assert get_type("test.statsz") == "statsz"
+        assert get_type("test.figure") == "figz"
+        assert get_type("test.plot") == "pltz"
+        assert get_type("test.stats") == "statsz"
 
     def test_get_type_new_extensions(self):
         """get_type should work with new .zip extensions."""

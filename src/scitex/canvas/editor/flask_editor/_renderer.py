@@ -3,28 +3,31 @@
 # File: ./src/scitex/vis/editor/flask_editor/renderer.py
 """Figure rendering for Flask editor - supports single and multi-axis figures."""
 
-from typing import Dict, Any, Tuple, Optional, List
 import base64
 import io
+from typing import Any, Dict, List, Optional, Tuple
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.ticker import MaxNLocator
 from PIL import Image
-import numpy as np
 
-from ._plotter import plot_from_csv, plot_from_recipe
-from ._bbox import extract_bboxes, extract_bboxes_multi
 from scitex.plt.styles import get_default_dpi
+
+from ._bbox import extract_bboxes, extract_bboxes_multi
+from ._plotter import plot_from_csv, plot_from_recipe
 
 # mm to pt conversion factor
 MM_TO_PT = 2.83465
 
 
 def render_preview_with_bboxes(
-    csv_data, overrides: Dict[str, Any], axis_fontsize: int = 7,
+    csv_data,
+    overrides: Dict[str, Any],
+    axis_fontsize: int = 7,
     metadata: Optional[Dict[str, Any]] = None,
     dark_mode: bool = False,
 ) -> Tuple[str, Dict[str, Any], Dict[str, int]]:
@@ -49,7 +52,9 @@ def render_preview_with_bboxes(
 
 
 def render_single_axis_preview(
-    csv_data, overrides: Dict[str, Any], axis_fontsize: int = 7,
+    csv_data,
+    overrides: Dict[str, Any],
+    axis_fontsize: int = 7,
     dark_mode: bool = False,
 ) -> Tuple[str, Dict[str, Any], Dict[str, int]]:
     """Render single-axis figure (legacy mode)."""
@@ -155,7 +160,9 @@ def render_single_axis_preview(
 
 
 def render_multi_axis_preview(
-    csv_data, overrides: Dict[str, Any], metadata: Dict[str, Any],
+    csv_data,
+    overrides: Dict[str, Any],
+    metadata: Dict[str, Any],
     dark_mode: bool = False,
 ) -> Tuple[str, Dict[str, Any], Dict[str, int]]:
     """Render multi-axis figure from new schema (scitex.plt.figure.recipe).
@@ -236,11 +243,22 @@ def render_multi_axis_preview(
             calls = ax_spec.get("calls", [])
             if calls:
                 # Recipe schema with explicit calls
-                plot_from_recipe(ax, csv_data, ax_spec, overrides, linewidth_pt, ax_id=ax_id)
+                plot_from_recipe(
+                    ax, csv_data, ax_spec, overrides, linewidth_pt, ax_id=ax_id
+                )
             else:
                 # Editable schema - plot from CSV column names
                 csv_row, csv_col = row, col  # Use computed row/col for CSV lookup
-                _plot_from_editable_csv(ax, csv_data, ax_id, csv_row, csv_col, overrides, linewidth_pt, metadata)
+                _plot_from_editable_csv(
+                    ax,
+                    csv_data,
+                    ax_id,
+                    csv_row,
+                    csv_col,
+                    overrides,
+                    linewidth_pt,
+                    metadata,
+                )
 
         # Get panel-specific overrides (e.g., ax_00_panel)
         panel_key = f"{ax_id}_panel"
@@ -412,21 +430,29 @@ def _build_ax_to_rowcol_map(axes_spec: Dict[str, Any]) -> Dict[str, Tuple[int, i
     return result
 
 
-def _get_row_col_from_ax_id(ax_id: str, ax_map: Optional[Dict[str, Tuple[int, int]]] = None) -> Tuple[int, int]:
+def _get_row_col_from_ax_id(
+    ax_id: str, ax_map: Optional[Dict[str, Tuple[int, int]]] = None
+) -> Tuple[int, int]:
     """Extract row and col from axis ID using the mapping."""
     if ax_map and ax_id in ax_map:
         return ax_map[ax_id]
     # Fallback: try parsing ax_XY format
     import re
-    match = re.match(r'ax_(\d)(\d)', ax_id)
+
+    match = re.match(r"ax_(\d)(\d)", ax_id)
     if match:
         return int(match.group(1)), int(match.group(2))
     return 0, 0
 
 
 def _plot_from_editable_csv(
-    ax, csv_data, ax_id: str, row: int, col: int,
-    overrides: Dict[str, Any], linewidth: float,
+    ax,
+    csv_data,
+    ax_id: str,
+    row: int,
+    col: int,
+    overrides: Dict[str, Any],
+    linewidth: float,
     metadata: Optional[Dict[str, Any]] = None,
 ):
     """Plot data from editable schema CSV format.
@@ -434,6 +460,7 @@ def _plot_from_editable_csv(
     CSV columns follow pattern: ax-row-X-col-Y_trace-id-NAME_variable-VAR
     """
     import re
+
     df = csv_data
     elements = metadata.get("elements", {}) if metadata else {}
 
@@ -448,7 +475,7 @@ def _plot_from_editable_csv(
     traces = {}
     for col_name in ax_cols:
         # Parse: ax-row-X-col-Y_trace-id-NAME_variable-VAR
-        match = re.match(rf'{pattern}trace-id-(.+?)_variable-(.+)', col_name)
+        match = re.match(rf"{pattern}trace-id-(.+?)_variable-(.+)", col_name)
         if match:
             trace_id = match.group(1)
             var_name = match.group(2)
@@ -474,61 +501,69 @@ def _plot_from_editable_csv(
         # Determine plot type based on variables present
         # Check more specific patterns first, then fall back to x/y
 
-        if 'y_lower' in vars_dict and 'y_middle' in vars_dict and 'y_upper' in vars_dict:
+        if (
+            "y_lower" in vars_dict
+            and "y_middle" in vars_dict
+            and "y_upper" in vars_dict
+        ):
             # Shaded line plot (fill_between + line)
-            x_col = vars_dict.get('x')
+            x_col = vars_dict.get("x")
             if x_col:
                 x = df[x_col].dropna().values
-                y_lower = df[vars_dict['y_lower']].dropna().values
-                y_middle = df[vars_dict['y_middle']].dropna().values
-                y_upper = df[vars_dict['y_upper']].dropna().values
+                y_lower = df[vars_dict["y_lower"]].dropna().values
+                y_middle = df[vars_dict["y_middle"]].dropna().values
+                y_upper = df[vars_dict["y_upper"]].dropna().values
 
                 min_len = min(len(x), len(y_lower), len(y_middle), len(y_upper))
                 if min_len > 0:
-                    ax.fill_between(x[:min_len], y_lower[:min_len], y_upper[:min_len], alpha=0.3)
+                    ax.fill_between(
+                        x[:min_len], y_lower[:min_len], y_upper[:min_len], alpha=0.3
+                    )
                     ax.plot(x[:min_len], y_middle[:min_len], linewidth=linewidth)
             trace_idx += 1
 
-        elif 'row' in vars_dict and 'col' in vars_dict and 'value' in vars_dict:
+        elif "row" in vars_dict and "col" in vars_dict and "value" in vars_dict:
             # Heatmap / imshow
-            rows_data = df[vars_dict['row']].dropna().values
-            cols_data = df[vars_dict['col']].dropna().values
-            values = df[vars_dict['value']].dropna().values
+            rows_data = df[vars_dict["row"]].dropna().values
+            cols_data = df[vars_dict["col"]].dropna().values
+            values = df[vars_dict["value"]].dropna().values
             if len(rows_data) > 0:
                 n_rows = int(rows_data.max()) + 1
                 n_cols = int(cols_data.max()) + 1
                 data = np.zeros((n_rows, n_cols))
-                for r, c, v in zip(rows_data.astype(int), cols_data.astype(int), values):
+                for r, c, v in zip(
+                    rows_data.astype(int), cols_data.astype(int), values
+                ):
                     data[r, c] = v
-                ax.imshow(data, aspect='auto', origin='lower')
+                ax.imshow(data, aspect="auto", origin="lower")
 
-        elif 'y1' in vars_dict and 'y2' in vars_dict:
+        elif "y1" in vars_dict and "y2" in vars_dict:
             # fill_between (CI band)
-            x_col = vars_dict.get('x')
+            x_col = vars_dict.get("x")
             if x_col:
                 x = df[x_col].dropna().values
-                y1 = df[vars_dict['y1']].dropna().values
-                y2 = df[vars_dict['y2']].dropna().values
+                y1 = df[vars_dict["y1"]].dropna().values
+                y2 = df[vars_dict["y2"]].dropna().values
                 min_len = min(len(x), len(y1), len(y2))
                 if min_len > 0:
                     ax.fill_between(x[:min_len], y1[:min_len], y2[:min_len], alpha=0.3)
 
-        elif 'yerr' in vars_dict and 'y' in vars_dict:
+        elif "yerr" in vars_dict and "y" in vars_dict:
             # Error bars with bar chart
-            x_col = vars_dict.get('x')
-            y_col = vars_dict.get('y')
+            x_col = vars_dict.get("x")
+            y_col = vars_dict.get("y")
             if x_col and y_col:
                 x = df[x_col].dropna().values
                 y = df[y_col].dropna().values
-                yerr = df[vars_dict['yerr']].dropna().values
+                yerr = df[vars_dict["yerr"]].dropna().values
                 min_len = min(len(x), len(y), len(yerr))
                 if min_len > 0:
                     ax.bar(x[:min_len], y[:min_len], yerr=yerr[:min_len])
 
-        elif 'group' in vars_dict and 'value' in vars_dict:
+        elif "group" in vars_dict and "value" in vars_dict:
             # Violin/strip plot - plot as scatter for now
-            groups = df[vars_dict['group']].dropna().values
-            values = df[vars_dict['value']].dropna().values
+            groups = df[vars_dict["group"]].dropna().values
+            values = df[vars_dict["value"]].dropna().values
             if len(groups) > 0 and len(values) > 0:
                 min_len = min(len(groups), len(values))
                 # Convert string groups to numeric positions
@@ -542,22 +577,22 @@ def _plot_from_editable_csv(
                 ax.set_xticks(range(len(unique_groups)))
                 ax.set_xticklabels(unique_groups, fontsize=6)
 
-        elif 'width' in vars_dict and 'height' in vars_dict:
+        elif "width" in vars_dict and "height" in vars_dict:
             # Rectangle - skip for now
             pass
 
-        elif 'type' in vars_dict:
+        elif "type" in vars_dict:
             # Skip type-only entries (like stim markers)
             pass
 
-        elif 'content' in vars_dict:
+        elif "content" in vars_dict:
             # Text annotation - skip for preview
             pass
 
-        elif 'x' in vars_dict and 'y' in vars_dict:
+        elif "x" in vars_dict and "y" in vars_dict:
             # Default: line or scatter plot
-            x_col = vars_dict['x']
-            y_col = vars_dict['y']
+            x_col = vars_dict["x"]
+            y_col = vars_dict["y"]
             x = df[x_col].dropna().values
             y = df[y_col].dropna().values
             if len(x) > 0 and len(y) > 0:
@@ -578,7 +613,7 @@ def _plot_from_editable_csv(
                     kwargs["label"] = label
 
                 # Check if this looks like scatter data (trace-id contains 'scatter' or 'strip')
-                if 'scatter' in trace_id.lower() or 'strip' in trace_id.lower():
+                if "scatter" in trace_id.lower() or "strip" in trace_id.lower():
                     scatter_kwargs = {"alpha": alpha, "s": 20}
                     if color:
                         scatter_kwargs["c"] = color
@@ -620,7 +655,8 @@ def _apply_caption(fig, o, caption_fontsize=7):
     # Place caption below the figure
     # Using fig.text with y position slightly below 0
     caption_artist = fig.text(
-        0.5, -0.02,  # Centered, below the figure
+        0.5,
+        -0.02,  # Centered, below the figure
         caption_text,
         ha="center",
         va="top",
@@ -699,17 +735,18 @@ def render_panel_preview(
     panel_dir,
     dark_mode: bool = False,
 ) -> Tuple[Optional[str], Optional[Dict[str, Any]], Optional[Dict[str, int]]]:
-    """Render a panel from its pltz bundle directory with dark mode support.
+    """Render a panel from its plot bundle directory with dark mode support.
 
     Args:
-        panel_dir: Path to the .pltz.d panel directory
+        panel_dir: Path to the .plot panel directory
         dark_mode: Whether to render with dark mode colors
 
     Returns:
         tuple: (base64_image_data, bboxes_dict, image_size) or (None, None, None) on error
     """
-    from pathlib import Path
     import json
+    from pathlib import Path
+
     import pandas as pd
 
     panel_dir = Path(panel_dir)
@@ -757,13 +794,15 @@ def render_panel_preview(
 
         # Render with dark mode
         return render_preview_with_bboxes(
-            csv_data, overrides,
+            csv_data,
+            overrides,
             metadata=metadata,
             dark_mode=dark_mode,
         )
 
     except Exception as e:
         import traceback
+
         print(f"Error rendering panel {panel_dir}: {e}")
         traceback.print_exc()
         return None, None, None
@@ -790,7 +829,9 @@ def _apply_dark_theme(ax):
     ax.yaxis.label.set_color(DARK_THEME_TEXT_COLOR)
 
     # Tick labels
-    ax.tick_params(axis="both", colors=DARK_THEME_TICK_COLOR, labelcolor=DARK_THEME_TEXT_COLOR)
+    ax.tick_params(
+        axis="both", colors=DARK_THEME_TICK_COLOR, labelcolor=DARK_THEME_TEXT_COLOR
+    )
 
     # Spines
     for spine in ax.spines.values():

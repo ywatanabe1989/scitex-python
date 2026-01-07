@@ -1,30 +1,29 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-12-16 (ywatanabe)"
+# Timestamp: 2026-01-07
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_nested.py
 
 """
 SciTeX Nested Bundle Access - Transparent access to nested bundles.
 
-Provides unified API to access nested bundles (pltz inside figz) regardless
+Provides unified API to access nested bundles (plot inside figure) regardless
 of whether they are stored as:
-    - ZIP files (.figz, .pltz)
-    - Directories (.figz.d, .pltz.d)
-    - Nested paths (Figure1.figz/A.pltz.d or Figure1.figz.d/A.pltz.d)
+    - ZIP files (.figure.zip, .plot.zip)
+    - Directories (.figure, .plot)
+    - Nested paths (Figure1.figure.zip/A.plot or Figure1.figure/A.plot)
 
 Usage:
     from scitex.io.bundle import nested
 
-    # Get pltz bundle from inside figz (works with both ZIP and directory)
-    pltz_data = nested.resolve("Figure1.figz/A.pltz.d")
-    pltz_data = nested.resolve("Figure1.figz.d/A.pltz.d")
+    # Get plot bundle from inside figure (works with both ZIP and directory)
+    plot_data = nested.resolve("Figure1.figure.zip/A.plot")
+    plot_data = nested.resolve("Figure1.figure/A.plot")
 
     # Get specific file from nested bundle
-    png_bytes = nested.get_file("Figure1.figz/A.pltz.d/exports/plot.png")
-    spec = nested.get_json("Figure1.figz/A.pltz.d/spec.json")
+    png_bytes = nested.get_file("Figure1.figure/A.plot/exports/plot.png")
+    spec = nested.get_json("Figure1.figure/A.plot/spec.json")
 
     # Get preview image (common use case)
-    preview_bytes = nested.get_preview("Figure1.figz/A.pltz.d")
+    preview_bytes = nested.get_preview("Figure1.figure/A.plot")
 """
 
 import json
@@ -47,25 +46,24 @@ __all__ = [
 
 
 def parse_path(
-    path: Union[str, Path]
+    path: Union[str, Path],
 ) -> Tuple[Optional[Path], Optional[str], Optional[str]]:
     """Parse a path to identify parent bundle, nested bundle, and file.
 
     Handles paths like:
-        - Figure1.figz/A.pltz.d
-        - Figure1.figz.d/A.pltz.d
-        - Figure1.figz/A.pltz.d/exports/plot.png
-        - Figure1.figz.d/A.pltz.d/spec.json
-        - A.pltz.d (standalone)
-        - A.pltz (standalone ZIP)
+        - Figure1.figure/A.plot
+        - Figure1.figure.zip/A.plot
+        - Figure1.figure/A.plot/exports/plot.png
+        - A.plot (standalone directory)
+        - A.plot.zip (standalone ZIP)
 
     Args:
         path: Path to parse. Can be absolute or relative.
 
     Returns:
         Tuple of (parent_bundle_path, nested_bundle_name, file_path_within_nested):
-        - parent_bundle_path: Path to .figz or .figz.d, or None if standalone
-        - nested_bundle_name: Name of nested bundle (e.g., "A.pltz.d"), or None
+        - parent_bundle_path: Path to .figure or .figure.zip, or None if standalone
+        - nested_bundle_name: Name of nested bundle (e.g., "A.plot"), or None
         - file_path_within_nested: Path within nested bundle, or None
     """
     p = Path(path)
@@ -75,19 +73,19 @@ def parse_path(
     nested_bundle = None
     file_within = None
 
-    # Find the first .figz or .figz.d component
-    figz_idx = None
+    # Find the first .figure.zip or .figure component
+    figure_idx = None
     for i, part in enumerate(parts):
-        if part.endswith(".figz") or part.endswith(".figz.d"):
-            figz_idx = i
+        if part.endswith(".figure.zip") or part.endswith(".figure"):
+            figure_idx = i
             break
 
-    if figz_idx is not None:
-        parent_bundle = Path(*parts[: figz_idx + 1])
-        remaining = parts[figz_idx + 1 :]
+    if figure_idx is not None:
+        parent_bundle = Path(*parts[: figure_idx + 1])
+        remaining = parts[figure_idx + 1 :]
 
         if remaining:
-            if remaining[0].endswith(".pltz.d") or remaining[0].endswith(".pltz"):
+            if remaining[0].endswith(".plot") or remaining[0].endswith(".plot.zip"):
                 nested_bundle = remaining[0]
                 if len(remaining) > 1:
                     file_within = str(Path(*remaining[1:]))
@@ -95,7 +93,7 @@ def parse_path(
                 file_within = str(Path(*remaining))
     else:
         for i, part in enumerate(parts):
-            if part.endswith(".pltz.d") or part.endswith(".pltz"):
+            if part.endswith(".plot") or part.endswith(".plot.zip"):
                 nested_bundle = part
                 parent_bundle = Path(*parts[:i]) if i > 0 else None
                 if i + 1 < len(parts):
@@ -111,17 +109,23 @@ def _find_bundle_path(base_path: Path, prefer_directory: bool = True) -> Optiona
     """Find the actual bundle path (ZIP or directory).
 
     Args:
-        base_path: Path to search for (with or without .d extension).
-        prefer_directory: If True, prefer .d directory over ZIP when both exist.
-            This is important for figz bundles where panels may be in the directory
+        base_path: Path to search for (with or without .zip extension).
+        prefer_directory: If True, prefer directory over ZIP when both exist.
+            This is important for figure bundles where panels may be in the directory
             while the ZIP is an older export.
 
     Returns:
         Path to the bundle (directory or ZIP), or None if not found.
     """
-    # Check for .d directory variant
-    if base_path.suffix in (".figz", ".pltz", ".statsz"):
-        dir_path = Path(str(base_path) + ".d")
+    # Check for ZIP extension (.figure.zip, .plot.zip, .stats.zip)
+    name = base_path.name
+    if (
+        name.endswith(".figure.zip")
+        or name.endswith(".plot.zip")
+        or name.endswith(".stats.zip")
+    ):
+        # ZIP path provided - check for directory variant
+        dir_path = Path(str(base_path)[:-4])  # Remove .zip
         if prefer_directory and dir_path.exists():
             return dir_path
         if base_path.exists():
@@ -129,9 +133,9 @@ def _find_bundle_path(base_path: Path, prefer_directory: bool = True) -> Optiona
         if dir_path.exists():
             return dir_path
 
-    # Check for ZIP variant
-    if str(base_path).endswith(".d"):
-        zip_path = Path(str(base_path)[:-2])
+    # Check for directory extension (.figure, .plot, .stats)
+    if name.endswith(".figure") or name.endswith(".plot") or name.endswith(".stats"):
+        zip_path = Path(str(base_path) + ".zip")
         if not prefer_directory and zip_path.exists():
             return zip_path
         if base_path.exists():
@@ -158,20 +162,20 @@ def _read_from_zip(zip_path: Path, internal_path: str) -> bytes:
             if name.endswith("/" + internal_path) or name.endswith(internal_path):
                 return zf.read(name)
 
-        if ".pltz.d/" in internal_path:
-            pltz_dir_name, file_in_pltz = internal_path.split(".pltz.d/", 1)
-            pltz_dir = pltz_dir_name + ".pltz.d"
+        if ".plot/" in internal_path:
+            plot_dir_name, file_in_plot = internal_path.split(".plot/", 1)
+            plot_dir = plot_dir_name + ".plot"
 
             for name in namelist:
-                if f"/{pltz_dir}/" in name or name.startswith(pltz_dir + "/"):
-                    if name.endswith("/" + file_in_pltz) or name.endswith(file_in_pltz):
+                if f"/{plot_dir}/" in name or name.startswith(plot_dir + "/"):
+                    if name.endswith("/" + file_in_plot) or name.endswith(file_in_plot):
                         return zf.read(name)
 
-            base_name = pltz_dir_name
+            base_name = plot_dir_name
             for name in namelist:
-                if name.endswith(".pltz") and base_name in name:
-                    pltz_data = zf.read(name)
-                    return _read_from_nested_zip(pltz_data, file_in_pltz, name)
+                if name.endswith(".plot.zip") and base_name in name:
+                    plot_data = zf.read(name)
+                    return _read_from_nested_zip(plot_data, file_in_plot, name)
 
         raise NestedBundleNotFoundError(
             f"File not found in {zip_path}: {internal_path}\n"
@@ -179,7 +183,9 @@ def _read_from_zip(zip_path: Path, internal_path: str) -> bytes:
         )
 
 
-def _read_from_nested_zip(zip_data: bytes, internal_path: str, zip_name: str = "") -> bytes:
+def _read_from_nested_zip(
+    zip_data: bytes, internal_path: str, zip_name: str = ""
+) -> bytes:
     """Read file from a ZIP archive stored as bytes (nested ZIP)."""
     import io
 
@@ -189,10 +195,12 @@ def _read_from_nested_zip(zip_data: bytes, internal_path: str, zip_name: str = "
         if internal_path in namelist:
             return nested_zf.read(internal_path)
 
-        base_name = zip_name.replace(".pltz", "") if zip_name else ""
-        d_prefix = f"{base_name}.pltz.d/"
+        base_name = (
+            zip_name.replace(".plot.zip", "").replace(".plot", "") if zip_name else ""
+        )
+        dir_prefix = f"{base_name}.plot/"
 
-        full_path = d_prefix + internal_path
+        full_path = dir_prefix + internal_path
         if full_path in namelist:
             return nested_zf.read(full_path)
 
@@ -212,8 +220,9 @@ def _read_from_directory(dir_path: Path, internal_path: str) -> bytes:
     if file_path.exists():
         return file_path.read_bytes()
 
-    if ".pltz/" in internal_path:
-        alt_path = internal_path.replace(".pltz/", ".pltz.d/")
+    # Try alternate form: .plot.zip -> .plot directory
+    if ".plot.zip/" in internal_path:
+        alt_path = internal_path.replace(".plot.zip/", ".plot/")
         alt_file_path = dir_path / alt_path
         if alt_file_path.exists():
             return alt_file_path.read_bytes()
@@ -228,9 +237,9 @@ def get_file(path: Union[str, Path]) -> bytes:
 
     Args:
         path: Full path to file, e.g.:
-            - "Figure1.figz/A.pltz.d/exports/plot.png"
-            - "Figure1.figz.d/A.pltz.d/exports/plot.png"
-            - "/abs/path/Figure1.figz/A.pltz.d/spec.json"
+            - "Figure1.figure/A.plot/exports/plot.png"
+            - "Figure1.figure.zip/A.plot/exports/plot.png"
+            - "/abs/path/Figure1.figure/A.plot/spec.json"
 
     Returns:
         File contents as bytes.
@@ -297,8 +306,8 @@ def put_file(path: Union[str, Path], data: bytes) -> None:
 
     Args:
         path: Full path to file, e.g.:
-            - "Figure1.figz/A.pltz.d/exports/plot.png"
-            - "Figure1.figz.d/A.pltz.d/exports/plot.png"
+            - "Figure1.figure/A.plot/exports/plot.png"
+            - "Figure1.figure.zip/A.plot/exports/plot.png"
         data: File contents as bytes.
 
     Raises:
@@ -403,10 +412,10 @@ def get_preview(
     bundle_path: Union[str, Path],
     filename: str = None,
 ) -> bytes:
-    """Get preview PNG from a nested pltz bundle.
+    """Get preview PNG from a nested plot bundle.
 
-    Handles .pltz and .pltz.d interchangeably. Does not assume the PNG
-    filename matches the bundle name (e.g., B.pltz.d may contain stx_scatter.png).
+    Handles .plot and .plot.zip interchangeably. Does not assume the PNG
+    filename matches the bundle name.
 
     Search order:
         1. Specific filename if provided
@@ -418,8 +427,8 @@ def get_preview(
         7. Any PNG in bundle not containing 'hitmap' or 'overview'
 
     Args:
-        bundle_path: Path to pltz bundle (can be nested in figz).
-            Handles both .pltz and .pltz.d extensions interchangeably.
+        bundle_path: Path to plot bundle (can be nested in figure).
+            Handles both .plot and .plot.zip extensions interchangeably.
         filename: Specific filename to look for (optional).
 
     Returns:
@@ -427,7 +436,7 @@ def get_preview(
     """
     parent_bundle, nested_bundle, file_within = parse_path(bundle_path)
 
-    # Build base path, handling .pltz ↔ .pltz.d interchangeably
+    # Build base path, handling .plot ↔ .plot.zip interchangeably
     if parent_bundle and nested_bundle:
         base_path = f"{parent_bundle}/{nested_bundle}"
     elif nested_bundle:
@@ -437,15 +446,15 @@ def get_preview(
 
     # Try alternate extension if list_files fails
     def try_with_fallback(path: str) -> List[str]:
-        """Try to list files, with .pltz ↔ .pltz.d fallback."""
+        """Try to list files, with .plot ↔ .plot.zip fallback."""
         try:
             return list_files(path)
         except NestedBundleNotFoundError:
             # Try alternate extension
-            if path.endswith(".pltz"):
-                alt_path = path + ".d"
-            elif path.endswith(".pltz.d"):
-                alt_path = path[:-2]  # Remove .d
+            if path.endswith(".plot"):
+                alt_path = path + ".zip"
+            elif path.endswith(".plot.zip"):
+                alt_path = path[:-4]  # Remove .zip
             else:
                 raise
             return list_files(alt_path)
@@ -455,14 +464,14 @@ def get_preview(
     try:
         files = try_with_fallback(base_path)
         # Determine which path worked
-        if base_path.endswith(".pltz"):
-            alt_path = base_path + ".d"
+        if base_path.endswith(".plot") and not base_path.endswith(".plot.zip"):
+            alt_path = base_path + ".zip"
             try:
                 list_files(base_path)
             except NestedBundleNotFoundError:
                 working_path = alt_path
-        elif base_path.endswith(".pltz.d"):
-            alt_path = base_path[:-2]
+        elif base_path.endswith(".plot.zip"):
+            alt_path = base_path[:-4]
             try:
                 list_files(base_path)
             except NestedBundleNotFoundError:
@@ -470,7 +479,7 @@ def get_preview(
     except NestedBundleNotFoundError:
         files = []
 
-    bundle_name = Path(working_path).stem.replace(".pltz", "")
+    bundle_name = Path(working_path).stem.replace(".plot", "")
 
     # Standard locations to try
     locations = [
@@ -560,12 +569,12 @@ def list_files(bundle_path: Union[str, Path]) -> List[str]:
                     if files:
                         return files
 
-                    if nested_bundle.endswith(".pltz.d"):
-                        base_name = nested_bundle[:-7]
+                    if nested_bundle.endswith(".plot"):
+                        base_name = nested_bundle[:-5]
                         for name in namelist:
-                            if name.endswith(".pltz") and base_name in name:
-                                pltz_data = zf.read(name)
-                                return _list_nested_zip_files(pltz_data, name)
+                            if name.endswith(".plot.zip") and base_name in name:
+                                plot_data = zf.read(name)
+                                return _list_nested_zip_files(plot_data, name)
 
                     return files
                 else:
@@ -573,18 +582,18 @@ def list_files(bundle_path: Union[str, Path]) -> List[str]:
         else:
             target = actual_parent
             if nested_bundle:
-                # Prefer .d directory over ZIP when both exist
-                if nested_bundle.endswith(".pltz"):
-                    dir_target = actual_parent / (nested_bundle + ".d")
+                # Prefer directory over ZIP when both exist
+                if nested_bundle.endswith(".plot.zip"):
+                    dir_target = actual_parent / nested_bundle[:-4]  # Remove .zip
                     if dir_target.exists():
                         target = dir_target
                     else:
                         target = actual_parent / nested_bundle
-                elif nested_bundle.endswith(".pltz.d"):
+                elif nested_bundle.endswith(".plot"):
                     target = actual_parent / nested_bundle
                     if not target.exists():
-                        # Try without .d
-                        zip_target = actual_parent / nested_bundle[:-2]
+                        # Try with .zip
+                        zip_target = actual_parent / (nested_bundle + ".zip")
                         if zip_target.exists():
                             target = zip_target
                 else:
@@ -593,7 +602,9 @@ def list_files(bundle_path: Union[str, Path]) -> List[str]:
             if not target.exists():
                 raise NestedBundleNotFoundError(f"Bundle not found: {target}")
 
-            return [str(f.relative_to(target)) for f in target.rglob("*") if f.is_file()]
+            return [
+                str(f.relative_to(target)) for f in target.rglob("*") if f.is_file()
+            ]
 
     bundle = Path(bundle_path)
     actual = _find_bundle_path(bundle)
@@ -614,13 +625,15 @@ def _list_nested_zip_files(zip_data: bytes, zip_name: str = "") -> List[str]:
     with zipfile.ZipFile(io.BytesIO(zip_data), "r") as nested_zf:
         namelist = nested_zf.namelist()
 
-        base_name = zip_name.replace(".pltz", "") if zip_name else ""
-        d_prefix = f"{base_name}.pltz.d/"
+        base_name = (
+            zip_name.replace(".plot.zip", "").replace(".plot", "") if zip_name else ""
+        )
+        dir_prefix = f"{base_name}.plot/"
 
         files = []
         for name in namelist:
-            if name.startswith(d_prefix):
-                rel = name[len(d_prefix) :]
+            if name.startswith(dir_prefix):
+                rel = name[len(dir_prefix) :]
                 if rel and not rel.endswith("/"):
                     files.append(rel)
             elif not name.endswith("/"):
@@ -636,16 +649,16 @@ def resolve(
     """Load a nested bundle's data.
 
     Transparently handles:
-        - Standalone .pltz or .pltz.d
-        - Nested .pltz.d inside .figz
-        - Nested .pltz.d inside .figz.d
+        - Standalone .plot or .plot.zip
+        - Nested .plot inside .figure
+        - Nested .plot inside .figure.zip
 
     Args:
         bundle_path: Path to bundle, e.g.:
-            - "Figure1.figz/A.pltz.d"
-            - "Figure1.figz.d/A.pltz.d"
-            - "A.pltz.d"
-            - "A.pltz"
+            - "Figure1.figure/A.plot"
+            - "Figure1.figure.zip/A.plot"
+            - "A.plot"
+            - "A.plot.zip"
         extract_to: If provided, extract ZIP contents to this directory.
 
     Returns:
@@ -677,7 +690,7 @@ def resolve(
     try:
         result["spec"] = get_json(f"{bundle_path}/spec.json")
     except NestedBundleNotFoundError:
-        bundle_name = Path(bundle_path).stem.replace(".pltz", "")
+        bundle_name = Path(bundle_path).stem.replace(".plot", "")
         try:
             result["spec"] = get_json(f"{bundle_path}/{bundle_name}.json")
         except NestedBundleNotFoundError:
@@ -696,7 +709,7 @@ def resolve(
         csv_bytes = get_file(f"{bundle_path}/data.csv")
         result["data"] = pd.read_csv(io.BytesIO(csv_bytes))
     except (NestedBundleNotFoundError, ImportError):
-        bundle_name = Path(bundle_path).stem.replace(".pltz", "")
+        bundle_name = Path(bundle_path).stem.replace(".plot", "")
         try:
             import io
 

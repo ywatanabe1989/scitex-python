@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # Timestamp: 2025-12-21
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_dataclasses/_Node.py
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_dataclasses/_Spec.py
 
-"""Node - Core FTS Node model with kind-based constraints."""
+"""Spec - Core bundle specification model with kind-based constraints."""
 
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -10,13 +10,13 @@ from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from ._Axes import Axes
 from ._BBox import BBox
-from ._NodeRefs import NodeRefs
 from ._SizeMM import SizeMM
+from ._SpecRefs import SpecRefs
 
 
 @dataclass
 class TextContent:
-    """Text content for kind=text nodes."""
+    """Text content for kind=text specs."""
 
     content: str = ""
     fontsize: Optional[float] = None
@@ -45,7 +45,7 @@ class TextContent:
 
 @dataclass
 class ShapeParams:
-    """Shape parameters for kind=shape nodes."""
+    """Shape parameters for kind=shape specs."""
 
     shape_type: str = "rectangle"  # "rectangle" | "ellipse" | "arrow" | "line"
     color: str = "#000000"
@@ -71,15 +71,15 @@ class ShapeParams:
 
 
 @dataclass
-class Node:
-    """Core FTS Node model with kind-based constraints.
+class Spec:
+    """Core bundle specification model with kind-based constraints.
 
-    The central structural element of an FTS bundle.
+    The central structural element of a bundle.
     Stored in canonical/spec.json.
 
     Kind categories:
     - Data leaf kinds (plot, table, stats): require payload data files
-    - Annotation leaf kinds (text, shape): no payload required, params in node
+    - Annotation leaf kinds (text, shape): no payload required, params in spec
     - Image leaf kinds (image): require payload image file
     - Composite kinds (figure): contain children, no payload
 
@@ -116,7 +116,7 @@ class Node:
     shape: Optional[ShapeParams] = None  # For kind=shape
 
     # References and timestamps
-    refs: NodeRefs = field(default_factory=NodeRefs)
+    refs: SpecRefs = field(default_factory=SpecRefs)
     created_at: Optional[str] = None
     modified_at: Optional[str] = None
 
@@ -128,7 +128,9 @@ class Node:
     # Image leaf kinds: require payload image file, forbid children
     IMAGE_LEAF_KINDS: ClassVar[Set[str]] = {"image"}
     # All leaf kinds (for convenience)
-    LEAF_KINDS: ClassVar[Set[str]] = DATA_LEAF_KINDS | ANNOTATION_LEAF_KINDS | IMAGE_LEAF_KINDS
+    LEAF_KINDS: ClassVar[Set[str]] = (
+        DATA_LEAF_KINDS | ANNOTATION_LEAF_KINDS | IMAGE_LEAF_KINDS
+    )
     # Composite kinds: allow children, forbid payload
     COMPOSITE_KINDS: ClassVar[Set[str]] = {"figure"}
     # All valid kinds
@@ -186,7 +188,9 @@ class Node:
 
         # Check: kind is valid
         if self.kind not in self.ALL_KINDS:
-            errors.append(f"Unknown kind: {self.kind}. Valid kinds: {sorted(self.ALL_KINDS)}")
+            errors.append(
+                f"Unknown kind: {self.kind}. Valid kinds: {sorted(self.ALL_KINDS)}"
+            )
             return errors  # Early return - other checks don't make sense
 
         # Check: children list has no duplicates
@@ -216,7 +220,9 @@ class Node:
                 # Check: panel child references must be subset of children
                 for child_ref in panel_children:
                     if child_ref not in self.children:
-                        errors.append(f"layout.panels references unknown child: {child_ref}")
+                        errors.append(
+                            f"layout.panels references unknown child: {child_ref}"
+                        )
 
                 # Check: no duplicate panel child references
                 if len(panel_children) != len(set(panel_children)):
@@ -259,8 +265,8 @@ class Node:
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Node":
-        """Create Node from dictionary."""
+    def from_dict(cls, data: Dict[str, Any]) -> "Spec":
+        """Create Spec from dictionary."""
         # Handle legacy 'type' field
         kind = data.get("kind") or data.get("type", "plot")
 
@@ -304,7 +310,7 @@ class Node:
             axes=Axes.from_dict(data["axes"]) if "axes" in data else None,
             text=text,
             shape=shape,
-            refs=NodeRefs.from_dict(data.get("refs", {})),
+            refs=SpecRefs.from_dict(data.get("refs", {})),
             created_at=data.get("created_at"),
             modified_at=data.get("modified_at"),
         )
@@ -314,6 +320,6 @@ class Node:
         self.modified_at = datetime.utcnow().isoformat() + "Z"
 
 
-__all__ = ["Node", "TextContent", "ShapeParams"]
+__all__ = ["Spec", "TextContent", "ShapeParams"]
 
 # EOF

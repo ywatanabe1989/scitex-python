@@ -11,7 +11,7 @@ HTML_BODY = """
         <span class="loading-text">Updating...</span>
     </div>
     <div class="preview">
-        <!-- Panel Grid View (for multi-panel figz bundles) -->
+        <!-- Panel Grid View (for multi-panel figure bundles) -->
         <div class="panel-grid-section" id="panel-grid-section" style="display: none;">
             <div class="panel-grid-header">
                 <div class="canvas-controls">
@@ -27,7 +27,7 @@ HTML_BODY = """
                             <a href="/download/pdf" class="download-item">PDF</a>
                             <div class="download-divider"></div>
                             <a href="/download/jpeg" class="download-item">JPEG</a>
-                            <a href="/download_figz" class="download-item">FIGZ Bundle</a>
+                            <a href="/download_figure" class="download-item">FIGZ Bundle</a>
                         </div>
                     </div>
                     <div class="toolbar-separator"></div>
@@ -41,7 +41,7 @@ HTML_BODY = """
             </div>
         </div>
 
-        <!-- Single-panel preview (hidden for multi-panel figz bundles) -->
+        <!-- Single-panel preview (hidden for multi-panel figure bundles) -->
         <div class="preview-wrapper" id="preview-wrapper">
             <div class="preview-header" id="preview-header" style="display: none;">
                 <span id="current-panel-name">Panel A</span>

@@ -3,14 +3,14 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_bundle/_storage.py
 
 """
-Storage Abstraction for FTS Bundles.
+Storage Abstraction for SciTeX Bundles.
 
 Provides a unified interface for reading/writing bundle contents
 regardless of whether the bundle is a ZIP file or directory.
 
 Usage:
     storage = get_storage(Path("bundle.zip"))  # or Path("bundle/")
-    data = storage.read("node.json")
+    data = storage.read("spec.json")
     storage.write("encoding.json", json_bytes)
 """
 
@@ -22,7 +22,7 @@ from typing import List, Optional, Union
 
 
 class Storage(ABC):
-    """Abstract storage interface for FTS bundles."""
+    """Abstract storage interface for SciTeX bundles."""
 
     def __init__(self, path: Path):
         self._path = path

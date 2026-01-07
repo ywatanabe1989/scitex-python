@@ -37,7 +37,7 @@ edges:
   to: PANELS
 layout:
   groups:
-    .figz Multi-Panel Figure Bundle: []
+    .figure Multi-Panel Figure Bundle: []
     Canonical Data (Embedded): []
     Derived (Regenerable): []
     Figure Lifecycle: []
@@ -48,7 +48,7 @@ layout:
 nodes:
 - emphasis: normal
   id: FIGZ
-  label: .figz Multi-Panel Figure Bundle
+  label: .figure Multi-Panel Figure Bundle
   shape: box
 - emphasis: normal
   id: PANELS

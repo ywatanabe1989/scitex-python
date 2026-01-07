@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./src/scitex/vis/editor/_defaults.py
 """Default style settings for SciTeX visual editor."""
 
-from scitex.plt.styles import get_default_dpi, get_preview_dpi
+from scitex.plt.styles import get_default_dpi
 
 
 def get_scitex_defaults():
@@ -198,7 +197,7 @@ def extract_defaults_from_metadata(metadata):
     # Extract traces information - check multiple possible locations
     traces = metadata.get("traces", [])
 
-    # Also check axes[].lines (pltz bundle format)
+    # Also check axes[].lines (plot bundle format)
     if not traces and isinstance(axes, list) and len(axes) > 0:
         ax = axes[0]
         lines = ax.get("lines", [])
@@ -212,11 +211,13 @@ def extract_defaults_from_metadata(metadata):
         if color_map:
             traces = []
             for trace_id, trace_info in color_map.items():
-                traces.append({
-                    "id": trace_id,
-                    "label": trace_info.get("label", f"Trace {trace_id}"),
-                    "type": trace_info.get("type", "line"),
-                })
+                traces.append(
+                    {
+                        "id": trace_id,
+                        "label": trace_info.get("label", f"Trace {trace_id}"),
+                        "type": trace_info.get("type", "line"),
+                    }
+                )
 
     if traces:
         defaults["traces"] = traces
@@ -224,7 +225,7 @@ def extract_defaults_from_metadata(metadata):
     # Extract legend information from multiple possible locations
     legend = metadata.get("legend", {})
 
-    # Also check selectable_regions.axes[0].legend (pltz bundle format)
+    # Also check selectable_regions.axes[0].legend (plot bundle format)
     if not legend:
         selectable = metadata.get("selectable_regions", {})
         sel_axes = selectable.get("axes", [])
@@ -253,8 +254,7 @@ def extract_defaults_from_metadata(metadata):
         if entries and not traces:
             # Use legend entries as trace labels
             defaults["traces"] = [
-                {"label": e.get("text", f"Trace {i}")}
-                for i, e in enumerate(entries)
+                {"label": e.get("text", f"Trace {i}")} for i, e in enumerate(entries)
             ]
 
     return defaults

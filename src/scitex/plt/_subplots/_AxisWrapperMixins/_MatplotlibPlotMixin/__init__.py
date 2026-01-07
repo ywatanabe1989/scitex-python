@@ -16,7 +16,7 @@ API Layer Design:
 -----------------
 stx_* (SciTeX canonical):
   - Full tracking, metadata, and reproducibility support
-  - Output connects to .pltz / .figz format
+  - Output connects to .plot / .figure format
   - Purpose: publication / reproducibility
 
 mpl_* (Matplotlib compatibility - see _RawMatplotlibMixin):
@@ -53,6 +53,7 @@ class MatplotlibPlotMixin(
     - StatisticalPlotMixin: Statistical line plots and distributions
     - StxAliasesMixin: stx_ prefixed matplotlib aliases
     """
+
     pass
 
 

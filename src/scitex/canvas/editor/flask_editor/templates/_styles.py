@@ -1169,7 +1169,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* =============================================================================
- * Panel Grid View (for multi-panel figz bundles)
+ * Panel Grid View (for multi-panel figure bundles)
  * ============================================================================= */
 .panel-grid-section {
     width: 100%;
@@ -1325,7 +1325,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* =============================================================================
- * Unified Panel Canvas (matches figz export layout)
+ * Unified Panel Canvas (matches figure export layout)
  * Exactly matches SciTeX Cloud's .plot-preview-area styling
  * ============================================================================= */
 .panel-canvas {
@@ -1356,7 +1356,7 @@ input[type="range"]::-moz-range-thumb {
     background-image: none !important;
 }
 
-/* Unified canvas - panels appear as single figure matching figz export */
+/* Unified canvas - panels appear as single figure matching figure export */
 .panel-canvas-item {
     position: absolute;
     user-select: none;

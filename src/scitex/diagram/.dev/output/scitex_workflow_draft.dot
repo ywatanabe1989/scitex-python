@@ -13,7 +13,7 @@ digraph G {
     }
     subgraph cluster_1 {
         label="Bundle";
-        figz_bundle [label=".figz Bundle", shape=box, fillcolor="#0d4a6b", style=filled, color="#5a9fcf"];
+        figz_bundle [label=".figure Bundle", shape=box, fillcolor="#0d4a6b", style=filled, color="#5a9fcf"];
         spec_json [label="spec.json", shape=box, fillcolor="#1a2634", style=filled, color="#3a4a5a"];
         data_csv [label="data.csv", shape=box, fillcolor="#1a2634", style=filled, color="#3a4a5a"];
         preview [label="preview.png", shape=box, fillcolor="#f0f0f0", style=filled, color="#999999"];

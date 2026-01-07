@@ -3,27 +3,31 @@
 # Timestamp: "2025-12-14 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/fig/editor/edit/bundle_resolver.py
 
-"""Bundle path resolution for .pltz and .figz formats."""
+"""Bundle path resolution for .plot and .figure formats."""
 
 import json as json_module
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Optional, Tuple, Dict, Any
+from typing import Any, Dict, Optional, Tuple
 
-__all__ = ["resolve_pltz_bundle", "resolve_figz_bundle", "resolve_layered_pltz_bundle"]
+__all__ = [
+    "resolve_plot_bundle",
+    "resolve_figure_bundle",
+    "resolve_layered_plot_bundle",
+]
 
 
-def resolve_figz_bundle(path: Path, panel_index: int = 0) -> Tuple:
+def resolve_figure_bundle(path: Path, panel_index: int = 0) -> Tuple:
     """
-    Resolve paths from a .figz bundle (multi-panel figure).
+    Resolve paths from a .figure bundle (multi-panel figure).
 
-    Uses in-memory zip reading for .pltz panels - no disk extraction.
+    Uses in-memory zip reading for .plot panels - no disk extraction.
 
     Parameters
     ----------
     path : Path
-        Path to .figz bundle (.figz or .figz.d)
+        Path to .figure bundle (.figure or .figure)
     panel_index : int, optional
         Index of panel to open (default: 0 for first panel)
 
@@ -33,41 +37,41 @@ def resolve_figz_bundle(path: Path, panel_index: int = 0) -> Tuple:
         (json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info)
     """
     spath = str(path)
-    figz_is_zip = False
+    figure_is_zip = False
 
     # Handle ZIP vs directory for figz
-    if spath.endswith('.figz') and not spath.endswith('.figz.d'):
-        figz_is_zip = True
+    if spath.endswith(".figure") and not spath.endswith(".figure"):
+        figure_is_zip = True
         if not path.exists():
-            raise FileNotFoundError(f"Figz bundle not found: {path}")
-        # For figz zip, extract to access nested pltz
-        temp_dir = tempfile.mkdtemp(prefix='scitex_edit_figz_')
-        with zipfile.ZipFile(path, 'r') as zf:
+            raise FileNotFoundError(f"Figure bundle not found: {path}")
+        # For figure zip, extract to access nested pltz
+        temp_dir = tempfile.mkdtemp(prefix="scitex_edit_figure_")
+        with zipfile.ZipFile(path, "r") as zf:
             zf.extractall(temp_dir)
         bundle_dir = Path(temp_dir)
         for item in bundle_dir.iterdir():
-            if item.is_dir() and str(item).endswith('.figz.d'):
+            if item.is_dir() and str(item).endswith(".figure"):
                 bundle_dir = item
                 break
     else:
         bundle_dir = Path(path)
         if not bundle_dir.exists():
-            raise FileNotFoundError(f"Figz bundle directory not found: {bundle_dir}")
+            raise FileNotFoundError(f"Figure bundle directory not found: {bundle_dir}")
 
-    # Find nested pltz bundles
+    # Find nested plot bundles
     panel_paths = []
     panel_is_zip = []
 
     for item in sorted(bundle_dir.iterdir(), key=lambda x: x.name):
-        if item.is_dir() and str(item).endswith('.pltz.d'):
+        if item.is_dir() and str(item).endswith(".plot"):
             panel_paths.append(str(item))
             panel_is_zip.append(False)
-        elif item.is_file() and str(item).endswith('.pltz'):
+        elif item.is_file() and str(item).endswith(".plot"):
             panel_paths.append(str(item))
             panel_is_zip.append(True)
 
     if not panel_paths:
-        raise FileNotFoundError(f"No .pltz panels found in figz bundle: {bundle_dir}")
+        raise FileNotFoundError(f"No .plot panels found in figure bundle: {bundle_dir}")
 
     # Validate panel index
     if panel_index < 0 or panel_index >= len(panel_paths):
@@ -77,7 +81,7 @@ def resolve_figz_bundle(path: Path, panel_index: int = 0) -> Tuple:
     panel_name = Path(selected_panel_path).name
     print(f"Opening panel: {panel_name}")
     if len(panel_paths) > 1:
-        print(f"  (Figz contains {len(panel_paths)} panels)")
+        print(f"  (Figure contains {len(panel_paths)} panels)")
 
     # Build panel info
     panel_names = [Path(p).name for p in panel_paths]
@@ -86,19 +90,21 @@ def resolve_figz_bundle(path: Path, panel_index: int = 0) -> Tuple:
         "panel_paths": panel_paths,
         "panel_is_zip": panel_is_zip,
         "current_index": panel_index,
-        "figz_dir": str(bundle_dir),
-        "figz_is_zip": figz_is_zip,
-        "bundle_path": str(path) if figz_is_zip else None,  # Original figz zip path for export/download
+        "figure_dir": str(bundle_dir),
+        "figure_is_zip": figure_is_zip,
+        "bundle_path": (
+            str(path) if figure_is_zip else None
+        ),  # Original figure zip path for export/download
     }
 
     # Resolve the selected panel
-    result = resolve_pltz_bundle(Path(selected_panel_path))
+    result = resolve_plot_bundle(Path(selected_panel_path))
     return result + (panel_info,)
 
 
-def resolve_pltz_bundle(path: Path) -> Tuple:
+def resolve_plot_bundle(path: Path) -> Tuple:
     """
-    Resolve paths from a .pltz bundle (directory or ZIP).
+    Resolve paths from a .plot bundle (directory or ZIP).
 
     Supports both:
     - Legacy format (single {basename}.json)
@@ -107,7 +113,7 @@ def resolve_pltz_bundle(path: Path) -> Tuple:
     Parameters
     ----------
     path : Path
-        Path to .pltz bundle (.pltz or .pltz.d)
+        Path to .plot bundle (.plot or .plot)
 
     Returns
     -------
@@ -117,15 +123,15 @@ def resolve_pltz_bundle(path: Path) -> Tuple:
     spath = str(path)
 
     # Handle ZIP vs directory
-    if spath.endswith('.pltz') and not spath.endswith('.pltz.d'):
+    if spath.endswith(".plot") and not spath.endswith(".plot"):
         if not path.exists():
             raise FileNotFoundError(f"Bundle not found: {path}")
-        temp_dir = tempfile.mkdtemp(prefix='scitex_edit_')
-        with zipfile.ZipFile(path, 'r') as zf:
+        temp_dir = tempfile.mkdtemp(prefix="scitex_edit_")
+        with zipfile.ZipFile(path, "r") as zf:
             zf.extractall(temp_dir)
         bundle_dir = Path(temp_dir)
         for item in bundle_dir.iterdir():
-            if item.is_dir() and str(item).endswith('.pltz.d'):
+            if item.is_dir() and str(item).endswith(".plot"):
                 bundle_dir = item
                 break
     else:
@@ -136,7 +142,7 @@ def resolve_pltz_bundle(path: Path) -> Tuple:
     # Check if this is a layered bundle (v2.0)
     spec_path = bundle_dir / "spec.json"
     if spec_path.exists():
-        return resolve_layered_pltz_bundle(bundle_dir)
+        return resolve_layered_plot_bundle(bundle_dir)
 
     # === Legacy format ===
     json_path = None
@@ -148,15 +154,17 @@ def resolve_pltz_bundle(path: Path) -> Tuple:
 
     for f in bundle_dir.iterdir():
         name = f.name
-        if name.endswith('.json') and not name.endswith('.manual.json'):
+        if name.endswith(".json") and not name.endswith(".manual.json"):
             json_path = f
-        elif name.endswith('.csv'):
+        elif name.endswith(".csv"):
             csv_path = f
-        elif name.endswith('_hitmap.png'):
+        elif name.endswith("_hitmap.png"):
             hitmap_path = f
-        elif name.endswith('.svg') and '_hitmap' not in name:
+        elif name.endswith(".svg") and "_hitmap" not in name:
             svg_path = f
-        elif name.endswith('.png') and '_hitmap' not in name and '_overview' not in name:
+        elif (
+            name.endswith(".png") and "_hitmap" not in name and "_overview" not in name
+        ):
             png_path = f
 
     # Prefer SVG for display
@@ -164,7 +172,7 @@ def resolve_pltz_bundle(path: Path) -> Tuple:
         png_path = svg_path
 
     if json_path and json_path.exists():
-        with open(json_path, 'r') as f:
+        with open(json_path, "r") as f:
             bundle_spec = json_module.load(f)
 
     return (
@@ -176,12 +184,12 @@ def resolve_pltz_bundle(path: Path) -> Tuple:
     )
 
 
-def resolve_layered_pltz_bundle(bundle_dir: Path) -> Tuple:
+def resolve_layered_plot_bundle(bundle_dir: Path) -> Tuple:
     """
-    Resolve paths from a layered .pltz bundle (v2.0 format).
+    Resolve paths from a layered .plot bundle (v2.0 format).
 
     Layered format structure:
-        plot.pltz.d/
+        plot.plot/
             spec.json           # Semantic
             style.json          # Appearance
             {basename}.csv      # Data
@@ -191,16 +199,16 @@ def resolve_layered_pltz_bundle(bundle_dir: Path) -> Tuple:
     Parameters
     ----------
     bundle_dir : Path
-        Path to .pltz.d bundle directory.
+        Path to .plot bundle directory.
 
     Returns
     -------
     tuple
         (json_path, csv_path, png_path, hitmap_path, bundle_spec)
     """
-    from scitex.plt.io import load_layered_pltz_bundle
+    from scitex.plt.io import load_layered_plot_bundle
 
-    bundle_data = load_layered_pltz_bundle(bundle_dir)
+    bundle_data = load_layered_plot_bundle(bundle_dir)
     spec_path = bundle_dir / "spec.json"
     csv_path = None
     png_path = None
@@ -216,11 +224,11 @@ def resolve_layered_pltz_bundle(bundle_dir: Path) -> Tuple:
     if exports_dir.exists():
         for f in exports_dir.iterdir():
             name = f.name
-            if name.endswith('_hitmap.png'):
+            if name.endswith("_hitmap.png"):
                 hitmap_path = f
-            elif name.endswith('.svg') and '_hitmap' not in name:
+            elif name.endswith(".svg") and "_hitmap" not in name:
                 png_path = f
-            elif name.endswith('.png') and '_hitmap' not in name and png_path is None:
+            elif name.endswith(".png") and "_hitmap" not in name and png_path is None:
                 png_path = f
 
     bundle_spec = bundle_data.get("merged", {})

@@ -8,7 +8,7 @@ digraph G {
 
     python_code [label="Python", shape=box, fillcolor="#1a2634", style=filled, color="#3a4a5a", style=rounded];
     savefig [label="savefig()", shape=box, fillcolor="#1a2634", style=filled, color="#3a4a5a"];
-    figz_bundle [label=".figz", shape=box, fillcolor="#0d4a6b", style=filled, color="#5a9fcf"];
+    figz_bundle [label=".figure", shape=box, fillcolor="#0d4a6b", style=filled, color="#5a9fcf"];
     spec_json [label="spec", shape=box, fillcolor="#1a2634", style=filled, color="#3a4a5a"];
     data_csv [label="data", shape=box, fillcolor="#1a2634", style=filled, color="#3a4a5a"];
     preview [label="preview", shape=box, fillcolor="#f0f0f0", style=filled, color="#999999"];

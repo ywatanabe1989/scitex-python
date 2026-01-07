@@ -78,11 +78,11 @@ async function loadInitialPreview() {
             updateOverlay();
         }
 
-        // Handle multi-panel figz bundles
+        // Handle multi-panel figure bundles
         if (data.panel_info && data.panel_info.panels) {
             panelData = data.panel_info;
             currentPanelIndex = data.panel_info.current_index || 0;
-            console.log('Multi-panel figz detected:', panelData.panels.length, 'panels');
+            console.log('Multi-panel figure detected:', panelData.panels.length, 'panels');
             loadPanelGrid();
         }
 
@@ -129,7 +129,7 @@ async function loadPanelGrid() {
         const canvasEl = document.getElementById('panel-canvas');
         canvasEl.innerHTML = '';
 
-        // Use figz layout to position panels as unified canvas (matching export)
+        // Use figure layout to position panels as unified canvas (matching export)
         const hasLayout = data.layout && Object.keys(data.layout).length > 0;
 
         // Calculate scale factor: convert mm to pixels
@@ -162,7 +162,7 @@ async function loadPanelGrid() {
                 };
             }
 
-            // Use figz layout for positioning (unified canvas like export)
+            // Use figure layout for positioning (unified canvas like export)
             let pos, posMm;
             if (panel.layout && panel.layout.position && panel.layout.size) {
                 const x_mm = panel.layout.position.x_mm || 0;
@@ -177,7 +177,7 @@ async function loadPanelGrid() {
                 };
                 posMm = { x_mm, y_mm, width_mm, height_mm };
             } else {
-                // Fallback grid layout if no figz layout
+                // Fallback grid layout if no figure layout
                 const cols = Math.ceil(Math.sqrt(data.panels.length));
                 const baseWidth = 220, baseHeight = 180, padding = 15;
                 const col = idx % cols;
