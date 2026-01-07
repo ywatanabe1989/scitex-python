@@ -1,3 +1,9 @@
+<!-- ---
+!-- Timestamp: 2026-01-07 15:28:47
+!-- Author: ywatanabe
+!-- File: /home/ywatanabe/proj/scitex-code/docs/visualization/01_TERMINOLOGY.md
+!-- --- -->
+
 # Terminology
 
 ## matplotlib (unchanged)
@@ -31,16 +37,25 @@
 ## Usage Examples
 
 ```python
-# Plotting
+import scitex.plt as splt
+import scitex.canvas as scanvas
+import scitex.io as sio
+
+# Data
+x = y = [0, 1, 2]
+
+# Plotting (trace = data series with id)
 fig, ax = splt.subplots()
-ax.plot(x, y, id="my_trace")  # trace = data series
+ax.plot(x, y, id="my_trace")
 
-# Composition
-canvas = scanvas.create_canvas()
-scanvas.add_panel(canvas, ...)  # panel = positioned plot
+# Save figure (creates bundle + exports)
+sio.save(fig, "/tmp/my_plot.png")
 
-# Bundles
-bundle = sio.load("plot.pltz")  # bundle = atomic package
+# Canvas composition (panel = positioned plot)
+# position/size are in millimeters (mm)
+scanvas.create_canvas("/tmp", "my_figure")
+scanvas.add_panel("/tmp", "my_figure", "panel_a", "/tmp/my_plot.png",
+                  position=(10, 10), size=(80, 60), label="A")
 ```
 
 <!-- EOF -->
