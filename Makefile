@@ -12,7 +12,8 @@ SHELL := /bin/bash
 	build release upload upload-test test-install test-install-pypi test-install-module test-install-modules \
 	build-all release-all upload-all upload-test-all \
 	sync-extras sync-tests sync-examples sync-redirect \
-	show-version tag
+	show-version tag \
+	bench-install bench-install-uv
 
 # Colors
 GREEN := \033[0;32m
@@ -87,6 +88,10 @@ help:
 	@echo -e "$(CYAN)📋 Other:$(NC)"
 	@echo -e "  make show-version      Show current version"
 	@echo -e "  make tag               Create git tag from version"
+	@echo -e ""
+	@echo -e "$(CYAN)⏱️  Benchmarks:$(NC)"
+	@echo -e "  make bench-install MODULE=io      Measure pip install time"
+	@echo -e "  make bench-install-uv MODULE=io   Measure uv install time"
 	@echo -e ""
 
 # ============================================
@@ -360,5 +365,29 @@ deps-fix:
 deps-fix-apply:
 	@echo -e "$(CYAN)🔧 Applying dependency fixes...$(NC)"
 	@python3 scripts/maintenance/fix-module-deps.py --apply
+
+# ============================================
+# Benchmarks
+# ============================================
+
+# Measure pip install time: make bench-install MODULE=io
+bench-install:
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make bench-install MODULE=io"
+	@exit 1
+endif
+	@echo -e "$(CYAN)⏱️  Measuring pip install time for [$(MODULE)]...$(NC)"
+	@./scripts/measure-install-time.sh $(MODULE)
+
+# Measure uv install time: make bench-install-uv MODULE=io
+bench-install-uv:
+ifndef MODULE
+	@echo -e "$(RED)ERROR: MODULE not specified$(NC)"
+	@echo "Usage: make bench-install-uv MODULE=io"
+	@exit 1
+endif
+	@echo -e "$(CYAN)⏱️  Measuring uv install time for [$(MODULE)]...$(NC)"
+	@./scripts/measure-install-time.sh --uv $(MODULE)
 
 # EOF
