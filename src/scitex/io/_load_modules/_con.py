@@ -4,10 +4,21 @@
 
 from typing import Any
 
-import mne
+try:
+    import mne
+
+    MNE_AVAILABLE = True
+except ImportError:
+    MNE_AVAILABLE = False
+    mne = None
 
 
 def _load_con(lpath: str, **kwargs) -> Any:
+    if not MNE_AVAILABLE:
+        raise ImportError(
+            "MNE-Python is not installed. Please install with: pip install mne"
+        )
+
     if not lpath.endswith(".con"):
         raise ValueError("File must have .con extension")
     raw = mne.io.read_raw_fif(lpath, preload=True, **kwargs)

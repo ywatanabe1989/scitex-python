@@ -1,11 +1,22 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-02 17:01:15 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/io/_save_optuna_study_as_csv_and_pngs.py
 
+try:
+    import optuna
+
+    OPTUNA_AVAILABLE = True
+except ImportError:
+    OPTUNA_AVAILABLE = False
+    optuna = None
+
 
 def save_optuna_study_as_csv_and_pngs(study, sdir):
-    import optuna
+    if not OPTUNA_AVAILABLE:
+        raise ImportError(
+            "Optuna is not installed. Please install with: pip install optuna"
+        )
+
     from .._save import save
 
     ## Trials DataFrame
