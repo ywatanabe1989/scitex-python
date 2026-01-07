@@ -38,9 +38,9 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from ._storage import Storage, get_storage
 
 if TYPE_CHECKING:
-    from ._dataclasses import DataInfo, Node
-    from .._fig import Encoding, Theme
     from .._stats import Stats
+    from ._dataclasses import DataInfo, Node
+    from .kinds._plot._dataclasses import Encoding, Theme
 
 
 def save_bundle_components(
@@ -74,7 +74,7 @@ def save_bundle_components(
     # Use .keep files as directory markers for ZIP compatibility
     files["canonical/.keep"] = ""
     files["payload/.keep"] = ""
-    files["payload/data.csv"] = ""  # Empty CSV for consistency
+    # NOTE: Don't write empty payload/data.csv - it may already contain data
     files["artifacts/.keep"] = ""
     files["artifacts/exports/.keep"] = ""
     files["artifacts/cache/.keep"] = ""
@@ -99,7 +99,7 @@ def save_bundle_components(
 
     # Write files, preserving any existing children/ files
     # For ZIP, we need to merge with existing content
-    if hasattr(storage, 'write_all_preserve'):
+    if hasattr(storage, "write_all_preserve"):
         storage.write_all_preserve(files)
     else:
         # Fallback: write each file individually (preserves existing)
@@ -186,7 +186,6 @@ def generate_hitmap(
         import io
 
         import matplotlib.pyplot as plt
-        import numpy as np
 
         # Create hitmap figure with same dimensions
         fig_size = figure.get_size_inches()
@@ -224,7 +223,7 @@ def generate_hitmap(
         plt.close(hitmap_fig)
         return png_bytes, svg_bytes
 
-    except Exception as e:
+    except Exception:
         # If hitmap generation fails, return None (non-critical)
         return None, None
 

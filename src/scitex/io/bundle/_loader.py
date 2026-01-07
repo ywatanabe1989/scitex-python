@@ -21,9 +21,9 @@ from typing import TYPE_CHECKING, Optional, Tuple
 from ._storage import get_storage
 
 if TYPE_CHECKING:
-    from ._dataclasses import DataInfo, Node
-    from .._fig import Encoding, Theme
     from .._stats import Stats
+    from ._dataclasses import DataInfo, Node
+    from .kinds._plot._dataclasses import Encoding, Theme
 
 
 def load_bundle_components(
@@ -45,9 +45,9 @@ def load_bundle_components(
     Returns:
         Tuple of (node, encoding, theme, stats, data_info)
     """
-    from ._dataclasses import DataInfo, Node
-    from .._fig import Encoding, Theme
     from .._stats import Stats
+    from ._dataclasses import DataInfo, Node
+    from .kinds._plot._dataclasses import Encoding, Theme
 
     storage = get_storage(path)
 
