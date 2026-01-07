@@ -1,16 +1,36 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-04-13 02:35:11 (ywatanabe)"
 
+try:
+    import torch
 
-import torch
-import torchaudio.transforms as T
-from scitex.decorators import signal_fn
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
+
+try:
+    import torchaudio.transforms as T
+
+    TORCHAUDIO_AVAILABLE = True
+except ImportError:
+    TORCHAUDIO_AVAILABLE = False
+    T = None
+
 import scitex
+from scitex.decorators import signal_fn
 
 
 @signal_fn
 def resample(x, src_fs, tgt_fs, t=None):
+    if not TORCH_AVAILABLE:
+        raise ImportError(
+            "PyTorch is not installed. Please install with: pip install torch"
+        )
+    if not TORCHAUDIO_AVAILABLE:
+        raise ImportError(
+            "torchaudio is not installed. Please install with: pip install torchaudio"
+        )
     xr = T.Resample(src_fs, tgt_fs, dtype=x.dtype).to(x.device)(x)
     if t is None:
         return xr

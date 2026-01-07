@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-06 01:45:32 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/dsp/_demo_sig.py
 
@@ -8,17 +7,61 @@ import sys
 import warnings
 
 import matplotlib.pyplot as plt
-import mne
 import numpy as np
-from mne.datasets import sample
-from ripple_detection.simulate import simulate_LFP, simulate_time
 from scipy.signal import chirp
-from tensorpac.signals import pac_signals_wavelet
+
+try:
+    import mne
+    from mne.datasets import sample
+
+    MNE_AVAILABLE = True
+except ImportError:
+    MNE_AVAILABLE = False
+    mne = None
+    sample = None
+
+try:
+    from ripple_detection.simulate import simulate_LFP, simulate_time
+
+    RIPPLE_DETECTION_AVAILABLE = True
+except ImportError:
+    RIPPLE_DETECTION_AVAILABLE = False
+    simulate_LFP = None
+    simulate_time = None
+
+try:
+    from tensorpac.signals import pac_signals_wavelet
+
+    TENSORPAC_AVAILABLE = True
+except ImportError:
+    TENSORPAC_AVAILABLE = False
+    pac_signals_wavelet = None
 
 from scitex.io._load_configs import load_configs
 
 # Config
 CONFIG = load_configs(verbose=False)
+
+
+def _check_mne():
+    if not MNE_AVAILABLE:
+        raise ImportError(
+            "MNE-Python is not installed. Please install with: pip install mne"
+        )
+
+
+def _check_ripple_detection():
+    if not RIPPLE_DETECTION_AVAILABLE:
+        raise ImportError(
+            "ripple_detection is not installed. Please install with: pip install ripple_detection"
+        )
+
+
+def _check_tensorpac():
+    if not TENSORPAC_AVAILABLE:
+        raise ImportError(
+            "tensorpac is not installed. Please install with: pip install tensorpac"
+        )
 
 
 # Functions
@@ -207,6 +250,7 @@ def _demo_sig_tensorpac(
     n_segments=20,
     verbose=False,
 ):
+    _check_tensorpac()
     n_times = int(t_sec * fs)
     x_2d, tt = pac_signals_wavelet(
         sf=fs,
@@ -222,6 +266,7 @@ def _demo_sig_tensorpac(
 
 
 def _demo_sig_meg(batch_size=8, n_chs=19, t_sec=10, fs=512, verbose=False, **kwargs):
+    _check_mne()
     data_path = sample.data_path()
     meg_path = data_path / "MEG" / "sample"
     raw_fname = meg_path / "sample_audvis_raw.fif"
@@ -280,6 +325,7 @@ def _demo_sig_chirp_1d(
 
 
 def _demo_sig_ripple_1d(t_sec=10, fs=512, **kwargs):
+    _check_ripple_detection()
     n_samples = t_sec * fs
     t = simulate_time(n_samples, fs)
     n_ripples = random.randint(1, 5)

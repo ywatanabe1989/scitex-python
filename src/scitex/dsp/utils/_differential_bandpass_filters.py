@@ -8,8 +8,16 @@ import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-import torch
-import torch.nn as nn
+
+try:
+    import torch
+    import torch.nn as nn
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
+    nn = None
 
 from scitex.decorators import torch_fn
 from scitex.gen._to_even import to_even
@@ -17,8 +25,18 @@ from scitex.gen._to_odd import to_odd
 
 try:
     from torchaudio.prototype.functional import sinc_impulse_response
+
+    TORCHAUDIO_AVAILABLE = True
 except ImportError:
+    TORCHAUDIO_AVAILABLE = False
     sinc_impulse_response = None
+
+
+def _check_torch():
+    if not TORCH_AVAILABLE:
+        raise ImportError(
+            "PyTorch is not installed. Please install with: pip install torch"
+        )
 
 
 def _check_sinc_available():

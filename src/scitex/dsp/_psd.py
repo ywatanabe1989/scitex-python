@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-04 02:11:25 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/dsp/_psd.py
 
 """This script does XYZ."""
 
-import torch
+try:
+    import torch
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
 
 from scitex.decorators import signal_fn
-from scitex.nn._PSD import PSD
+
+if TORCH_AVAILABLE:
+    from scitex.nn._PSD import PSD
 
 
 @signal_fn
@@ -32,6 +39,10 @@ def psd(
     ax.ylabel("log(Power [uV^2 / Hz]) [a.u.]")
     plt.show()
     """
+    if not TORCH_AVAILABLE:
+        raise ImportError(
+            "PyTorch is not installed. Please install with: pip install torch"
+        )
     psd, freqs = PSD(fs, prob=prob, dim=dim)(x)
     return psd, freqs
 
@@ -59,9 +70,10 @@ def band_powers(self, psd):
 
 if __name__ == "__main__":
     import sys
-    import scitex
 
     import matplotlib.pyplot as plt
+
+    import scitex
 
     # Start
     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
