@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-04 02:07:36 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/dsp/_mne.py
 
-import mne
+try:
+    import mne
+
+    MNE_AVAILABLE = True
+except ImportError:
+    MNE_AVAILABLE = False
+    mne = None
+
 import pandas as pd
+
 from .params import EEG_MONTAGE_1020
 
 
 def get_eeg_pos(channel_names=EEG_MONTAGE_1020):
+    if not MNE_AVAILABLE:
+        raise ImportError(
+            "MNE-Python is not installed. Please install with: pip install mne"
+        )
     # Load the standard 10-20 montage
     standard_montage = mne.channels.make_standard_montage("standard_1020")
     standard_montage.ch_names = [

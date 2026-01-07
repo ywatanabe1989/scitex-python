@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-26 22:24:40 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/dsp/_pac.py
 
@@ -9,11 +8,28 @@ import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-import torch
-from scitex.str import printc
 
-from scitex.decorators import signal_fn, batch_fn
-from scitex.nn._PAC import PAC
+try:
+    import torch
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
+
+
+from scitex.decorators import signal_fn
+
+if TORCH_AVAILABLE:
+    from scitex.nn._PAC import PAC
+
+
+def _check_torch():
+    if not TORCH_AVAILABLE:
+        raise ImportError(
+            "PyTorch is not installed. Please install with: pip install torch"
+        )
+
 
 """
 scitex.dsp.pac function
@@ -66,6 +82,7 @@ def pac(
         )
         pac, pha_mids_hz, amp_mids_hz = scitex.dsp.pac(xx, fs)
     """
+    _check_torch()
 
     def process_ch_batching(m, x, batch_size_ch, device):
         n_chs = x.shape[1]
@@ -107,6 +124,7 @@ def pac(
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+
     import scitex
 
     # Start
