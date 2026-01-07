@@ -14,7 +14,7 @@ Demonstrates a full workflow using all bridge components:
 This shows how the bridge layer connects:
 - scitex.plt (plotting with tracking)
 - scitex.stats (statistical results)
-- scitex.fig (JSON models for GUI)
+- scitex.canvas (JSON models for GUI)
 
 Usage:
     python 03_unified_workflow.py

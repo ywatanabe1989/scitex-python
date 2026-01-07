@@ -6,10 +6,11 @@
 
 from unittest.mock import MagicMock, Mock, patch
 
-import matplotlib
 import numpy as np
 import pytest
 
+# Required for scitex.tex module
+matplotlib = pytest.importorskip("matplotlib")
 matplotlib.use("Agg")  # Use non-interactive backend for testing
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure

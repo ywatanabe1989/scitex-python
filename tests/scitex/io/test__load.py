@@ -232,18 +232,18 @@ array:
         """Test loading files through symlinks."""
         # Arrange
         text_content = "Symlink test content"
-        
+
         # Create source file in subdirectory
         source_dir = os.path.join(temp_dir, "source")
         os.makedirs(source_dir)
         source_path = os.path.join(source_dir, "original.txt")
         with open(source_path, "w") as f:
             f.write(text_content)
-        
+
         # Create symlink
         symlink_path = os.path.join(temp_dir, "link.txt")
         os.symlink(os.path.relpath(source_path, temp_dir), symlink_path)
-        
+
         # Act
         loaded_text = scitex.io.load(symlink_path)
 
@@ -815,7 +815,7 @@ if __name__ == "__main__":
 #
 #
 # def _load_bundle(lpath, verbose=False, **kwargs):
-#     """Load a .pltz, .figz, or .statsz bundle.
+#     """Load a .plot, .figure, or .stats bundle.
 #
 #     Parameters
 #     ----------
@@ -828,12 +828,12 @@ if __name__ == "__main__":
 #
 #     Returns
 #     -------
-#     For .pltz bundles:
+#     For .plot bundles:
 #         tuple: (fig, ax, data) where fig is reconstructed figure,
 #                ax is the axes, data is DataFrame or None.
-#     For .figz bundles:
+#     For .figure bundles:
 #         dict: Figure data with 'spec' and 'panels'.
-#     For .statsz bundles:
+#     For .stats bundles:
 #         dict: Stats data with 'spec' and 'comparisons'.
 #     """
 #     from .bundle import load as load_bundle, BundleType
@@ -842,7 +842,7 @@ if __name__ == "__main__":
 #     bundle_type = bundle.get('type')
 #
 #     if bundle_type == BundleType.PLTZ:
-#         # Return (fig, ax, data) tuple for .pltz bundles
+#         # Return (fig, ax, data) tuple for .plot bundles
 #         # Note: We return the spec and data, not a reconstructed figure
 #         # as matplotlib figures cannot be perfectly serialized/deserialized
 #         import matplotlib.pyplot as plt
@@ -888,7 +888,7 @@ if __name__ == "__main__":
 #                 if theme:
 #                     fig._scitex_theme = theme.get('mode')
 #
-#             # Data from bundle (merged in load_layered_pltz_bundle)
+#             # Data from bundle (merged in load_layered_plot_bundle)
 #             data = bundle.get('data')
 #             return fig, ax, data
 #         else:
@@ -896,11 +896,11 @@ if __name__ == "__main__":
 #             return bundle.get('spec'), None, bundle.get('data')
 #
 #     elif bundle_type == BundleType.FIGZ:
-#         # Return figure dict for .figz bundles
+#         # Return figure dict for .figure bundles
 #         return bundle
 #
 #     elif bundle_type == BundleType.STATSZ:
-#         # Return stats dict for .statsz bundles
+#         # Return stats dict for .stats bundles
 #         return bundle
 #
 #     return bundle
@@ -964,7 +964,7 @@ if __name__ == "__main__":
 #         If the file extension is not supported.
 #     FileNotFoundError
 #         If the specified file does not exist.
-# 
+#
 #     Supported Extensions
 #     -------------------
 #     - Data formats: .csv, .tsv, .xls, .xlsx, .xlsm, .xlsb, .json, .yaml, .yml
@@ -974,7 +974,7 @@ if __name__ == "__main__":
 #     - Images: .jpg, .png, .tiff, .tif
 #     - EEG data: .vhdr, .vmrk, .edf, .bdf, .gdf, .cnt, .egi, .eeg, .set
 #     - Database: .db
-# 
+#
 #     Examples
 #     --------
 #     >>> # Load CSV data
@@ -1011,8 +1011,8 @@ if __name__ == "__main__":
 #         if verbose:
 #             print(f"[DEBUG] After Path conversion: {lpath}")
 #
-#     # Handle bundle formats (.pltz, .figz, .statsz and their .d variants)
-#     bundle_extensions = (".figz", ".pltz", ".statsz")
+#     # Handle bundle formats (.plot, .figure, .stats and their .d variants)
+#     bundle_extensions = (".figure", ".plot", ".stats")
 #     for bext in bundle_extensions:
 #         if lpath.endswith(bext) or lpath.endswith(f"{bext}.d"):
 #             return _load_bundle(lpath, verbose=verbose, **kwargs)

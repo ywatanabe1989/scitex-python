@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-05 16:58:59
+!-- Timestamp: 2026-01-07 22:01:07
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -76,8 +76,8 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 ## 📦 Installation
 
 ``` bash
-pip install scitex[all]   # Recommended: Full installation with all modules
-pip install scitex        # Core only (numpy, pandas, PyYAML, tqdm)
+uv pip install scitex[all]   # Recommended: Full installation with all modules
+uv pip install scitex        # Core only (numpy, pandas, PyYAML, tqdm)
 ```
 
 <details>
@@ -87,11 +87,58 @@ SciTeX is organized into focused modules for different aspects of scientific com
 
 **Modular Installation** (See [./src/scitex](./src/scitex) for all available modules):
 ``` bash
-# Install specific modules
-pip install scitex[ai]              # AI/ML module
-pip install scitex[ai,audio,writer] # Multiple modules
-pip install scitex[all]             # Everything
+# Install all modules
+uv pip install scitex[all]
+
+# Install only specific modules
+uv pip install scitex[ai]
+
+# All available modules, equivalent to scitex[all]
+uv pip install ~/proj/scitex-code[\
+ai,\
+audio,\
+benchmark,\
+bridge,\
+browser,\
+capture,\
+cli,\
+cloud,\
+config,\
+db,\
+decorators,\
+diagram,\
+dsp,\
+devtools,\
+dt,\
+fig,\
+fts,\
+gen,\
+git,\
+io,\
+linalg,\
+logging,\
+msword,\
+nn,\
+parallel,\
+path,\
+pd,\
+plt,\
+repro,\
+resource,\
+scholar,\
+session,\
+sh,\
+stats,\
+str,\
+tex,\
+torch,\
+types,\
+utils,\
+web,\
+writer,\
+dev]
 ```
+
 
 ## 📦 Module Overview
 
@@ -168,6 +215,8 @@ pip install scitex[all]             # Everything
 
 
 </details>
+
+## Font
 
 <details>
 <summary><strong>Arial Font Setup</strong></summary>

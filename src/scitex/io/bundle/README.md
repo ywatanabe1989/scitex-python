@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2025-12-16 20:36:14
+!-- Timestamp: 2026-01-07
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/README.md
 !-- --- -->
@@ -10,20 +10,20 @@
 
 SciTeX uses bundle formats for reproducible scientific figures:
 
-| Format    | Purpose             | Contents                                    |
-|-----------|---------------------|---------------------------------------------|
-| `.pltz`   | Single plot bundle  | spec.json, style.json, data.csv, exports/   |
-| `.figz`   | Multi-panel figure  | spec.json, style.json, nested .pltz bundles |
-| `.statsz` | Statistical results | spec.json, stats data, comparison metadata  |
+| Format         | Purpose             | Contents                                       |
+|----------------|---------------------|------------------------------------------------|
+| `.plot.zip`    | Single plot bundle  | spec.json, encoding.json, data.csv, exports/   |
+| `.figure.zip`  | Multi-panel figure  | spec.json, encoding.json, nested plot bundles  |
+| `.stats.zip`   | Statistical results | spec.json, stats data, comparison metadata     |
 
 ## Format Variants
 
 Each bundle can exist in two forms:
 
-| Suffix                              | Type        | Use Case                    |
-|-------------------------------------|-------------|-----------------------------|
-| `.pltz` / `.figz` / `.statsz`       | ZIP archive | Storage, transfer, download |
-| `.pltz.d` / `.figz.d` / `.statsz.d` | Directory   | Editing, development        |
+| Suffix                                       | Type        | Use Case                    |
+|----------------------------------------------|-------------|-----------------------------|
+| `.plot.zip` / `.figure.zip` / `.stats.zip`   | ZIP archive | Storage, transfer, download |
+| `.plot` / `.figure` / `.stats`               | Directory   | Editing, development        |
 
 ## Quick Start
 
@@ -31,19 +31,19 @@ Each bundle can exist in two forms:
 import scitex.io.bundle as bundle
 
 # Load a bundle (works with both ZIP and directory)
-data = bundle.load("Figure1.figz")
+data = bundle.load("Figure1.figure.zip")
 print(data['spec'])
-print(data['type'])  # 'figz'
+print(data['type'])  # 'figure'
 
 # Save a bundle
-bundle.save(data, "output.pltz", as_zip=True)
+bundle.save(data, "output.plot.zip", as_zip=True)
 
 # Copy a bundle
-bundle.copy("template.pltz", "my_plot.pltz.d")
+bundle.copy("template.plot.zip", "my_plot.plot")
 
 # Pack/unpack between formats
-bundle.pack("plot.pltz.d")      # -> plot.pltz
-bundle.unpack("plot.pltz")       # -> plot.pltz.d/
+bundle.pack("plot.plot")        # -> plot.plot.zip
+bundle.unpack("plot.plot.zip")  # -> plot.plot/
 ```
 
 ## ZipBundle Class
@@ -54,19 +54,19 @@ In-memory access to ZIP bundles without extraction:
 from scitex.io.bundle import ZipBundle
 
 # Reading
-with ZipBundle("figure.figz") as zb:
+with ZipBundle("figure.figure.zip") as zb:
     spec = zb.read_json("spec.json")
     data = zb.read_csv("data.csv")
     png = zb.read_bytes("exports/figure.png")
 
 # Writing (atomic)
-with ZipBundle("output.pltz", mode="w") as zb:
+with ZipBundle("output.plot.zip", mode="w") as zb:
     zb.write_json("spec.json", spec_dict)
     zb.write_csv("data.csv", dataframe)
     zb.write_bytes("exports/plot.png", png_bytes)
 
 # Modifying (read + write atomically)
-with ZipBundle("figure.figz", mode="a") as zb:
+with ZipBundle("figure.figure.zip", mode="a") as zb:
     spec = zb.read_json("spec.json")
     spec["title"] = "Updated"
     zb.write_json("spec.json", spec)
@@ -74,57 +74,66 @@ with ZipBundle("figure.figz", mode="a") as zb:
 
 ## Nested Bundle Access
 
-Access pltz bundles nested inside figz:
+Access plot bundles nested inside figure bundles:
 
 ```python
 from scitex.io.bundle import nested
 
 # Get preview image
-preview = nested.get_preview("Figure1.figz/A.pltz.d")
+preview = nested.get_preview("Figure1.figure/A.plot")
 
 # Get JSON
-spec = nested.get_json("Figure1.figz/A.pltz.d/spec.json")
+spec = nested.get_json("Figure1.figure/A.plot/spec.json")
 
 # Get any file
-png = nested.get_file("Figure1.figz/A.pltz.d/exports/plot.png")
+png = nested.get_file("Figure1.figure/A.plot/exports/plot.png")
 
 # Write to nested bundle
-nested.put_json("Figure1.figz/A.pltz.d/spec.json", updated_spec)
+nested.put_json("Figure1.figure/A.plot/spec.json", updated_spec)
 
 # List files
-files = nested.list_files("Figure1.figz/A.pltz.d")
+files = nested.list_files("Figure1.figure/A.plot")
 
 # Resolve full bundle data
-data = nested.resolve("Figure1.figz/A.pltz.d")
+data = nested.resolve("Figure1.figure/A.plot")
 ```
 
 ## Bundle Structure
 
-### .pltz Bundle
+### .plot Bundle
 
 ```
-plot.pltz.d/
-├── spec.json          # Plot specification (traces, axes, data refs)
-├── style.json         # Visual styling (colors, fonts, sizes)
-├── data.csv           # Source data
-├── exports/
-│   ├── plot.png       # Rendered preview
-│   ├── plot_hitmap.png
-│   └── plot.svg
-└── cache/
-    └── geometry_px.json
+plot.plot/
+├── canonical/
+│   ├── spec.json      # Plot specification (kind, id, size, etc.)
+│   ├── encoding.json  # Encoding specification (traces, axes)
+│   └── theme.json     # Visual styling (colors, fonts, sizes)
+├── payload/
+│   └── data.csv       # Source data
+├── artifacts/
+│   ├── exports/
+│   │   ├── plot.png   # Rendered preview
+│   │   └── plot.svg
+│   └── cache/
+│       └── geometry_px.json
+└── children/          # Empty for leaf bundles
 ```
 
-### .figz Bundle
+### .figure Bundle
 
 ```
-Figure1.figz.d/
-├── spec.json          # Figure layout, panel positions
-├── style.json         # Figure-level styling
-├── A.pltz.d/          # Panel A (nested pltz)
-├── B.pltz.d/          # Panel B (nested pltz)
-└── exports/
-    └── Figure1.png    # Composed figure
+Figure1.figure/
+├── canonical/
+│   ├── spec.json      # Figure layout, panel positions, children list
+│   ├── encoding.json  # Figure-level encoding
+│   └── theme.json     # Figure-level styling
+├── payload/           # Empty for composite bundles
+├── artifacts/
+│   └── exports/
+│       └── Figure1.png
+└── children/
+    ├── panel-a.zip    # Panel A (nested plot bundle)
+    └── panel-b.zip    # Panel B (nested plot bundle)
 ```
 
 ## API Reference
@@ -140,7 +149,7 @@ Figure1.figz.d/
 | `unpack(zip_path)` | Convert ZIP to directory |
 | `validate(path)` | Validate bundle structure |
 | `is_bundle(path)` | Check if path is a bundle |
-| `get_type(path)` | Get bundle type ('figz', 'pltz', 'statsz') |
+| `get_type(path)` | Get bundle type ('figure', 'plot', 'stats') |
 
 ### ZipBundle Methods
 
@@ -169,44 +178,44 @@ Figure1.figz.d/
 | `nested.resolve(path)` | Load full nested bundle data |
 | `nested.parse_path(path)` | Parse nested path components |
 
-## Migration from Old API
+### Bundle and Spec Classes
 
-| Old Import | New Import |
-|------------|------------|
-| `from scitex.io._bundle import load_bundle` | `from scitex.io.bundle import load` |
-| `from scitex.io._bundle import save_bundle` | `from scitex.io.bundle import save` |
-| `from scitex.io._bundle import copy_bundle` | `from scitex.io.bundle import copy` |
-| `from scitex.io._bundle import pack_bundle` | `from scitex.io.bundle import pack` |
-| `from scitex.io._bundle import unpack_bundle` | `from scitex.io.bundle import unpack` |
-| `from scitex.io._bundle import validate_bundle` | `from scitex.io.bundle import validate` |
-| `from scitex.io._bundle import BundleType` | `from scitex.io.bundle import BundleType` |
-| `from scitex.io._bundle import BundleValidationError` | `from scitex.io.bundle import BundleValidationError` |
-| `from scitex.io._bundle import BUNDLE_EXTENSIONS` | `from scitex.io.bundle import EXTENSIONS` |
-| `from scitex.io._bundle import get_bundle_type` | `from scitex.io.bundle import get_type` |
-| `from scitex.io._zip_bundle import ZipBundle` | `from scitex.io.bundle import ZipBundle` |
-| `from scitex.io._zip_bundle import open_bundle` | `from scitex.io.bundle import open_zip` |
-| `from scitex.io._zip_bundle import create_bundle` | `from scitex.io.bundle import create_zip` |
-| `from scitex.io._zip_bundle import zip_directory_bundle` | `from scitex.io.bundle import zip_directory` |
-| `from scitex.io._nested_bundle import resolve_nested_bundle` | `from scitex.io.bundle import nested; nested.resolve` |
-| `from scitex.io._nested_bundle import get_nested_file` | `from scitex.io.bundle import nested; nested.get_file` |
-| `from scitex.io._nested_bundle import get_nested_json` | `from scitex.io.bundle import nested; nested.get_json` |
-| `from scitex.io._nested_bundle import get_nested_preview` | `from scitex.io.bundle import nested; nested.get_preview` |
-| `from scitex.io._nested_bundle import put_nested_file` | `from scitex.io.bundle import nested; nested.put_file` |
-| `from scitex.io._nested_bundle import put_nested_json` | `from scitex.io.bundle import nested; nested.put_json` |
-| `from scitex.io._nested_bundle import list_nested_files` | `from scitex.io.bundle import nested; nested.list_files` |
-| `from scitex.io._nested_bundle import parse_nested_path` | `from scitex.io.bundle import nested; nested.parse_path` |
-| `from scitex.io._nested_bundle import NestedBundleNotFoundError` | `from scitex.io.bundle import NestedBundleNotFoundError` |
+```python
+from scitex.io.bundle import Bundle, Spec, SpecRefs
+
+# Create a new bundle
+bundle = Bundle("my_plot.plot", create=True, kind="plot")
+bundle.spec.name = "My Plot"
+bundle.save()
+
+# Load existing bundle
+bundle = Bundle("existing.plot.zip")
+print(bundle.spec.kind)  # 'plot'
+print(bundle.spec.id)
+
+# Create from matplotlib
+from scitex.io.bundle import from_matplotlib
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+ax.plot([1, 2, 3], [1, 4, 9])
+bundle = from_matplotlib(fig, "output.plot")
+```
 
 ## Module Structure
 
 ```
 scitex/io/bundle/
-├── __init__.py      # Public API exports
-├── _types.py        # BundleType, errors, constants
-├── _core.py         # load, save, copy, pack, unpack, validate
-├── _zip.py          # ZipBundle class and functions
-├── _nested.py       # Nested bundle access
-└── README.md        # This documentation
+├── __init__.py        # Public API exports
+├── _types.py          # BundleType, errors, constants
+├── _core.py           # load, save, copy, pack, unpack, validate
+├── _zip.py            # ZipBundle class and functions
+├── _nested.py         # Nested bundle access
+├── _Bundle.py         # Bundle class
+├── _dataclasses/      # Spec, SpecRefs, BBox, SizeMM, etc.
+├── _loader.py         # Bundle component loading
+├── _saver.py          # Bundle component saving
+└── README.md          # This documentation
 ```
 
 <!-- EOF -->
