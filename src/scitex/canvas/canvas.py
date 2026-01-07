@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: 2025-12-08
 # File: ./src/scitex/vis/canvas.py
 """
@@ -8,9 +7,9 @@ Canvas class for scitex.canvas.
 Provides object-oriented interface to canvas operations.
 """
 
-from pathlib import Path
-from typing import Dict, Any, Union, List, Optional
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Union
 
 
 class Canvas:
@@ -35,8 +34,8 @@ class Canvas:
     >>> # Create canvas
     >>> canvas = stx.vis.Canvas("fig1", width_mm=180, height_mm=120)
     >>> # Add panels
-    >>> canvas.add_panel("panel_a", "plot.png", position=(10, 10), size=(80, 50), label="A")
-    >>> canvas.add_panel("panel_b", "chart.png", position=(100, 10), size=(80, 50), label="B")
+    >>> canvas.add_panel("panel_a", "plot.png", xy_mm=(10, 10), size_mm=(80, 50), label="A")
+    >>> canvas.add_panel("panel_b", "chart.png", xy_mm=(100, 10), size_mm=(80, 50), label="B")
     >>> # Save (auto-exports PNG/PDF/SVG)
     >>> stx.io.save(canvas, "/output/fig1.canvas")
     """
@@ -82,8 +81,8 @@ class Canvas:
         self,
         panel_name: str,
         source: Union[str, Path],
-        position: tuple = (0, 0),
-        size: tuple = (50, 50),
+        xy_mm: tuple = (0, 0),
+        size_mm: tuple = (50, 50),
         label: str = "",
         **kwargs,
     ) -> "Canvas":
@@ -96,10 +95,10 @@ class Canvas:
             Name for the panel
         source : str or Path
             Path to source file (PNG, JPG, SVG)
-        position : tuple
-            (x_mm, y_mm) position on canvas
-        size : tuple
-            (width_mm, height_mm) panel size
+        xy_mm : tuple
+            (x_mm, y_mm) position on canvas in millimeters
+        size_mm : tuple
+            (width_mm, height_mm) panel size in millimeters
         label : str
             Panel label (A, B, C...)
         **kwargs
@@ -120,8 +119,8 @@ class Canvas:
         panel_entry = {
             "name": panel_name,
             "type": panel_type,
-            "position": {"x_mm": position[0], "y_mm": position[1]},
-            "size": {"width_mm": size[0], "height_mm": size[1]},
+            "position": {"x_mm": xy_mm[0], "y_mm": xy_mm[1]},
+            "size": {"width_mm": size_mm[0], "height_mm": size_mm[1]},
             "z_index": len(self._panels),
             "rotation_deg": kwargs.get("rotation_deg", 0),
             "opacity": kwargs.get("opacity", 1.0),
