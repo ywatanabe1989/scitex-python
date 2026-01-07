@@ -16,11 +16,7 @@ from typing import Any, Union
 
 from scitex.decorators import preserve_doc
 
-from ._load_cache import (
-    cache_data,
-    get_cached_data,
-    load_npy_cached,
-)
+from ._load_cache import cache_data, get_cached_data, load_npy_cached
 
 # Core loaders (no special dependencies)
 from ._load_modules._bibtex import _load_bibtex
@@ -101,7 +97,7 @@ except ImportError:
 
 
 def _load_bundle(lpath, verbose=False, **kwargs):
-    """Load a .pltz, .figz, or .statsz bundle.
+    """Load a .plot, .figure, or .stats bundle.
 
     Parameters
     ----------
@@ -114,12 +110,12 @@ def _load_bundle(lpath, verbose=False, **kwargs):
 
     Returns
     -------
-    For .pltz bundles:
+    For .plot bundles:
         tuple: (fig, ax, data) where fig is reconstructed figure,
                ax is the axes, data is DataFrame or None.
-    For .figz bundles:
+    For .figure bundles:
         dict: Figure data with 'spec' and 'panels'.
-    For .statsz bundles:
+    For .stats bundles:
         dict: Stats data with 'spec' and 'comparisons'.
     """
     from .bundle import BundleType
@@ -128,8 +124,8 @@ def _load_bundle(lpath, verbose=False, **kwargs):
     bundle = load_bundle(lpath)
     bundle_type = bundle.get("type")
 
-    if bundle_type == BundleType.PLTZ:
-        # Return (fig, ax, data) tuple for .pltz bundles
+    if bundle_type == BundleType.PLOT:
+        # Return (fig, ax, data) tuple for .plot bundles
         # Note: We return the spec and data, not a reconstructed figure
         # as matplotlib figures cannot be perfectly serialized/deserialized
         from pathlib import Path
@@ -177,19 +173,19 @@ def _load_bundle(lpath, verbose=False, **kwargs):
                 if theme:
                     fig._scitex_theme = theme.get("mode")
 
-            # Data from bundle (merged in load_layered_pltz_bundle)
+            # Data from bundle (merged in load_layered_plot_bundle)
             data = bundle.get("data")
             return fig, ax, data
         else:
             # No PNG, return spec and data
             return bundle.get("spec"), None, bundle.get("data")
 
-    elif bundle_type == BundleType.FIGZ:
-        # Return figure dict for .figz bundles
+    elif bundle_type == BundleType.FIGURE:
+        # Return figure dict for .figure bundles
         return bundle
 
-    elif bundle_type == BundleType.STATSZ:
-        # Return stats dict for .statsz bundles
+    elif bundle_type == BundleType.STATS:
+        # Return stats dict for .stats bundles
         return bundle
 
     return bundle
@@ -300,10 +296,10 @@ def load(
         if verbose:
             print(f"[DEBUG] After Path conversion: {lpath}")
 
-    # Handle bundle formats (.pltz, .figz, .statsz and their .d variants)
-    bundle_extensions = (".figz", ".pltz", ".statsz")
+    # Handle bundle formats (.plot, .figure, .stats and their ZIP variants)
+    bundle_extensions = (".figure", ".plot", ".stats")
     for bext in bundle_extensions:
-        if lpath.endswith(bext) or lpath.endswith(f"{bext}.d"):
+        if lpath.endswith(bext) or lpath.endswith(f"{bext}.zip"):
             return _load_bundle(lpath, verbose=verbose, **kwargs)
 
     # Check if it's a glob pattern

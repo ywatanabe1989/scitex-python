@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-14 23:12:20 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/parallel/_run.py
 
@@ -65,13 +64,15 @@ def run(
     if not callable(func):
         raise ValueError("Func must be callable")
 
+    # Validate n_jobs before conversion: must be -1 or >= 1
+    if n_jobs < -1 or n_jobs == 0:
+        raise ValueError("n_jobs must be >= 1 or -1")
+
     cpu_count = multiprocessing.cpu_count()
-    n_jobs = cpu_count if n_jobs < 0 else n_jobs
+    n_jobs = cpu_count if n_jobs == -1 else n_jobs
 
     if n_jobs > cpu_count:
         warnings.warn(f"n_jobs ({n_jobs}) is greater than CPU count ({cpu_count})")
-    if n_jobs < 1:
-        raise ValueError("n_jobs must be >= 1 or -1")
 
     results = [None] * len(args_list)  # Pre-allocate list
 

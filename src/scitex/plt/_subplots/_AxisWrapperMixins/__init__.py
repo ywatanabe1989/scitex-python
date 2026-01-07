@@ -19,7 +19,7 @@ stx_* (SciTeX Canonical)
 - Purpose: publication / reproducibility
 - Features:
   * Full tracking and metadata support
-  * Output connects to .pltz / .figz formats
+  * Output connects to .plot / .figure formats
   * Automatic styling according to SciTeX style
   * Primary API - recommended for final figures
 
@@ -83,7 +83,7 @@ __DIR__ = os.path.dirname(__FILE__)
 
 from ._AdjustmentMixin import AdjustmentMixin
 from ._MatplotlibPlotMixin import MatplotlibPlotMixin
-from ._RawMatplotlibMixin import RawMatplotlibMixin, MPL_METHODS
+from ._RawMatplotlibMixin import MPL_METHODS, RawMatplotlibMixin
 from ._SeabornMixin import SeabornMixin
 from ._TrackingMixin import TrackingMixin
 from ._UnitAwareMixin import UnitAwareMixin

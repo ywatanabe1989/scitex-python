@@ -57,21 +57,21 @@ from .auto import (
 )
 
 # =============================================================================
-# Stats Schema - Use scitex.fts.Stats as single source of truth
+# Stats Schema - Use scitex.io.bundle.Stats as single source of truth
 # =============================================================================
 
-# For backward compatibility, re-export from fts
+# Re-export Stats from bundle module
 try:
-    from scitex.fts import Stats
+    from scitex.io.bundle import Stats
 
-    FTS_AVAILABLE = True
+    BUNDLE_AVAILABLE = True
 except ImportError:
     Stats = None
-    FTS_AVAILABLE = False
+    BUNDLE_AVAILABLE = False
 
 
 def test_result_to_stats(result: dict) -> "Stats":
-    """Convert test result dict to FTS Stats schema.
+    """Convert test result dict to Stats schema.
 
     Parameters
     ----------
@@ -92,26 +92,24 @@ def test_result_to_stats(result: dict) -> "Stats":
     Returns
     -------
     Stats
-        FTS Stats object suitable for bundle storage
+        Stats object suitable for bundle storage
 
     Example
     -------
     >>> result = stats.t_test(x, y)
-    >>> fts_stats = stats.test_result_to_stats(result)
-    >>> bundle.stats = fts_stats
+    >>> stat_obj = stats.test_result_to_stats(result)
+    >>> bundle.stats = stat_obj
     """
-    if not FTS_AVAILABLE:
-        raise ImportError("scitex.fts is required for Stats conversion")
+    if not BUNDLE_AVAILABLE:
+        raise ImportError("scitex.io.bundle is required for Stats conversion")
 
     import uuid
 
-    from scitex.fts._stats._dataclasses._Stats import (
+    from scitex.io.bundle._stats._dataclasses._Stats import (
         Analysis,
         EffectSize,
         StatMethod,
-    )
-    from scitex.fts._stats._dataclasses._Stats import (
-        StatResult as FTSStatResult,
+        StatResult,
     )
 
     # Handle legacy flat format vs new nested format
@@ -134,7 +132,7 @@ def test_result_to_stats(result: dict) -> "Stats":
                 ci_lower=ci[0] if len(ci) > 0 else None,
                 ci_upper=ci[1] if len(ci) > 1 else None,
             )
-        stat_result = FTSStatResult(
+        stat_result = StatResult(
             statistic=result.get("statistic", 0.0),
             statistic_name=result.get("statistic_name", ""),
             p_value=result.get("p_value", 1.0),
@@ -164,7 +162,7 @@ def test_result_to_stats(result: dict) -> "Stats":
                 ci_upper=es.get("ci_upper"),
             )
 
-        stat_result = FTSStatResult(
+        stat_result = StatResult(
             statistic=results_data.get("statistic", 0.0),
             statistic_name=results_data.get("statistic_name", ""),
             p_value=results_data.get("p_value", 1.0),
@@ -189,25 +187,25 @@ def test_result_to_stats(result: dict) -> "Stats":
 
 
 # =============================================================================
-# .statsz Bundle Support - Using FTS
+# .stats Bundle Support
 # =============================================================================
 
 
-def save_statsz(
+def save_stats(
     comparisons,
     path,
     metadata=None,
     as_zip=False,
 ):
     """
-    Save statistical results as an FTS bundle.
+    Save statistical results as a SciTeX bundle.
 
     Parameters
     ----------
     comparisons : list of dict
         List of comparison results.
     path : str or Path
-        Output path (e.g., "results.zip").
+        Output path (e.g., "results.stats" or "results.stats.zip").
     metadata : dict, optional
         Additional metadata.
     as_zip : bool, optional
@@ -220,14 +218,14 @@ def save_statsz(
     """
     from pathlib import Path
 
-    from scitex.fts import FTS
+    from scitex.io.bundle import Bundle
 
     p = Path(path)
     if as_zip and not p.suffix == ".zip":
         p = p.with_suffix(".zip")
 
-    # Create FTS bundle
-    bundle = FTS(p, create=True, node_type="stats")
+    # Create bundle
+    bundle = Bundle(p, create=True, bundle_type="stats")
 
     # Convert comparisons to Stats
     if comparisons:
@@ -246,14 +244,14 @@ def save_statsz(
     return p
 
 
-def load_statsz(path):
+def load_stats(path):
     """
-    Load a stats bundle using FTS.
+    Load a stats bundle.
 
     Parameters
     ----------
     path : str or Path
-        Path to bundle.
+        Path to bundle (.stats or .stats.zip).
 
     Returns
     -------
@@ -262,9 +260,9 @@ def load_statsz(path):
         Each comparison is a flat dict with:
         - name, method, p_value, effect_size, ci95, formatted
     """
-    from scitex.fts import FTS
+    from scitex.io.bundle import Bundle
 
-    bundle = FTS(path)
+    bundle = Bundle(path)
 
     comparisons = []
     if bundle.stats and bundle.stats.analyses:
@@ -317,9 +315,8 @@ __all__ = [
     "describe",
     # Torch availability flag (for GPU acceleration)
     "TORCH_AVAILABLE",
-    # Stats schema (from FTS)
+    # Stats schema
     "Stats",
-    "FTS_AVAILABLE",
     # Auto module convenience exports
     "StatContext",
     "TestRule",
@@ -334,8 +331,8 @@ __all__ = [
     # Conversion utilities
     "test_result_to_stats",
     # Bundle functions
-    "save_statsz",
-    "load_statsz",
+    "save_stats",
+    "load_stats",
 ]
 
 __version__ = "2.2.0"

@@ -227,17 +227,19 @@ def validate_bundles(paths: tuple, verbose: bool):
       scitex convert validate output.stx
       scitex convert validate ./figures/*.stx --verbose
     """
-    # Use FTS instead of deprecated io.bundle
+    # Use Bundle for validation
     try:
-        from scitex.fts import FTS as ZipBundle
+        from scitex.io.bundle import Bundle as ZipBundle
+
         def validate_stx_bundle(path):
             try:
                 bundle = ZipBundle(path)
                 return bundle.validate(level="strict")
             except Exception as e:
                 return {"valid": False, "errors": [str(e)]}
+
     except ImportError:
-        click.echo("Error: scitex.fts not available", err=True)
+        click.echo("Error: scitex.io.bundle not available", err=True)
         return
 
     valid = 0
@@ -303,9 +305,9 @@ def bundle_info(path: str):
       scitex convert info figure.stx
     """
     try:
-        from scitex.fts import FTS as ZipBundle
+        from scitex.io.bundle import Bundle as ZipBundle
     except ImportError:
-        click.echo("Error: scitex.fts not available", err=True)
+        click.echo("Error: scitex.io.bundle not available", err=True)
         return
 
     bundle_path = Path(path)
@@ -368,12 +370,14 @@ def _convert_bundle(input_path: Path, output_path: Path) -> None:
     """
     import json
     import tempfile
-    import zipfile
 
     # Generate bundle ID and normalize spec - inline functions since io.bundle is deprecated
     import uuid
+    import zipfile
+
     def generate_bundle_id():
         return str(uuid.uuid4())[:8]
+
     def normalize_spec(spec):
         return spec  # FTS handles normalization internally
 

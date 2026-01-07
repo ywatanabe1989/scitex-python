@@ -6,7 +6,7 @@
 Save utilities for various data types to different file formats.
 
 Supported formats include CSV, NPY, PKL, JOBLIB, PNG, HTML, TIFF, MP4, YAML,
-JSON, HDF5, PTH, MAT, CBM, and FTS bundles (.zip or directory).
+JSON, HDF5, PTH, MAT, CBM, and SciTeX bundles (.zip or directory).
 """
 
 import inspect
@@ -40,8 +40,6 @@ from ._save_modules import (
     save_npz,
     save_pickle,
     save_pickle_compressed,
-    save_pltz_bundle,
-    save_stx_bundle,
     save_tex,
     save_text,
     save_torch,
@@ -53,12 +51,9 @@ from ._save_modules import (
 
 logger = logging.getLogger()
 
-# Re-export for backward compatibility
 _get_figure_with_data = get_figure_with_data
 _symlink = symlink
 _symlink_to = symlink_to
-_save_stx_bundle = save_stx_bundle
-_save_pltz_bundle = save_pltz_bundle
 _handle_image_with_csv = handle_image_with_csv
 
 
@@ -278,17 +273,17 @@ def _save(
     """Core dispatcher for saving objects to various formats."""
     ext = _os.path.splitext(spath)[1].lower()
 
-    # Check if this is a matplotlib figure being saved to FTS bundle format
-    # FTS bundles use .zip (archive) or no extension (directory)
+    # Check if this is a matplotlib figure being saved to SciTeX bundle format
+    # SciTeX bundles use .zip (archive) or no extension (directory)
     if _is_matplotlib_figure(obj):
-        # Save as FTS bundle if:
+        # Save as SciTeX bundle if:
         # 1. Path ends with .zip (create ZIP bundle)
         # 2. Path has no extension and doesn't match other formats (create directory bundle)
         if ext == ".zip" or (ext == "" and not spath.endswith("/")):
-            # Check if explicitly requesting FTS bundle or just .zip
+            # Check if explicitly requesting SciTeX bundle or just .zip
             # Pop as_zip from kwargs to avoid duplicate parameter error
             as_zip = kwargs.pop("as_zip", ext == ".zip")
-            _save_fts_bundle(
+            _save_scitex_bundle(
                 obj, spath, as_zip, verbose, symlink_from_cwd, symlink_to, **kwargs
             )
             return
@@ -348,12 +343,12 @@ def _is_matplotlib_figure(obj):
         return False
 
 
-def _save_fts_bundle(
+def _save_scitex_bundle(
     obj, spath, as_zip, verbose, symlink_from_cwd, symlink_to_path, **kwargs
 ):
-    """Save matplotlib figure as FTS bundle (.zip or directory).
+    """Save matplotlib figure as SciTeX bundle (.zip or directory).
 
-    Delegates to scitex.fts.from_matplotlib as the single source of truth
+    Delegates to scitex.io.bundle.from_matplotlib as the single source of truth
     for bundle structure (canonical/artifacts/payload/children).
 
     When figrecipe is available and enabled on the figure, also saves
@@ -362,7 +357,7 @@ def _save_fts_bundle(
     # Get the actual matplotlib figure
     import matplotlib.figure
 
-    from scitex.fts import from_matplotlib
+    from scitex.io.bundle import from_matplotlib
 
     from ._save_modules._figure_utils import get_figure_with_data
 
@@ -390,7 +385,7 @@ def _save_fts_bundle(
             except Exception:
                 pass
 
-    # Delegate to FTS (single source of truth)
+    # Delegate to Bundle (single source of truth)
     # Encoding is built from CSV columns directly for consistency
     from_matplotlib(fig, spath, name=name, csv_df=csv_df, dpi=dpi)
 

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """Test auto-split functionality for large diagrams."""
 
+import subprocess
 import sys
 from pathlib import Path
-import subprocess
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
@@ -31,7 +31,7 @@ def test_split_workflow():
     print(f"Split into {len(parts)} parts")
 
     for i, part in enumerate(parts):
-        label = chr(ord('A') + i)
+        label = chr(ord("A") + i)
         print(f"\n--- Part {label}: {len(part.spec.nodes)} nodes ---")
         for node in part.spec.nodes:
             ghost = "→" in node.label
@@ -43,7 +43,17 @@ def test_split_workflow():
 
         png_path = OUTPUT_DIR / f"workflow_split_{label}.png"
         result = subprocess.run(
-            ["mmdc", "-i", str(mmd_path), "-o", str(png_path), "-b", "transparent", "-w", "600"],
+            [
+                "mmdc",
+                "-i",
+                str(mmd_path),
+                "-o",
+                str(png_path),
+                "-b",
+                "transparent",
+                "-w",
+                "600",
+            ],
             capture_output=True,
         )
         if result.returncode == 0:
@@ -60,7 +70,7 @@ def test_manual_split():
     part_a = Diagram(type="workflow", title="Figure Creation")
     part_a.add_node("python", "Python", shape="rounded")
     part_a.add_node("savefig", "savefig()", shape="box")
-    part_a.add_node("figz", ".figz Bundle", shape="stadium", emphasis="primary")
+    part_a.add_node("figz", ".figure Bundle", shape="stadium", emphasis="primary")
     part_a.add_node("spec", "spec.json", shape="box")
     part_a.add_node("data", "data.csv", shape="box")
     part_a.add_node("preview", "preview", shape="box", emphasis="muted")
@@ -76,13 +86,25 @@ def test_manual_split():
 
     mmd_a = OUTPUT_DIR / "workflow_manual_A.mmd"
     part_a.to_mermaid(mmd_a)
-    subprocess.run(["mmdc", "-i", str(mmd_a), "-o", str(OUTPUT_DIR / "workflow_manual_A.png"),
-                    "-b", "transparent", "-w", "500"], capture_output=True)
+    subprocess.run(
+        [
+            "mmdc",
+            "-i",
+            str(mmd_a),
+            "-o",
+            str(OUTPUT_DIR / "workflow_manual_A.png"),
+            "-b",
+            "transparent",
+            "-w",
+            "500",
+        ],
+        capture_output=True,
+    )
     print(f"Part A rendered: {OUTPUT_DIR / 'workflow_manual_A.png'}")
 
     # Part B: Bundle -> Editing -> Export
     part_b = Diagram(type="workflow", title="Figure Editing")
-    part_b.add_node("figz", ".figz Bundle", shape="stadium", emphasis="primary")
+    part_b.add_node("figz", ".figure Bundle", shape="stadium", emphasis="primary")
     part_b.add_node("editor", "Editor", shape="rounded", emphasis="primary")
     part_b.add_node("ai", "AI Review", shape="diamond", emphasis="primary")
     part_b.add_node("export", "Export", shape="stadium", emphasis="success")
@@ -98,8 +120,20 @@ def test_manual_split():
 
     mmd_b = OUTPUT_DIR / "workflow_manual_B.mmd"
     part_b.to_mermaid(mmd_b)
-    subprocess.run(["mmdc", "-i", str(mmd_b), "-o", str(OUTPUT_DIR / "workflow_manual_B.png"),
-                    "-b", "transparent", "-w", "500"], capture_output=True)
+    subprocess.run(
+        [
+            "mmdc",
+            "-i",
+            str(mmd_b),
+            "-o",
+            str(OUTPUT_DIR / "workflow_manual_B.png"),
+            "-b",
+            "transparent",
+            "-w",
+            "500",
+        ],
+        capture_output=True,
+    )
     print(f"Part B rendered: {OUTPUT_DIR / 'workflow_manual_B.png'}")
 
 

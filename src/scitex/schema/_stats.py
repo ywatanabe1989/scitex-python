@@ -10,7 +10,7 @@ Statistical Result Schema - Central Source of Truth.
 This module defines the canonical schema for statistical test results
 that integrates with:
 - scitex.plt (TrackingMixin, metadata embedding)
-- scitex.fig (JSON serialization, FigureModel)
+- scitex.canvas (JSON serialization, FigureModel)
 - scitex-cloud GUI (Fabric.js canvas, properties panel, positioning)
 - scitex.bridge (cross-module adapters)
 
@@ -272,7 +272,7 @@ class StatResult:
 
     This is the central schema for statistical results that integrates with:
     - scitex.plt: Automatic annotation via TrackingMixin
-    - scitex.fig: JSON serialization for FigureModel
+    - scitex.canvas: JSON serialization for FigureModel
     - scitex-cloud GUI: Fabric.js canvas positioning and properties panel
     - scitex.bridge: Cross-module adapters
 

@@ -1,23 +1,35 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Time-stamp: "2024-11-02 16:18:06 (ywatanabe)"
-# File: ./scitex_repo/src/scitex/path/_split.py
+# Timestamp: "2026-01-08 02:00:00 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/path/_split.py
 
-import os
+"""Path splitting utilities."""
+
+from pathlib import Path
+from typing import Tuple, Union
 
 
-def split(fpath):
-    """Split a file path to (1) the directory path, (2) the file name, and (3) the file extention
-    Example:
-        dirname, fname, ext = split('../data/01/day1/split_octave/2kHz_mat/tt8-2.mat')
-        print(dirname) # '../data/01/day1/split_octave/2kHz_mat/'
-        print(fname) # 'tt8-2'
-        print(ext) # '.mat'
+def split(fpath: Union[str, Path]) -> Tuple[Path, str, str]:
+    """Split a file path into directory, filename, and extension.
+
+    Parameters
+    ----------
+    fpath : str or Path
+        File path to split.
+
+    Returns
+    -------
+    tuple of (Path, str, str)
+        (directory, filename without extension, extension)
+
+    Example
+    -------
+    >>> dirname, fname, ext = split('../data/01/day1/tt8-2.mat')
+    >>> print(dirname)  # Path('../data/01/day1')
+    >>> print(fname)    # 'tt8-2'
+    >>> print(ext)      # '.mat'
     """
-    dirname = os.path.dirname(fpath) + "/"
-    base = os.path.basename(fpath)
-    fname, ext = os.path.splitext(base)
-    return dirname, fname, ext
+    path = Path(fpath)
+    return path.parent, path.stem, path.suffix
 
 
 # EOF

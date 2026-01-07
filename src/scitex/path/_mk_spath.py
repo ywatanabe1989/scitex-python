@@ -1,49 +1,46 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Time-stamp: "2024-11-02 20:59:46 (ywatanabe)"
-# File: ./scitex_repo/src/scitex/path/_mk_spath.py
+# Timestamp: "2026-01-08 02:00:00 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/path/_mk_spath.py
+
+"""Save path creation utilities."""
 
 import inspect
 import os
+from pathlib import Path
+from typing import Union
 
-from ._split import split
 
+def mk_spath(sfname: Union[str, Path], makedirs: bool = False) -> Path:
+    """Create a save path based on the calling script's location.
 
-def mk_spath(sfname, makedirs=False):
-    """
-    Create a save path based on the calling script's location.
-
-    Parameters:
-    -----------
-    sfname : str
+    Parameters
+    ----------
+    sfname : str or Path
         The name of the file to be saved.
     makedirs : bool, optional
-        If True, create the directory structure for the save path. Default is False.
+        If True, create the directory structure for the save path.
 
-    Returns:
-    --------
-    str
+    Returns
+    -------
+    Path
         The full save path for the file.
 
-    Example:
-    --------
-    >>> import scitex.io._path as path
-    >>> spath = path.mk_spath('output.txt', makedirs=True)
+    Example
+    -------
+    >>> spath = mk_spath('output.txt', makedirs=True)
     >>> print(spath)
-    '/path/to/current/script/output.txt'
+    Path('/path/to/current/script_out/output.txt')
     """
-    THIS_FILE = inspect.stack()[1].filename
-    if "ipython" in __file__:  # for ipython
-        THIS_FILE = f"/tmp/fake-{os.getenv('USER')}.py"
+    caller_file = inspect.stack()[1].filename
+    if "ipython" in caller_file.lower():
+        caller_file = f"/tmp/fake-{os.getenv('USER')}.py"
 
-    ## spath
-    fpath = __file__
-    fdir, fname, _ = split(fpath)
-    sdir = fdir + fname + "/"
-    spath = sdir + sfname
+    fpath = Path(caller_file)
+    sdir = fpath.parent / f"{fpath.stem}_out"
+    spath = sdir / sfname
 
     if makedirs:
-        os.makedirs(split(spath)[0], exist_ok=True)
+        spath.parent.mkdir(parents=True, exist_ok=True)
 
     return spath
 

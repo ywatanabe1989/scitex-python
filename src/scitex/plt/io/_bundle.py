@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-13 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/io/_bundle.py
 
 """
-SciTeX .pltz Bundle I/O - Plot-specific bundle operations.
+SciTeX .plot Bundle I/O - Plot-specific bundle operations.
 
 Handles:
     - Plot specification validation
@@ -24,15 +23,15 @@ import numpy as np
 from scitex.plt.styles import get_preview_dpi
 
 __all__ = [
-    "validate_pltz_spec",
-    "load_pltz_bundle",
-    "save_pltz_bundle",
+    "validate_plot_spec",
+    "load_plot_bundle",
+    "save_plot_bundle",
     "generate_bundle_overview",
-    "PLTZ_SCHEMA_SPEC",
+    "PLOT_SCHEMA_SPEC",
 ]
 
-# Schema specification for .pltz bundles
-PLTZ_SCHEMA_SPEC = {
+# Schema specification for .plot bundles
+PLOT_SCHEMA_SPEC = {
     "name": "scitex.plt.plot",
     "version": "1.0.0",
     "required_fields": ["schema"],
@@ -47,8 +46,8 @@ PLTZ_SCHEMA_SPEC = {
 }
 
 
-def validate_pltz_spec(spec: Dict[str, Any]) -> List[str]:
-    """Validate .pltz-specific fields.
+def validate_plot_spec(spec: Dict[str, Any]) -> List[str]:
+    """Validate .plot-specific fields.
 
     Args:
         spec: The specification dictionary to validate.
@@ -66,8 +65,8 @@ def validate_pltz_spec(spec: Dict[str, Any]) -> List[str]:
     return errors
 
 
-def load_pltz_bundle(bundle_dir: Path) -> Dict[str, Any]:
-    """Load .pltz bundle contents from directory.
+def load_plot_bundle(bundle_dir: Path) -> Dict[str, Any]:
+    """Load .plot bundle contents from directory.
 
     Args:
         bundle_dir: Path to the bundle directory.
@@ -80,12 +79,12 @@ def load_pltz_bundle(bundle_dir: Path) -> Dict[str, Any]:
     # Find the spec file (could be plot.json or {basename}.json)
     spec_file = None
     for f in bundle_dir.glob("*.json"):
-        if not f.name.startswith('.'):  # Skip hidden files
+        if not f.name.startswith("."):  # Skip hidden files
             spec_file = f
             break
 
     if spec_file and spec_file.exists():
-        with open(spec_file, "r") as f:
+        with open(spec_file) as f:
             result["spec"] = json.load(f)
         # Extract basename from spec filename
         result["basename"] = spec_file.stem
@@ -96,24 +95,25 @@ def load_pltz_bundle(bundle_dir: Path) -> Dict[str, Any]:
     # Find and load CSV data (could be plot.csv or {basename}.csv)
     csv_file = None
     for f in bundle_dir.glob("*.csv"):
-        if not f.name.startswith('.'):  # Skip hidden files
+        if not f.name.startswith("."):  # Skip hidden files
             csv_file = f
             break
 
     if csv_file and csv_file.exists():
         try:
             import pandas as pd
+
             result["data"] = pd.read_csv(csv_file)
         except ImportError:
             # Fallback to basic CSV reading
-            with open(csv_file, "r") as f:
+            with open(csv_file) as f:
                 result["data"] = f.read()
 
     return result
 
 
-def save_pltz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
-    """Save .pltz bundle contents to directory.
+def save_plot_bundle(data: Dict[str, Any], dir_path: Path) -> None:
+    """Save .plot bundle contents to directory.
 
     Args:
         data: Bundle data dictionary containing:
@@ -154,12 +154,14 @@ def save_pltz_bundle(data: Dict[str, Any], dir_path: Path) -> None:
         generate_bundle_overview(dir_path, spec, data, basename)
     except Exception as e:
         import logging
+
         logging.getLogger("scitex").debug(f"Could not generate overview: {e}")
 
 
-def _save_exports(data: Dict[str, Any], dir_path: Path, spec: Dict, basename: str = "plot") -> None:
+def _save_exports(
+    data: Dict[str, Any], dir_path: Path, spec: Dict, basename: str = "plot"
+) -> None:
     """Save export files (PNG, SVG, PDF) with embedded metadata."""
-    from scitex.io._metadata import embed_metadata
 
     for fmt in ["png", "svg", "pdf"]:
         if fmt not in data:
@@ -180,14 +182,13 @@ def _save_exports(data: Dict[str, Any], dir_path: Path, spec: Dict, basename: st
                 _embed_metadata_in_export(out_file, spec, fmt)
             except Exception as e:
                 import logging
+
                 logging.getLogger("scitex").debug(
                     f"Could not embed metadata in {out_file}: {e}"
                 )
 
 
-def _embed_metadata_in_export(
-    file_path: Path, spec: Dict[str, Any], fmt: str
-) -> None:
+def _embed_metadata_in_export(file_path: Path, spec: Dict[str, Any], fmt: str) -> None:
     """Embed bundle spec metadata into exported image files."""
     from scitex.io._metadata import embed_metadata
 
@@ -223,11 +224,15 @@ def _save_hitmaps(data: Dict[str, Any], dir_path: Path, basename: str = "plot") 
         if isinstance(hitmap_svg_data, bytes):
             with open(hitmap_svg_file, "wb") as f:
                 f.write(hitmap_svg_data)
-        elif isinstance(hitmap_svg_data, (str, Path)) and Path(hitmap_svg_data).exists():
+        elif (
+            isinstance(hitmap_svg_data, (str, Path)) and Path(hitmap_svg_data).exists()
+        ):
             shutil.copy(hitmap_svg_data, hitmap_svg_file)
 
 
-def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: str = "plot") -> None:
+def generate_bundle_overview(
+    dir_path: Path, spec: Dict, data: Dict, basename: str = "plot"
+) -> None:
     """Generate overview image showing bundle contents visually.
 
     Creates a comprehensive overview image with:
@@ -246,15 +251,22 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: s
     basename : str
         Base filename for bundle files (e.g., "myplot").
     """
-    import matplotlib.pyplot as plt
     import matplotlib.gridspec as gridspec
+    import matplotlib.pyplot as plt
     from PIL import Image
 
     # Create figure with custom layout
     fig = plt.figure(figsize=(16, 10), facecolor="white")
     gs = gridspec.GridSpec(
-        2, 4, figure=fig, hspace=0.3, wspace=0.3,
-        left=0.05, right=0.95, top=0.92, bottom=0.05,
+        2,
+        4,
+        figure=fig,
+        hspace=0.3,
+        wspace=0.3,
+        left=0.05,
+        right=0.95,
+        top=0.92,
+        bottom=0.05,
     )
 
     # Title
@@ -282,8 +294,12 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: s
         csv_text.append("No CSV data")
 
     ax_csv.text(
-        0.05, 0.95, "\n".join(csv_text),
-        transform=ax_csv.transAxes, fontsize=9, verticalalignment="top",
+        0.05,
+        0.95,
+        "\n".join(csv_text),
+        transform=ax_csv.transAxes,
+        fontsize=9,
+        verticalalignment="top",
         fontfamily="monospace",
         bbox=dict(boxstyle="round", facecolor="#f0f0f0", alpha=0.8),
     )
@@ -295,8 +311,12 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: s
 
     json_lines = _json_to_tree(spec, max_depth=4, max_keys=8, max_lines=25)
     ax_json.text(
-        0.02, 0.98, "\n".join(json_lines),
-        transform=ax_json.transAxes, fontsize=7, verticalalignment="top",
+        0.02,
+        0.98,
+        "\n".join(json_lines),
+        transform=ax_json.transAxes,
+        fontsize=7,
+        verticalalignment="top",
         fontfamily="monospace",
         bbox=dict(boxstyle="round", facecolor="#f0f0f0", alpha=0.8),
     )
@@ -328,9 +348,14 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: s
     if svg_path.exists():
         svg_size = svg_path.stat().st_size
         ax_svg.text(
-            0.5, 0.5, f"SVG File\n{svg_size/1024:.1f} KB",
-            transform=ax_svg.transAxes, ha="center", va="center",
-            fontsize=12, bbox=dict(boxstyle="round", facecolor="#e0e0ff"),
+            0.5,
+            0.5,
+            f"SVG File\n{svg_size / 1024:.1f} KB",
+            transform=ax_svg.transAxes,
+            ha="center",
+            va="center",
+            fontsize=12,
+            bbox=dict(boxstyle="round", facecolor="#e0e0ff"),
         )
     ax_svg.axis("off")
 
@@ -341,9 +366,14 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: s
     if hitmap_svg_path.exists():
         svg_size = hitmap_svg_path.stat().st_size
         ax_hitmap_svg.text(
-            0.5, 0.5, f"SVG Hitmap\n{svg_size/1024:.1f} KB",
-            transform=ax_hitmap_svg.transAxes, ha="center", va="center",
-            fontsize=12, bbox=dict(boxstyle="round", facecolor="#ffe0e0"),
+            0.5,
+            0.5,
+            f"SVG Hitmap\n{svg_size / 1024:.1f} KB",
+            transform=ax_hitmap_svg.transAxes,
+            ha="center",
+            va="center",
+            fontsize=12,
+            bbox=dict(boxstyle="round", facecolor="#ffe0e0"),
         )
     ax_hitmap_svg.axis("off")
 
@@ -363,9 +393,14 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: s
             ax_diff.set_xlabel("Red=Hitmap, Blue=PNG", fontsize=9)
         else:
             ax_diff.text(
-                0.5, 0.5, "Size mismatch!",
-                transform=ax_diff.transAxes, ha="center", va="center",
-                fontsize=14, color="red",
+                0.5,
+                0.5,
+                "Size mismatch!",
+                transform=ax_diff.transAxes,
+                ha="center",
+                va="center",
+                fontsize=14,
+                color="red",
             )
     ax_diff.axis("off")
 
@@ -375,13 +410,21 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: s
     ax_valid.axis("off")
 
     validation_text = _generate_alignment_validation(png_path, hitmap_path)
-    color = "green" if all(
-        "✓" in t for t in validation_text if t.startswith("✓") or t.startswith("✗")
-    ) else "red"
+    color = (
+        "green"
+        if all(
+            "✓" in t for t in validation_text if t.startswith("✓") or t.startswith("✗")
+        )
+        else "red"
+    )
 
     ax_valid.text(
-        0.05, 0.95, "\n".join(validation_text),
-        transform=ax_valid.transAxes, fontsize=9, verticalalignment="top",
+        0.05,
+        0.95,
+        "\n".join(validation_text),
+        transform=ax_valid.transAxes,
+        fontsize=9,
+        verticalalignment="top",
         fontfamily="monospace",
         bbox=dict(
             boxstyle="round",
@@ -394,7 +437,9 @@ def generate_bundle_overview(dir_path: Path, spec: Dict, data: Dict, basename: s
     overview_path = dir_path / f"{basename}_overview.png"
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message=".*tight_layout.*")
-        fig.savefig(overview_path, dpi=get_preview_dpi(), bbox_inches="tight", facecolor="white")
+        fig.savefig(
+            overview_path, dpi=get_preview_dpi(), bbox_inches="tight", facecolor="white"
+        )
     plt.close(fig)
 
 
@@ -416,9 +461,11 @@ def _json_to_tree(
             if isinstance(v, dict):
                 if depth < max_depth - 1 and v:
                     lines.append(prefix + branch + f"{k}:")
-                    lines.extend(_json_to_tree(
-                        v, next_prefix, max_depth, depth + 1, max_keys, max_lines
-                    ))
+                    lines.extend(
+                        _json_to_tree(
+                            v, next_prefix, max_depth, depth + 1, max_keys, max_lines
+                        )
+                    )
                 else:
                     lines.append(prefix + branch + f"{k}: {{{len(v)} keys}}")
             elif isinstance(v, list):
@@ -473,9 +520,9 @@ def _generate_alignment_validation(png_path: Path, hitmap_path: Path) -> List[st
 
         bounds_match = png_bounds == hitmap_bounds
         validation_text.append(
-            f"✓ Content aligned"
+            "✓ Content aligned"
             if bounds_match
-            else f"✗ Content offset: {hitmap_bounds[0]-png_bounds[0]}, {hitmap_bounds[1]-png_bounds[1]}"
+            else f"✗ Content offset: {hitmap_bounds[0] - png_bounds[0]}, {hitmap_bounds[1] - png_bounds[1]}"
         )
 
         validation_text.append("")

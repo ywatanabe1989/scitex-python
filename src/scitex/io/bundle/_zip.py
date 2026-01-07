@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-16 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_zip.py
 
 """
 SciTeX ZipBundle - In-memory zip archive handler with atomic writes.
 
-Provides efficient access to .figz, .pltz, .statsz bundles without extracting
-to disk. Supports:
+Provides efficient access to .figure.zip, .plot.zip, .stats.zip bundles without
+extracting to disk. Supports:
     - In-memory file reading
     - Atomic writes using temp files
     - Context manager protocol
@@ -41,19 +40,19 @@ class ZipBundle:
 
     Usage:
         # Reading
-        with ZipBundle("figure.figz") as bundle:
+        with ZipBundle("figure.figure.zip") as bundle:
             spec = bundle.read_json("spec.json")
             csv_data = bundle.read_csv("data.csv")
             png_bytes = bundle.read_bytes("exports/figure.png")
 
         # Writing
-        with ZipBundle("output.pltz", mode="w") as bundle:
+        with ZipBundle("output.plot.zip", mode="w") as bundle:
             bundle.write_json("spec.json", spec_dict)
             bundle.write_csv("data.csv", dataframe)
             bundle.write_bytes("exports/plot.png", png_bytes)
 
         # Modifying (read then write atomically)
-        with ZipBundle("figure.figz", mode="a") as bundle:
+        with ZipBundle("figure.figure.zip", mode="a") as bundle:
             spec = bundle.read_json("spec.json")
             spec["title"] = "Updated"
             bundle.write_json("spec.json", spec)
@@ -68,7 +67,7 @@ class ZipBundle:
         """Initialize ZipBundle.
 
         Args:
-            path: Path to zip file (.figz, .pltz, .statsz)
+            path: Path to zip file (.figure.zip, .plot.zip, .stats.zip)
             mode: 'r' for read, 'w' for write, 'a' for append/modify
             compression: ZIP compression method (default: ZIP_DEFLATED)
         """
@@ -100,18 +99,14 @@ class ZipBundle:
             self._zipfile = zipfile.ZipFile(self.path, "r")
         elif self.mode == "w":
             self._temp_path = Path(tempfile.mktemp(suffix=self.path.suffix))
-            self._zipfile = zipfile.ZipFile(
-                self._temp_path, "w", self.compression
-            )
+            self._zipfile = zipfile.ZipFile(self._temp_path, "w", self.compression)
         elif self.mode == "a":
             if self.path.exists():
                 with zipfile.ZipFile(self.path, "r") as zf:
                     for name in zf.namelist():
                         self._cache[name] = zf.read(name)
             self._temp_path = Path(tempfile.mktemp(suffix=self.path.suffix))
-            self._zipfile = zipfile.ZipFile(
-                self._temp_path, "w", self.compression
-            )
+            self._zipfile = zipfile.ZipFile(self._temp_path, "w", self.compression)
         else:
             raise ValueError(f"Invalid mode: {self.mode}")
 
@@ -282,9 +277,7 @@ class ZipBundle:
         """
         self.write_bytes(name, text.encode(encoding))
 
-    def write_json(
-        self, name: str, data: Dict[str, Any], indent: int = 2
-    ) -> None:
+    def write_json(self, name: str, data: Dict[str, Any], indent: int = 2) -> None:
         """Write dictionary as JSON file.
 
         Args:
@@ -359,7 +352,7 @@ def open(path: Union[str, Path], mode: str = "r") -> ZipBundle:
         ZipBundle instance (use as context manager).
 
     Example:
-        with open("figure.figz") as bundle:
+        with open("figure.figure.zip") as bundle:
             spec = bundle.spec
             data = bundle.data
     """
@@ -376,7 +369,7 @@ def create(
     """Create a new bundle with atomic write.
 
     Args:
-        path: Output path (.figz, .pltz, or .statsz).
+        path: Output path (.figure.zip, .plot.zip, or .stats.zip).
         spec: Bundle specification dictionary.
         data: Optional CSV data as DataFrame.
         style: Optional style dictionary.
@@ -387,7 +380,7 @@ def create(
 
     Example:
         create(
-            "plot.pltz",
+            "plot.plot.zip",
             spec={"schema": {"name": "scitex.plt", "version": "1.0"}},
             data=df,
             exports={"exports/plot.png": png_bytes},
@@ -415,15 +408,15 @@ def zip_directory(
     source_dir: Union[str, Path],
     output_path: Optional[Union[str, Path]] = None,
 ) -> Path:
-    """Convert a directory bundle (.pltz.d, .figz.d) to a ZIP bundle (.pltz, .figz).
+    """Convert a directory bundle (.plot, .figure) to a ZIP bundle (.plot.zip, .figure.zip).
 
     Creates a ZIP archive from an existing directory bundle, preserving
     the internal structure. The ZIP file is created atomically using a temp file.
 
     Args:
-        source_dir: Path to directory bundle (e.g., "panel_A.pltz.d", "figure.figz.d")
+        source_dir: Path to directory bundle (e.g., "panel_A.plot", "figure.figure")
         output_path: Optional output ZIP path. If not provided, derives from source_dir
-            by replacing .pltz.d -> .pltz or .figz.d -> .figz
+            by appending .zip (e.g., .plot -> .plot.zip)
 
     Returns:
         Path to created ZIP bundle.
@@ -433,11 +426,11 @@ def zip_directory(
         ValueError: If source is not a valid bundle directory.
 
     Example:
-        # Convert panel_A.pltz.d to panel_A.pltz
-        zip_path = zip_directory("panel_A.pltz.d")
+        # Convert panel_A.plot to panel_A.plot.zip
+        zip_path = zip_directory("panel_A.plot")
 
         # Convert with custom output path
-        zip_path = zip_directory("A.pltz.d", "output/A.pltz")
+        zip_path = zip_directory("A.plot", "output/A.plot.zip")
     """
     source_dir = Path(source_dir)
 
@@ -449,12 +442,9 @@ def zip_directory(
 
     if output_path is None:
         dir_name = source_dir.name
-        if dir_name.endswith(".pltz.d"):
-            zip_name = dir_name.replace(".pltz.d", ".pltz")
-        elif dir_name.endswith(".figz.d"):
-            zip_name = dir_name.replace(".figz.d", ".figz")
-        elif dir_name.endswith(".statsz.d"):
-            zip_name = dir_name.replace(".statsz.d", ".statsz")
+        # New format: .plot -> .plot.zip, .figure -> .figure.zip, .stats -> .stats.zip
+        if dir_name.endswith((".plot", ".figure", ".stats")):
+            zip_name = dir_name + ".zip"
         else:
             zip_name = dir_name + ".zip"
         output_path = source_dir.parent / zip_name

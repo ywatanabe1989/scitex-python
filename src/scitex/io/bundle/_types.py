@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-12-16 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_types.py
+# Timestamp: 2026-01-07
+# File: src/scitex/io/bundle/_types.py
 
 """
 SciTeX Bundle Types and Constants.
 
 Defines bundle types, extensions, and error classes used across the bundle module.
+
+Extension formats:
+    - ZIP: .figure.zip, .plot.zip, .stats.zip
+    - Directory: .figure/, .plot/, .stats/
 """
 
 from typing import Tuple
@@ -18,18 +21,28 @@ __all__ = [
     "BundleNotFoundError",
     "NestedBundleNotFoundError",
     "EXTENSIONS",
-    "FIGZ",
-    "PLTZ",
-    "STATSZ",
+    "DIR_EXTENSIONS",
+    "FIGURE",
+    "PLOT",
+    "STATS",
 ]
 
-# Bundle extensions
-EXTENSIONS: Tuple[str, ...] = (".figz", ".pltz", ".statsz")
+# =============================================================================
+# ZIP extensions
+# =============================================================================
+EXTENSIONS: Tuple[str, ...] = (".figure.zip", ".plot.zip", ".stats.zip")
 
-# Bundle type constants (for convenience)
-FIGZ = "figz"
-PLTZ = "pltz"
-STATSZ = "statsz"
+# =============================================================================
+# Directory extensions
+# =============================================================================
+DIR_EXTENSIONS: Tuple[str, ...] = (".figure", ".plot", ".stats")
+
+# =============================================================================
+# Bundle type constants
+# =============================================================================
+FIGURE = "figure"
+PLOT = "plot"
+STATS = "stats"
 
 
 class BundleType:
@@ -38,13 +51,25 @@ class BundleType:
     Usage:
         from scitex.io.bundle import BundleType
 
-        if bundle_type == BundleType.FIGZ:
+        if bundle_type == BundleType.FIGURE:
             ...
     """
 
-    FIGZ = "figz"
-    PLTZ = "pltz"
-    STATSZ = "statsz"
+    FIGURE = "figure"
+    PLOT = "plot"
+    STATS = "stats"
+
+    @classmethod
+    def normalize(cls, bundle_type: str) -> str:
+        """Normalize bundle type to standard name.
+
+        Args:
+            bundle_type: Bundle type string.
+
+        Returns:
+            Normalized type ('figure', 'plot', 'stats').
+        """
+        return bundle_type.lower()
 
 
 class BundleError(Exception):

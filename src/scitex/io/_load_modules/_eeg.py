@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-14 07:56:27 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/io/_load_modules/_eeg.py
 
@@ -10,7 +9,7 @@ from typing import Any
 import mne
 
 
-def _load_eeg_data(path: str, **kwargs) -> Any:
+def _load_eeg_data(lpath: str, **kwargs) -> Any:
     """
     Load EEG data based on file extension and associated files using MNE-Python.
 
@@ -43,21 +42,24 @@ def _load_eeg_data(path: str, **kwargs) -> Any:
     extension = lpath.split(".")[-1]
 
     allowed_extensions = [
-        ".vhdr",
-        ".vmrk",
-        ".edf",
-        ".bdf",
-        ".gdf",
-        ".cnt",
-        ".egi",
-        ".eeg",
-        ".set",
+        "vhdr",
+        "vmrk",
+        "edf",
+        "bdf",
+        "gdf",
+        "cnt",
+        "egi",
+        "eeg",
+        "set",
     ]
 
     if extension not in allowed_extensions:
         raise ValueError(
             f"File must have one of these extensions: {', '.join(allowed_extensions)}"
         )
+
+    # Remove preload from kwargs if present - we always use preload=True
+    kwargs.pop("preload", None)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)
@@ -98,9 +100,11 @@ def _load_eeg_data(path: str, **kwargs) -> Any:
                 lpath_v = lpath.replace(".eeg", ".vhdr")
                 raw = mne.io.read_raw_brainvision(lpath_v, preload=True, **kwargs)
             # Nihon Koden
-            if is_NihonKoden:
+            elif is_NihonKoden:
                 # raw = mne.io.read_raw_nihon(lpath, preload=True, **kwargs)
                 raw = mne.io.read_raw(lpath, preload=True, **kwargs)
+            else:
+                raise ValueError("No associated files found for .eeg file")
         else:
             raise ValueError(f"Unsupported file extension: {extension}")
 
