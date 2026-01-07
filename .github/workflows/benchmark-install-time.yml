@@ -1,0 +1,113 @@
+# Benchmark module installation times using uv
+# Results stored as workflow artifacts and can be used to generate badges
+
+name: Install Time Benchmarks
+
+on:
+  release:
+    types: [published]
+  schedule:
+    - cron: '0 6 * * 0'  # Weekly on Sunday at 6 AM UTC
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    name: Benchmark Install Times
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Benchmark core installation
+        id: core
+        run: |
+          START=$(date +%s.%N)
+          uv pip install scitex --system
+          END=$(date +%s.%N)
+          TIME=$(echo "$END - $START" | bc)
+          echo "time=$TIME" >> $GITHUB_OUTPUT
+          echo "Core: ${TIME}s"
+
+      - name: Benchmark module installations
+        run: |
+          mkdir -p benchmark-results
+
+          # List of modules to benchmark
+          MODULES="ai audio benchmark bridge browser capture cli config db decorators dev diagram dsp dt gen git io linalg logging msword nn parallel path pd plt repro resource scholar session sh stats str tex torch types utils web writer"
+
+          echo "module,install_time_seconds" > benchmark-results/install-times.csv
+          echo "core,${{ steps.core.outputs.time }}" >> benchmark-results/install-times.csv
+
+          for module in $MODULES; do
+            echo "Benchmarking scitex[$module]..."
+
+            # Create fresh venv for each module
+            uv venv .venv-$module --python 3.11
+
+            START=$(date +%s.%N)
+            uv pip install "scitex[$module]" --python .venv-$module/bin/python 2>/dev/null || true
+            END=$(date +%s.%N)
+            TIME=$(echo "$END - $START" | bc)
+
+            echo "$module,$TIME" >> benchmark-results/install-times.csv
+            echo "  $module: ${TIME}s"
+
+            # Cleanup
+            rm -rf .venv-$module
+          done
+
+      - name: Generate summary
+        run: |
+          echo "## Installation Time Benchmarks" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Module | Install Time (s) |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|------------------|" >> $GITHUB_STEP_SUMMARY
+
+          tail -n +2 benchmark-results/install-times.csv | sort -t',' -k2 -n | while IFS=',' read -r module time; do
+            printf "| %s | %.2f |\n" "$module" "$time" >> $GITHUB_STEP_SUMMARY
+          done
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: install-time-benchmarks
+          path: benchmark-results/
+          retention-days: 90
+
+      - name: Create JSON for badges
+        run: |
+          # Generate JSON files for shields.io endpoint badges
+          mkdir -p benchmark-results/badges
+
+          while IFS=',' read -r module time; do
+            [ "$module" = "module" ] && continue  # Skip header
+            TIME_FORMATTED=$(printf "%.1fs" "$time")
+
+            # Color based on time: green < 10s, yellow < 30s, red >= 30s
+            if (( $(echo "$time < 10" | bc -l) )); then
+              COLOR="brightgreen"
+            elif (( $(echo "$time < 30" | bc -l) )); then
+              COLOR="yellow"
+            else
+              COLOR="red"
+            fi
+
+            cat > "benchmark-results/badges/${module}.json" << EOF
+          {
+            "schemaVersion": 1,
+            "label": "install",
+            "message": "$TIME_FORMATTED",
+            "color": "$COLOR"
+          }
+          EOF
+          done < benchmark-results/install-times.csv
