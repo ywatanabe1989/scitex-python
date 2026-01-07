@@ -94,25 +94,26 @@ ai = [
     "google-genai",
     "groq",
     "scikit-learn",
-    "optuna",
     "joblib",
     "seaborn",
     "scipy",
     "matplotlib",
     "natsort",
     "pillow",
-    "psutil",
     "pyyaml",
     "requests",
-    "torch",
     "ruamel.yaml",
     "xarray",
     "umap-learn",
     "sktime",
     "markdown2",
-    "pytorch_pretrained_vit",
-    "torchvision",
     "imbalanced-learn",
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "optuna",
+    # "psutil",
+    # "torch",
+    # "pytorch_pretrained_vit",
+    # "torchvision",
 ]
 
 # Audio Module - Text-to-Speech
@@ -191,12 +192,13 @@ db = [
 # Use: pip install scitex[decorators]
 decorators = [
     "joblib",
-    "torch",
     "tqdm",
     "xarray",
     "pytest-asyncio",
     "matplotlib",
     "scipy",
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "torch",
 ]
 
 # Diagram Module - Diagram generation
@@ -211,19 +213,20 @@ dsp = [
     "scipy",
     "sounddevice",
     "matplotlib",
-    "mne",
-    "torch",
     "joblib",
-    "ripple_detection",
     "tensorpac",
     "ruamel.yaml",
     "h5py",
     "readchar",
-    "torchsummary",
-    "julius",
-    "torchaudio",
     "xarray",
     "seaborn",
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "mne",
+    # "torch",
+    # "ripple_detection",
+    # "torchsummary",
+    # "julius",
+    # "torchaudio",
 ]
 
 # DevTools Module - scitex.dev code analysis and development tools
@@ -255,8 +258,9 @@ gen = [
     "matplotlib",
     "xarray",
     "requests",
-    "torch",
     "joblib",
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "torch",
 ]
 
 # Git Module - Git operations
@@ -295,14 +299,15 @@ io = [
     "GitPython",
     "scipy",
     "matplotlib",
-    "mne",
-    "optuna",
-    "catboost",
-    "psutil",
     "pyarrow",
     "pyyaml",
-    "torch",
     "tqdm",
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "mne",
+    # "optuna",
+    # "catboost",
+    # "psutil",
+    # "torch",
 ]
 
 # Linalg Module - Linear algebra
@@ -312,9 +317,10 @@ linalg = [
     "sympy",
     "geom_median",
     "matplotlib",
-    "torch",
     "joblib",
     "xarray",
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "torch",
 ]
 
 # Logging Module - Enhanced logging
@@ -333,21 +339,22 @@ msword = [
 # NN Module - Neural Networks
 # Use: pip install scitex[nn]
 nn = [
-    "torch",
-    "torchaudio",
-    "torchsummary",
-    "julius",
     "seaborn",
     "ipdb",
     "matplotlib",
     "joblib",
-    "mne",
-    "ripple_detection",
     "tensorpac",
     "ruamel.yaml",
     "h5py",
     "readchar",
     "xarray",
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "torch",
+    # "torchaudio",
+    # "torchsummary",
+    # "julius",
+    # "mne",
+    # "ripple_detection",
 ]
 
 # Parallel Module - Parallel processing
@@ -387,10 +394,11 @@ plt = [
 # Repro Module - Reproducibility tools
 # Use: pip install scitex[repro]
 repro = [
-    "torch",
     "matplotlib",
-    "jax",
-    "tensorflow",
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "torch",    
+    # "jax",
+    # "tensorflow",
 ]
 
 # Resource Module - Resource monitoring
@@ -399,12 +407,13 @@ resource = [
     "psutil",
     "matplotlib",
     "pyyaml",
-    "torch",
     "joblib",
     "ruamel.yaml",
     "h5py",
     "scipy",
     "readchar",
+    # # Heavy dependencies handled by _AVAILABLE flags    
+    # "torch",    
 ]
 
 # Scholar Module - Paper management & browser
@@ -440,10 +449,11 @@ scholar = [
     "requests",
     "matplotlib",
     "pyyaml",
-    "torch",
     "tqdm",
     "sql-manager",
     "ruamel.yaml",
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "torch",    
 ]
 
 # Session Module - Session management
@@ -465,8 +475,9 @@ stats = [
     "scipy",
     "statsmodels",
     "matplotlib",
-    "torch",
     "tabulate",
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "torch",    
 ]
 
 # Str Module - String utilities
@@ -492,8 +503,9 @@ torch = [
 # Types Module - Type utilities
 # Use: pip install scitex[types]
 types = [
-    "torch",
     "xarray",
+    # # Heavy dependencies handled by _AVAILABLE flags    
+    # "torch",    
 ]
 
 # Utils Module - General utilities
@@ -523,13 +535,14 @@ web = [
     "xarray",
     "seaborn",
     "scipy",
-    "torch",
-    "umap-learn",
     "markdown2",
     "anthropic",
     "openai",
     "google-genai",
     "groq",
+    # # Heavy dependencies handled by _AVAILABLE flags        
+    # "torch",    
+    # "umap-learn",    
 ]
 
 # Writer Module - Academic paper writing
@@ -541,6 +554,34 @@ writer = [
     "matplotlib",
     "GitPython",
     "pytest-asyncio",
+]
+
+# --------------------------------------------
+# Heavy Dependencies (Optional)
+# --------------------------------------------
+# Use: pip install scitex[heavy]
+# Or combine: pip install scitex[io,heavy]
+heavy = [
+    # PyTorch ecosystem
+    "torch",
+    "torchvision",
+    "torchaudio",
+    "torchsummary",
+    "julius",
+    "pytorch_pretrained_vit",
+    # Neuroscience
+    "mne",
+    "ripple_detection",
+    # ML/Optimization
+    "optuna",
+    "catboost",
+    # Other ML frameworks
+    "jax",
+    "tensorflow",
+    # Visualization
+    "umap-learn",
+    # System
+    "psutil",
 ]
 
 # --------------------------------------------
@@ -591,6 +632,7 @@ dev = [
     "types-setuptools",
     # Maintenance scripts
     "stdlib-list",
+    "tomlkit",
     "matplotlib",
     "pyyaml",
 ]
