@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-07 22:01:07
+!-- Timestamp: 2026-01-08 09:40:07
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -10,6 +10,8 @@ A Python framework for scientific research that makes the entire research pipeli
 
 Part of the fully open-source SciTeX project: https://scitex.ai
 
+## 📊 Status
+
 <!-- badges -->
 <div align="center">
 <table>
@@ -19,14 +21,6 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 <a href="https://badge.fury.io/py/scitex"><img src="https://badge.fury.io/py/scitex.svg" alt="PyPI version"></a>
 <a href="https://pypi.org/project/scitex/"><img src="https://img.shields.io/pypi/pyversions/scitex.svg" alt="Python Versions"></a>
 <a href="https://github.com/ywatanabe1989/SciTeX-Code/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ywatanabe1989/SciTeX-Code" alt="License"></a>
-</td>
-</tr>
-<tr>
-<td align="center"><strong>Quality</strong></td>
-<td>
-<a href="https://scitex.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/scitex/badge/?version=latest" alt="Documentation"></a>
-<a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code Style"></a>
-<a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white" alt="Pre-commit"></a>
 </td>
 </tr>
 <tr>
@@ -47,76 +41,76 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 
 | Module | Tests | Install | Description |
 |--------|-------|---------|-------------|
-| `io` | [![io](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-io.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-io.yml) | `uv pip install scitex[io]` | Universal I/O (30+ formats) |
-| `path` | [![path](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-path.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-path.yml) | `uv pip install scitex[path]` | Path utilities |
-| `str` | [![str](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-str.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-str.yml) | `uv pip install scitex[str]` | String processing |
-| `dict` | [![dict](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dict.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dict.yml) | core | Dictionary utilities |
-| `types` | [![types](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-types.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-types.yml) | core | Type checking |
-| `config` | [![config](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-config.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-config.yml) | `uv pip install scitex[config]` | Configuration management |
-| `utils` | [![utils](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-utils.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-utils.yml) | `uv pip install scitex[utils]` | General utilities |
-| `decorators` | [![decorators](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-decorators.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-decorators.yml) | `uv pip install scitex[decorators]` | Function decorators |
-| `logging` | [![logging](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-logging.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-logging.yml) | `uv pip install scitex[logging]` | Structured logging |
-| `gen` | [![gen](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-gen.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-gen.yml) | `uv pip install scitex[gen]` | Project setup |
+| [`io`](./src/scitex/io#readme) | [![io](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-io.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-io.yml) | `uv pip install scitex[io]` | Universal I/O (30+ formats) |
+| [`path`](./src/scitex/path#readme) | [![path](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-path.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-path.yml) | `uv pip install scitex[path]` | Path utilities |
+| [`str`](./src/scitex/str#readme) | [![str](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-str.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-str.yml) | `uv pip install scitex[str]` | String processing |
+| [`dict`](./src/scitex/dict#readme) | [![dict](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dict.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dict.yml) | core | Dictionary utilities |
+| [`types`](./src/scitex/types#readme) | [![types](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-types.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-types.yml) | core | Type checking |
+| [`config`](./src/scitex/config#readme) | [![config](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-config.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-config.yml) | `uv pip install scitex[config]` | Configuration management |
+| [`utils`](./src/scitex/utils#readme) | [![utils](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-utils.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-utils.yml) | `uv pip install scitex[utils]` | General utilities |
+| [`decorators`](./src/scitex/decorators#readme) | [![decorators](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-decorators.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-decorators.yml) | `uv pip install scitex[decorators]` | Function decorators |
+| [`logging`](./src/scitex/logging#readme) | [![logging](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-logging.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-logging.yml) | `uv pip install scitex[logging]` | Structured logging |
+| [`gen`](./src/scitex/gen#readme) | [![gen](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-gen.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-gen.yml) | `uv pip install scitex[gen]` | Project setup |
 
 ### Data Science & Statistics
 
 | Module | Tests | Install | Description |
 |--------|-------|---------|-------------|
-| `stats` | [![stats](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-stats.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-stats.yml) | `uv pip install scitex[stats]` | Statistical tests & analysis |
-| `pd` | [![pd](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-pd.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-pd.yml) | `uv pip install scitex[pd]` | Pandas extensions |
-| `linalg` | [![linalg](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-linalg.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-linalg.yml) | `uv pip install scitex[linalg]` | Linear algebra |
-| `plt` | [![plt](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-plt.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-plt.yml) | `uv pip install scitex[plt]` | Enhanced matplotlib |
-| `dsp` | [![dsp](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dsp.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dsp.yml) | `uv pip install scitex[dsp]` | Signal processing |
+| [`stats`](./src/scitex/stats#readme) | [![stats](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-stats.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-stats.yml) | `uv pip install scitex[stats]` | Statistical tests & analysis |
+| [`pd`](./src/scitex/pd#readme) | [![pd](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-pd.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-pd.yml) | `uv pip install scitex[pd]` | Pandas extensions |
+| [`linalg`](./src/scitex/linalg#readme) | [![linalg](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-linalg.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-linalg.yml) | `uv pip install scitex[linalg]` | Linear algebra |
+| [`plt`](./src/scitex/plt#readme) | [![plt](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-plt.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-plt.yml) | `uv pip install scitex[plt]` | Enhanced matplotlib |
+| [`dsp`](./src/scitex/dsp#readme) | [![dsp](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dsp.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dsp.yml) | `uv pip install scitex[dsp]` | Signal processing |
 
 ### AI & Machine Learning
 
 | Module | Tests | Install | Description |
 |--------|-------|---------|-------------|
-| `ai` | [![ai](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-ai.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-ai.yml) | `uv pip install scitex[ai]` | GenAI (7 providers) |
-| `nn` | [![nn](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-nn.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-nn.yml) | `uv pip install scitex[nn]` | Neural network layers |
-| `torch` | [![torch](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-torch.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-torch.yml) | `uv pip install scitex[torch]` | PyTorch utilities |
+| [`ai`](./src/scitex/ai#readme) | [![ai](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-ai.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-ai.yml) | `uv pip install scitex[ai]` | GenAI (7 providers) |
+| [`nn`](./src/scitex/nn#readme) | [![nn](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-nn.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-nn.yml) | `uv pip install scitex[nn]` | Neural network layers |
+| [`torch`](./src/scitex/torch#readme) | [![torch](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-torch.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-torch.yml) | `uv pip install scitex[torch]` | PyTorch utilities |
 
 ### System & Tools
 
 | Module | Tests | Install | Description |
 |--------|-------|---------|-------------|
-| `cli` | [![cli](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-cli.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-cli.yml) | `uv pip install scitex[cli]` | Command-line tools |
-| `sh` | [![sh](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-sh.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-sh.yml) | `uv pip install scitex[sh]` | Shell utilities |
-| `git` | [![git](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-git.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-git.yml) | `uv pip install scitex[git]` | Git operations |
-| `session` | [![session](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-session.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-session.yml) | `uv pip install scitex[session]` | Session management |
-| `resource` | [![resource](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-resource.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-resource.yml) | `uv pip install scitex[resource]` | System monitoring |
-| `db` | [![db](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-db.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-db.yml) | `uv pip install scitex[db]` | Database abstractions |
+| [`cli`](./src/scitex/cli#readme) | [![cli](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-cli.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-cli.yml) | `uv pip install scitex[cli]` | Command-line tools |
+| [`sh`](./src/scitex/sh#readme) | [![sh](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-sh.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-sh.yml) | `uv pip install scitex[sh]` | Shell utilities |
+| [`git`](./src/scitex/git#readme) | [![git](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-git.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-git.yml) | `uv pip install scitex[git]` | Git operations |
+| [`session`](./src/scitex/session#readme) | [![session](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-session.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-session.yml) | `uv pip install scitex[session]` | Session management |
+| [`resource`](./src/scitex/resource#readme) | [![resource](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-resource.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-resource.yml) | `uv pip install scitex[resource]` | System monitoring |
+| [`db`](./src/scitex/db#readme) | [![db](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-db.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-db.yml) | `uv pip install scitex[db]` | Database abstractions |
 
 ### Research & Publishing
 
 | Module | Tests | Install | Description |
 |--------|-------|---------|-------------|
-| `writer` | [![writer](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-writer.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-writer.yml) | `uv pip install scitex[writer]` | Document generation |
-| `tex` | [![tex](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-tex.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-tex.yml) | `uv pip install scitex[tex]` | LaTeX processing |
-| `msword` | [![msword](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-msword.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-msword.yml) | `uv pip install scitex[msword]` | MS Word conversion |
-| `scholar` | [![scholar](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-scholar.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-scholar.yml) | `uv pip install scitex[scholar]` | Literature management |
-| `diagram` | [![diagram](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-diagram.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-diagram.yml) | `uv pip install scitex[diagram]` | Diagram generation |
+| [`writer`](./src/scitex/writer#readme) | [![writer](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-writer.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-writer.yml) | `uv pip install scitex[writer]` | Document generation |
+| [`tex`](./src/scitex/tex#readme) | [![tex](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-tex.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-tex.yml) | `uv pip install scitex[tex]` | LaTeX processing |
+| [`msword`](./src/scitex/msword#readme) | [![msword](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-msword.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-msword.yml) | `uv pip install scitex[msword]` | MS Word conversion |
+| [`scholar`](./src/scitex/scholar#readme) | [![scholar](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-scholar.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-scholar.yml) | `uv pip install scitex[scholar]` | Literature management |
+| [`diagram`](./src/scitex/diagram#readme) | [![diagram](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-diagram.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-diagram.yml) | `uv pip install scitex[diagram]` | Diagram generation |
 
 ### Web & Automation
 
 | Module | Tests | Install | Description |
 |--------|-------|---------|-------------|
-| `web` | [![web](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-web.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-web.yml) | `uv pip install scitex[web]` | Web scraping |
-| `browser` | [![browser](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-browser.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-browser.yml) | `uv pip install scitex[browser]` | Browser automation |
+| [`web`](./src/scitex/web#readme) | [![web](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-web.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-web.yml) | `uv pip install scitex[web]` | Web scraping |
+| [`browser`](./src/scitex/browser#readme) | [![browser](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-browser.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-browser.yml) | `uv pip install scitex[browser]` | Browser automation |
 
 ### Other Modules
 
 | Module | Tests | Install | Description |
 |--------|-------|---------|-------------|
-| `audio` | [![audio](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-audio.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-audio.yml) | `uv pip install scitex[audio]` | Audio processing |
-| `capture` | [![capture](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-capture.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-capture.yml) | `uv pip install scitex[capture]` | Screen capture |
-| `repro` | [![repro](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-repro.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-repro.yml) | `uv pip install scitex[repro]` | Reproducibility |
-| `benchmark` | [![benchmark](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-benchmark.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-benchmark.yml) | `uv pip install scitex[benchmark]` | Performance testing |
-| `security` | [![security](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-security.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-security.yml) | `uv pip install scitex[security]` | Security utilities |
-| `dt` | [![dt](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dt.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dt.yml) | `uv pip install scitex[dt]` | Datetime utilities |
-| `dev` | [![dev](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dev.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dev.yml) | `uv pip install scitex[dev]` | Development tools |
-| `schema` | [![schema](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-schema.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-schema.yml) | `uv pip install scitex[schema]` | Data schemas |
-| `bridge` | [![bridge](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-bridge.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-bridge.yml) | `uv pip install scitex[bridge]` | Module integration |
+| [`audio`](./src/scitex/audio#readme) | [![audio](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-audio.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-audio.yml) | `uv pip install scitex[audio]` | Audio processing |
+| [`capture`](./src/scitex/capture#readme) | [![capture](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-capture.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-capture.yml) | `uv pip install scitex[capture]` | Screen capture |
+| [`repro`](./src/scitex/repro#readme) | [![repro](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-repro.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-repro.yml) | `uv pip install scitex[repro]` | Reproducibility |
+| [`benchmark`](./src/scitex/benchmark#readme) | [![benchmark](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-benchmark.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-benchmark.yml) | `uv pip install scitex[benchmark]` | Performance testing |
+| [`security`](./src/scitex/security#readme) | [![security](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-security.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-security.yml) | `uv pip install scitex[security]` | Security utilities |
+| [`dt`](./src/scitex/dt#readme) | [![dt](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dt.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dt.yml) | `uv pip install scitex[dt]` | Datetime utilities |
+| [`dev`](./src/scitex/dev#readme) | [![dev](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dev.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dev.yml) | `uv pip install scitex[dev]` | Development tools |
+| [`schema`](./src/scitex/schema#readme) | [![schema](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-schema.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-schema.yml) | `uv pip install scitex[schema]` | Data schemas |
+| [`bridge`](./src/scitex/bridge#readme) | [![bridge](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-bridge.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-bridge.yml) | `uv pip install scitex[bridge]` | Module integration |
 
 </details>
 
@@ -144,8 +138,12 @@ uv pip install scitex[all]
 
 # Install only specific modules
 uv pip install scitex[ai]
+```
 
-# All available modules, equivalent to scitex[all]
+<details>
+<summary><strong>All available modules, equivalent to scitex[all]</strong></summary>
+
+``` bash
 uv pip install ~/proj/scitex-code[\
 ai,\
 audio,\
@@ -191,87 +189,10 @@ writer,\
 dev]
 ```
 
-
-## 📦 Module Overview
-
-### 🔧 Core Utilities
-| Module                                          | Description                                                         |
-|-------------------------------------------------|---------------------------------------------------------------------|
-| [`scitex.gen`](./src/scitex/gen#readme)         | Project setup, session management, and experiment tracking          |
-| [`scitex.io`](./src/scitex/io#readme)           | Universal I/O for 30+ formats (CSV, JSON, HDF5, Zarr, pickle, etc.) |
-| [`scitex.path`](./src/scitex/path#readme)       | Path manipulation and project structure utilities                   |
-| [`scitex.logging`](./src/scitex/logging#readme) | Structured logging with color support and context                   |
-
-### 📊 Data Science & Statistics
-| Module                                      | Description                                                              |
-|---------------------------------------------|--------------------------------------------------------------------------|
-| [`scitex.stats`](./src/scitex/stats#readme) | 16 statistical tests, effect sizes, power analysis, multiple corrections |
-| [`scitex.plt`](./src/scitex/plt#readme)     | Enhanced matplotlib with auto-export and scientific captions             |
-| [`scitex.pd`](./src/scitex/pd#readme)       | Pandas extensions for research workflows                                 |
-
-### 🧠 AI & Machine Learning
-| Module                                      | Description                                             |
-|---------------------------------------------|---------------------------------------------------------|
-| [`scitex.ai`](./src/scitex/ai#readme)       | GenAI (7 providers), classification, training utilities |
-| [`scitex.torch`](./src/scitex/torch#readme) | PyTorch training loops, metrics, and utilities          |
-| [`scitex.nn`](./src/scitex/nn#readme)       | Custom neural network layers                            |
-
-### 🌊 Signal Processing
-| Module                                  | Description                                                   |
-|-----------------------------------------|---------------------------------------------------------------|
-| [`scitex.dsp`](./src/scitex/dsp#readme) | Filtering, spectral analysis, wavelets, PAC, ripple detection |
-
-### 📚 Literature Management
-| Module                                          | Description                                                     |
-|-------------------------------------------------|-----------------------------------------------------------------|
-| [`scitex.scholar`](./src/scitex/scholar#readme) | Paper search, PDF download, BibTeX enrichment with IF/citations |
-
-### 🌐 Web & Browser
-| Module                                          | Description                                                |
-|-------------------------------------------------|------------------------------------------------------------|
-| [`scitex.browser`](./src/scitex/browser#readme) | Playwright automation with debugging, PDF handling, popups |
-
-### 🗄️ Data Management
-| Module                                | Description                         |
-|---------------------------------------|-------------------------------------|
-| [`scitex.db`](./src/scitex/db#readme) | SQLite3 and PostgreSQL abstractions |
-
-### 🛠️ Utilities
-| Module                                                | Description                                         |
-|-------------------------------------------------------|-----------------------------------------------------|
-| [`scitex.decorators`](./src/scitex/decorators#readme) | Function decorators for caching, timing, validation |
-| [`scitex.rng`](./src/scitex/rng#readme)               | Reproducible random number generation               |
-| [`scitex.resource`](./src/scitex/resource#readme)     | System resource monitoring (CPU, memory, GPU)       |
-| [`scitex.dict`](./src/scitex/dict#readme)             | Dictionary manipulation and nested access           |
-| [`scitex.str`](./src/scitex/str#readme)               | String utilities for scientific text processing     |
-
-## 📖 Documentation
-
-### Online Documentation
-- **[Read the Docs](https://scitex.readthedocs.io/)**: Complete API reference and guides
-- **[Interactive Examples](https://scitex.readthedocs.io/en/latest/examples/index.html)**: Browse all tutorial notebooks
-- **[Quick Start Guide](https://scitex.readthedocs.io/en/latest/getting_started.html)**: Get up and running quickly
-
-### Local Resources
-- **[Master Tutorial Index](./examples/00_SCITEX_MASTER_INDEX.ipynb)**: Comprehensive guide to all features
-- **[Examples Directory](./examples/)**: 25+ Jupyter notebooks covering all modules
-- **[Module List](./docs/scitex_modules.csv)**: Complete list of all functions
-- **(Experimental) [MCP Servers Documentation](./mcp_servers/README.md)**
-
-### Key Tutorials
-1. **[I/O Operations](./examples/01_scitex_io.ipynb)**: Essential file handling (start here!)
-2. **[Plotting](./examples/14_scitex_plt.ipynb)**: Publication-ready visualizations
-3. **[Statistics](./examples/11_scitex_stats.ipynb)**: Research-grade statistical analysis
-4. **[Scholar](./examples/16_scitex_scholar.ipynb)**: Literature management with impact factors
-5. **[AI/ML](./examples/16_scitex_ai.ipynb)**: Complete machine learning toolkit
-
-
 </details>
 
-## Font
-
 <details>
-<summary><strong>Arial Font Setup</strong></summary>
+<summary><strong>Arial Font Setup for Figures</strong></summary>
 
 ``` bash
 # Ubuntu
@@ -316,6 +237,7 @@ plt.close(fig)
 ```
 
 </details>
+
 
 ## 🚀 Quick Start
 
@@ -618,6 +540,29 @@ demo_session_plt_io_out/
 - 🌍 **Universal format** - CSV data readable anywhere
 - 📝 **Zero manual work** - Metadata embedded automatically
 - 🎯 **3.3× less code** - Focus on research, not infrastructure
+
+## 📖 Documentation
+
+### Online Documentation
+- **[Read the Docs](https://scitex.readthedocs.io/)**: Complete API reference and guides
+- **[Interactive Examples](https://scitex.readthedocs.io/en/latest/examples/index.html)**: Browse all tutorial notebooks
+- **[Quick Start Guide](https://scitex.readthedocs.io/en/latest/getting_started.html)**: Get up and running quickly
+
+### Local Resources
+- **[Master Tutorial Index](./examples/00_SCITEX_MASTER_INDEX.ipynb)**: Comprehensive guide to all features
+- **[Examples Directory](./examples/)**: 25+ Jupyter notebooks covering all modules
+- **[Module List](./docs/scitex_modules.csv)**: Complete list of all functions
+- **(Experimental) [MCP Servers Documentation](./mcp_servers/README.md)**
+
+### Key Tutorials
+1. **[I/O Operations](./examples/01_scitex_io.ipynb)**: Essential file handling (start here!)
+2. **[Plotting](./examples/14_scitex_plt.ipynb)**: Publication-ready visualizations
+3. **[Statistics](./examples/11_scitex_stats.ipynb)**: Research-grade statistical analysis
+4. **[Scholar](./examples/16_scitex_scholar.ipynb)**: Literature management with impact factors
+5. **[AI/ML](./examples/16_scitex_ai.ipynb)**: Complete machine learning toolkit
+
+
+</details>
 
 ## 🤝 Contributing
 
