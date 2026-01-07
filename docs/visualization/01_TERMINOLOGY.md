@@ -52,10 +52,9 @@ ax.plot(x, y, id="my_trace")
 sio.save(fig, "/tmp/my_plot.png")
 
 # Canvas composition (panel = positioned plot)
-# position/size are in millimeters (mm)
 scanvas.create_canvas("/tmp", "my_figure")
 scanvas.add_panel("/tmp", "my_figure", "panel_a", "/tmp/my_plot.png",
-                  position=(10, 10), size=(80, 60), label="A")
+                  xy_mm=(10, 10), size_mm=(80, 60), label="A")
 ```
 
 <!-- EOF -->

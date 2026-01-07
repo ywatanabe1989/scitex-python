@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: 2025-12-08
 # File: ./src/scitex/vis/__init__.py
 """
@@ -19,7 +18,7 @@ Quick Start:
 >>> # Create canvas and add panels
 >>> stx.vis.create_canvas("/output", "fig1")
 >>> stx.vis.add_panel("/output", "fig1", "panel_a", source="plot.png",
-...                   position=(10, 10), size=(80, 60), label="A")
+...                   xy_mm=(10, 10), size_mm=(80, 60), label="A")
 >>>
 >>> # Save with stx.io (auto-exports PNG/PDF/SVG)
 >>> canvas = stx.io.load("/output/fig1.canvas")
@@ -34,45 +33,48 @@ Directory Structure:
 """
 
 # Submodules for advanced use
-from . import io
-from . import model
-from . import backend
-from . import utils
-from . import editor
+from . import backend, editor, io, model, utils
 
 # Canvas class
 from .canvas import Canvas
 
-# =============================================================================
-# Primary API (minimal, reusable, flexible)
-# =============================================================================
-
-# Canvas operations
-from .io import (
-    ensure_canvas_directory as create_canvas,
-    get_canvas_directory_path as get_canvas_path,
-    canvas_directory_exists as canvas_exists,
-    list_canvas_directories as list_canvases,
-    delete_canvas_directory as delete_canvas,
-)
+# Editor
+from .editor import edit
 
 # Panel operations
 from .io import (
-    add_panel_from_scitex,
     add_panel_from_image,
-    update_panel,
-    remove_panel,
+    add_panel_from_scitex,
     list_panels,
+    remove_panel,
+    update_panel,
+)
+from .io import (
+    canvas_directory_exists as canvas_exists,
+)
+from .io import (
+    delete_canvas_directory as delete_canvas,
+)
+
+# =============================================================================
+# Primary API (minimal, reusable, flexible)
+# =============================================================================
+# Canvas operations
+from .io import (
+    ensure_canvas_directory as create_canvas,
 )
 
 # Export (usually handled by stx.io.save, but available for explicit use)
 from .io import export_canvas_to_file as export_canvas
+from .io import (
+    get_canvas_directory_path as get_canvas_path,
+)
+from .io import (
+    list_canvas_directories as list_canvases,
+)
 
 # Data integrity
 from .io import verify_all_data_hashes as verify_data
-
-# Editor
-from .editor import edit
 
 
 # =============================================================================
@@ -83,8 +85,8 @@ def add_panel(
     canvas_name,
     panel_name,
     source,
-    position=(0, 0),
-    size=(50, 50),
+    xy_mm=(0, 0),
+    size_mm=(50, 50),
     label="",
     bundle=False,
     **kwargs,
@@ -102,10 +104,10 @@ def add_panel(
         Name for the panel
     source : str or Path
         Source file (PNG, JPG, SVG)
-    position : tuple
-        (x_mm, y_mm) position on canvas
-    size : tuple
-        (width_mm, height_mm) panel size
+    xy_mm : tuple
+        (x_mm, y_mm) position on canvas in millimeters
+    size_mm : tuple
+        (width_mm, height_mm) panel size in millimeters
     label : str
         Panel label (A, B, C...)
     bundle : bool
@@ -117,8 +119,8 @@ def add_panel(
 
     source = Path(source)
     panel_properties = {
-        "position": {"x_mm": position[0], "y_mm": position[1]},
-        "size": {"width_mm": size[0], "height_mm": size[1]},
+        "position": {"x_mm": xy_mm[0], "y_mm": xy_mm[1]},
+        "size": {"width_mm": size_mm[0], "height_mm": size_mm[1]},
         **kwargs,
     }
     if label:
@@ -149,6 +151,7 @@ def add_panel(
 # =============================================================================
 # .figz Bundle Support
 # =============================================================================
+
 
 def save_figz(
     panels,
@@ -189,9 +192,10 @@ def save_figz(
     >>> sfig.save_figz(panels, "Figure1.figz")    # Creates ZIP
     >>> sfig.save_figz(panels, "Figure1.figz.d")  # Creates directory
     """
-    from pathlib import Path
     import shutil
-    from scitex.io.bundle import save, BundleType
+    from pathlib import Path
+
+    from scitex.io.bundle import BundleType, save
 
     p = Path(path)
     spath = str(path)
@@ -206,8 +210,8 @@ def save_figz(
 
     # Build bundle data - pass source paths directly for file copying
     bundle_data = {
-        'spec': spec,
-        'plots': {},
+        "spec": spec,
+        "plots": {},
     }
 
     # Pass source paths directly (not loaded data) to preserve all files
@@ -215,7 +219,7 @@ def save_figz(
         pltz_path = Path(pltz_source)
         if pltz_path.exists():
             # Store source path for direct copying
-            bundle_data['plots'][panel_id] = str(pltz_path)
+            bundle_data["plots"][panel_id] = str(pltz_path)
 
     return save(bundle_data, p, bundle_type=BundleType.FIGZ, as_zip=as_zip)
 
@@ -247,19 +251,19 @@ def load_figz(path):
 
     bundle = load(path)
 
-    if bundle['type'] != 'figz':
+    if bundle["type"] != "figz":
         raise ValueError(f"Not a .figz bundle: {path}")
 
     result = {
-        'spec': bundle.get('spec', {}),
-        'panels': {},
+        "spec": bundle.get("spec", {}),
+        "panels": {},
     }
 
     # Return spec and data for each panel (reconstruction is optional)
-    for panel_id, plot_bundle in bundle.get('plots', {}).items():
-        result['panels'][panel_id] = {
-            'spec': plot_bundle.get('spec', {}),
-            'data': plot_bundle.get('data'),
+    for panel_id, plot_bundle in bundle.get("plots", {}).items():
+        result["panels"][panel_id] = {
+            "spec": plot_bundle.get("spec", {}),
+            "data": plot_bundle.get("data"),
         }
 
     return result
@@ -270,17 +274,17 @@ def _generate_figure_spec(panels):
     from pathlib import Path
 
     spec = {
-        'schema': {'name': 'scitex.canvas.figure', 'version': '1.0.0'},
-        'figure': {
-            'id': 'figure',
-            'title': '',
-            'caption': '',
-            'styles': {
-                'size': {'width_mm': 180, 'height_mm': 120},
-                'background': '#ffffff',
+        "schema": {"name": "scitex.canvas.figure", "version": "1.0.0"},
+        "figure": {
+            "id": "figure",
+            "title": "",
+            "caption": "",
+            "styles": {
+                "size": {"width_mm": 180, "height_mm": 120},
+                "background": "#ffffff",
             },
         },
-        'panels': [],
+        "panels": [],
     }
 
     # Auto-layout panels
@@ -306,14 +310,16 @@ def _generate_figure_spec(panels):
         y = margin + row * (panel_h + margin)
 
         # Note: save_bundle uses panel_id for the directory name (e.g., A.pltz.d)
-        spec['panels'].append({
-            'id': panel_id,
-            'label': panel_id,
-            'caption': '',
-            'plot': f"{panel_id}.pltz.d",
-            'position': {'x_mm': x, 'y_mm': y},
-            'size': {'width_mm': panel_w, 'height_mm': panel_h},
-        })
+        spec["panels"].append(
+            {
+                "id": panel_id,
+                "label": panel_id,
+                "caption": "",
+                "plot": f"{panel_id}.pltz.d",
+                "position": {"x_mm": x, "y_mm": y},
+                "size": {"width_mm": panel_w, "height_mm": panel_h},
+            }
+        )
 
     return spec
 
