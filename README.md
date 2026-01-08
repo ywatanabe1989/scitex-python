@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-08 11:23:00
+!-- Timestamp: 2026-01-08 11:41:42
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -36,82 +36,82 @@ Part of the fully open-source SciTeX project: https://scitex.ai
 </div>
 
 <details>
-<summary><strong>Module Status (v2.11.0) - Tests & Installation</strong></summary>
+<summary><strong>Module Status - Tests & Installation</strong></summary>
 
 ### Core Modules
 
-| Module | Tests | Time | Install | Description |
-|--------|-------|------|---------|-------------|
-| [`io`](./src/scitex/io#readme) | [![io](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-io.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-io.yml) | ![io](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/io.json) | `scitex[io]` | Universal I/O (30+ formats) |
-| [`path`](./src/scitex/path#readme) | [![path](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-path.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-path.yml) | ![path](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/path.json) | `scitex[path]` | Path utilities |
-| [`str`](./src/scitex/str#readme) | [![str](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-str.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-str.yml) | ![str](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/str.json) | `scitex[str]` | String processing |
-| [`dict`](./src/scitex/dict#readme) | [![dict](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dict.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dict.yml) | ![dict](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/dict.json) | core | Dictionary utilities |
-| [`types`](./src/scitex/types#readme) | [![types](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-types.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-types.yml) | ![types](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/types.json) | core | Type checking |
-| [`config`](./src/scitex/config#readme) | [![config](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-config.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-config.yml) | ![config](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/config.json) | `scitex[config]` | Configuration management |
-| [`utils`](./src/scitex/utils#readme) | [![utils](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-utils.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-utils.yml) | ![utils](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/utils.json) | `scitex[utils]` | General utilities |
-| [`decorators`](./src/scitex/decorators#readme) | [![decorators](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-decorators.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-decorators.yml) | ![decorators](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/decorators.json) | `scitex[decorators]` | Function decorators |
-| [`logging`](./src/scitex/logging#readme) | [![logging](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-logging.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-logging.yml) | ![logging](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/logging.json) | `scitex[logging]` | Structured logging |
-| [`gen`](./src/scitex/gen#readme) | [![gen](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-gen.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-gen.yml) | ![gen](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/gen.json) | `scitex[gen]` | Project setup |
+| Module | Description | Install (Time) | Tests |
+|--------|-------------|----------------|-------|
+| [`io`](./src/scitex/io#readme) | Universal I/O (30+ formats) | `scitex[io]` ![io](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/io.json) | [![io](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-io.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-io.yml) |
+| [`path`](./src/scitex/path#readme) | Path utilities | `scitex[path]` ![path](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/path.json) | [![path](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-path.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-path.yml) |
+| [`str`](./src/scitex/str#readme) | String processing | `scitex[str]` ![str](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/str.json) | [![str](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-str.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-str.yml) |
+| [`dict`](./src/scitex/dict#readme) | Dictionary utilities | core ![dict](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/dict.json) | [![dict](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dict.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dict.yml) |
+| [`types`](./src/scitex/types#readme) | Type checking | core ![types](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/types.json) | [![types](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-types.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-types.yml) |
+| [`config`](./src/scitex/config#readme) | Configuration management | `scitex[config]` ![config](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/config.json) | [![config](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-config.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-config.yml) |
+| [`utils`](./src/scitex/utils#readme) | General utilities | `scitex[utils]` ![utils](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/utils.json) | [![utils](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-utils.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-utils.yml) |
+| [`decorators`](./src/scitex/decorators#readme) | Function decorators | `scitex[decorators]` ![decorators](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/decorators.json) | [![decorators](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-decorators.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-decorators.yml) |
+| [`logging`](./src/scitex/logging#readme) | Structured logging | `scitex[logging]` ![logging](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/logging.json) | [![logging](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-logging.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-logging.yml) |
+| [`gen`](./src/scitex/gen#readme) | Project setup | `scitex[gen]` ![gen](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/gen.json) | [![gen](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-gen.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-gen.yml) |
 
 ### Data Science & Statistics
 
-| Module | Tests | Time | Install | Description |
-|--------|-------|------|---------|-------------|
-| [`stats`](./src/scitex/stats#readme) | [![stats](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-stats.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-stats.yml) | ![stats](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/stats.json) | `scitex[stats]` | Statistical tests & analysis |
-| [`pd`](./src/scitex/pd#readme) | [![pd](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-pd.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-pd.yml) | ![pd](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/pd.json) | `scitex[pd]` | Pandas extensions |
-| [`linalg`](./src/scitex/linalg#readme) | [![linalg](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-linalg.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-linalg.yml) | ![linalg](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/linalg.json) | `scitex[linalg]` | Linear algebra |
-| [`plt`](./src/scitex/plt#readme) | [![plt](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-plt.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-plt.yml) | ![plt](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/plt.json) | `scitex[plt]` | Enhanced matplotlib |
-| [`dsp`](./src/scitex/dsp#readme) | [![dsp](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dsp.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dsp.yml) | ![dsp](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/dsp.json) | `scitex[dsp]` | Signal processing |
+| Module | Description | Install (Time) | Tests |
+|--------|-------------|----------------|-------|
+| [`stats`](./src/scitex/stats#readme) | Statistical tests & analysis | `scitex[stats]` ![stats](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/stats.json) | [![stats](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-stats.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-stats.yml) |
+| [`pd`](./src/scitex/pd#readme) | Pandas extensions | `scitex[pd]` ![pd](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/pd.json) | [![pd](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-pd.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-pd.yml) |
+| [`linalg`](./src/scitex/linalg#readme) | Linear algebra | `scitex[linalg]` ![linalg](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/linalg.json) | [![linalg](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-linalg.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-linalg.yml) |
+| [`plt`](./src/scitex/plt#readme) | Enhanced matplotlib | `scitex[plt]` ![plt](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/plt.json) | [![plt](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-plt.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-plt.yml) |
+| [`dsp`](./src/scitex/dsp#readme) | Signal processing | `scitex[dsp]` ![dsp](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/dsp.json) | [![dsp](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dsp.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dsp.yml) |
 
 ### AI & Machine Learning
 
-| Module | Tests | Time | Install | Description |
-|--------|-------|------|---------|-------------|
-| [`ai`](./src/scitex/ai#readme) | [![ai](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-ai.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-ai.yml) | ![ai](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/ai.json) | `scitex[ai]` | GenAI (7 providers) |
-| [`nn`](./src/scitex/nn#readme) | [![nn](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-nn.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-nn.yml) | ![nn](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/nn.json) | `scitex[nn]` | Neural network layers |
-| [`torch`](./src/scitex/torch#readme) | [![torch](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-torch.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-torch.yml) | ![torch](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/torch.json) | `scitex[torch]` | PyTorch utilities |
+| Module | Description | Install (Time) | Tests |
+|--------|-------------|----------------|-------|
+| [`ai`](./src/scitex/ai#readme) | GenAI (7 providers) | `scitex[ai]` ![ai](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/ai.json) | [![ai](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-ai.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-ai.yml) |
+| [`nn`](./src/scitex/nn#readme) | Neural network layers | `scitex[nn]` ![nn](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/nn.json) | [![nn](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-nn.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-nn.yml) |
+| [`torch`](./src/scitex/torch#readme) | PyTorch utilities | `scitex[torch]` ![torch](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/torch.json) | [![torch](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-torch.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-torch.yml) |
 
 ### System & Tools
 
-| Module | Tests | Time | Install | Description |
-|--------|-------|------|---------|-------------|
-| [`cli`](./src/scitex/cli#readme) | [![cli](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-cli.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-cli.yml) | ![cli](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/cli.json) | `scitex[cli]` | Command-line tools |
-| [`sh`](./src/scitex/sh#readme) | [![sh](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-sh.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-sh.yml) | ![sh](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/sh.json) | `scitex[sh]` | Shell utilities |
-| [`git`](./src/scitex/git#readme) | [![git](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-git.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-git.yml) | ![git](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/git.json) | `scitex[git]` | Git operations |
-| [`session`](./src/scitex/session#readme) | [![session](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-session.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-session.yml) | ![session](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/session.json) | `scitex[session]` | Session management |
-| [`resource`](./src/scitex/resource#readme) | [![resource](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-resource.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-resource.yml) | ![resource](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/resource.json) | `scitex[resource]` | System monitoring |
-| [`db`](./src/scitex/db#readme) | [![db](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-db.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-db.yml) | ![db](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/db.json) | `scitex[db]` | Database abstractions |
+| Module | Description | Install (Time) | Tests |
+|--------|-------------|----------------|-------|
+| [`cli`](./src/scitex/cli#readme) | Command-line tools | `scitex[cli]` ![cli](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/cli.json) | [![cli](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-cli.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-cli.yml) |
+| [`sh`](./src/scitex/sh#readme) | Shell utilities | `scitex[sh]` ![sh](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/sh.json) | [![sh](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-sh.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-sh.yml) |
+| [`git`](./src/scitex/git#readme) | Git operations | `scitex[git]` ![git](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/git.json) | [![git](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-git.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-git.yml) |
+| [`session`](./src/scitex/session#readme) | Session management | `scitex[session]` ![session](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/session.json) | [![session](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-session.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-session.yml) |
+| [`resource`](./src/scitex/resource#readme) | System monitoring | `scitex[resource]` ![resource](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/resource.json) | [![resource](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-resource.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-resource.yml) |
+| [`db`](./src/scitex/db#readme) | Database abstractions | `scitex[db]` ![db](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/db.json) | [![db](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-db.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-db.yml) |
 
 ### Research & Publishing
 
-| Module | Tests | Time | Install | Description |
-|--------|-------|------|---------|-------------|
-| [`writer`](./src/scitex/writer#readme) | [![writer](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-writer.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-writer.yml) | ![writer](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/writer.json) | `scitex[writer]` | Document generation |
-| [`tex`](./src/scitex/tex#readme) | [![tex](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-tex.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-tex.yml) | ![tex](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/tex.json) | `scitex[tex]` | LaTeX processing |
-| [`msword`](./src/scitex/msword#readme) | [![msword](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-msword.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-msword.yml) | ![msword](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/msword.json) | `scitex[msword]` | MS Word conversion |
-| [`scholar`](./src/scitex/scholar#readme) | [![scholar](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-scholar.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-scholar.yml) | ![scholar](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/scholar.json) | `scitex[scholar]` | Literature management |
-| [`diagram`](./src/scitex/diagram#readme) | [![diagram](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-diagram.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-diagram.yml) | ![diagram](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/diagram.json) | `scitex[diagram]` | Diagram generation |
+| Module | Description | Install (Time) | Tests |
+|--------|-------------|----------------|-------|
+| [`writer`](./src/scitex/writer#readme) | Document generation | `scitex[writer]` ![writer](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/writer.json) | [![writer](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-writer.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-writer.yml) |
+| [`tex`](./src/scitex/tex#readme) | LaTeX processing | `scitex[tex]` ![tex](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/tex.json) | [![tex](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-tex.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-tex.yml) |
+| [`msword`](./src/scitex/msword#readme) | MS Word conversion | `scitex[msword]` ![msword](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/msword.json) | [![msword](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-msword.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-msword.yml) |
+| [`scholar`](./src/scitex/scholar#readme) | Literature management | `scitex[scholar]` ![scholar](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/scholar.json) | [![scholar](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-scholar.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-scholar.yml) |
+| [`diagram`](./src/scitex/diagram#readme) | Diagram generation | `scitex[diagram]` ![diagram](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/diagram.json) | [![diagram](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-diagram.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-diagram.yml) |
 
 ### Web & Automation
 
-| Module | Tests | Time | Install | Description |
-|--------|-------|------|---------|-------------|
-| [`web`](./src/scitex/web#readme) | [![web](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-web.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-web.yml) | ![web](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/web.json) | `scitex[web]` | Web scraping |
-| [`browser`](./src/scitex/browser#readme) | [![browser](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-browser.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-browser.yml) | ![browser](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/browser.json) | `scitex[browser]` | Browser automation |
+| Module | Description | Install (Time) | Tests |
+|--------|-------------|----------------|-------|
+| [`web`](./src/scitex/web#readme) | Web scraping | `scitex[web]` ![web](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/web.json) | [![web](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-web.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-web.yml) |
+| [`browser`](./src/scitex/browser#readme) | Browser automation | `scitex[browser]` ![browser](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/browser.json) | [![browser](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-browser.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-browser.yml) |
 
 ### Other Modules
 
-| Module | Tests | Time | Install | Description |
-|--------|-------|------|---------|-------------|
-| [`audio`](./src/scitex/audio#readme) | [![audio](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-audio.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-audio.yml) | ![audio](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/audio.json) | `scitex[audio]` | Audio processing |
-| [`capture`](./src/scitex/capture#readme) | [![capture](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-capture.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-capture.yml) | ![capture](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/capture.json) | `scitex[capture]` | Screen capture |
-| [`repro`](./src/scitex/repro#readme) | [![repro](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-repro.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-repro.yml) | ![repro](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/repro.json) | `scitex[repro]` | Reproducibility |
-| [`benchmark`](./src/scitex/benchmark#readme) | [![benchmark](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-benchmark.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-benchmark.yml) | ![benchmark](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/benchmark.json) | `scitex[benchmark]` | Performance testing |
-| [`security`](./src/scitex/security#readme) | [![security](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-security.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-security.yml) | ![security](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/security.json) | `scitex[security]` | Security utilities |
-| [`dt`](./src/scitex/dt#readme) | [![dt](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dt.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dt.yml) | ![dt](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/dt.json) | `scitex[dt]` | Datetime utilities |
-| [`dev`](./src/scitex/dev#readme) | [![dev](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dev.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dev.yml) | ![dev](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/dev.json) | `scitex[dev]` | Development tools |
-| [`schema`](./src/scitex/schema#readme) | [![schema](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-schema.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-schema.yml) | ![schema](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/schema.json) | `scitex[schema]` | Data schemas |
-| [`bridge`](./src/scitex/bridge#readme) | [![bridge](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-bridge.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-bridge.yml) | ![bridge](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/bridge.json) | `scitex[bridge]` | Module integration |
+| Module | Description | Install (Time) | Tests |
+|--------|-------------|----------------|-------|
+| [`audio`](./src/scitex/audio#readme) | Audio processing | `scitex[audio]` ![audio](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/audio.json) | [![audio](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-audio.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-audio.yml) |
+| [`capture`](./src/scitex/capture#readme) | Screen capture | `scitex[capture]` ![capture](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/capture.json) | [![capture](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-capture.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-capture.yml) |
+| [`repro`](./src/scitex/repro#readme) | Reproducibility | `scitex[repro]` ![repro](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/repro.json) | [![repro](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-repro.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-repro.yml) |
+| [`benchmark`](./src/scitex/benchmark#readme) | Performance testing | `scitex[benchmark]` ![benchmark](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/benchmark.json) | [![benchmark](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-benchmark.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-benchmark.yml) |
+| [`security`](./src/scitex/security#readme) | Security utilities | `scitex[security]` ![security](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/security.json) | [![security](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-security.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-security.yml) |
+| [`dt`](./src/scitex/dt#readme) | Datetime utilities | `scitex[dt]` ![dt](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/dt.json) | [![dt](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dt.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dt.yml) |
+| [`dev`](./src/scitex/dev#readme) | Development tools | `scitex[dev]` ![dev](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/dev.json) | [![dev](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dev.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-dev.yml) |
+| [`schema`](./src/scitex/schema#readme) | Data schemas | `scitex[schema]` ![schema](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/schema.json) | [![schema](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-schema.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-schema.yml) |
+| [`bridge`](./src/scitex/bridge#readme) | Module integration | `scitex[bridge]` ![bridge](https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/bridge.json) | [![bridge](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-bridge.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-code/actions/workflows/test-bridge.yml) |
 
 </details>
 
@@ -417,8 +417,10 @@ scitex completion                     # Enable tab completion
 
 </details>
 
+## 🔌 MCP Servers
+
 <details>
-<summary><strong>🔌 MCP Servers</strong></summary>
+<summary><strong>Model Context Protocol (MCP) servers for AI agent integration</strong></summary>
 
 SciTeX provides Model Context Protocol (MCP) servers for AI agent integration:
 
@@ -452,25 +454,6 @@ SciTeX provides Model Context Protocol (MCP) servers for AI agent integration:
 ```
 
 </details>
-
-<!-- **What SciTeX Automates:**
- !-- - ✅ Session ID generation and tracking
- !-- - ✅ Output directory management (`RUNNING/` → `FINISHED_SUCCESS/`)
- !-- - ✅ Argument parsing with auto-generated help
- !-- - ✅ Logging to files and console
- !-- - ✅ Config serialization (YAML + pickle)
- !-- - ✅ CSV export from matplotlib plots
- !-- - ✅ Metadata embedding in images
- !-- - ✅ Symlink management for centralized outputs
- !-- - ✅ Error handling and directory cleanup
- !-- - ✅ Global variable injection (CONFIG, plt, COLORS, logger, rng)
- !-- 
- !-- **Research Benefits:**
- !-- - 📊 **Figures + data always together** - CSV auto-exported from every plot
- !-- - 🔄 **Perfect reproducibility** - Every run tracked with unique session ID
- !-- - 🌍 **Universal format** - CSV data readable anywhere
- !-- - 📝 **Zero manual work** - Metadata embedded automatically
- !-- - 🎯 **3.3× less code** - Focus on research, not infrastructure -->
 
 ## 🚀 Quick Start
 
@@ -660,7 +643,7 @@ def save_figure(fig, output_path, metadata=None, symlink_to=None, logger=None):
         symlink_path.symlink_to(output_path.resolve())
 
 
-def demo(output_dir, filename, verbose=False, logger=None):
+    def demo(output_dir, filename, verbose=False, logger=None):
     """Generate, plot, and save signal."""
     fig, ax = plt.subplots(figsize=(8, 6))
     
@@ -741,6 +724,9 @@ if __name__ == "__main__":
 
 ## 📖 Documentation
 
+<details>
+<summary><strong>Resources</strong></summary>
+
 ### Online Documentation
 - **[Read the Docs](https://scitex.readthedocs.io/)**: Complete API reference and guides
 - **[Interactive Examples](https://scitex.readthedocs.io/en/latest/examples/index.html)**: Browse all tutorial notebooks
@@ -759,6 +745,7 @@ if __name__ == "__main__":
 4. **[Scholar](./examples/16_scitex_scholar.ipynb)**: Literature management with impact factors
 5. **[AI/ML](./examples/16_scitex_ai.ipynb)**: Complete machine learning toolkit
 
+</details>
 
 ## 🤝 Contributing
 
