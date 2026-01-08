@@ -38,6 +38,8 @@ PACKAGE_TO_EXTRA: Dict[str, tuple] = {
     "mss": ("mss", "capture"),
     # CLI Module
     "click": ("click", "cli"),
+    # MCP Module (Model Context Protocol)
+    "mcp": ("mcp", "mcp"),
     # DB Module
     "sqlalchemy": ("sqlalchemy", "db"),
     "psycopg2": ("psycopg2-binary", "db"),
@@ -295,6 +297,37 @@ def has_io() -> bool:
 def has_plotting() -> bool:
     """Check if plotting dependencies are available."""
     return check_optional_deps("matplotlib")["matplotlib"]
+
+
+def has_mcp() -> bool:
+    """Check if MCP (Model Context Protocol) dependencies are available."""
+    return check_optional_deps("mcp")["mcp"]
+
+
+def check_mcp_deps(server_name: str = "scitex") -> None:
+    """
+    Check MCP dependencies and exit with helpful message if missing.
+
+    Use at the start of MCP server main() functions for graceful handling.
+
+    Args:
+        server_name: Name of the MCP server for error messages
+    """
+    import sys
+
+    try:
+        import mcp  # noqa: F401
+    except ImportError:
+        print(f"{'=' * 60}")
+        print(f"MCP Server '{server_name}' requires the 'mcp' package.")
+        print()
+        print("Install with:")
+        print("  pip install mcp")
+        print()
+        print("Or install scitex with MCP support:")
+        print("  pip install scitex[mcp]")
+        print(f"{'=' * 60}")
+        sys.exit(1)
 
 
 # EOF

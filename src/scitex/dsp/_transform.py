@@ -1,14 +1,27 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-04-08 12:41:59 (ywatanabe)"#!/usr/bin/env python3
 
 
-import warnings
 
 import numpy as np
 import pandas as pd
-import torch
+
+try:
+    import torch
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
+
 from scitex.decorators import torch_fn
+
+
+def _check_torch():
+    if not TORCH_AVAILABLE:
+        raise ImportError(
+            "PyTorch is not installed. Please install with: pip install torch"
+        )
 
 
 def to_sktime_df(arr):

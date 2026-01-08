@@ -6,7 +6,13 @@ import os
 import warnings
 from typing import Any
 
-import mne
+try:
+    import mne
+
+    MNE_AVAILABLE = True
+except ImportError:
+    MNE_AVAILABLE = False
+    mne = None
 
 
 def _load_eeg_data(lpath: str, **kwargs) -> Any:
@@ -38,6 +44,11 @@ def _load_eeg_data(lpath: str, **kwargs) -> Any:
     This function uses MNE-Python to load the EEG data. It automatically detects the file format
     based on the file extension and uses the appropriate MNE function to load the data.
     """
+    if not MNE_AVAILABLE:
+        raise ImportError(
+            "MNE-Python is not installed. Please install with: pip install mne"
+        )
+
     # Get the file extension
     extension = lpath.split(".")[-1]
 

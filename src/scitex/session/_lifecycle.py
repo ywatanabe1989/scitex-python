@@ -411,12 +411,12 @@ def start(
     Returns
     -------
     tuple
-        (CONFIGS, stdout, stderr, plt, COLORS, rng_manager)
+        (CONFIGS, stdout, stderr, plt, COLORS, rng)
         - CONFIGS: Configuration dictionary
         - stdout, stderr: Redirected output streams
         - plt: Configured matplotlib.pyplot module
         - COLORS: Color cycle dictionary
-        - rng_manager: Global RandomStateManager instance for reproducible random generation
+        - rng: Global RandomStateManager instance for reproducible random generation
     """
     IS_DEBUG = _get_debug_mode()
     ID, PID = _initialize_env(IS_DEBUG)
@@ -516,7 +516,7 @@ def start(
             pass
 
     # Initialize RandomStateManager (automatically fixes all seeds)
-    rng_manager = RandomStateManager(seed=seed, verbose=verbose)
+    rng = RandomStateManager(seed=seed, verbose=verbose)
     if verbose:
         logger.info(f"Initialized RandomStateManager with seed {seed}")
 
@@ -554,9 +554,9 @@ def start(
 
     # Return appropriate values based on whether sys was provided
     if sys is not None:
-        return CONFIGS, sys.stdout, sys.stderr, plt, COLORS, rng_manager
+        return CONFIGS, sys.stdout, sys.stderr, plt, COLORS, rng
     else:
-        return CONFIGS, None, None, plt, COLORS, rng_manager
+        return CONFIGS, None, None, plt, COLORS, rng
 
 
 def _format_diff_time(diff_time):

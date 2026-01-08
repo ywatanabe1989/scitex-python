@@ -17,6 +17,16 @@ from unittest.mock import MagicMock, patch
 import yaml
 
 
+class TestLoadOptunaAvailableFlags:
+    """Test _AVAILABLE flags for optional dependencies."""
+
+    def test_optuna_available_flag_exists(self):
+        """Test that OPTUNA_AVAILABLE flag is exported."""
+        from scitex.io._load_modules._optuna import OPTUNA_AVAILABLE
+
+        assert isinstance(OPTUNA_AVAILABLE, bool)
+
+
 class TestLoadOptunaFunctions:
     """Test suite for Optuna loading functions"""
 
@@ -405,6 +415,7 @@ class TestLoadOptunaFunctions:
 
         finally:
             os.unlink(temp_yaml_path)
+
 
 if __name__ == "__main__":
     import os

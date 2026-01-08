@@ -109,8 +109,8 @@ class TestCSVColumnNaming:
             monkeypatch.setattr(sys, 'argv', ['test'])
 
             @stx.session
-            def _test_plotters(plt=stx.INJECTED, rng_manager=stx.INJECTED):
-                rng = rng_manager("csv_column_test")
+            def _test_plotters(plt=stx.INJECTED, rng=stx.INJECTED):
+                rng = rng("csv_column_test")
 
                 for name in plotter_names:
                     if name not in PLOTTERS_STX:
@@ -180,8 +180,8 @@ class TestCSVColumnNaming:
             monkeypatch.setattr(sys, 'argv', ['test'])
 
             @stx.session
-            def _test_all(plt=stx.INJECTED, rng_manager=stx.INJECTED):
-                rng = rng_manager("comprehensive_test")
+            def _test_all(plt=stx.INJECTED, rng=stx.INJECTED):
+                rng = rng("comprehensive_test")
 
                 for name in test_plotters:
                     if name not in PLOTTERS_STX:

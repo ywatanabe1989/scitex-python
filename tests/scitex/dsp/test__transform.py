@@ -1,13 +1,44 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-07 14:08:32 (ywatanabe)"
 # File: ./scitex_repo/tests/scitex/dsp/test__transform.py
 
 import pytest
+
 torch = pytest.importorskip("torch")
 import numpy as np
 import pandas as pd
-from scitex.dsp import to_sktime_df, to_segments
+
+from scitex.dsp import to_segments, to_sktime_df
+
+
+class TestTransformAvailableFlags:
+    """Test _AVAILABLE flags for optional dependencies."""
+
+    def test_torch_available_flag_exists(self):
+        """Test that TORCH_AVAILABLE flag is exported."""
+        from scitex.dsp._transform import TORCH_AVAILABLE
+
+        assert isinstance(TORCH_AVAILABLE, bool)
+
+    def test_check_torch_function_exists(self):
+        """Test that _check_torch function is exported."""
+        from scitex.dsp._transform import _check_torch
+
+        assert callable(_check_torch)
+
+    def test_torch_available_is_true_when_torch_installed(self):
+        """Test that TORCH_AVAILABLE is True when torch is installed."""
+        from scitex.dsp._transform import TORCH_AVAILABLE
+
+        # Since we're running this test, torch must be available
+        assert TORCH_AVAILABLE is True
+
+    def test_check_torch_does_not_raise_when_available(self):
+        """Test that _check_torch doesn't raise when torch is available."""
+        from scitex.dsp._transform import _check_torch
+
+        # Should not raise
+        _check_torch()
 
 
 class TestTransform:
@@ -223,6 +254,7 @@ class TestTransform:
         # With high overlap, should have many segments
         assert segments.shape[-2] > signal_len // window_size
 
+
 if __name__ == "__main__":
     import os
 
@@ -236,34 +268,34 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-04-08 12:41:59 (ywatanabe)"#!/usr/bin/env python3
-# 
-# 
+#
+#
 # import warnings
-# 
+#
 # import numpy as np
 # import pandas as pd
 # import torch
 # from scitex.decorators import torch_fn
-# 
-# 
+#
+#
 # def to_sktime_df(arr):
 #     """
 #     Convert a 3D numpy array into a DataFrame suitable for sktime.
-# 
+#
 #     Parameters:
 #     arr (numpy.ndarray): A 3D numpy array with shape (n_samples, n_channels, seq_len)
-# 
+#
 #     Returns:
 #     pandas.DataFrame: A DataFrame in sktime format
 #     """
 #     if len(arr.shape) != 3:
 #         raise ValueError("Input data must be a 3D array")
-# 
+#
 #     n_samples, seq_len, n_channels = arr.shape
-# 
+#
 #     # Initialize an empty DataFrame for sktime format
 #     sktime_df = pd.DataFrame(index=range(n_samples), columns=["dim_0"])
-# 
+#
 #     # Iterate over each sample
 #     for i in range(n_samples):
 #         # Combine all channels into a single cell
@@ -271,35 +303,35 @@ if __name__ == "__main__":
 #             {f"channel_{j}": pd.Series(arr[i, :, j]) for j in range(n_channels)}
 #         )
 #         sktime_df.iloc[i, 0] = combined_series
-# 
+#
 #     return sktime_df
-# 
-# 
+#
+#
 # @torch_fn
 # def to_segments(x, window_size, overlap_factor=1, dim=-1):
 #     stride = window_size // overlap_factor
 #     num_windows = (x.size(dim) - window_size) // stride + 1
 #     windows = x.unfold(dim, window_size, stride)
 #     return windows
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     import scitex
-# 
+#
 #     x, t, f = scitex.dsp.demo_sig()
-# 
+#
 #     y = to_segments(x, 256)
-# 
+#
 #     x = 100 * np.random.rand(16, 160, 1000)
 #     print(_normalize_time(x))
-# 
+#
 #     x = torch.randn(16, 160, 1000)
 #     print(_normalize_time(x))
-# 
+#
 #     x = torch.randn(16, 160, 1000).cuda()
 #     print(_normalize_time(x))
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

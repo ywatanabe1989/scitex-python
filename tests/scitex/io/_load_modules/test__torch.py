@@ -20,6 +20,22 @@ torch = pytest.importorskip("torch")
 import torch.nn as nn
 
 
+class TestLoadTorchAvailableFlags:
+    """Test _AVAILABLE flags for optional dependencies."""
+
+    def test_torch_available_flag_exists(self):
+        """Test that TORCH_AVAILABLE flag is exported."""
+        from scitex.io._load_modules._torch import TORCH_AVAILABLE
+
+        assert isinstance(TORCH_AVAILABLE, bool)
+
+    def test_torch_available_is_true_when_torch_installed(self):
+        """Test that TORCH_AVAILABLE is True when torch is installed."""
+        from scitex.io._load_modules._torch import TORCH_AVAILABLE
+
+        assert TORCH_AVAILABLE is True
+
+
 def test_load_torch_tensor():
     """Test loading a PyTorch tensor."""
     from scitex.io._load_modules._torch import _load_torch
@@ -228,6 +244,7 @@ def test_load_torch_cuda_tensor_to_cpu():
         assert torch.allclose(loaded_tensor, cuda_tensor.cpu())
     finally:
         os.unlink(temp_path)
+
 
 if __name__ == "__main__":
     import os

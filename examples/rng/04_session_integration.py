@@ -27,7 +27,7 @@ def example_with_session_start():
     logger.info("="*60)
     
     # Session.start() returns multiple utilities including RNG
-    CONFIG, stdout, stderr, plt, CC, rng_manager = stx.session.start(
+    CONFIG, stdout, stderr, plt, CC, rng = stx.session.start(
         __file__,
         seed=42,  # Sets up RNG with this seed
         SHOW_PLOTS=False,
@@ -97,7 +97,7 @@ def example_with_temporary_seed():
     logger.info("="*60)
     
     # Get RNG from session
-    CONFIG, stdout, stderr, plt, CC, rng_manager = stx.session.start(seed=42)
+    CONFIG, stdout, stderr, plt, CC, rng = stx.session.start(seed=42)
     
     # Generate some data with main seed
     main_gen = rng("main")
@@ -131,7 +131,7 @@ def example_multi_experiment_reproducibility():
         logger.info(f"\n>>> Experiment {exp_id} (seed={seed})")
         
         # Start session with specific seed
-        CONFIG, stdout, stderr, plt, CC, rng_manager = stx.session.start(
+        CONFIG, stdout, stderr, plt, CC, rng = stx.session.start(
             seed=seed,
             SHOW_PLOTS=False
         )
@@ -158,7 +158,7 @@ def example_multi_experiment_reproducibility():
     
     # Re-run one experiment to verify reproducibility
     logger.info("\n>>> Re-running Experiment 1 to verify reproducibility")
-    CONFIG, stdout, stderr, plt, CC, rng_manager = stx.session.start(seed=42)
+    CONFIG, stdout, stderr, plt, CC, rng = stx.session.start(seed=42)
     data_gen = rng("experiment")
     exp_data_repeat = data_gen.normal(0, 1, size=100)
     
@@ -201,7 +201,7 @@ def example_config_integration():
     logger.info(f"Created config file: {config_path}")
     
     # Start session with config file
-    CONFIG, stdout, stderr, plt, CC, rng_manager = stx.session.start(
+    CONFIG, stdout, stderr, plt, CC, rng = stx.session.start(
         config_path,
         seed=None  # Will use seed from config if available
     )
@@ -245,7 +245,7 @@ def example_parallel_experiments():
     for i in range(3):
         # Each experiment gets its own RNG with unique seed
         exp_seed = 1000 + i
-        exp_rng_manager = stx.rng.RandomStateManager(seed=exp_seed)
+        exp_rng = stx.rng.RandomStateManager(seed=exp_seed)
         
         # Run experiment
         data_gen = exp_rng("data")
@@ -264,7 +264,7 @@ def example_parallel_experiments():
     logger.info("\nVerifying independent reproducibility:")
     for exp in experiments:
         # Re-create RNG with same seed
-        verify_rng_manager = stx.rng.RandomStateManager(seed=exp['seed'])
+        verify_rng = stx.rng.RandomStateManager(seed=exp['seed'])
         verify_gen = verify_rng("data")
         verify_result = verify_gen.normal(0, 1, size=50).mean()
         
@@ -279,7 +279,7 @@ def main():
     logger.info("="*60)
     
     # Example 1: Basic session integration
-    CONFIG, rng_manager = example_with_session_start()
+    CONFIG, rng = example_with_session_start()
     
     # Example 2: Temporary seed context
     example_with_temporary_seed()

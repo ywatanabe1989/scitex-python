@@ -28,7 +28,7 @@ import torch
 import tensorflow as tf
 
 # Initialize once - fixes everything!
-rng_manager = stx.rng.RandomStateManager(seed=42)
+rng = stx.rng.RandomStateManager(seed=42)
 
 # Python random - automatically fixed
 python_val = random.random()  # Reproducible!
@@ -87,7 +87,7 @@ import sys
 import scitex as stx
 
 # Session.start returns RNG, fixing random seeds of the supported libraries automatically
-CONFIG, stdout, stderr, plt, CC, rng_manager = stx.session.start(
+CONFIG, stdout, stderr, plt, CC, rng = stx.session.start(
     sys=sys,
     seed=42
 )

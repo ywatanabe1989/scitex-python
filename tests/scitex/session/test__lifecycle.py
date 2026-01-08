@@ -466,7 +466,7 @@ class TestStartFunction:
             )
 
             assert len(result) == 6
-            CONFIG, stdout, stderr, plt_result, COLORS, rng_manager = result
+            CONFIG, stdout, stderr, plt_result, COLORS, rng = result
 
             # CONFIG should be a DotDict
             assert hasattr(CONFIG, "ID")
@@ -606,7 +606,7 @@ class TestStartFunction:
             assert session_info is not None
             assert session_info["status"] == "running"
 
-    def test_start_initializes_rng_manager(self):
+    def test_start_initializes_rng(self):
         """Test start returns RandomStateManager."""
         from scitex.repro import RandomStateManager
         from scitex.session._lifecycle import start
@@ -623,8 +623,8 @@ class TestStartFunction:
                 verbose=False,
             )
 
-            rng_manager = result[5]
-            assert isinstance(rng_manager, RandomStateManager)
+            rng = result[5]
+            assert isinstance(rng, RandomStateManager)
 
     def test_start_with_matplotlib(self):
         """Test start configures matplotlib."""
@@ -779,7 +779,7 @@ class TestIntegration:
             sdir = os.path.join(tmpdir, "test_out", "RUNNING", "full_test")
 
             # Start session
-            CONFIG, stdout, stderr, plt_result, COLORS, rng_manager = start(
+            CONFIG, stdout, stderr, plt_result, COLORS, rng = start(
                 sys=None,
                 plt=None,
                 file="/tmp/test.py",

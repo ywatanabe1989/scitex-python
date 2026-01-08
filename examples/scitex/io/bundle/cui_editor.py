@@ -144,12 +144,12 @@ def main(
     CONFIG=stx.INJECTED,
     plt=stx.INJECTED,
     COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
+    rng=stx.INJECTED,
     logger=stx.INJECTED,
 ):
     """Demonstrate programmatic figure editing."""
     out = Path(CONFIG.SDIR_OUT)
-    rng = rng_manager("cui_editor_demo")
+    rng = rng("cui_editor_demo")
 
     logger.info("=" * 60)
     logger.info("CUI Figure Editor Demo - Programmatic Editing")

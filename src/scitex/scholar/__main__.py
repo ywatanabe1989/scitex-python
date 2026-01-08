@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/__main__.py
 
 """Scholar CLI entry point - Subcommand-based interface.
@@ -8,6 +7,7 @@ Clean interface routing to battle-tested pipeline implementations:
 - single: Process single paper (DOI or title)
 - parallel: Process multiple papers in parallel
 - bibtex: Process papers from BibTeX file
+- mcp: Start MCP server for LLM integration
 """
 
 from __future__ import annotations
@@ -33,6 +33,7 @@ Clean subcommand interface to battle-tested pipelines:
   single   - Process a single paper (DOI or title)
   parallel - Process multiple papers in parallel
   bibtex   - Process papers from BibTeX file
+  mcp      - Start MCP server for LLM integration
 
 STORAGE: ~/.scitex/scholar/library/
   MASTER/{8DIGITID}/  - Centralized storage (no duplicates)
@@ -193,6 +194,16 @@ STORAGE: ~/.scitex/scholar/library/
         help="Base Chrome profile to sync from (default: system)",
     )
 
+    # ========================================
+    # Subcommand: mcp
+    # ========================================
+    subparsers.add_parser(
+        "mcp",
+        help="Start MCP server for LLM integration",
+        description="Start the MCP (Model Context Protocol) server for Claude/LLM integration",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
     return parser
 
 
@@ -220,7 +231,7 @@ async def run_single_pipeline(args):
         force=args.force,
     )
 
-    logger.success(f"Single paper pipeline completed")
+    logger.success("Single paper pipeline completed")
     return 0
 
 
@@ -288,6 +299,15 @@ async def run_bibtex_pipeline(args):
     return 0
 
 
+async def run_mcp_server():
+    """Run MCP server."""
+    from .mcp_server import main as mcp_main
+
+    logger.info("Starting Scholar MCP server...")
+    await mcp_main()
+    return 0
+
+
 async def main_async():
     """Main async entry point."""
     parser = create_parser()
@@ -300,6 +320,8 @@ async def main_async():
         return await run_parallel_pipeline(args)
     elif args.command == "bibtex":
         return await run_bibtex_pipeline(args)
+    elif args.command == "mcp":
+        return await run_mcp_server()
     else:
         logger.error(f"Unknown command: {args.command}")
         return 1

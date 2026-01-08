@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-04 02:09:55 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/dsp/_modulation_index.py
 
-import torch
+try:
+    import torch
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
 
 from scitex.decorators import signal_fn
-from scitex.nn._ModulationIndex import ModulationIndex
+
+if TORCH_AVAILABLE:
+    from scitex.nn._ModulationIndex import ModulationIndex
 
 
 @signal_fn
@@ -15,6 +22,10 @@ def modulation_index(pha, amp, n_bins=18, amp_prob=False):
     pha: (batch_size, n_chs, n_freqs_pha, n_segments, seq_len)
     amp: (batch_size, n_chs, n_freqs_amp, n_segments, seq_len)
     """
+    if not TORCH_AVAILABLE:
+        raise ImportError(
+            "PyTorch is not installed. Please install with: pip install torch"
+        )
     return ModulationIndex(n_bins=n_bins, amp_prob=amp_prob)(pha, amp)
 
 
@@ -32,6 +43,7 @@ if __name__ == "__main__":
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex
 
     # Start

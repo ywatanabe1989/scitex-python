@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 SciTeX CLI - Web Scraping Commands
 """
 
-import os
+import subprocess
 import sys
-import click
+from datetime import datetime
 from pathlib import Path
 
-from scitex.web import get_urls, download_images, get_image_urls
-from scitex.web._scraping import _get_default_download_dir
+import click
+
 from scitex.logging import getLogger
-import subprocess
-import json
-from datetime import datetime
+from scitex.web import download_images, get_image_urls, get_urls
+from scitex.web.download_images import _get_default_download_dir
 
 logger = getLogger(__name__)
 
@@ -34,7 +32,7 @@ def web():
     \b
     Examples:
       scitex web get-urls https://example.com
-      scitex web get-urls https://example.com --pattern "\.pdf$"
+      scitex web get-urls https://example.com --pattern "\\.pdf$"
       scitex web get-image-urls https://example.com
       scitex web download-images https://example.com --output ./downloads
       scitex web download-images https://example.com --min-size 100x100
@@ -195,7 +193,7 @@ def download_images_cmd(url, output, pattern, min_size, same_domain, max_workers
                 min_size_tuple = (width, height)
             except ValueError:
                 click.secho(
-                    f"ERROR: Invalid min-size format. Use WIDTHxHEIGHT (e.g., '100x100')",
+                    "ERROR: Invalid min-size format. Use WIDTHxHEIGHT (e.g., '100x100')",
                     fg="red",
                     err=True,
                 )
@@ -301,6 +299,7 @@ def take_screenshot_cmd(url, output, message, quality, full_page):
         try:
             # For now, we'll use a simpler approach with playwright directly
             import asyncio
+
             from playwright.async_api import async_playwright
 
             async def capture():
@@ -322,7 +321,7 @@ def take_screenshot_cmd(url, output, message, quality, full_page):
             asyncio.run(capture())
 
             if output_file.exists():
-                click.secho(f"Screenshot saved successfully", fg="green")
+                click.secho("Screenshot saved successfully", fg="green")
                 click.echo(f"Location: {output_file}")
                 sys.exit(0)
             else:
@@ -340,7 +339,7 @@ def take_screenshot_cmd(url, output, message, quality, full_page):
             )
 
             if result.returncode == 0 and output_file.exists():
-                click.secho(f"Screenshot saved successfully", fg="green")
+                click.secho("Screenshot saved successfully", fg="green")
                 click.echo(f"Location: {output_file}")
                 sys.exit(0)
             else:

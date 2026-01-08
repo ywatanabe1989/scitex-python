@@ -5,6 +5,67 @@ All notable changes to SciTeX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.13.0] - 2026-01-08
+
+### Changed
+- **Renamed `rng_manager` → `rng`**: Shorter, NumPy-aligned naming convention
+  - `stx.session.start()` now returns `rng` instead of `rng_manager`
+  - All examples, docs, and tests updated to use new naming
+- **MCP Servers**: Added graceful dependency handling with `MCP_AVAILABLE` flag
+  - Servers now provide helpful installation instructions when `mcp` package missing
+
+### Added
+- **GitHub Actions**: Install time benchmark workflow with GitHub Pages deployment
+  - Dynamic shields.io badges for all modules at `badges/<module>.json`
+  - Weekly scheduled benchmarks and release-triggered runs
+- **README**: Per-module install time badges in all module tables
+
+### Fixed
+- **README**: Removed stray `</details>` tag, fixed `stx.io.load` example
+
+## [2.12.0] - 2026-01-08
+
+### Added
+- **MCP Servers**: Integrated MCP (Model Context Protocol) servers for LLM integration
+  - `scholar`: Literature management with BibTeX operations, DOI resolution (11 tools)
+  - `stats`: Statistical testing with auto-recommendation, power analysis (10 tools)
+  - `template`: Project scaffolding from templates (4 tools)
+  - `plt`: Publication-quality plotting with style management (6 tools)
+  - `canvas`: Multi-panel figure composition (7 tools)
+  - `diagram`: Paper-optimized diagram generation with Mermaid/Graphviz (7 tools)
+- **CLI Commands**: 7 new CLI command groups (113 new tests)
+  - `audio`: Text-to-speech (speak, backends, check, stop)
+  - `capture`: Screenshot/monitoring (snap, start, stop, gif, info, window)
+  - `repro`: Reproducibility tools (gen-id, gen-timestamp, hash, seed)
+  - `resource`: System monitoring (specs, usage, monitor)
+  - `stats`: Statistical analysis (recommend, describe, save, load, tests)
+  - `template`: Project scaffolding (list, clone, info)
+  - `tex`: LaTeX operations (compile, preview, to-vec, check)
+- **Web Module**: New `download_images` function for batch image downloading with size filtering
+
+### Removed
+- **Obsolete MCP Servers**: Removed standalone `src/mcp_servers/` directory (18 servers, ~44K lines)
+  - Replaced by integrated module structure at `src/scitex/<module>/mcp_server.py`
+
+### Changed
+- MCP server entry points now follow pattern: `scitex-<module>` (e.g., `scitex-scholar`, `scitex-stats`)
+
+## [2.11.0] - 2026-01-08
+
+### Breaking Changes
+- **Removed Modules**: Deprecated `fig`, `fts`, and `compat` modules have been removed
+- **Canvas API**: `position`/`size` parameters renamed to `xy_mm`/`size_mm` for clarity
+
+### Changed
+- Removed legacy `Pltz*` aliases and terminology
+- Reorganized maintenance scripts into `dependencies/` directory
+- Simplified path module implementations
+- Added installation time benchmark scripts
+
+### Documentation
+- Updated README with uv recommendations
+- Consolidated visualization documentation into `docs/visualization/`
+
 ## [2.10.3] - 2026-01-06
 
 ### Fixed

@@ -29,7 +29,7 @@ def run_main():
     """Initialize scitex framework, run main function, and cleanup."""
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
         sys, plt, args=args, file=__FILE__, verbose=args.verbose, agg=True
     )
 
@@ -59,7 +59,7 @@ Modern approach using `@stx.session.session` decorator:
 def demo(n_samples: int = 100, show_config: bool = False):
     """SciTeX session decorator demonstration."""
     # Session variables automatically available:
-    # CONFIG, plt, CC, rng_manager
+    # CONFIG, plt, CC, rng
 
     logger.info(f"Session ID: {CONFIG['ID']}")
     # ... your code ...
@@ -93,7 +93,7 @@ Both approaches provide these global variables:
 - **CONFIG** (dict): Session configuration with ID, SDIR, paths, etc.
 - **plt** (module): matplotlib.pyplot configured for session
 - **CC** (CustomColors): Custom colors for consistent plotting
-- **rng_manager** (RandomStateManager): Reproducible random number generation
+- **rng** (RandomStateManager): Reproducible random number generation
 
 ## Usage Examples
 
@@ -149,7 +149,7 @@ scripts/
 @stx.session.session(verbose=True, notify=True, sdir_suffix="custom_name")
 def process(input_file: str, threshold: float = 0.5, debug: bool = False):
     """Process data file."""
-    # CONFIG, plt, CC, rng_manager available
+    # CONFIG, plt, CC, rng available
     data = stx.io.load(input_file)
     result = analyze(data, threshold, debug)
     stx.io.save(result, "output.csv")

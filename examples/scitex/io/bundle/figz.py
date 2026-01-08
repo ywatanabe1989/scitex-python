@@ -27,14 +27,14 @@ def main(
     CONFIG=stx.INJECTED,
     plt=stx.INJECTED,
     COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
+    rng=stx.INJECTED,
     logger=stx.INJECTED,
 ):
     """FTS bundle demonstration."""
     logger.info("Starting FTS bundle demo with various plot types")
 
     sdir = CONFIG["SDIR_OUT"]
-    rng = rng_manager("fts_demo")
+    rng = rng("fts_demo")
 
     # Clean up existing bundles
     panel_names = ["panel_line", "panel_bar", "panel_scatter", "panel_histogram",

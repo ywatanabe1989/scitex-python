@@ -912,3 +912,8 @@ tests/results/
 mgmt
 .jupyter_ystore.db
 docs/visualization/FROM_USER.md
+/.claude-worktree-symlinks
+# Claude worktree symlink
+/feature-mcp-servers
+# Claude worktree symlink
+/feature-cli
