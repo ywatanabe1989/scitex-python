@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-28 17:43:50 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_compile_async.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/writer/_compile_async.py"
@@ -17,17 +17,19 @@ Allows non-blocking compilation operations for concurrent workflows.
 """
 
 import asyncio
-from functools import wraps
-from pathlib import Path
-from typing import Callable
-from typing import Any
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial, wraps
+from pathlib import Path
+from typing import Any, Callable
+
 from scitex.logging import getLogger
 
-from ._compile import compile_manuscript
-from ._compile import compile_supplementary
-from ._compile import compile_revision
-from ._compile import CompilationResult
+from ._compile import (
+    CompilationResult,
+    compile_manuscript,
+    compile_revision,
+    compile_supplementary,
+)
 
 logger = getLogger(__name__)
 
@@ -49,7 +51,9 @@ def _make_async_wrapper(sync_func: Callable) -> Callable:
     @wraps(sync_func)
     async def async_wrapper(*args: Any, **kwargs: Any) -> CompilationResult:
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(_executor, sync_func, *args, **kwargs)
+        # Use partial to bind kwargs since run_in_executor only accepts positional args
+        bound_func = partial(sync_func, *args, **kwargs)
+        return await loop.run_in_executor(_executor, bound_func)
 
     return async_wrapper
 

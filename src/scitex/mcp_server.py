@@ -15,6 +15,7 @@ Aggregates tools from all SciTeX MCP modules with prefixed names:
 - plt_*: Publication plotting
 - canvas_*: Multi-panel figures
 - diagram_*: Diagram generation
+- writer_*: LaTeX manuscript compilation
 """
 
 from __future__ import annotations
@@ -40,6 +41,7 @@ MODULES = [
     ("plt", "scitex.plt._mcp_tool_schemas", "scitex.plt._mcp_handlers"),
     ("canvas", "scitex.canvas._mcp_tool_schemas", "scitex.canvas._mcp_handlers"),
     ("diagram", "scitex.diagram._mcp_tool_schemas", "scitex.diagram._mcp_handlers"),
+    ("writer", "scitex.writer._mcp_tool_schemas", "scitex.writer._mcp_handlers"),
 ]
 
 

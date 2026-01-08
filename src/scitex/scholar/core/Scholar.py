@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-13 08:11:40 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/core/Scholar.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/core/Scholar.py"
@@ -22,40 +22,35 @@ This is the main entry point for all scholar functionality, providing:
 - Progressive disclosure of advanced features
 """
 
+import asyncio
 import json
+import shutil
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
-from copy import deepcopy
+from typing import Any, Dict, List, Optional, Union
+
+import nest_asyncio
+
 from scitex import logging
-import shutil
 
 # PDF extraction is now handled by scitex.io
 from scitex.logging import ScholarError
-from scitex.scholar.config import ScholarConfig
 
 # Updated imports for current architecture
 from scitex.scholar.auth import ScholarAuthManager
-from scitex.browser.debugging import browser_logger
+from scitex.scholar.auth.core.AuthenticationGateway import (
+    AuthenticationGateway,
+)
 from scitex.scholar.browser import ScholarBrowserManager
-from scitex.scholar.storage import LibraryManager
-from scitex.scholar.storage import ScholarLibrary
+from scitex.scholar.config import ScholarConfig
+from scitex.scholar.impact_factor.ImpactFactorEngine import ImpactFactorEngine
 from scitex.scholar.metadata_engines.ScholarEngine import ScholarEngine
 from scitex.scholar.pdf_download.ScholarPDFDownloader import (
     ScholarPDFDownloader,
 )
-from scitex.scholar.auth.core.AuthenticationGateway import (
-    AuthenticationGateway,
-)
+from scitex.scholar.storage import LibraryManager, ScholarLibrary
 from scitex.scholar.url_finder.ScholarURLFinder import ScholarURLFinder
-
-import asyncio
-import nest_asyncio
-from scitex.scholar.impact_factor.ImpactFactorEngine import ImpactFactorEngine
 
 from .Papers import Papers
 
@@ -142,7 +137,7 @@ class Scholar:
         self._Scholar__library = None  # ScholarLibrary for high-level operations
 
         # Show user-friendly initialization message with library location
-        library_path = self.config.get_library_project_dir()
+        library_path = self.config.get_library_project_dir(self.project)
         if project:
             project_path = library_path / project
             logger.info(
@@ -257,7 +252,7 @@ class Scholar:
 
         return enriched_papers
 
-    def _enrich_impact_factors(self, papers: "Papers") -> "Papers":
+    def _enrich_impact_factors(self, papers: Papers) -> Papers:
         """Add journal impact factors to papers.
 
         Args:
@@ -278,7 +273,7 @@ class Scholar:
 
         return papers
 
-    def _merge_enrichment_data(self, paper: "Paper", results: Dict) -> "Paper":
+    def _merge_enrichment_data(self, paper: Paper, results: Dict) -> Paper:
         """Merge enrichment results into paper object.
 
         Creates a new Paper object with merged data to avoid modifying the original.
@@ -450,9 +445,9 @@ class Scholar:
             }
         """
         from scitex.scholar.auth.gateway import (
+            OpenURLResolver,
             normalize_doi_as_http,
             resolve_publisher_url_by_navigating_to_doi_page,
-            OpenURLResolver,
         )
 
         # Initialize result
@@ -586,7 +581,7 @@ class Scholar:
                         # Create/update metadata
                         metadata_file = storage_path / "metadata.json"
                         if metadata_file.exists():
-                            with open(metadata_file, "r") as f:
+                            with open(metadata_file) as f:
                                 metadata = json.load(f)
                         else:
                             metadata = {
@@ -780,7 +775,7 @@ class Scholar:
                     metadata_file = storage_path / "metadata.json"
                     if metadata_file.exists():
                         # Load existing rich metadata - DO NOT OVERWRITE IT
-                        with open(metadata_file, "r") as f:
+                        with open(metadata_file) as f:
                             metadata = json.load(f)
                         logger.debug(
                             f"{self.name}: Loaded existing metadata for {paper_id}"
@@ -912,9 +907,10 @@ class Scholar:
             raise ValueError("No project specified")
 
         # Load papers from library by reading symlinks in project directory
-        from ..core.Papers import Papers
-        from ..core.Paper import Paper
         import json
+
+        from ..core.Paper import Paper
+        from ..core.Papers import Papers
 
         logger.info(f"{self.name}: Loading papers from project: {project_name}")
 
@@ -941,7 +937,7 @@ class Scholar:
                     metadata_file = master_path / "metadata.json"
                     if metadata_file.exists():
                         try:
-                            with open(metadata_file, "r") as f:
+                            with open(metadata_file) as f:
                                 metadata = json.load(f)
 
                             # Create Paper object using from_dict class method
@@ -1177,7 +1173,7 @@ class Scholar:
                 metadata_file = item / "project_metadata.json"
                 if metadata_file.exists():
                     try:
-                        with open(metadata_file, "r") as f:
+                        with open(metadata_file) as f:
                             metadata = json.load(f)
                         project_info.update(metadata)
                     except Exception as e:
@@ -1271,7 +1267,7 @@ class Scholar:
         title: Optional[str] = None,
         doi: Optional[str] = None,
         project: Optional[str] = None,
-    ) -> "Paper":
+    ) -> Paper:
         """
         Complete sequential pipeline for processing a single paper.
 
@@ -1311,7 +1307,7 @@ class Scholar:
         project = project or self.project
 
         logger.info(f"{'=' * 60}")
-        logger.info(f"Processing paper")
+        logger.info("Processing paper")
         if title:
             logger.info(f"Title: {title[:50]}...")
         if doi:
@@ -1320,7 +1316,7 @@ class Scholar:
 
         # Stage 0: Resolve DOI from title (if needed)
         if not doi and title:
-            logger.info(f"Stage 0: Resolving DOI from title...")
+            logger.info("Stage 0: Resolving DOI from title...")
 
             # Use ScholarEngine to search and get DOI
             results = await self._scholar_engine.search_async(title=title)
@@ -1340,11 +1336,11 @@ class Scholar:
         logger.info(f"Storage: {storage_path}")
 
         # Stage 1: Load or create Paper from storage
-        logger.info(f"\nStage 1: Loading/creating metadata...")
+        logger.info("\nStage 1: Loading/creating metadata...")
         if self._library_manager.has_metadata(paper_id):
             # Load existing from storage
             paper = self._library_manager.load_paper_from_id(paper_id)
-            logger.info(f"Loaded existing metadata from storage")
+            logger.info("Loaded existing metadata from storage")
         else:
             # Create new Paper
             paper = Paper()
@@ -1357,10 +1353,10 @@ class Scholar:
 
             # Create storage and save
             self._library_manager.save_paper_incremental(paper_id, paper)
-            logger.success(f"Created new paper entry in storage")
+            logger.success("Created new paper entry in storage")
 
         # Stage 2: Check/find URLs
-        logger.info(f"\nStage 2: Checking/finding PDF URLs...")
+        logger.info("\nStage 2: Checking/finding PDF URLs...")
         if not self._library_manager.has_urls(paper_id):
             logger.info(f"Finding PDF URLs for DOI: {doi}")
             (
@@ -1382,9 +1378,9 @@ class Scholar:
             )
 
         # Stage 3: Check/download PDF
-        logger.info(f"\nStage 3: Checking/downloading PDF...")
+        logger.info("\nStage 3: Checking/downloading PDF...")
         if not self._library_manager.has_pdf(paper_id):
-            logger.info(f"Downloading PDF...")
+            logger.info("Downloading PDF...")
             if paper.metadata.url.pdfs:
                 (
                     browser,
@@ -1436,7 +1432,7 @@ class Scholar:
         title: Optional[str] = None,
         doi: Optional[str] = None,
         project: Optional[str] = None,
-    ) -> "Paper":
+    ) -> Paper:
         """
         Synchronous wrapper for process_paper_async.
 
@@ -1452,10 +1448,10 @@ class Scholar:
 
     async def process_papers_async(
         self,
-        papers: Union["Papers", List[str]],
+        papers: Union[Papers, List[str]],
         project: Optional[str] = None,
         max_concurrent: int = 3,
-    ) -> "Papers":
+    ) -> Papers:
         """
         Process multiple papers with controlled parallelism.
 
@@ -1557,10 +1553,10 @@ class Scholar:
 
     def process_papers(
         self,
-        papers: Union["Papers", List[str]],
+        papers: Union[Papers, List[str]],
         project: Optional[str] = None,
         max_concurrent: int = 3,
-    ) -> "Papers":
+    ) -> Papers:
         """
         Synchronous wrapper for process_papers_async.
 
@@ -1652,7 +1648,7 @@ if __name__ == "__main__":
             project="demo_project",
             project_description="Demo project for testing Scholar API",
         )
-        print(f"✓ Scholar initialized")
+        print("✓ Scholar initialized")
         print(f"  Project: {scholar.project}")
         print(f"  Workspace: {scholar.get_workspace_dir()}")
         print()
@@ -1665,7 +1661,7 @@ if __name__ == "__main__":
                 "neural_networks_2024",
                 description="Collection of neural network papers from 2024",
             )
-            print(f"   ✅ Created project: neural_networks_2024")
+            print("   ✅ Created project: neural_networks_2024")
             print(f"   📂 Project directory: {project_dir}")
 
             # List all projects
@@ -1762,7 +1758,7 @@ if __name__ == "__main__":
                         f"   📂 Loaded {len(project_papers)} papers from current project"
                     )
                 except:
-                    print(f"   📂 Current project is empty or doesn't exist yet")
+                    print("   📂 Current project is empty or doesn't exist yet")
 
         except Exception as e:
             print(f"   ⚠️  Workflow demo partially skipped: {e}")
@@ -1806,12 +1802,11 @@ if __name__ == "__main__":
         print("9. Backup and Maintenance:")
         try:
             import tempfile
-            import os
 
             # Create a temporary backup location
             backup_dir = Path(tempfile.mkdtemp()) / "scholar_backup"
             backup_info = scholar.backup_library(backup_dir)
-            print(f"   💾 Library backup created:")
+            print("   💾 Library backup created:")
             print(f"      📁 Location: {backup_info['backup']}")
             print(f"      📊 Size: {backup_info['size_mb']:.2f} MB")
             print(f"      🕐 Timestamp: {backup_info['timestamp']}")

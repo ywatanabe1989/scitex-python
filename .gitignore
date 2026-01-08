@@ -917,3 +917,10 @@ docs/visualization/FROM_USER.md
 /feature-mcp-servers
 # Claude worktree symlink
 /feature-cli
+# Claude worktree symlink
+/feature-cv-module
+# Claude worktree symlink
+/feature-alignment-mcp-tools
+# Claude worktree symlink
+/feature-writer-mcp
+MEMO.md

@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-08 11:41:42
+!-- Timestamp: 2026-01-08 12:55:25
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -177,19 +177,6 @@ plt.close(fig)
 ## Why SciTeX?
 
 SciTeX automates research analysis code.
-
-<!-- **What SciTeX Automates:**
- !-- - ✅ Symlink management for centralized outputs
- !-- - ✅ Error handling and directory cleanup
- !-- - ✅ Global variable injection (CONFIG, plt, COLORS, logger, rng)
- !-- 
- !-- **Research Benefits:**
- !-- - 📊 **Figures + data always together** - CSV auto-exported from every plot
- !-- - 🔄 **Perfect reproducibility** - Every run tracked with unique session ID
- !-- - 🌍 **Universal format** - CSV data readable anywhere
- !-- - 📝 **Zero manual work** - Metadata embedded automatically
- !-- - 🎯 **3.3× less code** - Focus on research, not infrastructure -->
-
 
 <details>
 <summary><strong><code>@scitex.session</code></strong> — Reproducible Experiment Tracking + Auto-CLI</summary>
@@ -435,7 +422,27 @@ SciTeX provides Model Context Protocol (MCP) servers for AI agent integration:
 | `scitex-template` | Project scaffolding |
 | `scitex-canvas` | Scientific figure canvas |
 
+### All-in-One Server (Recommended)
+
+Use `scitex-mcp-server` to load all MCP modules with a single server:
+
 **Claude Desktop Configuration** (`~/.config/claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "scitex": {
+      "command": "scitex-mcp-server"
+    }
+  }
+}
+```
+
+Tools are prefixed by module (e.g., `audio_speak`, `capture_screenshot`, `scholar_enrich_bibtex`).
+
+### Individual Servers
+
+For selective module loading, configure servers individually:
 
 ```json
 {
