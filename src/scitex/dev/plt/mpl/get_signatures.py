@@ -146,7 +146,7 @@ def main(
     CONFIG=stx.INJECTED,
     plt=stx.INJECTED,
     COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
+    rng=stx.INJECTED,
     logger=stx.INJECTED,
 ):
     """Inspect and display matplotlib plotting function signatures."""

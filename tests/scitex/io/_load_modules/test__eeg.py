@@ -15,6 +15,16 @@ pytest.importorskip("zarr")
 from unittest.mock import MagicMock, patch
 
 
+class TestLoadEegAvailableFlags:
+    """Test _AVAILABLE flags for optional dependencies."""
+
+    def test_mne_available_flag_exists(self):
+        """Test that MNE_AVAILABLE flag is exported."""
+        from scitex.io._load_modules._eeg import MNE_AVAILABLE
+
+        assert isinstance(MNE_AVAILABLE, bool)
+
+
 class TestLoadEegData:
     """Test suite for _load_eeg_data function"""
 
@@ -456,6 +466,7 @@ class TestLoadEegData:
         # Should raise an error for .eeg without associated files
         with pytest.raises(ValueError, match="No associated files found for .eeg file"):
             _load_eeg_data("standalone.eeg")
+
 
 if __name__ == "__main__":
     import os

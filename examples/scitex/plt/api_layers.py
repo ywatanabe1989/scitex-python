@@ -26,11 +26,11 @@ OUTPUT_DIR = "./api_layers_out"
 def main(
     extension="png",
     plt=stx.INJECTED,
-    rng_manager=stx.INJECTED,
+    rng=stx.INJECTED,
     logger=stx.INJECTED,
 ):
     """Demo: All registered plotters by API layer."""
-    rng = rng_manager("api_layers_demo")
+    rng = rng("api_layers_demo")
 
     logger.info("=" * 60)
     logger.info("SciTeX API Layers Demo")

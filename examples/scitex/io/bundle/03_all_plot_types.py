@@ -99,12 +99,12 @@ def save_report(out_dir, results, total):
 
 
 @stx.session(verbose=False, agg=True)
-def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED, rng_manager=INJECTED):
+def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED, rng=INJECTED):
     """Test FTS bundle creation for all plot types."""
     logger.info("Example 03: FTS Bundle Creation for All Plot Types")
 
     out_dir = CONFIG["SDIR_OUT"]
-    rng = rng_manager("fts_test")
+    rng = rng("fts_test")
     results = {"success": [], "failed": [], "no_csv": []}
 
     all_plotters = [

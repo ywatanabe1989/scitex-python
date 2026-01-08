@@ -268,7 +268,7 @@ if __name__ == "__main__":
 #             # - CONFIG: Session configuration dict
 #             # - plt: Matplotlib pyplot (configured for session)
 #             # - COLORS: Custom Colors
-#             # - rng_manager: RandomStateManager (fixes seeds, creates named generators)
+#             # - rng: RandomStateManager (fixes seeds, creates named generators)
 #             logger.info(f"Session ID: {CONFIG['ID']}")
 #             logger.info(f"Output directory: {CONFIG['SDIR_RUN']}")
 #             # ... training code ...
@@ -289,8 +289,8 @@ if __name__ == "__main__":
 #         - CONFIG (dict): Session configuration with ID, SDIR, paths, etc.
 #         - plt (module): matplotlib.pyplot configured with session settings
 #         - COLORS (CustomColors): Custom Colors for consistent plotting
-#         - rng_manager (RandomStateManager): Manages reproducibility by fixing global seeds
-#                                              and creating named generators via rng_manager("name")
+#         - rng (RandomStateManager): Manages reproducibility by fixing global seeds
+#                                              and creating named generators via rng("name")
 #     """
 #
 #     def decorator(func: Callable) -> Callable:
@@ -352,7 +352,7 @@ if __name__ == "__main__":
 #     # Start session
 #     import matplotlib.pyplot as plt
 #
-#     CONFIG, stdout, stderr, plt, COLORS, rng_manager = start(
+#     CONFIG, stdout, stderr, plt, COLORS, rng = start(
 #         sys=sys_module,
 #         plt=plt,
 #         args=cleaned_args,
@@ -371,7 +371,7 @@ if __name__ == "__main__":
 #     func_globals["CONFIG"] = CONFIG
 #     func_globals["plt"] = plt
 #     func_globals["COLORS"] = COLORS
-#     func_globals["rng_manager"] = rng_manager
+#     func_globals["rng"] = rng
 #     func_globals["logger"] = script_logger
 #
 #     # Log injected globals for user awareness
@@ -383,7 +383,7 @@ if __name__ == "__main__":
 #     _decorator_logger.info(f"      - CONFIG['PID']: {CONFIG['PID']}")
 #     _decorator_logger.info("  • plt - matplotlib.pyplot (configured for session)")
 #     _decorator_logger.info("  • COLORS - CustomColors (for consistent plotting)")
-#     _decorator_logger.info("  • rng_manager - RandomStateManager (for reproducibility)")
+#     _decorator_logger.info("  • rng - RandomStateManager (for reproducibility)")
 #     _decorator_logger.info("  • logger - SciTeX logger (configured for your script)")
 #     _decorator_logger.info("=" * 60)
 #
@@ -404,7 +404,7 @@ if __name__ == "__main__":
 #             "CONFIG": CONFIG,
 #             "plt": plt,
 #             "COLORS": COLORS,
-#             "rng_manager": rng_manager,
+#             "rng": rng,
 #             "logger": script_logger,
 #         }
 #
@@ -606,7 +606,7 @@ if __name__ == "__main__":
 #             plt.plot(x, y, color=COLORS.blue)
 #             plt.plot(x, y, color=COLORS['blue'])
 #
-#     rng_manager (RandomStateManager)
+#     rng (RandomStateManager)
 #         Manages reproducible randomness
 #
 #     logger (SciTeXLogger)
@@ -783,7 +783,7 @@ if __name__ == "__main__":
 #     # Start session
 #     import matplotlib.pyplot as plt
 #
-#     CONFIG, stdout, stderr, plt, COLORS, rng_manager = start(
+#     CONFIG, stdout, stderr, plt, COLORS, rng = start(
 #         sys=sys_module,
 #         plt=plt,
 #         args=args,

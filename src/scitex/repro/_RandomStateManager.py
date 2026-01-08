@@ -14,7 +14,7 @@ __DIR__ = os.path.dirname(__FILE__)
 Clean, simple RandomStateManager for scientific reproducibility.
 
 Main API:
-    rng_manager = RandomStateManager(seed=42)   # Create instance
+    rng = RandomStateManager(seed=42)   # Create instance
     gen = rng("name")                   # Get named generator
     rng.verify(obj, "name")             # Verify reproducibility
 """
@@ -44,11 +44,11 @@ class RandomStateManager:
     >>> import scitex as stx
     >>>
     >>> # Method 1: Direct usage
-    >>> rng_manager = stx.rng.RandomStateManager(seed=42)
+    >>> rng = stx.rng.RandomStateManager(seed=42)
     >>> data = rng("data").random(100)
     >>>
     >>> # Method 2: From session.start
-    >>> CONFIG, stdout, stderr, plt, CC, rng_manager = stx.session.start(seed=42)
+    >>> CONFIG, stdout, stderr, plt, CC, rng = stx.session.start(seed=42)
     >>> model = rng("model").normal(size=(10, 10))
     >>>
     >>> # Verify reproducibility
@@ -98,7 +98,7 @@ class RandomStateManager:
             np.random.seed(self.seed)
             # Also set default_rng for new API
             self._np = np
-            self._np_default_rng_manager = np.random.default_rng(self.seed)
+            self._np_default_rng = np.random.default_rng(self.seed)
             fixed_modules.append("numpy")
         except ImportError:
             self._np = None
@@ -159,7 +159,7 @@ class RandomStateManager:
 
         Examples
         --------
-        >>> rng_manager = RandomStateManager(42)
+        >>> rng = RandomStateManager(42)
         >>> gen = rng.get_np_generator("data")
         >>> values = gen.random(100)
         >>> perm = gen.permutation(100)
@@ -427,7 +427,7 @@ class RandomStateManager:
 
         Examples
         --------
-        >>> rng_manager = RandomStateManager(42)
+        >>> rng = RandomStateManager(42)
         >>> from sklearn.model_selection import train_test_split
         >>> X_train, X_test = train_test_split(
         ...     X, test_size=0.2,
@@ -455,7 +455,7 @@ class RandomStateManager:
 
         Examples
         --------
-        >>> rng_manager = RandomStateManager(42)
+        >>> rng = RandomStateManager(42)
         >>> gen = rng.get_torch_generator("model")
         >>> torch.randn(5, 5, generator=gen)
         """
@@ -503,7 +503,7 @@ class RandomStateManager:
 
         Examples
         --------
-        >>> rng_manager = RandomStateManager(42)
+        >>> rng = RandomStateManager(42)
         >>> rng.clear_cache()  # Clear all
         >>> rng.clear_cache("old_data")  # Clear specific
         >>> rng.clear_cache(["test1", "test2"])  # Clear multiple
@@ -559,7 +559,7 @@ def get(verbose: bool = False) -> RandomStateManager:
     Examples
     --------
     >>> import scitex as stx
-    >>> rng_manager = stx.rng.get()
+    >>> rng = stx.rng.get()
     >>> data = rng("data").random(100)
     """
     global _GLOBAL_INSTANCE
@@ -589,7 +589,7 @@ def reset(seed: int = 42, verbose: bool = False) -> RandomStateManager:
     Examples
     --------
     >>> import scitex as stx
-    >>> rng_manager = stx.repro.reset(seed=123)
+    >>> rng = stx.repro.reset(seed=123)
     """
     global _GLOBAL_INSTANCE
     _GLOBAL_INSTANCE = RandomStateManager(seed, verbose=verbose)
@@ -626,8 +626,8 @@ def main(args):
     print(f"Seed: {args.seed}")
 
     # Get named generators
-    data_gen = rng_manager("data")
-    model_gen = rng_manager("model")
+    data_gen = rng("data")
+    model_gen = rng("model")
 
     # Generate data
     print(f"\n{'Data Generation':-^60}")
@@ -641,7 +641,7 @@ def main(args):
 
     # Verify reproducibility
     print(f"\n{'Verification':-^60}")
-    rng_manager.verify(data, "demo_data")
+    rng.verify(data, "demo_data")
     print("✓ Data reproducibility verified")
 
     print(f"\n{'=' * 60}")
@@ -660,7 +660,7 @@ if __name__ == "__main__":
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
         sys,
         plt,
         args=args,

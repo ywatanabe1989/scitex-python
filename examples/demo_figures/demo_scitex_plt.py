@@ -33,9 +33,9 @@ def demo_line_plot(plt=stx.INJECTED, logger=stx.INJECTED):
 
 
 @stx.session
-def demo_scatter_plot(plt=stx.INJECTED, rng_manager=stx.INJECTED, logger=stx.INJECTED):
+def demo_scatter_plot(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
     """Scatter plot with color-coded groups."""
-    rng = rng_manager("scatter")
+    rng = rng("scatter")
     fig, ax = plt.subplots()
 
     groups = ["blue", "red", "green", "yellow"]
@@ -87,9 +87,9 @@ def demo_bar_plot(plt=stx.INJECTED, logger=stx.INJECTED):
 
 
 @stx.session
-def demo_heatmap(plt=stx.INJECTED, rng_manager=stx.INJECTED, logger=stx.INJECTED):
+def demo_heatmap(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
     """Correlation heatmap."""
-    rng = rng_manager("heatmap")
+    rng = rng("heatmap")
     fig, ax = plt.subplots()
 
     data = rng.standard_normal((5, 5))
@@ -116,9 +116,9 @@ def demo_heatmap(plt=stx.INJECTED, rng_manager=stx.INJECTED, logger=stx.INJECTED
 
 
 @stx.session
-def demo_histogram(plt=stx.INJECTED, rng_manager=stx.INJECTED, logger=stx.INJECTED):
+def demo_histogram(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
     """Histogram with distribution overlay."""
-    rng = rng_manager("histogram")
+    rng = rng("histogram")
     fig, ax = plt.subplots()
 
     data1 = rng.normal(0, 1, 500)
@@ -154,9 +154,9 @@ def demo_histogram(plt=stx.INJECTED, rng_manager=stx.INJECTED, logger=stx.INJECT
 
 
 @stx.session
-def demo_boxplot(plt=stx.INJECTED, rng_manager=stx.INJECTED, logger=stx.INJECTED):
+def demo_boxplot(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
     """Box plot comparison."""
-    rng = rng_manager("boxplot")
+    rng = rng("boxplot")
     fig, ax = plt.subplots()
 
     data = [rng.normal(m, 0.5, 50) for m in [2, 3, 2.5, 4]]
@@ -178,9 +178,9 @@ def demo_boxplot(plt=stx.INJECTED, rng_manager=stx.INJECTED, logger=stx.INJECTED
 
 
 @stx.session
-def demo_subplots_grid(plt=stx.INJECTED, rng_manager=stx.INJECTED, logger=stx.INJECTED):
+def demo_subplots_grid(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
     """2x2 subplot grid."""
-    rng = rng_manager("subplots")
+    rng = rng("subplots")
     fig, axes = plt.subplots(nrows=2, ncols=2)
 
     x = np.linspace(0, 10, 100)
@@ -225,10 +225,10 @@ def demo_subplots_grid(plt=stx.INJECTED, rng_manager=stx.INJECTED, logger=stx.IN
 
 @stx.session
 def demo_shaded_errorband(
-    plt=stx.INJECTED, rng_manager=stx.INJECTED, logger=stx.INJECTED
+    plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED
 ):
     """Line plot with shaded error band."""
-    rng = rng_manager("errorband")
+    rng = rng("errorband")
     fig, ax = plt.subplots()
 
     x = np.linspace(0, 10, 50)

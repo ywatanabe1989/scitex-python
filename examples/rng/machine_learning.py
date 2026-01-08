@@ -14,7 +14,7 @@ class SimpleNN:
     
     def __init__(self, rng, input_size, hidden_size, output_size):
         """Initialize with reproducible weights."""
-        self.rng_manager = rng
+        self.rng = rng
         
         # Get dedicated generator for weight initialization
         init_gen = rng("weight_init")
@@ -117,7 +117,7 @@ def train_model(seed=42):
     print("=" * 50)
     
     # Initialize RNG
-    rng_manager = stx.rng.RandomStateManager(seed=seed)
+    rng = stx.rng.RandomStateManager(seed=seed)
     
     # Create dataset
     print("\n1. Creating dataset...")
@@ -228,7 +228,7 @@ def demonstrate_temporary_seed():
     print("TEMPORARY SEED DEMONSTRATION")
     print("=" * 50)
     
-    rng_manager = stx.rng.RandomStateManager(seed=42)
+    rng = stx.rng.RandomStateManager(seed=42)
     
     # Normal training randomness
     train_gen = rng("training")

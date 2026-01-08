@@ -20,12 +20,23 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
-import mcp.types as types
-from mcp.server import NotificationOptions, Server
-from mcp.server.models import InitializationOptions
-from mcp.server.stdio import stdio_server
+# Graceful MCP dependency handling
+try:
+    import mcp.types as types
+    from mcp.server import NotificationOptions, Server
+    from mcp.server.models import InitializationOptions
+    from mcp.server.stdio import stdio_server
 
-__all__ = ["AudioServer", "main"]
+    MCP_AVAILABLE = True
+except ImportError:
+    MCP_AVAILABLE = False
+    types = None  # type: ignore
+    Server = None  # type: ignore
+    NotificationOptions = None  # type: ignore
+    InitializationOptions = None  # type: ignore
+    stdio_server = None  # type: ignore
+
+__all__ = ["AudioServer", "main", "MCP_AVAILABLE"]
 
 
 @dataclass
@@ -373,8 +384,8 @@ class AudioServer:
             return {"success": False, "error": str(e)}
 
 
-async def main():
-    """Main entry point for the MCP server."""
+async def _run_server():
+    """Run the MCP server (internal)."""
     server = AudioServer()
     async with stdio_server() as (read_stream, write_stream):
         await server.server.run(
@@ -391,8 +402,27 @@ async def main():
         )
 
 
+def main():
+    """Main entry point for the MCP server."""
+    if not MCP_AVAILABLE:
+        import sys
+
+        print("=" * 60)
+        print("MCP Server 'scitex-audio' requires the 'mcp' package.")
+        print()
+        print("Install with:")
+        print("  pip install mcp")
+        print()
+        print("Or install scitex with MCP support:")
+        print("  pip install scitex[mcp]")
+        print("=" * 60)
+        sys.exit(1)
+
+    asyncio.run(_run_server())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
 
 
 # EOF
