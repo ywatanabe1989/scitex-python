@@ -24,7 +24,7 @@ class ScientificExperiment:
     
     def __init__(self, seed=42, n_samples=100, n_features=10):
         """Initialize experiment with reproducible random state."""
-        self.rng_manager = stx.rng.RandomStateManager(seed=seed)
+        self.rng = stx.rng.RandomStateManager(seed=seed)
         self.n_samples = n_samples
         self.n_features = n_features
         self.results = {}

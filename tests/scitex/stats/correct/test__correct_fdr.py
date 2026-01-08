@@ -666,7 +666,7 @@ if __name__ == "__main__":
 #     """Demonstrate FDR correction."""
 #     import scitex as stx
 # 
-#     # CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager
+#     # CONFIG, sys.stdout, sys.stderr, plt, CC, rng
 # 
 #     logger.info("Demonstrating False Discovery Rate correction")
 # 

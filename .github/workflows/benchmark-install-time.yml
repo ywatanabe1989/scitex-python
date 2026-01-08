@@ -1,5 +1,5 @@
 # Benchmark module installation times using uv
-# Results stored as workflow artifacts and can be used to generate badges
+# Results deployed to GitHub Pages for dynamic shields.io badges
 
 name: Install Time Benchmarks
 
@@ -9,6 +9,17 @@ on:
   schedule:
     - cron: '0 6 * * 0'  # Weekly on Sunday at 6 AM UTC
   workflow_dispatch:
+
+# Sets permissions for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   benchmark:
@@ -38,15 +49,41 @@ jobs:
           echo "time=$TIME" >> $GITHUB_OUTPUT
           echo "Core: ${TIME}s"
 
+      - name: Benchmark heavy installation
+        id: heavy
+        run: |
+          uv venv .venv-heavy --python 3.11
+          START=$(date +%s.%N)
+          uv pip install "scitex[heavy]" --python .venv-heavy/bin/python 2>/dev/null || true
+          END=$(date +%s.%N)
+          TIME=$(echo "$END - $START" | bc)
+          echo "time=$TIME" >> $GITHUB_OUTPUT
+          echo "Heavy: ${TIME}s"
+          rm -rf .venv-heavy
+
+      - name: Benchmark all installation
+        id: all
+        run: |
+          uv venv .venv-all --python 3.11
+          START=$(date +%s.%N)
+          uv pip install "scitex[all]" --python .venv-all/bin/python 2>/dev/null || true
+          END=$(date +%s.%N)
+          TIME=$(echo "$END - $START" | bc)
+          echo "time=$TIME" >> $GITHUB_OUTPUT
+          echo "All: ${TIME}s"
+          rm -rf .venv-all
+
       - name: Benchmark module installations
         run: |
-          mkdir -p benchmark-results
+          mkdir -p benchmark-results/badges
 
           # List of modules to benchmark
           MODULES="ai audio benchmark bridge browser capture cli config db decorators dev diagram dsp dt gen git io linalg logging msword nn parallel path pd plt repro resource scholar session sh stats str tex torch types utils web writer"
 
           echo "module,install_time_seconds" > benchmark-results/install-times.csv
           echo "core,${{ steps.core.outputs.time }}" >> benchmark-results/install-times.csv
+          echo "heavy,${{ steps.heavy.outputs.time }}" >> benchmark-results/install-times.csv
+          echo "all,${{ steps.all.outputs.time }}" >> benchmark-results/install-times.csv
 
           for module in $MODULES; do
             echo "Benchmarking scitex[$module]..."
@@ -77,18 +114,9 @@ jobs:
             printf "| %s | %.2f |\n" "$module" "$time" >> $GITHUB_STEP_SUMMARY
           done
 
-      - name: Upload benchmark results
-        uses: actions/upload-artifact@v4
-        with:
-          name: install-time-benchmarks
-          path: benchmark-results/
-          retention-days: 90
-
       - name: Create JSON for badges
         run: |
           # Generate JSON files for shields.io endpoint badges
-          mkdir -p benchmark-results/badges
-
           while IFS=',' read -r module time; do
             [ "$module" = "module" ] && continue  # Skip header
             TIME_FORMATTED=$(printf "%.1fs" "$time")
@@ -103,11 +131,43 @@ jobs:
             fi
 
             cat > "benchmark-results/badges/${module}.json" << EOF
-          {
-            "schemaVersion": 1,
-            "label": "install",
-            "message": "$TIME_FORMATTED",
-            "color": "$COLOR"
-          }
-          EOF
+{
+  "schemaVersion": 1,
+  "label": "install",
+  "message": "$TIME_FORMATTED",
+  "color": "$COLOR"
+}
+EOF
           done < benchmark-results/install-times.csv
+
+          # Create index.html for GitHub Pages
+          cat > benchmark-results/index.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head><title>SciTeX Install Time Badges</title></head>
+<body>
+<h1>SciTeX Installation Time Badges</h1>
+<p>Use these endpoints with shields.io:</p>
+<pre>https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/core.json</pre>
+<p><a href="badges/">Browse all badges</a></p>
+</body>
+</html>
+EOF
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: benchmark-results/
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: benchmark
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -41,7 +41,7 @@ Key Differences from Manual Session Management:
   - No need for run_main() wrapper function
   - No need for parse_args() function (auto-generated from signature)
   - No need to manually call stx.session.start() or stx.session.close()
-  - Session variables (CONFIG, plt, CC, rng_manager) auto-injected as globals
+  - Session variables (CONFIG, plt, CC, rng) auto-injected as globals
   - CLI automatically generated from function parameters
   - Cleaner, more concise code
 """
@@ -60,8 +60,8 @@ def generate_sample_data(n_samples=100):
     """Generate synthetic data for demonstration."""
 
     # Use session-managed random number generator for reproducibility
-    x = rng_manager("data").uniform(0, 10, n_samples)
-    noise = rng_manager("noise").normal(0, 0.5, n_samples)
+    x = rng("data").uniform(0, 10, n_samples)
+    noise = rng("noise").normal(0, 0.5, n_samples)
     y = 2 * x + 3 + noise
 
     return x, y
@@ -114,7 +114,7 @@ def demo(n_samples: int = 100, show_config: bool = False):
     This function demonstrates the @stx.session decorator which:
     - Automatically generates CLI from function signature
     - Manages session lifecycle (start/close)
-    - Injects session variables (CONFIG, plt, CC, rng_manager)
+    - Injects session variables (CONFIG, plt, CC, rng)
     - Handles errors and cleanup
 
     Args:
@@ -126,7 +126,7 @@ def demo(n_samples: int = 100, show_config: bool = False):
     # - CONFIG: Session configuration dict
     # - plt: matplotlib.pyplot (configured)
     # - CC: Custom Colors
-    # - rng_manager: Random state manager
+    # - rng: Random state manager
 
     logger.info("Starting SciTeX session decorator demo")
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     # The decorator automatically:
     # 1. Parses CLI arguments based on function signature
     # 2. Starts session
-    # 3. Injects CONFIG, plt, CC, rng_manager as globals
+    # 3. Injects CONFIG, plt, CC, rng as globals
     # 4. Runs function
     # 5. Closes session
     demo()

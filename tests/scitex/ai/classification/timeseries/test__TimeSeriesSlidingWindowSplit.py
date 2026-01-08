@@ -163,7 +163,7 @@ if __name__ == "__main__":
 #         self.gap = gap
 #         self.val_ratio = val_ratio
 #         self.random_state = random_state
-#         self.rng_manager = np.random.default_rng(random_state)
+#         self.rng = np.random.default_rng(random_state)
 #         self.overlapping_tests = overlapping_tests
 #         self.expanding_window = expanding_window
 #         self.undersample = undersample
@@ -1625,7 +1625,7 @@ if __name__ == "__main__":
 # 
 #     args = parse_args()
 # 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
 #         sys,
 #         plt,
 #         args=args,

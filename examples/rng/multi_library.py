@@ -142,7 +142,7 @@ def compare_runs():
         print(f"\n{'='*20} RUN {run+1} {'='*20}")
         
         # Create fresh RNG
-        rng_manager = stx.rng.RandomStateManager(seed=42)
+        rng = stx.rng.RandomStateManager(seed=42)
         
         results = {}
         
@@ -203,7 +203,7 @@ def test_independence():
     print("INDEPENDENCE TEST")
     print("=" * 60)
     
-    rng_manager = stx.rng.RandomStateManager(seed=123)
+    rng = stx.rng.RandomStateManager(seed=123)
     
     print("\nGenerating values from different sources:")
     

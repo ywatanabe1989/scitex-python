@@ -5,6 +5,24 @@ All notable changes to SciTeX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.13.0] - 2026-01-08
+
+### Changed
+- **Renamed `rng_manager` → `rng`**: Shorter, NumPy-aligned naming convention
+  - `stx.session.start()` now returns `rng` instead of `rng_manager`
+  - All examples, docs, and tests updated to use new naming
+- **MCP Servers**: Added graceful dependency handling with `MCP_AVAILABLE` flag
+  - Servers now provide helpful installation instructions when `mcp` package missing
+
+### Added
+- **GitHub Actions**: Install time benchmark workflow with GitHub Pages deployment
+  - Dynamic shields.io badges for all modules at `badges/<module>.json`
+  - Weekly scheduled benchmarks and release-triggered runs
+- **README**: Per-module install time badges in all module tables
+
+### Fixed
+- **README**: Removed stray `</details>` tag, fixed `stx.io.load` example
+
 ## [2.12.0] - 2026-01-08
 
 ### Added

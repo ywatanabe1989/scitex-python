@@ -50,13 +50,13 @@ def parse_args():
 
 def run_main():
     """Initialize scitex framework, run main, and cleanup."""
-    global CONFIG, CC, sys, plt, rng_manager
+    global CONFIG, CC, sys, plt, rng
     import sys
     import matplotlib.pyplot as plt
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
         sys, plt,
         args=args,
         file=__FILE__,
@@ -94,8 +94,8 @@ logger = logging.getLogger(__name__)
 def generate_sample_data(n_samples=100):
     """Generate synthetic data."""
     # Use session-managed RNG for reproducibility
-    x = rng_manager("data").uniform(0, 10, n_samples)
-    noise = rng_manager("noise").normal(0, 0.5, n_samples)
+    x = rng("data").uniform(0, 10, n_samples)
+    noise = rng("noise").normal(0, 0.5, n_samples)
     y = 2 * x + 3 + noise
     return x, y
 
@@ -108,7 +108,7 @@ def demo(n_samples: int = 100, show_config: bool = False):
         n_samples: Number of samples to generate
         show_config: Show session configuration details
     """
-    # CONFIG, plt, CC, rng_manager automatically available
+    # CONFIG, plt, CC, rng automatically available
     logger.info(f"Session ID: {CONFIG['ID']}")
 
     x, y = generate_sample_data(n_samples)
@@ -147,7 +147,7 @@ def demo(n_samples: int = 100, show_config: bool = False):
 
 **Manual:**
 ```python
-CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
     sys, plt, args=args, file=__FILE__, verbose=args.verbose, agg=True
 )
 ```
@@ -198,14 +198,14 @@ stx.session.close(
 
 **Manual:**
 ```python
-# Need to manually use rng_manager if you remember
+# Need to manually use rng if you remember
 x = np.random.uniform(0, 10, n_samples)  # Not reproducible
 ```
 
 **Decorator:**
 ```python
 # Session-managed RNG readily available
-x = rng_manager("data").uniform(0, 10, n_samples)  # Reproducible
+x = rng("data").uniform(0, 10, n_samples)  # Reproducible
 ```
 
 ## CLI Generated Output

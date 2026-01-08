@@ -742,7 +742,7 @@ if __name__ == "__main__":
 #     )
 #     args = parser.parse_args([])
 # 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
 #         sys=sys,
 #         plt=plt,
 #         args=args,
