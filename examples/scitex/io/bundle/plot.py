@@ -26,13 +26,13 @@ from scitex.dev.plt import plot_mpl_hist, plot_stx_line, plot_stx_scatter
 def main(
     CONFIG=stx.INJECTED,
     plt=stx.INJECTED,
-    rng_manager=stx.INJECTED,
+    rng=stx.INJECTED,
     logger=stx.INJECTED,
 ):
     """Demonstrates FTS plot bundle functionality."""
     logger.info("Starting FTS plot bundle demo")
     sdir = CONFIG["SDIR_RUN"]
-    rng = rng_manager("plot_demo")
+    rng = rng("plot_demo")
 
     # 1. Basic plot bundle
     logger.info("Creating basic plot bundle")

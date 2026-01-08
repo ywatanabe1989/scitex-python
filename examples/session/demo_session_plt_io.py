@@ -109,7 +109,7 @@ if __name__ == "__main__":
 #            plt.plot(x, y, color=COLORS.blue)
 #            plt.plot(x, y, color=COLORS['blue'])
 #
-#    rng_manager (RandomStateManager)
+#    rng (RandomStateManager)
 #        Manages reproducible randomness
 #
 #    logger (SciTeXLogger)
@@ -135,7 +135,7 @@ if __name__ == "__main__":
 # INFO:       - CONFIG['PID']: 466633
 # INFO:   • plt - matplotlib.pyplot (configured for session)
 # INFO:   • COLORS - CustomColors (for consistent plotting)
-# INFO:   • rng_manager - RandomStateManager (for reproducibility)
+# INFO:   • rng - RandomStateManager (for reproducibility)
 # INFO:   • logger - SciTeX logger (configured for your script)
 # INFO: ============================================================
 # INFO: Running main with injected parameters:

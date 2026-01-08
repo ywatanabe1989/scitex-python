@@ -379,8 +379,8 @@ if __name__ == "__main__":
 #     print(f"Array size: {args.size}")
 #     print(f"Seed: {args.seed}")
 # 
-#     # Generate arrays using rng_manager
-#     gen = rng_manager("demo")
+#     # Generate arrays using rng
+#     gen = rng("demo")
 # 
 #     # Create array and hash it
 #     print(f"\n{'Hash Generation':-^60}")
@@ -402,7 +402,7 @@ if __name__ == "__main__":
 # 
 #     # Reset generator and create same data
 #     print(f"\n{'Reproducibility Check':-^60}")
-#     gen_repro = rng_manager("demo")  # Same name = same seed
+#     gen_repro = rng("demo")  # Same name = same seed
 #     data3 = gen_repro.random(args.size)
 #     hash3 = hash_array(data3)
 #     print(f"Array 3 hash (reproduced): {hash3}")
@@ -422,7 +422,7 @@ if __name__ == "__main__":
 # 
 #     args = parse_args()
 # 
-#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
 #         sys,
 #         plt,
 #         args=args,

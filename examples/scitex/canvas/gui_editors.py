@@ -304,7 +304,7 @@ def main(
     CONFIG=stx.INJECTED,
     plt=stx.INJECTED,
     COLORS=stx.INJECTED,
-    rng_manager=stx.INJECTED,
+    rng=stx.INJECTED,
     logger=stx.INJECTED,
 ):
     """Launch interactive GUI editor.
@@ -314,7 +314,7 @@ def main(
         backend: GUI backend (flask recommended)
     """
     out = Path(CONFIG.SDIR_OUT)
-    rng = rng_manager("gui_editors_demo")
+    rng = rng("gui_editors_demo")
 
     logger.info("=" * 60)
     logger.info("GUI Figure Editor Demo")

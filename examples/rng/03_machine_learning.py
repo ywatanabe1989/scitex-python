@@ -35,7 +35,7 @@ class SimpleNeuralNetwork:
     
     def __init__(self, input_dim, hidden_dim, output_dim, rng):
         """Initialize network with reproducible weights."""
-        self.rng_manager = rng
+        self.rng = rng
         
         # Initialize weights using named generators
         init_gen = self.rng("weight_init")
@@ -122,7 +122,7 @@ class MLExperiment:
     
     def __init__(self, seed=42):
         """Initialize ML experiment."""
-        self.rng_manager = stx.rng.RandomStateManager(seed=seed)
+        self.rng = stx.rng.RandomStateManager(seed=seed)
         self.history = {'train_loss': [], 'val_loss': [], 
                        'train_acc': [], 'val_acc': []}
         
@@ -305,7 +305,7 @@ def demonstrate_pytorch_integration():
     logger.info("="*60)
     
     # RNG automatically sets PyTorch seeds
-    rng_manager = stx.rng.RandomStateManager(seed=42)
+    rng = stx.rng.RandomStateManager(seed=42)
     
     # Create PyTorch model with reproducible initialization
     model = nn.Sequential(

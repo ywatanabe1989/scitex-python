@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-28 17:10:52 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/git_utils.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/writer/git_utils.py"
@@ -16,10 +16,10 @@ Git utilities for Writer.
 Provides git lock handling and retry logic for concurrent access.
 """
 
-import time
 import subprocess
-from typing import Callable
-from typing import TypeVar
+import time
+from typing import Callable, TypeVar
+
 from scitex.logging import getLogger
 
 logger = getLogger(__name__)
@@ -99,12 +99,14 @@ def run_session() -> None:
     """Initialize scitex framework, run main function, and cleanup."""
     global CONFIG, CC, sys, plt, rng
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
         sys,
         plt,
         args=args,
