@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-08-22 23:01:42 (ywatanabe)"
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/storage/_BibTeXHandler.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -41,7 +41,7 @@ class BibTeXHandler:
         # Return primitive types as-is
         return value
 
-    def papers_from_bibtex(self, bibtex_input: Union[str, Path]) -> List["Paper"]:
+    def papers_from_bibtex(self, bibtex_input: Union[str, Path]) -> List[Paper]:
         """Create Papers from BibTeX file or content."""
         is_path = False
         input_str = str(bibtex_input)
@@ -66,11 +66,32 @@ class BibTeXHandler:
         else:
             return self._papers_from_bibtex_text(input_str)
 
-    def _papers_from_bibtex_file(self, file_path: Union[str, Path]) -> List["Paper"]:
-        """Create Papers from a BibTeX file."""
+    def _papers_from_bibtex_file(
+        self, file_path: Union[str, Path], validate: bool = True
+    ) -> List[Paper]:
+        """Create Papers from a BibTeX file.
+
+        Args:
+            file_path: Path to BibTeX file
+            validate: If True, validate BibTeX syntax before loading
+        """
         bibtex_path = Path(os.path.expanduser(str(file_path)))
         if not bibtex_path.exists():
             raise ValueError(f"BibTeX file not found: {bibtex_path}")
+
+        # Validate BibTeX file before loading
+        if validate:
+            from ._BibTeXValidator import validate_bibtex_file
+
+            result = validate_bibtex_file(bibtex_path)
+            if not result.is_valid:
+                error_msgs = [str(e) for e in result.errors]
+                raise ValueError(
+                    f"Invalid BibTeX file: {bibtex_path}\n" + "\n".join(error_msgs)
+                )
+            if result.has_warnings:
+                for warning in result.warnings:
+                    logger.warning(f"BibTeX: {warning}")
 
         from scitex.io import load
 
@@ -85,7 +106,7 @@ class BibTeXHandler:
         logger.info(f"Created {len(papers)} papers from BibTeX file")
         return papers
 
-    def _papers_from_bibtex_text(self, bibtex_content: str) -> List["Paper"]:
+    def _papers_from_bibtex_text(self, bibtex_content: str) -> List[Paper]:
         """Create Papers from BibTeX content string."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".bib", delete=False) as f:
             f.write(bibtex_content)
@@ -107,7 +128,7 @@ class BibTeXHandler:
         logger.info(f"Created {len(papers)} papers from BibTeX text")
         return papers
 
-    def paper_from_bibtex_entry(self, entry: Dict[str, Any]) -> Optional["Paper"]:
+    def paper_from_bibtex_entry(self, entry: Dict[str, Any]) -> Optional[Paper]:
         """Convert BibTeX entry to Paper."""
         from ..core.Paper import Paper
 
@@ -257,7 +278,7 @@ class BibTeXHandler:
 
         return paper
 
-    def _handle_enriched_metadata(self, paper: "Paper", fields: Dict[str, Any]) -> None:
+    def _handle_enriched_metadata(self, paper: Paper, fields: Dict[str, Any]) -> None:
         """Handle enriched metadata from BibTeX fields."""
         if "citation_count" in fields:
             try:
@@ -307,7 +328,7 @@ class BibTeXHandler:
             except AttributeError:
                 pass
 
-    def paper_to_bibtex_entry(self, paper: "Paper") -> Dict[str, Any]:
+    def paper_to_bibtex_entry(self, paper: Paper) -> Dict[str, Any]:
         """Convert a Paper object to a BibTeX entry dictionary."""
         # Create entry type based on available data
         entry_type = getattr(paper, "_bibtex_entry_type", "misc")
@@ -379,7 +400,7 @@ class BibTeXHandler:
 
     def papers_to_bibtex(
         self,
-        papers: Union[List["Paper"], "Papers"],
+        papers: Union[List[Paper], Papers],
         output_path: Optional[Union[str, Path]] = None,
     ) -> str:
         """Convert Papers collection to BibTeX format.
@@ -434,7 +455,8 @@ class BibTeXHandler:
         output_path: Optional[Union[str, Path]] = None,
         dedup_strategy: str = "smart",
         return_details: bool = False,
-    ) -> Union["Papers", Dict[str, Any]]:
+        validate: bool = True,
+    ) -> Union[Papers, Dict[str, Any]]:
         """Merge multiple BibTeX files intelligently handling duplicates.
 
         Args:
@@ -442,11 +464,36 @@ class BibTeXHandler:
             output_path: Optional path to save merged BibTeX
             dedup_strategy: 'smart' (merge metadata), 'keep_first', 'keep_all'
             return_details: If True, return dict with papers and metadata
+            validate: If True, validate all files before merging
 
         Returns:
             Merged Papers collection, or dict with 'papers', 'file_papers', 'stats'
         """
         from ..core.Papers import Papers
+
+        # Validate all files before merging
+        if validate:
+            from ._BibTeXValidator import BibTeXValidator
+
+            validator = BibTeXValidator()
+            can_merge, results = validator.validate_before_merge(file_paths)
+
+            if not can_merge:
+                error_msgs = []
+                for result in results:
+                    if result.has_errors:
+                        for error in result.errors:
+                            error_msgs.append(f"{result.file_path}: {error}")
+                raise ValueError(
+                    "Cannot merge BibTeX files due to validation errors:\n"
+                    + "\n".join(error_msgs)
+                )
+
+            # Log warnings
+            for result in results:
+                if result.has_warnings:
+                    for warning in result.warnings:
+                        logger.warning(f"BibTeX {result.file_path}: {warning}")
 
         all_papers = []
         file_papers = {}  # Track which papers came from which file
@@ -508,10 +555,10 @@ class BibTeXHandler:
 
     def _deduplicate_papers(
         self,
-        papers: List["Paper"],
+        papers: List[Paper],
         strategy: str = "smart",
         stats: Optional[Dict] = None,
-    ) -> List["Paper"]:
+    ) -> List[Paper]:
         """Deduplicate a list of papers based on strategy.
 
         Args:
@@ -589,7 +636,7 @@ class BibTeXHandler:
         normalized = " ".join(normalized.split())
         return normalized
 
-    def _are_same_paper(self, paper1: "Paper", paper2: "Paper") -> bool:
+    def _are_same_paper(self, paper1: Paper, paper2: Paper) -> bool:
         """Determine if two papers are the same based on metadata."""
         # If both have DOIs and they match
         doi1 = paper1.metadata.id.doi
@@ -617,7 +664,7 @@ class BibTeXHandler:
 
         return False
 
-    def _merge_paper_metadata(self, paper1: "Paper", paper2: "Paper") -> "Paper":
+    def _merge_paper_metadata(self, paper1: Paper, paper2: Paper) -> Paper:
         """Merge metadata from two papers, keeping the most complete information."""
         from copy import deepcopy
 
@@ -719,10 +766,10 @@ class BibTeXHandler:
 
     def papers_to_bibtex_with_sources(
         self,
-        papers: Union[List["Paper"], "Papers"],
+        papers: Union[List[Paper], Papers],
         output_path: Union[str, Path],
         source_files: List[Path] = None,
-        file_papers: Dict[str, List["Paper"]] = None,
+        file_papers: Dict[str, List[Paper]] = None,
         stats: Dict = None,
     ) -> str:
         """Save papers to BibTeX with source file comments and SciTeX header.
@@ -795,12 +842,12 @@ class BibTeXHandler:
                 # Add section comment
                 bibtex_lines.append("")
                 bibtex_lines.append(
-                    f"% ============================================================"
+                    "% ============================================================"
                 )
                 bibtex_lines.append(f"% Source: {source_name}.bib")
                 bibtex_lines.append(f"% Entries: {len(source_papers)}")
                 bibtex_lines.append(
-                    f"% ============================================================"
+                    "% ============================================================"
                 )
                 bibtex_lines.append("")
 
@@ -836,12 +883,12 @@ class BibTeXHandler:
             if unassigned:
                 bibtex_lines.append("")
                 bibtex_lines.append(
-                    f"% ============================================================"
+                    "% ============================================================"
                 )
-                bibtex_lines.append(f"% Merged/Unassigned Entries")
+                bibtex_lines.append("% Merged/Unassigned Entries")
                 bibtex_lines.append(f"% Entries: {len(unassigned)}")
                 bibtex_lines.append(
-                    f"% ============================================================"
+                    "% ============================================================"
                 )
                 bibtex_lines.append("")
                 for paper in unassigned:
@@ -929,7 +976,7 @@ class BibTeXHandler:
         project_bib_link = project_dir / "info" / f"{project}.bib"
         if project_bib_link.exists() or project_bib_link.is_symlink():
             project_bib_link.unlink()
-        project_bib_link.symlink_to(f"bibliography/combined.bib")
+        project_bib_link.symlink_to("bibliography/combined.bib")
         logger.success(f"Created {project}.bib -> bibliography/combined.bib")
 
         return combined_path
@@ -1060,6 +1107,7 @@ class BibTeXHandler:
 
         # Convert to BibTeX
         from datetime import datetime
+
         from ..core.Papers import Papers
 
         papers_collection = Papers(papers, project=project)
@@ -1069,7 +1117,7 @@ class BibTeXHandler:
         bibtex_content.append(
             "% ============================================================"
         )
-        bibtex_content.append(f"% SciTeX Scholar - Project Library Export")
+        bibtex_content.append("% SciTeX Scholar - Project Library Export")
         bibtex_content.append(f"% Project: {project}")
         bibtex_content.append(
             f"% Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
