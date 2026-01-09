@@ -73,13 +73,19 @@ class ScholarServer:
     def setup_handlers(self):
         """Set up MCP server handlers."""
         from ._mcp_handlers import (
+            add_papers_to_project_handler,
             authenticate_handler,
+            check_auth_status_handler,
+            create_project_handler,
             download_pdf_handler,
             download_pdfs_batch_handler,
             enrich_bibtex_handler,
             export_papers_handler,
             get_library_status_handler,
+            list_projects_handler,
+            logout_handler,
             parse_bibtex_handler,
+            parse_pdf_content_handler,
             resolve_dois_handler,
             resolve_openurls_handler,
             search_papers_handler,
@@ -132,9 +138,31 @@ class ScholarServer:
             elif name == "authenticate":
                 return await self._wrap_result(authenticate_handler(**arguments))
 
+            elif name == "check_auth_status":
+                return await self._wrap_result(check_auth_status_handler(**arguments))
+
+            elif name == "logout":
+                return await self._wrap_result(logout_handler(**arguments))
+
             # Export
             elif name == "export_papers":
                 return await self._wrap_result(export_papers_handler(**arguments))
+
+            # Project Management
+            elif name == "create_project":
+                return await self._wrap_result(create_project_handler(**arguments))
+
+            elif name == "list_projects":
+                return await self._wrap_result(list_projects_handler(**arguments))
+
+            elif name == "add_papers_to_project":
+                return await self._wrap_result(
+                    add_papers_to_project_handler(**arguments)
+                )
+
+            # PDF Content Parsing
+            elif name == "parse_pdf_content":
+                return await self._wrap_result(parse_pdf_content_handler(**arguments))
 
             else:
                 raise ValueError(f"Unknown tool: {name}")

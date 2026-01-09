@@ -19,8 +19,8 @@ def get_tool_schemas() -> list[types.Tool]:
         types.Tool(
             name="search_papers",
             description=(
-                "Search for scientific papers across multiple databases "
-                "(PubMed, Crossref, Semantic Scholar, etc.)"
+                "Search for scientific papers. Supports local library search and "
+                "external databases (CrossRef, Semantic Scholar, PubMed, arXiv, OpenAlex)"
             ),
             inputSchema={
                 "type": "object",
@@ -29,12 +29,18 @@ def get_tool_schemas() -> list[types.Tool]:
                         "type": "string",
                         "description": "Search query string",
                     },
+                    "search_mode": {
+                        "type": "string",
+                        "description": "Search mode: 'local' (library only), 'external' (online databases), 'both'",
+                        "enum": ["local", "external", "both"],
+                        "default": "local",
+                    },
                     "sources": {
                         "type": "array",
                         "items": {"type": "string"},
                         "description": (
                             "Sources to search: pubmed, crossref, semantic_scholar, "
-                            "google_scholar, arxiv"
+                            "arxiv, openalex"
                         ),
                     },
                     "limit": {
@@ -146,11 +152,6 @@ def get_tool_schemas() -> list[types.Tool]:
                         "description": "Authentication method: openathens, shibboleth, none",
                         "enum": ["openathens", "shibboleth", "none"],
                         "default": "none",
-                    },
-                    "use_browser": {
-                        "type": "boolean",
-                        "description": "Use browser-based download for paywalled content",
-                        "default": False,
                     },
                 },
                 "required": ["doi"],
@@ -285,7 +286,10 @@ def get_tool_schemas() -> list[types.Tool]:
         types.Tool(
             name="authenticate",
             description=(
-                "Authenticate with institutional access (OpenAthens, Shibboleth)"
+                "Start SSO login for institutional access (OpenAthens, Shibboleth). "
+                "Call without confirm first to check requirements, then with confirm=True to proceed. "
+                "Opens a browser window for authentication. Requires environment "
+                "variables like SCITEX_SCHOLAR_OPENATHENS_EMAIL to be set."
             ),
             inputSchema={
                 "type": "object",
@@ -293,14 +297,70 @@ def get_tool_schemas() -> list[types.Tool]:
                     "method": {
                         "type": "string",
                         "description": "Authentication method",
-                        "enum": ["openathens", "shibboleth"],
+                        "enum": ["openathens", "shibboleth", "ezproxy"],
                     },
                     "institution": {
                         "type": "string",
                         "description": "Institution identifier (e.g., 'unimelb')",
                     },
+                    "force": {
+                        "type": "boolean",
+                        "description": "Force re-authentication even if session exists",
+                        "default": False,
+                    },
+                    "confirm": {
+                        "type": "boolean",
+                        "description": (
+                            "Set to True to proceed with login after reviewing requirements. "
+                            "Default False returns requirements check without starting login."
+                        ),
+                        "default": False,
+                    },
                 },
                 "required": ["method"],
+            },
+        ),
+        types.Tool(
+            name="check_auth_status",
+            description=(
+                "Check current authentication status without starting login. "
+                "Returns whether a valid session exists."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "method": {
+                        "type": "string",
+                        "description": "Authentication method to check",
+                        "enum": ["openathens", "shibboleth", "ezproxy"],
+                        "default": "openathens",
+                    },
+                    "verify_live": {
+                        "type": "boolean",
+                        "description": "Verify session with remote server (slower but more accurate)",
+                        "default": False,
+                    },
+                },
+            },
+        ),
+        types.Tool(
+            name="logout",
+            description="Logout from institutional authentication and clear session cache",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "method": {
+                        "type": "string",
+                        "description": "Authentication method to logout from",
+                        "enum": ["openathens", "shibboleth", "ezproxy"],
+                        "default": "openathens",
+                    },
+                    "clear_cache": {
+                        "type": "boolean",
+                        "description": "Also clear cached session files",
+                        "default": True,
+                    },
+                },
             },
         ),
         # Export to formats
@@ -331,6 +391,118 @@ def get_tool_schemas() -> list[types.Tool]:
                     },
                 },
                 "required": ["output_path"],
+            },
+        ),
+        # Project Management
+        types.Tool(
+            name="create_project",
+            description="Create a new scholar project for organizing papers",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project_name": {
+                        "type": "string",
+                        "description": "Name of the project to create",
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Optional project description",
+                    },
+                },
+                "required": ["project_name"],
+            },
+        ),
+        types.Tool(
+            name="list_projects",
+            description="List all scholar projects in the library",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+            },
+        ),
+        types.Tool(
+            name="add_papers_to_project",
+            description="Add papers to a project by DOI or from BibTeX file",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "project": {
+                        "type": "string",
+                        "description": "Target project name",
+                    },
+                    "dois": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of DOIs to add",
+                    },
+                    "bibtex_path": {
+                        "type": "string",
+                        "description": "Path to BibTeX file with papers to add",
+                    },
+                },
+                "required": ["project"],
+            },
+        ),
+        # PDF Content Parsing
+        types.Tool(
+            name="parse_pdf_content",
+            description=(
+                "Parse PDF content to extract text, sections (IMRaD), tables, "
+                "images, and metadata. Supports multiple extraction modes."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "pdf_path": {
+                        "type": "string",
+                        "description": "Direct path to PDF file",
+                    },
+                    "doi": {
+                        "type": "string",
+                        "description": "DOI to find PDF in library",
+                    },
+                    "project": {
+                        "type": "string",
+                        "description": "Project name to search for PDF",
+                    },
+                    "mode": {
+                        "type": "string",
+                        "description": (
+                            "Extraction mode: 'text' (plain text), 'sections' (IMRaD), "
+                            "'tables', 'images', 'metadata', 'pages', 'scientific', 'full'"
+                        ),
+                        "enum": [
+                            "text",
+                            "sections",
+                            "tables",
+                            "images",
+                            "metadata",
+                            "pages",
+                            "scientific",
+                            "full",
+                        ],
+                        "default": "scientific",
+                    },
+                    "extract_sections": {
+                        "type": "boolean",
+                        "description": "Whether to parse IMRaD sections",
+                        "default": True,
+                    },
+                    "extract_tables": {
+                        "type": "boolean",
+                        "description": "Whether to extract tables",
+                        "default": False,
+                    },
+                    "extract_images": {
+                        "type": "boolean",
+                        "description": "Whether to extract images",
+                        "default": False,
+                    },
+                    "max_pages": {
+                        "type": "integer",
+                        "description": "Maximum pages to process (None = all)",
+                    },
+                },
             },
         ),
     ]
