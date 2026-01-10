@@ -8,13 +8,13 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_mpl_helpers.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_mpl_helpers.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # Timestamp: 2025-12-20
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_mpl_helpers.py
+# # Timestamp: 2026-01-07
+# # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_mpl_helpers.py
 # 
-# """Matplotlib helper functions for FTS bundle creation."""
+# """Matplotlib helper functions for bundle creation."""
 # 
 # import warnings
 # from typing import TYPE_CHECKING, Any, Optional
@@ -22,7 +22,7 @@ if __name__ == "__main__":
 # if TYPE_CHECKING:
 #     from matplotlib.figure import Figure as MplFigure
 # 
-#     from .._fig import Encoding, Theme
+#     from .kinds._plot._dataclasses import Encoding, Theme
 # 
 # 
 # def _get_scitex_axes(fig: "MplFigure") -> Optional[Any]:
@@ -45,16 +45,27 @@ if __name__ == "__main__":
 #     return None
 # 
 # 
-# def _build_encoding_from_csv_columns(csv_df: "Any") -> "Encoding":
-#     """Build encoding from actual CSV column names.
+# def _simplify_csv_columns(csv_df: "Any") -> "Any":
+#     """CSV columns already use figrecipe-compatible format: r{row}c{col}_{caller}-{id}_{var}.
 # 
-#     Handles two formats:
-#     1. Verbose: ax-row-{row}-col-{col}_trace-id-{id}_variable-{var}
-#     2. Simple: column names like 'x', 'y' (user-provided DataFrames)
+#     This function is now a pass-through since the new format is already simple and consistent.
+#     Kept for backward compatibility with any code that calls it.
+#     """
+#     # New format r{row}c{col}_{caller}-{id}_{var} is already simple
+#     # No simplification needed
+#     return csv_df
+# 
+# 
+# def _build_encoding_from_csv_columns(csv_df: "Any") -> "Encoding":
+#     """Build encoding from CSV column names (simple or verbose format).
+# 
+#     Handles:
+#     1. Simple: x, y, trace_x, trace_y, ax0_0_trace_x
+#     2. Verbose: ax-row-{row}-col-{col}_trace-id-{id}_variable-{var}
 # 
 #     This ensures encoding references match actual data columns.
 #     """
-#     from .._fig._dataclasses import ChannelEncoding, Encoding, TraceEncoding
+#     from .kinds._plot._dataclasses import ChannelEncoding, Encoding, TraceEncoding
 # 
 #     if csv_df is None or csv_df.empty:
 #         return Encoding(traces=[])
@@ -101,7 +112,9 @@ if __name__ == "__main__":
 #                 if x_col is None:
 #                     x_col = numeric_cols[0]
 #                 if y_col is None:
-#                     y_col = numeric_cols[1] if numeric_cols[1] != x_col else numeric_cols[0]
+#                     y_col = (
+#                         numeric_cols[1] if numeric_cols[1] != x_col else numeric_cols[0]
+#                     )
 #             elif len(numeric_cols) == 1:
 #                 if x_col is None:
 #                     x_col = numeric_cols[0]
@@ -139,14 +152,10 @@ if __name__ == "__main__":
 #     for trace in encoding.traces:
 #         if trace.x and trace.x.column:
 #             if trace.x.column not in csv_columns:
-#                 errors.append(
-#                     f"Encoding references missing column: {trace.x.column}"
-#                 )
+#                 errors.append(f"Encoding references missing column: {trace.x.column}")
 #         if trace.y and trace.y.column:
 #             if trace.y.column not in csv_columns:
-#                 errors.append(
-#                     f"Encoding references missing column: {trace.y.column}"
-#                 )
+#                 errors.append(f"Encoding references missing column: {trace.y.column}")
 # 
 #     return errors
 # 
@@ -195,18 +204,84 @@ if __name__ == "__main__":
 #     return pd.DataFrame(padded)
 # 
 # 
+# def _build_encoding_from_history(
+#     history: dict, ax_row: int = 0, ax_col: int = 0
+# ) -> "Encoding":
+#     """Build encoding from scitex.plt axes history.
+# 
+#     Converts tracking history to Encoding with column names matching
+#     the figrecipe-compatible CSV format: r{row}c{col}_{caller}-{id}_{var}
+# 
+#     Parameters
+#     ----------
+#     history : dict
+#         History dict: {trace_id: (trace_id, method, tracked_dict, kwargs)}
+#     ax_row : int
+#         Row position of axes in grid
+#     ax_col : int
+#         Column position of axes in grid
+# 
+#     Returns
+#     -------
+#     Encoding
+#         Encoding object with traces referencing CSV column names.
+#     """
+#     from scitex.plt.utils._csv_column_naming import get_csv_column_name, sanitize_id
+# 
+#     from .kinds._plot._dataclasses import ChannelEncoding, Encoding, TraceEncoding
+# 
+#     traces = []
+# 
+#     # Track per-method counters for auto-generated IDs
+#     method_counters = {}
+# 
+#     for record_id, record in history.items():
+#         if not isinstance(record, tuple) or len(record) < 4:
+#             continue
+# 
+#         id_val, method, tracked_dict, kwargs = record
+# 
+#         # Extract user-provided id from kwargs if present
+#         user_id = kwargs.get("id") if kwargs else None
+# 
+#         # Determine trace_id: use user-provided id or auto-generate
+#         if user_id:
+#             trace_id = sanitize_id(user_id)
+#         else:
+#             # Auto-generate: per-method counter
+#             counter = method_counters.get(method, 0)
+#             method_counters[method] = counter + 1
+#             trace_id = str(counter)
+# 
+#         # Build column names using the new format
+#         x_col = get_csv_column_name("x", ax_row, ax_col, method, trace_id=trace_id)
+#         y_col = get_csv_column_name("y", ax_row, ax_col, method, trace_id=trace_id)
+# 
+#         # Create trace encoding
+#         trace = TraceEncoding(
+#             trace_id=f"{method}-{trace_id}",
+#             x=ChannelEncoding(column=x_col),
+#             y=ChannelEncoding(column=y_col),
+#         )
+#         traces.append(trace)
+# 
+#     return Encoding(traces=traces)
+# 
+# 
 # def build_encoding_from_mpl_figure(fig: "MplFigure") -> "Encoding":
 #     """Build encoding specification from matplotlib figure.
 # 
 #     Uses scitex.plt tracking if available (captures actual plot method),
 #     otherwise falls back to detecting from rendered figure.
 #     """
-#     from .._fig._dataclasses import Encoding
+#     from .kinds._plot._dataclasses import Encoding
 # 
 #     # Try scitex.plt tracking first (knows exact plot method)
 #     scitex_ax = _get_scitex_axes(fig)
 #     if scitex_ax is not None and hasattr(scitex_ax, "history") and scitex_ax.history:
-#         return _build_encoding_from_history(scitex_ax.history)
+#         encoding = _build_encoding_from_history(scitex_ax.history)
+#         if encoding and encoding.traces:
+#             return encoding
 # 
 #     # Fallback: detect from rendered figure
 #     from ._extractors import build_bar_traces, build_line_traces, build_scatter_traces
@@ -224,7 +299,7 @@ if __name__ == "__main__":
 # 
 # def build_theme_from_mpl_figure(fig: "MplFigure") -> "Theme":
 #     """Build theme specification from matplotlib figure."""
-#     from .._fig import Theme
+#     from .kinds._plot._dataclasses import Theme
 # 
 #     return Theme()
 # 
@@ -232,7 +307,10 @@ if __name__ == "__main__":
 # def extract_geometry_from_mpl_figure(fig: "MplFigure") -> dict:
 #     """Extract geometry data from matplotlib figure for hit testing."""
 #     try:
-#         from scitex.plt.utils._hitmap import extract_path_data, extract_selectable_regions
+#         from scitex.plt.utils._hitmap import (
+#             extract_path_data,
+#             extract_selectable_regions,
+#         )
 # 
 #         return {
 #             "path_data": extract_path_data(fig),
@@ -269,7 +347,9 @@ if __name__ == "__main__":
 #         png_buf = io.BytesIO()
 #         with warnings.catch_warnings():
 #             warnings.filterwarnings("ignore", message=".*tight_layout.*")
-#             fig.savefig(png_buf, format="png", dpi=dpi, facecolor=HITMAP_BACKGROUND_COLOR)
+#             fig.savefig(
+#                 png_buf, format="png", dpi=dpi, facecolor=HITMAP_BACKGROUND_COLOR
+#             )
 #         png_bytes = png_buf.getvalue()
 # 
 #         svg_buf = io.BytesIO()
@@ -295,7 +375,7 @@ if __name__ == "__main__":
 #     csv_df: Optional[Any] = None,
 #     dpi: int = 300,
 # ):
-#     """Create FTS bundle from matplotlib figure.
+#     """Create Bundle from matplotlib figure.
 # 
 #     Args:
 #         fig: Matplotlib figure object
@@ -312,7 +392,7 @@ if __name__ == "__main__":
 #     import json
 #     from pathlib import Path
 # 
-#     from ._FTS import FTS
+#     from ._Bundle import Bundle
 #     from ._saver import save_bundle_components
 # 
 #     path = Path(path)
@@ -323,13 +403,18 @@ if __name__ == "__main__":
 #         "height": round(fig_height_inch * 25.4, 2),
 #     }
 # 
-#     bundle = FTS(path, create=True, kind="plot", name=name, size_mm=size_mm)
+#     bundle = Bundle(path, create=True, kind="plot", name=name, size_mm=size_mm)
 # 
 #     if csv_df is None:
 #         csv_df = extract_data_from_mpl_figure(fig)
 # 
 #     if csv_df is not None and not csv_df.empty:
-#         bundle._node.payload_schema = "scitex.fts.payload.plot@1"
+#         bundle._spec.payload_schema = "scitex.io.bundle.payload.plot@1"
+# 
+#     # Simplify CSV column names for bundle (figrecipe-style)
+#     # Converts: ax-row-0-col-0_trace-id-sine_variable-x → sine_x (or just x)
+#     if csv_df is not None and not csv_df.empty:
+#         csv_df = _simplify_csv_columns(csv_df)
 # 
 #     # Build encoding from actual CSV columns (single source of truth)
 #     # This ensures encoding references match real data columns
@@ -354,7 +439,9 @@ if __name__ == "__main__":
 #             "dtypes": {col: str(dtype) for col, dtype in csv_df.dtypes.items()},
 #             "shape": list(csv_df.shape),
 #         }
-#         storage.write("canonical/data_info.json", json.dumps(data_info, indent=2).encode())
+#         storage.write(
+#             "canonical/data_info.json", json.dumps(data_info, indent=2).encode()
+#         )
 # 
 #     for fmt in ["png", "svg", "pdf"]:
 #         buf = io.BytesIO()
@@ -365,7 +452,9 @@ if __name__ == "__main__":
 # 
 #     geometry = extract_geometry_from_mpl_figure(fig)
 #     geometry["space"] = "figure_px"
-#     storage.write("artifacts/cache/geometry_px.json", json.dumps(geometry, indent=2).encode())
+#     storage.write(
+#         "artifacts/cache/geometry_px.json", json.dumps(geometry, indent=2).encode()
+#     )
 # 
 #     hitmap_png, hitmap_svg = generate_hitmap_from_mpl_figure(fig, dpi)
 #     if hitmap_png:
@@ -374,7 +463,9 @@ if __name__ == "__main__":
 #         storage.write("artifacts/cache/hitmap.svg", hitmap_svg)
 # 
 #     manifest = {"dpi": dpi, "formats": ["png", "svg", "pdf"], "size_mm": size_mm}
-#     storage.write("artifacts/cache/render_manifest.json", json.dumps(manifest, indent=2).encode())
+#     storage.write(
+#         "artifacts/cache/render_manifest.json", json.dumps(manifest, indent=2).encode()
+#     )
 # 
 #     save_bundle_components(
 #         path,
@@ -401,5 +492,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_mpl_helpers.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_mpl_helpers.py
 # --------------------------------------------------------------------------------

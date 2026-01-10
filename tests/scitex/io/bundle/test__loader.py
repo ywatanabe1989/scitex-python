@@ -218,7 +218,6 @@ class TestLoaderEdgeCases:
         assert encoding is None
         assert theme is None
 
-
 if __name__ == "__main__":
     import os
 
@@ -227,17 +226,17 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_loader.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_loader.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_loader.py
-#
-# """FTS Bundle loading utilities.
-#
+# 
+# """SciTeX Bundle loading utilities.
+# 
 # Loads bundles using the new canonical/artifacts/payload/children structure.
-# Supports backwards compatibility with old flat structure (node.json at root).
-#
+# Supports backwards compatibility with old flat structure (spec.json at root).
+# 
 # New structure:
 #     canonical/spec.json     (was node.json)
 #     canonical/encoding.json (was encoding.json)
@@ -245,52 +244,52 @@ if __name__ == "__main__":
 #     canonical/data_info.json (was data/data_info.json)
 #     payload/stats.json      (was stats/stats.json)
 # """
-#
+# 
 # from pathlib import Path
 # from typing import TYPE_CHECKING, Optional, Tuple
-#
+# 
 # from ._storage import get_storage
-#
+# 
 # if TYPE_CHECKING:
-#     from ._dataclasses import DataInfo, Node
-#     from .._fig import Encoding, Theme
-#     from .._stats import Stats
-#
-#
+#     from ._dataclasses import DataInfo, Spec
+#     from .kinds._plot._dataclasses import Encoding, Theme
+#     from .kinds._stats._dataclasses import Stats
+# 
+# 
 # def load_bundle_components(
 #     path: Path,
 # ) -> Tuple[
-#     Optional["Node"],
+#     Optional["Spec"],
 #     Optional["Encoding"],
 #     Optional["Theme"],
 #     Optional["Stats"],
 #     Optional["DataInfo"],
 # ]:
 #     """Load all bundle components from storage.
-#
+# 
 #     Supports both new canonical/ structure and legacy flat structure.
-#
+# 
 #     Args:
 #         path: Bundle path (directory or ZIP)
-#
+# 
 #     Returns:
-#         Tuple of (node, encoding, theme, stats, data_info)
+#         Tuple of (spec, encoding, theme, stats, data_info)
 #     """
-#     from ._dataclasses import DataInfo, Node
-#     from .._fig import Encoding, Theme
-#     from .._stats import Stats
-#
+#     from ._dataclasses import DataInfo, Spec
+#     from .kinds._plot._dataclasses import Encoding, Theme
+#     from .kinds._stats._dataclasses import Stats
+# 
 #     storage = get_storage(path)
-#
-#     node = None
+# 
+#     spec = None
 #     encoding = None
 #     theme = None
 #     stats = None
 #     data_info = None
-#
+# 
 #     # Detect structure: new (canonical/) or legacy (flat)
 #     # - New: canonical/spec.json
-#     # - Legacy FTS: node.json at root
+#     # - Legacy v1: node.json at root
 #     # - Legacy sio.save(): spec.json at root
 #     if storage.exists("canonical/spec.json"):
 #         structure = "v2"  # New canonical/ structure
@@ -299,17 +298,17 @@ if __name__ == "__main__":
 #     else:
 #         structure = "v1"  # Legacy node.json structure
 #     is_new_structure = structure == "v2"
-#
-#     # Node / spec.json
+# 
+#     # Spec / spec.json
 #     if structure == "v2":
-#         node_data = storage.read_json("canonical/spec.json")
+#         spec_data = storage.read_json("canonical/spec.json")
 #     elif structure == "sio":
-#         node_data = storage.read_json("spec.json")
+#         spec_data = storage.read_json("spec.json")
 #     else:
-#         node_data = storage.read_json("node.json")
-#     if node_data:
-#         node = Node.from_dict(node_data)
-#
+#         spec_data = storage.read_json("node.json")
+#     if spec_data:
+#         spec = Spec.from_dict(spec_data)
+# 
 #     # Encoding
 #     if is_new_structure:
 #         encoding_data = storage.read_json("canonical/encoding.json")
@@ -317,7 +316,7 @@ if __name__ == "__main__":
 #         encoding_data = storage.read_json("encoding.json")
 #     if encoding_data:
 #         encoding = Encoding.from_dict(encoding_data)
-#
+# 
 #     # Theme
 #     if is_new_structure:
 #         theme_data = storage.read_json("canonical/theme.json")
@@ -325,7 +324,7 @@ if __name__ == "__main__":
 #         theme_data = storage.read_json("theme.json")
 #     if theme_data:
 #         theme = Theme.from_dict(theme_data)
-#
+# 
 #     # Stats (payload for kind=stats, or legacy stats/)
 #     if is_new_structure:
 #         stats_data = storage.read_json("payload/stats.json")
@@ -333,7 +332,7 @@ if __name__ == "__main__":
 #         stats_data = storage.read_json("stats/stats.json")
 #     if stats_data:
 #         stats = Stats.from_dict(stats_data)
-#
+# 
 #     # Data info
 #     if is_new_structure:
 #         data_info_data = storage.read_json("canonical/data_info.json")
@@ -341,16 +340,16 @@ if __name__ == "__main__":
 #         data_info_data = storage.read_json("data/data_info.json")
 #     if data_info_data:
 #         data_info = DataInfo.from_dict(data_info_data)
-#
-#     return node, encoding, theme, stats, data_info
-#
-#
+# 
+#     return spec, encoding, theme, stats, data_info
+# 
+# 
 # def get_bundle_structure_version(path: Path) -> str:
 #     """Detect bundle structure version.
-#
+# 
 #     Args:
 #         path: Bundle path
-#
+# 
 #     Returns:
 #         "v2" for new canonical/ structure, "v1" for legacy flat structure
 #     """
@@ -358,12 +357,12 @@ if __name__ == "__main__":
 #     if storage.exists("canonical/spec.json"):
 #         return "v2"
 #     return "v1"
-#
-#
+# 
+# 
 # __all__ = ["load_bundle_components", "get_bundle_structure_version"]
-#
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_loader.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_loader.py
 # --------------------------------------------------------------------------------

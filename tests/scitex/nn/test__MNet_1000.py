@@ -330,8 +330,8 @@ if __name__ == "__main__":
 #     "n_fc2": 256,
 #     "d_ratio2": 0.85,
 # }
-#
-#
+# 
+# 
 # class MNet1000(nn.Module):
 #     def __init__(self, config):
 #         super().__init__()
@@ -340,7 +340,7 @@ if __name__ == "__main__":
 #         self.config = config
 #         # fc
 #         N_FC_IN = 15950
-#
+# 
 #         # conv
 #         self.backborn = nn.Sequential(
 #             *[
@@ -363,7 +363,7 @@ if __name__ == "__main__":
 #                 nn.Linear(N_FC_IN, config["n_fc1"]),
 #             ]
 #         )
-#
+# 
 #         # # conv
 #         # self.conv1 = nn.Conv2d(1, 40, kernel_size=(config["n_chs"], 4))
 #         # self.act1 = nn.Mish()
@@ -384,7 +384,7 @@ if __name__ == "__main__":
 #         # self.bn4 = nn.BatchNorm2d(50)
 #         # self.pool4 = nn.MaxPool2d((1, 2))
 #         # self.act4 = nn.Mish()
-#
+# 
 #         self.fc = nn.Sequential(
 #             # nn.Linear(N_FC_IN, config["n_fc1"]),
 #             nn.Mish(),
@@ -431,8 +431,8 @@ if __name__ == "__main__":
 #         x = self._reshape_input(x, self.config["n_chs"])
 #         x = self.backborn(x)
 #         return x
-#
-#
+# 
+# 
 # class SwapLayer(nn.Module):
 #     def __init__(
 #         self,
@@ -441,8 +441,8 @@ if __name__ == "__main__":
 # 
 #     def forward(self, x):
 #         return x.transpose(1, 2)
-#
-#
+# 
+# 
 # class ReshapeLayer(nn.Module):
 #     def __init__(
 #         self,
@@ -464,7 +464,7 @@ if __name__ == "__main__":
 #     y = model(x)
 #     summary(model, x)
 #     print(y.shape)
-#
+# 
 # # Backward compatibility
 # MNet_1000 = MNet1000  # Deprecated: use MNet1000 instead
 

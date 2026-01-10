@@ -476,11 +476,11 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-02 04:00:36 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/gen/_color_text.py
-#
-#
+# 
+# 
 # def color_text(text, c="green"):
 #     """Apply ANSI color codes to text.
-#
+# 
 #     Parameters
 #     ----------
 #     text : str
@@ -488,12 +488,12 @@ if __name__ == "__main__":
 #     c : str, optional
 #         The color to apply. Available colors are 'red', 'green', 'yellow',
 #         'blue', 'magenta', 'cyan', 'white', and 'grey' (default is "green").
-#
+# 
 #     Returns
 #     -------
 #     str
 #         The input text with ANSI color codes applied.
-#
+# 
 #     Example
 #     -------
 #     >>> print(color_text("Hello, World!", "blue"))
@@ -514,15 +514,15 @@ if __name__ == "__main__":
 #     ANSI_COLORS["tra"] = ANSI_COLORS["white"]
 #     ANSI_COLORS["val"] = ANSI_COLORS["green"]
 #     ANSI_COLORS["tes"] = ANSI_COLORS["red"]
-#
+# 
 #     start_code = ANSI_COLORS.get(c, ANSI_COLORS["reset"])
 #     end_code = ANSI_COLORS["reset"]
 #     return f"{start_code}{text}{end_code}"
-#
-#
+# 
+# 
 # ct = color_text
-#
-#
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -45,13 +45,13 @@ class TemplateServer:
 
     def setup_handlers(self):
         """Set up MCP server handlers."""
-        from ._mcp_handlers import (
+        from ._mcp.handlers import (
             clone_template_handler,
             get_template_info_handler,
             list_git_strategies_handler,
             list_templates_handler,
         )
-        from ._mcp_tool_schemas import get_tool_schemas
+        from ._mcp.tool_schemas import get_tool_schemas
 
         @self.server.list_tools()
         async def handle_list_tools():

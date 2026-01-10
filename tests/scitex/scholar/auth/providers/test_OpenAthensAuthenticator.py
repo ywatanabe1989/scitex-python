@@ -41,7 +41,7 @@ if __name__ == "__main__":
 # from playwright.async_api import async_playwright
 # 
 # from scitex import logging
-# from scitex.errors import ScholarError
+# from scitex.logging import ScholarError
 # from scitex.scholar.config import ScholarConfig
 # 
 # from ..core.BrowserAuthenticator import BrowserAuthenticator

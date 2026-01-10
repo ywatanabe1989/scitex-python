@@ -267,45 +267,45 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-#
+# 
 # __FILE__ = "./src/scitex/writer/_compile/_runner.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-#
+# 
 # """
 # Compilation script execution.
-#
+# 
 # Executes LaTeX compilation scripts and captures results.
 # """
-#
+# 
 # from pathlib import Path
 # from datetime import datetime
 # from typing import Optional, Callable
 # import subprocess
 # import time
 # import fcntl
-#
+# 
 # from scitex.logging import getLogger
 # from scitex.sh import sh
 # from scitex.writer._dataclasses.config import DOC_TYPE_DIRS
 # from scitex.writer._dataclasses import CompilationResult
 # from ._validator import validate_before_compile
 # from ._parser import parse_output
-#
+# 
 # logger = getLogger(__name__)
-#
-#
+# 
+# 
 # def _get_compile_script(project_dir: Path, doc_type: str) -> Path:
 #     """
 #     Get compile script path for document type.
-#
+# 
 #     Parameters
 #     ----------
 #     project_dir : Path
 #         Path to project directory
 #     doc_type : str
 #         Document type ('manuscript', 'supplementary', 'revision')
-#
+# 
 #     Returns
 #     -------
 #     Path
@@ -317,39 +317,39 @@ if __name__ == "__main__":
 #         "revision": project_dir / "scripts" / "shell" / "compile_revision.sh",
 #     }
 #     return script_map.get(doc_type)
-#
-#
+# 
+# 
 # def _find_output_files(
 #     project_dir: Path,
 #     doc_type: str,
 # ) -> tuple:
 #     """
 #     Find generated output files after compilation.
-#
+# 
 #     Parameters
 #     ----------
 #     project_dir : Path
 #         Path to project directory
 #     doc_type : str
 #         Document type
-#
+# 
 #     Returns
 #     -------
 #     tuple
 #         (output_pdf, diff_pdf, log_file)
 #     """
 #     doc_dir = project_dir / DOC_TYPE_DIRS[doc_type]
-#
+# 
 #     # Find generated PDF
 #     pdf_name = f"{doc_type}.pdf"
 #     potential_pdf = doc_dir / pdf_name
 #     output_pdf = potential_pdf if potential_pdf.exists() else None
-#
+# 
 #     # Check for diff PDF
 #     diff_name = f"{doc_type}_diff.pdf"
 #     potential_diff = doc_dir / diff_name
 #     diff_pdf = potential_diff if potential_diff.exists() else None
-#
+# 
 #     # Find log file
 #     log_dir = doc_dir / "logs"
 #     log_file = None
@@ -357,10 +357,10 @@ if __name__ == "__main__":
 #         log_files = list(log_dir.glob("*.log"))
 #         if log_files:
 #             log_file = max(log_files, key=lambda p: p.stat().st_mtime)
-#
+# 
 #     return output_pdf, diff_pdf, log_file
-#
-#
+# 
+# 
 # def _execute_with_callbacks(
 #     command: list,
 #     cwd: Path,
@@ -369,7 +369,7 @@ if __name__ == "__main__":
 # ) -> dict:
 #     """
 #     Execute command with line-by-line output capture and callbacks.
-#
+# 
 #     Parameters
 #     ----------
 #     command : list
@@ -380,7 +380,7 @@ if __name__ == "__main__":
 #         Timeout in seconds
 #     log_callback : Optional[Callable[[str], None]]
 #         Called with each output line
-#
+# 
 #     Returns
 #     -------
 #     dict
@@ -389,7 +389,7 @@ if __name__ == "__main__":
 #     # Set environment for unbuffered output
 #     env = os.environ.copy()
 #     env["PYTHONUNBUFFERED"] = "1"
-#
+# 
 #     process = subprocess.Popen(
 #         command,
 #         shell=False,
@@ -399,22 +399,22 @@ if __name__ == "__main__":
 #         cwd=str(cwd),
 #         env=env,
 #     )
-#
+# 
 #     stdout_lines = []
 #     stderr_lines = []
 #     start_time = time.time()
-#
+# 
 #     # Make file descriptors non-blocking
 #     def make_non_blocking(fd):
 #         flags = fcntl.fcntl(fd, fcntl.F_GETFL)
 #         fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
-#
+# 
 #     make_non_blocking(process.stdout)
 #     make_non_blocking(process.stderr)
-#
+# 
 #     stdout_buffer = b""
 #     stderr_buffer = b""
-#
+# 
 #     try:
 #         while True:
 #             # Check timeout
@@ -425,10 +425,10 @@ if __name__ == "__main__":
 #                     log_callback(timeout_msg)
 #                 stderr_lines.append(timeout_msg)
 #                 break
-#
+# 
 #             # Check if process has finished
 #             poll_result = process.poll()
-#
+# 
 #             # Read from stdout
 #             try:
 #                 chunk = process.stdout.read()
@@ -443,7 +443,7 @@ if __name__ == "__main__":
 #                             log_callback(line_str)
 #             except (IOError, BlockingIOError):
 #                 pass
-#
+# 
 #             # Read from stderr
 #             try:
 #                 chunk = process.stderr.read()
@@ -458,7 +458,7 @@ if __name__ == "__main__":
 #                             log_callback(f"[STDERR] {line_str}")
 #             except (IOError, BlockingIOError):
 #                 pass
-#
+# 
 #             # If process finished, do final read and break
 #             if poll_result is not None:
 #                 # Process remaining buffer content
@@ -467,30 +467,30 @@ if __name__ == "__main__":
 #                     stdout_lines.append(line_str)
 #                     if log_callback:
 #                         log_callback(line_str)
-#
+# 
 #                 if stderr_buffer:
 #                     line_str = stderr_buffer.decode("utf-8", errors="replace")
 #                     stderr_lines.append(line_str)
 #                     if log_callback:
 #                         log_callback(f"[STDERR] {line_str}")
-#
+# 
 #                 break
-#
+# 
 #             # Small sleep to prevent CPU spinning
 #             time.sleep(0.05)
-#
+# 
 #     except Exception as e:
 #         process.kill()
 #         raise
-#
+# 
 #     return {
 #         "stdout": "\n".join(stdout_lines),
 #         "stderr": "\n".join(stderr_lines),
 #         "exit_code": process.returncode,
 #         "success": process.returncode == 0,
 #     }
-#
-#
+# 
+# 
 # def run_compile(
 #     doc_type: str,
 #     project_dir: Path,
@@ -507,7 +507,7 @@ if __name__ == "__main__":
 # ) -> CompilationResult:
 #     """
 #     Run compilation script and parse results with optional callbacks.
-#
+# 
 #     Parameters
 #     ----------
 #     doc_type : str
@@ -534,7 +534,7 @@ if __name__ == "__main__":
 #         Called with each log line
 #     progress_callback : Optional[Callable[[int, str], None]]
 #         Called with progress updates (percent, step)
-#
+# 
 #     Returns
 #     -------
 #     CompilationResult
@@ -542,23 +542,23 @@ if __name__ == "__main__":
 #     """
 #     start_time = datetime.now()
 #     project_dir = Path(project_dir).absolute()
-#
+# 
 #     # Helper for progress tracking
 #     def progress(percent: int, step: str):
 #         if progress_callback:
 #             progress_callback(percent, step)
 #         logger.info(f"Progress: {percent}% - {step}")
-#
+# 
 #     # Helper for logging
 #     def log(message: str):
 #         if log_callback:
 #             log_callback(message)
 #         logger.info(message)
-#
+# 
 #     # Progress: Starting
 #     progress(0, "Starting compilation...")
 #     log("[INFO] Starting LaTeX compilation...")
-#
+# 
 #     # Validate project structure before compilation
 #     try:
 #         progress(5, "Validating project structure...")
@@ -574,7 +574,7 @@ if __name__ == "__main__":
 #             stderr=str(e),
 #             duration=0.0,
 #         )
-#
+# 
 #     # Get compile script
 #     compile_script = _get_compile_script(project_dir, doc_type)
 #     if not compile_script or not compile_script.exists():
@@ -587,17 +587,17 @@ if __name__ == "__main__":
 #             stderr=error_msg,
 #             duration=0.0,
 #         )
-#
+# 
 #     # Build command
 #     progress(10, "Preparing compilation command...")
 #     script_path = compile_script.absolute()
 #     cmd = [str(script_path)]
-#
+# 
 #     # Add document-specific options
 #     if doc_type == "revision":
 #         if track_changes:
 #             cmd.append("--track-changes")
-#
+# 
 #     elif doc_type == "manuscript":
 #         if no_figs:
 #             cmd.append("--no_figs")
@@ -611,7 +611,7 @@ if __name__ == "__main__":
 #             cmd.append("--verbose")
 #         if force:
 #             cmd.append("--force")
-#
+# 
 #     elif doc_type == "supplementary":
 #         if not no_figs:  # For supplementary, --figs means include figures (default)
 #             cmd.append("--figs")
@@ -621,17 +621,17 @@ if __name__ == "__main__":
 #             cmd.append("--crop_tif")
 #         if quiet:
 #             cmd.append("--quiet")
-#
+# 
 #     log(f"[INFO] Running: {' '.join(cmd)}")
 #     log(f"[INFO] Working directory: {project_dir}")
-#
+# 
 #     try:
 #         cwd_original = Path.cwd()
 #         os.chdir(project_dir)
-#
+# 
 #         try:
 #             progress(15, "Executing LaTeX compilation...")
-#
+# 
 #             # Use callbacks version if callbacks provided
 #             if log_callback:
 #                 result_dict = _execute_with_callbacks(
@@ -649,7 +649,7 @@ if __name__ == "__main__":
 #                     timeout=timeout,
 #                     stream_output=True,
 #                 )
-#
+# 
 #             result = type(
 #                 "Result",
 #                 (),
@@ -659,11 +659,11 @@ if __name__ == "__main__":
 #                     "stderr": result_dict["stderr"],
 #                 },
 #             )()
-#
+# 
 #             duration = (datetime.now() - start_time).total_seconds()
 #         finally:
 #             os.chdir(cwd_original)
-#
+# 
 #         # Find output files
 #         if result.returncode == 0:
 #             progress(90, "Compilation successful, locating output files...")
@@ -674,11 +674,11 @@ if __name__ == "__main__":
 #         else:
 #             output_pdf, diff_pdf, log_file = None, None, None
 #             log(f"[ERROR] Compilation failed with exit code {result.returncode}")
-#
+# 
 #         # Parse errors and warnings
 #         progress(95, "Parsing compilation logs...")
 #         errors, warnings = parse_output(result.stdout, result.stderr, log_file=log_file)
-#
+# 
 #         compilation_result = CompilationResult(
 #             success=(result.returncode == 0),
 #             exit_code=result.returncode,
@@ -691,7 +691,7 @@ if __name__ == "__main__":
 #             errors=errors,
 #             warnings=warnings,
 #         )
-#
+# 
 #         if compilation_result.success:
 #             progress(100, "Complete!")
 #             log(f"[SUCCESS] Compilation succeeded in {duration:.2f}s")
@@ -699,9 +699,9 @@ if __name__ == "__main__":
 #             progress(100, "Compilation failed")
 #             if errors:
 #                 log(f"[ERROR] Found {len(errors)} errors")
-#
+# 
 #         return compilation_result
-#
+# 
 #     except Exception as e:
 #         duration = (datetime.now() - start_time).total_seconds()
 #         logger.error(f"Compilation error: {e}")
@@ -712,10 +712,10 @@ if __name__ == "__main__":
 #             stderr=str(e),
 #             duration=duration,
 #         )
-#
-#
+# 
+# 
 # __all__ = ["run_compile"]
-#
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

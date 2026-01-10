@@ -323,8 +323,8 @@ if __name__ == "__main__":
 # from openai import OpenAI as _OpenAI
 # 
 # """Functions & Classes"""
-#
-#
+# 
+# 
 # class DeepSeek(BaseGenAI):
 #     def __init__(
 #         self,
@@ -411,8 +411,8 @@ if __name__ == "__main__":
 # 
 #         if buffer:
 #             yield buffer
-#
-#
+# 
+# 
 # if __name__ == "__main__":
 #     # -----------------------------------
 #     # Initiatialization of scitex format
@@ -449,7 +449,7 @@ if __name__ == "__main__":
 #         response = client.complete(prompt)
 #         print(response)
 #         return 0
-#
+# 
 #     exit_status = main()
 # 
 #     # -----------------------------------

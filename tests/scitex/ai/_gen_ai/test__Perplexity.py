@@ -282,7 +282,6 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/_gen_ai/_Perplexity.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-11 04:11:10 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/ai/_gen_ai/_Perplexity.py
 # 
@@ -328,6 +327,12 @@ if __name__ == "__main__":
 #         chat_history: Optional[List[Dict[str, str]]] = None,
 #         max_tokens: Optional[int] = None,  # Added parameter
 #     ) -> None:
+#         # Validate API key
+#         if not api_key:
+#             api_key = os.getenv("PERPLEXITY_API_KEY", "")
+#             if not api_key:
+#                 raise ValueError("PERPLEXITY_API_KEY environment variable not set")
+# 
 #         # Set max_tokens based on model if not provided
 #         if max_tokens is None:
 #             max_tokens = 128_000 if "128k" in model else 32_000
@@ -337,12 +342,18 @@ if __name__ == "__main__":
 #             model=model,
 #             api_key=api_key,
 #             stream=stream,
+#             seed=seed,
 #             n_keep=n_keep,
 #             temperature=temperature,
 #             provider="Perplexity",
 #             chat_history=chat_history,
 #             max_tokens=max_tokens,
 #         )
+# 
+#     @property
+#     def chat_history(self) -> List[Dict[str, str]]:
+#         """Alias for history to maintain backward compatibility."""
+#         return self.history
 # 
 #     def _init_client(self) -> OpenAI:
 #         return OpenAI(api_key=self.api_key, base_url="https://api.perplexity.ai")
@@ -378,7 +389,11 @@ if __name__ == "__main__":
 #         )
 # 
 #         for chunk in stream:
-#             if chunk and chunk.choices[0].finish_reason == "stop":
+#             # Handle empty chunks or chunks without choices
+#             if not chunk or not chunk.choices:
+#                 continue
+# 
+#             if chunk.choices[0].finish_reason == "stop":
 #                 print(chunk.choices)
 #                 try:
 #                     self.input_tokens += chunk.usage.prompt_tokens
@@ -386,10 +401,9 @@ if __name__ == "__main__":
 #                 except AttributeError:
 #                     pass
 # 
-#             if chunk.choices:
-#                 current_text = chunk.choices[0].delta.content
-#                 if current_text:
-#                     yield current_text
+#             current_text = chunk.choices[0].delta.content
+#             if current_text:
+#                 yield current_text
 # 
 #     def _get_available_models(self) -> List[str]:
 #         return [
@@ -466,13 +480,13 @@ if __name__ == "__main__":
 # 
 # if __name__ == "__main__":
 #     import scitex
-#
+# 
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys, plt, verbose=False
 #     )
 #     main()
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
-#
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

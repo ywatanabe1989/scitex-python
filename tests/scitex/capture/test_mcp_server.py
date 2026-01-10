@@ -11,11 +11,11 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/capture/mcp_server.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-17 03:24:58 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/capture/mcp_server.py
 # # ----------------------------------------
 # from __future__ import annotations
+# 
 # import os
 # 
 # __FILE__ = "./src/scitex/capture/mcp_server.py"
@@ -32,17 +32,27 @@ if __name__ == "__main__":
 # from datetime import datetime
 # from pathlib import Path
 # 
-# import mcp.types as types
-# from mcp.server import NotificationOptions, Server
-# from mcp.server.models import InitializationOptions
-# from mcp.server.stdio import stdio_server
+# # Graceful MCP dependency handling
+# try:
+#     import mcp.types as types
+#     from mcp.server import NotificationOptions, Server
+#     from mcp.server.models import InitializationOptions
+#     from mcp.server.stdio import stdio_server
 # 
-# from scitex import capture
-# import shutil
-# 
+#     MCP_AVAILABLE = True
+# except ImportError:
+#     MCP_AVAILABLE = False
+#     types = None  # type: ignore
+#     Server = None  # type: ignore
+#     NotificationOptions = None  # type: ignore
+#     InitializationOptions = None  # type: ignore
+#     stdio_server = None  # type: ignore
 # 
 # # Directory configuration
 # import os
+# import shutil
+# 
+# from scitex import capture
 # 
 # # Use SCITEX_DIR environment variable if set, otherwise default to ~/.scitex
 # SCITEX_BASE_DIR = Path(os.getenv("SCITEX_DIR", Path.home() / ".scitex"))
@@ -936,8 +946,8 @@ if __name__ == "__main__":
 #             return {"success": False, "error": str(e)}
 # 
 # 
-# async def main():
-#     """Main entry point for the MCP server."""
+# async def _run_server():
+#     """Run the MCP server (internal)."""
 #     server = CaptureServer()
 #     async with stdio_server() as (read_stream, write_stream):
 #         await server.server.run(
@@ -954,8 +964,27 @@ if __name__ == "__main__":
 #         )
 # 
 # 
+# def main():
+#     """Main entry point for the MCP server."""
+#     if not MCP_AVAILABLE:
+#         import sys
+# 
+#         print("=" * 60)
+#         print("MCP Server 'scitex-capture' requires the 'mcp' package.")
+#         print()
+#         print("Install with:")
+#         print("  pip install mcp")
+#         print()
+#         print("Or install scitex with MCP support:")
+#         print("  pip install scitex[mcp]")
+#         print("=" * 60)
+#         sys.exit(1)
+# 
+#     asyncio.run(_run_server())
+# 
+# 
 # if __name__ == "__main__":
-#     asyncio.run(main())
+#     main()
 # 
 # # EOF
 

@@ -246,25 +246,30 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/path/_increment_version.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Time-stamp: "2024-11-02 19:45:32 (ywatanabe)"
-# # File: ./scitex_repo/src/scitex/path/_increment_version.py
+# # Timestamp: "2026-01-08 02:00:00 (ywatanabe)"
+# # File: /home/ywatanabe/proj/scitex-code/src/scitex/path/_increment_version.py
 # 
-# import os
+# """File versioning utilities."""
+# 
 # import re
-# from glob import glob
+# from pathlib import Path
+# from typing import Union
 # 
 # 
-# def increment_version(dirname, fname, ext, version_prefix="_v"):
-#     """
-#     Generate the next version of a filename based on existing versioned files.
+# def increment_version(
+#     dirname: Union[str, Path],
+#     fname: str,
+#     ext: str,
+#     version_prefix: str = "_v",
+# ) -> Path:
+#     """Generate the next version of a filename based on existing versioned files.
 # 
 #     This function searches for files in the given directory that match the pattern:
 #     {fname}{version_prefix}{number}{ext} and returns the path for the next version.
 # 
-#     Parameters:
-#     -----------
-#     dirname : str
+#     Parameters
+#     ----------
+#     dirname : str or Path
 #         The directory to search in and where the new file will be created.
 #     fname : str
 #         The base filename without version number or extension.
@@ -273,62 +278,50 @@ if __name__ == "__main__":
 #     version_prefix : str, optional
 #         The prefix used before the version number. Default is '_v'.
 # 
-#     Returns:
-#     --------
-#     str
+#     Returns
+#     -------
+#     Path
 #         The full path for the next version of the file.
 # 
-#     Example:
-#     --------
+#     Example
+#     -------
 #     >>> increment_version('/path/to/dir', 'myfile', '.txt')
-#     '/path/to/dir/myfile_v004.txt'
+#     Path('/path/to/dir/myfile_v004.txt')
 # 
-#     Notes:
-#     ------
+#     Notes
+#     -----
 #     - If no existing versioned files are found, it starts with version 001.
 #     - The version number is always formatted with at least 3 digits.
 #     """
-#     # Create a regex pattern to match the version number in the filename
+#     dirname = Path(dirname)
+# 
 #     version_pattern = re.compile(
 #         rf"({re.escape(fname)}{re.escape(version_prefix)})(\d+)({re.escape(ext)})$"
 #     )
 # 
-#     # Construct the glob pattern to find all files that match the pattern
-#     glob_pattern = os.path.join(dirname, f"{fname}{version_prefix}*{ext}")
+#     glob_pattern = f"{fname}{version_prefix}*{ext}"
+#     files = list(dirname.glob(glob_pattern))
 # 
-#     # Use glob to find all files that match the pattern
-#     files = glob(glob_pattern)
-# 
-#     # Initialize the highest version number
 #     highest_version = 0
 #     base, suffix = None, None
 # 
-#     # Loop through the files to find the highest version number
 #     for file in files:
-#         filename = os.path.basename(file)
-#         match = version_pattern.search(filename)
+#         match = version_pattern.search(file.name)
 #         if match:
 #             base, version_str, suffix = match.groups()
 #             version_num = int(version_str)
 #             if version_num > highest_version:
 #                 highest_version = version_num
 # 
-#     # If no versioned files were found, use the provided filename and extension
 #     if base is None or suffix is None:
 #         base = f"{fname}{version_prefix}"
 #         suffix = ext
-#         highest_version = 0  # No previous versions
+#         highest_version = 0
 # 
-#     # Increment the highest version number
 #     next_version_number = highest_version + 1
-# 
-#     # Format the next version number with the same number of digits as the original
 #     next_version_str = f"{base}{next_version_number:03d}{suffix}"
 # 
-#     # Combine the directory and new filename to create the full path
-#     next_filepath = os.path.join(dirname, next_version_str)
-# 
-#     return next_filepath
+#     return dirname / next_version_str
 # 
 # 
 # # EOF

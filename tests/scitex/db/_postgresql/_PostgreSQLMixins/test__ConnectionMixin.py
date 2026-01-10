@@ -362,7 +362,7 @@ if __name__ == "__main__":
 #             self.connect()
 #         else:
 #             raise ValueError("No database configuration specified for reconnection")
-#
+# 
 #     def execute(self, query: str, parameters: Tuple = None) -> Any:
 #         """Execute a database query."""
 #         if not self.cursor:
@@ -375,7 +375,7 @@ if __name__ == "__main__":
 #         except psycopg2.Error as err:
 #             self.conn.rollback()
 #             raise psycopg2.Error(f"Query execution failed: {err}")
-#
+# 
 #     def executemany(self, query: str, parameters: list) -> None:
 #         """Execute multiple database queries."""
 #         if not self.cursor:
@@ -387,8 +387,8 @@ if __name__ == "__main__":
 #         except psycopg2.Error as err:
 #             self.conn.rollback()
 #             raise psycopg2.Error(f"Batch query execution failed: {err}")
-#
-#
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

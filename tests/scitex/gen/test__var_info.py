@@ -350,12 +350,12 @@ if __name__ == "__main__":
 # import pandas as pd
 # import torch
 # import xarray as xr
-#
+# 
 # ArrayLike = Union[
 #     list, tuple, np.ndarray, pd.Series, pd.DataFrame, xr.DataArray, torch.Tensor
 # ]
-#
-#
+# 
+# 
 # def var_info(variable: Any) -> dict:
 #     """Returns type and structural information about a variable.
 # 
@@ -382,18 +382,18 @@ if __name__ == "__main__":
 #         Dictionary containing variable information.
 #     """
 #     info = {"type": type(variable).__name__}
-#
+# 
 #     # Length check
 #     if hasattr(variable, "__len__"):
 #         info["length"] = len(variable)
-#
+# 
 #     # Shape check for array-like objects
 #     if isinstance(
 #         variable, (np.ndarray, pd.DataFrame, pd.Series, xr.DataArray, torch.Tensor)
 #     ):
 #         info["shape"] = variable.shape
 #         info["dimensions"] = len(variable.shape)
-#
+# 
 #     # Special handling for nested lists
 #     elif isinstance(variable, list):
 #         if variable and isinstance(variable[0], list):
@@ -406,7 +406,7 @@ if __name__ == "__main__":
 #                 depth += 1
 #             info["shape"] = tuple(shape)
 #             info["dimensions"] = depth
-#
+# 
 #     return info
 # 
 # 

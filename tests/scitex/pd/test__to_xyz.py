@@ -289,16 +289,16 @@ if __name__ == "__main__":
 # import scitex
 # import numpy as np
 # import pandas as pd
-#
-#
+# 
+# 
 # def to_xyz(data_frame):
 #     """
 #     Convert a DataFrame into x, y, z format (long format).
-#
+# 
 #     Transforms a DataFrame from wide format (matrix/heatmap) to long format
 #     where each value becomes a row with x (row index), y (column name),
 #     and z (value) columns.
-#
+# 
 #     Example
 #     -------
 #     data_frame = pd.DataFrame(...)  # Your DataFrame here
@@ -317,7 +317,7 @@ if __name__ == "__main__":
 #     """
 #     x_name = data_frame.index.name or "x"
 #     y_name = data_frame.columns.name or "y"
-#
+# 
 #     formatted_data_frames = []
 # 
 #     for column in data_frame.columns:
@@ -332,14 +332,14 @@ if __name__ == "__main__":
 #         formatted_data_frames.append(formatted_data)
 # 
 #     result = pd.concat(formatted_data_frames, ignore_index=True)
-#
+# 
 #     # Ensure column order is x, y, z
 #     col_order = [x_name, y_name, "z"]
 #     result = result[col_order]
-#
+# 
 #     return result
-#
-#
+# 
+# 
 # # def to_xyz(data_frame):
 # #     """
 # #     Convert a heatmap DataFrame into x, y, z format.

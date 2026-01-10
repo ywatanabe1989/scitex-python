@@ -430,39 +430,39 @@ if __name__ == "__main__":
 # # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/utils/_notify.py
 # # ----------------------------------------
 # import os
-#
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # # Time-stamp: "2024-11-24 17:54:38 (ywatanabe)"
-#
+# 
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/utils/_notify.py"
-#
+# 
 # # Time-stamp: "2024-11-07 05:38:14 (ywatanabe)"
-#
+# 
 # """This script does XYZ."""
-#
+# 
 # import inspect
 # import pwd
 # import socket
 # import subprocess
 # import sys
 # import warnings
-#
+# 
 # from ._email import send_gmail
-#
-#
+# 
+# 
 # def get_username():
 #     try:
 #         return pwd.getpwuid(os.getuid()).pw_name
 #     except:
 #         return os.getenv("USER") or os.getenv("LOGNAME") or "unknown"
-#
-#
+# 
+# 
 # def get_hostname():
 #     return socket.gethostname()
-#
-#
+# 
+# 
 # def get_git_branch(scitex):
 #     try:
 #         branch = (
@@ -475,26 +475,26 @@ if __name__ == "__main__":
 #             .strip()
 #         )
 #         return branch
-#
+# 
 #     except Exception as e:
 #         print(e)
 #         return "main"
-#
-#
+# 
+# 
 # def gen_footer(sender, script_name, scitex, branch):
 #     return f"""
-#
+# 
 # {"-" * 30}
 # Sent via
 # - Host: {sender}
 # - Script: {script_name}
 # - Source: scitex v{scitex.__version__} (github.com/ywatanabe1989/scitex/blob/{branch}/src/scitex/gen/system_ops/_notify.py)
 # {"-" * 30}"""
-#
-#
+# 
+# 
 # # This is an automated system notification. If received outside working hours, please disregard.
-#
-#
+# 
+# 
 # def notify(
 #     subject="",
 #     message=":)",
@@ -507,12 +507,12 @@ if __name__ == "__main__":
 #     verbose=False,
 # ):
 #     import scitex
-#
+# 
 #     try:
 #         message = str(message)
 #     except Exception as e:
 #         warnings.warn(str(e))
-#
+# 
 #     FAKE_PYTHON_SCRIPT_NAME = "$ python -c ..."
 #     # Use scitex.ai email addresses (not Gmail)
 #     sender_gmail = os.getenv(
@@ -525,7 +525,7 @@ if __name__ == "__main__":
 #     recipient_email = recipient_email or os.getenv(
 #         "SCITEX_SCHOLAR_TO_EMAIL_ADDRESS", "ywata1989@gmail.com"
 #     )
-#
+# 
 #     if file is not None:
 #         script_name = str(file)
 #     else:
@@ -538,18 +538,18 @@ if __name__ == "__main__":
 #             )
 #         if (script_name == "-c") or (not script_name.endswith(".py")):
 #             script_name = FAKE_PYTHON_SCRIPT_NAME
-#
+# 
 #     sender = f"{get_username()}@{get_hostname()}"
 #     branch = get_git_branch(scitex)
 #     footer = gen_footer(sender, script_name, scitex, branch)
-#
+# 
 #     full_message = script_name + "\n\n" + message + "\n\n" + footer
 #     full_subject = (
 #         f"{script_name}—{subject}"
 #         if subject and (script_name != FAKE_PYTHON_SCRIPT_NAME)
 #         else f"{subject}"
 #     )
-#
+# 
 #     if sender_gmail is None or sender_password is None:
 #         print(
 #             f"""
@@ -557,13 +557,13 @@ if __name__ == "__main__":
 #         $ export SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS="agent@scitex.ai"
 #         $ export SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD="YOUR_EMAIL_PASSWORD"
 #         $ export SCITEX_SCHOLAR_TO_EMAIL_ADDRESS="YOUR_EMAIL_ADDRESS"
-#
+# 
 #         Or alternatively:
 #         $ export SCITEX_EMAIL_AGENT="agent@scitex.ai"
 #         $ export SCITEX_EMAIL_PASSWORD="YOUR_EMAIL_PASSWORD"
 #         """
 #         )
-#
+# 
 #     send_gmail(
 #         sender_gmail,
 #         sender_password,
@@ -576,22 +576,22 @@ if __name__ == "__main__":
 #         attachment_paths=attachment_paths,
 #         verbose=verbose,
 #     )
-#
-#
+# 
+# 
 # if __name__ == "__main__":
 #     notify(verbose=True)
-#
+# 
 #     # python -c "; scitex.gen.notify()"
-#
-#
+# 
+# 
 # # # Example in shell
 # # #!/bin/bash
 # # # /home/ywatanabe/.dotfiles/.bin/notify
 # # # Author: ywatanabe (ywatanabe@scitex.ai)
 # # # Date: $(date +"%Y-%m-%d-%H-%M")
-#
+# 
 # # # LOG_FILE="${0%.sh}.log"
-#
+# 
 # # usage() {
 # #     echo "Usage: $0 [-s|--subject <subject>] [-m|--message <message>] [-r|--recipient-name <name>] [-t|--to <email>] [-c|--cc <email>] [-h|--help]"
 # #     echo "Options:"
@@ -606,13 +606,13 @@ if __name__ == "__main__":
 # #     echo "  $0 -s \"Notification\" -m \"This is a notification from ...\" -r \"Team\" -t \"team@example.com\""
 # #     exit 1
 # # }
-#
+# 
 # # main() {
 # #     subject="Subject"
 # #     message="Message"
 # #     recipient_email=""
 # #     cc_addresses=()
-#
+# 
 # #     while [[ $# -gt 0 ]]; do
 # #         case $1 in
 # #             -s|--subject)
@@ -652,18 +652,18 @@ if __name__ == "__main__":
 # #                 ;;
 # #         esac
 # #     done
-#
+# 
 # #     subject=$(echo "$subject" | sed "s/'/'\\\\''/g")
 # #     message=$(echo "$message" | sed "s/'/'\\\\''/g")
 # #     recipient_email=$(echo "$recipient_email" | sed "s/'/'\\\\''/g")
 # #     cc_string=$(IFS=,; echo "${cc_addresses[*]}" | sed "s/'/'\\\\''/g")
-#
+# 
 # #     python -c "
 # #
-#
+# 
 # # cc_list = [$(printf "'%s', " "${cc_addresses[@]}")]
 # # cc_list = [addr.strip() for addr in cc_list if addr.strip()]
-#
+# 
 # # scitex.gen.notify(
 # #     subject='$subject',
 # #     message='$message',
@@ -673,12 +673,12 @@ if __name__ == "__main__":
 # # )
 # # "
 # # }
-#
+# 
 # # main "$@"
 # # # { main "$@"; } 2>&1 | tee "$LOG_FILE"
-#
+# 
 # #
-#
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

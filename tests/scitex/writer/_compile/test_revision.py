@@ -184,7 +184,7 @@ if __name__ == "__main__":
 # from pathlib import Path
 # from typing import Optional, Callable
 # from ._runner import run_compile
-# from ..dataclasses import CompilationResult
+# from .._dataclasses import CompilationResult
 # 
 # 
 # def compile_revision(

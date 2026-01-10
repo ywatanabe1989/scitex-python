@@ -215,7 +215,7 @@ def run_test(args):
 
     data = json.loads(args.data)
 
-    from scitex.stats._mcp_handlers import run_test_handler
+    from scitex.stats._mcp.handlers import run_test_handler
 
     result = asyncio.run(
         run_test_handler(
@@ -231,7 +231,7 @@ def run_test(args):
 
 def run_power(args):
     """Run power analysis."""
-    from scitex.stats._mcp_handlers import power_analysis_handler
+    from scitex.stats._mcp.handlers import power_analysis_handler
 
     result = asyncio.run(
         power_analysis_handler(

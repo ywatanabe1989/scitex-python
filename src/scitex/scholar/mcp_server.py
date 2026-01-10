@@ -72,7 +72,7 @@ class ScholarServer:
 
     def setup_handlers(self):
         """Set up MCP server handlers."""
-        from ._mcp_handlers import (
+        from ._mcp.handlers import (
             add_papers_to_project_handler,
             authenticate_handler,
             check_auth_status_handler,
@@ -91,7 +91,7 @@ class ScholarServer:
             search_papers_handler,
             validate_pdfs_handler,
         )
-        from ._mcp_tool_schemas import get_tool_schemas
+        from ._mcp.tool_schemas import get_tool_schemas
 
         @self.server.list_tools()
         async def handle_list_tools():

@@ -438,8 +438,8 @@ if __name__ == "__main__":
 # import torch.nn.functional as F
 # from scitex.gen._to_even import to_even
 # from scitex.gen._to_odd import to_odd
-#
-#
+# 
+# 
 # class Wavelet(nn.Module):
 #     def __init__(
 #         self, samp_rate, kernel_size=None, freq_scale="linear", out_scale="log"

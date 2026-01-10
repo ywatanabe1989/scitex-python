@@ -8,21 +8,21 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_storage.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_storage.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_bundle/_storage.py
 # 
 # """
-# Storage Abstraction for FTS Bundles.
+# Storage Abstraction for SciTeX Bundles.
 # 
 # Provides a unified interface for reading/writing bundle contents
 # regardless of whether the bundle is a ZIP file or directory.
 # 
 # Usage:
 #     storage = get_storage(Path("bundle.zip"))  # or Path("bundle/")
-#     data = storage.read("node.json")
+#     data = storage.read("spec.json")
 #     storage.write("encoding.json", json_bytes)
 # """
 # 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 # 
 # 
 # class Storage(ABC):
-#     """Abstract storage interface for FTS bundles."""
+#     """Abstract storage interface for SciTeX bundles."""
 # 
 #     def __init__(self, path: Path):
 #         self._path = path
@@ -212,5 +212,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_storage.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_storage.py
 # --------------------------------------------------------------------------------

@@ -365,11 +365,11 @@ if __name__ == "__main__":
 # 
 #             indi_orig = self.dropout(torch.ones(x.shape[1])).bool()
 #             chs_to_shuffle = orig_chs[~indi_orig]
-#
+# 
 #             rand_chs = random.sample(
 #                 list(np.array(chs_to_shuffle)), len(chs_to_shuffle)
 #             )
-#
+# 
 #             swapped_chs = orig_chs.clone()
 #             swapped_chs[~indi_orig] = torch.LongTensor(rand_chs)
 # 

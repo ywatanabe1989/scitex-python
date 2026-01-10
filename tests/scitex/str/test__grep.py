@@ -477,25 +477,25 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-02 04:05:41 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/str/_grep.py
-#
+# 
 # import re
-#
-#
+# 
+# 
 # def grep(str_list, search_key):
 #     """Search for a key in a list of strings and return matching items.
-#
+# 
 #     Parameters
 #     ----------
 #     str_list : list of str
 #         The list of strings to search through.
 #     search_key : str
 #         The key to search for in the strings.
-#
+# 
 #     Returns
 #     -------
 #     list
 #         A list of strings from str_list that contain the search_key.
-#
+# 
 #     Example
 #     -------
 #     >>> grep(['apple', 'banana', 'cherry'], 'a')
@@ -518,8 +518,8 @@ if __name__ == "__main__":
 #             matched_keys.append(string)
 #             indi.append(ii)
 #     return indi, matched_keys
-#
-#
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

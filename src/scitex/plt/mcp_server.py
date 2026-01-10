@@ -46,7 +46,7 @@ class PltServer:
 
     def setup_handlers(self):
         """Set up MCP server handlers."""
-        from ._mcp_handlers import (
+        from ._mcp.handlers import (
             crop_figure_handler,
             get_color_palette_handler,
             get_dpi_settings_handler,
@@ -54,7 +54,7 @@ class PltServer:
             list_presets_handler,
             set_style_handler,
         )
-        from ._mcp_tool_schemas import get_tool_schemas
+        from ._mcp.tool_schemas import get_tool_schemas
 
         @self.server.list_tools()
         async def handle_list_tools():

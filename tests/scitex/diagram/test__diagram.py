@@ -329,7 +329,6 @@ class TestEdgeStyles:
         d.add_edge("a", "b", label="yes")
         assert d.spec.edges[0].label == "yes"
 
-
 if __name__ == "__main__":
     import os
 
@@ -345,41 +344,41 @@ if __name__ == "__main__":
 # # Timestamp: 2025-12-15
 # # Author: ywatanabe / Claude
 # # File: scitex/diagram/_diagram.py
-#
+# 
 # """
 # Main Diagram class - the user-facing API.
 # """
-#
+# 
 # from pathlib import Path
 # from typing import Optional, Union, List
 # import yaml
 # import re
-#
+# 
 # from scitex.diagram._schema import DiagramSpec, DiagramType, NodeSpec, EdgeSpec, PaperMode
 # from scitex.diagram._compile import compile_to_mermaid, compile_to_graphviz
 # from scitex.diagram._presets import get_preset
 # from scitex.diagram._split import split_diagram, SplitConfig, SplitStrategy, SplitResult
-#
-#
+# 
+# 
 # class Diagram:
 #     """
 #     Paper-optimized diagram with semantic specification.
-#
+# 
 #     This class provides the main interface for creating diagrams
 #     that compile to Mermaid or Graphviz with paper-appropriate
 #     layout constraints.
-#
+# 
 #     Examples
 #     --------
 #     >>> # From YAML spec
 #     >>> d = Diagram.from_yaml("workflow.diagram.yaml")
 #     >>> d.to_mermaid("workflow.mmd")
-#
+# 
 #     >>> # From existing Mermaid (parse and enhance)
 #     >>> d = Diagram.from_mermaid("existing.mmd", diagram_type="workflow")
 #     >>> d.spec.paper.column = "double"
 #     >>> d.to_mermaid("enhanced.mmd")
-#
+# 
 #     >>> # Programmatic creation
 #     >>> d = Diagram(type="pipeline")
 #     >>> d.add_node("input", "Raw Data")
@@ -389,7 +388,7 @@ if __name__ == "__main__":
 #     >>> d.add_edge("process", "output")
 #     >>> print(d.to_mermaid())
 #     """
-#
+# 
 #     def __init__(
 #         self,
 #         type: str = "workflow",
@@ -398,7 +397,7 @@ if __name__ == "__main__":
 #     ):
 #         """
 #         Initialize a new diagram.
-#
+# 
 #         Parameters
 #         ----------
 #         type : str
@@ -413,17 +412,17 @@ if __name__ == "__main__":
 #             title=title,
 #         )
 #         self.spec.paper.column = column
-#
+# 
 #     @classmethod
 #     def from_yaml(cls, path: Union[str, Path]) -> "Diagram":
 #         """
 #         Load diagram from YAML specification file.
-#
+# 
 #         Parameters
 #         ----------
 #         path : str or Path
 #             Path to YAML file.
-#
+# 
 #         Returns
 #         -------
 #         Diagram
@@ -432,11 +431,11 @@ if __name__ == "__main__":
 #         path = Path(path)
 #         with open(path, "r", encoding="utf-8") as f:
 #             data = yaml.safe_load(f)
-#
+# 
 #         diagram = cls.__new__(cls)
 #         diagram.spec = DiagramSpec.from_dict(data)
 #         return diagram
-#
+# 
 #     @classmethod
 #     def from_mermaid(
 #         cls,
@@ -445,17 +444,17 @@ if __name__ == "__main__":
 #     ) -> "Diagram":
 #         """
 #         Parse existing Mermaid file and create enhanced Diagram.
-#
+# 
 #         This allows upgrading existing Mermaid files with SciTeX
 #         paper constraints while preserving the original structure.
-#
+# 
 #         Parameters
 #         ----------
 #         path : str or Path
 #             Path to .mmd file.
 #         diagram_type : str
 #             Inferred diagram type.
-#
+# 
 #         Returns
 #         -------
 #         Diagram
@@ -464,17 +463,17 @@ if __name__ == "__main__":
 #         path = Path(path)
 #         with open(path, "r", encoding="utf-8") as f:
 #             content = f.read()
-#
+# 
 #         diagram = cls(type=diagram_type)
 #         diagram._parse_mermaid(content)
 #         return diagram
-#
+# 
 #     def _parse_mermaid(self, content: str):
 #         """Parse Mermaid content to extract structure."""
 #         # Extract nodes
 #         # Pattern: ID["Label"] or ID("Label") etc.
 #         node_pattern = r'(\w+)\s*[\[\(\{<][\"\']?([^"\'\]\)\}>]+)[\"\']?[\]\)\}>]'
-#
+# 
 #         for match in re.finditer(node_pattern, content):
 #             node_id = match.group(1)
 #             label = match.group(2).strip()
@@ -484,35 +483,35 @@ if __name__ == "__main__":
 #                 existing = [n for n in self.spec.nodes if n.id == node_id]
 #                 if not existing:
 #                     self.spec.nodes.append(NodeSpec(id=node_id, label=label))
-#
+# 
 #         # Extract edges
 #         # Pattern: A --> B or A -->|label| B
 #         edge_pattern = r'(\w+)\s*(-->|-.->|-----|---)\s*(?:\|["\']?([^|"\']+)["\']?\|)?\s*(\w+)'
-#
+# 
 #         for match in re.finditer(edge_pattern, content):
 #             source = match.group(1)
 #             arrow = match.group(2)
 #             label = match.group(3)
 #             target = match.group(4)
-#
+# 
 #             style = "solid"
 #             if "-.->" in arrow or "-.." in arrow:
 #                 style = "dashed"
-#
+# 
 #             self.spec.edges.append(EdgeSpec(
 #                 source=source,
 #                 target=target,
 #                 label=label.strip() if label else None,
 #                 style=style,
 #             ))
-#
+# 
 #         # Extract subgraphs as groups
 #         subgraph_pattern = r'subgraph\s+(\w+)\s*\[?"?([^"\]]*)"?\]?'
 #         for match in re.finditer(subgraph_pattern, content):
 #             group_id = match.group(1)
 #             group_name = match.group(2) or group_id
 #             self.spec.layout.groups[group_name] = []
-#
+# 
 #     def add_node(
 #         self,
 #         id: str,
@@ -527,7 +526,7 @@ if __name__ == "__main__":
 #             shape=shape,
 #             emphasis=emphasis,
 #         ))
-#
+# 
 #     def add_edge(
 #         self,
 #         source: str,
@@ -542,70 +541,70 @@ if __name__ == "__main__":
 #             label=label,
 #             style=style,
 #         ))
-#
+# 
 #     def set_group(self, group_name: str, node_ids: list):
 #         """Define a group of nodes (rendered as subgraph)."""
 #         self.spec.layout.groups[group_name] = node_ids
-#
+# 
 #     def emphasize(self, *node_ids: str):
 #         """Mark nodes as emphasized (primary styling)."""
 #         self.spec.paper.emphasize.extend(node_ids)
-#
+# 
 #     def to_mermaid(self, path: Optional[Union[str, Path]] = None) -> str:
 #         """
 #         Compile to Mermaid format.
-#
+# 
 #         Parameters
 #         ----------
 #         path : str or Path, optional
 #             If provided, write to file.
-#
+# 
 #         Returns
 #         -------
 #         str
 #             Mermaid source code.
 #         """
 #         result = compile_to_mermaid(self.spec)
-#
+# 
 #         if path:
 #             path = Path(path)
 #             with open(path, "w", encoding="utf-8") as f:
 #                 f.write(result)
-#
+# 
 #         return result
-#
+# 
 #     def to_graphviz(self, path: Optional[Union[str, Path]] = None) -> str:
 #         """
 #         Compile to Graphviz DOT format.
-#
+# 
 #         Parameters
 #         ----------
 #         path : str or Path, optional
 #             If provided, write to file.
-#
+# 
 #         Returns
 #         -------
 #         str
 #             Graphviz DOT source code.
 #         """
 #         result = compile_to_graphviz(self.spec)
-#
+# 
 #         if path:
 #             path = Path(path)
 #             with open(path, "w", encoding="utf-8") as f:
 #                 f.write(result)
-#
+# 
 #         return result
-#
+# 
 #     def to_yaml(self, path: Optional[Union[str, Path]] = None) -> str:
 #         """
 #         Export specification as YAML.
-#
+# 
 #         Parameters
 #         ----------
 #         path : str or Path, optional
 #             If provided, write to file.
-#
+# 
 #         Returns
 #         -------
 #         str
@@ -636,16 +635,16 @@ if __name__ == "__main__":
 #                 for e in self.spec.edges
 #             ],
 #         }
-#
+# 
 #         result = yaml.dump(data, default_flow_style=False, allow_unicode=True)
-#
+# 
 #         if path:
 #             path = Path(path)
 #             with open(path, "w", encoding="utf-8") as f:
 #                 f.write(result)
-#
+# 
 #         return result
-#
+# 
 #     def split(
 #         self,
 #         max_nodes: int = 12,
@@ -654,7 +653,7 @@ if __name__ == "__main__":
 #     ) -> List["Diagram"]:
 #         """
 #         Split diagram into multiple figures if too large.
-#
+# 
 #         Parameters
 #         ----------
 #         max_nodes : int
@@ -663,12 +662,12 @@ if __name__ == "__main__":
 #             Split strategy: "by_groups" or "by_articulation".
 #         keep_hubs : bool
 #             Show hub nodes as ghosts in both parts.
-#
+# 
 #         Returns
 #         -------
 #         List[Diagram]
 #             List of split diagrams (or single diagram if no split needed).
-#
+# 
 #         Examples
 #         --------
 #         >>> d = Diagram.from_yaml("large_workflow.yaml")
@@ -682,9 +681,9 @@ if __name__ == "__main__":
 #             strategy=SplitStrategy(strategy),
 #             keep_hubs=keep_hubs,
 #         )
-#
+# 
 #         result = split_diagram(self.spec, config)
-#
+# 
 #         # Wrap each spec in a Diagram object
 #         diagrams = []
 #         for fig_spec, label in zip(result.figures, result.labels):
@@ -693,7 +692,7 @@ if __name__ == "__main__":
 #             if label:
 #                 d.spec.title = f"{self.spec.title} ({label})" if self.spec.title else f"Part {label}"
 #             diagrams.append(d)
-#
+# 
 #         return diagrams
 
 # --------------------------------------------------------------------------------

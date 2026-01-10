@@ -53,11 +53,11 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_compile/_validator.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-29 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_compile/_validator.py
 # # ----------------------------------------
 # from __future__ import annotations
+# 
 # import os
 # 
 # __FILE__ = "./src/scitex/writer/_compile/_validator.py"
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 # from pathlib import Path
 # 
 # from scitex.logging import getLogger
-# from scitex.writer._verify_tree_structure import verify_tree_structure
+# from scitex.writer.utils._verify_tree_structure import verify_tree_structure
 # 
 # logger = getLogger(__name__)
 # 

@@ -351,10 +351,10 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-02-06 13:47:23 (ywatanabe)"
 # # File: _Google.py
-#
+# 
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/ai/_gen_ai/_Google.py"
-#
-#
+# 
+# 
 # """
 # Functionality:
 #     - Implements Google's Generative AI (Gemini) interface
@@ -369,26 +369,26 @@ if __name__ == "__main__":
 #     - Google API key (GOOGLE_API_KEY environment variable)
 #     - google.generativeai package
 # """
-#
+# 
 # """Imports"""
 # import os
 # import sys
 # from pprint import pprint
 # from typing import Any, Dict, Generator, List, Optional
-#
+# 
 # import matplotlib.pyplot as plt
 # import scitex
-#
+# 
 # try:
 #     from google import genai
 # except ImportError:
 #     genai = None
-#
+# 
 # from ._BaseGenAI import BaseGenAI
-#
+# 
 # """Functions & Classes"""
-#
-#
+# 
+# 
 # class Google(BaseGenAI):
 #     def __init__(
 #         self,
@@ -403,10 +403,10 @@ if __name__ == "__main__":
 #         max_tokens: int = 32_768,
 #     ) -> None:
 #         api_key = api_key or os.getenv("GOOGLE_API_KEY")
-#
+# 
 #         if not api_key:
 #             raise ValueError("GOOGLE_API_KEY environment variable not set")
-#
+# 
 #         super().__init__(
 #             system_setting=system_setting,
 #             model=model,
@@ -419,32 +419,32 @@ if __name__ == "__main__":
 #             chat_history=chat_history,
 #             max_tokens=max_tokens,
 #         )
-#
+# 
 #     def _init_client(self) -> Any:
 #         return genai.Client(api_key=self.api_key)
-#
+# 
 #     def _api_call_static(self) -> str:
 #         response = self.client.models.generate_content(
 #             model=self.model, contents=self.history
 #         )
-#
+# 
 #         try:
 #             self.input_tokens += response.usage_metadata.prompt_token_count
 #             self.output_tokens += response.usage_metadata.candidates_token_count
 #         except:
 #             pass
-#
+# 
 #         return response.text
-#
+# 
 #     def _api_call_stream(self) -> Generator[str, None, None]:
 #         # print("========================================")
 #         # pprint(self.history)
 #         # print("========================================")
-#
+# 
 #         # return self.client.models.generate_content_stream(
 #         #     model=self.model, contents=self.history
 #         # )
-#
+# 
 #         for chunk in self.client.models.generate_content_stream(
 #             model=self.model, contents=self.history
 #         ):
@@ -454,9 +454,9 @@ if __name__ == "__main__":
 #                     self.output_tokens += chunk.usage_metadata.candidates_token_count
 #                 except:
 #                     pass
-#
+# 
 #                 yield chunk.text
-#
+# 
 #     def _api_format_history(
 #         self, history: List[Dict[str, str]]
 #     ) -> List[Dict[str, str]]:
@@ -477,8 +477,8 @@ if __name__ == "__main__":
 #                 )
 #         # print(formatted_history)
 #         return formatted_history
-#
-#
+# 
+# 
 # def main() -> None:
 #     ai = scitex.ai.GenAI(
 #         # "gemini-2.0-flash-exp",
@@ -492,22 +492,22 @@ if __name__ == "__main__":
 #     print(ai("hi"))
 #     print(ai("My name is Yusuke"))
 #     print(ai("do you remember my name?"))
-#
-#
+# 
+# 
 # if __name__ == "__main__":
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys, plt, verbose=False
 #     )
 #     main()
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
-#
-#
+# 
+# 
 # """
 # python src/scitex/ai/_gen_ai/_Google.py
 # python -m src.scitex.ai._gen_ai._Google
 # """
-#
-#
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

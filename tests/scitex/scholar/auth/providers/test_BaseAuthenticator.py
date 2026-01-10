@@ -35,7 +35,7 @@ if __name__ == "__main__":
 # 
 # from scitex import logging
 # 
-# from scitex.errors import AuthenticationError
+# from scitex.logging import AuthenticationError
 # 
 # """Logger"""
 # logger = logging.getLogger(__name__)

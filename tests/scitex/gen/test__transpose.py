@@ -202,7 +202,7 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-08-24 09:47:16 (ywatanabe)"
 # # ./src/scitex/gen/_transpose.py
-#
+# 
 # from scitex.decorators import numpy_fn
 # import numpy as np
 # 

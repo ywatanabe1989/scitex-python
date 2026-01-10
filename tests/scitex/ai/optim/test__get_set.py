@@ -201,14 +201,14 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # """Optimizer utilities - legacy interface maintained for compatibility."""
-#
+# 
 # import warnings
 # from ._optimizers import get_optimizer, set_optimizer
-#
-#
+# 
+# 
 # def set(models, optim_str, lr):
 #     """Sets an optimizer to models.
-#
+# 
 #     DEPRECATED: Use set_optimizer instead.
 #     """
 #     warnings.warn(
@@ -217,11 +217,11 @@ if __name__ == "__main__":
 #         stacklevel=2,
 #     )
 #     return set_optimizer(models, optim_str, lr)
-#
-#
+# 
+# 
 # def get(optim_str):
 #     """Get optimizer class by name.
-#
+# 
 #     DEPRECATED: Use get_optimizer instead.
 #     """
 #     warnings.warn(

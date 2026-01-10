@@ -419,17 +419,19 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/__version__.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-05-31 00:20:14 (ywatanabe)"
-# # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/.claude-worktree/scitex_repo/src/scitex/__version__.py
-# # ----------------------------------------
-# import os
+# # File: /home/ywatanabe/proj/scitex-code/src/scitex/__version__.py
 # 
-# __FILE__ = "./src/scitex/__version__.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
+# """
+# Version is sourced from pyproject.toml via importlib.metadata.
+# Single source of truth: pyproject.toml [project] version field.
+# """
 # 
-# __version__ = "2.8.1"
+# try:
+#     from importlib.metadata import version
+# 
+#     __version__ = version("scitex")
+# except Exception:
+#     __version__ = "0.0.0"  # Fallback for editable installs without metadata
 # 
 # # EOF
 

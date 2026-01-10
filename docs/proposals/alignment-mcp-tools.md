@@ -152,7 +152,7 @@ def set_bracket_style(
 ## MCP Handlers (Thin Wrappers)
 
 ```python
-# src/scitex/canvas/_mcp_handlers.py
+# src/scitex/canvas/_mcp.handlers.py
 
 async def align_entities_handler(
     parent_dir: str,
@@ -184,8 +184,8 @@ src/scitex/canvas/
 │   ├── _align.py             # align() implementation
 │   ├── _distribute.py        # distribute() implementation
 │   └── _snap.py              # snap_to_grid() implementation
-├── _mcp_handlers.py          # Add alignment handlers
-└── _mcp_tool_schemas.py      # Add tool schemas
+├── _mcp.handlers.py          # Add alignment handlers
+└── _mcp.tool_schemas.py      # Add tool schemas
 
 src/scitex/plt/
 ├── legend/
@@ -194,7 +194,7 @@ src/scitex/plt/
 ├── stats_annotations/
 │   ├── __init__.py
 │   └── _bracket_style.py     # set_bracket_style()
-└── _mcp_handlers.py          # Add handlers
+└── _mcp.handlers.py          # Add handlers
 ```
 
 ## Implementation Plan
@@ -206,7 +206,7 @@ src/scitex/plt/
 4. Add unit tests
 
 ### Phase 2: Canvas MCP Wrappers
-1. Add async handlers in `_mcp_handlers.py`
+1. Add async handlers in `_mcp.handlers.py`
 2. Add tool schemas
 3. Register in mcp_server.py
 
