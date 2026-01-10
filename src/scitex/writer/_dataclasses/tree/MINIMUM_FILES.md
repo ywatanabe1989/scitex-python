@@ -88,7 +88,7 @@ test-writer-project/
 │   │   └── pptx2tiff.ps1
 │   ├── python
 │   │   ├── crop_tif.py
-│   │   ├── csv_to_latex.py
+│   │   ├── csv2latex.py
 │   │   ├── explore_bibtex.py
 │   │   ├── generate_ai2_prompt.py
 │   │   ├── optimize_figure.py

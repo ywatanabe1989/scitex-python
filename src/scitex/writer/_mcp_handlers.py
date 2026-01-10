@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional, Union
 
 
 async def clone_project_handler(
@@ -485,7 +485,7 @@ async def list_document_types_handler() -> dict:
     }
 
 
-async def csv_to_latex_handler(
+async def csv2latex_handler(
     csv_path: str,
     output_path: Optional[str] = None,
     caption: Optional[str] = None,
@@ -514,12 +514,12 @@ async def csv_to_latex_handler(
         LaTeX content and output path
     """
     try:
-        from scitex.writer.utils import csv_to_latex
+        from scitex.writer.utils import csv2latex
 
         loop = asyncio.get_event_loop()
         latex_content = await loop.run_in_executor(
             None,
-            lambda: csv_to_latex(
+            lambda: csv2latex(
                 csv_path=csv_path,
                 output_path=output_path,
                 caption=caption,
@@ -542,7 +542,7 @@ async def csv_to_latex_handler(
         }
 
 
-async def latex_to_csv_handler(
+async def latex2csv_handler(
     latex_path: str,
     output_path: Optional[str] = None,
     table_index: int = 0,
@@ -565,12 +565,12 @@ async def latex_to_csv_handler(
         CSV content preview and output path
     """
     try:
-        from scitex.writer.utils import latex_to_csv
+        from scitex.writer.utils import latex2csv
 
         loop = asyncio.get_event_loop()
         df = await loop.run_in_executor(
             None,
-            lambda: latex_to_csv(
+            lambda: latex2csv(
                 latex_path=latex_path,
                 output_path=output_path,
                 table_index=table_index,
@@ -593,10 +593,10 @@ async def latex_to_csv_handler(
         }
 
 
-async def pdf_to_image_handler(
+async def pdf_to_images_handler(
     pdf_path: str,
     output_dir: Optional[str] = None,
-    page: Optional[int] = None,
+    pages: Optional[Union[int, List[int]]] = None,
     dpi: int = 150,
     format: str = "png",
 ) -> dict:
@@ -609,8 +609,8 @@ async def pdf_to_image_handler(
         Path to PDF file
     output_dir : str, optional
         Output directory for images
-    page : int, optional
-        Specific page to render (0-indexed)
+    pages : int or list of int, optional
+        Page(s) to render (0-indexed). If None, renders all.
     dpi : int, optional
         Resolution in DPI
     format : str, optional
@@ -622,15 +622,15 @@ async def pdf_to_image_handler(
         List of rendered images with paths
     """
     try:
-        from scitex.writer.utils import pdf_to_image
+        from scitex.writer.utils import pdf_to_images
 
         loop = asyncio.get_event_loop()
         images = await loop.run_in_executor(
             None,
-            lambda: pdf_to_image(
+            lambda: pdf_to_images(
                 pdf_path=pdf_path,
                 output_dir=output_dir,
-                page=page,
+                pages=pages,
                 dpi=dpi,
                 format=format,
             ),
@@ -641,62 +641,6 @@ async def pdf_to_image_handler(
             "images": images,
             "count": len(images),
             "message": f"Rendered {len(images)} page(s) from {pdf_path}",
-        }
-
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e),
-        }
-
-
-async def pdf_thumbnail_handler(
-    pdf_path: str,
-    output_path: Optional[str] = None,
-    page: int = 0,
-    width: int = 200,
-    format: str = "png",
-) -> dict:
-    """
-    Generate thumbnail from PDF page.
-
-    Parameters
-    ----------
-    pdf_path : str
-        Path to PDF file
-    output_path : str, optional
-        Output path for thumbnail
-    page : int, optional
-        Page to use for thumbnail (0-indexed)
-    width : int, optional
-        Thumbnail width in pixels
-    format : str, optional
-        Output format (png, jpg)
-
-    Returns
-    -------
-    dict
-        Thumbnail info with path
-    """
-    try:
-        from scitex.writer.utils import pdf_thumbnail
-
-        loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
-            None,
-            lambda: pdf_thumbnail(
-                pdf_path=pdf_path,
-                output_path=output_path,
-                page=page,
-                width=width,
-                format=format,
-            ),
-        )
-
-        return {
-            "success": True,
-            **result,
-            "message": f"Generated thumbnail for {pdf_path}",
         }
 
     except Exception as e:
@@ -811,10 +755,9 @@ __all__ = [
     "get_project_info_handler",
     "get_pdf_handler",
     "list_document_types_handler",
-    "csv_to_latex_handler",
-    "latex_to_csv_handler",
-    "pdf_to_image_handler",
-    "pdf_thumbnail_handler",
+    "csv2latex_handler",
+    "latex2csv_handler",
+    "pdf_to_images_handler",
     "list_figures_handler",
     "convert_figure_handler",
 ]

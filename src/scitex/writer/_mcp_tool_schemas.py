@@ -271,7 +271,7 @@ def get_tool_schemas() -> list[types.Tool]:
         ),
         # PDF to image conversion
         types.Tool(
-            name="pdf_to_image",
+            name="pdf_to_images",
             description="Render PDF pages as images. Useful for creating figures from PDF or extracting specific pages.",
             inputSchema={
                 "type": "object",
@@ -284,49 +284,17 @@ def get_tool_schemas() -> list[types.Tool]:
                         "type": "string",
                         "description": "Output directory for images (uses temp if not specified)",
                     },
-                    "page": {
-                        "type": "integer",
-                        "description": "Specific page to render (0-indexed). If not specified, renders all pages.",
+                    "pages": {
+                        "oneOf": [
+                            {"type": "integer"},
+                            {"type": "array", "items": {"type": "integer"}},
+                        ],
+                        "description": "Page(s) to render (0-indexed). If not specified, renders all pages.",
                     },
                     "dpi": {
                         "type": "integer",
                         "description": "Resolution in DPI (default: 150)",
                         "default": 150,
-                    },
-                    "format": {
-                        "type": "string",
-                        "description": "Output format",
-                        "enum": ["png", "jpg"],
-                        "default": "png",
-                    },
-                },
-                "required": ["pdf_path"],
-            },
-        ),
-        # PDF thumbnail generation
-        types.Tool(
-            name="pdf_thumbnail",
-            description="Generate a thumbnail image from a PDF page. Great for title page previews.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "pdf_path": {
-                        "type": "string",
-                        "description": "Path to PDF file",
-                    },
-                    "output_path": {
-                        "type": "string",
-                        "description": "Output path for thumbnail (auto-generated if not specified)",
-                    },
-                    "page": {
-                        "type": "integer",
-                        "description": "Page to use for thumbnail (0-indexed, default: 0 for first/title page)",
-                        "default": 0,
-                    },
-                    "width": {
-                        "type": "integer",
-                        "description": "Thumbnail width in pixels (default: 200)",
-                        "default": 200,
                     },
                     "format": {
                         "type": "string",

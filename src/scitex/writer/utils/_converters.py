@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 
-def csv_to_latex(
+def csv2latex(
     csv_path: Union[str, Path],
     output_path: Optional[Union[str, Path]] = None,
     caption: Optional[str] = None,
@@ -71,8 +71,8 @@ def csv_to_latex(
 
     Examples
     --------
-    >>> latex = csv_to_latex("data.csv", caption="Results", label="tab:results")
-    >>> csv_to_latex("data.csv", "table.tex")  # Save to file
+    >>> latex = csv2latex("data.csv", caption="Results", label="tab:results")
+    >>> csv2latex("data.csv", "table.tex")  # Save to file
     """
     import pandas as pd
 
@@ -114,7 +114,7 @@ def csv_to_latex(
     return latex_content
 
 
-def latex_to_csv(
+def latex2csv(
     latex_path: Union[str, Path],
     output_path: Optional[Union[str, Path]] = None,
     table_index: int = 0,
@@ -138,8 +138,8 @@ def latex_to_csv(
 
     Examples
     --------
-    >>> df = latex_to_csv("table.tex")
-    >>> df = latex_to_csv("table.tex", "output.csv")
+    >>> df = latex2csv("table.tex")
+    >>> df = latex2csv("table.tex", "output.csv")
     """
     import pandas as pd
 
@@ -208,10 +208,10 @@ def latex_to_csv(
 # =============================================================================
 
 
-def pdf_to_image(
+def pdf_to_images(
     pdf_path: Union[str, Path],
     output_dir: Optional[Union[str, Path]] = None,
-    page: Optional[int] = None,
+    pages: Optional[Union[int, List[int]]] = None,
     dpi: int = 150,
     format: str = "png",
     prefix: str = "page",
@@ -225,8 +225,8 @@ def pdf_to_image(
         Path to PDF file
     output_dir : str or Path, optional
         Directory to save images. If None, uses temp directory.
-    page : int, optional
-        Specific page to render (0-indexed). If None, renders all pages.
+    pages : int or list of int, optional
+        Page(s) to render (0-indexed). If None, renders all pages.
     dpi : int, default 150
         Resolution in DPI
     format : str, default 'png'
@@ -246,11 +246,11 @@ def pdf_to_image(
     Examples
     --------
     >>> # Render first page as thumbnail
-    >>> images = pdf_to_image("paper.pdf", page=0, dpi=72)
+    >>> images = pdf_to_images("paper.pdf", pages=0, dpi=72)
     >>> print(images[0]['path'])
 
     >>> # Render all pages at high resolution
-    >>> images = pdf_to_image("paper.pdf", "output/", dpi=300)
+    >>> images = pdf_to_images("paper.pdf", "output/", dpi=300)
     """
     try:
         import fitz  # PyMuPDF
@@ -284,7 +284,12 @@ def pdf_to_image(
     doc = fitz.open(pdf_path)
 
     try:
-        pages_to_render = [page] if page is not None else range(len(doc))
+        if pages is None:
+            pages_to_render = range(len(doc))
+        elif isinstance(pages, int):
+            pages_to_render = [pages]
+        else:
+            pages_to_render = pages
 
         for page_num in pages_to_render:
             if page_num < 0 or page_num >= len(doc):
@@ -619,9 +624,9 @@ def convert_figure(
 
 
 __all__ = [
-    "csv_to_latex",
-    "latex_to_csv",
-    "pdf_to_image",
+    "csv2latex",
+    "latex2csv",
+    "pdf_to_images",
     "pdf_thumbnail",
     "list_figures",
     "convert_figure",

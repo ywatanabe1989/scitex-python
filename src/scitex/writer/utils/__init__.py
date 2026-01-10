@@ -5,21 +5,19 @@
 
 from scitex.writer.utils._converters import (
     convert_figure,
-    csv_to_latex,
-    latex_to_csv,
+    csv2latex,
+    latex2csv,
     list_figures,
-    pdf_thumbnail,
-    pdf_to_image,
+    pdf_to_images,
 )
 from scitex.writer.utils._verify_tree_structure import verify_tree_structure
 
 __all__ = [
     "convert_figure",
-    "csv_to_latex",
-    "latex_to_csv",
+    "csv2latex",
+    "latex2csv",
     "list_figures",
-    "pdf_thumbnail",
-    "pdf_to_image",
+    "pdf_to_images",
     "verify_tree_structure",
 ]
 
