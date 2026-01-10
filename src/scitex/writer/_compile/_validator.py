@@ -19,7 +19,7 @@ Validates project structure before attempting compilation.
 from pathlib import Path
 
 from scitex.logging import getLogger
-from scitex.writer.utils._validate_tree_structures import validate_tree_structures
+from scitex.writer.utils._verify_tree_structure import verify_tree_structure
 
 logger = getLogger(__name__)
 
@@ -38,7 +38,7 @@ def validate_before_compile(project_dir: Path) -> None:
     RuntimeError
         If validation fails
     """
-    validate_tree_structures(project_dir)
+    verify_tree_structure(project_dir)
 
 
 __all__ = ["validate_before_compile"]

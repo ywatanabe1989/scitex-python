@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # Timestamp: "2025-10-29 06:13:05 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_validate_tree_structures.py
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_verify_tree_structure.py
 # ----------------------------------------
 from __future__ import annotations
 
 import os
 
-__FILE__ = "./src/scitex/writer/_validate_tree_structures.py"
+__FILE__ = "./src/scitex/writer/_verify_tree_structure.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -56,7 +56,7 @@ class ProjectValidationError(Exception):
 
 
 # 2. Public validation functions
-def validate_tree_structures(
+def verify_tree_structure(
     project_dir: Path, func_name="validate_tree_structures"
 ) -> None:
     """Validates all tree structures in the project directory."""
@@ -178,7 +178,7 @@ def run_session() -> None:
 
 def main(args):
     project_dir = Path(args.dir) if args.dir else Path.cwd()
-    validate_tree_structures(project_dir)
+    verify_tree_structure(project_dir)
     return 0
 
 
@@ -200,6 +200,6 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     run_session()
 
-# python -m scitex.writer._validate_tree_structures --dir ./my_paper
+# python -m scitex.writer._verify_tree_structure --dir ./my_paper
 
 # EOF

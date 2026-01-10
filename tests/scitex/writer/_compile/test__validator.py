@@ -73,7 +73,7 @@ if __name__ == "__main__":
 # from pathlib import Path
 # 
 # from scitex.logging import getLogger
-# from scitex.writer._validate_tree_structures import validate_tree_structures
+# from scitex.writer._verify_tree_structure import verify_tree_structure
 # 
 # logger = getLogger(__name__)
 # 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 #     RuntimeError
 #         If validation fails
 #     """
-#     validate_tree_structures(project_dir)
+#     verify_tree_structure(project_dir)
 # 
 # 
 # __all__ = ["validate_before_compile"]

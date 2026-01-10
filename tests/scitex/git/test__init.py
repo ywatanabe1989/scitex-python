@@ -69,10 +69,10 @@ class TestCreateChildGit:
             assert (project_dir / ".git").exists()
 
     def test_create_child_git_already_exists(self):
-        """When repo already exists, validate_tree_structures is called.
+        """When repo already exists, verify_tree_structure is called.
 
         Note: In temp directory without proper project structure,
-        validate_tree_structures fails and returns None.
+        verify_tree_structure fails and returns None.
         """
         with tempfile.TemporaryDirectory() as temp_dir:
             project_dir = Path(temp_dir)
@@ -81,7 +81,7 @@ class TestCreateChildGit:
             second_result = create_child_git(project_dir)
 
             assert first_result == project_dir
-            # validate_tree_structures fails without proper project structure
+            # verify_tree_structure fails without proper project structure
             assert second_result is None
 
 
@@ -241,9 +241,9 @@ if __name__ == "__main__":
 #             repo = Repo(project_dir)
 #             logger.info(f"Project is already a git repository at {project_dir}")
 #             # Validate project structure even if repo already exists
-#             from scitex.writer._validate_tree_structures import validate_tree_structures
+#             from scitex.writer._verify_tree_structure import verify_tree_structure
 #
-#             validate_tree_structures(project_dir)
+#             verify_tree_structure(project_dir)
 #             return project_dir
 #         except InvalidGitRepositoryError:
 #             logger.info(f"Initializing new git repository at {project_dir}")

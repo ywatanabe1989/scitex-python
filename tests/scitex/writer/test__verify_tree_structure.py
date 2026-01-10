@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Tests for scitex.writer._validate_tree_structures."""
+"""Tests for scitex.writer._verify_tree_structure."""
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from scitex.writer._validate_tree_structures import (
+from scitex.writer._verify_tree_structure import (
     ProjectValidationError,
     _validate_tree_structure_base,
-    validate_tree_structures,
+    verify_tree_structure,
 )
 
 
@@ -78,7 +78,7 @@ class TestValidateTreeStructureBase:
 
 
 class TestValidateTreeStructures:
-    """Tests for validate_tree_structures function."""
+    """Tests for verify_tree_structure function."""
 
     def test_validates_all_tree_types(self, tmp_path):
         """Verify validates all tree structures."""
@@ -92,25 +92,25 @@ class TestValidateTreeStructures:
 
         # Mock all internal validation functions
         with patch(
-            "scitex.writer._validate_tree_structures._validate_config_structure",
+            "scitex.writer._verify_tree_structure._validate_config_structure",
             return_value=True,
         ), patch(
-            "scitex.writer._validate_tree_structures._validate_00_shared_structure",
+            "scitex.writer._verify_tree_structure._validate_00_shared_structure",
             return_value=True,
         ), patch(
-            "scitex.writer._validate_tree_structures._validate_01_manuscript_structure",
+            "scitex.writer._verify_tree_structure._validate_01_manuscript_structure",
             return_value=True,
         ), patch(
-            "scitex.writer._validate_tree_structures._validate_02_supplementary_structure",
+            "scitex.writer._verify_tree_structure._validate_02_supplementary_structure",
             return_value=True,
         ), patch(
-            "scitex.writer._validate_tree_structures._validate_03_revision_structure",
+            "scitex.writer._verify_tree_structure._validate_03_revision_structure",
             return_value=True,
         ), patch(
-            "scitex.writer._validate_tree_structures._validate_scripts_structure",
+            "scitex.writer._verify_tree_structure._validate_scripts_structure",
             return_value=True,
         ):
-            result = validate_tree_structures(tmp_path)
+            result = verify_tree_structure(tmp_path)
 
             assert result is True
 
@@ -128,26 +128,26 @@ class TestValidateTreeStructures:
             (tmp_path / dir_name).mkdir()
 
         with patch(
-            "scitex.writer._validate_tree_structures._validate_config_structure",
+            "scitex.writer._verify_tree_structure._validate_config_structure",
             return_value=True,
         ), patch(
-            "scitex.writer._validate_tree_structures._validate_00_shared_structure",
+            "scitex.writer._verify_tree_structure._validate_00_shared_structure",
             return_value=True,
         ), patch(
-            "scitex.writer._validate_tree_structures._validate_01_manuscript_structure",
+            "scitex.writer._verify_tree_structure._validate_01_manuscript_structure",
             return_value=True,
         ), patch(
-            "scitex.writer._validate_tree_structures._validate_02_supplementary_structure",
+            "scitex.writer._verify_tree_structure._validate_02_supplementary_structure",
             return_value=True,
         ), patch(
-            "scitex.writer._validate_tree_structures._validate_03_revision_structure",
+            "scitex.writer._verify_tree_structure._validate_03_revision_structure",
             return_value=True,
         ), patch(
-            "scitex.writer._validate_tree_structures._validate_scripts_structure",
+            "scitex.writer._verify_tree_structure._validate_scripts_structure",
             return_value=True,
         ):
             # Should not raise
-            result = validate_tree_structures(Path(tmp_path))
+            result = verify_tree_structure(Path(tmp_path))
 
             assert result is True
 
@@ -157,7 +157,7 @@ class TestTreeValidators:
 
     def test_tree_validators_has_expected_keys(self):
         """Verify TREE_VALIDATORS has expected keys."""
-        from scitex.writer._validate_tree_structures import TREE_VALIDATORS
+        from scitex.writer._verify_tree_structure import TREE_VALIDATORS
 
         expected_keys = [
             "config",
@@ -172,7 +172,7 @@ class TestTreeValidators:
 
     def test_tree_validators_have_dir_name_and_tree_class(self):
         """Verify each validator has dir_name and tree_class."""
-        from scitex.writer._validate_tree_structures import TREE_VALIDATORS
+        from scitex.writer._verify_tree_structure import TREE_VALIDATORS
 
         for key, validator in TREE_VALIDATORS.items():
             assert "dir_name" in validator
