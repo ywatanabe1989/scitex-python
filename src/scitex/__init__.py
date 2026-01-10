@@ -42,12 +42,24 @@ class _LazyModule:
         self._name = name
         self._module = None
 
-    def __getattr__(self, attr):
+    def _load_module(self):
         if self._module is None:
             import importlib
 
             self._module = importlib.import_module(f".{self._name}", package="scitex")
-        return getattr(self._module, attr)
+        return self._module
+
+    def __getattr__(self, attr):
+        return getattr(self._load_module(), attr)
+
+    def __dir__(self):
+        """Return dir of the actual module for tab completion."""
+        return dir(self._load_module())
+
+    def __repr__(self):
+        if self._module is None:
+            return f"<LazyModule(scitex.{self._name}) - not loaded>"
+        return repr(self._module)
 
 
 class _CallableModuleWrapper:
@@ -116,6 +128,17 @@ class _CallableModuleWrapper:
         # Otherwise, delegate to the actual module
         module = self._load_module()
         return getattr(module, name)
+
+    def __dir__(self):
+        """Return dir of the actual module for tab completion."""
+        module = self._load_module()
+        return dir(module)
+
+    def __repr__(self):
+        """Show module representation."""
+        if self._module is None:
+            return f"<LazyModule(scitex.{self._module_name}) - not loaded>"
+        return repr(self._module)
 
 
 # Create lazy modules
