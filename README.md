@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-08 12:55:25
+!-- Timestamp: 2026-01-09 13:47:53
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -759,12 +759,13 @@ if __name__ == "__main__":
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 
-## 📄 License
 
-AGPL-3.0.
+---
 
-## 📧 Contact
-
-Yusuke Watanabe (ywatanabe@scitex.ai)
+<p align="center">
+  <a href="https://scitex.ai" target="_blank"><img src="docs/scitex-icon-navy-inverted.png" alt="SciTeX" width="40"/></a>
+  <br>
+  AGPL-3.0 · ywatanabe@scitex.ai
+</p>
 
 <!-- EOF -->

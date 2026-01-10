@@ -8,7 +8,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_mcp.handlers.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_mcp/handlers.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Timestamp: "2025-12-27 (ywatanabe)"
@@ -156,7 +156,7 @@ if __name__ == "__main__":
 # async def play_audio_handler(path: str) -> dict:
 #     """Play an audio file."""
 #     try:
-#         from .engines._base import BaseTTS
+#         from .engines.base import BaseTTS
 # 
 #         path_obj = Path(path)
 #         if not path_obj.exists():
@@ -268,5 +268,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_mcp.handlers.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_mcp/handlers.py
 # --------------------------------------------------------------------------------

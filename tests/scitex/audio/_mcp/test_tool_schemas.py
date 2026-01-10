@@ -8,7 +8,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_mcp.tool_schemas.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_mcp/tool_schemas.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Timestamp: "2025-12-27 (ywatanabe)"
@@ -215,5 +215,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_mcp.tool_schemas.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_mcp/tool_schemas.py
 # --------------------------------------------------------------------------------

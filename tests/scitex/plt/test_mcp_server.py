@@ -59,11 +59,21 @@ if __name__ == "__main__":
 #     def setup_handlers(self):
 #         """Set up MCP server handlers."""
 #         from ._mcp.handlers import (
+#             add_panel_label_handler,
+#             add_significance_handler,
+#             close_figure_handler,
+#             create_figure_handler,
 #             crop_figure_handler,
 #             get_color_palette_handler,
 #             get_dpi_settings_handler,
 #             get_style_handler,
 #             list_presets_handler,
+#             plot_bar_handler,
+#             plot_box_handler,
+#             plot_line_handler,
+#             plot_scatter_handler,
+#             plot_violin_handler,
+#             save_figure_handler,
 #             set_style_handler,
 #         )
 #         from ._mcp.tool_schemas import get_tool_schemas
@@ -74,24 +84,40 @@ if __name__ == "__main__":
 # 
 #         @self.server.call_tool()
 #         async def handle_call_tool(name: str, arguments: dict):
+#             # Style tools
 #             if name == "get_style":
 #                 return await self._wrap_result(get_style_handler())
-# 
 #             elif name == "set_style":
 #                 return await self._wrap_result(set_style_handler(**arguments))
-# 
 #             elif name == "list_presets":
 #                 return await self._wrap_result(list_presets_handler())
-# 
 #             elif name == "crop_figure":
 #                 return await self._wrap_result(crop_figure_handler(**arguments))
-# 
 #             elif name == "get_dpi_settings":
 #                 return await self._wrap_result(get_dpi_settings_handler())
-# 
 #             elif name == "get_color_palette":
 #                 return await self._wrap_result(get_color_palette_handler(**arguments))
-# 
+#             # Plotting tools
+#             elif name == "create_figure":
+#                 return await self._wrap_result(create_figure_handler(**arguments))
+#             elif name == "plot_bar":
+#                 return await self._wrap_result(plot_bar_handler(**arguments))
+#             elif name == "plot_scatter":
+#                 return await self._wrap_result(plot_scatter_handler(**arguments))
+#             elif name == "plot_line":
+#                 return await self._wrap_result(plot_line_handler(**arguments))
+#             elif name == "plot_box":
+#                 return await self._wrap_result(plot_box_handler(**arguments))
+#             elif name == "plot_violin":
+#                 return await self._wrap_result(plot_violin_handler(**arguments))
+#             elif name == "add_significance":
+#                 return await self._wrap_result(add_significance_handler(**arguments))
+#             elif name == "add_panel_label":
+#                 return await self._wrap_result(add_panel_label_handler(**arguments))
+#             elif name == "save_figure":
+#                 return await self._wrap_result(save_figure_handler(**arguments))
+#             elif name == "close_figure":
+#                 return await self._wrap_result(close_figure_handler(**arguments))
 #             else:
 #                 raise ValueError(f"Unknown tool: {name}")
 # 

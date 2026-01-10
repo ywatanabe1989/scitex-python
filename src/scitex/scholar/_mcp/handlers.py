@@ -79,7 +79,7 @@ async def search_papers_handler(
         if search_mode in ("local", "both"):
             from scitex.scholar import Scholar
 
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             scholar = Scholar()
 
             def do_local_search():
@@ -297,7 +297,7 @@ async def enrich_bibtex_handler(
     try:
         from scitex.scholar import Scholar
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         scholar = Scholar()
 
         def do_enrich():
@@ -636,7 +636,7 @@ async def parse_bibtex_handler(bibtex_path: str) -> dict:
     try:
         from scitex.scholar import Scholar
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         scholar = Scholar()
 
         def do_parse():
@@ -1077,7 +1077,7 @@ async def export_papers_handler(
     try:
         from scitex.scholar import Scholar
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         scholar = Scholar(project=project) if project else Scholar()
 
         def do_export():
@@ -1255,7 +1255,7 @@ async def add_papers_to_project_handler(
     try:
         from scitex.scholar import Scholar
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         scholar = Scholar(project=project)
 
         def do_add():
@@ -1334,7 +1334,7 @@ async def parse_pdf_content_handler(
         max_pages: Maximum pages to process (None = all)
     """
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
 
         def do_parse():
             target_path = None

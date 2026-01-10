@@ -52,6 +52,7 @@ from scitex.scholar.pdf_download.ScholarPDFDownloader import (
 from scitex.scholar.storage import LibraryManager, ScholarLibrary
 from scitex.scholar.url_finder.ScholarURLFinder import ScholarURLFinder
 
+from .Paper import Paper
 from .Papers import Papers
 
 logger = logging.getLogger(__name__)
@@ -555,7 +556,7 @@ class Scholar:
 
             # Process results and organize in library
             stats = {"downloaded": 0, "failed": 0, "errors": 0}
-            library_dir = self.config.get_library_project_dir()
+            library_dir = self.config.path_manager.library_dir
             master_dir = library_dir / "MASTER"
             master_dir.mkdir(parents=True, exist_ok=True)
 
@@ -653,7 +654,7 @@ class Scholar:
             config=self.config,
         )
 
-        library_dir = self.config.get_library_project_dir()
+        library_dir = self.config.path_manager.library_dir
         master_dir = library_dir / "MASTER"
         project_dir = library_dir / self.project
         master_dir.mkdir(parents=True, exist_ok=True)
@@ -914,7 +915,7 @@ class Scholar:
 
         logger.info(f"{self.name}: Loading papers from project: {project_name}")
 
-        library_dir = self.config.get_library_project_dir()
+        library_dir = self.config.path_manager.library_dir
         project_dir = library_dir / project_name
 
         if not project_dir.exists():
@@ -1019,19 +1020,36 @@ class Scholar:
         all_papers = []
         for project in all_projects:
             try:
-                project_papers = Papers.from_project(project, self.config)
-                # Simple text search implementation
-                matching_papers = [
-                    p
-                    for p in project_papers._papers
-                    if query.lower() in (p.title or "").lower()
-                    or query.lower() in (p.abstract or "").lower()
-                    or any(
-                        query.lower() in (author or "").lower()
-                        for author in (p.authors or [])
-                    )
-                ]
-                all_papers.extend(matching_papers)
+                project_dir = self.config.get_library_project_dir(project)
+                # Load papers from metadata.json files in project directory
+                for item in project_dir.iterdir():
+                    if item.is_symlink() or item.is_dir():
+                        # Follow symlink to MASTER or use direct dir
+                        paper_dir = item.resolve() if item.is_symlink() else item
+                        metadata_file = paper_dir / "metadata.json"
+                        if metadata_file.exists():
+                            try:
+                                paper = Paper.model_validate_json(
+                                    metadata_file.read_text()
+                                )
+                                # Simple text search
+                                query_lower = query.lower()
+                                title = (paper.metadata.basic.title or "").lower()
+                                abstract = (paper.metadata.basic.abstract or "").lower()
+                                authors = paper.metadata.basic.authors or []
+                                if (
+                                    query_lower in title
+                                    or query_lower in abstract
+                                    or any(
+                                        query_lower in (a or "").lower()
+                                        for a in authors
+                                    )
+                                ):
+                                    all_papers.append(paper)
+                            except Exception as e:
+                                logger.debug(
+                                    f"{self.name}: Failed to load {metadata_file}: {e}"
+                                )
             except Exception as e:
                 logger.debug(f"{self.name}: Failed to search project {project}: {e}")
 
@@ -1094,7 +1112,7 @@ class Scholar:
         Returns:
             Path to the project directory
         """
-        project_dir = self.config.get_library_project_dir() / project
+        project_dir = self.config.get_library_project_dir(project)
         info_dir = project_dir / "info"
 
         # Create project and info directories
@@ -1156,7 +1174,7 @@ class Scholar:
         Returns:
             List of project information dictionaries
         """
-        library_dir = self.config.get_library_project_dir()
+        library_dir = self.config.path_manager.library_dir
         projects = []
 
         for item in library_dir.iterdir():
@@ -1201,7 +1219,7 @@ class Scholar:
                 len(list(master_dir.glob("*"))) if master_dir.exists() else 0
             ),
             "projects": projects,
-            "library_path": str(self.config.get_library_project_dir()),
+            "library_path": str(self.config.path_manager.library_dir),
             "master_path": str(master_dir),
         }
 
@@ -1226,7 +1244,7 @@ class Scholar:
             Dictionary with backup information
         """
         backup_path = Path(backup_path)
-        library_path = self.config.get_library_project_dir()
+        library_path = self.config.path_manager.library_dir
 
         if not library_path.exists():
             raise ScholarError("Library directory does not exist")
