@@ -21,8 +21,8 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 from scitex.logging import getLogger
-from scitex.writer.dataclasses import ManuscriptTree, SupplementaryTree, RevisionTree
-from scitex.writer.dataclasses.tree import ScriptsTree
+from scitex.writer._dataclasses import ManuscriptTree, SupplementaryTree, RevisionTree
+from scitex.writer._dataclasses.tree import ScriptsTree
 
 logger = getLogger(__name__)
 

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Tests for scitex.writer.dataclasses.contents._SupplementaryContents."""
+"""Tests for scitex.writer._dataclasses.contents._SupplementaryContents."""
 
 from pathlib import Path
 
 import pytest
 
-from scitex.writer.dataclasses.contents._SupplementaryContents import (
+from scitex.writer._dataclasses.contents._SupplementaryContents import (
     SupplementaryContents,
 )
-from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 
 
 class TestSupplementaryContentsCreation:

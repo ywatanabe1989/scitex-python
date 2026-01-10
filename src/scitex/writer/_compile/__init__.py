@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-11-08 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_compile/__init__.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/writer/_compile/__init__.py"
@@ -22,14 +22,15 @@ Provides organized compilation functionality:
 - _validator: Pre-compile validation
 """
 
+from .._dataclasses import CompilationResult
+from ._compile_unified import compile
 from ._runner import run_compile
-from ..dataclasses import CompilationResult
 from .manuscript import compile_manuscript
-from .supplementary import compile_supplementary
 from .revision import compile_revision
-
+from .supplementary import compile_supplementary
 
 __all__ = [
+    "compile",
     "run_compile",
     "compile_manuscript",
     "compile_supplementary",

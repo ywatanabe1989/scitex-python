@@ -24,12 +24,10 @@ from typing import Any, Callable
 
 from scitex.logging import getLogger
 
-from ._compile import (
-    CompilationResult,
-    compile_manuscript,
-    compile_revision,
-    compile_supplementary,
-)
+from .._dataclasses import CompilationResult
+from .manuscript import compile_manuscript
+from .revision import compile_revision
+from .supplementary import compile_supplementary
 
 logger = getLogger(__name__)
 
@@ -44,7 +42,8 @@ def _make_async_wrapper(sync_func: Callable) -> Callable:
     Args:
         sync_func: Synchronous compilation function
 
-    Returns:
+    Returns
+    -------
         Async wrapper function
     """
 
@@ -77,7 +76,8 @@ async def compile_all_async(
         track_changes: Whether to track changes in revision
         timeout: Timeout per compilation
 
-    Returns:
+    Returns
+    -------
         Dict with keys 'manuscript', 'supplementary', 'revision' and CompilationResult values.
         If a compilation fails, the value will be None.
 

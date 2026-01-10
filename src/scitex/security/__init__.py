@@ -32,4 +32,3 @@ __all__ = [
     "GitHubSecurityError",
 ]
 
-__version__ = "0.1.0"

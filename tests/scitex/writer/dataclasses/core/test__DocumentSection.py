@@ -24,7 +24,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 pytest.importorskip("git")
 
-from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 
 
 class TestDocumentSectionReadWrite:
@@ -1289,7 +1289,7 @@ if __name__ == "__main__":
 # 
 # __all__ = ["DocumentSection"]
 # 
-# # python -m scitex.writer.dataclasses.core._DocumentSection --file ./01_manuscript/contents/introduction.tex --action history
+# # python -m scitex.writer._dataclasses.core._DocumentSection --file ./01_manuscript/contents/introduction.tex --action history
 # 
 # # EOF
 

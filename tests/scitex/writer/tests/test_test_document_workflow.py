@@ -102,7 +102,7 @@ if __name__ == "__main__":
 # 
 #     def test_access_manuscript_introduction(self, valid_project_dir):
 #         """Test accessing manuscript introduction section."""
-#         from scitex.writer.dataclasses.tree._ManuscriptTree import ManuscriptTree
+#         from scitex.writer._dataclasses.tree._ManuscriptTree import ManuscriptTree
 # 
 #         # Create actual tree without mocking
 #         tree = ManuscriptTree(
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 # 
 #     def test_read_section_content(self, valid_project_dir):
 #         """Test reading section content."""
-#         from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+#         from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 # 
 #         intro_path = valid_project_dir / "01_manuscript" / "contents" / "introduction.tex"
 #         section = DocumentSection(intro_path, git_root=valid_project_dir)
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 # 
 #     def test_write_section_content(self, valid_project_dir):
 #         """Test writing to section."""
-#         from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+#         from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 # 
 #         intro_path = valid_project_dir / "01_manuscript" / "contents" / "introduction.tex"
 #         section = DocumentSection(intro_path, git_root=valid_project_dir)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
 # 
 #     def test_commit_section_changes(self, valid_project_dir):
 #         """Test committing changes to section."""
-#         from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+#         from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 # 
 #         intro_path = valid_project_dir / "01_manuscript" / "contents" / "introduction.tex"
 #         section = DocumentSection(intro_path, git_root=valid_project_dir)
@@ -164,7 +164,7 @@ if __name__ == "__main__":
 # 
 #     def test_access_multiple_sections(self, valid_project_dir):
 #         """Test accessing multiple sections."""
-#         from scitex.writer.dataclasses.contents._ManuscriptContents import (
+#         from scitex.writer._dataclasses.contents._ManuscriptContents import (
 #             ManuscriptContents,
 #         )
 # 
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 # 
 #     def test_read_write_commit_workflow(self, valid_project_dir):
 #         """Test complete read-write-commit workflow."""
-#         from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+#         from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 # 
 #         intro_path = valid_project_dir / "01_manuscript" / "contents" / "introduction.tex"
 #         section = DocumentSection(intro_path, git_root=valid_project_dir)
@@ -217,7 +217,7 @@ if __name__ == "__main__":
 # 
 #     def test_diff_shows_changes(self, valid_project_dir):
 #         """Test diff operation shows changes."""
-#         from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+#         from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 # 
 #         intro_path = valid_project_dir / "01_manuscript" / "contents" / "introduction.tex"
 #         section = DocumentSection(intro_path, git_root=valid_project_dir)
@@ -232,7 +232,7 @@ if __name__ == "__main__":
 # 
 #     def test_checkout_reverts_changes(self, valid_project_dir):
 #         """Test checking out file reverts to previous version."""
-#         from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+#         from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 # 
 #         intro_path = valid_project_dir / "01_manuscript" / "contents" / "introduction.tex"
 #         section = DocumentSection(intro_path, git_root=valid_project_dir)
@@ -254,7 +254,7 @@ if __name__ == "__main__":
 # 
 #     def test_history_tracks_commits(self, valid_project_dir):
 #         """Test history tracks multiple commits."""
-#         from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+#         from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 # 
 #         intro_path = valid_project_dir / "01_manuscript" / "contents" / "introduction.tex"
 #         section = DocumentSection(intro_path, git_root=valid_project_dir)
@@ -278,7 +278,7 @@ if __name__ == "__main__":
 # 
 #     def test_tree_structure_verification(self, valid_project_dir):
 #         """Test verifying manuscript tree structure."""
-#         from scitex.writer.dataclasses.tree._ManuscriptTree import ManuscriptTree
+#         from scitex.writer._dataclasses.tree._ManuscriptTree import ManuscriptTree
 # 
 #         tree = ManuscriptTree(
 #             valid_project_dir / "01_manuscript",
@@ -334,7 +334,7 @@ if __name__ == "__main__":
 # 
 #     def test_access_all_core_sections(self, manuscript_contents_dir):
 #         """Test accessing all core manuscript sections."""
-#         from scitex.writer.dataclasses.contents._ManuscriptContents import (
+#         from scitex.writer._dataclasses.contents._ManuscriptContents import (
 #             ManuscriptContents,
 #         )
 # 
@@ -353,7 +353,7 @@ if __name__ == "__main__":
 # 
 #     def test_access_all_metadata_sections(self, manuscript_contents_dir):
 #         """Test accessing metadata sections."""
-#         from scitex.writer.dataclasses.contents._ManuscriptContents import (
+#         from scitex.writer._dataclasses.contents._ManuscriptContents import (
 #             ManuscriptContents,
 #         )
 # 
@@ -366,7 +366,7 @@ if __name__ == "__main__":
 # 
 #     def test_access_optional_sections(self, manuscript_contents_dir):
 #         """Test accessing optional sections."""
-#         from scitex.writer.dataclasses.contents._ManuscriptContents import (
+#         from scitex.writer._dataclasses.contents._ManuscriptContents import (
 #             ManuscriptContents,
 #         )
 # 
@@ -378,7 +378,7 @@ if __name__ == "__main__":
 # 
 #     def test_access_bibliography(self, manuscript_contents_dir):
 #         """Test accessing bibliography file."""
-#         from scitex.writer.dataclasses.contents._ManuscriptContents import (
+#         from scitex.writer._dataclasses.contents._ManuscriptContents import (
 #             ManuscriptContents,
 #         )
 # 
@@ -389,7 +389,7 @@ if __name__ == "__main__":
 # 
 #     def test_access_directories(self, manuscript_contents_dir):
 #         """Test accessing figure and table directories."""
-#         from scitex.writer.dataclasses.contents._ManuscriptContents import (
+#         from scitex.writer._dataclasses.contents._ManuscriptContents import (
 #             ManuscriptContents,
 #         )
 # 

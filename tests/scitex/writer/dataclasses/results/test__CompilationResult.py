@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Tests for scitex.writer.dataclasses.results._CompilationResult."""
+"""Tests for scitex.writer._dataclasses.results._CompilationResult."""
 
 from pathlib import Path
 
 import pytest
 
-from scitex.writer.dataclasses.results._CompilationResult import CompilationResult
+from scitex.writer._dataclasses.results._CompilationResult import CompilationResult
 
 
 class TestCompilationResultCreation:

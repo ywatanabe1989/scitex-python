@@ -541,6 +541,6 @@ if __name__ == "__main__":
 
 __all__ = ["DocumentSection"]
 
-# python -m scitex.writer.dataclasses.core._DocumentSection --file ./01_manuscript/contents/introduction.tex --action history
+# python -m scitex.writer._dataclasses.core._DocumentSection --file ./01_manuscript/contents/introduction.tex --action history
 
 # EOF

@@ -26,7 +26,6 @@ from .core.journal_matcher import JournalMatcher
 from .core.cache_manager import CacheManager
 from .fetchers import OpenAlexFetcher, CrossrefFetcher, SemanticScholarFetcher
 
-__version__ = "1.0.0"
 __author__ = "SciTeX Team"
 __email__ = "contact@scitex.ai"
 

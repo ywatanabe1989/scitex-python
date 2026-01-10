@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Tests for scitex.writer.dataclasses.results._SectionReadResponse."""
+"""Tests for scitex.writer._dataclasses.results._SectionReadResponse."""
 
 from pathlib import Path
 
 import pytest
 
-from scitex.writer.dataclasses.results._SectionReadResponse import SectionReadResponse
+from scitex.writer._dataclasses.results._SectionReadResponse import SectionReadResponse
 
 
 class TestSectionReadResponseCreation:

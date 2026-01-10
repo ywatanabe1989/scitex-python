@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Tests for scitex.writer.dataclasses.config._WriterConfig."""
+"""Tests for scitex.writer._dataclasses.config._WriterConfig."""
 
 from pathlib import Path
 
 import pytest
 
-from scitex.writer.dataclasses.config._WriterConfig import WriterConfig
+from scitex.writer._dataclasses.config._WriterConfig import WriterConfig
 
 
 class TestWriterConfigCreation:

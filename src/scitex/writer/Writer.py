@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-29 06:13:07 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_Writer.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/writer/_Writer.py"
@@ -18,25 +18,24 @@ Provides object-oriented interface to scitex-writer functionality.
 
 
 from pathlib import Path
-from typing import Optional
-from typing import Callable
+from typing import Callable, Optional
 
-from ._compile import compile_manuscript
-from ._compile import compile_supplementary
-from ._compile import compile_revision
-from ._compile import CompilationResult
-from .utils._watch import watch_manuscript
+from scitex import logging
+from scitex.git import init_git_repo
+
 from ._clone_writer_project import (
     clone_writer_project as _clone_writer_project,
 )
-from .dataclasses.config import DOC_TYPE_DIRS
-from .dataclasses import ManuscriptTree
-from .dataclasses import SupplementaryTree
-from .dataclasses import RevisionTree
-from .dataclasses.tree import ScriptsTree
-from .dataclasses.tree import SharedTree
-from scitex import logging
-from scitex.git import init_git_repo
+from ._compile import (
+    CompilationResult,
+    compile_manuscript,
+    compile_revision,
+    compile_supplementary,
+)
+from ._dataclasses import ManuscriptTree, RevisionTree, SupplementaryTree
+from ._dataclasses.config import DOC_TYPE_DIRS
+from ._dataclasses.tree import ScriptsTree, SharedTree
+from .utils._watch import watch_manuscript
 
 logger = logging.getLogger(__name__)
 
@@ -57,18 +56,24 @@ class Writer:
 
         If directory doesn't exist, creates new project.
 
-        Args:
-            project_dir: Path to project directory
-            name: Project name (used if creating new project)
-            git_strategy: Git initialization strategy
-                - 'child': Create isolated git in project directory (default)
-                - 'parent': Use parent git repository
-                - 'origin': Preserve template's original git history
-                - None: Disable git initialization
-            branch: Specific branch of template repository to clone (optional)
-                If None, clones the default branch. Mutually exclusive with tag.
-            tag: Specific tag/release of template repository to clone (optional)
-                If None, clones the default branch. Mutually exclusive with branch.
+        Parameters
+        ----------
+        project_dir : Path
+            Path to project directory.
+        name : str, optional
+            Project name (used if creating new project).
+        git_strategy : str, optional
+            Git initialization strategy:
+            - 'child': Create isolated git in project directory (default)
+            - 'parent': Use parent git repository
+            - 'origin': Preserve template's original git history
+            - None: Disable git initialization
+        branch : str, optional
+            Specific branch of template repository to clone.
+            If None, clones the default branch. Mutually exclusive with tag.
+        tag : str, optional
+            Specific tag/release of template repository to clone.
+            If None, clones the default branch. Mutually exclusive with branch.
         """
         self.project_name = name or Path(project_dir).name
         self.project_dir = Path(project_dir)
@@ -117,11 +122,15 @@ class Writer:
         - 'child': Full template with git initialization
         - 'parent'/'None': Minimal directory structure
 
-        Args:
-            name: Project name (used if creating new project)
+        Parameters
+        ----------
+        name : str, optional
+            Project name (used if creating new project).
 
-        Returns:
-            Path to the project directory
+        Returns
+        -------
+        Path
+            Path to the project directory.
         """
         if self.project_dir.exists():
             logger.info(
@@ -150,11 +159,6 @@ class Writer:
                 f"Could not create project directory at {self.project_dir}"
             )
 
-        # Verify target directory exists
-        if not target_dir.exists():
-            logger.error(f"Writer: Target directory {target_dir} does not exist")
-            raise RuntimeError(f"Target directory {target_dir} was not created")
-
         # Verify project directory was created
         if not self.project_dir.exists():
             logger.error(
@@ -175,8 +179,10 @@ class Writer:
         - Required directories exist (01_manuscript, 02_supplementary, 03_revision)
         - .git exists (for git-enabled strategies)
 
-        Raises:
-            RuntimeError: If structure is invalid
+        Raises
+        ------
+        RuntimeError
+            If structure is invalid.
         """
         required_dirs = [
             self.project_dir / "01_manuscript",
@@ -206,37 +212,26 @@ class Writer:
 
         Runs scripts/shell/compile_manuscript.sh with configured settings.
 
-        Args:
-            timeout: Maximum compilation time in seconds (default: 300)
-            log_callback: Called with each log line: log_callback("Running pdflatex...")
-            progress_callback: Called with progress: progress_callback(50, "Pass 2/3")
+        Parameters
+        ----------
+        timeout : int, optional
+            Maximum compilation time in seconds (default: 300).
+        log_callback : callable, optional
+            Called with each log line: log_callback("Running pdflatex...").
+        progress_callback : callable, optional
+            Called with progress: progress_callback(50, "Pass 2/3").
 
-        Returns:
-            CompilationResult with success status, PDF path, and errors/warnings
+        Returns
+        -------
+        CompilationResult
+            With success status, PDF path, and errors/warnings.
 
-        Shell script options (see scripts/shell/compile_manuscript.sh):
-            -nf,  --no_figs       Exclude figures for quick compilation
-            -p2t, --ppt2tif       Convert PowerPoint to TIF on WSL
-            -c,   --crop_tif      Crop TIF images to remove excess whitespace
-            -q,   --quiet         Do not show detailed logs for LaTeX compilation
-            -v,   --verbose       Show verbose LaTeX compilation output
-            -f,   --force         Force recompilation (ignore cache)
-
-        Example:
-            >>> writer = Writer(Path("my_paper"))
-            >>> result = writer.compile_manuscript()
-            >>> if result.success:
-            ...     print(f"PDF created: {result.output_pdf}")
-
-            >>> # With callbacks for live updates
-            >>> def on_log(msg):
-            ...     append_to_job_log(job_id, msg)
-            >>> def on_progress(percent, step):
-            ...     update_job_progress(job_id, percent, step)
-            >>> result = writer.compile_manuscript(
-            ...     log_callback=on_log,
-            ...     progress_callback=on_progress
-            ... )
+        Examples
+        --------
+        >>> writer = Writer(Path("my_paper"))
+        >>> result = writer.compile_manuscript()
+        >>> if result.success:
+        ...     print(f"PDF created: {result.output_pdf}")
         """
         return compile_manuscript(
             self.project_dir,
@@ -256,25 +251,26 @@ class Writer:
 
         Runs scripts/shell/compile_supplementary.sh with configured settings.
 
-        Args:
-            timeout: Maximum compilation time in seconds (default: 300)
-            log_callback: Called with each log line
-            progress_callback: Called with progress updates
+        Parameters
+        ----------
+        timeout : int, optional
+            Maximum compilation time in seconds (default: 300).
+        log_callback : callable, optional
+            Called with each log line.
+        progress_callback : callable, optional
+            Called with progress updates.
 
-        Returns:
-            CompilationResult with success status, PDF path, and errors/warnings
+        Returns
+        -------
+        CompilationResult
+            With success status, PDF path, and errors/warnings.
 
-        Shell script options (see scripts/shell/compile_supplementary.sh):
-            -nf,  --no_figs       Exclude figures for quick compilation
-            -q,   --quiet         Do not show detailed logs for LaTeX compilation
-            -v,   --verbose       Show verbose LaTeX compilation output
-            -f,   --force         Force recompilation (ignore cache)
-
-        Example:
-            >>> writer = Writer(Path("my_paper"))
-            >>> result = writer.compile_supplementary()
-            >>> if result.success:
-            ...     print(f"PDF created: {result.output_pdf}")
+        Examples
+        --------
+        >>> writer = Writer(Path("my_paper"))
+        >>> result = writer.compile_supplementary()
+        >>> if result.success:
+        ...     print(f"PDF created: {result.output_pdf}")
         """
         return compile_supplementary(
             self.project_dir,
@@ -295,27 +291,28 @@ class Writer:
 
         Runs scripts/shell/compile_revision.sh with configured settings.
 
-        Args:
-            track_changes: Enable change tracking in compiled PDF (default: False)
-            timeout: Maximum compilation time in seconds (default: 300)
-            log_callback: Called with each log line
-            progress_callback: Called with progress updates
+        Parameters
+        ----------
+        track_changes : bool, optional
+            Enable change tracking in compiled PDF (default: False).
+        timeout : int, optional
+            Maximum compilation time in seconds (default: 300).
+        log_callback : callable, optional
+            Called with each log line.
+        progress_callback : callable, optional
+            Called with progress updates.
 
-        Returns:
-            CompilationResult with success status, PDF path, and errors/warnings
+        Returns
+        -------
+        CompilationResult
+            With success status, PDF path, and errors/warnings.
 
-        Shell script options (see scripts/shell/compile_revision.sh):
-            -tc, --track_changes  Show tracked changes in output PDF
-            -nf, --no_figs        Exclude figures for quick compilation
-            -q,  --quiet          Do not show detailed logs for LaTeX compilation
-            -v,  --verbose        Show verbose LaTeX compilation output
-            -f,  --force          Force recompilation (ignore cache)
-
-        Example:
-            >>> writer = Writer(Path("my_paper"))
-            >>> result = writer.compile_revision(track_changes=True)
-            >>> if result.success:
-            ...     print(f"Revision PDF: {result.output_pdf}")
+        Examples
+        --------
+        >>> writer = Writer(Path("my_paper"))
+        >>> result = writer.compile_revision(track_changes=True)
+        >>> if result.success:
+        ...     print(f"Revision PDF: {result.output_pdf}")
         """
         return compile_revision(
             self.project_dir,
@@ -358,7 +355,9 @@ def run_session() -> None:
     """Initialize scitex framework, run main function, and cleanup."""
     global CONFIG, CC, sys, plt, rng
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()
@@ -417,7 +416,7 @@ def main(args):
     elif args.action == "info":
         writer = Writer(Path(args.dir) if args.dir else Path.cwd())
         print(f"Project: {writer.project_dir}")
-        print(f"\nDocuments:")
+        print("\nDocuments:")
         print(f"  - Manuscript: {writer.manuscript}")
         print(f"  - Supplementary: {writer.supplementary}")
         print(f"  - Revision: {writer.revision}")

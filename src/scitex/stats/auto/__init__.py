@@ -183,6 +183,5 @@ __all__ = [
     "apply_multiple_correction",
 ]
 
-__version__ = "1.0.0"
 
 # EOF

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Tests for scitex.writer.dataclasses.results._SaveSectionsResponse."""
+"""Tests for scitex.writer._dataclasses.results._SaveSectionsResponse."""
 
 import pytest
 
-from scitex.writer.dataclasses.results._SaveSectionsResponse import SaveSectionsResponse
+from scitex.writer._dataclasses.results._SaveSectionsResponse import SaveSectionsResponse
 
 
 class TestSaveSectionsResponseCreation:

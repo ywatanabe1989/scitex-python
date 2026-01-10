@@ -18,7 +18,7 @@ pytest.importorskip("git")
 from pathlib import Path
 from unittest.mock import Mock, patch
 from scitex.writer._compile.revision import compile_revision
-from scitex.writer.dataclasses import CompilationResult
+from scitex.writer._dataclasses import CompilationResult
 
 
 class TestCompileRevision:

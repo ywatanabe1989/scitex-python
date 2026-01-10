@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Tests for scitex.writer.dataclasses.results._LaTeXIssue."""
+"""Tests for scitex.writer._dataclasses.results._LaTeXIssue."""
 
 import pytest
 
-from scitex.writer.dataclasses.results._LaTeXIssue import LaTeXIssue
+from scitex.writer._dataclasses.results._LaTeXIssue import LaTeXIssue
 
 
 class TestLaTeXIssueCreation:

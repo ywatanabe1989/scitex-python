@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 
 from scitex.writer._project._trees import create_document_trees
-from scitex.writer.dataclasses import ManuscriptTree, RevisionTree, SupplementaryTree
-from scitex.writer.dataclasses.tree import ScriptsTree
+from scitex.writer._dataclasses import ManuscriptTree, RevisionTree, SupplementaryTree
+from scitex.writer._dataclasses.tree import ScriptsTree
 
 
 class TestCreateDocumentTreesReturnTypes:

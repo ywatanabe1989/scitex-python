@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Tests for scitex.writer.dataclasses.contents._RevisionContents."""
+"""Tests for scitex.writer._dataclasses.contents._RevisionContents."""
 
 from pathlib import Path
 
 import pytest
 
-from scitex.writer.dataclasses.contents._RevisionContents import RevisionContents
-from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+from scitex.writer._dataclasses.contents._RevisionContents import RevisionContents
+from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 
 
 class TestRevisionContentsCreation:

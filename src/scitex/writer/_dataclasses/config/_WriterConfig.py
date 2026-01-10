@@ -170,6 +170,6 @@ if __name__ == "__main__":
 
 __all__ = ["WriterConfig"]
 
-# python -m scitex.writer.dataclasses.config._WriterConfig --dir ./my_paper --validate
+# python -m scitex.writer._dataclasses.config._WriterConfig --dir ./my_paper --validate
 
 # EOF

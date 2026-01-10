@@ -160,6 +160,6 @@ if __name__ == "__main__":
 
 __all__ = ["CompilationResult"]
 
-# python -m scitex.writer.dataclasses.results._CompilationResult --success --pdf ./manuscript.pdf --duration 10.5
+# python -m scitex.writer._dataclasses.results._CompilationResult --success --pdf ./manuscript.pdf --duration 10.5
 
 # EOF

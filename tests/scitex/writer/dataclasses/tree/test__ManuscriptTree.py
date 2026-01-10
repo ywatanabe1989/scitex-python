@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Tests for scitex.writer.dataclasses.tree._ManuscriptTree."""
+"""Tests for scitex.writer._dataclasses.tree._ManuscriptTree."""
 
 from pathlib import Path
 
 import pytest
 
-from scitex.writer.dataclasses.contents._ManuscriptContents import ManuscriptContents
-from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
-from scitex.writer.dataclasses.tree._ManuscriptTree import ManuscriptTree
+from scitex.writer._dataclasses.contents._ManuscriptContents import ManuscriptContents
+from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
+from scitex.writer._dataclasses.tree._ManuscriptTree import ManuscriptTree
 
 
 class TestManuscriptTreeCreation:

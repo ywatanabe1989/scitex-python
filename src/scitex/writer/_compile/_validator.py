@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-29 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_compile/_validator.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/writer/_compile/_validator.py"
@@ -19,7 +19,7 @@ Validates project structure before attempting compilation.
 from pathlib import Path
 
 from scitex.logging import getLogger
-from scitex.writer._validate_tree_structures import validate_tree_structures
+from scitex.writer.utils._validate_tree_structures import validate_tree_structures
 
 logger = getLogger(__name__)
 

@@ -335,4 +335,3 @@ __all__ = [
     "load_stats",
 ]
 
-__version__ = "2.2.0"

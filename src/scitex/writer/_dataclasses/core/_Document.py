@@ -141,6 +141,6 @@ if __name__ == "__main__":
 
 __all__ = ["Document"]
 
-# python -m scitex.writer.dataclasses.core._Document --dir ./01_manuscript
+# python -m scitex.writer._dataclasses.core._Document --dir ./01_manuscript
 
 # EOF

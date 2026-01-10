@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Tests for scitex.writer.dataclasses.config._CONSTANTS."""
+"""Tests for scitex.writer._dataclasses.config._CONSTANTS."""
 
 import pytest
 
-from scitex.writer.dataclasses.config._CONSTANTS import (
+from scitex.writer._dataclasses.config._CONSTANTS import (
     DOC_TYPE_DIRS,
     DOC_TYPE_FLAGS,
     DOC_TYPE_PDFS,

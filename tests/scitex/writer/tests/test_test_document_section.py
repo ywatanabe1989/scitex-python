@@ -30,7 +30,7 @@ if __name__ == "__main__":
 # 
 # import pytest
 # 
-# from scitex.writer.dataclasses.core._DocumentSection import DocumentSection
+# from scitex.writer._dataclasses.core._DocumentSection import DocumentSection
 # 
 # 
 # class TestDocumentSectionReadWrite:

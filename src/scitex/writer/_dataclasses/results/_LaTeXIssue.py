@@ -97,6 +97,6 @@ if __name__ == "__main__":
 
 __all__ = ["LaTeXIssue"]
 
-# python -m scitex.writer.dataclasses.results._LaTeXIssue --type warning --message "Citation not found"
+# python -m scitex.writer._dataclasses.results._LaTeXIssue --type warning --message "Citation not found"
 
 # EOF

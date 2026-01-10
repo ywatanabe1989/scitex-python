@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-29 06:13:05 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/_validate_tree_structures.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/writer/_validate_tree_structures.py"
@@ -17,13 +17,17 @@ import argparse
 Leverages dataclass verify_structure() methods for validation."""
 
 from pathlib import Path
+
 from scitex.logging import getLogger
-from .dataclasses import ManuscriptTree
-from .dataclasses import SupplementaryTree
-from .dataclasses import RevisionTree
-from .dataclasses import ConfigTree
-from .dataclasses import ScriptsTree
-from .dataclasses import SharedTree
+
+from .._dataclasses import (
+    ConfigTree,
+    ManuscriptTree,
+    RevisionTree,
+    ScriptsTree,
+    SharedTree,
+    SupplementaryTree,
+)
 
 logger = getLogger(__name__)
 
@@ -115,10 +119,12 @@ def _validate_tree_structure_base(
         dir_name: Name of directory to validate
         tree_class: Tree class with verify_structure method
 
-    Returns:
+    Returns
+    -------
         True if structure is valid
 
-    Raises:
+    Raises
+    ------
         ProjectValidationError: If directory missing or structure invalid
     """
     project_dir = Path(project_dir)
@@ -142,7 +148,9 @@ def run_session() -> None:
     """Initialize scitex framework, run main function, and cleanup."""
     global CONFIG, CC, sys, plt, rng
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

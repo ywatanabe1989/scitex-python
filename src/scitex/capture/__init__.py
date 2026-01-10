@@ -85,7 +85,6 @@ stop = stop_monitor
 gif = create_gif_from_latest_session  # Primary: simple
 make_gif = create_gif_from_latest_session  # Alternative
 
-__version__ = "0.2.1"
 __author__ = "Yusuke Watanabe"
 __email__ = "Yusuke.Watanabe@scitex.ai"
 

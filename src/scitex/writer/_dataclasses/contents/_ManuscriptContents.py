@@ -231,6 +231,6 @@ if __name__ == "__main__":
 
 __all__ = ["ManuscriptContents"]
 
-# python -m scitex.writer.dataclasses.contents._ManuscriptContents --dir ./my_paper --verify
+# python -m scitex.writer._dataclasses.contents._ManuscriptContents --dir ./my_paper --verify
 
 # EOF

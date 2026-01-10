@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from scitex.writer.dataclasses import LaTeXIssue
+from scitex.writer._dataclasses import LaTeXIssue
 from scitex.writer.utils._parse_latex_logs import parse_compilation_output
 
 

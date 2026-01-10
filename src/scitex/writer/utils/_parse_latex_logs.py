@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import List
 from typing import Tuple
 
-from ..dataclasses import LaTeXIssue
+from .._dataclasses import LaTeXIssue
 
 
 def parse_compilation_output(

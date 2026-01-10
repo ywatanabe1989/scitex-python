@@ -22,7 +22,7 @@ pytest.importorskip("git")
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 from scitex.writer._compile.manuscript import compile_manuscript
-from scitex.writer.dataclasses import CompilationResult
+from scitex.writer._dataclasses import CompilationResult
 
 
 class TestCompileManuscript:
