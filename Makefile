@@ -7,7 +7,7 @@
 SHELL := /bin/bash
 
 .PHONY: help install install-dev install-all \
-	clean test test-fast test-full test-lf test-ff test-nf test-inc test-unit test-changed lint format check \
+	clean clean-old-legacy test test-fast test-full test-lf test-ff test-nf test-inc test-unit test-changed lint format check \
 	test-stats-cov test-config-cov test-logging-cov \
 	build release upload upload-test test-install test-install-pypi test-install-module test-install-modules \
 	build-all release-all upload-all upload-test-all \
@@ -66,6 +66,7 @@ help:
 	@echo -e ""
 	@echo -e "$(CYAN)🧹 Maintenance:$(NC)"
 	@echo -e "  make clean             Remove build/test/cache artifacts"
+	@echo -e "  make clean-old-legacy  Remove all .old and .legacy directories"
 	@echo -e "  make sync-extras       Sync pyproject.toml extras from imports"
 	@echo -e "  make sync-tests        Sync test files with source structure"
 	@echo -e "  make sync-examples     Sync example files with source structure"
@@ -119,6 +120,11 @@ install-all:
 
 clean:
 	@./scripts/maintenance/clean.sh
+
+clean-old-legacy:
+	@echo -e "$(CYAN)🧹 Removing .old and .legacy directories...$(NC)"
+	@find . -type d \( -name ".old" -o -name ".legacy" \) -print -exec rm -rf {} + 2>/dev/null || true
+	@echo -e "$(GREEN)✅ Cleanup complete$(NC)"
 
 test:
 ifdef MODULE
