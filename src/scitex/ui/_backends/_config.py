@@ -50,6 +50,7 @@ from ._types import NotifyLevel
 BACKEND_PACKAGES = {
     "audio": None,  # Uses MCP or pyttsx3 (optional)
     "desktop": None,  # Uses PowerShell on WSL (no package needed)
+    "emacs": None,  # Uses emacsclient (no Python package needed)
     "matplotlib": "matplotlib",
     "playwright": "playwright",
     "email": None,  # Uses stdlib smtplib
@@ -76,6 +77,7 @@ DEFAULT_CONFIG = {
     "default_backend": "audio",
     "backend_priority": [
         "audio",
+        "emacs",
         "desktop",
         "matplotlib",
         "playwright",
@@ -84,9 +86,9 @@ DEFAULT_CONFIG = {
     ],
     "level_backends": {
         "info": ["audio"],
-        "warning": ["audio", "desktop"],
-        "error": ["audio", "desktop", "email"],
-        "critical": ["audio", "desktop", "matplotlib", "email"],
+        "warning": ["audio", "emacs"],
+        "error": ["audio", "emacs", "desktop", "email"],
+        "critical": ["audio", "emacs", "desktop", "matplotlib", "email"],
     },
     "timeouts": {
         "matplotlib": 5.0,
