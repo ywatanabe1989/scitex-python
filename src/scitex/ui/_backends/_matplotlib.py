@@ -83,9 +83,19 @@ class MatplotlibBackend(BaseNotifyBackend):
             plt.ion()
             plt.show(block=False)
 
-            # Auto-close after timeout
+            # Force render
+            fig.canvas.draw()
+            fig.canvas.flush_events()
+
+            # Auto-close after timeout, keeping GUI responsive
             timeout = kwargs.get("timeout", self.timeout)
-            await asyncio.sleep(timeout)
+            elapsed = 0.0
+            interval = 0.1  # Check every 100ms
+            while elapsed < timeout:
+                await asyncio.sleep(interval)
+                fig.canvas.flush_events()
+                elapsed += interval
+
             plt.close(fig)
 
             return NotifyResult(
