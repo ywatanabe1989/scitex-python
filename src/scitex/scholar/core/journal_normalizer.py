@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/core/journal_normalizer.py
 """
 Journal Name Normalizer.
@@ -29,13 +28,14 @@ Usage:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import re
 import time
 from pathlib import Path
-from typing import Optional, Set, Dict, List, Tuple, Any
-import asyncio
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 
 from scitex import logging
@@ -98,7 +98,7 @@ class JournalNormalizer:
     Data is cached locally with daily refresh from OpenAlex.
     """
 
-    _instance: Optional["JournalNormalizer"] = None
+    _instance: Optional[JournalNormalizer] = None
 
     def __init__(self, cache_dir: Optional[Path] = None):
         self._cache_dir = cache_dir or _get_default_cache_dir()
@@ -118,7 +118,7 @@ class JournalNormalizer:
         self._journal_count = 0
 
     @classmethod
-    def get_instance(cls, cache_dir: Optional[Path] = None) -> "JournalNormalizer":
+    def get_instance(cls, cache_dir: Optional[Path] = None) -> JournalNormalizer:
         """Get singleton instance."""
         if cls._instance is None:
             cls._instance = cls(cache_dir)
@@ -129,11 +129,11 @@ class JournalNormalizer:
         if not self._cache_file.exists():
             return False
         try:
-            with open(self._cache_file, "r") as f:
+            with open(self._cache_file) as f:
                 data = json.load(f)
             cached_time = data.get("timestamp", 0)
             return (time.time() - cached_time) < CACHE_TTL_SECONDS
-        except (json.JSONDecodeError, IOError):
+        except (OSError, json.JSONDecodeError):
             return False
 
     def _load_from_cache(self) -> bool:
@@ -141,7 +141,7 @@ class JournalNormalizer:
         if not self._cache_file.exists():
             return False
         try:
-            with open(self._cache_file, "r") as f:
+            with open(self._cache_file) as f:
                 data = json.load(f)
 
             self._issn_l_data = data.get("issn_l_data", {})
@@ -154,7 +154,7 @@ class JournalNormalizer:
 
             logger.info(f"Loaded {self._journal_count} journals from normalizer cache")
             return True
-        except (json.JSONDecodeError, IOError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"Failed to load journal normalizer cache: {e}")
             return False
 
@@ -173,7 +173,7 @@ class JournalNormalizer:
             with open(self._cache_file, "w") as f:
                 json.dump(data, f)
             logger.info(f"Saved {len(self._issn_l_data)} journals to normalizer cache")
-        except IOError as e:
+        except OSError as e:
             logger.warning(f"Failed to save journal normalizer cache: {e}")
 
     def _add_journal(self, source_data: Dict[str, Any]) -> None:
@@ -310,14 +310,20 @@ class JournalNormalizer:
     def _fetch_journals_sync(
         self, max_pages: int = 500, filter_oa_only: bool = False
     ) -> None:
-        """Synchronous wrapper for fetching journals."""
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+        """Synchronous wrapper for fetching journals (handles nested event loops)."""
+        import concurrent.futures
 
-        loop.run_until_complete(self._fetch_journals_async(max_pages, filter_oa_only))
+        try:
+            asyncio.get_running_loop()
+            # Already in async context - use thread to avoid nested loop error
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(
+                    asyncio.run, self._fetch_journals_async(max_pages, filter_oa_only)
+                )
+                future.result(timeout=120)
+        except RuntimeError:
+            # No running loop - safe to run directly
+            asyncio.run(self._fetch_journals_async(max_pages, filter_oa_only))
 
     def ensure_loaded(self, force_refresh: bool = False, max_pages: int = 500) -> None:
         """
@@ -347,7 +353,8 @@ class JournalNormalizer:
         Args:
             journal_name: Any journal name variant, abbreviation, or ISSN
 
-        Returns:
+        Returns
+        -------
             ISSN-L if found, None otherwise
         """
         self.ensure_loaded()
@@ -381,7 +388,8 @@ class JournalNormalizer:
         Args:
             journal_name: Any journal name variant
 
-        Returns:
+        Returns
+        -------
             Canonical journal name, or original if not found
         """
         issn_l = self.get_issn_l(journal_name)
@@ -396,7 +404,8 @@ class JournalNormalizer:
         Args:
             journal_name: Any journal name variant
 
-        Returns:
+        Returns
+        -------
             Abbreviated title if available
         """
         issn_l = self.get_issn_l(journal_name)
@@ -411,7 +420,8 @@ class JournalNormalizer:
         Args:
             journal_name: Any journal name variant
 
-        Returns:
+        Returns
+        -------
             Dict with canonical_name, abbreviated_title, alternate_titles, issns, is_oa, publisher
         """
         issn_l = self.get_issn_l(journal_name)
@@ -427,7 +437,8 @@ class JournalNormalizer:
             name1: First journal name
             name2: Second journal name
 
-        Returns:
+        Returns
+        -------
             True if both names resolve to the same ISSN-L
         """
         issn_l_1 = self.get_issn_l(name1)
@@ -446,7 +457,8 @@ class JournalNormalizer:
         Args:
             journal_name: Any journal name variant
 
-        Returns:
+        Returns
+        -------
             True if journal is OA
         """
         issn_l = self.get_issn_l(journal_name)
@@ -462,7 +474,8 @@ class JournalNormalizer:
             query: Search query
             limit: Maximum results
 
-        Returns:
+        Returns
+        -------
             List of matching journal info dicts
         """
         self.ensure_loaded()
@@ -497,8 +510,6 @@ class JournalNormalizer:
 
 
 # ==================== Convenience Functions ====================
-
-
 def get_journal_normalizer(cache_dir: Optional[Path] = None) -> JournalNormalizer:
     """Get the journal normalizer singleton."""
     return JournalNormalizer.get_instance(cache_dir)
