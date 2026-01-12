@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-02 12:30:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/__init__.py
 # ----------------------------------------
@@ -27,8 +26,8 @@ Style values can be customized by:
 3. Passing parameters directly to subplots()
 """
 
-import matplotlib.font_manager as fm
 import matplotlib as mpl
+import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 
 from scitex import logging as _logging
@@ -183,12 +182,21 @@ try:
     from ._tpl import termplot
 except ImportError:
     termplot = None
-from . import color
-from . import utils
-from . import ax
+from . import ax, color, gallery, styles, utils
+
+# Figrecipe integration (graph visualization, editor)
+from ._figrecipe_integration import (
+    FIGRECIPE_AVAILABLE,
+    draw_graph,
+    edit,
+    get_graph_preset,
+    list_graph_presets,
+    register_graph_preset,
+)
+from ._figrecipe_integration import (
+    check_available as check_figrecipe,
+)
 from .styles import presets
-from . import styles
-from . import gallery
 
 # Lazy import for subplots to avoid circular dependencies
 # Note: Use names that don't conflict with submodule names like _subplots
@@ -212,6 +220,7 @@ def figure(*args, **kwargs):
     global _figure_func_cached
     if _figure_func_cached is None:
         import matplotlib.pyplot as plt
+
         from ._subplots._FigWrapper import FigWrapper
 
         def _figure_impl(*args, **kwargs):
@@ -321,8 +330,9 @@ def load(path, apply_manual=True):
     - figure.manual.json exists alongside figure.json
     - Hash validation passes (warns if stale)
     """
-    from pathlib import Path
     import hashlib
+    from pathlib import Path
+
     import scitex as stx
 
     path = Path(path)
@@ -524,8 +534,8 @@ def _reconstruct_plots_from_csv(ax, csv_data, metadata):
 
     CSV columns follow pattern: ax_00_<type>_<name>
     """
-    import pandas as pd
     import numpy as np
+    import pandas as pd
 
     # Group columns by plot type
     plot_type = metadata.get("plot_type", metadata.get("method", "line"))
@@ -636,6 +646,7 @@ def tight_layout(**kwargs):
         All keyword arguments are passed to matplotlib.pyplot.tight_layout()
     """
     import warnings
+
     import matplotlib.pyplot as plt
 
     with warnings.catch_warnings():
@@ -757,6 +768,14 @@ __all__ = [
     "termplot",
     "tight_layout",
     "utils",
+    # Figrecipe integration
+    "FIGRECIPE_AVAILABLE",
+    "check_figrecipe",
+    "draw_graph",
+    "edit",
+    "get_graph_preset",
+    "list_graph_presets",
+    "register_graph_preset",
 ]
 
 
