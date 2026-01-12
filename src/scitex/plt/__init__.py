@@ -185,17 +185,7 @@ except ImportError:
 from . import ax, color, gallery, styles, utils
 
 # Figrecipe integration (graph visualization, editor)
-from ._figrecipe_integration import (
-    FIGRECIPE_AVAILABLE,
-    draw_graph,
-    edit,
-    get_graph_preset,
-    list_graph_presets,
-    register_graph_preset,
-)
-from ._figrecipe_integration import (
-    check_available as check_figrecipe,
-)
+from ._figrecipe_integration import draw_graph, edit
 from .styles import presets
 
 # Lazy import for subplots to avoid circular dependencies
@@ -760,6 +750,8 @@ __all__ = [
     "close",
     "color",
     "colorbar",
+    "draw_graph",
+    "edit",
     "figure",
     "gallery",
     "load",
@@ -768,14 +760,6 @@ __all__ = [
     "termplot",
     "tight_layout",
     "utils",
-    # Figrecipe integration
-    "FIGRECIPE_AVAILABLE",
-    "check_figrecipe",
-    "draw_graph",
-    "edit",
-    "get_graph_preset",
-    "list_graph_presets",
-    "register_graph_preset",
 ]
 
 

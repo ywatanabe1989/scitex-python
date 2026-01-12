@@ -191,13 +191,9 @@ def test_result_to_stats(result: dict) -> "Stats":
 # =============================================================================
 
 from ._figrecipe_integration import (
-    FIGRECIPE_AVAILABLE,
     annotate,
     load_and_annotate,
     to_figrecipe,
-)
-from ._figrecipe_integration import (
-    check_available as check_figrecipe,
 )
 
 # =============================================================================
@@ -348,9 +344,7 @@ __all__ = [
     "save_stats",
     "load_stats",
     # Figrecipe integration
-    "FIGRECIPE_AVAILABLE",
     "to_figrecipe",
     "annotate",
     "load_and_annotate",
-    "check_figrecipe",
 ]
