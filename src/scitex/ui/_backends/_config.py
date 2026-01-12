@@ -218,7 +218,8 @@ class UIConfig:
     def get_timeout(self, backend: str) -> float:
         """Get timeout for a backend."""
         timeouts = self._config.get("timeouts", {})
-        return timeouts.get(backend, 5.0)
+        value = timeouts.get(backend, 5.0)
+        return float(value) if value is not None else 5.0
 
     def reload(self):
         """Reload configuration from files."""
