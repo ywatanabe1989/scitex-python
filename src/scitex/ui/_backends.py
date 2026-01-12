@@ -147,11 +147,13 @@ class EmailBackend(BaseNotifyBackend):
 
     def is_available(self) -> bool:
         return bool(
-            os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS")
-            or os.getenv("SCITEX_EMAIL_AGENT")
+            os.getenv("SCITEX_SCHOLAR_EMAIL_NOREPLY")  # New name
+            or os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS")  # Deprecated
+            or os.getenv("SCITEX_EMAIL_AGENT")  # Fallback
         ) and bool(
-            os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD")
-            or os.getenv("SCITEX_EMAIL_PASSWORD")
+            os.getenv("SCITEX_SCHOLAR_EMAIL_PASSWORD")  # New name
+            or os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD")  # Deprecated
+            or os.getenv("SCITEX_EMAIL_PASSWORD")  # Fallback
         )
 
     async def send(
