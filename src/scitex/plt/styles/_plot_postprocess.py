@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: "2025-12-01 10:00:00 (ywatanabe)"
+# Timestamp: "2026-01-13 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/styles/_plot_postprocess.py
 
 """Post-processing styling for plot methods.
@@ -9,15 +8,19 @@ This module centralizes all styling applied AFTER matplotlib methods
 are called. Each function modifies the plot result or axes in-place.
 
 All default values are loaded from SCITEX_STYLE.yaml via presets.py.
+Delegates to figrecipe styling functions when available.
 """
 
-import numpy as np
-from matplotlib.ticker import MaxNLocator, FixedLocator
 from matplotlib.category import StrCategoryConverter, UnitData
+from matplotlib.ticker import FixedLocator, MaxNLocator
 
-from scitex.plt.utils import mm_to_pt
+from scitex.plt.styles._postprocess_helpers import (
+    calculate_cap_width_from_bar,
+    calculate_cap_width_from_box,
+    make_errorbar_one_sided,
+)
 from scitex.plt.styles.presets import SCITEX_STYLE
-
+from scitex.plt.utils import mm_to_pt
 
 # ============================================================================
 # Constants (loaded from centralized SCITEX_STYLE.yaml)
@@ -26,7 +29,6 @@ DEFAULT_LINE_WIDTH_MM = SCITEX_STYLE.get("trace_thickness_mm", 0.2)
 DEFAULT_MARKER_SIZE_MM = SCITEX_STYLE.get("marker_size_mm", 0.8)
 DEFAULT_N_TICKS = SCITEX_STYLE.get("n_ticks", 4) - 1  # nbins = n_ticks - 1
 SPINE_ZORDER = 1000
-CAP_WIDTH_RATIO = 1 / 3  # 33% of bar/box width
 
 
 # ============================================================================
@@ -42,7 +44,8 @@ def apply_plot_postprocess(method_name, result, ax, kwargs, args=None):
         kwargs: Original kwargs passed to the method
         args: Original positional args passed to the method (needed for violinplot)
 
-    Returns:
+    Returns
+    -------
         The result (possibly modified)
     """
     # Always ensure spines are on top
@@ -120,7 +123,7 @@ def _apply_tick_locator(ax):
 
         def is_categorical_axis(axis):
             # Use get_converter() for matplotlib 3.10+ compatibility
-            converter = getattr(axis, 'get_converter', lambda: axis.converter)()
+            converter = getattr(axis, "get_converter", lambda: axis.converter)()
             if isinstance(converter, StrCategoryConverter):
                 return True
             if hasattr(axis, "units") and isinstance(axis.units, UnitData):
@@ -271,8 +274,6 @@ def _postprocess_violin(result, ax, kwargs, args):
 
             # Style the boxplot: scitex gray fill with black edges for visibility
             # Set high z-order so boxplot appears on top of violin bodies
-            from scitex.plt.color._PARAMS import HEX
-
             boxplot_zorder = 10
             for box in bp.get("boxes", []):
                 box.set_facecolor(HEX["gray"])  # Scitex gray fill
@@ -312,7 +313,7 @@ def _postprocess_boxplot(result, ax):
     # Cap width: 33% of box width
     if "caps" in result and "boxes" in result and len(result["boxes"]) > 0:
         try:
-            cap_width_pts = _calculate_cap_width_from_box(result["boxes"][0], ax)
+            cap_width_pts = calculate_cap_width_from_box(result["boxes"][0], ax)
             for cap in result["caps"]:
                 cap.set_markersize(cap_width_pts)
         except Exception:
@@ -332,26 +333,23 @@ def _postprocess_hist(result, ax):
     """Apply styling for histogram plots.
 
     Ensures histogram bars have proper edge color and alpha for visibility.
+    Delegates edge styling to figrecipe when available.
     """
-    line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
+    # Delegate edge styling to figrecipe with fallback
+    from scitex.plt.styles._postprocess_helpers import apply_hist_edge_style
 
-    # result is (n, bins, patches) tuple
+    apply_hist_edge_style(ax, DEFAULT_LINE_WIDTH_MM)
+
+    # Additionally ensure alpha is at least 0.7 for visibility
     if len(result) >= 3:
         patches = result[2]
-        # Handle both single histogram and stacked histograms
         if hasattr(patches, "__iter__"):
             for patch_group in patches:
                 if hasattr(patch_group, "__iter__"):
                     for patch in patch_group:
-                        patch.set_edgecolor("black")
-                        patch.set_linewidth(line_width)
-                        # Ensure alpha is at least 0.7 for visibility
                         if patch.get_alpha() is None or patch.get_alpha() < 0.7:
                             patch.set_alpha(1.0)
                 else:
-                    # Single patch
-                    patch_group.set_edgecolor("black")
-                    patch_group.set_linewidth(line_width)
                     if patch_group.get_alpha() is None or patch_group.get_alpha() < 0.7:
                         patch_group.set_alpha(1.0)
 
@@ -363,9 +361,6 @@ def _postprocess_fill_between(result, kwargs):
     """
     # result is a PolyCollection
     if result is not None:
-        # Set edge color to match face color or black
-        line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
-
         # Only set edge if not already specified
         if "edgecolor" not in kwargs and "ec" not in kwargs:
             result.set_edgecolor("none")
@@ -377,7 +372,7 @@ def _postprocess_fill_between(result, kwargs):
 
 def _postprocess_bar(result, ax, kwargs):
     """Apply styling for bar plots with colors and error bars."""
-    # Get scitex palette for coloring (only if color not explicitly set)
+    # Apply scitex palette only if color not explicitly set
     if "color" not in kwargs and "c" not in kwargs:
         from scitex.plt.color._PARAMS import HEX
 
@@ -392,11 +387,13 @@ def _postprocess_bar(result, ax, kwargs):
             HEX["pink"],
         ]
 
-        line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
         for i, patch in enumerate(result.patches):
             patch.set_facecolor(palette[i % len(palette)])
-            patch.set_edgecolor("black")
-            patch.set_linewidth(line_width)
+
+    # Always apply SCITEX edge styling (black, 0.2mm) - delegate to figrecipe
+    from scitex.plt.styles._postprocess_helpers import apply_bar_edge_style
+
+    apply_bar_edge_style(ax, DEFAULT_LINE_WIDTH_MM)
 
     if "yerr" not in kwargs or kwargs["yerr"] is None:
         return
@@ -417,7 +414,7 @@ def _postprocess_bar(result, ax, kwargs):
 
             # Adjust cap width to 33% of bar width
             if len(result.patches) > 0:
-                cap_width_pts = _calculate_cap_width_from_bar(
+                cap_width_pts = calculate_cap_width_from_bar(
                     result.patches[0], ax, "width"
                 )
                 for cap in caplines[1:]:
@@ -425,14 +422,14 @@ def _postprocess_bar(result, ax, kwargs):
 
         # Make error bar lines one-sided
         barlinecols = lines[2]
-        _make_errorbar_one_sided(barlinecols, "vertical")
+        make_errorbar_one_sided(barlinecols, "vertical")
     except Exception:
         pass
 
 
 def _postprocess_barh(result, ax, kwargs):
     """Apply styling for horizontal bar plots with colors and error bars."""
-    # Get scitex palette for coloring (only if color not explicitly set)
+    # Apply scitex palette only if color not explicitly set
     if "color" not in kwargs and "c" not in kwargs:
         from scitex.plt.color._PARAMS import HEX
 
@@ -447,11 +444,13 @@ def _postprocess_barh(result, ax, kwargs):
             HEX["pink"],
         ]
 
-        line_width = mm_to_pt(DEFAULT_LINE_WIDTH_MM)
         for i, patch in enumerate(result.patches):
             patch.set_facecolor(palette[i % len(palette)])
-            patch.set_edgecolor("black")
-            patch.set_linewidth(line_width)
+
+    # Always apply SCITEX edge styling (black, 0.2mm) - delegate to figrecipe
+    from scitex.plt.styles._postprocess_helpers import apply_bar_edge_style
+
+    apply_bar_edge_style(ax, DEFAULT_LINE_WIDTH_MM)
 
     if "xerr" not in kwargs or kwargs["xerr"] is None:
         return
@@ -472,7 +471,7 @@ def _postprocess_barh(result, ax, kwargs):
 
             # Adjust cap width to 33% of bar height
             if len(result.patches) > 0:
-                cap_width_pts = _calculate_cap_width_from_bar(
+                cap_width_pts = calculate_cap_width_from_bar(
                     result.patches[0], ax, "height"
                 )
                 for cap in caplines[1:]:
@@ -480,90 +479,9 @@ def _postprocess_barh(result, ax, kwargs):
 
         # Make error bar lines one-sided
         barlinecols = lines[2]
-        _make_errorbar_one_sided(barlinecols, "horizontal")
+        make_errorbar_one_sided(barlinecols, "horizontal")
     except Exception:
         pass
-
-
-# ============================================================================
-# Helper functions
-# ============================================================================
-def _calculate_cap_width_from_box(box, ax):
-    """Calculate cap width as 33% of box width in points."""
-    # Get box width from path
-    if hasattr(box, "get_path"):
-        path = box.get_path()
-        vertices = path.vertices
-        x_coords = vertices[:, 0]
-        box_width_data = x_coords.max() - x_coords.min()
-    elif hasattr(box, "get_xdata"):
-        x_data = box.get_xdata()
-        box_width_data = max(x_data) - min(x_data)
-    else:
-        box_width_data = 0.5  # Default
-
-    return _data_width_to_points(box_width_data, ax, "x") * CAP_WIDTH_RATIO
-
-
-def _calculate_cap_width_from_bar(patch, ax, dimension):
-    """Calculate cap width as 33% of bar width/height in points."""
-    if dimension == "width":
-        bar_size = patch.get_width()
-        return _data_width_to_points(bar_size, ax, "x") * CAP_WIDTH_RATIO
-    else:  # height
-        bar_size = patch.get_height()
-        return _data_width_to_points(bar_size, ax, "y") * CAP_WIDTH_RATIO
-
-
-def _data_width_to_points(data_size, ax, axis="x"):
-    """Convert a data-space size to points."""
-    fig = ax.get_figure()
-    bbox = ax.get_position()
-
-    if axis == "x":
-        ax_size_inches = bbox.width * fig.get_figwidth()
-        lim = ax.get_xlim()
-    else:
-        ax_size_inches = bbox.height * fig.get_figheight()
-        lim = ax.get_ylim()
-
-    data_range = lim[1] - lim[0]
-    size_inches = (data_size / data_range) * ax_size_inches
-    return size_inches * 72  # 72 points per inch
-
-
-def _make_errorbar_one_sided(barlinecols, direction):
-    """Make error bar line segments one-sided (outward only)."""
-    if not barlinecols or len(barlinecols) == 0:
-        return
-
-    for lc in barlinecols:
-        if not hasattr(lc, "get_segments"):
-            continue
-
-        segs = lc.get_segments()
-        new_segs = []
-        for seg in segs:
-            if len(seg) < 2:
-                continue
-
-            if direction == "vertical":
-                # Keep upper half
-                bottom_y = min(seg[0][1], seg[1][1])
-                top_y = max(seg[0][1], seg[1][1])
-                mid_y = (bottom_y + top_y) / 2
-                new_seg = np.array([[seg[0][0], mid_y], [seg[0][0], top_y]])
-            else:  # horizontal
-                # Keep right half
-                left_x = min(seg[0][0], seg[1][0])
-                right_x = max(seg[0][0], seg[1][0])
-                mid_x = (left_x + right_x) / 2
-                new_seg = np.array([[mid_x, seg[0][1]], [right_x, seg[0][1]]])
-
-            new_segs.append(new_seg)
-
-        if new_segs:
-            lc.set_segments(new_segs)
 
 
 # EOF
