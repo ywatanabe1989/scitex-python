@@ -61,7 +61,7 @@ async def notify_handler(
                     )
                     continue
 
-                b = get_backend(backend_name, timeout=timeout)
+                b = get_backend(backend_name)
                 result = await b.send(
                     message,
                     title=title,
