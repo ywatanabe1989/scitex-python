@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-08-23 11:14:18 (ywatanabe)"
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/auth/sso_automation/_BaseSSOAutomator.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -124,7 +124,8 @@ class BaseSSOAutomator(ABC):
         Args:
             page: Playwright page object
 
-        Returns:
+        Returns
+        -------
             True if login successful or already logged in
         """
         try:
@@ -193,7 +194,7 @@ class BaseSSOAutomator(ABC):
             if not session_file.exists():
                 return False
 
-            with open(session_file, "r") as f:
+            with open(session_file) as f:
                 state = json.load(f)
 
             # Check expiry
@@ -224,15 +225,26 @@ class BaseSSOAutomator(ABC):
             event_type: Type of event (2fa_required, authentication_success, etc.)
             **kwargs: Additional context for the notification
         """
+        # Generate notification content based on event type
+        subject, message, priority = self._generate_notification_content(
+            event_type, **kwargs
+        )
+
+        # Audio alert (immediate feedback) - uses scitex.ui.alert
+        try:
+            from scitex.ui import alert_async
+
+            audio_msg = self._generate_audio_message(event_type, **kwargs)
+            level = "critical" if priority == "high" else "info"
+            await alert_async(audio_msg, title="SciTeX Scholar", level=level)
+            self.logger.info(f"Audio alert sent: {event_type}")
+        except Exception as e:
+            self.logger.debug(f"Audio alert skipped: {e}")
+
+        # Email notification (detailed record)
         try:
             from scitex.utils._email import send_email_async
 
-            # Generate notification content based on event type
-            subject, message, priority = self._generate_notification_content(
-                event_type, **kwargs
-            )
-
-            # Send notification using self.notification variables
             success = await send_email_async(
                 from_email=self.notification_from_email_address,
                 to_email=self.notification_to_email_address,
@@ -243,15 +255,21 @@ class BaseSSOAutomator(ABC):
                 smtp_port=self.notification_from_smtp_port,
                 sender_name=self.notification_from_email_sender_name,
             )
-
             if success:
-                self.logger.info(f"User notification sent: {event_type}")
-            else:
-                self.logger.warning(f"Failed to send user notification: {event_type}")
-
+                self.logger.info(f"Email notification sent: {event_type}")
         except Exception as e:
-            self.logger.warning(f"Failed to send user notification: {str(e)}")
-            # Don't fail SSO process if notification fails
+            self.logger.debug(f"Email notification skipped: {e}")
+
+    def _generate_audio_message(self, event_type: str, **kwargs) -> str:
+        """Generate concise audio message for TTS."""
+        if event_type == "2fa_required":
+            return "Two factor authentication required. Check your device."
+        elif event_type == "authentication_success":
+            return "Authentication successful."
+        elif event_type == "authentication_failed":
+            return "Authentication failed."
+        else:
+            return f"Scholar authentication event: {event_type}"
 
     def _generate_notification_content(
         self, event_type: str, **kwargs
@@ -262,7 +280,8 @@ class BaseSSOAutomator(ABC):
             event_type: Type of event
             **kwargs: Additional context
 
-        Returns:
+        Returns
+        -------
             Tuple of (subject, message, priority)
         """
         institution = self.get_institution_name()
