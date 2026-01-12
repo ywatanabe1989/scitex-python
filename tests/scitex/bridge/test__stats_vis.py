@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./tests/scitex/bridge/test__stats_vis.py
 # Time-stamp: "2024-12-09 10:30:00 (ywatanabe)"
 """Tests for scitex.bridge._stats_vis module."""
@@ -13,8 +12,8 @@ class TestStatResultToAnnotation:
     def test_creates_annotation_model(self):
         """Test that function creates AnnotationModel."""
         from scitex.bridge import stat_result_to_annotation
+        from scitex.canvas.model import AnnotationModel
         from scitex.schema import create_stat_result
-        from scitex.vis.model import AnnotationModel
 
         result = create_stat_result("t-test", "t", 2.5, 0.01)
         annotation = stat_result_to_annotation(result)
@@ -54,7 +53,7 @@ class TestAddStatsToFigureModel:
     @pytest.fixture
     def figure_model(self):
         """Create a basic FigureModel."""
-        from scitex.vis.model import FigureModel
+        from scitex.canvas.model import FigureModel
 
         return FigureModel(
             width_mm=170,
@@ -90,7 +89,7 @@ class TestPositionStatAnnotation:
     def test_returns_position(self):
         """Test that function returns Position object."""
         from scitex.bridge import position_stat_annotation
-        from scitex.schema import create_stat_result, Position
+        from scitex.schema import Position, create_stat_result
 
         result = create_stat_result("t-test", "t", 2.5, 0.01)
         bounds = {"x_min": 0, "x_max": 10, "y_min": 0, "y_max": 100}
@@ -135,31 +134,31 @@ if __name__ == "__main__":
 # # Time-stamp: "2024-12-09 10:00:00 (ywatanabe)"
 # """
 # Bridge module for stats ↔ vis integration.
-# 
+#
 # Provides adapters to:
 # - Convert StatResult to vis AnnotationModel
 # - Add statistical annotations to FigureModel
 # - Position stat annotations using vis coordinate system
-# 
+#
 # Coordinate Convention
 # ---------------------
 # This module uses **data coordinates** for positioning (via Position with
 # unit="data"). This matches the vis model's approach where positions
 # correspond to actual data values on the plot.
-# 
+#
 # - Positions are in the same units as the plot data
 # - position_stat_annotation() returns Position(unit="data")
 # - For normalized positioning, use axes_bounds to define the data range
-# 
+#
 # This differs from _stats_plt which uses axes coordinates (0-1 normalized).
 # When bridging between plt and vis, coordinate transformation may be needed.
 # """
-# 
+#
 # from typing import Optional, Dict, Any, List, Tuple
-# 
+#
 # # Import GUI classes from FTS (single source of truth)
 # from scitex.io.bundle._stats import Position, StatPositioning
-# 
+#
 # # Legacy model imports - may not be available
 # try:
 #     from scitex.canvas.model import AnnotationModel, FigureModel, AxesModel, TextStyle
@@ -170,11 +169,11 @@ if __name__ == "__main__":
 #     AxesModel = None
 #     TextStyle = None
 #     VIS_MODEL_AVAILABLE = False
-# 
+#
 # # StatResult placeholder for type hints (actual usage is through dict)
 # StatResult = dict  # Use dict as StatResult is deprecated
-# 
-# 
+#
+#
 # def stat_result_to_annotation(
 #     stat_result: StatResult,
 #     format_style: str = "asterisk",
@@ -183,7 +182,7 @@ if __name__ == "__main__":
 # ) -> AnnotationModel:
 #     """
 #     Convert a StatResult to a vis AnnotationModel.
-# 
+#
 #     Parameters
 #     ----------
 #     stat_result : StatResult
@@ -194,7 +193,7 @@ if __name__ == "__main__":
 #         X position (data coordinates). Overrides stat_result positioning
 #     y : float, optional
 #         Y position (data coordinates). Overrides stat_result positioning
-# 
+#
 #     Returns
 #     -------
 #     AnnotationModel
@@ -202,7 +201,7 @@ if __name__ == "__main__":
 #     """
 #     # Get formatted text
 #     text = stat_result.format_text(format_style)
-# 
+#
 #     # Determine position
 #     if x is None or y is None:
 #         positioning = stat_result.positioning
@@ -214,7 +213,7 @@ if __name__ == "__main__":
 #             # Default center-top position (will be overridden by positioning logic)
 #             x = x if x is not None else 0.5
 #             y = y if y is not None else 0.95
-# 
+#
 #     # Build text style from stat styling
 #     styling = stat_result.styling
 #     text_style = TextStyle(
@@ -223,7 +222,7 @@ if __name__ == "__main__":
 #         ha="center",
 #         va="top",
 #     )
-# 
+#
 #     # Create annotation model
 #     return AnnotationModel(
 #         annotation_type="text",
@@ -233,8 +232,8 @@ if __name__ == "__main__":
 #         annotation_id=stat_result.plot_id or f"stat_{id(stat_result)}",
 #         style=text_style,
 #     )
-# 
-# 
+#
+#
 # def add_stats_to_figure_model(
 #     figure_model: FigureModel,
 #     stat_results: List[StatResult],
@@ -244,7 +243,7 @@ if __name__ == "__main__":
 # ) -> FigureModel:
 #     """
 #     Add statistical results as annotations to a FigureModel.
-# 
+#
 #     Parameters
 #     ----------
 #     figure_model : FigureModel
@@ -257,7 +256,7 @@ if __name__ == "__main__":
 #         Format style for the text
 #     auto_position : bool
 #         Whether to automatically position stats to avoid overlap
-# 
+#
 #     Returns
 #     -------
 #     FigureModel
@@ -265,17 +264,17 @@ if __name__ == "__main__":
 #     """
 #     if not stat_results:
 #         return figure_model
-# 
+#
 #     # Ensure axes exist
 #     if axes_index >= len(figure_model.axes):
 #         raise IndexError(f"Axes index {axes_index} out of range")
-# 
+#
 #     axes_dict = figure_model.axes[axes_index]
-# 
+#
 #     # Get or initialize annotations list
 #     if "annotations" not in axes_dict:
 #         axes_dict["annotations"] = []
-# 
+#
 #     # Calculate positions if auto_position
 #     positions = []
 #     if auto_position:
@@ -283,7 +282,7 @@ if __name__ == "__main__":
 #             stat_results,
 #             len(axes_dict["annotations"]),
 #         )
-# 
+#
 #     # Add each stat as annotation
 #     for i, stat_result in enumerate(stat_results):
 #         x, y = positions[i] if positions else (None, None)
@@ -294,10 +293,10 @@ if __name__ == "__main__":
 #             y=y,
 #         )
 #         axes_dict["annotations"].append(annotation.to_dict())
-# 
+#
 #     return figure_model
-# 
-# 
+#
+#
 # def position_stat_annotation(
 #     stat_result: StatResult,
 #     axes_bounds: Dict[str, float],
@@ -306,7 +305,7 @@ if __name__ == "__main__":
 # ) -> Position:
 #     """
 #     Calculate optimal position for a stat annotation.
-# 
+#
 #     Parameters
 #     ----------
 #     stat_result : StatResult
@@ -317,23 +316,23 @@ if __name__ == "__main__":
 #         List of existing annotation positions to avoid
 #     preferred_corner : str
 #         Preferred corner: "top-left", "top-right", "bottom-left", "bottom-right"
-# 
+#
 #     Returns
 #     -------
 #     Position
 #         Calculated position in data coordinates
 #     """
 #     existing = existing_positions or []
-# 
+#
 #     # Get axes range
 #     x_min = axes_bounds.get("x_min", 0)
 #     x_max = axes_bounds.get("x_max", 1)
 #     y_min = axes_bounds.get("y_min", 0)
 #     y_max = axes_bounds.get("y_max", 1)
-# 
+#
 #     x_range = x_max - x_min
 #     y_range = y_max - y_min
-# 
+#
 #     # Calculate corner positions (as fraction, then convert to data)
 #     corner_fractions = {
 #         "top-right": (0.95, 0.95),
@@ -343,38 +342,38 @@ if __name__ == "__main__":
 #         "top-center": (0.5, 0.95),
 #         "bottom-center": (0.5, 0.05),
 #     }
-# 
+#
 #     # Start with preferred corner
 #     base_x, base_y = corner_fractions.get(preferred_corner, (0.95, 0.95))
 #     x = x_min + base_x * x_range
 #     y = y_min + base_y * y_range
-# 
+#
 #     # Check overlap and adjust if needed
 #     min_dist = stat_result.positioning.min_distance_mm if stat_result.positioning else 2.0
-# 
+#
 #     for ex_x, ex_y in existing:
 #         dist = ((x - ex_x) ** 2 + (y - ex_y) ** 2) ** 0.5
 #         if dist < min_dist:
 #             # Shift down
 #             y -= min_dist * 1.5
-# 
+#
 #     return Position(x=x, y=y, unit="data")
-# 
-# 
+#
+#
 # def _calculate_stat_positions(
 #     stat_results: List[StatResult],
 #     existing_count: int = 0,
 # ) -> List[Tuple[float, float]]:
 #     """
 #     Calculate non-overlapping positions for multiple stats.
-# 
+#
 #     Parameters
 #     ----------
 #     stat_results : List[StatResult]
 #         List of stats to position
 #     existing_count : int
 #         Number of existing annotations
-# 
+#
 #     Returns
 #     -------
 #     List[Tuple[float, float]]
@@ -383,30 +382,30 @@ if __name__ == "__main__":
 #     positions = []
 #     y_start = 0.95
 #     y_step = 0.05
-# 
+#
 #     for i, stat in enumerate(stat_results):
 #         # Stack vertically from top
 #         y = y_start - (i + existing_count) * y_step
 #         x = 0.5  # Center
-# 
+#
 #         # Check stat's own positioning preference
 #         if stat.positioning and stat.positioning.position:
 #             pos = stat.positioning.position
 #             x = pos.x
 #             y = pos.y
-# 
+#
 #         positions.append((x, y))
-# 
+#
 #     return positions
-# 
-# 
+#
+#
 # __all__ = [
 #     "stat_result_to_annotation",
 #     "add_stats_to_figure_model",
 #     "position_stat_annotation",
 # ]
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./src/scitex/bridge/_stats_plt.py
 # Time-stamp: "2024-12-09 10:00:00 (ywatanabe)"
 """
@@ -25,11 +24,9 @@ When explicit x, y are provided, they use whatever coordinate system
 the caller intends (typically data coordinates unless transform is set).
 """
 
-from typing import Optional, Dict, Any, Union, List
-import warnings
+from typing import Any, List, Optional
 
 # Import GUI classes from FTS (single source of truth)
-from scitex.io.bundle._stats import Position
 
 # StatResult is now a dict - the GUI-specific StatResult is deprecated
 StatResult = dict
@@ -214,6 +211,7 @@ def _parse_stat_annotation(text: str) -> Optional[StatResult]:
     def _create_stat_dict(test_type, statistic_name, statistic_value, p_value):
         """Create a simple stat result dict."""
         from scitex.stats.utils import p2stars
+
         return {
             "test_type": test_type,
             "test_category": "other",

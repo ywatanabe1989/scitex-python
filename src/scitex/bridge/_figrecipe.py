@@ -56,7 +56,7 @@ def save_with_recipe(
     dpi : int
         Resolution for image output.
     **kwargs
-        Additional arguments passed to savefig.
+        Additional arguments passed to savefig (including facecolor).
 
     Returns
     -------
@@ -76,12 +76,9 @@ def save_with_recipe(
         storage = get_storage(path)
         storage.ensure_exists()
 
-        # Get underlying matplotlib figure
-        mpl_fig = fig._fig_mpl if hasattr(fig, "_fig_mpl") else fig
-
-        # 1. Save image
+        # 1. Save image - use fig.savefig() to get facecolor fix from FigWrapper
         image_path = storage.path / "plot.png"
-        mpl_fig.savefig(image_path, dpi=dpi, **kwargs)
+        _save_figure_image(fig, image_path, dpi=dpi, **kwargs)
         result["image"] = image_path
 
         # 2. Save SigmaPlot CSV
@@ -105,8 +102,7 @@ def save_with_recipe(
 
     else:
         # Single file save (image + sidecars)
-        mpl_fig = fig._fig_mpl if hasattr(fig, "_fig_mpl") else fig
-        mpl_fig.savefig(path, dpi=dpi, **kwargs)
+        _save_figure_image(fig, path, dpi=dpi, **kwargs)
         result["image"] = path
 
         # Save CSV sidecar
@@ -129,6 +125,42 @@ def save_with_recipe(
                 result["recipe"] = recipe_path
 
     return result
+
+
+def _save_figure_image(fig, path: Path, dpi: int = 300, **kwargs):
+    """Save figure image using the best available method with facecolor support.
+
+    Uses fig.savefig() when available (FigWrapper or RecordingFigure) to get
+    the facecolor override fix for transparent figures.
+    """
+    # Check if this is a figrecipe RecordingFigure - use fr.save() for full support
+    if FIGRECIPE_AVAILABLE:
+        try:
+            from figrecipe._wrappers import RecordingFigure
+
+            if isinstance(fig, RecordingFigure):
+                # Use figrecipe's save with facecolor support
+                facecolor = kwargs.pop("facecolor", None)
+                fr.save(
+                    fig,
+                    path,
+                    save_recipe=False,  # Recipe saved separately
+                    dpi=dpi,
+                    facecolor=facecolor,
+                    verbose=False,
+                    **kwargs,
+                )
+                return
+        except (ImportError, AttributeError):
+            pass
+
+    # Use fig.savefig() if available (FigWrapper has facecolor fix)
+    if hasattr(fig, "savefig"):
+        fig.savefig(path, dpi=dpi, **kwargs)
+    else:
+        # Fallback to matplotlib figure's savefig
+        mpl_fig = fig._fig_mpl if hasattr(fig, "_fig_mpl") else fig
+        mpl_fig.savefig(path, dpi=dpi, **kwargs)
 
 
 def _save_recipe_to_path(

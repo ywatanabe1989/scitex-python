@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./src/scitex/bridge/_stats_vis.py
 # Time-stamp: "2024-12-09 10:00:00 (ywatanabe)"
 """
@@ -24,14 +23,15 @@ This differs from _stats_plt which uses axes coordinates (0-1 normalized).
 When bridging between plt and vis, coordinate transformation may be needed.
 """
 
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 # Import GUI classes from FTS (single source of truth)
-from scitex.io.bundle._stats import Position, StatPositioning
+from scitex.io.bundle.kinds._stats import Position
 
 # Legacy model imports - may not be available
 try:
-    from scitex.canvas.model import AnnotationModel, FigureModel, AxesModel, TextStyle
+    from scitex.canvas.model import AnnotationModel, AxesModel, FigureModel, TextStyle
+
     VIS_MODEL_AVAILABLE = True
 except ImportError:
     AnnotationModel = None
@@ -219,7 +219,9 @@ def position_stat_annotation(
     y = y_min + base_y * y_range
 
     # Check overlap and adjust if needed
-    min_dist = stat_result.positioning.min_distance_mm if stat_result.positioning else 2.0
+    min_dist = (
+        stat_result.positioning.min_distance_mm if stat_result.positioning else 2.0
+    )
 
     for ex_x, ex_y in existing:
         dist = ((x - ex_x) ** 2 + (y - ex_y) ** 2) ** 0.5
