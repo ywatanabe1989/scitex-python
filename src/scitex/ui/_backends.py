@@ -193,15 +193,39 @@ class EmailBackend(BaseNotifyBackend):
 
 
 class DesktopBackend(BaseNotifyBackend):
-    """Desktop notification via native OS APIs."""
+    """Desktop notification via native OS APIs.
+
+    Supports:
+    - Linux: notify-send
+    - WSL/Windows: PowerShell toast notifications
+    """
 
     name = "desktop"
 
-    def is_available(self) -> bool:
-        # Check for notify-send (Linux) or other notification tools
+    def _is_wsl(self) -> bool:
+        """Check if running in WSL."""
+        try:
+            with open("/proc/version") as f:
+                return "microsoft" in f.read().lower()
+        except Exception:
+            return False
+
+    def _has_powershell(self) -> bool:
+        """Check if PowerShell is available."""
         import shutil
 
-        return shutil.which("notify-send") is not None
+        return shutil.which("powershell.exe") is not None
+
+    def is_available(self) -> bool:
+        import shutil
+
+        # Check for notify-send (Linux)
+        if shutil.which("notify-send") is not None:
+            return True
+        # Check for PowerShell (WSL/Windows)
+        if self._is_wsl() and self._has_powershell():
+            return True
+        return False
 
     async def send(
         self,
@@ -210,35 +234,25 @@ class DesktopBackend(BaseNotifyBackend):
         level: NotifyLevel = NotifyLevel.INFO,
         **kwargs,
     ) -> NotifyResult:
-        import subprocess
+        import shutil
 
         try:
-            urgency_map = {
-                NotifyLevel.INFO: "normal",
-                NotifyLevel.WARNING: "normal",
-                NotifyLevel.ERROR: "critical",
-                NotifyLevel.CRITICAL: "critical",
-            }
+            title = title or "SciTeX"
 
-            cmd = [
-                "notify-send",
-                "-u",
-                urgency_map.get(level, "normal"),
-                title or "SciTeX",
-                message,
-            ]
+            # Use PowerShell for WSL
+            if self._is_wsl() and self._has_powershell():
+                return await self._send_windows_toast(message, title, level)
 
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(
-                None,
-                lambda: subprocess.run(cmd, capture_output=True, timeout=5),
-            )
+            # Use notify-send for Linux
+            if shutil.which("notify-send"):
+                return await self._send_notify_send(message, title, level)
 
             return NotifyResult(
-                success=True,
+                success=False,
                 backend=self.name,
                 message=message,
                 timestamp=datetime.now().isoformat(),
+                error="No desktop notification method available",
             )
         except Exception as e:
             return NotifyResult(
@@ -248,6 +262,111 @@ class DesktopBackend(BaseNotifyBackend):
                 timestamp=datetime.now().isoformat(),
                 error=str(e),
             )
+
+    async def _send_notify_send(
+        self, message: str, title: str, level: NotifyLevel
+    ) -> NotifyResult:
+        """Send notification via notify-send (Linux)."""
+        import subprocess
+
+        urgency_map = {
+            NotifyLevel.INFO: "normal",
+            NotifyLevel.WARNING: "normal",
+            NotifyLevel.ERROR: "critical",
+            NotifyLevel.CRITICAL: "critical",
+        }
+
+        cmd = [
+            "notify-send",
+            "-u",
+            urgency_map.get(level, "normal"),
+            title,
+            message,
+        ]
+
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: subprocess.run(cmd, capture_output=True, timeout=5),
+        )
+
+        return NotifyResult(
+            success=True,
+            backend=self.name,
+            message=message,
+            timestamp=datetime.now().isoformat(),
+        )
+
+    async def _send_windows_toast(
+        self, message: str, title: str, level: NotifyLevel
+    ) -> NotifyResult:
+        """Send Windows toast notification via PowerShell."""
+        import subprocess
+        import tempfile
+
+        # Escape for XML
+        title_escaped = (
+            title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        )
+        message_escaped = (
+            message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        )
+
+        # Write PowerShell script to temp file to avoid escaping issues
+        ps_script = f"""[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+$template = '<toast><visual><binding template="ToastGeneric"><text>{title_escaped}</text><text>{message_escaped}</text></binding></visual></toast>'
+$xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+$xml.LoadXml($template)
+$toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
+[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("SciTeX").Show($toast)
+"""
+
+        # Write to temp file
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".ps1", delete=False) as f:
+            f.write(ps_script)
+            ps_file = f.name
+
+        try:
+            # Use Popen to avoid blocking - PowerShell can hang on subprocess.run
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None,
+                lambda: subprocess.Popen(
+                    [
+                        "powershell.exe",
+                        "-NoProfile",
+                        "-NonInteractive",
+                        "-ExecutionPolicy",
+                        "Bypass",
+                        "-File",
+                        ps_file,
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    stdin=subprocess.DEVNULL,
+                ),
+            )
+
+            # Give PowerShell time to read the file before cleanup
+            await asyncio.sleep(0.5)
+
+            return NotifyResult(
+                success=True,
+                backend=self.name,
+                message=message,
+                timestamp=datetime.now().isoformat(),
+                details={"method": "windows_toast"},
+            )
+        finally:
+            # Clean up temp file after delay
+            import os as _os
+
+            await asyncio.sleep(1)
+            try:
+                _os.unlink(ps_file)
+            except Exception:
+                pass
 
 
 class WebhookBackend(BaseNotifyBackend):
