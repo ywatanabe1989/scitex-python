@@ -120,8 +120,15 @@ class TestEmailBackend:
         assert backend.name == "email"
 
     def test_is_available_without_env(self, monkeypatch):
+        # Delete all email address env vars
+        monkeypatch.delenv("SCITEX_SCHOLAR_EMAIL_NOREPLY", raising=False)
         monkeypatch.delenv("SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS", raising=False)
+        monkeypatch.delenv("SCITEX_EMAIL_NOREPLY", raising=False)
         monkeypatch.delenv("SCITEX_EMAIL_AGENT", raising=False)
+        # Delete all password env vars
+        monkeypatch.delenv("SCITEX_SCHOLAR_EMAIL_PASSWORD", raising=False)
+        monkeypatch.delenv("SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD", raising=False)
+        monkeypatch.delenv("SCITEX_EMAIL_PASSWORD", raising=False)
         backend = EmailBackend()
         assert backend.is_available() is False
 
@@ -173,6 +180,7 @@ class TestAsyncSend:
         result = await backend.send("Test", level=NotifyLevel.INFO)
         assert result.success is False
         assert "No webhook URL" in result.error
+
 
 if __name__ == "__main__":
     import os
