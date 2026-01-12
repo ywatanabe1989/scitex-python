@@ -93,7 +93,7 @@ def notify(
         "SCITEX_SCHOLAR_EMAIL_NOREPLY",  # New name
         os.getenv(
             "SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS",  # Deprecated
-            os.getenv("SCITEX_EMAIL_AGENT", "agent@scitex.ai"),
+            os.getenv("SCITEX_EMAIL_AGENT", "no-reply@scitex.ai"),
         ),
     )
     sender_password = os.getenv(
