@@ -70,8 +70,8 @@ class TestAlertFunction:
     def test_alert_with_invalid_backend(self):
         from scitex.ui import alert
 
-        # Should return False when backend is invalid
-        result = alert("Test", backend="nonexistent_backend")
+        # Should return False when backend is invalid and fallback disabled
+        result = alert("Test", backend="nonexistent_backend", fallback=False)
         assert result is False
 
     def test_alert_with_level_string(self):

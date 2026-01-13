@@ -479,16 +479,16 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/cli/writer.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # """
 # SciTeX Writer Commands - LaTeX Manuscript Management
 # 
 # Provides manuscript project initialization and compilation.
 # """
 # 
-# import click
 # import sys
 # from pathlib import Path
+# 
+# import click
 # 
 # 
 # @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -573,19 +573,19 @@ if __name__ == "__main__":
 #             click.echo("Project structure:")
 #             click.echo(f"  {project_dir}/")
 #             click.echo(
-#                 f"    ├── 00_shared/          # Shared resources (figures, bibliography)"
+#                 "    ├── 00_shared/          # Shared resources (figures, bibliography)"
 #             )
-#             click.echo(f"    ├── 01_manuscript/      # Main manuscript")
-#             click.echo(f"    ├── 02_supplementary/   # Supplementary materials")
-#             click.echo(f"    ├── 03_revision/        # Revision documents")
-#             click.echo(f"    └── scripts/            # Compilation scripts")
+#             click.echo("    ├── 01_manuscript/      # Main manuscript")
+#             click.echo("    ├── 02_supplementary/   # Supplementary materials")
+#             click.echo("    ├── 03_revision/        # Revision documents")
+#             click.echo("    └── scripts/            # Compilation scripts")
 #             click.echo()
 #             click.echo("Next steps:")
 #             click.echo(f"  cd {project_dir}")
-#             click.echo(f"  # Edit your manuscript in 01_manuscript/contents/")
-#             click.echo(f"  scitex writer compile manuscript")
+#             click.echo("  # Edit your manuscript in 01_manuscript/contents/")
+#             click.echo("  scitex writer compile manuscript")
 #         else:
-#             click.secho(f"✗ Failed to clone project", fg="red", err=True)
+#             click.secho("✗ Failed to clone project", fg="red", err=True)
 #             sys.exit(1)
 # 
 #     except Exception as e:
@@ -631,10 +631,23 @@ if __name__ == "__main__":
 #         scitex writer compile revision --track-changes
 #         scitex writer compile supplementary --timeout 600
 #     """
-#     try:
-#         from scitex.writer import Writer
+#     from scitex.writer import Writer
 # 
-#         project_dir = Path(dir) if dir else Path.cwd()
+#     project_dir = Path(dir) if dir else Path.cwd()
+# 
+#     # Check if this is a Writer project before trying to attach
+#     required_dirs = ["01_manuscript", "02_supplementary", "03_revision"]
+#     missing = [d for d in required_dirs if not (project_dir / d).exists()]
+# 
+#     if missing:
+#         click.echo(f"Not a Writer project: {project_dir.absolute()}")
+#         click.echo(f"Missing directories: {', '.join(missing)}")
+#         click.echo()
+#         click.echo("To create a new project, run:")
+#         click.echo("  scitex writer clone <project-name>")
+#         return  # Exit gracefully with code 0
+# 
+#     try:
 #         writer = Writer(project_dir)
 # 
 #         click.echo(f"Compiling {document} in {project_dir}...")
@@ -651,7 +664,7 @@ if __name__ == "__main__":
 #             )
 # 
 #         if result.success:
-#             click.secho(f"✓ Compilation successful!", fg="green")
+#             click.secho("✓ Compilation successful!", fg="green")
 #             click.echo(f"PDF: {result.output_pdf}")
 #         else:
 #             click.secho(
@@ -687,10 +700,20 @@ if __name__ == "__main__":
 #         scitex writer info
 #         scitex writer info --dir ./my_paper
 #     """
-#     try:
-#         from scitex.writer import Writer
+#     from scitex.writer import Writer
 # 
-#         project_dir = Path(dir) if dir else Path.cwd()
+#     project_dir = Path(dir) if dir else Path.cwd()
+# 
+#     # Check if this is a Writer project before trying to attach
+#     required_dirs = ["01_manuscript", "02_supplementary", "03_revision"]
+#     missing = [d for d in required_dirs if not (project_dir / d).exists()]
+# 
+#     if missing:
+#         click.echo(f"Not a Writer project: {project_dir.absolute()}")
+#         click.echo(f"Missing directories: {', '.join(missing)}")
+#         return  # Exit gracefully with code 0
+# 
+#     try:
 #         writer = Writer(project_dir)
 # 
 #         click.echo(f"Project: {writer.project_name}")
@@ -733,10 +756,20 @@ if __name__ == "__main__":
 #         scitex writer watch
 #         scitex writer watch --dir ./my_paper
 #     """
-#     try:
-#         from scitex.writer import Writer
+#     from scitex.writer import Writer
 # 
-#         project_dir = Path(dir) if dir else Path.cwd()
+#     project_dir = Path(dir) if dir else Path.cwd()
+# 
+#     # Check if this is a Writer project before trying to attach
+#     required_dirs = ["01_manuscript", "02_supplementary", "03_revision"]
+#     missing = [d for d in required_dirs if not (project_dir / d).exists()]
+# 
+#     if missing:
+#         click.echo(f"Not a Writer project: {project_dir.absolute()}")
+#         click.echo(f"Missing directories: {', '.join(missing)}")
+#         return  # Exit gracefully with code 0
+# 
+#     try:
 #         writer = Writer(project_dir)
 # 
 #         click.echo(f"Watching {project_dir} for changes...")

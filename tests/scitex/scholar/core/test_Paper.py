@@ -477,11 +477,11 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/core/Paper.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-07 10:47:02 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/core/Paper.py
 # # ----------------------------------------
 # from __future__ import annotations
+# 
 # import os
 # 
 # __FILE__ = "./src/scitex/scholar/core/Paper.py"
@@ -500,11 +500,13 @@ if __name__ == "__main__":
 # 
 # from typing import Any, Dict, List, Optional
 # 
-# from pydantic import BaseModel, Field, field_validator, model_validator
+# from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 # 
 # 
 # class IDMetadata(BaseModel):
 #     """Identification metadata with source tracking."""
+# 
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 #     doi: Optional[str] = None
 #     doi_engines: List[str] = Field(default_factory=list)
@@ -526,10 +528,6 @@ if __name__ == "__main__":
 # 
 #     scholar_id: Optional[str] = None
 #     scholar_id_engines: List[str] = Field(default_factory=list)
-# 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True  # Validate on attribute assignment too
 # 
 # 
 # class BasicMetadata(BaseModel):
@@ -561,9 +559,7 @@ if __name__ == "__main__":
 #             raise ValueError(f"Year {v} is outside reasonable range (1900-2100)")
 #         return v
 # 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True  # Validate on attribute assignment too
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 # 
 # class CitationCountMetadata(BaseModel):
@@ -627,9 +623,7 @@ if __name__ == "__main__":
 #             raise ValueError(f"Citation count cannot be negative: {v}")
 #         return v
 # 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True  # Validate on attribute assignment too  # Allow both "2025" and "y2025"
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 #     def model_dump(self, **kwargs) -> Dict[str, Any]:
 #         """Custom serialization to use aliases in output."""
@@ -680,9 +674,7 @@ if __name__ == "__main__":
 #             raise ValueError(f"Impact factor cannot be negative: {v}")
 #         return v
 # 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True  # Validate on attribute assignment too
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 # 
 # class URLMetadata(BaseModel):
@@ -715,9 +707,7 @@ if __name__ == "__main__":
 #     additional_files: List[str] = Field(default_factory=list)
 #     additional_files_engines: List[str] = Field(default_factory=list)
 # 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True  # Validate on attribute assignment too
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 # 
 # class PathMetadata(BaseModel):
@@ -732,9 +722,7 @@ if __name__ == "__main__":
 #     additional_files: List[str] = Field(default_factory=list)
 #     additional_files_engines: List[str] = Field(default_factory=list)
 # 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True  # Validate on attribute assignment too
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 # 
 # class AccessMetadata(BaseModel):
@@ -763,9 +751,7 @@ if __name__ == "__main__":
 #     paywall_bypass_attempted: Optional[bool] = None
 #     paywall_bypass_success: Optional[bool] = None
 # 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 # 
 # class SystemMetadata(BaseModel):
@@ -779,9 +765,7 @@ if __name__ == "__main__":
 #     searched_by_Semantic_Scholar: Optional[bool] = None
 #     searched_by_URL: Optional[bool] = None
 # 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True  # Validate on attribute assignment too
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 # 
 # class PaperMetadataStructure(BaseModel):
@@ -796,9 +780,7 @@ if __name__ == "__main__":
 #     access: AccessMetadata = Field(default_factory=AccessMetadata)
 #     system: SystemMetadata = Field(default_factory=SystemMetadata)
 # 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True  # Validate on attribute assignment too
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 #     @model_validator(mode="after")
 #     def sync_ids_and_urls(self):
@@ -965,9 +947,7 @@ if __name__ == "__main__":
 #             raise ValueError(f"PDF size cannot be negative: {v}")
 #         return v
 # 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True  # Validate on attribute assignment too
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 # 
 # class Paper(BaseModel):
@@ -976,9 +956,7 @@ if __name__ == "__main__":
 #     metadata: PaperMetadataStructure = Field(default_factory=PaperMetadataStructure)
 #     container: ContainerMetadata = Field(default_factory=ContainerMetadata)
 # 
-#     class Config:
-#         populate_by_name = True
-#         validate_assignment = True  # Validate on attribute assignment too
+#     model_config = ConfigDict(populate_by_name=True, validate_assignment=True)
 # 
 #     def model_dump(self, **kwargs) -> Dict[str, Any]:
 #         """Custom serialization to ensure all nested models use aliases."""
@@ -990,7 +968,7 @@ if __name__ == "__main__":
 #         }
 # 
 #     @classmethod
-#     def from_dict(cls, data: Dict[str, Any]) -> "Paper":
+#     def from_dict(cls, data: Dict[str, Any]) -> Paper:
 #         """Create from dictionary (for loading from JSON).
 # 
 #         Uses Pydantic's model_validate which handles:
@@ -1011,7 +989,7 @@ if __name__ == "__main__":
 #         self,
 #         use_unpaywall: bool = False,
 #         update_metadata: bool = True,
-#     ) -> "OAResult":
+#     ) -> OAResult:
 #         """
 #         Detect open access status for this paper.
 # 
@@ -1022,10 +1000,11 @@ if __name__ == "__main__":
 #             use_unpaywall: If True, query Unpaywall API for uncertain cases
 #             update_metadata: If True, update self.metadata.access with results
 # 
-#         Returns:
+#         Returns
+#         -------
 #             OAResult with detection results
 #         """
-#         from .open_access import check_oa_status, OAResult
+#         from .open_access import check_oa_status
 # 
 #         result = check_oa_status(
 #             doi=self.metadata.id.doi,
@@ -1077,7 +1056,6 @@ if __name__ == "__main__":
 # 
 # if __name__ == "__main__":
 #     import json
-#     from pprint import pprint
 # 
 #     print("=" * 80)
 #     print("Paper Class - Pydantic Type-Safe Metadata with Runtime Validation")
