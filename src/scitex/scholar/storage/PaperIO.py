@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-11 23:45:23 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/storage/PaperIO.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/storage/PaperIO.py"
@@ -209,7 +209,8 @@ class PaperIO:
     def save_metadata(self) -> Path:
         """Save Paper metadata to metadata.json
 
-        Returns:
+        Returns
+        -------
             Path to saved metadata.json
         """
         path = self.get_metadata_path()
@@ -224,7 +225,8 @@ class PaperIO:
         Args:
             pdf_path: Source PDF file path
 
-        Returns:
+        Returns
+        -------
             Path to main.pdf in paper directory
         """
         pdf_path = Path(pdf_path)
@@ -247,7 +249,8 @@ class PaperIO:
         Args:
             text: Extracted text content
 
-        Returns:
+        Returns
+        -------
             Path to content.txt
         """
         path = self.get_text_path()
@@ -262,7 +265,8 @@ class PaperIO:
         Args:
             tables: List of table data
 
-        Returns:
+        Returns
+        -------
             Path to tables.json
         """
         path = self.get_tables_path()
@@ -271,6 +275,32 @@ class PaperIO:
         logger.debug(f"{self.name}: Saved {len(tables)} tables: {path}")
         return path
 
+    def save_tables_from_extraction(self, tables_dict: Dict[int, List[Any]]) -> Path:
+        """Save tables from PDF extraction (converts DataFrames to JSON).
+
+        Args:
+            tables_dict: Dict[page_num, List[DataFrame]] from PDF extraction
+
+        Returns
+        -------
+            Path to tables.json
+        """
+        tables_data = []
+        for page_num, page_tables in tables_dict.items():
+            for idx, df in enumerate(page_tables):
+                try:
+                    entry = {
+                        "page": page_num,
+                        "index": idx,
+                        "columns": list(df.columns) if hasattr(df, "columns") else [],
+                        "data": df.to_dict(orient="records") if hasattr(df, "to_dict") else [],
+                        "shape": list(df.shape) if hasattr(df, "shape") else [0, 0],
+                    }
+                    tables_data.append(entry)
+                except Exception as e:
+                    logger.warning(f"{self.name}: Could not convert table {page_num}:{idx}: {e}")
+        return self.save_tables(tables_data)
+
     def save_image(self, image_data: bytes, filename: str) -> Path:
         """Save extracted image to images/ directory
 
@@ -278,7 +308,8 @@ class PaperIO:
             image_data: Image bytes
             filename: Image filename (e.g., "fig1.png")
 
-        Returns:
+        Returns
+        -------
             Path to saved image
         """
         images_dir = self.get_images_dir()
@@ -294,14 +325,15 @@ class PaperIO:
     def load_metadata(self) -> Paper:
         """Load Paper from metadata.json and update internal reference.
 
-        Returns:
+        Returns
+        -------
             Paper object
         """
         path = self.get_metadata_path()
         if not path.exists():
             raise FileNotFoundError(f"Metadata not found: {path}")
 
-        with open(path, "r") as f:
+        with open(path) as f:
             data = json.load(f)
 
         paper = Paper.from_dict(data)
@@ -313,14 +345,15 @@ class PaperIO:
     def load_text(self) -> str:
         """Load extracted text from content.txt
 
-        Returns:
+        Returns
+        -------
             Text content
         """
         path = self.get_text_path()
         if not path.exists():
             raise FileNotFoundError(f"Text not found: {path}")
 
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             text = f.read()
         logger.info(f"{self.name}: Loaded text: {path}")
         return text
@@ -328,14 +361,15 @@ class PaperIO:
     def load_tables(self) -> List[Any]:
         """Load extracted tables from tables.json
 
-        Returns:
+        Returns
+        -------
             List of tables
         """
         path = self.get_tables_path()
         if not path.exists():
             raise FileNotFoundError(f"Tables not found: {path}")
 
-        with open(path, "r") as f:
+        with open(path) as f:
             tables = json.load(f)
         logger.info(f"{self.name}: Loaded {len(tables)} tables: {path}")
         return tables
@@ -346,7 +380,8 @@ class PaperIO:
     def get_all_files(self) -> Dict[str, bool]:
         """Get status of all expected files
 
-        Returns:
+        Returns
+        -------
             Dictionary of actual filename: exists (shows real PDF name if exists)
         """
         # Get actual PDF filename using PathManager getter
