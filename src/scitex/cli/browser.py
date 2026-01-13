@@ -123,6 +123,38 @@ def open(url, stealth, timeout, background):
 
         click.echo("Commands: 's'=show, 'h'=hide, 'q'=quit")
 
+        async def switch_mode(new_mode):
+            """Switch browser mode by recreating with proper headless setting."""
+            nonlocal browser_obj, context, page, browser_instance
+
+            if browser_instance.mode == new_mode:
+                return
+
+            # Get current URL
+            current_url = page.url
+
+            # Close old browser
+            await browser_instance.close_all_pages()
+            await browser_obj.close()
+
+            # Create new browser with correct mode
+            browser_instance.mode = new_mode
+            browser_obj, context = await browser_instance.create_browser_context_async(
+                pw
+            )
+            page = await context.new_page()
+            await page.goto(current_url, wait_until="domcontentloaded")
+
+            # Update references
+            browser_instance._browser = browser_obj
+            browser_instance.contexts = [context]
+            browser_instance.pages = [page]
+
+            # Restore browser ID in title
+            await page.evaluate(f"""
+                document.title = '[{browser_id}] ' + document.title;
+            """)
+
         if timeout > 0:
             click.echo(f"Auto-closing in {timeout} seconds...")
             await asyncio.sleep(timeout)
@@ -137,10 +169,10 @@ def open(url, stealth, timeout, background):
                     if select.select([_sys.stdin], [], [], 0.5)[0]:
                         cmd = _sys.stdin.readline().strip().lower()
                         if cmd == "s":
-                            await browser_instance.show_async()
+                            await switch_mode("interactive")
                             click.echo("Browser: now visible (interactive)")
                         elif cmd == "h":
-                            await browser_instance.hide_async()
+                            await switch_mode("stealth")
                             click.echo("Browser: now hidden (stealth)")
                         elif cmd == "q":
                             break
