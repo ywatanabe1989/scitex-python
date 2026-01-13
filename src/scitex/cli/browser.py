@@ -174,7 +174,7 @@ def open(url, stealth, timeout, background):
 
         async def switch_display(to_virtual: bool):
             """Switch browser between real and virtual display."""
-            nonlocal browser_obj, context, page, use_virtual_display
+            nonlocal pw, browser_obj, context, page, use_virtual_display
 
             if to_virtual == use_virtual_display:
                 return  # Already on target display
@@ -188,15 +188,17 @@ def open(url, stealth, timeout, background):
             current_url = page.url
             cookies = await context.cookies()
 
-            # Close old browser
+            # Close EVERYTHING - browser and playwright
             await browser_instance.close_all_pages()
             await browser_obj.close()
+            await pw.stop()
 
-            # Switch display
+            # Switch display BEFORE restarting playwright
             os.environ["DISPLAY"] = XVFB_DISPLAY if to_virtual else original_display
             use_virtual_display = to_virtual
 
-            # Create new browser on new display
+            # Restart playwright with new display
+            pw = await async_playwright().start()
             browser_obj, context = await browser_instance.create_browser_context_async(
                 pw
             )
@@ -205,6 +207,7 @@ def open(url, stealth, timeout, background):
             await page.goto(current_url, wait_until="domcontentloaded")
 
             # Update references
+            browser_instance._playwright = pw
             browser_instance._browser = browser_obj
             browser_instance.contexts = [context]
             browser_instance.pages = [page]
