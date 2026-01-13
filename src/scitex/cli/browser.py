@@ -123,37 +123,24 @@ def open(url, stealth, timeout, background):
 
         click.echo("Commands: 's'=show, 'h'=hide, 'q'=quit")
 
-        async def switch_mode(new_mode):
-            """Switch browser mode by recreating with proper headless setting."""
-            nonlocal browser_obj, context, page, browser_instance
+        # Get CDP session for window control
+        cdp = await context.new_cdp_session(page)
+        window_info = await cdp.send("Browser.getWindowForTarget")
+        window_id = window_info["windowId"]
 
-            if browser_instance.mode == new_mode:
-                return
-
-            # Get current URL
-            current_url = page.url
-
-            # Close old browser
-            await browser_instance.close_all_pages()
-            await browser_obj.close()
-
-            # Create new browser with correct mode
-            browser_instance.mode = new_mode
-            browser_obj, context = await browser_instance.create_browser_context_async(
-                pw
+        async def hide_window():
+            """Minimize the browser window."""
+            await cdp.send(
+                "Browser.setWindowBounds",
+                {"windowId": window_id, "bounds": {"windowState": "minimized"}},
             )
-            page = await context.new_page()
-            await page.goto(current_url, wait_until="domcontentloaded")
 
-            # Update references
-            browser_instance._browser = browser_obj
-            browser_instance.contexts = [context]
-            browser_instance.pages = [page]
-
-            # Restore browser ID in title
-            await page.evaluate(f"""
-                document.title = '[{browser_id}] ' + document.title;
-            """)
+        async def show_window():
+            """Restore the browser window."""
+            await cdp.send(
+                "Browser.setWindowBounds",
+                {"windowId": window_id, "bounds": {"windowState": "normal"}},
+            )
 
         if timeout > 0:
             click.echo(f"Auto-closing in {timeout} seconds...")
@@ -169,11 +156,11 @@ def open(url, stealth, timeout, background):
                     if select.select([_sys.stdin], [], [], 0.5)[0]:
                         cmd = _sys.stdin.readline().strip().lower()
                         if cmd == "s":
-                            await switch_mode("interactive")
-                            click.echo("Browser: now visible (interactive)")
+                            await show_window()
+                            click.echo("Browser: restored")
                         elif cmd == "h":
-                            await switch_mode("stealth")
-                            click.echo("Browser: now hidden (stealth)")
+                            await hide_window()
+                            click.echo("Browser: minimized")
                         elif cmd == "q":
                             break
                     await asyncio.sleep(0.1)
