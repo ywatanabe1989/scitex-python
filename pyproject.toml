@@ -80,6 +80,7 @@ scitex-plt = "scitex.plt.mcp_server:main"
 scitex-scholar = "scitex.scholar.mcp_server:main"
 scitex-stats = "scitex.stats.mcp_server:main"
 scitex-template = "scitex.template.mcp_server:main"
+scitex-ui = "scitex.ui.mcp_server:main"
 # Unified MCP Server (all modules in one)
 scitex-mcp-server = "scitex.mcp_server:main"
 

@@ -16,6 +16,7 @@ Aggregates tools from all SciTeX MCP modules with prefixed names:
 - canvas_*: Multi-panel figures
 - diagram_*: Diagram generation
 - writer_*: LaTeX manuscript compilation
+- ui_*: User notifications
 """
 
 from __future__ import annotations
@@ -42,6 +43,7 @@ MODULES = [
     ("canvas", "scitex.canvas._mcp.tool_schemas", "scitex.canvas._mcp.handlers"),
     ("diagram", "scitex.diagram._mcp.tool_schemas", "scitex.diagram._mcp.handlers"),
     ("writer", "scitex.writer._mcp.tool_schemas", "scitex.writer._mcp.handlers"),
+    ("ui", "scitex.ui._mcp.tool_schemas", "scitex.ui._mcp.handlers"),
 ]
 
 

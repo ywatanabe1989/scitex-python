@@ -36,7 +36,7 @@ class NotifyServer:
     """MCP Server for multi-backend notifications."""
 
     def __init__(self):
-        self.server = Server("scitex-notify")
+        self.server = Server("scitex-ui")
         self._notification_count: int = 0
         self.setup_handlers()
 
@@ -115,7 +115,7 @@ async def _run_server():
             read_stream,
             write_stream,
             InitializationOptions(
-                server_name="scitex-notify",
+                server_name="scitex-ui",
                 server_version="0.1.0",
                 capabilities=server.server.get_capabilities(
                     notification_options=NotificationOptions(),
@@ -131,7 +131,7 @@ def main():
         import sys
 
         print("=" * 60)
-        print("MCP Server 'scitex-notify' requires the 'mcp' package.")
+        print("MCP Server 'scitex-ui' requires the 'mcp' package.")
         print()
         print("Install with:")
         print("  pip install mcp")

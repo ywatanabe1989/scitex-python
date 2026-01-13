@@ -20,20 +20,21 @@ class EmacsBackend(BaseNotifyBackend):
 
     Displays notifications in Emacs minibuffer or as alerts.
     Supports different display methods:
-    - minibuffer: message function (default)
+    - popup: temporary popup buffer (default, most noticeable)
+    - minibuffer: message function
     - alert: alert.el package
     - notifications: notifications.el (desktop notifications from Emacs)
     """
 
     name = "emacs"
 
-    def __init__(self, method: str = "minibuffer", timeout: float = 5.0):
+    def __init__(self, method: str = "popup", timeout: float = 5.0):
         """Initialize Emacs backend.
 
         Parameters
         ----------
         method : str
-            Notification method: 'minibuffer', 'alert', or 'notifications'
+            Notification method: 'popup', 'minibuffer', 'alert', or 'notifications'
         timeout : float
             Display timeout for visual methods
         """
@@ -76,7 +77,43 @@ class EmacsBackend(BaseNotifyBackend):
             face = self._get_face_for_level(level)
 
             # Build elisp command based on method
-            if method == "alert":
+            if method == "popup":
+                # Popup buffer - most noticeable
+                level_colors = {
+                    NotifyLevel.INFO: "#98C379",  # green
+                    NotifyLevel.WARNING: "#E5C07B",  # yellow
+                    NotifyLevel.ERROR: "#E06C75",  # red
+                    NotifyLevel.CRITICAL: "#E06C75",  # red
+                }
+                color = level_colors.get(level, "#98C379")
+                elisp = f'''
+                (let* ((buf (get-buffer-create "*SciTeX Alert*"))
+                       (timeout {int(timeout)}))
+                  (with-current-buffer buf
+                    (erase-buffer)
+                    (insert (propertize "\\n  ╔══════════════════════════════════════╗\\n"
+                                        'face '(:foreground "{color}" :weight bold)))
+                    (insert (propertize "  ║  SciTeX Alert                        ║\\n"
+                                        'face '(:foreground "{color}" :weight bold)))
+                    (insert (propertize "  ╠══════════════════════════════════════╣\\n"
+                                        'face '(:foreground "{color}")))
+                    (insert (propertize (format "  ║  [%s] %s\\n" "{level.value.upper()}" "{msg_escaped}")
+                                        'face '(:foreground "{color}")))
+                    (insert (propertize "  ╚══════════════════════════════════════╝\\n"
+                                        'face '(:foreground "{color}")))
+                    (goto-char (point-min)))
+                  (display-buffer buf
+                    '((display-buffer-in-side-window)
+                      (side . bottom)
+                      (window-height . 8)))
+                  (run-at-time timeout nil
+                    (lambda ()
+                      (when-let ((win (get-buffer-window buf t)))
+                        (delete-window win))
+                      (kill-buffer buf)))
+                  (message "[SciTeX] %s" "{msg_escaped}"))
+                '''
+            elif method == "alert":
                 # Use alert.el package (if installed)
                 severity_map = {
                     NotifyLevel.INFO: "normal",
