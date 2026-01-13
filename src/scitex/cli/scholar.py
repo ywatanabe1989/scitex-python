@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 SciTeX Scholar Commands - CLI wrapper for scitex.scholar module
 
@@ -7,12 +6,16 @@ Wraps existing Scholar implementation (browser automation, PDF download, metadat
 into the unified scitex CLI interface.
 """
 
-import click
-import sys
 import asyncio
+import sys
 from pathlib import Path
 
+import click
+
+from scitex import logging
 from scitex.config import get_paths
+
+logger = logging.getLogger(__name__)
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -83,9 +86,9 @@ def single(doi, title, project, browser_mode, chrome_profile, force):
             force=force,
         )
 
-        click.echo(f"✓ Paper processed successfully")
+        logger.success("Paper processed successfully")
         if symlink_path:
-            click.echo(f"  Location: {symlink_path}")
+            logger.info(f"  Location: {symlink_path}")
 
     try:
         asyncio.run(run())

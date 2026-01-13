@@ -215,7 +215,7 @@ class PaperIO:
         path = self.get_metadata_path()
         with open(path, "w") as f:
             json.dump(self.paper.to_dict(), f, indent=2)
-        logger.info(f"{self.name}: Saved metadata: {path}")
+        logger.debug(f"{self.name}: Saved metadata: {path}")
         return path
 
     def save_pdf(self, pdf_path: Path) -> Path:
@@ -238,7 +238,7 @@ class PaperIO:
         self.paper.metadata.path.pdfs = [str(dest)]
         self.paper.container.pdf_size_bytes = dest.stat().st_size
 
-        logger.info(f"{self.name}: Saved PDF: {dest}")
+        logger.debug(f"{self.name}: Saved PDF: {dest}")
         return dest
 
     def save_text(self, text: str) -> Path:
@@ -253,7 +253,7 @@ class PaperIO:
         path = self.get_text_path()
         with open(path, "w", encoding="utf-8") as f:
             f.write(text)
-        logger.info(f"{self.name}: Saved text: {path}")
+        logger.debug(f"{self.name}: Saved text: {path}")
         return path
 
     def save_tables(self, tables: List[Any]) -> Path:
@@ -268,7 +268,7 @@ class PaperIO:
         path = self.get_tables_path()
         with open(path, "w") as f:
             json.dump(tables, f, indent=2)
-        logger.info(f"{self.name}: Saved {len(tables)} tables: {path}")
+        logger.debug(f"{self.name}: Saved {len(tables)} tables: {path}")
         return path
 
     def save_image(self, image_data: bytes, filename: str) -> Path:
@@ -285,7 +285,7 @@ class PaperIO:
         path = images_dir / filename
         with open(path, "wb") as f:
             f.write(image_data)
-        logger.info(f"{self.name}: Saved image: {path}")
+        logger.debug(f"{self.name}: Saved image: {path}")
         return path
 
     # ========================================
