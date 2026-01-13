@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
 SciTeX Browser Commands - Browser automation utilities with session management
+
+Stealth mode uses Xvfb (X Virtual Framebuffer) - browser runs with GUI
+but on a virtual display that user doesn't see.
 """
 
 import asyncio
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -12,6 +17,37 @@ import click
 
 # Browser session storage
 BROWSER_STATE_FILE = Path.home() / ".scitex" / "browser" / "sessions.json"
+XVFB_DISPLAY = ":99"
+
+
+def _ensure_xvfb_running():
+    """Ensure Xvfb is running on virtual display."""
+    # Check if Xvfb is already running on :99
+    try:
+        result = subprocess.run(
+            ["pgrep", "-f", f"Xvfb {XVFB_DISPLAY}"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            return True  # Already running
+    except Exception:
+        pass
+
+    # Start Xvfb
+    try:
+        subprocess.Popen(
+            ["Xvfb", XVFB_DISPLAY, "-screen", "0", "1920x1080x24"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        import time
+
+        time.sleep(0.5)  # Wait for Xvfb to start
+        return True
+    except FileNotFoundError:
+        click.echo("Warning: Xvfb not found. Install with: sudo apt install xvfb")
+        return False
 
 
 def _load_sessions():
@@ -77,12 +113,23 @@ def open(url, stealth, timeout, background):
     class SimpleBrowser(BrowserMixin):
         pass
 
-    mode = "stealth" if stealth else "interactive"
+    use_virtual_display = stealth
+    original_display = os.environ.get("DISPLAY", ":0")
+
+    # Setup Xvfb for stealth mode
+    if use_virtual_display:
+        if not _ensure_xvfb_running():
+            click.echo("Falling back to visible mode")
+            use_virtual_display = False
+        else:
+            os.environ["DISPLAY"] = XVFB_DISPLAY
 
     async def run():
-        browser_instance = SimpleBrowser(mode=mode)
+        nonlocal use_virtual_display
 
-        # Use create_browser_context_async for proper headless support
+        # Always launch with GUI (mode=interactive), display controls visibility
+        browser_instance = SimpleBrowser(mode="interactive")
+
         pw = await async_playwright().start()
         browser_obj, context = await browser_instance.create_browser_context_async(pw)
         page = await context.new_page()
@@ -105,14 +152,16 @@ def open(url, stealth, timeout, background):
         """)
 
         click.echo(f"Browser ID: {browser_id}")
-        click.echo(f"Mode: {mode}")
+        click.echo(
+            f"Display: {XVFB_DISPLAY if use_virtual_display else original_display}"
+        )
         click.echo(f"URL: {url}")
 
         if background:
             # Save session info
             sessions = _load_sessions()
             sessions[browser_id] = {
-                "mode": mode,
+                "display": XVFB_DISPLAY if use_virtual_display else original_display,
                 "url": url,
                 "pid": None,  # Would need process management for true background
             }
@@ -123,24 +172,47 @@ def open(url, stealth, timeout, background):
 
         click.echo("Commands: 's'=show, 'h'=hide, 'q'=quit")
 
-        # Get CDP session for window control
-        cdp = await context.new_cdp_session(page)
-        window_info = await cdp.send("Browser.getWindowForTarget")
-        window_id = window_info["windowId"]
+        async def switch_display(to_virtual: bool):
+            """Switch browser between real and virtual display."""
+            nonlocal browser_obj, context, page, use_virtual_display
 
-        async def hide_window():
-            """Minimize the browser window."""
-            await cdp.send(
-                "Browser.setWindowBounds",
-                {"windowId": window_id, "bounds": {"windowState": "minimized"}},
-            )
+            if to_virtual == use_virtual_display:
+                return  # Already on target display
 
-        async def show_window():
-            """Restore the browser window."""
-            await cdp.send(
-                "Browser.setWindowBounds",
-                {"windowId": window_id, "bounds": {"windowState": "normal"}},
+            # Ensure Xvfb is running for virtual display
+            if to_virtual and not _ensure_xvfb_running():
+                click.echo("Cannot switch: Xvfb not available")
+                return
+
+            # Get current URL and cookies
+            current_url = page.url
+            cookies = await context.cookies()
+
+            # Close old browser
+            await browser_instance.close_all_pages()
+            await browser_obj.close()
+
+            # Switch display
+            os.environ["DISPLAY"] = XVFB_DISPLAY if to_virtual else original_display
+            use_virtual_display = to_virtual
+
+            # Create new browser on new display
+            browser_obj, context = await browser_instance.create_browser_context_async(
+                pw
             )
+            await context.add_cookies(cookies)
+            page = await context.new_page()
+            await page.goto(current_url, wait_until="domcontentloaded")
+
+            # Update references
+            browser_instance._browser = browser_obj
+            browser_instance.contexts = [context]
+            browser_instance.pages = [page]
+
+            # Restore browser ID in title
+            await page.evaluate(f"""
+                document.title = '[{browser_id}] ' + document.title;
+            """)
 
         if timeout > 0:
             click.echo(f"Auto-closing in {timeout} seconds...")
@@ -156,11 +228,11 @@ def open(url, stealth, timeout, background):
                     if select.select([_sys.stdin], [], [], 0.5)[0]:
                         cmd = _sys.stdin.readline().strip().lower()
                         if cmd == "s":
-                            await show_window()
-                            click.echo("Browser: restored")
+                            await switch_display(to_virtual=False)
+                            click.echo(f"Browser: visible ({original_display})")
                         elif cmd == "h":
-                            await hide_window()
-                            click.echo("Browser: minimized")
+                            await switch_display(to_virtual=True)
+                            click.echo(f"Browser: hidden ({XVFB_DISPLAY})")
                         elif cmd == "q":
                             break
                     await asyncio.sleep(0.1)
