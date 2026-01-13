@@ -36,7 +36,7 @@ __all__ = ["UnifiedServer", "main"]
 MODULES = [
     ("audio", "scitex.audio._mcp.tool_schemas", "scitex.audio._mcp.handlers"),
     ("capture", "scitex.capture._mcp.tool_schemas", "scitex.capture._mcp.handlers"),
-    ("scholar", "scitex.scholar._mcp.tool_schemas", "scitex.scholar._mcp.handlers"),
+    ("scholar", "scitex.scholar._mcp.tool_schemas", "scitex.scholar._mcp.all_handlers"),
     ("stats", "scitex.stats._mcp.tool_schemas", "scitex.stats._mcp.handlers"),
     ("template", "scitex.template._mcp.tool_schemas", "scitex.template._mcp.handlers"),
     ("plt", "scitex.plt._mcp.tool_schemas", "scitex.plt._mcp.handlers"),
