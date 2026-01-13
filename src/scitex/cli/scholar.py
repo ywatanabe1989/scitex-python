@@ -2,7 +2,7 @@
 """
 SciTeX Scholar Commands - CLI for literature management.
 
-Add papers to your library by DOI or title. Downloads PDFs, enriches metadata,
+Fetch papers to your library by DOI or title. Downloads PDFs, enriches metadata,
 and organizes everything in a searchable library.
 """
 
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 def scholar():
     """
-    Add papers to your library
+    Fetch papers to your library
 
     \b
     Downloads PDFs, enriches metadata, and organizes papers:
@@ -66,22 +66,22 @@ def scholar():
     "-o",
     help="Output path for enriched BibTeX (only with --from-bibtex)",
 )
-def add(
+def fetch(
     papers, bibtex_file, project, workers, browser_mode, chrome_profile, force, output
 ):
     """
-    Add papers to your library
+    Fetch papers to your library
 
     Provide DOIs or titles as arguments. Papers are downloaded, metadata is
     enriched, and everything is stored in your library.
 
     \b
     Examples:
-        scitex scholar add "10.1038/nature12373"
-        scitex scholar add "10.1038/nature12373" "10.1016/j.neuron.2018.01.023"
-        scitex scholar add "Spike sorting methods" --project neuroscience
-        scitex scholar add --from-bibtex papers.bib --project myresearch
-        scitex scholar add "10.1038/nature12373" --force
+        scitex scholar fetch "10.1038/nature12373"
+        scitex scholar fetch "10.1038/nature12373" "10.1016/j.neuron.2018.01.023"
+        scitex scholar fetch "Spike sorting methods" --project neuroscience
+        scitex scholar fetch --from-bibtex papers.bib --project myresearch
+        scitex scholar fetch "10.1038/nature12373" --force
 
     \b
     TIP: Get BibTeX files from Scholar QA (https://scholarqa.allen.ai/chat/)
@@ -89,8 +89,8 @@ def add(
     # Validate input
     if not papers and not bibtex_file:
         click.echo("Error: Provide DOIs/titles or use --from-bibtex", err=True)
-        click.echo("\nUsage: scitex scholar add <doi_or_title>...", err=True)
-        click.echo("       scitex scholar add --from-bibtex papers.bib", err=True)
+        click.echo("\nUsage: scitex scholar fetch <doi_or_title>...", err=True)
+        click.echo("       scitex scholar fetch --from-bibtex papers.bib", err=True)
         sys.exit(1)
 
     if papers and bibtex_file:
@@ -141,7 +141,7 @@ def _add_single(doi_or_title, project, browser_mode, chrome_profile, force):
     """Add a single paper to library."""
     from scitex.scholar.pipelines.ScholarPipelineSingle import ScholarPipelineSingle
 
-    logger.info(f"Adding: {doi_or_title}")
+    logger.info(f"Fetching: {doi_or_title}")
 
     async def run():
         pipeline = ScholarPipelineSingle(
@@ -155,7 +155,7 @@ def _add_single(doi_or_title, project, browser_mode, chrome_profile, force):
             force=force,
         )
 
-        logger.success("Paper added to library")
+        logger.success("Paper fetched")
         if symlink_path:
             logger.info(f"  Location: {symlink_path}")
 
@@ -173,7 +173,7 @@ def _add_multiple(papers, project, workers, browser_mode, chrome_profile):
     """Add multiple papers to library in parallel."""
     from scitex.scholar.pipelines.ScholarPipelineParallel import ScholarPipelineParallel
 
-    logger.info(f"Adding {len(papers)} papers ({workers} workers)")
+    logger.info(f"Fetching {len(papers)} papers ({workers} workers)")
 
     async def run():
         pipeline = ScholarPipelineParallel(
@@ -187,7 +187,7 @@ def _add_multiple(papers, project, workers, browser_mode, chrome_profile):
             project=project,
         )
 
-        logger.success(f"{len(results)} papers added to library")
+        logger.success(f"{len(results)} papers fetched")
 
     try:
         asyncio.run(run())
@@ -202,13 +202,13 @@ def _add_multiple(papers, project, workers, browser_mode, chrome_profile):
 def _add_from_bibtex(
     bibtex_file, project, workers, browser_mode, chrome_profile, output
 ):
-    """Add papers from BibTeX file."""
+    """Fetch papers from BibTeX file."""
     from scitex.scholar.pipelines.ScholarPipelineBibTeX import ScholarPipelineBibTeX
 
     bibtex_path = Path(bibtex_file)
     workers = workers or 4
 
-    logger.info(f"Adding papers from: {bibtex_path.name}")
+    logger.info(f"Fetching papers from: {bibtex_path.name}")
 
     async def run():
         pipeline = ScholarPipelineBibTeX(
@@ -223,7 +223,7 @@ def _add_from_bibtex(
             output_bibtex_path=output,
         )
 
-        logger.success(f"{len(results)} papers added from BibTeX")
+        logger.success(f"{len(results)} papers fetched from BibTeX")
         if output:
             logger.info(f"  Enriched BibTeX: {output}")
 
@@ -251,7 +251,7 @@ def library(project):
     library_path = get_paths().scholar_library
 
     if not library_path.exists():
-        click.echo("Library is empty. Add papers with: scitex scholar add <doi>")
+        click.echo("Library is empty. Fetch papers with: scitex scholar fetch <doi>")
         return
 
     if project:
