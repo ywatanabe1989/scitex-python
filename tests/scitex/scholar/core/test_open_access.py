@@ -1,4 +1,273 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""
+Tests for scitex.scholar.core.open_access module.
+
+Tests cover:
+- arXiv ID pattern detection
+- Open access source detection
+- Open access journal detection
+- OA status detection from identifiers
+- OAResult dataclass
+"""
+
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from scitex.scholar.core.open_access import (
+    OAResult,
+    OAStatus,
+    check_oa_status,
+    detect_oa_from_identifiers,
+    is_arxiv_id,
+    is_open_access_source,
+)
+
+
+class TestOAStatus:
+    """Tests for OAStatus enum."""
+
+    def test_gold_status_value(self):
+        """GOLD status should have correct value."""
+        assert OAStatus.GOLD.value == "gold"
+
+    def test_green_status_value(self):
+        """GREEN status should have correct value."""
+        assert OAStatus.GREEN.value == "green"
+
+    def test_closed_status_value(self):
+        """CLOSED status should have correct value."""
+        assert OAStatus.CLOSED.value == "closed"
+
+    def test_all_statuses_have_values(self):
+        """All OA statuses should have string values."""
+        for status in OAStatus:
+            assert isinstance(status.value, str)
+            assert len(status.value) > 0
+
+
+class TestOAResult:
+    """Tests for OAResult dataclass."""
+
+    def test_basic_creation(self):
+        """OAResult should be creatable with required fields."""
+        result = OAResult(is_open_access=True, status=OAStatus.GOLD)
+        assert result.is_open_access is True
+        assert result.status == OAStatus.GOLD
+
+    def test_default_values(self):
+        """OAResult should have sensible default values."""
+        result = OAResult(is_open_access=False, status=OAStatus.UNKNOWN)
+        assert result.oa_url is None
+        assert result.source is None
+        assert result.license is None
+        assert result.confidence == 1.0
+
+    def test_all_fields_settable(self):
+        """All OAResult fields should be settable."""
+        result = OAResult(
+            is_open_access=True,
+            status=OAStatus.GREEN,
+            oa_url="https://arxiv.org/pdf/2301.12345.pdf",
+            source="arxiv",
+            license="CC-BY-4.0",
+            confidence=0.95,
+        )
+        assert result.oa_url == "https://arxiv.org/pdf/2301.12345.pdf"
+        assert result.source == "arxiv"
+        assert result.license == "CC-BY-4.0"
+        assert result.confidence == 0.95
+
+
+class TestIsArxivId:
+    """Tests for is_arxiv_id function."""
+
+    def test_new_format_basic(self):
+        """Should recognize new arXiv format (YYMM.NNNNN)."""
+        assert is_arxiv_id("2301.12345") is True
+        assert is_arxiv_id("1912.00001") is True
+
+    def test_new_format_with_version(self):
+        """Should recognize new format with version suffix."""
+        assert is_arxiv_id("2301.12345v1") is True
+        assert is_arxiv_id("2301.12345v2") is True
+        assert is_arxiv_id("2301.12345v10") is True
+
+    def test_old_format_basic(self):
+        """Should recognize old arXiv format (subject/YYYYNNN)."""
+        assert is_arxiv_id("hep-th/9901001") is True
+        assert is_arxiv_id("astro-ph/0001001") is True
+
+    def test_old_format_with_version(self):
+        """Should recognize old format with version suffix."""
+        assert is_arxiv_id("hep-th/9901001v1") is True
+        assert is_arxiv_id("hep-th/9901001v2") is True
+
+    def test_with_arxiv_prefix(self):
+        """Should recognize IDs with 'arxiv:' prefix."""
+        assert is_arxiv_id("arxiv:2301.12345") is True
+        assert is_arxiv_id("ARXIV:2301.12345") is True
+
+    def test_invalid_formats(self):
+        """Should reject invalid formats."""
+        assert is_arxiv_id("10.1038/nature12373") is False  # DOI
+        assert is_arxiv_id("PMC1234567") is False  # PMC ID
+        assert is_arxiv_id("12345") is False  # Just numbers
+        assert is_arxiv_id("random text") is False
+
+    def test_empty_and_none(self):
+        """Should handle empty and None inputs safely."""
+        assert is_arxiv_id("") is False
+        assert is_arxiv_id(None) is False
+
+    def test_whitespace_handling(self):
+        """Should handle whitespace correctly."""
+        assert is_arxiv_id("  2301.12345  ") is True
+        assert is_arxiv_id("2301.12345\n") is True
+
+
+class TestIsOpenAccessSource:
+    """Tests for is_open_access_source function."""
+
+    def test_known_oa_sources(self):
+        """Should recognize known OA sources from config."""
+        # These should match entries in config/default.yaml OPENACCESS_SOURCES
+        # Common OA sources to test - exact match depends on config
+        with patch(
+            "scitex.scholar.core.open_access._get_oa_sources",
+            return_value=frozenset(["arxiv", "pmc", "biorxiv", "medrxiv", "plos"]),
+        ):
+            assert is_open_access_source("arxiv") is True
+            assert is_open_access_source("pmc") is True
+            assert is_open_access_source("biorxiv") is True
+
+    def test_case_insensitive(self):
+        """Should be case insensitive."""
+        with patch(
+            "scitex.scholar.core.open_access._get_oa_sources",
+            return_value=frozenset(["arxiv", "pmc"]),
+        ):
+            assert is_open_access_source("ArXiv") is True
+            assert is_open_access_source("ARXIV") is True
+            assert is_open_access_source("PMC") is True
+
+    def test_unknown_sources(self):
+        """Should reject unknown sources."""
+        with patch(
+            "scitex.scholar.core.open_access._get_oa_sources",
+            return_value=frozenset(["arxiv", "pmc"]),
+        ):
+            assert is_open_access_source("elsevier") is False
+            assert is_open_access_source("springer") is False
+            assert is_open_access_source("wiley") is False
+
+    def test_empty_and_none(self):
+        """Should handle empty and None inputs safely."""
+        assert is_open_access_source("") is False
+        assert is_open_access_source(None) is False
+
+
+class TestDetectOaFromIdentifiers:
+    """Tests for detect_oa_from_identifiers function."""
+
+    def test_arxiv_id_returns_green_oa(self):
+        """arXiv IDs should return GREEN OA with PDF URL."""
+        result = detect_oa_from_identifiers(arxiv_id="2301.12345")
+        assert result.is_open_access is True
+        assert result.status == OAStatus.GREEN
+        assert result.source == "arxiv"
+        assert "arxiv.org/pdf/2301.12345" in result.oa_url
+        assert result.confidence == 1.0
+
+    def test_pmcid_returns_green_oa(self):
+        """PMC IDs should return GREEN OA with PDF URL."""
+        result = detect_oa_from_identifiers(pmcid="PMC1234567")
+        assert result.is_open_access is True
+        assert result.status == OAStatus.GREEN
+        assert result.source == "pmc"
+        assert "pmc/articles/PMC1234567" in result.oa_url
+        assert result.confidence == 1.0
+
+    def test_pmcid_lowercase(self):
+        """Should handle lowercase PMC IDs."""
+        result = detect_oa_from_identifiers(pmcid="pmc1234567")
+        assert result.is_open_access is True
+        assert result.status == OAStatus.GREEN
+
+    def test_oa_flag_true_returns_oa(self):
+        """Pre-existing OA flag should be trusted."""
+        result = detect_oa_from_identifiers(is_open_access_flag=True)
+        assert result.is_open_access is True
+        assert result.source == "api_flag"
+        assert result.confidence == 0.9
+
+    def test_doi_only_returns_unknown(self):
+        """DOI without OA indicators should return uncertain status."""
+        result = detect_oa_from_identifiers(doi="10.1038/nature12373")
+        assert result.is_open_access is False
+        assert result.status == OAStatus.UNKNOWN
+        assert result.source == "no_oa_indicators"
+        assert result.confidence == 0.6  # Low confidence
+
+    def test_no_identifiers_returns_unknown(self):
+        """No identifiers should return low confidence unknown."""
+        result = detect_oa_from_identifiers()
+        assert result.is_open_access is False
+        assert result.status == OAStatus.UNKNOWN
+        assert result.confidence == 0.3
+
+    def test_arxiv_takes_priority(self):
+        """arXiv should take priority over other indicators."""
+        result = detect_oa_from_identifiers(
+            doi="10.1038/nature12373", arxiv_id="2301.12345"
+        )
+        assert result.is_open_access is True
+        assert result.status == OAStatus.GREEN
+        assert result.source == "arxiv"
+
+
+class TestCheckOaStatus:
+    """Tests for check_oa_status synchronous function."""
+
+    def test_without_unpaywall_uses_local_detection(self):
+        """Without Unpaywall, should use local detection only."""
+        result = check_oa_status(arxiv_id="2301.12345", use_unpaywall=False)
+        assert result.is_open_access is True
+        assert result.source == "arxiv"
+
+    def test_doi_only_returns_uncertain(self):
+        """DOI only without Unpaywall should return uncertain."""
+        result = check_oa_status(doi="10.1038/nature12373", use_unpaywall=False)
+        assert result.status == OAStatus.UNKNOWN
+        # Should not be making API calls
+        assert "unpaywall" not in (result.source or "")
+
+    def test_multiple_indicators_combined(self):
+        """Multiple indicators should be processed correctly."""
+        result = check_oa_status(
+            doi="10.1038/nature12373",
+            arxiv_id="2301.12345",
+            pmcid="PMC7654321",
+            use_unpaywall=False,
+        )
+        # arXiv takes priority as checked first
+        assert result.is_open_access is True
+
+
+class TestOaSourceDetectionIntegration:
+    """Integration tests for OA source detection with mocked config."""
+
+    @patch("scitex.scholar.core.open_access._get_oa_sources")
+    @patch("scitex.scholar.core.open_access.is_open_access_journal")
+    def test_known_oa_source_returns_gold(self, mock_oa_journal, mock_oa_sources):
+        """Known OA source (not arXiv/PMC) should return GOLD status."""
+        mock_oa_sources.return_value = frozenset(["plos", "frontiers"])
+        mock_oa_journal.return_value = False
+
+        result = detect_oa_from_identifiers(source="plos")
+        assert result.is_open_access is True
+        assert result.status == OAStatus.GOLD
+        assert result.confidence == 0.95
 
 if __name__ == "__main__":
     import os
