@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-13 11:08:24 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/impact_factor/jcr/ImpactFactorJCREngine.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/impact_factor/jcr/ImpactFactorJCREngine.py"
@@ -32,8 +32,16 @@ IO:
 """Imports"""
 import argparse
 import functools
+
+# Suppress SQLAlchemy engine logs BEFORE importing sql_manager/sqlalchemy
+import logging as stdlib_logging
 from pathlib import Path
 from typing import Dict, List, Optional
+
+stdlib_logging.getLogger("sqlalchemy").setLevel(stdlib_logging.WARNING)
+stdlib_logging.getLogger("sqlalchemy.engine").setLevel(stdlib_logging.WARNING)
+stdlib_logging.getLogger("sqlalchemy.engine.Engine").setLevel(stdlib_logging.WARNING)
+stdlib_logging.getLogger("sqlalchemy.pool").setLevel(stdlib_logging.WARNING)
 
 from sql_manager import DynamicModel, Manager
 from sqlalchemy import Column, Float, String, func
@@ -96,7 +104,12 @@ class ImpactFactorJCREngine:
         """
         self.dbfile = dbfile or DEFAULT_DB
         # Disable SQL echo to reduce log verbosity
-        self.manager = FactorManager(self.dbfile, echo=False)
+        # Pass a WARNING-level logger to suppress sql_manager's verbose output
+        from simple_loggers import SimpleLogger
+
+        quiet_logger = SimpleLogger("Manager")
+        quiet_logger.setLevel(stdlib_logging.WARNING)
+        self.manager = FactorManager(self.dbfile, echo=False, logger=quiet_logger)
         self.query = self.manager.session.query(FactorData)
 
     def search(self, value: str, key: Optional[str] = None) -> List[Dict]:
@@ -107,7 +120,8 @@ class ImpactFactorJCREngine:
             value: Search value (journal name, ISSN, etc.)
             key: Specific field to search (None for all fields)
 
-        Returns:
+        Returns
+        -------
             List of matching journal records as dictionaries
         """
         from scitex.context import suppress_output
@@ -140,7 +154,8 @@ class ImpactFactorJCREngine:
             max_value: Maximum impact factor
             limit: Maximum number of results
 
-        Returns:
+        Returns
+        -------
             List of matching journal records
         """
         from scitex.context import suppress_output
@@ -261,8 +276,6 @@ def run_main() -> None:
     import sys
 
     import matplotlib.pyplot as plt
-
-    import scitex as stx
 
     args = parse_args()
 

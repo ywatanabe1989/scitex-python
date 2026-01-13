@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./src/scitex/scholar/pipelines/ScholarPipelineSearchParallel.py
 
 """
@@ -27,24 +26,23 @@ IO:
 """
 
 import asyncio
-from typing import List, Dict, Optional, Any, Callable
 from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional
 
 from scitex import logging
-from scitex.scholar.core import Paper
-from scitex.scholar.core import normalize_journal_name
-from scitex.scholar.search_engines.individual.PubMedSearchEngine import (
-    PubMedSearchEngine,
-)
+from scitex.scholar.core import Paper, normalize_journal_name
+from scitex.scholar.search_engines.individual.ArXivSearchEngine import ArXivSearchEngine
 from scitex.scholar.search_engines.individual.CrossRefSearchEngine import (
     CrossRefSearchEngine,
 )
-from scitex.scholar.search_engines.individual.ArXivSearchEngine import ArXivSearchEngine
-from scitex.scholar.search_engines.individual.SemanticScholarSearchEngine import (
-    SemanticScholarSearchEngine,
-)
 from scitex.scholar.search_engines.individual.OpenAlexSearchEngine import (
     OpenAlexSearchEngine,
+)
+from scitex.scholar.search_engines.individual.PubMedSearchEngine import (
+    PubMedSearchEngine,
+)
+from scitex.scholar.search_engines.individual.SemanticScholarSearchEngine import (
+    SemanticScholarSearchEngine,
 )
 
 logger = logging.getLogger(__name__)
@@ -292,7 +290,7 @@ class ScholarPipelineSearchParallel:
 
         try:
             # Run synchronous search in executor to make it async
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
 
             # Prepare filters for API
             api_filters = {
@@ -459,7 +457,7 @@ class ScholarPipelineSearchParallel:
             if doi:
                 try:
                     # Use OpenAlex engine for citation lookup
-                    loop = asyncio.get_event_loop()
+                    loop = asyncio.get_running_loop()
                     result = await asyncio.wait_for(
                         loop.run_in_executor(
                             None,

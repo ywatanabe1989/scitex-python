@@ -22,7 +22,11 @@ if __name__ == "__main__":
 # from scitex.str._color_text import color_text
 # from scitex.str._readable_bytes import readable_bytes
 # 
-# from ._image import save_image
+# # Optional: plotly-dependent save_image
+# try:
+#     from ._image import save_image
+# except ImportError:
+#     save_image = None
 # 
 # 
 # def save_separate_legends(obj, spath, symlink_from_cwd=False, dry_run=False, **kwargs):

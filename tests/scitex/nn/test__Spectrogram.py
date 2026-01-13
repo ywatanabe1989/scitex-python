@@ -410,8 +410,8 @@ if __name__ == "__main__":
 # import matplotlib.pyplot as plt
 # import scitex
 # from scitex.decorators import numpy_fn, torch_fn
-#
-#
+# 
+# 
 # class Spectrogram(nn.Module):
 #     def __init__(
 #         self,
@@ -470,13 +470,13 @@ if __name__ == "__main__":
 # 
 #         # Calculate frequencies (y-axis)
 #         freqs = torch.linspace(0, self.sampling_rate / 2, steps=self.n_fft // 2 + 1)
-#
+# 
 #         # Calculate times (x-axis)
 #         # The number of frames can be computed from the size of the last dimension of the spectrogram
 #         n_frames = spectrograms.shape[-1]
 #         # Time of each frame in seconds, considering the hop length and sampling rate
 #         times_sec = torch.arange(0, n_frames) * (self.hop_length / self.sampling_rate)
-#
+# 
 #         return spectrograms, freqs, times_sec
 # 
 # 
@@ -516,7 +516,7 @@ if __name__ == "__main__":
 #             "The spectrograms function requires the wavelets-pytorch package. "
 #             "Install it with: pip install wavelets-pytorch"
 #         )
-#
+# 
 #     dt = 1 / fs
 #     # dj = 0.125
 #     batch_size, n_chs, seq_len = x.shape

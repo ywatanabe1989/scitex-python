@@ -474,7 +474,7 @@ if __name__ == "__main__":
 #                 for n_ch in BNet_config["n_chs_of_modalities"]
 #             ]
 #         )
-#
+# 
 #         self.cgcs = [
 #             scitex.nn.ChannelGainChanger(n_ch)
 #             for n_ch in BNet_config["n_chs_of_modalities"]
@@ -540,11 +540,11 @@ if __name__ == "__main__":
 #         x = F.avg_pool1d(x, kernel_size=2)
 #         x = self.blk7(x)
 #         x = F.avg_pool1d(x, kernel_size=2)
-#
+# 
 #         import ipdb
-#
+# 
 #         ipdb.set_trace()
-#
+# 
 #         # x = self.cgc(x)
 #         x = self.MNet.forward_bb(x)
 #         x = self.fcs[i_head](x)
@@ -575,7 +575,7 @@ if __name__ == "__main__":
 #     # EEG
 #     BS, N_CHS, SEQ_LEN = 16, 19, 1024
 #     x_EEG = torch.rand(BS, N_CHS, SEQ_LEN).cuda()
-#
+# 
 #     # m = scitex.nn.ResNetBasicBlock(19, 19).cuda()
 #     # m(x_EEG)
 #     # model = MNetBackBorn(scitex.nn.MNet_config).cuda()

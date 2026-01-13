@@ -86,9 +86,9 @@ def create_child_git(project_dir: Path) -> Optional[Path]:
             repo = Repo(project_dir)
             logger.info(f"Project is already a git repository at {project_dir}")
             # Validate project structure even if repo already exists
-            from scitex.writer._validate_tree_structures import validate_tree_structures
+            from scitex.writer._verify_tree_structure import verify_tree_structure
 
-            validate_tree_structures(project_dir)
+            verify_tree_structure(project_dir)
             return project_dir
         except InvalidGitRepositoryError:
             logger.info(f"Initializing new git repository at {project_dir}")

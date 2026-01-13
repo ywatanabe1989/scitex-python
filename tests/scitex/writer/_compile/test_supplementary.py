@@ -21,7 +21,7 @@ pytest.importorskip("git")
 from pathlib import Path
 from unittest.mock import Mock, patch
 from scitex.writer._compile.supplementary import compile_supplementary
-from scitex.writer.dataclasses import CompilationResult
+from scitex.writer._dataclasses import CompilationResult
 
 
 class TestCompileSupplementary:
@@ -254,7 +254,7 @@ if __name__ == "__main__":
 # from pathlib import Path
 # from typing import Optional, Callable
 # from ._runner import run_compile
-# from ..dataclasses import CompilationResult
+# from .._dataclasses import CompilationResult
 # 
 # 
 # def compile_supplementary(

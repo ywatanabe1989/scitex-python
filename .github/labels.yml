@@ -1,0 +1,146 @@
+# ==============================================================================
+# GitHub Labels Configuration for scitex-code
+# Synced via crazy-max/ghaction-github-labeler
+# ==============================================================================
+
+# =============
+# Type
+# =============
+- name: bug
+  color: d73a4a
+  description: Something isn't working
+
+- name: enhancement
+  color: a2eeef
+  description: New feature or request
+
+- name: refactor
+  color: fbca04
+  description: Code improvement without behavior change
+
+- name: test
+  color: 0e8a16
+  description: Test-related issues
+
+- name: chore
+  color: c5def5
+  description: Maintenance tasks (deps, cleanup, CI)
+
+- name: documentation
+  color: 0075ca
+  description: Improvements or additions to documentation
+
+- name: breaking
+  color: b60205
+  description: Breaking changes requiring migration
+
+# =============
+# Priority
+# =============
+- name: "priority: critical"
+  color: b60205
+  description: Must be fixed immediately
+
+- name: "priority: high"
+  color: d93f0b
+  description: Important, should be addressed soon
+
+- name: "priority: medium"
+  color: fbca04
+  description: Normal priority
+
+- name: "priority: low"
+  color: 0e8a16
+  description: Nice to have, not urgent
+
+# =============
+# Scope (modules)
+# =============
+- name: "scope: writer"
+  color: 5319e7
+  description: Writer module (LaTeX manuscript)
+
+- name: "scope: scholar"
+  color: 5319e7
+  description: Scholar module (literature search)
+
+- name: "scope: plt"
+  color: 5319e7
+  description: Plotting module
+
+- name: "scope: stats"
+  color: 5319e7
+  description: Statistics module
+
+- name: "scope: cli"
+  color: 5319e7
+  description: Command-line interface
+
+- name: "scope: mcp"
+  color: 5319e7
+  description: MCP server integration
+
+- name: "scope: canvas"
+  color: 5319e7
+  description: Canvas/diagram module
+
+- name: "scope: audio"
+  color: 5319e7
+  description: Audio/speech module
+
+# =============
+# Status
+# =============
+- name: blocked
+  color: b60205
+  description: Waiting on external dependency or decision
+
+- name: in-progress
+  color: fbca04
+  description: Currently being worked on
+
+- name: needs-review
+  color: 0e8a16
+  description: Ready for review
+
+- name: needs-discussion
+  color: d876e3
+  description: Requires team discussion before proceeding
+
+# =============
+# Effort
+# =============
+- name: "effort: small"
+  color: c2e0c6
+  description: Less than 1 hour
+
+- name: "effort: medium"
+  color: fef2c0
+  description: 1-4 hours
+
+- name: "effort: large"
+  color: f9d0c4
+  description: More than 4 hours
+
+# =============
+# Special
+# =============
+- name: good first issue
+  color: 7057ff
+  description: Good for newcomers
+
+- name: help wanted
+  color: "008672"
+  description: Extra attention is needed
+
+- name: duplicate
+  color: cfd3d7
+  description: This issue or pull request already exists
+
+- name: wontfix
+  color: ffffff
+  description: This will not be worked on
+
+- name: invalid
+  color: e4e669
+  description: This doesn't seem right

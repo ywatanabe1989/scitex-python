@@ -119,7 +119,7 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_torch_fn.py
 # # ----------------------------------------
 # import os
-#
+# 
 # __FILE__ = "./src/scitex/decorators/_torch_fn.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
@@ -129,16 +129,16 @@ if __name__ == "__main__":
 # from typing import Callable
 # 
 # import numpy as np
-#
+# 
 # from ._converters import _return_always, is_nested_decorator, to_torch
 # 
 # 
 # def torch_fn(func: Callable) -> Callable:
 #     """Decorator for PyTorch function compatibility.
-#
+# 
 #     Automatically converts inputs to PyTorch tensors and handles various data types
 #     gracefully. Preserves the original input type in the output.
-#
+# 
 #     Features
 #     --------
 #     - Converts inputs to PyTorch tensors
@@ -148,17 +148,17 @@ if __name__ == "__main__":
 #     - Automatically converts axis to dim for torch functions
 #     - Applies device="cuda" if available
 #     - Returns output in same type as input (numpy->numpy, pandas->pandas, etc.)
-#
+# 
 #     Parameters
 #     ----------
 #     func : Callable
 #         The function to decorate
-#
+# 
 #     Returns
 #     -------
 #     Callable
 #         The decorated function
-#
+# 
 #     Examples
 #     --------
 #     >>> @torch_fn
@@ -173,17 +173,17 @@ if __name__ == "__main__":
 #     >>>
 #     >>> # Preserves dimension tuples
 #     >>> result = mean_squared(data, dim=(0, 1))
-#
+# 
 #     Notes
 #     -----
 #     For optimal performance with batch processing, apply torch_fn before batch_fn:
 #     @batch_fn
 #     @torch_fn
 #     def my_function(x): ...
-#
+# 
 #     Or use auto-ordering to handle this automatically.
 #     """
-#
+# 
 #     @wraps(func)
 #     def wrapper(*args: _Any, **kwargs: _Any) -> _Any:
 #         # Skip conversion if already in a nested decorator context
@@ -200,11 +200,11 @@ if __name__ == "__main__":
 #         converted_args, converted_kwargs = to_torch(
 #             *args, return_fn=_return_always, **kwargs
 #         )
-#
+# 
 #         # Skip strict assertion for certain types that may not convert to tensors
 #         # Instead, convert what we can and pass through what we can't
 #         import torch
-#
+# 
 #         validated_args = []
 #         for arg_index, arg in enumerate(converted_args):
 #             if isinstance(arg, torch.Tensor):
@@ -224,12 +224,12 @@ if __name__ == "__main__":
 #                 except:
 #                     # If all else fails, pass through unchanged
 #                     validated_args.append(arg)
-#
+# 
 #         results = func(*validated_args, **converted_kwargs)
-#
+# 
 #         # Convert results back to original input types
 #         import torch
-#
+# 
 #         if isinstance(results, torch.Tensor):
 #             if original_object is not None:
 #                 if isinstance(original_object, list):
@@ -241,21 +241,21 @@ if __name__ == "__main__":
 #                     and original_object.__class__.__name__ == "DataFrame"
 #                 ):
 #                     import pandas as pd
-#
+# 
 #                     return pd.DataFrame(results.detach().cpu().numpy())
 #                 elif (
 #                     hasattr(original_object, "__class__")
 #                     and original_object.__class__.__name__ == "Series"
 #                 ):
 #                     import pandas as pd
-#
+# 
 #                     return pd.Series(results.detach().cpu().numpy().flatten())
 #                 elif (
 #                     hasattr(original_object, "__class__")
 #                     and original_object.__class__.__name__ == "DataArray"
 #                 ):
 #                     import xarray as xr
-#
+# 
 #                     return xr.DataArray(results.detach().cpu().numpy())
 #             return results
 # 
@@ -265,8 +265,8 @@ if __name__ == "__main__":
 #     wrapper._is_wrapper = True
 #     wrapper._decorator_type = "torch_fn"
 #     return wrapper
-#
-#
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

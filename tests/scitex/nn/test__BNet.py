@@ -417,7 +417,7 @@ if __name__ == "__main__":
 # import torch.nn.functional as F
 # from torchsummary import summary
 # import numpy as np
-#
+# 
 # # Import specific nn modules to avoid circular imports
 # from ._SpatialAttention import SpatialAttention
 # from ._SwapChannels import SwapChannels
@@ -425,8 +425,8 @@ if __name__ == "__main__":
 # from ._FreqGainChanger import FreqGainChanger
 # from ._ChannelGainChanger import ChannelGainChanger
 # from ._MNet_1000 import MNet_1000
-#
-#
+# 
+# 
 # class BHead(nn.Module):
 #     def __init__(self, n_chs_in, n_chs_out):
 #         super().__init__()
@@ -446,7 +446,7 @@ if __name__ == "__main__":
 #         super().__init__()
 #         self.dummy_param = nn.Parameter(torch.empty(0))
 #         N_VIRTUAL_CHS = 32
-#
+# 
 #         self.sc = SwapChannels()
 #         self.dc = DropoutChannels(dropout=0.01)
 #         self.fgc = FreqGainChanger(BNet_config["n_bands"], BNet_config["SAMP_RATE"])
@@ -456,13 +456,13 @@ if __name__ == "__main__":
 #                 for n_ch in BNet_config["n_chs"]
 #             ]
 #         )
-#
+# 
 #         self.cgcs = [ChannelGainChanger(n_ch) for n_ch in BNet_config["n_chs"]]
 #         # self.cgc = ChannelGainChanger(N_VIRTUAL_CHS)
-#
+# 
 #         MNet_config["n_chs"] = N_VIRTUAL_CHS  # BNet_config["n_chs"] # override
 #         self.MNet = MNet_1000(MNet_config)
-#
+# 
 #         self.fcs = nn.ModuleList(
 #             [
 #                 nn.Sequential(
@@ -490,7 +490,7 @@ if __name__ == "__main__":
 #         x = self.cgcs[i_head](x)
 #         x = self.heads[i_head](x)
 #         import ipdb
-#
+# 
 #         ipdb.set_trace()
 #         # x = self.cgc(x)
 #         x = self.MNet.forward_bb(x)

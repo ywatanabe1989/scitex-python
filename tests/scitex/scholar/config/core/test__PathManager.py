@@ -11,11 +11,11 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/config/core/_PathManager.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-13 05:03:58 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/config/core/_PathManager.py
 # # ----------------------------------------
 # from __future__ import annotations
+# 
 # import os
 # 
 # __FILE__ = "./src/scitex/scholar/config/core/_PathManager.py"
@@ -340,6 +340,10 @@ if __name__ == "__main__":
 #     # ========================================
 #     # Workspace Directories
 #     # ========================================
+#     def get_workspace_dir(self) -> Path:
+#         """workspace - Working directory for temporary operations"""
+#         return self._ensure_directory(self.dirs["workspace_dir"])
+# 
 #     def get_workspace_logs_dir(self) -> Path:
 #         """workspace/logs"""
 #         return self._ensure_directory(self.dirs["workspace_logs_dir"])

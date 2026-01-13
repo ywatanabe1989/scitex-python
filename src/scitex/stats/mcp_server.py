@@ -50,7 +50,7 @@ class StatsServer:
 
     def setup_handlers(self):
         """Set up MCP server handlers."""
-        from ._mcp_handlers import (
+        from ._mcp.handlers import (
             correct_pvalues_handler,
             describe_handler,
             effect_size_handler,
@@ -62,7 +62,7 @@ class StatsServer:
             recommend_tests_handler,
             run_test_handler,
         )
-        from ._mcp_tool_schemas import get_tool_schemas
+        from ._mcp.tool_schemas import get_tool_schemas
 
         @self.server.list_tools()
         async def handle_list_tools():

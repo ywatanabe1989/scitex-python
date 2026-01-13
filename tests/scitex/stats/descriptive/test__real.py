@@ -147,7 +147,6 @@ class TestNumpyInput:
         assert isinstance(result, np.ndarray)
         assert result.shape == (5,)
 
-
 if __name__ == "__main__":
     import os
 
@@ -159,194 +158,180 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/stats/descriptive/_real.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-09-20 14:56:35 (ywatanabe)"
-# # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/desc/_real_dev.py
-# # ----------------------------------------
+# # Timestamp: "2025-12-27 (refactored)"
+# # File: scitex/stats/descriptive/_real.py
+# """
+# Descriptive statistics for real-valued data.
+# 
+# Uses torch when available (preserves tensor type), falls back to numpy.
+# """
+# 
 # from __future__ import annotations
+# 
 # import os
-#
+# 
+# import numpy as np
+# 
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-#
-# """
-# Functionalities:
-# - Computes descriptive statistics on PyTorch tensors
-# - Provides mean, standard deviation, variance calculations
-# - Calculates z-scores, skewness, kurtosis
-# - Computes quantiles (25th, 50th, 75th percentiles)
-# - Demonstrates statistical computations with synthetic data
-#
-# Dependencies:
-# - packages:
-#   - torch
-#   - numpy
-#   - scitex
-#
-# IO:
-# - input-files:
-#   - PyTorch tensor or numpy array
-# - output-files:
-#   - Descriptive statistics results
-# """
-#
-# """Imports"""
-# import argparse
-#
-# import numpy as np
-# import scitex as stx
-# import torch
-# from scitex import logging
-#
-# from scitex.decorators import torch_fn
-#
-# logger = logging.getLogger(__name__)
-#
-# """Functions & Classes"""
-#
-#
-# @torch_fn
+# 
+# # Optional torch support
+# try:
+#     import torch
+# 
+#     HAS_TORCH = True
+# except ImportError:
+#     torch = None
+#     HAS_TORCH = False
+# 
+# 
+# def _is_torch_tensor(x):
+#     """Check if x is a torch tensor."""
+#     return HAS_TORCH and isinstance(x, torch.Tensor)
+# 
+# 
+# def _normalize_axis(axis, dim):
+#     """Normalize axis/dim parameter."""
+#     return dim if dim is not None else axis
+# 
+# 
+# # =============================================================================
+# # Core Functions - Use torch when input is tensor, numpy otherwise
+# # =============================================================================
+# 
+# 
 # def mean(x, axis=-1, dim=None, keepdims=False):
-#     return x.mean(dim, keepdims=keepdims)
-#
-#
-# @torch_fn
+#     """Compute mean along specified axis.
+# 
+#     Parameters
+#     ----------
+#     x : array-like
+#         Input data (numpy array or torch tensor)
+#     axis : int, default=-1
+#         Axis along which to compute (deprecated, use dim)
+#     dim : int or tuple, optional
+#         Dimension(s) along which to compute
+#     keepdims : bool, default=False
+#         Keep reduced dimensions
+# 
+#     Returns
+#     -------
+#     ndarray or Tensor
+#         Mean values (same type as input)
+#     """
+#     dim = _normalize_axis(axis, dim)
+#     if _is_torch_tensor(x):
+#         return x.mean(dim=dim, keepdim=keepdims)
+#     return np.mean(np.asarray(x), axis=dim, keepdims=keepdims)
+# 
+# 
 # def std(x, axis=-1, dim=None, keepdims=False):
-#     return x.std(dim, keepdims=keepdims)
-#
-#
-# @torch_fn
+#     """Compute standard deviation along specified axis."""
+#     dim = _normalize_axis(axis, dim)
+#     if _is_torch_tensor(x):
+#         return x.std(dim=dim, keepdim=keepdims)
+#     return np.std(np.asarray(x), axis=dim, keepdims=keepdims)
+# 
+# 
 # def var(x, axis=-1, dim=None, keepdims=False):
-#     return x.var(dim, keepdims=keepdims)
-#
-#
-# @torch_fn
+#     """Compute variance along specified axis."""
+#     dim = _normalize_axis(axis, dim)
+#     if _is_torch_tensor(x):
+#         return x.var(dim=dim, keepdim=keepdims)
+#     return np.var(np.asarray(x), axis=dim, keepdims=keepdims)
+# 
+# 
 # def zscore(x, axis=-1, dim=None, keepdims=True):
-#     _mean = mean(x, dim=dim, keepdims=True)
-#     _std = std(x, dim=dim, keepdims=True)
-#     zscores = (x - _mean) / _std
-#     return zscores if keepdims else zscores.squeeze(dim)
-#
-#
-# @torch_fn
-# def skewness(x, axis=-1, dim=None, keepdims=False):
-#     zscores = zscore(x, axis=axis, keepdims=True)
-#     return torch.mean(torch.pow(zscores, 3.0), dim=dim, keepdims=keepdims)
-#
-#
-# @torch_fn
-# def kurtosis(x, axis=-1, dim=None, keepdims=False):
-#     zscores = zscore(x, axis=axis, keepdims=True)
-#     return torch.mean(torch.pow(zscores, 4.0), dim=dim, keepdims=keepdims) - 3.0
-#
-#
-# @torch_fn
-# def quantile(x, q, axis=-1, dim=None, keepdims=False):
-#     dim = axis if dim is None else dim
-#     if isinstance(dim, (tuple, list)):
-#         for d in sorted(dim, reverse=True):
-#             x = torch.quantile(x, q / 100, dim=d, keepdims=keepdims)
+#     """Compute z-scores along specified axis."""
+#     dim = _normalize_axis(axis, dim)
+#     if _is_torch_tensor(x):
+#         _mean = x.mean(dim=dim, keepdim=True)
+#         _std = x.std(dim=dim, keepdim=True)
+#         zscores = (x - _mean) / _std
+#         return zscores if keepdims else zscores.squeeze(dim)
 #     else:
-#         x = torch.quantile(x, q / 100, dim=dim, keepdims=keepdims)
-#     return x
-#
-#
-# @torch_fn
+#         x = np.asarray(x)
+#         _mean = np.mean(x, axis=dim, keepdims=True)
+#         _std = np.std(x, axis=dim, keepdims=True)
+#         zscores = (x - _mean) / _std
+#         if not keepdims and dim is not None:
+#             zscores = np.squeeze(zscores, axis=dim)
+#         return zscores
+# 
+# 
+# def skewness(x, axis=-1, dim=None, keepdims=False):
+#     """Compute skewness along specified axis."""
+#     dim = _normalize_axis(axis, dim)
+#     zscores = zscore(x, dim=dim, keepdims=True)
+#     if _is_torch_tensor(x):
+#         return torch.mean(torch.pow(zscores, 3.0), dim=dim, keepdim=keepdims)
+#     return np.mean(np.power(zscores, 3.0), axis=dim, keepdims=keepdims)
+# 
+# 
+# def kurtosis(x, axis=-1, dim=None, keepdims=False):
+#     """Compute excess kurtosis along specified axis."""
+#     dim = _normalize_axis(axis, dim)
+#     zscores = zscore(x, dim=dim, keepdims=True)
+#     if _is_torch_tensor(x):
+#         return torch.mean(torch.pow(zscores, 4.0), dim=dim, keepdim=keepdims) - 3.0
+#     return np.mean(np.power(zscores, 4.0), axis=dim, keepdims=keepdims) - 3.0
+# 
+# 
+# def quantile(x, q, axis=-1, dim=None, keepdims=False):
+#     """Compute quantile along specified axis.
+# 
+#     Parameters
+#     ----------
+#     x : array-like
+#         Input data
+#     q : float
+#         Quantile to compute (0-100)
+#     axis : int, default=-1
+#         Axis along which to compute
+#     dim : int or tuple, optional
+#         Dimension(s) along which to compute
+#     keepdims : bool, default=False
+#         Keep reduced dimensions
+# 
+#     Returns
+#     -------
+#     ndarray or Tensor
+#         Quantile values
+#     """
+#     dim = _normalize_axis(axis, dim)
+# 
+#     if _is_torch_tensor(x):
+#         if isinstance(dim, (tuple, list)):
+#             result = x
+#             for d in sorted(dim, reverse=True):
+#                 result = torch.quantile(result, q / 100, dim=d, keepdim=keepdims)
+#             return result
+#         return torch.quantile(x, q / 100, dim=dim, keepdim=keepdims)
+#     else:
+#         x = np.asarray(x)
+#         if isinstance(dim, (tuple, list)):
+#             result = x
+#             for d in sorted(dim, reverse=True):
+#                 result = np.quantile(result, q / 100, axis=d, keepdims=keepdims)
+#             return result
+#         return np.quantile(x, q / 100, axis=dim, keepdims=keepdims)
+# 
+# 
 # def q25(x, axis=-1, dim=None, keepdims=False):
+#     """Compute 25th percentile."""
 #     return quantile(x, 25, axis=axis, dim=dim, keepdims=keepdims)
-#
-#
-# @torch_fn
+# 
+# 
 # def q50(x, axis=-1, dim=None, keepdims=False):
+#     """Compute 50th percentile (median)."""
 #     return quantile(x, 50, axis=axis, dim=dim, keepdims=keepdims)
-#
-#
-# @torch_fn
+# 
+# 
 # def q75(x, axis=-1, dim=None, keepdims=False):
+#     """Compute 75th percentile."""
 #     return quantile(x, 75, axis=axis, dim=dim, keepdims=keepdims)
-#
-#
-# def main(args) -> int:
-#     """Demonstrate descriptive statistics functions with synthetic data."""
-#     x = np.random.rand(4, 3, 2)
-#
-#     # Compute statistics
-#     x_mean = mean(x)
-#     x_std = std(x)
-#     x_var = var(x)
-#     x_skew = skewness(x)
-#     x_kurt = kurtosis(x)
-#     x_q25 = q25(x)
-#     x_q50 = q50(x)
-#     x_q75 = q75(x)
-#
-#     # Store results
-#     results = {
-#         "input": x,
-#         "mean": x_mean,
-#         "std": x_std,
-#         "variance": x_var,
-#         "skewness": x_skew,
-#         "kurtosis": x_kurt,
-#         "q25": x_q25,
-#         "q50": x_q50,
-#         "q75": x_q75,
-#     }
-#
-#     for k, v in results.items():
-#         if isinstance(v, (np.ndarray, torch.Tensor)):
-#             print(f"\n{k}, Type: {type(v)}, Shape: {v.shape}, Values: {v}")
-#         elif isinstance(v, list):
-#             print(f"\n{k}, Type: {type(v)}, Length: {len(v)}, Values: {v}")
-#         else:
-#             print(f"\n{k}, Type: {type(v)}, Values: {v}")
-#
-#     return 0
-#
-#
-# def parse_args() -> argparse.Namespace:
-#     """Parse command line arguments."""
-#     parser = argparse.ArgumentParser(
-#         description="Demonstrate descriptive statistics functions"
-#     )
-#     args = parser.parse_args()
-#     return args
-#
-#
-# def run_main() -> None:
-#     """Initialize scitex framework, run main function, and cleanup."""
-#     global CONFIG, CC, sys, plt, rng
-#     import sys
-#
-#     import matplotlib.pyplot as plt
-#     import scitex as stx
-#
-#     args = parse_args()
-#     CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
-#         sys,
-#         plt,
-#         args=args,
-#         file=__FILE__,
-#         sdir_suffix=None,
-#         verbose=False,
-#         agg=True,
-#     )
-#
-#     exit_status = main(args)
-#
-#     stx.session.close(
-#         CONFIG,
-#         verbose=False,
-#         notify=False,
-#         message="",
-#         exit_status=exit_status,
-#     )
-#
-#
-# if __name__ == "__main__":
-#     run_main()
-#
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

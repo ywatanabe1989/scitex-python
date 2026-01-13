@@ -8,7 +8,7 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_dataclasses/_BBox.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_dataclasses/_BBox.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
@@ -66,5 +66,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_dataclasses/_BBox.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_dataclasses/_BBox.py
 # --------------------------------------------------------------------------------

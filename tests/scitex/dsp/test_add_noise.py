@@ -293,15 +293,29 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/add_noise.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Time-stamp: "ywatanabe (2024-11-02 23:09:49)"
 # # File: ./scitex_repo/src/scitex/dsp/add_noise.py
 # 
-# import torch
+# try:
+#     import torch
+# 
+#     TORCH_AVAILABLE = True
+# except ImportError:
+#     TORCH_AVAILABLE = False
+#     torch = None
+# 
 # from scitex.decorators import signal_fn
 # 
 # 
+# def _check_torch():
+#     if not TORCH_AVAILABLE:
+#         raise ImportError(
+#             "PyTorch is not installed. Please install with: pip install torch"
+#         )
+# 
+# 
 # def _uniform(shape, amp=1.0):
+#     _check_torch()
 #     a, b = -amp, amp
 #     return -amp + (2 * amp) * torch.rand(shape)
 # 
@@ -344,9 +358,11 @@ if __name__ == "__main__":
 # 
 # @signal_fn
 # def brown(x, amp=1.0, dim=-1):
+#     from scitex.dsp import norm
+# 
 #     noise = _uniform(x.shape, amp=amp)
 #     noise = torch.cumsum(noise, dim=dim)
-#     noise = scitex.dsp.norm.minmax(noise, amp=amp, dim=dim)
+#     noise = norm.minmax(noise, amp=amp, dim=dim)
 #     return x + noise.to(x.device)
 # 
 # 
@@ -354,6 +370,7 @@ if __name__ == "__main__":
 #     import sys
 # 
 #     import matplotlib.pyplot as plt
+# 
 #     import scitex
 # 
 #     # Start

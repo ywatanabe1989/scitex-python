@@ -15,6 +15,8 @@ Aggregates tools from all SciTeX MCP modules with prefixed names:
 - plt_*: Publication plotting
 - canvas_*: Multi-panel figures
 - diagram_*: Diagram generation
+- writer_*: LaTeX manuscript compilation
+- ui_*: User notifications
 """
 
 from __future__ import annotations
@@ -32,14 +34,16 @@ __all__ = ["UnifiedServer", "main"]
 
 # Module registry: (prefix, schema_getter, handler_module)
 MODULES = [
-    ("audio", "scitex.audio._mcp_tool_schemas", "scitex.audio._mcp_handlers"),
-    ("capture", "scitex.capture._mcp_tool_schemas", "scitex.capture._mcp_handlers"),
-    ("scholar", "scitex.scholar._mcp_tool_schemas", "scitex.scholar._mcp_handlers"),
-    ("stats", "scitex.stats._mcp_tool_schemas", "scitex.stats._mcp_handlers"),
-    ("template", "scitex.template._mcp_tool_schemas", "scitex.template._mcp_handlers"),
-    ("plt", "scitex.plt._mcp_tool_schemas", "scitex.plt._mcp_handlers"),
-    ("canvas", "scitex.canvas._mcp_tool_schemas", "scitex.canvas._mcp_handlers"),
-    ("diagram", "scitex.diagram._mcp_tool_schemas", "scitex.diagram._mcp_handlers"),
+    ("audio", "scitex.audio._mcp.tool_schemas", "scitex.audio._mcp.handlers"),
+    ("capture", "scitex.capture._mcp.tool_schemas", "scitex.capture._mcp.handlers"),
+    ("scholar", "scitex.scholar._mcp.tool_schemas", "scitex.scholar._mcp.handlers"),
+    ("stats", "scitex.stats._mcp.tool_schemas", "scitex.stats._mcp.handlers"),
+    ("template", "scitex.template._mcp.tool_schemas", "scitex.template._mcp.handlers"),
+    ("plt", "scitex.plt._mcp.tool_schemas", "scitex.plt._mcp.handlers"),
+    ("canvas", "scitex.canvas._mcp.tool_schemas", "scitex.canvas._mcp.handlers"),
+    ("diagram", "scitex.diagram._mcp.tool_schemas", "scitex.diagram._mcp.handlers"),
+    ("writer", "scitex.writer._mcp.tool_schemas", "scitex.writer._mcp.handlers"),
+    ("ui", "scitex.ui._mcp.tool_schemas", "scitex.ui._mcp.handlers"),
 ]
 
 

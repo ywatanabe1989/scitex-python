@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-09 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/browser/debugging/_browser_logger.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/browser/debugging/_browser_logger.py"
@@ -87,7 +87,8 @@ async def log_page_async(
         verbose: Enable/disable visual popups and screenshots (default True)
         level: Log level - one of: debug, info, success, warning, error, fail (default "info")
 
-    Returns:
+    Returns
+    -------
         bool: True if successful, False otherwise
 
     Example:
@@ -115,9 +116,8 @@ async def log_page_async(
         When verbose=False, only logger messages are generated without
         any visual feedback or screenshots, making it suitable for production.
     """
-    # Log to terminal
-    log_func = getattr(logger, level, logger.info)
-    log_func(f"    {func_name} - {message}")
+    # Log to terminal at DEBUG level (visual popups still show at specified level)
+    logger.debug(f"    {func_name} - {message}")
 
     # Check if this log level would actually be shown
     level_numeric = {
@@ -371,9 +371,8 @@ async def log_page_async(
                     path=str(screenshot_full_path),
                     full_page=False,
                 )
-                log_func(
+                logger.debug(
                     f"    {func_name} - Screenshot: {screenshot_full_path}",
-                    c="grey",
                 )
             except Exception as e:
                 log_func(
@@ -599,8 +598,6 @@ def main(args):
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
-    import scitex as stx
-
     parser = argparse.ArgumentParser(
         description="Popup and screenshot capture utility for debugging"
     )

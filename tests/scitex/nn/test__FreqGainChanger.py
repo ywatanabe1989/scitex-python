@@ -388,7 +388,6 @@ class TestFreqGainChanger:
         for output in outputs:
             assert torch.allclose(output, torch.ones_like(output), atol=1e-6)
 
-
 if __name__ == "__main__":
     import os
 
@@ -450,8 +449,8 @@ if __name__ == "__main__":
 # #         x = x.sum(axis=0)
 # 
 # #         return x
-#
-#
+# 
+# 
 # class FreqGainChanger(nn.Module):
 #     def __init__(self, n_bands, samp_rate, dropout_ratio=0.5):
 #         super().__init__()
@@ -474,7 +473,7 @@ if __name__ == "__main__":
 #             )
 #             freq_gains = F.softmax(freq_gains, dim=0)
 #             x = (x * freq_gains).sum(axis=0)
-#
+# 
 #         return x
 #         # import ipdb; ipdb.set_trace()
 # 
@@ -487,14 +486,14 @@ if __name__ == "__main__":
 #         # gains = gains_orig * use_freqs
 #         # sum_gains = gains.sum()
 #         # gain_ratio = sum_gains / sum_gains_orig
-#
+# 
 #         # x *= use_freqs.unsqueeze(-1).unsqueeze(-1).unsqueeze(-1)
 #         # x /= gain_ratio
 #         # x = x.sum(axis=0)
 # 
 #         # return x
-#
-#
+# 
+# 
 # if __name__ == "__main__":
 #     # Parameters
 #     N_BANDS = 10

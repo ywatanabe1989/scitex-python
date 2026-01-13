@@ -246,7 +246,6 @@ class TestDiagramSpec:
         assert spec.layout.layers == [["a", "b"], ["c"]]
         assert spec.layout.layer_gap == SpacingLevel.TIGHT
 
-
 if __name__ == "__main__":
     import os
 
@@ -262,22 +261,22 @@ if __name__ == "__main__":
 # # Timestamp: 2025-12-15
 # # Author: ywatanabe / Claude
 # # File: scitex/diagram/_schema.py
-#
+# 
 # """
 # Schema definitions for SciTeX Diagram.
-#
+# 
 # The schema defines paper-specific constraints that Mermaid/Graphviz don't know:
 # - Paper layout (single/double column, max width)
 # - Reading direction preferences
 # - Node emphasis for scientific communication
 # - Semantic layer grouping
 # """
-#
+# 
 # from dataclasses import dataclass, field
 # from enum import Enum
 # from typing import List, Dict, Optional, Literal
-#
-#
+# 
+# 
 # class DiagramType(Enum):
 #     """Semantic type of diagram - affects layout strategy."""
 #     WORKFLOW = "workflow"       # Sequential process, prefer LR/TB flow
@@ -285,28 +284,28 @@ if __name__ == "__main__":
 #     PIPELINE = "pipeline"       # Data pipeline, strict LR with stages
 #     HIERARCHY = "hierarchy"     # Tree structure, TB with levels
 #     COMPARISON = "comparison"   # Side-by-side, two columns
-#
-#
+# 
+# 
 # class ColumnLayout(Enum):
 #     """Paper column layout."""
 #     SINGLE = "single"   # Full width (~170mm)
 #     DOUBLE = "double"   # Half width (~85mm)
-#
-#
+# 
+# 
 # class SpacingLevel(Enum):
 #     """Abstract spacing levels - mapped to backend-specific values."""
 #     TIGHT = "tight"       # Publication: minimal whitespace
 #     COMPACT = "compact"
 #     MEDIUM = "medium"
 #     LARGE = "large"
-#
-#
+# 
+# 
 # class PaperMode(Enum):
 #     """Paper mode affects layout density and edge visibility."""
 #     DRAFT = "draft"           # Full arrows, visible bidirectional, medium spacing
 #     PUBLICATION = "publication"  # Compact, return edges hidden/dotted
-#
-#
+# 
+# 
 # @dataclass
 # class PaperConstraints:
 #     """Paper-specific constraints that affect layout."""
@@ -315,13 +314,13 @@ if __name__ == "__main__":
 #     reading_direction: Literal["left_to_right", "top_to_bottom"] = "left_to_right"
 #     mode: PaperMode = PaperMode.DRAFT  # draft: full details, publication: compact
 #     emphasize: List[str] = field(default_factory=list)  # Node IDs to highlight
-#
+# 
 #     # Scientific communication hints
 #     main_flow: List[str] = field(default_factory=list)  # Critical path nodes
 #     secondary_flow: List[str] = field(default_factory=list)  # Supporting elements
 #     return_edges: List[tuple] = field(default_factory=list)  # Edges to hide in publication
-#
-#
+# 
+# 
 # @dataclass
 # class LayoutHints:
 #     """Abstract layout hints - compiled to backend directives."""
@@ -329,11 +328,11 @@ if __name__ == "__main__":
 #     alignment: Dict[str, str] = field(default_factory=dict)  # Node alignment hints
 #     layer_gap: SpacingLevel = SpacingLevel.MEDIUM
 #     node_gap: SpacingLevel = SpacingLevel.MEDIUM
-#
+# 
 #     # Subgraph organization
 #     groups: Dict[str, List[str]] = field(default_factory=dict)  # Named groups
-#
-#
+# 
+# 
 # @dataclass
 # class NodeSpec:
 #     """Specification for a single node."""
@@ -341,14 +340,14 @@ if __name__ == "__main__":
 #     label: str
 #     shape: Literal["box", "rounded", "diamond", "circle", "stadium"] = "box"
 #     emphasis: Literal["normal", "primary", "success", "warning", "muted"] = "normal"
-#
+# 
 #     def short_label(self, max_chars: int = 20) -> str:
 #         """Return truncated label for compact layouts."""
 #         if len(self.label) <= max_chars:
 #             return self.label
 #         return self.label[:max_chars-3] + "..."
-#
-#
+# 
+# 
 # @dataclass
 # class EdgeSpec:
 #     """Specification for an edge between nodes."""
@@ -357,40 +356,40 @@ if __name__ == "__main__":
 #     label: Optional[str] = None
 #     style: Literal["solid", "dashed", "dotted"] = "solid"
 #     arrow: Literal["normal", "none", "open"] = "normal"
-#
-#
+# 
+# 
 # @dataclass
 # class DiagramSpec:
 #     """Complete diagram specification - the semantic layer."""
-#
+# 
 #     # Metadata
 #     type: DiagramType = DiagramType.WORKFLOW
 #     title: str = ""
-#
+# 
 #     # Paper constraints
 #     paper: PaperConstraints = field(default_factory=PaperConstraints)
-#
+# 
 #     # Layout hints
 #     layout: LayoutHints = field(default_factory=LayoutHints)
-#
+# 
 #     # Content
 #     nodes: List[NodeSpec] = field(default_factory=list)
 #     edges: List[EdgeSpec] = field(default_factory=list)
-#
+# 
 #     # Theme
 #     theme: Dict[str, str] = field(default_factory=dict)
-#
+# 
 #     @classmethod
 #     def from_dict(cls, data: dict) -> "DiagramSpec":
 #         """Create DiagramSpec from dictionary (parsed YAML)."""
 #         spec = cls()
-#
+# 
 #         # Parse type
 #         if "type" in data:
 #             spec.type = DiagramType(data["type"])
-#
+# 
 #         spec.title = data.get("title", "")
-#
+# 
 #         # Parse paper constraints
 #         if "paper" in data:
 #             p = data["paper"]
@@ -404,7 +403,7 @@ if __name__ == "__main__":
 #                 secondary_flow=p.get("secondary_flow", []),
 #                 return_edges=[tuple(e) for e in p.get("return_edges", [])],
 #             )
-#
+# 
 #         # Parse layout hints
 #         if "layout" in data:
 #             lt = data["layout"]
@@ -415,7 +414,7 @@ if __name__ == "__main__":
 #                 node_gap=SpacingLevel(lt.get("node_gap", "medium")),
 #                 groups=lt.get("groups", {}),
 #             )
-#
+# 
 #         # Parse nodes
 #         for n in data.get("nodes", []):
 #             spec.nodes.append(NodeSpec(
@@ -424,7 +423,7 @@ if __name__ == "__main__":
 #                 shape=n.get("shape", "box"),
 #                 emphasis=n.get("emphasis", "normal"),
 #             ))
-#
+# 
 #         # Parse edges
 #         for e in data.get("edges", []):
 #             spec.edges.append(EdgeSpec(
@@ -434,10 +433,10 @@ if __name__ == "__main__":
 #                 style=e.get("style", "solid"),
 #                 arrow=e.get("arrow", "normal"),
 #             ))
-#
+# 
 #         # Theme
 #         spec.theme = data.get("theme", {})
-#
+# 
 #         return spec
 
 # --------------------------------------------------------------------------------

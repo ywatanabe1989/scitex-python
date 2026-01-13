@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-11 22:30:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/logging/_context.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/logging/_context.py"
@@ -47,7 +47,8 @@ def log_to_file(
         mode: File mode ('w' for overwrite, 'a' for append)
         formatter: Custom formatter (default: SciTeXFileFormatter)
 
-    Yields:
+    Yields
+    ------
         The file handler (can be ignored)
     """
     # Ensure directory exists
@@ -73,7 +74,7 @@ def log_to_file(
             from scitex import logging
 
             logger = logging.getLogger(__name__)
-            logger.info(f"Logging to: {file_path}")
+            logger.debug(f"Logging to: {file_path}")
         except:
             pass  # Silently fail if logging not ready
 
@@ -92,7 +93,7 @@ def log_to_file(
                 from scitex import logging
 
                 logger = logging.getLogger(__name__)
-                logger.info(f"Log saved: {file_path}")
+                logger.debug(f"Log saved: {file_path}")
             except:
                 pass
 

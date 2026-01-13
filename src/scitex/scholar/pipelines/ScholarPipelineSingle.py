@@ -381,10 +381,10 @@ class ScholarPipelineSingle:
         return None
 
     def _step_10_log_final_status(self, io):
-        logger.info(f"{self.name}: Complete")
+        logger.success(f"{self.name}: Complete")
         status = io.get_all_files()
         for filename, exists in status.items():
-            logger.info(f"  {'✓' if exists else '✗'} {filename}")
+            logger.debug(f"  {'✓' if exists else '✗'} {filename}")
 
     # ----------------------------------------
     # Helper functions
@@ -579,7 +579,7 @@ class ScholarPipelineSingle:
                         url_data.get(f"{field}_engines", []),
                     )
 
-        logger.info(f"{self.name}: Merged metadata into Paper object")
+        logger.debug(f"{self.name}: Merged metadata into Paper object")
 
     def _enrich_impact_factor(self, paper: Paper) -> None:
         """Add journal impact factor to paper metadata if not present."""

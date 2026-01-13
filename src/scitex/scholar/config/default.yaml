@@ -5,7 +5,7 @@
 # feature
 # ----------------------------------------
 scholar_dir: ${SCITEX_DIR:-"~/.scitex"}
-project: ${SCITEX_SCHOLAR_PROJECT:-"MASTER"}
+project: ${SCITEX_SCHOLAR_PROJECT:-"default"}
 debug_mode: ${SCITEX_SCHOLAR_DEBUG_MODE:-false}
 enable_auto_enrich: ${SCITEX_SCHOLAR_AUTO_ENRICH:-true}
 enable_auto_download: ${SCITEX_SCHOLAR_AUTO_DOWNLOAD:-false}

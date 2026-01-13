@@ -20,7 +20,6 @@ Example:
 from .builder import CitationGraphBuilder
 from .models import PaperNode, CitationEdge, CitationGraph
 
-__version__ = "0.1.0"
 __all__ = [
     "CitationGraphBuilder",
     "PaperNode",

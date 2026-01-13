@@ -169,7 +169,7 @@ class AudioServer:
 
     def setup_handlers(self):
         """Set up MCP server handlers."""
-        from ._mcp_handlers import (
+        from ._mcp.handlers import (
             check_audio_status_handler,
             clear_audio_cache_handler,
             generate_audio_handler,
@@ -178,7 +178,7 @@ class AudioServer:
             list_voices_handler,
             play_audio_handler,
         )
-        from ._mcp_tool_schemas import get_tool_schemas
+        from ._mcp.tool_schemas import get_tool_schemas
 
         @self.server.list_tools()
         async def handle_list_tools():

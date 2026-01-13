@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./tests/scitex/bridge/test__stats_vis.py
 # Time-stamp: "2024-12-09 10:30:00 (ywatanabe)"
 """Tests for scitex.bridge._stats_vis module."""
@@ -13,8 +12,8 @@ class TestStatResultToAnnotation:
     def test_creates_annotation_model(self):
         """Test that function creates AnnotationModel."""
         from scitex.bridge import stat_result_to_annotation
+        from scitex.canvas.model import AnnotationModel
         from scitex.schema import create_stat_result
-        from scitex.vis.model import AnnotationModel
 
         result = create_stat_result("t-test", "t", 2.5, 0.01)
         annotation = stat_result_to_annotation(result)
@@ -54,7 +53,7 @@ class TestAddStatsToFigureModel:
     @pytest.fixture
     def figure_model(self):
         """Create a basic FigureModel."""
-        from scitex.vis.model import FigureModel
+        from scitex.canvas.model import FigureModel
 
         return FigureModel(
             width_mm=170,
@@ -90,7 +89,7 @@ class TestPositionStatAnnotation:
     def test_returns_position(self):
         """Test that function returns Position object."""
         from scitex.bridge import position_stat_annotation
-        from scitex.schema import create_stat_result, Position
+        from scitex.schema import Position, create_stat_result
 
         result = create_stat_result("t-test", "t", 2.5, 0.01)
         bounds = {"x_min": 0, "x_max": 10, "y_min": 0, "y_max": 100}
@@ -130,7 +129,6 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/bridge/_stats_vis.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # File: ./src/scitex/bridge/_stats_vis.py
 # # Time-stamp: "2024-12-09 10:00:00 (ywatanabe)"
 # """
@@ -155,14 +153,15 @@ if __name__ == "__main__":
 # When bridging between plt and vis, coordinate transformation may be needed.
 # """
 # 
-# from typing import Optional, Dict, Any, List, Tuple
+# from typing import Dict, List, Optional, Tuple
 # 
 # # Import GUI classes from FTS (single source of truth)
-# from scitex.io.bundle._stats import Position, StatPositioning
+# from scitex.io.bundle.kinds._stats import Position
 # 
 # # Legacy model imports - may not be available
 # try:
-#     from scitex.canvas.model import AnnotationModel, FigureModel, AxesModel, TextStyle
+#     from scitex.canvas.model import AnnotationModel, AxesModel, FigureModel, TextStyle
+# 
 #     VIS_MODEL_AVAILABLE = True
 # except ImportError:
 #     AnnotationModel = None
@@ -350,7 +349,9 @@ if __name__ == "__main__":
 #     y = y_min + base_y * y_range
 # 
 #     # Check overlap and adjust if needed
-#     min_dist = stat_result.positioning.min_distance_mm if stat_result.positioning else 2.0
+#     min_dist = (
+#         stat_result.positioning.min_distance_mm if stat_result.positioning else 2.0
+#     )
 # 
 #     for ex_x, ex_y in existing:
 #         dist = ((x - ex_x) ** 2 + (y - ex_y) ** 2) ** 0.5

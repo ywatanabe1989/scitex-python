@@ -422,13 +422,13 @@ if __name__ == "__main__":
 # import torch
 # import torch.nn as nn
 # from torchsummary import summary
-#
-#
+# 
+# 
 # class ResNet1D(nn.Module):
 #     """
 #     A representative convolutional neural network for signal classification tasks.
 #     """
-#
+# 
 #     def __init__(self, n_chs=19, n_out=10, n_blks=5):
 #         super().__init__()
 # 
@@ -517,8 +517,8 @@ if __name__ == "__main__":
 #         x = self.activation(x)
 # 
 #         return x
-#
-#
+# 
+# 
 # if __name__ == "__main__":
 #     import sys
 # 

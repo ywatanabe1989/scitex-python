@@ -80,6 +80,7 @@ scitex-plt = "scitex.plt.mcp_server:main"
 scitex-scholar = "scitex.scholar.mcp_server:main"
 scitex-stats = "scitex.stats.mcp_server:main"
 scitex-template = "scitex.template.mcp_server:main"
+scitex-ui = "scitex.ui.mcp_server:main"
 # Unified MCP Server (all modules in one)
 scitex-mcp-server = "scitex.mcp_server:main"
 
@@ -997,6 +998,7 @@ select = [
     "B",      # flake8-bugbear
     "C4",     # flake8-comprehensions
     "UP",     # pyupgrade
+    "D",      # pydocstyle (NumPy-style docstrings)
 ]
 ignore = [
     "E203",   # whitespace before ':'
@@ -1006,11 +1008,20 @@ ignore = [
     "E402",   # module level import not at top of file
     "B008",   # do not perform function calls in argument defaults
     "B905",   # zip() without an explicit strict= parameter
+    # Docstring rules - relaxed for gradual adoption
+    "D100",   # Missing docstring in public module
+    "D104",   # Missing docstring in public package
+    "D105",   # Missing docstring in magic method
+    "D107",   # Missing docstring in __init__
 ]
 
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401", "F403"]
-"tests/*" = ["F401", "F403", "F811"]
+"__init__.py" = ["F401", "F403", "D"]
+"tests/*" = ["F401", "F403", "F811", "D"]
+"**/tests/*" = ["D"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["scitex"]

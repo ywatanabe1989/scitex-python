@@ -78,4 +78,35 @@ debug:
   verbose: ${SCITEX_VERBOSE:-false}
   capture_screenshots: ${SCITEX_CAPTURE_SCREENSHOTS:-true}
 
+# ----------------------------------------
+# UI Notification Settings
+# ----------------------------------------
+ui:
+  default_backend: ${SCITEX_UI_DEFAULT_BACKEND:-"audio"}
+  backend_priority:
+    - audio
+    - desktop
+    - matplotlib
+    - playwright
+    - email
+    - webhook
+  level_backends:
+    info:
+      - audio
+    warning:
+      - audio
+      - desktop
+    error:
+      - audio
+      - desktop
+      - email
+    critical:
+      - audio
+      - desktop
+      - matplotlib
+      - email
+  timeouts:
+    matplotlib: ${SCITEX_UI_TIMEOUT_MATPLOTLIB:-5.0}
+    playwright: ${SCITEX_UI_TIMEOUT_PLAYWRIGHT:-5.0}
+
 # EOF

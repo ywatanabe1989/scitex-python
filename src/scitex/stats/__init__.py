@@ -187,6 +187,16 @@ def test_result_to_stats(result: dict) -> "Stats":
 
 
 # =============================================================================
+# Figrecipe Integration (for plot annotations)
+# =============================================================================
+
+from ._figrecipe_integration import (
+    annotate,
+    load_and_annotate,
+    to_figrecipe,
+)
+
+# =============================================================================
 # .stats Bundle Support
 # =============================================================================
 
@@ -333,6 +343,8 @@ __all__ = [
     # Bundle functions
     "save_stats",
     "load_stats",
+    # Figrecipe integration
+    "to_figrecipe",
+    "annotate",
+    "load_and_annotate",
 ]
-
-__version__ = "2.2.0"

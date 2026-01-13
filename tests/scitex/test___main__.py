@@ -173,7 +173,6 @@ class TestSciTeXMain:
             # Simulate module execution - verify main module is importable
             assert hasattr(main_module, "main")
 
-
 if __name__ == "__main__":
     import os
 
@@ -185,29 +184,48 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/__main__.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # """
 # SciTeX Package Entry Point
-#
+# 
 # Allows running: python -m scitex [command]
 # """
-#
+# 
 # import sys
-#
-#
+# 
+# 
+# def _check_cli_dependencies():
+#     """Check CLI dependencies and return missing ones."""
+#     missing = []
+#     try:
+#         import click
+#     except ImportError:
+#         missing.append(("click", "pip install click"))
+#     return missing
+# 
+# 
 # def main():
 #     """Main entry point for scitex CLI"""
+#     # Check dependencies first
+#     missing = _check_cli_dependencies()
+#     if missing:
+#         print("SciTeX CLI missing dependencies:")
+#         for pkg, install in missing:
+#             print(f"  - {pkg}: {install}")
+#         print("\nOr install all CLI deps: pip install scitex[cli]")
+#         sys.exit(1)
+# 
 #     try:
 #         from scitex.cli.main import cli
-#
+# 
 #         cli()
-#     except ImportError:
-#         # CLI not available (click not installed)
-#         print("SciTeX CLI requires 'click' package")
-#         print("Install: pip install click")
+#     except ImportError as e:
+#         print(f"SciTeX CLI import error: {e}")
+#         import traceback
+# 
+#         traceback.print_exc()
 #         sys.exit(1)
-#
-#
+# 
+# 
 # if __name__ == "__main__":
 #     main()
 

@@ -300,7 +300,7 @@ if __name__ == "__main__":
 #     """
 #     if orders:
 #         by = [by] if isinstance(by, str) else list(orders.keys()) if by is None else by
-#
+# 
 #         def apply_custom_order(column):
 #             return (
 #                 pd.Categorical(column, categories=orders[column.name], ordered=True)

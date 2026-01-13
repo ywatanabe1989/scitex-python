@@ -22,7 +22,6 @@ class TestSaveOptunaAvailableFlags:
 
         assert isinstance(OPTUNA_AVAILABLE, bool)
 
-
 if __name__ == "__main__":
     import os
 
@@ -34,18 +33,29 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_optuna_study_as_csv_and_pngs.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-02 17:01:15 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/io/_save_optuna_study_as_csv_and_pngs.py
-#
-#
-# def save_optuna_study_as_csv_and_pngs(study, sdir):
+# 
+# try:
 #     import optuna
+# 
+#     OPTUNA_AVAILABLE = True
+# except ImportError:
+#     OPTUNA_AVAILABLE = False
+#     optuna = None
+# 
+# 
+# def save_optuna_study_as_csv_and_pngs(study, sdir):
+#     if not OPTUNA_AVAILABLE:
+#         raise ImportError(
+#             "Optuna is not installed. Please install with: pip install optuna"
+#         )
+# 
 #     from .._save import save
-#
+# 
 #     ## Trials DataFrame
 #     trials_df = study.trials_dataframe()
-#
+# 
 #     ## Figures
 #     hparams_keys = list(study.best_params.keys())
 #     slice_plot = optuna.visualization.plot_slice(study, params=hparams_keys)
@@ -62,14 +72,14 @@ if __name__ == "__main__":
 #         parallel_coord_plot=parallel_coord_plot,
 #         hparam_importances_plot=hparam_importances_plot,
 #     )
-#
+# 
 #     ## Saves
 #     save(trials_df, sdir + "trials_df.csv")
-#
+# 
 #     for figname, fig in figs_dict.items():
 #         save(fig, sdir + f"{figname}.png")
-#
-#
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

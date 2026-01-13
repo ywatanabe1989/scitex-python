@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./tests/scitex/bridge/test__helpers.py
 # Time-stamp: "2024-12-09 11:00:00 (ywatanabe)"
 """Tests for scitex.bridge._helpers module."""
@@ -23,6 +22,7 @@ class TestAddStatsFromResults:
     def test_auto_detect_matplotlib_axes(self, stat_results):
         """Test auto-detection works with matplotlib axes."""
         import matplotlib.pyplot as plt
+
         from scitex.bridge import add_stats_from_results
 
         fig, ax = plt.subplots()
@@ -41,7 +41,7 @@ class TestAddStatsFromResults:
     def test_auto_detect_figure_model(self, stat_results):
         """Test auto-detection works with FigureModel."""
         from scitex.bridge import add_stats_from_results
-        from scitex.vis.model import FigureModel
+        from scitex.canvas.model import FigureModel
 
         model = FigureModel(
             width_mm=170,
@@ -61,6 +61,7 @@ class TestAddStatsFromResults:
     def test_explicit_plt_backend(self, stat_results):
         """Test explicit plt backend."""
         import matplotlib.pyplot as plt
+
         from scitex.bridge import add_stats_from_results
 
         fig, ax = plt.subplots()
@@ -73,7 +74,7 @@ class TestAddStatsFromResults:
     def test_explicit_vis_backend(self, stat_results):
         """Test explicit vis backend."""
         from scitex.bridge import add_stats_from_results
-        from scitex.vis.model import FigureModel
+        from scitex.canvas.model import FigureModel
 
         model = FigureModel(
             width_mm=170,
@@ -87,6 +88,7 @@ class TestAddStatsFromResults:
     def test_single_stat_result(self):
         """Test with single StatResult (not list)."""
         import matplotlib.pyplot as plt
+
         from scitex.bridge import add_stats_from_results
         from scitex.schema import create_stat_result
 
@@ -102,6 +104,7 @@ class TestAddStatsFromResults:
     def test_format_style_applied(self):
         """Test format_style is passed through."""
         import matplotlib.pyplot as plt
+
         from scitex.bridge import add_stats_from_results
         from scitex.schema import create_stat_result
 
@@ -119,14 +122,13 @@ class TestAddStatsFromResults:
     def test_chaining_support(self, stat_results):
         """Test method chaining works."""
         import matplotlib.pyplot as plt
+
         from scitex.bridge import add_stats_from_results, extract_stats_from_axes
 
         fig, ax = plt.subplots()
 
         # Should support chaining
-        extracted = extract_stats_from_axes(
-            add_stats_from_results(ax, stat_results)
-        )
+        extracted = extract_stats_from_axes(add_stats_from_results(ax, stat_results))
 
         assert len(extracted) == 2
 
@@ -135,6 +137,7 @@ class TestAddStatsFromResults:
     def test_invalid_backend_raises(self, stat_results):
         """Test invalid backend raises ValueError."""
         import matplotlib.pyplot as plt
+
         from scitex.bridge import add_stats_from_results
 
         fig, ax = plt.subplots()

@@ -25,8 +25,8 @@ import fcntl
 
 from scitex.logging import getLogger
 from scitex.sh import sh
-from scitex.writer.dataclasses.config import DOC_TYPE_DIRS
-from scitex.writer.dataclasses import CompilationResult
+from scitex.writer._dataclasses.config import DOC_TYPE_DIRS
+from scitex.writer._dataclasses import CompilationResult
 from ._validator import validate_before_compile
 from ._parser import parse_output
 

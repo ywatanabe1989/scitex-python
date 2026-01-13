@@ -399,7 +399,6 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/dsp/example.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-04-06 01:36:18 (ywatanabe)"
 # 
 # import matplotlib
@@ -409,6 +408,17 @@ if __name__ == "__main__":
 # import pandas as pd
 # import scitex
 # 
+# import scitex
+# 
+# # Module-level constants (defaults for example functions)
+# TGT_FS = 512
+# LOW_HZ = 20
+# HIGH_HZ = 50
+# SIGMA = 10
+# 
+# # Default color cycle
+# CC = {"blue": "#1f77b4", "red": "#d62728", "green": "#2ca02c"}
+# 
 # 
 # # Functions
 # def calc_norm_resample_filt_hilbert(xx, tt, fs, sig_type, verbose=True):
@@ -417,18 +427,19 @@ if __name__ == "__main__":
 #     if sig_type == "tensorpac":
 #         xx = xx[:, :, 0]
 # 
-#     sigs[f"orig"] = (xx, tt, fs)
+#     sigs["orig"] = (xx, tt, fs)
 # 
 #     # Normalization
 #     sigs["z_normed"] = (scitex.dsp.norm.z(xx), tt, fs)
 #     sigs["minmax_normed"] = (scitex.dsp.norm.minmax(xx), tt, fs)
 # 
 #     # Resampling
-#     sigs["resampled"] = (
-#         scitex.dsp.resample(xx, fs, TGT_FS),
-#         tt[:: int(fs / TGT_FS)],
-#         TGT_FS,
-#     )
+#     resampled_xx = scitex.dsp.resample(xx, fs, TGT_FS)
+#     # Create proper time vector for resampled signal
+#     import numpy as np
+# 
+#     resampled_tt = np.linspace(tt[0], tt[-1], resampled_xx.shape[-1])
+#     sigs["resampled"] = (resampled_xx, resampled_tt, TGT_FS)
 # 
 #     # Noise injection
 #     sigs["gaussian_noise_added"] = (scitex.dsp.add_noise.gauss(xx), tt, fs)
@@ -436,15 +447,16 @@ if __name__ == "__main__":
 #     sigs["pink_noise_added"] = (scitex.dsp.add_noise.pink(xx), tt, fs)
 #     sigs["brown_noise_added"] = (scitex.dsp.add_noise.brown(xx), tt, fs)
 # 
-#     # Filtering
+#     # Filtering (bands format is [[low_hz, high_hz]])
+#     bands = [[LOW_HZ, HIGH_HZ]]
 #     sigs[f"bandpass_filted ({LOW_HZ} - {HIGH_HZ} Hz)"] = (
-#         scitex.dsp.filt.bandpass(xx, fs, low_hz=LOW_HZ, high_hz=HIGH_HZ),
+#         scitex.dsp.filt.bandpass(xx, fs, bands),
 #         tt,
 #         fs,
 #     )
 # 
 #     sigs[f"bandstop_filted ({LOW_HZ} - {HIGH_HZ} Hz)"] = (
-#         scitex.dsp.filt.bandstop(xx, fs, low_hz=LOW_HZ, high_hz=HIGH_HZ),
+#         scitex.dsp.filt.bandstop(xx, fs, bands),
 #         tt,
 #         fs,
 #     )
@@ -488,18 +500,19 @@ if __name__ == "__main__":
 #         # if sig_type == "tensorpac":
 #         #     xx = xx[:, :, 0]
 # 
-#         try:
-#             ax.plot(
-#                 tt,
-#                 xx[i_batch, i_ch],
-#                 label=col,
-#                 c=CC["red"] if col == "hilbert_amp" else CC["blue"],
-#             )
-#         except Exception as e:
-#             print(e)
-#             import ipdb
+#         # Handle potential shape mismatches from filter operations
+#         signal = xx[i_batch, i_ch]
+#         if hasattr(signal, "squeeze"):
+#             signal = signal.squeeze()
+#         if hasattr(signal, "numpy"):
+#             signal = signal.numpy()
 # 
-#             ipdb.set_trace()
+#         ax.plot(
+#             tt,
+#             signal,
+#             label=col,
+#             c=CC["red"] if col == "hilbert_amp" else CC["blue"],
+#         )
 # 
 #         # Adjustments
 #         ax.legend(loc="upper left")

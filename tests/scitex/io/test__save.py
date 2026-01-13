@@ -1160,7 +1160,6 @@ class TestSaveRoundTrip:
         # Assert
         pd.testing.assert_frame_equal(loaded, df)
 
-
 if __name__ == "__main__":
     import os
 
@@ -1174,19 +1173,19 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-19
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save.py
-#
+# 
 # """
 # Save utilities for various data types to different file formats.
-#
+# 
 # Supported formats include CSV, NPY, PKL, JOBLIB, PNG, HTML, TIFF, MP4, YAML,
-# JSON, HDF5, PTH, MAT, CBM, and FTS bundles (.zip or directory).
+# JSON, HDF5, PTH, MAT, CBM, and SciTeX bundles (.zip or directory).
 # """
-#
+# 
 # import inspect
 # import os as _os
 # from pathlib import Path
 # from typing import Any, Union
-#
+# 
 # from scitex import logging
 # from scitex.path._clean import clean
 # from scitex.path._getsize import getsize
@@ -1194,7 +1193,7 @@ if __name__ == "__main__":
 # from scitex.str._clean_path import clean_path
 # from scitex.str._color_text import color_text
 # from scitex.str._readable_bytes import readable_bytes
-#
+# 
 # # Import save functions from the modular structure
 # from ._save_modules import (
 #     get_figure_with_data,
@@ -1213,8 +1212,6 @@ if __name__ == "__main__":
 #     save_npz,
 #     save_pickle,
 #     save_pickle_compressed,
-#     save_plot_bundle,
-#     save_stx_bundle,
 #     save_tex,
 #     save_text,
 #     save_torch,
@@ -1223,18 +1220,15 @@ if __name__ == "__main__":
 #     symlink,
 #     symlink_to,
 # )
-#
+# 
 # logger = logging.getLogger()
-#
-# # Re-export for backward compatibility
+# 
 # _get_figure_with_data = get_figure_with_data
 # _symlink = symlink
 # _symlink_to = symlink_to
-# _save_stx_bundle = save_stx_bundle
-# _save_plot_bundle = save_plot_bundle
 # _handle_image_with_csv = handle_image_with_csv
-#
-#
+# 
+# 
 # def save(
 #     obj: Any,
 #     specified_path: Union[str, Path],
@@ -1253,7 +1247,7 @@ if __name__ == "__main__":
 # ) -> None:
 #     """
 #     Save an object to a file with the specified format.
-#
+# 
 #     Parameters
 #     ----------
 #     obj : Any
@@ -1286,28 +1280,28 @@ if __name__ == "__main__":
 #     try:
 #         if isinstance(specified_path, Path):
 #             specified_path = str(specified_path)
-#
+# 
 #         # Handle f-string expressions
 #         specified_path = _parse_fstring_path(specified_path)
-#
+# 
 #         # Determine save path
 #         spath = _determine_save_path(specified_path, use_caller_path)
 #         spath_final = clean(spath)
-#
+# 
 #         # Prepare symlink path from cwd
 #         spath_cwd = _os.getcwd() + "/" + specified_path
 #         spath_cwd = clean(spath_cwd)
-#
+# 
 #         # Remove existing files (skip for CSV/HDF5 with key)
 #         _cleanup_existing_files(spath_final, spath_cwd, kwargs)
-#
+# 
 #         if dry_run:
 #             _handle_dry_run(spath, verbose)
 #             return
-#
+# 
 #         if makedirs:
 #             _os.makedirs(_os.path.dirname(spath_final), exist_ok=True)
-#
+# 
 #         # Main save
 #         _save(
 #             obj,
@@ -1323,26 +1317,26 @@ if __name__ == "__main__":
 #             json_schema=json_schema,
 #             **kwargs,
 #         )
-#
+# 
 #         # Symbolic links
 #         _symlink(spath, spath_cwd, symlink_from_cwd, verbose)
 #         _symlink_to(spath_final, symlink_to, verbose)
 #         return Path(spath)
-#
+# 
 #     except AssertionError:
 #         raise
 #     except Exception as e:
 #         logger.error(f"Error occurred while saving: {str(e)}")
 #         return False
-#
-#
+# 
+# 
 # def _parse_fstring_path(specified_path):
 #     """Parse f-string expressions in path."""
 #     if not (specified_path.startswith('f"') or specified_path.startswith("f'")):
 #         return specified_path
-#
+# 
 #     import re
-#
+# 
 #     path_content = specified_path[2:-1]
 #     frame = inspect.currentframe().f_back.f_back
 #     try:
@@ -1359,18 +1353,18 @@ if __name__ == "__main__":
 #         return path_content.format(**format_dict)
 #     finally:
 #         del frame
-#
-#
+# 
+# 
 # def _determine_save_path(specified_path, use_caller_path):
 #     """Determine the full save path based on environment."""
 #     if specified_path.startswith("/"):
 #         return specified_path
-#
+# 
 #     from scitex.gen._detect_environment import detect_environment
 #     from scitex.gen._get_notebook_path import get_notebook_info_simple
-#
+# 
 #     env_type = detect_environment()
-#
+# 
 #     if env_type == "jupyter":
 #         notebook_name, notebook_dir = get_notebook_info_simple()
 #         if notebook_name:
@@ -1379,7 +1373,7 @@ if __name__ == "__main__":
 #         else:
 #             sdir = _os.path.join(_os.getcwd(), "notebook_out")
 #         return _os.path.join(sdir, specified_path)
-#
+# 
 #     elif env_type == "script":
 #         if use_caller_path:
 #             script_path = _find_caller_script_path()
@@ -1387,7 +1381,7 @@ if __name__ == "__main__":
 #             script_path = inspect.stack()[2].filename
 #         sdir = clean_path(_os.path.splitext(script_path)[0] + "_out")
 #         return _os.path.join(sdir, specified_path)
-#
+# 
 #     else:
 #         script_path = inspect.stack()[2].filename
 #         if (
@@ -1399,8 +1393,8 @@ if __name__ == "__main__":
 #         else:
 #             sdir = _os.path.join(_os.getcwd(), "output")
 #         return _os.path.join(sdir, specified_path)
-#
-#
+# 
+# 
 # def _find_caller_script_path():
 #     """Find the first non-scitex frame in the call stack."""
 #     scitex_src_path = _os.path.abspath(
@@ -1411,8 +1405,8 @@ if __name__ == "__main__":
 #         if not frame_path.startswith(scitex_src_path):
 #             return frame_path
 #     return inspect.stack()[2].filename
-#
-#
+# 
+# 
 # def _cleanup_existing_files(spath_final, spath_cwd, kwargs):
 #     """Remove existing files to prevent circular links."""
 #     should_skip = spath_final.endswith(".csv") or (
@@ -1422,8 +1416,8 @@ if __name__ == "__main__":
 #     if not should_skip:
 #         for path in [spath_final, spath_cwd]:
 #             sh(["rm", "-f", f"{path}"], verbose=False)
-#
-#
+# 
+# 
 # def _handle_dry_run(spath, verbose):
 #     """Handle dry run mode."""
 #     if verbose:
@@ -1432,8 +1426,8 @@ if __name__ == "__main__":
 #         except ValueError:
 #             rel_path = spath
 #         logger.success(color_text(f"(dry run) Saved to: ./{rel_path}", c="yellow"))
-#
-#
+# 
+# 
 # def _save(
 #     obj,
 #     spath,
@@ -1450,21 +1444,22 @@ if __name__ == "__main__":
 # ):
 #     """Core dispatcher for saving objects to various formats."""
 #     ext = _os.path.splitext(spath)[1].lower()
-#
-#     # Check if this is a matplotlib figure being saved to FTS bundle format
-#     # FTS bundles use .zip (archive) or no extension (directory)
+# 
+#     # Check if this is a matplotlib figure being saved to SciTeX bundle format
+#     # SciTeX bundles use .zip (archive) or no extension (directory)
 #     if _is_matplotlib_figure(obj):
-#         # Save as FTS bundle if:
+#         # Save as SciTeX bundle if:
 #         # 1. Path ends with .zip (create ZIP bundle)
 #         # 2. Path has no extension and doesn't match other formats (create directory bundle)
 #         if ext == ".zip" or (ext == "" and not spath.endswith("/")):
-#             # Check if explicitly requesting FTS bundle or just .zip
-#             as_zip = ext == ".zip"
-#             _save_fts_bundle(
+#             # Check if explicitly requesting SciTeX bundle or just .zip
+#             # Pop as_zip from kwargs to avoid duplicate parameter error
+#             as_zip = kwargs.pop("as_zip", ext == ".zip")
+#             _save_scitex_bundle(
 #                 obj, spath, as_zip, verbose, symlink_from_cwd, symlink_to, **kwargs
 #             )
 #             return
-#
+# 
 #     # Dispatch to format handlers
 #     if ext in _FILE_HANDLERS:
 #         _dispatch_handler(
@@ -1489,7 +1484,7 @@ if __name__ == "__main__":
 #     else:
 #         logger.warning(f"Unsupported file format. {spath} was not saved.")
 #         return
-#
+# 
 #     if verbose and _os.path.exists(spath):
 #         file_size = readable_bytes(getsize(spath))
 #         try:
@@ -1497,59 +1492,62 @@ if __name__ == "__main__":
 #         except ValueError:
 #             rel_path = spath
 #         logger.success(f"Saved to: ./{rel_path} ({file_size})")
-#
-#
+# 
+# 
 # def _is_matplotlib_figure(obj):
 #     """Check if object is a matplotlib figure or a wrapped figure.
-#
+# 
 #     Handles both raw matplotlib.figure.Figure and SciTeX FigWrapper objects.
 #     """
 #     try:
 #         import matplotlib.figure
-#
+# 
 #         # Direct matplotlib figure
 #         if isinstance(obj, matplotlib.figure.Figure):
 #             return True
-#
+# 
 #         # Wrapped figure (e.g., FigWrapper from scitex.plt)
-#         if hasattr(obj, "figure") and isinstance(
-#             obj.figure, matplotlib.figure.Figure
-#         ):
+#         if hasattr(obj, "figure") and isinstance(obj.figure, matplotlib.figure.Figure):
 #             return True
-#
+# 
 #         return False
 #     except ImportError:
 #         return False
-#
-#
-# def _save_fts_bundle(
+# 
+# 
+# def _save_scitex_bundle(
 #     obj, spath, as_zip, verbose, symlink_from_cwd, symlink_to_path, **kwargs
 # ):
-#     """Save matplotlib figure as FTS bundle (.zip or directory).
-#
+#     """Save matplotlib figure as SciTeX bundle (.zip or directory).
+# 
 #     Delegates to scitex.io.bundle.from_matplotlib as the single source of truth
 #     for bundle structure (canonical/artifacts/payload/children).
+# 
+#     When figrecipe is available and enabled on the figure, also saves
+#     recipe.yaml for reproducibility.
 #     """
-#     from scitex.io.bundle import from_matplotlib
-#
-#     from ._save_modules._figure_utils import get_figure_with_data
-#
 #     # Get the actual matplotlib figure
 #     import matplotlib.figure
-#
+# 
+#     from scitex.io.bundle import from_matplotlib
+# 
+#     from ._save_modules._figure_utils import get_figure_with_data
+# 
 #     if isinstance(obj, matplotlib.figure.Figure):
 #         fig = obj
+#         fig_wrapper = None
 #     elif hasattr(obj, "figure") and isinstance(obj.figure, matplotlib.figure.Figure):
 #         fig = obj.figure
+#         fig_wrapper = obj  # Keep wrapper for figrecipe access
 #     else:
 #         raise TypeError(f"Expected matplotlib figure, got {type(obj)}")
-#
+# 
 #     # Extract optional parameters
 #     # Support both "csv_df" and "data" parameter names for user convenience
 #     csv_df = kwargs.get("csv_df") or kwargs.get("data")
 #     dpi = kwargs.get("dpi", 300)
 #     name = kwargs.get("name") or Path(spath).stem
-#
+# 
 #     # Extract CSV data from scitex.plt tracking if available
 #     scitex_source = get_figure_with_data(obj)
 #     if csv_df is None and scitex_source is not None:
@@ -1558,11 +1556,21 @@ if __name__ == "__main__":
 #                 csv_df = scitex_source.export_as_csv()
 #             except Exception:
 #                 pass
-#
-#     # Delegate to FTS (single source of truth)
+# 
+#     # Delegate to Bundle (single source of truth)
 #     # Encoding is built from CSV columns directly for consistency
 #     from_matplotlib(fig, spath, name=name, csv_df=csv_df, dpi=dpi)
-#
+# 
+#     # Save figrecipe recipe.yaml if available
+#     try:
+#         from scitex.bridge._figrecipe import _save_recipe_to_path
+# 
+#         bundle_path = Path(spath)
+#         if bundle_path.suffix != ".zip":  # Skip zip for now
+#             _save_recipe_to_path(fig_wrapper or obj, bundle_path / "recipe.yaml")
+#     except (ImportError, Exception):
+#         pass  # figrecipe is optional
+# 
 #     bundle_path = spath
 #     if verbose and _os.path.exists(bundle_path):
 #         file_size = readable_bytes(getsize(bundle_path))
@@ -1571,16 +1579,16 @@ if __name__ == "__main__":
 #         except ValueError:
 #             rel_path = bundle_path
 #         logger.success(f"Saved to: ./{rel_path} ({file_size})")
-#
+# 
 #     if symlink_from_cwd and _os.path.exists(bundle_path):
 #         bundle_basename = _os.path.basename(bundle_path)
 #         bundle_cwd = _os.path.join(_os.getcwd(), bundle_basename)
 #         _symlink(bundle_path, bundle_cwd, symlink_from_cwd, verbose)
-#
+# 
 #     if symlink_to_path and _os.path.exists(bundle_path):
 #         _symlink_to(bundle_path, symlink_to_path, verbose)
-#
-#
+# 
+# 
 # def _dispatch_handler(
 #     ext,
 #     obj,
@@ -1617,8 +1625,8 @@ if __name__ == "__main__":
 #         _FILE_HANDLERS[ext](obj, spath, **kwargs)
 #     else:
 #         _FILE_HANDLERS[ext](obj, spath, **kwargs)
-#
-#
+# 
+# 
 # # Dispatch dictionary for O(1) file format lookup
 # _FILE_HANDLERS = {
 #     ".xlsx": save_excel,
@@ -1657,7 +1665,7 @@ if __name__ == "__main__":
 #     ".svg": handle_image_with_csv,
 #     ".pdf": handle_image_with_csv,
 # }
-#
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

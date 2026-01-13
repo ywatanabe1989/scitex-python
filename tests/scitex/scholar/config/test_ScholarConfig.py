@@ -30,7 +30,7 @@ if __name__ == "__main__":
 # 
 # import yaml
 # 
-# from scitex.errors import ScholarError
+# from scitex.logging import ScholarError
 # from scitex.logging import getLogger
 # 
 # from .core._CascadeConfig import CascadeConfig

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-06-15 20:25:22 (ywatanabe)"
 # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/utils/_notify.py
 # ----------------------------------------
@@ -89,15 +88,27 @@ def notify(
 
     FAKE_PYTHON_SCRIPT_NAME = "$ python -c ..."
     # Use scitex.ai email addresses (not Gmail)
+    # New env var names with backward compatibility
     sender_gmail = os.getenv(
-        "SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS",
-        os.getenv("SCITEX_EMAIL_AGENT", "agent@scitex.ai"),
+        "SCITEX_SCHOLAR_EMAIL_NOREPLY",  # New name
+        os.getenv(
+            "SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS",  # Deprecated
+            os.getenv(
+                "SCITEX_EMAIL_NOREPLY",
+                os.getenv("SCITEX_EMAIL_AGENT", "no-reply@scitex.ai"),
+            ),
+        ),
     )
     sender_password = os.getenv(
-        "SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD", os.getenv("SCITEX_EMAIL_PASSWORD", "")
+        "SCITEX_SCHOLAR_EMAIL_PASSWORD",  # New name
+        os.getenv(
+            "SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD",  # Deprecated
+            os.getenv("SCITEX_EMAIL_PASSWORD", ""),
+        ),
     )
     recipient_email = recipient_email or os.getenv(
-        "SCITEX_SCHOLAR_TO_EMAIL_ADDRESS", "ywata1989@gmail.com"
+        "SCITEX_SCHOLAR_EMAIL_RECIPIENT",  # New name
+        os.getenv("SCITEX_SCHOLAR_TO_EMAIL_ADDRESS", ""),  # Deprecated
     )
 
     if file is not None:

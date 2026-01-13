@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-30 08:47:48 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/template/clone_writer_directory.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/template/clone_writer_directory.py"
@@ -26,7 +26,7 @@ def clone_writer_directory(
     project_dir: str,
     git_strategy: Optional[str] = "child",
     branch: Optional[str] = None,
-    tag: Optional[str] = None,
+    tag: Optional[str] = "v2.0.0",
 ) -> bool:
     """
     Create a new paper directory from the scitex-writer template repository.
@@ -42,7 +42,7 @@ def clone_writer_directory(
         Specific branch of the template repository to clone. If None, clones the default branch.
         Mutually exclusive with tag parameter.
     tag : str, optional
-        Specific tag/release of the template repository to clone. If None, clones the default branch.
+        Specific tag/release of the template repository to clone. Default is 'v2.0.0'.
         Mutually exclusive with branch parameter.
 
     Returns
@@ -53,10 +53,10 @@ def clone_writer_directory(
     Example
     -------
     >>> from scitex.template import clone_writer_directory
-    >>> clone_writer_directory("my_paper")
+    >>> clone_writer_directory("my_paper")  # Uses v2.0.0
     >>> clone_writer_directory("./papers/my_paper")
     >>> clone_writer_directory("my_paper", branch="develop")
-    >>> clone_writer_directory("my_paper", tag="v1.0.0")
+    >>> clone_writer_directory("my_paper", tag="v2.0.0")
     """
     return clone_project(
         project_dir,

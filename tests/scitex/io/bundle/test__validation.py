@@ -8,14 +8,14 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_validation.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_validation.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_bundle/_validation.py
 # 
 # """
-# FTS Multi-Level Validation System.
+# SciTeX Multi-Level Validation System.
 # 
 # Three validation levels:
 # 1. schema   - Always ON (init/load/save) - Fast, structural checks
@@ -23,12 +23,12 @@ if __name__ == "__main__":
 # 3. strict   - Explicit (CI/publication) - Full scientific rigor
 # 
 # Usage:
-#     result = fts.validate(level="schema")  # Fast, default at init
-#     result = fts.validate(level="semantic")  # Cross-ref checks
-#     result = fts.validate(level="strict")  # Full validation
+#     result = bundle.validate(level="schema")  # Fast, default at init
+#     result = bundle.validate(level="semantic")  # Cross-ref checks
+#     result = bundle.validate(level="strict")  # Full validation
 # 
 #     if result.has_errors:
-#         raise FTSValidationError(result)
+#         raise BundleValidationError(result)
 # """
 # 
 # import json
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 # 
 # @dataclass
 # class ValidationResult:
-#     """Result of FTS validation.
+#     """Result of bundle validation.
 # 
 #     Attributes
 #     ----------
@@ -182,8 +182,8 @@ if __name__ == "__main__":
 #     return errors
 # 
 # 
-# def validate_node(data: Dict[str, Any]) -> List[str]:
-#     """Validate node.json data."""
+# def validate_spec(data: Dict[str, Any]) -> List[str]:
+#     """Validate spec.json data."""
 #     return validate_schema(data, "node")
 # 
 # 
@@ -213,7 +213,7 @@ if __name__ == "__main__":
 # 
 # 
 # def validate_semantic(
-#     node: Optional[Dict] = None,
+#     spec: Optional[Dict] = None,
 #     encoding: Optional[Dict] = None,
 #     theme: Optional[Dict] = None,
 #     stats: Optional[Dict] = None,
@@ -268,7 +268,7 @@ if __name__ == "__main__":
 # 
 # 
 # def validate_strict(
-#     node: Optional[Dict] = None,
+#     spec: Optional[Dict] = None,
 #     encoding: Optional[Dict] = None,
 #     theme: Optional[Dict] = None,
 #     stats: Optional[Dict] = None,
@@ -286,7 +286,7 @@ if __name__ == "__main__":
 #     # Include all semantic errors
 #     errors.extend(
 #         validate_semantic(
-#             node=node,
+#             spec=spec,
 #             encoding=encoding,
 #             theme=theme,
 #             stats=stats,
@@ -300,18 +300,20 @@ if __name__ == "__main__":
 #         for col in columns:
 #             if col.get("dtype") in ["float64", "int64", "number"]:
 #                 if not col.get("unit"):
-#                     errors.append(f"Column '{col.get('name')}' missing unit specification")
+#                     errors.append(
+#                         f"Column '{col.get('name')}' missing unit specification"
+#                     )
 # 
 #     # Provenance must be present
 #     if data_info and not data_info.get("source"):
 #         errors.append("data_info.source (provenance) is required for publication")
 # 
-#     # Node must have all metadata
-#     if node:
-#         if not node.get("name"):
-#             errors.append("node.name is required for publication")
-#         if not node.get("created_at"):
-#             errors.append("node.created_at is required for publication")
+#     # Spec must have all metadata
+#     if spec:
+#         if not spec.get("name"):
+#             errors.append("spec.name is required for publication")
+#         if not spec.get("created_at"):
+#             errors.append("spec.created_at is required for publication")
 # 
 #     return errors
 # 
@@ -446,5 +448,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_validation.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_validation.py
 # --------------------------------------------------------------------------------

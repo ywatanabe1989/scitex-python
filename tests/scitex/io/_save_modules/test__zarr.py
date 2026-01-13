@@ -11,7 +11,6 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_zarr.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Timestamp: "2025-07-11 15:44:00 (ywatanabe)"
 # # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_save_modules/_zarr.py
 # # ----------------------------------------
@@ -25,7 +24,55 @@ if __name__ == "__main__":
 # 
 # import numpy as np
 # import zarr
-# from numcodecs import Zstd, LZ4, GZip
+# 
+# # Detect Zarr version for API compatibility
+# ZARR_V3 = int(zarr.__version__.split(".")[0]) >= 3
+# 
+# 
+# def _get_compressor(compressor_name):
+#     """Get compressor based on Zarr version."""
+#     if ZARR_V3:
+#         from zarr.codecs import GzipCodec, ZstdCodec
+# 
+#         compressor_map = {
+#             "zstd": ZstdCodec(level=3),
+#             "gzip": GzipCodec(level=5),
+#         }
+#         return compressor_map.get(compressor_name.lower(), ZstdCodec(level=3))
+#     else:
+#         from numcodecs import LZ4, GZip, Zstd
+# 
+#         compressor_map = {
+#             "zstd": Zstd(level=3),
+#             "lz4": LZ4(acceleration=1),
+#             "gzip": GZip(level=5),
+#         }
+#         return compressor_map.get(compressor_name.lower(), Zstd(level=3))
+# 
+# 
+# def _create_array(group, name, data, chunks=True, compressor=None, **kwargs):
+#     """Create array with version-appropriate API."""
+#     if ZARR_V3:
+#         # Zarr v3 API: use create_array with compressors list
+#         comp_kwargs = {}
+#         if compressor is not None:
+#             comp_kwargs["compressors"] = [compressor]
+# 
+#         # Handle chunks parameter: v3 doesn't accept True/None
+#         if chunks is True:
+#             chunks = "auto"
+#         elif chunks is None or chunks is False:
+#             # Don't pass chunks, let zarr use defaults
+#             return group.create_array(name, data=data, **comp_kwargs, **kwargs)
+# 
+#         return group.create_array(
+#             name, data=data, chunks=chunks, **comp_kwargs, **kwargs
+#         )
+#     else:
+#         # Zarr v2 API: use create_dataset with compressor
+#         return group.create_dataset(
+#             name, data=data, chunks=chunks, compressor=compressor, **kwargs
+#         )
 # 
 # 
 # def _save_zarr(
@@ -50,7 +97,7 @@ if __name__ == "__main__":
 #     key : str, optional
 #         Key/group path within Zarr store
 #     compressor : str
-#         Compression algorithm ('zstd', 'lz4', 'gzip')
+#         Compression algorithm ('zstd', 'gzip')
 #     chunks : bool or tuple
 #         Chunking strategy
 #     store_type : str
@@ -72,7 +119,7 @@ if __name__ == "__main__":
 #     # Create appropriate store
 #     if store_type == "zip":
 #         # Single file ZIP store
-#         store = zarr.ZipStore(spath, mode="w")
+#         store = zarr.storage.ZipStore(spath, mode="w")
 #         root = zarr.open(store, mode="w")
 #     else:
 #         # Directory store
@@ -83,17 +130,12 @@ if __name__ == "__main__":
 #         # Open or create Zarr store
 #         try:
 #             root = zarr.open(spath, mode="a")
-#         except:
+#         except Exception:
 #             root = zarr.open(spath, mode="w")
 # 
 #     # Handle compressor configuration
 #     if isinstance(compressor, str):
-#         compressor_map = {
-#             "zstd": Zstd(level=3),
-#             "lz4": LZ4(acceleration=1),
-#             "gzip": GZip(level=5),
-#         }
-#         compressor = compressor_map.get(compressor.lower(), Zstd(level=3))
+#         compressor = _get_compressor(compressor)
 # 
 #     # Navigate to target group
 #     if key:
@@ -121,12 +163,14 @@ if __name__ == "__main__":
 #     for dataset_name, data in obj.items():
 #         if isinstance(data, str):
 #             # String data
-#             target_group.create_dataset(
-#                 dataset_name, data=np.array(data), compressor=None
+#             _create_array(
+#                 target_group, dataset_name, data=np.array(data), compressor=None
 #             )
 #         elif isinstance(data, (int, float, bool)):
-#             # Scalar data - no compression needed
-#             target_group.create_dataset(dataset_name, data=data)
+#             # Scalar data - convert to 0-d array
+#             _create_array(
+#                 target_group, dataset_name, data=np.array(data), compressor=None
+#             )
 #         else:
 #             # Array data
 #             data_array = np.asarray(data)
@@ -136,7 +180,8 @@ if __name__ == "__main__":
 #                 import pickle
 # 
 #                 pickled_data = pickle.dumps(data)
-#                 dataset = target_group.create_dataset(
+#                 dataset = _create_array(
+#                     target_group,
 #                     dataset_name,
 #                     data=np.frombuffer(pickled_data, dtype=np.uint8),
 #                     compressor=compressor,
@@ -144,7 +189,8 @@ if __name__ == "__main__":
 #                 dataset.attrs["_type"] = "pickled"
 #             else:
 #                 # Regular array data
-#                 target_group.create_dataset(
+#                 _create_array(
+#                     target_group,
 #                     dataset_name,
 #                     data=data_array,
 #                     chunks=chunks,
@@ -163,7 +209,7 @@ if __name__ == "__main__":
 #             print(
 #                 f"✅ Saved to Zarr (consolidated): {spath}" + (f"/{key}" if key else "")
 #             )
-#         except:
+#         except Exception:
 #             print(f"✅ Saved to Zarr: {spath}" + (f"/{key}" if key else ""))
 #     else:
 #         print(f"✅ Saved to Zarr ({store_type}): {spath}" + (f"/{key}" if key else ""))

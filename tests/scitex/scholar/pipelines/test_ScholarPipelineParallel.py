@@ -11,11 +11,11 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/pipelines/ScholarPipelineParallel.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-13 06:13:41 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/pipelines/ScholarPipelineParallel.py
 # # ----------------------------------------
 # from __future__ import annotations
+# 
 # import os
 # 
 # __FILE__ = "./src/scitex/scholar/pipelines/ScholarPipelineParallel.py"
@@ -184,7 +184,8 @@ if __name__ == "__main__":
 #             )
 # 
 #             # Process paper using single pipeline
-#             paper = await pipeline.process_single_paper(
+#             # Returns (paper, symlink_path) tuple
+#             paper, _symlink_path = await pipeline.process_single_paper(
 #                 doi_or_title=doi_or_title,
 #                 project=project,
 #             )
@@ -293,7 +294,7 @@ if __name__ == "__main__":
 # 
 #     async def process_papers_from_collection_async(
 #         self,
-#         papers: "Papers",
+#         papers: Papers,
 #         project: Optional[str] = None,
 #     ) -> List[Paper]:
 #         """Process multiple papers in parallel from a Papers collection.

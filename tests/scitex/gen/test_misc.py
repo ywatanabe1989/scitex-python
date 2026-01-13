@@ -1002,6 +1002,34 @@ if __name__ == "__main__":
 #     return result
 # 
 # 
+# def connect_nums(nums):
+#     """Connect multiple numbers/values with hyphens.
+# 
+#     This function takes an iterable of numbers or values and joins them
+#     with hyphens to create a single string representation.
+# 
+#     Parameters
+#     ----------
+#     nums : iterable
+#         An iterable of numbers or values to be connected.
+# 
+#     Returns
+#     -------
+#     str
+#         A string with the values joined by hyphens.
+# 
+#     Example
+#     -------
+#     >>> connect_nums((0, 0))
+#     '0-0'
+#     >>> connect_nums((1, 2, 3))
+#     '1-2-3'
+#     >>> connect_nums(('a', 'b'))
+#     'a-b'
+#     """
+#     return "-".join(str(num) for num in nums)
+# 
+# 
 # # def describe(df, method="mean", round_factor=1, axis=0):
 # # assert method in ["mean_std", "mean_ci", "median_iqr"]
 # #     df = pd.DataFrame(df)
@@ -1301,8 +1329,8 @@ if __name__ == "__main__":
 #     values = [start + i * step for i in range(num_points)]
 # 
 #     return np.array(values)
-#
-#
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

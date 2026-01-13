@@ -8,13 +8,13 @@ if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_saver.py
+# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_saver.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # Timestamp: 2025-12-20
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_saver.py
+# # Timestamp: 2026-01-07
+# # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_saver.py
 # 
-# """FTS Bundle saving utilities.
+# """Bundle saving utilities.
 # 
 # Bundle structure (IDENTICAL for all kinds):
 #     bundle.zip/
@@ -50,14 +50,14 @@ if __name__ == "__main__":
 # from ._storage import Storage, get_storage
 # 
 # if TYPE_CHECKING:
-#     from ._dataclasses import DataInfo, Node
-#     from .._fig import Encoding, Theme
-#     from .._stats import Stats
+#     from ._dataclasses import DataInfo, Spec
+#     from .kinds._plot._dataclasses import Encoding, Theme
+#     from .kinds._stats._dataclasses import Stats
 # 
 # 
 # def save_bundle_components(
 #     path: Path,
-#     node: Optional["Node"] = None,
+#     spec: Optional["Spec"] = None,
 #     encoding: Optional["Encoding"] = None,
 #     theme: Optional["Theme"] = None,
 #     stats: Optional["Stats"] = None,
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 # 
 #     Args:
 #         path: Bundle path (directory or ZIP)
-#         node: Node metadata (saved to canonical/spec.json)
+#         spec: Spec metadata (saved to canonical/spec.json)
 #         encoding: Encoding specification (saved to canonical/encoding.json)
 #         theme: Theme specification (saved to canonical/theme.json)
 #         stats: Statistics (saved to payload/stats.json for kind=stats)
@@ -82,16 +82,19 @@ if __name__ == "__main__":
 #     # Collect all files to write
 #     files = {}
 # 
-#     # === ALWAYS create all 4 directories (even if empty) ===
+#     # === ALWAYS create all directories and placeholder files ===
 #     # Use .keep files as directory markers for ZIP compatibility
 #     files["canonical/.keep"] = ""
 #     files["payload/.keep"] = ""
+#     # NOTE: Don't write empty payload/data.csv - it may already contain data
 #     files["artifacts/.keep"] = ""
+#     files["artifacts/exports/.keep"] = ""
+#     files["artifacts/cache/.keep"] = ""
 #     files["children/.keep"] = ""
 # 
 #     # canonical/ - Source of truth
-#     if node:
-#         files["canonical/spec.json"] = json.dumps(node.to_dict(), indent=2)
+#     if spec:
+#         files["canonical/spec.json"] = json.dumps(spec.to_dict(), indent=2)
 # 
 #     if encoding:
 #         files["canonical/encoding.json"] = encoding.to_json()
@@ -108,7 +111,7 @@ if __name__ == "__main__":
 # 
 #     # Write files, preserving any existing children/ files
 #     # For ZIP, we need to merge with existing content
-#     if hasattr(storage, 'write_all_preserve'):
+#     if hasattr(storage, "write_all_preserve"):
 #         storage.write_all_preserve(files)
 #     else:
 #         # Fallback: write each file individually (preserves existing)
@@ -195,7 +198,6 @@ if __name__ == "__main__":
 #         import io
 # 
 #         import matplotlib.pyplot as plt
-#         import numpy as np
 # 
 #         # Create hitmap figure with same dimensions
 #         fig_size = figure.get_size_inches()
@@ -233,7 +235,7 @@ if __name__ == "__main__":
 #         plt.close(hitmap_fig)
 #         return png_bytes, svg_bytes
 # 
-#     except Exception as e:
+#     except Exception:
 #         # If hitmap generation fails, return None (non-critical)
 #         return None, None
 # 
@@ -278,5 +280,5 @@ if __name__ == "__main__":
 # # EOF
 
 # --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_bundle/_saver.py
+# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_saver.py
 # --------------------------------------------------------------------------------

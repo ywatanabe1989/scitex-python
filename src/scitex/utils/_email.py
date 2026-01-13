@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-03 06:33:08 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/utils/_email.py
 
+import mimetypes
 import os
+import re
 import smtplib
 from email import encoders
 from email.mime.base import MIMEBase as _MIMEBase
 from email.mime.multipart import MIMEMultipart as _MIMEMultipart
 from email.mime.text import MIMEText as _MIMEText
-import mimetypes
 
 from scitex.repro._gen_ID import gen_ID
-
-import re
 
 ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 
@@ -87,7 +85,7 @@ def send_gmail(
             for path in attachment_paths:
                 _, ext = os.path.splitext(path)
                 if ext.lower() == ".log":
-                    with open(path, "r", encoding="utf-8") as file:
+                    with open(path, encoding="utf-8") as file:
                         content = file.read()
                         cleaned_content = ansi_escape.sub("", content)
                         part = _MIMEText(cleaned_content, "plain")
@@ -121,11 +119,11 @@ def send_gmail(
 
         if verbose:
             cc_info = f" (CC: {cc})" if cc else ""
-            message = f"Email was sent:\n"
+            message = "Email was sent:\n"
             message += f"    {sender_gmail} -> {recipient_email}{cc_info}\n"
             message += f"    (ID: {ID})\n"
             if attachment_paths:
-                message += f"    Attached:\n"
+                message += "    Attached:\n"
                 for ap in attachment_paths:
                     message += f"        {ap}\n"
             print(message)
@@ -138,6 +136,86 @@ def send_gmail(
 
     except Exception as e:
         print(f"Email was not sent: {e}")
+
+
+async def send_email_async(
+    from_email: str,
+    to_email: str,
+    subject: str,
+    message: str,
+    html: bool = False,
+) -> bool:
+    """Send email asynchronously using configured SMTP.
+
+    Args:
+        from_email: Sender email address
+        to_email: Recipient email address
+        subject: Email subject
+        message: Email body (plain text or HTML)
+        html: If True, send as HTML email
+
+    Returns
+    -------
+        True if email was sent successfully, False otherwise
+    """
+    import asyncio
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    # Get SMTP credentials from environment
+    smtp_user = os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS")
+    smtp_password = os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD")
+    smtp_server = os.getenv(
+        "SCITEX_SCHOLAR_FROM_EMAIL_SMTP_SERVER", "mail1030.onamae.ne.jp"
+    )
+    smtp_port = int(os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_SMTP_PORT", "587"))
+
+    # Check required credentials
+    if not smtp_user:
+        logger.warning(
+            "Email not sent: SCITEX_SCHOLAR_FROM_EMAIL_ADDRESS not set. "
+            "Configure SMTP credentials to enable email notifications."
+        )
+        return False
+
+    if not smtp_password:
+        logger.warning(
+            "Email not sent: SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD not set. "
+            "Configure SMTP credentials to enable email notifications."
+        )
+        return False
+
+    if not to_email:
+        logger.warning("Email not sent: No recipient email address provided.")
+        return False
+
+    def _send_sync():
+        try:
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+            server.login(smtp_user, smtp_password)
+
+            msg = _MIMEMultipart("alternative") if html else _MIMEMultipart()
+            msg["Subject"] = subject
+            msg["From"] = from_email
+            msg["To"] = to_email
+
+            if html:
+                msg.attach(_MIMEText(message, "html"))
+            else:
+                msg.attach(_MIMEText(message, "plain"))
+
+            server.send_message(msg)
+            server.quit()
+            return True
+        except Exception as e:
+            logger.error(f"Email send failed: {e}")
+            return False
+
+    # Run sync email in thread pool
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _send_sync)
 
 
 # EOF

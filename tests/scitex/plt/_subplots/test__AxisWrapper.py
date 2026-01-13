@@ -254,10 +254,14 @@ if __name__ == "__main__":
 #                             "errorbar",
 #                             "step",
 #                             "stem",
+#                             # Fill and area plots
+#                             "fill",
+#                             "stackplot",
 #                             # Statistical plots
 #                             "hist2d",
 #                             "hexbin",
 #                             "pie",
+#                             "eventplot",
 #                             # Contour plots
 #                             "contour",
 #                             "contourf",
@@ -267,6 +271,8 @@ if __name__ == "__main__":
 #                             "imshow",
 #                             "matshow",
 #                             "spy",
+#                             "pcolormesh",
+#                             "pcolor",
 #                             # Quiver plots
 #                             "quiver",
 #                             "streamplot",

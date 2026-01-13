@@ -18,7 +18,6 @@ Features:
 Version: 0.1.0-alpha (experimental)
 """
 
-__version__ = "0.1.0-alpha"
 __experimental__ = True
 
 # Import components

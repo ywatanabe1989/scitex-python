@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-03 12:35:08 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/tests/scitex/plt/_subplots/_AxisWrapperMixins/test__TrackingMixin.py
 # ----------------------------------------
@@ -38,14 +37,16 @@ def test_track_method_with_tracking_enabled(tracking_mixin_instance):
     args = ([1, 2, 3], [4, 5, 6])
     kwargs = {"color": "red", "marker": "o"}
     plot_id = "test_plot"
+    # Expected key includes ax position prefix (defaults to ax_00_)
+    expected_key = "ax_00_test_plot"
 
     # Execute
     instance._track(True, plot_id, method_name, args, kwargs)
 
-    # Verify
-    assert plot_id in instance._ax_history
-    assert instance._ax_history[plot_id] == (
-        plot_id,
+    # Verify - key is prefixed with ax position
+    assert expected_key in instance._ax_history
+    assert instance._ax_history[expected_key] == (
+        expected_key,
         method_name,
         args,
         kwargs,
@@ -76,12 +77,14 @@ def test_track_method_with_id_from_kwargs(tracking_mixin_instance):
     method_name = "test_method"
     args = ([1, 2, 3],)
     kwargs = {"color": "blue", "id": "kwargs_id"}
+    # Expected key includes ax position prefix (defaults to ax_00_)
+    expected_key = "ax_00_kwargs_id"
 
     # Execute
     instance._track(True, None, method_name, args, kwargs)
 
-    # Verify
-    assert "kwargs_id" in instance._ax_history
+    # Verify - key is prefixed with ax position
+    assert expected_key in instance._ax_history
     assert "id" not in kwargs  # id should have been removed from kwargs
 
 

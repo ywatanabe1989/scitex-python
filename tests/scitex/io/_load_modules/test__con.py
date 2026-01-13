@@ -286,7 +286,6 @@ class TestLoadCon:
         args, kwargs = mock_mne.io.read_raw_fif.call_args
         assert kwargs["preload"] is True
 
-
 if __name__ == "__main__":
     import os
 
@@ -298,24 +297,35 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/io/_load_modules/_con.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-14 07:51:45 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/io/_load_modules/_con.py
-#
+# 
 # from typing import Any
-#
-# import mne
-#
-#
+# 
+# try:
+#     import mne
+# 
+#     MNE_AVAILABLE = True
+# except ImportError:
+#     MNE_AVAILABLE = False
+#     mne = None
+# 
+# 
 # def _load_con(lpath: str, **kwargs) -> Any:
+#     if not MNE_AVAILABLE:
+#         raise ImportError(
+#             "MNE-Python is not installed. Please install with: pip install mne"
+#         )
+# 
 #     if not lpath.endswith(".con"):
 #         raise ValueError("File must have .con extension")
-#     obj = mne.io.read_raw_fif(lpath, preload=True, **kwargs)
-#     obj = obj.to_data_frame()
-#     obj["samp_rate"] = obj.info["sfreq"]
-#     return obj
-#
-#
+#     raw = mne.io.read_raw_fif(lpath, preload=True, **kwargs)
+#     sfreq = raw.info["sfreq"]
+#     df = raw.to_data_frame()
+#     df["samp_rate"] = sfreq
+#     return df
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

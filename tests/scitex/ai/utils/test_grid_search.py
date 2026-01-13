@@ -342,7 +342,7 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-04-22 23:54:02"
 # # Author: Yusuke Watanabe (ywatanabe@scitex.ai)
-#
+# 
 # """
 # This script defines scitex.ai.utils.grid_search
 # """
@@ -480,7 +480,7 @@ if __name__ == "__main__":
 # 
 #     # Close
 #     _scitex.session.close(CONFIG, verbose=False, notify=False)
-#
+# 
 # # EOF
 # 
 # """

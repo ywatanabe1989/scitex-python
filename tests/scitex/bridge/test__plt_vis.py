@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./tests/scitex/bridge/test__plt_vis.py
 # Time-stamp: "2024-12-09 10:30:00 (ywatanabe)"
 """Tests for scitex.bridge._plt_vis module."""
@@ -14,6 +13,7 @@ class TestFigureToVisModel:
     def mpl_figure(self):
         """Create a matplotlib figure."""
         import matplotlib.pyplot as plt
+
         fig, ax = plt.subplots()
         ax.plot([1, 2, 3], [4, 5, 6], label="test")
         ax.set_xlabel("X Label")
@@ -25,7 +25,7 @@ class TestFigureToVisModel:
     def test_converts_to_figure_model(self, mpl_figure):
         """Test conversion to FigureModel."""
         from scitex.bridge import figure_to_vis_model
-        from scitex.vis.model import FigureModel
+        from scitex.canvas.model import FigureModel
 
         model = figure_to_vis_model(mpl_figure)
 
@@ -66,6 +66,7 @@ class TestAxesToVisAxes:
     def mpl_axes(self):
         """Create matplotlib axes."""
         import matplotlib.pyplot as plt
+
         fig, ax = plt.subplots()
         ax.set_xlim(0, 10)
         ax.set_ylim(0, 100)
@@ -77,7 +78,7 @@ class TestAxesToVisAxes:
     def test_creates_axes_model(self, mpl_axes):
         """Test creation of AxesModel."""
         from scitex.bridge import axes_to_vis_axes
-        from scitex.vis.model import AxesModel
+        from scitex.canvas.model import AxesModel
 
         model = axes_to_vis_axes(mpl_axes)
 
@@ -100,8 +101,9 @@ class TestTrackingToPlotConfigs:
 
     def test_converts_plot_history(self):
         """Test conversion of plot tracking history."""
-        from scitex.bridge import tracking_to_plot_configs
         import numpy as np
+
+        from scitex.bridge import tracking_to_plot_configs
 
         history = {
             "plot_0": (
@@ -120,8 +122,9 @@ class TestTrackingToPlotConfigs:
 
     def test_handles_scatter(self):
         """Test conversion of scatter plot history."""
-        from scitex.bridge import tracking_to_plot_configs
         import numpy as np
+
+        from scitex.bridge import tracking_to_plot_configs
 
         history = {
             "scatter_0": (
@@ -145,6 +148,7 @@ class TestCollectFigureData:
     def mpl_figure(self):
         """Create a matplotlib figure."""
         import matplotlib.pyplot as plt
+
         fig, ax = plt.subplots()
         ax.plot([1, 2, 3], [4, 5, 6])
         yield fig

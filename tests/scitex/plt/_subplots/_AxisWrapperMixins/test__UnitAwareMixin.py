@@ -34,7 +34,7 @@ if __name__ == "__main__":
 # import re
 # import numpy as np
 # from scitex.units import Unit, Q, Units
-# from scitex.errors import SciTeXError
+# from scitex.logging import SciTeXError
 # import scitex.logging as logging
 # from scitex.logging import UnitWarning, warn as _warn
 # 

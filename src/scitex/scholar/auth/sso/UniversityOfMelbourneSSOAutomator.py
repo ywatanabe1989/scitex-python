@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-08-21 14:44:29 (ywatanabe)"
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/auth/sso_automation/_UniversityOfMelbourneSSOAutomator.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -90,20 +90,15 @@ class UniversityOfMelbourneSSOAutomator(BaseSSOAutomator):
             if not password_success:
                 return False
 
-            # Step 3: Handle 2FA if needed
+            # Step 3: Handle 2FA if needed (click push button)
             await self._handle_duo_authentication_async(page)
 
-            # Step 4: Wait for completion
-            success = await self._wait_for_completion_async(page)
-
-            # Only send notification on failure (no spam for successful auth)
-            if not success:
-                await self.notify_user_async(
-                    "authentication_failed",
-                    error="Login process timed out or failed",
-                )
-
-            return success
+            # Return immediately after filling forms
+            # BrowserAuthenticator will handle monitoring and notifications
+            self.logger.info(
+                "Form filling complete - returning to caller for monitoring"
+            )
+            return True
 
         except Exception as e:
             self.logger.error(f"UniMelb SSO login failed: {e}")
@@ -338,8 +333,6 @@ if __name__ == "__main__":
 
     def main():
         """Test UniMelb SSO automator."""
-        import asyncio
-
         from playwright.async_api import async_playwright
 
         async def test_automator():

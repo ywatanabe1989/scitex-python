@@ -350,22 +350,22 @@ if __name__ == "__main__":
 # Prerequisites:
 #     * importlib.metadata (Python 3.8+) or importlib_metadata, pandas
 # """
-#
+# 
 # import sys
 # from typing import Optional
-#
+# 
 # import pandas as pd
-#
+# 
 # try:
 #     # Python 3.8+ standard library
 #     from importlib.metadata import distributions
 # except ImportError:
 #     # Fallback for older Python versions
 #     from importlib_metadata import distributions
-#
+# 
 # from ._inspect_module import inspect_module
-#
-#
+# 
+# 
 # def list_packages(
 #     max_depth: int = 1,
 #     root_only: bool = True,
@@ -374,7 +374,7 @@ if __name__ == "__main__":
 # ) -> pd.DataFrame:
 #     """Lists all installed packages and their modules."""
 #     sys.setrecursionlimit(10_000)
-#
+# 
 #     # Skip known problematic packages
 #     skip_patterns = [
 #         "nvidia",
@@ -386,14 +386,14 @@ if __name__ == "__main__":
 #         "readme",
 #         "importlib-metadata",
 #     ]
-#
+# 
 #     # Get installed packages, excluding problematic ones
 #     installed_packages = [
 #         dist.name.replace("-", "_")
 #         for dist in distributions()
 #         if not any(pat in dist.name.lower() for pat in skip_patterns)
 #     ]
-#
+# 
 #     # Focus on commonly used packages first
 #     safelist = [
 #         "numpy",
@@ -412,12 +412,12 @@ if __name__ == "__main__":
 #         "django",
 #         "seaborn",
 #     ]
-#
+# 
 #     # Prioritize safelist packages
 #     installed_packages = [pkg for pkg in installed_packages if pkg in safelist] + [
 #         pkg for pkg in installed_packages if pkg not in safelist
 #     ]
-#
+# 
 #     all_dfs = []
 #     for package_name in installed_packages:
 #         try:
@@ -437,34 +437,34 @@ if __name__ == "__main__":
 #                 print(f"Error processing {package_name}: {err}")
 #             if not skip_errors:
 #                 raise
-#
+# 
 #     if not all_dfs:
 #         return pd.DataFrame(columns=["Name"])
-#
+# 
 #     combined_df = pd.concat(all_dfs, ignore_index=True)
 #     return combined_df.drop_duplicates().sort_values("Name")
-#
-#
+# 
+# 
 # def main() -> Optional[int]:
 #     """Main function for testing package listing functionality."""
 #     df = list_packages(verbose=True)
 #     __import__("ipdb").set_trace()
 #     return 0
-#
-#
+# 
+# 
 # if __name__ == "__main__":
 #     import matplotlib.pyplot as plt
 #     import scitex
-#
+# 
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys,
 #         plt,
 #         verbose=False,
 #         agg=True,
 #     )
-#
+# 
 #     exit_status = main()
-#
+# 
 #     scitex.session.close(
 #         CONFIG,
 #         verbose=False,
@@ -473,7 +473,7 @@ if __name__ == "__main__":
 #         message="",
 #         exit_status=exit_status,
 #     )
-#
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------

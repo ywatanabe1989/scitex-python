@@ -437,12 +437,12 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_wrap.py
 # # ----------------------------------------
 # import os
-#
+# 
 # __FILE__ = "./src/scitex/decorators/_wrap.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-#
-#
+# 
+# 
 # def wrap(func):
 #     """Basic function wrapper that preserves function metadata.
 #     Usage:
@@ -467,8 +467,8 @@ if __name__ == "__main__":
 #     # Mark as a wrapper for detection
 #     wrapper._is_wrapper = True
 #     return wrapper
-#
-#
+# 
+# 
 # # EOF
 
 # --------------------------------------------------------------------------------
