@@ -37,7 +37,7 @@ jobs:
       - name: Extract coverage percentage
         id: coverage
         run: |
-          COVERAGE=$(python -c "import json; data=json.load(open('coverage-stats.json')); print(f\"{data['totals']['percent_covered']:.1f}\")")
+          COVERAGE=$(python -c "import json; data=json.load(open('tests/results/coverage-stats.json')); print(f\"{data['totals']['percent_covered']:.1f}\")")
           echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
           echo "Stats module coverage: $COVERAGE%"
 
@@ -57,9 +57,9 @@ jobs:
         with:
           name: stats-coverage-reports
           path: |
-            htmlcov/stats/
-            coverage-stats.json
-            coverage-stats.xml
+            tests/htmlcov/stats/
+            tests/results/coverage-stats.json
+            tests/results/coverage-stats*.xml
           retention-days: 30
 
       - name: Comment coverage on PR
