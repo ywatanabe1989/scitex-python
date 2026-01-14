@@ -1,280 +1,331 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for CrossRefEngine - CrossRef metadata retrieval engine."""
+
+import json
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from scitex.scholar.metadata_engines.individual import CrossRefEngine
+
+
+class TestCrossRefEngineInit:
+    """Tests for CrossRefEngine initialization."""
+
+    def test_init_default_email(self):
+        """Should initialize with default email."""
+        engine = CrossRefEngine()
+        assert engine.email == "research@example.com"
+
+    def test_init_custom_email(self):
+        """Should accept custom email."""
+        engine = CrossRefEngine(email="custom@test.com")
+        assert engine.email == "custom@test.com"
+
+    def test_base_url(self):
+        """Should have correct CrossRef API URL."""
+        engine = CrossRefEngine()
+        assert engine.base_url == "https://api.crossref.org/works"
+
+
+class TestCrossRefEngineProperties:
+    """Tests for CrossRefEngine properties."""
+
+    def test_name_property(self):
+        """Name property should return 'CrossRef'."""
+        engine = CrossRefEngine()
+        assert engine.name == "CrossRef"
+
+    def test_rate_limit_delay(self):
+        """Rate limit delay should be 0.1 seconds."""
+        engine = CrossRefEngine()
+        assert engine.rate_limit_delay == 0.1
+
+
+class TestCrossRefEngineSearch:
+    """Tests for search method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return CrossRefEngine()
+
+    def test_search_by_doi_calls_correct_method(self, engine):
+        """Should call _search_by_doi when DOI provided."""
+        with patch.object(engine, "_search_by_doi") as mock_method:
+            mock_method.return_value = {"id": {"doi": "10.1038/test"}}
+            engine.search(doi="10.1038/test")
+            mock_method.assert_called_once_with("10.1038/test", "dict")
+
+    def test_search_by_title_calls_correct_method(self, engine):
+        """Should call _search_by_metadata when title provided."""
+        with patch.object(engine, "_search_by_metadata") as mock_method:
+            mock_method.return_value = {"basic": {"title": "Test Paper"}}
+            engine.search(title="Test Paper")
+            mock_method.assert_called_once()
+
+    def test_search_doi_takes_priority(self, engine):
+        """DOI should take priority over title when both provided."""
+        with patch.object(engine, "_search_by_doi") as mock_doi:
+            with patch.object(engine, "_search_by_metadata") as mock_meta:
+                mock_doi.return_value = {"id": {"doi": "10.1038/test"}}
+                engine.search(doi="10.1038/test", title="Test Paper")
+                mock_doi.assert_called_once()
+                mock_meta.assert_not_called()
+
+
+class TestCrossRefEngineSearchByDOI:
+    """Tests for _search_by_doi method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return CrossRefEngine()
+
+    def test_cleans_doi_url(self, engine):
+        """Should remove https://doi.org/ prefix from DOI."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "message": {"DOI": "10.1038/test", "title": ["Test"]}
+        }
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        engine._search_by_doi("https://doi.org/10.1038/test", "dict")
+        call_url = mock_session.get.call_args[0][0]
+        assert "https://doi.org/" not in call_url
+
+    def test_successful_doi_search(self, engine):
+        """Should return metadata for valid DOI."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "message": {
+                "DOI": "10.1038/nature12373",
+                "title": ["Test Paper Title"],
+                "published-print": {"date-parts": [[2023]]},
+                "author": [{"given": "John", "family": "Doe"}],
+                "container-title": ["Nature"],
+            }
+        }
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_doi("10.1038/nature12373", "dict")
+        assert result["id"]["doi"] == "10.1038/nature12373"
+        assert result["basic"]["title"] == "Test Paper Title"
+
+    def test_failed_doi_search_returns_minimal(self, engine):
+        """Should return minimal metadata on failure."""
+        mock_session = MagicMock()
+        mock_session.get.side_effect = Exception("Network error")
+        engine._session = mock_session
+
+        result = engine._search_by_doi("10.1038/test", "dict")
+        assert result["id"]["doi"] == "10.1038/test"
+
+    def test_return_as_json(self, engine):
+        """Should return JSON string when return_as='json'."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "message": {"DOI": "10.1038/test", "title": ["Test"]}
+        }
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_doi("10.1038/test", "json")
+        assert isinstance(result, str)
+        parsed = json.loads(result)
+        assert "id" in parsed
+
+
+class TestCrossRefEngineSearchByMetadata:
+    """Tests for _search_by_metadata method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return CrossRefEngine()
+
+    def test_returns_none_without_title(self, engine):
+        """Should return None when no title provided."""
+        result = engine._search_by_metadata(title=None)
+        assert result is None
+
+    def test_builds_correct_params(self, engine):
+        """Should build correct query parameters."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"message": {"items": []}}
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        engine._search_by_metadata(title="Test Paper", year=2023)
+        call_params = mock_session.get.call_args[1]["params"]
+        assert call_params["query.title"] == "Test Paper"
+        assert "from-pub-date:2023" in call_params["filter"]
+
+    def test_matches_title_substring(self, engine):
+        """Should match when search title is substring of result."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "message": {
+                "items": [
+                    {
+                        "DOI": "10.1038/test",
+                        "title": ["Test Paper: A Comprehensive Study"],
+                    }
+                ]
+            }
+        }
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_metadata(title="Test Paper")
+        assert result is not None
+        assert result["id"]["doi"] == "10.1038/test"
+
+    def test_handles_api_error(self, engine):
+        """Should handle API errors gracefully."""
+        mock_session = MagicMock()
+        mock_session.get.side_effect = Exception("API Error")
+        engine._session = mock_session
+
+        result = engine._search_by_metadata(title="Test")
+        assert result is not None
+        assert result["basic"]["title"] == "Test"
+
+
+class TestCrossRefEngineExtractMetadata:
+    """Tests for _extract_metadata_from_item method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return CrossRefEngine()
+
+    def test_extracts_title(self, engine):
+        """Should extract title from item."""
+        item = {"title": ["Test Paper Title"]}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["basic"]["title"] == "Test Paper Title"
+
+    def test_removes_trailing_period(self, engine):
+        """Should remove trailing period from title."""
+        item = {"title": ["Test Paper Title."]}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["basic"]["title"] == "Test Paper Title"
+
+    def test_extracts_year_from_published_print(self, engine):
+        """Should extract year from published-print."""
+        item = {"published-print": {"date-parts": [[2023, 5, 15]]}}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["basic"]["year"] == 2023
+
+    def test_extracts_year_from_published_online(self, engine):
+        """Should fall back to published-online for year."""
+        item = {"published-online": {"date-parts": [[2022]]}}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["basic"]["year"] == 2022
+
+    def test_extracts_authors(self, engine):
+        """Should extract author names correctly."""
+        item = {
+            "author": [
+                {"given": "John", "family": "Doe"},
+                {"given": "Jane", "family": "Smith"},
+                {"family": "Anonymous"},
+            ]
+        }
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert "John Doe" in result["basic"]["authors"]
+        assert "Jane Smith" in result["basic"]["authors"]
+        assert "Anonymous" in result["basic"]["authors"]
+
+    def test_extracts_doi(self, engine):
+        """Should extract DOI."""
+        item = {"DOI": "10.1038/nature12373"}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["id"]["doi"] == "10.1038/nature12373"
+
+    def test_extracts_journal(self, engine):
+        """Should extract journal name."""
+        item = {"container-title": ["Nature Communications"]}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["publication"]["journal"] == "Nature Communications"
+
+    def test_extracts_citation_count(self, engine):
+        """Should extract citation count."""
+        item = {"is-referenced-by-count": 150}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["citation_count"]["total"] == 150
+
+    def test_builds_doi_url(self, engine):
+        """Should build DOI URL."""
+        item = {"DOI": "10.1038/test"}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["url"]["doi"] == "https://doi.org/10.1038/test"
+
+    def test_tracks_engine_source(self, engine):
+        """Should track CrossRef as source engine."""
+        item = {"DOI": "10.1038/test", "title": ["Test"]}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["id"]["doi_engines"] == ["CrossRef"]
+        assert result["basic"]["title_engines"] == ["CrossRef"]
+        assert result["system"]["searched_by_CrossRef"] is True
+
+
+class TestCrossRefEngineEdgeCases:
+    """Edge case tests for CrossRefEngine."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return CrossRefEngine()
+
+    def test_empty_title_list(self, engine):
+        """Should handle empty title list."""
+        item = {"title": []}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["basic"]["title"] is None
+
+    def test_missing_date_parts(self, engine):
+        """Should handle missing date parts."""
+        item = {"published-print": {}}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert result["basic"]["year"] is None
+
+    def test_handles_unicode_title(self, engine):
+        """Should handle unicode in titles."""
+        item = {"title": ["Etude sur les donnees medicales"]}
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert "Etude" in result["basic"]["title"]
+
+    def test_handles_special_characters(self, engine):
+        """Should handle special characters in metadata."""
+        item = {
+            "title": ["Machine Learning & AI: A Study"],
+            "author": [{"given": "Jose", "family": "Garcia-Lopez"}],
+        }
+        result = engine._extract_metadata_from_item(item, "dict")
+        assert "&" in result["basic"]["title"]
+        assert "Garcia-Lopez" in result["basic"]["authors"][0]
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
     pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/metadata_engines/individual/CrossRefEngine.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-09-30 07:29:03 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/engines/individual/CrossRefEngine.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = __file__
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# import json
-# import time
-# from typing import Dict, List, Optional, Union
-# 
-# from scitex import logging
-# 
-# from ..utils import standardize_metadata
-# from ._BaseDOIEngine import BaseDOIEngine
-# 
-# logger = logging.getLogger(__name__)
-# 
-# 
-# class CrossRefEngine(BaseDOIEngine):
-#     """CrossRef DOI engine - no API key required, generous rate limits."""
-# 
-#     def __init__(self, email: str = "research@example.com"):
-#         super().__init__(email)
-#         self.base_url = "https://api.crossref.org/works"
-# 
-#     @property
-#     def name(self) -> str:
-#         return "CrossRef"
-# 
-#     @property
-#     def rate_limit_delay(self) -> float:
-#         return 0.1
-# 
-#     def search(
-#         self,
-#         title: Optional[str] = None,
-#         year: Optional[Union[int, str]] = None,
-#         authors: Optional[List[str]] = None,
-#         doi: Optional[str] = None,
-#         max_results=5,
-#         return_as: Optional[str] = "dict",
-#         **kwargs,
-#     ) -> Optional[Dict]:
-#         """When doi is provided, all the information other than doi is ignored"""
-#         if doi:
-#             return self._search_by_doi(doi, return_as)
-#         else:
-#             return self._search_by_metadata(
-#                 title, year, authors, max_results, return_as
-#             )
-# 
-#     def _search_by_doi(self, doi: str, return_as: str) -> Optional[Dict]:
-#         """Search by DOI directly"""
-#         doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
-#         url = f"{self.base_url}/{doi}"
-# 
-#         try:
-#             assert return_as in [
-#                 "dict",
-#                 "json",
-#             ], "return_as must be either of 'dict' or 'json'"
-#             response = self.session.get(url, timeout=30)
-#             response.raise_for_status()
-# 
-#             data = response.json()
-#             item = data.get("message", {})
-#             return self._extract_metadata_from_item(item, return_as)
-#         except Exception as exc:
-#             logger.warning(f"CrossRef DOI search error: {exc}")
-#             return self._create_minimal_metadata(
-#                 doi=doi,
-#                 return_as=return_as,
-#             )
-# 
-#     def _search_by_metadata(
-#         self,
-#         title: str,
-#         year: Optional[Union[int, str]] = None,
-#         authors: Optional[List[str]] = None,
-#         max_results: int = 5,
-#         return_as: str = "dict",
-#     ) -> Optional[Dict]:
-#         """Search by metadata other than doi"""
-#         if not title:
-#             return None
-# 
-#         params = {
-#             "query.title": title,  # Use query.title for more precise title-based search
-#             "rows": max_results,
-#             "select": "DOI,title,published-print,published-online,container-title,short-container-title,publisher,volume,issue,ISSN,abstract,author,is-referenced-by-count",
-#             "mailto": self.email,
-#         }
-# 
-#         if year:
-#             params["filter"] = f"from-pub-date:{year},until-pub-date:{year}"
-# 
-#         try:
-#             assert return_as in [
-#                 "dict",
-#                 "json",
-#             ], "return_as must be either of 'dict' or 'json'"
-#             response = self.session.get(self.base_url, params=params, timeout=30)
-#             response.raise_for_status()
-#             data = response.json()
-# 
-#             items = data.get("message", {}).get("items", [])
-#             for item in items:
-#                 item_title = " ".join(item.get("title", []))
-#                 if item_title.endswith("."):
-#                     item_title = item_title[:-1]
-# 
-#                 # Enhanced title matching for better compatibility with shortened titles
-#                 # Check if search title is a substring of result title (common with shortened BibTeX titles)
-#                 if title.lower() in item_title.lower():
-#                     logger.debug(
-#                         f"Title substring match: '{title}' found in '{item_title}'"
-#                     )
-#                     return self._extract_metadata_from_item(item, return_as)
-# 
-#                 # Fall back to similarity matching with lower threshold (85% instead of 95%)
-#                 if self._is_title_match(title, item_title, threshold=0.85):
-#                     return self._extract_metadata_from_item(item, return_as)
-#             return self._create_minimal_metadata(
-#                 title=title,
-#                 year=year,
-#                 authors=authors,
-#                 return_as=return_as,
-#             )
-# 
-#         except Exception as exc:
-#             logger.warning(f"CrossRef metadata error: {exc}")
-#             return self._create_minimal_metadata(
-#                 title=title,
-#                 year=year,
-#                 authors=authors,
-#                 return_as=return_as,
-#             )
-# 
-#     def _extract_metadata_from_item(self, item, return_as: str) -> Optional[Dict]:
-#         """Extract metadata from CrossRef item"""
-#         item_title = " ".join(item.get("title", []))
-#         if item_title.endswith("."):
-#             item_title = item_title[:-1]
-# 
-#         pub_year = None
-#         published = item.get("published-print") or item.get("published-online")
-#         if published and published.get("date-parts"):
-#             pub_year = published["date-parts"][0][0]
-# 
-#         extracted_authors = []
-#         for author in item.get("author", []):
-#             given = author.get("given", "")
-#             family = author.get("family", "")
-#             if family:
-#                 if given:
-#                     extracted_authors.append(f"{given} {family}")
-#                 else:
-#                     extracted_authors.append(family)
-# 
-#         container_titles = item.get("container-title", [])
-#         short_container_titles = item.get("short-container-title", [])
-#         journal = container_titles[0] if container_titles else None
-#         short_journal = short_container_titles[0] if short_container_titles else None
-#         issn_list = item.get("ISSN", [])
-#         issn = issn_list[0] if issn_list else None
-# 
-#         # Extract citation count
-#         citation_count = item.get("is-referenced-by-count")
-# 
-#         metadata = {
-#             "id": {
-#                 "doi": item.get("DOI"),
-#                 "doi_engines": [self.name] if item.get("DOI") else None,
-#             },
-#             "basic": {
-#                 "title": item_title if item_title else None,
-#                 "title_engines": [self.name] if item_title else None,
-#                 "year": pub_year if pub_year else None,
-#                 "year_engines": [self.name] if pub_year else None,
-#                 "abstract": (item.get("abstract") if item.get("abstract") else None),
-#                 "abstract_engines": ([self.name] if item.get("abstract") else None),
-#                 "authors": extracted_authors if extracted_authors else None,
-#                 "authors_engines": [self.name] if extracted_authors else None,
-#             },
-#             "citation_count": {
-#                 "total": citation_count if citation_count is not None else None,
-#                 "total_engines": [self.name] if citation_count is not None else None,
-#             },
-#             "publication": {
-#                 "journal": journal if journal else None,
-#                 "journal_engines": [self.name] if journal else None,
-#                 "short_journal": short_journal if short_journal else None,
-#                 "short_journal_engines": ([self.name] if short_journal else None),
-#                 "publisher": (item.get("publisher") if item.get("publisher") else None),
-#                 "publisher_engines": ([self.name] if item.get("publisher") else None),
-#                 "volume": item.get("volume") if item.get("volume") else None,
-#                 "volume_engines": [self.name] if item.get("volume") else None,
-#                 "issue": item.get("issue") if item.get("issue") else None,
-#                 "issue_engines": [self.name] if item.get("issue") else None,
-#                 "issn": issn if issn else None,
-#                 "issn_engines": [self.name] if issn else None,
-#             },
-#             "url": {
-#                 "doi": (
-#                     "https://doi.org/" + item.get("DOI") if item.get("DOI") else None
-#                 ),
-#                 "doi_engines": [self.name] if item.get("DOI") else None,
-#             },
-#             "system": {
-#                 f"searched_by_{self.name}": True,
-#             },
-#         }
-# 
-#         metadata = standardize_metadata(metadata)
-#         if return_as == "dict":
-#             return metadata
-#         if return_as == "json":
-#             return json.dumps(metadata, indent=2)
-# 
-# 
-# if __name__ == "__main__":
-# 
-#     def main():
-#         from pprint import pprint
-# 
-#         TITLE = "Attention is All You Need"
-#         # DOI = "https://doi.org/10.48550/arXiv.1706.03762"
-#         DOI = "10.1007/978-3-031-84300-6_13"
-# 
-#         # Example: CrossRef search
-#         engine = CrossRefEngine("test@example.com")
-# 
-#         outputs = {}
-# 
-#         # Search by title
-#         outputs["metadata_by_title_dict"] = engine.search(title=TITLE)
-#         outputs["metadata_by_title_json"] = engine.search(title=TITLE, return_as="json")
-# 
-#         # Search by DOI
-#         outputs["metadata_by_doi_dict"] = engine.search(doi=DOI)
-#         outputs["metadata_by_doi_json"] = engine.search(doi=DOI, return_as="json")
-# 
-#         # Empty Result
-#         outputs["empty_dict"] = engine._create_minimal_metadata(return_as="dict")
-#         outputs["empty_json"] = engine._create_minimal_metadata(return_as="json")
-# 
-#         for k, v in outputs.items():
-#             print("----------------------------------------")
-#             print(k)
-#             print("----------------------------------------")
-#             pprint(v)
-#             time.sleep(1)
-# 
-#     main()
-# 
-# # python -m scitex.scholar.engines.individual.CrossRefEngine
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/metadata_engines/individual/CrossRefEngine.py
-# --------------------------------------------------------------------------------

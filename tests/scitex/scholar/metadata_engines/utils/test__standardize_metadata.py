@@ -1,391 +1,313 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for standardize_metadata utility functions."""
+
+import pytest
+
+from scitex.scholar.metadata_engines.utils._standardize_metadata import (
+    BASE_STRUCTURE,
+    standardize_metadata,
+    to_bibtex_entry,
+)
+
+
+class TestBaseStructure:
+    """Tests for BASE_STRUCTURE constant."""
+
+    def test_has_id_section(self):
+        """BASE_STRUCTURE should have id section."""
+        assert "id" in BASE_STRUCTURE
+
+    def test_has_basic_section(self):
+        """BASE_STRUCTURE should have basic section."""
+        assert "basic" in BASE_STRUCTURE
+
+    def test_has_citation_count_section(self):
+        """BASE_STRUCTURE should have citation_count section."""
+        assert "citation_count" in BASE_STRUCTURE
+
+    def test_has_publication_section(self):
+        """BASE_STRUCTURE should have publication section."""
+        assert "publication" in BASE_STRUCTURE
+
+    def test_has_url_section(self):
+        """BASE_STRUCTURE should have url section."""
+        assert "url" in BASE_STRUCTURE
+
+    def test_has_path_section(self):
+        """BASE_STRUCTURE should have path section."""
+        assert "path" in BASE_STRUCTURE
+
+    def test_has_system_section(self):
+        """BASE_STRUCTURE should have system section."""
+        assert "system" in BASE_STRUCTURE
+
+    def test_id_section_has_doi(self):
+        """id section should have doi field."""
+        assert "doi" in BASE_STRUCTURE["id"]
+        assert "doi_engines" in BASE_STRUCTURE["id"]
+
+    def test_basic_section_has_title(self):
+        """basic section should have title field."""
+        assert "title" in BASE_STRUCTURE["basic"]
+        assert "title_engines" in BASE_STRUCTURE["basic"]
+
+    def test_citation_count_has_yearly_counts(self):
+        """citation_count section should have yearly count fields."""
+        assert "total" in BASE_STRUCTURE["citation_count"]
+        assert "2023" in BASE_STRUCTURE["citation_count"]
+        assert "2024" in BASE_STRUCTURE["citation_count"]
+
+
+class TestStandardizeMetadata:
+    """Tests for standardize_metadata function."""
+
+    def test_returns_dict(self):
+        """standardize_metadata should return a dictionary."""
+        result = standardize_metadata({})
+        assert isinstance(result, dict)
+
+    def test_empty_input_returns_base_structure(self):
+        """Empty input should return base structure with null values."""
+        result = standardize_metadata({})
+        assert "id" in result
+        assert "basic" in result
+        assert result["id"]["doi"] is None
+
+    def test_preserves_existing_values(self):
+        """Should preserve existing metadata values."""
+        metadata = {
+            "id": {"doi": "10.1038/nature12373"},
+            "basic": {"title": "Test Paper"},
+        }
+        result = standardize_metadata(metadata)
+        assert result["id"]["doi"] == "10.1038/nature12373"
+        assert result["basic"]["title"] == "Test Paper"
+
+    def test_adds_missing_sections(self):
+        """Should add missing sections with default values."""
+        metadata = {"id": {"doi": "10.1038/test"}}
+        result = standardize_metadata(metadata)
+        assert "basic" in result
+        assert "publication" in result
+        assert result["basic"]["title"] is None
+
+    def test_adds_missing_fields_within_section(self):
+        """Should add missing fields within existing sections."""
+        metadata = {"id": {"doi": "10.1038/test"}}
+        result = standardize_metadata(metadata)
+        assert "pmid" in result["id"]
+        assert "arxiv_id" in result["id"]
+
+    def test_does_not_modify_original(self):
+        """Should not modify the original metadata dict."""
+        metadata = {"id": {"doi": "10.1038/test"}}
+        original_doi = metadata["id"]["doi"]
+        standardize_metadata(metadata)
+        assert metadata["id"]["doi"] == original_doi
+
+    def test_handles_full_metadata(self):
+        """Should handle complete metadata structure."""
+        metadata = {
+            "id": {"doi": "10.1038/test", "pmid": "12345678"},
+            "basic": {
+                "title": "Test Paper",
+                "authors": ["Smith, John", "Doe, Jane"],
+                "year": 2023,
+            },
+            "publication": {"journal": "Nature", "volume": "600"},
+        }
+        result = standardize_metadata(metadata)
+        assert result["id"]["doi"] == "10.1038/test"
+        assert result["id"]["pmid"] == "12345678"
+        assert result["basic"]["title"] == "Test Paper"
+        assert result["publication"]["journal"] == "Nature"
+
+
+class TestToBibtexEntry:
+    """Tests for to_bibtex_entry function."""
+
+    @pytest.fixture
+    def sample_metadata(self):
+        """Create sample standardized metadata."""
+        return standardize_metadata(
+            {
+                "id": {"doi": "10.1038/nature12373"},
+                "basic": {
+                    "title": "Sample Paper Title",
+                    "authors": ["Smith, John", "Doe, Jane"],
+                    "year": 2023,
+                    "abstract": "This is the abstract.",
+                },
+                "publication": {"journal": "Nature"},
+            }
+        )
+
+    def test_returns_string(self, sample_metadata):
+        """to_bibtex_entry should return a string."""
+        result = to_bibtex_entry(sample_metadata)
+        assert isinstance(result, str)
+
+    def test_contains_entry_type(self, sample_metadata):
+        """BibTeX entry should contain entry type."""
+        result = to_bibtex_entry(sample_metadata)
+        assert result.startswith("@article{")
+
+    def test_uses_custom_key(self, sample_metadata):
+        """Should use custom key when provided."""
+        result = to_bibtex_entry(sample_metadata, key="custom2023")
+        assert "@article{custom2023," in result
+
+    def test_generates_key_from_author_year(self, sample_metadata):
+        """Should generate key from first author and year."""
+        result = to_bibtex_entry(sample_metadata)
+        # "Smith, John" -> split by space, take last -> "John" -> "john-2023"
+        assert "john-2023" in result.lower()
+
+    def test_includes_title(self, sample_metadata):
+        """BibTeX entry should include title."""
+        result = to_bibtex_entry(sample_metadata)
+        assert "title = {Sample Paper Title}" in result
+
+    def test_includes_authors(self, sample_metadata):
+        """BibTeX entry should include authors."""
+        result = to_bibtex_entry(sample_metadata)
+        assert "author = {Smith, John and Doe, Jane}" in result
+
+    def test_includes_year(self, sample_metadata):
+        """BibTeX entry should include year."""
+        result = to_bibtex_entry(sample_metadata)
+        assert "year = {2023}" in result
+
+    def test_includes_journal(self, sample_metadata):
+        """BibTeX entry should include journal."""
+        result = to_bibtex_entry(sample_metadata)
+        assert "journal = {Nature}" in result
+
+    def test_includes_doi(self, sample_metadata):
+        """BibTeX entry should include DOI."""
+        result = to_bibtex_entry(sample_metadata)
+        assert "doi = {10.1038/nature12373}" in result
+
+    def test_includes_abstract(self, sample_metadata):
+        """BibTeX entry should include abstract."""
+        result = to_bibtex_entry(sample_metadata)
+        assert "abstract = {This is the abstract.}" in result
+
+    def test_ends_with_closing_brace(self, sample_metadata):
+        """BibTeX entry should end with closing brace."""
+        result = to_bibtex_entry(sample_metadata)
+        assert result.strip().endswith("}")
+
+    def test_arxiv_entry_is_misc(self):
+        """ArXiv papers should have @misc entry type."""
+        metadata = standardize_metadata(
+            {
+                "id": {"arxiv_id": "2301.12345"},
+                "basic": {
+                    "title": "ArXiv Paper",
+                    "authors": ["Author, Test"],
+                    "year": 2023,
+                },
+                "publication": {},
+            }
+        )
+        result = to_bibtex_entry(metadata)
+        assert result.startswith("@misc{")
+
+    def test_no_journal_is_misc(self):
+        """Papers without journal should have @misc entry type."""
+        metadata = standardize_metadata(
+            {
+                "id": {},
+                "basic": {
+                    "title": "Test Paper",
+                    "authors": ["Author, Test"],
+                    "year": 2023,
+                },
+                "publication": {},
+            }
+        )
+        result = to_bibtex_entry(metadata)
+        assert result.startswith("@misc{")
+
+    def test_escapes_braces_in_title(self):
+        """Should escape braces in title."""
+        metadata = standardize_metadata(
+            {
+                "id": {},
+                "basic": {
+                    "title": "Title with {braces}",
+                    "authors": ["Test, Author"],
+                    "year": 2023,
+                },
+                "publication": {},
+            }
+        )
+        result = to_bibtex_entry(metadata)
+        assert r"\{braces\}" in result
+
+    def test_handles_no_authors(self):
+        """Should handle metadata with no authors."""
+        metadata = standardize_metadata(
+            {
+                "id": {},
+                "basic": {"title": "Test Paper", "authors": None, "year": 2023},
+                "publication": {},
+            }
+        )
+        result = to_bibtex_entry(metadata)
+        assert "unknown-2023" in result.lower()
+        assert "author" not in result.lower()
+
+    def test_handles_no_year(self):
+        """Should handle metadata with no year."""
+        metadata = standardize_metadata(
+            {
+                "id": {},
+                "basic": {
+                    "title": "Test Paper",
+                    "authors": ["Test, Author"],
+                    "year": None,
+                },
+                "publication": {},
+            }
+        )
+        result = to_bibtex_entry(metadata)
+        assert "author-0000" in result.lower()
+
+
+class TestStandardizeMetadataEdgeCases:
+    """Edge case tests for standardize_metadata."""
+
+    def test_handles_unknown_section(self):
+        """Should ignore unknown sections."""
+        metadata = {"unknown_section": {"field": "value"}}
+        result = standardize_metadata(metadata)
+        # Unknown section should be ignored
+        assert "id" in result
+        assert "basic" in result
+
+    def test_handles_nested_dict_update(self):
+        """Should properly update nested dictionaries."""
+        metadata = {
+            "citation_count": {"total": 150, "2023": 50},
+        }
+        result = standardize_metadata(metadata)
+        assert result["citation_count"]["total"] == 150
+        assert result["citation_count"]["2023"] == 50
+        # Other years should still exist with None
+        assert result["citation_count"]["2022"] is None
+
+    def test_preserves_list_values(self):
+        """Should preserve list values in metadata."""
+        metadata = {
+            "url": {"pdfs": ["http://example.com/paper.pdf"]},
+        }
+        result = standardize_metadata(metadata)
+        assert result["url"]["pdfs"] == ["http://example.com/paper.pdf"]
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/metadata_engines/utils/_standardize_metadata.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-08 06:23:06 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/engines/utils/_standardize_metadata.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/scholar/engines/utils/_standardize_metadata.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# __FILE__ = __file__
-# 
-# from collections import OrderedDict
-# 
-# BASE_STRUCTURE = OrderedDict(
-#     [
-#         (
-#             "id",
-#             OrderedDict(
-#                 [
-#                     ("doi", None),
-#                     ("doi_engines", []),
-#                     ("arxiv_id", None),
-#                     ("arxiv_id_engines", []),
-#                     ("pmid", None),
-#                     ("pmid_engines", []),
-#                     ("semantic_id", None),
-#                     ("semantic_id_engines", []),
-#                     ("ieee_id", None),
-#                     ("ieee_id_engines", []),
-#                     ("scholar_id", None),
-#                     ("scholar_id_engines", []),
-#                 ]
-#             ),
-#         ),
-#         (
-#             "basic",
-#             OrderedDict(
-#                 [
-#                     ("title", None),
-#                     ("title_engines", []),
-#                     ("authors", None),
-#                     ("authors_engines", []),
-#                     ("year", None),
-#                     ("year_engines", []),
-#                     ("abstract", None),
-#                     ("abstract_engines", []),
-#                     ("keywords", None),
-#                     ("keywords_engines", []),
-#                     ("type", None),
-#                     ("type_engines", []),
-#                 ]
-#             ),
-#         ),
-#         (
-#             "citation_count",
-#             OrderedDict(
-#                 [
-#                     ("total", None),
-#                     ("total_engines", []),
-#                     ("2025", None),
-#                     ("2025_engines", []),
-#                     ("2024", None),
-#                     ("2024_engines", []),
-#                     ("2023", None),
-#                     ("2023_engines", []),
-#                     ("2022", None),
-#                     ("2022_engines", []),
-#                     ("2021", None),
-#                     ("2021_engines", []),
-#                     ("2020", None),
-#                     ("2020_engines", []),
-#                     ("2019", None),
-#                     ("2019_engines", []),
-#                     ("2018", None),
-#                     ("2018_engines", []),
-#                     ("2017", None),
-#                     ("2017_engines", []),
-#                     ("2016", None),
-#                     ("2016_engines", []),
-#                     ("2015", None),
-#                     ("2015_engines", []),
-#                 ]
-#             ),
-#         ),
-#         (
-#             "publication",
-#             OrderedDict(
-#                 [
-#                     ("journal", None),
-#                     ("journal_engines", []),
-#                     ("short_journal", None),
-#                     ("short_journal_engines", []),
-#                     ("impact_factor", None),
-#                     ("impact_factor_engines", []),
-#                     ("issn", None),
-#                     ("issn_engines", []),
-#                     ("volume", None),
-#                     ("volume_engines", []),
-#                     ("issue", None),
-#                     ("issue_engines", []),
-#                     ("first_page", None),
-#                     ("first_page_engines", []),
-#                     ("last_page", None),
-#                     ("last_page_engines", []),
-#                     ("publisher", None),
-#                     ("publisher_engines", []),
-#                 ]
-#             ),
-#         ),
-#         (
-#             "url",
-#             OrderedDict(
-#                 [
-#                     ("doi", None),
-#                     ("doi_engines", []),
-#                     ("publisher", None),
-#                     ("publisher_engines", []),
-#                     ("openurl_query", None),
-#                     ("openurl_engines", []),
-#                     ("openurl_resolved", []),
-#                     ("openurl_resolved_engines", []),
-#                     ("pdfs", []),
-#                     ("pdfs_engines", []),
-#                     ("supplementary_files", []),
-#                     ("supplementary_files_engines", []),
-#                     ("additional_files", []),
-#                     ("additional_files_engines", []),
-#                 ]
-#             ),
-#         ),
-#         (
-#             "path",
-#             OrderedDict(
-#                 [
-#                     ("pdfs", []),
-#                     ("pdfs_engines", []),
-#                     ("supplementary_files", []),
-#                     ("supplementary_files_engines", []),
-#                     ("additional_files", []),
-#                     ("additional_files_engines", []),
-#                 ]
-#             ),
-#         ),
-#         (
-#             "system",
-#             OrderedDict(
-#                 [
-#                     ("searched_by_arXiv", None),
-#                     ("searched_by_CrossRef", None),
-#                     ("searched_by_CrossRefLocal", None),
-#                     ("searched_by_OpenAlex", None),
-#                     ("searched_by_PubMed", None),
-#                     ("searched_by_Semantic_Scholar", None),
-#                     ("searched_by_URL", None),
-#                 ]
-#             ),
-#         ),
-#     ]
-# )
-# 
-# 
-# def standardize_metadata(metadata):
-#     """Initialize all required fields with null values."""
-#     import copy
-# 
-#     complete_structure = copy.deepcopy(BASE_STRUCTURE)
-# 
-#     for section_key, section_data in metadata.items():
-#         if section_key in complete_structure:
-#             if isinstance(complete_structure[section_key], dict):
-#                 complete_structure[section_key].update(section_data)
-#             else:
-#                 complete_structure[section_key] = section_data
-# 
-#     return complete_structure
-# 
-# 
-# def to_bibtex_entry(metadata, key=None):
-#     """Convert complete metadata structure to BibTeX entry."""
-# 
-#     def _generate_bibtex_key(metadata):
-#         """Generate BibTeX key from metadata."""
-#         authors = metadata["basic"]["authors"]
-#         year = metadata["basic"]["year"] or "0000"
-# 
-#         if authors:
-#             first_author = authors[0].split()[-1].lower()
-#         else:
-#             first_author = "unknown"
-# 
-#         return f"{first_author}-{year}"
-# 
-#     def _determine_entry_type(metadata):
-#         """Determine BibTeX entry type from metadata."""
-#         if metadata["id"]["arxiv_id"]:
-#             return "misc"
-#         elif metadata["publication"]["journal"]:
-#             return "article"
-#         return "misc"
-# 
-#     def _add_bibtex_field(lines, field_name, value):
-#         """Add BibTeX field if value exists."""
-#         if value:
-#             escaped_value = str(value).replace("{", r"\{").replace("}", r"\}")
-#             lines.append(f"  {field_name} = {{{escaped_value}}},")
-# 
-#     def _add_bibtex_authors(lines, authors):
-#         """Add authors field to BibTeX."""
-#         if authors:
-#             authors_str = " and ".join(authors)
-#             lines.append(f"  author = {{{authors_str}}},")
-# 
-#     if not key:
-#         key = _generate_bibtex_key(metadata)
-# 
-#     entry_type = _determine_entry_type(metadata)
-#     lines = [f"@{entry_type}{{{key},"]
-# 
-#     # Add fields from metadata structure
-#     _add_bibtex_field(lines, "title", metadata["basic"]["title"])
-#     _add_bibtex_authors(lines, metadata["basic"]["authors"])
-#     _add_bibtex_field(lines, "year", metadata["basic"]["year"])
-#     _add_bibtex_field(lines, "journal", metadata["publication"]["journal"])
-#     _add_bibtex_field(lines, "doi", metadata["id"]["doi"])
-#     _add_bibtex_field(lines, "abstract", metadata["basic"]["abstract"])
-# 
-#     lines.append("}")
-#     return "\n".join(lines)
-# 
-# 
-# # def standardize_metadata(metadata):
-# #     """Initialize all required fields with null values."""
-# #     complete_structure = OrderedDict(
-# #         [
-# #             # Core identification
-# #             (
-# #                 "id",
-# #                 ("doi", None),
-# #                 ("doi_engine", None),
-# #                 ("arxiv_id", None),
-# #                 ("arxiv_id_engine", None),
-# #                 ("pmid", None),
-# #                 ("pmid_engine", None),
-# #                 ("scholar_id", None),
-# #                 ("scholar_id_engine", None),
-# #             ),
-# #             (
-# #                 "basic",
-# #                 ("title", None),
-# #                 ("title_engine", None),
-# #                 ("authors", None),
-# #                 ("authors_engine", None),
-# #                 ("year", None),
-# #                 ("year_engine", None),
-# #                 ("abstract", None),
-# #                 ("abstract_engine", None),
-# #                 ("citation_count", None),
-# #                 ("citation_engine", None),
-# #             ),
-# #             (
-# #                 "journal",
-# #                 ("journal", None),
-# #                 ("journal_engine", None),
-# #                 ("impact_factor", None),
-# #                 ("impact_factor_engine", None),
-# #                 ("issn", None),
-# #                 ("issn_engine", None),
-# #                 ("volume", None),
-# #                 ("volume_engine", None),
-# #                 ("issue", None),
-# #                 ("issue_engine", None),
-# #                 # Metrics
-# #             )(
-# #                 "urls",
-# #                 {
-# #                     "url_doi": None,
-# #                     "url_doi_engine": None,
-# #                     "url_publisher": None,
-# #                     "url_publisher_engine": None,
-# #                     "url_openurl_query": None,
-# #                     "url_openurl_engine": None,
-# #                     "url_openurl_resolved": [],
-# #                     "url_openurl_resolved_engine": [],
-# #                     "url_pdf": [],
-# #                     "url_pdf_engine": [],
-# #                     "url_supplementary": [],
-# #                     "url_supplementary_engine": [],
-# #                 },
-# #             ),
-# #         ]
-# #     )
-# 
-# #     # Update with existing metadata
-# #     complete_structure.update(metadata)
-# #     return complete_structure
-# 
-# 
-# # EOF
-# # #!/usr/bin/env python3
-# # # -*- coding: utf-8 -*-
-# # # Timestamp: "2025-08-14 06:53:44 (ywatanabe)"
-# # # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/metadata/doi/utils/_standardize_metadata.py
-# # # ----------------------------------------
-# # from __future__ import annotations
-# # import os
-# # __FILE__ = (
-# #     "./src/scitex/scholar/metadata/doi/utils/_standardize_metadata.py"
-# # )
-# # __DIR__ = os.path.dirname(__FILE__)
-# # # ----------------------------------------
-# 
-# # from collections import OrderedDict
-# 
-# # def standardize_metadata(metadata):
-# #     """Initialize all required fields with null values."""
-# #     complete_structure = {
-# #         # Core identification
-# #         "doi": None,
-# #         "doi_engine": None,
-# #         "arxiv_id": None,
-# #         "arxiv_id_engine": None,
-# #         "pmid": None,
-# #         "pmid_engine": None,
-# #         "scholar_id": None,
-# #         # Basic metadata
-# #         "title": None,
-# #         "title_engine": None,
-# #         "authors": None,
-# #         "authors_engine": None,
-# #         "year": None,
-# #         "year_engine": None,
-# #         # Publication details
-# #         "journal": None,
-# #         "journal_engine": None,
-# #         "issn": None,
-# #         "issn_engine": None,
-# #         "volume": None,
-# #         "volume_engine": None,
-# #         "issue": None,
-# #         "issue_engine": None,
-# #         # Content
-# #         "abstract": None,
-# #         "abstract_engine": None,
-# #         # Metrics
-# #         "impact_factor": None,
-# #         "impact_factor_engine": None,
-# #         "citation_count": None,
-# #         "citation_engine": None,
-# #         # URLs
-# #         "urls": {
-# #             "url_doi": None,
-# #             "url_doi_engine": None,
-# #             "url_publisher": None,
-# #             "url_publisher_engine": None,
-# #             "url_openurl_query": None,
-# #             "url_openurl_engine": None,
-# #             "url_openurl_resolved": [],
-# #             "url_openurl_resolved_engine": [],
-# #             "url_pdf": [],
-# #             "url_pdf_engine": [],
-# #             "url_supplementary": [],
-# #             "url_supplementary_engine": [],
-# #         },
-# #     }
-# 
-# #     # Update with existing metadata
-# #     complete_structure.update(metadata)
-# #     return complete_structure
-# 
-# # # EOF
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/metadata_engines/utils/_standardize_metadata.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

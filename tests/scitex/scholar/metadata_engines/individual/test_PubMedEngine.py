@@ -1,328 +1,527 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for PubMedEngine - PubMed metadata retrieval engine."""
+
+import json
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from scitex.scholar.metadata_engines.individual import PubMedEngine
+
+
+class TestPubMedEngineInit:
+    """Tests for PubMedEngine initialization."""
+
+    def test_init_default_email(self):
+        """Should initialize with default email."""
+        engine = PubMedEngine()
+        assert engine.email == "research@example.com"
+
+    def test_init_custom_email(self):
+        """Should accept custom email."""
+        engine = PubMedEngine(email="custom@test.com")
+        assert engine.email == "custom@test.com"
+
+
+class TestPubMedEngineProperties:
+    """Tests for PubMedEngine properties."""
+
+    def test_name_property(self):
+        """Name property should return 'PubMed'."""
+        engine = PubMedEngine()
+        assert engine.name == "PubMed"
+
+
+class TestPubMedEngineSearch:
+    """Tests for search method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return PubMedEngine()
+
+    def test_search_by_pmid_calls_correct_method(self, engine):
+        """Should call _search_by_pmid when PMID provided."""
+        with patch.object(engine, "_search_by_pmid") as mock_method:
+            mock_method.return_value = {"id": {"pmid": "12345678"}}
+            engine.search(pmid="12345678")
+            mock_method.assert_called_once_with("12345678", "dict")
+
+    def test_search_by_doi_calls_correct_method(self, engine):
+        """Should call _search_by_doi when DOI provided."""
+        with patch.object(engine, "_search_by_doi") as mock_method:
+            mock_method.return_value = {"id": {"doi": "10.1038/test"}}
+            engine.search(doi="10.1038/test")
+            mock_method.assert_called_once_with("10.1038/test", "dict")
+
+    def test_search_by_title_calls_correct_method(self, engine):
+        """Should call _search_by_metadata when title provided."""
+        with patch.object(engine, "_search_by_metadata") as mock_method:
+            mock_method.return_value = {"basic": {"title": "Test Paper"}}
+            engine.search(title="Test Paper")
+            mock_method.assert_called_once()
+
+    def test_search_pmid_takes_priority(self, engine):
+        """PMID should take priority over DOI and title."""
+        with patch.object(engine, "_search_by_pmid") as mock_pmid:
+            with patch.object(engine, "_search_by_doi") as mock_doi:
+                mock_pmid.return_value = {"id": {"pmid": "12345678"}}
+                engine.search(pmid="12345678", doi="10.1038/test", title="Test")
+                mock_pmid.assert_called_once()
+                mock_doi.assert_not_called()
+
+
+class TestPubMedEngineSearchByPMID:
+    """Tests for _search_by_pmid method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return PubMedEngine()
+
+    def test_successful_pmid_search(self, engine):
+        """Should return metadata for valid PMID."""
+        xml_response = """
+        <PubmedArticleSet>
+            <PubmedArticle>
+                <MedlineCitation>
+                    <Article>
+                        <ArticleTitle>Test Paper Title</ArticleTitle>
+                        <Journal>
+                            <Title>Nature</Title>
+                            <ISOAbbreviation>Nat</ISOAbbreviation>
+                            <ISSN>0028-0836</ISSN>
+                            <JournalIssue>
+                                <Volume>500</Volume>
+                                <Issue>7463</Issue>
+                            </JournalIssue>
+                        </Journal>
+                        <AuthorList>
+                            <Author>
+                                <ForeName>John</ForeName>
+                                <LastName>Doe</LastName>
+                            </Author>
+                        </AuthorList>
+                        <Abstract>
+                            <AbstractText>This is the abstract.</AbstractText>
+                        </Abstract>
+                    </Article>
+                </MedlineCitation>
+                <PubmedData>
+                    <ArticleIdList>
+                        <ArticleId IdType="doi">10.1038/nature12373</ArticleId>
+                    </ArticleIdList>
+                </PubmedData>
+            </PubmedArticle>
+        </PubmedArticleSet>
+        """
+        mock_response = MagicMock()
+        mock_response.text = xml_response
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_pmid("12345678", "dict")
+        assert result["id"]["pmid"] == "12345678"
+        assert result["id"]["doi"] == "10.1038/nature12373"
+        assert result["basic"]["title"] == "Test Paper Title"
+        assert result["publication"]["journal"] == "Nature"
+
+    def test_extracts_authors(self, engine):
+        """Should extract author names correctly."""
+        xml_response = """
+        <PubmedArticleSet>
+            <PubmedArticle>
+                <MedlineCitation>
+                    <Article>
+                        <AuthorList>
+                            <Author>
+                                <ForeName>John</ForeName>
+                                <LastName>Doe</LastName>
+                            </Author>
+                            <Author>
+                                <ForeName>Jane</ForeName>
+                                <LastName>Smith</LastName>
+                            </Author>
+                            <Author>
+                                <LastName>Anonymous</LastName>
+                            </Author>
+                        </AuthorList>
+                    </Article>
+                </MedlineCitation>
+            </PubmedArticle>
+        </PubmedArticleSet>
+        """
+        mock_response = MagicMock()
+        mock_response.text = xml_response
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_pmid("12345678", "dict")
+        assert "John Doe" in result["basic"]["authors"]
+        assert "Jane Smith" in result["basic"]["authors"]
+        assert "Anonymous" in result["basic"]["authors"]
+
+    def test_return_as_json(self, engine):
+        """Should return JSON string when return_as='json'."""
+        xml_response = """
+        <PubmedArticleSet>
+            <PubmedArticle>
+                <MedlineCitation>
+                    <Article>
+                        <ArticleTitle>Test</ArticleTitle>
+                    </Article>
+                </MedlineCitation>
+            </PubmedArticle>
+        </PubmedArticleSet>
+        """
+        mock_response = MagicMock()
+        mock_response.text = xml_response
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_pmid("12345678", "json")
+        assert isinstance(result, str)
+        parsed = json.loads(result)
+        assert "id" in parsed
+
+
+class TestPubMedEngineSearchByDOI:
+    """Tests for _search_by_doi method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return PubMedEngine()
+
+    def test_cleans_doi_url(self, engine):
+        """Should remove https://doi.org/ prefix from DOI."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"esearchresult": {"idlist": []}}
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        engine._search_by_doi("https://doi.org/10.1038/test", "dict")
+        call_params = mock_session.get.call_args[1]["params"]
+        assert "https://doi.org/" not in call_params["term"]
+
+    def test_finds_pmid_from_doi(self, engine):
+        """Should find PMID from DOI and get metadata."""
+        # First call returns PMID
+        search_response = MagicMock()
+        search_response.json.return_value = {"esearchresult": {"idlist": ["12345678"]}}
+        search_response.raise_for_status = MagicMock()
+
+        # Second call returns XML
+        xml_response = """
+        <PubmedArticleSet>
+            <PubmedArticle>
+                <MedlineCitation>
+                    <Article>
+                        <ArticleTitle>Test Paper</ArticleTitle>
+                    </Article>
+                </MedlineCitation>
+                <PubmedData>
+                    <ArticleIdList>
+                        <ArticleId IdType="doi">10.1038/test</ArticleId>
+                    </ArticleIdList>
+                </PubmedData>
+            </PubmedArticle>
+        </PubmedArticleSet>
+        """
+        fetch_response = MagicMock()
+        fetch_response.text = xml_response
+        fetch_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.side_effect = [search_response, fetch_response]
+        engine._session = mock_session
+
+        result = engine._search_by_doi("10.1038/test", "dict")
+        assert result["id"]["pmid"] == "12345678"
+        assert result["basic"]["title"] == "Test Paper"
+
+    def test_returns_minimal_when_not_found(self, engine):
+        """Should return minimal metadata when DOI not found."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"esearchresult": {"idlist": []}}
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_doi("10.1038/test", "dict")
+        assert result["id"]["doi"] == "10.1038/test"
+
+
+class TestPubMedEngineSearchByMetadata:
+    """Tests for _search_by_metadata method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return PubMedEngine()
+
+    def test_builds_correct_query(self, engine):
+        """Should build correct query from title and year."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"esearchresult": {"idlist": []}}
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        engine._search_by_metadata(title="Test Paper", year=2023)
+        call_params = mock_session.get.call_args[1]["params"]
+        assert "Test Paper[Title]" in call_params["term"]
+        assert "2023[pdat]" in call_params["term"]
+
+    def test_matches_title(self, engine):
+        """Should match when title matches result."""
+        # First call returns PMIDs
+        search_response = MagicMock()
+        search_response.json.return_value = {"esearchresult": {"idlist": ["12345678"]}}
+        search_response.raise_for_status = MagicMock()
+
+        # Second call returns XML
+        xml_response = """
+        <PubmedArticleSet>
+            <PubmedArticle>
+                <MedlineCitation>
+                    <Article>
+                        <ArticleTitle>Deep Learning Paper</ArticleTitle>
+                    </Article>
+                </MedlineCitation>
+            </PubmedArticle>
+        </PubmedArticleSet>
+        """
+        fetch_response = MagicMock()
+        fetch_response.text = xml_response
+        fetch_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.side_effect = [search_response, fetch_response]
+        engine._session = mock_session
+
+        result = engine._search_by_metadata(title="Deep Learning Paper")
+        assert result is not None
+        assert result["basic"]["title"] == "Deep Learning Paper"
+
+
+class TestPubMedEngineExtractMetadata:
+    """Tests for metadata extraction from XML."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return PubMedEngine()
+
+    def test_extracts_all_fields(self, engine):
+        """Should extract all available fields."""
+        xml_response = """
+        <PubmedArticleSet>
+            <PubmedArticle>
+                <MedlineCitation>
+                    <Article>
+                        <ArticleTitle>Test Paper Title.</ArticleTitle>
+                        <Journal>
+                            <Title>Nature Communications</Title>
+                            <ISOAbbreviation>Nat Commun</ISOAbbreviation>
+                            <ISSN>2041-1723</ISSN>
+                            <JournalIssue>
+                                <Volume>10</Volume>
+                                <Issue>1</Issue>
+                                <PubDate>
+                                    <Year>2023</Year>
+                                </PubDate>
+                            </JournalIssue>
+                        </Journal>
+                        <AuthorList>
+                            <Author>
+                                <ForeName>John</ForeName>
+                                <LastName>Doe</LastName>
+                            </Author>
+                        </AuthorList>
+                        <Abstract>
+                            <AbstractText>This is the abstract.</AbstractText>
+                        </Abstract>
+                    </Article>
+                    <MeshHeadingList>
+                        <MeshHeading>
+                            <DescriptorName>Neural Networks</DescriptorName>
+                        </MeshHeading>
+                    </MeshHeadingList>
+                </MedlineCitation>
+                <PubmedData>
+                    <ArticleIdList>
+                        <ArticleId IdType="doi">10.1038/s41467-023-12345</ArticleId>
+                    </ArticleIdList>
+                </PubmedData>
+            </PubmedArticle>
+        </PubmedArticleSet>
+        """
+        mock_response = MagicMock()
+        mock_response.text = xml_response
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_pmid("12345678", "dict")
+
+        # Title should have trailing period removed
+        assert result["basic"]["title"] == "Test Paper Title"
+        assert result["basic"]["year"] == 2023
+        assert result["basic"]["abstract"] == "This is the abstract."
+        assert "John Doe" in result["basic"]["authors"]
+        assert result["publication"]["journal"] == "Nature Communications"
+        assert result["publication"]["short_journal"] == "Nat Commun"
+        assert result["publication"]["issn"] == "2041-1723"
+        assert result["publication"]["volume"] == "10"
+        assert result["publication"]["issue"] == "1"
+        assert result["id"]["doi"] == "10.1038/s41467-023-12345"
+
+    def test_tracks_engine_source(self, engine):
+        """Should track PubMed as source engine."""
+        xml_response = """
+        <PubmedArticleSet>
+            <PubmedArticle>
+                <MedlineCitation>
+                    <Article>
+                        <ArticleTitle>Test</ArticleTitle>
+                    </Article>
+                </MedlineCitation>
+                <PubmedData>
+                    <ArticleIdList>
+                        <ArticleId IdType="doi">10.1038/test</ArticleId>
+                    </ArticleIdList>
+                </PubmedData>
+            </PubmedArticle>
+        </PubmedArticleSet>
+        """
+        mock_response = MagicMock()
+        mock_response.text = xml_response
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_pmid("12345678", "dict")
+        assert result["id"]["pmid_engines"] == ["PubMed"]
+        assert result["basic"]["title_engines"] == ["PubMed"]
+        assert result["system"]["searched_by_PubMed"] is True
+
+
+class TestPubMedEngineEdgeCases:
+    """Edge case tests for PubMedEngine."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return PubMedEngine()
+
+    def test_handles_missing_fields(self, engine):
+        """Should handle missing fields gracefully."""
+        xml_response = """
+        <PubmedArticleSet>
+            <PubmedArticle>
+                <MedlineCitation>
+                    <Article>
+                    </Article>
+                </MedlineCitation>
+            </PubmedArticle>
+        </PubmedArticleSet>
+        """
+        mock_response = MagicMock()
+        mock_response.text = xml_response
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_pmid("12345678", "dict")
+        assert result["id"]["pmid"] == "12345678"
+        assert result["basic"]["title"] is None
+        assert result["id"]["doi"] is None
+
+    def test_handles_unicode_content(self, engine):
+        """Should handle unicode in content."""
+        xml_response = """
+        <PubmedArticleSet>
+            <PubmedArticle>
+                <MedlineCitation>
+                    <Article>
+                        <ArticleTitle>Analyse des donnees medicales</ArticleTitle>
+                        <AuthorList>
+                            <Author>
+                                <ForeName>Jean-Pierre</ForeName>
+                                <LastName>Muller</LastName>
+                            </Author>
+                        </AuthorList>
+                    </Article>
+                </MedlineCitation>
+            </PubmedArticle>
+        </PubmedArticleSet>
+        """
+        mock_response = MagicMock()
+        mock_response.text = xml_response
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_pmid("12345678", "dict")
+        assert "Analyse" in result["basic"]["title"]
+        assert "Jean-Pierre Muller" in result["basic"]["authors"]
+
+    def test_builds_doi_url(self, engine):
+        """Should build DOI URL correctly."""
+        xml_response = """
+        <PubmedArticleSet>
+            <PubmedArticle>
+                <MedlineCitation>
+                    <Article>
+                        <ArticleTitle>Test</ArticleTitle>
+                    </Article>
+                </MedlineCitation>
+                <PubmedData>
+                    <ArticleIdList>
+                        <ArticleId IdType="doi">10.1038/test</ArticleId>
+                    </ArticleIdList>
+                </PubmedData>
+            </PubmedArticle>
+        </PubmedArticleSet>
+        """
+        mock_response = MagicMock()
+        mock_response.text = xml_response
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._search_by_pmid("12345678", "dict")
+        assert result["url"]["doi"] == "https://doi.org/10.1038/test"
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
     pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/metadata_engines/individual/PubMedEngine.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-08-22 00:00:20 (ywatanabe)"
-# # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/engines/individual/PubMedEngine.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = __file__
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# import time
-# from typing import Any, Dict
-# 
-# """
-# PubMed DOI engine implementation.
-# 
-# This module provides DOI resolution through the PubMed/NCBI E-utilities API.
-# """
-# 
-# import json
-# import xml.etree.ElementTree as ET
-# from typing import List, Optional
-# 
-# from tenacity import (
-#     retry,
-#     retry_if_exception_type,
-#     stop_after_attempt,
-#     wait_exponential,
-# )
-# 
-# from scitex import logging
-# 
-# from ..utils import standardize_metadata
-# from ._BaseDOIEngine import BaseDOIEngine
-# 
-# logger = logging.getLogger(__name__)
-# 
-# 
-# class PubMedEngine(BaseDOIEngine):
-#     """PubMed DOI engine - free, no API key required."""
-# 
-#     def __init__(self, email: str = "research@example.com"):
-#         super().__init__(email)  # Initialize base class to access utilities
-#         self._session = None
-# 
-#     @property
-#     def name(self) -> str:
-#         return "PubMed"
-# 
-#     def search(
-#         self,
-#         title: Optional[str] = None,
-#         year: Optional[int] = None,
-#         authors: Optional[List[str]] = None,
-#         max_results=1,
-#         doi: Optional[str] = None,
-#         pmid: Optional[str] = None,
-#         return_as: Optional[str] = "dict",
-#         **kwargs,
-#     ) -> Optional[Dict[str, Any]]:
-#         """Get comprehensive metadata from PubMed."""
-#         assert return_as in [
-#             "dict",
-#             "json",
-#         ], "return_as must be either of 'dict' or 'json'"
-# 
-#         if pmid:
-#             return self._search_by_pmid(pmid, return_as)
-#         elif doi:
-#             return self._search_by_doi(doi, return_as)
-#         else:
-#             return self._search_by_metadata(title, year, authors, return_as)
-# 
-#     def _search_by_metadata(
-#         self,
-#         title: str,
-#         year: Optional[int] = None,
-#         authors: Optional[List[str]] = None,
-#         return_as: Optional[str] = "dict",
-#     ) -> Optional[Dict[str, Any]]:
-#         query_parts = [f"{title}[Title]"]
-#         if year:
-#             query_parts.append(f"{year}[pdat]")
-#         query = " AND ".join(query_parts)
-# 
-#         search_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-#         search_params = {
-#             "db": "pubmed",
-#             "term": query,
-#             "retmode": "json",
-#             "retmax": 5,
-#             "email": self.email,
-#         }
-#         response = self.session.get(search_url, params=search_params, timeout=30)
-#         response.raise_for_status()
-#         data = response.json()
-#         pmids = data.get("esearchresult", {}).get("idlist", [])
-# 
-#         for pmid in pmids:
-#             metadata = self._search_by_pmid(pmid, "dict")
-# 
-#             if (
-#                 metadata
-#                 and metadata.get("basic")
-#                 and metadata.get("basic").get("title")
-#                 and self._is_title_match(title, metadata.get("basic").get("title"))
-#             ):
-#                 if return_as == "dict":
-#                     return metadata
-#                 if return_as == "json":
-#                     return json.dumps(metadata, indent=2)
-# 
-#     def _search_by_doi(
-#         self,
-#         doi: str,
-#         return_as: Optional[str] = "dict",
-#     ) -> Optional[Dict[str, Any]]:
-#         """Search by DOI using PubMed database"""
-#         doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
-# 
-#         search_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-#         search_params = {
-#             "db": "pubmed",
-#             "term": f'"{doi}"[doi]',
-#             "retmode": "json",
-#             "retmax": 1,
-#             "email": self.email,
-#         }
-# 
-#         response = self.session.get(search_url, params=search_params, timeout=30)
-#         response.raise_for_status()
-#         data = response.json()
-#         pmids = data.get("esearchresult", {}).get("idlist", [])
-# 
-#         if pmids:
-#             return self._search_by_pmid(pmids[0], return_as)
-# 
-#         return self._create_minimal_metadata(
-#             doi=doi,
-#             return_as=return_as,
-#         )
-# 
-#     def _search_by_pmid(
-#         self,
-#         pmid: str,
-#         return_as: Optional[str] = "dict",
-#     ) -> Optional[Dict[str, Any]]:
-#         """Fetch comprehensive metadata for a specific PMID."""
-#         fetch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-#         fetch_params = {
-#             "db": "pubmed",
-#             "id": pmid,
-#             "retmode": "xml",
-#             "email": self.email,
-#         }
-# 
-#         response = self.session.get(fetch_url, params=fetch_params, timeout=30)
-#         response.raise_for_status()
-# 
-#         root = ET.fromstring(response.text)
-# 
-#         # Extract data
-#         doi = None
-#         for id_elem in root.findall(".//ArticleId"):
-#             if id_elem.get("IdType") == "doi":
-#                 doi = id_elem.text
-#                 break
-# 
-#         title = None
-#         title_elem = root.find(".//ArticleTitle")
-#         if title_elem is not None:
-#             title = title_elem.text.rstrip(".")
-# 
-#         year = None
-#         date_elem = root.find(".//PubDate/Year")
-#         if date_elem is not None:
-#             year = int(date_elem.text)
-# 
-#         journal = None
-#         journal_elem = root.find(".//Journal/Title")
-#         if journal_elem is not None:
-#             journal = journal_elem.text
-# 
-#         short_journal = None
-#         iso_abbrev_elem = root.find(".//Journal/ISOAbbreviation")
-#         if iso_abbrev_elem is not None:
-#             short_journal = iso_abbrev_elem.text
-# 
-#         issn = None
-#         issn_elem = root.find(".//Journal/ISSN")
-#         if issn_elem is not None:
-#             issn = issn_elem.text
-# 
-#         volume = None
-#         volume_elem = root.find(".//JournalIssue/Volume")
-#         if volume_elem is not None:
-#             volume = volume_elem.text
-# 
-#         issue = None
-#         issue_elem = root.find(".//JournalIssue/Issue")
-#         if issue_elem is not None:
-#             issue = issue_elem.text
-# 
-#         authors = []
-#         for author_elem in root.findall(".//Author"):
-#             lastname = author_elem.find("LastName")
-#             forename = author_elem.find("ForeName")
-#             if lastname is not None:
-#                 if forename is not None:
-#                     authors.append(f"{forename.text} {lastname.text}")
-#                 else:
-#                     authors.append(lastname.text)
-# 
-#         abstract = None
-#         abstract_elem = root.find(".//AbstractText")
-#         if abstract_elem is not None:
-#             abstract = abstract_elem.text
-# 
-#         mesh_terms = []
-#         for mesh_elem in root.findall(".//MeshHeading/DescriptorName"):
-#             if mesh_elem.text:
-#                 mesh_terms.append(mesh_elem.text)
-# 
-#         metadata = {
-#             "id": {
-#                 "doi": doi,
-#                 "doi_engines": [self.name] if doi else None,
-#                 "pmid": pmid,
-#                 "pmid_engines": [self.name],
-#             },
-#             "basic": {
-#                 "title": title,
-#                 "title_engines": [self.name] if title else None,
-#                 "year": year,
-#                 "year_engines": [self.name] if year else None,
-#                 "abstract": abstract,
-#                 "abstract_engines": [self.name] if abstract else None,
-#                 "authors": authors if authors else None,
-#                 "authors_engines": [self.name] if authors else None,
-#             },
-#             "publication": {
-#                 "journal": journal,
-#                 "journal_engines": [self.name] if journal else None,
-#                 "short_journal": short_journal,
-#                 "short_journal_engines": ([self.name] if short_journal else None),
-#                 "issn": issn,
-#                 "issn_engines": [self.name] if issn else None,
-#                 "volume": volume,
-#                 "volume_engines": [self.name] if volume else None,
-#                 "issue": issue,
-#                 "issue_engines": [self.name] if issue else None,
-#             },
-#             "url": {
-#                 "doi": f"https://doi.org/{doi}" if doi else None,
-#                 "doi_engines": [self.name] if doi else None,
-#             },
-#             "system": {
-#                 f"searched_by_{self.name}": True,
-#             },
-#         }
-# 
-#         metadata = standardize_metadata(metadata)
-#         if return_as == "dict":
-#             return metadata
-#         if return_as == "json":
-#             return json.dumps(metadata, indent=2)
-# 
-#         return self._create_minimal_metadata(
-#             pmid=pmid,
-#             return_as=return_as,
-#         )
-# 
-# 
-# if __name__ == "__main__":
-#     from pprint import pprint
-# 
-#     TITLE = "Hippocampal ripples down-regulate synapses"
-#     DOI = "10.1126/science.aao0702"
-#     PMID = "29439023"
-# 
-#     # Example: PubMed search
-#     engine = PubMedEngine("test@example.com")
-#     outputs = {}
-# 
-#     # Search by title
-#     outputs["metadata_by_title_dict"] = engine.search(title=TITLE)
-#     outputs["metadata_by_title_json"] = engine.search(title=TITLE, return_as="json")
-# 
-#     # Search by DOI
-#     outputs["metadata_by_doi_dict"] = engine.search(doi=DOI)
-#     outputs["metadata_by_doi_json"] = engine.search(doi=DOI, return_as="json")
-# 
-#     # Search by PubMed ID
-#     outputs["metadata_by_pmid_dict"] = engine.search(pmid=PMID)
-#     outputs["metadata_by_pmid_json"] = engine.search(pmid=PMID, return_as="json")
-# 
-#     # Emptry Result
-#     outputs["empty_dict"] = engine._create_minimal_metadata(return_as="dict")
-#     outputs["empty_json"] = engine._create_minimal_metadata(return_as="json")
-# 
-#     for k, v in outputs.items():
-#         print("----------------------------------------")
-#         print(k)
-#         print("----------------------------------------")
-#         pprint(v)
-#         time.sleep(1)
-# 
-# # python -m scitex.scholar.engines.individual.PubMedEngine
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/metadata_engines/individual/PubMedEngine.py
-# --------------------------------------------------------------------------------

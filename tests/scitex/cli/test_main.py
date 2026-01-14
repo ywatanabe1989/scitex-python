@@ -232,6 +232,7 @@ if __name__ == "__main__":
 # 
 # from . import (
 #     audio,
+#     browser,
 #     capture,
 #     cloud,
 #     config,
@@ -280,6 +281,7 @@ if __name__ == "__main__":
 # 
 # # Add command groups
 # cli.add_command(audio.audio)
+# cli.add_command(browser.browser)
 # cli.add_command(capture.capture)
 # cli.add_command(cloud.cloud)
 # cli.add_command(config.config)

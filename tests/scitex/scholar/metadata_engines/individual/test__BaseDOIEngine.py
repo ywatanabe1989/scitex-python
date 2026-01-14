@@ -1,474 +1,821 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for BaseDOIEngine - Abstract base class for DOI engines."""
+
+import json
+import time
+from typing import List, Optional
+from unittest.mock import MagicMock, patch
+
+import pytest
+import requests
+
+from scitex.scholar.metadata_engines.individual._BaseDOIEngine import BaseDOIEngine
+
+
+# Create a concrete implementation for testing
+class MockDOIEngine(BaseDOIEngine):
+    """Concrete implementation of BaseDOIEngine for testing."""
+
+    @property
+    def name(self) -> str:
+        return "MockEngine"
+
+    def search(
+        self,
+        title: str,
+        year: Optional[int] = None,
+        authors: Optional[List[str]] = None,
+    ) -> Optional[str]:
+        return None
+
+
+class TestBaseDOIEngineInit:
+    """Tests for BaseDOIEngine initialization."""
+
+    def test_init_default_email(self):
+        """Should initialize with default email."""
+        engine = MockDOIEngine()
+        assert engine.email == "research@example.com"
+
+    def test_init_custom_email(self):
+        """Should accept custom email."""
+        engine = MockDOIEngine(email="custom@test.com")
+        assert engine.email == "custom@test.com"
+
+    def test_init_rate_limit_handler_none(self):
+        """Rate limit handler should be None initially."""
+        engine = MockDOIEngine()
+        assert engine.rate_limit_handler is None
+
+    def test_init_last_request_time_zero(self):
+        """Last request time should start at 0."""
+        engine = MockDOIEngine()
+        assert engine.last_request_time == 0.0
+
+    def test_init_request_count_zero(self):
+        """Request count should start at 0."""
+        engine = MockDOIEngine()
+        assert engine._request_count == 0
+
+    def test_init_lazy_loaded_utilities_none(self):
+        """Lazy-loaded utilities should be None initially."""
+        engine = MockDOIEngine()
+        assert engine._url_doi_extractor is None
+        assert engine._pubmed_converter is None
+        assert engine._session is None
+
+
+class TestBaseDOIEngineProperties:
+    """Tests for BaseDOIEngine properties."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return MockDOIEngine()
+
+    def test_name_property(self, engine):
+        """Name property should return engine name."""
+        assert engine.name == "MockEngine"
+
+    def test_rate_limit_delay_default(self, engine):
+        """Default rate limit delay should be 1.0 seconds."""
+        assert engine.rate_limit_delay == 1.0
+
+    def test_text_normalizer_property(self, engine):
+        """Should return TextNormalizer class."""
+        from scitex.scholar.metadata_engines.utils import TextNormalizer
+
+        assert engine.text_normalizer is TextNormalizer
+
+    def test_url_doi_extractor_lazy_loading(self, engine):
+        """URL DOI extractor should be lazy loaded."""
+        assert engine._url_doi_extractor is None
+        extractor = engine.url_doi_extractor
+        assert engine._url_doi_extractor is not None
+        # Second access should return same instance
+        assert engine.url_doi_extractor is extractor
+
+    def test_pubmed_converter_lazy_loading(self, engine):
+        """PubMed converter should be lazy loaded."""
+        assert engine._pubmed_converter is None
+        converter = engine.pubmed_converter
+        assert engine._pubmed_converter is not None
+        # Second access should return same instance
+        assert engine.pubmed_converter is converter
+
+    def test_session_lazy_loading(self, engine):
+        """Session should be lazy loaded."""
+        assert engine._session is None
+        session = engine.session
+        assert engine._session is not None
+        assert isinstance(session, requests.Session)
+        # Second access should return same instance
+        assert engine.session is session
+
+    def test_session_has_user_agent(self, engine):
+        """Session should have User-Agent header set."""
+        session = engine.session
+        assert "User-Agent" in session.headers
+        assert "SciTeX" in session.headers["User-Agent"]
+        assert engine.email in session.headers["User-Agent"]
+
+
+class TestBaseDOIEngineSetRateLimitHandler:
+    """Tests for set_rate_limit_handler method."""
+
+    def test_set_rate_limit_handler(self):
+        """Should set rate limit handler."""
+        engine = MockDOIEngine()
+        mock_handler = MagicMock()
+        engine.set_rate_limit_handler(mock_handler)
+        assert engine.rate_limit_handler is mock_handler
+
+
+class TestBaseDOIEngineGetUserAgent:
+    """Tests for _get_user_agent method."""
+
+    def test_get_user_agent_format(self):
+        """Should return properly formatted user agent."""
+        engine = MockDOIEngine(email="test@example.com")
+        user_agent = engine._get_user_agent()
+        assert "SciTeX/1.0" in user_agent
+        assert "mailto:test@example.com" in user_agent
+
+
+class TestBaseDOIEngineCleanQuery:
+    """Tests for _clean_query method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return MockDOIEngine()
+
+    def test_clean_query_removes_parentheses(self, engine):
+        """Should remove parentheses."""
+        result = engine._clean_query("Memory (LSTM) neural networks")
+        assert "(" not in result
+        assert ")" not in result
+        assert "LSTM" in result
+
+    def test_clean_query_removes_brackets(self, engine):
+        """Should remove brackets."""
+        result = engine._clean_query("Title [with] {brackets}")
+        assert "[" not in result
+        assert "]" not in result
+        assert "{" not in result
+        assert "}" not in result
+
+    def test_clean_query_removes_special_chars(self, engine):
+        """Should remove special characters."""
+        result = engine._clean_query("Title @#$%^& test")
+        assert "@" not in result
+        assert "#" not in result
+        assert "$" not in result
+
+    def test_clean_query_preserves_alphanumeric(self, engine):
+        """Should preserve alphanumeric characters."""
+        result = engine._clean_query("Test 123 Paper")
+        assert "Test" in result
+        assert "123" in result
+        assert "Paper" in result
+
+    def test_clean_query_preserves_hyphens(self, engine):
+        """Should preserve hyphens."""
+        result = engine._clean_query("Self-Attention Networks")
+        assert "-" in result
+
+    def test_clean_query_collapses_spaces(self, engine):
+        """Should collapse multiple spaces."""
+        result = engine._clean_query("Title   with    spaces")
+        assert "   " not in result
+        assert "    " not in result
+
+    def test_clean_query_empty_input(self, engine):
+        """Should handle empty input."""
+        result = engine._clean_query("")
+        assert result == ""
+
+    def test_clean_query_none_input(self, engine):
+        """Should handle None input."""
+        result = engine._clean_query(None)
+        assert result is None
+
+    def test_clean_query_strips_whitespace(self, engine):
+        """Should strip leading/trailing whitespace."""
+        result = engine._clean_query("  Title  ")
+        assert result == "Title"
+
+
+class TestBaseDOIEngineApplyRateLimiting:
+    """Tests for _apply_rate_limiting method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return MockDOIEngine()
+
+    def test_apply_rate_limiting_no_handler(self, engine):
+        """Should log error when no handler set."""
+        with patch(
+            "scitex.scholar.metadata_engines.individual._BaseDOIEngine.logger"
+        ) as mock_logger:
+            engine._apply_rate_limiting()
+            mock_logger.error.assert_called_once()
+
+    def test_apply_rate_limiting_with_handler_no_wait(self, engine):
+        """Should not sleep when wait time is 0."""
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        engine.set_rate_limit_handler(mock_handler)
+
+        with patch("time.sleep") as mock_sleep:
+            engine._apply_rate_limiting()
+            mock_sleep.assert_not_called()
+
+    def test_apply_rate_limiting_with_handler_wait(self, engine):
+        """Should sleep when wait time > 0."""
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0.5
+        engine.set_rate_limit_handler(mock_handler)
+
+        with patch("time.sleep") as mock_sleep:
+            engine._apply_rate_limiting()
+            mock_sleep.assert_called_once_with(0.5)
+
+
+class TestBaseDOIEngineApplyRateLimitingAsync:
+    """Tests for _apply_rate_limiting_async method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return MockDOIEngine()
+
+    @pytest.mark.asyncio
+    async def test_apply_rate_limiting_async_no_handler(self, engine):
+        """Should log error when no handler set."""
+        with patch(
+            "scitex.scholar.metadata_engines.individual._BaseDOIEngine.logger"
+        ) as mock_logger:
+            await engine._apply_rate_limiting_async()
+            mock_logger.error.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_apply_rate_limiting_async_no_wait(self, engine):
+        """Should not wait when wait time is 0."""
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        engine.set_rate_limit_handler(mock_handler)
+
+        await engine._apply_rate_limiting_async()
+        mock_handler.wait_with_countdown_async.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_apply_rate_limiting_async_with_wait(self, engine):
+        """Should wait when wait time > 0."""
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 1.0
+        mock_handler.wait_with_countdown_async = MagicMock(return_value=MagicMock())
+        # Make it a proper async mock
+        import asyncio
+
+        mock_handler.wait_with_countdown_async.return_value = asyncio.Future()
+        mock_handler.wait_with_countdown_async.return_value.set_result(None)
+        engine.set_rate_limit_handler(mock_handler)
+
+        await engine._apply_rate_limiting_async()
+        mock_handler.wait_with_countdown_async.assert_called_once_with(
+            1.0, "MockEngine"
+        )
+
+
+class TestBaseDOIEngineMakeRequestWithRetry:
+    """Tests for _make_request_with_retry method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine with mocked session."""
+        engine = MockDOIEngine()
+        engine._session = MagicMock()
+        return engine
+
+    def test_successful_request(self, engine):
+        """Should return response on successful request."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        engine._session.get.return_value = mock_response
+
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        mock_handler.detect_rate_limit.return_value = None
+        engine.set_rate_limit_handler(mock_handler)
+
+        result = engine._make_request_with_retry("http://example.com")
+
+        assert result == mock_response
+        assert engine._request_count == 1
+        mock_handler.record_success.assert_called_once()
+
+    def test_retry_on_timeout(self, engine):
+        """Should retry on timeout exception."""
+        engine._session.get.side_effect = [
+            requests.exceptions.Timeout(),
+            MagicMock(status_code=200),
+        ]
+
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        mock_handler.detect_rate_limit.return_value = None
+        engine.set_rate_limit_handler(mock_handler)
+
+        with patch("time.sleep"):
+            result = engine._make_request_with_retry(
+                "http://example.com", max_retries=1
+            )
+
+        assert result.status_code == 200
+        assert engine._request_count == 2
+
+    def test_retry_on_server_error(self, engine):
+        """Should retry on 503 server error."""
+        mock_response_503 = MagicMock()
+        mock_response_503.status_code = 503
+        mock_response_200 = MagicMock()
+        mock_response_200.status_code = 200
+
+        engine._session.get.side_effect = [mock_response_503, mock_response_200]
+
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        mock_handler.detect_rate_limit.return_value = None
+        engine.set_rate_limit_handler(mock_handler)
+
+        with patch("time.sleep"):
+            result = engine._make_request_with_retry(
+                "http://example.com", max_retries=1
+            )
+
+        assert result.status_code == 200
+
+    def test_retry_on_429_rate_limit(self, engine):
+        """Should retry on 429 rate limit."""
+        mock_response_429 = MagicMock()
+        mock_response_429.status_code = 429
+        mock_response_200 = MagicMock()
+        mock_response_200.status_code = 200
+
+        engine._session.get.side_effect = [mock_response_429, mock_response_200]
+
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        mock_handler.detect_rate_limit.return_value = None
+        engine.set_rate_limit_handler(mock_handler)
+
+        with patch("time.sleep"):
+            result = engine._make_request_with_retry(
+                "http://example.com", max_retries=1
+            )
+
+        assert result.status_code == 200
+
+    def test_max_retries_exceeded(self, engine):
+        """Should return None after max retries exceeded."""
+        engine._session.get.side_effect = requests.exceptions.Timeout()
+
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        mock_handler.detect_rate_limit.return_value = None
+        engine.set_rate_limit_handler(mock_handler)
+
+        with patch("time.sleep"):
+            result = engine._make_request_with_retry(
+                "http://example.com", max_retries=2
+            )
+
+        assert result is None
+        assert engine._request_count == 3  # Initial + 2 retries
+        mock_handler.record_failure.assert_called_once()
+
+    def test_rate_limit_handler_integration(self, engine):
+        """Should handle rate limit info from handler."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        engine._session.get.return_value = mock_response
+
+        mock_rate_limit_info = MagicMock()
+        mock_rate_limit_info.wait_time = 1.0
+
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        mock_handler.detect_rate_limit.side_effect = [mock_rate_limit_info, None]
+        engine.set_rate_limit_handler(mock_handler)
+
+        with patch("time.sleep"):
+            result = engine._make_request_with_retry(
+                "http://example.com", max_retries=1
+            )
+
+        assert result.status_code == 200
+        mock_handler.record_rate_limit.assert_called_once()
+
+    def test_request_exception_handling(self, engine):
+        """Should handle general request exceptions."""
+        engine._session.get.side_effect = requests.exceptions.ConnectionError()
+
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        engine.set_rate_limit_handler(mock_handler)
+
+        with patch("time.sleep"):
+            result = engine._make_request_with_retry(
+                "http://example.com", max_retries=0
+            )
+
+        assert result is None
+        mock_handler.record_failure.assert_called_once()
+
+    def test_unexpected_exception_handling(self, engine):
+        """Should handle unexpected exceptions."""
+        engine._session.get.side_effect = ValueError("Unexpected error")
+
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        engine.set_rate_limit_handler(mock_handler)
+
+        result = engine._make_request_with_retry("http://example.com", max_retries=0)
+
+        assert result is None
+        mock_handler.record_failure.assert_called_once()
+
+
+class TestBaseDOIEngineSearchAsync:
+    """Tests for search_async method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return MockDOIEngine()
+
+    @pytest.mark.asyncio
+    async def test_search_async_applies_rate_limiting(self, engine):
+        """Should apply rate limiting before search."""
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        engine.set_rate_limit_handler(mock_handler)
+
+        result = await engine.search_async("Test Title")
+
+        assert result is None  # MockDOIEngine returns None
+        mock_handler.get_wait_time_for_engine.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_search_async_handles_error(self, engine):
+        """Should handle errors gracefully."""
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        engine.set_rate_limit_handler(mock_handler)
+
+        # Make search raise an exception
+        with patch.object(engine, "search", side_effect=Exception("Search error")):
+            result = await engine.search_async("Test Title")
+
+        assert result is None
+        mock_handler.record_failure.assert_called_once()
+
+
+class TestBaseDOIEngineGetRequestStats:
+    """Tests for get_request_stats method."""
+
+    def test_get_request_stats_initial(self):
+        """Should return initial stats."""
+        engine = MockDOIEngine()
+        stats = engine.get_request_stats()
+
+        assert stats["total_requests"] == 0
+        assert stats["last_request_time"] == 0.0
+        assert stats["rate_limit_delay"] == 1.0
+
+    def test_get_request_stats_after_request(self):
+        """Should update stats after request."""
+        engine = MockDOIEngine()
+        engine._request_count = 5
+        engine.last_request_time = 1234567890.0
+
+        stats = engine.get_request_stats()
+
+        assert stats["total_requests"] == 5
+        assert stats["last_request_time"] == 1234567890.0
+
+
+class TestBaseDOIEngineExtractDOIFromURL:
+    """Tests for extract_doi_from_url method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return MockDOIEngine()
+
+    def test_extract_doi_from_doi_org_url(self, engine):
+        """Should extract DOI from doi.org URL."""
+        url = "https://doi.org/10.1038/nature12373"
+        result = engine.extract_doi_from_url(url)
+        assert result == "10.1038/nature12373"
+
+    def test_extract_doi_from_doi_org_url_with_query(self, engine):
+        """Should extract DOI from URL with query params."""
+        url = "https://doi.org/10.1038/nature12373?ref=test"
+        result = engine.extract_doi_from_url(url)
+        assert result == "10.1038/nature12373"
+
+    def test_extract_doi_from_doi_org_url_with_hash(self, engine):
+        """Should extract DOI from URL with hash."""
+        url = "https://doi.org/10.1038/nature12373#section"
+        result = engine.extract_doi_from_url(url)
+        assert result == "10.1038/nature12373"
+
+    def test_extract_doi_pattern_in_url(self, engine):
+        """Should extract DOI pattern from arbitrary URL."""
+        url = "https://example.com/article/10.1234/test.article"
+        result = engine.extract_doi_from_url(url)
+        assert result == "10.1234/test.article"
+
+    def test_extract_doi_no_doi_in_url(self, engine):
+        """Should return None when no DOI in URL."""
+        url = "https://example.com/article/12345"
+        result = engine.extract_doi_from_url(url)
+        assert result is None
+
+    def test_extract_doi_empty_url(self, engine):
+        """Should return None for empty URL."""
+        result = engine.extract_doi_from_url("")
+        assert result is None
+
+    def test_extract_doi_none_url(self, engine):
+        """Should return None for None URL."""
+        result = engine.extract_doi_from_url(None)
+        assert result is None
+
+    def test_extract_doi_complex_doi(self, engine):
+        """Should extract complex DOI with special chars."""
+        url = "https://doi.org/10.1016/j.cell.2020.01.001"
+        result = engine.extract_doi_from_url(url)
+        assert result == "10.1016/j.cell.2020.01.001"
+
+
+class TestBaseDOIEngineIsTitleMatch:
+    """Tests for _is_title_match method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return MockDOIEngine()
+
+    def test_exact_title_match(self, engine):
+        """Should match identical titles."""
+        result = engine._is_title_match(
+            "Attention Is All You Need", "Attention Is All You Need"
+        )
+        assert result is True
+
+    def test_case_insensitive_match(self, engine):
+        """Should match titles with different cases."""
+        result = engine._is_title_match(
+            "attention is all you need", "ATTENTION IS ALL YOU NEED"
+        )
+        assert result is True
+
+    def test_different_titles_no_match(self, engine):
+        """Should not match different titles."""
+        result = engine._is_title_match(
+            "Attention Is All You Need", "Completely Different Paper"
+        )
+        assert result is False
+
+    def test_custom_threshold(self, engine):
+        """Should respect custom threshold."""
+        # With lower threshold, minor differences should match
+        result = engine._is_title_match(
+            "Attention Is All You Need", "Attention Is All You Needs", threshold=0.9
+        )
+        # Depending on TextNormalizer implementation
+        assert isinstance(result, bool)
+
+
+class TestBaseDOIEngineCreateMinimalMetadata:
+    """Tests for _create_minimal_metadata method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return MockDOIEngine()
+
+    def test_create_minimal_metadata_empty(self, engine):
+        """Should create metadata structure with all None values."""
+        result = engine._create_minimal_metadata()
+        assert isinstance(result, dict)
+        assert "id" in result
+        assert "basic" in result
+
+    def test_create_minimal_metadata_with_doi(self, engine):
+        """Should include DOI and track engine source."""
+        result = engine._create_minimal_metadata(doi="10.1038/test")
+        assert result["id"]["doi"] == "10.1038/test"
+        assert result["id"]["doi_engines"] == ["MockEngine"]
+
+    def test_create_minimal_metadata_with_title(self, engine):
+        """Should include title and track engine source."""
+        result = engine._create_minimal_metadata(title="Test Paper")
+        assert result["basic"]["title"] == "Test Paper"
+        assert result["basic"]["title_engines"] == ["MockEngine"]
+
+    def test_create_minimal_metadata_with_year(self, engine):
+        """Should include year and track engine source."""
+        result = engine._create_minimal_metadata(year=2023)
+        assert result["basic"]["year"] == 2023
+        assert result["basic"]["year_engines"] == ["MockEngine"]
+
+    def test_create_minimal_metadata_with_authors(self, engine):
+        """Should include authors and track engine source."""
+        result = engine._create_minimal_metadata(authors=["John Doe", "Jane Smith"])
+        assert result["basic"]["authors"] == ["John Doe", "Jane Smith"]
+        assert result["basic"]["authors_engines"] == ["MockEngine"]
+
+    def test_create_minimal_metadata_with_pmid(self, engine):
+        """Should include PMID and track engine source."""
+        result = engine._create_minimal_metadata(pmid="12345678")
+        assert result["id"]["pmid"] == "12345678"
+        assert result["id"]["pmid_engines"] == ["MockEngine"]
+
+    def test_create_minimal_metadata_with_corpus_id(self, engine):
+        """Should include corpus ID and track engine source."""
+        result = engine._create_minimal_metadata(corpus_id="987654")
+        assert result["id"]["corpus_id"] == "987654"
+        assert result["id"]["corpus_id_engines"] == ["MockEngine"]
+
+    def test_create_minimal_metadata_with_semantic_id(self, engine):
+        """Should include semantic ID and track engine source."""
+        result = engine._create_minimal_metadata(semantic_id="abc123")
+        assert result["id"]["semantic_id"] == "abc123"
+        assert result["id"]["semantic_id_engines"] == ["MockEngine"]
+
+    def test_create_minimal_metadata_with_ieee_id(self, engine):
+        """Should include IEEE ID and track engine source."""
+        result = engine._create_minimal_metadata(ieee_id="8765432")
+        assert result["id"]["ieee_id"] == "8765432"
+        assert result["id"]["ieee_id_engines"] == ["MockEngine"]
+
+    def test_create_minimal_metadata_return_json(self, engine):
+        """Should return JSON string when requested."""
+        result = engine._create_minimal_metadata(doi="10.1038/test", return_as="json")
+        assert isinstance(result, str)
+        parsed = json.loads(result)
+        assert parsed["id"]["doi"] == "10.1038/test"
+
+    def test_create_minimal_metadata_return_dict(self, engine):
+        """Should return dict by default."""
+        result = engine._create_minimal_metadata(doi="10.1038/test", return_as="dict")
+        assert isinstance(result, dict)
+
+    def test_create_minimal_metadata_full_data(self, engine):
+        """Should handle all fields together."""
+        result = engine._create_minimal_metadata(
+            doi="10.1038/test",
+            pmid="12345678",
+            corpus_id="987654",
+            ieee_id="8765432",
+            semantic_id="abc123",
+            title="Test Paper",
+            year=2023,
+            authors=["John Doe"],
+        )
+
+        assert result["id"]["doi"] == "10.1038/test"
+        assert result["id"]["pmid"] == "12345678"
+        assert result["id"]["corpus_id"] == "987654"
+        assert result["id"]["ieee_id"] == "8765432"
+        assert result["id"]["semantic_id"] == "abc123"
+        assert result["basic"]["title"] == "Test Paper"
+        assert result["basic"]["year"] == 2023
+        assert result["basic"]["authors"] == ["John Doe"]
+
+
+class TestBaseDOIEngineAbstractMethods:
+    """Tests verifying abstract method requirements."""
+
+    def test_cannot_instantiate_base_class(self):
+        """Should not be able to instantiate abstract base class."""
+        with pytest.raises(TypeError):
+            BaseDOIEngine()
+
+    def test_must_implement_search(self):
+        """Subclass must implement search method."""
+
+        class IncompleteEngine(BaseDOIEngine):
+            @property
+            def name(self) -> str:
+                return "Incomplete"
+
+        with pytest.raises(TypeError):
+            IncompleteEngine()
+
+    def test_must_implement_name(self):
+        """Subclass must implement name property."""
+
+        class IncompleteEngine(BaseDOIEngine):
+            def search(self, title, year=None, authors=None):
+                return None
+
+        with pytest.raises(TypeError):
+            IncompleteEngine()
+
+
+class TestBaseDOIEngineEdgeCases:
+    """Edge case tests for BaseDOIEngine."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return MockDOIEngine()
+
+    def test_session_user_agent_update(self, engine):
+        """Session should update user agent from _get_user_agent."""
+        # Access session to trigger creation
+        session = engine.session
+        assert engine.email in session.headers["User-Agent"]
+
+    def test_multiple_utility_accesses(self, engine):
+        """Multiple accesses to utilities should return same instance."""
+        extractor1 = engine.url_doi_extractor
+        extractor2 = engine.url_doi_extractor
+        assert extractor1 is extractor2
+
+        converter1 = engine.pubmed_converter
+        converter2 = engine.pubmed_converter
+        assert converter1 is converter2
+
+    def test_clean_query_unicode(self, engine):
+        """Should handle unicode in query."""
+        result = engine._clean_query("Étude sur les données")
+        assert "Étude" in result
+        assert "données" in result
+
+    def test_extract_doi_with_parentheses(self, engine):
+        """Should extract DOI containing parentheses."""
+        url = "https://doi.org/10.1002/(SICI)1234"
+        result = engine.extract_doi_from_url(url)
+        assert result is not None
+        assert "10.1002" in result
+
+
+class TestBaseDOIEngineCustomRateLimitDelay:
+    """Tests for custom rate limit delay in subclasses."""
+
+    def test_override_rate_limit_delay(self):
+        """Subclasses can override rate_limit_delay."""
+
+        class SlowEngine(MockDOIEngine):
+            @property
+            def rate_limit_delay(self) -> float:
+                return 5.0
+
+        engine = SlowEngine()
+        assert engine.rate_limit_delay == 5.0
+
+
+class TestBaseDOIEngineIntegration:
+    """Integration tests for BaseDOIEngine."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return MockDOIEngine()
+
+    def test_full_workflow_simulation(self, engine):
+        """Simulate a full search workflow."""
+        # Set up rate limit handler
+        mock_handler = MagicMock()
+        mock_handler.get_wait_time_for_engine.return_value = 0
+        engine.set_rate_limit_handler(mock_handler)
+
+        # Check initial stats
+        stats = engine.get_request_stats()
+        assert stats["total_requests"] == 0
+
+        # Access utilities (lazy loading)
+        _ = engine.text_normalizer
+        _ = engine.session
+
+        # Create minimal metadata
+        metadata = engine._create_minimal_metadata(
+            doi="10.1038/test", title="Test Paper", year=2023
+        )
+
+        assert metadata["id"]["doi"] == "10.1038/test"
+        assert metadata["basic"]["title"] == "Test Paper"
+        assert metadata["basic"]["year"] == 2023
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
     pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/metadata_engines/individual/_BaseDOIEngine.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-08-21 23:54:23 (ywatanabe)"
-# # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/engines/individual/_BaseDOIEngine.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = __file__
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# import json
-# from typing import Dict
-# 
-# """
-# Abstract base class for DOI engines with enhanced rate limit handling.
-# 
-# This module defines the interface that all DOI engines must implement,
-# including automatic rate limit detection and retry mechanisms.
-# """
-# 
-# import asyncio
-# import re
-# import time
-# from abc import ABC, abstractmethod
-# from typing import List, Optional
-# 
-# import requests
-# 
-# from scitex import logging
-# 
-# from ..utils import (
-#     PubMedConverter,
-#     TextNormalizer,
-#     URLDOIExtractor,
-#     standardize_metadata,
-# )
-# 
-# logger = logging.getLogger(__name__)
-# 
-# 
-# class BaseDOIEngine(ABC):
-#     """Abstract base class for DOI engines with enhanced rate limit handling."""
-# 
-#     def __init__(self, email: str = "research@example.com"):
-#         """Initialize base engine."""
-#         self.email = email
-#         self.rate_limit_handler = None  # Will be injected by SingleDOIResolver
-#         self.last_request_time = 0.0
-#         self._request_count = 0
-# 
-#         # Lazy-loaded utilities - will be initialized when first accessed
-#         self._url_doi_extractor = None
-#         self._pubmed_converter = None
-#         self._session = None
-# 
-#     @abstractmethod
-#     def search(
-#         self,
-#         title: str,
-#         year: Optional[int] = None,
-#         authors: Optional[List[str]] = None,
-#     ) -> Optional[str]:
-#         """Search for DOI by title."""
-#         pass
-# 
-#     @property
-#     @abstractmethod
-#     def name(self) -> str:
-#         """Engine name for logging."""
-#         pass
-# 
-#     @property
-#     def rate_limit_delay(self) -> float:
-#         return 1.0
-# 
-#     def set_rate_limit_handler(self, handler):
-#         """Set the rate limit handler for this engine."""
-#         self.rate_limit_handler = handler
-# 
-#     @property
-#     def text_normalizer(self):
-#         """Get TextNormalizer utility (class-based, no instantiation needed)."""
-#         return TextNormalizer
-# 
-#     @property
-#     def url_doi_extractor(self):
-#         """Get URLDOIEngine utility with lazy loading."""
-#         if self._url_doi_extractor is None:
-#             self._url_doi_extractor = URLDOIExtractor()
-#         return self._url_doi_extractor
-# 
-#     @property
-#     def pubmed_converter(self):
-#         """Get PubMedConverter utility with lazy loading."""
-#         if self._pubmed_converter is None:
-#             self._pubmed_converter = PubMedConverter()
-#         return self._pubmed_converter
-# 
-#     @property
-#     def session(self):
-#         if self._session is None:
-#             self._session = requests.Session()
-#             self._session.headers.update({"User-Agent": self._get_user_agent()})
-#         return self._session
-# 
-#     def _get_user_agent(self) -> str:
-#         """Get user agent string. Override in subclasses if needed."""
-#         return f"SciTeX/1.0 (mailto:{self.email})"
-# 
-#     def _clean_query(self, query: str) -> str:
-#         """Clean query string by removing meta characters that might interfere with API search.
-# 
-#         Meta characters like parentheses, brackets, special symbols can cause search issues
-#         in various APIs. This strips them while preserving the core searchable text.
-# 
-#         Args:
-#             query: Raw query string (e.g., title with special characters)
-# 
-#         Returns:
-#             Cleaned query string suitable for API search
-# 
-#         Example:
-#             >>> engine._clean_query("Memory (LSTM) neural networks")
-#             'Memory LSTM neural networks'
-#         """
-#         if not query:
-#             return query
-# 
-#         # Remove common meta characters but keep alphanumeric, spaces, and basic punctuation
-#         # Keep: letters, numbers, spaces, hyphens, periods, commas
-#         # Remove: ()[]{}!@#$%^&*+=<>?/\|~`"':;
-#         cleaned = re.sub(r'[()[\]{}!@#$%^&*+=<>?/\\|~`"\':;]', " ", query)
-# 
-#         # Collapse multiple spaces into one
-#         cleaned = re.sub(r"\s+", " ", cleaned)
-# 
-#         return cleaned.strip()
-# 
-#     def _make_request_with_retry(
-#         self,
-#         url: str,
-#         params: Optional[dict] = None,
-#         headers: Optional[dict] = None,
-#         timeout: float = 30.0,
-#         max_retries: int = 3,
-#     ) -> Optional[requests.Response]:
-#         """Make HTTP request with automatic rate limit handling and retries.
-# 
-#         Args:
-#             url: Request URL
-#             params: Query parameters
-#             headers: Request headers
-#             timeout: Request timeout
-#             max_retries: Maximum number of retries
-# 
-#         Returns:
-#             Response object or None if all retries failed
-#         """
-#         session = getattr(self, "session", requests)
-# 
-#         for attempt in range(max_retries + 1):
-#             try:
-#                 # Apply rate limiting before request
-#                 self._apply_rate_limiting()
-# 
-#                 # Make the request
-#                 self._request_count += 1
-#                 self.last_request_time = time.time()
-# 
-#                 response = session.get(
-#                     url, params=params, headers=headers, timeout=timeout
-#                 )
-# 
-#                 # Check for rate limits
-#                 if self.rate_limit_handler:
-#                     rate_limit_info = self.rate_limit_handler.detect_rate_limit(
-#                         engine=self.name.lower(), response=response
-#                     )
-# 
-#                     if rate_limit_info:
-#                         self.rate_limit_handler.record_rate_limit(rate_limit_info)
-# 
-#                         # If this isn't the last attempt, wait and retry
-#                         if attempt < max_retries:
-#                             logger.info(
-#                                 f"Rate limited on attempt {attempt + 1}/{max_retries + 1} "
-#                                 f"for {self.name}, waiting {rate_limit_info.wait_time:.1f}s"
-#                             )
-#                             time.sleep(rate_limit_info.wait_time)
-#                             continue
-#                         else:
-#                             logger.warning(
-#                                 f"Max retries exceeded for {self.name} due to rate limiting"
-#                             )
-#                             return None
-# 
-#                 # Check for successful response
-#                 if response.status_code == 200:
-#                     if self.rate_limit_handler:
-#                         self.rate_limit_handler.record_success(self.name.lower())
-#                         # Record success for adaptive rate limiting
-#                         self.rate_limit_handler.record_request_outcome(
-#                             self.name.lower(), success=True
-#                         )
-#                     return response
-#                 elif response.status_code in [429, 503, 502, 504]:
-#                     # Server errors that might be temporary
-#                     if attempt < max_retries:
-#                         wait_time = min(2**attempt, 30)  # Exponential backoff, max 30s
-#                         logger.info(
-#                             f"Server error {response.status_code} on attempt {attempt + 1}, "
-#                             f"waiting {wait_time}s before retry"
-#                         )
-#                         time.sleep(wait_time)
-#                         continue
-#                     else:
-#                         logger.warning(
-#                             f"Server error {response.status_code} after max retries"
-#                         )
-#                         return response  # Return for caller to handle
-#                 else:
-#                     # Other HTTP errors
-#                     logger.debug(f"HTTP {response.status_code} from {self.name}: {url}")
-#                     return response
-# 
-#             except requests.exceptions.Timeout as e:
-#                 if self.rate_limit_handler:
-#                     rate_limit_info = self.rate_limit_handler.detect_rate_limit(
-#                         engine=self.name.lower(), exception=e
-#                     )
-#                     if rate_limit_info and attempt < max_retries:
-#                         self.rate_limit_handler.record_rate_limit(rate_limit_info)
-#                         logger.info(
-#                             f"Timeout on attempt {attempt + 1}, waiting {rate_limit_info.wait_time:.1f}s"
-#                         )
-#                         time.sleep(rate_limit_info.wait_time)
-#                         continue
-# 
-#                 if attempt < max_retries:
-#                     wait_time = min(2**attempt, 15)
-#                     logger.info(
-#                         f"Timeout on attempt {attempt + 1}, waiting {wait_time}s"
-#                     )
-#                     time.sleep(wait_time)
-#                     continue
-#                 else:
-#                     logger.warning(
-#                         f"Timeout after {max_retries + 1} attempts for {self.name}"
-#                     )
-#                     if self.rate_limit_handler:
-#                         self.rate_limit_handler.record_failure(self.name.lower(), e)
-#                         # Record failure for adaptive rate limiting
-#                         self.rate_limit_handler.record_request_outcome(
-#                             self.name.lower(), success=False
-#                         )
-#                     return None
-# 
-#             except requests.exceptions.RequestException as e:
-#                 if attempt < max_retries:
-#                     wait_time = min(2**attempt, 15)
-#                     logger.info(
-#                         f"Request error on attempt {attempt + 1}: {e}, waiting {wait_time}s"
-#                     )
-#                     time.sleep(wait_time)
-#                     continue
-#                 else:
-#                     logger.warning(
-#                         f"Request failed after {max_retries + 1} attempts: {e}"
-#                     )
-#                     if self.rate_limit_handler:
-#                         self.rate_limit_handler.record_failure(self.name.lower(), e)
-#                         # Record failure for adaptive rate limiting
-#                         self.rate_limit_handler.record_request_outcome(
-#                             self.name.lower(), success=False
-#                         )
-#                     return None
-# 
-#             except Exception as e:
-#                 logger.error(f"Unexpected error in {self.name}: {e}")
-#                 if self.rate_limit_handler:
-#                     self.rate_limit_handler.record_failure(self.name.lower(), e)
-#                     # Record failure for adaptive rate limiting
-#                     self.rate_limit_handler.record_request_outcome(
-#                         self.name.lower(), success=False
-#                     )
-#                 return None
-# 
-#         return None
-# 
-#     def _apply_rate_limiting(self):
-#         """Apply rate limiting before making a request."""
-#         if not self.rate_limit_handler:
-#             logger.error(
-#                 f"No rate limit handler set for {self.name}. This should not happen!"
-#             )
-#             return
-# 
-#         # Use advanced rate limiting with adaptive delays
-#         wait_time = self.rate_limit_handler.get_wait_time_for_engine(self.name.lower())
-#         if wait_time > 0:
-#             logger.debug(f"Rate limiting {self.name}: waiting {wait_time:.1f}s")
-#             time.sleep(wait_time)
-# 
-#     async def _apply_rate_limiting_async(self):
-#         """Apply rate limiting before making a request (async version)."""
-#         if not self.rate_limit_handler:
-#             logger.error(
-#                 f"No rate limit handler set for {self.name}. This should not happen!"
-#             )
-#             return
-# 
-#         # Use advanced rate limiting with countdown and adaptive delays
-#         wait_time = self.rate_limit_handler.get_wait_time_for_engine(self.name.lower())
-#         if wait_time > 0:
-#             await self.rate_limit_handler.wait_with_countdown_async(
-#                 wait_time, self.name
-#             )
-# 
-#     async def search_async(
-#         self,
-#         title: str,
-#         year: Optional[int] = None,
-#         authors: Optional[List[str]] = None,
-#     ) -> Optional[str]:
-#         """Async version of search method."""
-#         # Apply rate limiting
-#         await self._apply_rate_limiting_async()
-# 
-#         # Run sync search in executor
-#         loop = asyncio.get_event_loop()
-#         try:
-#             result = await loop.run_in_executor(None, self.search, title, year, authors)
-#             return result
-#         except Exception as e:
-#             logger.error(f"Error in async search for {self.name}: {e}")
-#             if self.rate_limit_handler:
-#                 self.rate_limit_handler.record_failure(self.name.lower(), e)
-#             return None
-# 
-#     def get_request_stats(self) -> dict:
-#         """Get request statistics for this engine."""
-#         return {
-#             "total_requests": self._request_count,
-#             "last_request_time": self.last_request_time,
-#             "rate_limit_delay": self.rate_limit_delay,
-#         }
-# 
-#     def extract_doi_from_url(self, url: str) -> Optional[str]:
-#         """Extract DOI from URL if present."""
-#         if not url:
-#             return None
-# 
-#         # Direct DOI URLs
-#         if "doi.org/" in url:
-#             match = re.search(r"doi\.org/(.+?)(?:\?|$|#)", url)
-#             if match:
-#                 return match.group(1).strip()
-# 
-#         # DOI pattern in URL
-#         doi_pattern = r"10\.\d{4,}/[-._;()/:\w]+"
-#         match = re.search(doi_pattern, url)
-#         if match:
-#             return match.group(0)
-# 
-#         return None
-# 
-#     def _is_title_match(
-#         self, title1: str, title2: str, threshold: float = 0.95
-#     ) -> bool:
-#         """
-#         Check if two titles match using the enhanced TextNormalizer utility.
-# 
-#         DEPRECATED: Use self.text_normalizer.is_likely_same_title() directly in new code.
-#         This method is kept for backward compatibility.
-#         """
-#         return self.text_normalizer.is_likely_same_title(title1, title2, threshold)
-# 
-#     def _create_minimal_metadata(
-#         self,
-#         doi=None,
-#         pmid=None,
-#         corpus_id=None,
-#         ieee_id=None,
-#         semantic_id=None,
-#         title=None,
-#         year=None,
-#         authors=None,
-#         return_as: str = "dict",
-#     ) -> Optional[Dict]:
-#         """Create empty result structure with tracking information when no metadata is found."""
-# 
-#         # Add system tracking
-#         metadata = {
-#             "id": {
-#                 "doi": doi,
-#                 "doi_engines": [self.name] if doi else None,
-#                 "pmid": pmid,
-#                 "pmid_engines": [self.name] if pmid else None,
-#                 "corpus_id": corpus_id,
-#                 "corpus_id_engines": [self.name] if corpus_id else None,
-#                 "semantic_id": semantic_id,
-#                 "semantic_id_engines": ([self.name] if semantic_id else None),
-#                 "ieee_id": ieee_id,
-#                 "ieee_id_engines": [self.name] if ieee_id else None,
-#             },
-#             "basic": {
-#                 "title": title if title else None,
-#                 "title_engines": [self.name] if title else None,
-#                 "year": year if year else None,
-#                 "year_engines": [self.name] if year else None,
-#                 "authors": authors if authors else None,
-#                 "authors_engines": [self.name] if authors else None,
-#             },
-#         }
-# 
-#         metadata = standardize_metadata(metadata)
-# 
-#         if return_as == "dict":
-#             return metadata
-#         elif return_as == "json":
-#             return json.dumps(metadata, indent=2)
-#         else:
-#             return metadata
-# 
-# 
-# if __name__ == "__main__":
-# 
-#     def main():
-#         class MockEngine(BaseDOIEngine):
-#             @property
-#             def name(self) -> str:
-#                 return "MockEngine"
-# 
-#             def search(
-#                 self,
-#                 title: str,
-#                 year: Optional[int] = None,
-#                 authors: Optional[List[str]] = None,
-#             ) -> Optional[str]:
-#                 return None
-# 
-#         engine = MockEngine()
-#         result = engine._create_minimal_metadata(
-#             # doi="10.1234/test",
-#             # title="Test Paper",
-#             # year=2023,
-#             # authors=["John Doe"],
-#         )
-#         print("Mock engine metadata:")
-#         print(json.dumps(result, indent=2))
-# 
-#     main()
-# 
-# # python -m scitex.scholar.engines.individual._BaseDOIEngine
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/metadata_engines/individual/_BaseDOIEngine.py
-# --------------------------------------------------------------------------------

@@ -11,11 +11,11 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/browser/core/ChromeProfileManager.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-11 07:53:19 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/browser/core/ChromeProfileManager.py
 # # ----------------------------------------
 # from __future__ import annotations
+# 
 # import os
 # 
 # __FILE__ = "./src/scitex/browser/core/ChromeProfileManager.py"
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 #         extensions_path = profile_dir / "Default" / "Extensions"
 # 
 #         if not extensions_path.exists():
-#             return {key: False for key in self.EXTENSIONS}
+#             return dict.fromkeys(self.EXTENSIONS, False)
 # 
 #         for key, ext_info in self.EXTENSIONS.items():
 #             ext_id = ext_info["id"]
@@ -280,7 +280,8 @@ if __name__ == "__main__":
 #         Args:
 #             source_profile_name: Name of source profile (default: "system")
 # 
-#         Returns:
+#         Returns
+#         -------
 #             True if sync succeeded, False otherwise
 #         """
 #         import time
@@ -355,6 +356,12 @@ if __name__ == "__main__":
 #             return True
 # 
 #         except subprocess.CalledProcessError as e:
+#             # Exit code 23 = partial transfer (often just timestamp issues on WSL)
+#             # Check if it's only "failed to set times" errors - these are harmless
+#             if e.returncode == 23 and "failed to set times" in e.stderr:
+#                 # Files copied successfully, just couldn't preserve timestamps
+#                 logger.debug("Profile sync complete (timestamps not preserved)")
+#                 return True
 #             logger.error(f"rsync failed (exit code {e.returncode}): {e.stderr}")
 #             return False
 #         except FileNotFoundError:

@@ -11,11 +11,11 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/pdf_download/strategies/chrome_pdf_viewer.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-13 08:18:35 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/pdf_download/strategies/chrome_pdf_viewer.py
 # # ----------------------------------------
 # from __future__ import annotations
+# 
 # import os
 # 
 # __FILE__ = "./src/scitex/scholar/pdf_download/strategies/chrome_pdf_viewer.py"
@@ -242,12 +242,12 @@ if __name__ == "__main__":
 #         new_files = files_after - files_before
 #         download_duration = time.time() - download_start_time
 # 
-#         logger.info(f"{func_name}: Checking download result...")
-#         logger.info(f"{func_name}:  is_downloaded (Playwright): {is_downloaded}")
-#         logger.info(f"{func_name}:  output_path: {output_path}")
-#         logger.info(f"{func_name}:  Files before: {len(files_before)}")
-#         logger.info(f"{func_name}:  Files after: {len(files_after)}")
-#         logger.info(f"{func_name}:  New files: {len(new_files)}")
+#         logger.debug(f"{func_name}: Checking download result...")
+#         logger.debug(f"{func_name}:  is_downloaded (Playwright): {is_downloaded}")
+#         logger.debug(f"{func_name}:  output_path: {output_path}")
+#         logger.debug(f"{func_name}:  Files before: {len(files_before)}")
+#         logger.debug(f"{func_name}:  Files after: {len(files_after)}")
+#         logger.debug(f"{func_name}:  New files: {len(new_files)}")
 # 
 #         if new_files:
 #             # Found new file(s) in download directory
@@ -255,10 +255,10 @@ if __name__ == "__main__":
 #             file_size = downloaded_file.stat().st_size
 #             file_size_mb = file_size / (1024 * 1024)
 # 
-#             logger.info(f"{func_name}: Found downloaded file: {downloaded_file.name}")
-#             logger.info(f"{func_name}:  Size: {file_size_mb:.2f} MB")
-#             logger.info(f"{func_name}:  Duration: {download_duration:.1f}s")
-#             logger.info(f"{func_name}:  Location: {downloaded_file}")
+#             logger.debug(f"{func_name}: Found downloaded file: {downloaded_file.name}")
+#             logger.debug(f"{func_name}:  Size: {file_size_mb:.2f} MB")
+#             logger.debug(f"{func_name}:  Duration: {download_duration:.1f}s")
+#             logger.debug(f"{func_name}:  Location: {downloaded_file}")
 # 
 #             if file_size > 1000:  # At least 1KB
 #                 # Rename to desired output filename
