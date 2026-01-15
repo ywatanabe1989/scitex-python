@@ -36,6 +36,24 @@ def capture():
     pass
 
 
+@capture.command("help-recursive")
+@click.pass_context
+def help_recursive(ctx):
+    """Show help for all commands recursively."""
+    fake_parent = click.Context(click.Group(), info_name="scitex")
+    parent_ctx = click.Context(capture, info_name="capture", parent=fake_parent)
+    click.secho("━━━ scitex capture ━━━", fg="cyan", bold=True)
+    click.echo(capture.get_help(parent_ctx))
+    for name in sorted(capture.list_commands(ctx) or []):
+        cmd = capture.get_command(ctx, name)
+        if cmd is None or name == "help-recursive":
+            continue
+        click.echo()
+        click.secho(f"━━━ scitex capture {name} ━━━", fg="cyan", bold=True)
+        with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
+            click.echo(cmd.get_help(sub_ctx))
+
+
 @capture.command()
 @click.option("--message", "-m", default="", help="Message to include in filename")
 @click.option("--output", "-o", type=click.Path(), help="Output directory")

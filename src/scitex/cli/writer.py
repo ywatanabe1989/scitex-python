@@ -26,6 +26,26 @@ def writer():
     pass
 
 
+@writer.command("help-recursive")
+@click.pass_context
+def help_recursive(ctx):
+    """Show help for all commands recursively."""
+    fake_parent = click.Context(click.Group(), info_name="scitex")
+    parent_ctx = click.Context(writer, info_name="writer", parent=fake_parent)
+
+    click.secho("━━━ scitex writer ━━━", fg="cyan", bold=True)
+    click.echo(writer.get_help(parent_ctx))
+
+    for name in sorted(writer.list_commands(ctx) or []):
+        cmd = writer.get_command(ctx, name)
+        if cmd is None or name == "help-recursive":
+            continue
+        click.echo()
+        click.secho(f"━━━ scitex writer {name} ━━━", fg="cyan", bold=True)
+        with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
+            click.echo(cmd.get_help(sub_ctx))
+
+
 @writer.command()
 @click.argument("project_dir", type=click.Path())
 @click.option(

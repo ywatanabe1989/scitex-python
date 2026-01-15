@@ -31,6 +31,24 @@ def audio():
     pass
 
 
+@audio.command("help-recursive")
+@click.pass_context
+def help_recursive(ctx):
+    """Show help for all commands recursively."""
+    fake_parent = click.Context(click.Group(), info_name="scitex")
+    parent_ctx = click.Context(audio, info_name="audio", parent=fake_parent)
+    click.secho("━━━ scitex audio ━━━", fg="cyan", bold=True)
+    click.echo(audio.get_help(parent_ctx))
+    for name in sorted(audio.list_commands(ctx) or []):
+        cmd = audio.get_command(ctx, name)
+        if cmd is None or name == "help-recursive":
+            continue
+        click.echo()
+        click.secho(f"━━━ scitex audio {name} ━━━", fg="cyan", bold=True)
+        with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
+            click.echo(cmd.get_help(sub_ctx))
+
+
 @audio.command()
 @click.argument("text")
 @click.option(

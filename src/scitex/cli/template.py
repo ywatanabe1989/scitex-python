@@ -32,6 +32,24 @@ def template():
     pass
 
 
+@template.command("help-recursive")
+@click.pass_context
+def help_recursive(ctx):
+    """Show help for all commands recursively."""
+    fake_parent = click.Context(click.Group(), info_name="scitex")
+    parent_ctx = click.Context(template, info_name="template", parent=fake_parent)
+    click.secho("━━━ scitex template ━━━", fg="cyan", bold=True)
+    click.echo(template.get_help(parent_ctx))
+    for name in sorted(template.list_commands(ctx) or []):
+        cmd = template.get_command(ctx, name)
+        if cmd is None or name == "help-recursive":
+            continue
+        click.echo()
+        click.secho(f"━━━ scitex template {name} ━━━", fg="cyan", bold=True)
+        with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
+            click.echo(cmd.get_help(sub_ctx))
+
+
 @template.command(name="list")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def list_templates(as_json):
