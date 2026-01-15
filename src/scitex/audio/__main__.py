@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-11 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/__main__.py
 # ----------------------------------------
@@ -14,8 +13,6 @@ Usage:
 """
 
 import argparse
-import asyncio
-import sys
 
 
 def main():
@@ -25,8 +22,9 @@ def main():
 
     # Global options
     parser.add_argument(
-        "--mcp", action="store_true",
-        help="Start MCP server (for Claude Code integration)"
+        "--mcp",
+        action="store_true",
+        help="Start MCP server (for Claude Code integration)",
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Commands")
@@ -35,19 +33,14 @@ def main():
     speak_parser = subparsers.add_parser("speak", help="Quick text-to-speech")
     speak_parser.add_argument("text", help="Text to speak")
     speak_parser.add_argument(
-        "-b", "--backend",
+        "-b",
+        "--backend",
         choices=["pyttsx3", "gtts", "elevenlabs"],
-        help="TTS backend (auto-selects with fallback if not specified)"
+        help="TTS backend (auto-selects with fallback if not specified)",
     )
-    speak_parser.add_argument(
-        "-v", "--voice", help="Voice name or language code"
-    )
-    speak_parser.add_argument(
-        "-o", "--output", help="Save to file"
-    )
-    speak_parser.add_argument(
-        "--no-play", action="store_true", help="Don't play audio"
-    )
+    speak_parser.add_argument("-v", "--voice", help="Voice name or language code")
+    speak_parser.add_argument("-o", "--output", help="Save to file")
+    speak_parser.add_argument("--no-play", action="store_true", help="Don't play audio")
     speak_parser.add_argument(
         "--no-fallback", action="store_true", help="Disable fallback"
     )
@@ -58,9 +51,10 @@ def main():
     # List voices
     voices_parser = subparsers.add_parser("voices", help="List available voices")
     voices_parser.add_argument(
-        "-b", "--backend",
+        "-b",
+        "--backend",
         choices=["pyttsx3", "gtts", "elevenlabs"],
-        help="Backend to list voices for"
+        help="Backend to list voices for",
     )
 
     args = parser.parse_args()
@@ -68,7 +62,9 @@ def main():
     # MCP server mode
     if args.mcp:
         from .mcp_server import main as server_main
-        asyncio.run(server_main())
+
+        # server_main() is synchronous - calls mcp.run() directly
+        server_main()
         return
 
     if args.command == "speak":
@@ -84,7 +80,7 @@ def main():
         )
 
     elif args.command == "backends":
-        from . import available_backends, FALLBACK_ORDER
+        from . import FALLBACK_ORDER, available_backends
 
         backends = available_backends()
         print("Available TTS backends (in fallback order):")
@@ -99,7 +95,7 @@ def main():
             print(f"  {marker} {b}: {desc.get(b, '')} - {status}")
 
     elif args.command == "voices":
-        from . import get_tts, available_backends
+        from . import available_backends, get_tts
 
         backend = args.backend
         if not backend:

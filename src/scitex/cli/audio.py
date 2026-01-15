@@ -229,5 +229,85 @@ def stop():
         sys.exit(1)
 
 
+@audio.command()
+@click.option(
+    "-t",
+    "--transport",
+    type=click.Choice(["stdio", "sse", "http"]),
+    default="stdio",
+    help="Transport protocol (default: stdio)",
+)
+@click.option(
+    "--host",
+    default="0.0.0.0",
+    help="Host for HTTP/SSE transport (default: 0.0.0.0)",
+)
+@click.option(
+    "--port",
+    default=8084,
+    type=int,
+    help="Port for HTTP/SSE transport (default: 8084)",
+)
+def serve(transport, host, port):
+    """
+    Run MCP server for remote audio playback
+
+    Enables remote agents (via SSH) to play audio on local speakers.
+
+    \b
+    Transports:
+      stdio  - Standard I/O (Claude Desktop, default)
+      sse    - Server-Sent Events
+      http   - HTTP Streamable
+
+    \b
+    Examples:
+      # Local stdio (Claude Desktop)
+      scitex audio serve
+
+      # HTTP server for remote agents
+      scitex audio serve -t http --port 8084
+
+      # SSE server
+      scitex audio serve -t sse --port 8084
+
+    \b
+    Remote Setup:
+      1. Local:  scitex audio serve -t http --port 8084
+      2. SSH:    Add to ~/.ssh/config:
+                   LocalForward 8084 127.0.0.1:8084
+      3. Remote MCP config:
+                   {"type": "sse", "url": "http://localhost:8084/sse"}
+    """
+    try:
+        from scitex.audio.mcp_server import FASTMCP_AVAILABLE, run_server
+
+        if not FASTMCP_AVAILABLE:
+            click.secho("Error: fastmcp not installed", fg="red", err=True)
+            click.echo("\nInstall with:")
+            click.echo("  pip install fastmcp")
+            sys.exit(1)
+
+        if transport != "stdio":
+            click.secho(f"Starting scitex-audio MCP server ({transport})", fg="cyan")
+            click.echo(f"  Host: {host}")
+            click.echo(f"  Port: {port}")
+            click.echo()
+            click.echo("Remote agents can connect via SSH tunnel:")
+            click.echo(f"  ssh -L {port}:localhost:{port} <this-host>")
+            click.echo()
+
+        run_server(transport=transport, host=host, port=port)
+
+    except ImportError as e:
+        click.secho(f"Error: {e}", fg="red", err=True)
+        click.echo("\nInstall dependencies:")
+        click.echo("  pip install fastmcp")
+        sys.exit(1)
+    except Exception as e:
+        click.secho(f"Error: {e}", fg="red", err=True)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     audio()

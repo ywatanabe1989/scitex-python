@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 __all__ = [
+    "speak_handler",
     "generate_audio_handler",
     "list_backends_handler",
     "list_voices_handler",
@@ -20,6 +21,8 @@ __all__ = [
     "list_audio_files_handler",
     "clear_audio_cache_handler",
     "check_audio_status_handler",
+    "speech_queue_status_handler",
+    "announce_context_handler",
 ]
 
 
@@ -42,7 +45,7 @@ async def generate_audio_handler(
 ) -> dict:
     """Generate audio file without playing."""
     try:
-        from . import speak as tts_speak
+        from .. import speak as tts_speak
 
         loop = asyncio.get_event_loop()
 
@@ -86,7 +89,7 @@ async def generate_audio_handler(
 async def list_backends_handler() -> dict:
     """List available TTS backends."""
     try:
-        from . import available_backends
+        from .. import available_backends
 
         backends = available_backends()
 
@@ -120,7 +123,7 @@ async def list_backends_handler() -> dict:
 async def list_voices_handler(backend: str = "gtts") -> dict:
     """List available voices for a backend."""
     try:
-        from . import get_tts
+        from .. import get_tts
 
         loop = asyncio.get_event_loop()
 
@@ -144,7 +147,7 @@ async def list_voices_handler(backend: str = "gtts") -> dict:
 async def play_audio_handler(path: str) -> dict:
     """Play an audio file."""
     try:
-        from .engines.base import BaseTTS
+        from ..engines.base import BaseTTS
 
         path_obj = Path(path)
         if not path_obj.exists():
@@ -242,12 +245,119 @@ async def clear_audio_cache_handler(max_age_hours: float = 24) -> dict:
 async def check_audio_status_handler() -> dict:
     """Check WSL audio connectivity and available playback methods."""
     try:
-        from . import check_wsl_audio
+        from .. import check_wsl_audio
 
         status = check_wsl_audio()
         status["success"] = True
         status["timestamp"] = datetime.now().isoformat()
         return status
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+async def speak_handler(
+    text: str,
+    backend: str | None = None,
+    voice: str | None = None,
+    rate: int = 150,
+    speed: float = 1.5,
+    play: bool = True,
+    save: bool = False,
+    fallback: bool = True,
+    agent_id: str | None = None,
+    wait: bool = True,
+) -> dict:
+    """Convert text to speech with fallback."""
+    try:
+        from .. import speak as tts_speak
+
+        loop = asyncio.get_event_loop()
+
+        output_path = None
+        if save:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_path = str(_get_audio_dir() / f"tts_{timestamp}.mp3")
+
+        def do_speak():
+            return tts_speak(
+                text=text,
+                backend=backend,
+                voice=voice,
+                rate=rate,
+                speed=speed,
+                play=play,
+                output_path=output_path,
+                fallback=fallback,
+            )
+
+        result_path = await loop.run_in_executor(None, do_speak)
+
+        result = {
+            "success": True,
+            "text": text,
+            "backend": backend,
+            "played": play,
+            "timestamp": datetime.now().isoformat(),
+        }
+        if result_path:
+            result["path"] = str(result_path)
+
+        return result
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+async def speech_queue_status_handler() -> dict:
+    """Get current speech queue status."""
+    try:
+        from .cross_process_lock import get_queue_status
+
+        status = get_queue_status()
+        status["success"] = True
+        return status
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+async def announce_context_handler(include_full_path: bool = False) -> dict:
+    """Announce current working directory and git branch."""
+    try:
+        import os
+        import subprocess
+
+        cwd = os.getcwd()
+        dir_name = cwd if include_full_path else os.path.basename(cwd)
+
+        branch = None
+        try:
+            result = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                capture_output=True,
+                text=True,
+                cwd=cwd,
+            )
+            if result.returncode == 0:
+                branch = result.stdout.strip()
+        except Exception:
+            pass
+
+        if branch:
+            text = f"Working in {dir_name}, on branch {branch}"
+        else:
+            text = f"Working in {dir_name}"
+
+        speak_result = await speak_handler(text=text, speed=1.5)
+
+        return {
+            "success": True,
+            "directory": dir_name,
+            "branch": branch,
+            "announced": text,
+            "speak_result": speak_result,
+        }
 
     except Exception as e:
         return {"success": False, "error": str(e)}

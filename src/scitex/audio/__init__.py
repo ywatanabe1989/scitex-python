@@ -145,8 +145,8 @@ __all__ = [
     "FALLBACK_ORDER",
 ]
 
-# Fallback order: elevenlabs (best quality) -> gtts (free) -> pyttsx3 (offline)
-FALLBACK_ORDER = ["elevenlabs", "gtts", "pyttsx3"]
+# Fallback order: pyttsx3 (offline/free) -> gtts (free) -> elevenlabs (paid)
+FALLBACK_ORDER = ["pyttsx3", "gtts", "elevenlabs"]
 
 
 def available_backends() -> List[str]:
@@ -383,11 +383,10 @@ def speak(
 
 def start_mcp_server():
     """Start the MCP server for audio."""
-    import asyncio
-
     from .mcp_server import main
 
-    asyncio.run(main())
+    # main() is synchronous - calls mcp.run() directly
+    main()
 
 
 # EOF
