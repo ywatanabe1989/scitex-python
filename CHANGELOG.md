@@ -5,6 +5,32 @@ All notable changes to SciTeX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.14.0] - 2026-01-15
+
+### Added
+- **Unified MCP Server**: Single FastMCP server with 106 tools across 10 modules
+  - `scitex mcp list`: List all tools with column-aligned output
+  - `scitex mcp doctor`: Check server health and configuration
+  - `scitex mcp serve`: Start server (stdio/sse/http transports)
+  - `scitex mcp help-recursive`: Show help for all MCP commands
+- **Scholar Module**: Expanded from 5 to 23 MCP tools
+  - Added: enrich_bibtex, download_pdf, download_pdfs_batch, parse_bibtex
+  - Added: validate_pdfs, resolve_openurls, authenticate, check_auth_status
+  - Added: logout, export_papers, add_papers_to_project, parse_pdf_content
+  - Added job handlers: fetch_papers, list_jobs, get_job_status, start_job, cancel_job, get_job_result
+- **MCP CLI Tests**: 10 new tests for mcp CLI commands
+
+### Changed
+- **MCP Architecture**: Consolidated into `_mcp_tools/` subpackage
+- **Test Naming**: Renamed MCP tests to module-prefixed convention (e.g., `test_audio_handlers.py`)
+
+### Removed
+- Legacy module-specific MCP files (consolidated into unified server)
+
+### Fixed
+- Release workflow: Simplified version check (pyproject.toml only)
+- Gitignore: Added `script_out/`, `.monitor_repository.sh.log`
+
 ## [2.13.0] - 2026-01-08
 
 ### Changed
