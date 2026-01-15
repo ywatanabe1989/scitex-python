@@ -1,163 +1,91 @@
 #!/usr/bin/env python3
-# Timestamp: 2026-01-08
-# File: src/scitex/mcp_server.py
+# Timestamp: 2026-01-15
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/mcp_server.py
 # ----------------------------------------
 
 """
-Unified MCP Server for SciTeX - All modules in one server.
+Unified FastMCP Server for SciTeX - Multi-Transport Support
 
-Aggregates tools from all SciTeX MCP modules with prefixed names:
-- audio_*: Text-to-speech
-- capture_*: Screenshot capture
-- scholar_*: Literature management
-- stats_*: Statistical analysis
-- template_*: Project scaffolding
-- plt_*: Publication plotting
-- canvas_*: Multi-panel figures
-- diagram_*: Diagram generation
-- writer_*: LaTeX manuscript compilation
-- ui_*: User notifications
+Provides all SciTeX tools via a single MCP server with stdio, SSE, and HTTP.
+
+Usage:
+    scitex serve                          # stdio (Claude Desktop)
+    scitex serve -t sse --port 8085       # SSE (remote via SSH)
+    scitex serve -t http --port 8085      # HTTP (streamable)
+
+Remote Setup:
+    1. Local:  scitex serve -t sse --port 8085
+    2. SSH:    ssh -R 8085:localhost:8085 remote-host
+    3. Remote: {"type": "sse", "url": "http://localhost:8085/sse"}
 """
 
 from __future__ import annotations
 
-import asyncio
 import json
-from typing import Callable
 
-import mcp.types as types
-from mcp.server import NotificationOptions, Server
-from mcp.server.models import InitializationOptions
-from mcp.server.stdio import stdio_server
+try:
+    from fastmcp import FastMCP
 
-__all__ = ["UnifiedServer", "main"]
+    FASTMCP_AVAILABLE = True
+except ImportError:
+    FASTMCP_AVAILABLE = False
+    FastMCP = None  # type: ignore
 
-# Module registry: (prefix, schema_getter, handler_module)
-MODULES = [
-    ("audio", "scitex.audio._mcp.tool_schemas", "scitex.audio._mcp.handlers"),
-    ("capture", "scitex.capture._mcp.tool_schemas", "scitex.capture._mcp.handlers"),
-    ("scholar", "scitex.scholar._mcp.tool_schemas", "scitex.scholar._mcp.all_handlers"),
-    ("stats", "scitex.stats._mcp.tool_schemas", "scitex.stats._mcp.handlers"),
-    ("template", "scitex.template._mcp.tool_schemas", "scitex.template._mcp.handlers"),
-    ("plt", "scitex.plt._mcp.tool_schemas", "scitex.plt._mcp.handlers"),
-    ("canvas", "scitex.canvas._mcp.tool_schemas", "scitex.canvas._mcp.handlers"),
-    ("diagram", "scitex.diagram._mcp.tool_schemas", "scitex.diagram._mcp.handlers"),
-    ("writer", "scitex.writer._mcp.tool_schemas", "scitex.writer._mcp.handlers"),
-    ("ui", "scitex.ui._mcp.tool_schemas", "scitex.ui._mcp.handlers"),
-]
+__all__ = ["mcp", "run_server", "main", "FASTMCP_AVAILABLE"]
 
-
-class UnifiedServer:
-    """Unified MCP Server aggregating all SciTeX modules."""
-
-    def __init__(self):
-        self.server = Server("scitex-mcp-server")
-        self.tools: list[types.Tool] = []
-        self.handlers: dict[str, Callable] = {}
-        self._load_modules()
-        self._setup_handlers()
-
-    def _load_modules(self):
-        """Load tool schemas and handlers from all modules."""
-        import importlib
-
-        for prefix, schema_module, handler_module in MODULES:
-            try:
-                # Load tool schemas
-                schema_mod = importlib.import_module(schema_module)
-                tools = schema_mod.get_tool_schemas()
-
-                # Load handlers
-                handler_mod = importlib.import_module(handler_module)
-
-                for tool in tools:
-                    # Create prefixed tool name
-                    prefixed_name = f"{prefix}_{tool.name}"
-
-                    # Create new tool with prefixed name
-                    prefixed_tool = types.Tool(
-                        name=prefixed_name,
-                        description=f"[{prefix}] {tool.description}",
-                        inputSchema=tool.inputSchema,
-                    )
-                    self.tools.append(prefixed_tool)
-
-                    # Map handler
-                    handler_name = f"{tool.name}_handler"
-                    if hasattr(handler_mod, handler_name):
-                        self.handlers[prefixed_name] = getattr(
-                            handler_mod, handler_name
-                        )
-
-            except ImportError as e:
-                # Module not available, skip it
-                print(f"Skipping {prefix} module: {e}")
-            except Exception as e:
-                print(f"Error loading {prefix} module: {e}")
-
-    def _setup_handlers(self):
-        """Set up MCP server handlers."""
-
-        @self.server.list_tools()
-        async def handle_list_tools():
-            return self.tools
-
-        @self.server.call_tool()
-        async def handle_call_tool(name: str, arguments: dict):
-            if name not in self.handlers:
-                return [
-                    types.TextContent(
-                        type="text",
-                        text=json.dumps(
-                            {"success": False, "error": f"Unknown tool: {name}"},
-                            indent=2,
-                        ),
-                    )
-                ]
-
-            return await self._wrap_result(self.handlers[name](**arguments))
-
-    async def _wrap_result(self, coro):
-        """Wrap handler result as MCP TextContent."""
-        try:
-            result = await coro
-            return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2, default=str),
-                )
-            ]
-        except Exception as e:
-            return [
-                types.TextContent(
-                    type="text",
-                    text=json.dumps({"success": False, "error": str(e)}, indent=2),
-                )
-            ]
+if FASTMCP_AVAILABLE:
+    mcp = FastMCP(
+        name="scitex",
+        instructions=(
+            "SciTeX unified MCP server for scientific research automation. "
+            "Modules: audio, capture, scholar, ui, plt, canvas, diagram, "
+            "stats, template, writer."
+        ),
+    )
+else:
+    mcp = None
 
 
-async def main():
-    """Run the unified MCP server."""
-    server = UnifiedServer()
-    print(f"Loaded {len(server.tools)} tools from {len(MODULES)} modules")
+def _json(data: dict) -> str:
+    return json.dumps(data, indent=2, default=str)
 
-    async with stdio_server() as (read_stream, write_stream):
-        await server.server.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="scitex-mcp-server",
-                server_version="0.1.0",
-                capabilities=server.server.get_capabilities(
-                    notification_options=NotificationOptions(),
-                    experimental_capabilities={},
-                ),
-            ),
-        )
+
+# Register tools from each module
+if FASTMCP_AVAILABLE:
+    from scitex._mcp_tools import register_all_tools
+
+    register_all_tools(mcp)
+
+
+def run_server(transport: str = "stdio", host: str = "0.0.0.0", port: int = 8085):
+    """Run the unified MCP server with transport selection."""
+    if not FASTMCP_AVAILABLE:
+        import sys
+
+        print("=" * 60)
+        print("Requires 'fastmcp' package: pip install fastmcp")
+        print("=" * 60)
+        sys.exit(1)
+
+    if transport == "stdio":
+        mcp.run(transport="stdio")
+    elif transport == "sse":
+        print(f"Starting scitex MCP (SSE) on {host}:{port}")
+        print(f"Remote: ssh -R {port}:localhost:{port} remote-host")
+        mcp.run(transport="sse", host=host, port=port)
+    elif transport == "http":
+        print(f"Starting scitex MCP (HTTP) on {host}:{port}")
+        mcp.run(transport="streamable-http", host=host, port=port)
+    else:
+        raise ValueError(f"Unknown transport: {transport}")
+
+
+def main():
+    """Entry point for scitex-mcp command."""
+    run_server(transport="stdio")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
-
+    main()
 
 # EOF
