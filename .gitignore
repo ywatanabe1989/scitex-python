@@ -123,6 +123,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .testmondata
+.testmondata-*
+tests/.testmondata*
 cover/
 
 # Translations
@@ -365,6 +367,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .testmondata
+.testmondata-*
+tests/.testmondata*
 cover/
 
 # Translations

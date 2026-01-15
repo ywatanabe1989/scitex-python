@@ -824,6 +824,7 @@ addopts = [
     "--ignore=tests/custom/old/",
     "--import-mode=importlib",
     "--timeout=60",
+    "--testmon-datafile=tests/.testmondata",
 ]
 timeout_method = "signal"
 asyncio_mode = "auto"

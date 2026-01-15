@@ -169,6 +169,7 @@ async def get_monitoring_status_handler() -> dict:
     global _monitoring_active, _monitoring_worker
 
     status = {
+        "success": True,
         "active": _monitoring_active,
         "cache_dir": str(_get_capture_dir()),
     }
