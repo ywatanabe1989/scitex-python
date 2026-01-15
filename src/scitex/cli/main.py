@@ -15,6 +15,7 @@ from . import (
     cloud,
     config,
     convert,
+    mcp,
     repro,
     resource,
     scholar,
@@ -48,6 +49,8 @@ def cli():
       scitex capture snap --output screenshot.jpg
       scitex resource usage
       scitex stats recommend --data data.csv
+      scitex mcp list                       # List all MCP tools
+      scitex mcp serve                      # Start MCP server
 
     \b
     Enable tab-completion:
@@ -64,6 +67,7 @@ cli.add_command(capture.capture)
 cli.add_command(cloud.cloud)
 cli.add_command(config.config)
 cli.add_command(convert.convert)
+cli.add_command(mcp.mcp)
 cli.add_command(repro.repro)
 cli.add_command(resource.resource)
 cli.add_command(scholar.scholar)
@@ -73,6 +77,38 @@ cli.add_command(template.template)
 cli.add_command(tex.tex)
 cli.add_command(web.web)
 cli.add_command(writer.writer)
+
+
+def _get_all_command_paths(group, prefix=""):
+    """Recursively get all command paths from a Click group."""
+    paths = []
+    for name in sorted(group.list_commands(None) or []):
+        cmd = group.get_command(None, name)
+        if cmd is None:
+            continue
+        full_path = f"{prefix} {name}".strip() if prefix else name
+        paths.append((full_path, cmd))
+        if isinstance(cmd, click.MultiCommand):
+            paths.extend(_get_all_command_paths(cmd, full_path))
+    return paths
+
+
+@cli.command("help-recursive")
+@click.pass_context
+def help_recursive(ctx):
+    """Show help for all commands recursively."""
+    # Show main CLI help first
+    click.secho("━━━ scitex ━━━", fg="cyan", bold=True)
+    click.echo(cli.get_help(ctx))
+
+    # Show help for each command using Click's internal help generation
+    command_paths = _get_all_command_paths(cli)
+    for cmd_path, cmd in command_paths:
+        click.echo()
+        click.secho(f"━━━ scitex {cmd_path} ━━━", fg="cyan", bold=True)
+        # Create a new context for this command
+        with click.Context(cmd, info_name=cmd_path, parent=ctx) as sub_ctx:
+            click.echo(cmd.get_help(sub_ctx))
 
 
 @cli.command()
