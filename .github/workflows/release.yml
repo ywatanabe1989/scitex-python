@@ -68,7 +68,7 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.10', '3.12']
-        install-type: ['core', 'all']
+        install-type: ['core', 'audio']
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -85,12 +85,12 @@ jobs:
         run: |
           pip install --upgrade pip
           WHEEL=$(ls dist/*.whl)
-          if [ "${{ matrix.install-type }}" == "all" ]; then
-            pip install "${WHEEL}[all]"
+          if [ "${{ matrix.install-type }}" == "audio" ]; then
+            pip install "${WHEEL}[audio]"
           else
             pip install "$WHEEL"
           fi
-        timeout-minutes: 15
+        timeout-minutes: 10
 
       - name: Test imports
         run: |
