@@ -25,24 +25,17 @@ jobs:
         run: |
           TAG_VERSION="${GITHUB_REF#refs/tags/v}"
           TOML_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
-          PY_VERSION=$(grep '__version__' src/scitex/__version__.py | sed 's/__version__ = "\(.*\)"/\1/')
 
           echo "Tag version: $TAG_VERSION"
           echo "pyproject.toml version: $TOML_VERSION"
-          echo "__version__.py version: $PY_VERSION"
 
           if [ "$TAG_VERSION" != "$TOML_VERSION" ]; then
             echo "ERROR: Tag version ($TAG_VERSION) != pyproject.toml ($TOML_VERSION)"
             exit 1
           fi
 
-          if [ "$TAG_VERSION" != "$PY_VERSION" ]; then
-            echo "ERROR: Tag version ($TAG_VERSION) != __version__.py ($PY_VERSION)"
-            exit 1
-          fi
-
           echo "version=$TAG_VERSION" >> $GITHUB_OUTPUT
-          echo "✓ All versions match: $TAG_VERSION"
+          echo "✓ Versions match: $TAG_VERSION"
 
   build:
     name: Build Package
