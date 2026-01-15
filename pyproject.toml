@@ -799,12 +799,26 @@ pattern = '__version__ = "(?P<version>[^"]+)"'
 
 [tool.hatch.build.targets.wheel]
 exclude = [
+    # Scholar development symlinks
+    "src/scitex/scholar/.env",
+    "src/scitex/scholar/.venv",
+    "src/scitex/scholar/.claude",
     "src/scitex/scholar/crossref_local",
+    "src/scitex/scholar/library",
+    "src/scitex/scholar/docs/to_claude",
+    "src/scitex/scholar/data/impact_factor/impact_factor.db",
 ]
 
 [tool.hatch.build.targets.sdist]
 exclude = [
+    # Scholar development symlinks
+    "src/scitex/scholar/.env",
+    "src/scitex/scholar/.venv",
+    "src/scitex/scholar/.claude",
     "src/scitex/scholar/crossref_local",
+    "src/scitex/scholar/library",
+    "src/scitex/scholar/docs/to_claude",
+    "src/scitex/scholar/data/impact_factor/impact_factor.db",
 ]
 
 [tool.pytest.ini_options]
