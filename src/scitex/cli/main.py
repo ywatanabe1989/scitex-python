@@ -15,6 +15,7 @@ from . import (
     cloud,
     config,
     convert,
+    introspect,
     mcp,
     repro,
     resource,
@@ -67,6 +68,7 @@ cli.add_command(capture.capture)
 cli.add_command(cloud.cloud)
 cli.add_command(config.config)
 cli.add_command(convert.convert)
+cli.add_command(introspect.introspect)
 cli.add_command(mcp.mcp)
 cli.add_command(repro.repro)
 cli.add_command(resource.resource)
