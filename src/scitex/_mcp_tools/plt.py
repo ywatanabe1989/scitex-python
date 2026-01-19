@@ -157,6 +157,7 @@ def register_plt_tools(mcp) -> None:
         caption: Optional[str] = None,
         create_symlinks: bool = True,
         canvas_size_mm: Optional[Tuple[float, float]] = None,
+        facecolor: str = "white",
     ) -> Dict[str, Any]:
         """[plt] Compose multiple figures into a single figure with panel labels.
 
@@ -191,6 +192,10 @@ def register_plt_tools(mcp) -> None:
         canvas_size_mm : tuple of (float, float), optional
             Canvas size as (width_mm, height_mm) for free-form positioning.
             Required when sources is a dict with mm positioning.
+        facecolor : str
+            Background color for the composed figure. Default is 'white'.
+            All source panels are flattened onto this background to ensure
+            consistent appearance regardless of original panel transparency.
 
         Returns
         -------
@@ -210,6 +215,7 @@ def register_plt_tools(mcp) -> None:
             caption=caption,
             create_symlinks=create_symlinks,
             canvas_size_mm=canvas_size_mm,
+            facecolor=facecolor,
         )
 
         return {
