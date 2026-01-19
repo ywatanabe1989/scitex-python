@@ -10,8 +10,13 @@ import sys
 import click
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
-def capture():
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=True,
+)
+@click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
+@click.pass_context
+def capture(ctx, help_recursive):
     """
     Screen capture and monitoring utilities
 
@@ -33,25 +38,13 @@ def capture():
       scitex capture gif                      # Create GIF from latest session
       scitex capture info                     # List monitors and windows
     """
-    pass
+    if help_recursive:
+        from . import print_help_recursive
 
-
-@capture.command("help-recursive")
-@click.pass_context
-def help_recursive(ctx):
-    """Show help for all commands recursively."""
-    fake_parent = click.Context(click.Group(), info_name="scitex")
-    parent_ctx = click.Context(capture, info_name="capture", parent=fake_parent)
-    click.secho("━━━ scitex capture ━━━", fg="cyan", bold=True)
-    click.echo(capture.get_help(parent_ctx))
-    for name in sorted(capture.list_commands(ctx) or []):
-        cmd = capture.get_command(ctx, name)
-        if cmd is None or name == "help-recursive":
-            continue
-        click.echo()
-        click.secho(f"━━━ scitex capture {name} ━━━", fg="cyan", bold=True)
-        with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
-            click.echo(cmd.get_help(sub_ctx))
+        print_help_recursive(ctx, capture)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
 @capture.command()

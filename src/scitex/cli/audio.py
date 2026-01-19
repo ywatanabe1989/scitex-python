@@ -10,8 +10,13 @@ import sys
 import click
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
-def audio():
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=True,
+)
+@click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
+@click.pass_context
+def audio(ctx, help_recursive):
     """
     Text-to-speech utilities
 
@@ -28,25 +33,13 @@ def audio():
       scitex audio backends              # List available backends
       scitex audio check                 # Check audio status (WSL)
     """
-    pass
+    if help_recursive:
+        from . import print_help_recursive
 
-
-@audio.command("help-recursive")
-@click.pass_context
-def help_recursive(ctx):
-    """Show help for all commands recursively."""
-    fake_parent = click.Context(click.Group(), info_name="scitex")
-    parent_ctx = click.Context(audio, info_name="audio", parent=fake_parent)
-    click.secho("━━━ scitex audio ━━━", fg="cyan", bold=True)
-    click.echo(audio.get_help(parent_ctx))
-    for name in sorted(audio.list_commands(ctx) or []):
-        cmd = audio.get_command(ctx, name)
-        if cmd is None or name == "help-recursive":
-            continue
-        click.echo()
-        click.secho(f"━━━ scitex audio {name} ━━━", fg="cyan", bold=True)
-        with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
-            click.echo(cmd.get_help(sub_ctx))
+        print_help_recursive(ctx, audio)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
 @audio.command()

@@ -36,6 +36,37 @@ def _get_audio_dir() -> Path:
     return audio_dir
 
 
+def _get_signature() -> str:
+    """Get signature string with hostname, project, and branch."""
+    import os
+    import socket
+    import subprocess
+
+    hostname = socket.gethostname()
+    cwd = os.getcwd()
+    project = os.path.basename(cwd)
+
+    branch = None
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            cwd=cwd,
+            timeout=5,
+        )
+        if result.returncode == 0:
+            branch = result.stdout.strip()
+    except Exception:
+        pass
+
+    parts = [f"Hostname: {hostname}", f"Project: {project}"]
+    if branch:
+        parts.append(f"Branch: {branch}")
+
+    return ". ".join(parts) + ". "
+
+
 async def generate_audio_handler(
     text: str,
     backend: str | None = None,
@@ -89,16 +120,16 @@ async def generate_audio_handler(
 async def list_backends_handler() -> dict:
     """List available TTS backends."""
     try:
-        from .. import available_backends
+        from .. import FALLBACK_ORDER, available_backends
 
         backends = available_backends()
 
         info = []
-        for b in ["gtts", "elevenlabs", "pyttsx3"]:
+        for b in FALLBACK_ORDER:
             available = b in backends
             desc = {
-                "gtts": "Google TTS - Free, requires internet",
                 "elevenlabs": "ElevenLabs - Paid, high quality",
+                "gtts": "Google TTS - Free, requires internet",
                 "pyttsx3": "System TTS - Offline, uses espeak/SAPI5",
             }
             info.append(
@@ -109,11 +140,18 @@ async def list_backends_handler() -> dict:
                 }
             )
 
+        # Determine actual default based on FALLBACK_ORDER
+        default = None
+        for b in FALLBACK_ORDER:
+            if b in backends:
+                default = b
+                break
+
         return {
             "success": True,
             "backends": info,
             "available": backends,
-            "default": backends[0] if backends else None,
+            "default": default,
         }
 
     except Exception as e:
@@ -267,12 +305,24 @@ async def speak_handler(
     fallback: bool = True,
     agent_id: str | None = None,
     wait: bool = True,
+    signature: bool = False,
 ) -> dict:
-    """Convert text to speech with fallback."""
+    """Convert text to speech with fallback.
+
+    Args:
+        signature: If True, prepend hostname/project/branch to text.
+    """
     try:
         from .. import speak as tts_speak
 
         loop = asyncio.get_event_loop()
+
+        # Prepend signature if requested
+        final_text = text
+        sig = None
+        if signature:
+            sig = _get_signature()
+            final_text = sig + text
 
         output_path = None
         if save:
@@ -281,7 +331,7 @@ async def speak_handler(
 
         def do_speak():
             return tts_speak(
-                text=text,
+                text=final_text,
                 backend=backend,
                 voice=voice,
                 rate=rate,
@@ -300,6 +350,9 @@ async def speak_handler(
             "played": play,
             "timestamp": datetime.now().isoformat(),
         }
+        if signature:
+            result["signature"] = sig
+            result["full_text"] = final_text
         if result_path:
             result["path"] = str(result_path)
 

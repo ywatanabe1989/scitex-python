@@ -400,6 +400,7 @@ plt = [
     "pyyaml",
     "joblib",
     "ruamel.yaml",
+    "figrecipe>=0.16.0",
 ]
 
 # Repro Module - Reproducibility tools
@@ -769,7 +770,7 @@ all = [
     "tensorpac",
     "ripple_detection",
     # figures
-    "figrecipe",
+    "figrecipe>=0.16.0",
     # jupyter
     "jupyterlab",
     "jupyter-collaboration",

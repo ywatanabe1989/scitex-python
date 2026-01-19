@@ -28,6 +28,7 @@ def register_audio_tools(mcp) -> None:
         fallback: bool = True,
         agent_id: Optional[str] = None,
         wait: bool = True,
+        signature: bool = False,
     ) -> str:
         """[audio] Convert text to speech with fallback (pyttsx3 -> gtts -> elevenlabs)."""
         from scitex.audio._mcp.handlers import speak_handler
@@ -43,6 +44,7 @@ def register_audio_tools(mcp) -> None:
             fallback=fallback,
             agent_id=agent_id,
             wait=wait,
+            signature=signature,
         )
         return _json(result)
 

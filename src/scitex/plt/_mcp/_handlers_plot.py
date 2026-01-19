@@ -168,14 +168,14 @@ async def plot_box_handler(
 ) -> dict:
     """Create a box plot on specified panel."""
     try:
+        from scitex.plt.ax import style_boxplot
+
         fig, ax, fid = _get_axes(figure_id, panel)
 
         bp = ax.boxplot(data, patch_artist=True, widths=0.6)
 
-        if colors is None:
-            colors = ["#007fbf", "#ff4433", "#14b514", "#c633ff", "#e25e33"]
-        for i, box in enumerate(bp["boxes"]):
-            box.set_facecolor(colors[i % len(colors)])
+        # Apply SCITEX styling (0.2mm lines, black edges) from SCITEX_STYLE.yaml
+        style_boxplot(bp, colors=colors)
 
         if labels:
             ax.set_xticklabels(labels)

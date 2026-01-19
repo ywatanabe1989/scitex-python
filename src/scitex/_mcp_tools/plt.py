@@ -1,350 +1,362 @@
 #!/usr/bin/env python3
-# Timestamp: 2026-01-15
+# Timestamp: 2026-01-20
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/_mcp_tools/plt.py
-"""Plt module tools for FastMCP unified server."""
+"""Plt module tools - delegates to figrecipe public API.
+
+This module registers figrecipe's functionality under scitex's unified MCP server
+with [plt] prefix for consistency with other scitex modules.
+"""
 
 from __future__ import annotations
 
-import json
-from typing import Optional
-
-
-def _json(data: dict) -> str:
-    return json.dumps(data, indent=2, default=str)
+import os
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def register_plt_tools(mcp) -> None:
-    """Register plt tools with FastMCP server."""
+    """Register plt tools by delegating to figrecipe's public API."""
+    # Ensure branding is set before any figrecipe imports
+    os.environ.setdefault("FIGRECIPE_BRAND", "scitex.plt")
+    os.environ.setdefault("FIGRECIPE_ALIAS", "plt")
 
-    # Style tools
+    # Check if figrecipe is available
+    try:
+        import figrecipe as fr
+
+        _FIGRECIPE_AVAILABLE = True
+    except ImportError:
+        _FIGRECIPE_AVAILABLE = False
+        fr = None
+
+    if not _FIGRECIPE_AVAILABLE:
+
+        @mcp.tool()
+        def plt_not_available() -> str:
+            """[plt] figrecipe not installed."""
+            return "figrecipe is required. Install with: pip install figrecipe"
+
+        return
+
+    # Re-register figrecipe tools with [plt] prefix
     @mcp.tool()
-    async def plt_get_style() -> str:
-        """[plt] Get current SciTeX publication style configuration."""
-        from scitex.plt._mcp._handlers_style import get_style_handler
+    def plt_plot(
+        spec: Dict[str, Any],
+        output_path: str,
+        dpi: int = 300,
+        save_recipe: bool = True,
+    ) -> Dict[str, Any]:
+        """[plt] Create a matplotlib figure from a declarative specification.
 
-        result = await get_style_handler()
-        return _json(result)
+        See figrecipe._api._plot module docstring for full spec format.
 
-    @mcp.tool()
-    async def plt_set_style(
-        axes_width_mm: Optional[float] = None,
-        axes_height_mm: Optional[float] = None,
-        margin_left_mm: Optional[float] = None,
-        margin_right_mm: Optional[float] = None,
-        margin_top_mm: Optional[float] = None,
-        margin_bottom_mm: Optional[float] = None,
-        dpi: Optional[int] = None,
-        title_font_size_pt: Optional[float] = None,
-        axis_font_size_pt: Optional[float] = None,
-        tick_font_size_pt: Optional[float] = None,
-        legend_font_size_pt: Optional[float] = None,
-        trace_thickness_mm: Optional[float] = None,
-        reset: Optional[bool] = None,
-    ) -> str:
-        """[plt] Set global style overrides for publication figures."""
-        from scitex.plt._mcp._handlers_style import set_style_handler
+        Parameters
+        ----------
+        spec : dict
+            Declarative specification. Key sections: figure, plots, stat_annotations,
+            xlabel, ylabel, title, legend, xlim, ylim.
+        output_path : str
+            Path to save the output figure.
+        dpi : int
+            DPI for raster output (default: 300).
+        save_recipe : bool
+            If True, also save as figrecipe YAML recipe.
 
-        result = await set_style_handler(
-            axes_width_mm=axes_width_mm,
-            axes_height_mm=axes_height_mm,
-            margin_left_mm=margin_left_mm,
-            margin_right_mm=margin_right_mm,
-            margin_top_mm=margin_top_mm,
-            margin_bottom_mm=margin_bottom_mm,
+        Returns
+        -------
+        dict
+            Result with 'image_path' and 'recipe_path'.
+
+        Raises
+        ------
+        ValueError
+            If no plots are specified or data is missing.
+        """
+        from figrecipe._api._plot import create_figure_from_spec
+
+        # Validate spec has plots with data
+        plots = spec.get("plots", [])
+        axes_specs = spec.get("axes") or spec.get("subplots", [])
+        if not plots and not axes_specs:
+            raise ValueError(
+                "No plots specified in spec. Add 'plots' or 'axes' section."
+            )
+        for i, p in enumerate(plots):
+            if not (p.get("x") or p.get("y") or p.get("data") or p.get("z")):
+                raise ValueError(f"Plot {i} has no data (x, y, data, or z required)")
+
+        result = create_figure_from_spec(
+            spec=spec,
+            output_path=output_path,
             dpi=dpi,
-            title_font_size_pt=title_font_size_pt,
-            axis_font_size_pt=axis_font_size_pt,
-            tick_font_size_pt=tick_font_size_pt,
-            legend_font_size_pt=legend_font_size_pt,
-            trace_thickness_mm=trace_thickness_mm,
-            reset=reset,
+            save_recipe=save_recipe,
+            show=False,
         )
-        return _json(result)
+
+        return {
+            "image_path": str(result["image_path"]) if result["image_path"] else None,
+            "recipe_path": str(result["recipe_path"])
+            if result.get("recipe_path")
+            else None,
+            "success": True,
+        }
 
     @mcp.tool()
-    async def plt_list_presets() -> str:
-        """[plt] List available publication style presets."""
-        from scitex.plt._mcp._handlers_style import list_presets_handler
+    def plt_reproduce(
+        recipe_path: str,
+        output_path: Optional[str] = None,
+        format: str = "png",
+        dpi: int = 300,
+    ) -> Dict[str, Any]:
+        """[plt] Reproduce a figure from a saved YAML recipe.
 
-        result = await list_presets_handler()
-        return _json(result)
+        Parameters
+        ----------
+        recipe_path : str
+            Path to the .yaml recipe file.
+
+        output_path : str, optional
+            Output path for the reproduced figure.
+            Defaults to recipe_path with .reproduced.{format} suffix.
+
+        format : str
+            Output format: png, pdf, or svg.
+
+        dpi : int
+            DPI for raster output.
+
+        Returns
+        -------
+        dict
+            Result with 'output_path' and 'success'.
+        """
+        from pathlib import Path
+
+        fig, axes = fr.reproduce(recipe_path)
+
+        # Determine output path
+        if output_path is None:
+            recipe_p = Path(recipe_path)
+            output_path = str(recipe_p.with_suffix(f".reproduced.{format}"))
+
+        fig.savefig(output_path, dpi=dpi, format=format)
+        import matplotlib.pyplot as plt
+
+        plt.close(fig)
+
+        return {"output_path": str(output_path), "success": True}
 
     @mcp.tool()
-    async def plt_get_dpi_settings() -> str:
-        """[plt] Get DPI settings for different output contexts."""
-        from scitex.plt._mcp._handlers_style import get_dpi_settings_handler
+    def plt_compose(
+        sources: List[str],
+        output_path: str,
+        layout: str = "horizontal",
+        gap_mm: float = 5.0,
+        dpi: int = 300,
+        panel_labels: bool = True,
+        label_style: str = "uppercase",
+        caption: Optional[str] = None,
+        create_symlinks: bool = True,
+        canvas_size_mm: Optional[Tuple[float, float]] = None,
+    ) -> Dict[str, Any]:
+        """[plt] Compose multiple figures into a single figure with panel labels.
 
-        result = await get_dpi_settings_handler()
-        return _json(result)
+        Supports two modes:
+        1. Grid-based layout (list sources): automatic arrangement with layout parameter
+        2. Free-form positioning (dict sources): precise mm-based positioning
 
-    @mcp.tool()
-    async def plt_get_color_palette(format: str = "hex") -> str:
-        """[plt] Get the SciTeX color palette for consistent figure colors."""
-        from scitex.plt._mcp._handlers_style import get_color_palette_handler
+        Parameters
+        ----------
+        sources : list of str or dict
+            Either:
+            - List of paths to source images or recipe files (grid-based layout)
+            - Dict mapping source paths to positioning specs with 'xy_mm' and 'size_mm':
+              {"panel_a.yaml": {"xy_mm": [0, 0], "size_mm": [80, 50]}, ...}
+        output_path : str
+            Path to save the composed figure.
+        layout : str
+            Layout mode for list sources: 'horizontal', 'vertical', or 'grid'.
+            Ignored when using dict sources with mm positioning.
+        gap_mm : float
+            Gap between panels in millimeters (for grid-based layout only).
+        dpi : int
+            DPI for output.
+        panel_labels : bool
+            If True, add panel labels (A, B, C, D) automatically.
+        label_style : str
+            Style: 'uppercase' (A,B,C), 'lowercase' (a,b,c), 'numeric' (1,2,3).
+        caption : str, optional
+            Figure caption to add below.
+        create_symlinks : bool
+            If True (default), create symlinks to source files for traceability.
+        canvas_size_mm : tuple of (float, float), optional
+            Canvas size as (width_mm, height_mm) for free-form positioning.
+            Required when sources is a dict with mm positioning.
 
-        result = await get_color_palette_handler(format=format)
-        return _json(result)
+        Returns
+        -------
+        dict
+            Result with 'output_path', 'success', and 'sources_dir' (if symlinks created).
+        """
+        from figrecipe import compose_figures
 
-    # Figure tools
-    @mcp.tool()
-    async def plt_create_figure(
-        nrows: int = 1,
-        ncols: int = 1,
-        axes_width_mm: float = 40,
-        axes_height_mm: float = 28,
-        space_w_mm: Optional[float] = None,
-        space_h_mm: Optional[float] = None,
-    ) -> str:
-        """[plt] Create a multi-panel figure canvas with SciTeX style."""
-        from scitex.plt._mcp._handlers_figure import create_figure_handler
-
-        result = await create_figure_handler(
-            nrows=nrows,
-            ncols=ncols,
-            axes_width_mm=axes_width_mm,
-            axes_height_mm=axes_height_mm,
-            space_w_mm=space_w_mm,
-            space_h_mm=space_h_mm,
+        result = compose_figures(
+            sources=sources,
+            output_path=output_path,
+            layout=layout,
+            gap_mm=gap_mm,
+            dpi=dpi,
+            panel_labels=panel_labels,
+            label_style=label_style,
+            caption=caption,
+            create_symlinks=create_symlinks,
+            canvas_size_mm=canvas_size_mm,
         )
-        return _json(result)
+
+        return {
+            "output_path": str(result.get("output_path", output_path)),
+            "success": True,
+            "sources_dir": str(result.get("sources_dir"))
+            if result.get("sources_dir")
+            else None,
+        }
 
     @mcp.tool()
-    async def plt_crop_figure(
+    def plt_info(recipe_path: str, verbose: bool = False) -> Dict[str, Any]:
+        """[plt] Get information about a recipe file.
+
+        Parameters
+        ----------
+        recipe_path : str
+            Path to the .yaml recipe file.
+
+        verbose : bool
+            If True, include detailed call information.
+
+        Returns
+        -------
+        dict
+            Recipe information including figure dimensions, call counts, etc.
+        """
+        return fr.info(recipe_path)
+
+    @mcp.tool()
+    def plt_validate(
+        recipe_path: str,
+        mse_threshold: float = 100.0,
+    ) -> Dict[str, Any]:
+        """[plt] Validate that a recipe can reproduce its original figure.
+
+        Parameters
+        ----------
+        recipe_path : str
+            Path to the .yaml recipe file.
+
+        mse_threshold : float
+            Maximum acceptable mean squared error (default: 100).
+
+        Returns
+        -------
+        dict
+            Validation result with 'passed', 'mse', and details.
+        """
+        result = fr.validate(recipe_path, mse_threshold=mse_threshold)
+
+        return {
+            "valid": result.valid,
+            "mse": result.mse,
+            "message": result.message,
+            "recipe_path": str(recipe_path),
+        }
+
+    @mcp.tool()
+    def plt_crop(
         input_path: str,
         output_path: Optional[str] = None,
-        margin: int = 12,
+        margin_mm: float = 1.0,
         overwrite: bool = False,
-    ) -> str:
-        """[plt] Auto-crop whitespace from a saved figure image."""
-        from scitex.plt._mcp._handlers_figure import crop_figure_handler
+    ) -> Dict[str, Any]:
+        """[plt] Crop whitespace from a figure image.
 
-        result = await crop_figure_handler(
-            input_path=input_path,
+        Parameters
+        ----------
+        input_path : str
+            Path to the input image.
+
+        output_path : str, optional
+            Path for cropped output. Defaults to input with .cropped suffix.
+
+        margin_mm : float
+            Margin to keep around content in millimeters.
+
+        overwrite : bool
+            If True, overwrite the input file.
+
+        Returns
+        -------
+        dict
+            Result with 'output_path' and 'success'.
+        """
+        result_path = fr.crop(
+            input_path,
             output_path=output_path,
-            margin=margin,
+            margin_mm=margin_mm,
             overwrite=overwrite,
         )
-        return _json(result)
+
+        return {"output_path": str(result_path), "success": True}
 
     @mcp.tool()
-    async def plt_save_figure(
-        output_path: str,
-        figure_id: Optional[str] = None,
-        dpi: int = 300,
-        crop: bool = True,
-    ) -> str:
-        """[plt] Save the current figure to file."""
-        from scitex.plt._mcp._handlers_figure import save_figure_handler
+    def plt_extract_data(recipe_path: str) -> Dict[str, Dict[str, Any]]:
+        """[plt] Extract plotted data arrays from a saved recipe.
 
-        result = await save_figure_handler(
-            output_path=output_path,
-            figure_id=figure_id,
-            dpi=dpi,
-            crop=crop,
-        )
-        return _json(result)
+        Parameters
+        ----------
+        recipe_path : str
+            Path to the .yaml recipe file.
+
+        Returns
+        -------
+        dict
+            Nested dict: {call_id: {'x': list, 'y': list, ...}}
+        """
+        return fr.extract_data(recipe_path)
 
     @mcp.tool()
-    async def plt_close_figure(figure_id: Optional[str] = None) -> str:
-        """[plt] Close a figure and free memory."""
-        from scitex.plt._mcp._handlers_figure import close_figure_handler
+    def plt_list_styles() -> Dict[str, Any]:
+        """[plt] List available figure style presets.
 
-        result = await close_figure_handler(figure_id=figure_id)
-        return _json(result)
-
-    # Plot tools
-    @mcp.tool()
-    async def plt_plot_bar(
-        x: list,
-        y: list,
-        yerr: Optional[list] = None,
-        colors: Optional[list] = None,
-        xlabel: Optional[str] = None,
-        ylabel: Optional[str] = None,
-        title: Optional[str] = None,
-        panel: str = "0,0",
-        figure_id: Optional[str] = None,
-    ) -> str:
-        """[plt] Create a bar plot on specified panel."""
-        from scitex.plt._mcp._handlers_plot import plot_bar_handler
-
-        result = await plot_bar_handler(
-            x=x,
-            y=y,
-            yerr=yerr,
-            colors=colors,
-            xlabel=xlabel,
-            ylabel=ylabel,
-            title=title,
-            panel=panel,
-            figure_id=figure_id,
-        )
-        return _json(result)
+        Returns
+        -------
+        dict
+            Dictionary with 'presets' list of available style names.
+        """
+        presets = fr.list_presets()
+        return {"presets": presets, "success": True}
 
     @mcp.tool()
-    async def plt_plot_scatter(
-        x: list,
-        y: list,
-        color: Optional[str] = None,
-        size: Optional[float] = None,
-        alpha: Optional[float] = None,
-        add_regression: bool = False,
-        xlabel: Optional[str] = None,
-        ylabel: Optional[str] = None,
-        title: Optional[str] = None,
-        panel: str = "0,0",
-        figure_id: Optional[str] = None,
-    ) -> str:
-        """[plt] Create a scatter plot on specified panel."""
-        from scitex.plt._mcp._handlers_plot import plot_scatter_handler
+    def plt_get_plot_types() -> Dict[str, Any]:
+        """[plt] Get list of supported plot types.
 
-        result = await plot_scatter_handler(
-            x=x,
-            y=y,
-            color=color,
-            size=size,
-            alpha=alpha,
-            add_regression=add_regression,
-            xlabel=xlabel,
-            ylabel=ylabel,
-            title=title,
-            panel=panel,
-            figure_id=figure_id,
-        )
-        return _json(result)
-
-    @mcp.tool()
-    async def plt_plot_line(
-        x: list,
-        y: list,
-        yerr: Optional[list] = None,
-        color: Optional[str] = None,
-        linestyle: str = "-",
-        label: Optional[str] = None,
-        xlabel: Optional[str] = None,
-        ylabel: Optional[str] = None,
-        title: Optional[str] = None,
-        panel: str = "0,0",
-        figure_id: Optional[str] = None,
-    ) -> str:
-        """[plt] Create a line plot on specified panel."""
-        from scitex.plt._mcp._handlers_plot import plot_line_handler
-
-        result = await plot_line_handler(
-            x=x,
-            y=y,
-            yerr=yerr,
-            color=color,
-            linestyle=linestyle,
-            label=label,
-            xlabel=xlabel,
-            ylabel=ylabel,
-            title=title,
-            panel=panel,
-            figure_id=figure_id,
-        )
-        return _json(result)
-
-    @mcp.tool()
-    async def plt_plot_box(
-        data: list,
-        labels: Optional[list] = None,
-        colors: Optional[list] = None,
-        xlabel: Optional[str] = None,
-        ylabel: Optional[str] = None,
-        title: Optional[str] = None,
-        panel: str = "0,0",
-        figure_id: Optional[str] = None,
-    ) -> str:
-        """[plt] Create a box plot on specified panel."""
-        from scitex.plt._mcp._handlers_plot import plot_box_handler
-
-        result = await plot_box_handler(
-            data=data,
-            labels=labels,
-            colors=colors,
-            xlabel=xlabel,
-            ylabel=ylabel,
-            title=title,
-            panel=panel,
-            figure_id=figure_id,
-        )
-        return _json(result)
-
-    @mcp.tool()
-    async def plt_plot_violin(
-        data: list,
-        labels: Optional[list] = None,
-        colors: Optional[list] = None,
-        xlabel: Optional[str] = None,
-        ylabel: Optional[str] = None,
-        title: Optional[str] = None,
-        panel: str = "0,0",
-        figure_id: Optional[str] = None,
-    ) -> str:
-        """[plt] Create a violin plot on specified panel."""
-        from scitex.plt._mcp._handlers_plot import plot_violin_handler
-
-        result = await plot_violin_handler(
-            data=data,
-            labels=labels,
-            colors=colors,
-            xlabel=xlabel,
-            ylabel=ylabel,
-            title=title,
-            panel=panel,
-            figure_id=figure_id,
-        )
-        return _json(result)
-
-    # Annotation tools
-    @mcp.tool()
-    async def plt_add_significance(
-        x1: float,
-        x2: float,
-        y: float,
-        text: str,
-        height: Optional[float] = None,
-        panel: str = "0,0",
-        figure_id: Optional[str] = None,
-    ) -> str:
-        """[plt] Add significance bracket between two groups."""
-        from scitex.plt._mcp._handlers_annotation import add_significance_handler
-
-        result = await add_significance_handler(
-            x1=x1,
-            x2=x2,
-            y=y,
-            text=text,
-            height=height,
-            panel=panel,
-            figure_id=figure_id,
-        )
-        return _json(result)
-
-    @mcp.tool()
-    async def plt_add_panel_label(
-        label: str,
-        x: float = -0.15,
-        y: float = 1.1,
-        fontsize: float = 10,
-        fontweight: str = "bold",
-        panel: str = "0,0",
-        figure_id: Optional[str] = None,
-    ) -> str:
-        """[plt] Add panel label (A, B, C, etc.) to a panel."""
-        from scitex.plt._mcp._handlers_annotation import add_panel_label_handler
-
-        result = await add_panel_label_handler(
-            label=label,
-            x=x,
-            y=y,
-            fontsize=fontsize,
-            fontweight=fontweight,
-            panel=panel,
-            figure_id=figure_id,
-        )
-        return _json(result)
+        Returns
+        -------
+        dict
+            Dictionary with 'plot_types' and their descriptions.
+        """
+        # figrecipe supports these plot types via spec
+        plot_types = {
+            "line": "Line plot with optional error bars",
+            "scatter": "Scatter plot with optional regression line",
+            "bar": "Bar chart with optional error bars",
+            "box": "Box plot for distribution visualization",
+            "violin": "Violin plot for distribution visualization",
+            "hist": "Histogram for distribution",
+            "heatmap": "Heatmap/image plot",
+            "contour": "Contour plot",
+            "errorbar": "Error bar plot",
+            "fill_between": "Filled area between curves",
+            "imshow": "Image display",
+        }
+        return {"plot_types": plot_types, "success": True}
 
 
 # EOF

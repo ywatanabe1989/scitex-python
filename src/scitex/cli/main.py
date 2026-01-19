@@ -28,36 +28,36 @@ from . import (
 )
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=True,
+)
 @click.version_option()
-def cli():
+@click.option("--help-recursive", is_flag=True, help="Show help for all commands")
+@click.pass_context
+def cli(ctx, help_recursive):
     """
     SciTeX - Integrated Scientific Research Platform
 
     \b
     Examples:
-      scitex config list                    # Show all configured paths
-      scitex config init                    # Initialize directories
-      scitex cloud login
-      scitex cloud clone ywatanabe/my-project
-      scitex scholar bibtex papers.bib --project myresearch
-      scitex scholar single --doi "10.1038/nature12373"
-      scitex security check --save
-      scitex web get-urls https://example.com
-      scitex web download-images https://example.com --output ./downloads
-      scitex audio speak "Hello world"
-      scitex capture snap --output screenshot.jpg
-      scitex resource usage
-      scitex stats recommend --data data.csv
-      scitex mcp list                       # List all MCP tools
-      scitex mcp serve                      # Start MCP server
+      scitex config list                    # Show configured paths
+      scitex cloud clone user/project       # Clone from cloud
+      scitex scholar bibtex papers.bib      # Manage papers
+      scitex audio speak "Hello"            # Text-to-speech
+      scitex mcp list-tools                 # List MCP tools
+      scitex mcp start                      # Start MCP server
 
     \b
     Enable tab-completion:
       scitex completion          # Auto-install for your shell
       scitex completion --show   # Show installation instructions
     """
-    pass
+    if help_recursive:
+        _print_help_recursive(ctx)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
 # Add command groups
@@ -93,10 +93,8 @@ def _get_all_command_paths(group, prefix=""):
     return paths
 
 
-@cli.command("help-recursive")
-@click.pass_context
-def help_recursive(ctx):
-    """Show help for all commands recursively."""
+def _print_help_recursive(ctx):
+    """Print help for all commands recursively."""
     # Show main CLI help first
     click.secho("━━━ scitex ━━━", fg="cyan", bold=True)
     click.echo(cli.get_help(ctx))

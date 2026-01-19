@@ -13,23 +13,26 @@ Commands:
 import click
 
 
-@click.group()
-def mcp():
+@click.group(invoke_without_command=True)
+@click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
+@click.pass_context
+def mcp(ctx, help_recursive):
     """
     MCP (Model Context Protocol) server management.
 
     \b
     Examples:
-      scitex mcp list                    # List all tools
-      scitex mcp list --module audio     # List audio tools only
-      scitex mcp doctor                  # Check server health
-      scitex mcp serve                   # Start stdio server
-      scitex mcp serve -t sse -p 8085    # Start SSE server
+      scitex mcp list-tools    # List all tools
+      scitex mcp start         # Start MCP server
     """
-    pass
+    if help_recursive:
+        _print_help_recursive(ctx)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
-@mcp.command("list")
+@mcp.command("list-tools")
 @click.option(
     "--module",
     "-m",
@@ -44,9 +47,8 @@ def list_tools(module: str, as_json: bool):
 
     \b
     Examples:
-      scitex mcp list                    # List all 106 tools
-      scitex mcp list --module audio     # List audio tools only
-      scitex mcp list --json             # Output as JSON
+      scitex mcp list-tools
+      scitex mcp list-tools --module audio
     """
     try:
         from scitex.mcp_server import FASTMCP_AVAILABLE
@@ -268,11 +270,8 @@ def doctor(verbose: bool):
     raise SystemExit(1 if issues else 0)
 
 
-@mcp.command("help-recursive")
-@click.pass_context
-def help_recursive(ctx):
-    """Show help for all MCP commands recursively."""
-    # Create a fake parent context to show "scitex mcp" in Usage
+def _print_help_recursive(ctx):
+    """Print help for mcp and all its subcommands."""
     fake_parent = click.Context(click.Group(), info_name="scitex")
     parent_ctx = click.Context(mcp, info_name="mcp", parent=fake_parent)
 
@@ -289,7 +288,7 @@ def help_recursive(ctx):
             click.echo(cmd.get_help(sub_ctx))
 
 
-@mcp.command("serve")
+@mcp.command("start")
 @click.option(
     "--transport",
     "-t",
@@ -301,27 +300,14 @@ def help_recursive(ctx):
 @click.option(
     "--port", "-p", default=8085, type=int, help="Port to bind (default: 8085)"
 )
-def serve(transport: str, host: str, port: int):
+def start(transport: str, host: str, port: int):
     """
     Start the unified MCP server.
 
     \b
-    Transport types:
-      stdio  - Standard I/O (for Claude Desktop)
-      sse    - Server-Sent Events (for remote via SSH)
-      http   - HTTP streamable (for web clients)
-
-    \b
     Examples:
-      scitex mcp serve                      # Start stdio server
-      scitex mcp serve -t sse -p 8085       # Start SSE server
-      scitex mcp serve -t http -p 8085      # Start HTTP server
-
-    \b
-    Remote Setup (SSE):
-      1. Local:  scitex mcp serve -t sse -p 8085
-      2. SSH:    ssh -R 8085:localhost:8085 remote-host
-      3. Config: {"type": "sse", "url": "http://localhost:8085/sse"}
+      scitex mcp start
+      scitex mcp start -t sse -p 8085
     """
     try:
         from scitex.mcp_server import run_server
@@ -331,6 +317,46 @@ def serve(transport: str, host: str, port: int):
         raise SystemExit(1)
 
     run_server(transport=transport, host=host, port=port)
+
+
+@mcp.command("installation")
+def installation():
+    """
+    Show Claude Desktop configuration for SciTeX MCP server.
+
+    \b
+    Examples:
+      scitex mcp installation
+    """
+    import shutil
+    import sys
+
+    from scitex import __version__
+
+    click.secho(f"SciTeX MCP Server v{__version__}", fg="cyan", bold=True)
+    click.echo()
+
+    # Get actual path
+    scitex_path = shutil.which("scitex")
+    python_path = sys.executable
+
+    if scitex_path:
+        click.echo(f"Your installation path: {scitex_path}")
+        click.echo(f"Your Python path: {python_path}")
+    click.echo()
+
+    click.secho("Claude Desktop Configuration:", fg="green", bold=True)
+    click.echo(
+        "Add to ~/Library/Application Support/Claude/claude_desktop_config.json (macOS)"
+    )
+    click.echo("or %APPDATA%\\Claude\\claude_desktop_config.json (Windows):")
+    click.echo()
+
+    config = f'''"scitex": {{
+  "command": "{scitex_path or "/path/to/.venv/bin/scitex"}",
+  "args": ["mcp", "start"]
+}}'''
+    click.secho(config, fg="yellow")
 
 
 # EOF

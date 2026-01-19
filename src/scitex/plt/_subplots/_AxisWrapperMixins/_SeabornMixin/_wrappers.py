@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-13 (ywatanabe)"
 # File: _wrappers.py - Seaborn plot wrappers
 
@@ -113,20 +112,16 @@ class SeabornWrappersMixin:
             "sns_boxplot", data=data, x=x, y=y, track=track, id=id, **kwargs
         )
 
-        # Post-processing: Style boxplot with black medians
+        # Post-processing: Style boxplot elements (0.2mm black lines)
         from scitex.plt.utils import mm_to_pt
 
         lw_pt = mm_to_pt(0.2)
-
         for line in self._axis_mpl.get_lines():
             line.set_linewidth(lw_pt)
-            xdata = line.get_xdata()
-            ydata = line.get_ydata()
-            if len(xdata) == 2 and len(ydata) == 2:
-                if ydata[0] == ydata[1]:
-                    x_span = abs(xdata[1] - xdata[0])
-                    if x_span < 0.4:
-                        line.set_color("black")
+            line.set_color("black")
+        for patch in self._axis_mpl.patches:
+            patch.set_linewidth(lw_pt)
+            patch.set_edgecolor("black")
 
         if strip:
             strip_kwargs = kwargs.copy()

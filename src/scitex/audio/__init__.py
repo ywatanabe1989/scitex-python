@@ -6,12 +6,12 @@
 """
 SciTeX Audio Module - Text-to-Speech with Multiple Backends
 
-Fallback order: pyttsx3 -> gtts -> elevenlabs
+Fallback order: elevenlabs -> gtts -> pyttsx3
 
 Backends:
-    - pyttsx3: System TTS (offline, free, uses espeak/SAPI5)
-    - gtts: Google TTS (free, requires internet)
     - elevenlabs: ElevenLabs (paid, high quality)
+    - gtts: Google TTS (free, requires internet)
+    - pyttsx3: System TTS (offline, free, uses espeak/SAPI5)
 
 Usage:
     import scitex
@@ -145,8 +145,8 @@ __all__ = [
     "FALLBACK_ORDER",
 ]
 
-# Fallback order: pyttsx3 (offline/free) -> gtts (free) -> elevenlabs (paid)
-FALLBACK_ORDER = ["pyttsx3", "gtts", "elevenlabs"]
+# Fallback order: elevenlabs (best quality) -> gtts (free) -> pyttsx3 (offline)
+FALLBACK_ORDER = ["elevenlabs", "gtts", "pyttsx3"]
 
 
 def available_backends() -> List[str]:
@@ -277,7 +277,7 @@ def speak(
 ) -> Optional[str]:
     """Convert text to speech with automatic fallback.
 
-    Fallback order: pyttsx3 -> gtts -> elevenlabs
+    Fallback order: elevenlabs -> gtts -> pyttsx3
 
     Args:
         text: Text to speak.

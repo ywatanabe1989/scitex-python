@@ -1,46 +1,200 @@
 #!/usr/bin/env python3
-# Timestamp: "2025-12-02 12:30:00 (ywatanabe)"
+# Timestamp: "2026-01-19 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/__init__.py
 # ----------------------------------------
+"""
+SciTeX plt module - Publication-quality plotting via figrecipe.
+
+This module provides a thin wrapper around figrecipe with scitex branding.
+Simply importing this module automatically configures matplotlib with
+SciTeX publication defaults.
+
+Usage
+-----
+>>> import scitex.plt as plt
+>>> fig, ax = plt.subplots()
+>>> ax.plot([1, 2, 3], [1, 4, 9])
+>>> plt.save(fig, "figure.png")
+
+Style Management
+----------------
+>>> plt.load_style("SCITEX")  # Load publication style
+>>> plt.STYLE  # Access current style configuration
+>>> plt.list_presets()  # Show available presets
+
+The module delegates to figrecipe for:
+- Recording and reproducing figures
+- Style management (mm-based layouts)
+- Figure composition
+- Graph visualization
+
+SciTeX-specific features (kept locally):
+- AxisWrapper/FigWrapper compatibility
+- Color palettes (scitex.plt.color)
+- Gallery utilities (scitex.plt.gallery)
+"""
+
 import os
 
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
-"""
-SciTeX plt module - Publication-quality plotting.
+# ============================================================================
+# Set branding environment variables BEFORE importing figrecipe
+# This enables automatic docstring replacement: figrecipe -> scitex.plt, fr -> plt
+# ============================================================================
+os.environ.setdefault("FIGRECIPE_BRAND", "scitex.plt")
+os.environ.setdefault("FIGRECIPE_ALIAS", "plt")
 
-Simply importing this module automatically configures matplotlib with
-SciTeX publication defaults from SCITEX_STYLE.yaml:
+# ============================================================================
+# Now import figrecipe (branding will be applied)
+# ============================================================================
+try:
+    import figrecipe as _fr
 
-    import scitex.plt as splt
-    fig, ax = splt.subplots()
-    ax.plot([1, 2, 3], [1, 4, 9])
-    fig.savefig("figure.png")
+    _FIGRECIPE_AVAILABLE = True
+except ImportError:
+    _FIGRECIPE_AVAILABLE = False
+    _fr = None
 
-No need to call scitex.session() or configure_mpl() - it's automatic.
-
-Style values can be customized by:
-1. Editing SCITEX_STYLE.yaml
-2. Setting environment variables (SCITEX_PLT_FONTS_AXIS_LABEL_PT=8)
-3. Passing parameters directly to subplots()
-"""
-
+# Standard library and matplotlib imports
 import matplotlib as mpl
 import matplotlib.font_manager as fm
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as _plt
 
 from scitex import logging as _logging
 
 _logger = _logging.getLogger(__name__)
 
-# =============================================================================
-# Auto-configure matplotlib with SciTeX style on import
-# =============================================================================
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
+
+# ============================================================================
+# Re-export figrecipe public API with scitex branding
+# ============================================================================
+if _FIGRECIPE_AVAILABLE:
+    # Core functions
+    from figrecipe import (
+        STYLE,
+        align_panels,
+        apply_style,
+        compose,
+        crop,
+        distribute_panels,
+        edit,
+        enable_svg,
+        extract_data,
+        get_graph_preset,
+        info,
+        list_graph_presets,
+        list_presets,
+        load_style,
+        register_graph_preset,
+        reproduce,
+        save,
+        smart_align,
+        sns,
+        subplots,
+        unload_style,
+        validate,
+    )
+    from figrecipe import (
+        __version__ as _figrecipe_version,
+    )
+
+    # Also export load as alias for reproduce
+    load = reproduce
+else:
+    # Provide stub versions when figrecipe is not available
+    _figrecipe_version = "0.0.0"
+
+    def _not_available(*args, **kwargs):
+        raise ImportError(
+            "figrecipe is required for this feature. Install with: pip install figrecipe"
+        )
+
+    STYLE = None
+    load_style = _not_available
+    unload_style = _not_available
+    list_presets = _not_available
+    apply_style = _not_available
+    subplots = _not_available
+    save = _not_available
+    reproduce = _not_available
+    load = _not_available
+    crop = _not_available
+    validate = _not_available
+    extract_data = _not_available
+    info = _not_available
+    edit = _not_available
+    compose = _not_available
+    align_panels = _not_available
+    distribute_panels = _not_available
+    smart_align = _not_available
+    sns = None
+    enable_svg = _not_available
+    get_graph_preset = _not_available
+    list_graph_presets = _not_available
+    register_graph_preset = _not_available
+
+# ============================================================================
+# Local scitex submodules (kept for compatibility)
+# ============================================================================
+try:
+    from ._tpl import termplot
+except ImportError:
+    termplot = None
+
+# Backward compatibility: expose styles submodule (deprecated, use figrecipe)
+from . import ax, color, gallery, styles, utils
+
+# Import draw_graph from figrecipe integration (handles AxisWrapper)
+from ._figrecipe_integration import draw_graph
+from .styles import presets
+
+# ============================================================================
+# Auto-configure matplotlib with SciTeX defaults on import
+# ============================================================================
+
+
+def _register_arial_fonts():
+    """Register Arial fonts if available."""
+    try:
+        fm.findfont("Arial", fallback_to_default=False)
+        return True
+    except Exception:
+        # Search for Arial font files and register them
+        arial_paths = [
+            f
+            for f in fm.findSystemFonts()
+            if os.path.basename(f).lower().startswith("arial")
+        ]
+
+        if arial_paths:
+            for path in arial_paths:
+                try:
+                    fm.fontManager.addfont(path)
+                except Exception:
+                    pass
+
+            # Verify Arial is now available
+            try:
+                fm.findfont("Arial", fallback_to_default=False)
+                return True
+            except Exception:
+                pass
+        return False
 
 
 def _auto_configure_mpl():
     """Apply SciTeX style configuration automatically on import."""
+    # Try to use figrecipe's style system first
+    if _FIGRECIPE_AVAILABLE:
+        try:
+            # Load SCITEX style preset from figrecipe
+            load_style("SCITEX")
+            return
+        except Exception:
+            pass
+
+    # Fallback: use local style loader
     from .styles import resolve_style_value
 
     # mm to pt conversion factor
@@ -111,32 +265,8 @@ def _auto_configure_mpl():
     mpl.rcParams.update(mpl_config)
 
 
-# Register Arial fonts eagerly (before style configuration)
-_arial_enabled = False
-try:
-    fm.findfont("Arial", fallback_to_default=False)
-    _arial_enabled = True
-except Exception:
-    # Search for Arial font files and register them
-    arial_paths = [
-        f
-        for f in fm.findSystemFonts()
-        if os.path.basename(f).lower().startswith("arial")
-    ]
-
-    if arial_paths:
-        for path in arial_paths:
-            try:
-                fm.fontManager.addfont(path)
-            except Exception:
-                pass
-
-        # Verify Arial is now available
-        try:
-            fm.findfont("Arial", fallback_to_default=False)
-            _arial_enabled = True
-        except Exception:
-            pass
+# Register Arial fonts eagerly
+_arial_enabled = _register_arial_fonts()
 
 # Configure font family
 if _arial_enabled:
@@ -165,458 +295,35 @@ _auto_configure_mpl()
 
 # Set up color cycle from scitex colors
 try:
-    from . import color as _color_module
-
     _rgba_norm_cycle = {
-        k: tuple(_color_module.update_alpha(v, 1.0))
-        for k, v in _color_module.PARAMS.get("RGBA_NORM_FOR_CYCLE", {}).items()
+        k: tuple(color.update_alpha(v, 1.0))
+        for k, v in color.PARAMS.get("RGBA_NORM_FOR_CYCLE", {}).items()
     }
     if _rgba_norm_cycle:
-        mpl.rcParams["axes.prop_cycle"] = plt.cycler(
+        mpl.rcParams["axes.prop_cycle"] = _plt.cycler(
             color=list(_rgba_norm_cycle.values())
         )
 except Exception:
     pass  # Use matplotlib default colors if color module fails
 
-try:
-    from ._tpl import termplot
-except ImportError:
-    termplot = None
-from . import ax, color, gallery, styles, utils
 
-# Figrecipe integration (graph visualization, editor)
-from ._figrecipe_integration import draw_graph, edit
-from .styles import presets
-
-# Lazy import for subplots to avoid circular dependencies
-# Note: Use names that don't conflict with submodule names like _subplots
-_subplots_func_cached = None
-_figure_func_cached = None
-_crop_func_cached = None
-
-
-def subplots(*args, **kwargs):
-    """Lazy-loaded subplots function."""
-    global _subplots_func_cached
-    if _subplots_func_cached is None:
-        from ._subplots._SubplotsWrapper import subplots as _subplots_impl
-
-        _subplots_func_cached = _subplots_impl
-    return _subplots_func_cached(*args, **kwargs)
+# ============================================================================
+# SciTeX-specific wrapper functions (for AxisWrapper/FigWrapper compatibility)
+# ============================================================================
 
 
 def figure(*args, **kwargs):
-    """Lazy-loaded figure function that returns a FigWrapper."""
-    global _figure_func_cached
-    if _figure_func_cached is None:
-        import matplotlib.pyplot as plt
+    """Create a figure that returns a FigWrapper.
 
-        from ._subplots._FigWrapper import FigWrapper
+    This is the scitex-specific figure function that creates FigWrapper
+    objects for compatibility with scitex.plt.ax utilities.
 
-        def _figure_impl(*args, **kwargs):
-            fig_mpl = plt.figure(*args, **kwargs)
-            return FigWrapper(fig_mpl)
-
-        _figure_func_cached = _figure_impl
-    return _figure_func_cached(*args, **kwargs)
-
-
-def crop(input_path, output_path=None, margin=12, overwrite=False, verbose=False):
+    For figrecipe-style recording figures, use subplots() instead.
     """
-    Auto-crop a figure to its content area.
+    from ._subplots._FigWrapper import FigWrapper
 
-    This function automatically detects the content area of a saved figure
-    and crops it, removing excess whitespace. Designed for publication figures
-    created with large margins.
-
-    Parameters
-    ----------
-    input_path : str
-        Path to the input image
-    output_path : str, optional
-        Path to save cropped image. If None and overwrite=True, overwrites input.
-        If None and overwrite=False, adds '_cropped' suffix.
-    margin : int, optional
-        Margin in pixels around content (default: 12, ~1mm at 300 DPI)
-    overwrite : bool, optional
-        Overwrite input file (default: False)
-    verbose : bool, optional
-        Print detailed information (default: False)
-
-    Returns
-    -------
-    str
-        Path to the saved cropped image
-
-    Examples
-    --------
-    >>> fig, ax = stx.plt.subplots(**stx.plt.presets.SCITEX_STYLE)
-    >>> ax.plot([1, 2, 3], [1, 2, 3])
-    >>> stx.io.save(fig, "figure.png")
-    >>> stx.plt.crop("figure.png", "figure_cropped.png")  # 1mm margin
-    """
-    global _crop_func_cached
-    if _crop_func_cached is None:
-        from .utils._crop import crop as _crop_impl
-
-        _crop_func_cached = _crop_impl
-    return _crop_func_cached(input_path, output_path, margin, overwrite, verbose)
-
-
-def load(path, apply_manual=True):
-    """
-    Load a figure from saved JSON + CSV files.
-
-    Parameters
-    ----------
-    path : str or Path
-        Path to JSON file, PNG file, or CSV file.
-        Will auto-detect sibling files in same directory or organized subdirectories.
-    apply_manual : bool, optional
-        If True, apply .manual.json overrides if exists (default: True)
-
-    Returns
-    -------
-    tuple
-        (fig, axes) where fig is FigWrapper and axes is AxisWrapper or array
-
-    Raises
-    ------
-    FileNotFoundError
-        If required JSON file is not found
-    ValueError
-        If manual.json hash doesn't match (stale manual edits)
-
-    Examples
-    --------
-    >>> # Load from JSON (sibling pattern)
-    >>> fig, axes = stx.plt.load("output/figure.json")
-
-    >>> # Load from PNG (finds sibling JSON + CSV)
-    >>> fig, axes = stx.plt.load("output/figure.png")
-
-    >>> # Load from organized directory pattern
-    >>> fig, axes = stx.plt.load("output/json/figure.json")
-
-    >>> # Skip manual overrides
-    >>> fig, axes = stx.plt.load("figure.json", apply_manual=False)
-
-    Notes
-    -----
-    Supports two directory patterns:
-
-    Pattern 1 (flat/sibling):
-        output/figure.png
-        output/figure.json
-        output/figure.csv
-
-    Pattern 2 (organized):
-        output/png/figure.png
-        output/json/figure.json
-        output/csv/figure.csv
-
-    Manual overrides (.manual.json) are applied if:
-    - apply_manual=True
-    - figure.manual.json exists alongside figure.json
-    - Hash validation passes (warns if stale)
-    """
-    import hashlib
-    from pathlib import Path
-
-    import scitex as stx
-
-    path = Path(path)
-
-    # Resolve JSON path from any input (png, csv, or json)
-    json_path, csv_path = _resolve_figure_paths(path)
-
-    if not json_path.exists():
-        raise FileNotFoundError(f"JSON file not found: {json_path}")
-
-    # Load JSON metadata
-    metadata = stx.io.load(json_path)
-
-    # Load CSV data if exists
-    csv_data = None
-    if csv_path and csv_path.exists():
-        csv_data = stx.io.load(csv_path)
-
-    # Check for manual overrides
-    manual_path = json_path.with_suffix(".manual.json")
-    manual_overrides = None
-    if apply_manual and manual_path.exists():
-        manual_data = stx.io.load(manual_path)
-
-        # Validate hash
-        if "base_hash" in manual_data:
-            current_hash = _compute_file_hash(json_path)
-            if manual_data["base_hash"] != current_hash:
-                _logger.warning(
-                    f"Manual overrides may be stale: base data changed since manual edits.\n"
-                    f"  Expected hash: {manual_data['base_hash'][:16]}...\n"
-                    f"  Current hash:  {current_hash[:16]}...\n"
-                    f"  Review: {manual_path}"
-                )
-        manual_overrides = manual_data.get("overrides", {})
-
-    # Reconstruct figure
-    fig, axes = _reconstruct_figure(metadata, csv_data, manual_overrides)
-
-    return fig, axes
-
-
-def _resolve_figure_paths(path):
-    """
-    Resolve JSON and CSV paths from any input file path.
-
-    Supports both flat (sibling) and organized (subdirectory) patterns.
-    """
-    from pathlib import Path
-
-    path = Path(path)
-    stem = path.stem
-    suffix = path.suffix.lower()
-    parent = path.parent
-
-    # Determine base name (remove .manual if present)
-    if stem.endswith(".manual"):
-        stem = stem[:-7]
-
-    json_path = None
-    csv_path = None
-
-    if suffix == ".json":
-        json_path = path
-        # Try sibling CSV first
-        csv_sibling = parent / f"{stem}.csv"
-        if csv_sibling.exists():
-            csv_path = csv_sibling
-        # Try organized pattern (../csv/)
-        elif parent.name == "json":
-            csv_organized = parent.parent / "csv" / f"{stem}.csv"
-            if csv_organized.exists():
-                csv_path = csv_organized
-
-    elif suffix in (".png", ".jpg", ".jpeg", ".pdf", ".svg"):
-        # Look for sibling JSON
-        json_sibling = parent / f"{stem}.json"
-        csv_sibling = parent / f"{stem}.csv"
-
-        if json_sibling.exists():
-            json_path = json_sibling
-            if csv_sibling.exists():
-                csv_path = csv_sibling
-        # Try organized pattern (parent has png/, look for json/)
-        elif parent.name in ("png", "jpg", "jpeg", "pdf", "svg"):
-            json_organized = parent.parent / "json" / f"{stem}.json"
-            csv_organized = parent.parent / "csv" / f"{stem}.csv"
-            if json_organized.exists():
-                json_path = json_organized
-            if csv_organized.exists():
-                csv_path = csv_organized
-
-    elif suffix == ".csv":
-        csv_path = path
-        # Try sibling JSON
-        json_sibling = parent / f"{stem}.json"
-        if json_sibling.exists():
-            json_path = json_sibling
-        # Try organized pattern (../json/)
-        elif parent.name == "csv":
-            json_organized = parent.parent / "json" / f"{stem}.json"
-            if json_organized.exists():
-                json_path = json_organized
-
-    # Fallback: assume it's the JSON path
-    if json_path is None:
-        json_path = path if suffix == ".json" else path.with_suffix(".json")
-
-    return json_path, csv_path
-
-
-def _compute_file_hash(path):
-    """Compute SHA256 hash of a file."""
-    import hashlib
-    from pathlib import Path
-
-    path = Path(path)
-    sha256 = hashlib.sha256()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(8192), b""):
-            sha256.update(chunk)
-    return f"sha256:{sha256.hexdigest()}"
-
-
-def _reconstruct_figure(metadata, csv_data, manual_overrides=None):
-    """
-    Reconstruct figure from metadata and CSV data.
-
-    Parameters
-    ----------
-    metadata : dict
-        JSON metadata from stx.io.save()
-    csv_data : DataFrame or None
-        CSV data with plot values
-    manual_overrides : dict or None
-        Manual style/annotation overrides
-
-    Returns
-    -------
-    tuple
-        (fig, axes)
-    """
-    import numpy as np
-
-    # Extract dimensions from metadata
-    dims = metadata.get("dimensions", {})
-    fig_size_mm = dims.get("figure_size_mm", [80, 68])
-    dpi = dims.get("dpi", 300)
-
-    # Get style from metadata
-    scitex_meta = metadata.get("scitex", {})
-    style_mm = scitex_meta.get("style_mm", {})
-
-    # Create figure with same dimensions
-    fig, axes = subplots(
-        axes_width_mm=style_mm.get(
-            "axes_width_mm", dims.get("axes_size_mm", [40, 28])[0]
-        ),
-        axes_height_mm=style_mm.get(
-            "axes_height_mm", dims.get("axes_size_mm", [40, 28])[1]
-        ),
-        dpi=dpi,
-    )
-
-    # Handle single vs multiple axes
-    ax = axes if not hasattr(axes, "flat") else list(axes.flat)[0]
-
-    # Set axis labels from metadata
-    axes_meta = metadata.get("axes", {})
-    x_meta = axes_meta.get("x", {})
-    y_meta = axes_meta.get("y", {})
-
-    xlabel = x_meta.get("label", "")
-    ylabel = y_meta.get("label", "")
-    x_unit = x_meta.get("unit", "")
-    y_unit = y_meta.get("unit", "")
-
-    if xlabel:
-        full_xlabel = f"{xlabel} [{x_unit}]" if x_unit else xlabel
-        ax.set_xlabel(full_xlabel)
-    if ylabel:
-        full_ylabel = f"{ylabel} [{y_unit}]" if y_unit else ylabel
-        ax.set_ylabel(full_ylabel)
-
-    # Reconstruct plots from CSV data
-    if csv_data is not None and not csv_data.empty:
-        _reconstruct_plots_from_csv(ax, csv_data, metadata)
-
-    # Apply manual overrides
-    if manual_overrides:
-        _apply_manual_overrides(fig, axes, manual_overrides)
-
-    return fig, axes
-
-
-def _reconstruct_plots_from_csv(ax, csv_data, metadata):
-    """
-    Reconstruct plot elements from CSV data.
-
-    CSV columns follow pattern: ax_00_<type>_<name>
-    """
-    import numpy as np
-    import pandas as pd
-
-    # Group columns by plot type
-    plot_type = metadata.get("plot_type", metadata.get("method", "line"))
-
-    # Parse column names to find plot data
-    columns = csv_data.columns.tolist()
-
-    # Find x/y data columns
-    x_cols = [c for c in columns if "_x" in c.lower() and "text" not in c.lower()]
-    y_cols = [c for c in columns if "_y" in c.lower() and "text" not in c.lower()]
-
-    if plot_type == "line" or plot_type == "plot":
-        # For line plots, look for paired x/y or just y with index
-        if x_cols and y_cols:
-            for x_col, y_col in zip(x_cols, y_cols):
-                x = csv_data[x_col].dropna().values
-                y = csv_data[y_col].dropna().values
-                if len(x) > 0 and len(y) > 0:
-                    ax.plot(x[: len(y)], y[: len(x)])
-        elif y_cols:
-            for y_col in y_cols:
-                y = csv_data[y_col].dropna().values
-                if len(y) > 0:
-                    ax.plot(y)
-
-    elif plot_type == "scatter":
-        if x_cols and y_cols:
-            x = csv_data[x_cols[0]].dropna().values
-            y = csv_data[y_cols[0]].dropna().values
-            ax.scatter(x[: min(len(x), len(y))], y[: min(len(x), len(y))])
-
-    # Add text annotations
-    text_cols = [c for c in columns if "text" in c.lower() and "content" in c.lower()]
-    for text_col in text_cols:
-        # Find corresponding x, y columns
-        prefix = text_col.rsplit("_content", 1)[0]
-        x_col = f"{prefix}_x"
-        y_col = f"{prefix}_y"
-
-        if x_col in columns and y_col in columns:
-            x_vals = csv_data[x_col].dropna()
-            y_vals = csv_data[y_col].dropna()
-            text_vals = csv_data[text_col].dropna()
-
-            for i in range(min(len(x_vals), len(y_vals), len(text_vals))):
-                ax.text(
-                    x_vals.iloc[i],
-                    y_vals.iloc[i],
-                    str(text_vals.iloc[i]),
-                    transform=ax.transAxes,
-                    fontsize=6,
-                    verticalalignment="top",
-                    horizontalalignment="right",
-                )
-
-
-def _apply_manual_overrides(fig, axes, overrides):
-    """
-    Apply manual style/annotation overrides to figure.
-
-    Parameters
-    ----------
-    fig : FigWrapper
-        Figure to modify
-    axes : AxisWrapper or array
-        Axes to modify
-    overrides : dict
-        Override specifications like {"axes[0].style.linewidth": 0.5}
-    """
-    # Simple override application - can be extended
-    for key, value in overrides.items():
-        # Parse key like "axes[0].title" or "style.linewidth"
-        parts = key.split(".")
-
-        if parts[0].startswith("axes["):
-            # Extract axis index
-            import re
-
-            match = re.match(r"axes\[(\d+)\]", parts[0])
-            if match:
-                idx = int(match.group(1))
-                ax = axes if not hasattr(axes, "flat") else list(axes.flat)[idx]
-
-                if len(parts) > 1:
-                    attr = parts[1]
-                    if attr == "title":
-                        ax.set_title(value)
-                    elif attr == "xlabel":
-                        ax.set_xlabel(value)
-                    elif attr == "ylabel":
-                        ax.set_ylabel(value)
+    fig_mpl = _plt.figure(*args, **kwargs)
+    return FigWrapper(fig_mpl)
 
 
 def tight_layout(**kwargs):
@@ -627,9 +334,6 @@ def tight_layout(**kwargs):
     1. UserWarning: "The figure layout has changed to tight" - informational only
     2. RuntimeError: Colorbar layout incompatibility - occurs when colorbars exist with old engine
 
-    When a colorbar layout error occurs, the function silently continues as the layout
-    is still functional even if the engine cannot be changed.
-
     Parameters
     ----------
     **kwargs
@@ -637,18 +341,14 @@ def tight_layout(**kwargs):
     """
     import warnings
 
-    import matplotlib.pyplot as plt
-
     with warnings.catch_warnings():
         warnings.filterwarnings(
             "ignore", message="The figure layout has changed to tight"
         )
         try:
-            plt.tight_layout(**kwargs)
+            _plt.tight_layout(**kwargs)
         except RuntimeError as e:
             # Silently handle colorbar layout engine incompatibility
-            # This occurs when colorbars were created before tight_layout is called
-            # The layout is still usable, so we can safely ignore this error
             if "Colorbar layout" not in str(e):
                 raise
 
@@ -664,12 +364,10 @@ def colorbar(mappable=None, cax=None, ax=None, **kwargs):
     ----------
     mappable : ScalarMappable, optional
         The image, contour set, etc. to which the colorbar applies.
-        If None, uses the current image.
     cax : Axes, optional
         Axes into which the colorbar will be drawn.
     ax : Axes or AxisWrapper or list thereof, optional
         Parent axes from which space for the colorbar will be stolen.
-        If None, uses current axes.
     **kwargs
         Additional keyword arguments passed to matplotlib.pyplot.colorbar()
 
@@ -678,8 +376,6 @@ def colorbar(mappable=None, cax=None, ax=None, **kwargs):
     Colorbar
         The created colorbar object
     """
-    import matplotlib.pyplot as plt
-
     # Unwrap ax if it's a SciTeX AxisWrapper
     if ax is not None:
         if hasattr(ax, "__iter__") and not isinstance(ax, str):
@@ -694,7 +390,7 @@ def colorbar(mappable=None, cax=None, ax=None, **kwargs):
         cax = cax._axis_mpl if hasattr(cax, "_axis_mpl") else cax
 
     # Call matplotlib's colorbar with unwrapped axes
-    return plt.colorbar(mappable=mappable, cax=cax, ax=ax, **kwargs)
+    return _plt.colorbar(mappable=mappable, cax=cax, ax=ax, **kwargs)
 
 
 def close(fig=None):
@@ -712,54 +408,72 @@ def close(fig=None):
         - Figure or FigWrapper: close the specified figure
         - int: close figure with that number
         - str: close figure with that label, or 'all' to close all figures
-
-    Examples
-    --------
-    >>> import scitex.plt as splt
-    >>> fig, ax = splt.subplots()
-    >>> ax.plot([1, 2, 3])
-    >>> splt.close(fig)  # Works with FigWrapper
-
-    >>> splt.close('all')  # Close all figures
-    >>> splt.close()  # Close current figure
-
-    See Also
-    --------
-    matplotlib.pyplot.close : Standard matplotlib close function
     """
-    import matplotlib.pyplot as plt
-
     if fig is None:
-        # Close current figure
-        plt.close()
+        _plt.close()
     elif isinstance(fig, (int, str)):
-        # Close by figure number or label (including 'all')
-        plt.close(fig)
+        _plt.close(fig)
     elif hasattr(fig, "_fig_mpl"):
         # FigWrapper object - unwrap and close
-        plt.close(fig._fig_mpl)
+        _plt.close(fig._fig_mpl)
     elif hasattr(fig, "figure"):
         # Alternative attribute name (backward compatibility)
-        plt.close(fig.figure)
+        _plt.close(fig.figure)
+    elif hasattr(fig, "fig"):
+        # figrecipe RecordingFigure - unwrap and close
+        _plt.close(fig.fig)
     else:
         # Assume it's a matplotlib Figure
-        plt.close(fig)
+        _plt.close(fig)
 
+
+# ============================================================================
+# Public API
+# ============================================================================
 
 __all__ = [
-    "close",
-    "color",
-    "colorbar",
-    "draw_graph",
-    "edit",
-    "figure",
-    "gallery",
-    "load",
-    "presets",
+    # Figrecipe core (re-exported with branding)
     "subplots",
-    "termplot",
+    "save",
+    "reproduce",
+    "load",  # Alias for reproduce
+    "crop",
+    "validate",
+    "extract_data",
+    "info",
+    "edit",
+    # Style management
+    "STYLE",
+    "load_style",
+    "unload_style",
+    "list_presets",
+    "apply_style",
+    # Composition
+    "compose",
+    "align_panels",
+    "distribute_panels",
+    "smart_align",
+    # Graph visualization
+    "draw_graph",
+    "get_graph_preset",
+    "list_graph_presets",
+    "register_graph_preset",
+    # Extensions
+    "sns",
+    "enable_svg",
+    # SciTeX-specific wrappers
+    "figure",
+    "colorbar",
+    "close",
     "tight_layout",
+    # Local submodules
+    "ax",
+    "color",
+    "gallery",
     "utils",
+    "styles",
+    "presets",
+    "termplot",
 ]
 
 
@@ -768,35 +482,19 @@ def __getattr__(name):
     Fallback to matplotlib.pyplot for any missing attributes.
     This makes scitex.plt a complete drop-in replacement for matplotlib.pyplot.
     """
-    try:
-        import matplotlib.pyplot as plt
-
-        if hasattr(plt, name):
-            return getattr(plt, name)
-        else:
-            raise AttributeError(f"module 'scitex.plt' has no attribute '{name}'")
-    except ImportError:
-        raise AttributeError(
-            f"module 'scitex.plt' has no attribute '{name}' (matplotlib not available)"
-        )
+    if hasattr(_plt, name):
+        return getattr(_plt, name)
+    raise AttributeError(f"module 'scitex.plt' has no attribute '{name}'")
 
 
 def __dir__():
     """
     Provide comprehensive directory listing including matplotlib.pyplot functions.
     """
-    # Get local attributes
-    local_attrs = __all__.copy()
-
+    local_attrs = list(__all__)
     # Add matplotlib.pyplot attributes
-    try:
-        import matplotlib.pyplot as plt
-
-        mpl_attrs = [attr for attr in dir(plt) if not attr.startswith("_")]
-        local_attrs.extend(mpl_attrs)
-    except ImportError:
-        pass
-
+    mpl_attrs = [attr for attr in dir(_plt) if not attr.startswith("_")]
+    local_attrs.extend(mpl_attrs)
     return sorted(set(local_attrs))
 
 
