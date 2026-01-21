@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-09 13:47:53
+!-- Timestamp: 2026-01-20 09:23:14
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
@@ -162,7 +162,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 mpl.rcParams["font.family"] = "Arial"
-mpl.rcParams["font.sans-serif"] = ["Arial"]  # 念のため
+mpl.rcParams["font.sans-serif"] = ["Arial"]  # Just in case
 
 fig, ax = plt.subplots(figsize=(3, 2))
 ax.text(0.5, 0.5, "Arial Test", fontsize=32, ha="center", va="center")
@@ -200,12 +200,12 @@ def main(
     logger=stx.INJECTED,        # Session logger
 ):
     """This docstring becomes --help description."""
-    
+
     stx.io.save(results, "results.csv", symlink_to="./data/")
     # SUCC: Saved to: /path/to/script_out/tmp.txt (4.0 B)
     # SUCC: Symlinked: /path/to/script_out/tmp.txt ->
     # SUCC:            ./data/tmp.txt
-    
+
     return 0
 ```
 
@@ -573,20 +573,20 @@ def setup_logging(log_dir):
     log_dir.mkdir(parents=True, exist_ok=True)
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-    
+
     stdout_handler = logging.FileHandler(log_dir / "stdout.log")
     stderr_handler = logging.FileHandler(log_dir / "stderr.log")
     console_handler = logging.StreamHandler(sys.stdout)
-    
+
     formatter = logging.Formatter('%(levelname)s: %(message)s')
     stdout_handler.setFormatter(formatter)
     stderr_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
-    
+
     logger.addHandler(stdout_handler)
     logger.addHandler(stderr_handler)
     logger.addHandler(console_handler)
-    
+
     return logger
 
 
@@ -594,14 +594,14 @@ def save_plot_data_to_csv(fig, output_path):
     """Extract and save plot data."""
     csv_path = output_path.with_suffix('.csv')
     data_lines = ["ax_00_plot_line_0_line_x,ax_00_plot_line_0_line_y"]
-    
+
     for ax in fig.get_axes():
         for line in ax.get_lines():
             x_data = line.get_xdata()
             y_data = line.get_ydata()
             for x, y in zip(x_data, y_data):
                 data_lines.append(f"{x},{y}")
-    
+
     csv_path.write_text('\n'.join(data_lines))
     return csv_path, csv_path.stat().st_size / 1024
 
@@ -609,7 +609,7 @@ def save_plot_data_to_csv(fig, output_path):
 def embed_metadata_in_image(image_path, metadata):
     """Embed metadata into image file."""
     img = Image.open(image_path)
-    
+
     if image_path.suffix.lower() in ['.png']:
         pnginfo = PngInfo()
         for key, value in metadata.items():
@@ -625,22 +625,22 @@ def save_figure(fig, output_path, metadata=None, symlink_to=None, logger=None):
     """Save figure with metadata and symlink."""
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     if metadata is None:
         metadata = {}
     metadata['url'] = 'https://scitex.ai'
-    
+
     if logger:
         logger.info(f"📝 Saving figure with metadata to: {output_path}")
         logger.info(f"  • Embedded metadata: {metadata}")
-    
+
     csv_path, csv_size = save_plot_data_to_csv(fig, output_path)
     if logger:
         logger.info(f"✅ Saved to: {csv_path} ({csv_size:.1f} KiB)")
-    
+
     fig.savefig(output_path, dpi=150, bbox_inches='tight')
     embed_metadata_in_image(output_path, metadata)
-    
+
     if symlink_to:
         symlink_dir = Path(symlink_to)
         symlink_dir.mkdir(parents=True, exist_ok=True)
@@ -653,21 +653,21 @@ def save_figure(fig, output_path, metadata=None, symlink_to=None, logger=None):
     def demo(output_dir, filename, verbose=False, logger=None):
     """Generate, plot, and save signal."""
     fig, ax = plt.subplots(figsize=(8, 6))
-    
+
     t = np.linspace(0, 2, 1000)
     signal = np.sin(2 * np.pi * 5 * t) * np.exp(-t / 2)
-    
+
     ax.plot(t, signal)
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Amplitude")
     ax.set_title("Damped Oscillation")
     ax.grid(True, alpha=0.3)
-    
+
     output_path = output_dir / filename
     save_figure(fig, output_path, metadata={"exp": "s01", "subj": "S001"},
                 symlink_to=output_dir.parent / "data", logger=logger)
     plt.close(fig)
-    
+
     return 0
 
 
@@ -677,16 +677,16 @@ def main():
     parser.add_argument('-f', '--filename', default='demo.jpg')
     parser.add_argument('-v', '--verbose', type=bool, default=True)
     args = parser.parse_args()
-    
+
     session_id = generate_session_id()
     script_path = Path(__file__).resolve()
     output_base = script_path.parent / (script_path.stem + "_out")
     running_dir = output_base / "RUNNING" / session_id
     logs_dir = running_dir / "logs"
     config_dir = running_dir / "CONFIGS"
-    
+
     logger = setup_logging(logs_dir)
-    
+
     print("=" * 40)
     print(f"Pure Python Demo")
     print(f"{session_id} (PID: {os.getpid()})")
@@ -695,7 +695,7 @@ def main():
     print(f"    filename: {args.filename}")
     print(f"    verbose: {args.verbose}")
     print("=" * 40)
-    
+
     config_dir.mkdir(parents=True, exist_ok=True)
     config_data = {
         'ID': session_id,
@@ -706,7 +706,7 @@ def main():
         'ARGS': vars(args)
     }
     (config_dir / "CONFIG.json").write_text(json.dumps(config_data, indent=2))
-    
+
     try:
         result = demo(output_base, args.filename, args.verbose, logger)
         success_dir = output_base / "FINISHED_SUCCESS" / session_id
