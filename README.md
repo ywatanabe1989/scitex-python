@@ -260,6 +260,16 @@ def main(filename="demo.jpg"):
     return 0
 ```
 
+**Output**:
+```
+script_out/FINISHED_SUCCESS/2025-01-08_12-30-00_AbC1/
+├── demo.jpg                    # Figure with embedded metadata
+├── demo.csv                    # Auto-exported plot data
+├── CONFIGS/CONFIG.yaml         # Reproducible parameters
+└── logs/{stdout,stderr}.log    # Execution logs
+data/demo.jpg -> ...            # Symlink for easy access
+```
+
 <details>
 <summary><strong>Equivalent without SciTeX: 188 lines</strong></summary>
 
