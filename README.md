@@ -27,6 +27,32 @@ Part of the fully open-source SciTeX project: https://scitex.ai
   <img src="https://img.shields.io/badge/uv-recommended-blue" alt="uv recommended">
 </p>
 
+## 🔧 MCP Tools (Claude Integration)
+
+SciTeX provides 108 MCP tools for AI assistant integration across 12 categories:
+
+| Category | Tools | Description |
+|----------|-------|-------------|
+| **plt** | 9 | Publication-ready figures with CSV data |
+| **stats** | 10 | Statistical analysis & power analysis |
+| **scholar** | 23 | Literature management & PDF download |
+| **audio** | 10 | Text-to-speech feedback |
+| **capture** | 12 | Screen capture & monitoring |
+| **diagram** | 7 | Mermaid & Graphviz diagrams |
+| **canvas** | 7 | Multi-panel figure composition |
+| **template** | 4 | Project templates |
+| **ui** | 5 | Desktop notifications |
+| **social** | 9 | Social media integration |
+| **introspect** | 11 | API exploration (like IPython's ?) |
+| **writer** | 1 | LaTeX manuscript guide |
+
+```bash
+scitex mcp list-tools             # List all 108 tools
+scitex serve                      # Start MCP server (stdio)
+scitex serve -t http --port 8085  # HTTP transport
+```
+
+
 <details>
 <summary><strong>Module Status - Tests & Installation</strong></summary>
 
