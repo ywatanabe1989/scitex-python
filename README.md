@@ -10,6 +10,16 @@ A Python framework for scientific research that makes the entire research pipeli
 
 Part of the fully open-source SciTeX project: https://scitex.ai
 
+## 🎬 Demo
+
+<p align="center">
+  <a href="https://scitex.ai/demos/watch/scitex-automated-research/">
+    <img src="docs/assets/images/scitex-demo.gif" alt="SciTeX Demo" width="800">
+  </a>
+  <br>
+  <a href="https://scitex.ai/demos/watch/scitex-automated-research/">▶ Watch Full Demo</a>
+</p>
+
 ## 📊 Status
 
 <!-- badges -->
