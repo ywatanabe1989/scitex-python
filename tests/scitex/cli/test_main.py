@@ -203,7 +203,7 @@ class TestCLISubcommandAccess:
         runner = CliRunner()
         result = runner.invoke(cli, ["scholar", "--help"])
         assert result.exit_code == 0
-        assert "Literature management" in result.output
+        assert "Scientific paper management" in result.output
 
     def test_security_subcommand_accessible(self):
         """Test that security subcommand is accessible."""
