@@ -136,58 +136,30 @@ def _get_rc_file(shell: str) -> str:
     return ""
 
 
-def _get_ecosystem_clis() -> list[dict]:
-    """Get info about SciTeX ecosystem CLIs."""
+def _generate_completion_script(shell: str) -> str:
+    """Generate completion script for scitex CLI."""
     import shutil
 
-    clis = [
-        {"name": "scitex", "type": "click", "env_var": "_SCITEX_COMPLETE"},
-        {"name": "figrecipe", "type": "click", "env_var": "_FIGRECIPE_COMPLETE"},
-        {
-            "name": "crossref-local",
-            "type": "click",
-            "env_var": "_CROSSREF_LOCAL_COMPLETE",
-        },
-        {"name": "socialia", "type": "argcomplete", "env_var": None},
-    ]
-    for cli_info in clis:
-        cli_info["available"] = shutil.which(cli_info["name"]) is not None
-    return clis
+    cli_path = shutil.which("scitex")
+    if not cli_path:
+        return ""
 
-
-def _generate_completion_lines(shell: str) -> list[str]:
-    """Generate completion lines for all ecosystem CLIs."""
-    import shutil
-
-    lines = ["# SciTeX ecosystem tab completion"]
-    clis = _get_ecosystem_clis()
-
-    for cli_info in clis:
-        if not cli_info["available"]:
-            continue
-
-        cli_path = shutil.which(cli_info["name"])
-        if cli_info["type"] == "click":
-            if shell == "bash":
-                lines.append(f'eval "$({cli_info["env_var"]}=bash_source {cli_path})"')
-            elif shell == "zsh":
-                lines.append(f'eval "$({cli_info["env_var"]}=zsh_source {cli_path})"')
-            elif shell == "fish":
-                lines.append(f"eval (env {cli_info['env_var']}=fish_source {cli_path})")
-        elif cli_info["type"] == "argcomplete":
-            if shell in ("bash", "zsh"):
-                lines.append(
-                    f'eval "$(register-python-argcomplete {cli_info["name"]})"'
-                )
-
-    return lines
+    if shell == "bash":
+        return f'# scitex tab completion\neval "$(_SCITEX_COMPLETE=bash_source {cli_path})"'
+    elif shell == "zsh":
+        return (
+            f'# scitex tab completion\neval "$(_SCITEX_COMPLETE=zsh_source {cli_path})"'
+        )
+    elif shell == "fish":
+        return f"# scitex tab completion\neval (env _SCITEX_COMPLETE=fish_source {cli_path})"
+    return ""
 
 
 @cli.group(invoke_without_command=True)
 @click.pass_context
 def completion(ctx):
     """
-    Shell completion for SciTeX ecosystem.
+    Shell completion for scitex CLI.
 
     \b
     Commands:
@@ -213,7 +185,7 @@ def completion(ctx):
 )
 def completion_install(shell):
     """
-    Install shell completion for SciTeX ecosystem.
+    Install shell completion for scitex CLI.
 
     \b
     Examples:
@@ -232,19 +204,17 @@ def completion_install(shell):
 
     shell = shell.lower()
     rc_file = _get_rc_file(shell)
-    lines = _generate_completion_lines(shell)
+    completion_script = _generate_completion_script(shell)
 
-    if len(lines) <= 1:
-        click.secho("No SciTeX ecosystem CLIs found.", fg="yellow")
+    if not completion_script:
+        click.secho("scitex CLI not found in PATH.", fg="red", err=True)
         sys.exit(1)
-
-    completion_block = "\n".join(lines)
 
     # Check if already installed
     if os.path.exists(rc_file):
         with open(rc_file) as f:
             content = f.read()
-            if "SciTeX ecosystem tab completion" in content:
+            if "scitex tab completion" in content:
                 click.secho(f"Completion already installed in {rc_file}", fg="yellow")
                 click.echo(
                     "\nTo reinstall, first remove the existing block, then run again."
@@ -257,24 +227,16 @@ def completion_install(shell):
     try:
         os.makedirs(os.path.dirname(rc_file), exist_ok=True)
         with open(rc_file, "a") as f:
-            f.write(f"\n{completion_block}\n")
+            f.write(f"\n{completion_script}\n")
 
-        click.secho(f"Installed completion to {rc_file}", fg="green")
-        click.echo("\nCLIs with completion:")
-        for cli_info in _get_ecosystem_clis():
-            status = (
-                click.style("OK", fg="green")
-                if cli_info["available"]
-                else click.style("not found", fg="yellow")
-            )
-            click.echo(f"  {cli_info['name']}: {status}")
+        click.secho(f"Installed scitex completion to {rc_file}", fg="green")
         click.echo("\nTo activate, run:")
         click.secho(f"  source {rc_file}", fg="cyan")
 
     except Exception as e:
         click.secho(f"ERROR: {e}", fg="red", err=True)
         click.echo("\nManually add to your shell config:")
-        click.echo(completion_block)
+        click.echo(completion_script)
         sys.exit(1)
 
 
@@ -286,9 +248,11 @@ def completion_status():
     \b
     Shows:
       - Current shell
-      - Installed completions
-      - Available ecosystem CLIs
+      - Config file path
+      - Installation status
     """
+    import shutil
+
     shell = _detect_shell() or "unknown"
     rc_file = _get_rc_file(shell) if shell != "unknown" else "N/A"
 
@@ -300,7 +264,8 @@ def completion_status():
     installed = False
     if rc_file != "N/A" and os.path.exists(rc_file):
         with open(rc_file) as f:
-            if "SciTeX ecosystem tab completion" in f.read():
+            content = f.read()
+            if "scitex tab completion" in content:
                 installed = True
 
     status = (
@@ -310,14 +275,12 @@ def completion_status():
     )
     click.echo(f"  Status: {status}")
 
-    click.echo("\nEcosystem CLIs:")
-    for cli_info in _get_ecosystem_clis():
-        avail = (
-            click.style("OK", fg="green")
-            if cli_info["available"]
-            else click.style("missing", fg="red")
-        )
-        click.echo(f"  {cli_info['name']}: {avail}")
+    # Check if scitex is in PATH
+    cli_path = shutil.which("scitex")
+    path_status = (
+        click.style("OK", fg="green") if cli_path else click.style("missing", fg="red")
+    )
+    click.echo(f"  scitex in PATH: {path_status}")
 
     if not installed:
         click.echo("\nTo install completion:")
@@ -327,22 +290,34 @@ def completion_status():
 @completion.command("bash")
 def completion_bash():
     """Show bash completion script."""
-    lines = _generate_completion_lines("bash")
-    click.echo("\n".join(lines))
+    script = _generate_completion_script("bash")
+    if script:
+        click.echo(script)
+    else:
+        click.secho("scitex CLI not found in PATH.", fg="red", err=True)
+        sys.exit(1)
 
 
 @completion.command("zsh")
 def completion_zsh():
     """Show zsh completion script."""
-    lines = _generate_completion_lines("zsh")
-    click.echo("\n".join(lines))
+    script = _generate_completion_script("zsh")
+    if script:
+        click.echo(script)
+    else:
+        click.secho("scitex CLI not found in PATH.", fg="red", err=True)
+        sys.exit(1)
 
 
 @completion.command("fish")
 def completion_fish():
     """Show fish completion script."""
-    lines = _generate_completion_lines("fish")
-    click.echo("\n".join(lines))
+    script = _generate_completion_script("fish")
+    if script:
+        click.echo(script)
+    else:
+        click.secho("scitex CLI not found in PATH.", fg="red", err=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

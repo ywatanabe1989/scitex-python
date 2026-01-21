@@ -81,7 +81,7 @@ class TestCompletionCommand:
         result = runner.invoke(cli, ["completion", "bash"])
         assert result.exit_code == 0
         assert "_SCITEX_COMPLETE=bash_source" in result.output
-        assert "SciTeX ecosystem" in result.output
+        assert "scitex tab completion" in result.output
 
     def test_completion_zsh_subcommand(self):
         """Test zsh completion script output."""
@@ -104,14 +104,14 @@ class TestCompletionCommand:
         assert result.exit_code == 0
         assert "Shell Completion Status" in result.output
         assert "Shell:" in result.output
-        assert "Ecosystem CLIs:" in result.output
+        assert "scitex in PATH:" in result.output
 
-    def test_completion_status_shows_clis(self):
-        """Test that status shows ecosystem CLIs."""
+    def test_completion_status_shows_scitex(self):
+        """Test that status shows scitex CLI status."""
         runner = CliRunner(env={"SHELL": "/bin/bash"})
         result = runner.invoke(cli, ["completion", "status"])
         assert result.exit_code == 0
-        assert "scitex:" in result.output
+        assert "scitex in PATH:" in result.output
 
     def test_completion_install_auto_detect_unknown(self):
         """Test error when shell cannot be auto-detected."""
@@ -146,8 +146,8 @@ class TestCompletionCommand:
         runner = CliRunner()
         with tempfile.TemporaryDirectory() as tmpdir:
             bashrc = Path(tmpdir) / ".bashrc"
-            # Write ecosystem completion marker
-            bashrc.write_text("# SciTeX ecosystem tab completion\n")
+            # Write completion marker
+            bashrc.write_text("# scitex tab completion\n")
 
             with patch(
                 "os.path.expanduser",
