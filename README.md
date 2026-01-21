@@ -18,6 +18,8 @@
 
 **Modular Python framework for AI-driven scientific research automation.**
 
+Extended capabilities for AI agents in academic work — each component works independently and adapts to various workflows. Handles both primary and secondary research with real or simulated data.
+
 - **108 MCP tools** for Claude/AI agent integration
 - **Standardized outputs** with reproducible session tracking
 - **Fast boilerplates** — 70% less code for research pipelines
@@ -44,6 +46,10 @@
 
 <details>
 <summary><strong>🔧 MCP Tools - 108 tools for Claude Integration</strong></summary>
+
+Turn AI agents into autonomous scientific researchers. Tools allow AI to "reach out" of the chat window and perform real-world actions — compiling LaTeX, searching databases, running statistical tests.
+
+**Typical workflow**: Scholar (find papers) → Stats (analyze) → Plt (visualize) → Writer (manuscript) → Capture (verify)
 
 See **[docs/MCP_TOOLS.md](./docs/MCP_TOOLS.md)** for full list.
 
@@ -206,32 +212,11 @@ ai = GenAI(provider="anthropic", model="claude-3-opus-20240229")
 
 ## 🖥️ CLI Commands
 
-<details>
-<summary><strong>CLI Commands</strong></summary>
-
 ```bash
-# SciTeX Cloud
-scitex cloud login
-scitex cloud clone user/project
-
-# Research Tools
-scitex scholar bibtex papers.bib
-scitex stats recommend --data data.csv
-
-# Media
-scitex audio speak "Hello world"
-scitex capture snap --output screenshot.jpg
-
-# Documents
-scitex tex compile manuscript.tex
-scitex writer compile my_paper
-
-# Utilities
-scitex resource usage
-scitex completion
+scitex --help-recursive    # Show all available commands
 ```
 
-</details>
+See **[docs/CLI_COMMANDS.md](./docs/CLI_COMMANDS.md)** for full reference.
 
 ## 🔌 MCP Server Configuration
 
