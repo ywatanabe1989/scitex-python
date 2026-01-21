@@ -12,6 +12,7 @@ from .diagram import register_diagram_tools
 from .introspect import register_introspect_tools
 from .plt import register_plt_tools
 from .scholar import register_scholar_tools
+from .social import register_social_tools
 from .stats import register_stats_tools
 from .template import register_template_tools
 from .ui import register_ui_tools
@@ -29,6 +30,7 @@ def register_all_tools(mcp) -> None:
     register_introspect_tools(mcp)
     register_plt_tools(mcp)
     register_scholar_tools(mcp)
+    register_social_tools(mcp)
     register_stats_tools(mcp)
     register_template_tools(mcp)
     register_ui_tools(mcp)

@@ -21,6 +21,7 @@ from . import (
     resource,
     scholar,
     security,
+    social,
     stats,
     template,
     tex,
@@ -74,6 +75,7 @@ cli.add_command(repro.repro)
 cli.add_command(resource.resource)
 cli.add_command(scholar.scholar)
 cli.add_command(security.security)
+cli.add_command(social.social)
 cli.add_command(stats.stats)
 cli.add_command(template.template)
 cli.add_command(tex.tex)
