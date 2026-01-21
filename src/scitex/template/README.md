@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-10-29 05:56:40
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/template/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/src/scitex/template/README.md
 !-- --- -->
 
 # SciTeX Template Module

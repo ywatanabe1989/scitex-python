@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-10-29 07:23:56
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/sh/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/src/scitex/sh/README.md
 !-- --- -->
 
 # scitex.sh - Shell Command Execution Module

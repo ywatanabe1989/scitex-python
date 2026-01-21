@@ -41,9 +41,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ywatanabe1989/scitex-code"
+Homepage = "https://github.com/ywatanabe1989/scitex-python"
 Documentation = "https://scitex.readthedocs.io"
-Repository = "https://github.com/ywatanabe1989/scitex-code"
+Repository = "https://github.com/ywatanabe1989/scitex-python"
 
 [tool.hatch.build.targets.wheel]
 # Empty package - just a dependency redirect

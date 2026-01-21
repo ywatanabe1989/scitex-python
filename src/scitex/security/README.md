@@ -14,7 +14,7 @@ Reusable security utilities for the SciTeX ecosystem. Works everywhere: local, c
 The module is part of the `scitex` package (editable install):
 
 ```bash
-cd ~/proj/scitex-code
+cd ~/proj/scitex-python
 pip install -e .
 ```
 
@@ -162,7 +162,7 @@ Total open alerts: 2
 ```yaml
 - name: Check Security
   run: |
-    pip install -e ~/proj/scitex-code
+    pip install -e ~/proj/scitex-python
     python -m scitex.security.cli check --save
 ```
 
@@ -245,7 +245,7 @@ Get path to latest alerts file.
 ## Testing
 
 ```bash
-cd ~/proj/scitex-code
+cd ~/proj/scitex-python
 pytest tests/test_security.py
 ```
 

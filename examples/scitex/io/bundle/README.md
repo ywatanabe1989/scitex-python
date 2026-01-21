@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-12-19
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/examples/fig/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/examples/fig/README.md
 !-- --- -->
 
 # scitex.fig Examples
@@ -13,7 +13,7 @@
 ## Quick Start
 
 ```bash
-cd /path/to/scitex-code
+cd /path/to/scitex-python
 ./examples/fig/01_basic_figure.py
 ```
 

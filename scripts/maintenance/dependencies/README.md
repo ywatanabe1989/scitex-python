@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2026-01-08 01:55:00
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/scripts/maintenance/dependencies/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/scripts/maintenance/dependencies/README.md
 !-- --- -->
 
 # Dependency Analysis Scripts

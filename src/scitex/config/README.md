@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-12-09
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/config/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/src/scitex/config/README.md
 !-- --- -->
 
 # SciTeX Configuration Module

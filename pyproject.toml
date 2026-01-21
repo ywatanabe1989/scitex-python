@@ -3,7 +3,7 @@
 # https://scitex.ai
 # ============================================
 
-# /home/ywatanabe/proj/scitex-code/pyproject.toml
+# /home/ywatanabe/proj/scitex-python/pyproject.toml
 
 [build-system]
 requires = ["hatchling"]
@@ -63,10 +63,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ywatanabe1989/scitex-code"
+Homepage = "https://github.com/ywatanabe1989/scitex-python"
 Documentation = "https://scitex.readthedocs.io"
-Repository = "https://github.com/ywatanabe1989/scitex-code"
-"Bug Tracker" = "https://github.com/ywatanabe1989/scitex-code/issues"
+Repository = "https://github.com/ywatanabe1989/scitex-python"
+"Bug Tracker" = "https://github.com/ywatanabe1989/scitex-python/issues"
 
 [project.scripts]
 scitex = "scitex.__main__:main"
