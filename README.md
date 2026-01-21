@@ -20,30 +20,12 @@ Part of the fully open-source SciTeX project: https://scitex.ai
   <a href="https://scitex.ai/demos/watch/scitex-automated-research/">▶ Watch Full Demo</a>
 </p>
 
-## 📊 Status
-
-<!-- badges -->
-<div align="center">
-  <table>
-    <tr>
-      <td align="center"><strong>Package</strong></td>
-      <td>
-        <a href="https://badge.fury.io/py/scitex"><img src="https://badge.fury.io/py/scitex.svg" alt="PyPI version"></a>
-        <a href="https://pypi.org/project/scitex/"><img src="https://img.shields.io/pypi/pyversions/scitex.svg" alt="Python Versions"></a>
-        <a href="https://github.com/ywatanabe1989/SciTeX-Code/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ywatanabe1989/SciTeX-Code" alt="License"></a>
-      </td>
-    </tr>
-    <tr>
-      <td align="center"><strong>Install</strong></td>
-      <td>
-        <img src="https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-python/badges/core.json&label=core" alt="Core Install Time">
-        <img src="https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-python/badges/all.json&label=all" alt="All Install Time">
-        <img src="https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-python/badges/heavy.json&label=heavy" alt="Heavy Install Time">
-        <img src="https://img.shields.io/badge/uv-recommended-blue" alt="uv recommended">
-      </td>
-    </tr>
-  </table>
-</div>
+<p align="center">
+  <a href="https://badge.fury.io/py/scitex"><img src="https://badge.fury.io/py/scitex.svg" alt="PyPI version"></a>
+  <a href="https://pypi.org/project/scitex/"><img src="https://img.shields.io/pypi/pyversions/scitex.svg" alt="Python Versions"></a>
+  <a href="https://github.com/ywatanabe1989/scitex-python/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ywatanabe1989/scitex-python" alt="License"></a>
+  <img src="https://img.shields.io/badge/uv-recommended-blue" alt="uv recommended">
+</p>
 
 <details>
 <summary><strong>Module Status - Tests & Installation</strong></summary>
