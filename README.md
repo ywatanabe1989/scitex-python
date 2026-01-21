@@ -27,30 +27,31 @@ Part of the fully open-source SciTeX project: https://scitex.ai
   <img src="https://img.shields.io/badge/uv-recommended-blue" alt="uv recommended">
 </p>
 
-## 🔧 MCP Tools (Claude Integration)
+<details>
+<summary><strong>🔧 MCP Tools - 108 tools for Claude Integration</strong></summary>
 
-SciTeX provides 108 MCP tools for AI assistant integration across 12 categories:
-
-| Category | Tools | Description |
-|----------|-------|-------------|
-| **plt** | 9 | Publication-ready figures with CSV data |
-| **stats** | 10 | Statistical analysis & power analysis |
-| **scholar** | 23 | Literature management & PDF download |
-| **audio** | 10 | Text-to-speech feedback |
-| **capture** | 12 | Screen capture & monitoring |
-| **diagram** | 7 | Mermaid & Graphviz diagrams |
-| **canvas** | 7 | Multi-panel figure composition |
-| **template** | 4 | Project templates |
-| **ui** | 5 | Desktop notifications |
-| **social** | 9 | Social media integration |
-| **introspect** | 11 | API exploration (like IPython's ?) |
-| **writer** | 1 | LaTeX manuscript guide |
+| Category | # | Key Tools | Description |
+|----------|---|-----------|-------------|
+| **plt** | 9 | `plot`, `compose`, `reproduce`, `crop` | Publication-ready figures with CSV data |
+| **stats** | 10 | `run_test`, `recommend_tests`, `power_analysis`, `format_results` | Statistical analysis (23 tests supported) |
+| **scholar** | 23 | `fetch_papers`, `enrich_bibtex`, `download_pdf`, `search_papers` | Literature management & PDF download |
+| **audio** | 10 | `speak`, `generate_audio`, `list_backends`, `announce_context` | Text-to-speech feedback |
+| **capture** | 12 | `capture_screenshot`, `start_monitoring`, `create_gif` | Screen capture & monitoring |
+| **diagram** | 7 | `create_diagram`, `compile_mermaid`, `compile_graphviz` | Mermaid & Graphviz diagrams |
+| **canvas** | 7 | `create_canvas`, `add_panel`, `export_canvas` | Multi-panel figure composition |
+| **template** | 4 | `list_templates`, `clone_template` | Project scaffolding |
+| **ui** | 5 | `notify`, `notify_by_level` | Desktop notifications |
+| **social** | 9 | `post`, `thread`, `feed`, `analytics` | Social media integration |
+| **introspect** | 11 | `signature`, `docstring`, `source`, `members` | API exploration (like IPython's ?) |
+| **writer** | 1 | `usage` | LaTeX manuscript guide |
 
 ```bash
-scitex mcp list-tools             # List all 108 tools
-scitex serve                      # Start MCP server (stdio)
-scitex serve -t http --port 8085  # HTTP transport
+scitex mcp list-tools             # List all 108 tools with descriptions
+scitex serve                      # Start MCP server (stdio for Claude Desktop)
+scitex serve -t http --port 8085  # HTTP transport for remote access
 ```
+
+</details>
 
 
 <details>
