@@ -21,7 +21,7 @@
 Empowers both human researchers and AI agents. Each module works independently and adapts to various academic workflows, handling primary and secondary research with real or simulated data.
 
 - **108 MCP tools** for Claude/AI agent integration
-- **Standardized outputs** with reproducible session tracking
+- **Standardized outputs** with reproducible session tracking — linked scripts, data, statistics, and figures
 - **Fast boilerplates** — 70% less code for research pipelines
 - **30+ I/O formats** with unified API
 
