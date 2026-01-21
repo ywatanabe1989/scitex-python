@@ -16,7 +16,7 @@
 
 ---
 
-**Modular Python framework for AI-driven scientific research automation.**
+**Modular Python toolkit for both human researchers and AI agents.**
 
 Extended capabilities for AI agents in academic work — each component works independently and adapts to various workflows. Handles both primary and secondary research with real or simulated data.
 
