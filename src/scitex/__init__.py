@@ -196,6 +196,7 @@ config = _LazyModule("config")
 audio = _LazyModule("audio")
 msword = _LazyModule("msword")
 fts = _LazyModule("fts")  # Bundle schemas module
+social = _LazyModule("social")  # Social media integration (socialia wrapper)
 
 # Centralized path configuration - eager loaded for convenience
 # Usage: scitex.PATHS.logs, scitex.PATHS.cache, etc.
@@ -261,6 +262,7 @@ __all__ = [
     "msword",
     "fts",
     "fsb",  # Legacy alias
+    "social",  # Social media integration
     "PATHS",
     "INJECTED",
 ]
