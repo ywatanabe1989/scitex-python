@@ -16,9 +16,9 @@
 
 ---
 
-**Modular Python toolkit for both human researchers and AI agents.**
+**Modular Python toolkit for scientific research automation — with verification features to ease peer review.**
 
-Extended capabilities for AI agents in academic work — each component works independently and adapts to various workflows. Handles both primary and secondary research with real or simulated data.
+Empowers both human researchers and AI agents. Each module works independently and adapts to various academic workflows, handling primary and secondary research with real or simulated data.
 
 - **108 MCP tools** for Claude/AI agent integration
 - **Standardized outputs** with reproducible session tracking
