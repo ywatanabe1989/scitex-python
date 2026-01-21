@@ -174,5 +174,40 @@ def register_social_tools(mcp) -> None:
                 }
             )
 
+    @mcp.tool()
+    async def social_check(
+        platform: Optional[str] = None,
+    ) -> str:
+        """[social] Check platform connection status (v0.1.4+)."""
+        args = ["check"]
+        if platform:
+            args.append(platform)
+        result = _run_socialia_cli(*args)
+        return _json(result)
+
+    @mcp.tool()
+    async def social_feed(
+        platform: Optional[str] = None,
+        limit: int = 10,
+        mentions: bool = False,
+    ) -> str:
+        """[social] Get recent posts from platform feeds (v0.1.4+)."""
+        args = ["feed"]
+        if platform:
+            args.append(platform)
+        args.extend(["--limit", str(limit)])
+        if mentions:
+            args.append("--mentions")
+        result = _run_socialia_cli(*args)
+        return _json(result)
+
+    @mcp.tool()
+    async def social_me(
+        platform: str,
+    ) -> str:
+        """[social] Get user profile information (v0.1.4+)."""
+        result = _run_socialia_cli("me", platform)
+        return _json(result)
+
 
 # EOF

@@ -160,6 +160,71 @@ def status(as_json):
 
 
 @social.command()
+@click.argument(
+    "platform",
+    type=click.Choice(["twitter", "linkedin", "reddit", "youtube"]),
+    required=False,
+)
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def check(platform, as_json):
+    """
+    Check platform connection status.
+
+    \b
+    Examples:
+      scitex social check              # Check all platforms
+      scitex social check twitter      # Check specific platform
+    """
+    args = ["check"]
+    if platform:
+        args.append(platform)
+    sys.exit(_run_socialia(*args, json_output=as_json))
+
+
+@social.command()
+@click.argument(
+    "platform",
+    type=click.Choice(["twitter", "linkedin", "reddit"]),
+    required=False,
+)
+@click.option("--limit", "-l", type=int, default=10, help="Number of posts to fetch")
+@click.option("--mentions", is_flag=True, help="Get mentions/notifications instead")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def feed(platform, limit, mentions, as_json):
+    """
+    Get recent posts from platform feeds.
+
+    \b
+    Examples:
+      scitex social feed                    # All platforms
+      scitex social feed twitter --limit 5  # Specific platform
+      scitex social feed --mentions         # Get mentions
+    """
+    args = ["feed"]
+    if platform:
+        args.append(platform)
+    args.extend(["--limit", str(limit)])
+    if mentions:
+        args.append("--mentions")
+    sys.exit(_run_socialia(*args, json_output=as_json))
+
+
+@social.command()
+@click.argument("platform", type=click.Choice(["twitter", "linkedin", "reddit"]))
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def me(platform, as_json):
+    """
+    Get user profile information.
+
+    \b
+    Examples:
+      scitex social me twitter
+      scitex social me linkedin --json
+    """
+    sys.exit(_run_socialia("me", platform, json_output=as_json))
+
+
+@social.command()
 @click.argument("platform", type=click.Choice(["twitter", "youtube", "ga"]))
 @click.option("--days", "-d", type=int, default=7, help="Number of days to analyze")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
