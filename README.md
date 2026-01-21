@@ -6,8 +6,15 @@
 
 <p align="center">
   <a href="https://scitex.ai">
-    <img src="docs/assets/images/scitex-logo-navy-bg.png" alt="SciTeX" width="400">
+    <img src="docs/assets/images/scitex-logo-blue-cropped.png" alt="SciTeX" width="400">
   </a>
+</p>
+
+<p align="center">
+  <a href="https://badge.fury.io/py/scitex"><img src="https://badge.fury.io/py/scitex.svg" alt="PyPI version"></a>
+  <a href="https://pypi.org/project/scitex/"><img src="https://img.shields.io/pypi/pyversions/scitex.svg" alt="Python Versions"></a>
+  <a href="https://github.com/ywatanabe1989/scitex-python/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ywatanabe1989/scitex-python" alt="License"></a>
+  <img src="https://img.shields.io/badge/uv-recommended-blue" alt="uv recommended">
 </p>
 
 <p align="center">
@@ -19,13 +26,6 @@
 **Modular Python toolkit for scientific research automation — with verification features to ease peer review.**
 
 Empowers both human researchers and AI agents. Each module works independently and adapts to various academic workflows, handling primary and secondary research with real or simulated data.
-
-<p align="center">
-  <a href="https://badge.fury.io/py/scitex"><img src="https://badge.fury.io/py/scitex.svg" alt="PyPI version"></a>
-  <a href="https://pypi.org/project/scitex/"><img src="https://img.shields.io/pypi/pyversions/scitex.svg" alt="Python Versions"></a>
-  <a href="https://github.com/ywatanabe1989/scitex-python/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ywatanabe1989/scitex-python" alt="License"></a>
-  <img src="https://img.shields.io/badge/uv-recommended-blue" alt="uv recommended">
-</p>
 
 ## 🎬 Demo
 
