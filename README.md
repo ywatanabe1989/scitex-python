@@ -47,11 +47,11 @@ Extended capabilities for AI agents in academic work — each component works in
 <details>
 <summary><strong>🔧 MCP Tools - 108 tools for Claude Integration</strong></summary>
 
+<br>
+
 Turn AI agents into autonomous scientific researchers. Tools allow AI to "reach out" of the chat window and perform real-world actions — compiling LaTeX, searching databases, running statistical tests.
 
 **Typical workflow**: Scholar (find papers) → Stats (analyze) → Plt (visualize) → Writer (manuscript) → Capture (verify)
-
-See **[docs/MCP_TOOLS.md](./docs/MCP_TOOLS.md)** for full list.
 
 | Category | Tools | Description |
 |----------|-------|-------------|
@@ -73,12 +73,14 @@ scitex mcp list-tools             # List all tools with full descriptions
 scitex serve                      # Start MCP server (stdio)
 ```
 
+→ **[Full tool reference](./docs/MCP_TOOLS.md)**
+
 </details>
 
 <details>
 <summary><strong>Module Status - Tests & Installation</strong></summary>
 
-See **[docs/MODULE_STATUS.md](./docs/MODULE_STATUS.md)** for full status.
+<br>
 
 **Core**: io, path, str, dict, types, config, utils, decorators, logging, gen
 **Data Science**: stats, pd, linalg, plt, dsp
@@ -87,6 +89,8 @@ See **[docs/MODULE_STATUS.md](./docs/MODULE_STATUS.md)** for full status.
 **Research**: writer, tex, msword, scholar, diagram
 **Web**: web, browser
 **Other**: audio, capture, repro, benchmark, security, dt, dev, schema, bridge
+
+→ **[Full module status](./docs/MODULE_STATUS.md)**
 
 </details>
 
@@ -276,7 +280,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md).
 ---
 
 <p align="center">
-  <a href="https://scitex.ai" target="_blank"><img src="docs/scitex-icon-navy-inverted.png" alt="SciTeX" width="40"/></a>
+  <a href="https://scitex.ai" target="_blank"><img src="docs/assets/images/scitex-icon-navy-inverted.png" alt="SciTeX" width="40"/></a>
   <br>
   AGPL-3.0 · ywatanabe@scitex.ai
 </p>
