@@ -63,99 +63,115 @@ class TestCLIGroup:
 
 
 class TestCompletionCommand:
-    """Tests for the completion command."""
+    """Tests for the completion command group."""
 
-    def test_completion_show_bash(self):
-        """Test showing bash completion script."""
+    def test_completion_help(self):
+        """Test completion group help."""
         runner = CliRunner()
-        result = runner.invoke(cli, ["completion", "--shell", "bash", "--show"])
+        result = runner.invoke(cli, ["completion", "--help"])
         assert result.exit_code == 0
-        assert ".bashrc" in result.output
+        assert "install" in result.output
+        assert "status" in result.output
+        assert "bash" in result.output
+        assert "zsh" in result.output
+
+    def test_completion_bash_subcommand(self):
+        """Test bash completion script output."""
+        runner = CliRunner()
+        result = runner.invoke(cli, ["completion", "bash"])
+        assert result.exit_code == 0
         assert "_SCITEX_COMPLETE=bash_source" in result.output
+        assert "SciTeX ecosystem" in result.output
 
-    def test_completion_show_zsh(self):
-        """Test showing zsh completion script."""
+    def test_completion_zsh_subcommand(self):
+        """Test zsh completion script output."""
         runner = CliRunner()
-        result = runner.invoke(cli, ["completion", "--shell", "zsh", "--show"])
+        result = runner.invoke(cli, ["completion", "zsh"])
         assert result.exit_code == 0
-        assert ".zshrc" in result.output
         assert "_SCITEX_COMPLETE=zsh_source" in result.output
 
-    def test_completion_show_fish(self):
-        """Test showing fish completion script."""
+    def test_completion_fish_subcommand(self):
+        """Test fish completion script output."""
         runner = CliRunner()
-        result = runner.invoke(cli, ["completion", "--shell", "fish", "--show"])
+        result = runner.invoke(cli, ["completion", "fish"])
         assert result.exit_code == 0
-        assert "config.fish" in result.output
         assert "_SCITEX_COMPLETE=fish_source" in result.output
 
-    def test_completion_auto_detect_bash(self):
-        """Test auto-detection of bash shell."""
+    def test_completion_status(self):
+        """Test completion status command."""
         runner = CliRunner(env={"SHELL": "/bin/bash"})
-        result = runner.invoke(cli, ["completion", "--show"])
+        result = runner.invoke(cli, ["completion", "status"])
         assert result.exit_code == 0
-        assert "bash" in result.output.lower()
+        assert "Shell Completion Status" in result.output
+        assert "Shell:" in result.output
+        assert "Ecosystem CLIs:" in result.output
 
-    def test_completion_auto_detect_zsh(self):
-        """Test auto-detection of zsh shell."""
-        runner = CliRunner(env={"SHELL": "/bin/zsh"})
-        result = runner.invoke(cli, ["completion", "--show"])
+    def test_completion_status_shows_clis(self):
+        """Test that status shows ecosystem CLIs."""
+        runner = CliRunner(env={"SHELL": "/bin/bash"})
+        result = runner.invoke(cli, ["completion", "status"])
         assert result.exit_code == 0
-        assert "zsh" in result.output.lower()
+        assert "scitex:" in result.output
 
-    def test_completion_auto_detect_fish(self):
-        """Test auto-detection of fish shell."""
-        runner = CliRunner(env={"SHELL": "/usr/bin/fish"})
-        result = runner.invoke(cli, ["completion", "--show"])
-        assert result.exit_code == 0
-        assert "fish" in result.output.lower()
-
-    def test_completion_auto_detect_unknown_shell(self):
+    def test_completion_install_auto_detect_unknown(self):
         """Test error when shell cannot be auto-detected."""
         runner = CliRunner(env={"SHELL": "/bin/unknown"})
-        result = runner.invoke(cli, ["completion"])
+        result = runner.invoke(cli, ["completion", "install"])
         assert result.exit_code == 1
         assert "Could not auto-detect shell" in result.output
 
-    def test_completion_install_bash(self):
-        """Test installing bash completion."""
+    def test_completion_install_with_shell_option(self):
+        """Test install with explicit shell option."""
         runner = CliRunner()
         with tempfile.TemporaryDirectory() as tmpdir:
             bashrc = Path(tmpdir) / ".bashrc"
             bashrc.touch()
 
-            with patch.object(Path, "home", return_value=Path(tmpdir)):
-                with patch(
-                    "os.path.expanduser",
-                    side_effect=lambda x: str(bashrc) if "bashrc" in x else x,
-                ):
-                    result = runner.invoke(cli, ["completion", "--shell", "bash"])
-                    # Should succeed or show already installed message
-                    # The actual file writing may fail in test environment
-                    # so we just check it doesn't crash unexpectedly
-                    assert (
-                        "completion" in result.output.lower()
-                        or result.exit_code in [0, 1]
-                    )
+            with patch(
+                "os.path.expanduser",
+                side_effect=lambda x: str(bashrc) if "bashrc" in x else x,
+            ):
+                result = runner.invoke(
+                    cli, ["completion", "install", "--shell", "bash"]
+                )
+                # Should succeed or show message
+                assert result.exit_code in [0, 1]
+                assert (
+                    "completion" in result.output.lower()
+                    or "install" in result.output.lower()
+                )
 
     def test_completion_already_installed(self):
         """Test that already-installed completion is detected."""
         runner = CliRunner()
         with tempfile.TemporaryDirectory() as tmpdir:
             bashrc = Path(tmpdir) / ".bashrc"
-            # Write a completion line
-            bashrc.write_text(
-                'eval "$(_SCITEX_COMPLETE=bash_source /usr/bin/scitex)"\n'
-            )
+            # Write ecosystem completion marker
+            bashrc.write_text("# SciTeX ecosystem tab completion\n")
 
-            with patch("os.path.expanduser", return_value=str(bashrc)):
-                with patch("os.path.exists", return_value=True):
-                    # We can't easily test this without complex mocking
-                    # Just verify the command runs
-                    result = runner.invoke(
-                        cli, ["completion", "--shell", "bash", "--show"]
-                    )
-                    assert result.exit_code == 0
+            with patch(
+                "os.path.expanduser",
+                side_effect=lambda x: str(bashrc) if "bashrc" in x else x,
+            ):
+                result = runner.invoke(
+                    cli, ["completion", "install", "--shell", "bash"]
+                )
+                assert "already installed" in result.output.lower()
+
+    def test_completion_default_invokes_install(self):
+        """Test that completion without subcommand invokes install."""
+        runner = CliRunner(env={"SHELL": "/bin/bash"})
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bashrc = Path(tmpdir) / ".bashrc"
+            bashrc.touch()
+
+            with patch(
+                "os.path.expanduser",
+                side_effect=lambda x: str(bashrc) if "bashrc" in x else x,
+            ):
+                result = runner.invoke(cli, ["completion"])
+                # Should attempt install (may succeed or fail based on env)
+                assert result.exit_code in [0, 1]
 
 
 class TestCLISubcommandAccess:
@@ -210,6 +226,7 @@ class TestCLISubcommandAccess:
         assert result.exit_code == 0
         assert "Manuscript writing" in result.output
 
+
 if __name__ == "__main__":
     import os
 
@@ -224,12 +241,12 @@ if __name__ == "__main__":
 # """
 # SciTeX CLI Main Entry Point
 # """
-# 
+#
 # import os
 # import sys
-# 
+#
 # import click
-# 
+#
 # from . import (
 #     audio,
 #     browser,
@@ -247,14 +264,14 @@ if __name__ == "__main__":
 #     web,
 #     writer,
 # )
-# 
-# 
+#
+#
 # @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 # @click.version_option()
 # def cli():
 #     """
 #     SciTeX - Integrated Scientific Research Platform
-# 
+#
 #     \b
 #     Examples:
 #       scitex config list                    # Show all configured paths
@@ -270,15 +287,15 @@ if __name__ == "__main__":
 #       scitex capture snap --output screenshot.jpg
 #       scitex resource usage
 #       scitex stats recommend --data data.csv
-# 
+#
 #     \b
 #     Enable tab-completion:
 #       scitex completion          # Auto-install for your shell
 #       scitex completion --show   # Show installation instructions
 #     """
 #     pass
-# 
-# 
+#
+#
 # # Add command groups
 # cli.add_command(audio.audio)
 # cli.add_command(browser.browser)
@@ -295,8 +312,8 @@ if __name__ == "__main__":
 # cli.add_command(tex.tex)
 # cli.add_command(web.web)
 # cli.add_command(writer.writer)
-# 
-# 
+#
+#
 # @cli.command()
 # @click.option(
 #     "--shell",
@@ -309,22 +326,22 @@ if __name__ == "__main__":
 # def completion(shell, show):
 #     """
 #     Install or show shell completion for scitex commands.
-# 
+#
 #     \b
 #     Supported shells: bash, zsh, fish
-# 
+#
 #     \b
 #     Installation:
 #       # Auto-detect shell and install
 #       scitex completion
-# 
+#
 #       # Specify shell
 #       scitex completion --shell bash
 #       scitex completion --shell zsh
-# 
+#
 #       # Show completion script
 #       scitex completion --show
-# 
+#
 #     \b
 #     After installation, restart your shell or run:
 #       source ~/.bashrc    # for bash
@@ -346,19 +363,19 @@ if __name__ == "__main__":
 #                 err=True,
 #             )
 #             sys.exit(1)
-# 
+#
 #     shell = shell.lower()
-# 
+#
 #     # Get full path to scitex executable
 #     scitex_path = sys.argv[0]
 #     if not os.path.isabs(scitex_path):
 #         # If relative path, find the full path
 #         import shutil
-# 
+#
 #         scitex_full = shutil.which("scitex") or scitex_path
 #     else:
 #         scitex_full = scitex_path
-# 
+#
 #     # Generate completion script
 #     if shell == "bash":
 #         rc_file = os.path.expanduser("~/.bashrc")
@@ -369,14 +386,14 @@ if __name__ == "__main__":
 #     elif shell == "fish":
 #         rc_file = os.path.expanduser("~/.config/fish/config.fish")
 #         eval_line = f"eval (env _SCITEX_COMPLETE=fish_source {scitex_full})"
-# 
+#
 #     if show:
 #         # Just show the completion script
 #         click.echo(f"Add this line to your {rc_file}:")
 #         click.echo()
 #         click.secho(eval_line, fg="green")
 #         sys.exit(0)
-# 
+#
 #     # Check if already installed (and not commented out)
 #     if os.path.exists(rc_file):
 #         with open(rc_file) as f:
@@ -391,16 +408,16 @@ if __name__ == "__main__":
 #                     click.echo("To reload, run:")
 #                     click.secho(f"  source {rc_file}", fg="cyan")
 #                     sys.exit(0)
-# 
+#
 #     # Install completion
 #     try:
 #         # Create config directory if it doesn't exist (for fish)
 #         os.makedirs(os.path.dirname(rc_file), exist_ok=True)
-# 
+#
 #         with open(rc_file, "a") as f:
 #             f.write("\n# SciTeX tab completion\n")
 #             f.write(f"{eval_line}\n")
-# 
+#
 #         click.secho(f"Successfully installed tab completion to {rc_file}", fg="green")
 #         click.echo()
 #         click.echo("To activate completion in current shell, run:")
@@ -408,15 +425,15 @@ if __name__ == "__main__":
 #         click.echo()
 #         click.echo("Or restart your shell.")
 #         sys.exit(0)
-# 
+#
 #     except Exception as e:
 #         click.secho(f"ERROR: Failed to install completion: {e}", fg="red", err=True)
 #         click.echo()
 #         click.echo("You can manually add this line to your shell config:")
 #         click.secho(eval_line, fg="green")
 #         sys.exit(1)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     cli()
 
