@@ -227,17 +227,18 @@ See **[docs/CLI_COMMANDS.md](./docs/CLI_COMMANDS.md)** for full reference.
 <details>
 <summary><strong>Claude Desktop Setup</strong></summary>
 
-**All-in-One** (`~/.config/claude/claude_desktop_config.json`):
+**Claude Desktop** (`~/.config/claude/claude_desktop_config.json`):
 
 ```json
 {
   "mcpServers": {
-    "scitex": { "command": "scitex-mcp-server" }
+    "scitex": {
+      "command": "scitex",
+      "args": ["mcp", "start"]
+    }
   }
 }
 ```
-
-**Individual servers**: `scitex-audio`, `scitex-capture`, `scitex-scholar`, etc.
 
 </details>
 
