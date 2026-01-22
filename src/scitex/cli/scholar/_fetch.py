@@ -219,13 +219,35 @@ def _add_single(
             project=project,
             force=force,
         )
+
+        # Granular success flags
+        has_doi = bool(paper and paper.metadata.id.doi)
+        has_metadata = bool(paper and paper.metadata.basic.title)
+        has_pdf = bool(symlink_path)
+        has_content = bool(
+            paper
+            and hasattr(paper, "container")
+            and paper.container.pdf_size_bytes
+            and paper.container.pdf_size_bytes > 0
+        )
+        pdf_method = None
+        if paper and paper.metadata.path.pdfs_engines:
+            pdf_method = paper.metadata.path.pdfs_engines[0]
+
         return {
-            "success": True,
-            "message": "Paper fetched",
+            "success": has_pdf,  # Overall success = PDF obtained
+            "success_doi": has_doi,
+            "success_metadata": has_metadata,
+            "success_pdf": has_pdf,
+            "success_content": has_content,
+            "pdf_method": pdf_method,
+            "message": "Paper fetched"
+            if has_pdf
+            else "Metadata fetched but PDF not downloaded",
             "doi": paper.metadata.id.doi if paper else None,
             "title": paper.metadata.basic.title if paper else None,
             "path": str(symlink_path) if symlink_path else None,
-            "has_pdf": bool(symlink_path),
+            "has_pdf": has_pdf,
             "timestamp": datetime.now().isoformat(),
         }
 

@@ -140,6 +140,8 @@ class TestScholarFetch:
             mock_paper = MagicMock()
             mock_paper.metadata.id.doi = "10.1038/nature12373"
             mock_paper.metadata.basic.title = "Test Paper"
+            mock_paper.metadata.path.pdfs_engines = ["chrome_pdf_viewer"]
+            mock_paper.container.pdf_size_bytes = 1024
             mock_pipeline.process_single_paper = MagicMock(
                 return_value=(mock_paper, Path("/tmp/paper.pdf"))
             )
@@ -148,6 +150,11 @@ class TestScholarFetch:
             with patch("asyncio.run") as mock_run:
                 mock_run.return_value = {
                     "success": True,
+                    "success_doi": True,
+                    "success_metadata": True,
+                    "success_pdf": True,
+                    "success_content": True,
+                    "pdf_method": "chrome_pdf_viewer",
                     "message": "Paper fetched",
                     "doi": "10.1038/nature12373",
                 }
@@ -160,6 +167,99 @@ class TestScholarFetch:
                     assert "success" in data
                 except json.JSONDecodeError:
                     # Some output might include logs before JSON
+                    pass
+
+    def test_fetch_json_output_granular_flags(self):
+        """Test fetch JSON output includes granular success flags."""
+        runner = CliRunner()
+        with patch("scitex.scholar.pipelines.ScholarPipelineSingle") as mock_cls:
+            mock_pipeline = MagicMock()
+            mock_paper = MagicMock()
+            mock_paper.metadata.id.doi = "10.1038/nature12373"
+            mock_paper.metadata.basic.title = "Test Paper"
+            mock_paper.metadata.path.pdfs_engines = ["manual_download"]
+            mock_paper.container.pdf_size_bytes = 2048
+            mock_pipeline.process_single_paper = MagicMock(
+                return_value=(mock_paper, Path("/tmp/paper.pdf"))
+            )
+            mock_cls.return_value = mock_pipeline
+
+            with patch("asyncio.run") as mock_run:
+                mock_run.return_value = {
+                    "success": True,
+                    "success_doi": True,
+                    "success_metadata": True,
+                    "success_pdf": True,
+                    "success_content": True,
+                    "pdf_method": "manual_download",
+                    "message": "Paper fetched",
+                    "doi": "10.1038/nature12373",
+                    "title": "Test Paper",
+                    "path": "/tmp/paper.pdf",
+                    "has_pdf": True,
+                }
+                result = runner.invoke(
+                    scholar, ["fetch", "10.1038/nature12373", "--json"]
+                )
+                try:
+                    data = json.loads(result.output)
+                    # Verify granular success flags are present
+                    assert "success_doi" in data
+                    assert "success_metadata" in data
+                    assert "success_pdf" in data
+                    assert "success_content" in data
+                    assert "pdf_method" in data
+                    # Verify values
+                    assert data["success_doi"] is True
+                    assert data["success_metadata"] is True
+                    assert data["success_pdf"] is True
+                    assert data["pdf_method"] == "manual_download"
+                except json.JSONDecodeError:
+                    pass
+
+    def test_fetch_json_output_partial_success(self):
+        """Test fetch JSON output with partial success (metadata only, no PDF)."""
+        runner = CliRunner()
+        with patch("scitex.scholar.pipelines.ScholarPipelineSingle") as mock_cls:
+            mock_pipeline = MagicMock()
+            mock_paper = MagicMock()
+            mock_paper.metadata.id.doi = "10.1038/nature12373"
+            mock_paper.metadata.basic.title = "Test Paper"
+            mock_paper.metadata.path.pdfs_engines = []
+            mock_paper.container.pdf_size_bytes = 0
+            mock_pipeline.process_single_paper = MagicMock(
+                return_value=(mock_paper, None)  # No symlink = no PDF
+            )
+            mock_cls.return_value = mock_pipeline
+
+            with patch("asyncio.run") as mock_run:
+                mock_run.return_value = {
+                    "success": False,
+                    "success_doi": True,
+                    "success_metadata": True,
+                    "success_pdf": False,
+                    "success_content": False,
+                    "pdf_method": None,
+                    "message": "Metadata fetched but PDF not downloaded",
+                    "doi": "10.1038/nature12373",
+                    "title": "Test Paper",
+                    "path": None,
+                    "has_pdf": False,
+                }
+                result = runner.invoke(
+                    scholar, ["fetch", "10.1038/nature12373", "--json"]
+                )
+                try:
+                    data = json.loads(result.output)
+                    # Overall success is False (no PDF)
+                    assert data["success"] is False
+                    # But metadata was obtained
+                    assert data["success_doi"] is True
+                    assert data["success_metadata"] is True
+                    # PDF not obtained
+                    assert data["success_pdf"] is False
+                    assert data["pdf_method"] is None
+                except json.JSONDecodeError:
                     pass
 
     def test_fetch_cannot_mix_args_and_bibtex(self):
