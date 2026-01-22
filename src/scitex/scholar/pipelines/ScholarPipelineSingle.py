@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Timestamp: "2026-01-14 (ywatanabe)"
+# Timestamp: "2026-01-22 (ywatanabe)"
 # File: src/scitex/scholar/pipelines/ScholarPipelineSingle.py
 """
 Single paper acquisition pipeline orchestrator.
@@ -21,10 +21,10 @@ IO:
 
 from __future__ import annotations
 
-import argparse
 import asyncio
 from typing import Optional
 
+import scitex as stx
 from scitex import logging
 from scitex.scholar.storage import PaperIO
 
@@ -90,10 +90,10 @@ class ScholarPipelineSingle(PipelineStepsMixin, PipelineHelpersMixin):
             )
             if context:
                 await self._step_06_find_pdf_urls(
-                    paper, io, context, auth_gateway, force
+                    paper, io, context, auth_gateway, force, browser_manager
                 )
                 await self._step_07_download_pdf(
-                    paper, io, context, auth_gateway, force
+                    paper, io, context, auth_gateway, force, browser_manager
                 )
             if browser_manager:
                 await browser_manager.close()
@@ -108,75 +108,55 @@ class ScholarPipelineSingle(PipelineStepsMixin, PipelineHelpersMixin):
             return paper, symlink_path
 
 
-def main(args):
-    """Run single paper pipeline."""
+@stx.session
+def main(
+    doi_or_title: str = None,
+    project: str = None,
+    browser_mode: str = "stealth",
+    chrome_profile: str = "system",
+    force: bool = False,
+    CONFIG=stx.INJECTED,
+    logger=stx.INJECTED,
+) -> int:
+    """Orchestrate full paper acquisition pipeline.
+
+    Parameters
+    ----------
+    doi_or_title : str
+        DOI or paper title (required)
+    project : str
+        Project name for symlinking (optional)
+    browser_mode : str
+        Browser mode: 'stealth' or 'interactive' (default: stealth)
+    chrome_profile : str
+        Chrome profile name (default: system)
+    force : bool
+        Force fresh processing (default: False)
+
+    Returns
+    -------
+    int
+        Exit status code (0 for success)
+    """
+    if not doi_or_title:
+        logger.error("--doi-or-title is required")
+        return 1
+
     pipeline = ScholarPipelineSingle(
-        browser_mode=args.browser_mode, chrome_profile=args.chrome_profile
+        browser_mode=browser_mode, chrome_profile=chrome_profile
     )
     paper, symlink_path = asyncio.run(
         pipeline.process_single_paper(
-            doi_or_title=args.doi_or_title,
-            project=args.project,
-            force=args.force,
+            doi_or_title=doi_or_title,
+            project=project,
+            force=force,
         )
     )
     return 0
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Orchestrate full paper acquisition pipeline"
-    )
-    parser.add_argument(
-        "--doi-or-title", type=str, required=True, help="DOI or paper title"
-    )
-    parser.add_argument(
-        "--project", type=str, default=None, help="Project name for symlinking"
-    )
-    parser.add_argument(
-        "--browser-mode",
-        type=str,
-        choices=["stealth", "interactive"],
-        default="stealth",
-        help="Browser mode (default: stealth)",
-    )
-    parser.add_argument(
-        "--chrome-profile",
-        type=str,
-        required=True,
-        help="Chrome profile name (default: system)",
-    )
-    parser.add_argument(
-        "--force",
-        "-f",
-        action="store_true",
-        default=False,
-        help="Force fresh processing",
-    )
-    return parser.parse_args()
-
-
-def run_main() -> None:
-    """Initialize scitex framework, run main function, and cleanup."""
-    import sys
-
-    import matplotlib.pyplot as plt
-
-    import scitex as stx
-
-    args = parse_args()
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
-        sys, plt, args=args, file=__file__, sdir_suffix=None, verbose=False, agg=True
-    )
-    exit_status = main(args)
-    stx.session.close(
-        CONFIG, verbose=False, notify=False, message="", exit_status=exit_status
-    )
-
-
 if __name__ == "__main__":
-    run_main()
+    main()
 
 # Usage:
 # python -m scitex.scholar.pipelines.ScholarPipelineSingle \

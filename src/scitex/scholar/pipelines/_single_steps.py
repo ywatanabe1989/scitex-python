@@ -115,7 +115,9 @@ class PipelineStepsMixin:
         )
         return browser_manager, context, auth_gateway
 
-    async def _step_06_find_pdf_urls(self, paper, io, context, auth_gateway, force):
+    async def _step_06_find_pdf_urls(
+        self, paper, io, context, auth_gateway, force, browser_manager=None
+    ):
         if not paper.metadata.url.pdfs or force:
             logger.info(f"{self.name}: Finding PDF URLs...")
             try:
@@ -127,6 +129,9 @@ class PipelineStepsMixin:
                 )
             except Exception as e:
                 logger.warning(f"{self.name}: Auth gateway failed: {e}")
+                await self._capture_screenshot(
+                    browser_manager, context, io, "auth_gateway_failed"
+                )
                 publisher_url = paper.metadata.id.doi
             from scitex.scholar import ScholarURLFinder
 
@@ -135,23 +140,34 @@ class PipelineStepsMixin:
             paper.metadata.url.pdfs = urls
             paper.metadata.url.pdfs_engines = ["ScholarURLFinder"]
             io.save_metadata()
+            if not urls:
+                await self._capture_screenshot(
+                    browser_manager, context, io, "no_pdf_urls_found"
+                )
             logger.info(f"{self.name}: Found {len(urls)} PDF URL(s)")
         else:
             logger.info(f"{self.name}: PDF URLs exist ({len(paper.metadata.url.pdfs)})")
 
-    async def _step_07_download_pdf(self, paper, io, context, auth_gateway, force):
+    async def _step_07_download_pdf(
+        self, paper, io, context, auth_gateway, force, browser_manager=None
+    ):
         if (not io.has_pdf() or force) and paper.metadata.url.pdfs:
             logger.info(f"{self.name}: Downloading PDF...")
             from scitex.scholar.pdf_download import ScholarPDFDownloader
 
             downloader = ScholarPDFDownloader(context)
-            downloaded, temp_path = await self._download_pdf_from_url(
+            downloaded, temp_path, download_method = await self._download_pdf_from_url(
                 paper, io, context, auth_gateway, downloader
             )
             if downloaded:
-                self._handle_downloaded_pdf(paper, io, downloaded, temp_path)
+                self._handle_downloaded_pdf(
+                    paper, io, downloaded, temp_path, download_method
+                )
             else:
-                self._check_manual_download(io)
+                await self._capture_screenshot(
+                    browser_manager, context, io, "pdf_download_failed"
+                )
+                self._check_manual_download(io, paper)
         elif io.has_pdf():
             logger.info(f"{self.name}: PDF already exists, skipping download")
 
@@ -211,24 +227,35 @@ class PipelineStepsMixin:
         downloaded_file = await downloader.download_from_url(
             pdf_url, output_path=temp_pdf_path, doi=paper.metadata.id.doi
         )
-        return downloaded_file, temp_pdf_path
+        # Track download method based on context flags
+        download_method = "unknown"
+        if downloaded_file:
+            is_manual = getattr(context, "_scitex_is_manual_mode", False)
+            download_method = "manual_download" if is_manual else "automated"
+        return downloaded_file, temp_pdf_path, download_method
 
-    def _handle_downloaded_pdf(self, paper, io, downloaded_file, temp_pdf_path):
+    def _handle_downloaded_pdf(
+        self, paper, io, downloaded_file, temp_pdf_path, download_method="unknown"
+    ):
         import shutil
 
         if downloaded_file == temp_pdf_path and temp_pdf_path.exists():
             main_pdf = io.get_pdf_path()
             shutil.move(str(temp_pdf_path), str(main_pdf))
             paper.metadata.path.pdfs = [str(main_pdf)]
+            paper.metadata.path.pdfs_engines = [download_method]
             paper.container.pdf_size_bytes = main_pdf.stat().st_size
             io.save_metadata()
-            logger.success(f"{self.name}: PDF downloaded to MASTER")
+            logger.success(
+                f"{self.name}: PDF downloaded to MASTER via {download_method}"
+            )
         else:
             io.save_pdf(downloaded_file)
+            paper.metadata.path.pdfs_engines = [download_method]
             io.save_metadata()
         logger.info(f"{self.name}: PDF saved ({str(downloaded_file)})")
 
-    def _check_manual_download(self, io):
+    def _check_manual_download(self, io, paper=None):
         import time
 
         from scitex.scholar import ScholarConfig
@@ -249,6 +276,9 @@ class PipelineStepsMixin:
             latest_pdf = recent_pdfs[0][0]
             logger.info(f"{self.name}: Found recent PDF: {latest_pdf.name}")
             io.save_pdf(latest_pdf)
+            # Track as manual download
+            if paper:
+                paper.metadata.path.pdfs_engines = ["manual_download"]
             io.save_metadata()
             logger.success(f"{self.name}: Manual PDF saved to MASTER")
         else:
@@ -258,39 +288,44 @@ class PipelineStepsMixin:
 class PipelineHelpersMixin:
     """Mixin containing helper methods for single paper pipeline."""
 
+    async def _capture_screenshot(self, browser_manager, context, io, description):
+        """Capture screenshot for debugging when issues occur."""
+        if not browser_manager or not context:
+            return
+        try:
+            from datetime import datetime
+
+            screenshots_dir = io.paper_dir / "screenshots"
+            screenshots_dir.mkdir(parents=True, exist_ok=True)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            screenshot_path = screenshots_dir / f"{timestamp}_{description}.png"
+            pages = context.pages
+            if pages:
+                page = pages[0]
+                await browser_manager.take_screenshot_async(
+                    page, str(screenshot_path), full_page=True
+                )
+                logger.info(f"{self.name}: Screenshot saved: {screenshot_path.name}")
+        except Exception as e:
+            logger.debug(f"{self.name}: Screenshot capture failed: {e}")
+
     def _generate_paper_id(self, doi: str) -> str:
         """Generate 8-digit library ID from DOI."""
         return hashlib.md5(f"DOI:{doi}".encode()).hexdigest()[:8].upper()
 
     def _link_to_project(self, paper: Paper, project: str, io: PaperIO) -> Path:
-        """Create human-readable symlink in project directory."""
-        from scitex.scholar import ScholarConfig
+        """Create human-readable symlink in project directory using LibraryManager."""
+        from scitex.scholar.storage import LibraryManager
 
-        config = ScholarConfig()
-        project_dir = config.path_manager.get_library_project_dir(project)
-        pdf_files = list(io.paper_dir.glob("*.pdf"))
-        entry_name = config.path_manager.get_library_project_entry_dirname(
-            n_pdfs=len(pdf_files),
-            citation_count=paper.metadata.citation_count.total or 0,
-            impact_factor=int(paper.metadata.publication.impact_factor or 0),
-            year=paper.metadata.basic.year or 0,
-            first_author=(
-                paper.metadata.basic.authors[0].split()[-1]
-                if paper.metadata.basic.authors
-                else "Unknown"
-            ),
-            journal_name=(
-                paper.metadata.publication.short_journal
-                or paper.metadata.publication.journal
-                or "Unknown"
-            ),
+        library_manager = LibraryManager()
+        symlink_path = library_manager.update_symlink(
+            master_storage_path=io.paper_dir,
+            project=project,
         )
-        symlink_path = project_dir / entry_name
-        target_path = Path("../MASTER") / paper.container.library_id
-        if symlink_path.exists() or symlink_path.is_symlink():
-            symlink_path.unlink()
-        symlink_path.symlink_to(target_path)
-        logger.success(f"{self.name}: Created symlink: {project}/{entry_name}")
+        if symlink_path:
+            logger.success(
+                f"{self.name}: Created symlink: {project}/{symlink_path.name}"
+            )
         return symlink_path
 
     def _enrich_impact_factor(self, paper: Paper) -> None:

@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Timestamp: "2025-10-16 01:47:39 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/pipelines/ScholarPipelineBibTeX.py
-# ----------------------------------------
-from __future__ import annotations
-import os
+# Timestamp: "2026-01-22 16:32:41 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/pipelines/ScholarPipelineBibTeX.py
 
-__FILE__ = "./src/scitex/scholar/pipelines/ScholarPipelineBibTeX.py"
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
 """
 Functionalities:
@@ -33,12 +27,12 @@ IO:
     - {input_bibtex}_processed.bib (enriched BibTeX with download status)
 """
 
-"""Imports"""
-import argparse
 import asyncio
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
+from typing import Union
 
+import scitex as stx
 from scitex import logging
 from scitex.scholar.core import Papers
 from scitex.scholar.pipelines.ScholarPipelineParallel import (
@@ -49,8 +43,6 @@ from scitex.scholar.storage import BibTeXHandler
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
-
-
 class ScholarPipelineBibTeX:
     """Processes BibTeX files through parallel paper acquisition pipeline"""
 
@@ -96,7 +88,8 @@ class ScholarPipelineBibTeX:
             project: Project name for symlinking (optional)
             output_bibtex_path: Path to save enriched BibTeX (optional, defaults to {input}_processed.bib)
 
-        Returns:
+        Returns
+        -------
             Papers collection with processed papers
         """
         bibtex_path = Path(bibtex_path)
@@ -145,7 +138,9 @@ class ScholarPipelineBibTeX:
         logger.success(
             f"{self.name}: Processed {len(processed_papers)}/{len(papers)} papers"
         )
-        logger.success(f"{self.name}: Saved enriched BibTeX: {output_bibtex_path}")
+        logger.success(
+            f"{self.name}: Saved enriched BibTeX: {output_bibtex_path}"
+        )
 
         # Update project bibliography if project specified
         if project:
@@ -161,7 +156,9 @@ class ScholarPipelineBibTeX:
                     bibtex_files=[bibtex_path, output_bibtex_path],
                 )
 
-                logger.success(f"{self.name}: Updated project bibliography: {project}")
+                logger.success(
+                    f"{self.name}: Updated project bibliography: {project}"
+                )
             except Exception as e:
                 logger.warning(f"Failed to update bibliography: {e}")
 
@@ -180,7 +177,8 @@ class ScholarPipelineBibTeX:
             project: Project name for symlinking (optional)
             output_bibtex_path: Path to save enriched BibTeX (optional)
 
-        Returns:
+        Returns
+        -------
             Papers collection with processed papers
         """
         logger.info(f"{self.name}: Processing BibTeX text content")
@@ -193,7 +191,9 @@ class ScholarPipelineBibTeX:
             logger.warning(f"{self.name}: No papers found in BibTeX text")
             return Papers([], project=project)
 
-        logger.info(f"{self.name}: Loaded {len(papers)} papers from BibTeX text")
+        logger.info(
+            f"{self.name}: Loaded {len(papers)} papers from BibTeX text"
+        )
 
         # Step 2: Process papers in parallel
         papers_collection = Papers(papers, project=project)
@@ -213,7 +213,9 @@ class ScholarPipelineBibTeX:
                 processed_collection,
                 output_path=output_bibtex_path,
             )
-            logger.success(f"{self.name}: Saved enriched BibTeX: {output_bibtex_path}")
+            logger.success(
+                f"{self.name}: Saved enriched BibTeX: {output_bibtex_path}"
+            )
 
         logger.success(
             f"{self.name}: Processed {len(processed_papers)}/{len(papers)} papers"
@@ -222,134 +224,84 @@ class ScholarPipelineBibTeX:
         return processed_collection
 
 
-def main(args):
-    """Run BibTeX pipeline"""
+@stx.session
+def main(
+    bibtex: str = None,
+    project: str = None,
+    output: str = None,
+    num_workers: int = 4,
+    browser_mode: str = "stealth",
+    chrome_profile: str = "system",
+    CONFIG=stx.INJECTED,
+    logger=stx.INJECTED,
+) -> int:
+    """Process BibTeX files through parallel paper acquisition pipeline.
 
-    if not args.bibtex:
+    Parameters
+    ----------
+    bibtex : str
+        Path to BibTeX file (required)
+    project : str
+        Project name for symlinking (optional)
+    output : str
+        Output BibTeX path (default: {input}_processed.bib)
+    num_workers : int
+        Number of parallel workers (default: 4)
+    browser_mode : str
+        Browser mode: 'stealth' or 'interactive' (default: stealth)
+    chrome_profile : str
+        Base Chrome profile name to sync from (default: system)
+
+    Returns
+    -------
+    int
+        Exit status code (0 for success)
+    """
+    if not bibtex:
         logger.error("No BibTeX file provided. Use --bibtex")
         return 1
 
-    bibtex_path = Path(args.bibtex)
+    bibtex_path = Path(bibtex)
     if not bibtex_path.exists():
         logger.error(f"BibTeX file not found: {bibtex_path}")
         return 1
 
     logger.info(f"Processing BibTeX file: {bibtex_path}")
-    logger.info(f"Workers: {args.num_workers}")
-    logger.info(f"Project: {args.project or 'None'}")
+    logger.info(f"Workers: {num_workers}")
+    logger.info(f"Project: {project or 'None'}")
 
     # Create BibTeX pipeline
     bibtex_pipeline = ScholarPipelineBibTeX(
-        num_workers=args.num_workers,
-        browser_mode=args.browser_mode,
-        base_chrome_profile=args.chrome_profile,
+        num_workers=num_workers,
+        browser_mode=browser_mode,
+        base_chrome_profile=chrome_profile,
     )
 
     # Run pipeline
     papers = asyncio.run(
         bibtex_pipeline.process_bibtex_file_async(
             bibtex_path=bibtex_path,
-            project=args.project,
-            output_bibtex_path=args.output,
+            project=project,
+            output_bibtex_path=output,
         )
     )
 
-    logger.success(f"BibTeX processing complete: {len(papers)} papers processed")
+    logger.success(
+        f"BibTeX processing complete: {len(papers)} papers processed"
+    )
     return 0
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Process BibTeX files through parallel paper acquisition pipeline"
-    )
-    parser.add_argument(
-        "--bibtex",
-        type=str,
-        required=True,
-        help="Path to BibTeX file",
-    )
-    parser.add_argument(
-        "--project",
-        type=str,
-        default=None,
-        help="Project name for symlinking (optional)",
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        default=None,
-        help="Output BibTeX path (default: {input}_processed.bib)",
-    )
-    parser.add_argument(
-        "--num-workers",
-        type=int,
-        default=4,
-        help="Number of parallel workers (default: 4)",
-    )
-    parser.add_argument(
-        "--browser-mode",
-        type=str,
-        choices=["stealth", "interactive"],
-        default="stealth",
-        help="Browser mode (default: stealth)",
-    )
-    parser.add_argument(
-        "--chrome-profile",
-        type=str,
-        default="system",
-        help="Base Chrome profile name to sync from (default: system)",
-    )
-    args = parser.parse_args()
-    return args
-
-
-def run_main() -> None:
-    """Initialize scitex framework, run main function, and cleanup."""
-    global CONFIG, CC, sys, plt, rng
-
-    import sys
-
-    import matplotlib.pyplot as plt
-
-    import scitex as stx
-
-    args = parse_args()
-
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
-        sys,
-        plt,
-        args=args,
-        file=__FILE__,
-        sdir_suffix=None,
-        verbose=False,
-        agg=True,
-    )
-
-    exit_status = main(args)
-
-    stx.session.close(
-        CONFIG,
-        verbose=False,
-        notify=False,
-        message="",
-        exit_status=exit_status,
-    )
-
-
 if __name__ == "__main__":
-    run_main()
+    main()
 
 """
-Usage:
-
-    # Process BibTeX file with 8 workers
-    python -m scitex.scholar.pipelines.ScholarPipelineBibTeX \
-        --bibtex ./data/scholar/bib_files/neurovista.bib \
-        --project neurovista \
-        --num-workers 8 \
-        --chrome-profile system \
-        --browser-mode stealth
+python -m scitex.scholar.pipelines.ScholarPipelineBibTeX \
+    --bibtex ./data/scholar/bib_files/neurovista.bib \
+    --project neurovista \
+    --num-workers 8 \
+    --chrome-profile system \
+    --browser-mode interactive
 """
 
 # EOF
