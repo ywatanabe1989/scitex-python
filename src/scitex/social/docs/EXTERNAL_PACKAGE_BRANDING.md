@@ -1,0 +1,1 @@
+../../../../docs/guides/EXTERNAL_PACKAGE_BRANDING.md
