@@ -1,4 +1,4 @@
-# SciTeX MCP Tools (108 total)
+# SciTeX MCP Tools (110 total)
 
 Model Context Protocol tools for AI agent integration.
 
@@ -12,7 +12,7 @@ scitex serve -t http --port 8085  # HTTP transport
 
 | Category | Tool | Description |
 |----------|------|-------------|
-| **audio** (10) | `audio_announce_context` | Announce cwd and git branch |
+| **audio** (12) | `audio_announce_context` | Announce cwd and git branch |
 |  | `audio_check_audio_status` | Check audio connectivity |
 |  | `audio_clear_audio_cache` | Clear audio cache |
 |  | `audio_generate_audio` | Generate speech audio file |
@@ -21,6 +21,8 @@ scitex serve -t http --port 8085  # HTTP transport
 |  | `audio_list_voices` | List voices for backend |
 |  | `audio_play_audio` | Play audio file |
 |  | `audio_speak` | Text-to-speech with fallback engines |
+|  | `audio_speak_local` | TTS on server (local playback) |
+|  | `audio_speak_relay` | TTS via relay (remote playback) |
 |  | `audio_speech_queue_status` | Get speech queue status |
 | **canvas** (7) | `canvas_add_panel` | Add panel to canvas |
 |  | `canvas_canvas_exists` | Check canvas exists |

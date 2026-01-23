@@ -44,6 +44,7 @@ scitex stats recommend --n-groups 2 --design between
 
 # Media
 scitex audio speak "Analysis complete"
+scitex audio relay --port 31293  # Start relay for remote audio
 scitex capture snap --message "results"
 
 # Documents

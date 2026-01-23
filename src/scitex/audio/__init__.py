@@ -264,69 +264,20 @@ _default_tts: Optional[BaseTTS] = None
 _default_backend: Optional[str] = None
 
 
-def speak(
+def _speak_local(
     text: str,
     backend: Optional[str] = None,
     voice: Optional[str] = None,
     play: bool = True,
     output_path: Optional[str] = None,
     fallback: bool = True,
-    rate: Optional[int] = None,
-    speed: Optional[float] = None,
     **kwargs,
 ) -> Optional[str]:
-    """Convert text to speech with automatic fallback.
-
-    Fallback order: elevenlabs -> gtts -> pyttsx3
-
-    Args:
-        text: Text to speak.
-        backend: TTS backend ('pyttsx3', 'gtts', 'elevenlabs').
-                 Auto-selects with fallback if None.
-        voice: Voice name, ID, or language code.
-        play: Whether to play the audio.
-        output_path: Path to save audio file.
-        fallback: If True, try next backend on failure.
-        rate: Speech rate in words per minute (pyttsx3 only, default 150).
-        speed: Speed multiplier for gtts (1.0=normal, >1.0=faster, <1.0=slower).
-        **kwargs: Additional backend options.
-
-    Returns:
-        Path to audio file if output_path specified, else None.
-
-    Examples:
-        import scitex
-
-        # Simple (auto-selects with fallback)
-        scitex.audio.speak("Hello!")
-
-        # Faster speech (pyttsx3)
-        scitex.audio.speak("Hello", rate=200)
-
-        # Faster speech (gtts with pydub)
-        scitex.audio.speak("Hello", backend="gtts", speed=1.5)
-
-        # Specific backend (no fallback)
-        scitex.audio.speak("Hello", backend="pyttsx3", fallback=False)
-
-        # Different language (gTTS)
-        scitex.audio.speak("Bonjour", backend="gtts", voice="fr")
-
-        # Save to file
-        scitex.audio.speak("Test", output_path="/tmp/test.mp3")
-    """
+    """Local TTS playback (original implementation)."""
     global _default_tts, _default_backend
 
-    # Stop any previously running speech first
-    stop_speech()
-
-    # Pass rate to kwargs for pyttsx3
-    if rate is not None:
-        kwargs["rate"] = rate
-
-    # Pass speed to kwargs for gtts
-    if speed is not None:
-        kwargs["speed"] = speed
+    # Note: stop_speech() removed - FIFO locking handles queuing
+    # Call stop_speech() explicitly if you want to interrupt current audio
 
     # If specific backend requested without fallback
     if backend and not fallback:
@@ -364,7 +315,6 @@ def speak(
         return str(result) if result else None
     except Exception as e:
         if fallback:
-            # Try other backends
             result, used_backend, errors = _try_speak_with_fallback(
                 text=text,
                 voice=voice,
@@ -379,6 +329,124 @@ def speak(
                 )
             return str(result) if result else None
         raise
+
+
+def speak(
+    text: str,
+    backend: Optional[str] = None,
+    voice: Optional[str] = None,
+    play: bool = True,
+    output_path: Optional[str] = None,
+    fallback: bool = True,
+    rate: Optional[int] = None,
+    speed: Optional[float] = None,
+    mode: Optional[str] = None,
+    **kwargs,
+) -> Optional[str]:
+    """Convert text to speech with smart local/remote switching.
+
+    Modes:
+        - local: Always use local TTS backends
+        - remote: Always forward to relay server
+        - auto: Try remote first, fall back to local (default)
+
+    Fallback order (local): elevenlabs -> gtts -> pyttsx3
+
+    Args:
+        text: Text to speak.
+        backend: TTS backend ('pyttsx3', 'gtts', 'elevenlabs').
+                 Auto-selects with fallback if None.
+        voice: Voice name, ID, or language code.
+        play: Whether to play the audio.
+        output_path: Path to save audio file.
+        fallback: If True, try next backend on failure.
+        rate: Speech rate in words per minute (pyttsx3 only, default 150).
+        speed: Speed multiplier for gtts (1.0=normal, >1.0=faster, <1.0=slower).
+        mode: Override mode ('local', 'remote', 'auto'). Uses env if None.
+        **kwargs: Additional backend options.
+
+    Returns:
+        Path to audio file if output_path specified, else None.
+
+    Environment Variables:
+        SCITEX_AUDIO_MODE: Default mode ('local', 'remote', 'auto')
+        SCITEX_AUDIO_RELAY_URL: Relay server URL for remote mode
+
+    Examples:
+        import scitex
+
+        # Simple (auto mode - tries remote, falls back to local)
+        scitex.audio.speak("Hello!")
+
+        # Force local playback
+        scitex.audio.speak("Hello", mode="local")
+
+        # Force remote relay
+        scitex.audio.speak("Hello", mode="remote")
+
+        # Faster speech (gtts with pydub)
+        scitex.audio.speak("Hello", backend="gtts", speed=1.5)
+    """
+    from ._branding import get_mode, get_relay_url
+    from ._relay import is_relay_available, relay_speak
+
+    # Pass rate/speed to kwargs
+    if rate is not None:
+        kwargs["rate"] = rate
+    if speed is not None:
+        kwargs["speed"] = speed
+
+    # Determine mode
+    effective_mode = mode or get_mode()
+
+    # Remote mode: always use relay
+    if effective_mode == "remote":
+        relay_url = get_relay_url()
+        if not relay_url:
+            raise RuntimeError(
+                "Remote mode requires SCITEX_AUDIO_RELAY_URL or "
+                "SCITEX_AUDIO_RELAY_HOST to be set"
+            )
+        result = relay_speak(
+            text=text,
+            backend=backend,
+            voice=voice,
+            rate=rate or 150,
+            speed=speed or 1.5,
+            play=play,
+            **kwargs,
+        )
+        return result.get("saved_to") if result.get("success") else None
+
+    # Auto mode: try remote first, fall back to local
+    if effective_mode == "auto":
+        relay_url = get_relay_url()
+        if relay_url and is_relay_available():
+            try:
+                result = relay_speak(
+                    text=text,
+                    backend=backend,
+                    voice=voice,
+                    rate=rate or 150,
+                    speed=speed or 1.5,
+                    play=play,
+                    **kwargs,
+                )
+                if result.get("success"):
+                    return result.get("saved_to")
+            except Exception:
+                pass  # Fall through to local
+
+    # Local mode (or fallback from auto)
+    return _speak_local(
+        text=text,
+        backend=backend,
+        voice=voice,
+        play=play,
+        output_path=output_path,
+        fallback=fallback,
+        **kwargs,
+    )
 
 
 def start_mcp_server():

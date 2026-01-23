@@ -255,9 +255,9 @@ def stop():
 )
 @click.option(
     "--port",
-    default=8084,
+    default=31293,
     type=int,
-    help="Port for HTTP/SSE transport (default: 8084)",
+    help="Port for HTTP/SSE transport (default: 31293)",
 )
 def serve(transport, host, port):
     """
@@ -277,18 +277,18 @@ def serve(transport, host, port):
       scitex audio serve
 
       # HTTP server for remote agents
-      scitex audio serve -t http --port 8084
+      scitex audio serve -t http --port 31293
 
       # SSE server
-      scitex audio serve -t sse --port 8084
+      scitex audio serve -t sse --port 31293
 
     \b
     Remote Setup:
-      1. Local:  scitex audio serve -t http --port 8084
+      1. Local:  scitex audio serve -t http --port 31293
       2. SSH:    Add to ~/.ssh/config:
-                   LocalForward 8084 127.0.0.1:8084
+                   LocalForward 31293 127.0.0.1:31293
       3. Remote MCP config:
-                   {"type": "sse", "url": "http://localhost:8084/sse"}
+                   {"type": "sse", "url": "http://localhost:31293/sse"}
     """
     try:
         from scitex.audio.mcp_server import FASTMCP_AVAILABLE, run_server
@@ -315,6 +315,62 @@ def serve(transport, host, port):
         click.echo("\nInstall dependencies:")
         click.echo("  pip install fastmcp")
         sys.exit(1)
+    except Exception as e:
+        click.secho(f"Error: {e}", fg="red", err=True)
+        sys.exit(1)
+
+
+@audio.command()
+@click.option(
+    "--host",
+    default="0.0.0.0",
+    help="Host to bind (default: 0.0.0.0)",
+)
+@click.option(
+    "--port",
+    default=31293,
+    type=int,
+    help="Port to bind (default: 31293)",
+)
+def relay(host, port):
+    """
+    Run simple HTTP relay server for remote audio playback
+
+    Unlike 'serve' (MCP server), this exposes simple REST endpoints
+    that remote agents can POST to for audio playback.
+
+    \b
+    Endpoints:
+      POST /speak        - Play text-to-speech
+      GET  /health       - Health check
+      GET  /list_backends - List available backends
+
+    \b
+    Example:
+      # On your local machine (where you want audio)
+      scitex audio relay --port 31293
+
+      # On remote server, set env var
+      export SCITEX_AUDIO_RELAY_URL=http://YOUR_LOCAL_IP:31293
+
+      # Or use SSH reverse tunnel
+      ssh -R 31293:localhost:31293 remote-server
+    """
+    try:
+        from scitex.audio.mcp_server import run_relay_server
+
+        click.secho(f"Starting audio relay server", fg="cyan")
+        click.echo(f"  Host: {host}")
+        click.echo(f"  Port: {port}")
+        click.echo()
+        click.echo("Endpoints:")
+        click.echo("  POST /speak       - Play text-to-speech")
+        click.echo("  GET  /health      - Health check")
+        click.echo("  GET  /list_backends - List backends")
+        click.echo()
+
+        run_relay_server(host=host, port=port)
+
     except Exception as e:
         click.secho(f"Error: {e}", fg="red", err=True)
         sys.exit(1)

@@ -27,6 +27,8 @@ scitex audio speak "Hello world"
 scitex audio speak "Bonjour" --backend gtts --voice fr
 scitex audio backends       # List available backends
 scitex audio check          # Check audio status (WSL)
+scitex audio relay          # Start HTTP relay server (for remote audio)
+scitex audio serve          # Start MCP server
 ```
 
 ## MCP Server
@@ -46,75 +48,77 @@ Add to `~/.claude/mcp.json`:
 }
 ```
 
-### Remote Audio (SSH tunnel)
+### Remote Audio (HTTP Relay)
 
-Enable remote agents to play audio on local speakers.
+Enable remote agents to play audio on local speakers using a simple HTTP relay.
 
 **Architecture:**
 ```
 ┌─────────────────────────┐              ┌─────────────────────────┐
 │  Remote (e.g., NAS)     │              │  Local (WSL/Windows)    │
 │                         │              │                         │
-│  Claude Agent ──────────┼─ SSH ───────▶│  scitex audio serve     │
-│  connects to            │ RemoteForward│  -t sse --port 8084     │
-│  localhost:8084         │              │         │               │
-│                         │              │         ▼               │
+│  Claude Agent uses      │              │  scitex audio relay     │
+│  audio_speak_relay ─────┼─ SSH ───────▶│  --port 31293           │
+│                         │ Reverse      │         │               │
+│  localhost:31293        │ Tunnel       │         ▼               │
 │                         │              │     🔊 Speakers         │
 └─────────────────────────┘              └─────────────────────────┘
 ```
 
-**Step 1: Local machine - Start audio server**
+**Step 1: Local machine - Start relay server**
 ```bash
-scitex audio serve -t sse --port 8084
+scitex audio relay --port 31293
 ```
 
-**Step 2: SSH config - Add RemoteForward**
+**Step 2: SSH with reverse tunnel**
+```bash
+ssh -R 31293:localhost:31293 remote-server
+```
 
-In `~/.ssh/config` (on local machine):
+Or add to `~/.ssh/config`:
 ```
 Host nas
   HostName 192.168.x.x
   User youruser
-  RemoteForward 8084 127.0.0.1:8084  # Audio: remote -> local speakers
+  RemoteForward 31293 127.0.0.1:31293
 ```
 
-**Step 3: Remote machine - MCP config**
+**Step 3: Remote agent uses relay**
 
-On remote machine, add to `~/.claude/mcp.json`:
-```json
-{
-  "mcpServers": {
-    "scitex-audio-remote": {
-      "type": "sse",
-      "url": "http://localhost:8084/sse"
-    }
-  }
-}
-```
+The `audio_speak_relay` MCP tool auto-detects:
+1. `SCITEX_AUDIO_RELAY_URL` env var
+2. Localhost:31293 (SSH reverse tunnel)
+3. SSH_CLIENT IP (auto-detected from SSH session)
 
-**Step 4: Connect via SSH**
-```bash
-ssh nas  # RemoteForward creates tunnel automatically
-```
+### Environment Variables
 
-Now Claude agents on the remote machine can use `mcp__scitex-audio-remote__speak` to play audio on your local speakers.
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SCITEX_AUDIO_PORT` | 31293 | Server/relay port |
+| `SCITEX_AUDIO_MODE` | auto | `local`, `remote`, or `auto` |
+| `SCITEX_AUDIO_RELAY_URL` | (auto) | Full relay URL |
+| `SCITEX_AUDIO_RELAY_HOST` | (none) | Relay host |
+| `SCITEX_AUDIO_RELAY_PORT` | 31293 | Relay port |
 
 ### Server Transports
 
 | Transport | Command | Use Case |
 |-----------|---------|----------|
 | stdio | `scitex audio serve` | Claude Desktop (default) |
-| sse | `scitex audio serve -t sse --port 8084` | Remote agents via SSH |
-| http | `scitex audio serve -t http --port 8084` | HTTP clients |
+| sse | `scitex audio serve -t sse --port 31293` | Remote MCP agents |
+| http | `scitex audio serve -t http --port 31293` | HTTP MCP clients |
+| relay | `scitex audio relay --port 31293` | Simple HTTP relay |
 
-### Tools
+### MCP Tools
 
 | Tool | Description |
 |------|-------------|
-| `speak` | Text to speech (supports `rate`, `speed` params) |
-| `list_backends` | Show available backends |
-| `check_audio_status` | Check WSL audio connectivity |
-| `announce_context` | Announce current directory and git branch |
+| `audio_speak` | Text to speech (plays on server) |
+| `audio_speak_local` | TTS on server machine |
+| `audio_speak_relay` | TTS via relay (remote playback) |
+| `audio_list_backends` | Show available backends |
+| `audio_check_audio_status` | Check WSL audio connectivity |
+| `audio_announce_context` | Announce current directory and git branch |
 
 ## Backends
 
@@ -126,4 +130,4 @@ Now Claude agents on the remote machine can use `mcp__scitex-audio-remote__speak
 
 ## Cross-Process Locking
 
-The MCP server uses FIFO locking to ensure only one audio plays at a time across all Claude Code sessions. This prevents audio overlap when multiple agents are running.
+The relay server uses FIFO locking to ensure only one audio plays at a time across all Claude Code sessions. This prevents audio overlap when multiple agents are running.
