@@ -1,3 +1,0 @@
-Content of experiment_v1.txt
-Version: 1
-Created: 1751627660.9275122
