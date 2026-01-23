@@ -80,13 +80,32 @@ def get_ssh_client_ip() -> Optional[str]:
     return None
 
 
+def _check_relay_reachable(url: str, timeout: float = 1.0) -> bool:
+    """Quick check if relay URL is reachable."""
+    import socket
+    import urllib.parse
+
+    try:
+        parsed = urllib.parse.urlparse(url)
+        host = parsed.hostname or "localhost"
+        port = parsed.port or DEFAULT_PORT
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        result = sock.connect_ex((host, port))
+        sock.close()
+        return result == 0
+    except Exception:
+        return False
+
+
 def get_relay_url() -> Optional[str]:
     """Get relay server URL for remote mode.
 
     Priority:
     1. SCITEX_AUDIO_RELAY_URL env var
     2. SCITEX_AUDIO_RELAY_HOST env var + port
-    3. Auto-detect from SSH_CLIENT (if in SSH session)
+    3. localhost:31293 (SSH reverse tunnel - if reachable)
+    4. Auto-detect from SSH_CLIENT (if in SSH session)
 
     Returns URL like 'http://192.168.1.100:31293' or None.
     """
@@ -99,6 +118,11 @@ def get_relay_url() -> Optional[str]:
     if relay_host:
         relay_port = get_env("RELAY_PORT", str(DEFAULT_PORT))
         return f"http://{relay_host}:{relay_port}"
+
+    # Check localhost first (SSH reverse tunnel)
+    localhost_url = f"http://localhost:{DEFAULT_PORT}"
+    if _check_relay_reachable(localhost_url):
+        return localhost_url
 
     # Auto-detect from SSH client IP
     ssh_client_ip = get_ssh_client_ip()
