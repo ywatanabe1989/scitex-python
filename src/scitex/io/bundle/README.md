@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2026-01-07
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/src/scitex/io/bundle/README.md
 !-- --- -->
 
 # SciTeX Bundle I/O

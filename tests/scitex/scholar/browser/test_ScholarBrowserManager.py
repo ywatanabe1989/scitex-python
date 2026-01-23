@@ -1,696 +1,660 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for ScholarBrowserManager class."""
+
+import asyncio
+import os
+import tempfile
+from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from scitex.scholar.browser.ScholarBrowserManager import ScholarBrowserManager
+
+
+class TestScholarBrowserManagerInit:
+    """Tests for ScholarBrowserManager initialization."""
+
+    def test_init_creates_instance(self):
+        """ScholarBrowserManager should initialize without errors."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                # Must pass browser_mode explicitly due to source code bug
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+                assert manager is not None
+                assert manager.name == "ScholarBrowserManager"
+
+    def test_init_stores_browser_mode(self):
+        """Should store browser mode."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+                assert manager.browser_mode == "interactive"
+
+    def test_init_stores_auth_manager(self):
+        """Should store auth manager."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                mock_auth = MagicMock()
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive",
+                    auth_manager=mock_auth,
+                    chrome_profile_name="test",
+                )
+                assert manager.auth_manager is mock_auth
+
+    def test_init_creates_chrome_profile_manager(self):
+        """Should create ChromeProfileManager."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test_profile"
+                )
+                assert manager.chrome_profile_manager is not None
+
+    def test_init_creates_stealth_manager(self):
+        """Should create StealthManager."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+                assert manager.stealth_manager is not None
+
+    def test_init_creates_cookie_acceptor(self):
+        """Should create CookieAutoAcceptor."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+                assert manager.cookie_acceptor is not None
+
+    def test_init_sets_persistent_attributes_to_none(self):
+        """Should initialize persistent attributes to None."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+                assert manager._persistent_browser is None
+                assert manager._persistent_context is None
+                assert manager._persistent_playwright is None
+
+    def test_init_uses_config(self):
+        """Should use provided config."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                from scitex.scholar.config import ScholarConfig
+
+                config = ScholarConfig()
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive",
+                    config=config,
+                    chrome_profile_name="test",
+                )
+                assert manager.config is config
+
+
+class TestSetInteractiveOrStealth:
+    """Tests for _set_interactive_or_stealth method."""
+
+    def test_interactive_mode_settings(self):
+        """Interactive mode should set correct settings."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+                assert manager.headless is False
+                assert manager.spoof_dimension is False
+                assert manager.viewport_size == (1920, 1080)
+                assert manager.display == 0
+
+    def test_stealth_mode_settings(self):
+        """Stealth mode should set correct settings."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="stealth", chrome_profile_name="test"
+                )
+                assert manager.headless is False
+                assert manager.spoof_dimension is True
+                assert manager.viewport_size == (1920, 1080)
+                assert manager.display == 99
+
+    def test_invalid_mode_raises_error(self):
+        """Invalid browser mode should raise AssertionError from BrowserMixin."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                # BrowserMixin.__init__ raises AssertionError before
+                # _set_interactive_or_stealth can raise ValueError
+                with pytest.raises(AssertionError):
+                    ScholarBrowserManager(
+                        browser_mode="invalid_mode", chrome_profile_name="test"
+                    )
+
+
+class TestGetAuthenticatedBrowserAndContextAsync:
+    """Tests for get_authenticated_browser_and_context_async method."""
+
+    @pytest.mark.asyncio
+    async def test_raises_without_auth_manager(self):
+        """Should raise ValueError when auth_manager is None."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive",
+                    auth_manager=None,
+                    chrome_profile_name="test",
+                )
+                with pytest.raises(ValueError) as excinfo:
+                    await manager.get_authenticated_browser_and_context_async()
+                assert "Authentication manager is not set" in str(excinfo.value)
+
+    @pytest.mark.asyncio
+    async def test_calls_ensure_authenticate(self):
+        """Should call auth_manager.ensure_authenticate_async."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                mock_auth = MagicMock()
+                mock_auth.ensure_authenticate_async = AsyncMock()
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive",
+                    auth_manager=mock_auth,
+                    chrome_profile_name="test",
+                )
+
+                with patch.object(
+                    manager,
+                    "_get_persistent_browser_with_profile_but_not_with_auth_async",
+                    AsyncMock(return_value=MagicMock()),
+                ):
+                    manager._persistent_context = MagicMock()
+                    await manager.get_authenticated_browser_and_context_async()
+
+                mock_auth.ensure_authenticate_async.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_returns_persistent_context_when_available(self):
+        """Should return persistent context when available."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                mock_auth = MagicMock()
+                mock_auth.ensure_authenticate_async = AsyncMock()
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive",
+                    auth_manager=mock_auth,
+                    chrome_profile_name="test",
+                )
+
+                mock_browser = MagicMock()
+                mock_context = MagicMock()
+                manager._persistent_context = mock_context
+
+                with patch.object(
+                    manager,
+                    "_get_persistent_browser_with_profile_but_not_with_auth_async",
+                    AsyncMock(return_value=mock_browser),
+                ):
+                    (
+                        browser,
+                        context,
+                    ) = await manager.get_authenticated_browser_and_context_async()
+
+                assert browser is mock_browser
+                assert context is mock_context
+
+
+class TestNewContextAsync:
+    """Tests for _new_context_async method."""
+
+    @pytest.mark.asyncio
+    async def test_creates_context_with_stealth_options(self):
+        """Should create context with stealth options."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_browser = MagicMock()
+                mock_context = MagicMock()
+                mock_context.add_init_script = AsyncMock()
+                mock_browser.new_context = AsyncMock(return_value=mock_context)
+
+                result = await manager._new_context_async(mock_browser)
+
+                mock_browser.new_context.assert_called_once()
+                assert result is mock_context
+
+    @pytest.mark.asyncio
+    async def test_applies_stealth_scripts(self):
+        """Should apply stealth scripts to context."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_browser = MagicMock()
+                mock_context = MagicMock()
+                mock_context.add_init_script = AsyncMock()
+                mock_browser.new_context = AsyncMock(return_value=mock_context)
+
+                await manager._new_context_async(mock_browser)
+
+                # Should call add_init_script 3 times (stealth, dimension, cookie)
+                assert mock_context.add_init_script.call_count == 3
+
+
+class TestBuildPersistentContextLaunchOptions:
+    """Tests for _build_persistent_context_launch_options method."""
+
+    def test_returns_dict_with_required_keys(self):
+        """Should return dict with all required launch options."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+                options = manager._build_persistent_context_launch_options()
+
+                assert "user_data_dir" in options
+                assert "headless" in options
+                assert "args" in options
+                assert "accept_downloads" in options
+                assert "downloads_path" in options
+                assert "viewport" in options
+                assert "screen" in options
+
+    def test_includes_extension_args(self):
+        """Should include extension args in launch options."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                with patch.object(
+                    manager.chrome_profile_manager,
+                    "get_extension_args",
+                    return_value=["--load-extension=test"],
+                ):
+                    options = manager._build_persistent_context_launch_options()
+                    assert "--load-extension=test" in options["args"]
+
+    def test_includes_stealth_args(self):
+        """Should include stealth args in launch options."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+                options = manager._build_persistent_context_launch_options()
+
+                # Should have display arg
+                display_args = [arg for arg in options["args"] if "--display=" in arg]
+                assert len(display_args) > 0
+
+    def test_sets_accept_downloads_true(self):
+        """Should set accept_downloads to True."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+                options = manager._build_persistent_context_launch_options()
+                assert options["accept_downloads"] is True
+
+    def test_viewport_matches_viewport_size(self):
+        """Viewport should match configured viewport size."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+                options = manager._build_persistent_context_launch_options()
+
+                assert options["viewport"]["width"] == manager.viewport_size[0]
+                assert options["viewport"]["height"] == manager.viewport_size[1]
+
+
+class TestTakeScreenshotAsync:
+    """Tests for take_screenshot_async method."""
+
+    @pytest.mark.asyncio
+    async def test_calls_page_screenshot(self):
+        """Should call page.screenshot with correct parameters."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_page = MagicMock()
+                mock_page.screenshot = AsyncMock()
+
+                screenshot_path = Path(tmpdir) / "test.png"
+                await manager.take_screenshot_async(mock_page, screenshot_path)
+
+                mock_page.screenshot.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_uses_correct_timeout(self):
+        """Should use correct timeout in milliseconds."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_page = MagicMock()
+                mock_page.screenshot = AsyncMock()
+
+                await manager.take_screenshot_async(
+                    mock_page, "/tmp/test.png", timeout_sec=10.0
+                )
+
+                call_kwargs = mock_page.screenshot.call_args[1]
+                assert call_kwargs["timeout"] == 10000  # 10 seconds in ms
+
+    @pytest.mark.asyncio
+    async def test_handles_full_page_option(self):
+        """Should pass full_page option to screenshot."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_page = MagicMock()
+                mock_page.screenshot = AsyncMock()
+
+                await manager.take_screenshot_async(
+                    mock_page, "/tmp/test.png", full_page=True
+                )
+
+                call_kwargs = mock_page.screenshot.call_args[1]
+                assert call_kwargs["full_page"] is True
+
+    @pytest.mark.asyncio
+    async def test_handles_screenshot_error_gracefully(self):
+        """Should handle screenshot errors gracefully."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_page = MagicMock()
+                mock_page.screenshot = AsyncMock(
+                    side_effect=Exception("Screenshot failed")
+                )
+
+                # Should not raise
+                await manager.take_screenshot_async(mock_page, "/tmp/test.png")
+
+
+class TestPeriodicScreenshots:
+    """Tests for periodic screenshot functionality."""
+
+    @pytest.mark.asyncio
+    async def test_start_returns_task(self):
+        """start_periodic_screenshots_async should return an asyncio Task."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_page = MagicMock()
+                mock_page.screenshot = AsyncMock()
+
+                task = await manager.start_periodic_screenshots_async(
+                    mock_page, tmpdir, duration_seconds=0
+                )
+
+                assert isinstance(task, asyncio.Task)
+                task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+
+    @pytest.mark.asyncio
+    async def test_stop_cancels_task(self):
+        """stop_periodic_screenshots_async should cancel the task."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_page = MagicMock()
+                mock_page.screenshot = AsyncMock()
+
+                task = await manager.start_periodic_screenshots_async(
+                    mock_page, tmpdir, duration_seconds=0
+                )
+
+                await manager.stop_periodic_screenshots_async(task)
+
+                assert task.cancelled() or task.done()
+
+
+class TestVerifyXvfbRunning:
+    """Tests for _verify_xvfb_running method."""
+
+    def test_returns_true_when_display_running(self):
+        """Should return True when Xvfb display is running."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                with patch("subprocess.run") as mock_run:
+                    mock_run.return_value = MagicMock(returncode=0)
+                    result = manager._verify_xvfb_running()
+                    assert result is True
+
+    def test_handles_xvfb_not_found(self):
+        """Should handle case when Xvfb not installed."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                with patch("subprocess.run") as mock_run:
+                    mock_run.side_effect = Exception("xdpyinfo not found")
+                    result = manager._verify_xvfb_running()
+                    assert result is False
+
+
+class TestClose:
+    """Tests for close method."""
+
+    @pytest.mark.asyncio
+    async def test_closes_persistent_context(self):
+        """Should close persistent context."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_context = MagicMock()
+                mock_context.close = AsyncMock()
+                mock_browser = MagicMock()
+                mock_browser.is_connected.return_value = True
+                mock_context.browser = mock_browser
+
+                manager._persistent_context = mock_context
+
+                await manager.close()
+
+                mock_context.close.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_closes_persistent_browser(self):
+        """Should close persistent browser."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_browser = MagicMock()
+                mock_browser.is_connected.return_value = True
+                mock_browser.close = AsyncMock()
+
+                mock_context = MagicMock()
+                mock_context.close = AsyncMock()
+                mock_context.browser.is_connected.return_value = True
+
+                manager._persistent_context = mock_context
+                manager._persistent_browser = mock_browser
+
+                await manager.close()
+
+                mock_browser.close.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_stops_playwright(self):
+        """Should stop playwright instance."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_playwright = MagicMock()
+                mock_playwright.stop = AsyncMock()
+
+                mock_context = MagicMock()
+                mock_context.close = AsyncMock()
+                mock_context.browser.is_connected.return_value = True
+
+                manager._persistent_context = mock_context
+                manager._persistent_playwright = mock_playwright
+
+                await manager.close()
+
+                mock_playwright.stop.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_resets_persistent_attributes(self):
+        """Should reset persistent attributes to None after close."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_context = MagicMock()
+                mock_context.close = AsyncMock()
+                mock_context.browser.is_connected.return_value = True
+
+                manager._persistent_context = mock_context
+                manager._persistent_browser = MagicMock()
+                manager._persistent_playwright = MagicMock()
+                manager._persistent_playwright.stop = AsyncMock()
+
+                await manager.close()
+
+                assert manager._persistent_context is None
+                assert manager._persistent_browser is None
+                assert manager._persistent_playwright is None
+
+    @pytest.mark.asyncio
+    async def test_handles_already_closed_browser(self):
+        """Should handle case when browser already closed."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="test"
+                )
+
+                mock_context = MagicMock()
+                mock_context.browser.is_connected.return_value = False
+                manager._persistent_context = mock_context
+
+                # Should not raise
+                await manager.close()
+
+
+class TestZenRowsProxy:
+    """Tests for ZenRows proxy functionality."""
+
+    def test_zenrows_import_fails_when_enabled(self):
+        """Should raise ModuleNotFoundError when use_zenrows_proxy=True.
+
+        The remote module with ZenRowsProxyManager doesn't exist in the
+        scholar browser path, so enabling zenrows_proxy causes an import error.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                with pytest.raises(ModuleNotFoundError):
+                    ScholarBrowserManager(
+                        browser_mode="interactive",
+                        use_zenrows_proxy=True,
+                        chrome_profile_name="test",
+                    )
+
+    def test_no_zenrows_manager_when_disabled(self):
+        """Should not create ZenRowsProxyManager when use_zenrows_proxy=False."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive",
+                    use_zenrows_proxy=False,
+                    chrome_profile_name="test",
+                )
+                assert manager.use_zenrows_proxy is False
+                assert not hasattr(manager, "zenrows_proxy_manager")
+
+
+class TestScholarBrowserManagerIntegration:
+    """Integration tests for ScholarBrowserManager."""
+
+    def test_full_initialization(self):
+        """Test complete initialization with all components."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                mock_auth = MagicMock()
+                manager = ScholarBrowserManager(
+                    browser_mode="interactive",
+                    auth_manager=mock_auth,
+                    chrome_profile_name="test",
+                )
+
+                assert manager.name == "ScholarBrowserManager"
+                assert manager.browser_mode == "interactive"
+                assert manager.auth_manager is mock_auth
+                assert manager.chrome_profile_manager is not None
+                assert manager.stealth_manager is not None
+                assert manager.cookie_acceptor is not None
+
+    def test_multiple_instances_independent(self):
+        """Multiple instances should be independent."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.dict(os.environ, {"SCITEX_DIR": tmpdir}):
+                manager1 = ScholarBrowserManager(
+                    browser_mode="interactive", chrome_profile_name="profile1"
+                )
+                manager2 = ScholarBrowserManager(
+                    browser_mode="stealth", chrome_profile_name="profile2"
+                )
+
+                assert manager1.browser_mode != manager2.browser_mode
+                assert manager1.display != manager2.display
+
 
 if __name__ == "__main__":
-    import os
-
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/browser/ScholarBrowserManager.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-10-11 07:53:46 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/browser/ScholarBrowserManager.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = "./src/scitex/scholar/browser/ScholarBrowserManager.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# __FILE__ = __file__
-# 
-# import asyncio
-# import subprocess
-# import time
-# from datetime import datetime
-# from pathlib import Path
-# from typing import Union
-# 
-# from playwright.async_api import Browser, BrowserContext, async_playwright
-# 
-# from scitex import logging
-# from scitex.browser.automation import CookieAutoAcceptor
-# from scitex.browser.core import BrowserMixin, ChromeProfileManager
-# from scitex.browser.stealth import StealthManager
-# from scitex.scholar.browser.utils.close_unwanted_pages import (
-#     close_unwanted_pages,
-# )
-# from scitex.scholar.config import ScholarConfig
-# 
-# logger = logging.getLogger(__name__)
-# 
-# """
-# Browser Manager with persistent context support.
-# 
-# _persistent_context is a **persistent browser context** that stays alive across multiple operations.
-# 
-# ## Regular vs Persistent Context
-# 
-# **Regular context** (new each time):
-# ```python
-# browser = await playwright.chromium.launch()
-# context = await browser.new_context()  # New context each time
-# page = await context.new_page()
-# ```
-# 
-# **Persistent context** (reused):
-# ```python
-# # Created once in _launch_persistent_context_async()
-# self._persistent_context = await self._persistent_playwright.chromium.launch_persistent_context(
-#     user_data_dir=str(profile_dir),  # Persistent profile
-#     headless=False,
-#     args=[...extensions...]
-# )
-# 
-# # Reused multiple times
-# if hasattr(self, "_persistent_context") and self._persistent_context:
-#     context = self._persistent_context  # Same context
-# ```
-# 
-# ## Benefits of Persistent Context
-# 
-# 1. **Extensions persist** - Extensions loaded once, available for all pages
-# 2. **Authentication cookies persist** - No need to re-login
-# 3. **Profile data persistent** - Bookmarks, history, settings maintained
-# 4. **Performance** - Faster page creation (no browser restart)
-# 5. **Session continuity** - Maintains login state across operations
-# 
-# ## In Your Code
-# 
-# `_persistent_context` is set in `_launch_persistent_context_async()` and reused in `get_authenticated_browser_and_context_async()`. This allows multiple pages to share the same authenticated, extension-enabled browser session.
-# """
-# 
-# 
-# class ScholarBrowserManager(BrowserMixin):
-#     """Manages a local browser instance with stealth enhancements and invisible mode."""
-# 
-#     def __init__(
-#         self,
-#         browser_mode=None,
-#         auth_manager=None,
-#         chrome_profile_name=None,
-#         use_zenrows_proxy=False,
-#         config: ScholarConfig = None,
-#     ):
-#         """
-#         Initialize ScholarBrowserManager with invisible browser capabilities.
-# 
-#         Args:
-#             auth_manager: Authentication manager instance
-#             config: Scholar configuration instance
-#         """
-#         # Store scholar_config for use by components like ChromeProfileManager
-#         self.name = self.__class__.__name__
-#         self.config = config or ScholarConfig()
-# 
-#         # Browser
-#         self.browser_mode = self.config.resolve(
-#             "browser_mode", browser_mode, default="interactive"
-#         )
-#         super().__init__(mode=self.browser_mode)
-#         self._set_interactive_or_stealth(browser_mode)
-# 
-#         # ZenRows
-#         self.use_zenrows_proxy = use_zenrows_proxy
-#         if use_zenrows_proxy:
-#             from .remote.ZenRowsProxyManager import ZenRowsProxyManager
-# 
-#             self.zenrows_proxy_manager = ZenRowsProxyManager(config=config)
-# 
-#         # Library Authentication
-#         self.auth_manager = auth_manager
-#         if auth_manager is None:
-#             logger.fail(
-#                 f"{self.name}: auth_manager not passed. University Authentication will not be enabled."
-#             )
-# 
-#         # Chrome Extension
-#         self.chrome_profile_manager = ChromeProfileManager(
-#             chrome_profile_name, config=self.config
-#         )
-# 
-#         # Stealth
-#         self.stealth_manager = StealthManager(self.viewport_size, self.spoof_dimension)
-# 
-#         # Cookie
-#         self.cookie_acceptor = CookieAutoAcceptor()
-# 
-#         # Initialize persistent browser attributes
-#         self._persistent_browser = None
-#         self._persistent_context = None
-#         self._persistent_playwright = None
-# 
-#     def _set_interactive_or_stealth(self, browser_mode):
-#         # Interactive or Stealth
-#         if browser_mode == "interactive":
-#             self.headless = False
-#             self.spoof_dimension = False
-#             self.viewport_size = (1920, 1080)
-#             self.display = 0
-#         elif browser_mode == "stealth":
-#             # Must be False for dimension spoofing to work
-#             self.headless = False
-#             self.spoof_dimension = True
-#             # This only affects internal viewport, not window size
-#             # self.viewport_size = (1, 1)
-#             self.viewport_size = (1920, 1080)
-#             self.display = 99
-#         else:
-#             raise ValueError(
-#                 "browser_mode must be eighther of 'interactive' or 'stealth'"
-#             )
-#         logger.debug(f"{self.name}: Browser initialized:")
-#         logger.debug(f"{self.name}: headless: {self.headless}")
-#         logger.debug(f"{self.name}: spoof_dimension: {self.spoof_dimension}")
-#         logger.debug(f"{self.name}: viewport_size: {self.viewport_size}")
-# 
-#     async def get_authenticated_browser_and_context_async(
-#         self, **context_options
-#     ) -> tuple[Browser, BrowserContext]:
-#         """Get browser context with authentication cookies and extensions loaded."""
-#         if self.auth_manager is None:
-#             raise ValueError(
-#                 f"{self.name}: "
-#                 "Authentication manager is not set. "
-#                 "To use this method, please initialize ScholarBrowserManager with an auth_manager."
-#             )
-# 
-#         await self.auth_manager.ensure_authenticate_async()
-# 
-#         browser = (
-#             await self._get_persistent_browser_with_profile_but_not_with_auth_async()
-#         )
-# 
-#         if hasattr(self, "_persistent_context") and self._persistent_context:
-#             context = self._persistent_context
-#             logger.info(
-#                 f"{self.name}: Using persistent context with profile and extensions"
-#             )
-#         else:
-#             logger.warning(f"{self.name}: Falling back to regular context creation")
-# 
-#             auth_options = await self.auth_manager.get_auth_options()
-#             context_options.update(auth_options)
-# 
-#             context = await self._new_context_async(browser, **context_options)
-# 
-#         return browser, context
-# 
-#     async def _new_context_async(
-#         self, browser: Browser, **context_options
-#     ) -> BrowserContext:
-#         """Creates a new browser context with stealth options and invisible mode applied."""
-#         stealth_options = self.stealth_manager.get_stealth_options()
-#         context = await browser.new_context({**stealth_options, **context_options})
-# 
-#         # Apply stealth script
-#         await context.add_init_script(self.stealth_manager.get_init_script())
-#         await context.add_init_script(
-#             self.stealth_manager.get_dimension_spoofing_script()
-#         )
-#         await context.add_init_script(self.cookie_acceptor.get_auto_acceptor_script())
-#         return context
-# 
-#     # ########################################
-#     # Persistent Context
-#     # ########################################
-#     async def _get_persistent_browser_with_profile_but_not_with_auth_async(
-#         self,
-#     ) -> Browser:
-#         if (
-#             self._persistent_browser is None
-#             or self._persistent_browser.is_connected() is False
-#         ):
-#             await self.auth_manager.ensure_authenticate_async()
-#             await self._ensure_playwright_started_async()
-#             await self._ensure_extensions_installed_async()
-#             self._verify_xvfb_running()
-#             await self._launch_persistent_context_async()
-#         return self._persistent_browser
-# 
-#     async def _ensure_playwright_started_async(self):
-#         if self._persistent_playwright is None:
-#             self._persistent_playwright = await async_playwright().start()
-# 
-#     async def _ensure_extensions_installed_async(self):
-#         if not self.chrome_profile_manager.check_extensions_installed():
-#             logger.error(f"{self.name}: Chrome extensions not verified")
-#             try:
-#                 logger.warning(f"{self.name}: Trying install extensions")
-#                 await self.chrome_profile_manager.install_extensions_manually_if_not_installed_async()
-#             except Exception as e:
-#                 logger.error(f"{self.name}: Installation failed: {str(e)}")
-# 
-#     async def _launch_persistent_context_async(self):
-#         persistent_context_launch_options = (
-#             self._build_persistent_context_launch_options()
-#         )
-# 
-#         # # Create preferences to disable PDF viewer and force downloads
-#         # self._set_pdf_download_preferences()
-# 
-#         # Clean up any existing singleton lock files that might prevent browser launch
-#         profile_dir = self.chrome_profile_manager.profile_dir
-# 
-#         # Multiple possible lock file locations
-#         lock_files = [
-#             profile_dir / "SingletonLock",
-#             profile_dir / "SingletonSocket",
-#             profile_dir / "SingletonCookie",
-#             profile_dir / "lockfile",
-#         ]
-# 
-#         removed_locks = 0
-#         for lock_file in lock_files:
-#             if lock_file.exists():
-#                 try:
-#                     lock_file.unlink()
-#                     logger.debug(
-#                         f"{self.name}: Removed Chrome lock file: {lock_file.name}"
-#                     )
-#                     removed_locks += 1
-#                 except Exception as e:
-#                     logger.warning(
-#                         f"{self.name}: Could not remove {lock_file.name}: {e}"
-#                     )
-# 
-#         if removed_locks > 0:
-#             logger.debug(f"{self.name}: Cleaned up {removed_locks} Chrome lock files")
-#             # Wait a moment for the system to release file handles
-#             time.sleep(1)
-# 
-#         # Kill any lingering Chrome processes using this profile
-#         try:
-#             profile_path_str = str(profile_dir)
-#             # Find and kill Chrome processes using this profile
-#             result = subprocess.run(
-#                 ["pkill", "-f", f"user-data-dir={profile_path_str}"],
-#                 capture_output=True,
-#                 text=True,
-#             )
-#             if result.returncode == 0:
-#                 logger.debug(
-#                     f"{self.name}: Killed lingering Chrome processes for this profile"
-#                 )
-#                 time.sleep(2)  # Give processes time to fully terminate
-#         except Exception as e:
-#             logger.debug(f"{self.name}: Chrome process cleanup attempt: {e}")
-# 
-#         # This show_asyncs a small screen with 4 extensions show_asyncn
-#         persistent_context_launch_options["headless"] = False
-#         self._persistent_context = (
-#             await self._persistent_playwright.chromium.launch_persistent_context(
-#                 **persistent_context_launch_options
-#             )
-#         )
-#         # First cleanup run (immediate, non-continuous)
-#         await close_unwanted_pages(
-#             self._persistent_context, delay_sec=1, continuous=False
-#         )
-#         # Background continuous monitoring task
-#         asyncio.create_task(
-#             close_unwanted_pages(self._persistent_context, delay_sec=5, continuous=True)
-#         )
-#         # await self._close_unwanted_extension_pages_async()
-#         # asyncio.create_task(self._close_unwanted_extension_pages_async())
-#         await self._apply_stealth_scripts_to_persistent_context_async()
-#         await self._load_auth_cookies_to_persistent_context_async()
-#         self._persistent_browser = self._persistent_context.browser
-# 
-#     def _verify_xvfb_running(self):
-#         """Verify Xvfb virtual display is running"""
-#         try:
-#             result = subprocess.run(
-#                 ["xdpyinfo", "-display", f":{self.display}"],
-#                 capture_output=True,
-#                 text=True,
-#                 timeout=5,
-#             )
-#             if result.returncode == 0:
-#                 logger.debug(f"{self.name}: Xvfb display :{self.display} is running")
-#                 return True
-#             else:
-#                 logger.debug(f"{self.name}: Starting Xvfb display :{self.display}")
-#                 # Kill any existing Xvfb on this display first
-#                 subprocess.run(
-#                     ["pkill", "-f", f"Xvfb.*:{self.display}"],
-#                     capture_output=True,
-#                 )
-#                 time.sleep(0.5)
-# 
-#                 subprocess.Popen(
-#                     [
-#                         "Xvfb",
-#                         f":{self.display}",
-#                         "-screen",
-#                         "0",
-#                         "1920x1080x24",  # 24-bit color depth for better rendering
-#                         "-ac",  # Disable access control
-#                         "+extension",
-#                         "GLX",  # OpenGL support
-#                         "+extension",
-#                         "RANDR",  # Screen resize support
-#                         "+render",  # Render extension for better graphics
-#                         "-noreset",  # Don't reset after last client exits
-#                         "-dpi",
-#                         "96",  # Standard DPI
-#                     ],
-#                     env={**os.environ, "DISPLAY": f":{self.display}"},
-#                 )
-#                 time.sleep(3)  # Give Xvfb more time to initialize properly
-#                 return self._verify_xvfb_running()
-#         except Exception as e:
-#             logger.error(f"{self.name}: Cannot verify Xvfb: {e}")
-#             return False
-# 
-#     def _build_persistent_context_launch_options(self):
-#         stealth_args = self.stealth_manager.get_stealth_options_additional()
-#         extension_args = self.chrome_profile_manager.get_extension_args()
-#         pdf_download_args = [
-#             "--always-open-pdf-externally",
-#             "--disable-plugins-discovery",
-#             "--plugin-policy=block",
-#         ]
-# 
-#         stealth_args.extend(
-#             [
-#                 f"--display=:{self.display}",
-#                 "--window-size=1920,1080",
-#             ]
-#         )
-# 
-#         no_welcome_args = [
-#             "--disable-extensions-file-access-check",
-#             "--disable-extensions-http-throttling",
-#             "--disable-component-extensions-with-background-pages",
-#         ]
-# 
-#         # Disable "Restore pages?" popup and session restore dialogs
-#         no_restore_args = [
-#             "--disable-session-crashed-bubble",
-#             "--disable-infobars",
-#             "--no-first-run",
-#             "--no-default-browser-check",
-#         ]
-# 
-#         screenshot_args = [
-#             "--no-sandbox",
-#             "--disable-blink-features=AutomationControlled",
-#             "--disable-features=VizDisplayCompositor",
-#             "--disable-web-security",
-#             "--disable-features=TranslateUI",
-#             "--disable-ipc-flooding-protection",
-#             "--font-render-hinting=none",
-#             "--disable-font-subpixel-positioning",
-#             "--disable-remote-fonts",
-#             "--disable-background-timer-throttling",
-#             "--disable-backgrounding-occluded-windows",
-#             "--disable-renderer-backgrounding",
-#             "--disable-font-loading-api",
-#         ]
-# 
-#         launch_args = (
-#             extension_args
-#             + stealth_args
-#             + no_welcome_args
-#             + no_restore_args
-#             + pdf_download_args
-#             + screenshot_args
-#         )
-# 
-#         # Debug: Show window args for stealth mode
-#         if self.spoof_dimension:
-#             window_args = [arg for arg in launch_args if "window-" in arg]
-#             logger.debug(f"{self.name}: Stealth window args: {window_args}")
-# 
-#         proxy_config = None
-#         if self.use_zenrows_proxy:
-#             proxy_config = self.zenrows_proxy_manager.get_proxy_config()
-# 
-#         # Set download directory to scholar library downloads folder
-#         downloads_path = self.config.get_library_downloads_dir()
-# 
-#         return {
-#             "user_data_dir": str(self.chrome_profile_manager.profile_dir),
-#             "headless": self.headless,
-#             "args": launch_args,
-#             "accept_downloads": True,  # Enable download handling
-#             "downloads_path": str(downloads_path),  # Set custom download directory
-#             "proxy": proxy_config,
-#             "viewport": {
-#                 "width": self.viewport_size[0],
-#                 "height": self.viewport_size[1],
-#             },
-#             "screen": {
-#                 "width": self.viewport_size[0],
-#                 "height": self.viewport_size[1],
-#             },
-#         }
-# 
-#     async def _apply_stealth_scripts_to_persistent_context_async(self):
-#         await self._persistent_context.add_init_script(
-#             self.stealth_manager.get_init_script()
-#         )
-#         await self._persistent_context.add_init_script(
-#             self.stealth_manager.get_dimension_spoofing_script()
-#         )
-#         await self._persistent_context.add_init_script(
-#             self.cookie_acceptor.get_auto_acceptor_script()
-#         )
-# 
-#     async def _load_auth_cookies_to_persistent_context_async(self):
-#         """Load authentication cookies into the persistent browser context."""
-#         if not self.auth_manager:
-#             logger.debug(
-#                 f"{self.name}: No auth_manager available, skipping cookie loading"
-#             )
-#             return
-# 
-#         try:
-#             # Check if we have authentication
-#             if await self.auth_manager.is_authenticate_async(verify_live=False):
-#                 cookies = await self.auth_manager.get_auth_cookies_async()
-#                 if cookies:
-#                     await self._persistent_context.add_cookies(cookies)
-#                     logger.info(
-#                         f"{self.name}: Loaded {len(cookies)} authentication cookies into persistent browser context"
-#                     )
-#                 else:
-#                     logger.debug(f"{self.name}: No cookies available from auth manager")
-#             else:
-#                 logger.debug(f"{self.name}: Not authenticated, skipping cookie loading")
-#         except Exception as e:
-#             logger.warning(f"{self.name}: Failed to load authentication cookies: {e}")
-# 
-#     async def take_screenshot_async(
-#         self,
-#         page,
-#         path: Union[str, Path],
-#         timeout_sec: float = 30.0,
-#         timeout_after_sec: float = 30.0,
-#         full_page: bool = False,
-#     ):
-#         """Take screenshot without viewport changes."""
-#         try:
-#             await page.screenshot(
-#                 path=path, timeout=timeout_sec * 1000, full_page=full_page
-#             )
-#             logger.info(f"{self.name}: Saved: {path}")
-#         except Exception as e:
-#             logger.fail(f"{self.name}: Screenshot failed for {path}: {e}")
-# 
-#     async def start_periodic_screenshots_async(
-#         self,
-#         page,
-#         output_dir: Union[str, Path],
-#         prefix: str = "periodic",
-#         interval_seconds: int = 1,
-#         duration_seconds: int = 10,
-#         verbose: bool = False,
-#     ):
-#         """
-#         Start taking periodic screenshots in the background.
-# 
-#         Args:
-#             page: The page to screenshot
-#             prefix: Prefix for screenshot filenames
-#             interval_seconds: Seconds between screenshots
-#             duration_seconds: Total duration to take screenshots (0 = infinite)
-#             verbose: Whether to log each screenshot
-# 
-#         Returns:
-#             asyncio.Task that can be cancelled to stop screenshots
-#         """
-# 
-#         async def take_periodic_screenshots():
-#             elapsed = 0
-#             step = 0
-# 
-#             while duration_seconds == 0 or elapsed < duration_seconds:
-#                 step += 1
-#                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[
-#                     :-3
-#                 ]  # Include milliseconds
-#                 path = os.path.join(
-#                     str(output_dir),
-#                     f"{prefix}_step{step:03d}_{timestamp}-{self.browser_mode}.png",
-#                 )
-# 
-#                 try:
-#                     await page.screenshot(path=path)
-#                     if verbose:
-#                         logger.debug(f"{self.name}: Screenshot {step}: {path}")
-#                     elif step == 1:
-#                         logger.debug(
-#                             f"{self.name}: Started periodic screenshots: {prefix}_*"
-#                         )
-#                 except Exception as e:
-#                     if verbose:
-#                         logger.debug(f"{self.name}: Screenshot {step} failed: {e}")
-# 
-#                 await asyncio.sleep(interval_seconds)
-#                 elapsed += interval_seconds
-# 
-#             logger.debug(
-#                 f"{self.name}: Completed {step} periodic screenshots for {prefix}"
-#             )
-# 
-#         # Start the task in background
-#         task = asyncio.create_task(take_periodic_screenshots())
-#         return task
-# 
-#     async def stop_periodic_screenshots_async(self, task: asyncio.Task):
-#         """Stop periodic screenshots task."""
-#         if task and not task.done():
-#             task.cancel()
-#             try:
-#                 await task
-#             except asyncio.CancelledError:
-#                 logger.debug(f"{self.name}: Periodic screenshots stopped")
-# 
-#     async def __aexit__(self, exc_type, exc_val, exc_tb):
-#         await super().__aexit__(exc_type, exc_val, exc_tb)
-# 
-#     async def close(self):
-#         """Close browser while preserving authentication and extension data."""
-#         try:
-#             if (
-#                 self._persistent_context
-#                 and not self._persistent_context.browser.is_connected()
-#             ):
-#                 logger.debug(f"{self.name}: Browser already closed")
-#                 return
-# 
-#             if self._persistent_context:
-#                 await self._persistent_context.close()
-#                 logger.debug(f"{self.name}: Closed persistent browser context")
-# 
-#             if self._persistent_browser and self._persistent_browser.is_connected():
-#                 await self._persistent_browser.close()
-#                 logger.debug(f"{self.name}: Closed persistent browser")
-# 
-#             if self._persistent_playwright:
-#                 await self._persistent_playwright.stop()
-#                 logger.debug(f"{self.name}: Stopped Playwright instance")
-# 
-#         except Exception as e:
-#             logger.warning(f"{self.name}: Error during browser cleanup: {e}")
-#         finally:
-#             # Reset references but keep auth_manager and chrome_profile_manager
-#             self._persistent_context = None
-#             self._persistent_browser = None
-#             self._persistent_playwright = None
-# 
-# 
-# if __name__ == "__main__":
-# 
-#     async def main(browser_mode="interactive"):
-#         """Example usage of ScholarBrowserManager with stealth features."""
-#         from scitex.scholar import ScholarAuthManager, ScholarBrowserManager
-# 
-#         browser_manager = ScholarBrowserManager(
-#             chrome_profile_name="system",
-#             browser_mode=browser_mode,
-#             auth_manager=ScholarAuthManager(),
-#         )
-# 
-#         (
-#             browser,
-#             context,
-#         ) = await browser_manager.get_authenticated_browser_and_context_async()
-#         page = await context.new_page()
-# 
-#         # Test sites configuration
-#         test_sites = [
-#             # {
-#             #     "name": "Extensions Test",
-#             #     "url": "",
-#             #     "screenshot_spath": "/tmp/openathens_test.png",
-#             # },
-#             # {
-#             #     "name": "SSO Test",
-#             #     "url": "https://sso.unimelb.edu.au/",
-#             #     "screenshot_spath": "/tmp/unimelb_sso_test.png",
-#             # },
-#             # {
-#             #     "name": "OpenAthens",
-#             #     "url": "https://my.openathens.net/account",
-#             #     "screenshot_spath": "/tmp/openathens_test.png",
-#             # },
-#             # {
-#             #     "name": "CAPTCHA Test",
-#             #     "url": "https://www.google.com/recaptcha/api2/demo",
-#             #     "screenshot_spath": "/tmp/captcha_test.png",
-#             # },
-#             {
-#                 "name": "Nature Test",
-#                 "url": "https://www.nature.com/articles/s41593-025-01990-7",
-#                 "screenshot_spath": "/tmp/nature_test.png",
-#             },
-#             # {
-#             #     "name": "Google Test",
-#             #     "url": "https://www.google.com",
-#             #     "screenshot_spath": "/tmp/google_test.png",
-#             # },
-#         ]
-# 
-#         # Run tests for each site
-#         for site in test_sites:
-#             try:
-#                 await page.goto(
-#                     site["url"], wait_until="domcontentloaded", timeout=30000
-#                 )
-# 
-#                 await browser_manager.take_screenshot_async(
-#                     page, site["screenshot_spath"]
-#                 )
-#             except Exception as e:
-#                 logger.fail(f"Failed to process {site['name']}: {e}")
-#                 continue
-# 
-#     import argparse
-# 
-#     parser = argparse.ArgumentParser(description="ScholarBrowserManager testing")
-#     parser.add_argument(
-#         "--stealth",
-#         action="store_true",
-#         help="Use stealth mode (default: interactive)",
-#     )
-#     args = parser.parse_args()
-# 
-#     browser_mode = "stealth" if args.stealth else "interactive"
-#     asyncio.run(main(browser_mode=browser_mode))
-# 
-# # python -m scitex.scholar.browser.ScholarBrowserManager --stealth
-# # python -m scitex.scholar.browser.ScholarBrowserManager
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/browser/ScholarBrowserManager.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

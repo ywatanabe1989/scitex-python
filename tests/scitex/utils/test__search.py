@@ -227,23 +227,21 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/utils/_search.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-02 13:01:38 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/utils/_search.py
 # 
-# import numpy as np
 # import re
 # from collections import abc
+# 
+# import numpy as np
 # 
 # try:
 #     import pandas as pd
 # except ImportError:
 #     pd = None
 # 
-# try:
-#     import xarray as xr
-# except ImportError:
-#     xr = None
+# # xarray imported lazily to avoid atexit hang issues
+# xr = None
 # 
 # try:
 #     from natsort import natsorted
@@ -305,10 +303,14 @@ if __name__ == "__main__":
 #             if isinstance(string_or_pattern, (pd.Series, pd.Index)):
 #                 return string_or_pattern.tolist()
 # 
-#         # Check for xarray types if xarray is available
-#         if xr is not None:
+#         # Check for xarray types (lazy import to avoid atexit hang)
+#         try:
+#             import xarray as xr
+# 
 #             if isinstance(string_or_pattern, xr.DataArray):
 #                 return string_or_pattern.tolist()
+#         except ImportError:
+#             pass
 # 
 #         # Check for other iterables
 #         if isinstance(string_or_pattern, abc.KeysView):
@@ -335,7 +337,7 @@ if __name__ == "__main__":
 # 
 #     if ensure_one:
 #         assert len(indices_matched) == 1, (
-#             "Expected exactly one match, but found {}".format(len(indices_matched))
+#             f"Expected exactly one match, but found {len(indices_matched)}"
 #         )
 # 
 #     if as_bool:

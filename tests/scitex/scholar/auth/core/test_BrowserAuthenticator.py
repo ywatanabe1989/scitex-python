@@ -11,11 +11,11 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/auth/core/BrowserAuthenticator.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-11 01:05:03 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/auth/core/BrowserAuthenticator.py
 # # ----------------------------------------
 # from __future__ import annotations
+# 
 # import os
 # 
 # __FILE__ = "./src/scitex/scholar/auth/core/BrowserAuthenticator.py"
@@ -67,7 +67,8 @@ if __name__ == "__main__":
 #         Args:
 #             url: Login URL to navigate to
 # 
-#         Returns:
+#         Returns
+#         -------
 #             Page object for further operations
 #         """
 #         # Use the BrowserMixin's get_browser_async method to get properly configured browser
@@ -97,15 +98,22 @@ if __name__ == "__main__":
 #         return page
 # 
 #     async def wait_for_login_completion_async(
-#         self, page: Page, success_indicators: List[str]
+#         self,
+#         page: Page,
+#         success_indicators: List[str],
+#         on_screenshot=None,
+#         on_intervention_needed=None,
 #     ) -> bool:
 #         """Wait for login completion by monitoring URL changes and handling SSO automation.
 # 
 #         Args:
 #             page: Browser page to monitor
 #             success_indicators: List of URL patterns indicating successful login
+#             on_screenshot: Optional async callback(screenshot_data) for notifications
+#             on_intervention_needed: Optional async callback() when user intervention needed
 # 
-#         Returns:
+#         Returns
+#         -------
 #             True if login successful, False if timed out
 #         """
 #         max_wait_time = self.timeout
@@ -113,6 +121,10 @@ if __name__ == "__main__":
 #         elapsed_time = 0
 #         seen_sso_page = False
 #         openathens_automated = False
+#         institution_sso_attempted = False
+#         generic_sso_attempted = False
+#         intervention_notified = False
+#         screenshot_sent = False  # Only send ONE screenshot after intervention
 # 
 #         while elapsed_time < max_wait_time:
 #             current_url = page.url
@@ -156,12 +168,18 @@ if __name__ == "__main__":
 #                     logger.warning(f"{self.name}: OpenAthens automation failed: {e}")
 # 
 #             # Priority 2: Institution-specific SSO automation (if available and on SSO page)
-#             elif self.sso_automator and self.sso_automator.is_sso_page(current_url):
+#             # Only attempt ONCE - don't retry after failure
+#             elif (
+#                 self.sso_automator
+#                 and self.sso_automator.is_sso_page(current_url)
+#                 and not institution_sso_attempted
+#             ):
 #                 institution_name = self.sso_automator.get_institution_name()
 #                 logger.info(
 #                     f"{self.name}: {institution_name} SSO detected - attempting automation"
 #                 )
 #                 automation_attempted = True
+#                 institution_sso_attempted = True
 # 
 #                 sso_success = await self.sso_automator.handle_sso_redirect_async(page)
 #                 if sso_success:
@@ -173,12 +191,29 @@ if __name__ == "__main__":
 #                         f"{self.name}: {institution_name} SSO automation failed"
 #                     )
 # 
-#             # Priority 3: Generic automation attempt for unknown SSO pages
-#             elif self._is_sso_page(current_url) and not automation_attempted:
+#                 # Notify user AFTER automation completes - intervention may be needed
+#                 if not intervention_notified and on_intervention_needed:
+#                     intervention_notified = True
+#                     # Capture screenshot for 2FA page and pass to callback
+#                     screenshot_data = await self.capture_screenshot_async(
+#                         page, description="2fa_page"
+#                     )
+#                     try:
+#                         await on_intervention_needed(screenshot_data)
+#                     except Exception as e:
+#                         logger.debug(f"{self.name}: Intervention callback failed: {e}")
+# 
+#             # Priority 3: Generic automation attempt for unknown SSO pages (only once)
+#             elif (
+#                 self._is_sso_page(current_url)
+#                 and not automation_attempted
+#                 and not generic_sso_attempted
+#             ):
 #                 logger.info(
 #                     f"{self.name}: Generic SSO page detected - attempting basic automation"
 #                 )
 #                 automation_attempted = True
+#                 generic_sso_attempted = True
 # 
 #                 try:
 #                     generic_success = await self._attempt_generic_sso_automation(page)
@@ -216,6 +251,19 @@ if __name__ == "__main__":
 #                     f"{self.name}: Waiting for login... ({elapsed_time}s elapsed)"
 #                 )
 # 
+#             # Send ONE screenshot immediately after intervention notification
+#             # This captures the 2FA page for user to see the code
+#             if intervention_notified and not screenshot_sent and on_screenshot:
+#                 screenshot_sent = True
+#                 screenshot_data = await self.capture_screenshot_async(
+#                     page, description="2fa_page"
+#                 )
+#                 if screenshot_data.get("success"):
+#                     try:
+#                         await on_screenshot(screenshot_data)
+#                     except Exception as e:
+#                         logger.debug(f"{self.name}: Screenshot callback failed: {e}")
+# 
 #             await asyncio.sleep(check_interval)
 #             elapsed_time += check_interval
 # 
@@ -231,7 +279,8 @@ if __name__ == "__main__":
 #             verification_url: URL to test access to
 #             cookies: Authentication cookies to use
 # 
-#         Returns:
+#         Returns
+#         -------
 #             True if authentication verified, False otherwise
 #         """
 #         try:
@@ -286,7 +335,8 @@ if __name__ == "__main__":
 #         Args:
 #             page: Browser page to extract cookies from
 # 
-#         Returns:
+#         Returns
+#         -------
 #             Tuple of (simple_cookies_dict, full_cookies_list)
 #         """
 #         cookies = await page.context.cookies()
@@ -327,6 +377,73 @@ if __name__ == "__main__":
 #         for key, value in os.environ.items():
 #             if "SCITEX_SCHOLAR_OPENATHENS" in key:
 #                 logger.debug(f"{self.name}:   {key}: {value}")
+# 
+#     async def capture_screenshot_async(
+#         self,
+#         page: Page,
+#         description: str = "auth",
+#         save_dir: Optional[str] = None,
+#     ) -> Dict[str, Any]:
+#         """Capture screenshot of current page state.
+# 
+#         Useful for monitoring authentication progress, especially for 2FA pages.
+# 
+#         Args:
+#             page: Browser page to capture
+#             description: Short description for filename
+#             save_dir: Directory to save screenshot (uses temp if None)
+# 
+#         Returns
+#         -------
+#             Dict with 'path', 'base64', 'url', 'timestamp'
+#         """
+#         import base64
+#         from datetime import datetime
+#         from pathlib import Path
+# 
+#         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#         filename = f"auth_{description}_{timestamp}.png"
+# 
+#         # Determine save directory
+#         if save_dir:
+#             save_path = Path(save_dir)
+#         else:
+#             save_path = Path(os.environ.get("SCITEX_DIR", "~/.scitex")).expanduser()
+#             save_path = save_path / "scholar" / "screenshots"
+#         save_path.mkdir(parents=True, exist_ok=True)
+# 
+#         filepath = save_path / filename
+# 
+#         try:
+#             # Capture screenshot
+#             screenshot_bytes = await page.screenshot(full_page=False)
+# 
+#             # Save to file
+#             with open(filepath, "wb") as f:
+#                 f.write(screenshot_bytes)
+# 
+#             # Convert to base64 for email embedding
+#             b64_data = base64.b64encode(screenshot_bytes).decode("utf-8")
+# 
+#             logger.info(f"{self.name}: Screenshot saved: {filepath}")
+# 
+#             return {
+#                 "path": str(filepath),
+#                 "base64": b64_data,
+#                 "url": page.url,
+#                 "timestamp": timestamp,
+#                 "success": True,
+#             }
+#         except Exception as e:
+#             logger.warning(f"{self.name}: Screenshot capture failed: {e}")
+#             return {
+#                 "path": None,
+#                 "base64": None,
+#                 "url": page.url,
+#                 "timestamp": timestamp,
+#                 "success": False,
+#                 "error": str(e),
+#             }
 # 
 #     def _is_sso_page(self, url: str) -> bool:
 #         """Check if URL indicates SSO/login page."""

@@ -31,6 +31,24 @@ def tex():
     pass
 
 
+@tex.command("help-recursive")
+@click.pass_context
+def help_recursive(ctx):
+    """Show help for all commands recursively."""
+    fake_parent = click.Context(click.Group(), info_name="scitex")
+    parent_ctx = click.Context(tex, info_name="tex", parent=fake_parent)
+    click.secho("━━━ scitex tex ━━━", fg="cyan", bold=True)
+    click.echo(tex.get_help(parent_ctx))
+    for name in sorted(tex.list_commands(ctx) or []):
+        cmd = tex.get_command(ctx, name)
+        if cmd is None or name == "help-recursive":
+            continue
+        click.echo()
+        click.secho(f"━━━ scitex tex {name} ━━━", fg="cyan", bold=True)
+        with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
+            click.echo(cmd.get_help(sub_ctx))
+
+
 @tex.command()
 @click.argument("tex_file", type=click.Path(exists=True))
 @click.option("--output", "-o", type=click.Path(), help="Output PDF path")

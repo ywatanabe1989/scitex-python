@@ -32,6 +32,24 @@ def repro():
     pass
 
 
+@repro.command("help-recursive")
+@click.pass_context
+def help_recursive(ctx):
+    """Show help for all commands recursively."""
+    fake_parent = click.Context(click.Group(), info_name="scitex")
+    parent_ctx = click.Context(repro, info_name="repro", parent=fake_parent)
+    click.secho("━━━ scitex repro ━━━", fg="cyan", bold=True)
+    click.echo(repro.get_help(parent_ctx))
+    for name in sorted(repro.list_commands(ctx) or []):
+        cmd = repro.get_command(ctx, name)
+        if cmd is None or name == "help-recursive":
+            continue
+        click.echo()
+        click.secho(f"━━━ scitex repro {name} ━━━", fg="cyan", bold=True)
+        with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
+            click.echo(cmd.get_help(sub_ctx))
+
+
 @repro.command("gen-id")
 @click.option("--length", "-l", type=int, default=8, help="ID length (default: 8)")
 @click.option("--prefix", "-p", default="", help="Prefix to add to ID")

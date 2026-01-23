@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-12-19
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/tests/scitex/fig/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/tests/scitex/fig/README.md
 !-- --- -->
 
 # Tests for scitex.fig

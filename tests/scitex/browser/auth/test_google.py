@@ -1,402 +1,595 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for GoogleAuthHelper class."""
+
+import os
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from scitex.browser.auth.google import GoogleAuthHelper, google_login
+
+
+class TestGoogleAuthHelperInit:
+    """Tests for GoogleAuthHelper initialization."""
+
+    def test_init_creates_instance(self):
+        """GoogleAuthHelper should initialize without errors."""
+        auth = GoogleAuthHelper()
+        assert auth is not None
+
+    def test_init_stores_email(self):
+        """Should store provided email."""
+        auth = GoogleAuthHelper(email="test@gmail.com")
+        assert auth.email == "test@gmail.com"
+
+    def test_init_stores_password(self):
+        """Should store provided password."""
+        auth = GoogleAuthHelper(password="secret123")
+        assert auth.password == "secret123"
+
+    def test_init_stores_debug_flag(self):
+        """Should store debug flag."""
+        auth = GoogleAuthHelper(debug=True)
+        assert auth.debug is True
+
+    def test_init_uses_env_email_when_not_provided(self):
+        """Should use GOOGLE_EMAIL env var when email not provided."""
+        with patch.dict(os.environ, {"GOOGLE_EMAIL": "env@gmail.com"}):
+            auth = GoogleAuthHelper()
+            assert auth.email == "env@gmail.com"
+
+    def test_init_uses_env_password_when_not_provided(self):
+        """Should use GOOGLE_PASSWORD env var when password not provided."""
+        with patch.dict(os.environ, {"GOOGLE_PASSWORD": "envpass"}):
+            auth = GoogleAuthHelper()
+            assert auth.password == "envpass"
+
+    def test_init_uses_env_debug_when_not_provided(self):
+        """Should use GOOGLE_AUTH_DEBUG env var when debug not provided."""
+        with patch.dict(os.environ, {"GOOGLE_AUTH_DEBUG": "1"}):
+            auth = GoogleAuthHelper()
+            assert auth.debug is True
+
+    def test_init_prefers_param_over_env(self):
+        """Provided params should override env vars."""
+        with patch.dict(
+            os.environ, {"GOOGLE_EMAIL": "env@gmail.com", "GOOGLE_PASSWORD": "envpass"}
+        ):
+            auth = GoogleAuthHelper(email="param@gmail.com", password="parampass")
+            assert auth.email == "param@gmail.com"
+            assert auth.password == "parampass"
+
+    def test_init_defaults_to_empty_strings(self):
+        """Should default to empty strings when nothing provided."""
+        with patch.dict(os.environ, {}, clear=True):
+            os.environ.pop("GOOGLE_EMAIL", None)
+            os.environ.pop("GOOGLE_PASSWORD", None)
+            os.environ.pop("GOOGLE_AUTH_DEBUG", None)
+            auth = GoogleAuthHelper()
+            assert auth.email == ""
+            assert auth.password == ""
+            assert auth.debug is False
+
+
+class TestGoogleAuthHelperLog:
+    """Tests for _log method."""
+
+    def test_log_prints_when_debug_enabled(self, capsys):
+        """_log should print when debug is True."""
+        auth = GoogleAuthHelper(debug=True)
+        auth._log("Test message")
+        captured = capsys.readouterr()
+        assert "Test message" in captured.err
+        assert "[GoogleAuth]" in captured.err
+
+    def test_log_silent_when_debug_disabled(self, capsys):
+        """_log should not print when debug is False."""
+        auth = GoogleAuthHelper(debug=False)
+        auth._log("Test message")
+        captured = capsys.readouterr()
+        assert captured.err == ""
+
+
+class TestLoginViaGoogleButton:
+    """Tests for login_via_google_button method."""
+
+    @pytest.mark.asyncio
+    async def test_returns_false_when_button_not_found(self):
+        """Should return False when Google button not found."""
+        auth = GoogleAuthHelper()
+        mock_page = MagicMock()
+        mock_page.query_selector = AsyncMock(return_value=None)
+
+        result = await auth.login_via_google_button(mock_page)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_tries_alternative_selectors(self):
+        """Should try alternative selectors when primary fails."""
+        auth = GoogleAuthHelper()
+        mock_page = MagicMock()
+        # First call fails, second succeeds
+        call_count = 0
+
+        async def mock_query_selector(selector):
+            nonlocal call_count
+            call_count += 1
+            if call_count >= 2:
+                return MagicMock()
+            return None
+
+        mock_page.query_selector = mock_query_selector
+        mock_page.context.expect_page = MagicMock()
+
+        # This will fail due to other issues but tests selector logic
+        result = await auth.login_via_google_button(mock_page)
+
+        assert call_count >= 2
+
+    @pytest.mark.asyncio
+    async def test_handles_exception_gracefully(self):
+        """Should return False on exception."""
+        auth = GoogleAuthHelper()
+        mock_page = MagicMock()
+        mock_page.query_selector = AsyncMock(side_effect=Exception("Test error"))
+
+        result = await auth.login_via_google_button(mock_page)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_clicks_google_button(self):
+        """Should click the Google button when found."""
+        auth = GoogleAuthHelper()
+        mock_page = MagicMock()
+        mock_button = MagicMock()
+        mock_button.click = AsyncMock()
+        mock_page.query_selector = AsyncMock(return_value=mock_button)
+
+        # Setup popup context manager
+        mock_popup = MagicMock()
+        mock_popup.url = "https://accounts.google.com"
+        mock_popup_info = MagicMock()
+        mock_popup_info.value = mock_popup
+
+        mock_cm = MagicMock()
+        mock_cm.__aenter__ = AsyncMock(return_value=mock_popup_info)
+        mock_cm.__aexit__ = AsyncMock(return_value=None)
+        mock_page.context.expect_page = MagicMock(return_value=mock_cm)
+
+        # Mock popup handler
+        with patch.object(auth, "_handle_google_popup", AsyncMock(return_value=False)):
+            await auth.login_via_google_button(mock_page)
+            mock_button.click.assert_called_once()
+
+
+class TestHandleGooglePopup:
+    """Tests for _handle_google_popup method."""
+
+    @pytest.mark.asyncio
+    async def test_returns_false_on_email_failure(self):
+        """Should return False when email fill fails."""
+        auth = GoogleAuthHelper()
+        mock_popup = MagicMock()
+        mock_popup.wait_for_load_state = AsyncMock()
+        mock_popup.wait_for_timeout = AsyncMock()
+
+        with patch.object(auth, "_fill_email", AsyncMock(return_value=False)):
+            result = await auth._handle_google_popup(mock_popup)
+            assert result is False
+
+    @pytest.mark.asyncio
+    async def test_returns_false_on_password_failure(self):
+        """Should return False when password fill fails."""
+        auth = GoogleAuthHelper()
+        mock_popup = MagicMock()
+        mock_popup.wait_for_load_state = AsyncMock()
+        mock_popup.wait_for_timeout = AsyncMock()
+
+        with patch.object(auth, "_fill_email", AsyncMock(return_value=True)):
+            with patch.object(auth, "_fill_password", AsyncMock(return_value=False)):
+                result = await auth._handle_google_popup(mock_popup)
+                assert result is False
+
+    @pytest.mark.asyncio
+    async def test_returns_true_when_popup_closes(self):
+        """Should return True when popup closes (indicates success)."""
+        auth = GoogleAuthHelper()
+        mock_popup = MagicMock()
+        mock_popup.wait_for_load_state = AsyncMock()
+        mock_popup.wait_for_timeout = AsyncMock()
+        mock_popup.wait_for_event = AsyncMock(return_value=None)
+
+        with patch.object(auth, "_fill_email", AsyncMock(return_value=True)):
+            with patch.object(auth, "_fill_password", AsyncMock(return_value=True)):
+                result = await auth._handle_google_popup(mock_popup)
+                assert result is True
+
+    @pytest.mark.asyncio
+    async def test_handles_exception_gracefully(self):
+        """Should return False on exception."""
+        auth = GoogleAuthHelper()
+        mock_popup = MagicMock()
+        mock_popup.wait_for_load_state = AsyncMock(side_effect=Exception("Load error"))
+
+        result = await auth._handle_google_popup(mock_popup)
+        assert result is False
+
+
+class TestFillEmail:
+    """Tests for _fill_email method."""
+
+    @pytest.mark.asyncio
+    async def test_fills_email_input(self):
+        """Should fill email in input field."""
+        auth = GoogleAuthHelper(email="test@gmail.com")
+        mock_popup = MagicMock()
+        mock_popup.wait_for_selector = AsyncMock()
+        mock_popup.fill = AsyncMock()
+        mock_popup.wait_for_timeout = AsyncMock()
+
+        mock_next_btn = MagicMock()
+        mock_next_btn.click = AsyncMock()
+        mock_popup.query_selector = AsyncMock(return_value=mock_next_btn)
+
+        result = await auth._fill_email(mock_popup)
+
+        mock_popup.fill.assert_called_with('input[type="email"]', "test@gmail.com")
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_clicks_next_button(self):
+        """Should click Next button after filling email."""
+        auth = GoogleAuthHelper(email="test@gmail.com")
+        mock_popup = MagicMock()
+        mock_popup.wait_for_selector = AsyncMock()
+        mock_popup.fill = AsyncMock()
+        mock_popup.wait_for_timeout = AsyncMock()
+
+        mock_next_btn = MagicMock()
+        mock_next_btn.click = AsyncMock()
+        mock_popup.query_selector = AsyncMock(return_value=mock_next_btn)
+
+        await auth._fill_email(mock_popup)
+
+        mock_next_btn.click.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_returns_false_when_next_button_not_found(self):
+        """Should return False when Next button not found."""
+        auth = GoogleAuthHelper(email="test@gmail.com")
+        mock_popup = MagicMock()
+        mock_popup.wait_for_selector = AsyncMock()
+        mock_popup.fill = AsyncMock()
+        mock_popup.wait_for_timeout = AsyncMock()
+        mock_popup.query_selector = AsyncMock(return_value=None)
+
+        result = await auth._fill_email(mock_popup)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_handles_exception_gracefully(self):
+        """Should return False on exception."""
+        auth = GoogleAuthHelper(email="test@gmail.com")
+        mock_popup = MagicMock()
+        mock_popup.wait_for_selector = AsyncMock(
+            side_effect=Exception("Selector error")
+        )
+
+        result = await auth._fill_email(mock_popup)
+
+        assert result is False
+
+
+class TestFillPassword:
+    """Tests for _fill_password method."""
+
+    @pytest.mark.asyncio
+    async def test_fills_password_input(self):
+        """Should fill password in input field."""
+        auth = GoogleAuthHelper(password="secret123")
+        mock_popup = MagicMock()
+        mock_popup.wait_for_selector = AsyncMock()
+        mock_popup.fill = AsyncMock()
+        mock_popup.wait_for_timeout = AsyncMock()
+
+        mock_next_btn = MagicMock()
+        mock_next_btn.click = AsyncMock()
+        mock_popup.query_selector = AsyncMock(return_value=mock_next_btn)
+
+        with patch.object(auth, "_wait_for_2fa", AsyncMock(return_value=True)):
+            with patch.object(auth, "_handle_consent_screens", AsyncMock()):
+                result = await auth._fill_password(mock_popup)
+
+        mock_popup.fill.assert_called_with('input[type="password"]', "secret123")
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_returns_false_when_next_button_not_found(self):
+        """Should return False when Next button not found."""
+        auth = GoogleAuthHelper(password="secret123")
+        mock_popup = MagicMock()
+        mock_popup.wait_for_selector = AsyncMock()
+        mock_popup.fill = AsyncMock()
+        mock_popup.wait_for_timeout = AsyncMock()
+        mock_popup.query_selector = AsyncMock(return_value=None)
+
+        result = await auth._fill_password(mock_popup)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_calls_2fa_handler(self):
+        """Should call 2FA handler after password."""
+        auth = GoogleAuthHelper(password="secret123")
+        mock_popup = MagicMock()
+        mock_popup.wait_for_selector = AsyncMock()
+        mock_popup.fill = AsyncMock()
+        mock_popup.wait_for_timeout = AsyncMock()
+
+        mock_next_btn = MagicMock()
+        mock_next_btn.click = AsyncMock()
+        mock_popup.query_selector = AsyncMock(return_value=mock_next_btn)
+
+        mock_2fa = AsyncMock(return_value=True)
+        with patch.object(auth, "_wait_for_2fa", mock_2fa):
+            with patch.object(auth, "_handle_consent_screens", AsyncMock()):
+                await auth._fill_password(mock_popup)
+
+        mock_2fa.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_returns_false_when_2fa_fails(self):
+        """Should return False when 2FA fails."""
+        auth = GoogleAuthHelper(password="secret123")
+        mock_popup = MagicMock()
+        mock_popup.wait_for_selector = AsyncMock()
+        mock_popup.fill = AsyncMock()
+        mock_popup.wait_for_timeout = AsyncMock()
+
+        mock_next_btn = MagicMock()
+        mock_next_btn.click = AsyncMock()
+        mock_popup.query_selector = AsyncMock(return_value=mock_next_btn)
+
+        with patch.object(auth, "_wait_for_2fa", AsyncMock(return_value=False)):
+            result = await auth._fill_password(mock_popup)
+
+        assert result is False
+
+
+class TestHandleConsentScreens:
+    """Tests for _handle_consent_screens method."""
+
+    @pytest.mark.asyncio
+    async def test_clicks_continue_button(self):
+        """Should click Continue button when found."""
+        auth = GoogleAuthHelper()
+        mock_popup = MagicMock()
+
+        mock_btn = MagicMock()
+        mock_btn.is_visible = AsyncMock(return_value=True)
+        mock_btn.click = AsyncMock()
+        mock_popup.query_selector = AsyncMock(return_value=mock_btn)
+        mock_popup.wait_for_timeout = AsyncMock()
+
+        await auth._handle_consent_screens(mock_popup)
+
+        mock_btn.click.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_handles_no_consent_screen(self):
+        """Should handle case when no consent screen present."""
+        auth = GoogleAuthHelper()
+        mock_popup = MagicMock()
+        mock_popup.query_selector = AsyncMock(return_value=None)
+
+        # Should not raise
+        await auth._handle_consent_screens(mock_popup)
+
+    @pytest.mark.asyncio
+    async def test_handles_exception_gracefully(self):
+        """Should handle exceptions gracefully."""
+        auth = GoogleAuthHelper()
+        mock_popup = MagicMock()
+        mock_popup.query_selector = AsyncMock(side_effect=Exception("Error"))
+
+        # Should not raise
+        await auth._handle_consent_screens(mock_popup)
+
+
+class TestWaitFor2FA:
+    """Tests for _wait_for_2fa method."""
+
+    @pytest.mark.asyncio
+    async def test_returns_true_when_not_2fa_page(self):
+        """Should return True when not on 2FA page."""
+        auth = GoogleAuthHelper()
+        mock_popup = MagicMock()
+        mock_popup.inner_text = AsyncMock(return_value="Welcome to Google")
+
+        result = await auth._wait_for_2fa(mock_popup)
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_detects_2fa_indicators(self):
+        """Should detect 2FA indicators in page text."""
+        auth = GoogleAuthHelper()
+        mock_popup = MagicMock()
+        mock_popup.inner_text = AsyncMock(return_value="2-Step Verification required")
+        mock_popup.url = "https://accounts.google.com/2fa"
+        mock_popup.wait_for_timeout = AsyncMock()
+
+        # Simulate popup closing
+        call_count = 0
+
+        @property
+        def url_getter():
+            nonlocal call_count
+            call_count += 1
+            if call_count > 2:
+                raise Exception("Popup closed")
+            return "https://accounts.google.com/2fa"
+
+        type(mock_popup).url = url_getter
+
+        result = await auth._wait_for_2fa(mock_popup, timeout=5000)
+
+        # Should have detected 2FA
+        assert mock_popup.inner_text.called
+
+    @pytest.mark.asyncio
+    async def test_handles_exception_gracefully(self):
+        """Should return False on exception."""
+        auth = GoogleAuthHelper()
+        mock_popup = MagicMock()
+        mock_popup.inner_text = AsyncMock(side_effect=Exception("Error"))
+
+        result = await auth._wait_for_2fa(mock_popup)
+
+        assert result is False
+
+
+class TestIsLoggedIn:
+    """Tests for is_logged_in method."""
+
+    @pytest.mark.asyncio
+    async def test_returns_false_for_login_url(self):
+        """Should return False when URL contains login."""
+        auth = GoogleAuthHelper()
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com/login"
+
+        result = await auth.is_logged_in(mock_page)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_returns_false_for_signin_url(self):
+        """Should return False when URL contains signin."""
+        auth = GoogleAuthHelper()
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com/signin"
+
+        result = await auth.is_logged_in(mock_page)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_returns_false_for_oauth_url(self):
+        """Should return False when URL contains oauth."""
+        auth = GoogleAuthHelper()
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com/oauth/authorize"
+
+        result = await auth.is_logged_in(mock_page)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_returns_false_for_google_accounts_url(self):
+        """Should return False when URL is Google accounts."""
+        auth = GoogleAuthHelper()
+        mock_page = MagicMock()
+        mock_page.url = "https://accounts.google.com/signin"
+
+        result = await auth.is_logged_in(mock_page)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_returns_true_for_dashboard_url(self):
+        """Should return True when URL suggests logged in."""
+        auth = GoogleAuthHelper()
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com/dashboard"
+
+        result = await auth.is_logged_in(mock_page)
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_accepts_custom_indicators(self):
+        """Should use custom login indicators."""
+        auth = GoogleAuthHelper()
+        mock_page = MagicMock()
+        mock_page.url = "https://example.com/auth"
+
+        result = await auth.is_logged_in(mock_page, login_indicators=["auth"])
+
+        assert result is False
+
+
+class TestGoogleLoginConvenienceFunction:
+    """Tests for google_login convenience function."""
+
+    @pytest.mark.asyncio
+    async def test_creates_auth_helper(self):
+        """Should create GoogleAuthHelper with correct params."""
+        mock_page = MagicMock()
+        mock_page.query_selector = AsyncMock(return_value=None)
+
+        with patch("scitex.browser.auth.google.GoogleAuthHelper") as mock_class:
+            mock_instance = MagicMock()
+            mock_instance.login_via_google_button = AsyncMock(return_value=True)
+            mock_class.return_value = mock_instance
+
+            await google_login(mock_page, "test@gmail.com", "password", debug=True)
+
+            mock_class.assert_called_with(
+                email="test@gmail.com", password="password", debug=True
+            )
+
+    @pytest.mark.asyncio
+    async def test_calls_login_method(self):
+        """Should call login_via_google_button method."""
+        mock_page = MagicMock()
+        mock_page.query_selector = AsyncMock(return_value=None)
+
+        with patch("scitex.browser.auth.google.GoogleAuthHelper") as mock_class:
+            mock_instance = MagicMock()
+            mock_instance.login_via_google_button = AsyncMock(return_value=True)
+            mock_class.return_value = mock_instance
+
+            result = await google_login(
+                mock_page, "test@gmail.com", "password", button_selector="custom"
+            )
+
+            mock_instance.login_via_google_button.assert_called_with(
+                mock_page, "custom"
+            )
+            assert result is True
+
+
+class TestGoogleAuthHelperIntegration:
+    """Integration tests for GoogleAuthHelper."""
+
+    def test_multiple_instances_independent(self):
+        """Multiple instances should be independent."""
+        auth1 = GoogleAuthHelper(email="user1@gmail.com")
+        auth2 = GoogleAuthHelper(email="user2@gmail.com")
+
+        assert auth1.email != auth2.email
+        assert auth1.email == "user1@gmail.com"
+        assert auth2.email == "user2@gmail.com"
+
+    def test_full_config_from_env(self):
+        """Should configure fully from environment."""
+        with patch.dict(
+            os.environ,
+            {
+                "GOOGLE_EMAIL": "env@gmail.com",
+                "GOOGLE_PASSWORD": "envpass",
+                "GOOGLE_AUTH_DEBUG": "1",
+            },
+        ):
+            auth = GoogleAuthHelper()
+            assert auth.email == "env@gmail.com"
+            assert auth.password == "envpass"
+            assert auth.debug is True
+
 
 if __name__ == "__main__":
-    import os
-
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/browser/auth/google.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-12-04 (ywatanabe)"
-# # File: ./src/scitex/browser/auth/google.py
-# # ----------------------------------------
-# """
-# Google OAuth authentication helper for Playwright.
-# 
-# Handles Google OAuth popup flow for services that use "Continue with Google".
-# 
-# Example:
-#     from scitex.browser.auth import GoogleAuthHelper
-# 
-#     auth = GoogleAuthHelper(
-#         email="user@gmail.com",
-#         password="your_password",
-#     )
-# 
-#     # Login to a service that uses Google OAuth
-#     success = await auth.login_via_google_button(page, 'button:has-text("Continue with Google")')
-# """
-# 
-# import os
-# import sys
-# from typing import Optional
-# from playwright.async_api import Page
-# 
-# 
-# class GoogleAuthHelper:
-#     """
-#     Google OAuth authentication helper.
-# 
-#     Handles the popup-based Google OAuth flow used by many services.
-# 
-#     Environment Variables:
-#         GOOGLE_EMAIL: Default email if not provided
-#         GOOGLE_PASSWORD: Default password if not provided
-#     """
-# 
-#     def __init__(
-#         self,
-#         email: Optional[str] = None,
-#         password: Optional[str] = None,
-#         debug: bool = False,
-#     ):
-#         """
-#         Initialize GoogleAuthHelper.
-# 
-#         Args:
-#             email: Google account email
-#             password: Google account password
-#             debug: Print debug messages to stderr
-#         """
-#         self.email = email or os.getenv("GOOGLE_EMAIL", "")
-#         self.password = password or os.getenv("GOOGLE_PASSWORD", "")
-#         self.debug = debug or bool(os.getenv("GOOGLE_AUTH_DEBUG"))
-# 
-#     def _log(self, msg: str):
-#         """Print debug message if debug mode is enabled."""
-#         if self.debug:
-#             print(f"[GoogleAuth] {msg}", file=sys.stderr)
-# 
-#     async def login_via_google_button(
-#         self,
-#         page: Page,
-#         google_button_selector: str = 'button:has-text("Continue with Google")',
-#         timeout: int = 60000,
-#     ) -> bool:
-#         """
-#         Perform Google OAuth login via a "Continue with Google" button.
-# 
-#         This handles the popup-based OAuth flow:
-#         1. Click the Google button on the main page
-#         2. Handle the Google popup for email/password entry
-#         3. Wait for redirect back to the original service
-# 
-#         Args:
-#             page: Playwright Page object (the main page with the Google button)
-#             google_button_selector: CSS selector for the Google login button
-#             timeout: Maximum time to wait for login (ms)
-# 
-#         Returns:
-#             True if login successful, False otherwise
-#         """
-#         try:
-#             # Find the Google button
-#             google_btn = await page.query_selector(google_button_selector)
-#             if not google_btn:
-#                 # Try alternative selectors
-#                 alternatives = [
-#                     'button:has-text("Google")',
-#                     '[data-testid="google-login"]',
-#                     "button >> text=Continue with Google",
-#                     "button >> text=Sign in with Google",
-#                 ]
-#                 for selector in alternatives:
-#                     try:
-#                         google_btn = await page.query_selector(selector)
-#                         if google_btn:
-#                             break
-#                     except:
-#                         continue
-# 
-#             if not google_btn:
-#                 self._log("Google button not found")
-#                 return False
-# 
-#             self._log("Found Google button, clicking...")
-# 
-#             # Google OAuth opens in a popup - listen for it
-#             async with page.context.expect_page(timeout=timeout) as popup_info:
-#                 await google_btn.click()
-# 
-#             popup = await popup_info.value
-#             self._log(f"Popup opened: {popup.url[:100]}...")
-# 
-#             # Handle Google OAuth in popup
-#             success = await self._handle_google_popup(popup, timeout)
-# 
-#             if success:
-#                 # Wait for main page to update after OAuth completes
-#                 await page.wait_for_timeout(3000)
-#                 self._log(f"Login complete, main page URL: {page.url}")
-# 
-#             return success
-# 
-#         except Exception as e:
-#             self._log(f"Login error: {e}")
-#             return False
-# 
-#     async def _handle_google_popup(self, popup: Page, timeout: int = 60000) -> bool:
-#         """
-#         Handle the Google OAuth popup flow.
-# 
-#         Args:
-#             popup: The Google OAuth popup page
-#             timeout: Maximum time to wait (ms)
-# 
-#         Returns:
-#             True if authentication successful, False otherwise
-#         """
-#         try:
-#             # Wait for Google login page to load
-#             await popup.wait_for_load_state("domcontentloaded")
-#             await popup.wait_for_timeout(2000)
-# 
-#             # Step 1: Enter email
-#             email_filled = await self._fill_email(popup)
-#             if not email_filled:
-#                 self._log("Failed to fill email")
-#                 return False
-# 
-#             # Step 2: Wait for password page and enter password
-#             password_filled = await self._fill_password(popup)
-#             if not password_filled:
-#                 self._log("Failed to fill password")
-#                 return False
-# 
-#             # Step 3: Wait for popup to close (indicates success)
-#             try:
-#                 await popup.wait_for_event("close", timeout=20000)
-#                 self._log("Popup closed - login successful")
-#                 return True
-#             except:
-#                 # Check if we're still on Google or redirected
-#                 current_url = popup.url
-#                 if "accounts.google.com" not in current_url:
-#                     self._log("Redirected away from Google - login successful")
-#                     return True
-#                 self._log("Popup didn't close - possible error")
-#                 return False
-# 
-#         except Exception as e:
-#             self._log(f"Popup handling error: {e}")
-#             return False
-# 
-#     async def _fill_email(self, popup: Page) -> bool:
-#         """Fill email on Google login page."""
-#         try:
-#             # Wait for email input
-#             await popup.wait_for_selector(
-#                 'input[type="email"]', state="visible", timeout=10000
-#             )
-# 
-#             self._log(f"Filling email: {self.email}")
-#             await popup.fill('input[type="email"]', self.email)
-#             await popup.wait_for_timeout(500)
-# 
-#             # Click Next button
-#             next_btn = await popup.query_selector("#identifierNext")
-#             if not next_btn:
-#                 next_btn = await popup.query_selector('button:has-text("Next")')
-# 
-#             if next_btn:
-#                 self._log("Clicking Next after email")
-#                 await next_btn.click()
-#                 await popup.wait_for_timeout(3000)
-#                 return True
-#             else:
-#                 self._log("Next button not found after email")
-#                 return False
-# 
-#         except Exception as e:
-#             self._log(f"Email fill error: {e}")
-#             return False
-# 
-#     async def _fill_password(self, popup: Page) -> bool:
-#         """Fill password on Google login page."""
-#         try:
-#             # Wait for password page to load (Google transitions between pages)
-#             self._log("Waiting for password page...")
-# 
-#             # Wait for password input to become visible
-#             await popup.wait_for_selector(
-#                 'input[type="password"]', state="visible", timeout=15000
-#             )
-# 
-#             self._log("Filling password")
-#             await popup.fill('input[type="password"]', self.password)
-#             await popup.wait_for_timeout(500)
-# 
-#             # Click Next button
-#             next_btn = await popup.query_selector("#passwordNext")
-#             if not next_btn:
-#                 next_btn = await popup.query_selector('button:has-text("Next")')
-# 
-#             if next_btn:
-#                 self._log("Clicking Next after password")
-#                 await next_btn.click()
-#                 await popup.wait_for_timeout(5000)
-# 
-#                 # Handle 2FA if present
-#                 twofa_ok = await self._wait_for_2fa(popup, timeout=60000)
-#                 if not twofa_ok:
-#                     return False
-# 
-#                 # Handle potential consent/continue screens
-#                 await self._handle_consent_screens(popup)
-# 
-#                 return True
-#             else:
-#                 self._log("Next button not found after password")
-#                 return False
-# 
-#         except Exception as e:
-#             self._log(f"Password fill error: {e}")
-#             return False
-# 
-#     async def _handle_consent_screens(self, popup: Page) -> None:
-#         """Handle OAuth consent or 'Continue' screens that may appear."""
-#         try:
-#             # Check for Continue button (consent screen)
-#             continue_selectors = [
-#                 'button:has-text("Continue")',
-#                 'button:has-text("Allow")',
-#                 "#submit_approve_access",
-#                 'button[data-idom-class*="continue"]',
-#             ]
-# 
-#             for selector in continue_selectors:
-#                 try:
-#                     btn = await popup.query_selector(selector)
-#                     if btn and await btn.is_visible():
-#                         self._log(f"Found consent button: {selector}")
-#                         await btn.click()
-#                         await popup.wait_for_timeout(3000)
-#                         break
-#                 except:
-#                     continue
-# 
-#         except Exception as e:
-#             self._log(f"Consent handling: {e}")
-# 
-#     async def _wait_for_2fa(self, popup: Page, timeout: int = 60000) -> bool:
-#         """
-#         Wait for 2FA verification to complete.
-# 
-#         Detects 2FA screens and waits for user to approve on their device.
-# 
-#         Args:
-#             popup: The Google OAuth popup page
-#             timeout: Maximum time to wait for 2FA (ms)
-# 
-#         Returns:
-#             True if 2FA completed, False if timed out
-#         """
-#         try:
-#             # Check if we're on a 2FA page
-#             page_text = await popup.inner_text("body")
-#             twofa_indicators = [
-#                 "2-Step Verification",
-#                 "Verify it's you",
-#                 "confirm it's you",
-#                 "Open the Gmail app",
-#                 "Check your phone",
-#             ]
-# 
-#             is_2fa = any(
-#                 indicator.lower() in page_text.lower() for indicator in twofa_indicators
-#             )
-# 
-#             if is_2fa:
-#                 self._log("2FA detected - waiting for user approval...")
-#                 # Wait for popup to close or URL to change (indicating 2FA success)
-#                 start_url = popup.url
-#                 check_interval = 2000  # Check every 2 seconds
-#                 elapsed = 0
-# 
-#                 while elapsed < timeout:
-#                     await popup.wait_for_timeout(check_interval)
-#                     elapsed += check_interval
-# 
-#                     # Check if popup closed
-#                     try:
-#                         current_url = popup.url
-#                         if (
-#                             current_url != start_url
-#                             and "accounts.google.com" not in current_url
-#                         ):
-#                             self._log("2FA completed - redirected")
-#                             return True
-#                     except:
-#                         # Popup closed
-#                         self._log("2FA completed - popup closed")
-#                         return True
-# 
-#                 self._log("2FA timeout")
-#                 return False
-# 
-#             return True  # Not a 2FA page
-# 
-#         except Exception as e:
-#             self._log(f"2FA check error: {e}")
-#             return False
-# 
-#     async def is_logged_in(self, page: Page, login_indicators: list = None) -> bool:
-#         """
-#         Check if user appears to be logged in.
-# 
-#         Args:
-#             page: Page to check
-#             login_indicators: List of URL substrings that indicate NOT logged in
-#                              (default: ["login", "signin", "oauth"])
-# 
-#         Returns:
-#             True if appears logged in, False otherwise
-#         """
-#         if login_indicators is None:
-#             login_indicators = ["login", "signin", "oauth", "accounts.google.com"]
-# 
-#         current_url = page.url.lower()
-#         for indicator in login_indicators:
-#             if indicator.lower() in current_url:
-#                 return False
-#         return True
-# 
-# 
-# # Convenience function for quick usage
-# async def google_login(
-#     page: Page,
-#     email: str,
-#     password: str,
-#     button_selector: str = 'button:has-text("Continue with Google")',
-#     debug: bool = False,
-# ) -> bool:
-#     """
-#     Quick Google OAuth login.
-# 
-#     Args:
-#         page: Playwright Page with Google login button
-#         email: Google account email
-#         password: Google account password
-#         button_selector: CSS selector for Google button
-#         debug: Print debug messages
-# 
-#     Returns:
-#         True if login successful, False otherwise
-# 
-#     Example:
-#         success = await google_login(page, "user@gmail.com", "password")
-#     """
-#     auth = GoogleAuthHelper(email=email, password=password, debug=debug)
-#     return await auth.login_via_google_button(page, button_selector)
-# 
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/browser/auth/google.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

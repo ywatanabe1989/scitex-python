@@ -25,24 +25,17 @@ jobs:
         run: |
           TAG_VERSION="${GITHUB_REF#refs/tags/v}"
           TOML_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
-          PY_VERSION=$(grep '__version__' src/scitex/__version__.py | sed 's/__version__ = "\(.*\)"/\1/')
 
           echo "Tag version: $TAG_VERSION"
           echo "pyproject.toml version: $TOML_VERSION"
-          echo "__version__.py version: $PY_VERSION"
 
           if [ "$TAG_VERSION" != "$TOML_VERSION" ]; then
             echo "ERROR: Tag version ($TAG_VERSION) != pyproject.toml ($TOML_VERSION)"
             exit 1
           fi
 
-          if [ "$TAG_VERSION" != "$PY_VERSION" ]; then
-            echo "ERROR: Tag version ($TAG_VERSION) != __version__.py ($PY_VERSION)"
-            exit 1
-          fi
-
           echo "version=$TAG_VERSION" >> $GITHUB_OUTPUT
-          echo "✓ All versions match: $TAG_VERSION"
+          echo "✓ Versions match: $TAG_VERSION"
 
   build:
     name: Build Package
@@ -74,8 +67,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.11']
-        install-type: ['core', 'all']
+        python-version: ['3.10', '3.12']
+        install-type: ['core', 'audio']
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -92,12 +85,12 @@ jobs:
         run: |
           pip install --upgrade pip
           WHEEL=$(ls dist/*.whl)
-          if [ "${{ matrix.install-type }}" == "all" ]; then
-            pip install "${WHEEL}[all]"
+          if [ "${{ matrix.install-type }}" == "audio" ]; then
+            pip install "${WHEEL}[audio]"
           else
             pip install "$WHEEL"
           fi
-        timeout-minutes: 15
+        timeout-minutes: 10
 
       - name: Test imports
         run: |

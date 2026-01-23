@@ -91,6 +91,14 @@ class ScholarServer:
             search_papers_handler,
             validate_pdfs_handler,
         )
+        from ._mcp.job_handlers import (
+            cancel_job_handler,
+            fetch_papers_handler,
+            get_job_result_handler,
+            get_job_status_handler,
+            list_jobs_handler,
+            start_job_handler,
+        )
         from ._mcp.tool_schemas import get_tool_schemas
 
         @self.server.list_tools()
@@ -163,6 +171,20 @@ class ScholarServer:
             # PDF Content Parsing
             elif name == "parse_pdf_content":
                 return await self._wrap_result(parse_pdf_content_handler(**arguments))
+
+            # Job Management (async fetch)
+            elif name == "fetch_papers":
+                return await self._wrap_result(fetch_papers_handler(**arguments))
+            elif name == "list_jobs":
+                return await self._wrap_result(list_jobs_handler(**arguments))
+            elif name == "get_job_status":
+                return await self._wrap_result(get_job_status_handler(**arguments))
+            elif name == "start_job":
+                return await self._wrap_result(start_job_handler(**arguments))
+            elif name == "cancel_job":
+                return await self._wrap_result(cancel_job_handler(**arguments))
+            elif name == "get_job_result":
+                return await self._wrap_result(get_job_result_handler(**arguments))
 
             else:
                 raise ValueError(f"Unknown tool: {name}")

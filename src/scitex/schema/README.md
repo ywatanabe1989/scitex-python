@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-12-09 20:40:40
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/schema/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/src/scitex/schema/README.md
 !-- --- -->
 
 # SciTeX Schema Module

@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 __all__ = [
+    "speak_handler",
     "generate_audio_handler",
     "list_backends_handler",
     "list_voices_handler",
@@ -20,6 +21,8 @@ __all__ = [
     "list_audio_files_handler",
     "clear_audio_cache_handler",
     "check_audio_status_handler",
+    "speech_queue_status_handler",
+    "announce_context_handler",
 ]
 
 
@@ -33,6 +36,37 @@ def _get_audio_dir() -> Path:
     return audio_dir
 
 
+def _get_signature() -> str:
+    """Get signature string with hostname, project, and branch."""
+    import os
+    import socket
+    import subprocess
+
+    hostname = socket.gethostname()
+    cwd = os.getcwd()
+    project = os.path.basename(cwd)
+
+    branch = None
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            cwd=cwd,
+            timeout=5,
+        )
+        if result.returncode == 0:
+            branch = result.stdout.strip()
+    except Exception:
+        pass
+
+    parts = [f"Hostname: {hostname}", f"Project: {project}"]
+    if branch:
+        parts.append(f"Branch: {branch}")
+
+    return ". ".join(parts) + ". "
+
+
 async def generate_audio_handler(
     text: str,
     backend: str | None = None,
@@ -42,7 +76,7 @@ async def generate_audio_handler(
 ) -> dict:
     """Generate audio file without playing."""
     try:
-        from . import speak as tts_speak
+        from .. import speak as tts_speak
 
         loop = asyncio.get_event_loop()
 
@@ -86,16 +120,16 @@ async def generate_audio_handler(
 async def list_backends_handler() -> dict:
     """List available TTS backends."""
     try:
-        from . import available_backends
+        from .. import FALLBACK_ORDER, available_backends
 
         backends = available_backends()
 
         info = []
-        for b in ["gtts", "elevenlabs", "pyttsx3"]:
+        for b in FALLBACK_ORDER:
             available = b in backends
             desc = {
-                "gtts": "Google TTS - Free, requires internet",
                 "elevenlabs": "ElevenLabs - Paid, high quality",
+                "gtts": "Google TTS - Free, requires internet",
                 "pyttsx3": "System TTS - Offline, uses espeak/SAPI5",
             }
             info.append(
@@ -106,11 +140,18 @@ async def list_backends_handler() -> dict:
                 }
             )
 
+        # Determine actual default based on FALLBACK_ORDER
+        default = None
+        for b in FALLBACK_ORDER:
+            if b in backends:
+                default = b
+                break
+
         return {
             "success": True,
             "backends": info,
             "available": backends,
-            "default": backends[0] if backends else None,
+            "default": default,
         }
 
     except Exception as e:
@@ -120,7 +161,7 @@ async def list_backends_handler() -> dict:
 async def list_voices_handler(backend: str = "gtts") -> dict:
     """List available voices for a backend."""
     try:
-        from . import get_tts
+        from .. import get_tts
 
         loop = asyncio.get_event_loop()
 
@@ -144,7 +185,7 @@ async def list_voices_handler(backend: str = "gtts") -> dict:
 async def play_audio_handler(path: str) -> dict:
     """Play an audio file."""
     try:
-        from .engines.base import BaseTTS
+        from ..engines.base import BaseTTS
 
         path_obj = Path(path)
         if not path_obj.exists():
@@ -242,12 +283,134 @@ async def clear_audio_cache_handler(max_age_hours: float = 24) -> dict:
 async def check_audio_status_handler() -> dict:
     """Check WSL audio connectivity and available playback methods."""
     try:
-        from . import check_wsl_audio
+        from .. import check_wsl_audio
 
         status = check_wsl_audio()
         status["success"] = True
         status["timestamp"] = datetime.now().isoformat()
         return status
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+async def speak_handler(
+    text: str,
+    backend: str | None = None,
+    voice: str | None = None,
+    rate: int = 150,
+    speed: float = 1.5,
+    play: bool = True,
+    save: bool = False,
+    fallback: bool = True,
+    agent_id: str | None = None,
+    wait: bool = True,
+    signature: bool = False,
+) -> dict:
+    """Convert text to speech with fallback.
+
+    Args:
+        signature: If True, prepend hostname/project/branch to text.
+    """
+    try:
+        from .. import speak as tts_speak
+
+        loop = asyncio.get_event_loop()
+
+        # Prepend signature if requested
+        final_text = text
+        sig = None
+        if signature:
+            sig = _get_signature()
+            final_text = sig + text
+
+        output_path = None
+        if save:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_path = str(_get_audio_dir() / f"tts_{timestamp}.mp3")
+
+        def do_speak():
+            return tts_speak(
+                text=final_text,
+                backend=backend,
+                voice=voice,
+                rate=rate,
+                speed=speed,
+                play=play,
+                output_path=output_path,
+                fallback=fallback,
+            )
+
+        result_path = await loop.run_in_executor(None, do_speak)
+
+        result = {
+            "success": True,
+            "text": text,
+            "backend": backend,
+            "played": play,
+            "timestamp": datetime.now().isoformat(),
+        }
+        if signature:
+            result["signature"] = sig
+            result["full_text"] = final_text
+        if result_path:
+            result["path"] = str(result_path)
+
+        return result
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+async def speech_queue_status_handler() -> dict:
+    """Get current speech queue status."""
+    try:
+        from .cross_process_lock import get_queue_status
+
+        status = get_queue_status()
+        status["success"] = True
+        return status
+
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+async def announce_context_handler(include_full_path: bool = False) -> dict:
+    """Announce current working directory and git branch."""
+    try:
+        import os
+        import subprocess
+
+        cwd = os.getcwd()
+        dir_name = cwd if include_full_path else os.path.basename(cwd)
+
+        branch = None
+        try:
+            result = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                capture_output=True,
+                text=True,
+                cwd=cwd,
+            )
+            if result.returncode == 0:
+                branch = result.stdout.strip()
+        except Exception:
+            pass
+
+        if branch:
+            text = f"Working in {dir_name}, on branch {branch}"
+        else:
+            text = f"Working in {dir_name}"
+
+        speak_result = await speak_handler(text=text, speed=1.5)
+
+        return {
+            "success": True,
+            "directory": dir_name,
+            "branch": branch,
+            "announced": text,
+            "speak_result": speak_result,
+        }
 
     except Exception as e:
         return {"success": False, "error": str(e)}

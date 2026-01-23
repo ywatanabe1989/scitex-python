@@ -28,6 +28,8 @@ htmlcov/
 .env.*.local
 test_comprehensive_fixes.py
 catboost_info/
+script_out/
+.monitor_repository.sh.log
 
 ## Test artifacts (should not be in root)
 /output/
@@ -123,6 +125,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .testmondata
+.testmondata-*
+tests/.testmondata*
 cover/
 
 # Translations
@@ -365,6 +369,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .testmondata
+.testmondata-*
+tests/.testmondata*
 cover/
 
 # Translations

@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-12-08 23:59:46
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/gallery/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/src/scitex/plt/gallery/README.md
 !-- --- -->
 
 # SciTeX Plot Gallery

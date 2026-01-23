@@ -41,7 +41,7 @@ sudo apt-get install -y singularity-container
 ### Build All Containers
 
 ```bash
-cd /home/ywatanabe/proj/scitex-code/containers
+cd /home/ywatanabe/proj/scitex-python/containers
 sudo ./build_containers.sh
 ```
 
@@ -216,7 +216,7 @@ singularity exec --nv scitex-ml.sif python -c "import torch; print(f'CUDA: {torc
 
 ```bash
 # Example download
-wget https://github.com/ywatanabe1989/scitex-code/releases/download/v1.0.0/scitex-core.sif
+wget https://github.com/ywatanabe1989/scitex-python/releases/download/v1.0.0/scitex-core.sif
 ```
 
 ### Option 2: Singularity Hub / Container Library

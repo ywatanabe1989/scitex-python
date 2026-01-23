@@ -1,15 +1,6 @@
 #!/usr/bin/env python3
-# Timestamp: "2025-10-13 06:13:41 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/pipelines/ScholarPipelineParallel.py
-# ----------------------------------------
-from __future__ import annotations
-
-import os
-
-__FILE__ = "./src/scitex/scholar/pipelines/ScholarPipelineParallel.py"
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
-
+# Timestamp: "2026-01-22 (ywatanabe)"
+# File: src/scitex/scholar/pipelines/ScholarPipelineParallel.py
 """
 Functionalities:
   - Orchestrates parallel paper acquisition using multiple browser profiles
@@ -33,11 +24,12 @@ IO:
     - library/{project}/{paper_id} -> ../MASTER/{paper_id} (multiple symlinks)
 """
 
-"""Imports"""
-import argparse
+from __future__ import annotations
+
 import asyncio
 from typing import List, Optional
 
+import scitex as stx
 from scitex import logging
 from scitex.browser.core import ChromeProfileManager
 from scitex.scholar.auth import ScholarAuthManager
@@ -79,7 +71,8 @@ class ScholarPipelineParallel:
     async def _verify_authentication_async(self) -> bool:
         """Pre-verify authentication once before spawning workers.
 
-        Returns:
+        Returns
+        -------
             True if authenticated, False otherwise
         """
         logger.info(f"{self.name}: Verifying authentication...")
@@ -110,7 +103,8 @@ class ScholarPipelineParallel:
         Args:
             num_workers: Number of workers to prepare (defaults to self.num_workers)
 
-        Returns:
+        Returns
+        -------
             List of worker profile names
         """
         workers_to_prepare = (
@@ -157,7 +151,8 @@ class ScholarPipelineParallel:
             worker_id: Worker ID for logging
             worker_profile: Chrome profile name for this worker
 
-        Returns:
+        Returns
+        -------
             Paper object if successful, None otherwise
         """
         logger.info(
@@ -200,7 +195,8 @@ class ScholarPipelineParallel:
             doi_or_title_list: List of DOI or title strings
             project: Project name for symlinking (optional)
 
-        Returns:
+        Returns
+        -------
             List of successfully processed Paper objects
         """
         if not doi_or_title_list:
@@ -291,7 +287,8 @@ class ScholarPipelineParallel:
             papers: Papers collection
             project: Project name for symlinking (optional, uses papers.project if None)
 
-        Returns:
+        Returns
+        -------
             List of successfully processed Paper objects
         """
         # Extract DOIs or titles from papers
@@ -314,34 +311,64 @@ class ScholarPipelineParallel:
         )
 
 
-def main(args):
-    """Run parallel pipeline"""
+@stx.session
+def main(
+    dois: str = None,
+    titles: str = None,
+    project: str = None,
+    num_workers: int = 4,
+    browser_mode: str = "stealth",
+    chrome_profile: str = "system",
+    CONFIG=stx.INJECTED,
+    logger=stx.INJECTED,
+) -> int:
+    """Orchestrate parallel paper acquisition pipeline.
 
+    Parameters
+    ----------
+    dois : str
+        Comma-separated DOIs (e.g., '10.1038/...,10.1016/...')
+    titles : str
+        Comma-separated paper titles
+    project : str
+        Project name for symlinking (optional)
+    num_workers : int
+        Number of parallel workers (default: 4)
+    browser_mode : str
+        Browser mode: 'stealth' or 'interactive' (default: stealth)
+    chrome_profile : str
+        Base Chrome profile name to sync from (default: system)
+
+    Returns
+    -------
+    int
+        Exit status code (0 for success)
+    """
     # Parse input queries
     queries = []
-    if args.dois:
-        queries.extend(args.dois.split(","))
-    if args.titles:
-        queries.extend(args.titles.split(","))
+    if dois:
+        queries.extend(dois.split(","))
+    if titles:
+        queries.extend(titles.split(","))
 
     if not queries:
         logger.error("No queries provided. Use --dois or --titles")
         return 1
 
-    logger.info(f"Processing {len(queries)} queries with {args.num_workers} workers")
+    logger.info(f"Processing {len(queries)} queries with {num_workers} workers")
 
     # Create parallel pipeline
     parallel_pipeline = ScholarPipelineParallel(
-        num_workers=args.num_workers,
-        browser_mode=args.browser_mode,
-        base_chrome_profile=args.chrome_profile,
+        num_workers=num_workers,
+        browser_mode=browser_mode,
+        base_chrome_profile=chrome_profile,
     )
 
     # Run pipeline
     papers = asyncio.run(
         parallel_pipeline.process_papers_from_list_async(
             doi_or_title_list=queries,
-            project=args.project,
+            project=project,
         )
     )
 
@@ -349,114 +376,29 @@ def main(args):
     return 0
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Orchestrate parallel paper acquisition pipeline"
-    )
-    parser.add_argument(
-        "--dois",
-        type=str,
-        default=None,
-        help="Comma-separated DOIs (e.g., '10.1038/...,10.1016/...')",
-    )
-    parser.add_argument(
-        "--titles",
-        type=str,
-        default=None,
-        help="Comma-separated paper titles",
-    )
-    parser.add_argument(
-        "--project",
-        type=str,
-        default=None,
-        help="Project name for symlinking (optional)",
-    )
-    parser.add_argument(
-        "--num-workers",
-        type=int,
-        default=4,
-        help="Number of parallel workers (default: 4)",
-    )
-    parser.add_argument(
-        "--browser-mode",
-        type=str,
-        choices=["stealth", "interactive"],
-        default="stealth",
-        help="Browser mode (default: stealth)",
-    )
-    parser.add_argument(
-        "--chrome-profile",
-        type=str,
-        default="system",
-        help="Base Chrome profile name to sync from (default: system)",
-    )
-    args = parser.parse_args()
-    return args
-
-
-def run_main() -> None:
-    """Initialize scitex framework, run main function, and cleanup."""
-    global CONFIG, CC, sys, plt, rng
-
-    import sys
-
-    import matplotlib.pyplot as plt
-
-    import scitex as stx
-
-    args = parse_args()
-
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
-        sys,
-        plt,
-        args=args,
-        file=__FILE__,
-        sdir_suffix=None,
-        verbose=False,
-        agg=True,
-    )
-
-    exit_status = main(args)
-
-    stx.session.close(
-        CONFIG,
-        verbose=False,
-        notify=False,
-        message="",
-        exit_status=exit_status,
-    )
-
-
 if __name__ == "__main__":
-    run_main()
+    main()
 
-"""
-Usage:
-    # With DOIs (4 workers)
-    python -m scitex.scholar.pipelines.ScholarPipelineParallel \
-        --dois "10.1212/wnl.0000000000200348,10.1038/s41598-017-02626-y" \
-        --project neurovista \
-        --num-workers 4 \
-        --browser-mode stealth \
-        --chrome-profile system
-
-    # With titles (2 workers)
-    python -m scitex.scholar.pipelines.ScholarPipelineParallel \
-        --titles "Attention Is All You Need,BERT: Pre-training of Deep Bidirectional Transformers" \
-        --project transformers \
-        --num-workers 2 \
-        --browser-mode stealth \
-        --chrome-profile system
-
-    # Mixed DOIs and titles (8 workers)
-    python -m scitex.scholar.pipelines.ScholarPipelineParallel \
-        --dois "10.1038/s41593-025-01990-7" \
-        --titles "Neural State Monitoring in the Treatment of Epilepsy" \
-        --project epilepsy \
-        --num-workers 8 \
-        --browser-mode stealth \
-        --chrome-profile system
-"""
+# Usage:
+#     # With DOIs (4 workers)
+#     python -m scitex.scholar.pipelines.ScholarPipelineParallel \
+#         --dois "10.1212/wnl.0000000000200348,10.1038/s41598-017-02626-y" \
+#         --project neurovista \
+#         --num-workers 4 \
+#         --browser-mode stealth \
+#         --chrome-profile system
+#
+#     # With titles (2 workers)
+#     python -m scitex.scholar.pipelines.ScholarPipelineParallel \
+#         --titles "Attention Is All You Need,BERT: Pre-training" \
+#         --project transformers \
+#         --num-workers 2
+#
+#     # Mixed DOIs and titles (8 workers)
+#     python -m scitex.scholar.pipelines.ScholarPipelineParallel \
+#         --dois "10.1038/s41593-025-01990-7" \
+#         --titles "Neural State Monitoring in the Treatment of Epilepsy" \
+#         --project epilepsy \
+#         --num-workers 8
 
 # EOF

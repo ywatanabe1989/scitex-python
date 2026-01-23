@@ -25,4 +25,4 @@ import scitex as stx
 - **scitex**: The primary package name
 - **scitex-python**: Alternative name following the convention of packages like `opencv-python`
 
-For documentation and more information, visit the [main repository](https://github.com/ywatanabe1989/scitex-code).
+For documentation and more information, visit the [main repository](https://github.com/ywatanabe1989/scitex-python).

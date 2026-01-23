@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-11-10
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/examples/scitex_session_demo/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/examples/scitex_session_demo/README.md
 !-- --- -->
 
 # SciTeX Session Demo
@@ -116,17 +116,25 @@ Both produce organized outputs:
 
 ```
 scripts/
-├── scitex_session_demo.py_out/
-│   ├── sample_data.npy
+├── scitex_session_demo_out/
+│   ├── sample_data.npy              # Output files at ROOT level
 │   ├── visualization.jpg
 │   ├── results.json
-│   └── log.txt
-└── scitex_session_demo_decorator.py_out/
-    ├── sample_data.npy
-    ├── visualization.jpg
-    ├── results.json
-    └── log.txt
+│   └── FINISHED_SUCCESS/            # Session metadata here
+│       └── 2026Y-01M-20D-...-main/
+│           ├── CONFIGS/
+│           │   ├── CONFIG.pkl
+│           │   └── CONFIG.yaml
+│           └── logs/
+│               ├── stdout.log       # print() captured
+│               └── stderr.log       # errors captured
+└── data/                            # Central navigation via symlinks
+    ├── sample_data.npy -> ../scitex_session_demo_out/sample_data.npy
+    └── visualization.jpg -> ../scitex_session_demo_out/visualization.jpg
 ```
+
+**Key**: Output files go to `script_out/` ROOT, not inside session directories.
+Use `symlink_to="./data"` for centralized access across multiple scripts.
 
 ## Recommendation
 

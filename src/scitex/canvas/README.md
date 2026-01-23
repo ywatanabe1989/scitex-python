@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-12-08
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/vis/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/src/scitex/vis/README.md
 !-- --- -->
 
 # scitex.vis - Canvas-Based Figure Composition

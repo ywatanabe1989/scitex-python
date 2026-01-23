@@ -26,6 +26,26 @@ def writer():
     pass
 
 
+@writer.command("help-recursive")
+@click.pass_context
+def help_recursive(ctx):
+    """Show help for all commands recursively."""
+    fake_parent = click.Context(click.Group(), info_name="scitex")
+    parent_ctx = click.Context(writer, info_name="writer", parent=fake_parent)
+
+    click.secho("━━━ scitex writer ━━━", fg="cyan", bold=True)
+    click.echo(writer.get_help(parent_ctx))
+
+    for name in sorted(writer.list_commands(ctx) or []):
+        cmd = writer.get_command(ctx, name)
+        if cmd is None or name == "help-recursive":
+            continue
+        click.echo()
+        click.secho(f"━━━ scitex writer {name} ━━━", fg="cyan", bold=True)
+        with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
+            click.echo(cmd.get_help(sub_ctx))
+
+
 @writer.command()
 @click.argument("project_dir", type=click.Path())
 @click.option(
@@ -258,6 +278,123 @@ def info(dir):
     except Exception as e:
         click.secho(f"Error: {e}", fg="red", err=True)
         sys.exit(1)
+
+
+@writer.group()
+def mcp():
+    """
+    MCP (Model Context Protocol) tools for writer module.
+
+    \b
+    Examples:
+      scitex writer mcp list-tools      # List available MCP tools
+      scitex writer mcp usage           # Show tool usage and parameters
+    """
+    pass
+
+
+@mcp.command("list-tools")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def list_tools(as_json: bool):
+    """
+    List available MCP tools for writer module.
+
+    \b
+    Examples:
+      scitex writer mcp list-tools
+      scitex writer mcp list-tools --json
+    """
+    from scitex.writer._mcp.tool_schemas import get_tool_schemas
+
+    tools = get_tool_schemas()
+
+    if as_json:
+        import json
+
+        output = {
+            "module": "writer",
+            "count": len(tools),
+            "tools": [
+                {
+                    "name": t.name,
+                    "description": t.description,
+                    "parameters": list(t.inputSchema.get("properties", {}).keys()),
+                    "required": t.inputSchema.get("required", []),
+                }
+                for t in tools
+            ],
+        }
+        click.echo(json.dumps(output, indent=2))
+    else:
+        click.secho(
+            f"SciTeX Writer MCP Tools ({len(tools)} total)", fg="cyan", bold=True
+        )
+        click.echo()
+
+        for tool in tools:
+            click.secho(f"  {tool.name}", fg="green", bold=True)
+            # First line of description
+            desc = tool.description.split("\n")[0] if tool.description else ""
+            click.echo(f"    {desc}")
+
+            # Parameters
+            props = tool.inputSchema.get("properties", {})
+            required = tool.inputSchema.get("required", [])
+            if props:
+                params = []
+                for pname, pinfo in props.items():
+                    req_marker = "*" if pname in required else ""
+                    params.append(f"{pname}{req_marker}")
+                click.echo(f"    Parameters: {', '.join(params)}")
+            click.echo()
+
+
+@mcp.command("usage")
+@click.argument("tool_name", required=False)
+def usage(tool_name: str):
+    """
+    Show detailed usage for writer MCP tools.
+
+    \b
+    Examples:
+      scitex writer mcp usage                    # Show all tools
+      scitex writer mcp usage compile_manuscript # Show specific tool
+    """
+    from scitex.writer._mcp.tool_schemas import get_tool_schemas
+
+    tools = get_tool_schemas()
+
+    if tool_name:
+        # Find specific tool
+        tool = next((t for t in tools if t.name == tool_name), None)
+        if not tool:
+            click.secho(f"Tool '{tool_name}' not found", fg="red", err=True)
+            click.echo(f"Available tools: {', '.join(t.name for t in tools)}")
+            raise SystemExit(1)
+        tools = [tool]
+
+    for tool in tools:
+        click.secho(f"━━━ {tool.name} ━━━", fg="cyan", bold=True)
+        click.echo()
+        click.echo(f"Description: {tool.description}")
+        click.echo()
+
+        props = tool.inputSchema.get("properties", {})
+        required = tool.inputSchema.get("required", [])
+
+        if props:
+            click.secho("Parameters:", bold=True)
+            for pname, pinfo in props.items():
+                req = " (required)" if pname in required else ""
+                ptype = pinfo.get("type", "any")
+                pdesc = pinfo.get("description", "")
+                default = pinfo.get("default")
+                default_str = f" [default: {default}]" if default is not None else ""
+
+                click.echo(f"  {pname}: {ptype}{req}{default_str}")
+                if pdesc:
+                    click.echo(f"    {pdesc}")
+        click.echo()
 
 
 @writer.command()

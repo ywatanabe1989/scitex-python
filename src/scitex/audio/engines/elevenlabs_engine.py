@@ -38,6 +38,10 @@ class ElevenLabsTTS(BaseTTS):
         "sam": "yoZ06aMxZJJ28mfd3POQ",
     }
 
+    # ElevenLabs API speed limits
+    MIN_SPEED = 0.7
+    MAX_SPEED = 1.2
+
     def __init__(
         self,
         api_key: Optional[str] = None,
@@ -58,7 +62,8 @@ class ElevenLabsTTS(BaseTTS):
         self.model_id = model_id
         self.stability = stability
         self.similarity_boost = similarity_boost
-        self.speed = speed
+        # Clamp speed to ElevenLabs API limits (0.7-1.2)
+        self.speed = max(self.MIN_SPEED, min(self.MAX_SPEED, speed))
         self._client = None
 
     @property

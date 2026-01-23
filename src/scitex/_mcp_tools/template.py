@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+# Timestamp: 2026-01-15
+# File: /home/ywatanabe/proj/scitex-code/src/scitex/_mcp_tools/template.py
+"""Template module tools for FastMCP unified server."""
+
+from __future__ import annotations
+
+import json
+from typing import Optional
+
+
+def _json(data: dict) -> str:
+    return json.dumps(data, indent=2, default=str)
+
+
+def register_template_tools(mcp) -> None:
+    """Register template tools with FastMCP server."""
+
+    @mcp.tool()
+    async def template_list_templates() -> str:
+        """[template] List all available SciTeX project templates with their descriptions."""
+        from scitex.template._mcp.handlers import list_templates_handler
+
+        result = await list_templates_handler()
+        return _json(result)
+
+    @mcp.tool()
+    async def template_get_template_info(template_id: str) -> str:
+        """[template] Get detailed information about a specific project template."""
+        from scitex.template._mcp.handlers import get_template_info_handler
+
+        result = await get_template_info_handler(template_id=template_id)
+        return _json(result)
+
+    @mcp.tool()
+    async def template_clone_template(
+        template_id: str,
+        project_name: str,
+        target_dir: Optional[str] = None,
+        git_strategy: str = "child",
+        branch: Optional[str] = None,
+        tag: Optional[str] = None,
+    ) -> str:
+        """[template] Create a new project by cloning a template."""
+        from scitex.template._mcp.handlers import clone_template_handler
+
+        result = await clone_template_handler(
+            template_id=template_id,
+            project_name=project_name,
+            target_dir=target_dir,
+            git_strategy=git_strategy,
+            branch=branch,
+            tag=tag,
+        )
+        return _json(result)
+
+    @mcp.tool()
+    async def template_list_git_strategies() -> str:
+        """[template] List available git initialization strategies for template cloning."""
+        from scitex.template._mcp.handlers import list_git_strategies_handler
+
+        result = await list_git_strategies_handler()
+        return _json(result)
+
+
+# EOF

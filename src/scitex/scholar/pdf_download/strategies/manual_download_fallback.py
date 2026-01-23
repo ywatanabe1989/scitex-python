@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-13 08:00:08 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/pdf_download/strategies/manual_download_fallback.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/pdf_download/strategies/manual_download_fallback.py"
@@ -21,7 +21,6 @@ from scitex.scholar import ScholarConfig
 from scitex.scholar.browser import browser_logger
 from scitex.scholar.pdf_download.strategies.manual_download_utils import (
     DownloadMonitorAndSync,
-    complete_manual_download_workflow_async,
 )
 
 logger = logging.getLogger(__name__)
@@ -51,7 +50,8 @@ async def try_download_manual_async(
         config: Scholar configuration
         doi: Optional DOI for filename generation
 
-    Returns:
+    Returns
+    -------
         Path to downloaded file, or None if failed
     """
     config = config or ScholarConfig()
@@ -162,6 +162,83 @@ async def try_download_manual_async(
             except Exception:
                 pass
         return None
+
+
+async def handle_manual_download_on_page_async(
+    page,
+    pdf_url: str,
+    output_path: Path,
+    func_name: str = "handle_manual_download",
+    config: ScholarConfig = None,
+    doi: Optional[str] = None,
+) -> Optional[Path]:
+    """Handle manual download on an already-open page.
+
+    Unlike try_download_manual_async, this uses an existing page
+    (e.g., from the stop automation button workflow).
+
+    Args:
+        page: Already-open Playwright page
+        pdf_url: URL of the PDF
+        output_path: Target output path
+        config: Scholar configuration
+        doi: Optional DOI for metadata
+
+    Returns
+    -------
+        Path to downloaded file, or None if failed
+    """
+    config = config or ScholarConfig()
+    downloads_dir = config.get_library_downloads_dir()
+
+    # Extract DOI from URL if not provided
+    if not doi and "doi.org/" in pdf_url:
+        doi = pdf_url.split("doi.org/")[-1].split("?")[0].split("#")[0]
+
+    await browser_logger.info(page, f"{func_name}: Manual download mode activated")
+    await browser_logger.info(
+        page, f"{func_name}: Please download the PDF manually from this page"
+    )
+
+    # Monitor for download
+    monitor = DownloadMonitorAndSync(downloads_dir, downloads_dir)
+
+    def log_progress(msg: str):
+        logger.info(f"{func_name}: {msg}")
+
+    temp_file = await monitor.monitor_for_new_download_async(
+        timeout_sec=120, logger_func=log_progress
+    )
+
+    if not temp_file:
+        await browser_logger.error(
+            page, f"{func_name}: No new PDF detected in downloads directory"
+        )
+        return None
+
+    await browser_logger.info(
+        page,
+        f"{func_name}: Detected PDF: {temp_file.name} ({temp_file.stat().st_size / 1e6:.1f} MB)",
+    )
+
+    # Save minimal metadata
+    if doi:
+        import json
+
+        metadata_file = temp_file.parent / f"{temp_file.name}.meta.json"
+        metadata = {"doi": doi, "pdf_url": pdf_url, "pdf_file": temp_file.name}
+        with open(metadata_file, "w") as f:
+            json.dump(metadata, f, indent=2)
+
+    await browser_logger.info(
+        page, f"{func_name}: Manual download complete - saved in downloads/"
+    )
+
+    logger.info(f"{func_name}: PDF: {temp_file}")
+    if doi:
+        logger.info(f"{func_name}: DOI: {doi} (saved in {temp_file.name}.meta.json)")
+
+    return temp_file
 
 
 # EOF

@@ -25,8 +25,8 @@ TEMPLATE_REPO_URL = "https://github.com/ywatanabe1989/scitex-writer.git"
 def clone_writer_directory(
     project_dir: str,
     git_strategy: Optional[str] = "child",
-    branch: Optional[str] = None,
-    tag: Optional[str] = "v2.0.0",
+    branch: Optional[str] = "main",
+    tag: Optional[str] = None,
 ) -> bool:
     """
     Create a new paper directory from the scitex-writer template repository.
@@ -39,10 +39,10 @@ def clone_writer_directory(
     git_strategy : str, optional
         Git initialization strategy ('child', 'parent', None). Default is 'child'.
     branch : str, optional
-        Specific branch of the template repository to clone. If None, clones the default branch.
+        Specific branch of the template repository to clone. Default is 'main'.
         Mutually exclusive with tag parameter.
     tag : str, optional
-        Specific tag/release of the template repository to clone. Default is 'v2.0.0'.
+        Specific tag/release of the template repository to clone. If None, uses the branch.
         Mutually exclusive with branch parameter.
 
     Returns
@@ -53,7 +53,7 @@ def clone_writer_directory(
     Example
     -------
     >>> from scitex.template import clone_writer_directory
-    >>> clone_writer_directory("my_paper")  # Uses v2.0.0
+    >>> clone_writer_directory("my_paper")  # Uses main branch
     >>> clone_writer_directory("./papers/my_paper")
     >>> clone_writer_directory("my_paper", branch="develop")
     >>> clone_writer_directory("my_paper", tag="v2.0.0")

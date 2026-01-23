@@ -1,319 +1,411 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for CrossRefLocalEngine - CrossRef Local API metadata retrieval engine."""
+
+import json
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from scitex.scholar.metadata_engines.individual import CrossRefLocalEngine
+
+
+class TestCrossRefLocalEngineInit:
+    """Tests for CrossRefLocalEngine initialization."""
+
+    def test_init_default_email(self):
+        """Should initialize with default email."""
+        engine = CrossRefLocalEngine()
+        assert engine.email == "research@example.com"
+
+    def test_init_custom_email(self):
+        """Should accept custom email."""
+        engine = CrossRefLocalEngine(email="custom@test.com")
+        assert engine.email == "custom@test.com"
+
+    def test_init_default_api_url(self):
+        """Should have default API URL."""
+        engine = CrossRefLocalEngine()
+        assert engine.api_url == "http://127.0.0.1:3333"
+
+    def test_init_custom_api_url(self):
+        """Should accept custom API URL."""
+        engine = CrossRefLocalEngine(api_url="http://custom:8080")
+        assert engine.api_url == "http://custom:8080"
+
+    def test_strips_trailing_slash(self):
+        """Should strip trailing slash from API URL."""
+        engine = CrossRefLocalEngine(api_url="http://custom:8080/")
+        assert engine.api_url == "http://custom:8080"
+
+
+class TestCrossRefLocalEngineProperties:
+    """Tests for CrossRefLocalEngine properties."""
+
+    def test_name_property(self):
+        """Name property should return 'CrossRefLocal'."""
+        engine = CrossRefLocalEngine()
+        assert engine.name == "CrossRefLocal"
+
+    def test_rate_limit_delay(self):
+        """Rate limit delay should be 0.01 seconds."""
+        engine = CrossRefLocalEngine()
+        assert engine.rate_limit_delay == 0.01
+
+
+class TestCrossRefLocalEngineAPIDetection:
+    """Tests for API type detection."""
+
+    def test_detects_internal_api(self):
+        """Should detect internal API (Docker/local)."""
+        engine = CrossRefLocalEngine(api_url="http://crossref:3333")
+        assert engine._is_external_api is False
+
+    def test_detects_external_api_by_path(self):
+        """Should detect external API by path."""
+        engine = CrossRefLocalEngine(api_url="https://scitex.ai/scholar/api/crossref")
+        assert engine._is_external_api is True
+
+    def test_detects_external_api_by_domain(self):
+        """Should detect external API by domain."""
+        engine = CrossRefLocalEngine(api_url="https://scitex.ai/api")
+        assert engine._is_external_api is True
+
+
+class TestCrossRefLocalEngineBuildEndpoint:
+    """Tests for _build_endpoint_url method."""
+
+    def test_builds_internal_endpoint(self):
+        """Should build internal API endpoint correctly."""
+        engine = CrossRefLocalEngine(api_url="http://crossref:3333")
+        url = engine._build_endpoint_url("search")
+        assert url == "http://crossref:3333/api/search/"
+
+    def test_builds_external_endpoint(self):
+        """Should build external API endpoint correctly."""
+        engine = CrossRefLocalEngine(api_url="https://scitex.ai/scholar/api/crossref")
+        url = engine._build_endpoint_url("search")
+        assert url == "https://scitex.ai/scholar/api/crossref/search/"
+
+
+class TestCrossRefLocalEngineSearch:
+    """Tests for search method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return CrossRefLocalEngine()
+
+    def test_search_with_doi(self, engine):
+        """Should search with DOI parameter."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "DOI": "10.1038/test",
+            "title": ["Test Paper"],
+        }
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine.search(doi="10.1038/test")
+        call_params = mock_session.get.call_args[1]["params"]
+        assert call_params["doi"] == "10.1038/test"
+
+    def test_search_cleans_doi_url(self, engine):
+        """Should clean DOI URL prefix."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "DOI": "10.1038/test",
+            "title": ["Test Paper"],
+        }
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        engine.search(doi="https://doi.org/10.1038/test")
+        call_params = mock_session.get.call_args[1]["params"]
+        assert call_params["doi"] == "10.1038/test"
+
+    def test_search_with_title(self, engine):
+        """Should search with title parameter."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"results": []}
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        engine.search(title="Test Paper")
+        call_params = mock_session.get.call_args[1]["params"]
+        assert call_params["title"] == "Test Paper"
+
+    def test_search_with_year(self, engine):
+        """Should search with year parameter."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"results": []}
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        engine.search(title="Test", year=2023)
+        call_params = mock_session.get.call_args[1]["params"]
+        assert call_params["year"] == "2023"
+
+    def test_search_with_authors(self, engine):
+        """Should search with authors parameter."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"results": []}
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        engine.search(title="Test", authors=["John Doe", "Jane Smith"])
+        call_params = mock_session.get.call_args[1]["params"]
+        assert call_params["authors"] == "John Doe Jane Smith"
+
+    def test_search_no_params_returns_minimal(self, engine):
+        """Should return minimal metadata when no params."""
+        result = engine.search()
+        assert result is not None
+        assert "id" in result
+
+
+class TestCrossRefLocalEngineMakeSearchRequest:
+    """Tests for _make_search_request method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return CrossRefLocalEngine()
+
+    def test_successful_doi_search(self, engine):
+        """Should return metadata for valid DOI response."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "DOI": "10.1038/nature12373",
+            "title": ["Test Paper Title"],
+            "published-print": {"date-parts": [[2023, 5, 15]]},
+            "author": [{"given": "John", "family": "Doe"}],
+            "container-title": ["Nature"],
+        }
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._make_search_request({"doi": "10.1038/nature12373"}, "dict")
+        assert result["id"]["doi"] == "10.1038/nature12373"
+        assert result["basic"]["title"] == "Test Paper Title"
+
+    def test_handles_results_array(self, engine):
+        """Should handle results array format."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"results": [{"doi": "10.1038/test"}]}
+        mock_response.raise_for_status = MagicMock()
+
+        # Second call for DOI lookup
+        doi_response = MagicMock()
+        doi_response.json.return_value = {
+            "DOI": "10.1038/test",
+            "title": ["Found Paper"],
+        }
+        doi_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.side_effect = [mock_response, doi_response]
+        engine._session = mock_session
+
+        result = engine._make_search_request({"title": "Test"}, "dict")
+        assert result is not None
+
+    def test_handles_api_error(self, engine):
+        """Should handle API errors gracefully."""
+        mock_session = MagicMock()
+        mock_session.get.side_effect = Exception("Connection refused")
+        engine._session = mock_session
+
+        result = engine._make_search_request({"doi": "10.1038/test"}, "dict")
+        assert result is not None
+
+    def test_handles_error_response(self, engine):
+        """Should handle error in response."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"error": "Not found"}
+        mock_response.raise_for_status = MagicMock()
+
+        mock_session = MagicMock()
+        mock_session.get.return_value = mock_response
+        engine._session = mock_session
+
+        result = engine._make_search_request({"doi": "10.1038/test"}, "dict")
+        assert result is not None
+
+
+class TestCrossRefLocalEngineExtractMetadata:
+    """Tests for _extract_metadata_from_crossref_data method."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return CrossRefLocalEngine()
+
+    def test_extracts_title(self, engine):
+        """Should extract title from data."""
+        data = {"title": ["Test Paper Title"]}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["basic"]["title"] == "Test Paper Title"
+
+    def test_removes_trailing_period(self, engine):
+        """Should remove trailing period from title."""
+        data = {"title": ["Test Paper Title."]}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["basic"]["title"] == "Test Paper Title"
+
+    def test_extracts_year_from_published_print(self, engine):
+        """Should extract year from published-print."""
+        data = {"published-print": {"date-parts": [[2023, 5, 15]]}}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["basic"]["year"] == 2023
+
+    def test_extracts_year_from_published_online(self, engine):
+        """Should fall back to published-online for year."""
+        data = {"published-online": {"date-parts": [[2022, 3, 10]]}}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["basic"]["year"] == 2022
+
+    def test_extracts_authors(self, engine):
+        """Should extract author names correctly."""
+        data = {
+            "author": [
+                {"given": "John", "family": "Doe"},
+                {"given": "Jane", "family": "Smith"},
+                {"family": "Anonymous"},
+            ]
+        }
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert "John Doe" in result["basic"]["authors"]
+        assert "Jane Smith" in result["basic"]["authors"]
+        assert "Anonymous" in result["basic"]["authors"]
+
+    def test_extracts_doi(self, engine):
+        """Should extract DOI."""
+        data = {"DOI": "10.1038/nature12373"}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["id"]["doi"] == "10.1038/nature12373"
+
+    def test_extracts_journal(self, engine):
+        """Should extract journal name."""
+        data = {"container-title": ["Nature Communications"]}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["publication"]["journal"] == "Nature Communications"
+
+    def test_extracts_short_journal(self, engine):
+        """Should extract short journal name."""
+        data = {"short-container-title": ["Nat Commun"]}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["publication"]["short_journal"] == "Nat Commun"
+
+    def test_extracts_publisher(self, engine):
+        """Should extract publisher."""
+        data = {"publisher": "Nature Publishing Group"}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["publication"]["publisher"] == "Nature Publishing Group"
+
+    def test_extracts_volume_issue(self, engine):
+        """Should extract volume and issue."""
+        data = {"volume": "10", "issue": "5"}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["publication"]["volume"] == "10"
+        assert result["publication"]["issue"] == "5"
+
+    def test_extracts_issn(self, engine):
+        """Should extract ISSN."""
+        data = {"ISSN": ["2041-1723", "2041-1731"]}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["publication"]["issn"] == "2041-1723"
+
+    def test_builds_doi_url(self, engine):
+        """Should build DOI URL."""
+        data = {"DOI": "10.1038/test"}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["url"]["doi"] == "https://doi.org/10.1038/test"
+
+    def test_tracks_engine_source(self, engine):
+        """Should track CrossRefLocal as source engine."""
+        data = {"DOI": "10.1038/test", "title": ["Test"]}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["id"]["doi_engines"] == ["CrossRefLocal"]
+        assert result["basic"]["title_engines"] == ["CrossRefLocal"]
+        assert result["system"]["searched_by_CrossRefLocal"] is True
+
+    def test_return_as_json(self, engine):
+        """Should return JSON string when return_as='json'."""
+        data = {"DOI": "10.1038/test", "title": ["Test"]}
+        result = engine._extract_metadata_from_crossref_data(data, "json")
+        assert isinstance(result, str)
+        parsed = json.loads(result)
+        assert "id" in parsed
+
+
+class TestCrossRefLocalEngineEdgeCases:
+    """Edge case tests for CrossRefLocalEngine."""
+
+    @pytest.fixture
+    def engine(self):
+        """Create engine instance."""
+        return CrossRefLocalEngine()
+
+    def test_handles_empty_data(self, engine):
+        """Should handle empty data."""
+        result = engine._extract_metadata_from_crossref_data({}, "dict")
+        assert result is not None
+
+    def test_handles_error_in_data(self, engine):
+        """Should handle error in data."""
+        result = engine._extract_metadata_from_crossref_data(
+            {"error": "Not found"}, "dict"
+        )
+        assert result is not None
+
+    def test_handles_none_data(self, engine):
+        """Should handle None data."""
+        result = engine._extract_metadata_from_crossref_data(None, "dict")
+        assert result is not None
+
+    def test_handles_empty_title_list(self, engine):
+        """Should handle empty title list."""
+        data = {"title": []}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["basic"]["title"] is None
+
+    def test_handles_missing_date_parts(self, engine):
+        """Should handle missing date parts."""
+        data = {"published-print": {}}
+        result = engine._extract_metadata_from_crossref_data(data, "dict")
+        assert result["basic"]["year"] is None
+
+    def test_handles_connection_refused(self, engine):
+        """Should handle connection refused error."""
+        mock_session = MagicMock()
+        mock_session.get.side_effect = Exception(
+            "Max retries exceeded with url: /api/search/"
+        )
+        engine._session = mock_session
+
+        result = engine.search(doi="10.1038/test")
+        assert result is not None
+
 
 if __name__ == "__main__":
     import os
 
-    import pytest
-
     pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/metadata_engines/individual/CrossRefLocalEngine.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-09-30 07:29:16 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/engines/individual/CrossRefLocalEngine.py
-# # ----------------------------------------
-# from __future__ import annotations
-# import os
-# 
-# __FILE__ = __file__
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-# 
-# import json
-# import time
-# import urllib.parse
-# from typing import Dict, List, Optional, Union
-# 
-# from scitex import logging
-# 
-# from ..utils import standardize_metadata
-# from ._BaseDOIEngine import BaseDOIEngine
-# 
-# logger = logging.getLogger(__name__)
-# 
-# 
-# class CrossRefLocalEngine(BaseDOIEngine):
-#     """CrossRef Local Engine using local Django API or external public API
-# 
-#     Supports both:
-#     - Internal API: http://crossref:3333 (Docker network)
-#     - External API: https://scitex.ai/scholar/api/crossref (Public internet)
-# 
-#     Automatically detects API format and adjusts endpoints accordingly.
-#     """
-# 
-#     def __init__(
-#         self,
-#         email: str = "research@example.com",
-#         api_url: str = "http://127.0.0.1:3333",
-#     ):
-#         super().__init__(email)
-#         self.api_url = api_url.rstrip("/")
-# 
-#         # Detect API type: external (public) vs internal (Docker/local)
-#         self._is_external_api = (
-#             "/api/crossref" in self.api_url or "scitex.ai" in self.api_url
-#         )
-# 
-#     @property
-#     def name(self) -> str:
-#         return "CrossRefLocal"
-# 
-#     @property
-#     def rate_limit_delay(self) -> float:
-#         return 0.01
-# 
-#     def _build_endpoint_url(self, endpoint: str) -> str:
-#         """Build the correct endpoint URL based on API type
-# 
-#         Args:
-#             endpoint: Endpoint name (e.g., 'search', 'health', 'stats')
-# 
-#         Returns:
-#             Full URL for the endpoint
-# 
-#         Examples:
-#             Internal: http://crossref:3333/api/search/
-#             External: https://scitex.ai/scholar/api/crossref/search/
-#         """
-#         if self._is_external_api:
-#             # External API: base URL already includes /scholar/api/crossref
-#             return f"{self.api_url}/{endpoint}/"
-#         else:
-#             # Internal API: need to add /api/ prefix
-#             return f"{self.api_url}/api/{endpoint}/"
-# 
-#     def search(
-#         self,
-#         title: Optional[str] = None,
-#         year: Optional[Union[int, str]] = None,
-#         authors: Optional[List[str]] = None,
-#         doi: Optional[str] = None,
-#         max_results=1,
-#         return_as: Optional[str] = "dict",
-#         **kwargs,
-#     ) -> Optional[Dict]:
-#         """Search using local CrossRef API with all parameters"""
-#         params = {}
-# 
-#         if doi:
-#             doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
-#             params["doi"] = doi
-# 
-#         if title:
-#             params["title"] = title
-# 
-#         if year:
-#             params["year"] = str(year)
-# 
-#         if authors:
-#             if isinstance(authors, list):
-#                 params["authors"] = " ".join(authors)
-#             else:
-#                 params["authors"] = str(authors)
-# 
-#         if not params:
-#             return self._create_minimal_metadata(return_as=return_as)
-# 
-#         return self._make_search_request(params, return_as)
-# 
-#     def _make_search_request(self, params: dict, return_as: str) -> Optional[Dict]:
-#         """Make search request to local or external API"""
-#         url = self._build_endpoint_url("search")
-# 
-#         try:
-#             assert return_as in [
-#                 "dict",
-#                 "json",
-#             ], "return_as must be either 'dict' or 'json'"
-# 
-#             response = self.session.get(url, params=params, timeout=10)
-#             response.raise_for_status()
-#             data = response.json()
-# 
-#             if "doi" in params and isinstance(data, dict) and not data.get("error"):
-#                 return self._extract_metadata_from_crossref_data(data, return_as)
-# 
-#             elif "results" in data and data["results"]:
-#                 first_result = data["results"][0]
-#                 if first_result.get("doi"):
-#                     return self._search_by_doi_only(first_result["doi"], return_as)
-# 
-#             elif isinstance(data, dict) and not data.get("error"):
-#                 return self._extract_metadata_from_crossref_data(data, return_as)
-# 
-#             return self._create_minimal_metadata(return_as=return_as)
-# 
-#         except Exception as e:
-#             # Shorten verbose connection error messages
-#             if "Connection refused" in str(e) or "Max retries exceeded" in str(e):
-#                 logger.warning(
-#                     f"CrossRef Local server not available at {self.api_url} (connection refused)"
-#                 )
-#             else:
-#                 logger.warning(f"CrossRef Local search error: {e}")
-#             return self._create_minimal_metadata(return_as=return_as)
-# 
-#     def _search_by_doi_only(self, doi: str, return_as: str) -> Optional[Dict]:
-#         """Get full metadata for DOI"""
-#         doi = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
-#         url = self._build_endpoint_url("search")
-#         params = {"doi": doi}
-# 
-#         try:
-#             response = self.session.get(url, params=params, timeout=10)
-#             response.raise_for_status()
-#             data = response.json()
-#             return self._extract_metadata_from_crossref_data(data, return_as)
-#         except Exception as exc:
-#             # Shorten verbose connection error messages
-#             if "Connection refused" in str(exc) or "Max retries exceeded" in str(exc):
-#                 logger.warning(
-#                     f"CrossRef Local server not available at {self.api_url} (connection refused)"
-#                 )
-#             else:
-#                 logger.warning(f"CrossRef Local DOI lookup error: {exc}")
-#             return self._create_minimal_metadata(doi=doi, return_as=return_as)
-# 
-#     def _extract_metadata_from_crossref_data(
-#         self, data, return_as: str
-#     ) -> Optional[Dict]:
-#         """Extract metadata from CrossRef JSON data"""
-#         if not data or data.get("error"):
-#             return self._create_minimal_metadata(return_as=return_as)
-# 
-#         title_list = data.get("title", [])
-#         title = title_list[0] if title_list else None
-#         if title and title.endswith("."):
-#             title = title[:-1]
-# 
-#         pub_year = None
-#         published = data.get("published-print") or data.get("published-online")
-#         if published and published.get("date-parts"):
-#             pub_year = published["date-parts"][0][0]
-# 
-#         extracted_authors = []
-#         for author in data.get("author", []):
-#             given = author.get("given", "")
-#             family = author.get("family", "")
-#             if family:
-#                 if given:
-#                     extracted_authors.append(f"{given} {family}")
-#                 else:
-#                     extracted_authors.append(family)
-# 
-#         container_titles = data.get("container-title", [])
-#         short_container_titles = data.get("short-container-title", [])
-#         journal = container_titles[0] if container_titles else None
-#         short_journal = short_container_titles[0] if short_container_titles else None
-# 
-#         issn_list = data.get("ISSN", [])
-#         issn = issn_list[0] if issn_list else None
-# 
-#         metadata = {
-#             "id": {
-#                 "doi": data.get("DOI"),
-#                 "doi_engines": [self.name] if data.get("DOI") else None,
-#             },
-#             "basic": {
-#                 "title": title if title else None,
-#                 "title_engines": [self.name] if title else None,
-#                 "year": pub_year if pub_year else None,
-#                 "year_engines": [self.name] if pub_year else None,
-#                 "authors": extracted_authors if extracted_authors else None,
-#                 "authors_engines": [self.name] if extracted_authors else None,
-#             },
-#             "publication": {
-#                 "journal": journal if journal else None,
-#                 "journal_engines": [self.name] if journal else None,
-#                 "short_journal": short_journal if short_journal else None,
-#                 "short_journal_engines": ([self.name] if short_journal else None),
-#                 "publisher": (data.get("publisher") if data.get("publisher") else None),
-#                 "publisher_engines": ([self.name] if data.get("publisher") else None),
-#                 "volume": data.get("volume") if data.get("volume") else None,
-#                 "volume_engines": [self.name] if data.get("volume") else None,
-#                 "issue": data.get("issue") if data.get("issue") else None,
-#                 "issue_engines": [self.name] if data.get("issue") else None,
-#                 "issn": issn if issn else None,
-#                 "issn_engines": [self.name] if issn else None,
-#             },
-#             "url": {
-#                 "doi": (
-#                     f"https://doi.org/{data.get('DOI')}" if data.get("DOI") else None
-#                 ),
-#                 "doi_engines": [self.name] if data.get("DOI") else None,
-#             },
-#             "system": {
-#                 f"searched_by_{self.name}": True,
-#             },
-#         }
-# 
-#         metadata = standardize_metadata(metadata)
-# 
-#         if return_as == "dict":
-#             return metadata
-#         if return_as == "json":
-#             return json.dumps(metadata, indent=2)
-# 
-# 
-# if __name__ == "__main__":
-#     from pprint import pprint
-# 
-#     from scitex.scholar.metadata_engines.individual import CrossRefLocalEngine
-# 
-#     TITLE = "deep learning"
-#     DOI = "10.1038/nature12373"
-# 
-#     # Example 1: Internal API (Docker network or localhost)
-#     print("\n" + "=" * 60)
-#     print("INTERNAL API EXAMPLE")
-#     print("=" * 60)
-#     engine_internal = CrossRefLocalEngine(
-#         "test@example.com", api_url="http://crossref:3333"
-#     )
-#     print(f"API URL: {engine_internal.api_url}")
-#     print(f"Is External: {engine_internal._is_external_api}")
-#     print(f"Search endpoint: {engine_internal._build_endpoint_url('search')}")
-# 
-#     # Example 2: External API (public internet)
-#     print("\n" + "=" * 60)
-#     print("EXTERNAL API EXAMPLE")
-#     print("=" * 60)
-#     engine_external = CrossRefLocalEngine(
-#         "test@example.com", api_url="https://scitex.ai/scholar/api/crossref"
-#     )
-#     print(f"API URL: {engine_external.api_url}")
-#     print(f"Is External: {engine_external._is_external_api}")
-#     print(f"Search endpoint: {engine_external._build_endpoint_url('search')}")
-# 
-#     # Test search (use external for demo)
-#     print("\n" + "=" * 60)
-#     print("SEARCH TEST")
-#     print("=" * 60)
-#     result = engine_external.search(doi=DOI)
-#     if result:
-#         print(f"Title: {result.get('basic', {}).get('title')}")
-#         print(f"DOI: {result.get('id', {}).get('doi')}")
-#         print(f"Year: {result.get('basic', {}).get('year')}")
-#     else:
-#         print("No results found")
-# 
-# 
-# # Usage examples:
-# #
-# # Internal API (from NAS Docker):
-# #   export SCITEX_SCHOLAR_CROSSREF_API_URL=http://crossref:3333
-# #   python -m scitex.scholar.metadata_engines.individual.CrossRefLocalEngine
-# #
-# # External API (from anywhere):
-# #   export SCITEX_SCHOLAR_CROSSREF_API_URL=https://scitex.ai/scholar/api/crossref
-# #   python -m scitex.scholar.metadata_engines.individual.CrossRefLocalEngine
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/metadata_engines/individual/CrossRefLocalEngine.py
-# --------------------------------------------------------------------------------

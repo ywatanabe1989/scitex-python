@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-10-29 17:33:34
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/writer/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/src/scitex/writer/README.md
 !-- --- -->
 
 # SciTeX Writer

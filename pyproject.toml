@@ -3,7 +3,7 @@
 # https://scitex.ai
 # ============================================
 
-# /home/ywatanabe/proj/scitex-code/pyproject.toml
+# /home/ywatanabe/proj/scitex-python/pyproject.toml
 
 [build-system]
 requires = ["hatchling"]
@@ -11,10 +11,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scitex"
-version = "2.13.0"
+version = "2.14.1"
 description = "A comprehensive Python library for scientific computing and data analysis"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = { text = "AGPL-3.0" }
 authors = [
     { name = "Yusuke Watanabe", email = "ywatanabe@scitex.ai" }
@@ -34,11 +34,10 @@ classifiers = [
     "License :: OSI Approved :: GNU Affero General Public License v3",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Scientific/Engineering :: Information Analysis",
@@ -64,10 +63,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ywatanabe1989/scitex-code"
+Homepage = "https://github.com/ywatanabe1989/scitex-python"
 Documentation = "https://scitex.readthedocs.io"
-Repository = "https://github.com/ywatanabe1989/scitex-code"
-"Bug Tracker" = "https://github.com/ywatanabe1989/scitex-code/issues"
+Repository = "https://github.com/ywatanabe1989/scitex-python"
+"Bug Tracker" = "https://github.com/ywatanabe1989/scitex-python/issues"
 
 [project.scripts]
 scitex = "scitex.__main__:main"
@@ -401,6 +400,7 @@ plt = [
     "pyyaml",
     "joblib",
     "ruamel.yaml",
+    "figrecipe>=0.16.0",
 ]
 
 # Repro Module - Reproducibility tools
@@ -770,7 +770,7 @@ all = [
     "tensorpac",
     "ripple_detection",
     # figures
-    "figrecipe",
+    "figrecipe>=0.16.0",
     # jupyter
     "jupyterlab",
     "jupyter-collaboration",
@@ -799,12 +799,26 @@ pattern = '__version__ = "(?P<version>[^"]+)"'
 
 [tool.hatch.build.targets.wheel]
 exclude = [
+    # Scholar development symlinks
+    "src/scitex/scholar/.env",
+    "src/scitex/scholar/.venv",
+    "src/scitex/scholar/.claude",
     "src/scitex/scholar/crossref_local",
+    "src/scitex/scholar/library",
+    "src/scitex/scholar/docs/to_claude",
+    "src/scitex/scholar/data/impact_factor/impact_factor.db",
 ]
 
 [tool.hatch.build.targets.sdist]
 exclude = [
+    # Scholar development symlinks
+    "src/scitex/scholar/.env",
+    "src/scitex/scholar/.venv",
+    "src/scitex/scholar/.claude",
     "src/scitex/scholar/crossref_local",
+    "src/scitex/scholar/library",
+    "src/scitex/scholar/docs/to_claude",
+    "src/scitex/scholar/data/impact_factor/impact_factor.db",
 ]
 
 [tool.pytest.ini_options]

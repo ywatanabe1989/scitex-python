@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-08 05:41:15 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/storage/_LibraryManager.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/storage/_LibraryManager.py"
@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional
 
 from scitex import logging
 from scitex.scholar.config import ScholarConfig
-from scitex.scholar.metadata_engines.utils import BASE_STRUCTURE, standardize_metadata
+from scitex.scholar.metadata_engines.utils import BASE_STRUCTURE
 from scitex.scholar.storage._DeduplicationManager import DeduplicationManager
 from scitex.scholar.utils import TextNormalizer
 
@@ -57,7 +57,8 @@ class LibraryManager:
         Args:
             paper_id: 8-digit paper ID
 
-        Returns:
+        Returns
+        -------
             True if metadata.json exists, False otherwise
         """
         metadata_file = self.library_master_dir / paper_id / "metadata.json"
@@ -69,7 +70,8 @@ class LibraryManager:
         Args:
             paper_id: 8-digit paper ID
 
-        Returns:
+        Returns
+        -------
             True if metadata has PDF URLs, False otherwise
         """
         if not self.has_metadata(paper_id):
@@ -77,7 +79,7 @@ class LibraryManager:
 
         metadata_file = self.library_master_dir / paper_id / "metadata.json"
         try:
-            with open(metadata_file, "r") as f:
+            with open(metadata_file) as f:
                 data = json.load(f)
 
             # Check nested structure: metadata.url.pdfs
@@ -92,7 +94,8 @@ class LibraryManager:
         Args:
             paper_id: 8-digit paper ID
 
-        Returns:
+        Returns
+        -------
             True if any PDF file exists, False otherwise
         """
         paper_dir = self.library_master_dir / paper_id
@@ -103,13 +106,14 @@ class LibraryManager:
         pdf_files = list(paper_dir.glob("*.pdf"))
         return len(pdf_files) > 0
 
-    def load_paper_from_id(self, paper_id: str) -> Optional["Paper"]:
+    def load_paper_from_id(self, paper_id: str) -> Optional[Paper]:
         """Load Paper object from storage by ID.
 
         Args:
             paper_id: 8-digit paper ID
 
-        Returns:
+        Returns
+        -------
             Paper object if found, None otherwise
         """
         from scitex.scholar.core.Paper import Paper
@@ -120,7 +124,7 @@ class LibraryManager:
             return None
 
         try:
-            with open(metadata_file, "r") as f:
+            with open(metadata_file) as f:
                 data = json.load(f)
 
             # Use Paper.from_dict() which handles Pydantic validation
@@ -131,7 +135,7 @@ class LibraryManager:
             logger.error(f"Failed to load paper {paper_id}: {e}")
             return None
 
-    def save_paper_incremental(self, paper_id: str, paper: "Paper") -> None:
+    def save_paper_incremental(self, paper_id: str, paper: Paper) -> None:
         """Save Paper object to storage (incremental update).
 
         This saves the complete Paper object to metadata.json,
@@ -150,7 +154,7 @@ class LibraryManager:
         existing_data = {}
         if metadata_file.exists():
             try:
-                with open(metadata_file, "r") as f:
+                with open(metadata_file) as f:
                     existing_data = json.load(f)
             except Exception:
                 pass
@@ -396,7 +400,6 @@ class LibraryManager:
         self, title: str, year: Optional[int] = None
     ) -> Optional[str]:
         """Check if DOI already exists in master Scholar library."""
-
         try:
             for paper_dir in self.library_master_dir.iterdir():
                 if not paper_dir.is_dir():
@@ -405,7 +408,7 @@ class LibraryManager:
                 metadata_file = paper_dir / "metadata.json"
                 if metadata_file.exists():
                     try:
-                        with open(metadata_file, "r") as file_:
+                        with open(metadata_file) as file_:
                             metadata = json.load(file_)
 
                         stored_title = metadata.get("title", "")
@@ -447,7 +450,7 @@ class LibraryManager:
     def save_resolved_paper(
         self,
         # Can accept either a Paper object or individual fields
-        paper_data: Optional["Paper"] = None,
+        paper_data: Optional[Paper] = None,
         # Required bibliographic fields (if not providing paper_data)
         title: Optional[str] = None,
         doi: Optional[str] = None,
@@ -484,7 +487,6 @@ class LibraryManager:
         **kwargs,  # For backward compatibility
     ) -> str:
         """Save successfully resolved paper to Scholar library."""
-
         # If paper_data is provided, extract fields from it
         if paper_data is not None:
             if hasattr(paper_data, "metadata"):
@@ -581,9 +583,9 @@ class LibraryManager:
         existing_metadata = {}
         if master_metadata_file.exists():
             try:
-                with open(master_metadata_file, "r") as file_:
+                with open(master_metadata_file) as file_:
                     existing_metadata = json.load(file_)
-            except (json.JSONDecodeError, IOError):
+            except (OSError, json.JSONDecodeError):
                 existing_metadata = {}
 
         # Clean text fields
@@ -1144,52 +1146,12 @@ class LibraryManager:
             else:
                 if_val = if_val or 0.0
 
-        # Check PDF status with more granular states
+        # Count PDFs - simple and post-hoc updatable
         pdf_files = list(master_storage_path.glob("*.pdf"))
-        screenshot_dir = master_storage_path / "screenshots"
-        has_screenshots = screenshot_dir.exists() and any(screenshot_dir.iterdir())
-        downloading_marker = master_storage_path / ".downloading"
-        attempted_marker = master_storage_path / ".download_attempted"
+        n_pdfs = len(pdf_files)
 
-        # Extract DOI from metadata to check availability
-        doi = None
-        if "metadata" in comprehensive_metadata:
-            # Nested structure from file
-            doi = comprehensive_metadata.get("metadata", {}).get("id", {}).get("doi")
-        else:
-            # Flat structure (during initial save)
-            doi = comprehensive_metadata.get("doi")
-
-        if downloading_marker.exists():
-            # Download in progress
-            pdf_status_letter = "r"
-        elif pdf_files:
-            # Has PDF = Successful
-            pdf_status_letter = "s"
-        elif has_screenshots:
-            # Has screenshots but no PDF = Failed (attempted but failed)
-            pdf_status_letter = "f"
-        elif attempted_marker.exists():
-            # Download was attempted but failed early (before screenshots)
-            pdf_status_letter = "f"
-        elif not doi:
-            # No DOI = Failed (cannot download without identifier)
-            pdf_status_letter = "f"
-        else:
-            # No PDF, no screenshots, no attempts, has DOI = Pending (not attempted yet)
-            pdf_status_letter = "p"
-
-        pdf_status_id_map = {
-            "p": 0,
-            "r": 1,
-            "f": 2,
-            "s": 3,
-        }
-        pdf_status_str = f"{pdf_status_id_map[pdf_status_letter]}{pdf_status_letter}"
-        # Format: CC_000000-PDF_s-IF_032-2016-Author-Journal
-        # PDF status: r=running, s=successful, f=failed, p=pending
-        # readable_name = f"CC_{cc:06d}-PDF_{pdf_status_letter}-IF_{int(if_val):03d}-{year_str}-{first_author}-{journal_clean}"
-        readable_name = f"PDF-{pdf_status_str}_CC-{cc:06d}_IF-{int(if_val):03d}_{year_str}_{first_author}_{journal_clean}"
+        # Format matches get_library_project_entry_dirname for consistency
+        readable_name = f"PDF-{n_pdfs:02d}_CC-{cc:06d}_IF-{int(if_val):03d}_{year_str}_{first_author}_{journal_clean}"
 
         return readable_name
 
@@ -1210,7 +1172,8 @@ class LibraryManager:
             project: Project name
             metadata: Optional metadata dict (if not provided, will read from file)
 
-        Returns:
+        Returns
+        -------
             Path to the created symlink, or None if failed
         """
         try:
@@ -1220,7 +1183,7 @@ class LibraryManager:
                 if metadata_file.exists():
                     import json
 
-                    with open(metadata_file, "r") as f:
+                    with open(metadata_file) as f:
                         metadata = json.load(f)
                 else:
                     logger.warning(f"No metadata found for {master_storage_path.name}")
@@ -1272,7 +1235,6 @@ class LibraryManager:
         Removes old symlinks for the same paper with different statuses
         (e.g., removes PDF_p when creating PDF_s).
         """
-
         try:
             project_dir = self.config.path_manager.get_library_project_dir(project)
             symlink_path = project_dir / readable_name
@@ -1544,7 +1506,7 @@ class LibraryManager:
             existing_metadata = {}
             if metadata_file.exists():
                 try:
-                    with open(metadata_file, "r") as file_:
+                    with open(metadata_file) as file_:
                         existing_metadata = json.load(file_)
                 except Exception as exc_:
                     logger.warning(f"Error loading existing metadata: {exc_}")

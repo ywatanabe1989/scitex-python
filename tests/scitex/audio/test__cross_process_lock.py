@@ -1,155 +1,377 @@
-# Add your tests here
+#!/usr/bin/env python3
+"""Tests for CrossProcessLock module."""
+
+import os
+import tempfile
+import threading
+import time
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from scitex.audio._cross_process_lock import (
+    AudioPlaybackLock,
+    acquire_audio_lock,
+)
+
+
+class TestAudioPlaybackLockInit:
+    """Tests for AudioPlaybackLock initialization."""
+
+    def test_init_creates_instance(self):
+        """AudioPlaybackLock should initialize without errors."""
+        lock = AudioPlaybackLock()
+        assert lock is not None
+
+    def test_init_uses_default_lock_file(self):
+        """Should use default LOCK_FILE when none provided."""
+        lock = AudioPlaybackLock()
+        assert lock.lock_file is not None
+        assert "audio" in str(lock.lock_file)
+
+    def test_init_uses_custom_lock_file(self):
+        """Should use custom lock file when provided."""
+        custom_path = Path("/tmp/custom.lock")
+        lock = AudioPlaybackLock(lock_file=custom_path)
+        assert lock.lock_file == custom_path
+
+    def test_init_sets_fd_to_none(self):
+        """Should initialize _fd to None."""
+        lock = AudioPlaybackLock()
+        assert lock._fd is None
+
+    def test_init_sets_acquired_to_false(self):
+        """Should initialize _acquired to False."""
+        lock = AudioPlaybackLock()
+        assert lock._acquired is False
+
+
+class TestEnsureLockDir:
+    """Tests for _ensure_lock_dir method."""
+
+    def test_creates_parent_directory(self):
+        """Should create parent directory if it doesn't exist."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "subdir" / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            lock._ensure_lock_dir()
+            assert lock_path.parent.exists()
+
+    def test_handles_existing_directory(self):
+        """Should not raise if directory already exists."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            # Should not raise
+            lock._ensure_lock_dir()
+            lock._ensure_lock_dir()  # Call again
+
+
+class TestAcquire:
+    """Tests for acquire method."""
+
+    def test_acquire_returns_true(self):
+        """Should return True when lock acquired."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            result = lock.acquire()
+            assert result is True
+            lock.release()
+
+    def test_acquire_sets_acquired_flag(self):
+        """Should set _acquired to True after acquiring."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            lock.acquire()
+            assert lock._acquired is True
+            lock.release()
+
+    def test_acquire_creates_lock_file(self):
+        """Should create lock file."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            lock.acquire()
+            assert lock_path.exists()
+            lock.release()
+
+    def test_acquire_writes_pid_to_file(self):
+        """Should write PID to lock file."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            lock.acquire()
+            content = lock_path.read_text()
+            assert str(os.getpid()) in content
+            lock.release()
+
+    def test_acquire_with_timeout_returns_false_on_timeout(self):
+        """Should return False when timeout expires."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+
+            # First lock holds it
+            lock1 = AudioPlaybackLock(lock_file=lock_path)
+            lock1.acquire()
+
+            # Second lock times out
+            lock2 = AudioPlaybackLock(lock_file=lock_path)
+            result = lock2.acquire(timeout=0.2)
+
+            assert result is False
+            lock1.release()
+
+    def test_acquire_sets_fd(self):
+        """Should set _fd to valid file descriptor."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            lock.acquire()
+            assert lock._fd is not None
+            assert isinstance(lock._fd, int)
+            lock.release()
+
+
+class TestRelease:
+    """Tests for release method."""
+
+    def test_release_clears_acquired_flag(self):
+        """Should clear _acquired flag."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            lock.acquire()
+            lock.release()
+            assert lock._acquired is False
+
+    def test_release_clears_fd(self):
+        """Should clear _fd to None."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            lock.acquire()
+            lock.release()
+            assert lock._fd is None
+
+    def test_release_allows_another_process_to_acquire(self):
+        """Should allow another lock to acquire after release."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+
+            lock1 = AudioPlaybackLock(lock_file=lock_path)
+            lock1.acquire()
+            lock1.release()
+
+            lock2 = AudioPlaybackLock(lock_file=lock_path)
+            result = lock2.acquire(timeout=0.5)
+            assert result is True
+            lock2.release()
+
+    def test_release_without_acquire_is_safe(self):
+        """Should not raise when releasing without acquiring."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            # Should not raise
+            lock.release()
+
+
+class TestCleanup:
+    """Tests for _cleanup method."""
+
+    def test_cleanup_closes_fd(self):
+        """Should close file descriptor."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            lock.acquire()
+            fd = lock._fd
+            lock._cleanup()
+            assert lock._fd is None
+            # Verify fd is closed by trying to use it
+            with pytest.raises(OSError):
+                os.read(fd, 1)
+
+    def test_cleanup_handles_none_fd(self):
+        """Should handle None _fd gracefully."""
+        lock = AudioPlaybackLock()
+        # Should not raise
+        lock._cleanup()
+
+
+class TestContextManager:
+    """Tests for context manager support."""
+
+    def test_enter_acquires_lock(self):
+        """__enter__ should acquire the lock."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            with lock:
+                assert lock._acquired is True
+
+    def test_exit_releases_lock(self):
+        """__exit__ should release the lock."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            with lock:
+                pass
+            assert lock._acquired is False
+            assert lock._fd is None
+
+    def test_exit_releases_on_exception(self):
+        """__exit__ should release lock even on exception."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            try:
+                with lock:
+                    raise ValueError("Test exception")
+            except ValueError:
+                pass
+            assert lock._acquired is False
+
+    def test_exit_returns_false(self):
+        """__exit__ should return False (not suppress exceptions)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            result = lock.__exit__(None, None, None)
+            assert result is False
+
+
+class TestAcquireAudioLock:
+    """Tests for acquire_audio_lock context manager function."""
+
+    def test_yields_true_when_acquired(self):
+        """Should yield True when lock is acquired."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch(
+                "scitex.audio._cross_process_lock.LOCK_FILE",
+                Path(tmpdir) / "test.lock",
+            ):
+                with acquire_audio_lock() as result:
+                    assert result is True
+
+    def test_raises_timeout_error_on_timeout(self):
+        """Should raise TimeoutError when timeout expires."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+
+            # Hold the lock
+            holding_lock = AudioPlaybackLock(lock_file=lock_path)
+            holding_lock.acquire()
+
+            try:
+                with patch(
+                    "scitex.audio._cross_process_lock.LOCK_FILE",
+                    lock_path,
+                ):
+                    with pytest.raises(TimeoutError) as excinfo:
+                        with acquire_audio_lock(timeout=0.2):
+                            pass
+                    assert "0.2s" in str(excinfo.value)
+            finally:
+                holding_lock.release()
+
+    def test_releases_lock_after_context(self):
+        """Should release lock after context exits."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+
+            with patch(
+                "scitex.audio._cross_process_lock.LOCK_FILE",
+                lock_path,
+            ):
+                with acquire_audio_lock():
+                    pass
+
+            # Should be able to acquire again
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            result = lock.acquire(timeout=0.5)
+            assert result is True
+            lock.release()
+
+    def test_default_timeout_is_60_seconds(self):
+        """Should use 60 second default timeout."""
+        # This is a specification test - we verify the function signature
+        import inspect
+
+        sig = inspect.signature(acquire_audio_lock)
+        timeout_param = sig.parameters["timeout"]
+        assert timeout_param.default == 60.0
+
+
+class TestConcurrency:
+    """Tests for concurrent lock acquisition."""
+
+    def test_sequential_acquisition(self):
+        """Locks should be acquired sequentially."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+            results = []
+
+            def acquire_and_record(name):
+                lock = AudioPlaybackLock(lock_file=lock_path)
+                if lock.acquire(timeout=2.0):
+                    results.append(f"{name}_acquired")
+                    time.sleep(0.1)
+                    results.append(f"{name}_released")
+                    lock.release()
+
+            # Start first thread
+            t1 = threading.Thread(target=acquire_and_record, args=("t1",))
+            t2 = threading.Thread(target=acquire_and_record, args=("t2",))
+
+            t1.start()
+            time.sleep(0.05)  # Ensure t1 starts first
+            t2.start()
+
+            t1.join()
+            t2.join()
+
+            # Both should complete
+            assert len(results) == 4
+            # t1 should acquire and release before t2 acquires
+            assert results[0] == "t1_acquired"
+
+
+class TestIntegration:
+    """Integration tests for AudioPlaybackLock."""
+
+    def test_full_lifecycle(self):
+        """Test complete lock lifecycle."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+
+            # Create and acquire
+            lock = AudioPlaybackLock(lock_file=lock_path)
+            assert lock.acquire() is True
+            assert lock._acquired is True
+            assert lock_path.exists()
+
+            # Release
+            lock.release()
+            assert lock._acquired is False
+            assert lock._fd is None
+
+    def test_context_manager_lifecycle(self):
+        """Test complete context manager lifecycle."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            lock_path = Path(tmpdir) / "test.lock"
+
+            with patch(
+                "scitex.audio._cross_process_lock.LOCK_FILE",
+                lock_path,
+            ):
+                with acquire_audio_lock(timeout=5.0) as acquired:
+                    assert acquired is True
+                    assert lock_path.exists()
+
 
 if __name__ == "__main__":
-    import os
-
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_cross_process_lock.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # Timestamp: "2025-12-27 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_cross_process_lock.py
-# # ----------------------------------------
-# 
-# """
-# Cross-process FIFO lock for audio playback.
-# 
-# Ensures only one MCP server instance can play audio at a time,
-# providing true FIFO ordering across all Claude Code sessions.
-# """
-# 
-# from __future__ import annotations
-# 
-# import fcntl
-# import os
-# import time
-# from contextlib import contextmanager
-# from pathlib import Path
-# 
-# __all__ = ["AudioPlaybackLock", "acquire_audio_lock"]
-# 
-# # Lock file location
-# SCITEX_BASE_DIR = Path(os.getenv("SCITEX_DIR", Path.home() / ".scitex"))
-# LOCK_FILE = SCITEX_BASE_DIR / "audio" / ".audio_playback.lock"
-# 
-# 
-# class AudioPlaybackLock:
-#     """Cross-process lock for sequential audio playback.
-# 
-#     Uses fcntl.flock() for POSIX file locking to ensure
-#     only one process can play audio at a time.
-#     """
-# 
-#     def __init__(self, lock_file: Path | None = None):
-#         self.lock_file = lock_file or LOCK_FILE
-#         self._fd: int | None = None
-#         self._acquired = False
-# 
-#     def _ensure_lock_dir(self):
-#         """Ensure the lock file directory exists."""
-#         self.lock_file.parent.mkdir(parents=True, exist_ok=True)
-# 
-#     def acquire(self, timeout: float | None = None) -> bool:
-#         """Acquire the audio playback lock.
-# 
-#         Args:
-#             timeout: Maximum time to wait in seconds.
-#                      None means wait indefinitely.
-# 
-#         Returns:
-#             True if lock acquired, False if timeout.
-#         """
-#         self._ensure_lock_dir()
-# 
-#         # Open or create the lock file
-#         self._fd = os.open(
-#             str(self.lock_file),
-#             os.O_RDWR | os.O_CREAT,
-#             0o644,
-#         )
-# 
-#         start_time = time.time()
-# 
-#         while True:
-#             try:
-#                 # Try to acquire exclusive lock (non-blocking)
-#                 fcntl.flock(self._fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-#                 self._acquired = True
-# 
-#                 # Write PID to lock file for debugging
-#                 os.ftruncate(self._fd, 0)
-#                 os.lseek(self._fd, 0, os.SEEK_SET)
-#                 os.write(self._fd, f"{os.getpid()}\n".encode())
-# 
-#                 return True
-# 
-#             except OSError:
-#                 # Lock is held by another process
-#                 if timeout is not None:
-#                     elapsed = time.time() - start_time
-#                     if elapsed >= timeout:
-#                         self._cleanup()
-#                         return False
-# 
-#                 # Wait a bit before retrying
-#                 time.sleep(0.1)
-# 
-#     def release(self):
-#         """Release the audio playback lock."""
-#         if self._fd is not None and self._acquired:
-#             try:
-#                 fcntl.flock(self._fd, fcntl.LOCK_UN)
-#             except OSError:
-#                 pass
-#             self._acquired = False
-#         self._cleanup()
-# 
-#     def _cleanup(self):
-#         """Clean up file descriptor."""
-#         if self._fd is not None:
-#             try:
-#                 os.close(self._fd)
-#             except OSError:
-#                 pass
-#             self._fd = None
-# 
-#     def __enter__(self):
-#         self.acquire()
-#         return self
-# 
-#     def __exit__(self, exc_type, exc_val, exc_tb):
-#         self.release()
-#         return False
-# 
-# 
-# @contextmanager
-# def acquire_audio_lock(timeout: float | None = 60.0):
-#     """Context manager for acquiring the audio playback lock.
-# 
-#     Args:
-#         timeout: Maximum time to wait in seconds (default: 60s).
-# 
-#     Yields:
-#         True if lock was acquired.
-# 
-#     Raises:
-#         TimeoutError: If lock could not be acquired within timeout.
-#     """
-#     lock = AudioPlaybackLock()
-#     try:
-#         if not lock.acquire(timeout=timeout):
-#             raise TimeoutError(f"Could not acquire audio lock within {timeout}s")
-#         yield True
-#     finally:
-#         lock.release()
-# 
-# 
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_cross_process_lock.py
-# --------------------------------------------------------------------------------
+    pytest.main([os.path.abspath(__file__), "-v"])

@@ -1,7 +1,7 @@
 <!-- ---
 !-- Timestamp: 2025-11-18 10:14:48
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/src/scitex/session/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/src/scitex/session/README.md
 !-- --- -->
 
 # scitex.session

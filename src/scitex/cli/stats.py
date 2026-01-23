@@ -32,6 +32,24 @@ def stats():
     pass
 
 
+@stats.command("help-recursive")
+@click.pass_context
+def help_recursive(ctx):
+    """Show help for all commands recursively."""
+    fake_parent = click.Context(click.Group(), info_name="scitex")
+    parent_ctx = click.Context(stats, info_name="stats", parent=fake_parent)
+    click.secho("━━━ scitex stats ━━━", fg="cyan", bold=True)
+    click.echo(stats.get_help(parent_ctx))
+    for name in sorted(stats.list_commands(ctx) or []):
+        cmd = stats.get_command(ctx, name)
+        if cmd is None or name == "help-recursive":
+            continue
+        click.echo()
+        click.secho(f"━━━ scitex stats {name} ━━━", fg="cyan", bold=True)
+        with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
+            click.echo(cmd.get_help(sub_ctx))
+
+
 @stats.command()
 @click.option(
     "--n-groups", "-n", type=int, required=True, help="Number of groups to compare"

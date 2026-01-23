@@ -10,8 +10,13 @@ import sys
 import click
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
-def capture():
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=True,
+)
+@click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
+@click.pass_context
+def capture(ctx, help_recursive):
     """
     Screen capture and monitoring utilities
 
@@ -33,7 +38,13 @@ def capture():
       scitex capture gif                      # Create GIF from latest session
       scitex capture info                     # List monitors and windows
     """
-    pass
+    if help_recursive:
+        from . import print_help_recursive
+
+        print_help_recursive(ctx, capture)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
 @capture.command()
