@@ -57,10 +57,38 @@ def get_mode() -> str:
     return get_env("MODE", "auto").lower()
 
 
+def get_ssh_client_ip() -> Optional[str]:
+    """Get IP address of SSH client if running in SSH session.
+
+    Extracts client IP from SSH_CLIENT or SSH_CONNECTION env vars.
+    Returns None if not in SSH session.
+    """
+    # SSH_CLIENT format: "client_ip client_port server_port"
+    ssh_client = os.environ.get("SSH_CLIENT", "")
+    if ssh_client:
+        parts = ssh_client.split()
+        if parts:
+            return parts[0]
+
+    # SSH_CONNECTION format: "client_ip client_port server_ip server_port"
+    ssh_connection = os.environ.get("SSH_CONNECTION", "")
+    if ssh_connection:
+        parts = ssh_connection.split()
+        if parts:
+            return parts[0]
+
+    return None
+
+
 def get_relay_url() -> Optional[str]:
     """Get relay server URL for remote mode.
 
-    Returns URL like 'http://localhost:31293' or None if not configured.
+    Priority:
+    1. SCITEX_AUDIO_RELAY_URL env var
+    2. SCITEX_AUDIO_RELAY_HOST env var + port
+    3. Auto-detect from SSH_CLIENT (if in SSH session)
+
+    Returns URL like 'http://192.168.1.100:31293' or None.
     """
     url = get_env("RELAY_URL")
     if url:
@@ -71,6 +99,11 @@ def get_relay_url() -> Optional[str]:
     if relay_host:
         relay_port = get_env("RELAY_PORT", str(DEFAULT_PORT))
         return f"http://{relay_host}:{relay_port}"
+
+    # Auto-detect from SSH client IP
+    ssh_client_ip = get_ssh_client_ip()
+    if ssh_client_ip:
+        return f"http://{ssh_client_ip}:{DEFAULT_PORT}"
 
     return None
 
@@ -122,6 +155,7 @@ __all__ = [
     "get_host",
     "get_mode",
     "get_relay_url",
+    "get_ssh_client_ip",
     "get_mcp_server_name",
     "get_mcp_instructions",
 ]
