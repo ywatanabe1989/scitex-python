@@ -388,18 +388,33 @@ def run_relay_server(host: Optional[str] = None, port: Optional[int] = None) -> 
                 body = self.rfile.read(content_length)
                 try:
                     data = json.loads(body.decode("utf-8"))
-                    result = speak(
-                        text=data.get("text", ""),
-                        backend=data.get("backend"),
-                        voice=data.get("voice"),
-                        rate=data.get("rate", 150),
-                        speed=data.get("speed", 1.5),
-                        play=data.get("play", True),
-                        save=data.get("save", False),
-                        fallback=data.get("fallback", True),
-                        agent_id=data.get("agent_id"),
-                    )
-                    self._send_json(json.loads(result))
+                    # Import speak directly from audio module (not MCP tool)
+                    from . import speak as tts_speak
+                    from ._cross_process_lock import AudioPlaybackLock
+
+                    # Acquire lock for FIFO
+                    lock = AudioPlaybackLock()
+                    lock.acquire(timeout=120.0)
+                    try:
+                        tts_speak(
+                            text=data.get("text", ""),
+                            backend=data.get("backend"),
+                            voice=data.get("voice"),
+                            rate=data.get("rate", 150),
+                            speed=data.get("speed", 1.5),
+                            play=data.get("play", True),
+                            fallback=data.get("fallback", True),
+                            mode="local",
+                        )
+                    finally:
+                        lock.release()
+
+                    self._send_json({
+                        "success": True,
+                        "text": data.get("text", ""),
+                        "played": True,
+                        "timestamp": datetime.now().isoformat(),
+                    })
                 except Exception as e:
                     self._send_json({"success": False, "error": str(e)}, 500)
             else:
