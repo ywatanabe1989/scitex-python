@@ -255,9 +255,9 @@ def stop():
 )
 @click.option(
     "--port",
-    default=8084,
+    default=31293,
     type=int,
-    help="Port for HTTP/SSE transport (default: 8084)",
+    help="Port for HTTP/SSE transport (default: 31293)",
 )
 def serve(transport, host, port):
     """
@@ -277,18 +277,18 @@ def serve(transport, host, port):
       scitex audio serve
 
       # HTTP server for remote agents
-      scitex audio serve -t http --port 8084
+      scitex audio serve -t http --port 31293
 
       # SSE server
-      scitex audio serve -t sse --port 8084
+      scitex audio serve -t sse --port 31293
 
     \b
     Remote Setup:
-      1. Local:  scitex audio serve -t http --port 8084
+      1. Local:  scitex audio serve -t http --port 31293
       2. SSH:    Add to ~/.ssh/config:
-                   LocalForward 8084 127.0.0.1:8084
+                   LocalForward 31293 127.0.0.1:31293
       3. Remote MCP config:
-                   {"type": "sse", "url": "http://localhost:8084/sse"}
+                   {"type": "sse", "url": "http://localhost:31293/sse"}
     """
     try:
         from scitex.audio.mcp_server import FASTMCP_AVAILABLE, run_server

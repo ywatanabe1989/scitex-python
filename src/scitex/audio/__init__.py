@@ -276,8 +276,8 @@ def _speak_local(
     """Local TTS playback (original implementation)."""
     global _default_tts, _default_backend
 
-    # Stop any previously running speech first
-    stop_speech()
+    # Note: stop_speech() removed - FIFO locking handles queuing
+    # Call stop_speech() explicitly if you want to interrupt current audio
 
     # If specific backend requested without fallback
     if backend and not fallback:

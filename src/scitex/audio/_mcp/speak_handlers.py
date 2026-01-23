@@ -77,6 +77,7 @@ async def speak_local_handler(
     """
     try:
         from .. import speak as tts_speak
+        from .._cross_process_lock import AudioPlaybackLock
 
         loop = asyncio.get_event_loop()
 
@@ -92,17 +93,23 @@ async def speak_local_handler(
             output_path = str(_get_audio_dir() / f"tts_{timestamp}.mp3")
 
         def do_speak():
-            return tts_speak(
-                text=final_text,
-                backend=backend,
-                voice=voice,
-                rate=rate,
-                speed=speed,
-                play=play,
-                output_path=output_path,
-                fallback=fallback,
-                mode="local",  # Force local mode
-            )
+            # Acquire cross-process lock for FIFO audio playback
+            lock = AudioPlaybackLock()
+            lock.acquire(timeout=120.0)
+            try:
+                return tts_speak(
+                    text=final_text,
+                    backend=backend,
+                    voice=voice,
+                    rate=rate,
+                    speed=speed,
+                    play=play,
+                    output_path=output_path,
+                    fallback=fallback,
+                    mode="local",  # Force local mode
+                )
+            finally:
+                lock.release()
 
         result_path = await loop.run_in_executor(None, do_speak)
 
