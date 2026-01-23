@@ -132,5 +132,69 @@ def register_audio_tools(mcp) -> None:
         result = await announce_context_handler(include_full_path=include_full_path)
         return _json(result)
 
+    @mcp.tool()
+    async def audio_speak_local(
+        text: str,
+        backend: Optional[str] = None,
+        voice: Optional[str] = None,
+        rate: int = 150,
+        speed: float = 1.5,
+        play: bool = True,
+        save: bool = False,
+        fallback: bool = True,
+        agent_id: Optional[str] = None,
+    ) -> str:
+        """[audio] Convert text to speech on the LOCAL/SERVER machine.
+
+        Use when running Claude Code directly on your local machine.
+        Audio plays where MCP server runs.
+        """
+        from scitex.audio._mcp.speak_handlers import speak_local_handler
+
+        result = await speak_local_handler(
+            text=text,
+            backend=backend,
+            voice=voice,
+            rate=rate,
+            speed=speed,
+            play=play,
+            save=save,
+            fallback=fallback,
+            agent_id=agent_id,
+        )
+        return _json(result)
+
+    @mcp.tool()
+    async def audio_speak_relay(
+        text: str,
+        backend: Optional[str] = None,
+        voice: Optional[str] = None,
+        rate: int = 150,
+        speed: float = 1.5,
+        play: bool = True,
+        save: bool = False,
+        fallback: bool = True,
+        agent_id: Optional[str] = None,
+    ) -> str:
+        """[audio] Convert text to speech via RELAY server (remote playback).
+
+        Use when running on remote server (NAS) and want audio on your
+        local machine. Returns error with setup instructions if unavailable.
+        """
+        from scitex.audio._mcp.speak_handlers import speak_relay_handler
+
+        result = await speak_relay_handler(
+            text=text,
+            backend=backend,
+            voice=voice,
+            rate=rate,
+            speed=speed,
+            play=play,
+            save=save,
+            fallback=fallback,
+            agent_id=agent_id,
+        )
+        return _json(result)
+
 
 # EOF
