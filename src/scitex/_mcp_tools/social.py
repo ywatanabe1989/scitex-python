@@ -15,6 +15,21 @@ import subprocess
 import sys
 from typing import Optional
 
+# Import platform strategies from socialia for MCP tool descriptions
+try:
+    from scitex.social import PLATFORM_STRATEGIES
+except ImportError:
+    try:
+        from socialia import PLATFORM_STRATEGIES
+    except ImportError:
+        PLATFORM_STRATEGIES = """
+## Platform Strategies (install socialia for full guide)
+- twitter: 280 chars, hook first, 1-2 hashtags at end
+- linkedin: 3000 chars, first 2 lines critical, 3-5 hashtags at end
+- reddit: title is key, no hashtags, value first
+- youtube: keyword-rich title <60 chars, 3-5 hashtags in description
+"""
+
 
 def _json(data: dict) -> str:
     return json.dumps(data, indent=2, default=str)
@@ -72,7 +87,23 @@ def register_social_tools(mcp) -> None:
         title: Optional[str] = None,
         dry_run: bool = False,
     ) -> str:
-        """[social] Post content to a social media platform (twitter, linkedin, reddit, youtube)."""
+        """[social] Post content to a social media platform (twitter, linkedin, reddit, youtube).
+
+        PLATFORM STRATEGIES:
+        - twitter: 280 chars. Hook first. 1+ emoji. GitHub URL. 3-5 hashtags at END for SEO
+        - linkedin: 3000 chars. First 2 lines critical. Short paragraphs. Include project links. 3-5 hashtags at END
+        - reddit: Title is key. NO hashtags. Value first, self-promo last. Link in body
+        - youtube: Keyword-rich title <60 chars. Links in description. 3-5 hashtags in description
+
+        BAD: "SciTeX v2.15.0 released! New feature. #Python #AI"
+        GOOD: "Your AI agent can now speak to you remotely.
+
+        Audio relay bridges the gap.
+
+        github.com/user/repo
+
+        #AIAgents #Python"
+        """
         args = ["post", platform, text]
 
         if reply_to:

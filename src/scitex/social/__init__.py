@@ -63,6 +63,8 @@ try:
 
     # Re-export platform clients
     from socialia import (
+        # Content strategies for MCP
+        PLATFORM_STRATEGIES,
         # Base class
         BasePoster,
         GoogleAnalytics,
@@ -112,6 +114,7 @@ except ImportError:
     LinkedInPoster = _SocialiaNotAvailable
     RedditPoster = _SocialiaNotAvailable
     YouTubePoster = _SocialiaNotAvailable
+    PLATFORM_STRATEGIES = ""
 
 
 def has_socialia() -> bool:
@@ -143,6 +146,8 @@ __all__ = [
     "LinkedInPoster",
     "RedditPoster",
     "YouTubePoster",
+    # Content strategies
+    "PLATFORM_STRATEGIES",
 ]
 
 # EOF

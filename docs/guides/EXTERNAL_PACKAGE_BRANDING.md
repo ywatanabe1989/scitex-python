@@ -115,7 +115,7 @@ from figrecipe import *
 
 ## Port Scheme
 
-SciTeX uses port scheme 3129X (TEX → te-ku-su → 2-9-3 in Japanese):
+SciTeX uses port scheme 3129X (sa-i-te-ku-su → 3-1-2-9 in Japanese):
 
 | Port  | Service          |
 |-------|------------------|
@@ -130,7 +130,7 @@ External packages should use `{ENV_PREFIX}_{SETTING}`:
 
 ```
 SCITEX_PLT_MODE=local
-CROSSREF_LOCAL_API_URL=http://localhost:8333
+CROSSREF_LOCAL_API_URL=http://localhost:31291
 SCITEX_AUDIO_RELAY_URL=http://localhost:31293
 ```
 
