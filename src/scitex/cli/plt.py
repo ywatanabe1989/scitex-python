@@ -1,0 +1,357 @@
+#!/usr/bin/env python3
+# Timestamp: 2026-01-25
+# File: /home/ywatanabe/proj/scitex-python/src/scitex/cli/plt.py
+
+"""
+SciTeX CLI - Plot Commands
+
+Thin wrapper around figrecipe CLI for reproducible matplotlib figures.
+All commands delegate to figrecipe for reproducibility.
+"""
+
+import subprocess
+import sys
+
+import click
+
+
+def _run_figrecipe(*args) -> int:
+    """Run figrecipe CLI command."""
+    cmd = [sys.executable, "-m", "figrecipe"]
+    cmd.extend(args)
+
+    result = subprocess.run(cmd)
+    return result.returncode
+
+
+def _check_figrecipe() -> bool:
+    """Check if figrecipe is available."""
+    try:
+        import figrecipe  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=True,
+)
+@click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
+@click.pass_context
+def plt(ctx, help_recursive):
+    """
+    Plot and figure management (powered by figrecipe)
+
+    \b
+    Commands:
+      plot       - Create figure from YAML/JSON spec
+      edit       - Launch interactive GUI editor
+      compose    - Combine multiple figures
+      crop       - Crop whitespace from images
+      reproduce  - Reproduce figure from recipe
+      validate   - Validate recipe reproducibility
+      diagram    - Create diagrams (flowcharts, etc.)
+
+    \b
+    Examples:
+      scitex plt plot spec.yaml -o fig.png
+      scitex plt edit
+      scitex plt compose a.png b.png -o combined.png
+      scitex plt reproduce recipe.yaml
+
+    \b
+    Note: Wraps figrecipe CLI. Run 'figrecipe --help' for full options.
+    """
+    if not _check_figrecipe():
+        click.secho("Error: figrecipe not installed", fg="red", err=True)
+        click.echo("\nInstall with: pip install figrecipe")
+        ctx.exit(1)
+
+    if help_recursive:
+        from . import print_help_recursive
+
+        print_help_recursive(ctx, plt)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
+
+
+@plt.command()
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("-o", "--output", required=True, help="Output file path")
+@click.option("--dpi", type=int, default=300, help="DPI for raster output")
+@click.option("--no-recipe", is_flag=True, help="Don't save YAML recipe")
+def plot(spec_file, output, dpi, no_recipe):
+    """
+    Create a figure from a declarative YAML/JSON spec.
+
+    \b
+    Examples:
+      scitex plt plot spec.yaml -o fig.png
+      scitex plt plot spec.json -o fig.pdf --dpi 600
+    """
+    args = ["plot", spec_file, "-o", output, "--dpi", str(dpi)]
+    if no_recipe:
+        args.append("--no-recipe")
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.argument("recipe_file", type=click.Path(exists=True), required=False)
+def edit(recipe_file):
+    """
+    Launch interactive GUI editor.
+
+    \b
+    Examples:
+      scitex plt edit                  # Open blank editor
+      scitex plt edit recipe.yaml      # Open existing recipe
+    """
+    args = ["edit"]
+    if recipe_file:
+        args.append(recipe_file)
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.argument("sources", nargs=-1, required=True, type=click.Path(exists=True))
+@click.option("-o", "--output", required=True, help="Output file path")
+@click.option(
+    "-l",
+    "--layout",
+    type=click.Choice(["horizontal", "vertical", "grid"]),
+    default="horizontal",
+    help="Layout mode",
+)
+@click.option("--gap", type=float, default=5, help="Gap between panels (mm)")
+@click.option("--dpi", type=int, default=300, help="DPI for output")
+@click.option("--no-labels", is_flag=True, help="Don't add panel labels (A, B, C)")
+@click.option("--caption", help="Figure caption")
+def compose(sources, output, layout, gap, dpi, no_labels, caption):
+    """
+    Compose multiple figures into one.
+
+    \b
+    Examples:
+      scitex plt compose a.png b.png -o combined.png
+      scitex plt compose *.png -o fig.pdf --layout grid
+      scitex plt compose a.yaml b.yaml -o fig.png --gap 10
+    """
+    args = ["compose"]
+    args.extend(sources)
+    args.extend(
+        ["-o", output, "--layout", layout, "--gap", str(gap), "--dpi", str(dpi)]
+    )
+    if no_labels:
+        args.append("--no-labels")
+    if caption:
+        args.extend(["--caption", caption])
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.argument("input_file", type=click.Path(exists=True))
+@click.option("-o", "--output", help="Output file (default: overwrites input)")
+@click.option("--margin", type=float, default=1, help="Margin to keep (mm)")
+def crop(input_file, output, margin):
+    """
+    Crop whitespace from an image.
+
+    \b
+    Examples:
+      scitex plt crop figure.png
+      scitex plt crop figure.png -o cropped.png --margin 2
+    """
+    args = ["crop", input_file, "--margin", str(margin)]
+    if output:
+        args.extend(["-o", output])
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.argument("recipe_file", type=click.Path(exists=True))
+@click.option("-o", "--output", help="Output file path")
+@click.option(
+    "--format", "fmt", type=click.Choice(["png", "pdf", "svg"]), help="Output format"
+)
+@click.option("--dpi", type=int, default=300, help="DPI for raster output")
+def reproduce(recipe_file, output, fmt, dpi):
+    """
+    Reproduce a figure from a YAML recipe.
+
+    \b
+    Examples:
+      scitex plt reproduce recipe.yaml
+      scitex plt reproduce recipe.yaml -o new_fig.pdf
+    """
+    args = ["reproduce", recipe_file, "--dpi", str(dpi)]
+    if output:
+        args.extend(["-o", output])
+    if fmt:
+        args.extend(["--format", fmt])
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.argument("recipe_file", type=click.Path(exists=True))
+@click.option("--threshold", type=float, default=100, help="MSE threshold")
+def validate(recipe_file, threshold):
+    """
+    Validate that a recipe reproduces its original figure.
+
+    \b
+    Examples:
+      scitex plt validate recipe.yaml
+      scitex plt validate recipe.yaml --threshold 50
+    """
+    args = ["validate", recipe_file, "--threshold", str(threshold)]
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("-o", "--output", help="Output file path")
+@click.option(
+    "--format", "fmt", type=click.Choice(["mermaid", "graphviz"]), default="mermaid"
+)
+def diagram(spec_file, output, fmt):
+    """
+    Create diagrams (flowcharts, pipelines, etc.)
+
+    \b
+    Examples:
+      scitex plt diagram workflow.yaml
+      scitex plt diagram pipeline.yaml -o diagram.png --format graphviz
+    """
+    args = ["diagram", spec_file, "--format", fmt]
+    if output:
+        args.extend(["-o", output])
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.argument("recipe_file", type=click.Path(exists=True))
+@click.option("-v", "--verbose", is_flag=True, help="Show detailed info")
+def info(recipe_file, verbose):
+    """
+    Show information about a recipe.
+
+    \b
+    Examples:
+      scitex plt info recipe.yaml
+      scitex plt info recipe.yaml --verbose
+    """
+    args = ["info", recipe_file]
+    if verbose:
+        args.append("--verbose")
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.argument("recipe_file", type=click.Path(exists=True))
+@click.option("-o", "--output", help="Output file for extracted data")
+def extract(recipe_file, output):
+    """
+    Extract plotted data arrays from a recipe.
+
+    \b
+    Examples:
+      scitex plt extract recipe.yaml
+      scitex plt extract recipe.yaml -o data.json
+    """
+    args = ["extract", recipe_file]
+    if output:
+        args.extend(["-o", output])
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.argument("action", type=click.Choice(["list", "show", "set"]), default="list")
+@click.argument("style_name", required=False)
+def style(action, style_name):
+    """
+    Manage figure styles and presets.
+
+    \b
+    Examples:
+      scitex plt style list              # List available styles
+      scitex plt style show nature       # Show style details
+      scitex plt style set publication   # Set default style
+    """
+    args = ["style", action]
+    if style_name:
+        args.append(style_name)
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.option("--check", is_flag=True, help="Check font availability")
+def fonts(check):
+    """
+    List or check available fonts.
+
+    \b
+    Examples:
+      scitex plt fonts
+      scitex plt fonts --check
+    """
+    args = ["fonts"]
+    if check:
+        args.append("--check")
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.argument("input_file", type=click.Path(exists=True))
+@click.option("-o", "--output", required=True, help="Output file path")
+@click.option("--format", "fmt", help="Output format (inferred from extension)")
+def convert(input_file, output, fmt):
+    """
+    Convert between figure formats.
+
+    \b
+    Examples:
+      scitex plt convert fig.png -o fig.pdf
+      scitex plt convert fig.svg -o fig.png
+    """
+    args = ["convert", input_file, "-o", output]
+    if fmt:
+        args.extend(["--format", fmt])
+    sys.exit(_run_figrecipe(*args))
+
+
+@plt.command()
+@click.option(
+    "-t",
+    "--transport",
+    type=click.Choice(["stdio", "sse", "http"]),
+    default="stdio",
+    help="Transport protocol",
+)
+@click.option("--host", default="0.0.0.0", help="Host for HTTP/SSE transport")
+@click.option("--port", default=8087, type=int, help="Port for HTTP/SSE transport")
+def serve(transport, host, port):
+    """
+    Run figrecipe MCP server
+
+    \b
+    Examples:
+      scitex plt serve                    # stdio for Claude Desktop
+      scitex plt serve -t http --port 8087
+    """
+    args = ["mcp", "run", "--transport", transport]
+    if transport != "stdio":
+        args.extend(["--host", host, "--port", str(port)])
+        click.secho(f"Starting figrecipe MCP server ({transport})", fg="cyan")
+        click.echo(f"  Host: {host}")
+        click.echo(f"  Port: {port}")
+
+    sys.exit(_run_figrecipe(*args))
+
+
+if __name__ == "__main__":
+    plt()
+
+# EOF
