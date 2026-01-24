@@ -11,8 +11,13 @@ from pathlib import Path
 import click
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
-def writer():
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=True,
+)
+@click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
+@click.pass_context
+def writer(ctx, help_recursive):
     """
     Manuscript writing and LaTeX compilation
 
@@ -23,13 +28,15 @@ def writer():
     - Watch mode for auto-recompilation
     - Project structure management
     """
-    pass
+    if help_recursive:
+        _print_help_recursive(ctx)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
-@writer.command("help-recursive")
-@click.pass_context
-def help_recursive(ctx):
-    """Show help for all commands recursively."""
+def _print_help_recursive(ctx):
+    """Print help for all commands recursively."""
     fake_parent = click.Context(click.Group(), info_name="scitex")
     parent_ctx = click.Context(writer, info_name="writer", parent=fake_parent)
 
@@ -38,7 +45,7 @@ def help_recursive(ctx):
 
     for name in sorted(writer.list_commands(ctx) or []):
         cmd = writer.get_command(ctx, name)
-        if cmd is None or name == "help-recursive":
+        if cmd is None:
             continue
         click.echo()
         click.secho(f"━━━ scitex writer {name} ━━━", fg="cyan", bold=True)

@@ -10,8 +10,13 @@ import sys
 import click
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
-def resource():
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=True,
+)
+@click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
+@click.pass_context
+def resource(ctx, help_recursive):
     """
     System resource monitoring
 
@@ -27,20 +32,22 @@ def resource():
       scitex resource usage              # Current CPU/memory/GPU usage
       scitex resource monitor --interval 5
     """
-    pass
+    if help_recursive:
+        _print_help_recursive(ctx)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
-@resource.command("help-recursive")
-@click.pass_context
-def help_recursive(ctx):
-    """Show help for all commands recursively."""
+def _print_help_recursive(ctx):
+    """Print help for all commands recursively."""
     fake_parent = click.Context(click.Group(), info_name="scitex")
     parent_ctx = click.Context(resource, info_name="resource", parent=fake_parent)
     click.secho("━━━ scitex resource ━━━", fg="cyan", bold=True)
     click.echo(resource.get_help(parent_ctx))
     for name in sorted(resource.list_commands(ctx) or []):
         cmd = resource.get_command(ctx, name)
-        if cmd is None or name == "help-recursive":
+        if cmd is None:
             continue
         click.echo()
         click.secho(f"━━━ scitex resource {name} ━━━", fg="cyan", bold=True)

@@ -33,8 +33,13 @@ from ._jobs import jobs
 from ._library import config, library
 
 
-@click.group()
-def scholar():
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=True,
+)
+@click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
+@click.pass_context
+def scholar(ctx, help_recursive):
     """
     Scientific paper management
 
@@ -48,13 +53,15 @@ def scholar():
         scitex scholar library
         scitex scholar jobs list
     """
-    pass
+    if help_recursive:
+        _print_help_recursive(ctx)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
-@scholar.command("help-recursive")
-@click.pass_context
-def help_recursive(ctx):
-    """Show help for all commands recursively."""
+def _print_help_recursive(ctx):
+    """Print help for all commands recursively."""
     fake_parent = click.Context(click.Group(), info_name="scitex")
     parent_ctx = click.Context(scholar, info_name="scholar", parent=fake_parent)
 
@@ -63,7 +70,7 @@ def help_recursive(ctx):
 
     for name in sorted(scholar.list_commands(ctx) or []):
         cmd = scholar.get_command(ctx, name)
-        if cmd is None or name == "help-recursive":
+        if cmd is None:
             continue
         click.echo()
         click.secho(f"━━━ scitex scholar {name} ━━━", fg="cyan", bold=True)

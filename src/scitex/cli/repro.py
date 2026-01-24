@@ -10,8 +10,13 @@ import sys
 import click
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
-def repro():
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=True,
+)
+@click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
+@click.pass_context
+def repro(ctx, help_recursive):
     """
     Reproducibility utilities
 
@@ -29,20 +34,22 @@ def repro():
       scitex repro hash data.npy       # Hash array file
       scitex repro seed 42             # Set random seed
     """
-    pass
+    if help_recursive:
+        _print_help_recursive(ctx)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
-@repro.command("help-recursive")
-@click.pass_context
-def help_recursive(ctx):
-    """Show help for all commands recursively."""
+def _print_help_recursive(ctx):
+    """Print help for all commands recursively."""
     fake_parent = click.Context(click.Group(), info_name="scitex")
     parent_ctx = click.Context(repro, info_name="repro", parent=fake_parent)
     click.secho("━━━ scitex repro ━━━", fg="cyan", bold=True)
     click.echo(repro.get_help(parent_ctx))
     for name in sorted(repro.list_commands(ctx) or []):
         cmd = repro.get_command(ctx, name)
-        if cmd is None or name == "help-recursive":
+        if cmd is None:
             continue
         click.echo()
         click.secho(f"━━━ scitex repro {name} ━━━", fg="cyan", bold=True)
