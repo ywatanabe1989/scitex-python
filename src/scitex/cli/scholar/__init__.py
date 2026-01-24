@@ -15,12 +15,19 @@ Usage:
     scitex scholar config
     scitex scholar jobs list
     scitex scholar jobs status <job_id>
+
+CrossRef database (167M+ papers via crossref-local):
+    scitex scholar crossref-scitex search "deep learning"
+    scitex scholar crossref-scitex get 10.1038/nature12373
+    scitex scholar crossref-scitex count "epilepsy seizure"
+    scitex scholar crossref-scitex info
 """
 
 from __future__ import annotations
 
 import click
 
+from ._crossref_scitex import crossref_scitex
 from ._fetch import fetch
 from ._jobs import jobs
 from ._library import config, library
@@ -79,6 +86,7 @@ def help_recursive(ctx):
                         click.echo(sub_cmd.get_help(sub_sub_ctx))
 
 
+scholar.add_command(crossref_scitex)
 scholar.add_command(fetch)
 scholar.add_command(library)
 scholar.add_command(config)
