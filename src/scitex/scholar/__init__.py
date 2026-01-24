@@ -71,6 +71,12 @@ try:
 except ImportError:
     utils = None
 
+# CrossRef integration via crossref-local delegation (branded as crossref-scitex)
+try:
+    from . import crossref_scitex
+except ImportError:
+    crossref_scitex = None
+
 __all__ = [
     "ScholarConfig",
     "ScholarEngine",
@@ -81,6 +87,8 @@ __all__ = [
     "Papers",
     "Scholar",
     "utils",
+    # CrossRef integration (167M+ papers via crossref-local)
+    "crossref_scitex",
 ]
 
 # # Import core classes for advanced users

@@ -369,5 +369,79 @@ def register_scholar_tools(mcp) -> None:
         result = await get_job_result_handler(job_id=job_id)
         return _json(result)
 
+    # =========================================================================
+    # CrossRef Tools (via crossref-local delegation - 167M+ papers)
+    # =========================================================================
+
+    @mcp.tool()
+    async def scholar_crossref_search(
+        query: str,
+        limit: int = 20,
+        offset: int = 0,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        enrich: bool = False,
+    ) -> str:
+        """[scholar] Search CrossRef database (167M+ papers) via crossref-local. Fast full-text search with optional citation enrichment."""
+        from scitex.scholar._mcp.crossref_handlers import crossref_search_handler
+
+        result = await crossref_search_handler(
+            query=query,
+            limit=limit,
+            offset=offset,
+            year_min=year_min,
+            year_max=year_max,
+            enrich=enrich,
+        )
+        return _json(result)
+
+    @mcp.tool()
+    async def scholar_crossref_get(
+        doi: str,
+        include_citations: bool = False,
+        include_references: bool = False,
+    ) -> str:
+        """[scholar] Get paper metadata by DOI from CrossRef database."""
+        from scitex.scholar._mcp.crossref_handlers import crossref_get_handler
+
+        result = await crossref_get_handler(
+            doi=doi,
+            include_citations=include_citations,
+            include_references=include_references,
+        )
+        return _json(result)
+
+    @mcp.tool()
+    async def scholar_crossref_count(query: str) -> str:
+        """[scholar] Count papers matching a query in CrossRef database."""
+        from scitex.scholar._mcp.crossref_handlers import crossref_count_handler
+
+        result = await crossref_count_handler(query=query)
+        return _json(result)
+
+    @mcp.tool()
+    async def scholar_crossref_citations(
+        doi: str,
+        direction: str = "citing",
+        limit: int = 100,
+    ) -> str:
+        """[scholar] Get citation relationships (citing/cited papers) for a DOI."""
+        from scitex.scholar._mcp.crossref_handlers import crossref_citations_handler
+
+        result = await crossref_citations_handler(
+            doi=doi,
+            direction=direction,
+            limit=limit,
+        )
+        return _json(result)
+
+    @mcp.tool()
+    async def scholar_crossref_info() -> str:
+        """[scholar] Get CrossRef database configuration and status info."""
+        from scitex.scholar._mcp.crossref_handlers import crossref_info_handler
+
+        result = await crossref_info_handler()
+        return _json(result)
+
 
 # EOF
