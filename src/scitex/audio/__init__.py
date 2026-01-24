@@ -173,8 +173,8 @@ def available_backends() -> List[str]:
     if ElevenLabsTTS:
         import os
 
-        api_key = os.environ.get("ELEVENLABS_API_KEY") or os.environ.get(
-            "ELEVENLABS_API_KEY_SCITEX_AUDIO"
+        api_key = os.environ.get("SCITEX_AUDIO_ELEVENLABS_API_KEY") or os.environ.get(
+            "ELEVENLABS_API_KEY"
         )
         if api_key:
             backends.append("elevenlabs")

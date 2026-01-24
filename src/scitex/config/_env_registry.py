@@ -40,7 +40,9 @@ ENV_REGISTRY: List[EnvVar] = [
     EnvVar("SCITEX_AUDIO_RELAY_HOST", "Relay server host", "audio"),
     EnvVar("SCITEX_AUDIO_RELAY_PORT", "Relay server port", "audio", "31293"),
     EnvVar("SCITEX_AUDIO_PORT", "Audio server port", "audio", "31293"),
-    EnvVar("ELEVENLABS_API_KEY", "ElevenLabs API key", "audio", sensitive=True),
+    EnvVar(
+        "SCITEX_AUDIO_ELEVENLABS_API_KEY", "ElevenLabs API key", "audio", sensitive=True
+    ),
     # Scholar
     EnvVar("SCITEX_SCHOLAR_DIR", "Scholar library directory", "scholar"),
     EnvVar("SCITEX_CROSSREF_EMAIL", "Email for Crossref API", "scholar"),

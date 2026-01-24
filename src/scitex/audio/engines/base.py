@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-11 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/engines/base.py
 # ----------------------------------------
@@ -49,10 +48,13 @@ class TTSBackend:
 
         # Check ElevenLabs
         try:
-            import elevenlabs
             import os
 
-            if os.environ.get("ELEVENLABS_API_KEY"):
+            import elevenlabs
+
+            if os.environ.get("SCITEX_AUDIO_ELEVENLABS_API_KEY") or os.environ.get(
+                "ELEVENLABS_API_KEY"
+            ):
                 backends.append(cls.ELEVENLABS)
         except ImportError:
             pass
@@ -74,7 +76,8 @@ class BaseTTS(ABC):
             text: Text to convert to speech.
             output_path: Path to save the audio file.
 
-        Returns:
+        Returns
+        -------
             Path to the generated audio file.
         """
         pass
@@ -83,7 +86,8 @@ class BaseTTS(ABC):
     def get_voices(self) -> List[dict]:
         """Get available voices for this backend.
 
-        Returns:
+        Returns
+        -------
             List of voice dictionaries with 'name' and 'id' keys.
         """
         pass
@@ -119,7 +123,8 @@ class BaseTTS(ABC):
             play: Whether to play the audio.
             voice: Optional voice name/id.
 
-        Returns:
+        Returns
+        -------
             Path to audio file if output_path specified, else None.
         """
         import tempfile
@@ -201,7 +206,8 @@ class BaseTTS(ABC):
         Args:
             path: Path to audio file (in WSL filesystem)
 
-        Returns:
+        Returns
+        -------
             True if playback succeeded, False otherwise
         """
         import os
@@ -220,16 +226,17 @@ class BaseTTS(ABC):
         try:
             # SoundPlayer only supports WAV, so convert if needed
             wav_path = path
-            if path.suffix.lower() in ('.mp3', '.ogg', '.m4a'):
+            if path.suffix.lower() in (".mp3", ".ogg", ".m4a"):
                 try:
                     from pydub import AudioSegment
+
                     # Create temp WAV file
-                    fd, tmp_wav = tempfile.mkstemp(suffix='.wav', prefix='scitex_')
+                    fd, tmp_wav = tempfile.mkstemp(suffix=".wav", prefix="scitex_")
                     os.close(fd)
                     wav_path = Path(tmp_wav)
 
                     audio = AudioSegment.from_file(str(path))
-                    audio.export(str(wav_path), format='wav')
+                    audio.export(str(wav_path), format="wav")
                 except ImportError:
                     # pydub not available, try direct playback anyway
                     pass

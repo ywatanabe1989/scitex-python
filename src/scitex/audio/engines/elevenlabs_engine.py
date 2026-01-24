@@ -55,8 +55,8 @@ class ElevenLabsTTS(BaseTTS):
         super().__init__(**kwargs)
         self.api_key = (
             api_key
+            or os.environ.get("SCITEX_AUDIO_ELEVENLABS_API_KEY")
             or os.environ.get("ELEVENLABS_API_KEY")
-            or os.environ.get("ELEVENLABS_API_KEY_SCITEX_AUDIO")
         )
         self.voice = voice
         self.model_id = model_id
