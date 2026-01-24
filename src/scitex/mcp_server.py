@@ -23,6 +23,11 @@ from __future__ import annotations
 
 import json
 
+# Load environment variables from SCITEX_ENV_SRC early
+from scitex._env_loader import load_scitex_env
+
+load_scitex_env()
+
 try:
     from fastmcp import FastMCP
 

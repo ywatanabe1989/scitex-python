@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-# Timestamp: 2026-01-20
+# Timestamp: 2026-01-24
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/_mcp_tools/plt.py
-"""Plt module tools - delegates to figrecipe public API.
+"""Plt module tools for FastMCP unified server.
 
-This module registers figrecipe's functionality under scitex's unified MCP server
-with [plt] prefix for consistency with other scitex modules.
+This module delegates to figrecipe's MCP tools for single source of truth.
+All plt_* tools are thin wrappers around figrecipe's canonical implementation.
 """
 
 from __future__ import annotations
@@ -14,30 +14,47 @@ from typing import Any, Dict, List, Optional, Tuple
 
 
 def register_plt_tools(mcp) -> None:
-    """Register plt tools by delegating to figrecipe's public API."""
+    """Register plt tools with FastMCP server.
+
+    Delegates to figrecipe's plt tools (canonical source).
+    Tools are prefixed with 'plt_' for scitex namespace consistency.
+    """
     # Ensure branding is set before any figrecipe imports
     os.environ.setdefault("FIGRECIPE_BRAND", "scitex.plt")
     os.environ.setdefault("FIGRECIPE_ALIAS", "plt")
 
     # Check if figrecipe is available
     try:
-        import figrecipe as fr
+        from figrecipe._mcp import server as fr_mcp
+
+        # Access underlying functions from FunctionTool objects
+        _plot = fr_mcp.plot.fn
+        _reproduce = fr_mcp.reproduce.fn
+        _compose = fr_mcp.compose.fn
+        _info = fr_mcp.info.fn
+        _validate = fr_mcp.validate.fn
+        _crop = fr_mcp.crop.fn
+        _extract_data = fr_mcp.extract_data.fn
+        _list_styles = fr_mcp.list_styles.fn
+        _get_plot_types = fr_mcp.get_plot_types.fn
 
         _FIGRECIPE_AVAILABLE = True
     except ImportError:
         _FIGRECIPE_AVAILABLE = False
-        fr = None
 
     if not _FIGRECIPE_AVAILABLE:
 
         @mcp.tool()
         def plt_not_available() -> str:
             """[plt] figrecipe not installed."""
-            return "figrecipe is required. Install with: pip install figrecipe"
+            return "figrecipe is required for plt tools. Install with: pip install figrecipe"
 
         return
 
-    # Re-register figrecipe tools with [plt] prefix
+    # Delegate to figrecipe's MCP tools with plt_ prefix
+    # Each wrapper simply calls the figrecipe function
+
+
     @mcp.tool()
     def plt_plot(
         spec: Dict[str, Any],
@@ -71,34 +88,7 @@ def register_plt_tools(mcp) -> None:
         ValueError
             If no plots are specified or data is missing.
         """
-        from figrecipe._api._plot import create_figure_from_spec
-
-        # Validate spec has plots with data
-        plots = spec.get("plots", [])
-        axes_specs = spec.get("axes") or spec.get("subplots", [])
-        if not plots and not axes_specs:
-            raise ValueError(
-                "No plots specified in spec. Add 'plots' or 'axes' section."
-            )
-        for i, p in enumerate(plots):
-            if not (p.get("x") or p.get("y") or p.get("data") or p.get("z")):
-                raise ValueError(f"Plot {i} has no data (x, y, data, or z required)")
-
-        result = create_figure_from_spec(
-            spec=spec,
-            output_path=output_path,
-            dpi=dpi,
-            save_recipe=save_recipe,
-            show=False,
-        )
-
-        return {
-            "image_path": str(result["image_path"]) if result["image_path"] else None,
-            "recipe_path": str(result["recipe_path"])
-            if result.get("recipe_path")
-            else None,
-            "success": True,
-        }
+        return _plot(spec, output_path, dpi, save_recipe)
 
     @mcp.tool()
     def plt_reproduce(
@@ -129,21 +119,7 @@ def register_plt_tools(mcp) -> None:
         dict
             Result with 'output_path' and 'success'.
         """
-        from pathlib import Path
-
-        fig, axes = fr.reproduce(recipe_path)
-
-        # Determine output path
-        if output_path is None:
-            recipe_p = Path(recipe_path)
-            output_path = str(recipe_p.with_suffix(f".reproduced.{format}"))
-
-        fig.savefig(output_path, dpi=dpi, format=format)
-        import matplotlib.pyplot as plt
-
-        plt.close(fig)
-
-        return {"output_path": str(output_path), "success": True}
+        return _reproduce(recipe_path, output_path, format, dpi)
 
     @mcp.tool()
     def plt_compose(
@@ -202,29 +178,19 @@ def register_plt_tools(mcp) -> None:
         dict
             Result with 'output_path', 'success', and 'sources_dir' (if symlinks created).
         """
-        from figrecipe import compose_figures
-
-        result = compose_figures(
-            sources=sources,
-            output_path=output_path,
-            layout=layout,
-            gap_mm=gap_mm,
-            dpi=dpi,
-            panel_labels=panel_labels,
-            label_style=label_style,
-            caption=caption,
-            create_symlinks=create_symlinks,
-            canvas_size_mm=canvas_size_mm,
-            facecolor=facecolor,
+        return _compose(
+            sources,
+            output_path,
+            layout,
+            gap_mm,
+            dpi,
+            panel_labels,
+            label_style,
+            caption,
+            create_symlinks,
+            canvas_size_mm,
+            facecolor,
         )
-
-        return {
-            "output_path": str(result.get("output_path", output_path)),
-            "success": True,
-            "sources_dir": str(result.get("sources_dir"))
-            if result.get("sources_dir")
-            else None,
-        }
 
     @mcp.tool()
     def plt_info(recipe_path: str, verbose: bool = False) -> Dict[str, Any]:
@@ -243,7 +209,7 @@ def register_plt_tools(mcp) -> None:
         dict
             Recipe information including figure dimensions, call counts, etc.
         """
-        return fr.info(recipe_path)
+        return _info(recipe_path, verbose)
 
     @mcp.tool()
     def plt_validate(
@@ -265,14 +231,7 @@ def register_plt_tools(mcp) -> None:
         dict
             Validation result with 'passed', 'mse', and details.
         """
-        result = fr.validate(recipe_path, mse_threshold=mse_threshold)
-
-        return {
-            "valid": result.valid,
-            "mse": result.mse,
-            "message": result.message,
-            "recipe_path": str(recipe_path),
-        }
+        return _validate(recipe_path, mse_threshold)
 
     @mcp.tool()
     def plt_crop(
@@ -302,14 +261,7 @@ def register_plt_tools(mcp) -> None:
         dict
             Result with 'output_path' and 'success'.
         """
-        result_path = fr.crop(
-            input_path,
-            output_path=output_path,
-            margin_mm=margin_mm,
-            overwrite=overwrite,
-        )
-
-        return {"output_path": str(result_path), "success": True}
+        return _crop(input_path, output_path, margin_mm, overwrite)
 
     @mcp.tool()
     def plt_extract_data(recipe_path: str) -> Dict[str, Dict[str, Any]]:
@@ -325,7 +277,7 @@ def register_plt_tools(mcp) -> None:
         dict
             Nested dict: {call_id: {'x': list, 'y': list, ...}}
         """
-        return fr.extract_data(recipe_path)
+        return _extract_data(recipe_path)
 
     @mcp.tool()
     def plt_list_styles() -> Dict[str, Any]:
@@ -336,8 +288,7 @@ def register_plt_tools(mcp) -> None:
         dict
             Dictionary with 'presets' list of available style names.
         """
-        presets = fr.list_presets()
-        return {"presets": presets, "success": True}
+        return _list_styles()
 
     @mcp.tool()
     def plt_get_plot_types() -> Dict[str, Any]:
@@ -348,21 +299,7 @@ def register_plt_tools(mcp) -> None:
         dict
             Dictionary with 'plot_types' and their descriptions.
         """
-        # figrecipe supports these plot types via spec
-        plot_types = {
-            "line": "Line plot with optional error bars",
-            "scatter": "Scatter plot with optional regression line",
-            "bar": "Bar chart with optional error bars",
-            "box": "Box plot for distribution visualization",
-            "violin": "Violin plot for distribution visualization",
-            "hist": "Histogram for distribution",
-            "heatmap": "Heatmap/image plot",
-            "contour": "Contour plot",
-            "errorbar": "Error bar plot",
-            "fill_between": "Filled area between curves",
-            "imshow": "Image display",
-        }
-        return {"plot_types": plot_types, "success": True}
+        return _get_plot_types()
 
 
 # EOF

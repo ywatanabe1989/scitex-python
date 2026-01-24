@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 14:55:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/stats/utils/_power.py
 
@@ -19,12 +18,13 @@ IO:
 """
 
 """Imports"""
-import sys
 import argparse
+from typing import Literal, Optional, Union
+
 import numpy as np
 import pandas as pd
-from typing import Union, Optional, Literal
 from scipy import stats
+
 import scitex as stx
 from scitex.logging import getLogger
 
@@ -151,7 +151,17 @@ def power_ttest(
         ncp = effect_size * np.sqrt(sample_size)
 
     # Compute power using non-central t-distribution
-    if alternative == "two-sided":
+    # For very large ncp (>37), power is essentially 1.0 (avoid numerical overflow)
+    if abs(ncp) > 37:
+        # With ncp > 37, the non-central t-distribution is so far from 0
+        # that power approaches 1.0 for correct direction, 0.0 for wrong direction
+        if alternative == "two-sided":
+            power = 1.0
+        elif alternative == "greater":
+            power = 1.0 if ncp > 0 else 0.0
+        else:  # less
+            power = 1.0 if ncp < 0 else 0.0
+    elif alternative == "two-sided":
         # For two-sided, power = P(|T| > t_crit | ncp)
         power = 1 - stats.nct.cdf(t_crit, df, ncp) + stats.nct.cdf(-t_crit, df, ncp)
     elif alternative == "greater":
@@ -405,6 +415,7 @@ def run_main():
     global CONFIG, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
 
     args = parse_args()

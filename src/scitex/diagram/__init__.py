@@ -1,38 +1,59 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Timestamp: 2025-12-15
+# Timestamp: 2026-01-24
 # Author: ywatanabe / Claude
 # File: scitex/diagram/__init__.py
 
 """
 SciTeX Diagram - Paper-optimized diagram generation.
 
-This module provides a semantic layer above Mermaid/Graphviz/D2 that
-understands paper constraints (column width, reading direction, emphasis)
-and compiles to backend formats with appropriate layout hints.
-
-Key insight: LLMs are good at generating CONSTRAINTS, not pixel layouts.
-SciTeX Diagram defines "what this diagram means for a paper" and compiles
-that to backend-specific layout directives.
+This module delegates entirely to figrecipe._diagram.
+figrecipe is the single source of truth for diagram functionality.
 
 Example
 -------
->>> from scitex.diagram import Diagram
+>>> import scitex as stx
 >>>
->>> diagram = Diagram.from_yaml("workflow.diagram.yaml")
->>> diagram.to_mermaid("workflow.mmd")
->>> diagram.to_graphviz("workflow.dot")
+>>> # Recommended: Use stx.Diagram directly
+>>> d = stx.Diagram(type="pipeline")
+>>> d.add_node("input", "Raw Data")
+>>> d.add_node("process", "Transform", emphasis="primary")
+>>> d.add_edge("input", "process")
+>>> d.to_mermaid("pipeline.mmd")
+>>>
+>>> # From YAML spec
+>>> d = stx.Diagram.from_yaml("workflow.diagram.yaml")
+>>> d.to_mermaid("workflow.mmd")
+>>> d.to_graphviz("workflow.dot")
 """
 
-from scitex.diagram._schema import DiagramSpec, PaperConstraints, LayoutHints, PaperMode
-from scitex.diagram._diagram import Diagram
-from scitex.diagram._compile import compile_to_mermaid, compile_to_graphviz
-from scitex.diagram._presets import WORKFLOW_PRESET, DECISION_PRESET, PIPELINE_PRESET
-from scitex.diagram._split import split_diagram, SplitConfig, SplitStrategy, SplitResult
+# Import everything from figrecipe._diagram (single source of truth)
+from figrecipe._diagram import (
+    DECISION_PRESET,
+    PIPELINE_PRESET,
+    SCIENTIFIC_PRESET,
+    WORKFLOW_PRESET,
+    Diagram,
+    DiagramSpec,
+    DiagramType,
+    EdgeSpec,
+    LayoutHints,
+    NodeSpec,
+    PaperConstraints,
+    PaperMode,
+    SplitConfig,
+    SplitResult,
+    SplitStrategy,
+    get_preset,
+    list_presets,
+)
+from figrecipe._diagram._compile import compile_to_graphviz, compile_to_mermaid
 
 __all__ = [
     "Diagram",
     "DiagramSpec",
+    "DiagramType",
+    "NodeSpec",
+    "EdgeSpec",
     "PaperConstraints",
     "LayoutHints",
     "PaperMode",
@@ -41,7 +62,9 @@ __all__ = [
     "WORKFLOW_PRESET",
     "DECISION_PRESET",
     "PIPELINE_PRESET",
-    "split_diagram",
+    "SCIENTIFIC_PRESET",
+    "get_preset",
+    "list_presets",
     "SplitConfig",
     "SplitStrategy",
     "SplitResult",

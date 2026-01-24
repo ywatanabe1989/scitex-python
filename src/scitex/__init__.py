@@ -197,6 +197,49 @@ audio = _LazyModule("audio")
 msword = _LazyModule("msword")
 fts = _LazyModule("fts")  # Bundle schemas module
 social = _LazyModule("social")  # Social media integration (socialia wrapper)
+diagram = _LazyModule("diagram")  # Diagram creation (delegates to figrecipe)
+
+
+# Lazy Diagram class - delegates to figrecipe.Diagram
+class _LazyDiagram:
+    """Lazy loader for Diagram class from figrecipe."""
+
+    _class = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._class is None:
+            try:
+                from figrecipe import Diagram as _FigrecipeDiagram
+
+                cls._class = _FigrecipeDiagram
+            except ImportError:
+                # Fallback to scitex's own implementation if figrecipe not available
+                from scitex.diagram._diagram import Diagram as _ScitexDiagram
+
+                cls._class = _ScitexDiagram
+        return cls._class(*args, **kwargs)
+
+    @classmethod
+    def from_yaml(cls, *args, **kwargs):
+        if cls._class is None:
+            cls.__new__(cls)  # Trigger lazy load
+        return cls._class.from_yaml(*args, **kwargs)
+
+    @classmethod
+    def from_mermaid(cls, *args, **kwargs):
+        if cls._class is None:
+            cls.__new__(cls)  # Trigger lazy load
+        return cls._class.from_mermaid(*args, **kwargs)
+
+    @classmethod
+    def from_dict(cls, *args, **kwargs):
+        if cls._class is None:
+            cls.__new__(cls)  # Trigger lazy load
+        return cls._class.from_dict(*args, **kwargs)
+
+
+Diagram = _LazyDiagram
+
 
 # Centralized path configuration - eager loaded for convenience
 # Usage: scitex.PATHS.logs, scitex.PATHS.cache, etc.
@@ -263,6 +306,8 @@ __all__ = [
     "fts",
     "fsb",  # Legacy alias
     "social",  # Social media integration
+    "diagram",  # Diagram module (delegates to figrecipe)
+    "Diagram",  # Diagram class (from figrecipe)
     "PATHS",
     "INJECTED",
 ]

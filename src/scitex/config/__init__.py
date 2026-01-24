@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-09 (ywatanabe)"
 # File: ./src/scitex/config/__init__.py
 
@@ -34,8 +33,16 @@ Usage:
     cache_dir = paths.resolve("cache", user_provided_path)
 """
 
-from ._PriorityConfig import PriorityConfig, get_scitex_dir, load_dotenv
+from ._env_registry import (
+    ENV_REGISTRY,
+    EnvVar,
+    generate_template,
+    get_all_modules,
+    get_env_by_module,
+    get_env_docs,
+)
 from ._paths import ScitexPaths, get_paths
+from ._PriorityConfig import PriorityConfig, get_scitex_dir, load_dotenv
 from ._ScitexConfig import ScitexConfig, get_config, load_yaml
 
 __all__ = [
@@ -50,6 +57,13 @@ __all__ = [
     "PriorityConfig",
     "get_scitex_dir",
     "load_dotenv",
+    # Environment variable registry
+    "ENV_REGISTRY",
+    "EnvVar",
+    "generate_template",
+    "get_all_modules",
+    "get_env_by_module",
+    "get_env_docs",
 ]
 
 
