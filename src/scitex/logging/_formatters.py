@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-11 00:17:43 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/logging/_formatters.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/logging/_formatters.py"
@@ -18,12 +18,17 @@ import sys
 
 # Global format configuration via environment variable
 # Options: default, minimal, detailed, debug, full
-# SCITEX_LOG_FORMAT=debug python script.py
-LOG_FORMAT = os.getenv("SCITEX_LOG_FORMAT", "default")
+# SCITEX_LOGGING_FORMAT=debug python script.py
+LOG_FORMAT = os.getenv("SCITEX_LOGGING_FORMAT") or os.getenv(
+    "SCITEX_LOG_FORMAT", "default"
+)
 
 # Force color output even when stdout is not a TTY (e.g., when piping through tee)
-# SCITEX_FORCE_COLOR=1 python script.py | tee output.log
-FORCE_COLOR = os.getenv("SCITEX_FORCE_COLOR", "").lower() in ("1", "true", "yes")
+# SCITEX_LOGGING_FORCE_COLOR=1 python script.py | tee output.log
+_force_color = os.getenv("SCITEX_LOGGING_FORCE_COLOR") or os.getenv(
+    "SCITEX_FORCE_COLOR", ""
+)
+FORCE_COLOR = _force_color.lower() in ("1", "true", "yes")
 
 # Available format templates
 FORMAT_TEMPLATES = {
@@ -107,14 +112,19 @@ class SciTeXConsoleFormatter(logging.Formatter):
             # First line already has prefix from parent formatter
             # Add prefix to each continuation line
             prefix = f"{record.levelname}: "
-            formatted = lines[0] + "\n" + "\n".join(
-                prefix + line if line.strip() else line
-                for line in lines[1:]
+            formatted = (
+                lines[0]
+                + "\n"
+                + "\n".join(
+                    prefix + line if line.strip() else line for line in lines[1:]
+                )
             )
 
         # Check if we can use colors (stdout is a tty and not closed, or forced)
         try:
-            use_colors = FORCE_COLOR or (hasattr(sys.stdout, "isatty") and sys.stdout.isatty())
+            use_colors = FORCE_COLOR or (
+                hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+            )
         except ValueError:
             # stdout/stderr is closed
             use_colors = FORCE_COLOR

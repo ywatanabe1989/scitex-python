@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-11 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_tts.py
 # ----------------------------------------
@@ -20,7 +19,7 @@ from __future__ import annotations
 import os
 import subprocess
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -44,7 +43,8 @@ class TTSConfig:
 class TTS:
     """Text-to-Speech using ElevenLabs API.
 
-    Examples:
+    Examples
+    --------
         # Basic usage
         tts = TTS()
         tts.speak("Hello, world!")
@@ -84,7 +84,11 @@ class TTS:
             voice_id: Direct voice ID (overrides voice_name).
             **kwargs: Additional config options (stability, speed, etc.)
         """
-        self.api_key = api_key or os.environ.get("ELEVENLABS_API_KEY")
+        self.api_key = (
+            api_key
+            or os.environ.get("SCITEX_AUDIO_ELEVENLABS_API_KEY")
+            or os.environ.get("ELEVENLABS_API_KEY")
+        )
         self.config = TTSConfig(**kwargs)
 
         if voice_id:
@@ -129,7 +133,8 @@ class TTS:
             voice_name: Override voice name for this call.
             voice_id: Override voice ID for this call.
 
-        Returns:
+        Returns
+        -------
             Path to the generated audio file, or None if only played.
         """
         # Determine voice
@@ -228,14 +233,15 @@ class TTS:
         try:
             # SoundPlayer only supports WAV, so convert if needed
             wav_path = path
-            if path.suffix.lower() in ('.mp3', '.ogg', '.m4a'):
+            if path.suffix.lower() in (".mp3", ".ogg", ".m4a"):
                 try:
                     from pydub import AudioSegment
-                    fd, tmp_wav = tempfile.mkstemp(suffix='.wav', prefix='scitex_')
+
+                    fd, tmp_wav = tempfile.mkstemp(suffix=".wav", prefix="scitex_")
                     os.close(fd)
                     wav_path = Path(tmp_wav)
                     audio = AudioSegment.from_file(str(path))
-                    audio.export(str(wav_path), format='wav')
+                    audio.export(str(wav_path), format="wav")
                 except ImportError:
                     pass
 
@@ -303,10 +309,12 @@ def speak(
         output_path: Optional path to save audio.
         **kwargs: Additional TTS config options.
 
-    Returns:
+    Returns
+    -------
         Path to audio file if output_path specified, else None.
 
-    Examples:
+    Examples
+    --------
         import scitex
 
         # Simple speak

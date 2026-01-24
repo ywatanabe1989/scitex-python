@@ -179,9 +179,11 @@ def get_crossref_metrics(
 
     # Use provided email or fallback to environment variables
     if not email:
-        email = os.getenv(
-            "SCITEX_CROSSREF_EMAIL",
-            os.getenv("SCITEX_PUBMED_EMAIL", "research@example.com"),
+        email = (
+            os.getenv("SCITEX_SCHOLAR_CROSSREF_EMAIL")
+            or os.getenv("SCITEX_CROSSREF_EMAIL")
+            or os.getenv("SCITEX_SCHOLAR_PUBMED_EMAIL")
+            or os.getenv("SCITEX_PUBMED_EMAIL", "research@example.com")
         )
     headers = {"User-Agent": f"SciTeX/1.0 (mailto:{email})"}
 
@@ -218,9 +220,11 @@ async def get_crossref_metrics_async(
 
     # Use provided email or fallback to environment variables
     if not email:
-        email = os.getenv(
-            "SCITEX_CROSSREF_EMAIL",
-            os.getenv("SCITEX_PUBMED_EMAIL", "research@example.com"),
+        email = (
+            os.getenv("SCITEX_SCHOLAR_CROSSREF_EMAIL")
+            or os.getenv("SCITEX_CROSSREF_EMAIL")
+            or os.getenv("SCITEX_SCHOLAR_PUBMED_EMAIL")
+            or os.getenv("SCITEX_PUBMED_EMAIL", "research@example.com")
         )
     headers = {"User-Agent": f"SciTeX/1.0 (mailto:{email})"}
 

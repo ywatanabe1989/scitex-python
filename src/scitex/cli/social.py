@@ -61,13 +61,13 @@ def social(ctx, help_recursive):
       scitex social analytics twitter
 
     \b
-    Environment Variables (SCITEX_ prefix):
-      SCITEX_X_CONSUMER_KEY          Twitter API keys
-      SCITEX_LINKEDIN_ACCESS_TOKEN   LinkedIn OAuth token
-      SCITEX_REDDIT_CLIENT_ID        Reddit app credentials
-      SCITEX_YOUTUBE_API_KEY         YouTube API key
+    Environment Variables (SCITEX_SOCIAL_ prefix):
+      SCITEX_SOCIAL_X_CONSUMER_KEY          Twitter API keys
+      SCITEX_SOCIAL_LINKEDIN_ACCESS_TOKEN   LinkedIn OAuth token
+      SCITEX_SOCIAL_REDDIT_CLIENT_ID        Reddit app credentials
+      SCITEX_SOCIAL_YOUTUBE_API_KEY         YouTube API key
 
-    Note: Falls back to SOCIALIA_ prefix if SCITEX_ not set.
+    Note: Falls back to SOCIALIA_ prefix if SCITEX_SOCIAL_ not set.
     """
     if not _check_socialia():
         click.secho("Error: socialia not installed", fg="red", err=True)
