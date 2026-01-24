@@ -184,5 +184,71 @@ class TestTemplateInfo:
             assert "not found" in result.output.lower()
 
 
+class TestTemplateGet:
+    """Tests for the template get command."""
+
+    def test_get_session(self):
+        """Test get command for session template."""
+        runner = CliRunner()
+        result = runner.invoke(template, ["get", "session"])
+        assert result.exit_code == 0
+        assert "@stx.session" in result.output
+
+    def test_get_io(self):
+        """Test get command for io template."""
+        runner = CliRunner()
+        result = runner.invoke(template, ["get", "io"])
+        assert result.exit_code == 0
+        assert "stx.io" in result.output
+
+    def test_get_all(self):
+        """Test get command for all templates combined."""
+        runner = CliRunner()
+        result = runner.invoke(template, ["get", "all"])
+        assert result.exit_code == 0
+        assert "SCITEX CODE TEMPLATES" in result.output
+
+    def test_get_module_usage_templates(self):
+        """Test get command for module usage templates."""
+        runner = CliRunner()
+        for template_id in [
+            "plt",
+            "stats",
+            "scholar",
+            "audio",
+            "capture",
+            "diagram",
+            "canvas",
+            "writer",
+        ]:
+            result = runner.invoke(template, ["get", template_id])
+            assert result.exit_code == 0, f"Failed for template: {template_id}"
+
+    def test_get_with_output_file(self):
+        """Test get command with output file."""
+        runner = CliRunner()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, "script.py")
+            result = runner.invoke(template, ["get", "session", "-o", output_path])
+            assert result.exit_code == 0
+            assert os.path.exists(output_path)
+            with open(output_path) as f:
+                content = f.read()
+            assert "@stx.session" in content
+
+    def test_get_with_docstring(self):
+        """Test get command with custom docstring."""
+        runner = CliRunner()
+        result = runner.invoke(template, ["get", "session", "-d", "Custom description"])
+        assert result.exit_code == 0
+        assert "Custom description" in result.output
+
+    def test_get_invalid_template(self):
+        """Test get command with invalid template."""
+        runner = CliRunner()
+        result = runner.invoke(template, ["get", "nonexistent"])
+        assert result.exit_code != 0
+
+
 if __name__ == "__main__":
     pytest.main([os.path.abspath(__file__), "-v"])

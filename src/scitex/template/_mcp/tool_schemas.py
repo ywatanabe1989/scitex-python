@@ -104,6 +104,61 @@ def get_tool_schemas() -> list[types.Tool]:
                 "required": [],
             },
         ),
+        # Get code template
+        types.Tool(
+            name="get_code_template",
+            description="Get a code template for @stx.session scripts, module usage, or config files. Returns ready-to-use Python code with usage guidelines. Core templates: session, io, config. Module usage: plt, stats, scholar, audio, capture, diagram, canvas, writer.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "template_id": {
+                        "type": "string",
+                        "description": "Template identifier. Core (priority 1-3): session, io, config. Session variants: session-minimal, session-plot, session-stats, module. Module usage: plt, stats, scholar, audio, capture, diagram, canvas, writer. Use 'all' for all templates.",
+                        "enum": [
+                            # Core templates
+                            "session",
+                            "io",
+                            "config",
+                            # Session variants
+                            "session-minimal",
+                            "session-plot",
+                            "session-stats",
+                            "module",
+                            # Module usage templates
+                            "plt",
+                            "stats",
+                            "scholar",
+                            "audio",
+                            "capture",
+                            "diagram",
+                            "canvas",
+                            "writer",
+                            # All
+                            "all",
+                        ],
+                    },
+                    "filepath": {
+                        "type": "string",
+                        "description": "File path to include in template header (optional)",
+                    },
+                    "docstring": {
+                        "type": "string",
+                        "description": "Custom docstring for the template (optional)",
+                    },
+                },
+                "required": ["template_id"],
+            },
+        ),
+        # List code templates
+        types.Tool(
+            name="list_code_templates",
+            description="List all available code templates for scripts and modules",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        ),
     ]
 
 

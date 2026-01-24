@@ -22,17 +22,27 @@ def template(ctx, help_recursive):
     Project template scaffolding
 
     \b
-    Available templates:
+    Project Templates (clone):
       research      - Full scientific workflow structure
       pip-project   - Pip-installable Python package
       singularity   - Container-based project
       paper         - Academic paper writing template
 
     \b
+    Code Templates (get):
+      session       - @stx.session script with CONFIG docs (priority)
+      io            - stx.io save/load patterns (priority)
+      config        - YAML configuration file
+      session-minimal/plot/stats - Variants
+      module        - Standard Python module
+      all           - All templates combined
+
+    \b
     Examples:
-      scitex template list                        # Show available templates
-      scitex template clone research ./my-project # Clone research template
-      scitex template clone pip-project ./my-pkg  # Clone package template
+      scitex template get session                 # Session script template
+      scitex template get io                      # I/O operations template
+      scitex template get all                     # All templates
+      scitex template get session -o script.py   # Save to file
     """
     if help_recursive:
         _print_help_recursive(ctx)
@@ -199,6 +209,106 @@ def clone(template_type, destination, git_strategy, branch, tag):
         else:
             click.secho("Failed to clone template", fg="red", err=True)
             sys.exit(1)
+
+    except Exception as e:
+        click.secho(f"Error: {e}", fg="red", err=True)
+        sys.exit(1)
+
+
+@template.command()
+@click.argument(
+    "template_id",
+    type=click.Choice(
+        [
+            # Core templates (priority 1-3)
+            "session",
+            "io",
+            "config",
+            # Session variants
+            "session-minimal",
+            "session-plot",
+            "session-stats",
+            # Module template
+            "module",
+            # Module usage templates
+            "plt",
+            "stats",
+            "scholar",
+            "audio",
+            "capture",
+            "diagram",
+            "canvas",
+            "writer",
+            # All templates
+            "all",
+        ]
+    ),
+)
+@click.option(
+    "--output", "-o", type=click.Path(), help="Save to file instead of printing"
+)
+@click.option("--docstring", "-d", help="Custom docstring for the template")
+def get(template_id, output, docstring):
+    """
+    Get a code template (print or save to file)
+
+    \b
+    Core Templates (priority 1-3):
+      session         - Full @stx.session script with CONFIG docs
+      io              - stx.io.save/load patterns (30+ formats)
+      config          - YAML configuration file
+
+    \b
+    Session Variants:
+      session-minimal - Minimal session script
+      session-plot    - Plotting-focused session script
+      session-stats   - Statistical analysis script
+      module          - Standard Python module
+
+    \b
+    Module Usage Templates:
+      plt             - stx.plt plotting usage
+      stats           - stx.stats statistical analysis
+      scholar         - stx.scholar literature management
+      audio           - stx.audio text-to-speech
+      capture         - stx.capture screenshots
+      diagram         - stx.diagram Mermaid/Graphviz
+      canvas          - stx.canvas figure composition
+      writer          - stx.writer LaTeX compilation
+
+    \b
+    All:
+      all             - All templates combined
+
+    \b
+    Examples:
+      scitex template get session              # Print to stdout
+      scitex template get io                   # I/O operations template
+      scitex template get all                  # All templates
+      scitex template get session -o script.py # Save to file
+    """
+    try:
+        if template_id == "all":
+            from scitex.template import get_all_templates
+
+            content = get_all_templates()
+        else:
+            from scitex.template import get_code_template
+
+            filepath = output if output else None
+            content = get_code_template(
+                template_id, filepath=filepath, docstring=docstring
+            )
+
+        if output:
+            # Save to file
+            out_path = Path(output)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(content)
+            click.secho(f"Template saved: {out_path}", fg="green")
+        else:
+            # Print to stdout
+            click.echo(content)
 
     except Exception as e:
         click.secho(f"Error: {e}", fg="red", err=True)
