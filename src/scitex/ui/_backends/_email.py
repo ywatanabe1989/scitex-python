@@ -24,8 +24,16 @@ class EmailBackend(BaseNotifyBackend):
         recipient: Optional[str] = None,
         sender: Optional[str] = None,
     ):
-        self.recipient = recipient or os.getenv("SCITEX_NOTIFY_EMAIL_TO")
-        self.sender = sender or os.getenv("SCITEX_NOTIFY_EMAIL_FROM")
+        self.recipient = (
+            recipient
+            or os.getenv("SCITEX_UI_EMAIL_NOTIFICATION_TO")
+            or os.getenv("SCITEX_NOTIFY_EMAIL_TO")
+        )
+        self.sender = (
+            sender
+            or os.getenv("SCITEX_UI_EMAIL_NOTIFICATION_FROM")
+            or os.getenv("SCITEX_NOTIFY_EMAIL_FROM")
+        )
 
     def is_available(self) -> bool:
         return bool(

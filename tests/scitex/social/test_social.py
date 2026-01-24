@@ -142,7 +142,7 @@ class TestSocialiaIntegration:
         assert Twitter is SocialiaTwitter
 
     def test_branding_env_prefix(self):
-        """Test SCITEX_ environment prefix is set."""
+        """Test SCITEX_SOCIAL_ environment prefix is set."""
         import os
 
         from socialia._branding import ENV_PREFIX
@@ -150,7 +150,7 @@ class TestSocialiaIntegration:
         # Import to trigger branding setup
         from scitex import social  # noqa: F401
 
-        assert ENV_PREFIX == "SCITEX"
+        assert ENV_PREFIX == "SCITEX_SOCIAL"
 
 
 # EOF

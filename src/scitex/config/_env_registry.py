@@ -32,8 +32,8 @@ ENV_REGISTRY: List[EnvVar] = [
     EnvVar("SCITEX_DIR", "Base directory for scitex data", "core", "~/.scitex"),
     EnvVar("SCITEX_ENV_SRC", "Path to env source file/directory", "core"),
     EnvVar("SCITEX_LOGGING_LEVEL", "Logging level", "logging", "INFO"),
-    EnvVar("SCITEX_LOG_FORMAT", "Log format style", "logging", "default"),
-    EnvVar("SCITEX_FORCE_COLOR", "Force colored output", "logging", "false"),
+    EnvVar("SCITEX_LOGGING_FORMAT", "Log format style", "logging", "default"),
+    EnvVar("SCITEX_LOGGING_FORCE_COLOR", "Force colored output", "logging", "false"),
     # Audio
     EnvVar("SCITEX_AUDIO_MODE", "Audio mode: local/remote/auto", "audio", "auto"),
     EnvVar("SCITEX_AUDIO_RELAY_URL", "Relay server URL for remote audio", "audio"),
@@ -45,8 +45,8 @@ ENV_REGISTRY: List[EnvVar] = [
     ),
     # Scholar
     EnvVar("SCITEX_SCHOLAR_DIR", "Scholar library directory", "scholar"),
-    EnvVar("SCITEX_CROSSREF_EMAIL", "Email for Crossref API", "scholar"),
-    EnvVar("SCITEX_PUBMED_EMAIL", "Email for PubMed API", "scholar"),
+    EnvVar("SCITEX_SCHOLAR_CROSSREF_EMAIL", "Email for Crossref API", "scholar"),
+    EnvVar("SCITEX_SCHOLAR_PUBMED_EMAIL", "Email for PubMed API", "scholar"),
     EnvVar("SCITEX_SCHOLAR_CROSSREF_DB", "Local Crossref database path", "scholar"),
     EnvVar("SCITEX_SCHOLAR_CROSSREF_API_URL", "Crossref API URL", "scholar"),
     EnvVar(
@@ -70,35 +70,98 @@ ENV_REGISTRY: List[EnvVar] = [
         sensitive=True,
     ),
     # Social
-    EnvVar("SCITEX_X_CONSUMER_KEY", "Twitter/X consumer key", "social", sensitive=True),
     EnvVar(
-        "SCITEX_X_CONSUMER_SECRET",
+        "SCITEX_SOCIAL_X_CONSUMER_KEY",
+        "Twitter/X consumer key",
+        "social",
+        sensitive=True,
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_X_CONSUMER_KEY_SECRET",
         "Twitter/X consumer secret",
         "social",
         sensitive=True,
     ),
-    EnvVar("SCITEX_X_ACCESS_TOKEN", "Twitter/X access token", "social", sensitive=True),
     EnvVar(
-        "SCITEX_X_ACCESS_TOKEN_SECRET",
+        "SCITEX_SOCIAL_X_ACCESS_TOKEN",
+        "Twitter/X access token",
+        "social",
+        sensitive=True,
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_X_ACCESS_TOKEN_SECRET",
         "Twitter/X access token secret",
         "social",
         sensitive=True,
     ),
     EnvVar(
-        "SCITEX_LINKEDIN_ACCESS_TOKEN",
+        "SCITEX_SOCIAL_X_BEARER_TOKEN",
+        "Twitter/X bearer token",
+        "social",
+        sensitive=True,
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_LINKEDIN_CLIENT_ID",
+        "LinkedIn client ID",
+        "social",
+        sensitive=True,
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_LINKEDIN_CLIENT_SECRET",
+        "LinkedIn client secret",
+        "social",
+        sensitive=True,
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_LINKEDIN_ACCESS_TOKEN",
         "LinkedIn access token",
         "social",
         sensitive=True,
     ),
-    EnvVar("SCITEX_REDDIT_CLIENT_ID", "Reddit client ID", "social", sensitive=True),
     EnvVar(
-        "SCITEX_REDDIT_CLIENT_SECRET",
+        "SCITEX_SOCIAL_REDDIT_CLIENT_ID",
+        "Reddit client ID",
+        "social",
+        sensitive=True,
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_REDDIT_CLIENT_SECRET",
         "Reddit client secret",
         "social",
         sensitive=True,
     ),
-    EnvVar("SCITEX_YOUTUBE_API_KEY", "YouTube API key", "social", sensitive=True),
-    EnvVar("SCITEX_GA_PROPERTY_ID", "Google Analytics property ID", "social"),
+    EnvVar(
+        "SCITEX_SOCIAL_YOUTUBE_API_KEY",
+        "YouTube API key",
+        "social",
+        sensitive=True,
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_YOUTUBE_CLIENT_SECRETS_FILE",
+        "YouTube client secrets file path",
+        "social",
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_GOOGLE_ANALYTICS_PROPERTY_ID",
+        "Google Analytics property ID",
+        "social",
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_GOOGLE_ANALYTICS_MEASUREMENT_ID",
+        "Google Analytics measurement ID",
+        "social",
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_GOOGLE_ANALYTICS_API_SECRET",
+        "Google Analytics API secret",
+        "social",
+        sensitive=True,
+    ),
+    EnvVar(
+        "SCITEX_SOCIAL_GOOGLE_APPLICATION_CREDENTIALS",
+        "Google service account credentials path",
+        "social",
+    ),
     # Cloud
     EnvVar("SCITEX_CLOUD_USERNAME", "Cloud username", "cloud", sensitive=True),
     EnvVar("SCITEX_CLOUD_PASSWORD", "Cloud password", "cloud", sensitive=True),
@@ -118,9 +181,9 @@ ENV_REGISTRY: List[EnvVar] = [
     EnvVar("SCITEX_UI_WARNING_BACKENDS", "Backends for warning notifications", "ui"),
     EnvVar("SCITEX_UI_ERROR_BACKENDS", "Backends for error notifications", "ui"),
     EnvVar("SCITEX_UI_CRITICAL_BACKENDS", "Backends for critical notifications", "ui"),
-    EnvVar("SCITEX_NOTIFY_EMAIL_FROM", "Email notification sender", "ui"),
-    EnvVar("SCITEX_NOTIFY_EMAIL_TO", "Email notification recipient", "ui"),
-    EnvVar("SCITEX_NOTIFY_WEBHOOK_URL", "Webhook URL for notifications", "ui"),
+    EnvVar("SCITEX_UI_EMAIL_NOTIFICATION_FROM", "Email notification sender", "ui"),
+    EnvVar("SCITEX_UI_EMAIL_NOTIFICATION_TO", "Email notification recipient", "ui"),
+    EnvVar("SCITEX_UI_WEBHOOK_URL", "Webhook URL for notifications", "ui"),
     # Capture
     EnvVar("SCITEX_CAPTURE_DIR", "Screenshot capture directory", "capture"),
     # Web
@@ -128,8 +191,8 @@ ENV_REGISTRY: List[EnvVar] = [
     # PLT
     EnvVar("SCITEX_PLT_AXES_WIDTH_MM", "Default axes width in mm", "plt"),
     EnvVar("SCITEX_PLT_LINES_TRACE_MM", "Default line trace width in mm", "plt"),
-    EnvVar("SCITEX_STYLE", "Default plot style", "plt"),
-    EnvVar("SCITEX_COLORS", "Color palette to use", "plt"),
+    EnvVar("SCITEX_PLT_STYLE", "Default plot style", "plt"),
+    EnvVar("SCITEX_PLT_COLORS", "Color palette to use", "plt"),
 ]
 
 

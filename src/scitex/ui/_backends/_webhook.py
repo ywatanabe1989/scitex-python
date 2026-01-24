@@ -22,7 +22,11 @@ class WebhookBackend(BaseNotifyBackend):
     name = "webhook"
 
     def __init__(self, url: Optional[str] = None):
-        self.url = url or os.getenv("SCITEX_NOTIFY_WEBHOOK_URL")
+        self.url = (
+            url
+            or os.getenv("SCITEX_UI_WEBHOOK_URL")
+            or os.getenv("SCITEX_NOTIFY_WEBHOOK_URL")
+        )
 
     def is_available(self) -> bool:
         return bool(self.url)
