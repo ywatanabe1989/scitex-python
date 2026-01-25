@@ -130,29 +130,11 @@ jobs:
               COLOR="red"
             fi
 
-            cat > "benchmark-results/badges/${module}.json" << EOF
-{
-  "schemaVersion": 1,
-  "label": "install",
-  "message": "$TIME_FORMATTED",
-  "color": "$COLOR"
-}
-EOF
+            printf '{\n  "schemaVersion": 1,\n  "label": "install",\n  "message": "%s",\n  "color": "%s"\n}\n' "$TIME_FORMATTED" "$COLOR" > "benchmark-results/badges/${module}.json"
           done < benchmark-results/install-times.csv
 
           # Create index.html for GitHub Pages
-          cat > benchmark-results/index.html << 'EOF'
-<!DOCTYPE html>
-<html>
-<head><title>SciTeX Install Time Badges</title></head>
-<body>
-<h1>SciTeX Installation Time Badges</h1>
-<p>Use these endpoints with shields.io:</p>
-<pre>https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-code/badges/core.json</pre>
-<p><a href="badges/">Browse all badges</a></p>
-</body>
-</html>
-EOF
+          echo '<!DOCTYPE html><html><head><title>SciTeX Install Time Badges</title></head><body><h1>SciTeX Installation Time Badges</h1><p>Use these endpoints with shields.io:</p><pre>https://img.shields.io/endpoint?url=https://ywatanabe1989.github.io/scitex-python/badges/core.json</pre><p><a href="badges/">Browse all badges</a></p></body></html>' > benchmark-results/index.html
 
       - name: Upload artifact for Pages
         uses: actions/upload-pages-artifact@v3
