@@ -26,6 +26,7 @@ Advanced Introspection:
 - get_function_calls: Simple outgoing calls list
 """
 
+# Module introspection (moved from gen)
 from ._core import (
     # Basic
     find_examples,
@@ -49,6 +50,7 @@ from ._core import (
     list_members,
     resolve_object,
 )
+from ._inspect_module import inspect_module
 
 __all__ = [
     # Basic
@@ -72,4 +74,6 @@ __all__ = [
     # Advanced - Call graph
     "get_call_graph",
     "get_function_calls",
+    # Module introspection (from gen)
+    "inspect_module",
 ]

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -8,9 +8,9 @@ __DIR__ = os.path.dirname(__FILE__)
 
 from typing import Union
 
-from ._types import CommandInput, ReturnFormat, ShellResult
-from ._security import quote, validate_command
 from ._execute import execute
+from ._security import quote, validate_command
+from ._types import CommandInput, ReturnFormat, ShellResult
 
 
 def sh(
@@ -88,6 +88,9 @@ def sh_run(command: CommandInput, verbose: bool = True) -> ShellResult:
     return execute(command, verbose=verbose)
 
 
-__all__ = ["sh", "sh_run", "quote"]
+# Legacy functions moved from gen module
+from ._shell_legacy import run_shellcommand, run_shellscript
+
+__all__ = ["sh", "sh_run", "quote", "run_shellcommand", "run_shellscript"]
 
 # EOF

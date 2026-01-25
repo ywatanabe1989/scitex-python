@@ -188,8 +188,7 @@ def _determine_save_path(specified_path, use_caller_path):
     if specified_path.startswith("/"):
         return specified_path
 
-    from scitex.gen._detect_environment import detect_environment
-    from scitex.gen._get_notebook_path import get_notebook_info_simple
+    from scitex.context import detect_environment, get_notebook_info_simple
 
     env_type = detect_environment()
 

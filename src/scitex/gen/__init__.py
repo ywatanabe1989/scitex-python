@@ -1,15 +1,45 @@
 #!/usr/bin/env python3
-"""Scitex gen module."""
+"""Scitex gen module.
+
+NOTE: This module is being refactored. Many functions are being moved to
+more appropriate locations. For backward compatibility, they are re-exported
+here with deprecation warnings.
+
+Recommended imports:
+- ci -> scitex.stats.descriptive.ci
+- check_host, is_host, verify_host -> scitex.os
+- detect_environment, is_notebook, is_script -> scitex.context
+- inspect_module -> scitex.introspect
+- run_shellcommand, run_shellscript -> scitex.sh
+- xml2dict, XmlDictConfig, XmlListConfig -> scitex.io
+- title_case -> scitex.str
+- symlink -> scitex.path
+"""
+
+import warnings
+
+
+def _deprecation_warning(old_path, new_path):
+    warnings.warn(
+        f"{old_path} is deprecated, use {new_path} instead",
+        DeprecationWarning,
+        stacklevel=3,
+    )
+
+
+# ci -> scitex.stats.descriptive.ci (with re-export for backward compat)
+from scitex.stats.descriptive import ci
 
 # Optional: DimHandler requires torch
 try:
     from ._DimHandler import DimHandler
 except ImportError:
     DimHandler = None
+# check_host moved to scitex.os (re-export for backward compatibility)
+from scitex.os import check_host, is_host, verify_host
+
 from ._alternate_kwarg import alternate_kwarg
 from ._cache import cache
-from ._check_host import check_host, is_host, verify_host
-from ._ci import ci
 from ._deprecated_close import (
     close as _deprecated_close,
 )
@@ -27,7 +57,9 @@ try:
     from ._embed import embed
 except ImportError:
     embed = None
-from ._inspect_module import inspect_module
+# inspect_module moved to scitex.introspect (re-export for backward compatibility)
+from scitex.introspect import inspect_module
+
 from ._is_ipython import is_ipython, is_script
 from ._less import less
 from ._list_packages import list_packages, main
@@ -51,9 +83,11 @@ except ImportError:
     to_nanz = None
     to_z = None
     unbias = None
+# shell functions moved to scitex.sh (re-export for backward compatibility)
+from scitex.sh import run_shellcommand, run_shellscript
+
 from ._paste import paste
 from ._print_config import print_config, print_config_main
-from ._shell import run_shellcommand, run_shellscript
 from ._src import src
 from ._TimeStamper import TimeStamper
 
@@ -62,20 +96,23 @@ start = _deprecated_start
 close = _deprecated_close
 running2finished = _deprecated_running2finished
 
-from ._detect_environment import (
+# environment detection moved to scitex.context (re-export for backward compatibility)
+from scitex.context import (
     detect_environment,
+    get_notebook_directory,
+    get_notebook_info_simple,
+    get_notebook_name,
+    get_notebook_path,
     get_output_directory,
     is_notebook,
 )
-from ._get_notebook_path import (
-    get_notebook_directory,
-    get_notebook_name,
-    get_notebook_path,
-)
+
+# title_case moved to scitex.str (re-export for backward compatibility)
+from scitex.str import title_case
+
 from ._symlink import symlink
 from ._symlog import symlog
 from ._title2path import title2path
-from ._title_case import main, title_case
 from ._to_even import to_even
 from ._to_odd import to_odd
 
@@ -99,10 +136,9 @@ except ImportError:
     pass  # Already set to None above
 from ._wrap import wrap
 from ._xml2dict import XmlDictConfig, XmlListConfig, xml2dict
-from .misc import float_linspace
 
 # Import from misc module
-from .misc import connect_nums
+from .misc import connect_nums, float_linspace
 
 __all__ = [
     "ArrayLike",

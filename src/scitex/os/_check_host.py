@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-02 13:43:36 (ywatanabe)"
-# File: ./scitex_repo/src/scitex/gen/_check_host.py
+# File: /home/ywatanabe/proj/scitex-python/src/scitex/os/_check_host.py
 
-
-from scitex.sh import sh
+import socket
 import sys
 
 
 def check_host(keyword):
-    return keyword in sh("echo $(hostname)", verbose=False)
+    """Check if the current hostname contains the given keyword."""
+    return keyword in socket.gethostname()
 
 
 is_host = check_host

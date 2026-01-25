@@ -21,7 +21,7 @@ import sys as sys_module
 
 from ._lifecycle import start, close
 from scitex.logging import getLogger
-from scitex import INJECTED
+from . import INJECTED  # Use local INJECTED from session module
 
 # Internal logger for the decorator itself
 _decorator_logger = getLogger(__name__)

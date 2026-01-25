@@ -70,34 +70,31 @@ __DIR__ = os.path.dirname(__FILE__)
 # Re-export figrecipe public API with scitex branding
 # ============================================================================
 if _FIGRECIPE_AVAILABLE:
-    # Core functions
+    # Core public API
+    from figrecipe import __version__ as _figrecipe_version
     from figrecipe import (
-        STYLE,
-        align_panels,
-        apply_style,
         compose,
         crop,
-        distribute_panels,
         edit,
-        enable_svg,
         extract_data,
-        get_graph_preset,
         info,
-        list_graph_presets,
         list_presets,
         load_style,
-        register_graph_preset,
         reproduce,
         save,
-        smart_align,
-        sns,
         subplots,
         unload_style,
         validate,
     )
-    from figrecipe import (
-        __version__ as _figrecipe_version,
-    )
+
+    # Internal imports (not part of figrecipe public API)
+    from figrecipe._api._notebook import enable_svg
+    from figrecipe._api._seaborn_proxy import sns
+    from figrecipe._api._style_manager import STYLE, apply_style
+    from figrecipe._composition import align_panels, distribute_panels, smart_align
+    from figrecipe._graph_presets import get_preset as get_graph_preset
+    from figrecipe._graph_presets import list_presets as list_graph_presets
+    from figrecipe._graph_presets import register_preset as register_graph_preset
 
     # Also export load as alias for reproduce
     load = reproduce

@@ -24,47 +24,45 @@ from scitex.gen import check_host, is_host, verify_host
 class TestCheckHostBasic:
     """Test basic check_host functionality."""
 
-    @patch("scitex.gen._check_host.sh")
-    def test_check_host_found(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_check_host_found(self, mock_gethostname):
         """Test check_host returns True when keyword is found."""
-        mock_sh.return_value = "myhost.example.com"
+        mock_gethostname.return_value = "myhost.example.com"
         assert check_host("myhost") is True
-        mock_sh.assert_called_once_with("echo $(hostname)", verbose=False)
 
-    @patch("scitex.gen._check_host.sh")
-    def test_check_host_not_found(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_check_host_not_found(self, mock_gethostname):
         """Test check_host returns False when keyword is not found."""
-        mock_sh.return_value = "myhost.example.com"
+        mock_gethostname.return_value = "myhost.example.com"
         assert check_host("otherhost") is False
-        mock_sh.assert_called_once_with("echo $(hostname)", verbose=False)
 
-    @patch("scitex.gen._check_host.sh")
-    def test_check_host_partial_match(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_check_host_partial_match(self, mock_gethostname):
         """Test check_host with partial matches."""
-        mock_sh.return_value = "server123.domain.com"
+        mock_gethostname.return_value = "server123.domain.com"
         assert check_host("server") is True
         assert check_host("123") is True
         assert check_host("domain") is True
         assert check_host("xyz") is False
 
-    @patch("scitex.gen._check_host.sh")
-    def test_check_host_case_sensitive(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_check_host_case_sensitive(self, mock_gethostname):
         """Test check_host is case sensitive."""
-        mock_sh.return_value = "MyHost"
+        mock_gethostname.return_value = "MyHost"
         assert check_host("MyHost") is True
         assert check_host("myhost") is False
         assert check_host("MYHOST") is False
 
-    @patch("scitex.gen._check_host.sh")
-    def test_check_host_empty_keyword(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_check_host_empty_keyword(self, mock_gethostname):
         """Test check_host with empty keyword."""
-        mock_sh.return_value = "myhost"
+        mock_gethostname.return_value = "myhost"
         assert check_host("") is True  # Empty string is always found
 
-    @patch("scitex.gen._check_host.sh")
-    def test_is_host_alias(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_is_host_alias(self, mock_gethostname):
         """Test is_host is an alias for check_host."""
-        mock_sh.return_value = "testhost"
+        mock_gethostname.return_value = "testhost"
         assert is_host("test") is True
         assert is_host is check_host  # Verify they're the same function
 
@@ -72,10 +70,10 @@ class TestCheckHostBasic:
 class TestVerifyHost:
     """Test verify_host functionality."""
 
-    @patch("scitex.gen._check_host.sh")
-    def test_verify_host_success(self, mock_sh, capsys):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_verify_host_success(self, mock_gethostname, capsys):
         """Test verify_host when keyword is found."""
-        mock_sh.return_value = "myhost.example.com"
+        mock_gethostname.return_value = "myhost.example.com"
 
         # Should not raise SystemExit
         verify_host("myhost")
@@ -84,10 +82,10 @@ class TestVerifyHost:
         captured = capsys.readouterr()
         assert "Host verification successed for keyword: myhost" in captured.out
 
-    @patch("scitex.gen._check_host.sh")
-    def test_verify_host_failure(self, mock_sh, capsys):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_verify_host_failure(self, mock_gethostname, capsys):
         """Test verify_host when keyword is not found."""
-        mock_sh.return_value = "myhost.example.com"
+        mock_gethostname.return_value = "myhost.example.com"
 
         # Should raise SystemExit with code 1
         with pytest.raises(SystemExit) as exc_info:
@@ -99,10 +97,10 @@ class TestVerifyHost:
         captured = capsys.readouterr()
         assert "Host verification failed for keyword: otherhost" in captured.out
 
-    @patch("scitex.gen._check_host.sh")
-    def test_verify_host_multiple_keywords(self, mock_sh, capsys):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_verify_host_multiple_keywords(self, mock_gethostname, capsys):
         """Test verify_host with multiple keywords in sequence."""
-        mock_sh.return_value = "titan-server"
+        mock_gethostname.return_value = "titan-server"
 
         # First should succeed
         verify_host("titan")
@@ -119,61 +117,61 @@ class TestVerifyHost:
 class TestCheckHostEdgeCases:
     """Test edge cases and special scenarios."""
 
-    @patch("scitex.gen._check_host.sh")
-    def test_sh_command_failure(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_sh_command_failure(self, mock_gethostname):
         """Test behavior when sh command fails."""
-        mock_sh.side_effect = Exception("Command failed")
+        mock_gethostname.side_effect = Exception("Command failed")
 
         # Should raise the exception
         with pytest.raises(Exception, match="Command failed"):
             check_host("test")
 
-    @patch("scitex.gen._check_host.sh")
-    def test_hostname_with_spaces(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_hostname_with_spaces(self, mock_gethostname):
         """Test with hostname containing spaces (edge case)."""
-        mock_sh.return_value = "my host name"
+        mock_gethostname.return_value = "my host name"
         assert check_host("my") is True
         assert check_host("host") is True
         assert check_host("my host") is True
 
-    @patch("scitex.gen._check_host.sh")
-    def test_special_characters_in_keyword(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_special_characters_in_keyword(self, mock_gethostname):
         """Test with special characters in keyword."""
-        mock_sh.return_value = "host-123.example.com"
+        mock_gethostname.return_value = "host-123.example.com"
         assert check_host("host-123") is True
         assert check_host(".example") is True
         assert check_host("example.com") is True
 
-    @patch("scitex.gen._check_host.sh")
-    def test_unicode_hostname(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_unicode_hostname(self, mock_gethostname):
         """Test with unicode characters in hostname."""
-        mock_sh.return_value = "測試-server.example.com"
+        mock_gethostname.return_value = "測試-server.example.com"
         assert check_host("測試") is True
         assert check_host("server") is True
         assert check_host("テスト") is False  # Different unicode
 
-    @patch("scitex.gen._check_host.sh")
-    def test_very_long_hostname(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_very_long_hostname(self, mock_gethostname):
         """Test with very long hostname."""
         long_hostname = "a" * 100 + ".example.com"
-        mock_sh.return_value = long_hostname
+        mock_gethostname.return_value = long_hostname
         assert check_host("a" * 50) is True
         assert check_host("example") is True
 
-    @patch("scitex.gen._check_host.sh")
-    def test_hostname_with_newlines(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_hostname_with_newlines(self, mock_gethostname):
         """Test hostname with newline characters."""
-        mock_sh.return_value = "myhost\n"
+        mock_gethostname.return_value = "myhost\n"
         assert check_host("myhost") is True
         # "myhost\n" in "myhost\n" is True (substring match)
         assert check_host("myhost\n") is True
         # Keyword not present
         assert check_host("otherhost") is False
 
-    @patch("scitex.gen._check_host.sh")
-    def test_none_keyword(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_none_keyword(self, mock_gethostname):
         """Test with None as keyword."""
-        mock_sh.return_value = "myhost"
+        mock_gethostname.return_value = "myhost"
         with pytest.raises(TypeError):
             check_host(None)
 
@@ -181,8 +179,8 @@ class TestCheckHostEdgeCases:
 class TestCheckHostPatterns:
     """Test various hostname patterns and formats."""
 
-    @patch("scitex.gen._check_host.sh")
-    def test_fqdn_patterns(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_fqdn_patterns(self, mock_gethostname):
         """Test with fully qualified domain names."""
         test_cases = [
             ("server.example.com", ["server", "example", "com", "."]),
@@ -192,12 +190,12 @@ class TestCheckHostPatterns:
         ]
 
         for hostname, should_match in test_cases:
-            mock_sh.return_value = hostname
+            mock_gethostname.return_value = hostname
             for keyword in should_match:
                 assert check_host(keyword) is True, f"{keyword} should match {hostname}"
 
-    @patch("scitex.gen._check_host.sh")
-    def test_common_hostname_formats(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_common_hostname_formats(self, mock_gethostname):
         """Test common hostname formats."""
         test_cases = [
             "web-server-01",
@@ -210,7 +208,7 @@ class TestCheckHostPatterns:
         ]
 
         for hostname in test_cases:
-            mock_sh.return_value = hostname
+            mock_gethostname.return_value = hostname
             # Test various parts of the hostname
             parts = (
                 hostname.replace("-", " ").replace("_", " ").replace(".", " ").split()
@@ -219,10 +217,10 @@ class TestCheckHostPatterns:
                 if part:  # Skip empty parts
                     assert check_host(part) is True
 
-    @patch("scitex.gen._check_host.sh")
-    def test_regex_special_chars_in_keyword(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_regex_special_chars_in_keyword(self, mock_gethostname):
         """Test keywords with regex special characters."""
-        mock_sh.return_value = "server[prod].example.com"
+        mock_gethostname.return_value = "server[prod].example.com"
 
         # These contain regex special chars but should work as literal matches
         assert check_host("[prod]") is True
@@ -230,7 +228,7 @@ class TestCheckHostPatterns:
         assert check_host("].example") is True
 
         # Other regex special chars
-        mock_sh.return_value = "server*.example.com"
+        mock_gethostname.return_value = "server*.example.com"
         assert check_host("*") is True
         assert check_host("server*") is True
 
@@ -238,23 +236,23 @@ class TestCheckHostPatterns:
 class TestCheckHostPerformance:
     """Test performance characteristics."""
 
-    @patch("scitex.gen._check_host.sh")
-    def test_multiple_checks_same_host(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_multiple_checks_same_host(self, mock_gethostname):
         """Test multiple checks don't cause redundant shell calls."""
-        mock_sh.return_value = "myhost"
+        mock_gethostname.return_value = "myhost"
 
         # Multiple checks with same keyword
         for _ in range(5):
             assert check_host("my") is True
 
         # Each call should invoke sh command (no caching)
-        assert mock_sh.call_count == 5
+        assert mock_gethostname.call_count == 5
 
-    @patch("scitex.gen._check_host.sh")
-    def test_large_keyword_performance(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_large_keyword_performance(self, mock_gethostname):
         """Test with very large keyword."""
         hostname = "server.example.com"
-        mock_sh.return_value = hostname
+        mock_gethostname.return_value = hostname
 
         # Very large keyword that won't match
         large_keyword = "x" * 10000
@@ -267,11 +265,11 @@ class TestCheckHostPerformance:
 class TestVerifyHostBehavior:
     """Test verify_host specific behaviors."""
 
-    @patch("scitex.gen._check_host.sh")
+    @patch("scitex.os._check_host.socket.gethostname")
     @patch("sys.exit")
-    def test_verify_host_exit_code(self, mock_exit, mock_sh, capsys):
+    def test_verify_host_exit_code(self, mock_exit, mock_gethostname, capsys):
         """Test that verify_host uses sys.exit properly."""
-        mock_sh.return_value = "myhost"
+        mock_gethostname.return_value = "myhost"
 
         # Failure case
         verify_host("wronghost")
@@ -281,19 +279,19 @@ class TestVerifyHostBehavior:
         captured = capsys.readouterr()
         assert "Host verification failed" in captured.out
 
-    @patch("scitex.gen._check_host.sh")
-    def test_verify_host_no_exit_on_success(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_verify_host_no_exit_on_success(self, mock_gethostname):
         """Test that verify_host doesn't exit on success."""
-        mock_sh.return_value = "correcthost"
+        mock_gethostname.return_value = "correcthost"
 
         # Should return normally (implicitly None)
         result = verify_host("correct")
         assert result is None
 
-    @patch("scitex.gen._check_host.sh")
-    def test_verify_host_output_format(self, mock_sh, capsys):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_verify_host_output_format(self, mock_gethostname, capsys):
         """Test exact output format of verify_host."""
-        mock_sh.return_value = "test-server-123"
+        mock_gethostname.return_value = "test-server-123"
 
         # Success case
         verify_host("test")
@@ -310,65 +308,65 @@ class TestVerifyHostBehavior:
 class TestCheckHostIntegration:
     """Integration tests with actual system calls."""
 
-    @patch("scitex.gen._check_host.sh")
-    def test_integration_with_sh_module(self, mock_sh):
-        """Test integration with sh module.
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_integration_with_socket_module(self, mock_gethostname):
+        """Test integration with socket module.
 
-        check_host uses scitex.sh.sh() to execute hostname command.
+        check_host uses socket.gethostname() to get hostname.
         """
-        mock_sh.return_value = "test-hostname"
+        mock_gethostname.return_value = "test-hostname"
 
         # Verify integration works correctly
         assert check_host("test") is True
         assert check_host("hostname") is True
         assert check_host("invalid") is False
 
-        # Verify sh was called with correct arguments
-        mock_sh.assert_called_with("echo $(hostname)", verbose=False)
+        # Verify socket.gethostname was called
+        mock_gethostname.assert_called()
 
-    def test_sh_command_format(self):
-        """Test that the shell command is correctly formatted."""
-        with patch("scitex.gen._check_host.sh") as mock_sh:
-            mock_sh.return_value = "hostname"
-            check_host("test")
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_socket_gethostname_usage(self, mock_gethostname):
+        """Test that socket.gethostname is used correctly."""
+        mock_gethostname.return_value = "hostname"
+        check_host("test")
 
-            # Verify the exact command
-            mock_sh.assert_called_with("echo $(hostname)", verbose=False)
+        # Verify socket.gethostname was called without arguments
+        mock_gethostname.assert_called_once_with()
 
 
 class TestCheckHostErrorHandling:
     """Test error handling scenarios."""
 
-    @patch("scitex.gen._check_host.sh")
-    def test_sh_returns_none(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_sh_returns_none(self, mock_gethostname):
         """Test when sh command returns None."""
-        mock_sh.return_value = None
+        mock_gethostname.return_value = None
 
         # Should handle None gracefully
         with pytest.raises(TypeError):
             check_host("test")
 
-    @patch("scitex.gen._check_host.sh")
-    def test_sh_returns_non_string(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_sh_returns_non_string(self, mock_gethostname):
         """Test when sh returns non-string value."""
-        mock_sh.return_value = 12345  # Integer instead of string
+        mock_gethostname.return_value = 12345  # Integer instead of string
 
         # Should raise TypeError when trying 'in' operator
         with pytest.raises(TypeError):
             check_host("test")
 
-    @patch("scitex.gen._check_host.sh")
-    def test_empty_hostname(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_empty_hostname(self, mock_gethostname):
         """Test with empty hostname."""
-        mock_sh.return_value = ""
+        mock_gethostname.return_value = ""
 
         assert check_host("test") is False
         assert check_host("") is True  # Empty string is in empty string
 
-    @patch("scitex.gen._check_host.sh")
-    def test_whitespace_only_hostname(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_whitespace_only_hostname(self, mock_gethostname):
         """Test with whitespace-only hostname."""
-        mock_sh.return_value = "   \t\n  "
+        mock_gethostname.return_value = "   \t\n  "
 
         assert check_host("test") is False
         assert check_host(" ") is True
@@ -378,8 +376,8 @@ class TestCheckHostErrorHandling:
 class TestCheckHostUsagePatterns:
     """Test common usage patterns and best practices."""
 
-    @patch("scitex.gen._check_host.sh")
-    def test_environment_detection(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_environment_detection(self, mock_gethostname):
         """Test using check_host for environment detection."""
         environments = {
             "prod-server-01": "production",
@@ -389,7 +387,7 @@ class TestCheckHostUsagePatterns:
         }
 
         for hostname, expected_env in environments.items():
-            mock_sh.return_value = hostname
+            mock_gethostname.return_value = hostname
 
             # Detect environment based on hostname
             if check_host("prod"):
@@ -405,10 +403,10 @@ class TestCheckHostUsagePatterns:
 
             assert env == expected_env
 
-    @patch("scitex.gen._check_host.sh")
-    def test_multiple_keyword_check(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_multiple_keyword_check(self, mock_gethostname):
         """Test checking multiple keywords."""
-        mock_sh.return_value = "web-prod-server-01"
+        mock_gethostname.return_value = "web-prod-server-01"
 
         # All these should match
         keywords = ["web", "prod", "server", "01", "-"]
@@ -420,10 +418,10 @@ class TestCheckHostUsagePatterns:
         for keyword in non_keywords:
             assert check_host(keyword) is False
 
-    @patch("scitex.gen._check_host.sh")
-    def test_conditional_execution_pattern(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_conditional_execution_pattern(self, mock_gethostname):
         """Test pattern for conditional execution based on host."""
-        mock_sh.return_value = "gpu-server-01"
+        mock_gethostname.return_value = "gpu-server-01"
 
         # Simulate conditional execution
         executed = []
@@ -466,17 +464,18 @@ class TestCheckHostDocumentation:
         # would be to add them
         pass
 
-    @patch("scitex.gen._check_host.sh")
-    def test_example_usage_from_source(self, mock_sh):
+    @patch("scitex.os._check_host.socket.gethostname")
+    def test_example_usage_from_source(self, mock_gethostname):
         """Test the example usage from source code comments."""
         # From source: verify_host("titan")
-        mock_sh.return_value = "titan-gpu-server"
+        mock_gethostname.return_value = "titan-gpu-server"
         verify_host("titan")  # Should succeed
 
         # From source: verify_host("crest")
-        mock_sh.return_value = "titan-gpu-server"
+        mock_gethostname.return_value = "titan-gpu-server"
         with pytest.raises(SystemExit):
             verify_host("crest")  # Should fail
+
 
 if __name__ == "__main__":
     import os
@@ -492,19 +491,19 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-02 13:43:36 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/gen/_check_host.py
-# 
-# 
+#
+#
 # from scitex.sh import sh
 # import sys
-# 
-# 
+#
+#
 # def check_host(keyword):
 #     return keyword in sh("echo $(hostname)", verbose=False)
-# 
-# 
+#
+#
 # is_host = check_host
-# 
-# 
+#
+#
 # def verify_host(keyword):
 #     if is_host(keyword):
 #         print(f"Host verification successed for keyword: {keyword}")
@@ -512,15 +511,15 @@ if __name__ == "__main__":
 #     else:
 #         print(f"Host verification failed for keyword: {keyword}")
 #         sys.exit(1)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     # check_host("ywata")
 #     verify_host("titan")
 #     verify_host("ywata")
 #     verify_host("crest")
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

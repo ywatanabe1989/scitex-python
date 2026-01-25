@@ -29,19 +29,9 @@ warnings.filterwarnings("default", category=DeprecationWarning, module="scitex.*
 # Version
 from .__version__ import __version__
 
-# Installation guide - show users what modules are available
-from ._install_guide import show_install_guide
-
-
-# Sentinel object for decorator-injected parameters
-class _InjectedSentinel:
-    """Sentinel value indicating a parameter will be injected by a decorator"""
-
-    def __repr__(self):
-        return "<INJECTED>"
-
-
-INJECTED = _InjectedSentinel()
+# BACKWARD COMPATIBILITY: Deprecated items accessible via __getattr__
+# These are handled at the end of this file after lazy modules are defined
+_DEPRECATED_ATTRS = {"INJECTED", "show_install_guide", "Diagram"}
 
 
 # Lazy loading for all modules
@@ -198,47 +188,53 @@ msword = _LazyModule("msword")
 fts = _LazyModule("fts")  # Bundle schemas module
 social = _LazyModule("social")  # Social media integration (socialia wrapper)
 diagram = _LazyModule("diagram")  # Diagram creation (delegates to figrecipe)
+introspect = _LazyModule("introspect")  # Python introspection utilities
+sh = _LazyModule("sh")  # Shell command execution
+os = _LazyModule("os")  # OS utilities (file operations)
+cv = _LazyModule("cv")  # Computer vision utilities
+ui = _LazyModule("ui")  # User interface utilities
+git = _LazyModule("git")  # Git operations
+schema = _LazyModule("schema")  # Data schema utilities
+canvas = _LazyModule("canvas")  # Canvas utilities for figure composition
+security = _LazyModule("security")  # Security utilities
+benchmark = _LazyModule("benchmark")  # Benchmarking utilities
+bridge = _LazyModule("bridge")  # Bridge utilities
+browser = _LazyModule("browser")  # Browser automation
+compat = _LazyModule("compat")  # Compatibility utilities
+cli = _LazyModule("cli")  # Command-line interface
 
 
-# Lazy Diagram class - delegates to figrecipe.Diagram
-class _LazyDiagram:
-    """Lazy loader for Diagram class from figrecipe."""
+# BACKWARD COMPATIBILITY: Module-level __getattr__ for deprecated attributes
+def __getattr__(name):
+    """Handle deprecated attributes with warnings."""
+    if name == "INJECTED":
+        warnings.warn(
+            "scitex.INJECTED is deprecated, use scitex.session.INJECTED instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from .session import INJECTED
 
-    _class = None
+        return INJECTED
+    if name == "show_install_guide":
+        warnings.warn(
+            "scitex.show_install_guide() is deprecated, use scitex.dev.show_install_guide() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from .dev import show_install_guide
 
-    def __new__(cls, *args, **kwargs):
-        if cls._class is None:
-            try:
-                from figrecipe import Diagram as _FigrecipeDiagram
+        return show_install_guide
+    if name == "Diagram":
+        warnings.warn(
+            "scitex.Diagram is deprecated, use scitex.diagram.Diagram instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from .diagram import Diagram
 
-                cls._class = _FigrecipeDiagram
-            except ImportError:
-                # Fallback to scitex's own implementation if figrecipe not available
-                from scitex.diagram._diagram import Diagram as _ScitexDiagram
-
-                cls._class = _ScitexDiagram
-        return cls._class(*args, **kwargs)
-
-    @classmethod
-    def from_yaml(cls, *args, **kwargs):
-        if cls._class is None:
-            cls.__new__(cls)  # Trigger lazy load
-        return cls._class.from_yaml(*args, **kwargs)
-
-    @classmethod
-    def from_mermaid(cls, *args, **kwargs):
-        if cls._class is None:
-            cls.__new__(cls)  # Trigger lazy load
-        return cls._class.from_mermaid(*args, **kwargs)
-
-    @classmethod
-    def from_dict(cls, *args, **kwargs):
-        if cls._class is None:
-            cls.__new__(cls)  # Trigger lazy load
-        return cls._class.from_dict(*args, **kwargs)
-
-
-Diagram = _LazyDiagram
+        return Diagram
+    raise AttributeError(f"module 'scitex' has no attribute '{name}'")
 
 
 # Centralized path configuration - eager loaded for convenience
@@ -257,6 +253,7 @@ if _os.environ.get("SCITEX_CLOUD_CODE_WORKSPACE") == "true":
         pass  # Silently fail if matplotlib not available
 
 __all__ = [
+    # Core modules
     "io",
     "gen",
     "plt",
@@ -268,7 +265,6 @@ __all__ = [
     "path",
     "dict",
     "decorators",
-    "__version__",
     "sh",
     "errors",
     "units",
@@ -292,7 +288,7 @@ __all__ = [
     "linalg",
     "parallel",
     "datetime",
-    "dt",  # Alias for datetime (shorter name)
+    "dt",
     "types",
     "utils",
     "etc",
@@ -304,12 +300,23 @@ __all__ = [
     "audio",
     "msword",
     "fts",
-    "fsb",  # Legacy alias
-    "social",  # Social media integration
-    "diagram",  # Diagram module (delegates to figrecipe)
-    "Diagram",  # Diagram class (from figrecipe)
+    "social",
+    "diagram",
+    "introspect",
+    "os",
+    "cv",
+    "ui",
+    "git",
+    "schema",
+    "canvas",
+    "security",
+    "benchmark",
+    "bridge",
+    "browser",
+    "compat",
+    "cli",
     "PATHS",
-    "INJECTED",
+    "__version__",
 ]
 
 # EOF

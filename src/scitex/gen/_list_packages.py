@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2024-11-03 02:11:54 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/gen/_list_packages.py
 """
@@ -25,7 +24,7 @@ except ImportError:
     # Fallback for older Python versions
     from importlib_metadata import distributions
 
-from ._inspect_module import inspect_module
+from scitex.introspect import inspect_module
 
 
 def list_packages(
@@ -116,6 +115,7 @@ def main() -> Optional[int]:
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+
     import scitex
 
     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
