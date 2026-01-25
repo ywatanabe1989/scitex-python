@@ -1,13 +1,43 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # SciTeX Cloud Integration Module
 # Provides cloud-specific functionality for SciTeX running in SciTeX Cloud
+#
+# This module wraps the scitex-cloud package (if installed) and provides
+# additional cloud environment utilities.
 
+import base64
 import os
 import sys
-import base64
 from pathlib import Path
 from typing import Optional
+
+# ============================================================================
+# Optional scitex-cloud package integration
+# Pattern: scitex-cloud → scitex.cloud (like figrecipe → scitex.plt)
+# ============================================================================
+try:
+    from scitex_cloud import (
+        DockerManager,
+        Environment,
+        get_environment,
+    )
+    from scitex_cloud import __version__ as cloud_version
+    from scitex_cloud import (
+        config as cloud_config,
+    )
+    from scitex_cloud import (
+        utils as cloud_utils,
+    )
+
+    HAS_CLOUD_CLI = True
+except ImportError:
+    HAS_CLOUD_CLI = False
+    cloud_version = None
+    DockerManager = None
+    Environment = None
+    get_environment = None
+    cloud_config = None
+    cloud_utils = None
 
 
 def is_cloud_environment() -> bool:
@@ -116,11 +146,20 @@ def emit_file_link(file_path: str, line_number: Optional[int] = None) -> None:
 
 
 __all__ = [
+    # Local cloud environment utilities
     "is_cloud_environment",
     "get_cloud_backend",
     "get_project_root",
     "emit_inline_image",
     "emit_file_link",
+    # scitex-cloud package integration (if installed)
+    "HAS_CLOUD_CLI",
+    "cloud_version",
+    "DockerManager",
+    "Environment",
+    "get_environment",
+    "cloud_config",
+    "cloud_utils",
 ]
 
 # Auto-import matplotlib hook to enable inline plotting
