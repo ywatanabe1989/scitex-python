@@ -11,8 +11,13 @@ from pathlib import Path
 import click
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
-def stats():
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    invoke_without_command=True,
+)
+@click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
+@click.pass_context
+def stats(ctx, help_recursive):
     """
     Statistical analysis and testing utilities
 
@@ -29,20 +34,22 @@ def stats():
       scitex stats describe data.csv
       scitex stats save results.json --output analysis.stats
     """
-    pass
+    if help_recursive:
+        _print_help_recursive(ctx)
+        ctx.exit(0)
+    elif ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
-@stats.command("help-recursive")
-@click.pass_context
-def help_recursive(ctx):
-    """Show help for all commands recursively."""
+def _print_help_recursive(ctx):
+    """Print help for all commands recursively."""
     fake_parent = click.Context(click.Group(), info_name="scitex")
     parent_ctx = click.Context(stats, info_name="stats", parent=fake_parent)
     click.secho("━━━ scitex stats ━━━", fg="cyan", bold=True)
     click.echo(stats.get_help(parent_ctx))
     for name in sorted(stats.list_commands(ctx) or []):
         cmd = stats.get_command(ctx, name)
-        if cmd is None or name == "help-recursive":
+        if cmd is None:
             continue
         click.echo()
         click.secho(f"━━━ scitex stats {name} ━━━", fg="cyan", bold=True)

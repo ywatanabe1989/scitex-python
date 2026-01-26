@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-06-13 22:55:11 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/str/__init__.py
 # ----------------------------------------
@@ -62,6 +61,7 @@ from ._remove_ansi import remove_ansi
 from ._replace import replace
 from ._search import search
 from ._squeeze_space import squeeze_spaces
+from ._title_case import title_case
 
 __all__ = [
     "LaTeXFallbackError",
@@ -106,6 +106,7 @@ __all__ = [
     "smart_tick_formatter",
     "squeeze_spaces",
     "title",
+    "title_case",
     "to_latex_style",
 ]
 

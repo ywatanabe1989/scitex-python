@@ -37,6 +37,13 @@ scitex completion install  # Enable tab completion
 ## Examples
 
 ```bash
+# Code templates
+scitex template get session              # @stx.session script template
+scitex template get io                   # stx.io save/load patterns
+scitex template get plt                  # stx.plt plotting usage
+scitex template get all                  # All templates combined
+scitex template get session -o script.py # Save to file
+
 # Research workflow
 scitex scholar fetch "10.1038/nature12373"
 scitex scholar fetch --from-bibtex refs.bib --project myresearch

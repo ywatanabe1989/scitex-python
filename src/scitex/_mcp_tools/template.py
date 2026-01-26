@@ -62,5 +62,29 @@ def register_template_tools(mcp) -> None:
         result = await list_git_strategies_handler()
         return _json(result)
 
+    @mcp.tool()
+    async def template_get_code_template(
+        template_id: str,
+        filepath: Optional[str] = None,
+        docstring: Optional[str] = None,
+    ) -> str:
+        """[template] Get a code template for scripts and modules. Core: session, io, config. Module usage: plt, stats, scholar, audio, capture, diagram, canvas, writer. Use 'all' for all templates combined."""
+        from scitex.template._mcp.handlers import get_code_template_handler
+
+        result = await get_code_template_handler(
+            template_id=template_id,
+            filepath=filepath,
+            docstring=docstring,
+        )
+        return _json(result)
+
+    @mcp.tool()
+    async def template_list_code_templates() -> str:
+        """[template] List all available code templates for scripts and modules."""
+        from scitex.template._mcp.handlers import list_code_templates_handler
+
+        result = await list_code_templates_handler()
+        return _json(result)
+
 
 # EOF

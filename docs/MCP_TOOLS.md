@@ -1,4 +1,4 @@
-# SciTeX MCP Tools (110 total)
+# SciTeX MCP Tools (112 total)
 
 Model Context Protocol tools for AI agent integration.
 
@@ -50,17 +50,18 @@ scitex serve -t http --port 8085  # HTTP transport
 |  | `diagram_get_preset` | Get preset config |
 |  | `diagram_list_presets` | List diagram presets |
 |  | `diagram_split_diagram` | Split large diagrams |
-| **introspect** (11) | `introspect_call_graph` | Get call graph |
-|  | `introspect_class_hierarchy` | Get class MRO |
-|  | `introspect_dependencies` | Get dependencies |
+| **introspect** (12) | `introspect_q` | Get function signature (like func?) |
+|  | `introspect_qq` | Get source code (like func??) |
+|  | `introspect_dir` | List module members (like dir()) |
+|  | `introspect_api` | List full API tree |
 |  | `introspect_docstring` | Get docstring |
-|  | `introspect_examples` | Find usage examples |
 |  | `introspect_exports` | Get __all__ exports |
-|  | `introspect_imports` | Get module imports |
-|  | `introspect_members` | List module members |
-|  | `introspect_signature` | Get function signature |
-|  | `introspect_source` | Get source code |
+|  | `introspect_examples` | Find usage examples |
+|  | `introspect_class_hierarchy` | Get class MRO |
 |  | `introspect_type_hints` | Get type hints |
+|  | `introspect_imports` | Get module imports |
+|  | `introspect_dependencies` | Get dependencies |
+|  | `introspect_call_graph` | Get call graph |
 | **plt** (9) | `plt_compose` | Compose multi-panel figure |
 |  | `plt_crop` | Crop whitespace |
 |  | `plt_extract_data` | Extract plotted data |
@@ -112,8 +113,10 @@ scitex serve -t http --port 8085  # HTTP transport
 |  | `stats_power_analysis` | Power/sample size calc |
 |  | `stats_recommend_tests` | Recommend statistical tests |
 |  | `stats_run_test` | Execute statistical test |
-| **template** (4) | `template_clone_template` | Clone template |
+| **template** (6) | `template_clone_template` | Clone template |
+|  | `template_get_code_template` | Get code template (session, io, plt, stats, etc.) |
 |  | `template_get_template_info` | Get template info |
+|  | `template_list_code_templates` | List code templates |
 |  | `template_list_git_strategies` | List git strategies |
 |  | `template_list_templates` | List project templates |
 | **ui** (5) | `ui_available_notification_backends` | Available backends |

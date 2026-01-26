@@ -160,6 +160,24 @@ Turn AI agents into autonomous scientific researchers.
 
 </details>
 
+## 🧩 Standalone Packages
+
+SciTeX integrates several standalone packages that can be used independently:
+
+| Package | scitex Module | Description |
+|---------|--------------|-------------|
+| [figrecipe](https://github.com/ywatanabe1989/figrecipe) | `scitex.plt` | Publication-ready matplotlib figures |
+| [crossref-local](https://github.com/ywatanabe1989/crossref-local) | `scitex.scholar.crossref_scitex` | Local CrossRef database (167M+ papers) |
+| [socialia](https://github.com/ywatanabe1989/socialia) | `scitex.social` | Social media posting (Twitter, LinkedIn) |
+| [scitex-writer](https://github.com/ywatanabe1989/scitex-writer) | `scitex.writer` | LaTeX manuscript compilation |
+
+Each package works standalone or as part of scitex:
+
+```bash
+pip install figrecipe        # Use independently
+pip install scitex[plt]      # Or via scitex
+```
+
 ## 📖 Documentation
 
 - **[Read the Docs](https://scitex.readthedocs.io/)**: Complete API reference

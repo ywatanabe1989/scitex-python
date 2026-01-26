@@ -17,6 +17,7 @@ from . import (
     convert,
     introspect,
     mcp,
+    plt,
     repro,
     resource,
     scholar,
@@ -71,6 +72,7 @@ cli.add_command(config.config)
 cli.add_command(convert.convert)
 cli.add_command(introspect.introspect)
 cli.add_command(mcp.mcp)
+cli.add_command(plt.plt)
 cli.add_command(repro.repro)
 cli.add_command(resource.resource)
 cli.add_command(scholar.scholar)

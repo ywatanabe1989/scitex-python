@@ -1,23 +1,34 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/template/__init__.py
 
 """
 Template management for SciTeX projects.
 """
 
-from .clone_research import clone_research, TEMPLATE_REPO_URL as RESEARCH_URL
-from .clone_pip_project import clone_pip_project, TEMPLATE_REPO_URL as PIP_PROJECT_URL
-from .clone_singularity import clone_singularity, TEMPLATE_REPO_URL as SINGULARITY_URL
+from scitex.git import (
+    create_child_git,
+    find_parent_git,
+    init_git_repo,
+    remove_child_git,
+)
+
+from ._code_templates import (
+    CODE_TEMPLATES,
+    get_all_templates,
+    get_code_template,
+    list_code_templates,
+)
+from .clone_pip_project import TEMPLATE_REPO_URL as PIP_PROJECT_URL
+from .clone_pip_project import clone_pip_project
+from .clone_research import TEMPLATE_REPO_URL as RESEARCH_URL
+from .clone_research import clone_research
+from .clone_singularity import TEMPLATE_REPO_URL as SINGULARITY_URL
+from .clone_singularity import clone_singularity
 from .clone_writer_directory import (
-    clone_writer_directory,
     TEMPLATE_REPO_URL as PAPER_DIRECTORY_URL,
 )
-from scitex.git import (
-    init_git_repo,
-    find_parent_git,
-    create_child_git,
-    remove_child_git,
+from .clone_writer_directory import (
+    clone_writer_directory,
 )
 
 
@@ -106,6 +117,10 @@ __all__ = [
     "clone_singularity",
     "clone_writer_directory",
     "get_available_templates_info",
+    "get_code_template",
+    "list_code_templates",
+    "get_all_templates",
+    "CODE_TEMPLATES",
     "init_git_repo",
     "find_parent_git",
     "create_child_git",

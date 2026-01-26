@@ -5,6 +5,39 @@ All notable changes to SciTeX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Module Refactoring**: Cleaned up root-level namespace, moved items to appropriate modules
+  - `INJECTED` sentinel → `scitex.session.INJECTED` (backward-compatible with deprecation warning)
+  - `show_install_guide()` → `scitex.dev.show_install_guide()` (backward-compatible with deprecation warning)
+  - `Diagram` class → `scitex.diagram.Diagram` (backward-compatible with deprecation warning)
+  - `ci()` (confidence interval) → `scitex.stats.descriptive.ci` (also available via `stx.gen.ci`)
+
+### Added
+- **New Lazy Modules**: Added missing modules to root namespace
+  - `introspect`, `sh`, `os`, `cv`, `ui`, `git`, `schema`, `canvas`, `security`, `benchmark`, `bridge`, `browser`, `compat`, `cli`
+
+### Migration Map
+
+| Before (Deprecated)          | After (Recommended)              |
+|------------------------------|----------------------------------|
+| `stx.INJECTED`               | `stx.session.INJECTED`           |
+| `stx.show_install_guide()`   | `stx.dev.show_install_guide()`   |
+| `stx.Diagram`                | `stx.diagram.Diagram`            |
+| `stx.gen.ci()`               | `stx.stats.descriptive.ci()`     |
+| `stx.gen.inspect_module()`   | `stx.introspect.inspect_module()`|
+| `stx.gen.check_host()`       | `stx.os.check_host()`            |
+| `stx.gen.is_host()`          | `stx.os.is_host()`               |
+| `stx.gen.verify_host()`      | `stx.os.verify_host()`           |
+| `stx.gen.detect_environment()`| `stx.context.detect_environment()`|
+| `stx.gen.is_notebook()`      | `stx.context.is_notebook()`      |
+| `stx.gen.is_script()`        | `stx.context.is_script()`        |
+| `stx.gen.get_notebook_path()`| `stx.context.get_notebook_path()`|
+| `stx.gen.run_shellcommand()` | `stx.sh.run_shellcommand()`      |
+| `stx.gen.run_shellscript()`  | `stx.sh.run_shellscript()`       |
+| `stx.gen.title_case()`       | `stx.str.title_case()`           |
+
 ## [2.14.0] - 2026-01-15
 
 ### Added

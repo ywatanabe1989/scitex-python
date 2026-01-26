@@ -201,6 +201,85 @@ async def clone_template_handler(
         }
 
 
+async def get_code_template_handler(
+    template_id: str,
+    filepath: Optional[str] = None,
+    docstring: Optional[str] = None,
+) -> dict:
+    """
+    Get a code template by ID.
+
+    Parameters
+    ----------
+    template_id : str
+        Template identifier (session, io, config, session-minimal, session-plot, session-stats, module, all)
+    filepath : str, optional
+        File path to include in template header
+    docstring : str, optional
+        Custom docstring for the template
+
+    Returns
+    -------
+    dict
+        Success status and template content
+    """
+    try:
+        if template_id == "all":
+            from scitex.template import get_all_templates
+
+            content = get_all_templates()
+        else:
+            from scitex.template import get_code_template
+
+            content = get_code_template(
+                template_id=template_id,
+                filepath=filepath,
+                docstring=docstring,
+            )
+
+        return {
+            "success": True,
+            "template_id": template_id,
+            "content": content,
+        }
+    except ValueError as e:
+        return {
+            "success": False,
+            "error": str(e),
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+        }
+
+
+async def list_code_templates_handler() -> dict:
+    """
+    List all available code templates.
+
+    Returns
+    -------
+    dict
+        Success status and list of code templates
+    """
+    try:
+        from scitex.template import list_code_templates
+
+        templates = list_code_templates()
+
+        return {
+            "success": True,
+            "count": len(templates),
+            "templates": templates,
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+        }
+
+
 async def list_git_strategies_handler() -> dict:
     """
     List available git initialization strategies.
@@ -254,6 +333,8 @@ __all__ = [
     "get_template_info_handler",
     "clone_template_handler",
     "list_git_strategies_handler",
+    "get_code_template_handler",
+    "list_code_templates_handler",
 ]
 
 # EOF

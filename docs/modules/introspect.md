@@ -6,11 +6,12 @@ IPython-like introspection for any Python package. Helps AI agents and developer
 
 The introspect module provides tools similar to IPython's `?` and `??` operators:
 
-| IPython | scitex.introspect |
-|---------|-------------------|
-| `func?` | `get_signature()` |
-| `func??` | `get_source()` |
-| `dir(module)` | `list_members()` |
+| IPython | scitex.introspect | CLI |
+|---------|-------------------|-----|
+| `func?` | `q()` | `scitex introspect q` |
+| `func??` | `qq()` | `scitex introspect qq` |
+| `dir(module)` | `dir()` | `scitex introspect dir` |
+| (recursive) | `list_api()` | `scitex introspect api` |
 
 ## Installation
 
@@ -20,16 +21,16 @@ Included with scitex. No additional dependencies required.
 pip install scitex
 ```
 
-## Basic Functions
+## Core Functions (IPython-style)
 
-### get_signature
+### q (signature)
 
-Get function/class signature with parameters.
+Get function/class signature with parameters (like IPython's `func?`).
 
 ```python
-from scitex.introspect import get_signature
+from scitex.introspect import q
 
-result = get_signature("json.dumps")
+result = q("json.dumps")
 # Returns: {
 #   "success": True,
 #   "name": "dumps",
@@ -42,6 +43,53 @@ result = get_signature("json.dumps")
 - `include_defaults=True` - Include default values
 - `include_annotations=True` - Include type annotations
 
+### qq (source)
+
+Get source code with optional line limit (like IPython's `func??`).
+
+```python
+from scitex.introspect import qq
+
+result = qq("json.dumps", max_lines=20)
+# Returns: {"success": True, "source": "def dumps(...)...", "file": "...", "line_start": 123}
+```
+
+**Options:**
+- `max_lines=None` - Limit output lines
+- `include_decorators=True` - Include decorator lines
+
+### dir (members)
+
+List module/class members (like Python's `dir()`).
+
+```python
+from scitex.introspect import dir
+
+result = dir("json", filter="public", kind="functions")
+# Returns: {"success": True, "members": [{"name": "dumps", "kind": "function", "summary": "..."}]}
+```
+
+**Filters:** `all`, `public`, `private`, `dunder`
+**Kinds:** `all`, `functions`, `classes`, `data`, `modules`
+
+### list_api (full API tree)
+
+List the full API tree of a module recursively.
+
+```python
+from scitex.introspect import list_api
+
+df = list_api("json", max_depth=2)
+# Returns DataFrame with Type, Name, Docstring, Depth columns
+```
+
+**Options:**
+- `max_depth=5` - Maximum recursion depth
+- `docstring=False` - Include docstrings
+- `root_only=False` - Show only root-level items
+
+## Other Basic Functions
+
 ### get_docstring
 
 Get docstring in raw, parsed, or summary format.
@@ -53,39 +101,7 @@ result = get_docstring("json.dumps", format="summary")
 # Returns: {"success": True, "docstring": "Serialize obj to JSON..."}
 ```
 
-**Formats:**
-- `raw` - Full docstring as-is
-- `summary` - First line only
-- `parsed` - Parsed into sections (parameters, returns, etc.)
-
-### get_source
-
-Get source code with optional line limit.
-
-```python
-from scitex.introspect import get_source
-
-result = get_source("json.dumps", max_lines=20)
-# Returns: {"success": True, "source": "def dumps(...)...", "file": "...", "line_start": 123}
-```
-
-**Options:**
-- `max_lines=None` - Limit output lines
-- `include_decorators=True` - Include decorator lines
-
-### list_members
-
-List module/class members (like dir()).
-
-```python
-from scitex.introspect import list_members
-
-result = list_members("json", filter="public", kind="functions")
-# Returns: {"success": True, "members": [{"name": "dumps", "kind": "function", "summary": "..."}]}
-```
-
-**Filters:** `all`, `public`, `private`, `dunder`
-**Kinds:** `all`, `functions`, `classes`, `data`, `modules`
+**Formats:** `raw`, `summary`, `parsed`
 
 ### get_exports
 
@@ -171,14 +187,16 @@ result = get_call_graph("scitex.introspect._resolve", timeout_seconds=10)
 All functions are available via CLI:
 
 ```bash
-# Basic introspection
-scitex introspect signature json.dumps
-scitex introspect docstring json.dumps --format parsed
-scitex introspect source scitex.plt.plot --max-lines 50
+# IPython-style commands
+scitex introspect q json.dumps                    # signature
+scitex introspect qq scitex.plt.plot --max-lines 50  # source
+scitex introspect dir json --kind functions       # members
+scitex introspect api scitex --max-depth 2        # full API tree
 
-# Module exploration
-scitex introspect members json --kind functions
+# Other basic commands
+scitex introspect docstring json.dumps --format parsed
 scitex introspect exports json
+scitex introspect examples scitex.plt.plot
 
 # Advanced
 scitex introspect hierarchy collections.abc.Mapping
@@ -194,24 +212,27 @@ Add `--json` to any command for JSON output.
 
 When used via MCP, tools are prefixed with `introspect_`:
 
-- `introspect_signature` - Get function/class signature
-- `introspect_docstring` - Get docstring
-- `introspect_source` - Get source code
-- `introspect_members` - List module/class members
-- `introspect_exports` - Get __all__ exports
-- `introspect_examples` - Find usage examples
-- `introspect_hierarchy` - Get class hierarchy
-- `introspect_hints` - Get type hints
-- `introspect_imports` - Get module imports
-- `introspect_deps` - Get dependencies
-- `introspect_calls` - Get call graph
+| Python | MCP Tool | Description |
+|--------|----------|-------------|
+| `q()` | `introspect_q` | Get signature (like func?) |
+| `qq()` | `introspect_qq` | Get source (like func??) |
+| `dir()` | `introspect_dir` | List members (like dir()) |
+| `list_api()` | `introspect_api` | Full API tree |
+| `get_docstring()` | `introspect_docstring` | Get docstring |
+| `get_exports()` | `introspect_exports` | Get __all__ exports |
+| `find_examples()` | `introspect_examples` | Find usage examples |
+| `get_class_hierarchy()` | `introspect_class_hierarchy` | Get class hierarchy |
+| `get_type_hints_detailed()` | `introspect_type_hints` | Get type hints |
+| `get_imports()` | `introspect_imports` | Get module imports |
+| `get_dependencies()` | `introspect_dependencies` | Get dependencies |
+| `get_call_graph()` | `introspect_call_graph` | Get call graph |
 
 ## Error Handling
 
 All functions return a dict with `success` field:
 
 ```python
-result = get_signature("nonexistent.module")
+result = q("nonexistent.module")
 if not result["success"]:
     print(f"Error: {result['error']}")
 ```

@@ -106,7 +106,7 @@ result = stx.stats.test_anova(*groups, return_as="latex")
 - [scholar] search_papers, enrich_bibtex, download_pdf, fetch_papers
 - [diagram] create_diagram, compile_mermaid, compile_graphviz
 - [canvas] create_canvas, add_panel, export_canvas
-- [template] list_templates, clone_template
+- [template] list_templates, clone_template, get_code_template, list_code_templates
 - [ui] notify, list_notification_backends
 - [writer] usage (LaTeX manuscript compilation)
 - [introspect] signature, docstring, source, members (like IPython's ? and ??)

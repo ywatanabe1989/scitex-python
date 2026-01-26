@@ -9,16 +9,16 @@ from __future__ import annotations
 from typing import Literal
 
 
-async def signature_handler(
+async def q_handler(
     dotted_path: str,
     include_defaults: bool = True,
     include_annotations: bool = True,
 ) -> dict:
-    """Get the signature of a function, method, or class."""
+    """Get the signature of a function, method, or class (like IPython's func?)."""
     try:
-        from .. import get_signature
+        from .. import q
 
-        result = get_signature(
+        result = q(
             dotted_path,
             include_defaults=include_defaults,
             include_annotations=include_annotations,
@@ -42,16 +42,16 @@ async def docstring_handler(
         return {"success": False, "error": str(e)}
 
 
-async def source_handler(
+async def qq_handler(
     dotted_path: str,
     max_lines: int | None = None,
     include_decorators: bool = True,
 ) -> dict:
-    """Get the source code of a Python object."""
+    """Get the source code of a Python object (like IPython's func??)."""
     try:
-        from .. import get_source
+        from .. import qq
 
-        result = get_source(
+        result = qq(
             dotted_path,
             max_lines=max_lines,
             include_decorators=include_decorators,
@@ -61,17 +61,17 @@ async def source_handler(
         return {"success": False, "error": str(e)}
 
 
-async def members_handler(
+async def dir_handler(
     dotted_path: str,
     filter: Literal["all", "public", "private", "dunder"] = "public",
     kind: Literal["all", "functions", "classes", "data", "modules"] | None = None,
     include_inherited: bool = False,
 ) -> dict:
-    """List members of a module or class."""
+    """List members of a module or class (like dir())."""
     try:
-        from .. import list_members
+        from .. import dir
 
-        result = list_members(
+        result = dir(
             dotted_path,
             filter=filter,
             kind=kind,
@@ -204,5 +204,30 @@ async def call_graph_handler(
             internal_only=internal_only,
         )
         return result
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+async def list_api_handler(
+    dotted_path: str,
+    max_depth: int = 5,
+    docstring: bool = False,
+    root_only: bool = False,
+) -> dict:
+    """List the API tree of a module recursively."""
+    try:
+        from .. import list_api
+
+        df = list_api(
+            dotted_path,
+            max_depth=max_depth,
+            docstring=docstring,
+            root_only=root_only,
+        )
+        return {
+            "success": True,
+            "api": df.to_dict(orient="records"),
+            "count": len(df),
+        }
     except Exception as e:
         return {"success": False, "error": str(e)}

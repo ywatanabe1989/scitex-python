@@ -11,7 +11,7 @@ import inspect
 from ._resolve import get_type_info, resolve_object
 
 
-def get_source(
+def qq(
     dotted_path: str,
     max_lines: int | None = None,
     include_decorators: bool = True,
@@ -19,7 +19,7 @@ def get_source(
     """
     Get the source code of a Python object.
 
-    Like IPython's `func??`.
+    Like IPython's `func??` (full source).
 
     Parameters
     ----------

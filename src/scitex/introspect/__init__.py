@@ -7,11 +7,14 @@ Introspection utilities for Python packages.
 
 Provides IPython-like introspection capabilities for any Python package.
 
+IPython-style shortcuts:
+- q: Function/class signature with type hints (like `func?`)
+- qq: Full source code (like `func??`)
+- dir: List attributes/methods (like `dir()`)
+- list_api: Recursive module API tree
+
 Basic Introspection:
-- get_signature: Function/class signature with type hints (like `func?`)
 - get_docstring: Docstring extraction with parsing
-- get_source: Full source code (like `func??`)
-- list_members: List attributes/methods (like `dir()`)
 - get_exports: Module's __all__ contents
 - find_examples: Find usage examples in tests/examples
 
@@ -27,6 +30,8 @@ Advanced Introspection:
 """
 
 from ._core import (
+    # IPython-style names
+    dir,
     # Basic
     find_examples,
     # Advanced - Call graph
@@ -42,20 +47,22 @@ from ._core import (
     get_function_calls,
     get_imports,
     get_mro,
-    get_signature,
-    get_source,
     get_type_hints_detailed,
     get_type_info,
-    list_members,
+    q,
+    qq,
     resolve_object,
 )
+from ._list_api import list_api
 
 __all__ = [
+    # IPython-style names
+    "q",
+    "qq",
+    "dir",
+    "list_api",
     # Basic
-    "get_signature",
     "get_docstring",
-    "get_source",
-    "list_members",
     "get_exports",
     "find_examples",
     "resolve_object",

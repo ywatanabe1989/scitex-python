@@ -79,6 +79,95 @@ class TestListGitStrategiesHandler:
             assert "strategies" in result
 
 
+class TestGetCodeTemplateHandler:
+    """Tests for get_code_template_handler."""
+
+    @pytest.mark.asyncio
+    async def test_get_code_template_session(self):
+        """Test getting session code template."""
+        from scitex.template._mcp.handlers import get_code_template_handler
+
+        result = await get_code_template_handler("session")
+        assert isinstance(result, dict)
+        assert result.get("success") is True
+        assert "content" in result
+
+    @pytest.mark.asyncio
+    async def test_get_code_template_all(self):
+        """Test getting all code templates combined."""
+        from scitex.template._mcp.handlers import get_code_template_handler
+
+        result = await get_code_template_handler("all")
+        assert isinstance(result, dict)
+        assert result.get("success") is True
+        assert "content" in result
+
+    @pytest.mark.asyncio
+    async def test_get_code_template_invalid(self):
+        """Test getting invalid code template."""
+        from scitex.template._mcp.handlers import get_code_template_handler
+
+        result = await get_code_template_handler("nonexistent")
+        assert isinstance(result, dict)
+        assert result.get("success") is False
+        assert "error" in result
+
+    @pytest.mark.asyncio
+    async def test_get_code_template_with_filepath(self):
+        """Test getting code template with custom filepath."""
+        from scitex.template._mcp.handlers import get_code_template_handler
+
+        result = await get_code_template_handler("session", filepath="custom_script.py")
+        assert isinstance(result, dict)
+        assert result.get("success") is True
+        assert "custom_script.py" in result.get("content", "")
+
+    @pytest.mark.asyncio
+    async def test_get_code_template_module_usage(self):
+        """Test getting module usage templates."""
+        from scitex.template._mcp.handlers import get_code_template_handler
+
+        for template_id in [
+            "plt",
+            "stats",
+            "scholar",
+            "audio",
+            "capture",
+            "diagram",
+            "canvas",
+            "writer",
+        ]:
+            result = await get_code_template_handler(template_id)
+            assert result.get("success") is True, f"Failed for template: {template_id}"
+            assert "content" in result
+
+
+class TestListCodeTemplatesHandler:
+    """Tests for list_code_templates_handler."""
+
+    @pytest.mark.asyncio
+    async def test_list_code_templates(self):
+        """Test listing code templates."""
+        from scitex.template._mcp.handlers import list_code_templates_handler
+
+        result = await list_code_templates_handler()
+        assert isinstance(result, dict)
+        assert result.get("success") is True
+        assert "templates" in result
+
+    @pytest.mark.asyncio
+    async def test_list_code_templates_contains_expected(self):
+        """Test that list contains expected templates."""
+        from scitex.template._mcp.handlers import list_code_templates_handler
+
+        result = await list_code_templates_handler()
+        if result.get("success"):
+            template_ids = [t["id"] for t in result["templates"]]
+            expected = ["session", "io", "config", "plt", "stats", "scholar"]
+            for tid in expected:
+                assert tid in template_ids, f"Template '{tid}' not in list"
+
+
 if __name__ == "__main__":
     import os
 
