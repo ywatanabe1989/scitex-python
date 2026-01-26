@@ -23,20 +23,20 @@ def introspect(ctx, help_recursive):
 
     \b
     IPython-like introspection for any Python package:
-      signature  - Function/class signature (like func?)
-      docstring  - Extract docstrings
-      source     - Full source code (like func??)
-      members    - List module/class members (like dir())
-      exports    - Show __all__ exports
-      examples   - Find usage examples
+      q         - Function/class signature (like func?)
+      qq        - Full source code (like func??)
+      dir       - List module/class members (like dir())
+      api       - Full module API tree
+      docstring - Extract docstrings
+      exports   - Show __all__ exports
+      examples  - Find usage examples
 
     \b
     Examples:
-      scitex introspect signature scitex.plt.plot
-      scitex introspect docstring scitex.audio.speak --format parsed
-      scitex introspect source scitex.stats.run_test --max-lines 50
-      scitex introspect members scitex.plt --kind functions
-      scitex introspect exports scitex.audio
+      scitex introspect q scitex.plt.plot
+      scitex introspect qq scitex.stats.run_test --max-lines 50
+      scitex introspect dir scitex.plt --kind functions
+      scitex introspect api scitex --max-depth 2
     """
     if help_recursive:
         from . import print_help_recursive
@@ -52,19 +52,19 @@ def introspect(ctx, help_recursive):
 @click.option("--no-defaults", is_flag=True, help="Exclude default values")
 @click.option("--no-annotations", is_flag=True, help="Exclude type annotations")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
-def signature(dotted_path, no_defaults, no_annotations, as_json):
+def q(dotted_path, no_defaults, no_annotations, as_json):
     """
     Get function/class signature (like IPython's func?)
 
     \b
     Examples:
-      scitex introspect signature scitex.plt.plot
-      scitex introspect signature scitex.audio.speak --json
-      scitex introspect signature json.dumps
+      scitex introspect q scitex.plt.plot
+      scitex introspect q scitex.audio.speak --json
+      scitex introspect q json.dumps
     """
-    from scitex.introspect import get_signature
+    from scitex.introspect import q as get_q
 
-    result = get_signature(
+    result = get_q(
         dotted_path,
         include_defaults=not no_defaults,
         include_annotations=not no_annotations,
@@ -87,6 +87,130 @@ def signature(dotted_path, no_defaults, no_annotations, as_json):
                 if "default" in p:
                     line += f" = {p['default']}"
                 click.echo(line)
+
+
+@introspect.command()
+@click.argument("dotted_path")
+@click.option("--max-lines", "-n", type=int, help="Limit output to N lines")
+@click.option("--no-decorators", is_flag=True, help="Exclude decorator lines")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def qq(dotted_path, max_lines, no_decorators, as_json):
+    """
+    Get source code of a Python object (like IPython's func??)
+
+    \b
+    Examples:
+      scitex introspect qq scitex.plt.plot
+      scitex introspect qq scitex.audio.speak --max-lines 50
+    """
+    from scitex.introspect import qq as get_qq
+
+    result = get_qq(
+        dotted_path,
+        max_lines=max_lines,
+        include_decorators=not no_decorators,
+    )
+
+    if not result.get("success", False):
+        click.secho(f"Error: {result.get('error', 'Unknown error')}", fg="red")
+        sys.exit(1)
+
+    if as_json:
+        click.echo(json.dumps(result, indent=2))
+    else:
+        click.secho(f"# File: {result['file']}:{result['line_start']}", fg="cyan")
+        click.secho(f"# Lines: {result['line_count']}", fg="cyan")
+        click.echo()
+        click.echo(result["source"])
+
+
+@introspect.command("dir")
+@click.argument("dotted_path")
+@click.option(
+    "--filter",
+    "-f",
+    type=click.Choice(["all", "public", "private", "dunder"]),
+    default="public",
+    help="Filter members",
+)
+@click.option(
+    "--kind",
+    "-k",
+    type=click.Choice(["all", "functions", "classes", "data", "modules"]),
+    help="Filter by type",
+)
+@click.option("--inherited", is_flag=True, help="Include inherited members (classes)")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def dir_cmd(dotted_path, filter, kind, inherited, as_json):
+    """
+    List members of a module or class (like dir())
+
+    \b
+    Examples:
+      scitex introspect dir scitex.plt
+      scitex introspect dir scitex.audio --kind functions
+      scitex introspect dir scitex.plt.AxisWrapper --filter all
+    """
+    from scitex.introspect import dir as get_dir
+
+    result = get_dir(
+        dotted_path,
+        filter=filter,
+        kind=kind,
+        include_inherited=inherited,
+    )
+
+    if not result.get("success", False):
+        click.secho(f"Error: {result.get('error', 'Unknown error')}", fg="red")
+        sys.exit(1)
+
+    if as_json:
+        click.echo(json.dumps(result, indent=2))
+    else:
+        click.secho(f"Members of {dotted_path} ({result['count']}):", fg="cyan")
+        for m in result["members"]:
+            kind_str = click.style(f"[{m['kind']}]", fg="yellow")
+            name_str = click.style(m["name"], fg="green", bold=True)
+            summary = f" - {m['summary']}" if m["summary"] else ""
+            click.echo(f"  {kind_str} {name_str}{summary}")
+
+
+@introspect.command()
+@click.argument("dotted_path")
+@click.option("--max-depth", "-d", type=int, default=5, help="Max recursion depth")
+@click.option("--docstring", is_flag=True, help="Include docstrings")
+@click.option("--root-only", is_flag=True, help="Show only root-level items")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def api(dotted_path, max_depth, docstring, root_only, as_json):
+    """
+    List the full API tree of a module recursively
+
+    \b
+    Examples:
+      scitex introspect api scitex --max-depth 2
+      scitex introspect api scitex.plt --docstring
+      scitex introspect api scitex.audio --root-only
+    """
+    from scitex.introspect import list_api
+
+    df = list_api(
+        dotted_path,
+        max_depth=max_depth,
+        docstring=docstring,
+        root_only=root_only,
+    )
+
+    if as_json:
+        click.echo(json.dumps(df.to_dict(orient="records"), indent=2))
+    else:
+        click.secho(f"API tree of {dotted_path} ({len(df)} items):", fg="cyan")
+        for _, row in df.iterrows():
+            indent = "  " * row["Depth"]
+            type_str = click.style(f"[{row['Type']}]", fg="yellow")
+            name = row["Name"].split(".")[-1]
+            name_str = click.style(name, fg="green", bold=True)
+            doc = f" - {row['Docstring'][:50]}..." if row.get("Docstring") else ""
+            click.echo(f"{indent}{type_str} {name_str}{doc}")
 
 
 @introspect.command()
@@ -132,92 +256,6 @@ def docstring(dotted_path, format, as_json):
                 if value:
                     click.secho(f"\n[{key}]", fg="cyan", bold=True)
                     click.echo(value)
-
-
-@introspect.command()
-@click.argument("dotted_path")
-@click.option("--max-lines", "-n", type=int, help="Limit output to N lines")
-@click.option("--no-decorators", is_flag=True, help="Exclude decorator lines")
-@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
-def source(dotted_path, max_lines, no_decorators, as_json):
-    """
-    Get source code of a Python object (like IPython's func??)
-
-    \b
-    Examples:
-      scitex introspect source scitex.plt.plot
-      scitex introspect source scitex.audio.speak --max-lines 50
-    """
-    from scitex.introspect import get_source
-
-    result = get_source(
-        dotted_path,
-        max_lines=max_lines,
-        include_decorators=not no_decorators,
-    )
-
-    if not result.get("success", False):
-        click.secho(f"Error: {result.get('error', 'Unknown error')}", fg="red")
-        sys.exit(1)
-
-    if as_json:
-        click.echo(json.dumps(result, indent=2))
-    else:
-        click.secho(f"# File: {result['file']}:{result['line_start']}", fg="cyan")
-        click.secho(f"# Lines: {result['line_count']}", fg="cyan")
-        click.echo()
-        click.echo(result["source"])
-
-
-@introspect.command()
-@click.argument("dotted_path")
-@click.option(
-    "--filter",
-    "-f",
-    type=click.Choice(["all", "public", "private", "dunder"]),
-    default="public",
-    help="Filter members",
-)
-@click.option(
-    "--kind",
-    "-k",
-    type=click.Choice(["all", "functions", "classes", "data", "modules"]),
-    help="Filter by type",
-)
-@click.option("--inherited", is_flag=True, help="Include inherited members (classes)")
-@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
-def members(dotted_path, filter, kind, inherited, as_json):
-    """
-    List members of a module or class (like dir())
-
-    \b
-    Examples:
-      scitex introspect members scitex.plt
-      scitex introspect members scitex.audio --kind functions
-      scitex introspect members scitex.plt.AxisWrapper --filter all
-    """
-    from scitex.introspect import list_members
-
-    result = list_members(
-        dotted_path,
-        filter=filter,
-        kind=kind,
-        include_inherited=inherited,
-    )
-
-    if not result.get("success", False):
-        click.secho(f"Error: {result.get('error', 'Unknown error')}", fg="red")
-        sys.exit(1)
-
-    if as_json:
-        click.echo(json.dumps(result, indent=2))
-    else:
-        click.secho(f"Members of {dotted_path} ({result['count']}):", fg="cyan")
-        for m in result["members"]:
-            kind_str = click.style(f"[{m['kind']}]", fg="yellow")
-            name_str = click.style(m["name"], fg="green", bold=True)
-            summary = f" - {m['summary']}" if m["summary"] else ""
-            click.echo(f"  {kind_str} {name_str}{summary}")
 
 
 @introspect.command()

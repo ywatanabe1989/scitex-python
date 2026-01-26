@@ -7,58 +7,58 @@
 import pytest
 
 
-class TestGetSignature:
-    """Tests for get_signature function."""
+class TestQ:
+    """Tests for q function."""
 
-    def test_get_signature_success(self):
+    def test_q_success(self):
         """Test getting signature successfully."""
-        from scitex.introspect import get_signature
+        from scitex.introspect import q
 
-        result = get_signature("json.dumps")
+        result = q("json.dumps")
         assert result["success"] is True
         assert result["name"] == "dumps"
         assert "signature" in result
         assert "parameters" in result
 
-    def test_get_signature_with_annotations(self):
+    def test_q_with_annotations(self):
         """Test signature includes type annotations."""
-        from scitex.introspect import get_signature
+        from scitex.introspect import q
 
-        result = get_signature("json.dumps", include_annotations=True)
+        result = q("json.dumps", include_annotations=True)
         assert result["success"] is True
         # json.dumps has annotations in newer Python
         assert "parameters" in result
 
-    def test_get_signature_without_defaults(self):
+    def test_q_without_defaults(self):
         """Test signature without default values."""
-        from scitex.introspect import get_signature
+        from scitex.introspect import q
 
-        result = get_signature("json.dumps", include_defaults=False)
+        result = q("json.dumps", include_defaults=False)
         assert result["success"] is True
         # Check no defaults in parameters
         for param in result["parameters"]:
             assert "default" not in param
 
-    def test_get_signature_class(self):
+    def test_q_class(self):
         """Test getting signature of a class (its __init__)."""
-        from scitex.introspect import get_signature
+        from scitex.introspect import q
 
-        result = get_signature("pathlib.Path")
+        result = q("pathlib.Path")
         assert result["success"] is True
         assert result["type_info"]["kind"] == "class"
 
-    def test_get_signature_invalid_path(self):
+    def test_q_invalid_path(self):
         """Test invalid path returns error."""
-        from scitex.introspect import get_signature
+        from scitex.introspect import q
 
-        result = get_signature("nonexistent.module")
+        result = q("nonexistent.module")
         assert result["success"] is False
         assert "error" in result
 
-    def test_get_signature_builtin(self):
+    def test_q_builtin(self):
         """Test signature of builtin may fail gracefully."""
-        from scitex.introspect import get_signature
+        from scitex.introspect import q
 
-        result = get_signature("len")
+        result = q("len")
         # Builtins may not have introspectable signatures
         assert "success" in result

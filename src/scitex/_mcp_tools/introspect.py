@@ -16,20 +16,73 @@ def _json(data: dict) -> str:
 
 def register_introspect_tools(mcp) -> None:
     """Register introspection tools with FastMCP server."""
+    # IPython-style tools (primary)
 
     @mcp.tool()
-    async def introspect_signature(
+    async def introspect_q(
         dotted_path: str,
         include_defaults: bool = True,
         include_annotations: bool = True,
     ) -> str:
         """[introspect] Get function/class signature (like IPython's func?)."""
-        from scitex.introspect._mcp.handlers import signature_handler
+        from scitex.introspect._mcp.handlers import q_handler
 
-        result = await signature_handler(
+        result = await q_handler(
             dotted_path=dotted_path,
             include_defaults=include_defaults,
             include_annotations=include_annotations,
+        )
+        return _json(result)
+
+    @mcp.tool()
+    async def introspect_qq(
+        dotted_path: str,
+        max_lines: Optional[int] = None,
+        include_decorators: bool = True,
+    ) -> str:
+        """[introspect] Get source code of a Python object (like IPython's func??)."""
+        from scitex.introspect._mcp.handlers import qq_handler
+
+        result = await qq_handler(
+            dotted_path=dotted_path,
+            max_lines=max_lines,
+            include_decorators=include_decorators,
+        )
+        return _json(result)
+
+    @mcp.tool()
+    async def introspect_dir(
+        dotted_path: str,
+        filter: str = "public",
+        kind: Optional[str] = None,
+        include_inherited: bool = False,
+    ) -> str:
+        """[introspect] List members of module/class (like dir()). filter: all|public|private|dunder."""
+        from scitex.introspect._mcp.handlers import dir_handler
+
+        result = await dir_handler(
+            dotted_path=dotted_path,
+            filter=filter,
+            kind=kind,
+            include_inherited=include_inherited,
+        )
+        return _json(result)
+
+    @mcp.tool()
+    async def introspect_api(
+        dotted_path: str,
+        max_depth: int = 5,
+        docstring: bool = False,
+        root_only: bool = False,
+    ) -> str:
+        """[introspect] List the API tree of a module recursively."""
+        from scitex.introspect._mcp.handlers import list_api_handler
+
+        result = await list_api_handler(
+            dotted_path=dotted_path,
+            max_depth=max_depth,
+            docstring=docstring,
+            root_only=root_only,
         )
         return _json(result)
 
@@ -44,40 +97,6 @@ def register_introspect_tools(mcp) -> None:
         result = await docstring_handler(
             dotted_path=dotted_path,
             format=format,
-        )
-        return _json(result)
-
-    @mcp.tool()
-    async def introspect_source(
-        dotted_path: str,
-        max_lines: Optional[int] = None,
-        include_decorators: bool = True,
-    ) -> str:
-        """[introspect] Get source code of a Python object (like IPython's func??)."""
-        from scitex.introspect._mcp.handlers import source_handler
-
-        result = await source_handler(
-            dotted_path=dotted_path,
-            max_lines=max_lines,
-            include_decorators=include_decorators,
-        )
-        return _json(result)
-
-    @mcp.tool()
-    async def introspect_members(
-        dotted_path: str,
-        filter: str = "public",
-        kind: Optional[str] = None,
-        include_inherited: bool = False,
-    ) -> str:
-        """[introspect] List members of module/class (like dir()). filter: all|public|private|dunder."""
-        from scitex.introspect._mcp.handlers import members_handler
-
-        result = await members_handler(
-            dotted_path=dotted_path,
-            filter=filter,
-            kind=kind,
-            include_inherited=include_inherited,
         )
         return _json(result)
 

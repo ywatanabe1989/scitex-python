@@ -9,7 +9,7 @@ Recommended imports:
 - ci -> scitex.stats.descriptive.ci
 - check_host, is_host, verify_host -> scitex.os
 - detect_environment, is_notebook, is_script -> scitex.context
-- inspect_module -> scitex.introspect
+- list_api -> scitex.introspect
 - run_shellcommand, run_shellscript -> scitex.sh
 - xml2dict, XmlDictConfig, XmlListConfig -> scitex.io
 - title_case -> scitex.str
@@ -57,8 +57,8 @@ try:
     from ._embed import embed
 except ImportError:
     embed = None
-# inspect_module moved to scitex.introspect (re-export for backward compatibility)
-from scitex.introspect import inspect_module
+# list_api moved to scitex.introspect (re-export for backward compatibility)
+from scitex.introspect import list_api
 
 from ._is_ipython import is_ipython, is_script
 from ._less import less
@@ -158,7 +158,7 @@ __all__ = [
     "dir2npy",
     "embed",
     "float_linspace",
-    "inspect_module",
+    "list_api",
     "is_host",
     "is_ipython",
     "is_script",

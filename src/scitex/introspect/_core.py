@@ -4,25 +4,24 @@
 
 """Core introspection module - re-exports all utilities."""
 
-# Basic introspection
-# Advanced introspection
 from ._call_graph import get_call_graph, get_function_calls
 from ._class_hierarchy import get_class_hierarchy, get_mro
 from ._docstring import get_docstring
 from ._examples import find_examples
 from ._imports import get_dependencies, get_imports
-from ._members import get_exports, list_members
+from ._members import dir, get_exports
 from ._resolve import get_type_info, resolve_object
-from ._signature import get_signature
-from ._source import get_source
+from ._signature import q
+from ._source import qq
 from ._type_hints import get_class_annotations, get_type_hints_detailed
 
 __all__ = [
+    # IPython-style names
+    "q",  # signature (like func?)
+    "qq",  # source (like func??)
+    "dir",  # members (like dir())
     # Basic
-    "get_signature",
     "get_docstring",
-    "get_source",
-    "list_members",
     "get_exports",
     "find_examples",
     "resolve_object",

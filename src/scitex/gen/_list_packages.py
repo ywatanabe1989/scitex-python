@@ -24,8 +24,6 @@ except ImportError:
     # Fallback for older Python versions
     from importlib_metadata import distributions
 
-from scitex.introspect import inspect_module
-
 
 def list_packages(
     max_depth: int = 1,
@@ -79,10 +77,12 @@ def list_packages(
         pkg for pkg in installed_packages if pkg not in safelist
     ]
 
+    from scitex.introspect import list_api
+
     all_dfs = []
     for package_name in installed_packages:
         try:
-            df = inspect_module(
+            df = list_api(
                 package_name,
                 docstring=False,  # Speed up by skipping docstrings
                 print_output=False,

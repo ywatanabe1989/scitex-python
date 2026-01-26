@@ -9,23 +9,27 @@ from .handlers import (
     call_graph_handler,
     class_hierarchy_handler,
     dependencies_handler,
+    # IPython-style names
+    dir_handler,
     # Basic
     docstring_handler,
     examples_handler,
     exports_handler,
     imports_handler,
-    members_handler,
-    signature_handler,
-    source_handler,
+    list_api_handler,
+    q_handler,
+    qq_handler,
     type_hints_handler,
 )
 
 __all__ = [
+    # IPython-style names
+    "q_handler",
+    "qq_handler",
+    "dir_handler",
+    "list_api_handler",
     # Basic
-    "signature_handler",
     "docstring_handler",
-    "source_handler",
-    "members_handler",
     "exports_handler",
     "examples_handler",
     # Advanced

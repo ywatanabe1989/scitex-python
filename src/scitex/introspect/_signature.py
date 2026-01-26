@@ -45,7 +45,7 @@ def _build_signature_string(
     return sig
 
 
-def get_signature(
+def q(
     dotted_path: str,
     include_defaults: bool = True,
     include_annotations: bool = True,
@@ -53,7 +53,7 @@ def get_signature(
     """
     Get the signature of a function, method, or class.
 
-    Like IPython's `func?` but returns structured data.
+    Like IPython's `func?` (quick info).
 
     Parameters
     ----------
@@ -75,7 +75,7 @@ def get_signature(
 
     Examples
     --------
-    >>> get_signature("scitex.plt.plot")
+    >>> q("scitex.plt.plot")
     {'name': 'plot', 'signature': 'plot(spec: dict, ...) -> dict', ...}
     """
     obj, error = resolve_object(dotted_path)

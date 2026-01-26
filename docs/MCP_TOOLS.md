@@ -50,17 +50,18 @@ scitex serve -t http --port 8085  # HTTP transport
 |  | `diagram_get_preset` | Get preset config |
 |  | `diagram_list_presets` | List diagram presets |
 |  | `diagram_split_diagram` | Split large diagrams |
-| **introspect** (11) | `introspect_call_graph` | Get call graph |
-|  | `introspect_class_hierarchy` | Get class MRO |
-|  | `introspect_dependencies` | Get dependencies |
+| **introspect** (12) | `introspect_q` | Get function signature (like func?) |
+|  | `introspect_qq` | Get source code (like func??) |
+|  | `introspect_dir` | List module members (like dir()) |
+|  | `introspect_api` | List full API tree |
 |  | `introspect_docstring` | Get docstring |
-|  | `introspect_examples` | Find usage examples |
 |  | `introspect_exports` | Get __all__ exports |
-|  | `introspect_imports` | Get module imports |
-|  | `introspect_members` | List module members |
-|  | `introspect_signature` | Get function signature |
-|  | `introspect_source` | Get source code |
+|  | `introspect_examples` | Find usage examples |
+|  | `introspect_class_hierarchy` | Get class MRO |
 |  | `introspect_type_hints` | Get type hints |
+|  | `introspect_imports` | Get module imports |
+|  | `introspect_dependencies` | Get dependencies |
+|  | `introspect_call_graph` | Get call graph |
 | **plt** (9) | `plt_compose` | Compose multi-panel figure |
 |  | `plt_crop` | Crop whitespace |
 |  | `plt_extract_data` | Extract plotted data |

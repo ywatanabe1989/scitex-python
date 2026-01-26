@@ -6,13 +6,17 @@
 
 from __future__ import annotations
 
+import builtins
 import inspect
 from typing import Literal
 
 from ._resolve import get_type_info, resolve_object
 
+# Save reference to built-in dir before shadowing
+_builtin_dir = builtins.dir
 
-def list_members(
+
+def dir(
     dotted_path: str,
     filter: Literal["all", "public", "private", "dunder"] = "public",
     kind: Literal["all", "functions", "classes", "data", "modules"] | None = None,
@@ -53,7 +57,7 @@ def list_members(
     if inspect.isclass(obj) and not include_inherited:
         member_names = list(obj.__dict__.keys())
     else:
-        member_names = dir(obj)
+        member_names = _builtin_dir(obj)
 
     if filter == "public":
         member_names = [n for n in member_names if not n.startswith("_")]
@@ -137,7 +141,7 @@ def get_exports(dotted_path: str) -> dict:
     exports = getattr(obj, "__all__", None)
 
     if exports is None:
-        exports = [n for n in dir(obj) if not n.startswith("_")]
+        exports = [n for n in _builtin_dir(obj) if not n.startswith("_")]
         has_all = False
     else:
         has_all = True
