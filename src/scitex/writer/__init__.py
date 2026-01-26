@@ -8,6 +8,15 @@ This module re-exports scitex-writer for convenience.
 Install: pip install scitex-writer
 """
 
+import os as _os
+
+# =============================================================================
+# Set branding environment variables BEFORE importing scitex-writer
+# (Will take effect once scitex-writer implements branding support)
+# =============================================================================
+_os.environ.setdefault("SCITEX_WRITER_BRAND", "scitex.writer")
+_os.environ.setdefault("SCITEX_WRITER_ALIAS", "sw")
+
 # =============================================================================
 # Re-export from scitex-writer package (single source of truth)
 # =============================================================================
