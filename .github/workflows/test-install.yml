@@ -37,10 +37,18 @@ jobs:
             echo "version=${{ github.event.release.tag_name }}" | sed 's/v//' >> $GITHUB_OUTPUT
           fi
 
+      - name: Wait for PyPI propagation
+        run: sleep 60
+
       - name: Install scitex (core)
         run: |
           pip install --upgrade pip
-          pip install scitex==${{ steps.version.outputs.version }}
+          # Retry up to 3 times with 30s delay for PyPI propagation
+          for i in 1 2 3; do
+            pip install scitex==${{ steps.version.outputs.version }} && break
+            echo "Attempt $i failed, waiting 30s..."
+            sleep 30
+          done
 
       - name: Test core imports
         run: |
@@ -71,10 +79,18 @@ jobs:
             echo "version=${{ github.event.release.tag_name }}" | sed 's/v//' >> $GITHUB_OUTPUT
           fi
 
+      - name: Wait for PyPI propagation
+        run: sleep 60
+
       - name: Install scitex[all]
         run: |
           pip install --upgrade pip
-          pip install "scitex[all]==${{ steps.version.outputs.version }}"
+          # Retry up to 3 times with 30s delay for PyPI propagation
+          for i in 1 2 3; do
+            pip install "scitex[all]==${{ steps.version.outputs.version }}" && break
+            echo "Attempt $i failed, waiting 30s..."
+            sleep 30
+          done
         timeout-minutes: 15
 
       - name: Test all imports
