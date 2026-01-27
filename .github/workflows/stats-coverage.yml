@@ -51,6 +51,7 @@ jobs:
           message: ${{ steps.coverage.outputs.percentage }}%
           color: ${{ steps.coverage.outputs.percentage > 80 && 'brightgreen' || steps.coverage.outputs.percentage > 60 && 'yellow' || 'red' }}
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        continue-on-error: true
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
