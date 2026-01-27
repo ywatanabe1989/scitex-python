@@ -27,13 +27,31 @@ scitex (umbrella)
 
 Re-export downstream package as-is, without modifications.
 
+**Python API:**
 ```python
 # scitex/writer/__init__.py
 from scitex_writer import bib, compile, figures, guidelines, project, prompts, tables
+
+# scitex/social/__init__.py
+from socialia import Twitter, LinkedIn, Reddit, YouTube, GoogleAnalytics, BasePoster
+```
+
+**MCP Tools:**
+```python
+# scitex/_mcp_tools/writer.py
+def register_writer_tools(mcp):
+    from scitex_writer._mcp.tools import register_all_tools
+    register_all_tools(mcp)  # Delegate to downstream
+
+# scitex/_mcp_tools/social.py
+def register_social_tools(mcp):
+    from socialia._mcp.tools import register_all_tools
+    register_all_tools(mcp)  # Delegate to downstream
 ```
 
 - Single source of truth: downstream package
-- API parity: `scitex.writer` ≈ `scitex_writer`
+- API parity: `scitex.writer` ≈ `scitex_writer`, `scitex.social` ≈ `socialia`
+- MCP tools delegated to downstream's `register_all_tools(mcp)`
 - Use `scitex introspect api` to verify consistency
 
 ### Enhanced Wrapper (scitex.plt, scitex.scholar)

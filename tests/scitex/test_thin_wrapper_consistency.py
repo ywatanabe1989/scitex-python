@@ -83,11 +83,7 @@ class TestWriterThinWrapper:
 
 
 class TestSocialThinWrapper:
-    """Tests for scitex.social thin wrapper consistency with socialia.
-
-    Note: MCP tools are not yet identical due to different MCP patterns.
-    See: https://github.com/ywatanabe1989/socialia/issues/14
-    """
+    """Tests for scitex.social thin wrapper consistency with socialia."""
 
     def test_python_api_exports_classes(self):
         """scitex.social should export same platform classes as socialia."""
@@ -114,10 +110,42 @@ class TestSocialThinWrapper:
             assert cls in scitex_exports, f"scitex.social missing {cls}"
             assert cls in standalone_exports, f"socialia missing {cls}"
 
-    @pytest.mark.skip(reason="socialia needs FastMCP support - see issue #14")
     def test_mcp_tools_identical(self):
         """scitex social MCP tools should match socialia MCP tools."""
-        pass
+        import re
+
+        # Get scitex social tools
+        result1 = subprocess.run(
+            [sys.executable, "-m", "scitex", "mcp", "list-tools"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        scitex_tools = set()
+        for line in result1.stdout.split("\n"):
+            # Match tool lines with social_ or analytics_ prefix
+            match = re.match(r"^\s+(social_\w+|analytics_\w+)\s", line)
+            if match:
+                scitex_tools.add(match.group(1))
+
+        # Get socialia tools
+        result2 = subprocess.run(
+            [sys.executable, "-m", "socialia", "mcp", "list-tools"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        standalone_tools = set()
+        for line in result2.stdout.split("\n"):
+            match = re.match(r"^\s+(social_\w+|analytics_\w+)\s", line)
+            if match:
+                standalone_tools.add(match.group(1))
+
+        assert scitex_tools == standalone_tools, (
+            f"MCP tools mismatch!\n"
+            f"Only in scitex: {scitex_tools - standalone_tools}\n"
+            f"Only in standalone: {standalone_tools - scitex_tools}"
+        )
 
 
 class TestIntrospectAPIConsistency:
