@@ -22,7 +22,7 @@ class TestGetTypeHintsDetailed:
         """Test detecting optional type hints."""
         from scitex.introspect import get_type_hints_detailed
 
-        result = get_type_hints_detailed("scitex.introspect._signature.get_signature")
+        result = get_type_hints_detailed("scitex.introspect._signature.q")
         assert result["success"] is True
         # Check for optional detection in hints
         if result.get("hints"):

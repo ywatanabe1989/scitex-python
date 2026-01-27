@@ -14,7 +14,7 @@ class TestFindExamples:
         """Test finding examples successfully."""
         from scitex.introspect import find_examples
 
-        result = find_examples("scitex.introspect.get_signature")
+        result = find_examples("scitex.introspect.q")
         assert result["success"] is True
         assert "examples" in result
         assert "count" in result
@@ -24,7 +24,7 @@ class TestFindExamples:
         from scitex.introspect import find_examples
 
         result = find_examples(
-            "scitex.introspect.get_signature",
+            "scitex.introspect.q",
             search_paths=["tests/scitex/introspect"],
         )
         assert result["success"] is True
@@ -33,7 +33,7 @@ class TestFindExamples:
         """Test max_results limits output."""
         from scitex.introspect import find_examples
 
-        result = find_examples("scitex.introspect.get_signature", max_results=2)
+        result = find_examples("scitex.introspect.q", max_results=2)
         assert result["success"] is True
         assert len(result["examples"]) <= 2
 
@@ -41,7 +41,7 @@ class TestFindExamples:
         """Test examples include context."""
         from scitex.introspect import find_examples
 
-        result = find_examples("scitex.introspect.get_signature")
+        result = find_examples("scitex.introspect.q")
         assert result["success"] is True
         if result["examples"]:
             for ex in result["examples"]:
