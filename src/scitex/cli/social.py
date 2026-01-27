@@ -279,33 +279,74 @@ def thread(platform, file, delay, dry_run, as_json):
     sys.exit(_run_socialia(*args, json_output=as_json))
 
 
-@social.command()
-@click.option(
-    "-t",
-    "--transport",
-    type=click.Choice(["stdio", "sse", "http"]),
-    default="stdio",
-    help="Transport protocol",
-)
-@click.option("--host", default="0.0.0.0", help="Host for HTTP/SSE transport")
-@click.option("--port", default=8086, type=int, help="Port for HTTP/SSE transport")
-def serve(transport, host, port):
+@social.group(invoke_without_command=True)
+@click.pass_context
+def mcp(ctx):
     """
-    Run socialia MCP server
+    MCP (Model Context Protocol) server operations
+
+    \b
+    Commands:
+      start        - Start the MCP server
+      doctor       - Check MCP server health
+      list-tools   - List available MCP tools
+      installation - Show Claude Desktop configuration
 
     \b
     Examples:
-      scitex social serve                    # stdio for Claude Desktop
-      scitex social serve -t http --port 8086
+      scitex social mcp start
+      scitex social mcp doctor
     """
-    args = ["mcp", "run", "--transport", transport]
-    if transport != "stdio":
-        args.extend(["--host", host, "--port", str(port)])
-        click.secho(f"Starting socialia MCP server ({transport})", fg="cyan")
-        click.echo(f"  Host: {host}")
-        click.echo(f"  Port: {port}")
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
-    sys.exit(_run_socialia(*args))
+
+@mcp.command()
+def start():
+    """
+    Start the MCP server
+
+    \b
+    Example:
+      scitex social mcp start
+    """
+    sys.exit(_run_socialia("mcp", "start"))
+
+
+@mcp.command()
+def doctor():
+    """
+    Check MCP server health
+
+    \b
+    Example:
+      scitex social mcp doctor
+    """
+    sys.exit(_run_socialia("mcp", "doctor"))
+
+
+@mcp.command("list-tools")
+def list_tools():
+    """
+    List available MCP tools
+
+    \b
+    Example:
+      scitex social mcp list-tools
+    """
+    sys.exit(_run_socialia("mcp", "list-tools"))
+
+
+@mcp.command()
+def installation():
+    """
+    Show Claude Desktop configuration
+
+    \b
+    Example:
+      scitex social mcp installation
+    """
+    sys.exit(_run_socialia("mcp", "installation"))
 
 
 if __name__ == "__main__":

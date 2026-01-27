@@ -322,33 +322,90 @@ def convert(input_file, output, fmt):
     sys.exit(_run_figrecipe(*args))
 
 
-@plt.command()
-@click.option(
-    "-t",
-    "--transport",
-    type=click.Choice(["stdio", "sse", "http"]),
-    default="stdio",
-    help="Transport protocol",
-)
-@click.option("--host", default="0.0.0.0", help="Host for HTTP/SSE transport")
-@click.option("--port", default=8087, type=int, help="Port for HTTP/SSE transport")
-def serve(transport, host, port):
+@plt.group(invoke_without_command=True)
+@click.pass_context
+def mcp(ctx):
     """
-    Run figrecipe MCP server
+    MCP (Model Context Protocol) server operations
+
+    \b
+    Commands:
+      start      - Start the MCP server
+      doctor     - Check MCP server health
+      list-tools - List available MCP tools
+      info       - Show MCP server information
+      install    - Show installation instructions
 
     \b
     Examples:
-      scitex plt serve                    # stdio for Claude Desktop
-      scitex plt serve -t http --port 8087
+      scitex plt mcp start
+      scitex plt mcp doctor
     """
-    args = ["mcp", "run", "--transport", transport]
-    if transport != "stdio":
-        args.extend(["--host", host, "--port", str(port)])
-        click.secho(f"Starting figrecipe MCP server ({transport})", fg="cyan")
-        click.echo(f"  Host: {host}")
-        click.echo(f"  Port: {port}")
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
-    sys.exit(_run_figrecipe(*args))
+
+@mcp.command()
+@click.option("--host", default="0.0.0.0", help="Host for HTTP transport")
+@click.option("--port", default=8087, type=int, help="Port for HTTP transport")
+def start(host, port):
+    """
+    Start the MCP server
+
+    \b
+    Example:
+      scitex plt mcp start
+      scitex plt mcp start --port 8087
+    """
+    sys.exit(_run_figrecipe("mcp", "run", "--host", host, "--port", str(port)))
+
+
+@mcp.command()
+def doctor():
+    """
+    Check MCP server health
+
+    \b
+    Example:
+      scitex plt mcp doctor
+    """
+    sys.exit(_run_figrecipe("mcp", "doctor"))
+
+
+@mcp.command("list-tools")
+def list_tools_mcp():
+    """
+    List available MCP tools
+
+    \b
+    Example:
+      scitex plt mcp list-tools
+    """
+    sys.exit(_run_figrecipe("mcp", "list-tools"))
+
+
+@mcp.command()
+def info():
+    """
+    Show MCP server information
+
+    \b
+    Example:
+      scitex plt mcp info
+    """
+    sys.exit(_run_figrecipe("mcp", "info"))
+
+
+@mcp.command()
+def install():
+    """
+    Show installation instructions
+
+    \b
+    Example:
+      scitex plt mcp install
+    """
+    sys.exit(_run_figrecipe("mcp", "install"))
 
 
 if __name__ == "__main__":
