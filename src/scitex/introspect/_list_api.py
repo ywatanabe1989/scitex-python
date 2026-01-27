@@ -4,6 +4,7 @@
 
 """Module API listing utilities."""
 
+import importlib
 import inspect
 import sys
 import warnings
@@ -109,7 +110,7 @@ def _list_api_impl(
 
     if isinstance(module, str):
         try:
-            module = __import__(module)
+            module = importlib.import_module(module)
         except ImportError as err:
             print(f"Error importing module {module}: {err}")
             return pd.DataFrame(columns=columns)
