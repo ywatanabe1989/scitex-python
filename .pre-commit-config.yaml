@@ -46,7 +46,10 @@ repos:
     rev: v1.10.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-all]
+        additional_dependencies:
+          - types-requests
+          - types-PyYAML
+          - types-setuptools
         args: [--ignore-missing-imports, --no-strict-optional]
         exclude: ^(src/scitex/\.old/|\.old/|examples/\.old/)
 
@@ -97,7 +100,7 @@ repos:
         language: pygrep
         types: [python]
         exclude: ^(tests/|examples/)
-      
+
       - id: no-todos-in-commits
         name: Check for TODO comments
         entry: '(?i)(TODO|FIXME|XXX|HACK)'

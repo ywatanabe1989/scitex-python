@@ -1,3 +1,9 @@
+<!-- ---
+!-- Timestamp: 2026-01-27 18:23:50
+!-- Author: ywatanabe
+!-- File: /home/ywatanabe/proj/scitex-python/docs/05_SCITEX_FAMILY.md
+!-- --- -->
+
 # SciTeX Family
 
 SciTeX integrates standalone packages that can be used independently or through the unified `scitex` interface.
@@ -99,3 +105,5 @@ SciTeX uses `3129X` (sa-i-te-ku-su = 3-1-2-9):
 | 31291 | crossref-local |
 | 31292 | openalex |
 | 31293 | scitex-audio |
+
+<!-- EOF -->
