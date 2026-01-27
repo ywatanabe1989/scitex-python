@@ -145,6 +145,8 @@ jobs:
     name: Deploy to GitHub Pages
     needs: benchmark
     runs-on: ubuntu-latest
+    # Skip if Pages is not set up
+    continue-on-error: true
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -153,3 +155,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: true
