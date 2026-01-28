@@ -21,6 +21,11 @@ CrossRef database (167M+ papers via crossref-local):
     scitex scholar crossref-scitex get 10.1038/nature12373
     scitex scholar crossref-scitex count "epilepsy seizure"
     scitex scholar crossref-scitex info
+
+OpenAlex database (284M+ works via openalex-local):
+    scitex scholar openalex-scitex search "neural networks"
+    scitex scholar openalex-scitex search-by-doi 10.1038/nature12373
+    scitex scholar openalex-scitex status
 """
 
 from __future__ import annotations
@@ -31,6 +36,7 @@ from ._crossref_scitex import crossref_scitex
 from ._fetch import fetch
 from ._jobs import jobs
 from ._library import config, library
+from ._openalex_scitex import openalex_scitex
 
 
 @click.group(
@@ -193,6 +199,14 @@ def doctor():
     except ImportError:
         click.secho("NOT INSTALLED (optional)", fg="yellow")
 
+    click.echo("Checking openalex-local... ", nl=False)
+    try:
+        import openalex_local  # noqa: F401
+
+        click.secho("OK", fg="green")
+    except ImportError:
+        click.secho("NOT INSTALLED (optional)", fg="yellow")
+
 
 @mcp.command("list-tools")
 def list_tools():
@@ -223,12 +237,18 @@ def list_tools():
         ("crossref_count", "Count papers matching query"),
         ("crossref_citations", "Get citation relationships"),
         ("crossref_info", "Get CrossRef database status"),
+        # OpenAlex-Local (284M+ works)
+        ("openalex_search", "Search OpenAlex database (284M+ works)"),
+        ("openalex_get", "Get paper by DOI/ID from OpenAlex"),
+        ("openalex_count", "Count papers matching query"),
+        ("openalex_info", "Get OpenAlex database status"),
     ]
     for name, desc in tools:
         click.echo(f"  {name}: {desc}")
 
 
 scholar.add_command(crossref_scitex)
+scholar.add_command(openalex_scitex)
 scholar.add_command(fetch)
 scholar.add_command(library)
 scholar.add_command(config)

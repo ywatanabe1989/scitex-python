@@ -71,11 +71,16 @@ try:
 except ImportError:
     utils = None
 
-# CrossRef integration via crossref-local delegation (branded as crossref-scitex)
+# Local database integrations (crossref-local, openalex-local)
 try:
-    from . import crossref_scitex
+    from .local_dbs import crossref_scitex
 except ImportError:
     crossref_scitex = None
+
+try:
+    from .local_dbs import openalex_scitex
+except ImportError:
+    openalex_scitex = None
 
 __all__ = [
     "ScholarConfig",
@@ -87,8 +92,9 @@ __all__ = [
     "Papers",
     "Scholar",
     "utils",
-    # CrossRef integration (167M+ papers via crossref-local)
-    "crossref_scitex",
+    # Local database integrations
+    "crossref_scitex",  # CrossRef (167M+ papers via crossref-local)
+    "openalex_scitex",  # OpenAlex (284M+ works via openalex-local)
 ]
 
 # # Import core classes for advanced users
