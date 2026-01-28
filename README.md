@@ -52,7 +52,7 @@ uv pip install scitex          # Core only
 |-----------|-----|-------------|
 | 🐍 **Python API** | Human researchers | `import scitex as stx` — 70% less code |
 | 🖥️ **CLI Commands** | Terminal users | `scitex scholar fetch`, `scitex stats run` |
-| 🔧 **MCP Tools** | AI agents | 108 tools for Claude/GPT integration |
+| 🔧 **MCP Tools** | AI agents | 145 tools for Claude/GPT integration |
 
 <details>
 <summary><strong>🐍 Python API</strong></summary>
@@ -120,7 +120,7 @@ scitex capture snap                  # Screenshot
 </details>
 
 <details>
-<summary><strong>🔧 MCP Tools — 108 tools for AI Agents</strong></summary>
+<summary><strong>🔧 MCP Tools — 145 tools for AI Agents</strong></summary>
 
 <br>
 

@@ -139,9 +139,9 @@ def recommend(
             output = {
                 "context": {
                     "n_groups": n_groups,
-                    "sample_sizes": list(sample_sizes)
-                    if sample_sizes
-                    else [30] * n_groups,
+                    "sample_sizes": (
+                        list(sample_sizes) if sample_sizes else [30] * n_groups
+                    ),
                     "outcome_type": outcome_type,
                     "design": design,
                     "paired": paired,
@@ -344,6 +344,124 @@ def tests():
     except Exception as e:
         click.secho(f"Error: {e}", fg="red", err=True)
         sys.exit(1)
+
+
+@stats.group(invoke_without_command=True)
+@click.pass_context
+def mcp(ctx):
+    """
+    MCP (Model Context Protocol) server operations
+
+    \b
+    Commands:
+      start      - Start the MCP server
+      doctor     - Check MCP server health
+      list-tools - List available MCP tools
+
+    \b
+    Examples:
+      scitex stats mcp start
+      scitex stats mcp list-tools
+    """
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
+
+
+@mcp.command()
+@click.option(
+    "-t",
+    "--transport",
+    type=click.Choice(["stdio", "sse", "http"]),
+    default="stdio",
+    help="Transport protocol (default: stdio)",
+)
+@click.option("--host", default="0.0.0.0", help="Host for HTTP/SSE (default: 0.0.0.0)")
+@click.option(
+    "--port", default=8095, type=int, help="Port for HTTP/SSE (default: 8095)"
+)
+def start(transport, host, port):
+    """
+    Start the stats MCP server
+
+    \b
+    Examples:
+      scitex stats mcp start
+      scitex stats mcp start -t http --port 8095
+    """
+    try:
+        from scitex.stats.mcp_server import main as run_server
+
+        if transport != "stdio":
+            click.secho(f"Starting stats MCP server ({transport})", fg="cyan")
+            click.echo(f"  Host: {host}")
+            click.echo(f"  Port: {port}")
+
+        run_server()
+
+    except ImportError as e:
+        click.secho(f"Error: {e}", fg="red", err=True)
+        click.echo("\nInstall dependencies: pip install fastmcp")
+        sys.exit(1)
+    except Exception as e:
+        click.secho(f"Error: {e}", fg="red", err=True)
+        sys.exit(1)
+
+
+@mcp.command()
+def doctor():
+    """
+    Check MCP server health and dependencies
+
+    \b
+    Example:
+      scitex stats mcp doctor
+    """
+    click.secho("Stats MCP Server Health Check", fg="cyan", bold=True)
+    click.echo()
+
+    click.echo("Checking FastMCP... ", nl=False)
+    try:
+        import fastmcp  # noqa: F401
+
+        click.secho("OK", fg="green")
+    except ImportError:
+        click.secho("NOT INSTALLED", fg="red")
+        click.echo("  Install with: pip install fastmcp")
+
+    click.echo("Checking stats module... ", nl=False)
+    try:
+        from scitex import stats as _  # noqa: F401
+
+        click.secho("OK", fg="green")
+    except ImportError as e:
+        click.secho(f"FAIL ({e})", fg="red")
+
+
+@mcp.command("list-tools")
+def list_tools():
+    """
+    List available MCP tools
+
+    \b
+    Example:
+      scitex stats mcp list-tools
+    """
+    click.secho("Stats MCP Tools", fg="cyan", bold=True)
+    click.echo()
+    tools = [
+        ("stats_recommend_tests", "Recommend appropriate statistical tests"),
+        ("stats_run_test", "Execute a statistical test on data"),
+        ("stats_format_results", "Format results in journal style"),
+        ("stats_power_analysis", "Calculate power or sample size"),
+        ("stats_correct_pvalues", "Apply multiple comparison correction"),
+        ("stats_describe", "Calculate descriptive statistics"),
+        ("stats_effect_size", "Calculate effect size"),
+        ("stats_normality_test", "Test for normal distribution"),
+        ("stats_posthoc_test", "Run post-hoc pairwise comparisons"),
+        ("stats_p_to_stars", "Convert p-value to significance stars"),
+    ]
+    for name, desc in tools:
+        click.echo(f"  {name}: {desc}")
 
 
 if __name__ == "__main__":

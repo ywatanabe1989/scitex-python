@@ -93,6 +93,137 @@ def _print_help_recursive(ctx):
                         click.echo(sub_cmd.get_help(sub_sub_ctx))
 
 
+@scholar.group(invoke_without_command=True)
+@click.pass_context
+def mcp(ctx):
+    """
+    MCP (Model Context Protocol) server operations
+
+    \b
+    Commands:
+      start      - Start the MCP server
+      doctor     - Check MCP server health
+      list-tools - List available MCP tools
+
+    \b
+    Examples:
+      scitex scholar mcp start
+      scitex scholar mcp list-tools
+    """
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
+
+
+@mcp.command()
+@click.option(
+    "-t",
+    "--transport",
+    type=click.Choice(["stdio", "sse", "http"]),
+    default="stdio",
+    help="Transport protocol (default: stdio)",
+)
+@click.option("--host", default="0.0.0.0", help="Host for HTTP/SSE (default: 0.0.0.0)")
+@click.option(
+    "--port", default=8097, type=int, help="Port for HTTP/SSE (default: 8097)"
+)
+def start(transport, host, port):
+    """
+    Start the scholar MCP server
+
+    \b
+    Examples:
+      scitex scholar mcp start
+      scitex scholar mcp start -t http --port 8097
+    """
+    import sys
+
+    try:
+        from scitex.scholar.mcp_server import main as run_server
+
+        if transport != "stdio":
+            click.secho(f"Starting scholar MCP server ({transport})", fg="cyan")
+            click.echo(f"  Host: {host}")
+            click.echo(f"  Port: {port}")
+
+        run_server()
+
+    except ImportError as e:
+        click.secho(f"Error: {e}", fg="red", err=True)
+        click.echo("\nInstall dependencies: pip install fastmcp")
+        sys.exit(1)
+    except Exception as e:
+        click.secho(f"Error: {e}", fg="red", err=True)
+        sys.exit(1)
+
+
+@mcp.command()
+def doctor():
+    """
+    Check MCP server health and dependencies
+
+    \b
+    Example:
+      scitex scholar mcp doctor
+    """
+    click.secho("Scholar MCP Server Health Check", fg="cyan", bold=True)
+    click.echo()
+
+    click.echo("Checking FastMCP... ", nl=False)
+    try:
+        import fastmcp  # noqa: F401
+
+        click.secho("OK", fg="green")
+    except ImportError:
+        click.secho("NOT INSTALLED", fg="red")
+        click.echo("  Install with: pip install fastmcp")
+
+    click.echo("Checking scholar module... ", nl=False)
+    try:
+        from scitex import scholar as _  # noqa: F401
+
+        click.secho("OK", fg="green")
+    except ImportError as e:
+        click.secho(f"FAIL ({e})", fg="red")
+
+    click.echo("Checking crossref-local... ", nl=False)
+    try:
+        import crossref_local  # noqa: F401
+
+        click.secho("OK", fg="green")
+    except ImportError:
+        click.secho("NOT INSTALLED (optional)", fg="yellow")
+
+
+@mcp.command("list-tools")
+def list_tools():
+    """
+    List available MCP tools
+
+    \b
+    Example:
+      scitex scholar mcp list-tools
+    """
+    click.secho("Scholar MCP Tools", fg="cyan", bold=True)
+    click.echo()
+    tools = [
+        ("scholar_search_papers", "Search for papers by query"),
+        ("scholar_resolve_dois", "Resolve DOIs to metadata"),
+        ("scholar_enrich_bibtex", "Enrich BibTeX with abstracts/DOIs"),
+        ("scholar_download_pdf", "Download PDF for a paper"),
+        ("scholar_download_pdfs_batch", "Batch download PDFs"),
+        ("scholar_get_library_status", "Get library status"),
+        ("scholar_parse_bibtex", "Parse BibTeX file"),
+        ("scholar_validate_pdfs", "Validate downloaded PDFs"),
+        ("scholar_authenticate", "Authenticate with institution"),
+        ("scholar_check_auth_status", "Check authentication status"),
+        ("scholar_fetch_papers", "Fetch papers by DOIs"),
+        ("scholar_crossref_search", "Search CrossRef database"),
+        ("scholar_crossref_get", "Get paper by DOI from CrossRef"),
+    ]
+    for name, desc in tools:
+        click.echo(f"  {name}: {desc}")
+
+
 scholar.add_command(crossref_scitex)
 scholar.add_command(fetch)
 scholar.add_command(library)

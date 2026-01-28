@@ -34,11 +34,14 @@ def cleanup_existing(out_dir, name):
 def create_sample_data():
     """Create sample signal data."""
     np.random.seed(42)
-    return pd.DataFrame({
-        "time": np.arange(50),
-        "signal": np.sin(np.linspace(0, 4 * np.pi, 50)) + np.random.normal(0, 0.1, 50),
-        "noise": np.random.normal(0, 0.3, 50),
-    })
+    return pd.DataFrame(
+        {
+            "time": np.arange(50),
+            "signal": np.sin(np.linspace(0, 4 * np.pi, 50))
+            + np.random.normal(0, 0.1, 50),
+            "noise": np.random.normal(0, 0.3, 50),
+        }
+    )
 
 
 def create_plot(plt, df, out_dir):
@@ -149,7 +152,9 @@ def show_file_contents(bundle_path, logger):
         logger.info("\nencoding.json:")
         logger.info(f"  traces: {len(enc.get('traces', []))}")
         for t in enc.get("traces", []):
-            logger.info(f"    - {t.get('trace_id')}: {t.get('y', {}).get('column')} -> y")
+            logger.info(
+                f"    - {t.get('trace_id')}: {t.get('y', {}).get('column')} -> y"
+            )
 
     theme_path = bundle_path / "theme.json"
     if theme_path.exists():

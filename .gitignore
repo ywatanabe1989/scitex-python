@@ -124,6 +124,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.playwright-mcp/
 .testmondata
 .testmondata-*
 tests/.testmondata*
@@ -368,6 +369,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.playwright-mcp/
 .testmondata
 .testmondata-*
 tests/.testmondata*

@@ -21,7 +21,6 @@ import scitex.io as sio
 from scitex import INJECTED
 from scitex.io.bundle import FTS
 
-
 # Journal theme profiles
 PROFILES = {
     "nature": {
@@ -100,7 +99,9 @@ def print_comparison_report(logger):
     logger.info("JOURNAL PROFILE COMPARISON")
     logger.info("=" * 60)
 
-    logger.info(f"\n{'Journal':<10} {'Font':<20} {'Title Size':<12} {'Primary Color':<14}")
+    logger.info(
+        f"\n{'Journal':<10} {'Font':<20} {'Title Size':<12} {'Primary Color':<14}"
+    )
     logger.info("-" * 56)
 
     for profile_id, profile in PROFILES.items():
