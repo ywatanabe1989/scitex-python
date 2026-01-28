@@ -206,19 +206,23 @@ def list_tools():
     click.secho("Scholar MCP Tools", fg="cyan", bold=True)
     click.echo()
     tools = [
-        ("scholar_search_papers", "Search for papers by query"),
-        ("scholar_resolve_dois", "Resolve DOIs to metadata"),
-        ("scholar_enrich_bibtex", "Enrich BibTeX with abstracts/DOIs"),
-        ("scholar_download_pdf", "Download PDF for a paper"),
-        ("scholar_download_pdfs_batch", "Batch download PDFs"),
-        ("scholar_get_library_status", "Get library status"),
-        ("scholar_parse_bibtex", "Parse BibTeX file"),
-        ("scholar_validate_pdfs", "Validate downloaded PDFs"),
-        ("scholar_authenticate", "Authenticate with institution"),
-        ("scholar_check_auth_status", "Check authentication status"),
-        ("scholar_fetch_papers", "Fetch papers by DOIs"),
-        ("scholar_crossref_search", "Search CrossRef database"),
-        ("scholar_crossref_get", "Get paper by DOI from CrossRef"),
+        ("search_papers", "Search for papers by query"),
+        ("resolve_dois", "Resolve DOIs to metadata"),
+        ("enrich_bibtex", "Enrich BibTeX with abstracts/DOIs"),
+        ("download_pdf", "Download PDF for a paper"),
+        ("download_pdfs_batch", "Batch download PDFs"),
+        ("get_library_status", "Get library status"),
+        ("parse_bibtex", "Parse BibTeX file"),
+        ("validate_pdfs", "Validate downloaded PDFs"),
+        ("authenticate", "Authenticate with institution"),
+        ("check_auth_status", "Check authentication status"),
+        ("fetch_papers", "Fetch papers by DOIs (async)"),
+        # CrossRef-Local (167M+ papers)
+        ("crossref_search", "Search CrossRef database (167M+ papers)"),
+        ("crossref_get", "Get paper by DOI from CrossRef"),
+        ("crossref_count", "Count papers matching query"),
+        ("crossref_citations", "Get citation relationships"),
+        ("crossref_info", "Get CrossRef database status"),
     ]
     for name, desc in tools:
         click.echo(f"  {name}: {desc}")

@@ -186,6 +186,18 @@ class ScholarServer:
             elif name == "get_job_result":
                 return await self._wrap_result(get_job_result_handler(**arguments))
 
+            # CrossRef-Local Tools
+            elif name == "crossref_search":
+                return await self._wrap_result(crossref_search_handler(**arguments))
+            elif name == "crossref_get":
+                return await self._wrap_result(crossref_get_handler(**arguments))
+            elif name == "crossref_count":
+                return await self._wrap_result(crossref_count_handler(**arguments))
+            elif name == "crossref_citations":
+                return await self._wrap_result(crossref_citations_handler(**arguments))
+            elif name == "crossref_info":
+                return await self._wrap_result(crossref_info_handler(**arguments))
+
             else:
                 raise ValueError(f"Unknown tool: {name}")
 
