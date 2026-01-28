@@ -13,7 +13,8 @@ SciTeX integrates standalone packages that can be used independently or through 
 | Package | scitex Module | Description | Status |
 |---------|---------------|-------------|--------|
 | [figrecipe](https://github.com/ywatanabe1989/figrecipe) | `scitex.plt` | Publication-ready matplotlib figures | Integrated |
-| [crossref-local](https://github.com/ywatanabe1989/crossref-local) | `scitex.scholar.crossref` | Local CrossRef database (167M+ papers) | Integrated |
+| [crossref-local](https://github.com/ywatanabe1989/crossref-local) | `scitex.scholar.crossref_scitex` | Local CrossRef database (167M+ papers) | Integrated |
+| [openalex-local](https://github.com/ywatanabe1989/openalex-local) | `scitex.scholar.openalex_scitex` | Local OpenAlex database (250M+ papers) | Integrated |
 | [socialia](https://github.com/ywatanabe1989/socialia) | `scitex.social` | Social media posting (Twitter, LinkedIn) | Integrated |
 | [scitex-writer](https://github.com/ywatanabe1989/scitex-writer) | `scitex.writer` | LaTeX manuscript compilation | Integrated |
 
@@ -23,7 +24,7 @@ SciTeX integrates standalone packages that can be used independently or through 
 scitex (umbrella)
 ├── scitex.plt      ← figrecipe
 ├── scitex.social   ← socialia
-├── scitex.scholar  ← crossref-local
+├── scitex.scholar  ← crossref-local + openalex-local
 └── scitex.writer   ← scitex-writer
 ```
 
@@ -77,7 +78,8 @@ SciTeX integrates standalone packages that can be used independently or through 
 | Package | scitex Module | Integration | API Items |
 |---------|---------------|-------------|-----------|
 | [figrecipe](https://github.com/ywatanabe1989/figrecipe) | `scitex.plt` | Enhanced | 14 → 3881 |
-| [crossref-local](https://github.com/ywatanabe1989/crossref-local) | `scitex.scholar` | Enhanced | 98 → 2063 |
+| [crossref-local](https://github.com/ywatanabe1989/crossref-local) | `scitex.scholar.crossref_scitex` | Enhanced | 98 → 2063 |
+| [openalex-local](https://github.com/ywatanabe1989/openalex-local) | `scitex.scholar.openalex_scitex` | Enhanced | - |
 | [socialia](https://github.com/ywatanabe1989/socialia) | `scitex.social` | Thin | 2907 → 12 |
 | [scitex-writer](https://github.com/ywatanabe1989/scitex-writer) | `scitex.writer` | Thin | 37 → 37 |
 
@@ -86,7 +88,7 @@ SciTeX integrates standalone packages that can be used independently or through 
 ```
 scitex (umbrella)
 ├── scitex.plt      ← figrecipe + matplotlib + local features
-├── scitex.scholar  ← crossref-local + local features
+├── scitex.scholar  ← crossref-local + openalex-local + local features
 ├── scitex.social   ← socialia (thin wrapper)
 └── scitex.writer   ← scitex-writer (thin wrapper)
 ```

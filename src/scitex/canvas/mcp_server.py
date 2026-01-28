@@ -3,8 +3,12 @@
 # File: src/scitex/canvas/mcp_server.py
 # ----------------------------------------
 
-"""
-MCP Server for SciTeX canvas - Multi-panel figure composition.
+"""MCP Server for SciTeX canvas - Multi-panel figure composition.
+
+.. deprecated::
+    This standalone server is deprecated. Use the unified scitex MCP server:
+    CLI: scitex serve
+    Python: from scitex.mcp_server import run_server
 
 Provides tools for:
 - Creating canvas workspaces
@@ -14,6 +18,15 @@ Provides tools for:
 """
 
 from __future__ import annotations
+
+import warnings
+
+warnings.warn(
+    "scitex.canvas.mcp_server is deprecated. Use 'scitex serve' or "
+    "'from scitex.mcp_server import run_server' for the unified MCP server.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 import asyncio
 
@@ -126,7 +139,7 @@ async def _run_server():
 
 
 def main():
-    """Main entry point for the MCP server."""
+    """Run the MCP server."""
     if not MCP_AVAILABLE:
         import sys
 

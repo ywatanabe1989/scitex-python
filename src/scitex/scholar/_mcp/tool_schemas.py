@@ -507,8 +507,14 @@ def get_tool_schemas() -> list[types.Tool]:
     ]
     from .crossref_tool_schemas import get_crossref_tool_schemas
     from .job_tool_schemas import get_job_tool_schemas
+    from .openalex_tool_schemas import get_openalex_tool_schemas
 
-    return base_schemas + get_job_tool_schemas() + get_crossref_tool_schemas()
+    return (
+        base_schemas
+        + get_job_tool_schemas()
+        + get_crossref_tool_schemas()
+        + get_openalex_tool_schemas()
+    )
 
 
 # EOF

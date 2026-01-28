@@ -2,13 +2,26 @@
 # Timestamp: "2026-01-13 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/ui/mcp_server.py
 
-"""
-MCP Server for SciTeX Notifications - Multi-backend alert system.
+"""MCP Server for SciTeX Notifications - Multi-backend alert system.
+
+.. deprecated::
+    This standalone server is deprecated. Use the unified scitex MCP server:
+    CLI: scitex serve
+    Python: from scitex.mcp_server import run_server
 
 Supports: audio, desktop, email, matplotlib, playwright, webhook backends.
 """
 
 from __future__ import annotations
+
+import warnings
+
+warnings.warn(
+    "scitex.ui.mcp_server is deprecated. Use 'scitex serve' or "
+    "'from scitex.mcp_server import run_server' for the unified MCP server.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 import asyncio
 from datetime import datetime
@@ -126,7 +139,7 @@ async def _run_server():
 
 
 def main():
-    """Main entry point for the MCP server."""
+    """Run the MCP server."""
     if not MCP_AVAILABLE:
         import sys
 

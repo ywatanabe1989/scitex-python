@@ -1,5 +1,4 @@
-"""
-SciTeX Scholar - Scientific Literature Management Made Simple
+"""SciTeX Scholar - Scientific Literature Management Made Simple.
 
 This module provides a unified interface for:
 - Searching scientific literature across multiple sources
@@ -27,17 +26,17 @@ _missing = warn_module_deps("scholar")
 try:
     from scitex.scholar.auth import ScholarAuthManager
 except ImportError:
-    ScholarAuthManager = None
+    ScholarAuthManager = None  # type: ignore[misc,assignment]
 
 try:
     from scitex.scholar.browser import ScholarBrowserManager
 except ImportError:
-    ScholarBrowserManager = None
+    ScholarBrowserManager = None  # type: ignore[misc,assignment]
 
 try:
     from scitex.scholar.config import ScholarConfig
 except ImportError:
-    ScholarConfig = None
+    ScholarConfig = None  # type: ignore[misc,assignment]
 
 try:
     from scitex.scholar.core import Paper, Papers, Scholar

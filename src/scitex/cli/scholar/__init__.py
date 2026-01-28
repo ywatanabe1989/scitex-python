@@ -46,8 +46,7 @@ from ._openalex_scitex import openalex_scitex
 @click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
 @click.pass_context
 def scholar(ctx, help_recursive):
-    """
-    Scientific paper management
+    r"""Scientific paper management.
 
     \b
     Fetch papers, manage your library, and track background jobs.
@@ -102,8 +101,7 @@ def _print_help_recursive(ctx):
 @scholar.group(invoke_without_command=True)
 @click.pass_context
 def mcp(ctx):
-    """
-    MCP (Model Context Protocol) server operations
+    r"""MCP (Model Context Protocol) server operations.
 
     \b
     Commands:
@@ -130,28 +128,35 @@ def mcp(ctx):
 )
 @click.option("--host", default="0.0.0.0", help="Host for HTTP/SSE (default: 0.0.0.0)")
 @click.option(
-    "--port", default=8097, type=int, help="Port for HTTP/SSE (default: 8097)"
+    "--port", default=8085, type=int, help="Port for HTTP/SSE (default: 8085)"
 )
 def start(transport, host, port):
-    """
-    Start the scholar MCP server
+    r"""Start the MCP server with scholar tools.
+
+    \b
+    NOTE: This now uses the unified scitex MCP server which includes
+    all scholar tools plus other scitex tools (plt, stats, etc.)
 
     \b
     Examples:
       scitex scholar mcp start
-      scitex scholar mcp start -t http --port 8097
+      scitex scholar mcp start -t http --port 8085
+
+    \b
+    Equivalent to: scitex serve -t <transport>
     """
     import sys
 
     try:
-        from scitex.scholar.mcp_server import main as run_server
+        from scitex.mcp_server import run_server
 
         if transport != "stdio":
-            click.secho(f"Starting scholar MCP server ({transport})", fg="cyan")
+            click.secho(f"Starting unified scitex MCP server ({transport})", fg="cyan")
             click.echo(f"  Host: {host}")
             click.echo(f"  Port: {port}")
+            click.echo("  Includes: scholar, plt, stats, audio, and more")
 
-        run_server()
+        run_server(transport=transport, host=host, port=port)
 
     except ImportError as e:
         click.secho(f"Error: {e}", fg="red", err=True)
@@ -164,8 +169,7 @@ def start(transport, host, port):
 
 @mcp.command()
 def doctor():
-    """
-    Check MCP server health and dependencies
+    r"""Check MCP server health and dependencies.
 
     \b
     Example:
@@ -210,8 +214,7 @@ def doctor():
 
 @mcp.command("list-tools")
 def list_tools():
-    """
-    List available MCP tools
+    r"""List available MCP tools.
 
     \b
     Example:
