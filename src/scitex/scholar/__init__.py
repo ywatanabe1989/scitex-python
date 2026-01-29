@@ -17,10 +17,10 @@ Installation:
     pip install scitex[scholar]
 """
 
-# Check for missing dependencies and warn user
-from scitex._install_guide import warn_module_deps
+# Check for missing dependencies and warn user (internal)
+from scitex._install_guide import warn_module_deps as _warn_module_deps
 
-_missing = warn_module_deps("scholar")
+_missing = _warn_module_deps("scholar")
 
 # Import configuration - wrap all in try/except for graceful degradation
 try:
@@ -66,9 +66,9 @@ except ImportError:
     ScholarURLFinder = None
 
 try:
-    from . import utils
+    from . import _utils  # Internal utilities
 except ImportError:
-    utils = None
+    _utils = None
 
 # Local database integrations (crossref-local, openalex-local)
 try:
@@ -82,15 +82,18 @@ except ImportError:
     openalex_scitex = None
 
 __all__ = [
+    # Core classes
+    "Scholar",
+    "Paper",
+    "Papers",
+    # Configuration and managers
     "ScholarConfig",
     "ScholarEngine",
     "ScholarURLFinder",
     "ScholarAuthManager",
     "ScholarBrowserManager",
-    "Paper",
-    "Papers",
-    "Scholar",
-    "utils",
+    "ScholarLibrary",
+    "ScholarPDFDownloader",
     # Local database integrations
     "crossref_scitex",  # CrossRef (167M+ papers via crossref-local)
     "openalex_scitex",  # OpenAlex (284M+ works via openalex-local)

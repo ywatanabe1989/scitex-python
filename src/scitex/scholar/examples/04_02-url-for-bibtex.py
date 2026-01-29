@@ -83,7 +83,7 @@ async def process_bibtex_urls(
         ScholarEngine,
         ScholarURLFinder,
     )
-    from scitex.scholar.utils import parse_bibtex
+    from scitex.scholar._utils import parse_bibtex
 
     print(f"📚 Parsing BibTeX file: {bibtex_path}")
     entries = parse_bibtex(bibtex_path)
