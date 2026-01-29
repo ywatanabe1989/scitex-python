@@ -341,20 +341,22 @@ async def speak_handler(
                 fallback=fallback,
             )
 
-        result_path = await loop.run_in_executor(None, do_speak)
+        speak_result = await loop.run_in_executor(None, do_speak)
 
         result = {
-            "success": True,
+            "success": speak_result.get("success", True),
             "text": text,
-            "backend": backend,
-            "played": play,
+            "backend": speak_result.get("backend", backend),
+            "played": speak_result.get("played", False),
+            "play_requested": play,
+            "mode": speak_result.get("mode", "local"),
             "timestamp": datetime.now().isoformat(),
         }
         if signature:
             result["signature"] = sig
             result["full_text"] = final_text
-        if result_path:
-            result["path"] = str(result_path)
+        if speak_result.get("path"):
+            result["path"] = str(speak_result["path"])
 
         return result
 
