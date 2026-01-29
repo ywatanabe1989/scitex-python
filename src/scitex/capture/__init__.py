@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 scitex.capture - AI's Camera
 A lightweight, intuitive screen capture library optimized for WSL and Windows.
@@ -27,18 +26,18 @@ Usage:
     capture.stop()
 """
 
-from .utils import capture, start_monitor, stop_monitor
+from .capture import CaptureManager as _CaptureManager  # Internal class
 from .gif import (
-    create_gif_from_session,
     create_gif_from_files,
-    create_gif_from_pattern,
     create_gif_from_latest_session,
+    create_gif_from_pattern,
+    create_gif_from_session,
 )
 from .session import session
-from .capture import CaptureManager
+from .utils import capture, start_monitor, stop_monitor
 
 # Global manager for monitor enumeration
-_manager = CaptureManager()
+_manager = _CaptureManager()
 
 
 def get_info():
