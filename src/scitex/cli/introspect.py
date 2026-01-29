@@ -11,6 +11,13 @@ import sys
 import click
 
 
+def _normalize_path(ctx, param, value):
+    """Normalize dotted path: convert hyphens to underscores for Python module names."""
+    if value:
+        return value.replace("-", "_")
+    return value
+
+
 @click.group(
     context_settings={"help_option_names": ["-h", "--help"]},
     invoke_without_command=True,
@@ -48,7 +55,7 @@ def introspect(ctx, help_recursive):
 
 
 @introspect.command()
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option("--no-defaults", is_flag=True, help="Exclude default values")
 @click.option("--no-annotations", is_flag=True, help="Exclude type annotations")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
@@ -90,7 +97,7 @@ def q(dotted_path, no_defaults, no_annotations, as_json):
 
 
 @introspect.command()
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option("--max-lines", "-n", type=int, help="Limit output to N lines")
 @click.option("--no-decorators", is_flag=True, help="Exclude decorator lines")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
@@ -125,7 +132,7 @@ def qq(dotted_path, max_lines, no_decorators, as_json):
 
 
 @introspect.command("dir")
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option(
     "--filter",
     "-f",
@@ -176,7 +183,7 @@ def dir_cmd(dotted_path, filter, kind, inherited, as_json):
 
 
 @introspect.command()
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option("--max-depth", "-d", type=int, default=5, help="Max recursion depth")
 @click.option("--docstring", is_flag=True, help="Include docstrings")
 @click.option("--root-only", is_flag=True, help="Show only root-level items")
@@ -214,7 +221,7 @@ def api(dotted_path, max_depth, docstring, root_only, as_json):
 
 
 @introspect.command()
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option(
     "--format",
     "-f",
@@ -259,7 +266,7 @@ def docstring(dotted_path, format, as_json):
 
 
 @introspect.command()
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def exports(dotted_path, as_json):
     """
@@ -289,7 +296,7 @@ def exports(dotted_path, as_json):
 
 
 @introspect.command()
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option("--search-paths", "-p", help="Comma-separated search paths")
 @click.option("--max-results", "-n", type=int, default=10, help="Max examples")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
@@ -332,7 +339,7 @@ def examples(dotted_path, search_paths, max_results, as_json):
 
 
 @introspect.command("hierarchy")
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option("--builtins", is_flag=True, help="Include builtin classes")
 @click.option("--max-depth", "-d", type=int, default=10, help="Max subclass depth")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
@@ -368,7 +375,7 @@ def _print_subclasses(subclasses, indent=0):
 
 
 @introspect.command("hints")
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def type_hints(dotted_path, as_json):
     """Get detailed type hint analysis"""
@@ -392,7 +399,7 @@ def type_hints(dotted_path, as_json):
 
 
 @introspect.command("imports")
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option("--no-categorize", is_flag=True, help="Don't group by category")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def imports(dotted_path, no_categorize, as_json):
@@ -421,7 +428,7 @@ def imports(dotted_path, no_categorize, as_json):
 
 
 @introspect.command("deps")
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option("--recursive", "-r", is_flag=True, help="Recursive analysis")
 @click.option("--max-depth", "-d", type=int, default=3, help="Max recursion depth")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
@@ -444,7 +451,7 @@ def dependencies(dotted_path, recursive, max_depth, as_json):
 
 
 @introspect.command("calls")
-@click.argument("dotted_path")
+@click.argument("dotted_path", callback=_normalize_path)
 @click.option("--timeout", "-t", type=int, default=10, help="Timeout in seconds")
 @click.option("--all", "all_calls", is_flag=True, help="Include external calls")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")

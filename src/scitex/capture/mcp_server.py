@@ -10,10 +10,24 @@ __FILE__ = "./src/scitex/capture/mcp_server.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
-"""
-MCP Server for SciTeX Capture - Screen Capture for Python
+"""MCP Server for SciTeX Capture - Screen Capture for Python.
+
+.. deprecated::
+    This standalone server is deprecated. Use the unified scitex MCP server:
+    CLI: scitex serve
+    Python: from scitex.mcp_server import run_server
+
 Provides screenshot capture capabilities via Model Context Protocol.
 """
+
+import warnings
+
+warnings.warn(
+    "scitex.capture.mcp_server is deprecated. Use 'scitex serve' or "
+    "'from scitex.mcp_server import run_server' for the unified MCP server.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 import asyncio
 import base64

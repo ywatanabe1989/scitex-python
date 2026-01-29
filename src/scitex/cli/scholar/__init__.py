@@ -21,6 +21,11 @@ CrossRef database (167M+ papers via crossref-local):
     scitex scholar crossref-scitex get 10.1038/nature12373
     scitex scholar crossref-scitex count "epilepsy seizure"
     scitex scholar crossref-scitex info
+
+OpenAlex database (284M+ works via openalex-local):
+    scitex scholar openalex-scitex search "neural networks"
+    scitex scholar openalex-scitex search-by-doi 10.1038/nature12373
+    scitex scholar openalex-scitex status
 """
 
 from __future__ import annotations
@@ -31,6 +36,7 @@ from ._crossref_scitex import crossref_scitex
 from ._fetch import fetch
 from ._jobs import jobs
 from ._library import config, library
+from ._openalex_scitex import openalex_scitex
 
 
 @click.group(
@@ -40,8 +46,7 @@ from ._library import config, library
 @click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
 @click.pass_context
 def scholar(ctx, help_recursive):
-    """
-    Scientific paper management
+    r"""Scientific paper management.
 
     \b
     Fetch papers, manage your library, and track background jobs.
@@ -93,7 +98,160 @@ def _print_help_recursive(ctx):
                         click.echo(sub_cmd.get_help(sub_sub_ctx))
 
 
+@scholar.group(invoke_without_command=True)
+@click.pass_context
+def mcp(ctx):
+    r"""MCP (Model Context Protocol) server operations.
+
+    \b
+    Commands:
+      start      - Start the MCP server
+      doctor     - Check MCP server health
+      list-tools - List available MCP tools
+
+    \b
+    Examples:
+      scitex scholar mcp start
+      scitex scholar mcp list-tools
+    """
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
+
+
+@mcp.command()
+@click.option(
+    "-t",
+    "--transport",
+    type=click.Choice(["stdio", "sse", "http"]),
+    default="stdio",
+    help="Transport protocol (default: stdio)",
+)
+@click.option("--host", default="0.0.0.0", help="Host for HTTP/SSE (default: 0.0.0.0)")
+@click.option(
+    "--port", default=8085, type=int, help="Port for HTTP/SSE (default: 8085)"
+)
+def start(transport, host, port):
+    r"""Start the MCP server with scholar tools.
+
+    \b
+    NOTE: This now uses the unified scitex MCP server which includes
+    all scholar tools plus other scitex tools (plt, stats, etc.)
+
+    \b
+    Examples:
+      scitex scholar mcp start
+      scitex scholar mcp start -t http --port 8085
+
+    \b
+    Equivalent to: scitex serve -t <transport>
+    """
+    import sys
+
+    try:
+        from scitex.mcp_server import run_server
+
+        if transport != "stdio":
+            click.secho(f"Starting unified scitex MCP server ({transport})", fg="cyan")
+            click.echo(f"  Host: {host}")
+            click.echo(f"  Port: {port}")
+            click.echo("  Includes: scholar, plt, stats, audio, and more")
+
+        run_server(transport=transport, host=host, port=port)
+
+    except ImportError as e:
+        click.secho(f"Error: {e}", fg="red", err=True)
+        click.echo("\nInstall dependencies: pip install fastmcp")
+        sys.exit(1)
+    except Exception as e:
+        click.secho(f"Error: {e}", fg="red", err=True)
+        sys.exit(1)
+
+
+@mcp.command()
+def doctor():
+    r"""Check MCP server health and dependencies.
+
+    \b
+    Example:
+      scitex scholar mcp doctor
+    """
+    click.secho("Scholar MCP Server Health Check", fg="cyan", bold=True)
+    click.echo()
+
+    click.echo("Checking FastMCP... ", nl=False)
+    try:
+        import fastmcp  # noqa: F401
+
+        click.secho("OK", fg="green")
+    except ImportError:
+        click.secho("NOT INSTALLED", fg="red")
+        click.echo("  Install with: pip install fastmcp")
+
+    click.echo("Checking scholar module... ", nl=False)
+    try:
+        from scitex import scholar as _  # noqa: F401
+
+        click.secho("OK", fg="green")
+    except ImportError as e:
+        click.secho(f"FAIL ({e})", fg="red")
+
+    click.echo("Checking crossref-local... ", nl=False)
+    try:
+        import crossref_local  # noqa: F401
+
+        click.secho("OK", fg="green")
+    except ImportError:
+        click.secho("NOT INSTALLED (optional)", fg="yellow")
+
+    click.echo("Checking openalex-local... ", nl=False)
+    try:
+        import openalex_local  # noqa: F401
+
+        click.secho("OK", fg="green")
+    except ImportError:
+        click.secho("NOT INSTALLED (optional)", fg="yellow")
+
+
+@mcp.command("list-tools")
+def list_tools():
+    r"""List available MCP tools.
+
+    \b
+    Example:
+      scitex scholar mcp list-tools
+    """
+    click.secho("Scholar MCP Tools", fg="cyan", bold=True)
+    click.echo()
+    tools = [
+        ("search_papers", "Search for papers by query"),
+        ("resolve_dois", "Resolve DOIs to metadata"),
+        ("enrich_bibtex", "Enrich BibTeX with abstracts/DOIs"),
+        ("download_pdf", "Download PDF for a paper"),
+        ("download_pdfs_batch", "Batch download PDFs"),
+        ("get_library_status", "Get library status"),
+        ("parse_bibtex", "Parse BibTeX file"),
+        ("validate_pdfs", "Validate downloaded PDFs"),
+        ("authenticate", "Authenticate with institution"),
+        ("check_auth_status", "Check authentication status"),
+        ("fetch_papers", "Fetch papers by DOIs (async)"),
+        # CrossRef-Local (167M+ papers)
+        ("crossref_search", "Search CrossRef database (167M+ papers)"),
+        ("crossref_get", "Get paper by DOI from CrossRef"),
+        ("crossref_count", "Count papers matching query"),
+        ("crossref_citations", "Get citation relationships"),
+        ("crossref_info", "Get CrossRef database status"),
+        # OpenAlex-Local (284M+ works)
+        ("openalex_search", "Search OpenAlex database (284M+ works)"),
+        ("openalex_get", "Get paper by DOI/ID from OpenAlex"),
+        ("openalex_count", "Count papers matching query"),
+        ("openalex_info", "Get OpenAlex database status"),
+    ]
+    for name, desc in tools:
+        click.echo(f"  {name}: {desc}")
+
+
 scholar.add_command(crossref_scitex)
+scholar.add_command(openalex_scitex)
 scholar.add_command(fetch)
 scholar.add_command(library)
 scholar.add_command(config)

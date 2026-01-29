@@ -1,0 +1,34 @@
+#!/bin/bash
+# -*- coding: utf-8 -*-
+# Timestamp: "2026-01-29 00:06:00 (ywatanabe)"
+# File: .env.d.examples/entry.src
+#
+# Single entry point for all SciTeX environment variables
+# MCP config only needs: SCITEX_ENV_SRC=/path/to/.env.d/entry.src
+
+# shellcheck disable=SC1091
+
+THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# ---------------------------------------
+
+export SCITEX_ENV_SRC="$0"
+
+# Standalone packages (can be used independently)
+source "$THIS_DIR"/00_scitex.env
+source "$THIS_DIR"/00_crossref-local.env
+source "$THIS_DIR"/00_figrecipe.env
+source "$THIS_DIR"/00_socialia.env
+source "$THIS_DIR"/00_scitex-writer.env
+
+# Modules (scitex.*)
+source "$THIS_DIR"/01_audio.env
+source "$THIS_DIR"/01_cloud.env
+source "$THIS_DIR"/01_config.env
+source "$THIS_DIR"/01_logging.env
+source "$THIS_DIR"/01_plt.env
+source "$THIS_DIR"/01_scholar.env
+source "$THIS_DIR"/01_social.env
+source "$THIS_DIR"/01_ui.env
+source "$THIS_DIR"/01_web.env
+
+# EOF

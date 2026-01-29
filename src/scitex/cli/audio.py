@@ -240,7 +240,28 @@ def stop():
         sys.exit(1)
 
 
-@audio.command()
+@audio.group(invoke_without_command=True)
+@click.pass_context
+def mcp(ctx):
+    """
+    MCP (Model Context Protocol) server operations
+
+    \b
+    Commands:
+      start      - Start the MCP server
+      doctor     - Check MCP server health
+      list-tools - List available MCP tools
+
+    \b
+    Examples:
+      scitex audio mcp start
+      scitex audio mcp start -t http --port 31293
+    """
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
+
+
+@mcp.command()
 @click.option(
     "-t",
     "--transport",
@@ -259,9 +280,9 @@ def stop():
     type=int,
     help="Port for HTTP/SSE transport (default: 31293)",
 )
-def serve(transport, host, port):
+def start(transport, host, port):
     """
-    Run MCP server for remote audio playback
+    Start the MCP server for remote audio playback
 
     Enables remote agents (via SSH) to play audio on local speakers.
 
@@ -273,22 +294,9 @@ def serve(transport, host, port):
 
     \b
     Examples:
-      # Local stdio (Claude Desktop)
-      scitex audio serve
-
-      # HTTP server for remote agents
-      scitex audio serve -t http --port 31293
-
-      # SSE server
-      scitex audio serve -t sse --port 31293
-
-    \b
-    Remote Setup:
-      1. Local:  scitex audio serve -t http --port 31293
-      2. SSH:    Add to ~/.ssh/config:
-                   LocalForward 31293 127.0.0.1:31293
-      3. Remote MCP config:
-                   {"type": "sse", "url": "http://localhost:31293/sse"}
+      scitex audio mcp start
+      scitex audio mcp start -t http --port 31293
+      scitex audio mcp start -t sse --port 31293
     """
     try:
         from scitex.audio.mcp_server import FASTMCP_AVAILABLE, run_server
@@ -318,6 +326,68 @@ def serve(transport, host, port):
     except Exception as e:
         click.secho(f"Error: {e}", fg="red", err=True)
         sys.exit(1)
+
+
+@mcp.command()
+def doctor():
+    """
+    Check MCP server health and dependencies
+
+    \b
+    Example:
+      scitex audio mcp doctor
+    """
+    click.secho("Audio MCP Server Health Check", fg="cyan", bold=True)
+    click.echo()
+
+    # Check fastmcp
+    click.echo("Checking FastMCP... ", nl=False)
+    try:
+        from scitex.audio.mcp_server import FASTMCP_AVAILABLE
+
+        if FASTMCP_AVAILABLE:
+            click.secho("OK", fg="green")
+        else:
+            click.secho("NOT INSTALLED", fg="red")
+            click.echo("  Install with: pip install fastmcp")
+    except ImportError:
+        click.secho("FAIL", fg="red")
+
+    # Check audio backends
+    click.echo("Checking audio backends... ", nl=False)
+    try:
+        from scitex.audio import available_backends
+
+        backends = available_backends()
+        if backends:
+            click.secho(f"OK ({', '.join(backends)})", fg="green")
+        else:
+            click.secho("NONE AVAILABLE", fg="yellow")
+    except Exception as e:
+        click.secho(f"FAIL ({e})", fg="red")
+
+
+@mcp.command("list-tools")
+def list_tools():
+    """
+    List available MCP tools
+
+    \b
+    Example:
+      scitex audio mcp list-tools
+    """
+    click.secho("Audio MCP Tools", fg="cyan", bold=True)
+    click.echo()
+    tools = [
+        ("audio_speak", "Convert text to speech and play audio"),
+        ("audio_generate_audio", "Generate audio file without playing"),
+        ("audio_list_backends", "List available TTS backends"),
+        ("audio_list_voices", "List available voices for a backend"),
+        ("audio_play_audio", "Play an audio file"),
+        ("audio_check_audio_status", "Check audio system status"),
+    ]
+    for name, desc in tools:
+        click.echo(f"  {name}: {desc}")
 
 
 @audio.command()
@@ -359,7 +429,7 @@ def relay(host, port):
     try:
         from scitex.audio.mcp_server import run_relay_server
 
-        click.secho(f"Starting audio relay server", fg="cyan")
+        click.secho("Starting audio relay server", fg="cyan")
         click.echo(f"  Host: {host}")
         click.echo(f"  Port: {port}")
         click.echo()

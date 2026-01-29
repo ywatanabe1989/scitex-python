@@ -11,7 +11,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scitex"
-version = "2.15.2"
+version = "2.15.4"
 description = "A comprehensive Python library for scientific computing and data analysis"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -408,7 +408,7 @@ plt = [
 repro = [
     "matplotlib",
     # # Heavy dependencies handled by _AVAILABLE flags
-    # "torch",    
+    # "torch",
     # "jax",
     # "tensorflow",
 ]
@@ -424,8 +424,8 @@ resource = [
     "h5py",
     "scipy",
     "readchar",
-    # # Heavy dependencies handled by _AVAILABLE flags    
-    # "torch",    
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "torch",
 ]
 
 # Scholar Module - Paper management & browser
@@ -465,7 +465,7 @@ scholar = [
     "sql-manager",
     "ruamel.yaml",
     # # Heavy dependencies handled by _AVAILABLE flags
-    # "torch",    
+    # "torch",
 ]
 
 # Session Module - Session management
@@ -489,7 +489,7 @@ stats = [
     "matplotlib",
     "tabulate",
     # # Heavy dependencies handled by _AVAILABLE flags
-    # "torch",    
+    # "torch",
 ]
 
 # Str Module - String utilities
@@ -516,8 +516,8 @@ torch = [
 # Use: pip install scitex[types]
 types = [
     "xarray",
-    # # Heavy dependencies handled by _AVAILABLE flags    
-    # "torch",    
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "torch",
 ]
 
 # Utils Module - General utilities
@@ -552,14 +552,15 @@ web = [
     "openai",
     "google-genai",
     "groq",
-    # # Heavy dependencies handled by _AVAILABLE flags        
-    # "torch",    
-    # "umap-learn",    
+    # # Heavy dependencies handled by _AVAILABLE flags
+    # "torch",
+    # "umap-learn",
 ]
 
 # Writer Module - Academic paper writing
 # Use: pip install scitex[writer]
 writer = [
+    "scitex-writer",  # Core writer package (single source of truth)
     "yq",
     "xlsx2csv",
     "csv2latex",

@@ -20,6 +20,7 @@ from ._cheatsheet import register_cheatsheet_resources
 from ._figrecipe import register_figrecipe_resources
 from ._formats import register_format_resources
 from ._modules import register_module_resources
+from ._scholar import register_scholar_resources
 from ._session import register_session_resources
 
 __all__ = ["register_resources"]
@@ -32,6 +33,7 @@ def register_resources(mcp) -> None:
     register_module_resources(mcp)
     register_format_resources(mcp)
     register_figrecipe_resources(mcp)
+    register_scholar_resources(mcp)
 
 
 # EOF

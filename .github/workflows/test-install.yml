@@ -1,11 +1,12 @@
 # Test PyPI installation
-# Triggered on release publication to verify package installs correctly
+# Triggered after Release workflow completes to verify package installs correctly
 
 name: Test Installation
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       version:
@@ -17,6 +18,8 @@ jobs:
   test-install-core:
     name: Test Core Install (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    # Only run if Release workflow succeeded
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -33,8 +36,14 @@ jobs:
         run: |
           if [ -n "${{ github.event.inputs.version }}" ]; then
             echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          elif [ -n "${{ github.event.workflow_run.head_branch }}" ]; then
+            # Extract version from tag (workflow_run trigger)
+            VERSION="${{ github.event.workflow_run.head_branch }}"
+            echo "version=${VERSION#v}" >> $GITHUB_OUTPUT
           else
-            echo "version=${{ github.event.release.tag_name }}" | sed 's/v//' >> $GITHUB_OUTPUT
+            # Fallback: get latest from PyPI
+            VERSION=$(pip index versions scitex 2>/dev/null | grep -oP 'scitex \(\K[^)]+' | head -1)
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
           fi
 
       - name: Wait for PyPI propagation
@@ -59,6 +68,8 @@ jobs:
   test-install-all:
     name: Test Full Install (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    # Only run if Release workflow succeeded
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -75,8 +86,14 @@ jobs:
         run: |
           if [ -n "${{ github.event.inputs.version }}" ]; then
             echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          elif [ -n "${{ github.event.workflow_run.head_branch }}" ]; then
+            # Extract version from tag (workflow_run trigger)
+            VERSION="${{ github.event.workflow_run.head_branch }}"
+            echo "version=${VERSION#v}" >> $GITHUB_OUTPUT
           else
-            echo "version=${{ github.event.release.tag_name }}" | sed 's/v//' >> $GITHUB_OUTPUT
+            # Fallback: get latest from PyPI
+            VERSION=$(pip index versions scitex 2>/dev/null | grep -oP 'scitex \(\K[^)]+' | head -1)
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
           fi
 
       - name: Wait for PyPI propagation

@@ -1,4 +1,4 @@
-# SciTeX MCP Tools (112 total)
+# SciTeX MCP Tools (145 total)
 
 Model Context Protocol tools for AI agent integration.
 

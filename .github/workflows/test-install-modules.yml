@@ -4,8 +4,9 @@
 name: Test Module Installation
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       version:
@@ -22,6 +23,8 @@ jobs:
   get-modules:
     name: Get Module List
     runs-on: ubuntu-latest
+    # Only run if Release workflow succeeded
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     outputs:
       modules: ${{ steps.modules.outputs.modules }}
     steps:
@@ -65,8 +68,9 @@ jobs:
         run: |
           if [ -n "${{ github.event.inputs.version }}" ]; then
             echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          elif [ -n "${{ github.event.release.tag_name }}" ]; then
-            VERSION="${{ github.event.release.tag_name }}"
+          elif [ -n "${{ github.event.workflow_run.head_branch }}" ]; then
+            # Extract version from tag (workflow_run trigger)
+            VERSION="${{ github.event.workflow_run.head_branch }}"
             echo "version=${VERSION#v}" >> $GITHUB_OUTPUT
           else
             # Get latest from PyPI

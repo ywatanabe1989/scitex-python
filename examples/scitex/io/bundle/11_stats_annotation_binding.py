@@ -43,7 +43,9 @@ def generate_sample_data():
 def compute_statistics(data, logger):
     """Compute statistics for group comparison."""
     t_stat, p_value = scipy_stats.ttest_ind(data["control"], data["treatment"])
-    effect_size = (np.mean(data["treatment"]) - np.mean(data["control"])) / np.std(data["control"])
+    effect_size = (np.mean(data["treatment"]) - np.mean(data["control"])) / np.std(
+        data["control"]
+    )
 
     logger.info(f"Statistical test: t={t_stat:.3f}, p={p_value:.6f}")
     logger.info(f"Effect size (Cohen's d): {effect_size:.3f}")
@@ -73,7 +75,13 @@ def create_plot(plt, data, stats_result, out_dir):
     # Add significance indicator
     y_max = max(means) + max(stds) + 0.5
     ax.plot([0, 0, 1, 1], [y_max, y_max + 0.3, y_max + 0.3, y_max], "k-", lw=1.2)
-    ax.text(0.5, y_max + 0.4, sstats.p_to_stars(stats_result["p_value"]), ha="center", fontsize=14)
+    ax.text(
+        0.5,
+        y_max + 0.4,
+        sstats.p_to_stars(stats_result["p_value"]),
+        ha="center",
+        fontsize=14,
+    )
 
     bundle_path = out_dir / "stats_binding.zip"
     sio.save(fig, bundle_path)

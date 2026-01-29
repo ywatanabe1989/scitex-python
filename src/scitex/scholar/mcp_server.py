@@ -3,8 +3,17 @@
 # File: src/scitex/scholar/mcp_server.py
 # ----------------------------------------
 
-"""
-MCP Server for SciTeX Scholar - Scientific Literature Management
+"""MCP Server for SciTeX Scholar - Scientific Literature Management.
+
+.. deprecated::
+    This standalone server is deprecated. Use the unified scitex MCP server instead:
+
+    CLI: scitex serve
+    Python: from scitex.mcp_server import run_server
+
+    The unified server includes all scholar tools plus other scitex tools.
+    Scholar tools are prefixed with 'scholar_' (e.g., scholar_search_papers).
+    Scholar resources are available at scholar://library and scholar://bibtex.
 
 Provides tools for:
 - Searching papers across multiple databases
@@ -15,6 +24,15 @@ Provides tools for:
 """
 
 from __future__ import annotations
+
+import warnings
+
+warnings.warn(
+    "scitex.scholar.mcp_server is deprecated. Use 'scitex serve' or "
+    "'from scitex.mcp_server import run_server' for the unified MCP server.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 import asyncio
 import os
@@ -67,11 +85,18 @@ class ScholarServer:
 
                 self._scholar_instance = Scholar()
             except ImportError as e:
-                raise RuntimeError(f"Scholar module not available: {e}")
+                raise RuntimeError(f"Scholar module not available: {e}") from e
         return self._scholar_instance
 
     def setup_handlers(self):
         """Set up MCP server handlers."""
+        from ._mcp.crossref_handlers import (
+            crossref_citations_handler,
+            crossref_count_handler,
+            crossref_get_handler,
+            crossref_info_handler,
+            crossref_search_handler,
+        )
         from ._mcp.handlers import (
             add_papers_to_project_handler,
             authenticate_handler,
@@ -185,6 +210,36 @@ class ScholarServer:
                 return await self._wrap_result(cancel_job_handler(**arguments))
             elif name == "get_job_result":
                 return await self._wrap_result(get_job_result_handler(**arguments))
+
+            # CrossRef-Local Tools
+            elif name == "crossref_search":
+                return await self._wrap_result(crossref_search_handler(**arguments))
+            elif name == "crossref_get":
+                return await self._wrap_result(crossref_get_handler(**arguments))
+            elif name == "crossref_count":
+                return await self._wrap_result(crossref_count_handler(**arguments))
+            elif name == "crossref_citations":
+                return await self._wrap_result(crossref_citations_handler(**arguments))
+            elif name == "crossref_info":
+                return await self._wrap_result(crossref_info_handler(**arguments))
+
+            # OpenAlex-Local Tools
+            elif name == "openalex_search":
+                from ._mcp.openalex_handlers import openalex_search_handler
+
+                return await self._wrap_result(openalex_search_handler(**arguments))
+            elif name == "openalex_get":
+                from ._mcp.openalex_handlers import openalex_get_handler
+
+                return await self._wrap_result(openalex_get_handler(**arguments))
+            elif name == "openalex_count":
+                from ._mcp.openalex_handlers import openalex_count_handler
+
+                return await self._wrap_result(openalex_count_handler(**arguments))
+            elif name == "openalex_info":
+                from ._mcp.openalex_handlers import openalex_info_handler
+
+                return await self._wrap_result(openalex_info_handler(**arguments))
 
             else:
                 raise ValueError(f"Unknown tool: {name}")
@@ -340,7 +395,7 @@ async def _run_server():
 
 
 def main():
-    """Main entry point for the MCP server."""
+    """Run the MCP server."""
     if not MCP_AVAILABLE:
         import sys
 

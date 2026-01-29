@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import json
-from typing import List, Optional
 
 
 def _json(data: dict) -> str:
@@ -20,10 +19,10 @@ def register_scholar_tools(mcp) -> None:
     async def scholar_search_papers(
         query: str,
         limit: int = 20,
-        year_min: Optional[int] = None,
-        year_max: Optional[int] = None,
+        year_min: int | None = None,
+        year_max: int | None = None,
         search_mode: str = "local",
-        sources: Optional[List[str]] = None,
+        sources: list[str] | None = None,
     ) -> str:
         """[scholar] Search for scientific papers. Supports local library search and external databases (CrossRef, Semantic Scholar, PubMed, arXiv, OpenAlex)."""
         from scitex.scholar._mcp.handlers import search_papers_handler
@@ -40,9 +39,9 @@ def register_scholar_tools(mcp) -> None:
 
     @mcp.tool()
     async def scholar_resolve_dois(
-        titles: Optional[List[str]] = None,
-        bibtex_path: Optional[str] = None,
-        project: Optional[str] = None,
+        titles: list[str] | None = None,
+        bibtex_path: str | None = None,
+        project: str | None = None,
         resume: bool = True,
     ) -> str:
         """[scholar] Resolve DOIs from paper titles using Crossref API. Supports resumable operation for large batches."""
@@ -59,7 +58,7 @@ def register_scholar_tools(mcp) -> None:
     @mcp.tool()
     async def scholar_enrich_bibtex(
         bibtex_path: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
         add_abstracts: bool = True,
         add_citations: bool = True,
         add_impact_factors: bool = True,
@@ -94,10 +93,10 @@ def register_scholar_tools(mcp) -> None:
 
     @mcp.tool()
     async def scholar_download_pdfs_batch(
-        dois: Optional[List[str]] = None,
-        bibtex_path: Optional[str] = None,
-        project: Optional[str] = None,
-        output_dir: Optional[str] = None,
+        dois: list[str] | None = None,
+        bibtex_path: str | None = None,
+        project: str | None = None,
+        output_dir: str | None = None,
         max_concurrent: int = 3,
         resume: bool = True,
     ) -> str:
@@ -116,7 +115,7 @@ def register_scholar_tools(mcp) -> None:
 
     @mcp.tool()
     async def scholar_get_library_status(
-        project: Optional[str] = None,
+        project: str | None = None,
         include_details: bool = False,
     ) -> str:
         """[scholar] Get status of the paper library: download progress, missing PDFs, validation status."""
@@ -138,8 +137,8 @@ def register_scholar_tools(mcp) -> None:
 
     @mcp.tool()
     async def scholar_validate_pdfs(
-        project: Optional[str] = None,
-        pdf_paths: Optional[List[str]] = None,
+        project: str | None = None,
+        pdf_paths: list[str] | None = None,
     ) -> str:
         """[scholar] Validate PDF files in library for completeness and readability."""
         from scitex.scholar._mcp.handlers import validate_pdfs_handler
@@ -152,8 +151,8 @@ def register_scholar_tools(mcp) -> None:
 
     @mcp.tool()
     async def scholar_resolve_openurls(
-        dois: List[str],
-        resolver_url: Optional[str] = None,
+        dois: list[str],
+        resolver_url: str | None = None,
         resume: bool = True,
     ) -> str:
         """[scholar] Resolve publisher URLs via OpenURL resolver for institutional access."""
@@ -169,7 +168,7 @@ def register_scholar_tools(mcp) -> None:
     @mcp.tool()
     async def scholar_authenticate(
         method: str,
-        institution: Optional[str] = None,
+        institution: str | None = None,
         force: bool = False,
         confirm: bool = False,
     ) -> str:
@@ -215,7 +214,7 @@ def register_scholar_tools(mcp) -> None:
     @mcp.tool()
     async def scholar_export_papers(
         output_path: str,
-        project: Optional[str] = None,
+        project: str | None = None,
         format: str = "bibtex",
         filter_has_pdf: bool = False,
     ) -> str:
@@ -233,7 +232,7 @@ def register_scholar_tools(mcp) -> None:
     @mcp.tool()
     async def scholar_create_project(
         project_name: str,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> str:
         """[scholar] Create a new scholar project for organizing papers."""
         from scitex.scholar._mcp.handlers import create_project_handler
@@ -255,8 +254,8 @@ def register_scholar_tools(mcp) -> None:
     @mcp.tool()
     async def scholar_add_papers_to_project(
         project: str,
-        dois: Optional[List[str]] = None,
-        bibtex_path: Optional[str] = None,
+        dois: list[str] | None = None,
+        bibtex_path: str | None = None,
     ) -> str:
         """[scholar] Add papers to a project by DOI or from BibTeX file."""
         from scitex.scholar._mcp.handlers import add_papers_to_project_handler
@@ -270,14 +269,14 @@ def register_scholar_tools(mcp) -> None:
 
     @mcp.tool()
     async def scholar_parse_pdf_content(
-        pdf_path: Optional[str] = None,
-        doi: Optional[str] = None,
-        project: Optional[str] = None,
+        pdf_path: str | None = None,
+        doi: str | None = None,
+        project: str | None = None,
         mode: str = "scientific",
         extract_sections: bool = True,
         extract_tables: bool = False,
         extract_images: bool = False,
-        max_pages: Optional[int] = None,
+        max_pages: int | None = None,
     ) -> str:
         """[scholar] Parse PDF content to extract text, sections (IMRaD), tables, images, and metadata."""
         from scitex.scholar._mcp.handlers import parse_pdf_content_handler
@@ -297,14 +296,14 @@ def register_scholar_tools(mcp) -> None:
     # Job management tools (from job_handlers.py)
     @mcp.tool()
     async def scholar_fetch_papers(
-        papers: Optional[List[str]] = None,
-        bibtex_path: Optional[str] = None,
-        project: Optional[str] = None,
-        workers: Optional[int] = None,
+        papers: list[str] | None = None,
+        bibtex_path: str | None = None,
+        project: str | None = None,
+        workers: int | None = None,
         browser_mode: str = "stealth",
         chrome_profile: str = "system",
         force: bool = False,
-        output: Optional[str] = None,
+        output: str | None = None,
         async_mode: bool = True,
     ) -> str:
         """[scholar] Fetch papers to your library. Supports async mode (default) which returns immediately with a job_id for tracking."""
@@ -325,7 +324,7 @@ def register_scholar_tools(mcp) -> None:
 
     @mcp.tool()
     async def scholar_list_jobs(
-        status: Optional[str] = None,
+        status: str | None = None,
         limit: int = 20,
     ) -> str:
         """[scholar] List all background jobs with their status."""
@@ -369,79 +368,31 @@ def register_scholar_tools(mcp) -> None:
         result = await get_job_result_handler(job_id=job_id)
         return _json(result)
 
-    # =========================================================================
-    # CrossRef Tools (via crossref-local delegation - 167M+ papers)
-    # =========================================================================
+    # Import crossref-local and openalex-local MCP servers
+    _import_local_db_servers(mcp)
 
-    @mcp.tool()
-    async def scholar_crossref_search(
-        query: str,
-        limit: int = 20,
-        offset: int = 0,
-        year_min: Optional[int] = None,
-        year_max: Optional[int] = None,
-        enrich: bool = False,
-    ) -> str:
-        """[scholar] Search CrossRef database (167M+ papers) via crossref-local. Fast full-text search with optional citation enrichment."""
-        from scitex.scholar._mcp.crossref_handlers import crossref_search_handler
 
-        result = await crossref_search_handler(
-            query=query,
-            limit=limit,
-            offset=offset,
-            year_min=year_min,
-            year_max=year_max,
-            enrich=enrich,
-        )
-        return _json(result)
+def _import_local_db_servers(mcp) -> None:
+    """Mount crossref-local and openalex-local MCP servers if available.
 
-    @mcp.tool()
-    async def scholar_crossref_get(
-        doi: str,
-        include_citations: bool = False,
-        include_references: bool = False,
-    ) -> str:
-        """[scholar] Get paper metadata by DOI from CrossRef database."""
-        from scitex.scholar._mcp.crossref_handlers import crossref_get_handler
+    Uses fastmcp's mount() for automatic tool delegation.
+    Tools are prefixed: crossref_search, openalex_search, etc.
+    """
+    # Mount crossref-local MCP server (167M+ papers)
+    try:
+        from crossref_local.mcp_server import mcp as crossref_mcp
 
-        result = await crossref_get_handler(
-            doi=doi,
-            include_citations=include_citations,
-            include_references=include_references,
-        )
-        return _json(result)
+        mcp.mount(crossref_mcp, prefix="crossref")
+    except ImportError:
+        pass  # crossref-local not installed
 
-    @mcp.tool()
-    async def scholar_crossref_count(query: str) -> str:
-        """[scholar] Count papers matching a query in CrossRef database."""
-        from scitex.scholar._mcp.crossref_handlers import crossref_count_handler
+    # Mount openalex-local MCP server (250M+ papers)
+    try:
+        from openalex_local._cli.mcp_server import mcp as openalex_mcp
 
-        result = await crossref_count_handler(query=query)
-        return _json(result)
-
-    @mcp.tool()
-    async def scholar_crossref_citations(
-        doi: str,
-        direction: str = "citing",
-        limit: int = 100,
-    ) -> str:
-        """[scholar] Get citation relationships (citing/cited papers) for a DOI."""
-        from scitex.scholar._mcp.crossref_handlers import crossref_citations_handler
-
-        result = await crossref_citations_handler(
-            doi=doi,
-            direction=direction,
-            limit=limit,
-        )
-        return _json(result)
-
-    @mcp.tool()
-    async def scholar_crossref_info() -> str:
-        """[scholar] Get CrossRef database configuration and status info."""
-        from scitex.scholar._mcp.crossref_handlers import crossref_info_handler
-
-        result = await crossref_info_handler()
-        return _json(result)
+        mcp.mount(openalex_mcp, prefix="openalex")
+    except ImportError:
+        pass  # openalex-local not installed
 
 
 # EOF

@@ -4,6 +4,7 @@
 
 """Module API listing utilities."""
 
+import importlib
 import inspect
 import sys
 import warnings
@@ -108,10 +109,12 @@ def _list_api_impl(
         warnings.filterwarnings("ignore", category=UserWarning)
 
     if isinstance(module, str):
+        # Normalize hyphens to underscores for Python module names
+        module_name = module.replace("-", "_")
         try:
-            module = __import__(module)
+            module = importlib.import_module(module_name)
         except ImportError as err:
-            print(f"Error importing module {module}: {err}")
+            print(f"Error importing module {module_name}: {err}")
             return pd.DataFrame(columns=columns)
 
     if visited is None:
