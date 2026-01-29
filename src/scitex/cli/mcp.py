@@ -25,8 +25,26 @@ def mcp(ctx, help_recursive):
         click.echo(ctx.get_help())
 
 
-def _format_signature(tool_obj) -> str:
-    """Format tool as Python-like function signature."""
+def _extract_return_keys(description: str) -> list:
+    """Extract return dict keys from docstring Returns section."""
+    import re
+
+    if not description or "Returns" not in description:
+        return []
+    match = re.search(
+        r"Returns\s*[-]+\s*\w+\s*(.+?)(?:Raises|Examples|Notes|\Z)",
+        description,
+        re.DOTALL,
+    )
+    if not match:
+        return []
+    return re.findall(r"'([a-z_]+)'", match.group(1))
+
+
+def _format_signature(tool_obj, multiline: bool = False, indent: str = "  ") -> str:
+    """Format tool as Python-like function signature with return type."""
+    import inspect
+
     params = []
     if hasattr(tool_obj, "parameters") and tool_obj.parameters:
         schema = tool_obj.parameters
@@ -36,12 +54,38 @@ def _format_signature(tool_obj) -> str:
             ptype = info.get("type", "any")
             default = info.get("default")
             if name in required:
-                params.append(f"{name}: {ptype}")
+                p = f"{click.style(name, fg='white', bold=True)}: {click.style(ptype, fg='cyan')}"
             elif default is not None:
-                params.append(f"{name}: {ptype} = {default!r}")
+                def_str = repr(default) if len(repr(default)) < 20 else "..."
+                p = f"{click.style(name, fg='white', bold=True)}: {click.style(ptype, fg='cyan')} = {click.style(def_str, fg='yellow')}"
             else:
-                params.append(f"{name}: {ptype} = None")
-    return f"{tool_obj.name}({', '.join(params)})"
+                p = f"{click.style(name, fg='white', bold=True)}: {click.style(ptype, fg='cyan')} = {click.style('None', fg='yellow')}"
+            params.append(p)
+    # Get return type from function annotation + dict keys from docstring
+    ret_type = ""
+    if hasattr(tool_obj, "fn") and tool_obj.fn:
+        try:
+            sig = inspect.signature(tool_obj.fn)
+            if sig.return_annotation != inspect.Parameter.empty:
+                ret = sig.return_annotation
+                ret_name = ret.__name__ if hasattr(ret, "__name__") else str(ret)
+                keys = (
+                    _extract_return_keys(tool_obj.description)
+                    if tool_obj.description
+                    else []
+                )
+                keys_str = (
+                    click.style(f"{{{', '.join(keys)}}}", fg="yellow") if keys else ""
+                )
+                ret_type = f" -> {click.style(ret_name, fg='magenta')}{keys_str}"
+        except Exception:
+            pass
+    name_s = click.style(tool_obj.name, fg="green", bold=True)
+    if multiline and len(params) > 2:
+        param_indent = indent + "    "
+        params_str = ",\n".join(f"{param_indent}{p}" for p in params)
+        return f"{indent}{name_s}(\n{params_str}\n{indent}){ret_type}"
+    return f"{indent}{name_s}({', '.join(params)}){ret_type}"
 
 
 def _estimate_tokens(text: str) -> int:
@@ -79,6 +123,7 @@ def _get_mcp_summary(mcp_server) -> dict:
 
 @mcp.command("list-tools")
 @click.option("-v", "--verbose", count=True, help="Verbosity: -v, -vv, -vvv.")
+@click.option("-c", "--compact", is_flag=True, help="Compact signatures (single line)")
 @click.option(
     "--module",
     "-m",
@@ -88,11 +133,21 @@ def _get_mcp_summary(mcp_server) -> dict:
 )
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 @click.option("--summary", "show_summary", is_flag=True, help="Show context summary")
-def list_tools(verbose: int, module: str, as_json: bool, show_summary: bool):
+def list_tools(
+    verbose: int, compact: bool, module: str, as_json: bool, show_summary: bool
+):
     """List all available MCP tools.
 
     Verbosity: (none) names, -v signatures, -vv +description, -vvv full.
+    Signatures are expanded by default; use -c/--compact for single line.
     """  # noqa: D301
+    import logging
+    import warnings
+
+    # Suppress DeprecationWarnings from third-party libraries (httplib2, etc.)
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    # Suppress INFO messages from env loader during import
+    logging.getLogger("scitex._env_loader").setLevel(logging.WARNING)
     try:
         from scitex.mcp_server import FASTMCP_AVAILABLE
         from scitex.mcp_server import mcp as mcp_server
@@ -180,20 +235,32 @@ def list_tools(verbose: int, module: str, as_json: bool, show_summary: bool):
                     click.echo(f"  {tool_name}")
                 elif verbose == 1:
                     # Full signature
-                    sig = _format_signature(tool_obj) if tool_obj else tool_name
-                    click.echo(f"  {sig}")
+                    sig = (
+                        _format_signature(tool_obj, multiline=not compact)
+                        if tool_obj
+                        else f"  {tool_name}"
+                    )
+                    click.echo(sig)
                 elif verbose == 2:
                     # Signature + one-line description
-                    sig = _format_signature(tool_obj) if tool_obj else tool_name
-                    click.echo(f"  {sig}")
+                    sig = (
+                        _format_signature(tool_obj, multiline=not compact)
+                        if tool_obj
+                        else f"  {tool_name}"
+                    )
+                    click.echo(sig)
                     if tool_obj and tool_obj.description:
                         desc = tool_obj.description.split("\n")[0].strip()
                         click.echo(f"    {desc}")
                     click.echo()
                 else:
                     # Signature + full description
-                    sig = _format_signature(tool_obj) if tool_obj else tool_name
-                    click.echo(f"  {sig}")
+                    sig = (
+                        _format_signature(tool_obj, multiline=not compact)
+                        if tool_obj
+                        else f"  {tool_name}"
+                    )
+                    click.echo(sig)
                     if tool_obj and tool_obj.description:
                         for line in tool_obj.description.strip().split("\n"):
                             click.echo(f"    {line}")
