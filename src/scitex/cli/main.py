@@ -338,5 +338,23 @@ def completion_fish():
         sys.exit(1)
 
 
+@cli.command("list-python-apis")
+@click.option("-v", "--verbose", count=True, help="Verbosity: -v +doc, -vv full doc")
+@click.option("-d", "--max-depth", type=int, default=5, help="Max recursion depth")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+@click.pass_context
+def list_python_apis(ctx, verbose, max_depth, as_json):
+    """List all scitex Python APIs (alias for: scitex introspect api scitex)."""
+    from .introspect import api
+
+    ctx.invoke(
+        api,
+        dotted_path="scitex",
+        verbose=verbose,
+        max_depth=max_depth,
+        as_json=as_json,
+    )
+
+
 if __name__ == "__main__":
     cli()

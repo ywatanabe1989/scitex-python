@@ -146,10 +146,13 @@ def _list_api_impl(
             obj_name = f"{full_path}.{name}"
 
             if inspect.ismodule(obj):
-                # Only recurse into submodules of the same package (skip stdlib/external)
+                # Only recurse into direct submodules (not sibling packages)
                 obj_mod_name = getattr(obj, "__name__", "")
-                root_pkg = module_name.split(".")[0]
-                if obj_mod_name.startswith(root_pkg) and obj_mod_name not in visited:
+                # Check if this is a direct submodule of current module
+                if (
+                    obj_mod_name.startswith(module_name + ".")
+                    and obj_mod_name not in visited
+                ):
                     content_list.append(
                         (
                             "M",
@@ -178,10 +181,12 @@ def _list_api_impl(
                     except Exception as err:
                         print(f"Error processing module {obj_name}: {err}")
             elif inspect.isfunction(obj):
-                # Only include functions defined in this package
+                # Only include functions defined in this module (not re-exported from siblings)
                 obj_module = getattr(obj, "__module__", "")
-                root_pkg = module_name.split(".")[0]
-                if obj_module.startswith(root_pkg):
+                # Check if function is defined in current module or its submodules
+                if obj_module == module_name or obj_module.startswith(
+                    module_name + "."
+                ):
                     content_list.append(
                         (
                             "F",
@@ -191,10 +196,12 @@ def _list_api_impl(
                         )
                     )
             elif inspect.isclass(obj):
-                # Only include classes defined in this package
+                # Only include classes defined in this module (not re-exported from siblings)
                 obj_module = getattr(obj, "__module__", "")
-                root_pkg = module_name.split(".")[0]
-                if obj_module.startswith(root_pkg):
+                # Check if class is defined in current module or its submodules
+                if obj_module == module_name or obj_module.startswith(
+                    module_name + "."
+                ):
                     content_list.append(
                         (
                             "C",
