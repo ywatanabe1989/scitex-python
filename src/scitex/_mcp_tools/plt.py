@@ -28,15 +28,16 @@ def register_plt_tools(mcp) -> None:
         from figrecipe._mcp import server as fr_mcp
 
         # Access underlying functions from FunctionTool objects
-        _plot = fr_mcp.plot.fn
-        _reproduce = fr_mcp.reproduce.fn
-        _compose = fr_mcp.compose.fn
-        _info = fr_mcp.info.fn
-        _validate = fr_mcp.validate.fn
-        _crop = fr_mcp.crop.fn
-        _extract_data = fr_mcp.extract_data.fn
-        _list_styles = fr_mcp.list_styles.fn
-        _get_plot_types = fr_mcp.get_plot_types.fn
+        # figrecipe tools are named plt_* for proper MCP categorization
+        _plot = fr_mcp.plt_plot.fn
+        _reproduce = fr_mcp.plt_reproduce.fn
+        _compose = fr_mcp.plt_compose.fn
+        _info = fr_mcp.plt_info.fn
+        _validate = fr_mcp.plt_validate.fn
+        _crop = fr_mcp.plt_crop.fn
+        _extract_data = fr_mcp.plt_extract_data.fn
+        _list_styles = fr_mcp.plt_list_styles.fn
+        _get_plot_types = fr_mcp.plt_get_plot_types.fn
 
         _FIGRECIPE_AVAILABLE = True
     except ImportError:
@@ -53,7 +54,6 @@ def register_plt_tools(mcp) -> None:
 
     # Delegate to figrecipe's MCP tools with plt_ prefix
     # Each wrapper simply calls the figrecipe function
-
 
     @mcp.tool()
     def plt_plot(

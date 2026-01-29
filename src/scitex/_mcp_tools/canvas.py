@@ -150,11 +150,13 @@ def _mount_figrecipe(mcp) -> None:
     """Mount figrecipe MCP server for composition tools.
 
     Provides: plt_plot, plt_compose, plt_reproduce, plt_info, etc.
+    Note: figrecipe tools are already prefixed with plt_ so no additional prefix needed.
     """
     try:
         from figrecipe._mcp.server import mcp as figrecipe_mcp
 
-        mcp.mount(figrecipe_mcp, prefix="plt")
+        # Don't add prefix - figrecipe tools already have plt_/diagram_ prefixes
+        mcp.mount(figrecipe_mcp)
     except ImportError:
         pass  # figrecipe not installed
 

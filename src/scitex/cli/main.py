@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
-"""
-SciTeX CLI Main Entry Point
-"""
+"""SciTeX CLI Main Entry Point."""
+
+# Suppress httplib2/pyparsing deprecation warnings BEFORE any imports
+# These are from system packages using old pyparsing API
+import warnings
+
+# Filter pyparsing-related deprecation warnings from httplib2
+for msg in [
+    "setName",
+    "leaveWhitespace",
+    "setParseAction",
+    "addParseAction",
+    "delimitedList",
+]:
+    warnings.filterwarnings(
+        "ignore", message=f".*{msg}.*deprecated.*", category=DeprecationWarning
+    )
 
 import os
 import sys
@@ -15,6 +29,7 @@ from . import (
     cloud,
     config,
     convert,
+    dataset,
     introspect,
     mcp,
     plt,
@@ -39,8 +54,8 @@ from . import (
 @click.option("--help-recursive", is_flag=True, help="Show help for all commands")
 @click.pass_context
 def cli(ctx, help_recursive):
-    """
-    SciTeX - Integrated Scientific Research Platform
+    r"""
+    SciTeX - Integrated Scientific Research Platform.
 
     \b
     Examples:
@@ -70,6 +85,7 @@ cli.add_command(capture.capture)
 cli.add_command(cloud.cloud)
 cli.add_command(config.config)
 cli.add_command(convert.convert)
+cli.add_command(dataset.dataset)
 cli.add_command(introspect.introspect)
 cli.add_command(mcp.mcp)
 cli.add_command(plt.plt)
@@ -160,7 +176,7 @@ def _generate_completion_script(shell: str) -> str:
 @cli.group(invoke_without_command=True)
 @click.pass_context
 def completion(ctx):
-    """
+    r"""
     Shell completion for scitex CLI.
 
     \b
@@ -186,7 +202,7 @@ def completion(ctx):
     help="Shell type (auto-detected if not provided).",
 )
 def completion_install(shell):
-    """
+    r"""
     Install shell completion for scitex CLI.
 
     \b
@@ -244,7 +260,7 @@ def completion_install(shell):
 
 @completion.command("status")
 def completion_status():
-    """
+    r"""
     Check shell completion installation status.
 
     \b
