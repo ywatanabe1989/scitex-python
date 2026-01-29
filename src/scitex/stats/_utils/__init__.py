@@ -9,33 +9,26 @@ Helper functions for effect sizes, power analysis, formatting, and data normaliz
 
 # Effect sizes
 from ._effect_size import (
-    cohens_d,
     cliffs_delta,
-    prob_superiority,
-    eta_squared,
+    cohens_d,
     epsilon_squared,
-    interpret_cohens_d,
+    eta_squared,
     interpret_cliffs_delta,
-    interpret_prob_superiority,
-    interpret_eta_squared,
+    interpret_cohens_d,
     interpret_epsilon_squared,
-)
-
-# Power analysis
-from ._power import (
-    power_ttest,
-    sample_size_ttest,
+    interpret_eta_squared,
+    interpret_prob_superiority,
+    prob_superiority,
 )
 
 # Formatters
-from ._formatters import (
-    p2stars,
-)
+from ._formatters import p2stars
 
 # Normalizers
-from ._normalizers import (
-    force_dataframe,
-)
+from ._normalizers import force_dataframe
+
+# Power analysis
+from ._power import power_ttest, sample_size_ttest
 
 __all__ = [
     # Effect sizes

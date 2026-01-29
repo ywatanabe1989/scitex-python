@@ -43,24 +43,11 @@ except ImportError:
 
 # Export key auto module classes at top level for convenience
 # Internal imports (hidden with underscore prefix)
-from .auto import (
-    TEST_RULES as _TEST_RULES,
-)
-from .auto import (
-    StatContext,
-    StatStyle,
-    TestRule,
-    check_applicable,
-    get_stat_style,
-    p_to_stars,
-    recommend_tests,
-)
-from .auto import (
-    format_test_line as _format_test_line,
-)
-from .auto import (
-    get_menu_items as _get_menu_items,
-)
+from .auto import TEST_RULES as _TEST_RULES
+from .auto import StatContext, StatStyle, TestRule, check_applicable
+from .auto import format_test_line as _format_test_line
+from .auto import get_menu_items as _get_menu_items
+from .auto import get_stat_style, p_to_stars, recommend_tests
 
 # =============================================================================
 # Stats Schema - Use scitex.io.bundle.Stats as single source of truth
@@ -196,11 +183,7 @@ def test_result_to_stats(result: dict) -> "Stats":
 # Figrecipe Integration (for plot annotations)
 # =============================================================================
 
-from ._figrecipe_integration import (
-    annotate,
-    load_and_annotate,
-    to_figrecipe,
-)
+from ._figrecipe_integration import annotate, load_and_annotate, to_figrecipe
 
 # =============================================================================
 # .stats Bundle Support

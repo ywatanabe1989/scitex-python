@@ -19,12 +19,14 @@ IO:
 """
 
 """Imports"""
-import sys
 import argparse
+import sys
+from typing import Literal, Optional, Union
+
 import numpy as np
 import pandas as pd
-from typing import Union, Optional, Literal
 from scipy import stats
+
 import scitex as stx
 from scitex.logging import getLogger
 
@@ -405,6 +407,7 @@ def run_main():
     global CONFIG, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
 
     args = parse_args()

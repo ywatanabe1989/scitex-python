@@ -61,9 +61,9 @@ class TestPowerTtest:
         """Test power at boundary cases."""
         # Large n should give power close to 1 (use moderate n to avoid overflow)
         power = power_ttest(effect_size=0.5, n1=200, n2=200)
-        assert power > 0.99 or np.isnan(power), (
-            "Large n should give power ~1 (or nan on overflow)"
-        )
+        assert power > 0.99 or np.isnan(
+            power
+        ), "Large n should give power ~1 (or nan on overflow)"
 
         # Very small effect should give power close to alpha
         power = power_ttest(effect_size=0.01, n1=30, n2=30)
@@ -191,9 +191,9 @@ class TestPowerSampleSizeConsistency:
         actual_power = power_ttest(effect_size=effect_size, n1=n1, n2=n2)
 
         # Actual power should be >= target (due to rounding up)
-        assert actual_power >= target_power, (
-            f"Calculated n={n1} should achieve power>={target_power}, got {actual_power}"
-        )
+        assert (
+            actual_power >= target_power
+        ), f"Calculated n={n1} should achieve power>={target_power}, got {actual_power}"
 
     def test_round_trip_one_sample(self):
         """Test round trip for one-sample test."""
@@ -205,9 +205,9 @@ class TestPowerSampleSizeConsistency:
         )
         actual_power = power_ttest(effect_size=effect_size, n=n, test_type="one-sample")
 
-        assert actual_power >= target_power, (
-            f"Calculated n={n} should achieve power>={target_power}, got {actual_power}"
-        )
+        assert (
+            actual_power >= target_power
+        ), f"Calculated n={n} should achieve power>={target_power}, got {actual_power}"
 
     def test_round_trip_paired(self):
         """Test round trip for paired test."""
@@ -219,9 +219,9 @@ class TestPowerSampleSizeConsistency:
         )
         actual_power = power_ttest(effect_size=effect_size, n=n, test_type="paired")
 
-        assert actual_power >= target_power, (
-            f"Calculated n={n} should achieve power>={target_power}, got {actual_power}"
-        )
+        assert (
+            actual_power >= target_power
+        ), f"Calculated n={n} should achieve power>={target_power}, got {actual_power}"
 
 
 if __name__ == "__main__":

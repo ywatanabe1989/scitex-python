@@ -7,9 +7,14 @@
 import numpy as np
 import pandas as pd
 import pytest
+
 from scitex.stats._utils._normalizers import (
-    force_dataframe, to_dict, to_dataframe,
-    normalize_result, combine_results, convert_results
+    combine_results,
+    convert_results,
+    force_dataframe,
+    normalize_result,
+    to_dataframe,
+    to_dict,
 )
 
 
@@ -18,61 +23,56 @@ class TestForceDataframe:
 
     def test_dict_to_dataframe(self):
         """Test converting dict to DataFrame."""
-        result = {'var_x': 'A', 'pvalue': 0.01, 'statistic': 2.5}
+        result = {"var_x": "A", "pvalue": 0.01, "statistic": 2.5}
         df = force_dataframe(result)
-        
+
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 1
-        assert 'pvalue' in df.columns
+        assert "pvalue" in df.columns
 
     def test_list_of_dicts(self):
         """Test converting list of dicts."""
-        results = [
-            {'var_x': 'A', 'pvalue': 0.01},
-            {'var_x': 'B', 'pvalue': 0.05}
-        ]
+        results = [{"var_x": "A", "pvalue": 0.01}, {"var_x": "B", "pvalue": 0.05}]
         df = force_dataframe(results)
-        
+
         assert len(df) == 2
-        assert df['var_x'].tolist() == ['A', 'B']
+        assert df["var_x"].tolist() == ["A", "B"]
 
     def test_dataframe_passthrough(self):
         """Test DataFrame passthrough."""
-        df_in = pd.DataFrame({'pvalue': [0.01, 0.05]})
+        df_in = pd.DataFrame({"pvalue": [0.01, 0.05]})
         df_out = force_dataframe(df_in)
-        
+
         assert isinstance(df_out, pd.DataFrame)
         assert len(df_out) == 2
 
     def test_fill_missing_columns(self):
         """Test filling missing standard columns."""
-        result = {'pvalue': 0.01}
+        result = {"pvalue": 0.01}
         df = force_dataframe(result)
-        
+
         # Should have standard defaults
-        assert 'pstars' in df.columns
-        assert 'rejected' in df.columns
-        assert 'alpha' in df.columns
+        assert "pstars" in df.columns
+        assert "rejected" in df.columns
+        assert "alpha" in df.columns
 
     def test_custom_columns(self):
         """Test specifying required columns."""
-        result = {'pvalue': 0.01}
-        df = force_dataframe(result, columns=['pvalue', 'effect_size', 'power'])
-        
-        assert 'effect_size' in df.columns
-        assert 'power' in df.columns
+        result = {"pvalue": 0.01}
+        df = force_dataframe(result, columns=["pvalue", "effect_size", "power"])
+
+        assert "effect_size" in df.columns
+        assert "power" in df.columns
 
     def test_custom_defaults(self):
         """Test custom default values."""
-        result = {'pvalue': 0.01}
+        result = {"pvalue": 0.01}
         # Must specify columns to ensure effect_size is added
         df = force_dataframe(
-            result,
-            columns=['pvalue', 'effect_size'],
-            defaults={'effect_size': 0.5}
+            result, columns=["pvalue", "effect_size"], defaults={"effect_size": 0.5}
         )
 
-        assert df['effect_size'].iloc[0] == 0.5
+        assert df["effect_size"].iloc[0] == 0.5
 
 
 class TestToDict:
@@ -80,20 +80,20 @@ class TestToDict:
 
     def test_basic_to_dict(self):
         """Test basic DataFrame to dict conversion."""
-        df = pd.DataFrame({'pvalue': [0.01, 0.05], 'var_x': ['A', 'B']})
+        df = pd.DataFrame({"pvalue": [0.01, 0.05], "var_x": ["A", "B"]})
         result = to_dict(df, row=0)
-        
+
         assert isinstance(result, dict)
-        assert result['pvalue'] == 0.01
-        assert result['var_x'] == 'A'
+        assert result["pvalue"] == 0.01
+        assert result["var_x"] == "A"
 
     def test_second_row(self):
         """Test converting second row."""
-        df = pd.DataFrame({'pvalue': [0.01, 0.05], 'var_x': ['A', 'B']})
+        df = pd.DataFrame({"pvalue": [0.01, 0.05], "var_x": ["A", "B"]})
         result = to_dict(df, row=1)
-        
-        assert result['pvalue'] == 0.05
-        assert result['var_x'] == 'B'
+
+        assert result["pvalue"] == 0.05
+        assert result["var_x"] == "B"
 
 
 class TestToDataframe:
@@ -101,29 +101,26 @@ class TestToDataframe:
 
     def test_single_dict(self):
         """Test converting single dict."""
-        result = {'var_x': 'A', 'pvalue': 0.01}
+        result = {"var_x": "A", "pvalue": 0.01}
         df = to_dataframe(result)
-        
+
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 1
 
     def test_list_of_dicts(self):
         """Test converting list of dicts."""
-        results = [
-            {'var_x': 'A', 'pvalue': 0.01},
-            {'var_x': 'B', 'pvalue': 0.05}
-        ]
+        results = [{"var_x": "A", "pvalue": 0.01}, {"var_x": "B", "pvalue": 0.05}]
         df = to_dataframe(results)
-        
+
         assert len(df) == 2
 
     def test_normalize_true(self):
         """Test with normalization."""
-        result = {'pvalue': 0.01}
+        result = {"pvalue": 0.01}
         df = to_dataframe(result, normalize=True)
-        
+
         # Should add standard columns
-        assert 'pstars' in df.columns
+        assert "pstars" in df.columns
 
 
 class TestNormalizeResult:
@@ -131,34 +128,34 @@ class TestNormalizeResult:
 
     def test_basic_normalization(self):
         """Test basic result normalization."""
-        result = {'pvalue': 0.023, 'statistic': 2.45}
+        result = {"pvalue": 0.023, "statistic": 2.45}
         normalized = normalize_result(result)
-        
-        assert 'pstars' in normalized
-        assert normalized['pstars'] == '*'
+
+        assert "pstars" in normalized
+        assert normalized["pstars"] == "*"
 
     def test_rejected_flag(self):
         """Test rejected flag computation."""
-        result_sig = {'pvalue': 0.01, 'alpha': 0.05}
+        result_sig = {"pvalue": 0.01, "alpha": 0.05}
         normalized_sig = normalize_result(result_sig)
-        assert normalized_sig['rejected'] is True
-        
-        result_ns = {'pvalue': 0.08, 'alpha': 0.05}
+        assert normalized_sig["rejected"] is True
+
+        result_ns = {"pvalue": 0.08, "alpha": 0.05}
         normalized_ns = normalize_result(result_ns)
-        assert normalized_ns['rejected'] is False
+        assert normalized_ns["rejected"] is False
 
     def test_adjusted_pvalue(self):
         """Test using adjusted p-value for decisions."""
         result = {
-            'pvalue': 0.01,
-            'pvalue_adjusted': 0.06,
-            'alpha': 0.05,
-            'alpha_adjusted': 0.05
+            "pvalue": 0.01,
+            "pvalue_adjusted": 0.06,
+            "alpha": 0.05,
+            "alpha_adjusted": 0.05,
         }
         normalized = normalize_result(result)
-        
+
         # Should use adjusted values
-        assert normalized['rejected'] is False  # 0.06 > 0.05
+        assert normalized["rejected"] is False  # 0.06 > 0.05
 
 
 class TestCombineResults:
@@ -166,30 +163,30 @@ class TestCombineResults:
 
     def test_combine_dicts(self):
         """Test combining dict results."""
-        r1 = {'var_x': 'A', 'pvalue': 0.01}
-        r2 = {'var_x': 'B', 'pvalue': 0.05}
-        
+        r1 = {"var_x": "A", "pvalue": 0.01}
+        r2 = {"var_x": "B", "pvalue": 0.05}
+
         df = combine_results([r1, r2])
-        
+
         assert len(df) == 2
         assert isinstance(df, pd.DataFrame)
 
     def test_combine_dataframes(self):
         """Test combining DataFrame results."""
-        df1 = pd.DataFrame({'pvalue': [0.01]})
-        df2 = pd.DataFrame({'pvalue': [0.05]})
-        
+        df1 = pd.DataFrame({"pvalue": [0.01]})
+        df2 = pd.DataFrame({"pvalue": [0.05]})
+
         df = combine_results([df1, df2])
-        
+
         assert len(df) == 2
 
     def test_combine_mixed(self):
         """Test combining mixed types."""
-        r1 = {'pvalue': 0.01}
-        df2 = pd.DataFrame({'pvalue': [0.05]})
-        
+        r1 = {"pvalue": 0.01}
+        df2 = pd.DataFrame({"pvalue": [0.05]})
+
         df = combine_results([r1, df2])
-        
+
         assert len(df) == 2
 
 
@@ -198,46 +195,47 @@ class TestConvertResults:
 
     def test_convert_to_dict(self):
         """Test converting to dict."""
-        result = {'pvalue': 0.01}
-        output = convert_results(result, return_as='dict')
-        
+        result = {"pvalue": 0.01}
+        output = convert_results(result, return_as="dict")
+
         assert isinstance(output, dict)
 
     def test_convert_to_dataframe(self):
         """Test converting to DataFrame."""
-        result = {'pvalue': 0.01}
-        output = convert_results(result, return_as='dataframe')
-        
+        result = {"pvalue": 0.01}
+        output = convert_results(result, return_as="dataframe")
+
         assert isinstance(output, pd.DataFrame)
 
     def test_convert_to_markdown(self):
         """Test converting to Markdown."""
-        result = {'pvalue': 0.01, 'var_x': 'A'}
-        output = convert_results(result, return_as='markdown')
-        
+        result = {"pvalue": 0.01, "var_x": "A"}
+        output = convert_results(result, return_as="markdown")
+
         assert isinstance(output, str)
-        assert '|' in output  # Markdown table syntax
+        assert "|" in output  # Markdown table syntax
 
     def test_convert_to_json(self):
         """Test converting to JSON."""
-        result = {'pvalue': 0.01}
-        output = convert_results(result, return_as='json')
-        
+        result = {"pvalue": 0.01}
+        output = convert_results(result, return_as="json")
+
         assert isinstance(output, str)
-        assert '{' in output
+        assert "{" in output
 
     def test_convert_to_latex(self):
         """Test converting to LaTeX."""
-        result = {'pvalue': 0.01}
-        output = convert_results(result, return_as='latex')
-        
+        result = {"pvalue": 0.01}
+        output = convert_results(result, return_as="latex")
+
         assert isinstance(output, str)
-        assert '\\' in output  # LaTeX table syntax
+        assert "\\" in output  # LaTeX table syntax
 
     def test_invalid_format(self):
         """Test error on invalid format."""
         with pytest.raises(ValueError, match="Unknown return_as format"):
-            convert_results({}, return_as='invalid')
+            convert_results({}, return_as="invalid")
+
 
 if __name__ == "__main__":
     import os
@@ -256,23 +254,23 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Output format normalization utilities for scitex.stats.
-# 
+#
 # Provides functions to convert between dict and DataFrame formats,
 # ensuring consistent output structure across all statistical tests.
 # """
-# 
+#
 # from typing import Any, Dict, List, Literal, Optional, Union
-# 
+#
 # import numpy as np
 # import pandas as pd
-# 
+#
 # # Standard columns for statistical test outputs
 # STANDARD_COLUMNS = [
 #     "test_method",
@@ -300,7 +298,7 @@ if __name__ == "__main__":
 #     "power",
 #     "H0",
 # ]
-# 
+#
 # # Default values for standard columns
 # STANDARD_DEFAULTS = {
 #     "alternative": "two-sided",
@@ -317,7 +315,7 @@ if __name__ == "__main__":
 #     "var_x": "",
 #     "var_y": "",
 # }
-# 
+#
 # # Column types
 # COLUMN_TYPES = {
 #     "test_method": str,
@@ -345,26 +343,26 @@ if __name__ == "__main__":
 #     "power": float,
 #     "H0": str,
 # }
-# 
-# 
+#
+#
 # def normalize_result(
 #     result: Dict[str, Any], fill_missing: bool = True
 # ) -> Dict[str, Any]:
 #     """
 #     Normalize a test result dictionary to standard format.
-# 
+#
 #     Parameters
 #     ----------
 #     result : dict
 #         Result dictionary from a statistical test
 #     fill_missing : bool, default True
 #         Whether to fill missing standard columns with defaults
-# 
+#
 #     Returns
 #     -------
 #     dict
 #         Normalized result dictionary
-# 
+#
 #     Examples
 #     --------
 #     >>> result = {'pvalue': 0.023, 'statistic': 2.45}
@@ -373,58 +371,58 @@ if __name__ == "__main__":
 #     True
 #     """
 #     normalized = result.copy()
-# 
+#
 #     # Use adjusted pvalue if available, otherwise use raw pvalue
 #     pvalue_for_decision = normalized.get("pvalue_adjusted", normalized.get("pvalue"))
 #     alpha_for_decision = normalized.get("alpha_adjusted", normalized.get("alpha", 0.05))
-# 
+#
 #     # Compute pstars based on adjusted pvalue if available
 #     # Do this BEFORE filling defaults so we compute actual values
 #     if "pstars" not in normalized and pvalue_for_decision is not None:
 #         from ._formatters import p2stars
-# 
+#
 #         normalized["pstars"] = p2stars(pvalue_for_decision)
-# 
+#
 #     # Compute rejected based on adjusted criteria if available
 #     # Do this BEFORE filling defaults so we compute actual values
 #     if "rejected" not in normalized and pvalue_for_decision is not None:
 #         normalized["rejected"] = pvalue_for_decision < alpha_for_decision
-# 
+#
 #     # Fill missing columns with defaults AFTER computing derived values
 #     if fill_missing:
 #         for col, default in STANDARD_DEFAULTS.items():
 #             if col not in normalized:
 #                 normalized[col] = default
-# 
+#
 #     return normalized
-# 
-# 
+#
+#
 # def to_dataframe(
 #     results: Union[Dict[str, Any], List[Dict[str, Any]]],
 #     normalize: bool = True,
 # ) -> pd.DataFrame:
 #     """
 #     Convert test result(s) to DataFrame.
-# 
+#
 #     Parameters
 #     ----------
 #     results : dict or list of dict
 #         Single result dict or list of result dicts
 #     normalize : bool, default True
 #         Whether to normalize results before conversion
-# 
+#
 #     Returns
 #     -------
 #     pd.DataFrame
 #         DataFrame with one row per result
-# 
+#
 #     Examples
 #     --------
 #     >>> result = {'var_x': 'A', 'var_y': 'B', 'pvalue': 0.01}
 #     >>> df = to_dataframe(result)
 #     >>> df.shape
 #     (1, ...)
-# 
+#
 #     >>> results = [result1, result2, result3]
 #     >>> df = to_dataframe(results)
 #     >>> len(df)
@@ -433,17 +431,17 @@ if __name__ == "__main__":
 #     # Handle single dict
 #     if isinstance(results, dict):
 #         results = [results]
-# 
+#
 #     # Normalize if requested
 #     if normalize:
 #         results = [normalize_result(r) for r in results]
-# 
+#
 #     # Convert to DataFrame
 #     df = pd.DataFrame(results)
-# 
+#
 #     return df
-# 
-# 
+#
+#
 # def force_dataframe(
 #     results: Union[Dict[str, Any], List[Dict[str, Any]], pd.DataFrame],
 #     columns: Optional[List[str]] = None,
@@ -453,10 +451,10 @@ if __name__ == "__main__":
 # ) -> pd.DataFrame:
 #     """
 #     Ensure DataFrame output with consistent columns and types.
-# 
+#
 #     This is the main function for normalizing statistical test outputs
 #     to a standard DataFrame format.
-# 
+#
 #     Parameters
 #     ----------
 #     results : dict, list of dict, or DataFrame
@@ -470,12 +468,12 @@ if __name__ == "__main__":
 #         Custom default values. Merged with STANDARD_DEFAULTS.
 #     enforce_types : bool, default True
 #         Whether to enforce correct dtypes for standard columns
-# 
+#
 #     Returns
 #     -------
 #     pd.DataFrame
 #         Normalized DataFrame with consistent format
-# 
+#
 #     Examples
 #     --------
 #     >>> # Basic usage
@@ -488,7 +486,7 @@ if __name__ == "__main__":
 #     True
 #     >>> df['effect_size'].isna().sum()
 #     1
-# 
+#
 #     >>> # Specify required columns
 #     >>> df = force_dataframe(
 #     ...     results,
@@ -496,7 +494,7 @@ if __name__ == "__main__":
 #     ... )
 #     >>> set(df.columns) >= {'var_x', 'pvalue', 'pstars', 'rejected'}
 #     True
-# 
+#
 #     >>> # Custom defaults
 #     >>> df = force_dataframe(
 #     ...     results,
@@ -508,25 +506,25 @@ if __name__ == "__main__":
 #         df = to_dataframe(results, normalize=True)
 #     else:
 #         df = results.copy()
-# 
+#
 #     # Merge custom defaults with standard defaults
 #     all_defaults = STANDARD_DEFAULTS.copy()
 #     if defaults:
 #         all_defaults.update(defaults)
-# 
+#
 #     # Ensure specified columns exist
 #     if columns:
 #         for col in columns:
 #             if col not in df.columns:
 #                 default_val = all_defaults.get(col, np.nan)
 #                 df[col] = default_val
-# 
+#
 #     # Fill NaN values with defaults
 #     if fill_na:
 #         for col, default_val in all_defaults.items():
 #             if col in df.columns:
 #                 df[col] = df[col].fillna(default_val)
-# 
+#
 #     # Enforce types for standard columns
 #     if enforce_types:
 #         for col, dtype in COLUMN_TYPES.items():
@@ -536,26 +534,26 @@ if __name__ == "__main__":
 #                 except (ValueError, TypeError):
 #                     # Skip if conversion fails
 #                     pass
-# 
+#
 #     return df
-# 
-# 
+#
+#
 # def to_dict(df: pd.DataFrame, row: int = 0) -> Dict[str, Any]:
 #     """
 #     Convert DataFrame row to dictionary.
-# 
+#
 #     Parameters
 #     ----------
 #     df : pd.DataFrame
 #         DataFrame containing test results
 #     row : int, default 0
 #         Row index to convert
-# 
+#
 #     Returns
 #     -------
 #     dict
 #         Dictionary representation of the row
-# 
+#
 #     Examples
 #     --------
 #     >>> df = pd.DataFrame({'pvalue': [0.01, 0.05], 'var_x': ['A', 'B']})
@@ -564,26 +562,26 @@ if __name__ == "__main__":
 #     'B'
 #     """
 #     return df.iloc[row].to_dict()
-# 
-# 
+#
+#
 # def combine_results(
 #     results_list: List[Union[Dict, pd.DataFrame]], **kwargs
 # ) -> pd.DataFrame:
 #     """
 #     Combine multiple test results into a single DataFrame.
-# 
+#
 #     Parameters
 #     ----------
 #     results_list : list
 #         List of result dicts or DataFrames
 #     **kwargs : dict
 #         Additional arguments passed to force_dataframe
-# 
+#
 #     Returns
 #     -------
 #     pd.DataFrame
 #         Combined DataFrame with all results
-# 
+#
 #     Examples
 #     --------
 #     >>> r1 = test_ttest_ind(x1, y1, var_x='Control', var_y='Treatment')
@@ -602,14 +600,14 @@ if __name__ == "__main__":
 #         else:
 #             raise TypeError(f"Expected dict or DataFrame, got {type(result)}")
 #         dfs.append(df)
-# 
+#
 #     # Concatenate
 #     combined = pd.concat(dfs, ignore_index=True)
-# 
+#
 #     # Normalize
 #     return force_dataframe(combined, **kwargs)
-# 
-# 
+#
+#
 # def export_results(
 #     results: Union[Dict[str, Any], List[Dict[str, Any]], pd.DataFrame],
 #     path: str,
@@ -618,7 +616,7 @@ if __name__ == "__main__":
 # ) -> str:
 #     """
 #     Export test results to various formats.
-# 
+#
 #     Parameters
 #     ----------
 #     results : dict, list of dict, or DataFrame
@@ -630,40 +628,40 @@ if __name__ == "__main__":
 #         If None, inferred from path extension
 #     **kwargs : dict
 #         Additional arguments passed to export function
-# 
+#
 #     Returns
 #     -------
 #     str
 #         Path to exported file
-# 
+#
 #     Examples
 #     --------
 #     >>> result = test_ttest_ind(x, y)
 #     >>> export_results(result, 'results.csv')
 #     'results.csv'
-# 
+#
 #     >>> # Multiple results
 #     >>> results = [result1, result2, result3]
 #     >>> export_results(results, 'results.xlsx')
 #     'results.xlsx'
-# 
+#
 #     >>> # LaTeX table
 #     >>> export_results(results, 'results.tex', format='latex')
 #     'results.tex'
 #     """
 #     import os
-# 
+#
 #     # Infer format from extension if not provided
 #     if format is None:
 #         _, ext = os.path.splitext(path)
 #         format = ext.lstrip(".").lower()
-# 
+#
 #     # Convert to DataFrame
 #     if not isinstance(results, pd.DataFrame):
 #         df = force_dataframe(results)
 #     else:
 #         df = results
-# 
+#
 #     # Export based on format
 #     if format == "csv":
 #         df.to_csv(path, index=False, **kwargs)
@@ -678,7 +676,7 @@ if __name__ == "__main__":
 #     elif format == "json":
 #         # Export JSON with metadata
 #         import json
-# 
+#
 #         data = {
 #             "data": df.to_dict("records"),
 #             "metadata": {
@@ -702,10 +700,10 @@ if __name__ == "__main__":
 #             f"Unsupported format: {format}. "
 #             f"Use 'csv', 'txt', 'json', 'xlsx', or 'latex'"
 #         )
-# 
+#
 #     return path
-# 
-# 
+#
+#
 # def export_excel_styled(
 #     results: Union[Dict[str, Any], List[Dict[str, Any]], pd.DataFrame],
 #     path: str,
@@ -713,8 +711,8 @@ if __name__ == "__main__":
 # ) -> str:
 #     """ """
 #     pass
-# 
-# 
+#
+#
 # def export_report(
 #     results: Union[Dict[str, Any], List[Dict[str, Any]], pd.DataFrame],
 #     path: str,
@@ -724,7 +722,7 @@ if __name__ == "__main__":
 # ) -> str:
 #     """
 #     Export formatted report with colored highlights.
-# 
+#
 #     Parameters
 #     ----------
 #     results : dict, list of dict, or DataFrame
@@ -737,40 +735,40 @@ if __name__ == "__main__":
 #         Whether to include summary statistics
 #     **kwargs : dict
 #         Additional arguments
-# 
+#
 #     Returns
 #     -------
 #     str
 #         Path to exported file
-# 
+#
 #     Notes
 #     -----
 #     Report includes:
 #     - Summary statistics (counts of significant results)
 #     - Full results table with color-coded significance
 #     - Automatic detection of output format from extension
-# 
+#
 #     Examples
 #     --------
 #     >>> results = [result1, result2, result3]
 #     >>> export_report(results, 'report.html', title='My Analysis')
 #     'report.html'
-# 
+#
 #     >>> export_report(results, 'report.md')  # Markdown format
 #     'report.md'
 #     """
 #     import os
-# 
+#
 #     # Convert to DataFrame
 #     if not isinstance(results, pd.DataFrame):
 #         df = force_dataframe(results)
 #     else:
 #         df = results
-# 
+#
 #     # Detect format
 #     _, ext = os.path.splitext(path)
 #     format_type = ext.lstrip(".").lower()
-# 
+#
 #     # Generate report based on format
 #     if format_type == "html":
 #         return _export_report_html(df, path, title, include_summary)
@@ -778,14 +776,14 @@ if __name__ == "__main__":
 #         return _export_report_markdown(df, path, title, include_summary)
 #     else:  # txt or other
 #         return _export_report_text(df, path, title, include_summary)
-# 
-# 
+#
+#
 # def _get_scitex_signature(format_type="html"):
 #     """Generate SciTeX Stats signature for branding."""
 #     import datetime
-# 
+#
 #     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-# 
+#
 #     if format_type == "html":
 #         return f"""
 #         <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd; text-align: center; color: #666; font-size: 12px;">
@@ -799,8 +797,8 @@ if __name__ == "__main__":
 #         return f"\n\n{'=' * 80}\nGenerated by SciTeX Stats | {timestamp}\nProfessional Statistical Analysis Framework for Scientific Computing\n{'=' * 80}\n"
 #     else:
 #         return f"Generated by SciTeX Stats | {timestamp}"
-# 
-# 
+#
+#
 # def _export_report_html(df, path, title, include_summary):
 #     """Generate HTML report with styling."""
 #     # Generate summary
@@ -811,7 +809,7 @@ if __name__ == "__main__":
 #         n_sig_01 = ((df["pvalue"] >= 0.001) & (df["pvalue"] < 0.01)).sum()
 #         n_sig_05 = ((df["pvalue"] >= 0.01) & (df["pvalue"] < 0.05)).sum()
 #         n_ns = (df["pvalue"] >= 0.05).sum()
-# 
+#
 #         summary_html = f"""
 #         <div class="summary">
 #             <h2>Summary</h2>
@@ -824,7 +822,7 @@ if __name__ == "__main__":
 #             </ul>
 #         </div>
 #         """
-# 
+#
 #     # Style function for DataFrame
 #     def style_pvalue(val):
 #         if pd.isna(val):
@@ -837,16 +835,16 @@ if __name__ == "__main__":
 #             return "background-color: #FFE66D; font-weight: bold;"
 #         else:
 #             return "background-color: #E8E8E8;"
-# 
+#
 #     # Apply styling
 #     if "pvalue" in df.columns:
 #         styled = df.style.applymap(style_pvalue, subset=["pvalue"])
 #     else:
 #         styled = df.style
-# 
+#
 #     # Generate HTML
 #     table_html = styled.to_html()
-# 
+#
 #     html_content = f"""
 #     <!DOCTYPE html>
 #     <html>
@@ -900,68 +898,68 @@ if __name__ == "__main__":
 #     </body>
 #     </html>
 #     """
-# 
+#
 #     with open(path, "w") as f:
 #         f.write(html_content)
-# 
+#
 #     return path
-# 
-# 
+#
+#
 # def _export_report_markdown(df, path, title, include_summary):
 #     """Generate Markdown report."""
 #     lines = [f"# {title}\n"]
-# 
+#
 #     # Summary
 #     if include_summary and "pvalue" in df.columns:
 #         n_total = len(df)
 #         n_sig = (df["pvalue"] < 0.05).sum()
 #         n_ns = (df["pvalue"] >= 0.05).sum()
-# 
+#
 #         lines.append("## Summary\n")
 #         lines.append(f"- Total tests: {n_total}")
 #         lines.append(f"- Significant (p < 0.05): {n_sig}")
 #         lines.append(f"- Non-significant (p >= 0.05): {n_ns}\n")
-# 
+#
 #     # Table
 #     lines.append("## Results\n")
 #     lines.append(df.to_markdown(index=False))
-# 
+#
 #     # Add signature
 #     lines.append(_get_scitex_signature("markdown"))
-# 
+#
 #     with open(path, "w") as f:
 #         f.write("\n".join(lines))
-# 
+#
 #     return path
-# 
-# 
+#
+#
 # def _export_report_text(df, path, title, include_summary):
 #     """Generate plain text report."""
 #     lines = [title, "=" * len(title), ""]
-# 
+#
 #     # Summary
 #     if include_summary and "pvalue" in df.columns:
 #         n_total = len(df)
 #         n_sig = (df["pvalue"] < 0.05).sum()
-# 
+#
 #         lines.append("SUMMARY")
 #         lines.append(f"Total tests: {n_total}")
 #         lines.append(f"Significant: {n_sig}")
 #         lines.append("")
-# 
+#
 #     # Table
 #     lines.append("RESULTS")
 #     lines.append(df.to_string(index=False))
-# 
+#
 #     # Add signature
 #     lines.append(_get_scitex_signature("text"))
-# 
+#
 #     with open(path, "w") as f:
 #         f.write("\n".join(lines))
-# 
+#
 #     return path
-# 
-# 
+#
+#
 # def export_summary(
 #     results: Union[Dict[str, Any], List[Dict[str, Any]], pd.DataFrame],
 #     path: str,
@@ -971,7 +969,7 @@ if __name__ == "__main__":
 # ) -> str:
 #     """
 #     Export summary of test results (selected columns only).
-# 
+#
 #     Parameters
 #     ----------
 #     results : dict, list of dict, or DataFrame
@@ -984,18 +982,18 @@ if __name__ == "__main__":
 #         Output format (inferred from extension if None)
 #     **kwargs : dict
 #         Additional arguments passed to export function
-# 
+#
 #     Returns
 #     -------
 #     str
 #         Path to exported file
-# 
+#
 #     Examples
 #     --------
 #     >>> # Export only key columns
 #     >>> export_summary(results, 'summary.csv')
 #     'summary.csv'
-# 
+#
 #     >>> # Custom columns
 #     >>> export_summary(
 #     ...     results,
@@ -1020,21 +1018,21 @@ if __name__ == "__main__":
 #             "effect_size_metric",
 #             "effect_size_interpretation",
 #         ]
-# 
+#
 #     # Convert to DataFrame
 #     if not isinstance(results, pd.DataFrame):
 #         df = force_dataframe(results)
 #     else:
 #         df = results
-# 
+#
 #     # Select columns (only those that exist)
 #     available_cols = [col for col in columns if col in df.columns]
 #     df_summary = df[available_cols]
-# 
+#
 #     # Export
 #     return export_results(df_summary, path, format=format, **kwargs)
-# 
-# 
+#
+#
 # def convert_results(
 #     results: Union[Dict[str, Any], List[Dict[str, Any]], pd.DataFrame],
 #     return_as: Literal[
@@ -1050,10 +1048,10 @@ if __name__ == "__main__":
 # ) -> Union[dict, List[dict], pd.DataFrame, str]:
 #     """
 #     Convert statistical test results to specified format.
-# 
+#
 #     This is a pure format converter - does NOT save files.
 #     For saving, use scitex.io.save() after conversion.
-# 
+#
 #     Parameters
 #     ----------
 #     results : dict, list of dict, or DataFrame
@@ -1069,36 +1067,36 @@ if __name__ == "__main__":
 #         - 'text': Plain text table string
 #     **kwargs : dict
 #         Additional arguments passed to format functions
-# 
+#
 #     Returns
 #     -------
 #     output : dict, list, DataFrame, or str
 #         Converted results in requested format
-# 
+#
 #     Notes
 #     -----
 #     This function only handles format conversion. To save results to files,
 #     convert to DataFrame first, then use scitex.io.save():
-# 
+#
 #     >>> df = convert_results(results, return_as='dataframe')
 #     >>> stx.io.save(df, 'results.xlsx')
-# 
+#
 #     Examples
 #     --------
 #     >>> result = {'pvalue': 0.01, 'var_x': 'A', 'var_y': 'B'}
-# 
+#
 #     # Convert to different formats
 #     >>> convert_results(result, return_as='dict')
 #     {'pvalue': 0.01, 'var_x': 'A', 'var_y': 'B'}
-# 
+#
 #     >>> df = convert_results(result, return_as='dataframe')
 #     # Returns DataFrame
-# 
+#
 #     >>> convert_results(result, return_as='markdown')
 #     '| var_x | var_y | pvalue |\\n|-------|-------|--------|...'
-# 
+#
 #     >>> latex_str = convert_results(result, return_as='latex')
-# 
+#
 #     # To save to file, use stx.io.save
 #     >>> import scitex as stx
 #     >>> df = convert_results(result, return_as='dataframe')
@@ -1116,44 +1114,44 @@ if __name__ == "__main__":
 #                 if len(results) > 1
 #                 else to_dict(results, row=0)
 #             )
-# 
+#
 #     elif return_as == "dataframe":
 #         return force_dataframe(results)
-# 
+#
 #     elif return_as == "markdown":
 #         df_out = force_dataframe(results)
 #         return df_out.to_markdown(index=False, **kwargs)
-# 
+#
 #     elif return_as == "json":
 #         df_out = force_dataframe(results)
 #         return df_out.to_json(orient="records", indent=2, **kwargs)
-# 
+#
 #     elif return_as == "latex":
 #         df_out = force_dataframe(results)
 #         return df_out.to_latex(index=False, **kwargs)
-# 
+#
 #     elif return_as == "html":
 #         df_out = force_dataframe(results)
 #         return df_out.to_html(index=False, **kwargs)
-# 
+#
 #     elif return_as == "text":
 #         df_out = force_dataframe(results)
 #         return df_out.to_string(index=False, **kwargs)
-# 
+#
 #     elif return_as == "csv":
 #         df_out = force_dataframe(results)
 #         return df_out.to_csv(index=False, **kwargs)
-# 
+#
 #     else:
 #         raise ValueError(
 #             f"Unknown return_as format: {return_as}. "
 #             f"Use 'dict', 'dataframe', 'markdown', 'json', 'latex', 'html', or 'text'"
 #         )
-# 
-# 
+#
+#
 # # Convenience alias
 # as_dataframe = force_dataframe
-# 
+#
 # __all__ = [
 #     "normalize_result",
 #     "to_dataframe",
@@ -1170,7 +1168,7 @@ if __name__ == "__main__":
 #     "STANDARD_DEFAULTS",
 #     "COLUMN_TYPES",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

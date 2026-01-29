@@ -21,7 +21,7 @@ IO:
 """
 
 import argparse
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -124,8 +124,8 @@ def test_pearson(
     >>> result_dict = result.to_dict()
     >>> print(result_dict['statistic']['value'])
     """
-    from scitex.stats._utils._formatters import p2stars
     from scitex.stats._schema import StatResult
+    from scitex.stats._utils._formatters import p2stars
 
     # Convert to numpy arrays and remove NaN
     x = np.asarray(x)

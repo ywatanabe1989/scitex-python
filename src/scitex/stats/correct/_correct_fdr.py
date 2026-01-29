@@ -23,17 +23,13 @@ IO:
 """
 
 """Imports"""
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Literal
-from typing import Optional
-from typing import Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import matplotlib
 import matplotlib.axes
 import numpy as np
 import pandas as pd
+
 from scitex.logging import getLogger
 
 logger = getLogger(__name__)
