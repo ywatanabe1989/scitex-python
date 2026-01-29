@@ -191,7 +191,6 @@ def dir_cmd(dotted_path, filter, kind, inherited, as_json):
 def api(dotted_path, max_depth, root_only, verbose, as_json):
     """List API tree with types and signatures. -v adds docstrings, -vv full docs."""
     import importlib
-    import inspect
 
     from scitex.introspect import list_api
 
@@ -205,6 +204,8 @@ def api(dotted_path, max_depth, root_only, verbose, as_json):
     if as_json:
         click.echo(json.dumps(df.to_dict(orient="records"), indent=2))
     else:
+        from . import format_python_signature
+
         click.secho(f"API tree of {dotted_path} ({len(df)} items):", fg="cyan")
         legend = " ".join(
             click.style(f"[{t}]={n}", fg=type_colors[t])
@@ -223,7 +224,7 @@ def api(dotted_path, max_depth, root_only, verbose, as_json):
             t = row["Type"]
             type_s = click.style(f"[{t}]", fg=type_colors.get(t, "yellow"))
             name = row["Name"].split(".")[-1]
-            sig_s, sig_lines = "", []
+
             if t == "F":
                 try:
                     rel_parts = row["Name"].split(".")[:-1]
@@ -234,24 +235,18 @@ def api(dotted_path, max_depth, root_only, verbose, as_json):
                     )
                     fn = getattr(importlib.import_module(full_mod), name, None)
                     if fn and callable(fn):
-                        sig = str(inspect.signature(fn))
-                        ret = sig[sig.rfind(" -> ") :] if " -> " in sig else ""
-                        pstr = sig[: sig.rfind(" -> ")] if ret else sig
-                        params = [
-                            p.strip() for p in pstr.strip("()").split(",") if p.strip()
-                        ]
-                        if len(params) > 2:  # Multiline for 3+ params
-                            sig_lines = [f"{indent}    {p}," for p in params[:-1]]
-                            sig_lines.append(f"{indent}    {params[-1]}")
-                            sig_s = "(\n" + "\n".join(sig_lines) + f"\n{indent}){ret}"
-                        else:
-                            sig_s = sig
+                        name_s, sig_s = format_python_signature(fn, indent=indent)
+                        click.echo(f"{indent}{type_s} {name_s}{sig_s}")
+                    else:
+                        name_s = click.style(name, fg="green", bold=True)
+                        click.echo(f"{indent}{type_s} {name_s}")
                 except Exception:
-                    pass
-            name_s = click.style(name, fg=type_colors.get(t, "white"), bold=True)
-            click.echo(
-                f"{indent}{type_s} {name_s}{click.style(sig_s, fg=type_colors.get(t, 'white'), bold=True)}"
-            )
+                    name_s = click.style(name, fg="green", bold=True)
+                    click.echo(f"{indent}{type_s} {name_s}")
+            else:
+                name_s = click.style(name, fg=type_colors.get(t, "white"), bold=True)
+                click.echo(f"{indent}{type_s} {name_s}")
+
             if verbose >= 1 and row.get("Docstring"):
                 if verbose == 1:
                     doc = row["Docstring"].split("\n")[0][:60]

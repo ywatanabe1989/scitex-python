@@ -56,4 +56,61 @@ def print_help_recursive(ctx, group: click.Group) -> None:
                         click.echo(sub_cmd.get_help(sub_sub_ctx))
 
 
-__all__ = ["cli", "print_help_recursive"]
+def format_python_signature(func, multiline: bool = True, indent: str = "  ") -> tuple:
+    """Format Python function signature with colors matching mcp list-tools.
+
+    Returns (name_colored, signature_colored)
+    """
+    import inspect
+
+    try:
+        sig = inspect.signature(func)
+    except (ValueError, TypeError):
+        return click.style(func.__name__, fg="green", bold=True), ""
+
+    params = []
+    for name, param in sig.parameters.items():
+        # Get type annotation
+        if param.annotation != inspect.Parameter.empty:
+            ann = param.annotation
+            type_str = ann.__name__ if hasattr(ann, "__name__") else str(ann)
+            type_str = type_str.replace("typing.", "")
+        else:
+            type_str = None
+
+        # Get default value
+        if param.default != inspect.Parameter.empty:
+            default = param.default
+            def_str = repr(default) if len(repr(default)) < 20 else "..."
+            if type_str:
+                p = f"{click.style(name, fg='white', bold=True)}: {click.style(type_str, fg='cyan')} = {click.style(def_str, fg='yellow')}"
+            else:
+                p = f"{click.style(name, fg='white', bold=True)} = {click.style(def_str, fg='yellow')}"
+        else:
+            if type_str:
+                p = f"{click.style(name, fg='white', bold=True)}: {click.style(type_str, fg='cyan')}"
+            else:
+                p = click.style(name, fg="white", bold=True)
+        params.append(p)
+
+    # Return type
+    ret_str = ""
+    if sig.return_annotation != inspect.Parameter.empty:
+        ret = sig.return_annotation
+        ret_name = ret.__name__ if hasattr(ret, "__name__") else str(ret)
+        ret_name = ret_name.replace("typing.", "")
+        ret_str = f" -> {click.style(ret_name, fg='magenta')}"
+
+    name_s = click.style(func.__name__, fg="green", bold=True)
+
+    if multiline and len(params) > 2:
+        param_indent = indent + "    "
+        params_str = ",\n".join(f"{param_indent}{p}" for p in params)
+        sig_s = f"(\n{params_str}\n{indent}){ret_str}"
+    else:
+        sig_s = f"({', '.join(params)}){ret_str}"
+
+    return name_s, sig_s
+
+
+__all__ = ["cli", "print_help_recursive", "format_python_signature"]
