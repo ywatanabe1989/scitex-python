@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # Time-stamp: "2026-01-04"
 
-"""Tests for scitex.stats.utils._power module."""
+"""Tests for scitex.stats._utils._power module."""
 
 import numpy as np
 import pytest
 
-from scitex.stats.utils._power import power_ttest, sample_size_ttest
+from scitex.stats._utils._power import power_ttest, sample_size_ttest
 
 
 class TestPowerTtest:

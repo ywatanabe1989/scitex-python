@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 # Time-stamp: "2025-11-11"
 
-"""Tests for scitex.stats.utils._effect_size module."""
+"""Tests for scitex.stats._utils._effect_size module."""
 
 import numpy as np
 import pytest
-from scitex.stats.utils._effect_size import (
+from scitex.stats._utils._effect_size import (
     cohens_d, cliffs_delta, prob_superiority,
     eta_squared, epsilon_squared,
     interpret_cohens_d, interpret_cliffs_delta,

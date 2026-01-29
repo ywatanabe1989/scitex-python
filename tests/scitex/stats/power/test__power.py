@@ -3,7 +3,7 @@
 # File: tests/scitex/stats/power/test__power.py
 
 """
-Tests for scitex.stats.utils._power module.
+Tests for scitex.stats._utils._power module.
 
 Tests power analysis functions including:
 - power_ttest: Calculate power for t-tests
@@ -13,7 +13,7 @@ Tests power analysis functions including:
 import numpy as np
 import pytest
 
-from scitex.stats.utils._power import power_ttest, sample_size_ttest
+from scitex.stats._utils._power import power_ttest, sample_size_ttest
 
 
 class TestPowerTtest:

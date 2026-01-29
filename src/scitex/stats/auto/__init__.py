@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-10 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/stats/auto/__init__.py
 
@@ -51,81 +50,71 @@ Submodules:
 """
 
 # =============================================================================
-# Context
+# Context (public)
 # =============================================================================
-from ._context import (
-    StatContext,
-    OutcomeType,
-    DesignType,
-)
+# Internal context types (hidden with underscore prefix)
+from ._context import DesignType as _DesignType
+from ._context import OutcomeType as _OutcomeType
+from ._context import StatContext
+
+# Internal formatting (hidden)
+from ._formatting import CorrectionMethod as _CorrectionMethod
+from ._formatting import EffectResultDict as _EffectResultDict
+from ._formatting import SummaryStatsDict as _SummaryStatsDict
+from ._formatting import TestResultDict as _TestResultDict
 
 # =============================================================================
-# Rules
+# Formatting (public)
 # =============================================================================
-from ._rules import (
-    TestRule,
-    TestFamily,
-    TEST_RULES,
-    get_test_rule,
-    list_tests_by_family,
-)
+from ._formatting import apply_multiple_correction, format_test_line, p_to_stars
+from ._formatting import compute_summary_from_groups as _compute_summary_from_groups
+from ._formatting import compute_summary_stats as _compute_summary_stats
+from ._formatting import format_for_inspector as _format_for_inspector
+from ._formatting import format_test_line_compact as _format_test_line_compact
+from ._formatting import get_stat_symbol as _get_stat_symbol
 
 # =============================================================================
-# Selector
+# Rules (public)
+# =============================================================================
+from ._rules import TEST_RULES, TestRule
+
+# Internal rules (hidden)
+from ._rules import TestFamily as _TestFamily
+from ._rules import get_test_rule as _get_test_rule
+from ._rules import list_tests_by_family as _list_tests_by_family
+
+# =============================================================================
+# Selector (public)
 # =============================================================================
 from ._selector import (
     check_applicable,
     get_menu_items,
-    recommend_tests,
     recommend_effect_sizes,
     recommend_posthoc,
-    run_all_applicable_tests,
+    recommend_tests,
 )
 
-# =============================================================================
-# Styles
-# =============================================================================
-from ._styles import (
-    StatStyle,
-    OutputTarget,
-    STAT_STYLES,
-    get_stat_style,
-    list_styles,
-    # Individual presets
-    APA_LATEX_STYLE,
-    APA_HTML_STYLE,
-    NATURE_LATEX_STYLE,
-    NATURE_HTML_STYLE,
-    CELL_LATEX_STYLE,
-    CELL_HTML_STYLE,
-    ELSEVIER_LATEX_STYLE,
-    ELSEVIER_HTML_STYLE,
-    PLAIN_STYLE,
-)
+# Internal selector functions (hidden)
+from ._selector import run_all_applicable_tests as _run_all_applicable_tests
+
+# Internal styles (hidden)
+from ._styles import APA_HTML_STYLE as _APA_HTML_STYLE
+from ._styles import APA_LATEX_STYLE as _APA_LATEX_STYLE
+from ._styles import CELL_HTML_STYLE as _CELL_HTML_STYLE
+from ._styles import CELL_LATEX_STYLE as _CELL_LATEX_STYLE
+from ._styles import ELSEVIER_HTML_STYLE as _ELSEVIER_HTML_STYLE
+from ._styles import ELSEVIER_LATEX_STYLE as _ELSEVIER_LATEX_STYLE
+from ._styles import NATURE_HTML_STYLE as _NATURE_HTML_STYLE
+from ._styles import NATURE_LATEX_STYLE as _NATURE_LATEX_STYLE
+from ._styles import PLAIN_STYLE as _PLAIN_STYLE
+from ._styles import STAT_STYLES as _STAT_STYLES
+from ._styles import OutputTarget as _OutputTarget
 
 # =============================================================================
-# Formatting
+# Styles (public)
 # =============================================================================
-from ._formatting import (
-    # Type definitions
-    SummaryStatsDict,
-    TestResultDict,
-    EffectResultDict,
-    CorrectionMethod,
-    # Summary statistics
-    compute_summary_stats,
-    compute_summary_from_groups,
-    # Symbol mapping
-    get_stat_symbol,
-    # Formatting
-    format_test_line,
-    format_test_line_compact,
-    format_for_inspector,
-    p_to_stars,
-    # Correction
-    apply_multiple_correction,
-)
-
+from ._styles import StatStyle, get_stat_style
+from ._styles import list_styles as _list_styles
 
 # =============================================================================
 # Public API
@@ -134,51 +123,20 @@ from ._formatting import (
 __all__ = [
     # Context
     "StatContext",
-    "OutcomeType",
-    "DesignType",
-
     # Rules
     "TestRule",
-    "TestFamily",
     "TEST_RULES",
-    "get_test_rule",
-    "list_tests_by_family",
-
     # Selector
     "check_applicable",
-    "get_menu_items",
     "recommend_tests",
     "recommend_effect_sizes",
     "recommend_posthoc",
-    "run_all_applicable_tests",
-
+    "get_menu_items",
     # Styles
     "StatStyle",
-    "OutputTarget",
-    "STAT_STYLES",
     "get_stat_style",
-    "list_styles",
-    "APA_LATEX_STYLE",
-    "APA_HTML_STYLE",
-    "NATURE_LATEX_STYLE",
-    "NATURE_HTML_STYLE",
-    "CELL_LATEX_STYLE",
-    "CELL_HTML_STYLE",
-    "ELSEVIER_LATEX_STYLE",
-    "ELSEVIER_HTML_STYLE",
-    "PLAIN_STYLE",
-
     # Formatting
-    "SummaryStatsDict",
-    "TestResultDict",
-    "EffectResultDict",
-    "CorrectionMethod",
-    "compute_summary_stats",
-    "compute_summary_from_groups",
-    "get_stat_symbol",
     "format_test_line",
-    "format_test_line_compact",
-    "format_for_inspector",
     "p_to_stars",
     "apply_multiple_correction",
 ]

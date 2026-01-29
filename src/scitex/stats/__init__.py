@@ -12,7 +12,6 @@ Organized submodules:
 - posthoc: Post-hoc tests (Tukey, Dunnett, Games-Howell)
 - tests: Statistical tests (correlation, etc.)
 - descriptive: Descriptive statistics
-- utils: Formatters and normalizers
 
 Quick Start (Auto Selection):
 ----------------------------
@@ -30,30 +29,37 @@ Quick Start (Auto Selection):
 >>> print(tests)  # ['brunner_munzel', 'ttest_ind', 'mannwhitneyu']
 """
 
-# Import organized submodules
-from . import auto, correct, descriptive, effect_sizes, posthoc, power, tests, utils
-from .descriptive import describe
+# Import organized submodules (public)
+# Internal submodule (hidden with underscore prefix)
+from . import _utils, auto, correct, descriptive, effect_sizes, posthoc, power, tests
 
-# Check if torch is available for GPU acceleration
+# Check if torch is available for GPU acceleration (internal flag)
 try:
     import torch
 
-    TORCH_AVAILABLE = True
+    _TORCH_AVAILABLE = True
 except ImportError:
-    TORCH_AVAILABLE = False
+    _TORCH_AVAILABLE = False
 
 # Export key auto module classes at top level for convenience
+# Internal imports (hidden with underscore prefix)
 from .auto import (
-    TEST_RULES,
+    TEST_RULES as _TEST_RULES,
+)
+from .auto import (
     StatContext,
     StatStyle,
     TestRule,
     check_applicable,
-    format_test_line,
-    get_menu_items,
     get_stat_style,
     p_to_stars,
     recommend_tests,
+)
+from .auto import (
+    format_test_line as _format_test_line,
+)
+from .auto import (
+    get_menu_items as _get_menu_items,
 )
 
 # =============================================================================
@@ -312,31 +318,25 @@ def load_stats(path):
 
 
 __all__ = [
-    # Main submodules
+    # Main submodules (public)
     "auto",
     "correct",
     "descriptive",
     "effect_sizes",
     "power",
-    "utils",
     "posthoc",
     "tests",
     # Descriptive convenience export
     "describe",
-    # Torch availability flag (for GPU acceleration)
-    "TORCH_AVAILABLE",
     # Stats schema
     "Stats",
     # Auto module convenience exports
     "StatContext",
     "TestRule",
-    "TEST_RULES",
+    "StatStyle",
     "check_applicable",
     "recommend_tests",
-    "get_menu_items",
-    "StatStyle",
     "get_stat_style",
-    "format_test_line",
     "p_to_stars",
     # Conversion utilities
     "test_result_to_stats",

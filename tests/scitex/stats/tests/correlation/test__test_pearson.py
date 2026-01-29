@@ -136,7 +136,7 @@ if __name__ == "__main__":
 #     >>> result_dict = result.to_dict()
 #     >>> print(result_dict['statistic']['value'])
 #     """
-#     from scitex.stats.utils._formatters import p2stars
+#     from scitex.stats._utils._formatters import p2stars
 #     from scitex.stats._schema import StatResult
 # 
 #     # Convert to numpy arrays and remove NaN

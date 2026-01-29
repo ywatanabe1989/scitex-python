@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 # Time-stamp: "2025-11-11"
 
-"""Tests for scitex.stats.utils._normalizers module."""
+"""Tests for scitex.stats._utils._normalizers module."""
 
 import numpy as np
 import pandas as pd
 import pytest
-from scitex.stats.utils._normalizers import (
+from scitex.stats._utils._normalizers import (
     force_dataframe, to_dict, to_dataframe,
     normalize_result, combine_results, convert_results
 )

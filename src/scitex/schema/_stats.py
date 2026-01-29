@@ -710,7 +710,7 @@ def create_stat_result(
     ... )
     """
     # Import here to avoid circular dependency
-    from scitex.stats.utils import p2stars
+    from scitex.stats._utils import p2stars
 
     # Determine category from test type
     category_map = {

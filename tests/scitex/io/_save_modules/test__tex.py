@@ -127,7 +127,7 @@ if __name__ == "__main__":
 #     elif isinstance(obj, (dict, list)):
 #         # Try to convert using stats module's convert_results
 #         try:
-#             from scitex.stats.utils._normalizers import convert_results
+#             from scitex.stats._utils._normalizers import convert_results
 # 
 #             tex_content = convert_results(obj, return_as="latex", **kwargs)
 # 

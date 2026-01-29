@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 # Time-stamp: "2025-11-11"
 
-"""Tests for scitex.stats.utils._formatters module."""
+"""Tests for scitex.stats._utils._formatters module."""
 
 import numpy as np
 import pandas as pd
 import pytest
-from scitex.stats.utils._formatters import p2stars, _p2stars_scalar
+from scitex.stats._utils._formatters import p2stars, _p2stars_scalar
 
 
 class TestP2stars:

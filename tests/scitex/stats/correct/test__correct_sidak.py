@@ -559,7 +559,7 @@ if __name__ == "__main__":
 #     correct_holm : Sequential Bonferroni method
 #     correct_fdr : FDR control (less conservative)
 #     """
-#     from scitex.stats.utils._formatters import p2stars
+#     from scitex.stats._utils._formatters import p2stars
 # 
 #     if verbose:
 #         logger.info("Applying Šidák correction")

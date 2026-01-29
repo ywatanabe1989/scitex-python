@@ -412,8 +412,8 @@ if __name__ == "__main__":
 # import pandas as pd
 # from typing import Union, List, Optional
 # from scipy import stats
-# from scitex.stats.utils._formatters import p2stars
-# from scitex.stats.utils._normalizers import convert_results
+# from scitex.stats._utils._formatters import p2stars
+# from scitex.stats._utils._normalizers import convert_results
 # 
 # 
 # def studentized_range_critical(k: int, df: int, alpha: float = 0.05) -> float:

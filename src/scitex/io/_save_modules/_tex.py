@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 21:30:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/io/_save_modules/_tex.py
 # ----------------------------------------
@@ -19,7 +18,7 @@ Supports multiple input types:
 - matplotlib figures → TikZ/PGFPlots (future enhancement)
 """
 
-from typing import Union, Optional, Any
+from typing import Any, Optional
 
 from scitex import logging
 
@@ -88,7 +87,7 @@ def save_tex(
     Notes
     -----
     - For DataFrames, uses pandas.DataFrame.to_latex()
-    - For dicts/lists, attempts to use scitex.stats.utils.convert_results()
+    - For dicts/lists, attempts to use scitex.stats._utils.convert_results()
     - For strings, writes content directly
     - The document=True option creates a complete compilable LaTeX document
     """
@@ -115,7 +114,7 @@ def save_tex(
     elif isinstance(obj, (dict, list)):
         # Try to convert using stats module's convert_results
         try:
-            from scitex.stats.utils._normalizers import convert_results
+            from scitex.stats._utils._normalizers import convert_results
 
             tex_content = convert_results(obj, return_as="latex", **kwargs)
 
@@ -126,7 +125,7 @@ def save_tex(
         except ImportError:
             logger.warning(
                 "Cannot convert dict/list to LaTeX: "
-                "scitex.stats.utils.convert_results not available. "
+                "scitex.stats._utils.convert_results not available."
                 "Converting to string instead."
             )
             tex_content = str(obj)
@@ -183,8 +182,6 @@ def _dataframe_to_latex(
     str
         LaTeX table string
     """
-    import pandas as pd
-
     # Build to_latex arguments
     latex_kwargs = {
         "index": False,

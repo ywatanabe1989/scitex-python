@@ -145,8 +145,8 @@ def correct_bonferroni(
     >>> df_corrected['alpha_adjusted'].iloc[0]
     0.0166...
     """
-    from scitex.stats.utils._formatters import p2stars
-    from scitex.stats.utils._normalizers import force_dataframe, to_dict
+    from scitex.stats._utils._formatters import p2stars
+    from scitex.stats._utils._normalizers import force_dataframe, to_dict
 
     if verbose:
         logger.info("Applying Bonferroni correction")
