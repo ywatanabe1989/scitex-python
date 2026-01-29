@@ -155,7 +155,7 @@ def _list_api_impl(
                             "M",
                             obj_name,
                             obj.__doc__ if docstring and obj.__doc__ else "",
-                            current_depth,
+                            current_depth + 1,  # Children are one level deeper
                         )
                     )
                     try:
@@ -187,7 +187,7 @@ def _list_api_impl(
                             "F",
                             obj_name,
                             obj.__doc__ if docstring and obj.__doc__ else "",
-                            current_depth,
+                            current_depth + 1,  # Children are one level deeper
                         )
                     )
             elif inspect.isclass(obj):
@@ -200,7 +200,7 @@ def _list_api_impl(
                             "C",
                             obj_name,
                             obj.__doc__ if docstring and obj.__doc__ else "",
-                            current_depth,
+                            current_depth + 1,  # Children are one level deeper
                         )
                     )
 

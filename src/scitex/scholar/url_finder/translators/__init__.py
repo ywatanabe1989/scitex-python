@@ -21,11 +21,12 @@ Internal modules (not part of public API):
 """
 
 # Public API - only expose what users need
-from .core.registry import TranslatorRegistry
-from .core.base import BaseTranslator
+from ._core.base import (
+    BaseTranslator as _BaseTranslator,
+)  # Hidden, use TranslatorRegistry
+from ._core.registry import TranslatorRegistry
 
 # Everything else is internal implementation
 __all__ = [
     "TranslatorRegistry",
-    "BaseTranslator",
 ]
