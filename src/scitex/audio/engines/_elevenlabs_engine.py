@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 from typing import List, Optional
 
-from .base import BaseTTS
+from ._base import BaseTTS
 
 __all__ = ["ElevenLabsTTS"]
 

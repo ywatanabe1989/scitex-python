@@ -114,7 +114,7 @@ class BaseTTS(ABC):
         output_path: Optional[str] = None,
         play: bool = True,
         voice: Optional[str] = None,
-    ) -> Optional[Path]:
+    ) -> dict:
         """Synthesize and optionally play text.
 
         Args:
@@ -125,7 +125,7 @@ class BaseTTS(ABC):
 
         Returns
         -------
-            Path to audio file if output_path specified, else None.
+            Dict with keys: path (if output_path), played (bool), success (bool).
         """
         import tempfile
 
@@ -148,20 +148,24 @@ class BaseTTS(ABC):
         result_path = self.synthesize(text, str(out_path))
 
         # Play if requested
+        played = False
         if play:
-            self._play_audio(result_path)
+            played = self._play_audio(result_path)
 
-        # Return path only if explicitly requested
+        result = {"success": True, "played": played, "play_requested": play}
         if output_path:
-            return result_path
+            result["path"] = result_path
+        return result
 
-        return None
-
-    def _play_audio(self, path: Path) -> None:
+    def _play_audio(self, path: Path) -> bool:
         """Play audio file using available system player.
 
         Includes Windows fallback for WSL environments where PulseAudio
         may be unstable.
+
+        Returns
+        -------
+            True if playback succeeded, False otherwise.
         """
         import os
 
@@ -169,7 +173,7 @@ class BaseTTS(ABC):
         # to avoid double playback issues with Linux audio hanging
         if os.path.exists("/mnt/c/Windows"):
             if self._play_audio_windows(path):
-                return
+                return True
             # Fall through to Linux players if Windows playback fails
 
         players = [
@@ -188,14 +192,15 @@ class BaseTTS(ABC):
                     stderr=subprocess.DEVNULL,
                     timeout=30,
                 )
-                return
+                return True
             except subprocess.TimeoutExpired:
-                # Audio playback hung, don't try more players
-                return
+                # Audio playback hung - might have played but can't confirm
+                return False
             except (subprocess.CalledProcessError, FileNotFoundError):
                 continue
 
         print(f"Warning: No audio player found. Audio saved to: {path}")
+        return False
 
     def _play_audio_windows(self, path: Path) -> bool:
         """Play audio via Windows PowerShell SoundPlayer (WSL fallback).
