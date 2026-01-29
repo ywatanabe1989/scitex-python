@@ -146,7 +146,10 @@ def _list_api_impl(
             obj_name = f"{full_path}.{name}"
 
             if inspect.ismodule(obj):
-                if obj.__name__ not in visited:
+                # Only recurse into submodules of the same package (skip stdlib/external)
+                obj_mod_name = getattr(obj, "__name__", "")
+                root_pkg = module_name.split(".")[0]
+                if obj_mod_name.startswith(root_pkg) and obj_mod_name not in visited:
                     content_list.append(
                         (
                             "M",
@@ -175,23 +178,31 @@ def _list_api_impl(
                     except Exception as err:
                         print(f"Error processing module {obj_name}: {err}")
             elif inspect.isfunction(obj):
-                content_list.append(
-                    (
-                        "F",
-                        obj_name,
-                        obj.__doc__ if docstring and obj.__doc__ else "",
-                        current_depth,
+                # Only include functions defined in this package
+                obj_module = getattr(obj, "__module__", "")
+                root_pkg = module_name.split(".")[0]
+                if obj_module.startswith(root_pkg):
+                    content_list.append(
+                        (
+                            "F",
+                            obj_name,
+                            obj.__doc__ if docstring and obj.__doc__ else "",
+                            current_depth,
+                        )
                     )
-                )
             elif inspect.isclass(obj):
-                content_list.append(
-                    (
-                        "C",
-                        obj_name,
-                        obj.__doc__ if docstring and obj.__doc__ else "",
-                        current_depth,
+                # Only include classes defined in this package
+                obj_module = getattr(obj, "__module__", "")
+                root_pkg = module_name.split(".")[0]
+                if obj_module.startswith(root_pkg):
+                    content_list.append(
+                        (
+                            "C",
+                            obj_name,
+                            obj.__doc__ if docstring and obj.__doc__ else "",
+                            current_depth,
+                        )
                     )
-                )
 
     except Exception as err:
         print(f"Error processing module structure: {err}")

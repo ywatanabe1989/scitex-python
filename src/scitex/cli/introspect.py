@@ -185,39 +185,80 @@ def dir_cmd(dotted_path, filter, kind, inherited, as_json):
 @introspect.command()
 @click.argument("dotted_path", callback=_normalize_path)
 @click.option("--max-depth", "-d", type=int, default=5, help="Max recursion depth")
-@click.option("--docstring", is_flag=True, help="Include docstrings")
 @click.option("--root-only", is_flag=True, help="Show only root-level items")
+@click.option("-v", "--verbose", count=True, help="Verbosity: -v +doc, -vv full doc")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
-def api(dotted_path, max_depth, docstring, root_only, as_json):
-    """
-    List the full API tree of a module recursively
+def api(dotted_path, max_depth, root_only, verbose, as_json):
+    """List API tree with types and signatures. -v adds docstrings, -vv full docs."""
+    import importlib
+    import inspect
 
-    \b
-    Examples:
-      scitex introspect api scitex --max-depth 2
-      scitex introspect api scitex.plt --docstring
-      scitex introspect api scitex.audio --root-only
-    """
     from scitex.introspect import list_api
 
     df = list_api(
-        dotted_path,
-        max_depth=max_depth,
-        docstring=docstring,
-        root_only=root_only,
+        dotted_path, max_depth=max_depth, docstring=(verbose >= 1), root_only=root_only
     )
+
+    # Color mapping for types
+    type_colors = {"M": "blue", "C": "magenta", "F": "green", "V": "cyan"}
 
     if as_json:
         click.echo(json.dumps(df.to_dict(orient="records"), indent=2))
     else:
         click.secho(f"API tree of {dotted_path} ({len(df)} items):", fg="cyan")
+        legend = " ".join(
+            click.style(f"[{t}]={n}", fg=type_colors[t])
+            for t, n in [
+                ("M", "Module"),
+                ("C", "Class"),
+                ("F", "Function"),
+                ("V", "Variable"),
+            ]
+        )
+        click.echo(f"Legend: {legend}")
+        # Get base module for signature lookup
+        base_parts = dotted_path.split(".")
         for _, row in df.iterrows():
             indent = "  " * row["Depth"]
-            type_str = click.style(f"[{row['Type']}]", fg="yellow")
+            t = row["Type"]
+            type_s = click.style(f"[{t}]", fg=type_colors.get(t, "yellow"))
             name = row["Name"].split(".")[-1]
-            name_str = click.style(name, fg="green", bold=True)
-            doc = f" - {row['Docstring'][:50]}..." if row.get("Docstring") else ""
-            click.echo(f"{indent}{type_str} {name_str}{doc}")
+            sig_s, sig_lines = "", []
+            if t == "F":
+                try:
+                    rel_parts = row["Name"].split(".")[:-1]
+                    full_mod = (
+                        ".".join(base_parts[:-1] + rel_parts)
+                        if len(base_parts) > 1
+                        else ".".join(rel_parts)
+                    )
+                    fn = getattr(importlib.import_module(full_mod), name, None)
+                    if fn and callable(fn):
+                        sig = str(inspect.signature(fn))
+                        ret = sig[sig.rfind(" -> ") :] if " -> " in sig else ""
+                        pstr = sig[: sig.rfind(" -> ")] if ret else sig
+                        params = [
+                            p.strip() for p in pstr.strip("()").split(",") if p.strip()
+                        ]
+                        if len(params) > 2:  # Multiline for 3+ params
+                            sig_lines = [f"{indent}    {p}," for p in params[:-1]]
+                            sig_lines.append(f"{indent}    {params[-1]}")
+                            sig_s = "(\n" + "\n".join(sig_lines) + f"\n{indent}){ret}"
+                        else:
+                            sig_s = sig
+                except Exception:
+                    pass
+            name_s = click.style(name, fg=type_colors.get(t, "white"), bold=True)
+            click.echo(
+                f"{indent}{type_s} {name_s}{click.style(sig_s, fg=type_colors.get(t, 'white'), bold=True)}"
+            )
+            if verbose >= 1 and row.get("Docstring"):
+                if verbose == 1:
+                    doc = row["Docstring"].split("\n")[0][:60]
+                    click.echo(f"{indent}    - {doc}")
+                else:
+                    for ln in row["Docstring"].split("\n"):
+                        click.echo(f"{indent}    {ln}")
 
 
 @introspect.command()
