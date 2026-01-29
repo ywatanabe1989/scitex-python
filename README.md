@@ -1,7 +1,7 @@
 <!-- ---
-!-- Timestamp: 2026-01-20 09:23:14
+!-- Timestamp: 2026-01-29 23:07:31
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-python/README.md
+!-- File: /home/ywatanabe/proj/scitex-code/README.md
 !-- --- -->
 
 <p align="center">
@@ -149,8 +149,11 @@ Turn AI agents into autonomous scientific researchers.
 {
   "mcpServers": {
     "scitex": {
-      "command": "scitex",
-      "args": ["mcp", "start"]
+      "command": "/home/ywatanabe/.venv/bin/scitex",
+      "args": ["mcp", "start"],
+      "env": {
+        "SCITEX_ENV_SRC": "${SCITEX_ENV_SRC}"
+      }
     }
   }
 }

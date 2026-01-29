@@ -1,22 +1,23 @@
 <!-- ---
-!-- Timestamp: 2026-01-29 04:06:43
+!-- Timestamp: 2026-01-29 22:43:42
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-python/docs/05_SCITEX_ECOSYSTEM.md
+!-- File: /home/ywatanabe/proj/scitex-code/docs/05_SCITEX_ECOSYSTEM.md
 !-- --- -->
 
-# SciTeX Family
+# SciTeX Ecosystem
 
 SciTeX integrates standalone packages that can be used independently or through the unified `scitex` interface.
 
 ## Packages
 
-| Package | scitex Module | Description | Status |
-|---------|---------------|-------------|--------|
-| [figrecipe](https://github.com/ywatanabe1989/figrecipe) | `scitex.plt` | Publication-ready matplotlib figures | Integrated |
-| [crossref-local](https://github.com/ywatanabe1989/crossref-local) | `scitex.scholar.crossref_scitex` | Local CrossRef database (167M+ papers) | Integrated |
-| [openalex-local](https://github.com/ywatanabe1989/openalex-local) | `scitex.scholar.openalex_scitex` | Local OpenAlex database (250M+ papers) | Integrated |
-| [socialia](https://github.com/ywatanabe1989/socialia) | `scitex.social` | Social media posting (Twitter, LinkedIn) | Integrated |
-| [scitex-writer](https://github.com/ywatanabe1989/scitex-writer) | `scitex.writer` | LaTeX manuscript compilation | Integrated |
+| Package                                                           | scitex Module                    | Description                              | Status     |
+|-------------------------------------------------------------------|----------------------------------|------------------------------------------|------------|
+| [figrecipe](https://github.com/ywatanabe1989/figrecipe)           | `scitex.plt`                     | Publication-ready matplotlib figures     | Integrated |
+| [crossref-local](https://github.com/ywatanabe1989/crossref-local) | `scitex.scholar.crossref_scitex` | Local CrossRef database (167M+ papers)   | Integrated |
+| [openalex-local](https://github.com/ywatanabe1989/openalex-local) | `scitex.scholar.openalex_scitex` | Local OpenAlex database (250M+ papers)   | Integrated |
+| [socialia](https://github.com/ywatanabe1989/socialia)             | `scitex.social`                  | Social media posting (Twitter, LinkedIn) | Integrated |
+| [scitex-writer](https://github.com/ywatanabe1989/scitex-writer)   | `scitex.writer`                  | LaTeX manuscript compilation             | Integrated |
+| [scitex-dataset](https://github.com/ywatanabe1989/scitex-dataset) | `scitex.dataset`                 |                                          |            |
 
 ## Architecture
 
