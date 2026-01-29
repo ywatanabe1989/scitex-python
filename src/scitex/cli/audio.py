@@ -70,6 +70,13 @@ def speak(text, backend, voice, output, no_play, rate, speed, no_fallback):
       scitex audio speak "Fast speech" --backend pyttsx3 --rate 200
       scitex audio speak "Slow speech" --backend gtts --speed 0.8
     """
+    import logging
+    import warnings
+
+    # Suppress noisy warnings
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+
     try:
         from scitex.audio import speak as tts_speak
 
@@ -92,10 +99,17 @@ def speak(text, backend, voice, output, no_play, rate, speed, no_fallback):
 
         result = tts_speak(**kwargs)
 
-        if output and result:
-            click.secho(f"Audio saved: {result}", fg="green")
-        elif not no_play:
-            click.secho("Speech completed", fg="green")
+        if output and result.get("path"):
+            click.secho(f"Audio saved: {result['path']}", fg="green")
+
+        if not no_play:
+            if result.get("played"):
+                click.secho("Speech completed (audio played)", fg="green")
+            else:
+                click.secho(
+                    "Warning: Audio generated but playback failed (no speaker?)",
+                    fg="yellow",
+                )
 
     except Exception as e:
         click.secho(f"Error: {e}", fg="red", err=True)
@@ -368,26 +382,24 @@ def doctor():
 
 
 @mcp.command("list-tools")
-def list_tools():
-    """
-    List available MCP tools
+@click.option(
+    "-v", "--verbose", count=True, help="Verbosity: -v sig, -vv +desc, -vvv full"
+)
+@click.option("-c", "--compact", is_flag=True, help="Compact signatures (single line)")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+@click.pass_context
+def list_tools(ctx, verbose, compact, as_json):
+    """List available audio MCP tools (delegates to main MCP with -m audio)."""
+    from scitex.cli.mcp import list_tools as main_list_tools
 
-    \b
-    Example:
-      scitex audio mcp list-tools
-    """
-    click.secho("Audio MCP Tools", fg="cyan", bold=True)
-    click.echo()
-    tools = [
-        ("audio_speak", "Convert text to speech and play audio"),
-        ("audio_generate_audio", "Generate audio file without playing"),
-        ("audio_list_backends", "List available TTS backends"),
-        ("audio_list_voices", "List available voices for a backend"),
-        ("audio_play_audio", "Play an audio file"),
-        ("audio_check_audio_status", "Check audio system status"),
-    ]
-    for name, desc in tools:
-        click.echo(f"  {name}: {desc}")
+    # Invoke main list-tools with audio module filter
+    ctx.invoke(
+        main_list_tools,
+        verbose=verbose,
+        compact=compact,
+        module="audio",
+        as_json=as_json,
+    )
 
 
 @audio.command()
@@ -444,6 +456,24 @@ def relay(host, port):
     except Exception as e:
         click.secho(f"Error: {e}", fg="red", err=True)
         sys.exit(1)
+
+
+@audio.command("list-python-apis")
+@click.option("-v", "--verbose", count=True, help="Verbosity: -v +doc, -vv full doc")
+@click.option("-d", "--max-depth", type=int, default=5, help="Max recursion depth")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+@click.pass_context
+def list_python_apis(ctx, verbose, max_depth, as_json):
+    """List Python APIs (alias for: scitex introspect api scitex.audio)."""
+    from scitex.cli.introspect import api
+
+    ctx.invoke(
+        api,
+        dotted_path="scitex.audio",
+        verbose=verbose,
+        max_depth=max_depth,
+        as_json=as_json,
+    )
 
 
 if __name__ == "__main__":
