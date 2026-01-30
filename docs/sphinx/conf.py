@@ -1,5 +1,5 @@
-# Configuration file for the Sphinx documentation builder.
-#
+"""Sphinx configuration for SciTeX documentation."""
+
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
@@ -43,6 +43,72 @@ autodoc_default_options = {
     "exclude-members": "__weakref__",
 }
 
+# Mock imports for optional dependencies not available in RTD build environment
+# Only mock heavy optional dependencies that are unlikely to be installed
+autodoc_mock_imports = [
+    # ML/AI frameworks
+    "sklearn",
+    "torch",
+    "torchvision",
+    "torchaudio",
+    "tensorflow",
+    "keras",
+    "jax",
+    "flax",
+    "optax",
+    # Computer vision
+    "cv2",
+    # LLM APIs
+    "openai",
+    "anthropic",
+    "groq",
+    "google.generativeai",
+    "google.genai",
+    "google_genai",
+    # Neuroscience
+    "mne",
+    "nibabel",
+    "nilearn",
+    # Audio
+    "soundfile",
+    "librosa",
+    "pyaudio",
+    "gtts",
+    "pyttsx3",
+    "pygame",
+    "vlc",
+    "playsound",
+    "pydub",
+    # Video
+    "moviepy",
+    # Distributed computing
+    "dask",
+    "ray",
+    "pyspark",
+    "cupy",
+    "numba",
+    # ML experiment tracking
+    "wandb",
+    "mlflow",
+    "tensorboard",
+    # PyTorch ecosystem
+    "lightning",
+    "ignite",
+    "catalyst",
+    "transformers",
+    "datasets",
+    "tokenizers",
+    "accelerate",
+    "diffusers",
+    "timm",
+    "einops",
+    # Config management
+    "hydra",
+    "omegaconf",
+    # FigRecipe (external package)
+    "figrecipe",
+]
+
 # Autosummary settings
 autosummary_generate = True
 
@@ -71,8 +137,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "to_claude/**"]
 
 # The suffix(es) of source filenames.
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.md': 'markdown',
+    ".rst": "restructuredtext",
+    ".md": "markdown",
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -110,7 +176,7 @@ html_context = {
 }
 
 # nbsphinx configuration for Jupyter notebooks
-nbsphinx_execute = 'never'  # Don't execute notebooks during build
+nbsphinx_execute = "never"  # Don't execute notebooks during build
 nbsphinx_allow_errors = True
 nbsphinx_timeout = 60
 
