@@ -76,7 +76,7 @@ if FASTMCP_AVAILABLE:
         return loop.run_until_complete(coro)
 
     @mcp.tool()
-    def speak(
+    def audio_speak(
         text: str,
         backend: Optional[str] = None,
         voice: Optional[str] = None,
@@ -86,93 +86,118 @@ if FASTMCP_AVAILABLE:
         save: bool = False,
         fallback: bool = True,
         agent_id: Optional[str] = None,
+        signature: bool = False,
     ) -> str:
         """[audio] Convert text to speech with fallback (pyttsx3 -> gtts -> elevenlabs).
 
-        NOTE: Plays on SERVER. For remote use, see speak_relay.
-        """
-        return audio_speak_local(
-            text=text, backend=backend, voice=voice, rate=rate,
-            speed=speed, play=play, save=save, fallback=fallback,
-            agent_id=agent_id,
-        )
+        Smart routing: Automatically uses relay when local audio unavailable.
 
-    @mcp.tool()
-    def audio_speak_local(
-        text: str,
-        backend: Optional[str] = None,
-        voice: Optional[str] = None,
-        rate: int = 150,
-        speed: float = 1.5,
-        play: bool = True,
-        save: bool = False,
-        fallback: bool = True,
-        agent_id: Optional[str] = None,
-    ) -> str:
-        """[audio] Convert text to speech on the LOCAL/SERVER machine.
+        Routing logic (mode=auto, default):
+        - If local audio sink is SUSPENDED and relay available -> uses relay
+        - If local audio available -> uses local
+        - If neither available -> returns error with instructions
 
-        Use when running Claude Code directly on your local machine.
-        Audio plays where MCP server runs.
+        Environment variables:
+        - SCITEX_AUDIO_MODE: 'local', 'remote', or 'auto' (default: auto)
+        - SCITEX_AUDIO_RELAY_URL: Relay server URL for remote playback
 
         Args:
             text: Text to convert to speech
             backend: TTS backend (pyttsx3, gtts, elevenlabs)
             voice: Voice/language
             rate: Speech rate (pyttsx3 only)
-            speed: Speed multiplier (gtts)
+            speed: Speed multiplier for gtts (default 1.5)
             play: Play audio (default True)
             save: Save to file (default False)
             fallback: Try next backend on failure
-            agent_id: Agent identifier
+            agent_id: Agent identifier for tracking
+            signature: Prepend hostname/project/branch to text
         """
-        from ._mcp.speak_handlers import speak_local_handler
+        from ._cross_process_lock import AudioPlaybackLock
+        from ._speak import speak as tts_speak
 
-        result = _run_async(speak_local_handler(
-            text=text, backend=backend, voice=voice, rate=rate,
-            speed=speed, play=play, save=save, fallback=fallback,
-            agent_id=agent_id,
-        ))
-        return json.dumps(result, indent=2)
+        try:
+            output_path = None
+            if save:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                output_path = str(_get_audio_dir() / f"tts_{timestamp}.mp3")
 
-    @mcp.tool()
-    def audio_speak_relay(
-        text: str,
-        backend: Optional[str] = None,
-        voice: Optional[str] = None,
-        rate: int = 150,
-        speed: float = 1.5,
-        play: bool = True,
-        save: bool = False,
-        fallback: bool = True,
-        agent_id: Optional[str] = None,
-    ) -> str:
-        """[audio] Convert text to speech via RELAY server (remote playback).
+            # Prepend signature if requested
+            final_text = text
+            sig = None
+            if signature:
+                import os
+                import socket
+                import subprocess
 
-        Use when running on remote server (e.g., NAS) and want audio
-        on your local machine. REQUIRES relay server running locally.
+                hostname = socket.gethostname()
+                cwd = os.getcwd()
+                project = os.path.basename(cwd)
+                branch = None
+                try:
+                    result = subprocess.run(
+                        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                        capture_output=True, text=True, cwd=cwd, timeout=5,
+                    )
+                    if result.returncode == 0:
+                        branch = result.stdout.strip()
+                except Exception:
+                    pass
+                parts = [f"Hostname: {hostname}", f"Project: {project}"]
+                if branch:
+                    parts.append(f"Branch: {branch}")
+                sig = ". ".join(parts) + ". "
+                final_text = sig + text
 
-        Args:
-            text: Text to convert to speech
-            backend: TTS backend (pyttsx3, gtts, elevenlabs)
-            voice: Voice/language
-            rate: Speech rate (pyttsx3 only)
-            speed: Speed multiplier (gtts)
-            play: Play audio (default True)
-            save: Save to file (default False)
-            fallback: Try next backend on failure
-            agent_id: Agent identifier
+            # Acquire cross-process lock for FIFO audio playback
+            lock = AudioPlaybackLock()
+            lock.acquire(timeout=120.0)
+            try:
+                speak_result = tts_speak(
+                    text=final_text,
+                    backend=backend,
+                    voice=voice,
+                    rate=rate,
+                    speed=speed,
+                    play=play,
+                    output_path=output_path,
+                    fallback=fallback,
+                    # mode=None uses SCITEX_AUDIO_MODE env (default: auto)
+                )
+            finally:
+                lock.release()
 
-        Returns:
-            Success with playback info, or error with setup instructions
-        """
-        from ._mcp.speak_handlers import speak_relay_handler
+            result = {
+                "success": speak_result.get("success", False),
+                "text": text,
+                "backend": speak_result.get("backend", backend),
+                "played": speak_result.get("played", False),
+                "play_requested": play,
+                "mode": speak_result.get("mode", "unknown"),
+                "agent_id": agent_id,
+                "timestamp": datetime.now().isoformat(),
+            }
 
-        result = _run_async(speak_relay_handler(
-            text=text, backend=backend, voice=voice, rate=rate,
-            speed=speed, play=play, save=save, fallback=fallback,
-            agent_id=agent_id,
-        ))
-        return json.dumps(result, indent=2)
+            if signature:
+                result["signature"] = sig
+                result["full_text"] = final_text
+            if speak_result.get("path"):
+                result["path"] = str(speak_result["path"])
+            if speak_result.get("error"):
+                result["error"] = speak_result["error"]
+            if speak_result.get("routing"):
+                result["routing"] = speak_result["routing"]
+            if speak_result.get("local_state"):
+                result["local_state"] = speak_result["local_state"]
+
+            return json.dumps(result, indent=2)
+
+        except Exception as e:
+            return json.dumps({
+                "success": False,
+                "error": str(e),
+                "text": text,
+            }, indent=2)
 
     @mcp.tool()
     def list_backends() -> str:
@@ -256,8 +281,8 @@ if FASTMCP_AVAILABLE:
             else:
                 text = f"Working in {dir_name}"
 
-            # Speak the announcement using the speak tool
-            speak_result = speak(text=text)
+            # Speak the announcement using the unified audio_speak tool
+            speak_result = audio_speak(text=text)
 
             return json.dumps(
                 {
