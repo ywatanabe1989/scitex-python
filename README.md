@@ -1,7 +1,7 @@
 <!-- ---
-!-- Timestamp: 2026-01-29 23:07:31
+!-- Timestamp: 2026-01-30 11:20:09
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/README.md
+!-- File: /home/ywatanabe/proj/scitex-python/README.md
 !-- --- -->
 
 <p align="center">
@@ -43,21 +43,52 @@ Empowers both human researchers and AI agents. Each module works independently a
 
 ## 📦 Installation
 
+
 ``` bash
+uv pip install scitex          # Core (minimal)
+uv pip install scitex[plt,stats,scholar]  # Typical research setup
 uv pip install scitex[all]     # Recommended: Full installation
-uv pip install scitex          # Core only
 ```
+
+## ⚙️ Configuration
+
+Modular environment configuration via `.env.d/`:
+
+```bash
+# 1. Copy examples
+cp -r .env.d.examples .env.d
+
+# 2. Edit with your credentials
+$EDITOR .env.d/
+
+# 3. Source in shell (~/.bashrc or ~/.zshrc)
+source /path/to/.env.d/entry.src
+```
+
+**Structure:**
+```
+.env.d/
+├── entry.src              # Single entry point
+├── 00_scitex.env          # Base settings (SCITEX_DIR)
+├── 00_crossref-local.env  # CrossRef database
+├── 00_figrecipe.env       # Plotting config
+├── 01_scholar.env         # OpenAthens, API keys
+├── 01_audio.env           # TTS backends
+└── ...                    # Per-module configs
+```
+
+→ **[Full configuration reference](./.env.d.examples/README.md)**
 
 ## Three Interfaces
 
-| Interface | For | Description |
-|-----------|-----|-------------|
-| 🐍 **Python API** | Human researchers | `import scitex as stx` — 70% less code |
-| 🖥️ **CLI Commands** | Terminal users | `scitex scholar fetch`, `scitex stats run` |
-| 🔧 **MCP Tools** | AI agents | 148 tools for Claude/GPT integration |
+<!-- | Interface | For | Description |
+ !-- |-----------|-----|-------------|
+ !-- | 🐍 **Python API** | Human researchers | `import scitex as stx` — 70% less code |
+ !-- | 🖥️ **CLI Commands** | Terminal users | `scitex scholar fetch`, `scitex stats run` |
+ !-- | 🔧 **MCP Tools** | AI agents | 148 tools for Claude/GPT integration | -->
 
 <details>
-<summary><strong>🐍 Python API</strong></summary>
+<summary><strong>🐍 Python API for Humans and AI Agents</strong></summary>
 
 <br>
 
@@ -104,7 +135,7 @@ result = stx.stats.test_ttest_ind(group1, group2, return_as="dataframe")
 </details>
 
 <details>
-<summary><strong>🖥️ CLI Commands</strong></summary>
+<summary><strong>🖥️ CLI Commands for Humans and AI Agents</strong></summary>
 
 <br>
 
