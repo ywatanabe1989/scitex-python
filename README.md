@@ -54,7 +54,7 @@ uv pip install scitex          # Core only
 |-----------|-----|-------------|
 | 🐍 **Python API** | Human researchers | `import scitex as stx` — 70% less code |
 | 🖥️ **CLI Commands** | Terminal users | `scitex scholar fetch`, `scitex stats run` |
-| 🔧 **MCP Tools** | AI agents | 145 tools for Claude/GPT integration |
+| 🔧 **MCP Tools** | AI agents | 148 tools for Claude/GPT integration |
 
 <details>
 <summary><strong>🐍 Python API</strong></summary>
@@ -115,6 +115,11 @@ scitex scholar bibtex refs.bib       # Enrich BibTeX
 scitex stats recommend               # Suggest statistical tests
 scitex audio speak "Done"            # Text-to-speech
 scitex capture snap                  # Screenshot
+
+# List available APIs and tools
+scitex list-python-apis              # List all Python APIs (210 items)
+scitex mcp list-tools                # List all MCP tools (148 tools)
+scitex introspect api scitex.stats   # List APIs for specific module
 ```
 
 → **[Full CLI reference](./docs/CLI_COMMANDS.md)**
@@ -122,7 +127,7 @@ scitex capture snap                  # Screenshot
 </details>
 
 <details>
-<summary><strong>🔧 MCP Tools — 145 tools for AI Agents</strong></summary>
+<summary><strong>🔧 MCP Tools — 148 tools for AI Agents</strong></summary>
 
 <br>
 
@@ -173,8 +178,10 @@ SciTeX integrates several standalone packages that can be used independently:
 |---------|--------------|-------------|
 | [figrecipe](https://github.com/ywatanabe1989/figrecipe) | `scitex.plt` | Publication-ready matplotlib figures |
 | [crossref-local](https://github.com/ywatanabe1989/crossref-local) | `scitex.scholar.crossref_scitex` | Local CrossRef database (167M+ papers) |
+| [openalex-local](https://github.com/ywatanabe1989/openalex-local) | `scitex.scholar.openalex_scitex` | Local OpenAlex database (250M+ papers) |
 | [socialia](https://github.com/ywatanabe1989/socialia) | `scitex.social` | Social media posting (Twitter, LinkedIn) |
 | [scitex-writer](https://github.com/ywatanabe1989/scitex-writer) | `scitex.writer` | LaTeX manuscript compilation |
+| [scitex-dataset](https://github.com/ywatanabe1989/scitex-dataset) | `scitex.dataset` | Scientific dataset access |
 
 Each package works standalone or as part of scitex:
 
