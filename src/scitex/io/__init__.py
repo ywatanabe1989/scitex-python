@@ -28,17 +28,21 @@ from ._save import save
 
 # Optional: HDF5 explorer (requires h5py)
 try:
-    from ._load_modules._H5Explorer import H5Explorer, explore_h5, has_h5_key
+    from ._load_modules._H5Explorer import H5Explorer as _H5Explorer  # Internal class
+    from ._load_modules._H5Explorer import explore_h5, has_h5_key
 except ImportError:
-    H5Explorer = None
+    _H5Explorer = None
     explore_h5 = None
     has_h5_key = None
 
 # Optional: Zarr explorer (requires zarr)
 try:
-    from ._load_modules._ZarrExplorer import ZarrExplorer, explore_zarr, has_zarr_key
+    from ._load_modules._ZarrExplorer import (
+        ZarrExplorer as _ZarrExplorer,
+    )  # Internal class
+    from ._load_modules._ZarrExplorer import explore_zarr, has_zarr_key
 except ImportError:
-    ZarrExplorer = None
+    _ZarrExplorer = None
     explore_zarr = None
     has_zarr_key = None
 
@@ -67,25 +71,25 @@ except ImportError:
     save_listed_scalars_as_csv = None
     save_optuna_study_as_csv_and_pngs = None
 
-# Optional imports that might fail
+# Optional internal imports
 try:
-    from ._path import path
+    from ._path import path as _path  # Internal helper
 except ImportError:
-    path = None
+    _path = None
 
 try:
-    from ._mv_to_tmp import mv_to_tmp
+    from ._mv_to_tmp import mv_to_tmp as _mv_to_tmp  # Internal helper
 except ImportError:
-    mv_to_tmp = None
+    _mv_to_tmp = None
 
 try:
     from ._json2md import json2md
 except ImportError:
     json2md = None
 
-# Import utils
+# Import from internal utils module (hidden)
 try:
-    from .utils import migrate_h5_to_zarr, migrate_h5_to_zarr_batch
+    from ._utils import migrate_h5_to_zarr, migrate_h5_to_zarr_batch
 except ImportError:
     migrate_h5_to_zarr = None
     migrate_h5_to_zarr_batch = None

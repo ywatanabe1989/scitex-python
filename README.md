@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-20 09:23:14
+!-- Timestamp: 2026-01-30 11:36:29
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-python/README.md
 !-- --- -->
@@ -27,6 +27,8 @@
 
 Empowers both human researchers and AI agents. Each module works independently and adapts to various academic workflows, handling primary and secondary research with real or simulated data.
 
+> **SciTeX is fully modular; every module is opt-in and exposed only when operational.**
+
 ## 🎬 Demo
 
 **40 min, zero human intervention** — AI agent conducts full research pipeline:
@@ -41,21 +43,50 @@ Empowers both human researchers and AI agents. Each module works independently a
 
 ## 📦 Installation
 
+
 ``` bash
+uv pip install scitex          # Core (minimal)
+uv pip install scitex[plt,stats,scholar]  # Typical research setup
 uv pip install scitex[all]     # Recommended: Full installation
-uv pip install scitex          # Core only
 ```
+
+## ⚙️ Configuration
+
+Modular environment configuration via `.env.d/`:
+
+<details>
+
+```bash
+# 1. Copy examples
+cp -r .env.d.examples .env.d
+
+# 2. Edit with your credentials
+$EDITOR .env.d/
+
+# 3. Source in shell (~/.bashrc or ~/.zshrc)
+source /path/to/.env.d/entry.src
+```
+
+**Structure:**
+```
+.env.d/
+├── entry.src              # Single entry point
+├── 00_scitex.env          # Base settings (SCITEX_DIR)
+├── 00_crossref-local.env  # CrossRef database
+├── 00_figrecipe.env       # Plotting config
+├── 01_scholar.env         # OpenAthens, API keys
+├── 01_audio.env           # TTS backends
+└── ...                    # Per-module configs
+```
+
+→ **[Full configuration reference](./.env.d.examples/README.md)**
+
+</details>
 
 ## Three Interfaces
 
-| Interface | For | Description |
-|-----------|-----|-------------|
-| 🐍 **Python API** | Human researchers | `import scitex as stx` — 70% less code |
-| 🖥️ **CLI Commands** | Terminal users | `scitex scholar fetch`, `scitex stats run` |
-| 🔧 **MCP Tools** | AI agents | 145 tools for Claude/GPT integration |
-
 <details>
-<summary><strong>🐍 Python API</strong></summary>
+<summary><strong>🐍 Python API for Humans and AI Agents</strong></summary>
 
 <br>
 
@@ -102,7 +133,7 @@ result = stx.stats.test_ttest_ind(group1, group2, return_as="dataframe")
 </details>
 
 <details>
-<summary><strong>🖥️ CLI Commands</strong></summary>
+<summary><strong>🖥️ CLI Commands for Humans and AI Agents</strong></summary>
 
 <br>
 
@@ -113,6 +144,11 @@ scitex scholar bibtex refs.bib       # Enrich BibTeX
 scitex stats recommend               # Suggest statistical tests
 scitex audio speak "Done"            # Text-to-speech
 scitex capture snap                  # Screenshot
+
+# List available APIs and tools
+scitex list-python-apis              # List all Python APIs (210 items)
+scitex mcp list-tools                # List all MCP tools (148 tools)
+scitex introspect api scitex.stats   # List APIs for specific module
 ```
 
 → **[Full CLI reference](./docs/CLI_COMMANDS.md)**
@@ -120,7 +156,7 @@ scitex capture snap                  # Screenshot
 </details>
 
 <details>
-<summary><strong>🔧 MCP Tools — 145 tools for AI Agents</strong></summary>
+<summary><strong>🔧 MCP Tools — 148 tools for AI Agents</strong></summary>
 
 <br>
 
@@ -149,8 +185,11 @@ Turn AI agents into autonomous scientific researchers.
 {
   "mcpServers": {
     "scitex": {
-      "command": "scitex",
-      "args": ["mcp", "start"]
+      "command": "/home/ywatanabe/.venv/bin/scitex",
+      "args": ["mcp", "start"],
+      "env": {
+        "SCITEX_ENV_SRC": "${SCITEX_ENV_SRC}"
+      }
     }
   }
 }
@@ -164,12 +203,16 @@ Turn AI agents into autonomous scientific researchers.
 
 SciTeX integrates several standalone packages that can be used independently:
 
+<details>
+
 | Package | scitex Module | Description |
 |---------|--------------|-------------|
 | [figrecipe](https://github.com/ywatanabe1989/figrecipe) | `scitex.plt` | Publication-ready matplotlib figures |
 | [crossref-local](https://github.com/ywatanabe1989/crossref-local) | `scitex.scholar.crossref_scitex` | Local CrossRef database (167M+ papers) |
+| [openalex-local](https://github.com/ywatanabe1989/openalex-local) | `scitex.scholar.openalex_scitex` | Local OpenAlex database (250M+ papers) |
 | [socialia](https://github.com/ywatanabe1989/socialia) | `scitex.social` | Social media posting (Twitter, LinkedIn) |
 | [scitex-writer](https://github.com/ywatanabe1989/scitex-writer) | `scitex.writer` | LaTeX manuscript compilation |
+| [scitex-dataset](https://github.com/ywatanabe1989/scitex-dataset) | `scitex.dataset` | Scientific dataset access |
 
 Each package works standalone or as part of scitex:
 
@@ -178,9 +221,11 @@ pip install figrecipe        # Use independently
 pip install scitex[plt]      # Or via scitex
 ```
 
+</details>
+
 ## 📖 Documentation
 
-- **[Read the Docs](https://scitex.readthedocs.io/)**: Complete API reference
+- **[Read the Docs](https://scitex-python.readthedocs.io/)**: Complete API reference
 - **[Example Notebooks](./examples/notebooks/)**: 25+ Jupyter notebooks
 
 ## 🤝 Contributing

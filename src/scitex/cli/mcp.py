@@ -17,14 +17,7 @@ import click
 @click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
 @click.pass_context
 def mcp(ctx, help_recursive):
-    """
-    MCP (Model Context Protocol) server management.
-
-    \b
-    Examples:
-      scitex mcp list-tools    # List all tools
-      scitex mcp start         # Start MCP server
-    """
+    """MCP (Model Context Protocol) server management."""  # noqa: D301
     if help_recursive:
         _print_help_recursive(ctx)
         ctx.exit(0)
@@ -32,30 +25,135 @@ def mcp(ctx, help_recursive):
         click.echo(ctx.get_help())
 
 
+def _extract_return_keys(description: str) -> list:
+    """Extract return dict keys from docstring Returns section."""
+    import re
+
+    if not description or "Returns" not in description:
+        return []
+    match = re.search(
+        r"Returns\s*[-]+\s*\w+\s*(.+?)(?:Raises|Examples|Notes|\Z)",
+        description,
+        re.DOTALL,
+    )
+    if not match:
+        return []
+    return re.findall(r"'([a-z_]+)'", match.group(1))
+
+
+def _format_signature(tool_obj, multiline: bool = False, indent: str = "  ") -> str:
+    """Format tool as Python-like function signature with return type."""
+    import inspect
+
+    params = []
+    if hasattr(tool_obj, "parameters") and tool_obj.parameters:
+        schema = tool_obj.parameters
+        props = schema.get("properties", {})
+        required = schema.get("required", [])
+        for name, info in props.items():
+            ptype = info.get("type", "any")
+            default = info.get("default")
+            if name in required:
+                p = f"{click.style(name, fg='white', bold=True)}: {click.style(ptype, fg='cyan')}"
+            elif default is not None:
+                def_str = repr(default) if len(repr(default)) < 20 else "..."
+                p = f"{click.style(name, fg='white', bold=True)}: {click.style(ptype, fg='cyan')} = {click.style(def_str, fg='yellow')}"
+            else:
+                p = f"{click.style(name, fg='white', bold=True)}: {click.style(ptype, fg='cyan')} = {click.style('None', fg='yellow')}"
+            params.append(p)
+    # Get return type from function annotation + dict keys from docstring
+    ret_type = ""
+    if hasattr(tool_obj, "fn") and tool_obj.fn:
+        try:
+            sig = inspect.signature(tool_obj.fn)
+            if sig.return_annotation != inspect.Parameter.empty:
+                ret = sig.return_annotation
+                ret_name = ret.__name__ if hasattr(ret, "__name__") else str(ret)
+                keys = (
+                    _extract_return_keys(tool_obj.description)
+                    if tool_obj.description
+                    else []
+                )
+                keys_str = (
+                    click.style(f"{{{', '.join(keys)}}}", fg="yellow") if keys else ""
+                )
+                ret_type = f" -> {click.style(ret_name, fg='magenta')}{keys_str}"
+        except Exception:
+            pass
+    name_s = click.style(tool_obj.name, fg="green", bold=True)
+    if multiline and len(params) > 2:
+        param_indent = indent + "    "
+        params_str = ",\n".join(f"{param_indent}{p}" for p in params)
+        return f"{indent}{name_s}(\n{params_str}\n{indent}){ret_type}"
+    return f"{indent}{name_s}({', '.join(params)}){ret_type}"
+
+
+def _estimate_tokens(text: str) -> int:
+    """Estimate token count (rough: ~4 chars per token)."""
+    return len(text) // 4 if text else 0
+
+
+def _get_mcp_summary(mcp_server) -> dict:
+    """Get MCP server summary statistics."""
+    import json as json_mod
+
+    tools = list(mcp_server._tool_manager._tools.values())
+    instructions = getattr(mcp_server, "instructions", "") or ""
+    total_desc = sum(len(t.description or "") for t in tools)
+    total_params = sum(
+        len(json_mod.dumps(t.parameters))
+        if hasattr(t, "parameters") and t.parameters
+        else 0
+        for t in tools
+    )
+
+    return {
+        "name": getattr(mcp_server, "name", "unknown"),
+        "tool_count": len(tools),
+        "instructions_tokens": _estimate_tokens(instructions),
+        "descriptions_tokens": _estimate_tokens("x" * total_desc),
+        "schemas_tokens": _estimate_tokens("x" * total_params),
+        "total_context_tokens": (
+            _estimate_tokens(instructions)
+            + _estimate_tokens("x" * total_desc)
+            + _estimate_tokens("x" * total_params)
+        ),
+    }
+
+
 @mcp.command("list-tools")
+@click.option("-v", "--verbose", count=True, help="Verbosity: -v, -vv, -vvv.")
+@click.option("-c", "--compact", is_flag=True, help="Compact signatures (single line)")
 @click.option(
     "--module",
     "-m",
     type=str,
     default=None,
-    help="Filter by module (audio, canvas, capture, diagram, plt, scholar, stats, template, ui, writer)",
+    help="Filter by module (audio, canvas, capture, dataset, diagram, plt, scholar, stats, template, ui, writer)",
 )
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
-def list_tools(module: str, as_json: bool):
-    """
-    List all available MCP tools.
+@click.option("--summary", "show_summary", is_flag=True, help="Show context summary")
+def list_tools(
+    verbose: int, compact: bool, module: str, as_json: bool, show_summary: bool
+):
+    """List all available MCP tools.
 
-    \b
-    Examples:
-      scitex mcp list-tools
-      scitex mcp list-tools --module audio
-    """
+    Verbosity: (none) names, -v signatures, -vv +description, -vvv full.
+    Signatures are expanded by default; use -c/--compact for single line.
+    """  # noqa: D301
+    import logging
+    import warnings
+
+    # Suppress DeprecationWarnings from third-party libraries (httplib2, etc.)
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    # Suppress INFO messages from env loader during import
+    logging.getLogger("scitex._env_loader").setLevel(logging.WARNING)
     try:
         from scitex.mcp_server import FASTMCP_AVAILABLE
         from scitex.mcp_server import mcp as mcp_server
     except ImportError:
         click.secho("ERROR: Could not import MCP server", fg="red", err=True)
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     if not FASTMCP_AVAILABLE:
         click.secho(
@@ -87,53 +185,93 @@ def list_tools(module: str, as_json: bool):
             raise SystemExit(1)
         modules = {module: modules[module]}
 
+    summary = _get_mcp_summary(mcp_server)
+
     if as_json:
         import json
 
         output = {
+            "summary": summary,
             "total": sum(len(t) for t in modules.values()),
-            "modules": {m: {"count": len(t), "tools": t} for m, t in modules.items()},
+            "modules": {},
         }
+        for mod, tool_list in modules.items():
+            output["modules"][mod] = {
+                "count": len(tool_list),
+                "tools": [],
+            }
+            for tool_name in tool_list:
+                tool_obj = mcp_server._tool_manager._tools.get(tool_name)
+                schema = tool_obj.parameters if hasattr(tool_obj, "parameters") else {}
+                output["modules"][mod]["tools"].append(
+                    {
+                        "name": tool_name,
+                        "signature": _format_signature(tool_obj)
+                        if tool_obj
+                        else tool_name,
+                        "description": tool_obj.description if tool_obj else "",
+                        "parameters": schema,
+                    }
+                )
         click.echo(json.dumps(output, indent=2))
     else:
         total = sum(len(t) for t in modules.values())
-        click.secho(f"SciTeX MCP Tools ({total} total)", fg="cyan", bold=True)
+        click.secho(f"SciTeX MCP: {summary['name']}", fg="cyan", bold=True)
+        click.echo(f"Tools: {total} ({len(modules)} modules)")
+        if show_summary:
+            click.echo(f"Context: ~{summary['total_context_tokens']:,} tokens")
+            click.echo(f"  Instructions: ~{summary['instructions_tokens']:,} tokens")
+            click.echo(f"  Descriptions: ~{summary['descriptions_tokens']:,} tokens")
+            click.echo(f"  Schemas: ~{summary['schemas_tokens']:,} tokens")
         click.echo()
 
         for mod, tool_list in sorted(modules.items()):
-            # Calculate max tool name length for this module
-            max_name_len = max(len(t) for t in tool_list)
-
             click.secho(f"{mod}: {len(tool_list)} tools", fg="green", bold=True)
-            for tool in tool_list:
-                # Get tool description if available
-                tool_obj = mcp_server._tool_manager._tools.get(tool)
-                desc = ""
-                if tool_obj and hasattr(tool_obj, "description"):
-                    desc = tool_obj.description
-                    if desc:
-                        # Truncate long descriptions
-                        desc = desc.split("\n")[0][:50]
-                        if len(desc) == 50:
-                            desc += "..."
-                # Use printf-style formatting for aligned columns
-                click.echo(f"  {tool:<{max_name_len}}  {desc}")
+            for tool_name in tool_list:
+                tool_obj = mcp_server._tool_manager._tools.get(tool_name)
+
+                if verbose == 0:
+                    # Names only
+                    click.echo(f"  {tool_name}")
+                elif verbose == 1:
+                    # Full signature
+                    sig = (
+                        _format_signature(tool_obj, multiline=not compact)
+                        if tool_obj
+                        else f"  {tool_name}"
+                    )
+                    click.echo(sig)
+                elif verbose == 2:
+                    # Signature + one-line description
+                    sig = (
+                        _format_signature(tool_obj, multiline=not compact)
+                        if tool_obj
+                        else f"  {tool_name}"
+                    )
+                    click.echo(sig)
+                    if tool_obj and tool_obj.description:
+                        desc = tool_obj.description.split("\n")[0].strip()
+                        click.echo(f"    {desc}")
+                    click.echo()
+                else:
+                    # Signature + full description
+                    sig = (
+                        _format_signature(tool_obj, multiline=not compact)
+                        if tool_obj
+                        else f"  {tool_name}"
+                    )
+                    click.echo(sig)
+                    if tool_obj and tool_obj.description:
+                        for line in tool_obj.description.strip().split("\n"):
+                            click.echo(f"    {line}")
+                    click.echo()
             click.echo()
 
 
 @mcp.command("doctor")
 @click.option("--verbose", "-v", is_flag=True, help="Show detailed diagnostics")
 def doctor(verbose: bool):
-    """
-    Check MCP server health and configuration.
-
-    \b
-    Checks:
-      - FastMCP package installation
-      - Module imports
-      - Handler availability
-      - Tool registration
-    """
+    """Check MCP server health and configuration."""
     issues = []
     warnings = []
 
@@ -143,7 +281,7 @@ def doctor(verbose: bool):
     # Check 1: FastMCP installation
     click.echo("Checking FastMCP installation... ", nl=False)
     try:
-        from fastmcp import FastMCP
+        from fastmcp import FastMCP  # noqa: F401
 
         click.secho("OK", fg="green")
         if verbose:
@@ -172,7 +310,7 @@ def doctor(verbose: bool):
     # Check 3: _mcp_tools subpackage
     click.echo("Checking _mcp_tools subpackage... ", nl=False)
     try:
-        from scitex._mcp_tools import register_all_tools
+        from scitex._mcp_tools import register_all_tools  # noqa: F401
 
         click.secho("OK", fg="green")
     except ImportError as e:
@@ -301,33 +439,20 @@ def _print_help_recursive(ctx):
     "--port", "-p", default=8085, type=int, help="Port to bind (default: 8085)"
 )
 def start(transport: str, host: str, port: int):
-    """
-    Start the unified MCP server.
-
-    \b
-    Examples:
-      scitex mcp start
-      scitex mcp start -t sse -p 8085
-    """
+    """Start the unified MCP server."""
     try:
         from scitex.mcp_server import run_server
     except ImportError:
         click.secho("ERROR: Could not import MCP server", fg="red", err=True)
         click.echo("Run: pip install fastmcp")
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     run_server(transport=transport, host=host, port=port)
 
 
 @mcp.command("installation")
 def installation():
-    """
-    Show Claude Desktop configuration for SciTeX MCP server.
-
-    \b
-    Examples:
-      scitex mcp installation
-    """
+    """Show Claude Desktop configuration for SciTeX MCP server."""
     import shutil
     import sys
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 from .audio import register_audio_tools
 from .canvas import register_canvas_tools
 from .capture import register_capture_tools
+from .dataset import register_dataset_tools
 from .diagram import register_diagram_tools
 from .introspect import register_introspect_tools
 from .plt import register_plt_tools
@@ -26,6 +27,7 @@ def register_all_tools(mcp) -> None:
     register_audio_tools(mcp)
     register_canvas_tools(mcp)
     register_capture_tools(mcp)
+    register_dataset_tools(mcp)
     register_diagram_tools(mcp)
     register_introspect_tools(mcp)
     register_plt_tools(mcp)

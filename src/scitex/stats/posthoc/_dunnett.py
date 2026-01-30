@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/stats/posthoc/_dunnett.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -26,12 +27,14 @@ IO:
 """
 
 """Imports"""
+from typing import List, Literal, Optional, Union
+
 import numpy as np
 import pandas as pd
-from typing import Union, List, Optional, Literal
 from scipy import stats
-from scitex.stats.utils._formatters import p2stars
-from scitex.stats.utils._normalizers import convert_results
+
+from scitex.stats._utils._formatters import p2stars
+from scitex.stats._utils._normalizers import convert_results
 
 
 def dunnett_critical_value(
@@ -306,12 +309,12 @@ def posthoc_dunnett(
                 "pvalue": round(float(pvalue), 4),
                 "significant": bool(significant),
                 "pstars": p2stars(pvalue),
-                "ci_lower": round(float(ci_lower), 3)
-                if not np.isinf(ci_lower)
-                else "-inf",
-                "ci_upper": round(float(ci_upper), 3)
-                if not np.isinf(ci_upper)
-                else "inf",
+                "ci_lower": (
+                    round(float(ci_lower), 3) if not np.isinf(ci_lower) else "-inf"
+                ),
+                "ci_upper": (
+                    round(float(ci_upper), 3) if not np.isinf(ci_upper) else "inf"
+                ),
                 "alpha": alpha,
                 "alternative": alternative,
             }
@@ -325,8 +328,9 @@ def posthoc_dunnett(
 
 
 if __name__ == "__main__":
-    import sys
     import argparse
+    import sys
+
     import scitex as stx
 
     parser = argparse.ArgumentParser()

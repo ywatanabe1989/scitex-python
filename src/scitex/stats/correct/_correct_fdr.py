@@ -23,17 +23,13 @@ IO:
 """
 
 """Imports"""
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Literal
-from typing import Optional
-from typing import Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import matplotlib
 import matplotlib.axes
 import numpy as np
 import pandas as pd
+
 from scitex.logging import getLogger
 
 logger = getLogger(__name__)
@@ -161,8 +157,8 @@ def correct_fdr(
     >>> corrected_bh[0]['pvalue_adjusted'] < corrected_by[0]['pvalue_adjusted']
     True
     """
-    from scitex.stats.utils._formatters import p2stars
-    from scitex.stats.utils._normalizers import force_dataframe, to_dict
+    from scitex.stats._utils._formatters import p2stars
+    from scitex.stats._utils._normalizers import force_dataframe, to_dict
 
     if verbose:
         method_name = "Benjamini-Hochberg" if method == "bh" else "Benjamini-Yekutieli"

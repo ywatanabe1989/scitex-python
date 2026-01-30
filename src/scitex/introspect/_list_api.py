@@ -146,13 +146,19 @@ def _list_api_impl(
             obj_name = f"{full_path}.{name}"
 
             if inspect.ismodule(obj):
-                if obj.__name__ not in visited:
+                # Only recurse into direct submodules (not sibling packages)
+                obj_mod_name = getattr(obj, "__name__", "")
+                # Check if this is a direct submodule of current module
+                if (
+                    obj_mod_name.startswith(module_name + ".")
+                    and obj_mod_name not in visited
+                ):
                     content_list.append(
                         (
                             "M",
                             obj_name,
                             obj.__doc__ if docstring and obj.__doc__ else "",
-                            current_depth,
+                            current_depth + 1,  # Children are one level deeper
                         )
                     )
                     try:
@@ -175,23 +181,35 @@ def _list_api_impl(
                     except Exception as err:
                         print(f"Error processing module {obj_name}: {err}")
             elif inspect.isfunction(obj):
-                content_list.append(
-                    (
-                        "F",
-                        obj_name,
-                        obj.__doc__ if docstring and obj.__doc__ else "",
-                        current_depth,
+                # Only include functions defined in this module (not re-exported from siblings)
+                obj_module = getattr(obj, "__module__", "")
+                # Check if function is defined in current module or its submodules
+                if obj_module == module_name or obj_module.startswith(
+                    module_name + "."
+                ):
+                    content_list.append(
+                        (
+                            "F",
+                            obj_name,
+                            obj.__doc__ if docstring and obj.__doc__ else "",
+                            current_depth + 1,  # Children are one level deeper
+                        )
                     )
-                )
             elif inspect.isclass(obj):
-                content_list.append(
-                    (
-                        "C",
-                        obj_name,
-                        obj.__doc__ if docstring and obj.__doc__ else "",
-                        current_depth,
+                # Only include classes defined in this module (not re-exported from siblings)
+                obj_module = getattr(obj, "__module__", "")
+                # Check if class is defined in current module or its submodules
+                if obj_module == module_name or obj_module.startswith(
+                    module_name + "."
+                ):
+                    content_list.append(
+                        (
+                            "C",
+                            obj_name,
+                            obj.__doc__ if docstring and obj.__doc__ else "",
+                            current_depth + 1,  # Children are one level deeper
+                        )
                     )
-                )
 
     except Exception as err:
         print(f"Error processing module structure: {err}")

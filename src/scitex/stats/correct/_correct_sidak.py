@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/correct/_correct_sidak.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -32,6 +33,7 @@ import matplotlib
 import matplotlib.axes
 import numpy as np
 import pandas as pd
+
 import scitex as stx
 from scitex.logging import getLogger
 
@@ -150,7 +152,7 @@ def correct_sidak(
     correct_holm : Sequential Bonferroni method
     correct_fdr : FDR control (less conservative)
     """
-    from scitex.stats.utils._formatters import p2stars
+    from scitex.stats._utils._formatters import p2stars
 
     if verbose:
         logger.info("Applying Šidák correction")

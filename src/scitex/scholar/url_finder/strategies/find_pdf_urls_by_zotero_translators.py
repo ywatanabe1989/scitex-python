@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-13 06:32:08 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/url_finder/strategies/find_pdf_urls_by_zotero_translators.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = (
@@ -38,10 +38,10 @@ Usage:
 from typing import List
 
 from playwright.async_api import Page
-from scitex.scholar.url_finder.translators.core.registry import TranslatorRegistry
 
 from scitex import logging
 from scitex.browser import browser_logger
+from scitex.scholar.url_finder.translators._core.registry import TranslatorRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -67,11 +67,13 @@ async def find_pdf_urls_by_zotero_translators(
         config: ScholarConfig instance (unused, for signature consistency)
         func_name: Function name for logging
 
-    Returns:
+    Returns
+    -------
         List of PDF URLs extracted by matching translators
         Empty list if no translator matches or extraction fails
 
-    Examples:
+    Examples
+    --------
         >>> async with async_playwright() as p:
         ...     browser = await p.chromium.launch()
         ...     page = await browser.new_page()

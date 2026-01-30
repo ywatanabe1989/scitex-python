@@ -24,12 +24,12 @@ def _json(data: dict) -> str:
 def register_canvas_tools(mcp) -> None:
     """Register canvas tools with FastMCP server.
 
-    Note: These tools are deprecated. figrecipe is mounted for composition.
+    Note: These tools are deprecated. Use plt_compose from figrecipe instead.
+    plt_* and diagram_* tools are registered via plt.py and diagram.py respectively.
     """
-    # Mount figrecipe MCP server if available (preferred)
-    _mount_figrecipe(mcp)
 
-    # Legacy canvas tools (deprecated, for backward compatibility)
+    # Legacy canvas tools only (deprecated, for backward compatibility)
+    # plt_* tools are registered in plt.py, diagram_* in diagram.py
     @mcp.tool()
     async def canvas_create_canvas(
         parent_dir: str,
@@ -144,19 +144,6 @@ def register_canvas_tools(mcp) -> None:
         )
         result["_deprecated"] = "Use figrecipe instead"
         return _json(result)
-
-
-def _mount_figrecipe(mcp) -> None:
-    """Mount figrecipe MCP server for composition tools.
-
-    Provides: plt_plot, plt_compose, plt_reproduce, plt_info, etc.
-    """
-    try:
-        from figrecipe._mcp.server import mcp as figrecipe_mcp
-
-        mcp.mount(figrecipe_mcp, prefix="plt")
-    except ImportError:
-        pass  # figrecipe not installed
 
 
 # EOF

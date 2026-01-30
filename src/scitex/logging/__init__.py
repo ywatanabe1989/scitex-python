@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-08-21 20:09:30 (ywatanabe)"
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/logging/__init__.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -39,88 +39,112 @@ Usage:
 
 import logging as _logging
 
-from ._Tee import Tee, tee
-
-# Import modular components
-from ._levels import SUCCESS, FAIL, DEBUG, INFO, WARNING, ERROR, CRITICAL
-from ._logger import SciTeXLogger, setup_logger_class
-from ._formatters import SciTeXConsoleFormatter, SciTeXFileFormatter
-from ._handlers import create_console_handler, create_file_handler, get_default_log_path
 from ._config import (
-    set_level,
-    get_level,
-    enable_file_logging,
-    is_file_logging_enabled,
     configure,
+    enable_file_logging,
+    get_level,
     get_log_path,
-)
-from ._print_capture import (
-    PrintCapture,
-    enable_print_capture,
-    disable_print_capture,
-    is_print_capture_enabled,
+    is_file_logging_enabled,
+    set_level,
 )
 from ._context import log_to_file
 
-# Warnings (like Python's warnings module)
-from ._warnings import (
-    SciTeXWarning,
-    UnitWarning,
-    StyleWarning,
-    SciTeXDeprecationWarning,
-    PerformanceWarning,
-    DataLossWarning,
-    warn,
-    filterwarnings,
-    resetwarnings,
-    warn_deprecated,
-    warn_performance,
-    warn_data_loss,
-)
-
 # Errors (exceptions)
 from ._errors import (
-    SciTeXError,
-    ConfigurationError,
+    AuthenticationError,
+    AxisError,
+    BibTeXEnrichmentError,
     ConfigFileNotFoundError,
     ConfigKeyError,
-    IOError,
-    FileFormatError,
-    SaveError,
-    LoadError,
-    ScholarError,
-    SearchError,
-    EnrichmentError,
-    PDFDownloadError,
-    DOIResolutionError,
-    PDFExtractionError,
-    BibTeXEnrichmentError,
-    TranslatorError,
-    AuthenticationError,
-    PlottingError,
-    FigureNotFoundError,
-    AxisError,
+    ConfigurationError,
     DataError,
-    ShapeError,
+    DOIResolutionError,
     DTypeError,
-    PathError,
+    EnrichmentError,
+    FigureNotFoundError,
+    FileFormatError,
     InvalidPathError,
+    IOError,
+    LoadError,
+    ModelError,
+    NNError,
+    PathError,
     PathNotFoundError,
+    PDFDownloadError,
+    PDFExtractionError,
+    PlottingError,
+    SaveError,
+    ScholarError,
+    SciTeXError,
+    SearchError,
+    ShapeError,
+    StatsError,
     TemplateError,
     TemplateViolationError,
-    NNError,
-    ModelError,
-    StatsError,
     TestError,
-    check_path,
+    TranslatorError,
     check_file_exists,
+    check_path,
     check_shape_compatibility,
+)
+from ._formatters import (
+    SciTeXConsoleFormatter as _SciTeXConsoleFormatter,
+)
+from ._formatters import (
+    SciTeXFileFormatter as _SciTeXFileFormatter,
+)
+from ._handlers import (
+    create_console_handler as _create_console_handler,
+)
+from ._handlers import (
+    create_file_handler as _create_file_handler,
+)
+from ._handlers import (
+    get_default_log_path as _get_default_log_path,
+)
+
+# Import modular components
+from ._levels import CRITICAL, DEBUG, ERROR, FAIL, INFO, SUCCESS, WARNING
+from ._logger import (
+    SciTeXLogger as _SciTeXLogger,
+)
+from ._logger import (
+    setup_logger_class as _setup_logger_class,
+)
+from ._print_capture import (
+    PrintCapture as _PrintCapture,
+)
+from ._print_capture import (
+    disable_print_capture as _disable_print_capture,
+)
+from ._print_capture import (
+    enable_print_capture as _enable_print_capture,
+)
+from ._print_capture import (
+    is_print_capture_enabled as _is_print_capture_enabled,
+)
+from ._Tee import Tee, tee
+
+# Warnings (like Python's warnings module)
+from ._warnings import (
+    DataLossWarning,
+    PerformanceWarning,
+    SciTeXDeprecationWarning,
+    SciTeXWarning,
+    StyleWarning,
+    UnitWarning,
+    filterwarnings,
+    resetwarnings,
+    warn,
+    warn_data_loss,
+    warn_deprecated,
+    warn_performance,
 )
 
 # Re-export standard logging functions for compatibility
 getLogger = _logging.getLogger
-basicConfig = _logging.basicConfig
-disable = _logging.disable
+_basicConfig = _logging.basicConfig
+_disable = _logging.disable
 
 level_by_env = os.getenv("SCITEX_LOGGING_LEVEL", "INFO").upper()
 level_map = {
@@ -156,6 +180,10 @@ __all__ = [
     "FAIL",
     # Configuration
     "configure",
+    "set_level",
+    "get_level",
+    "enable_file_logging",
+    "is_file_logging_enabled",
     "get_log_path",
     "Tee",
     "tee",

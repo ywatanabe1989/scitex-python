@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/correct/_correct_fdr.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -33,6 +34,7 @@ import matplotlib
 import matplotlib.axes
 import numpy as np
 import pandas as pd
+
 import scitex as stx
 from scitex.logging import getLogger
 
@@ -161,8 +163,8 @@ def correct_fdr(
     >>> corrected_bh[0]['pvalue_adjusted'] < corrected_by[0]['pvalue_adjusted']
     True
     """
-    from scitex.stats.utils._formatters import p2stars
-    from scitex.stats.utils._normalizers import force_dataframe, to_dict
+    from scitex.stats._utils._formatters import p2stars
+    from scitex.stats._utils._normalizers import force_dataframe, to_dict
 
     if verbose:
         method_name = "Benjamini-Hochberg" if method == "bh" else "Benjamini-Yekutieli"

@@ -32,7 +32,7 @@ from scitex.scholar.core import Paper
 from scitex.scholar.metadata_engines import ScholarEngine
 from scitex.scholar.impact_factor import ImpactFactorEngine
 from scitex.scholar.config import ScholarConfig
-from scitex.scholar.utils import DOIValidator
+from scitex.scholar._utils import DOIValidator
 
 logger = logging.getLogger(__name__)
 

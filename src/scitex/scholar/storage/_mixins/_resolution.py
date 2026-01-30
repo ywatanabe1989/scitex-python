@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from scitex import logging
-from scitex.scholar.utils import TextNormalizer
+from scitex.scholar._utils import TextNormalizer
 
 logger = logging.getLogger(__name__)
 

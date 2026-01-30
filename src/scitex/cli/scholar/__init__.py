@@ -213,41 +213,48 @@ def doctor():
 
 
 @mcp.command("list-tools")
-def list_tools():
-    r"""List available MCP tools.
+@click.option(
+    "-v", "--verbose", count=True, help="Verbosity: -v sig, -vv +desc, -vvv full"
+)
+@click.option("-c", "--compact", is_flag=True, help="Compact signatures (single line)")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+@click.pass_context
+def list_tools(ctx, verbose, compact, as_json):
+    r"""List available scholar MCP tools (delegates to main MCP with -m scholar).
 
     \b
     Example:
       scitex scholar mcp list-tools
+      scitex scholar mcp list-tools -v
     """
-    click.secho("Scholar MCP Tools", fg="cyan", bold=True)
-    click.echo()
-    tools = [
-        ("search_papers", "Search for papers by query"),
-        ("resolve_dois", "Resolve DOIs to metadata"),
-        ("enrich_bibtex", "Enrich BibTeX with abstracts/DOIs"),
-        ("download_pdf", "Download PDF for a paper"),
-        ("download_pdfs_batch", "Batch download PDFs"),
-        ("get_library_status", "Get library status"),
-        ("parse_bibtex", "Parse BibTeX file"),
-        ("validate_pdfs", "Validate downloaded PDFs"),
-        ("authenticate", "Authenticate with institution"),
-        ("check_auth_status", "Check authentication status"),
-        ("fetch_papers", "Fetch papers by DOIs (async)"),
-        # CrossRef-Local (167M+ papers)
-        ("crossref_search", "Search CrossRef database (167M+ papers)"),
-        ("crossref_get", "Get paper by DOI from CrossRef"),
-        ("crossref_count", "Count papers matching query"),
-        ("crossref_citations", "Get citation relationships"),
-        ("crossref_info", "Get CrossRef database status"),
-        # OpenAlex-Local (284M+ works)
-        ("openalex_search", "Search OpenAlex database (284M+ works)"),
-        ("openalex_get", "Get paper by DOI/ID from OpenAlex"),
-        ("openalex_count", "Count papers matching query"),
-        ("openalex_info", "Get OpenAlex database status"),
-    ]
-    for name, desc in tools:
-        click.echo(f"  {name}: {desc}")
+    from scitex.cli.mcp import list_tools as main_list_tools
+
+    # Invoke main list-tools with scholar module filter
+    ctx.invoke(
+        main_list_tools,
+        verbose=verbose,
+        compact=compact,
+        module="scholar",
+        as_json=as_json,
+    )
+
+
+@scholar.command("list-python-apis")
+@click.option("-v", "--verbose", count=True, help="Verbosity: -v +doc, -vv full doc")
+@click.option("-d", "--max-depth", type=int, default=5, help="Max recursion depth")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+@click.pass_context
+def list_python_apis(ctx, verbose, max_depth, as_json):
+    """List Python APIs (alias for: scitex introspect api scitex.scholar)."""
+    from scitex.cli.introspect import api
+
+    ctx.invoke(
+        api,
+        dotted_path="scitex.scholar",
+        verbose=verbose,
+        max_depth=max_depth,
+        as_json=as_json,
+    )
 
 
 scholar.add_command(crossref_scitex)

@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/correct/_correct_holm.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -33,6 +34,7 @@ import matplotlib
 import matplotlib.axes
 import numpy as np
 import pandas as pd
+
 import scitex as stx
 from scitex.logging import getLogger
 
@@ -142,7 +144,7 @@ def correct_holm(
     >>> df = pd.DataFrame(results)
     >>> df_corrected = correct_holm(df)
     """
-    from scitex.stats.utils._normalizers import force_dataframe
+    from scitex.stats._utils._normalizers import force_dataframe
 
     if verbose:
         logger.info("Applying Holm-Bonferroni correction")

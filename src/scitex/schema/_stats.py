@@ -21,14 +21,12 @@ Note: This is the SOURCE OF TRUTH. Other modules (stats, plt, vis) should
 import from here, not define their own versions.
 """
 
-from dataclasses import dataclass
-from dataclasses import field, asdict
-from typing import Optional
-from typing import Dict, Any, List, Literal, Union
-from datetime import datetime
 import json
-import numpy as np
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from typing import Any, Dict, List, Literal, Optional, Union
 
+import numpy as np
 
 # Schema version for statistical result schemas
 STATS_SCHEMA_VERSION = "0.1.0"
@@ -647,22 +645,16 @@ class StatResult:
                     self.effect_size.get("value") if self.effect_size else None
                 ),
                 "group1": (
-                    self.samples.get("group1", {}).get("name")
-                    if self.samples
-                    else None
+                    self.samples.get("group1", {}).get("name") if self.samples else None
                 ),
                 "group2": (
-                    self.samples.get("group2", {}).get("name")
-                    if self.samples
-                    else None
+                    self.samples.get("group2", {}).get("name") if self.samples else None
                 ),
                 "statistic": self.statistic.get("value"),
                 "method": self.test_type,
                 "formatted_output": self.format_text(style="compact"),
             },
-            "positioning": (
-                self.positioning.to_dict() if self.positioning else None
-            ),
+            "positioning": (self.positioning.to_dict() if self.positioning else None),
             "styling": self.styling.to_dict() if self.styling else None,
         }
 
@@ -710,7 +702,7 @@ def create_stat_result(
     ... )
     """
     # Import here to avoid circular dependency
-    from scitex.stats.utils import p2stars
+    from scitex.stats._utils import p2stars
 
     # Determine category from test type
     category_map = {

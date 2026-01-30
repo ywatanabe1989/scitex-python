@@ -34,19 +34,16 @@ Installation:
 import subprocess
 from typing import List, Optional
 
-# Check for missing dependencies and warn user
-from scitex._install_guide import warn_module_deps
+# Check for missing dependencies and warn user (internal)
+from scitex._install_guide import warn_module_deps as _warn_module_deps
 
-_missing = warn_module_deps("audio")
+_missing = _warn_module_deps("audio")
 
-# Import from engines subpackage
-from .engines import (
-    BaseTTS,
-    ElevenLabsTTS,
-    GoogleTTS,
-    SystemTTS,
-    TTSBackend,
-)
+# Import from engines subpackage (public TTS classes only)
+# Internal imports (prefixed with _ to hide from API)
+from .engines import ElevenLabsTTS, GoogleTTS, SystemTTS
+from .engines._base import BaseTTS as _BaseTTS
+from .engines._base import TTSBackend as _TTSBackend
 
 
 def stop_speech() -> None:
@@ -137,8 +134,6 @@ __all__ = [
     "GoogleTTS",
     "ElevenLabsTTS",
     "SystemTTS",
-    "BaseTTS",
-    "TTSBackend",
     "get_tts",
     "available_backends",
     "start_mcp_server",
@@ -182,7 +177,7 @@ def available_backends() -> List[str]:
     return backends
 
 
-def get_tts(backend: Optional[str] = None, **kwargs) -> BaseTTS:
+def get_tts(backend: Optional[str] = None, **kwargs) -> _BaseTTS:
     """Get a TTS instance for the specified backend.
 
     Args:
@@ -234,7 +229,8 @@ def _try_speak_with_fallback(
     """Try to speak with fallback through backends.
 
     Returns:
-        (result, backend_used, error_log)
+        (result_dict, backend_used, error_log)
+        result_dict has keys: path, played, success, play_requested
     """
     backends = available_backends()
     errors = []
@@ -251,6 +247,8 @@ def _try_speak_with_fallback(
                 play=play,
                 output_path=output_path,
             )
+            # result is now a dict with: path, played, success, play_requested
+            result["backend"] = backend
             return (result, backend, errors)
         except Exception as e:
             errors.append(f"{backend}: {str(e)}")
@@ -260,7 +258,7 @@ def _try_speak_with_fallback(
 
 
 # Cache for default TTS instance
-_default_tts: Optional[BaseTTS] = None
+_default_tts: Optional[_BaseTTS] = None
 _default_backend: Optional[str] = None
 
 
@@ -272,62 +270,49 @@ def _speak_local(
     output_path: Optional[str] = None,
     fallback: bool = True,
     **kwargs,
-) -> Optional[str]:
-    """Local TTS playback (original implementation)."""
-    global _default_tts, _default_backend
+) -> dict:
+    """Local TTS playback (original implementation).
 
-    # Note: stop_speech() removed - FIFO locking handles queuing
-    # Call stop_speech() explicitly if you want to interrupt current audio
+    Returns:
+        Dict with keys: success, played, play_requested, backend, path (optional).
+    """
+    global _default_tts, _default_backend
 
     # If specific backend requested without fallback
     if backend and not fallback:
         tts = get_tts(backend, **kwargs)
-        result = tts.speak(
-            text=text,
-            voice=voice,
-            play=play,
-            output_path=output_path,
-        )
-        return str(result) if result else None
+        result = tts.speak(text=text, voice=voice, play=play, output_path=output_path)
+        result["backend"] = backend
+        return result
 
     # Use fallback logic
     if fallback and backend is None:
         result, used_backend, errors = _try_speak_with_fallback(
-            text=text,
-            voice=voice,
-            play=play,
-            output_path=output_path,
-            **kwargs,
+            text=text, voice=voice, play=play, output_path=output_path, **kwargs
         )
         if result is None and errors:
             raise RuntimeError("All TTS backends failed:\n" + "\n".join(errors))
-        return str(result) if result else None
+        return (
+            result if result else {"success": False, "played": False, "errors": errors}
+        )
 
     # Specific backend with fallback enabled
     try:
         tts = get_tts(backend, **kwargs)
-        result = tts.speak(
-            text=text,
-            voice=voice,
-            play=play,
-            output_path=output_path,
-        )
-        return str(result) if result else None
+        result = tts.speak(text=text, voice=voice, play=play, output_path=output_path)
+        result["backend"] = backend
+        return result
     except Exception as e:
         if fallback:
             result, used_backend, errors = _try_speak_with_fallback(
-                text=text,
-                voice=voice,
-                play=play,
-                output_path=output_path,
-                **kwargs,
+                text=text, voice=voice, play=play, output_path=output_path, **kwargs
             )
             if result is None:
                 raise RuntimeError(
                     f"Primary backend '{backend}' failed: {e}\n"
                     f"Fallback errors:\n" + "\n".join(errors)
                 )
-            return str(result) if result else None
+            return result
         raise
 
 
@@ -342,7 +327,7 @@ def speak(
     speed: Optional[float] = None,
     mode: Optional[str] = None,
     **kwargs,
-) -> Optional[str]:
+) -> dict:
     """Convert text to speech with smart local/remote switching.
 
     Modes:
@@ -366,7 +351,7 @@ def speak(
         **kwargs: Additional backend options.
 
     Returns:
-        Path to audio file if output_path specified, else None.
+        Dict with: success, played, play_requested, backend, path (if saved), mode.
 
     Environment Variables:
         SCITEX_AUDIO_MODE: Default mode ('local', 'remote', 'auto')
@@ -376,7 +361,9 @@ def speak(
         import scitex
 
         # Simple (auto mode - tries remote, falls back to local)
-        scitex.audio.speak("Hello!")
+        result = scitex.audio.speak("Hello!")
+        if result["played"]:
+            print("Audio played successfully")
 
         # Force local playback
         scitex.audio.speak("Hello", mode="local")
@@ -416,7 +403,13 @@ def speak(
             play=play,
             **kwargs,
         )
-        return result.get("saved_to") if result.get("success") else None
+        return {
+            "success": result.get("success", False),
+            "played": result.get("success", False) and play,
+            "play_requested": play,
+            "mode": "remote",
+            "path": result.get("saved_to"),
+        }
 
     # Auto mode: try remote first, fall back to local
     if effective_mode == "auto":
@@ -433,12 +426,18 @@ def speak(
                     **kwargs,
                 )
                 if result.get("success"):
-                    return result.get("saved_to")
+                    return {
+                        "success": True,
+                        "played": play,
+                        "play_requested": play,
+                        "mode": "remote",
+                        "path": result.get("saved_to"),
+                    }
             except Exception:
                 pass  # Fall through to local
 
     # Local mode (or fallback from auto)
-    return _speak_local(
+    result = _speak_local(
         text=text,
         backend=backend,
         voice=voice,
@@ -447,6 +446,8 @@ def speak(
         fallback=fallback,
         **kwargs,
     )
+    result["mode"] = "local"
+    return result
 
 
 def start_mcp_server():

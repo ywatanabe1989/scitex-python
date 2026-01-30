@@ -66,7 +66,7 @@ def demonstrate_bibtex_parsing(
     dict
         Parsed BibTeX entries
     """
-    from scitex.scholar.utils import parse_bibtex
+    from scitex.scholar._utils import parse_bibtex
 
     results = {}
 

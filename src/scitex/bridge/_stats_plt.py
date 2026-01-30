@@ -210,7 +210,7 @@ def _parse_stat_annotation(text: str) -> Optional[StatResult]:
 
     def _create_stat_dict(test_type, statistic_name, statistic_value, p_value):
         """Create a simple stat result dict."""
-        from scitex.stats.utils import p2stars
+        from scitex.stats._utils import p2stars
 
         return {
             "test_type": test_type,

@@ -54,7 +54,7 @@ async def search_bibtex_metadata(
 ) -> list:
     """Search for metadata of papers from BibTeX file."""
     from scitex.scholar import ScholarConfig, ScholarEngine
-    from scitex.scholar.utils import parse_bibtex
+    from scitex.scholar._utils import parse_bibtex
 
     entries = parse_bibtex(bibtex_path)
     if n_samples:

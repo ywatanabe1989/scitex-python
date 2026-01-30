@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/stats/posthoc/_games_howell.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -26,12 +27,14 @@ IO:
 """
 
 """Imports"""
+from typing import List, Optional, Union
+
 import numpy as np
 import pandas as pd
-from typing import Union, List, Optional
 from scipy import stats
-from scitex.stats.utils._formatters import p2stars
-from scitex.stats.utils._normalizers import convert_results
+
+from scitex.stats._utils._formatters import p2stars
+from scitex.stats._utils._normalizers import convert_results
 
 
 def welch_satterthwaite_df(var_i: float, n_i: int, var_j: float, n_j: int) -> float:
@@ -276,8 +279,9 @@ def posthoc_games_howell(
 
 
 if __name__ == "__main__":
-    import sys
     import argparse
+    import sys
+
     import scitex as stx
 
     parser = argparse.ArgumentParser()

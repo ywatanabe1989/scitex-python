@@ -85,7 +85,7 @@ async def process_bibtex_entries(
         ScholarPDFDownloader,
         ScholarURLFinder,
     )
-    from scitex.scholar.utils import parse_bibtex
+    from scitex.scholar._utils import parse_bibtex
 
     # Parse BibTeX entries
     entries = parse_bibtex(bibtex_path)

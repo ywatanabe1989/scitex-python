@@ -45,11 +45,11 @@ from ._latex_fallback import (
     latex_fallback_decorator,
     latex_to_mathtext,
     latex_to_unicode,
-    logger,
     reset_latex_cache,
     safe_latex_render,
     set_fallback_mode,
 )
+from ._latex_fallback import logger as _logger  # Internal
 from ._mask_api import mask_api
 from ._mask_api_key import mask_api
 from ._parse import parse
@@ -88,7 +88,6 @@ __all__ = [
     "latex_style",
     "latex_to_mathtext",
     "latex_to_unicode",
-    "logger",
     "mask_api",
     "parse",
     "print_debug",
