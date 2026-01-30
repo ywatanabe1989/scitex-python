@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-30 11:31:59
+!-- Timestamp: 2026-01-30 11:36:29
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-python/README.md
 !-- --- -->
@@ -54,6 +54,8 @@ uv pip install scitex[all]     # Recommended: Full installation
 
 Modular environment configuration via `.env.d/`:
 
+<details>
+
 ```bash
 # 1. Copy examples
 cp -r .env.d.examples .env.d
@@ -79,13 +81,9 @@ source /path/to/.env.d/entry.src
 
 → **[Full configuration reference](./.env.d.examples/README.md)**
 
-## Three Interfaces
+</details>
 
-<!-- | Interface | For | Description |
- !-- |-----------|-----|-------------|
- !-- | 🐍 **Python API** | Human researchers | `import scitex as stx` — 70% less code |
- !-- | 🖥️ **CLI Commands** | Terminal users | `scitex scholar fetch`, `scitex stats run` |
- !-- | 🔧 **MCP Tools** | AI agents | 148 tools for Claude/GPT integration | -->
+## Three Interfaces
 
 <details>
 <summary><strong>🐍 Python API for Humans and AI Agents</strong></summary>
