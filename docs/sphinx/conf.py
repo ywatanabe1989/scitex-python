@@ -43,70 +43,17 @@ autodoc_default_options = {
     "exclude-members": "__weakref__",
 }
 
-# Mock imports for optional dependencies not available in RTD build environment
-# Only mock heavy optional dependencies that are unlikely to be installed
+# Mock imports for packages with system dependencies that can't be installed on RTD
 autodoc_mock_imports = [
-    # ML/AI frameworks
-    "sklearn",
-    "torch",
-    "torchvision",
-    "torchaudio",
-    "tensorflow",
-    "keras",
-    "jax",
-    "flax",
-    "optax",
-    # Computer vision
-    "cv2",
-    # LLM APIs
-    "openai",
-    "anthropic",
-    "groq",
-    "google.generativeai",
-    "google.genai",
-    "google_genai",
-    # Neuroscience
-    "mne",
-    "nibabel",
-    "nilearn",
-    # Audio
-    "soundfile",
-    "librosa",
+    # GUI frameworks (require display)
+    "PyQt6",
+    "PyQt5",
+    "dearpygui",
+    # Audio backends (require system audio)
     "pyaudio",
-    "gtts",
-    "pyttsx3",
-    "pygame",
-    "vlc",
-    "playsound",
-    "pydub",
-    # Video
-    "moviepy",
-    # Distributed computing
-    "dask",
-    "ray",
-    "pyspark",
-    "cupy",
-    "numba",
-    # ML experiment tracking
-    "wandb",
-    "mlflow",
-    "tensorboard",
-    # PyTorch ecosystem
-    "lightning",
-    "ignite",
-    "catalyst",
-    "transformers",
-    "datasets",
-    "tokenizers",
-    "accelerate",
-    "diffusers",
-    "timm",
-    "einops",
-    # Config management
-    "hydra",
-    "omegaconf",
-    # FigRecipe (external package)
-    "figrecipe",
+    "sounddevice",
+    # System-level dependencies
+    "cv2",  # OpenCV requires system libs
 ]
 
 # Autosummary settings

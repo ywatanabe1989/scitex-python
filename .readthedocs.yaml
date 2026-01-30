@@ -22,10 +22,10 @@ formats:
 # Python configuration
 python:
   install:
-    # Install our python package
+    # Install package with all optional dependencies
     - method: pip
       path: .
       extra_requirements:
-        - docs
-    # Install requirements
+        - all
+    # Install sphinx documentation requirements
     - requirements: docs/sphinx/requirements.txt
