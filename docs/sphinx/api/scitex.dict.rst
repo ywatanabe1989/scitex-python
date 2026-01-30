@@ -5,13 +5,3 @@ scitex.dict API Reference
    :members:
    :undoc-members:
    :show-inheritance:
-   :inherited-members:
-
-Submodules
-----------
-
-.. autosummary::
-   :toctree: generated
-   :recursive:
-
-   scitex.dict
