@@ -27,6 +27,8 @@
 
 Empowers both human researchers and AI agents. Each module works independently and adapts to various academic workflows, handling primary and secondary research with real or simulated data.
 
+> **SciTeX is fully modular; every module is opt-in and exposed only when operational.**
+
 ## 🎬 Demo
 
 **40 min, zero human intervention** — AI agent conducts full research pipeline:
