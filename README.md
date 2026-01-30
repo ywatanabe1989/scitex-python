@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-30 11:20:09
+!-- Timestamp: 2026-01-30 11:31:59
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-python/README.md
 !-- --- -->
@@ -205,6 +205,8 @@ Turn AI agents into autonomous scientific researchers.
 
 SciTeX integrates several standalone packages that can be used independently:
 
+<details>
+
 | Package | scitex Module | Description |
 |---------|--------------|-------------|
 | [figrecipe](https://github.com/ywatanabe1989/figrecipe) | `scitex.plt` | Publication-ready matplotlib figures |
@@ -220,6 +222,8 @@ Each package works standalone or as part of scitex:
 pip install figrecipe        # Use independently
 pip install scitex[plt]      # Or via scitex
 ```
+
+</details>
 
 ## 📖 Documentation
 
