@@ -3,6 +3,8 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/__init__.py
 # ----------------------------------------
 
+from __future__ import annotations
+
 """
 SciTeX Audio Module - Text-to-Speech with Multiple Backends
 
@@ -31,8 +33,7 @@ Installation:
     pip install scitex[audio]
 """
 
-import subprocess
-from typing import List, Optional
+import subprocess as _subprocess
 
 # Check for missing dependencies and warn user (internal)
 from scitex._install_guide import warn_module_deps as _warn_module_deps
@@ -41,15 +42,17 @@ _missing = _warn_module_deps("audio")
 
 # Import from engines subpackage (public TTS classes only)
 # Internal imports (prefixed with _ to hide from API)
+from . import engines as _engines_module
 from .engines import ElevenLabsTTS, GoogleTTS, SystemTTS
 from .engines._base import BaseTTS as _BaseTTS
 from .engines._base import TTSBackend as _TTSBackend
+del _engines_module
 
 
 def stop_speech() -> None:
     """Stop any currently playing speech by killing espeak processes."""
     try:
-        subprocess.run(["pkill", "-9", "espeak"], capture_output=True)
+        _subprocess.run(["pkill", "-9", "espeak"], capture_output=True)
     except Exception:
         pass
 
@@ -94,7 +97,7 @@ def check_wsl_audio() -> dict:
             try:
                 env = os.environ.copy()
                 env["PULSE_SERVER"] = "unix:/mnt/wslg/PulseServer"
-                proc = subprocess.run(
+                proc = _subprocess.run(
                     ["pactl", "info"],
                     capture_output=True,
                     timeout=5,
@@ -148,7 +151,7 @@ __all__ = [
 FALLBACK_ORDER = ["elevenlabs", "gtts", "pyttsx3"]
 
 
-def available_backends() -> List[str]:
+def available_backends() -> list[str]:
     """Return list of available TTS backends in fallback order."""
     backends = []
 
@@ -181,7 +184,7 @@ def available_backends() -> List[str]:
     return backends
 
 
-def get_tts(backend: Optional[str] = None, **kwargs) -> _BaseTTS:
+def get_tts(backend: str | None = None, **kwargs) -> _BaseTTS:
     """Get a TTS instance for the specified backend.
 
     Args:
@@ -233,6 +236,18 @@ def start_mcp_server():
 
     # main() is synchronous - calls mcp.run() directly
     main()
+
+
+# Clean up internal imports from public namespace
+def _cleanup_namespace():
+    import sys
+    _module = sys.modules[__name__]
+    for _name in ["annotations", "engines"]:
+        if hasattr(_module, _name):
+            delattr(_module, _name)
+
+_cleanup_namespace()
+del _cleanup_namespace
 
 
 # EOF
