@@ -225,7 +225,7 @@ pip install scitex[plt]      # Or via scitex
 
 ## 📖 Documentation
 
-- **[Read the Docs](https://scitex.readthedocs.io/)**: Complete API reference
+- **[Read the Docs](https://scitex-python.readthedocs.io/)**: Complete API reference
 - **[Example Notebooks](./examples/notebooks/)**: 25+ Jupyter notebooks
 
 ## 🤝 Contributing
