@@ -7,7 +7,6 @@ Provides multiple visualization backends:
 - Terminal: Colored text output with status icons
 - Mermaid: Text-based diagrams for docs/GitHub
 - HTML: Interactive web visualization
-- Plotly: Interactive Python-based visualization (optional)
 """
 
 from ._colors import Colors, VerificationLevel
@@ -21,21 +20,6 @@ from ._format import (
 from ._mermaid import generate_html_dag, generate_mermaid_dag, render_dag
 from ._utils import print_verification_summary
 
-# Optional Plotly support
-try:
-    from ._plotly import generate_plotly_dag, render_plotly_dag
-
-    _HAS_PLOTLY = True
-except ImportError:
-    _HAS_PLOTLY = False
-
-    def generate_plotly_dag(*args, **kwargs):
-        raise ImportError("plotly required: pip install plotly")
-
-    def render_plotly_dag(*args, **kwargs):
-        raise ImportError("plotly required: pip install plotly")
-
-
 __all__ = [
     "Colors",
     "VerificationLevel",
@@ -48,8 +32,6 @@ __all__ = [
     "generate_html_dag",
     "render_dag",
     "print_verification_summary",
-    "generate_plotly_dag",
-    "render_plotly_dag",
 ]
 
 

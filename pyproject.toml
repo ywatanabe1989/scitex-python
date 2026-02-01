@@ -560,6 +560,11 @@ web = [
     # "umap-learn",
 ]
 
+# Verify Module - Hash-based verification for reproducible science
+# Use: pip install scitex[verify]
+# Note: No extra dependencies - uses only stdlib (sqlite3, hashlib)
+verify = []
+
 # Writer Module - Academic paper writing
 # Use: pip install scitex[writer]
 writer = [

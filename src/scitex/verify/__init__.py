@@ -109,10 +109,8 @@ from ._visualize import (
     format_status,
     generate_html_dag,
     generate_mermaid_dag,
-    generate_plotly_dag,
     print_verification_summary,
     render_dag,
-    render_plotly_dag,
 )
 
 
@@ -191,9 +189,7 @@ __all__ = [
     "format_list",
     "generate_mermaid_dag",
     "generate_html_dag",
-    "generate_plotly_dag",
     "render_dag",
-    "render_plotly_dag",
     "print_verification_summary",
     # Convenience functions
     "list_runs",
