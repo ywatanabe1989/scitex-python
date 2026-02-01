@@ -2,9 +2,9 @@ ID: 2026Y-02M-01D-08h58m16s_wDYF
 PID: 1735627
 START_DATETIME: 2026-02-01 08:58:16.298103
 FILE: /home/ywatanabe/proj/scitex-python/examples/scitex/verify/01_source_a.py
-SDIR_OUT: 
+SDIR_OUT:
     /home/ywatanabe/proj/scitex-python/examples/scitex/verify/01_source_a_out
-SDIR_RUN: 
+SDIR_RUN:
     /home/ywatanabe/proj/scitex-python/examples/scitex/verify/01_source_a_out/RUNNING/2026Y-02M-01D-08h58m16s_wDYF-main
 ARGS:
     n_samples: 200

@@ -1,11 +1,11 @@
 ID: 2026Y-02M-01D-08h56m22s_8myN
 PID: 1729811
 START_DATETIME: 2026-02-01 08:56:22.579771
-FILE: 
+FILE:
     /home/ywatanabe/proj/scitex-python/examples/scitex/verify/04_preprocess_b.py
-SDIR_OUT: 
+SDIR_OUT:
     /home/ywatanabe/proj/scitex-python/examples/scitex/verify/04_preprocess_b_out
-SDIR_RUN: 
+SDIR_RUN:
     /home/ywatanabe/proj/scitex-python/examples/scitex/verify/04_preprocess_b_out/RUNNING/2026Y-02M-01D-08h56m22s_8myN-main
 ARGS:
     input_file:

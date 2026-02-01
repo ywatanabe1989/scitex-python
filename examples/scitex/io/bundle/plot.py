@@ -24,10 +24,10 @@ from scitex.dev.plt import plot_mpl_hist, plot_stx_line, plot_stx_scatter
 
 @stx.session
 def main(
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    rng=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=stx.session.INJECTED,
+    plt=stx.session.INJECTED,
+    rngg=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     """Demonstrates FTS plot bundle functionality."""
     logger.info("Starting FTS plot bundle demo")

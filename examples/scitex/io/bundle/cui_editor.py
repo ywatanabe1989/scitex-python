@@ -141,11 +141,11 @@ def edit_figure_programmatically(bundle_path: Path, logger) -> None:
 
 @stx.session
 def main(
-    CONFIG=stx.INJECTED,
-    plt=stx.INJECTED,
-    COLORS=stx.INJECTED,
-    rng=stx.INJECTED,
-    logger=stx.INJECTED,
+    CONFIG=stx.session.INJECTED,
+    plt=stx.session.INJECTED,
+    COLORS=stx.session.INJECTED,
+    rngg=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     """Demonstrate programmatic figure editing."""
     out = Path(CONFIG.SDIR_OUT)

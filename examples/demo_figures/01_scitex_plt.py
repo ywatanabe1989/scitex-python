@@ -33,7 +33,7 @@ def demo_line_plot(plt=stx.INJECTED, logger=stx.INJECTED):
 
 
 @stx.session
-def demo_scatter_plot(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
+def demo_scatter_plot(plt=stx.INJECTED, rngg=stx.INJECTED, logger=stx.INJECTED):
     """Scatter plot with color-coded groups."""
     rng = rng("scatter")
     fig, ax = plt.subplots()
@@ -87,7 +87,7 @@ def demo_bar_plot(plt=stx.INJECTED, logger=stx.INJECTED):
 
 
 @stx.session
-def demo_heatmap(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
+def demo_heatmap(plt=stx.INJECTED, rngg=stx.INJECTED, logger=stx.INJECTED):
     """Correlation heatmap."""
     rng = rng("heatmap")
     fig, ax = plt.subplots()
@@ -116,7 +116,7 @@ def demo_heatmap(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
 
 
 @stx.session
-def demo_histogram(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
+def demo_histogram(plt=stx.INJECTED, rngg=stx.INJECTED, logger=stx.INJECTED):
     """Histogram with distribution overlay."""
     rng = rng("histogram")
     fig, ax = plt.subplots()
@@ -154,7 +154,7 @@ def demo_histogram(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
 
 
 @stx.session
-def demo_boxplot(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
+def demo_boxplot(plt=stx.INJECTED, rngg=stx.INJECTED, logger=stx.INJECTED):
     """Box plot comparison."""
     rng = rng("boxplot")
     fig, ax = plt.subplots()
@@ -178,7 +178,7 @@ def demo_boxplot(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
 
 
 @stx.session
-def demo_subplots_grid(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
+def demo_subplots_grid(plt=stx.INJECTED, rngg=stx.INJECTED, logger=stx.INJECTED):
     """2x2 subplot grid."""
     rng = rng("subplots")
     fig, axes = plt.subplots(nrows=2, ncols=2)
@@ -225,7 +225,7 @@ def demo_subplots_grid(plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED):
 
 @stx.session
 def demo_shaded_errorband(
-    plt=stx.INJECTED, rng=stx.INJECTED, logger=stx.INJECTED
+    plt=stx.INJECTED, rngg=stx.INJECTED, logger=stx.INJECTED
 ):
     """Line plot with shaded error band."""
     rng = rng("errorband")
