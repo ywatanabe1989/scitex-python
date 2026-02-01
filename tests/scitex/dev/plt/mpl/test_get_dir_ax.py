@@ -33,7 +33,7 @@ if __name__ == "__main__":
 #     CONFIG=stx.INJECTED,
 #     plt=stx.INJECTED,
 #     COLORS=stx.INJECTED,
-#     rng=stx.INJECTED,
+#     rngg=stx.INJECTED,
 #     logger=stx.INJECTED,
 # ):
 #     """Help message for `$ python __file__ --help`"""

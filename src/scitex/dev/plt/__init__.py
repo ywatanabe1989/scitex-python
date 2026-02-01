@@ -16,7 +16,7 @@ Usage:
     from scitex.dev.plt import PLOTTERS_STX, PLOTTERS_SNS, PLOTTERS_MPL
 
     @stx.session
-    def main(plt=stx.INJECTED, rng=stx.INJECTED):
+    def main(plt=stx.INJECTED, rngg=stx.INJECTED):
         rng = rng("demo")
 
         # stx_* API (ArrayLike)

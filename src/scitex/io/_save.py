@@ -71,6 +71,7 @@ def save(
     crop_margin_mm: float = 1.0,
     metadata_extra: dict = None,
     json_schema: str = "editable",
+    track: bool = True,
     **kwargs,
 ) -> None:
     """
@@ -102,6 +103,8 @@ def save(
         Additional metadata to merge with auto-collected metadata.
     json_schema : str, optional
         Schema type for JSON metadata output. Default is "editable".
+    track : bool, optional
+        If True, track this file in verification system. Default is True.
     **kwargs
         Additional keyword arguments for the underlying save function.
     """
@@ -149,6 +152,15 @@ def save(
         # Symbolic links
         _symlink(spath, spath_cwd, symlink_from_cwd, verbose)
         _symlink_to(spath_final, symlink_to, verbose)
+
+        # Track output for verification (if session is active)
+        try:
+            from scitex.verify import on_io_save
+
+            on_io_save(spath_final, track=track)
+        except Exception:
+            pass  # Silent fail - don't interrupt save operations
+
         return Path(spath)
 
     except AssertionError:

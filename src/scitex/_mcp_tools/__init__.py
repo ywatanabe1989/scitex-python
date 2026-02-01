@@ -17,6 +17,7 @@ from .social import register_social_tools
 from .stats import register_stats_tools
 from .template import register_template_tools
 from .ui import register_ui_tools
+from .verify import register_verify_tools
 from .writer import register_writer_tools
 
 __all__ = ["register_all_tools"]
@@ -36,6 +37,7 @@ def register_all_tools(mcp) -> None:
     register_stats_tools(mcp)
     register_template_tools(mcp)
     register_ui_tools(mcp)
+    register_verify_tools(mcp)
     register_writer_tools(mcp)
 
 

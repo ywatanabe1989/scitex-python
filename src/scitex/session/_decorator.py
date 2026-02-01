@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Timestamp: "2026-02-01 08:38:19 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-python/src/scitex/session/_decorator.py
+
 # Timestamp: "2025-11-05"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/session/_decorator.py
-# ----------------------------------------
 """Session decorator for scitex.
 
 Provides @stx.session decorator that automatically:
@@ -16,10 +17,12 @@ import functools
 import inspect
 import argparse
 from pathlib import Path
-from typing import Callable, Any, get_type_hints
+from typing import Callable
+from typing import Any, get_type_hints
 import sys as sys_module
 
-from ._lifecycle import start, close
+from ._lifecycle import start
+from ._lifecycle import close
 from scitex.logging import getLogger
 from . import INJECTED  # Use local INJECTED from session module
 
@@ -79,7 +82,7 @@ def session(
             # - CONFIG: Session configuration dict
             # - plt: Matplotlib pyplot (configured for session)
             # - COLORS: Custom Colors
-            # - rng: RandomStateManager (fixes seeds, creates named generators)
+            # - rngg: RandomStateManager (fixes seeds, creates named generators)
             logger.info(f"Session ID: {CONFIG['ID']}")
             logger.info(f"Output directory: {CONFIG['SDIR_RUN']}")
             # ... training code ...
@@ -100,8 +103,8 @@ def session(
         - CONFIG (dict): Session configuration with ID, SDIR, paths, etc.
         - plt (module): matplotlib.pyplot configured with session settings
         - COLORS (CustomColors): Custom Colors for consistent plotting
-        - rng (RandomStateManager): Manages reproducibility by fixing global seeds
-                                             and creating named generators via rng("name")
+        - rngg (RandomStateManager): Manages reproducibility by fixing global seeds
+                                             and creating named generators via rngg("name")
     """
 
     def decorator(func: Callable) -> Callable:
@@ -157,13 +160,17 @@ def _run_with_session(
 
     # Clean up INJECTED sentinels from args before passing to session
     cleaned_args = argparse.Namespace(
-        **{k: v for k, v in vars(args).items() if not isinstance(v, type(INJECTED))}
+        **{
+            k: v
+            for k, v in vars(args).items()
+            if not isinstance(v, type(INJECTED))
+        }
     )
 
     # Start session
     import matplotlib.pyplot as plt
 
-    CONFIG, stdout, stderr, plt, COLORS, rng = start(
+    CONFIG, stdout, stderr, plt, COLORS, rngg = start(
         sys=sys_module,
         plt=plt,
         args=cleaned_args,
@@ -182,21 +189,33 @@ def _run_with_session(
     func_globals["CONFIG"] = CONFIG
     func_globals["plt"] = plt
     func_globals["COLORS"] = COLORS
-    func_globals["rng"] = rng
+    func_globals["rngg"] = rngg
     func_globals["logger"] = script_logger
 
     # Log injected globals for user awareness (only in verbose mode)
     if verbose:
         _decorator_logger.info("=" * 60)
-        _decorator_logger.info("Injected Global Variables (available in your function):")
+        _decorator_logger.info(
+            "Injected Global Variables (available in your function):"
+        )
         _decorator_logger.info("  • CONFIG - Session configuration dict")
         _decorator_logger.info(f"      - CONFIG['ID']: {CONFIG['ID']}")
-        _decorator_logger.info(f"      - CONFIG['SDIR_RUN']: {CONFIG['SDIR_RUN']}")
+        _decorator_logger.info(
+            f"      - CONFIG['SDIR_RUN']: {CONFIG['SDIR_RUN']}"
+        )
         _decorator_logger.info(f"      - CONFIG['PID']: {CONFIG['PID']}")
-        _decorator_logger.info("  • plt - matplotlib.pyplot (configured for session)")
-        _decorator_logger.info("  • COLORS - CustomColors (for consistent plotting)")
-        _decorator_logger.info("  • rng - RandomStateManager (for reproducibility)")
-        _decorator_logger.info("  • logger - SciTeX logger (configured for your script)")
+        _decorator_logger.info(
+            "  • plt - matplotlib.pyplot (configured for session)"
+        )
+        _decorator_logger.info(
+            "  • COLORS - CustomColors (for consistent plotting)"
+        )
+        _decorator_logger.info(
+            "  • rngg - RandomStateManager (for reproducibility)"
+        )
+        _decorator_logger.info(
+            "  • logger - SciTeX logger (configured for your script)"
+        )
         _decorator_logger.info("=" * 60)
 
     # Run function
@@ -216,7 +235,7 @@ def _run_with_session(
             "CONFIG": CONFIG,
             "plt": plt,
             "COLORS": COLORS,
-            "rng": rng,
+            "rngg": rngg,
             "logger": script_logger,
         }
 
@@ -238,8 +257,12 @@ def _run_with_session(
 
         # Log injected arguments summary (only in verbose mode)
         if verbose:
-            args_summary = {k: type(v).__name__ for k, v in filtered_kwargs.items()}
-            _decorator_logger.info(f"Running {func.__name__} with injected parameters:")
+            args_summary = {
+                k: type(v).__name__ for k, v in filtered_kwargs.items()
+            }
+            _decorator_logger.info(
+                f"Running {func.__name__} with injected parameters:"
+            )
             _decorator_logger.info(args_summary, pprint=True, indent=2)
 
         # Execute function
@@ -252,7 +275,9 @@ def _run_with_session(
             exit_status = 0
 
     except Exception as e:
-        _decorator_logger.error(f"Error in {func.__name__}: {e}", exc_info=True)
+        _decorator_logger.error(
+            f"Error in {func.__name__}: {e}", exc_info=True
+        )
         exit_status = 1
         raise
 
@@ -359,15 +384,11 @@ def _create_parser(func: Callable) -> argparse.ArgumentParser:
                     # If we can't load the YAML files, just show error
                     config_status = "        CONFIG from YAML files:\n        (unable to load at help-time, will be available at runtime)"
             else:
-                config_status = (
-                    "        CONFIG from YAML files:\n        (no .yaml files found)"
-                )
+                config_status = "        CONFIG from YAML files:\n        (no .yaml files found)"
         else:
             config_status = "        CONFIG from YAML files:\n        (./config/ directory not found)"
     except:
-        config_status = (
-            "        CONFIG from YAML files:\n        (unable to check at help-time)"
-        )
+        config_status = "        CONFIG from YAML files:\n        (unable to check at help-time)"
 
     # Get available color keys
     try:
@@ -380,7 +401,9 @@ def _create_parser(func: Callable) -> argparse.ArgumentParser:
         color_keys = ", ".join(f"'{k}'" for k in sorted_keys)
     except Exception as e:
         # Fallback if configure_mpl fails
-        color_keys = "'blue', 'red', 'green', 'yellow', 'purple', 'orange', ..."
+        color_keys = (
+            "'blue', 'red', 'green', 'yellow', 'purple', 'orange', ..."
+        )
 
     # Create parser with epilog documenting injected globals with actual values
     epilog = f"""
@@ -419,7 +442,7 @@ Global Variables Injected by @session Decorator:
             plt.plot(x, y, color=COLORS.blue)
             plt.plot(x, y, color=COLORS['blue'])
 
-    rng (RandomStateManager)
+    rngg (RandomStateManager)
         Manages reproducible randomness
 
     logger (SciTeXLogger)
@@ -545,9 +568,11 @@ def _add_argument(
         choices_str = f", choices: {choices}" if choices else ""
         kwargs = {
             "type": param_type,
-            "help": f"(default: {default}{choices_str})"
-            if has_default
-            else f"(required{choices_str})",
+            "help": (
+                f"(default: {default}{choices_str})"
+                if has_default
+                else f"(required{choices_str})"
+            ),
         }
 
         if choices:
@@ -596,7 +621,7 @@ def run(func: Callable, parse_args: Callable = None, **session_kwargs) -> Any:
     # Start session
     import matplotlib.pyplot as plt
 
-    CONFIG, stdout, stderr, plt, COLORS, rng = start(
+    CONFIG, stdout, stderr, plt, COLORS, rngg = start(
         sys=sys_module,
         plt=plt,
         args=args,
@@ -626,6 +651,5 @@ def run(func: Callable, parse_args: Callable = None, **session_kwargs) -> Any:
         )
 
     return exit_status
-
 
 # EOF

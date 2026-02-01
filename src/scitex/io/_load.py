@@ -286,7 +286,6 @@ def load(
     >>> # Load file without extension (e.g., UUID PDF)
     >>> pdf = load('f2694ccb-1b6f-4994-add8-5111fd4d52f1', ext='pdf')
     """
-
     # Don't use clean_path as it breaks relative paths like ./file.txt
     # lpath = clean_path(lpath)
 
@@ -444,6 +443,14 @@ def load(
             cache_data(lpath, result)
             if verbose:
                 print(f"[Cache STORED] Cached data for: {lpath}")
+
+        # Track input for verification (if session is active)
+        try:
+            from scitex.verify import on_io_load
+
+            on_io_load(lpath)
+        except Exception:
+            pass  # Silent fail - don't interrupt load operations
 
         return result
     except (ValueError, FileNotFoundError) as e:

@@ -74,7 +74,7 @@ def main(
     CONFIG=stx.INJECTED,   # Session config
     plt=stx.INJECTED,      # Pre-configured matplotlib
     COLORS=stx.INJECTED,   # Color palette
-    rng=stx.INJECTED,      # Random generator
+    rngg=stx.INJECTED,      # Random generator
     logger=stx.INJECTED,   # Logger
 ):
     """Example plotting with session management."""

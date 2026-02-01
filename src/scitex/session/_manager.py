@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-08-21 20:36:50 (ywatanabe)"
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/session/_manager.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -22,7 +22,12 @@ class SessionManager:
     def __init__(self):
         self.active_sessions = {}
 
-    def create_session(self, session_id: str, config: Dict[str, Any]) -> None:
+    def create_session(
+        self,
+        session_id: str,
+        config: Dict[str, Any],
+        script_path: str = None,
+    ) -> None:
         """Register a new session.
 
         Parameters
@@ -31,24 +36,56 @@ class SessionManager:
             Unique identifier for the session
         config : Dict[str, Any]
             Session configuration dictionary
+        script_path : str, optional
+            Path to the script being run
         """
         self.active_sessions[session_id] = {
             "config": config,
             "start_time": datetime.now(),
             "status": "running",
+            "script_path": script_path,
         }
 
-    def close_session(self, session_id: str) -> None:
+        # Start verification tracking (silent fail)
+        try:
+            from scitex.verify import on_session_start
+
+            on_session_start(
+                session_id=session_id,
+                script_path=script_path,
+            )
+        except Exception:
+            pass
+
+    def close_session(
+        self,
+        session_id: str,
+        status: str = "success",
+        exit_code: int = 0,
+    ) -> None:
         """Mark a session as closed.
 
         Parameters
         ----------
         session_id : str
             Unique identifier for the session to close
+        status : str, optional
+            Final status (success, failed, error)
+        exit_code : int, optional
+            Exit code of the session
         """
         if session_id in self.active_sessions:
             self.active_sessions[session_id]["status"] = "closed"
             self.active_sessions[session_id]["end_time"] = datetime.now()
+            self.active_sessions[session_id]["exit_code"] = exit_code
+
+        # Stop verification tracking (silent fail)
+        try:
+            from scitex.verify import on_session_close
+
+            on_session_close(status=status, exit_code=exit_code)
+        except Exception:
+            pass
 
     def get_active_sessions(self) -> Dict[str, Any]:
         """Get all active sessions.
