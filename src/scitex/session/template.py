@@ -16,7 +16,7 @@ def main(
     CONFIG=INJECTED,
     plt=INJECTED,
     COLORS=INJECTED,
-    rng=INJECTED,
+    rngg=scitex.INJECTED,
     logger=INJECTED,
 ):
     """Demonstration for scitex.session.session"""

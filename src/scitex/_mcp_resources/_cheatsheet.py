@@ -32,7 +32,7 @@ def main(
     CONFIG=stx.INJECTED,         # Session config with ID, paths
     plt=stx.INJECTED,            # Pre-configured matplotlib
     COLORS=stx.INJECTED,         # Color palette
-    rng=stx.INJECTED,            # Seeded random generator
+    rngg=stx.INJECTED,            # Seeded random generator
     logger=stx.INJECTED,         # Session logger
 ):
     \"\"\"This docstring becomes --help description.\"\"\"

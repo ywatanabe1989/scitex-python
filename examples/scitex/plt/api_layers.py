@@ -25,9 +25,9 @@ OUTPUT_DIR = "./api_layers_out"
 @stx.session
 def main(
     extension="png",
-    plt=stx.INJECTED,
-    rng=stx.INJECTED,
-    logger=stx.INJECTED,
+    plt=stx.session.INJECTED,
+    rngg=stx.session.INJECTED,
+    logger=stx.session.INJECTED,
 ):
     """Demo: All registered plotters by API layer."""
     rng = rng("api_layers_demo")

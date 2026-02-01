@@ -54,6 +54,9 @@ autodoc_mock_imports = [
     "sounddevice",
     # System-level dependencies
     "cv2",  # OpenCV requires system libs
+    # Optional dependencies that may not be installed
+    "figrecipe",
+    "figrecipe._graph_presets",
 ]
 
 # Autosummary settings

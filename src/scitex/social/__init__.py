@@ -61,25 +61,14 @@ _os.environ.setdefault("SOCIALIA_ENV_PREFIX", "SCITEX_SOCIAL")
 
 # Check socialia availability
 try:
-    import socialia as _socialia
-
     # Re-export platform clients
-    from socialia import (
-        # Content strategies for MCP
+    from socialia import (  # Content strategies for MCP; Platform clients (preferred names)
         PLATFORM_STRATEGIES,
-        # Base class
-        BasePoster,
         GoogleAnalytics,
         LinkedIn,
-        LinkedInPoster,
         Reddit,
-        RedditPoster,
-        # Platform clients (preferred names)
         Twitter,
-        # Backward compatibility aliases
-        TwitterPoster,
         YouTube,
-        YouTubePoster,
     )
     from socialia import __version__ as _socialia_version
 
@@ -106,16 +95,11 @@ except ImportError:
                 "Install with: pip install socialia"
             )
 
-    BasePoster = _SocialiaNotAvailable
     Twitter = _SocialiaNotAvailable
     LinkedIn = _SocialiaNotAvailable
     Reddit = _SocialiaNotAvailable
     YouTube = _SocialiaNotAvailable
     GoogleAnalytics = _SocialiaNotAvailable
-    TwitterPoster = _SocialiaNotAvailable
-    LinkedInPoster = _SocialiaNotAvailable
-    RedditPoster = _SocialiaNotAvailable
-    YouTubePoster = _SocialiaNotAvailable
     PLATFORM_STRATEGIES = ""
 
 
@@ -135,19 +119,12 @@ __all__ = [
     "SOCIALIA_AVAILABLE",
     "has_socialia",
     "__socialia_version__",
-    # Base class
-    "BasePoster",
     # Platform clients (preferred names)
     "Twitter",
     "LinkedIn",
     "Reddit",
     "YouTube",
     "GoogleAnalytics",
-    # Backward compatibility aliases
-    "TwitterPoster",
-    "LinkedInPoster",
-    "RedditPoster",
-    "YouTubePoster",
     # Content strategies
     "PLATFORM_STRATEGIES",
 ]

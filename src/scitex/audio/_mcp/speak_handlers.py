@@ -8,6 +8,7 @@ over audio playback location (server vs relay).
 from __future__ import annotations
 
 import asyncio
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -19,12 +20,14 @@ __all__ = [
 
 def _get_audio_dir() -> Path:
     """Get the audio output directory."""
-    import os
-
     base_dir = Path(os.getenv("SCITEX_DIR", Path.home() / ".scitex"))
     audio_dir = base_dir / "audio"
     audio_dir.mkdir(parents=True, exist_ok=True)
     return audio_dir
+
+
+# Import from common module
+from .._audio_check import check_local_audio_available as check_audio_sink_state
 
 
 def _get_signature() -> str:
@@ -74,7 +77,40 @@ async def speak_local_handler(
 
     Use when running Claude Code directly on your local machine.
     Audio plays on the machine where the MCP server is running.
+
+    Returns success=False if:
+    - SCITEX_AUDIO_MODE=remote (should use relay instead)
+    - Audio sink is SUSPENDED (no output device)
+    - Playback was requested but failed
     """
+    # Check if mode is set to remote - local playback should not be used
+    audio_mode = os.getenv("SCITEX_AUDIO_MODE", "").lower()
+    if audio_mode == "remote":
+        return {
+            "success": False,
+            "error": "SCITEX_AUDIO_MODE=remote but speak_local was called",
+            "reason": "Environment configured for remote audio playback",
+            "instructions": [
+                "Use speak_relay instead, or",
+                "Set SCITEX_AUDIO_MODE=local to enable local playback",
+            ],
+        }
+
+    # Check if audio sink is usable before attempting playback
+    if play:
+        sink_state = check_audio_sink_state()
+        if not sink_state["available"]:
+            return {
+                "success": False,
+                "error": f"Audio output not available: {sink_state['reason']}",
+                "sink_state": sink_state["state"],
+                "reason": sink_state["reason"],
+                "instructions": [
+                    "1. Connect speakers/headphones, or",
+                    "2. Set SCITEX_AUDIO_MODE=remote and configure relay server",
+                ],
+            }
+
     try:
         from .. import speak as tts_speak
         from .._cross_process_lock import AudioPlaybackLock
@@ -111,13 +147,22 @@ async def speak_local_handler(
             finally:
                 lock.release()
 
-        result_path = await loop.run_in_executor(None, do_speak)
+        speak_result = await loop.run_in_executor(None, do_speak)
+
+        # speak_result is a dict with: success, played, play_requested, backend, path, mode
+        actually_played = speak_result.get("played", False)
+
+        # Determine success: if play was requested, it must have actually played
+        success = True
+        if play and not actually_played:
+            success = False
 
         result = {
-            "success": True,
+            "success": success,
             "text": text,
-            "backend": backend,
-            "played": play,
+            "backend": speak_result.get("backend", backend),
+            "played": actually_played,
+            "play_requested": play,
             "played_on": "server",
             "agent_id": agent_id,
             "timestamp": datetime.now().isoformat(),
@@ -125,8 +170,11 @@ async def speak_local_handler(
         if signature:
             result["signature"] = sig
             result["full_text"] = final_text
-        if result_path:
-            result["path"] = str(result_path)
+        if speak_result.get("path"):
+            result["path"] = str(speak_result["path"])
+        if not success:
+            result["error"] = "Playback was requested but audio did not play"
+            result["reason"] = "No audio player succeeded or sink unavailable"
 
         return result
 

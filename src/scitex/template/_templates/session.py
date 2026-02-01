@@ -91,7 +91,7 @@ def main(
     CONFIG=stx.INJECTED,           # Auto-injected from ./config/*.yaml
     plt=stx.INJECTED,              # Pre-configured matplotlib
     COLORS=stx.INJECTED,           # Color palette
-    rng=stx.INJECTED,              # Random number generator
+    rngg=stx.INJECTED,              # Random number generator
     logger=stx.INJECTED,           # Session logger
 ):
     """

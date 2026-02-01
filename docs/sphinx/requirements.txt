@@ -4,3 +4,7 @@ myst-parser>=2.0
 sphinx-copybutton>=0.5
 sphinx-autodoc-typehints>=1.25
 nbsphinx>=0.9
+
+# Thin wrapper dependencies (for autodoc)
+scitex-writer>=2.0
+socialia>=0.3.0

@@ -210,15 +210,45 @@ class TestSpeakHandlers:
 
     @pytest.mark.asyncio
     async def test_speak_local_handler_success(self):
-        """Test local speak handler."""
+        """Test local speak handler with play=False (skips sink check)."""
         from scitex.audio._mcp.speak_handlers import speak_local_handler
 
-        with patch("scitex.audio.speak") as mock_speak:
-            mock_speak.return_value = None
-            result = await speak_local_handler("Test text", play=False)
-            assert result["success"] is True
-            assert result["text"] == "Test text"
-            assert result["played_on"] == "server"
+        # Mock the speak function and ensure SCITEX_AUDIO_MODE is not "remote"
+        mock_result = {
+            "success": True,
+            "played": False,
+            "play_requested": False,
+            "backend": "gtts",
+            "mode": "local",
+        }
+        with patch.dict(os.environ, {"SCITEX_AUDIO_MODE": "local"}, clear=False):
+            with patch("scitex.audio.speak", return_value=mock_result):
+                result = await speak_local_handler("Test text", play=False)
+                assert result["success"] is True
+                assert result["text"] == "Test text"
+                assert result["played_on"] == "server"
+
+    @pytest.mark.asyncio
+    async def test_speak_local_handler_fails_when_mode_remote(self):
+        """Test local speak handler fails when SCITEX_AUDIO_MODE=remote."""
+        from scitex.audio._mcp.speak_handlers import speak_local_handler
+
+        with patch.dict(os.environ, {"SCITEX_AUDIO_MODE": "remote"}, clear=False):
+            result = await speak_local_handler("Test text")
+            assert result["success"] is False
+            assert "SCITEX_AUDIO_MODE=remote" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_speak_local_handler_fails_when_sink_suspended(self):
+        """Test local speak handler fails when sink is SUSPENDED."""
+        from scitex.audio._mcp.speak_handlers import speak_local_handler
+
+        mock_sink = {"available": False, "state": "SUSPENDED", "reason": "No output"}
+        with patch.dict(os.environ, {"SCITEX_AUDIO_MODE": "local"}, clear=False):
+            with patch("scitex.audio._mcp.speak_handlers.check_audio_sink_state", return_value=mock_sink):
+                result = await speak_local_handler("Test text", play=True)
+                assert result["success"] is False
+                assert "SUSPENDED" in result.get("sink_state", "")
 
     @pytest.mark.asyncio
     async def test_speak_relay_handler_no_url(self):

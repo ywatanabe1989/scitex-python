@@ -22,7 +22,7 @@ def main(
     CONFIG=scitex.INJECTED,
     plt=scitex.INJECTED,
     COLORS=scitex.INJECTED,
-    rng=scitex.INJECTED,
+    rngg=scitex.INJECTED,
 ):
     """Args injected by @scitex.session decorator"""
     print(f"Session ID: {CONFIG['ID']}")
@@ -46,7 +46,7 @@ def main(
     CONFIG=scitex.INJECTED,
     plt=scitex.INJECTED,
     COLORS=scitex.INJECTED,
-    rng=scitex.INJECTED,
+    rngg=scitex.INJECTED,
 ):
     """Args injected by @scitex.session decorator"""
     print(f"Session ID: {CONFIG['ID']}")

@@ -320,7 +320,7 @@ if __name__ == "__main__":
 #     CONFIG=stx.INJECTED,
 #     plt=stx.INJECTED,
 #     COLORS=stx.INJECTED,
-#     rng=stx.INJECTED,
+#     rngg=stx.INJECTED,
 #     logger=stx.INJECTED,
 # ):
 #     """Inspect and display matplotlib plotting function signatures."""

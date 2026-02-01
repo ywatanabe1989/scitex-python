@@ -492,7 +492,7 @@ def main(
     CONFIG=stx.INJECTED,
     plt=stx.INJECTED,
     COLORS=stx.INJECTED,
-    rng=stx.INJECTED,
+    rngg=stx.INJECTED,
     logger=stx.INJECTED,
 ):
     """Extract signatures with flattened *args/**kwargs."""

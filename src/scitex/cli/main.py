@@ -41,6 +41,7 @@ from . import (
     stats,
     template,
     tex,
+    verify,
     web,
     writer,
 )
@@ -97,6 +98,7 @@ cli.add_command(social.social)
 cli.add_command(stats.stats)
 cli.add_command(template.template)
 cli.add_command(tex.tex)
+cli.add_command(verify.verify)
 cli.add_command(web.web)
 cli.add_command(writer.writer)
 

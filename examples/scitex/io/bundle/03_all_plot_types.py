@@ -99,7 +99,7 @@ def save_report(out_dir, results, total):
 
 
 @stx.session(verbose=False, agg=True)
-def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED, rng=INJECTED):
+def main(plt=INJECTED, CONFIG=INJECTED, logger=INJECTED, rngg=INJECTED):
     """Test FTS bundle creation for all plot types."""
     logger.info("Example 03: FTS Bundle Creation for All Plot Types")
 

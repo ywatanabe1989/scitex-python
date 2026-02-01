@@ -1,20 +1,45 @@
 # SciTeX Audio
 
-Text-to-Speech with automatic fallback: pyttsx3 -> gtts -> elevenlabs
+Text-to-Speech with automatic fallback and smart routing.
+
+**Fallback order:** elevenlabs -> gtts -> pyttsx3
+
+## Smart Routing
+
+The `speak()` function automatically routes audio based on availability:
+
+| Local Sink | Relay Available | Result (mode=auto) |
+|------------|-----------------|-------------------|
+| SUSPENDED | Yes | Uses relay |
+| SUSPENDED | No | Returns error |
+| RUNNING | Yes | Prefers relay |
+| RUNNING | No | Uses local |
 
 ## Usage
 
 ```python
 import scitex
 
-# Basic
-scitex.audio.speak("Hello!")
+# Basic - auto mode (smart routing)
+result = scitex.audio.speak("Hello!")
+if result["played"]:
+    print(f"Played via {result['mode']}")
 
-# Faster speech (rate in words per minute)
-scitex.audio.speak("Hello!", rate=200)
+# Force local playback (fails if sink unavailable)
+result = scitex.audio.speak("Hello!", mode="local")
+
+# Force remote relay
+result = scitex.audio.speak("Hello!", mode="remote")
+
+# Faster speech (speed multiplier for gtts)
+scitex.audio.speak("Hello!", speed=1.5)
 
 # Specific backend
-scitex.audio.speak("Hello", backend="pyttsx3")
+scitex.audio.speak("Hello", backend="gtts")
+
+# Check local audio availability
+status = scitex.audio.check_local_audio_available()
+print(status)  # {'available': False, 'state': 'SUSPENDED', 'reason': '...'}
 
 # Stop speech
 scitex.audio.stop_speech()
@@ -58,8 +83,8 @@ Enable remote agents to play audio on local speakers using a simple HTTP relay.
 │  Remote (e.g., NAS)     │              │  Local (WSL/Windows)    │
 │                         │              │                         │
 │  Claude Agent uses      │              │  scitex audio relay     │
-│  audio_speak_relay ─────┼─ SSH ───────▶│  --port 31293           │
-│                         │ Reverse      │         │               │
+│  audio_speak ───────────┼─ SSH ───────▶│  --port 31293           │
+│  (auto-routes to relay) │ Reverse      │         │               │
 │  localhost:31293        │ Tunnel       │         ▼               │
 │                         │              │     🔊 Speakers         │
 └─────────────────────────┘              └─────────────────────────┘
@@ -85,7 +110,7 @@ Host nas
 
 **Step 3: Remote agent uses relay**
 
-The `audio_speak_relay` MCP tool auto-detects:
+The unified `audio_speak` MCP tool auto-detects relay:
 1. `SCITEX_AUDIO_RELAY_URL` env var
 2. Localhost:31293 (SSH reverse tunnel)
 3. SSH_CLIENT IP (auto-detected from SSH session)
@@ -113,12 +138,15 @@ The `audio_speak_relay` MCP tool auto-detects:
 
 | Tool | Description |
 |------|-------------|
-| `audio_speak` | Text to speech (plays on server) |
-| `audio_speak_local` | TTS on server machine |
-| `audio_speak_relay` | TTS via relay (remote playback) |
+| `audio_speak` | **Unified TTS with smart routing** (auto-selects local/relay) |
 | `audio_list_backends` | Show available backends |
 | `audio_check_audio_status` | Check WSL audio connectivity |
 | `audio_announce_context` | Announce current directory and git branch |
+
+The `audio_speak` tool automatically:
+- Checks if local audio sink is available (not SUSPENDED)
+- Uses relay server when local audio unavailable
+- Returns clear error messages when neither is available
 
 ## Backends
 

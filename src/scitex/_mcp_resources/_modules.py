@@ -223,7 +223,7 @@ def main(
     CONFIG=stx.INJECTED,         # Session config
     plt=stx.INJECTED,            # matplotlib
     COLORS=stx.INJECTED,         # Color palette
-    rng=stx.INJECTED,            # Random generator
+    rngg=stx.INJECTED,            # Random generator
     logger=stx.INJECTED,         # Logger
 ):
     \"\"\"Docstring becomes --help.\"\"\"
