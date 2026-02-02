@@ -5,7 +5,6 @@
 """Tests for scitex.audio.engines.elevenlabs_engine module."""
 
 import os
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -79,7 +78,14 @@ class TestElevenLabsTTS:
 
     def test_api_key_from_environment(self):
         """Test API key is read from environment."""
-        with patch.dict(os.environ, {"ELEVENLABS_API_KEY": "env-api-key"}):
+        # Clear both possible env vars, then set only ELEVENLABS_API_KEY
+        env_patch = {
+            "ELEVENLABS_API_KEY": "env-api-key",
+            "SCITEX_AUDIO_ELEVENLABS_API_KEY": "",
+        }
+        with patch.dict(os.environ, env_patch, clear=False):
+            # Need to delete the scitex key if it exists
+            os.environ.pop("SCITEX_AUDIO_ELEVENLABS_API_KEY", None)
             from scitex.audio.engines._elevenlabs_engine import ElevenLabsTTS
 
             tts = ElevenLabsTTS()
@@ -114,11 +120,12 @@ class TestElevenLabsTTS:
         assert tts.similarity_boost == 0.9
 
     def test_custom_speed_initialization(self):
-        """Test initializing with custom speed."""
+        """Test initializing with custom speed (clamped to API limits)."""
         from scitex.audio.engines._elevenlabs_engine import ElevenLabsTTS
 
+        # Speed is clamped to ElevenLabs API limits (0.7-1.2)
         tts = ElevenLabsTTS(speed=1.5)
-        assert tts.speed == 1.5
+        assert tts.speed == ElevenLabsTTS.MAX_SPEED  # 1.2
 
     def test_voices_dictionary_contains_presets(self):
         """Test VOICES dict contains preset voices."""
@@ -333,14 +340,20 @@ class TestElevenLabsTTSEdgeCases:
         assert tts_max.similarity_boost == 1.0
 
     def test_speed_boundary_values(self):
-        """Test speed at various values."""
+        """Test speed is clamped to ElevenLabs API limits (0.7-1.2)."""
         from scitex.audio.engines._elevenlabs_engine import ElevenLabsTTS
 
+        # Values below MIN_SPEED are clamped to 0.7
         tts_slow = ElevenLabsTTS(speed=0.5)
-        assert tts_slow.speed == 0.5
+        assert tts_slow.speed == ElevenLabsTTS.MIN_SPEED  # 0.7
 
+        # Values above MAX_SPEED are clamped to 1.2
         tts_fast = ElevenLabsTTS(speed=2.0)
-        assert tts_fast.speed == 2.0
+        assert tts_fast.speed == ElevenLabsTTS.MAX_SPEED  # 1.2
+
+        # Values within range are preserved
+        tts_mid = ElevenLabsTTS(speed=1.0)
+        assert tts_mid.speed == 1.0
 
     def test_no_api_key(self):
         """Test behavior when no API key is set."""
@@ -385,10 +398,6 @@ class TestElevenLabsTTSVoicePresets:
 
 
 if __name__ == "__main__":
-    import os
-
-    import pytest
-
     pytest.main([os.path.abspath(__file__)])
 
 # --------------------------------------------------------------------------------
