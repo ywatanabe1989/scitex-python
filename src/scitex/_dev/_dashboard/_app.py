@@ -31,7 +31,9 @@ def create_app() -> Flask:
 
     static_folder = Path(__file__).parent / "static"
     app = Flask(__name__, static_folder=str(static_folder), static_url_path="/static")
-    app.config["JSON_SORT_KEYS"] = False
+
+    # Disable JSON key sorting to preserve insertion order (Flask 2.2+)
+    app.json.sort_keys = False
 
     # Register routes
     from ._routes import register_routes
