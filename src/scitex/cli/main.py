@@ -30,6 +30,7 @@ from . import (
     config,
     convert,
     dataset,
+    dev,
     introspect,
     mcp,
     plt,
@@ -87,6 +88,7 @@ cli.add_command(cloud.cloud)
 cli.add_command(config.config)
 cli.add_command(convert.convert)
 cli.add_command(dataset.dataset)
+cli.add_command(dev.dev)
 cli.add_command(introspect.introspect)
 cli.add_command(mcp.mcp)
 cli.add_command(plt.plt)
