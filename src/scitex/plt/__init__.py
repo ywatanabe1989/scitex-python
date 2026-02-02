@@ -75,8 +75,8 @@ if _FIGRECIPE_AVAILABLE:
     from figrecipe import (
         compose,
         crop,
-        edit,
         extract_data,
+        gui,
         info,
         list_presets,
         load_style,
@@ -87,11 +87,17 @@ if _FIGRECIPE_AVAILABLE:
         validate,
     )
 
+    # Backward compatibility alias
+    edit = gui
+
     # Internal imports (not part of figrecipe public API)
     from figrecipe._api._notebook import enable_svg
     from figrecipe._api._seaborn_proxy import sns
     from figrecipe._api._style_manager import STYLE, apply_style
-    from figrecipe._composition import align_panels, distribute_panels, smart_align
+    from figrecipe._composition import align_panels, align_smart, distribute_panels
+
+    # Backward compatibility alias
+    smart_align = align_smart
     from figrecipe._graph_presets import get_preset as get_graph_preset
     from figrecipe._graph_presets import list_presets as list_graph_presets
     from figrecipe._graph_presets import register_preset as register_graph_preset
@@ -120,11 +126,13 @@ else:
     validate = _not_available
     extract_data = _not_available
     info = _not_available
-    edit = _not_available
+    gui = _not_available
+    edit = _not_available  # Backward compatibility alias
     compose = _not_available
     align_panels = _not_available
     distribute_panels = _not_available
-    smart_align = _not_available
+    align_smart = _not_available
+    smart_align = _not_available  # Backward compatibility alias
     sns = None
     enable_svg = _not_available
     get_graph_preset = _not_available
@@ -438,7 +446,8 @@ __all__ = [
     "validate",
     "extract_data",
     "info",
-    "edit",
+    "gui",
+    "edit",  # Backward compatibility alias for gui
     # Style management
     "STYLE",
     "load_style",
@@ -449,7 +458,8 @@ __all__ = [
     "compose",
     "align_panels",
     "distribute_panels",
-    "smart_align",
+    "align_smart",
+    "smart_align",  # Backward compatibility alias for align_smart
     # Graph visualization
     "draw_graph",
     "get_graph_preset",
