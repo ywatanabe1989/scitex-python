@@ -147,20 +147,49 @@ def get_remote_versions(
     ssh_target = f"{host.user}@{host.hostname}"
     ssh_args.append(ssh_target)
 
-    # Build Python command to check all packages
-    packages_str = ",".join(f"'{p}'" for p in packages)
-    python_cmd = f"""python3 -c "
+    # Build Python command to check all packages (installed + toml)
+    # Use base64 encoding to avoid shell escaping issues
+    import base64
+
+    packages_list = repr(packages)
+    python_script = f"""
 import json
 from importlib.metadata import version
+from pathlib import Path
+import re
+
+def get_toml_version(pkg):
+    pkg_dir_names = [pkg, pkg.replace("-", "_"), pkg.replace("_", "-")]
+    if pkg == "scitex":
+        pkg_dir_names.append("scitex-python")
+    for dir_name in pkg_dir_names:
+        toml_path = Path.home() / "proj" / dir_name / "pyproject.toml"
+        if toml_path.exists():
+            try:
+                content = toml_path.read_text()
+                match = re.search(r'^version\\s*=\\s*["\\'](.*?)["\\']\\s*$', content, re.MULTILINE)
+                if match:
+                    return match.group(1)
+            except Exception:
+                pass
+    return None
+
 results = {{}}
-for pkg in [{packages_str}]:
+for pkg in {packages_list}:
+    result = {{"installed": None, "toml": None, "status": "not_installed"}}
     try:
-        results[pkg] = {{'installed': version(pkg), 'status': 'ok'}}
+        result["installed"] = version(pkg)
+        result["status"] = "ok"
     except Exception as e:
-        results[pkg] = {{'installed': None, 'status': 'not_installed', 'error': str(e)}}
+        result["error"] = str(e)
+    result["toml"] = get_toml_version(pkg)
+    results[pkg] = result
 print(json.dumps(results))
-"
 """
+    encoded = base64.b64encode(python_script.encode()).decode()
+    python_cmd = (
+        f"python3 -c \"import base64;exec(base64.b64decode('{encoded}').decode())\""
+    )
     ssh_args.append(python_cmd)
 
     try:
@@ -179,9 +208,10 @@ print(json.dumps(results))
             }
 
         import json
+        from typing import cast
 
         try:
-            return json.loads(result.stdout.strip())
+            return cast(dict[str, dict[str, Any]], json.loads(result.stdout.strip()))
         except json.JSONDecodeError:
             return {
                 pkg: {

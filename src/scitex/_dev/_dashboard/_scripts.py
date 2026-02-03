@@ -239,30 +239,31 @@ function renderPackageCard(name, info, local, git, remote, hostVersions, remoteV
             <div class="package-body">
                 <div class="version-grid">
                     <div class="version-section">
-                        <h4>Local</h4>
+                        <h4>LOCAL</h4>
                         <div class="version-item"><span class="key">toml</span><span class="value">${local.pyproject_toml || '-'}</span></div>
                         <div class="version-item"><span class="key">installed</span><span class="value">${local.installed || '-'}</span></div>
                     </div>
                     <div class="version-section">
-                        <h4>Git</h4>
+                        <h4>GIT</h4>
                         <div class="version-item"><span class="key">tag</span><span class="value">${git.latest_tag || '-'}</span></div>
                         <div class="version-item"><span class="key">branch</span><span class="value">${git.branch || '-'}</span></div>
                     </div>
                     <div class="version-section">
-                        <h4>PyPI</h4>
+                        <h4>PYPI</h4>
                         <div class="version-item"><span class="key">published</span><span class="value">${remote.pypi || '-'}</span></div>
                     </div>`;
 
     if (hostVersions.length > 0) {
-        html += `<div class="version-section"><h4>Hosts</h4>`;
         hostVersions.forEach(h => {
-            html += `<div class="version-item"><span class="key">${h.name}</span><span class="value">${h.installed || h.error || '-'}</span></div>`;
+            html += `<div class="version-section"><h4>${h.name.toUpperCase()}</h4>`;
+            html += `<div class="version-item"><span class="key">toml</span><span class="value">${h.toml || '-'}</span></div>`;
+            html += `<div class="version-item"><span class="key">installed</span><span class="value">${h.installed || h.error || '-'}</span></div>`;
+            html += `</div>`;
         });
-        html += `</div>`;
     }
 
     if (remoteVersions.length > 0) {
-        html += `<div class="version-section"><h4>GitHub</h4>`;
+        html += `<div class="version-section"><h4>GITHUB</h4>`;
         remoteVersions.forEach(r => {
             html += `<div class="version-item"><span class="key">${r.name}</span><span class="value">${r.latest_tag || r.error || '-'}</span></div>`;
         });
