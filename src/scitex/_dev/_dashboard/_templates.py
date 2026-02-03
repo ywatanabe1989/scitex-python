@@ -36,7 +36,11 @@ def get_dashboard_html() -> str:
             </div>
         </header>
 
-        <div class="filters">
+        <div class="filters collapsed">
+            <div class="filters-toggle" onclick="toggleFilters()">
+                <span class="fold-icon">▶</span>
+                <span>Filters &amp; Config</span>
+            </div>
             <div class="filter-group">
                 <h3>Packages</h3>
                 <div class="filter-options" id="packageFilters"></div>
@@ -63,6 +67,11 @@ def get_dashboard_html() -> str:
                 <h3>RTD</h3>
                 <div class="filter-options" id="rtdFilters"></div>
             </div>
+        </div>
+
+        <div class="expand-controls">
+            <button class="btn-secondary" onclick="toggleAllCards(true)">Expand All</button>
+            <button class="btn-secondary" onclick="toggleAllCards(false)">Collapse All</button>
         </div>
 
         <div class="summary" id="summary"></div>

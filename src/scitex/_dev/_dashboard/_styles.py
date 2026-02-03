@@ -209,6 +209,86 @@ button {
 .rtd-passing a:hover, .rtd-failing a:hover, .rtd-unknown a:hover {
     text-decoration: underline;
 }
+/* Collapsible cards */
+.package-card .package-header {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.package-card .fold-icon {
+    transition: transform 0.2s ease;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.package-card:not(.collapsed) .fold-icon {
+    transform: rotate(90deg);
+}
+.package-card.collapsed .package-body {
+    display: none;
+}
+.package-card .package-name {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: bold;
+}
+.package-card .package-name:hover {
+    text-decoration: underline;
+}
+.package-card .quick-links {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    font-size: 1rem;
+}
+.package-card .quick-links a {
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.package-card .quick-links a:hover {
+    opacity: 1;
+}
+/* Collapsible filters */
+.filters.collapsed .filter-group {
+    display: none;
+}
+.filters-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    margin: -20px -20px 15px -20px;
+    background: var(--bg-card);
+    border-radius: 10px 10px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.filters-toggle .fold-icon {
+    transition: transform 0.2s ease;
+}
+.filters:not(.collapsed) .filters-toggle .fold-icon {
+    transform: rotate(90deg);
+}
+.expand-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.expand-controls button {
+    padding: 5px 12px;
+    font-size: 0.8rem;
+}
+/* Section header links */
+.version-section h4 a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+.version-section h4 a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+}
 """
 
 

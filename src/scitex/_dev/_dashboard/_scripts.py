@@ -210,6 +210,22 @@ function getSelectedFilters() {
     };
 }
 
+function getEffectiveStatus(name, info) {
+    // Check RTD status and downgrade if needed
+    const rtdData = cachedData.rtd || {};
+    let status = info.status;
+    if (status === 'ok') {
+        const rtdLatest = rtdData['latest'] && rtdData['latest'][name];
+        const rtdStable = rtdData['stable'] && rtdData['stable'][name];
+        if ((rtdLatest && rtdLatest.status === 'failing') ||
+            (rtdStable && rtdStable.status === 'failing') ||
+            (rtdLatest && rtdLatest.status === 'not_found')) {
+            status = 'mismatch';
+        }
+    }
+    return status;
+}
+
 function renderData() {
     if (!cachedData) return;
     const filters = getSelectedFilters();
@@ -218,16 +234,17 @@ function renderData() {
     const filteredPackages = Object.entries(packages)
         .filter(([name, info]) => {
             if (!filters.packages.includes(name)) return false;
-            if (!filters.statuses.includes(info.status)) return false;
+            const effectiveStatus = getEffectiveStatus(name, info);
+            if (!filters.statuses.includes(effectiveStatus)) return false;
             return true;
         });
 
     const summary = {
         total: filteredPackages.length,
-        ok: filteredPackages.filter(([, i]) => i.status === 'ok').length,
-        unreleased: filteredPackages.filter(([, i]) => i.status === 'unreleased').length,
-        mismatch: filteredPackages.filter(([, i]) => i.status === 'mismatch').length,
-        outdated: filteredPackages.filter(([, i]) => i.status === 'outdated').length
+        ok: filteredPackages.filter(([n, i]) => getEffectiveStatus(n, i) === 'ok').length,
+        unreleased: filteredPackages.filter(([n, i]) => getEffectiveStatus(n, i) === 'unreleased').length,
+        mismatch: filteredPackages.filter(([n, i]) => getEffectiveStatus(n, i) === 'mismatch').length,
+        outdated: filteredPackages.filter(([n, i]) => getEffectiveStatus(n, i) === 'outdated').length
     };
 
     document.getElementById('summary').innerHTML = `
@@ -266,11 +283,47 @@ function renderData() {
 }
 
 function renderPackageCard(name, info, local, git, remote, hostVersions, remoteVersions, rtdStatus) {
+    const pypiUrl = `https://pypi.org/project/${name}/`;
+    const githubUrl = `https://github.com/ywatanabe1989/${name}`;
+    const rtdUrl = `https://${name === 'scitex' ? 'scitex-python' : name}.readthedocs.io/`;
+
+    // Collect all issues for tooltip
+    let allIssues = [...(info.issues || [])];
+
+    // Re-evaluate status based on RTD
+    let effectiveStatus = info.status;
+    if (rtdStatus && Object.keys(rtdStatus).length > 0) {
+        const rtdLatest = rtdStatus['latest'];
+        const rtdStable = rtdStatus['stable'];
+        if (rtdLatest && rtdLatest.status === 'failing') {
+            allIssues.push('RTD latest build failing');
+            if (effectiveStatus === 'ok') effectiveStatus = 'mismatch';
+        }
+        if (rtdStable && rtdStable.status === 'failing') {
+            allIssues.push('RTD stable build failing');
+            if (effectiveStatus === 'ok') effectiveStatus = 'mismatch';
+        }
+        if (rtdLatest && rtdLatest.status === 'not_found') {
+            allIssues.push('RTD project not found');
+            if (effectiveStatus === 'ok') effectiveStatus = 'mismatch';
+        }
+    }
+
+    // Create tooltip text from issues (using &#10; for newlines in title attribute)
+    const tooltipText = allIssues.length > 0 ? allIssues.join('&#10;') : '';
+    const tooltipAttr = tooltipText ? `title="${tooltipText}"` : '';
+
     let html = `
-        <div class="package-card">
-            <div class="package-header">
-                <span class="package-name">${name}</span>
-                <span class="status-badge status-${info.status}">${info.status}</span>
+        <div class="package-card collapsed">
+            <div class="package-header" onclick="toggleCard(this)">
+                <span class="fold-icon">▶</span>
+                <a href="${githubUrl}" target="_blank" class="package-name" onclick="event.stopPropagation()">${name}</a>
+                <span class="status-badge status-${effectiveStatus}" ${tooltipAttr}>${effectiveStatus}</span>
+                <span class="quick-links">
+                    <a href="${pypiUrl}" target="_blank" title="PyPI" onclick="event.stopPropagation()">📦</a>
+                    <a href="${githubUrl}" target="_blank" title="GitHub" onclick="event.stopPropagation()">🐙</a>
+                    <a href="${rtdUrl}" target="_blank" title="Docs" onclick="event.stopPropagation()">📖</a>
+                </span>
             </div>
             <div class="package-body">
                 <div class="version-grid">
@@ -285,7 +338,7 @@ function renderPackageCard(name, info, local, git, remote, hostVersions, remoteV
                         <div class="version-item"><span class="key">branch</span><span class="value">${git.branch || '-'}</span></div>
                     </div>
                     <div class="version-section">
-                        <h4>PYPI</h4>
+                        <h4><a href="https://pypi.org/project/${name}/" target="_blank">PYPI</a></h4>
                         <div class="version-item"><span class="key">published</span><span class="value">${remote.pypi || '-'}</span></div>
                     </div>`;
 
@@ -299,7 +352,7 @@ function renderPackageCard(name, info, local, git, remote, hostVersions, remoteV
     }
 
     if (remoteVersions.length > 0) {
-        html += `<div class="version-section"><h4>GITHUB</h4>`;
+        html += `<div class="version-section"><h4><a href="${githubUrl}" target="_blank">GITHUB</a></h4>`;
         remoteVersions.forEach(r => {
             html += `<div class="version-item"><span class="key">${r.name}</span><span class="value">${r.latest_tag || r.error || '-'}</span></div>`;
         });
@@ -307,7 +360,7 @@ function renderPackageCard(name, info, local, git, remote, hostVersions, remoteV
     }
 
     if (rtdStatus && Object.keys(rtdStatus).length > 0) {
-        html += `<div class="version-section"><h4>RTD</h4>`;
+        html += `<div class="version-section"><h4><a href="${rtdUrl}" target="_blank">RTD</a></h4>`;
         Object.entries(rtdStatus).forEach(([version, data]) => {
             const statusClass = data.status === 'passing' ? 'rtd-passing' : (data.status === 'failing' ? 'rtd-failing' : 'rtd-unknown');
             const statusIcon = data.status === 'passing' ? '✓' : (data.status === 'failing' ? '✗' : '?');
@@ -319,9 +372,9 @@ function renderPackageCard(name, info, local, git, remote, hostVersions, remoteV
 
     html += `</div>`;
 
-    if (info.issues && info.issues.length > 0) {
+    if (allIssues.length > 0) {
         html += `<div class="issues"><h4>Issues</h4><ul>`;
-        info.issues.forEach(i => { html += `<li>${i}</li>`; });
+        allIssues.forEach(i => { html += `<li>${i}</li>`; });
         html += `</ul></div>`;
     }
 
@@ -330,6 +383,26 @@ function renderPackageCard(name, info, local, git, remote, hostVersions, remoteV
 }
 
 async function refreshData() { await fetchVersions(); }
+
+function toggleCard(header) {
+    const card = header.parentElement;
+    card.classList.toggle('collapsed');
+}
+
+function toggleAllCards(expand) {
+    document.querySelectorAll('.package-card').forEach(card => {
+        if (expand) {
+            card.classList.remove('collapsed');
+        } else {
+            card.classList.add('collapsed');
+        }
+    });
+}
+
+function toggleFilters() {
+    const filters = document.querySelector('.filters');
+    filters.classList.toggle('collapsed');
+}
 
 function exportJSON() {
     if (!cachedData) return;
