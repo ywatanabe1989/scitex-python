@@ -31,6 +31,7 @@ from .individual import ArXivEngine
 from .individual import CrossRefEngine
 from .individual import CrossRefLocalEngine
 from .individual import OpenAlexEngine
+from .individual import OpenAlexLocalEngine
 from .individual import PubMedEngine
 from .individual import SemanticScholarEngine
 from .individual import URLDOIEngine
@@ -232,6 +233,7 @@ class ScholarEngine:
                 "CrossRef": CrossRefEngine,
                 "CrossRefLocal": CrossRefLocalEngine,
                 "OpenAlex": OpenAlexEngine,
+                "OpenAlexLocal": OpenAlexLocalEngine,
                 "PubMed": PubMedEngine,
                 "Semantic_Scholar": SemanticScholarEngine,
                 "arXiv": ArXivEngine,
@@ -243,6 +245,14 @@ class ScholarEngine:
                     # Get API URL from config (supports SCITEX_SCHOLAR_CROSSREF_API_URL env var)
                     api_url = self.config.resolve(
                         "crossref_api_url", "http://127.0.0.1:3333"
+                    )
+                    self._engine_instances[name] = engine_classes[name](
+                        "research@example.com", api_url=api_url
+                    )
+                elif name == "OpenAlexLocal":
+                    # Get API URL from config (supports SCITEX_SCHOLAR_OPENALEX_API_URL env var)
+                    api_url = self.config.resolve(
+                        "openalex_api_url", "http://127.0.0.1:31292"
                     )
                     self._engine_instances[name] = engine_classes[name](
                         "research@example.com", api_url=api_url
@@ -476,6 +486,7 @@ class ScholarEngine:
         engine_priority = {
             "URL": 6,
             "CrossRefLocal": 5,
+            "OpenAlexLocal": 5,
             "CrossRef": 4,
             "OpenAlex": 3,
             "Semantic_Scholar": 2,
