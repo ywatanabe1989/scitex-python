@@ -38,6 +38,8 @@ async def openalex_search_handler(
     offset: int = 0,
     year_min: int | None = None,
     year_max: int | None = None,
+    save_path: str | None = None,
+    save_format: str = "json",
 ) -> dict:
     """Search OpenAlex database (250M+ papers) via openalex-local.
 
@@ -47,6 +49,8 @@ async def openalex_search_handler(
         offset: Number of results to skip for pagination
         year_min: Minimum publication year filter
         year_max: Maximum publication year filter
+        save_path: Optional file path to save results (e.g., "results.json", "papers.bib")
+        save_format: Output format for save_path: "text", "json", or "bibtex" (default: "json")
     """
     try:
         openalex = _ensure_openalex()
@@ -86,11 +90,21 @@ async def openalex_search_handler(
                 if len(papers) >= limit:
                     break
 
-            return papers, getattr(results, "total", len(papers))
+            return papers, getattr(results, "total", len(papers)), results
 
-        papers, total = await loop.run_in_executor(None, do_search)
+        papers, total, search_results = await loop.run_in_executor(None, do_search)
 
-        return {
+        # Save to file if requested
+        saved_path = None
+        if save_path:
+            try:
+                from openalex_local import save as oa_save
+
+                saved_path = oa_save(search_results, save_path, format=save_format)
+            except Exception as e:
+                return {"success": False, "error": f"Failed to save: {e}"}
+
+        result = {
             "success": True,
             "query": query,
             "total": total,
@@ -102,6 +116,11 @@ async def openalex_search_handler(
             "timestamp": datetime.now().isoformat(),
         }
 
+        if saved_path:
+            result["saved_to"] = saved_path
+
+        return result
+
     except Exception as e:
         return {"success": False, "error": str(e)}
 
@@ -109,12 +128,16 @@ async def openalex_search_handler(
 async def openalex_get_handler(
     doi: str = None,
     openalex_id: str = None,
+    save_path: str | None = None,
+    save_format: str = "json",
 ) -> dict:
     """Get a paper by DOI or OpenAlex ID from OpenAlex database.
 
     Args:
         doi: DOI of the paper (e.g., '10.1038/nature12373')
         openalex_id: OpenAlex ID (e.g., 'W2100837269')
+        save_path: Optional file path to save result (e.g., "paper.json", "paper.bib")
+        save_format: Output format for save_path: "text", "json", or "bibtex" (default: "json")
     """
     if not doi and not openalex_id:
         return {"success": False, "error": "Must provide either doi or openalex_id"}
@@ -127,7 +150,7 @@ async def openalex_get_handler(
             identifier = doi or openalex_id
             work = openalex.get(identifier)
             if not work:
-                return None
+                return None, None
 
             result = {
                 "doi": work.doi,
@@ -144,9 +167,9 @@ async def openalex_get_handler(
                 "url": getattr(work, "url", None),
             }
 
-            return result
+            return result, work
 
-        result = await loop.run_in_executor(None, do_get)
+        result, work_obj = await loop.run_in_executor(None, do_get)
 
         if result is None:
             identifier = doi or openalex_id
@@ -156,12 +179,27 @@ async def openalex_get_handler(
                 "identifier": identifier,
             }
 
-        return {
+        # Save to file if requested
+        saved_path = None
+        if save_path and work_obj:
+            try:
+                from openalex_local import save as oa_save
+
+                saved_path = oa_save(work_obj, save_path, format=save_format)
+            except Exception as e:
+                return {"success": False, "error": f"Failed to save: {e}"}
+
+        response = {
             "success": True,
             "paper": result,
             "source": "openalex_local",
             "timestamp": datetime.now().isoformat(),
         }
+
+        if saved_path:
+            response["saved_to"] = saved_path
+
+        return response
 
     except Exception as e:
         return {"success": False, "error": str(e)}
