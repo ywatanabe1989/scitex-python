@@ -117,6 +117,19 @@ def register_routes(app: Flask) -> None:
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
+    @app.route("/api/rtd")
+    def api_rtd():
+        """Get Read the Docs build status."""
+        try:
+            packages = request.args.getlist("package") or None
+            versions = request.args.getlist("version") or None
+            from .._rtd import check_all_rtd
+
+            data = check_all_rtd(packages=packages, versions=versions)
+            return jsonify(data)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
 
 def _get_all_version_data(force_refresh: bool = False) -> dict[str, Any]:
     """Get all version data from all sources.

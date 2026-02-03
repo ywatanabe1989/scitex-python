@@ -59,6 +59,10 @@ def get_dashboard_html() -> str:
                 <h3>Remotes</h3>
                 <div class="filter-options" id="remoteFilters"></div>
             </div>
+            <div class="filter-group">
+                <h3>RTD</h3>
+                <div class="filter-options" id="rtdFilters"></div>
+            </div>
         </div>
 
         <div class="summary" id="summary"></div>

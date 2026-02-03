@@ -8,19 +8,20 @@
 def get_javascript() -> str:
     """Return dashboard JavaScript."""
     return """
-let cachedData = { packages: {}, hosts: {}, remotes: {} };
+let cachedData = { packages: {}, hosts: {}, remotes: {}, rtd: {} };
 
 async function fetchVersions() {
     showLoading(true);
-    cachedData = { packages: {}, hosts: {}, remotes: {} };
+    cachedData = { packages: {}, hosts: {}, remotes: {}, rtd: {} };
     renderFilters();
     renderData();
 
     // Load packages first (fast)
     fetchPackages();
-    // Load hosts and remotes in parallel (slower)
+    // Load hosts, remotes, and RTD in parallel (slower)
     fetchHosts();
     fetchRemotes();
+    fetchRtd();
 }
 
 async function fetchPackages() {
@@ -69,6 +70,22 @@ async function fetchRemotes() {
         cachedData.remotes = { error: err.message };
     } finally {
         setSectionLoading('remote', false);
+    }
+}
+
+async function fetchRtd() {
+    setSectionLoading('rtd', true);
+    try {
+        const response = await fetch('/api/rtd');
+        cachedData.rtd = await response.json();
+        renderFilters();
+        renderData();
+        setSectionUpdated('rtd');
+    } catch (err) {
+        console.error('Failed to fetch RTD status:', err);
+        cachedData.rtd = { error: err.message };
+    } finally {
+        setSectionLoading('rtd', false);
     }
 }
 
@@ -167,6 +184,16 @@ function renderFilters() {
         remoteFilters.innerHTML = '<span style="color: var(--text-secondary)">No remotes configured</span>';
     }
 
+    const rtdFilters = document.getElementById('rtdFilters');
+    const rtdVersions = Object.keys(cachedData.rtd || {});
+    if (rtdVersions.length > 0) {
+        rtdFilters.innerHTML = rtdVersions.map(v =>
+            `<label><input type="checkbox" value="${v}" checked onchange="renderData()"> ${v}</label>`
+        ).join('');
+    } else {
+        rtdFilters.innerHTML = '<span style="color: var(--text-secondary)">Loading...</span>';
+    }
+
     document.querySelectorAll('#statusFilters input').forEach(input => {
         input.onchange = renderData;
     });
@@ -216,6 +243,7 @@ function renderData() {
         const remote = info.remote || {};
         const hostData = cachedData.hosts || {};
         const remoteData = cachedData.remotes || {};
+        const rtdData = cachedData.rtd || {};
 
         const hostVersions = Object.entries(hostData)
             .filter(([h]) => !h.startsWith('_') && filters.hosts.includes(h))
@@ -225,11 +253,19 @@ function renderData() {
             .filter(([r]) => !r.startsWith('_') && filters.remotes.includes(r))
             .map(([remoteName, remoteInfo]) => ({ name: remoteName, ...(remoteInfo[name] || {}) }));
 
-        return renderPackageCard(name, info, local, git, remote, hostVersions, remoteVersions);
+        // Get RTD status for this package (latest and stable)
+        const rtdStatus = {};
+        Object.entries(rtdData).forEach(([version, pkgData]) => {
+            if (pkgData[name]) {
+                rtdStatus[version] = pkgData[name];
+            }
+        });
+
+        return renderPackageCard(name, info, local, git, remote, hostVersions, remoteVersions, rtdStatus);
     }).join('');
 }
 
-function renderPackageCard(name, info, local, git, remote, hostVersions, remoteVersions) {
+function renderPackageCard(name, info, local, git, remote, hostVersions, remoteVersions, rtdStatus) {
     let html = `
         <div class="package-card">
             <div class="package-header">
@@ -266,6 +302,17 @@ function renderPackageCard(name, info, local, git, remote, hostVersions, remoteV
         html += `<div class="version-section"><h4>GITHUB</h4>`;
         remoteVersions.forEach(r => {
             html += `<div class="version-item"><span class="key">${r.name}</span><span class="value">${r.latest_tag || r.error || '-'}</span></div>`;
+        });
+        html += `</div>`;
+    }
+
+    if (rtdStatus && Object.keys(rtdStatus).length > 0) {
+        html += `<div class="version-section"><h4>RTD</h4>`;
+        Object.entries(rtdStatus).forEach(([version, data]) => {
+            const statusClass = data.status === 'passing' ? 'rtd-passing' : (data.status === 'failing' ? 'rtd-failing' : 'rtd-unknown');
+            const statusIcon = data.status === 'passing' ? '✓' : (data.status === 'failing' ? '✗' : '?');
+            const link = data.url ? `<a href="${data.url}" target="_blank">${statusIcon}</a>` : statusIcon;
+            html += `<div class="version-item"><span class="key">${version}</span><span class="value ${statusClass}">${link} ${data.status || '-'}</span></div>`;
         });
         html += `</div>`;
     }

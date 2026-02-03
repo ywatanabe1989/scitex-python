@@ -199,6 +199,16 @@ button {
     0% { background: rgba(74, 222, 128, 0.3); }
     100% { background: transparent; }
 }
+.rtd-passing { color: var(--success); }
+.rtd-failing { color: var(--error); }
+.rtd-unknown { color: var(--warning); }
+.rtd-passing a, .rtd-failing a, .rtd-unknown a {
+    color: inherit;
+    text-decoration: none;
+}
+.rtd-passing a:hover, .rtd-failing a:hover, .rtd-unknown a:hover {
+    text-decoration: underline;
+}
 """
 
 
