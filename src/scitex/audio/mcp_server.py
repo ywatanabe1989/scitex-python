@@ -38,10 +38,7 @@ except ImportError:
 __all__ = ["mcp", "run_server", "run_relay_server", "main", "FASTMCP_AVAILABLE"]
 
 # Import branding
-from ._branding import (
-    get_mcp_instructions,
-    get_mcp_server_name,
-)
+from ._branding import get_mcp_instructions, get_mcp_server_name
 
 # Initialize MCP server
 if FASTMCP_AVAILABLE:
@@ -137,7 +134,10 @@ if FASTMCP_AVAILABLE:
                 try:
                     result = subprocess.run(
                         ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-                        capture_output=True, text=True, cwd=cwd, timeout=5,
+                        capture_output=True,
+                        text=True,
+                        cwd=cwd,
+                        timeout=5,
                     )
                     if result.returncode == 0:
                         branch = result.stdout.strip()
@@ -193,11 +193,14 @@ if FASTMCP_AVAILABLE:
             return json.dumps(result, indent=2)
 
         except Exception as e:
-            return json.dumps({
-                "success": False,
-                "error": str(e),
-                "text": text,
-            }, indent=2)
+            return json.dumps(
+                {
+                    "success": False,
+                    "error": str(e),
+                    "text": text,
+                },
+                indent=2,
+            )
 
     @mcp.tool()
     def list_backends() -> str:
@@ -348,11 +351,18 @@ def run_server(
         raise ValueError(f"Unknown transport: {transport}")
 
 
-def run_relay_server(host: Optional[str] = None, port: Optional[int] = None) -> None:
+def run_relay_server(
+    host: Optional[str] = None, port: Optional[int] = None, force: bool = False
+) -> None:
     """Run HTTP relay server for remote audio playback.
 
     This exposes simple REST endpoints that remote agents can connect to.
     Unlike the MCP server, this uses standard HTTP POST/GET.
+
+    Args:
+        host: Host to bind to (default: 0.0.0.0)
+        port: Port to listen on (default: 31293)
+        force: If True, kill any existing process using the port
 
     Endpoints:
         POST /speak - Speak text
@@ -363,6 +373,11 @@ def run_relay_server(host: Optional[str] = None, port: Optional[int] = None) -> 
 
     host = host or DEFAULT_HOST
     port = port or DEFAULT_PORT
+
+    if force:
+        from ._utils import kill_process_on_port
+
+        kill_process_on_port(port)
 
     try:
         from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -434,12 +449,14 @@ def run_relay_server(host: Optional[str] = None, port: Optional[int] = None) -> 
                     finally:
                         lock.release()
 
-                    self._send_json({
-                        "success": True,
-                        "text": data.get("text", ""),
-                        "played": True,
-                        "timestamp": datetime.now().isoformat(),
-                    })
+                    self._send_json(
+                        {
+                            "success": True,
+                            "text": data.get("text", ""),
+                            "played": True,
+                            "timestamp": datetime.now().isoformat(),
+                        }
+                    )
                 except Exception as e:
                     self._send_json({"success": False, "error": str(e)}, 500)
             else:
