@@ -30,6 +30,7 @@ def get_dashboard_html() -> str:
                 <span class="last-updated" id="lastUpdated">Loading...</span>
             </div>
             <div class="actions">
+                <button class="btn-secondary" onclick="copyResults()">Copy</button>
                 <button class="btn-secondary" onclick="exportJSON()">Export JSON</button>
                 <button class="btn-secondary" id="autoRefreshBtn" onclick="cycleAutoRefresh()">Auto: Off</button>
                 <button class="btn-primary" onclick="refreshData()">Refresh</button>

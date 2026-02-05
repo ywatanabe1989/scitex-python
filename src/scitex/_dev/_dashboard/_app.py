@@ -43,11 +43,60 @@ def create_app() -> Flask:
     return app
 
 
+def _kill_process_on_port(port: int) -> None:
+    """Kill any process using the specified port.
+
+    Parameters
+    ----------
+    port : int
+        Port number to free up.
+    """
+    import subprocess
+    import sys
+
+    try:
+        if sys.platform == "win32":
+            # Windows: use netstat and taskkill
+            result = subprocess.run(
+                ["netstat", "-ano"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            for line in result.stdout.splitlines():
+                if f":{port}" in line and "LISTENING" in line:
+                    pid = line.strip().split()[-1]
+                    subprocess.run(
+                        ["taskkill", "/F", "/PID", pid],
+                        capture_output=True,
+                        check=False,
+                    )
+                    print(f"Killed process {pid} on port {port}")
+        else:
+            # Unix: use lsof
+            result = subprocess.run(
+                ["lsof", "-ti", f":{port}"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if result.stdout.strip():
+                pids = result.stdout.strip().split("\n")
+                for pid in pids:
+                    subprocess.run(
+                        ["kill", "-9", pid], capture_output=True, check=False
+                    )
+                    print(f"Killed process {pid} on port {port}")
+    except Exception as e:
+        print(f"Warning: Could not kill process on port {port}: {e}")
+
+
 def run_dashboard(
     host: str = "127.0.0.1",
     port: int = 5000,
     debug: bool = False,
     open_browser: bool = True,
+    force: bool = False,
 ) -> None:
     """Run the Flask dashboard server.
 
@@ -61,7 +110,12 @@ def run_dashboard(
         Enable Flask debug mode.
     open_browser : bool
         Open browser automatically.
+    force : bool
+        Kill existing process using the port if any.
     """
+    if force:
+        _kill_process_on_port(port)
+
     app = create_app()
 
     url = f"http://{host}:{port}"

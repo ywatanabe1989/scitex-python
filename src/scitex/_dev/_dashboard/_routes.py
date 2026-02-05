@@ -97,9 +97,17 @@ def register_routes(app: Flask) -> None:
         try:
             packages = request.args.getlist("package") or None
             hosts = request.args.getlist("host") or None
+            from .._config import get_enabled_hosts, load_config
             from .._ssh import check_all_hosts
 
-            data = check_all_hosts(packages=packages, hosts=hosts)
+            config = load_config()
+            data = check_all_hosts(packages=packages, hosts=hosts, config=config)
+
+            # Add host metadata (hostname/IP) for display
+            enabled_hosts = get_enabled_hosts(config)
+            data["_meta"] = {
+                h.name: {"hostname": h.hostname, "role": h.role} for h in enabled_hosts
+            }
             return jsonify(data)
         except Exception as e:
             return jsonify({"error": str(e)}), 500

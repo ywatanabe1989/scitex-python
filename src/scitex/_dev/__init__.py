@@ -100,6 +100,7 @@ def run_dashboard(
     port: int = 5000,
     debug: bool = False,
     open_browser: bool = True,
+    force: bool = False,
 ) -> None:
     """Run the Flask version dashboard.
 
@@ -113,10 +114,12 @@ def run_dashboard(
         Enable debug mode.
     open_browser : bool
         Open browser automatically.
+    force : bool
+        Kill existing process using the port if any.
     """
     from ._dashboard import run_dashboard as _run
 
-    _run(host=host, port=port, debug=debug, open_browser=open_browser)
+    _run(host=host, port=port, debug=debug, open_browser=open_browser, force=force)
 
 
 # EOF

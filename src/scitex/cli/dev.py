@@ -373,7 +373,8 @@ def list_python_apis(ctx, verbose, max_depth, as_json):
 @click.option("--port", "-p", default=5000, type=int, help="Port to listen on")
 @click.option("--debug", is_flag=True, help="Enable debug mode")
 @click.option("--no-browser", is_flag=True, help="Don't open browser")
-def dashboard(host, port, debug, no_browser):
+@click.option("--force", is_flag=True, help="Kill existing process using the port")
+def dashboard(host, port, debug, no_browser, force):
     """
     Start the Flask version dashboard.
 
@@ -382,10 +383,13 @@ def dashboard(host, port, debug, no_browser):
       scitex dev dashboard              # Start on localhost:5000
       scitex dev dashboard --port 5001  # Custom port
       scitex dev dashboard --no-browser # Don't open browser
+      scitex dev dashboard --force      # Kill existing and restart
     """
     from scitex._dev import run_dashboard
 
-    run_dashboard(host=host, port=port, debug=debug, open_browser=not no_browser)
+    run_dashboard(
+        host=host, port=port, debug=debug, open_browser=not no_browser, force=force
+    )
 
 
 # Config subgroup

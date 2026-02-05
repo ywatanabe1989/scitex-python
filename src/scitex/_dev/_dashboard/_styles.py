@@ -137,6 +137,13 @@ button {
     margin-bottom: 8px;
     text-transform: uppercase;
 }
+.host-ip {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    font-weight: normal;
+    text-transform: none;
+}
 .version-item { display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.9rem; }
 .version-item .key { color: var(--text-secondary); }
 .version-item .value { font-family: monospace; }
@@ -288,6 +295,36 @@ button {
 .version-section h4 a:hover {
     color: var(--accent);
     text-decoration: underline;
+}
+/* Source mini-badges */
+.source-badges {
+    display: flex;
+    gap: 4px;
+    margin-left: 8px;
+}
+.source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+.source-badge.src-ok { background: rgba(74, 222, 128, 0.25); color: var(--success); }
+.source-badge.src-warn { background: rgba(251, 191, 36, 0.25); color: var(--warning); }
+.source-badge.src-error { background: rgba(248, 113, 113, 0.25); color: var(--error); }
+.source-badge.src-loading { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
+.source-badge.src-na { background: rgba(156, 163, 175, 0.15); color: #6b7280; }
+/* Loading indicator in cells */
+.loading-cell {
+    opacity: 0.6;
+}
+.loading-cell .value {
+    color: var(--text-secondary);
+    font-style: italic;
 }
 """
 
