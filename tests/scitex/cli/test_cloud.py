@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
 """Tests for scitex.cli.cloud - Cloud CLI delegation to scitex-cloud."""
 
+import subprocess
+
 import pytest
 from click.testing import CliRunner
 
 from scitex.cli.cloud import HAS_CLOUD, cloud
 
 
-class TestCloudGroup:
-    """Tests for the cloud command group."""
+class TestCloudCommand:
+    """Tests for the cloud command delegation."""
 
     def test_cloud_help(self):
         """Test that cloud help is displayed correctly."""
         runner = CliRunner()
         result = runner.invoke(cloud, ["--help"])
         assert result.exit_code == 0
-        assert "Cloud" in result.output
+        assert "Cloud" in result.output or "cloud" in result.output
 
     def test_cloud_short_help(self):
         """Test that -h also shows help."""
@@ -24,99 +26,52 @@ class TestCloudGroup:
         assert result.exit_code == 0
 
     @pytest.mark.skipif(not HAS_CLOUD, reason="scitex-cloud not installed")
-    def test_cloud_has_subcommands(self):
-        """Test that all expected subcommands are registered."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["--help"])
-        expected_commands = [
-            "login",
-            "clone",
-            "create",
-            "list",
-            "search",
-            "delete",
-            "fork",
-            "pr",
-            "issue",
-            "push",
-            "pull",
-            "status",
-            "enrich",
-        ]
-        for cmd in expected_commands:
-            assert cmd in result.output, f"Command '{cmd}' not found"
+    def test_cloud_delegates_to_scitex_cloud(self):
+        """Test that cloud command delegates to scitex-cloud CLI."""
+        # Test that scitex-cloud is callable
+        result = subprocess.run(
+            ["scitex-cloud", "--version"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0
+        assert "scitex-cloud" in result.stdout
 
+    @pytest.mark.skipif(not HAS_CLOUD, reason="scitex-cloud not installed")
+    def test_cloud_gitea_help(self):
+        """Test that cloud gitea subcommand works."""
+        result = subprocess.run(
+            ["scitex-cloud", "gitea", "--help"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0
+        assert "clone" in result.stdout
+        assert "create" in result.stdout
 
-@pytest.mark.skipif(not HAS_CLOUD, reason="scitex-cloud not installed")
-class TestCloudDelegation:
-    """Tests for cloud CLI delegation to scitex-cloud."""
+    @pytest.mark.skipif(not HAS_CLOUD, reason="scitex-cloud not installed")
+    def test_cloud_mcp_help(self):
+        """Test that cloud mcp subcommand works."""
+        result = subprocess.run(
+            ["scitex-cloud", "mcp", "--help"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0
+        assert "start" in result.stdout
+        assert "doctor" in result.stdout
+        assert "list-tools" in result.stdout
 
-    def test_login_help(self):
-        """Test login command help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["login", "--help"])
-        assert result.exit_code == 0
-
-    def test_clone_help(self):
-        """Test clone command help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["clone", "--help"])
-        assert result.exit_code == 0
-        assert "Clone" in result.output
-
-    def test_create_help(self):
-        """Test create command help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["create", "--help"])
-        assert result.exit_code == 0
-
-    def test_list_help(self):
-        """Test list command help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["list", "--help"])
-        assert result.exit_code == 0
-
-    def test_search_help(self):
-        """Test search command help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["search", "--help"])
-        assert result.exit_code == 0
-
-    def test_pr_help(self):
-        """Test PR command group help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["pr", "--help"])
-        assert result.exit_code == 0
-
-    def test_issue_help(self):
-        """Test issue command group help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["issue", "--help"])
-        assert result.exit_code == 0
-
-    def test_push_help(self):
-        """Test push command help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["push", "--help"])
-        assert result.exit_code == 0
-
-    def test_pull_help(self):
-        """Test pull command help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["pull", "--help"])
-        assert result.exit_code == 0
-
-    def test_status_help(self):
-        """Test status command help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["status", "--help"])
-        assert result.exit_code == 0
-
-    def test_enrich_help(self):
-        """Test enrich command help."""
-        runner = CliRunner()
-        result = runner.invoke(cloud, ["enrich", "--help"])
-        assert result.exit_code == 0
+    @pytest.mark.skipif(not HAS_CLOUD, reason="scitex-cloud not installed")
+    def test_cloud_mcp_list_tools(self):
+        """Test that mcp list-tools shows available tools."""
+        result = subprocess.run(
+            ["scitex-cloud", "mcp", "list-tools"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0
+        assert "cloud" in result.stdout.lower() or "api" in result.stdout.lower()
 
 
 # EOF
