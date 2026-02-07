@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Timestamp: "2026-02-06 23:03:14 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-python/src/scitex/audio/mcp_server.py
+
+
 # Timestamp: 2026-01-15
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/mcp_server.py
-# ----------------------------------------
 
 """
 FastMCP Server for SciTeX Audio - HTTP/SSE Transport Support
@@ -19,8 +22,6 @@ For remote audio:
     3. Remote agent connects to http://localhost:31293
 """
 
-from __future__ import annotations
-
 import json
 from datetime import datetime
 from pathlib import Path
@@ -35,7 +36,13 @@ except ImportError:
     FASTMCP_AVAILABLE = False
     FastMCP = None  # type: ignore
 
-__all__ = ["mcp", "run_server", "run_relay_server", "main", "FASTMCP_AVAILABLE"]
+__all__ = [
+    "mcp",
+    "run_server",
+    "run_relay_server",
+    "main",
+    "FASTMCP_AVAILABLE",
+]
 
 # Import branding
 from ._branding import get_mcp_instructions, get_mcp_server_name
@@ -143,9 +150,10 @@ if FASTMCP_AVAILABLE:
                         branch = result.stdout.strip()
                 except Exception:
                     pass
-                parts = [f"Hostname: {hostname}", f"Project: {project}"]
+
+                parts = [hostname, project]
                 if branch:
-                    parts.append(f"Branch: {branch}")
+                    parts.append(branch)
                 sig = ". ".join(parts) + ". "
                 final_text = sig + text
 
@@ -483,6 +491,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 # EOF

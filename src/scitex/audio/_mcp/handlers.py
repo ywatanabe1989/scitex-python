@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-# Timestamp: "2025-12-27 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_mcp.handlers.py
-# ----------------------------------------
+# -*- coding: utf-8 -*-
+# Timestamp: "2026-02-06 23:02:36 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-python/src/scitex/audio/_mcp/handlers.py
+
 
 """Utility handlers for the scitex-audio MCP server."""
-
-from __future__ import annotations
 
 import asyncio
 import base64
@@ -60,9 +59,9 @@ def _get_signature() -> str:
     except Exception:
         pass
 
-    parts = [f"Hostname: {hostname}", f"Project: {project}"]
+    parts = [hostname, project]
     if branch:
-        parts.append(f"Branch: {branch}")
+        parts.append(branch)
 
     return ". ".join(parts) + ". "
 
