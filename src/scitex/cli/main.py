@@ -32,6 +32,7 @@ from . import (
     dataset,
     dev,
     introspect,
+    linter,
     mcp,
     plt,
     repro,
@@ -90,6 +91,7 @@ cli.add_command(convert.convert)
 cli.add_command(dataset.dataset)
 cli.add_command(dev.dev)
 cli.add_command(introspect.introspect)
+cli.add_command(linter.linter)
 cli.add_command(mcp.mcp)
 cli.add_command(plt.plt)
 cli.add_command(repro.repro)
