@@ -55,6 +55,12 @@ ECOSYSTEM: dict[str, PackageInfo] = {
         "github_repo": "ywatanabe1989/scitex-writer",
         "import_name": "scitex_writer",
     },
+    "scitex-linter": {
+        "local_path": "~/proj/scitex-linter",
+        "pypi_name": "scitex-linter",
+        "github_repo": "ywatanabe1989/scitex-linter",
+        "import_name": "scitex_linter",
+    },
     "scitex-dataset": {
         "local_path": "~/proj/scitex-dataset",
         "pypi_name": "scitex-dataset",

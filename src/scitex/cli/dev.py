@@ -495,4 +495,10 @@ def config_validate():
         click.secho(f"Configuration error: {e}", fg="red")
 
 
+# Register clone command from separate module
+from ._dev_clone import clone
+
+dev.add_command(clone)
+
+
 # EOF

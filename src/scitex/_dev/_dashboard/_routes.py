@@ -26,14 +26,34 @@ def register_routes(app: Flask) -> None:
         except Exception as e:
             return get_error_html(str(e)), 500
 
+    @app.route("/json")
     @app.route("/api/versions")
     def api_versions():
-        """Get version data as JSON."""
+        """Get version data as JSON (also available at /json)."""
         try:
             data = _get_all_version_data()
             return jsonify(data)
         except Exception as e:
             return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/ecosystem")
+    def api_ecosystem():
+        """Get ecosystem registry (repos, paths, clone URLs) for AI agents."""
+        from .._ecosystem import ECOSYSTEM
+
+        repos = []
+        for name, info in ECOSYSTEM.items():
+            repos.append(
+                {
+                    "name": name,
+                    "github_repo": info["github_repo"],
+                    "clone_url": f"git@github.com:{info['github_repo']}.git",
+                    "local_path": info["local_path"],
+                    "pypi_name": info.get("pypi_name", name),
+                    "import_name": info.get("import_name", ""),
+                }
+            )
+        return jsonify({"ecosystem": repos})
 
     @app.route("/api/packages")
     def api_packages():
