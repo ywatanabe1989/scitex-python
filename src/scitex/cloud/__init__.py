@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: 2026-02-05
 # File: scitex/cloud/__init__.py
 
@@ -21,6 +20,12 @@ Example:
 
 from __future__ import annotations
 
+import os as _os
+
+# Set branding BEFORE importing scitex-cloud
+_os.environ.setdefault("SCITEX_CLOUD_BRAND", "scitex.cloud")
+_os.environ.setdefault("SCITEX_CLOUD_ALIAS", "cloud")
+
 __all__ = [
     "get_version",
     "health_check",
@@ -31,7 +36,6 @@ AVAILABLE = False
 _import_error_msg = None
 
 try:
-    from scitex_cloud import __version__ as _cloud_version
     from scitex_cloud import get_version, health_check
 
     AVAILABLE = True

@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 # Timestamp: "2026-01-19 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/__init__.py
-# ----------------------------------------
 """
 SciTeX plt module - Publication-quality plotting via figrecipe.
-
-This module provides a thin wrapper around figrecipe with scitex branding.
-Simply importing this module automatically configures matplotlib with
-SciTeX publication defaults.
 
 Usage
 -----
@@ -15,37 +10,23 @@ Usage
 >>> fig, ax = plt.subplots()
 >>> ax.plot([1, 2, 3], [1, 4, 9])
 >>> plt.save(fig, "figure.png")
-
-Style Management
-----------------
->>> plt.load_style("SCITEX")  # Load publication style
->>> plt.STYLE  # Access current style configuration
->>> plt.list_presets()  # Show available presets
-
-The module delegates to figrecipe for:
-- Recording and reproducing figures
-- Style management (mm-based layouts)
-- Figure composition
-- Graph visualization
-
-SciTeX-specific features (kept locally):
-- AxisWrapper/FigWrapper compatibility
-- Color palettes (scitex.plt.color)
-- Gallery utilities (scitex.plt.gallery)
 """
 
 import os
 
-# ============================================================================
-# Set branding environment variables BEFORE importing figrecipe
-# This enables automatic docstring replacement: figrecipe -> scitex.plt, fr -> plt
-# ============================================================================
+# Set branding BEFORE importing figrecipe
 os.environ.setdefault("FIGRECIPE_BRAND", "scitex.plt")
 os.environ.setdefault("FIGRECIPE_ALIAS", "plt")
 
-# ============================================================================
-# Now import figrecipe (branding will be applied)
-# ============================================================================
+# Map SCITEX_PLT_* → FIGRECIPE_* (user-facing prefix takes priority)
+_ENV_MAPPINGS = [
+    ("SCITEX_PLT_DEBUG_MODE", "FIGRECIPE_DEBUG_MODE"),
+    ("SCITEX_PLT_DEV_REPRESENTATIVE_PLOTS", "FIGRECIPE_DEV_REPRESENTATIVE_PLOTS"),
+]
+for _stx_key, _fr_key in _ENV_MAPPINGS:
+    _val = os.environ.get(_stx_key) or os.environ.get(_fr_key)
+    if _val:
+        os.environ[_fr_key] = _val
 try:
     import figrecipe as _fr
 
