@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-29 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/template/_clone_project.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/template/_clone_project.py"
@@ -24,14 +24,14 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
-from scitex.logging import getLogger
 import scitex.git
+from scitex.logging import getLogger
 
 from ._copy import copy_template
-from ._rename import rename_package_directories
 from ._customize import update_references
 from ._git_strategy import apply_git_strategy, remove_template_git
-from ._logging_helpers import log_group, log_step, log_final
+from ._logging_helpers import log_final, log_group
+from ._rename import rename_package_directories
 
 logger = getLogger(__name__)
 
@@ -43,6 +43,7 @@ def clone_project(
     git_strategy: Optional[str] = "child",
     branch: Optional[str] = None,
     tag: Optional[str] = None,
+    use_cache: bool = True,
 ) -> bool:
     """
     Create a project from a template repository.
@@ -75,6 +76,9 @@ def clone_project(
     tag : str, optional
         Specific tag/release of the template repository to clone. If None, clones the default branch.
         Mutually exclusive with branch parameter.
+    use_cache : bool, optional
+        Use cached template from ~/.scitex/templates/ if available. Default True.
+        Set to False to force fresh git clone.
 
     Returns
     -------
@@ -107,32 +111,56 @@ def clone_project(
             target_dir_path.mkdir(parents=True, exist_ok=True)
             ctx.step(f"Target directory: {target_dir_path}")
 
-            # Create temporary directory for cloning
-            with tempfile.TemporaryDirectory() as temp_dir:
-                temp_path = Path(temp_dir) / "template"
+            # Determine cache location
+            from scitex.config import get_scitex_dir
 
-                ref_info = ""
-                if branch:
-                    ref_info = f" (branch: {branch})"
-                elif tag:
-                    ref_info = f" (tag: {tag})"
+            cache_dir = get_scitex_dir() / "templates"
+            cache_name = template_name.replace("/", "_").replace(":", "_")
+            cache_path = cache_dir / cache_name
 
-                # Clone the template repository
-                ctx.substep(f"Cloning from {template_url}{ref_info}...")
-                if not scitex.git.clone_repo(
-                    template_url, temp_path, branch=branch, tag=tag, verbose=False
-                ):
-                    ctx.step(f"Failed to clone to {target_path}", success=False)
-                    return False
-                ctx.step(f"Cloned to {target_path}")
+            # Check cache first if enabled
+            import shutil
 
-                # Handle git directory based on strategy
-                if git_strategy != "origin":
-                    remove_template_git(temp_path)
+            if use_cache and cache_path.exists():
+                ctx.step(f"Using cached template: {cache_path}")
+                # Copy from cache (don't modify cache directly)
+                copy_template(cache_path, target_path, quiet=True)
+                ctx.step("Copied from cache")
+            else:
+                # Clone fresh from git
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    temp_path = Path(temp_dir) / "template"
 
-                # Copy template to target location
-                copy_template(temp_path, target_path, quiet=True)
-                ctx.step("Copied template files")
+                    ref_info = ""
+                    if branch:
+                        ref_info = f" (branch: {branch})"
+                    elif tag:
+                        ref_info = f" (tag: {tag})"
+
+                    # Clone the template repository
+                    ctx.substep(f"Cloning from {template_url}{ref_info}...")
+                    if not scitex.git.clone_repo(
+                        template_url, temp_path, branch=branch, tag=tag, verbose=False
+                    ):
+                        ctx.step(f"Failed to clone to {target_path}", success=False)
+                        return False
+                    ctx.step("Cloned template")
+
+                    # Cache the template if caching enabled (before removing .git)
+                    if use_cache:
+                        cache_dir.mkdir(parents=True, exist_ok=True)
+                        if cache_path.exists():
+                            shutil.rmtree(cache_path)
+                        shutil.copytree(temp_path, cache_path, symlinks=True)
+                        ctx.substep(f"Cached to {cache_path}")
+
+                    # Handle git directory based on strategy
+                    if git_strategy != "origin":
+                        remove_template_git(temp_path)
+
+                    # Copy template to target location
+                    copy_template(temp_path, target_path, quiet=True)
+                    ctx.step("Copied template files")
 
         # Customize template for project
         with log_group("Customizing template", "🔧") as ctx:
@@ -152,8 +180,8 @@ def clone_project(
         logger.info("Next steps:")
         logger.info(f"  cd {target_path}")
         if git_strategy == "child":
-            logger.info(f"  # Edit your manuscript in 01_manuscript/contents/")
-            logger.info(f"  scitex writer compile manuscript")
+            logger.info("  # Edit your manuscript in 01_manuscript/contents/")
+            logger.info("  scitex writer compile manuscript")
 
         return True
 
