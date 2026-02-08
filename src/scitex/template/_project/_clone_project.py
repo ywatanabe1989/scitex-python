@@ -27,11 +27,11 @@ from typing import Optional
 import scitex.git
 from scitex.logging import getLogger
 
-from ._copy import copy_template
-from ._customize import update_references
-from ._git_strategy import apply_git_strategy, remove_template_git
-from ._logging_helpers import log_final, log_group
-from ._rename import rename_package_directories
+from .._utils._copy import copy_template
+from .._utils._customize import update_references
+from .._utils._git_strategy import apply_git_strategy, remove_template_git
+from .._utils._logging_helpers import log_final, log_group
+from .._utils._rename import rename_package_directories
 
 logger = getLogger(__name__)
 
