@@ -133,25 +133,7 @@ async def clone_template_handler(
         Success status and project path
     """
     try:
-        # Map template_id to clone function
-        clone_functions = {
-            "research": "clone_research",
-            "pip_project": "clone_pip_project",
-            "singularity": "clone_singularity",
-            "paper_directory": "clone_writer_directory",
-        }
-
-        if template_id not in clone_functions:
-            return {
-                "success": False,
-                "error": f"Unknown template: {template_id}",
-                "available_templates": list(clone_functions.keys()),
-            }
-
-        # Import the specific clone function
-        import scitex.template as template_module
-
-        clone_func = getattr(template_module, clone_functions[template_id])
+        from scitex.template import clone_template as _clone_template
 
         # Build project path
         if target_dir:
@@ -164,15 +146,22 @@ async def clone_template_handler(
 
         # Run clone in executor (blocking operation)
         loop = asyncio.get_event_loop()
-        success = await loop.run_in_executor(
-            None,
-            lambda: clone_func(
-                project_dir=project_path,
-                git_strategy=git_strat,
-                branch=branch,
-                tag=tag,
-            ),
-        )
+        try:
+            success = await loop.run_in_executor(
+                None,
+                lambda: _clone_template(
+                    template_id=template_id,
+                    project_dir=project_path,
+                    git_strategy=git_strat,
+                    branch=branch,
+                    tag=tag,
+                ),
+            )
+        except ValueError as e:
+            return {
+                "success": False,
+                "error": str(e),
+            }
 
         if success:
             # Resolve the actual path

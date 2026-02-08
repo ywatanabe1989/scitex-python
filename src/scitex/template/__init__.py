@@ -18,6 +18,7 @@ from ._code._code_templates import (
     get_code_template,
     list_code_templates,
 )
+from ._project._clone_template import clone_template
 from ._project.clone_pip_project import TEMPLATE_REPO_URL as PIP_PROJECT_URL
 from ._project.clone_pip_project import clone_pip_project
 from ._project.clone_research import TEMPLATE_REPO_URL as RESEARCH_URL
@@ -128,6 +129,7 @@ def get_available_templates_info():
 
 
 __all__ = [
+    "clone_template",
     "clone_research",
     "clone_research_minimal",
     "clone_pip_project",
