@@ -47,12 +47,39 @@ class _LazyModule:
             self._module = importlib.import_module(f".{self._name}", package="scitex")
         return self._module
 
+    def _warn_missing(self):
+        warnings.warn(
+            f"scitex.{self._name} requires additional dependencies. "
+            f"Install with: pip install scitex[{self._name}]",
+            UserWarning,
+            stacklevel=3,
+        )
+
     def __getattr__(self, attr):
-        return getattr(self._load_module(), attr)
+        try:
+            return getattr(self._load_module(), attr)
+        except (ImportError, ModuleNotFoundError):
+            self._module = None  # Reset so next attempt retries
+            raise ImportError(
+                f"scitex.{self._name} requires additional dependencies. "
+                f"Install with: pip install scitex[{self._name}]"
+            ) from None
 
     def __dir__(self):
         """Return dir of the actual module for tab completion."""
-        return dir(self._load_module())
+        try:
+            members = dir(self._load_module())
+        except (ImportError, ModuleNotFoundError):
+            self._module = None  # Reset so next attempt retries
+            self._warn_missing()
+            return []
+        # Detect broken modules stuck in sys.modules (only have dunder attrs)
+        public = [m for m in members if not m.startswith("_")]
+        if not public:
+            self._module = None
+            self._warn_missing()
+            return []
+        return members
 
     def __repr__(self):
         if self._module is None:
@@ -202,6 +229,7 @@ bridge = _LazyModule("bridge")  # Bridge utilities
 browser = _LazyModule("browser")  # Browser automation
 compat = _LazyModule("compat")  # Compatibility utilities
 cli = _LazyModule("cli")  # Command-line interface
+linter = _LazyModule("linter")  # AST-based linter (delegates to scitex-linter)
 
 
 # BACKWARD COMPATIBILITY: Module-level __getattr__ for deprecated attributes

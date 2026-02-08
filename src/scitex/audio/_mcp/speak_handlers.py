@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Timestamp: "2026-02-06 23:02:43 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-python/src/scitex/audio/_mcp/speak_handlers.py
+
 """Speak handlers for scitex.audio MCP server.
 
 Provides speak_local_handler and speak_relay_handler for explicit control
 over audio playback location (server vs relay).
 """
-
-from __future__ import annotations
 
 import asyncio
 import os
@@ -54,9 +56,9 @@ def _get_signature() -> str:
     except Exception:
         pass
 
-    parts = [f"Hostname: {hostname}", f"Project: {project}"]
+    parts = [hostname, project]
     if branch:
-        parts.append(f"Branch: {branch}")
+        parts.append(branch)
 
     return ". ".join(parts) + ". "
 

@@ -40,6 +40,8 @@ async def crossref_search_handler(
     year_min: int | None = None,
     year_max: int | None = None,
     enrich: bool = False,
+    save_path: str | None = None,
+    save_format: str = "json",
 ) -> dict:
     """Search CrossRef database (167M+ papers) via crossref-local.
 
@@ -50,6 +52,8 @@ async def crossref_search_handler(
         year_min: Minimum publication year filter
         year_max: Maximum publication year filter
         enrich: If True, add citation counts and references
+        save_path: Optional file path to save results (e.g., "results.json", "papers.bib")
+        save_format: Output format for save_path: "text", "json", or "bibtex" (default: "json")
     """
     try:
         crossref = _ensure_crossref()
@@ -91,11 +95,21 @@ async def crossref_search_handler(
                 if len(papers) >= limit:
                     break
 
-            return papers, results.total
+            return papers, results.total, results
 
-        papers, total = await loop.run_in_executor(None, do_search)
+        papers, total, search_results = await loop.run_in_executor(None, do_search)
 
-        return {
+        # Save to file if requested
+        saved_path = None
+        if save_path:
+            try:
+                from crossref_local import save as cr_save
+
+                saved_path = cr_save(search_results, save_path, format=save_format)
+            except Exception as e:
+                return {"success": False, "error": f"Failed to save: {e}"}
+
+        result = {
             "success": True,
             "query": query,
             "total": total,
@@ -107,6 +121,11 @@ async def crossref_search_handler(
             "timestamp": datetime.now().isoformat(),
         }
 
+        if saved_path:
+            result["saved_to"] = saved_path
+
+        return result
+
     except Exception as e:
         return {"success": False, "error": str(e)}
 
@@ -115,6 +134,8 @@ async def crossref_get_handler(
     doi: str,
     include_citations: bool = False,
     include_references: bool = False,
+    save_path: str | None = None,
+    save_format: str = "json",
 ) -> dict:
     """Get a paper by DOI from CrossRef database.
 
@@ -122,6 +143,8 @@ async def crossref_get_handler(
         doi: DOI of the paper
         include_citations: Include list of citing DOIs
         include_references: Include list of referenced DOIs
+        save_path: Optional file path to save result (e.g., "paper.json", "paper.bib")
+        save_format: Output format for save_path: "text", "json", or "bibtex" (default: "json")
     """
     try:
         crossref = _ensure_crossref()
@@ -130,7 +153,7 @@ async def crossref_get_handler(
         def do_get():
             work = crossref.get(doi)
             if not work:
-                return None
+                return None, None
 
             result = {
                 "doi": work.doi,
@@ -152,9 +175,9 @@ async def crossref_get_handler(
             if include_references:
                 result["referenced_dois"] = crossref.get_cited(doi)
 
-            return result
+            return result, work
 
-        result = await loop.run_in_executor(None, do_get)
+        result, work_obj = await loop.run_in_executor(None, do_get)
 
         if result is None:
             return {
@@ -163,12 +186,27 @@ async def crossref_get_handler(
                 "doi": doi,
             }
 
-        return {
+        # Save to file if requested
+        saved_path = None
+        if save_path and work_obj:
+            try:
+                from crossref_local import save as cr_save
+
+                saved_path = cr_save(work_obj, save_path, format=save_format)
+            except Exception as e:
+                return {"success": False, "error": f"Failed to save: {e}"}
+
+        response = {
             "success": True,
             "paper": result,
             "source": "crossref_local",
             "timestamp": datetime.now().isoformat(),
         }
+
+        if saved_path:
+            response["saved_to"] = saved_path
+
+        return response
 
     except Exception as e:
         return {"success": False, "error": str(e)}

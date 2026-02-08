@@ -262,13 +262,12 @@ def verify_chain_cmd(target_file, verbose, mermaid, as_json):
 @click.option("--session", "-s", help="Session ID to visualize")
 @click.option("--file", "-f", "target_file", help="Target file to trace chain")
 @click.option("--title", "-t", default="Verification DAG", help="Title for output")
-@click.option("--plotly", "-p", is_flag=True, help="Use Plotly (interactive)")
-def render_cmd(output_path, session, target_file, title, plotly):
+def render_cmd(output_path, session, target_file, title):
     """
     Render verification DAG to file (HTML, PNG, SVG, or Mermaid).
 
     The output format is determined by the file extension:
-    - .html: Interactive HTML (Mermaid.js or Plotly with --plotly)
+    - .html: Interactive HTML with Mermaid.js
     - .png: PNG image
     - .svg: SVG image
     - .mmd: Raw Mermaid code
@@ -276,7 +275,6 @@ def render_cmd(output_path, session, target_file, title, plotly):
     \b
     Examples:
       scitex verify render dag.html --file ./results/fig.png
-      scitex verify render dag.html --file ./results/fig.png --plotly
       scitex verify render dag.png --session 2025Y-11M-18D-09h12m03s
     """
     try:
@@ -284,24 +282,14 @@ def render_cmd(output_path, session, target_file, title, plotly):
             click.secho("Error: Specify --session or --file", fg="red", err=True)
             sys.exit(1)
 
-        if plotly:
-            from scitex.verify import render_plotly_dag
+        from scitex.verify import render_dag
 
-            result_path = render_plotly_dag(
-                output_path=output_path,
-                session_id=session,
-                target_file=target_file,
-                title=title,
-            )
-        else:
-            from scitex.verify import render_dag
-
-            result_path = render_dag(
-                output_path=output_path,
-                session_id=session,
-                target_file=target_file,
-                title=title,
-            )
+        result_path = render_dag(
+            output_path=output_path,
+            session_id=session,
+            target_file=target_file,
+            title=title,
+        )
         click.secho(f"Rendered to: {result_path}", fg="green")
 
     except Exception as e:
@@ -433,25 +421,34 @@ def mcp(ctx):
 
 
 @mcp.command("list-tools")
-def list_tools():
-    """
-    List available MCP tools for verification.
-
-    \b
-    Example:
-      scitex verify mcp list-tools
-    """
+@click.option("-v", "--verbose", count=True, help="-v params, -vv returns")
+def list_tools(verbose):
+    """List available MCP tools for verification."""
     click.secho("Verify MCP Tools", fg="cyan", bold=True)
     click.echo()
+    # (name, desc, params, returns)
     tools = [
-        ("verify_list", "List all tracked runs with verification status"),
-        ("verify_run", "Verify a specific session run"),
-        ("verify_chain", "Verify dependency chain for a target file"),
-        ("verify_status", "Show verification status (like git status)"),
-        ("verify_stats", "Show database statistics"),
+        ("verify_list", "List tracked runs", "limit=50, status_filter=None", "JSON"),
+        ("verify_run", "Verify a session run", "session_or_path: str", "JSON"),
+        ("verify_chain", "Verify dependency chain", "target_file: str", "JSON"),
+        ("verify_status", "Show status (like git status)", "", "JSON"),
+        ("verify_stats", "Show database statistics", "", "JSON"),
+        (
+            "verify_mermaid",
+            "Generate Mermaid DAG",
+            "session_id=None, target_file=None",
+            "str",
+        ),
     ]
-    for name, desc in tools:
-        click.echo(f"  {name}: {desc}")
+    for name, desc, params, returns in tools:
+        click.secho(f"  {name}", fg="green", bold=True, nl=False)
+        click.echo(f": {desc}")
+        if verbose >= 1 and params:
+            click.echo(f"    params: {params}")
+        if verbose >= 2:
+            click.echo(f"    returns: {returns}")
+        if verbose >= 1:
+            click.echo()
 
 
 @verify.command("list-python-apis")

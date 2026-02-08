@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 # Import templates from subdirectory
-from ._templates import CODE_TEMPLATES
+from .templates import CODE_TEMPLATES
 
 
 def get_code_template(

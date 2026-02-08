@@ -1,20 +1,61 @@
 <!-- ---
-!-- Timestamp: 2025-12-11 08:04:57
+!-- Timestamp: 2026-02-04 05:42:05
 !-- Author: ywatanabe
-!-- File: /home/ywatanabe/proj/scitex-code/CLAUDE.md
+!-- File: /home/ywatanabe/proj/scitex-python/CLAUDE.md
 !-- --- -->
 
+## Workflow Orchestration
 
-Use voice with MCP scitex.audio with x1.5 speed with gTTS
+### 1. Plan Mode Default
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan immediately – don't keep pushing
+- Use plan mode for verification steps, not just building
+- Write detailed specs upfront to reduce ambiguity
 
-## Word and TeX
-You can use them for development and tests
-  /home/ywatanabe/proj/scitex-code/docs/MSWORD_MANUSCTIPS:
-  drwxr-xr-x  3 ywatanabe ywatanabe 4.0K Dec 11 06:46 .
-  drwxr-xr-x 10 ywatanabe ywatanabe 4.0K Dec 11 06:38 ..
-  drwxr-xr-x  3 ywatanabe ywatanabe 4.0K Dec 11 06:49 converted_tex
-  -rwxr-xr-x  1 ywatanabe ywatanabe  93K Dec 11 06:39 ijerph-template.dot
-  -rwxr-xr-x  1 ywatanabe ywatanabe  35K Dec 11 06:37 IOP-SCIENCE-Word-template-Double-anonymous.docx
-  -rwxr-xr-x  1 ywatanabe ywatanabe  62K Dec 11 06:42 RESNA 2025 Scientific Paper Template.docx
+### 2. Subagent Strategy
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- For complex problems, throw more compute at it via subagents
+- One task per subagent for focused execution
+
+### 3. Self-Improvement Loop
+- After ANY correction from the user: update `GITIGNORED/tasks/lessons.md` with the pattern
+- Write rules for yourself that prevent the same mistake
+- Ruthlessly iterate on these lessons until mistake rate drops
+- Review lessons at session start for relevant project
+
+### 4. Verification Before Done
+- Never mark a task complete without proving it works
+- Diff behavior between main and your changes when relevant
+- Ask yourself: "Would a staff engineer approve this?"
+- Run tests, check logs, demonstrate correctness
+
+### 5. Demand Elegance (Balanced)
+- For non-trivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
+- Skip this for simple, obvious fixes – don't over-engineer
+- Challenge your own work before presenting it
+
+### 6. Autonomous Bug Fixing
+- When given a bug report: just fix it. Don't ask for hand-holding
+- Point at logs, errors, failing tests – then resolve them
+- Zero context switching required from the user
+- Go fix failing CI tests without being told how
+
+## Task Management
+
+1. **Plan First:** Write plan to `GITIGNORED/tasks/todo.md` with checkable items
+2. **Verify Plan:** Check in before starting implementation
+3. **Track Progress:** Mark items complete as you go
+4. **Explain Changes:** High-level summary at each step
+5. **Document Results:** Add review section to `GITIGNORED/tasks/todo.md`
+6. **Capture Lessons:** Update `GITIGNORED/tasks/lessons.md` after corrections
+
+## Core Principles
+
+- **Simplicity First:** Make every change as simple as possible. Impact minimal code.
+- **No Laziness:** Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact:** Changes should only touch what's necessary. Avoid introducing bugs.
+- 
 
 <!-- EOF -->

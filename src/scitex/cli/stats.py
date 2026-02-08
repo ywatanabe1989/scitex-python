@@ -438,30 +438,58 @@ def doctor():
 
 
 @mcp.command("list-tools")
-def list_tools():
-    """
-    List available MCP tools
-
-    \b
-    Example:
-      scitex stats mcp list-tools
-    """
+@click.option("-v", "--verbose", count=True, help="-v params, -vv returns")
+def list_tools(verbose):
+    """List available MCP tools for statistics."""
     click.secho("Stats MCP Tools", fg="cyan", bold=True)
     click.echo()
+    # (name, desc, params, returns)
     tools = [
-        ("stats_recommend_tests", "Recommend appropriate statistical tests"),
-        ("stats_run_test", "Execute a statistical test on data"),
-        ("stats_format_results", "Format results in journal style"),
-        ("stats_power_analysis", "Calculate power or sample size"),
-        ("stats_correct_pvalues", "Apply multiple comparison correction"),
-        ("stats_describe", "Calculate descriptive statistics"),
-        ("stats_effect_size", "Calculate effect size"),
-        ("stats_normality_test", "Test for normal distribution"),
-        ("stats_posthoc_test", "Run post-hoc pairwise comparisons"),
-        ("stats_p_to_stars", "Convert p-value to significance stars"),
+        (
+            "recommend_tests",
+            "Recommend statistical tests",
+            "data_description: str",
+            "JSON",
+        ),
+        (
+            "run_test",
+            "Execute a statistical test",
+            "test_name: str, data: list",
+            "JSON",
+        ),
+        ("format_results", "Format results in journal style", "results: dict", "str"),
+        (
+            "power_analysis",
+            "Calculate power or sample size",
+            "test: str, effect=0.5",
+            "JSON",
+        ),
+        (
+            "correct_pvalues",
+            "Apply multiple comparison correction",
+            "pvalues: list",
+            "JSON",
+        ),
+        ("describe", "Calculate descriptive statistics", "data: list", "JSON"),
+        ("effect_size", "Calculate effect size", "group1: list, group2: list", "JSON"),
+        ("normality_test", "Test for normal distribution", "data: list", "JSON"),
+        ("posthoc_test", "Run post-hoc pairwise comparisons", "groups: list", "JSON"),
+        (
+            "p_to_stars",
+            "Convert p-value to significance stars",
+            "p_value: float",
+            "str",
+        ),
     ]
-    for name, desc in tools:
-        click.echo(f"  {name}: {desc}")
+    for name, desc, params, returns in tools:
+        click.secho(f"  stats_{name}", fg="green", bold=True, nl=False)
+        click.echo(f": {desc}")
+        if verbose >= 1 and params:
+            click.echo(f"    params: {params}")
+        if verbose >= 2:
+            click.echo(f"    returns: {returns}")
+        if verbose >= 1:
+            click.echo()
 
 
 @stats.command("list-python-apis")

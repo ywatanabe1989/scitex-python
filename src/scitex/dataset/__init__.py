@@ -15,6 +15,12 @@ Usage:
     >>> results = dataset.db.search("alzheimer EEG")
 """
 
+import os as _os
+
+# Set branding BEFORE importing scitex-dataset
+_os.environ.setdefault("SCITEX_DATASET_BRAND", "scitex.dataset")
+_os.environ.setdefault("SCITEX_DATASET_ALIAS", "dataset")
+
 try:
     from scitex_dataset import (
         OPENNEURO_API,

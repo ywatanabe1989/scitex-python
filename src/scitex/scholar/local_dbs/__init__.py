@@ -20,11 +20,15 @@ Usage:
 
 from __future__ import annotations
 
-from . import crossref_scitex, openalex_scitex
+from . import crossref_scitex, openalex_scitex, unified
+from .export import SUPPORTED_FORMATS, save
 
 __all__ = [
     "crossref_scitex",
     "openalex_scitex",
+    "unified",
+    "save",
+    "SUPPORTED_FORMATS",
 ]
 
 

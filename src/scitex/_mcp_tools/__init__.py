@@ -9,8 +9,10 @@ from .audio import register_audio_tools
 from .canvas import register_canvas_tools
 from .capture import register_capture_tools
 from .dataset import register_dataset_tools
+from .dev import register_dev_tools
 from .diagram import register_diagram_tools
 from .introspect import register_introspect_tools
+from .linter import register_linter_tools
 from .plt import register_plt_tools
 from .scholar import register_scholar_tools
 from .social import register_social_tools
@@ -29,8 +31,10 @@ def register_all_tools(mcp) -> None:
     register_canvas_tools(mcp)
     register_capture_tools(mcp)
     register_dataset_tools(mcp)
+    register_dev_tools(mcp)
     register_diagram_tools(mcp)
     register_introspect_tools(mcp)
+    register_linter_tools(mcp)
     register_plt_tools(mcp)
     register_scholar_tools(mcp)
     register_social_tools(mcp)

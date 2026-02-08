@@ -414,7 +414,12 @@ def list_tools(ctx, verbose, compact, as_json):
     type=int,
     help="Port to bind (default: 31293)",
 )
-def relay(host, port):
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Kill existing process using the port if any",
+)
+def relay(host, port, force):
     """
     Run simple HTTP relay server for remote audio playback
 
@@ -441,6 +446,12 @@ def relay(host, port):
     try:
         from scitex.audio.mcp_server import run_relay_server
 
+        # Handle force flag
+        if force:
+            from scitex.audio._utils import kill_process_on_port
+
+            kill_process_on_port(port)
+
         click.secho("Starting audio relay server", fg="cyan")
         click.echo(f"  Host: {host}")
         click.echo(f"  Port: {port}")
@@ -451,7 +462,7 @@ def relay(host, port):
         click.echo("  GET  /list_backends - List backends")
         click.echo()
 
-        run_relay_server(host=host, port=port)
+        run_relay_server(host=host, port=port, force=force)
 
     except Exception as e:
         click.secho(f"Error: {e}", fg="red", err=True)

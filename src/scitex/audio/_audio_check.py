@@ -7,9 +7,75 @@ before attempting to play audio.
 
 from __future__ import annotations
 
+import os
+import shutil
 import subprocess
 
-__all__ = ["check_local_audio_available"]
+__all__ = ["check_local_audio_available", "check_wsl_windows_audio_available"]
+
+
+def check_wsl_windows_audio_available() -> dict:
+    """Check if WSL Windows audio playback is available.
+
+    In WSL, audio can be played via PowerShell's System.Media.SoundPlayer
+    even when PulseAudio is unavailable or SUSPENDED.
+
+    Returns
+    -------
+        dict with keys:
+        - available: bool - True if Windows playback via PowerShell is possible
+        - reason: str - Human-readable explanation
+    """
+    if not os.path.exists("/mnt/c/Windows"):
+        return {"available": False, "reason": "Not running in WSL"}
+
+    if not shutil.which("powershell.exe"):
+        return {"available": False, "reason": "powershell.exe not found in PATH"}
+
+    return {
+        "available": True,
+        "reason": "WSL Windows playback available via PowerShell",
+    }
+
+
+def _try_wsl_fallback(
+    state: str, reason: str, pulseaudio_state: str | None = None
+) -> dict:
+    """Try WSL Windows fallback, return appropriate result dict."""
+    wsl_check = check_wsl_windows_audio_available()
+    if wsl_check["available"]:
+        result = {
+            "available": True,
+            "state": "WSL_WINDOWS",
+            "reason": wsl_check["reason"],
+            "fallback": "windows_powershell",
+        }
+        if pulseaudio_state:
+            result["pulseaudio_state"] = pulseaudio_state
+        return result
+    return {"available": False, "state": state, "reason": reason}
+
+
+def _parse_pulseaudio_state(output: str) -> dict:
+    """Parse PulseAudio sink state from pactl output."""
+    for line in output.strip().split("\n"):
+        parts = line.split("\t")
+        if len(parts) >= 5:
+            state = parts[4]
+            if state == "SUSPENDED":
+                return _try_wsl_fallback(
+                    "SUSPENDED",
+                    "Audio sink SUSPENDED (no active output device)",
+                    pulseaudio_state="SUSPENDED",
+                )
+            if state in ("RUNNING", "IDLE"):
+                return {
+                    "available": True,
+                    "state": state,
+                    "reason": f"Audio sink is {state}",
+                }
+
+    return _try_wsl_fallback("UNKNOWN", "Could not determine sink state")
 
 
 def check_local_audio_available() -> dict:
@@ -18,11 +84,15 @@ def check_local_audio_available() -> dict:
     Checks PulseAudio sink state to determine if audio can actually be heard.
     On NAS or headless servers, the sink is typically SUSPENDED.
 
-    Returns:
+    In WSL environments, also checks for Windows playback fallback via PowerShell.
+
+    Returns
+    -------
         dict with keys:
         - available: bool - True if local audio output is likely to work
         - state: str - 'RUNNING', 'IDLE', 'SUSPENDED', 'NO_SINK', etc.
         - reason: str - Human-readable explanation
+        - fallback: str (optional) - Fallback method if primary unavailable
     """
     try:
         result = subprocess.run(
@@ -32,45 +102,22 @@ def check_local_audio_available() -> dict:
             timeout=5,
         )
         if result.returncode != 0:
-            return {
-                "available": False,
-                "state": "NO_PACTL",
-                "reason": "PulseAudio not available",
-            }
+            return _try_wsl_fallback("NO_PACTL", "PulseAudio not available")
 
         if not result.stdout.strip():
-            return {
-                "available": False,
-                "state": "NO_SINK",
-                "reason": "No audio sinks found",
-            }
+            return _try_wsl_fallback("NO_SINK", "No audio sinks found")
 
-        # Parse sink state (format: id\tname\tmodule\tformat\tstate)
-        for line in result.stdout.strip().split("\n"):
-            parts = line.split("\t")
-            if len(parts) >= 5:
-                state = parts[4]
-                if state == "SUSPENDED":
-                    return {
-                        "available": False,
-                        "state": "SUSPENDED",
-                        "reason": "Audio sink SUSPENDED (no active output device)",
-                    }
-                elif state in ("RUNNING", "IDLE"):
-                    return {
-                        "available": True,
-                        "state": state,
-                        "reason": f"Audio sink is {state}",
-                    }
-
-        return {
-            "available": False,
-            "state": "UNKNOWN",
-            "reason": "Could not determine sink state",
-        }
+        return _parse_pulseaudio_state(result.stdout)
 
     except FileNotFoundError:
-        # No pactl - might be macOS or minimal system, assume available
+        wsl_check = check_wsl_windows_audio_available()
+        if wsl_check["available"]:
+            return {
+                "available": True,
+                "state": "WSL_WINDOWS",
+                "reason": wsl_check["reason"],
+                "fallback": "windows_powershell",
+            }
         return {
             "available": True,
             "state": "NO_PACTL",
@@ -83,11 +130,7 @@ def check_local_audio_available() -> dict:
             "reason": "PulseAudio query timed out",
         }
     except Exception as e:
-        return {
-            "available": False,
-            "state": "ERROR",
-            "reason": str(e),
-        }
+        return {"available": False, "state": "ERROR", "reason": str(e)}
 
 
 # EOF

@@ -34,7 +34,6 @@ scitex/verify/
 ├── _visualize.py        # Re-exports from _viz/
 └── _viz/
     ├── _mermaid.py      # Mermaid DAG generation
-    ├── _plotly.py       # Interactive Plotly DAGs
     ├── _json.py         # JSON DAG export
     ├── _format.py       # Terminal output formatting
     ├── _colors.py       # Color constants
@@ -197,17 +196,6 @@ render_dag("dag.svg", target_file="output.csv")
 # Raw formats
 render_dag("dag.mmd", target_file="output.csv")  # Mermaid code
 render_dag("dag.json", target_file="output.csv")  # Graph structure
-```
-
-### Interactive Plotly
-
-```python
-from scitex.verify import generate_plotly_dag, render_plotly_dag
-
-fig = generate_plotly_dag(target_file="output.csv")
-fig.show()  # Opens browser
-
-render_plotly_dag("dag_plotly.html", target_file="output.csv")
 ```
 
 ## Integration Hooks (`_integration.py`)
