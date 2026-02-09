@@ -52,21 +52,26 @@ __DIR__ = os.path.dirname(__FILE__)
 # ============================================================================
 if _FIGRECIPE_AVAILABLE:
     # Core public API
-    from figrecipe import __version__ as _figrecipe_version
     from figrecipe import (
+        Diagram,
+        Schematic,
         compose,
         crop,
         extract_data,
         gui,
         info,
         list_presets,
+        load_bundle,
         load_style,
         reproduce,
+        reproduce_bundle,
         save,
+        save_bundle,
         subplots,
         unload_style,
         validate,
     )
+    from figrecipe import __version__ as _figrecipe_version
 
     # Backward compatibility alias
     edit = gui
@@ -94,6 +99,8 @@ else:
             "figrecipe is required for this feature. Install with: pip install figrecipe"
         )
 
+    Diagram = _not_available
+    Schematic = _not_available
     STYLE = None
     load_style = _not_available
     unload_style = _not_available
@@ -116,6 +123,9 @@ else:
     smart_align = _not_available  # Backward compatibility alias
     sns = None
     enable_svg = _not_available
+    save_bundle = _not_available
+    load_bundle = _not_available
+    reproduce_bundle = _not_available
     get_graph_preset = _not_available
     list_graph_presets = _not_available
     register_graph_preset = _not_available
@@ -418,6 +428,9 @@ def close(fig=None):
 # ============================================================================
 
 __all__ = [
+    # Figrecipe classes
+    "Diagram",
+    "Schematic",
     # Figrecipe core (re-exported with branding)
     "subplots",
     "save",
@@ -429,6 +442,10 @@ __all__ = [
     "info",
     "gui",
     "edit",  # Backward compatibility alias for gui
+    # Bundle support
+    "save_bundle",
+    "load_bundle",
+    "reproduce_bundle",
     # Style management
     "STYLE",
     "load_style",
