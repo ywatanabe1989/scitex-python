@@ -230,6 +230,8 @@ browser = _LazyModule("browser")  # Browser automation
 compat = _LazyModule("compat")  # Compatibility utilities
 cli = _LazyModule("cli")  # Command-line interface
 linter = _LazyModule("linter")  # AST-based linter (delegates to scitex-linter)
+usage = _CallableModuleWrapper("usage", main_decorator_name="show")
+usage._setup_persistence("scitex", "usage")
 
 
 # BACKWARD COMPATIBILITY: Module-level __getattr__ for deprecated attributes
@@ -343,6 +345,7 @@ __all__ = [
     "browser",
     "compat",
     "cli",
+    "usage",
     "PATHS",
     "__version__",
 ]
