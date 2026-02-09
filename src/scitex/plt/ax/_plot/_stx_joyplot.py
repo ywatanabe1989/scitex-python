@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-02 09:03:23 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/ax/_plot/_plot_joyplot.py
 # ----------------------------------------
@@ -59,7 +58,7 @@ def stx_joyplot(
         kwargs["label"] = f"{kwargs['label']} ($n$={n_str})"
 
     # Import scitex colors
-    from scitex.plt.color._PARAMS import HEX
+    from scitex.plt.color import HEX
 
     # Default colors from scitex palette
     if colors is None:
