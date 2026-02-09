@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-08 23:30:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/gallery/_generate.py
 
 """Gallery generation functionality."""
 
 import json
-import os
 from pathlib import Path
 
 import numpy as np
@@ -15,7 +13,7 @@ from ._plots import PLOT_FUNCTIONS
 from ._registry import CATEGORIES
 
 
-def generate(
+def generate(  # noqa: C901
     output_dir="./gallery",
     category=None,
     plot_type=None,
@@ -78,7 +76,7 @@ def generate(
     if verbose:
         print(f"Generating {len(plots_to_generate)} plots to {output_dir}")
 
-    results = {"png": [], "svg": [], "csv": [], "plot": [], "errors": []}
+    results = {"png": [], "svg": [], "csv": [], "plot": [], "errors": []}  # type: ignore[var-annotated]
 
     for plot_name in plots_to_generate:
         if plot_name not in PLOT_FUNCTIONS:
@@ -203,7 +201,7 @@ def _get_plots_to_generate(category=None, plot_type=None):
         return CATEGORIES[category]["plots"]
 
     # All plots
-    all_plots = []
+    all_plots = []  # type: ignore[var-annotated]
     for cat_info in CATEGORIES.values():
         all_plots.extend(cat_info["plots"])
     return all_plots
@@ -238,13 +236,6 @@ def _add_element_bboxes_to_json(fig, ax, dpi, json_path, verbose=True):
     """
     from PIL import Image
 
-    from scitex.plt.utils.metadata._geometry_extraction import (
-        extract_axes_bbox_px,
-        extract_line_geometry,
-        extract_polygon_geometry,
-        extract_scatter_geometry,
-    )
-
     try:
         # Get matplotlib objects
         mpl_fig = fig._fig_mpl if hasattr(fig, "_fig_mpl") else fig
@@ -276,7 +267,7 @@ def _add_element_bboxes_to_json(fig, ax, dpi, json_path, verbose=True):
             return
 
         # Load existing JSON
-        with open(json_path, "r") as f:
+        with open(json_path) as f:
             metadata = json.load(f)
 
         # Add element_bboxes
@@ -304,13 +295,14 @@ def _add_element_bboxes_to_json(fig, ax, dpi, json_path, verbose=True):
             print(f"  [WARN] Could not add element_bboxes: {e}")
 
 
-def _extract_element_bboxes_for_gallery(fig, ax, renderer, img_width, img_height):
+def _extract_element_bboxes_for_gallery(  # noqa: C901
+    fig, ax, renderer, img_width, img_height
+):
     """Extract element bounding boxes for gallery figures.
 
     Similar to vis_app's extract_element_bboxes but simplified for gallery use.
     """
     import numpy as np
-    from matplotlib.transforms import Bbox
 
     # Get figure tight bbox in inches
     fig_bbox = fig.get_tightbbox(renderer)
@@ -462,7 +454,7 @@ def _extract_element_bboxes_for_gallery(fig, ax, renderer, img_width, img_height
     return bboxes
 
 
-def _generate_and_save_hitmap(
+def _generate_and_save_hitmap(  # noqa: C901
     fig, dpi, hitmap_path, json_path, verbose=True, crop_box=None
 ):
     """Generate hitmap PNG and add color_map to JSON.
@@ -500,7 +492,7 @@ def _generate_and_save_hitmap(
 
         if not color_map:
             if verbose:
-                print(f"  [HITMAP] No elements found to map - generating empty hitmap")
+                print("  [HITMAP] No elements found to map - generating empty hitmap")
             # Still generate hitmap (all zeros/black) for consistency
             # This ensures hitmap always exists with correct size
 
@@ -520,7 +512,7 @@ def _generate_and_save_hitmap(
 
         # Apply same crop as PNG if crop_box provided
         if crop_box is not None:
-            from scitex.plt.utils._crop import crop
+            from figrecipe._utils._crop import crop
 
             crop(
                 str(hitmap_path),
@@ -556,7 +548,7 @@ def _generate_and_save_hitmap(
 
         # Add hitmap_color_map to JSON
         if json_path.exists():
-            with open(json_path, "r") as f:
+            with open(json_path) as f:
                 metadata = json.load(f)
 
             # Store color_map with string keys for JSON compatibility

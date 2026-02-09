@@ -47,7 +47,7 @@ def handle_image_with_csv(
     save_image(obj, spath, verbose=verbose, **kwargs)
 
     # Auto-crop if requested (only for raster formats)
-    crop_offset = _auto_crop_image(
+    _auto_crop_image(
         spath, auto_crop, crop_margin_mm, collected_metadata, kwargs, verbose
     )
 
@@ -80,7 +80,7 @@ def handle_image_with_csv(
         )
 
 
-def _collect_metadata(obj, kwargs, verbose, json_schema, metadata_extra):
+def _collect_metadata(obj, kwargs, verbose, json_schema, metadata_extra):  # noqa: C901
     """Auto-collect metadata from scitex figures."""
     collected_metadata = None
     if "metadata" not in kwargs or kwargs["metadata"] is None:
@@ -171,7 +171,7 @@ def _auto_crop_image(
         ext = spath.lower()
         if ext.endswith((".png", ".jpg", ".jpeg", ".tiff", ".tif")):
             try:
-                from scitex.plt.utils._crop import crop
+                from figrecipe._utils._crop import crop
 
                 dpi = kwargs.get("dpi", 300)
                 margin_px = int(crop_margin_mm * dpi / 25.4)
@@ -179,7 +179,7 @@ def _auto_crop_image(
                 _, crop_offset = crop(
                     spath,
                     output_path=spath,
-                    margin=margin_px,
+                    margin_px=margin_px,
                     overwrite=True,
                     verbose=False,
                     return_offset=True,
@@ -231,7 +231,6 @@ def _export_csv_data(
     obj, spath, collected_metadata, symlink_from_cwd, symlink_to_path, dry_run
 ):
     """Export CSV data from figure."""
-    ext = os.path.splitext(spath)[1].lower()
     image_extensions = ["png", "jpg", "jpeg", "gif", "tiff", "tif", "svg", "pdf"]
     parent_dir = os.path.dirname(spath)
     parent_name = os.path.basename(parent_dir)

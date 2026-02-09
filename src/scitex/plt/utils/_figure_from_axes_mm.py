@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-11-19 12:30:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_figure_from_axes_mm.py
 
@@ -15,17 +14,14 @@ not the total figure size. The figure size is just axes + margins.
 
 __FILE__ = __file__
 
-from typing import Dict, Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 import matplotlib.pyplot as plt
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
-
-from ._units import mm_to_inch, mm_to_pt
+from figrecipe._utils._units import mm_to_inch
 
 if TYPE_CHECKING:
-    from scitex.plt._subplots._FigWrapper import FigWrapper
     from scitex.plt._subplots._AxisWrapper import AxisWrapper
+    from scitex.plt._subplots._FigWrapper import FigWrapper
 
 
 def create_axes_with_size_mm(
@@ -158,14 +154,14 @@ def create_axes_with_size_mm(
     }
 
     # Wrap in scitex wrappers for consistent API
-    from scitex.plt._subplots._FigWrapper import FigWrapper
     from scitex.plt._subplots._AxisWrapper import AxisWrapper
+    from scitex.plt._subplots._FigWrapper import FigWrapper
 
     fig_wrapped = FigWrapper(fig)
     ax_wrapped = AxisWrapper(fig_wrapped, ax, track=False)
 
     # Store axes reference in FigWrapper
-    fig_wrapped.axes = ax_wrapped
+    fig_wrapped.axes = ax_wrapped  # type: ignore[attr-defined]
 
     return fig_wrapped, ax_wrapped
 
@@ -205,7 +201,7 @@ def get_dimension_info(fig, ax) -> Dict:
     >>> print(f"Axes size: {info['axes_size_mm']} mm")
     >>> print(f"Axes size: {info['axes_size_px']} pixels at {info['dpi']} DPI")
     """
-    from ._units import MM_PER_INCH, inch_to_mm
+    from figrecipe._utils._units import MM_PER_INCH, inch_to_mm
 
     # Figure dimensions
     fig_width_inch, fig_height_inch = fig.get_size_inches()
@@ -337,8 +333,8 @@ def print_dimension_info(fig, ax):
     print(f"  • Conversion:   1 inch = {info['mm_per_inch']} mm")
 
     print("\n💡 KEY RELATIONSHIPS:")
-    print(f"  • pixels = inches × DPI")
-    print(f"  • mm = inches × 25.4")
+    print("  • pixels = inches × DPI")
+    print("  • mm = inches × 25.4")
     print(f"  • At {info['dpi']} DPI:")
     print(f"    - 1 mm = {info['dpi'] / 25.4:.2f} pixels")
     print(f"    - 1 inch = {info['dpi']} pixels")

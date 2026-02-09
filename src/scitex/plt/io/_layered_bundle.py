@@ -71,7 +71,7 @@ def is_layered_bundle(bundle_dir: Path) -> bool:
     return (bundle_dir / "spec.json").exists()
 
 
-def save_layered_plot_bundle(
+def save_layered_plot_bundle(  # noqa: C901
     fig,
     bundle_dir: Path,
     basename: str = "plot",
@@ -172,7 +172,6 @@ def save_layered_plot_bundle(
                 traces.append(trace)
 
     # Handle CSV data - prefer extracted data (captures all matplotlib artists)
-    columns = []
     csv_hash = None
     if extracted_data:
         # Use extracted data from matplotlib artists (captures axhline, etc.)
@@ -190,12 +189,10 @@ def save_layered_plot_bundle(
             else:
                 padded[k] = v_float
         csv_df = pd.DataFrame(padded)
-        columns = list(csv_df.columns)
         csv_str = csv_df.to_csv(index=False)
         csv_hash = f"sha256:{hashlib.sha256(csv_str.encode()).hexdigest()[:16]}"
     elif csv_df is not None:
         # Fallback to provided CSV if no extracted data
-        columns = list(csv_df.columns)
         csv_str = csv_df.to_csv(index=False)
         csv_hash = f"sha256:{hashlib.sha256(csv_str.encode()).hexdigest()[:16]}"
 
@@ -344,40 +341,14 @@ def save_layered_plot_bundle(
     # IMPORTANT: Use fig.dpi for coordinate calculations, NOT export dpi
     # extract_selectable_regions uses fig.dpi for all bbox calculations
     fig_dpi = fig.dpi
-    display_fig_size_px = [
-        int(fig.get_figwidth() * fig_dpi),
-        int(fig.get_figheight() * fig_dpi),
-    ]
 
-    # Get matplotlib's tight bounding box (what bbox_inches='tight' crops to)
-    # Note: get_tightbbox returns values in INCHES, not pixels
-    fig.canvas.draw()  # Ensure renderer is ready
-    renderer = fig.canvas.get_renderer()
-    tight_bbox_inches = fig.get_tightbbox(renderer)
-
-    # Convert from inches to display pixels (using fig.dpi, NOT export dpi)
-    tight_bbox_display_px = {
-        "x0": tight_bbox_inches.x0 * fig_dpi,
-        "y0": tight_bbox_inches.y0 * fig_dpi,
-        "x1": tight_bbox_inches.x1 * fig_dpi,
-        "y1": tight_bbox_inches.y1 * fig_dpi,
-    }
-
-    # Convert from matplotlib display coords (y=0 at bottom)
-    # to image coords (y=0 at top)
-    tight_bbox_in_image_coords = {
-        "left": tight_bbox_display_px["x0"],
-        "upper": display_fig_size_px[1] - tight_bbox_display_px["y1"],  # Flip y
-        "right": tight_bbox_display_px["x1"],
-        "lower": display_fig_size_px[1] - tight_bbox_display_px["y0"],
-    }
+    # Ensure renderer is ready
+    fig.canvas.draw()
 
     # Scale factor: export_dpi / fig_dpi (to scale from display coords to export PNG coords)
     dpi_scale = dpi / fig_dpi
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        tmp_path = Path(tmp_dir)
-
+    with tempfile.TemporaryDirectory():
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message=".*tight_layout.*")
 
@@ -428,13 +399,13 @@ def save_layered_plot_bundle(
             # Apply additional margin cropping (removes transparent edges)
             margin_crop_box = None
             try:
-                from scitex.plt.utils._crop import crop
+                from figrecipe._utils._crop import crop
 
                 _, margin_crop_box = crop(
                     str(png_path),
                     output_path=str(png_path),
                     overwrite=True,
-                    margin=12,
+                    margin_px=12,
                     verbose=False,
                     return_offset=True,
                 )
@@ -649,10 +620,11 @@ def save_layered_plot_bundle(
     logger.debug(f"Saved layered plot bundle: {bundle_dir}")
 
 
-def _generate_plot_overview(exports_dir: Path, basename: str) -> None:
+def _generate_plot_overview(exports_dir: Path, basename: str) -> None:  # noqa: C901
     """Generate comprehensive overview with plot, hitmap, overlay, bboxes, and JSON info.
 
-    Args:
+    Args
+    ----
         exports_dir: Path to exports directory.
         basename: Base filename for the bundle.
     """
@@ -1047,7 +1019,7 @@ stx.plt.io.regenerate_cache("{bundle_dir}")
         f.write(readme_content)
 
 
-def _adjust_coords_for_offset(
+def _adjust_coords_for_offset(  # noqa: C901
     selectable_regions: Dict[str, Any],
     offset_left: float,
     offset_upper: float,
@@ -1125,7 +1097,7 @@ def _adjust_coords_for_offset(
     return result
 
 
-def _adjust_path_data_for_offset(
+def _adjust_path_data_for_offset(  # noqa: C901
     path_data: Dict[str, Any],
     offset_left: float,
     offset_upper: float,
@@ -1187,7 +1159,7 @@ def _adjust_path_data_for_offset(
     return result
 
 
-def _adjust_path_data_for_crop(
+def _adjust_path_data_for_crop(  # noqa: C901
     path_data: Dict[str, Any],
     offset_left: float,
     offset_upper: float,
@@ -1273,7 +1245,9 @@ def _draw_bbox(ax, bbox: List, color: str, label: str, lw: float = 2) -> None:
     )
 
 
-def _format_json_summary(data: Dict, max_depth: int = 2, current_depth: int = 0) -> str:
+def _format_json_summary(  # noqa: C901
+    data: Dict, max_depth: int = 2, current_depth: int = 0
+) -> str:  # noqa: C901
     """Format JSON data as summary text with limited depth."""
     lines = []
 
@@ -1344,7 +1318,7 @@ def load_layered_plot_bundle(bundle_dir: Path) -> Dict[str, Any]:
     if spec_path.exists():
         with open(spec_path) as f:
             result["spec"] = json.load(f)
-            result["basename"] = result["spec"].get("plot_id", "plot")
+            result["basename"] = result["spec"].get("plot_id", "plot")  # type: ignore[attr-defined]
 
     # Load style.json
     style_path = bundle_dir / "style.json"
@@ -1359,14 +1333,14 @@ def load_layered_plot_bundle(bundle_dir: Path) -> Dict[str, Any]:
             result["geometry"] = json.load(f)
 
     # Create merged view for backward compatibility with editor
-    result["merged"] = merge_layered_bundle(
-        result["spec"], result["style"], result["geometry"]
+    result["merged"] = merge_layered_bundle(  # type: ignore[assignment]
+        result["spec"], result["style"], result["geometry"]  # type: ignore[arg-type]
     )
 
     return result
 
 
-def merge_layered_bundle(
+def merge_layered_bundle(  # noqa: C901
     spec: Optional[Dict],
     style: Optional[Dict],
     geometry: Optional[Dict],
@@ -1424,7 +1398,7 @@ def merge_layered_bundle(
                     ax_merged["bbox_px"] = ax_geom.get("bbox_px", {})
                     break
 
-        merged["axes"].append(ax_merged)
+        merged["axes"].append(ax_merged)  # type: ignore[attr-defined]
 
     # Merge traces with styles
     merged["traces"] = []
@@ -1441,7 +1415,7 @@ def merge_layered_bundle(
         trace_id = trace.get("id", "")
         if trace_id in trace_style_map:
             trace_merged.update(trace_style_map[trace_id])
-        merged["traces"].append(trace_merged)
+        merged["traces"].append(trace_merged)  # type: ignore[attr-defined]
 
     # Merge theme from style
     if style and "theme" in style:
