@@ -214,7 +214,7 @@ def _close_streams(sys) -> None:
 def _stop_verification(exit_status: int) -> None:
     """Stop verification tracking for this session."""
     try:
-        from scitex.verify import on_session_close
+        from scitex.clew import on_session_close
 
         status = "success" if exit_status == 0 else "failed"
         on_session_close(status=status, exit_code=exit_status or 0)

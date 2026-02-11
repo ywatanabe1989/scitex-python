@@ -2,11 +2,11 @@
 # Timestamp: "2026-02-01 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-python/tests/scitex/verify/test__db.py
 
-"""Tests for scitex.verify._db module."""
+"""Tests for scitex.clew._db module."""
 
 import pytest
 
-from scitex.verify import VerificationDB
+from scitex.clew import VerificationDB
 
 
 class TestVerificationDB:

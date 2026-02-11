@@ -2,9 +2,9 @@
 # Timestamp: "2026-02-01 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-python/tests/scitex/verify/test__chain.py
 
-"""Tests for scitex.verify._chain module."""
+"""Tests for scitex.clew._chain module."""
 
-from scitex.verify import (
+from scitex.clew import (
     ChainVerification,
     FileVerification,
     RunVerification,
@@ -243,7 +243,7 @@ class TestVerifyFile:
 
     def test_verify_file_match(self, tmp_path):
         """Test verifying a file that matches expected hash."""
-        from scitex.verify import hash_file
+        from scitex.clew import hash_file
 
         test_file = tmp_path / "test.txt"
         test_file.write_text("Hello, World!")

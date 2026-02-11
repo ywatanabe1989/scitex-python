@@ -8,6 +8,7 @@ from __future__ import annotations
 from .audio import register_audio_tools
 from .canvas import register_canvas_tools
 from .capture import register_capture_tools
+from .clew import register_clew_tools
 from .dataset import register_dataset_tools
 from .dev import register_dev_tools
 from .diagram import register_diagram_tools
@@ -20,7 +21,6 @@ from .stats import register_stats_tools
 from .template import register_template_tools
 from .ui import register_ui_tools
 from .usage import register_usage_tools
-from .verify import register_verify_tools
 from .writer import register_writer_tools
 
 __all__ = ["register_all_tools"]
@@ -43,7 +43,7 @@ def register_all_tools(mcp) -> None:
     register_template_tools(mcp)
     register_ui_tools(mcp)
     register_usage_tools(mcp)
-    register_verify_tools(mcp)
+    register_clew_tools(mcp)
     register_writer_tools(mcp)
 
 

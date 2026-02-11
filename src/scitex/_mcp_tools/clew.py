@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Timestamp: "2026-02-01 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-python/src/scitex/_mcp_tools/verify.py
-"""Verify module tools for FastMCP unified server."""
+# File: /home/ywatanabe/proj/scitex-python/src/scitex/_mcp_tools/clew.py
+"""Clew module tools for FastMCP unified server."""
 
 from __future__ import annotations
 
@@ -13,15 +13,15 @@ def _json(data: dict) -> str:
     return json.dumps(data, indent=2, default=str)
 
 
-def register_verify_tools(mcp) -> None:
-    """Register verify tools with FastMCP server."""
+def register_clew_tools(mcp) -> None:
+    """Register clew tools with FastMCP server."""
 
     @mcp.tool()
-    async def verify_list(
+    async def clew_list(
         limit: int = 50,
         status_filter: Optional[str] = None,
     ) -> str:
-        """[verify] List all tracked runs with verification status.
+        """[clew] List all tracked runs with verification status.
 
         Parameters
         ----------
@@ -35,7 +35,7 @@ def register_verify_tools(mcp) -> None:
         str
             JSON with list of runs and their verification status
         """
-        from scitex.verify import get_db, verify_run
+        from scitex.clew import get_db, verify_run
 
         db = get_db()
         runs = db.list_runs(status=status_filter, limit=limit)
@@ -63,10 +63,10 @@ def register_verify_tools(mcp) -> None:
         )
 
     @mcp.tool()
-    async def verify_run(
+    async def clew_run(
         session_or_path: str,
     ) -> str:
-        """[verify] Verify a specific session run by checking all file hashes.
+        """[clew] Verify a specific session run by checking all file hashes.
 
         Parameters
         ----------
@@ -81,8 +81,8 @@ def register_verify_tools(mcp) -> None:
         """
         from pathlib import Path
 
-        from scitex.verify import get_db
-        from scitex.verify import verify_run as do_verify_run
+        from scitex.clew import get_db
+        from scitex.clew import verify_run as do_verify_run
 
         db = get_db()
 
@@ -130,10 +130,10 @@ def register_verify_tools(mcp) -> None:
         )
 
     @mcp.tool()
-    async def verify_chain(
+    async def clew_chain(
         target_file: str,
     ) -> str:
-        """[verify] Verify the dependency chain for a target file.
+        """[clew] Verify the dependency chain for a target file.
 
         Traces back through all sessions that contributed to producing
         the target file and verifies each one.
@@ -150,7 +150,7 @@ def register_verify_tools(mcp) -> None:
         """
         from pathlib import Path
 
-        from scitex.verify import verify_chain as do_verify_chain
+        from scitex.clew import verify_chain as do_verify_chain
 
         path = Path(target_file)
         if not path.exists():
@@ -185,40 +185,40 @@ def register_verify_tools(mcp) -> None:
         )
 
     @mcp.tool()
-    async def verify_status() -> str:
-        """[verify] Show verification status summary (like git status).
+    async def clew_status() -> str:
+        """[clew] Show verification status summary (like git status).
 
         Returns
         -------
         str
             JSON with counts of verified, mismatched, and missing runs
         """
-        from scitex.verify import get_status
+        from scitex.clew import get_status
 
         status = get_status()
         return _json(status)
 
     @mcp.tool()
-    async def verify_stats() -> str:
-        """[verify] Show verification database statistics.
+    async def clew_stats() -> str:
+        """[clew] Show verification database statistics.
 
         Returns
         -------
         str
             JSON with database statistics
         """
-        from scitex.verify import get_db
+        from scitex.clew import get_db
 
         db = get_db()
         stats = db.stats()
         return _json(stats)
 
     @mcp.tool()
-    async def verify_mermaid(
+    async def clew_mermaid(
         session_id: Optional[str] = None,
         target_file: Optional[str] = None,
     ) -> str:
-        """[verify] Generate Mermaid diagram for verification DAG.
+        """[clew] Generate Mermaid diagram for verification DAG.
 
         Parameters
         ----------
@@ -234,7 +234,7 @@ def register_verify_tools(mcp) -> None:
         """
         from pathlib import Path
 
-        from scitex.verify import generate_mermaid_dag
+        from scitex.clew import generate_mermaid_dag
 
         if target_file:
             target_file = str(Path(target_file).resolve())

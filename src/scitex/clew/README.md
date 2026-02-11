@@ -4,7 +4,7 @@
 !-- File: /home/ywatanabe/proj/scitex-python/src/scitex/verify/README.md
 !-- --- -->
 
-# scitex.verify Module
+# scitex.clew Module
 
 Hash-based verification system for reproducible scientific computations.
 
@@ -23,7 +23,7 @@ The verify module provides cryptographic tracking of scientific pipelines, enabl
 ## Architecture
 
 ```
-scitex/verify/
+scitex/clew/
 ├── __init__.py          # Public API and convenience functions
 ├── _hash.py             # SHA256 hashing utilities
 ├── _db.py               # SQLite database for storing hashes
@@ -46,7 +46,7 @@ scitex/verify/
 ### Hash Utilities (`_hash.py`)
 
 ```python
-from scitex.verify import hash_file, hash_files, hash_directory
+from scitex.clew import hash_file, hash_files, hash_directory
 
 # Single file
 h = hash_file("data.csv")  # SHA256 hex string
@@ -63,7 +63,7 @@ h = hash_directory("output/")  # Combined hash of all files
 SQLite-based storage for verification records:
 
 ```python
-from scitex.verify import get_db
+from scitex.clew import get_db
 
 db = get_db()  # ~/.scitex/verify.db by default
 
@@ -94,7 +94,7 @@ chain = db.get_chain("abc123")  # Parent session IDs
 Integrates with `@stx.session`:
 
 ```python
-from scitex.verify import SessionTracker, start_tracking, stop_tracking
+from scitex.clew import SessionTracker, start_tracking, stop_tracking
 
 # Manual tracking (usually automatic via @stx.session)
 tracker = start_tracking(session_id="abc123")
@@ -106,7 +106,7 @@ stop_tracking()
 ### Chain Verification (`_chain.py`)
 
 ```python
-from scitex.verify import verify_file, verify_run, verify_chain
+from scitex.clew import verify_file, verify_run, verify_chain
 
 # Verify single file
 file_result = verify_file("/path/to/output.csv")
@@ -128,7 +128,7 @@ for run in chain_result.runs:
 ### Verification Levels
 
 ```python
-from scitex.verify import VerificationLevel, VerificationStatus
+from scitex.clew import VerificationLevel, VerificationStatus
 
 # Levels
 VerificationLevel.CACHE     # Fast hash comparison (✓)
@@ -144,7 +144,7 @@ VerificationStatus.UNKNOWN
 ### Re-execution Verification (`_rerun.py`)
 
 ```python
-from scitex.verify import verify_by_rerun
+from scitex.clew import verify_by_rerun
 
 # Re-run script and verify outputs match
 result = verify_by_rerun("/path/to/output.csv")
@@ -157,7 +157,7 @@ print(result.level)  # VerificationLevel.RERUN
 ### Terminal Output
 
 ```python
-from scitex.verify import format_status, format_chain_verification
+from scitex.clew import format_status, format_chain_verification
 
 # Git status-like output
 print(format_status())
@@ -170,7 +170,7 @@ print(format_chain_verification(chain))
 ### Mermaid DAG
 
 ```python
-from scitex.verify import generate_mermaid_dag
+from scitex.clew import generate_mermaid_dag
 
 mermaid = generate_mermaid_dag(target_file="output.csv")
 # Returns:
@@ -184,7 +184,7 @@ mermaid = generate_mermaid_dag(target_file="output.csv")
 ### HTML/PNG/SVG Export
 
 ```python
-from scitex.verify import render_dag
+from scitex.clew import render_dag
 
 # Interactive HTML
 render_dag("dag.html", target_file="output.csv", show_hashes=True)
@@ -203,7 +203,7 @@ render_dag("dag.json", target_file="output.csv")  # Graph structure
 Automatically called by `@stx.session` and `stx.io`:
 
 ```python
-from scitex.verify import on_session_start, on_session_close, on_io_load, on_io_save
+from scitex.clew import on_session_start, on_session_close, on_io_load, on_io_save
 
 # Session lifecycle
 on_session_start(session_id, script_path, config_hash)
@@ -218,19 +218,19 @@ on_io_save(file_path)  # Records as output
 
 ```bash
 # List runs
-scitex verify list [--limit N] [--status success|failed]
+scitex clew list [--limit N] [--status success|failed]
 
 # Check status
-scitex verify status
+scitex clew status
 
 # Verify specific run
-scitex verify run SESSION_ID [--from-scratch]
+scitex clew run SESSION_ID [--from-scratch]
 
 # Trace dependencies
-scitex verify chain FILE_PATH
+scitex clew chain FILE_PATH
 
 # Database stats
-scitex verify stats
+scitex clew stats
 ```
 
 ## MCP Tools
@@ -284,7 +284,7 @@ CREATE TABLE verifications (
 
 ## Examples
 
-See `examples/scitex/verify/` for complete working examples:
+See `examples/scitex/clew/` for complete working examples:
 
 - `00_run_all.sh` - Run complete pipeline
 - `01-08` - Multi-branch processing pipeline
@@ -293,7 +293,7 @@ See `examples/scitex/verify/` for complete working examples:
 
 ## See Also
 
-- `examples/scitex/verify/README.md` - Usage examples with DAG visualization
+- `examples/scitex/clew/README.md` - Usage examples with DAG visualization
 - `@stx.session` decorator - Automatic session tracking
 - `stx.io` module - File I/O with hash tracking
 

@@ -155,7 +155,7 @@ def save(
 
         # Track output for verification (if session is active)
         try:
-            from scitex.verify import on_io_save
+            from scitex.clew import on_io_save
 
             on_io_save(spath_final, track=track)
         except Exception:

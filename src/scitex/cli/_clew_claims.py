@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Timestamp: "2026-02-09 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-python/src/scitex/cli/_verify_claims.py
+# File: /home/ywatanabe/proj/scitex-python/src/scitex/cli/_clew_claims.py
 """CLI commands for claim layer, external timestamping, and backward-compat aliases."""
 
 import sys
@@ -8,10 +8,10 @@ import sys
 import click
 
 
-def register_claim_commands(verify_group):  # noqa: C901
-    """Register claim-related commands on the verify CLI group."""
+def register_claim_commands(clew_group):  # noqa: C901
+    """Register claim-related commands on the clew CLI group."""
 
-    @verify_group.command("add-claim")
+    @clew_group.command("add-claim")
     @click.option(
         "--file", "-f", "file_path", required=True, help="Manuscript file path"
     )
@@ -43,12 +43,12 @@ def register_claim_commands(verify_group):  # noqa: C901
 
         \\b
         Examples:
-          scitex verify add-claim -f paper.tex -l 42 -t statistic -V "p = 0.003" -s results.csv
-          scitex verify add-claim -f paper.tex -l 58 -t figure -s figure1.yaml
-          scitex verify add-claim -f paper.tex -l 10 -t text -V "N = 150" -s summary.csv
+          scitex clew add-claim -f paper.tex -l 42 -t statistic -V "p = 0.003" -s results.csv
+          scitex clew add-claim -f paper.tex -l 58 -t figure -s figure1.yaml
+          scitex clew add-claim -f paper.tex -l 10 -t text -V "N = 150" -s summary.csv
         """
         try:
-            from scitex.verify import add_claim
+            from scitex.clew import add_claim
 
             claim = add_claim(
                 file_path=file_path,
@@ -71,7 +71,7 @@ def register_claim_commands(verify_group):  # noqa: C901
             click.secho(f"Error: {e}", fg="red", err=True)
             sys.exit(1)
 
-    @verify_group.command("list-claims")
+    @clew_group.command("list-claims")
     @click.option("--file", "-f", "file_path", help="Filter by manuscript file")
     @click.option(
         "--type",
@@ -89,12 +89,12 @@ def register_claim_commands(verify_group):  # noqa: C901
 
         \\b
         Examples:
-          scitex verify list-claims
-          scitex verify list-claims -f paper.tex
-          scitex verify list-claims -t statistic -v
+          scitex clew list-claims
+          scitex clew list-claims -f paper.tex
+          scitex clew list-claims -t statistic -v
         """
         try:
-            from scitex.verify import format_claims, list_claims
+            from scitex.clew import format_claims, list_claims
 
             claims = list_claims(
                 file_path=file_path,
@@ -109,7 +109,7 @@ def register_claim_commands(verify_group):  # noqa: C901
             else:
                 if not claims:
                     click.echo("No claims registered.")
-                    click.echo("\nTo register claims, use: scitex verify add-claim")
+                    click.echo("\nTo register claims, use: scitex clew add-claim")
                     return
                 output = format_claims(claims, verbose=verbose)
                 click.echo(output)
@@ -119,7 +119,7 @@ def register_claim_commands(verify_group):  # noqa: C901
             click.secho(f"Error: {e}", fg="red", err=True)
             sys.exit(1)
 
-    @verify_group.command("verify-claim")
+    @clew_group.command("verify-claim")
     @click.argument("target", required=True)
     @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
     def verify_claim_cmd(target, as_json):
@@ -130,11 +130,11 @@ def register_claim_commands(verify_group):  # noqa: C901
 
         \\b
         Examples:
-          scitex verify verify-claim claim_a1b2c3d4e5f6
-          scitex verify verify-claim paper.tex:L42
+          scitex clew verify-claim claim_a1b2c3d4e5f6
+          scitex clew verify-claim paper.tex:L42
         """
         try:
-            from scitex.verify import verify_claim
+            from scitex.clew import verify_claim
 
             result = verify_claim(target)
 
@@ -178,7 +178,7 @@ def register_claim_commands(verify_group):  # noqa: C901
 
     # ── External timestamping commands ──
 
-    @verify_group.command("stamp")
+    @clew_group.command("stamp")
     @click.option(
         "--backend",
         "-b",
@@ -194,12 +194,12 @@ def register_claim_commands(verify_group):  # noqa: C901
 
         \\b
         Examples:
-          scitex verify stamp                       # Local file stamp
-          scitex verify stamp -b rfc3161            # RFC 3161 TSA
-          scitex verify stamp --json                # JSON output
+          scitex clew stamp                       # Local file stamp
+          scitex clew stamp -b rfc3161            # RFC 3161 TSA
+          scitex clew stamp --json                # JSON output
         """
         try:
-            from scitex.verify import stamp as do_stamp
+            from scitex.clew import stamp as do_stamp
 
             result = do_stamp(backend=backend, service_url=service_url)
 
@@ -220,7 +220,7 @@ def register_claim_commands(verify_group):  # noqa: C901
             click.secho(f"Error: {e}", fg="red", err=True)
             sys.exit(1)
 
-    @verify_group.command("check-stamp")
+    @clew_group.command("check-stamp")
     @click.argument("stamp_id", required=False)
     @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
     def check_stamp_cmd(stamp_id, as_json):
@@ -231,11 +231,11 @@ def register_claim_commands(verify_group):  # noqa: C901
 
         \\b
         Examples:
-          scitex verify check-stamp                 # Check latest
-          scitex verify check-stamp stamp_abc123    # Check specific
+          scitex clew check-stamp                 # Check latest
+          scitex clew check-stamp stamp_abc123    # Check specific
         """
         try:
-            from scitex.verify import check_stamp
+            from scitex.clew import check_stamp
 
             result = check_stamp(stamp_id=stamp_id)
 
@@ -271,19 +271,19 @@ def register_claim_commands(verify_group):  # noqa: C901
             click.secho(f"Error: {e}", fg="red", err=True)
             sys.exit(1)
 
-    # Backward compat: hidden 'bpv' alias redirects to 'clew'
-    @verify_group.command("bpv", hidden=True)
+    # Backward compat: hidden 'bpv' alias redirects to 'chain'
+    @clew_group.command("bpv", hidden=True)
     @click.argument("target_file", type=click.Path(exists=True))
     @click.option("-v", "--verbose", is_flag=True)
     @click.option("--mermaid", is_flag=True)
     @click.option("--json", "as_json", is_flag=True)
     @click.pass_context
     def bpv_compat_cmd(ctx, target_file, verbose, mermaid, as_json):
-        """Deprecated: use 'scitex verify clew' instead."""
-        from scitex.cli.verify import verify_clew_cmd
+        """Deprecated: use 'scitex clew chain' instead."""
+        from scitex.cli.clew import verify_chain_cmd
 
         ctx.invoke(
-            verify_clew_cmd,
+            verify_chain_cmd,
             target_file=target_file,
             verbose=verbose,
             mermaid=mermaid,

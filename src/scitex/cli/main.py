@@ -26,6 +26,7 @@ from . import (
     audio,
     browser,
     capture,
+    clew,
     cloud,
     config,
     convert,
@@ -43,7 +44,6 @@ from . import (
     stats,
     template,
     tex,
-    verify,
     web,
     writer,
 )
@@ -85,6 +85,8 @@ def cli(ctx, help_recursive):
 cli.add_command(audio.audio)
 cli.add_command(browser.browser)
 cli.add_command(capture.capture)
+cli.add_command(clew.clew)
+cli.add_command(clew.clew, name="verify")  # Backward compatibility alias
 cli.add_command(cloud.cloud)
 cli.add_command(config.config)
 cli.add_command(convert.convert)
@@ -102,7 +104,6 @@ cli.add_command(social.social)
 cli.add_command(stats.stats)
 cli.add_command(template.template)
 cli.add_command(tex.tex)
-cli.add_command(verify.verify)
 cli.add_command(web.web)
 cli.add_command(writer.writer)
 

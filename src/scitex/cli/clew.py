@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # Timestamp: "2026-02-01 (ywatanabe)"
-# File: /home/ywatanabe/proj/scitex-python/src/scitex/cli/verify.py
+# File: /home/ywatanabe/proj/scitex-python/src/scitex/cli/clew.py
 """
-SciTeX CLI - Verify Commands (Hash-based verification).
+SciTeX CLI - Clew Commands (Hash-based verification).
 
 Provides commands for tracking and verifying reproducibility of computations.
 """
@@ -19,7 +19,7 @@ import click
 )
 @click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
 @click.pass_context
-def verify(ctx, help_recursive):
+def clew(ctx, help_recursive):
     """
     Hash-based verification for reproducible science.
 
@@ -33,10 +33,10 @@ def verify(ctx, help_recursive):
 
     \b
     Examples:
-      scitex verify list                          # List all runs
-      scitex verify run 2025Y-11M-18D-09h12m03s   # Verify specific run
-      scitex verify chain ./results/figure3.png  # Trace back to source
-      scitex verify status                        # Show changes
+      scitex clew list                          # List all runs
+      scitex clew run 2025Y-11M-18D-09h12m03s   # Verify specific run
+      scitex clew chain ./results/figure3.png  # Trace back to source
+      scitex clew status                        # Show changes
     """
     if help_recursive:
         _print_help_recursive(ctx)
@@ -48,20 +48,20 @@ def verify(ctx, help_recursive):
 def _print_help_recursive(ctx):
     """Print help for all commands recursively."""
     fake_parent = click.Context(click.Group(), info_name="scitex")
-    parent_ctx = click.Context(verify, info_name="verify", parent=fake_parent)
-    click.secho("━━━ scitex verify ━━━", fg="cyan", bold=True)
-    click.echo(verify.get_help(parent_ctx))
-    for name in sorted(verify.list_commands(ctx) or []):
-        cmd = verify.get_command(ctx, name)
+    parent_ctx = click.Context(clew, info_name="clew", parent=fake_parent)
+    click.secho("━━━ scitex clew ━━━", fg="cyan", bold=True)
+    click.echo(clew.get_help(parent_ctx))
+    for name in sorted(clew.list_commands(ctx) or []):
+        cmd = clew.get_command(ctx, name)
         if cmd is None:
             continue
         click.echo()
-        click.secho(f"━━━ scitex verify {name} ━━━", fg="cyan", bold=True)
+        click.secho(f"━━━ scitex clew {name} ━━━", fg="cyan", bold=True)
         with click.Context(cmd, info_name=name, parent=parent_ctx) as sub_ctx:
             click.echo(cmd.get_help(sub_ctx))
 
 
-@verify.command("list")
+@clew.command("list")
 @click.option(
     "--limit", "-n", type=int, default=50, help="Maximum number of runs to show"
 )
@@ -80,13 +80,13 @@ def list_runs(limit, filter_status, no_verify, as_json):
 
     \b
     Examples:
-      scitex verify list                    # List all runs
-      scitex verify list -n 10              # Limit to 10 runs
-      scitex verify list -s success         # Only successful runs
-      scitex verify list --no-verify        # Skip verification (faster)
+      scitex clew list                    # List all runs
+      scitex clew list -n 10              # Limit to 10 runs
+      scitex clew list -s success         # Only successful runs
+      scitex clew list --no-verify        # Skip verification (faster)
     """
     try:
-        from scitex.verify import format_list, get_db
+        from scitex.clew import format_list, get_db
 
         db = get_db()
         status_filter = None if filter_status == "all" else filter_status
@@ -124,7 +124,7 @@ def list_runs(limit, filter_status, no_verify, as_json):
         sys.exit(1)
 
 
-@verify.command("run")
+@clew.command("run")
 @click.argument("targets", nargs=-1, required=True)
 @click.option("--rerun", is_flag=True, help="Re-execute script and compare (thorough)")
 @click.option("-v", "--verbose", is_flag=True, help="Show detailed file information")
@@ -140,13 +140,13 @@ def verify_run_cmd(targets, rerun, verbose, as_json):
 
     \b
     Examples:
-      scitex verify run 2025Y-11M-18D-09h12m03s_HmH5
-      scitex verify run ./results/figure3.png
-      scitex verify run ./script.py --rerun
-      scitex verify run file1.csv file2.csv --rerun
+      scitex clew run 2025Y-11M-18D-09h12m03s_HmH5
+      scitex clew run ./results/figure3.png
+      scitex clew run ./script.py --rerun
+      scitex clew run file1.csv file2.csv --rerun
     """
     try:
-        from scitex.verify import format_run_verification, verify_by_rerun, verify_run
+        from scitex.clew import format_run_verification, verify_by_rerun, verify_run
 
         results = []
         for target in targets:
@@ -190,7 +190,7 @@ def verify_run_cmd(targets, rerun, verbose, as_json):
         sys.exit(1)
 
 
-@verify.command("chain")
+@clew.command("chain")
 @click.argument("target_file", type=click.Path(exists=True))
 @click.option("-v", "--verbose", is_flag=True, help="Show detailed information")
 @click.option("--mermaid", is_flag=True, help="Output as Mermaid diagram")
@@ -204,12 +204,12 @@ def verify_chain_cmd(target_file, verbose, mermaid, as_json):
 
     \b
     Examples:
-      scitex verify chain ./results/figure3.png
-      scitex verify chain ./results/figure3.png -v
-      scitex verify chain ./results/figure3.png --mermaid
+      scitex clew chain ./results/figure3.png
+      scitex clew chain ./results/figure3.png -v
+      scitex clew chain ./results/figure3.png --mermaid
     """
     try:
-        from scitex.verify import (
+        from scitex.clew import (
             format_chain_verification,
             generate_mermaid_dag,
             verify_chain,
@@ -257,7 +257,7 @@ def verify_chain_cmd(target_file, verbose, mermaid, as_json):
         sys.exit(1)
 
 
-@verify.command("render")
+@clew.command("render")
 @click.argument("output_path", type=click.Path())
 @click.option("--session", "-s", help="Session ID to visualize")
 @click.option("--file", "-f", "target_file", help="Target file to trace chain")
@@ -274,15 +274,15 @@ def render_cmd(output_path, session, target_file, title):
 
     \b
     Examples:
-      scitex verify render dag.html --file ./results/fig.png
-      scitex verify render dag.png --session 2025Y-11M-18D-09h12m03s
+      scitex clew render dag.html --file ./results/fig.png
+      scitex clew render dag.png --session 2025Y-11M-18D-09h12m03s
     """
     try:
         if not session and not target_file:
             click.secho("Error: Specify --session or --file", fg="red", err=True)
             sys.exit(1)
 
-        from scitex.verify import render_dag
+        from scitex.clew import render_dag
 
         result_path = render_dag(
             output_path=output_path,
@@ -297,7 +297,7 @@ def render_cmd(output_path, session, target_file, title):
         sys.exit(1)
 
 
-@verify.command("status")
+@clew.command("status")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def status_cmd(as_json):
     """
@@ -308,11 +308,11 @@ def status_cmd(as_json):
 
     \b
     Examples:
-      scitex verify status
-      scitex verify status --json
+      scitex clew status
+      scitex clew status --json
     """
     try:
-        from scitex.verify import format_status, get_status
+        from scitex.clew import format_status, get_status
 
         status = get_status()
 
@@ -329,7 +329,7 @@ def status_cmd(as_json):
         sys.exit(1)
 
 
-@verify.command("stats")
+@clew.command("stats")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def stats_cmd(as_json):
     """
@@ -337,11 +337,11 @@ def stats_cmd(as_json):
 
     \b
     Examples:
-      scitex verify stats
-      scitex verify stats --json
+      scitex clew stats
+      scitex clew stats --json
     """
     try:
-        from scitex.verify import get_db
+        from scitex.clew import get_db
 
         db = get_db()
         db_stats = db.stats()
@@ -365,7 +365,7 @@ def stats_cmd(as_json):
         sys.exit(1)
 
 
-@verify.command("clear")
+@clew.command("clear")
 @click.option("--force", "-f", is_flag=True, help="Skip confirmation")
 def clear_cmd(force):
     """
@@ -373,11 +373,11 @@ def clear_cmd(force):
 
     \b
     Examples:
-      scitex verify clear
-      scitex verify clear -f
+      scitex clew clear
+      scitex clew clear -f
     """
     try:
-        from scitex.verify import get_db
+        from scitex.clew import get_db
 
         db = get_db()
         db_stats = db.stats()
@@ -402,7 +402,7 @@ def clear_cmd(force):
         sys.exit(1)
 
 
-@verify.group(invoke_without_command=True)
+@clew.group(invoke_without_command=True)
 @click.pass_context
 def mcp(ctx):
     """
@@ -414,7 +414,7 @@ def mcp(ctx):
 
     \b
     Examples:
-      scitex verify mcp list-tools
+      scitex clew mcp list-tools
     """
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
@@ -451,18 +451,18 @@ def list_tools(verbose):
             click.echo()
 
 
-@verify.command("list-python-apis")
+@clew.command("list-python-apis")
 @click.option("-v", "--verbose", count=True, help="Verbosity: -v +doc, -vv full doc")
 @click.option("-d", "--max-depth", type=int, default=5, help="Max recursion depth")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 @click.pass_context
 def list_python_apis(ctx, verbose, max_depth, as_json):
-    """List Python APIs (alias for: scitex introspect api scitex.verify)."""
+    """List Python APIs (alias for: scitex introspect api scitex.clew)."""
     from scitex.cli.introspect import api
 
     ctx.invoke(
         api,
-        dotted_path="scitex.verify",
+        dotted_path="scitex.clew",
         verbose=verbose,
         max_depth=max_depth,
         as_json=as_json,
@@ -470,4 +470,4 @@ def list_python_apis(ctx, verbose, max_depth, as_json):
 
 
 if __name__ == "__main__":
-    verify()
+    clew()

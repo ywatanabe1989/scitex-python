@@ -48,7 +48,7 @@ class SessionManager:
 
         # Start verification tracking (silent fail)
         try:
-            from scitex.verify import on_session_start
+            from scitex.clew import on_session_start
 
             on_session_start(
                 session_id=session_id,
@@ -81,7 +81,7 @@ class SessionManager:
 
         # Stop verification tracking (silent fail)
         try:
-            from scitex.verify import on_session_close
+            from scitex.clew import on_session_close
 
             on_session_close(status=status, exit_code=exit_code)
         except Exception:

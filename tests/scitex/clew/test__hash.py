@@ -2,11 +2,11 @@
 # Timestamp: "2026-02-01 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-python/tests/scitex/verify/test__hash.py
 
-"""Tests for scitex.verify._hash module."""
+"""Tests for scitex.clew._hash module."""
 
 import pytest
 
-from scitex.verify import (
+from scitex.clew import (
     combine_hashes,
     hash_directory,
     hash_file,
