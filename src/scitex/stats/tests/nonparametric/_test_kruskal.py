@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 18:14:34 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/tests/nonparametric/_test_kruskal.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
+
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
@@ -33,8 +34,9 @@ import matplotlib
 import matplotlib.axes
 import numpy as np
 import pandas as pd
-import scitex as stx
 from scipy import stats
+
+import scitex as stx
 from scitex.logging import getLogger
 
 logger = getLogger(__name__)
@@ -178,8 +180,10 @@ def test_kruskal(
     >>> from scitex.stats.utils._normalizers import convert_results
     >>> convert_results(result, return_as='excel', path='kruskal_results.xlsx')
     """
-    from scitex.stats._utils._effect_size import (epsilon_squared,
-                                       interpret_epsilon_squared)
+    from scitex.stats._utils._effect_size import (
+        epsilon_squared,
+        interpret_epsilon_squared,
+    )
     from scitex.stats._utils._formatters import p2stars
     from scitex.stats._utils._normalizers import convert_results, force_dataframe
 
@@ -195,13 +199,13 @@ def test_kruskal(
     for i, g in enumerate(groups):
         if len(g) < 5:
             logger.warning(
-                f"Group {i+1} has only {len(g)} observations. "
+                f"Group {i + 1} has only {len(g)} observations. "
                 "Kruskal-Wallis test is most reliable with n ≥ 5 per group."
             )
 
     # Generate default names if not provided
     if var_names is None:
-        var_names = [f"Group {i+1}" for i in range(len(groups))]
+        var_names = [f"Group {i + 1}" for i in range(len(groups))]
 
     if len(var_names) != len(groups):
         raise ValueError("Number of var_names must match number of groups")
@@ -255,9 +259,7 @@ def test_kruskal(
         logger.info(
             f"Kruskal-Wallis: H = {h_stat:.3f}, p = {pvalue:.4f} {p2stars(pvalue)}"
         )
-        logger.info(
-            f"Epsilon-squared = {effect_size:.3f} ({effect_size_interp})"
-        )
+        logger.info(f"Epsilon-squared = {effect_size:.3f} ({effect_size_interp})")
 
     # Auto-enable plotting if ax is provided
     if ax is not None:
@@ -330,7 +332,7 @@ def _plot_kruskal(groups, var_names, result, ax):
         )
 
     # Significance annotation
-    if result["rejected"]:
+    if result["significant"]:
         y_max = max(np.max(g) for g in groups)
         y_min = min(np.min(g) for g in groups)
         y_range = y_max - y_min
@@ -374,7 +376,9 @@ def main(args):
     group3 = np.random.normal(9, 1, 30)
 
     result1 = test_kruskal(
-        [group1, group2, group3], var_names=["Group A", "Group B", "Group C"], verbose=True
+        [group1, group2, group3],
+        var_names=["Group A", "Group B", "Group C"],
+        verbose=True,
     )
 
     # Example 2: No significant difference
@@ -387,7 +391,7 @@ def main(args):
     result2 = test_kruskal(
         [group1, group2, group3],
         var_names=["Control", "Treatment 1", "Treatment 2"],
-        verbose=True
+        verbose=True,
     )
 
     # Example 3: Non-normal data with outliers (with visualization)
@@ -403,7 +407,7 @@ def main(args):
         [group1, group2, group3],
         var_names=["Exponential 1", "Exponential 2", "Exponential 3"],
         plot=True,
-        verbose=True
+        verbose=True,
     )
     stx.io.save(stx.plt.gcf(), "./kruskal_example3.jpg")
     stx.plt.close()
@@ -419,7 +423,7 @@ def main(args):
     result4 = test_kruskal(
         [group1, group2, group3, group4],
         var_names=["Dose 0", "Dose 1", "Dose 2", "Dose 3"],
-        verbose=True
+        verbose=True,
     )
 
     # Example 5: Ordinal data (Likert scale)
@@ -439,7 +443,7 @@ def main(args):
     result5 = test_kruskal(
         [likert1, likert2, likert3],
         var_names=["Condition A", "Condition B", "Condition C"],
-        verbose=True
+        verbose=True,
     )
     logger.info(
         f"Medians: {np.median(likert1):.1f}, {np.median(likert2):.1f}, {np.median(likert3):.1f}"
@@ -501,9 +505,7 @@ def main(args):
     logger.info(f"Columns: {df.columns.tolist()}")
 
     # Export to Excel with styling
-    convert_results(
-        test_results, return_as="excel", path="./kruskal_tests.xlsx"
-    )
+    convert_results(test_results, return_as="excel", path="./kruskal_tests.xlsx")
     logger.info("Results exported to Excel")
 
     # Export to CSV
@@ -515,12 +517,8 @@ def main(args):
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Demonstrate Kruskal-Wallis H test"
-    )
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
+    parser = argparse.ArgumentParser(description="Demonstrate Kruskal-Wallis H test")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 

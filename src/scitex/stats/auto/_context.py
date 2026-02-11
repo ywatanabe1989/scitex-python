@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-10 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/stats/auto/_context.py
 
@@ -16,11 +15,10 @@ and is used by the test selection engine to filter applicable tests.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import List, Literal, Optional, Dict, Any
+from dataclasses import dataclass
+from typing import Any, Dict, List, Literal, Optional
 
 import numpy as np
-
 
 # =============================================================================
 # Type Aliases
@@ -142,7 +140,7 @@ class StatContext:
     def __post_init__(self):
         """Validate and set defaults."""
         # Ensure sample_sizes matches n_groups
-        if len(self.sample_sizes) != self.n_groups:
+        if self.sample_sizes is not None and len(self.sample_sizes) != self.n_groups:
             raise ValueError(
                 f"sample_sizes length ({len(self.sample_sizes)}) must match "
                 f"n_groups ({self.n_groups})"
@@ -158,12 +156,12 @@ class StatContext:
 
         # Default group names if not provided
         if self.group_names is None:
-            self.group_names = [f"Group_{i+1}" for i in range(self.n_groups)]
+            self.group_names = [f"Group_{i + 1}" for i in range(self.n_groups)]
 
     @property
     def n_total(self) -> int:
         """Total sample size across all groups."""
-        return sum(self.sample_sizes)
+        return sum(self.sample_sizes) if self.sample_sizes else 0
 
     @property
     def min_n_per_group(self) -> int:
@@ -206,7 +204,7 @@ class StatContext:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "StatContext":
+    def from_dict(cls, data: Dict[str, Any]) -> StatContext:
         """Create from dictionary."""
         return cls(**data)
 
@@ -218,7 +216,7 @@ class StatContext:
         design: DesignType = "between",
         outcome_type: Optional[OutcomeType] = None,
         **kwargs,
-    ) -> "StatContext":
+    ) -> StatContext:
         """
         Create StatContext from data arrays.
 
