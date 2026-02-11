@@ -271,7 +271,7 @@ def register_claim_commands(verify_group):  # noqa: C901
             click.secho(f"Error: {e}", fg="red", err=True)
             sys.exit(1)
 
-    # Backward compat: hidden 'bpv' alias redirects to 'vbp'
+    # Backward compat: hidden 'bpv' alias redirects to 'clew'
     @verify_group.command("bpv", hidden=True)
     @click.argument("target_file", type=click.Path(exists=True))
     @click.option("-v", "--verbose", is_flag=True)
@@ -279,11 +279,11 @@ def register_claim_commands(verify_group):  # noqa: C901
     @click.option("--json", "as_json", is_flag=True)
     @click.pass_context
     def bpv_compat_cmd(ctx, target_file, verbose, mermaid, as_json):
-        """Deprecated: use 'scitex verify vbp' instead."""
-        from scitex.cli.verify import verify_vbp_cmd
+        """Deprecated: use 'scitex verify clew' instead."""
+        from scitex.cli.verify import verify_clew_cmd
 
         ctx.invoke(
-            verify_vbp_cmd,
+            verify_clew_cmd,
             target_file=target_file,
             verbose=verbose,
             mermaid=mermaid,
