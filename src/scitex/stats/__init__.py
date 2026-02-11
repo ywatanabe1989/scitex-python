@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-SciTeX Stats Module - Professional Statistical Testing Framework
+"""SciTeX Stats Module - Professional Statistical Testing Framework.
 
 Clean, normalized API for statistical analysis with publication-ready outputs.
 
@@ -31,11 +30,23 @@ Quick Start (Auto Selection):
 
 # Import organized submodules (public)
 # Internal submodule (hidden with underscore prefix)
-from . import _utils, auto, correct, descriptive, effect_sizes, posthoc, power, tests
+from . import (  # noqa: F401
+    _utils,
+    auto,
+    correct,
+    descriptive,
+    effect_sizes,
+    posthoc,
+    power,
+    tests,
+)
+
+# Convenience re-export from descriptive
+from .descriptive import describe
 
 # Check if torch is available for GPU acceleration (internal flag)
 try:
-    import torch
+    import torch  # noqa: F401
 
     _TORCH_AVAILABLE = True
 except ImportError:
@@ -43,10 +54,10 @@ except ImportError:
 
 # Export key auto module classes at top level for convenience
 # Internal imports (hidden with underscore prefix)
-from .auto import TEST_RULES as _TEST_RULES
+from .auto import TEST_RULES as _TEST_RULES  # noqa: F401
 from .auto import StatContext, StatStyle, TestRule, check_applicable
-from .auto import format_test_line as _format_test_line
-from .auto import get_menu_items as _get_menu_items
+from .auto import format_test_line as _format_test_line  # noqa: F401
+from .auto import get_menu_items as _get_menu_items  # noqa: F401
 from .auto import get_stat_style, p_to_stars, recommend_tests
 
 # =============================================================================
@@ -55,7 +66,7 @@ from .auto import get_stat_style, p_to_stars, recommend_tests
 
 # Re-export Stats from bundle module
 try:
-    from scitex.io.bundle import Stats
+    from scitex.io.bundle import Stats  # type: ignore[attr-defined]
 
     BUNDLE_AVAILABLE = True
 except ImportError:
@@ -183,7 +194,11 @@ def test_result_to_stats(result: dict) -> "Stats":
 # Figrecipe Integration (for plot annotations)
 # =============================================================================
 
-from ._figrecipe_integration import annotate, load_and_annotate, to_figrecipe
+from ._figrecipe_integration import (  # noqa: E402
+    annotate,
+    load_and_annotate,
+    to_figrecipe,
+)
 
 # =============================================================================
 # .stats Bundle Support
@@ -224,7 +239,7 @@ def save_stats(
         p = p.with_suffix(".zip")
 
     # Create bundle
-    bundle = Bundle(p, create=True, bundle_type="stats")
+    bundle = Bundle(p, create=True, bundle_type="stats")  # type: ignore[call-arg]
 
     # Convert comparisons to Stats
     if comparisons:
@@ -296,7 +311,7 @@ def load_stats(path):
 
     return {
         "comparisons": comparisons,
-        "metadata": bundle.node.to_dict() if bundle.node else {},
+        "metadata": bundle.node.to_dict() if bundle.node else {},  # type: ignore[attr-defined]
     }
 
 
