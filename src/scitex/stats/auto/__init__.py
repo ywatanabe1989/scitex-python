@@ -58,6 +58,17 @@ from ._context import OutcomeType as _OutcomeType
 from ._context import StatContext
 
 # =============================================================================
+# Decision Tree (public)
+# =============================================================================
+from ._decision_tree import (
+    DECISION_TREE,
+    DecisionNode,
+    get_decision_tree,
+    get_leaf_node_test_ids,
+    render_flowchart_svg,
+)
+
+# =============================================================================
 # Formatting (public)
 # =============================================================================
 # Internal formatting (hidden)
@@ -65,22 +76,19 @@ from ._formatting import CorrectionMethod as _CorrectionMethod
 from ._formatting import EffectResultDict as _EffectResultDict
 from ._formatting import SummaryStatsDict as _SummaryStatsDict
 from ._formatting import TestResultDict as _TestResultDict
-from ._formatting import apply_multiple_correction
+from ._formatting import apply_multiple_correction, format_test_line, p_to_stars
 from ._formatting import compute_summary_from_groups as _compute_summary_from_groups
 from ._formatting import compute_summary_stats as _compute_summary_stats
 from ._formatting import format_for_inspector as _format_for_inspector
-from ._formatting import format_test_line
 from ._formatting import format_test_line_compact as _format_test_line_compact
 from ._formatting import get_stat_symbol as _get_stat_symbol
-from ._formatting import p_to_stars
 
 # Internal rules (hidden)
 # =============================================================================
 # Rules (public)
 # =============================================================================
-from ._rules import TEST_RULES
+from ._rules import TEST_RULES, TestRule
 from ._rules import TestFamily as _TestFamily
-from ._rules import TestRule
 from ._rules import get_test_rule as _get_test_rule
 from ._rules import list_tests_by_family as _list_tests_by_family
 
@@ -122,6 +130,12 @@ from ._styles import list_styles as _list_styles
 __all__ = [
     # Context
     "StatContext",
+    # Decision Tree
+    "DecisionNode",
+    "DECISION_TREE",
+    "get_decision_tree",
+    "render_flowchart_svg",
+    "get_leaf_node_test_ids",
     # Rules
     "TestRule",
     "TEST_RULES",
