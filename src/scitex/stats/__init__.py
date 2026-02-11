@@ -44,6 +44,38 @@ from . import (  # noqa: F401
 # Convenience re-export from descriptive
 from .descriptive import describe
 
+# Re-export all 23 test functions at stx.stats level
+from .tests import (  # noqa: F401
+    test_anova,
+    test_anova_2way,
+    test_anova_rm,
+    # Nonparametric (5)
+    test_brunner_munzel,
+    # Categorical (4)
+    test_chi2,
+    test_cochran_q,
+    test_fisher,
+    test_friedman,
+    test_kendall,
+    test_kruskal,
+    test_ks_1samp,
+    test_ks_2samp,
+    test_mannwhitneyu,
+    test_mcnemar,
+    test_normality,
+    # Correlation (4)
+    test_pearson,
+    # Normality (4)
+    test_shapiro,
+    test_spearman,
+    test_theilsen,
+    test_ttest_1samp,
+    # Parametric (6)
+    test_ttest_ind,
+    test_ttest_rel,
+    test_wilcoxon,
+)
+
 # Check if torch is available for GPU acceleration (internal flag)
 try:
     import torch  # noqa: F401
@@ -55,10 +87,17 @@ except ImportError:
 # Export key auto module classes at top level for convenience
 # Internal imports (hidden with underscore prefix)
 from .auto import TEST_RULES as _TEST_RULES  # noqa: F401
-from .auto import StatContext, StatStyle, TestRule, check_applicable
+from .auto import (
+    StatContext,
+    StatStyle,
+    TestRule,
+    check_applicable,
+    get_stat_style,
+    p_to_stars,
+    recommend_tests,
+)
 from .auto import format_test_line as _format_test_line  # noqa: F401
 from .auto import get_menu_items as _get_menu_items  # noqa: F401
-from .auto import get_stat_style, p_to_stars, recommend_tests
 
 # =============================================================================
 # Stats Schema - Use scitex.io.bundle.Stats as single source of truth
@@ -326,6 +365,35 @@ __all__ = [
     "tests",
     # Descriptive convenience export
     "describe",
+    # Statistical tests - public API (23 tests)
+    # Parametric (6)
+    "test_ttest_ind",
+    "test_ttest_rel",
+    "test_ttest_1samp",
+    "test_anova",
+    "test_anova_rm",
+    "test_anova_2way",
+    # Nonparametric (5)
+    "test_brunner_munzel",
+    "test_wilcoxon",
+    "test_kruskal",
+    "test_mannwhitneyu",
+    "test_friedman",
+    # Correlation (4)
+    "test_pearson",
+    "test_spearman",
+    "test_kendall",
+    "test_theilsen",
+    # Categorical (4)
+    "test_chi2",
+    "test_fisher",
+    "test_mcnemar",
+    "test_cochran_q",
+    # Normality (4)
+    "test_shapiro",
+    "test_normality",
+    "test_ks_1samp",
+    "test_ks_2samp",
     # Stats schema
     "Stats",
     # Auto module convenience exports

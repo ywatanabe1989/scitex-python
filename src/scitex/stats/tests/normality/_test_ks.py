@@ -186,6 +186,7 @@ def test_ks_1samp(
     result = {
         'test_method': 'Kolmogorov-Smirnov test (1-sample)',
         'statistic': round(d_stat, decimals),
+        'stat_symbol': 'D',
         'n': n_x,
         'var_x': var_x,
         'pvalue': round(pvalue, decimals),
@@ -346,6 +347,7 @@ def test_ks_2samp(
     result = {
         'test_method': 'Kolmogorov-Smirnov test (2-sample)',
         'statistic': round(d_stat, decimals),
+        'stat_symbol': 'D',
         'n_x': n_x,
         'n_y': n_y,
         'var_x': var_x,

@@ -258,6 +258,7 @@ def test_anova(
     result = {
         'test_method': 'One-way ANOVA',
         'statistic': round(f_stat, decimals),
+        'stat_symbol': 'F',
         'n_groups': n_groups,
         'n_samples': n_samples,
         'df_between': df_between,

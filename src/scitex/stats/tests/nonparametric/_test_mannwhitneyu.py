@@ -216,6 +216,7 @@ def test_mannwhitneyu(
     result = {
         'test_method': 'Mann-Whitney U test',
         'statistic': round(u_stat, decimals),
+        'stat_symbol': 'U',
         'n_x': n_x,
         'n_y': n_y,
         'var_x': var_x,

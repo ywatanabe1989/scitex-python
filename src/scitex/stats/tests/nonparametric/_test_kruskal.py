@@ -227,6 +227,7 @@ def test_kruskal(
     result = {
         "test_method": "Kruskal-Wallis H test",
         "statistic": round(h_stat, decimals),
+        "stat_symbol": "H",
         "n_groups": n_groups,
         "n_samples": n_samples,
         "var_names": var_names,

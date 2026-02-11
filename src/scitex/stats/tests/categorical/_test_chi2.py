@@ -304,6 +304,7 @@ def test_chi2(
     result = {
         "test_method": "Chi-square test of independence",
         "statistic": round(chi2_stat, decimals),
+        "stat_symbol": "χ²",
         "pvalue": round(pvalue, decimals),
         "df": dof,
         "alpha": alpha,

@@ -208,6 +208,7 @@ def test_spearman(
     result = {
         "test_method": "Spearman's rank correlation",
         "statistic": round(rho, decimals),
+        "stat_symbol": "r",
         "pvalue": round(pvalue, decimals),
         "alternative": alternative,
         "alpha": alpha,

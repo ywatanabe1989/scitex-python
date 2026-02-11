@@ -212,6 +212,7 @@ def test_brunner_munzel(
     result = {
         "test_method": "Brunner-Munzel test",
         "statistic": w_stat,
+        "stat_symbol": "BM",
         "alternative": alternative,
         "n_x": n_x,
         "n_y": n_y,

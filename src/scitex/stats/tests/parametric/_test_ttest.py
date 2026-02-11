@@ -197,6 +197,7 @@ def test_ttest_ind(
     result = {
         'test_method': test_method,
         'statistic': t_stat,
+        'stat_symbol': 't',
         'alternative': alternative,
         'n_x': n_x,
         'n_y': n_y,
@@ -453,6 +454,7 @@ def test_ttest_rel(
     result = {
         'test_method': "Paired t-test",
         'statistic': t_stat,
+        'stat_symbol': 't',
         'alternative': alternative,
         'n_pairs': n_pairs,
         'var_x': var_x,
@@ -631,6 +633,7 @@ def test_ttest_1samp(
     result = {
         'test_method': "One-sample t-test",
         'statistic': t_stat,
+        'stat_symbol': 't',
         'alternative': alternative,
         'n_x': n_x,
         'var_x': var_x,

@@ -237,6 +237,7 @@ def test_pearson(
     result = {
         "test_method": "Pearson correlation",
         "statistic": round(r, decimals),
+        "stat_symbol": "r",
         "n": n,
         "var_x": var_x,
         "var_y": var_y,

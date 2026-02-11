@@ -77,19 +77,22 @@ from ._formatting import CorrectionMethod as _CorrectionMethod
 from ._formatting import EffectResultDict as _EffectResultDict
 from ._formatting import SummaryStatsDict as _SummaryStatsDict
 from ._formatting import TestResultDict as _TestResultDict
-from ._formatting import apply_multiple_correction, format_test_line, p_to_stars
+from ._formatting import apply_multiple_correction
 from ._formatting import compute_summary_from_groups as _compute_summary_from_groups
 from ._formatting import compute_summary_stats as _compute_summary_stats
 from ._formatting import format_for_inspector as _format_for_inspector
+from ._formatting import format_test_line
 from ._formatting import format_test_line_compact as _format_test_line_compact
 from ._formatting import get_stat_symbol as _get_stat_symbol
+from ._formatting import p_to_stars
 
 # Internal rules (hidden)
 # =============================================================================
 # Rules (public)
 # =============================================================================
-from ._rules import TEST_RULES, TestRule
+from ._rules import TEST_RULES
 from ._rules import TestFamily as _TestFamily
+from ._rules import TestRule
 from ._rules import get_test_rule as _get_test_rule
 from ._rules import list_tests_by_family as _list_tests_by_family
 

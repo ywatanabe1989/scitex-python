@@ -224,6 +224,7 @@ def test_wilcoxon(
     result = {
         'test_method': 'Wilcoxon signed-rank test',
         'statistic': w_stat,
+        'stat_symbol': 'W',
         'alternative': alternative,
         'n_pairs': n_nonzero,
         'n_zeros': n_zeros,

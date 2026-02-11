@@ -179,6 +179,7 @@ def test_shapiro(
     result = {
         'test_method': 'Shapiro-Wilk test',
         'statistic': w_stat,
+        'stat_symbol': 'W',
         'n': n_x,
         'var_x': var_x,
         'pvalue': pvalue,
