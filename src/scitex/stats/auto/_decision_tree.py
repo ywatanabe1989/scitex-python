@@ -308,6 +308,29 @@ def get_decision_tree() -> Dict[str, Any]:
     }
 
 
+def render_flowchart_mermaid() -> str:
+    """Render the decision tree as Mermaid markup text.
+
+    Returns Mermaid text suitable for client-side rendering with Mermaid.js.
+    This avoids the need for mermaid-cli (mmdc) on the server.
+
+    Returns
+    -------
+    str
+        Mermaid markup string.
+    """
+    from figrecipe import Diagram
+
+    d = Diagram(type="decision", title="Which Statistical Test?")
+
+    for node in DECISION_TREE.values():
+        d.add_node(node.id, node.label, shape=node.shape, emphasis=node.emphasis)
+        for edge_label, child_id in node.children:
+            d.add_edge(node.id, child_id, label=edge_label)
+
+    return d.to_mermaid()
+
+
 def render_flowchart_svg(output_path: Optional[Union[str, Path]] = None) -> str:
     """Render the decision tree as an SVG string using figrecipe.Diagram.
 
@@ -363,6 +386,7 @@ __all__ = [
     "DecisionNode",
     "DECISION_TREE",
     "get_decision_tree",
+    "render_flowchart_mermaid",
     "render_flowchart_svg",
     "get_leaf_node_test_ids",
 ]

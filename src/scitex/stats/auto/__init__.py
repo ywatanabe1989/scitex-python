@@ -65,6 +65,7 @@ from ._decision_tree import (
     DecisionNode,
     get_decision_tree,
     get_leaf_node_test_ids,
+    render_flowchart_mermaid,
     render_flowchart_svg,
 )
 
@@ -134,6 +135,7 @@ __all__ = [
     "DecisionNode",
     "DECISION_TREE",
     "get_decision_tree",
+    "render_flowchart_mermaid",
     "render_flowchart_svg",
     "get_leaf_node_test_ids",
     # Rules
