@@ -4,9 +4,9 @@
 !-- File: /home/ywatanabe/proj/scitex-python/examples/scitex/verify/README.md
 !-- --- -->
 
-# SciTeX Verify Module Examples
+# SciTeX Clew Module Examples
 
-This directory demonstrates the **verify module** - hash-based verification for reproducible science.
+This directory demonstrates the **clew module** - hash-based verification for reproducible science.
 
 ## DAG Visualization
 
@@ -85,7 +85,7 @@ python 07_merge.py --input_a=custom_path.csv
 
 ## Verification States
 
-The verify module tracks three verification states:
+The clew module tracks three verification states:
 
 ### Cache-Verified (✓)
 Fast comparison of stored vs current file hashes.
@@ -100,7 +100,7 @@ def main():
 ### Rerun-Verified (✓✓)
 Full re-execution confirms outputs match stored hashes.
 ```python
-from scitex.verify import verify_by_rerun
+from scitex.clew import verify_by_rerun
 result = verify_by_rerun("01_source_a_out/source_A.csv")
 print("✓✓" if result.is_verified else "✗")
 ```
@@ -120,37 +120,37 @@ data.to_csv("clean_C.csv", index=False)
 
 ```bash
 # List tracked runs
-scitex verify list
+scitex clew list
 
 # Check status (like git status)
-scitex verify status
+scitex clew status
 
 # Verify specific run
-scitex verify run SESSION_ID
+scitex clew run SESSION_ID
 
 # Trace file dependencies
-scitex verify chain 08_analyze_out/report.json
+scitex clew chain 08_analyze_out/report.json
 ```
 
 ## Programmatic API
 
 ```python
-from scitex import verify
+from scitex import clew
 
 # Database stats
-stats = verify.stats()
+stats = clew.stats()
 print(f"Total runs: {stats['total_runs']}")
 
 # List recent runs
-runs = verify.list_runs(limit=10)
+runs = clew.list_runs(limit=10)
 
 # Verify a chain
-chain = verify.chain("08_analyze_out/report.json")
+chain = clew.chain("08_analyze_out/report.json")
 print(f"Chain verified: {chain.is_verified}")
 print(f"Chain length: {chain.chain_length}")
 
 # Generate DAG visualization
-from scitex.verify import render_dag
+from scitex.clew import render_dag
 render_dag("dag.html", target_file="report.json", show_hashes=True)
 render_dag("dag.png", target_file="report.json")  # Requires mmdc
 ```
@@ -202,7 +202,7 @@ source_C.csv (✓) ──→ clean_C.csv (✗) ──┘
 ## See Also
 
 - `src/scitex/verify/README.md` - Module implementation details
-- `scitex verify --help` - CLI documentation
+- `scitex clew --help` - CLI documentation
 - `scitex://module/session` - MCP resource for session tracking
 
 <!-- EOF -->

@@ -66,9 +66,9 @@ def main(
     # 4. Generate verification summary
     logger.info("\n=== Verification Summary ===")
     logger.info("Use these commands for more details:")
-    logger.info("  scitex verify status     # Show changed items")
-    logger.info("  scitex verify list       # List all tracked runs")
-    logger.info("  scitex verify chain FILE # Trace file dependencies")
+    logger.info("  scitex clew status     # Show changed items")
+    logger.info("  scitex clew list       # List all tracked runs")
+    logger.info("  scitex clew chain FILE # Trace file dependencies")
 
     return 0
 

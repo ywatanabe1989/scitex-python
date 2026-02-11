@@ -15,7 +15,7 @@ SCRIPT_DIR = Path(__file__).parent
 
 def _verify_by_rerun():
     """Verify source_A by re-running to demonstrate ✓✓ badge."""
-    from scitex.verify import verify_by_rerun
+    from scitex.clew import verify_by_rerun
 
     target = str(SCRIPT_DIR / "01_source_a_out" / "source_A.csv")
     result = verify_by_rerun(target)
@@ -36,7 +36,7 @@ def _break_chain():
 
 def _visualize():
     """Generate DAG visualization in multiple formats."""
-    from scitex.verify import render_dag
+    from scitex.clew import render_dag
 
     target = str(SCRIPT_DIR / "08_analyze_out" / "report.json")
     title = "Verification DAG (Multi-Script Pipeline)"
