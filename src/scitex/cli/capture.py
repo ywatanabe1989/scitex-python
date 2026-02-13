@@ -406,32 +406,55 @@ def doctor():
 
 
 @mcp.command("list-tools")
-def list_tools():
-    """
-    List available MCP tools
-
-    \b
-    Example:
-      scitex capture mcp list-tools
-    """
+@click.option("-v", "--verbose", count=True, help="-v params, -vv returns")
+def list_tools(verbose):
+    """List available MCP tools for capture."""
     click.secho("Capture MCP Tools", fg="cyan", bold=True)
     click.echo()
+    # (name, desc, params, returns)
     tools = [
-        ("capture_capture_screenshot", "Capture screenshot"),
-        ("capture_capture_window", "Capture specific window"),
-        ("capture_start_monitoring", "Start continuous capture"),
-        ("capture_stop_monitoring", "Stop monitoring"),
-        ("capture_get_monitoring_status", "Get monitoring status"),
-        ("capture_analyze_screenshot", "Analyze screenshot for errors"),
-        ("capture_list_recent_screenshots", "List recent screenshots"),
-        ("capture_clear_cache", "Clear screenshot cache"),
-        ("capture_create_gif", "Create animated GIF"),
-        ("capture_list_sessions", "List monitoring sessions"),
-        ("capture_get_info", "Get monitor/window info"),
-        ("capture_list_windows", "List visible windows"),
+        (
+            "capture_screenshot",
+            "Capture screenshot",
+            "output_path=None, monitor=0",
+            "str",
+        ),
+        (
+            "capture_window",
+            "Capture specific window",
+            "window_id: str, output=None",
+            "str",
+        ),
+        (
+            "start_monitoring",
+            "Start continuous capture",
+            "interval=5.0, monitor=0",
+            "str",
+        ),
+        ("stop_monitoring", "Stop monitoring", "session_id=None", "str"),
+        ("get_monitoring_status", "Get monitoring status", "", "JSON"),
+        (
+            "analyze_screenshot",
+            "Analyze screenshot for errors",
+            "image_path: str",
+            "JSON",
+        ),
+        ("list_recent_screenshots", "List recent screenshots", "limit=10", "JSON"),
+        ("clear_cache", "Clear screenshot cache", "older_than_hours=24", "JSON"),
+        ("create_gif", "Create animated GIF", "session_id: str, output=None", "str"),
+        ("list_sessions", "List monitoring sessions", "", "JSON"),
+        ("get_info", "Get monitor/window info", "", "JSON"),
+        ("list_windows", "List visible windows", "", "JSON"),
     ]
-    for name, desc in tools:
-        click.echo(f"  {name}: {desc}")
+    for name, desc, params, returns in tools:
+        click.secho(f"  capture_{name}", fg="green", bold=True, nl=False)
+        click.echo(f": {desc}")
+        if verbose >= 1 and params:
+            click.echo(f"    params: {params}")
+        if verbose >= 2:
+            click.echo(f"    returns: {returns}")
+        if verbose >= 1:
+            click.echo()
 
 
 @capture.command("list-python-apis")

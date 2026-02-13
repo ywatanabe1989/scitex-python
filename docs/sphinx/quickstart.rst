@@ -1,163 +1,189 @@
-Quick Start Guide
-=================
+Quick Start
+===========
 
-This guide will help you get started with SciTeX in just a few minutes.
+Three Interfaces
+----------------
 
-Basic Usage
------------
+SciTeX exposes the same capabilities through three interfaces:
+Python API, CLI commands, and MCP tools for AI agents.
 
-1. **Import and Initialize**
+Python API
+^^^^^^^^^^
 
-   .. code-block:: python
+``@stx.session`` -- Reproducible Experiment Tracking
 
-       import scitex
-       import sys
-       import matplotlib.pyplot as plt
-       
-       # Start a managed session
-       CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
+.. code-block:: python
 
-2. **Load and Save Data**
+   import scitex as stx
 
-   .. code-block:: python
+   @stx.session
+   def main(filename="demo.jpg"):
+       fig, ax = stx.plt.subplots()
+       ax.plot_line(t, signal)
+       ax.set_xyt("Time (s)", "Amplitude", "Title")
+       stx.io.save(fig, filename)
+       return 0
 
-       # Load data (auto-detects format)
-       data = scitex.io.load("data.pkl")
-       
-       # Save data (auto-detects format from extension)
-       scitex.io.save(data, "results.npy")
+Output:
 
-3. **Create Enhanced Plots**
+.. code-block:: text
 
-   .. code-block:: python
+   script_out/FINISHED_SUCCESS/2025-01-08_12-30-00_AbC1/
+   |-- demo.jpg                    # Figure with embedded metadata
+   |-- demo.csv                    # Auto-exported plot data
+   |-- CONFIGS/CONFIG.yaml         # Reproducible parameters
+   +-- logs/{stdout,stderr}.log    # Execution logs
 
-       # Create plots with automatic data export
-       fig, ax = scitex.plt.subplots()
-       ax.plot([1, 2, 3], [1, 4, 9])
-       ax.set_xlabel("X")
-       ax.set_ylabel("Y²")
-       plt.show()
-       # Data automatically saved to CSV alongside plot
+``stx.io`` -- Universal File I/O (30+ formats)
 
-4. **Clean Up**
+.. code-block:: python
 
-   .. code-block:: python
+   stx.io.save(df, "output.csv")
+   stx.io.save(fig, "output.jpg")
+   df = stx.io.load("output.csv")
 
-       # Always close to save logs
-       scitex.gen.close(CONFIG)
+``stx.stats`` -- Publication-Ready Statistics (23 tests)
+
+.. code-block:: python
+
+   result = stx.stats.test_ttest_ind(group1, group2, return_as="dataframe")
+   # Includes: p-value, effect size, CI, normality check, power
+
+``stx.plt`` -- Publication-Ready Figures
+
+.. code-block:: python
+
+   fig, ax = stx.plt.subplots()
+   ax.plot_line(x, y, label="signal")
+   ax.set_xyt("Time (s)", "Amplitude", "Sine Wave")
+   stx.io.save(fig, "plot.png")
+   # Creates: plot.png + plot.csv + plot.yaml (recipe for reproduction)
+
+``stx.scholar`` -- Literature Management
+
+.. code-block:: python
+
+   # Enrich BibTeX with abstracts, DOIs, citation counts
+   stx.scholar.enrich_bibtex("refs.bib", add_abstracts=True)
+
+CLI Commands
+^^^^^^^^^^^^
+
+.. code-block:: bash
+
+   scitex --help-recursive              # Show all commands
+   scitex scholar fetch "10.1038/..."   # Download paper by DOI
+   scitex scholar bibtex refs.bib       # Enrich BibTeX
+   scitex stats recommend               # Suggest statistical tests
+   scitex audio speak "Done"            # Text-to-speech
+   scitex capture snap                  # Screenshot
+
+MCP Tools (148 tools for AI agents)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Turn AI agents into autonomous scientific researchers.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 10 70
+
+   * - Category
+     - Tools
+     - Description
+   * - scholar
+     - 23
+     - PDF download, metadata enrichment
+   * - capture
+     - 12
+     - Screen monitoring and capture
+   * - introspect
+     - 12
+     - Python code introspection
+   * - audio
+     - 10
+     - Text-to-speech, audio playback
+   * - stats
+     - 10
+     - Automated statistical testing
+   * - plt
+     - 9
+     - Matplotlib figure creation
+   * - diagram
+     - 9
+     - Mermaid and Graphviz diagrams
+   * - social
+     - 7
+     - Social media posting
+   * - writer
+     - 28
+     - LaTeX manuscript compilation
+   * - template
+     - 6
+     - Project scaffolding
+   * - ui
+     - 5
+     - Notifications
+
+Configure in Claude Desktop (``~/.config/claude/claude_desktop_config.json``):
+
+.. code-block:: json
+
+   {
+     "mcpServers": {
+       "scitex": {
+         "command": "scitex",
+         "args": ["mcp", "start"]
+       }
+     }
+   }
 
 Complete Example
 ----------------
 
-Here's a complete example of a typical SciTeX workflow:
+A typical research script combining session, I/O, plotting, and statistics:
 
 .. code-block:: python
 
-    import scitex
-    import numpy as np
-    import sys
-    import matplotlib.pyplot as plt
-    
-    # Initialize SciTeX
-    CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.gen.start(sys, plt)
-    
-    try:
-        # Generate sample data
-        x = np.linspace(0, 10, 100)
-        y = np.sin(x) + np.random.normal(0, 0.1, 100)
-        
-        # Save data
-        data = {"x": x, "y": y}
-        scitex.io.save(data, "sample_data.pkl")
-        
-        # Create visualization
-        fig, ax = scitex.plt.subplots(figsize=(8, 6))
-        ax.plot(x, y, 'o', alpha=0.5, label='Noisy data')
-        ax.plot(x, np.sin(x), 'r-', linewidth=2, label='True signal')
-        ax.set_xlabel("Time (s)")
-        ax.set_ylabel("Amplitude")
-        ax.legend()
-        ax.set_title("Sample Signal with Noise")
-        
-        # Signal processing
-        from scitex.dsp import filt
-        filtered = filt.lowpass(y, fs=10, cutoff=1)
-        ax.plot(x, filtered, 'g--', linewidth=2, label='Filtered')
-        ax.legend()
-        
-        # Save figure with auto-exported data
-        plt.savefig("signal_analysis.png")
-        
-        # Statistical analysis
-        correlation = scitex.stats.corr_test(x, y)
-        print(f"Correlation: {correlation}")
-        
-    finally:
-        # Clean up - saves all logs
-        scitex.gen.close(CONFIG)
+   import scitex as stx
 
-Key Concepts
-------------
+   @stx.session
+   def main(
+       n=200,
+       noise=0.1,
+       CONFIG=stx.INJECTED,
+       plt=stx.INJECTED,
+       logger=stx.INJECTED,
+   ):
+       """Analyze noisy sine wave."""
+       import numpy as np
 
-1. **Session Management**: Always use ``start()`` and ``close()``
-2. **Automatic Logging**: All stdout/stderr is logged to timestamped files
-3. **Format Detection**: I/O functions automatically detect file formats
-4. **Data Preservation**: Plots automatically export underlying data
-5. **Consistent API**: Similar patterns across all modules
+       # Generate data
+       x = np.linspace(0, 4 * np.pi, n)
+       y_clean = np.sin(x)
+       y_noisy = y_clean + np.random.normal(0, noise, n)
+
+       # Save raw data
+       stx.io.save({"x": x, "y_clean": y_clean, "y_noisy": y_noisy}, "data.npz")
+
+       # Visualize
+       fig, ax = plt.subplots()
+       ax.plot_scatter(x, y_noisy, alpha=0.3, label="Noisy")
+       ax.plot_line(x, y_clean, color="red", label="True")
+       ax.set_xyt("x", "y", f"Sine Wave (noise={noise})")
+       stx.io.save(fig, "sine.png")
+
+       # Correlation between noisy and clean
+       result = stx.stats.test_pearson(y_clean, y_noisy)
+       logger.info(f"Pearson r={result.effect_size:.3f}, p={result.p_value:.1e}")
+
+       # Save summary
+       stx.io.save({"r": result.effect_size, "p": result.p_value}, "stats.yaml")
+
+       return 0
 
 Next Steps
 ----------
 
-- Explore :doc:`modules/index` for detailed module documentation
-- Check out :doc:`examples/index` for more examples
-- Read :doc:`best_practices` for tips and recommendations
-
-Common Patterns
----------------
-
-**Loading Multiple Files**
-
-.. code-block:: python
-
-    import scitex
-    from pathlib import Path
-    
-    # Load all CSV files in a directory
-    data_files = scitex.io.glob("./data/*.csv")
-    datasets = {f: scitex.io.load(f) for f in data_files}
-
-**Batch Processing**
-
-.. code-block:: python
-
-    # Process multiple datasets
-    results = {}
-    for name, data in datasets.items():
-        # Create output directory
-        out_dir = scitex.gen.mk_spath(f"./results/{name}/")
-        
-        # Process
-        processed = process_data(data)
-        
-        # Save results
-        scitex.io.save(processed, out_dir + "processed.pkl")
-        results[name] = processed
-
-**Configuration Files**
-
-.. code-block:: python
-
-    # Load project configuration
-    config = scitex.io.load("./config/experiment.yaml")
-    
-    # Start with custom config
-    CONFIG, *_ = scitex.gen.start(CONFIG=config)
-
-Tips
-----
-
-- Use ``scitex.io.load()`` for any file type - it auto-detects the format
-- Take advantage of ``scitex.plt`` for publication-ready figures
-- Use ``scitex.gen.mk_spath()`` to organize outputs with timestamps
-- Leverage GPU acceleration in ``scitex.dsp`` for signal processing
-- Check logs in ``[script_name]_out/`` directory for debugging
+- :doc:`core_concepts` -- Architecture and design principles
+- :doc:`modules/index` -- Detailed module documentation
+- :doc:`gallery` -- Plot examples

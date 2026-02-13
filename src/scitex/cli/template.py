@@ -110,7 +110,7 @@ def list_templates(as_json):
 @template.command()
 @click.argument(
     "template_type",
-    type=click.Choice(["research", "pip-project", "singularity", "paper"]),
+    type=click.Choice(["research", "minimal", "pip-project", "singularity", "paper"]),
 )
 @click.argument("destination", type=click.Path())
 @click.option(
@@ -129,6 +129,7 @@ def clone(template_type, destination, git_strategy, branch, tag):
     \b
     Template Types:
       research    - Full scientific workflow (scripts, data, docs, results)
+      minimal     - Minimal SciTeX structure (writer, scholar, visualizer)
       pip-project - Python package (src, tests, docs, CI/CD)
       singularity - Container-based (definition files, build scripts)
       paper       - Academic paper (LaTeX, BibTeX, figures)
@@ -143,6 +144,7 @@ def clone(template_type, destination, git_strategy, branch, tag):
     \b
     Examples:
       scitex template clone research ./my-research
+      scitex template clone minimal ./my-project
       scitex template clone pip-project ./my-package --git-strategy parent
       scitex template clone paper ./manuscript --branch develop
     """
@@ -156,33 +158,17 @@ def clone(template_type, destination, git_strategy, branch, tag):
         if git_strategy == "none":
             git_strategy = None
 
-        # Map template types to clone functions
-        clone_funcs = {
-            "research": "clone_research",
-            "pip-project": "clone_pip_project",
-            "singularity": "clone_singularity",
-            "paper": "clone_writer_directory",
-        }
-
-        func_name = clone_funcs[template_type]
-
-        # Import the appropriate function
-        from scitex import template as tmpl_module
-
-        clone_func = getattr(tmpl_module, func_name)
+        from scitex.template import clone_template as _clone_template
 
         click.echo(f"Cloning {template_type} template to {destination}...")
 
-        # Call clone function
-        kwargs = {"path": destination}
-        if git_strategy is not None:
-            kwargs["git_strategy"] = git_strategy
-        if branch:
-            kwargs["branch"] = branch
-        if tag:
-            kwargs["tag"] = tag
-
-        result = clone_func(**kwargs)
+        result = _clone_template(
+            template_id=template_type,
+            project_dir=destination,
+            git_strategy=git_strategy,
+            branch=branch,
+            tag=tag,
+        )
 
         if result:
             dest_path = Path(destination).absolute()

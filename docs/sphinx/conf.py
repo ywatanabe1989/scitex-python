@@ -13,9 +13,9 @@ sys.path.insert(0, os.path.abspath("../../src"))
 # -- Project information -----------------------------------------------------
 
 project = "SciTeX"
-copyright = "2025, Yusuke Watanabe"
+copyright = "2024-2026, Yusuke Watanabe"
 author = "Yusuke Watanabe"
-release = "2.0.0"
+release = "2.17.8"
 
 # -- General configuration ---------------------------------------------------
 
@@ -38,9 +38,9 @@ extensions = [
 autodoc_default_options = {
     "members": True,
     "member-order": "bysource",
-    "special-members": "__init__",
-    "undoc-members": True,
-    "exclude-members": "__weakref__",
+    "undoc-members": False,
+    "private-members": False,
+    "exclude-members": "__weakref__,__init__,__dict__,__module__",
 }
 
 # Mock imports for packages with system dependencies that can't be installed on RTD
@@ -66,7 +66,7 @@ autosummary_generate = True
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = True
-napoleon_include_private_with_doc = True
+napoleon_include_private_with_doc = False
 napoleon_include_special_with_doc = True
 napoleon_use_admonition_for_examples = True
 napoleon_use_admonition_for_notes = True
@@ -120,9 +120,9 @@ html_favicon = None  # Add path to favicon if available
 html_context = {
     "display_github": True,
     "github_user": "ywatanabe1989",
-    "github_repo": "SciTeX-Code",
-    "github_version": "main",
-    "conf_py_path": "/docs/",
+    "github_repo": "scitex-python",
+    "github_version": "develop",
+    "conf_py_path": "/docs/sphinx/",
 }
 
 # nbsphinx configuration for Jupyter notebooks
@@ -153,3 +153,29 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "torch": ("https://pytorch.org/docs/stable/", None),
 }
+
+
+# -- Hide private/internal members from autodoc --------------------------------
+
+
+def autodoc_skip_member(app, what, name, obj, skip, options):
+    """Skip private members (starting with _) in all autodoc output."""
+    # Skip any name starting with underscore (private/internal)
+    if name.startswith("_"):
+        return True
+    # Also check the fully qualified name for private components
+    full_name = getattr(obj, "__qualname__", "") or ""
+    if any(part.startswith("_") for part in full_name.split(".")):
+        return True
+    return skip
+
+
+def autodoc_process_bases(app, name, obj, options, bases):
+    """Filter out private base classes from inheritance display."""
+    return [b for b in bases if not getattr(b, "__name__", "").startswith("_")]
+
+
+def setup(app):
+    """Register Sphinx event hooks for filtering private members."""
+    app.connect("autodoc-skip-member", autodoc_skip_member)
+    app.connect("autodoc-process-bases", autodoc_process_bases)

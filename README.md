@@ -237,7 +237,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md).
 <p align="center">
   <a href="https://scitex.ai" target="_blank"><img src="docs/assets/images/scitex-icon-navy-inverted.png" alt="SciTeX" width="40"/></a>
   <br>
-  AGPL-3.0 · ywatanabe@scitex.ai
+  AGPL-3.0
 </p>
 
 <!-- EOF -->

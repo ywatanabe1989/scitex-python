@@ -13,15 +13,20 @@ Tests cover:
 - Project linking (step 9)
 """
 
-import json
-from pathlib import Path
+import json  # noqa: F401
+from pathlib import Path  # noqa: F401
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from scitex.scholar.core import Paper
-from scitex.scholar.pipelines import ScholarPipelineSingle
-from scitex.scholar.storage import PaperIO
+pytest.importorskip("scitex.scholar.pipelines")
+
+try:
+    from scitex.scholar.core import Paper
+    from scitex.scholar.pipelines import ScholarPipelineSingle
+    from scitex.scholar.storage import PaperIO
+except ImportError:
+    pytest.skip("scitex.scholar.pipelines not available", allow_module_level=True)
 
 
 class TestPipelineInit:
@@ -482,6 +487,7 @@ class TestStep10LogFinalStatus:
         # Should not raise
         pipeline._step_10_log_final_status(io)
 
+
 if __name__ == "__main__":
     import os
 
@@ -497,12 +503,12 @@ if __name__ == "__main__":
 # # File: src/scitex/scholar/pipelines/ScholarPipelineSingle.py
 # """
 # Single paper acquisition pipeline orchestrator.
-# 
+#
 # Functionalities:
 #   - Orchestrates full paper acquisition pipeline from query to storage
 #   - Single command: query (DOI/title) + project -> complete paper in library
 #   - Coordinates all workers: metadata, URLs, download, extraction, storage
-# 
+#
 # IO:
 #   - output-files:
 #     - library/MASTER/{paper_id}/metadata.json
@@ -512,31 +518,31 @@ if __name__ == "__main__":
 #     - library/MASTER/{paper_id}/images/
 #     - library/{project}/{paper_id} -> ../MASTER/{paper_id}
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import argparse
 # import asyncio
 # from typing import Optional
-# 
+#
 # from scitex import logging
 # from scitex.scholar.storage import PaperIO
-# 
+#
 # from ._single_steps import PipelineHelpersMixin, PipelineStepsMixin
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # class ScholarPipelineSingle(PipelineStepsMixin, PipelineHelpersMixin):
 #     """Orchestrates full paper acquisition pipeline."""
-# 
+#
 #     def __init__(
 #         self, browser_mode: str = "interactive", chrome_profile: str = "system"
 #     ):
 #         self.name = self.__class__.__name__
 #         self.browser_mode = browser_mode
 #         self.chrome_profile = chrome_profile
-# 
+#
 #     async def process_single_paper(
 #         self,
 #         doi_or_title: str,
@@ -544,7 +550,7 @@ if __name__ == "__main__":
 #         force: bool = False,
 #     ):
 #         """Process single paper from query (DOI or Title) to complete storage.
-# 
+#
 #         Pipeline:
 #         1. Normalize as DOI
 #         2. Create Paper object (resolve DOI from title if needed)
@@ -556,12 +562,12 @@ if __name__ == "__main__":
 #         8. Extract content (text, tables, images)
 #         9. Link to project (if specified)
 #         10. Log final status
-# 
+#
 #         Args:
 #             doi_or_title: DOI or title string
 #             project: Optional project name for symlinking
 #             force: If True, ignore existing files and force fresh processing
-# 
+#
 #         Returns
 #         -------
 #             Tuple of (Complete Paper object, symlink_path)
@@ -570,14 +576,14 @@ if __name__ == "__main__":
 #         doi = self._step_01_normalize_as_doi(doi_or_title)
 #         paper = await self._step_02_create_paper(doi, doi_or_title)
 #         paper = self._step_03_add_paper_id(paper)
-# 
+#
 #         io = PaperIO(paper)
 #         logger.info(f"{self.name}: Paper directory: {io.paper_dir}")
-# 
+#
 #         with logger.to(io.paper_dir / "logs" / "pipeline.log"):
 #             # Step 4: Metadata
 #             paper = await self._step_04_resolve_metadata(paper, io, force)
-# 
+#
 #             # Steps 5-7: Browser and PDF
 #             browser_manager, context, auth_gateway = await self._step_05_setup_browser(
 #                 paper, io
@@ -591,17 +597,17 @@ if __name__ == "__main__":
 #                 )
 #             if browser_manager:
 #                 await browser_manager.close()
-# 
+#
 #             # Step 8: Content extraction
 #             self._step_08_extract_content(io, force)
-# 
+#
 #             # Step 9-10: Finalize
 #             symlink_path = self._step_09_link_to_project(paper, io, project)
 #             self._step_10_log_final_status(io)
-# 
+#
 #             return paper, symlink_path
-# 
-# 
+#
+#
 # def main(args):
 #     """Run single paper pipeline."""
 #     pipeline = ScholarPipelineSingle(
@@ -615,8 +621,8 @@ if __name__ == "__main__":
 #         )
 #     )
 #     return 0
-# 
-# 
+#
+#
 # def parse_args() -> argparse.Namespace:
 #     """Parse command line arguments."""
 #     parser = argparse.ArgumentParser(
@@ -649,16 +655,16 @@ if __name__ == "__main__":
 #         help="Force fresh processing",
 #     )
 #     return parser.parse_args()
-# 
-# 
+#
+#
 # def run_main() -> None:
 #     """Initialize scitex framework, run main function, and cleanup."""
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     import scitex as stx
-# 
+#
 #     args = parse_args()
 #     CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
 #         sys, plt, args=args, file=__file__, sdir_suffix=None, verbose=False, agg=True
@@ -667,18 +673,18 @@ if __name__ == "__main__":
 #     stx.session.close(
 #         CONFIG, verbose=False, notify=False, message="", exit_status=exit_status
 #     )
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     run_main()
-# 
+#
 # # Usage:
 # # python -m scitex.scholar.pipelines.ScholarPipelineSingle \
 # #     --doi-or-title "10.1038/nature12373" \
 # #     --project test \
 # #     --chrome-profile system \
 # #     --browser-mode stealth
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

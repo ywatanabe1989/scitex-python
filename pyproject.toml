@@ -11,7 +11,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scitex"
-version = "2.17.0"
+version = "2.17.8"
 description = "A comprehensive Python library for scientific computing and data analysis"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -559,6 +559,11 @@ web = [
     # "torch",
     # "umap-learn",
 ]
+
+# Clew Module - Hash-based verification for reproducible science (Ariadne's thread)
+# Use: pip install scitex[clew]
+# Note: No extra dependencies - uses only stdlib (sqlite3, hashlib)
+clew = []
 
 # Writer Module - Academic paper writing
 # Use: pip install scitex[writer]

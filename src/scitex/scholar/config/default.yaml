@@ -16,6 +16,7 @@ enable_auto_download: ${SCITEX_SCHOLAR_AUTO_DOWNLOAD:-false}
 engines:
   - URL
   - CrossRefLocal
+  - OpenAlexLocal
   - Semantic_Scholar
   - CrossRef
   - OpenAlex
@@ -110,6 +111,7 @@ unpaywall_email: ${SCITEX_SCHOLAR_UNPAYWALL_EMAIL:-"research@scitex.io"}
 semantic_scholar_api_key: ${SCITEX_SCHOLAR_SEMANTIC_SCHOLAR_API_KEY:-null}
 crossref_api_key: ${SCITEX_SCHOLAR_CROSSREF_API_KEY:-null}
 crossref_api_url: ${SCITEX_SCHOLAR_CROSSREF_API_URL:-"http://127.0.0.1:3333"}
+openalex_api_url: ${SCITEX_SCHOLAR_OPENALEX_API_URL:-"http://127.0.0.1:31292"}
 pubmed_api_key: ${SCITEX_SCHOLAR_PUBMED_API_KEY:-null}
 twocaptcha_api_key: ${SCITEX_SCHOLAR_2CAPTCHA_API_KEY:-null}
 

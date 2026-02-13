@@ -207,9 +207,23 @@ def _list_api_impl(
                             "C",
                             obj_name,
                             obj.__doc__ if docstring and obj.__doc__ else "",
-                            current_depth + 1,  # Children are one level deeper
+                            current_depth + 1,
                         )
                     )
+                    # List public methods of the class
+                    for mname, mobj in inspect.getmembers(
+                        obj, predicate=inspect.isfunction
+                    ):
+                        if mname.startswith("_"):
+                            continue
+                        content_list.append(
+                            (
+                                "F",
+                                f"{obj_name}.{mname}",
+                                mobj.__doc__ if docstring and mobj.__doc__ else "",
+                                current_depth + 2,
+                            )
+                        )
 
     except Exception as err:
         print(f"Error processing module structure: {err}")

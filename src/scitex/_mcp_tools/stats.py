@@ -13,7 +13,7 @@ def _json(data: dict) -> str:
     return json.dumps(data, indent=2, default=str)
 
 
-def register_stats_tools(mcp) -> None:
+def register_stats_tools(mcp) -> None:  # noqa: C901
     """Register stats tools with FastMCP server."""
 
     @mcp.tool()
@@ -43,7 +43,9 @@ def register_stats_tools(mcp) -> None:
     @mcp.tool()
     async def stats_run_test(
         test_name: str,
-        data: List[List[float]],
+        data: Optional[List[List[float]]] = None,
+        data_file: Optional[str] = None,
+        columns: Optional[List[str]] = None,
         alternative: str = "two-sided",
     ) -> str:
         """[stats] Execute a statistical test on provided data."""
@@ -52,6 +54,8 @@ def register_stats_tools(mcp) -> None:
         result = await run_test_handler(
             test_name=test_name,
             data=data,
+            data_file=data_file,
+            columns=columns,
             alternative=alternative,
         )
         return _json(result)

@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
-"""Scitex color module."""
+"""Scitex color module — delegates to figrecipe.colors (single source of truth).
 
-from ._add_hue_col import add_hue_col
-from ._colors import (
+Kept for backward compatibility: ``from scitex.plt.color import PARAMS`` still works.
+"""
+
+# Core exports from figrecipe.colors
+from figrecipe.colors import (
+    DEF_ALPHA,
+    HEX,
+    PARAMS,
+    RGB,
+    RGB_NORM,
+    RGBA,
+    RGBA_NORM,
     bgr2bgra,
     bgr2rgb,
     bgra2bgr,
@@ -11,11 +21,16 @@ from ._colors import (
     cycle_color,
     cycle_color_bgr,
     cycle_color_rgb,
+    gen_interpolate,
+    get_categorical_colors_from_conf_matap,
+    get_color_from_conf_matap,
+    get_colors_from_conf_matap,
     gradiate_color,
     gradiate_color_bgr,
     gradiate_color_bgra,
     gradiate_color_rgb,
     gradiate_color_rgba,
+    interpolate,
     rgb2bgr,
     rgb2rgba,
     rgba2bgra,
@@ -31,13 +46,9 @@ from ._colors import (
     to_rgba,
     update_alpha,
 )
-from ._get_colors_from_conf_matap import (
-    get_categorical_colors_from_conf_matap,
-    get_color_from_conf_matap,
-    get_colors_from_conf_matap,
-)
-from ._interpolate import gen_interpolate, interpolate
-from ._PARAMS import PARAMS, DEF_ALPHA, RGB, RGB_NORM, RGBA, RGBA_NORM
+
+# scitex-specific extras (not in figrecipe)
+from ._add_hue_col import add_hue_col
 from ._vizualize_colors import vizualize_colors
 
 __all__ = [
@@ -47,6 +58,7 @@ __all__ = [
     "RGB_NORM",
     "RGBA",
     "RGBA_NORM",
+    "HEX",
     "add_hue_col",
     "bgr2bgra",
     "bgr2rgb",
@@ -82,3 +94,5 @@ __all__ = [
     "update_alpha",
     "vizualize_colors",
 ]
+
+# EOF

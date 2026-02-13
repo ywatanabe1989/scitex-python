@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Timestamp: "2026-02-06 23:03:14 (ywatanabe)"
+# File: /home/ywatanabe/proj/scitex-python/src/scitex/audio/mcp_server.py
+
+
 # Timestamp: 2026-01-15
-# File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/mcp_server.py
-# ----------------------------------------
 
 """
 FastMCP Server for SciTeX Audio - HTTP/SSE Transport Support
@@ -19,8 +22,6 @@ For remote audio:
     3. Remote agent connects to http://localhost:31293
 """
 
-from __future__ import annotations
-
 import json
 from datetime import datetime
 from pathlib import Path
@@ -35,13 +36,16 @@ except ImportError:
     FASTMCP_AVAILABLE = False
     FastMCP = None  # type: ignore
 
-__all__ = ["mcp", "run_server", "run_relay_server", "main", "FASTMCP_AVAILABLE"]
+__all__ = [
+    "mcp",
+    "run_server",
+    "run_relay_server",
+    "main",
+    "FASTMCP_AVAILABLE",
+]
 
 # Import branding
-from ._branding import (
-    get_mcp_instructions,
-    get_mcp_server_name,
-)
+from ._branding import get_mcp_instructions, get_mcp_server_name
 
 # Initialize MCP server
 if FASTMCP_AVAILABLE:
@@ -137,15 +141,19 @@ if FASTMCP_AVAILABLE:
                 try:
                     result = subprocess.run(
                         ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-                        capture_output=True, text=True, cwd=cwd, timeout=5,
+                        capture_output=True,
+                        text=True,
+                        cwd=cwd,
+                        timeout=5,
                     )
                     if result.returncode == 0:
                         branch = result.stdout.strip()
                 except Exception:
                     pass
-                parts = [f"Hostname: {hostname}", f"Project: {project}"]
+
+                parts = [hostname, project]
                 if branch:
-                    parts.append(f"Branch: {branch}")
+                    parts.append(branch)
                 sig = ". ".join(parts) + ". "
                 final_text = sig + text
 
@@ -193,11 +201,14 @@ if FASTMCP_AVAILABLE:
             return json.dumps(result, indent=2)
 
         except Exception as e:
-            return json.dumps({
-                "success": False,
-                "error": str(e),
-                "text": text,
-            }, indent=2)
+            return json.dumps(
+                {
+                    "success": False,
+                    "error": str(e),
+                    "text": text,
+                },
+                indent=2,
+            )
 
     @mcp.tool()
     def list_backends() -> str:
@@ -348,11 +359,18 @@ def run_server(
         raise ValueError(f"Unknown transport: {transport}")
 
 
-def run_relay_server(host: Optional[str] = None, port: Optional[int] = None) -> None:
+def run_relay_server(
+    host: Optional[str] = None, port: Optional[int] = None, force: bool = False
+) -> None:
     """Run HTTP relay server for remote audio playback.
 
     This exposes simple REST endpoints that remote agents can connect to.
     Unlike the MCP server, this uses standard HTTP POST/GET.
+
+    Args:
+        host: Host to bind to (default: 0.0.0.0)
+        port: Port to listen on (default: 31293)
+        force: If True, kill any existing process using the port
 
     Endpoints:
         POST /speak - Speak text
@@ -363,6 +381,11 @@ def run_relay_server(host: Optional[str] = None, port: Optional[int] = None) -> 
 
     host = host or DEFAULT_HOST
     port = port or DEFAULT_PORT
+
+    if force:
+        from ._utils import kill_process_on_port
+
+        kill_process_on_port(port)
 
     try:
         from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -434,12 +457,14 @@ def run_relay_server(host: Optional[str] = None, port: Optional[int] = None) -> 
                     finally:
                         lock.release()
 
-                    self._send_json({
-                        "success": True,
-                        "text": data.get("text", ""),
-                        "played": True,
-                        "timestamp": datetime.now().isoformat(),
-                    })
+                    self._send_json(
+                        {
+                            "success": True,
+                            "text": data.get("text", ""),
+                            "played": True,
+                            "timestamp": datetime.now().isoformat(),
+                        }
+                    )
                 except Exception as e:
                     self._send_json({"success": False, "error": str(e)}, 500)
             else:
@@ -466,6 +491,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 # EOF

@@ -79,25 +79,49 @@ def get_tool_schemas() -> list[types.Tool]:
                         "type": "string",
                         "description": "Name of test to run",
                         "enum": [
+                            # Parametric (6)
                             "ttest_ind",
                             "ttest_paired",
                             "ttest_1samp",
+                            "anova",
+                            "anova_rm",
+                            "anova_2way",
+                            # Nonparametric (5)
                             "brunner_munzel",
                             "mannwhitneyu",
                             "wilcoxon",
-                            "anova",
                             "kruskal",
-                            "chi2",
-                            "fisher_exact",
+                            "friedman",
+                            # Correlation (4)
                             "pearson",
                             "spearman",
                             "kendall",
+                            "theilsen",
+                            # Categorical (4)
+                            "chi2",
+                            "fisher_exact",
+                            "mcnemar",
+                            "cochran_q",
+                            # Normality (4)
+                            "shapiro",
+                            "normality",
+                            "ks_1samp",
+                            "ks_2samp",
                         ],
                     },
                     "data": {
                         "type": "array",
                         "items": {"type": "array", "items": {"type": "number"}},
-                        "description": "Data arrays for each group",
+                        "description": "Data arrays for each group (alternative to data_file+columns)",
+                    },
+                    "data_file": {
+                        "type": "string",
+                        "description": "Path to CSV file (use with columns instead of data)",
+                    },
+                    "columns": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Column names to extract from data_file",
                     },
                     "alternative": {
                         "type": "string",
@@ -106,7 +130,7 @@ def get_tool_schemas() -> list[types.Tool]:
                         "default": "two-sided",
                     },
                 },
-                "required": ["test_name", "data"],
+                "required": ["test_name"],
             },
         ),
         # Format Results

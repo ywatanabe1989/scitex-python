@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 14:45:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/stats/utils/_formatters.py
 
-"""
+"""Statistical result formatters.
+
 Functionalities:
   - Convert p-values to significance stars for scientific reporting
   - Format p-values according to publication standards
@@ -18,19 +18,184 @@ IO:
 """
 
 """Imports"""
-import argparse
-import sys
-from typing import Union
+import argparse  # noqa: E402
+import re  # noqa: E402
+from typing import Union  # noqa: E402
 
-import numpy as np
-import pandas as pd
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
 
-import scitex as stx
-from scitex.logging import getLogger
+import scitex as stx  # noqa: E402
+from scitex.logging import getLogger  # noqa: E402
 
 logger = getLogger(__name__)
 
 """Functions"""
+
+# Matplotlib mathtext mapping for publication stat symbols.
+# Latin letters use \mathit{} for italic (APA style) because SCITEX sets
+# mathtext.default=regular which renders plain $t$ upright.
+# Greek letters are naturally upright in APA, so no \mathit{} needed.
+_MATHTEXT = {
+    "t": "$\\mathit{t}$",
+    "F": "$\\mathit{F}$",
+    "p": "$\\mathit{p}$",
+    "r": "$\\mathit{r}$",
+    "d": "$\\mathit{d}$",
+    "D": "$\\mathit{D}$",
+    "U": "$\\mathit{U}$",
+    "W": "$\\mathit{W}$",
+    "H": "$\\mathit{H}$",
+    "Z": "$\\mathit{Z}$",
+    "BM": "$\\mathit{BM}$",
+    "n": "$\\mathit{n}$",
+    "n_x": "$\\mathit{n}_x$",
+    "n_y": "$\\mathit{n}_y$",
+    "n_1": "$\\mathit{n}_1$",
+    "n_2": "$\\mathit{n}_2$",
+    "X": "$\\mathit{X}$",
+    "Y": "$\\mathit{Y}$",
+    "chi2": "$\\chi^2$",
+    "delta": "$\\delta$",
+    "epsilon2": "$\\epsilon^2$",
+    "eta2": "$\\eta^2$",
+    "eta_p2": "$\\eta_p^2$",
+    "R2": "$\\mathit{R}^2$",
+    "rho": "$\\rho$",
+    "tau": "$\\tau$",
+}
+
+
+# Latin stat symbols that need \mathit{} for APA italic rendering.
+# Single letters only — multi-char like "ns", Greek, or already-decorated skipped.
+_ITALIC_LATIN = frozenset("tFprdDUWHZnR")
+
+
+def italicize_stats(text: str) -> str:
+    r"""Auto-convert plain $X$ to $\mathit{X}$ for known Latin stat symbols.
+
+    Users can write simple ``$t$`` or ``$p$`` and this function ensures
+    they render italic under SCITEX's ``mathtext.default=regular`` setting.
+
+    Already-decorated expressions (containing ``\mathit``, ``\chi``, ``\eta``,
+    ``\rho``, ``\tau``) are left untouched.
+
+    Parameters
+    ----------
+    text : str
+        Text potentially containing plain mathtext like ``$t$``, ``$F$``.
+
+    Returns
+    -------
+    str
+        Text with Latin stat symbols wrapped in ``\mathit{}``.
+
+    Examples
+    --------
+    >>> italicize_stats('$t$ = 2.31')
+    '$\\mathit{t}$ = 2.31'
+    >>> italicize_stats('$\\chi^2$ = 5.99')
+    '$\\chi^2$ = 5.99'
+    >>> italicize_stats('$\\mathit{F}$ = 3.14')
+    '$\\mathit{F}$ = 3.14'
+    """
+
+    def _replace(m):
+        inner = m.group(1)
+        # Skip already-decorated or Greek
+        if "\\" in inner:
+            return m.group(0)
+        # Single Latin stat letter
+        if inner in _ITALIC_LATIN:
+            return f"$\\mathit{{{inner}}}$"
+        # Subscripted forms like n_x, n_1
+        if re.match(r"^[A-Za-z]_[A-Za-z0-9]$", inner):
+            base = inner[0]
+            sub = inner[2]
+            if base in _ITALIC_LATIN:
+                return f"$\\mathit{{{base}}}_{sub}$"
+        # R^2 pattern
+        if re.match(r"^([A-Za-z])\^(\d)$", inner):
+            base = inner[0]
+            exp = inner[2]
+            if base in _ITALIC_LATIN:
+                return f"$\\mathit{{{base}}}^{exp}$"
+        return m.group(0)
+
+    return re.sub(r"\$([^$]+)\$", _replace, text)
+
+
+def fmt_sym(symbol: str) -> str:
+    """Return mathtext-italic stat symbol for matplotlib annotations.
+
+    Parameters
+    ----------
+    symbol : str
+        Plain symbol name (e.g. 't', 'F', 'p', 'chi2', 'eta_p2').
+
+    Returns
+    -------
+    str
+        Mathtext string (e.g. '$t$', '$F$', '$\\\\chi^2$').
+
+    Examples
+    --------
+    >>> fmt_sym('t')
+    '$\\\\mathit{t}$'
+    >>> fmt_sym('chi2')
+    '$\\\\chi^2$'
+    """
+    return _MATHTEXT.get(symbol, f"${symbol}$")
+
+
+def fmt_stat(
+    symbol: str,
+    value,
+    fmt: str = ".3f",
+    df=None,
+    stars: str = None,
+) -> str:
+    """Format a stat line with italic symbol for matplotlib text.
+
+    Parameters
+    ----------
+    symbol : str
+        Stat symbol name (e.g. 't', 'F', 'p').
+    value : float or str
+        Statistic value.
+    fmt : str
+        Format spec for the value (default '.3f').
+    df : str or tuple, optional
+        Degrees of freedom. Shown as symbol(df) = value.
+    stars : str, optional
+        Significance stars to append.
+
+    Returns
+    -------
+    str
+        Formatted line, e.g. '$t$(28) = 2.310 ***'.
+
+    Examples
+    --------
+    >>> fmt_stat('t', -10.521, stars='***')
+    '$\\\\mathit{t}$ = -10.521 ***'
+    >>> fmt_stat('F', 119.265, df='2, 147', stars='***')
+    '$\\\\mathit{F}$(2, 147) = 119.265 ***'
+    >>> fmt_stat('p', 0.0001, fmt='.4f')
+    '$\\\\mathit{p}$ = 0.0001'
+    """
+    sym = fmt_sym(symbol)
+    val = f"{value:{fmt}}" if isinstance(value, (int, float)) else str(value)
+    # Replace hyphen-minus with proper Unicode minus sign for display
+    val = val.replace("-", "\u2212")
+    if df is not None:
+        line = f"{sym}({df}) = {val}"
+    else:
+        line = f"{sym} = {val}"
+    if stars:
+        s = stars.replace("ns", "$ns$")
+        line += f" {s}"
+    return line
 
 
 def p2stars(

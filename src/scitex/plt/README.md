@@ -56,7 +56,7 @@ scitex.io.save(fig, 'my_plot.png')
 # Automatically saves:
 # - my_plot.png (figure)
 # - my_plot.csv (data)
-# - my_plot_for_sigmaplot.csv (SigmaPlot format)  
+# - my_plot_for_sigmaplot.csv (SigmaPlot format)
 # - my_plot_metadata.yaml (structured metadata)
 ```
 
@@ -113,7 +113,7 @@ ax1.set_meta(
     experimental_details={'tau': 5, 'frequency': 1, 'duration': 20}
 )
 
-# Panel B: Frequency spectrum  
+# Panel B: Frequency spectrum
 freq = np.fft.fftfreq(len(signal), t[1]-t[0])
 spectrum = np.abs(np.fft.fft(signal))
 ax2.semilogy(freq[:len(freq)//2], spectrum[:len(freq)//2], id='spectrum')
@@ -179,7 +179,7 @@ panel_metadata:
       duration: 20
     created_timestamp: "2025-06-04T11:35:00"
     scitex_version: "1.11.0"
-  
+
   panel_2:
     caption: "Frequency spectrum revealing 1 Hz fundamental..."
     methods: "Fast Fourier Transform (FFT) analysis..."
@@ -329,7 +329,7 @@ labels = ['A', 'B', 'C', 'D', 'E']
 explode = (0, 0.1, 0, 0, 0)
 
 # Act
-ax.pie(sizes, labels=labels, explode=explode, autopct='%1.1f%%', 
+ax.pie(sizes, labels=labels, explode=explode, autopct='%1.1f%%',
        startangle=90, id='pie_chart')
 ax.set_xyt(t='Pie Chart Distribution')
 
@@ -450,7 +450,7 @@ lower = y - 0.2
 upper = y + 0.2
 
 # Act
-ax.plot_shaded_line(x, y, lower, upper, color='purple', alpha=0.3, 
+ax.plot_shaded_line(x, y, lower, upper, color='purple', alpha=0.3,
                     label='Shaded line', id='shaded_line')
 ax.set_xyt(x='X values', y='Y values', t='Shaded Line Plot')
 ax.legend()
@@ -703,7 +703,7 @@ row_names = [f'Row {i}' for i in range(8)]
 col_names = [f'Col {i}' for i in range(6)]
 
 # Act
-ax.sns_heatmap(data_2d, annot=True, cmap='coolwarm', 
+ax.sns_heatmap(data_2d, annot=True, cmap='coolwarm',
                xticklabels=col_names, yticklabels=row_names, id='sns_heatmap')
 ax.set_xyt(t='Seaborn Heatmap with Annotations')
 
@@ -833,7 +833,7 @@ spike_times = [np.random.uniform(0, 10, 30) for _ in range(5)]
 trial_positions = [0, 1.2, 2.4, 3.6, 4.8]  # Custom spacing
 
 # Act
-ax.plot_raster(spike_times, y_offset=trial_positions, color='black', 
+ax.plot_raster(spike_times, y_offset=trial_positions, color='black',
                apply_set_n_ticks=True, n_xticks=6, id='neural_spikes')
 ax.set_xytc(x='Time (s)', y='Trial', t='Neural Spike Trains with Custom Positioning',
            c='Neural spike raster plot demonstrating custom trial positioning and automatic tick control for electrophysiology data visualization.')
@@ -1093,7 +1093,7 @@ axes[1, 2].plot_violin(violin_data, id='subplot_violin')
 axes[1, 2].set_xyt(t='Violin Plot')
 
 # Figure-level caption using any axis
-axes[0, 0].set_supxytc(title='Multiple Plot Types Demonstration', 
+axes[0, 0].set_supxytc(title='Multiple Plot Types Demonstration',
                       caption='Comprehensive demonstration of various plot types including line plots, scatter plots, bar charts, histograms, heatmaps, and violin plots.')
 
 # Assert (Save)
@@ -1115,8 +1115,8 @@ y = 100 / (1 + (10/x)**2)
 
 ax.semilogx(x, y, 'o-', markersize=6, linewidth=2, id='dose_response')
 ax.set_xytc(
-    x='Concentration (μM)', 
-    y='Response (%)', 
+    x='Concentration (μM)',
+    y='Response (%)',
     t='Dose-Response Analysis',
     c='Dose-response curve showing concentration-dependent activation with EC50 = 10.0 ± 0.5 μM and Hill coefficient = 2.0 ± 0.1 (n=3 experiments, mean ± SEM).'
 )
@@ -1174,9 +1174,9 @@ scitex.io.save(fig, 'figure_2_comprehensive.png')
 from scitex.plt.utils._scientific_captions import configure_caption_style
 
 # Nature style (concise, technical)
-configure_caption_style('nature', 
-                       max_length=500, 
-                       technical_terms=True, 
+configure_caption_style('nature',
+                       max_length=500,
+                       technical_terms=True,
                        statistical_details=True)
 
 # Science style (detailed methodology)
@@ -1204,7 +1204,7 @@ ax.set_xytc(x='Dose (μM)', y='Response (%)', t='Dose-Response Analysis',
            c='Pharmacological dose-response relationship showing EC50 = 10.2 ± 0.5 μM with Hill coefficient = 1.8 ± 0.2 (n=6 experiments, mean ± SEM). Statistical analysis performed using one-way ANOVA followed by Tukey post-hoc test.')
 
 # Export directly for SciTeX-Paper system
-export_for_scitex(fig, 'figure_1', 
+export_for_scitex(fig, 'figure_1',
                   scitex_dir='~/proj/SciTeX-Paper/',
                   include_methods=True,
                   include_stats=True)
@@ -1229,7 +1229,7 @@ ax1.set_xytc(x='Time (min)', y='Response (%)', t='A. Kinetic Analysis',
             methods='Time course measurements performed at 37°C with 5-minute intervals over 60 minutes.',
             stats='Data fitted using non-linear least squares regression with 95% confidence intervals.')
 
-# Panel B: Dose response with statistical details  
+# Panel B: Dose response with statistical details
 ax2.semilogx(dose, response, 'ro-', markersize=6, id='dose_response')
 ax2.set_xytc(x='Dose (μM)', y='Response (%)', t='B. Concentration-Response',
             c='Sigmoidal dose-response curve with EC50 = 5.2 ± 0.3 μM and Hill coefficient = 1.9 ± 0.1.',
@@ -1281,7 +1281,7 @@ scitex.io.save(fig2, 'figure_2.png')  # Auto-registered in SciTeX-Paper
 
 # Generate complete manuscript sections
 stm.generate_methods_section()      # ~/proj/SciTeX-Paper/sections/methods_figures.tex
-stm.generate_results_section()      # ~/proj/SciTeX-Paper/sections/results_figures.tex  
+stm.generate_results_section()      # ~/proj/SciTeX-Paper/sections/results_figures.tex
 stm.generate_figure_legends()       # ~/proj/SciTeX-Paper/sections/figure_legends.tex
 stm.generate_supplementary()        # ~/proj/SciTeX-Paper/supplementary/
 
@@ -1403,7 +1403,7 @@ scitex.plt.tpl(x, y)  # Creates ASCII plot in terminal
 ### Color Utilities
 - **`scitex.plt.color.get_colors_from_conf_matap()`**, **`interpolate()`**, **`vizualize_colors()`**
 
-### Advanced Scientific Features  
+### Advanced Scientific Features
 - **`scitex.str.auto_factor_axis()`** - Automatic factor-out-of-digits notation
 - **`scitex.plt.ax.set_log_scale()`** - Enhanced logarithmic scaling with minor ticks
 - **`scitex.str.format_axis_label()`**, **`format_plot_text()`** - Scientific text formatting
@@ -1416,7 +1416,7 @@ scitex.plt.tpl(x, y)  # Creates ASCII plot in terminal
 
 ### SciTeX Ecosystem Integration
 - **SciTeX-Code** - AI-powered code generation from metadata
-- **SciTeX-Paper** - Automated LaTeX manuscript generation  
+- **SciTeX-Paper** - Automated LaTeX manuscript generation
 - **SigMacro (SciTeX-Vis)** - Advanced publication-ready visualization
 - **Complete AI Workflow** - Raw data to published paper automation
 
@@ -1470,7 +1470,7 @@ code_gen = AICodeGenerator()
 analysis_code = code_gen.generate_from_metadata(fig)
 # → Automatic generation of statistical analysis, data processing, and visualization code
 
-# 4. SCITEX-PAPER INTEGRATION (LaTeX Manuscript Automation)  
+# 4. SCITEX-PAPER INTEGRATION (LaTeX Manuscript Automation)
 from scitex_paper import ManuscriptGenerator
 manuscript = ManuscriptGenerator('~/proj/SciTeX-Paper/')
 
@@ -1517,7 +1517,7 @@ ai_researcher = ScientificAI(
 # AI processes multiple experiments automatically
 studies = [
     'experiment_1_patch_clamp.csv',
-    'experiment_2_optical_recording.csv', 
+    'experiment_2_optical_recording.csv',
     'experiment_3_behavioral_data.csv'
 ]
 
@@ -1525,13 +1525,13 @@ studies = [
 for study in studies:
     # Automatic data loading and preprocessing
     data = ai_researcher.load_and_preprocess(study)
-    
+
     # AI-generated hypotheses and analysis
     hypotheses = ai_researcher.generate_hypotheses(data)
-    
+
     # Automated figure creation with metadata
     figures = ai_researcher.create_publication_figures(data, hypotheses)
-    
+
     # AI literature review and contextualization
     context = ai_researcher.literature_context(hypotheses)
 
@@ -1559,7 +1559,7 @@ manuscript = SciTeXManager('~/proj/SciTeX-Paper/')
 
 # Generate all figure components automatically
 manuscript.compile_all_figures()          # Process all saved figures
-manuscript.generate_figure_legends()      # Create figure legends section  
+manuscript.generate_figure_legends()      # Create figure legends section
 manuscript.generate_methods_section()     # Compile methods from all figures
 manuscript.generate_results_section()     # Auto-generate results text
 manuscript.generate_supplementary()       # Create supplementary materials
@@ -1630,18 +1630,13 @@ ax.set_meta(                                                     # Structured me
 scitex.io.save(fig, 'experiment.png')  # → Triggers SciTeX ecosystem integration
 ```
 
-### 🔧 SciTeX Ecosystem Setup
-```python
-# One-time ecosystem configuration
-from scitex.plt.utils._scitex_config import configure_scitex_ecosystem
-configure_scitex_ecosystem()
+### SciTeX Ecosystem Setup
 
-# Creates complete directory structure:
-# ~/.scitex/config.yaml              # Central configuration
-# ~/proj/SciTeX-Paper/               # LaTeX manuscripts  
-# ~/proj/SciTeX-Code/                # AI-generated code
-# ~/proj/SigMacro/                   # Advanced visualization
-# ~/proj/emacs-claude-code/          # Core AI engine integration
+SciTeX ecosystem configuration is handled via `scitex.config`:
+```python
+from scitex.config import get_config, get_paths
+config = get_config()
+paths = get_paths()
 ```
 
 ### 🚀 Complete Ecosystem Status
@@ -1652,7 +1647,7 @@ configure_scitex_ecosystem()
 - ✅ **AI-Ready Format** - Structured YAML for LLM agent processing
 - ✅ **SciTeX Integration** - Unified configuration and workflow
 - 🔄 **SciTeX-Code** - AI code generation (in development)
-- 🔄 **SciTeX-Paper** - Automated manuscript writing (in development)  
+- 🔄 **SciTeX-Paper** - Automated manuscript writing (in development)
 - 🔄 **SigMacro Enhancement** - Publication visualization (in development)
 - ✅ **Emacs-Claude Core** - AI development engine integration
 

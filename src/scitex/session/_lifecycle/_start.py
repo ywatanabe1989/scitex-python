@@ -232,7 +232,7 @@ def _redirect_logging_handlers(sys) -> None:
 def _start_verification(CONFIG) -> None:
     """Start verification tracking for this session."""
     try:
-        from scitex.verify import on_session_start
+        from scitex.clew import on_session_start
 
         session_id = CONFIG.get("ID", "unknown")
         file_path = CONFIG.get("FILE")

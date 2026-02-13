@@ -6,9 +6,17 @@ import os
 from unittest.mock import MagicMock, patch
 
 import pytest
-import requests
+import requests  # noqa: F401
 
-from scitex.scholar.metadata_engines.individual import URLDOIEngine
+pytest.importorskip("scitex.scholar.metadata_engines.individual")
+
+try:
+    from scitex.scholar.metadata_engines.individual import URLDOIEngine
+except ImportError:
+    pytest.skip(
+        "scitex.scholar.metadata_engines.individual not available",
+        allow_module_level=True,
+    )
 
 
 class TestURLDOIEngineInit:
@@ -481,6 +489,6 @@ class TestURLDOIEngineIntegration:
 
 
 if __name__ == "__main__":
-    import os
+    import os  # noqa: F811
 
     pytest.main([os.path.abspath(__file__)])

@@ -34,7 +34,7 @@ SPINE_ZORDER = 1000
 # ============================================================================
 # Main post-processing function
 # ============================================================================
-def apply_plot_postprocess(method_name, result, ax, kwargs, args=None):
+def apply_plot_postprocess(method_name, result, ax, kwargs, args=None):  # noqa: C901
     """Apply post-processing styling after matplotlib method call.
 
     Args:
@@ -212,10 +212,10 @@ def _postprocess_errorbar(result):
     mlegend.Legend.update_default_handler_map({ErrorbarContainer: SimpleLineHandler()})
 
 
-def _postprocess_violin(result, ax, kwargs, args):
+def _postprocess_violin(result, ax, kwargs, args):  # noqa: C901
     """Apply styling for violin plots with optional boxplot overlay."""
     # Get scitex palette for coloring
-    from scitex.plt.color._PARAMS import HEX
+    from scitex.plt.color import HEX
 
     palette = [
         HEX["blue"],
@@ -370,11 +370,11 @@ def _postprocess_fill_between(result, kwargs):
             result.set_alpha(0.3)
 
 
-def _postprocess_bar(result, ax, kwargs):
+def _postprocess_bar(result, ax, kwargs):  # noqa: C901
     """Apply styling for bar plots with colors and error bars."""
     # Apply scitex palette only if color not explicitly set
     if "color" not in kwargs and "c" not in kwargs:
-        from scitex.plt.color._PARAMS import HEX
+        from scitex.plt.color import HEX
 
         palette = [
             HEX["blue"],
@@ -427,11 +427,11 @@ def _postprocess_bar(result, ax, kwargs):
         pass
 
 
-def _postprocess_barh(result, ax, kwargs):
+def _postprocess_barh(result, ax, kwargs):  # noqa: C901
     """Apply styling for horizontal bar plots with colors and error bars."""
     # Apply scitex palette only if color not explicitly set
     if "color" not in kwargs and "c" not in kwargs:
-        from scitex.plt.color._PARAMS import HEX
+        from scitex.plt.color import HEX
 
         palette = [
             HEX["blue"],

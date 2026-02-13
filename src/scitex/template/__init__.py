@@ -12,22 +12,24 @@ from scitex.git import (
     remove_child_git,
 )
 
-from ._code_templates import (
+from ._code._code_templates import (
     CODE_TEMPLATES,
     get_all_templates,
     get_code_template,
     list_code_templates,
 )
-from .clone_pip_project import TEMPLATE_REPO_URL as PIP_PROJECT_URL
-from .clone_pip_project import clone_pip_project
-from .clone_research import TEMPLATE_REPO_URL as RESEARCH_URL
-from .clone_research import clone_research
-from .clone_singularity import TEMPLATE_REPO_URL as SINGULARITY_URL
-from .clone_singularity import clone_singularity
-from .clone_writer_directory import (
+from ._project._clone_template import clone_template
+from ._project.clone_pip_project import TEMPLATE_REPO_URL as PIP_PROJECT_URL
+from ._project.clone_pip_project import clone_pip_project
+from ._project.clone_research import TEMPLATE_REPO_URL as RESEARCH_URL
+from ._project.clone_research import clone_research
+from ._project.clone_research_minimal import clone_research_minimal
+from ._project.clone_singularity import TEMPLATE_REPO_URL as SINGULARITY_URL
+from ._project.clone_singularity import clone_singularity
+from ._project.clone_writer_directory import (
     TEMPLATE_REPO_URL as PAPER_DIRECTORY_URL,
 )
-from .clone_writer_directory import (
+from ._project.clone_writer_directory import (
     clone_writer_directory,
 )
 
@@ -55,8 +57,23 @@ def get_available_templates_info():
     """
     return [
         {
+            "id": "research_minimal",
+            "name": "Research Minimal",
+            "description": "Minimal SciTeX structure with writer, scholar, visualizer, and console",
+            "github_url": RESEARCH_URL,
+            "branch": "minimal",
+            "use_case": "Focused research workflow with essential SciTeX modules only",
+            "features": [
+                "scitex/writer/ - LaTeX manuscript writing",
+                "scitex/scholar/ - Bibliography management",
+                "scitex/visualizer/ - Figure creation",
+                "scitex/console/ - Code execution",
+                "scitex/management/ - Project management",
+            ],
+        },
+        {
             "id": "research",
-            "name": "Research Project",
+            "name": "Research Project (Full)",
             "description": "Full scientific workflow structure for research projects",
             "github_url": RESEARCH_URL,
             "use_case": "Scientific research with data analysis, experiments, and paper writing",
@@ -112,7 +129,9 @@ def get_available_templates_info():
 
 
 __all__ = [
+    "clone_template",
     "clone_research",
+    "clone_research_minimal",
     "clone_pip_project",
     "clone_singularity",
     "clone_writer_directory",

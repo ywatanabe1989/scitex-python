@@ -446,7 +446,7 @@ def load(
 
         # Track input for verification (if session is active)
         try:
-            from scitex.verify import on_io_load
+            from scitex.clew import on_io_load
 
             on_io_load(lpath)
         except Exception:

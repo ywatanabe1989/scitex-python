@@ -109,13 +109,13 @@ def save(
         Additional keyword arguments for the underlying save function.
     """
     try:
+        # Handle file-like objects (BytesIO) directly
+        if hasattr(specified_path, "write"):
+            return _save(obj, specified_path, verbose=False, **kwargs) or specified_path
+
         if isinstance(specified_path, Path):
             specified_path = str(specified_path)
-
-        # Handle f-string expressions
-        specified_path = _parse_fstring_path(specified_path)
-
-        # Determine save path
+        specified_path = _parse_fstring_path(specified_path)  # Handle f-strings
         spath = _determine_save_path(specified_path, use_caller_path)
         spath_final = clean(spath)
 
@@ -155,7 +155,7 @@ def save(
 
         # Track output for verification (if session is active)
         try:
-            from scitex.verify import on_io_save
+            from scitex.clew import on_io_save
 
             on_io_save(spath_final, track=track)
         except Exception:
@@ -282,17 +282,17 @@ def _save(
     **kwargs,
 ):
     """Core dispatcher for saving objects to various formats."""
-    ext = _os.path.splitext(spath)[1].lower()
+    # Handle file-like objects (BytesIO, etc.)
+    is_file_like = hasattr(spath, "write")
+    ext = (
+        f".{kwargs.get('format', 'png').lower()}"
+        if is_file_like
+        else _os.path.splitext(spath)[1].lower()
+    )
 
-    # Check if this is a matplotlib figure being saved to SciTeX bundle format
-    # SciTeX bundles use .zip (archive) or no extension (directory)
-    if _is_matplotlib_figure(obj):
-        # Save as SciTeX bundle if:
-        # 1. Path ends with .zip (create ZIP bundle)
-        # 2. Path has no extension and doesn't match other formats (create directory bundle)
+    # Check if matplotlib figure for SciTeX bundle (zip or no-ext directory)
+    if _is_matplotlib_figure(obj) and not is_file_like:
         if ext == ".zip" or (ext == "" and not spath.endswith("/")):
-            # Check if explicitly requesting SciTeX bundle or just .zip
-            # Pop as_zip from kwargs to avoid duplicate parameter error
             as_zip = kwargs.pop("as_zip", ext == ".zip")
             _save_scitex_bundle(
                 obj, spath, as_zip, verbose, symlink_from_cwd, symlink_to, **kwargs
@@ -316,15 +316,15 @@ def _save(
             json_schema,
             kwargs,
         )
-    elif spath.endswith(".csv"):
+    elif not is_file_like and spath.endswith(".csv"):
         save_csv(obj, spath, **kwargs)
-    elif spath.endswith(".pkl.gz"):
+    elif not is_file_like and spath.endswith(".pkl.gz"):
         save_pickle_compressed(obj, spath, **kwargs)
     else:
         logger.warning(f"Unsupported file format. {spath} was not saved.")
         return
 
-    if verbose and _os.path.exists(spath):
+    if verbose and not is_file_like and _os.path.exists(spath):
         file_size = readable_bytes(getsize(spath))
         try:
             rel_path = _os.path.relpath(spath, _os.getcwd())

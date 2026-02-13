@@ -14,13 +14,18 @@ Tests cover:
 - Primitive extraction helper
 """
 
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from pathlib import Path  # noqa: F401
+from unittest.mock import MagicMock, patch  # noqa: F401
 
 import pytest
 
-from scitex.scholar.core import Paper
-from scitex.scholar.storage import ScholarLibrary
+pytest.importorskip("scitex.scholar.storage")
+
+try:
+    from scitex.scholar.core import Paper
+    from scitex.scholar.storage import ScholarLibrary  # type: ignore[attr-defined]
+except ImportError:
+    pytest.skip("scitex.scholar.storage not available", allow_module_level=True)
 
 
 def create_sample_paper(
@@ -140,7 +145,7 @@ class TestScholarLibraryExtractPrimitive:
 
     def test_extract_dotdict(self, library):
         """_extract_primitive should convert DotDict to dict."""
-        from scitex.dict import DotDict
+        from scitex.dict import DotDict  # type: ignore[attr-defined]
 
         dd = DotDict({"key": "value"})
         result = library._extract_primitive(dd)
@@ -370,6 +375,7 @@ class TestScholarLibraryCheckExistingDoi:
         library._cache_manager.is_doi_stored.assert_called_once_with("Some Paper", None)
         assert result == "10.1234/test"
 
+
 if __name__ == "__main__":
     import os
 
@@ -387,35 +393,35 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # from pathlib import Path
 # from typing import Any, Dict, List, Optional, Union
-# 
+#
 # from scitex.scholar.config import ScholarConfig
-# 
+#
 # from ._LibraryCacheManager import LibraryCacheManager
 # from ._LibraryManager import LibraryManager
 # from .BibTeXHandler import BibTeXHandler
-# 
-# 
+#
+#
 # class ScholarLibrary:
 #     """Unified Scholar library management combining cache and storage operations."""
-# 
+#
 #     def __init__(
 #         self, project: Union[str, Path] = None, config: Optional[ScholarConfig] = None
 #     ):
 #         """Initialize ScholarLibrary.
-# 
+#
 #         Args:
 #             project: Project name (str) or library directory path (Path)
 #             config: Optional ScholarConfig instance
 #         """
 #         self.config = config or ScholarConfig()
-# 
+#
 #         # Handle both project name and library directory path
 #         if isinstance(project, Path):
 #             # If Path is the library root dir (e.g., ~/.scitex/scholar/library)
@@ -433,21 +439,21 @@ if __name__ == "__main__":
 #         else:
 #             # Standard project name
 #             self.project = self.config.resolve("project", project)
-# 
+#
 #         self._cache_manager = LibraryCacheManager(
 #             project=self.project, config=self.config
 #         )
 #         self._library_manager = LibraryManager(project=self.project, config=self.config)
 #         self.bibtex_handler = BibTeXHandler(project=self.project, config=self.config)
-# 
+#
 #     def load_paper(self, library_id: str) -> Dict[str, Any]:
 #         """Load paper metadata from library."""
 #         return self._cache_manager.load_paper_metadata(library_id)
-# 
+#
 #     def _extract_primitive(self, value):
 #         """Extract primitive value from DotDict or nested structure."""
 #         from scitex.dict import DotDict
-# 
+#
 #         if value is None:
 #             return None
 #         if isinstance(value, DotDict):
@@ -458,10 +464,10 @@ if __name__ == "__main__":
 #             return value
 #         # Return primitive types as-is
 #         return value
-# 
+#
 #     def save_paper(self, paper: "Paper", force: bool = False) -> str:
 #         """Save paper to library with explicit parameters.
-# 
+#
 #         Supports both old flat Paper and new Pydantic Paper structures.
 #         """
 #         # Check if this is a Pydantic Paper (has metadata attribute)
@@ -494,7 +500,7 @@ if __name__ == "__main__":
 #         else:
 #             # Old flat Paper structure (legacy support)
 #             paper_dict = paper.to_dict() if hasattr(paper, "to_dict") else {}
-# 
+#
 #             return self._library_manager.save_resolved_paper(
 #                 # Required fields
 #                 title=self._extract_primitive(
@@ -559,29 +565,29 @@ if __name__ == "__main__":
 #                 ),
 #                 project=self.project,
 #             )
-# 
+#
 #     def papers_from_bibtex(self, bibtex_input: Union[str, Path]) -> List["Paper"]:
 #         """Create Papers from BibTeX file or content."""
 #         return self.bibtex_handler.papers_from_bibtex(bibtex_input)
-# 
+#
 #     def paper_from_bibtex_entry(self, entry: Dict[str, Any]) -> Optional["Paper"]:
 #         """Convert BibTeX entry to Paper."""
 #         return self.bibtex_handler.paper_from_bibtex_entry(entry)
-# 
+#
 #     def check_existing_doi(
 #         self, title: str, year: Optional[int] = None
 #     ) -> Optional[str]:
 #         """Check if DOI exists in library."""
 #         return self._cache_manager.is_doi_stored(title, year)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     # Implement main guard to demonstrate typical usage of this script
 #     def main():
 #         pass
-# 
+#
 #     main()
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

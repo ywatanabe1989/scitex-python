@@ -189,7 +189,7 @@ class TestCLISubcommandAccess:
         runner = CliRunner()
         result = runner.invoke(cli, ["cloud", "--help"])
         assert result.exit_code == 0
-        assert "Cloud/Git operations" in result.output
+        assert "Cloud operations" in result.output
 
     def test_convert_subcommand_accessible(self):
         """Test that convert subcommand is accessible."""

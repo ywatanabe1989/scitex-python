@@ -58,6 +58,18 @@ from ._context import OutcomeType as _OutcomeType
 from ._context import StatContext
 
 # =============================================================================
+# Decision Tree (public)
+# =============================================================================
+from ._decision_tree import (
+    DECISION_TREE,
+    DecisionNode,
+    get_decision_tree,
+    get_leaf_node_test_ids,
+    render_flowchart_mermaid,
+    render_flowchart_svg,
+)
+
+# =============================================================================
 # Formatting (public)
 # =============================================================================
 # Internal formatting (hidden)
@@ -122,6 +134,13 @@ from ._styles import list_styles as _list_styles
 __all__ = [
     # Context
     "StatContext",
+    # Decision Tree
+    "DecisionNode",
+    "DECISION_TREE",
+    "get_decision_tree",
+    "render_flowchart_mermaid",
+    "render_flowchart_svg",
+    "get_leaf_node_test_ids",
     # Rules
     "TestRule",
     "TEST_RULES",

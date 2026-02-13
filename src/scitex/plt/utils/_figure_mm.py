@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-11-19 12:00:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_figure_mm.py
 
@@ -16,13 +15,11 @@ Supports dark/light theme modes for eye-friendly visualization.
 
 __FILE__ = __file__
 
-from typing import Any, Dict, Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 import matplotlib.pyplot as plt
+from figrecipe._utils._units import mm_to_inch, mm_to_pt
 from matplotlib.axes import Axes
-from matplotlib.figure import Figure
-
-from ._units import mm_to_inch, mm_to_pt
 
 # Default theme color palettes
 # Both modes use transparent background by default for flexibility
@@ -30,28 +27,26 @@ from ._units import mm_to_inch, mm_to_pt
 # Light mode: all text elements use black
 THEME_COLORS = {
     "dark": {
-        "background": "transparent",   # Transparent for overlay on dark backgrounds
-        "axes_bg": "transparent",      # Transparent axes background
-        "text": "#e8e8e8",             # Soft white (reduced strain)
-        "spine": "#e8e8e8",            # Same as text (like black in light mode)
-        "tick": "#e8e8e8",             # Same as text
-        "grid": "#3a3a4a",             # Subtle grid
+        "background": "transparent",  # Transparent for overlay on dark backgrounds
+        "axes_bg": "transparent",  # Transparent axes background
+        "text": "#e8e8e8",  # Soft white (reduced strain)
+        "spine": "#e8e8e8",  # Same as text (like black in light mode)
+        "tick": "#e8e8e8",  # Same as text
+        "grid": "#3a3a4a",  # Subtle grid
     },
     "light": {
         "background": "transparent",  # Transparent for overlay on light backgrounds
-        "axes_bg": "transparent",      # Transparent axes background
-        "text": "black",               # Black text
-        "spine": "black",              # Black spines
-        "tick": "black",               # Black ticks
-        "grid": "#cccccc",             # Light gray grid
+        "axes_bg": "transparent",  # Transparent axes background
+        "text": "black",  # Black text
+        "spine": "black",  # Black spines
+        "tick": "black",  # Black ticks
+        "grid": "#cccccc",  # Light gray grid
     },
 }
 
 
-def _apply_theme_colors(
-    ax: Axes,
-    theme: str = "light",
-    custom_colors: Optional[Dict[str, str]] = None
+def _apply_theme_colors(  # noqa: C901
+    ax: Axes, theme: str = "light", custom_colors: Optional[Dict[str, str]] = None
 ) -> None:
     """
     Apply theme colors to axes for dark/light mode support.
@@ -129,9 +124,10 @@ def _apply_theme_colors(
         ax._scitex_metadata["theme"] = theme
         ax._scitex_metadata["theme_colors"] = colors
 
+
 if TYPE_CHECKING:
-    from scitex.plt._subplots._FigWrapper import FigWrapper
     from scitex.plt._subplots._AxisWrapper import AxisWrapper
+    from scitex.plt._subplots._FigWrapper import FigWrapper
 
 
 def create_figure_ax_mm(
@@ -269,14 +265,14 @@ def create_figure_ax_mm(
     }
 
     # Wrap in scitex wrappers for consistent API
-    from scitex.plt._subplots._FigWrapper import FigWrapper
     from scitex.plt._subplots._AxisWrapper import AxisWrapper
+    from scitex.plt._subplots._FigWrapper import FigWrapper
 
     fig_wrapped = FigWrapper(fig)
     ax_wrapped = AxisWrapper(fig_wrapped, ax, track=False)
 
     # Store axes reference in FigWrapper
-    fig_wrapped.axes = ax_wrapped
+    fig_wrapped.axes = ax_wrapped  # type: ignore[attr-defined]
 
     return fig_wrapped, ax_wrapped
 
@@ -421,7 +417,7 @@ def apply_style_mm(ax: Axes, style: Dict) -> float:
     # See _AxisWrapper.py for the implementation.
 
     # Return trace linewidth for use in plotting
-    return trace_lw_pt
+    return trace_lw_pt  # type: ignore[no-any-return]
 
 
 if __name__ == "__main__":
