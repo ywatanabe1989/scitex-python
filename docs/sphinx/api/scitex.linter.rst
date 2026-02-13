@@ -1,6 +1,6 @@
-scitex.writer
+scitex.linter
 =============
 
-.. automodule:: scitex.writer
+.. automodule:: scitex.linter
    :members:
    :show-inheritance:

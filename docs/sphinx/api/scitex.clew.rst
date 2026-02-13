@@ -1,6 +1,6 @@
-scitex.dict API Reference
+scitex.clew API Reference
 =========================
 
-.. automodule:: scitex.dict
+.. automodule:: scitex.clew
    :members:
    :show-inheritance:

@@ -1,6 +1,6 @@
-scitex.decorators API Reference
+scitex.introspect API Reference
 ===============================
 
-.. automodule:: scitex.decorators
+.. automodule:: scitex.introspect
    :members:
    :show-inheritance:

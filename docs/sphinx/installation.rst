@@ -4,11 +4,11 @@ Installation
 Requirements
 ------------
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - pip package manager
 
 Installing SciTeX
----------------
+-----------------
 
 From PyPI (Recommended)
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -17,6 +17,12 @@ From PyPI (Recommended)
 
     pip install scitex
 
+With optional extras (plotting, statistics, scholar, etc.):
+
+.. code-block:: bash
+
+    pip install scitex[all]
+
 From Source
 ~~~~~~~~~~~
 
@@ -24,67 +30,157 @@ Clone the repository and install in development mode:
 
 .. code-block:: bash
 
-    git clone https://github.com/ywatanabe1989/scitex.git
-    cd scitex
-    pip install -e .
+    git clone https://github.com/ywatanabe1989/scitex-python.git
+    cd scitex-python
+    pip install -e ".[all]"
 
 Dependencies
 ------------
 
-SciTeX has several optional dependencies for specific functionalities:
-
 Core Dependencies
 ~~~~~~~~~~~~~~~~~
 
-These are installed automatically:
+These are installed automatically with ``pip install scitex``:
 
 - numpy
 - pandas
-- matplotlib
-- scipy
-- scikit-learn
+- PyYAML
+- tqdm
+- packaging
+- natsort
 
 Optional Dependencies
 ~~~~~~~~~~~~~~~~~~~~~
 
-For deep learning features:
+SciTeX uses optional extras to keep the base install lightweight.
+Install what you need:
 
 .. code-block:: bash
 
-    pip install torch torchvision torchaudio
+    pip install scitex[plt]       # Matplotlib + figure tools
+    pip install scitex[stats]     # Statistical testing
+    pip install scitex[scholar]   # Literature management
+    pip install scitex[all]       # Everything
 
-For advanced signal processing:
+All available extras:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 15 15 70
+
+   * - Extra
+     - Category
+     - Description
+   * - ``session``
+     - Core
+     - Session management dependencies
+   * - ``io``
+     - Core
+     - Extended file I/O (HDF5, MATLAB, Parquet, etc.)
+   * - ``config``
+     - Core
+     - YAML configuration
+   * - ``logging``
+     - Core
+     - Logging infrastructure
+   * - ``repro``
+     - Core
+     - Reproducibility (seed fixing, timestamps)
+   * - ``clew``
+     - Core
+     - Provenance tracking
+   * - ``stats``
+     - Science
+     - Statistical testing (scipy, statsmodels, pingouin)
+   * - ``plt``
+     - Science
+     - Publication figures (matplotlib, figrecipe)
+   * - ``dsp``
+     - Science
+     - Signal processing (scipy, MNE)
+   * - ``diagram``
+     - Science
+     - Mermaid / Graphviz diagram generation
+   * - ``scholar``
+     - Literature
+     - Paper search, PDF download, BibTeX enrichment
+   * - ``writer``
+     - Literature
+     - LaTeX manuscript compilation
+   * - ``ai``
+     - ML
+     - LLM APIs (OpenAI, Anthropic, Google), scikit-learn
+   * - ``nn``
+     - ML
+     - PyTorch neural network layers
+   * - ``torch``
+     - ML
+     - PyTorch core
+   * - ``audio``
+     - Utilities
+     - Text-to-speech (gTTS, pyttsx3, ElevenLabs)
+   * - ``browser``
+     - Utilities
+     - Web automation (Playwright)
+   * - ``capture``
+     - Utilities
+     - Screenshot capture
+   * - ``db``
+     - Utilities
+     - SQLite / PostgreSQL wrappers
+   * - ``pd``
+     - Utilities
+     - Pandas helpers
+   * - ``web``
+     - Utilities
+     - Web crawling and URL extraction
+   * - ``cloud``
+     - Utilities
+     - Cloud service integration
+   * - ``cli``
+     - Utilities
+     - Command-line interface
+   * - ``gen``
+     - Utilities
+     - General utilities (clipboard, shell commands)
+   * - ``linalg``
+     - Utilities
+     - Linear algebra extensions
+   * - ``parallel``
+     - Utilities
+     - Parallel processing
+   * - ``resource``
+     - Utilities
+     - System resource monitoring
+   * - ``dev``
+     - Meta
+     - Development tools (pytest, black, ruff, mypy)
+   * - ``heavy``
+     - Meta
+     - All heavy dependencies (torch, optuna, etc.)
+   * - ``all``
+     - Meta
+     - Everything combined
+
+Multiple extras can be combined:
 
 .. code-block:: bash
 
-    pip install mne tensorpac ripple_detection
-
-For database operations:
-
-.. code-block:: bash
-
-    pip install psycopg2-binary sqlalchemy
-
-For all optional dependencies:
-
-.. code-block:: bash
-
-    pip install scitex[all]
+    pip install scitex[plt,stats,scholar]
 
 Verifying Installation
 ----------------------
 
-To verify your installation:
-
 .. code-block:: python
 
-    import scitex
-    print(scitex.__version__)
-    
-    # Test basic functionality
-    CONFIG, sys, _, plt, _ = scitex.gen.start()
-    print("SciTeX successfully initialized!")
-    scitex.gen.close(CONFIG)
+    import scitex as stx
+    print(stx.__version__)
+
+    # Quick smoke test
+    fig, ax = stx.plt.subplots()
+    ax.plot_line([1, 2, 3], [1, 4, 9])
+    stx.io.save(fig, "/tmp/test.png")
+    print("SciTeX is working.")
 
 Troubleshooting
 ---------------
@@ -92,29 +188,26 @@ Troubleshooting
 Common Issues
 ~~~~~~~~~~~~~
 
-1. **Import Error**: If you encounter import errors, ensure all dependencies are installed:
+1. **Import Error**: Ensure core dependencies are installed:
 
    .. code-block:: bash
 
-       pip install -r requirements.txt
+       pip install scitex --force-reinstall
 
-2. **GPU Support**: For GPU acceleration, ensure PyTorch is installed with CUDA support:
-
-   .. code-block:: bash
-
-       pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-
-3. **Missing Optional Dependencies**: Some modules require additional packages. Install them as needed or use:
+2. **Missing optional module**: If a specific module raises ``ImportError``, install its extras:
 
    .. code-block:: bash
 
-       pip install scitex[all]
+       pip install scitex[plt,stats]
+
+3. **GPU Support**: For PyTorch GPU acceleration:
+
+   .. code-block:: bash
+
+       pip install torch --index-url https://download.pytorch.org/whl/cu121
 
 Getting Help
 ~~~~~~~~~~~~
 
-If you encounter issues:
-
-1. Check the :doc:`troubleshooting guide <troubleshooting>`
-2. Search existing `GitHub issues <https://github.com/ywatanabe1989/scitex/issues>`_
-3. Create a new issue with a minimal reproducible example
+- Search existing `GitHub issues <https://github.com/ywatanabe1989/scitex-python/issues>`_
+- Create a new issue with a minimal reproducible example

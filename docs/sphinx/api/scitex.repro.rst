@@ -1,6 +1,6 @@
-scitex.stats API Reference
+scitex.repro API Reference
 ==========================
 
-.. automodule:: scitex.stats
+.. automodule:: scitex.repro
    :members:
    :show-inheritance:
