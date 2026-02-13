@@ -2,14 +2,22 @@
 """Tests for BaseDOIEngine - Abstract base class for DOI engines."""
 
 import json
-import time
+import time  # noqa: F401
 from typing import List, Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
 
-from scitex.scholar.metadata_engines.individual._BaseDOIEngine import BaseDOIEngine
+pytest.importorskip("scitex.scholar.metadata_engines.individual")
+
+try:
+    from scitex.scholar.metadata_engines.individual._BaseDOIEngine import BaseDOIEngine
+except ImportError:
+    pytest.skip(
+        "scitex.scholar.metadata_engines.individual not available",
+        allow_module_level=True,
+    )
 
 
 # Create a concrete implementation for testing

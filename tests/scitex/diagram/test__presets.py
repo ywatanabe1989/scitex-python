@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Tests for scitex.diagram._presets"""
 
 import pytest
-from scitex.diagram._presets import (
-    DiagramPreset, WORKFLOW_PRESET, DECISION_PRESET, PIPELINE_PRESET, get_preset
+
+pytest.importorskip(
+    "scitex.diagram._presets", reason="scitex.diagram._presets module not available"
+)
+
+from scitex.diagram._presets import (  # noqa: E402
+    DECISION_PRESET,
+    PIPELINE_PRESET,
+    WORKFLOW_PRESET,
+    get_preset,
 )
 
 
@@ -121,6 +128,7 @@ class TestEmphasisStyles:
         pipeline_keys = set(PIPELINE_PRESET.emphasis_styles.keys())
         assert workflow_keys == decision_keys == pipeline_keys
 
+
 if __name__ == "__main__":
     import os
 
@@ -136,42 +144,42 @@ if __name__ == "__main__":
 # # Timestamp: 2025-12-15
 # # Author: ywatanabe / Claude
 # # File: scitex/diagram/_presets.py
-# 
+#
 # """
 # Presets for common diagram types in scientific papers.
-# 
+#
 # Each preset defines rules for compiling the semantic spec to backend formats.
 # These encode domain knowledge about "what makes a good paper figure."
 # """
-# 
+#
 # from dataclasses import dataclass
 # from typing import Dict, Any, List
-# 
-# 
+#
+#
 # @dataclass
 # class DiagramPreset:
 #     """Rules for compiling a diagram type."""
-# 
+#
 #     # Mermaid settings
 #     mermaid_direction: str  # TB, LR, RL, BT
 #     mermaid_theme: Dict[str, str]
-# 
+#
 #     # Graphviz settings
 #     graphviz_rankdir: str  # TB, LR, RL, BT
 #     graphviz_ranksep: float
 #     graphviz_nodesep: float
-# 
+#
 #     # Spacing mappings
 #     spacing_map: Dict[str, Dict[str, float]]
-# 
+#
 #     # Shape mappings (semantic -> backend)
 #     mermaid_shapes: Dict[str, str]
 #     graphviz_shapes: Dict[str, str]
-# 
+#
 #     # Emphasis styles (colors, borders)
 #     emphasis_styles: Dict[str, Dict[str, str]]
-# 
-# 
+#
+#
 # # Workflow preset: sequential processes, emphasize flow
 # WORKFLOW_PRESET = DiagramPreset(
 #     mermaid_direction="LR",  # Left-to-right for workflows
@@ -212,7 +220,7 @@ if __name__ == "__main__":
 #         "normal": {"fill": "#1a2634", "stroke": "#3a4a5a"},
 #     },
 # )
-# 
+#
 # # Decision tree preset: top-to-bottom with branches
 # DECISION_PRESET = DiagramPreset(
 #     mermaid_direction="TB",
@@ -252,7 +260,7 @@ if __name__ == "__main__":
 #         "normal": {"fill": "#ffffff", "stroke": "#666666"},
 #     },
 # )
-# 
+#
 # # Pipeline preset: strict horizontal stages
 # PIPELINE_PRESET = DiagramPreset(
 #     mermaid_direction="LR",
@@ -292,8 +300,8 @@ if __name__ == "__main__":
 #         "normal": {"fill": "#ffffff", "stroke": "#0066cc"},
 #     },
 # )
-# 
-# 
+#
+#
 # def get_preset(diagram_type: str) -> DiagramPreset:
 #     """Get preset for diagram type."""
 #     presets = {

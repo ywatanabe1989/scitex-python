@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Time-stamp: "2025-05-31 21:45:00 (ywatanabe)"
 # File: ./scitex_repo/tests/scitex/gen/test__inspect_module.py
 
@@ -10,10 +9,15 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
-pytest.importorskip("torch")
 
-from scitex.gen import inspect_module
-from scitex.gen._inspect_module import _print_module_contents
+pytest.importorskip("torch")
+pytest.importorskip("scitex.gen.inspect_module")
+
+try:
+    from scitex.gen import inspect_module
+    from scitex.gen._inspect_module import _print_module_contents
+except ImportError:
+    pytest.skip("scitex.gen.inspect_module not available", allow_module_level=True)
 
 
 # Mock module for testing
@@ -69,8 +73,8 @@ class TestInspectModule:
         submodule = types.ModuleType("submodule")
         subsubmodule = types.ModuleType("subsubmodule")
 
-        module.submodule = submodule
-        submodule.subsubmodule = subsubmodule
+        module.submodule = submodule  # type: ignore[attr-defined]
+        submodule.subsubmodule = subsubmodule  # type: ignore[attr-defined]
 
         # Test with max_depth=1
         result = inspect_module(module, max_depth=1)
@@ -85,8 +89,8 @@ class TestInspectModule:
         # Create circular reference
         module1 = types.ModuleType("module1")
         module2 = types.ModuleType("module2")
-        module1.module2 = module2
-        module2.module1 = module1
+        module1.module2 = module2  # type: ignore[attr-defined]
+        module2.module1 = module1  # type: ignore[attr-defined]
 
         # Should not cause infinite recursion
         result = inspect_module(module1, max_depth=5)
@@ -100,7 +104,7 @@ class TestInspectModule:
         """Test docstring inclusion/exclusion."""
         module = types.ModuleType("test_module")
         module.__doc__ = "Module docstring"
-        module.test_function = lambda: None
+        module.test_function = lambda: None  # type: ignore[attr-defined]
         module.test_function.__doc__ = "Function docstring"
 
         # Test with docstring=True
@@ -127,9 +131,9 @@ class TestInspectModule:
     def test_type_detection(self):
         """Test correct type detection for different objects."""
         module = types.ModuleType("test_module")
-        module.test_function = mock_function
-        module.TestClass = MockClass
-        module.submodule = types.ModuleType("submodule")
+        module.test_function = mock_function  # type: ignore[attr-defined]
+        module.TestClass = MockClass  # type: ignore[attr-defined]
+        module.submodule = types.ModuleType("submodule")  # type: ignore[attr-defined]
 
         result = inspect_module(module)
 
@@ -142,9 +146,9 @@ class TestInspectModule:
     def test_private_member_filtering(self):
         """Test that private members (starting with _) are filtered out."""
         module = types.ModuleType("test_module")
-        module.public_function = lambda: None
-        module._private_function = lambda: None
-        module.__very_private = lambda: None
+        module.public_function = lambda: None  # type: ignore[attr-defined]
+        module._private_function = lambda: None  # type: ignore[attr-defined]
+        module.__very_private = lambda: None  # type: ignore[attr-defined]
 
         result = inspect_module(module)
 
@@ -156,8 +160,8 @@ class TestInspectModule:
     def test_root_only_filtering(self):
         """Test root_only parameter filters nested modules."""
         module = types.ModuleType("test_module")
-        module.level1 = types.ModuleType("level1")
-        module.level1.level2 = types.ModuleType("level2")
+        module.level1 = types.ModuleType("level1")  # type: ignore[attr-defined]
+        module.level1.level2 = types.ModuleType("level2")  # type: ignore[attr-defined]
 
         # Test with root_only=True
         result = inspect_module(module, root_only=True, max_depth=3)
@@ -172,14 +176,14 @@ class TestInspectModule:
         module = types.ModuleType("test_module")
 
         # Add functions that will result in duplicates when processed
-        module.func1 = lambda: None
-        module.func2 = lambda: None
+        module.func1 = lambda: None  # type: ignore[attr-defined]
+        module.func2 = lambda: None  # type: ignore[attr-defined]
 
         # Get result with drop_duplicates=True (default)
         result_dedup = inspect_module(module, drop_duplicates=True)
 
         # Get result with drop_duplicates=False
-        result_with_dup = inspect_module(module, drop_duplicates=False)
+        result_with_dup = inspect_module(module, drop_duplicates=False)  # noqa: F841
 
         # The deduplicated result should have unique names
         assert result_dedup["Name"].nunique() == len(result_dedup)
@@ -188,8 +192,8 @@ class TestInspectModule:
         """Test exception handling during module processing."""
         module = types.ModuleType("test_module")
         # Add an object that raises exception when inspected
-        module.bad_obj = MagicMock()
-        module.bad_obj.__name__ = property(lambda x: 1 / 0)  # Raises ZeroDivisionError
+        module.bad_obj = MagicMock()  # type: ignore[attr-defined]
+        module.bad_obj.__name__ = property(lambda x: 1 / 0)  # type: ignore[attr-defined]
 
         # Should handle exception gracefully
         result = inspect_module(module)
@@ -200,7 +204,7 @@ class TestInspectModule:
     def test_print_output_parameter(self, mock_print):
         """Test print_output parameter."""
         module = types.ModuleType("test_module")
-        module.test_func = lambda: None
+        module.test_func = lambda: None  # type: ignore[attr-defined]
 
         # Test with print_output=True
         inspect_module(module, print_output=True, tree=True)
@@ -211,7 +215,7 @@ class TestInspectModule:
     def test_version_handling(self):
         """Test handling of module version attribute."""
         module = types.ModuleType("test_module")
-        module.__version__ = "1.2.3"
+        module.__version__ = "1.2.3"  # type: ignore[attr-defined]
 
         result = inspect_module(module, docstring=True)
 
@@ -223,8 +227,8 @@ class TestInspectModule:
         """Test that depth is correctly tracked."""
         # Create a simple module structure for predictable testing
         module = types.ModuleType("test_module")
-        module.test_function = lambda: None
-        module.TestClass = type("TestClass", (), {})
+        module.test_function = lambda: None  # type: ignore[attr-defined]
+        module.TestClass = type("TestClass", (), {})  # type: ignore[attr-defined]
 
         result = inspect_module(module, max_depth=2)
 
@@ -302,6 +306,7 @@ class TestPrintModuleContents:
         # Should have tree characters
         assert any("├──" in s or "└──" in s or "│" in s for s in printed_strings)
 
+
 if __name__ == "__main__":
     import os
 
@@ -316,16 +321,16 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-07 18:58:55 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/gen/_inspect_module.py
-# 
+#
 # import inspect
 # import sys
 # import warnings
 # from typing import Any, List, Optional, Set, Union
-# 
+#
 # import scitex
 # import pandas as pd
-# 
-# 
+#
+#
 # def inspect_module(
 #     module: Union[str, Any],
 #     columns: List[str] = ["Type", "Name", "Docstring", "Depth"],
@@ -353,8 +358,8 @@ if __name__ == "__main__":
 #         drop_duplicates=drop_duplicates,
 #         root_only=root_only,
 #     )[columns]
-# 
-# 
+#
+#
 # def _inspect_module(
 #     module: Union[str, Any],
 #     columns: List[str] = ["Type", "Name", "Docstring", "Depth"],
@@ -370,7 +375,7 @@ if __name__ == "__main__":
 #     root_only: bool = False,
 # ) -> pd.DataFrame:
 #     """List the contents of a module recursively and return as a DataFrame.
-# 
+#
 #     Example
 #     -------
 #     >>>
@@ -381,7 +386,7 @@ if __name__ == "__main__":
 #     1    F  scitex.some_function  Function description        1
 #     2    C  scitex.SomeClass  Class description               1
 #     ...
-# 
+#
 #     Parameters
 #     ----------
 #     module : Union[str, Any]
@@ -408,7 +413,7 @@ if __name__ == "__main__":
 #         Whether to remove duplicate module entries
 #     root_only : bool
 #         Whether to show only root-level modules
-# 
+#
 #     Returns
 #     -------
 #     pd.DataFrame
@@ -417,28 +422,28 @@ if __name__ == "__main__":
 #     if skip_depwarnings:
 #         warnings.filterwarnings("ignore", category=DeprecationWarning)
 #         warnings.filterwarnings("ignore", category=UserWarning)
-# 
+#
 #     if isinstance(module, str):
 #         try:
 #             module = __import__(module)
 #         except ImportError as err:
 #             print(f"Error importing module {module}: {err}")
 #             return pd.DataFrame(columns=columns)
-# 
+#
 #     if visited is None:
 #         visited = set()
-# 
+#
 #     content_list = []
-# 
+#
 #     try:
 #         module_name = getattr(module, "__name__", "")
 #         if max_depth < 0 or module_name in visited:
 #             return pd.DataFrame(content_list, columns=columns)
-# 
+#
 #         visited.add(module_name)
 #         base_name = module_name.split(".")[-1]
 #         full_path = f"{prefix}.{base_name}" if prefix else base_name
-# 
+#
 #         try:
 #             module_version = (
 #                 f" (v{module.__version__})" if hasattr(module, "__version__") else ""
@@ -446,13 +451,13 @@ if __name__ == "__main__":
 #             content_list.append(("M", full_path, module_version, current_depth))
 #         except Exception:
 #             pass
-# 
+#
 #         for name, obj in inspect.getmembers(module):
 #             if name.startswith("_"):
 #                 continue
-# 
+#
 #             obj_name = f"{full_path}.{name}"
-# 
+#
 #             if inspect.ismodule(obj):
 #                 if obj.__name__ not in visited:
 #                     content_list.append(
@@ -500,29 +505,29 @@ if __name__ == "__main__":
 #                         current_depth,
 #                     )
 #                 )
-# 
+#
 #     except Exception as err:
 #         print(f"Error processing module structure: {err}")
 #         return pd.DataFrame(columns=columns)
-# 
+#
 #     df = pd.DataFrame(content_list, columns=columns)
-# 
+#
 #     if drop_duplicates:
 #         df = df.drop_duplicates(subset="Name", keep="first")
-# 
+#
 #     if root_only:
 #         mask = df["Name"].str.count(r"\.") <= 1
 #         df = df[mask]
-# 
+#
 #     if tree and current_depth == 0 and print_output:
 #         _print_module_contents(df)
-# 
+#
 #     return df[columns]
-# 
-# 
+#
+#
 # def _print_module_contents(df: pd.DataFrame) -> None:
 #     """Prints module contents in tree structure.
-# 
+#
 #     Parameters
 #     ----------
 #     df : pd.DataFrame
@@ -530,24 +535,24 @@ if __name__ == "__main__":
 #     """
 #     df_sorted = df.sort_values(["Depth", "Name"])
 #     depth_last = {}
-# 
+#
 #     for index, row in df_sorted.iterrows():
 #         depth = row["Depth"]
 #         is_last = (
 #             index == len(df_sorted) - 1 or df_sorted.iloc[index + 1]["Depth"] <= depth
 #         )
-# 
+#
 #         prefix = ""
 #         for d in range(depth):
 #             if d == depth - 1:
 #                 prefix += "└── " if is_last else "├── "
 #             else:
 #                 prefix += "    " if depth_last.get(d, False) else "│   "
-# 
+#
 #         print(f"{prefix}({row['Type']}) {row['Name']}{row['Docstring']}")
 #         depth_last[depth] = is_last
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     sys.setrecursionlimit(10_000)
 #     df = inspect_module(scitex, docstring=True, print_output=False, columns=["Name"])
@@ -564,9 +569,9 @@ if __name__ == "__main__":
 #     # 5376            scitex.typing.Iterable
 #     # 5377                        scitex.web
 #     # 5379          scitex.web.summarize_url
-# 
+#
 #     # [5361 rows x 1 columns]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

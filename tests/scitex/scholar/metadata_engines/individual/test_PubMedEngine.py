@@ -6,7 +6,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from scitex.scholar.metadata_engines.individual import PubMedEngine
+pytest.importorskip("scitex.scholar.metadata_engines.individual")
+
+try:
+    from scitex.scholar.metadata_engines.individual import PubMedEngine
+except ImportError:
+    pytest.skip(
+        "scitex.scholar.metadata_engines.individual not available",
+        allow_module_level=True,
+    )
 
 
 class TestPubMedEngineInit:

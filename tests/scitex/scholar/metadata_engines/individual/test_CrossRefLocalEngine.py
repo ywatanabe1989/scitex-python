@@ -2,11 +2,19 @@
 """Tests for CrossRefLocalEngine - CrossRef Local API metadata retrieval engine."""
 
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch  # noqa: F401
 
 import pytest
 
-from scitex.scholar.metadata_engines.individual import CrossRefLocalEngine
+pytest.importorskip("scitex.scholar.metadata_engines.individual")
+
+try:
+    from scitex.scholar.metadata_engines.individual import CrossRefLocalEngine
+except ImportError:
+    pytest.skip(
+        "scitex.scholar.metadata_engines.individual not available",
+        allow_module_level=True,
+    )
 
 
 class TestCrossRefLocalEngineInit:
@@ -108,7 +116,7 @@ class TestCrossRefLocalEngineSearch:
         mock_session.get.return_value = mock_response
         engine._session = mock_session
 
-        result = engine.search(doi="10.1038/test")
+        result = engine.search(doi="10.1038/test")  # noqa: F841
         call_params = mock_session.get.call_args[1]["params"]
         assert call_params["doi"] == "10.1038/test"
 

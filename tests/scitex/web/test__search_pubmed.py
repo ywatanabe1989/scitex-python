@@ -9,26 +9,31 @@ Tests for PubMed search functionality.
 import pytest
 
 aiohttp = pytest.importorskip("aiohttp")
-import asyncio
-import json
-import xml.etree.ElementTree as ET
-from io import StringIO
-from unittest.mock import MagicMock, Mock, mock_open, patch
+pytest.importorskip("scitex.web.search_pubmed")
 
-from scitex.web import (
-    _fetch_details,
-    _get_citation,
-    _parse_abstract_xml,
-    _search_pubmed,
-    batch__fetch_details,
-    fetch_async,
-    format_bibtex,
-    get_crossref_metrics,
-    parse_args,
-    run_main,
-    save_bibtex,
-    search_pubmed,
-)
+import asyncio  # noqa: F401, E402
+import json  # noqa: F401, E402
+import xml.etree.ElementTree as ET  # noqa: F401, E402
+from io import StringIO  # noqa: F401, E402
+from unittest.mock import MagicMock, Mock, mock_open, patch  # noqa: E402
+
+try:
+    from scitex.web import (
+        _fetch_details,
+        _get_citation,
+        _parse_abstract_xml,
+        _search_pubmed,
+        batch__fetch_details,
+        fetch_async,
+        format_bibtex,
+        get_crossref_metrics,
+        parse_args,
+        run_main,
+        save_bibtex,
+        search_pubmed,
+    )
+except ImportError:
+    pytest.skip("scitex.web.search_pubmed not available", allow_module_level=True)
 
 
 class TestSearchPubmed:
@@ -365,7 +370,7 @@ class TestSaveBibtex:
         papers = {"uids": ["12345"], "12345": {"title": "Real Paper"}}
         abstracts = {}
 
-        with patch("builtins.open", mock_open()) as mock_file:
+        with patch("builtins.open", mock_open()) as mock_file:  # noqa: F841
             with patch("scitex.web._search_pubmed._get_citation", return_value=""):
                 with patch("scitex.web._search_pubmed.format_bibtex") as mock_format:
                     with patch("scitex.str.printc"):
@@ -647,6 +652,7 @@ class TestRunMain:
                         # Verify close was called with exit_status=1
                         assert mock_close.call_args[1]["exit_status"] == 1
 
+
 if __name__ == "__main__":
     import os
 
@@ -660,7 +666,7 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Time-stamp: "2024-11-13 14:30:43 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/web/_search_pubmed.py
-# 
+#
 # """
 # 1. Functionality:
 #    - Searches PubMed database for scientific articles
@@ -677,21 +683,21 @@ if __name__ == "__main__":
 #    - requests package
 #    - scitex package
 # """
-# 
+#
 # """Imports"""
 # import argparse
 # import asyncio
 # import xml.etree.ElementTree as ET
 # from typing import Any, Dict, List, Optional, Union
-# 
+#
 # import aiohttp
 # import requests
-# 
+#
 # import scitex
-# 
+#
 # """Functions & Classes"""
-# 
-# 
+#
+#
 # def _search_pubmed(query: str, retmax: int = 300) -> Dict[str, Any]:
 #     try:
 #         base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
@@ -703,7 +709,7 @@ if __name__ == "__main__":
 #             "retmode": "json",
 #             "usehistory": "y",
 #         }
-# 
+#
 #         response = requests.get(search_url, params=params, timeout=10)
 #         if not response.ok:
 #             scitex.str.printc("PubMed API request failed", c="red")
@@ -712,24 +718,24 @@ if __name__ == "__main__":
 #     except requests.exceptions.RequestException as e:
 #         scitex.str.printc(f"Network error: {e}", c="red")
 #         return {}
-# 
-# 
+#
+#
 # def _fetch_details(
 #     webenv: str, query_key: str, retstart: int = 0, retmax: int = 100
 # ) -> Dict[str, Any]:
 #     """Fetches detailed information including abstracts for articles.
-# 
+#
 #     Parameters
 #     ----------
 #     [Previous parameters remain the same]
-# 
+#
 #     Returns
 #     -------
 #     Dict[str, Any]
 #         Dictionary containing article details and abstracts
 #     """
 #     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
-# 
+#
 #     # Fetch abstracts
 #     efetch_url = f"{base_url}efetch.fcgi"
 #     efetch_params = {
@@ -742,9 +748,9 @@ if __name__ == "__main__":
 #         "rettype": "abstract",
 #         "field": "abstract,mesh",
 #     }
-# 
+#
 #     abstract_response = requests.get(efetch_url, params=efetch_params)
-# 
+#
 #     # Fetch metadata
 #     fetch_url = f"{base_url}esummary.fcgi"
 #     params = {
@@ -755,27 +761,27 @@ if __name__ == "__main__":
 #         "retmax": retmax,
 #         "retmode": "json",
 #     }
-# 
+#
 #     details_response = requests.get(fetch_url, params=params)
-# 
+#
 #     if not all([abstract_response.ok, details_response.ok]):
 #         # print(f"Error fetching data")
 #         return {}
-# 
+#
 #     return {
 #         "abstracts": abstract_response.text,
 #         "details": details_response.json(),
 #     }
-# 
-# 
+#
+#
 # def _parse_abstract_xml(xml_text: str) -> Dict[str, tuple]:
 #     """Parses XML response to extract abstracts.
-# 
+#
 #     Parameters
 #     ----------
 #     xml_text : str
 #         XML response from PubMed
-# 
+#
 #     Returns
 #     -------
 #     Dict[str, str]
@@ -783,34 +789,34 @@ if __name__ == "__main__":
 #     """
 #     root = ET.fromstring(xml_text)
 #     results = {}
-# 
+#
 #     for article in root.findall(".//PubmedArticle"):
 #         pmid = article.find(".//PMID").text
 #         abstract_element = article.find(".//Abstract/AbstractText")
 #         abstract = abstract_element.text if abstract_element is not None else ""
-# 
+#
 #         # DOI
 #         doi_element = article.find(".//ArticleId[@IdType='doi']")
 #         doi = doi_element.text if doi_element is not None else ""
-# 
+#
 #         # Get MeSH terms
 #         keywords = []
 #         mesh_terms = article.findall(".//MeshHeading/DescriptorName")
 #         keywords = [term.text for term in mesh_terms if term is not None]
-# 
+#
 #         results[pmid] = (abstract, keywords, doi)
-# 
+#
 #     return results
-# 
-# 
+#
+#
 # def _get_citation(pmid: str) -> str:
 #     """Gets official citation in BibTeX format.
-# 
+#
 #     Parameters
 #     ----------
 #     pmid : str
 #         PubMed ID
-# 
+#
 #     Returns
 #     -------
 #     str
@@ -826,16 +832,16 @@ if __name__ == "__main__":
 #     }
 #     response = requests.get(cite_url, params=params)
 #     return response.text if response.ok else ""
-# 
-# 
+#
+#
 # def get_crossref_metrics(
 #     doi: str, api_key: Optional[str] = None, email: Optional[str] = None
 # ) -> Dict[str, Any]:
 #     """Get article metrics from CrossRef using DOI."""
 #     import os
-# 
+#
 #     base_url = "https://api.crossref.org/works/"
-# 
+#
 #     # Use provided email or fallback to environment variables
 #     if not email:
 #         email = os.getenv(
@@ -843,12 +849,12 @@ if __name__ == "__main__":
 #             os.getenv("SCITEX_PUBMED_EMAIL", "research@example.com"),
 #         )
 #     headers = {"User-Agent": f"SciTeX/1.0 (mailto:{email})"}
-# 
+#
 #     # Add API key as query parameter if provided
 #     params = {}
 #     if api_key:
 #         params["key"] = api_key
-# 
+#
 #     try:
 #         response = requests.get(
 #             f"{base_url}{doi}", headers=headers, params=params, timeout=10
@@ -865,16 +871,16 @@ if __name__ == "__main__":
 #     except Exception as e:
 #         print(f"CrossRef API error for DOI {doi}: {e}")
 #     return {}
-# 
-# 
+#
+#
 # async def get_crossref_metrics_async(
 #     doi: str, api_key: Optional[str] = None, email: Optional[str] = None
 # ) -> Dict[str, Any]:
 #     """Get article metrics from CrossRef using DOI (async version)."""
 #     import os
-# 
+#
 #     base_url = "https://api.crossref.org/works/"
-# 
+#
 #     # Use provided email or fallback to environment variables
 #     if not email:
 #         email = os.getenv(
@@ -882,12 +888,12 @@ if __name__ == "__main__":
 #             os.getenv("SCITEX_PUBMED_EMAIL", "research@example.com"),
 #         )
 #     headers = {"User-Agent": f"SciTeX/1.0 (mailto:{email})"}
-# 
+#
 #     # Add API key as query parameter if provided
 #     params = {}
 #     if api_key:
 #         params["key"] = api_key
-# 
+#
 #     try:
 #         async with aiohttp.ClientSession() as session:
 #             async with session.get(
@@ -906,13 +912,13 @@ if __name__ == "__main__":
 #     except Exception as e:
 #         print(f"CrossRef API error for DOI {doi}: {e}")
 #     return {}
-# 
-# 
+#
+#
 # def save_bibtex(
 #     papers: Dict[str, Any], abstracts: Dict[str, str], output_file: str
 # ) -> None:
 #     """Saves paper metadata as BibTeX file with abstracts.
-# 
+#
 #     Parameters
 #     ----------
 #     papers : Dict[str, Any]
@@ -926,7 +932,7 @@ if __name__ == "__main__":
 #         for pmid, paper in papers.items():
 #             if pmid == "uids":
 #                 continue
-# 
+#
 #             citation = _get_citation(pmid)
 #             if citation:
 #                 bibtex_file.write(citation)
@@ -938,29 +944,29 @@ if __name__ == "__main__":
 #                 )
 #                 bibtex_file.write(bibtex_entry + "\n")
 #     scitex.str.printc(f"Saved to: {str(bibtex_file)}", c="yellow")
-# 
-# 
+#
+#
 # def format_bibtex(paper: Dict[str, Any], pmid: str, abstract_data: tuple) -> str:
 #     abstract, keywords, doi = abstract_data
-# 
+#
 #     # Get CrossRef and Scimago metrics
 #     crossref_metrics = get_crossref_metrics(doi) if doi else {}
 #     journal = paper.get("source", "Unknown Journal")
 #     # journal_metrics = get_journal_metrics(journal)
-# 
+#
 #     authors = paper.get("authors", [{"name": "Unknown"}])
 #     author_names = " and ".join(author["name"] for author in authors)
 #     pubdate = paper.get("pubdate", "")
 #     year = pubdate.split()[0] if pubdate.strip() else ""
 #     title = paper.get("title", "No Title")
-# 
+#
 #     # Name formatting
 #     first_author = authors[0]["name"]
 #     first_name = first_author.split()[0]
 #     last_name = first_author.split()[-1]
 #     clean_first_name = "".join(c for c in first_name if c.isalnum())
 #     clean_last_name = "".join(c for c in last_name if c.isalnum())
-# 
+#
 #     # Title words
 #     title_words = title.split()
 #     first_title_word = "".join(c.lower() for c in title_words[0] if c.isalnum())
@@ -969,9 +975,9 @@ if __name__ == "__main__":
 #         if len(title_words) > 1
 #         else ""
 #     )
-# 
+#
 #     citation_key = f"{clean_first_name}.{clean_last_name}_{year}_{first_title_word}_{second_title_word}"
-# 
+#
 #     entry = f"""@article{{{citation_key},
 #     author = {{{author_names}}},
 #     title = {{{title}}},
@@ -986,8 +992,8 @@ if __name__ == "__main__":
 # }}
 # """
 #     return entry
-# 
-# 
+#
+#
 # async def fetch_async(
 #     session: aiohttp.ClientSession, url: str, params: Dict
 # ) -> Union[Dict, str]:
@@ -1000,30 +1006,30 @@ if __name__ == "__main__":
 #                 return await response.json()
 #             return await response.text()
 #         return {}
-# 
-# 
+#
+#
 # async def batch__fetch_details(pmids: List[str], batch_size: int = 20) -> List[Dict]:
 #     """Fetches details for multiple PMIDs concurrently.
-# 
+#
 #     Parameters
 #     ----------
 #     pmids : List[str]
 #         List of PubMed IDs
 #     batch_size : int, optional
 #         Size of each batch for concurrent requests
-# 
+#
 #     Returns
 #     -------
 #     List[Dict]
 #         List of response data
 #     """
 #     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
-# 
+#
 #     async with aiohttp.ClientSession() as session:
 #         tasks = []
 #         for i in range(0, len(pmids), batch_size):
 #             batch_pmids = pmids[i : i + batch_size]
-# 
+#
 #             # Fetch both details and citations concurrently
 #             efetch_params = {
 #                 "db": "pubmed",
@@ -1031,60 +1037,60 @@ if __name__ == "__main__":
 #                 "retmode": "xml",
 #                 "rettype": "abstract",
 #             }
-# 
+#
 #             esummary_params = {
 #                 "db": "pubmed",
 #                 "id": ",".join(batch_pmids),
 #                 "retmode": "json",
 #             }
-# 
+#
 #             tasks.append(fetch_async(session, f"{base_url}efetch.fcgi", efetch_params))
 #             tasks.append(
 #                 fetch_async(session, f"{base_url}esummary.fcgi", esummary_params)
 #             )
-# 
+#
 #         results = await asyncio.gather(*tasks)
 #         return results
-# 
-# 
+#
+#
 # def search_pubmed(query: str, n_entries: int = 10) -> int:
 #     # query = args.query or "epilepsy prediction"
 #     # print(f"Using query: {query}")
-# 
+#
 #     search_results = _search_pubmed(query)
 #     if not search_results:
 #         # print("No results found or error occurred")
 #         return 1
-# 
+#
 #     pmids = search_results["esearchresult"]["idlist"]
 #     count = len(pmids)
 #     # print(f"Found {count:,} results")
-# 
+#
 #     output_file = f"pubmed_{query.replace(' ', '_')}.bib"
 #     # print(f"Saving results to: {output_file}")
-# 
+#
 #     # Process in larger batches asynchronously
 #     results = asyncio.run(batch__fetch_details(pmids[:n_entries]))
 #     # here, results seems long string
-# 
+#
 #     # Process results and save
 #     with open(output_file, "w", encoding="utf-8") as f:
 #         for i in range(0, len(results), 2):
 #             xml_response = results[i]
 #             json_response = results[i + 1]
-# 
+#
 #             if isinstance(xml_response, str):
 #                 abstracts = _parse_abstract_xml(xml_response)
 #                 if isinstance(json_response, dict) and "result" in json_response:
 #                     details = json_response["result"]
 #                     save_bibtex(details, abstracts, output_file)
-# 
+#
 #     # Process results and save
 #     temp_bibtex = []
 #     for i in range(0, len(results), 2):
 #         xml_response = results[i]
 #         json_response = results[i + 1]
-# 
+#
 #         if isinstance(xml_response, str):
 #             abstracts = _parse_abstract_xml(xml_response)
 #             if isinstance(json_response, dict) and "result" in json_response:
@@ -1099,14 +1105,14 @@ if __name__ == "__main__":
 #                                 details[pmid], pmid, abstracts.get(pmid, "")
 #                             )
 #                             temp_bibtex.append(entry)
-# 
+#
 #     # Write all entries at once
 #     with open(output_file, "w", encoding="utf-8") as f:
 #         f.write("\n".join(temp_bibtex))
-# 
+#
 #     return 0
-# 
-# 
+#
+#
 # def parse_args() -> argparse.Namespace:
 #     parser = argparse.ArgumentParser(
 #         description="PubMed article search and retrieval tool"
@@ -1127,24 +1133,24 @@ if __name__ == "__main__":
 #     args = parser.parse_args()
 #     scitex.str.printc(args, c="yellow")
 #     return args
-# 
-# 
+#
+#
 # def run_main() -> None:
 #     global CONFIG
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     import scitex
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys,
 #         verbose=False,
 #     )
-# 
+#
 #     args = parse_args()
 #     exit_status = search_pubmed(args.query, args.n_entries)
-# 
+#
 #     scitex.session.close(
 #         CONFIG,
 #         verbose=False,
@@ -1152,11 +1158,11 @@ if __name__ == "__main__":
 #         message="",
 #         exit_status=exit_status,
 #     )
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     run_main()
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

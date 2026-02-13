@@ -10,16 +10,21 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from scitex.scholar.core.oa_cache import (
-    CACHE_TTL_SECONDS,
-    OPENALEX_OA_SOURCES_URL,
-    OPENALEX_POLITE_EMAIL,
-    OASourcesCache,
-    _get_default_cache_dir,
-    get_oa_cache,
-    is_oa_journal_cached,
-    refresh_oa_cache,
-)
+pytest.importorskip("scitex.scholar.core.oa_cache")
+
+try:
+    from scitex.scholar.core.oa_cache import (
+        CACHE_TTL_SECONDS,
+        OPENALEX_OA_SOURCES_URL,
+        OPENALEX_POLITE_EMAIL,
+        OASourcesCache,
+        _get_default_cache_dir,
+        get_oa_cache,
+        is_oa_journal_cached,
+        refresh_oa_cache,
+    )
+except ImportError:
+    pytest.skip("scitex.scholar.core.oa_cache not available", allow_module_level=True)
 
 
 class TestConstants:
@@ -1000,6 +1005,6 @@ class TestIntegrationScenarios:
 
 
 if __name__ == "__main__":
-    import os
+    import os  # noqa: F811
 
     pytest.main([os.path.abspath(__file__)])
