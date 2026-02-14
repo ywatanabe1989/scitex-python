@@ -18,7 +18,7 @@ import click
 @click.option("--help-recursive", is_flag=True, help="Show help for all subcommands")
 @click.pass_context
 def dev(ctx, help_recursive):
-    """
+    r"""
     Developer utilities (internal).
 
     \b
@@ -80,8 +80,30 @@ def dev(ctx, help_recursive):
     is_flag=True,
     help="Check all configured GitHub remotes",
 )
-def versions(check, as_json, package, local_only, host, all_hosts, remote, all_remotes):
-    """
+@click.option(
+    "--rtd",
+    is_flag=True,
+    help="Check Read the Docs build status",
+)
+@click.option(
+    "--all",
+    "check_all",
+    is_flag=True,
+    help="Check all sources (hosts, remotes, RTD)",
+)
+def versions(
+    check,
+    as_json,
+    package,
+    local_only,
+    host,
+    all_hosts,
+    remote,
+    all_remotes,
+    rtd,
+    check_all,
+):
+    r"""
     List versions across the scitex ecosystem.
 
     \b
@@ -91,25 +113,31 @@ def versions(check, as_json, package, local_only, host, all_hosts, remote, all_r
       - git tag (latest version tag)
       - git branch (current branch)
       - PyPI (remote published version)
-      - SSH hosts (if configured)
-      - GitHub remotes (if configured)
+      - SSH hosts (--all-hosts or --all)
+      - GitHub remotes (--all-remotes or --all)
+      - Read the Docs (--rtd or --all)
 
     \b
     Examples:
       scitex dev versions                    # List all versions
+      scitex dev versions --all              # Include hosts, remotes, RTD
       scitex dev versions --check            # Check consistency
       scitex dev versions --json             # JSON output
       scitex dev versions -p scitex          # Single package
-      scitex dev versions -p scitex -p figrecipe  # Multiple packages
-      scitex dev versions --local-only       # Skip PyPI checks
-      scitex dev versions --host myhost      # Check specific host
       scitex dev versions --all-hosts        # Check all hosts
-      scitex dev versions --remote ywatanabe1989  # Check GitHub remote
-      scitex dev versions --all-remotes      # Check all remotes
+      scitex dev versions --rtd              # Check RTD build status
     """
     import json as json_module
 
     from scitex._dev import check_versions, list_versions
+
+    from ._dev_fmt import (
+        print_check_result,
+        print_hosts,
+        print_remotes,
+        print_rtd,
+        print_versions,
+    )
 
     packages = list(package) if package else None
 
@@ -124,8 +152,7 @@ def versions(check, as_json, package, local_only, host, all_hosts, remote, all_r
             for pkg_info in result.values():
                 pkg_info.get("remote", {}).pop("pypi", None)
 
-    # Add host data if requested
-    if host or all_hosts:
+    if host or all_hosts or check_all:
         from scitex._dev import check_all_hosts
 
         hosts_filter = list(host) if host else None
@@ -134,8 +161,7 @@ def versions(check, as_json, package, local_only, host, all_hosts, remote, all_r
         except Exception as e:
             result["hosts"] = {"error": str(e)}
 
-    # Add remote data if requested
-    if remote or all_remotes:
+    if remote or all_remotes or check_all:
         from scitex._dev import check_all_remotes
 
         remotes_filter = list(remote) if remote else None
@@ -146,168 +172,38 @@ def versions(check, as_json, package, local_only, host, all_hosts, remote, all_r
         except Exception as e:
             result["remotes"] = {"error": str(e)}
 
+    if rtd or check_all:
+        try:
+            from scitex._dev._rtd import check_all_rtd
+
+            result["rtd"] = check_all_rtd(packages=packages, versions=["latest"])
+        except Exception as e:
+            result["rtd"] = {"error": str(e)}
+
     if as_json:
         click.echo(json_module.dumps(result, indent=2))
         return
 
-    # Human-readable output
     if check:
-        _print_check_result(result)
+        print_check_result(result)
     else:
-        _print_versions(result)
+        print_versions(result)
 
-    # Print host data
     if "hosts" in result and result["hosts"]:
-        _print_hosts(result["hosts"])
+        print_hosts(result["hosts"])
 
-    # Print remote data
     if "remotes" in result and result["remotes"]:
-        _print_remotes(result["remotes"])
+        print_remotes(result["remotes"])
 
-
-def _print_versions(versions: dict) -> None:
-    """Print version information in human-readable format."""
-    click.secho("SciTeX Ecosystem Versions", fg="cyan", bold=True)
-    click.echo("=" * 60)
-    click.echo()
-
-    for pkg, info in versions.items():
-        status = info.get("status", "unknown")
-        status_color = {
-            "ok": "green",
-            "unreleased": "yellow",
-            "mismatch": "red",
-            "outdated": "magenta",
-            "unavailable": "white",
-            "unknown": "white",
-        }.get(status, "white")
-
-        click.secho(f"{pkg}", fg="cyan", bold=True, nl=False)
-        click.echo("  ", nl=False)
-        click.secho(f"[{status}]", fg=status_color)
-
-        # Local versions
-        local = info.get("local", {})
-        if local.get("pyproject_toml"):
-            click.echo(f"    toml:      {local['pyproject_toml']}")
-        if local.get("installed"):
-            click.echo(f"    installed: {local['installed']}")
-
-        # Git info
-        git = info.get("git", {})
-        if git.get("latest_tag"):
-            click.echo(f"    git tag:   {git['latest_tag']}")
-        if git.get("branch"):
-            click.echo(f"    branch:    {git['branch']}")
-
-        # Remote
-        remote = info.get("remote", {})
-        if remote.get("pypi"):
-            click.echo(f"    pypi:      {remote['pypi']}")
-
-        # Issues
-        issues = info.get("issues", [])
-        if issues:
-            for issue in issues:
-                click.secho(f"    ! {issue}", fg="yellow")
-
-        click.echo()
-
-
-def _print_check_result(result: dict) -> None:
-    """Print version check result with summary."""
-    _print_versions(result.get("packages", {}))
-
-    summary = result.get("summary", {})
-    click.secho("Summary", fg="cyan", bold=True)
-    click.echo("-" * 30)
-
-    total = summary.get("total", 0)
-    ok = summary.get("ok", 0)
-    unreleased = summary.get("unreleased", 0)
-    mismatch = summary.get("mismatch", 0)
-    outdated = summary.get("outdated", 0)
-    unavailable = summary.get("unavailable", 0)
-
-    click.echo(f"  Total:       {total}")
-    click.secho(f"  OK:          {ok}", fg="green" if ok else "white")
-    if unreleased:
-        click.secho(f"  Unreleased:  {unreleased}", fg="yellow")
-    if mismatch:
-        click.secho(f"  Mismatch:    {mismatch}", fg="red")
-    if outdated:
-        click.secho(f"  Outdated:    {outdated}", fg="magenta")
-    if unavailable:
-        click.secho(f"  Unavailable: {unavailable}", fg="white")
-
-    click.echo()
-    if mismatch > 0:
-        click.secho("Some packages have version mismatches!", fg="red", bold=True)
-    elif unreleased > 0:
-        click.secho("Some packages are ready to release.", fg="yellow")
-    else:
-        click.secho("All versions are consistent.", fg="green", bold=True)
-
-
-def _print_hosts(hosts_data: dict) -> None:
-    """Print host version data."""
-    click.echo()
-    click.secho("SSH Hosts", fg="cyan", bold=True)
-    click.echo("-" * 40)
-
-    if "error" in hosts_data:
-        click.secho(f"  Error: {hosts_data['error']}", fg="red")
-        return
-
-    for host_name, host_info in hosts_data.items():
-        if host_name.startswith("_"):
-            continue
-        click.secho(f"  {host_name}", fg="yellow", bold=True)
-        meta = host_info.get("_host", {})
-        if meta:
-            click.echo(f"    ({meta.get('hostname', '')} - {meta.get('role', '')})")
-        for pkg, pkg_info in host_info.items():
-            if pkg.startswith("_"):
-                continue
-            status = pkg_info.get("status", "unknown")
-            installed = pkg_info.get("installed", "-")
-            color = (
-                "green" if status == "ok" else "red" if status == "error" else "yellow"
-            )
-            click.echo(f"    {pkg}: ", nl=False)
-            click.secho(f"{installed}", fg=color)
-
-
-def _print_remotes(remotes_data: dict) -> None:
-    """Print GitHub remote version data."""
-    click.echo()
-    click.secho("GitHub Remotes", fg="cyan", bold=True)
-    click.echo("-" * 40)
-
-    if "error" in remotes_data:
-        click.secho(f"  Error: {remotes_data['error']}", fg="red")
-        return
-
-    for remote_name, remote_info in remotes_data.items():
-        if remote_name.startswith("_"):
-            continue
-        click.secho(f"  {remote_name}", fg="yellow", bold=True)
-        meta = remote_info.get("_remote", {})
-        if meta:
-            click.echo(f"    (org: {meta.get('org', '')})")
-        for pkg, pkg_info in remote_info.items():
-            if pkg.startswith("_"):
-                continue
-            tag = pkg_info.get("latest_tag", "-")
-            release = pkg_info.get("release", "-")
-            click.echo(f"    {pkg}: tag={tag}, release={release}")
+    if "rtd" in result and result["rtd"]:
+        print_rtd(result["rtd"])
 
 
 # MCP subgroup
 @dev.group(invoke_without_command=True)
 @click.pass_context
 def mcp(ctx):
-    """
+    r"""
     MCP (Model Context Protocol) server operations.
 
     \b
@@ -375,7 +271,7 @@ def list_python_apis(ctx, verbose, max_depth, as_json):
 @click.option("--no-browser", is_flag=True, help="Don't open browser")
 @click.option("--force", is_flag=True, help="Kill existing process using the port")
 def dashboard(host, port, debug, no_browser, force):
-    """
+    r"""
     Start the Flask version dashboard.
 
     \b
@@ -396,8 +292,8 @@ def dashboard(host, port, debug, no_browser, force):
 @dev.group(invoke_without_command=True)
 @click.pass_context
 def config(ctx):
-    """
-    Configuration management.
+    r"""
+    Manage configuration.
 
     \b
     Commands:
@@ -495,10 +391,14 @@ def config_validate():
         click.secho(f"Configuration error: {e}", fg="red")
 
 
-# Register clone command from separate module
+# Register commands from separate modules
 from ._dev_clone import clone
+from ._dev_rename import rename
+from ._dev_test import test
 
 dev.add_command(clone)
+dev.add_command(rename)
+dev.add_command(test)
 
 
 # EOF

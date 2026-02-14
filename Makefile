@@ -8,6 +8,7 @@ SHELL := /bin/bash
 
 .PHONY: help install install-dev install-all \
 	clean clean-old-legacy test test-fast test-full test-lf test-ff test-nf test-inc test-unit test-changed lint format check \
+	test-hpc test-hpc-async test-hpc-poll test-hpc-watch test-hpc-result \
 	test-stats-cov test-config-cov test-logging-cov \
 	build release upload upload-test test-install test-install-pypi test-install-module test-install-modules \
 	build-all release-all upload-all upload-test-all \
@@ -52,6 +53,11 @@ help:
 	@echo -e "  make test-nf           New tests first"
 	@echo -e "  make test              Full suite with coverage"
 	@echo -e "  make test-full         Including slow/integration"
+	@echo -e "  make test-hpc          Run tests on HPC (Spartan, blocking)"
+	@echo -e "  make test-hpc-async    Submit HPC test job (returns immediately)"
+	@echo -e "  make test-hpc-poll     Check HPC job status once"
+	@echo -e "  make test-hpc-watch    Poll until job completes"
+	@echo -e "  make test-hpc-result   Fetch HPC test output"
 	@echo -e ""
 	@echo -e "$(CYAN)🔍 Linting:$(NC)"
 	@echo -e "  make lint              Check code style (ruff)"
@@ -193,6 +199,27 @@ endif
 test-changed:
 	@echo -e "$(CYAN)📝 Running tests for git-changed files...$(NC)"
 	@./scripts/maintenance/test.sh --changed
+
+# HPC testing (Spartan)
+test-hpc:
+	@echo -e "$(CYAN)🖥️  Running tests on HPC (blocking)...$(NC)"
+	@./scripts/maintenance/test-hpc.sh
+
+test-hpc-async:
+	@echo -e "$(CYAN)🖥️  Submitting async HPC test job...$(NC)"
+	@./scripts/maintenance/test-hpc.sh --async
+
+test-hpc-poll:
+	@echo -e "$(CYAN)🖥️  Checking HPC job status...$(NC)"
+	@./scripts/maintenance/test-hpc.sh --poll
+
+test-hpc-watch:
+	@echo -e "$(CYAN)🖥️  Watching HPC job until done...$(NC)"
+	@./scripts/maintenance/test-hpc.sh --watch
+
+test-hpc-result:
+	@echo -e "$(CYAN)🖥️  Fetching HPC test output...$(NC)"
+	@./scripts/maintenance/test-hpc.sh --result
 
 lint:
 	@./scripts/maintenance/lint.sh

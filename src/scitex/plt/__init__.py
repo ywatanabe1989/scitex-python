@@ -83,9 +83,9 @@ if _FIGRECIPE_AVAILABLE:
 
     # Backward compatibility alias
     smart_align = align_smart
-    from figrecipe._graph_presets import get_preset as get_graph_preset
-    from figrecipe._graph_presets import list_presets as list_graph_presets
-    from figrecipe._graph_presets import register_preset as register_graph_preset
+    from figrecipe._graph._presets import get_preset as get_graph_preset
+    from figrecipe._graph._presets import list_presets as list_graph_presets
+    from figrecipe._graph._presets import register_preset as register_graph_preset
 
     # Also export load as alias for reproduce
     load = reproduce

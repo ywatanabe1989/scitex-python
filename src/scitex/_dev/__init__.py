@@ -54,11 +54,28 @@ from ._github import (
     get_github_release,
     get_github_tags,
 )
+from ._rename import (
+    RenameConfig,
+    RenameResult,
+    bulk_rename,
+    execute_rename,
+    preview_rename,
+)
 from ._ssh import (
     check_all_hosts,
     get_remote_version,
     get_remote_versions,
     test_host_connection,
+)
+from ._test import (
+    TestConfig,
+    fetch_hpc_result,
+    poll_hpc_job,
+    run_hpc_sbatch,
+    run_hpc_srun,
+    run_local,
+    sync_to_hpc,
+    watch_hpc_job,
 )
 from ._versions import check_versions, list_versions
 
@@ -92,6 +109,21 @@ __all__ = [
     "get_github_tags",
     "get_github_latest_tag",
     "get_github_release",
+    # Rename
+    "bulk_rename",
+    "preview_rename",
+    "execute_rename",
+    "RenameConfig",
+    "RenameResult",
+    # Test
+    "run_local",
+    "run_hpc_srun",
+    "run_hpc_sbatch",
+    "poll_hpc_job",
+    "fetch_hpc_result",
+    "watch_hpc_job",
+    "sync_to_hpc",
+    "TestConfig",
 ]
 
 

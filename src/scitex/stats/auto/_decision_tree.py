@@ -18,7 +18,7 @@ from __future__ import annotations
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 
 @dataclass
@@ -45,15 +45,15 @@ class DecisionNode:
     label: str
     shape: str = "diamond"
     emphasis: str = "primary"
-    children: List[Tuple[str, str]] = field(default_factory=list)
-    test_id: Optional[str] = None
+    children: list[tuple[str, str]] = field(default_factory=list)
+    test_id: str | None = None
 
 
 # =============================================================================
 # Decision Tree Structure
 # =============================================================================
 
-DECISION_TREE: Dict[str, DecisionNode] = {
+DECISION_TREE: dict[str, DecisionNode] = {
     # Root
     "start": DecisionNode(
         "start",
@@ -286,7 +286,7 @@ DECISION_TREE: Dict[str, DecisionNode] = {
 }
 
 
-def get_decision_tree() -> Dict[str, Any]:
+def get_decision_tree() -> dict[str, Any]:
     """Return the decision tree as a JSON-serializable dictionary.
 
     Returns
@@ -319,9 +319,9 @@ def render_flowchart_mermaid() -> str:
     str
         Mermaid markup string.
     """
-    import figrecipe._diagram as _fr_diagram
+    from figrecipe._diagram import GraphDiagram
 
-    d = _fr_diagram.Diagram(type="decision", title="Which Statistical Test?")
+    d = GraphDiagram(type="decision", title="Which Statistical Test?")
 
     for node in DECISION_TREE.values():
         d.add_node(node.id, node.label, shape=node.shape, emphasis=node.emphasis)
@@ -331,7 +331,7 @@ def render_flowchart_mermaid() -> str:
     return d.to_mermaid()  # type: ignore[no-any-return]
 
 
-def render_flowchart_svg(output_path: Optional[Union[str, Path]] = None) -> str:
+def render_flowchart_svg(output_path: str | Path | None = None) -> str:
     """Render the decision tree as an SVG string using figrecipe Diagram.
 
     Parameters
@@ -344,9 +344,9 @@ def render_flowchart_svg(output_path: Optional[Union[str, Path]] = None) -> str:
     str
         SVG content string.
     """
-    import figrecipe._diagram as _fr_diagram
+    from figrecipe._diagram import GraphDiagram
 
-    d = _fr_diagram.Diagram(type="decision", title="Which Statistical Test?")
+    d = GraphDiagram(type="decision", title="Which Statistical Test?")
 
     for node in DECISION_TREE.values():
         d.add_node(node.id, node.label, shape=node.shape, emphasis=node.emphasis)
@@ -367,7 +367,7 @@ def render_flowchart_svg(output_path: Optional[Union[str, Path]] = None) -> str:
         tmp_path.unlink(missing_ok=True)
 
 
-def get_leaf_node_test_ids() -> Dict[str, str]:
+def get_leaf_node_test_ids() -> dict[str, str]:
     """Return mapping of node_id -> test_id for all leaf nodes.
 
     Returns
