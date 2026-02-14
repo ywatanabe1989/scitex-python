@@ -10,7 +10,7 @@ repos:
       - id: black
         language_version: python3.11
         args: [--line-length=88]
-        exclude: ^(src/scitex/\.old/|\.old/|examples/\.old/)
+        exclude: ^(src/scitex/\.old/|\.old/|examples/)
 
   # Import sorting
   - repo: https://github.com/PyCQA/isort
@@ -18,7 +18,7 @@ repos:
     hooks:
       - id: isort
         args: [--profile=black, --line-length=88]
-        exclude: ^(src/scitex/\.old/|\.old/|examples/\.old/)
+        exclude: ^(src/scitex/\.old/|\.old/|examples/)
 
   # Linting
   - repo: https://github.com/PyCQA/flake8
@@ -31,7 +31,7 @@ repos:
           --max-complexity=10,
           --exclude=.old/*
         ]
-        exclude: ^(src/scitex/\.old/|\.old/|examples/\.old/)
+        exclude: ^(src/scitex/\.old/|\.old/|examples/)
 
   # Security checks
   - repo: https://github.com/PyCQA/bandit
@@ -39,7 +39,7 @@ repos:
     hooks:
       - id: bandit
         args: ["--skip=B101,B108,B110"]
-        exclude: ^(tests/|src/scitex/\.old/|\.old/)
+        exclude: ^(tests/|src/scitex/\.old/|\.old/|examples/)
 
   # Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -51,7 +51,7 @@ repos:
           - types-PyYAML
           - types-setuptools
         args: [--ignore-missing-imports, --no-strict-optional]
-        exclude: ^(src/scitex/\.old/|\.old/|examples/\.old/)
+        exclude: ^(src/scitex/\.old/|\.old/|examples/)
 
   # Docstring checking
   - repo: https://github.com/PyCQA/pydocstyle
@@ -59,7 +59,7 @@ repos:
     hooks:
       - id: pydocstyle
         args: [--convention=numpy]
-        exclude: ^(tests/|src/scitex/\.old/|\.old/|examples/\.old/|setup\.py)
+        exclude: ^(tests/|src/scitex/\.old/|\.old/|examples/|setup\.py)
 
   # YAML/JSON validation
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -90,6 +90,7 @@ repos:
     hooks:
       - id: shellcheck
         args: [-x]
+        exclude: ^examples/
 
   # Optional: Local hooks
   - repo: local
@@ -106,7 +107,7 @@ repos:
         entry: '(?i)(TODO|FIXME|XXX|HACK)'
         language: pygrep
         types: [python]
-        exclude: ^(\.old/|src/scitex/\.old/)
+        exclude: ^(\.old/|src/scitex/\.old/|examples/)
         stages: [commit]
 
       - id: pytest-changed
