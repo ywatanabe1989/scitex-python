@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-03 00:53:43 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/color/_vizualize_colors.py
 # ----------------------------------------
@@ -13,6 +12,8 @@ import numpy as np
 
 
 def vizualize_colors(colors):
+    """Visualize a dictionary of named RGBA colors as shaded line plots."""
+
     def gen_rand_sample(size=100):
         x = np.linspace(-1, 1, size)
         y = np.random.normal(size=size)
@@ -31,8 +32,9 @@ def vizualize_colors(colors):
         #     xx=ii, yy=0, width=1, height=1, color=rgba, label=color_str
         # )
 
-        # Line plot
-        ax.stx_shaded_line(xx, yy - ss, yy, yy + ss, color=rgba, label=color_str)
+        # Shaded line plot
+        ax.fill_between(xx, yy - ss, yy + ss, color=rgba, alpha=0.3)
+        ax.plot(xx, yy, color=rgba, label=color_str)
 
         # # Scatter plot
         # axes[2].scatter(xx, yy, color=rgba, label=color_str)

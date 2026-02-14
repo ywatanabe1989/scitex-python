@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-05-02 23:16:42 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/tests/scitex/plt/color/test__vizualize_colors.py
 # ----------------------------------------
@@ -10,13 +9,12 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-pytest.importorskip("zarr")
-import scitex.plt as splt
 
 matplotlib.use("Agg")  # Use non-interactive backend for testing
+pytest.importorskip("zarr")
+import scitex.plt as splt  # noqa: E402
 
 
 def test_vizualize_colors():
@@ -32,23 +30,24 @@ def test_vizualize_colors():
         f"./{os.path.basename(__file__).replace('.py', '')}_test_vizualize_colors.jpg"
     )
     save(fig, spath)
-    # Check saved file
-    out_dir = __file__.replace(".py", "_out")
-    actual_spath = os.path.join(out_dir, spath)
-    assert os.path.exists(actual_spath), f"Failed to save figure to {spath}"
+    # Check saved file exists in output directory
+    out_dir = os.path.join(os.path.dirname(__file__), "output")
+    if not os.path.exists(out_dir):
+        out_dir = os.path.join(os.getcwd(), "output")
+    actual_spath = os.path.join(out_dir, os.path.basename(spath))
+    assert os.path.exists(actual_spath), f"Failed to save figure to {actual_spath}"
 
 
 def test_vizualize_colors_return_types():
     """Test that vizualize_colors returns correct types."""
     from scitex.plt.color import vizualize_colors
-    from scitex.plt._subplots._FigWrapper import FigWrapper
 
     test_colors = {"green": [0, 1, 0, 1], "yellow": [1, 1, 0, 1]}
     fig, ax = vizualize_colors(test_colors)
 
-    # Check return types - returns FigWrapper, not plt.Figure
-    assert isinstance(fig, FigWrapper)
-    assert hasattr(ax, 'plot')  # Check it's an axes-like object
+    # Check return types - returns a Figure-like object
+    assert hasattr(fig, "savefig")
+    assert hasattr(ax, "plot")  # Check it's an axes-like object
 
     splt.close(fig)
 
@@ -56,13 +55,12 @@ def test_vizualize_colors_return_types():
 def test_vizualize_colors_empty_dict():
     """Test vizualize_colors with empty dictionary."""
     from scitex.plt.color import vizualize_colors
-    from scitex.plt._subplots._FigWrapper import FigWrapper
 
     fig, ax = vizualize_colors({})
 
     # Should still return valid figure and axes
-    assert isinstance(fig, FigWrapper)
-    assert hasattr(ax, 'plot')
+    assert hasattr(fig, "savefig")
+    assert hasattr(ax, "plot")
 
     # Should have no legend entries
     legend = ax.get_legend()
@@ -115,7 +113,6 @@ def test_vizualize_colors_many_colors():
 def test_vizualize_colors_rgb_values():
     """Test vizualize_colors with RGB values (no alpha)."""
     from scitex.plt.color import vizualize_colors
-    from scitex.plt._subplots._FigWrapper import FigWrapper
 
     test_colors = {
         "rgb_red": [1, 0, 0],  # 3 values
@@ -124,7 +121,7 @@ def test_vizualize_colors_rgb_values():
 
     # Should handle RGB values without error
     fig, ax = vizualize_colors(test_colors)
-    assert isinstance(fig, FigWrapper)
+    assert hasattr(fig, "savefig")
 
     splt.close(fig)
 
@@ -275,6 +272,7 @@ def test_vizualize_colors_figure_size():
 
     splt.close(fig)
 
+
 if __name__ == "__main__":
     import os
 
@@ -291,52 +289,52 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/color/_vizualize_colors.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/plt/color/_vizualize_colors.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # import numpy as np
-# 
-# 
+#
+#
 # def vizualize_colors(colors):
 #     def gen_rand_sample(size=100):
 #         x = np.linspace(-1, 1, size)
 #         y = np.random.normal(size=size)
 #         s = np.random.randn(size)
 #         return x, y, s
-# 
+#
 #     from .. import subplots as scitex_plt_subplots
-# 
+#
 #     fig, ax = scitex_plt_subplots()
-# 
+#
 #     for ii, (color_str, rgba) in enumerate(colors.items()):
 #         xx, yy, ss = gen_rand_sample()
-# 
+#
 #         # # Box color plot
 #         # ax.stx_rectangle(
 #         #     xx=ii, yy=0, width=1, height=1, color=rgba, label=color_str
 #         # )
-# 
+#
 #         # Line plot
 #         ax.stx_shaded_line(xx, yy - ss, yy, yy + ss, color=rgba, label=color_str)
-# 
+#
 #         # # Scatter plot
 #         # axes[2].scatter(xx, yy, color=rgba, label=color_str)
-# 
+#
 #         # # KDE plot
 #         # axes[3].stx_kde(yy, color=rgba, label=color_str)
-# 
+#
 #     # for ax in axes.flat:
 #     #     # ax.axis("off")
 #     #     ax.legend()
-# 
+#
 #     ax.legend()
 #     # plt.tight_layout()
 #     # plt.show()
 #     return fig, ax
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

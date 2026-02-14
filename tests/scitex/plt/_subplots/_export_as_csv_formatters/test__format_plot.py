@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 13:20:00 (ywatanabe)"
 # File: tests/scitex/plt/_subplots/_export_as_csv_formatters/test__format_plot.py
 
@@ -8,9 +7,12 @@
 import numpy as np
 import pandas as pd
 import pytest
+
 pytest.importorskip("zarr")
 
-from scitex.plt._subplots._export_as_csv_formatters._format_plot import _format_plot
+from scitex.plt._subplots._export_as_csv_formatters._format_plot import (  # noqa: E402
+    _format_plot,
+)
 
 
 class TestFormatPlot:
@@ -35,9 +37,9 @@ class TestFormatPlot:
 
         result = _format_plot("ax_00", tracked_dict, {})
 
-        assert "ax_00_x" in result.columns
-        assert "ax_00_y" in result.columns
-        assert list(result["ax_00_x"]) == [1, 2, 3]
+        assert "r0c0_plot-0_x" in result.columns
+        assert "r0c0_plot-0_y" in result.columns
+        assert list(result["r0c0_plot-0_x"]) == [1, 2, 3]
 
     def test_args_single_1d_array(self):
         """Single 1D array arg should generate x from indices."""
@@ -46,11 +48,10 @@ class TestFormatPlot:
 
         result = _format_plot("ax_00", tracked_dict, {})
 
-        # Column naming includes trace index: ax_00_plot_0_plot_x
-        assert "ax_00_plot_0_plot_x" in result.columns
-        assert "ax_00_plot_0_plot_y" in result.columns
-        assert list(result["ax_00_plot_0_plot_x"]) == [0, 1, 2, 3]
-        assert list(result["ax_00_plot_0_plot_y"]) == [1.0, 2.0, 3.0, 4.0]
+        assert "r0c0_plot-0_x" in result.columns
+        assert "r0c0_plot-0_y" in result.columns
+        assert list(result["r0c0_plot-0_x"]) == [0, 1, 2, 3]
+        assert list(result["r0c0_plot-0_y"]) == [1.0, 2.0, 3.0, 4.0]
 
     def test_args_single_2d_array(self):
         """Single 2D array arg should extract x and y columns."""
@@ -59,11 +60,10 @@ class TestFormatPlot:
 
         result = _format_plot("ax_00", tracked_dict, {})
 
-        # Column naming includes trace index: ax_00_plot_0_plot_x
-        assert "ax_00_plot_0_plot_x" in result.columns
-        assert "ax_00_plot_0_plot_y" in result.columns
-        assert list(result["ax_00_plot_0_plot_x"]) == [0, 1, 2]
-        assert list(result["ax_00_plot_0_plot_y"]) == [1, 4, 9]
+        assert "r0c0_plot-0_x" in result.columns
+        assert "r0c0_plot-0_y" in result.columns
+        assert list(result["r0c0_plot-0_x"]) == [0, 1, 2]
+        assert list(result["r0c0_plot-0_y"]) == [1, 4, 9]
 
     def test_args_two_1d_arrays(self):
         """Two 1D array args should use first as x, second as y."""
@@ -73,11 +73,10 @@ class TestFormatPlot:
 
         result = _format_plot("ax_00", tracked_dict, {})
 
-        # Column naming includes trace index: ax_00_plot_0_plot_x
-        assert "ax_00_plot_0_plot_x" in result.columns
-        assert "ax_00_plot_0_plot_y" in result.columns
-        np.testing.assert_array_equal(result["ax_00_plot_0_plot_x"], x)
-        np.testing.assert_array_equal(result["ax_00_plot_0_plot_y"], y)
+        assert "r0c0_plot-0_x" in result.columns
+        assert "r0c0_plot-0_y" in result.columns
+        np.testing.assert_array_equal(result["r0c0_plot-0_x"], x)
+        np.testing.assert_array_equal(result["r0c0_plot-0_y"], y)
 
     def test_args_x_and_2d_y(self):
         """X and 2D Y arrays should create multiple y columns."""
@@ -87,11 +86,10 @@ class TestFormatPlot:
 
         result = _format_plot("ax_00", tracked_dict, {})
 
-        # Column naming includes trace index: ax_00_plot_0_plot_x00
-        assert "ax_00_plot_0_plot_x00" in result.columns
-        assert "ax_00_plot_0_plot_y00" in result.columns
-        assert "ax_00_plot_0_plot_x01" in result.columns
-        assert "ax_00_plot_0_plot_y01" in result.columns
+        assert "r0c0_plot-0-0_x00" in result.columns
+        assert "r0c0_plot-0-0_y00" in result.columns
+        assert "r0c0_plot-0-1_x01" in result.columns
+        assert "r0c0_plot-0-1_y01" in result.columns
 
     def test_args_x_and_dataframe_y(self):
         """X and DataFrame Y should handle column iteration with indexed columns."""
@@ -101,12 +99,10 @@ class TestFormatPlot:
 
         result = _format_plot("ax_00", tracked_dict, {})
 
-        # DataFrame Y creates indexed x and y columns for each DataFrame column
-        # Column naming includes trace index: ax_00_plot_0_plot_x00
-        assert "ax_00_plot_0_plot_x00" in result.columns
-        assert "ax_00_plot_0_plot_y00" in result.columns
-        assert "ax_00_plot_0_plot_x01" in result.columns
-        assert "ax_00_plot_0_plot_y01" in result.columns
+        assert "r0c0_plot-0-0_x00" in result.columns
+        assert "r0c0_plot-0-0_y00" in result.columns
+        assert "r0c0_plot-0-1_x01" in result.columns
+        assert "r0c0_plot-0-1_y01" in result.columns
 
     def test_id_prefix_applied_correctly(self):
         """ID prefix should be correctly applied to all columns.
@@ -121,9 +117,9 @@ class TestFormatPlot:
 
         result = _format_plot("custom_prefix", tracked_dict, {})
 
-        # Non-standard IDs default to ax_00_plot_0 prefix
         for col in result.columns:
-            assert col.startswith("ax_00_plot_0_")
+            assert col.startswith("r0c0_plot-custom-prefix_")
+
 
 if __name__ == "__main__":
     import os
@@ -139,22 +135,22 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-08 18:45:00 (ywatanabe)"
 # # File: ./src/scitex/plt/_subplots/_export_as_csv_formatters/_format_plot.py
-# 
+#
 # """CSV formatter for matplotlib plot() calls."""
-# 
+#
 # from collections import OrderedDict
 # from typing import Any, Dict, Optional
-# 
+#
 # import numpy as np
 # import pandas as pd
 # import xarray as xr
-# 
+#
 # from scitex.plt.utils._csv_column_naming import get_csv_column_name
-# 
-# 
+#
+#
 # def _parse_tracking_id(id: str, record_index: int = 0) -> tuple:
 #     """Parse tracking ID to extract axes position and trace ID.
-# 
+#
 #     Parameters
 #     ----------
 #     id : str
@@ -162,19 +158,19 @@ if __name__ == "__main__":
 #         or user-provided like "sine"
 #     record_index : int
 #         Index of this record in the history (fallback for trace_id)
-# 
+#
 #     Returns
 #     -------
 #     tuple
 #         (ax_row, ax_col, trace_id)
 #         trace_id is a string - either the user-provided ID (e.g., "sine")
 #         or the record_index as string (e.g., "0")
-# 
+#
 #     Note
 #     ----
 #     When user provides a custom ID like "sine", that ID is preserved in the
 #     column names for clarity and traceability.
-# 
+#
 #     Examples
 #     --------
 #     >>> _parse_tracking_id("ax_00_plot_0")
@@ -188,7 +184,7 @@ if __name__ == "__main__":
 #     """
 #     ax_row, ax_col = 0, 0
 #     trace_id = str(record_index)  # Default to record_index as string
-# 
+#
 #     if id.startswith("ax_"):
 #         parts = id.split("_")
 #         if len(parts) >= 2:
@@ -211,24 +207,24 @@ if __name__ == "__main__":
 #     else:
 #         # User-provided ID like "sine", "cosine" - use it directly
 #         trace_id = id
-# 
+#
 #     return ax_row, ax_col, trace_id
-# 
-# 
+#
+#
 # def _format_plot(
 #     id: str,
 #     tracked_dict: Optional[Dict[str, Any]],
 #     kwargs: Dict[str, Any],
 # ) -> pd.DataFrame:
 #     """Format data from a plot() call for CSV export.
-# 
+#
 #     Handles various input formats including:
 #     - Pre-formatted plot_df from scitex wrappers
 #     - Raw args from __getattr__ proxied matplotlib calls
 #     - Single array: plot(y) generates x from indices
 #     - Two arrays: plot(x, y)
 #     - 2D arrays: creates multiple x/y column pairs
-# 
+#
 #     Parameters
 #     ----------
 #     id : str
@@ -239,7 +235,7 @@ if __name__ == "__main__":
 #         - 'args': Raw positional arguments (x, y) from plot()
 #     kwargs : dict
 #         Keyword arguments passed to plot (currently unused).
-# 
+#
 #     Returns
 #     -------
 #     pd.DataFrame
@@ -249,10 +245,10 @@ if __name__ == "__main__":
 #     # Check if tracked_dict is empty or not a dictionary
 #     if not tracked_dict or not isinstance(tracked_dict, dict):
 #         return pd.DataFrame()
-# 
+#
 #     # Parse the tracking ID to get axes position and trace ID
 #     ax_row, ax_col, trace_id = _parse_tracking_id(id)
-# 
+#
 #     # For stx_line, we expect a 'plot_df' key
 #     if "plot_df" in tracked_dict:
 #         plot_df = tracked_dict["plot_df"]
@@ -274,7 +270,7 @@ if __name__ == "__main__":
 #                         col, ax_row, ax_col, trace_id=trace_id
 #                     )
 #             return plot_df.rename(columns=renamed)
-# 
+#
 #     # Handle raw args from __getattr__ proxied calls
 #     if "args" in tracked_dict:
 #         args = tracked_dict["args"]
@@ -286,37 +282,37 @@ if __name__ == "__main__":
 #             y_col = get_csv_column_name(
 #                 "y", ax_row, ax_col, trace_id=trace_id
 #             )
-# 
+#
 #             # Handle single argument: plot(y) or plot(data_2d)
 #             if len(args) == 1:
 #                 args_value = args[0]
-# 
+#
 #                 # Convert to numpy for consistent handling
 #                 if hasattr(args_value, "values"):  # pandas Series/DataFrame
 #                     args_value = args_value.values
 #                 args_value = np.asarray(args_value)
-# 
+#
 #                 # 2D array: extract x and y columns
 #                 if hasattr(args_value, "ndim") and args_value.ndim == 2:
 #                     x, y = args_value[:, 0], args_value[:, 1]
 #                     df = pd.DataFrame({x_col: x, y_col: y})
 #                     return df
-# 
+#
 #                 # 1D array: generate x from indices (common case: plot(y))
 #                 elif hasattr(args_value, "ndim") and args_value.ndim == 1:
 #                     x = np.arange(len(args_value))
 #                     y = args_value
 #                     df = pd.DataFrame({x_col: x, y_col: y})
 #                     return df
-# 
+#
 #             # Handle two arguments: plot(x, y)
 #             elif len(args) >= 2:
 #                 x_arg, y_arg = args[0], args[1]
-# 
+#
 #                 # Convert to numpy
 #                 x = np.asarray(x_arg.values if hasattr(x_arg, "values") else x_arg)
 #                 y = np.asarray(y_arg.values if hasattr(y_arg, "values") else y_arg)
-# 
+#
 #                 # Handle 2D y array (multiple lines)
 #                 if hasattr(y, "ndim") and y.ndim == 2:
 #                     out = OrderedDict()
@@ -331,7 +327,7 @@ if __name__ == "__main__":
 #                         out[y_col_i] = y[:, ii]
 #                     df = pd.DataFrame(out)
 #                     return df
-# 
+#
 #                 # Handle DataFrame y
 #                 if isinstance(y_arg, pd.DataFrame):
 #                     result = {x_col: x}
@@ -342,7 +338,7 @@ if __name__ == "__main__":
 #                         result[y_col_i] = np.array(y_arg[col])
 #                     df = pd.DataFrame(result)
 #                     return df
-# 
+#
 #                 # Handle 1D arrays (most common case: plot(x, y))
 #                 if hasattr(y, "ndim") and y.ndim == 1:
 #                     # Flatten x if needed
@@ -350,11 +346,11 @@ if __name__ == "__main__":
 #                     y_flat = np.ravel(y)
 #                     df = pd.DataFrame({x_col: x_flat, y_col: y_flat})
 #                     return df
-# 
+#
 #                 # Fallback for list-like y
 #                 df = pd.DataFrame({x_col: np.ravel(x), y_col: np.ravel(y)})
 #                 return df
-# 
+#
 #     # Default empty DataFrame if we can't process the input
 #     return pd.DataFrame()
 

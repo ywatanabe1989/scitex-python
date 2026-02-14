@@ -319,20 +319,20 @@ def render_flowchart_mermaid() -> str:
     str
         Mermaid markup string.
     """
-    from figrecipe import Diagram
+    import figrecipe._diagram as _fr_diagram
 
-    d = Diagram(type="decision", title="Which Statistical Test?")
+    d = _fr_diagram.Diagram(type="decision", title="Which Statistical Test?")
 
     for node in DECISION_TREE.values():
         d.add_node(node.id, node.label, shape=node.shape, emphasis=node.emphasis)
         for edge_label, child_id in node.children:
             d.add_edge(node.id, child_id, label=edge_label)
 
-    return d.to_mermaid()
+    return d.to_mermaid()  # type: ignore[no-any-return]
 
 
 def render_flowchart_svg(output_path: Optional[Union[str, Path]] = None) -> str:
-    """Render the decision tree as an SVG string using figrecipe.Diagram.
+    """Render the decision tree as an SVG string using figrecipe Diagram.
 
     Parameters
     ----------
@@ -344,9 +344,9 @@ def render_flowchart_svg(output_path: Optional[Union[str, Path]] = None) -> str:
     str
         SVG content string.
     """
-    from figrecipe import Diagram
+    import figrecipe._diagram as _fr_diagram
 
-    d = Diagram(type="decision", title="Which Statistical Test?")
+    d = _fr_diagram.Diagram(type="decision", title="Which Statistical Test?")
 
     for node in DECISION_TREE.values():
         d.add_node(node.id, node.label, shape=node.shape, emphasis=node.emphasis)
