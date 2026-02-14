@@ -235,6 +235,18 @@ def _plt_reproduce(kw: dict) -> str:
     )
 
 
+def _plt_list_styles(kw: dict) -> str:
+    return (
+        "from figrecipe import list_styles\n\nstyles = list_styles()\nprint(styles)\n"
+    )
+
+
+def _plt_load_style(kw: dict) -> str:
+    style = kw.get("style", "SCITEX")
+    dark = kw.get("dark", False)
+    return f'from figrecipe import load_style\n\nload_style("{style}", dark={dark})\n'
+
+
 # =============================================================================
 # Registry
 # =============================================================================
@@ -252,6 +264,8 @@ _TEMPLATES = {
     "plt_plot": _plt_plot,
     "plt_compose": _plt_compose,
     "plt_reproduce": _plt_reproduce,
+    "plt_list_styles": _plt_list_styles,
+    "plt_load_style": _plt_load_style,
 }
 
 
