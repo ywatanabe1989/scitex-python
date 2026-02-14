@@ -147,7 +147,7 @@ scitex capture snap                  # Screenshot
 
 # List available APIs and tools
 scitex list-python-apis              # List all Python APIs (210 items)
-scitex mcp list-tools                # List all MCP tools (148 tools)
+scitex mcp list-tools                # List all MCP tools (161 tools)
 scitex introspect api scitex.stats   # List APIs for specific module
 ```
 
@@ -156,7 +156,7 @@ scitex introspect api scitex.stats   # List APIs for specific module
 </details>
 
 <details>
-<summary><strong>🔧 MCP Tools — 148 tools for AI Agents</strong></summary>
+<summary><strong>🔧 MCP Tools — 161 tools for AI Agents</strong></summary>
 
 <br>
 
@@ -166,18 +166,22 @@ Turn AI agents into autonomous scientific researchers.
 
 | Category | Tools | Description |
 |----------|-------|-------------|
+| writer | 28 | LaTeX manuscript compilation |
 | scholar | 23 | PDF download, metadata enrichment |
+| capture | 12 | Screen monitoring and capture |
+| introspect | 12 | Python code introspection |
+| audio | 10 | Text-to-speech, audio playback |
 | stats | 10 | Automated statistical testing |
 | plt | 9 | Matplotlib figure creation |
-| capture | 12 | Screen monitoring and capture |
-| audio | 10 | Text-to-speech, audio playback |
-| introspect | 11 | Python introspection |
-| diagram | 7 | Mermaid and flowchart creation |
+| diagram | 9 | Mermaid and Graphviz diagrams |
+| dataset | 8 | Scientific dataset access |
+| social | 7 | Social media posting |
 | canvas | 7 | Scientific figure canvas |
-| social | 9 | Social media posting |
-| template | 4 | Project scaffolding |
+| template | 6 | Project scaffolding |
+| verify | 6 | Reproducibility verification |
+| dev | 6 | Ecosystem version management |
 | ui | 5 | Notifications |
-| writer | 1 | LaTeX manuscript compilation |
+| linter | 3 | Code pattern checking |
 
 **Claude Desktop** (`~/.config/claude/claude_desktop_config.json`):
 
@@ -185,7 +189,7 @@ Turn AI agents into autonomous scientific researchers.
 {
   "mcpServers": {
     "scitex": {
-      "command": "/home/ywatanabe/.venv/bin/scitex",
+      "command": "scitex",
       "args": ["mcp", "start"],
       "env": {
         "SCITEX_ENV_SRC": "${SCITEX_ENV_SRC}"
@@ -226,7 +230,7 @@ pip install scitex[plt]      # Or via scitex
 ## 📖 Documentation
 
 - **[Read the Docs](https://scitex-python.readthedocs.io/)**: Complete API reference
-- **[Example Notebooks](./examples/notebooks/)**: 25+ Jupyter notebooks
+- **[Examples](./examples/)**: Usage examples and demonstrations
 
 ## 🤝 Contributing
 
