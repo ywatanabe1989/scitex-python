@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 17:30:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/stats/tests/parametric/_test_anova_2way.py
 # ----------------------------------------
 from __future__ import annotations
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
-"""
+r"""
 Functionalities:
   - Perform two-way ANOVA for factorial designs (2 factors)
   - Test main effects and interaction effects
@@ -26,51 +21,41 @@ IO:
 """
 
 """Imports"""
-import numpy as np
-import pandas as pd
-from typing import Union, Optional, Literal, Tuple, List, Dict
-from scipy import stats
-import matplotlib.pyplot as plt
-import matplotlib.axes
-from scitex.stats._utils._formatters import p2stars
-from scitex.stats._utils._normalizers import convert_results
+import os  # noqa: E402
+from typing import Literal, Optional, Tuple, Union  # noqa: E402
+
+import matplotlib.axes  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+from scipy import stats  # noqa: E402
+
+from scitex.stats._utils._formatters import p2stars  # noqa: E402
+
+from ._anova_helpers import interpret_eta_squared, partial_eta_squared  # noqa: E402
+from ._plot_anova_2way import _plot_anova_2way  # noqa: E402
+
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
 
 HAS_PLT = True
 
 
-def partial_eta_squared(ss_effect: float, ss_error: float) -> float:
-    """Compute partial eta-squared."""
-    return ss_effect / (ss_effect + ss_error)
-
-
-def interpret_eta_squared(eta2: float) -> str:
-    """Interpret eta-squared effect size."""
-    if eta2 < 0.01:
-        return 'negligible'
-    elif eta2 < 0.06:
-        return 'small'
-    elif eta2 < 0.14:
-        return 'medium'
-    else:
-        return 'large'
-
-
-def test_anova_2way(
+def test_anova_2way(  # noqa: C901
     data: Union[pd.DataFrame, np.ndarray],
     factor_a: Optional[Union[str, np.ndarray]] = None,
     factor_b: Optional[Union[str, np.ndarray]] = None,
     value: Optional[str] = None,
-    factor_a_name: str = 'Factor A',
-    factor_b_name: str = 'Factor B',
+    factor_a_name: str = "Factor A",
+    factor_b_name: str = "Factor B",
     alpha: float = 0.05,
     check_assumptions: bool = True,
     plot: bool = False,
     ax: Optional[matplotlib.axes.Axes] = None,
-    return_as: Literal['dict', 'dataframe'] = 'dict',
+    return_as: Literal["dict", "dataframe"] = "dict",
     decimals: int = 3,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> Union[dict, pd.DataFrame, Tuple]:
-    """
+    r"""
     Perform two-way ANOVA for factorial designs.
 
     Parameters
@@ -221,7 +206,9 @@ def test_anova_2way(
     # Parse input data
     if isinstance(data, pd.DataFrame):
         if factor_a is None or factor_b is None or value is None:
-            raise ValueError("For DataFrame input, must specify factor_a, factor_b, and value column names")
+            raise ValueError(
+                "For DataFrame input, must specify factor_a, factor_b, and value column names"
+            )
 
         df = data.copy()
         y = df[value].values
@@ -233,9 +220,9 @@ def test_anova_2way(
         b_levels = sorted(df[factor_b].unique())
 
         # Use actual column names if not specified
-        if factor_a_name == 'Factor A':
+        if factor_a_name == "Factor A":
             factor_a_name = factor_a
-        if factor_b_name == 'Factor B':
+        if factor_b_name == "Factor B":
             factor_b_name = factor_b
 
     else:
@@ -243,7 +230,9 @@ def test_anova_2way(
         y = np.asarray(data).ravel()
 
         if factor_a is None or factor_b is None:
-            raise ValueError("For array input, must provide factor_a and factor_b arrays")
+            raise ValueError(
+                "For array input, must provide factor_a and factor_b arrays"
+            )
 
         factor_a_vals = np.asarray(factor_a).ravel()
         factor_b_vals = np.asarray(factor_b).ravel()
@@ -276,17 +265,23 @@ def test_anova_2way(
 
     # Check for empty cells
     if np.any(cell_counts == 0):
-        raise ValueError("Empty cells detected. All factor combinations must have at least one observation.")
+        raise ValueError(
+            "Empty cells detected. All factor combinations must have at least one observation."
+        )
 
     cell_means = cell_sums / cell_counts
 
-    # Compute marginal means
-    a_marginal_means = np.average(cell_means, axis=1, weights=cell_counts.sum(axis=1) / cell_counts.sum())
-    b_marginal_means = np.average(cell_means, axis=0, weights=cell_counts.sum(axis=0) / cell_counts.sum())
+    # Compute marginal means (weighted by cell counts for unbalanced designs)
+    a_marginal_means = np.sum(cell_means * cell_counts, axis=1) / cell_counts.sum(
+        axis=1
+    )
+    b_marginal_means = np.sum(cell_means * cell_counts, axis=0) / cell_counts.sum(
+        axis=0
+    )
     grand_mean = np.average(y)
 
     # Compute sum of squares
-    ss_total = np.sum((y - grand_mean) ** 2)
+    # ss_total = np.sum((y - grand_mean) ** 2)  # Not used in calculations
 
     # SS for factor A (main effect)
     ss_a = 0
@@ -306,7 +301,11 @@ def test_anova_2way(
         for bi in range(n_b):
             if cell_counts[ai, bi] > 0:
                 n_cell = cell_counts[ai, bi]
-                predicted = grand_mean + (a_marginal_means[ai] - grand_mean) + (b_marginal_means[bi] - grand_mean)
+                predicted = (
+                    grand_mean
+                    + (a_marginal_means[ai] - grand_mean)
+                    + (b_marginal_means[bi] - grand_mean)
+                )
                 ss_ab += n_cell * (cell_means[ai, bi] - predicted) ** 2
 
     # SS error (within cells)
@@ -321,7 +320,7 @@ def test_anova_2way(
     df_b = n_b - 1
     df_ab = df_a * df_b
     df_error = n - n_a * n_b
-    df_total = n - 1
+    # df_total = n - 1  # Not used in calculations
 
     # Mean squares
     ms_a = ss_a / df_a if df_a > 0 else 0
@@ -348,75 +347,84 @@ def test_anova_2way(
     results = []
 
     # Main effect A
-    results.append({
-        'test': 'Two-way ANOVA',
-        'effect': factor_a_name,
-        'effect_type': 'main',
-        'statistic': round(float(F_a), decimals),
-        'pvalue': round(float(p_a), decimals + 1),
-        'df_effect': int(df_a),
-        'df_error': int(df_error),
-        'effect_size': round(float(eta2_a), decimals),
-        'effect_size_metric': 'partial_eta_squared',
-        'effect_size_interpretation': interpret_eta_squared(eta2_a),
-        'alpha': alpha,
-        'significant': p_a < alpha,
-        'stars': p2stars(p_a),
-    })
+    results.append(
+        {
+            "test": "Two-way ANOVA",
+            "effect": factor_a_name,
+            "effect_type": "main",
+            "statistic": round(float(F_a), decimals),
+            "pvalue": round(float(p_a), decimals + 1),
+            "df_effect": int(df_a),
+            "df_error": int(df_error),
+            "effect_size": round(float(eta2_a), decimals),
+            "effect_size_metric": "partial_eta_squared",
+            "effect_size_interpretation": interpret_eta_squared(eta2_a),
+            "alpha": alpha,
+            "significant": p_a < alpha,
+            "stars": p2stars(p_a),
+        }
+    )
 
     # Main effect B
-    results.append({
-        'test': 'Two-way ANOVA',
-        'effect': factor_b_name,
-        'effect_type': 'main',
-        'statistic': round(float(F_b), decimals),
-        'pvalue': round(float(p_b), decimals + 1),
-        'df_effect': int(df_b),
-        'df_error': int(df_error),
-        'effect_size': round(float(eta2_b), decimals),
-        'effect_size_metric': 'partial_eta_squared',
-        'effect_size_interpretation': interpret_eta_squared(eta2_b),
-        'alpha': alpha,
-        'significant': p_b < alpha,
-        'stars': p2stars(p_b),
-    })
+    results.append(
+        {
+            "test": "Two-way ANOVA",
+            "effect": factor_b_name,
+            "effect_type": "main",
+            "statistic": round(float(F_b), decimals),
+            "pvalue": round(float(p_b), decimals + 1),
+            "df_effect": int(df_b),
+            "df_error": int(df_error),
+            "effect_size": round(float(eta2_b), decimals),
+            "effect_size_metric": "partial_eta_squared",
+            "effect_size_interpretation": interpret_eta_squared(eta2_b),
+            "alpha": alpha,
+            "significant": p_b < alpha,
+            "stars": p2stars(p_b),
+        }
+    )
 
     # Interaction A×B
-    results.append({
-        'test': 'Two-way ANOVA',
-        'effect': f'{factor_a_name} × {factor_b_name}',
-        'effect_type': 'interaction',
-        'statistic': round(float(F_ab), decimals),
-        'pvalue': round(float(p_ab), decimals + 1),
-        'df_effect': int(df_ab),
-        'df_error': int(df_error),
-        'effect_size': round(float(eta2_ab), decimals),
-        'effect_size_metric': 'partial_eta_squared',
-        'effect_size_interpretation': interpret_eta_squared(eta2_ab),
-        'alpha': alpha,
-        'significant': p_ab < alpha,
-        'stars': p2stars(p_ab),
-    })
+    results.append(
+        {
+            "test": "Two-way ANOVA",
+            "effect": f"{factor_a_name} × {factor_b_name}",
+            "effect_type": "interaction",
+            "statistic": round(float(F_ab), decimals),
+            "pvalue": round(float(p_ab), decimals + 1),
+            "df_effect": int(df_ab),
+            "df_error": int(df_error),
+            "effect_size": round(float(eta2_ab), decimals),
+            "effect_size_metric": "partial_eta_squared",
+            "effect_size_interpretation": interpret_eta_squared(eta2_ab),
+            "alpha": alpha,
+            "significant": p_ab < alpha,
+            "stars": p2stars(p_ab),
+        }
+    )
 
     # Store cell means and marginals for plotting
     results_dict = {
-        'effects': results,
-        'cell_means': cell_means,
-        'a_levels': a_levels,
-        'b_levels': b_levels,
-        'a_marginal_means': a_marginal_means,
-        'b_marginal_means': b_marginal_means,
-        'factor_a_name': factor_a_name,
-        'factor_b_name': factor_b_name,
+        "effects": results,
+        "cell_means": cell_means,
+        "a_levels": a_levels,
+        "b_levels": b_levels,
+        "a_marginal_means": a_marginal_means,
+        "b_marginal_means": b_marginal_means,
+        "factor_a_name": factor_a_name,
+        "factor_b_name": factor_b_name,
     }
 
     # Log results if verbose
     if verbose:
         from scitex.logging import getLogger
+
         logger = getLogger(__name__)
-        logger.info(f"Two-way ANOVA Results:")
+        logger.info("Two-way ANOVA Results:")
         for r in results:
-            logger.info(f"  {r['effect']}: F({r['df_effect']}, {r['df_error']}) = {r['statistic']:.3f}, p = {r['pvalue']:.4f} {r['stars']}")
+            logger.info(
+                f"  {r['effect']}: F({r['df_effect']}, {r['df_error']}) = {r['statistic']:.3f}, p = {r['pvalue']:.4f} {r['stars']}"
+            )
 
     # Auto-enable plotting if ax is provided
     if ax is not None:
@@ -432,7 +440,7 @@ def test_anova_2way(
             fig = _plot_anova_2way(results_dict)
 
     # Return based on format
-    if return_as == 'dataframe':
+    if return_as == "dataframe":
         result_df = pd.DataFrame(results)
         if plot and fig is not None:
             return result_df, fig
@@ -443,223 +451,6 @@ def test_anova_2way(
         return results
 
 
-def _plot_anova_2way(results_dict):
-    """Create visualization for two-way ANOVA."""
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-
-    cell_means = results_dict['cell_means']
-    a_levels = results_dict['a_levels']
-    b_levels = results_dict['b_levels']
-    a_marginal = results_dict['a_marginal_means']
-    b_marginal = results_dict['b_marginal_means']
-    factor_a_name = results_dict['factor_a_name']
-    factor_b_name = results_dict['factor_b_name']
-    effects = results_dict['effects']
-
-    # Panel 1: Interaction plot (A on x-axis, lines for B)
-    ax = axes[0, 0]
-    x_pos = np.arange(len(a_levels))
-
-    for bi, b_level in enumerate(b_levels):
-        ax.plot(x_pos, cell_means[:, bi], marker='o', label=str(b_level), linewidth=2)
-
-    ax.set_xticks(x_pos)
-    ax.set_xticklabels([str(l) for l in a_levels])
-    ax.set_xlabel(factor_a_name, fontsize=12)
-    ax.set_ylabel('Mean', fontsize=12)
-    ax.set_title(f'Interaction Plot: {factor_a_name} × {factor_b_name}',
-                fontsize=12, fontweight='bold')
-    ax.legend(title=factor_b_name, loc='best')
-    ax.grid(True, alpha=0.3)
-
-    # Panel 2: Interaction plot (B on x-axis, lines for A)
-    ax = axes[0, 1]
-    x_pos = np.arange(len(b_levels))
-
-    for ai, a_level in enumerate(a_levels):
-        ax.plot(x_pos, cell_means[ai, :], marker='s', label=str(a_level), linewidth=2)
-
-    ax.set_xticks(x_pos)
-    ax.set_xticklabels([str(l) for l in b_levels])
-    ax.set_xlabel(factor_b_name, fontsize=12)
-    ax.set_ylabel('Mean', fontsize=12)
-    ax.set_title(f'Interaction Plot: {factor_b_name} × {factor_a_name}',
-                fontsize=12, fontweight='bold')
-    ax.legend(title=factor_a_name, loc='best')
-    ax.grid(True, alpha=0.3)
-
-    # Panel 3: Marginal means for Factor A
-    ax = axes[1, 0]
-    bars = ax.bar(range(len(a_levels)), a_marginal, color='steelblue', alpha=0.7, edgecolor='black')
-
-    ax.set_xticks(range(len(a_levels)))
-    ax.set_xticklabels([str(l) for l in a_levels])
-    ax.set_xlabel(factor_a_name, fontsize=12)
-    ax.set_ylabel('Marginal Mean', fontsize=12)
-    ax.set_title(f'Main Effect: {factor_a_name}', fontsize=12, fontweight='bold')
-    ax.grid(True, alpha=0.3, axis='y')
-
-    # Add significance annotation
-    effect_a = effects[0]
-    if effect_a['significant']:
-        ax.text(0.5, 0.95, f"F = {effect_a['statistic']:.2f} {effect_a['stars']}",
-               transform=ax.transAxes, ha='center', va='top',
-               bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.5))
-
-    # Panel 4: Marginal means for Factor B
-    ax = axes[1, 1]
-    bars = ax.bar(range(len(b_levels)), b_marginal, color='coral', alpha=0.7, edgecolor='black')
-
-    ax.set_xticks(range(len(b_levels)))
-    ax.set_xticklabels([str(l) for l in b_levels])
-    ax.set_xlabel(factor_b_name, fontsize=12)
-    ax.set_ylabel('Marginal Mean', fontsize=12)
-    ax.set_title(f'Main Effect: {factor_b_name}', fontsize=12, fontweight='bold')
-    ax.grid(True, alpha=0.3, axis='y')
-
-    # Add significance annotation
-    effect_b = effects[1]
-    if effect_b['significant']:
-        ax.text(0.5, 0.95, f"F = {effect_b['statistic']:.2f} {effect_b['stars']}",
-               transform=ax.transAxes, ha='center', va='top',
-               bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.5))
-
-    plt.tight_layout()
-    return fig
-
-"""Main function"""
-def main(args):
-    logger.info("=" * 70)
-    logger.info("Two-way ANOVA Examples")
-    logger.info("=" * 70)
-
-    # Example 1: Drug × Gender (with interaction)
-    logger.info("\n[Example 1] Drug × Gender (interaction present)")
-    logger.info("-" * 70)
-
-    np.random.seed(42)
-    n_per_cell = 15
-
-    data = pd.DataFrame({
-        'Drug': ['Placebo']*30 + ['Active']*30,
-        'Gender': (['Male']*15 + ['Female']*15) * 2,
-        'Score': np.concatenate([
-            np.random.normal(50, 10, 15),  # Placebo, Male
-            np.random.normal(55, 10, 15),  # Placebo, Female
-            np.random.normal(65, 10, 15),  # Active, Male
-            np.random.normal(75, 10, 15),  # Active, Female (interaction)
-        ])
-    })
-
-    results = test_anova_2way(
-        data,
-        factor_a='Drug',
-        factor_b='Gender',
-        value='Score',
-        plot=True,
-        verbose=True
-    )
-    stx.io.save(plt.gcf(), "./.dev/anova_2way_example1.jpg")
-    plt.close()
-
-    for effect in results:
-        logger.info(f"{effect['effect']:20s}: F({effect['df_effect']},{effect['df_error']}) = "
-                   f"{effect['statistic']:.3f}, p = {effect['pvalue']:.4f} {effect['stars']}, "
-                   f"η²p = {effect['effect_size']:.3f}")
-
-    # Example 2: No interaction (additive effects)
-    logger.info("\n[Example 2] Temperature × Time (no interaction)")
-    logger.info("-" * 70)
-
-    data2 = pd.DataFrame({
-        'Temperature': (['Low']*20 + ['Medium']*20 + ['High']*20),
-        'Time': (['Short', 'Long'] * 30),
-        'Yield': np.concatenate([
-            np.random.normal(40, 5, 10) + np.random.normal(0, 2, 10),    # Low, Short
-            np.random.normal(40, 5, 10) + np.random.normal(10, 2, 10),   # Low, Long
-            np.random.normal(50, 5, 10) + np.random.normal(0, 2, 10),    # Medium, Short
-            np.random.normal(50, 5, 10) + np.random.normal(10, 2, 10),   # Medium, Long
-            np.random.normal(60, 5, 10) + np.random.normal(0, 2, 10),    # High, Short
-            np.random.normal(60, 5, 10) + np.random.normal(10, 2, 10),   # High, Long
-        ])
-    })
-
-    results2 = test_anova_2way(
-        data2,
-        factor_a='Temperature',
-        factor_b='Time',
-        value='Yield',
-        plot=True,
-        verbose=True
-    )
-    stx.io.save(plt.gcf(), "./.dev/anova_2way_example2.jpg")
-    plt.close()
-
-    logger.info("\nMain effects should be significant, interaction should not be:")
-    for effect in results2:
-        logger.info(f"{effect['effect']:25s}: p = {effect['pvalue']:.4f} ({effect['effect_size_interpretation']})")
-
-    # Example 3: DataFrame output
-    logger.info("\n[Example 3] DataFrame output format")
-    logger.info("-" * 70)
-
-    results_df = test_anova_2way(
-        data,
-        factor_a='Drug',
-        factor_b='Gender',
-        value='Score',
-        return_as='dataframe',
-        verbose=True
-    )
-
-    logger.info(f"\n{results_df[['effect', 'statistic', 'pvalue', 'effect_size', 'significant']].to_string()}")
-
-    # Example 4: Export
-    logger.info("\n[Example 4] Export results")
-    logger.info("-" * 70)
-
-    convert_results(results_df, return_as='excel', path='./.dev/anova_2way_results.xlsx')
-    logger.info("Saved to: ./.dev/anova_2way_results.xlsx")
-
-# EOF
-
-    return 0
-
-def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="")
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
-    return parser.parse_args()
-
-
-def run_main():
-    """Initialize SciTeX framework and run main."""
-    global CONFIG, CC, sys, plt, rng
-
-    import sys
-    import matplotlib.pyplot as plt
-
-    args = parse_args()
-
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-        sys,
-        plt,
-        args=args,
-        file=__FILE__,
-        verbose=args.verbose,
-        agg=True,
-    )
-
-    exit_status = main(args)
-
-    stx.session.close(
-        CONFIG,
-        verbose=args.verbose,
-        exit_status=exit_status,
-    )
-
-
-if __name__ == "__main__":
-    run_main()
+# Demo: python -m scitex.stats.tests.parametric._demo_anova_2way
 
 # EOF

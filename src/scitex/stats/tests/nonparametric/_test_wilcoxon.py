@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 15:45:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/stats/tests/nonparametric/_test_wilcoxon.py
-# ----------------------------------------
-from __future__ import annotations
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
+r"""
+Wilcoxon signed-rank test (non-parametric paired test).
 
-"""
 Functionalities:
   - Perform Wilcoxon signed-rank test (non-parametric paired test)
   - Compute rank-biserial correlation effect size
@@ -25,33 +19,41 @@ IO:
   - output: Test results (dict or DataFrame) and optional figure
 """
 
-"""Imports"""
-import sys
+from __future__ import annotations
+
 import argparse
+import os
+from typing import Literal, Optional, Union
+
+import matplotlib.axes
 import numpy as np
 import pandas as pd
-from typing import Union, Optional, Literal
 from scipy import stats
-import matplotlib.axes
+
 import scitex as stx
 from scitex.logging import getLogger
+from scitex.stats._utils._formatters import fmt_stat, fmt_sym
+
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
 
 logger = getLogger(__name__)
 
-"""Functions"""
-def test_wilcoxon(
-    x: Union[np.ndarray, pd.Series],
-    y: Union[np.ndarray, pd.Series],
-    var_x: str = 'before',
-    var_y: str = 'after',
-    alternative: Literal['two-sided', 'greater', 'less'] = 'two-sided',
+
+def test_wilcoxon(  # noqa: C901
+    x: Union[np.ndarray, pd.Series, str],
+    y: Union[np.ndarray, pd.Series, str],
+    var_x: str = "before",
+    var_y: str = "after",
+    alternative: Literal["two-sided", "greater", "less"] = "two-sided",
     alpha: float = 0.05,
     plot: bool = False,
     ax: Optional[matplotlib.axes.Axes] = None,
-    return_as: Literal['dict', 'dataframe'] = 'dict',
-    verbose: bool = False
+    data: Union[pd.DataFrame, str, None] = None,
+    return_as: Literal["dict", "dataframe"] = "dict",
+    verbose: bool = False,
 ) -> Union[dict, pd.DataFrame]:
-    """
+    r"""
     Perform Wilcoxon signed-rank test (non-parametric paired test).
 
     Parameters
@@ -77,6 +79,9 @@ def test_wilcoxon(
     ax : matplotlib.axes.Axes, optional
         Axes object to plot on. If None and plot=True, creates new figure.
         If provided, automatically enables plotting.
+    data : DataFrame, str, or None, optional
+        DataFrame or CSV path. When provided, string values for x/y
+        are resolved as column names (seaborn-style).
     return_as : {'dict', 'dataframe'}, default 'dict'
         Output format
     verbose : bool, default False
@@ -123,7 +128,7 @@ def test_wilcoxon(
     **Effect size** (rank-biserial correlation):
 
     .. math::
-        r = \\frac{W_+ - W_-}{n(n+1)/2}
+        r = \frac{W_+ - W_-}{n(n+1)/2}
 
     Ranges from -1 to 1:
     - r close to 1: x > y (large positive effect)
@@ -154,6 +159,13 @@ def test_wilcoxon(
     >>> # With visualization
     >>> result, fig = test_wilcoxon(before, after, plot=True)
     """
+    # Resolve column names from DataFrame (seaborn-style data= parameter)
+    if data is not None:
+        from scitex.stats._utils._csv_support import resolve_columns
+
+        resolved = resolve_columns(data, x=x, y=y)
+        x, y = resolved["x"], resolved["y"]
+
     from scitex.stats._utils._formatters import p2stars
     from scitex.stats._utils._normalizers import force_dataframe
 
@@ -176,7 +188,7 @@ def test_wilcoxon(
     n_zeros = np.sum(diff == 0)
 
     # Perform Wilcoxon signed-rank test
-    w_result = stats.wilcoxon(x, y, alternative=alternative, zero_method='wilcox')
+    w_result = stats.wilcoxon(x, y, alternative=alternative, zero_method="wilcox")
     w_stat = float(w_result.statistic)
     pvalue = float(w_result.pvalue)
 
@@ -204,46 +216,48 @@ def test_wilcoxon(
     # Interpret effect size
     effect_size_abs = abs(effect_size)
     if effect_size_abs < 0.1:
-        effect_size_interpretation = 'negligible'
+        effect_size_interpretation = "negligible"
     elif effect_size_abs < 0.3:
-        effect_size_interpretation = 'small'
+        effect_size_interpretation = "small"
     elif effect_size_abs < 0.5:
-        effect_size_interpretation = 'medium'
+        effect_size_interpretation = "medium"
     else:
-        effect_size_interpretation = 'large'
+        effect_size_interpretation = "large"
 
     # Create null hypothesis description
-    if alternative == 'two-sided':
+    if alternative == "two-sided":
         H0 = f"median({var_x} - {var_y}) = 0"
-    elif alternative == 'greater':
+    elif alternative == "greater":
         H0 = f"median({var_x} - {var_y}) ≤ 0"
     else:  # less
         H0 = f"median({var_x} - {var_y}) ≥ 0"
 
     # Compile results
     result = {
-        'test_method': 'Wilcoxon signed-rank test',
-        'statistic': w_stat,
-        'stat_symbol': 'W',
-        'alternative': alternative,
-        'n_pairs': n_nonzero,
-        'n_zeros': n_zeros,
-        'var_x': var_x,
-        'var_y': var_y,
-        'pvalue': pvalue,
-        'stars': p2stars(pvalue),
-        'alpha': alpha,
-        'significant': pvalue < alpha,
-        'effect_size': effect_size,
-        'effect_size_metric': 'rank-biserial correlation',
-        'effect_size_interpretation': effect_size_interpretation,
-        'H0': H0,
+        "test_method": "Wilcoxon signed-rank test",
+        "statistic": w_stat,
+        "stat_symbol": "W",
+        "alternative": alternative,
+        "n_pairs": n_nonzero,
+        "n_zeros": n_zeros,
+        "var_x": var_x,
+        "var_y": var_y,
+        "pvalue": pvalue,
+        "stars": p2stars(pvalue),
+        "alpha": alpha,
+        "significant": pvalue < alpha,
+        "effect_size": effect_size,
+        "effect_size_metric": "rank-biserial correlation",
+        "effect_size_interpretation": effect_size_interpretation,
+        "H0": H0,
     }
 
     # Log results if verbose
     if verbose:
         logger.info(f"Wilcoxon: W = {w_stat:.3f}, p = {pvalue:.4f} {p2stars(pvalue)}")
-        logger.info(f"Rank-biserial r = {effect_size:.3f} ({effect_size_interpretation})")
+        logger.info(
+            f"Rank-biserial r = {effect_size:.3f} ({effect_size_interpretation})"
+        )
 
     # Auto-enable plotting if ax is provided
     if ax is not None:
@@ -252,11 +266,11 @@ def test_wilcoxon(
     # Generate plot if requested
     if plot:
         if ax is None:
-            fig, ax = stx.plt.subplots()
+            _fig, ax = stx.plt.subplots()
         _plot_wilcoxon(x, y, var_x, var_y, result, ax)
 
     # Convert to requested format
-    if return_as == 'dataframe':
+    if return_as == "dataframe":
         result = force_dataframe(result)
 
     return result
@@ -264,76 +278,29 @@ def test_wilcoxon(
 
 def _plot_wilcoxon(x, y, var_x, var_y, result, ax):
     """Create violin+swarm visualization on given axes."""
-    positions = [0, 1]
-    data = [x, y]
-    colors = ["C0", "C1"]
-
-    # Violin plot (background, transparent)
-    parts = ax.violinplot(
-        data,
-        positions=positions,
-        widths=0.6,
-        showmeans=False,
-        showmedians=False,
-        showextrema=False,
+    from scitex.stats._plot_helpers import (
+        significance_bracket,
+        stats_text_box,
+        violin_swarm,
     )
 
-    for i, pc in enumerate(parts["bodies"]):
-        pc.set_facecolor(colors[i])
-        pc.set_alpha(0.3)
-        pc.set_edgecolor(colors[i])
-        pc.set_linewidth(1.5)
+    violin_swarm(ax, [x, y], [0, 1], [var_x, var_y])
+    significance_bracket(ax, 0, 1, result["stars"], [x, y])
 
-    # Swarm plot (foreground - scatter in front!)
-    np.random.seed(42)
-    for i, vals in enumerate(data):
-        y_vals = vals
-        x_vals = np.random.normal(positions[i], 0.04, size=len(vals))
-        ax.scatter(
-            x_vals, y_vals,
-            alpha=0.6,
-            s=40,
-            color=colors[i],
-            edgecolors='white',
-            linewidths=0.5,
-            zorder=3  # In front!
-        )
-
-    # Add median lines
-    for i, vals in enumerate(data):
-        median = np.median(vals)
-        ax.hlines(
-            median,
-            positions[i] - 0.3,
-            positions[i] + 0.3,
-            colors='black',
-            linewidth=2,
-            zorder=4
-        )
-
-    # Significance stars
-    y_max = max(np.max(x), np.max(y))
-    y_min = min(np.min(x), np.min(y))
-    y_range = y_max - y_min
-    sig_y = y_max + y_range * 0.05
-
-    ax.plot([0, 1], [sig_y, sig_y], 'k-', linewidth=1.5)
-    ax.text(
-        0.5, sig_y + y_range * 0.02,
-        result['stars'],
-        ha='center', va='bottom',
-        fontsize=14, fontweight='bold'
+    stats_text_box(
+        ax,
+        [
+            fmt_stat("W", result["statistic"]),
+            fmt_stat("p", result["pvalue"], fmt=".4f", stars=result["stars"]),
+            fmt_stat("r", result["effect_size"]),
+            f"{fmt_sym('n')} = {result['n_pairs']}",
+        ],
     )
 
-    ax.set_xticks(positions)
-    ax.set_xticklabels([var_x, var_y])
-    ax.set_ylabel('Value')
-    ax.set_title(f"Wilcoxon Signed-Rank Test\nW = {result['statistic']:.2f}, p = {result['pvalue']:.4f} {result['stars']}")
-    ax.grid(True, alpha=0.3, axis='y')
+    ax.set_title("Wilcoxon Signed-Rank Test")
 
 
-"""Main function"""
-def main(args):
+def main(args):  # noqa: C901
     """Demonstrate Wilcoxon signed-rank test functionality."""
     logger.info("Demonstrating Wilcoxon signed-rank test")
 
@@ -346,11 +313,15 @@ def main(args):
     before1 = np.random.normal(10, 2, 30)
     after1 = before1 + np.random.normal(2, 1, 30)
 
-    result1 = test_wilcoxon(before1, after1, var_x='Before', var_y='After', verbose=True)
+    result1 = test_wilcoxon(
+        before1, after1, var_x="Before", var_y="After", verbose=True
+    )
 
     logger.info(f"W = {result1['statistic']:.0f}")
     logger.info(f"p = {result1['pvalue']:.4f} {result1['stars']}")
-    logger.info(f"Effect size (r) = {result1['effect_size']:.3f} ({result1['effect_size_interpretation']})")
+    logger.info(
+        f"Effect size (r) = {result1['effect_size']:.3f} ({result1['effect_size_interpretation']})"
+    )
 
     # Example 2: Skewed data
     logger.info("\n=== Example 2: Skewed data ===")
@@ -370,7 +341,7 @@ def main(args):
     before3 = np.concatenate([np.random.normal(10, 1, 28), [20, 25]])  # Add outliers
     after3 = np.concatenate([np.random.normal(12, 1, 28), [22, 27]])
 
-    result3 = test_wilcoxon(before3, after3, var_x='Pre', var_y='Post', verbose=True)
+    result3 = test_wilcoxon(before3, after3, var_x="Pre", var_y="Post", verbose=True)
 
     logger.info(f"W = {result3['statistic']:.0f}")
     logger.info(f"p = {result3['pvalue']:.4f} {result3['stars']}")
@@ -394,11 +365,13 @@ def main(args):
     before5 = np.random.normal(10, 2, 30)
     after5 = before5 + np.random.normal(1.5, 1, 30)
 
-    result_two = test_wilcoxon(before5, after5, alternative='two-sided', verbose=True)
-    result_less = test_wilcoxon(before5, after5, alternative='less', verbose=True)
+    result_two = test_wilcoxon(before5, after5, alternative="two-sided", verbose=True)
+    result_less = test_wilcoxon(before5, after5, alternative="less", verbose=True)
 
     logger.info(f"Two-sided: p = {result_two['pvalue']:.4f} {result_two['stars']}")
-    logger.info(f"One-sided (less): p = {result_less['pvalue']:.4f} {result_less['stars']}")
+    logger.info(
+        f"One-sided (less): p = {result_less['pvalue']:.4f} {result_less['stars']}"
+    )
 
     # Example 6: With visualization (demonstrates plt.gcf() and stx.io.save())
     logger.info("\n=== Example 6: With visualization ===")
@@ -406,16 +379,17 @@ def main(args):
     before6 = np.random.lognormal(2, 0.5, 40)
     after6 = before6 * np.random.lognormal(0.15, 0.3, 40)
 
-    result6 = test_wilcoxon(
-        before6, after6,
-        var_x='Baseline',
-        var_y='Treatment',
+    test_wilcoxon(
+        before6,
+        after6,
+        var_x="Baseline",
+        var_y="Treatment",
         plot=True,
-        verbose=True
+        verbose=True,
     )
 
     # Save the figure using plt.gcf()
-    stx.io.save(stx.plt.gcf(), './wilcoxon_demo.jpg')
+    stx.io.save(stx.plt.gcf(), "./wilcoxon_demo.jpg")
     stx.plt.close()
     logger.info("Figure saved to wilcoxon_demo.jpg")
 
@@ -429,10 +403,14 @@ def main(args):
     from ..parametric._test_ttest import test_ttest_rel
 
     result_wilcox = test_wilcoxon(normal_before, normal_after, verbose=True)
-    result_ttest = test_ttest_rel(normal_before, normal_after, verbose=True)
+    result_ttest = test_ttest_rel(normal_before, normal_after)
 
-    logger.info(f"Wilcoxon: p = {result_wilcox['pvalue']:.4f} {result_wilcox['stars']}, r = {result_wilcox['effect_size']:.3f}")
-    logger.info(f"Paired t-test: p = {result_ttest['pvalue']:.4f} {result_ttest['stars']}, d = {result_ttest['effect_size']:.3f}")
+    logger.info(
+        f"Wilcoxon: p = {result_wilcox['pvalue']:.4f} {result_wilcox['stars']}, r = {result_wilcox['effect_size']:.3f}"
+    )
+    logger.info(
+        f"Paired t-test: p = {result_ttest['pvalue']:.4f} {result_ttest['stars']}, d = {result_ttest['effect_size']:.3f}"
+    )
     logger.info("For normal data, both tests should agree")
 
     # Example 8: Export results
@@ -444,17 +422,13 @@ def main(args):
     for i in range(5):
         before = np.random.exponential(2, 30)
         after = before + np.random.exponential(0.5, 30)
-        result = test_wilcoxon(
-            before, after,
-            var_x=f'Pre_{i}',
-            var_y=f'Post_{i}'
-        )
+        result = test_wilcoxon(before, after, var_x=f"Pre_{i}", var_y=f"Post_{i}")
         results_list.append(result)
 
     df_all = combine_results(results_list)
     logger.info(f"\n{df_all[['var_x', 'var_y', 'pvalue', 'stars', 'effect_size']]}")
 
-    export_summary(df_all, './wilcoxon_results.csv')
+    export_summary(df_all, "./wilcoxon_results.csv")
     logger.info("Results exported")
 
     return 0
@@ -463,26 +437,21 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description='Demonstrate Wilcoxon signed-rank test'
+        description="Demonstrate Wilcoxon signed-rank test"
     )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose output'
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
 def run_main():
     """Initialize SciTeX framework and run main."""
-    global CONFIG, sys, plt, rng
-
     import sys
+
     import matplotlib.pyplot as plt
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, _CC, _rng_manager = stx.session.start(
         sys,
         plt,
         args=args,
@@ -500,7 +469,7 @@ def run_main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
 
 # EOF

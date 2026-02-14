@@ -1,15 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 22:22:16 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/tests/correlation/_test_kendall.py
 # ----------------------------------------
 from __future__ import annotations
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
-
-import argparse
 
 """
 Functionalities:
@@ -26,18 +19,22 @@ IO:
   - output: Test results (dict or DataFrame) and optional figure
 """
 
-"""Imports"""
+import argparse
+import os
 from typing import Literal, Optional, Union
 
 import matplotlib.axes
 import numpy as np
 import pandas as pd
-import scitex as stx
 from scipy import stats
-from scitex.logging import getLogger
 
-from scitex.stats._utils._formatters import p2stars
+import scitex as stx
+from scitex.logging import getLogger
+from scitex.stats._utils._formatters import fmt_stat, fmt_sym, p2stars
 from scitex.stats._utils._normalizers import convert_results, force_dataframe
+
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
 
 logger = getLogger(__name__)
 
@@ -67,9 +64,9 @@ def interpret_kendall_tau(tau: float) -> str:
         return "large"
 
 
-def test_kendall(
-    x: Union[np.ndarray, pd.Series],
-    y: Union[np.ndarray, pd.Series],
+def test_kendall(  # noqa: C901
+    x: Union[np.ndarray, pd.Series, str],
+    y: Union[np.ndarray, pd.Series, str],
     var_x: str = "x",
     var_y: str = "y",
     alternative: Literal["two-sided", "less", "greater"] = "two-sided",
@@ -77,11 +74,12 @@ def test_kendall(
     alpha: float = 0.05,
     plot: bool = False,
     ax: Optional[matplotlib.axes.Axes] = None,
+    data: Union[pd.DataFrame, str, None] = None,
     return_as: Literal["dict", "dataframe"] = "dict",
     decimals: int = 3,
     verbose: bool = False,
 ) -> Union[dict, pd.DataFrame]:
-    """
+    r"""
     Perform Kendall's tau correlation test.
 
     Parameters
@@ -109,6 +107,9 @@ def test_kendall(
         Whether to generate scatter plot
     ax : matplotlib.axes.Axes, optional
         Axes to plot on. If provided, plot is set to True
+    data : DataFrame, str, or None, optional
+        DataFrame or CSV path. When provided, string values for x/y
+        are resolved as column names (seaborn-style).
     return_as : {'dict', 'dataframe'}, default 'dict'
         Output format
     decimals : int, default 3
@@ -150,7 +151,7 @@ def test_kendall(
     **Kendall's tau-b** (accounts for ties):
 
     .. math::
-        \\tau_b = \\frac{n_c - n_d}{\\sqrt{(n_0 - n_1)(n_0 - n_2)}}
+        \tau_b = \frac{n_c - n_d}{\\sqrt{(n_0 - n_1)(n_0 - n_2)}}
 
     Where:
     - n_c: Number of concordant pairs
@@ -213,6 +214,13 @@ def test_kendall(
     test_spearman : Alternative rank correlation
     test_pearson : Parametric correlation
     """
+    # Resolve column names from DataFrame (seaborn-style data= parameter)
+    if data is not None:
+        from scitex.stats._utils._csv_support import resolve_columns
+
+        resolved = resolve_columns(data, x=x, y=y)
+        x, y = resolved["x"], resolved["y"]
+
     # Convert to arrays
     x = np.asarray(x)
     y = np.asarray(y)
@@ -236,13 +244,9 @@ def test_kendall(
 
     # Compute Kendall's tau
     if variant == "b":
-        tau, pvalue = stats.kendalltau(
-            x, y, alternative=alternative, variant="b"
-        )
+        tau, pvalue = stats.kendalltau(x, y, alternative=alternative, variant="b")
     elif variant == "c":
-        tau, pvalue = stats.kendalltau(
-            x, y, alternative=alternative, variant="c"
-        )
+        tau, pvalue = stats.kendalltau(x, y, alternative=alternative, variant="c")
     else:
         raise ValueError(f"Unknown variant: {variant}. Use 'b' or 'c'.")
 
@@ -304,9 +308,7 @@ def test_kendall(
 
     # Log results if verbose
     if verbose:
-        logger.info(
-            f"Kendall: τ = {tau:.3f}, p = {pvalue:.4f} {p2stars(pvalue)}"
-        )
+        logger.info(f"Kendall: τ = {tau:.3f}, p = {pvalue:.4f} {p2stars(pvalue)}")
         logger.info(f"τ² = {tau_squared:.3f} ({tau_interpretation})")
         logger.info(
             f"Concordant: {n_concordant}, Discordant: {n_discordant}, Ties: {n_ties}"
@@ -331,50 +333,35 @@ def test_kendall(
     return result
 
 
-def _plot_kendall(x, y, result, var_x, var_y, ax):
+def _plot_kendall(x, y, result, var_x, var_y, ax) -> None:
     """Create scatter plot with rank-based visualization on given axes."""
+    from scitex.stats._plot_helpers import scatter_regression, stats_text_box
+
     # Convert to ranks
     ranks_x = stats.rankdata(x)
     ranks_y = stats.rankdata(y)
 
-    # Scatter plot of ranks
-    ax.scatter(
-        ranks_x,
-        ranks_y,
-        alpha=0.6,
-        s=50,
-        color="C0",
-        edgecolors="white",
-        linewidths=0.5,
-        zorder=3,
-    )
-
-    # Add regression line for ranks
-    z = np.polyfit(ranks_x, ranks_y, 1)
-    p = np.poly1d(z)
-    x_line = np.linspace(ranks_x.min(), ranks_x.max(), 100)
-    ax.plot(
-        x_line,
-        p(x_line),
-        "r-",
-        linewidth=2,
-        label=f'τ = {result["statistic"]:.3f}',
-        zorder=2,
-    )
-
-    # Labels and title
+    scatter_regression(ax, ranks_x, ranks_y)
     ax.set_xlabel(f"Rank({var_x})")
     ax.set_ylabel(f"Rank({var_y})")
-    stars = result["stars"]
-    ax.set_title(f"Kendall: τ = {result['statistic']:.3f} {stars}")
-    ax.legend()
-    ax.grid(True, alpha=0.3, zorder=1)
+    ax.set_title("Kendall Correlation")
+
+    stats_text_box(
+        ax,
+        [
+            fmt_stat("tau", result["statistic"]),
+            fmt_stat("p", result["pvalue"], fmt=".4f", stars=result["stars"]),
+            fmt_stat("tau2", result["tau_squared"]),
+            f"{fmt_sym('n')} = {result['n']}",
+        ],
+    )
 
 
 """Main function"""
 
 
-def main(args):
+def main(args) -> int:
+    """Run Kendall tau correlation examples."""
     logger.info("=" * 70)
     logger.info("Kendall's Tau Correlation Examples")
     logger.info("=" * 70)
@@ -387,7 +374,7 @@ def main(args):
     x = np.array([1, 2, 2, 3, 4, 4, 5, 6, 7, 8, 9, 10])
     y = np.array([2, 3, 3, 5, 6, 6, 8, 9, 10, 11, 12, 13])
 
-    result = test_kendall(
+    test_kendall(
         x, y, var_x="Treatment Dose", var_y="Response", plot=True, verbose=True
     )
     stx.io.save(stx.plt.gcf(), "kendall_example1.jpg")
@@ -400,9 +387,9 @@ def main(args):
     from . import test_spearman
 
     logger.info("Kendall:")
-    result_kendall = test_kendall(x, y, verbose=True)
+    test_kendall(x, y, verbose=True)
     logger.info("\nSpearman:")
-    result_spearman = test_spearman(x, y, verbose=True)
+    test_spearman(x, y, verbose=True)
     logger.info("\nNote: Kendall's tau is generally smaller but more robust")
 
     # Example 3: Small sample size
@@ -413,7 +400,7 @@ def main(args):
     y_small = np.array([2, 4, 3, 7, 6, 9, 8, 10])
 
     logger.info("With small samples, Kendall's tau is preferred over Spearman")
-    result_small = test_kendall(x_small, y_small, plot=True, verbose=True)
+    test_kendall(x_small, y_small, plot=True, verbose=True)
     stx.io.save(stx.plt.gcf(), "kendall_example3.jpg")
     stx.plt.close()
 
@@ -425,7 +412,7 @@ def main(args):
     loyalty = np.array([1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5])
 
     logger.info("Ideal for ordinal data with limited unique values")
-    result_ordinal = test_kendall(
+    test_kendall(
         satisfaction,
         loyalty,
         var_x="Satisfaction (1-5)",
@@ -441,9 +428,9 @@ def main(args):
     logger.info("-" * 70)
 
     logger.info("Two-sided test:")
-    result_two = test_kendall(x, y, alternative="two-sided", verbose=True)
+    test_kendall(x, y, alternative="two-sided", verbose=True)
     logger.info("\nOne-sided test (greater):")
-    result_one_sided = test_kendall(x, y, alternative="greater", verbose=True)
+    test_kendall(x, y, alternative="greater", verbose=True)
     logger.info("Note: One-sided test has more power when direction is known")
 
     # Example 6: DataFrame output
@@ -468,23 +455,19 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
-def run_main():
+def run_main() -> None:
     """Initialize SciTeX framework and run main."""
-    global CONFIG, CC, sys, plt, rng
-
     import sys
 
     import matplotlib.pyplot as plt
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+    _CONFIG, sys.stdout, sys.stderr, plt, _CC, _rng_manager = stx.session.start(
         sys,
         plt,
         args=args,
@@ -496,7 +479,7 @@ def run_main():
     exit_status = main(args)
 
     stx.session.close(
-        CONFIG,
+        _CONFIG,
         verbose=args.verbose,
         exit_status=exit_status,
     )

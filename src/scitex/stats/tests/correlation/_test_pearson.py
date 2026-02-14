@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 21:47:27 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/tests/correlation/_test_pearson.py
 # ----------------------------------------
 from __future__ import annotations
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
 """
 Functionalities:
@@ -25,36 +20,41 @@ IO:
   - output: Test results (dict or DataFrame) and optional figure
 """
 
-"""Imports"""
-import argparse
+import os
 from typing import Literal, Optional, Union
 
 import matplotlib.axes
 import numpy as np
 import pandas as pd
-import scitex as stx
 from scipy import stats
+
+import scitex as stx
 from scitex.logging import getLogger
+from scitex.stats._utils._formatters import fmt_stat, fmt_sym
+
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
 
 logger = getLogger(__name__)
 
 """Functions"""
 
 
-def test_pearson(
-    x: Union[np.ndarray, pd.Series],
-    y: Union[np.ndarray, pd.Series],
+def test_pearson(  # noqa: C901
+    x: Union[np.ndarray, pd.Series, str],
+    y: Union[np.ndarray, pd.Series, str],
     var_x: str = "x",
     var_y: str = "y",
     alternative: Literal["two-sided", "less", "greater"] = "two-sided",
     alpha: float = 0.05,
     plot: bool = False,
     ax: Optional[matplotlib.axes.Axes] = None,
+    data: Union[pd.DataFrame, str, None] = None,
     return_as: Literal["dict", "dataframe"] = "dict",
     decimals: int = 3,
     verbose: bool = False,
 ) -> Union[dict, pd.DataFrame]:
-    """
+    r"""
     Perform Pearson correlation test.
 
     Parameters
@@ -72,6 +72,9 @@ def test_pearson(
     ax : matplotlib.axes.Axes, optional
         Axes object to plot on. If None and plot=True, creates new figure.
         If provided, automatically enables plotting.
+    data : DataFrame, str, or None, optional
+        DataFrame or CSV path. When provided, string values for x/y
+        are resolved as column names (seaborn-style).
     return_as : {'dict', 'dataframe'}, default 'dict'
         Output format
     decimals : int, default 3
@@ -107,7 +110,7 @@ def test_pearson(
     **Pearson's r**:
 
     .. math::
-        r = \\frac{\\sum(x_i - \\bar{x})(y_i - \\bar{y})}{\\sqrt{\\sum(x_i - \\bar{x})^2 \\sum(y_i - \\bar{y})^2}}
+        r = \frac{\\sum(x_i - \bar{x})(y_i - \bar{y})}{\\sqrt{\\sum(x_i - \bar{x})^2 \\sum(y_i - \bar{y})^2}}
 
     Range: -1 ≤ r ≤ 1
     - r = 1: Perfect positive linear relationship
@@ -149,7 +152,7 @@ def test_pearson(
     Computed using Fisher's z-transformation:
 
     .. math::
-        z = 0.5 \\ln\\left(\\frac{1+r}{1-r}\\right)
+        z = 0.5 \\ln\\left(\frac{1+r}{1-r}\right)
 
     References
     ----------
@@ -171,6 +174,13 @@ def test_pearson(
     >>> # With visualization
     >>> result, fig = test_pearson(x, y, plot=True)
     """
+    # Resolve column names from DataFrame (seaborn-style data= parameter)
+    if data is not None:
+        from scitex.stats._utils._csv_support import resolve_columns
+
+        resolved = resolve_columns(data, x=x, y=y)
+        x, y = resolved["x"], resolved["y"]
+
     from scitex.stats._utils._formatters import p2stars
     from scitex.stats._utils._normalizers import convert_results, force_dataframe
 
@@ -262,15 +272,11 @@ def test_pearson(
             f"(r = {r:.3f}, 95% CI [{ci_lower:.3f}, {ci_upper:.3f}])"
         )
     else:
-        result["interpretation"] = (
-            f"No significant correlation detected (r = {r:.3f})"
-        )
+        result["interpretation"] = f"No significant correlation detected (r = {r:.3f})"
 
     # Log results if verbose
     if verbose:
-        logger.info(
-            f"Pearson: r = {r:.3f}, p = {pvalue:.4f} {p2stars(pvalue)}"
-        )
+        logger.info(f"Pearson: r = {r:.3f}, p = {pvalue:.4f} {p2stars(pvalue)}")
         logger.info(
             f"R² = {r_squared:.3f} ({effect_interp}), 95% CI [{ci_lower:.3f}, {ci_upper:.3f}]"
         )
@@ -294,296 +300,25 @@ def test_pearson(
     return result
 
 
-def _plot_pearson(x, y, var_x, var_y, result, ax):
+def _plot_pearson(x, y, var_x, var_y, result, ax) -> None:
     """Create scatter plot with regression line on given axes."""
-    # Scatter plot
-    ax.scatter(
-        x,
-        y,
-        alpha=0.6,
-        s=50,
-        color="C0",
-        edgecolors="white",
-        linewidths=0.5,
-        zorder=3,
-    )
+    from scitex.stats._plot_helpers import scatter_regression, stats_text_box
 
-    # Regression line
-    z = np.polyfit(x, y, 1)
-    p = np.poly1d(z)
-    x_line = np.linspace(np.min(x), np.max(x), 100)
-    ax.plot(
-        x_line,
-        p(x_line),
-        "r-",
-        linewidth=2,
-        label=f'r = {result["statistic"]:.3f}',
-        zorder=2,
-    )
-
+    scatter_regression(ax, x, y)
     ax.set_xlabel(var_x)
     ax.set_ylabel(var_y)
-    ax.set_title(
-        f'Pearson Correlation\nr = {result["statistic"]:.3f}, p = {result["pvalue"]:.4f} {result["stars"]}'
-    )
-    ax.legend()
-    ax.grid(True, alpha=0.3)
+    ax.set_title("Pearson Correlation")
 
-    # Add text with results
-    text_str = (
-        f"r = {result['statistic']:.3f} {result['stars']}\n"
-        f"p = {result['pvalue']:.4f}\n"
-        f"95% CI [{result['ci_lower']:.3f}, {result['ci_upper']:.3f}]\n"
-        f"R² = {result['r_squared']:.3f}\n"
-        f"n = {result['n']}"
-    )
-    ax.text(
-        0.02,
-        0.98,
-        text_str,
-        transform=ax.transAxes,
-        verticalalignment="top",
-        bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
-        fontsize=10,
+    stats_text_box(
+        ax,
+        [
+            fmt_stat("r", result["statistic"]),
+            fmt_stat("p", result["pvalue"], fmt=".4f", stars=result["stars"]),
+            f"95% CI [{result['ci_lower']:.3f}, {result['ci_upper']:.3f}]",
+            fmt_stat("R2", result["r_squared"]),
+            f"{fmt_sym('n')} = {result['n']}",
+        ],
     )
 
-
-"""Main function"""
-
-
-def main(args):
-    """Demonstrate Pearson correlation functionality."""
-    logger.info("Demonstrating Pearson correlation test")
-
-    # Set random seed
-    np.random.seed(42)
-
-    # Example 1: Strong positive correlation
-    logger.info("\n=== Example 1: Strong positive correlation ===")
-
-    x1 = np.random.normal(0, 1, 50)
-    y1 = 2 * x1 + np.random.normal(0, 0.5, 50)  # y ≈ 2x with noise
-
-    result1 = test_pearson(x1, y1, var_x="X", var_y="Y", verbose=True)
-
-    # Example 2: Negative correlation
-    logger.info("\n=== Example 2: Negative correlation ===")
-
-    x2 = np.random.normal(0, 1, 50)
-    y2 = -1.5 * x2 + np.random.normal(0, 0.8, 50)
-
-    result2 = test_pearson(
-        x2, y2, var_x="Temperature", var_y="Ice Cream Sales", verbose=True
-    )
-
-    # Example 3: No correlation
-    logger.info("\n=== Example 3: No correlation ===")
-
-    x3 = np.random.normal(0, 1, 50)
-    y3 = np.random.normal(0, 1, 50)  # Independent
-
-    result3 = test_pearson(
-        x3, y3, var_x="Variable A", var_y="Variable B", verbose=True
-    )
-
-    # Example 4: With visualization (demonstrates plt.gcf() and stx.io.save())
-    logger.info("\n=== Example 4: With visualization ===")
-
-    x4 = np.random.normal(100, 15, 60)
-    y4 = 0.8 * x4 + 20 + np.random.normal(0, 10, 60)
-
-    result4 = test_pearson(
-        x4,
-        y4,
-        var_x="Study Hours",
-        var_y="Test Score",
-        plot=True,
-        verbose=True,
-    )
-
-    # Save the figure using plt.gcf()
-    stx.io.save(plt.gcf(), "./.dev/pearson_demo.jpg")
-    plt.close()
-    logger.info("Figure saved to ./.dev/pearson_demo.jpg")
-
-    # Example 5: One-sided tests
-    logger.info("\n=== Example 5: One-sided tests ===")
-
-    x5 = np.random.normal(0, 1, 40)
-    y5 = 1.2 * x5 + np.random.normal(0, 0.5, 40)
-
-    result_two = test_pearson(x5, y5, alternative="two-sided")
-    result_greater = test_pearson(x5, y5, alternative="greater")
-
-    logger.info(f"Two-sided: p = {result_two['pvalue']:.4f}")
-    logger.info(f"One-sided (greater): p = {result_greater['pvalue']:.4f}")
-
-    # Example 6: Effect of sample size
-    logger.info("\n=== Example 6: Effect of sample size ===")
-
-    # Small sample
-    x_small = np.random.normal(0, 1, 10)
-    y_small = 0.5 * x_small + np.random.normal(0, 0.8, 10)
-
-    # Large sample
-    x_large = np.random.normal(0, 1, 100)
-    y_large = 0.5 * x_large + np.random.normal(0, 0.8, 100)
-
-    result_small = test_pearson(x_small, y_small)
-    result_large = test_pearson(x_large, y_large)
-
-    logger.info(
-        f"Small sample (n=10):  r = {result_small['statistic']:.3f}, p = {result_small['pvalue']:.4f}"
-    )
-    logger.info(
-        f"Large sample (n=100): r = {result_large['statistic']:.3f}, p = {result_large['pvalue']:.4f}"
-    )
-    logger.info("Note: Larger samples provide narrower confidence intervals")
-
-    # Example 7: Effect of outliers
-    logger.info("\n=== Example 7: Effect of outliers ===")
-
-    x7 = np.random.normal(0, 1, 40)
-    y7 = 0.5 * x7 + np.random.normal(0, 0.5, 40)
-
-    # Without outliers
-    result_clean = test_pearson(x7, y7)
-
-    # With outliers
-    x7_outlier = np.append(x7, [5, 5.5])
-    y7_outlier = np.append(y7, [-3, -3.5])
-
-    result_outlier = test_pearson(x7_outlier, y7_outlier)
-
-    logger.info(f"Without outliers: r = {result_clean['statistic']:.3f}")
-    logger.info(f"With outliers:    r = {result_outlier['statistic']:.3f}")
-    logger.info(
-        "Note: Pearson correlation is sensitive to outliers. Use Spearman if outliers present."
-    )
-
-    # Example 8: Comparison with Spearman
-    logger.info(
-        "\n=== Example 8: Pearson vs Spearman (non-linear relationship) ==="
-    )
-
-    x8 = np.linspace(0, 10, 50)
-    y8 = x8**2 + np.random.normal(0, 5, 50)  # Quadratic relationship
-
-    pearson_result = test_pearson(x8, y8)
-
-    # Note: Spearman will be implemented separately
-    logger.info(f"Pearson r = {pearson_result['statistic']:.3f}")
-    logger.info(
-        "Note: For non-linear monotonic relationships, use Spearman correlation"
-    )
-
-    # Example 9: Multiple correlations
-    logger.info("\n=== Example 9: Multiple correlation analyses ===")
-
-    # Correlation matrix scenario
-    data = {
-        "Age": np.random.normal(40, 10, 50),
-        "Income": np.random.normal(50000, 15000, 50),
-        "Education": np.random.normal(16, 3, 50),
-    }
-
-    # Income vs Age
-    result_ia = test_pearson(
-        data["Income"], data["Age"], var_x="Income", var_y="Age"
-    )
-
-    # Income vs Education
-    result_ie = test_pearson(
-        data["Income"], data["Education"], var_x="Income", var_y="Education"
-    )
-
-    # Age vs Education
-    result_ae = test_pearson(
-        data["Age"], data["Education"], var_x="Age", var_y="Education"
-    )
-
-    logger.info(
-        f"Income vs Age:       r = {result_ia['statistic']:.3f}, p = {result_ia['pvalue']:.4f}"
-    )
-    logger.info(
-        f"Income vs Education: r = {result_ie['statistic']:.3f}, p = {result_ie['pvalue']:.4f}"
-    )
-    logger.info(
-        f"Age vs Education:    r = {result_ae['statistic']:.3f}, p = {result_ae['pvalue']:.4f}"
-    )
-    logger.info(
-        "Note: For multiple comparisons, apply correction (e.g., Bonferroni)"
-    )
-
-    # Example 10: Export results
-    logger.info("\n=== Example 10: Export results ===")
-
-    from scitex.stats._utils._normalizers import convert_results, force_dataframe
-
-    test_results = [
-        result1,
-        result2,
-        result3,
-        result4,
-        result_small,
-        result_large,
-    ]
-
-    df = force_dataframe(test_results)
-    logger.info(f"\nDataFrame shape: {df.shape}")
-
-    stx.io.save(df, "./pearson_tests.xlsx")
-    stx.io.save(df, "./pearson_tests.csv")
-
-    # convert_results(test_results, return_as='excel', path='./pearson_tests.xlsx')
-    # logger.info("Results exported to Excel")
-
-    # convert_results(test_results, return_as='csv', path='./pearson_tests.csv')
-    # logger.info("Results exported to CSV")
-
-    return 0
-
-
-def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Demonstrate Pearson correlation test"
-    )
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
-    return parser.parse_args()
-
-
-def run_main():
-    """Initialize SciTeX framework and run main."""
-    global CONFIG, sys, plt, rng
-
-    import sys
-
-    import matplotlib.pyplot as plt
-
-    args = parse_args()
-
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-        sys,
-        plt,
-        args=args,
-        file=__file__,
-        verbose=args.verbose,
-        agg=True,
-    )
-
-    exit_status = main(args)
-
-    stx.session.close(
-        CONFIG,
-        verbose=args.verbose,
-        exit_status=exit_status,
-    )
-
-
-if __name__ == "__main__":
-    run_main()
 
 # EOF

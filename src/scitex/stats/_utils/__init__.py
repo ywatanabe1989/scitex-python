@@ -8,6 +8,8 @@ Helper functions for effect sizes, power analysis, formatting, and data normaliz
 """
 
 # Effect sizes
+# CSV/DataFrame column resolution
+from ._csv_support import resolve_columns, resolve_groups
 from ._effect_size import (
     cliffs_delta,
     cohens_d,
@@ -22,7 +24,7 @@ from ._effect_size import (
 )
 
 # Formatters
-from ._formatters import p2stars
+from ._formatters import fmt_stat, fmt_sym, italicize_stats, p2stars
 
 # Normalizers
 from ._normalizers import force_dataframe
@@ -46,7 +48,13 @@ __all__ = [
     "power_ttest",
     "sample_size_ttest",
     # Formatters
+    "fmt_stat",
+    "fmt_sym",
+    "italicize_stats",
     "p2stars",
     # Normalizers
     "force_dataframe",
+    # CSV/DataFrame column resolution
+    "resolve_columns",
+    "resolve_groups",
 ]

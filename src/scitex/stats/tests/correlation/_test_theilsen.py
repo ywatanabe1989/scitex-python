@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./scitex_repo/src/scitex/stats/tests/correlation/_test_theilsen.py
+from __future__ import annotations
 
 """
 Theil-Sen robust regression estimator.
@@ -18,10 +18,11 @@ from scipy import stats
 
 
 def test_theilsen(
-    x: Union[np.ndarray, pd.Series, list],
-    y: Union[np.ndarray, pd.Series, list],
+    x: Union[np.ndarray, pd.Series, list, str],
+    y: Union[np.ndarray, pd.Series, list, str],
     var_x: str = "x",
     var_y: str = "y",
+    data: Union[pd.DataFrame, str, None] = None,
     return_as: str = "dict",
     verbose: bool = True,
 ) -> Union[dict, pd.DataFrame]:
@@ -42,6 +43,9 @@ def test_theilsen(
         Name of independent variable (for reporting)
     var_y : str, default="y"
         Name of dependent variable (for reporting)
+    data : DataFrame, str, or None, optional
+        DataFrame or CSV path. When provided, string values for x/y
+        are resolved as column names (seaborn-style).
     return_as : str, default="dict"
         Format of return value: "dict" or "dataframe"
     verbose : bool, default=True
@@ -97,6 +101,13 @@ def test_theilsen(
     >>> print(f"Robust slope: {result['slope']:.3f}")
     Robust slope: 2.000
     """
+    # Resolve column names from DataFrame (seaborn-style data= parameter)
+    if data is not None:
+        from scitex.stats._utils._csv_support import resolve_columns
+
+        resolved = resolve_columns(data, x=x, y=y)
+        x, y = resolved["x"], resolved["y"]
+
     # Convert inputs to numpy arrays
     x = np.asarray(x).flatten()
     y = np.asarray(y).flatten()
@@ -114,15 +125,11 @@ def test_theilsen(
 
     # Check for sufficient data
     if len(x) < 3:
-        raise ValueError(
-            f"Need at least 3 valid data points, got {len(x)}"
-        )
+        raise ValueError(f"Need at least 3 valid data points, got {len(x)}")
 
     # Check for variation
     if len(np.unique(x)) < 2:
-        raise ValueError(
-            "Independent variable has no variation (constant values)"
-        )
+        raise ValueError("Independent variable has no variation (constant values)")
 
     # Compute Theil-Sen estimator
     result = stats.theilslopes(y, x, alpha=0.95)
@@ -144,11 +151,11 @@ def test_theilsen(
         print("=" * 70)
         print(f"Variables: {var_y} ~ {var_x}")
         print(f"Sample size: n = {len(x)}")
-        print(f"\nResults:")
+        print("\nResults:")
         print(f"  Slope:     {output['slope']:.6f}")
         print(f"  Intercept: {output['intercept']:.6f}")
         print(f"  95% CI:    [{output['low_slope']:.6f}, {output['high_slope']:.6f}]")
-        print(f"\nInterpretation:")
+        print("\nInterpretation:")
         print(f"  For each unit increase in {var_x},")
         print(f"  {var_y} changes by {output['slope']:.6f} units (median slope)")
         print("=" * 70 + "\n")
@@ -159,9 +166,7 @@ def test_theilsen(
     elif return_as == "dict":
         return output
     else:
-        raise ValueError(
-            f"return_as must be 'dict' or 'dataframe', got '{return_as}'"
-        )
+        raise ValueError(f"return_as must be 'dict' or 'dataframe', got '{return_as}'")
 
 
 if __name__ == "__main__":
@@ -185,9 +190,12 @@ if __name__ == "__main__":
 
     # Compare with OLS
     from scipy.stats import linregress
+
     ols = linregress(x_out, y_out)
-    print(f"\nComparison:")
+    print("\nComparison:")
     print(f"  Theil-Sen slope: {result_out['slope']:.6f}")
     print(f"  OLS slope:       {ols.slope:.6f}")
-    print(f"  True slope:      2.000000")
-    print(f"\nTheil-Sen is more robust to the {((y_out[[10,20,30]] - (2*x_out[[10,20,30]] + 1)) != 0).sum()} outliers!")
+    print("  True slope:      2.000000")
+    print(
+        f"\nTheil-Sen is more robust to the {((y_out[[10, 20, 30]] - (2 * x_out[[10, 20, 30]] + 1)) != 0).sum()} outliers!"
+    )

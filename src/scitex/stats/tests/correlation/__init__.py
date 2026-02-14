@@ -19,14 +19,14 @@ Robust regression:
     test_theilsen : Theil-Sen robust slope estimator
 """
 
+from ._test_kendall import test_kendall
 from ._test_pearson import test_pearson
 from ._test_spearman import test_spearman
-from ._test_kendall import test_kendall
 from ._test_theilsen import test_theilsen
 
 __all__ = [
-    'test_pearson',
-    'test_spearman',
-    'test_kendall',
-    'test_theilsen',
+    "test_pearson",
+    "test_spearman",
+    "test_kendall",
+    "test_theilsen",
 ]

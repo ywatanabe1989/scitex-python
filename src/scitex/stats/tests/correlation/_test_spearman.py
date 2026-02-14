@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 22:17:48 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/tests/correlation/_test_spearman.py
 # ----------------------------------------
 from __future__ import annotations
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
 """
 Spearman's rank correlation coefficient test.
@@ -17,35 +12,40 @@ More robust to outliers than Pearson's r.
 """
 
 import argparse
+import os
 from typing import Literal, Optional, Union
 
 import matplotlib.axes
 import numpy as np
 import pandas as pd
-import scitex as stx
 from scipy import stats
-from scitex.logging import getLogger
 
-from scitex.stats._utils._formatters import p2stars
+import scitex as stx
+from scitex.logging import getLogger
+from scitex.stats._utils._formatters import fmt_stat, fmt_sym, p2stars
 from scitex.stats._utils._normalizers import convert_results, force_dataframe
+
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
 
 logger = getLogger(__name__)
 
 
-def test_spearman(
-    x: Union[np.ndarray, pd.Series],
-    y: Union[np.ndarray, pd.Series],
+def test_spearman(  # noqa: C901
+    x: Union[np.ndarray, pd.Series, str],
+    y: Union[np.ndarray, pd.Series, str],
     var_x: str = "x",
     var_y: str = "y",
     alternative: Literal["two-sided", "less", "greater"] = "two-sided",
     alpha: float = 0.05,
     plot: bool = False,
     ax: Optional[matplotlib.axes.Axes] = None,
+    data: Union[pd.DataFrame, str, None] = None,
     return_as: Literal["dict", "dataframe"] = "dict",
     decimals: int = 3,
     verbose: bool = False,
 ) -> Union[dict, pd.DataFrame]:
-    """
+    r"""
     Spearman's rank correlation coefficient test.
 
     Non-parametric measure of monotonic relationship between two variables.
@@ -70,6 +70,9 @@ def test_spearman(
         Significance level
     plot : bool, default False
         If True, create visualization with scatter plot of ranks
+    data : DataFrame, str, or None, optional
+        DataFrame or CSV path. When provided, string values for x/y
+        are resolved as column names (seaborn-style).
     return_as : {'dict', 'dataframe'}, default 'dict'
         Return format
     decimals : int, default 3
@@ -162,15 +165,20 @@ def test_spearman(
     >>> convert_results(result, return_as='latex', path='spearman.tex')
     >>> convert_results(result, return_as='csv', path='spearman.csv')
     """
+    # Resolve column names from DataFrame (seaborn-style data= parameter)
+    if data is not None:
+        from scitex.stats._utils._csv_support import resolve_columns
+
+        resolved = resolve_columns(data, x=x, y=y)
+        x, y = resolved["x"], resolved["y"]
+
     # Convert to arrays
     x = np.asarray(x)
     y = np.asarray(y)
 
     # Check lengths
     if len(x) != len(y):
-        raise ValueError(
-            f"x and y must have same length (got {len(x)} and {len(y)})"
-        )
+        raise ValueError(f"x and y must have same length (got {len(x)} and {len(y)})")
 
     # Remove NaN pairs
     mask = ~(np.isnan(x) | np.isnan(y))
@@ -225,9 +233,7 @@ def test_spearman(
 
     # Log results if verbose
     if verbose:
-        logger.info(
-            f"Spearman: ρ = {rho:.3f}, p = {pvalue:.4f} {p2stars(pvalue)}"
-        )
+        logger.info(f"Spearman: ρ = {rho:.3f}, p = {pvalue:.4f} {p2stars(pvalue)}")
         logger.info(f"ρ² = {rho_squared:.3f} ({interpretation})")
 
     # Auto-enable plotting if ax is provided
@@ -238,7 +244,7 @@ def test_spearman(
     if plot:
         if ax is None:
             fig, ax = stx.plt.subplots()
-        _plot_spearman(x, y, rho, pvalue, var_x, var_y, alpha, ax)
+        _plot_spearman(x, y, result, var_x, var_y, ax)
 
     # Convert to requested format
     if return_as == "dataframe":
@@ -249,46 +255,35 @@ def test_spearman(
     return result
 
 
-def _plot_spearman(x, y, rho, pvalue, var_x, var_y, alpha, ax):
+def _plot_spearman(x, y, result, var_x, var_y, ax) -> None:
     """Create scatter plot with rank-based regression line on given axes."""
+    from scitex.stats._plot_helpers import scatter_regression, stats_text_box
+
     # Convert to ranks
     x_ranks = stats.rankdata(x)
     y_ranks = stats.rankdata(y)
 
-    # Scatter plot of ranks
-    ax.scatter(
-        x_ranks,
-        y_ranks,
-        alpha=0.6,
-        s=50,
-        color="C0",
-        edgecolors="white",
-        linewidths=0.5,
-        zorder=3,
-    )
-
-    # Add regression line for ranks
-    z = np.polyfit(x_ranks, y_ranks, 1)
-    p = np.poly1d(z)
-    x_line = np.linspace(x_ranks.min(), x_ranks.max(), 100)
-    ax.plot(
-        x_line, p(x_line), "r-", linewidth=2, label=f"ρ = {rho:.3f}", zorder=2
-    )
-
-    # Labels and title
+    scatter_regression(ax, x_ranks, y_ranks)
     ax.set_xlabel(f"Rank({var_x})")
     ax.set_ylabel(f"Rank({var_y})")
-    stars = p2stars(pvalue)
-    ax.set_title(f"Spearman: ρ = {rho:.3f} {stars}")
-    ax.legend()
-    ax.grid(True, alpha=0.3, zorder=1)
+    ax.set_title("Spearman Correlation")
+
+    stats_text_box(
+        ax,
+        [
+            fmt_stat("rho", result["statistic"]),
+            fmt_stat("p", result["pvalue"], fmt=".4f", stars=result["stars"]),
+            fmt_stat("rho2", result["rho_squared"]),
+            f"{fmt_sym('n')} = {result['n']}",
+        ],
+    )
 
 
 # Example usage
 """Main function"""
 
 
-def main(args):
+def main(args) -> int:
     """Demonstrate Spearman correlation test functionality."""
     logger.info("=" * 70)
     logger.info("Spearman's Rank Correlation Test - Examples")
@@ -299,9 +294,7 @@ def main(args):
     logger.info("-" * 70)
     x1 = np.array([1, 2, 3, 4, 5])
     y1 = np.array([1, 4, 9, 16, 25])
-    result1 = test_spearman(
-        x1, y1, var_x="x", var_y="y²", plot=True, verbose=True
-    )
+    result1 = test_spearman(x1, y1, var_x="x", var_y="y²", plot=True, verbose=True)
     logger.info(force_dataframe(result1))
 
     # Save the figure using plt.gcf()
@@ -318,9 +311,9 @@ def main(args):
 
     logger.info("With outlier (x=100):")
     logger.info("Spearman:")
-    spearman_result = test_spearman(x2, y2, var_x="x", var_y="y", verbose=True)
+    test_spearman(x2, y2, var_x="x", var_y="y", verbose=True)
     logger.info("Pearson:")
-    pearson_result = test_pearson(x2, y2, var_x="x", var_y="y", verbose=True)
+    test_pearson(x2, y2, var_x="x", var_y="y", verbose=True)
     logger.info("→ Spearman is more robust to the outlier")
 
     # Example 3: Non-linear monotonic relationship
@@ -329,9 +322,7 @@ def main(args):
     np.random.seed(42)
     x3 = np.linspace(1, 50, 50)
     y3 = np.log(x3) + np.random.normal(0, 0.2, size=50)
-    result3 = test_spearman(
-        x3, y3, var_x="x", var_y="log(x)", plot=True, verbose=True
-    )
+    result3 = test_spearman(x3, y3, var_x="x", var_y="log(x)", plot=True, verbose=True)
     logger.info(force_dataframe(result3))
     stx.io.save(stx.plt.gcf(), "example3_logarithmic.jpg")
     stx.plt.close()
@@ -362,11 +353,9 @@ def main(args):
     x5 = np.arange(30)
     y5 = x5 + np.random.normal(0, 3, size=30)
     logger.info("Two-tailed test:")
-    result5_two = test_spearman(x5, y5, alternative="two-sided", verbose=True)
+    test_spearman(x5, y5, alternative="two-sided", verbose=True)
     logger.info("\nOne-tailed test (greater):")
-    result5_greater = test_spearman(
-        x5, y5, alternative="greater", verbose=True
-    )
+    test_spearman(x5, y5, alternative="greater", verbose=True)
 
     # Example 6: Exponential relationship
     logger.info("\nExample 6: Exponential relationship")
@@ -399,9 +388,9 @@ def main(args):
 
     logger.info("Exponential distribution with power relationship:")
     logger.info("Spearman:")
-    spearman_res = test_spearman(x8, y8, verbose=True)
+    test_spearman(x8, y8, verbose=True)
     logger.info("Pearson:")
-    pearson_res = test_pearson(x8, y8, verbose=True)
+    test_pearson(x8, y8, verbose=True)
 
     # Example 9: Export to multiple formats
     logger.info("\nExample 9: Export to multiple formats")
@@ -436,9 +425,9 @@ def main(args):
     stx.io.save(stx.plt.gcf(), "example10_large_dataset.jpg")
     stx.plt.close()
 
-    logger.info(f"\n{'='*70}")
+    logger.info(f"\n{'=' * 70}")
     logger.info("All examples completed")
-    logger.info(f"{'='*70}")
+    logger.info(f"{'=' * 70}")
 
     return 0
 
@@ -446,23 +435,19 @@ def main(args):
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
-def run_main():
+def run_main() -> None:
     """Initialize SciTeX framework and run main."""
-    global CONFIG, CC, sys, plt, rng
-
     import sys
 
     import matplotlib.pyplot as plt
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+    _CONFIG, sys.stdout, sys.stderr, plt, _CC, _rng_manager = stx.session.start(
         sys,
         plt,
         args=args,
@@ -474,7 +459,7 @@ def run_main():
     exit_status = main(args)
 
     stx.session.close(
-        CONFIG,
+        _CONFIG,
         verbose=args.verbose,
         exit_status=exit_status,
     )

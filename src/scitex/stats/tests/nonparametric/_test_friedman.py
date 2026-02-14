@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 22:43:58 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/tests/nonparametric/_test_friedman.py
-# ----------------------------------------
-from __future__ import annotations
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
-import argparse
+r"""Friedman test for repeated measures (non-parametric).
 
-"""
 Functionalities:
   - Perform Friedman test for repeated measures (non-parametric)
   - Non-parametric alternative to repeated measures ANOVA
@@ -27,19 +19,22 @@ IO:
   - output: Test results (dict or DataFrame) and optional figure
 """
 
-"""Imports"""
+from __future__ import annotations
+
+import os
 from typing import List, Literal, Optional, Union
 
 import matplotlib.axes
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scitex as stx
 from scipy import stats
-from scitex.logging import getLogger
 
-from scitex.stats._utils._formatters import p2stars
-from scitex.stats._utils._normalizers import convert_results
+import scitex as stx
+from scitex.logging import getLogger
+from scitex.stats._utils._formatters import fmt_stat, p2stars
+
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
 
 logger = getLogger(__name__)
 
@@ -94,7 +89,7 @@ def interpret_kendall_w(W: float) -> str:
         return "very strong agreement"
 
 
-def test_friedman(
+def test_friedman(  # noqa: C901
     data: Union[np.ndarray, pd.DataFrame],
     subject_col: Optional[str] = None,
     condition_col: Optional[str] = None,
@@ -107,7 +102,7 @@ def test_friedman(
     decimals: int = 3,
     verbose: bool = False,
 ) -> Union[dict, pd.DataFrame]:
-    """
+    r"""
     Perform Friedman test for repeated measures (non-parametric).
 
     Non-parametric alternative to repeated measures ANOVA. Tests whether
@@ -176,7 +171,7 @@ def test_friedman(
     **Test Statistic**:
 
     .. math::
-        \\chi^2_F = \\frac{12}{nk(k+1)} \\sum_{j=1}^{k} R_j^2 - 3n(k+1)
+        \chi^2_F = \frac{12}{nk(k+1)} \sum_{j=1}^{k} R_j^2 - 3n(k+1)
 
     Where:
     - n: Number of subjects
@@ -186,7 +181,7 @@ def test_friedman(
     **Effect Size (Kendall's W)**:
 
     .. math::
-        W = \\frac{12 \\sum_{j=1}^{k}(R_j - \\bar{R})^2}{n^2(k^3 - k)}
+        W = \frac{12 \sum_{j=1}^{k}(R_j - \bar{R})^2}{n^2(k^3 - k)}
 
     Interpretation:
     - W < 0.1: negligible agreement
@@ -287,7 +282,7 @@ def test_friedman(
         raise ValueError("Need at least 2 subjects")
 
     if condition_names is None:
-        condition_names = [f"Condition {i+1}" for i in range(n_conditions)]
+        condition_names = [f"Condition {i + 1}" for i in range(n_conditions)]
 
     # Perform Friedman test
     statistic, pvalue = stats.friedmanchisquare(*data_array.T)
@@ -340,7 +335,7 @@ def test_friedman(
     # Generate plot if requested
     if plot:
         if ax is None:
-            fig, ax = stx.plt.subplots()
+            _fig, ax = stx.plt.subplots()
         _plot_friedman(data_array, ranks, result, condition_names, ax)
 
     # Return based on format
@@ -353,243 +348,33 @@ def test_friedman(
 
 def _plot_friedman(data, ranks, result, condition_names, ax):
     """Create violin+swarm visualization on given axes."""
-    n_subjects, n_conditions = data.shape
-    positions = np.arange(n_conditions)
-    colors = [f"C{i}" for i in range(n_conditions)]
+    from scitex.stats._plot_helpers import (
+        significance_bracket,
+        stats_text_box,
+        violin_swarm,
+    )
 
-    # Prepare data for plotting
+    n_subjects, n_conditions = data.shape
+    positions = list(range(n_conditions))
     data_list = [data[:, i] for i in range(n_conditions)]
 
-    # Violin plot (background, transparent)
-    parts = ax.violinplot(
-        data_list,
-        positions=positions,
-        widths=0.6,
-        showmeans=False,
-        showmedians=False,
-        showextrema=False,
-    )
+    violin_swarm(ax, data_list, positions, condition_names)
 
-    for i, pc in enumerate(parts["bodies"]):
-        pc.set_facecolor(colors[i])
-        pc.set_alpha(0.3)
-        pc.set_edgecolor(colors[i])
-        pc.set_linewidth(1.5)
-
-    # Swarm plot (foreground - scatter in front!)
-    np.random.seed(42)
-    for i, vals in enumerate(data_list):
-        y_vals = vals
-        x_vals = np.random.normal(positions[i], 0.04, size=len(vals))
-        ax.scatter(
-            x_vals,
-            y_vals,
-            alpha=0.6,
-            s=40,
-            color=colors[i],
-            edgecolors="white",
-            linewidths=0.5,
-            zorder=3,  # In front!
-        )
-
-    # Add median lines
-    for i, vals in enumerate(data_list):
-        median = np.median(vals)
-        ax.hlines(
-            median,
-            positions[i] - 0.3,
-            positions[i] + 0.3,
-            colors="black",
-            linewidth=2,
-            zorder=4,
-        )
-
-    # Significance annotation
     if result["significant"]:
-        y_max = max(np.max(data_list[i]) for i in range(n_conditions))
-        y_min = min(np.min(data_list[i]) for i in range(n_conditions))
-        y_range = y_max - y_min
-        y_pos = y_max + 0.1 * y_range
+        significance_bracket(ax, 0, n_conditions - 1, result["stars"], data_list)
 
-        ax.plot([0, n_conditions - 1], [y_pos, y_pos], "k-", linewidth=1.5)
-        ax.text(
-            (n_conditions - 1) / 2,
-            y_pos + 0.02 * y_range,
-            result["stars"],
-            ha="center",
-            va="bottom",
-            fontsize=14,
-            fontweight="bold",
-        )
-
-    ax.set_xticks(positions)
-    ax.set_xticklabels(condition_names, rotation=45, ha="right")
-    ax.set_ylabel("Value")
-    ax.set_title(
-        f"Friedman Test\nχ² = {result['statistic']:.2f}, p = {result['pvalue']:.4f} {result['stars']}"
+    stats_text_box(
+        ax,
+        [
+            fmt_stat("chi2", result["statistic"]),
+            fmt_stat("p", result["pvalue"], fmt=".4f", stars=result["stars"]),
+            fmt_stat("W", result["kendall_w"]),
+        ],
     )
+
+    ax.set_xticklabels(condition_names, rotation=45, ha="right")
+    ax.set_title("Friedman Test")
     ax.grid(True, alpha=0.3, axis="y")
 
-
-"""Main function"""
-
-
-def main(args):
-    # Example 1: Pain ratings (ordinal data)
-    logger.info("\n[Example 1] Pain ratings across 4 time points (ordinal)")
-    logger.info("-" * 70)
-
-    np.random.seed(42)
-    # Simulate decreasing pain over time
-    pain_data = np.array(
-        [
-            [7, 6, 5, 4],
-            [8, 7, 6, 5],
-            [6, 5, 4, 3],
-            [9, 8, 7, 6],
-            [7, 6, 5, 4],
-            [8, 7, 6, 5],
-            [6, 5, 5, 4],
-            [7, 6, 5, 5],
-        ]
-    )
-
-    result = test_friedman(
-        pain_data,
-        condition_names=["Baseline", "Week 1", "Week 2", "Week 3"],
-        plot=True,
-        verbose=True,
-    )
-    stx.io.save(plt.gcf(), "./friedman_example1.jpg")
-
-    # Example 2: Likert scale ratings
-    logger.info("\n[Example 2] Likert scale ratings (1-5) for 4 products")
-    logger.info("-" * 70)
-
-    likert_data = np.array(
-        [
-            [3, 4, 5, 3],
-            [2, 3, 4, 2],
-            [4, 5, 5, 4],
-            [3, 4, 4, 3],
-            [2, 3, 5, 2],
-            [3, 4, 4, 3],
-            [4, 5, 5, 4],
-            [3, 3, 4, 3],
-            [2, 4, 5, 3],
-            [3, 4, 4, 2],
-        ]
-    )
-
-    result_likert = test_friedman(
-        likert_data,
-        condition_names=["Product A", "Product B", "Product C", "Product D"],
-        plot=True,
-        verbose=True,
-    )
-    stx.io.save(plt.gcf(), "./friedman_example2.jpg")
-    plt.close()
-
-    logger.info(
-        f"χ²({result_likert['df']}) = {result_likert['statistic']:.3f}"
-    )
-    logger.info(f"p-value = {result_likert['pvalue']:.4f}")
-    logger.info(f"Kendall's W = {result_likert['kendall_w']:.3f}")
-
-    # Example 3: Long format DataFrame
-    logger.info("\n[Example 3] Long format DataFrame input")
-    logger.info("-" * 70)
-
-    subjects = np.repeat(np.arange(8), 4)
-    conditions = np.tile(["Pre", "Mid1", "Mid2", "Post"], 8)
-    values = np.random.randint(1, 11, 32)  # Random scores 1-10
-
-    df_long = pd.DataFrame(
-        {"Subject": subjects, "TimePoint": conditions, "Score": values}
-    )
-
-    result_long = test_friedman(
-        df_long,
-        subject_col="Subject",
-        condition_col="TimePoint",
-        value_col="Score",
-        plot=True,
-        verbose=True,
-    )
-    stx.io.save(plt.gcf(), "./friedman_example3.jpg")
-    plt.close()
-
-    logger.info(
-        f"χ² = {result_long['statistic']:.3f}, p = {result_long['pvalue']:.4f}"
-    )
-
-    # Example 4: Comparison with RM-ANOVA
-    logger.info("\n[Example 4] Comparison: Friedman vs RM-ANOVA")
-    logger.info("-" * 70)
-
-    from ..parametric import test_anova_rm
-
-    # Data with outliers
-    data_outlier = np.random.normal(5, 1, (10, 4))
-    data_outlier[0, 0] = 20  # Add outlier
-
-    result_friedman = test_friedman(data_outlier, verbose=True)
-    result_rm_anova = test_anova_rm(data_outlier, verbose=True)
-
-    logger.info(
-        f"RM-ANOVA: F = {result_rm_anova['statistic']:.3f}, p = {result_rm_anova['pvalue']:.4f}"
-    )
-    logger.info(f"Note: Friedman is more robust to outliers")
-
-    # Example 5: Export results
-    logger.info("\n[Example 5] Export results")
-    logger.info("-" * 70)
-
-    stx.io.save(result, "./friedman_results.xlsx")
-
-    # EOF
-
-    return 0
-
-
-def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="")
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
-    return parser.parse_args()
-
-
-def run_main():
-    """Initialize SciTeX framework and run main."""
-    global CONFIG, CC, sys, plt, rng
-
-    import sys
-
-    import matplotlib.pyplot as plt
-
-    args = parse_args()
-
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-        sys,
-        plt,
-        args=args,
-        file=__FILE__,
-        verbose=args.verbose,
-        agg=True,
-    )
-
-    exit_status = main(args)
-
-    stx.session.close(
-        CONFIG,
-        verbose=args.verbose,
-        exit_status=exit_status,
-    )
-
-
-if __name__ == "__main__":
-    run_main()
 
 # EOF
