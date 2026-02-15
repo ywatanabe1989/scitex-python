@@ -1,10 +1,14 @@
-repos:
-  - repo: local
-    hooks:
-      - id: pytest-testmon
-        name: pytest-testmon
-        entry: python -m pytest --testmon -x -q --tb=short
-        language: system
-        types: [python]
-        pass_filenames: false
-        stages: [pre-commit]
+# Timestamp: "2026-02-15 14:00:26 (ywatanabe)"
+# File: ./.pre-commit-config.yaml
+# repos:
+#   - repo: local
+#     hooks:
+#       - id: pytest-testmon
+#         name: pytest-testmon
+#         entry: python -m pytest --testmon -x -q --tb=short
+#         language: system
+#         types: [python]
+#         pass_filenames: false
+#         stages: [pre-commit]
+
+# EOF

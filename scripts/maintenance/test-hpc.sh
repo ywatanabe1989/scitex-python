@@ -12,8 +12,10 @@
 #   test-hpc.sh --result JID # Fetch output from completed job
 #
 # Environment:
-#   HPC_HOST=spartan  HPC_CPUS=8  HPC_PARTITION=sapphire
-#   HPC_TIME=00:10:00  HPC_MEM=128G  REMOTE_BASE=~/proj
+#   SCITEX_DEV_TEST_HOST=spartan  SCITEX_DEV_TEST_CPUS=16
+#   SCITEX_DEV_TEST_PARTITION=sapphire  SCITEX_DEV_TEST_MEM=128G
+#   SCITEX_DEV_TEST_TIME=00:20:00  SCITEX_DEV_TEST_REMOTE_BASE=~/proj
+#   (Also accepts legacy HPC_HOST, HPC_CPUS, etc.)
 
 set -euo pipefail
 
@@ -35,14 +37,14 @@ echo_warning() { echo -e "${YELLOW}WARN: $1${NC}"; }
 echo_error() { echo -e "${RED}ERRO: $1${NC}"; }
 echo_header() { echo_info "=== $1 ==="; }
 
-# Configurable
-HPC_HOST="${HPC_HOST:-spartan}"
-HPC_CPUS="${HPC_CPUS:-8}"
-HPC_PARTITION="${HPC_PARTITION:-sapphire}"
-HPC_TIME="${HPC_TIME:-00:10:00}"
-# Total memory for job (128G needed for 8 workers with matplotlib tests)
-HPC_MEM="${HPC_MEM:-128G}"
-REMOTE_BASE="${REMOTE_BASE:-~/proj}"
+# Configurable: SCITEX_DEV_TEST_* > HPC_* > defaults
+HPC_HOST="${SCITEX_DEV_TEST_HOST:-${HPC_HOST:-spartan}}"
+HPC_CPUS="${SCITEX_DEV_TEST_CPUS:-${HPC_CPUS:-16}}"
+HPC_PARTITION="${SCITEX_DEV_TEST_PARTITION:-${HPC_PARTITION:-sapphire}}"
+HPC_TIME="${SCITEX_DEV_TEST_TIME:-${HPC_TIME:-00:20:00}}"
+# Total memory for job (16 workers need headroom for matplotlib caches)
+HPC_MEM="${SCITEX_DEV_TEST_MEM:-${HPC_MEM:-128G}}"
+REMOTE_BASE="${SCITEX_DEV_TEST_REMOTE_BASE:-${REMOTE_BASE:-~/proj}}"
 REMOTE_OUT="${REMOTE_BASE}/${PROJECT}/.pytest-hpc-output"
 
 # Pytest command: centralized so srun and sbatch use the same command

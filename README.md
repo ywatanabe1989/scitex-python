@@ -147,7 +147,7 @@ scitex capture snap                  # Screenshot
 
 # List available APIs and tools
 scitex list-python-apis              # List all Python APIs (210 items)
-scitex mcp list-tools                # List all MCP tools (161 tools)
+scitex mcp list-tools                # List all MCP tools (120+ tools)
 scitex introspect api scitex.stats   # List APIs for specific module
 ```
 
@@ -156,7 +156,7 @@ scitex introspect api scitex.stats   # List APIs for specific module
 </details>
 
 <details>
-<summary><strong>🔧 MCP Tools — 161 tools for AI Agents</strong></summary>
+<summary><strong>🔧 MCP Tools — 120+ tools for AI Agents</strong></summary>
 
 <br>
 
