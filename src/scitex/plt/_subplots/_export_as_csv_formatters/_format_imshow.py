@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -47,7 +48,9 @@ def _format_imshow(id, tracked_dict, kwargs):
                 # Get column names from single source of truth
                 col_row = get_csv_column_name("row", ax_row, ax_col, trace_id=trace_id)
                 col_col = get_csv_column_name("col", ax_row, ax_col, trace_id=trace_id)
-                col_value = get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id)
+                col_value = get_csv_column_name(
+                    "value", ax_row, ax_col, trace_id=trace_id
+                )
 
                 df = pd.DataFrame(
                     {
@@ -77,7 +80,9 @@ def _format_imshow(id, tracked_dict, kwargs):
                 # Add channel data (R, G, B, A)
                 channel_names = ["r", "g", "b", "a"][:channels]
                 for c, name in enumerate(channel_names):
-                    col_channel = get_csv_column_name(name, ax_row, ax_col, trace_id=trace_id)
+                    col_channel = get_csv_column_name(
+                        name, ax_row, ax_col, trace_id=trace_id
+                    )
                     data[col_channel] = img[:, :, c].flatten()
 
                 return pd.DataFrame(data)

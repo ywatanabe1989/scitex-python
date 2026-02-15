@@ -19,9 +19,11 @@ def plot_sns_kdeplot(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     n = 100
-    groups = rng.choice(['A', 'B'], n)
-    df = pd.DataFrame({'group': groups, 'value': rng.normal(0, 1, n) + np.where(groups == 'A', 0, 2)})
-    ax.sns_kdeplot(data=df, x='value', hue='group')
+    groups = rng.choice(["A", "B"], n)
+    df = pd.DataFrame(
+        {"group": groups, "value": rng.normal(0, 1, n) + np.where(groups == "A", 0, 2)}
+    )
+    ax.sns_kdeplot(data=df, x="value", hue="group")
     ax.set_xyt("X", "Y", "sns_kdeplot")
     return fig, ax
 

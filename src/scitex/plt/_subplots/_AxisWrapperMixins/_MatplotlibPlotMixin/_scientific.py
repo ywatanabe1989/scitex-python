@@ -472,21 +472,24 @@ class ScientificPlotMixin:
         method_name = "stx_scatter_hist"
 
         with self._no_tracking():
-            self._axis_mpl, ax_histx, ax_histy, hist_data = (
-                self._get_ax_module().stx_scatter_hist(
-                    self._axis_mpl,
-                    x,
-                    y,
-                    hist_bins=hist_bins,
-                    scatter_alpha=scatter_alpha,
-                    scatter_size=scatter_size,
-                    scatter_color=scatter_color,
-                    hist_color_x=hist_color_x,
-                    hist_color_y=hist_color_y,
-                    hist_alpha=hist_alpha,
-                    scatter_ratio=scatter_ratio,
-                    **kwargs,
-                )
+            (
+                self._axis_mpl,
+                ax_histx,
+                ax_histy,
+                hist_data,
+            ) = self._get_ax_module().stx_scatter_hist(
+                self._axis_mpl,
+                x,
+                y,
+                hist_bins=hist_bins,
+                scatter_alpha=scatter_alpha,
+                scatter_size=scatter_size,
+                scatter_color=scatter_color,
+                hist_color_x=hist_color_x,
+                hist_color_y=hist_color_y,
+                hist_alpha=hist_alpha,
+                scatter_ratio=scatter_ratio,
+                **kwargs,
             )
 
         tracked_dict = {

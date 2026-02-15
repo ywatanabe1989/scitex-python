@@ -46,15 +46,21 @@ def _format_sns_stripplot(id, tracked_dict, kwargs):
 
             # Add x variable if specified
             if x_var and x_var in data.columns:
-                result[get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)] = data[x_var]
+                result[get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)] = (
+                    data[x_var]
+                )
 
             # Add y variable if specified
             if y_var and y_var in data.columns:
-                result[get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)] = data[y_var]
+                result[get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)] = (
+                    data[y_var]
+                )
 
             # Add grouping variable if present
             if hue_var and hue_var in data.columns:
-                result[get_csv_column_name("hue", ax_row, ax_col, trace_id=trace_id)] = data[hue_var]
+                result[
+                    get_csv_column_name("hue", ax_row, ax_col, trace_id=trace_id)
+                ] = data[hue_var]
 
             # If we've added columns, return the result
             if not result.empty:
@@ -62,7 +68,9 @@ def _format_sns_stripplot(id, tracked_dict, kwargs):
 
             # If no columns were explicitly specified, return all columns
             for col in data.columns:
-                col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                col_name = get_csv_column_name(
+                    f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                )
                 result[col_name] = data[col]
             return result
 
@@ -73,7 +81,9 @@ def _format_sns_stripplot(id, tracked_dict, kwargs):
         if isinstance(data, pd.DataFrame):
             result = pd.DataFrame()
             for col in data.columns:
-                col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                col_name = get_csv_column_name(
+                    f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                )
                 result[col_name] = data[col]
             return result
 

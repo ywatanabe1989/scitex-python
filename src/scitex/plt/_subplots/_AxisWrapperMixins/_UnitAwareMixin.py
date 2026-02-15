@@ -18,16 +18,25 @@ Features:
 - Unit-aware axis labels
 """
 
-from typing import Optional, Dict, Tuple, Union, Any
 import re
+from typing import Any, Dict, Optional, Tuple, Union
+
 import numpy as np
-from scitex.units import Unit, Q, Units
-from scitex.logging import SciTeXError
+
 import scitex.logging as logging
-from scitex.logging import UnitWarning, warn as _warn
+from scitex.logging import SciTeXError, UnitWarning
+from scitex.logging import warn as _warn
+from scitex.units import Q, Unit, Units
 
 # Valid dimensionless/special unit markers
-_VALID_DIMENSIONLESS = {"[-]", "[a.u.]", "[arb. units]", "[dimensionless]", "[1]", "[A.U.]"}
+_VALID_DIMENSIONLESS = {
+    "[-]",
+    "[a.u.]",
+    "[arb. units]",
+    "[dimensionless]",
+    "[1]",
+    "[A.U.]",
+}
 
 
 def _convert_to_negative_exponent(unit: str) -> str:

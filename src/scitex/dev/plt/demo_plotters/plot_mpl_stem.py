@@ -21,7 +21,7 @@ def plot_mpl_stem(plt, rng, ax=None):
     y = rng.uniform(-1, 1, 20)
     ax.mpl_stem(x, y)
     ax.set_xyt("X", "Y", "mpl_stem")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

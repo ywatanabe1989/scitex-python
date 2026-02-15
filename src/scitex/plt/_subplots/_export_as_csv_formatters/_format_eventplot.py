@@ -11,10 +11,11 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import numpy as np
 import pandas as pd
-import scitex
 
+import scitex
 from scitex import logging
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 logger = logging.getLogger(__name__)
@@ -45,14 +46,21 @@ def _format_eventplot(id, tracked_dict, kwargs):
                 if isinstance(positions, (list, np.ndarray)) and not isinstance(
                     positions[0], (list, np.ndarray)
                 ):
-                    col_name = get_csv_column_name("eventplot-events", ax_row, ax_col, trace_id=trace_id)
+                    col_name = get_csv_column_name(
+                        "eventplot-events", ax_row, ax_col, trace_id=trace_id
+                    )
                     return pd.DataFrame({col_name: positions})
 
                 # If positions is a list of arrays (multiple event sets)
                 elif isinstance(positions, (list, np.ndarray)):
                     data = {}
                     for i, events in enumerate(positions):
-                        col_name = get_csv_column_name(f"eventplot-events{i:02d}", ax_row, ax_col, trace_id=f"{trace_id}-{i}")
+                        col_name = get_csv_column_name(
+                            f"eventplot-events{i:02d}",
+                            ax_row,
+                            ax_col,
+                            trace_id=f"{trace_id}-{i}",
+                        )
                         data[col_name] = events
 
                     # Use force_df to handle different length arrays
@@ -64,7 +72,9 @@ def _format_eventplot(id, tracked_dict, kwargs):
                 if isinstance(positions, (list, np.ndarray)) and not isinstance(
                     positions[0], (list, np.ndarray)
                 ):
-                    col_name = get_csv_column_name("eventplot-events", ax_row, ax_col, trace_id=trace_id)
+                    col_name = get_csv_column_name(
+                        "eventplot-events", ax_row, ax_col, trace_id=trace_id
+                    )
                     return pd.DataFrame({col_name: positions})
 
                 # If positions is a list of arrays (multiple event sets)
@@ -72,7 +82,12 @@ def _format_eventplot(id, tracked_dict, kwargs):
                     # Create a DataFrame where each column is a Series that can handle varying lengths
                     df = pd.DataFrame()
                     for i, events in enumerate(positions):
-                        col_name = get_csv_column_name(f"eventplot-events{i:02d}", ax_row, ax_col, trace_id=f"{trace_id}-{i}")
+                        col_name = get_csv_column_name(
+                            f"eventplot-events{i:02d}",
+                            ax_row,
+                            ax_col,
+                            trace_id=f"{trace_id}-{i}",
+                        )
                         df[col_name] = pd.Series(events)
                     return df
         except Exception as e:

@@ -7,8 +7,9 @@
 Add fitted regression line to scatter plots.
 """
 
+from typing import Dict, Optional, Tuple
+
 import numpy as np
-from typing import Optional, Tuple, Dict
 
 
 def add_fitted_line(

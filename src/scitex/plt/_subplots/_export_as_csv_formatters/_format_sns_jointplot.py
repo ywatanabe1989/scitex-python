@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -44,8 +45,12 @@ def _format_sns_jointplot(id, tracked_dict, kwargs):
 
             result = pd.DataFrame(
                 {
-                    get_csv_column_name(f"joint_{x_var}", ax_row, ax_col, trace_id=trace_id): x_data,
-                    get_csv_column_name(f"joint_{y_var}", ax_row, ax_col, trace_id=trace_id): y_data,
+                    get_csv_column_name(
+                        f"joint_{x_var}", ax_row, ax_col, trace_id=trace_id
+                    ): x_data,
+                    get_csv_column_name(
+                        f"joint_{y_var}", ax_row, ax_col, trace_id=trace_id
+                    ): y_data,
                 }
             )
             return result
@@ -56,7 +61,9 @@ def _format_sns_jointplot(id, tracked_dict, kwargs):
             result = data.copy()
             if id is not None:
                 result.columns = [
-                    get_csv_column_name(f"joint_{col}", ax_row, ax_col, trace_id=trace_id)
+                    get_csv_column_name(
+                        f"joint_{col}", ax_row, ax_col, trace_id=trace_id
+                    )
                     for col in result.columns
                 ]
             return result
@@ -68,9 +75,15 @@ def _format_sns_jointplot(id, tracked_dict, kwargs):
             and isinstance(args[1], (np.ndarray, list))
         ):
             x_data, y_data = args[0], args[1]
-            return pd.DataFrame({
-                get_csv_column_name("joint_x", ax_row, ax_col, trace_id=trace_id): x_data,
-                get_csv_column_name("joint_y", ax_row, ax_col, trace_id=trace_id): y_data,
-            })
+            return pd.DataFrame(
+                {
+                    get_csv_column_name(
+                        "joint_x", ax_row, ax_col, trace_id=trace_id
+                    ): x_data,
+                    get_csv_column_name(
+                        "joint_y", ax_row, ax_col, trace_id=trace_id
+                    ): y_data,
+                }
+            )
 
     return pd.DataFrame()

@@ -4,7 +4,9 @@
 
 import numpy as np
 import pandas as pd
+
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -49,11 +51,9 @@ def _format_stx_imshow(id, tracked_dict, kwargs):
         # Flatten the DataFrame values
         values = imshow_df.values.flatten()
 
-        result = pd.DataFrame({
-            col_row: row_indices,
-            col_col: col_indices,
-            col_value: values
-        })
+        result = pd.DataFrame(
+            {col_row: row_indices, col_col: col_indices, col_value: values}
+        )
 
         return result
 

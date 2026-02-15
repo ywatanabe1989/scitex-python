@@ -23,7 +23,7 @@ def plot_mpl_contour(plt, rng, ax=None):
     Z = np.exp(-(X**2 + Y**2))
     ax.mpl_contour(X, Y, Z, levels=10)
     ax.set_xyt("X", "Y", "mpl_contour")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

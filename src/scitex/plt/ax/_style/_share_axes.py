@@ -10,8 +10,9 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import matplotlib.pyplot as plt
-import scitex
 import numpy as np
+
+import scitex
 
 
 def sharexy(*multiple_axes):
@@ -133,9 +134,7 @@ def get_global_xlim(*multiple_axes):
     xmin, xmax = np.inf, -np.inf
     for axes in multiple_axes:
         # axes
-        if isinstance(
-            axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
-        ):
+        if isinstance(axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)):
             for ax in axes.flat:
                 _xmin, _xmax = ax.get_xlim()  # Fixed: was get_ylim()
                 xmin = min(xmin, _xmin)
@@ -187,9 +186,7 @@ def get_global_ylim(*multiple_axes):
     ymin, ymax = np.inf, -np.inf
     for axes in multiple_axes:
         # axes
-        if isinstance(
-            axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
-        ):
+        if isinstance(axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)):
             for ax in axes.flat:
                 _ymin, _ymax = ax.get_ylim()
                 ymin = min(ymin, _ymin)
@@ -210,9 +207,7 @@ def set_xlims(*multiple_axes, xlim=None):
 
     for axes in multiple_axes:
         # axes
-        if isinstance(
-            axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
-        ):
+        if isinstance(axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)):
             for ax in axes.flat:
                 ax.set_xlim(xlim)
         # axis
@@ -233,9 +228,7 @@ def set_ylims(*multiple_axes, ylim=None):
 
     for axes in multiple_axes:
         # axes
-        if isinstance(
-            axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
-        ):
+        if isinstance(axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)):
             for ax in axes.flat:
                 ax.set_ylim(ylim)
 

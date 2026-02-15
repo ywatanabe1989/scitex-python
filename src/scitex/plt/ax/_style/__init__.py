@@ -18,21 +18,21 @@ from ._format_label import format_label
 from ._hide_spines import hide_spines
 from ._map_ticks import map_ticks
 from ._rotate_labels import rotate_labels
-from ._sci_note import sci_note, OOMFormatter
+from ._sci_note import OOMFormatter, sci_note
+from ._set_meta import export_metadata_yaml, set_figure_meta, set_meta
 from ._set_n_ticks import set_n_ticks
 from ._set_size import set_size
 from ._set_supxyt import set_supxyt, set_supxytc
 from ._set_ticks import set_ticks
 from ._set_xyt import set_xyt, set_xytc
-from ._set_meta import set_meta, set_figure_meta, export_metadata_yaml
 from ._share_axes import (
-    sharexy,
-    sharex,
-    sharey,
     get_global_xlim,
     get_global_ylim,
     set_xlims,
     set_ylims,
+    sharex,
+    sharexy,
+    sharey,
 )
 from ._shift import shift
 from ._show_spines import show_spines

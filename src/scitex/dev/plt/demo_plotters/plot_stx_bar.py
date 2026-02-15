@@ -19,9 +19,9 @@ def plot_stx_bar(plt, rng, ax=None):
 
     x = [1, 2, 3, 4, 5]
     height = rng.uniform(2, 8, 5)
-    ax.stx_bar(x, height, label='Values')
+    ax.stx_bar(x, height, label="Values")
     ax.set_xyt("X", "Y", "stx_bar")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

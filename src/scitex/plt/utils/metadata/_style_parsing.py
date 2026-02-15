@@ -123,7 +123,10 @@ def _collect_style_metadata(fig, ax) -> dict:
     # Try to extract from wrapped axes if this is an AxisWrapper
     elif hasattr(ax, "_ax"):
         mpl_ax = ax._ax
-        if hasattr(mpl_ax, "_scitex_metadata") and "style_mm" in mpl_ax._scitex_metadata:
+        if (
+            hasattr(mpl_ax, "_scitex_metadata")
+            and "style_mm" in mpl_ax._scitex_metadata
+        ):
             flat_style = mpl_ax._scitex_metadata["style_mm"]
             style_metadata = _restructure_style(flat_style)
 

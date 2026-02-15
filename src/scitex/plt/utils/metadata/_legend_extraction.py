@@ -47,7 +47,7 @@ def _extract_legend_info(ax) -> Optional[dict]:
     # This allows reconstructing the legend by referencing artists
     handles = []
     texts = legend.get_texts()
-    legend_handles = legend.legend_handles if hasattr(legend, 'legend_handles') else []
+    legend_handles = legend.legend_handles if hasattr(legend, "legend_handles") else []
 
     # Get the raw matplotlib axes for accessing lines to match IDs
     mpl_ax = ax._axis_mpl if hasattr(ax, "_axis_mpl") else ax

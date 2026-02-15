@@ -10,6 +10,7 @@ PolyCollection (hexbin/violin), and other collection artists from matplotlib axe
 """
 
 import matplotlib.colors as mcolors
+
 from ._label_parsing import _get_csv_column_names
 
 
@@ -63,20 +64,24 @@ def _extract_scatter_artists(mpl_ax, ax_row, ax_col):
         backend = {
             "name": "matplotlib",
             "artist_class": type(coll).__name__,
-            "props": {}
+            "props": {},
         }
 
         try:
             facecolors = coll.get_facecolor()
             if len(facecolors) > 0:
-                backend["props"]["facecolor"] = mcolors.to_hex(facecolors[0], keep_alpha=False)
+                backend["props"]["facecolor"] = mcolors.to_hex(
+                    facecolors[0], keep_alpha=False
+                )
         except (ValueError, TypeError, IndexError):
             pass
 
         try:
             edgecolors = coll.get_edgecolor()
             if len(edgecolors) > 0:
-                backend["props"]["edgecolor"] = mcolors.to_hex(edgecolors[0], keep_alpha=False)
+                backend["props"]["edgecolor"] = mcolors.to_hex(
+                    edgecolors[0], keep_alpha=False
+                )
         except (ValueError, TypeError, IndexError):
             pass
 
@@ -130,11 +135,7 @@ def _extract_hist2d_hexbin_artists(mpl_ax, ax_for_detection, plot_type):
             artist["zorder"] = coll.get_zorder()
 
             # Backend layer
-            backend = {
-                "name": "matplotlib",
-                "artist_class": coll_type,
-                "props": {}
-            }
+            backend = {"name": "matplotlib", "artist_class": coll_type, "props": {}}
             try:
                 cmap = coll.get_cmap()
                 if cmap:
@@ -154,6 +155,7 @@ def _extract_hist2d_hexbin_artists(mpl_ax, ax_for_detection, plot_type):
                 arr = coll.get_array()
                 if arr is not None and len(arr) > 0:
                     import numpy as np
+
                     coords = coll.get_coordinates()
                     if coords is not None and len(coords) > 0:
                         n_ybins = coords.shape[0] - 1
@@ -188,11 +190,7 @@ def _extract_hist2d_hexbin_artists(mpl_ax, ax_for_detection, plot_type):
                 artist["zorder"] = coll.get_zorder()
 
                 # Backend layer
-                backend = {
-                    "name": "matplotlib",
-                    "artist_class": coll_type,
-                    "props": {}
-                }
+                backend = {"name": "matplotlib", "artist_class": coll_type, "props": {}}
                 try:
                     cmap = coll.get_cmap()
                     if cmap:
@@ -200,8 +198,12 @@ def _extract_hist2d_hexbin_artists(mpl_ax, ax_for_detection, plot_type):
                 except (ValueError, TypeError, AttributeError):
                     pass
                 try:
-                    backend["props"]["vmin"] = float(coll.norm.vmin) if coll.norm else None
-                    backend["props"]["vmax"] = float(coll.norm.vmax) if coll.norm else None
+                    backend["props"]["vmin"] = (
+                        float(coll.norm.vmin) if coll.norm else None
+                    )
+                    backend["props"]["vmax"] = (
+                        float(coll.norm.vmax) if coll.norm else None
+                    )
                 except (ValueError, TypeError, AttributeError):
                     pass
 
@@ -211,7 +213,11 @@ def _extract_hist2d_hexbin_artists(mpl_ax, ax_for_detection, plot_type):
                 try:
                     artist["result"] = {
                         "n_hexagons": int(len(arr)),
-                        "count_range": [float(arr.min()), float(arr.max())] if len(arr) > 0 else None,
+                        "count_range": (
+                            [float(arr.min()), float(arr.max())]
+                            if len(arr) > 0
+                            else None
+                        ),
                         "total_count": int(arr.sum()),
                     }
                 except (TypeError, AttributeError, ValueError):
@@ -268,21 +274,21 @@ def _extract_violin_body_artists(mpl_ax, plot_type):
             artist["zorder"] = coll.get_zorder()
 
             # Backend layer
-            backend = {
-                "name": "matplotlib",
-                "artist_class": coll_type,
-                "props": {}
-            }
+            backend = {"name": "matplotlib", "artist_class": coll_type, "props": {}}
             try:
                 facecolors = coll.get_facecolor()
                 if len(facecolors) > 0:
-                    backend["props"]["facecolor"] = mcolors.to_hex(facecolors[0], keep_alpha=False)
+                    backend["props"]["facecolor"] = mcolors.to_hex(
+                        facecolors[0], keep_alpha=False
+                    )
             except (ValueError, TypeError, IndexError):
                 pass
             try:
                 edgecolors = coll.get_edgecolor()
                 if len(edgecolors) > 0:
-                    backend["props"]["edgecolor"] = mcolors.to_hex(edgecolors[0], keep_alpha=False)
+                    backend["props"]["edgecolor"] = mcolors.to_hex(
+                        edgecolors[0], keep_alpha=False
+                    )
             except (ValueError, TypeError, IndexError):
                 pass
 

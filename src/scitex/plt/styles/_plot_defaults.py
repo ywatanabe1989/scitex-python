@@ -14,8 +14,8 @@ Style values use the key format from YAML (e.g., 'lines.trace_mm').
 Env vars: SCITEX_PLT_LINES_TRACE_MM (prefix + dots→underscores + uppercase)
 """
 
-from scitex.plt.utils import mm_to_pt
 from scitex.plt.styles.presets import resolve_style_value
+from scitex.plt.utils import mm_to_pt
 
 # Default alpha for fill regions (0.3 = semi-transparent)
 DEFAULT_FILL_ALPHA = 0.3

@@ -10,7 +10,6 @@ the JSON metadata declarations.
 """
 
 
-
 def assert_csv_json_consistency(csv_path: str, json_path: str = None) -> None:
     """
     Assert that CSV data file and its JSON metadata are consistent.

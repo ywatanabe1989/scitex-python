@@ -20,7 +20,7 @@ def plot_mpl_violinplot(plt, rng, ax=None):
     data = [rng.normal(i, 1, 100) for i in range(4)]
     ax.mpl_violinplot(data)
     ax.set_xyt("X", "Y", "mpl_violinplot")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

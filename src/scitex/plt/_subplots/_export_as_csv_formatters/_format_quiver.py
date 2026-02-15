@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -47,10 +48,18 @@ def _format_quiver(id, tracked_dict, kwargs):
 
             df = pd.DataFrame(
                 {
-                    get_csv_column_name("quiver-x", ax_row, ax_col, trace_id=trace_id): X.flatten(),
-                    get_csv_column_name("quiver-y", ax_row, ax_col, trace_id=trace_id): Y.flatten(),
-                    get_csv_column_name("quiver-u", ax_row, ax_col, trace_id=trace_id): U.flatten(),
-                    get_csv_column_name("quiver-v", ax_row, ax_col, trace_id=trace_id): V.flatten(),
+                    get_csv_column_name(
+                        "quiver-x", ax_row, ax_col, trace_id=trace_id
+                    ): X.flatten(),
+                    get_csv_column_name(
+                        "quiver-y", ax_row, ax_col, trace_id=trace_id
+                    ): Y.flatten(),
+                    get_csv_column_name(
+                        "quiver-u", ax_row, ax_col, trace_id=trace_id
+                    ): U.flatten(),
+                    get_csv_column_name(
+                        "quiver-v", ax_row, ax_col, trace_id=trace_id
+                    ): V.flatten(),
                 }
             )
             return df

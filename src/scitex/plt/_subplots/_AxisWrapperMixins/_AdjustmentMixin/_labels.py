@@ -21,6 +21,7 @@ class LabelsMixin:
     def _get_ax_module(self):
         """Lazy import ax module to avoid circular imports."""
         from .....plt import ax as ax_module
+
         return ax_module
 
     def rotate_labels(
@@ -117,18 +118,20 @@ class LabelsMixin:
 
             axis_id = self._get_axis_id(fig)
 
-            fig._separate_legend_params.append({
-                "axis": self._axis_mpl,
-                "axis_id": axis_id,
-                "handles": handles,
-                "labels": labels,
-                "figsize": figsize,
-                "dpi": dpi,
-                "frameon": frameon,
-                "fancybox": fancybox,
-                "shadow": shadow,
-                "kwargs": kwargs,
-            })
+            fig._separate_legend_params.append(
+                {
+                    "axis": self._axis_mpl,
+                    "axis_id": axis_id,
+                    "handles": handles,
+                    "labels": labels,
+                    "figsize": figsize,
+                    "dpi": dpi,
+                    "frameon": frameon,
+                    "fancybox": fancybox,
+                    "shadow": shadow,
+                    "kwargs": kwargs,
+                }
+            )
 
             if self._axis_mpl.get_legend():
                 self._axis_mpl.get_legend().remove()
@@ -205,6 +208,7 @@ class LabelsMixin:
     def _check_legend_overlap(self, legend_obj):
         """Check if legend overlaps with plotted data and issue warning if needed."""
         import warnings
+
         import matplotlib.transforms as transforms
         import numpy as np
 

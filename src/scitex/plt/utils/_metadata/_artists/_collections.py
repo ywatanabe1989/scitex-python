@@ -164,9 +164,9 @@ def _extract_hexbin(ctx: ExtractionContext, index: int, coll, arr) -> dict:
     try:
         artist["result"] = {
             "n_hexagons": int(len(arr)),
-            "count_range": [float(arr.min()), float(arr.max())]
-            if len(arr) > 0
-            else None,
+            "count_range": (
+                [float(arr.min()), float(arr.max())] if len(arr) > 0 else None
+            ),
             "total_count": int(arr.sum()),
         }
     except (TypeError, AttributeError, ValueError):

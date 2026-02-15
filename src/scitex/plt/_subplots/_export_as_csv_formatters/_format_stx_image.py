@@ -4,10 +4,12 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_export_as_csv_formatters/_format_plot_image.py
 # ----------------------------------------
 import os
+
 import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 __FILE__ = __file__
@@ -68,9 +70,15 @@ def _format_plot_image(id, tracked_dict, kwargs):
             # Create xyz format using single source of truth
             df = pd.DataFrame(
                 {
-                    get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): col_indices.flatten(),  # x is column
-                    get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): row_indices.flatten(),  # y is row
-                    get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id): img.flatten(),  # z is intensity
+                    get_csv_column_name(
+                        "x", ax_row, ax_col, trace_id=trace_id
+                    ): col_indices.flatten(),  # x is column
+                    get_csv_column_name(
+                        "y", ax_row, ax_col, trace_id=trace_id
+                    ): row_indices.flatten(),  # y is row
+                    get_csv_column_name(
+                        "value", ax_row, ax_col, trace_id=trace_id
+                    ): img.flatten(),  # z is intensity
                 }
             )
             return df
@@ -86,7 +94,9 @@ def _format_plot_image(id, tracked_dict, kwargs):
             # Get column names using single source of truth
             x_col = get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)
             y_col = get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)
-            channel_col = get_csv_column_name("channel", ax_row, ax_col, trace_id=trace_id)
+            channel_col = get_csv_column_name(
+                "channel", ax_row, ax_col, trace_id=trace_id
+            )
             value_col = get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id)
 
             # Create long-format data (x, y, channel, value)

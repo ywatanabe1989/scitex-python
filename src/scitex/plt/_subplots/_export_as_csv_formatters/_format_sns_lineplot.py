@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -46,7 +47,9 @@ def _format_sns_lineplot(id, tracked_dict, kwargs):
         result = {}
         for col in data.columns:
             col_name = str(col) if not isinstance(col, str) else col
-            result[get_csv_column_name(col_name, ax_row, ax_col, trace_id=trace_id)] = data[col].values
+            result[get_csv_column_name(col_name, ax_row, ax_col, trace_id=trace_id)] = (
+                data[col].values
+            )
         return pd.DataFrame(result)
 
     # Handle direct x, y data arrays from args
@@ -56,9 +59,11 @@ def _format_sns_lineplot(id, tracked_dict, kwargs):
         and isinstance(args[1], (np.ndarray, list))
     ):
         x_data, y_data = args[0], args[1]
-        return pd.DataFrame({
-            get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): x_data,
-            get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): y_data
-        })
+        return pd.DataFrame(
+            {
+                get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): x_data,
+                get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): y_data,
+            }
+        )
 
     return pd.DataFrame()

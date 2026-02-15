@@ -18,10 +18,10 @@ def plot_mpl_imshow(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     data = rng.uniform(0, 1, (10, 10))
-    im = ax.mpl_imshow(data, cmap='viridis', aspect='auto')
+    im = ax.mpl_imshow(data, cmap="viridis", aspect="auto")
     fig.colorbar(im, ax=ax)
     ax.set_xyt("X", "Y", "mpl_imshow")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

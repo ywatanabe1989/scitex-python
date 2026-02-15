@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -37,9 +38,15 @@ def _format_matshow(id, tracked_dict, kwargs):
 
             df = pd.DataFrame(
                 {
-                    get_csv_column_name("row", ax_row, ax_col, trace_id=trace_id): rows.flatten(),
-                    get_csv_column_name("col", ax_row, ax_col, trace_id=trace_id): cols.flatten(),
-                    get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id): Z.flatten(),
+                    get_csv_column_name(
+                        "row", ax_row, ax_col, trace_id=trace_id
+                    ): rows.flatten(),
+                    get_csv_column_name(
+                        "col", ax_row, ax_col, trace_id=trace_id
+                    ): cols.flatten(),
+                    get_csv_column_name(
+                        "value", ax_row, ax_col, trace_id=trace_id
+                    ): Z.flatten(),
                 }
             )
             return df

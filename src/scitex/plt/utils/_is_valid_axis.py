@@ -10,6 +10,7 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import inspect
+
 import matplotlib
 
 

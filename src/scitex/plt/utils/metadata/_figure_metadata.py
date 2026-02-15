@@ -10,6 +10,7 @@ dimensions, DPI, and overall figure properties.
 """
 
 from typing import Dict
+
 from ._dimensions import _extract_figure_dimensions
 
 
@@ -41,7 +42,9 @@ def _initialize_metadata_structure() -> dict:
     """
     import datetime
     import uuid
+
     import matplotlib
+
     import scitex
 
     metadata = {

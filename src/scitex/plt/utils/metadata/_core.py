@@ -10,20 +10,26 @@ the collection of all metadata from matplotlib figures and axes.
 """
 
 from typing import Dict
+
 import numpy as np
 
 from scitex import logging
 
 logger = logging.getLogger(__name__)
 
-# Import sub-modules
-from ._figure_metadata import _initialize_metadata_structure, _collect_figure_metadata
 from ._axes_metadata import _collect_all_axes_metadata
-from ._dimensions import _collect_grid_info, _extract_figure_dimensions
-from ._style_parsing import _restructure_style, _collect_style_metadata, _extract_mode_and_method
-from ._plot_content import _detect_plot_type, _extract_artists, _extract_legend_info
 from ._data_linkage import _compute_csv_hash
+from ._dimensions import _collect_grid_info, _extract_figure_dimensions
+
+# Import sub-modules
+from ._figure_metadata import _collect_figure_metadata, _initialize_metadata_structure
+from ._plot_content import _detect_plot_type, _extract_artists, _extract_legend_info
 from ._precision import _round_metadata
+from ._style_parsing import (
+    _collect_style_metadata,
+    _extract_mode_and_method,
+    _restructure_style,
+)
 
 
 def collect_figure_metadata(fig, ax=None) -> Dict:
@@ -123,20 +129,21 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
     # Extract font information
     try:
         from .._get_actual_font import get_actual_font_name
+
         actual_font = get_actual_font_name()
-        
+
         if "style" in metadata:
             if "global" not in metadata["style"]:
                 metadata["style"]["global"] = {}
             if "fonts" not in metadata["style"]["global"]:
                 metadata["style"]["global"]["fonts"] = {}
-            
+
             requested_font = metadata["style"]["global"]["fonts"].get("family", "Arial")
             if "family" in metadata["style"]["global"]["fonts"]:
                 del metadata["style"]["global"]["fonts"]["family"]
             metadata["style"]["global"]["fonts"]["family_requested"] = requested_font
             metadata["style"]["global"]["fonts"]["family_actual"] = actual_font
-            
+
             if requested_font != actual_font:
                 logger.warning(
                     f"Font mismatch: Requested '{requested_font}' but using '{actual_font}'"
@@ -160,22 +167,27 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
 
             # Find axes with history for plot type detection
             ax_for_history = primary_ax
-            if not hasattr(primary_ax, 'history'):
-                if hasattr(primary_ax, '_scitex_wrapper'):
+            if not hasattr(primary_ax, "history"):
+                if hasattr(primary_ax, "_scitex_wrapper"):
                     ax_for_history = primary_ax._scitex_wrapper
 
             # Extract plot info
             plot_info = {}
-            
+
             # Get axes position
             ax_row, ax_col = 0, 0
-            if hasattr(primary_ax, "_scitex_metadata") and "position_in_grid" in primary_ax._scitex_metadata:
+            if (
+                hasattr(primary_ax, "_scitex_metadata")
+                and "position_in_grid" in primary_ax._scitex_metadata
+            ):
                 pos = primary_ax._scitex_metadata["position_in_grid"]
                 ax_row, ax_col = pos[0], pos[1]
             plot_info["ax_id"] = f"ax_{ax_row:02d}_{ax_col:02d}"
 
             # Extract title
-            ax_mpl = primary_ax._axis_mpl if hasattr(primary_ax, '_axis_mpl') else primary_ax
+            ax_mpl = (
+                primary_ax._axis_mpl if hasattr(primary_ax, "_axis_mpl") else primary_ax
+            )
             title = ax_mpl.get_title()
             if title:
                 plot_info["title"] = title

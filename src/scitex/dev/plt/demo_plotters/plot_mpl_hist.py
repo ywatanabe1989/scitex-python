@@ -18,9 +18,9 @@ def plot_mpl_hist(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     data = rng.standard_normal(1000)
-    ax.mpl_hist(data, bins=30, edgecolor='white', alpha=0.8)
+    ax.mpl_hist(data, bins=30, edgecolor="white", alpha=0.8)
     ax.set_xyt("X", "Y", "mpl_hist")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

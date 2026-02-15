@@ -143,12 +143,8 @@ def _format_plot(
         args = tracked_dict["args"]
         if isinstance(args, tuple) and len(args) > 0:
             # Get column names from single source of truth
-            x_col = get_csv_column_name(
-                "x", ax_row, ax_col, trace_id=trace_id
-            )
-            y_col = get_csv_column_name(
-                "y", ax_row, ax_col, trace_id=trace_id
-            )
+            x_col = get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)
+            y_col = get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)
 
             # Handle single argument: plot(y) or plot(data_2d)
             if len(args) == 1:

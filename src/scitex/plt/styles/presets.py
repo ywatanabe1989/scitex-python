@@ -152,7 +152,7 @@ def get_preview_dpi() -> int:
 
 # Module-level constants (evaluated at import time)
 # Use functions for dynamic resolution, constants for static defaults
-DPI_SAVE = _FALLBACK_DPI_SAVE      # Use get_default_dpi() for dynamic
+DPI_SAVE = _FALLBACK_DPI_SAVE  # Use get_default_dpi() for dynamic
 DPI_DISPLAY = _FALLBACK_DPI_DISPLAY
 DPI_PREVIEW = _FALLBACK_DPI_PREVIEW
 

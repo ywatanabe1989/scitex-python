@@ -19,9 +19,15 @@ def plot_sns_histplot(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     n = 100
-    groups = rng.choice(['A', 'B', 'C'], n)
-    df = pd.DataFrame({'group': groups, 'value': rng.normal(0, 1, n) + np.where(groups == 'A', 0, np.where(groups == 'B', 1, 2))})
-    ax.sns_histplot(data=df, x='value', hue='group', bins=20)
+    groups = rng.choice(["A", "B", "C"], n)
+    df = pd.DataFrame(
+        {
+            "group": groups,
+            "value": rng.normal(0, 1, n)
+            + np.where(groups == "A", 0, np.where(groups == "B", 1, 2)),
+        }
+    )
+    ax.sns_histplot(data=df, x="value", hue="group", bins=20)
     ax.set_xyt("X", "Y", "sns_histplot")
     return fig, ax
 

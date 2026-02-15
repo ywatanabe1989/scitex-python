@@ -27,6 +27,7 @@ class SeabornMixin(SeabornBaseMixin, SeabornWrappersMixin):
     - SeabornBaseMixin: Helper methods for tracking and data preparation
     - SeabornWrappersMixin: Individual sns_ prefixed seaborn wrappers
     """
+
     pass
 
 

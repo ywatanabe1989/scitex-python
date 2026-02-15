@@ -18,9 +18,9 @@ def plot_stx_ecdf(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     data = rng.normal(0, 1, 200)
-    ax.stx_ecdf(data, label='ECDF')
+    ax.stx_ecdf(data, label="ECDF")
     ax.set_xyt("X", "Y", "stx_ecdf")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

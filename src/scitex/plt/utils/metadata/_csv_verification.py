@@ -9,8 +9,9 @@ This module provides functions to verify that CSV columns match JSON metadata ex
 """
 
 import json
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 
 def assert_csv_json_consistency(csv_path: str, json_path: str = None) -> None:
@@ -49,7 +50,7 @@ def verify_csv_json_consistency(csv_path: str, json_path: str = None) -> dict:
     """
     # Determine JSON path
     if json_path is None:
-        json_path = str(Path(csv_path).with_suffix('.json'))
+        json_path = str(Path(csv_path).with_suffix(".json"))
 
     try:
         # Load CSV
@@ -57,7 +58,7 @@ def verify_csv_json_consistency(csv_path: str, json_path: str = None) -> dict:
         csv_columns = set(df.columns)
 
         # Load JSON
-        with open(json_path, 'r') as f:
+        with open(json_path, "r") as f:
             metadata = json.load(f)
 
         # Extract column names from JSON metadata
@@ -70,7 +71,7 @@ def verify_csv_json_consistency(csv_path: str, json_path: str = None) -> dict:
             return {
                 "status": "consistent",
                 "message": "CSV columns match JSON metadata",
-                "details": {"column_count": len(csv_columns)}
+                "details": {"column_count": len(csv_columns)},
             }
         else:
             missing_in_json = csv_columns - json_columns
@@ -78,18 +79,18 @@ def verify_csv_json_consistency(csv_path: str, json_path: str = None) -> dict:
             return {
                 "status": "inconsistent",
                 "message": f"CSV-JSON mismatch: {len(missing_in_json)} columns in CSV not in JSON, "
-                          f"{len(missing_in_csv)} columns in JSON not in CSV",
+                f"{len(missing_in_csv)} columns in JSON not in CSV",
                 "details": {
                     "csv_columns": sorted(csv_columns),
                     "json_columns": sorted(json_columns),
                     "missing_in_json": sorted(missing_in_json),
                     "missing_in_csv": sorted(missing_in_csv),
-                }
+                },
             }
 
     except Exception as e:
         return {
             "status": "error",
             "message": f"Error verifying consistency: {e}",
-            "details": {}
+            "details": {},
         }

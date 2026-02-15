@@ -55,11 +55,13 @@ def _extract_csv_columns_from_history(ax) -> list:
         )
 
         if columns:
-            csv_columns_list.append({
-                "id": id_val,
-                "method": method,
-                "columns": columns,
-            })
+            csv_columns_list.append(
+                {
+                    "id": id_val,
+                    "method": method,
+                    "columns": columns,
+                }
+            )
 
     return csv_columns_list
 

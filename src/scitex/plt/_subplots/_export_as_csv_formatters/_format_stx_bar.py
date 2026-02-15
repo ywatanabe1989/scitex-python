@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 """CSV formatter for stx_bar() calls."""
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -38,11 +40,17 @@ def _format_stx_bar(id, tracked_dict, kwargs):
         # Map 'x' and 'height' to standardized column names
         for col in result.columns:
             if col == "x":
-                renamed[col] = get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)
+                renamed[col] = get_csv_column_name(
+                    "x", ax_row, ax_col, trace_id=trace_id
+                )
             elif col == "height":
-                renamed[col] = get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)
+                renamed[col] = get_csv_column_name(
+                    "y", ax_row, ax_col, trace_id=trace_id
+                )
             else:
-                renamed[col] = get_csv_column_name(col, ax_row, ax_col, trace_id=trace_id)
+                renamed[col] = get_csv_column_name(
+                    col, ax_row, ax_col, trace_id=trace_id
+                )
 
         result = result.rename(columns=renamed)
 
@@ -52,7 +60,9 @@ def _format_stx_bar(id, tracked_dict, kwargs):
             try:
                 yerr_array = np.asarray(yerr)
                 if len(yerr_array) == len(result):
-                    col_yerr = get_csv_column_name("yerr", ax_row, ax_col, trace_id=trace_id)
+                    col_yerr = get_csv_column_name(
+                        "yerr", ax_row, ax_col, trace_id=trace_id
+                    )
                     result[col_yerr] = yerr_array
             except (TypeError, ValueError):
                 pass
@@ -71,7 +81,9 @@ def _format_stx_bar(id, tracked_dict, kwargs):
         if yerr is not None:
             try:
                 yerr_array = np.asarray(yerr)
-                col_yerr = get_csv_column_name("yerr", ax_row, ax_col, trace_id=trace_id)
+                col_yerr = get_csv_column_name(
+                    "yerr", ax_row, ax_col, trace_id=trace_id
+                )
                 data[col_yerr] = yerr_array
             except (TypeError, ValueError):
                 pass

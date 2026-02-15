@@ -17,6 +17,7 @@ class PlotBaseMixin:
     def _get_ax_module(self):
         """Lazy import ax module to avoid circular imports."""
         from .....plt import ax as ax_module
+
         return ax_module
 
     def _apply_scitex_postprocess(
@@ -28,6 +29,7 @@ class PlotBaseMixin:
         as matplotlib methods going through __getattr__ (tick locator, spines, etc.).
         """
         from scitex.plt.styles import apply_plot_postprocess
+
         apply_plot_postprocess(method_name, result, self._axis_mpl, kwargs or {}, args)
 
 

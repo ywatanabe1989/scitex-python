@@ -52,9 +52,8 @@ __DIR__ = os.path.dirname(__FILE__)
 # ============================================================================
 if _FIGRECIPE_AVAILABLE:
     # Core public API
-    from figrecipe import Diagram
-    from figrecipe import __version__ as _figrecipe_version
     from figrecipe import (
+        Diagram,
         compose,
         crop,
         extract_data,
@@ -71,6 +70,7 @@ if _FIGRECIPE_AVAILABLE:
         unload_style,
         validate,
     )
+    from figrecipe import __version__ as _figrecipe_version
 
     # Backward compatibility alias
     edit = gui

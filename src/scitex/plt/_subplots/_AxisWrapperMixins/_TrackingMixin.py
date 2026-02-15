@@ -65,7 +65,9 @@ class TrackingMixin:
         if track:
             # Get axes position from _scitex_metadata if available
             ax_row, ax_col = 0, 0
-            if hasattr(self, "_axis_mpl") and hasattr(self._axis_mpl, "_scitex_metadata"):
+            if hasattr(self, "_axis_mpl") and hasattr(
+                self._axis_mpl, "_scitex_metadata"
+            ):
                 meta = self._axis_mpl._scitex_metadata
                 if "position_in_grid" in meta:
                     ax_row, ax_col = meta["position_in_grid"]

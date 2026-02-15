@@ -15,20 +15,20 @@ specialized modules. This file serves as a backward compatibility layer.
 from typing import Dict, List, Union
 
 # Import from specialized modules
-from ._precision_config import PRECISION, FixedFloat, _round_value, _round_list
+from ._precision_config import PRECISION, FixedFloat, _round_list, _round_value
+from ._precision_sections import _round_trace  # Backward compatibility alias
 from ._precision_sections import (
-    _round_figure_section,
+    _round_artist,
     _round_axes_section,
-    _round_single_axes_data,
     _round_axis_info,
+    _round_backend_dict,
+    _round_figure_section,
+    _round_geometry_dict,
+    _round_plot_section,
+    _round_single_axes_data,
+    _round_style_dict,
     _round_style_section,
     _round_style_subsection,
-    _round_plot_section,
-    _round_artist,
-    _round_style_dict,
-    _round_backend_dict,
-    _round_geometry_dict,
-    _round_trace,  # Backward compatibility alias
 )
 
 __all__ = [

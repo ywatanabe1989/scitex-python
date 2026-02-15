@@ -127,4 +127,3 @@ theme:
     spine: "black"             # Axis spines
     tick: "black"              # Tick marks and labels
     grid: "#cccccc"            # Grid lines
-

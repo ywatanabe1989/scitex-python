@@ -14,8 +14,9 @@ Prerequisites:
     matplotlib
 """
 
+from typing import List, Union
+
 import matplotlib
-from typing import Union, List
 
 
 def show_spines(
@@ -91,9 +92,9 @@ def show_spines(
         # This is an scitex AxisWrapper, get the underlying matplotlib axis
         axis = axis._axis_mpl
 
-    assert isinstance(axis, matplotlib.axes._axes.Axes), (
-        "First argument must be a matplotlib axis or scitex AxisWrapper"
-    )
+    assert isinstance(
+        axis, matplotlib.axes._axes.Axes
+    ), "First argument must be a matplotlib axis or scitex AxisWrapper"
 
     # Define which spines to show
     spine_settings = {"top": top, "bottom": bottom, "left": left, "right": right}

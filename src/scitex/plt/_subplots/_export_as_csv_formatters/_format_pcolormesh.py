@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -54,11 +55,13 @@ def _format_pcolormesh(id, tracked_dict, kwargs):
     col_value = get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id)
 
     # Flatten for CSV format
-    df = pd.DataFrame({
-        col_x: X.flatten(),
-        col_y: Y.flatten(),
-        col_value: C.flatten(),
-    })
+    df = pd.DataFrame(
+        {
+            col_x: X.flatten(),
+            col_y: Y.flatten(),
+            col_value: C.flatten(),
+        }
+    )
 
     return df
 

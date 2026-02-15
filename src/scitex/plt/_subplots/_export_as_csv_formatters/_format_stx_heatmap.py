@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -48,9 +49,15 @@ def _format_plot_heatmap(id, tracked_dict, kwargs):
         # Format data in xyz format (x, y, value) using single source of truth
         df = pd.DataFrame(
             {
-                get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): col_indices.flatten(),  # x is column
-                get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): row_indices.flatten(),  # y is row
-                get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id): data.flatten(),  # z is intensity/value
+                get_csv_column_name(
+                    "x", ax_row, ax_col, trace_id=trace_id
+                ): col_indices.flatten(),  # x is column
+                get_csv_column_name(
+                    "y", ax_row, ax_col, trace_id=trace_id
+                ): row_indices.flatten(),  # y is row
+                get_csv_column_name(
+                    "value", ax_row, ax_col, trace_id=trace_id
+                ): data.flatten(),  # z is intensity/value
             }
         )
 
@@ -59,14 +66,18 @@ def _format_plot_heatmap(id, tracked_dict, kwargs):
             # Map column indices to x labels (columns are x)
             x_label_map = {i: label for i, label in enumerate(x_labels)}
             x_col_name = get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)
-            x_label_col_name = get_csv_column_name("x_label", ax_row, ax_col, trace_id=trace_id)
+            x_label_col_name = get_csv_column_name(
+                "x_label", ax_row, ax_col, trace_id=trace_id
+            )
             df[x_label_col_name] = df[x_col_name].map(x_label_map)
 
         if y_labels is not None and len(y_labels) == rows:
             # Map row indices to y labels (rows are y)
             y_label_map = {i: label for i, label in enumerate(y_labels)}
             y_col_name = get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)
-            y_label_col_name = get_csv_column_name("y_label", ax_row, ax_col, trace_id=trace_id)
+            y_label_col_name = get_csv_column_name(
+                "y_label", ax_row, ax_col, trace_id=trace_id
+            )
             df[y_label_col_name] = df[y_col_name].map(y_label_map)
 
         return df

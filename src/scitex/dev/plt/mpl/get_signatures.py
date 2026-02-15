@@ -6,7 +6,6 @@
 
 """Inspect matplotlib Axes plotting functions to extract args/kwargs signatures."""
 
-import scitex as stx
 import inspect
 import json
 from pathlib import Path
@@ -14,6 +13,8 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import yaml
+
+import scitex as stx
 
 
 def get_typehint_str(annotation) -> str | None:
@@ -55,15 +56,19 @@ def inspect_function(func) -> list[dict[str, Any]]:
 
         # Determine type based on parameter kind
         if param.kind == inspect.Parameter.VAR_POSITIONAL:
-            params.append({
-                "name": f"*{name}",
-                "type": "*args",
-            })
+            params.append(
+                {
+                    "name": f"*{name}",
+                    "type": "*args",
+                }
+            )
         elif param.kind == inspect.Parameter.VAR_KEYWORD:
-            params.append({
-                "name": f"**{name}",
-                "type": "**kwargs",
-            })
+            params.append(
+                {
+                    "name": f"**{name}",
+                    "type": "**kwargs",
+                }
+            )
         else:
             # Get typehint (None if not available)
             typehint = get_typehint_str(param.annotation)

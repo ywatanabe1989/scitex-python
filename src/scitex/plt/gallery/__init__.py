@@ -26,8 +26,8 @@ Usage:
 """
 
 from ._generate import generate
-from ._registry import CATEGORIES, list_plots
 from ._plots import PLOT_FUNCTIONS
+from ._registry import CATEGORIES, list_plots
 
 
 def get_plot_spec(category: str, plot_name: str) -> dict:
@@ -46,7 +46,9 @@ def get_plot_spec(category: str, plot_name: str) -> dict:
         Spec dictionary for the plot type.
     """
     if category not in CATEGORIES:
-        raise ValueError(f"Unknown category: {category}. Available: {list(CATEGORIES.keys())}")
+        raise ValueError(
+            f"Unknown category: {category}. Available: {list(CATEGORIES.keys())}"
+        )
 
     if plot_name not in CATEGORIES[category]["plots"]:
         raise ValueError(f"Unknown plot: {plot_name} in category {category}")
@@ -80,7 +82,9 @@ def get_plot_data(category: str, plot_name: str):
     from pathlib import Path
 
     if category not in CATEGORIES:
-        raise ValueError(f"Unknown category: {category}. Available: {list(CATEGORIES.keys())}")
+        raise ValueError(
+            f"Unknown category: {category}. Available: {list(CATEGORIES.keys())}"
+        )
 
     if plot_name not in CATEGORIES[category]["plots"]:
         raise ValueError(f"Unknown plot: {plot_name} in category {category}")
@@ -107,6 +111,7 @@ def get_plot_data(category: str, plot_name: str):
         csv_buffer.seek(0)
 
         import pandas as pd
+
         df = pd.read_csv(csv_buffer)
 
         # Close figure
@@ -117,6 +122,7 @@ def get_plot_data(category: str, plot_name: str):
     except Exception as e:
         # Some plots may not have exportable CSV data
         import warnings
+
         warnings.warn(f"Could not get data for {category}/{plot_name}: {e}")
         return None
 

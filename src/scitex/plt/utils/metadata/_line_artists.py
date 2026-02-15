@@ -10,11 +10,14 @@ from matplotlib axes, including special handling for boxplot, violin, and stem p
 """
 
 import matplotlib.colors as mcolors
+
 from ._label_parsing import _get_csv_column_names
 from ._line_semantic_handling import _compute_boxplot_stats, _determine_semantic_type
 
 
-def _extract_line_artists(mpl_ax, ax_for_detection, plot_type, method, ax_row, ax_col, skip_unlabeled):
+def _extract_line_artists(
+    mpl_ax, ax_for_detection, plot_type, method, ax_row, ax_col, skip_unlabeled
+):
     """
     Extract Line2D artists from axes.
 
@@ -50,8 +53,10 @@ def _extract_line_artists(mpl_ax, ax_for_detection, plot_type, method, ax_row, a
         label = line.get_label()
 
         # Determine semantic type
-        semantic_type, semantic_id, has_boxplot_stats, box_idx, should_skip = _determine_semantic_type(
-            line, i, plot_type, num_boxes, skip_unlabeled, scitex_id
+        semantic_type, semantic_id, has_boxplot_stats, box_idx, should_skip = (
+            _determine_semantic_type(
+                line, i, plot_type, num_boxes, skip_unlabeled, scitex_id
+            )
         )
 
         if should_skip:
@@ -66,9 +71,20 @@ def _extract_line_artists(mpl_ax, ax_for_detection, plot_type, method, ax_row, a
 
         # Build artist dictionary
         artist = _build_line_artist_dict(
-            line, i, scitex_id, semantic_id, semantic_type, is_regression_line,
-            label, ax_row, ax_col, ax_for_detection, mpl_ax, boxplot_stats,
-            has_boxplot_stats, box_idx
+            line,
+            i,
+            scitex_id,
+            semantic_id,
+            semantic_type,
+            is_regression_line,
+            label,
+            ax_row,
+            ax_col,
+            ax_for_detection,
+            mpl_ax,
+            boxplot_stats,
+            has_boxplot_stats,
+            box_idx,
         )
 
         artists.append(artist)
@@ -76,9 +92,22 @@ def _extract_line_artists(mpl_ax, ax_for_detection, plot_type, method, ax_row, a
     return artists
 
 
-def _build_line_artist_dict(line, i, scitex_id, semantic_id, semantic_type, is_regression_line,
-                             label, ax_row, ax_col, ax_for_detection, mpl_ax, boxplot_stats,
-                             has_boxplot_stats, box_idx):
+def _build_line_artist_dict(
+    line,
+    i,
+    scitex_id,
+    semantic_id,
+    semantic_type,
+    is_regression_line,
+    label,
+    ax_row,
+    ax_col,
+    ax_for_detection,
+    mpl_ax,
+    boxplot_stats,
+    has_boxplot_stats,
+    box_idx,
+):
     """
     Build artist dictionary for a line.
 
@@ -154,11 +183,7 @@ def _build_line_artist_dict(line, i, scitex_id, semantic_id, semantic_type, is_r
     artist["zorder"] = line.get_zorder()
 
     # Backend layer
-    backend = {
-        "name": "matplotlib",
-        "artist_class": type(line).__name__,
-        "props": {}
-    }
+    backend = {"name": "matplotlib", "artist_class": type(line).__name__, "props": {}}
 
     color = line.get_color()
     try:
@@ -181,7 +206,9 @@ def _build_line_artist_dict(line, i, scitex_id, semantic_id, semantic_type, is_r
 
     # data_ref - CSV column mapping
     if not semantic_type:
-        trace_id_for_ref = _find_trace_id_for_line(scitex_id, i, mpl_ax, ax_for_detection)
+        trace_id_for_ref = _find_trace_id_for_line(
+            scitex_id, i, mpl_ax, ax_for_detection
+        )
         if not trace_id_for_ref:
             trace_id_for_ref = artist.get("id", str(i))
         artist["data_ref"] = _get_csv_column_names(trace_id_for_ref, ax_row, ax_col)
@@ -198,7 +225,9 @@ def _build_line_artist_dict(line, i, scitex_id, semantic_id, semantic_type, is_r
     return artist
 
 
-def _extract_line_collection_artists(mpl_ax, ax_for_detection, plot_type, method, ax_row, ax_col):
+def _extract_line_collection_artists(
+    mpl_ax, ax_for_detection, plot_type, method, ax_row, ax_col
+):
     """
     Extract LineCollection artists (errorbar lines, stem lines, etc.).
 
@@ -256,11 +285,7 @@ def _extract_line_collection_artists(mpl_ax, ax_for_detection, plot_type, method
         artist["zorder"] = coll.get_zorder()
 
         # Backend layer
-        backend = {
-            "name": "matplotlib",
-            "artist_class": coll_type,
-            "props": {}
-        }
+        backend = {"name": "matplotlib", "artist_class": coll_type, "props": {}}
 
         try:
             colors = coll.get_colors()
@@ -303,7 +328,7 @@ def _add_linecollection_data_ref(artist, ax_for_detection, method, ax_row, ax_co
             artist["data_ref"] = {
                 "x": base_ref.get("x"),
                 "y": base_ref.get("y"),
-                error_var: f"ax-row-{ax_row}-col-{ax_col}_trace-id-{errorbar_trace_id}_variable-{error_var}"
+                error_var: f"ax-row-{ax_row}-col-{ax_col}_trace-id-{errorbar_trace_id}_variable-{error_var}",
             }
     elif artist["role"] == "stem_stem" and hasattr(ax_for_detection, "history"):
         for record in ax_for_detection.history.values():
@@ -311,7 +336,9 @@ def _add_linecollection_data_ref(artist, ax_for_detection, method, ax_row, ax_co
                 method_name = record[1]
                 if method_name == "stem":
                     stem_trace_id = record[0]
-                    artist["data_ref"] = _get_csv_column_names(stem_trace_id, ax_row, ax_col)
+                    artist["data_ref"] = _get_csv_column_names(
+                        stem_trace_id, ax_row, ax_col
+                    )
                     break
 
 
@@ -340,7 +367,9 @@ def _find_trace_id_for_line(scitex_id, line_index, mpl_ax, ax_for_detection):
                     elif len(parts) == 4:
                         trace_id_for_ref = parts[3]
                 elif tracking_id.startswith("plot_"):
-                    trace_id_for_ref = tracking_id[5:] if len(tracking_id) > 5 else str(line_index)
+                    trace_id_for_ref = (
+                        tracking_id[5:] if len(tracking_id) > 5 else str(line_index)
+                    )
                 else:
                     trace_id_for_ref = tracking_id
 

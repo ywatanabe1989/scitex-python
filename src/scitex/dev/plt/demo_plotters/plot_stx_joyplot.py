@@ -18,9 +18,9 @@ def plot_stx_joyplot(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     data = [rng.normal(i, 1, 200) for i in range(5)]
-    ax.stx_joyplot(data, labels=['A', 'B', 'C', 'D', 'E'])
+    ax.stx_joyplot(data, labels=["A", "B", "C", "D", "E"])
     ax.set_xyt("X", "Y", "stx_joyplot")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

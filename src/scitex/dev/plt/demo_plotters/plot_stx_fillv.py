@@ -17,10 +17,10 @@ def plot_stx_fillv(plt, rng, ax=None):
     else:
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
-    ax.plot(np.sin(np.linspace(0, 4*np.pi, 100)))
+    ax.plot(np.sin(np.linspace(0, 4 * np.pi, 100)))
     ax.stx_fillv([20, 60], [40, 80], alpha=0.3)
     ax.set_xyt("X", "Y", "stx_fillv")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

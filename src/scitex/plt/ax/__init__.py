@@ -9,6 +9,29 @@ __FILE__ = "./src/scitex/plt/ax/__init__.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
+from ._plot._add_fitted_line import add_fitted_line
+from ._plot._plot_circular_hist import plot_circular_hist
+from ._plot._plot_cube import plot_cube
+from ._plot._plot_statistical_shaded_line import (
+    stx_line,
+    stx_mean_ci,
+    stx_mean_std,
+    stx_median_iqr,
+)
+from ._plot._stx_conf_mat import stx_conf_mat
+from ._plot._stx_ecdf import stx_ecdf
+from ._plot._stx_fillv import stx_fillv
+
+# Plot
+from ._plot._stx_heatmap import stx_heatmap
+from ._plot._stx_image import stx_image
+from ._plot._stx_joyplot import stx_joyplot
+from ._plot._stx_raster import stx_raster
+from ._plot._stx_rectangle import stx_rectangle
+from ._plot._stx_scatter_hist import stx_scatter_hist
+from ._plot._stx_shaded_line import stx_shaded_line
+from ._plot._stx_violin import stx_violin
+
 # Adjust
 from ._style._add_marginal_ax import add_marginal_ax
 from ._style._add_panel import add_panel, panel
@@ -18,24 +41,19 @@ from ._style._force_aspect import force_aspect
 from ._style._format_label import format_label as format_label_old
 from ._style._format_units import format_label, format_label_auto
 from ._style._hide_spines import hide_spines
-from ._style._show_spines import (
-    show_spines,
-    show_all_spines,
-    show_classic_spines,
-    show_box_spines,
-    toggle_spines,
-    scientific_spines,
-    clean_spines,
-)
 from ._style._map_ticks import map_ticks
 from ._style._rotate_labels import rotate_labels
 from ._style._sci_note import sci_note
+from ._style._set_log_scale import (
+    add_log_scale_indicator,
+    set_log_scale,
+    smart_log_limits,
+)
 from ._style._set_n_ticks import set_n_ticks
 from ._style._set_size import set_size
 from ._style._set_supxyt import set_supxyt
 from ._style._set_ticks import set_ticks
 from ._style._set_xyt import set_xyt
-from ._style._shift import shift
 from ._style._share_axes import (
     get_global_xlim,
     get_global_ylim,
@@ -45,40 +63,22 @@ from ._style._share_axes import (
     sharexy,
     sharey,
 )
-from ._style._set_log_scale import (
-    set_log_scale,
-    smart_log_limits,
-    add_log_scale_indicator,
+from ._style._shift import shift
+from ._style._show_spines import (
+    clean_spines,
+    scientific_spines,
+    show_all_spines,
+    show_box_spines,
+    show_classic_spines,
+    show_spines,
+    toggle_spines,
 )
+from ._style._style_barplot import style_barplot
 from ._style._style_boxplot import style_boxplot
 from ._style._style_errorbar import style_errorbar
-from ._style._style_barplot import style_barplot
 from ._style._style_scatter import style_scatter
 from ._style._style_suptitles import style_suptitles
 from ._style._style_violinplot import style_violinplot
-
-# Plot
-from ._plot._stx_heatmap import stx_heatmap
-from ._plot._plot_circular_hist import plot_circular_hist
-from ._plot._stx_conf_mat import stx_conf_mat
-from ._plot._plot_cube import plot_cube
-from ._plot._stx_ecdf import stx_ecdf
-from ._plot._stx_fillv import stx_fillv
-from ._plot._stx_violin import stx_violin
-from ._plot._stx_image import stx_image
-from ._plot._stx_joyplot import stx_joyplot
-from ._plot._stx_raster import stx_raster
-from ._plot._stx_rectangle import stx_rectangle
-from ._plot._stx_scatter_hist import stx_scatter_hist
-from ._plot._stx_shaded_line import stx_shaded_line
-from ._plot._plot_statistical_shaded_line import (
-    stx_line,
-    stx_mean_std,
-    stx_mean_ci,
-    stx_median_iqr,
-)
-from ._plot._add_fitted_line import add_fitted_line
-
 
 # ################################################################################
 # # For Matplotlib Compatibility

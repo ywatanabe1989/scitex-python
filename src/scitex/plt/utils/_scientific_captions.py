@@ -14,12 +14,13 @@ Prerequisites:
     matplotlib, textwrap
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib.patches import FancyBboxPatch
-import textwrap
-from typing import Union, List, Dict, Tuple, Optional
 import re
+import textwrap
+from typing import Dict, List, Optional, Tuple, Union
+
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+from matplotlib.patches import FancyBboxPatch
 
 
 class ScientificCaption:

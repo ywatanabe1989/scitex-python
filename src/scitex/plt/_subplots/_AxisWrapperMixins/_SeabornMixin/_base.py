@@ -8,10 +8,11 @@
 import os
 from functools import wraps
 
-import scitex
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
+import scitex
 
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
@@ -19,6 +20,7 @@ __DIR__ = os.path.dirname(__FILE__)
 
 def sns_copy_doc(func):
     """Decorator to copy docstring from seaborn function."""
+
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         return func(self, *args, **kwargs)
@@ -46,6 +48,7 @@ class SeabornBaseMixin:
                 )
 
             import warnings
+
             from scitex import logging
 
             mpl_logger = logging.getLogger("matplotlib")
@@ -73,6 +76,7 @@ class SeabornBaseMixin:
             # Post-processing for histplot with kde=True
             if sns_method_name == "histplot" and kwargs.get("kde", False):
                 from scitex.plt.utils import mm_to_pt
+
                 kde_lw = mm_to_pt(0.2)
                 for line in self._axis_mpl.get_lines():
                     line.set_linewidth(kde_lw)

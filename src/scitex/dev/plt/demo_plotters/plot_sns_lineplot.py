@@ -20,10 +20,12 @@ def plot_sns_lineplot(plt, rng, ax=None):
 
     n = 100
     times = np.tile(np.arange(20), 30)
-    groups = np.repeat(['A', 'B'], 300)
-    values = np.where(groups == 'A', np.sin(times * 0.3), np.cos(times * 0.3)) + rng.normal(0, 0.3, 600)
-    df = pd.DataFrame({'time': times, 'value': values, 'group': groups})
-    ax.sns_lineplot(data=df, x='time', y='value', hue='group')
+    groups = np.repeat(["A", "B"], 300)
+    values = np.where(
+        groups == "A", np.sin(times * 0.3), np.cos(times * 0.3)
+    ) + rng.normal(0, 0.3, 600)
+    df = pd.DataFrame({"time": times, "value": values, "group": groups})
+    ax.sns_lineplot(data=df, x="time", y="value", hue="group")
     ax.set_xyt("X", "Y", "sns_lineplot")
     return fig, ax
 

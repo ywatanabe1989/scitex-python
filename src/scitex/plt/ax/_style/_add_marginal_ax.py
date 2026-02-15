@@ -11,6 +11,7 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import matplotlib
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 from ....plt.utils import assert_valid_axis
 
 

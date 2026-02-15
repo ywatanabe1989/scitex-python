@@ -30,6 +30,7 @@ class AdjustmentMixin(LabelsMixin, MetadataMixin, VisualAdjustmentMixin):
     - MetadataMixin: Axis labels, titles, and scientific metadata
     - VisualAdjustmentMixin: Ticks, spines, extend, shift
     """
+
     pass
 
 

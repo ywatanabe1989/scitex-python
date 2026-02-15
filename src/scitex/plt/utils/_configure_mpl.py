@@ -4,14 +4,12 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/utils/_configure_mpl.py
 
 
-from typing import Any
-from typing import Dict
-from typing import Optional
-from typing import Tuple
-
 import logging
+from typing import Any, Dict, Optional, Tuple
+
 import matplotlib.pyplot as plt
 import numpy as np
+
 import scitex
 from scitex.dict import DotDict
 
@@ -256,8 +254,9 @@ def configure_mpl(
     else:
         # Use sans-serif fonts without LaTeX
         # Try to enable Arial explicitly
-        import matplotlib.font_manager as fm
         import os
+
+        import matplotlib.font_manager as fm
 
         # Try to detect and register Arial fonts
         arial_enabled = False
@@ -346,7 +345,9 @@ def configure_mpl(
     plt.rcParams.update(mpl_config)
 
     if verbose:
-        colors_str = "\n".join(f"  {color_str}: {rgba}" for color_str, rgba in RGBA.items())
+        colors_str = "\n".join(
+            f"  {color_str}: {rgba}" for color_str, rgba in RGBA.items()
+        )
         config_msg = (
             f"\n{'-' * 40}\n"
             f"Matplotlib has been configured as follows:\n\n"
