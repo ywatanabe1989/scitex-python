@@ -1,0 +1,248 @@
+{
+  "container:upper_row": {
+    "id": 1,
+    "type": "container",
+    "rgb": [
+      255,
+      0,
+      0
+    ],
+    "title": null
+  },
+  "container:analysis_grp": {
+    "id": 2,
+    "type": "container",
+    "rgb": [
+      0,
+      200,
+      0
+    ],
+    "title": "Analysis & Visualization"
+  },
+  "container:main_grp": {
+    "id": 3,
+    "type": "container",
+    "rgb": [
+      0,
+      0,
+      255
+    ],
+    "title": null
+  },
+  "container:source_col": {
+    "id": 4,
+    "type": "container",
+    "rgb": [
+      255,
+      200,
+      0
+    ],
+    "title": null
+  },
+  "container:paper_col": {
+    "id": 5,
+    "type": "container",
+    "rgb": [
+      255,
+      0,
+      200
+    ],
+    "title": null
+  },
+  "container:main_row": {
+    "id": 6,
+    "type": "container",
+    "rgb": [
+      0,
+      200,
+      200
+    ],
+    "title": null
+  },
+  "box:scripts": {
+    "id": 7,
+    "type": "box",
+    "rgb": [
+      200,
+      100,
+      0
+    ],
+    "title": "Python Script"
+  },
+  "box:linter": {
+    "id": 8,
+    "type": "box",
+    "rgb": [
+      100,
+      0,
+      200
+    ],
+    "title": "Automatic translation"
+  },
+  "box:source": {
+    "id": 9,
+    "type": "box",
+    "rgb": [
+      0,
+      100,
+      50
+    ],
+    "title": "Source Data"
+  },
+  "box:core": {
+    "id": 10,
+    "type": "box",
+    "rgb": [
+      200,
+      0,
+      100
+    ],
+    "title": "Core"
+  },
+  "box:domain": {
+    "id": 11,
+    "type": "box",
+    "rgb": [
+      100,
+      200,
+      0
+    ],
+    "title": "Domain-specific"
+  },
+  "box:writer": {
+    "id": 12,
+    "type": "box",
+    "rgb": [
+      0,
+      100,
+      200
+    ],
+    "title": "Writer"
+  },
+  "box:scholar": {
+    "id": 13,
+    "type": "box",
+    "rgb": [
+      22,
+      229,
+      125
+    ],
+    "title": "Scholar"
+  },
+  "box:spacer": {
+    "id": 14,
+    "type": "box",
+    "rgb": [
+      229,
+      65,
+      22
+    ],
+    "title": ""
+  },
+  "box:source_pad": {
+    "id": 15,
+    "type": "box",
+    "rgb": [
+      22,
+      40,
+      229
+    ],
+    "title": ""
+  },
+  "box:paper_pad": {
+    "id": 16,
+    "type": "box",
+    "rgb": [
+      100,
+      229,
+      22
+    ],
+    "title": ""
+  },
+  "box:paper": {
+    "id": 17,
+    "type": "box",
+    "rgb": [
+      229,
+      22,
+      161
+    ],
+    "title": "Manuscript"
+  },
+  "box:cloud": {
+    "id": 18,
+    "type": "box",
+    "rgb": [
+      22,
+      221,
+      229
+    ],
+    "title": "Cloud"
+  },
+  "arrow:scripts->linter": {
+    "id": 19,
+    "type": "arrow",
+    "rgb": [
+      229,
+      177,
+      22
+    ],
+    "source": "scripts",
+    "target": "linter"
+  },
+  "arrow:linter->core": {
+    "id": 20,
+    "type": "arrow",
+    "rgb": [
+      117,
+      22,
+      229
+    ],
+    "source": "linter",
+    "target": "core"
+  },
+  "arrow:source->core": {
+    "id": 21,
+    "type": "arrow",
+    "rgb": [
+      22,
+      229,
+      56
+    ],
+    "source": "source",
+    "target": "core"
+  },
+  "arrow:domain->writer": {
+    "id": 22,
+    "type": "arrow",
+    "rgb": [
+      229,
+      22,
+      49
+    ],
+    "source": "domain",
+    "target": "writer"
+  },
+  "arrow:scholar->writer": {
+    "id": 23,
+    "type": "arrow",
+    "rgb": [
+      22,
+      109,
+      229
+    ],
+    "source": "scholar",
+    "target": "writer"
+  },
+  "arrow:writer->paper": {
+    "id": 24,
+    "type": "arrow",
+    "rgb": [
+      169,
+      229,
+      22
+    ],
+    "source": "writer",
+    "target": "paper"
+  }
+}

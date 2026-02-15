@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-01-30 11:36:29
+!-- Timestamp: 2026-02-16 02:54:23
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-python/README.md
 !-- --- -->
@@ -28,6 +28,11 @@
 Empowers both human researchers and AI agents. Each module works independently and adapts to various academic workflows, handling primary and secondary research with real or simulated data.
 
 > **SciTeX is fully modular; every module is opt-in and exposed only when operational.**
+
+
+<p align="center">
+    <img src="scripts/assets/workflow_out/workflow.png" alt="SciTeX Ecosystem" width="800">
+</p>
 
 ## 🎬 Demo
 

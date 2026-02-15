@@ -1,0 +1,407 @@
+figrecipe: '1.0'
+type: diagram
+created: '2026-02-16T02:51:32.021790'
+dpi: 200
+diagram:
+  title: SciTeX Ecosystem
+  width_mm: 704.8
+  height_mm: 282.0
+  xlim:
+  - -267.3999999999999
+  - 437.40000000000003
+  ylim:
+  - 2.0
+  - 284.0
+  boxes:
+  - id: scripts
+    title: Python Script
+    subtitle: null
+    content: []
+    emphasis: muted
+    shape: document
+    fill_color: '#EFEFEF'
+    border_color: '#808080'
+    title_color: '#595959'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: linter
+    title: Automatic translation
+    subtitle: null
+    content:
+    - scitex.linter
+    - Smooth Migration to SciTeX
+    emphasis: normal
+    shape: rounded
+    fill_color: '#E6A01419'
+    border_color: '#E6A014'
+    title_color: '#4C4C4C'
+    padding_mm: 8
+    margin_mm: 0.0
+  - id: source
+    title: Source Data
+    subtitle: null
+    content: []
+    emphasis: normal
+    shape: cylinder
+    fill_color: '#EBEBEB'
+    border_color: '#808080'
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: core
+    title: Core
+    subtitle: null
+    content:
+    - scitex.io
+    - scitex.config
+    - scitex.logger
+    - scitex.session
+    - scitex.template
+    - scitex.repro
+    - scitex.rng
+    emphasis: normal
+    shape: rounded
+    fill_color: '#0080C019'
+    border_color: '#0080C0'
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: domain
+    title: Domain-specific
+    subtitle: null
+    content:
+    - scitex.plt
+    - scitex.stats
+    - scitex.dsp
+    - scitex.ml
+    - scitex.nn
+    emphasis: normal
+    shape: rounded
+    fill_color: '#14B41419'
+    border_color: '#14B414'
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: writer
+    title: Writer
+    subtitle: LaTeX Compilation
+    content:
+    - scitex.writer
+    emphasis: normal
+    shape: rounded
+    fill_color: '#FF463219'
+    border_color: '#FF4632'
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: scholar
+    title: Scholar
+    subtitle: Literature management
+    content:
+    - scitex.scholar
+    - CrossRef Local Database
+    - OpenAlex Local Database
+    emphasis: normal
+    shape: rounded
+    fill_color: '#C832FF19'
+    border_color: '#C832FF'
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: spacer
+    title: ''
+    subtitle: null
+    content: []
+    emphasis: normal
+    shape: rounded
+    fill_color: none
+    border_color: none
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: source_pad
+    title: ''
+    subtitle: null
+    content: []
+    emphasis: normal
+    shape: rounded
+    fill_color: none
+    border_color: none
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: paper_pad
+    title: ''
+    subtitle: null
+    content: []
+    emphasis: normal
+    shape: rounded
+    fill_color: none
+    border_color: none
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: paper
+    title: Manuscript
+    subtitle: null
+    content:
+    - Manuscript
+    - Supplementary materials
+    - Revision Letter
+    emphasis: muted
+    shape: document
+    fill_color: '#EFEFEF'
+    border_color: '#808080'
+    title_color: '#595959'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: cloud
+    title: Cloud
+    subtitle: Web Interface and collaboration
+    content:
+    - scitex.cloud
+    - https://scitex.ai
+    - self-host
+    emphasis: muted
+    shape: stadium
+    fill_color: '#EFEFEF'
+    border_color: '#808080'
+    title_color: '#595959'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  containers:
+  - id: upper_row
+    title: null
+    children:
+    - scripts
+    - linter
+    - spacer
+    - cloud
+    emphasis: muted
+    fill_color: none
+    border_color: none
+    direction: row
+    gap_mm: 8.0
+    padding_mm: 8.0
+  - id: analysis_grp
+    title: Analysis & Visualization
+    children:
+    - core
+    - domain
+    emphasis: muted
+    fill_color: '#EFEFEF'
+    border_color: '#808080'
+    direction: row
+    gap_mm: 8.0
+    padding_mm: 8.0
+  - id: main_grp
+    title: null
+    children:
+    - analysis_grp
+    - scholar
+    - writer
+    emphasis: muted
+    fill_color: '#EFEFEF'
+    border_color: '#808080'
+    direction: column
+    gap_mm: 8.0
+    padding_mm: 8.0
+  - id: source_col
+    title: null
+    children:
+    - source
+    - source_pad
+    emphasis: muted
+    fill_color: none
+    border_color: none
+    direction: column
+    gap_mm: 8.0
+    padding_mm: 8.0
+  - id: paper_col
+    title: null
+    children:
+    - paper_pad
+    - paper
+    emphasis: muted
+    fill_color: none
+    border_color: none
+    direction: column
+    gap_mm: 8.0
+    padding_mm: 8.0
+  - id: main_row
+    title: null
+    children:
+    - source_col
+    - main_grp
+    - paper_col
+    emphasis: muted
+    fill_color: none
+    border_color: none
+    direction: row
+    gap_mm: 8.0
+    padding_mm: 8.0
+  arrows:
+  - source: scripts
+    target: linter
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0.0
+    linewidth_mm: 0.5
+  - source: linter
+    target: core
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0.3
+    linewidth_mm: 0.5
+  - source: source
+    target: core
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0
+    linewidth_mm: 0.5
+  - source: domain
+    target: writer
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: -0.5
+    linewidth_mm: 0.5
+  - source: scholar
+    target: writer
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0
+    linewidth_mm: 0.5
+  - source: writer
+    target: paper
+    source_anchor: auto
+    target_anchor: lower-left
+    label: null
+    style: solid
+    color: null
+    curve: 0.3
+    linewidth_mm: 0.5
+  positions:
+    scripts:
+      x_mm: -6.600000000000005
+      y_mm: 238.0
+      width_mm: 38.6
+      height_mm: 36.0
+    linter:
+      x_mm: !!python/object/apply:numpy._core.multiarray.scalar
+      - &id001 !!python/object/apply:numpy.dtype
+        args:
+        - f8
+        - false
+        - true
+        state: !!python/tuple
+        - 3
+        - <
+        - null
+        - null
+        - null
+        - -1
+        - -1
+        - 0
+      - !!binary |
+        mZmZmZlZSkA=
+      y_mm: !!python/object/apply:numpy._core.multiarray.scalar
+      - *id001
+      - !!binary |
+        AAAAAADAbUA=
+      width_mm: 50
+      height_mm: 36.0
+    source:
+      x_mm: -24.299999999999976
+      y_mm: 166.0
+      width_mm: 34.2
+      height_mm: 40
+    core:
+      x_mm: 46.300000000000026
+      y_mm: 144.5
+      width_mm: 43.0
+      height_mm: 51.0
+    domain:
+      x_mm: 97.30000000000003
+      y_mm: 144.5
+      width_mm: 43.0
+      height_mm: 51.0
+    writer:
+      x_mm: 71.80000000000003
+      y_mm: 39.0
+      width_mm: 110.0
+      height_mm: 26.0
+    scholar:
+      x_mm: 71.80000000000003
+      y_mm: 85.0
+      width_mm: 110.0
+      height_mm: 36.0
+    spacer:
+      x_mm: 97.69999999999999
+      y_mm: 238.0
+      width_mm: 24.0
+      height_mm: 36.0
+    source_pad:
+      x_mm: -24.299999999999976
+      y_mm: 129.0
+      width_mm: 34.2
+      height_mm: 18.0
+    paper_pad:
+      x_mm: 181.10000000000002
+      y_mm: 177.0
+      width_mm: 60.6
+      height_mm: 18.0
+    paper:
+      x_mm: 181.10000000000002
+      y_mm: 140.0
+      width_mm: 60.6
+      height_mm: 40
+    cloud:
+      x_mm: 156.79999999999998
+      y_mm: 238.0
+      width_mm: 78.2
+      height_mm: 36.0
+    upper_row:
+      x_mm: 85.0
+      y_mm: 238.0
+      width_mm: 237.8
+      height_mm: 52.0
+    analysis_grp:
+      x_mm: 71.80000000000003
+      y_mm: 148.5
+      width_mm: 110.0
+      height_mm: 75.0
+    main_grp:
+      x_mm: 71.80000000000003
+      y_mm: 106.0
+      width_mm: 126.0
+      height_mm: 176.0
+    source_col:
+      x_mm: -24.299999999999976
+      y_mm: 106.0
+      width_mm: 50.2
+      height_mm: 176.0
+    paper_col:
+      x_mm: 181.10000000000002
+      y_mm: 106.0
+      width_mm: 76.6
+      height_mm: 176.0
+    main_row:
+      x_mm: 85.0
+      y_mm: 106.0
+      width_mm: 284.79999999999995
+      height_mm: 192.0

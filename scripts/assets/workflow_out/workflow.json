@@ -1,0 +1,1744 @@
+{
+    "scitex_schema": "scitex.plt.figure.editable",
+    "scitex_schema_version": "0.3.0",
+    "meta": {
+        "title": "",
+        "description": "",
+        "exported_at": "2026-02-16T02:51:25.573610"
+    },
+    "figure": {
+        "size_px": [
+            2961,
+            3064
+        ],
+        "dpi": 100.0,
+        "figsize_inches": [
+            27.748031496062993,
+            11.10236220472441
+        ]
+    },
+    "axes": {
+        "ax_00": {
+            "bbox_px": {
+                "x0": 26,
+                "y0": 10,
+                "x1": 2748,
+                "y1": 1099
+            },
+            "position": [
+                0.009457446808510826,
+                0.009457446808510683,
+                0.9810851063829784,
+                0.9810851063829786
+            ],
+            "xlim": [
+                -267.3999999999999,
+                437.40000000000003
+            ],
+            "ylim": [
+                2.0,
+                284.0
+            ]
+        }
+    },
+    "elements": {
+        "ax_00_line_00": {
+            "id": "ax_00_line_00",
+            "axes_id": "ax_00",
+            "element_type": "line",
+            "label": "line_0",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 873,
+                    "y0": 398,
+                    "x1": 873,
+                    "y1": 513
+                },
+                "path_simplified": [
+                    [
+                        872.8,
+                        513.1
+                    ],
+                    [
+                        872.8,
+                        398.3
+                    ]
+                ],
+                "path": null
+            },
+            "style": {
+                "color": "#808080",
+                "linewidth": 2.0,
+                "linestyle": "-",
+                "alpha": null,
+                "marker": "None",
+                "markersize": 6.0
+            },
+            "editable_styles": [
+                "color",
+                "linewidth",
+                "linestyle",
+                "alpha",
+                "marker"
+            ],
+            "zorder": 2.1,
+            "visible": true
+        },
+        "ax_00_line_01": {
+            "id": "ax_00_line_01",
+            "axes_id": "ax_00",
+            "element_type": "line",
+            "label": "line_1",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1005,
+                    "y0": 398,
+                    "x1": 1005,
+                    "y1": 513
+                },
+                "path_simplified": [
+                    [
+                        1004.9,
+                        513.1
+                    ],
+                    [
+                        1004.9,
+                        398.3
+                    ]
+                ],
+                "path": null
+            },
+            "style": {
+                "color": "#808080",
+                "linewidth": 2.0,
+                "linestyle": "-",
+                "alpha": null,
+                "marker": "None",
+                "markersize": 6.0
+            },
+            "editable_styles": [
+                "color",
+                "linewidth",
+                "linestyle",
+                "alpha",
+                "marker"
+            ],
+            "zorder": 2.1,
+            "visible": true
+        },
+        "ax_00_bars": {
+            "id": "ax_00_bars",
+            "axes_id": "ax_00",
+            "element_type": "bar",
+            "label": "bars",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 872,
+                    "y0": 398,
+                    "x1": 1004,
+                    "y1": 513
+                },
+                "rectangles": [
+                    {
+                        "x": 872.8,
+                        "y": 398.3,
+                        "width": 132.1,
+                        "height": 114.8
+                    }
+                ]
+            },
+            "style": {
+                "facecolor": [
+                    0.9215686274509803,
+                    0.9215686274509803,
+                    0.9215686274509803,
+                    1.0
+                ],
+                "edgecolor": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "linewidth": 1.0,
+                "alpha": null
+            },
+            "editable_styles": [
+                "facecolor",
+                "edgecolor",
+                "alpha",
+                "linewidth"
+            ],
+            "zorder": 2,
+            "visible": true
+        },
+        "ax_00_text_00": {
+            "id": "ax_00_text_00",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Analysis & Visualiza",
+            "text": "Analysis & Visualization",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1222,
+                    "y0": 385,
+                    "x1": 1398,
+                    "y1": 399
+                },
+                "anchor": {
+                    "x": 1310.0,
+                    "y": 384.2
+                }
+            },
+            "style": {
+                "fontsize": 11.0,
+                "color": "#595959",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "Arial"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "top",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_01": {
+            "id": "ax_00_text_01",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Python Script",
+            "text": "Python Script",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 958,
+                    "y0": 171,
+                    "x1": 1058,
+                    "y1": 185
+                },
+                "anchor": {
+                    "x": 1007.2,
+                    "y": 177.6
+                }
+            },
+            "style": {
+                "fontsize": 11.0,
+                "color": "#595959",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_02": {
+            "id": "ax_00_text_02",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Automatic translatio",
+            "text": "Automatic translation",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1158,
+                    "y0": 149,
+                    "x1": 1315,
+                    "y1": 163
+                },
+                "anchor": {
+                    "x": 1236.3,
+                    "y": 155.8
+                }
+            },
+            "style": {
+                "fontsize": 11.0,
+                "color": "#4C4C4C",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_03": {
+            "id": "ax_00_text_03",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "scitex.linter",
+            "text": "scitex.linter",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1209,
+                    "y0": 173,
+                    "x1": 1265,
+                    "y1": 183
+                },
+                "anchor": {
+                    "x": 1236.3,
+                    "y": 177.6
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_04": {
+            "id": "ax_00_text_04",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Smooth Migration to ",
+            "text": "Smooth Migration to SciTeX",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1168,
+                    "y0": 195,
+                    "x1": 1305,
+                    "y1": 205
+                },
+                "anchor": {
+                    "x": 1236.3,
+                    "y": 199.5
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_05": {
+            "id": "ax_00_text_05",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Source Data",
+            "text": "Source Data",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 895,
+                    "y0": 449,
+                    "x1": 984,
+                    "y1": 463
+                },
+                "anchor": {
+                    "x": 938.9,
+                    "y": 455.7
+                }
+            },
+            "style": {
+                "fontsize": 11.0,
+                "color": "#4C4C4C",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_06": {
+            "id": "ax_00_text_06",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Core",
+            "text": "Core",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1194,
+                    "y0": 473,
+                    "x1": 1229,
+                    "y1": 487
+                },
+                "anchor": {
+                    "x": 1211.5,
+                    "y": 479.8
+                }
+            },
+            "style": {
+                "fontsize": 11.0,
+                "color": "#4C4C4C",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_07": {
+            "id": "ax_00_text_07",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.io",
+            "text": "\u00b7 scitex.io",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1188,
+                    "y0": 492,
+                    "x1": 1235,
+                    "y1": 502
+                },
+                "anchor": {
+                    "x": 1211.5,
+                    "y": 496.7
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_08": {
+            "id": "ax_00_text_08",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.config",
+            "text": "\u00b7 scitex.config",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1178,
+                    "y0": 509,
+                    "x1": 1246,
+                    "y1": 519
+                },
+                "anchor": {
+                    "x": 1211.5,
+                    "y": 513.5
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_09": {
+            "id": "ax_00_text_09",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.logger",
+            "text": "\u00b7 scitex.logger",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1177,
+                    "y0": 526,
+                    "x1": 1247,
+                    "y1": 536
+                },
+                "anchor": {
+                    "x": 1211.5,
+                    "y": 530.3
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_10": {
+            "id": "ax_00_text_10",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.session",
+            "text": "\u00b7 scitex.session",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1174,
+                    "y0": 543,
+                    "x1": 1250,
+                    "y1": 553
+                },
+                "anchor": {
+                    "x": 1211.5,
+                    "y": 547.1
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_11": {
+            "id": "ax_00_text_11",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.template",
+            "text": "\u00b7 scitex.template",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1171,
+                    "y0": 560,
+                    "x1": 1252,
+                    "y1": 570
+                },
+                "anchor": {
+                    "x": 1211.5,
+                    "y": 563.9
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_12": {
+            "id": "ax_00_text_12",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.repro",
+            "text": "\u00b7 scitex.repro",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1180,
+                    "y0": 576,
+                    "x1": 1244,
+                    "y1": 586
+                },
+                "anchor": {
+                    "x": 1211.5,
+                    "y": 580.8
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_13": {
+            "id": "ax_00_text_13",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.rng",
+            "text": "\u00b7 scitex.rng",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1185,
+                    "y0": 593,
+                    "x1": 1239,
+                    "y1": 603
+                },
+                "anchor": {
+                    "x": 1211.5,
+                    "y": 597.6
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_14": {
+            "id": "ax_00_text_14",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Domain-specific",
+            "text": "Domain-specific",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1350,
+                    "y0": 476,
+                    "x1": 1468,
+                    "y1": 490
+                },
+                "anchor": {
+                    "x": 1408.5,
+                    "y": 482.6
+                }
+            },
+            "style": {
+                "fontsize": 11.0,
+                "color": "#4C4C4C",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_15": {
+            "id": "ax_00_text_15",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.plt",
+            "text": "\u00b7 scitex.plt",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1384,
+                    "y0": 501,
+                    "x1": 1434,
+                    "y1": 511
+                },
+                "anchor": {
+                    "x": 1408.5,
+                    "y": 505.1
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_16": {
+            "id": "ax_00_text_16",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.stats",
+            "text": "\u00b7 scitex.stats",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1378,
+                    "y0": 523,
+                    "x1": 1440,
+                    "y1": 533
+                },
+                "anchor": {
+                    "x": 1408.5,
+                    "y": 527.5
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_17": {
+            "id": "ax_00_text_17",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.dsp",
+            "text": "\u00b7 scitex.dsp",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1381,
+                    "y0": 546,
+                    "x1": 1437,
+                    "y1": 556
+                },
+                "anchor": {
+                    "x": 1408.5,
+                    "y": 549.9
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_18": {
+            "id": "ax_00_text_18",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.ml",
+            "text": "\u00b7 scitex.ml",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1384,
+                    "y0": 568,
+                    "x1": 1434,
+                    "y1": 578
+                },
+                "anchor": {
+                    "x": 1408.5,
+                    "y": 572.4
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_19": {
+            "id": "ax_00_text_19",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.nn",
+            "text": "\u00b7 scitex.nn",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1384,
+                    "y0": 590,
+                    "x1": 1434,
+                    "y1": 600
+                },
+                "anchor": {
+                    "x": 1408.5,
+                    "y": 594.8
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_20": {
+            "id": "ax_00_text_20",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Writer",
+            "text": "Writer",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1288,
+                    "y0": 922,
+                    "x1": 1332,
+                    "y1": 936
+                },
+                "anchor": {
+                    "x": 1310.0,
+                    "y": 928.6
+                }
+            },
+            "style": {
+                "fontsize": 11.0,
+                "color": "#4C4C4C",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_21": {
+            "id": "ax_00_text_21",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "LaTeX Compilation",
+            "text": "LaTeX Compilation",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1258,
+                    "y0": 941,
+                    "x1": 1363,
+                    "y1": 953
+                },
+                "anchor": {
+                    "x": 1310.0,
+                    "y": 946.1
+                }
+            },
+            "style": {
+                "fontsize": 9.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_22": {
+            "id": "ax_00_text_22",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.writer",
+            "text": "\u00b7 scitex.writer",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1278,
+                    "y0": 959,
+                    "x1": 1343,
+                    "y1": 969
+                },
+                "anchor": {
+                    "x": 1310.0,
+                    "y": 963.6
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_23": {
+            "id": "ax_00_text_23",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Scholar",
+            "text": "Scholar",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1282,
+                    "y0": 728,
+                    "x1": 1339,
+                    "y1": 742
+                },
+                "anchor": {
+                    "x": 1310.0,
+                    "y": 734.3
+                }
+            },
+            "style": {
+                "fontsize": 11.0,
+                "color": "#4C4C4C",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_24": {
+            "id": "ax_00_text_24",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Literature managemen",
+            "text": "Literature management",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1245,
+                    "y0": 746,
+                    "x1": 1375,
+                    "y1": 758
+                },
+                "anchor": {
+                    "x": 1310.0,
+                    "y": 751.4
+                }
+            },
+            "style": {
+                "fontsize": 9.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_25": {
+            "id": "ax_00_text_25",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.scholar",
+            "text": "\u00b7 scitex.scholar",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1273,
+                    "y0": 764,
+                    "x1": 1347,
+                    "y1": 774
+                },
+                "anchor": {
+                    "x": 1310.0,
+                    "y": 768.5
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_26": {
+            "id": "ax_00_text_26",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 CrossRef Local Dat",
+            "text": "\u00b7 CrossRef Local Database",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1244,
+                    "y0": 781,
+                    "x1": 1377,
+                    "y1": 791
+                },
+                "anchor": {
+                    "x": 1310.0,
+                    "y": 785.5
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_27": {
+            "id": "ax_00_text_27",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 OpenAlex Local Dat",
+            "text": "\u00b7 OpenAlex Local Database",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1242,
+                    "y0": 798,
+                    "x1": 1378,
+                    "y1": 808
+                },
+                "anchor": {
+                    "x": 1310.0,
+                    "y": 802.6
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#4C4C4C",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_31": {
+            "id": "ax_00_text_31",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Manuscript",
+            "text": "Manuscript",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1692,
+                    "y0": 515,
+                    "x1": 1773,
+                    "y1": 529
+                },
+                "anchor": {
+                    "x": 1732.1,
+                    "y": 521.3
+                }
+            },
+            "style": {
+                "fontsize": 11.0,
+                "color": "#595959",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_32": {
+            "id": "ax_00_text_32",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 Manuscript",
+            "text": "\u00b7 Manuscript",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1702,
+                    "y0": 540,
+                    "x1": 1763,
+                    "y1": 550
+                },
+                "anchor": {
+                    "x": 1732.1,
+                    "y": 544.5
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#595959",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_33": {
+            "id": "ax_00_text_33",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 Supplementary mate",
+            "text": "\u00b7 Supplementary materials",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1668,
+                    "y0": 563,
+                    "x1": 1798,
+                    "y1": 573
+                },
+                "anchor": {
+                    "x": 1732.1,
+                    "y": 567.7
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#595959",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_34": {
+            "id": "ax_00_text_34",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 Revision Letter",
+            "text": "\u00b7 Revision Letter",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1692,
+                    "y0": 586,
+                    "x1": 1773,
+                    "y1": 596
+                },
+                "anchor": {
+                    "x": 1732.1,
+                    "y": 590.8
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#595959",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_35": {
+            "id": "ax_00_text_35",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Cloud",
+            "text": "Cloud",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1617,
+                    "y0": 137,
+                    "x1": 1660,
+                    "y1": 151
+                },
+                "anchor": {
+                    "x": 1638.3,
+                    "y": 143.5
+                }
+            },
+            "style": {
+                "fontsize": 11.0,
+                "color": "#595959",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_36": {
+            "id": "ax_00_text_36",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "Web Interface and co",
+            "text": "Web Interface and collaboration",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1550,
+                    "y0": 155,
+                    "x1": 1727,
+                    "y1": 167
+                },
+                "anchor": {
+                    "x": 1638.3,
+                    "y": 160.6
+                }
+            },
+            "style": {
+                "fontsize": 9.0,
+                "color": "#595959",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_37": {
+            "id": "ax_00_text_37",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 scitex.cloud",
+            "text": "\u00b7 scitex.cloud",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1606,
+                    "y0": 173,
+                    "x1": 1671,
+                    "y1": 183
+                },
+                "anchor": {
+                    "x": 1638.3,
+                    "y": 177.6
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#595959",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_38": {
+            "id": "ax_00_text_38",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 https://scitex.ai",
+            "text": "\u00b7 https://scitex.ai",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1598,
+                    "y0": 190,
+                    "x1": 1679,
+                    "y1": 200
+                },
+                "anchor": {
+                    "x": 1638.3,
+                    "y": 194.7
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#595959",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_39": {
+            "id": "ax_00_text_39",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "\u00b7 self-host",
+            "text": "\u00b7 self-host",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1614,
+                    "y0": 207,
+                    "x1": 1663,
+                    "y1": 217
+                },
+                "anchor": {
+                    "x": 1638.3,
+                    "y": 211.8
+                }
+            },
+            "style": {
+                "fontsize": 8.0,
+                "color": "#595959",
+                "fontweight": "normal",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "sans-serif"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "center",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 7,
+            "visible": true
+        },
+        "ax_00_text_40": {
+            "id": "ax_00_text_40",
+            "axes_id": "ax_00",
+            "element_type": "text",
+            "label": "SciTeX Ecosystem",
+            "text": "SciTeX Ecosystem",
+            "geometry_px": {
+                "coord_space": "axes",
+                "bbox": {
+                    "x0": 1288,
+                    "y0": 20,
+                    "x1": 1435,
+                    "y1": 35
+                },
+                "anchor": {
+                    "x": 1361.0,
+                    "y": 19.3
+                }
+            },
+            "style": {
+                "fontsize": 12.0,
+                "color": "black",
+                "fontweight": "bold",
+                "fontstyle": "normal",
+                "fontfamily": [
+                    "Arial"
+                ],
+                "alpha": null,
+                "ha": "center",
+                "va": "top",
+                "rotation": 0.0
+            },
+            "editable_styles": [
+                "fontsize",
+                "color",
+                "fontweight",
+                "alpha"
+            ],
+            "zorder": 3,
+            "visible": true
+        }
+    },
+    "statistics": {},
+    "data": {},
+    "output": {
+        "format": "png",
+        "width_px": 2774,
+        "height_px": 1110
+    }
+}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# Timestamp: "2026-02-15 15:00:00 (ywatanabe)"
+# -*- coding: utf-8 -*-
+# Timestamp: "2026-02-16 02:49:17 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-python/scripts/assets/workflow.py
 
 
@@ -18,27 +19,53 @@ def main(
     rngg=stx.session.INJECTED,
     logger=stx.session.INJECTED,
 ):
-    d = Diagram(title="SciTeX\nPython Engine for Reproducible Research", gap_mm=10)
+    d = Diagram(title="SciTeX Ecosystem", gap_mm=10)
 
     # -- Input --
-    d.add_box("scripts", "Existing .py scripts", shape="stadium", emphasis="muted")
-    d.add_box("linter", "linter", emphasis="warning")
-    d.add_box("source", "Source Data", shape="stadium")
-    d.add_box("disk", "Disk", subtitle="Storage", shape="cylinder", emphasis="muted")
+    d.add_box("scripts", "Python Script", shape="document", emphasis="muted")
+    d.add_box(
+        "linter",
+        "Automatic translation",
+        content=["scitex.linter", "Smooth Migration to SciTeX"],
+        padding_mm=8,
+        fill_color="#E6A01419",
+        border_color="#E6A014",
+        width_mm=50,
+    )
+    d.add_box("source", "Source Data", shape="cylinder", height_mm=40)
 
-    # -- Analysis (consolidated with bullet content lists) --
+    # -- Analysis & Visualization (nested containers) --
+    # Core infrastructure
     d.add_box(
         "core",
         "Core",
-        content=["io", "config", "logger", "session", "template", "repro", "rng"],
-        emphasis="primary",
+        content=[
+            "scitex.io",
+            "scitex.config",
+            "scitex.logger",
+            "scitex.session",
+            "scitex.template",
+            "scitex.repro",
+            "scitex.rng",
+        ],
+        fill_color="#0080C019",
+        border_color="#0080C0",
         bullet="circle",
     )
+
+    # Domain-specific analysis
     d.add_box(
-        "tools",
-        "Tools",
-        content=["plt \u00b7 figrecipe", "stats", "dsp", "ml", "nn"],
-        emphasis="primary",
+        "domain",
+        "Domain-specific",
+        content=[
+            "scitex.plt",
+            "scitex.stats",
+            "scitex.dsp",
+            "scitex.ml",
+            "scitex.nn",
+        ],
+        fill_color="#14B41419",
+        border_color="#14B414",
         bullet="circle",
     )
 
@@ -46,110 +73,125 @@ def main(
     d.add_box(
         "writer",
         "Writer",
-        content=["LaTeX editor", "PDF preview", "version ctrl"],
-        emphasis="success",
+        subtitle="LaTeX Compilation",
+        content=["scitex.writer"],
+        fill_color="#FF463219",
+        border_color="#FF4632",
         bullet="circle",
     )
     d.add_box(
         "scholar",
         "Scholar",
-        content=["Literature \u00b7 BibTeX", "CrossRef DB", "OpenAlex DB"],
-        emphasis="success",
+        subtitle="Literature management",
+        content=[
+            "scitex.scholar",
+            "CrossRef Local Database",
+            "OpenAlex Local Database",
+        ],
+        fill_color="#C832FF19",
+        border_color="#C832FF",
         bullet="circle",
     )
 
+    # Spacers for layout alignment
+    d.add_box("spacer", "", fill_color="none", border_color="none")
+    d.add_box("source_pad", "", fill_color="none", border_color="none")
+    d.add_box("paper_pad", "", fill_color="none", border_color="none")
+
     # -- Output --
     d.add_box(
-        "paper", "Paper", subtitle="manuscript", shape="document", emphasis="success"
+        "paper",
+        "Manuscript",
+        content=["Manuscript", "Supplementary materials", "Revision Letter"],
+        bullet="circle",
+        shape="document",
+        emphasis="muted",
+        height_mm=40,
     )
-    d.add_box("cloud", "Cloud", subtitle="scitex.ai", shape="stadium", emphasis="muted")
-
-    # -- External --
-    d.add_box("user", "User")
     d.add_box(
-        "ai",
-        "AI Layer",
-        subtitle="Agent \u00b7 LLM \u00b7 MCP tools",
-        emphasis="warning",
+        "cloud",
+        "Cloud",
+        subtitle="Web Interface and collaboration",
+        content=["scitex.cloud", "https://scitex.ai", "self-host"],
+        bullet="circle",
+        shape="stadium",
+        emphasis="muted",
     )
 
     # -- Containers --
 
-    # Input (column)
+    # Upper row: scripts → linter → spacer → cloud
     d.add_container(
-        "input_grp",
-        title="Input",
-        children=["scripts", "linter", "source", "disk"],
-        direction="column",
-    )
-
-    # Analysis = Core + Tools side-by-side (row)
-    d.add_container(
-        "analysis_grp",
-        title="Analysis \u00b7 scitex-code",
-        children=["core", "tools"],
-        direction="row",
-    )
-
-    # Publication = Writer + Scholar stacked (column)
-    d.add_container(
-        "pub_grp",
-        title="Publication",
-        children=["writer", "scholar"],
-        direction="column",
-    )
-
-    # Output (column)
-    d.add_container(
-        "output_grp",
-        title="Output",
-        children=["paper", "cloud"],
-        direction="column",
-    )
-
-    # Top-level row (invisible — layout-only grouping)
-    d.add_container(
-        "main_row",
-        children=["input_grp", "analysis_grp", "pub_grp", "output_grp"],
+        "upper_row",
+        children=["scripts", "linter", "spacer", "cloud"],
         direction="row",
         fill_color="none",
         border_color="none",
     )
 
-    # AI container (row: User + AI side-by-side, below main)
+    # Inner container: Analysis & Visualization = Core + Domain-specific (row)
     d.add_container(
-        "ai_grp",
-        title="AI",
-        children=["user", "ai"],
+        "analysis_grp",
+        title="Analysis & Visualization",
+        title_loc="upper center",
+        children=["core", "domain"],
         direction="row",
+        # fill_color="#E8E8E8",
+    )
+
+    # FIX 2: Reversed column order — bottom-up data flow:
+    #   analysis_grp (bottom) → scholar (middle) → writer (top)
+    d.add_container(
+        "main_grp",
+        children=["analysis_grp", "scholar", "writer"],
+        direction="column",
+    )
+
+    # Source at top, paper at bottom (column wrappers with spacers)
+    d.add_container(
+        "source_col",
+        children=["source", "source_pad"],
+        direction="column",
+        fill_color="none",
+        border_color="none",
+    )
+    d.add_container(
+        "paper_col",
+        children=["paper_pad", "paper"],
+        direction="column",
+        fill_color="none",
+        border_color="none",
+    )
+
+    # Main row: source (top-aligned) → analysis → paper (bottom-aligned)
+    d.add_container(
+        "main_row",
+        children=["source_col", "main_grp", "paper_col"],
+        direction="row",
+        fill_color="none",
+        border_color="none",
     )
 
     # -- Arrows --
 
-    # Input flow
+    # Input stage
     d.add_arrow("scripts", "linter")
-    d.add_arrow("linter", "core", label="migrate")
-    d.add_arrow("source", "core")
+    # FIX 3: Reduced curve for linter→core to avoid wild arc
+    d.add_arrow("linter", "core", curve=0.3)
+    d.add_arrow("source", "core", curve=0)
 
-    # Analysis -> Publication
-    d.add_arrow("tools", "writer")
-    d.add_arrow("tools", "scholar")
+    # Analysis flow (bottom-up): core → domain → scholar → writer
+    d.add_arrow("domain", "writer", curve=-0.5)
+    d.add_arrow("scholar", "writer", curve=0)
 
-    # Publication -> Paper
-    d.add_arrow("writer", "paper")
+    # Output
+    # FIX 4: Reduced curve magnitude for writer→paper
+    d.add_arrow("writer", "paper", curve=0.3, target_anchor="lower-left")
 
-    # Clew verification (3 segmented reverse arrows)
-    d.add_arrow("paper", "writer", style="dashed", label="Clew")
-    d.add_arrow("writer", "core", style="dashed")
-    d.add_arrow("core", "source", style="dashed")
+    # # Cloud connection
+    # d.add_arrow("writer", "cloud", curve=-0.3)
 
-    # User -> AI -> modules
-    d.add_arrow("user", "ai", style="dashed")
-    d.add_arrow("ai", "core", style="dashed")
-    d.add_arrow("ai", "tools", style="dashed")
-    d.add_arrow("ai", "writer", style="dashed")
-
-    # Render (auto_fix handles arrow routing, sizing, etc.)
+    # Render
     fig, ax = d.render(auto_fix=True)
     stx.io.save(fig, CONFIG.SDIR_OUT / "workflow.png", dpi=300)
 
