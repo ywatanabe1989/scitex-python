@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-02-16 10:11:28
+!-- Timestamp: 2026-02-16 10:13:53
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-python/README.md
 !-- --- -->
@@ -33,7 +33,6 @@
 >3. The freedom to **modify** any module and share improvements with the community.
 >
 >AGPL-3.0 — because research infrastructure deserves the same freedoms as the software it runs on.
-
 
 <p align="center">
     <img src="scripts/assets/workflow_out/workflow.png" alt="SciTeX Ecosystem" width="800">
