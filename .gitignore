@@ -39,6 +39,10 @@ script_out/
 ## Exceptions
 !src/mngs/ml/ClassificationReporter/*
 !src/mngs/ml/ClassificationReporter/**/*.png
+!docs/sphinx/_static/gallery/**/*.png
+!docs/sphinx/_static/workflow.png
+!docs/assets/images/*.png
+!scripts/assets/workflow_out/*.png
 
 **RUNNING**
 **FINISHED**
