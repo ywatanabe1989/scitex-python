@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/plt/_subplots/_export_as_csv.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -12,9 +13,9 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import numpy as np
 import pandas as pd
-from scitex.pd import to_xyz
 
 from scitex import logging
+from scitex.pd import to_xyz
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +65,7 @@ def _warn_once(message, category=UserWarning):
         logger.warning(message)
 
 
-from ._export_as_csv_formatters import (
-    # Standard matplotlib formatters
+from ._export_as_csv_formatters import (  # Standard matplotlib formatters; Custom scitex formatters; stx_ aliases formatters; Seaborn formatters
     _format_annotate,
     _format_bar,
     _format_barh,
@@ -76,34 +76,22 @@ from ._export_as_csv_formatters import (
     _format_eventplot,
     _format_fill,
     _format_fill_between,
-    _format_stackplot,
-    _format_pcolormesh,
     _format_hexbin,
     _format_hist,
     _format_hist2d,
     _format_imshow,
     _format_imshow2d,
     _format_matshow,
+    _format_pcolormesh,
     _format_pie,
     _format_plot,
-    _format_quiver,
-    _format_scatter,
-    _format_stem,
-    _format_step,
-    _format_streamplot,
-    _format_text,
-    _format_violin,
-    _format_violinplot,
-    # Custom scitex formatters
     _format_plot_box,
     _format_plot_conf_mat,
-    _format_stx_contour,
     _format_plot_ecdf,
     _format_plot_fillv,
     _format_plot_heatmap,
     _format_plot_image,
     _format_plot_imshow,
-    _format_stx_imshow,
     _format_plot_joyplot,
     _format_plot_kde,
     _format_plot_line,
@@ -116,12 +104,8 @@ from ._export_as_csv_formatters import (
     _format_plot_scatter_hist,
     _format_plot_shaded_line,
     _format_plot_violin,
-    # stx_ aliases formatters
-    _format_stx_scatter,
-    _format_stx_bar,
-    _format_stx_barh,
-    _format_stx_errorbar,
-    # Seaborn formatters
+    _format_quiver,
+    _format_scatter,
     _format_sns_barplot,
     _format_sns_boxplot,
     _format_sns_heatmap,
@@ -134,6 +118,19 @@ from ._export_as_csv_formatters import (
     _format_sns_stripplot,
     _format_sns_swarmplot,
     _format_sns_violinplot,
+    _format_stackplot,
+    _format_stem,
+    _format_step,
+    _format_streamplot,
+    _format_stx_bar,
+    _format_stx_barh,
+    _format_stx_contour,
+    _format_stx_errorbar,
+    _format_stx_imshow,
+    _format_stx_scatter,
+    _format_text,
+    _format_violin,
+    _format_violinplot,
 )
 
 # Registry mapping method names to their formatter functions

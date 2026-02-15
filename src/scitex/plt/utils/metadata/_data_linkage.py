@@ -23,10 +23,10 @@ from ._csv_column_extraction import (
 from ._csv_hash import _compute_csv_hash, _compute_csv_hash_from_df
 from ._csv_verification import assert_csv_json_consistency, verify_csv_json_consistency
 from ._recipe_extraction import (
-    collect_recipe_metadata,
-    _extract_calls_from_history,
     _build_data_ref,
+    _extract_calls_from_history,
     _filter_style_kwargs,
+    collect_recipe_metadata,
 )
 
 __all__ = [
@@ -41,7 +41,9 @@ __all__ = [
 ]
 
 
-def _get_csv_columns_for_method(id_val, method, tracked_dict, kwargs, ax_index: int) -> list:
+def _get_csv_columns_for_method(
+    id_val, method, tracked_dict, kwargs, ax_index: int
+) -> list:
     """
     Get CSV column names for a specific plotting method (legacy function).
 
@@ -73,8 +75,9 @@ def _get_csv_columns_for_method(id_val, method, tracked_dict, kwargs, ax_index: 
     """
     # Import the actual formatters to ensure consistency
     try:
-        from scitex.plt._subplots._export_as_csv import format_record
         import pandas as pd
+
+        from scitex.plt._subplots._export_as_csv import format_record
 
         # Construct the record tuple as used in tracking
         record = (id_val, method, tracked_dict, kwargs)
@@ -112,7 +115,9 @@ def _get_csv_columns_for_method(id_val, method, tracked_dict, kwargs, ax_index: 
 
             from scitex.types import is_listed_X as scitex_types_is_listed_X
 
-            if isinstance(data, np.ndarray) or scitex_types_is_listed_X(data, [float, int]):
+            if isinstance(data, np.ndarray) or scitex_types_is_listed_X(
+                data, [float, int]
+            ):
                 # Single box
                 if labels and len(labels) == 1:
                     columns.append(f"{prefix}{id_val}_{labels[0]}")
@@ -211,6 +216,7 @@ def _get_csv_columns_for_method(id_val, method, tracked_dict, kwargs, ax_index: 
 # Demo code (from original module)
 if __name__ == "__main__":
     import numpy as np
+
     from ._figure_from_axes_mm import create_axes_with_size_mm
 
     print("=" * 60)
@@ -239,12 +245,14 @@ if __name__ == "__main__":
     # Collect metadata
     print("\n2. Collecting metadata...")
     from ._core import collect_figure_metadata
+
     metadata = collect_figure_metadata(fig, ax)
 
     # Display metadata
     print("\n3. Collected metadata:")
     print("-" * 60)
     import json
+
     print(json.dumps(metadata, indent=2))
     print("-" * 60)
 

@@ -4,7 +4,7 @@
 """Load figure JSON specifications."""
 
 from pathlib import Path
-from typing import Dict, Any, Union, Optional
+from typing import Any, Dict, Optional, Union
 
 
 def load_figure_json(

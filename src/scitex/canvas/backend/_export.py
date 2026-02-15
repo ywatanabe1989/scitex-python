@@ -4,7 +4,7 @@
 """Export figure models to image files via scitex.io."""
 
 from pathlib import Path
-from typing import Dict, Any, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from ._render import build_figure_from_json
 

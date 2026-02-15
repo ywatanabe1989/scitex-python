@@ -14,58 +14,58 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-13 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/schema/_plot.py
-# 
+#
 # """
 # Plot Schema - Canonical source of truth for plot specifications.
-# 
+#
 # This module defines the layered schema architecture for plots:
-# 
+#
 # 1. PlotSpec (spec.json) - Semantic definition: WHAT to plot
 #    - Traces with type and column mappings
 #    - Axes configuration (labels, limits)
 #    - Data source reference
-# 
+#
 # 2. PlotStyle (style.json) - Appearance: HOW it looks
 #    - Theme and colors
 #    - Line widths, marker sizes
 #    - Font settings
-# 
+#
 # 3. PlotGeometry (cache/geometry_px.json) - Rendered positions: WHERE (cache)
 #    - Pixel coordinates
 #    - Path data for hit testing
 #    - Bounding boxes in px
-# 
+#
 # 4. RenderManifest (cache/render_manifest.json) - Render metadata
 #    - DPI, figure size
 #    - Source hash for cache invalidation
-# 
+#
 # Design Principles:
 # - Canonical data uses ratio (0-1) for axes bbox, mm for panel size
 # - px data is ALWAYS derived/cached, never source of truth
 # - Traces are semantic (boxplot, heatmap) not decomposed (line segments)
 # """
-# 
+#
 # from dataclasses import dataclass, field, asdict
 # from typing import Dict, Any, List, Optional, Literal, Union
 # from datetime import datetime
 # import json
-# 
-# 
+#
+#
 # # Schema versions
 # PLOT_SPEC_VERSION = "1.0.0"
 # PLOT_STYLE_VERSION = "1.0.0"
 # PLOT_GEOMETRY_VERSION = "1.0.0"
-# 
+#
 # # DPI fallback for legacy data without explicit DPI
 # # Note: For dynamic DPI resolution, use scitex.plt.styles.get_default_dpi()
 # # This constant is only used as a fallback when parsing data without DPI info
 # DPI_FALLBACK = 300
-# 
-# 
+#
+#
 # # =============================================================================
 # # Type Aliases
 # # =============================================================================
-# 
+#
 # TraceType = Literal[
 #     # Line-based
 #     "line", "step", "stem",
@@ -86,20 +86,20 @@ if __name__ == "__main__":
 #     # Generic fallback
 #     "unknown",
 # ]
-# 
+#
 # CoordinateSpace = Literal["panel", "figure", "data"]
-# 
-# 
+#
+#
 # # =============================================================================
 # # Bounding Box Specs
 # # =============================================================================
-# 
-# 
+#
+#
 # @dataclass
 # class BboxRatio:
 #     """
 #     Bounding box in normalized coordinates (0-1).
-# 
+#
 #     This is the CANONICAL representation for axes position within a panel.
 #     """
 #     x0: float
@@ -107,15 +107,15 @@ if __name__ == "__main__":
 #     width: float
 #     height: float
 #     space: CoordinateSpace = "panel"
-# 
+#
 #     @property
 #     def x1(self) -> float:
 #         return self.x0 + self.width
-# 
+#
 #     @property
 #     def y1(self) -> float:
 #         return self.y0 + self.height
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "x0": self.x0,
@@ -124,7 +124,7 @@ if __name__ == "__main__":
 #             "height": self.height,
 #             "space": self.space,
 #         }
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "BboxRatio":
 #         # Handle both width/height and x1/y1 formats
@@ -135,28 +135,28 @@ if __name__ == "__main__":
 #             data.pop("x1", None)
 #             data.pop("y1", None)
 #         return cls(**{k: v for k, v in data.items() if k in ["x0", "y0", "width", "height", "space"]})
-# 
-# 
+#
+#
 # @dataclass
 # class BboxPx:
 #     """
 #     Bounding box in pixel coordinates.
-# 
+#
 #     This is DERIVED/CACHED, not canonical.
 #     """
 #     x0: float
 #     y0: float
 #     width: float
 #     height: float
-# 
+#
 #     @property
 #     def x1(self) -> float:
 #         return self.x0 + self.width
-# 
+#
 #     @property
 #     def y1(self) -> float:
 #         return self.y0 + self.height
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "x0": self.x0,
@@ -166,7 +166,7 @@ if __name__ == "__main__":
 #             "width": self.width,
 #             "height": self.height,
 #         }
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "BboxPx":
 #         if "width" not in data and "x1" in data:
@@ -179,20 +179,20 @@ if __name__ == "__main__":
 #             width=data.get("width", 0),
 #             height=data.get("height", 0),
 #         )
-# 
-# 
+#
+#
 # # =============================================================================
 # # Trace Specification (Semantic)
 # # =============================================================================
-# 
-# 
+#
+#
 # @dataclass
 # class TraceSpec:
 #     """
 #     Semantic specification for a single trace/artist.
-# 
+#
 #     This captures WHAT the user intended to plot, not how it was rendered.
-# 
+#
 #     Parameters
 #     ----------
 #     id : str
@@ -213,24 +213,24 @@ if __name__ == "__main__":
 #         Legend label
 #     group : str, optional
 #         Grouping identifier for related traces
-# 
+#
 #     Examples
 #     --------
 #     >>> # Line plot
 #     >>> TraceSpec(id="line-0", type="line", x_col="time", y_col="signal", label="EEG")
-# 
+#
 #     >>> # Boxplot with 4 groups
 #     >>> TraceSpec(id="box-0", type="boxplot", data_cols=["A", "B", "C", "D"])
-# 
+#
 #     >>> # Heatmap
 #     >>> TraceSpec(id="hmap-0", type="heatmap", x_col="x", y_col="y", value_col="z")
-# 
+#
 #     >>> # Quiver (vector field)
 #     >>> TraceSpec(id="quiv-0", type="quiver", x_col="x", y_col="y", u_col="u", v_col="v")
 #     """
 #     id: str
 #     type: TraceType
-# 
+#
 #     # Column mappings (usage depends on trace type)
 #     x_col: Optional[str] = None
 #     y_col: Optional[str] = None
@@ -238,15 +238,15 @@ if __name__ == "__main__":
 #     value_col: Optional[str] = None  # For heatmap, contour
 #     u_col: Optional[str] = None  # For quiver
 #     v_col: Optional[str] = None  # For quiver
-# 
+#
 #     # Metadata
 #     label: Optional[str] = None
 #     group: Optional[str] = None
 #     axes_index: int = 0  # Which axes this trace belongs to
-# 
+#
 #     # Additional type-specific parameters
 #     extra: Dict[str, Any] = field(default_factory=dict)
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "id": self.id,
@@ -273,23 +273,23 @@ if __name__ == "__main__":
 #         if self.extra:
 #             result["extra"] = self.extra
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "TraceSpec":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # # =============================================================================
 # # Axes Specification (Semantic)
 # # =============================================================================
-# 
-# 
+#
+#
 # @dataclass
 # class AxesLimits:
 #     """Axis limits specification."""
 #     x: Optional[List[float]] = None  # [xmin, xmax]
 #     y: Optional[List[float]] = None  # [ymin, ymax]
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {}
 #         if self.x:
@@ -297,19 +297,19 @@ if __name__ == "__main__":
 #         if self.y:
 #             result["y"] = self.y
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "AxesLimits":
 #         return cls(x=data.get("x"), y=data.get("y"))
-# 
-# 
+#
+#
 # @dataclass
 # class AxesLabels:
 #     """Axes labels specification."""
 #     xlabel: Optional[str] = None
 #     ylabel: Optional[str] = None
 #     title: Optional[str] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {}
 #         if self.xlabel:
@@ -319,17 +319,17 @@ if __name__ == "__main__":
 #         if self.title:
 #             result["title"] = self.title
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "AxesLabels":
 #         return cls(**{k: v for k, v in data.items() if k in ["xlabel", "ylabel", "title"]})
-# 
-# 
+#
+#
 # @dataclass
 # class AxesSpecItem:
 #     """
 #     Specification for a single axes within a plot.
-# 
+#
 #     Parameters
 #     ----------
 #     id : str
@@ -351,7 +351,7 @@ if __name__ == "__main__":
 #     limits: Optional[AxesLimits] = None
 #     role: str = "main"  # "main", "colorbar", "inset", "twinx", "twiny"
 #     linked_to: Optional[str] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "id": self.id,
@@ -364,7 +364,7 @@ if __name__ == "__main__":
 #         if self.linked_to:
 #             result["linked_to"] = self.linked_to
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "AxesSpecItem":
 #         data_copy = data.copy()
@@ -378,18 +378,18 @@ if __name__ == "__main__":
 #         if "limits" in data_copy and data_copy["limits"]:
 #             data_copy["limits"] = AxesLimits.from_dict(data_copy["limits"])
 #         return cls(**{k: v for k, v in data_copy.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # # =============================================================================
 # # Data Source Specification
 # # =============================================================================
-# 
-# 
+#
+#
 # @dataclass
 # class DataSourceSpec:
 #     """
 #     Specification for the data source.
-# 
+#
 #     Parameters
 #     ----------
 #     csv : str
@@ -402,13 +402,13 @@ if __name__ == "__main__":
 #     csv: str
 #     format: str = "wide"
 #     hash: Optional[str] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {"csv": self.csv, "format": self.format}
 #         if self.hash:
 #             result["hash"] = self.hash
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "DataSourceSpec":
 #         # Handle legacy "source" or "path" keys
@@ -418,21 +418,21 @@ if __name__ == "__main__":
 #             format=data.get("format", "wide"),
 #             hash=data.get("hash"),
 #         )
-# 
-# 
+#
+#
 # # =============================================================================
 # # PlotSpec - Main Semantic Specification
 # # =============================================================================
-# 
-# 
+#
+#
 # @dataclass
 # class PlotSpec:
 #     """
 #     Complete semantic specification for a plot.
-# 
+#
 #     This is the SOURCE OF TRUTH stored in spec.json.
 #     Contains only semantic information about WHAT to plot.
-# 
+#
 #     Parameters
 #     ----------
 #     plot_id : str
@@ -443,7 +443,7 @@ if __name__ == "__main__":
 #         Axes configurations
 #     traces : list of TraceSpec
 #         Trace/artist specifications
-# 
+#
 #     Examples
 #     --------
 #     >>> spec = PlotSpec(
@@ -458,11 +458,11 @@ if __name__ == "__main__":
 #     data: DataSourceSpec
 #     axes: List[AxesSpecItem] = field(default_factory=list)
 #     traces: List[TraceSpec] = field(default_factory=list)
-# 
+#
 #     # Schema metadata
 #     scitex_schema: str = "scitex.plt.spec"
 #     scitex_schema_version: str = PLOT_SPEC_VERSION
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "schema": {
@@ -474,10 +474,10 @@ if __name__ == "__main__":
 #             "axes": [ax.to_dict() for ax in self.axes],
 #             "traces": [tr.to_dict() for tr in self.traces],
 #         }
-# 
+#
 #     def to_json(self, indent: int = 2) -> str:
 #         return json.dumps(self.to_dict(), indent=indent)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "PlotSpec":
 #         schema_info = data.get("schema", {})
@@ -489,17 +489,17 @@ if __name__ == "__main__":
 #             scitex_schema=schema_info.get("name", "scitex.plt.spec"),
 #             scitex_schema_version=schema_info.get("version", PLOT_SPEC_VERSION),
 #         )
-# 
+#
 #     @classmethod
 #     def from_json(cls, json_str: str) -> "PlotSpec":
 #         return cls.from_dict(json.loads(json_str))
-# 
-# 
+#
+#
 # # =============================================================================
 # # PlotStyle - Appearance Specification
 # # =============================================================================
-# 
-# 
+#
+#
 # @dataclass
 # class TraceStyleSpec:
 #     """Style overrides for a specific trace."""
@@ -511,7 +511,7 @@ if __name__ == "__main__":
 #     markersize: Optional[float] = None
 #     alpha: Optional[float] = None
 #     extra: Dict[str, Any] = field(default_factory=dict)
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {"trace_id": self.trace_id}
 #         for field_name in ["color", "linewidth", "linestyle", "marker", "markersize", "alpha"]:
@@ -521,12 +521,12 @@ if __name__ == "__main__":
 #         if self.extra:
 #             result["extra"] = self.extra
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "TraceStyleSpec":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class ThemeSpec:
 #     """Theme specification."""
@@ -539,13 +539,13 @@ if __name__ == "__main__":
 #         "tick": "black",
 #     })
 #     palette: Optional[str] = None  # Color palette name
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {"mode": self.mode, "colors": self.colors}
 #         if self.palette:
 #             result["palette"] = self.palette
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "ThemeSpec":
 #         return cls(
@@ -553,8 +553,8 @@ if __name__ == "__main__":
 #             colors=data.get("colors", {}),
 #             palette=data.get("palette"),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class FontSpec:
 #     """Font specification."""
@@ -563,45 +563,45 @@ if __name__ == "__main__":
 #     title_size_pt: float = 8.0
 #     label_size_pt: float = 7.0
 #     tick_size_pt: float = 6.0
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return asdict(self)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "FontSpec":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class SizeSpec:
 #     """Panel size specification (canonical in mm)."""
 #     width_mm: float = 80.0
 #     height_mm: float = 68.0
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return asdict(self)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "SizeSpec":
 #         return cls(
 #             width_mm=data.get("width_mm", 80.0),
 #             height_mm=data.get("height_mm", 68.0),
 #         )
-# 
-# 
+#
+#
 # # Valid matplotlib legend location strings
 # LegendLocation = Literal[
 #     "best", "upper right", "upper left", "lower left", "lower right",
 #     "right", "center left", "center right", "lower center", "upper center",
 #     "center",
 # ]
-# 
-# 
+#
+#
 # @dataclass
 # class LegendSpec:
 #     """
 #     Legend configuration specification.
-# 
+#
 #     Parameters
 #     ----------
 #     visible : bool
@@ -627,7 +627,7 @@ if __name__ == "__main__":
 #     fontsize: Optional[float] = None
 #     ncols: int = 1
 #     title: Optional[str] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "visible": self.visible,
@@ -640,23 +640,23 @@ if __name__ == "__main__":
 #         if self.title is not None:
 #             result["title"] = self.title
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "LegendSpec":
 #         # Handle backward compatibility: boolean legend value
 #         if isinstance(data, bool):
 #             return cls(visible=data)
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class PlotStyle:
 #     """
 #     Appearance specification for a plot.
-# 
+#
 #     Stored in style.json. Contains HOW the plot looks.
 #     Only stores overrides from defaults.
-# 
+#
 #     Parameters
 #     ----------
 #     theme : ThemeSpec
@@ -677,14 +677,14 @@ if __name__ == "__main__":
 #     font: FontSpec = field(default_factory=FontSpec)
 #     traces: List[TraceStyleSpec] = field(default_factory=list)
 #     legend: LegendSpec = field(default_factory=LegendSpec)
-# 
+#
 #     # Axes-level overrides
 #     grid: bool = False
-# 
+#
 #     # Schema metadata
 #     scitex_schema: str = "scitex.plt.style"
 #     scitex_schema_version: str = PLOT_STYLE_VERSION
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "schema": {
@@ -698,10 +698,10 @@ if __name__ == "__main__":
 #             "legend": self.legend.to_dict(),
 #             "grid": self.grid,
 #         }
-# 
+#
 #     def to_json(self, indent: int = 2) -> str:
 #         return json.dumps(self.to_dict(), indent=indent)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "PlotStyle":
 #         # Handle backward compatibility: legend can be bool or dict
@@ -712,7 +712,7 @@ if __name__ == "__main__":
 #             legend = LegendSpec.from_dict(legend_data)
 #         else:
 #             legend = LegendSpec()
-# 
+#
 #         return cls(
 #             theme=ThemeSpec.from_dict(data.get("theme", {})),
 #             size=SizeSpec.from_dict(data.get("size", {})),
@@ -721,22 +721,22 @@ if __name__ == "__main__":
 #             legend=legend,
 #             grid=data.get("grid", False),
 #         )
-# 
+#
 #     @classmethod
 #     def from_json(cls, json_str: str) -> "PlotStyle":
 #         return cls.from_dict(json.loads(json_str))
-# 
-# 
+#
+#
 # # =============================================================================
 # # PlotGeometry - Cached Render Output
 # # =============================================================================
-# 
-# 
+#
+#
 # @dataclass
 # class RenderedArtist:
 #     """
 #     Cached pixel-level data for a rendered artist.
-# 
+#
 #     This is DERIVED from PlotSpec + PlotStyle, not source of truth.
 #     """
 #     id: str
@@ -746,7 +746,7 @@ if __name__ == "__main__":
 #     bbox_px: Optional[BboxPx] = None
 #     path_px: Optional[List[List[float]]] = None  # [[x, y], [x, y], ...]
 #     extra: Dict[str, Any] = field(default_factory=dict)
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "id": self.id,
@@ -762,15 +762,15 @@ if __name__ == "__main__":
 #         if self.extra:
 #             result.update(self.extra)
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "RenderedArtist":
 #         data_copy = data.copy()
 #         if "bbox_px" in data_copy and data_copy["bbox_px"]:
 #             data_copy["bbox_px"] = BboxPx.from_dict(data_copy["bbox_px"])
 #         return cls(**{k: v for k, v in data_copy.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class RenderedAxes:
 #     """Cached pixel-level data for rendered axes."""
@@ -778,7 +778,7 @@ if __name__ == "__main__":
 #     xlim: List[float]
 #     ylim: List[float]
 #     bbox_px: BboxPx
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "id": self.id,
@@ -786,7 +786,7 @@ if __name__ == "__main__":
 #             "ylim": self.ylim,
 #             "bbox_px": self.bbox_px.to_dict(),
 #         }
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "RenderedAxes":
 #         return cls(
@@ -795,8 +795,8 @@ if __name__ == "__main__":
 #             ylim=data.get("ylim", [0, 1]),
 #             bbox_px=BboxPx.from_dict(data.get("bbox_px", {"x0": 0, "y0": 0, "width": 100, "height": 100})),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class HitRegionEntry:
 #     """Entry in the hit region color map."""
@@ -807,15 +807,15 @@ if __name__ == "__main__":
 #     rgb: List[int]
 #     group_id: Optional[str] = None
 #     role: str = "standalone"
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return asdict(self)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "HitRegionEntry":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class SelectableRegion:
 #     """Selectable region for GUI interaction."""
@@ -823,7 +823,7 @@ if __name__ == "__main__":
 #     text: Optional[str] = None
 #     fontsize: Optional[float] = None
 #     color: Optional[str] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {"bbox_px": self.bbox_px}
 #         if self.text:
@@ -833,20 +833,20 @@ if __name__ == "__main__":
 #         if self.color:
 #             result["color"] = self.color
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "SelectableRegion":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class PlotGeometry:
 #     """
 #     Cached geometry data for a rendered plot.
-# 
+#
 #     Stored in cache/geometry_px.json. This is DERIVED output.
 #     Can be deleted and regenerated from PlotSpec + PlotStyle.
-# 
+#
 #     Parameters
 #     ----------
 #     source_hash : str
@@ -872,11 +872,11 @@ if __name__ == "__main__":
 #     hit_regions: Dict[str, Any] = field(default_factory=dict)
 #     selectable_regions: Dict[str, Any] = field(default_factory=dict)
 #     crop_box: Optional[Dict[str, int]] = None
-# 
+#
 #     # Schema metadata
 #     scitex_schema: str = "scitex.plt.geometry"
 #     scitex_schema_version: str = PLOT_GEOMETRY_VERSION
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "schema": {
@@ -892,10 +892,10 @@ if __name__ == "__main__":
 #             "selectable_regions": self.selectable_regions,
 #             "crop_box": self.crop_box,
 #         }
-# 
+#
 #     def to_json(self, indent: int = 2) -> str:
 #         return json.dumps(self.to_dict(), indent=indent)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "PlotGeometry":
 #         return cls(
@@ -908,50 +908,50 @@ if __name__ == "__main__":
 #             selectable_regions=data.get("selectable_regions", {}),
 #             crop_box=data.get("crop_box"),
 #         )
-# 
+#
 #     @classmethod
 #     def from_json(cls, json_str: str) -> "PlotGeometry":
 #         return cls.from_dict(json.loads(json_str))
-# 
-# 
+#
+#
 # # =============================================================================
 # # RenderManifest - Render Configuration and Metadata
 # # =============================================================================
-# 
-# 
+#
+#
 # @dataclass
 # class RenderManifest:
 #     """
 #     Manifest for rendered outputs.
-# 
+#
 #     Stored in cache/render_manifest.json.
 #     Contains metadata about how the render was produced.
 #     """
 #     source_hash: str  # Hash of spec + style
 #     panel_size_mm: List[float]  # [width, height]
-# 
+#
 #     # Output files
 #     overview_png: Optional[str] = None
 #     overview_svg: Optional[str] = None
 #     hitmap_png: Optional[str] = None
 #     hitmap_svg: Optional[str] = None
-# 
+#
 #     # Render settings
 #     dpi: int = DPI_FALLBACK  # Use scitex.plt.styles.get_default_dpi() for dynamic resolution
 #     render_px: Optional[List[int]] = None  # [width, height]
 #     crop_margin_mm: float = 1.0
-# 
+#
 #     # Timestamps
 #     rendered_at: Optional[str] = None
-# 
+#
 #     # Schema metadata
 #     scitex_schema: str = "scitex.plt.render_manifest"
 #     scitex_schema_version: str = "1.0.0"
-# 
+#
 #     def __post_init__(self):
 #         if self.rendered_at is None:
 #             self.rendered_at = datetime.now().isoformat()
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "schema": {
@@ -969,24 +969,24 @@ if __name__ == "__main__":
 #             "crop_margin_mm": self.crop_margin_mm,
 #             "rendered_at": self.rendered_at,
 #         }
-# 
+#
 #     def to_json(self, indent: int = 2) -> str:
 #         return json.dumps(self.to_dict(), indent=indent)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "RenderManifest":
 #         return cls(**{k: v for k, v in data.items()
 #                      if k in cls.__dataclass_fields__ and k != "scitex_schema" and k != "scitex_schema_version"})
-# 
+#
 #     @classmethod
 #     def from_json(cls, json_str: str) -> "RenderManifest":
 #         return cls.from_dict(json.loads(json_str))
-# 
-# 
+#
+#
 # # =============================================================================
 # # Public API
 # # =============================================================================
-# 
+#
 # __all__ = [
 #     # Version constants
 #     "PLOT_SPEC_VERSION",
@@ -1022,8 +1022,8 @@ if __name__ == "__main__":
 #     # Manifest
 #     "RenderManifest",
 # ]
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """Test publication mode vs draft mode."""
 
+import subprocess
 import sys
 from pathlib import Path
-import subprocess
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
@@ -45,7 +45,17 @@ def test_publication_mode():
 
     png_mmd_path = OUTPUT_DIR / "scitex_workflow_publication.png"
     result = subprocess.run(
-        ["mmdc", "-i", str(mmd_path), "-o", str(png_mmd_path), "-b", "transparent", "-w", "800"],
+        [
+            "mmdc",
+            "-i",
+            str(mmd_path),
+            "-o",
+            str(png_mmd_path),
+            "-b",
+            "transparent",
+            "-w",
+            "800",
+        ],
         capture_output=True,
         text=True,
     )
@@ -67,6 +77,7 @@ def test_draft_mode():
 
     # Force draft mode
     from scitex.diagram._schema import PaperMode
+
     diagram.spec.paper.mode = PaperMode.DRAFT
 
     dot_path = OUTPUT_DIR / "scitex_workflow_draft.dot"

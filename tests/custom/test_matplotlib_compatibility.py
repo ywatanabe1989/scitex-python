@@ -11,7 +11,8 @@ __DIR__ = os.path.dirname(__FILE__)
 
 # Use non-interactive backend for matplotlib
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -45,12 +46,14 @@ def compare_modules_recursively(
 
         try:
             # Use hasattr to check if attribute can be accessed safely
-            if not hasattr(mpl_module, attr_name) or not hasattr(scitex_module, attr_name):
+            if not hasattr(mpl_module, attr_name) or not hasattr(
+                scitex_module, attr_name
+            ):
                 continue
-                
+
             mpl_attr = getattr(mpl_module, attr_name, None)
             scitex_attr = getattr(scitex_module, attr_name, None)
-            
+
             if mpl_attr is None or scitex_attr is None:
                 continue
 
@@ -82,6 +85,7 @@ def compare_modules_recursively(
 def generate_comprehensive_report():
     """Generate a comprehensive compatibility report between matplotlib.pyplot and scitex.plt."""
     import matplotlib.pyplot as plt
+
     import scitex.plt
 
     # Compare the modules
@@ -203,29 +207,29 @@ def test_plot_types():
     fig, ax = scitex.plt.subplots()
     x = np.linspace(0, 10, 50)
     y = np.sin(x)
-    
+
     # Line plot variations
-    ax.plot(x, y, 'r-')
-    ax.plot(x, y * 0.5, 'b--', linewidth=2)
-    ax.plot(x, y * 0.3, 'g:', alpha=0.5)
-    
+    ax.plot(x, y, "r-")
+    ax.plot(x, y * 0.5, "b--", linewidth=2)
+    ax.plot(x, y * 0.3, "g:", alpha=0.5)
+
     # Scatter variations
-    ax.scatter(x[::5], y[::5], c='red', s=50)
-    ax.scatter(x[::5], -y[::5], marker='^', edgecolors='black')
-    
+    ax.scatter(x[::5], y[::5], c="red", s=50)
+    ax.scatter(x[::5], -y[::5], marker="^", edgecolors="black")
+
     # Bar variations
     ax.bar([1, 2, 3], [1, 2, 3], width=0.5)
     ax.barh([4, 5, 6], [1, 2, 3], height=0.5)
-    
+
     # Histogram
     ax.hist(np.random.randn(100), bins=20)
-    
+
     # Error bars
-    ax.errorbar(x[::10], y[::10], yerr=0.1, fmt='o')
-    
+    ax.errorbar(x[::10], y[::10], yerr=0.1, fmt="o")
+
     # Fill between
-    ax.fill_between(x, y-0.1, y+0.1, alpha=0.3)
-    
+    ax.fill_between(x, y - 0.1, y + 0.1, alpha=0.3)
+
     # All should complete without error
     assert True
 
@@ -235,28 +239,28 @@ def test_axis_customization():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Limits
     ax.set_xlim(0, 10)
     ax.set_ylim(-2, 2)
     assert ax.get_xlim() == (0, 10)
     assert ax.get_ylim() == (-2, 2)
-    
+
     # Scales
-    ax.set_xscale('log')
-    ax.set_yscale('linear')
-    
+    ax.set_xscale("log")
+    ax.set_yscale("linear")
+
     # Ticks
     ax.set_xticks([1, 2, 5, 10])
-    ax.set_xticklabels(['1', '2', '5', '10'])
-    
+    ax.set_xticklabels(["1", "2", "5", "10"])
+
     # Grid
-    ax.grid(True, which='both', linestyle='--', alpha=0.5)
-    
+    ax.grid(True, which="both", linestyle="--", alpha=0.5)
+
     # Spines
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
     # Twin axes
     ax2 = ax.twinx()
     assert ax2 is not None
@@ -267,25 +271,29 @@ def test_text_and_annotations():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Text
-    ax.text(0.5, 0.5, 'Center Text', ha='center', va='center')
-    
+    ax.text(0.5, 0.5, "Center Text", ha="center", va="center")
+
     # Annotation
-    ax.annotate('Point', xy=(0.3, 0.3), xytext=(0.5, 0.7),
-                arrowprops=dict(arrowstyle='->', color='red'))
-    
+    ax.annotate(
+        "Point",
+        xy=(0.3, 0.3),
+        xytext=(0.5, 0.7),
+        arrowprops=dict(arrowstyle="->", color="red"),
+    )
+
     # Title with properties
-    ax.set_title('Complex Title', fontsize=16, fontweight='bold', color='blue')
-    
+    ax.set_title("Complex Title", fontsize=16, fontweight="bold", color="blue")
+
     # Axis labels with properties
-    ax.set_xlabel('X Axis', fontsize=14, style='italic')
-    ax.set_ylabel('Y Axis', fontsize=14, rotation=45)
-    
+    ax.set_xlabel("X Axis", fontsize=14, style="italic")
+    ax.set_ylabel("Y Axis", fontsize=14, rotation=45)
+
     # Legend
-    ax.plot([1, 2], [1, 2], label='Line 1')
-    ax.plot([1, 2], [2, 1], label='Line 2')
-    ax.legend(loc='best', frameon=True, fancybox=True, shadow=True)
+    ax.plot([1, 2], [1, 2], label="Line 1")
+    ax.plot([1, 2], [2, 1], label="Line 2")
+    ax.legend(loc="best", frameon=True, fancybox=True, shadow=True)
 
 
 def test_color_and_style():
@@ -293,42 +301,42 @@ def test_color_and_style():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Color formats
     x = np.linspace(0, 10, 100)
-    ax.plot(x, np.sin(x), color='red')
-    ax.plot(x, np.sin(x + 1), color='#00FF00')
+    ax.plot(x, np.sin(x), color="red")
+    ax.plot(x, np.sin(x + 1), color="#00FF00")
     ax.plot(x, np.sin(x + 2), color=(0, 0, 1))
     ax.plot(x, np.sin(x + 3), color=(0, 0, 0, 0.5))  # RGBA
-    
+
     # Line styles
-    ax.plot(x, np.cos(x), linestyle='-')
-    ax.plot(x, np.cos(x + 1), linestyle='--')
-    ax.plot(x, np.cos(x + 2), linestyle=':')
-    ax.plot(x, np.cos(x + 3), linestyle='-.')
-    
+    ax.plot(x, np.cos(x), linestyle="-")
+    ax.plot(x, np.cos(x + 1), linestyle="--")
+    ax.plot(x, np.cos(x + 2), linestyle=":")
+    ax.plot(x, np.cos(x + 3), linestyle="-.")
+
     # Markers
-    markers = ['o', 's', '^', 'v', '<', '>', 'p', '*', '+', 'x']
+    markers = ["o", "s", "^", "v", "<", ">", "p", "*", "+", "x"]
     for i, marker in enumerate(markers[:5]):
-        ax.plot(x[::20], np.sin(x[::20] + i*0.5), marker=marker, linestyle='')
+        ax.plot(x[::20], np.sin(x[::20] + i * 0.5), marker=marker, linestyle="")
 
 
 def test_3d_plotting():
     """Test 3D plotting capabilities if available."""
     import scitex.plt
-    
+
     try:
         from mpl_toolkits.mplot3d import Axes3D
-        
+
         fig = scitex.plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        
+        ax = fig.add_subplot(111, projection="3d")
+
         # 3D scatter
         xs = np.random.rand(100)
         ys = np.random.rand(100)
         zs = np.random.rand(100)
         ax.scatter(xs, ys, zs)
-        
+
         # 3D line
         theta = np.linspace(-4 * np.pi, 4 * np.pi, 100)
         z = np.linspace(-2, 2, 100)
@@ -336,7 +344,7 @@ def test_3d_plotting():
         x = r * np.sin(theta)
         y = r * np.cos(theta)
         ax.plot(x, y, z)
-        
+
         # 3D surface
         X = np.arange(-5, 5, 0.25)
         Y = np.arange(-5, 5, 0.25)
@@ -344,7 +352,7 @@ def test_3d_plotting():
         R = np.sqrt(X**2 + Y**2)
         Z = np.sin(R)
         ax.plot_surface(X, Y, Z)
-        
+
         assert True
     except ImportError:
         pytest.skip("3D plotting not available")
@@ -355,24 +363,24 @@ def test_image_handling():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Create test image
     img = np.random.rand(100, 100)
-    
+
     # Display image
-    im = ax.imshow(img, cmap='viridis', aspect='auto')
+    im = ax.imshow(img, cmap="viridis", aspect="auto")
     assert im is not None
-    
+
     # Colorbar
     cbar = fig.colorbar(im, ax=ax)
     assert cbar is not None
-    
+
     # Different interpolations
-    ax.imshow(img, interpolation='nearest')
-    ax.imshow(img, interpolation='bilinear')
-    
+    ax.imshow(img, interpolation="nearest")
+    ax.imshow(img, interpolation="bilinear")
+
     # Extent and origin
-    ax.imshow(img, extent=[0, 10, 0, 10], origin='lower')
+    ax.imshow(img, extent=[0, 10, 0, 10], origin="lower")
 
 
 def test_subplot_layouts():
@@ -387,9 +395,9 @@ def test_subplot_layouts():
     ax3 = fig.add_subplot(gs[1:, -1])
     ax4 = fig.add_subplot(gs[-1, 0])
     ax5 = fig.add_subplot(gs[-1, -2])
-    
+
     assert all([ax1, ax2, ax3, ax4, ax5])
-    
+
     # Constrained layout
     fig, axes = scitex.plt.subplots(2, 2, constrained_layout=True)
     assert axes.shape == (2, 2)
@@ -397,25 +405,27 @@ def test_subplot_layouts():
 
 def test_save_functionality():
     """Test figure saving capabilities."""
-    import scitex.plt
-    import tempfile
     import os
+    import tempfile
+
+    import scitex.plt
 
     fig, ax = scitex.plt.subplots()
     ax.plot([1, 2, 3], [1, 2, 3])
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Save in different formats
-        formats = ['png', 'pdf', 'svg', 'jpg']
+        formats = ["png", "pdf", "svg", "jpg"]
         for fmt in formats:
-            filepath = os.path.join(tmpdir, f'test.{fmt}')
+            filepath = os.path.join(tmpdir, f"test.{fmt}")
             fig.savefig(filepath, format=fmt)
             assert os.path.exists(filepath)
-        
+
         # Save with options
-        filepath = os.path.join(tmpdir, 'test_dpi.png')
-        fig.savefig(filepath, dpi=300, bbox_inches='tight', 
-                   facecolor='white', edgecolor='none')
+        filepath = os.path.join(tmpdir, "test_dpi.png")
+        fig.savefig(
+            filepath, dpi=300, bbox_inches="tight", facecolor="white", edgecolor="none"
+        )
         assert os.path.exists(filepath)
 
 
@@ -424,18 +434,18 @@ def test_interactive_features():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Zoom and pan (just test they don't error)
-    if hasattr(ax, 'set_navigate_mode'):
-        ax.set_navigate_mode('pan')
-        ax.set_navigate_mode('zoom')
+    if hasattr(ax, "set_navigate_mode"):
+        ax.set_navigate_mode("pan")
+        ax.set_navigate_mode("zoom")
         ax.set_navigate_mode(None)
-    
+
     # Picker events
-    line, = ax.plot([1, 2, 3], [1, 2, 3], picker=True)
-    
+    (line,) = ax.plot([1, 2, 3], [1, 2, 3], picker=True)
+
     # Cursor
-    if hasattr(ax, 'format_coord'):
+    if hasattr(ax, "format_coord"):
         coord_str = ax.format_coord(1.5, 1.5)
         assert isinstance(coord_str, str)
 
@@ -446,22 +456,22 @@ def test_style_contexts():
 
     # Test with style context
     try:
-        with plt.style.context('seaborn'):
+        with plt.style.context("seaborn"):
             fig, ax = scitex.plt.subplots()
             ax.plot([1, 2, 3], [1, 2, 3])
     except:
         # Style might not be available
         pass
-    
+
     # Test rcParams modification
-    original_linewidth = plt.rcParams['lines.linewidth']
-    plt.rcParams['lines.linewidth'] = 3.0
-    
+    original_linewidth = plt.rcParams["lines.linewidth"]
+    plt.rcParams["lines.linewidth"] = 3.0
+
     fig, ax = scitex.plt.subplots()
-    line, = ax.plot([1, 2, 3], [1, 2, 3])
-    
+    (line,) = ax.plot([1, 2, 3], [1, 2, 3])
+
     # Restore
-    plt.rcParams['lines.linewidth'] = original_linewidth
+    plt.rcParams["lines.linewidth"] = original_linewidth
 
 
 def test_special_plots():
@@ -469,19 +479,19 @@ def test_special_plots():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Pie chart
-    ax.pie([1, 2, 3, 4], labels=['A', 'B', 'C', 'D'], autopct='%1.1f%%')
-    
+    ax.pie([1, 2, 3, 4], labels=["A", "B", "C", "D"], autopct="%1.1f%%")
+
     # Box plot
     ax.clear()
     data = [np.random.randn(100) for _ in range(4)]
     ax.boxplot(data)
-    
+
     # Violin plot
     ax.clear()
     ax.violinplot(data)
-    
+
     # Contour plot
     ax.clear()
     X, Y = np.meshgrid(np.linspace(-3, 3, 100), np.linspace(-3, 3, 100))
@@ -495,23 +505,23 @@ def test_axes_properties():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Aspect ratio
-    ax.set_aspect('equal')
+    ax.set_aspect("equal")
     ax.set_aspect(2.0)
-    ax.set_aspect('auto')
-    
+    ax.set_aspect("auto")
+
     # Background color
-    ax.set_facecolor('lightgray')
-    
+    ax.set_facecolor("lightgray")
+
     # Margins
     ax.margins(0.1)
     ax.margins(x=0.2, y=0.3)
-    
+
     # Autoscaling
-    ax.autoscale(enable=True, axis='both', tight=True)
+    ax.autoscale(enable=True, axis="both", tight=True)
     ax.autoscale(enable=False)
-    
+
     # Visibility
     ax.set_visible(False)
     ax.set_visible(True)
@@ -522,7 +532,7 @@ def test_fallback_mechanism():
     import warnings
 
     import scitex.plt
-    
+
     try:
         # Get the compatibility report
         report = generate_comprehensive_report()
@@ -609,29 +619,29 @@ def test_plot_types():
     fig, ax = scitex.plt.subplots()
     x = np.linspace(0, 10, 50)
     y = np.sin(x)
-    
+
     # Line plot variations
-    ax.plot(x, y, 'r-')
-    ax.plot(x, y * 0.5, 'b--', linewidth=2)
-    ax.plot(x, y * 0.3, 'g:', alpha=0.5)
-    
+    ax.plot(x, y, "r-")
+    ax.plot(x, y * 0.5, "b--", linewidth=2)
+    ax.plot(x, y * 0.3, "g:", alpha=0.5)
+
     # Scatter variations
-    ax.scatter(x[::5], y[::5], c='red', s=50)
-    ax.scatter(x[::5], -y[::5], marker='^', edgecolors='black')
-    
+    ax.scatter(x[::5], y[::5], c="red", s=50)
+    ax.scatter(x[::5], -y[::5], marker="^", edgecolors="black")
+
     # Bar variations
     ax.bar([1, 2, 3], [1, 2, 3], width=0.5)
     ax.barh([4, 5, 6], [1, 2, 3], height=0.5)
-    
+
     # Histogram
     ax.hist(np.random.randn(100), bins=20)
-    
+
     # Error bars
-    ax.errorbar(x[::10], y[::10], yerr=0.1, fmt='o')
-    
+    ax.errorbar(x[::10], y[::10], yerr=0.1, fmt="o")
+
     # Fill between
-    ax.fill_between(x, y-0.1, y+0.1, alpha=0.3)
-    
+    ax.fill_between(x, y - 0.1, y + 0.1, alpha=0.3)
+
     # All should complete without error
     assert True
 
@@ -641,28 +651,28 @@ def test_axis_customization():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Limits
     ax.set_xlim(0, 10)
     ax.set_ylim(-2, 2)
     assert ax.get_xlim() == (0, 10)
     assert ax.get_ylim() == (-2, 2)
-    
+
     # Scales
-    ax.set_xscale('log')
-    ax.set_yscale('linear')
-    
+    ax.set_xscale("log")
+    ax.set_yscale("linear")
+
     # Ticks
     ax.set_xticks([1, 2, 5, 10])
-    ax.set_xticklabels(['1', '2', '5', '10'])
-    
+    ax.set_xticklabels(["1", "2", "5", "10"])
+
     # Grid
-    ax.grid(True, which='both', linestyle='--', alpha=0.5)
-    
+    ax.grid(True, which="both", linestyle="--", alpha=0.5)
+
     # Spines
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
     # Twin axes
     ax2 = ax.twinx()
     assert ax2 is not None
@@ -673,25 +683,29 @@ def test_text_and_annotations():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Text
-    ax.text(0.5, 0.5, 'Center Text', ha='center', va='center')
-    
+    ax.text(0.5, 0.5, "Center Text", ha="center", va="center")
+
     # Annotation
-    ax.annotate('Point', xy=(0.3, 0.3), xytext=(0.5, 0.7),
-                arrowprops=dict(arrowstyle='->', color='red'))
-    
+    ax.annotate(
+        "Point",
+        xy=(0.3, 0.3),
+        xytext=(0.5, 0.7),
+        arrowprops=dict(arrowstyle="->", color="red"),
+    )
+
     # Title with properties
-    ax.set_title('Complex Title', fontsize=16, fontweight='bold', color='blue')
-    
+    ax.set_title("Complex Title", fontsize=16, fontweight="bold", color="blue")
+
     # Axis labels with properties
-    ax.set_xlabel('X Axis', fontsize=14, style='italic')
-    ax.set_ylabel('Y Axis', fontsize=14, rotation=45)
-    
+    ax.set_xlabel("X Axis", fontsize=14, style="italic")
+    ax.set_ylabel("Y Axis", fontsize=14, rotation=45)
+
     # Legend
-    ax.plot([1, 2], [1, 2], label='Line 1')
-    ax.plot([1, 2], [2, 1], label='Line 2')
-    ax.legend(loc='upper right', frameon=True, fancybox=True)
+    ax.plot([1, 2], [1, 2], label="Line 1")
+    ax.plot([1, 2], [2, 1], label="Line 2")
+    ax.legend(loc="upper right", frameon=True, fancybox=True)
 
 
 def test_color_and_style():
@@ -699,42 +713,43 @@ def test_color_and_style():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Different color formats
-    ax.plot([1, 2, 3], [1, 2, 3], color='red')
-    ax.plot([1, 2, 3], [2, 3, 4], color='#FF5733')
+    ax.plot([1, 2, 3], [1, 2, 3], color="red")
+    ax.plot([1, 2, 3], [2, 3, 4], color="#FF5733")
     ax.plot([1, 2, 3], [3, 4, 5], color=(0.1, 0.2, 0.5))
-    ax.plot([1, 2, 3], [4, 5, 6], color='C3')
-    
+    ax.plot([1, 2, 3], [4, 5, 6], color="C3")
+
     # Different line styles
-    ax.plot([1, 2, 3], [5, 6, 7], linestyle='-')
-    ax.plot([1, 2, 3], [6, 7, 8], linestyle='--')
-    ax.plot([1, 2, 3], [7, 8, 9], linestyle=':')
-    ax.plot([1, 2, 3], [8, 9, 10], linestyle='-.')
-    
+    ax.plot([1, 2, 3], [5, 6, 7], linestyle="-")
+    ax.plot([1, 2, 3], [6, 7, 8], linestyle="--")
+    ax.plot([1, 2, 3], [7, 8, 9], linestyle=":")
+    ax.plot([1, 2, 3], [8, 9, 10], linestyle="-.")
+
     # Markers
-    ax.plot([1, 2, 3], [9, 10, 11], marker='o', markersize=10)
-    ax.plot([1, 2, 3], [10, 11, 12], marker='s', markerfacecolor='red')
+    ax.plot([1, 2, 3], [9, 10, 11], marker="o", markersize=10)
+    ax.plot([1, 2, 3], [10, 11, 12], marker="s", markerfacecolor="red")
 
 
 def test_3d_plotting():
     """Test 3D plotting capabilities."""
-    import scitex.plt
     from mpl_toolkits.mplot3d import Axes3D
 
+    import scitex.plt
+
     fig = scitex.plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    
+    ax = fig.add_subplot(111, projection="3d")
+
     # 3D scatter
     x = np.random.randn(100)
     y = np.random.randn(100)
     z = np.random.randn(100)
     ax.scatter(x, y, z)
-    
+
     # 3D line
     t = np.linspace(0, 10, 100)
     ax.plot(np.sin(t), np.cos(t), t)
-    
+
     # Surface plot
     X, Y = np.meshgrid(np.linspace(-5, 5, 50), np.linspace(-5, 5, 50))
     Z = np.sin(np.sqrt(X**2 + Y**2))
@@ -746,20 +761,20 @@ def test_image_handling():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Create and display an image
     img = np.random.rand(100, 100)
-    im = ax.imshow(img, cmap='viridis', aspect='auto')
-    
+    im = ax.imshow(img, cmap="viridis", aspect="auto")
+
     # Add colorbar
     fig.colorbar(im, ax=ax)
-    
+
     # Test different interpolations
-    ax.imshow(img, interpolation='nearest')
-    ax.imshow(img, interpolation='bilinear')
-    
+    ax.imshow(img, interpolation="nearest")
+    ax.imshow(img, interpolation="bilinear")
+
     # Test extent and origin
-    ax.imshow(img, extent=[0, 10, 0, 5], origin='lower')
+    ax.imshow(img, extent=[0, 10, 0, 5], origin="lower")
 
 
 def test_subplot_layouts():
@@ -769,16 +784,16 @@ def test_subplot_layouts():
     # GridSpec
     fig = scitex.plt.figure(figsize=(12, 8))
     gs = fig.add_gridspec(3, 3, hspace=0.3, wspace=0.3)
-    
+
     # Different sized subplots
     ax1 = fig.add_subplot(gs[0, :])
     ax2 = fig.add_subplot(gs[1:, 0])
     ax3 = fig.add_subplot(gs[1:, 1:])
-    
+
     assert ax1 is not None
     assert ax2 is not None
     assert ax3 is not None
-    
+
     # Subplot2grid
     ax4 = scitex.plt.subplot2grid((3, 3), (0, 0), colspan=2, rowspan=2)
     assert ax4 is not None
@@ -787,17 +802,18 @@ def test_subplot_layouts():
 def test_save_functionality():
     """Test figure saving in different formats."""
     import tempfile
+
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
     ax.plot([1, 2, 3], [1, 2, 3])
-    
+
     with tempfile.TemporaryDirectory() as tmpdir:
         # Test different formats
-        formats = ['png', 'pdf', 'svg', 'jpg']
+        formats = ["png", "pdf", "svg", "jpg"]
         for fmt in formats:
             filepath = f"{tmpdir}/test.{fmt}"
-            fig.savefig(filepath, dpi=100, bbox_inches='tight')
+            fig.savefig(filepath, dpi=100, bbox_inches="tight")
             assert os.path.exists(filepath)
 
 
@@ -808,15 +824,15 @@ def test_interactive_features():
     # Test ion/ioff
     scitex.plt.ion()
     scitex.plt.ioff()
-    
+
     # Test show (in non-blocking mode)
     fig, ax = scitex.plt.subplots()
     ax.plot([1, 2, 3], [1, 2, 3])
     # Note: We can't really test plt.show() in automated tests
-    
+
     # Test pause
     scitex.plt.pause(0.001)
-    
+
     # Test draw
     fig.canvas.draw()
 
@@ -826,18 +842,18 @@ def test_style_contexts():
     import scitex.plt
 
     # Test style context - use a built-in style that's always available
-    with scitex.plt.style.context('default'):
+    with scitex.plt.style.context("default"):
         fig, ax = scitex.plt.subplots()
         ax.plot([1, 2, 3], [1, 2, 3])
-    
+
     # Test rc params
-    scitex.plt.rc('lines', linewidth=2, linestyle='--')
+    scitex.plt.rc("lines", linewidth=2, linestyle="--")
     scitex.plt.rcdefaults()
-    
+
     # Test rcParams
-    old_linewidth = scitex.plt.rcParams['lines.linewidth']
-    scitex.plt.rcParams['lines.linewidth'] = 3
-    scitex.plt.rcParams['lines.linewidth'] = old_linewidth
+    old_linewidth = scitex.plt.rcParams["lines.linewidth"]
+    scitex.plt.rcParams["lines.linewidth"] = 3
+    scitex.plt.rcParams["lines.linewidth"] = old_linewidth
 
 
 def test_special_plots():
@@ -845,17 +861,17 @@ def test_special_plots():
     import scitex.plt
 
     fig, axes = scitex.plt.subplots(2, 2, figsize=(10, 10))
-    
+
     # Pie chart
-    axes[0, 0].pie([30, 25, 20, 25], labels=['A', 'B', 'C', 'D'])
-    
+    axes[0, 0].pie([30, 25, 20, 25], labels=["A", "B", "C", "D"])
+
     # Box plot
     data = [np.random.randn(100) for _ in range(4)]
     axes[0, 1].boxplot(data)
-    
+
     # Violin plot
     axes[1, 0].violinplot(data)
-    
+
     # Contour plot
     X, Y = np.meshgrid(np.linspace(-3, 3, 100), np.linspace(-3, 3, 100))
     Z = np.sin(X) * np.cos(Y)
@@ -867,19 +883,19 @@ def test_axes_properties():
     import scitex.plt
 
     fig, ax = scitex.plt.subplots()
-    
+
     # Test aspect ratio
-    ax.set_aspect('equal')
+    ax.set_aspect("equal")
     ax.set_aspect(2.0)
-    ax.set_aspect('auto')
-    
+    ax.set_aspect("auto")
+
     # Test axis on/off
-    ax.axis('off')
-    ax.axis('on')
-    
+    ax.axis("off")
+    ax.axis("on")
+
     # Test tight layout
     fig.tight_layout()
-    
+
     # Test visibility
     ax.set_visible(False)
     ax.set_visible(True)

@@ -61,7 +61,9 @@ def export_figure_to_latex(
 
     # Validate type
     if node_type not in ("figure", "plot", "image"):
-        raise ValueError(f"Cannot export node type '{node_type}' as figure. Expected 'figure', 'plot', or 'image'.")
+        raise ValueError(
+            f"Cannot export node type '{node_type}' as figure. Expected 'figure', 'plot', or 'image'."
+        )
 
     # Get width
     width_mm = options.width_mm

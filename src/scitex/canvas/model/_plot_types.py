@@ -12,9 +12,8 @@ properties for:
 - Diff analysis
 """
 
-from typing import Optional, List, Union, Any
 from dataclasses import dataclass, field
-
+from typing import Any, List, Optional, Union
 
 # ============================================================================
 # MATPLOTLIB BASIC PLOTS

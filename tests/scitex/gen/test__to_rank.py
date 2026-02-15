@@ -265,13 +265,13 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-08-29 22:10:06 (ywatanabe)"
 # # ./src/scitex/gen/data_processing/_to_rank.py
-# 
+#
 # import torch
-# 
+#
 # # from .._converters import
 # from scitex.decorators import torch_fn
-# 
-# 
+#
+#
 # @torch_fn
 # def to_rank(tensor, method="average"):
 #     sorted_tensor, indices = torch.sort(tensor)
@@ -279,7 +279,7 @@ if __name__ == "__main__":
 #     ranks[indices] = (
 #         torch.arange(len(tensor), dtype=tensor.dtype, device=tensor.device) + 1
 #     )
-# 
+#
 #     if method == "average":
 #         ranks = ranks.float()
 #         ties = torch.nonzero(sorted_tensor[1:] == sorted_tensor[:-1])
@@ -291,10 +291,10 @@ if __name__ == "__main__":
 #             ):
 #                 end += 1
 #             ranks[indices[start:end]] = ranks[indices[start:end]].mean()
-# 
+#
 #     return ranks
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

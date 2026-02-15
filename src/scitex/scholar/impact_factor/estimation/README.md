@@ -27,7 +27,7 @@ IF = Citations in year Y to papers from years (Y-1) and (Y-2) / Papers published
 ```
 
 ### 2. H-Index Based Impact Indicator
-```  
+```
 H-IF = H-index / 10 (normalized)
 ```
 
@@ -204,7 +204,7 @@ matches = matcher.find_multiple_matches(
 
 ### API Rate Limits
 - **OpenAlex**: 100,000 requests/day, 10 per second
-- **Crossref**: 50 requests/second (polite usage)  
+- **Crossref**: 50 requests/second (polite usage)
 - **Semantic Scholar**: 100 requests per query
 
 ## 📁 Example Files
@@ -214,7 +214,7 @@ matches = matcher.find_multiple_matches(
 **journals.txt**
 ```
 Nature
-Science  
+Science
 Cell
 PLOS ONE
 ```

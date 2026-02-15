@@ -506,17 +506,23 @@ def _convert_caption(
 
         if image_path:
             # Remove extension for includegraphics
-            image_path_no_ext = image_path.rsplit(".", 1)[0] if "." in image_path else image_path
-            lines.append(f"\\includegraphics[width=0.8\\textwidth]{{{image_path_no_ext}}}")
+            image_path_no_ext = (
+                image_path.rsplit(".", 1)[0] if "." in image_path else image_path
+            )
+            lines.append(
+                f"\\includegraphics[width=0.8\\textwidth]{{{image_path_no_ext}}}"
+            )
         else:
             lines.append(f"% Image placeholder for Figure {number}")
 
-        lines.extend([
-            f"\\caption{{{caption_text}}}",
-            f"\\label{{fig:{number}}}",
-            "\\end{figure}",
-            "",
-        ])
+        lines.extend(
+            [
+                f"\\caption{{{caption_text}}}",
+                f"\\label{{fig:{number}}}",
+                "\\end{figure}",
+                "",
+            ]
+        )
         return "\n".join(lines)
 
     elif caption_type == "table":
@@ -541,7 +547,9 @@ def _convert_image(
     if image_hash and image_hash in image_map:
         image_path = image_map[image_hash]
         # Remove extension for includegraphics
-        image_path_no_ext = image_path.rsplit(".", 1)[0] if "." in image_path else image_path
+        image_path_no_ext = (
+            image_path.rsplit(".", 1)[0] if "." in image_path else image_path
+        )
 
         lines = [
             "\\begin{figure}[htbp]",
@@ -576,11 +584,13 @@ def _convert_table(block: Dict[str, Any]) -> str:
         lines.append(" & ".join(escaped_cells) + " \\\\")
         lines.append("\\hline")
 
-    lines.extend([
-        "\\end{tabular}",
-        "\\end{table}",
-        "",
-    ])
+    lines.extend(
+        [
+            "\\end{tabular}",
+            "\\end{table}",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -627,7 +637,7 @@ def _escape_latex(text: str) -> str:
         # Skip if already escaped
         if old == "\\":
             # Don't escape existing LaTeX commands
-            result = re.sub(r'(?<!\\)\\(?![a-zA-Z{])', new, result)
+            result = re.sub(r"(?<!\\)\\(?![a-zA-Z{])", new, result)
         else:
             result = result.replace(old, new)
 
@@ -657,6 +667,7 @@ class CompileResult:
     warnings : list[str]
         Extracted warning messages.
     """
+
     success: bool
     pdf_path: Optional[Path]
     exit_code: int
@@ -833,8 +844,19 @@ def compile_tex(
 
     # Clean auxiliary files
     if clean:
-        aux_extensions = [".aux", ".log", ".out", ".toc", ".lof", ".lot",
-                         ".bbl", ".blg", ".fls", ".fdb_latexmk", ".synctex.gz"]
+        aux_extensions = [
+            ".aux",
+            ".log",
+            ".out",
+            ".toc",
+            ".lof",
+            ".lot",
+            ".bbl",
+            ".blg",
+            ".fls",
+            ".fdb_latexmk",
+            ".synctex.gz",
+        ]
         for ext in aux_extensions:
             aux_file = output_dir / (tex_path.stem + ext)
             if aux_file.exists():

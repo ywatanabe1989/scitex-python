@@ -9,15 +9,15 @@ This module provides the main _extract_artists function that coordinates extract
 of all artist types from matplotlib axes.
 """
 
-from ._plot_type_detection import _detect_plot_type
-from ._line_artists import _extract_line_artists, _extract_line_collection_artists
 from ._collection_artists import (
-    _extract_scatter_artists,
     _extract_hist2d_hexbin_artists,
+    _extract_scatter_artists,
     _extract_violin_body_artists,
 )
-from ._patch_artists import _extract_rectangle_artists, _extract_wedge_artists
 from ._image_text_artists import _extract_image_artists, _extract_text_artists
+from ._line_artists import _extract_line_artists, _extract_line_collection_artists
+from ._patch_artists import _extract_rectangle_artists, _extract_wedge_artists
+from ._plot_type_detection import _detect_plot_type
 
 
 def _extract_artists(ax) -> list:
@@ -57,7 +57,7 @@ def _extract_artists(ax) -> list:
 
     # Try to find scitex wrapper for plot type detection and history access
     ax_for_detection = ax
-    if not hasattr(ax, 'history') and hasattr(mpl_ax, '_scitex_wrapper'):
+    if not hasattr(ax, "history") and hasattr(mpl_ax, "_scitex_wrapper"):
         ax_for_detection = mpl_ax._scitex_wrapper
 
     # Detect plot type
@@ -65,8 +65,21 @@ def _extract_artists(ax) -> list:
 
     # Plot types where internal line artists should be hidden
     internal_plot_types = {
-        "boxplot", "violin", "hist", "bar", "image", "heatmap", "kde", "ecdf",
-        "errorbar", "fill", "stem", "contour", "pie", "quiver", "stream"
+        "boxplot",
+        "violin",
+        "hist",
+        "bar",
+        "image",
+        "heatmap",
+        "kde",
+        "ecdf",
+        "errorbar",
+        "fill",
+        "stem",
+        "contour",
+        "pie",
+        "quiver",
+        "stream",
     }
     skip_unlabeled = plot_type in internal_plot_types
 
@@ -91,7 +104,9 @@ def _extract_artists(ax) -> list:
     artists.extend(wedge_artists)
 
     # Extract QuadMesh and PolyCollection (hist2d, hexbin)
-    hist2d_hexbin_artists = _extract_hist2d_hexbin_artists(mpl_ax, ax_for_detection, plot_type)
+    hist2d_hexbin_artists = _extract_hist2d_hexbin_artists(
+        mpl_ax, ax_for_detection, plot_type
+    )
     artists.extend(hist2d_hexbin_artists)
 
     # Extract violin body (PolyCollection)

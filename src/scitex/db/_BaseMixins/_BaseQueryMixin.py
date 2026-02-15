@@ -10,7 +10,7 @@ THIS_FILE = (
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from typing import List, Dict, Any, Optional, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 
 class _BaseQueryMixin:

@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from scitex.io._load import load
+
 from ._calc_cost import calc_cost
 from ._format_output_func import format_output_func
 from ._PARAMS import MODELS

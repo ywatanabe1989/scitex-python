@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/ml/classification/reporters/_ClassificationReporter.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -548,9 +549,9 @@ def parse_args():
 def main(args):
     """Test ClassificationReporter functionality."""
     from sklearn.datasets import make_classification
-    from sklearn.model_selection import StratifiedKFold
-    from sklearn.linear_model import LogisticRegression
     from sklearn.ensemble import RandomForestClassifier
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import StratifiedKFold
 
     # Create output directory
     output_dir = Path(args.output_dir)
@@ -726,7 +727,9 @@ def run_main():
     global CONFIG, CC, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

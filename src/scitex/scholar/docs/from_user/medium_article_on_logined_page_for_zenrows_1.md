@@ -64,21 +64,21 @@ Zoom image will be displayed
 
 The following scraping script will bypass the auth wall. It creates a similar payload and posts the request to the User Information page. Once the response arrives, the program uses Beautiful Soup to parse the response text and print the page name.
 
-from bs4 import BeautifulSoup as bs 
-import requests 
-URL = "http://testphp.vulnweb.com/userinfo.php" 
- 
-payload = { 
- "uname": "test", 
- "pass": "test" 
-} 
-s = requests.session() 
-response = s.post(URL, data=payload) 
-print(response.status_code) # If the request went Ok we usually get a 200 status. 
- 
-from bs4 import BeautifulSoup 
-soup = BeautifulSoup(response.content, "html.parser") 
-protected_content = soup.find(attrs={"id": "pageName"}).text 
+from bs4 import BeautifulSoup as bs
+import requests
+URL = "http://testphp.vulnweb.com/userinfo.php"
+
+payload = {
+ "uname": "test",
+ "pass": "test"
+}
+s = requests.session()
+response = s.post(URL, data=payload)
+print(response.status_code) # If the request went Ok we usually get a 200 status.
+
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(response.content, "html.parser")
+protected_content = soup.find(attrs={"id": "pageName"}).text
 print(protected_content)
 This is our output:
 
@@ -124,25 +124,25 @@ Zoom image will be displayed
 
 The following script gets the CSRF token, timestamp, and timestamp_secret from the login page:
 
-import requests 
-from bs4 import BeautifulSoup 
-login_url = "https://github.com/session" 
-login = "Your Git username Here" 
-password = "Your Git Password Here" 
-with requests.session() as s: 
- req = s.get(login_url).text 
- html = BeautifulSoup(req,"html.parser") 
- token = html.find("input", {"name": "authenticity_token"}). attrs["value"] 
- time = html.find("input", {"name": "timestamp"}).attrs["value"] 
+import requests
+from bs4 import BeautifulSoup
+login_url = "https://github.com/session"
+login = "Your Git username Here"
+password = "Your Git Password Here"
+with requests.session() as s:
+ req = s.get(login_url).text
+ html = BeautifulSoup(req,"html.parser")
+ token = html.find("input", {"name": "authenticity_token"}). attrs["value"]
+ time = html.find("input", {"name": "timestamp"}).attrs["value"]
  timeSecret = html.find("input", {"name": "timestamp_secret"}). attrs["value"]
 We can now populate the payload dictionary for our Python login request as:
 
-payload = { 
- "authenticity_token": token, 
- "login": login, 
- "password": password, 
- "timestamp": time, 
- "timestamp_secret": timeSecret 
+payload = {
+ "authenticity_token": token,
+ "login": login,
+ "password": password,
+ "timestamp": time,
+ "timestamp_secret": timeSecret
 }
 Note: If you can’t find the CSRF token on the HTML, it’s probably saved in a cookie. In Chromium-based browsers, go to the Application tab in the DevTools. Then, in the left panel, search for cookies and select the domain of your target website.
 
@@ -165,7 +165,7 @@ Alternatively, you can use a web scraping API like ZenRows to get around those a
 Step #4: The Login in Action
 This is our lucky day since adding headers for GitHub is unnecessary, so we’re ready to send our login request through Python:
 
-res = s.post(login_url, data=payload) 
+res = s.post(login_url, data=payload)
 print(res.url)
 If the login’s successful, our output’ll be https://github.com/. Otherwise, we’ll get https://github.com/session.
 
@@ -176,8 +176,8 @@ Recall that we began an earlier code with the with requests.session() as s: stat
 
 It’s time to get to the repositories. Generate a GET, then parse the response using Beautiful Soup.
 
-repos_url = "https://github.com/" + login + "/?tab=repositories" 
-r = s.get(repos_url) 
+repos_url = "https://github.com/" + login + "/?tab=repositories"
+r = s.get(repos_url)
 soup = BeautifulSoup(r.content, "html.parser")
 We’ll extract the username and a list of repositories.
 
@@ -191,48 +191,48 @@ Zoom image will be displayed
 
 The repositories’ names are inside hyperlinks in the <h3> tag with the class wb-break-all. Ok, we have enough knowledge of the target elements now, so let’s extract them:
 
-usernameDiv = soup.find("span", class_="p-nickname vcard-username d-block") 
-print("Username: " + usernameDiv.getText()) 
-repos = soup.find_all("h3",class_="wb-break-all") 
-for r in repos: 
- repoName = r.find("a").getText() 
+usernameDiv = soup.find("span", class_="p-nickname vcard-username d-block")
+print("Username: " + usernameDiv.getText())
+repos = soup.find_all("h3",class_="wb-break-all")
+for r in repos:
+ repoName = r.find("a").getText()
  print("Repository Name: " + repoName)
 Since it’s possible to find multiple repositories on the target web page, the script uses the find_all() method to extract all. For that, the loop iterates through each <h3> tag and prints the text of the enclosed <a> tag.
 
 Here’s what the complete code looks like:
 
-import requests 
-from bs4 import BeautifulSoup 
- 
-login = "Your Username Here" 
-password = "Your Password Here" 
-login_url = "https://github.com/session" 
-repos_url = "https://github.com/" + login + "/?tab=repositories" 
- 
-with requests.session() as s: 
- req = s.get(login_url).text 
- html = BeautifulSoup(req,"html.parser") 
- token = html.find("input", {"name": "authenticity_token"}).attrs["value"] 
- time = html.find("input", {"name": "timestamp"}).attrs["value"] 
- timeSecret = html.find("input", {"name": "timestamp_secret"}).attrs["value"] 
- 
- payload = { 
-  "authenticity_token": token, 
-  "login": login, 
-  "password": password, 
-  "timestamp": time, 
-  "timestamp_secret": timeSecret 
- } 
- res =s.post(login_url, data=payload) 
- 
- r = s.get(repos_url) 
- soup = BeautifulSoup (r.content, "html.parser") 
- usernameDiv = soup.find("span", class_="p-nickname vcard-username d-block") 
- print("Username: " + usernameDiv.getText()) 
- 
- repos = soup.find_all("h3", class_="wb-break-all") 
- for r in repos: 
-  repoName = r.find("a").getText() 
+import requests
+from bs4 import BeautifulSoup
+
+login = "Your Username Here"
+password = "Your Password Here"
+login_url = "https://github.com/session"
+repos_url = "https://github.com/" + login + "/?tab=repositories"
+
+with requests.session() as s:
+ req = s.get(login_url).text
+ html = BeautifulSoup(req,"html.parser")
+ token = html.find("input", {"name": "authenticity_token"}).attrs["value"]
+ time = html.find("input", {"name": "timestamp"}).attrs["value"]
+ timeSecret = html.find("input", {"name": "timestamp_secret"}).attrs["value"]
+
+ payload = {
+  "authenticity_token": token,
+  "login": login,
+  "password": password,
+  "timestamp": time,
+  "timestamp_secret": timeSecret
+ }
+ res =s.post(login_url, data=payload)
+
+ r = s.get(repos_url)
+ soup = BeautifulSoup (r.content, "html.parser")
+ usernameDiv = soup.find("span", class_="p-nickname vcard-username d-block")
+ print("Username: " + usernameDiv.getText())
+
+ repos = soup.find_all("h3", class_="wb-break-all")
+ for r in repos:
+  repoName = r.find("a").getText()
   print("Repository Name: " + repoName)
 And the output:
 
@@ -263,16 +263,16 @@ Setting JavaScript Rendering is mandatory for running some JavaScript instructio
 Selecting Antibot helps you bypass advanced WAF security measures.
 Checking JS Instructions lets you add an encoded string of JavaScript instructions to run on the target. In turn, this allows control similar to a headless browser.
 A text box appears when you complete the instructions checkbox. You can write any number of them, and we put in the following:
-[ 
- {"wait": 2000}, 
- {"evaluate": "document.querySelector('.input-group-field').value = 'Your Business Email Here';"}, 
- {"wait": 1000}, 
- {"click": ".js-button-submit"}, 
- {"wait": 2000}, 
- {"evaluate": "document.querySelector('#password_input').value = 'Your Password Here';"}, 
- {"wait": 1000}, 
- {"click": "input[value='Sign In']"}, 
- {"wait": 6000} 
+[
+ {"wait": 2000},
+ {"evaluate": "document.querySelector('.input-group-field').value = 'Your Business Email Here';"},
+ {"wait": 1000},
+ {"click": ".js-button-submit"},
+ {"wait": 2000},
+ {"evaluate": "document.querySelector('#password_input').value = 'Your Password Here';"},
+ {"wait": 1000},
+ {"click": "input[value='Sign In']"},
+ {"wait": 6000}
 ]
 Note: Update the code above by adding your own login credentials.
 
@@ -280,41 +280,41 @@ Choose Python.
 Select SDK and copy the whole code. Remember to install the ZenRows SDK package using pip install zenrows.
 Paste this script into your Python project and execute it. We’ve copied the SDK code and modified it to make it more portable and easier to understand.
 
-# pip install zenrows 
-from zenrows import ZenRowsClient 
-import urllib 
-import json 
- 
-client = ZenRowsClient("Your Zenrows API Goes Here") 
-url = "https://www.g2.com/login?form=signup#state.email.show_asyncform" 
- 
-js_instructions = [ 
- {"wait": 2000}, 
- {"evaluate": "document.querySelector('.input-group-field').value = 'Your G2 Login Email Here';"}, 
- {"wait": 1000}, 
- {"click": ".js-button-submit"}, 
- {"wait": 2000}, 
- {"evaluate": "document.querySelector('#password_input').value = 'Your G2 Password Here';"}, 
- {"wait": 1000}, 
- {"click": "input[value='Sign In']"}, 
- {"wait": 6000} 
-] 
- 
-params = { 
- "js_render":"true", 
- "antibot":"true", 
- "js_instructions":urllib.parse.quote(json.dumps(js_instructions)), 
- "premium_proxy":"true" 
-} 
- 
-response = client.get(url, params=params) 
- 
+# pip install zenrows
+from zenrows import ZenRowsClient
+import urllib
+import json
+
+client = ZenRowsClient("Your Zenrows API Goes Here")
+url = "https://www.g2.com/login?form=signup#state.email.show_asyncform"
+
+js_instructions = [
+ {"wait": 2000},
+ {"evaluate": "document.querySelector('.input-group-field').value = 'Your G2 Login Email Here';"},
+ {"wait": 1000},
+ {"click": ".js-button-submit"},
+ {"wait": 2000},
+ {"evaluate": "document.querySelector('#password_input').value = 'Your G2 Password Here';"},
+ {"wait": 1000},
+ {"click": "input[value='Sign In']"},
+ {"wait": 6000}
+]
+
+params = {
+ "js_render":"true",
+ "antibot":"true",
+ "js_instructions":urllib.parse.quote(json.dumps(js_instructions)),
+ "premium_proxy":"true"
+}
+
+response = client.get(url, params=params)
+
 print(response.text)
 That snippet brings and prints the plain HTML from the G2 Homepage after logging in. Now, we’ll use Beautiful Soup to further parse the HTML and extract the data we want.
 
-from bs4 import BeautifulSoup 
-soup = BeautifulSoup(response.text, "html.parser") 
-welcome = soup.find("div", attrs={"class", "l4 color-white my-1"}) 
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(response.text, "html.parser")
+welcome = soup.find("div", attrs={"class", "l4 color-white my-1"})
 print(welcome.text)
 It’s a success! 🥳
 
@@ -322,38 +322,38 @@ Zoom image will be displayed
 
 Here’s the complete code:
 
-# pip install zenrows 
-from zenrows import ZenRowsClient 
-from bs4 import BeautifulSoup 
-import urllib 
-import json 
- 
-client = ZenRowsClient("Your Zenrows API Goes Here") 
-url = "https://www.g2.com/login?form=signup#state.email.show_asyncform" 
- 
-js_instructions = [ 
- {"wait": 2000}, 
- {"evaluate": "document.querySelector('.input-group-field').value = 'Your G2 Login Email Here';"}, 
- {"wait": 1000}, 
- {"click": ".js-button-submit"}, 
- {"wait": 2000}, 
- {"evaluate": "document.querySelector('#password_input').value = 'Your G2 Password Here';"}, 
- {"wait": 1000}, 
- {"click": "input[value='Sign In']"}, 
- {"wait": 6000} 
-] 
- 
-params = { 
- "js_render":"true", 
- "antibot":"true", 
- "js_instructions":urllib.parse.quote(json.dumps(js_instructions)), 
- "premium_proxy":"true" 
-} 
- 
-response = client.get(url, params=params) 
- 
-soup = BeautifulSoup(response.text, "html.parser") 
-welcome = soup.find("div", attrs={"class", "l4 color-white my-1"}) 
+# pip install zenrows
+from zenrows import ZenRowsClient
+from bs4 import BeautifulSoup
+import urllib
+import json
+
+client = ZenRowsClient("Your Zenrows API Goes Here")
+url = "https://www.g2.com/login?form=signup#state.email.show_asyncform"
+
+js_instructions = [
+ {"wait": 2000},
+ {"evaluate": "document.querySelector('.input-group-field').value = 'Your G2 Login Email Here';"},
+ {"wait": 1000},
+ {"click": ".js-button-submit"},
+ {"wait": 2000},
+ {"evaluate": "document.querySelector('#password_input').value = 'Your G2 Password Here';"},
+ {"wait": 1000},
+ {"click": "input[value='Sign In']"},
+ {"wait": 6000}
+]
+
+params = {
+ "js_render":"true",
+ "antibot":"true",
+ "js_instructions":urllib.parse.quote(json.dumps(js_instructions)),
+ "premium_proxy":"true"
+}
+
+response = client.get(url, params=params)
+
+soup = BeautifulSoup(response.text, "html.parser")
+welcome = soup.find("div", attrs={"class", "l4 color-white my-1"})
 print(welcome.text)
 Don’t miss the rest of the tutorial!
 To read the rest of the article, which is about how to scrape_async behind a login on more protected sites, go to our full tutorial on how to scrape_async a website that requires a login with Python.

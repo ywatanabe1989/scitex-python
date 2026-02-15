@@ -10,6 +10,7 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import matplotlib
+
 from scitex.plt.utils import assert_valid_axis
 
 

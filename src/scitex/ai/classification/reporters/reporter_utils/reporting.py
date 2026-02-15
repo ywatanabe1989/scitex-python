@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/ai/classification/reporter_utils/reporting.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -20,11 +21,12 @@ Supports multiple output formats:
 - Paper export functionality
 """
 
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+
 import numpy as np
 import pandas as pd
-from datetime import datetime
 import yaml
 
 
@@ -554,9 +556,9 @@ def generate_org_report(
 
     # Optional pandoc conversions
     if convert_formats:
-        import subprocess
-        import shutil
         import os
+        import shutil
+        import subprocess
 
         # Check for pandoc in regular PATH or module system
         pandoc_cmd = shutil.which("pandoc")

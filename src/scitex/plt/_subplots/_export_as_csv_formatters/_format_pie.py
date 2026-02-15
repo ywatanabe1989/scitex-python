@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -33,13 +34,17 @@ def _format_pie(id, tracked_dict, kwargs):
             x = np.asarray(args[0])
 
             # Get column names from single source of truth
-            col_values = get_csv_column_name("values", ax_row, ax_col, trace_id=trace_id)
+            col_values = get_csv_column_name(
+                "values", ax_row, ax_col, trace_id=trace_id
+            )
             data = {col_values: x}
 
             # Add labels if provided
             labels = kwargs.get("labels", None)
             if labels is not None:
-                col_labels = get_csv_column_name("labels", ax_row, ax_col, trace_id=trace_id)
+                col_labels = get_csv_column_name(
+                    "labels", ax_row, ax_col, trace_id=trace_id
+                )
                 data[col_labels] = labels
 
             df = pd.DataFrame(data)

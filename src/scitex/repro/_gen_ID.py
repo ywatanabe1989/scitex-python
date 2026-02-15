@@ -109,7 +109,9 @@ def main(args):
 
 if __name__ == "__main__":
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

@@ -413,6 +413,7 @@ class TestConvertBundleConversion:
                 assert result.exit_code == 0
                 mock_convert.assert_called_once()
 
+
 if __name__ == "__main__":
     import os
 
@@ -426,32 +427,32 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: "2025-12-19 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/cli/convert.py
-# 
+#
 # """
 # CLI commands for converting legacy bundle formats to unified .stx format.
-# 
+#
 # Usage:
 #     scitex convert old_figure.figz                    # Convert to old_figure.stx
 #     scitex convert old_figure.figz output.stx         # Convert with custom output
 #     scitex convert --batch ./figures/*.figz           # Batch convert
 #     scitex convert --validate output.stx              # Validate bundle
 # """
-# 
+#
 # import sys
 # from pathlib import Path
 # from typing import List, Optional
-# 
+#
 # import click
-# 
-# 
+#
+#
 # @click.group()
 # def convert():
 #     """Convert and validate SciTeX bundle files.
-# 
+#
 #     \b
 #     Convert legacy formats (.figz, .pltz, .statsz) to unified .stx format.
 #     Supports single file conversion, batch conversion, and validation.
-# 
+#
 #     \b
 #     Examples:
 #       scitex convert file old_figure.figz              # Convert single file
@@ -460,8 +461,8 @@ if __name__ == "__main__":
 #       scitex convert validate output.stx               # Validate bundle
 #     """
 #     pass
-# 
-# 
+#
+#
 # @convert.command("file")
 # @click.argument("input_path", type=click.Path(exists=True))
 # @click.option(
@@ -484,13 +485,13 @@ if __name__ == "__main__":
 #     input_path: str, output: Optional[str], overwrite: bool, dry_run: bool
 # ):
 #     """Convert a single legacy bundle to .stx format.
-# 
+#
 #     \b
 #     Supported input formats:
 #       .figz  - Figure bundles
 #       .pltz  - Plot bundles
 #       .statsz - Statistics bundles
-# 
+#
 #     \b
 #     Examples:
 #       scitex convert file old_figure.figz
@@ -498,18 +499,18 @@ if __name__ == "__main__":
 #       scitex convert file stats.statsz --dry-run
 #     """
 #     input_file = Path(input_path)
-# 
+#
 #     # Determine output path
 #     if output:
 #         output_file = Path(output)
 #     else:
 #         output_file = input_file.with_suffix(".stx")
-# 
+#
 #     # Check if already .stx
 #     if input_file.suffix == ".stx":
 #         click.secho(f"File is already in .stx format: {input_file}", fg="yellow")
 #         return
-# 
+#
 #     # Validate input format
 #     valid_extensions = (".figz", ".pltz", ".statsz")
 #     if input_file.suffix not in valid_extensions:
@@ -520,7 +521,7 @@ if __name__ == "__main__":
 #             err=True,
 #         )
 #         sys.exit(1)
-# 
+#
 #     # Check output exists
 #     if output_file.exists() and not overwrite:
 #         click.secho(
@@ -529,11 +530,11 @@ if __name__ == "__main__":
 #             err=True,
 #         )
 #         sys.exit(1)
-# 
+#
 #     if dry_run:
 #         click.echo(f"Would convert: {input_file} -> {output_file}")
 #         return
-# 
+#
 #     # Perform conversion
 #     try:
 #         _convert_bundle(input_file, output_file)
@@ -541,8 +542,8 @@ if __name__ == "__main__":
 #     except Exception as e:
 #         click.secho(f"Error converting {input_file}: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @convert.command("batch")
 # @click.argument("pattern", nargs=-1, required=True)
 # @click.option(
@@ -565,7 +566,7 @@ if __name__ == "__main__":
 #     pattern: tuple, output_dir: Optional[str], overwrite: bool, dry_run: bool
 # ):
 #     """Batch convert multiple legacy bundles to .stx format.
-# 
+#
 #     \b
 #     Examples:
 #       scitex convert batch ./figures/*.figz
@@ -573,28 +574,28 @@ if __name__ == "__main__":
 #       scitex convert batch ./**/*.figz ./**/*.pltz --dry-run
 #     """
 #     import glob
-# 
+#
 #     # Collect all files matching patterns
 #     files: List[Path] = []
 #     for pat in pattern:
 #         matches = glob.glob(pat, recursive=True)
 #         files.extend(Path(m) for m in matches)
-# 
+#
 #     # Filter to valid extensions
 #     valid_extensions = (".figz", ".pltz", ".statsz")
 #     files = [f for f in files if f.suffix in valid_extensions]
-# 
+#
 #     if not files:
 #         click.secho("No matching files found.", fg="yellow")
 #         return
-# 
+#
 #     click.echo(f"Found {len(files)} file(s) to convert")
-# 
+#
 #     # Determine output directory
 #     out_dir = Path(output_dir) if output_dir else None
 #     if out_dir and not dry_run:
 #         out_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #     # Convert each file
 #     converted = 0
 #     errors = 0
@@ -603,16 +604,16 @@ if __name__ == "__main__":
 #             output_file = out_dir / input_file.with_suffix(".stx").name
 #         else:
 #             output_file = input_file.with_suffix(".stx")
-# 
+#
 #         if output_file.exists() and not overwrite:
 #             click.secho(f"Skipping (exists): {output_file}", fg="yellow")
 #             continue
-# 
+#
 #         if dry_run:
 #             click.echo(f"Would convert: {input_file} -> {output_file}")
 #             converted += 1
 #             continue
-# 
+#
 #         try:
 #             _convert_bundle(input_file, output_file)
 #             click.secho(
@@ -622,12 +623,12 @@ if __name__ == "__main__":
 #         except Exception as e:
 #             click.secho(f"Error: {input_file}: {e}", fg="red", err=True)
 #             errors += 1
-# 
+#
 #     # Summary
 #     click.echo()
 #     click.echo(f"Converted: {converted}, Errors: {errors}")
-# 
-# 
+#
+#
 # @convert.command("validate")
 # @click.argument("paths", nargs=-1, required=True, type=click.Path(exists=True))
 # @click.option(
@@ -638,7 +639,7 @@ if __name__ == "__main__":
 # )
 # def validate_bundles(paths: tuple, verbose: bool):
 #     """Validate one or more .stx bundles.
-# 
+#
 #     \b
 #     Checks:
 #       - Valid ZIP structure
@@ -646,7 +647,7 @@ if __name__ == "__main__":
 #       - Schema version
 #       - Depth limits
 #       - Circular references
-# 
+#
 #     \b
 #     Examples:
 #       scitex convert validate output.stx
@@ -655,35 +656,35 @@ if __name__ == "__main__":
 #     # Use Bundle for validation
 #     try:
 #         from scitex.io.bundle import Bundle as ZipBundle
-# 
+#
 #         def validate_stx_bundle(path):
 #             try:
 #                 bundle = ZipBundle(path)
 #                 return bundle.validate(level="strict")
 #             except Exception as e:
 #                 return {"valid": False, "errors": [str(e)]}
-# 
+#
 #     except ImportError:
 #         click.echo("Error: scitex.io.bundle not available", err=True)
 #         return
-# 
+#
 #     valid = 0
 #     invalid = 0
-# 
+#
 #     for path_str in paths:
 #         path = Path(path_str)
-# 
+#
 #         try:
 #             with ZipBundle(path, mode="r") as zb:
 #                 spec = zb.read_json("spec.json")
-# 
+#
 #             # Check schema
 #             schema = spec.get("schema", {})
 #             schema_name = schema.get("name", "unknown")
 #             schema_version = schema.get("version", "unknown")
 #             bundle_type = spec.get("type", "unknown")
 #             bundle_id = spec.get("bundle_id", "missing")
-# 
+#
 #             if verbose:
 #                 click.echo(f"\n{path}:")
 #                 click.echo(f"  Schema: {schema_name} v{schema_version}")
@@ -691,40 +692,40 @@ if __name__ == "__main__":
 #                 click.echo(f"  ID: {bundle_id}")
 #                 constraints = spec.get("constraints", {})
 #                 click.echo(f"  Constraints: {constraints}")
-# 
+#
 #             # Validate structure
 #             validate_stx_bundle(spec)
-# 
+#
 #             click.secho(f"VALID: {path}", fg="green")
 #             valid += 1
-# 
+#
 #         except FileNotFoundError as e:
 #             click.secho(f"INVALID: {path} - File not found: {e}", fg="red")
 #             invalid += 1
 #         except Exception as e:
 #             click.secho(f"INVALID: {path} - {e}", fg="red")
 #             invalid += 1
-# 
+#
 #     # Summary
 #     click.echo()
 #     click.echo(f"Valid: {valid}, Invalid: {invalid}")
-# 
+#
 #     if invalid > 0:
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @convert.command("info")
 # @click.argument("path", type=click.Path(exists=True))
 # def bundle_info(path: str):
 #     """Show information about a bundle file.
-# 
+#
 #     \b
 #     Displays:
 #       - Format (stx vs legacy)
 #       - Schema version
 #       - Bundle type
 #       - Contents summary
-# 
+#
 #     \b
 #     Example:
 #       scitex convert info figure.stx
@@ -734,19 +735,19 @@ if __name__ == "__main__":
 #     except ImportError:
 #         click.echo("Error: scitex.io.bundle not available", err=True)
 #         return
-# 
+#
 #     bundle_path = Path(path)
-# 
+#
 #     try:
 #         with ZipBundle(bundle_path, mode="r") as zb:
 #             spec = zb.read_json("spec.json")
 #             files = zb.namelist()
-# 
+#
 #         # Basic info
 #         click.echo(f"\nBundle: {bundle_path}")
 #         click.echo(f"Extension: {bundle_path.suffix}")
 #         click.echo(f"Size: {bundle_path.stat().st_size:,} bytes")
-# 
+#
 #         # Schema info
 #         schema = spec.get("schema", {})
 #         click.echo(
@@ -754,21 +755,21 @@ if __name__ == "__main__":
 #         )
 #         click.echo(f"Type: {spec.get('type', 'unknown')}")
 #         click.echo(f"Bundle ID: {spec.get('bundle_id', 'not set')}")
-# 
+#
 #         # Constraints
 #         constraints = spec.get("constraints", {})
 #         if constraints:
 #             click.echo("\nConstraints:")
 #             click.echo(f"  allow_children: {constraints.get('allow_children', 'N/A')}")
 #             click.echo(f"  max_depth: {constraints.get('max_depth', 'N/A')}")
-# 
+#
 #         # Contents
 #         click.echo(f"\nContents ({len(files)} files):")
 #         for f in sorted(files)[:20]:  # Show first 20
 #             click.echo(f"  {f}")
 #         if len(files) > 20:
 #             click.echo(f"  ... and {len(files) - 20} more")
-# 
+#
 #         # Type-specific info
 #         if spec.get("type") == "figure":
 #             panels = spec.get("panels", [])
@@ -780,32 +781,32 @@ if __name__ == "__main__":
 #         elif spec.get("type") == "stats":
 #             comparisons = spec.get("comparisons", [])
 #             click.echo(f"\nComparisons: {len(comparisons)}")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error reading bundle: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # def _convert_bundle(input_path: Path, output_path: Path) -> None:
 #     """Convert a legacy bundle to .stx format.
-# 
+#
 #     Args:
 #         input_path: Path to legacy bundle (.figz, .pltz, .statsz)
 #         output_path: Path for output .stx bundle
 #     """
 #     import json
 #     import tempfile
-# 
+#
 #     # Generate bundle ID and normalize spec - inline functions since io.bundle is deprecated
 #     import uuid
 #     import zipfile
-# 
+#
 #     def generate_bundle_id():
 #         return str(uuid.uuid4())[:8]
-# 
+#
 #     def normalize_spec(spec):
 #         return spec  # FTS handles normalization internally
-# 
+#
 #     # Determine bundle type from extension
 #     ext = input_path.suffix
 #     type_map = {
@@ -814,30 +815,30 @@ if __name__ == "__main__":
 #         ".statsz": "stats",
 #     }
 #     bundle_type = type_map.get(ext)
-# 
+#
 #     # Read input bundle
 #     with zipfile.ZipFile(input_path, "r") as zf:
 #         # Read spec
 #         spec_data = zf.read("spec.json")
 #         spec = json.loads(spec_data)
-# 
+#
 #         # Normalize to v2.0.0
 #         normalized_spec = normalize_spec(spec, bundle_type)
-# 
+#
 #         # Ensure bundle_id
 #         if "bundle_id" not in normalized_spec:
 #             normalized_spec["bundle_id"] = generate_bundle_id()
-# 
+#
 #         # Copy all files to new bundle
 #         with tempfile.TemporaryDirectory() as tmpdir:
 #             # Extract all
 #             zf.extractall(tmpdir)
-# 
+#
 #             # Write updated spec
 #             spec_path = Path(tmpdir) / "spec.json"
 #             with open(spec_path, "w") as f:
 #                 json.dump(normalized_spec, f, indent=2)
-# 
+#
 #             # Create output bundle
 #             output_path.parent.mkdir(parents=True, exist_ok=True)
 #             with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as out_zf:
@@ -845,8 +846,8 @@ if __name__ == "__main__":
 #                     if file_path.is_file():
 #                         arcname = file_path.relative_to(tmpdir)
 #                         out_zf.write(file_path, arcname)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

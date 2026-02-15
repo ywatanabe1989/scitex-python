@@ -3,8 +3,7 @@
 # File: ./src/scitex/vis/utils/defaults.py
 """Default figure templates for common publication formats."""
 
-from typing import Dict, Any
-
+from typing import Any, Dict
 
 # Common journal figure widths (mm)
 NATURE_SINGLE_COLUMN_MM = 89  # Nature single column

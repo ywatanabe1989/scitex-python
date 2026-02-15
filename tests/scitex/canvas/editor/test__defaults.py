@@ -13,14 +13,14 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # File: ./src/scitex/vis/editor/_defaults.py
 # """Default style settings for SciTeX visual editor."""
-# 
+#
 # from scitex.plt.styles import get_default_dpi
-# 
-# 
+#
+#
 # def get_scitex_defaults():
 #     """
 #     Get default style values based on SciTeX publication standards.
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -63,12 +63,12 @@ if __name__ == "__main__":
 #         # Annotations
 #         "annotations": [],
 #     }
-# 
-# 
+#
+#
 # def get_scitex_colors():
 #     """
 #     Get SciTeX color palette.
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -92,31 +92,31 @@ if __name__ == "__main__":
 #         "dark_gray": "#404040",
 #         "light_gray": "#d0d0d0",
 #     }
-# 
-# 
+#
+#
 # def extract_defaults_from_metadata(metadata):
 #     """
 #     Extract style defaults from loaded figure metadata.
-# 
+#
 #     Parameters
 #     ----------
 #     metadata : dict
 #         Figure metadata loaded from JSON
-# 
+#
 #     Returns
 #     -------
 #     dict
 #         Dictionary of style values extracted from metadata
 #     """
 #     defaults = get_scitex_defaults()
-# 
+#
 #     if not metadata:
 #         return defaults
-# 
+#
 #     # Extract from scitex section (new format)
 #     scitex_meta = metadata.get("scitex", {})
 #     style_mm = scitex_meta.get("style_mm", {})
-# 
+#
 #     # Font sizes from style_mm
 #     if "axis_font_size_pt" in style_mm:
 #         defaults["axis_fontsize"] = style_mm["axis_font_size_pt"]
@@ -126,7 +126,7 @@ if __name__ == "__main__":
 #         defaults["title_fontsize"] = style_mm["title_font_size_pt"]
 #     if "legend_font_size_pt" in style_mm:
 #         defaults["legend_fontsize"] = style_mm["legend_font_size_pt"]
-# 
+#
 #     # Line/axis thickness from metadata (in mm)
 #     if "trace_thickness_mm" in style_mm:
 #         defaults["linewidth"] = style_mm["trace_thickness_mm"] * 2.83465  # mm to pt
@@ -138,14 +138,14 @@ if __name__ == "__main__":
 #         defaults["tick_width"] = style_mm["tick_thickness_mm"]
 #     if "n_ticks" in style_mm:
 #         defaults["n_ticks"] = style_mm["n_ticks"]
-# 
+#
 #     # Dimensions from metadata (support both old and new formats)
 #     dimensions = metadata.get("dimensions", {})
 #     if "dpi" in dimensions:
 #         defaults["dpi"] = dimensions["dpi"]
 #     if "figure_size_inch" in dimensions:
 #         defaults["fig_size"] = dimensions["figure_size_inch"]
-# 
+#
 #     # New format: size.width_mm, size.height_mm, size.dpi
 #     size = metadata.get("size", {})
 #     if "dpi" in size:
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 #         width_inch = size["width_mm"] / 25.4
 #         height_inch = size["height_mm"] / 25.4
 #         defaults["fig_size"] = [width_inch, height_inch]
-# 
+#
 #     # Axis labels from metadata
 #     if "xlabel" in metadata:
 #         defaults["xlabel"] = metadata["xlabel"]
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 #         defaults["ylabel"] = metadata["ylabel"]
 #     if "title" in metadata:
 #         defaults["title"] = metadata["title"]
-# 
+#
 #     # Try to extract from axes if present
 #     axes = metadata.get("axes", {})
 #     if isinstance(axes, dict):
@@ -205,17 +205,17 @@ if __name__ == "__main__":
 #             defaults["xlim"] = ax["xlim"]
 #         if "ylim" in ax:
 #             defaults["ylim"] = ax["ylim"]
-# 
+#
 #     # Extract traces information - check multiple possible locations
 #     traces = metadata.get("traces", [])
-# 
+#
 #     # Also check axes[].lines (plot bundle format)
 #     if not traces and isinstance(axes, list) and len(axes) > 0:
 #         ax = axes[0]
 #         lines = ax.get("lines", [])
 #         if lines:
 #             traces = lines
-# 
+#
 #     # Also check hit_regions.color_map for trace info
 #     if not traces:
 #         hit_regions = metadata.get("hit_regions", {})
@@ -230,20 +230,20 @@ if __name__ == "__main__":
 #                         "type": trace_info.get("type", "line"),
 #                     }
 #                 )
-# 
+#
 #     if traces:
 #         defaults["traces"] = traces
-# 
+#
 #     # Extract legend information from multiple possible locations
 #     legend = metadata.get("legend", {})
-# 
+#
 #     # Also check selectable_regions.axes[0].legend (plot bundle format)
 #     if not legend:
 #         selectable = metadata.get("selectable_regions", {})
 #         sel_axes = selectable.get("axes", [])
 #         if sel_axes and len(sel_axes) > 0:
 #             legend = sel_axes[0].get("legend", {})
-# 
+#
 #     if legend:
 #         defaults["legend_visible"] = legend.get("visible", True)
 #         defaults["legend_frameon"] = legend.get("frameon", False)
@@ -260,7 +260,7 @@ if __name__ == "__main__":
 #         # Extract title if present
 #         if "title" in legend:
 #             defaults["legend_title"] = legend["title"]
-# 
+#
 #         # Extract legend entries if present
 #         entries = legend.get("entries", [])
 #         if entries and not traces:
@@ -268,21 +268,21 @@ if __name__ == "__main__":
 #             defaults["traces"] = [
 #                 {"label": e.get("text", f"Trace {i}")} for i, e in enumerate(entries)
 #             ]
-# 
+#
 #     return defaults
-# 
-# 
+#
+#
 # def _normalize_legend_loc(loc):
 #     """Convert legend location to string format for GUI compatibility.
-# 
+#
 #     Matplotlib accepts both numeric codes and string locations for legends.
 #     This function ensures consistency by converting numeric codes to strings.
-# 
+#
 #     Parameters
 #     ----------
 #     loc : int or str
 #         Legend location (numeric or string)
-# 
+#
 #     Returns
 #     -------
 #     str
@@ -290,7 +290,7 @@ if __name__ == "__main__":
 #     """
 #     if isinstance(loc, str):
 #         return loc
-# 
+#
 #     # Numeric to string mapping (matplotlib legend location codes)
 #     loc_map = {
 #         0: "best",
@@ -305,10 +305,10 @@ if __name__ == "__main__":
 #         9: "upper center",
 #         10: "center",
 #     }
-# 
+#
 #     return loc_map.get(loc, "best")
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

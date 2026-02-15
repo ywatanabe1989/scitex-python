@@ -3,14 +3,15 @@
 # Time-stamp: "2024-11-05 08:00:00 (ywatanabe)"
 # File: ./tests/scitex/pd/test__slice.py
 
-import pytest
-import numpy as np
-import pandas as pd
-from unittest.mock import Mock, patch, MagicMock
-import tempfile
+import builtins
 import os
 import sys
-import builtins
+import tempfile
+from unittest.mock import MagicMock, Mock, patch
+
+import numpy as np
+import pandas as pd
+import pytest
 
 
 class TestSliceBasic:
@@ -421,6 +422,7 @@ class TestCopyBehavior:
         assert df["A"].tolist() == [1, 2, 3]
         assert result["A"].tolist() == [99, 98]
 
+
 if __name__ == "__main__":
     import os
 
@@ -435,15 +437,15 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-05 07:45:00 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/pd/_slice.py
-# 
+#
 # from typing import Dict, Union, List, Optional
 # import builtins
-# 
+#
 # import pandas as pd
-# 
+#
 # from ._find_indi import find_indi
-# 
-# 
+#
+#
 # def slice(
 #     df: pd.DataFrame,
 #     conditions: Union[
@@ -452,7 +454,7 @@ if __name__ == "__main__":
 #     columns: Optional[List[str]] = None,
 # ) -> pd.DataFrame:
 #     """Slices DataFrame rows and/or columns.
-# 
+#
 #     Example
 #     -------
 #     >>> df = pd.DataFrame({'A': [1, 2, 3], 'B': ['x', 'y', 'x']})
@@ -462,7 +464,7 @@ if __name__ == "__main__":
 #     >>> result = slice(df, {'A': [1, 2], 'B': 'x'})
 #     >>> # Slice columns
 #     >>> result = slice(df, columns=['A'])
-# 
+#
 #     Parameters
 #     ----------
 #     df : pd.DataFrame
@@ -471,28 +473,28 @@ if __name__ == "__main__":
 #         Either a slice object for row indices, or a dictionary of column conditions
 #     columns : List[str], optional
 #         List of column names to select
-# 
+#
 #     Returns
 #     -------
 #     pd.DataFrame
 #         Sliced DataFrame
 #     """
 #     result = df.copy()
-# 
+#
 #     # Handle row slicing
 #     if isinstance(conditions, builtins.slice):
 #         result = result.iloc[conditions]
 #     elif isinstance(conditions, dict):
 #         indices = find_indi(result, conditions)
 #         result = result.loc[indices]
-# 
+#
 #     # Handle column slicing
 #     if columns is not None:
 #         result = result[columns]
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -141,6 +141,18 @@ Ghost nodes are automatically added at boundaries with `→` prefix.
 | `stadium` | `(["label"])` | Start/End |
 | `diamond` | `{"label"}` | Decisions |
 | `circle` | `(("label"))` | Events |
+| `codeblock` | `["label"]` | Scripts, code snippets |
+
+### Schematic-Only Shapes
+
+These shapes are available in the schematic module (native matplotlib rendering):
+
+| Shape | Visual | Use Case |
+|-------|--------|----------|
+| `cylinder` | Database drum | Data stores, files |
+| `document` | Paper with folded corner | Reports, manuscripts |
+| `file` | Folder with tab | Directories, file groups |
+| `codeblock` | Terminal window with title bar | Scripts, commands |
 
 ## Emphasis Levels
 

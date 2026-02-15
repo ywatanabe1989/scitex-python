@@ -20,7 +20,7 @@ def plot_mpl_hist2d(plt, rng, ax=None):
     x, y = rng.normal(0, 1, 1000), rng.normal(0, 1, 1000)
     ax.mpl_hist2d(x, y, bins=20)
     ax.set_xyt("X", "Y", "mpl_hist2d")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

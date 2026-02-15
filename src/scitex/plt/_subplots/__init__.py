@@ -9,10 +9,11 @@ __FILE__ = "./src/scitex/plt/_subplots/__init__.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
+from ._AxesWrapper import AxesWrapper
+from ._AxisWrapper import AxisWrapper
+
 # Import wrapper classes
 from ._FigWrapper import FigWrapper
-from ._AxisWrapper import AxisWrapper
-from ._AxesWrapper import AxesWrapper
 
 # Backward-compatible aliases
 _FigWrapper = FigWrapper
@@ -24,23 +25,23 @@ from ._export_as_csv import export_as_csv, format_record
 
 # Import formatters for backward compatibility
 from ._export_as_csv_formatters import (
-    _format_plot_kde,
-    _format_plot_line,
-    _format_plot_conf_mat,
-    _format_plot_mean_std,
-    _format_plot_ecdf,
-    _format_plot_raster,
-    _format_plot_joyplot,
-    _format_plot,
-    _format_scatter,
     _format_bar,
-    _format_hist,
     _format_boxplot,
     _format_errorbar,
     _format_fill_between,
+    _format_hist,
     _format_imshow,
-    _format_violin,
+    _format_plot,
+    _format_plot_conf_mat,
+    _format_plot_ecdf,
+    _format_plot_joyplot,
+    _format_plot_kde,
+    _format_plot_line,
+    _format_plot_mean_std,
+    _format_plot_raster,
+    _format_scatter,
     _format_sns_boxplot,
+    _format_violin,
 )
 
 # import importlib

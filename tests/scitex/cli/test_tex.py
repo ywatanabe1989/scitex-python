@@ -321,6 +321,7 @@ class TestTexCheck:
         finally:
             os.unlink(temp_path)
 
+
 if __name__ == "__main__":
     import os
 
@@ -334,27 +335,27 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # """
 # SciTeX CLI - TeX Commands (LaTeX Operations)
-# 
+#
 # Provides LaTeX compilation and preview utilities.
 # """
-# 
+#
 # import sys
 # from pathlib import Path
-# 
+#
 # import click
-# 
-# 
+#
+#
 # @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 # def tex():
 #     """
 #     LaTeX compilation and utilities
-# 
+#
 #     \b
 #     Commands:
 #       compile    Compile LaTeX document to PDF
 #       preview    Preview LaTeX document
 #       to-vec     Convert to vector format (SVG/PDF)
-# 
+#
 #     \b
 #     Examples:
 #       scitex tex compile paper.tex
@@ -362,8 +363,8 @@ if __name__ == "__main__":
 #       scitex tex to-vec figure.tex --format svg
 #     """
 #     pass
-# 
-# 
+#
+#
 # @tex.command()
 # @click.argument("tex_file", type=click.Path(exists=True))
 # @click.option("--output", "-o", type=click.Path(), help="Output PDF path")
@@ -387,7 +388,7 @@ if __name__ == "__main__":
 # def compile(tex_file, output, engine, clean, timeout, verbose):
 #     """
 #     Compile LaTeX document to PDF
-# 
+#
 #     \b
 #     Examples:
 #       scitex tex compile paper.tex
@@ -397,21 +398,21 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.tex import compile_tex
-# 
+#
 #         path = Path(tex_file)
 #         click.echo(f"Compiling: {path.name}")
-# 
+#
 #         result = compile_tex(
 #             tex_path=path,
 #             output_path=output,
 #             engine=engine,
 #             timeout=timeout,
 #         )
-# 
+#
 #         if result.success:
 #             click.secho("Compilation successful!", fg="green")
 #             click.echo(f"PDF: {result.output_pdf}")
-# 
+#
 #             if clean:
 #                 # Clean auxiliary files
 #                 aux_extensions = [
@@ -438,19 +439,19 @@ if __name__ == "__main__":
 #                 for error in result.errors[:10]:
 #                     click.echo(f"  {error}")
 #             sys.exit(result.exit_code)
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @tex.command()
 # @click.argument("tex_file", type=click.Path(exists=True))
 # @click.option("--viewer", "-v", help="PDF viewer to use (default: system default)")
 # def preview(tex_file, viewer):
 #     """
 #     Preview LaTeX document (compile and open)
-# 
+#
 #     \b
 #     Examples:
 #       scitex tex preview paper.tex
@@ -458,17 +459,17 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.tex import preview as tex_preview
-# 
+#
 #         path = Path(tex_file)
 #         click.echo(f"Previewing: {path.name}")
-# 
+#
 #         tex_preview(path, viewer=viewer)
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @tex.command("to-vec")
 # @click.argument("tex_file", type=click.Path(exists=True))
 # @click.option(
@@ -483,10 +484,10 @@ if __name__ == "__main__":
 # def to_vec(tex_file, fmt, output):
 #     """
 #     Convert LaTeX to vector format
-# 
+#
 #     \b
 #     Useful for embedding equations and figures in other documents.
-# 
+#
 #     \b
 #     Examples:
 #       scitex tex to-vec equation.tex
@@ -495,42 +496,42 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.tex import to_vec as convert_to_vec
-# 
+#
 #         path = Path(tex_file)
 #         click.echo(f"Converting: {path.name} -> {fmt.upper()}")
-# 
+#
 #         if output:
 #             output_path = Path(output)
 #         else:
 #             output_path = path.with_suffix(f".{fmt}")
-# 
+#
 #         result = convert_to_vec(path, output_path, format=fmt)
-# 
+#
 #         if result:
 #             click.secho("Conversion successful!", fg="green")
 #             click.echo(f"Output: {result}")
 #         else:
 #             click.secho("Conversion failed", fg="red", err=True)
 #             sys.exit(1)
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @tex.command()
 # @click.argument("tex_file", type=click.Path(exists=True))
 # def check(tex_file):
 #     """
 #     Check LaTeX document for common issues
-# 
+#
 #     \b
 #     Checks:
 #       - Missing packages
 #       - Undefined references
 #       - Overfull/underfull boxes
 #       - Citation warnings
-# 
+#
 #     \b
 #     Example:
 #       scitex tex check paper.tex
@@ -538,10 +539,10 @@ if __name__ == "__main__":
 #     try:
 #         import subprocess
 #         from pathlib import Path
-# 
+#
 #         path = Path(tex_file)
 #         click.echo(f"Checking: {path.name}")
-# 
+#
 #         # Run LaTeX in draft mode to check
 #         result = subprocess.run(
 #             ["pdflatex", "-draftmode", "-interaction=nonstopmode", str(path)],
@@ -550,7 +551,7 @@ if __name__ == "__main__":
 #             cwd=path.parent,
 #             timeout=60,
 #         )
-# 
+#
 #         # Parse log for issues
 #         log_file = path.with_suffix(".log")
 #         issues = {
@@ -559,7 +560,7 @@ if __name__ == "__main__":
 #             "overfull": [],
 #             "undefined": [],
 #         }
-# 
+#
 #         if log_file.exists():
 #             with open(log_file) as f:
 #                 for line in f:
@@ -571,27 +572,27 @@ if __name__ == "__main__":
 #                         issues["overfull"].append(line.strip())
 #                     elif "undefined" in line.lower():
 #                         issues["undefined"].append(line.strip())
-# 
+#
 #         # Report
 #         total_issues = sum(len(v) for v in issues.values())
-# 
+#
 #         if total_issues == 0:
 #             click.secho("No issues found!", fg="green")
 #         else:
 #             click.secho(f"Found {total_issues} issue(s):", fg="yellow")
-# 
+#
 #             if issues["errors"]:
 #                 click.secho(f"\nErrors ({len(issues['errors'])}):", fg="red")
 #                 for err in issues["errors"][:5]:
 #                     click.echo(f"  {err}")
-# 
+#
 #             if issues["undefined"]:
 #                 click.secho(
 #                     f"\nUndefined References ({len(issues['undefined'])}):", fg="yellow"
 #                 )
 #                 for ref in issues["undefined"][:5]:
 #                     click.echo(f"  {ref}")
-# 
+#
 #             if issues["overfull"]:
 #                 click.secho(
 #                     f"\nOverfull/Underfull Boxes ({len(issues['overfull'])}):",
@@ -599,12 +600,12 @@ if __name__ == "__main__":
 #                 )
 #                 for box in issues["overfull"][:5]:
 #                     click.echo(f"  {box}")
-# 
+#
 #             if issues["warnings"]:
 #                 click.secho(f"\nWarnings ({len(issues['warnings'])}):", fg="yellow")
 #                 for warn in issues["warnings"][:5]:
 #                     click.echo(f"  {warn}")
-# 
+#
 #     except subprocess.TimeoutExpired:
 #         click.secho("Check timed out", fg="yellow")
 #     except FileNotFoundError:
@@ -613,8 +614,8 @@ if __name__ == "__main__":
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     tex()
 

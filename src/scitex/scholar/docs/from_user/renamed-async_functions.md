@@ -224,14 +224,14 @@ File: utils/_CheckpointScreenshotter.py
 
 File: utils/_DirectScholarPDFDownloader.py
   39   5     async def _capture_download_screenshot(self, page, download_path: Path, stage: str) -> Optional[str]:
-  73   5     async def download_pdf_async_direct(self, 
+  73   5     async def download_pdf_async_direct(self,
  104  13             async def handle_response(response):
- 254   5     async def download_multiple_pdfs(self, 
+ 254   5     async def download_multiple_pdfs(self,
  337   1 async def download_pdf_asyncs_direct(page, pdf_urls: List[str], download_dir: Path) -> List[Tuple[str, Path, bool, Optional[str]]]:
 
 File: utils/_GeneralizedPDFDetector.py
  217   5     async def detect_pdf_candidates(self, page, doi: str = "", url: str = "") -> List[PDFCandidate]:
- 386   5     async def download_best_pdf(self, page, candidates: List[PDFCandidate], 
+ 386   5     async def download_best_pdf(self, page, candidates: List[PDFCandidate],
 
 File: doi/batch/_LibraryManager.py
  182   5     async def resolve_and_create_library_structure_async(
@@ -602,7 +602,7 @@ File: download/_EZProxyDownloadStrategy.py
 File: download/_ScreenshotDownloadHelper.py
   57   5     async def download_with_screenshots(self, storage_key: str, urls: List[str],
   99  13             async def handle_download(download):
- 205   5     async def _capture_screenshot_async(self, page: Page, storage_key: str, 
+ 205   5     async def _capture_screenshot_async(self, page: Page, storage_key: str,
  238   5     async def _check_for_login_async(self, page: Page) -> bool:
  258   5     async def _check_for_captcha_async(self, page: Page) -> bool:
  277   5     async def _try_download_button(self, page: Page) -> bool:

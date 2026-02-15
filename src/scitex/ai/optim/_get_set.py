@@ -2,6 +2,7 @@
 """Optimizer utilities - legacy interface maintained for compatibility."""
 
 import warnings
+
 from ._optimizers import get_optimizer, set_optimizer
 
 

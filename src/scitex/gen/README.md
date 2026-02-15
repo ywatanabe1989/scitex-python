@@ -38,7 +38,7 @@ plt.ylabel('Sin(x)')
 plt.legend()
 
 # Save the figure using scitex.io.save
-scitex.io.save(plt, 'sine_wave_plot.png') 
+scitex.io.save(plt, 'sine_wave_plot.png')
 
 # See scitex.plt.subplots to automatic data tracking and saving in a sigmaplot-compatible format
 
@@ -54,7 +54,7 @@ This script demonstrates the basic usage of `scitex.session.start` and `scitex.s
   - Fixes random seeds for reproducibility.
   - Configures Matplotlib settings.
   - Returns a configuration dictionary (`CONFIG`) and other variables for use in your script.
-  
+
 - **`scitex.session.close`**:
   - Handles cleanup tasks such as flushing output streams.
   - Saves configuration settings and logs.

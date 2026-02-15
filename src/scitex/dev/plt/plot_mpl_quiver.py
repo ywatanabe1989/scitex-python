@@ -23,7 +23,7 @@ def plot_mpl_quiver(plt, rng, ax=None):
     U, V = np.cos(X), np.sin(Y)
     ax.mpl_quiver(X, Y, U, V)
     ax.set_xyt("X", "Y", "mpl_quiver")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

@@ -14,9 +14,9 @@ from functools import wraps
 from typing import Callable
 
 from ._batch_fn import batch_fn
-from ._torch_fn import torch_fn
 from ._numpy_fn import numpy_fn
 from ._pandas_fn import pandas_fn
+from ._torch_fn import torch_fn
 
 
 def torch_batch_fn(func: Callable) -> Callable:

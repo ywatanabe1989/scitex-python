@@ -38,12 +38,12 @@ graph TD
     D --> E[Result Processing]
     E --> F[Type Restoration]
     F --> G[Output Data]
-    
+
     H[Decorator Selection] --> |torch_fn| C
     H --> |numpy_fn| C
     H --> |pandas_fn| C
     H --> |batch_fn| E
-    
+
     I[Device Detection] --> C
     I --> F
 ```

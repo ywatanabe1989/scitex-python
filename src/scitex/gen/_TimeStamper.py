@@ -4,7 +4,8 @@
 # File: ./scitex_repo/src/scitex/gen/_TimeStamper.py
 
 import time
-from typing import Union, Optional
+from typing import Optional, Union
+
 import pandas as pd
 
 

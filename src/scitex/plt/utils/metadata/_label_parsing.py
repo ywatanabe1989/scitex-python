@@ -48,7 +48,9 @@ def _parse_label_unit(label_text: str) -> tuple:
     return label_text.strip(), ""
 
 
-def _get_csv_column_names(trace_id: str, ax_row: int = 0, ax_col: int = 0, variables: list = None) -> dict:
+def _get_csv_column_names(
+    trace_id: str, ax_row: int = 0, ax_col: int = 0, variables: list = None
+) -> dict:
     """
     Get CSV column names using the single source of truth naming convention.
 

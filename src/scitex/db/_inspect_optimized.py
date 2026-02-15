@@ -4,6 +4,7 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/SciTeX-Code/src/scitex/db/_inspect_optimized.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -11,8 +12,8 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import sqlite3
-from typing import Any, Dict, List, Optional, Tuple
 from contextlib import contextmanager
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class OptimizedInspector:
@@ -74,10 +75,12 @@ class OptimizedInspector:
                 columns = cursor.fetchall()
 
                 # Get primary key info more efficiently
-                cursor.execute(f"""
-                    SELECT name FROM pragma_table_info('{table_name}') 
+                cursor.execute(
+                    f"""
+                    SELECT name FROM pragma_table_info('{table_name}')
                     WHERE pk > 0
-                """)
+                """
+                )
                 pk_columns = {row[0] for row in cursor.fetchall()}
 
                 # Build column info
@@ -124,11 +127,13 @@ class OptimizedInspector:
                 # Get row count (can be slow for large tables)
                 if not skip_count:
                     # Use approximate count if available
-                    cursor.execute(f"""
+                    cursor.execute(
+                        f"""
                         SELECT COUNT(*) FROM (
                             SELECT 1 FROM {table_name} LIMIT 100000
                         )
-                    """)
+                    """
+                    )
                     approx_count = cursor.fetchone()[0]
 
                     if approx_count < 100000:
@@ -284,8 +289,8 @@ def inspect_optimized(
 
 # Performance comparison example:
 if __name__ == "__main__":
-    import time
     import sys
+    import time
 
     if len(sys.argv) > 1:
         db_path = sys.argv[1]

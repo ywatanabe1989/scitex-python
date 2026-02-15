@@ -14,8 +14,9 @@ Examples:
     10000, 20000, 30000, 40000      →  10, 20, 30, 40    with label "[×10³]"
 """
 
-import numpy as np
 from typing import Optional, Tuple
+
+import numpy as np
 
 
 def detect_scale_factor(

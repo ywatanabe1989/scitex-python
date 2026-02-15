@@ -45,7 +45,7 @@ This means you can write decorators in any order and they'll work correctly:
 def func1(x): ...
 
 @torch_fn
-@batch_fn  
+@batch_fn
 def func2(x): ...
 
 # Even multiple type converters are handled correctly
@@ -119,7 +119,7 @@ A decorator for processing data in batches.
 ### Features
 - Requires explicit `batch_size` keyword argument
   - Automatically applies `batch_size=-1` if not specified
-- Supports multiple batch dimensions: 
+- Supports multiple batch dimensions:
   - Single dimension: `batch_size=4`
   - Multiple dimensions: `batch_size=(4, 8)`
 - Guarantees consistent output regardless of batch size

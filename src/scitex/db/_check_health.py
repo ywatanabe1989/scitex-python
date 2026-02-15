@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/db/_check_health.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -167,9 +168,7 @@ def check_health(
     results["status"] = (
         "HEALTHY"
         if health_score >= 80
-        else "ISSUES_FOUND"
-        if health_score >= 50
-        else "CRITICAL"
+        else "ISSUES_FOUND" if health_score >= 50 else "CRITICAL"
     )
 
     if verbose:

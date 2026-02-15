@@ -7,8 +7,9 @@ THIS_FILE = (
     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_SQLite3Mixins/_TransactionMixin.py"
 )
 
-import sqlite3
 import contextlib
+import sqlite3
+
 from ..._BaseMixins._BaseTransactionMixin import _BaseTransactionMixin
 
 

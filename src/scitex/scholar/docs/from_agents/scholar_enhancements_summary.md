@@ -8,7 +8,7 @@
 #### 1. Fixed PDF Download Return Value Issue ✅
 **Problem**: `Scholar.download_pdf_asyncs()` was returning an empty Papers collection even though PDFs were downloading successfully.
 
-**Solution**: 
+**Solution**:
 - Added logic to create Paper objects when DOI strings are provided as input
 - Properly maps download PDFs back to Paper objects
 - Returns a populated Papers collection with pdf_path set for successful downloads
@@ -35,7 +35,7 @@
 - Added missing configuration options for OpenAthens and auto-download features
 - Updated documentation in default_config.yaml
 
-**Files changed**: 
+**Files changed**:
 - `config/default_config.yaml`
 
 ### Configuration Methods Supported

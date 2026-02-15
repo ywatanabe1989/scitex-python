@@ -2,34 +2,37 @@
 # Time-stamp: "2025-01-15 00:00:00 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/stats/tests/categorical/_test_fisher.py
 # ----------------------------------------
-from __future__ import annotations
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
-
-"""
+r"""
 Fisher's exact test for 2×2 contingency tables.
 
 Tests association between two binary categorical variables with small sample sizes.
 """
 
-from typing import Union, Optional, Literal, Tuple
-import argparse
+from __future__ import annotations
+
+import os
+from typing import Literal, Optional, Tuple, Union
+
+import matplotlib.axes
 import numpy as np
 import pandas as pd
 from scipy import stats
-import matplotlib.axes
+
 import scitex as stx
 from scitex.logging import getLogger
 from scitex.stats._utils._formatters import p2stars
-from scitex.stats._utils._normalizers import force_dataframe, convert_results
+from scitex.stats._utils._normalizers import convert_results, force_dataframe
+
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
 
 logger = getLogger(__name__)
 
 
-def odds_ratio_ci(a: int, b: int, c: int, d: int, alpha: float = 0.05) -> Tuple[float, float]:
+def odds_ratio_ci(
+    a: int, b: int, c: int, d: int, alpha: float = 0.05
+) -> Tuple[float, float]:
     """
     Compute confidence interval for odds ratio using log transformation.
 
@@ -61,7 +64,7 @@ def odds_ratio_ci(a: int, b: int, c: int, d: int, alpha: float = 0.05) -> Tuple[
     log_or = np.log(or_val)
 
     # Standard error of log(OR)
-    se_log_or = np.sqrt(1/a_adj + 1/b_adj + 1/c_adj + 1/d_adj)
+    se_log_or = np.sqrt(1 / a_adj + 1 / b_adj + 1 / c_adj + 1 / d_adj)
 
     # Z critical value
     z_crit = stats.norm.ppf(1 - alpha / 2)
@@ -92,39 +95,39 @@ def interpret_odds_ratio(or_val: float) -> str:
         Interpretation of effect size
     """
     if or_val == 1.0:
-        return 'no association'
+        return "no association"
     elif or_val > 1.0:
         if or_val < 1.5:
-            return 'weak positive association'
+            return "weak positive association"
         elif or_val < 3.0:
-            return 'moderate positive association'
+            return "moderate positive association"
         elif or_val < 9.0:
-            return 'strong positive association'
+            return "strong positive association"
         else:
-            return 'very strong positive association'
+            return "very strong positive association"
     else:  # or_val < 1.0
         inv_or = 1.0 / or_val
         if inv_or < 1.5:
-            return 'weak negative association'
+            return "weak negative association"
         elif inv_or < 3.0:
-            return 'moderate negative association'
+            return "moderate negative association"
         elif inv_or < 9.0:
-            return 'strong negative association'
+            return "strong negative association"
         else:
-            return 'very strong negative association'
+            return "very strong negative association"
 
 
-def test_fisher(
+def test_fisher(  # noqa: C901
     observed: Union[np.ndarray, pd.DataFrame, list],
     var_row: Optional[str] = None,
     var_col: Optional[str] = None,
-    alternative: Literal['two-sided', 'less', 'greater'] = 'two-sided',
+    alternative: Literal["two-sided", "less", "greater"] = "two-sided",
     alpha: float = 0.05,
     plot: bool = False,
     ax: Optional[matplotlib.axes.Axes] = None,
-    return_as: Literal['dict', 'dataframe'] = 'dict',
+    return_as: Literal["dict", "dataframe"] = "dict",
     decimals: int = 3,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> Union[dict, pd.DataFrame]:
     """
     Fisher's exact test for 2×2 contingency tables.
@@ -256,20 +259,22 @@ def test_fisher(
     # Convert to numpy array
     if isinstance(observed, pd.DataFrame):
         if var_row is None:
-            var_row = observed.index.name or 'row_variable'
+            var_row = observed.index.name or "row_variable"
         if var_col is None:
-            var_col = observed.columns.name or 'col_variable'
+            var_col = observed.columns.name or "col_variable"
         observed = observed.values
     else:
         observed = np.asarray(observed)
         if var_row is None:
-            var_row = 'row_variable'
+            var_row = "row_variable"
         if var_col is None:
-            var_col = 'col_variable'
+            var_col = "col_variable"
 
     # Check dimensions
     if observed.shape != (2, 2):
-        raise ValueError(f"Fisher's exact test requires 2×2 table (got {observed.shape})")
+        raise ValueError(
+            f"Fisher's exact test requires 2×2 table (got {observed.shape})"
+        )
 
     # Extract table values
     a, b = int(observed[0, 0]), int(observed[0, 1])
@@ -298,21 +303,21 @@ def test_fisher(
 
     # Build result
     result = {
-        'test_method': "Fisher's exact test",
-        'statistic': round(or_val, decimals),
-        'pvalue': round(pvalue, decimals),
-        'alternative': alternative,
-        'alpha': alpha,
-        'significant': significant,
-        'stars': stars,
-        'effect_size': round(or_val, decimals),
-        'effect_size_metric': 'Odds ratio',
-        'effect_size_interpretation': interpretation,
-        'ci_lower': round(ci_lower, decimals),
-        'ci_upper': round(ci_upper, decimals),
-        'n': n,
-        'var_row': var_row,
-        'var_col': var_col,
+        "test_method": "Fisher's exact test",
+        "statistic": round(or_val, decimals),
+        "pvalue": round(pvalue, decimals),
+        "alternative": alternative,
+        "alpha": alpha,
+        "significant": significant,
+        "stars": stars,
+        "effect_size": round(or_val, decimals),
+        "effect_size_metric": "Odds ratio",
+        "effect_size_interpretation": interpretation,
+        "ci_lower": round(ci_lower, decimals),
+        "ci_upper": round(ci_upper, decimals),
+        "n": n,
+        "var_row": var_row,
+        "var_col": var_col,
     }
 
     # Log results if verbose
@@ -328,39 +333,65 @@ def test_fisher(
     if plot:
         if ax is None:
             fig, axes = stx.plt.subplots(1, 2, figsize=(12, 5))
-            _plot_fisher_full([[a, b], [c, d]], or_val, pvalue, ci_lower, ci_upper, var_row, var_col, axes)
+            _plot_fisher_full(
+                [[a, b], [c, d]],
+                or_val,
+                pvalue,
+                ci_lower,
+                ci_upper,
+                var_row,
+                var_col,
+                axes,
+            )
         else:
-            _plot_fisher_simple([[a, b], [c, d]], or_val, pvalue, ci_lower, ci_upper, var_row, var_col, ax)
+            _plot_fisher_simple(
+                [[a, b], [c, d]],
+                or_val,
+                pvalue,
+                ci_lower,
+                ci_upper,
+                var_row,
+                var_col,
+                ax,
+            )
 
     # Convert to requested format
-    if return_as == 'dataframe':
+    if return_as == "dataframe":
         result = force_dataframe(result)
-    elif return_as not in ['dict', 'dataframe']:
+    elif return_as not in ["dict", "dataframe"]:
         return convert_results(result, return_as=return_as)
 
     return result
 
 
-def _plot_fisher_full(observed, or_val, pvalue, ci_lower, ci_upper, var_row, var_col, axes):
+def _plot_fisher_full(
+    observed, or_val, pvalue, ci_lower, ci_upper, var_row, var_col, axes
+):
     """Create 2-panel visualization for Fisher's exact test."""
     observed = np.array(observed)
 
     # Panel 1: 2×2 table heatmap
     ax = axes[0]
-    im = ax.imshow(observed, cmap='Blues', aspect='auto')
-    ax.set_title('Observed Frequencies')
+    im = ax.imshow(observed, cmap="Blues", aspect="auto")
+    ax.set_title("Observed")
     ax.set_xlabel(var_col)
     ax.set_ylabel(var_row)
     ax.set_xticks([0, 1])
     ax.set_yticks([0, 1])
-    ax.set_xticklabels(['C1', 'C2'])
-    ax.set_yticklabels(['R1', 'R2'])
+    ax.set_xticklabels(["C1", "C2"])
+    ax.set_yticklabels(["R1", "R2"])
 
     # Add values
     for i in range(2):
         for j in range(2):
-            ax.text(j, i, f'{observed[i,j]:.0f}',
-                   ha='center', va='center', color='white', fontsize=20, fontweight='bold')
+            ax.text(
+                j,
+                i,
+                f"{observed[i, j]:.0f}",
+                ha="center",
+                va="center",
+                color="white",
+            )
 
     stx.plt.colorbar(im, ax=ax)
 
@@ -368,218 +399,95 @@ def _plot_fisher_full(observed, or_val, pvalue, ci_lower, ci_upper, var_row, var
     ax = axes[1]
 
     # Plot OR point estimate
-    ax.plot([or_val], [0], 'o', markersize=15, color='darkblue', zorder=3)
+    ax.plot([or_val], [0], "o", zorder=3)
 
     # Plot CI
-    ax.plot([ci_lower, ci_upper], [0, 0], '-', linewidth=3, color='darkblue', zorder=2)
-    ax.plot([ci_lower, ci_lower], [-0.1, 0.1], '-', linewidth=2, color='darkblue', zorder=2)
-    ax.plot([ci_upper, ci_upper], [-0.1, 0.1], '-', linewidth=2, color='darkblue', zorder=2)
+    ax.plot([ci_lower, ci_upper], [0, 0], "-", zorder=2)
+    ax.plot([ci_lower, ci_lower], [-0.1, 0.1], "-", zorder=2)
+    ax.plot([ci_upper, ci_upper], [-0.1, 0.1], "-", zorder=2)
 
     # Add reference line at OR = 1
-    ax.axvline(1, color='red', linestyle='--', linewidth=2, alpha=0.5, label='OR = 1 (null)')
+    ax.axvline(1, linestyle="--", alpha=0.5, label="OR = 1 (null)")
 
     # Set x-axis (log scale for OR)
     if or_val > 0:
         x_min = min(0.1, ci_lower * 0.5)
         x_max = max(10, ci_upper * 2)
         ax.set_xlim(x_min, x_max)
-        ax.set_xscale('log')
+        ax.set_xscale("log")
 
     ax.set_ylim(-0.5, 0.5)
     ax.set_yticks([])
-    ax.set_xlabel('Odds Ratio (log scale)')
+    ax.set_xlabel("Odds Ratio (log scale)")
 
-    stars = p2stars(pvalue)
-    ax.set_title(f"OR = {or_val:.3f} {stars}, 95% CI [{ci_lower:.3f}, {ci_upper:.3f}]")
-    ax.grid(True, alpha=0.3, axis='x')
-    ax.legend(loc='upper right')
+    ax.set_title("Fisher's Exact Test")
+    ax.legend(loc="upper right")
+
+    # Add stats text box
+    stars_text = p2stars(pvalue).replace("ns", "$n$s")
+    text_str = (
+        f"$OR$ = {or_val:.3f} {stars_text}\n"
+        f"$p$ = {pvalue:.4f}\n"
+        f"95% CI [{ci_lower:.3f}, {ci_upper:.3f}]"
+    )
+    ax.text(
+        0.02,
+        0.98,
+        text_str,
+        transform=ax.transAxes,
+        verticalalignment="top",
+        color="black",
+        fontsize=6,
+    )
 
 
-def _plot_fisher_simple(observed, or_val, pvalue, ci_lower, ci_upper, var_row, var_col, ax):
+def _plot_fisher_simple(
+    observed, or_val, pvalue, ci_lower, ci_upper, var_row, var_col, ax
+):
     """Create simplified single-panel OR plot on given axes."""
     # Plot OR point estimate
-    ax.plot([or_val], [0], 'o', markersize=12, color='darkblue', zorder=3)
+    ax.plot([or_val], [0], "o", zorder=3)
 
     # Plot CI
-    ax.plot([ci_lower, ci_upper], [0, 0], '-', linewidth=2, color='darkblue', zorder=2)
-    ax.plot([ci_lower, ci_lower], [-0.1, 0.1], '-', linewidth=2, color='darkblue', zorder=2)
-    ax.plot([ci_upper, ci_upper], [-0.1, 0.1], '-', linewidth=2, color='darkblue', zorder=2)
+    ax.plot([ci_lower, ci_upper], [0, 0], "-", zorder=2)
+    ax.plot([ci_lower, ci_lower], [-0.1, 0.1], "-", zorder=2)
+    ax.plot([ci_upper, ci_upper], [-0.1, 0.1], "-", zorder=2)
 
     # Add reference line at OR = 1
-    ax.axvline(1, color='red', linestyle='--', linewidth=2, alpha=0.5, label='OR = 1')
+    ax.axvline(1, linestyle="--", alpha=0.5, label="OR = 1")
 
     # Set x-axis (log scale for OR)
     if or_val > 0:
         x_min = min(0.1, ci_lower * 0.5)
         x_max = max(10, ci_upper * 2)
         ax.set_xlim(x_min, x_max)
-        ax.set_xscale('log')
+        ax.set_xscale("log")
 
     ax.set_ylim(-0.5, 0.5)
     ax.set_yticks([])
-    ax.set_xlabel('Odds Ratio (log scale)')
+    ax.set_xlabel("Odds Ratio (log scale)")
 
-    stars = p2stars(pvalue)
-    ax.set_title(f"Fisher: OR = {or_val:.3f} {stars}")
-    ax.grid(True, alpha=0.3, axis='x')
+    ax.set_title("Fisher's Exact Test")
     ax.legend()
 
-
-# Example usage
-
-"""Main function"""
-def main(args):
-    import matplotlib
-
-    logger.info("=" * 70)
-    logger.info("Fisher's Exact Test - Examples")
-    logger.info("=" * 70)
-
-    # Example 1: Small sample treatment study
-    logger.info("\nExample 1: Small sample treatment study")
-    logger.info("-" * 70)
-    observed1 = [[8, 2], [1, 5]]  # Treatment: Success/Failure
-    result1 = test_fisher(observed1, var_row='Treatment', var_col='Outcome',
-                         plot=True, verbose=True)
-    logger.info(force_dataframe(result1))
-    stx.io.save(stx.plt.gcf(), "fisher_example1.jpg")
-    stx.plt.close()
-
-    # Example 2: Case-control study (exposure × disease)
-    logger.info("\nExample 2: Case-control study")
-    logger.info("-" * 70)
-    observed2 = [[12, 5], [8, 20]]  # Exposure: Cases/Controls
-    result2 = test_fisher(observed2, var_row='Exposure', var_col='Disease',
-                         plot=True, verbose=True)
-    logger.info(force_dataframe(result2))
-    stx.io.save(stx.plt.gcf(), "fisher_example2.jpg")
-    stx.plt.close()
-
-    # Example 3: One-tailed test (expect positive association)
-    logger.info("\nExample 3: One-tailed test (alternative='greater')")
-    logger.info("-" * 70)
-    observed3 = [[10, 2], [3, 8]]
-    logger.info("Two-tailed:")
-    result3_two = test_fisher(observed3, alternative='two-sided', verbose=True)
-    logger.info("\nOne-tailed (greater):")
-    result3_greater = test_fisher(observed3, alternative='greater', verbose=True)
-
-    # Example 4: Using pandas DataFrame with labels
-    print("\nExample 4: Using pandas DataFrame")
-    print("-" * 70)
-    df4 = pd.DataFrame([[15, 5], [3, 10]],
-                       index=['Group A', 'Group B'],
-                       columns=['Success', 'Failure'])
-    df4.index.name = 'Group'
-    df4.columns.name = 'Outcome'
-    result4 = test_fisher(df4, plot=True)
-    print(force_dataframe(result4))
-    plt.gcf().savefig('example4_dataframe.jpg', dpi=150, bbox_inches='tight')
-    plt.close()
-
-    # Example 5: Compare Fisher vs Chi-square
-    print("\nExample 5: Compare Fisher's exact vs Chi-square")
-    print("-" * 70)
-    observed5 = [[5, 10], [10, 5]]
-    fisher_result = test_fisher(observed5, plot=False)
-
-    from ._test_chi2 import test_chi2
-    chi2_result = test_chi2(observed5, plot=False)
-
-    print(f"Fisher's exact test: p = {fisher_result['pvalue']:.4f} (exact)")
-    print(f"Chi-square test:     p = {chi2_result['pvalue']:.4f} (approximation)")
-    print("→ Fisher's exact provides exact p-value, chi-square is approximation")
-
-    # Example 6: Very small sample
-    print("\nExample 6: Very small sample (chi-square not recommended)")
-    print("-" * 70)
-    observed6 = [[2, 3], [1, 4]]
-    result6 = test_fisher(observed6, var_row='Group', var_col='Response', plot=True)
-    print(force_dataframe(result6))
-    print("Fisher's exact test is ideal for small samples")
-    plt.gcf().savefig('example6_small_sample.jpg', dpi=150, bbox_inches='tight')
-    plt.close()
-
-    # Example 7: Strong association
-    print("\nExample 7: Strong positive association")
-    print("-" * 70)
-    observed7 = [[20, 2], [3, 18]]
-    result7 = test_fisher(observed7, var_row='Factor A', var_col='Factor B', plot=True)
-    print(force_dataframe(result7))
-    print(f"Very strong association: OR = {result7['statistic']:.1f}")
-    plt.gcf().savefig('example7_strong_association.jpg', dpi=150, bbox_inches='tight')
-    plt.close()
-
-    # Example 8: No association (OR ≈ 1)
-    print("\nExample 8: No association")
-    print("-" * 70)
-    observed8 = [[10, 10], [10, 10]]
-    result8 = test_fisher(observed8, plot=True)
-    print(force_dataframe(result8))
-    print(f"OR = {result8['statistic']:.2f} ≈ 1 (no association)")
-    plt.gcf().savefig('example8_no_association.jpg', dpi=150, bbox_inches='tight')
-    plt.close()
-
-    # Example 9: Negative association (OR < 1)
-    print("\nExample 9: Negative association (OR < 1)")
-    print("-" * 70)
-    observed9 = [[2, 15], [12, 8]]
-    result9 = test_fisher(observed9, var_row='Treatment', var_col='Adverse Event', plot=True)
-    print(force_dataframe(result9))
-    print(f"OR = {result9['statistic']:.3f} < 1 (negative association)")
-    plt.gcf().savefig('example9_negative_association.jpg', dpi=150, bbox_inches='tight')
-    plt.close()
-
-    # Example 10: Export to various formats
-    print("\nExample 10: Export to various formats")
-    print("-" * 70)
-    result10 = test_fisher(observed2, var_row='Exposure', var_col='Disease', return_as='dataframe')
-    result10.to_csv('fisher_demo.csv', index=False)
-    stx.io.save(result10, 'fisher_demo.tex')
-    print("Exported to CSV and LaTeX formats")
-    print(result10)
-
-    logger.info(f"\n{'='*70}")
-    logger.info("All examples completed")
-    logger.info(f"{'='*70}")
-
-    return 0
-
-def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="")
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
-    return parser.parse_args()
-
-
-def run_main():
-    """Initialize SciTeX framework and run main."""
-    global CONFIG, CC, sys, plt, rng
-
-    import sys
-    import matplotlib.pyplot as plt
-
-    args = parse_args()
-
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-        sys,
-        plt,
-        args=args,
-        file=__FILE__,
-        verbose=args.verbose,
-        agg=True,
+    # Add stats text box
+    stars_text = p2stars(pvalue).replace("ns", "$n$s")
+    text_str = (
+        f"$OR$ = {or_val:.3f} {stars_text}\n"
+        f"$p$ = {pvalue:.4f}\n"
+        f"95% CI [{ci_lower:.3f}, {ci_upper:.3f}]"
     )
-
-    exit_status = main(args)
-
-    stx.session.close(
-        CONFIG,
-        verbose=args.verbose,
-        exit_status=exit_status,
+    ax.text(
+        0.02,
+        0.98,
+        text_str,
+        transform=ax.transAxes,
+        verticalalignment="top",
+        color="black",
+        fontsize=6,
     )
 
 
-if __name__ == "__main__":
-    run_main()
+# Demo: python -m scitex.stats.tests.categorical._demo_fisher
 
 # EOF

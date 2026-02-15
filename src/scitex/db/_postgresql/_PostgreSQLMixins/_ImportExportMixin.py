@@ -5,10 +5,11 @@
 
 THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_ImportExportMixin.py"
 
-import pandas as pd
-from typing import List
-import psycopg2
 from io import StringIO
+from typing import List
+
+import pandas as pd
+import psycopg2
 
 
 class _ImportExportMixin:

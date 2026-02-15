@@ -15,8 +15,8 @@ Metadata:
     lastUpdated: 2021-07-30 23:08:33
 """
 
-from typing import Dict, Any, List, Optional
 import re
+from typing import Any, Dict, List, Optional
 
 
 class DarAlmandumahTranslator:

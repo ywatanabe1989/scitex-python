@@ -26,10 +26,11 @@ Prerequisites:
     * Foreign key constraints must be enabled if using inherit_foreign
 """
 
+import sqlite3
 from typing import Any as _Any
 from typing import Dict, List, Optional
+
 from ..._BaseMixins._BaseBatchMixin import _BaseBatchMixin
-import sqlite3
 
 
 class _BatchMixin:

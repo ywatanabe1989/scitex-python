@@ -23,37 +23,37 @@ if __name__ == "__main__":
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # # Test file for src/cli/serve02.py
-# 
+#
 # import contextlib
 # import sys
 # from io import StringIO
 # from pathlib import Path
 # from unittest.mock import patch
-# 
+#
 # import pytest
-# 
+#
 # # Add src to path
 # sys.path.insert(0, str(Path(__file__).parents[3] / "src"))
-# 
+#
 # from pip_project_template.cli.serve02 import create_parser, main
-# 
-# 
+#
+#
 # class TestServe02:
 #     """Test suite for cli.serve02"""
-# 
+#
 #     def test_module_imports(self):
 #         """Test that module imports successfully."""
 #         import importlib
-# 
+#
 #         module = importlib.import_module("pip_project_template.cli.serve02")
 #         assert module is not None
-# 
+#
 #     def test_module_has_expected_attributes(self):
 #         """Test that module has expected structure."""
 #         import importlib
-# 
+#
 #         module = importlib.import_module("pip_project_template.cli.serve02")
-# 
+#
 #         # Check that module has a docstring or __all__ or callable functions
 #         has_content = (
 #             hasattr(module, "__doc__")
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 #         assert (
 #             has_content
 #         ), f"Module cli.serve02 appears to be empty or malformed"
-# 
+#
 #     def test_module_file_exists(self):
 #         """Test that the source file exists and is readable."""
 #         src_file = (
@@ -80,29 +80,29 @@ if __name__ == "__main__":
 #         )
 #         assert src_file.exists(), f"Source file {src_file} does not exist"
 #         assert src_file.is_file(), f"Source path {src_file} is not a file"
-# 
+#
 #     def test_create_parser(self):
 #         """Test serve02 parser creation."""
 #         parser = create_parser()
 #         assert parser is not None
-# 
+#
 #         # Test default arguments
 #         args = parser.parse_args([])
 #         assert args.port == 8082  # serve02 uses different default port
 #         assert args.host == "localhost"
 #         assert args.transport == "stdio"
-# 
+#
 #     @patch("pip_project_template.mcp_servers.McpServer02.run_server")
 #     def test_main_stdio_transport(self, mock_run_server):
 #         """Test main function with stdio transport."""
 #         with contextlib.redirect_stdout(StringIO()) as captured:
 #             result = main(["--transport", "stdio"])
-# 
+#
 #         assert result == 0
 #         mock_run_server.assert_called_once_with(transport="stdio")
 #         output = captured.getvalue()
 #         assert "Server 02" in output
-# 
+#
 #     @patch("pip_project_template.mcp_servers.McpServer02.run_server")
 #     def test_main_http_transport(self, mock_run_server):
 #         """Test main function with http transport."""
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 #             result = main(
 #                 ["--transport", "http", "--host", "test.com", "--port", "9001"]
 #             )
-# 
+#
 #         assert result == 0
 #         mock_run_server.assert_called_once_with(
 #             transport="http", host="test.com", port=9001
@@ -118,13 +118,13 @@ if __name__ == "__main__":
 #         output = captured.getvalue()
 #         assert "Server 02" in output
 #         assert "HTTP" in output
-# 
+#
 #     @patch("pip_project_template.mcp_servers.McpServer02.run_server")
 #     def test_main_sse_transport(self, mock_run_server):
 #         """Test main function with sse transport."""
 #         with contextlib.redirect_stdout(StringIO()) as captured:
 #             result = main(["--transport", "sse"])
-# 
+#
 #         assert result == 0
 #         mock_run_server.assert_called_once_with(
 #             transport="sse", host="localhost", port=8082
@@ -132,11 +132,11 @@ if __name__ == "__main__":
 #         output = captured.getvalue()
 #         assert "Server 02" in output
 #         assert "SSE" in output
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     pytest.main([__file__, "-v"])
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

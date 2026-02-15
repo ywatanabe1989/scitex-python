@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2021-12-28 04:34:11
 """
 
-from typing import Dict, Any
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict
+
+from bs4 import BeautifulSoup
 
 
 class CanadaComTranslator:

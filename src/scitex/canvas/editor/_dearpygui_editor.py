@@ -4,11 +4,11 @@
 # File: ./src/scitex/vis/editor/_dearpygui_editor.py
 """DearPyGui-based figure editor with GPU-accelerated rendering."""
 
-from pathlib import Path
-from typing import Dict, Any, Optional
+import base64
 import copy
 import io
-import base64
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 
 def _create_checkerboard(width: int, height: int, square_size: int = 10) -> "Image":
@@ -28,8 +28,8 @@ def _create_checkerboard(width: int, height: int, square_size: int = 10) -> "Ima
     PIL.Image
         RGBA image with checkerboard pattern (light/dark gray)
     """
-    from PIL import Image
     import numpy as np
+    from PIL import Image
 
     # Create checkerboard pattern
     light_gray = (220, 220, 220, 255)
@@ -80,7 +80,7 @@ class DearPyGuiEditor:
         self.manual_overrides = manual_overrides or {}
 
         # Get SciTeX defaults and merge with metadata
-        from ._defaults import get_scitex_defaults, extract_defaults_from_metadata
+        from ._defaults import extract_defaults_from_metadata, get_scitex_defaults
 
         self.scitex_defaults = get_scitex_defaults()
         self.metadata_defaults = extract_defaults_from_metadata(metadata)
@@ -908,11 +908,11 @@ class DearPyGuiEditor:
         import matplotlib
 
         matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
-        from matplotlib.ticker import MaxNLocator
-        import numpy as np
-        from PIL import Image
         import dearpygui.dearpygui as dpg
+        import matplotlib.pyplot as plt
+        import numpy as np
+        from matplotlib.ticker import MaxNLocator
+        from PIL import Image
 
         # mm to pt conversion
         mm_to_pt = 2.83465
@@ -1181,8 +1181,8 @@ class DearPyGuiEditor:
 
     def _draw_element_highlights(self, fig, ax):
         """Draw selection highlights for non-trace elements (hover handled via PIL overlay)."""
-        from matplotlib.patches import FancyBboxPatch
         import matplotlib.transforms as transforms
+        from matplotlib.patches import FancyBboxPatch
 
         renderer = fig.canvas.get_renderer()
 
@@ -1298,6 +1298,7 @@ class DearPyGuiEditor:
             Index of trace to highlight with hover effect (cyan glow)
         """
         import pandas as pd
+
         from ._defaults import _normalize_legend_loc
 
         if not isinstance(self.csv_data, pd.DataFrame):
@@ -1477,8 +1478,9 @@ class DearPyGuiEditor:
 
     def _on_preview_hover(self, sender, app_data):
         """Handle mouse move for hover effects on preview (optimized with caching)."""
-        import dearpygui.dearpygui as dpg
         import time
+
+        import dearpygui.dearpygui as dpg
 
         # Throttle hover updates - reduced to 16ms (~60fps) since we use fast overlay
         current_time = time.time()
@@ -1777,8 +1779,8 @@ class DearPyGuiEditor:
 
     def _find_nearest_trace(self, click_x, click_y, preview_width, preview_height):
         """Find the nearest trace to the click position."""
-        import pandas as pd
         import numpy as np
+        import pandas as pd
 
         if self.csv_data is None or not isinstance(self.csv_data, pd.DataFrame):
             return None
@@ -1901,6 +1903,7 @@ class DearPyGuiEditor:
     def _save_manual(self, sender=None, app_data=None, user_data=None):
         """Save current overrides to .manual.json."""
         import dearpygui.dearpygui as dpg
+
         from .edit import save_manual_overrides
 
         try:

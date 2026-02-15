@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/engines/individual/SemanticScholarEngine.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -307,9 +308,11 @@ class SemanticScholarEngine(BaseDOIEngine):
                 "publisher_engines": [self.name] if paper.get("url") else None,
                 "arxiv": f"https://arxiv.org/abs/{arxiv_id}" if arxiv_id else None,
                 "arxiv_engines": [self.name] if arxiv_id else None,
-                "corpus_id": f"https://www.semanticscholar.org/paper/{corpus_id}"
-                if corpus_id
-                else None,
+                "corpus_id": (
+                    f"https://www.semanticscholar.org/paper/{corpus_id}"
+                    if corpus_id
+                    else None
+                ),
                 "corpus_id_engines": [self.name] if corpus_id else None,
             },
             "system": {

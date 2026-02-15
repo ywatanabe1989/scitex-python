@@ -14,27 +14,27 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-13 (ywatanabe)"
 # # File: _labels.py - Label rotation and legend handling
-# 
+#
 # """Mixin for label rotation and legend positioning."""
-# 
+#
 # import os
-# 
+#
 # from scitex import logging
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # class LabelsMixin:
 #     """Mixin for label rotation and legend positioning."""
-# 
+#
 #     def _get_ax_module(self):
 #         """Lazy import ax module to avoid circular imports."""
 #         from .....plt import ax as ax_module
 #         return ax_module
-# 
+#
 #     def rotate_labels(
 #         self,
 #         x: float = None,
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 #         tight_layout: bool = False,
 #     ) -> None:
 #         """Rotate x and y axis labels with automatic positioning.
-# 
+#
 #         Parameters
 #         ----------
 #         x : float or None, optional
@@ -78,12 +78,12 @@ if __name__ == "__main__":
 #             scientific_convention=scientific_convention,
 #             tight_layout=tight_layout,
 #         )
-# 
+#
 #     def legend(
 #         self, *args, loc: str = "best", check_overlap: bool = False, **kwargs
 #     ) -> None:
 #         """Places legend at specified location, with support for outside positions.
-# 
+#
 #         Parameters
 #         ----------
 #         *args : tuple
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 #             Additional keyword arguments passed to legend()
 #         """
 #         import matplotlib.pyplot as plt
-# 
+#
 #         if loc == "outer":
 #             legend = self._axis_mpl.legend(
 #                 *args, loc="center left", bbox_to_anchor=(1.02, 0.5), **kwargs
@@ -110,25 +110,25 @@ if __name__ == "__main__":
 #                 self._figure_wrapper._fig_mpl.tight_layout()
 #                 self._figure_wrapper._fig_mpl.subplots_adjust(right=0.85)
 #             return legend
-# 
+#
 #         elif loc == "separate":
 #             handles, labels = self._axis_mpl.get_legend_handles_labels()
 #             if not handles:
 #                 logger.warning("No legend handles found.")
 #                 return None
-# 
+#
 #             fig = self._axis_mpl.get_figure()
 #             if not hasattr(fig, "_separate_legend_params"):
 #                 fig._separate_legend_params = []
-# 
+#
 #             figsize = kwargs.pop("figsize", (4, 3))
 #             dpi = kwargs.pop("dpi", 150)
 #             frameon = kwargs.pop("frameon", True)
 #             fancybox = kwargs.pop("fancybox", True)
 #             shadow = kwargs.pop("shadow", True)
-# 
+#
 #             axis_id = self._get_axis_id(fig)
-# 
+#
 #             fig._separate_legend_params.append({
 #                 "axis": self._axis_mpl,
 #                 "axis_id": axis_id,
@@ -141,12 +141,12 @@ if __name__ == "__main__":
 #                 "shadow": shadow,
 #                 "kwargs": kwargs,
 #             })
-# 
+#
 #             if self._axis_mpl.get_legend():
 #                 self._axis_mpl.get_legend().remove()
-# 
+#
 #             return None
-# 
+#
 #         outside_positions = {
 #             "upper right out": ("center left", (1.15, 0.85)),
 #             "right upper out": ("center left", (1.15, 0.85)),
@@ -167,7 +167,7 @@ if __name__ == "__main__":
 #             "lower center out": ("upper center", (0.5, -0.25)),
 #             "lower out": ("upper center", (0.5, -0.25)),
 #         }
-# 
+#
 #         if loc in outside_positions:
 #             location, bbox = outside_positions[loc]
 #             legend_obj = self._axis_mpl.legend(
@@ -175,16 +175,16 @@ if __name__ == "__main__":
 #             )
 #         else:
 #             legend_obj = self._axis_mpl.legend(*args, loc=loc, **kwargs)
-# 
+#
 #         if check_overlap and legend_obj is not None:
 #             self._check_legend_overlap(legend_obj)
-# 
+#
 #         return legend_obj
-# 
+#
 #     def _get_axis_id(self, fig):
 #         """Get unique axis identifier for separate legend handling."""
 #         axis_id = None
-# 
+#
 #         try:
 #             fig_axes = fig.get_axes()
 #             for idx, ax in enumerate(fig_axes):
@@ -193,7 +193,7 @@ if __name__ == "__main__":
 #                     break
 #         except:
 #             pass
-# 
+#
 #         if axis_id is None and hasattr(self._axis_mpl, "get_subplotspec"):
 #             try:
 #                 spec = self._axis_mpl.get_subplotspec()
@@ -208,28 +208,28 @@ if __name__ == "__main__":
 #                     axis_id = f"ax_{flat_idx:02d}"
 #             except:
 #                 pass
-# 
+#
 #         if axis_id is None:
 #             axis_id = f"ax_{len(fig._separate_legend_params):02d}"
-# 
+#
 #         return axis_id
-# 
+#
 #     def _check_legend_overlap(self, legend_obj):
 #         """Check if legend overlaps with plotted data and issue warning if needed."""
 #         import warnings
 #         import matplotlib.transforms as transforms
 #         import numpy as np
-# 
+#
 #         try:
 #             fig = self._axis_mpl.get_figure()
 #             fig.canvas.draw()
-# 
+#
 #             legend_bbox = legend_obj.get_window_extent(fig.canvas.get_renderer())
 #             inv_transform = self._axis_mpl.transData.inverted()
 #             legend_bbox_data = legend_bbox.transformed(inv_transform)
-# 
+#
 #             data_bboxes = []
-# 
+#
 #             for line in self._axis_mpl.get_lines():
 #                 if line.get_visible():
 #                     try:
@@ -238,7 +238,7 @@ if __name__ == "__main__":
 #                             data_bboxes.append(data)
 #                     except:
 #                         pass
-# 
+#
 #             for collection in self._axis_mpl.collections:
 #                 if collection.get_visible():
 #                     try:
@@ -247,10 +247,10 @@ if __name__ == "__main__":
 #                             data_bboxes.append(offsets)
 #                     except:
 #                         pass
-# 
+#
 #             if data_bboxes:
 #                 all_data = np.vstack(data_bboxes)
-# 
+#
 #                 x_overlap = (all_data[:, 0] >= legend_bbox_data.x0) & (
 #                     all_data[:, 0] <= legend_bbox_data.x1
 #                 )
@@ -259,20 +259,20 @@ if __name__ == "__main__":
 #                 )
 #                 overlap_points = np.sum(x_overlap & y_overlap)
 #                 overlap_pct = (overlap_points / len(all_data)) * 100
-# 
+#
 #                 if overlap_pct > 5:
 #                     logger.warning(
 #                         f"Legend overlaps with {overlap_pct:.1f}% of data points. "
 #                         f"Consider using loc='outer' or loc='separate'."
 #                     )
 #                     return True
-# 
+#
 #         except Exception:
 #             pass
-# 
+#
 #         return False
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

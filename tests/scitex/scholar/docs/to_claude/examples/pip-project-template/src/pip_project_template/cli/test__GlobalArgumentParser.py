@@ -22,27 +22,27 @@ if __name__ == "__main__":
 # )
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """Central argument parser configuration."""
-# 
+#
 # import argparse
 # import importlib
 # import pkgutil
 # from typing import Dict, Tuple
-# 
-# 
+#
+#
 # class GlobalArgumentParser:
 #     """Central argument parser for all CLI commands."""
-# 
+#
 #     @classmethod
 #     def get_command_parsers(cls):
 #         """Dynamically discover and load parsers from command modules."""
 #         parsers = {}
 #         descriptions = {}
-# 
+#
 #         # Get the directory of this CLI package
 #         cli_package_path = os.path.dirname(__file__)
-# 
+#
 #         # Scan all Python files in the CLI directory
 #         for importer, modname, ispkg in pkgutil.iter_modules(
 #             [cli_package_path]
@@ -50,13 +50,13 @@ if __name__ == "__main__":
 #             # Skip private modules and the central parser itself
 #             if modname.startswith("_") or modname == "__pycache__":
 #                 continue
-# 
+#
 #             try:
 #                 # Dynamic import
 #                 module = importlib.import_module(
 #                     f".{modname}", package="pip_project_template.cli"
 #                 )
-# 
+#
 #                 # Check if module has create_parser function
 #                 if hasattr(module, "create_parser"):
 #                     parser = module.create_parser()
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 #                     descriptions[command_name] = getattr(
 #                         parser, "description", f"Run {command_name} command"
 #                     )
-# 
+#
 #             except (
 #                 ImportError,
 #                 AttributeError,
@@ -75,9 +75,9 @@ if __name__ == "__main__":
 #             ) as e:
 #                 # Silently skip modules that can't be imported or don't have create_parser
 #                 continue
-# 
+#
 #         return parsers, descriptions
-# 
+#
 #     @classmethod
 #     def get_main_parser(cls) -> Tuple[argparse.ArgumentParser, Dict]:
 #         """Create main parser with subcommands."""
@@ -85,14 +85,14 @@ if __name__ == "__main__":
 #             prog="python -m pip_project_template",
 #             description="Pip Project Template CLI",
 #         )
-# 
+#
 #         subparsers = parser.add_subparsers(
 #             dest="command", help="Available commands"
 #         )
-# 
+#
 #         parsers, descriptions = cls.get_command_parsers()
 #         subparsers_dict = {}
-# 
+#
 #         for command_name, command_parser in parsers.items():
 #             # Create subparser with description from individual parser
 #             subparser = subparsers.add_parser(
@@ -104,9 +104,9 @@ if __name__ == "__main__":
 #                 add_help=False,
 #             )
 #             subparsers_dict[command_name] = subparser
-# 
+#
 #         return parser, subparsers_dict
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

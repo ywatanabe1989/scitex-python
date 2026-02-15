@@ -35,7 +35,7 @@ with open(output_file, 'w') as f:
     f.write("# DOI URLs for Zotero Download\n")
     f.write("# Open each URL in Chrome and press Ctrl+Shift+S\n")
     f.write("# " + "="*50 + "\n\n")
-    
+
     for i, paper in enumerate(papers_with_dois):
         f.write(f"# {i+1}. {paper.title[:70]}...\n")
         f.write(f"https://doi.org/{paper.doi}\n\n")
@@ -48,7 +48,7 @@ shell_script = "/home/ywatanabe/win/downloads/open_dois_in_chrome.sh"
 with open(shell_script, 'w') as f:
     f.write("#!/bin/bash\n")
     f.write("# Open DOI URLs in Chrome for Zotero download\n\n")
-    
+
     # Open in batches of 5 to avoid overwhelming the browser
     for i in range(0, len(papers_with_dois), 5):
         batch = papers_with_dois[i:i+5]

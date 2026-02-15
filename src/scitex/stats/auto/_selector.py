@@ -23,11 +23,10 @@ due to its robustness (no normality or equal variance assumptions).
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List, Optional, Tuple, Callable, Any
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from ._context import StatContext
-from ._rules import TestRule, TEST_RULES, TestFamily
-
+from ._rules import TEST_RULES, TestFamily, TestRule
 
 # =============================================================================
 # Pretty Labels for UI
@@ -42,32 +41,26 @@ _PRETTY_LABELS: Dict[str, str] = {
     "anova_twoway": "Two-way ANOVA",
     "anova_twoway_mixed": "Mixed-design ANOVA",
     "welch_anova": "Welch's ANOVA",
-
     # Nonparametric
     "brunner_munzel": "Brunner-Munzel test (recommended)",
     "mannwhitneyu": "Mann-Whitney U",
     "wilcoxon": "Wilcoxon signed-rank",
     "kruskal": "Kruskal-Wallis",
     "friedman": "Friedman test",
-
     # Categorical
     "chi2_independence": "Chi-square test",
     "fisher_exact": "Fisher's exact test",
     "mcnemar": "McNemar's test",
-
     # Correlation
     "pearsonr": "Pearson correlation",
     "spearmanr": "Spearman correlation",
-
     # Normality/Other
     "shapiro": "Shapiro-Wilk (normality)",
     "levene": "Levene's test (variance)",
-
     # Posthoc
     "tukey_hsd": "Tukey HSD",
     "dunnett": "Dunnett's test (vs control)",
     "games_howell": "Games-Howell",
-
     # Effect sizes
     "cohens_d_ind": "Cohen's d (independent)",
     "cohens_d_paired": "Cohen's d (paired)",
@@ -146,21 +139,18 @@ def check_applicable(
     # Number of groups
     if ctx.n_groups < rule.min_groups:
         reasons.append(
-            f"Requires at least {rule.min_groups} groups "
-            f"(current: {ctx.n_groups})"
+            f"Requires at least {rule.min_groups} groups " f"(current: {ctx.n_groups})"
         )
     if rule.max_groups is not None and ctx.n_groups > rule.max_groups:
         reasons.append(
-            f"Maximum {rule.max_groups} groups allowed "
-            f"(current: {ctx.n_groups})"
+            f"Maximum {rule.max_groups} groups allowed " f"(current: {ctx.n_groups})"
         )
 
     # Outcome type
     if ctx.outcome_type not in rule.outcome_types:
         allowed = ", ".join(sorted(rule.outcome_types))
         reasons.append(
-            f"This test is for {allowed} data "
-            f"(current: {ctx.outcome_type})"
+            f"This test is for {allowed} data " f"(current: {ctx.outcome_type})"
         )
 
     # Paired / unpaired
@@ -173,10 +163,7 @@ def check_applicable(
     # Design
     if ctx.design not in rule.design_allowed:
         allowed = ", ".join(sorted(rule.design_allowed))
-        reasons.append(
-            f"Design '{ctx.design}' not supported "
-            f"(allowed: {allowed})"
-        )
+        reasons.append(f"Design '{ctx.design}' not supported " f"(allowed: {allowed})")
 
     # Sample sizes
     if rule.min_n_total is not None:
@@ -197,9 +184,7 @@ def check_applicable(
 
     # Normality assumption
     if rule.needs_normality and ctx.normality_ok is False:
-        reasons.append(
-            "Normality assumption not met (consider nonparametric test)"
-        )
+        reasons.append("Normality assumption not met (consider nonparametric test)")
 
     # Equal variance assumption
     if rule.needs_equal_variance and ctx.variance_homogeneity_ok is False:
@@ -293,19 +278,21 @@ def get_menu_items(
         ok, reasons = check_applicable(rule, ctx)
         tooltip = None if ok else "; ".join(reasons)
 
-        items.append({
-            "id": name,
-            "label": _pretty_label(name),
-            "family": rule.family,
-            "enabled": ok,
-            "tooltip": tooltip,
-            "priority": rule.priority,
-        })
+        items.append(
+            {
+                "id": name,
+                "label": _pretty_label(name),
+                "family": rule.family,
+                "enabled": ok,
+                "tooltip": tooltip,
+                "priority": rule.priority,
+            }
+        )
 
     # Sort: enabled first, then by priority (desc), then label
     items.sort(
         key=lambda d: (
-            not d["enabled"],      # False (enabled) -> 0 -> top
+            not d["enabled"],  # False (enabled) -> 0 -> top
             -int(d["priority"]),
             d["label"],
         )

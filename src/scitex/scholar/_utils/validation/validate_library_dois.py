@@ -19,6 +19,7 @@ from typing import Dict, Optional
 
 from scitex import logging
 from scitex.scholar.config import ScholarConfig
+
 from .DOIValidator import DOIValidator
 
 logger = logging.getLogger(__name__)

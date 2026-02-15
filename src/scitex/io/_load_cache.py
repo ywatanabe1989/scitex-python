@@ -8,11 +8,12 @@ File load caching infrastructure for scitex.io module.
 Provides intelligent caching with file modification detection.
 """
 
-import os
 import hashlib
+import os
 import weakref
 from functools import lru_cache
-from typing import Any, Tuple, Optional, Dict
+from typing import Any, Dict, Optional, Tuple
+
 from scitex import logging
 
 # Cache for file metadata (path -> (mtime, size, hash))

@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 # Time-stamp: "2023-04-23 09:45:28 (ywatanabe)"
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchsummary import summary
+
 import scitex
-import numpy as np
 
 
 class SpatialAttention(nn.Module):

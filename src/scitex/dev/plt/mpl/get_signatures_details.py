@@ -27,9 +27,9 @@ def parse_parameter_types(docstring: str | None) -> dict[str, str]:
 
     # Find Parameters section
     params_match = re.search(
-        r'Parameters\s*[-]+\s*(.*?)(?:\n\s*Returns|\n\s*See Also|\n\s*Notes|\n\s*Examples|\n\s*Other Parameters|\Z)',
+        r"Parameters\s*[-]+\s*(.*?)(?:\n\s*Returns|\n\s*See Also|\n\s*Notes|\n\s*Examples|\n\s*Other Parameters|\Z)",
         docstring,
-        re.DOTALL
+        re.DOTALL,
     )
     if not params_match:
         return {}
@@ -37,16 +37,22 @@ def parse_parameter_types(docstring: str | None) -> dict[str, str]:
     params_text = params_match.group(1)
 
     # Parse lines like "x, y : array-like or float" or "fmt : str, optional"
-    for match in re.finditer(r'^(\w+(?:\s*,\s*\w+)*)\s*:\s*(.+?)(?=\n\s*\n|\n\w+\s*:|\Z)', params_text, re.MULTILINE | re.DOTALL):
+    for match in re.finditer(
+        r"^(\w+(?:\s*,\s*\w+)*)\s*:\s*(.+?)(?=\n\s*\n|\n\w+\s*:|\Z)",
+        params_text,
+        re.MULTILINE | re.DOTALL,
+    ):
         names_str = match.group(1)
-        type_str = match.group(2).split('\n')[0].strip()  # First line only
+        type_str = match.group(2).split("\n")[0].strip()  # First line only
 
         # Clean up type string
-        type_str = re.sub(r',?\s*optional\s*$', '', type_str).strip()
-        type_str = re.sub(r',?\s*default[^,]*$', '', type_str, flags=re.IGNORECASE).strip()
+        type_str = re.sub(r",?\s*optional\s*$", "", type_str).strip()
+        type_str = re.sub(
+            r",?\s*default[^,]*$", "", type_str, flags=re.IGNORECASE
+        ).strip()
 
         # Handle multiple names like "x, y"
-        for name in re.split(r'\s*,\s*', names_str):
+        for name in re.split(r"\s*,\s*", names_str):
             name = name.strip()
             if name:
                 types[name.lower()] = type_str
@@ -54,36 +60,40 @@ def parse_parameter_types(docstring: str | None) -> dict[str, str]:
     return types
 
 
-def parse_args_pattern(args_str: str, param_types: dict[str, str]) -> list[dict[str, Any]]:
+def parse_args_pattern(
+    args_str: str, param_types: dict[str, str]
+) -> list[dict[str, Any]]:
     """Parse args pattern like '[x], y, [fmt]' into list of arg dicts."""
     if not args_str:
         return []
 
     args = []
     # Split by comma, handling brackets
-    parts = re.split(r',\s*', args_str)
+    parts = re.split(r",\s*", args_str)
 
     for part in parts:
         part = part.strip()
-        if not part or part == '/':  # Skip empty or positional-only marker
+        if not part or part == "/":  # Skip empty or positional-only marker
             continue
 
         # Check if optional (wrapped in [])
-        optional = part.startswith('[') and part.endswith(']')
+        optional = part.startswith("[") and part.endswith("]")
         if optional:
             name = part[1:-1].strip()
         else:
             # Handle cases like "[X, Y,] Z" where Z is required
-            name = part.strip('[]').strip()
+            name = part.strip("[]").strip()
 
-        if name and name not in ('...', '*'):
+        if name and name not in ("...", "*"):
             # Look up type from parsed parameters
             type_str = param_types.get(name.lower())
-            args.append({
-                "name": name,
-                "type": type_str,
-                "optional": optional,
-            })
+            args.append(
+                {
+                    "name": name,
+                    "type": type_str,
+                    "optional": optional,
+                }
+            )
 
     return args
 
@@ -110,7 +120,9 @@ MANUAL_ARGS_PATTERNS = {
 }
 
 
-def extract_args_from_docstring(docstring: str | None, func_name: str = "") -> list[dict[str, Any]]:
+def extract_args_from_docstring(
+    docstring: str | None, func_name: str = ""
+) -> list[dict[str, Any]]:
     """Extract *args as flattened list from docstring call signature."""
     if not docstring:
         return []
@@ -124,8 +136,8 @@ def extract_args_from_docstring(docstring: str | None, func_name: str = "") -> l
 
     # Look for "Call signature:" patterns
     patterns = [
-        r'Call signatures?::\s*\n\s*(.*?)(?:\n\n|\n[A-Z])',
-        r'^\s*(\w+\([^)]+\))\s*$',
+        r"Call signatures?::\s*\n\s*(.*?)(?:\n\n|\n[A-Z])",
+        r"^\s*(\w+\([^)]+\))\s*$",
     ]
 
     for pattern in patterns:
@@ -133,13 +145,14 @@ def extract_args_from_docstring(docstring: str | None, func_name: str = "") -> l
         if match:
             sig_text = match.group(1).strip()
             # Extract first signature line
-            first_line = sig_text.split('\n')[0].strip()
+            first_line = sig_text.split("\n")[0].strip()
             # Parse the args from signature like "plot([x], y, [fmt], *, ...)"
-            inner_match = re.search(r'\(([^*]+?)(?:,\s*\*|,\s*data|\))', first_line)
+            inner_match = re.search(r"\(([^*]+?)(?:,\s*\*|,\s*data|\))", first_line)
             if inner_match:
-                args_str = inner_match.group(1).strip().rstrip(',')
+                args_str = inner_match.group(1).strip().rstrip(",")
                 return parse_args_pattern(args_str, param_types)
     return []
+
 
 def get_setter_type(obj, prop_name: str) -> str | None:
     """Get type from set_* method docstring."""
@@ -153,22 +166,22 @@ def get_setter_type(obj, prop_name: str) -> str | None:
 
     # Parse Parameters section
     match = re.search(
-        r'Parameters\s*[-]+\s*\n\s*(\w+)\s*:\s*(.+?)(?:\n\s*\n|\Z)',
+        r"Parameters\s*[-]+\s*\n\s*(\w+)\s*:\s*(.+?)(?:\n\s*\n|\Z)",
         method.__doc__,
-        re.DOTALL
+        re.DOTALL,
     )
     if match:
-        type_str = match.group(2).split('\n')[0].strip()
+        type_str = match.group(2).split("\n")[0].strip()
         return type_str
     return None
 
 
 def build_kwargs_with_types():
     """Build kwargs lists with types from matplotlib classes."""
+    from matplotlib.artist import Artist
     from matplotlib.lines import Line2D
     from matplotlib.patches import Patch
     from matplotlib.text import Text
-    from matplotlib.artist import Artist
 
     # Create instances for introspection
     line = Line2D([0], [0])
@@ -188,10 +201,18 @@ def build_kwargs_with_types():
         {"name": "clip_path", "type": get_type(artist, "clip_path"), "default": None},
         {"name": "gid", "type": get_type(artist, "gid"), "default": None},
         {"name": "label", "type": get_type(artist, "label"), "default": ""},
-        {"name": "path_effects", "type": get_type(artist, "path_effects"), "default": None},
+        {
+            "name": "path_effects",
+            "type": get_type(artist, "path_effects"),
+            "default": None,
+        },
         {"name": "picker", "type": get_type(artist, "picker"), "default": None},
         {"name": "rasterized", "type": get_type(artist, "rasterized"), "default": None},
-        {"name": "sketch_params", "type": get_type(artist, "sketch_params"), "default": None},
+        {
+            "name": "sketch_params",
+            "type": get_type(artist, "sketch_params"),
+            "default": None,
+        },
         {"name": "snap", "type": get_type(artist, "snap"), "default": None},
         {"name": "transform", "type": get_type(artist, "transform"), "default": None},
         {"name": "url", "type": get_type(artist, "url"), "default": None},
@@ -204,16 +225,48 @@ def build_kwargs_with_types():
         {"name": "linestyle", "type": get_type(line, "linestyle"), "default": "-"},
         {"name": "linewidth", "type": get_type(line, "linewidth"), "default": None},
         {"name": "marker", "type": get_type(line, "marker"), "default": ""},
-        {"name": "markeredgecolor", "type": get_type(line, "markeredgecolor"), "default": None},
-        {"name": "markeredgewidth", "type": get_type(line, "markeredgewidth"), "default": None},
-        {"name": "markerfacecolor", "type": get_type(line, "markerfacecolor"), "default": None},
+        {
+            "name": "markeredgecolor",
+            "type": get_type(line, "markeredgecolor"),
+            "default": None,
+        },
+        {
+            "name": "markeredgewidth",
+            "type": get_type(line, "markeredgewidth"),
+            "default": None,
+        },
+        {
+            "name": "markerfacecolor",
+            "type": get_type(line, "markerfacecolor"),
+            "default": None,
+        },
         {"name": "markersize", "type": get_type(line, "markersize"), "default": None},
         {"name": "antialiased", "type": get_type(line, "antialiased"), "default": True},
-        {"name": "dash_capstyle", "type": get_type(line, "dash_capstyle"), "default": "butt"},
-        {"name": "dash_joinstyle", "type": get_type(line, "dash_joinstyle"), "default": "round"},
-        {"name": "solid_capstyle", "type": get_type(line, "solid_capstyle"), "default": "projecting"},
-        {"name": "solid_joinstyle", "type": get_type(line, "solid_joinstyle"), "default": "round"},
-        {"name": "drawstyle", "type": get_type(line, "drawstyle"), "default": "default"},
+        {
+            "name": "dash_capstyle",
+            "type": get_type(line, "dash_capstyle"),
+            "default": "butt",
+        },
+        {
+            "name": "dash_joinstyle",
+            "type": get_type(line, "dash_joinstyle"),
+            "default": "round",
+        },
+        {
+            "name": "solid_capstyle",
+            "type": get_type(line, "solid_capstyle"),
+            "default": "projecting",
+        },
+        {
+            "name": "solid_joinstyle",
+            "type": get_type(line, "solid_joinstyle"),
+            "default": "round",
+        },
+        {
+            "name": "drawstyle",
+            "type": get_type(line, "drawstyle"),
+            "default": "default",
+        },
         {"name": "fillstyle", "type": get_type(line, "fillstyle"), "default": "full"},
     ]
 
@@ -225,7 +278,11 @@ def build_kwargs_with_types():
         {"name": "hatch", "type": get_type(patch, "hatch"), "default": None},
         {"name": "linestyle", "type": get_type(patch, "linestyle"), "default": "-"},
         {"name": "linewidth", "type": get_type(patch, "linewidth"), "default": None},
-        {"name": "antialiased", "type": get_type(patch, "antialiased"), "default": None},
+        {
+            "name": "antialiased",
+            "type": get_type(patch, "antialiased"),
+            "default": None,
+        },
         {"name": "capstyle", "type": get_type(patch, "capstyle"), "default": "butt"},
         {"name": "joinstyle", "type": get_type(patch, "joinstyle"), "default": "miter"},
     ]
@@ -236,13 +293,33 @@ def build_kwargs_with_types():
         {"name": "fontsize", "type": get_type(text, "fontsize"), "default": None},
         {"name": "fontstretch", "type": get_type(text, "fontstretch"), "default": None},
         {"name": "fontstyle", "type": get_type(text, "fontstyle"), "default": "normal"},
-        {"name": "fontvariant", "type": get_type(text, "fontvariant"), "default": "normal"},
-        {"name": "fontweight", "type": get_type(text, "fontweight"), "default": "normal"},
-        {"name": "horizontalalignment", "type": get_type(text, "horizontalalignment"), "default": "center"},
-        {"name": "verticalalignment", "type": get_type(text, "verticalalignment"), "default": "center"},
+        {
+            "name": "fontvariant",
+            "type": get_type(text, "fontvariant"),
+            "default": "normal",
+        },
+        {
+            "name": "fontweight",
+            "type": get_type(text, "fontweight"),
+            "default": "normal",
+        },
+        {
+            "name": "horizontalalignment",
+            "type": get_type(text, "horizontalalignment"),
+            "default": "center",
+        },
+        {
+            "name": "verticalalignment",
+            "type": get_type(text, "verticalalignment"),
+            "default": "center",
+        },
         {"name": "rotation", "type": get_type(text, "rotation"), "default": None},
         {"name": "linespacing", "type": get_type(text, "linespacing"), "default": None},
-        {"name": "multialignment", "type": get_type(text, "multialignment"), "default": None},
+        {
+            "name": "multialignment",
+            "type": get_type(text, "multialignment"),
+            "default": None,
+        },
         {"name": "wrap", "type": get_type(text, "wrap"), "default": False},
     ]
 
@@ -446,9 +523,7 @@ def inspect_mpl_plotting_functions_flattened(
                     func, func_name
                 )
             else:
-                results[category][func_name] = {
-                    "error": "Function not found"
-                }
+                results[category][func_name] = {"error": "Function not found"}
 
     return results
 

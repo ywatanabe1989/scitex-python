@@ -27,23 +27,23 @@ IO:
 """
 
 import asyncio
-from typing import List, Dict, Optional, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from scitex import logging
 from scitex.scholar.core import Paper
-from scitex.scholar.search_engines.individual.PubMedSearchEngine import (
-    PubMedSearchEngine,
-)
+from scitex.scholar.search_engines.individual.ArXivSearchEngine import ArXivSearchEngine
 from scitex.scholar.search_engines.individual.CrossRefSearchEngine import (
     CrossRefSearchEngine,
 )
-from scitex.scholar.search_engines.individual.ArXivSearchEngine import ArXivSearchEngine
-from scitex.scholar.search_engines.individual.SemanticScholarSearchEngine import (
-    SemanticScholarSearchEngine,
-)
 from scitex.scholar.search_engines.individual.OpenAlexSearchEngine import (
     OpenAlexSearchEngine,
+)
+from scitex.scholar.search_engines.individual.PubMedSearchEngine import (
+    PubMedSearchEngine,
+)
+from scitex.scholar.search_engines.individual.SemanticScholarSearchEngine import (
+    SemanticScholarSearchEngine,
 )
 
 logger = logging.getLogger(__name__)

@@ -10,29 +10,29 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 """Scitex AI module for machine learning and artificial intelligence utilities."""
 
-# Lazy imports to avoid loading heavy dependencies eagerly
-from .classification import ClassificationReporter
-from .training._LearningCurveLogger import LearningCurveLogger
-from .training._EarlyStopping import EarlyStopping
-from .loss import MultiTaskLoss
-from .classification import Classifier
-from .optim import get_optimizer, set_optimizer
-
-# Import submodules to make them accessible
-from . import activation
-from . import classification
-from . import clustering
-from . import feature_extraction
-
 # from . import layer
-from . import loss
-from . import metrics
-from . import optim
-from . import plt
-from . import sampling
-from . import sklearn
-from . import training
-from . import utils
+# Import submodules to make them accessible
+from . import (
+    activation,
+    classification,
+    clustering,
+    feature_extraction,
+    loss,
+    metrics,
+    optim,
+    plt,
+    sampling,
+    sklearn,
+    training,
+    utils,
+)
+
+# Lazy imports to avoid loading heavy dependencies eagerly
+from .classification import ClassificationReporter, Classifier
+from .loss import MultiTaskLoss
+from .optim import get_optimizer, set_optimizer
+from .training._EarlyStopping import EarlyStopping
+from .training._LearningCurveLogger import LearningCurveLogger
 
 
 # Lazy import for GenAI (heavy anthropic dependency)

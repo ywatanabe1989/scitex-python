@@ -10,8 +10,8 @@ When running in a notebook like ./examples/analysis.ipynb,
 outputs should go to ./examples/analysis_out/
 """
 
-import os
 import json
+import os
 from typing import Optional
 
 __all__ = ["get_notebook_path", "get_notebook_output_dir"]
@@ -45,8 +45,8 @@ def get_notebook_path() -> Optional[str]:
             return ip.notebook_name
 
         # Method 3: Try to get from kernel connection file
-        import re
         import glob
+        import re
 
         # Get kernel ID from the current session
         kernel_id = re.search(
@@ -81,16 +81,19 @@ def get_notebook_path() -> Optional[str]:
 
         # Method 4: Try JavaScript bridge (if available)
         try:
-            from IPython.display import Javascript, display
             import time
+
+            from IPython.display import Javascript, display
 
             # This won't work in papermill, but works in interactive notebooks
             display(
-                Javascript("""
+                Javascript(
+                    """
                 IPython.notebook.kernel.execute(
                     `__notebook_path__ = '${IPython.notebook.notebook_path}'`
                 );
-            """)
+            """
+                )
             )
 
             # Brief pause for JS execution

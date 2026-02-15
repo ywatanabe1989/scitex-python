@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import scitex
 import numpy as np
+
+import scitex
 
 # y1, y2 = T_tra, M_tra
 # def merge_labels(y1, y2):

@@ -13,22 +13,22 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_metadata_modules/read_metadata_png.py
-# 
+#
 # """PNG metadata reading from tEXt chunks."""
-# 
+#
 # import json
 # from typing import Any, Dict, Optional
-# 
+#
 # from PIL import Image
-# 
-# 
+#
+#
 # def read_metadata_png(image_path: str) -> Optional[Dict[str, Any]]:
 #     """
 #     Read metadata from a PNG file.
-# 
+#
 #     Args:
 #         image_path: Path to the PNG file.
-# 
+#
 #     Returns:
 #         Dictionary containing metadata, or None if no metadata found.
 #     """
@@ -44,10 +44,10 @@ if __name__ == "__main__":
 #                 metadata = {"raw": metadata_json}
 #     finally:
 #         img.close()
-# 
+#
 #     return metadata
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

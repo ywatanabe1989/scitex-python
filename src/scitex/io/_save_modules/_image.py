@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 12:23:32 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_image.py
 
-import os
 
 __FILE__ = __file__
 
@@ -32,10 +30,10 @@ def save_image(
 
     # Get format from file extension or kwargs
     if is_file_like:
-        fmt = kwargs.get('format', '').lower()
+        fmt = kwargs.get("format", "").lower()
     else:
         # Get extension without the leading dot
-        fmt = spath.lower().rsplit('.', 1)[-1] if '.' in spath else ''
+        fmt = spath.lower().rsplit(".", 1)[-1] if "." in spath else ""
 
     # Auto-save stats BEFORE saving (obj may be deleted during save)
     # Only for file paths, not file-like objects
@@ -70,7 +68,7 @@ def save_image(
                 logger.warning(f"Failed to add QR code: {e}")
 
     # png
-    if fmt == 'png':
+    if fmt == "png":
         # plotly
         if isinstance(obj, plotly.graph_objs.Figure):
             obj.write_image(file=spath, format="png")
@@ -86,7 +84,7 @@ def save_image(
         del obj
 
     # tiff
-    elif fmt in ('tiff', 'tif'):
+    elif fmt in ("tiff", "tif"):
         # PIL image
         if isinstance(obj, Image.Image):
             obj.save(spath)
@@ -103,7 +101,7 @@ def save_image(
         del obj
 
     # jpeg
-    elif fmt in ('jpeg', 'jpg'):
+    elif fmt in ("jpeg", "jpg"):
         buf = _io.BytesIO()
 
         # plotly
@@ -140,7 +138,7 @@ def save_image(
         del obj
 
     # GIF
-    elif fmt == 'gif':
+    elif fmt == "gif":
         # PIL image
         if isinstance(obj, Image.Image):
             obj.save(spath, save_all=True)
@@ -168,7 +166,7 @@ def save_image(
         del obj
 
     # SVG
-    elif fmt == 'svg':
+    elif fmt == "svg":
         # Plotly
         if isinstance(obj, plotly.graph_objs.Figure):
             obj.write_image(file=spath, format="svg")
@@ -183,7 +181,7 @@ def save_image(
         del obj
 
     # PDF
-    elif fmt == 'pdf':
+    elif fmt == "pdf":
         # Plotly
         if isinstance(obj, plotly.graph_objs.Figure):
             obj.write_image(file=spath, format="pdf")
@@ -216,6 +214,7 @@ def save_image(
                 logger.debug(f"  • Embedded metadata: {metadata}")
         except Exception as e:
             logger.warning(f"Failed to embed metadata: {e}")
+
 
 def _save_stats_from_figure(obj, spath, verbose=False):
     """
@@ -286,6 +285,7 @@ def _save_stats_from_figure(obj, spath, verbose=False):
 
         # Save to {basename}_stats.csv
         import os
+
         base, ext = os.path.splitext(spath)
         stats_path = f"{base}_stats.csv"
         stats_df.to_csv(stats_path, index=False)

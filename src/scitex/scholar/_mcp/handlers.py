@@ -102,9 +102,11 @@ async def search_papers_handler(
                 results.append(
                     {
                         "title": paper.metadata.basic.title,
-                        "authors": paper.metadata.basic.authors[:5]
-                        if paper.metadata.basic.authors
-                        else [],
+                        "authors": (
+                            paper.metadata.basic.authors[:5]
+                            if paper.metadata.basic.authors
+                            else []
+                        ),
                         "year": paper.metadata.basic.year,
                         "doi": paper.metadata.id.doi,
                         "journal": paper.metadata.publication.journal,
@@ -874,9 +876,11 @@ async def authenticate_handler(
                         and env_status["sso_password_set"]
                     ),
                 },
-                "warnings": []
-                if requirements_met
-                else [f"Environment variable {email_var} is NOT set"],
+                "warnings": (
+                    []
+                    if requirements_met
+                    else [f"Environment variable {email_var} is NOT set"]
+                ),
                 "instructions": [
                     "A browser window will open for SSO login",
                     "If SSO credentials are set, login will be automated",
@@ -1453,9 +1457,9 @@ async def parse_pdf_content_handler(
                     "path": str(target_path),
                     "mode": "text",
                     "page_count": page_count,
-                    "text": full_text[:5000] + "..."
-                    if len(full_text) > 5000
-                    else full_text,
+                    "text": (
+                        full_text[:5000] + "..." if len(full_text) > 5000 else full_text
+                    ),
                     "text_length": len(full_text),
                     "fallback": "PyPDF2",
                 }

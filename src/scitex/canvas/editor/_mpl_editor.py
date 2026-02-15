@@ -3,9 +3,9 @@
 # File: ./src/scitex/vis/editor/_mpl_editor.py
 """Minimal matplotlib-based figure editor."""
 
-from pathlib import Path
-from typing import Dict, Any, Optional
 import copy
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 
 class MplEditor:

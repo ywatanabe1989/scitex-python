@@ -145,7 +145,6 @@ TEST_RULES: Dict[str, TestRule] = {
     # =========================================================================
     # Parametric Tests - Mean Comparisons
     # =========================================================================
-
     # Independent 2-sample t-test (Welch)
     "ttest_ind": TestRule(
         name="ttest_ind",
@@ -166,7 +165,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=90,
         description="Independent samples t-test (Welch)",
     ),
-
     # Paired t-test
     "ttest_rel": TestRule(
         name="ttest_rel",
@@ -187,7 +185,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=95,
         description="Paired samples t-test",
     ),
-
     # One-way ANOVA (between)
     "anova_oneway": TestRule(
         name="anova_oneway",
@@ -208,7 +205,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=80,
         description="One-way ANOVA (between subjects)",
     ),
-
     # Repeated-measures one-way ANOVA
     "anova_rm_oneway": TestRule(
         name="anova_rm_oneway",
@@ -229,7 +225,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=85,
         description="Repeated-measures one-way ANOVA",
     ),
-
     # Welch ANOVA (unequal variances)
     "welch_anova": TestRule(
         name="welch_anova",
@@ -250,7 +245,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=82,
         description="Welch's ANOVA (heterogeneous variances)",
     ),
-
     # Two-way ANOVA (between)
     "anova_twoway": TestRule(
         name="anova_twoway",
@@ -271,7 +265,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=78,
         description="Two-way ANOVA (between subjects)",
     ),
-
     # Two-way ANOVA (mixed)
     "anova_twoway_mixed": TestRule(
         name="anova_twoway_mixed",
@@ -292,11 +285,9 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=80,
         description="Two-way mixed-design ANOVA",
     ),
-
     # =========================================================================
     # Nonparametric Tests - Rank Comparisons
     # =========================================================================
-
     # Brunner-Munzel test (RECOMMENDED DEFAULT for 2 groups)
     "brunner_munzel": TestRule(
         name="brunner_munzel",
@@ -317,7 +308,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=110,  # HIGHEST PRIORITY - recommended default
         description="Brunner-Munzel test (most robust, recommended)",
     ),
-
     # Mann-Whitney U test
     "mannwhitneyu": TestRule(
         name="mannwhitneyu",
@@ -338,7 +328,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=85,
         description="Mann-Whitney U test (rank-sum)",
     ),
-
     # Wilcoxon signed-rank test (paired)
     "wilcoxon": TestRule(
         name="wilcoxon",
@@ -359,7 +348,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=90,
         description="Wilcoxon signed-rank test (paired)",
     ),
-
     # Kruskal-Wallis (3+ groups, between)
     "kruskal": TestRule(
         name="kruskal",
@@ -380,7 +368,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=75,
         description="Kruskal-Wallis H test",
     ),
-
     # Friedman test (3+ groups, within)
     "friedman": TestRule(
         name="friedman",
@@ -401,11 +388,9 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=80,
         description="Friedman test (repeated measures)",
     ),
-
     # =========================================================================
     # Categorical Tests
     # =========================================================================
-
     # Chi-square test of independence
     "chi2_independence": TestRule(
         name="chi2_independence",
@@ -426,7 +411,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=80,
         description="Chi-square test of independence",
     ),
-
     # Fisher's exact test (2x2)
     "fisher_exact": TestRule(
         name="fisher_exact",
@@ -447,7 +431,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=90,
         description="Fisher's exact test (2x2)",
     ),
-
     # McNemar's test (paired binary)
     "mcnemar": TestRule(
         name="mcnemar",
@@ -468,11 +451,9 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=85,
         description="McNemar's test (paired binary)",
     ),
-
     # =========================================================================
     # Correlation Tests
     # =========================================================================
-
     # Pearson correlation
     "pearsonr": TestRule(
         name="pearsonr",
@@ -493,7 +474,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=80,
         description="Pearson correlation coefficient",
     ),
-
     # Spearman correlation
     "spearmanr": TestRule(
         name="spearmanr",
@@ -514,11 +494,9 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=85,
         description="Spearman rank correlation",
     ),
-
     # =========================================================================
     # Normality Tests
     # =========================================================================
-
     # Shapiro-Wilk test
     "shapiro": TestRule(
         name="shapiro",
@@ -539,7 +517,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=60,
         description="Shapiro-Wilk normality test",
     ),
-
     # Levene's test for homogeneity of variance
     "levene": TestRule(
         name="levene",
@@ -560,11 +537,9 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=70,
         description="Levene's test for homogeneity of variance",
     ),
-
     # =========================================================================
     # Post-hoc Tests
     # =========================================================================
-
     # Tukey HSD
     "tukey_hsd": TestRule(
         name="tukey_hsd",
@@ -585,7 +560,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=88,
         description="Tukey HSD post-hoc test",
     ),
-
     # Dunnett (control vs treatments)
     "dunnett": TestRule(
         name="dunnett",
@@ -606,7 +580,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=86,
         description="Dunnett's test (control vs treatments)",
     ),
-
     # Games-Howell (unequal variances)
     "games_howell": TestRule(
         name="games_howell",
@@ -627,11 +600,9 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=89,
         description="Games-Howell post-hoc (unequal variances)",
     ),
-
     # =========================================================================
     # Effect Size Measures
     # =========================================================================
-
     # Cohen's d (independent)
     "cohens_d_ind": TestRule(
         name="cohens_d_ind",
@@ -652,7 +623,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=90,
         description="Cohen's d (independent samples)",
     ),
-
     # Cohen's d (paired)
     "cohens_d_paired": TestRule(
         name="cohens_d_paired",
@@ -673,7 +643,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=92,
         description="Cohen's d (paired samples)",
     ),
-
     # Hedges' g
     "hedges_g": TestRule(
         name="hedges_g",
@@ -694,7 +663,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=88,
         description="Hedges' g (bias-corrected effect size)",
     ),
-
     # Cliff's delta
     "cliffs_delta": TestRule(
         name="cliffs_delta",
@@ -715,7 +683,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=86,
         description="Cliff's delta (nonparametric effect size)",
     ),
-
     # Eta-squared
     "eta_squared": TestRule(
         name="eta_squared",
@@ -736,7 +703,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=80,
         description="Eta-squared (variance explained)",
     ),
-
     # Partial eta-squared
     "partial_eta_squared": TestRule(
         name="partial_eta_squared",
@@ -757,7 +723,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=85,
         description="Partial eta-squared (multi-factor designs)",
     ),
-
     # Effect size r (for correlations)
     "effect_size_r": TestRule(
         name="effect_size_r",
@@ -778,7 +743,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=80,
         description="Effect size r (correlation)",
     ),
-
     # Odds ratio
     "odds_ratio": TestRule(
         name="odds_ratio",
@@ -799,7 +763,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=88,
         description="Odds ratio (2x2 table)",
     ),
-
     # Risk ratio
     "risk_ratio": TestRule(
         name="risk_ratio",
@@ -820,7 +783,6 @@ TEST_RULES: Dict[str, TestRule] = {
         priority=86,
         description="Risk ratio (relative risk)",
     ),
-
     # Probability of superiority P(X>Y)
     "prob_superiority": TestRule(
         name="prob_superiority",
@@ -880,10 +842,7 @@ def list_tests_by_family(family: TestFamily) -> Dict[str, TestRule]:
     dict
         Dictionary of test name -> TestRule for the family.
     """
-    return {
-        name: rule for name, rule in TEST_RULES.items()
-        if rule.family == family
-    }
+    return {name: rule for name, rule in TEST_RULES.items() if rule.family == family}
 
 
 # =============================================================================

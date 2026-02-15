@@ -7,7 +7,12 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from ._utils import format_effect_size, format_p_value, format_statistic, significance_stars
+from ._utils import (
+    format_effect_size,
+    format_p_value,
+    format_statistic,
+    significance_stars,
+)
 
 
 @dataclass

@@ -13,6 +13,7 @@ import json
 import os
 import tempfile
 from pathlib import Path
+
 import pytest
 
 # Required for scitex.io module
@@ -23,17 +24,17 @@ pytest.importorskip("zarr")
 def test_load_json_basic():
     """Test loading a basic JSON file."""
     from scitex.io._load_modules._json import _load_json
-    
+
     # Create a temporary JSON file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         data = {"key": "value", "number": 42, "list": [1, 2, 3]}
         json.dump(data, f)
         temp_path = f.name
-    
+
     try:
         # Load the JSON file
         loaded_data = _load_json(temp_path)
-        
+
         # Verify the data
         assert loaded_data == data
         assert loaded_data["key"] == "value"
@@ -47,32 +48,23 @@ def test_load_json_basic():
 def test_load_json_complex_structure():
     """Test loading JSON with nested structures."""
     from scitex.io._load_modules._json import _load_json
-    
+
     # Create complex data
     complex_data = {
-        "nested": {
-            "level1": {
-                "level2": {
-                    "value": "deep"
-                }
-            }
-        },
-        "array_of_objects": [
-            {"id": 1, "name": "first"},
-            {"id": 2, "name": "second"}
-        ],
+        "nested": {"level1": {"level2": {"value": "deep"}}},
+        "array_of_objects": [{"id": 1, "name": "first"}, {"id": 2, "name": "second"}],
         "null_value": None,
         "boolean": True,
-        "float": 3.14159
+        "float": 3.14159,
     }
-    
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(complex_data, f)
         temp_path = f.name
-    
+
     try:
         loaded_data = _load_json(temp_path)
-        
+
         assert loaded_data == complex_data
         assert loaded_data["nested"]["level1"]["level2"]["value"] == "deep"
         assert len(loaded_data["array_of_objects"]) == 2
@@ -86,13 +78,17 @@ def test_load_json_complex_structure():
 def test_load_json_invalid_extension():
     """Test that loading non-JSON file raises ValueError."""
     from scitex.io._load_modules._json import _load_json
-    
+
     # Try to load a file without .json extension
-    with pytest.raises(FileNotFoundError):  # Extension validation done by load(), not _load_ .json
+    with pytest.raises(
+        FileNotFoundError
+    ):  # Extension validation done by load(), not _load_ .json
         # _load_X just opens file; raises FileNotFoundError for non-existent files
         _load_json("test.txt")
-    
-    with pytest.raises(FileNotFoundError):  # Extension validation done by load(), not _load_ .json
+
+    with pytest.raises(
+        FileNotFoundError
+    ):  # Extension validation done by load(), not _load_ .json
         # _load_X just opens file; raises FileNotFoundError for non-existent files
         _load_json("/path/to/file.yaml")
 
@@ -100,12 +96,12 @@ def test_load_json_invalid_extension():
 def test_load_json_invalid_json_content():
     """Test handling of invalid JSON content."""
     from scitex.io._load_modules._json import _load_json
-    
+
     # Create a file with invalid JSON
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         f.write("This is not valid JSON {incomplete:")
         temp_path = f.name
-    
+
     try:
         with pytest.raises(json.JSONDecodeError):
             _load_json(temp_path)
@@ -116,11 +112,11 @@ def test_load_json_invalid_json_content():
 def test_load_json_empty_file():
     """Test loading an empty JSON file."""
     from scitex.io._load_modules._json import _load_json
-    
+
     # Create an empty file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         temp_path = f.name
-    
+
     try:
         with pytest.raises(json.JSONDecodeError):
             _load_json(temp_path)
@@ -131,21 +127,19 @@ def test_load_json_empty_file():
 def test_load_json_unicode_content():
     """Test loading JSON with Unicode characters."""
     from scitex.io._load_modules._json import _load_json
-    
+
     # Create JSON with Unicode
-    unicode_data = {
-        "japanese": "こんにちは",
-        "emoji": "🎉🐍",
-        "mixed": "Hello 世界"
-    }
-    
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as f:
+    unicode_data = {"japanese": "こんにちは", "emoji": "🎉🐍", "mixed": "Hello 世界"}
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".json", delete=False, encoding="utf-8"
+    ) as f:
         json.dump(unicode_data, f, ensure_ascii=False)
         temp_path = f.name
-    
+
     try:
         loaded_data = _load_json(temp_path)
-        
+
         assert loaded_data == unicode_data
         assert loaded_data["japanese"] == "こんにちは"
         assert loaded_data["emoji"] == "🎉🐍"
@@ -156,7 +150,7 @@ def test_load_json_unicode_content():
 def test_load_json_nonexistent_file():
     """Test loading a nonexistent file."""
     from scitex.io._load_modules._json import _load_json
-    
+
     with pytest.raises(FileNotFoundError):
         _load_json("/nonexistent/path/file.json")
 
@@ -164,27 +158,25 @@ def test_load_json_nonexistent_file():
 def test_load_json_large_file():
     """Test loading a large JSON file."""
     from scitex.io._load_modules._json import _load_json
-    
+
     # Create a large JSON structure
     large_data = {
-        f"key_{i}": {
-            "value": i,
-            "data": list(range(100))
-        } for i in range(100)
+        f"key_{i}": {"value": i, "data": list(range(100))} for i in range(100)
     }
-    
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(large_data, f)
         temp_path = f.name
-    
+
     try:
         loaded_data = _load_json(temp_path)
-        
+
         assert len(loaded_data) == 100
         assert loaded_data["key_50"]["value"] == 50
         assert len(loaded_data["key_99"]["data"]) == 100
     finally:
         os.unlink(temp_path)
+
 
 if __name__ == "__main__":
     import os
@@ -200,21 +192,21 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-14 07:55:40 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/io/_load_modules/_json.py
-# 
+#
 # import json
 # from typing import Any
-# 
-# 
+#
+#
 # def _load_json(lpath: str, **kwargs) -> Any:
 #     """Load JSON file.
-# 
+#
 #     Extension validation is handled by load() function, not here.
 #     This allows loading files without extensions when ext='json' is specified.
 #     """
 #     with open(lpath, "r") as f:
 #         return json.load(f)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

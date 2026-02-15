@@ -13,27 +13,27 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # """ScienceDirect translator."""
-# 
+#
 # import re
 # from typing import List
 # from playwright.async_api import Page
 # from ..core.base import BaseTranslator
-# 
-# 
+#
+#
 # class ScienceDirectTranslator(BaseTranslator):
 #     """ScienceDirect."""
-# 
+#
 #     LABEL = "ScienceDirect"
 #     URL_TARGET_PATTERN = r"^https?://[^/]*science-?direct\.com[^/]*/((science/)?(article/|(journal|bookseries|book|handbook)/\d)|search[?/]|journal/[^/]+/vol)"
-# 
+#
 #     @classmethod
 #     def matches_url(cls, url: str) -> bool:
 #         return bool(re.match(cls.URL_TARGET_PATTERN, url))
-# 
+#
 #     @classmethod
 #     async def extract_pdf_urls_async(cls, page: Page) -> List[str]:
 #         """Extract PDF URLs from ScienceDirect article page.
-# 
+#
 #         Based on JavaScript translator getPDFLink() function (lines 67-173).
 #         Implements all 5 methods matching JavaScript exactly:
 #         1. Direct PDF link (#pdfLink or meta tag)
@@ -62,7 +62,7 @@ if __name__ == "__main__":
 #                 return []
 #         except:
 #             pass
-# 
+#
 #         # Method 1: Direct PDF link (JS lines 75-76)
 #         try:
 #             pdf_url = await page.locator("#pdfLink").first.get_attribute(
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 #                 return [pdf_url]
 #         except:
 #             pass
-# 
+#
 #         # Method 1b: Meta tag citation_pdf_url (JS line 76)
 #         try:
 #             pdf_url = await page.locator(
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 #                 return [pdf_url]
 #         except:
 #             pass
-# 
+#
 #         # Method 2: Embedded PDF object (JS lines 83-92)
 #         try:
 #             intermediate_url = await page.locator(
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 #                 return [intermediate_url]
 #         except:
 #             pass
-# 
+#
 #         # Method 3: JSON metadata (JS lines 123-148)
 #         try:
 #             json_script = await page.locator(
@@ -100,9 +100,9 @@ if __name__ == "__main__":
 #             ).first.text_content(timeout=2000)
 #             if json_script:
 #                 import json
-# 
+#
 #                 data = json.loads(json_script)
-# 
+#
 #                 # Try to construct PDF URL from JSON
 #                 url_metadata = (
 #                     data.get("article", {})
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 #                 query_params = url_metadata.get("queryParams", {})
 #                 md5 = query_params.get("md5")
 #                 pid = query_params.get("pid")
-# 
+#
 #                 if all([path, pdf_extension, pii, md5, pid]):
 #                     pdf_url = f"/{path}/{pii}{pdf_extension}?md5={md5}&pid={pid}"
 #                     # Make absolute URL
@@ -124,7 +124,7 @@ if __name__ == "__main__":
 #                     return [pdf_url]
 #         except:
 #             pass
-# 
+#
 #         # Method 4: Canonical link + suffix (JS lines 154-159)
 #         try:
 #             canonical_url = await page.locator(
@@ -135,12 +135,12 @@ if __name__ == "__main__":
 #                 return [pdf_url]
 #         except:
 #             pass
-# 
+#
 #         # Method 5: Refetch HTML for .pdf-download-btn-link (JS lines 164-172)
 #         # Note: This is a last resort method that requires refetching the page
 #         # Skipping this in Python as it's expensive and rarely needed
 #         # The JavaScript uses: let reloadedDoc = await requestDocument(url);
-# 
+#
 #         return []
 
 # --------------------------------------------------------------------------------

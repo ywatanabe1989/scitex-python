@@ -3,9 +3,10 @@
 # File: ./src/scitex/vis/editor/flask_editor/plotter.py
 """CSV plotting functionality for Flask editor."""
 
-from typing import Dict, Any, Optional
-import pandas as pd
+from typing import Any, Dict, Optional
+
 import numpy as np
+import pandas as pd
 
 
 def _apply_element_overrides(
@@ -181,23 +182,47 @@ def plot_from_recipe(
 
         try:
             if method == "plot":
-                element_key = f"{ax_id}_trace_{element_counts['trace']}" if ax_id else f"trace_{element_counts['trace']}"
-                kwargs = _apply_element_overrides(kwargs, element_key, element_overrides, "trace")
+                element_key = (
+                    f"{ax_id}_trace_{element_counts['trace']}"
+                    if ax_id
+                    else f"trace_{element_counts['trace']}"
+                )
+                kwargs = _apply_element_overrides(
+                    kwargs, element_key, element_overrides, "trace"
+                )
                 _render_plot(ax, df, data_ref, kwargs, linewidth)
                 element_counts["trace"] += 1
             elif method == "scatter":
-                element_key = f"{ax_id}_scatter_{element_counts['scatter']}" if ax_id else f"scatter_{element_counts['scatter']}"
-                kwargs = _apply_element_overrides(kwargs, element_key, element_overrides, "scatter")
+                element_key = (
+                    f"{ax_id}_scatter_{element_counts['scatter']}"
+                    if ax_id
+                    else f"scatter_{element_counts['scatter']}"
+                )
+                kwargs = _apply_element_overrides(
+                    kwargs, element_key, element_overrides, "scatter"
+                )
                 _render_scatter(ax, df, data_ref, kwargs)
                 element_counts["scatter"] += 1
             elif method == "bar":
-                element_key = f"{ax_id}_bar_{element_counts['bar']}" if ax_id else f"bar_{element_counts['bar']}"
-                kwargs = _apply_element_overrides(kwargs, element_key, element_overrides, "bar")
+                element_key = (
+                    f"{ax_id}_bar_{element_counts['bar']}"
+                    if ax_id
+                    else f"bar_{element_counts['bar']}"
+                )
+                kwargs = _apply_element_overrides(
+                    kwargs, element_key, element_overrides, "bar"
+                )
                 _render_bar(ax, df, data_ref, kwargs)
                 element_counts["bar"] += 1
             elif method == "fill_between":
-                element_key = f"{ax_id}_fill_{element_counts['fill']}" if ax_id else f"fill_{element_counts['fill']}"
-                kwargs = _apply_element_overrides(kwargs, element_key, element_overrides, "fill")
+                element_key = (
+                    f"{ax_id}_fill_{element_counts['fill']}"
+                    if ax_id
+                    else f"fill_{element_counts['fill']}"
+                )
+                kwargs = _apply_element_overrides(
+                    kwargs, element_key, element_overrides, "fill"
+                )
                 _render_fill_between(ax, df, data_ref, kwargs)
                 element_counts["fill"] += 1
             elif method == "errorbar":
@@ -208,8 +233,14 @@ def plot_from_recipe(
                 _render_contour(ax, df, data_ref, kwargs)
             elif method == "contourf":
                 _render_contourf(ax, df, data_ref, kwargs)
-            elif method in ("stx_shaded_line", "stx_fillv", "stx_violin",
-                           "stx_box", "stx_rectangle", "stx_raster"):
+            elif method in (
+                "stx_shaded_line",
+                "stx_fillv",
+                "stx_violin",
+                "stx_box",
+                "stx_rectangle",
+                "stx_raster",
+            ):
                 _render_stx_method(ax, df, method, data_ref, kwargs)
             elif method == "hist":
                 _render_hist(ax, df, data_ref, kwargs)
@@ -250,34 +281,37 @@ def _get_column_data(df, col_ref: str) -> Optional[np.ndarray]:
     # Pattern: ax-row-X-col-Y_trace-id-ax_XX_NAME_variable-Z
     # Should become: ax-row-X-col-Y_trace-id-NAME_variable-Z
     import re
-    simplified = re.sub(r'(trace-id-)ax_\d+_', r'\1', col_ref)
+
+    simplified = re.sub(r"(trace-id-)ax_\d+_", r"\1", col_ref)
     if simplified in df.columns:
         return df[simplified].dropna().values
 
     # Try case variations (lowercase the trace-id part)
-    simplified_lower = re.sub(r'(trace-id-)[^_]+', lambda m: m.group(0).lower(), simplified)
+    simplified_lower = re.sub(
+        r"(trace-id-)[^_]+", lambda m: m.group(0).lower(), simplified
+    )
     if simplified_lower in df.columns:
         return df[simplified_lower].dropna().values
 
     # Try matching by suffix (variable-x, variable-y, etc.)
-    suffix_match = re.search(r'_variable-(\w+)$', col_ref)
+    suffix_match = re.search(r"_variable-(\w+)$", col_ref)
     if suffix_match:
         var_suffix = suffix_match.group(0)
         # Extract trace-id pattern
-        trace_match = re.search(r'trace-id-(?:ax_\d+_)?([^_]+)', col_ref)
+        trace_match = re.search(r"trace-id-(?:ax_\d+_)?([^_]+)", col_ref)
         if trace_match:
             trace_name = trace_match.group(1).lower()
             for col in df.columns:
-                if f'trace-id-{trace_name}' in col.lower() and col.endswith(var_suffix):
+                if f"trace-id-{trace_name}" in col.lower() and col.endswith(var_suffix):
                     return df[col].dropna().values
 
     # Last resort: fuzzy match by ending
     for col in df.columns:
         # Match if same variable suffix and similar trace pattern
-        if col_ref.split('_variable-')[-1] == col.split('_variable-')[-1]:
+        if col_ref.split("_variable-")[-1] == col.split("_variable-")[-1]:
             # Check if trace-id portion is similar
-            ref_trace = re.search(r'trace-id-(?:ax_\d+_)?(.+?)_variable', col_ref)
-            col_trace = re.search(r'trace-id-(.+?)_variable', col)
+            ref_trace = re.search(r"trace-id-(?:ax_\d+_)?(.+?)_variable", col_ref)
+            col_trace = re.search(r"trace-id-(.+?)_variable", col)
             if ref_trace and col_trace:
                 if ref_trace.group(1).lower() == col_trace.group(1).lower():
                     return df[col].dropna().values
@@ -431,9 +465,13 @@ def _render_stx_method(ax, df, method, data_ref, kwargs):
 
         if all(v is not None for v in [x, y_lower, y_middle, y_upper]):
             min_len = min(len(x), len(y_lower), len(y_middle), len(y_upper))
-            ax.fill_between(x[:min_len], y_lower[:min_len], y_upper[:min_len],
-                           alpha=0.3, **{k: v for k, v in kwargs.items()
-                                        if k not in ['linewidth']})
+            ax.fill_between(
+                x[:min_len],
+                y_lower[:min_len],
+                y_upper[:min_len],
+                alpha=0.3,
+                **{k: v for k, v in kwargs.items() if k not in ["linewidth"]},
+            )
             ax.plot(x[:min_len], y_middle[:min_len], **kwargs)
 
 
@@ -476,15 +514,41 @@ def _render_generic(ax, df, method, data_ref, kwargs, linewidth):
     if x is not None and y is not None and len(x) == len(y):
         # Filter out kwargs that are not valid for ax.plot()
         invalid_plot_kwargs = {
-            'levels', 'extend', 'origin', 'extent', 'aspect',
-            'norm', 'vmin', 'vmax', 'interpolation', 'filternorm',
-            'filterrad', 'resample', 'bins', 'range', 'density',
-            'weights', 'cumulative', 'bottom', 'histtype', 'align',
-            'orientation', 'rwidth', 'log', 'stacked', 'data',
-            'width', 'height', 'edgecolors', 's', 'c', 'facecolors',
+            "levels",
+            "extend",
+            "origin",
+            "extent",
+            "aspect",
+            "norm",
+            "vmin",
+            "vmax",
+            "interpolation",
+            "filternorm",
+            "filterrad",
+            "resample",
+            "bins",
+            "range",
+            "density",
+            "weights",
+            "cumulative",
+            "bottom",
+            "histtype",
+            "align",
+            "orientation",
+            "rwidth",
+            "log",
+            "stacked",
+            "data",
+            "width",
+            "height",
+            "edgecolors",
+            "s",
+            "c",
+            "facecolors",
         }
-        filtered_kwargs = {k: v for k, v in kwargs.items()
-                          if k not in invalid_plot_kwargs}
+        filtered_kwargs = {
+            k: v for k, v in kwargs.items() if k not in invalid_plot_kwargs
+        }
         ax.plot(x, y, linewidth=linewidth, **filtered_kwargs)
 
 

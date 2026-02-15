@@ -20,7 +20,7 @@ def plot_mpl_hexbin(plt, rng, ax=None):
     x, y = rng.normal(0, 1, 1000), rng.normal(0, 1, 1000)
     ax.mpl_hexbin(x, y, gridsize=15)
     ax.set_xyt("X", "Y", "mpl_hexbin")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

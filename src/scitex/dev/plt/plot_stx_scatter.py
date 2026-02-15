@@ -18,10 +18,10 @@ def plot_stx_scatter(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     x = rng.uniform(0, 10, 50)
-    y = 2*x + rng.normal(0, 2, 50)
-    ax.stx_scatter(x, y, label='Data')
+    y = 2 * x + rng.normal(0, 2, 50)
+    ax.stx_scatter(x, y, label="Data")
     ax.set_xyt("X", "Y", "stx_scatter")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

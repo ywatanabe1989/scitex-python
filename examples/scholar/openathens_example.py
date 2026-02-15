@@ -11,7 +11,7 @@ from scitex.scholar import Scholar, ScholarConfig
 config = ScholarConfig(
     # Existing configuration
     pubmed_email="researcher@unimelb.edu.au",
-    
+
     # OpenAthens configuration (now working!)
     openathens_enabled=True,
     openathens_email="researcher@unimelb.edu.au",

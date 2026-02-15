@@ -18,9 +18,9 @@ def plot_stx_kde(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     data = np.concatenate([rng.normal(-2, 0.5, 200), rng.normal(2, 1, 300)])
-    ax.stx_kde(data, label='Bimodal')
+    ax.stx_kde(data, label="Bimodal")
     ax.set_xyt("X", "Y", "stx_kde")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

@@ -3,8 +3,8 @@
 # Time-stamp: "2024-11-05 07:45:00 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/pd/_slice.py
 
-from typing import Dict, Union, List, Optional
 import builtins
+from typing import Dict, List, Optional, Union
 
 import pandas as pd
 

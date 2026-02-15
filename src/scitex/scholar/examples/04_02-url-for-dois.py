@@ -13,18 +13,15 @@ to check if the OpenURL resolution works across different publishers.
 import argparse
 import asyncio
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
-from datetime import datetime
+
 import pandas as pd
 
 import scitex as stx
 from scitex import logging
-from scitex.scholar import (
-    ScholarAuthManager,
-    ScholarBrowserManager,
-    ScholarURLFinder,
-)
+from scitex.scholar import ScholarAuthManager, ScholarBrowserManager, ScholarURLFinder
 
 logger = logging.getLogger(__name__)
 
@@ -164,9 +161,9 @@ def generate_report(results: List[Dict], output_dir: Path):
             "stopped_at_auth": stopped_at_auth,
             "errors": errors,
             "success_rate": f"{(successful / total) * 100:.1f}%" if total > 0 else "0%",
-            "article_reach_rate": f"{(reached_article / total) * 100:.1f}%"
-            if total > 0
-            else "0%",
+            "article_reach_rate": (
+                f"{(reached_article / total) * 100:.1f}%" if total > 0 else "0%"
+            ),
             "avg_time_seconds": round(avg_time, 2),
         },
         "results": results,

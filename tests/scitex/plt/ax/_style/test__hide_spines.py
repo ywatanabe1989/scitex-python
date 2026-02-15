@@ -11,6 +11,7 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import matplotlib.pyplot as plt
 import pytest
+
 pytest.importorskip("zarr")
 from scitex.plt.ax._style._hide_spines import hide_spines
 
@@ -49,8 +50,15 @@ class TestMainFunctionality:
 
     def test_keep_ticks_and_labels(self):
         # Test keeping ticks and labels while hiding all spines
-        ax = hide_spines(self.ax, top=True, bottom=True, left=True, right=True,
-                         ticks=False, labels=False)
+        ax = hide_spines(
+            self.ax,
+            top=True,
+            bottom=True,
+            left=True,
+            right=True,
+            ticks=False,
+            labels=False,
+        )
 
         # Check that all spines are hidden
         assert not ax.spines["top"].get_visible()
@@ -128,17 +136,17 @@ if __name__ == "__main__":
 # # File: /ssh:ywatanabe@sp:/home/ywatanabe/proj/.claude-worktree/scitex_repo/src/scitex/plt/ax/_style/_hide_spines.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # # Time-stamp: "2024-04-26 20:03:45 (ywatanabe)"
-# 
+#
 # import matplotlib
 # from ....plt.utils import assert_valid_axis
-# 
-# 
+#
+#
 # def hide_spines(
 #     axis,
 #     top=True,
@@ -150,11 +158,11 @@ if __name__ == "__main__":
 # ):
 #     """
 #     Hides the specified spines of a matplotlib Axes object or scitex axis wrapper and optionally removes the ticks and labels.
-# 
+#
 #     This function is designed to work with matplotlib Axes objects or scitex axis wrappers. It allows for a cleaner, more minimalist
 #     presentation of plots by hiding the spines (the lines denoting the boundaries of the plot area) and optionally
 #     removing the ticks and labels from the axes.
-# 
+#
 #     Arguments:
 #         ax (matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper): The axis for which the spines will be hidden.
 #         top (bool, optional): If True, hides the top spine. Defaults to True.
@@ -163,10 +171,10 @@ if __name__ == "__main__":
 #         right (bool, optional): If True, hides the right spine. Defaults to True.
 #         ticks (bool, optional): If True, removes the ticks from the hidden spines' axes. Defaults to False.
 #         labels (bool, optional): If True, removes the labels from the hidden spines' axes. Defaults to False.
-# 
+#
 #     Returns:
 #         matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper: The modified axis with the specified spines hidden.
-# 
+#
 #     Example:
 #         >>> fig, ax = plt.subplots()
 #         >>> hide_spines(ax)
@@ -175,7 +183,7 @@ if __name__ == "__main__":
 #     assert_valid_axis(
 #         axis, "First argument must be a matplotlib axis or scitex axis wrapper"
 #     )
-# 
+#
 #     tgts = []
 #     if top:
 #         tgts.append("top")
@@ -185,28 +193,28 @@ if __name__ == "__main__":
 #         tgts.append("left")
 #     if right:
 #         tgts.append("right")
-# 
+#
 #     for tgt in tgts:
 #         # Spines
 #         axis.spines[tgt].set_visible(False)
-# 
+#
 #         # Ticks
 #         if ticks:
 #             if tgt == "bottom":
 #                 axis.xaxis.set_ticks_position("none")
 #             elif tgt == "left":
 #                 axis.yaxis.set_ticks_position("none")
-# 
+#
 #         # Labels
 #         if labels:
 #             if tgt == "bottom":
 #                 axis.set_xticklabels([])
 #             elif tgt == "left":
 #                 axis.set_yticklabels([])
-# 
+#
 #     return axis
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

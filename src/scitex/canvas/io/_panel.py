@@ -9,13 +9,13 @@ Handles adding, removing, updating, and listing panels within a canvas.
 Panels can be either 'scitex' type (full stx.plt output) or 'image' type (static image).
 """
 
-from pathlib import Path
-from typing import Dict, Any, Union, List, Optional
 import shutil
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
-from ._directory import get_canvas_directory_path
 from ._canvas import load_canvas_json, save_canvas_json
 from ._data import compute_file_hash
+from ._directory import get_canvas_directory_path
 
 
 def _symlink_or_copy(source: Path, dest: Path, bundle: bool = False) -> None:

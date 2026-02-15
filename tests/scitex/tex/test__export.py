@@ -906,6 +906,7 @@ class TestBuildLatexDocument:
         assert r"\usepackage{graphicx}" in result
         assert r"\usepackage{hyperref}" in result
 
+
 if __name__ == "__main__":
     import os
 
@@ -920,16 +921,16 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: 2025-12-11 16:00:00
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/tex/_export.py
-# 
+#
 # """
 # Export SciTeX writer documents to LaTeX format.
-# 
+#
 # This module converts the intermediate document format (from scitex.msword
 # or scitex.writer) into LaTeX source files.
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import os
 # import re
 # import shutil
@@ -937,7 +938,7 @@ if __name__ == "__main__":
 # from dataclasses import dataclass
 # from pathlib import Path
 # from typing import Any, Dict, List, Optional, Tuple
-# 
+#
 # # Journal-specific document class configurations
 # JOURNAL_PRESETS = {
 #     "article": {
@@ -976,8 +977,8 @@ if __name__ == "__main__":
 #         "required_packages": [],
 #     },
 # }
-# 
-# 
+#
+#
 # def export_tex(
 #     writer_doc: Dict[str, Any],
 #     output_path: str | Path,
@@ -992,7 +993,7 @@ if __name__ == "__main__":
 # ) -> Path:
 #     """
 #     Export a SciTeX writer document to LaTeX format.
-# 
+#
 #     Parameters
 #     ----------
 #     writer_doc : dict
@@ -1024,12 +1025,12 @@ if __name__ == "__main__":
 #     use_bibtex : bool
 #         If True, generate \\bibliography{} instead of thebibliography.
 #         Creates a .bib file alongside the .tex file.
-# 
+#
 #     Returns
 #     -------
 #     Path
 #         The path to the written .tex file.
-# 
+#
 #     Examples
 #     --------
 #     >>> from scitex.msword import load_docx
@@ -1037,32 +1038,32 @@ if __name__ == "__main__":
 #     >>> doc = load_docx("manuscript.docx")
 #     >>> export_tex(doc, "manuscript.tex")
 #     PosixPath('manuscript.tex')
-# 
+#
 #     >>> # Export for IEEE conference
 #     >>> export_tex(doc, "manuscript.tex", journal_preset="ieee")
-# 
+#
 #     >>> # Export with custom image directory
 #     >>> export_tex(doc, "manuscript.tex", image_dir="./figures")
 #     """
 #     output_path = Path(output_path)
-# 
+#
 #     # Apply journal preset if specified
 #     effective_class = document_class
 #     effective_options = class_options or []
 #     extra_packages = []
-# 
+#
 #     if journal_preset and journal_preset in JOURNAL_PRESETS:
 #         preset = JOURNAL_PRESETS[journal_preset]
 #         effective_class = preset["document_class"]
 #         effective_options = preset["class_options"] + (class_options or [])
 #         extra_packages = preset["required_packages"]
-# 
+#
 #     # Extract components from writer_doc
 #     blocks = writer_doc.get("blocks", [])
 #     metadata = writer_doc.get("metadata", {})
 #     references = writer_doc.get("references", [])
 #     images = writer_doc.get("images", [])
-# 
+#
 #     # Handle image export
 #     image_map: Dict[str, str] = {}  # hash -> relative path
 #     if export_images and images:
@@ -1070,13 +1071,13 @@ if __name__ == "__main__":
 #             image_dir = output_path.parent / f"{output_path.stem}_figures"
 #         else:
 #             image_dir = Path(image_dir)
-# 
+#
 #         image_dir.mkdir(parents=True, exist_ok=True)
 #         image_map = _write_images_to_dir(images, image_dir, output_path.parent)
-# 
+#
 #     # Combine packages
 #     all_packages = extra_packages + (packages or [])
-# 
+#
 #     # Build LaTeX content
 #     latex_content = _build_latex_document(
 #         blocks=blocks,
@@ -1090,35 +1091,35 @@ if __name__ == "__main__":
 #         use_bibtex=use_bibtex,
 #         output_stem=output_path.stem,
 #     )
-# 
+#
 #     # Write to file
 #     output_path.write_text(latex_content, encoding="utf-8")
-# 
+#
 #     # Generate .bib file if using bibtex
 #     if use_bibtex and references:
 #         bib_path = output_path.with_suffix(".bib")
 #         bib_content = _generate_bibtex(references)
 #         bib_path.write_text(bib_content, encoding="utf-8")
-# 
+#
 #     return output_path
-# 
-# 
+#
+#
 # def _generate_bibtex(references: List[Dict[str, Any]]) -> str:
 #     """Generate BibTeX content from references."""
 #     entries = []
 #     for ref in references:
 #         num = ref.get("number", len(entries) + 1)
 #         text = ref.get("text", ref.get("raw", ""))
-# 
+#
 #         # Basic entry - in practice, would parse author/title/year
 #         entry = f"""@misc{{ref{num},
 #   note = {{{text}}}
 # }}"""
 #         entries.append(entry)
-# 
+#
 #     return "\n\n".join(entries)
-# 
-# 
+#
+#
 # def _write_images_to_dir(
 #     images: List[Dict[str, Any]],
 #     image_dir: Path,
@@ -1126,7 +1127,7 @@ if __name__ == "__main__":
 # ) -> Dict[str, str]:
 #     """
 #     Write images to directory and return hash->relative_path mapping.
-# 
+#
 #     Parameters
 #     ----------
 #     images : list
@@ -1135,7 +1136,7 @@ if __name__ == "__main__":
 #         Directory to write images to.
 #     tex_parent : Path
 #         Parent directory of the .tex file (for relative paths).
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -1143,37 +1144,37 @@ if __name__ == "__main__":
 #     """
 #     image_map = {}
 #     fig_counter = 0
-# 
+#
 #     for img in images:
 #         img_hash = img.get("hash")
 #         ext = img.get("extension", ".png")
 #         data = img.get("data")
-# 
+#
 #         if data is None or img_hash is None:
 #             continue
-# 
+#
 #         # Skip duplicates (same hash = same image content)
 #         if img_hash in image_map:
 #             continue
-# 
+#
 #         fig_counter += 1
 #         filename = f"fig_{fig_counter}{ext}"
 #         filepath = image_dir / filename
-# 
+#
 #         # Write image data
 #         filepath.write_bytes(data)
-# 
+#
 #         # Store relative path from tex file location
 #         try:
 #             rel_path = filepath.relative_to(tex_parent)
 #         except ValueError:
 #             rel_path = filepath
-# 
+#
 #         image_map[img_hash] = str(rel_path)
-# 
+#
 #     return image_map
-# 
-# 
+#
+#
 # def _build_latex_document(
 #     blocks: List[Dict[str, Any]],
 #     metadata: Dict[str, Any],
@@ -1190,7 +1191,7 @@ if __name__ == "__main__":
 #     if image_map is None:
 #         image_map = {}
 #     lines = []
-# 
+#
 #     # Document class with options
 #     if class_options:
 #         opts = ",".join(class_options)
@@ -1198,7 +1199,7 @@ if __name__ == "__main__":
 #     else:
 #         lines.append(f"\\documentclass{{{document_class}}}")
 #     lines.append("")
-# 
+#
 #     # Default packages
 #     default_packages = [
 #         "inputenc",
@@ -1208,28 +1209,28 @@ if __name__ == "__main__":
 #         "graphicx",
 #         "hyperref",
 #     ]
-# 
+#
 #     # Package options
 #     package_options = {
 #         "inputenc": "utf8",
 #         "fontenc": "T1",
 #     }
-# 
+#
 #     for pkg in default_packages:
 #         opt = package_options.get(pkg)
 #         if opt:
 #             lines.append(f"\\usepackage[{opt}]{{{pkg}}}")
 #         else:
 #             lines.append(f"\\usepackage{{{pkg}}}")
-# 
+#
 #     # Additional packages
 #     if packages:
 #         for pkg in packages:
 #             if pkg not in default_packages:
 #                 lines.append(f"\\usepackage{{{pkg}}}")
-# 
+#
 #     lines.append("")
-# 
+#
 #     # Metadata
 #     if metadata.get("title"):
 #         title = _escape_latex(metadata["title"])
@@ -1237,31 +1238,31 @@ if __name__ == "__main__":
 #     if metadata.get("author"):
 #         author = _escape_latex(metadata["author"])
 #         lines.append(f"\\author{{{author}}}")
-# 
+#
 #     lines.append("")
-# 
+#
 #     # Additional preamble
 #     if preamble:
 #         lines.append(preamble)
 #         lines.append("")
-# 
+#
 #     # Begin document
 #     lines.append("\\begin{document}")
 #     lines.append("")
-# 
+#
 #     # Title
 #     if metadata.get("title"):
 #         lines.append("\\maketitle")
 #         lines.append("")
-# 
+#
 #     # Track list state for proper itemize/enumerate environments
 #     in_list = False
 #     list_type = None
-# 
+#
 #     # Process blocks
 #     for i, block in enumerate(blocks):
 #         btype = block.get("type")
-# 
+#
 #         # Handle list transitions
 #         if btype == "list-item":
 #             item_list_type = block.get("list_type", "unordered")
@@ -1277,17 +1278,17 @@ if __name__ == "__main__":
 #             lines.append("")
 #             in_list = False
 #             list_type = None
-# 
+#
 #         block_latex = _convert_block_to_latex(block, image_map)
 #         if block_latex:
 #             lines.append(block_latex)
-# 
+#
 #     # Close any open list
 #     if in_list:
 #         env = "enumerate" if list_type == "ordered" else "itemize"
 #         lines.append(f"\\end{{{env}}}")
 #         lines.append("")
-# 
+#
 #     # References section
 #     if references:
 #         lines.append("")
@@ -1301,14 +1302,14 @@ if __name__ == "__main__":
 #                 if ref_latex:
 #                     lines.append(ref_latex)
 #             lines.append("\\end{thebibliography}")
-# 
+#
 #     # End document
 #     lines.append("")
 #     lines.append("\\end{document}")
-# 
+#
 #     return "\n".join(lines)
-# 
-# 
+#
+#
 # def _convert_block_to_latex(
 #     block: Dict[str, Any],
 #     image_map: Optional[Dict[str, str]] = None,
@@ -1316,13 +1317,13 @@ if __name__ == "__main__":
 #     """Convert a single block to LaTeX."""
 #     if image_map is None:
 #         image_map = {}
-# 
+#
 #     btype = block.get("type", "paragraph")
 #     text = block.get("text", "")
-# 
+#
 #     if not text and btype not in ("table", "image", "caption", "equation"):
 #         return None
-# 
+#
 #     if btype == "heading":
 #         return _convert_heading(block)
 #     elif btype == "paragraph":
@@ -1343,13 +1344,13 @@ if __name__ == "__main__":
 #     else:
 #         # Default: treat as paragraph
 #         return _escape_latex(text) + "\n"
-# 
-# 
+#
+#
 # def _convert_equation(block: Dict[str, Any]) -> str:
 #     """Convert an equation block to LaTeX."""
 #     latex = block.get("latex", "")
 #     text = block.get("text", "")
-# 
+#
 #     if latex:
 #         # Use the converted LaTeX from OMML
 #         return f"\\begin{{equation}}\n{latex}\n\\end{{equation}}\n"
@@ -1357,13 +1358,13 @@ if __name__ == "__main__":
 #         # Fallback: wrap text in equation environment
 #         return f"\\begin{{equation}}\n{_escape_latex(text)}\n\\end{{equation}}\n"
 #     return ""
-# 
-# 
+#
+#
 # def _convert_heading(block: Dict[str, Any]) -> str:
 #     """Convert a heading block to LaTeX."""
 #     level = block.get("level", 1)
 #     text = _escape_latex(block.get("text", ""))
-# 
+#
 #     # Map heading levels to LaTeX commands
 #     level_commands = {
 #         1: "section",
@@ -1372,15 +1373,15 @@ if __name__ == "__main__":
 #         4: "paragraph",
 #         5: "subparagraph",
 #     }
-# 
+#
 #     command = level_commands.get(level, "paragraph")
 #     return f"\\{command}{{{text}}}\n"
-# 
-# 
+#
+#
 # def _convert_paragraph(block: Dict[str, Any]) -> str:
 #     """Convert a paragraph block to LaTeX."""
 #     runs = block.get("runs", [])
-# 
+#
 #     if runs:
 #         # Build paragraph from formatted runs
 #         parts = []
@@ -1396,8 +1397,8 @@ if __name__ == "__main__":
 #         return "".join(parts) + "\n"
 #     else:
 #         return _escape_latex(block.get("text", "")) + "\n"
-# 
-# 
+#
+#
 # def _convert_caption(
 #     block: Dict[str, Any],
 #     image_map: Optional[Dict[str, str]] = None,
@@ -1405,30 +1406,30 @@ if __name__ == "__main__":
 #     """Convert a caption block to LaTeX figure/table environment."""
 #     if image_map is None:
 #         image_map = {}
-# 
+#
 #     caption_type = block.get("caption_type", "")
 #     number = block.get("number", "")
 #     caption_text = _escape_latex(block.get("caption_text", block.get("text", "")))
 #     image_hash = block.get("image_hash")
-# 
+#
 #     if caption_type == "figure":
 #         # Check if we have an associated image
 #         image_path = None
 #         if image_hash and image_hash in image_map:
 #             image_path = image_map[image_hash]
-# 
+#
 #         lines = [
 #             "\\begin{figure}[htbp]",
 #             "\\centering",
 #         ]
-# 
+#
 #         if image_path:
 #             # Remove extension for includegraphics
 #             image_path_no_ext = image_path.rsplit(".", 1)[0] if "." in image_path else image_path
 #             lines.append(f"\\includegraphics[width=0.8\\textwidth]{{{image_path_no_ext}}}")
 #         else:
 #             lines.append(f"% Image placeholder for Figure {number}")
-# 
+#
 #         lines.extend([
 #             f"\\caption{{{caption_text}}}",
 #             f"\\label{{fig:{number}}}",
@@ -1436,15 +1437,15 @@ if __name__ == "__main__":
 #             "",
 #         ])
 #         return "\n".join(lines)
-# 
+#
 #     elif caption_type == "table":
 #         # Table captions - typically above the table
 #         return f"% Table {number}: {caption_text}\n"
-# 
+#
 #     else:
 #         return f"% Caption: {caption_text}\n"
-# 
-# 
+#
+#
 # def _convert_image(
 #     block: Dict[str, Any],
 #     image_map: Optional[Dict[str, str]] = None,
@@ -1452,15 +1453,15 @@ if __name__ == "__main__":
 #     """Convert an image block to LaTeX includegraphics."""
 #     if image_map is None:
 #         image_map = {}
-# 
+#
 #     image_hash = block.get("image_hash") or block.get("hash")
 #     width = block.get("width", "0.8\\textwidth")
-# 
+#
 #     if image_hash and image_hash in image_map:
 #         image_path = image_map[image_hash]
 #         # Remove extension for includegraphics
 #         image_path_no_ext = image_path.rsplit(".", 1)[0] if "." in image_path else image_path
-# 
+#
 #         lines = [
 #             "\\begin{figure}[htbp]",
 #             "\\centering",
@@ -1469,62 +1470,62 @@ if __name__ == "__main__":
 #             "",
 #         ]
 #         return "\n".join(lines)
-# 
+#
 #     return "% Image placeholder\n"
-# 
-# 
+#
+#
 # def _convert_table(block: Dict[str, Any]) -> str:
 #     """Convert a table block to LaTeX."""
 #     rows = block.get("rows", [])
 #     if not rows:
 #         return ""
-# 
+#
 #     num_cols = len(rows[0]) if rows else 0
 #     col_spec = "|" + "c|" * num_cols
-# 
+#
 #     lines = [
 #         "\\begin{table}[htbp]",
 #         "\\centering",
 #         f"\\begin{{tabular}}{{{col_spec}}}",
 #         "\\hline",
 #     ]
-# 
+#
 #     for i, row in enumerate(rows):
 #         escaped_cells = [_escape_latex(str(cell)) for cell in row]
 #         lines.append(" & ".join(escaped_cells) + " \\\\")
 #         lines.append("\\hline")
-# 
+#
 #     lines.extend([
 #         "\\end{tabular}",
 #         "\\end{table}",
 #         "",
 #     ])
-# 
+#
 #     return "\n".join(lines)
-# 
-# 
+#
+#
 # def _convert_list_item(block: Dict[str, Any]) -> str:
 #     """Convert a list item to LaTeX."""
 #     text = _escape_latex(block.get("text", ""))
 #     return f"\\item {text}\n"
-# 
-# 
+#
+#
 # def _convert_reference_to_latex(ref: Dict[str, Any]) -> str:
 #     """Convert a reference entry to LaTeX bibitem."""
 #     number = ref.get("number")
 #     text = _escape_latex(ref.get("text", ref.get("raw", "")))
-# 
+#
 #     if number:
 #         return f"\\bibitem{{ref{number}}} {text}"
 #     else:
 #         return f"\\bibitem{{}} {text}"
-# 
-# 
+#
+#
 # def _escape_latex(text: str) -> str:
 #     """Escape special LaTeX characters."""
 #     if not text:
 #         return ""
-# 
+#
 #     # Characters that need escaping in LaTeX
 #     replacements = [
 #         ("\\", "\\textbackslash{}"),
@@ -1538,7 +1539,7 @@ if __name__ == "__main__":
 #         ("~", "\\textasciitilde{}"),
 #         ("^", "\\textasciicircum{}"),
 #     ]
-# 
+#
 #     # Apply replacements (order matters - backslash first)
 #     result = text
 #     for old, new in replacements:
@@ -1548,14 +1549,14 @@ if __name__ == "__main__":
 #             result = re.sub(r'(?<!\\)\\(?![a-zA-Z{])', new, result)
 #         else:
 #             result = result.replace(old, new)
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # @dataclass
 # class CompileResult:
 #     """Result of LaTeX compilation.
-# 
+#
 #     Attributes
 #     ----------
 #     success : bool
@@ -1583,14 +1584,14 @@ if __name__ == "__main__":
 #     log_content: str = ""
 #     errors: List[str] = None
 #     warnings: List[str] = None
-# 
+#
 #     def __post_init__(self):
 #         if self.errors is None:
 #             self.errors = []
 #         if self.warnings is None:
 #             self.warnings = []
-# 
-# 
+#
+#
 # def compile_tex(
 #     tex_path: str | Path,
 #     output_dir: Optional[str | Path] = None,
@@ -1601,7 +1602,7 @@ if __name__ == "__main__":
 # ) -> CompileResult:
 #     """
 #     Compile a LaTeX file to PDF.
-# 
+#
 #     Parameters
 #     ----------
 #     tex_path : str | Path
@@ -1619,12 +1620,12 @@ if __name__ == "__main__":
 #         Default is True.
 #     timeout : int
 #         Timeout in seconds for each compilation pass. Default is 120.
-# 
+#
 #     Returns
 #     -------
 #     CompileResult
 #         Compilation result with success status, PDF path, and logs.
-# 
+#
 #     Examples
 #     --------
 #     >>> from scitex.tex import compile_tex
@@ -1633,16 +1634,16 @@ if __name__ == "__main__":
 #     ...     print(f"PDF created: {result.pdf_path}")
 #     ... else:
 #     ...     print(f"Errors: {result.errors}")
-# 
+#
 #     >>> # Use latexmk for automatic multi-pass compilation
 #     >>> result = compile_tex("manuscript.tex", compiler="latexmk")
-# 
+#
 #     Notes
 #     -----
 #     Requires LaTeX to be installed on the system (texlive, miktex, etc.).
 #     """
 #     tex_path = Path(tex_path).absolute()
-# 
+#
 #     if not tex_path.exists():
 #         return CompileResult(
 #             success=False,
@@ -1652,14 +1653,14 @@ if __name__ == "__main__":
 #             stderr=f"File not found: {tex_path}",
 #             errors=[f"File not found: {tex_path}"],
 #         )
-# 
+#
 #     # Determine output directory
 #     if output_dir is None:
 #         output_dir = tex_path.parent
 #     else:
 #         output_dir = Path(output_dir).absolute()
 #         output_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #     # Check if compiler is available
 #     compiler_cmd = shutil.which(compiler)
 #     if compiler_cmd is None:
@@ -1671,7 +1672,7 @@ if __name__ == "__main__":
 #             stderr=f"Compiler not found: {compiler}",
 #             errors=[f"Compiler not found: {compiler}. Install texlive or miktex."],
 #         )
-# 
+#
 #     # Build command
 #     if compiler == "latexmk":
 #         cmd = [
@@ -1690,12 +1691,12 @@ if __name__ == "__main__":
 #             f"-output-directory={output_dir}",
 #             str(tex_path),
 #         ]
-# 
+#
 #     # Run compilation
 #     stdout_all = []
 #     stderr_all = []
 #     exit_code = 0
-# 
+#
 #     for run_num in range(runs):
 #         try:
 #             result = subprocess.run(
@@ -1708,11 +1709,11 @@ if __name__ == "__main__":
 #             stdout_all.append(f"=== Pass {run_num + 1} ===\n{result.stdout}")
 #             stderr_all.append(result.stderr)
 #             exit_code = result.returncode
-# 
+#
 #             # If compilation failed, don't continue
 #             if exit_code != 0:
 #                 break
-# 
+#
 #         except subprocess.TimeoutExpired:
 #             return CompileResult(
 #                 success=False,
@@ -1731,24 +1732,24 @@ if __name__ == "__main__":
 #                 stderr=str(e),
 #                 errors=[str(e)],
 #             )
-# 
+#
 #     # Check for output PDF
 #     pdf_name = tex_path.stem + ".pdf"
 #     pdf_path = output_dir / pdf_name
-# 
+#
 #     # Read log file for detailed errors/warnings
 #     log_path = output_dir / (tex_path.stem + ".log")
 #     log_content = ""
 #     errors = []
 #     warnings = []
-# 
+#
 #     if log_path.exists():
 #         try:
 #             log_content = log_path.read_text(encoding="utf-8", errors="replace")
 #             errors, warnings = _parse_latex_log(log_content)
 #         except Exception:
 #             pass
-# 
+#
 #     # Clean auxiliary files
 #     if clean:
 #         aux_extensions = [".aux", ".log", ".out", ".toc", ".lof", ".lot",
@@ -1760,9 +1761,9 @@ if __name__ == "__main__":
 #                     aux_file.unlink()
 #                 except Exception:
 #                     pass
-# 
+#
 #     success = exit_code == 0 and pdf_path.exists()
-# 
+#
 #     return CompileResult(
 #         success=success,
 #         pdf_path=pdf_path if pdf_path.exists() else None,
@@ -1773,15 +1774,15 @@ if __name__ == "__main__":
 #         errors=errors,
 #         warnings=warnings,
 #     )
-# 
-# 
+#
+#
 # def _parse_latex_log(log_content: str) -> Tuple[List[str], List[str]]:
 #     """Parse LaTeX log file for errors and warnings."""
 #     errors = []
 #     warnings = []
-# 
+#
 #     lines = log_content.split("\n")
-# 
+#
 #     for i, line in enumerate(lines):
 #         # Error patterns
 #         if line.startswith("!"):
@@ -1792,19 +1793,19 @@ if __name__ == "__main__":
 #                     break
 #                 error_lines.append(lines[j])
 #             errors.append(" ".join(error_lines))
-# 
+#
 #         elif "Error:" in line or "Fatal error" in line:
 #             errors.append(line.strip())
-# 
+#
 #         # Warning patterns
 #         elif "Warning:" in line:
 #             warnings.append(line.strip())
 #         elif "Underfull" in line or "Overfull" in line:
 #             warnings.append(line.strip())
-# 
+#
 #     return errors, warnings
-# 
-# 
+#
+#
 # __all__ = ["export_tex", "compile_tex", "CompileResult"]
 
 # --------------------------------------------------------------------------------

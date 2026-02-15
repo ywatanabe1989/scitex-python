@@ -8,6 +8,7 @@ THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/dev/_analyze_code_flow.
 import ast
 
 import matplotlib.pyplot as plt
+
 import scitex
 
 

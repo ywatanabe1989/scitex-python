@@ -63,10 +63,10 @@ async def scrape_asyncr_async():
         browser = await p.chromium.connect_over_cdp(connection_url)
         context = browser.contexts[0] if browser.contexts else await browser.new_context()
         page = await context.new_page()
-        
+
         await page.goto('https://www.scrapingcourse.com/ecommerce/')
         print(await page.title())
-        
+
         await browser.close()
 
 if __name__ == "__main__":
@@ -113,26 +113,26 @@ async def scrape_asyncr_async(url):
         # connect to the scraping browser
         browser = await p.chromium.connect_over_cdp(connection_url)
         page = await browser.new_page()
-        
+
         try:
             await page.goto(url)
-            
+
             # extract the desired data
             await page.wait_for_selector(".product")
             products = await page.query_selector_all(".product")
             data = []
-            
+
             for product in products:
                 name = await product.query_selector(".product-name")
                 price = await product.query_selector(".price")
                 product_url = await product.query_selector(".woocommerce-LoopProduct-link")
-                
+
                 data.append({
                     "name": await name.text_content() or "",
                     "price": await price.text_content() or "",
                     "productURL": await product_url.get_attribute("href") or "",
                 })
-            
+
             return data
         except Exception as error:
             return error
@@ -228,13 +228,13 @@ const scrape_asyncr_async = async () => {
     // Initialize SDK
     const scrapingBrowser = new ScrapingBrowser({ apiKey: 'YOUR_ZENROWS_API_KEY' });
     const connectionURL = scrapingBrowser.getConnectURL();
-    
+
     const browser = await chromium.connectOverCDP(connectionURL);
     const page = await browser.newPage();
-    
+
     await page.goto('https://www.scrapingcourse.com/ecommerce/');
     console.log(await page.title());
-    
+
     await browser.close();
 };
 

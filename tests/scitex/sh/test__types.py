@@ -241,6 +241,7 @@ class TestModuleExports:
         assert return_format in ("dict", "str")
         assert isinstance(result, dict)
 
+
 if __name__ == "__main__":
     import os
 
@@ -258,26 +259,26 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/sh/_types.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # __FILE__ = __file__
-# 
+#
 # from typing import List, Literal, TypedDict
-# 
-# 
+#
+#
 # class ShellResult(TypedDict):
 #     stdout: str
 #     stderr: str
 #     exit_code: int
 #     success: bool
-# 
-# 
+#
+#
 # CommandInput = List[str]
 # ReturnFormat = Literal["dict", "str"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

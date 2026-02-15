@@ -4763,7 +4763,7 @@ annotation:
             type: "{FONTNAME, 'serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'}"
             default:
           - name: fontsize
-            type: float or {'xx-small', 'x-small', 'small', 'medium', 'large', 
+            type: float or {'xx-small', 'x-small', 'small', 'medium', 'large',
                 'x-large', 'xx-large'}
             default:
           - name: fontstretch
@@ -4871,7 +4871,7 @@ annotation:
             type: "{FONTNAME, 'serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'}"
             default:
           - name: fontsize
-            type: float or {'xx-small', 'x-small', 'small', 'medium', 'large', 
+            type: float or {'xx-small', 'x-small', 'small', 'medium', 'large',
                 'x-large', 'xx-large'}
             default:
           - name: fontstretch
@@ -5996,7 +5996,7 @@ decoration:
             type: "{FONTNAME, 'serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'}"
             default:
           - name: fontsize
-            type: float or {'xx-small', 'x-small', 'small', 'medium', 'large', 
+            type: float or {'xx-small', 'x-small', 'small', 'medium', 'large',
                 'x-large', 'xx-large'}
             default:
           - name: fontstretch
@@ -6109,7 +6109,7 @@ decoration:
             type: "{FONTNAME, 'serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'}"
             default:
           - name: fontsize
-            type: float or {'xx-small', 'x-small', 'small', 'medium', 'large', 
+            type: float or {'xx-small', 'x-small', 'small', 'medium', 'large',
                 'x-large', 'xx-large'}
             default:
           - name: fontstretch

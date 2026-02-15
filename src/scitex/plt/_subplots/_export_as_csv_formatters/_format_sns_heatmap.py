@@ -36,7 +36,9 @@ def _format_sns_heatmap(id, tracked_dict, kwargs):
     def _format_dataframe(df):
         result = pd.DataFrame()
         for col in df.columns:
-            col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+            col_name = get_csv_column_name(
+                f"data-{col}", ax_row, ax_col, trace_id=trace_id
+            )
             result[col_name] = df[col]
         return result
 
@@ -45,7 +47,9 @@ def _format_sns_heatmap(id, tracked_dict, kwargs):
         result = pd.DataFrame()
         for i in range(cols):
             col_data = arr[:, i] if len(arr.shape) >= 2 else arr
-            col_name = get_csv_column_name(f"data-col-{i}", ax_row, ax_col, trace_id=trace_id)
+            col_name = get_csv_column_name(
+                f"data-col-{i}", ax_row, ax_col, trace_id=trace_id
+            )
             result[col_name] = col_data
         return result
 

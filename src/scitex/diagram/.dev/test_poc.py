@@ -25,7 +25,9 @@ from scitex.diagram import Diagram
 
 def test_parse_existing_mermaid():
     """Test parsing existing mermaid files."""
-    examples_dir = Path(__file__).parent.parent.parent.parent.parent / "docs/diagram_examples"
+    examples_dir = (
+        Path(__file__).parent.parent.parent.parent.parent / "docs/diagram_examples"
+    )
 
     print("=" * 60)
     print("TEST 1: Parse existing Mermaid files")
@@ -46,7 +48,9 @@ def test_parse_existing_mermaid():
 
 def test_yaml_roundtrip():
     """Test YAML export and import."""
-    examples_dir = Path(__file__).parent.parent.parent.parent.parent / "docs/diagram_examples"
+    examples_dir = (
+        Path(__file__).parent.parent.parent.parent.parent / "docs/diagram_examples"
+    )
     output_dir = Path(__file__).parent / "output"
     output_dir.mkdir(exist_ok=True)
 
@@ -128,7 +132,9 @@ def test_compile_with_constraints():
 
 def test_enhance_existing():
     """Test enhancing existing mermaid with constraints."""
-    examples_dir = Path(__file__).parent.parent.parent.parent.parent / "docs/diagram_examples"
+    examples_dir = (
+        Path(__file__).parent.parent.parent.parent.parent / "docs/diagram_examples"
+    )
     output_dir = Path(__file__).parent / "output"
     output_dir.mkdir(exist_ok=True)
 

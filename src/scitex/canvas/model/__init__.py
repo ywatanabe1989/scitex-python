@@ -8,57 +8,53 @@ This module provides dataclass-based models for representing
 publication-quality figures as JSON structures.
 """
 
-from ._figure import FigureModel
-from ._axes import AxesModel
-from ._plot import PlotModel
-from ._guides import GuideModel
 from ._annotations import AnnotationModel
-from ._styles import (
-    PlotStyle,
-    AxesStyle,
-    GuideStyle,
-    TextStyle,
-    copy_plot_style,
-    copy_axes_style,
-    copy_guide_style,
-    copy_text_style,
-    apply_style_to_plots,
-)
-from ._plot_types import (
-    # Registry
+from ._axes import AxesModel
+from ._figure import FigureModel
+from ._guides import GuideModel
+from ._plot import PlotModel
+from ._plot_types import (  # Registry; Matplotlib basic; Custom scitex; Seaborn
     PLOT_TYPE_CONFIGS,
-    get_plot_config_class,
-    list_plot_types,
-    # Matplotlib basic
-    LinePlotConfig,
-    ScatterPlotConfig,
-    BarPlotConfig,
     BarHPlotConfig,
-    HistPlotConfig,
+    BarPlotConfig,
+    BoxConfig,
     BoxPlotConfig,
+    ContourConfig,
+    ECDFConfig,
     ErrorbarPlotConfig,
     FillBetweenConfig,
-    ImshowConfig,
-    ContourConfig,
-    ViolinPlotConfig,
-    # Custom scitex
     HeatmapConfig,
+    HistPlotConfig,
+    ImshowConfig,
+    KDEConfig,
+    LinePlotConfig,
+    MeanStdConfig,
     PlotLineConfig,
+    ScatterPlotConfig,
+    SeabornBarplotConfig,
+    SeabornBoxplotConfig,
+    SeabornHistplotConfig,
+    SeabornKDEplotConfig,
+    SeabornLineplotConfig,
+    SeabornScatterplotConfig,
+    SeabornStripplotConfig,
+    SeabornViolinplotConfig,
     ShadedLineConfig,
     ViolinConfig,
-    ECDFConfig,
-    BoxConfig,
-    MeanStdConfig,
-    KDEConfig,
-    # Seaborn
-    SeabornBoxplotConfig,
-    SeabornViolinplotConfig,
-    SeabornScatterplotConfig,
-    SeabornLineplotConfig,
-    SeabornHistplotConfig,
-    SeabornBarplotConfig,
-    SeabornStripplotConfig,
-    SeabornKDEplotConfig,
+    ViolinPlotConfig,
+    get_plot_config_class,
+    list_plot_types,
+)
+from ._styles import (
+    AxesStyle,
+    GuideStyle,
+    PlotStyle,
+    TextStyle,
+    apply_style_to_plots,
+    copy_axes_style,
+    copy_guide_style,
+    copy_plot_style,
+    copy_text_style,
 )
 
 __all__ = [

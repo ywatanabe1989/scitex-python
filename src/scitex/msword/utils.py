@@ -46,7 +46,8 @@ def link_captions_to_images(doc: Dict[str, Any]) -> Dict[str, Any]:
 
     # Find all figure captions
     figure_captions = [
-        b for b in blocks
+        b
+        for b in blocks
         if b.get("type") == "caption" and b.get("caption_type") == "figure"
     ]
 
@@ -218,14 +219,21 @@ def validate_document(doc: Dict[str, Any]) -> Dict[str, Any]:
     # Check for required sections
     headings = [b.get("text", "").lower() for b in blocks if b.get("type") == "heading"]
 
-    required_sections = ["introduction", "methods", "results", "discussion", "references"]
+    required_sections = [
+        "introduction",
+        "methods",
+        "results",
+        "discussion",
+        "references",
+    ]
     for section in required_sections:
         if not any(section in h for h in headings):
             warnings.append(f"Missing section: {section.title()}")
 
     # Check for duplicate figure numbers
     figure_numbers = [
-        b.get("number") for b in blocks
+        b.get("number")
+        for b in blocks
         if b.get("type") == "caption" and b.get("caption_type") == "figure"
     ]
     seen = set()
@@ -273,10 +281,12 @@ def create_post_import_hook(*functions):
     >>> # Use with custom profile
     >>> profile.post_import_hooks = [hook]
     """
+
     def composite_hook(doc: Dict[str, Any]) -> Dict[str, Any]:
         for func in functions:
             doc = func(doc)
         return doc
+
     return composite_hook
 
 

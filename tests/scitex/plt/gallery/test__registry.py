@@ -14,11 +14,11 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-08 23:30:00 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/gallery/_registry.py
-# 
+#
 # """Plot registry organized by visualization purpose."""
-# 
+#
 # import numpy as np
-# 
+#
 # # Categories organized by visualization purpose
 # CATEGORIES = {
 #     "line": {
@@ -128,16 +128,16 @@ if __name__ == "__main__":
 #         ],
 #     },
 # }
-# 
-# 
+#
+#
 # def list_plots(category=None):
 #     """List available plots.
-# 
+#
 #     Parameters
 #     ----------
 #     category : str, optional
 #         If provided, list plots in that category only.
-# 
+#
 #     Returns
 #     -------
 #     dict or list
@@ -153,15 +153,15 @@ if __name__ == "__main__":
 #             }
 #             for cat, info in CATEGORIES.items()
 #         }
-# 
+#
 #     if category not in CATEGORIES:
 #         raise ValueError(
 #             f"Unknown category: {category}. Available: {list(CATEGORIES.keys())}"
 #         )
-# 
+#
 #     return CATEGORIES[category]["plots"]
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

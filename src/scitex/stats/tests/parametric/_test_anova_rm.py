@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 17:00:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/stats/tests/parametric/_test_anova_rm.py
 # ----------------------------------------
 from __future__ import annotations
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
-"""
+r"""
 Functionalities:
   - Perform repeated measures ANOVA for within-subjects designs
   - Test sphericity assumption (Mauchly's test)
@@ -26,166 +21,54 @@ IO:
 """
 
 """Imports"""
-import numpy as np
-import pandas as pd
-from typing import Union, Optional, Literal, Tuple, List
-from scipy import stats
-import matplotlib.pyplot as plt
-import matplotlib.axes
-from scitex.stats._utils._formatters import p2stars
-from scitex.stats._utils._normalizers import convert_results
+import os  # noqa: E402
+from typing import List, Literal, Optional, Tuple, Union  # noqa: E402
+
+import matplotlib.axes  # noqa: E402
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+from scipy import stats  # noqa: E402
+
+from scitex.stats._utils._formatters import p2stars  # noqa: E402
+
+from ._anova_helpers import (  # noqa: E402
+    greenhouse_geisser_epsilon,
+    interpret_eta_squared,
+    mauchly_sphericity,
+)
+from ._anova_helpers import partial_eta_squared as partial_eta_squared_rm  # noqa: E402
+
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
 
 HAS_PLT = True
 
 # Try importing pingouin for sphericity test
 try:
-    import pingouin as pg
+    import pingouin as pg  # noqa: E402
+
     HAS_PINGOUIN = True
 except ImportError:
     HAS_PINGOUIN = False
 
 
-def mauchly_sphericity(data: np.ndarray) -> Tuple[float, float, float]:
-    """
-    Compute Mauchly's test of sphericity.
-
-    Parameters
-    ----------
-    data : array, shape (n_subjects, n_conditions)
-        Data matrix
-
-    Returns
-    -------
-    W : float
-        Mauchly's W statistic
-    chi2 : float
-        Chi-square statistic
-    pvalue : float
-        p-value
-
-    Notes
-    -----
-    Tests whether the variances of differences between conditions are equal.
-    If p < 0.05, sphericity is violated.
-    """
-    n, k = data.shape
-
-    # Compute difference matrix
-    diffs = []
-    for i in range(k):
-        for j in range(i + 1, k):
-            diffs.append(data[:, i] - data[:, j])
-
-    diff_matrix = np.array(diffs).T  # shape: (n_subjects, n_pairs)
-
-    # Covariance matrix of differences
-    S = np.cov(diff_matrix, rowvar=False)
-
-    # Mauchly's W statistic
-    W = np.linalg.det(S) / (np.trace(S) / S.shape[0]) ** S.shape[0]
-
-    # Chi-square approximation
-    df = k * (k - 1) / 2 - 1
-    chi2 = -(n - 1 - (2*k**2 - 3*k + 3) / (6*(k-1))) * np.log(W)
-    pvalue = 1 - stats.chi2.cdf(chi2, df)
-
-    return float(W), float(chi2), float(pvalue)
-
-
-def greenhouse_geisser_epsilon(data: np.ndarray) -> float:
-    """
-    Compute Greenhouse-Geisser epsilon correction factor.
-
-    Parameters
-    ----------
-    data : array, shape (n_subjects, n_conditions)
-        Data matrix
-
-    Returns
-    -------
-    epsilon : float
-        GG epsilon (between 1/(k-1) and 1.0)
-
-    Notes
-    -----
-    Used to correct degrees of freedom when sphericity is violated.
-    epsilon = 1.0 indicates perfect sphericity.
-    """
-    n, k = data.shape
-
-    # Compute covariance matrix
-    centered = data - data.mean(axis=1, keepdims=True)
-    S = np.dot(centered.T, centered) / (n - 1)
-
-    # Compute epsilon
-    trace_S = np.trace(S)
-    trace_S2 = np.trace(np.dot(S, S))
-
-    numerator = (k * trace_S) ** 2
-    denominator = (k - 1) * (k * trace_S2 - trace_S ** 2)
-
-    if denominator == 0:
-        return 1.0
-
-    epsilon = numerator / denominator
-
-    # Bound epsilon
-    epsilon = max(1.0 / (k - 1), min(epsilon, 1.0))
-
-    return float(epsilon)
-
-
-def partial_eta_squared_rm(ss_effect: float, ss_error: float) -> float:
-    """
-    Compute partial eta-squared for repeated measures.
-
-    Parameters
-    ----------
-    ss_effect : float
-        Sum of squares for the effect
-    ss_error : float
-        Sum of squares for error
-
-    Returns
-    -------
-    eta_p2 : float
-        Partial eta-squared
-
-    Notes
-    -----
-    Partial η² = SS_effect / (SS_effect + SS_error)
-    """
-    return ss_effect / (ss_effect + ss_error)
-
-
-def interpret_eta_squared(eta2: float) -> str:
-    """Interpret eta-squared effect size."""
-    if eta2 < 0.01:
-        return 'negligible'
-    elif eta2 < 0.06:
-        return 'small'
-    elif eta2 < 0.14:
-        return 'medium'
-    else:
-        return 'large'
-
-
-def test_anova_rm(
+def test_anova_rm(  # noqa: C901
     data: Union[np.ndarray, pd.DataFrame],
     subject_col: Optional[str] = None,
     condition_col: Optional[str] = None,
     value_col: Optional[str] = None,
     condition_names: Optional[List[str]] = None,
     alpha: float = 0.05,
-    correction: Literal['auto', 'none', 'gg'] = 'auto',
+    correction: Literal["auto", "none", "gg"] = "auto",
     check_sphericity: bool = True,
     plot: bool = False,
     ax: Optional[matplotlib.axes.Axes] = None,
-    return_as: Literal['dict', 'dataframe'] = 'dict',
+    return_as: Literal["dict", "dataframe"] = "dict",
     decimals: int = 3,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> Union[dict, pd.DataFrame, Tuple]:
-    """
+    r"""
     Perform repeated measures ANOVA for within-subjects designs.
 
     Parameters
@@ -319,9 +202,15 @@ def test_anova_rm(
     """
     # Convert data to wide format array
     if isinstance(data, pd.DataFrame):
-        if subject_col is not None and condition_col is not None and value_col is not None:
+        if (
+            subject_col is not None
+            and condition_col is not None
+            and value_col is not None
+        ):
             # Long format - pivot to wide
-            data_wide = data.pivot(index=subject_col, columns=condition_col, values=value_col)
+            data_wide = data.pivot(
+                index=subject_col, columns=condition_col, values=value_col
+            )
             data_array = data_wide.values
             if condition_names is None:
                 condition_names = list(data_wide.columns)
@@ -341,7 +230,7 @@ def test_anova_rm(
         raise ValueError("Need at least 2 conditions for repeated measures ANOVA")
 
     if condition_names is None:
-        condition_names = [f'Condition {i+1}' for i in range(n_conditions)]
+        condition_names = [f"Condition {i + 1}" for i in range(n_conditions)]
 
     # Compute ANOVA
     grand_mean = data_array.mean()
@@ -375,42 +264,47 @@ def test_anova_rm(
     sphericity_chi2 = None
     sphericity_pvalue = None
     epsilon_gg = None
-    correction_applied = 'none'
+    correction_applied = "none"
 
     if check_sphericity and n_conditions > 2:
         try:
             if HAS_PINGOUIN:
                 # Use pingouin for robust sphericity test
-                spher = pg.sphericity(data_array, method='mauchly')
+                spher = pg.sphericity(data_array, method="mauchly")
                 sphericity_W = spher[0]
                 sphericity_chi2 = spher[1]
                 sphericity_pvalue = spher[2]
             else:
                 # Use our implementation
-                sphericity_W, sphericity_chi2, sphericity_pvalue = mauchly_sphericity(data_array)
+                sphericity_W, sphericity_chi2, sphericity_pvalue = mauchly_sphericity(
+                    data_array
+                )
 
             sphericity_met = sphericity_pvalue >= alpha
 
             # Compute Greenhouse-Geisser epsilon
             if HAS_PINGOUIN:
-                epsilon_gg = pg.epsilon(data_array, correction='gg')
+                epsilon_gg = pg.epsilon(data_array, correction="gg")
             else:
                 epsilon_gg = greenhouse_geisser_epsilon(data_array)
 
             # Apply correction if needed
-            if correction == 'gg' or (correction == 'auto' and not sphericity_met):
+            if correction == "gg" or (correction == "auto" and not sphericity_met):
                 # Adjust degrees of freedom
                 df_conditions_adj = df_conditions * epsilon_gg
                 df_error_adj = df_error * epsilon_gg
                 pvalue = 1 - stats.f.cdf(F_stat, df_conditions_adj, df_error_adj)
-                correction_applied = 'greenhouse-geisser'
+                correction_applied = "greenhouse-geisser"
                 df_conditions = df_conditions_adj
                 df_error = df_error_adj
 
         except Exception as e:
             # If sphericity test fails, continue without it
             import warnings
-            warnings.warn(f"Sphericity test failed: {e}. Proceeding without correction.")
+
+            warnings.warn(
+                f"Sphericity test failed: {e}. Proceeding without correction."
+            )
             sphericity_met = None
 
     # Compute effect size (partial eta-squared)
@@ -419,38 +313,43 @@ def test_anova_rm(
 
     # Build result dictionary
     result = {
-        'test': 'Repeated Measures ANOVA',
-        'statistic': round(float(F_stat), decimals),
-        'pvalue': round(float(pvalue), decimals + 1),
-        'df_effect': round(float(df_conditions), decimals),
-        'df_error': round(float(df_error), decimals),
-        'n_subjects': int(n_subjects),
-        'n_conditions': int(n_conditions),
-        'condition_names': condition_names,
-        'effect_size': round(float(partial_eta2), decimals),
-        'effect_size_metric': 'partial_eta_squared',
-        'effect_size_interpretation': eta2_interpretation,
-        'alpha': alpha,
-        'significant': pvalue < alpha,
-        'stars': p2stars(pvalue),
+        "test": "Repeated Measures ANOVA",
+        "statistic": round(float(F_stat), decimals),
+        "pvalue": round(float(pvalue), decimals + 1),
+        "df_effect": round(float(df_conditions), decimals),
+        "df_error": round(float(df_error), decimals),
+        "n_subjects": int(n_subjects),
+        "n_conditions": int(n_conditions),
+        "condition_names": condition_names,
+        "effect_size": round(float(partial_eta2), decimals),
+        "effect_size_metric": "partial_eta_squared",
+        "effect_size_interpretation": eta2_interpretation,
+        "alpha": alpha,
+        "significant": pvalue < alpha,
+        "stars": p2stars(pvalue),
     }
 
     # Add sphericity results
     if sphericity_W is not None:
-        result['sphericity_W'] = round(float(sphericity_W), decimals)
-        result['sphericity_chi2'] = round(float(sphericity_chi2), decimals)
-        result['sphericity_pvalue'] = round(float(sphericity_pvalue), decimals + 1)
-        result['sphericity_met'] = sphericity_met
-        result['epsilon_gg'] = round(float(epsilon_gg), decimals)
-        result['correction_applied'] = correction_applied
+        result["sphericity_W"] = round(float(sphericity_W), decimals)
+        result["sphericity_chi2"] = round(float(sphericity_chi2), decimals)
+        result["sphericity_pvalue"] = round(float(sphericity_pvalue), decimals + 1)
+        result["sphericity_met"] = sphericity_met
+        result["epsilon_gg"] = round(float(epsilon_gg), decimals)
+        result["correction_applied"] = correction_applied
 
     # Log results if verbose
     if verbose:
         from scitex.logging import getLogger
+
         logger = getLogger(__name__)
-        logger.info(f"Repeated Measures ANOVA: F({result['df_effect']:.1f}, {result['df_error']:.1f}) = {result['statistic']:.3f}, p = {result['pvalue']:.4f} {result['stars']}")
-        logger.info(f"Partial η² = {result['effect_size']:.3f} ({result['effect_size_interpretation']})")
-        if 'sphericity_met' in result:
+        logger.info(
+            f"Repeated Measures ANOVA: F({result['df_effect']:.1f}, {result['df_error']:.1f}) = {result['statistic']:.3f}, p = {result['pvalue']:.4f} {result['stars']}"
+        )
+        logger.info(
+            f"Partial η² = {result['effect_size']:.3f} ({result['effect_size_interpretation']})"
+        )
+        if "sphericity_met" in result:
             logger.info(f"Sphericity met: {result['sphericity_met']}")
 
     # Auto-enable plotting if ax is provided
@@ -467,7 +366,7 @@ def test_anova_rm(
             fig = _plot_anova_rm(data_array, condition_names, result)
 
     # Return based on format
-    if return_as == 'dataframe':
+    if return_as == "dataframe":
         result_df = pd.DataFrame([result])
         if plot and fig is not None:
             return result_df, fig
@@ -488,47 +387,88 @@ def _plot_anova_rm(data, condition_names, result):
     # Panel 1: Profile plot (individual subjects)
     ax = axes[0]
     for i in range(n_subjects):
-        ax.plot(conditions, data[i, :], marker='o', alpha=0.3, color='gray', linewidth=0.5)
+        ax.plot(
+            conditions,
+            data[i, :],
+            marker="o",
+            alpha=0.3,
+            color="gray",
+            linewidth=0.5,
+        )
 
     # Add mean profile
     means = data.mean(axis=0)
     sems = data.std(axis=0) / np.sqrt(n_subjects)
-    ax.plot(conditions, means, marker='o', color='red', linewidth=2.5, markersize=8,
-           label='Mean', zorder=10)
-    ax.fill_between(conditions, means - sems, means + sems, alpha=0.3, color='red',
-                    label='±SEM')
+    ax.plot(
+        conditions,
+        means,
+        marker="o",
+        color="red",
+        linewidth=2.5,
+        markersize=8,
+        label="Mean",
+        zorder=10,
+    )
+    ax.fill_between(
+        conditions,
+        means - sems,
+        means + sems,
+        alpha=0.3,
+        color="red",
+        label="±SEM",
+    )
 
     ax.set_xticks(conditions)
-    ax.set_xticklabels(condition_names, rotation=45, ha='right')
-    ax.set_xlabel('Condition', fontsize=12)
-    ax.set_ylabel('Value', fontsize=12)
-    ax.set_title('Profile Plot', fontsize=12, fontweight='bold')
-    ax.legend(loc='best')
+    ax.set_xticklabels(condition_names, rotation=45, ha="right")
+    ax.set_xlabel("Condition", fontsize=12)
+    ax.set_ylabel("Value", fontsize=12)
+    ax.set_title("Repeated Measures ANOVA", fontsize=12, fontweight="bold")
+    ax.legend(loc="best")
     ax.grid(True, alpha=0.3)
+
+    # Stats text box - top-left corner
+    stars_text = result["stars"].replace("ns", "$n$s")
+    text_str = (
+        f"$F$({result['df_effect']:.1f}, {result['df_error']:.1f}) = {result['statistic']:.3f} {stars_text}\n"
+        f"$p$ = {result['pvalue']:.4f}\n"
+        f"$\\eta_p^2$ = {result['effect_size']:.3f}\n"
+        f"$n$ = {result['n_subjects']}"
+    )
+    ax.text(
+        0.02,
+        0.98,
+        text_str,
+        transform=ax.transAxes,
+        verticalalignment="top",
+        color="black",
+        fontsize=6,
+    )
 
     # Panel 2: Box plots
     ax = axes[1]
     positions = np.arange(1, n_conditions + 1)
-    bp = ax.boxplot([data[:, i] for i in range(n_conditions)],
-                    positions=positions,
-                    widths=0.6,
-                    patch_artist=True)
+    _ = ax.boxplot(
+        [data[:, i] for i in range(n_conditions)],
+        positions=positions,
+        widths=0.6,
+        patch_artist=True,
+    )
 
     # Color boxes
-    for patch in bp['boxes']:
-        patch.set_facecolor('lightblue')
+    for patch in _["boxes"]:
+        patch.set_facecolor("lightblue")
         patch.set_alpha(0.7)
 
     ax.set_xticks(positions)
-    ax.set_xticklabels(condition_names, rotation=45, ha='right')
-    ax.set_xlabel('Condition', fontsize=12)
-    ax.set_ylabel('Value', fontsize=12)
-    ax.set_title('Distribution by Condition', fontsize=12, fontweight='bold')
-    ax.grid(True, alpha=0.3, axis='y')
+    ax.set_xticklabels(condition_names, rotation=45, ha="right")
+    ax.set_xlabel("Condition", fontsize=12)
+    ax.set_ylabel("Value", fontsize=12)
+    ax.set_title("Distribution by Condition", fontsize=12, fontweight="bold")
+    ax.grid(True, alpha=0.3, axis="y")
 
     # Panel 3: Results summary
     ax = axes[2]
-    ax.axis('off')
+    ax.axis("off")
 
     result_text = "Repeated Measures ANOVA\n"
     result_text += "=" * 35 + "\n\n"
@@ -537,181 +477,36 @@ def _plot_anova_rm(data, condition_names, result):
     result_text += f"Partial η² = {result['effect_size']:.3f}\n"
     result_text += f"Interpretation: {result['effect_size_interpretation']}\n\n"
 
-    if 'sphericity_W' in result:
+    if "sphericity_W" in result:
         result_text += "Sphericity Test:\n"
         result_text += f"  Mauchly's W = {result['sphericity_W']:.3f}\n"
         result_text += f"  p = {result['sphericity_pvalue']:.4f}\n"
         result_text += f"  Met: {'Yes' if result['sphericity_met'] else 'No'}\n\n"
-        if result['correction_applied'] != 'none':
+        if result["correction_applied"] != "none":
             result_text += f"  ε_GG = {result['epsilon_gg']:.3f}\n"
             result_text += f"  Correction: {result['correction_applied']}\n\n"
 
     result_text += f"Subjects: {result['n_subjects']}\n"
     result_text += f"Conditions: {result['n_conditions']}\n"
     result_text += f"Significant (α={result['alpha']}): "
-    result_text += "Yes" if result['significant'] else "No"
+    result_text += "Yes" if result["significant"] else "No"
 
-    ax.text(0.1, 0.5, result_text,
-           transform=ax.transAxes,
-           fontsize=10,
-           verticalalignment='center',
-           fontfamily='monospace',
-           bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.3))
+    ax.text(
+        0.1,
+        0.5,
+        result_text,
+        transform=ax.transAxes,
+        fontsize=10,
+        verticalalignment="center",
+        fontfamily="monospace",
+        bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.3),
+    )
 
     plt.tight_layout()
 
     return fig
 
-"""Main function"""
-def main(args):
-    logger.info("=" * 70)
-    logger.info("Repeated Measures ANOVA Examples")
-    logger.info("=" * 70)
 
-    # Example 1: Basic repeated measures (4 time points)
-    logger.info("\n[Example 1] Basic repeated measures - 4 time points")
-    logger.info("-" * 70)
-
-    np.random.seed(42)
-    n_subjects = 12
-    # Simulate increasing trend over time
-    time_effects = np.array([0, 0.5, 1.0, 0.8])
-    data = np.random.normal(5, 1, (n_subjects, 4)) + time_effects
-
-    result = test_anova_rm(
-        data,
-        condition_names=['Baseline', 'Week 1', 'Week 2', 'Week 3'],
-        plot=True,
-        verbose=True
-    )
-    stx.io.save(plt.gcf(), "./.dev/anova_rm_example1.jpg")
-    plt.close()
-
-    logger.info(f"F({result['df_effect']:.1f}, {result['df_error']:.1f}) = {result['statistic']:.3f}")
-    logger.info(f"p-value = {result['pvalue']:.4f} {result['stars']}")
-    logger.info(f"Partial η² = {result['effect_size']:.3f} ({result['effect_size_interpretation']})")
-    if 'sphericity_met' in result:
-        logger.info(f"Sphericity met: {result['sphericity_met']}")
-
-    # Example 2: Sphericity violation
-    logger.info("\n[Example 2] Data with sphericity violation")
-    logger.info("-" * 70)
-
-    # Create data that violates sphericity
-    data_spher = np.random.normal(0, 1, (15, 4))
-    data_spher[:, 1] += np.random.normal(0, 2, 15)  # High variance for condition 2
-    data_spher[:, 2] += np.random.normal(0.5, 0.5, 15)
-
-    result_spher = test_anova_rm(
-        data_spher,
-        condition_names=['T1', 'T2', 'T3', 'T4'],
-        correction='auto',
-        plot=True,
-        verbose=True
-    )
-    stx.io.save(plt.gcf(), "./.dev/anova_rm_example2.jpg")
-    plt.close()
-
-    logger.info(f"Sphericity W = {result_spher.get('sphericity_W', 'N/A')}")
-    logger.info(f"Sphericity p = {result_spher.get('sphericity_pvalue', 'N/A')}")
-    logger.info(f"Correction applied: {result_spher.get('correction_applied', 'none')}")
-    logger.info(f"Adjusted F({result_spher['df_effect']:.2f}, {result_spher['df_error']:.2f}) = {result_spher['statistic']:.3f}")
-    logger.info(f"p-value = {result_spher['pvalue']:.4f}")
-
-    # Example 3: Long format DataFrame
-    logger.info("\n[Example 3] Long format DataFrame input")
-    logger.info("-" * 70)
-
-    # Create long format data
-    subjects = np.repeat(np.arange(10), 3)
-    conditions = np.tile(['Pre', 'Mid', 'Post'], 10)
-    values = np.random.normal(10, 2, 30) + np.tile([0, 1, 1.5], 10)
-
-    df_long = pd.DataFrame({
-        'Subject': subjects,
-        'TimePoint': conditions,
-        'Score': values
-    })
-
-    result_long = test_anova_rm(
-        df_long,
-        subject_col='Subject',
-        condition_col='TimePoint',
-        value_col='Score',
-        plot=True,
-        verbose=True
-    )
-    stx.io.save(plt.gcf(), "./.dev/anova_rm_example3.jpg")
-    plt.close()
-
-    logger.info(f"F = {result_long['statistic']:.3f}, p = {result_long['pvalue']:.4f}")
-    logger.info(f"Conditions: {result_long['condition_names']}")
-
-    # Example 4: Wide format DataFrame
-    logger.info("\n[Example 4] Wide format DataFrame")
-    logger.info("-" * 70)
-
-    df_wide = pd.DataFrame(
-        np.random.normal(50, 10, (20, 5)),
-        columns=['Drug_0mg', 'Drug_5mg', 'Drug_10mg', 'Drug_15mg', 'Drug_20mg']
-    )
-    # Add dose-response trend
-    for i, dose in enumerate([0, 5, 10, 15, 20]):
-        df_wide.iloc[:, i] += dose * 0.5
-
-    result_wide = test_anova_rm(df_wide, plot=True, verbose=True)
-    stx.io.save(plt.gcf(), "./.dev/anova_rm_example4.jpg")
-    plt.close()
-
-    logger.info(f"F = {result_wide['statistic']:.3f}, p = {result_wide['pvalue']:.4f}")
-    logger.info(f"Partial η² = {result_wide['effect_size']:.3f}")
-
-    # Example 5: Export results
-    logger.info("\n[Example 5] Export results")
-    logger.info("-" * 70)
-
-    convert_results(result, return_as='excel', path='./.dev/anova_rm_results.xlsx')
-    logger.info("Saved to: ./.dev/anova_rm_results.xlsx")
-
-# EOF
-
-    return 0
-
-def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="")
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
-    return parser.parse_args()
-
-
-def run_main():
-    """Initialize SciTeX framework and run main."""
-    global CONFIG, CC, sys, plt, rng
-
-    import sys
-    import matplotlib.pyplot as plt
-
-    args = parse_args()
-
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
-        sys,
-        plt,
-        args=args,
-        file=__FILE__,
-        verbose=args.verbose,
-        agg=True,
-    )
-
-    exit_status = main(args)
-
-    stx.session.close(
-        CONFIG,
-        verbose=args.verbose,
-        exit_status=exit_status,
-    )
-
-
-if __name__ == "__main__":
-    run_main()
+# Demo: python -m scitex.stats.tests.parametric._demo_anova_rm
 
 # EOF

@@ -12,39 +12,39 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # """
 # Citation Graph Builder
-# 
+#
 # Main interface for building citation networks from CrossRef data.
 # """
-# 
+#
 # import json
 # from pathlib import Path
 # from typing import Optional, List
 # from collections import Counter
-# 
+#
 # from .database import CitationDatabase
 # from .models import PaperNode, CitationEdge, CitationGraph
-# 
-# 
+#
+#
 # class CitationGraphBuilder:
 #     """
 #     Build citation network graphs for academic papers.
-# 
+#
 #     Example:
 #         >>> builder = CitationGraphBuilder("/path/to/crossref.db")
 #         >>> graph = builder.build("10.1038/s41586-020-2008-3", top_n=20)
 #         >>> builder.export_json(graph, "network.json")
 #     """
-# 
+#
 #     def __init__(self, db_path: str):
 #         """
 #         Initialize builder with database path.
-# 
+#
 #         Args:
 #             db_path: Path to CrossRef SQLite database
 #         """
 #         self.db_path = db_path
 #         self.db = CitationDatabase(db_path)
-# 
+#
 #     def build(
 #         self,
 #         seed_doi: str,
@@ -55,14 +55,14 @@ if __name__ == "__main__":
 #     ) -> CitationGraph:
 #         """
 #         Build citation network around a seed paper.
-# 
+#
 #         Args:
 #             seed_doi: DOI of the seed paper
 #             top_n: Number of most similar papers to include
 #             weight_coupling: Weight for bibliographic coupling
 #             weight_cocitation: Weight for co-citation
 #             weight_direct: Weight for direct citations
-# 
+#
 #         Returns:
 #             CitationGraph object with nodes and edges
 #         """
@@ -74,19 +74,19 @@ if __name__ == "__main__":
 #                 weight_cocitation=weight_cocitation,
 #                 weight_direct=weight_direct,
 #             )
-# 
+#
 #             # Get top N most similar papers
 #             top_dois = [seed_doi] + [doi for doi, _ in scores.most_common(top_n)]
-# 
+#
 #             # Build nodes with metadata
 #             nodes = []
 #             for doi in top_dois:
 #                 node = self._create_paper_node(doi, scores.get(doi, 100.0))
 #                 nodes.append(node)
-# 
+#
 #             # Build edges (citations between papers in network)
 #             edges = self._build_citation_edges(top_dois)
-# 
+#
 #             # Create graph
 #             graph = CitationGraph(
 #                 seed_doi=seed_doi,
@@ -101,41 +101,41 @@ if __name__ == "__main__":
 #                     },
 #                 },
 #             )
-# 
+#
 #             return graph
-# 
+#
 #     def _create_paper_node(self, doi: str, similarity_score: float) -> PaperNode:
 #         """
 #         Create a PaperNode with metadata from database.
-# 
+#
 #         Args:
 #             doi: DOI of the paper
 #             similarity_score: Calculated similarity score
-# 
+#
 #         Returns:
 #             PaperNode object
 #         """
 #         metadata = self.db.get_paper_metadata(doi)
-# 
+#
 #         if metadata:
 #             # Extract author names
 #             authors = metadata.get("author", [])
 #             author_names = [
 #                 f"{a.get('family', '')} {a.get('given', '')[:1]}" for a in authors[:3]
 #             ]
-# 
+#
 #             # Extract year
 #             year = 0
 #             if "published" in metadata and "date-parts" in metadata["published"]:
 #                 date_parts = metadata["published"]["date-parts"]
 #                 if date_parts and date_parts[0]:
 #                     year = date_parts[0][0] if date_parts[0][0] else 0
-# 
+#
 #             # Extract journal
 #             journal = ""
 #             if "container-title" in metadata and metadata["container-title"]:
 #                 journal = metadata["container-title"][0]
-# 
+#
 #             return PaperNode(
 #                 doi=doi,
 #                 title=metadata.get("title", ["Unknown"])[0][:200],
@@ -146,24 +146,24 @@ if __name__ == "__main__":
 #             )
 #         else:
 #             return PaperNode(doi=doi, similarity_score=similarity_score)
-# 
+#
 #     def _build_citation_edges(self, dois: List[str]) -> List[CitationEdge]:
 #         """
 #         Build citation edges between papers in the network.
-# 
+#
 #         Args:
 #             dois: List of DOIs in the network
-# 
+#
 #         Returns:
 #             List of CitationEdge objects
 #         """
 #         edges = []
 #         doi_set = set(d.lower() for d in dois)
-# 
+#
 #         for doi in dois:
 #             # Get references (papers this one cites)
 #             refs = self.db.get_references(doi, limit=100)
-# 
+#
 #             for cited_doi in refs:
 #                 if cited_doi in doi_set:
 #                     edges.append(
@@ -173,13 +173,13 @@ if __name__ == "__main__":
 #                             edge_type="cites",
 #                         )
 #                     )
-# 
+#
 #         return edges
-# 
+#
 #     def export_json(self, graph: CitationGraph, output_path: str):
 #         """
 #         Export graph to JSON file for visualization.
-# 
+#
 #         Args:
 #             graph: CitationGraph to export
 #             output_path: Path to output JSON file
@@ -187,27 +187,27 @@ if __name__ == "__main__":
 #         output = Path(output_path)
 #         with open(output, "w") as f:
 #             json.dump(graph.to_dict(), f, indent=2)
-# 
+#
 #     def get_paper_summary(self, doi: str) -> Optional[dict]:
 #         """
 #         Get summary information for a paper.
-# 
+#
 #         Args:
 #             doi: DOI of the paper
-# 
+#
 #         Returns:
 #             Dictionary with paper summary
 #         """
 #         with self.db:
 #             metadata = self.db.get_paper_metadata(doi)
-# 
+#
 #             if not metadata:
 #                 return None
-# 
+#
 #             # Get citation counts
 #             refs = self.db.get_references(doi, limit=1000)
 #             citations = self.db.get_citations(doi, limit=1000)
-# 
+#
 #             return {
 #                 "doi": doi,
 #                 "title": metadata.get("title", ["Unknown"])[0],

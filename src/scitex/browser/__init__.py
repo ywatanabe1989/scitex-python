@@ -6,10 +6,8 @@
 
 # Debugging utilities
 try:
-    from .debugging import (
-        # Sync browser session for zombie prevention
+    from .debugging import (  # Sync browser session for zombie prevention; Test monitoring (periodic screenshots via scitex.capture); Visual cursor/feedback utilities (sync and async); Failure capture utilities (mirrors console-interceptor.ts)
         SyncBrowserSession,
-        # Test monitoring (periodic screenshots via scitex.capture)
         TestMonitor,
         browser_logger,
         collect_console_logs,
@@ -19,12 +17,10 @@ try:
         create_test_monitor_fixture,
         format_logs_devtools_style,
         highlight_element_async,
-        # Visual cursor/feedback utilities (sync and async)
         inject_visual_effects,
         inject_visual_effects_async,
         monitor_test,
         save_failure_artifacts,
-        # Failure capture utilities (mirrors console-interceptor.ts)
         setup_console_interceptor,
         show_click_effect,
         show_click_effect_async,

@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory=$false)]
     [int]$MonitorNumber = 0,  # 0-based index from Python
-    
+
     [Parameter(Mandatory=$false)]
     [string]$OutputFormat = "base64"  # "base64" or "file"
 )
@@ -16,10 +16,10 @@ using System.Runtime.InteropServices;
 public class User32 {
     [DllImport("user32.dll")]
     public static extern bool SetProcessDPIAware();
-    
+
     [DllImport("shcore.dll")]
     public static extern int GetDpiForMonitor(IntPtr hmonitor, int dpiType, out uint dpiX, out uint dpiY);
-    
+
     [DllImport("user32.dll")]
     public static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
 }

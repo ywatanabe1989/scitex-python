@@ -24,13 +24,14 @@ Example:
     ... )
 """
 
-import time
 import json
-from typing import List, Dict, Any, Optional
+import time
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from scitex import logging
 from scitex.scholar.metadata_engines.individual.PubMedEngine import PubMedEngine
+
 from .._BaseSearchEngine import BaseSearchEngine
 
 logger = logging.getLogger(__name__)

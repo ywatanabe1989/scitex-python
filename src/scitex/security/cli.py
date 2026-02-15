@@ -22,11 +22,11 @@ except ImportError:
     click = None
 
 from .github import (
+    GitHubSecurityError,
     check_github_alerts,
-    save_alerts_to_file,
     format_alerts_report,
     get_latest_alerts_file,
-    GitHubSecurityError,
+    save_alerts_to_file,
 )
 
 

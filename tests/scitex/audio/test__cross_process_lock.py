@@ -10,10 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from scitex.audio._cross_process_lock import (
-    AudioPlaybackLock,
-    acquire_audio_lock,
-)
+from scitex.audio._cross_process_lock import AudioPlaybackLock, acquire_audio_lock
 
 
 class TestAudioPlaybackLockInit:

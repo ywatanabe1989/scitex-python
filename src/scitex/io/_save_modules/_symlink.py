@@ -89,8 +89,8 @@ def symlink_to(spath_final, symlink_to_path, verbose):
 
         if verbose:
             logger.success(
-                f"Symlinked: {spath_final} ->\n"
-                f"           {symlink_to_path}"
+                f"Symlinked: {spath_final} ->\n" f"           {symlink_to_path}"
             )
+
 
 # EOF

@@ -15,8 +15,8 @@ Metadata:
     lastUpdated: 2016-09-12 06:17:30
 """
 
-from typing import Dict, Any, List, Optional
 import json
+from typing import Any, Dict, List, Optional
 
 
 class DPLATranslator:

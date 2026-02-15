@@ -24,26 +24,35 @@ import torch.nn as nn
 # Mock scitex modules
 scitex_mock = MagicMock()
 scitex_mock.dsp = MagicMock()
-scitex_mock.dsp.ensure_3d = lambda x: x.view(-1, x.shape[-2], x.shape[-1]) if x.dim() == 2 else x
+scitex_mock.dsp.ensure_3d = lambda x: (
+    x.view(-1, x.shape[-2], x.shape[-1]) if x.dim() == 2 else x
+)
+
 
 # Mock the to_even and to_odd functions
 def mock_to_even(x):
     return x if x % 2 == 0 else x + 1
 
+
 def mock_to_odd(x):
     return x if x % 2 == 1 else x + 1
 
-with patch.dict('sys.modules', {
-    'scitex': scitex_mock,
-    'scitex.dsp': scitex_mock.dsp,
-    'scitex.gen': MagicMock(),
-    'scitex.gen._to_even': MagicMock(to_even=mock_to_even),
-    'scitex.gen._to_odd': MagicMock(to_odd=mock_to_odd)
-}):
+
+with patch.dict(
+    "sys.modules",
+    {
+        "scitex": scitex_mock,
+        "scitex.dsp": scitex_mock.dsp,
+        "scitex.gen": MagicMock(),
+        "scitex.gen._to_even": MagicMock(to_even=mock_to_even),
+        "scitex.gen._to_odd": MagicMock(to_odd=mock_to_odd),
+    },
+):
     # Import with mocked dependencies
     import sys
-    sys.modules['scitex.gen._to_even'].to_even = mock_to_even
-    sys.modules['scitex.gen._to_odd'].to_odd = mock_to_odd
+
+    sys.modules["scitex.gen._to_even"].to_even = mock_to_even
+    sys.modules["scitex.gen._to_odd"].to_odd = mock_to_odd
 
     from scitex.nn import Wavelet
 
@@ -81,7 +90,7 @@ class TestWavelet:
             samp_rate=sample_rate,
             kernel_size=kernel_size,
             freq_scale=freq_scale,
-            out_scale=out_scale
+            out_scale=out_scale,
         )
 
         assert layer.out_scale == out_scale
@@ -90,9 +99,7 @@ class TestWavelet:
     def test_morlet_generation_linear_scale(self, sample_rate):
         """Test Morlet wavelet generation with linear frequency scale."""
         morlets, freqs = Wavelet.gen_morlet_to_nyquist(
-            samp_rate=sample_rate,
-            kernel_size=None,
-            freq_scale="linear"
+            samp_rate=sample_rate, kernel_size=None, freq_scale="linear"
         )
 
         # Check output types
@@ -113,9 +120,7 @@ class TestWavelet:
     def test_morlet_generation_log_scale(self, sample_rate):
         """Test Morlet wavelet generation with log frequency scale."""
         morlets, freqs = Wavelet.gen_morlet_to_nyquist(
-            samp_rate=sample_rate,
-            kernel_size=None,
-            freq_scale="log"
+            samp_rate=sample_rate, kernel_size=None, freq_scale="log"
         )
 
         # Check logarithmic spacing
@@ -171,7 +176,9 @@ class TestWavelet:
         loss.backward()
 
         assert sample_input.grad is not None
-        assert not torch.allclose(sample_input.grad, torch.zeros_like(sample_input.grad))
+        assert not torch.allclose(
+            sample_input.grad, torch.zeros_like(sample_input.grad)
+        )
 
     def test_edge_handling(self, sample_rate):
         """Test edge handling with reflection padding."""
@@ -241,7 +248,7 @@ class TestWavelet:
         layer = Wavelet(samp_rate=sample_rate, freq_scale="linear")
 
         # Create single tone at 100 Hz
-        t = torch.arange(0, 2, 1/sample_rate)
+        t = torch.arange(0, 2, 1 / sample_rate)
         freq = 100
         x = torch.sin(2 * np.pi * freq * t).unsqueeze(0).unsqueeze(0)
 
@@ -260,9 +267,9 @@ class TestWavelet:
         layer = Wavelet(samp_rate=sample_rate)
 
         # Create chirp signal (frequency increases over time)
-        t = torch.arange(0, 2, 1/sample_rate)
+        t = torch.arange(0, 2, 1 / sample_rate)
         f0, f1 = 50, 200
-        chirp = torch.sin(2 * np.pi * (f0 + (f1-f0) * t / 2) * t)
+        chirp = torch.sin(2 * np.pi * (f0 + (f1 - f0) * t / 2) * t)
         x = chirp.unsqueeze(0).unsqueeze(0)
 
         pha, amp, freqs = layer(x)
@@ -328,7 +335,10 @@ class TestWavelet:
         layer = Wavelet(samp_rate=sample_rate)
 
         # Kernel should be complex
-        assert layer.kernel.dtype == torch.complex64 or layer.kernel.dtype == torch.complex128
+        assert (
+            layer.kernel.dtype == torch.complex64
+            or layer.kernel.dtype == torch.complex128
+        )
 
         # Each wavelet should be normalized
         for i in range(layer.kernel.shape[0]):
@@ -351,6 +361,7 @@ class TestWavelet:
 
     def test_integration_with_sequential(self, sample_rate):
         """Test integration in nn.Sequential."""
+
         class WaveletFeatures(nn.Module):
             def __init__(self, samp_rate):
                 super().__init__()
@@ -366,7 +377,7 @@ class TestWavelet:
             nn.Flatten(),
             nn.Linear(3 * 10, 64),  # Assuming ~10 frequency bands
             nn.ReLU(),
-            nn.Linear(64, 10)
+            nn.Linear(64, 10),
         )
 
         x = torch.randn(4, 3, 1000)
@@ -409,7 +420,10 @@ class TestWavelet:
         _, amp_large, freqs_large = layer_large(x)
 
         # Different kernel sizes should give different results
-        assert amp_small.shape != amp_large.shape or not torch.allclose(amp_small, amp_large)
+        assert amp_small.shape != amp_large.shape or not torch.allclose(
+            amp_small, amp_large
+        )
+
 
 if __name__ == "__main__":
     import os
@@ -425,12 +439,12 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-03 07:17:26 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/nn/_Wavelet.py
-# 
+#
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-05-30 11:04:45 (ywatanabe)"
-# 
-# 
+#
+#
 # import scitex
 # import numpy as np
 # import torch
@@ -438,8 +452,8 @@ if __name__ == "__main__":
 # import torch.nn.functional as F
 # from scitex.gen._to_even import to_even
 # from scitex.gen._to_odd import to_odd
-# 
-# 
+#
+#
 # class Wavelet(nn.Module):
 #     def __init__(
 #         self, samp_rate, kernel_size=None, freq_scale="linear", out_scale="log"
@@ -449,12 +463,12 @@ if __name__ == "__main__":
 #         self.kernel = None
 #         self.init_kernel(samp_rate, kernel_size=kernel_size, freq_scale=freq_scale)
 #         self.out_scale = out_scale
-# 
+#
 #     def forward(self, x):
 #         """Apply the 2D filter (n_filts, kernel_size) to input signal x with shape: (batch_size, n_chs, seq_len)"""
 #         x = scitex.dsp.ensure_3d(x).to(self.dummy.device)
 #         seq_len = x.shape[-1]
-# 
+#
 #         # Ensure the kernel is initialized
 #         if self.kernel is None:
 #             self.init_kernel()
@@ -462,28 +476,28 @@ if __name__ == "__main__":
 #                 raise ValueError("Filter kernel has not been initialized.")
 #         assert self.kernel.ndim == 2
 #         self.kernel = self.kernel.to(x.device)  # cuda, torch.complex128
-# 
+#
 #         # Edge handling and convolution
 #         extension_length = self.radius
 #         first_segment = x[:, :, :extension_length].flip(dims=[-1])
 #         last_segment = x[:, :, -extension_length:].flip(dims=[-1])
 #         extended_x = torch.cat([first_segment, x, last_segment], dim=-1)
-# 
+#
 #         # working??
 #         kernel_batched = self.kernel.unsqueeze(1)
 #         extended_x_reshaped = extended_x.view(-1, 1, extended_x.shape[-1])
-# 
+#
 #         filtered_x_real = F.conv1d(
 #             extended_x_reshaped, kernel_batched.real.float(), groups=1
 #         )
 #         filtered_x_imag = F.conv1d(
 #             extended_x_reshaped, kernel_batched.imag.float(), groups=1
 #         )
-# 
+#
 #         filtered_x = torch.view_as_complex(
 #             torch.stack([filtered_x_real, filtered_x_imag], dim=-1)
 #         )
-# 
+#
 #         filtered_x = filtered_x.view(
 #             x.shape[0], x.shape[1], kernel_batched.shape[0], -1
 #         )
@@ -492,20 +506,20 @@ if __name__ == "__main__":
 #         )
 #         filtered_x = filtered_x[..., :seq_len]
 #         assert filtered_x.shape[-1] == seq_len
-# 
+#
 #         pha = filtered_x.angle()
 #         amp = filtered_x.abs()
-# 
+#
 #         # Repeats freqs
 #         freqs = (
 #             self.freqs.unsqueeze(0).unsqueeze(0).repeat(pha.shape[0], pha.shape[1], 1)
 #         )
-# 
+#
 #         if self.out_scale == "log":
 #             return pha, torch.log(amp + 1e-5), freqs
 #         else:
 #             return pha, amp, freqs
-# 
+#
 #     def init_kernel(self, samp_rate, kernel_size=None, freq_scale="log"):
 #         device = self.dummy.device
 #         morlets, freqs = self.gen_morlet_to_nyquist(
@@ -513,24 +527,24 @@ if __name__ == "__main__":
 #         )
 #         self.kernel = torch.tensor(morlets).to(device)
 #         self.freqs = torch.tensor(freqs).float().to(device)
-# 
+#
 #     @staticmethod
 #     def gen_morlet_to_nyquist(samp_rate, kernel_size=None, freq_scale="linear"):
 #         """
 #         Generates Morlet wavelets for exponentially increasing frequency bands up to the Nyquist frequency.
-# 
+#
 #         Parameters:
 #         - samp_rate (int): The sampling rate of the signal, in Hertz.
 #         - kernel_size (int): The size of the kernel, in number of samples.
-# 
+#
 #         Returns:
 #         - np.ndarray: A 2D array of complex values representing the Morlet wavelets for each frequency band.
 #         """
 #         if kernel_size is None:
 #             kernel_size = int(samp_rate)  # * 2.5)
-# 
+#
 #         nyquist_freq = samp_rate / 2
-# 
+#
 #         # Log freq_scale
 #         def calc_freq_boundaries_log(nyquist_freq):
 #             n_kernels = int(np.floor(np.log2(nyquist_freq)))
@@ -540,69 +554,69 @@ if __name__ == "__main__":
 #             high_hz = mid_hz + width_hz
 #             low_hz[0] = 0.1
 #             return low_hz, high_hz
-# 
+#
 #         def calc_freq_boundaries_linear(nyquist_freq):
 #             n_kernels = int(nyquist_freq)
 #             high_hz = np.linspace(1, nyquist_freq, n_kernels)
 #             low_hz = high_hz - np.hstack([np.array(1), np.diff(high_hz)])
 #             low_hz[0] = 0.1
 #             return low_hz, high_hz
-# 
+#
 #         if freq_scale == "linear":
 #             fn = calc_freq_boundaries_linear
 #         if freq_scale == "log":
 #             fn = calc_freq_boundaries_log
 #         low_hz, high_hz = fn(nyquist_freq)
-# 
+#
 #         morlets = []
 #         freqs = []
-# 
+#
 #         for _, (ll, hh) in enumerate(zip(low_hz, high_hz)):
 #             if ll > nyquist_freq:
 #                 break
-# 
+#
 #             center_frequency = (ll + hh) / 2
-# 
+#
 #             t = np.arange(-kernel_size // 2, kernel_size // 2) / samp_rate
 #             # Calculate standard deviation of the gaussian window for a given center frequency
 #             sigma = 7 / (2 * np.pi * center_frequency)
 #             sine_wave = np.exp(2j * np.pi * center_frequency * t)
 #             gaussian_window = np.exp(-(t**2) / (2 * sigma**2))
 #             morlet_wavelet = sine_wave * gaussian_window
-# 
+#
 #             freqs.append(center_frequency)
 #             morlets.append(morlet_wavelet)
-# 
+#
 #         return np.array(morlets), np.array(freqs)
-# 
+#
 #     @property
 #     def kernel_size(
 #         self,
 #     ):
 #         return to_even(self.kernel.shape[-1])
-# 
+#
 #     @property
 #     def radius(
 #         self,
 #     ):
 #         return to_even(self.kernel_size // 2)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     import matplotlib.pyplot as plt
 #     import scitex
-# 
+#
 #     xx, tt, fs = scitex.dsp.demo_sig(sig_type="chirp")
-# 
+#
 #     pha, amp, ff = scitex.dsp.wavelet(xx, fs)
-# 
+#
 #     fig, ax = scitex.plt.subplots()
 #     ax.imshow2d(amp[0, 0].T)
 #     ax = scitex.plt.ax.set_ticks(ax, xticks=tt, yticks=ff)
 #     ax = scitex.plt.ax.set_n_ticks(ax)
 #     plt.show()
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

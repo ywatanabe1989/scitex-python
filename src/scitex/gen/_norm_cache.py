@@ -7,15 +7,15 @@
 Cached normalization functions for improved performance on repeated operations.
 """
 
-import torch
-import numpy as np
+import hashlib
 import weakref
 from functools import lru_cache
-from typing import Union, Tuple, Optional
-import hashlib
+from typing import Optional, Tuple, Union
+
+import numpy as np
+import torch
 
 from scitex.decorators import torch_fn
-
 
 # Cache for normalized data
 _norm_cache = weakref.WeakValueDictionary()

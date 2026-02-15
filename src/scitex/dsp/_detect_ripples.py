@@ -8,6 +8,7 @@ import pandas as pd
 from scipy.signal import find_peaks
 
 from scitex.gen._norm import to_z
+
 from ._demo_sig import demo_sig
 from ._hilbert import hilbert
 from ._resample import resample
@@ -196,6 +197,7 @@ if __name__ == "__main__":
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex
 
     # # Argument Parser

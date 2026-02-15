@@ -17,10 +17,9 @@ The .canvas extension makes canvas directories:
 - Detectable by scitex.io
 """
 
+import shutil
 from pathlib import Path
 from typing import List, Union
-import shutil
-
 
 SCHEMA_VERSION = "2.0.0"
 CANVAS_EXTENSION = ".canvas"
@@ -75,8 +74,9 @@ def ensure_canvas_directory(
     # Create empty canvas.json if not exists
     json_path = canvas_dir / "canvas.json"
     if not json_path.exists():
-        from ._canvas import _get_empty_canvas_template
         import json
+
+        from ._canvas import _get_empty_canvas_template
 
         # Use the name without extension for canvas_name in JSON
         base_name = _strip_canvas_extension(canvas_name)

@@ -14,16 +14,16 @@ if __name__ == "__main__":
 # # Timestamp: 2026-01-08
 # # File: src/scitex/dev/cv/_mcp.handlers.py
 # """MCP Handler implementations for SciTeX cv module.
-# 
+#
 # Provides async handlers for video title card and composition operations.
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import asyncio
 # from typing import Optional
-# 
-# 
+#
+#
 # async def create_opening_handler(
 #     title: str,
 #     subtitle: str = "Part of SciTeX",
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 #     height: int = 1080,
 # ) -> dict:
 #     """Create an opening title card.
-# 
+#
 #     Parameters
 #     ----------
 #     title : str
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 #         Version string.
 #     width, height : int
 #         Image dimensions.
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.dev.cv import create_opening
-# 
+#
 #         loop = asyncio.get_event_loop()
 #         result_path = await loop.run_in_executor(
 #             None,
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 #                 height=height,
 #             ),
 #         )
-# 
+#
 #         return {
 #             "success": True,
 #             "output_path": str(result_path),
@@ -88,8 +88,8 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # async def create_closing_handler(
 #     output_path: Optional[str] = None,
 #     product: str = "SciTeX",
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 #     height: int = 1080,
 # ) -> dict:
 #     """Create a closing branding card.
-# 
+#
 #     Parameters
 #     ----------
 #     output_path : str, optional
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 #         Website URL.
 #     width, height : int
 #         Image dimensions.
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.dev.cv import create_closing
-# 
+#
 #         loop = asyncio.get_event_loop()
 #         result_path = await loop.run_in_executor(
 #             None,
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 #                 height=height,
 #             ),
 #         )
-# 
+#
 #         return {
 #             "success": True,
 #             "output_path": str(result_path),
@@ -146,8 +146,8 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # async def compose_video_handler(
 #     content: str,
 #     output: str,
@@ -158,7 +158,7 @@ if __name__ == "__main__":
 #     transition: str = "fade",
 # ) -> dict:
 #     """Compose a video with opening and closing.
-# 
+#
 #     Parameters
 #     ----------
 #     content : str
@@ -175,7 +175,7 @@ if __name__ == "__main__":
 #         Duration for closing if image.
 #     transition : str
 #         Transition type.
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.dev.cv import compose
-# 
+#
 #         loop = asyncio.get_event_loop()
 #         result_path = await loop.run_in_executor(
 #             None,
@@ -197,7 +197,7 @@ if __name__ == "__main__":
 #                 transition=transition,
 #             ),
 #         )
-# 
+#
 #         return {
 #             "success": True,
 #             "output_path": str(result_path),
@@ -210,8 +210,8 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # async def image_to_video_handler(
 #     image_path: str,
 #     output_path: str,
@@ -221,7 +221,7 @@ if __name__ == "__main__":
 #     fade_out: float = 0.5,
 # ) -> dict:
 #     """Convert an image to a video clip.
-# 
+#
 #     Parameters
 #     ----------
 #     image_path : str
@@ -234,7 +234,7 @@ if __name__ == "__main__":
 #         Frames per second.
 #     fade_in, fade_out : float
 #         Fade durations.
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -242,7 +242,7 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.dev.cv import image_to_video
-# 
+#
 #         loop = asyncio.get_event_loop()
 #         result_path = await loop.run_in_executor(
 #             None,
@@ -255,7 +255,7 @@ if __name__ == "__main__":
 #                 fade_out=fade_out,
 #             ),
 #         )
-# 
+#
 #         return {
 #             "success": True,
 #             "output_path": str(result_path),
@@ -268,15 +268,15 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # __all__ = [
 #     "create_opening_handler",
 #     "create_closing_handler",
 #     "compose_video_handler",
 #     "image_to_video_handler",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2023-03-15 05:20:22
 """
 
-from typing import Dict, Any, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, Optional
+
+from bs4 import BeautifulSoup
 
 
 class CanLIITranslator:

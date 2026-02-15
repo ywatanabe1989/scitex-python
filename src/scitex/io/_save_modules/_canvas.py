@@ -113,8 +113,9 @@ def _export_canvas_figures(
         formats = ["png", "pdf", "svg"]
 
     try:
-        from scitex.canvas.io.export import _compose_and_export
         import json
+
+        from scitex.canvas.io.export import _compose_and_export
 
         # Load canvas.json
         json_path = canvas_dir / "canvas.json"

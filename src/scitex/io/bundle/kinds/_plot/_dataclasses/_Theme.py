@@ -220,7 +220,11 @@ class FigureTitle:
     fontweight: str = "bold"
 
     def to_dict(self) -> Dict[str, Any]:
-        result = {"text": self.text, "prefix": self.prefix, "fontweight": self.fontweight}
+        result = {
+            "text": self.text,
+            "prefix": self.prefix,
+            "fontweight": self.fontweight,
+        }
         if self.number is not None:
             result["number"] = self.number
         if self.fontsize is not None:
@@ -345,7 +349,9 @@ class Theme:
     traces: List[TraceTheme] = field(default_factory=list)
 
     # Publication metadata
-    preset: Optional[str] = None  # nature, science, cell, ieee, acs, minimal, presentation
+    preset: Optional[str] = (
+        None  # nature, science, cell, ieee, acs, minimal, presentation
+    )
     figure_title: Optional[FigureTitle] = None
     caption: Optional[Caption] = None
     panel_labels: Optional[PanelLabels] = None

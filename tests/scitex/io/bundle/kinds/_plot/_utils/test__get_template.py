@@ -13,11 +13,11 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_utils/_get_template.py
-# 
+#
 # """Figure template getter functions for publications."""
-# 
+#
 # from typing import Any, Dict
-# 
+#
 # from ._const_sizes import (
 #     DEFAULT_MARGIN_MM,
 #     DEFAULT_SPACING_MM,
@@ -25,8 +25,8 @@ if __name__ == "__main__":
 #     NATURE_SINGLE_COLUMN_MM,
 #     SCIENCE_SINGLE_COLUMN_MM,
 # )
-# 
-# 
+#
+#
 # def get_nature_single_column(
 #     height_mm: float = 89, nrows: int = 1, ncols: int = 1
 # ) -> Dict[str, Any]:
@@ -45,8 +45,8 @@ if __name__ == "__main__":
 #         "hspace_mm": DEFAULT_SPACING_MM,
 #         "metadata": {"template": "nature_single_column", "journal": "Nature"},
 #     }
-# 
-# 
+#
+#
 # def get_nature_double_column(
 #     height_mm: float = 120, nrows: int = 1, ncols: int = 1
 # ) -> Dict[str, Any]:
@@ -65,8 +65,8 @@ if __name__ == "__main__":
 #         "hspace_mm": DEFAULT_SPACING_MM,
 #         "metadata": {"template": "nature_double_column", "journal": "Nature"},
 #     }
-# 
-# 
+#
+#
 # def get_science_single_column(
 #     height_mm: float = 84, nrows: int = 1, ncols: int = 1
 # ) -> Dict[str, Any]:
@@ -85,8 +85,8 @@ if __name__ == "__main__":
 #         "hspace_mm": DEFAULT_SPACING_MM,
 #         "metadata": {"template": "science_single_column", "journal": "Science"},
 #     }
-# 
-# 
+#
+#
 # def get_a4_figure(
 #     width_mm: float = 180, height_mm: float = 120, nrows: int = 1, ncols: int = 1
 # ) -> Dict[str, Any]:
@@ -105,8 +105,8 @@ if __name__ == "__main__":
 #         "hspace_mm": DEFAULT_SPACING_MM,
 #         "metadata": {"template": "a4_figure"},
 #     }
-# 
-# 
+#
+#
 # def get_square_figure(
 #     size_mm: float = 120, nrows: int = 1, ncols: int = 1
 # ) -> Dict[str, Any]:
@@ -125,8 +125,8 @@ if __name__ == "__main__":
 #         "hspace_mm": DEFAULT_SPACING_MM,
 #         "metadata": {"template": "square_figure"},
 #     }
-# 
-# 
+#
+#
 # def get_presentation_slide(
 #     aspect_ratio: str = "16:9", width_mm: float = 254
 # ) -> Dict[str, Any]:
@@ -137,7 +137,7 @@ if __name__ == "__main__":
 #         height_mm = width_mm * 3 / 4
 #     else:
 #         raise ValueError(f"Unsupported aspect ratio: {aspect_ratio}")
-# 
+#
 #     return {
 #         "width_mm": width_mm,
 #         "height_mm": height_mm,
@@ -150,8 +150,8 @@ if __name__ == "__main__":
 #         "bottom_mm": DEFAULT_MARGIN_MM,
 #         "metadata": {"template": "presentation_slide", "aspect_ratio": aspect_ratio},
 #     }
-# 
-# 
+#
+#
 # # Template registry
 # TEMPLATES = {
 #     "nature_single": get_nature_single_column,
@@ -161,20 +161,20 @@ if __name__ == "__main__":
 #     "square": get_square_figure,
 #     "presentation": get_presentation_slide,
 # }
-# 
-# 
+#
+#
 # def get_template(name: str, **kwargs) -> Dict[str, Any]:
 #     """Get a figure template by name."""
 #     if name not in TEMPLATES:
 #         raise ValueError(f"Unknown template: {name}. Available: {list(TEMPLATES.keys())}")
 #     return TEMPLATES[name](**kwargs)
-# 
-# 
+#
+#
 # def list_templates() -> list:
 #     """List available template names."""
 #     return list(TEMPLATES.keys())
-# 
-# 
+#
+#
 # __all__ = [
 #     "get_nature_single_column",
 #     "get_nature_double_column",
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 #     "list_templates",
 #     "TEMPLATES",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

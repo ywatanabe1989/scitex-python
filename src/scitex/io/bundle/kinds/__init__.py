@@ -15,12 +15,12 @@ Bundle kinds:
 """
 
 from ._figure import render_composite
+from ._image import load_image, render_image
 from ._plot import Encoding, Theme, render_traces
+from ._shape import render_shape
 from ._stats import Stats
 from ._table import export_to_latex
 from ._text import render_text
-from ._shape import render_shape
-from ._image import render_image, load_image
 
 __all__ = [
     # Figure (composite)

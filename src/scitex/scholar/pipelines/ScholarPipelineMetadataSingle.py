@@ -28,11 +28,11 @@ import asyncio
 from typing import Optional
 
 from scitex import logging
-from scitex.scholar.core import Paper
-from scitex.scholar.metadata_engines import ScholarEngine
-from scitex.scholar.impact_factor import ImpactFactorEngine
-from scitex.scholar.config import ScholarConfig
 from scitex.scholar._utils import DOIValidator
+from scitex.scholar.config import ScholarConfig
+from scitex.scholar.core import Paper
+from scitex.scholar.impact_factor import ImpactFactorEngine
+from scitex.scholar.metadata_engines import ScholarEngine
 
 logger = logging.getLogger(__name__)
 

@@ -3,12 +3,13 @@
 # Time-stamp: "2024-11-03 11:15:00 (ywatanabe)"
 # File: ./tests/scitex/pd/test__mv.py
 
-import pytest
+import os
+import sys
+from unittest.mock import Mock, patch
+
 import numpy as np
 import pandas as pd
-from unittest.mock import Mock, patch
-import sys
-import os
+import pytest
 
 # Add the project root to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../src"))
@@ -383,6 +384,7 @@ class TestNaNAndSpecialValues:
         assert list(result.columns) == ["values", "dates"]
         assert pd.isna(result["dates"].iloc[1])
 
+
 if __name__ == "__main__":
     import os
 
@@ -397,18 +399,18 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-05 07:39:12 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/pd/_mv.py
-# 
-# 
+#
+#
 # def mv(df, key, position, axis=1):
 #     """
 #     Move a row or column to a specified position in a DataFrame.
-# 
+#
 #     Args:
 #     df (pandas.DataFrame): The input DataFrame.
 #     key (str): The label of the row or column to move.
 #     position (int): The position to move the row or column to.
 #     axis (int, optional): 0 for rows, 1 for columns. Defaults to 1.
-# 
+#
 #     Returns:
 #     pandas.DataFrame: A new DataFrame with the row or column moved.
 #     """
@@ -417,44 +419,44 @@ if __name__ == "__main__":
 #     else:
 #         items = df.columns.tolist()
 #     items.remove(key)
-# 
+#
 #     if position < 0:
 #         position += len(items) + 1
-# 
+#
 #     items.insert(position, key)
 #     return df.reindex(items, axis=axis)
-# 
-# 
+#
+#
 # def mv_to_first(df, key, axis=1):
 #     """
 #     Move a row or column to the first position in a DataFrame.
-# 
+#
 #     Args:
 #     df (pandas.DataFrame): The input DataFrame.
 #     key (str): The label of the row or column to move.
 #     axis (int, optional): 0 for rows, 1 for columns. Defaults to 1.
-# 
+#
 #     Returns:
 #     pandas.DataFrame: A new DataFrame with the row or column moved to the first position.
 #     """
 #     return mv(df, key, 0, axis)
-# 
-# 
+#
+#
 # def mv_to_last(df, key, axis=1):
 #     """
 #     Move a row or column to the last position in a DataFrame.
-# 
+#
 #     Args:
 #     df (pandas.DataFrame): The input DataFrame.
 #     key (str): The label of the row or column to move.
 #     axis (int, optional): 0 for rows, 1 for columns. Defaults to 1.
-# 
+#
 #     Returns:
 #     pandas.DataFrame: A new DataFrame with the row or column moved to the last position.
 #     """
 #     return mv(df, key, -1, axis)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

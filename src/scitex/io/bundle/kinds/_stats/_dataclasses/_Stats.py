@@ -12,7 +12,7 @@ supporting both:
 """
 
 import json
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional, Union
 
@@ -21,7 +21,9 @@ STATS_VERSION = "1.1.0"
 # Type aliases for GUI support
 PositionMode = Literal["absolute", "relative_to_plot", "above_whisker", "auto"]
 UnitType = Literal["mm", "px", "inch", "data"]
-SymbolStyle = Literal["asterisk", "text", "bracket", "compact", "detailed", "publication"]
+SymbolStyle = Literal[
+    "asterisk", "text", "bracket", "compact", "detailed", "publication"
+]
 
 
 @dataclass

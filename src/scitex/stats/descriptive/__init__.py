@@ -31,18 +31,7 @@ from ._nan import (
     nanvar,
     nanzscore,
 )
-from ._real import (
-    kurtosis,
-    mean,
-    q25,
-    q50,
-    q75,
-    quantile,
-    skewness,
-    std,
-    var,
-    zscore,
-)
+from ._real import kurtosis, mean, q25, q50, q75, quantile, skewness, std, var, zscore
 
 __all__ = [
     # Confidence interval

@@ -8,9 +8,9 @@ Data operations for scitex.canvas.
 Handles SHA256 hash computation and verification for data integrity.
 """
 
+import hashlib
 from pathlib import Path
 from typing import Dict, Union
-import hashlib
 
 
 class HashMismatchError(Exception):
@@ -93,8 +93,8 @@ def verify_all_data_hashes(
     Dict[str, bool]
         Dictionary mapping file paths to validation results
     """
-    from ._directory import get_canvas_directory_path
     from ._canvas import load_canvas_json
+    from ._directory import get_canvas_directory_path
 
     canvas_dir = get_canvas_directory_path(project_dir, canvas_name)
 
@@ -142,8 +142,8 @@ def update_data_hash(
     str
         New hash value
     """
-    from ._directory import get_canvas_directory_path
     from ._canvas import load_canvas_json, save_canvas_json
+    from ._directory import get_canvas_directory_path
 
     canvas_dir = get_canvas_directory_path(project_dir, canvas_name)
     filepath = canvas_dir / rel_path

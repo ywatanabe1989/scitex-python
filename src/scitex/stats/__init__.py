@@ -45,13 +45,11 @@ from . import (  # noqa: F401
 from .descriptive import describe
 
 # Re-export all 23 test functions at stx.stats level
-from .tests import (  # noqa: F401
+from .tests import (  # noqa: F401; Nonparametric (5); Categorical (4); Correlation (4); Normality (4); Parametric (6)
     test_anova,
     test_anova_2way,
     test_anova_rm,
-    # Nonparametric (5)
     test_brunner_munzel,
-    # Categorical (4)
     test_chi2,
     test_cochran_q,
     test_fisher,
@@ -63,14 +61,11 @@ from .tests import (  # noqa: F401
     test_mannwhitneyu,
     test_mcnemar,
     test_normality,
-    # Correlation (4)
     test_pearson,
-    # Normality (4)
     test_shapiro,
     test_spearman,
     test_theilsen,
     test_ttest_1samp,
-    # Parametric (6)
     test_ttest_ind,
     test_ttest_rel,
     test_wilcoxon,
@@ -87,17 +82,10 @@ except ImportError:
 # Export key auto module classes at top level for convenience
 # Internal imports (hidden with underscore prefix)
 from .auto import TEST_RULES as _TEST_RULES  # noqa: F401
-from .auto import (
-    StatContext,
-    StatStyle,
-    TestRule,
-    check_applicable,
-    get_stat_style,
-    p_to_stars,
-    recommend_tests,
-)
+from .auto import StatContext, StatStyle, TestRule, check_applicable
 from .auto import format_test_line as _format_test_line  # noqa: F401
 from .auto import get_menu_items as _get_menu_items  # noqa: F401
+from .auto import get_stat_style, p_to_stars, recommend_tests
 
 # =============================================================================
 # Stats Schema - Use scitex.io.bundle.Stats as single source of truth

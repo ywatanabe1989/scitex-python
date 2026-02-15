@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/config/ScholarConfig.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/config/ScholarConfig.py"
@@ -18,8 +19,7 @@ from typing import Optional, Union
 
 import yaml
 
-from scitex.logging import ScholarError
-from scitex.logging import getLogger
+from scitex.logging import ScholarError, getLogger
 
 from .core._CascadeConfig import CascadeConfig
 from .core._PathManager import PathManager

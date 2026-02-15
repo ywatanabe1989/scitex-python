@@ -9,7 +9,8 @@ for each source type (arXiv, PubMed Central, OpenAlex OA URLs, etc.).
 """
 
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 import aiohttp
 
 from scitex import logging
@@ -21,9 +22,9 @@ logger = logging.getLogger(__name__)
 OA_SOURCE_PATTERNS = {
     "arxiv": {
         "patterns": ["arxiv.org"],
-        "pdf_transform": lambda url: url.replace("/abs/", "/pdf/") + ".pdf"
-        if "/abs/" in url
-        else url,
+        "pdf_transform": lambda url: (
+            url.replace("/abs/", "/pdf/") + ".pdf" if "/abs/" in url else url
+        ),
     },
     "pmc": {
         "patterns": ["ncbi.nlm.nih.gov/pmc", "europepmc.org"],
@@ -31,9 +32,9 @@ OA_SOURCE_PATTERNS = {
     },
     "biorxiv": {
         "patterns": ["biorxiv.org", "medrxiv.org"],
-        "pdf_transform": lambda url: url + ".full.pdf"
-        if not url.endswith(".pdf")
-        else url,
+        "pdf_transform": lambda url: (
+            url + ".full.pdf" if not url.endswith(".pdf") else url
+        ),
     },
     "doaj": {
         "patterns": ["doaj.org"],

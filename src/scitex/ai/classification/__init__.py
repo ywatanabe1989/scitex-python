@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """Classification utilities with unified API."""
 
-# Import reporters
-from .reporters import ClassificationReporter, SingleTaskClassificationReporter
+# Import time series module
+from . import timeseries
 
 # Import other existing modules
 from .Classifier import Classifier
 from .CrossValidationExperiment import CrossValidationExperiment, quick_experiment
 
-# Import time series module
-from . import timeseries
+# Import reporters
+from .reporters import ClassificationReporter, SingleTaskClassificationReporter
 
 # Import time series CV utilities from submodule
 from .timeseries import (
-    TimeSeriesStratifiedSplit,
     TimeSeriesBlockingSplit,
-    TimeSeriesSlidingWindowSplit,
     TimeSeriesCalendarSplit,
-    TimeSeriesStrategy,
     TimeSeriesMetadata,
+    TimeSeriesSlidingWindowSplit,
+    TimeSeriesStrategy,
+    TimeSeriesStratifiedSplit,
 )
 
 # Backward compatibility alias

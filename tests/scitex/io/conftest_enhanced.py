@@ -14,16 +14,19 @@ This file provides advanced testing fixtures following best practices:
 """
 
 import os
-import tempfile
 import shutil
+import tempfile
+
 import pytest
+
 torch = pytest.importorskip("torch")
-import numpy as np
-import pandas as pd
-from pathlib import Path
-from unittest.mock import MagicMock
 import time
 from contextlib import contextmanager
+from pathlib import Path
+from unittest.mock import MagicMock
+
+import numpy as np
+import pandas as pd
 
 
 # --- Directory and File Management Fixtures ---
@@ -224,8 +227,9 @@ def performance_monitor():
 
     @contextmanager
     def _monitor():
-        import psutil
         import gc
+
+        import psutil
 
         # Force garbage collection before test
         gc.collect()

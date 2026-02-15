@@ -8,7 +8,8 @@
 # Time-stamp: "2024-10-07 12:03:29 (ywatanabe)"
 # ./src/scitex/pd/_merge_cols.py
 
-from typing import Union, List, Tuple
+from typing import List, Tuple, Union
+
 import pandas as pd
 
 

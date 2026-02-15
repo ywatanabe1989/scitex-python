@@ -36,19 +36,10 @@ from ._detect import _detect_plot_type
 
 # Legend extraction
 from ._legend import _extract_legend_info
-from ._rounding import (
-    PRECISION,
-    FixedFloat,
-    _round_dict,
-    _round_list,
-    _round_value,
-)
+from ._rounding import PRECISION, FixedFloat, _round_dict, _round_list, _round_value
 
 # Verification
-from ._verification import (
-    assert_csv_json_consistency,
-    verify_csv_json_consistency,
-)
+from ._verification import assert_csv_json_consistency, verify_csv_json_consistency
 
 __all__ = [
     # Rounding

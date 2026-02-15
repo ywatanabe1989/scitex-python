@@ -39,12 +39,7 @@ class MetricsMixin:
         feature_names: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """Calculate and save classification metrics using unified API."""
-        from ..reporter_utils import (
-            calc_bacc,
-            calc_clf_report,
-            calc_conf_mat,
-            calc_mcc,
-        )
+        from ..reporter_utils import calc_bacc, calc_clf_report, calc_conf_mat, calc_mcc
 
         if verbose:
             if fold:

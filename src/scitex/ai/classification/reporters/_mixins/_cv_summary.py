@@ -340,19 +340,19 @@ class CVSummaryMixin:
                         mean_support = np.mean(values)
                         std_support = np.std(values)
                         if std_support > 0:
-                            summary_report[cls][metric] = (
-                                f"{mean_support:.1f} ± {std_support:.1f} (total={total_support})"
-                            )
+                            summary_report[cls][
+                                metric
+                            ] = f"{mean_support:.1f} ± {std_support:.1f} (total={total_support})"
                         else:
-                            summary_report[cls][metric] = (
-                                f"{int(mean_support)} per fold (total={total_support})"
-                            )
+                            summary_report[cls][
+                                metric
+                            ] = f"{int(mean_support)} per fold (total={total_support})"
                     else:
                         mean_val = np.mean(values)
                         std_val = np.std(values)
-                        summary_report[cls][metric] = (
-                            f"{mean_val:.3f} ± {std_val:.3f} (n={n_folds})"
-                        )
+                        summary_report[cls][
+                            metric
+                        ] = f"{mean_val:.3f} ± {std_val:.3f} (n={n_folds})"
 
         for avg_type in ["macro avg", "weighted avg"]:
             avg_metrics = {"precision": [], "recall": [], "f1-score": []}
@@ -369,9 +369,9 @@ class CVSummaryMixin:
                     if values:
                         mean_val = np.mean(values)
                         std_val = np.std(values)
-                        summary_report[avg_type][metric] = (
-                            f"{mean_val:.3f} ± {std_val:.3f} (n={n_folds})"
-                        )
+                        summary_report[avg_type][
+                            metric
+                        ] = f"{mean_val:.3f} ± {std_val:.3f} (n={n_folds})"
 
         if summary_report:
             report_df = pd.DataFrame(summary_report).T

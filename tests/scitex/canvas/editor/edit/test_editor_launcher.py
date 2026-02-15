@@ -14,19 +14,19 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-14 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fig/editor/edit/editor_launcher.py
-# 
+#
 # """Main edit function for launching visual editor."""
-# 
+#
 # from pathlib import Path
 # from typing import Literal, Union
-# 
+#
 # from .backend_detector import detect_best_backend, print_available_backends
 # from .bundle_resolver import resolve_figure_bundle, resolve_plot_bundle
 # from .path_resolver import resolve_figure_paths
-# 
+#
 # __all__ = ["edit"]
-# 
-# 
+#
+#
 # def edit(
 #     path: Union[str, Path],
 #     backend: Literal["auto", "flask", "dearpygui", "qt", "tkinter", "mpl"] = "auto",
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 # ) -> None:
 #     """
 #     Launch interactive editor for figure style/annotation editing.
-# 
+#
 #     Parameters
 #     ----------
 #     path : str or Path
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 #         If True, load .manual.json overrides if exists (default: True)
 #     port : int, optional
 #         Port number for web-based editors. Default: 5050.
-# 
+#
 #     Returns
 #     -------
 #     None
@@ -67,41 +67,41 @@ if __name__ == "__main__":
 #     path = Path(path)
 #     spath = str(path)
 #     parent_str = str(path.parent) if path.is_file() else ""
-# 
+#
 #     # Panel info for multi-panel figures
 #     panel_info = None
-# 
+#
 #     # Resolve paths based on input type
 #     json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info = (
 #         _resolve_paths(path, spath, parent_str)
 #     )
-# 
+#
 #     if not json_path.exists():
 #         raise FileNotFoundError(f"JSON file not found: {json_path}")
-# 
+#
 #     # Load data
 #     import scitex as stx
-# 
+#
 #     metadata = bundle_spec if bundle_spec else stx.io.load(json_path)
 #     csv_data = None
 #     if csv_path and csv_path.exists():
 #         csv_data = stx.io.load(csv_path)
-# 
+#
 #     # Load manual overrides if exists
 #     manual_path = json_path.with_suffix(".manual.json")
 #     manual_overrides = None
 #     if apply_manual and manual_path.exists():
 #         manual_data = stx.io.load(manual_path)
 #         manual_overrides = manual_data.get("overrides", {})
-# 
+#
 #     # Resolve backend if "auto"
 #     if backend == "auto":
 #         backend = detect_best_backend()
-# 
+#
 #     # Print status
 #     print_available_backends()
 #     print(f"Launching {backend} editor for: {json_path}")
-# 
+#
 #     # Launch appropriate backend
 #     _launch_backend(
 #         backend=backend,
@@ -115,14 +115,14 @@ if __name__ == "__main__":
 #         panel_info=panel_info,
 #         port=port,
 #     )
-# 
-# 
+#
+#
 # def _resolve_paths(path: Path, spath: str, parent_str: str) -> tuple:
 #     """Resolve paths based on input type."""
 #     panel_info = None
 #     hitmap_path = None
 #     bundle_spec = None
-# 
+#
 #     # Check if this is a .figure bundle (multi-panel figure)
 #     if spath.endswith(".figure") or spath.endswith(".figure"):
 #         json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info = (
@@ -151,10 +151,10 @@ if __name__ == "__main__":
 #     else:
 #         # Standard file paths
 #         json_path, csv_path, png_path = resolve_figure_paths(path)
-# 
+#
 #     return json_path, csv_path, png_path, hitmap_path, bundle_spec, panel_info
-# 
-# 
+#
+#
 # def _launch_backend(
 #     backend: str,
 #     json_path: Path,
@@ -200,8 +200,8 @@ if __name__ == "__main__":
 #             f"Unknown backend: {backend}. "
 #             "Use 'auto', 'flask', 'dearpygui', 'qt', 'tkinter', or 'mpl'."
 #         )
-# 
-# 
+#
+#
 # def _launch_flask(
 #     json_path,
 #     metadata,
@@ -215,7 +215,7 @@ if __name__ == "__main__":
 #     """Launch Flask web editor."""
 #     try:
 #         from .._flask_editor import WebEditor
-# 
+#
 #         editor = WebEditor(
 #             json_path=json_path,
 #             metadata=metadata,
@@ -231,13 +231,13 @@ if __name__ == "__main__":
 #         raise ImportError(
 #             "Flask backend requires Flask. Install with: pip install flask"
 #         ) from e
-# 
-# 
+#
+#
 # def _launch_dearpygui(json_path, metadata, csv_data, png_path, manual_overrides):
 #     """Launch DearPyGui editor."""
 #     try:
 #         from .._dearpygui_editor import DearPyGuiEditor
-# 
+#
 #         editor = DearPyGuiEditor(
 #             json_path=json_path,
 #             metadata=metadata,
@@ -250,15 +250,15 @@ if __name__ == "__main__":
 #         raise ImportError(
 #             "DearPyGui backend requires dearpygui. Install with: pip install dearpygui"
 #         ) from e
-# 
-# 
+#
+#
 # def _launch_qt(
 #     json_path, metadata, csv_data, png_path, manual_overrides, hitmap_path, bundle_spec
 # ):
 #     """Launch Qt editor."""
 #     try:
 #         from .._qt_editor import QtEditor
-# 
+#
 #         editor = QtEditor(
 #             json_path=json_path,
 #             metadata=metadata,
@@ -273,12 +273,12 @@ if __name__ == "__main__":
 #         raise ImportError(
 #             "Qt backend requires PyQt5/PyQt6 or PySide2/PySide6. Install with: pip install PyQt6"
 #         ) from e
-# 
-# 
+#
+#
 # def _launch_tkinter(json_path, metadata, csv_data, manual_overrides):
 #     """Launch Tkinter editor."""
 #     from .._tkinter_editor import TkinterEditor
-# 
+#
 #     editor = TkinterEditor(
 #         json_path=json_path,
 #         metadata=metadata,
@@ -286,12 +286,12 @@ if __name__ == "__main__":
 #         manual_overrides=manual_overrides,
 #     )
 #     editor.run()
-# 
-# 
+#
+#
 # def _launch_mpl(json_path, metadata, csv_data, manual_overrides):
 #     """Launch matplotlib editor."""
 #     from .._mpl_editor import MplEditor
-# 
+#
 #     editor = MplEditor(
 #         json_path=json_path,
 #         metadata=metadata,
@@ -299,8 +299,8 @@ if __name__ == "__main__":
 #         manual_overrides=manual_overrides,
 #     )
 #     editor.run()
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

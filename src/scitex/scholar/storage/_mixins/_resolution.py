@@ -136,9 +136,9 @@ class ResolutionMixin:
                     "scholar_id": paper_id,
                     "doi": complete_metadata.get("doi"),
                     "master_storage_path": str(storage_path),
-                    "project_symlink_path": str(project_symlink_path)
-                    if project_symlink_path
-                    else None,
+                    "project_symlink_path": (
+                        str(project_symlink_path) if project_symlink_path else None
+                    ),
                     "readable_name": storage_paths["readable_name"],
                     "metadata_file": str(metadata_file),
                     "info_dir": str(info_dir) if info_dir else None,
@@ -232,25 +232,33 @@ class ResolutionMixin:
 
         complete_metadata = {
             "title": clean_title,
-            "title_source": doi_source_value
-            if enhanced_metadata.get("title") != paper.get("title")
-            else "manual",
+            "title_source": (
+                doi_source_value
+                if enhanced_metadata.get("title") != paper.get("title")
+                else "manual"
+            ),
             "authors": enhanced_metadata.get("authors") or paper.get("authors"),
-            "authors_source": doi_source_value
-            if enhanced_metadata.get("authors") != paper.get("authors")
-            else ("manual" if paper.get("authors") else None),
+            "authors_source": (
+                doi_source_value
+                if enhanced_metadata.get("authors") != paper.get("authors")
+                else ("manual" if paper.get("authors") else None)
+            ),
             "year": enhanced_metadata.get("year") or paper.get("year"),
-            "year_source": doi_source_value
-            if enhanced_metadata.get("year") != paper.get("year")
-            else ("manual" if paper.get("year") else None),
+            "year_source": (
+                doi_source_value
+                if enhanced_metadata.get("year") != paper.get("year")
+                else ("manual" if paper.get("year") else None)
+            ),
             "journal": enhanced_metadata.get("journal") or paper.get("journal"),
-            "journal_source": doi_source_value
-            if enhanced_metadata.get("journal") != paper.get("journal")
-            else ("manual" if paper.get("journal") else None),
+            "journal_source": (
+                doi_source_value
+                if enhanced_metadata.get("journal") != paper.get("journal")
+                else ("manual" if paper.get("journal") else None)
+            ),
             "abstract": raw_abstract,
-            "abstract_source": doi_source_value
-            if enhanced_metadata.get("abstract")
-            else None,
+            "abstract_source": (
+                doi_source_value if enhanced_metadata.get("abstract") else None
+            ),
             "scitex_id": paper_id,
             "created_at": datetime.now().isoformat(),
             "created_by": "SciTeX Scholar",

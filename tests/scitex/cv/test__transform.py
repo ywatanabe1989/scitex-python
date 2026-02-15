@@ -14,15 +14,15 @@ if __name__ == "__main__":
 # # Timestamp: 2026-01-08
 # # File: src/scitex/cv/_transform.py
 # """Image transformation utilities using cv2."""
-# 
+#
 # from __future__ import annotations
-# 
+#
 # from typing import Optional, Tuple, Union
-# 
+#
 # import cv2
 # import numpy as np
-# 
-# 
+#
+#
 # def resize(
 #     img: np.ndarray,
 #     size: Optional[Tuple[int, int]] = None,
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 #     interpolation: str = "linear",
 # ) -> np.ndarray:
 #     """Resize an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
@@ -41,7 +41,7 @@ if __name__ == "__main__":
 #         Scale factor (alternative to size).
 #     interpolation : str
 #         Interpolation method: 'nearest', 'linear', 'cubic', 'area', 'lanczos'.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
@@ -55,15 +55,15 @@ if __name__ == "__main__":
 #         "lanczos": cv2.INTER_LANCZOS4,
 #     }
 #     interp = interp_map.get(interpolation, cv2.INTER_LINEAR)
-# 
+#
 #     if scale is not None:
 #         return cv2.resize(img, None, fx=scale, fy=scale, interpolation=interp)
 #     elif size is not None:
 #         return cv2.resize(img, size, interpolation=interp)
 #     else:
 #         raise ValueError("Either size or scale must be provided")
-# 
-# 
+#
+#
 # def rotate(
 #     img: np.ndarray,
 #     angle: float,
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 #     scale: float = 1.0,
 # ) -> np.ndarray:
 #     """Rotate an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 #         Rotation center. Defaults to image center.
 #     scale : float
 #         Scale factor.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
@@ -91,24 +91,24 @@ if __name__ == "__main__":
 #     h, w = img.shape[:2]
 #     if center is None:
 #         center = (w // 2, h // 2)
-# 
+#
 #     matrix = cv2.getRotationMatrix2D(center, angle, scale)
 #     return cv2.warpAffine(img, matrix, (w, h))
-# 
-# 
+#
+#
 # def flip(
 #     img: np.ndarray,
 #     direction: str = "horizontal",
 # ) -> np.ndarray:
 #     """Flip an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
 #         Input image.
 #     direction : str
 #         Flip direction: 'horizontal', 'vertical', or 'both'.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
@@ -121,8 +121,8 @@ if __name__ == "__main__":
 #     }
 #     code = flip_map.get(direction, 1)
 #     return cv2.flip(img, code)
-# 
-# 
+#
+#
 # def crop(
 #     img: np.ndarray,
 #     x: int,
@@ -131,7 +131,7 @@ if __name__ == "__main__":
 #     height: int,
 # ) -> np.ndarray:
 #     """Crop a region from an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
@@ -140,15 +140,15 @@ if __name__ == "__main__":
 #         Top-left corner coordinates.
 #     width, height : int
 #         Crop dimensions.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
 #         Cropped image.
 #     """
 #     return img[y : y + height, x : x + width].copy()
-# 
-# 
+#
+#
 # def pad(
 #     img: np.ndarray,
 #     top: int = 0,
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 #     mode: str = "constant",
 # ) -> np.ndarray:
 #     """Pad an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
@@ -170,7 +170,7 @@ if __name__ == "__main__":
 #         Padding color for constant mode.
 #     mode : str
 #         Padding mode: 'constant', 'reflect', 'replicate'.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
@@ -183,8 +183,8 @@ if __name__ == "__main__":
 #     }
 #     border_type = mode_map.get(mode, cv2.BORDER_CONSTANT)
 #     return cv2.copyMakeBorder(img, top, bottom, left, right, border_type, value=color)
-# 
-# 
+#
+#
 # __all__ = [
 #     "resize",
 #     "rotate",
@@ -192,7 +192,7 @@ if __name__ == "__main__":
 #     "crop",
 #     "pad",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

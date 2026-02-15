@@ -19,13 +19,10 @@ warnings.warn(
 )
 
 # Re-export from schema module (the OLD API with full StatResult dataclass)
-from scitex.schema._stats import (
-    # Position and styling
+from scitex.schema._stats import (  # Position and styling; Type aliases; StatResult dataclass (old API)
     Position,
-    # Type aliases
     PositionMode,
     StatPositioning,
-    # StatResult dataclass (old API)
     StatResult,
     StatStyling,
     SymbolStyle,

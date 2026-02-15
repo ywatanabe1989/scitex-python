@@ -17,10 +17,10 @@ def plot_stx_violin(plt, rng, ax=None):
     else:
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
-    data = [rng.normal(i, 0.5 + i*0.2, 100) for i in range(4)]
-    ax.stx_violin(data, labels=['A', 'B', 'C', 'D'])
+    data = [rng.normal(i, 0.5 + i * 0.2, 100) for i in range(4)]
+    ax.stx_violin(data, labels=["A", "B", "C", "D"])
     ax.set_xyt("X", "Y", "stx_violin")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -43,9 +44,13 @@ def _format_boxplot(id, tracked_dict, kwargs):
             df = pd.DataFrame(x)
             # Use label if single box and labels provided
             if labels and len(labels) == 1:
-                col_name = get_csv_column_name(labels[0], ax_row, ax_col, trace_id=trace_id)
+                col_name = get_csv_column_name(
+                    labels[0], ax_row, ax_col, trace_id=trace_id
+                )
             else:
-                col_name = get_csv_column_name("data-0", ax_row, ax_col, trace_id=trace_id)
+                col_name = get_csv_column_name(
+                    "data-0", ax_row, ax_col, trace_id=trace_id
+                )
             df.columns = [col_name]
         else:
             # Multiple boxes
@@ -61,7 +66,9 @@ def _format_boxplot(id, tracked_dict, kwargs):
                 ]
             else:
                 df.columns = [
-                    get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                    get_csv_column_name(
+                        f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                    )
                     for col in range(len(df.columns))
                 ]
 

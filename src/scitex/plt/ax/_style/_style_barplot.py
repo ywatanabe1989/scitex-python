@@ -9,7 +9,7 @@ Style bar plot elements with millimeter-based control.
 Default values are loaded from SCITEX_STYLE.yaml via presets.py.
 """
 
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
 from scitex.plt.styles.presets import SCITEX_STYLE
 

@@ -20,9 +20,9 @@ def plot_mpl_errorbar(plt, rng, ax=None):
     x = np.arange(1, 6)
     y = rng.uniform(2, 8, 5)
     yerr = rng.uniform(0.5, 1.5, 5)
-    ax.mpl_errorbar(x, y, yerr=yerr, fmt='o-', capsize=3)
+    ax.mpl_errorbar(x, y, yerr=yerr, fmt="o-", capsize=3)
     ax.set_xyt("X", "Y", "mpl_errorbar")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

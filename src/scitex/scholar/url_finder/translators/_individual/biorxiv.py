@@ -14,7 +14,9 @@ Supports:
 
 import re
 from typing import List
+
 from playwright.async_api import Page
+
 from .._core.base import BaseTranslator
 
 

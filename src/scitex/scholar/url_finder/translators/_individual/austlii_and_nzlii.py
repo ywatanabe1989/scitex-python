@@ -4,10 +4,9 @@ Description: AustLII and NZLII translator for Zotero
 Translator ID: 5ed5ab01-899f-4a3b-a74c-290fb2a1c9a4
 """
 
-from typing import Any, Dict, Optional, List
 import re
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
-
 
 TRANSLATOR_INFO = {
     "translator_id": "5ed5ab01-899f-4a3b-a74c-290fb2a1c9a4",

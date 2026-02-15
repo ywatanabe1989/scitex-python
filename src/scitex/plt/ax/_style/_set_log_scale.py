@@ -14,10 +14,11 @@ Prerequisites:
     matplotlib, numpy
 """
 
-import numpy as np
+from typing import List, Optional, Union
+
 import matplotlib.pyplot as plt
-from matplotlib.ticker import LogLocator, LogFormatter, NullFormatter
-from typing import Union, Optional, List
+import numpy as np
+from matplotlib.ticker import LogFormatter, LogLocator, NullFormatter
 
 
 def set_log_scale(

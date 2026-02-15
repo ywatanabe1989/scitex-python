@@ -76,22 +76,6 @@ def register_scholar_tools(mcp) -> None:
         return _json(result)
 
     @mcp.tool()
-    async def scholar_download_pdf(
-        doi: str,
-        output_dir: str = "./pdfs",
-        auth_method: str = "none",
-    ) -> str:
-        """[scholar] Download a PDF for a paper using DOI. Supports multiple strategies: direct, publisher, open access repositories."""
-        from scitex.scholar._mcp.handlers import download_pdf_handler
-
-        result = await download_pdf_handler(
-            doi=doi,
-            output_dir=output_dir,
-            auth_method=auth_method,
-        )
-        return _json(result)
-
-    @mcp.tool()
     async def scholar_download_pdfs_batch(
         dois: list[str] | None = None,
         bibtex_path: str | None = None,

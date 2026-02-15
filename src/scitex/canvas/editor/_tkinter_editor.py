@@ -3,11 +3,11 @@
 # File: ./src/scitex/vis/editor/_tkinter_editor.py
 """Tkinter-based figure editor with matplotlib canvas."""
 
-import tkinter as tk
-from tkinter import ttk, colorchooser, messagebox
-from pathlib import Path
-from typing import Dict, Any, Optional
 import copy
+import tkinter as tk
+from pathlib import Path
+from tkinter import colorchooser, messagebox, ttk
+from typing import Any, Dict, Optional
 
 
 class TkinterEditor:
@@ -35,7 +35,7 @@ class TkinterEditor:
         self.manual_overrides = manual_overrides or {}
 
         # Get SciTeX defaults and merge with metadata
-        from ._defaults import get_scitex_defaults, extract_defaults_from_metadata
+        from ._defaults import extract_defaults_from_metadata, get_scitex_defaults
 
         self.scitex_defaults = get_scitex_defaults()
         self.metadata_defaults = extract_defaults_from_metadata(metadata)
@@ -456,9 +456,9 @@ class TkinterEditor:
                 "text": text,
                 "x": x,
                 "y": y,
-                "fontsize": self.fontsize_var.get()
-                if hasattr(self, "fontsize_var")
-                else 10,
+                "fontsize": (
+                    self.fontsize_var.get() if hasattr(self, "fontsize_var") else 10
+                ),
             }
         )
 

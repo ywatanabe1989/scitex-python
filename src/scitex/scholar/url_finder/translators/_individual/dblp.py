@@ -15,8 +15,8 @@ Metadata:
     lastUpdated: 2023-04-20 13:37:43
 """
 
-from typing import Dict, Any, List, Optional
 import re
+from typing import Any, Dict, List, Optional
 
 
 class DBLPTranslator:

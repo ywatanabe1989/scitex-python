@@ -195,6 +195,7 @@ class TestReproSeed:
             assert result.exit_code == 1
             assert "Error" in result.output
 
+
 if __name__ == "__main__":
     import os
 
@@ -208,27 +209,27 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # """
 # SciTeX CLI - Repro Commands (Reproducibility)
-# 
+#
 # Provides reproducibility utilities: ID generation, timestamps, hashing.
 # """
-# 
+#
 # import sys
-# 
+#
 # import click
-# 
-# 
+#
+#
 # @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 # def repro():
 #     """
 #     Reproducibility utilities
-# 
+#
 #     \b
 #     Commands:
 #       gen-id         Generate unique identifier
 #       gen-timestamp  Generate timestamp
 #       hash           Hash array/file for reproducibility
 #       seed           Set random seed across all libraries
-# 
+#
 #     \b
 #     Examples:
 #       scitex repro gen-id              # Generate unique ID
@@ -237,8 +238,8 @@ if __name__ == "__main__":
 #       scitex repro seed 42             # Set random seed
 #     """
 #     pass
-# 
-# 
+#
+#
 # @repro.command("gen-id")
 # @click.option("--length", "-l", type=int, default=8, help="ID length (default: 8)")
 # @click.option("--prefix", "-p", default="", help="Prefix to add to ID")
@@ -246,7 +247,7 @@ if __name__ == "__main__":
 # def gen_id(length, prefix, count):
 #     """
 #     Generate unique identifier(s)
-# 
+#
 #     \b
 #     Examples:
 #       scitex repro gen-id
@@ -256,7 +257,7 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.repro import gen_ID
-# 
+#
 #         for _ in range(count):
 #             id_str = gen_ID()
 #             if length != 8:
@@ -264,12 +265,12 @@ if __name__ == "__main__":
 #             if prefix:
 #                 id_str = f"{prefix}{id_str}"
 #             click.echo(id_str)
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @repro.command("gen-timestamp")
 # @click.option(
 #     "--format",
@@ -283,14 +284,14 @@ if __name__ == "__main__":
 # def gen_timestamp(fmt, utc):
 #     """
 #     Generate timestamp
-# 
+#
 #     \b
 #     Formats:
 #       iso     - ISO 8601 format (2025-01-08T12:30:45)
 #       file    - File-safe format (20250108_123045)
 #       compact - Compact format (20250108123045)
 #       human   - Human readable (Jan 08, 2025 12:30:45)
-# 
+#
 #     \b
 #     Examples:
 #       scitex repro gen-timestamp
@@ -299,14 +300,14 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from datetime import datetime, timezone
-# 
+#
 #         from scitex.repro import gen_timestamp as make_timestamp
-# 
+#
 #         if utc:
 #             now = datetime.now(timezone.utc)
 #         else:
 #             now = datetime.now()
-# 
+#
 #         if fmt == "iso":
 #             ts = now.isoformat()
 #         elif fmt == "file":
@@ -317,14 +318,14 @@ if __name__ == "__main__":
 #             ts = now.strftime("%b %d, %Y %H:%M:%S")
 #         else:
 #             ts = make_timestamp()
-# 
+#
 #         click.echo(ts)
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @repro.command()
 # @click.argument("file_path", type=click.Path(exists=True))
 # @click.option(
@@ -334,14 +335,14 @@ if __name__ == "__main__":
 # def hash(file_path, algorithm, short):
 #     """
 #     Hash array or file for reproducibility verification
-# 
+#
 #     \b
 #     Supported file types:
 #       .npy, .npz  - NumPy arrays
 #       .pt, .pth   - PyTorch tensors
 #       .pkl        - Pickle files
 #       *           - Any file (raw bytes hash)
-# 
+#
 #     \b
 #     Examples:
 #       scitex repro hash data.npy
@@ -351,17 +352,17 @@ if __name__ == "__main__":
 #     try:
 #         import hashlib
 #         from pathlib import Path
-# 
+#
 #         path = Path(file_path)
-# 
+#
 #         # Try to load as array first
 #         hash_val = None
 #         try:
 #             if path.suffix in (".npy", ".npz"):
 #                 import numpy as np
-# 
+#
 #                 from scitex.repro import hash_array
-# 
+#
 #                 arr = np.load(path, allow_pickle=True)
 #                 if isinstance(arr, np.lib.npyio.NpzFile):
 #                     # For npz, hash all arrays
@@ -373,7 +374,7 @@ if __name__ == "__main__":
 #                     hash_val = hash_array(arr)
 #             elif path.suffix in (".pt", ".pth"):
 #                 import torch
-# 
+#
 #                 data = torch.load(path, map_location="cpu")
 #                 if isinstance(data, torch.Tensor):
 #                     hash_val = hashlib.sha256(data.numpy().tobytes()).hexdigest()
@@ -382,7 +383,7 @@ if __name__ == "__main__":
 #                     hash_val = hashlib.sha256(str(data).encode()).hexdigest()
 #         except ImportError:
 #             pass
-# 
+#
 #         # Fall back to file hash
 #         if hash_val is None:
 #             h = hashlib.new(algorithm)
@@ -390,27 +391,27 @@ if __name__ == "__main__":
 #                 for chunk in iter(lambda: f.read(8192), b""):
 #                     h.update(chunk)
 #             hash_val = h.hexdigest()
-# 
+#
 #         if short:
 #             hash_val = hash_val[:8]
-# 
+#
 #         click.echo(f"{hash_val}  {path.name}")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @repro.command()
 # @click.argument("seed", type=int)
 # @click.option("--verbose", "-v", is_flag=True, help="Show what was seeded")
 # def seed(seed, verbose):
 #     """
 #     Set random seed across all available libraries
-# 
+#
 #     \b
 #     Affects: os, random, numpy, torch, tensorflow, jax
-# 
+#
 #     \b
 #     Examples:
 #       scitex repro seed 42
@@ -418,9 +419,9 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.repro import RandomStateManager
-# 
+#
 #         rsm = RandomStateManager(seed=seed, verbose=verbose)
-# 
+#
 #         click.secho(f"Random seed set to: {seed}", fg="green")
 #         if verbose:
 #             click.echo("Seeded libraries:")
@@ -430,12 +431,12 @@ if __name__ == "__main__":
 #             click.echo("  - torch (if available)")
 #             click.echo("  - tensorflow (if available)")
 #             click.echo("  - jax (if available)")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     repro()
 

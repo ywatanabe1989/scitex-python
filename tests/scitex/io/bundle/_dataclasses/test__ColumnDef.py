@@ -13,17 +13,17 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_dataclasses/ColumnDef.py
-# 
+#
 # """ColumnDef - Column definition with metadata."""
-# 
+#
 # from dataclasses import dataclass
 # from typing import Any, Dict, List, Optional
-# 
-# 
+#
+#
 # @dataclass
 # class ColumnDef:
 #     """Column definition with metadata."""
-# 
+#
 #     name: str
 #     dtype: str  # float64, int64, string, bool, datetime, category
 #     description: Optional[str] = None
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 #     mean: Optional[float] = None
 #     std: Optional[float] = None
 #     categories: Optional[List[str]] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {"name": self.name, "dtype": self.dtype}
 #         for attr in [
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 #             if val is not None:
 #                 result[attr] = val
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "ColumnDef":
 #         # Handle case where column is just a string (column name)
@@ -77,10 +77,10 @@ if __name__ == "__main__":
 #             std=data.get("std"),
 #             categories=data.get("categories"),
 #         )
-# 
-# 
+#
+#
 # __all__ = ["ColumnDef"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

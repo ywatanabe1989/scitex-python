@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/ml/plt/plot_pre_rec_curve.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -13,8 +14,9 @@ __DIR__ = os.path.dirname(__FILE__)
 import argparse
 
 import numpy as np
-from scitex.plt.color import get_colors_from_conf_matap
 from sklearn.metrics import average_precision_score, precision_recall_curve
+
+from scitex.plt.color import get_colors_from_conf_matap
 
 
 def _solve_intersection(f1, a, b):
@@ -253,6 +255,7 @@ def run_main() -> None:
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

@@ -7,15 +7,16 @@
 Core benchmarking functionality for SciTeX.
 """
 
+import gc
+import inspect
+import os
 import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
 import numpy as np
 import pandas as pd
-from typing import Callable, Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
-import inspect
-import gc
-import os
-from pathlib import Path
 
 
 @dataclass
@@ -287,8 +288,8 @@ def benchmark_module(module_name: str, pattern: str = "test_*") -> BenchmarkSuit
     BenchmarkSuite
         Suite containing all matching benchmarks
     """
-    import importlib
     import fnmatch
+    import importlib
 
     module = importlib.import_module(module_name)
     suite = BenchmarkSuite(module_name)
@@ -311,6 +312,7 @@ def benchmark_module(module_name: str, pattern: str = "test_*") -> BenchmarkSuit
 def create_io_benchmark_suite() -> BenchmarkSuite:
     """Create benchmark suite for I/O operations."""
     import tempfile
+
     import numpy as np
 
     suite = BenchmarkSuite("IO Operations")

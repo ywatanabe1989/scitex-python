@@ -14,26 +14,26 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-09-21 20:48:00 (ywatanabe)"
 # # File: _TimeSeriesMetadata.py
-# 
+#
 # """
 # Time series metadata dataclass.
-# 
+#
 # Stores comprehensive metadata about time series datasets for informed
 # cross-validation strategy selection.
 # """
-# 
+#
 # from dataclasses import dataclass
 # from typing import Optional, Dict, Tuple, Any
-# 
-# 
+#
+#
 # @dataclass
 # class TimeSeriesMetadata:
 #     """
 #     Metadata about the time series data.
-# 
+#
 #     This dataclass captures essential characteristics of time series data
 #     that inform the selection of appropriate cross-validation strategies.
-# 
+#
 #     Attributes
 #     ----------
 #     n_samples : int
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 #         Whether classes are balanced (for classification)
 #     class_distribution : Optional[Dict[Any, float]]
 #         Mapping of class labels to their proportions
-# 
+#
 #     Examples
 #     --------
 #     >>> import numpy as np
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 #     >>> print(f"Dataset has {metadata.n_samples} samples")
 #     >>> print(f"Number of groups: {len(metadata.group_sizes) if metadata.group_sizes else 0}")
 #     """
-# 
+#
 #     n_samples: int
 #     n_features: int
 #     n_classes: Optional[int] = None
@@ -94,11 +94,11 @@ if __name__ == "__main__":
 #     max_gap_size: Optional[float] = None
 #     is_balanced: bool = True
 #     class_distribution: Optional[Dict[Any, float]] = None
-# 
+#
 #     def get_summary(self) -> str:
 #         """
 #         Generate human-readable summary of the metadata.
-# 
+#
 #         Returns
 #         -------
 #         str
@@ -109,33 +109,33 @@ if __name__ == "__main__":
 #             f"  Samples: {self.n_samples}",
 #             f"  Features: {self.n_features}",
 #         ]
-# 
+#
 #         if self.n_classes is not None:
 #             lines.append(f"  Classes: {self.n_classes}")
 #             if self.class_distribution:
 #                 lines.append(f"  Class balance: {self.class_distribution}")
-# 
+#
 #         if self.has_groups and self.group_sizes:
 #             n_groups = len(self.group_sizes)
 #             avg_size = sum(self.group_sizes.values()) / n_groups
 #             lines.append(f"  Groups: {n_groups} (avg size: {avg_size:.1f})")
-# 
+#
 #         if self.time_range:
 #             duration = self.time_range[1] - self.time_range[0]
 #             lines.append(f"  Time range: {duration:.2f} units")
-# 
+#
 #         if self.sampling_rate:
 #             lines.append(f"  Sampling rate: {self.sampling_rate:.2f} Hz")
-# 
+#
 #         if self.has_gaps:
 #             lines.append(f"  Has gaps: Yes (max: {self.max_gap_size:.2f})")
-# 
+#
 #         return "\n".join(lines)
-# 
+#
 #     def suggest_strategy(self) -> str:
 #         """
 #         Suggest appropriate CV strategy based on metadata.
-# 
+#
 #         Returns
 #         -------
 #         str

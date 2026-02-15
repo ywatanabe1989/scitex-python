@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/browser/utils/click_and_wait.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/browser/utils/click_and_wait.py"
@@ -55,10 +56,7 @@ async def click_and_wait(
             'timed_out': bool,
         }
     """
-    from scitex.browser.debugging import (
-        browser_logger,
-        highlight_element_async,
-    )
+    from scitex.browser.debugging import browser_logger, highlight_element_async
 
     from .wait_redirects import wait_redirects
 

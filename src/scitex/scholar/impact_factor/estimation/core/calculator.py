@@ -4,20 +4,22 @@
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/externals/impact_factor/src/impact_factor/core/calculator.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./impact_factor/core/calculator.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 import time
-from typing import Dict, List, Optional, Tuple
-from datetime import datetime, timedelta
 from collections import defaultdict
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple
 
 from scitex.logging import getLogger
-from ..fetchers import OpenAlexFetcher, CrossrefFetcher, SemanticScholarFetcher
-from .journal_matcher import JournalMatcher
+
+from ..fetchers import CrossrefFetcher, OpenAlexFetcher, SemanticScholarFetcher
 from .cache_manager import CacheManager
+from .journal_matcher import JournalMatcher
 
 logger = getLogger(__name__)
 

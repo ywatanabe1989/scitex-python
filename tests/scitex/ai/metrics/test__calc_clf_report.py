@@ -14,17 +14,17 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-02 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ml/metrics/_calc_clf_report.py
-# 
+#
 # """Generate classification report."""
-# 
+#
 # __FILE__ = __file__
-# 
+#
 # from typing import Any, Dict, List, Optional
 # import pandas as pd
 # from sklearn.metrics import classification_report
 # from ._normalize_labels import normalize_labels
-# 
-# 
+#
+#
 # def calc_clf_report(
 #     y_true,
 #     y_pred,
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 # ) -> Dict[str, Any]:
 #     """
 #     Generate classification report with robust label handling.
-# 
+#
 #     Parameters
 #     ----------
 #     y_true : np.ndarray
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 #         Expected label list
 #     fold : int, optional
 #         Fold number for tracking
-# 
+#
 #     Returns
 #     -------
 #     Dict[str, Any]
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 #         y_true_norm, y_pred_norm, label_names, _ = normalize_labels(
 #             y_true, y_pred, labels
 #         )
-# 
+#
 #         # Get classification report
 #         report_dict = classification_report(
 #             y_true_norm,
@@ -68,10 +68,10 @@ if __name__ == "__main__":
 #             output_dict=True,
 #             zero_division=0,
 #         )
-# 
+#
 #         # Convert to DataFrame
 #         report_df = pd.DataFrame(report_dict).T
-# 
+#
 #         return {
 #             "metric": "classification_report",
 #             "value": report_df,
@@ -85,8 +85,8 @@ if __name__ == "__main__":
 #             "fold": fold,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

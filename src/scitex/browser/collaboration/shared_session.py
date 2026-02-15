@@ -18,12 +18,12 @@ Key features:
 import asyncio
 import os
 import time
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List, Callable
-from dataclasses import dataclass, field
+from typing import Callable, List, Optional
 
-from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+from playwright.async_api import Browser, BrowserContext, Page, async_playwright
 
 
 @dataclass
@@ -360,17 +360,21 @@ class SharedBrowserSession:
         """
         if options:
             # Multiple choice
-            result = await self.page.evaluate(f"""
+            result = await self.page.evaluate(
+                f"""
                 () => {{
                     const choice = prompt('{question}\\n\\nOptions: {", ".join(options)}');
                     return choice;
                 }}
-            """)
+            """
+            )
         else:
             # Free text
-            result = await self.page.evaluate(f"""
+            result = await self.page.evaluate(
+                f"""
                 () => prompt('{question}')
-            """)
+            """
+            )
 
         self._log_event("user_input", {"question": question, "response": result})
         return result
@@ -381,9 +385,11 @@ class SharedBrowserSession:
 
         Returns True if user clicks OK, False if Cancel.
         """
-        result = await self.page.evaluate(f"""
+        result = await self.page.evaluate(
+            f"""
             () => confirm('{message}')
-        """)
+        """
+        )
 
         self._log_event("user_confirmation", {"message": message, "confirmed": result})
         return result

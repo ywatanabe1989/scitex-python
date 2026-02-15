@@ -12,8 +12,8 @@ __DIR__ = os.path.dirname(__FILE__)
 import matplotlib
 import numpy as np
 import pandas as pd
-from ....plt.utils import assert_valid_axis
 
+from ....plt.utils import assert_valid_axis
 from ._stx_shaded_line import stx_shaded_line as scitex_plt_plot_shaded_line
 
 
@@ -74,9 +74,9 @@ def stx_line(axis, values_1d, xx=None, **kwargs):
         xx = np.arange(len(values_1d))
     else:
         xx = np.asarray(xx)
-    assert len(xx) == len(values_1d), (
-        f"xx length ({len(xx)}) must match values_1d length ({len(values_1d)})"
-    )
+    assert len(xx) == len(
+        values_1d
+    ), f"xx length ({len(xx)}) must match values_1d length ({len(values_1d)})"
 
     axis.plot(xx, values_1d, **kwargs)
     return axis, pd.DataFrame({"x": xx, "y": values_1d})
@@ -117,9 +117,9 @@ def stx_mean_std(axis, values_2d, xx=None, sd=1, **kwargs):
     else:
         xx = np.asarray(xx)
     expected_len = values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d)
-    assert len(xx) == expected_len, (
-        f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
-    )
+    assert (
+        len(xx) == expected_len
+    ), f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
 
     if values_2d.ndim == 1:
         central = values_2d
@@ -175,9 +175,9 @@ def stx_mean_ci(axis, values_2d, xx=None, perc=95, **kwargs):
         xx = np.asarray(xx)
 
     expected_len = values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d)
-    assert len(xx) == expected_len, (
-        f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
-    )
+    assert (
+        len(xx) == expected_len
+    ), f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
 
     if values_2d.ndim == 1:
         central = values_2d
@@ -232,9 +232,9 @@ def stx_median_iqr(axis, values_2d, xx=None, **kwargs):
         xx = np.asarray(xx)
 
     expected_len = values_2d.shape[1] if values_2d.ndim > 1 else len(values_2d)
-    assert len(xx) == expected_len, (
-        f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
-    )
+    assert (
+        len(xx) == expected_len
+    ), f"xx length ({len(xx)}) must match values_2d length ({expected_len})"
 
     if values_2d.ndim == 1:
         central = values_2d

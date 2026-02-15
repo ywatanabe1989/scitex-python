@@ -11,13 +11,16 @@ including index creation and deletion.
 """
 
 import pytest
+
 pytest.importorskip("psycopg2")
 from unittest.mock import Mock, patch
+
 from scitex.db._BaseMixins import _BaseIndexMixin
 
 
 class ConcreteIndexMixin(_BaseIndexMixin):
     """Concrete implementation for testing."""
+
     pass
 
 
@@ -40,7 +43,7 @@ class TestBaseIndexMixin:
                 table_name="users",
                 column_names=["email", "username"],
                 index_name="idx_users_email_username",
-                unique=True
+                unique=True,
             )
 
     def test_drop_index_not_implemented(self):
@@ -51,29 +54,29 @@ class TestBaseIndexMixin:
     def test_method_signatures(self):
         """Test that all required methods exist with correct signatures."""
         # Check method existence
-        assert hasattr(self.mixin, 'create_index')
-        assert hasattr(self.mixin, 'drop_index')
+        assert hasattr(self.mixin, "create_index")
+        assert hasattr(self.mixin, "drop_index")
 
         # Check method signatures
         import inspect
-        
+
         # create_index signature
         sig = inspect.signature(self.mixin.create_index)
         params = list(sig.parameters.keys())
-        assert 'table_name' in params
-        assert 'column_names' in params
-        assert 'index_name' in params
-        assert 'unique' in params
-        
+        assert "table_name" in params
+        assert "column_names" in params
+        assert "index_name" in params
+        assert "unique" in params
+
         # Check defaults
-        assert sig.parameters['index_name'].default is None
-        assert sig.parameters['unique'].default is False
+        assert sig.parameters["index_name"].default is None
+        assert sig.parameters["unique"].default is False
         assert sig.return_annotation is None or sig.return_annotation == type(None)
 
         # drop_index signature
         sig = inspect.signature(self.mixin.drop_index)
         params = list(sig.parameters.keys())
-        assert 'index_name' in params
+        assert "index_name" in params
         assert sig.return_annotation is None or sig.return_annotation == type(None)
 
     def test_inheritance(self):
@@ -82,41 +85,47 @@ class TestBaseIndexMixin:
 
     def test_mixin_usage_pattern(self):
         """Test that mixin can be properly combined with other classes."""
+
         class DatabaseWithIndex(_BaseIndexMixin):
             def __init__(self):
                 self.indexes = {}
-                
-            def create_index(self, table_name: str, column_names: list,
-                           index_name: str = None, unique: bool = False) -> None:
+
+            def create_index(
+                self,
+                table_name: str,
+                column_names: list,
+                index_name: str = None,
+                unique: bool = False,
+            ) -> None:
                 if index_name is None:
                     index_name = f"idx_{table_name}_{'_'.join(column_names)}"
-                
+
                 self.indexes[index_name] = {
-                    'table': table_name,
-                    'columns': column_names,
-                    'unique': unique
+                    "table": table_name,
+                    "columns": column_names,
+                    "unique": unique,
                 }
                 return f"Created index {index_name}"
-                
+
             def drop_index(self, index_name: str) -> None:
                 if index_name in self.indexes:
                     del self.indexes[index_name]
                     return f"Dropped index {index_name}"
                 raise KeyError(f"Index {index_name} not found")
-                
+
         db = DatabaseWithIndex()
-        
+
         # Test index creation with default name
         result = db.create_index("users", ["email"])
         assert result == "Created index idx_users_email"
         assert "idx_users_email" in db.indexes
-        assert db.indexes["idx_users_email"]['unique'] is False
-        
+        assert db.indexes["idx_users_email"]["unique"] is False
+
         # Test index creation with custom name and unique
         result = db.create_index("products", ["sku"], "unique_sku", unique=True)
         assert result == "Created index unique_sku"
-        assert db.indexes["unique_sku"]['unique'] is True
-        
+        assert db.indexes["unique_sku"]["unique"] is True
+
         # Test index drop
         result = db.drop_index("idx_users_email")
         assert result == "Dropped index idx_users_email"
@@ -127,11 +136,11 @@ class TestBaseIndexMixin:
         # Test with empty table name
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("", ["column"])
-            
+
         # Test with empty column list
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("table", [])
-            
+
         # Test with empty index name for drop
         with pytest.raises(NotImplementedError):
             self.mixin.drop_index("")
@@ -141,11 +150,11 @@ class TestBaseIndexMixin:
         # Single column index
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("users", ["email"])
-            
+
         # Composite index (multiple columns)
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("orders", ["user_id", "created_at", "status"])
-            
+
         # Many columns (stress test)
         many_columns = [f"col_{i}" for i in range(20)]
         with pytest.raises(NotImplementedError):
@@ -156,11 +165,11 @@ class TestBaseIndexMixin:
         # With explicit name
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("users", ["email"], index_name="email_idx")
-            
+
         # With None (should use default naming in implementation)
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("users", ["email"], index_name=None)
-            
+
         # With very long name
         long_name = "idx_" + "_".join([f"column_{i}" for i in range(50)])
         with pytest.raises(NotImplementedError):
@@ -171,11 +180,11 @@ class TestBaseIndexMixin:
         # Non-unique index (default)
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("users", ["email"], unique=False)
-            
+
         # Unique index
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("users", ["email"], unique=True)
-            
+
         # Unique composite index
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("user_roles", ["user_id", "role_id"], unique=True)
@@ -185,11 +194,11 @@ class TestBaseIndexMixin:
         # Column names with spaces (if supported)
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("table", ["first name", "last name"])
-            
+
         # Column names with special characters
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("table", ["user-id", "created@time"])
-            
+
         # Reserved keywords as column names
         with pytest.raises(NotImplementedError):
             self.mixin.create_index("table", ["order", "select", "from"])
@@ -198,7 +207,9 @@ class TestBaseIndexMixin:
         """Test that methods have appropriate documentation."""
         # The abstract methods don't have docstrings in the base class,
         # but concrete implementations should add them
-        assert _BaseIndexMixin.__doc__ is None or isinstance(_BaseIndexMixin.__doc__, str)
+        assert _BaseIndexMixin.__doc__ is None or isinstance(
+            _BaseIndexMixin.__doc__, str
+        )
 
 
 # --------------------------------------------------------------------------------
@@ -217,18 +228,18 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-24 22:20:26 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/db/_Basemodules/_BaseIndexMixin.py
-# 
+#
 # THIS_FILE = (
 #     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_Basemodules/_BaseIndexMixin.py"
 # )
-# 
-# 
+#
+#
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# 
+#
 # from typing import List
-# 
-# 
+#
+#
 # class _BaseIndexMixin:
 #     def create_index(
 #         self,
@@ -238,11 +249,11 @@ if __name__ == "__main__":
 #         unique: bool = False,
 #     ) -> None:
 #         raise NotImplementedError
-# 
+#
 #     def drop_index(self, index_name: str) -> None:
 #         raise NotImplementedError
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

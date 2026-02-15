@@ -19,9 +19,9 @@ Metadata:
     lastUpdated: 2014-04-03 16:34:38
 """
 
-from typing import Dict, Any, List
-from xml.etree.ElementTree import Element, SubElement, tostring
 import re
+from typing import Any, Dict, List
+from xml.etree.ElementTree import Element, SubElement, tostring
 
 
 class BibliontologyRDFTranslator:

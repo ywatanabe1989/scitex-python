@@ -122,7 +122,11 @@ def _validate_syntax(lines: List[str], result: ValidationResult) -> None:
 
     for line_num, line in enumerate(lines, 1):
         # Skip comments
-        line_no_comment = line.split("%")[0] if "%" in line and "\\%" not in line.split("%")[0] else line
+        line_no_comment = (
+            line.split("%")[0]
+            if "%" in line and "\\%" not in line.split("%")[0]
+            else line
+        )
 
         # Check brace balance
         for col, char in enumerate(line_no_comment, 1):
@@ -337,7 +341,12 @@ def _validate_compilation(latex_code: str, result: ValidationResult) -> None:
             tex_path.write_text(latex_code, encoding="utf-8")
 
             proc = subprocess.run(
-                ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", str(tex_path)],
+                [
+                    "pdflatex",
+                    "-interaction=nonstopmode",
+                    "-halt-on-error",
+                    str(tex_path),
+                ],
                 cwd=tmpdir,
                 capture_output=True,
                 text=True,

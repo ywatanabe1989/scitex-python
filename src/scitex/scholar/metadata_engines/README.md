@@ -23,7 +23,7 @@ async def main_async():
     outputs["metadata_by_title"] = await engine.search_async(
         title=TITLE,
     )
-     
+
     # Search by DOI
     outputs["metadata_by_doi"] = await engine.search_async(
         doi=DOI,

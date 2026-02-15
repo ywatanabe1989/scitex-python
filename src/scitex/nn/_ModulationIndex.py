@@ -167,6 +167,7 @@ def _reshape(x, batch_size=2, n_chs=4):
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+
     import scitex
 
     # Start

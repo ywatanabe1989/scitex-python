@@ -13,10 +13,10 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: ./src/scitex/scholar/search_engines/individual/SemanticScholarSearchEngine.py
-# 
+#
 # """
 # Semantic Scholar Search Engine - AI-powered academic search.
-# 
+#
 # Features:
 #   - Keyword search with relevance ranking
 #   - Rich metadata (citations, influential citations, tldr)
@@ -24,21 +24,21 @@ if __name__ == "__main__":
 #   - Field of study filtering
 #   - Rate limit: 100 requests per 5 minutes (API key recommended)
 # """
-# 
+#
 # from typing import List, Dict, Any, Optional
-# 
+#
 # from scitex import logging
 # from scitex.scholar.metadata_engines.individual.SemanticScholarEngine import (
 #     SemanticScholarEngine,
 # )
 # from .._BaseSearchEngine import BaseSearchEngine
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # class SemanticScholarSearchEngine(SemanticScholarEngine, BaseSearchEngine):
 #     """Semantic Scholar search engine for AI-powered paper discovery."""
-# 
+#
 #     def search_by_keywords(
 #         self,
 #         query: str,
@@ -46,24 +46,24 @@ if __name__ == "__main__":
 #         max_results: int = 100,
 #     ) -> List[Dict[str, Any]]:
 #         """Search Semantic Scholar by keywords.
-# 
+#
 #         Args:
 #             query: Keyword query
 #             filters: Optional filters (year_start, year_end)
 #             max_results: Maximum results
-# 
+#
 #         Returns:
 #             List of paper metadata dictionaries
 #         """
 #         filters = filters or {}
-# 
+#
 #         # Build Semantic Scholar API parameters
 #         params = {
 #             "query": query,
 #             "limit": min(max_results, 100),  # API max
 #             "fields": "paperId,title,authors,year,abstract,citationCount,openAccessPdf,externalIds,venue,publicationDate,fieldsOfStudy",
 #         }
-# 
+#
 #         # Add year filter if specified
 #         if filters.get("year_start"):
 #             params["year"] = f"{filters['year_start']}-"
@@ -72,41 +72,41 @@ if __name__ == "__main__":
 #                 params["year"] += str(filters["year_end"])
 #             else:
 #                 params["year"] = f"-{filters['year_end']}"
-# 
+#
 #         logger.info(
 #             f"{self.name}: Searching Semantic Scholar with query: {query[:50]}..."
 #         )
-# 
+#
 #         try:
 #             url = "https://api.semanticscholar.org/graph/v1/paper/search"
 #             response = self.session.get(url, params=params, timeout=30)
 #             response.raise_for_status()
 #             data = response.json()
-# 
+#
 #             papers = data.get("data", [])
-# 
+#
 #             if not papers:
 #                 logger.info(f"{self.name}: No results found")
 #                 return []
-# 
+#
 #             logger.info(f"{self.name}: Found {len(papers)} results")
-# 
+#
 #             # Convert to standardized format
 #             results = []
 #             for paper in papers:
 #                 metadata = self._semanticscholar_to_standard_format(paper)
 #                 if metadata:
 #                     results.append(metadata)
-# 
+#
 #             # Apply post-filters
 #             filtered_results = self._apply_post_filters(results, filters)
-# 
+#
 #             return filtered_results
-# 
+#
 #         except Exception as e:
 #             logger.error(f"{self.name}: Search failed: {e}")
 #             return []
-# 
+#
 #     def _semanticscholar_to_standard_format(self, paper: Dict) -> Dict[str, Any]:
 #         """Convert Semantic Scholar paper to standard metadata format."""
 #         # Extract authors
@@ -114,17 +114,17 @@ if __name__ == "__main__":
 #         for author in paper.get("authors", []):
 #             if author.get("name"):
 #                 authors.append(author["name"])
-# 
+#
 #         # Extract external IDs
 #         external_ids = paper.get("externalIds", {})
 #         doi = external_ids.get("DOI")
 #         pmid = external_ids.get("PubMed")
 #         arxiv = external_ids.get("ArXiv")
-# 
+#
 #         # Open access PDF
 #         oa_pdf = paper.get("openAccessPdf")
 #         pdf_url = oa_pdf.get("url") if oa_pdf else None
-# 
+#
 #         # Build metadata dict
 #         metadata = {
 #             "id": {
@@ -163,10 +163,10 @@ if __name__ == "__main__":
 #                 else None,
 #             },
 #         }
-# 
+#
 #         return metadata
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

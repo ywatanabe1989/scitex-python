@@ -128,21 +128,21 @@ if __name__ == "__main__":
 # # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/plt/_subplots/_FigWrapper.py.new
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/plt/_subplots/_FigWrapper.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # import warnings
 # from functools import wraps
-# 
+#
 # import pandas as pd
-# 
+#
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # class FigWrapper:
 #     def __init__(self, fig_mpl):
 #         self._fig_mpl = fig_mpl
@@ -150,24 +150,24 @@ if __name__ == "__main__":
 #         self._last_saved_info = None
 #         self._not_saved_yet_flag = True
 #         self._called_from_mng_io_save = False
-# 
+#
 #     @property
 #     def figure(
 #         self,
 #     ):
 #         return self._fig_mpl
-# 
+#
 #     def __getattr__(self, attr):
 #         # print(f"Attribute of FigWrapper: {attr}")
 #         attr_mpl = getattr(self._fig_mpl, attr)
-# 
+#
 #         if callable(attr_mpl):
-# 
+#
 #             @wraps(attr_mpl)
 #             def wrapper(*args, track=None, id=None, **kwargs):
 #                 # Suppress constrained_layout warnings for certain operations
 #                 import warnings
-# 
+#
 #                 with warnings.catch_warnings():
 #                     if attr in ["subplots_adjust", "tight_layout"]:
 #                         warnings.filterwarnings(
@@ -183,23 +183,23 @@ if __name__ == "__main__":
 #                     results = attr_mpl(*args, **kwargs)
 #                 # self._track(track, id, attr, args, kwargs)
 #                 return results
-# 
+#
 #             return wrapper
-# 
+#
 #         else:
 #             return attr_mpl
-# 
+#
 #     def __dir__(self):
 #         # Combine attributes from both self and the wrapped matplotlib figure
 #         attrs = set(dir(self.__class__))
 #         attrs.update(object.__dir__(self))
 #         attrs.update(dir(self._fig_mpl))
 #         return sorted(attrs)
-# 
+#
 #     def savefig(self, fname, *args, embed_metadata=True, metadata=None, **kwargs):
 #         """
 #         Save figure with automatic metadata embedding.
-# 
+#
 #         Parameters
 #         ----------
 #         fname : str
@@ -210,7 +210,7 @@ if __name__ == "__main__":
 #             Additional custom metadata to merge with auto-collected metadata
 #         *args, **kwargs
 #             Passed to scitex.io.save_image or matplotlib savefig
-# 
+#
 #         Notes
 #         -----
 #         For PNG/JPEG/TIFF/PDF formats, metadata is automatically embedded including:
@@ -220,25 +220,25 @@ if __name__ == "__main__":
 #         - DPI settings
 #         - Styling parameters (if available via _scitex_metadata)
 #         - Mode (display/publication)
-# 
+#
 #         For other formats (SVG, etc.), delegates to matplotlib's savefig.
-# 
+#
 #         When facecolor is specified (and is not 'none'), axes with transparent
 #         patches will temporarily have their alpha set to 1.0 to ensure the
 #         facecolor is visible.
-# 
+#
 #         Examples
 #         --------
 #         >>> fig, ax = splt.subplots(fig_mm={'width': 35, 'height': 24.5})
 #         >>> ax.plot(x, y)
 #         >>> fig.savefig('result.png', dpi=300)  # Metadata embedded automatically!
-# 
+#
 #         >>> # Add custom metadata
 #         >>> fig.savefig('result.png', dpi=300, metadata={'experiment': 'test_001'})
-# 
+#
 #         >>> # Disable metadata embedding
 #         >>> fig.savefig('result.png', embed_metadata=False)
-# 
+#
 #         >>> # Override transparent background with white
 #         >>> fig.savefig('result.png', facecolor='white')
 #         """
@@ -246,14 +246,14 @@ if __name__ == "__main__":
 #         # When facecolor is specified (not 'none'), temporarily make axes and figure opaque
 #         facecolor = kwargs.get("facecolor", None)
 #         patches_backup = []  # List of (patch, original_alpha, original_facecolor)
-# 
+#
 #         if facecolor is not None:
 #             # Check if facecolor indicates a non-transparent background
 #             is_opaque_facecolor = True
 #             if isinstance(facecolor, str):
 #                 if facecolor.lower() in ("none", "transparent"):
 #                     is_opaque_facecolor = False
-# 
+#
 #             if is_opaque_facecolor:
 #                 # Backup and set figure patch to opaque
 #                 fig_patch = self._fig_mpl.patch
@@ -262,7 +262,7 @@ if __name__ == "__main__":
 #                 patches_backup.append((fig_patch, fig_alpha, fig_fc))
 #                 fig_patch.set_alpha(1.0)
 #                 fig_patch.set_facecolor(facecolor)
-# 
+#
 #                 # Backup and set axes patches to opaque
 #                 for ax_mpl in self._fig_mpl.axes:
 #                     ax_patch = ax_mpl.patch
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 #                     # Set axes facecolor to match figure facecolor if it was transparent
 #                     if original_alpha == 0.0 or original_alpha is None:
 #                         ax_patch.set_facecolor(facecolor)
-# 
+#
 #                 # Ensure transparent=False so matplotlib respects the facecolor
 #                 if "transparent" not in kwargs:
 #                     kwargs["transparent"] = False
@@ -290,11 +290,11 @@ if __name__ == "__main__":
 #                 # Otherwise default to False (no metadata embedding for BytesIO etc.)
 #                 fmt = kwargs.get("format", "").lower() if kwargs.get("format") else ""
 #                 is_image_format = fmt in ("png", "jpg", "jpeg", "tiff", "tif", "pdf")
-# 
+#
 #             if is_image_format and embed_metadata:
 #                 # Collect automatic metadata
 #                 auto_metadata = None
-# 
+#
 #                 # Get first axes if available
 #                 # Keep the scitex AxisWrapper (for history tracking) separate from matplotlib axes
 #                 ax = None
@@ -318,7 +318,7 @@ if __name__ == "__main__":
 #                                 ax_scitex = flat[0]
 #                     except Exception:
 #                         pass
-# 
+#
 #                 # If still no axes, try from figure
 #                 if (
 #                     ax is None
@@ -326,16 +326,16 @@ if __name__ == "__main__":
 #                     and len(self._fig_mpl.axes) > 0
 #                 ):
 #                     ax = self._fig_mpl.axes[0]
-# 
+#
 #                 # Collect metadata
 #                 # Pass ax_scitex if available (has history for plot type detection)
 #                 try:
 #                     from scitex.plt.utils import collect_figure_metadata
-# 
+#
 #                     auto_metadata = collect_figure_metadata(
 #                         self._fig_mpl, ax_scitex if ax_scitex else ax
 #                     )
-# 
+#
 #                     # Merge with custom metadata
 #                     if metadata:
 #                         if "custom" not in auto_metadata:
@@ -345,11 +345,11 @@ if __name__ == "__main__":
 #                     # If metadata collection fails, warn but continue
 #                     logger.warning(f"Could not collect metadata: {e}")
 #                     auto_metadata = metadata
-# 
+#
 #                 # Use scitex.io.save_image for metadata embedding
 #                 try:
 #                     from scitex.io._save_modules import save_image
-# 
+#
 #                     save_image(
 #                         self._fig_mpl, fname, metadata=auto_metadata, *args, **kwargs
 #                     )
@@ -367,21 +367,21 @@ if __name__ == "__main__":
 #             for patch, original_alpha, original_fc in patches_backup:
 #                 patch.set_alpha(original_alpha)
 #                 patch.set_facecolor(original_fc)
-# 
+#
 #     def export_as_csv(self):
 #         """Export plotted data from all axes.
-# 
+#
 #         This method collects data from all axes in the figure and combines
 #         them into a single DataFrame with appropriate axis identifiers in
 #         the column names.
-# 
+#
 #         Returns
 #         -------
 #             pd.DataFrame: Combined DataFrame with data from all axes,
 #                           with axis ID prefixes for each column.
 #         """
 #         dfs = []
-# 
+#
 #         # Use the _traverse_axes helper method to iterate through all axes
 #         # regardless of their structure (single, array, list, etc.)
 #         for ii, ax in enumerate(self._traverse_axes()):
@@ -399,7 +399,7 @@ if __name__ == "__main__":
 #                     continue
 #             except Exception:
 #                 continue
-# 
+#
 #             # Process the DataFrame if it's not empty
 #             if df is not None and not df.empty:
 #                 # Column names already include axis position via get_csv_column_name
@@ -409,28 +409,28 @@ if __name__ == "__main__":
 #                 col_counts = {}
 #                 for col in df.columns:
 #                     col_str = str(col)
-# 
+#
 #                     # Handle duplicates by adding a counter
 #                     if col_str in col_counts:
 #                         col_counts[col_str] += 1
 #                         col_str = f"{col_str}_{col_counts[col_str]}"
 #                     else:
 #                         col_counts[col_str] = 0
-# 
+#
 #                     new_cols.append(col_str)
-# 
+#
 #                 df.columns = new_cols
 #                 dfs.append(df)
-# 
+#
 #         # Return concatenated DataFrame or empty DataFrame if no data
 #         return pd.concat(dfs, axis=1) if dfs else pd.DataFrame()
-# 
+#
 #     def colorbar(self, mappable, ax=None, **kwargs):
 #         """Add a colorbar to the figure, automatically unwrapping SciTeX axes.
-# 
+#
 #         This method properly handles both regular matplotlib axes and SciTeX
 #         AxisWrapper objects when creating colorbars.
-# 
+#
 #         Parameters
 #         ----------
 #         mappable : ScalarMappable
@@ -439,7 +439,7 @@ if __name__ == "__main__":
 #             The axes to attach the colorbar to. If not specified, uses current axes.
 #         **kwargs : dict
 #             Additional keyword arguments passed to matplotlib's colorbar
-# 
+#
 #         Returns
 #         -------
 #         Colorbar
@@ -450,10 +450,10 @@ if __name__ == "__main__":
 #             ax_mpl = ax._axis_mpl if hasattr(ax, "_axis_mpl") else ax
 #         else:
 #             ax_mpl = None
-# 
+#
 #         # Call matplotlib's colorbar with the unwrapped axes
 #         return self._fig_mpl.colorbar(mappable, ax=ax_mpl, **kwargs)
-# 
+#
 #     def _traverse_axes(self):
 #         """Helper method to traverse all axis wrappers in the figure."""
 #         if hasattr(self, "axes"):
@@ -481,22 +481,22 @@ if __name__ == "__main__":
 #                     # List of axes
 #                     for ax in self.axes:
 #                         yield ax
-# 
+#
 #     @property
 #     def history(self):
 #         """Aggregate tracking history from all axes in the figure.
-# 
+#
 #         Returns a combined OrderedDict of all tracking records from all axes,
 #         enabling FTS bundle creation to build encoding from plot operations.
 #         """
 #         from collections import OrderedDict
-# 
+#
 #         combined = OrderedDict()
 #         for ax in self._traverse_axes():
 #             if hasattr(ax, "history") and ax.history:
 #                 combined.update(ax.history)
 #         return combined
-# 
+#
 #     def legend(self, *args, loc="best", **kwargs):
 #         """Legend with 'best' automatic placement by default for all axes."""
 #         for ax in self._traverse_axes():
@@ -504,7 +504,7 @@ if __name__ == "__main__":
 #                 ax.legend(*args, loc=loc, **kwargs)
 #             except Exception:
 #                 pass
-# 
+#
 #     def supxyt(self, x=False, y=False, t=False):
 #         """Wrapper for supxlabel, supylabel, and suptitle"""
 #         if x is not False:
@@ -514,10 +514,10 @@ if __name__ == "__main__":
 #         if t is not False:
 #             self._fig_mpl.suptitle(t)
 #         return self._fig_mpl
-# 
+#
 #     def tight_layout(self, *, rect=[0, 0.03, 1, 0.95], **kwargs):
 #         """Wrapper for tight_layout with rect=[0, 0.03, 1, 0.95] by default.
-# 
+#
 #         Handles cases where certain axes (like colorbars) are incompatible
 #         with tight_layout. If the figure is using constrained_layout, this
 #         method does nothing as constrained_layout handles spacing automatically.
@@ -530,7 +530,7 @@ if __name__ == "__main__":
 #             # Figure is using constrained_layout, which handles colorbars better
 #             # No need to call tight_layout
 #             return
-# 
+#
 #         try:
 #             with warnings.catch_warnings():
 #                 # Suppress the specific warning about incompatible axes
@@ -547,10 +547,10 @@ if __name__ == "__main__":
 #             except Exception:
 #                 # If both fail, do nothing - figure will use default layout
 #                 pass
-# 
+#
 #     def adjust_layout(self, **kwargs):
 #         """Adjust the constrained layout parameters.
-# 
+#
 #         Parameters
 #         ----------
 #         w_pad : float, optional
@@ -575,28 +575,28 @@ if __name__ == "__main__":
 #             # Fall back to tight_layout with rect parameter if provided
 #             if "rect" in kwargs:
 #                 self.tight_layout(rect=kwargs["rect"])
-# 
+#
 #     def close(self):
 #         """Close the underlying matplotlib figure"""
 #         import matplotlib.pyplot as plt
-# 
+#
 #         plt.close(self._fig_mpl)
-# 
+#
 #     @property
 #     def number(self):
 #         """Return the figure number for matplotlib.pyplot.close() compatibility"""
 #         return self._fig_mpl.number
-# 
+#
 #     def __del__(self):
 #         """Cleanup when FigWrapper is deleted"""
 #         try:
 #             import matplotlib.pyplot as plt
-# 
+#
 #             plt.close(self._fig_mpl)
 #         except:
 #             pass
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

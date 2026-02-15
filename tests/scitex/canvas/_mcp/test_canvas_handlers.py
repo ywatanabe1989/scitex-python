@@ -14,19 +14,19 @@ if __name__ == "__main__":
 # # Timestamp: 2026-01-08
 # # File: src/scitex/canvas/_mcp.handlers.py
 # # ----------------------------------------
-# 
+#
 # """
 # MCP Handler implementations for SciTeX canvas module.
-# 
+#
 # Provides async handlers for multi-panel figure composition.
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import asyncio
 # from typing import Optional
-# 
-# 
+#
+#
 # async def create_canvas_handler(
 #     parent_dir: str,
 #     canvas_name: str,
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 # ) -> dict:
 #     """
 #     Create a new canvas workspace.
-# 
+#
 #     Parameters
 #     ----------
 #     parent_dir : str
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 #         Canvas width in mm
 #     height_mm : float
 #         Canvas height in mm
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         import scitex.canvas as canvas_module
-# 
+#
 #         loop = asyncio.get_event_loop()
 #         await loop.run_in_executor(
 #             None,
@@ -63,9 +63,9 @@ if __name__ == "__main__":
 #                 canvas_name,
 #             ),
 #         )
-# 
+#
 #         canvas_path = canvas_module.get_canvas_path(parent_dir, canvas_name)
-# 
+#
 #         return {
 #             "success": True,
 #             "canvas_name": canvas_name,
@@ -78,8 +78,8 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # async def add_panel_handler(
 #     parent_dir: str,
 #     canvas_name: str,
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 # ) -> dict:
 #     """
 #     Add a panel to a canvas.
-# 
+#
 #     Parameters
 #     ----------
 #     parent_dir : str
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 #         Size in mm
 #     label : str, optional
 #         Panel label (A, B, C...)
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         import scitex.canvas as canvas_module
-# 
+#
 #         loop = asyncio.get_event_loop()
 #         await loop.run_in_executor(
 #             None,
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 #                 label=label or "",
 #             ),
 #         )
-# 
+#
 #         return {
 #             "success": True,
 #             "canvas_name": canvas_name,
@@ -148,22 +148,22 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # async def list_panels_handler(
 #     parent_dir: str,
 #     canvas_name: str,
 # ) -> dict:
 #     """
 #     List all panels in a canvas.
-# 
+#
 #     Parameters
 #     ----------
 #     parent_dir : str
 #         Parent directory
 #     canvas_name : str
 #         Canvas name
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -171,13 +171,13 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         import scitex.canvas as canvas_module
-# 
+#
 #         loop = asyncio.get_event_loop()
 #         panels = await loop.run_in_executor(
 #             None,
 #             lambda: canvas_module.list_panels(parent_dir, canvas_name),
 #         )
-# 
+#
 #         return {
 #             "success": True,
 #             "canvas_name": canvas_name,
@@ -189,8 +189,8 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # async def remove_panel_handler(
 #     parent_dir: str,
 #     canvas_name: str,
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 # ) -> dict:
 #     """
 #     Remove a panel from a canvas.
-# 
+#
 #     Parameters
 #     ----------
 #     parent_dir : str
@@ -207,7 +207,7 @@ if __name__ == "__main__":
 #         Canvas name
 #     panel_name : str
 #         Panel to remove
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -215,13 +215,13 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         import scitex.canvas as canvas_module
-# 
+#
 #         loop = asyncio.get_event_loop()
 #         await loop.run_in_executor(
 #             None,
 #             lambda: canvas_module.remove_panel(parent_dir, canvas_name, panel_name),
 #         )
-# 
+#
 #         return {
 #             "success": True,
 #             "canvas_name": canvas_name,
@@ -233,8 +233,8 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # async def export_canvas_handler(
 #     parent_dir: str,
 #     canvas_name: str,
@@ -244,7 +244,7 @@ if __name__ == "__main__":
 # ) -> dict:
 #     """
 #     Export canvas to file.
-# 
+#
 #     Parameters
 #     ----------
 #     parent_dir : str
@@ -257,7 +257,7 @@ if __name__ == "__main__":
 #         Output format (png, pdf, svg)
 #     dpi : int
 #         Output DPI
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -265,15 +265,15 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from pathlib import Path
-# 
+#
 #         import scitex.canvas as canvas_module
-# 
+#
 #         # Build output path if not provided
 #         if output_path is None:
 #             canvas_path = canvas_module.get_canvas_path(parent_dir, canvas_name)
 #             fmt = format or "png"
 #             output_path = str(Path(canvas_path) / "exports" / f"{canvas_name}.{fmt}")
-# 
+#
 #         loop = asyncio.get_event_loop()
 #         result_path = await loop.run_in_executor(
 #             None,
@@ -283,7 +283,7 @@ if __name__ == "__main__":
 #                 output_path,
 #             ),
 #         )
-# 
+#
 #         return {
 #             "success": True,
 #             "canvas_name": canvas_name,
@@ -297,17 +297,17 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # async def list_canvases_handler(parent_dir: str) -> dict:
 #     """
 #     List all canvases in a directory.
-# 
+#
 #     Parameters
 #     ----------
 #     parent_dir : str
 #         Directory to search
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -315,13 +315,13 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         import scitex.canvas as canvas_module
-# 
+#
 #         loop = asyncio.get_event_loop()
 #         canvases = await loop.run_in_executor(
 #             None,
 #             lambda: canvas_module.list_canvases(parent_dir),
 #         )
-# 
+#
 #         return {
 #             "success": True,
 #             "parent_dir": parent_dir,
@@ -333,22 +333,22 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # async def canvas_exists_handler(
 #     parent_dir: str,
 #     canvas_name: str,
 # ) -> dict:
 #     """
 #     Check if a canvas exists.
-# 
+#
 #     Parameters
 #     ----------
 #     parent_dir : str
 #         Parent directory
 #     canvas_name : str
 #         Canvas name
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -356,9 +356,9 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         import scitex.canvas as canvas_module
-# 
+#
 #         exists = canvas_module.canvas_exists(parent_dir, canvas_name)
-# 
+#
 #         return {
 #             "success": True,
 #             "canvas_name": canvas_name,
@@ -369,8 +369,8 @@ if __name__ == "__main__":
 #             "success": False,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # __all__ = [
 #     "create_canvas_handler",
 #     "add_panel_handler",
@@ -380,7 +380,7 @@ if __name__ == "__main__":
 #     "list_canvases_handler",
 #     "canvas_exists_handler",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -256,11 +256,11 @@ class TTS:
 
             windows_path = result.stdout.strip()
 
-            ps_command = f'''
+            ps_command = f"""
 $player = New-Object System.Media.SoundPlayer
 $player.SoundLocation = "{windows_path}"
 $player.PlaySync()
-'''
+"""
             subprocess.run(
                 [powershell, "-NoProfile", "-Command", ps_command],
                 stdout=subprocess.DEVNULL,

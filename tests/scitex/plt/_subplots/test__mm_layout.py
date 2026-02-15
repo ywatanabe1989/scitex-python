@@ -12,15 +12,15 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # """Millimeter-based layout control for matplotlib figures."""
-# 
+#
 # import matplotlib.pyplot as plt
 # import numpy as np
-# 
+#
 # from ._AxesWrapper import AxesWrapper
 # from ._AxisWrapper import AxisWrapper
 # from ._FigWrapper import FigWrapper
-# 
-# 
+#
+#
 # def create_with_mm_control(
 #     *args,
 #     track=True,
@@ -57,14 +57,14 @@ if __name__ == "__main__":
 #     **kwargs,
 # ):
 #     """Create figure with mm-based control over axes dimensions.
-# 
+#
 #     Returns
 #     -------
 #     tuple
 #         (FigWrapper, AxisWrapper or AxesWrapper)
 #     """
 #     from scitex.plt.utils import apply_style_mm, mm_to_inch
-# 
+#
 #     # Parse nrows, ncols from args or kwargs
 #     nrows, ncols = 1, 1
 #     if len(args) >= 1:
@@ -75,9 +75,9 @@ if __name__ == "__main__":
 #         ncols = args[1]
 #     elif "ncols" in kwargs:
 #         ncols = kwargs.pop("ncols")
-# 
+#
 #     n_axes = nrows * ncols
-# 
+#
 #     # Apply mode-specific defaults
 #     if mode == "display":
 #         scale_factor = 3.0
@@ -85,18 +85,18 @@ if __name__ == "__main__":
 #     else:
 #         scale_factor = 1.0
 #         dpi = dpi or 300
-# 
+#
 #     # Set defaults with scaling
 #     if axes_width_mm is None:
 #         axes_width_mm = 30.0 * scale_factor
 #     elif mode == "display":
 #         axes_width_mm = axes_width_mm * scale_factor
-# 
+#
 #     if axes_height_mm is None:
 #         axes_height_mm = 21.0 * scale_factor
 #     elif mode == "display":
 #         axes_height_mm = axes_height_mm * scale_factor
-# 
+#
 #     margin_left_mm = (
 #         margin_left_mm if margin_left_mm is not None else (5.0 * scale_factor)
 #     )
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 #     margin_top_mm = margin_top_mm if margin_top_mm is not None else (2.0 * scale_factor)
 #     space_w_mm = space_w_mm if space_w_mm is not None else (3.0 * scale_factor)
 #     space_h_mm = space_h_mm if space_h_mm is not None else (3.0 * scale_factor)
-# 
+#
 #     # Handle list vs scalar for axes dimensions
 #     if isinstance(axes_width_mm, (list, tuple)):
 #         ax_widths_mm = list(axes_width_mm)
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 #             )
 #     else:
 #         ax_widths_mm = [axes_width_mm] * n_axes
-# 
+#
 #     if isinstance(axes_height_mm, (list, tuple)):
 #         ax_heights_mm = list(axes_height_mm)
 #         if len(ax_heights_mm) != n_axes:
@@ -130,14 +130,14 @@ if __name__ == "__main__":
 #             )
 #     else:
 #         ax_heights_mm = [axes_height_mm] * n_axes
-# 
+#
 #     # Calculate figure size from axes grid
 #     ax_widths_2d = np.array(ax_widths_mm).reshape(nrows, ncols)
 #     ax_heights_2d = np.array(ax_heights_mm).reshape(nrows, ncols)
-# 
+#
 #     max_widths_per_col = ax_widths_2d.max(axis=0)
 #     max_heights_per_row = ax_heights_2d.max(axis=1)
-# 
+#
 #     total_width_mm = (
 #         margin_left_mm
 #         + max_widths_per_col.sum()
@@ -150,22 +150,22 @@ if __name__ == "__main__":
 #         + (nrows - 1) * space_h_mm
 #         + margin_top_mm
 #     )
-# 
+#
 #     # Create figure
 #     figsize_inch = (mm_to_inch(total_width_mm), mm_to_inch(total_height_mm))
 #     if transparent:
 #         fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi, facecolor="none")
 #     else:
 #         fig_mpl = plt.figure(figsize=figsize_inch, dpi=dpi)
-# 
+#
 #     # Store theme on figure
 #     if theme is not None:
 #         fig_mpl._scitex_theme = theme
-# 
+#
 #     # Create axes array and position each one manually
 #     axes_mpl_list = []
 #     ax_idx = 0
-# 
+#
 #     for row in range(nrows):
 #         for col in range(ncols):
 #             # Calculate position
@@ -176,19 +176,19 @@ if __name__ == "__main__":
 #                 + max_heights_per_row[row + 1 :].sum()
 #                 + rows_below * space_h_mm
 #             )
-# 
+#
 #             # Convert to figure coordinates [0-1]
 #             left = left_mm / total_width_mm
 #             bottom = bottom_mm / total_height_mm
 #             width = ax_widths_mm[ax_idx] / total_width_mm
 #             height = ax_heights_mm[ax_idx] / total_height_mm
-# 
+#
 #             # Create axes
 #             ax_mpl = fig_mpl.add_axes([left, bottom, width, height])
 #             if transparent:
 #                 ax_mpl.patch.set_alpha(0.0)
 #             axes_mpl_list.append(ax_mpl)
-# 
+#
 #             # Tag with metadata
 #             ax_mpl._scitex_metadata = {
 #                 "created_with": "scitex.plt.subplots",
@@ -197,7 +197,7 @@ if __name__ == "__main__":
 #                 "position_in_grid": (row, col),
 #             }
 #             ax_idx += 1
-# 
+#
 #     # Apply styling to each axes
 #     suptitle_font_size_pt_value = None
 #     for i, ax_mpl in enumerate(axes_mpl_list):
@@ -245,30 +245,30 @@ if __name__ == "__main__":
 #                 style_dict["font_family"] = font_family
 #             if n_ticks is not None:
 #                 style_dict["n_ticks"] = n_ticks
-# 
+#
 #         # Always add theme to style_dict
 #         if theme is not None:
 #             style_dict["theme"] = theme
-# 
+#
 #         # Extract suptitle font size if available
 #         if "suptitle_font_size_pt" in style_dict:
 #             suptitle_font_size_pt_value = style_dict["suptitle_font_size_pt"]
-# 
+#
 #         # Apply style if not empty
 #         if style_dict:
 #             apply_style_mm(ax_mpl, style_dict)
 #             ax_mpl._scitex_metadata["style_mm"] = style_dict
-# 
+#
 #     # Store suptitle font size in figure metadata
 #     if suptitle_font_size_pt_value is not None:
 #         fig_mpl._scitex_suptitle_font_size_pt = suptitle_font_size_pt_value
-# 
+#
 #     # Wrap the figure
 #     fig_scitex = FigWrapper(fig_mpl)
-# 
+#
 #     # Reshape axes list
 #     axes_array_mpl = np.array(axes_mpl_list).reshape(nrows, ncols)
-# 
+#
 #     # Handle single axis case
 #     if n_axes == 1:
 #         ax_mpl_scalar = axes_array_mpl.item()
@@ -276,21 +276,21 @@ if __name__ == "__main__":
 #         fig_scitex.axes = [axis_scitex]
 #         ax_mpl_scalar._scitex_wrapper = axis_scitex
 #         return fig_scitex, axis_scitex
-# 
+#
 #     # Handle multiple axes case
 #     axes_flat_scitex_list = []
 #     for ax_mpl in axes_mpl_list:
 #         ax_scitex = AxisWrapper(fig_scitex, ax_mpl, track)
 #         ax_mpl._scitex_wrapper = ax_scitex
 #         axes_flat_scitex_list.append(ax_scitex)
-# 
+#
 #     axes_array_scitex = np.array(axes_flat_scitex_list).reshape(nrows, ncols)
 #     axes_scitex = AxesWrapper(fig_scitex, axes_array_scitex)
 #     fig_scitex.axes = axes_scitex
-# 
+#
 #     return fig_scitex, axes_scitex
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

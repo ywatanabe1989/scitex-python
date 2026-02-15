@@ -20,9 +20,9 @@ def plot_stx_errorbar(plt, rng, ax=None):
     x = np.arange(1, 6)
     y = rng.uniform(2, 8, 5)
     yerr = rng.uniform(0.5, 1.5, 5)
-    ax.stx_errorbar(x, y, yerr=yerr, label='Measurements')
+    ax.stx_errorbar(x, y, yerr=yerr, label="Measurements")
     ax.set_xyt("X", "Y", "stx_errorbar")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

@@ -12,10 +12,10 @@ from scitex.scholar.browser.remote import ZenRowsRemoteBrowserManager, ZenRowsAP
 
 async def quick_test():
     """Quick test to compare IP addresses across all methods."""
-    
+
     print("Quick Browser Comparison Test")
     print("="*50)
-    
+
     # Test regular browser
     print("\n1. Regular Browser:")
     try:
@@ -29,7 +29,7 @@ async def quick_test():
         await manager.close()
     except Exception as e:
         print(f"   Failed: {e}")
-    
+
     # Test ZenRows Local Proxy
     print("\n2. ZenRows Local Proxy:")
     try:
@@ -43,7 +43,7 @@ async def quick_test():
         await manager.close()
     except Exception as e:
         print(f"   Failed: {e}")
-    
+
     # Test ZenRows Scraping Browser
     print("\n3. ZenRows Scraping Browser:")
     try:
@@ -57,7 +57,7 @@ async def quick_test():
         await manager.close()
     except Exception as e:
         print(f"   Failed: {e}")
-    
+
     # Test ZenRows API (no country)
     print("\n4. ZenRows API (Basic):")
     try:
@@ -68,7 +68,7 @@ async def quick_test():
         print(f"   Cost: {response.headers.get('X-Request-Cost', 'Unknown')} credits")
     except Exception as e:
         print(f"   Failed: {e}")
-    
+
     # Test ZenRows API (Australian)
     print("\n5. ZenRows API (Australia):")
     try:
@@ -79,7 +79,7 @@ async def quick_test():
         print(f"   Cost: {response.headers.get('X-Request-Cost', 'Unknown')} credits")
     except Exception as e:
         print(f"   Failed: {e}")
-    
+
     print("\n" + "="*50)
     print("Test completed!")
 

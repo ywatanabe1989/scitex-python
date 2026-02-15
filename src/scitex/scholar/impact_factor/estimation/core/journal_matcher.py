@@ -4,15 +4,16 @@
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/externals/impact_factor/src/impact_factor/core/journal_matcher.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./impact_factor/core/journal_matcher.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 import re
-from typing import Dict, List, Optional, Tuple
-from difflib import SequenceMatcher
 from collections import Counter
+from difflib import SequenceMatcher
+from typing import Dict, List, Optional, Tuple
 
 from scitex.logging import getLogger
 

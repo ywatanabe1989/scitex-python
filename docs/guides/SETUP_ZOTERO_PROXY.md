@@ -12,12 +12,12 @@ Chrome in WSL2 cannot directly connect to Zotero on Windows. The Zotero Connecto
 ### Step 2: On Windows - Start Proxy Server
 1. Download the proxy from: https://github.com/XFY9326/Zotero-WSL-ProxyServer/releases
    - Download `Zotero-WSL-ProxyServer.exe`
-   
+
 2. Run the proxy server:
    ```cmd
    Zotero-WSL-ProxyServer.exe
    ```
-   
+
 3. The proxy will:
    - Open port 23119
    - Bridge WSL → Windows Zotero connection
@@ -30,7 +30,7 @@ Chrome in WSL2 cannot directly connect to Zotero on Windows. The Zotero Connecto
 4. Set connector URL to one of:
    - `http://10.255.255.254:23119` (your Windows IP)
    - `http://host.windows.internal:23119`
-   
+
 ### Step 4: Test Connection
 Run this in WSL to verify:
 ```bash

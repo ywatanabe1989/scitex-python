@@ -4,9 +4,8 @@ Description: Australian Dictionary of Biography translator for Zotero
 Translator ID: 0aea3026-a246-4201-a4b5-265f75b9a6a7
 """
 
-from typing import Any, Dict, Optional, List
 import re
-
+from typing import Any, Dict, List, Optional
 
 TRANSLATOR_INFO = {
     "translator_id": "0aea3026-a246-4201-a4b5-265f75b9a6a7",

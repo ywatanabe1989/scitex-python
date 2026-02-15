@@ -293,12 +293,18 @@ class PaperIO:
                         "page": page_num,
                         "index": idx,
                         "columns": list(df.columns) if hasattr(df, "columns") else [],
-                        "data": df.to_dict(orient="records") if hasattr(df, "to_dict") else [],
+                        "data": (
+                            df.to_dict(orient="records")
+                            if hasattr(df, "to_dict")
+                            else []
+                        ),
                         "shape": list(df.shape) if hasattr(df, "shape") else [0, 0],
                     }
                     tables_data.append(entry)
                 except Exception as e:
-                    logger.warning(f"{self.name}: Could not convert table {page_num}:{idx}: {e}")
+                    logger.warning(
+                        f"{self.name}: Could not convert table {page_num}:{idx}: {e}"
+                    )
         return self.save_tables(tables_data)
 
     def save_image(self, image_data: bytes, filename: str) -> Path:

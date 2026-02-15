@@ -26,7 +26,7 @@ import signal
 from pathlib import Path
 from typing import Optional
 
-from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+from playwright.async_api import Browser, BrowserContext, Page, async_playwright
 
 
 class PersistentBrowserServer:

@@ -4,10 +4,9 @@ Description: Atlanta Journal-Constitution translator for Zotero
 Translator ID: 01322929-5782-4612-81f7-d861fb46d9f2
 """
 
-from typing import Any, Dict, Optional, List
-import re
 import json
-
+import re
+from typing import Any, Dict, List, Optional
 
 TRANSLATOR_INFO = {
     "translator_id": "01322929-5782-4612-81f7-d861fb46d9f2",

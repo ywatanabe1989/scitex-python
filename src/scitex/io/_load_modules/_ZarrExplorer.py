@@ -12,6 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 from typing import Any, List, Optional
 
 import zarr
+
 from ._zarr import _load_zarr_dataset
 
 

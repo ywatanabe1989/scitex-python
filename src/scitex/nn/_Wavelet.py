@@ -8,11 +8,12 @@
 # Time-stamp: "2024-05-30 11:04:45 (ywatanabe)"
 
 
-import scitex
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+import scitex
 from scitex.gen._to_even import to_even
 from scitex.gen._to_odd import to_odd
 
@@ -167,6 +168,7 @@ class Wavelet(nn.Module):
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+
     import scitex
 
     xx, tt, fs = scitex.dsp.demo_sig(sig_type="chirp")

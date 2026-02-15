@@ -13,17 +13,17 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_deprecated_start.py
-# 
+#
 # """
 # Deprecated wrapper for the old scitex.gen.start function.
-# 
+#
 # This module provides backward compatibility by forwarding calls to the new
 # scitex.session.start function while showing deprecation warnings.
 # """
-# 
+#
 # from scitex.decorators._deprecated import deprecated
-# 
-# 
+#
+#
 # @deprecated(
 #     reason="Use scitex.session.start instead. The old interface will be removed in a future version.",
 #     forward_to="..session.start",
@@ -35,8 +35,8 @@ if __name__ == "__main__":
 #     raise NotImplementedError(
 #         "This function should be forwarded by the @deprecated decorator"
 #     )
-# 
-# 
+#
+#
 # __all__ = ["start"]
 
 # --------------------------------------------------------------------------------

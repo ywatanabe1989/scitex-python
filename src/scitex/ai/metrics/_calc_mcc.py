@@ -8,8 +8,10 @@
 __FILE__ = __file__
 
 from typing import Any, Dict, List, Optional
+
 import numpy as np
 from sklearn.metrics import matthews_corrcoef
+
 from ._normalize_labels import normalize_labels
 
 

@@ -7,8 +7,10 @@
 
 import os
 import tempfile
-import pytest
 from pathlib import Path
+
+import pytest
+
 from scitex.config import ScitexConfig, get_config, load_yaml
 
 
@@ -17,7 +19,7 @@ class TestLoadYaml:
 
     def test_load_yaml_basic(self):
         """Test basic YAML loading."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("key: value\nnumber: 42\n")
             temp_path = f.name
 
@@ -30,7 +32,7 @@ class TestLoadYaml:
 
     def test_load_yaml_nested(self):
         """Test loading nested YAML structure."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("parent:\n  child: value\n  nested:\n    deep: content\n")
             temp_path = f.name
 
@@ -47,7 +49,7 @@ class TestLoadYaml:
         if "TEST_YAML_VAR" in os.environ:
             del os.environ["TEST_YAML_VAR"]
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write('value: ${TEST_YAML_VAR:-"default_value"}\n')
             temp_path = f.name
 
@@ -61,7 +63,7 @@ class TestLoadYaml:
         """Test env var substitution when var is set."""
         os.environ["TEST_YAML_VAR2"] = "from_env"
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write('value: ${TEST_YAML_VAR2:-"default"}\n')
             temp_path = f.name
 
@@ -74,7 +76,7 @@ class TestLoadYaml:
 
     def test_load_yaml_boolean_values(self):
         """Test boolean value handling in env substitution."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("enabled: true\ndisabled: false\n")
             temp_path = f.name
 
@@ -101,7 +103,7 @@ class TestScitexConfigBasic:
 
     def test_initialization_with_custom_path(self):
         """Test initialization with custom config path."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("custom_key: custom_value\n")
             temp_path = f.name
 
@@ -130,7 +132,7 @@ class TestScitexConfigFlattenDict:
 
     def test_flatten_simple(self):
         """Test flattening simple nested dict."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("parent:\n  child: value\n")
             temp_path = f.name
 
@@ -142,7 +144,7 @@ class TestScitexConfigFlattenDict:
 
     def test_flatten_deep_nesting(self):
         """Test flattening deeply nested dict."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("a:\n  b:\n    c:\n      d: deep_value\n")
             temp_path = f.name
 
@@ -158,7 +160,7 @@ class TestScitexConfigGet:
 
     def test_get_existing_key(self):
         """Test getting existing key."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("test_key: test_value\n")
             temp_path = f.name
 
@@ -184,13 +186,15 @@ class TestScitexConfigResolve:
 
     def test_resolve_direct_value_highest(self):
         """Test direct value takes highest priority."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("test_key: from_config\n")
             temp_path = f.name
 
         try:
             config = ScitexConfig(config_path=temp_path)
-            result = config.resolve("test_key", direct_val="from_direct", default="from_default")
+            result = config.resolve(
+                "test_key", direct_val="from_direct", default="from_default"
+            )
             assert result == "from_direct"
         finally:
             os.unlink(temp_path)
@@ -199,7 +203,7 @@ class TestScitexConfigResolve:
         """Test config takes priority over env."""
         os.environ["SCITEX_TEST_KEY"] = "from_env"
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("test_key: from_config\n")
             temp_path = f.name
 
@@ -257,7 +261,7 @@ class TestScitexConfigGetNested:
 
     def test_get_nested_simple(self):
         """Test getting nested value."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("parent:\n  child: nested_value\n")
             temp_path = f.name
 
@@ -270,7 +274,7 @@ class TestScitexConfigGetNested:
 
     def test_get_nested_deep(self):
         """Test getting deeply nested value."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("a:\n  b:\n    c: deep\n")
             temp_path = f.name
 
@@ -293,7 +297,7 @@ class TestScitexConfigProperties:
 
     def test_raw_property(self):
         """Test raw property returns original nested dict."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("parent:\n  child: value\n")
             temp_path = f.name
 
@@ -308,7 +312,7 @@ class TestScitexConfigProperties:
 
     def test_flat_property(self):
         """Test flat property returns flattened dict."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("parent:\n  child: value\n")
             temp_path = f.name
 
@@ -332,7 +336,7 @@ class TestGetConfig:
 
     def test_get_config_with_path(self):
         """Test get_config with custom path."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("custom: value\n")
             temp_path = f.name
 
@@ -341,6 +345,7 @@ class TestGetConfig:
             assert config.get("custom") == "value"
         finally:
             os.unlink(temp_path)
+
 
 if __name__ == "__main__":
     import os
@@ -356,46 +361,46 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-09 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/config/ScitexConfig.py
-# 
+#
 # """
 # YAML-based configuration for SciTeX with environment variable substitution.
-# 
+#
 # Similar to ScholarConfig, provides:
 # - YAML configuration loading
 # - Environment variable substitution (${VAR:-default} syntax)
 # - Cascade resolution (direct → config → env → default)
-# 
+#
 # Usage:
 #     from scitex.config import ScitexConfig
-# 
+#
 #     # Load default configuration
 #     config = ScitexConfig()
-# 
+#
 #     # Load custom configuration
 #     config = ScitexConfig(config_path="/path/to/config.yaml")
-# 
+#
 #     # Resolve values with precedence
 #     log_level = config.resolve("logging.level", default="INFO")
 # """
-# 
+#
 # import os
 # import re
 # from pathlib import Path
 # from typing import Any, Dict, Optional, Type, Union
-# 
+#
 # from ._PriorityConfig import PriorityConfig, load_dotenv
-# 
-# 
+#
+#
 # def load_yaml(path: Path) -> dict:
 #     """Load YAML file with environment variable substitution.
-# 
+#
 #     Supports ${VAR:-default} syntax for environment variable expansion.
-# 
+#
 #     Parameters
 #     ----------
 #     path : Path
 #         Path to YAML file
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -407,11 +412,11 @@ if __name__ == "__main__":
 #         raise ImportError(
 #             "PyYAML required for YAML config. Install with: pip install pyyaml"
 #         )
-# 
+#
 #     try:
 #         with open(path) as f:
 #             content = f.read()
-# 
+#
 #         def env_replacer(match):
 #             """Replace ${VAR:-default} with environment variable or default."""
 #             env_expr = match.group(1)
@@ -420,7 +425,7 @@ if __name__ == "__main__":
 #                 value = os.getenv(var_name, default_value.strip('"'))
 #             else:
 #                 value = os.getenv(env_expr)
-# 
+#
 #             # Handle special values
 #             if value in ["true", "false"]:
 #                 return value
@@ -430,19 +435,19 @@ if __name__ == "__main__":
 #                 return f'"{value}"'
 #             else:
 #                 return value or "null"
-# 
+#
 #         content = re.sub(r"\$\{([^}]+)\}", env_replacer, content)
 #         return yaml.safe_load(content)
 #     except Exception as e:
 #         raise ValueError(f"Failed to load YAML config from {path}: {e}")
-# 
-# 
+#
+#
 # class ScitexConfig:
 #     """YAML-based configuration manager for SciTeX.
-# 
+#
 #     Loads configuration from YAML files with environment variable substitution.
 #     Values can be resolved with priority: direct → config → env → default.
-# 
+#
 #     Examples
 #     --------
 #     >>> from scitex.config import ScitexConfig
@@ -452,14 +457,14 @@ if __name__ == "__main__":
 #     >>> config.get("debug.enabled")
 #     False
 #     """
-# 
+#
 #     def __init__(
 #         self,
 #         config_path: Optional[Union[str, Path]] = None,
 #         env_prefix: str = "SCITEX_",
 #     ):
 #         """Initialize ScitexConfig.
-# 
+#
 #         Parameters
 #         ----------
 #         config_path : str or Path, optional
@@ -469,7 +474,7 @@ if __name__ == "__main__":
 #         """
 #         # Load .env file first
 #         load_dotenv()
-# 
+#
 #         # Load YAML configuration
 #         if config_path and Path(config_path).exists():
 #             self._config_data = load_yaml(Path(config_path))
@@ -481,19 +486,19 @@ if __name__ == "__main__":
 #             else:
 #                 self._config_data = {}
 #             self._config_path = default_path
-# 
+#
 #         # Flatten nested config for easy access
 #         self._flat_config = self._flatten_dict(self._config_data)
-# 
+#
 #         # Initialize PriorityConfig for resolution
 #         self._priority_config = PriorityConfig(
 #             config_dict=self._flat_config,
 #             env_prefix=env_prefix,
 #         )
-# 
+#
 #     def _flatten_dict(self, d: dict, parent_key: str = "", sep: str = ".") -> dict:
 #         """Flatten nested dictionary with dot notation keys.
-# 
+#
 #         Parameters
 #         ----------
 #         d : dict
@@ -502,7 +507,7 @@ if __name__ == "__main__":
 #             Parent key for recursion
 #         sep : str
 #             Separator for nested keys
-# 
+#
 #         Returns
 #         -------
 #         dict
@@ -516,26 +521,26 @@ if __name__ == "__main__":
 #             else:
 #                 items.append((new_key, v))
 #         return dict(items)
-# 
+#
 #     def get(self, key: str, default: Any = None) -> Any:
 #         """Get value from config directly (no precedence resolution).
-# 
+#
 #         Supports dot notation for nested keys.
-# 
+#
 #         Parameters
 #         ----------
 #         key : str
 #             Configuration key (e.g., "logging.level" or "debug.enabled")
 #         default : Any
 #             Default value if key not found
-# 
+#
 #         Returns
 #         -------
 #         Any
 #             Configuration value
 #         """
 #         return self._flat_config.get(key, default)
-# 
+#
 #     def resolve(
 #         self,
 #         key: str,
@@ -544,10 +549,10 @@ if __name__ == "__main__":
 #         type: Type = str,
 #     ) -> Any:
 #         """Resolve value with precedence: direct → config → env → default.
-# 
+#
 #         This follows the Scholar module's CascadeConfig pattern where
 #         YAML config takes higher priority than environment variables.
-# 
+#
 #         Parameters
 #         ----------
 #         key : str
@@ -558,7 +563,7 @@ if __name__ == "__main__":
 #             Default value (lowest precedence)
 #         type : Type
 #             Type conversion (str, int, float, bool, list)
-# 
+#
 #         Returns
 #         -------
 #         Any
@@ -568,21 +573,21 @@ if __name__ == "__main__":
 #         # (Same as Scholar's CascadeConfig pattern)
 #         if direct_val is not None:
 #             return direct_val
-# 
+#
 #         # Config (YAML) takes priority over env
 #         config_val = self._flat_config.get(key)
 #         if config_val is not None:
 #             return config_val
-# 
+#
 #         # Then check environment variable
 #         normalized_key = key.replace(".", "_")
 #         env_key = f"SCITEX_{normalized_key.upper()}"
 #         env_val = os.getenv(env_key)
 #         if env_val:
 #             return self._convert_type(env_val, type)
-# 
+#
 #         return default
-# 
+#
 #     def _convert_type(self, value: str, type: Type) -> Any:
 #         """Convert string value to specified type."""
 #         if type == int:
@@ -594,17 +599,17 @@ if __name__ == "__main__":
 #         elif type == list:
 #             return value.split(",")
 #         return value
-# 
+#
 #     def get_nested(self, *keys: str, default: Any = None) -> Any:
 #         """Get nested value from original config structure.
-# 
+#
 #         Parameters
 #         ----------
 #         *keys : str
 #             Keys to traverse (e.g., "browser", "screenshots_dir")
 #         default : Any
 #             Default value if not found
-# 
+#
 #         Returns
 #         -------
 #         Any
@@ -617,59 +622,59 @@ if __name__ == "__main__":
 #             else:
 #                 return default
 #         return current
-# 
+#
 #     @property
 #     def config_path(self) -> Path:
 #         """Get the path to the loaded config file."""
 #         return self._config_path
-# 
+#
 #     @property
 #     def raw(self) -> dict:
 #         """Get raw configuration data (original nested structure)."""
 #         return self._config_data
-# 
+#
 #     @property
 #     def flat(self) -> dict:
 #         """Get flattened configuration data."""
 #         return self._flat_config
-# 
+#
 #     def print(self) -> None:
 #         """Print configuration resolution log."""
 #         self._priority_config.print_resolutions()
-# 
+#
 #     def __repr__(self) -> str:
 #         return f"ScitexConfig(path='{self._config_path}')"
-# 
-# 
+#
+#
 # # Module-level convenience functions
-# 
+#
 # _default_config: Optional[ScitexConfig] = None
-# 
-# 
+#
+#
 # def get_config(config_path: Optional[Union[str, Path]] = None) -> ScitexConfig:
 #     """Get ScitexConfig instance.
-# 
+#
 #     Parameters
 #     ----------
 #     config_path : str or Path, optional
 #         Path to custom config. If None, returns cached default instance.
-# 
+#
 #     Returns
 #     -------
 #     ScitexConfig
 #         Configuration instance
 #     """
 #     global _default_config
-# 
+#
 #     if config_path is not None:
 #         return ScitexConfig(config_path)
-# 
+#
 #     if _default_config is None:
 #         _default_config = ScitexConfig()
-# 
+#
 #     return _default_config
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

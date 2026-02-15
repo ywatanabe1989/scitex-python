@@ -12,6 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 # Time-stamp: "2024-04-26 20:03:45 (ywatanabe)"
 
 import matplotlib
+
 from ....plt.utils import assert_valid_axis
 
 

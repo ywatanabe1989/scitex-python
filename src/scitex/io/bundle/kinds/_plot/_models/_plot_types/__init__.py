@@ -6,32 +6,29 @@
 
 from typing import List, Type
 
+# Bar plots
+from ._bar import BarHPlotConfig, BarPlotConfig
+
+# Box plots
+from ._box import BoxConfig, BoxPlotConfig
+
+# Distribution plots
+from ._distribution import ECDFConfig, KDEConfig
+
+# Error bars and fill
+from ._errorbar import ErrorbarPlotConfig, FillBetweenConfig, MeanStdConfig
+
+# Histograms
+from ._histogram import HistPlotConfig
+
+# Image plots
+from ._image import ContourConfig, HeatmapConfig, ImshowConfig
+
 # Line plots
 from ._line import LinePlotConfig, PlotLineConfig, ShadedLineConfig
 
 # Scatter plots
 from ._scatter import ScatterPlotConfig
-
-# Bar plots
-from ._bar import BarHPlotConfig, BarPlotConfig
-
-# Histograms
-from ._histogram import HistPlotConfig
-
-# Box plots
-from ._box import BoxConfig, BoxPlotConfig
-
-# Violin plots
-from ._violin import ViolinConfig, ViolinPlotConfig
-
-# Error bars and fill
-from ._errorbar import ErrorbarPlotConfig, FillBetweenConfig, MeanStdConfig
-
-# Image plots
-from ._image import ContourConfig, HeatmapConfig, ImshowConfig
-
-# Distribution plots
-from ._distribution import ECDFConfig, KDEConfig
 
 # Seaborn plots
 from ._seaborn import (
@@ -44,6 +41,9 @@ from ._seaborn import (
     SeabornStripplotConfig,
     SeabornViolinplotConfig,
 )
+
+# Violin plots
+from ._violin import ViolinConfig, ViolinPlotConfig
 
 # =============================================================================
 # PLOT TYPE REGISTRY

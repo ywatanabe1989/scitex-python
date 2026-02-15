@@ -49,11 +49,7 @@ def _extract_image_artists(mpl_ax):
         artist["zorder"] = img.get_zorder()
 
         # Backend layer
-        backend = {
-            "name": "matplotlib",
-            "artist_class": img_type,
-            "props": {}
-        }
+        backend = {"name": "matplotlib", "artist_class": img_type, "props": {}}
         try:
             cmap = img.get_cmap()
             if cmap:
@@ -112,7 +108,7 @@ def _extract_text_artists(mpl_ax):
         # Try to determine role from content or position
         pos = text_obj.get_position()
         # Check if this looks like stats annotation
-        if any(kw in text_content.lower() for kw in ['r=', 'p=', 'r²=', 'n=']):
+        if any(kw in text_content.lower() for kw in ["r=", "p=", "r²=", "n="]):
             artist["role"] = "stats_annotation"
         else:
             artist["role"] = "annotation"
@@ -132,7 +128,7 @@ def _extract_text_artists(mpl_ax):
         backend = {
             "name": "matplotlib",
             "artist_class": type(text_obj).__name__,
-            "props": {}
+            "props": {},
         }
 
         try:
@@ -159,7 +155,7 @@ def _extract_text_artists(mpl_ax):
             artist["data_ref"] = {
                 "x": f"text_{text_count}_x",
                 "y": f"text_{text_count}_y",
-                "content": f"text_{text_count}_content"
+                "content": f"text_{text_count}_content",
             }
 
         text_count += 1

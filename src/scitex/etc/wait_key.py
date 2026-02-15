@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 # Time-stamp: "2023-03-24 23:13:32 (ywatanabe)"
 
-import readchar
-import time
 import multiprocessing
+import time
+
+import readchar
 
 
 def wait_key(p):

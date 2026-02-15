@@ -22,7 +22,8 @@ Geometry types per artist:
 - text: bbox + anchor
 """
 
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
 
 
@@ -101,7 +102,9 @@ def data_to_axes_px(ax, fig, x_data, y_data) -> Tuple[np.ndarray, np.ndarray]:
     return x_px.astype(float), y_px.astype(float)
 
 
-def extract_line_geometry(line, ax, fig, simplify_threshold: float = 0.5) -> Dict[str, Any]:
+def extract_line_geometry(
+    line, ax, fig, simplify_threshold: float = 0.5
+) -> Dict[str, Any]:
     """
     Extract line geometry in axes-local pixels.
 
@@ -142,7 +145,7 @@ def extract_line_geometry(line, ax, fig, simplify_threshold: float = 0.5) -> Dic
         "coord_space": "axes",
         "bbox": bbox,
         "path_simplified": path_simplified,
-        "path": None  # Full path omitted for performance
+        "path": None,  # Full path omitted for performance
     }
 
 
@@ -196,7 +199,7 @@ def extract_scatter_geometry(collection, ax, fig) -> Dict[str, Any]:
         "coord_space": "axes",
         "bbox": bbox,
         "hit_radius_px": round(hit_radius_px, 1),
-        "points": points
+        "points": points,
     }
 
 
@@ -244,11 +247,7 @@ def extract_polygon_geometry(collection, ax, fig) -> Dict[str, Any]:
     # Compute bounding box
     bbox = _compute_bbox(x_px, y_px)
 
-    return {
-        "coord_space": "axes",
-        "bbox": bbox,
-        "polygon": polygon
-    }
+    return {"coord_space": "axes", "bbox": bbox, "polygon": polygon}
 
 
 def extract_rectangle_geometry(patch, ax, fig) -> Dict[str, Any]:
@@ -290,8 +289,13 @@ def extract_rectangle_geometry(patch, ax, fig) -> Dict[str, Any]:
 
     return {
         "coord_space": "axes",
-        "bbox": {"x0": int(x), "y0": int(y), "x1": int(x + width), "y1": int(y + height)},
-        "rectangle": {"x": x, "y": y, "width": width, "height": height}
+        "bbox": {
+            "x0": int(x),
+            "y0": int(y),
+            "x1": int(x + width),
+            "y1": int(y + height),
+        },
+        "rectangle": {"x": x, "y": y, "width": width, "height": height},
     }
 
 
@@ -333,14 +337,10 @@ def extract_bar_group_geometry(patches, ax, fig) -> Dict[str, Any]:
         "x0": int(min(all_x)),
         "y0": int(min(all_y)),
         "x1": int(max(all_x)),
-        "y1": int(max(all_y))
+        "y1": int(max(all_y)),
     }
 
-    return {
-        "coord_space": "axes",
-        "bbox": bbox,
-        "rectangles": rectangles
-    }
+    return {"coord_space": "axes", "bbox": bbox, "rectangles": rectangles}
 
 
 def extract_text_geometry(text, ax, fig) -> Dict[str, Any]:
@@ -379,7 +379,9 @@ def extract_text_geometry(text, ax, fig) -> Dict[str, Any]:
 
         # Convert display coords to axes-local pixels
         x0 = bbox_display.x0 - axes_bbox["x0"]
-        y0 = (fig.get_figheight() * fig.dpi - bbox_display.y1) - axes_bbox["y0"]  # Flip Y
+        y0 = (fig.get_figheight() * fig.dpi - bbox_display.y1) - axes_bbox[
+            "y0"
+        ]  # Flip Y
         x1 = bbox_display.x1 - axes_bbox["x0"]
         y1 = (fig.get_figheight() * fig.dpi - bbox_display.y0) - axes_bbox["y0"]
 
@@ -387,7 +389,7 @@ def extract_text_geometry(text, ax, fig) -> Dict[str, Any]:
             "x0": int(round(x0)),
             "y0": int(round(y0)),
             "x1": int(round(x1)),
-            "y1": int(round(y1))
+            "y1": int(round(y1)),
         }
     except Exception:
         # Fallback: estimate bbox from anchor
@@ -395,14 +397,10 @@ def extract_text_geometry(text, ax, fig) -> Dict[str, Any]:
             "x0": int(anchor["x"] - 20),
             "y0": int(anchor["y"] - 10),
             "x1": int(anchor["x"] + 80),
-            "y1": int(anchor["y"] + 10)
+            "y1": int(anchor["y"] + 10),
         }
 
-    return {
-        "coord_space": "axes",
-        "bbox": bbox,
-        "anchor": anchor
-    }
+    return {"coord_space": "axes", "bbox": bbox, "anchor": anchor}
 
 
 def extract_image_geometry(image, ax, fig) -> Dict[str, Any]:
@@ -429,7 +427,7 @@ def extract_image_geometry(image, ax, fig) -> Dict[str, Any]:
         # Full axes
         return {
             "coord_space": "axes",
-            "bbox": {"x0": 0, "y0": 0, "x1": 100, "y1": 100}  # Will be computed
+            "bbox": {"x0": 0, "y0": 0, "x1": 100, "y1": 100},  # Will be computed
         }
 
     x0_data, x1_data, y0_data, y1_data = extent
@@ -441,18 +439,16 @@ def extract_image_geometry(image, ax, fig) -> Dict[str, Any]:
         "x0": int(round(min(x_px))),
         "y0": int(round(min(y_px))),
         "x1": int(round(max(x_px))),
-        "y1": int(round(max(y_px)))
+        "y1": int(round(max(y_px))),
     }
 
-    return {
-        "coord_space": "axes",
-        "bbox": bbox
-    }
+    return {"coord_space": "axes", "bbox": bbox}
 
 
 # =============================================================================
 # Helper functions
 # =============================================================================
+
 
 def _compute_bbox(x_px: np.ndarray, y_px: np.ndarray) -> Dict[str, int]:
     """Compute bounding box from pixel coordinates."""
@@ -460,7 +456,7 @@ def _compute_bbox(x_px: np.ndarray, y_px: np.ndarray) -> Dict[str, int]:
         "x0": int(round(np.nanmin(x_px))),
         "y0": int(round(np.nanmin(y_px))),
         "x1": int(round(np.nanmax(x_px))),
-        "y1": int(round(np.nanmax(y_px)))
+        "y1": int(round(np.nanmax(y_px))),
     }
 
 
@@ -506,7 +502,7 @@ def _simplify_path(path: List[List[float]], tolerance: float) -> List[List[float
             return _simplify_open_path(path, tolerance)
 
         # Split and simplify each half
-        first_half = [p.tolist() for p in points[:split_idx + 1]]
+        first_half = [p.tolist() for p in points[: split_idx + 1]]
         second_half = [p.tolist() for p in points[split_idx:]]
 
         simplified_first = _simplify_open_path(first_half, tolerance)
@@ -560,7 +556,9 @@ def _simplify_open_path(path: List[List[float]], tolerance: float) -> List[List[
 
     if max_dist > tolerance:
         # Recurse
-        left = _simplify_open_path([p.tolist() for p in points[:max_idx + 1]], tolerance)
+        left = _simplify_open_path(
+            [p.tolist() for p in points[: max_idx + 1]], tolerance
+        )
         right = _simplify_open_path([p.tolist() for p in points[max_idx:]], tolerance)
         return left[:-1] + right
     else:

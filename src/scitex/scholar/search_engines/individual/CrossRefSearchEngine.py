@@ -13,10 +13,11 @@ Features:
 """
 
 import time
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from scitex import logging
 from scitex.scholar.metadata_engines.individual.CrossRefEngine import CrossRefEngine
+
 from .._BaseSearchEngine import BaseSearchEngine
 
 logger = logging.getLogger(__name__)
@@ -130,9 +131,11 @@ class CrossRefSearchEngine(CrossRefEngine, BaseSearchEngine):
             "publication": {
                 "year": year,
                 "year_engines": [self.name] if year else None,
-                "journal": item.get("container-title", [""])[0]
-                if item.get("container-title")
-                else None,
+                "journal": (
+                    item.get("container-title", [""])[0]
+                    if item.get("container-title")
+                    else None
+                ),
                 "journal_engines": [self.name] if item.get("container-title") else None,
                 "volume": item.get("volume"),
                 "issue": item.get("issue"),
@@ -140,15 +143,16 @@ class CrossRefSearchEngine(CrossRefEngine, BaseSearchEngine):
             },
             "metrics": {
                 "citation_count": item.get("is-referenced-by-count", 0),
-                "is_open_access": item.get("link", [{}])[0].get("content-type")
-                == "unspecified"
-                if item.get("link")
-                else False,
+                "is_open_access": (
+                    item.get("link", [{}])[0].get("content-type") == "unspecified"
+                    if item.get("link")
+                    else False
+                ),
             },
             "urls": {
-                "doi_url": f"https://doi.org/{item['DOI']}"
-                if item.get("DOI")
-                else None,
+                "doi_url": (
+                    f"https://doi.org/{item['DOI']}" if item.get("DOI") else None
+                ),
                 "publisher": item.get("URL"),
             },
         }

@@ -1,0 +1,549 @@
+figrecipe: '1.0'
+type: diagram
+created: '2026-02-16T09:33:50.663819'
+dpi: 200
+diagram:
+  title: SciTeX Ecosystem
+  width_mm: 1590.8000000000002
+  height_mm: 375.0
+  xlim:
+  - -789.5999999999999
+  - 801.2000000000002
+  ylim:
+  - 2.0
+  - 377.0
+  boxes:
+  - id: scripts_box
+    title: Python Script
+    subtitle: null
+    content: []
+    emphasis: muted
+    shape: document
+    fill_color: '#EFEFEF'
+    border_color: '#808080'
+    title_color: '#595959'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: linter_box
+    title: Automatic translation
+    subtitle: Smooth Migration to SciTeX
+    content:
+    - scitex.linter
+    emphasis: normal
+    shape: rounded
+    fill_color: !!python/tuple
+    - 0.89
+    - 0.37
+    - 0.2
+    - 0.1
+    border_color: !!python/tuple
+    - 0.89
+    - 0.37
+    - 0.2
+    - 0.9
+    title_color: '#4C4C4C'
+    padding_mm: 8
+    margin_mm: 0.0
+  - id: source_box
+    title: Source Data
+    subtitle: null
+    content: []
+    emphasis: normal
+    shape: cylinder
+    fill_color: '#EBEBEB'
+    border_color: '#808080'
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: core_box
+    title: Core Modules
+    subtitle: Infrastructure of All Python Scripts in SciTeX
+    content:
+    - scitex.io
+    - scitex.config
+    - scitex.logger
+    - '@scitex.session'
+    - scitex.template
+    - scitex.repro
+    - scitex.rng
+    - scitex.plt
+    - (figrecipe)
+    - scitex.stats
+    emphasis: normal
+    shape: rounded
+    fill_color: !!python/tuple
+    - 0.0
+    - 0.5
+    - 0.75
+    - 0.1
+    border_color: !!python/tuple
+    - 0.0
+    - 0.5
+    - 0.75
+    - 0.9
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: domain_box
+    title: Domain-specific Modules
+    subtitle: Calculation Modules for Specific Fields
+    content:
+    - scitex.dsp
+    - scitex.ml
+    - scitex.nn
+    emphasis: normal
+    shape: rounded
+    fill_color: !!python/tuple
+    - 0.0
+    - 0.0
+    - 0.39
+    - 0.1
+    border_color: !!python/tuple
+    - 0.0
+    - 0.0
+    - 0.39
+    - 0.9
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: writer_box
+    title: Writer
+    subtitle: LaTeX Compilation
+    content:
+    - scitex.writer
+    - Direct Link with bibliography, figures, and tables
+    emphasis: normal
+    shape: rounded
+    fill_color: !!python/tuple
+    - 0.5
+    - 0.0
+    - 0.0
+    - 0.1
+    border_color: !!python/tuple
+    - 0.5
+    - 0.0
+    - 0.0
+    - 0.9
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: outputs_box
+    title: Outputs
+    subtitle: Artifacts from Analysis
+    content:
+    - Processed Data
+    - Intermediate Results
+    - Statistical Results
+    - Figures
+    - Tables
+    emphasis: normal
+    shape: rounded
+    fill_color: !!python/tuple
+    - 0.9
+    - 0.63
+    - 0.08
+    - 0.1
+    border_color: !!python/tuple
+    - 0.9
+    - 0.63
+    - 0.08
+    - 0.9
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: scholar_box
+    title: Scholar
+    subtitle: Literature management
+    content:
+    - scitex.scholar
+    - CrossRef Local Database (167M+ papers)
+    - OpenAlex Local Database (284M+ papers)
+    emphasis: normal
+    shape: rounded
+    fill_color: !!python/tuple
+    - 0.78
+    - 0.2
+    - 1.0
+    - 0.1
+    border_color: !!python/tuple
+    - 0.78
+    - 0.2
+    - 1.0
+    - 0.9
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: manuscript_box
+    title: Manuscript
+    subtitle: null
+    content:
+    - Manuscript
+    - Supplementary materials
+    - Revision Letter
+    emphasis: muted
+    shape: document
+    fill_color: '#EFEFEF'
+    border_color: '#808080'
+    title_color: '#595959'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: cloud_box
+    title: Cloud
+    subtitle: Web Interface and collaboration
+    content:
+    - scitex.cloud
+    - https://scitex.ai
+    - self-host
+    emphasis: muted
+    shape: stadium
+    fill_color: '#EFEFEF'
+    border_color: '#808080'
+    title_color: '#595959'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: spacer_box
+    title: ''
+    subtitle: null
+    content: []
+    emphasis: normal
+    shape: rounded
+    fill_color: none
+    border_color: none
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: source_pad_box
+    title: ''
+    subtitle: null
+    content: []
+    emphasis: normal
+    shape: rounded
+    fill_color: none
+    border_color: none
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  - id: paper_pad_box
+    title: ''
+    subtitle: null
+    content: []
+    emphasis: normal
+    shape: rounded
+    fill_color: none
+    border_color: none
+    title_color: '#4C4C4C'
+    padding_mm: 5.0
+    margin_mm: 0.0
+  containers:
+  - id: upper_row_container
+    title: null
+    children:
+    - scripts_box
+    - linter_box
+    - spacer_box
+    - cloud_box
+    emphasis: muted
+    fill_color: none
+    border_color: none
+    direction: row
+    gap_mm: 8.0
+    padding_mm: 8.0
+  - id: analysis_container
+    title: Analysis & Visualization
+    children:
+    - core_box
+    - domain_box
+    emphasis: muted
+    fill_color: !!python/tuple
+    - 0.08
+    - 0.78
+    - 0.78
+    - 0.1
+    border_color: !!python/tuple
+    - 0.08
+    - 0.78
+    - 0.78
+    - 0.9
+    direction: row
+    gap_mm: 8.0
+    padding_mm: 8.0
+  - id: main_container
+    title: null
+    children:
+    - analysis_container
+    - outputs_box
+    - writer_box
+    - scholar_box
+    emphasis: muted
+    fill_color: '#EFEFEF'
+    border_color: '#808080'
+    direction: column
+    gap_mm: 8.0
+    padding_mm: 8.0
+  - id: source_col_container
+    title: null
+    children:
+    - source_box
+    - source_pad_box
+    emphasis: muted
+    fill_color: none
+    border_color: none
+    direction: column
+    gap_mm: 8.0
+    padding_mm: 8.0
+  - id: paper_col_container
+    title: null
+    children:
+    - paper_pad_box
+    - manuscript_box
+    emphasis: muted
+    fill_color: none
+    border_color: none
+    direction: column
+    gap_mm: 8.0
+    padding_mm: 8.0
+  - id: main_row_container
+    title: null
+    children:
+    - source_col_container
+    - main_container
+    - paper_col_container
+    emphasis: muted
+    fill_color: none
+    border_color: none
+    direction: row
+    gap_mm: 8.0
+    padding_mm: 8.0
+  arrows:
+  - source: scripts_box
+    target: linter_box
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0.0
+    linewidth_mm: 0.5
+  - source: linter_box
+    target: core_box
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0.0
+    linewidth_mm: 0.5
+  - source: source_box
+    target: analysis_container
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: -0.3
+    linewidth_mm: 0.5
+  - source: outputs_box
+    target: writer_box
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0.0
+    linewidth_mm: 0.5
+  - source: outputs_box
+    target: analysis_container
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0.4
+    linewidth_mm: 0.5
+  - source: analysis_container
+    target: outputs_box
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0.4
+    linewidth_mm: 0.5
+  - source: scholar_box
+    target: writer_box
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0.0
+    linewidth_mm: 0.5
+  - source: writer_box
+    target: manuscript_box
+    source_anchor: auto
+    target_anchor: auto
+    label: null
+    style: solid
+    color: null
+    curve: 0.0
+    linewidth_mm: 0.5
+  - source: manuscript_box
+    target: outputs_box
+    source_anchor: auto
+    target_anchor: auto
+    label: 'scitex.clew
+
+      verification'
+    style: solid
+    color: !!python/tuple
+    - 1.0
+    - 0.27
+    - 0.2
+    - 0.9
+    curve: 0.0
+    linewidth_mm: 0.5
+  - source: outputs_box
+    target: analysis_container
+    source_anchor: top-left
+    target_anchor: bottom-left
+    label: 'scitex.clew
+
+      verification'
+    style: solid
+    color: !!python/tuple
+    - 1.0
+    - 0.27
+    - 0.2
+    - 0.9
+    curve: 0.4
+    linewidth_mm: 0.5
+  - source: analysis_container
+    target: source_box
+    source_anchor: left
+    target_anchor: right
+    label: 'scitex.clew
+
+      verification'
+    style: solid
+    color: !!python/tuple
+    - 1.0
+    - 0.27
+    - 0.2
+    - 0.9
+    curve: -0.3
+    linewidth_mm: 0.5
+  positions:
+    scripts_box:
+      x_mm: -6.600000000000005
+      y_mm: 331.0
+      width_mm: 38.6
+      height_mm: 36.0
+    linter_box:
+      x_mm: !!python/object/apply:numpy._core.multiarray.scalar
+      - &id001 !!python/object/apply:numpy.dtype
+        args:
+        - f8
+        - false
+        - true
+        state: !!python/tuple
+        - 3
+        - <
+        - null
+        - null
+        - null
+        - -1
+        - -1
+        - 0
+      - !!binary |
+        mZmZmZlZSkA=
+      y_mm: !!python/object/apply:numpy._core.multiarray.scalar
+      - *id001
+      - !!binary |
+        AAAAAACwdEA=
+      width_mm: 50
+      height_mm: 36.0
+    source_box:
+      x_mm: -84.79999999999998
+      y_mm: 259.0
+      width_mm: 34.2
+      height_mm: 40
+    core_box:
+      x_mm: 19.900000000000013
+      y_mm: 227.5
+      width_mm: 111.2
+      height_mm: 71.0
+    domain_box:
+      x_mm: 131.40000000000003
+      y_mm: 227.5
+      width_mm: 95.80000000000001
+      height_mm: 71.0
+    writer_box:
+      x_mm: 71.80000000000001
+      y_mm: 92.5
+      width_mm: 231.0
+      height_mm: 31.0
+    outputs_box:
+      x_mm: 71.80000000000001
+      y_mm: 146.0
+      width_mm: 231.0
+      height_mm: 46.0
+    scholar_box:
+      x_mm: 71.80000000000001
+      y_mm: 44.0
+      width_mm: 231.0
+      height_mm: 36.0
+    manuscript_box:
+      x_mm: 241.60000000000002
+      y_mm: 131.0
+      width_mm: 60.6
+      height_mm: 40
+    cloud_box:
+      x_mm: 156.79999999999998
+      y_mm: 331.0
+      width_mm: 78.2
+      height_mm: 36.0
+    spacer_box:
+      x_mm: 97.69999999999999
+      y_mm: 331.0
+      width_mm: 24.0
+      height_mm: 36.0
+    source_pad_box:
+      x_mm: -84.79999999999998
+      y_mm: 222.0
+      width_mm: 34.2
+      height_mm: 18.0
+    paper_pad_box:
+      x_mm: 241.60000000000002
+      y_mm: 219.0
+      width_mm: 60.6
+      height_mm: 120
+    upper_row_container:
+      x_mm: 85.0
+      y_mm: 331.0
+      width_mm: 237.8
+      height_mm: 52.0
+    analysis_container:
+      x_mm: 71.80000000000001
+      y_mm: 231.5
+      width_mm: 231.0
+      height_mm: 95.0
+    main_container:
+      x_mm: 71.80000000000001
+      y_mm: 152.5
+      width_mm: 247.0
+      height_mm: 269.0
+    source_col_container:
+      x_mm: -84.79999999999998
+      y_mm: 152.5
+      width_mm: 50.2
+      height_mm: 269.0
+    paper_col_container:
+      x_mm: 241.60000000000002
+      y_mm: 152.5
+      width_mm: 76.6
+      height_mm: 269.0
+    main_row_container:
+      x_mm: 85.0
+      y_mm: 152.5
+      width_mm: 405.79999999999995
+      height_mm: 285.0

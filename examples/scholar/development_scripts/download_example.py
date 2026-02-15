@@ -11,10 +11,10 @@ from scitex.scholar import Scholar, ScholarConfig
 config = ScholarConfig(
     # Required for PubMed searches
     pubmed_email="your-email@example.com",
-    
+
     # Enable Sci-Hub (requires ethical acknowledgment)
     acknowledge_scihub_ethical_usage=True,
-    
+
     # Optional: Get better citation data
     # semantic_scholar_api_key="your-api-key",
 )

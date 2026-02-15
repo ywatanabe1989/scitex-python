@@ -4,6 +4,7 @@
 # File: /data/gpfs/projects/punim2354/ywatanabe/SciTeX-Code/src/scitex/db/_sqlite3/_SQLite3Mixins/_ColumnMixin.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -11,8 +12,9 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
 import time
-from scitex import logging
 from typing import Any, Dict, List, Optional, Tuple
+
+from scitex import logging
 
 logger = logging.getLogger(__name__)
 
@@ -159,23 +161,27 @@ class _ColumnMixin:
 
             # Create temporary table
             temp_table = f"{table_name}_temp_{int(time.time())}"
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 CREATE TABLE {temp_table} (
                     {", ".join(column_defs)}
                 )
-            """)
+            """
+            )
 
             # Copy data in batches for progress reporting
             batch_size = 10000
             offset = 0
 
             while offset < total_rows:
-                cursor.execute(f"""
+                cursor.execute(
+                    f"""
                     INSERT INTO {temp_table} ({", ".join(column_names)})
                     SELECT {", ".join(column_names)}
                     FROM {table_name}
                     LIMIT {batch_size} OFFSET {offset}
-                """)
+                """
+                )
 
                 offset += batch_size
                 if progress_callback:
@@ -184,12 +190,14 @@ class _ColumnMixin:
                     )
 
             # Get indexes, triggers, and views
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 SELECT sql FROM sqlite_master
                 WHERE type IN ('index', 'trigger', 'view')
                 AND tbl_name = '{table_name}'
                 AND sql IS NOT NULL
-            """)
+            """
+            )
             dependencies = cursor.fetchall()
 
             # Drop old table
@@ -249,10 +257,12 @@ class _ColumnMixin:
             if self.supports_rename_column():
                 # Use native RENAME COLUMN
                 cursor = self.cursor
-                cursor.execute(f"""
+                cursor.execute(
+                    f"""
                     ALTER TABLE {table_name}
                     RENAME COLUMN {old_name} TO {new_name}
-                """)
+                """
+                )
                 self.conn.commit()
                 logger.info(f"Renamed column {old_name} to {new_name} in {table_name}")
                 return True
@@ -335,17 +345,21 @@ class _ColumnMixin:
 
             # Create temp table with new column order
             temp_table = f"{table_name}_reorder_{int(time.time())}"
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 CREATE TABLE {temp_table} (
                     {", ".join(column_defs)}
                 )
-            """)
+            """
+            )
 
             # Copy data
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 INSERT INTO {temp_table} ({", ".join(column_order)})
                 SELECT {", ".join(column_order)} FROM {table_name}
-            """)
+            """
+            )
 
             # Swap tables
             cursor.execute(f"DROP TABLE {table_name}")
@@ -526,17 +540,21 @@ class _ColumnMixin:
 
             # Create temp table
             temp_table = f"{table_name}_drop_{int(time.time())}"
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 CREATE TABLE {temp_table} (
                     {", ".join(column_defs)}
                 )
-            """)
+            """
+            )
 
             # Copy data
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 INSERT INTO {temp_table} ({", ".join(column_names_keep)})
                 SELECT {", ".join(column_names_keep)} FROM {table_name}
-            """)
+            """
+            )
 
             # Swap tables
             cursor.execute(f"DROP TABLE {table_name}")

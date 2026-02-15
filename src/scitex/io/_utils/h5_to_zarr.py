@@ -27,18 +27,19 @@ THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/io/utils/h5_to_zarr.py"
 """
 
 """Imports"""
-import h5py
-import zarr
-import numpy as np
 import os
 from pathlib import Path
-from typing import Optional, Union, Dict, Any, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import h5py
+import numpy as np
+import zarr
 from tqdm import tqdm
 
 from scitex import logging
+from scitex.logging import FileFormatError
+from scitex.logging import IOError as SciTeXIOError
 from scitex.logging import (
-    IOError as SciTeXIOError,
-    FileFormatError,
     PathNotFoundError,
     check_file_exists,
     check_path,
@@ -59,7 +60,7 @@ def _get_zarr_compressor(
     if not isinstance(compressor, str):
         return compressor
 
-    from numcodecs import Zstd, LZ4, GZip, Blosc
+    from numcodecs import LZ4, Blosc, GZip, Zstd
 
     compressor_map = {
         "zstd": Zstd(level=3),
@@ -164,9 +165,11 @@ def _migrate_dataset(
                     # String scalar - store as 0-d string array
                     zarr_array = zarr_parent.create_dataset(
                         name,
-                        data=str(value)
-                        if isinstance(value, str)
-                        else value.decode("utf-8", errors="replace"),
+                        data=(
+                            str(value)
+                            if isinstance(value, str)
+                            else value.decode("utf-8", errors="replace")
+                        ),
                         dtype=str,
                         compressor=None,
                     )
@@ -187,9 +190,11 @@ def _migrate_dataset(
                     # String data - convert to string array
                     data = np.array(
                         [
-                            str(item)
-                            if isinstance(item, str)
-                            else item.decode("utf-8", errors="replace")
+                            (
+                                str(item)
+                                if isinstance(item, str)
+                                else item.decode("utf-8", errors="replace")
+                            )
                             for item in h5_dataset[:]
                         ]
                     )

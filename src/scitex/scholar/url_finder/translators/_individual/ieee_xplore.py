@@ -18,11 +18,13 @@ IEEE Xplore provides academic papers in electrical engineering, computer science
 and electronics.
 """
 
-import re
 import json
-from typing import List, Dict, Optional
+import re
+from typing import Dict, List, Optional
 from urllib.parse import quote, urljoin
+
 from playwright.async_api import Page
+
 from .._core.base import BaseTranslator
 
 

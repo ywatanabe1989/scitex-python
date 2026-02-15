@@ -15,61 +15,61 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/impact_factor/jcr/ImpactFactorJCREngine.py
 # # ----------------------------------------
 # from __future__ import annotations
-# 
+#
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/scholar/impact_factor/jcr/ImpactFactorJCREngine.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Functionalities:
 #   - Query JCR database for journal impact factors
 #   - Fast SQLite-based lookup
 #   - Returns impact factor, quartile, ISSN information
 #   - Handles missing data gracefully
-# 
+#
 # Dependencies:
 #   - packages:
 #     - sqlalchemy
 #     - sql_manager
-# 
+#
 # IO:
 #   - input-files:
 #     - ../../data/impact_factor/impact_factor.db (SQLite database)
 #   - output-files:
 #     - None (read-only queries)
 # """
-# 
+#
 # """Imports"""
 # import argparse
 # import functools
-# 
+#
 # # Suppress SQLAlchemy engine logs BEFORE importing sql_manager/sqlalchemy
 # import logging as stdlib_logging
 # from pathlib import Path
 # from typing import Dict, List, Optional
-# 
+#
 # stdlib_logging.getLogger("sqlalchemy").setLevel(stdlib_logging.WARNING)
 # stdlib_logging.getLogger("sqlalchemy.engine").setLevel(stdlib_logging.WARNING)
 # stdlib_logging.getLogger("sqlalchemy.engine.Engine").setLevel(stdlib_logging.WARNING)
 # stdlib_logging.getLogger("sqlalchemy.pool").setLevel(stdlib_logging.WARNING)
-# 
+#
 # from sql_manager import DynamicModel, Manager
 # from sqlalchemy import Column, Float, String, func
-# 
+#
 # import scitex as stx
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
+#
 # """Parameters"""
 # # Use absolute path based on package location
 # # __file__ is in: src/scitex/scholar/impact_factor/jcr/ImpactFactorJCREngine.py
 # # We need: data/scholar/impact_factor/JCR_IF_2024.db (sibling to src/)
 # _PACKAGE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
 # DEFAULT_DB = _PACKAGE_DIR / "data" / "scholar" / "impact_factor" / "JCR_IF_2024.db"
-# 
+#
 # """Functions & Classes"""
 # # Database model
 # columns = {
@@ -81,11 +81,11 @@ if __name__ == "__main__":
 #     "issn": Column(String, comment="the ISSN of journal", default="."),
 #     "eissn": Column(String, comment="the eISSN of journal", default="."),
 # }
-# 
+#
 # FactorData = DynamicModel("Factor", columns, "factor")
 # FactorManager = functools.partial(Manager, FactorData)
-# 
-# 
+#
+#
 # # Utility functions
 # def record_to_dict(record) -> Dict:
 #     """Convert SQLAlchemy record to dictionary."""
@@ -98,19 +98,19 @@ if __name__ == "__main__":
 #         "jcr": record.jcr,
 #         "nlm_id": record.nlm_id,
 #     }
-# 
-# 
+#
+#
 # class ImpactFactorJCREngine:
 #     """
 #     JCR database engine for impact factor lookup.
-# 
+#
 #     Fast SQLite-based queries for journal metrics.
 #     """
-# 
+#
 #     def __init__(self, dbfile=None):
 #         """
 #         Initialize JCR engine.
-# 
+#
 #         Args:
 #             dbfile: Path to SQLite database (uses DEFAULT_DB if None)
 #         """
@@ -118,29 +118,29 @@ if __name__ == "__main__":
 #         # Disable SQL echo to reduce log verbosity
 #         # Pass a WARNING-level logger to suppress sql_manager's verbose output
 #         from simple_loggers import SimpleLogger
-# 
+#
 #         quiet_logger = SimpleLogger("Manager")
 #         quiet_logger.setLevel(stdlib_logging.WARNING)
 #         self.manager = FactorManager(self.dbfile, echo=False, logger=quiet_logger)
 #         self.query = self.manager.session.query(FactorData)
-# 
+#
 #     def search(self, value: str, key: Optional[str] = None) -> List[Dict]:
 #         """
 #         Search for journal in database.
-# 
+#
 #         Args:
 #             value: Search value (journal name, ISSN, etc.)
 #             key: Specific field to search (None for all fields)
-# 
+#
 #         Returns
 #         -------
 #             List of matching journal records as dictionaries
 #         """
 #         from scitex.context import suppress_output
-# 
+#
 #         default_keys = ["issn", "eissn", "nlm_id", "journal", "journal_abbr"]
 #         keys = [key] if key else default_keys
-# 
+#
 #         # Suppress SQLAlchemy echo output during queries
 #         with suppress_output():
 #             for field in keys:
@@ -150,48 +150,48 @@ if __name__ == "__main__":
 #                     result = self.query.filter(
 #                         func.lower(FactorData.__dict__[field]) == func.lower(value)
 #                     )
-# 
+#
 #                 if result.count():
 #                     data = [record_to_dict(record) for record in result]
 #                     return data
-# 
+#
 #         return []
-# 
+#
 #     def filter(self, min_value=None, max_value=None, limit=None):
 #         """
 #         Filter journals by impact factor range.
-# 
+#
 #         Args:
 #             min_value: Minimum impact factor
 #             max_value: Maximum impact factor
 #             limit: Maximum number of results
-# 
+#
 #         Returns
 #         -------
 #             List of matching journal records
 #         """
 #         from scitex.context import suppress_output
-# 
+#
 #         # Suppress SQLAlchemy echo output during queries
 #         with suppress_output():
 #             query = self.query
-# 
+#
 #             if min_value is not None:
 #                 query = query.filter(FactorData.factor >= min_value)
-# 
+#
 #             if max_value is not None:
 #                 query = query.filter(FactorData.factor <= max_value)
-# 
+#
 #             if limit and query.count() > limit:
 #                 query = query.limit(limit)
-# 
+#
 #             return [record_to_dict(record) for record in query]
-# 
-# 
+#
+#
 # def main(args):
 #     """Main function for CLI usage."""
 #     engine = ImpactFactorJCREngine(args.database)
-# 
+#
 #     if args.search:
 #         results = engine.search(args.search, args.key)
 #         if results:
@@ -206,7 +206,7 @@ if __name__ == "__main__":
 #         else:
 #             logger.warning(f"No results found for: {args.search}")
 #         return 0
-# 
+#
 #     if args.filter:
 #         results = engine.filter(
 #             min_value=args.min_factor,
@@ -219,11 +219,11 @@ if __name__ == "__main__":
 #         if len(results) > 10:
 #             logger.info(f"  ... and {len(results) - 10} more")
 #         return 0
-# 
+#
 #     logger.error("No action specified. Use --search or --filter")
 #     return 1
-# 
-# 
+#
+#
 # def parse_args() -> argparse.Namespace:
 #     """Parse command line arguments."""
 #     parser = argparse.ArgumentParser(
@@ -279,18 +279,18 @@ if __name__ == "__main__":
 #     )
 #     args = parser.parse_args()
 #     return args
-# 
-# 
+#
+#
 # def run_main() -> None:
 #     """Initialize scitex framework, run main function, and cleanup."""
 #     global CONFIG, CC, sys, plt, rng
-# 
+#
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     args = parse_args()
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
 #         sys,
 #         plt,
@@ -300,9 +300,9 @@ if __name__ == "__main__":
 #         verbose=False,
 #         agg=True,
 #     )
-# 
+#
 #     exit_status = main(args)
-# 
+#
 #     stx.session.close(
 #         CONFIG,
 #         verbose=False,
@@ -310,28 +310,28 @@ if __name__ == "__main__":
 #         message="",
 #         exit_status=exit_status,
 #     )
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     run_main()
-# 
-# 
+#
+#
 # """
 # Examples:
-# 
+#
 # # Search for a specific journal
 # python -m scitex.scholar.impact_factor.jcr.ImpactFactorJCREngine \
 #     --search "Nature"
-# 
+#
 # # Search by ISSN
 # python -m scitex.scholar.impact_factor.jcr.ImpactFactorJCREngine \
 #     --search "0028-0836" --key issn
-# 
+#
 # # Filter journals by impact factor range
 # python -m scitex.scholar.impact_factor.jcr.ImpactFactorJCREngine \
 #     --filter --min-factor 10.0 --max-factor 50.0 --limit 20
 # """
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

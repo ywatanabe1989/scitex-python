@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/auth/AuthenticationGateway.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/auth/core/AuthenticationGateway.py"
@@ -116,9 +117,7 @@ class AuthenticationGateway:
         url_context = URLContext(doi=doi, title=title)
 
         # Step 1: Build OpenURL
-        from scitex.scholar.auth.gateway._OpenURLResolver import (
-            OpenURLResolver,
-        )
+        from scitex.scholar.auth.gateway._OpenURLResolver import OpenURLResolver
 
         resolver = OpenURLResolver(config=self.config)
         openurl = resolver._build_query(url_context.doi)
@@ -185,9 +184,7 @@ class AuthenticationGateway:
         Returns:
             URLContext with url and auth_gateway_url populated
         """
-        from scitex.scholar.auth.gateway._OpenURLResolver import (
-            OpenURLResolver,
-        )
+        from scitex.scholar.auth.gateway._OpenURLResolver import OpenURLResolver
 
         resolver = OpenURLResolver(config=self.config)
 
@@ -344,9 +341,7 @@ class AuthenticationGateway:
         # Visit OpenURL and click through to publisher
         # This uses the existing OpenURLResolver flow
         from scitex.browser import browser_logger
-        from scitex.scholar.auth.gateway._OpenURLResolver import (
-            OpenURLResolver,
-        )
+        from scitex.scholar.auth.gateway._OpenURLResolver import OpenURLResolver
 
         resolver = OpenURLResolver(config=self.config)
         page = await context.new_page()
@@ -398,9 +393,7 @@ async def main_async():
     3. Use the context for subsequent operations
     """
     from scitex.scholar.auth.ScholarAuthManager import ScholarAuthManager
-    from scitex.scholar.browser.ScholarBrowserManager import (
-        ScholarBrowserManager,
-    )
+    from scitex.scholar.browser.ScholarBrowserManager import ScholarBrowserManager
     from scitex.scholar.config import ScholarConfig
 
     # Initialize components

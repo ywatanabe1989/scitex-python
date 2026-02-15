@@ -44,7 +44,9 @@ class Encoding:
     """
 
     traces: List[TraceEncoding] = field(default_factory=list)
-    axes: Dict[str, AxesConfig] = field(default_factory=dict)  # {"x": AxesConfig, "y": AxesConfig}
+    axes: Dict[str, AxesConfig] = field(
+        default_factory=dict
+    )  # {"x": AxesConfig, "y": AxesConfig}
 
     # Schema metadata
     schema_name: str = "fsb.encoding"
@@ -66,7 +68,9 @@ class Encoding:
         axes = {}
         axes_data = data.get("axes", {})
         for key, val in axes_data.items():
-            axes[key] = AxesConfig.from_dict(val) if isinstance(val, dict) else AxesConfig()
+            axes[key] = (
+                AxesConfig.from_dict(val) if isinstance(val, dict) else AxesConfig()
+            )
         return cls(
             traces=[TraceEncoding.from_dict(t) for t in data.get("traces", [])],
             axes=axes,

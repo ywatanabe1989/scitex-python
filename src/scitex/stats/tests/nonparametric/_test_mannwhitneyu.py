@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-10-01 17:45:00 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/stats/tests/nonparametric/_test_mannwhitneyu.py
-# ----------------------------------------
-from __future__ import annotations
-import os
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
 
+r"""
+Mann-Whitney U test (Wilcoxon rank-sum test).
 
-"""
 Functionalities:
   - Perform Mann-Whitney U test (Wilcoxon rank-sum test)
   - Non-parametric test for comparing two independent samples
@@ -26,34 +20,42 @@ IO:
   - output: Test results (dict or DataFrame) and optional figure
 """
 
-"""Imports"""
-import sys
+from __future__ import annotations
+
 import argparse
+import os
+from typing import Literal, Optional, Union
+
+import matplotlib.axes
 import numpy as np
 import pandas as pd
-from typing import Union, Optional, Literal
 from scipy import stats
-import matplotlib.axes
+
 import scitex as stx
 from scitex.logging import getLogger
+from scitex.stats._utils._formatters import fmt_stat, fmt_sym
+
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
 
 logger = getLogger(__name__)
 
-"""Functions"""
-def test_mannwhitneyu(
-    x: Union[np.ndarray, pd.Series],
-    y: Union[np.ndarray, pd.Series],
-    var_x: str = 'x',
-    var_y: str = 'y',
-    alternative: Literal['two-sided', 'less', 'greater'] = 'two-sided',
+
+def test_mannwhitneyu(  # noqa: C901
+    x: Union[np.ndarray, pd.Series, str],
+    y: Union[np.ndarray, pd.Series, str],
+    var_x: str = "x",
+    var_y: str = "y",
+    alternative: Literal["two-sided", "less", "greater"] = "two-sided",
     alpha: float = 0.05,
     plot: bool = False,
     ax: Optional[matplotlib.axes.Axes] = None,
-    return_as: Literal['dict', 'dataframe'] = 'dict',
+    data: Union[pd.DataFrame, str, None] = None,
+    return_as: Literal["dict", "dataframe"] = "dict",
     decimals: int = 3,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> Union[dict, pd.DataFrame]:
-    """
+    r"""
     Perform Mann-Whitney U test (Wilcoxon rank-sum test).
 
     Parameters
@@ -71,6 +73,9 @@ def test_mannwhitneyu(
     ax : matplotlib.axes.Axes, optional
         Axes object to plot on. If None and plot=True, creates new figure.
         If provided, automatically enables plotting.
+    data : DataFrame, str, or None, optional
+        DataFrame or CSV path. When provided, string values for x/y
+        are resolved as column names (seaborn-style).
     return_as : {'dict', 'dataframe'}, default 'dict'
         Output format
     decimals : int, default 3
@@ -105,7 +110,7 @@ def test_mannwhitneyu(
     **Test Statistic U**:
 
     .. math::
-        U = n_1 n_2 + \\frac{n_1(n_1+1)}{2} - R_1
+        U = n_1 n_2 + \frac{n_1(n_1+1)}{2} - R_1
 
     Where:
     - n_1, n_2: Sample sizes
@@ -114,12 +119,12 @@ def test_mannwhitneyu(
     **Effect Size (Rank-biserial correlation)**:
 
     .. math::
-        r = 1 - \\frac{2U}{n_1 n_2}
+        r = 1 - \frac{2U}{n_1 n_2}
 
     Or equivalently:
 
     .. math::
-        r = \\frac{2(\\bar{R}_1 - \\bar{R}_2)}{n_1 + n_2}
+        r = \frac{2(\bar{R}_1 - \bar{R}_2)}{n_1 + n_2}
 
     Interpretation:
     - |r| < 0.1:  negligible
@@ -177,8 +182,15 @@ def test_mannwhitneyu(
     >>> # With verbose output
     >>> result = test_mannwhitneyu(x, y, verbose=True)
     """
+    # Resolve column names from DataFrame (seaborn-style data= parameter)
+    if data is not None:
+        from scitex.stats._utils._csv_support import resolve_columns
+
+        resolved = resolve_columns(data, x=x, y=y)
+        x, y = resolved["x"], resolved["y"]
+
     from scitex.stats._utils._formatters import p2stars
-    from scitex.stats._utils._normalizers import force_dataframe, convert_results
+    from scitex.stats._utils._normalizers import convert_results, force_dataframe
 
     # Convert to numpy arrays and remove NaN
     x = np.asarray(x)
@@ -204,42 +216,46 @@ def test_mannwhitneyu(
     # Interpret effect size
     r_abs = abs(r)
     if r_abs < 0.1:
-        effect_interp = 'negligible'
+        effect_interp = "negligible"
     elif r_abs < 0.3:
-        effect_interp = 'small'
+        effect_interp = "small"
     elif r_abs < 0.5:
-        effect_interp = 'medium'
+        effect_interp = "medium"
     else:
-        effect_interp = 'large'
+        effect_interp = "large"
 
     # Compile results
     result = {
-        'test_method': 'Mann-Whitney U test',
-        'statistic': round(u_stat, decimals),
-        'stat_symbol': 'U',
-        'n_x': n_x,
-        'n_y': n_y,
-        'var_x': var_x,
-        'var_y': var_y,
-        'pvalue': round(pvalue, decimals),
-        'stars': p2stars(pvalue),
-        'alpha': alpha,
-        'significant': rejected,
-        'effect_size': round(r, decimals),
-        'effect_size_metric': 'rank-biserial correlation',
-        'effect_size_interpretation': effect_interp,
-        'H0': f'Distributions of {var_x} and {var_y} have equal medians',
+        "test_method": "Mann-Whitney U test",
+        "statistic": round(u_stat, decimals),
+        "stat_symbol": "U",
+        "n_x": n_x,
+        "n_y": n_y,
+        "var_x": var_x,
+        "var_y": var_y,
+        "pvalue": round(pvalue, decimals),
+        "stars": p2stars(pvalue),
+        "alpha": alpha,
+        "significant": rejected,
+        "effect_size": round(r, decimals),
+        "effect_size_metric": "rank-biserial correlation",
+        "effect_size_interpretation": effect_interp,
+        "H0": f"Distributions of {var_x} and {var_y} have equal medians",
     }
 
     # Add recommendation
     if rejected:
-        result['recommendation'] = f"{var_x} and {var_y} have significantly different medians."
+        result["recommendation"] = (
+            f"{var_x} and {var_y} have significantly different medians."
+        )
     else:
-        result['recommendation'] = "No significant difference in medians detected."
+        result["recommendation"] = "No significant difference in medians detected."
 
     # Log results if verbose
     if verbose:
-        logger.info(f"Mann-Whitney U: U = {u_stat:.3f}, p = {pvalue:.4f} {p2stars(pvalue)}")
+        logger.info(
+            f"Mann-Whitney U: U = {u_stat:.3f}, p = {pvalue:.4f} {p2stars(pvalue)}"
+        )
         logger.info(f"Rank-biserial r = {r:.3f} ({effect_interp})")
 
     # Auto-enable plotting if ax is provided
@@ -249,13 +265,13 @@ def test_mannwhitneyu(
     # Generate plot if requested
     if plot:
         if ax is None:
-            fig, ax = stx.plt.subplots()
+            _fig, ax = stx.plt.subplots()
         _plot_mannwhitneyu(x, y, var_x, var_y, result, ax)
 
     # Convert to requested format
-    if return_as == 'dataframe':
+    if return_as == "dataframe":
         result = force_dataframe(result)
-    elif return_as not in ['dict', 'dataframe']:
+    elif return_as not in ["dict", "dataframe"]:
         return convert_results(result, return_as=return_as)
 
     return result
@@ -263,76 +279,28 @@ def test_mannwhitneyu(
 
 def _plot_mannwhitneyu(x, y, var_x, var_y, result, ax):
     """Create violin+swarm visualization on given axes."""
-    positions = [0, 1]
-    data = [x, y]
-    colors = ["C0", "C1"]
-
-    # Violin plot (background, transparent)
-    parts = ax.violinplot(
-        data,
-        positions=positions,
-        widths=0.6,
-        showmeans=False,
-        showmedians=False,
-        showextrema=False,
+    from scitex.stats._plot_helpers import (
+        significance_bracket,
+        stats_text_box,
+        violin_swarm,
     )
 
-    for i, pc in enumerate(parts["bodies"]):
-        pc.set_facecolor(colors[i])
-        pc.set_alpha(0.3)
-        pc.set_edgecolor(colors[i])
-        pc.set_linewidth(1.5)
+    violin_swarm(ax, [x, y], [0, 1], [var_x, var_y])
+    significance_bracket(ax, 0, 1, result["stars"], [x, y])
 
-    # Swarm plot (foreground - scatter in front!)
-    np.random.seed(42)
-    for i, vals in enumerate(data):
-        y_vals = vals
-        x_vals = np.random.normal(positions[i], 0.04, size=len(vals))
-        ax.scatter(
-            x_vals, y_vals,
-            alpha=0.6,
-            s=40,
-            color=colors[i],
-            edgecolors='white',
-            linewidths=0.5,
-            zorder=3  # In front!
-        )
-
-    # Add median lines
-    for i, vals in enumerate(data):
-        median = np.median(vals)
-        ax.hlines(
-            median,
-            positions[i] - 0.3,
-            positions[i] + 0.3,
-            colors='black',
-            linewidth=2,
-            zorder=4
-        )
-
-    # Significance stars
-    y_max = max(np.max(x), np.max(y))
-    y_min = min(np.min(x), np.min(y))
-    y_range = y_max - y_min
-    sig_y = y_max + y_range * 0.05
-
-    ax.plot([0, 1], [sig_y, sig_y], 'k-', linewidth=1.5)
-    ax.text(
-        0.5, sig_y + y_range * 0.02,
-        result['stars'],
-        ha='center', va='bottom',
-        fontsize=14, fontweight='bold'
+    stats_text_box(
+        ax,
+        [
+            fmt_stat("U", result["statistic"]),
+            fmt_stat("p", result["pvalue"], fmt=".4f", stars=result["stars"]),
+            f"{fmt_sym('n_1')} = {result['n_x']}, {fmt_sym('n_2')} = {result['n_y']}",
+        ],
     )
 
-    ax.set_xticks(positions)
-    ax.set_xticklabels([var_x, var_y])
-    ax.set_ylabel('Value')
-    ax.set_title(f"Mann-Whitney U Test\nU = {result['statistic']:.2f}, p = {result['pvalue']:.4f} {result['stars']}")
-    ax.grid(True, alpha=0.3, axis='y')
+    ax.set_title("Mann-Whitney U Test")
 
 
-"""Main function"""
-def main(args):
+def main(args):  # noqa: C901
     """Demonstrate Mann-Whitney U test functionality."""
     logger.info("Demonstrating Mann-Whitney U test")
 
@@ -345,7 +313,7 @@ def main(args):
     x1 = np.random.normal(5, 1, 30)
     y1 = np.random.normal(6, 1, 30)
 
-    result1 = test_mannwhitneyu(x1, y1, var_x='Group A', var_y='Group B', verbose=True)
+    result1 = test_mannwhitneyu(x1, y1, var_x="Group A", var_y="Group B", verbose=True)
 
     # Example 2: Non-normal data
     logger.info("\n=== Example 2: Non-normal (skewed) data ===")
@@ -353,7 +321,9 @@ def main(args):
     x2 = np.random.exponential(2, 40)
     y2 = np.random.exponential(3, 40)
 
-    result2 = test_mannwhitneyu(x2, y2, var_x='Exp(λ=0.5)', var_y='Exp(λ=0.33)', verbose=True)
+    result2 = test_mannwhitneyu(
+        x2, y2, var_x="Exp(λ=0.5)", var_y="Exp(λ=0.33)", verbose=True
+    )
 
     # Example 3: With outliers
     logger.info("\n=== Example 3: Data with outliers ===")
@@ -361,16 +331,28 @@ def main(args):
     x3 = np.concatenate([np.random.normal(0, 1, 35), [10, 12]])
     y3 = np.random.normal(0.5, 1, 40)
 
-    result3 = test_mannwhitneyu(x3, y3, var_x='With Outliers', var_y='Normal', verbose=True)
+    result3 = test_mannwhitneyu(
+        x3, y3, var_x="With Outliers", var_y="Normal", verbose=True
+    )
     logger.info("Mann-Whitney U is robust to outliers")
 
     # Example 4: Ordinal data (Likert scale)
     logger.info("\n=== Example 4: Ordinal data (Likert scale) ===")
 
-    likert1 = np.random.choice([1, 2, 3, 4, 5], size=50, p=[0.05, 0.15, 0.40, 0.30, 0.10])
-    likert2 = np.random.choice([1, 2, 3, 4, 5], size=50, p=[0.05, 0.10, 0.25, 0.35, 0.25])
+    likert1 = np.random.choice(
+        [1, 2, 3, 4, 5], size=50, p=[0.05, 0.15, 0.40, 0.30, 0.10]
+    )
+    likert2 = np.random.choice(
+        [1, 2, 3, 4, 5], size=50, p=[0.05, 0.10, 0.25, 0.35, 0.25]
+    )
 
-    result4 = test_mannwhitneyu(likert1, likert2, var_x='Condition A', var_y='Condition B', verbose=True)
+    result4 = test_mannwhitneyu(
+        likert1,
+        likert2,
+        var_x="Condition A",
+        var_y="Condition B",
+        verbose=True,
+    )
     logger.info(f"Medians: {np.median(likert1):.1f} vs {np.median(likert2):.1f}")
 
     # Example 5: One-sided tests
@@ -380,10 +362,10 @@ def main(args):
     y5 = np.random.normal(6, 1, 40)
 
     logger.info("Two-sided:")
-    result_two = test_mannwhitneyu(x5, y5, alternative='two-sided', verbose=True)
+    test_mannwhitneyu(x5, y5, alternative="two-sided", verbose=True)
 
     logger.info("\nOne-sided (less):")
-    result_less = test_mannwhitneyu(x5, y5, alternative='less', verbose=True)
+    test_mannwhitneyu(x5, y5, alternative="less", verbose=True)
 
     # Example 6: With visualization
     logger.info("\n=== Example 6: Complete analysis with visualization ===")
@@ -392,11 +374,7 @@ def main(args):
     y6 = np.random.gamma(3, 2, 50)
 
     result6 = test_mannwhitneyu(
-        x6, y6,
-        var_x='Gamma(k=2)',
-        var_y='Gamma(k=3)',
-        plot=True,
-        verbose=True
+        x6, y6, var_x="Gamma(k=2)", var_y="Gamma(k=3)", plot=True, verbose=True
     )
     stx.io.save(stx.plt.gcf(), "./mannwhitneyu_example6.jpg")
     stx.plt.close()
@@ -411,19 +389,19 @@ def main(args):
     y_norm = np.random.normal(5.5, 1, 50)
 
     logger.info("Mann-Whitney U:")
-    mwu_result = test_mannwhitneyu(x_norm, y_norm, verbose=True)
+    test_mannwhitneyu(x_norm, y_norm, verbose=True)
     logger.info("\nt-test:")
-    ttest_result = test_ttest_ind(x_norm, y_norm, verbose=True)
+    test_ttest_ind(x_norm, y_norm, verbose=True)
 
     # Non-normal data - MWU more appropriate
     x_exp = np.random.exponential(2, 50)
     y_exp = np.random.exponential(2.5, 50)
 
-    logger.info(f"\nFor exponential data:")
+    logger.info("\nFor exponential data:")
     logger.info("Mann-Whitney U:")
-    mwu_result2 = test_mannwhitneyu(x_exp, y_exp, verbose=True)
+    test_mannwhitneyu(x_exp, y_exp, verbose=True)
     logger.info("\nt-test:")
-    ttest_result2 = test_ttest_ind(x_exp, y_exp, verbose=True)
+    test_ttest_ind(x_exp, y_exp, verbose=True)
     logger.info("Mann-Whitney U is more reliable for non-normal data")
 
     # Example 8: Comparison with Brunner-Munzel
@@ -439,8 +417,12 @@ def main(args):
     bm = test_brunner_munzel(x8, y8)
 
     logger.info("Same distribution shape:")
-    logger.info(f"  Mann-Whitney U: p = {mwu['pvalue']:.4f}, r = {mwu['effect_size']:.3f}")
-    logger.info(f"  Brunner-Munzel: p = {bm['pvalue']:.4f}, P(X>Y) = {bm['effect_size']:.3f}")
+    logger.info(
+        f"  Mann-Whitney U: p = {mwu['pvalue']:.4f}, r = {mwu['effect_size']:.3f}"
+    )
+    logger.info(
+        f"  Brunner-Munzel: p = {bm['pvalue']:.4f}, P(X>Y) = {bm['effect_size']:.3f}"
+    )
 
     # Different shapes
     x9 = np.random.normal(5, 1, 50)
@@ -464,10 +446,10 @@ def main(args):
     df = force_dataframe(test_results)
     logger.info(f"\nDataFrame shape: {df.shape}")
 
-    convert_results(test_results, return_as='excel', path='./mannwhitneyu_tests.xlsx')
+    convert_results(test_results, return_as="excel", path="./mannwhitneyu_tests.xlsx")  # type: ignore[arg-type]
     logger.info("Results exported to Excel")
 
-    convert_results(test_results, return_as='csv', path='./mannwhitneyu_tests.csv')
+    convert_results(test_results, return_as="csv", path="./mannwhitneyu_tests.csv")  # type: ignore[arg-type]
     logger.info("Results exported to CSV")
 
     return 0
@@ -475,27 +457,20 @@ def main(args):
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description='Demonstrate Mann-Whitney U test'
-    )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Enable verbose output'
-    )
+    parser = argparse.ArgumentParser(description="Demonstrate Mann-Whitney U test")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     return parser.parse_args()
 
 
 def run_main():
     """Initialize SciTeX framework and run main."""
-    global CONFIG, sys, plt, rng
-
     import sys
+
     import matplotlib.pyplot as plt
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, _CC, _rng_manager = stx.session.start(
         sys,
         plt,
         args=args,
@@ -513,7 +488,7 @@ def run_main():
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_main()
 
 # EOF

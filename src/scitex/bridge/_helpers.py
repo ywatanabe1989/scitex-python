@@ -9,7 +9,7 @@ These helpers provide a unified API for common workflows that span
 multiple modules, abstracting away backend-specific details.
 """
 
-from typing import Union, List, Optional, Literal
+from typing import List, Literal, Optional, Union
 
 # StatResult is now a dict - the GUI-specific StatResult is deprecated
 StatResult = dict
@@ -119,6 +119,7 @@ def _detect_backend(target) -> Literal["plt", "vis"]:
     # Check for vis FigureModel
     try:
         from scitex.canvas.model import FigureModel
+
         if isinstance(target, FigureModel):
             return "vis"
     except ImportError:
@@ -127,6 +128,7 @@ def _detect_backend(target) -> Literal["plt", "vis"]:
     # Check for matplotlib axes
     try:
         import matplotlib.axes
+
         if isinstance(target, matplotlib.axes.Axes):
             return "plt"
     except ImportError:

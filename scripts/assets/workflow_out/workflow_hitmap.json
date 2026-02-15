@@ -1,0 +1,302 @@
+{
+  "container:upper_row_container": {
+    "id": 1,
+    "type": "container",
+    "rgb": [
+      255,
+      0,
+      0
+    ],
+    "title": null
+  },
+  "container:analysis_container": {
+    "id": 2,
+    "type": "container",
+    "rgb": [
+      0,
+      200,
+      0
+    ],
+    "title": "Analysis & Visualization"
+  },
+  "container:main_container": {
+    "id": 3,
+    "type": "container",
+    "rgb": [
+      0,
+      0,
+      255
+    ],
+    "title": null
+  },
+  "container:source_col_container": {
+    "id": 4,
+    "type": "container",
+    "rgb": [
+      255,
+      200,
+      0
+    ],
+    "title": null
+  },
+  "container:paper_col_container": {
+    "id": 5,
+    "type": "container",
+    "rgb": [
+      255,
+      0,
+      200
+    ],
+    "title": null
+  },
+  "container:main_row_container": {
+    "id": 6,
+    "type": "container",
+    "rgb": [
+      0,
+      200,
+      200
+    ],
+    "title": null
+  },
+  "box:scripts_box": {
+    "id": 7,
+    "type": "box",
+    "rgb": [
+      200,
+      100,
+      0
+    ],
+    "title": "Python Script"
+  },
+  "box:linter_box": {
+    "id": 8,
+    "type": "box",
+    "rgb": [
+      100,
+      0,
+      200
+    ],
+    "title": "Automatic translation"
+  },
+  "box:source_box": {
+    "id": 9,
+    "type": "box",
+    "rgb": [
+      0,
+      100,
+      50
+    ],
+    "title": "Source Data"
+  },
+  "box:core_box": {
+    "id": 10,
+    "type": "box",
+    "rgb": [
+      200,
+      0,
+      100
+    ],
+    "title": "Core Modules"
+  },
+  "box:domain_box": {
+    "id": 11,
+    "type": "box",
+    "rgb": [
+      100,
+      200,
+      0
+    ],
+    "title": "Domain-specific Modules"
+  },
+  "box:writer_box": {
+    "id": 12,
+    "type": "box",
+    "rgb": [
+      0,
+      100,
+      200
+    ],
+    "title": "Writer"
+  },
+  "box:outputs_box": {
+    "id": 13,
+    "type": "box",
+    "rgb": [
+      22,
+      229,
+      125
+    ],
+    "title": "Outputs"
+  },
+  "box:scholar_box": {
+    "id": 14,
+    "type": "box",
+    "rgb": [
+      229,
+      65,
+      22
+    ],
+    "title": "Scholar"
+  },
+  "box:manuscript_box": {
+    "id": 15,
+    "type": "box",
+    "rgb": [
+      22,
+      40,
+      229
+    ],
+    "title": "Manuscript"
+  },
+  "box:cloud_box": {
+    "id": 16,
+    "type": "box",
+    "rgb": [
+      100,
+      229,
+      22
+    ],
+    "title": "Cloud"
+  },
+  "box:spacer_box": {
+    "id": 17,
+    "type": "box",
+    "rgb": [
+      229,
+      22,
+      161
+    ],
+    "title": ""
+  },
+  "box:source_pad_box": {
+    "id": 18,
+    "type": "box",
+    "rgb": [
+      22,
+      221,
+      229
+    ],
+    "title": ""
+  },
+  "box:paper_pad_box": {
+    "id": 19,
+    "type": "box",
+    "rgb": [
+      229,
+      177,
+      22
+    ],
+    "title": ""
+  },
+  "arrow:scripts_box->linter_box": {
+    "id": 20,
+    "type": "arrow",
+    "rgb": [
+      117,
+      22,
+      229
+    ],
+    "source": "scripts_box",
+    "target": "linter_box"
+  },
+  "arrow:linter_box->core_box": {
+    "id": 21,
+    "type": "arrow",
+    "rgb": [
+      22,
+      229,
+      56
+    ],
+    "source": "linter_box",
+    "target": "core_box"
+  },
+  "arrow:source_box->analysis_container": {
+    "id": 22,
+    "type": "arrow",
+    "rgb": [
+      229,
+      22,
+      49
+    ],
+    "source": "source_box",
+    "target": "analysis_container"
+  },
+  "arrow:outputs_box->writer_box": {
+    "id": 23,
+    "type": "arrow",
+    "rgb": [
+      22,
+      109,
+      229
+    ],
+    "source": "outputs_box",
+    "target": "writer_box"
+  },
+  "arrow:outputs_box->analysis_container": {
+    "id": 29,
+    "type": "arrow",
+    "rgb": [
+      58,
+      229,
+      22
+    ],
+    "source": "outputs_box",
+    "target": "analysis_container"
+  },
+  "arrow:analysis_container->outputs_box": {
+    "id": 25,
+    "type": "arrow",
+    "rgb": [
+      228,
+      22,
+      229
+    ],
+    "source": "analysis_container",
+    "target": "outputs_box"
+  },
+  "arrow:scholar_box->writer_box": {
+    "id": 26,
+    "type": "arrow",
+    "rgb": [
+      22,
+      229,
+      168
+    ],
+    "source": "scholar_box",
+    "target": "writer_box"
+  },
+  "arrow:writer_box->manuscript_box": {
+    "id": 27,
+    "type": "arrow",
+    "rgb": [
+      229,
+      108,
+      22
+    ],
+    "source": "writer_box",
+    "target": "manuscript_box"
+  },
+  "arrow:manuscript_box->outputs_box": {
+    "id": 28,
+    "type": "arrow",
+    "rgb": [
+      48,
+      22,
+      229
+    ],
+    "source": "manuscript_box",
+    "target": "outputs_box"
+  },
+  "arrow:analysis_container->source_box": {
+    "id": 30,
+    "type": "arrow",
+    "rgb": [
+      229,
+      22,
+      118
+    ],
+    "source": "analysis_container",
+    "target": "source_box"
+  }
+}

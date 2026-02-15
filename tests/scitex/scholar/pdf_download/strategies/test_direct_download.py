@@ -17,23 +17,23 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/scholar/pdf_download/strategies/direct_download.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # """Direct Download Strategy"""
-# 
+#
 # from pathlib import Path
 # from typing import Optional
-# 
+#
 # from playwright.async_api import BrowserContext
-# 
+#
 # from scitex import logging
 # from scitex.scholar.browser import browser_logger
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # async def try_download_direct_async(
 #     context: BrowserContext,
 #     pdf_url: str,
@@ -47,16 +47,16 @@ if __name__ == "__main__":
 #         await browser_logger.info(
 #             page, f"{func_name}: Trying direct download from {pdf_url}"
 #         )
-# 
+#
 #         download_occurred = False
-# 
+#
 #         async def handle_download(download):
 #             nonlocal download_occurred
 #             await download.save_as(output_path)
 #             download_occurred = True
-# 
+#
 #         page.on("download", handle_download)
-# 
+#
 #         # Step 1: Navigate
 #         await browser_logger.info(
 #             page,
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 #                 )
 #                 await page.wait_for_timeout(2000)
 #                 raise ee
-# 
+#
 #         # Step 2: Check result
 #         if download_occurred and output_path.exists():
 #             size_MiB = output_path.stat().st_size / 1024 / 1024
@@ -111,10 +111,10 @@ if __name__ == "__main__":
 #                 f"{func_name}: Direct Download: ✗ No download event occurred",
 #             )
 #             await page.wait_for_timeout(2000)
-# 
+#
 #         await page.close()
 #         return None
-# 
+#
 #     except Exception as ee:
 #         if page is not None:
 #             await browser_logger.warning(
@@ -134,8 +134,8 @@ if __name__ == "__main__":
 #                 except Exception as close_error:
 #                     logger.debug(f"{func_name}: Error closing page: {close_error}")
 #         return None
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

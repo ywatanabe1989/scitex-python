@@ -290,31 +290,59 @@ class RawMatplotlibMixin:
 # Registry of mpl_xxx methods for programmatic access
 MPL_METHODS = [
     # Line plots
-    "mpl_plot", "mpl_step", "mpl_stem",
+    "mpl_plot",
+    "mpl_step",
+    "mpl_stem",
     # Scatter
     "mpl_scatter",
     # Bar
-    "mpl_bar", "mpl_barh", "mpl_bar3d",
+    "mpl_bar",
+    "mpl_barh",
+    "mpl_bar3d",
     # Histograms
-    "mpl_hist", "mpl_hist2d", "mpl_hexbin",
+    "mpl_hist",
+    "mpl_hist2d",
+    "mpl_hexbin",
     # Statistical
-    "mpl_boxplot", "mpl_violinplot", "mpl_errorbar", "mpl_eventplot",
+    "mpl_boxplot",
+    "mpl_violinplot",
+    "mpl_errorbar",
+    "mpl_eventplot",
     # Fill/area
-    "mpl_fill", "mpl_fill_between", "mpl_fill_betweenx", "mpl_stackplot",
+    "mpl_fill",
+    "mpl_fill_between",
+    "mpl_fill_betweenx",
+    "mpl_stackplot",
     # Contour/heatmap
-    "mpl_contour", "mpl_contourf", "mpl_imshow", "mpl_pcolormesh", "mpl_pcolor", "mpl_matshow",
+    "mpl_contour",
+    "mpl_contourf",
+    "mpl_imshow",
+    "mpl_pcolormesh",
+    "mpl_pcolor",
+    "mpl_matshow",
     # Vector fields
-    "mpl_quiver", "mpl_streamplot", "mpl_barbs",
+    "mpl_quiver",
+    "mpl_streamplot",
+    "mpl_barbs",
     # Pie
     "mpl_pie",
     # Text/annotations
-    "mpl_text", "mpl_annotate",
+    "mpl_text",
+    "mpl_annotate",
     # Lines/spans
-    "mpl_axhline", "mpl_axvline", "mpl_axhspan", "mpl_axvspan",
+    "mpl_axhline",
+    "mpl_axvline",
+    "mpl_axhspan",
+    "mpl_axvspan",
     # Patches
-    "mpl_add_patch", "mpl_add_artist", "mpl_add_collection",
+    "mpl_add_patch",
+    "mpl_add_artist",
+    "mpl_add_collection",
     # 3D
-    "mpl_plot_surface", "mpl_plot_wireframe", "mpl_contour3D", "mpl_scatter3D",
+    "mpl_plot_surface",
+    "mpl_plot_wireframe",
+    "mpl_contour3D",
+    "mpl_scatter3D",
 ]
 
 

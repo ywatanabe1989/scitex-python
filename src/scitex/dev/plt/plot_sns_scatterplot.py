@@ -19,9 +19,11 @@ def plot_sns_scatterplot(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     n = 100
-    groups = rng.choice(['A', 'B', 'C'], n)
-    df = pd.DataFrame({'group': groups, 'x': rng.uniform(0, 10, n), 'y': rng.uniform(0, 10, n)})
-    ax.sns_scatterplot(data=df, x='x', y='y', hue='group')
+    groups = rng.choice(["A", "B", "C"], n)
+    df = pd.DataFrame(
+        {"group": groups, "x": rng.uniform(0, 10, n), "y": rng.uniform(0, 10, n)}
+    )
+    ax.sns_scatterplot(data=df, x="x", y="y", hue="group")
     ax.set_xyt("X", "Y", "sns_scatterplot")
     return fig, ax
 

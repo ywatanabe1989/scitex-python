@@ -29,8 +29,8 @@ Example:
 """
 
 import re
-from typing import Dict, List, Optional, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class SearchQueryParser:

@@ -4,9 +4,8 @@ Description: BAILII translator for Zotero
 Translator ID: 5ae63913-669a-4792-9f45-e089a37de9ab
 """
 
-from typing import Any, Dict, Optional, List
 import re
-
+from typing import Any, Dict, List, Optional
 
 TRANSLATOR_INFO = {
     "translator_id": "5ae63913-669a-4792-9f45-e089a37de9ab",

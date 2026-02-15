@@ -3,89 +3,84 @@
 # Timestamp: "2025-06-02 13:15:00 (ywatanabe)"
 # File: ./tests/scitex/path/test__this_path.py
 
-import pytest
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 def test_this_path_normal():
     """Test this_path in normal Python environment."""
     from scitex.path import this_path
-    
-    with patch('inspect.stack') as mock_stack:
+
+    with patch("inspect.stack") as mock_stack:
         # Mock the calling file
         mock_stack.return_value = [
-            None, 
-            MagicMock(filename='/path/to/calling/script.py')
+            None,
+            MagicMock(filename="/path/to/calling/script.py"),
         ]
-        
-        with patch('scitex.path._this_path.__file__', '/path/to/module.py'):
+
+        with patch("scitex.path._this_path.__file__", "/path/to/module.py"):
             result = this_path()
-            
+
             # The function returns __file__ (module path), not the calling file
-            assert result == '/path/to/module.py'
+            assert result == "/path/to/module.py"
 
 
 def test_this_path_ipython():
     """Test this_path in iPython environment."""
     from scitex.path import this_path
-    
-    with patch('inspect.stack') as mock_stack:
-        mock_stack.return_value = [
-            None,
-            MagicMock(filename='<ipython-input-1>')
-        ]
-        
+
+    with patch("inspect.stack") as mock_stack:
+        mock_stack.return_value = [None, MagicMock(filename="<ipython-input-1>")]
+
         # Simulate ipython module path
-        with patch('scitex.path._this_path.__file__', '/path/to/ipython/module.py'):
+        with patch("scitex.path._this_path.__file__", "/path/to/ipython/module.py"):
             result = this_path()
-            
+
             # Still returns __file__ regardless of ipython
-            assert result == '/path/to/ipython/module.py'
+            assert result == "/path/to/ipython/module.py"
 
 
 def test_this_path_custom_ipython_path():
     """Test this_path with custom iPython fake path."""
     from scitex.path import this_path
-    
-    with patch('inspect.stack') as mock_stack:
-        mock_stack.return_value = [
-            None,
-            MagicMock(filename='<ipython-input-1>')
-        ]
-        
-        with patch('scitex.path._this_path.__file__', '/path/to/ipython/module.py'):
-            result = this_path(ipython_fake_path='/custom/fake.py')
-            
+
+    with patch("inspect.stack") as mock_stack:
+        mock_stack.return_value = [None, MagicMock(filename="<ipython-input-1>")]
+
+        with patch("scitex.path._this_path.__file__", "/path/to/ipython/module.py"):
+            result = this_path(ipython_fake_path="/custom/fake.py")
+
             # The ipython_fake_path parameter doesn't affect output
-            assert result == '/path/to/ipython/module.py'
+            assert result == "/path/to/ipython/module.py"
 
 
 def test_this_path_stack_levels():
     """Test this_path with different stack levels."""
     from scitex.path import this_path
-    
+
     def wrapper_function():
         return this_path()
-    
-    with patch('inspect.stack') as mock_stack:
+
+    with patch("inspect.stack") as mock_stack:
         # Multiple stack frames
         mock_stack.return_value = [
-            MagicMock(filename='this_path.py'),  # this_path itself
-            MagicMock(filename='wrapper.py'),     # wrapper function
-            MagicMock(filename='test.py')        # test function
+            MagicMock(filename="this_path.py"),  # this_path itself
+            MagicMock(filename="wrapper.py"),  # wrapper function
+            MagicMock(filename="test.py"),  # test function
         ]
-        
-        with patch('scitex.path._this_path.__file__', '/module/path.py'):
+
+        with patch("scitex.path._this_path.__file__", "/module/path.py"):
             result = wrapper_function()
-            
-            assert result == '/module/path.py'
+
+            assert result == "/module/path.py"
 
 
 def test_get_this_path_alias():
     """Test that get_this_path is an alias for this_path."""
-    from scitex.path import this_path, get_this_path
-    
+    from scitex.path import get_this_path, this_path
+
     # They should be the same function
     assert get_this_path is this_path
 
@@ -93,11 +88,11 @@ def test_get_this_path_alias():
 def test_this_path_no_arguments():
     """Test this_path requires no arguments."""
     from scitex.path import this_path
-    
-    with patch('inspect.stack') as mock_stack:
-        mock_stack.return_value = [None, MagicMock(filename='/test.py')]
-        
-        with patch('scitex.path._this_path.__file__', '/module.py'):
+
+    with patch("inspect.stack") as mock_stack:
+        mock_stack.return_value = [None, MagicMock(filename="/test.py")]
+
+        with patch("scitex.path._this_path.__file__", "/module.py"):
             # Should work without arguments
             result = this_path()
             assert result is not None
@@ -106,11 +101,11 @@ def test_this_path_no_arguments():
 def test_this_path_return_type():
     """Test this_path returns a string."""
     from scitex.path import this_path
-    
-    with patch('inspect.stack') as mock_stack:
-        mock_stack.return_value = [None, MagicMock(filename='/test.py')]
-        
-        with patch('scitex.path._this_path.__file__', '/module.py'):
+
+    with patch("inspect.stack") as mock_stack:
+        mock_stack.return_value = [None, MagicMock(filename="/test.py")]
+
+        with patch("scitex.path._this_path.__file__", "/module.py"):
             result = this_path()
             assert isinstance(result, str)
 
@@ -118,12 +113,12 @@ def test_this_path_return_type():
 def test_this_path_absolute_path():
     """Test this_path returns absolute path."""
     from scitex.path import this_path
-    
-    with patch('inspect.stack') as mock_stack:
-        mock_stack.return_value = [None, MagicMock(filename='/test.py')]
-        
+
+    with patch("inspect.stack") as mock_stack:
+        mock_stack.return_value = [None, MagicMock(filename="/test.py")]
+
         # Test with absolute path
-        with patch('scitex.path._this_path.__file__', '/absolute/path/to/module.py'):
+        with patch("scitex.path._this_path.__file__", "/absolute/path/to/module.py"):
             result = this_path()
             assert os.path.isabs(result)
 
@@ -143,21 +138,21 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: "2026-01-08 02:00:00 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/path/_this_path.py
-# 
+#
 # """Get current file path utilities."""
-# 
+#
 # import inspect
 # from pathlib import Path
-# 
-# 
+#
+#
 # def this_path(ipython_fake_path: str = "/tmp/fake.py") -> Path:
 #     """Get the path of the calling script.
-# 
+#
 #     Parameters
 #     ----------
 #     ipython_fake_path : str
 #         Fake path to return when running in IPython.
-# 
+#
 #     Returns
 #     -------
 #     Path
@@ -167,11 +162,11 @@ if __name__ == "__main__":
 #     if "ipython" in caller_file.lower():
 #         return Path(ipython_fake_path)
 #     return Path(caller_file)
-# 
-# 
+#
+#
 # get_this_path = this_path
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

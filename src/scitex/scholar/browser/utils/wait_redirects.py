@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/browser/utils/wait_redirects.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/browser/utils/wait_redirects.py"
@@ -408,9 +409,7 @@ async def wait_redirects(
                             f"{func_name}: CAPTCHA detected on page: {current_url[:80]}"
                         )
                         if show_progress:
-                            from scitex.browser import (
-                                browser_logger,
-                            )
+                            from scitex.browser import browser_logger
 
                             asyncio.create_task(
                                 browser_logger.info(
@@ -487,9 +486,7 @@ async def wait_redirects(
                             f"{func_name}: CAPTCHA appears to be solved, waiting for redirect..."
                         )
                         if show_progress:
-                            from scitex.browser import (
-                                browser_logger,
-                            )
+                            from scitex.browser import browser_logger
 
                             asyncio.create_task(
                                 browser_logger.info(
@@ -517,9 +514,7 @@ async def wait_redirects(
                             f"{func_name}: CAPTCHA solver timeout (60s) - continuing anyway"
                         )
                         if show_progress:
-                            from scitex.browser import (
-                                browser_logger,
-                            )
+                            from scitex.browser import browser_logger
 
                             asyncio.create_task(
                                 browser_logger.info(

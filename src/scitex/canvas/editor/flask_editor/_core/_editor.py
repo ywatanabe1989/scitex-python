@@ -136,10 +136,7 @@ class WebEditor:
             create_download_route,
             create_export_route,
         )
-        from ._routes_panels import (
-            create_panels_route,
-            create_switch_panel_route,
-        )
+        from ._routes_panels import create_panels_route, create_switch_panel_route
         from ._routes_save import (
             create_save_element_position_route,
             create_save_layout_route,

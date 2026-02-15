@@ -14,16 +14,16 @@ if __name__ == "__main__":
 # # Timestamp: 2026-01-08
 # # File: src/scitex/stats/_mcp.tool_schemas.py
 # # ----------------------------------------
-# 
+#
 # """Tool schemas for the scitex-stats MCP server."""
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import mcp.types as types
-# 
+#
 # __all__ = ["get_tool_schemas"]
-# 
-# 
+#
+#
 # def get_tool_schemas() -> list[types.Tool]:
 #     """Return all tool schemas for the Stats MCP server."""
 #     return [
@@ -391,8 +391,8 @@ if __name__ == "__main__":
 #             },
 #         ),
 #     ]
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

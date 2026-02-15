@@ -21,20 +21,20 @@ logger = logging.getLogger(__name__)
 
 class HybridResolverWorkflow:
     """Combines ZenRows and standard resolvers for optimal workflow."""
-    
+
     def __init__(self):
         """Initialize both resolvers."""
         # Set API keys
         os.environ["SCITEX_SCHOLAR_2CAPTCHA_API_KEY"] = "36d184fbba134f828cdd314f01dc7f18"
-        
+
         # Initialize authentication
         self.auth_manager = AuthenticationManager(
             email_openathens=os.getenv("SCITEX_SCHOLAR_OPENATHENS_EMAIL")
         )
-        
+
         # Initialize resolvers
         resolver_url = os.getenv("SCITEX_SCHOLAR_OPENURL_RESOLVER_URL")
-        
+
         # ZenRows for discovery (fast, handles CAPTCHAs)
         self.zenrows_resolver = ZenRowsOpenURLResolver(
             self.auth_manager,
@@ -42,20 +42,20 @@ class HybridResolverWorkflow:
             os.getenv("SCITEX_SCHOLAR_ZENROWS_API_KEY"),
             enable_captcha_solving=True
         )
-        
+
         # Standard for authenticated access
         self.standard_resolver = OpenURLResolver(
             self.auth_manager,
             resolver_url
         )
-        
+
         # Scholar for integrated workflow
         self.scholar = Scholar()
-    
+
     async def discover_access_async(self, dois: List[str]) -> Dict[str, Dict]:
         """
         Phase 1: Use ZenRows to quickly discover which papers might be accessible.
-        
+
         Benefits:
         - Fast parallel checking
         - Bypasses rate limits
@@ -63,38 +63,38 @@ class HybridResolverWorkflow:
         """
         print("\n🔍 PHASE 1: Discovery with ZenRows")
         print("="*50)
-        
+
         results = {}
         tasks = []
-        
+
         for doi in dois:
             task = self._check_single_doi(doi)
             tasks.append(task)
-        
+
         # Check all DOIs in parallel
         discoveries = await asyncio.gather(*tasks)
-        
+
         # Categorize results
         for doi, discovery in zip(dois, discoveries):
             results[doi] = discovery
-            
+
         # Summary
         accessible = [doi for doi, r in results.items() if r['status'] == 'accessible']
         needs_auth = [doi for doi, r in results.items() if r['status'] == 'needs_auth']
         no_access = [doi for doi, r in results.items() if r['status'] == 'no_access']
-        
+
         print(f"\n📊 Discovery Results:")
         print(f"  ✅ Openly accessible: {len(accessible)}")
         print(f"  🔐 Needs authentication: {len(needs_auth)}")
         print(f"  ❌ No access found: {len(no_access)}")
-        
+
         return results
-    
+
     async def _check_single_doi(self, doi: str) -> Dict:
         """Check single DOI availability with ZenRows."""
         try:
             result = await self.zenrows_resolver._resolve_single_async(doi=doi)
-            
+
             # Categorize based on ZenRows result
             if result.get('success'):
                 return {
@@ -117,11 +117,11 @@ class HybridResolverWorkflow:
                 'status': 'error',
                 'reason': str(e)
             }
-    
+
     async def download_authenticated_async(self, dois: List[str]) -> Dict[str, str]:
         """
         Phase 2: Use standard resolver for papers that need authentication.
-        
+
         Benefits:
         - Uses your actual browser session
         - Maintains authentication context
@@ -129,7 +129,7 @@ class HybridResolverWorkflow:
         """
         print("\n\n🔐 PHASE 2: Authenticated Downloads")
         print("="*50)
-        
+
         # Ensure authenticated
         is_auth = await self.auth_manager.is_authenticated()
         if not is_auth:
@@ -138,9 +138,9 @@ class HybridResolverWorkflow:
             if not success:
                 print("❌ Authentication failed!")
                 return {}
-        
+
         results = {}
-        
+
         for doi in dois:
             print(f"\nDownloading: {doi}")
             try:
@@ -152,41 +152,41 @@ class HybridResolverWorkflow:
                     print(f"  ❌ Failed: {result.get('access_type', 'Unknown')}")
             except Exception as e:
                 print(f"  ❌ Error: {e}")
-        
+
         return results
-    
+
     def run_hybrid_workflow(self, dois: List[str]):
         """Run the complete hybrid workflow."""
         print("🚀 HYBRID RESOLVER WORKFLOW")
         print("="*70)
         print("Combining ZenRows (discovery) + Standard (authenticated access)")
-        
+
         # Run async workflow
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
+
         try:
             # Phase 1: Discovery
             discoveries = loop.run_until_complete(self.discover_access_async(dois))
-            
+
             # Separate papers by access type
-            needs_auth = [doi for doi, d in discoveries.items() 
+            needs_auth = [doi for doi, d in discoveries.items()
                          if d['status'] == 'needs_auth']
-            
+
             # Phase 2: Authenticated download for paywalled papers
             if needs_auth:
                 print(f"\n\n📥 {len(needs_auth)} papers need authenticated access")
                 auth_results = loop.run_until_complete(
                     self.download_authenticated_async(needs_auth)
                 )
-            
+
             # Phase 3: Use Scholar for integrated download
             print("\n\n📚 PHASE 3: Integrated Download with Scholar")
             print("="*50)
             print("Scholar automatically uses the best method for each paper")
-            
+
             download_results = self.scholar.download_pdfs(dois)
-            
+
             # Summary
             print("\n\n📊 FINAL SUMMARY")
             print("="*50)
@@ -195,29 +195,29 @@ class HybridResolverWorkflow:
                     print(f"✅ {paper.doi or 'Unknown'}: Downloaded via {getattr(paper, 'pdf_source', 'Unknown')}")
                 else:
                     print(f"❌ {paper.doi or 'Unknown'}: Failed")
-                    
+
         finally:
             loop.close()
 
 def main():
     """Demonstrate the hybrid workflow."""
-    
+
     # Example DOIs - mix of open access and paywalled
     test_dois = [
         # Likely paywalled
         "10.1038/nature12373",  # Nature
         "10.1016/j.cell.2020.05.032",  # Cell
         "10.1126/science.abg6155",  # Science
-        
+
         # Might be open access
         "10.1371/journal.pone.0123456",  # PLOS ONE (usually OA)
         "10.1186/s12859-020-3456-3",  # BMC (usually OA)
     ]
-    
+
     # Run workflow
     workflow = HybridResolverWorkflow()
     workflow.run_hybrid_workflow(test_dois)
-    
+
     print("\n\n💡 BENEFITS OF HYBRID APPROACH:")
     print("="*50)
     print("1. ZenRows for discovery:")

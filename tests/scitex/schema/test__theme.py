@@ -13,14 +13,14 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-19
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/schema/_theme.py
-# 
+#
 # """
 # Theme Schema - Pure Aesthetics for Visual Presentation.
-# 
+#
 # This module defines the theme layer that controls visual appearance
 # without affecting scientific meaning. Theme can be changed without
 # affecting reproducibility of the data representation.
-# 
+#
 # Theme (theme.json) - Aesthetics Only:
 #   - Colors and color palettes
 #   - Fonts and typography
@@ -28,19 +28,19 @@ if __name__ == "__main__":
 #   - Marker styles and sizes
 #   - Layout and spacing
 # """
-# 
+#
 # import json
 # from dataclasses import asdict, dataclass, field
 # from typing import Any, Dict, List, Optional
-# 
+#
 # THEME_VERSION = "1.0.0"
-# 
-# 
+#
+#
 # @dataclass
 # class ColorScheme:
 #     """
 #     Color scheme specification.
-# 
+#
 #     Parameters
 #     ----------
 #     mode : str
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 #     palette : str, optional
 #         Named color palette for traces
 #     """
-# 
+#
 #     mode: str = "light"
 #     background: str = "transparent"
 #     axes_bg: str = "white"
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 #     tick: str = "black"
 #     grid: str = "#cccccc"
 #     palette: Optional[str] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "mode": self.mode,
@@ -83,17 +83,17 @@ if __name__ == "__main__":
 #         if self.palette:
 #             result["palette"] = self.palette
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "ColorScheme":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class Typography:
 #     """
 #     Typography specification.
-# 
+#
 #     Parameters
 #     ----------
 #     family : str
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 #     weight : str
 #         Font weight (normal, bold, etc.)
 #     """
-# 
+#
 #     family: str = "sans-serif"
 #     size_pt: float = 7.0
 #     title_size_pt: float = 8.0
@@ -119,53 +119,53 @@ if __name__ == "__main__":
 #     tick_size_pt: float = 6.0
 #     legend_size_pt: float = 6.0
 #     weight: str = "normal"
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return asdict(self)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "Typography":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class LineDefaults:
 #     """Default line style settings."""
-# 
+#
 #     width: float = 1.0
 #     style: str = "-"  # solid
 #     alpha: float = 1.0
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return asdict(self)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "LineDefaults":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class MarkerDefaults:
 #     """Default marker style settings."""
-# 
+#
 #     size: float = 6.0
 #     style: str = "o"
 #     edge_width: float = 0.5
 #     edge_color: str = "auto"  # auto means same as fill or black
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return asdict(self)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "MarkerDefaults":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class TraceStyle:
 #     """
 #     Per-trace style overrides.
-# 
+#
 #     Parameters
 #     ----------
 #     trace_id : str
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 #     alpha : float, optional
 #         Opacity
 #     """
-# 
+#
 #     trace_id: str
 #     color: Optional[str] = None
 #     linewidth: Optional[float] = None
@@ -191,7 +191,7 @@ if __name__ == "__main__":
 #     marker: Optional[str] = None
 #     markersize: Optional[float] = None
 #     alpha: Optional[float] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {"trace_id": self.trace_id}
 #         for name in [
@@ -206,22 +206,22 @@ if __name__ == "__main__":
 #             if val is not None:
 #                 result[name] = val
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "TraceStyle":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class LegendStyle:
 #     """Legend styling options."""
-# 
+#
 #     visible: bool = True
 #     location: str = "best"
 #     frameon: bool = True
 #     ncols: int = 1
 #     title: Optional[str] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "visible": self.visible,
@@ -232,22 +232,22 @@ if __name__ == "__main__":
 #         if self.title:
 #             result["title"] = self.title
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "LegendStyle":
 #         if isinstance(data, bool):
 #             return cls(visible=data)
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class PlotTheme:
 #     """
 #     Complete theme specification for a plot.
-# 
+#
 #     Stored in theme.json. Contains pure aesthetics that can be
 #     changed without affecting scientific interpretation.
-# 
+#
 #     Parameters
 #     ----------
 #     colors : ColorScheme
@@ -265,7 +265,7 @@ if __name__ == "__main__":
 #     grid : bool
 #         Whether to show grid
 #     """
-# 
+#
 #     colors: ColorScheme = field(default_factory=ColorScheme)
 #     typography: Typography = field(default_factory=Typography)
 #     line: LineDefaults = field(default_factory=LineDefaults)
@@ -273,11 +273,11 @@ if __name__ == "__main__":
 #     traces: List[TraceStyle] = field(default_factory=list)
 #     legend: LegendStyle = field(default_factory=LegendStyle)
 #     grid: bool = False
-# 
+#
 #     # Schema metadata
 #     scitex_schema: str = "scitex.plt.theme"
 #     scitex_schema_version: str = THEME_VERSION
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "schema": {
@@ -292,10 +292,10 @@ if __name__ == "__main__":
 #             "legend": self.legend.to_dict(),
 #             "grid": self.grid,
 #         }
-# 
+#
 #     def to_json(self, indent: int = 2) -> str:
 #         return json.dumps(self.to_dict(), indent=indent)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "PlotTheme":
 #         return cls(
@@ -307,11 +307,11 @@ if __name__ == "__main__":
 #             legend=LegendStyle.from_dict(data.get("legend", {})),
 #             grid=data.get("grid", False),
 #         )
-# 
+#
 #     @classmethod
 #     def from_json(cls, json_str: str) -> "PlotTheme":
 #         return cls.from_dict(json.loads(json_str))
-# 
+#
 #     @classmethod
 #     def from_style(cls, style: dict) -> "PlotTheme":
 #         """
@@ -320,7 +320,7 @@ if __name__ == "__main__":
 #         theme_data = style.get("theme", {})
 #         font_data = style.get("font", {})
 #         size_data = style.get("size", {})
-# 
+#
 #         return cls(
 #             colors=ColorScheme(
 #                 mode=theme_data.get("mode", "light"),
@@ -355,8 +355,8 @@ if __name__ == "__main__":
 #             legend=LegendStyle.from_dict(style.get("legend", {})),
 #             grid=style.get("grid", False),
 #         )
-# 
-# 
+#
+#
 # __all__ = [
 #     "THEME_VERSION",
 #     "ColorScheme",
@@ -367,8 +367,8 @@ if __name__ == "__main__":
 #     "LegendStyle",
 #     "PlotTheme",
 # ]
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

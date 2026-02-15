@@ -39,36 +39,6 @@ def register_ui_tools(mcp) -> None:
         return _json(result)
 
     @mcp.tool()
-    async def ui_notify_by_level(
-        message: str,
-        title: Optional[str] = None,
-        level: str = "info",
-    ) -> str:
-        """[ui] Send notification using backends configured for a level."""
-        from scitex.ui._mcp.handlers import notify_by_level_handler
-
-        result = await notify_by_level_handler(
-            message=message, title=title, level=level
-        )
-        return _json(result)
-
-    @mcp.tool()
-    async def ui_list_notification_backends() -> str:
-        """[ui] List all notification backends and their status."""
-        from scitex.ui._mcp.handlers import list_backends_handler
-
-        result = await list_backends_handler()
-        return _json(result)
-
-    @mcp.tool()
-    async def ui_available_notification_backends() -> str:
-        """[ui] Get list of currently available backends."""
-        from scitex.ui._mcp.handlers import available_backends_handler
-
-        result = await available_backends_handler()
-        return _json(result)
-
-    @mcp.tool()
     async def ui_get_notification_config() -> str:
         """[ui] Get current notification configuration."""
         from scitex.ui._mcp.handlers import get_config_handler

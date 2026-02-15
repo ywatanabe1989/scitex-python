@@ -19,8 +19,12 @@ def plot_sns_heatmap(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     n = 100
-    data = pd.DataFrame(rng.uniform(0, 1, (5, 5)), index=['A', 'B', 'C', 'D', 'E'], columns=['V1', 'V2', 'V3', 'V4', 'V5'])
-    ax.sns_heatmap(data, annot=True, fmt='.2f')
+    data = pd.DataFrame(
+        rng.uniform(0, 1, (5, 5)),
+        index=["A", "B", "C", "D", "E"],
+        columns=["V1", "V2", "V3", "V4", "V5"],
+    )
+    ax.sns_heatmap(data, annot=True, fmt=".2f")
     ax.set_xyt("X", "Y", "sns_heatmap")
     return fig, ax
 

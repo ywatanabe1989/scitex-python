@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 # Time-stamp: "2023-05-04 21:21:19 (ywatanabe)"
 
+import random
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchsummary import summary
+
 import scitex
-import numpy as np
-import random
 
 
 class SwapChannels(nn.Module):

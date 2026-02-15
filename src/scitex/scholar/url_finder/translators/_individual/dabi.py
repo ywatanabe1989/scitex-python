@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2021-09-10 18:58:10
 """
 
-from typing import Dict, Any, Optional, List
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class DABITranslator:

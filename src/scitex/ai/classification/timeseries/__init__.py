@@ -10,18 +10,18 @@ This module provides specialized cross-validation strategies for time series dat
 ensuring proper temporal ordering and preventing data leakage.
 """
 
-# Import splitters
-from ._TimeSeriesStratifiedSplit import TimeSeriesStratifiedSplit
+# Import timestamp normalizer
+from ._normalize_timestamp import normalize_timestamp
 from ._TimeSeriesBlockingSplit import TimeSeriesBlockingSplit
-from ._TimeSeriesSlidingWindowSplit import TimeSeriesSlidingWindowSplit
 from ._TimeSeriesCalendarSplit import TimeSeriesCalendarSplit
+from ._TimeSeriesMetadata import TimeSeriesMetadata
+from ._TimeSeriesSlidingWindowSplit import TimeSeriesSlidingWindowSplit
 
 # Import metadata and strategy
 from ._TimeSeriesStrategy import TimeSeriesStrategy
-from ._TimeSeriesMetadata import TimeSeriesMetadata
 
-# Import timestamp normalizer
-from ._normalize_timestamp import normalize_timestamp
+# Import splitters
+from ._TimeSeriesStratifiedSplit import TimeSeriesStratifiedSplit
 
 __all__ = [
     # Main time series CV splitters

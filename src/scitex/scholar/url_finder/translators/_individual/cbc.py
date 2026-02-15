@@ -16,10 +16,11 @@ Metadata:
     lastUpdated: 2024-03-14 20:55:10
 """
 
-from typing import Dict, Any, Optional
-from bs4 import BeautifulSoup
 import json
 import re
+from typing import Any, Dict, Optional
+
+from bs4 import BeautifulSoup
 
 
 class CBCTranslator:

@@ -78,7 +78,7 @@ CLI Commands
    scitex audio speak "Done"            # Text-to-speech
    scitex capture snap                  # Screenshot
 
-MCP Tools (148 tools for AI agents)
+MCP Tools (120+ tools for AI agents)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Turn AI agents into autonomous scientific researchers.
@@ -90,6 +90,9 @@ Turn AI agents into autonomous scientific researchers.
    * - Category
      - Tools
      - Description
+   * - writer
+     - 28
+     - LaTeX manuscript compilation
    * - scholar
      - 23
      - PDF download, metadata enrichment
@@ -111,18 +114,30 @@ Turn AI agents into autonomous scientific researchers.
    * - diagram
      - 9
      - Mermaid and Graphviz diagrams
+   * - dataset
+     - 8
+     - Neuroimaging/physiology datasets
    * - social
      - 7
      - Social media posting
-   * - writer
-     - 28
-     - LaTeX manuscript compilation
+   * - canvas
+     - 7
+     - Figure composition
    * - template
      - 6
      - Project scaffolding
+   * - verify
+     - 6
+     - Reproducibility verification
+   * - dev
+     - 6
+     - Version checking
    * - ui
      - 5
      - Notifications
+   * - linter
+     - 3
+     - Code pattern checking
 
 Configure in Claude Desktop (``~/.config/claude/claude_desktop_config.json``):
 
@@ -174,10 +189,10 @@ A typical research script combining session, I/O, plotting, and statistics:
 
        # Correlation between noisy and clean
        result = stx.stats.test_pearson(y_clean, y_noisy)
-       logger.info(f"Pearson r={result.effect_size:.3f}, p={result.p_value:.1e}")
+       logger.info(f"Pearson r={result['effect_size']:.3f}, p={result['pvalue']:.1e}")
 
        # Save summary
-       stx.io.save({"r": result.effect_size, "p": result.p_value}, "stats.yaml")
+       stx.io.save({"r": result["effect_size"], "p": result["pvalue"]}, "stats.yaml")
 
        return 0
 

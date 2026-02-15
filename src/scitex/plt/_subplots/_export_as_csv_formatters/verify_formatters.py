@@ -5,9 +5,10 @@
 # ----------------------------------------
 import os
 import sys
+
+import matplotlib
 import numpy as np
 import pandas as pd
-import matplotlib
 
 matplotlib.use("Agg")  # Non-interactive backend
 
@@ -68,9 +69,9 @@ def test_plot_kde():
     # Read CSV and verify contents
     df = pd.read_csv(csv_path)
     assert "kde_test_kde_x" in df.columns, "Expected column 'kde_test_kde_x' not found"
-    assert "kde_test_kde_density" in df.columns, (
-        "Expected column 'kde_test_kde_density' not found"
-    )
+    assert (
+        "kde_test_kde_density" in df.columns
+    ), "Expected column 'kde_test_kde_density' not found"
 
     # Close figure
     scitex.plt.close(fig)

@@ -4,12 +4,13 @@
 Mendeley exporter - Export from Scholar library to Mendeley.
 """
 
-from typing import Dict, List, Optional, Union
 import os
+from typing import Dict, List, Optional, Union
 
 from scitex import logging
 from scitex.scholar.core.Paper import Paper
 from scitex.scholar.core.Papers import Papers
+
 from ..base import BaseExporter
 from .mapper import MendeleyMapper
 

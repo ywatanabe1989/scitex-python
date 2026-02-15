@@ -4,13 +4,14 @@
 Mendeley linker - Live synchronization with Mendeley.
 """
 
-from typing import Optional
 import os
+from typing import Optional
 
 from scitex import logging
+
 from ..base import BaseLinker
-from .importer import MendeleyImporter
 from .exporter import MendeleyExporter
+from .importer import MendeleyImporter
 from .mapper import MendeleyMapper
 
 logger = logging.getLogger(__name__)

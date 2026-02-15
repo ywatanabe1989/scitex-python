@@ -5,13 +5,15 @@
 """Tests for scitex.stats._schema module."""
 
 import json
-import pytest
+
 import numpy as np
+import pytest
+
 from scitex.stats._schema import (
-    StatResult,
     Position,
-    StatStyling,
     StatPositioning,
+    StatResult,
+    StatStyling,
     create_stat_result,
 )
 
@@ -33,7 +35,7 @@ class TestPosition:
             y=10.0,
             unit="mm",
             relative_to="plot_0",
-            offset={"dx": 2.0, "dy": -1.0}
+            offset={"dx": 2.0, "dy": -1.0},
         )
         assert pos.relative_to == "plot_0"
         assert pos.offset["dx"] == 2.0
@@ -105,7 +107,7 @@ class TestStatStyling:
             font_family="Times",
             color="#FF0000",
             symbol_style="bracket",
-            line_width_mm=0.3
+            line_width_mm=0.3,
         )
 
         assert style.font_size_pt == 8.0
@@ -159,9 +161,7 @@ class TestStatPositioning:
         """Test StatPositioning with explicit position."""
         position = Position(x=10.0, y=20.0, unit="mm")
         pos = StatPositioning(
-            mode="absolute",
-            position=position,
-            preferred_corner="top-right"
+            mode="absolute", position=position, preferred_corner="top-right"
         )
 
         assert pos.mode == "absolute"
@@ -186,7 +186,7 @@ class TestStatPositioning:
             "avoid_overlap": True,
             "min_distance_mm": 2.0,
             "preferred_corner": None,
-            "anchor_to": None
+            "anchor_to": None,
         }
         pos = StatPositioning.from_dict(data)
 
@@ -205,7 +205,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": 0.85},
             p_value=0.001,
-            stars="***"
+            stars="***",
         )
 
         assert result.test_type == "pearson"
@@ -220,7 +220,7 @@ class TestStatResult:
             test_category="parametric",
             statistic={"name": "t", "value": 3.45},
             p_value=0.002,
-            stars="**"
+            stars="**",
         )
 
         # Should auto-create created_at
@@ -246,8 +246,8 @@ class TestStatResult:
                 "name": "cohens_d",
                 "value": 0.85,
                 "interpretation": "large",
-                "ci_95": [0.42, 1.28]
-            }
+                "ci_95": [0.42, 1.28],
+            },
         )
 
         assert result.effect_size["name"] == "cohens_d"
@@ -264,8 +264,8 @@ class TestStatResult:
             stars="*",
             samples={
                 "group1": {"name": "Control", "n": 30, "mean": 5.2, "std": 1.1},
-                "group2": {"name": "Treatment", "n": 32, "mean": 6.8, "std": 1.3}
-            }
+                "group2": {"name": "Treatment", "n": 32, "mean": 6.8, "std": 1.3},
+            },
         )
 
         assert result.samples["group1"]["n"] == 30
@@ -278,7 +278,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": 0.75},
             p_value=0.01,
-            stars="**"
+            stars="**",
         )
 
         data = result.to_dict()
@@ -295,7 +295,7 @@ class TestStatResult:
             statistic={"name": "t", "value": np.float64(3.45)},
             p_value=np.float64(0.002),
             stars="**",
-            ci_95=[np.float64(0.5), np.float64(1.2)]
+            ci_95=[np.float64(0.5), np.float64(1.2)],
         )
 
         data = result.to_dict()
@@ -312,7 +312,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": 0.85},
             p_value=0.001,
-            stars="***"
+            stars="***",
         )
 
         json_str = result.to_json()
@@ -340,7 +340,7 @@ class TestStatResult:
             "ci_95": None,
             "positioning": None,
             "styling": None,
-            "extra": None
+            "extra": None,
         }
 
         result = StatResult.from_dict(data)
@@ -350,7 +350,7 @@ class TestStatResult:
 
     def test_from_json(self):
         """Test StatResult from_json creation."""
-        json_str = '''
+        json_str = """
         {
             "test_type": "kendall",
             "test_category": "correlation",
@@ -369,7 +369,7 @@ class TestStatResult:
             "styling": null,
             "extra": null
         }
-        '''
+        """
 
         result = StatResult.from_json(json_str)
 
@@ -383,7 +383,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": 0.850},
             p_value=0.001,
-            stars="***"
+            stars="***",
         )
 
         text = result.format_text(style="compact")
@@ -397,7 +397,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": 0.850},
             p_value=0.001,
-            stars="***"
+            stars="***",
         )
 
         text = result.format_text(style="asterisk")
@@ -411,7 +411,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": 0.15},
             p_value=0.15,
-            stars="ns"
+            stars="ns",
         )
 
         text = result.format_text(style="asterisk")
@@ -425,7 +425,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": 0.850},
             p_value=0.023,
-            stars="*"
+            stars="*",
         )
 
         text = result.format_text(style="text")
@@ -440,7 +440,7 @@ class TestStatResult:
             statistic={"name": "t", "value": 3.456},
             p_value=0.002,
             stars="**",
-            effect_size={"name": "d", "value": 0.85}
+            effect_size={"name": "d", "value": 0.85},
         )
 
         text = result.format_text(style="detailed")
@@ -456,7 +456,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": 0.85},
             p_value=0.0005,
-            stars="***"
+            stars="***",
         )
 
         text = result.format_text(style="publication")
@@ -470,7 +470,7 @@ class TestStatResult:
             test_category="parametric",
             statistic={"name": "t", "value": 5.0},
             p_value=0.0001,
-            stars="***"
+            stars="***",
         )
 
         p_text = result._format_p_publication()
@@ -484,7 +484,7 @@ class TestStatResult:
             test_category="parametric",
             statistic={"name": "t", "value": 3.0},
             p_value=0.005,
-            stars="**"
+            stars="**",
         )
 
         p_text = result._format_p_publication()
@@ -498,7 +498,7 @@ class TestStatResult:
             test_category="parametric",
             statistic={"name": "t", "value": 2.0},
             p_value=0.045,
-            stars="*"
+            stars="*",
         )
 
         p_text = result._format_p_publication()
@@ -512,7 +512,7 @@ class TestStatResult:
             test_category="parametric",
             statistic={"name": "t", "value": 1.0},
             p_value=0.15,
-            stars="ns"
+            stars="ns",
         )
 
         p_text = result._format_p_publication()
@@ -526,7 +526,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": 0.85},
             p_value=0.001,
-            stars="***"
+            stars="***",
         )
 
         interp = result.get_interpretation()
@@ -542,7 +542,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": -0.35},
             p_value=0.045,
-            stars="*"
+            stars="*",
         )
 
         interp = result.get_interpretation()
@@ -556,7 +556,7 @@ class TestStatResult:
             test_category="correlation",
             statistic={"name": "r", "value": 0.15},
             p_value=0.25,
-            stars="ns"
+            stars="ns",
         )
 
         interp = result.get_interpretation()
@@ -571,7 +571,7 @@ class TestStatResult:
             test_category="parametric",
             statistic={"name": "t", "value": 3.45},
             p_value=0.002,
-            stars="**"
+            stars="**",
         )
 
         interp = result.get_interpretation()
@@ -590,8 +590,8 @@ class TestStatResult:
             plot_id="plot_0",
             samples={
                 "group1": {"name": "Control", "n": 30},
-                "group2": {"name": "Treatment", "n": 32}
-            }
+                "group2": {"name": "Treatment", "n": 32},
+            },
         )
 
         ann = result.to_annotation_dict()
@@ -615,7 +615,7 @@ class TestStatResult:
             statistic={"name": "t", "value": 3.0},
             p_value=0.01,
             stars="**",
-            positioning=positioning
+            positioning=positioning,
         )
 
         ann = result.to_annotation_dict()
@@ -632,7 +632,7 @@ class TestStatResult:
             p_value=0.001,
             stars="***",
             effect_size={"name": "r_squared", "value": 0.7225},
-            ci_95=[0.65, 0.95]
+            ci_95=[0.65, 0.95],
         )
 
         # To JSON and back
@@ -651,10 +651,7 @@ class TestCreateStatResult:
     def test_basic_creation(self):
         """Test basic creation with minimal fields."""
         result = create_stat_result(
-            test_type="pearson",
-            statistic_name="r",
-            statistic_value=0.85,
-            p_value=0.001
+            test_type="pearson", statistic_name="r", statistic_value=0.85, p_value=0.001
         )
 
         assert result.test_type == "pearson"
@@ -670,7 +667,7 @@ class TestCreateStatResult:
             statistic_name="t",
             statistic_value=3.45,
             p_value=0.002,
-            effect_size={"name": "cohens_d", "value": 0.85}
+            effect_size={"name": "cohens_d", "value": 0.85},
         )
 
         assert result.test_type == "t-test"
@@ -683,7 +680,7 @@ class TestCreateStatResult:
             test_type="spearman",
             statistic_name="rho",
             statistic_value=0.72,
-            p_value=0.01
+            p_value=0.01,
         )
 
         assert result.test_category == "correlation"
@@ -691,10 +688,7 @@ class TestCreateStatResult:
     def test_category_mapping_parametric(self):
         """Test automatic category mapping for parametric tests."""
         result = create_stat_result(
-            test_type="anova",
-            statistic_name="F",
-            statistic_value=5.23,
-            p_value=0.01
+            test_type="anova", statistic_name="F", statistic_value=5.23, p_value=0.01
         )
 
         assert result.test_category == "parametric"
@@ -705,7 +699,7 @@ class TestCreateStatResult:
             test_type="mannwhitney",
             statistic_name="U",
             statistic_value=150.0,
-            p_value=0.03
+            p_value=0.03,
         )
 
         assert result.test_category == "non-parametric"
@@ -716,7 +710,7 @@ class TestCreateStatResult:
             test_type="custom_test",
             statistic_name="X",
             statistic_value=1.0,
-            p_value=0.05
+            p_value=0.05,
         )
 
         assert result.test_category == "other"
@@ -739,21 +733,21 @@ if __name__ == "__main__":
 # # Timestamp: 2025-12-20
 # """
 # Statistical Result Schema - DEPRECATED
-# 
+#
 # This module is deprecated. Import from scitex.schema._stats instead:
 #     from scitex.schema._stats import Position, StatStyling, StatPositioning, StatResult
-# 
+#
 # For the new simplified API, use scitex.io.bundle._stats.
 # """
-# 
+#
 # import warnings
-# 
+#
 # warnings.warn(
 #     "scitex.stats._schema is deprecated. Import from scitex.schema._stats instead.",
 #     DeprecationWarning,
 #     stacklevel=2,
 # )
-# 
+#
 # # Re-export from schema module (the OLD API with full StatResult dataclass)
 # from scitex.schema._stats import (
 #     # Position and styling
@@ -768,7 +762,7 @@ if __name__ == "__main__":
 #     UnitType,
 #     create_stat_result,
 # )
-# 
+#
 # __all__ = [
 #     # Type aliases
 #     "PositionMode",
@@ -782,7 +776,7 @@ if __name__ == "__main__":
 #     "StatResult",
 #     "create_stat_result",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

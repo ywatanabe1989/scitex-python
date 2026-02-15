@@ -15,6 +15,7 @@ DEPRECATED: Import from scitex.logging instead.
 """
 
 from __future__ import annotations
+
 import warnings
 
 # Issue deprecation warning on import
@@ -27,54 +28,51 @@ warnings.warn(
 )
 
 # Re-export everything from scitex.logging for backwards compatibility
-from scitex.logging import (
-    # Warnings
-    SciTeXWarning,
-    UnitWarning,
-    StyleWarning,
-    SciTeXDeprecationWarning,
-    PerformanceWarning,
-    DataLossWarning,
-    warn_deprecated,
-    warn_performance,
-    warn_data_loss,
-    # Errors
-    SciTeXError,
-    ConfigurationError,
+from scitex.logging import (  # Warnings; Errors; Validation helpers
+    AuthenticationError,
+    AxisError,
+    BibTeXEnrichmentError,
     ConfigFileNotFoundError,
     ConfigKeyError,
-    IOError,
-    FileFormatError,
-    SaveError,
-    LoadError,
-    ScholarError,
-    SearchError,
-    EnrichmentError,
-    PDFDownloadError,
-    DOIResolutionError,
-    PDFExtractionError,
-    BibTeXEnrichmentError,
-    TranslatorError,
-    AuthenticationError,
-    PlottingError,
-    FigureNotFoundError,
-    AxisError,
+    ConfigurationError,
     DataError,
-    ShapeError,
+    DataLossWarning,
+    DOIResolutionError,
     DTypeError,
-    PathError,
+    EnrichmentError,
+    FigureNotFoundError,
+    FileFormatError,
     InvalidPathError,
+    IOError,
+    LoadError,
+    ModelError,
+    NNError,
+    PathError,
     PathNotFoundError,
+    PDFDownloadError,
+    PDFExtractionError,
+    PerformanceWarning,
+    PlottingError,
+    SaveError,
+    ScholarError,
+    SciTeXDeprecationWarning,
+    SciTeXError,
+    SciTeXWarning,
+    SearchError,
+    ShapeError,
+    StatsError,
+    StyleWarning,
     TemplateError,
     TemplateViolationError,
-    NNError,
-    ModelError,
-    StatsError,
     TestError,
-    # Validation helpers
-    check_path,
+    TranslatorError,
+    UnitWarning,
     check_file_exists,
+    check_path,
     check_shape_compatibility,
+    warn_data_loss,
+    warn_deprecated,
+    warn_performance,
 )
 
 __all__ = [

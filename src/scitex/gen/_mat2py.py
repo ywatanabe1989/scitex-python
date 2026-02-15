@@ -19,10 +19,11 @@ mat2py.dir2npa(dir = '/vol/ccnlab-scratch1/julber/phoneme_decoding/data/', typ =
 September 07, 2017
 JB"""
 
-import numpy as np
-import h5py
-from glob import glob as _glob
 import os
+from glob import glob as _glob
+
+import h5py
+import numpy as np
 from scipy.io import loadmat
 
 

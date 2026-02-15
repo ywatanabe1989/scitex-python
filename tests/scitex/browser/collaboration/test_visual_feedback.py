@@ -17,33 +17,33 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # """
 # Visual feedback for collaborative browser sessions.
-# 
+#
 # Shows who's controlling the browser and what they're doing.
 # """
-# 
+#
 # from playwright.async_api import Page
 # from typing import Optional
-# 
-# 
+#
+#
 # class VisualFeedback:
 #     """
 #     Simple visual feedback overlay on browser.
-# 
+#
 #     Shows:
 #     - Who's in control
 #     - What action is being performed
 #     - Status messages
 #     """
-# 
+#
 #     def __init__(self, page: Page):
 #         self.page = page
 #         self.initialized = False
-# 
+#
 #     async def initialize(self):
 #         """Initialize visual feedback overlay."""
 #         if self.initialized:
 #             return
-# 
+#
 #         await self.page.add_init_script("""
 #             () => {
 #                 // Create feedback container
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 #                 document.body?.appendChild(container) || window.addEventListener('load', () => {
 #                     document.body.appendChild(container);
 #                 });
-# 
+#
 #                 // Make globally accessible
 #                 window.scitexFeedback = {
 #                     show: function(message, type = 'info', duration = 3000) {
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 #                             'agent': '#9C27B0',
 #                             'human': '#00BCD4',
 #                         };
-# 
+#
 #                         const badge = document.createElement('div');
 #                         badge.style.cssText = `
 #                             background: ${colors[type] || colors.info};
@@ -86,11 +86,11 @@ if __name__ == "__main__":
 #                             max-width: 300px;
 #                         `;
 #                         badge.textContent = message;
-# 
+#
 #                         const container = document.getElementById('scitex-feedback-container');
 #                         if (container) {
 #                             container.appendChild(badge);
-# 
+#
 #                             if (duration > 0) {
 #                                 setTimeout(() => {
 #                                     badge.style.animation = 'slideOut 0.3s ease-in';
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 #                             }
 #                         }
 #                     },
-# 
+#
 #                     showParticipant: function(name, type = 'agent') {
 #                         const indicator = document.createElement('div');
 #                         indicator.id = `scitex-participant-${name}`;
@@ -113,13 +113,13 @@ if __name__ == "__main__":
 #                             font-weight: 500;
 #                         `;
 #                         indicator.textContent = `${type === 'agent' ? '🤖' : '👤'} ${name}`;
-# 
+#
 #                         const container = document.getElementById('scitex-feedback-container');
 #                         if (container) {
 #                             container.appendChild(indicator);
 #                         }
 #                     },
-# 
+#
 #                     clear: function() {
 #                         const container = document.getElementById('scitex-feedback-container');
 #                         if (container) {
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 #                         }
 #                     }
 #                 };
-# 
+#
 #                 // Add animations
 #                 const style = document.createElement('style');
 #                 style.textContent = `
@@ -157,9 +157,9 @@ if __name__ == "__main__":
 #                 });
 #             }
 #         """)
-# 
+#
 #         self.initialized = True
-# 
+#
 #     async def show_message(
 #         self,
 #         message: str,
@@ -170,13 +170,13 @@ if __name__ == "__main__":
 #         await self.page.evaluate(
 #             f"window.scitexFeedback?.show('{message}', '{type}', {duration})"
 #         )
-# 
+#
 #     async def show_participant(self, name: str, type: str = "agent"):
 #         """Show participant indicator."""
 #         await self.page.evaluate(
 #             f"window.scitexFeedback?.showParticipant('{name}', '{type}')"
 #         )
-# 
+#
 #     async def show_action(self, participant_name: str, action: str):
 #         """Show what participant is doing."""
 #         await self.show_message(
@@ -184,12 +184,12 @@ if __name__ == "__main__":
 #             type="agent" if "agent" in participant_name.lower() else "human",
 #             duration=2000,
 #         )
-# 
+#
 #     async def clear(self):
 #         """Clear all feedback."""
 #         await self.page.evaluate("window.scitexFeedback?.clear()")
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

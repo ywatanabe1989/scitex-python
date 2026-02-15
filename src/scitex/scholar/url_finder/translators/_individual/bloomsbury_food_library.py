@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2021-08-03 01:17:12
 """
 
-from typing import Dict, Any, List, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class BloomsburyFoodLibraryTranslator:

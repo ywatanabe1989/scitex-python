@@ -12,7 +12,7 @@ Structure:
 - No payload (shape definition is in node specification)
 """
 
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -70,13 +70,8 @@ def render_shape(
     Patch or None
         The created matplotlib patch, or None for lines
     """
-    from matplotlib.patches import (
-        Rectangle,
-        Circle,
-        Ellipse,
-        FancyArrowPatch,
-    )
     from matplotlib.lines import Line2D
+    from matplotlib.patches import Circle, Ellipse, FancyArrowPatch, Rectangle
 
     patch_kwargs = {
         "linewidth": linewidth,
@@ -94,9 +89,7 @@ def render_shape(
     if shape_type == "rectangle":
         w = width or 0.1
         h = height or 0.1
-        patch = Rectangle(
-            (x, y), w, h, transform=ax.transAxes, **patch_kwargs
-        )
+        patch = Rectangle((x, y), w, h, transform=ax.transAxes, **patch_kwargs)
         ax.add_patch(patch)
 
     elif shape_type == "circle":

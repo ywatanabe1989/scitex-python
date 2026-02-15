@@ -3,12 +3,13 @@
 # Time-stamp: "2024-05-14 00:58:26 (ywatanabe)"
 
 import matplotlib.pyplot as plt
-import scitex
 import numpy as np
 import seaborn as sns
 from natsort import natsorted
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import LabelEncoder
+
+import scitex
 
 
 def pca(

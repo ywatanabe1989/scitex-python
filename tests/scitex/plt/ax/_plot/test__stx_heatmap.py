@@ -14,19 +14,19 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-01 13:00:00 (ywatanabe)"
 # # File: ./src/scitex/plt/ax/_plot/_plot_heatmap.py
-# 
+#
 # """Heatmap plotting with automatic annotation color switching."""
-# 
+#
 # from typing import Any, List, Optional, Tuple, Union
-# 
+#
 # import matplotlib
 # import matplotlib.pyplot as plt
 # import numpy as np
 # from matplotlib.axes import Axes
 # from matplotlib.colorbar import Colorbar
 # from matplotlib.image import AxesImage
-# 
-# 
+#
+#
 # def stx_heatmap(
 #     ax: Union[Axes, "AxisWrapper"],
 #     values_2d: np.ndarray,
@@ -41,11 +41,11 @@ if __name__ == "__main__":
 #     **kwargs: Any,
 # ) -> Tuple[Union[Axes, "AxisWrapper"], AxesImage, Colorbar]:
 #     """Plot a heatmap on the given axes with automatic annotation colors.
-# 
+#
 #     Creates a heatmap visualization with optional cell annotations. Annotation
 #     text colors are automatically switched based on background brightness for
 #     optimal readability.
-# 
+#
 #     Parameters
 #     ----------
 #     ax : matplotlib.axes.Axes or AxisWrapper
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 #         Text color for annotations on darker backgrounds.
 #     **kwargs : dict
 #         Additional keyword arguments passed to imshow().
-# 
+#
 #     Returns
 #     -------
 #     ax : matplotlib.axes.Axes or AxisWrapper
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 #         The image object created by imshow.
 #     cbar : matplotlib.colorbar.Colorbar
 #         The colorbar object.
-# 
+#
 #     Examples
 #     --------
 #     >>> import numpy as np
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 #     ...     cmap="Blues"
 #     ... )
 #     """
-# 
+#
 #     im, cbar = _mpl_heatmap(
 #         values_2d,
 #         x_labels,
@@ -102,7 +102,7 @@ if __name__ == "__main__":
 #         cmap=cmap,
 #         cbarlabel=cbar_label,
 #     )
-# 
+#
 #     if show_annot:
 #         textcolors = _switch_annot_colors(cmap, annot_color_lighter, annot_color_darker)
 #         texts = _mpl_annotate_heatmap(
@@ -110,20 +110,20 @@ if __name__ == "__main__":
 #             valfmt=annot_format,
 #             textcolors=textcolors,
 #         )
-# 
+#
 #     return ax, im, cbar
-# 
-# 
+#
+#
 # def _switch_annot_colors(
 #     cmap: str,
 #     annot_color_lighter: str,
 #     annot_color_darker: str,
 # ) -> Tuple[str, str]:
 #     """Determine annotation text colors based on colormap brightness.
-# 
+#
 #     Uses perceived brightness (ITU-R BT.709) to select appropriate text
 #     colors for light vs dark backgrounds in the colormap.
-# 
+#
 #     Parameters
 #     ----------
 #     cmap : str
@@ -132,30 +132,30 @@ if __name__ == "__main__":
 #         Color to use on lighter backgrounds.
 #     annot_color_darker : str
 #         Color to use on darker backgrounds.
-# 
+#
 #     Returns
 #     -------
 #     tuple of str
 #         (color_for_dark_bg, color_for_light_bg) text colors.
 #     """
 #     cmap_obj = plt.cm.get_cmap(cmap)
-# 
+#
 #     # Sample colormap at extremes (avoiding edge effects)
 #     dark_color = cmap_obj(0.1)
 #     light_color = cmap_obj(0.9)
-# 
+#
 #     # Calculate perceived brightness using ITU-R BT.709 coefficients
 #     dark_brightness = (
 #         0.2126 * dark_color[0] + 0.7152 * dark_color[1] + 0.0722 * dark_color[2]
 #     )
-# 
+#
 #     # Choose text colors based on background brightness
 #     if dark_brightness < 0.5:
 #         return (annot_color_lighter, annot_color_darker)
 #     else:
 #         return (annot_color_darker, annot_color_lighter)
-# 
-# 
+#
+#
 # def _mpl_heatmap(
 #     data: np.ndarray,
 #     row_labels: Optional[List[str]],
@@ -166,7 +166,7 @@ if __name__ == "__main__":
 #     **kwargs: Any,
 # ) -> Tuple[AxesImage, Colorbar]:
 #     """Create a heatmap with imshow and add a colorbar.
-# 
+#
 #     Parameters
 #     ----------
 #     data : np.ndarray
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 #         Label for the colorbar.
 #     **kwargs : dict
 #         Additional keyword arguments passed to imshow().
-# 
+#
 #     Returns
 #     -------
 #     im : matplotlib.image.AxesImage
@@ -191,29 +191,29 @@ if __name__ == "__main__":
 #     cbar : matplotlib.colorbar.Colorbar
 #         The colorbar object.
 #     """
-# 
+#
 #     if ax is None:
 #         ax = plt.gca()
-# 
+#
 #     if cbar_kw is None:
 #         cbar_kw = {}
-# 
+#
 #     # Plot the heatmap
 #     im = ax.imshow(data, **kwargs)
-# 
+#
 #     # Create colorbar with proper formatting
 #     cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
 #     cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
-# 
+#
 #     # Set colorbar border width to match axes spines
 #     cbar.outline.set_linewidth(0.2 * 2.83465)  # 0.2mm in points
-# 
+#
 #     # Format colorbar ticks
 #     from matplotlib.ticker import MaxNLocator
-# 
+#
 #     cbar.ax.yaxis.set_major_locator(MaxNLocator(nbins=4, min_n_ticks=3))
 #     cbar.ax.tick_params(width=0.2 * 2.83465, length=0.8 * 2.83465)  # Match tick styling
-# 
+#
 #     # Show all ticks and label them with the respective list entries.
 #     ax.set_xticks(
 #         range(data.shape[1]),
@@ -223,35 +223,35 @@ if __name__ == "__main__":
 #         # rotation_mode="anchor",
 #     )
 #     ax.set_yticks(range(data.shape[0]), labels=row_labels)
-# 
+#
 #     # Let the horizontal axes labeling appear on top.
 #     ax.tick_params(top=False, bottom=True, labeltop=False, labelbottom=True)
-# 
+#
 #     # Show all 4 spines for heatmap
 #     ax.spines[:].set_visible(True)
-# 
+#
 #     # Set aspect ratio to 'equal' for square cells (1:1)
 #     ax.set_aspect("equal", adjustable="box")
-# 
+#
 #     ax.set_xticks(np.arange(data.shape[1] + 1) - 0.5, minor=True)
 #     ax.set_yticks(np.arange(data.shape[0] + 1) - 0.5, minor=True)
 #     ax.tick_params(which="minor", bottom=False, left=False)
-# 
+#
 #     return im, cbar
-# 
-# 
+#
+#
 # def _calc_annot_fontsize(n_rows: int, n_cols: int) -> float:
 #     """Calculate dynamic annotation font size based on cell count.
-# 
+#
 #     Uses a base size of 6pt for small heatmaps and scales down for larger ones.
-# 
+#
 #     Parameters
 #     ----------
 #     n_rows : int
 #         Number of rows in the heatmap.
 #     n_cols : int
 #         Number of columns in the heatmap.
-# 
+#
 #     Returns
 #     -------
 #     float
@@ -260,10 +260,10 @@ if __name__ == "__main__":
 #     # Base font size for small heatmaps (e.g., 5x5)
 #     BASE_FONTSIZE = 6.0
 #     BASE_CELLS = 5  # Reference dimension
-# 
+#
 #     # Use the larger dimension to scale
 #     max_dim = max(n_rows, n_cols)
-# 
+#
 #     if max_dim <= BASE_CELLS:
 #         return BASE_FONTSIZE
 #     elif max_dim <= 10:
@@ -275,8 +275,8 @@ if __name__ == "__main__":
 #     else:
 #         # Minimum 3pt for very large heatmaps
 #         return max(3.0, 4.0 - (max_dim - 20) * 0.05)
-# 
-# 
+#
+#
 # def _mpl_annotate_heatmap(
 #     im: AxesImage,
 #     data: Optional[np.ndarray] = None,
@@ -287,7 +287,7 @@ if __name__ == "__main__":
 #     **textkw: Any,
 # ) -> List:
 #     """Annotate a heatmap with cell values.
-# 
+#
 #     Parameters
 #     ----------
 #     im : matplotlib.image.AxesImage
@@ -307,38 +307,38 @@ if __name__ == "__main__":
 #         cell count (6pt base, scaling down for larger heatmaps).
 #     **textkw : dict
 #         Additional keyword arguments passed to ax.text().
-# 
+#
 #     Returns
 #     -------
 #     texts : list of matplotlib.text.Text
 #         The annotation text objects.
 #     """
-# 
+#
 #     if not isinstance(data, (list, np.ndarray)):
 #         data = im.get_array()
-# 
+#
 #     # Calculate dynamic font size if not specified
 #     if fontsize is None:
 #         fontsize = _calc_annot_fontsize(data.shape[0], data.shape[1])
-# 
+#
 #     # Normalize the threshold to the images color range.
 #     if threshold is not None:
 #         threshold = im.norm(threshold)
 #     else:
 #         # Use 0.7 instead of 0.5 for better visibility with most colormaps
 #         threshold = im.norm(data.max()) * 0.7
-# 
+#
 #     # Set default alignment to center, but allow it to be
 #     # overwritten by textkw.
 #     kw = dict(
 #         horizontalalignment="center", verticalalignment="center", fontsize=fontsize
 #     )
 #     kw.update(textkw)
-# 
+#
 #     # Get the formatter in case a string is supplied
 #     if isinstance(valfmt, str):
 #         valfmt = matplotlib.ticker.StrMethodFormatter(valfmt)
-# 
+#
 #     # Loop over the data and create a `Text` for each "pixel".
 #     # Change the text's color depending on the data.
 #     texts = []
@@ -347,22 +347,22 @@ if __name__ == "__main__":
 #             kw.update(color=textcolors[int(im.norm(data[ii, jj]) > threshold)])
 #             text = im.axes.text(jj, ii, valfmt(data[ii, jj], None), **kw)
 #             texts.append(text)
-# 
+#
 #     return texts
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     import matplotlib
 #     import matplotlib as mpl
 #     import matplotlib.pyplot as plt
 #     import numpy as np
-# 
+#
 #     data = np.random.rand(5, 10)
 #     x_labels = [f"X{ii + 1}" for ii in range(5)]
 #     y_labels = [f"Y{ii + 1}" for ii in range(10)]
-# 
+#
 #     fig, ax = plt.subplots()
-# 
+#
 #     im, cbar = stx_heatmap(
 #         ax,
 #         data,
@@ -373,11 +373,11 @@ if __name__ == "__main__":
 #         annot_color_darker="black",
 #         cmap="Blues",
 #     )
-# 
+#
 #     fig.tight_layout()
 #     plt.show()
 #     # EOF
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -18,27 +18,11 @@ All integrations follow the same pattern:
 - Link: Live synchronization, citation insertion
 """
 
-from .base import (
-    BaseImporter,
-    BaseExporter,
-    BaseLinker,
-    BaseMapper,
-)
+from .base import BaseExporter, BaseImporter, BaseLinker, BaseMapper
+from .mendeley import MendeleyExporter, MendeleyImporter, MendeleyLinker, MendeleyMapper
 
 # Import all reference manager modules
-from .zotero import (
-    ZoteroImporter,
-    ZoteroExporter,
-    ZoteroLinker,
-    ZoteroMapper,
-)
-
-from .mendeley import (
-    MendeleyImporter,
-    MendeleyExporter,
-    MendeleyLinker,
-    MendeleyMapper,
-)
+from .zotero import ZoteroExporter, ZoteroImporter, ZoteroLinker, ZoteroMapper
 
 __all__ = [
     # Base classes

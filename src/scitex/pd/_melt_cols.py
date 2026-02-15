@@ -10,6 +10,7 @@
 # /home/ywatanabe/proj/_scitex_repo_openhands/src/scitex/pd/_melt_cols.py
 
 from typing import List, Optional
+
 import pandas as pd
 
 

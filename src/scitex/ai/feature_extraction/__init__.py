@@ -12,9 +12,9 @@ THIS_FILE = (
 # Time-stamp: "2024-10-22 19:51:47 (ywatanabe)"
 # File: __init__.py
 
-import os as __os
 import importlib as __importlib
 import inspect as __inspect
+import os as __os
 import warnings as __warnings
 
 # Get the current directory

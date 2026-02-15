@@ -14,6 +14,7 @@ Key features:
 
 import re
 from typing import List
+
 from playwright.async_api import Page
 
 
@@ -42,7 +43,8 @@ class InterResearchScienceCenterTranslator:
             pass
 
         # Extract PDF URL from meta tags and direct links
-        urls = await page.evaluate("""
+        urls = await page.evaluate(
+            """
             () => {
                 const pdfUrls = [];
 
@@ -70,7 +72,8 @@ class InterResearchScienceCenterTranslator:
 
                 return pdfUrls;
             }
-        """)
+        """
+        )
 
         pdf_urls.extend(urls)
         return pdf_urls
@@ -78,6 +81,7 @@ class InterResearchScienceCenterTranslator:
 
 if __name__ == "__main__":
     import asyncio
+
     from playwright.async_api import async_playwright
 
     async def main():

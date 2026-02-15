@@ -83,8 +83,9 @@ def cache(id, *args):
 
 # Usage example
 if __name__ == "__main__":
-    import scitex
     import numpy as np
+
+    import scitex
 
     # Variables to cache
     var1 = "x"

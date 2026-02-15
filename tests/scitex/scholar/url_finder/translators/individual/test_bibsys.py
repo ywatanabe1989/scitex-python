@@ -15,11 +15,11 @@ if __name__ == "__main__":
 # Description: BIBSYS translator for Zotero
 # Translator ID: ab961e61-2a8a-4be1-b8a3-044f20d52d78
 # """
-# 
+#
 # from typing import Any, Dict, Optional, List
 # import re
-# 
-# 
+#
+#
 # TRANSLATOR_INFO = {
 #     "translator_id": "ab961e61-2a8a-4be1-b8a3-044f20d52d78",
 #     "label": "BIBSYS",
@@ -32,8 +32,8 @@ if __name__ == "__main__":
 #     "browser_support": "gcsibv",
 #     "last_updated": "2021-12-28 04:44:52",
 # }
-# 
-# 
+#
+#
 # def detect_web(doc: Any, url: str) -> Optional[str]:
 #     """Detect if the page is a book or multiple items"""
 #     if re.match(r"^https?://ask\.bibsys\.no/ask/action/result", url):
@@ -41,37 +41,37 @@ if __name__ == "__main__":
 #     elif re.match(r"^https?://ask\.bibsys\.no/ask/action/show", url):
 #         return "book"
 #     return None
-# 
-# 
+#
+#
 # def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str, str]]:
 #     """Get search results from a multiple item page"""
 #     items = {}
-# 
+#
 #     # Get titles
 #     title_rows = doc.select('tr td[width="49%"][align="left"][valign="top"] a')
-# 
+#
 #     # Get codes (IDs)
 #     code_inputs = doc.select('tr td input[type="checkbox"][name="valg"]')
-# 
+#
 #     if not title_rows or not code_inputs:
 #         return None
-# 
+#
 #     # Skip first title (it's usually a header)
 #     for i, (title_elem, code_input) in enumerate(zip(title_rows, code_inputs)):
 #         if i == 0:  # Skip first
 #             continue
-# 
+#
 #         title = title_elem.get_text(strip=True)
 #         code = code_input.get("value", "")
-# 
+#
 #         if title and code:
 #             if check_only:
 #                 return True
 #             items[code] = title
-# 
+#
 #     return items if items else None
-# 
-# 
+#
+#
 # def scrape_from_ris(ris_text: str) -> Dict[str, Any]:
 #     """Parse RIS format text and return item"""
 #     item = {
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 #         "notes": [],
 #         "seeAlso": [],
 #     }
-# 
+#
 #     lines = ris_text.split("\n")
 #     for line in lines:
 #         if line.startswith("TI  - "):
@@ -135,13 +135,13 @@ if __name__ == "__main__":
 #             note_text = line[6:].strip()
 #             if note_text:
 #                 item["notes"].append({"note": note_text})
-# 
+#
 #     return item
-# 
-# 
+#
+#
 # def scrape(doc: Any, url: str) -> Dict[str, Any]:
 #     """Scrape a single item page
-# 
+#
 #     Note: This requires making an HTTP POST request to get RIS data,
 #     which would need to be implemented with proper HTTP handling
 #     """
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 #     # 2. With data: visningsformat=ris&eksportFormat=refmanager&eksportEpostAdresse=&eksportEpostFormat=fortekst&cmd=sendtil
 #     # 3. Parse the returned RIS text
 #     # 4. Return the item
-# 
+#
 #     return {
 #         "itemType": "book",
 #         "title": "",
@@ -161,12 +161,12 @@ if __name__ == "__main__":
 #         "notes": [],
 #         "seeAlso": [],
 #     }
-# 
-# 
+#
+#
 # def do_web(doc: Any, url: str) -> List[Dict[str, Any]]:
 #     """Main entry point for the translator"""
 #     web_type = detect_web(doc, url)
-# 
+#
 #     if web_type == "multiple":
 #         return []
 #     elif web_type == "book":

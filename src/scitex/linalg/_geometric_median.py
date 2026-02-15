@@ -10,6 +10,7 @@ This script does XYZ.
 
 import torch
 from geom_median.torch import compute_geometric_median
+
 from scitex.decorators import torch_fn
 
 # @torch_fn
@@ -49,7 +50,9 @@ def geometric_median(xx, dim=-1):
 
 if __name__ == "__main__":
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex
 
     # # Argument Parser
@@ -58,7 +61,6 @@ if __name__ == "__main__":
     # parser.add_argument('--var', '-v', type=int, default=1, help='')
     # parser.add_argument('--flag', '-f', action='store_true', default=False, help='')
     # args = parser.parse_args()
-
     # Main
     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
         sys, plt, verbose=False

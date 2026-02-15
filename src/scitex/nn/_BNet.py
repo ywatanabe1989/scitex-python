@@ -2,19 +2,20 @@
 # -*- coding: utf-8 -*-
 # Time-stamp: "2023-05-15 16:44:27 (ywatanabe)"
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchsummary import summary
-import numpy as np
+
+from ._ChannelGainChanger import ChannelGainChanger
+from ._DropoutChannels import DropoutChannels
+from ._FreqGainChanger import FreqGainChanger
+from ._MNet_1000 import MNet_1000
 
 # Import specific nn modules to avoid circular imports
 from ._SpatialAttention import SpatialAttention
 from ._SwapChannels import SwapChannels
-from ._DropoutChannels import DropoutChannels
-from ._FreqGainChanger import FreqGainChanger
-from ._ChannelGainChanger import ChannelGainChanger
-from ._MNet_1000 import MNet_1000
 
 
 class BHead(nn.Module):

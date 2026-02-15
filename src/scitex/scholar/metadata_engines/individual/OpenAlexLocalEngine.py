@@ -88,7 +88,9 @@ class OpenAlexLocalEngine(BaseDOIEngine):
         if doi:
             return self._search_by_doi(doi, return_as)
         else:
-            return self._search_by_metadata(title, year, authors, max_results, return_as)
+            return self._search_by_metadata(
+                title, year, authors, max_results, return_as
+            )
 
     def _search_by_doi(self, doi: str, return_as: str) -> Optional[Dict]:
         """Get work metadata by DOI"""

@@ -10,12 +10,12 @@ __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 """Database operations module for scitex."""
 
-from ._postgresql._PostgreSQL import PostgreSQL
-from ._sqlite3._SQLite3 import SQLite3
-from ._sqlite3._delete_duplicates import delete_sqlite3_duplicates
+from ._check_health import batch_health_check, check_health
 from ._delete_duplicates import delete_duplicates
 from ._inspect import inspect
-from ._check_health import check_health, batch_health_check
+from ._postgresql._PostgreSQL import PostgreSQL
+from ._sqlite3._delete_duplicates import delete_sqlite3_duplicates
+from ._sqlite3._SQLite3 import SQLite3
 
 __all__ = [
     "PostgreSQL",

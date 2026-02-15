@@ -108,8 +108,8 @@ def count_grids(params_grid):
 
 
 if __name__ == "__main__":
-    import pandas as pd
     import matplotlib.pyplot as _plt
+    import pandas as pd
 
     # Start
     CONFIG, _sys.stdout, _sys.stderr, _plt, CC = _scitex.session.start(

@@ -14,10 +14,9 @@ These are lightweight dataclasses that mirror the JSON structure,
 separate from the Canvas class which provides the OO interface.
 """
 
-from dataclasses import dataclass, field, asdict
-from typing import Dict, Any, List, Optional
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
-
+from typing import Any, Dict, List, Optional
 
 # Schema version for canvas format
 CANVAS_SCHEMA_VERSION = "0.1.0"
@@ -375,7 +374,9 @@ class CanvasSpec:
         return cls(
             canvas_name=data.get("canvas_name", ""),
             scitex_schema=data.get("scitex_schema", "scitex.schema.canvas"),
-            scitex_schema_version=data.get("scitex_schema_version", CANVAS_SCHEMA_VERSION),
+            scitex_schema_version=data.get(
+                "scitex_schema_version", CANVAS_SCHEMA_VERSION
+            ),
             size=CanvasSizeSpec.from_dict(data.get("size", {})),
             background=CanvasBackgroundSpec.from_dict(data.get("background", {})),
             panels=[PanelSpec.from_dict(p) for p in data.get("panels", [])],

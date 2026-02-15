@@ -59,7 +59,10 @@ def _extract_axes_dimensions(fig, ax, ax_index: int) -> dict:
             ax_metadata["bounds_figure_fraction"] = list(dim_info["axes_position"])
 
         # Position in grid (row, col)
-        if hasattr(ax, "_scitex_metadata") and "position_in_grid" in ax._scitex_metadata:
+        if (
+            hasattr(ax, "_scitex_metadata")
+            and "position_in_grid" in ax._scitex_metadata
+        ):
             ax_metadata["position_in_grid"] = ax._scitex_metadata["position_in_grid"]
         else:
             # Calculate from ax_index if we have grid info

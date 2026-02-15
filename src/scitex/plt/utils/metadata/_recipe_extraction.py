@@ -9,7 +9,7 @@ This module provides functions to extract reconstruction recipes from axes histo
 allowing figures to be recreated from metadata and CSV data.
 """
 
-from typing import List, Dict
+from typing import Dict, List
 
 
 def collect_recipe_metadata(
@@ -72,13 +72,13 @@ def _extract_calls_from_history(ax, ax_index: int) -> List[dict]:
     calls = []
 
     # Check for scitex wrapper with history
-    if not hasattr(ax, 'history') and not hasattr(ax, '_ax_history'):
+    if not hasattr(ax, "history") and not hasattr(ax, "_ax_history"):
         return calls
 
     # Get history dict
-    history = getattr(ax, 'history', None)
+    history = getattr(ax, "history", None)
     if history is None:
-        history = getattr(ax, '_ax_history', {})
+        history = getattr(ax, "_ax_history", {})
 
     # Get grid position
     ax_row = 0
@@ -115,8 +115,9 @@ def _extract_calls_from_history(ax, ax_index: int) -> List[dict]:
     return calls
 
 
-def _build_data_ref(trace_id, method_name: str, tracked_dict: dict,
-                    ax_row: int, ax_col: int) -> dict:
+def _build_data_ref(
+    trace_id, method_name: str, tracked_dict: dict, ax_row: int, ax_col: int
+) -> dict:
     """
     Build data_ref mapping from tracked_dict to CSV column names.
 
@@ -141,77 +142,82 @@ def _build_data_ref(trace_id, method_name: str, tracked_dict: dict,
     data_ref = {}
 
     # Method-specific column naming
-    if method_name == 'hist':
+    if method_name == "hist":
         data_ref["raw_data"] = f"{prefix}raw-data"
         data_ref["bin_centers"] = f"{prefix}bin-centers"
         data_ref["bin_counts"] = f"{prefix}bin-counts"
-    elif method_name in ('plot', 'scatter', 'step', 'errorbar'):
+    elif method_name in ("plot", "scatter", "step", "errorbar"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-        if tracked_dict and 'yerr' in tracked_dict:
+        if tracked_dict and "yerr" in tracked_dict:
             data_ref["yerr"] = f"{prefix}yerr"
-        if tracked_dict and 'xerr' in tracked_dict:
+        if tracked_dict and "xerr" in tracked_dict:
             data_ref["xerr"] = f"{prefix}xerr"
-    elif method_name in ('bar', 'barh'):
+    elif method_name in ("bar", "barh"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name == 'stem':
+    elif method_name == "stem":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name in ('fill_between', 'fill_betweenx'):
+    elif method_name in ("fill_between", "fill_betweenx"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y1"] = f"{prefix}y1"
         data_ref["y2"] = f"{prefix}y2"
-    elif method_name in ('imshow', 'matshow', 'pcolormesh'):
+    elif method_name in ("imshow", "matshow", "pcolormesh"):
         data_ref["data"] = f"{prefix}data"
-    elif method_name in ('contour', 'contourf'):
+    elif method_name in ("contour", "contourf"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
         data_ref["z"] = f"{prefix}z"
-    elif method_name in ('boxplot', 'violinplot'):
+    elif method_name in ("boxplot", "violinplot"):
         data_ref["data"] = f"{prefix}data"
-    elif method_name == 'pie':
+    elif method_name == "pie":
         data_ref["x"] = f"{prefix}x"
-    elif method_name in ('quiver', 'streamplot'):
+    elif method_name in ("quiver", "streamplot"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
         data_ref["u"] = f"{prefix}u"
         data_ref["v"] = f"{prefix}v"
-    elif method_name == 'hexbin':
+    elif method_name == "hexbin":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name == 'hist2d':
+    elif method_name == "hist2d":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name == 'kde':
+    elif method_name == "kde":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
     # SciTeX custom methods (stx_*)
-    elif method_name == 'stx_line':
+    elif method_name == "stx_line":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name in ('stx_mean_std', 'stx_mean_ci', 'stx_median_iqr', 'stx_shaded_line'):
+    elif method_name in (
+        "stx_mean_std",
+        "stx_mean_ci",
+        "stx_median_iqr",
+        "stx_shaded_line",
+    ):
         data_ref["x"] = f"{prefix}x"
         data_ref["y_lower"] = f"{prefix}y-lower"
         data_ref["y_middle"] = f"{prefix}y-middle"
         data_ref["y_upper"] = f"{prefix}y-upper"
-    elif method_name in ('stx_box', 'stx_violin'):
+    elif method_name in ("stx_box", "stx_violin"):
         data_ref["data"] = f"{prefix}data"
-    elif method_name == 'stx_scatter_hist':
+    elif method_name == "stx_scatter_hist":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name in ('stx_heatmap', 'stx_conf_mat', 'stx_image', 'stx_raster'):
+    elif method_name in ("stx_heatmap", "stx_conf_mat", "stx_image", "stx_raster"):
         data_ref["data"] = f"{prefix}data"
-    elif method_name in ('stx_kde', 'stx_ecdf'):
+    elif method_name in ("stx_kde", "stx_ecdf"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name.startswith('stx_'):
+    elif method_name.startswith("stx_"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
     else:
         # Generic fallback
         if tracked_dict:
-            if 'x' in tracked_dict or 'args' in tracked_dict:
+            if "x" in tracked_dict or "args" in tracked_dict:
                 data_ref["x"] = f"{prefix}x"
                 data_ref["y"] = f"{prefix}y"
 
@@ -242,24 +248,49 @@ def _filter_style_kwargs(kwargs: dict, method_name: str) -> dict:
 
     # Style-relevant kwargs to keep
     style_keys = {
-        'color', 'c', 'facecolor', 'edgecolor', 'linecolor',
-        'linewidth', 'lw', 'linestyle', 'ls',
-        'marker', 'markersize', 'ms', 'markerfacecolor', 'markeredgecolor',
-        'alpha', 'zorder',
-        'label',
-        'bins', 'density', 'histtype', 'orientation',
-        'width', 'height', 'align',
-        'cmap', 'vmin', 'vmax', 'norm',
-        'levels', 'extend',
-        'scale', 'units',
-        'autopct', 'explode', 'shadow', 'startangle',
+        "color",
+        "c",
+        "facecolor",
+        "edgecolor",
+        "linecolor",
+        "linewidth",
+        "lw",
+        "linestyle",
+        "ls",
+        "marker",
+        "markersize",
+        "ms",
+        "markerfacecolor",
+        "markeredgecolor",
+        "alpha",
+        "zorder",
+        "label",
+        "bins",
+        "density",
+        "histtype",
+        "orientation",
+        "width",
+        "height",
+        "align",
+        "cmap",
+        "vmin",
+        "vmax",
+        "norm",
+        "levels",
+        "extend",
+        "scale",
+        "units",
+        "autopct",
+        "explode",
+        "shadow",
+        "startangle",
     }
 
     filtered = {}
     for key, value in kwargs.items():
         if key in style_keys:
             # Skip if value is a large array (data, not style)
-            if hasattr(value, '__len__') and not isinstance(value, str):
+            if hasattr(value, "__len__") and not isinstance(value, str):
                 if len(value) > 10:
                     continue
             filtered[key] = value

@@ -12,7 +12,7 @@ Structure:
 - No payload (text is in node specification)
 """
 
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

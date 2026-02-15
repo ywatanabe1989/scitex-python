@@ -38,8 +38,8 @@ except ImportError:
 # Optional: Zarr explorer (requires zarr)
 try:
     from ._load_modules._ZarrExplorer import (
-        ZarrExplorer as _ZarrExplorer,
-    )  # Internal class
+        ZarrExplorer as _ZarrExplorer,  # Internal class
+    )
     from ._load_modules._ZarrExplorer import explore_zarr, has_zarr_key
 except ImportError:
     _ZarrExplorer = None

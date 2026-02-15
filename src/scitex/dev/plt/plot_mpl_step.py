@@ -19,9 +19,9 @@ def plot_mpl_step(plt, rng, ax=None):
 
     x = np.arange(20)
     y = rng.integers(0, 10, 20)
-    ax.mpl_step(x, y, where='mid', label='step')
+    ax.mpl_step(x, y, where="mid", label="step")
     ax.set_xyt("X", "Y", "mpl_step")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

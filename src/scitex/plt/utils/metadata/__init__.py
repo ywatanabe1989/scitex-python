@@ -26,21 +26,21 @@ export_editable_figure : function
 from ._core import collect_figure_metadata
 from ._data_linkage import (
     assert_csv_json_consistency,
-    verify_csv_json_consistency,
     collect_recipe_metadata,
-)
-from ._geometry_extraction import (
-    extract_axes_bbox_px,
-    data_to_axes_px,
-    extract_line_geometry,
-    extract_scatter_geometry,
-    extract_polygon_geometry,
-    extract_rectangle_geometry,
-    extract_bar_group_geometry,
-    extract_text_geometry,
-    extract_image_geometry,
+    verify_csv_json_consistency,
 )
 from ._editable_export import export_editable_figure
+from ._geometry_extraction import (
+    data_to_axes_px,
+    extract_axes_bbox_px,
+    extract_bar_group_geometry,
+    extract_image_geometry,
+    extract_line_geometry,
+    extract_polygon_geometry,
+    extract_rectangle_geometry,
+    extract_scatter_geometry,
+    extract_text_geometry,
+)
 
 __all__ = [
     "collect_figure_metadata",

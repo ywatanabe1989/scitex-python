@@ -8,6 +8,7 @@
 __FILE__ = __file__
 
 from typing import Any, Dict, List, Optional
+
 import numpy as np
 from sklearn.metrics import average_precision_score, precision_recall_curve
 

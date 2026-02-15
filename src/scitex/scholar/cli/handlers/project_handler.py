@@ -57,9 +57,7 @@ async def handle_project_operations(args, scholar):
                     dois_to_download.append(paper.metadata.id.doi)
             elif not paper.metadata.path.pdfs or len(paper.metadata.path.pdfs) == 0:
                 # Paper has no DOI and no PDF - mark as failed with explanation
-                from scitex.scholar.storage._LibraryManager import (
-                    LibraryManager,
-                )
+                from scitex.scholar.storage._LibraryManager import LibraryManager
 
                 library_manager = LibraryManager(
                     config=scholar.config, project=args.project

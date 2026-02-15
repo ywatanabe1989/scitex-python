@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ml/training/_LearningCurveLogger.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -321,6 +322,7 @@ def main(args):
     from torch.utils.data import DataLoader, TensorDataset
     from torch.utils.data.dataset import Subset
     from torchvision import datasets
+
     import scitex
 
     ################################################################################
@@ -520,7 +522,9 @@ def run_main() -> None:
     global CONFIG, CC, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

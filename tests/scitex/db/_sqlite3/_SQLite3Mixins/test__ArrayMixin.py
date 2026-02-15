@@ -17,26 +17,26 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # import hashlib
 # import zlib
 # from typing import Any
 # from typing import Any as _Any
 # from typing import Dict, List, Optional, Tuple, Union
-# 
+#
 # import numpy as np
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # class _ArrayMixin:
 #     """Array data handling functionality"""
-# 
+#
 #     def verify_array_hash(
 #         self,
 #         table_name: str,
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 #         row_id: int,
 #     ) -> bool:
 #         """Verify array integrity using stored hash.
-# 
+#
 #         Parameters
 #         ----------
 #         table_name : str
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 #             Name of the array column
 #         row_id : int
 #             ID of the row to verify
-# 
+#
 #         Returns
 #         -------
 #         bool
@@ -63,22 +63,22 @@ if __name__ == "__main__":
 #         array = self.load_array(table_name, column, where=f"id = {row_id}")
 #         if array is None:
 #             return False
-# 
+#
 #         # Get stored hash
 #         result = self.execute(
 #             f"SELECT {column}_hash FROM {table_name} WHERE id = ?", (row_id,)
 #         ).fetchone()
-# 
+#
 #         if not result or not result[0]:
 #             return False
-# 
+#
 #         stored_hash = result[0]
-# 
+#
 #         # Calculate current hash
 #         current_hash = hashlib.sha256(array.tobytes()).hexdigest()[:16]
-# 
+#
 #         return current_hash == stored_hash
-# 
+#
 #     def save_arrays(
 #         self,
 #         table_name: str,
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 #         verbose: bool = True,
 #     ) -> None:
 #         """Save multiple arrays to multiple columns in one operation.
-# 
+#
 #         Parameters
 #         ----------
 #         table_name : str
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 #         with self.lock:
 #             if compress is None:
 #                 compress = getattr(self, "compress_by_default", False)
-# 
+#
 #             # Auto-add columns for all arrays
 #             for column in data.keys():
 #                 for suffix in ["_dtype", "_shape", "_is_compressed", "_hash"]:
@@ -122,25 +122,25 @@ if __name__ == "__main__":
 #                         )
 #                     except:
 #                         pass
-# 
+#
 #             # Prepare all columns and values
 #             all_columns = []
 #             all_values = []
-# 
+#
 #             for column, arr in data.items():
 #                 if not isinstance(arr, np.ndarray):
 #                     raise ValueError(f"{column} must be a NumPy array")
-# 
+#
 #                 # Calculate hash from original array data
 #                 array_hash = hashlib.sha256(arr.tobytes()).hexdigest()[:16]
-# 
+#
 #                 binary = arr.tobytes()
 #                 if compress and len(binary) > 1024:
 #                     binary = zlib.compress(binary, level=compress_level)
 #                     is_compressed = True
 #                 else:
 #                     is_compressed = False
-# 
+#
 #                 all_columns.extend(
 #                     [
 #                         column,
@@ -159,11 +159,11 @@ if __name__ == "__main__":
 #                         array_hash,
 #                     ]
 #                 )
-# 
+#
 #             if additional_columns:
 #                 all_columns = list(additional_columns.keys()) + all_columns
 #                 all_values = list(additional_columns.values()) + all_values
-# 
+#
 #             # Single insert/update
 #             if ids is not None:
 #                 update_cols = [f"{col}=?" for col in all_columns]
@@ -175,15 +175,15 @@ if __name__ == "__main__":
 #                 query = (
 #                     f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
 #                 )
-# 
+#
 #             self.execute(query, tuple(all_values))
-# 
+#
 #             if verbose:
 #                 logger.success(
 #                     f"Saved {len(data)} arrays to `{table_name}` table "
 #                     f"in `{self.db_path}`"
 #                 )
-# 
+#
 #     def save_array(
 #         self,
 #         table_name: str,
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 #         verbose: bool = True,
 #     ) -> None:
 #         """Save numpy array to database column.
-# 
+#
 #         Parameters
 #         ----------
 #         table_name : str
@@ -222,13 +222,13 @@ if __name__ == "__main__":
 #         verbose : bool, default True
 #             Whether to print status messages
 #         """
-# 
+#
 #         # Note: save_arrays doesn't support 'where' parameter
 #         # If where is provided but ids is not, we should handle it differently
 #         if where and not ids:
 #             # TODO: Implement WHERE clause support in save_arrays
 #             pass
-# 
+#
 #         self.save_arrays(
 #             table_name=table_name,
 #             data={column: data},
@@ -238,7 +238,7 @@ if __name__ == "__main__":
 #             compress_level=compress_level,
 #             verbose=verbose,
 #         )
-# 
+#
 #     def load_arrays(
 #         self,
 #         table_name: str,
@@ -249,7 +249,7 @@ if __name__ == "__main__":
 #         verbose: bool = True,
 #     ) -> Dict[str, np.ndarray]:
 #         """Load multiple array columns in one query.
-# 
+#
 #         Parameters
 #         ----------
 #         table_name : str
@@ -264,7 +264,7 @@ if __name__ == "__main__":
 #             Batch size for loading
 #         verbose : bool, default True
 #             Whether to print status messages
-# 
+#
 #         Returns
 #         -------
 #         dict
@@ -272,7 +272,7 @@ if __name__ == "__main__":
 #         """
 #         self.ensure_connection()
 #         self._check_context_manager()
-# 
+#
 #         if columns == "all":
 #             all_table_columns = self.get_table_schema(table_name)["name"].tolist()
 #             array_columns = []
@@ -286,7 +286,7 @@ if __name__ == "__main__":
 #                     array_columns.append(col)
 #         else:
 #             array_columns = columns if isinstance(columns, list) else [columns]
-# 
+#
 #         query_columns = ["id"]
 #         for col in array_columns:
 #             query_columns.extend(
@@ -298,7 +298,7 @@ if __name__ == "__main__":
 #                     f"{col}_hash",
 #                 ]
 #             )
-# 
+#
 #         df = self.get_rows(
 #             table_name=table_name,
 #             columns=query_columns,
@@ -306,12 +306,12 @@ if __name__ == "__main__":
 #             where=where,
 #             return_as="dataframe",
 #         )
-# 
+#
 #         result = {}
 #         for array_col in array_columns:
 #             arrays = []
 #             valid_arrays = []
-# 
+#
 #             for _, row in df.iterrows():
 #                 blob = row[array_col]
 #                 if blob is not None:
@@ -323,11 +323,11 @@ if __name__ == "__main__":
 #                         blob, dtype=np.dtype(row[f"{array_col}_dtype"])
 #                     ).reshape(eval(row[f"{array_col}_shape"]))
 #                     valid_arrays.append(arr)
-# 
+#
 #             if valid_arrays:
 #                 ref_shape = valid_arrays[0].shape
 #                 ref_dtype = valid_arrays[0].dtype
-# 
+#
 #                 for _, row in df.iterrows():
 #                     blob = row[array_col]
 #                     if blob is None:
@@ -341,16 +341,16 @@ if __name__ == "__main__":
 #                             blob, dtype=np.dtype(row[f"{array_col}_dtype"])
 #                         ).reshape(eval(row[f"{array_col}_shape"]))
 #                     arrays.append(arr)
-# 
+#
 #                 result[array_col] = np.stack(arrays) if arrays else None
 #             else:
 #                 result[array_col] = None
-# 
+#
 #         if verbose:
 #             print(f"Loaded {len(array_columns)} array columns from {table_name}")
-# 
+#
 #         return result
-# 
+#
 #     def load_array(
 #         self,
 #         table_name: str,
@@ -364,7 +364,7 @@ if __name__ == "__main__":
 #         verbose: bool = True,
 #     ) -> Optional[np.ndarray]:
 #         """Load numpy array from database column.
-# 
+#
 #         Parameters
 #         ----------
 #         table_name : str
@@ -385,13 +385,13 @@ if __name__ == "__main__":
 #             Shape hint (not used)
 #         verbose : bool, default True
 #             Whether to print status messages
-# 
+#
 #         Returns
 #         -------
 #         np.ndarray or None
 #             Stacked array or None if no data
 #         """
-# 
+#
 #         result = self.load_arrays(
 #             table_name=table_name,
 #             columns=[column],
@@ -401,7 +401,7 @@ if __name__ == "__main__":
 #             verbose=verbose,
 #         )
 #         return result.get(column) if result else None
-# 
+#
 #     # def binary_to_array(
 #     #     self,
 #     #     binary_data,
@@ -411,7 +411,7 @@ if __name__ == "__main__":
 #     #     shape=None,
 #     # ):
 #     #     """Convert binary data to numpy array.
-# 
+#
 #     #     Parameters
 #     #     ----------
 #     #     binary_data : bytes
@@ -424,16 +424,16 @@ if __name__ == "__main__":
 #     #         Numpy dtype (used if dtype_str not provided)
 #     #     shape : tuple, optional
 #     #         Array shape (used if shape_str not provided)
-# 
+#
 #     #     Returns
 #     #     -------
 #     #     np.ndarray or bytes
 #     #         Decoded array or original binary if no metadata
 #     #     """
-# 
+#
 #     #     if binary_data is None:
 #     #         return None
-# 
+#
 #     #     if dtype_str and shape_str:
 #     #         return np.frombuffer(
 #     #             binary_data, dtype=np.dtype(dtype_str)
@@ -441,7 +441,7 @@ if __name__ == "__main__":
 #     #     elif dtype and shape:
 #     #         return np.frombuffer(binary_data, dtype=dtype).reshape(shape)
 #     #     return binary_data
-# 
+#
 #     def binary_to_array(
 #         self,
 #         binary_data,
@@ -453,11 +453,11 @@ if __name__ == "__main__":
 #     ):
 #         if binary_data is None:
 #             return None
-# 
+#
 #         # Decompress if needed
 #         if compressed:
 #             binary_data = zlib.decompress(binary_data)
-# 
+#
 #         if dtype_str and shape_str:
 #             return np.frombuffer(binary_data, dtype=np.dtype(dtype_str)).reshape(
 #                 eval(shape_str)
@@ -465,10 +465,10 @@ if __name__ == "__main__":
 #         elif dtype and shape:
 #             return np.frombuffer(binary_data, dtype=dtype).reshape(shape)
 #         return binary_data
-# 
+#
 #     def get_array_dict(self, df, columns=None, dtype=None, shape=None):
 #         """Extract arrays from dataframe columns into dictionary.
-# 
+#
 #         Parameters
 #         ----------
 #         df : pd.DataFrame
@@ -479,13 +479,13 @@ if __name__ == "__main__":
 #             Fallback dtype if metadata missing
 #         shape : tuple, optional
 #             Fallback shape if metadata missing
-# 
+#
 #         Returns
 #         -------
 #         dict
 #             Dictionary mapping column names to stacked arrays
 #         """
-# 
+#
 #         result = {}
 #         if columns is None:
 #             columns = [
@@ -497,7 +497,7 @@ if __name__ == "__main__":
 #                     or col.endswith("_is_compressed")
 #                 )
 #             ]
-# 
+#
 #         for col in columns:
 #             if f"{col}_dtype" in df.columns and f"{col}_shape" in df.columns:
 #                 arrays = [
@@ -511,12 +511,12 @@ if __name__ == "__main__":
 #                     self.binary_to_array(x, dtype=dtype, shape=shape) for x in df[col]
 #                 ]
 #             result[col] = np.stack(arrays)
-# 
+#
 #         return result
-# 
+#
 #     # def decode_array_columns(self, df, columns=None, dtype=None, shape=None):
 #     #     """Decode binary array columns in-place in dataframe.
-# 
+#
 #     #     Parameters
 #     #     ----------
 #     #     df : pd.DataFrame
@@ -527,13 +527,13 @@ if __name__ == "__main__":
 #     #         Fallback dtype if metadata missing
 #     #     shape : tuple, optional
 #     #         Fallback shape if metadata missing
-# 
+#
 #     #     Returns
 #     #     -------
 #     #     pd.DataFrame
 #     #         Same dataframe with decoded arrays
 #     #     """
-# 
+#
 #     #     if columns is None:
 #     #         columns = [
 #     #             col
@@ -544,7 +544,7 @@ if __name__ == "__main__":
 #     #                 or col.endswith("_is_compressed")
 #     #             )
 #     #         ]
-# 
+#
 #     #     for col in columns:
 #     #         if f"{col}_dtype" in df.columns and f"{col}_shape" in df.columns:
 #     #             df[col] = df.apply(
@@ -558,7 +558,7 @@ if __name__ == "__main__":
 #     #                 lambda x: self.binary_to_array(x, dtype=dtype, shape=shape)
 #     #             )
 #     #     return df
-# 
+#
 #     def decode_array_columns(self, df, columns=None, dtype=None, shape=None):
 #         if columns is None:
 #             columns = [
@@ -570,7 +570,7 @@ if __name__ == "__main__":
 #                     or col.endswith("_is_compressed")
 #                 )
 #             ]
-# 
+#
 #         for col in columns:
 #             if f"{col}_dtype" in df.columns and f"{col}_shape" in df.columns:
 #                 df[col] = df.apply(
@@ -587,8 +587,8 @@ if __name__ == "__main__":
 #                     lambda x: self.binary_to_array(x, dtype=dtype, shape=shape)
 #                 )
 #         return df
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

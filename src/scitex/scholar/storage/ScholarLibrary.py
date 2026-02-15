@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/storage/ScholarLibrary.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -97,9 +98,11 @@ class ScholarLibrary:
                 # Additional bibliographic fields
                 volume=paper.metadata.publication.volume,
                 issue=paper.metadata.publication.issue,
-                pages=f"{paper.metadata.publication.first_page or ''}-{paper.metadata.publication.last_page or ''}"
-                if paper.metadata.publication.first_page
-                else None,
+                pages=(
+                    f"{paper.metadata.publication.first_page or ''}-{paper.metadata.publication.last_page or ''}"
+                    if paper.metadata.publication.first_page
+                    else None
+                ),
                 publisher=paper.metadata.publication.publisher,
                 issn=paper.metadata.publication.issn,
                 # Enrichment fields

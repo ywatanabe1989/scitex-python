@@ -288,9 +288,7 @@ class BibTeXValidator:
 
         return issues
 
-    def _parse_entries(
-        self, content: str
-    ) -> Tuple[List[dict], List[ValidationIssue]]:
+    def _parse_entries(self, content: str) -> Tuple[List[dict], List[ValidationIssue]]:
         """Parse BibTeX entries from content."""
         entries = []
         issues = []
@@ -417,9 +415,7 @@ class BibTeXValidator:
                 has_field = True
             # title variations
             if field == "title" and not has_field:
-                has_field = any(
-                    f in fields for f in ["title", "booktitle", "chapter"]
-                )
+                has_field = any(f in fields for f in ["title", "booktitle", "chapter"])
 
             if not has_field:
                 issues.append(
@@ -538,7 +534,9 @@ class BibTeXValidator:
         return can_merge, results
 
 
-def validate_bibtex_file(file_path: str | Path, strict: bool = False) -> ValidationResult:
+def validate_bibtex_file(
+    file_path: str | Path, strict: bool = False
+) -> ValidationResult:
     """
     Convenience function to validate a single BibTeX file.
 

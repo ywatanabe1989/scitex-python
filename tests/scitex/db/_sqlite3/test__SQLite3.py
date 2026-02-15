@@ -482,6 +482,7 @@ class TestSQLite3:
             assert hasattr(db, "optimize")
             assert hasattr(db, "backup")
 
+
 if __name__ == "__main__":
     import os
 
@@ -499,14 +500,14 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # import warnings
 # from typing import List, Optional
-# 
+#
 # from scitex.str import printc as _printc
 # from ._SQLite3Mixins._ArrayMixin import _ArrayMixin
 # from ._SQLite3Mixins._BatchMixin import _BatchMixin
@@ -521,8 +522,8 @@ if __name__ == "__main__":
 # from ._SQLite3Mixins._RowMixin import _RowMixin
 # from ._SQLite3Mixins._TableMixin import _TableMixin
 # from ._SQLite3Mixins._TransactionMixin import _TransactionMixin
-# 
-# 
+#
+#
 # class SQLite3(
 #     _ArrayMixin,
 #     _ConnectionMixin,
@@ -539,27 +540,27 @@ if __name__ == "__main__":
 #     _GitMixin,
 # ):
 #     """SQLite database manager with automatic metadata handling, numpy array storage, and compression.
-# 
+#
 #     This class provides a comprehensive interface for SQLite database operations with
 #     automatic compression, thread-safe operations, and specialized numpy array handling.
-# 
+#
 #     Features:
 #         - Automatic compression for BLOB data (70-90% reduction)
 #         - Thread-safe operations with proper connection management
 #         - Metadata handling for BLOB columns
 #         - Batch processing support
 #         - Context manager support for proper resource cleanup
-# 
+#
 #     Examples:
 #         Basic usage with context manager (recommended):
-# 
+#
 #         >>> with SQLite3("data.db", compress_by_default=True) as db:
 #         ...     db.create_table("experiments", {"id": "INTEGER PRIMARY KEY", "data": "BLOB"})
 #         ...     data = np.random.random((1000, 100))
 #         ...     db.save_array("experiments", data, column="data", additional_columns={"id": 1})
-# 
+#
 #         Array storage and retrieval:
-# 
+#
 #         >>> with SQLite3("data.db") as db:
 #         ...     # Save numpy array
 #         ...     db.save_array(
@@ -570,9 +571,9 @@ if __name__ == "__main__":
 #         ...     )
 #         ...     # Load array
 #         ...     loaded = db.load_array("measurements", "data", where="name = 'experiment_1'")
-# 
+#
 #         Generic object storage:
-# 
+#
 #         >>> with SQLite3("data.db") as db:
 #         ...     db.save_blob(
 #         ...         table_name="objects",
@@ -580,14 +581,14 @@ if __name__ == "__main__":
 #         ...         key="model_v1"
 #         ...     )
 #         ...     loaded_obj = db.load_blob("objects", key="model_v1")
-# 
+#
 #     Notes:
 #         - Always use context manager (with statement) for proper resource cleanup
 #         - BLOB columns automatically get metadata columns: {column}_dtype, {column}_shape, {column}_compressed
 #         - Compression is enabled by default for arrays > 1KB
 #         - Thread-safe operations are supported
 #     """
-# 
+#
 #     def __init__(
 #         self,
 #         db_path: str,
@@ -596,7 +597,7 @@ if __name__ == "__main__":
 #         autocommit: bool = False,
 #     ):
 #         """Initialize SQLite database manager.
-# 
+#
 #         Parameters
 #         ----------
 #         db_path : str
@@ -607,36 +608,36 @@ if __name__ == "__main__":
 #             Whether to compress BLOB data by default when not explicitly specified, by default False
 #         autocommit : bool, optional
 #             Whether to automatically commit transactions, by default False
-# 
+#
 #         Warnings
 #         --------
 #         UserWarning
 #             If not used with context manager, warns about potential resource leaks
 #         """
-# 
+#
 #         if not os.path.exists(db_path):
 #             os.makedirs(os.path.dirname(db_path), exist_ok=True)
-# 
+#
 #         _ConnectionMixin.__init__(self, db_path, use_temp)
 #         self.compress_by_default = compress_by_default
 #         self.autocommit = autocommit
 #         self._context_manager_used = False
-# 
+#
 #     def __enter__(self):
 #         """Enter context manager."""
 #         self._context_manager_used = True
 #         return self
-# 
+#
 #     def _check_context_manager(self):
 #         if not self._context_manager_used:
 #             raise RuntimeError(
 #                 "SQLite3 must be used with context manager: 'with SQLite3(...) as db:'"
 #             )
-# 
+#
 #     def __exit__(self, exc_type, exc_val, exc_tb):
 #         """Exit context manager and ensure proper cleanup."""
 #         self.close()
-# 
+#
 #     def __del__(self):
 #         """Destructor with context manager usage warning."""
 #         if hasattr(self, "_context_manager_used") and not self._context_manager_used:
@@ -648,7 +649,7 @@ if __name__ == "__main__":
 #             )
 #         if hasattr(self, "close"):
 #             self.close()
-# 
+#
 #     def __call__(
 #         self,
 #         return_summary=False,
@@ -658,7 +659,7 @@ if __name__ == "__main__":
 #         limit: int = 5,
 #     ):
 #         """Display database summary information.
-# 
+#
 #         Parameters
 #         ----------
 #         return_summary : bool, optional
@@ -671,34 +672,34 @@ if __name__ == "__main__":
 #             Whether to show detailed information, by default True
 #         limit : int, optional
 #             Maximum number of rows to display per table, by default 5
-# 
+#
 #         Returns
 #         -------
 #         dict or None
 #             Summary dictionary if return_summary=True, else None
 #         """
-# 
+#
 #         summary = self.get_summaries(
 #             table_names=table_names,
 #             verbose=verbose,
 #             limit=limit,
 #         )
-# 
+#
 #         if print_summary:
 #             for k, v in summary.items():
 #                 _printc(f"{k}\n{v}")
-# 
+#
 #         if return_summary:
 #             return summary
-# 
+#
 #     @property
 #     def summary(self):
 #         """Quick access to database summary."""
 #         self()
-# 
-# 
+#
+#
 # BaseSQLiteDB = SQLite3
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/zotero-translators-python/src/zotero_translators_python/core/registry.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/zotero_translators_python/core/registry.py"
@@ -69,9 +70,7 @@ from .._individual.cambridge import CambridgeTranslator
 from .._individual.cambridge_core import CambridgeCoreTranslator
 from .._individual.cell_press import CellPressTranslator
 from .._individual.cern_document_server import CERNDocumentServerTranslator
-from .._individual.ceur_workshop_proceedings import (
-    CEURWorkshopProceedingsTranslator,
-)
+from .._individual.ceur_workshop_proceedings import CEURWorkshopProceedingsTranslator
 from .._individual.clacso import CLACSOTranslator
 from .._individual.csiro_publishing import CSIROPublishingTranslator
 from .._individual.dblp_computer_science_bibliography import DBLPTranslator
@@ -80,9 +79,7 @@ from .._individual.digital_humanities_quarterly import (
 )
 from .._individual.dlibra import DLibraTranslator
 from .._individual.doi import DOITranslator
-from .._individual.e_periodica_switzerland import (
-    EPeriodicaSwitzerlandTranslator,
-)
+from .._individual.e_periodica_switzerland import EPeriodicaSwitzerlandTranslator
 from .._individual.ebsco_discovery_layer import EBSCODiscoveryLayerTranslator
 from .._individual.elife import ELifeTranslator
 from .._individual.elsevier_health import ElsevierHealthTranslator
@@ -91,9 +88,7 @@ from .._individual.emerald import EmeraldTranslator
 from .._individual.europe_pmc import EuropePMCTranslator
 from .._individual.fachportal_padagogik import FachportalPadagogikTranslator
 from .._individual.frontiers import FrontiersTranslator
-from .._individual.gms_german_medical_science import (
-    GMSGermanMedicalScienceTranslator,
-)
+from .._individual.gms_german_medical_science import GMSGermanMedicalScienceTranslator
 from .._individual.google_patents import GooglePatentsTranslator
 from .._individual.hindawi import HindawiTranslator
 from .._individual.ieee_computer_society import IEEEComputerSocietyTranslator
@@ -114,13 +109,9 @@ from .._individual.lww import LWWTranslator
 from .._individual.mdpi import MDPITranslator
 from .._individual.medline_nbib import MEDLINEnbibTranslator
 from .._individual.nature import NatureTranslator
-from .._individual.nature_publishing_group import (
-    NaturePublishingGroupTranslator,
-)
+from .._individual.nature_publishing_group import NaturePublishingGroupTranslator
 from .._individual.nber import NBERTranslator
-from .._individual.open_knowledge_repository import (
-    OpenKnowledgeRepositoryTranslator,
-)
+from .._individual.open_knowledge_repository import OpenKnowledgeRepositoryTranslator
 from .._individual.openalex_json import OpenAlexJSONTranslator
 from .._individual.openedition_journals import OpenEditionJournalsTranslator
 from .._individual.oxford import OxfordTranslator
@@ -135,9 +126,7 @@ from .._individual.research_square import ResearchSquareTranslator
 from .._individual.rsc import RSCTranslator
 from .._individual.sage import SAGETranslator
 from .._individual.sage_journals import SAGEJournalsTranslator
-from .._individual.scholars_portal_journals import (
-    ScholarsPortalJournalsTranslator,
-)
+from .._individual.scholars_portal_journals import ScholarsPortalJournalsTranslator
 from .._individual.sciencedirect import ScienceDirectTranslator
 from .._individual.scinapse import ScinapseTranslator
 from .._individual.semantic_scholar import SemanticScholarTranslator

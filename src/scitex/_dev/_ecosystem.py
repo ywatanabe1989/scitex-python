@@ -5,7 +5,7 @@
 """SciTeX ecosystem package registry."""
 
 from pathlib import Path
-from typing import TypedDict
+from typing import Dict, List, Optional, TypedDict
 
 
 class PackageInfo(TypedDict, total=False):
@@ -18,7 +18,7 @@ class PackageInfo(TypedDict, total=False):
 
 
 # Ordered dict - order matters for display
-ECOSYSTEM: dict[str, PackageInfo] = {
+ECOSYSTEM: Dict[str, PackageInfo] = {
     "scitex": {
         "local_path": "~/proj/scitex-python",
         "pypi_name": "scitex",
@@ -36,6 +36,12 @@ ECOSYSTEM: dict[str, PackageInfo] = {
         "pypi_name": "figrecipe",
         "github_repo": "ywatanabe1989/figrecipe",
         "import_name": "figrecipe",
+    },
+    "scitex-plt": {
+        "local_path": "~/proj/scitex-plt",
+        "pypi_name": "scitex-plt",
+        "github_repo": "ywatanabe1989/scitex-plt",
+        "import_name": "scitex_plt",
     },
     "openalex-local": {
         "local_path": "~/proj/openalex-local",
@@ -100,14 +106,14 @@ ECOSYSTEM: dict[str, PackageInfo] = {
 }
 
 
-def get_local_path(package: str) -> Path | None:
+def get_local_path(package: str) -> Optional[Path]:
     """Get expanded local path for a package."""
     if package not in ECOSYSTEM:
         return None
     return Path(ECOSYSTEM[package]["local_path"]).expanduser()
 
 
-def get_all_packages() -> list[str]:
+def get_all_packages() -> List[str]:
     """Get list of all ecosystem package names."""
     return list(ECOSYSTEM.keys())
 

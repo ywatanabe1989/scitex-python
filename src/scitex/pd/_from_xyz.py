@@ -3,8 +3,8 @@
 # Time-stamp: "2024-09-26 07:22:18 (ywatanabe)"
 # /home/ywatanabe/proj/_scitex_repo_openhands/src/scitex/pd/_from_xyz.py
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 
 def from_xyz(data_frame, x=None, y=None, z=None, square=False):

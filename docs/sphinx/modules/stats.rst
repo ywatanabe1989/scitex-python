@@ -18,12 +18,11 @@ Quick Reference
     # Run a test
     result = stx.stats.test_ttest_ind(g1, g2)
 
-    # StatResult with all details
-    print(result.statistic)     # t-statistic
-    print(result.p_value)       # p-value
-    print(result.effect_size)   # Cohen's d
-    print(result.ci_lower)      # 95% CI lower
-    print(result.ci_upper)      # 95% CI upper
+    # Result is a flat dict with all details
+    print(result["statistic"])     # t-statistic
+    print(result["pvalue"])        # p-value
+    print(result["effect_size"])   # Cohen's d
+    print(result["stars"])         # Significance stars
 
     # Get as DataFrame or LaTeX
     df = stx.stats.test_ttest_ind(g1, g2, return_as="dataframe")
@@ -54,6 +53,7 @@ Available Tests
 - ``test_pearson(x, y)`` -- Pearson correlation
 - ``test_spearman(x, y)`` -- Spearman rank correlation
 - ``test_kendall(x, y)`` -- Kendall tau correlation
+- ``test_theilsen(x, y)`` -- Theil-Sen robust regression
 
 **Categorical**
 
@@ -65,7 +65,33 @@ Available Tests
 **Normality**
 
 - ``test_shapiro(data)`` -- Shapiro-Wilk test
-- ``test_ks(data)`` -- Kolmogorov-Smirnov test
+- ``test_ks_1samp(data)`` -- One-sample Kolmogorov-Smirnov test
+- ``test_ks_2samp(x, y)`` -- Two-sample Kolmogorov-Smirnov test
+- ``test_normality(*samples)`` -- Multi-sample normality check
+
+Seaborn-Style Data Parameter
+----------------------------
+
+All two-sample and one-sample tests accept an optional ``data`` parameter
+for DataFrame/CSV column resolution (like seaborn):
+
+.. code-block:: python
+
+   import pandas as pd
+
+   df = pd.read_csv("experiment.csv")
+
+   # Two-sample: column names as x/y
+   result = stx.stats.test_ttest_ind(x="before", y="after", data=df)
+
+   # One-sample: column name as x
+   result = stx.stats.test_shapiro(x="scores", data=df)
+
+   # Multi-group: value + group columns
+   result = stx.stats.test_anova(data=df, value_col="score", group_col="treatment")
+
+   # Also works with CSV path
+   result = stx.stats.test_ttest_ind(x="col1", y="col2", data="data.csv")
 
 Test Recommendation
 -------------------
@@ -86,20 +112,18 @@ Output Formats
 
 Every test supports ``return_as`` parameter:
 
-- ``"auto"`` (default) -- Returns ``StatResult`` namedtuple
+- ``"dict"`` (default) -- Returns plain dict with all results
 - ``"dataframe"`` -- Returns pandas DataFrame
-- ``"latex"`` -- Returns LaTeX-formatted string
-- ``"dict"`` -- Returns plain dict
 
 Descriptive Statistics
 ----------------------
 
 .. code-block:: python
 
-    stx.stats.describe(data)            # mean, std, median, IQR, etc.
-    stx.stats.effect_size(g1, g2)       # Cohen's d
-    stx.stats.normality_test(data)      # Shapiro-Wilk
-    stx.stats.p_to_stars(0.003)         # "**"
+    stx.stats.describe(data)                    # mean, std, median, IQR, etc.
+    stx.stats.effect_sizes.cohens_d(g1, g2)     # Cohen's d
+    stx.stats.test_normality(g1, g2)            # Multi-sample normality
+    stx.stats.p_to_stars(0.003)                 # "**"
 
 Multiple Comparison Correction
 ------------------------------

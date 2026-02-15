@@ -12,6 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 import matplotlib
 import matplotlib.pyplot as plt
 import pytest
+
 pytest.importorskip("zarr")
 from scitex.plt.ax._style import set_xyt
 
@@ -104,6 +105,7 @@ class TestMainFunctionality:
         actual_spath = os.path.join(ACTUAL_SAVE_DIR, spath)
         assert os.path.exists(actual_spath), f"Failed to save figure to {spath}"
 
+
 if __name__ == "__main__":
     import os
 
@@ -118,36 +120,36 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-07-13 08:14:19 (ywatanabe)"
 # # Author: Yusuke Watanabe (ywatanabe@scitex.ai)
-# 
+#
 # """
 # This script does XYZ.
 # """
-# 
+#
 # # Imports
 # import matplotlib.pyplot as plt
-# 
+#
 # from ._format_label import format_label
-# 
-# 
+#
+#
 # # Functions
 # def set_xyt(ax, x=False, y=False, t=False, format_labels=True):
 #     """Sets xlabel, ylabel and title"""
-# 
+#
 #     if x is not False:
 #         x = format_label(x) if format_labels else x
 #         ax.set_xlabel(x)
-# 
+#
 #     if y is not False:
 #         y = format_label(y) if format_labels else y
 #         ax.set_ylabel(y)
-# 
+#
 #     if t is not False:
 #         t = format_label(t) if format_labels else t
 #         ax.set_title(t)
-# 
+#
 #     return ax
-# 
-# 
+#
+#
 # def set_xytc(
 #     ax,
 #     x=False,
@@ -159,7 +161,7 @@ if __name__ == "__main__":
 #     format_labels=True,
 # ):
 #     """Sets xlabel, ylabel, title, and caption with SciTeX-Paper integration
-# 
+#
 #     Parameters
 #     ----------
 #     ax : matplotlib.axes.Axes or scitex AxisWrapper
@@ -178,12 +180,12 @@ if __name__ == "__main__":
 #         Statistical analysis details for SciTeX-Paper integration, by default False
 #     format_labels : bool, optional
 #         Whether to apply automatic formatting, by default True
-# 
+#
 #     Returns
 #     -------
 #     ax : matplotlib.axes.Axes or scitex AxisWrapper
 #         The modified axes
-# 
+#
 #     Examples
 #     --------
 #     >>> fig, ax = scitex.plt.subplots()
@@ -197,7 +199,7 @@ if __name__ == "__main__":
 #     """
 #     # Set labels and title using existing function
 #     set_xyt(ax, x=x, y=y, t=t, format_labels=format_labels)
-# 
+#
 #     # Store caption and extended metadata for later use by scitex.io.save()
 #     if c is not False or methods is not False or stats is not False:
 #         # Store comprehensive metadata as axis attribute for retrieval by save function
@@ -206,7 +208,7 @@ if __name__ == "__main__":
 #             "methods": methods if methods is not False else None,
 #             "stats": stats if stats is not False else None,
 #         }
-# 
+#
 #         if hasattr(ax, "_scitex_metadata"):
 #             ax._scitex_metadata.update(metadata)
 #         else:
@@ -216,7 +218,7 @@ if __name__ == "__main__":
 #                 fig._scitex_metadata = {}
 #             # Use axis position as identifier
 #             fig._scitex_metadata[ax] = metadata
-# 
+#
 #         # Backward compatibility - also store simple caption
 #         if c is not False:
 #             if hasattr(ax, "_scitex_caption"):
@@ -226,21 +228,21 @@ if __name__ == "__main__":
 #                 if not hasattr(fig, "_scitex_captions"):
 #                     fig._scitex_captions = {}
 #                 fig._scitex_captions[ax] = c
-# 
+#
 #     return ax
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     # Start
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)
-# 
+#
 #     # (YOUR AWESOME CODE)
-# 
+#
 #     # Close
 #     scitex.session.close(CONFIG)
-# 
+#
 # # EOF
-# 
+#
 # """
 # /ssh:ywatanabe@444:/home/ywatanabe/proj/entrance/scitex/plt/ax/_set_lt.py
 # """

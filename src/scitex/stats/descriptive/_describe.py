@@ -75,9 +75,9 @@ def verify_non_leakage(
     described_first, _ = describe(x_first, dim=dim)
 
     if _is_torch_tensor(x):
-        assert described_first.shape == described[:1].shape, (
-            f"Shape mismatch: {described_first.shape} != {described[:1].shape}"
-        )
+        assert (
+            described_first.shape == described[:1].shape
+        ), f"Shape mismatch: {described_first.shape} != {described[:1].shape}"
         torch.testing.assert_close(
             described_first,
             described[:1],
@@ -86,9 +86,9 @@ def verify_non_leakage(
             msg="Statistics leak information across samples",
         )
     else:
-        assert described_first.shape == described[:1].shape, (
-            f"Shape mismatch: {described_first.shape} != {described[:1].shape}"
-        )
+        assert (
+            described_first.shape == described[:1].shape
+        ), f"Shape mismatch: {described_first.shape} != {described[:1].shape}"
         np.testing.assert_allclose(
             described_first,
             described[:1],

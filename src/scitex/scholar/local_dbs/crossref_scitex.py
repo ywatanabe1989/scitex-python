@@ -10,14 +10,12 @@ Usage:
 """
 
 try:
-    from crossref_local import (
+    from crossref_local import (  # Classes; Core functions
         SearchResult,
-        # Classes
         Work,
         count,
         get,
         info,
-        # Core functions
         search,
     )
 except ImportError as e:

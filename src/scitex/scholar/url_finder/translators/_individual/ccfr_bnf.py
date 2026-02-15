@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2014-09-18 14:08:05
 """
 
-from typing import Dict, Any, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, Optional
+
+from bs4 import BeautifulSoup
 
 
 class CCfrBnFTranslator:

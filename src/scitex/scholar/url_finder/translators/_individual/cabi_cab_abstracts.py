@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2017-06-14 03:41:30
 """
 
-from typing import Dict, Any, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, Optional
+
+from bs4 import BeautifulSoup
 
 
 class CABICABAbstractsTranslator:

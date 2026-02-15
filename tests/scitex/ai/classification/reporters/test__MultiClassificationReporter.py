@@ -17,14 +17,14 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Improved Multiple Tasks Classification Reporter with unified API.
-# 
+#
 # Enhanced version that addresses all identified issues:
 # - Unified API interface matching SingleTaskClassificationReporter
 # - Lazy directory creation
@@ -32,32 +32,32 @@ if __name__ == "__main__":
 # - Graceful plotting with error handling
 # - Consistent parameter names
 # """
-# 
+#
 # from pathlib import Path
 # from typing import Any, Dict, List, Optional, Union
-# 
+#
 # import numpy as np
-# 
+#
 # # Import base class and improved single reporter
 # from ._BaseClassificationReporter import BaseClassificationReporter, ReporterConfig
 # from ._SingleClassificationReporter import SingleTaskClassificationReporter
 # from .reporter_utils.storage import MetricStorage
-# 
-# 
+#
+#
 # class MultipleTasksClassificationReporter(BaseClassificationReporter):
 #     """
 #     Improved multi-task classification reporter with unified API.
-# 
+#
 #     This reporter manages multiple SingleTaskClassificationReporter instances,
 #     one for each target/task, providing a unified interface for multi-task scenarios.
-# 
+#
 #     Key improvements:
 #     - Same API as SingleTaskClassificationReporter (calculate_metrics method)
 #     - Lazy directory creation (no empty folders)
 #     - Numerical precision control
 #     - Graceful plotting with proper error handling
 #     - Consistent parameter names across all methods
-# 
+#
 #     Parameters
 #     ----------
 #     output_dir : Union[str, Path]
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 #     **kwargs
 #         Additional arguments passed to base class
 #     """
-# 
+#
 #     def __init__(
 #         self,
 #         output_dir: Union[str, Path],
@@ -81,25 +81,25 @@ if __name__ == "__main__":
 #         # Use config or create default
 #         if config is None:
 #             config = ReporterConfig()
-# 
+#
 #         # Initialize base class
 #         super().__init__(output_dir=output_dir, precision=config.precision, **kwargs)
-# 
+#
 #         self.config = config
 #         self.storage = MetricStorage(self.output_dir, precision=self.precision)
-# 
+#
 #         # Setup tasks
 #         self.tasks = tasks if tasks is not None else []
 #         self.verbose = verbose
-# 
+#
 #         # Create individual reporters for each target
 #         self.reporters: Dict[str, SingleTaskClassificationReporter] = {}
 #         if self.tasks:
 #             self._setup_target_reporters()
-# 
+#
 #         # Save configuration
 #         self._save_config()
-# 
+#
 #         # Print initialization info if verbose
 #         if self.verbose:
 #             print(f"\n{'=' * 70}")
@@ -108,19 +108,19 @@ if __name__ == "__main__":
 #             print(f"Output Directory: {self.output_dir.absolute()}")
 #             print(f"Tasks: {self.tasks}")
 #             print(f"{'=' * 70}\n")
-# 
+#
 #     def _create_single_reporter(self, task: str) -> None:
 #         """Create a single task reporter."""
 #         task_output_dir = self.output_dir / task
 #         self.reporters[task] = SingleTaskClassificationReporter(
 #             output_dir=task_output_dir, config=self.config, verbose=False
 #         )
-# 
+#
 #     def _setup_target_reporters(self) -> None:
 #         """Setup individual reporters for each task."""
 #         for task in self.tasks:
 #             self._create_single_reporter(task)
-# 
+#
 #     def calculate_metrics(
 #         self,
 #         y_true: np.ndarray,
@@ -133,10 +133,10 @@ if __name__ == "__main__":
 #     ) -> Dict[str, Any]:
 #         """
 #         Calculate metrics for a specific task using unified API.
-# 
+#
 #         This method has the same signature as SingleTaskClassificationReporter
 #         but with an additional 'task' parameter to specify which task.
-# 
+#
 #         Parameters
 #         ----------
 #         y_true : np.ndarray
@@ -153,7 +153,7 @@ if __name__ == "__main__":
 #             Task identifier. If None, uses first task.
 #         verbose : bool, default True
 #             Whether to print progress
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
@@ -175,7 +175,7 @@ if __name__ == "__main__":
 #                 if task not in self.tasks:
 #                     self.tasks.append(task)
 #                 self._create_single_reporter(task)
-# 
+#
 #         # Delegate to appropriate single-task reporter
 #         return self.reporters[task].calculate_metrics(
 #             y_true=y_true,
@@ -185,7 +185,7 @@ if __name__ == "__main__":
 #             fold=fold,
 #             verbose=verbose,
 #         )
-# 
+#
 #     def calculate_metrics_for_all_targets(
 #         self,
 #         targets_data: Dict[str, Dict[str, np.ndarray]],
@@ -194,7 +194,7 @@ if __name__ == "__main__":
 #     ) -> Dict[str, Dict[str, Any]]:
 #         """
 #         Calculate metrics for all targets in batch.
-# 
+#
 #         Parameters
 #         ----------
 #         targets_data : Dict[str, Dict[str, np.ndarray]]
@@ -212,25 +212,25 @@ if __name__ == "__main__":
 #             Fold index for cross-validation
 #         verbose : bool, default True
 #             Whether to print progress
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Dict[str, Any]]
 #             Dictionary mapping target names to their metrics
 #         """
 #         all_results = {}
-# 
+#
 #         for target_name, data in targets_data.items():
 #             if target_name not in self.reporters:
 #                 print(f"Warning: Unknown target '{target_name}', skipping")
 #                 continue
-# 
+#
 #             # Extract data with defaults
 #             y_true = data["y_true"]
 #             y_pred = data["y_pred"]
 #             y_proba = data.get("y_proba", None)
 #             labels = data.get("labels", None)
-# 
+#
 #             # Calculate metrics for this target
 #             all_results[target_name] = self.calculate_metrics(
 #                 y_true=y_true,
@@ -241,13 +241,13 @@ if __name__ == "__main__":
 #                 task=target_name,
 #                 verbose=verbose,
 #             )
-# 
+#
 #         return all_results
-# 
+#
 #     def get_summary(self) -> Dict[str, Any]:
 #         """
 #         Get summary of all calculated metrics across all targets.
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
@@ -257,23 +257,23 @@ if __name__ == "__main__":
 #             "tasks": self.tasks,
 #             "targets_summary": {},
 #         }
-# 
+#
 #         # Get summary from each target reporter
 #         for target_name, reporter in self.reporters.items():
 #             target_summary = reporter.get_summary()
 #             summary["targets_summary"][target_name] = target_summary
-# 
+#
 #         return summary
-# 
+#
 #     def save_summary(self, filename: str = "multi_task_summary.json") -> Path:
 #         """
 #         Save multi-task summary to file.
-# 
+#
 #         Parameters
 #         ----------
 #         filename : str, default "multi_task_summary.json"
 #             Filename for summary
-# 
+#
 #         Returns
 #         -------
 #         Path
@@ -281,16 +281,16 @@ if __name__ == "__main__":
 #         """
 #         summary = self.get_summary()
 #         return self.storage.save(summary, filename)
-# 
+#
 #     def get_reporter_for_target(self, target: str) -> SingleTaskClassificationReporter:
 #         """
 #         Get the individual reporter for a specific target.
-# 
+#
 #         Parameters
 #         ----------
 #         target : str
 #             Target identifier
-# 
+#
 #         Returns
 #         -------
 #         SingleTaskClassificationReporter
@@ -301,7 +301,7 @@ if __name__ == "__main__":
 #                 f"Unknown target '{target}'. Available targets: {list(self.reporters.keys())}"
 #             )
 #         return self.reporters[target]
-# 
+#
 #     def save(
 #         self,
 #         data: Any,
@@ -311,7 +311,7 @@ if __name__ == "__main__":
 #     ) -> Path:
 #         """
 #         Save custom data with automatic task/fold organization.
-# 
+#
 #         Parameters
 #         ----------
 #         data : Any
@@ -325,12 +325,12 @@ if __name__ == "__main__":
 #             Task name. If provided, saves to task-specific directory
 #         fold : Optional[int], default None
 #             If provided, automatically prepends "fold_{fold:02d}/" to the path
-# 
+#
 #         Returns
 #         -------
 #         Path
 #             Absolute path to the saved file
-# 
+#
 #         Examples
 #         --------
 #         >>> # Save custom metrics for task1, fold 0
@@ -340,14 +340,14 @@ if __name__ == "__main__":
 #         ...     task="task1",
 #         ...     fold=0
 #         ... )  # Saves to: task1/fold_00/custom_metrics.json
-# 
+#
 #         >>> # Save aggregated data for a specific task
 #         >>> reporter.save(
 #         ...     df_results,
 #         ...     "cv_summary/analysis.csv",
 #         ...     task="task2"
 #         ... )  # Saves to: task2/cv_summary/analysis.csv
-# 
+#
 #         >>> # Save global summary across all tasks
 #         >>> reporter.save(
 #         ...     global_summary,
@@ -367,7 +367,7 @@ if __name__ == "__main__":
 #             if fold is not None:
 #                 relative_path = f"fold_{fold:02d}/{relative_path}"
 #             return self.storage.save(data, relative_path)
-# 
+#
 #     def _save_config(self) -> None:
 #         """Save configuration to file."""
 #         config_data = {
@@ -377,7 +377,7 @@ if __name__ == "__main__":
 #             "precision": self.precision,
 #         }
 #         self.storage.save(config_data, "config.json")
-# 
+#
 #     def __repr__(self) -> str:
 #         task_count = len(self.tasks)
 #         return (
@@ -385,14 +385,14 @@ if __name__ == "__main__":
 #             f"tasks={task_count}, "
 #             f"output_dir='{self.output_dir}')"
 #         )
-# 
-# 
+#
+#
 # def create_multi_task_reporter(
 #     output_dir: Union[str, Path], tasks: Optional[List[str]] = None, **kwargs
 # ) -> MultipleTasksClassificationReporter:
 #     """
 #     Convenience function to create a multi-task reporter.
-# 
+#
 #     Parameters
 #     ----------
 #     tasks : List[str]
@@ -401,7 +401,7 @@ if __name__ == "__main__":
 #         Output directory
 #     **kwargs
 #         Additional arguments
-# 
+#
 #     Returns
 #     -------
 #     MultipleTasksClassificationReporter
@@ -410,8 +410,8 @@ if __name__ == "__main__":
 #     return MultipleTasksClassificationReporter(
 #         tasks=tasks, output_dir=output_dir, **kwargs
 #     )
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -17,8 +17,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from scitex.plt.utils._calc_bacc_from_conf_mat import calc_bacc_from_conf_mat
 from scitex.plt.utils import assert_valid_axis
+from scitex.plt.utils._calc_bacc_from_conf_mat import calc_bacc_from_conf_mat
+
 from .._style._extend import extend as scitex_plt_extend
 
 

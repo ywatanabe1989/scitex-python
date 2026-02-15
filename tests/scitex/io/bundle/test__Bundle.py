@@ -13,20 +13,20 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_Bundle.py
-# 
+#
 # """Bundle Class - Main entry point for scitex bundles.
-# 
+#
 # Structure (identical for all kinds):
 # - canonical/: Source of truth (spec.json, encoding.json, theme.json)
 # - payload/: Data files (empty for composites)
 # - artifacts/: Exports and cache
 # - children/: Embedded child bundles (empty for leaves)
 # """
-# 
+#
 # import uuid
 # from pathlib import Path
 # from typing import TYPE_CHECKING, Any, Dict, Optional, Union
-# 
+#
 # from ._children import ValidationError, embed_child, load_embedded_children
 # from ._dataclasses import DataInfo, SizeMM, Spec
 # from ._loader import load_bundle_components
@@ -40,14 +40,14 @@ if __name__ == "__main__":
 # from ._validation import ValidationResult
 # from .kinds._plot import Encoding, Theme
 # from .kinds._stats import Stats
-# 
+#
 # if TYPE_CHECKING:
 #     from matplotlib.figure import Figure as MplFigure
-# 
-# 
+#
+#
 # class Bundle:
 #     """Scitex Bundle - Self-contained figure/plot/stats package.
-# 
+#
 #     Attributes:
 #         spec: Spec metadata (kind, children, layout, payload_schema, etc.)
 #         encoding: Encoding specification (traces, channels)
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 #         stats: Statistics (for kind=stats)
 #         data_info: Data info metadata
 #     """
-# 
+#
 #     def __init__(
 #         self,
 #         path: Union[str, Path],
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 #         node_type: Optional[str] = None,
 #     ):
 #         """Initialize Bundle.
-# 
+#
 #         Args:
 #             path: Bundle path (directory or .zip file)
 #             create: If True, create new bundle; if False, load existing
@@ -85,48 +85,48 @@ if __name__ == "__main__":
 #         self._data_info: Optional[DataInfo] = None
 #         self._dirty = False
 #         self._storage: Optional[Storage] = None
-# 
+#
 #         # Handle legacy node_type parameter
 #         if node_type is not None:
 #             kind = node_type
-# 
+#
 #         if create:
 #             self._create_new(kind, name, size_mm)
 #         else:
 #             self._load()
-# 
+#
 #     @property
 #     def path(self) -> Path:
 #         """Bundle path (directory or ZIP)."""
 #         return self._path
-# 
+#
 #     @property
 #     def is_zip(self) -> bool:
 #         """Whether bundle is a ZIP file."""
 #         return self._is_zip
-# 
+#
 #     @property
 #     def bundle_type(self) -> str:
 #         """Bundle kind (figure, plot, table, etc.)."""
 #         return self._spec.kind if self._spec else "unknown"
-# 
+#
 #     @property
 #     def is_dirty(self) -> bool:
 #         """Whether bundle has unsaved changes."""
 #         return self._dirty
-# 
+#
 #     @property
 #     def storage(self) -> Storage:
 #         """Get storage for this bundle."""
 #         if self._storage is None:
 #             self._storage = get_storage(self._path)
 #         return self._storage
-# 
+#
 #     @property
 #     def spec(self) -> Optional[Spec]:
 #         """Bundle specification metadata."""
 #         return self._spec
-# 
+#
 #     @spec.setter
 #     def spec(self, value: Union[Spec, Dict[str, Any]]):
 #         if isinstance(value, dict):
@@ -134,12 +134,12 @@ if __name__ == "__main__":
 #         else:
 #             self._spec = value
 #         self._dirty = True
-# 
+#
 #     @property
 #     def encoding(self) -> Optional[Encoding]:
 #         """Encoding specification (typed object)."""
 #         return self._encoding
-# 
+#
 #     @encoding.setter
 #     def encoding(self, value: Union[Encoding, Dict[str, Any]]):
 #         if isinstance(value, dict):
@@ -147,17 +147,17 @@ if __name__ == "__main__":
 #         else:
 #             self._encoding = value
 #         self._dirty = True
-# 
+#
 #     @property
 #     def encoding_dict(self) -> Optional[Dict[str, Any]]:
 #         """Encoding as dictionary (for serialization)."""
 #         return self._encoding.to_dict() if self._encoding else None
-# 
+#
 #     @property
 #     def theme(self) -> Optional[Theme]:
 #         """Theme specification (typed object)."""
 #         return self._theme
-# 
+#
 #     @theme.setter
 #     def theme(self, value: Union[Theme, Dict[str, Any]]):
 #         if isinstance(value, dict):
@@ -165,17 +165,17 @@ if __name__ == "__main__":
 #         else:
 #             self._theme = value
 #         self._dirty = True
-# 
+#
 #     @property
 #     def theme_dict(self) -> Optional[Dict[str, Any]]:
 #         """Theme as dictionary (for serialization)."""
 #         return self._theme.to_dict() if self._theme else None
-# 
+#
 #     @property
 #     def stats(self) -> Optional[Stats]:
 #         """Statistics."""
 #         return self._stats
-# 
+#
 #     @stats.setter
 #     def stats(self, value: Union[Stats, Dict[str, Any]]):
 #         if isinstance(value, dict):
@@ -183,12 +183,12 @@ if __name__ == "__main__":
 #         else:
 #             self._stats = value
 #         self._dirty = True
-# 
+#
 #     @property
 #     def data_info(self) -> Optional[DataInfo]:
 #         """Data info metadata."""
 #         return self._data_info
-# 
+#
 #     @data_info.setter
 #     def data_info(self, value: Union[DataInfo, Dict[str, Any]]):
 #         if isinstance(value, dict):
@@ -196,7 +196,7 @@ if __name__ == "__main__":
 #         else:
 #             self._data_info = value
 #         self._dirty = True
-# 
+#
 #     def _create_new(
 #         self,
 #         kind: str,
@@ -207,7 +207,7 @@ if __name__ == "__main__":
 #         bundle_id = str(uuid.uuid4())
 #         if name is None:
 #             name = self._path.stem
-# 
+#
 #         # Determine payload_schema for leaf kinds
 #         # Note: payload_schema is optional. For plots without data, it's None.
 #         # For plots with data, from_matplotlib will set it.
@@ -219,7 +219,7 @@ if __name__ == "__main__":
 #                 "stats": "scitex.io.bundle.payload.stats@1",
 #             }
 #             payload_schema = payload_schema_map.get(kind)
-# 
+#
 #         self._spec = Spec(
 #             id=bundle_id,
 #             kind=kind,
@@ -231,12 +231,12 @@ if __name__ == "__main__":
 #         self._theme = Theme()
 #         self._stats = Stats()
 #         self._dirty = True
-# 
+#
 #     def _load(self):
 #         """Load existing bundle."""
 #         if not self._path.exists():
 #             raise FileNotFoundError(f"Bundle not found: {self._path}")
-# 
+#
 #         (
 #             self._spec,
 #             self._encoding,
@@ -244,7 +244,7 @@ if __name__ == "__main__":
 #             self._stats,
 #             self._data_info,
 #         ) = load_bundle_components(self._path)
-# 
+#
 #     def add_child(
 #         self,
 #         child: Union[str, Path, "Bundle"],
@@ -258,24 +258,24 @@ if __name__ == "__main__":
 #         """Add and embed a child bundle. Returns child_name in children/."""
 #         if not self.spec.is_composite_kind():
 #             raise TypeError(f"kind={self.spec.kind} cannot have children")
-# 
+#
 #         # Get child path
 #         if isinstance(child, Bundle):
 #             child_path = child.path
 #         else:
 #             child_path = Path(child)
-# 
+#
 #         # Embed child into children/ directory
 #         # Returns (child_name, child_id) tuple
 #         child_name, child_id = embed_child(self.storage, child_path)
-# 
+#
 #         # Add to spec.children
 #         self._spec.children.append(child_name)
-# 
+#
 #         # Initialize layout if needed
 #         if self._spec.layout is None:
 #             self._spec.layout = {"rows": 2, "cols": 2, "panels": []}
-# 
+#
 #         # Update grid size if needed
 #         self._spec.layout["rows"] = max(
 #             self._spec.layout.get("rows", 1), row + row_span
@@ -283,7 +283,7 @@ if __name__ == "__main__":
 #         self._spec.layout["cols"] = max(
 #             self._spec.layout.get("cols", 1), col + col_span
 #         )
-# 
+#
 #         # Add to layout.panels
 #         panel_info = {
 #             "child": child_name,
@@ -296,21 +296,21 @@ if __name__ == "__main__":
 #         }
 #         if label:
 #             panel_info["label"] = label
-# 
+#
 #         self._spec.layout["panels"].append(panel_info)
 #         self._dirty = True
-# 
+#
 #         return child_name
-# 
+#
 #     def load_children(self) -> Dict[str, "Bundle"]:
 #         """Load embedded children. Returns dict: child_name -> Bundle."""
 #         return load_embedded_children(self._path)
-# 
+#
 #     def render(self) -> Optional["MplFigure"]:
 #         """Render figure. Composite renders children, leaf renders from encoding."""
 #         if self._spec is None:
 #             return None
-# 
+#
 #         if self._spec.is_composite_kind():
 #             return self._render_composite()
 #         elif self._spec.is_data_leaf_kind():
@@ -322,24 +322,24 @@ if __name__ == "__main__":
 #         elif self._spec.is_image_leaf_kind():
 #             # Image kinds render from payload image
 #             return self._render_image()
-# 
+#
 #         return None
-# 
+#
 #     def _render_composite(self) -> Optional["MplFigure"]:
 #         """Render composite figure with children."""
 #         import scitex.plt as splt
-# 
+#
 #         size_mm = (
 #             self._spec.size_mm.to_dict()
 #             if self._spec.size_mm
 #             else {"width": 170, "height": 100}
 #         )
-# 
+#
 #         # Get background color from theme
 #         bg_color = "#ffffff"
 #         if self._theme and self._theme.colors:
 #             bg_color = self._theme.colors.background or "#ffffff"
-# 
+#
 #         if not self._spec.children:
 #             # Empty container - render blank figure with specified size and background
 #             fig, ax = splt.subplots(
@@ -349,48 +349,48 @@ if __name__ == "__main__":
 #             ax.set_facecolor(bg_color)
 #             ax.set_axis_off()
 #             return fig
-# 
+#
 #         from .kinds._figure._composite import render_composite
-# 
+#
 #         children = self.load_children()
-# 
+#
 #         fig, geometry = render_composite(
 #             children=children,
 #             layout=self._spec.layout or {"rows": 1, "cols": 1, "panels": []},
 #             size_mm=size_mm,
 #             theme=self._theme,
 #         )
-# 
+#
 #         return fig
-# 
+#
 #     def _render_from_encoding(self) -> Optional["MplFigure"]:
 #         """Render leaf figure from encoding + payload."""
 #         if self._encoding is None:
 #             return None
-# 
+#
 #         import scitex.plt as splt
-# 
+#
 #         size_mm = (
 #             self._spec.size_mm.to_dict()
 #             if self._spec.size_mm
 #             else {"width": 85, "height": 85}
 #         )
-# 
+#
 #         # Use scitex.plt for proper styling (3-4 ticks, etc.)
 #         fig, ax = splt.subplots(
 #             figsize_mm=(size_mm.get("width", 85), size_mm.get("height", 85))
 #         )
-# 
+#
 #         # Load data from payload
 #         data = self._load_payload_data()
-# 
+#
 #         # Render traces
 #         from .kinds._plot._backend._render import render_traces
-# 
+#
 #         traces = self._encoding.traces if self._encoding.traces else []
 #         for trace in traces:
 #             render_traces(ax, trace, data, self._theme)
-# 
+#
 #         # Apply labels from encoding axes config (if available)
 #         # Note: Unit validation happens in scitex.plt via UnitAwareMixin.set_xlabel/set_ylabel
 #         if self._encoding.axes:
@@ -398,16 +398,16 @@ if __name__ == "__main__":
 #                 ax.set_xlabel(self._encoding.axes["x"].title)
 #             if "y" in self._encoding.axes and self._encoding.axes["y"].title:
 #                 ax.set_ylabel(self._encoding.axes["y"].title)
-# 
+#
 #         fig.tight_layout()
 #         return fig
-# 
+#
 #     def _load_payload_data(self) -> Optional["pd.DataFrame"]:
 #         """Load data from payload/data.csv or legacy data/data.csv."""
 #         from io import StringIO
-# 
+#
 #         import pandas as pd
-# 
+#
 #         # Try new path first, then legacy
 #         for path in ["payload/data.csv", "data/data.csv"]:
 #             if self.storage.exists(path):
@@ -417,21 +417,21 @@ if __name__ == "__main__":
 #                     return None
 #                 return pd.read_csv(StringIO(csv_bytes.decode("utf-8")))
 #         return None
-# 
+#
 #     def _render_annotation(self) -> Optional["MplFigure"]:
 #         """Render annotation (text/shape) from spec parameters."""
 #         import scitex.plt as splt
-# 
+#
 #         size_mm = (
 #             self._spec.size_mm.to_dict()
 #             if self._spec.size_mm
 #             else {"width": 85, "height": 85}
 #         )
-# 
+#
 #         fig, ax = splt.subplots(
 #             figsize_mm=(size_mm.get("width", 85), size_mm.get("height", 85))
 #         )
-# 
+#
 #         # Get background color
 #         bg_color = "#ffffff"
 #         if self._theme and self._theme.colors:
@@ -439,7 +439,7 @@ if __name__ == "__main__":
 #         fig.set_facecolor(bg_color)
 #         ax.set_facecolor(bg_color)
 #         ax.set_axis_off()
-# 
+#
 #         if self._spec.kind == "text":
 #             # Render text annotation
 #             text_obj = self._spec.text
@@ -454,11 +454,11 @@ if __name__ == "__main__":
 #                 text_content = self._spec.name or ""
 #                 kwargs = {"ha": "center", "va": "center"}
 #             ax.text(0.5, 0.5, text_content, transform=ax.transAxes, **kwargs)
-# 
+#
 #         elif self._spec.kind == "shape":
 #             # Render shape annotation
 #             from .kinds._shape import render_shape
-# 
+#
 #             shape_obj = self._spec.shape
 #             if shape_obj:
 #                 render_shape(
@@ -472,69 +472,69 @@ if __name__ == "__main__":
 #                     edgecolor=shape_obj.color,
 #                     linewidth=shape_obj.linewidth,
 #                 )
-# 
+#
 #         fig.tight_layout()
 #         return fig
-# 
+#
 #     def _render_image(self) -> Optional["MplFigure"]:
 #         """Render image from payload."""
 #         import numpy as np
-# 
+#
 #         import scitex.plt as splt
-# 
+#
 #         size_mm = (
 #             self._spec.size_mm.to_dict()
 #             if self._spec.size_mm
 #             else {"width": 85, "height": 85}
 #         )
-# 
+#
 #         fig, ax = splt.subplots(
 #             figsize_mm=(size_mm.get("width", 85), size_mm.get("height", 85))
 #         )
 #         ax.set_axis_off()
-# 
+#
 #         # Try to find image in payload
 #         for ext in ["png", "jpg", "jpeg", "gif", "bmp"]:
 #             path = f"payload/image.{ext}"
 #             if self.storage.exists(path):
 #                 from io import BytesIO
-# 
+#
 #                 from PIL import Image
-# 
+#
 #                 img_bytes = self.storage.read(path)
 #                 img = Image.open(BytesIO(img_bytes))
 #                 ax.imshow(np.array(img))
 #                 break
-# 
+#
 #         fig.tight_layout()
 #         return fig
-# 
+#
 #     def _validate_manifest(self) -> tuple:
 #         """Validate manifest.json existence and structure.
-# 
+#
 #         Returns:
 #             Tuple of (errors: List[str], warnings: List[str])
 #         """
 #         import json
-# 
+#
 #         errors = []
 #         warnings = []
-# 
+#
 #         # Check if bundle path exists
 #         if not self._path.exists():
 #             return errors, warnings  # Can't validate non-existent bundle
-# 
+#
 #         # Check manifest.json exists (required)
 #         manifest_path = "manifest.json"
 #         if not self.storage.exists(manifest_path):
 #             errors.append("Missing required manifest.json")
 #             return errors, warnings
-# 
+#
 #         # Validate manifest structure
 #         try:
 #             content = self.storage.read(manifest_path)
 #             manifest = json.loads(content.decode("utf-8"))
-# 
+#
 #             if "scitex" not in manifest:
 #                 errors.append("manifest.json missing 'scitex' key")
 #             else:
@@ -543,13 +543,13 @@ if __name__ == "__main__":
 #                     errors.append("manifest.json missing 'scitex.type'")
 #                 if "version" not in scitex:
 #                     errors.append("manifest.json missing 'scitex.version'")
-# 
+#
 #                 # Validate type matches spec kind
 #                 manifest_type = scitex.get("type")
 #                 if manifest_type and self._spec:
 #                     # Normalize both to compare
 #                     from ._types import BundleType
-# 
+#
 #                     normalized_manifest = BundleType.normalize(manifest_type)
 #                     normalized_node = BundleType.normalize(self._spec.kind)
 #                     if normalized_manifest != normalized_node:
@@ -557,34 +557,34 @@ if __name__ == "__main__":
 #                             f"Type mismatch: manifest says '{manifest_type}', "
 #                             f"spec says '{self._spec.kind}'"
 #                         )
-# 
+#
 #         except json.JSONDecodeError as e:
 #             errors.append(f"manifest.json is invalid JSON: {e}")
 #         except Exception as e:
 #             errors.append(f"Error reading manifest.json: {e}")
-# 
+#
 #         return errors, warnings
-# 
+#
 #     def validate(self, level: str = "schema") -> ValidationResult:
 #         """Validate bundle.
-# 
+#
 #         Args:
 #             level: Validation level - "schema", "semantic", or "strict"
-# 
+#
 #         Returns:
 #             ValidationResult with is_valid property and errors list
 #         """
 #         result = ValidationResult(level=level)
-# 
+#
 #         # Manifest validation (returns errors, warnings tuple)
 #         manifest_errors, manifest_warnings = self._validate_manifest()
 #         result.errors.extend(manifest_errors)
 #         result.warnings.extend(manifest_warnings)
-# 
+#
 #         # Spec logical validation
 #         if self._spec:
 #             result.errors.extend(self._spec.validate())
-# 
+#
 #         # Storage-level validation - check required payload files
 #         if self._spec and self._spec.is_leaf_kind():
 #             required_file = self._spec.get_required_payload_file()
@@ -602,10 +602,10 @@ if __name__ == "__main__":
 #                         result.errors.append(
 #                             f"Missing required payload file: {required_file}"
 #                         )
-# 
+#
 #         # NOTE: For composite kinds, do NOT validate payload/ emptiness by listing files.
 #         # Payload prohibition is enforced purely via payload_schema is None (in Spec.validate).
-# 
+#
 #         # Recursively validate embedded children
 #         if self._spec and self._spec.is_composite_kind() and self._spec.children:
 #             children = self.load_children()
@@ -617,7 +617,7 @@ if __name__ == "__main__":
 #                 result.warnings.extend(
 #                     [f"{child_name}: {w}" for w in child_result.warnings]
 #                 )
-# 
+#
 #         # Schema validation for other components
 #         if level in ("semantic", "strict"):
 #             # Additional semantic validation
@@ -626,9 +626,9 @@ if __name__ == "__main__":
 #                     result.errors.append(
 #                         "Composite kinds should not have encoding traces"
 #                     )
-# 
+#
 #         return result
-# 
+#
 #     def save(
 #         self,
 #         path: Optional[Union[str, Path]] = None,
@@ -637,7 +637,7 @@ if __name__ == "__main__":
 #         render: bool = True,
 #     ):
 #         """Save bundle to disk.
-# 
+#
 #         Args:
 #             path: Override save path
 #             validate: Run validation before saving
@@ -649,17 +649,17 @@ if __name__ == "__main__":
 #             self._path = Path(path)
 #             self._is_zip = self._path.suffix == ".zip"
 #             self._storage = None  # Reset storage
-# 
+#
 #         # Validate before saving
 #         if validate:
 #             result = self.validate(level=validation_level)
 #             if not result.is_valid:
 #                 raise ValidationError(f"Validation failed: {result.errors}")
-# 
+#
 #         # Update modified timestamp
 #         if self._spec:
 #             self._spec.touch()
-# 
+#
 #         # Save canonical files
 #         save_bundle_components(
 #             self._path,
@@ -670,7 +670,7 @@ if __name__ == "__main__":
 #             data_info=self._data_info,
 #             render=render,
 #         )
-# 
+#
 #         # Render and save exports/cache (optional)
 #         if render:
 #             fig = self.render()
@@ -693,7 +693,7 @@ if __name__ == "__main__":
 #                 )
 #                 import matplotlib.pyplot as plt
 #                 from matplotlib.figure import Figure as MplFigure
-# 
+#
 #                 # Handle FigWrapper from scitex.plt
 #                 if isinstance(fig, MplFigure):
 #                     plt.close(fig)
@@ -701,9 +701,9 @@ if __name__ == "__main__":
 #                     plt.close(fig.figure)
 #                 else:
 #                     plt.close(fig)
-# 
+#
 #         self._dirty = False
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         """Convert bundle to dictionary."""
 #         result = {
@@ -722,36 +722,36 @@ if __name__ == "__main__":
 #         if self._data_info:
 #             result["data_info"] = self._data_info.to_dict()
 #         return result
-# 
+#
 #     def __enter__(self) -> "Bundle":
 #         """Enter context manager."""
 #         return self
-# 
+#
 #     def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
 #         """Exit context manager, auto-saving if dirty and no exception."""
 #         if exc_type is None and self._dirty:
 #             self.save()
 #         return False
-# 
+#
 #     def __repr__(self) -> str:
 #         dirty_marker = "*" if self._dirty else ""
 #         kind = self._spec.kind if self._spec else "unknown"
 #         return f"Bundle({self._path!r}, kind={kind!r}){dirty_marker}"
-# 
-# 
+#
+#
 # # =============================================================================
 # # Factory Functions
 # # =============================================================================
-# 
+#
 # # Import from_matplotlib from helper module (single source of truth)
 # from ._mpl_helpers import from_matplotlib
-# 
-# 
+#
+#
 # def load_bundle(path: Union[str, Path]) -> Bundle:
 #     """Load an existing Bundle."""
 #     return Bundle(path)
-# 
-# 
+#
+#
 # def create_bundle(
 #     path: Union[str, Path],
 #     kind: str = "plot",
@@ -764,10 +764,10 @@ if __name__ == "__main__":
 #     if node_type is not None:
 #         kind = node_type
 #     return Bundle(path, create=True, kind=kind, name=name, size_mm=size_mm)
-# 
-# 
+#
+#
 # __all__ = ["Bundle", "load_bundle", "create_bundle", "from_matplotlib"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

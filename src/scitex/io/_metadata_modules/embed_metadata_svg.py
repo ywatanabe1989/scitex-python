@@ -40,9 +40,7 @@ def embed_metadata_svg(image_path: str, metadata_json: str) -> None:
             f"</metadata>\n"
         )
         svg_content = (
-            svg_content[:svg_tag_end]
-            + metadata_element
-            + svg_content[svg_tag_end:]
+            svg_content[:svg_tag_end] + metadata_element + svg_content[svg_tag_end:]
         )
 
         # Ensure scitex namespace is declared in svg tag if not present

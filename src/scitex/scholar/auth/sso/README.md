@@ -94,33 +94,33 @@ from playwright.async_api import Page
 
 class YourInstitutionSSOAutomator(BaseSSOAutomator):
     """SSO automator for Your Institution."""
-    
+
     def get_institution_name(self) -> str:
         return "Your Institution"
-    
+
     def get_institution_id(self) -> str:
         return "your_institution"
-    
+
     def is_sso_page(self, url: str) -> bool:
         """Check if URL is your institution's SSO login page."""
         return "your-sso-domain.edu" in url.lower()
-    
+
     async def perform_login_async(self, page: Page) -> bool:
         """Implement your institution's login flow."""
         try:
             # Wait for username field
             await page.wait_for_selector("#username")
-            
+
             # Fill credentials
             await page.fill("#username", self.username)
             await page.fill("#password", self.password)
-            
+
             # Submit
             await page.click("button[type='submit']")
-            
+
             # Handle any additional steps (2FA, etc.)
             # ...
-            
+
             return True
         except Exception as e:
             self.logger.error(f"Login failed: {e}")
@@ -134,12 +134,12 @@ Then register it in the factory (`_SSOAutomator.py`):
 def create_from_url(cls, url: str, **kwargs) -> Optional[BaseSSOAutomator]:
     """Auto-detect institution from URL."""
     url_lower = url.lower()
-    
+
     # Add your institution detection
     if "your-institution" in url_lower:
         from ._YourInstitutionSSOAutomator import YourInstitutionSSOAutomator
         return YourInstitutionSSOAutomator(**kwargs)
-    
+
     # ... existing detections ...
 ```
 

@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2020-06-22 00:23:44
 """
 
-from typing import Dict, Any, List, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class BibliotecaNacionalDeMaestrosTranslator:

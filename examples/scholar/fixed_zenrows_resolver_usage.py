@@ -21,13 +21,13 @@ auth_manager = AuthenticationManager(
 # Choose your resolver
 # # Standard browser-based resolver
 # resolver = OpenURLResolver(
-#     auth_manager, 
+#     auth_manager,
 #     os.getenv("SCITEX_SCHOLAR_OPENURL_RESOLVER_URL")
 # )
 
 # OR: ZenRows cloud browser resolver (for anti-bot bypass)
 resolver = ZenRowsOpenURLResolver(
-    auth_manager, 
+    auth_manager,
     os.getenv("SCITEX_SCHOLAR_OPENURL_RESOLVER_URL"),
     os.getenv("SCITEX_SCHOLAR_ZENROWS_API_KEY")
 )
@@ -60,19 +60,19 @@ for doi in dois[:3]:  # Test first 3
 async def resolve_async_example():
     """Proper async usage with detailed results."""
     print("\n=== Method 3: Async resolution ===")
-    
+
     # Single DOI async
     result = await resolver._resolve_single_async(doi=dois[0])
     print(f"\nSingle async result:")
     print(f"  Success: {result.get('success', False)}")
     print(f"  Final URL: {result.get('final_url', 'None')}")
     print(f"  Access type: {result.get('access_type', 'Unknown')}")
-    
+
     # Multiple DOIs in parallel
     print("\n=== Parallel async resolution ===")
     tasks = [resolver._resolve_single_async(doi=doi) for doi in dois[:3]]
     results = await asyncio.gather(*tasks)
-    
+
     for doi, result in zip(dois[:3], results):
         print(f"\nDOI: {doi}")
         print(f"  Success: {result.get('success', False)}")

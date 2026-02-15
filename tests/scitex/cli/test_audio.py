@@ -220,6 +220,7 @@ class TestAudioStop:
             assert result.exit_code == 1
             assert "Error" in result.output
 
+
 if __name__ == "__main__":
     import os
 
@@ -233,26 +234,26 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # """
 # SciTeX CLI - Audio Commands (Text-to-Speech)
-# 
+#
 # Provides text-to-speech with multiple backend support.
 # """
-# 
+#
 # import sys
-# 
+#
 # import click
-# 
-# 
+#
+#
 # @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 # def audio():
 #     """
 #     Text-to-speech utilities
-# 
+#
 #     \b
 #     Backends (fallback order):
 #       pyttsx3    - System TTS (offline, free)
 #       gtts       - Google TTS (free, needs internet)
 #       elevenlabs - ElevenLabs (paid, high quality)
-# 
+#
 #     \b
 #     Examples:
 #       scitex audio speak "Hello world"
@@ -261,8 +262,8 @@ if __name__ == "__main__":
 #       scitex audio check                 # Check audio status (WSL)
 #     """
 #     pass
-# 
-# 
+#
+#
 # @audio.command()
 # @click.argument("text")
 # @click.option(
@@ -282,7 +283,7 @@ if __name__ == "__main__":
 # def speak(text, backend, voice, output, no_play, rate, speed, no_fallback):
 #     """
 #     Convert text to speech
-# 
+#
 #     \b
 #     Examples:
 #       scitex audio speak "Hello world"
@@ -293,13 +294,13 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.audio import speak as tts_speak
-# 
+#
 #         kwargs = {
 #             "text": text,
 #             "play": not no_play,
 #             "fallback": not no_fallback,
 #         }
-# 
+#
 #         if backend:
 #             kwargs["backend"] = backend
 #         if voice:
@@ -310,25 +311,25 @@ if __name__ == "__main__":
 #             kwargs["rate"] = rate
 #         if speed:
 #             kwargs["speed"] = speed
-# 
+#
 #         result = tts_speak(**kwargs)
-# 
+#
 #         if output and result:
 #             click.secho(f"Audio saved: {result}", fg="green")
 #         elif not no_play:
 #             click.secho("Speech completed", fg="green")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @audio.command(name="backends")
 # @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 # def list_backends(as_json):
 #     """
 #     List available TTS backends
-# 
+#
 #     \b
 #     Example:
 #       scitex audio backends
@@ -336,12 +337,12 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.audio import FALLBACK_ORDER, available_backends
-# 
+#
 #         backends = available_backends()
-# 
+#
 #         if as_json:
 #             import json
-# 
+#
 #             output = {
 #                 "available": backends,
 #                 "fallback_order": FALLBACK_ORDER,
@@ -350,7 +351,7 @@ if __name__ == "__main__":
 #         else:
 #             click.secho("Available TTS Backends", fg="cyan", bold=True)
 #             click.echo("=" * 40)
-# 
+#
 #             click.echo("\nFallback order:")
 #             for i, b in enumerate(FALLBACK_ORDER, 1):
 #                 status = (
@@ -359,7 +360,7 @@ if __name__ == "__main__":
 #                     else click.style("not installed", fg="red")
 #                 )
 #                 click.echo(f"  {i}. {b}: {status}")
-# 
+#
 #             if not backends:
 #                 click.echo()
 #                 click.secho("No backends available!", fg="red")
@@ -367,25 +368,25 @@ if __name__ == "__main__":
 #                 click.echo("  pip install pyttsx3  # + apt install espeak-ng")
 #                 click.echo("  pip install gTTS")
 #                 click.echo("  pip install elevenlabs")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @audio.command()
 # @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 # def check(as_json):
 #     """
 #     Check audio status (especially for WSL)
-# 
+#
 #     \b
 #     Checks:
 #       - WSL detection
 #       - WSLg availability
 #       - PulseAudio connection
 #       - Windows fallback availability
-# 
+#
 #     \b
 #     Example:
 #       scitex audio check
@@ -393,26 +394,26 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.audio import check_wsl_audio
-# 
+#
 #         status = check_wsl_audio()
-# 
+#
 #         if as_json:
 #             import json
-# 
+#
 #             click.echo(json.dumps(status, indent=2))
 #         else:
 #             click.secho("Audio Status Check", fg="cyan", bold=True)
 #             click.echo("=" * 40)
-# 
+#
 #             def status_mark(val):
 #                 return (
 #                     click.style("Yes", fg="green")
 #                     if val
 #                     else click.style("No", fg="red")
 #                 )
-# 
+#
 #             click.echo(f"\nWSL Environment: {status_mark(status['is_wsl'])}")
-# 
+#
 #             if status["is_wsl"]:
 #                 click.echo(f"WSLg Available: {status_mark(status['wslg_available'])}")
 #                 click.echo(
@@ -424,7 +425,7 @@ if __name__ == "__main__":
 #                 click.echo(
 #                     f"Windows Fallback: {status_mark(status['windows_fallback_available'])}"
 #                 )
-# 
+#
 #             click.echo()
 #             rec = status["recommended"]
 #             if rec == "linux":
@@ -435,32 +436,32 @@ if __name__ == "__main__":
 #                 )
 #             else:
 #                 click.secho("No audio output available", fg="red")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @audio.command()
 # def stop():
 #     """
 #     Stop any currently playing speech
-# 
+#
 #     \b
 #     Example:
 #       scitex audio stop
 #     """
 #     try:
 #         from scitex.audio import stop_speech
-# 
+#
 #         stop_speech()
 #         click.secho("Speech stopped", fg="green")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     audio()
 

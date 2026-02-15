@@ -9,14 +9,16 @@ import matplotlib.pyplot as plt
 __FILE__ = "./src/scitex/plt/_subplots/_SubplotsWrapper.py"
 __DIR__ = os.path.dirname(__FILE__)
 
-# Configure fonts at import
-from ._fonts import _arial_enabled  # noqa: F401
-from ._mm_layout import create_with_mm_control
+import os
+
+import matplotlib as mpl
 
 # Register Arial fonts at module import
 import matplotlib.font_manager as fm
-import matplotlib as mpl
-import os
+
+# Configure fonts at import
+from ._fonts import _arial_enabled  # noqa: F401
+from ._mm_layout import create_with_mm_control
 
 _arial_enabled = False
 

@@ -4,26 +4,25 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/browser/__init__.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
-from .ScholarBrowserManager import ScholarBrowserManager
+from scitex.browser.debugging import browser_logger, show_grid_async
 from scitex.browser.interaction import (
+    PopupHandler,
     click_center_async,
     close_popups_async,
-    PopupHandler,
 )
 from scitex.browser.pdf import (
     click_download_for_chrome_pdf_viewer_async,
     detect_chrome_pdf_viewer_async,
 )
-from scitex.browser.debugging import (
-    show_grid_async,
-    browser_logger,
-)
+
+from .ScholarBrowserManager import ScholarBrowserManager
 
 __all__ = [
     "ScholarBrowserManager",

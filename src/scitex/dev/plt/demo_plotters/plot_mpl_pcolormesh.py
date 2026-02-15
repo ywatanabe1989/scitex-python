@@ -21,9 +21,9 @@ def plot_mpl_pcolormesh(plt, rng, ax=None):
     y = np.linspace(0, 5, 20)
     X, Y = np.meshgrid(x, y)
     Z = np.sin(X) * np.cos(Y)
-    ax.mpl_pcolormesh(X, Y, Z, shading='auto')
+    ax.mpl_pcolormesh(X, Y, Z, shading="auto")
     ax.set_xyt("X", "Y", "mpl_pcolormesh")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

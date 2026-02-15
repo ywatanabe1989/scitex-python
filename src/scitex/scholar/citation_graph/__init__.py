@@ -18,7 +18,7 @@ Example:
 """
 
 from .builder import CitationGraphBuilder
-from .models import PaperNode, CitationEdge, CitationGraph
+from .models import CitationEdge, CitationGraph, PaperNode
 
 __all__ = [
     "CitationGraphBuilder",

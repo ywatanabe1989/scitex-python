@@ -11,6 +11,7 @@ __DIR__ = os.path.dirname(__FILE__)
 
 import matplotlib
 import numpy as np
+
 from ....plt.utils import assert_valid_axis
 
 

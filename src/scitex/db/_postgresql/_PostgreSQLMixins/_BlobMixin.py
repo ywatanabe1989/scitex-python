@@ -7,10 +7,12 @@ THIS_FILE = (
     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_BlobMixin.py"
 )
 
-import psycopg2
-import numpy as np
 from typing import Any as _Any
 from typing import Dict, List, Optional, Tuple, Union
+
+import numpy as np
+import psycopg2
+
 from ..._BaseMixins._BaseBlobMixin import _BaseBlobMixin
 
 

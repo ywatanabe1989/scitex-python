@@ -8,9 +8,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from ._figure_exporter import FigureExportOptions, export_figure_to_latex, generate_figure_preamble
+from ._figure_exporter import (
+    FigureExportOptions,
+    export_figure_to_latex,
+    generate_figure_preamble,
+)
 from ._stats_formatter import FormattedStat, format_stat_note, format_stats_for_latex
-from ._table_exporter import TableExportOptions, export_table_to_latex, generate_table_preamble
+from ._table_exporter import (
+    TableExportOptions,
+    export_table_to_latex,
+    generate_table_preamble,
+)
 from ._validator import LaTeXError, ValidationResult, validate_latex
 
 if TYPE_CHECKING:
@@ -162,7 +170,9 @@ def export_to_latex(
         output_path = exports_dir / f"{bundle.node.id}.tex"
 
     if output_path:
-        _save_latex(latex_code, output_path, preamble if options.include_preamble else None)
+        _save_latex(
+            latex_code, output_path, preamble if options.include_preamble else None
+        )
         result.output_path = output_path
 
     return result
@@ -251,7 +261,11 @@ def export_multiple(
     combined_preamble = "\n\n".join(sorted(all_preamble))
 
     # Save combined file
-    _save_latex(combined_code, output_path, combined_preamble if options.include_preamble else None)
+    _save_latex(
+        combined_code,
+        output_path,
+        combined_preamble if options.include_preamble else None,
+    )
 
     # Create combined validation result
     combined_validation = ValidationResult()

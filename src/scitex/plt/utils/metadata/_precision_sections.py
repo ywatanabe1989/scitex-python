@@ -9,7 +9,7 @@ This module provides functions to round numeric values in specific sections
 of the metadata dictionary (figure, axes, style, plot, etc.).
 """
 
-from ._precision_config import PRECISION, _round_value, _round_list
+from ._precision_config import PRECISION, _round_list, _round_value
 
 
 def _round_figure_section(fig_data: dict) -> dict:
@@ -59,13 +59,25 @@ def _round_single_axes_data(ax_data: dict) -> dict:
         elif key == "position_in_grid":
             result[key] = [int(v) for v in value]
         elif key == "margins_mm":
-            result[key] = {k: _round_value(v, PRECISION["mm"], fixed=True) for k, v in value.items()}
+            result[key] = {
+                k: _round_value(v, PRECISION["mm"], fixed=True)
+                for k, v in value.items()
+            }
         elif key == "margins_inch":
-            result[key] = {k: _round_value(v, PRECISION["inch"], fixed=True) for k, v in value.items()}
+            result[key] = {
+                k: _round_value(v, PRECISION["inch"], fixed=True)
+                for k, v in value.items()
+            }
         elif key == "bbox_mm":
-            result[key] = {k: _round_value(v, PRECISION["mm"], fixed=True) for k, v in value.items()}
+            result[key] = {
+                k: _round_value(v, PRECISION["mm"], fixed=True)
+                for k, v in value.items()
+            }
         elif key == "bbox_inch":
-            result[key] = {k: _round_value(v, PRECISION["inch"], fixed=True) for k, v in value.items()}
+            result[key] = {
+                k: _round_value(v, PRECISION["inch"], fixed=True)
+                for k, v in value.items()
+            }
         elif key == "bbox_px":
             result[key] = {k: int(v) for k, v in value.items()}
         elif key in ("xaxis", "yaxis", "xaxis_top", "yaxis_right"):
@@ -100,7 +112,9 @@ def _round_style_section(style_data: dict) -> dict:
             result[scope] = {}
             for category, category_data in scope_data.items():
                 if isinstance(category_data, dict):
-                    result[scope][category] = _round_style_subsection(category, category_data)
+                    result[scope][category] = _round_style_subsection(
+                        category, category_data
+                    )
                 else:
                     result[scope][category] = category_data
         elif isinstance(scope_data, dict):

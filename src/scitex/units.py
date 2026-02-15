@@ -17,10 +17,11 @@ Author: SciTeX Development Team
 Date: 2025-07-04
 """
 
-from typing import Union, Optional, Dict, Any, Tuple
-import numpy as np
-from dataclasses import dataclass
 import warnings
+from dataclasses import dataclass
+from typing import Any, Dict, Optional, Tuple, Union
+
+import numpy as np
 
 
 @dataclass

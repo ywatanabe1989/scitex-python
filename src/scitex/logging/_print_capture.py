@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """Print capture system for SciTeX logging."""
 
-import sys
 import logging
-from typing import Optional
+import sys
 from io import StringIO
+from typing import Optional
 
 
 class PrintCapture:

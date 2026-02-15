@@ -23,22 +23,22 @@ if __name__ == "__main__":
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # """Info command."""
-# 
+#
 # import argparse
-# 
-# 
+#
+#
 # def create_parser():
 #     """Create parser for info command."""
 #     parser = argparse.ArgumentParser(description="Show system information")
 #     return parser
-# 
-# 
+#
+#
 # def main(args=None):
 #     """Execute info command."""
 #     import sys
 #     import os
-#     
-#     # Get version from package __init__.py  
+#
+#     # Get version from package __init__.py
 #     package_init = os.path.join(os.path.dirname(os.path.dirname(__file__)), '__init__.py')
 #     version = "0.1.0"  # default
 #     try:
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 #                     break
 #     except Exception:
 #         pass
-# 
+#
 #     print("Pip Project Template - FastMCP Edition")
 #     print("=" * 40)
 #     print(f"Version: {version}")
@@ -62,11 +62,11 @@ if __name__ == "__main__":
 #     print()
 #     print("Transport Options: stdio, http, sse")
 #     return 0
-# 
+#
 # if __name__ == "__main__":
 #     import sys
 #     sys.exit(main())
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

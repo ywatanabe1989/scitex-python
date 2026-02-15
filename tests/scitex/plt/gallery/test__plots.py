@@ -14,12 +14,12 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-08 23:30:00 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/gallery/_plots.py
-# 
+#
 # """Plot definitions for gallery generation."""
-# 
+#
 # import numpy as np
-# 
-# 
+#
+#
 # # =============================================================================
 # # Line Plots
 # # =============================================================================
@@ -31,8 +31,8 @@ if __name__ == "__main__":
 #     ax.set_xyt(x="Time [s]", y="Amplitude [a.u.]", t="ax.plot()")
 #     ax.legend(frameon=False, fontsize=6)
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_step(fig, ax, stx):
 #     """ax.step() - Step plot."""
 #     time_ms = np.arange(20)
@@ -40,8 +40,8 @@ if __name__ == "__main__":
 #     ax.step(time_ms, voltage_mv, where="mid", id="digital_signal")
 #     ax.set_xyt(x="Time [ms]", y="Voltage [mV]", t="ax.step()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_line(fig, ax, stx):
 #     """ax.stx_line() - Simple line from 1D array."""
 #     np.random.seed(42)
@@ -52,8 +52,8 @@ if __name__ == "__main__":
 #     ax.set_xyt(x="Sample", y="Amplitude [μV]", t="ax.stx_line()")
 #     ax.legend(frameon=False, fontsize=6)
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_shaded_line(fig, ax, stx):
 #     """ax.stx_shaded_line() - Line with shaded region."""
 #     np.random.seed(42)
@@ -66,8 +66,8 @@ if __name__ == "__main__":
 #     )
 #     ax.set_xyt(x="Time [s]", y="Response [a.u.]", t="ax.stx_shaded_line()")
 #     return fig, ax
-# 
-# 
+#
+#
 # # =============================================================================
 # # Statistical Summaries
 # # =============================================================================
@@ -81,8 +81,8 @@ if __name__ == "__main__":
 #     ax.stx_mean_std(trials_data, id="trial_average")
 #     ax.set_xyt(x="Time [ms]", y="Amplitude [μV]", t="ax.stx_mean_std()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_mean_ci(fig, ax, stx):
 #     """ax.stx_mean_ci() - Mean with confidence interval."""
 #     np.random.seed(42)
@@ -93,8 +93,8 @@ if __name__ == "__main__":
 #     ax.stx_mean_ci(subjects_data, id="group_average")
 #     ax.set_xyt(x="Time [ms]", y="BOLD [%]", t="ax.stx_mean_ci()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_median_iqr(fig, ax, stx):
 #     """ax.stx_median_iqr() - Median with interquartile range."""
 #     np.random.seed(42)
@@ -105,8 +105,8 @@ if __name__ == "__main__":
 #     ax.stx_median_iqr(samples_data, id="reaction_times")
 #     ax.set_xyt(x="Trial", y="RT [ms]", t="ax.stx_median_iqr()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_errorbar(fig, ax, stx):
 #     """ax.errorbar() - Error bars."""
 #     conditions = np.arange(5)
@@ -117,8 +117,8 @@ if __name__ == "__main__":
 #     )
 #     ax.set_xyt(x="Condition", y="Accuracy", t="ax.errorbar()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_errorbar(fig, ax, stx):
 #     """ax.stx_errorbar() - Error bars with x, y, yerr."""
 #     np.random.seed(42)
@@ -128,8 +128,8 @@ if __name__ == "__main__":
 #     ax.stx_errorbar(x, y, yerr=yerr, id="group_accuracy", fmt="o-", capsize=3)
 #     ax.set_xyt(x="Condition", y="Accuracy", t="ax.stx_errorbar()")
 #     return fig, ax
-# 
-# 
+#
+#
 # # =============================================================================
 # # Distributions
 # # =============================================================================
@@ -140,8 +140,8 @@ if __name__ == "__main__":
 #     ax.hist(reaction_times, bins=30, alpha=0.7, edgecolor="black", id="rt_distribution")
 #     ax.set_xyt(x="Reaction Time [ms]", y="Count", t="ax.hist()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_hist2d(fig, ax, stx):
 #     """ax.hist2d() - 2D histogram."""
 #     np.random.seed(42)
@@ -150,8 +150,8 @@ if __name__ == "__main__":
 #     ax.hist2d(x_position, y_position, bins=30, cmap="viridis", id="position_density")
 #     ax.set_xyt(x="X Position [cm]", y="Y Position [cm]", t="ax.hist2d()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_kde(fig, ax, stx):
 #     """ax.stx_kde() - Kernel density estimation."""
 #     np.random.seed(42)
@@ -161,8 +161,8 @@ if __name__ == "__main__":
 #     ax.stx_kde(scores, id="score_distribution")
 #     ax.set_xyt(x="Score", y="Density", t="ax.stx_kde()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_ecdf(fig, ax, stx):
 #     """ax.stx_ecdf() - Empirical CDF."""
 #     np.random.seed(42)
@@ -170,8 +170,8 @@ if __name__ == "__main__":
 #     ax.stx_ecdf(latencies, id="latency_cdf")
 #     ax.set_xyt(x="Latency [ms]", y="Cumulative Probability", t="ax.stx_ecdf()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_joyplot(fig, ax, stx):
 #     """ax.stx_joyplot() - Ridge/joy plot."""
 #     np.random.seed(42)
@@ -180,8 +180,8 @@ if __name__ == "__main__":
 #     ax.stx_joyplot(data_groups, id="distributions_by_group")
 #     ax.set_xyt(x="Value", y="Group", t="ax.stx_joyplot()")
 #     return fig, ax
-# 
-# 
+#
+#
 # # =============================================================================
 # # Categorical
 # # =============================================================================
@@ -192,8 +192,8 @@ if __name__ == "__main__":
 #     ax.bar(categories, values, id="category_counts")
 #     ax.set_xyt(x="Category", y="Count", t="ax.bar()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_barh(fig, ax, stx):
 #     """ax.barh() - Horizontal bar chart."""
 #     methods = ["Method A", "Method B", "Method C", "Method D"]
@@ -201,8 +201,8 @@ if __name__ == "__main__":
 #     ax.barh(methods, accuracy, id="method_comparison")
 #     ax.set_xyt(x="Accuracy", y="Method", t="ax.barh()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_bar(fig, ax, stx):
 #     """ax.stx_bar() - Bar chart with x and height."""
 #     x = ["A", "B", "C", "D"]
@@ -210,8 +210,8 @@ if __name__ == "__main__":
 #     ax.stx_bar(x, height, id="condition_means")
 #     ax.set_xyt(x="Condition", y="Performance", t="ax.stx_bar()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_barh(fig, ax, stx):
 #     """ax.stx_barh() - Horizontal bar with y and width."""
 #     y = ["Method A", "Method B", "Method C", "Method D"]
@@ -219,8 +219,8 @@ if __name__ == "__main__":
 #     ax.stx_barh(y, width, id="method_performance")
 #     ax.set_xyt(x="Accuracy", y="Method", t="ax.stx_barh()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_boxplot(fig, ax, stx):
 #     """ax.boxplot() - Box plot."""
 #     np.random.seed(42)
@@ -234,8 +234,8 @@ if __name__ == "__main__":
 #     )
 #     ax.set_xyt(x="Group", y="Response", t="ax.boxplot()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_violinplot(fig, ax, stx):
 #     """ax.violinplot() - Violin plot."""
 #     np.random.seed(42)
@@ -243,8 +243,8 @@ if __name__ == "__main__":
 #     ax.violinplot(data, showmeans=True, showmedians=True, id="distribution_comparison")
 #     ax.set_xyt(x="Condition", y="Value", t="ax.violinplot()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_box(fig, ax, stx):
 #     """ax.stx_box() - Box plot from 2D array."""
 #     np.random.seed(42)
@@ -253,8 +253,8 @@ if __name__ == "__main__":
 #     ax.stx_box(data, id="condition_distributions")
 #     ax.set_xyt(x="Condition", y="Score", t="ax.stx_box()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_violin(fig, ax, stx):
 #     """ax.stx_violin() - Violin plot from list of arrays."""
 #     np.random.seed(42)
@@ -266,8 +266,8 @@ if __name__ == "__main__":
 #     ax.stx_violin(data, id="effect_distributions")
 #     ax.set_xyt(x="Condition", y="Effect Size", t="ax.stx_violin()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_boxplot(fig, ax, stx):
 #     """ax.stx_boxplot() - Enhanced box plot."""
 #     np.random.seed(42)
@@ -275,8 +275,8 @@ if __name__ == "__main__":
 #     ax.stx_boxplot(data, id="skewed_distributions")
 #     ax.set_xyt(x="Group", y="Value", t="ax.stx_boxplot()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_violinplot(fig, ax, stx):
 #     """ax.stx_violinplot() - Enhanced violin plot."""
 #     np.random.seed(42)
@@ -287,8 +287,8 @@ if __name__ == "__main__":
 #     ax.stx_violinplot(data, id="bimodal_distributions")
 #     ax.set_xyt(x="Condition", y="Value", t="ax.stx_violinplot()")
 #     return fig, ax
-# 
-# 
+#
+#
 # # =============================================================================
 # # Scatter & Points
 # # =============================================================================
@@ -300,8 +300,8 @@ if __name__ == "__main__":
 #     ax.scatter(age, response_time, alpha=0.6, id="age_rt_correlation")
 #     ax.set_xyt(x="Age [years]", y="Response Time [ms]", t="ax.scatter()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_scatter(fig, ax, stx):
 #     """ax.stx_scatter() - Enhanced scatter plot."""
 #     np.random.seed(42)
@@ -310,8 +310,8 @@ if __name__ == "__main__":
 #     ax.stx_scatter(x_feature, y_feature, id="feature_correlation")
 #     ax.set_xyt(x="Feature X", y="Feature Y", t="ax.stx_scatter()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stem(fig, ax, stx):
 #     """ax.stem() - Stem plot."""
 #     frequencies = np.arange(0, 50, 5)
@@ -319,8 +319,8 @@ if __name__ == "__main__":
 #     ax.stem(frequencies, power_spectrum, id="frequency_spectrum")
 #     ax.set_xyt(x="Frequency [Hz]", y="Power [dB]", t="ax.stem()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_hexbin(fig, ax, stx):
 #     """ax.hexbin() - Hexagonal binning."""
 #     np.random.seed(42)
@@ -329,8 +329,8 @@ if __name__ == "__main__":
 #     ax.hexbin(x_coord, y_coord, gridsize=20, cmap="YlOrRd", id="density_map")
 #     ax.set_xyt(x="X", y="Y", t="ax.hexbin()")
 #     return fig, ax
-# 
-# 
+#
+#
 # # =============================================================================
 # # Area & Fill
 # # =============================================================================
@@ -343,8 +343,8 @@ if __name__ == "__main__":
 #     ax.plot(time, np.sin(time), "b-", id="mean_line")
 #     ax.set_xyt(x="Time [s]", y="Value", t="ax.fill_between()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_fill_betweenx(fig, ax, stx):
 #     """ax.fill_betweenx() - Horizontal filled area."""
 #     y = np.linspace(0, 10, 100)
@@ -353,8 +353,8 @@ if __name__ == "__main__":
 #     ax.fill_betweenx(y, x1, x2, alpha=0.3, id="horizontal_band")
 #     ax.set_xyt(x="Value", y="Depth [m]", t="ax.fill_betweenx()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_fill_between(fig, ax, stx):
 #     """ax.stx_fill_between() - Enhanced fill between."""
 #     np.random.seed(42)
@@ -365,8 +365,8 @@ if __name__ == "__main__":
 #     ax.plot(time, mean, "k-", linewidth=1, id="central_estimate")
 #     ax.set_xyt(x="Time [s]", y="Estimate", t="ax.stx_fill_between()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_fillv(fig, ax, stx):
 #     """ax.stx_fillv() - Vertical fill regions."""
 #     time = np.linspace(0, 10, 100)
@@ -375,8 +375,8 @@ if __name__ == "__main__":
 #     ax.stx_fillv([2, 6], [4, 8], alpha=0.3, color="red", id="stimulus_periods")
 #     ax.set_xyt(x="Time [s]", y="Amplitude", t="ax.stx_fillv()")
 #     return fig, ax
-# 
-# 
+#
+#
 # # =============================================================================
 # # Grid & Matrix
 # # =============================================================================
@@ -388,8 +388,8 @@ if __name__ == "__main__":
 #     fig.colorbar(im, ax=ax, shrink=0.8)
 #     ax.set_xyt(x="X", y="Y", t="ax.imshow()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_matshow(fig, ax, stx):
 #     """ax.matshow() - Matrix display."""
 #     np.random.seed(42)
@@ -398,8 +398,8 @@ if __name__ == "__main__":
 #     fig.colorbar(im, ax=ax, shrink=0.8)
 #     ax.set_xyt(x="Variable", y="Variable", t="ax.matshow()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_imshow(fig, ax, stx):
 #     """ax.stx_imshow() - Enhanced image display."""
 #     np.random.seed(42)
@@ -407,8 +407,8 @@ if __name__ == "__main__":
 #     ax.stx_imshow(brain_slice, cmap="hot", id="brain_activity")
 #     ax.set_xyt(x="X [voxels]", y="Y [voxels]", t="ax.stx_imshow()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_image(fig, ax, stx):
 #     """ax.stx_image() - Image from 2D array."""
 #     np.random.seed(42)
@@ -416,8 +416,8 @@ if __name__ == "__main__":
 #     ax.stx_image(grayscale_image, id="grayscale_image")
 #     ax.set_xyt(x="X", y="Y", t="ax.stx_image()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_heatmap(fig, ax, stx):
 #     """ax.stx_heatmap() - Annotated heatmap."""
 #     np.random.seed(42)
@@ -425,8 +425,8 @@ if __name__ == "__main__":
 #     ax.stx_heatmap(data, id="annotated_heatmap")
 #     ax.set_xyt(x="Feature", y="Sample", t="ax.stx_heatmap()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_conf_mat(fig, ax, stx):
 #     """ax.stx_conf_mat() - Confusion matrix."""
 #     np.random.seed(42)
@@ -434,8 +434,8 @@ if __name__ == "__main__":
 #     ax.stx_conf_mat(conf_matrix, id="classification_results")
 #     ax.set_xyt(x="Predicted", y="Actual", t="ax.stx_conf_mat()")
 #     return fig, ax
-# 
-# 
+#
+#
 # # =============================================================================
 # # Contours
 # # =============================================================================
@@ -449,8 +449,8 @@ if __name__ == "__main__":
 #     ax.clabel(cs, inline=True, fontsize=6)
 #     ax.set_xyt(x="X", y="Y", t="ax.contour()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_contourf(fig, ax, stx):
 #     """ax.contourf() - Filled contours."""
 #     x = np.linspace(-3, 3, 100)
@@ -461,8 +461,8 @@ if __name__ == "__main__":
 #     fig.colorbar(cf, ax=ax, shrink=0.8)
 #     ax.set_xyt(x="X", y="Y", t="ax.contourf()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_contour(fig, ax, stx):
 #     """ax.stx_contour() - Enhanced contour plot."""
 #     np.random.seed(42)
@@ -473,8 +473,8 @@ if __name__ == "__main__":
 #     ax.stx_contour(X, Y, Z, id="potential_field")
 #     ax.set_xyt(x="X", y="Y", t="ax.stx_contour()")
 #     return fig, ax
-# 
-# 
+#
+#
 # # =============================================================================
 # # Vector Fields
 # # =============================================================================
@@ -488,8 +488,8 @@ if __name__ == "__main__":
 #     ax.quiver(X, Y, U, V, id="rotation_field")
 #     ax.set_xyt(x="X", y="Y", t="ax.quiver()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_streamplot(fig, ax, stx):
 #     """ax.streamplot() - Streamlines."""
 #     x = np.linspace(-2, 2, 30)
@@ -500,8 +500,8 @@ if __name__ == "__main__":
 #     ax.streamplot(X, Y, U, V, density=1, id="flow_field")
 #     ax.set_xyt(x="X", y="Y", t="ax.streamplot()")
 #     return fig, ax
-# 
-# 
+#
+#
 # # =============================================================================
 # # Special
 # # =============================================================================
@@ -512,8 +512,8 @@ if __name__ == "__main__":
 #     ax.pie(sizes, labels=labels, autopct="%1.1f%%", id="category_breakdown")
 #     ax.set_title("ax.pie()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_raster(fig, ax, stx):
 #     """ax.stx_raster() - Spike raster plot."""
 #     np.random.seed(42)
@@ -527,8 +527,8 @@ if __name__ == "__main__":
 #     ax.stx_raster(spike_times, id="neural_spikes")
 #     ax.set_xyt(x="Time [ms]", y="Neuron", t="ax.stx_raster()")
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_stx_rectangle(fig, ax, stx):
 #     """ax.stx_rectangle() - Rectangle annotation."""
 #     np.random.seed(42)
@@ -538,8 +538,8 @@ if __name__ == "__main__":
 #     ax.stx_rectangle(2, -0.5, 2, 1.5, alpha=0.3, color="red", id="region_of_interest")
 #     ax.set_xyt(x="Time [s]", y="Amplitude", t="ax.stx_rectangle()")
 #     return fig, ax
-# 
-# 
+#
+#
 # # =============================================================================
 # # Plot Registry
 # # =============================================================================
@@ -601,8 +601,8 @@ if __name__ == "__main__":
 #     "stx_raster": plot_stx_raster,
 #     "stx_rectangle": plot_stx_rectangle,
 # }
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

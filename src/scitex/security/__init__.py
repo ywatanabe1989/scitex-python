@@ -17,11 +17,11 @@ Usage:
 """
 
 from .github import (
-    check_github_alerts,
-    save_alerts_to_file,
-    get_latest_alerts_file,
-    format_alerts_report,
     GitHubSecurityError,
+    check_github_alerts,
+    format_alerts_report,
+    get_latest_alerts_file,
+    save_alerts_to_file,
 )
 
 __all__ = [
@@ -31,4 +31,3 @@ __all__ = [
     "format_alerts_report",
     "GitHubSecurityError",
 ]
-

@@ -10,10 +10,13 @@ from matplotlib axes.
 """
 
 import matplotlib.colors as mcolors
+
 from ._label_parsing import _get_csv_column_names
 
 
-def _extract_rectangle_artists(mpl_ax, ax_for_detection, plot_type, ax_row, ax_col, skip_unlabeled):
+def _extract_rectangle_artists(
+    mpl_ax, ax_for_detection, plot_type, ax_row, ax_col, skip_unlabeled
+):
     """
     Extract Rectangle patches (bar/barh/hist charts).
 
@@ -68,13 +71,19 @@ def _extract_rectangle_artists(mpl_ax, ax_for_detection, plot_type, ax_row, ax_c
 
         # For bar/hist, we want ALL rectangles even if unlabeled
         if not (is_bar or is_hist):
-            if skip_unlabeled and not scitex_id and (not label or label.startswith("_")):
+            if (
+                skip_unlabeled
+                and not scitex_id
+                and (not label or label.startswith("_"))
+            ):
                 continue
 
         artist = {}
 
         # Generate unique ID with index
-        base_id = scitex_id or (label if label and not label.startswith("_") else trace_id_for_bars or "bar")
+        base_id = scitex_id or (
+            label if label and not label.startswith("_") else trace_id_for_bars or "bar"
+        )
         artist["id"] = f"{base_id}_{bar_count}"
         artist["group_id"] = base_id
 
@@ -95,18 +104,18 @@ def _extract_rectangle_artists(mpl_ax, ax_for_detection, plot_type, ax_row, ax_c
         artist["zorder"] = patch.get_zorder()
 
         # Backend layer
-        backend = {
-            "name": "matplotlib",
-            "artist_class": patch_type,
-            "props": {}
-        }
+        backend = {"name": "matplotlib", "artist_class": patch_type, "props": {}}
 
         try:
-            backend["props"]["facecolor"] = mcolors.to_hex(patch.get_facecolor(), keep_alpha=False)
+            backend["props"]["facecolor"] = mcolors.to_hex(
+                patch.get_facecolor(), keep_alpha=False
+            )
         except (ValueError, TypeError):
             pass
         try:
-            backend["props"]["edgecolor"] = mcolors.to_hex(patch.get_edgecolor(), keep_alpha=False)
+            backend["props"]["edgecolor"] = mcolors.to_hex(
+                patch.get_edgecolor(), keep_alpha=False
+            )
         except (ValueError, TypeError):
             pass
         try:
@@ -138,7 +147,9 @@ def _extract_rectangle_artists(mpl_ax, ax_for_detection, plot_type, ax_row, ax_c
                     "bin_index": bar_count,
                 }
             else:
-                artist["data_ref"] = _get_csv_column_names(trace_id_for_bars, ax_row, ax_col)
+                artist["data_ref"] = _get_csv_column_names(
+                    trace_id_for_bars, ax_row, ax_col
+                )
                 artist["data_ref"]["row_index"] = bar_count
 
         bar_count += 1
@@ -195,13 +206,11 @@ def _extract_wedge_artists(mpl_ax):
         artist["zorder"] = patch.get_zorder()
 
         # Backend layer
-        backend = {
-            "name": "matplotlib",
-            "artist_class": patch_type,
-            "props": {}
-        }
+        backend = {"name": "matplotlib", "artist_class": patch_type, "props": {}}
         try:
-            backend["props"]["facecolor"] = mcolors.to_hex(patch.get_facecolor(), keep_alpha=False)
+            backend["props"]["facecolor"] = mcolors.to_hex(
+                patch.get_facecolor(), keep_alpha=False
+            )
         except (ValueError, TypeError):
             pass
 

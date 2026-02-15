@@ -17,18 +17,18 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/ml/classification/reporters/_SingleClassificationReporter.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # __FILE__ = __file__
-# 
+#
 # from pprint import pprint
-# 
+#
 # """
 # Improved Single Classification Reporter with unified API.
-# 
+#
 # Enhanced version that addresses all identified issues:
 # - Unified API interface
 # - Lazy directory creation
@@ -36,17 +36,17 @@ if __name__ == "__main__":
 # - Graceful plotting with error handling
 # - Consistent parameter names
 # """
-# 
+#
 # from pathlib import Path
 # from typing import Any, Dict, List, Optional, Union
-# 
+#
 # import numpy as np
 # import pandas as pd
 # from scitex.logging import getLogger
-# 
+#
 # # Import base class and utilities
 # from ._BaseClassificationReporter import BaseClassificationReporter, ReporterConfig
-# 
+#
 # # Import original metric calculation functions (these are good)
 # from .reporter_utils import (
 #     calc_bacc,
@@ -64,14 +64,14 @@ if __name__ == "__main__":
 #     generate_org_report,
 # )
 # from .reporter_utils.storage import MetricStorage, save_metric
-# 
+#
 # logger = getLogger(__name__)
-# 
-# 
+#
+#
 # # Fold directory and filename prefixes for consistent naming
 # FOLD_DIR_PREFIX_PATTERN = "fold_{fold:02d}"  # Directory: fold_00, fold_01, ...
 # FOLD_FILE_PREFIX_PATTERN = "fold-{fold:02d}"  # Filename prefix: fold-00_, fold-01_, ...
-# 
+#
 # # Filename patterns for consistent naming across the reporter
 # # Note: fold-{fold:02d} comes first to group files by fold when sorted
 # # Convention: hyphens within chunks, underscores between chunks
@@ -124,19 +124,19 @@ if __name__ == "__main__":
 #     "cv_summary_confusion_matrix_csv_no_bacc": "cv-summary_confusion-matrix_n-{n_folds}.csv",
 #     "cv_summary_confusion_matrix_jpg_no_bacc": "cv-summary_confusion-matrix_n-{n_folds}.jpg",
 # }
-# 
-# 
+#
+#
 # class SingleTaskClassificationReporter(BaseClassificationReporter):
 #     """
 #     Improved single-task classification reporter with unified API.
-# 
+#
 #     Key improvements:
 #     - Inherits from BaseClassificationReporter for consistent API
 #     - Lazy directory creation (no empty folders)
 #     - Numerical precision control
 #     - Graceful plotting with proper error handling
 #     - Consistent parameter names across all methods
-# 
+#
 #     Features:
 #     - Comprehensive metrics calculation (balanced accuracy, MCC, ROC-AUC, PR-AUC, etc.)
 #     - Automated visualization generation:
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 #       * Comprehensive metrics dashboard
 #     - Multi-format report generation (Org, Markdown, LaTeX, HTML, DOCX, PDF)
 #     - Cross-validation support with automatic fold aggregation
-# 
+#
 #     Parameters
 #     ----------
 #     output_dir : Union[str, Path]
@@ -156,21 +156,21 @@ if __name__ == "__main__":
 #         Configuration object for advanced settings
 #     **kwargs
 #         Additional arguments passed to base class
-# 
+#
 #     Examples
 #     --------
 #     >>> # Basic usage
 #     >>> reporter = SingleTaskClassificationReporter("./results")
 #     >>> metrics = reporter.calculate_metrics(y_true, y_pred, y_proba, labels=['A', 'B'])
 #     >>> reporter.save_summary()
-# 
+#
 #     >>> # Cross-validation with automatic CV aggregation plots
 #     >>> for fold, (train_idx, test_idx) in enumerate(cv.split(X, y)):
 #     ...     metrics = reporter.calculate_metrics(
 #     ...         y_test, y_pred, y_proba, fold=fold
 #     ...     )
 #     >>> reporter.save_summary()  # Automatically creates CV aggregation visualizations
-# 
+#
 #     >>> # Feature importance visualization
 #     >>> reporter.plotter.create_feature_importance_plot(
 #     ...     feature_importance=importances,
@@ -178,7 +178,7 @@ if __name__ == "__main__":
 #     ...     save_path=output_dir / "feature_importance.png"
 #     ... )
 #     """
-# 
+#
 #     def __init__(
 #         self,
 #         output_dir: Union[str, Path],
@@ -189,41 +189,41 @@ if __name__ == "__main__":
 #         # Use config or create default
 #         if config is None:
 #             config = ReporterConfig()
-# 
+#
 #         # Initialize base class with config settings
 #         super().__init__(
 #             output_dir=output_dir,
 #             precision=config.precision,
 #             **kwargs,
 #         )
-# 
+#
 #         self.config = config
 #         self.session_config = None  # Will store SciTeX session CONFIG if provided
 #         self.storage = MetricStorage(self.output_dir, precision=self.precision)
 #         self.plotter = Plotter(enable_plotting=True)
-# 
+#
 #         # Track calculated metrics for summary
 #         self.fold_metrics: Dict[int, Dict[str, Any]] = {}
-# 
+#
 #         # Store all predictions for overall curves
 #         self.all_predictions: List[Dict[str, Any]] = []
-# 
+#
 #         if verbose:
 #             logger.info(
 #                 f"{self.__class__.__name__} initialized with output directory: {self.output_dir}"
 #             )
-# 
+#
 #     def set_session_config(self, config: Any) -> None:
 #         """
 #         Set the SciTeX session CONFIG object for inclusion in reports.
-# 
+#
 #         Parameters
 #         ----------
 #         config : Any
 #             The SciTeX session CONFIG object
 #         """
 #         self.session_config = config
-# 
+#
 #     def calculate_metrics(
 #         self,
 #         y_true: np.ndarray,
@@ -240,7 +240,7 @@ if __name__ == "__main__":
 #     ) -> Dict[str, Any]:
 #         """
 #         Calculate and save classification metrics using unified API.
-# 
+#
 #         Parameters
 #         ----------
 #         y_true : np.ndarray
@@ -265,55 +265,55 @@ if __name__ == "__main__":
 #             Trained model for feature importance extraction
 #         feature_names : List[str], optional
 #             Feature names for feature importance (required if model is provided)
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
 #             Dictionary of calculated metrics
 #         """
-# 
+#
 #         if verbose:
 #             if fold:
 #                 print()
 #                 logger.info(f"Calculating metrics for fold #{fold:02d}...")
 #             else:
 #                 logger.info(f"Calculating metrics...")
-# 
+#
 #         # Validate inputs
 #         if len(y_true) != len(y_pred):
 #             raise ValueError("y_true and y_pred must have same length")
-# 
+#
 #         if y_proba is not None and len(y_true) != len(y_proba):
 #             raise ValueError("y_true and y_proba must have same length")
-# 
+#
 #         # Set default fold index
 #         if fold is None:
 #             fold = 0
-# 
+#
 #         # Set default labels if not provided
 #         if labels is None:
 #             unique_labels = sorted(np.unique(np.concatenate([y_true, y_pred])))
 #             labels = [f"Class_{i}" for i in unique_labels]
-# 
+#
 #         # Calculate all metrics
 #         metrics = {}
-# 
+#
 #         # Core metrics (always calculated) - pass fold to all metrics
 #         metrics["balanced-accuracy"] = calc_bacc(y_true, y_pred, fold=fold)
 #         metrics["mcc"] = calc_mcc(y_true, y_pred, fold=fold)
-# 
+#
 #         metrics["confusion_matrix"] = calc_conf_mat(
 #             y_true=y_true, y_pred=y_pred, labels=labels, fold=fold
 #         )
 #         metrics["classification_report"] = calc_clf_report(
 #             y_true, y_pred, labels, fold=fold
 #         )
-# 
+#
 #         # AUC metrics (only if probabilities available)
 #         if y_proba is not None:
 #             try:
 #                 from scitex.ai.metrics import calc_pre_rec_auc, calc_roc_auc
-# 
+#
 #                 metrics["roc-auc"] = calc_roc_auc(
 #                     y_true,
 #                     y_proba,
@@ -330,20 +330,20 @@ if __name__ == "__main__":
 #                 )
 #             except Exception as e:
 #                 logger.warning(f"Could not calculate AUC metrics: {e}")
-# 
+#
 #         # Round all numerical values
 #         metrics = self._round_numeric(metrics)
-# 
+#
 #         # Add labels to metrics for later use
 #         metrics["labels"] = labels
-# 
+#
 #         if verbose:
 #             logger.info(f"Metrics calculated:")
 #             pprint(metrics)
-# 
+#
 #         # Store metrics for summary
 #         self.fold_metrics[fold] = metrics.copy()
-# 
+#
 #         # Store predictions for overall curves
 #         if y_proba is not None:
 #             self.all_predictions.append(
@@ -353,18 +353,18 @@ if __name__ == "__main__":
 #                     "y_proba": y_proba.copy(),
 #                 }
 #             )
-# 
+#
 #         # Save metrics if requested
 #         self._save_fold_metrics(metrics, fold, labels)
-# 
+#
 #         # Generate plots if requested
 #         self._create_plots(y_true, y_pred, y_proba, labels, fold, metrics)
-# 
+#
 #         # Handle feature importance automatically if model provided
 #         if model is not None and feature_names is not None:
 #             try:
 #                 from scitex.ai.feature_selection import extract_feature_importance
-# 
+#
 #                 importance_dict = extract_feature_importance(
 #                     model, feature_names, method="auto"
 #                 )
@@ -372,25 +372,25 @@ if __name__ == "__main__":
 #                     # Store in fold metrics for cross-fold aggregation
 #                     metrics["feature-importance"] = importance_dict
 #                     self.fold_metrics[fold]["feature-importance"] = importance_dict
-# 
+#
 #                     # Save feature importance
 #                     fold_dir = FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
 #                     filename = FILENAME_PATTERNS["feature_importance_json"].format(
 #                         fold=fold
 #                     )
 #                     self.storage.save(importance_dict, f"{fold_dir}/{filename}")
-# 
+#
 #                     if verbose:
 #                         logger.info(f"  Feature importance extracted and saved")
 #             except Exception as e:
 #                 logger.warning(f"Could not extract feature importance: {e}")
-# 
+#
 #         # Save raw predictions if requested (as CSV using DataFrames)
 #         # Include sample_index for easy concatenation across folds
 #         if store_y_true or store_y_pred or store_y_proba:
 #             fold_dir = FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
 #             sample_indices = np.arange(len(y_true))
-# 
+#
 #             # Warn if file size will be large (>10MB estimated)
 #             n_samples = len(y_true)
 #             estimated_size_mb = 0
@@ -401,13 +401,13 @@ if __name__ == "__main__":
 #             if store_y_proba and y_proba is not None:
 #                 n_classes = 1 if y_proba.ndim == 1 else y_proba.shape[1]
 #                 estimated_size_mb += n_samples * n_classes * 0.0001
-# 
+#
 #             if estimated_size_mb > 10:
 #                 logger.warning(
 #                     f"Storing raw predictions for fold {fold} will create ~{estimated_size_mb:.1f}MB of CSV files. "
 #                     f"Set store_y_true/store_y_pred/store_y_proba=False to disable."
 #                 )
-# 
+#
 #             if store_y_true:
 #                 filename = FILENAME_PATTERNS["y_true"].format(fold=fold)
 #                 # Convert to DataFrame for CSV format with index
@@ -415,7 +415,7 @@ if __name__ == "__main__":
 #                     {"sample_index": sample_indices, "fold": fold, "y_true": y_true}
 #                 )
 #                 self.storage.save(df_y_true, f"{fold_dir}/{filename}")
-# 
+#
 #             if store_y_pred:
 #                 filename = FILENAME_PATTERNS["y_pred"].format(fold=fold)
 #                 # Convert to DataFrame for CSV format with index
@@ -423,7 +423,7 @@ if __name__ == "__main__":
 #                     {"sample_index": sample_indices, "fold": fold, "y_pred": y_pred}
 #                 )
 #                 self.storage.save(df_y_pred, f"{fold_dir}/{filename}")
-# 
+#
 #             if store_y_proba and y_proba is not None:
 #                 filename = FILENAME_PATTERNS["y_proba"].format(fold=fold)
 #                 # Convert to DataFrame for CSV format with index
@@ -443,21 +443,21 @@ if __name__ == "__main__":
 #                         data[f"proba_class_{i}"] = y_proba[:, i]
 #                     df_y_proba = pd.DataFrame(data)
 #                 self.storage.save(df_y_proba, f"{fold_dir}/{filename}")
-# 
+#
 #         return metrics
-# 
+#
 #     def _save_fold_metrics(
 #         self, metrics: Dict[str, Any], fold: int, labels: List[str]
 #     ) -> None:
 #         """Save metrics for a specific fold in shallow directory structure."""
 #         fold_dir = FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
-# 
+#
 #         # Extract metric values for filenames
 #         balanced_acc = self._extract_metric_value(metrics.get("balanced-accuracy"))
 #         mcc_value = self._extract_metric_value(metrics.get("mcc"))
 #         roc_auc_value = self._extract_metric_value(metrics.get("roc-auc"))
 #         pr_auc_value = self._extract_metric_value(metrics.get("pr-auc"))
-# 
+#
 #         # Save individual metrics with values in filenames
 #         for metric_name, metric_value in metrics.items():
 #             # Extract actual value if it's a wrapped dict with 'value' key
@@ -465,7 +465,7 @@ if __name__ == "__main__":
 #                 actual_value = metric_value["value"]
 #             else:
 #                 actual_value = metric_value
-# 
+#
 #             if metric_name == "confusion_matrix":
 #                 # Save confusion matrix as CSV with proper formatting
 #                 try:
@@ -485,7 +485,7 @@ if __name__ == "__main__":
 #                 except Exception as e:
 #                     logger.error(f"Error formatting confusion matrix: {e}")
 #                     cm_df = None
-# 
+#
 #                 # Save if cm_df was created successfully
 #                 if cm_df is not None:
 #                     # Create filename with balanced accuracy
@@ -497,10 +497,10 @@ if __name__ == "__main__":
 #                         cm_filename = FILENAME_PATTERNS[
 #                             "confusion_matrix_csv_no_bacc"
 #                         ].format(fold=fold)
-# 
+#
 #                     # Save with index=True to preserve row labels
 #                     self.storage.save(cm_df, f"{fold_dir}/{cm_filename}", index=True)
-# 
+#
 #             elif metric_name == "classification_report":
 #                 # Save classification report with consistent naming
 #                 report_filename = FILENAME_PATTERNS["classification_report"].format(
@@ -531,7 +531,7 @@ if __name__ == "__main__":
 #                         "classification_report_txt"
 #                     ].format(fold=fold)
 #                     self.storage.save(actual_value, f"{fold_dir}/{report_filename}")
-# 
+#
 #             elif metric_name == "balanced-accuracy" and balanced_acc is not None:
 #                 # Save with value in filename
 #                 filename = FILENAME_PATTERNS["fold_metric_with_value"].format(
@@ -578,7 +578,7 @@ if __name__ == "__main__":
 #                     fold=fold,
 #                     precision=self.precision,
 #                 )
-# 
+#
 #     def _extract_metric_value(self, metric_data: Any) -> Optional[float]:
 #         """Extract numeric value from metric data."""
 #         if metric_data is None:
@@ -588,7 +588,7 @@ if __name__ == "__main__":
 #         if isinstance(metric_data, (int, float, np.number)):
 #             return float(metric_data)
 #         return None
-# 
+#
 #     def _save_curve_data(
 #         self,
 #         y_true: np.ndarray,
@@ -599,16 +599,16 @@ if __name__ == "__main__":
 #         """Save ROC and PR curve data as CSV files with metric values in filenames."""
 #         if y_proba is None:
 #             return
-# 
+#
 #         from sklearn.metrics import (
 #             auc,
 #             average_precision_score,
 #             precision_recall_curve,
 #             roc_curve,
 #         )
-# 
+#
 #         fold_dir = FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
-# 
+#
 #         # Handle binary vs multiclass
 #         if y_proba.ndim == 1 or y_proba.shape[1] == 2:
 #             # Binary classification
@@ -616,38 +616,38 @@ if __name__ == "__main__":
 #                 y_proba_pos = y_proba[:, 1]
 #             else:
 #                 y_proba_pos = y_proba
-# 
+#
 #             # Normalize labels to integers for sklearn curve functions
 #             from scitex.ai.metrics import _normalize_labels
-# 
+#
 #             y_true_norm, _, _, _ = _normalize_labels(y_true, y_true)
-# 
+#
 #             # ROC curve data
 #             fpr, tpr, _ = roc_curve(y_true_norm, y_proba_pos)
 #             roc_auc = auc(fpr, tpr)
-# 
+#
 #             # Create ROC curve DataFrame with just FPR and TPR columns
 #             roc_df = pd.DataFrame({"FPR": fpr, "TPR": tpr})
-# 
+#
 #             # Save with AUC value in filename
 #             roc_filename = FILENAME_PATTERNS["roc_curve_csv"].format(
 #                 fold=fold, auc=roc_auc
 #             )
 #             self.storage.save(roc_df, f"{fold_dir}/{roc_filename}")
-# 
+#
 #             # PR curve data
 #             precision, recall, _ = precision_recall_curve(y_true_norm, y_proba_pos)
 #             avg_precision = average_precision_score(y_true_norm, y_proba_pos)
-# 
+#
 #             # Create PR curve DataFrame with Recall and Precision columns
 #             pr_df = pd.DataFrame({"Recall": recall, "Precision": precision})
-# 
+#
 #             # Save with AP value in filename
 #             pr_filename = FILENAME_PATTERNS["pr_curve_csv"].format(
 #                 fold=fold, ap=avg_precision
 #             )
 #             self.storage.save(pr_df, f"{fold_dir}/{pr_filename}")
-# 
+#
 #     def _create_plots(
 #         self,
 #         y_true: np.ndarray,
@@ -663,17 +663,17 @@ if __name__ == "__main__":
 #             FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
 #         )
 #         fold_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #         # # Save curve data for external plotting
 #         # self._save_curve_data(y_true, y_proba, fold, metrics)
-# 
+#
 #         # Confusion matrix plot with metric in filename
 #         if "confusion_matrix" in metrics:
 #             # Extract actual confusion matrix value if wrapped in dict
 #             cm_data = metrics["confusion_matrix"]
 #             if isinstance(cm_data, dict) and "value" in cm_data:
 #                 cm_data = cm_data["value"]
-# 
+#
 #             # Get balanced accuracy for title and filename
 #             balanced_acc = metrics.get("balanced-accuracy", {})
 #             if isinstance(balanced_acc, dict) and "value" in balanced_acc:
@@ -682,7 +682,7 @@ if __name__ == "__main__":
 #                 balanced_acc = float(balanced_acc)
 #             else:
 #                 balanced_acc = None
-# 
+#
 #             # Create title with balanced accuracy and filename with fold and metric
 #             if balanced_acc is not None:
 #                 title = f"Confusion Matrix (Fold {fold:02d}) - Balanced Acc: {balanced_acc:.3f}"
@@ -694,14 +694,14 @@ if __name__ == "__main__":
 #                 filename = FILENAME_PATTERNS["confusion_matrix_jpg_no_bacc"].format(
 #                     fold=fold
 #                 )
-# 
+#
 #             self.plotter.create_confusion_matrix_plot(
 #                 cm_data,
 #                 labels=labels,
 #                 save_path=fold_dir / filename,
 #                 title=title,
 #             )
-# 
+#
 #         # ROC curve with AUC in filename (if probabilities available)
 #         if y_proba is not None:
 #             # Get AUC for filename
@@ -715,7 +715,7 @@ if __name__ == "__main__":
 #                 roc_filename = FILENAME_PATTERNS["roc_curve_jpg_no_auc"].format(
 #                     fold=fold
 #                 )
-# 
+#
 #             self.plotter.create_roc_curve(
 #                 y_true,
 #                 y_proba,
@@ -723,7 +723,7 @@ if __name__ == "__main__":
 #                 save_path=fold_dir / roc_filename,
 #                 title=f"ROC Curve (Fold {fold:02d})",
 #             )
-# 
+#
 #             # PR curve with AP in filename
 #             pr_auc = metrics.get("pr-auc", {})
 #             if isinstance(pr_auc, dict) and "value" in pr_auc:
@@ -733,7 +733,7 @@ if __name__ == "__main__":
 #                 )
 #             else:
 #                 pr_filename = FILENAME_PATTERNS["pr_curve_jpg_no_ap"].format(fold=fold)
-# 
+#
 #             self.plotter.create_precision_recall_curve(
 #                 y_true,
 #                 y_proba,
@@ -741,7 +741,7 @@ if __name__ == "__main__":
 #                 save_path=fold_dir / pr_filename,
 #                 title=f"Precision-Recall Curve (Fold {fold:02d})",
 #             )
-# 
+#
 #         # NEW: Create comprehensive metrics visualization dashboard
 #         # This automatically creates a 4-panel figure with confusion matrix, ROC, PR curve, and metrics table
 #         summary_filename = FILENAME_PATTERNS["metrics_summary"].format(fold=fold)
@@ -756,11 +756,11 @@ if __name__ == "__main__":
 #             fold=fold,
 #             verbose=False,  # Already have verbose output from individual plots
 #         )
-# 
+#
 #     def get_summary(self) -> Dict[str, Any]:
 #         """
 #         Get summary of all calculated metrics across folds.
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
@@ -768,13 +768,13 @@ if __name__ == "__main__":
 #         """
 #         if not self.fold_metrics:
 #             return {"error": "No metrics calculated yet"}
-# 
+#
 #         summary = {
 #             "output_dir": str(self.output_dir),
 #             "total_folds": len(self.fold_metrics),
 #             "metrics_summary": {},
 #         }
-# 
+#
 #         # Aggregate confusion matrices across all folds
 #         confusion_matrices = []
 #         for fold_metrics in self.fold_metrics.values():
@@ -785,21 +785,21 @@ if __name__ == "__main__":
 #                     cm_data = cm_data["value"]
 #                 if cm_data is not None:
 #                     confusion_matrices.append(cm_data)
-# 
+#
 #         if confusion_matrices:
 #             # Sum all confusion matrices to get overall counts
 #             overall_cm = np.sum(confusion_matrices, axis=0)
 #             summary["overall_confusion_matrix"] = overall_cm.tolist()
-# 
+#
 #             # Also calculate normalized version (as percentages)
 #             overall_cm_normalized = overall_cm / overall_cm.sum()
 #             summary["overall_confusion_matrix_normalized"] = self._round_numeric(
 #                 overall_cm_normalized.tolist()
 #             )
-# 
+#
 #         # Calculate summary statistics for scalar metrics
 #         scalar_metrics = ["balanced-accuracy", "mcc", "roc-auc", "pr-auc"]
-# 
+#
 #         for metric_name in scalar_metrics:
 #             values = []
 #             for fold_metrics in self.fold_metrics.values():
@@ -810,7 +810,7 @@ if __name__ == "__main__":
 #                         values.append(metric_val["value"])
 #                     else:
 #                         values.append(metric_val)
-# 
+#
 #             if values:
 #                 values = np.array(values)
 #                 summary["metrics_summary"][metric_name] = {
@@ -820,26 +820,26 @@ if __name__ == "__main__":
 #                     "max": self._round_numeric(np.max(values)),
 #                     "values": self._round_numeric(values.tolist()),
 #                 }
-# 
+#
 #         # Aggregate feature importance across folds
 #         feature_importances_list = []
 #         for fold_metrics in self.fold_metrics.values():
 #             if "feature-importance" in fold_metrics:
 #                 feature_importances_list.append(fold_metrics["feature-importance"])
-# 
+#
 #         if feature_importances_list:
 #             from scitex.ai.feature_selection import (
 #                 aggregate_feature_importances,
 #                 create_feature_importance_dataframe,
 #             )
-# 
+#
 #             aggregated_importances = aggregate_feature_importances(
 #                 feature_importances_list
 #             )
 #             summary["feature-importance"] = aggregated_importances
-# 
+#
 #         return summary
-# 
+#
 #     def create_cv_aggregation_visualizations(
 #         self,
 #         output_dir: Optional[Path] = None,
@@ -848,12 +848,12 @@ if __name__ == "__main__":
 #     ) -> None:
 #         """
 #         Create CV aggregation visualizations with faded individual fold lines.
-# 
+#
 #         This creates publication-quality cross-validation plots showing:
 #         - Individual fold curves (faded/transparent)
 #         - Mean curve across folds (bold)
 #         - Confidence intervals (± 1 std. dev.)
-# 
+#
 #         Parameters
 #         ----------
 #         output_dir : Path, optional
@@ -866,13 +866,13 @@ if __name__ == "__main__":
 #         if not self.all_predictions:
 #             logger.warning("No predictions stored for CV aggregation visualizations")
 #             return
-# 
+#
 #         if output_dir is None:
 #             output_dir = self._create_subdir_if_needed("cv_summary")
 #             output_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #         n_folds = len(self.all_predictions)
-# 
+#
 #         # ROC curve with faded fold lines
 #         roc_save_path = output_dir / f"roc_cv_aggregation_n{n_folds}.jpg"
 #         self.plotter.create_cv_aggregation_plot(
@@ -885,7 +885,7 @@ if __name__ == "__main__":
 #             verbose=True,
 #         )
 #         logger.info(f"Created CV aggregation ROC plot with faded fold lines")
-# 
+#
 #         # PR curve with faded fold lines
 #         pr_save_path = output_dir / f"pr_cv_aggregation_n{n_folds}.jpg"
 #         self.plotter.create_cv_aggregation_plot(
@@ -898,7 +898,7 @@ if __name__ == "__main__":
 #             verbose=True,
 #         )
 #         logger.info(f"Created CV aggregation PR plot with faded fold lines")
-# 
+#
 #     def save_feature_importance(
 #         self,
 #         model,
@@ -907,7 +907,7 @@ if __name__ == "__main__":
 #     ) -> Dict[str, float]:
 #         """
 #         Calculate and save feature importance for tree-based models.
-# 
+#
 #         Parameters
 #         ----------
 #         model : object
@@ -916,7 +916,7 @@ if __name__ == "__main__":
 #             Names of features
 #         fold : int, optional
 #             Fold number for tracking
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, float]
@@ -924,16 +924,16 @@ if __name__ == "__main__":
 #         """
 #         # Use centralized metric calculation
 #         from scitex.ai.metrics import calc_feature_importance
-# 
+#
 #         try:
 #             importance_dict, importances = calc_feature_importance(model, feature_names)
 #         except ValueError as e:
 #             logger.warning(f"Could not extract feature importance: {e}")
 #             return {}
-# 
+#
 #         # Already sorted by calc_feature_importance
 #         sorted_importances = list(importance_dict.items())
-# 
+#
 #         # Save as JSON using FILENAME_PATTERNS
 #         fold_subdir = (
 #             FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
@@ -942,12 +942,12 @@ if __name__ == "__main__":
 #         )
 #         json_filename = FILENAME_PATTERNS["feature_importance_json"].format(fold=fold)
 #         self.storage.save(dict(sorted_importances), f"{fold_subdir}/{json_filename}")
-# 
+#
 #         # Create visualization using FILENAME_PATTERNS
 #         jpg_filename = FILENAME_PATTERNS["feature_importance_jpg"].format(fold=fold)
 #         save_path = self.output_dir / fold_subdir / jpg_filename
 #         save_path.parent.mkdir(parents=True, exist_ok=True)
-# 
+#
 #         self.plotter.create_feature_importance_plot(
 #             feature_importance=importances,
 #             feature_names=feature_names,
@@ -958,21 +958,21 @@ if __name__ == "__main__":
 #                 else "Feature Importance (CV Summary)"
 #             ),
 #         )
-# 
+#
 #         logger.info(
 #             f"Saved feature importance"
 #             + (f" for fold {fold}" if fold is not None else "")
 #         )
-# 
+#
 #         return importance_dict
-# 
+#
 #     def save_feature_importance_summary(
 #         self,
 #         all_importances: List[Dict[str, float]],
 #     ) -> None:
 #         """
 #         Create summary visualization of feature importances across all folds.
-# 
+#
 #         Parameters
 #         ----------
 #         all_importances : List[Dict[str, float]]
@@ -980,12 +980,12 @@ if __name__ == "__main__":
 #         """
 #         if not all_importances:
 #             return
-# 
+#
 #         # Aggregate importances across folds
 #         all_features = set()
 #         for imp_dict in all_importances:
 #             all_features.update(imp_dict.keys())
-# 
+#
 #         # Calculate mean and std for each feature
 #         feature_stats = {}
 #         for feature in all_features:
@@ -995,12 +995,12 @@ if __name__ == "__main__":
 #                 "std": float(np.std(values)),
 #                 "values": [float(v) for v in values],
 #             }
-# 
+#
 #         # Sort by mean importance
 #         sorted_features = sorted(
 #             feature_stats.items(), key=lambda x: x[1]["mean"], reverse=True
 #         )
-# 
+#
 #         # Save as JSON using FILENAME_PATTERNS
 #         n_folds = len(all_importances)
 #         json_filename = FILENAME_PATTERNS["cv_summary_feature_importance_json"].format(
@@ -1010,23 +1010,23 @@ if __name__ == "__main__":
 #             dict(sorted_features),
 #             f"cv_summary/{json_filename}",
 #         )
-# 
+#
 #         # Create visualization using centralized plotting function
 #         from scitex.ai.plt import plot_feature_importance_cv_summary
-# 
+#
 #         jpg_filename = FILENAME_PATTERNS["cv_summary_feature_importance_jpg"].format(
 #             n_folds=n_folds
 #         )
 #         save_path = self.output_dir / "cv_summary" / jpg_filename
 #         save_path.parent.mkdir(parents=True, exist_ok=True)
-# 
+#
 #         fig = plot_feature_importance_cv_summary(
 #             all_importances=all_importances,
 #             spath=save_path,
 #         )
-# 
+#
 #         logger.info("Saved feature importance summary")
-# 
+#
 #     def create_cv_summary_curves(self, summary: Dict[str, Any]) -> None:
 #         """
 #         Create CV summary ROC and PR curves from aggregated predictions.
@@ -1034,11 +1034,11 @@ if __name__ == "__main__":
 #         if not self.all_predictions:
 #             logger.warning("No predictions stored for CV summary curves")
 #             return
-# 
+#
 #         # Aggregate all predictions
 #         all_y_true = np.concatenate([p["y_true"] for p in self.all_predictions])
 #         all_y_proba = np.concatenate([p["y_proba"] for p in self.all_predictions])
-# 
+#
 #         # Get per-fold metrics for mean and std
 #         roc_values = []
 #         pr_values = []
@@ -1055,7 +1055,7 @@ if __name__ == "__main__":
 #                     pr_values.append(val["value"])
 #                 else:
 #                     pr_values.append(val)
-# 
+#
 #         # Calculate mean and std
 #         n_folds = len(self.fold_metrics)
 #         if roc_values:
@@ -1063,25 +1063,25 @@ if __name__ == "__main__":
 #             roc_std = np.std(roc_values)
 #         else:
 #             from .reporter_utils.metrics import calc_roc_auc
-# 
+#
 #             overall_roc = calc_roc_auc(all_y_true, all_y_proba)
 #             roc_mean = overall_roc["value"]
 #             roc_std = 0.0
-# 
+#
 #         if pr_values:
 #             pr_mean = np.mean(pr_values)
 #             pr_std = np.std(pr_values)
 #         else:
 #             from .reporter_utils.metrics import calc_pre_rec_auc
-# 
+#
 #             overall_pr = calc_pre_rec_auc(all_y_true, all_y_proba)
 #             pr_mean = overall_pr["value"]
 #             pr_std = 0.0
-# 
+#
 #         # Create cv_summary directory
 #         cv_summary_dir = self._create_subdir_if_needed("cv_summary")
 #         cv_summary_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #         # Save CV summary curve data
 #         self._save_cv_summary_curve_data(
 #             all_y_true,
@@ -1092,12 +1092,12 @@ if __name__ == "__main__":
 #             pr_std,
 #             n_folds,
 #         )
-# 
+#
 #         # Normalize labels to integers for sklearn curve functions in plotter
 #         from scitex.ai.metrics import _normalize_labels
-# 
+#
 #         all_y_true_norm, _, label_names, _ = _normalize_labels(all_y_true, all_y_true)
-# 
+#
 #         # ROC Curve with mean±std and n_folds in filename
 #         roc_title = f"ROC Curve (CV Summary) - AUC: {roc_mean:.3f} ± {roc_std:.3f} (n={n_folds})"
 #         roc_filename = FILENAME_PATTERNS["cv_summary_roc_curve_jpg"].format(
@@ -1113,7 +1113,7 @@ if __name__ == "__main__":
 #             auc_std=roc_std,
 #             verbose=True,
 #         )
-# 
+#
 #         # PR Curve with mean±std and n_folds in filename
 #         pr_title = f"Precision-Recall Curve (CV Summary) - AP: {pr_mean:.3f} ± {pr_std:.3f} (n={n_folds})"
 #         pr_filename = FILENAME_PATTERNS["cv_summary_pr_curve_jpg"].format(
@@ -1129,14 +1129,14 @@ if __name__ == "__main__":
 #             ap_std=pr_std,
 #             verbose=True,
 #         )
-# 
+#
 #         logger.info(
 #             f"Created CV summary ROC curve: AUC = {roc_mean:.3f} ± {roc_std:.3f} (n={n_folds})"
 #         )
 #         logger.info(
 #             f"Created CV summary PR curve: AP = {pr_mean:.3f} ± {pr_std:.3f} (n={n_folds})"
 #         )
-# 
+#
 #     def _save_cv_summary_curve_data(
 #         self,
 #         y_true: np.ndarray,
@@ -1154,9 +1154,9 @@ if __name__ == "__main__":
 #             precision_recall_curve,
 #             roc_curve,
 #         )
-# 
+#
 #         cv_summary_dir = "cv_summary"
-# 
+#
 #         # Handle binary vs multiclass
 #         if y_proba.ndim == 1 or y_proba.shape[1] == 2:
 #             # Binary classification
@@ -1164,42 +1164,42 @@ if __name__ == "__main__":
 #                 y_proba_pos = y_proba[:, 1]
 #             else:
 #                 y_proba_pos = y_proba
-# 
+#
 #             # Normalize labels to integers for sklearn curve functions
 #             from scitex.ai.metrics import _normalize_labels
-# 
+#
 #             y_true_norm, _, _, _ = _normalize_labels(y_true, y_true)
-# 
+#
 #             # ROC curve data
 #             fpr, tpr, _ = roc_curve(y_true_norm, y_proba_pos)
 #             roc_auc = auc(fpr, tpr)
-# 
+#
 #             # Create ROC curve DataFrame with just FPR and TPR columns
 #             roc_df = pd.DataFrame({"FPR": fpr, "TPR": tpr})
-# 
+#
 #             # Save with mean±std and n_folds in filename
 #             roc_filename = FILENAME_PATTERNS["cv_summary_roc_curve_csv"].format(
 #                 mean=roc_mean, std=roc_std, n_folds=n_folds
 #             )
 #             self.storage.save(roc_df, f"{cv_summary_dir}/{roc_filename}")
-# 
+#
 #             # PR curve data
 #             precision, recall, _ = precision_recall_curve(y_true_norm, y_proba_pos)
 #             avg_precision = average_precision_score(y_true_norm, y_proba_pos)
-# 
+#
 #             # Create PR curve DataFrame with Recall and Precision columns
 #             pr_df = pd.DataFrame({"Recall": recall, "Precision": precision})
-# 
+#
 #             # Save with mean±std and n_folds in filename
 #             pr_filename = FILENAME_PATTERNS["cv_summary_pr_curve_csv"].format(
 #                 mean=pr_mean, std=pr_std, n_folds=n_folds
 #             )
 #             self.storage.save(pr_df, f"{cv_summary_dir}/{pr_filename}")
-# 
+#
 #     def save_cv_summary_confusion_matrix(self, summary: Dict[str, Any]) -> None:
 #         """
 #         Save and plot the CV summary confusion matrix.
-# 
+#
 #         Parameters
 #         ----------
 #         summary : Dict[str, Any]
@@ -1215,13 +1215,13 @@ if __name__ == "__main__":
 #                     cm_data = cm_data["value"]
 #                 if cm_data is not None:
 #                     confusion_matrices.append(cm_data)
-# 
+#
 #         if not confusion_matrices:
 #             return
-# 
+#
 #         # Sum all confusion matrices to get overall counts
 #         overall_cm = np.sum(confusion_matrices, axis=0)
-# 
+#
 #         # Get labels from one of the folds
 #         labels = None
 #         for fold_metrics in self.fold_metrics.values():
@@ -1235,11 +1235,11 @@ if __name__ == "__main__":
 #                 if isinstance(cm_data, dict) and "labels" in cm_data:
 #                     labels = cm_data["labels"]
 #                     break
-# 
+#
 #         # Save as CSV with labels in cv_summary directory
 #         cv_summary_dir = self._create_subdir_if_needed("cv_summary")
 #         cv_summary_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #         # Get balanced accuracy stats for filename
 #         balanced_acc_mean = None
 #         balanced_acc_std = None
@@ -1249,7 +1249,7 @@ if __name__ == "__main__":
 #                 balanced_acc_stats = summary["metrics_summary"]["balanced-accuracy"]
 #                 balanced_acc_mean = balanced_acc_stats.get("mean")
 #                 balanced_acc_std = balanced_acc_stats.get("std")
-# 
+#
 #         # Create filename with mean±std and n_folds
 #         if balanced_acc_mean is not None and balanced_acc_std is not None:
 #             cm_filename = FILENAME_PATTERNS["cv_summary_confusion_matrix_csv"].format(
@@ -1259,7 +1259,7 @@ if __name__ == "__main__":
 #             cm_filename = FILENAME_PATTERNS[
 #                 "cv_summary_confusion_matrix_csv_no_bacc"
 #             ].format(n_folds=n_folds)
-# 
+#
 #         if labels:
 #             cm_df = pd.DataFrame(
 #                 overall_cm,
@@ -1268,14 +1268,14 @@ if __name__ == "__main__":
 #             )
 #         else:
 #             cm_df = pd.DataFrame(overall_cm)
-# 
+#
 #         # Save with proper filename (with index=True to preserve row labels)
 #         self.storage.save(cm_df, f"cv_summary/{cm_filename}", index=True)
-# 
+#
 #         # Create plot for CV summary confusion matrix
 #         cv_summary_dir = self._create_subdir_if_needed("cv_summary")
 #         cv_summary_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #         # Calculate balanced accuracy mean and std for overall confusion matrix title
 #         balanced_acc_mean = None
 #         balanced_acc_std = None
@@ -1285,7 +1285,7 @@ if __name__ == "__main__":
 #                 balanced_acc_stats = metrics_summary["balanced-accuracy"]
 #                 balanced_acc_mean = balanced_acc_stats.get("mean")
 #                 balanced_acc_std = balanced_acc_stats.get("std")
-# 
+#
 #         # Create title with balanced accuracy stats and filename with mean±std and n_folds
 #         if balanced_acc_mean is not None and balanced_acc_std is not None:
 #             title = f"Confusion Matrix (CV Summary) - Balanced Acc: {balanced_acc_mean:.3f} ± {balanced_acc_std:.3f} (n={n_folds})"
@@ -1297,7 +1297,7 @@ if __name__ == "__main__":
 #             filename = FILENAME_PATTERNS[
 #                 "cv_summary_confusion_matrix_jpg_no_bacc"
 #             ].format(n_folds=n_folds)
-# 
+#
 #         # Create the plot with enhanced title
 #         self.plotter.create_confusion_matrix_plot(
 #             overall_cm,
@@ -1305,11 +1305,11 @@ if __name__ == "__main__":
 #             save_path=cv_summary_dir / filename,
 #             title=title,
 #         )
-# 
+#
 #     def generate_reports(self) -> Dict[str, Path]:
 #         """
 #         Generate comprehensive reports in multiple formats.
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Path]
@@ -1326,28 +1326,28 @@ if __name__ == "__main__":
 #             "folds": [],
 #             "plots": {},
 #         }
-# 
+#
 #         # Get summary statistics
 #         summary = self.get_summary()
-# 
+#
 #         # Extract summary statistics for reporting
 #         if "metrics_summary" in summary:
 #             results["summary"] = summary["metrics_summary"]
-# 
+#
 #         # Add feature importance if available
 #         if "feature-importance" in summary:
 #             results["summary"]["feature-importance"] = summary["feature-importance"]
-# 
+#
 #         # Add per-fold results
 #         for fold, fold_data in self.fold_metrics.items():
 #             fold_result = {"fold_id": fold}
 #             fold_result.update(fold_data)
-# 
+#
 #             # Try to load sample size info from features.json
 #             # scitex.io.save transforms relative paths: adds storage_out to calling file's dir
 #             try:
 #                 import json
-# 
+#
 #                 # Construct the storage_out path where scitex.io.save actually saves files
 #                 # Pattern: {calling_file_dir}/storage_out/{relative_path}
 #                 calling_file_dir = Path(__file__).parent / "reporter_utils"
@@ -1358,20 +1358,20 @@ if __name__ == "__main__":
 #                     / FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
 #                     / "features.json"
 #                 )
-# 
+#
 #                 # Also try regular path in case storage behavior changes
 #                 regular_path = (
 #                     self.output_dir
 #                     / FOLD_DIR_PREFIX_PATTERN.format(fold=fold)
 #                     / "features.json"
 #                 )
-# 
+#
 #                 features_json = None
 #                 if storage_out_path.exists():
 #                     features_json = storage_out_path
 #                 elif regular_path.exists():
 #                     features_json = regular_path
-# 
+#
 #                 if features_json:
 #                     with open(features_json, "r") as f:
 #                         features_data = json.load(f)
@@ -1388,9 +1388,9 @@ if __name__ == "__main__":
 #                                 fold_result[key] = int(features_data[key])
 #             except Exception:
 #                 pass
-# 
+#
 #             results["folds"].append(fold_result)
-# 
+#
 #         # Add plot references with unified structure
 #         # CV summary plots in cv_summary directory
 #         cv_summary_dir = self.output_dir / "cv_summary"
@@ -1398,7 +1398,7 @@ if __name__ == "__main__":
 #             for plot_file in cv_summary_dir.glob("*.jpg"):
 #                 plot_key = f"cv_summary_{plot_file.stem}"
 #                 results["plots"][plot_key] = str(plot_file.relative_to(self.output_dir))
-# 
+#
 #         # Per-fold plots in fold directories
 #         for fold_dir in sorted(self.output_dir.glob("fold_*")):
 #             # Extract fold number (directory is fold_XX, filename starts with fold-XX)
@@ -1408,33 +1408,33 @@ if __name__ == "__main__":
 #                 # e.g., "fold-00_confusion-matrix_bacc-0.500" becomes plot key "fold_00_confusion-matrix"
 #                 plot_key = f"fold_{fold_num}_{plot_file.stem}"
 #                 results["plots"][plot_key] = str(plot_file.relative_to(self.output_dir))
-# 
+#
 #         # Generate reports
 #         reports_dir = self._create_subdir_if_needed("reports")
 #         generated_files = {}
-# 
+#
 #         # Org-mode report (primary format) - will generate other formats via pandoc
 #         org_path = reports_dir / "classification_report.org"
 #         generate_org_report(results, org_path, include_plots=True, convert_formats=True)
 #         generated_files["org"] = org_path
 #         logger.info(f"Generated org-mode report: {org_path}")
-# 
+#
 #         # Note: Markdown, HTML, LaTeX, and DOCX are now generated via pandoc from org
 #         # This ensures consistency across all formats
-# 
+#
 #         # Try to compile LaTeX to PDF
 #         try:
 #             import shutil
 #             import subprocess
-# 
+#
 #             if shutil.which("pdflatex"):
 #                 # Change to reports directory for compilation
 #                 original_dir = Path.cwd()
 #                 try:
 #                     import os
-# 
+#
 #                     os.chdir(reports_dir)
-# 
+#
 #                     # Run pdflatex twice for proper references
 #                     for _ in range(2):
 #                         result = subprocess.run(
@@ -1447,12 +1447,12 @@ if __name__ == "__main__":
 #                             text=True,
 #                             timeout=30,
 #                         )
-# 
+#
 #                     pdf_path = reports_dir / "classification_report.pdf"
 #                     if pdf_path.exists():
 #                         generated_files["pdf"] = pdf_path
 #                         logger.info(f"Generated PDF report: {pdf_path}")
-# 
+#
 #                         # Clean up LaTeX auxiliary files
 #                         for ext in [".aux", ".log", ".out", ".toc"]:
 #                             aux_file = reports_dir / f"classification_report{ext}"
@@ -1464,30 +1464,30 @@ if __name__ == "__main__":
 #                 logger.warning("pdflatex not found. Skipping PDF generation.")
 #         except Exception as e:
 #             logger.warning(f"Could not generate PDF report: {e}")
-# 
+#
 #         # Skip paper_exports - all data is already available in fold_XX/ and cv_summary/
 #         # with descriptive filenames perfect for sharing
-# 
+#
 #         return generated_files
-# 
+#
 #     def save_summary(
 #         self, filename: str = "cv_summary/summary.json", verbose: bool = True
 #     ) -> Path:
 #         """
 #         Save summary to file, create CV summary visualizations, and generate reports.
-# 
+#
 #         Parameters
 #         ----------
 #         filename : str, default "cv_summary/summary.json"
 #             Filename for summary (now in cv_summary directory)
-# 
+#
 #         Returns
 #         -------
 #         Path
 #             Path to saved summary file
 #         """
 #         summary = self.get_summary()
-# 
+#
 #         # Try to load and include configuration
 #         try:
 #             # Try different possible locations for CONFIG.yaml
@@ -1500,69 +1500,69 @@ if __name__ == "__main__":
 #                 / "CONFIG.yaml",  # ../../CONFIGS/CONFIG.yaml
 #                 self.output_dir / "CONFIGS" / "CONFIG.yaml",  # ./CONFIGS/CONFIG.yaml
 #             ]
-# 
+#
 #             config_path = None
 #             for path in possible_paths:
 #                 if path.exists():
 #                     config_path = path
 #                     break
-# 
+#
 #             if config_path and config_path.exists():
 #                 import yaml
-# 
+#
 #                 with open(config_path, "r") as config_file:
 #                     config_data = yaml.safe_load(config_file)
 #                     summary["experiment_configuration"] = config_data
 #         except Exception as e:
 #             logger.warning(f"Could not load CONFIG.yaml: {e}")
-# 
+#
 #         # Save CV summary metrics with proper filenames
 #         self._save_cv_summary_metrics(summary)
-# 
+#
 #         # Save and plot CV summary confusion matrix
 #         self.save_cv_summary_confusion_matrix(summary)
-# 
+#
 #         # Create CV summary ROC and PR curves
 #         self.create_cv_summary_curves(summary)
-# 
+#
 #         # Create CV aggregation visualizations with faded fold lines
 #         self.create_cv_aggregation_visualizations(
 #             show_individual_folds=True, fold_alpha=0.15
 #         )
-# 
+#
 #         # Save CV summary classification report
 #         self._save_cv_summary_classification_report(summary)
-# 
+#
 #         # Generate comprehensive reports in multiple formats
 #         self.generate_reports()
-# 
+#
 #         # Ensure cv_summary directory exists
 #         cv_summary_dir = self._create_subdir_if_needed("cv_summary")
 #         cv_summary_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #         if verbose:
 #             print()
 #             logger.info("Summary:")
 #             pprint(summary)
-# 
+#
 #         # Save summary in cv_summary directory
 #         return self.storage.save(summary, "cv_summary/summary.json")
-# 
+#
 #     def _save_cv_summary_metrics(self, summary: Dict[str, Any]) -> None:
 #         """
 #         Save individual CV summary metrics with mean/std/n_folds in filenames.
 #         """
 #         if "metrics_summary" not in summary:
 #             return
-# 
+#
 #         n_folds = len(self.fold_metrics)
 #         cv_summary_dir = "cv_summary"
-# 
+#
 #         for metric_name, stats in summary["metrics_summary"].items():
 #             if isinstance(stats, dict) and "mean" in stats:
 #                 mean_val = stats.get("mean", 0)
 #                 std_val = stats.get("std", 0)
-# 
+#
 #                 # Create filename with mean_std_n format
 #                 filename = FILENAME_PATTERNS["cv_summary_metric"].format(
 #                     metric_name=metric_name,
@@ -1570,17 +1570,17 @@ if __name__ == "__main__":
 #                     std=std_val,
 #                     n_folds=n_folds,
 #                 )
-# 
+#
 #                 # Save metric statistics
 #                 self.storage.save(stats, f"{cv_summary_dir}/{filename}")
-# 
+#
 #     def _save_cv_summary_classification_report(self, summary: Dict[str, Any]) -> None:
 #         """
 #         Save CV summary classification report with mean ± std (n_folds=X) format.
 #         """
 #         n_folds = len(self.fold_metrics)
 #         cv_summary_dir = "cv_summary"
-# 
+#
 #         # Collect classification reports from all folds
 #         all_reports = []
 #         for fold_num, fold_metrics in self.fold_metrics.items():
@@ -1588,7 +1588,7 @@ if __name__ == "__main__":
 #                 report = fold_metrics["classification_report"]
 #                 if isinstance(report, dict) and "value" in report:
 #                     report = report["value"]
-# 
+#
 #                 # Convert DataFrame to dict if needed
 #                 if isinstance(report, pd.DataFrame):
 #                     # Convert DataFrame to dict format expected by aggregation
@@ -1606,16 +1606,16 @@ if __name__ == "__main__":
 #                     else:
 #                         # DataFrame with class names as index
 #                         report = report.to_dict("index")
-# 
+#
 #                 if isinstance(report, dict):
 #                     all_reports.append(report)
-# 
+#
 #         if not all_reports:
 #             return
-# 
+#
 #         # Calculate mean and std for each metric in the classification report
 #         summary_report = {}
-# 
+#
 #         # Get all class labels (excluding summary rows)
 #         all_classes = set()
 #         for report in all_reports:
@@ -1626,7 +1626,7 @@ if __name__ == "__main__":
 #                     if k not in ["accuracy", "macro avg", "weighted avg"]
 #                 ]
 #             )
-# 
+#
 #         # Process each class
 #         for cls in sorted(all_classes):
 #             cls_metrics = {
@@ -1635,7 +1635,7 @@ if __name__ == "__main__":
 #                 "f1-score": [],
 #                 "support": [],
 #             }
-# 
+#
 #             for report in all_reports:
 #                 if cls in report:
 #                     for metric in [
@@ -1646,7 +1646,7 @@ if __name__ == "__main__":
 #                     ]:
 #                         if metric in report[cls]:
 #                             cls_metrics[metric].append(report[cls][metric])
-# 
+#
 #             summary_report[cls] = {}
 #             for metric, values in cls_metrics.items():
 #                 if values:
@@ -1671,17 +1671,17 @@ if __name__ == "__main__":
 #                         summary_report[cls][metric] = (
 #                             f"{mean_val:.3f} ± {std_val:.3f} (n={n_folds})"
 #                         )
-# 
+#
 #         # Process summary rows (macro avg, weighted avg)
 #         for avg_type in ["macro avg", "weighted avg"]:
 #             avg_metrics = {"precision": [], "recall": [], "f1-score": []}
-# 
+#
 #             for report in all_reports:
 #                 if avg_type in report:
 #                     for metric in ["precision", "recall", "f1-score"]:
 #                         if metric in report[avg_type]:
 #                             avg_metrics[metric].append(report[avg_type][metric])
-# 
+#
 #             if any(avg_metrics.values()):
 #                 summary_report[avg_type] = {}
 #                 for metric, values in avg_metrics.items():
@@ -1691,14 +1691,14 @@ if __name__ == "__main__":
 #                         summary_report[avg_type][metric] = (
 #                             f"{mean_val:.3f} ± {std_val:.3f} (n={n_folds})"
 #                         )
-# 
+#
 #         # Convert to DataFrame for better visualization
 #         if summary_report:
 #             report_df = pd.DataFrame(summary_report).T
 #             # Reset index to make it an ordinary column with name
 #             report_df = report_df.reset_index()
 #             report_df = report_df.rename(columns={"index": "class"})
-# 
+#
 #             # Save as CSV
 #             filename = FILENAME_PATTERNS["cv_summary_classification_report"].format(
 #                 n_folds=n_folds
@@ -1707,7 +1707,7 @@ if __name__ == "__main__":
 #                 report_df,
 #                 f"{cv_summary_dir}/{filename}",
 #             )
-# 
+#
 #     def save(
 #         self,
 #         data: Any,
@@ -1716,7 +1716,7 @@ if __name__ == "__main__":
 #     ) -> Path:
 #         """
 #         Save custom data with automatic fold organization and filename prefixing.
-# 
+#
 #         Parameters
 #         ----------
 #         data : Any
@@ -1728,12 +1728,12 @@ if __name__ == "__main__":
 #         fold : Optional[int], default None
 #             If provided, automatically prepends "fold_{fold:02d}/" to the path
 #             and adds "fold-{fold:02d}_" prefix to the filename
-# 
+#
 #         Returns
 #         -------
 #         Path
 #             Absolute path to the saved file
-# 
+#
 #         Examples
 #         --------
 #         >>> # Save custom metrics for fold 0 (automatic fold directory and prefix)
@@ -1742,13 +1742,13 @@ if __name__ == "__main__":
 #         ...     "custom_metrics.json",
 #         ...     fold=0
 #         ... )  # Saves to: fold_00/fold-00_custom_metrics.json
-# 
+#
 #         >>> # Save to cv_summary (no fold, no prefix)
 #         >>> reporter.save(
 #         ...     df_results,
 #         ...     "cv_summary/final_analysis.csv"
 #         ... )
-# 
+#
 #         >>> # Save to reports directory
 #         >>> reporter.save(
 #         ...     report_content,
@@ -1761,12 +1761,12 @@ if __name__ == "__main__":
 #             path_obj = Path(relative_path)
 #             filename = path_obj.name
 #             parent = path_obj.parent
-# 
+#
 #             # Add fold prefix to filename (e.g., "fold-00_custom_metrics.json")
 #             prefixed_filename = (
 #                 f"{FOLD_FILE_PREFIX_PATTERN.format(fold=fold)}_{filename}"
 #             )
-# 
+#
 #             # Construct full path: fold_00/fold-00_filename.ext
 #             if parent and str(parent) != ".":
 #                 relative_path = f"{FOLD_DIR_PREFIX_PATTERN.format(fold=fold)}/{parent}/{prefixed_filename}"
@@ -1774,10 +1774,10 @@ if __name__ == "__main__":
 #                 relative_path = (
 #                     f"{FOLD_DIR_PREFIX_PATTERN.format(fold=fold)}/{prefixed_filename}"
 #                 )
-# 
+#
 #         # Use the existing storage.save method which already handles everything
 #         return self.storage.save(data, relative_path)
-# 
+#
 #     def __repr__(self) -> str:
 #         fold_count = len(self.fold_metrics)
 #         return (
@@ -1785,8 +1785,8 @@ if __name__ == "__main__":
 #             f"folds={fold_count}, "
 #             f"output_dir='{self.output_dir}')"
 #         )
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

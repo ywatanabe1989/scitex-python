@@ -8,6 +8,7 @@ THIS_FILE = (
 )
 
 from typing import Any, Dict, List, Union
+
 import psycopg2
 
 

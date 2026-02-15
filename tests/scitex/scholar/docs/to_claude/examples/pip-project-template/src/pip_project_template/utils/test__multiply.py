@@ -23,19 +23,19 @@ if __name__ == "__main__":
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # """Multiply function."""
-# 
-# 
+#
+#
 # def multiply(a: float, b: float) -> float:
 #     return a * b
-# 
-# 
+#
+#
 # def main():
 #     print(f"4 * 5 = {multiply(4, 5)}")
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     main()
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

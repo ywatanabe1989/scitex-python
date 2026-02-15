@@ -9,20 +9,20 @@ from pathlib import Path
 
 def fix_cell_11_indentation(notebook_path):
     """Fix the specific indentation error in cell 11."""
-    
+
     with open(notebook_path, 'r') as f:
         notebook = json.load(f)
-    
+
     # Find and fix the problematic cell
     for i, cell in enumerate(notebook.get('cells', [])):
         if cell.get('cell_type') == 'code':
             source = cell.get('source', [])
             source_text = ''.join(source) if isinstance(source, list) else source
-            
+
             # Look for the problematic pattern
             if 'for name, arr in arrays.items():' in source_text and 'dim_handler = scitex.gen.DimHandler()' in source_text:
                 print(f"Found problematic cell at index {i}")
-                
+
                 # Fix the indentation
                 fixed_source = """# Create test arrays with different dimensions
 array_1d = np.random.randn(100)
@@ -50,14 +50,14 @@ for name, arr in arrays.items():
     print(f"  Shape: {arr.shape}")
     print(f"  Dimensions: {arr.ndim}")
     print(f"  Total elements: {arr.size}")"""
-                
+
                 cell['source'] = fixed_source.split('\n')
                 break
-    
+
     # Save the fixed notebook
     with open(notebook_path, 'w') as f:
         json.dump(notebook, f, indent=2)
-    
+
     print("Fixed indentation issue in 02_scitex_gen.ipynb")
 
 

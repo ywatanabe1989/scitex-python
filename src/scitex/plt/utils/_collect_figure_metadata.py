@@ -13,7 +13,7 @@ figures self-documenting and reproducible.
 
 __FILE__ = __file__
 
-from typing import Dict, Optional, Union, List
+from typing import Dict, List, Optional, Union
 
 from scitex import logging
 
@@ -21,11 +21,11 @@ logger = logging.getLogger(__name__)
 
 # Precision settings for JSON output
 PRECISION = {
-    "mm": 2,      # Millimeters: 0.01mm precision (10 microns)
-    "inch": 3,    # Inches: 0.001 inch precision
-    "position": 3, # Normalized position: 0.001 precision
-    "lim": 2,     # Axis limits: 2 decimal places
-    "linewidth": 2, # Line widths: 0.01 precision
+    "mm": 2,  # Millimeters: 0.01mm precision (10 microns)
+    "inch": 3,  # Inches: 0.001 inch precision
+    "position": 3,  # Normalized position: 0.001 precision
+    "lim": 2,  # Axis limits: 2 decimal places
+    "linewidth": 2,  # Line widths: 0.01 precision
 }
 
 
@@ -35,6 +35,7 @@ class FixedFloat:
 
     Example: FixedFloat(0.25, 3) -> "0.250" in JSON
     """
+
     def __init__(self, value: float, precision: int):
         self.value = round(value, precision)
         self.precision = precision
@@ -46,7 +47,9 @@ class FixedFloat:
         return self.value
 
 
-def _round_value(value: Union[float, int], precision: int, fixed: bool = False) -> Union[float, int, "FixedFloat"]:
+def _round_value(
+    value: Union[float, int], precision: int, fixed: bool = False
+) -> Union[float, int, "FixedFloat"]:
     """
     Round a single value to specified precision.
 
@@ -163,7 +166,10 @@ def _collect_single_axes_metadata(fig, ax, ax_index: int) -> dict:
             ax_metadata["bounds_figure_fraction"] = list(dim_info["axes_position"])
 
         # Position in grid (row, col)
-        if hasattr(ax, "_scitex_metadata") and "position_in_grid" in ax._scitex_metadata:
+        if (
+            hasattr(ax, "_scitex_metadata")
+            and "position_in_grid" in ax._scitex_metadata
+        ):
             ax_metadata["position_in_grid"] = ax._scitex_metadata["position_in_grid"]
         else:
             # Calculate from ax_index if we have grid info
@@ -368,6 +374,7 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
     import uuid
 
     import matplotlib
+
     import scitex
 
     # Base metadata with cleaner structure:
@@ -397,6 +404,7 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
         # Handle AxesWrapper (multi-axes) - extract individual AxisWrappers with positions
         if hasattr(ax, "_axes_scitex"):
             import numpy as np
+
             axes_array = ax._axes_scitex
             if isinstance(axes_array, np.ndarray):
                 grid_shape = axes_array.shape
@@ -457,7 +465,9 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
             ax_key = f"ax_{row}{col}"
             try:
                 ax_mpl = _unwrap_ax(ax_item)
-                ax_metadata = _collect_single_axes_metadata(fig, ax_mpl, row * grid_shape[1] + col)
+                ax_metadata = _collect_single_axes_metadata(
+                    fig, ax_mpl, row * grid_shape[1] + col
+                )
                 if ax_metadata:
                     # Add grid position info
                     ax_metadata["grid_position"] = {"row": row, "col": col}
@@ -560,6 +570,7 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
         # Handle AxesWrapper (multi-axes) - use first axis for primary plot info
         if hasattr(ax, "_axes_scitex"):
             import numpy as np
+
             axes_array = ax._axes_scitex
             if isinstance(axes_array, np.ndarray) and axes_array.size > 0:
                 primary_ax = axes_array.flat[0]
@@ -573,22 +584,26 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
             ax_for_history = primary_ax
 
             # If ax is a raw matplotlib axes, try to find the scitex wrapper
-            if not hasattr(primary_ax, 'history'):
+            if not hasattr(primary_ax, "history"):
                 # Check if primary_ax has a scitex wrapper stored on it
-                if hasattr(primary_ax, '_scitex_wrapper'):
+                if hasattr(primary_ax, "_scitex_wrapper"):
                     ax_for_history = primary_ax._scitex_wrapper
                 # Check if figure has scitex axes reference
-                elif hasattr(fig, 'axes') and hasattr(fig.axes, 'history'):
+                elif hasattr(fig, "axes") and hasattr(fig.axes, "history"):
                     ax_for_history = fig.axes
                 # Check for FigWrapper's axes attribute
-                elif hasattr(fig, '_fig_scitex') and hasattr(fig._fig_scitex, 'axes'):
+                elif hasattr(fig, "_fig_scitex") and hasattr(fig._fig_scitex, "axes"):
                     ax_for_history = fig._fig_scitex.axes
                 # Check if the figure object itself has scitex_axes
-                elif hasattr(fig, '_scitex_axes'):
+                elif hasattr(fig, "_scitex_axes"):
                     ax_for_history = fig._scitex_axes
 
             # Add n_ticks to axes metadata if available from style
-            if "style" in metadata and "ticks" in metadata["style"] and "n_ticks" in metadata["style"]["ticks"]:
+            if (
+                "style" in metadata
+                and "ticks" in metadata["style"]
+                and "n_ticks" in metadata["style"]["ticks"]
+            ):
                 n_ticks = metadata["style"]["ticks"]["n_ticks"]
                 # Add n_ticks to each axes' axis info
                 if "axes" in metadata:
@@ -605,14 +620,23 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
             # Add ax_id to match the axes key in metadata["axes"]
             # This links plot info to the corresponding axes entry
             ax_row, ax_col = 0, 0  # Default for single axes
-            if hasattr(primary_ax, "_scitex_metadata") and "position_in_grid" in primary_ax._scitex_metadata:
+            if (
+                hasattr(primary_ax, "_scitex_metadata")
+                and "position_in_grid" in primary_ax._scitex_metadata
+            ):
                 pos = primary_ax._scitex_metadata["position_in_grid"]
                 ax_row, ax_col = pos[0], pos[1]
             # Use same format as axes keys: ax_00, ax_01, etc.
-            plot_info["ax_id"] = f"ax_{ax_row:02d}" if ax_row == ax_col == 0 else f"ax_{ax_row * 10 + ax_col:02d}"
+            plot_info["ax_id"] = (
+                f"ax_{ax_row:02d}"
+                if ax_row == ax_col == 0
+                else f"ax_{ax_row * 10 + ax_col:02d}"
+            )
 
             # Extract title - use underlying matplotlib axes if needed
-            ax_mpl = primary_ax._axis_mpl if hasattr(primary_ax, '_axis_mpl') else primary_ax
+            ax_mpl = (
+                primary_ax._axis_mpl if hasattr(primary_ax, "_axis_mpl") else primary_ax
+            )
             title = ax_mpl.get_title()
             if title:
                 plot_info["title"] = title
@@ -632,7 +656,9 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
             ):
                 if "style" not in metadata:
                     metadata["style"] = {}
-                metadata["style"]["preset"] = primary_ax._scitex_metadata["style_preset"]
+                metadata["style"]["preset"] = primary_ax._scitex_metadata[
+                    "style_preset"
+                ]
             elif (
                 hasattr(fig, "_scitex_metadata")
                 and "style_preset" in fig._scitex_metadata
@@ -644,10 +670,17 @@ def collect_figure_metadata(fig, ax=None) -> Dict:
             # Extract artists and legend - add to axes section (matplotlib terminology)
             # Artists and legend belong to axes, not a separate plot section
             ax_row, ax_col = 0, 0
-            if hasattr(primary_ax, "_scitex_metadata") and "position_in_grid" in primary_ax._scitex_metadata:
+            if (
+                hasattr(primary_ax, "_scitex_metadata")
+                and "position_in_grid" in primary_ax._scitex_metadata
+            ):
                 pos = primary_ax._scitex_metadata["position_in_grid"]
                 ax_row, ax_col = pos[0], pos[1]
-            ax_key = f"ax_{ax_row:02d}" if ax_row == ax_col == 0 else f"ax_{ax_row * 10 + ax_col:02d}"
+            ax_key = (
+                f"ax_{ax_row:02d}"
+                if ax_row == ax_col == 0
+                else f"ax_{ax_row * 10 + ax_col:02d}"
+            )
 
             if "axes" in metadata and ax_key in metadata["axes"]:
                 # Add artists to axes
@@ -790,16 +823,28 @@ def _round_single_axes_data(ax_data: dict) -> dict:
             result[key] = [int(v) for v in value]
         elif key == "margins_mm":
             # Fixed 2 decimals: {"left": 20.00, ...}
-            result[key] = {k: _round_value(v, PRECISION["mm"], fixed=True) for k, v in value.items()}
+            result[key] = {
+                k: _round_value(v, PRECISION["mm"], fixed=True)
+                for k, v in value.items()
+            }
         elif key == "margins_inch":
             # Fixed 3 decimals: {"left": 0.787, ...}
-            result[key] = {k: _round_value(v, PRECISION["inch"], fixed=True) for k, v in value.items()}
+            result[key] = {
+                k: _round_value(v, PRECISION["inch"], fixed=True)
+                for k, v in value.items()
+            }
         elif key == "bbox_mm":
             # Fixed 2 decimals
-            result[key] = {k: _round_value(v, PRECISION["mm"], fixed=True) for k, v in value.items()}
+            result[key] = {
+                k: _round_value(v, PRECISION["mm"], fixed=True)
+                for k, v in value.items()
+            }
         elif key == "bbox_inch":
             # Fixed 3 decimals
-            result[key] = {k: _round_value(v, PRECISION["inch"], fixed=True) for k, v in value.items()}
+            result[key] = {
+                k: _round_value(v, PRECISION["inch"], fixed=True)
+                for k, v in value.items()
+            }
         elif key == "bbox_px":
             result[key] = {k: int(v) for k, v in value.items()}
         elif key in ("xaxis", "yaxis", "xaxis_top", "yaxis_right"):
@@ -842,7 +887,9 @@ def _round_style_section(style_data: dict) -> dict:
             result[scope] = {}
             for category, category_data in scope_data.items():
                 if isinstance(category_data, dict):
-                    result[scope][category] = _round_style_subsection(category, category_data)
+                    result[scope][category] = _round_style_subsection(
+                        category, category_data
+                    )
                 else:
                     result[scope][category] = category_data
         elif isinstance(scope_data, dict):
@@ -905,7 +952,9 @@ def _round_artist(artist: dict) -> dict:
             for sk, sv in value.items():
                 if sk in ("linewidth_pt", "markersize_pt"):
                     # Fixed 2 decimals: 0.57
-                    style_result[sk] = _round_value(sv, PRECISION["linewidth"], fixed=True)
+                    style_result[sk] = _round_value(
+                        sv, PRECISION["linewidth"], fixed=True
+                    )
                 else:
                     style_result[sk] = sv
             result[key] = style_result
@@ -919,7 +968,9 @@ def _round_artist(artist: dict) -> dict:
                 for pk, pv in value["props"].items():
                     if pk in ("linewidth_pt", "markersize_pt"):
                         # Fixed 2 decimals: 0.57
-                        props_result[pk] = _round_value(pv, PRECISION["linewidth"], fixed=True)
+                        props_result[pk] = _round_value(
+                            pv, PRECISION["linewidth"], fixed=True
+                        )
                     elif pk == "size":
                         # Scatter size: 1 decimal
                         props_result[pk] = _round_value(pv, 1, fixed=True)
@@ -985,7 +1036,9 @@ def _parse_label_unit(label_text: str) -> tuple:
     return label_text.strip(), ""
 
 
-def _get_csv_column_names(trace_id: str, ax_row: int = 0, ax_col: int = 0, variables: list = None) -> dict:
+def _get_csv_column_names(
+    trace_id: str, ax_row: int = 0, ax_col: int = 0, variables: list = None
+) -> dict:
     """
     Get CSV column names using the single source of truth naming convention.
 
@@ -1058,7 +1111,7 @@ def _extract_artists(ax) -> list:
 
     # Try to find scitex wrapper for plot type detection and history access
     ax_for_detection = ax
-    if not hasattr(ax, 'history') and hasattr(mpl_ax, '_scitex_wrapper'):
+    if not hasattr(ax, "history") and hasattr(mpl_ax, "_scitex_wrapper"):
         ax_for_detection = mpl_ax._scitex_wrapper
 
     # Check if we should filter to only tracked artists
@@ -1073,8 +1126,21 @@ def _extract_artists(ax) -> list:
     # NOTE: scatter is NOT included here because scatter plots often have
     # regression lines that should be exported
     internal_plot_types = {
-        "boxplot", "violin", "hist", "bar", "image", "heatmap", "kde", "ecdf",
-        "errorbar", "fill", "stem", "contour", "pie", "quiver", "stream"
+        "boxplot",
+        "violin",
+        "hist",
+        "bar",
+        "image",
+        "heatmap",
+        "kde",
+        "ecdf",
+        "errorbar",
+        "fill",
+        "stem",
+        "contour",
+        "pie",
+        "quiver",
+        "stream",
     }
 
     skip_unlabeled = plot_type in internal_plot_types
@@ -1108,9 +1174,11 @@ def _extract_artists(ax) -> list:
                     args = tracked_dict.get("args", [])
                     if args and len(args) > 0:
                         data = args[0]
-                        if hasattr(data, '__len__') and not isinstance(data, str):
+                        if hasattr(data, "__len__") and not isinstance(data, str):
                             # Check if it's list of arrays or single array
-                            if hasattr(data[0], '__len__') and not isinstance(data[0], str):
+                            if hasattr(data[0], "__len__") and not isinstance(
+                                data[0], str
+                            ):
                                 num_boxes = len(data)
                                 boxplot_data = data
                             else:
@@ -1121,6 +1189,7 @@ def _extract_artists(ax) -> list:
     # Compute boxplot statistics
     if boxplot_data is not None:
         import numpy as np
+
         for box_idx, box_data in enumerate(boxplot_data):
             try:
                 arr = np.asarray(box_data)
@@ -1134,16 +1203,18 @@ def _extract_artists(ax) -> list:
                     whisker_high = float(min(arr.max(), q3 + 1.5 * iqr))
                     # Fliers are points outside whiskers
                     fliers = arr[(arr < whisker_low) | (arr > whisker_high)]
-                    boxplot_stats.append({
-                        "box_index": box_idx,
-                        "median": median,
-                        "q1": q1,
-                        "q3": q3,
-                        "whisker_low": whisker_low,
-                        "whisker_high": whisker_high,
-                        "n_fliers": int(len(fliers)),
-                        "n_samples": int(len(arr)),
-                    })
+                    boxplot_stats.append(
+                        {
+                            "box_index": box_idx,
+                            "median": median,
+                            "q1": q1,
+                            "q3": q3,
+                            "whisker_low": whisker_low,
+                            "whisker_high": whisker_high,
+                            "n_fliers": int(len(fliers)),
+                            "n_samples": int(len(arr)),
+                        }
+                    )
             except (ValueError, TypeError):
                 pass
 
@@ -1279,7 +1350,7 @@ def _extract_artists(ax) -> list:
         backend = {
             "name": "matplotlib",
             "artist_class": type(line).__name__,  # e.g., "Line2D"
-            "props": {}
+            "props": {},
         }
 
         # Color - always convert to hex for consistent JSON storage
@@ -1337,7 +1408,11 @@ def _extract_artists(ax) -> list:
                                     elif len(parts) == 4:
                                         trace_id_for_ref = parts[3]
                                 elif tracking_id.startswith("plot_"):
-                                    trace_id_for_ref = tracking_id[5:] if len(tracking_id) > 5 else str(i)
+                                    trace_id_for_ref = (
+                                        tracking_id[5:]
+                                        if len(tracking_id) > 5
+                                        else str(i)
+                                    )
                                 else:
                                     # User-provided ID like "sine"
                                     trace_id_for_ref = tracking_id
@@ -1413,20 +1488,24 @@ def _extract_artists(ax) -> list:
         backend = {
             "name": "matplotlib",
             "artist_class": type(coll).__name__,  # "PathCollection"
-            "props": {}
+            "props": {},
         }
 
         try:
             facecolors = coll.get_facecolor()
             if len(facecolors) > 0:
-                backend["props"]["facecolor"] = mcolors.to_hex(facecolors[0], keep_alpha=False)
+                backend["props"]["facecolor"] = mcolors.to_hex(
+                    facecolors[0], keep_alpha=False
+                )
         except (ValueError, TypeError, IndexError):
             pass
 
         try:
             edgecolors = coll.get_edgecolor()
             if len(edgecolors) > 0:
-                backend["props"]["edgecolor"] = mcolors.to_hex(edgecolors[0], keep_alpha=False)
+                backend["props"]["edgecolor"] = mcolors.to_hex(
+                    edgecolors[0], keep_alpha=False
+                )
         except (ValueError, TypeError, IndexError):
             pass
 
@@ -1478,13 +1557,19 @@ def _extract_artists(ax) -> list:
 
         # For bar/hist, we want ALL rectangles even if unlabeled
         if not (is_bar or is_hist):
-            if skip_unlabeled and not scitex_id and (not label or label.startswith("_")):
+            if (
+                skip_unlabeled
+                and not scitex_id
+                and (not label or label.startswith("_"))
+            ):
                 continue
 
         artist = {}
 
         # Generate unique ID with index
-        base_id = scitex_id or (label if label and not label.startswith("_") else trace_id_for_bars or "bar")
+        base_id = scitex_id or (
+            label if label and not label.startswith("_") else trace_id_for_bars or "bar"
+        )
         artist["id"] = f"{base_id}_{bar_count}"
 
         # Add group_id for referencing the whole group
@@ -1507,18 +1592,18 @@ def _extract_artists(ax) -> list:
         artist["zorder"] = patch.get_zorder()
 
         # Backend layer: matplotlib-specific properties
-        backend = {
-            "name": "matplotlib",
-            "artist_class": patch_type,
-            "props": {}
-        }
+        backend = {"name": "matplotlib", "artist_class": patch_type, "props": {}}
 
         try:
-            backend["props"]["facecolor"] = mcolors.to_hex(patch.get_facecolor(), keep_alpha=False)
+            backend["props"]["facecolor"] = mcolors.to_hex(
+                patch.get_facecolor(), keep_alpha=False
+            )
         except (ValueError, TypeError):
             pass
         try:
-            backend["props"]["edgecolor"] = mcolors.to_hex(patch.get_edgecolor(), keep_alpha=False)
+            backend["props"]["edgecolor"] = mcolors.to_hex(
+                patch.get_edgecolor(), keep_alpha=False
+            )
         except (ValueError, TypeError):
             pass
         try:
@@ -1551,7 +1636,9 @@ def _extract_artists(ax) -> list:
                     "bin_index": bar_count,
                 }
             else:
-                artist["data_ref"] = _get_csv_column_names(trace_id_for_bars, ax_row, ax_col)
+                artist["data_ref"] = _get_csv_column_names(
+                    trace_id_for_bars, ax_row, ax_col
+                )
                 artist["data_ref"]["row_index"] = bar_count
 
         bar_count += 1
@@ -1591,13 +1678,11 @@ def _extract_artists(ax) -> list:
         artist["zorder"] = patch.get_zorder()
 
         # Backend layer
-        backend = {
-            "name": "matplotlib",
-            "artist_class": patch_type,
-            "props": {}
-        }
+        backend = {"name": "matplotlib", "artist_class": patch_type, "props": {}}
         try:
-            backend["props"]["facecolor"] = mcolors.to_hex(patch.get_facecolor(), keep_alpha=False)
+            backend["props"]["facecolor"] = mcolors.to_hex(
+                patch.get_facecolor(), keep_alpha=False
+            )
         except (ValueError, TypeError):
             pass
 
@@ -1633,11 +1718,7 @@ def _extract_artists(ax) -> list:
             artist["zorder"] = coll.get_zorder()
 
             # Backend layer
-            backend = {
-                "name": "matplotlib",
-                "artist_class": coll_type,
-                "props": {}
-            }
+            backend = {"name": "matplotlib", "artist_class": coll_type, "props": {}}
             try:
                 cmap = coll.get_cmap()
                 if cmap:
@@ -1658,6 +1739,7 @@ def _extract_artists(ax) -> list:
                 arr = coll.get_array()
                 if arr is not None and len(arr) > 0:
                     import numpy as np
+
                     # QuadMesh from hist2d has counts as flattened array
                     # Try to get coordinates from the mesh
                     coords = coll.get_coordinates()
@@ -1684,7 +1766,9 @@ def _extract_artists(ax) -> list:
 
             artists.append(artist)
 
-        elif coll_type == "PolyCollection" or (coll_type == "FillBetweenPolyCollection" and plot_type == "violin"):
+        elif coll_type == "PolyCollection" or (
+            coll_type == "FillBetweenPolyCollection" and plot_type == "violin"
+        ):
             arr = coll.get_array() if hasattr(coll, "get_array") else None
 
             # Check if this is hexbin (has array data for counts) or violin body
@@ -1700,11 +1784,7 @@ def _extract_artists(ax) -> list:
                 artist["zorder"] = coll.get_zorder()
 
                 # Backend layer
-                backend = {
-                    "name": "matplotlib",
-                    "artist_class": coll_type,
-                    "props": {}
-                }
+                backend = {"name": "matplotlib", "artist_class": coll_type, "props": {}}
                 try:
                     cmap = coll.get_cmap()
                     if cmap:
@@ -1712,8 +1792,12 @@ def _extract_artists(ax) -> list:
                 except (ValueError, TypeError, AttributeError):
                     pass
                 try:
-                    backend["props"]["vmin"] = float(coll.norm.vmin) if coll.norm else None
-                    backend["props"]["vmax"] = float(coll.norm.vmax) if coll.norm else None
+                    backend["props"]["vmin"] = (
+                        float(coll.norm.vmin) if coll.norm else None
+                    )
+                    backend["props"]["vmax"] = (
+                        float(coll.norm.vmax) if coll.norm else None
+                    )
                 except (ValueError, TypeError, AttributeError):
                     pass
 
@@ -1723,7 +1807,11 @@ def _extract_artists(ax) -> list:
                 try:
                     artist["result"] = {
                         "n_hexagons": int(len(arr)),
-                        "count_range": [float(arr.min()), float(arr.max())] if len(arr) > 0 else None,
+                        "count_range": (
+                            [float(arr.min()), float(arr.max())]
+                            if len(arr) > 0
+                            else None
+                        ),
                         "total_count": int(arr.sum()),
                     }
                 except (TypeError, AttributeError, ValueError):
@@ -1751,21 +1839,21 @@ def _extract_artists(ax) -> list:
                 artist["zorder"] = coll.get_zorder()
 
                 # Backend layer
-                backend = {
-                    "name": "matplotlib",
-                    "artist_class": coll_type,
-                    "props": {}
-                }
+                backend = {"name": "matplotlib", "artist_class": coll_type, "props": {}}
                 try:
                     facecolors = coll.get_facecolor()
                     if len(facecolors) > 0:
-                        backend["props"]["facecolor"] = mcolors.to_hex(facecolors[0], keep_alpha=False)
+                        backend["props"]["facecolor"] = mcolors.to_hex(
+                            facecolors[0], keep_alpha=False
+                        )
                 except (ValueError, TypeError, IndexError):
                     pass
                 try:
                     edgecolors = coll.get_edgecolor()
                     if len(edgecolors) > 0:
-                        backend["props"]["edgecolor"] = mcolors.to_hex(edgecolors[0], keep_alpha=False)
+                        backend["props"]["edgecolor"] = mcolors.to_hex(
+                            edgecolors[0], keep_alpha=False
+                        )
                 except (ValueError, TypeError, IndexError):
                     pass
 
@@ -1796,11 +1884,7 @@ def _extract_artists(ax) -> list:
         artist["zorder"] = img.get_zorder()
 
         # Backend layer
-        backend = {
-            "name": "matplotlib",
-            "artist_class": img_type,
-            "props": {}
-        }
+        backend = {"name": "matplotlib", "artist_class": img_type, "props": {}}
         try:
             cmap = img.get_cmap()
             if cmap:
@@ -1842,7 +1926,7 @@ def _extract_artists(ax) -> list:
         # Try to determine role from content or position
         pos = text_obj.get_position()
         # Check if this looks like stats annotation (contains r=, p=, etc.)
-        if any(kw in text_content.lower() for kw in ['r=', 'p=', 'r²=', 'n=']):
+        if any(kw in text_content.lower() for kw in ["r=", "p=", "r²=", "n="]):
             artist["role"] = "stats_annotation"
         else:
             artist["role"] = "annotation"
@@ -1863,7 +1947,7 @@ def _extract_artists(ax) -> list:
         backend = {
             "name": "matplotlib",
             "artist_class": type(text_obj).__name__,
-            "props": {}
+            "props": {},
         }
 
         try:
@@ -1891,7 +1975,7 @@ def _extract_artists(ax) -> list:
             artist["data_ref"] = {
                 "x": f"text_{text_count}_x",
                 "y": f"text_{text_count}_y",
-                "content": f"text_{text_count}_content"
+                "content": f"text_{text_count}_content",
             }
 
         text_count += 1
@@ -1930,16 +2014,14 @@ def _extract_artists(ax) -> list:
             artist["zorder"] = coll.get_zorder()
 
             # Backend layer
-            backend = {
-                "name": "matplotlib",
-                "artist_class": coll_type,
-                "props": {}
-            }
+            backend = {"name": "matplotlib", "artist_class": coll_type, "props": {}}
 
             try:
                 colors = coll.get_colors()
                 if len(colors) > 0:
-                    backend["props"]["color"] = mcolors.to_hex(colors[0], keep_alpha=False)
+                    backend["props"]["color"] = mcolors.to_hex(
+                        colors[0], keep_alpha=False
+                    )
             except (ValueError, TypeError, IndexError):
                 pass
 
@@ -1969,7 +2051,7 @@ def _extract_artists(ax) -> list:
                     artist["data_ref"] = {
                         "x": base_ref.get("x"),
                         "y": base_ref.get("y"),
-                        error_var: f"ax-row-{ax_row}-col-{ax_col}_trace-id-{errorbar_trace_id}_variable-{error_var}"
+                        error_var: f"ax-row-{ax_row}-col-{ax_col}_trace-id-{errorbar_trace_id}_variable-{error_var}",
                     }
             elif artist["role"] == "stem_stem" and hasattr(ax_for_detection, "history"):
                 # Add data_ref for stem LineCollection
@@ -1978,7 +2060,9 @@ def _extract_artists(ax) -> list:
                         method_name = record[1]
                         if method_name == "stem":
                             stem_trace_id = record[0]
-                            artist["data_ref"] = _get_csv_column_names(stem_trace_id, ax_row, ax_col)
+                            artist["data_ref"] = _get_csv_column_names(
+                                stem_trace_id, ax_row, ax_col
+                            )
                             break
 
             artists.append(artist)
@@ -2026,7 +2110,7 @@ def _extract_legend_info(ax) -> Optional[dict]:
     # This allows reconstructing the legend by referencing artists
     handles = []
     texts = legend.get_texts()
-    legend_handles = legend.legend_handles if hasattr(legend, 'legend_handles') else []
+    legend_handles = legend.legend_handles if hasattr(legend, "legend_handles") else []
 
     # Get the raw matplotlib axes for accessing lines to match IDs
     mpl_ax = ax._axis_mpl if hasattr(ax, "_axis_mpl") else ax
@@ -2321,11 +2405,13 @@ def _extract_csv_columns_from_history(ax) -> list:
         )
 
         if columns:
-            csv_columns_list.append({
-                "id": id_val,
-                "method": method,
-                "columns": columns,
-            })
+            csv_columns_list.append(
+                {
+                    "id": id_val,
+                    "method": method,
+                    "columns": columns,
+                }
+            )
 
     return csv_columns_list
 
@@ -2561,7 +2647,9 @@ def _compute_csv_hash(ax_or_df) -> Optional[str]:
         return None
 
 
-def _get_csv_columns_for_method(id_val, method, tracked_dict, kwargs, ax_index: int) -> list:
+def _get_csv_columns_for_method(
+    id_val, method, tracked_dict, kwargs, ax_index: int
+) -> list:
     """
     Get CSV column names for a specific plotting method.
 
@@ -2594,8 +2682,9 @@ def _get_csv_columns_for_method(id_val, method, tracked_dict, kwargs, ax_index: 
     # Import the actual formatters to ensure consistency
     # This is the single source of truth - we use the same code path as CSV export
     try:
-        from scitex.plt._subplots._export_as_csv import format_record
         import pandas as pd
+
+        from scitex.plt._subplots._export_as_csv import format_record
 
         # Construct the record tuple as used in tracking
         record = (id_val, method, tracked_dict, kwargs)
@@ -2637,7 +2726,9 @@ def _get_csv_columns_for_method(id_val, method, tracked_dict, kwargs, ax_index: 
 
             from scitex.types import is_listed_X as scitex_types_is_listed_X
 
-            if isinstance(data, np.ndarray) or scitex_types_is_listed_X(data, [float, int]):
+            if isinstance(data, np.ndarray) or scitex_types_is_listed_X(
+                data, [float, int]
+            ):
                 # Single box
                 if labels and len(labels) == 1:
                     columns.append(f"{prefix}{id_val}_{labels[0]}")
@@ -2767,18 +2858,22 @@ def assert_csv_json_consistency(csv_path: str, json_path: str = None) -> None:
     """
     result = verify_csv_json_consistency(csv_path, json_path)
 
-    if result['errors']:
-        raise FileNotFoundError('\n'.join(result['errors']))
+    if result["errors"]:
+        raise FileNotFoundError("\n".join(result["errors"]))
 
-    if not result['valid']:
+    if not result["valid"]:
         msg_parts = ["CSV/JSON consistency check failed:"]
-        if result['missing_in_csv']:
-            msg_parts.append(f"  columns_actual missing in CSV: {result['missing_in_csv']}")
-        if result['extra_in_csv']:
+        if result["missing_in_csv"]:
+            msg_parts.append(
+                f"  columns_actual missing in CSV: {result['missing_in_csv']}"
+            )
+        if result["extra_in_csv"]:
             msg_parts.append(f"  Extra columns in CSV: {result['extra_in_csv']}")
-        if result.get('data_ref_missing'):
-            msg_parts.append(f"  data_ref columns missing in CSV: {result['data_ref_missing']}")
-        raise AssertionError('\n'.join(msg_parts))
+        if result.get("data_ref_missing"):
+            msg_parts.append(
+                f"  data_ref columns missing in CSV: {result['data_ref_missing']}"
+            )
+        raise AssertionError("\n".join(msg_parts))
 
 
 def verify_csv_json_consistency(csv_path: str, json_path: str = None) -> dict:
@@ -2820,88 +2915,89 @@ def verify_csv_json_consistency(csv_path: str, json_path: str = None) -> dict:
     """
     import json
     import os
+
     import pandas as pd
 
     result = {
-        'valid': False,
-        'csv_columns': [],
-        'json_columns': [],
-        'data_ref_columns': [],
-        'missing_in_csv': [],
-        'extra_in_csv': [],
-        'data_ref_missing': [],
-        'errors': [],
+        "valid": False,
+        "csv_columns": [],
+        "json_columns": [],
+        "data_ref_columns": [],
+        "missing_in_csv": [],
+        "extra_in_csv": [],
+        "data_ref_missing": [],
+        "errors": [],
     }
 
     # Determine JSON path
     if json_path is None:
         base, _ = os.path.splitext(csv_path)
-        json_path = base + '.json'
+        json_path = base + ".json"
 
     # Check files exist
     if not os.path.exists(csv_path):
-        result['errors'].append(f"CSV file not found: {csv_path}")
+        result["errors"].append(f"CSV file not found: {csv_path}")
         return result
     if not os.path.exists(json_path):
-        result['errors'].append(f"JSON file not found: {json_path}")
+        result["errors"].append(f"JSON file not found: {json_path}")
         return result
 
     try:
         # Read CSV columns
         df = pd.read_csv(csv_path, nrows=0)  # Just read header
         csv_columns = list(df.columns)
-        result['csv_columns'] = csv_columns
+        result["csv_columns"] = csv_columns
     except Exception as e:
-        result['errors'].append(f"Error reading CSV: {e}")
+        result["errors"].append(f"Error reading CSV: {e}")
         return result
 
     try:
         # Read JSON metadata
-        with open(json_path, 'r') as f:
+        with open(json_path, "r") as f:
             metadata = json.load(f)
 
         # Get columns_actual from data section
         json_columns = []
-        if 'data' in metadata and 'columns_actual' in metadata['data']:
-            json_columns = metadata['data']['columns_actual']
-        result['json_columns'] = json_columns
+        if "data" in metadata and "columns_actual" in metadata["data"]:
+            json_columns = metadata["data"]["columns_actual"]
+        result["json_columns"] = json_columns
 
         # Extract data_ref columns from artists
         # Skip 'derived_from' key as it contains descriptive text, not CSV column names
         # Also skip 'row_index' as it's a numeric index, not a column name
         data_ref_columns = []
-        skip_keys = {'derived_from', 'row_index'}
-        if 'axes' in metadata:
-            for ax_key, ax_data in metadata['axes'].items():
-                if 'artists' in ax_data:
-                    for artist in ax_data['artists']:
-                        if 'data_ref' in artist:
-                            for key, val in artist['data_ref'].items():
+        skip_keys = {"derived_from", "row_index"}
+        if "axes" in metadata:
+            for ax_key, ax_data in metadata["axes"].items():
+                if "artists" in ax_data:
+                    for artist in ax_data["artists"]:
+                        if "data_ref" in artist:
+                            for key, val in artist["data_ref"].items():
                                 if key not in skip_keys and isinstance(val, str):
                                     data_ref_columns.append(val)
-        result['data_ref_columns'] = data_ref_columns
+        result["data_ref_columns"] = data_ref_columns
 
     except Exception as e:
-        result['errors'].append(f"Error reading JSON: {e}")
+        result["errors"].append(f"Error reading JSON: {e}")
         return result
 
     # Compare columns_actual with CSV
     csv_set = set(csv_columns)
     json_set = set(json_columns)
 
-    result['missing_in_csv'] = list(json_set - csv_set)
-    result['extra_in_csv'] = list(csv_set - json_set)
+    result["missing_in_csv"] = list(json_set - csv_set)
+    result["extra_in_csv"] = list(csv_set - json_set)
 
     # Check data_ref columns exist in CSV (if there are any)
     if data_ref_columns:
         data_ref_set = set(data_ref_columns)
-        result['data_ref_missing'] = list(data_ref_set - csv_set)
+        result["data_ref_missing"] = list(data_ref_set - csv_set)
 
     # Valid only if columns_actual matches AND data_ref columns are found in CSV
-    result['valid'] = (
-        len(result['missing_in_csv']) == 0 and
-        len(result['extra_in_csv']) == 0 and
-        len(result['data_ref_missing']) == 0
+    result["valid"] = (
+        len(result["missing_in_csv"]) == 0
+        and len(result["extra_in_csv"]) == 0
+        and len(result["data_ref_missing"]) == 0
     )
 
     return result
@@ -2957,6 +3053,7 @@ def collect_recipe_metadata(
     import uuid
 
     import matplotlib
+
     import scitex
 
     metadata = {
@@ -2978,6 +3075,7 @@ def collect_recipe_metadata(
         # Handle AxesWrapper (multi-axes) - extract individual AxisWrappers with positions
         if hasattr(ax, "_axes_scitex"):
             import numpy as np
+
             axes_array = ax._axes_scitex
             if isinstance(axes_array, np.ndarray):
                 grid_shape = axes_array.shape
@@ -3002,18 +3100,19 @@ def collect_recipe_metadata(
     if all_axes:
         try:
             from ._figure_from_axes_mm import get_dimension_info
+
             first_ax_tuple = all_axes[0]
             first_ax = first_ax_tuple[0]
             # Get underlying matplotlib axis if wrapped
-            mpl_ax = getattr(first_ax, '_axis_mpl', first_ax)
+            mpl_ax = getattr(first_ax, "_axis_mpl", first_ax)
             dim_info = get_dimension_info(fig, mpl_ax)
 
             # Convert to plain lists/floats for JSON serialization
             size_mm = dim_info["figure_size_mm"]
-            if hasattr(size_mm, 'tolist'):
+            if hasattr(size_mm, "tolist"):
                 size_mm = size_mm.tolist()
             elif isinstance(size_mm, (list, tuple)):
-                size_mm = [float(v) if hasattr(v, 'value') else v for v in size_mm]
+                size_mm = [float(v) if hasattr(v, "value") else v for v in size_mm]
 
             metadata["figure"] = {
                 "size_mm": size_mm,
@@ -3071,11 +3170,9 @@ def collect_recipe_metadata(
             ax_key = f"ax_{row}{col}"
 
             # Get underlying matplotlib axis if wrapped
-            mpl_ax = getattr(current_ax, '_axis_mpl', current_ax)
+            mpl_ax = getattr(current_ax, "_axis_mpl", current_ax)
 
-            ax_meta = {
-                "grid_position": {"row": row, "col": col}
-            }
+            ax_meta = {"grid_position": {"row": row, "col": col}}
 
             # Additional position info from scitex_metadata if available
             if hasattr(current_ax, "_scitex_metadata"):
@@ -3127,13 +3224,13 @@ def _extract_calls_from_history(ax, ax_index: int) -> List[dict]:
     calls = []
 
     # Check for scitex wrapper with history
-    if not hasattr(ax, 'history') and not hasattr(ax, '_ax_history'):
+    if not hasattr(ax, "history") and not hasattr(ax, "_ax_history"):
         return calls
 
     # Get history dict
-    history = getattr(ax, 'history', None)
+    history = getattr(ax, "history", None)
     if history is None:
-        history = getattr(ax, '_ax_history', {})
+        history = getattr(ax, "_ax_history", {})
 
     # Get grid position
     ax_row = 0
@@ -3170,8 +3267,9 @@ def _extract_calls_from_history(ax, ax_index: int) -> List[dict]:
     return calls
 
 
-def _build_data_ref(trace_id, method_name: str, tracked_dict: dict,
-                    ax_row: int, ax_col: int) -> dict:
+def _build_data_ref(
+    trace_id, method_name: str, tracked_dict: dict, ax_row: int, ax_col: int
+) -> dict:
     """
     Build data_ref mapping from tracked_dict to CSV column names.
 
@@ -3196,81 +3294,86 @@ def _build_data_ref(trace_id, method_name: str, tracked_dict: dict,
     data_ref = {}
 
     # Method-specific column naming
-    if method_name == 'hist':
+    if method_name == "hist":
         # Histogram: raw data + computed bins
         data_ref["raw_data"] = f"{prefix}raw-data"
         data_ref["bin_centers"] = f"{prefix}bin-centers"
         data_ref["bin_counts"] = f"{prefix}bin-counts"
-    elif method_name in ('plot', 'scatter', 'step', 'errorbar'):
+    elif method_name in ("plot", "scatter", "step", "errorbar"):
         # Standard x, y plots
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
         # Check for error bars in tracked_dict
-        if tracked_dict and 'yerr' in tracked_dict:
+        if tracked_dict and "yerr" in tracked_dict:
             data_ref["yerr"] = f"{prefix}yerr"
-        if tracked_dict and 'xerr' in tracked_dict:
+        if tracked_dict and "xerr" in tracked_dict:
             data_ref["xerr"] = f"{prefix}xerr"
-    elif method_name in ('bar', 'barh'):
+    elif method_name in ("bar", "barh"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name == 'stem':
+    elif method_name == "stem":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name in ('fill_between', 'fill_betweenx'):
+    elif method_name in ("fill_between", "fill_betweenx"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y1"] = f"{prefix}y1"
         data_ref["y2"] = f"{prefix}y2"
-    elif method_name in ('imshow', 'matshow', 'pcolormesh'):
+    elif method_name in ("imshow", "matshow", "pcolormesh"):
         data_ref["data"] = f"{prefix}data"
-    elif method_name in ('contour', 'contourf'):
+    elif method_name in ("contour", "contourf"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
         data_ref["z"] = f"{prefix}z"
-    elif method_name in ('boxplot', 'violinplot'):
+    elif method_name in ("boxplot", "violinplot"):
         data_ref["data"] = f"{prefix}data"
-    elif method_name == 'pie':
+    elif method_name == "pie":
         data_ref["x"] = f"{prefix}x"
-    elif method_name in ('quiver', 'streamplot'):
+    elif method_name in ("quiver", "streamplot"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
         data_ref["u"] = f"{prefix}u"
         data_ref["v"] = f"{prefix}v"
-    elif method_name == 'hexbin':
+    elif method_name == "hexbin":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name == 'hist2d':
+    elif method_name == "hist2d":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name == 'kde':
+    elif method_name == "kde":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
     # SciTeX custom methods (stx_*) - use same naming as matplotlib wrappers
-    elif method_name == 'stx_line':
+    elif method_name == "stx_line":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name in ('stx_mean_std', 'stx_mean_ci', 'stx_median_iqr', 'stx_shaded_line'):
+    elif method_name in (
+        "stx_mean_std",
+        "stx_mean_ci",
+        "stx_median_iqr",
+        "stx_shaded_line",
+    ):
         data_ref["x"] = f"{prefix}x"
         data_ref["y_lower"] = f"{prefix}y-lower"
         data_ref["y_middle"] = f"{prefix}y-middle"
         data_ref["y_upper"] = f"{prefix}y-upper"
-    elif method_name in ('stx_box', 'stx_violin'):
+    elif method_name in ("stx_box", "stx_violin"):
         data_ref["data"] = f"{prefix}data"
-    elif method_name == 'stx_scatter_hist':
+    elif method_name == "stx_scatter_hist":
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name in ('stx_heatmap', 'stx_conf_mat', 'stx_image', 'stx_raster'):
+    elif method_name in ("stx_heatmap", "stx_conf_mat", "stx_image", "stx_raster"):
         data_ref["data"] = f"{prefix}data"
-    elif method_name in ('stx_kde', 'stx_ecdf'):
+    elif method_name in ("stx_kde", "stx_ecdf"):
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
-    elif method_name.startswith('stx_'):
+    elif method_name.startswith("stx_"):
         # Generic fallback for other stx_ methods
         data_ref["x"] = f"{prefix}x"
         data_ref["y"] = f"{prefix}y"
     else:
         # Generic fallback for tracked data
         if tracked_dict:
-            if 'x' in tracked_dict or 'args' in tracked_dict:
+            if "x" in tracked_dict or "args" in tracked_dict:
                 data_ref["x"] = f"{prefix}x"
                 data_ref["y"] = f"{prefix}y"
 
@@ -3301,24 +3404,49 @@ def _filter_style_kwargs(kwargs: dict, method_name: str) -> dict:
 
     # Style-relevant kwargs to keep
     style_keys = {
-        'color', 'c', 'facecolor', 'edgecolor', 'linecolor',
-        'linewidth', 'lw', 'linestyle', 'ls',
-        'marker', 'markersize', 'ms', 'markerfacecolor', 'markeredgecolor',
-        'alpha', 'zorder',
-        'label',
-        'bins', 'density', 'histtype', 'orientation',
-        'width', 'height', 'align',
-        'cmap', 'vmin', 'vmax', 'norm',
-        'levels', 'extend',
-        'scale', 'units',
-        'autopct', 'explode', 'shadow', 'startangle',
+        "color",
+        "c",
+        "facecolor",
+        "edgecolor",
+        "linecolor",
+        "linewidth",
+        "lw",
+        "linestyle",
+        "ls",
+        "marker",
+        "markersize",
+        "ms",
+        "markerfacecolor",
+        "markeredgecolor",
+        "alpha",
+        "zorder",
+        "label",
+        "bins",
+        "density",
+        "histtype",
+        "orientation",
+        "width",
+        "height",
+        "align",
+        "cmap",
+        "vmin",
+        "vmax",
+        "norm",
+        "levels",
+        "extend",
+        "scale",
+        "units",
+        "autopct",
+        "explode",
+        "shadow",
+        "startangle",
     }
 
     filtered = {}
     for key, value in kwargs.items():
         if key in style_keys:
             # Skip if value is a large array (data, not style)
-            if hasattr(value, '__len__') and not isinstance(value, str):
+            if hasattr(value, "__len__") and not isinstance(value, str):
                 if len(value) > 10:
                     continue
             # Round float values to 4 decimal places for cleaner JSON

@@ -227,6 +227,7 @@ class TestPipelineIntegration:
         assert isinstance(score_gb, float)
         assert 0 <= score_gb <= 1
 
+
 if __name__ == "__main__":
     import os
 
@@ -240,7 +241,7 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-03-23 17:36:05 (ywatanabe)"
-# 
+#
 # import numpy as np
 # from sklearn.decomposition import PCA
 # from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
@@ -260,17 +261,17 @@ if __name__ == "__main__":
 # from sktime.classification.kernel_based import RocketClassifier, TimeSeriesSVC
 # from sktime.transformations.panel.reduce import Tabularizer
 # from sktime.transformations.panel.rocket import Rocket
-# 
+#
 # # _rocket_pipeline = make_pipeline(
 # #     Rocket(n_jobs=-1),
 # #     RidgeClassifierCV(alphas=np.logspace(-3, 3, 10)),
 # # )
-# 
-# 
+#
+#
 # # def rocket_pipeline(*args, **kwargs):
 # #     return _rocket_pipeline
-# 
-# 
+#
+#
 # def rocket_pipeline(*args, **kwargs):
 #     return make_pipeline(
 #         Rocket(*args, **kwargs),
@@ -280,8 +281,8 @@ if __name__ == "__main__":
 #         # RidgeClassifierCV(alphas=np.logspace(-3, 3, 10)),
 #         # SVC(probability=True, kernel="linear"),
 #     )
-# 
-# 
+#
+#
 # # def rocket_pipeline(*args, **kwargs):
 # #     return make_pipeline(
 # #         Rocket(*args, **kwargs),
@@ -289,8 +290,8 @@ if __name__ == "__main__":
 # #         PCA(n_components=100),
 # #         LinearSVC(dual=False, tol=1e-3, C=0.1, probability=True),
 # #     )
-# 
-# 
+#
+#
 # GB_pipeline = make_pipeline(
 #     Tabularizer(),
 #     GradientBoostingClassifier(),

@@ -3,14 +3,15 @@
 # Time-stamp: "2024-11-05 08:00:00 (ywatanabe)"
 # File: ./tests/scitex/pd/test__ignore_SettingWithCopyWarning.py
 
-import pytest
-import numpy as np
-import pandas as pd
-from unittest.mock import Mock, patch, MagicMock
-import warnings
-import tempfile
 import os
 import sys
+import tempfile
+import warnings
+from unittest.mock import MagicMock, Mock, patch
+
+import numpy as np
+import pandas as pd
+import pytest
 
 
 class TestIgnoreSettingWithCopyWarningBasic:
@@ -18,9 +19,7 @@ class TestIgnoreSettingWithCopyWarningBasic:
 
     def test_suppress_warning_on_slice_assignment(self):
         """Test that SettingWithCopyWarning is suppressed during slice assignment."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         # Create a DataFrame and a view that would normally trigger warning
         df = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
@@ -60,9 +59,7 @@ class TestIgnoreSettingWithCopyWarningBasic:
 
     def test_loc_assignment_with_context_manager(self):
         """Test .loc assignment with context manager."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         df = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
         subset = df[["A"]]  # This creates a view
@@ -117,9 +114,7 @@ class TestComplexScenarios:
 
     def test_chained_indexing(self):
         """Test suppression with chained indexing."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         df = pd.DataFrame(
             {"A": [1, 2, 3, 4], "B": [5, 6, 7, 8], "C": ["x", "y", "z", "w"]}
@@ -139,9 +134,7 @@ class TestComplexScenarios:
 
     def test_multiple_operations(self):
         """Test multiple operations within context manager."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         df = pd.DataFrame({"A": range(10), "B": range(10, 20), "C": range(20, 30)})
 
@@ -163,9 +156,7 @@ class TestComplexScenarios:
 
     def test_nested_dataframes(self):
         """Test with nested DataFrame operations."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         df = pd.DataFrame({"group": ["A", "A", "B", "B"], "value": [1, 2, 3, 4]})
 
@@ -188,9 +179,7 @@ class TestWarningRestoration:
 
     def test_warnings_restored_after_context(self):
         """Test that warning filters are restored after context manager exits."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         # Get initial warning filters
         initial_filters = warnings.filters.copy()
@@ -214,9 +203,7 @@ class TestWarningRestoration:
 
     def test_exception_in_context_restores_warnings(self):
         """Test that warnings are restored even if exception occurs."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         with pytest.raises(ValueError):
             with ignore_setting_with_copy_warning():
@@ -235,9 +222,7 @@ class TestEdgeCases:
 
     def test_empty_context(self):
         """Test context manager with no operations."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         # Should not raise any errors
         with ignore_setting_with_copy_warning():
@@ -245,9 +230,7 @@ class TestEdgeCases:
 
     def test_non_pandas_operations(self):
         """Test that non-pandas operations work normally."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
@@ -270,9 +253,7 @@ class TestEdgeCases:
 
     def test_multiple_context_managers(self):
         """Test using multiple context managers."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         df1 = pd.DataFrame({"A": [1, 2, 3]})
         df2 = pd.DataFrame({"B": [4, 5, 6]})
@@ -300,9 +281,7 @@ class TestRealWorldUsage:
 
     def test_data_cleaning_workflow(self):
         """Test typical data cleaning workflow."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         # Create sample data
         df = pd.DataFrame(
@@ -332,9 +311,7 @@ class TestRealWorldUsage:
 
     def test_iterative_updates(self):
         """Test iterative DataFrame updates."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         df = pd.DataFrame(
             {
@@ -366,9 +343,7 @@ class TestDocstringExample:
 
     def test_docstring_example(self):
         """Test exact example from docstring."""
-        from scitex.pd import (
-            ignore_setting_with_copy_warning,
-        )
+        from scitex.pd import ignore_setting_with_copy_warning
 
         # Create a situation that would trigger warning
         df = pd.DataFrame({"column": [1, 2, 3], "other": [4, 5, 6]})
@@ -387,6 +362,7 @@ class TestDocstringExample:
             ]
             assert len(setting_warnings) == 0
 
+
 if __name__ == "__main__":
     import os
 
@@ -401,16 +377,16 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-05 07:35:30 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/pd/_ignore_.py
-# 
+#
 # import warnings
 # from contextlib import contextmanager
-# 
-# 
+#
+#
 # @contextmanager
 # def ignore_setting_with_copy_warning():
 #     """
 #     Context manager to temporarily ignore pandas SettingWithCopyWarning.
-# 
+#
 #     Example
 #     -------
 #     >>> with ignore_SettingWithCopyWarning():
@@ -420,16 +396,16 @@ if __name__ == "__main__":
 #         from pandas.errors import SettingWithCopyWarning
 #     except ImportError:
 #         from pandas.core.common import SettingWithCopyWarning
-# 
+#
 #     # Save current warning filters
 #     with warnings.catch_warnings():
 #         warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
 #         yield
-# 
-# 
+#
+#
 # # Backward compatibility
 # ignore_SettingWithCopyWarning = ignore_setting_with_copy_warning  # Deprecated
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

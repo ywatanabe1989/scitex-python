@@ -20,7 +20,7 @@ def plot_stx_raster(plt, rng, ax=None):
     spikes = [rng.uniform(0, 100, rng.integers(10, 30)) for _ in range(10)]
     ax.stx_raster(spikes)
     ax.set_xyt("X", "Y", "stx_raster")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

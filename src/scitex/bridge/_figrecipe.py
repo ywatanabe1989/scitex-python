@@ -207,6 +207,13 @@ def _save_recipe_to_path(
             fig.save_recipe(path, include_data=True, data_format=data_format)
             return path
 
+        # Diagram figures: d.render() attaches _figrecipe_diagram
+        if hasattr(fig, "_figrecipe_diagram"):
+            from figrecipe._diagram._diagram._io import save_diagram_recipe
+
+            save_diagram_recipe(fig._figrecipe_diagram, path)
+            return path
+
     except Exception:
         pass  # Recipe saving is optional
 

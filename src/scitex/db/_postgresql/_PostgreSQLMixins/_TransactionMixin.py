@@ -6,6 +6,7 @@
 THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_TransactionMixin.py"
 
 import psycopg2
+
 from ..._BaseMixins._BaseTransactionMixin import _BaseTransactionMixin
 
 

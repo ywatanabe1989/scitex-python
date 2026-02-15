@@ -10,8 +10,8 @@ Separating style properties from data makes:
 - Batch style application simple
 """
 
-from typing import Optional, Dict, Any
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, Optional
 
 
 @dataclass

@@ -9,11 +9,11 @@ The actual implementation is in the flask_editor/ subpackage.
 
 from .flask_editor import (
     WebEditor,
+    check_port_available,
     find_available_port,
     kill_process_on_port,
-    check_port_available,
-    render_preview_with_bboxes,
     plot_from_csv,
+    render_preview_with_bboxes,
 )
 
 # Legacy aliases for backward compatibility

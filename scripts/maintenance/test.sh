@@ -161,12 +161,22 @@ main() {
             shift
             ;;
         --changed)
-            # Run tests for git-changed files
+            # Run tests for git-changed files only
+            local changed_dirs=()
             while IFS= read -r f; do
-                test_path="tests/scitex/${f#src/scitex/}"
-                test_dir="${test_path%/*}"
-                [ -d "$test_dir" ] && extra_args+=("$test_dir")
-            done < <(git diff --name-only HEAD -- 'src/scitex/*.py' 2>/dev/null)
+                local tp="tests/scitex/${f#src/scitex/}"
+                local td="${tp%/*}"
+                [ -d "$td" ] && changed_dirs+=("$td")
+            done < <(git diff --cached --name-only -- 'src/scitex/' 2>/dev/null | grep '\.py$')
+            if [ ${#changed_dirs[@]} -gt 0 ]; then
+                # De-duplicate and use only changed dirs
+                local unique_dirs
+                unique_dirs=$(printf '%s\n' "${changed_dirs[@]}" | sort -u)
+                mapfile -t unique_arr <<<"$unique_dirs"
+                extra_args+=("${unique_arr[@]}")
+            fi
+            # Always restrict to changed mode (skip full suite)
+            module="__changed__"
             shift
             ;;
         -m | --marker)
@@ -206,7 +216,15 @@ main() {
     local src_path="src/scitex"
     local report_name="all"
 
-    if [ -n "$module" ]; then
+    if [ "$module" = "__changed__" ]; then
+        # --changed mode: test_path is empty, extra_args has specific dirs
+        test_path=""
+        report_name="changed"
+        if [ ${#extra_args[@]} -eq 0 ]; then
+            echo_info "No test directories found for changed files. Skipping."
+            exit 0
+        fi
+    elif [ -n "$module" ]; then
         test_path="tests/scitex/${module_path}/"
         src_path="src/scitex/${module_path}"
         report_name="$module"

@@ -38,11 +38,11 @@ Usage:
     paper = await scholar.process_paper_async(doi="10.1038/...")
 """
 
-from .ScholarPipelineSingle import ScholarPipelineSingle
-from .ScholarPipelineParallel import ScholarPipelineParallel
 from .ScholarPipelineBibTeX import ScholarPipelineBibTeX
-from .ScholarPipelineMetadataSingle import ScholarPipelineMetadataSingle
 from .ScholarPipelineMetadataParallel import ScholarPipelineMetadataParallel
+from .ScholarPipelineMetadataSingle import ScholarPipelineMetadataSingle
+from .ScholarPipelineParallel import ScholarPipelineParallel
+from .ScholarPipelineSingle import ScholarPipelineSingle
 
 __all__ = [
     "ScholarPipelineSingle",

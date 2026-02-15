@@ -39,7 +39,9 @@ def _format_sns_barplot(id, tracked_dict, kwargs):
         if isinstance(df, pd.DataFrame):
             result = pd.DataFrame()
             for col in df.columns:
-                col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                col_name = get_csv_column_name(
+                    f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                )
                 result[col_name] = df[col]
             return result
 
@@ -53,13 +55,17 @@ def _format_sns_barplot(id, tracked_dict, kwargs):
                 ).T
                 result = pd.DataFrame()
                 for col in processed_df.columns:
-                    col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                    col_name = get_csv_column_name(
+                        f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                    )
                     result[col_name] = processed_df[col]
                 return result
             except (ValueError, TypeError, IndexError):
                 result = pd.DataFrame()
                 for col in df.columns:
-                    col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                    col_name = get_csv_column_name(
+                        f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                    )
                     result[col_name] = df[col]
                 return result
 

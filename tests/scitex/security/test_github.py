@@ -499,6 +499,7 @@ class TestGetLatestAlertsFile:
         result = get_latest_alerts_file(None)
         assert result is None
 
+
 if __name__ == "__main__":
     import os
 
@@ -512,26 +513,26 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: ~/proj/scitex-code/src/scitex/security/github.py
-# 
+#
 # """
 # GitHub Security Alerts Module
-# 
+#
 # Fetches and processes security alerts from GitHub.
 # """
-# 
+#
 # import json
 # import subprocess
 # from datetime import datetime
 # from pathlib import Path
 # from typing import Dict, List, Optional
-# 
-# 
+#
+#
 # class GitHubSecurityError(Exception):
 #     """Raised when GitHub security operations fail."""
-# 
+#
 #     pass
-# 
-# 
+#
+#
 # def _run_gh_command(args: List[str]) -> str:
 #     """Run GitHub CLI command and return output."""
 #     try:
@@ -548,8 +549,8 @@ if __name__ == "__main__":
 #         raise GitHubSecurityError(
 #             "GitHub CLI (gh) not found. Install: https://cli.github.com/"
 #         )
-# 
-# 
+#
+#
 # def check_gh_auth() -> bool:
 #     """Check if GitHub CLI is authenticated."""
 #     try:
@@ -561,15 +562,15 @@ if __name__ == "__main__":
 #         return True
 #     except (subprocess.CalledProcessError, FileNotFoundError):
 #         return False
-# 
-# 
+#
+#
 # def get_secret_alerts(repo: Optional[str] = None) -> List[Dict]:
 #     """
 #     Get secret scanning alerts.
-# 
+#
 #     Args:
 #         repo: Repository in format 'owner/repo'. If None, uses current repo.
-# 
+#
 #     Returns:
 #         List of secret scanning alerts
 #     """
@@ -579,7 +580,7 @@ if __name__ == "__main__":
 #         if repo:
 #             owner, repo_name = repo.split("/")
 #             api_path = f"/repos/{owner}/{repo_name}/secret-scanning/alerts"
-# 
+#
 #         output = _run_gh_command(
 #             [
 #                 "api",
@@ -593,10 +594,10 @@ if __name__ == "__main__":
 #                 "line: .first_location_detected.start_line}",
 #             ]
 #         )
-# 
+#
 #         if not output.strip():
 #             return []
-# 
+#
 #         # Parse line-delimited JSON
 #         alerts = []
 #         for line in output.strip().split("\n"):
@@ -605,15 +606,15 @@ if __name__ == "__main__":
 #         return alerts
 #     except GitHubSecurityError:
 #         return []
-# 
-# 
+#
+#
 # def get_dependabot_alerts(repo: Optional[str] = None) -> List[Dict]:
 #     """
 #     Get Dependabot vulnerability alerts.
-# 
+#
 #     Args:
 #         repo: Repository in format 'owner/repo'. If None, uses current repo.
-# 
+#
 #     Returns:
 #         List of Dependabot alerts
 #     """
@@ -623,7 +624,7 @@ if __name__ == "__main__":
 #         if repo:
 #             owner, repo_name = repo.split("/")
 #             api_path = f"/repos/{owner}/{repo_name}/dependabot/alerts"
-# 
+#
 #         output = _run_gh_command(
 #             [
 #                 "api",
@@ -638,10 +639,10 @@ if __name__ == "__main__":
 #                 "created_at: .created_at}",
 #             ]
 #         )
-# 
+#
 #         if not output.strip():
 #             return []
-# 
+#
 #         # Parse line-delimited JSON
 #         alerts = []
 #         for line in output.strip().split("\n"):
@@ -650,15 +651,15 @@ if __name__ == "__main__":
 #         return alerts
 #     except GitHubSecurityError:
 #         return []
-# 
-# 
+#
+#
 # def get_code_scanning_alerts(repo: Optional[str] = None) -> List[Dict]:
 #     """
 #     Get code scanning alerts.
-# 
+#
 #     Args:
 #         repo: Repository in format 'owner/repo'. If None, uses current repo.
-# 
+#
 #     Returns:
 #         List of code scanning alerts
 #     """
@@ -668,7 +669,7 @@ if __name__ == "__main__":
 #         if repo:
 #             owner, repo_name = repo.split("/")
 #             api_path = f"/repos/{owner}/{repo_name}/code-scanning/alerts"
-# 
+#
 #         output = _run_gh_command(
 #             [
 #                 "api",
@@ -683,10 +684,10 @@ if __name__ == "__main__":
 #                 "created_at: .created_at}",
 #             ]
 #         )
-# 
+#
 #         if not output.strip():
 #             return []
-# 
+#
 #         # Parse line-delimited JSON
 #         alerts = []
 #         for line in output.strip().split("\n"):
@@ -695,18 +696,18 @@ if __name__ == "__main__":
 #         return alerts
 #     except GitHubSecurityError:
 #         return []
-# 
-# 
+#
+#
 # def check_github_alerts(repo: Optional[str] = None) -> Dict[str, List[Dict]]:
 #     """
 #     Check all GitHub security alerts.
-# 
+#
 #     Args:
 #         repo: Repository in format 'owner/repo'. If None, uses current repo.
-# 
+#
 #     Returns:
 #         Dictionary with keys: 'secrets', 'dependabot', 'code_scanning'
-# 
+#
 #     Raises:
 #         GitHubSecurityError: If GitHub CLI is not installed or not authenticated
 #     """
@@ -714,21 +715,21 @@ if __name__ == "__main__":
 #         raise GitHubSecurityError(
 #             "Not authenticated with GitHub CLI. Run: gh auth login"
 #         )
-# 
+#
 #     return {
 #         "secrets": get_secret_alerts(repo),
 #         "dependabot": get_dependabot_alerts(repo),
 #         "code_scanning": get_code_scanning_alerts(repo),
 #     }
-# 
-# 
+#
+#
 # def format_alerts_report(alerts: Dict[str, List[Dict]]) -> str:
 #     """
 #     Format alerts into a readable text report.
-# 
+#
 #     Args:
 #         alerts: Dictionary of alerts from check_github_alerts()
-# 
+#
 #     Returns:
 #         Formatted text report
 #     """
@@ -738,7 +739,7 @@ if __name__ == "__main__":
 #     lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 #     lines.append("=" * 50)
 #     lines.append("")
-# 
+#
 #     # Secret scanning alerts
 #     lines.append("### SECRET SCANNING ALERTS ###")
 #     lines.append("")
@@ -756,10 +757,10 @@ if __name__ == "__main__":
 #     else:
 #         lines.append("No open secret scanning alerts")
 #         lines.append("")
-# 
+#
 #     lines.append("=" * 50)
 #     lines.append("")
-# 
+#
 #     # Dependabot alerts
 #     lines.append("### DEPENDABOT VULNERABILITY ALERTS ###")
 #     lines.append("")
@@ -775,10 +776,10 @@ if __name__ == "__main__":
 #     else:
 #         lines.append("No open Dependabot alerts")
 #         lines.append("")
-# 
+#
 #     lines.append("=" * 50)
 #     lines.append("")
-# 
+#
 #     # Code scanning alerts
 #     lines.append("### CODE SCANNING ALERTS ###")
 #     lines.append("")
@@ -797,10 +798,10 @@ if __name__ == "__main__":
 #     else:
 #         lines.append("No open code scanning alerts")
 #         lines.append("")
-# 
+#
 #     lines.append("=" * 50)
 #     lines.append("")
-# 
+#
 #     # Summary
 #     total = len(secrets) + len(dependabot) + len(code_scanning)
 #     lines.append("### SUMMARY ###")
@@ -810,15 +811,15 @@ if __name__ == "__main__":
 #     lines.append(f"  - Dependabot: {len(dependabot)}")
 #     lines.append(f"  - Code Scanning: {len(code_scanning)}")
 #     lines.append("")
-# 
+#
 #     if total > 0:
 #         lines.append("⚠️  ACTION REQUIRED: Security issues found!")
 #     else:
 #         lines.append("✓ No open security alerts")
-# 
+#
 #     return "\n".join(lines)
-# 
-# 
+#
+#
 # def save_alerts_to_file(
 #     alerts: Dict[str, List[Dict]],
 #     output_dir: Optional[Path] = None,
@@ -826,12 +827,12 @@ if __name__ == "__main__":
 # ) -> Path:
 #     """
 #     Save alerts to a timestamped file.
-# 
+#
 #     Args:
 #         alerts: Dictionary of alerts from check_github_alerts()
 #         output_dir: Directory to save file. Defaults to ./logs/security
 #         create_symlink: If True, create 'security-latest.txt' symlink
-# 
+#
 #     Returns:
 #         Path to saved file
 #     """
@@ -839,32 +840,32 @@ if __name__ == "__main__":
 #         output_dir = Path.cwd() / "logs" / "security"
 #     else:
 #         output_dir = Path(output_dir)
-# 
+#
 #     output_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 #     output_file = output_dir / f"security-{timestamp}.txt"
-# 
+#
 #     report = format_alerts_report(alerts)
 #     output_file.write_text(report)
-# 
+#
 #     # Create symlink to latest
 #     if create_symlink:
 #         latest_link = output_dir / "security-latest.txt"
 #         if latest_link.exists() or latest_link.is_symlink():
 #             latest_link.unlink()
 #         latest_link.symlink_to(output_file.name)
-# 
+#
 #     return output_file
-# 
-# 
+#
+#
 # def get_latest_alerts_file(security_dir: Optional[Path] = None) -> Optional[Path]:
 #     """
 #     Get path to the latest security alerts file.
-# 
+#
 #     Args:
 #         security_dir: Directory containing security files. Defaults to ./logs/security
-# 
+#
 #     Returns:
 #         Path to latest file, or None if not found
 #     """
@@ -872,11 +873,11 @@ if __name__ == "__main__":
 #         security_dir = Path.cwd() / "logs" / "security"
 #     else:
 #         security_dir = Path(security_dir)
-# 
+#
 #     latest_link = security_dir / "security-latest.txt"
 #     if latest_link.exists():
 #         return latest_link
-# 
+#
 #     # Fallback: find most recent file
 #     files = sorted(security_dir.glob("security-*.txt"), reverse=True)
 #     return files[0] if files else None

@@ -3,30 +3,25 @@
 # Time-stamp: "2025-06-05 12:01:00 (ywatanabe)"
 # File: ./tests/scitex/str/test__factor_out_digits.py
 
-import pytest
-import numpy as np
-import matplotlib.pyplot as plt
 from unittest.mock import Mock, patch
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
+
 try:
     # Try importing from public API first
-    from scitex.str import (
-        factor_out_digits,
-        auto_factor_axis,
-        smart_tick_formatter,
-    )
+    from scitex.str import auto_factor_axis, factor_out_digits, smart_tick_formatter
 except ImportError:
     # Fall back to module imports
     from scitex.str._factor_out_digits import (
-        factor_out_digits,
         auto_factor_axis,
+        factor_out_digits,
         smart_tick_formatter,
     )
 
 # Import private functions directly
-from scitex.str._factor_out_digits import (
-    _format_factor_string,
-    _factor_single_axis,
-)
+from scitex.str._factor_out_digits import _factor_single_axis, _format_factor_string
 
 
 class TestFactorOutDigits:
@@ -36,7 +31,7 @@ class TestFactorOutDigits:
         """Test factoring with basic positive values."""
         values = [1000, 2000, 3000]
         factored, factor_str = factor_out_digits(values)
-        
+
         assert factored == [1.0, 2.0, 3.0]
         assert factor_str == r"$\times 10^{3}$"
 
@@ -44,7 +39,7 @@ class TestFactorOutDigits:
         """Test factoring with negative values."""
         values = [-1000, -2000, -3000]
         factored, factor_str = factor_out_digits(values)
-        
+
         assert factored == [-1.0, -2.0, -3.0]
         assert factor_str == r"$\times 10^{3}$"
 
@@ -52,7 +47,7 @@ class TestFactorOutDigits:
         """Test factoring with small decimal values."""
         values = [0.001, 0.002, 0.003]
         factored, factor_str = factor_out_digits(values)
-        
+
         assert factored == [1.0, 2.0, 3.0]
         assert factor_str == r"$\times 10^{-3}$"
 
@@ -60,7 +55,7 @@ class TestFactorOutDigits:
         """Test factoring with scientific notation input."""
         values = [1.5e6, 2.3e6, 4.1e6]
         factored, factor_str = factor_out_digits(values)
-        
+
         expected = [1.5, 2.3, 4.1]
         np.testing.assert_array_almost_equal(factored, expected, decimal=1)
         assert factor_str == r"$\times 10^{6}$"
@@ -69,7 +64,7 @@ class TestFactorOutDigits:
         """Test factoring with scalar input."""
         value = 5000
         factored, factor_str = factor_out_digits(value)
-        
+
         assert factored == 5.0
         assert factor_str == r"$\times 10^{3}$"
 
@@ -77,7 +72,7 @@ class TestFactorOutDigits:
         """Test factoring with numpy array input."""
         values = np.array([10000, 20000, 30000])
         factored, factor_str = factor_out_digits(values)
-        
+
         expected = np.array([1.0, 2.0, 3.0])
         np.testing.assert_array_equal(factored, expected)
         assert factor_str == r"$\times 10^{4}$"
@@ -86,7 +81,7 @@ class TestFactorOutDigits:
         """Test factoring with mixed order of magnitude values."""
         values = [100, 1000, 10000]
         factored, factor_str = factor_out_digits(values)
-        
+
         # Should use average power (around 10^3)
         expected = [0.1, 1.0, 10.0]
         np.testing.assert_array_almost_equal(factored, expected, decimal=1)
@@ -96,7 +91,7 @@ class TestFactorOutDigits:
         """Test precision parameter."""
         values = [1234.5678, 2345.6789]
         factored, factor_str = factor_out_digits(values, precision=1)
-        
+
         expected = [1.2, 2.3]
         np.testing.assert_array_almost_equal(factored, expected, decimal=1)
         assert factor_str == r"$\times 10^{3}$"
@@ -106,13 +101,13 @@ class TestFactorOutDigits:
         # Small power, should not be factored with default threshold
         values = [10, 20, 30]
         factored, factor_str = factor_out_digits(values, min_factor_power=3)
-        
+
         assert factored == values  # Should return original values
         assert factor_str == ""
 
         # Same values with lower threshold
         factored, factor_str = factor_out_digits(values, min_factor_power=1)
-        
+
         expected = [1.0, 2.0, 3.0]
         np.testing.assert_array_equal(factored, expected)
         assert factor_str == r"$\times 10^{1}$"
@@ -120,16 +115,20 @@ class TestFactorOutDigits:
     def test_unicode_format(self):
         """Test Unicode superscript format."""
         values = [1000, 2000, 3000]
-        factored, factor_str = factor_out_digits(values, return_latex=False, return_unicode=True)
-        
+        factored, factor_str = factor_out_digits(
+            values, return_latex=False, return_unicode=True
+        )
+
         assert factored == [1.0, 2.0, 3.0]
         assert factor_str == "×10³"
 
     def test_plain_format(self):
         """Test plain format (no LaTeX, no Unicode)."""
         values = [1000, 2000, 3000]
-        factored, factor_str = factor_out_digits(values, return_latex=False, return_unicode=False)
-        
+        factored, factor_str = factor_out_digits(
+            values, return_latex=False, return_unicode=False
+        )
+
         assert factored == [1.0, 2.0, 3.0]
         assert factor_str == "×10^3"
 
@@ -137,7 +136,7 @@ class TestFactorOutDigits:
         """Test handling of zero values."""
         values = [0, 0, 0]
         factored, factor_str = factor_out_digits(values)
-        
+
         assert factored == values
         assert factor_str == ""
 
@@ -145,7 +144,7 @@ class TestFactorOutDigits:
         """Test handling of mixed values including zeros."""
         values = [0, 1000, 2000, 0, 3000]
         factored, factor_str = factor_out_digits(values)
-        
+
         expected = [0.0, 1.0, 2.0, 0.0, 3.0]
         np.testing.assert_array_equal(factored, expected)
         assert factor_str == r"$\times 10^{3}$"
@@ -154,7 +153,7 @@ class TestFactorOutDigits:
         """Test single non-zero value."""
         values = [5000]
         factored, factor_str = factor_out_digits(values)
-        
+
         assert factored == [5.0]
         assert factor_str == r"$\times 10^{3}$"
 
@@ -162,7 +161,7 @@ class TestFactorOutDigits:
         """Test negative powers formatting."""
         values = [0.00001, 0.00002, 0.00003]
         factored, factor_str = factor_out_digits(values, min_factor_power=3)
-        
+
         expected = [1.0, 2.0, 3.0]
         np.testing.assert_array_almost_equal(factored, expected, decimal=1)
         assert factor_str == r"$\times 10^{-5}$"
@@ -171,7 +170,7 @@ class TestFactorOutDigits:
         """Test very large numbers."""
         values = [1e12, 2e12, 3e12]
         factored, factor_str = factor_out_digits(values)
-        
+
         expected = [1.0, 2.0, 3.0]
         np.testing.assert_array_almost_equal(factored, expected, decimal=1)
         assert factor_str == r"$\times 10^{12}$"
@@ -223,68 +222,73 @@ class TestAutoFactorAxis:
         """Test factoring x-axis only."""
         fig, ax = plt.subplots()
         ax.plot([1000, 2000, 3000], [1, 2, 3])
-        
-        with patch.object(ax, 'set_xticks') as mock_set_x, \
-             patch.object(ax, 'set_xticklabels') as mock_labels_x, \
-             patch.object(ax, 'text') as mock_text:
-            
+
+        with patch.object(ax, "set_xticks") as mock_set_x, patch.object(
+            ax, "set_xticklabels"
+        ) as mock_labels_x, patch.object(ax, "text") as mock_text:
+
             mock_ax = Mock()
             mock_ax.get_xticks.return_value = np.array([1000, 2000, 3000])
-            
-            auto_factor_axis(mock_ax, axis='x')
-            
+
+            auto_factor_axis(mock_ax, axis="x")
+
             # Should call x-axis methods
             mock_ax.get_xticks.assert_called_once()
-        
+
         plt.close(fig)
 
     def test_factor_y_axis(self):
         """Test factoring y-axis only."""
         fig, ax = plt.subplots()
         ax.plot([1, 2, 3], [1000, 2000, 3000])
-        
-        with patch.object(ax, 'set_yticks') as mock_set_y, \
-             patch.object(ax, 'set_yticklabels') as mock_labels_y, \
-             patch.object(ax, 'text') as mock_text:
-            
+
+        with patch.object(ax, "set_yticks") as mock_set_y, patch.object(
+            ax, "set_yticklabels"
+        ) as mock_labels_y, patch.object(ax, "text") as mock_text:
+
             mock_ax = Mock()
             mock_ax.get_yticks.return_value = np.array([1000, 2000, 3000])
-            
-            auto_factor_axis(mock_ax, axis='y')
-            
+
+            auto_factor_axis(mock_ax, axis="y")
+
             # Should call y-axis methods
             mock_ax.get_yticks.assert_called_once()
-        
+
         plt.close(fig)
 
     def test_factor_both_axes(self):
         """Test factoring both axes."""
         fig, ax = plt.subplots()
         ax.plot([1000, 2000, 3000], [0.001, 0.002, 0.003])
-        
-        with patch('scitex.str._factor_out_digits._factor_single_axis') as mock_factor:
-            auto_factor_axis(ax, axis='both')
-            
+
+        with patch("scitex.str._factor_out_digits._factor_single_axis") as mock_factor:
+            auto_factor_axis(ax, axis="both")
+
             # Should call _factor_single_axis twice (for x and y)
             assert mock_factor.call_count == 2
-        
+
         plt.close(fig)
 
     def test_custom_parameters(self):
         """Test auto_factor_axis with custom parameters."""
         fig, ax = plt.subplots()
         ax.plot([1000, 2000, 3000], [1, 2, 3])
-        
-        with patch('scitex.str._factor_out_digits._factor_single_axis') as mock_factor:
-            auto_factor_axis(ax, precision=1, min_factor_power=2, 
-                           return_latex=False, label_offset=(0.1, 0.9))
-            
+
+        with patch("scitex.str._factor_out_digits._factor_single_axis") as mock_factor:
+            auto_factor_axis(
+                ax,
+                precision=1,
+                min_factor_power=2,
+                return_latex=False,
+                label_offset=(0.1, 0.9),
+            )
+
             # Verify parameters are passed correctly
             mock_factor.assert_called()
             args = mock_factor.call_args_list[0][0]  # First call args
             assert args[2] == 1  # precision
             assert args[3] == 2  # min_factor_power
-        
+
         plt.close(fig)
 
 
@@ -295,7 +299,7 @@ class TestSmartTickFormatter:
         """Test basic tick formatting."""
         values = [1000, 1500, 2000, 2500, 3000]
         positions, labels, factor_str = smart_tick_formatter(values)
-        
+
         assert len(positions) <= 6  # max_ticks default
         assert len(labels) == len(positions)
         assert factor_str == r"$\times 10^{3}$"
@@ -304,7 +308,7 @@ class TestSmartTickFormatter:
         """Test tick formatting without factoring."""
         values = [1000, 1500, 2000, 2500, 3000]
         positions, labels, factor_str = smart_tick_formatter(values, factor_out=False)
-        
+
         assert factor_str == ""
         assert len(labels) == len(positions)
 
@@ -312,25 +316,25 @@ class TestSmartTickFormatter:
         """Test custom max_ticks parameter."""
         values = np.linspace(1000, 10000, 100)
         positions, labels, factor_str = smart_tick_formatter(values, max_ticks=3)
-        
+
         assert len(positions) <= 3
 
     def test_small_values_no_factoring(self):
         """Test small values that shouldn't be factored."""
         values = [1, 2, 3, 4, 5]
         positions, labels, factor_str = smart_tick_formatter(values)
-        
+
         assert factor_str == ""  # Should not factor small values
 
     def test_precision_formatting(self):
         """Test precision in tick label formatting."""
         values = [1234.567, 2345.678, 3456.789]
         positions, labels, factor_str = smart_tick_formatter(values, precision=1)
-        
+
         # Labels should reflect precision
         for label in labels:
-            if '.' in label:
-                decimal_places = len(label.split('.')[1])
+            if "." in label:
+                decimal_places = len(label.split(".")[1])
                 assert decimal_places <= 1
 
 
@@ -342,9 +346,9 @@ class TestFactorSingleAxis:
         mock_ax = Mock()
         mock_ax.get_xticks.return_value = np.array([1000, 2000, 3000])
         mock_ax.transAxes = plt.gca().transAxes
-        
-        _factor_single_axis(mock_ax, 'x', 2, 3, True, False, (0.02, 0.98))
-        
+
+        _factor_single_axis(mock_ax, "x", 2, 3, True, False, (0.02, 0.98))
+
         # Verify x-axis methods were called
         mock_ax.get_xticks.assert_called_once()
         mock_ax.set_xticks.assert_called_once()
@@ -356,9 +360,9 @@ class TestFactorSingleAxis:
         mock_ax = Mock()
         mock_ax.get_yticks.return_value = np.array([1000, 2000, 3000])
         mock_ax.transAxes = plt.gca().transAxes
-        
-        _factor_single_axis(mock_ax, 'y', 2, 3, True, False, (0.02, 0.98))
-        
+
+        _factor_single_axis(mock_ax, "y", 2, 3, True, False, (0.02, 0.98))
+
         # Verify y-axis methods were called
         mock_ax.get_yticks.assert_called_once()
         mock_ax.set_yticks.assert_called_once()
@@ -369,9 +373,9 @@ class TestFactorSingleAxis:
         """Test no factoring occurs when power is insufficient."""
         mock_ax = Mock()
         mock_ax.get_xticks.return_value = np.array([1, 2, 3])  # Small values
-        
-        _factor_single_axis(mock_ax, 'x', 2, 3, True, False, (0.02, 0.98))
-        
+
+        _factor_single_axis(mock_ax, "x", 2, 3, True, False, (0.02, 0.98))
+
         # Should not set new tick labels when no factoring occurs
         mock_ax.set_xticks.assert_not_called()
         mock_ax.set_xticklabels.assert_not_called()
@@ -416,7 +420,7 @@ class TestEdgeCases:
         """Test precision with very small numbers."""
         values = [1e-15, 2e-15, 3e-15]
         factored, factor_str = factor_out_digits(values, min_factor_power=10)
-        
+
         # Should factor out if power is significant enough
         if factor_str:
             assert "10^{-15}" in factor_str or "10^{-14}" in factor_str
@@ -427,10 +431,10 @@ class TestEdgeCases:
         x = np.array([1000, 2000, 3000])
         y = np.array([0.001, 0.002, 0.003])
         ax.plot(x, y)
-        
+
         # Test that auto_factor_axis doesn't crash with real matplotlib objects
         try:
-            auto_factor_axis(ax, axis='both')
+            auto_factor_axis(ax, axis="both")
             # If successful, verify the plot still renders
             assert ax.get_xlim() is not None
             assert ax.get_ylim() is not None
@@ -438,6 +442,7 @@ class TestEdgeCases:
             pytest.fail(f"auto_factor_axis failed with real matplotlib axes: {e}")
         finally:
             plt.close(fig)
+
 
 if __name__ == "__main__":
     import os
@@ -453,7 +458,7 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2025-06-04 11:05:00 (ywatanabe)"
 # # File: ./src/scitex/str/_factor_out_digits.py
-# 
+#
 # """
 # Functionality:
 #     Factor out common powers of 10 from numerical data for cleaner axis labels
@@ -464,11 +469,11 @@ if __name__ == "__main__":
 # Prerequisites:
 #     numpy
 # """
-# 
+#
 # import numpy as np
 # from typing import Union, List, Tuple, Optional
-# 
-# 
+#
+#
 # def factor_out_digits(
 #     values: Union[List, np.ndarray, float, int],
 #     precision: int = 2,
@@ -478,7 +483,7 @@ if __name__ == "__main__":
 # ) -> Tuple[Union[List, np.ndarray, float], str]:
 #     """
 #     Factor out common powers of 10 from numerical values for cleaner scientific notation.
-# 
+#
 #     Parameters
 #     ----------
 #     values : Union[List, np.ndarray, float, int]
@@ -491,20 +496,20 @@ if __name__ == "__main__":
 #         Return factor string in LaTeX format, by default True
 #     return_unicode : bool, optional
 #         Return factor string with Unicode superscripts, by default False
-# 
+#
 #     Returns
 #     -------
 #     Tuple[Union[List, np.ndarray, float], str]
 #         Tuple of (factored_values, factor_string)
-# 
+#
 #     Examples
 #     --------
 #     >>> factor_out_digits([1000, 2000, 3000])
 #     ([1.0, 2.0, 3.0], '$\\times 10^{3}$')
-# 
+#
 #     >>> factor_out_digits([0.001, 0.002, 0.003])
 #     ([1.0, 2.0, 3.0], '$\\times 10^{-3}$')
-# 
+#
 #     >>> factor_out_digits([1.5e6, 2.3e6, 4.1e6])
 #     ([1.5, 2.3, 4.1], '$\\times 10^{6}$')
 #     """
@@ -515,30 +520,30 @@ if __name__ == "__main__":
 #     else:
 #         values_array = np.array(values)
 #         is_scalar = False
-# 
+#
 #     # Remove zeros and handle special cases
 #     non_zero_values = values_array[values_array != 0]
 #     if len(non_zero_values) == 0:
 #         return values, ""
-# 
+#
 #     # Find the common order of magnitude
 #     log_values = np.log10(np.abs(non_zero_values))
 #     common_power = int(np.floor(np.mean(log_values)))
-# 
+#
 #     # Only factor out if the power is significant enough
 #     if abs(common_power) < min_factor_power:
 #         return values, ""
-# 
+#
 #     # Calculate factored values
 #     factor = 10**common_power
 #     factored_values = values_array / factor
-# 
+#
 #     # Round to specified precision
 #     factored_values = np.round(factored_values, precision)
-# 
+#
 #     # Generate factor string
 #     factor_string = _format_factor_string(common_power, return_latex, return_unicode)
-# 
+#
 #     # Return in original format
 #     if is_scalar:
 #         return float(factored_values[0]), factor_string
@@ -547,8 +552,8 @@ if __name__ == "__main__":
 #             return factored_values.tolist(), factor_string
 #         else:
 #             return factored_values, factor_string
-# 
-# 
+#
+#
 # def auto_factor_axis(
 #     ax,
 #     axis: str = "both",
@@ -560,7 +565,7 @@ if __name__ == "__main__":
 # ) -> None:
 #     """
 #     Automatically factor out common powers of 10 from axis tick labels.
-# 
+#
 #     Parameters
 #     ----------
 #     ax : matplotlib.axes.Axes
@@ -577,7 +582,7 @@ if __name__ == "__main__":
 #         Use Unicode superscripts for factor string, by default False
 #     label_offset : Tuple[float, float], optional
 #         Position for factor label as (x, y) in axes coordinates, by default (0.02, 0.98)
-# 
+#
 #     Examples
 #     --------
 #     >>> import matplotlib.pyplot as plt
@@ -595,7 +600,7 @@ if __name__ == "__main__":
 #             return_unicode,
 #             label_offset,
 #         )
-# 
+#
 #     if axis in ["y", "both"]:
 #         _factor_single_axis(
 #             ax,
@@ -606,8 +611,8 @@ if __name__ == "__main__":
 #             return_unicode,
 #             label_offset,
 #         )
-# 
-# 
+#
+#
 # def _factor_single_axis(
 #     ax,
 #     axis_name: str,
@@ -629,17 +634,17 @@ if __name__ == "__main__":
 #         set_ticks = ax.set_yticks
 #         set_ticklabels = ax.set_yticklabels
 #         label_x, label_y = 0.02, label_offset[1]
-# 
+#
 #     # Factor out common digits
 #     factored_ticks, factor_string = factor_out_digits(
 #         tick_values, precision, min_factor_power, return_latex, return_unicode
 #     )
-# 
+#
 #     # Apply factored labels if factor was found
 #     if factor_string:
 #         set_ticks(tick_values)
 #         set_ticklabels([f"{val:.{precision}f}" for val in factored_ticks])
-# 
+#
 #         # Add factor label
 #         ax.text(
 #             label_x,
@@ -649,14 +654,14 @@ if __name__ == "__main__":
 #             fontsize="small",
 #             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8),
 #         )
-# 
-# 
+#
+#
 # def _format_factor_string(
 #     power: int, latex: bool = True, unicode_sup: bool = False
 # ) -> str:
 #     """
 #     Format the factor string for display.
-# 
+#
 #     Parameters
 #     ----------
 #     power : int
@@ -665,7 +670,7 @@ if __name__ == "__main__":
 #         Use LaTeX formatting, by default True
 #     unicode_sup : bool, optional
 #         Use Unicode superscripts, by default False
-# 
+#
 #     Returns
 #     -------
 #     str
@@ -694,8 +699,8 @@ if __name__ == "__main__":
 #         return f"×10{unicode_power}"
 #     else:
 #         return f"×10^{power}"
-# 
-# 
+#
+#
 # def smart_tick_formatter(
 #     values: Union[List, np.ndarray],
 #     max_ticks: int = 6,
@@ -706,7 +711,7 @@ if __name__ == "__main__":
 # ) -> Tuple[Union[List, np.ndarray], List[str], str]:
 #     """
 #     Smart tick formatter that combines nice tick selection with factor-out-digits.
-# 
+#
 #     Parameters
 #     ----------
 #     values : Union[List, np.ndarray]
@@ -721,25 +726,25 @@ if __name__ == "__main__":
 #         Minimum power to factor out, by default 3
 #     return_latex : bool, optional
 #         Use LaTeX format, by default True
-# 
+#
 #     Returns
 #     -------
 #     Tuple[Union[List, np.ndarray], List[str], str]
 #         (tick_positions, tick_labels, factor_string)
-# 
+#
 #     Examples
 #     --------
 #     >>> smart_tick_formatter([1000, 1500, 2000, 2500, 3000])
 #     ([1000, 1500, 2000, 2500, 3000], ['1.0', '1.5', '2.0', '2.5', '3.0'], '$\\times 10^{3}$')
 #     """
 #     values_array = np.array(values)
-# 
+#
 #     # Create nice tick positions
 #     from matplotlib.ticker import MaxNLocator
-# 
+#
 #     locator = MaxNLocator(nbins=max_ticks, prune="both")
 #     tick_positions = locator.tick_values(values_array.min(), values_array.max())
-# 
+#
 #     # Factor out common digits if requested
 #     if factor_out:
 #         factored_ticks, factor_string = factor_out_digits(
@@ -753,10 +758,10 @@ if __name__ == "__main__":
 #             f"{val:.{precision}f}".rstrip("0").rstrip(".") for val in tick_positions
 #         ]
 #         factor_string = ""
-# 
+#
 #     return tick_positions, tick_labels, factor_string
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

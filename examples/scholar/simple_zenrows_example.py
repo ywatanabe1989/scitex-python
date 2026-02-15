@@ -21,7 +21,7 @@ auth_manager = AuthenticationManager(
 
 # Initialize ZenRows resolver
 resolver = ZenRowsOpenURLResolver(
-    auth_manager, 
+    auth_manager,
     os.getenv("SCITEX_SCHOLAR_OPENURL_RESOLVER_URL"),
     os.getenv("SCITEX_SCHOLAR_ZENROWS_API_KEY")
 )

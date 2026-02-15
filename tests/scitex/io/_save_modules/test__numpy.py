@@ -14,43 +14,43 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-05-16 12:19:07 (ywatanabe)"
 # # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/io/_save_modules/_numpy.py
-# 
+#
 # import numpy as np
-# 
-# 
+#
+#
 # def _save_npy(obj, spath):
 #     """
 #     Save a numpy array to .npy format.
-# 
+#
 #     Parameters
 #     ----------
 #     obj : numpy.ndarray
 #         The numpy array to save.
 #     spath : str
 #         Path where the .npy file will be saved.
-# 
+#
 #     Returns
 #     -------
 #     None
 #     """
 #     np.save(spath, obj)
-# 
-# 
+#
+#
 # def _save_npz(obj, spath):
 #     """
 #     Save numpy arrays to .npz format.
-# 
+#
 #     Parameters
 #     ----------
 #     obj : dict or list/tuple of numpy.ndarray
 #         Either a dictionary of arrays or a list/tuple of arrays.
 #     spath : str
 #         Path where the .npz file will be saved.
-# 
+#
 #     Returns
 #     -------
 #     None
-# 
+#
 #     Raises
 #     ------
 #     ValueError

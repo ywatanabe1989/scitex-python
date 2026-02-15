@@ -2,54 +2,106 @@
 """SciTeX CLI Main Entry Point."""
 
 # Suppress httplib2/pyparsing deprecation warnings BEFORE any imports
-# These are from system packages using old pyparsing API
+# These come from system httplib2 using old pyparsing API (not our code)
 import warnings
 
-# Filter pyparsing-related deprecation warnings from httplib2
-for msg in [
-    "setName",
-    "leaveWhitespace",
-    "setParseAction",
-    "addParseAction",
-    "delimitedList",
-]:
-    warnings.filterwarnings(
-        "ignore", message=f".*{msg}.*deprecated.*", category=DeprecationWarning
-    )
+warnings.filterwarnings(
+    "ignore",
+    message=".*deprecated.*use.*",
+    category=DeprecationWarning,
+    module=r"httplib2\..*",
+)
 
 import os
 import sys
 
 import click
 
-from . import (
-    audio,
-    browser,
-    capture,
-    clew,
-    cloud,
-    config,
-    convert,
-    dataset,
-    dev,
-    introspect,
-    linter,
-    mcp,
-    plt,
-    repro,
-    resource,
-    scholar,
-    security,
-    social,
-    stats,
-    template,
-    tex,
-    web,
-    writer,
-)
+
+class LazyGroup(click.Group):
+    """Click group that lazily imports subcommands on demand.
+
+    Subcommands are only imported when actually invoked, not during
+    help display or tab completion. This makes CLI startup instant.
+    """
+
+    def __init__(self, *args, lazy_subcommands=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        # {name: (module_path, attr_name, short_help)}
+        self._lazy_subcommands = lazy_subcommands or {}
+
+    def list_commands(self, ctx):
+        """List all available commands."""
+        base = super().list_commands(ctx)
+        lazy = sorted(self._lazy_subcommands.keys())
+        return sorted(set(base + lazy))
+
+    def get_command(self, ctx, cmd_name):
+        """Get a command by name, loading lazily if needed."""
+        if cmd_name in self._lazy_subcommands:
+            return self._load_lazy(cmd_name)
+        return super().get_command(ctx, cmd_name)
+
+    def format_commands(self, ctx, formatter):
+        """Show help without importing lazy subcommands."""
+        commands = []
+        for name in self.list_commands(ctx):
+            if name in self._lazy_subcommands:
+                _, _, help_text = self._lazy_subcommands[name]
+                commands.append((name, help_text))
+            else:
+                cmd = super().get_command(ctx, name)
+                if cmd is None:
+                    continue
+                help_text = cmd.get_short_help_str(limit=150)
+                commands.append((name, help_text))
+
+        if commands:
+            limit = formatter.width - 6 - max(len(c[0]) for c in commands)
+            rows = [(name, h[:limit]) for name, h in commands]
+            with formatter.section("Commands"):
+                formatter.write_dl(rows)
+
+    def _load_lazy(self, cmd_name):
+        import importlib
+
+        module_path, attr_name, _ = self._lazy_subcommands[cmd_name]
+        mod = importlib.import_module(module_path)
+        return getattr(mod, attr_name)
+
+
+_LAZY_SUBCOMMANDS = {
+    "audio": ("scitex.cli.audio", "audio", "Audio tools and text-to-speech."),
+    "browser": ("scitex.cli.browser", "browser", "Browser automation tools."),
+    "capture": ("scitex.cli.capture", "capture", "Screenshot capture tools."),
+    "clew": ("scitex.cli.clew", "clew", "Verification and reproducibility."),
+    "cloud": ("scitex.cli.cloud", "cloud", "Cloud storage operations."),
+    "config": ("scitex.cli.config", "config", "Configuration management."),
+    "convert": ("scitex.cli.convert", "convert", "File format conversion."),
+    "dataset": ("scitex.cli.dataset", "dataset", "Dataset discovery and management."),
+    "dev": ("scitex.cli.dev", "dev", "Developer tools."),
+    "event": ("scitex.cli.event", "event", "Event bus for async task results."),
+    "introspect": ("scitex.cli.introspect", "introspect", "Code introspection tools."),
+    "linter": ("scitex.cli.linter", "linter", "SciTeX linter."),
+    "mcp": ("scitex.cli.mcp", "mcp", "MCP server management."),
+    "plt": ("scitex.cli.plt", "plt", "Plotting tools."),
+    "repro": ("scitex.cli.repro", "repro", "Reproducibility tools."),
+    "resource": ("scitex.cli.resource", "resource", "Resource management."),
+    "scholar": ("scitex.cli.scholar", "scholar", "Scholar CLI commands."),
+    "security": ("scitex.cli.security", "security", "Security scanning tools."),
+    "social": ("scitex.cli.social", "social", "Social media tools."),
+    "stats": ("scitex.cli.stats", "stats", "Statistical analysis tools."),
+    "template": ("scitex.cli.template", "template", "Project templates."),
+    "tex": ("scitex.cli.tex", "tex", "LaTeX tools."),
+    "verify": ("scitex.cli.clew", "clew", "Verification (alias for clew)."),
+    "web": ("scitex.cli.web", "web", "Web utilities."),
+    "writer": ("scitex.cli.writer", "writer", "Manuscript writing tools."),
+}
 
 
 @click.group(
+    cls=LazyGroup,
+    lazy_subcommands=_LAZY_SUBCOMMANDS,
     context_settings={"help_option_names": ["-h", "--help"]},
     invoke_without_command=True,
 )
@@ -58,7 +110,7 @@ from . import (
 @click.pass_context
 def cli(ctx, help_recursive):
     r"""
-    SciTeX - Integrated Scientific Research Platform.
+    Integrated Scientific Research Platform (SciTeX).
 
     \b
     Examples:
@@ -79,33 +131,6 @@ def cli(ctx, help_recursive):
         ctx.exit(0)
     elif ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
-
-
-# Add command groups
-cli.add_command(audio.audio)
-cli.add_command(browser.browser)
-cli.add_command(capture.capture)
-cli.add_command(clew.clew)
-cli.add_command(clew.clew, name="verify")  # Backward compatibility alias
-cli.add_command(cloud.cloud)
-cli.add_command(config.config)
-cli.add_command(convert.convert)
-cli.add_command(dataset.dataset)
-cli.add_command(dev.dev)
-cli.add_command(introspect.introspect)
-cli.add_command(linter.linter)
-cli.add_command(mcp.mcp)
-cli.add_command(plt.plt)
-cli.add_command(repro.repro)
-cli.add_command(resource.resource)
-cli.add_command(scholar.scholar)
-cli.add_command(security.security)
-cli.add_command(social.social)
-cli.add_command(stats.stats)
-cli.add_command(template.template)
-cli.add_command(tex.tex)
-cli.add_command(web.web)
-cli.add_command(writer.writer)
 
 
 def _get_all_command_paths(group, prefix=""):

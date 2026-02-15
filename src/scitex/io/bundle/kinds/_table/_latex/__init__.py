@@ -19,7 +19,11 @@ Usage:
 
 from ._editor import launch_editor
 from ._export import LaTeXExportOptions, LaTeXResult, export_multiple, export_to_latex
-from ._figure_exporter import FigureExportOptions, export_figure_to_latex, generate_figure_preamble
+from ._figure_exporter import (
+    FigureExportOptions,
+    export_figure_to_latex,
+    generate_figure_preamble,
+)
 from ._stats_formatter import (
     FormattedStat,
     format_inline_stat,

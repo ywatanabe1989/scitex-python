@@ -3,12 +3,13 @@
 # Time-stamp: "2024-11-03 10:30:00 (ywatanabe)"
 # File: ./tests/scitex/pd/test__from_xyz.py
 
-import pytest
+import os
+import sys
+from unittest.mock import Mock, patch
+
 import numpy as np
 import pandas as pd
-from unittest.mock import Mock, patch
-import sys
-import os
+import pytest
 
 # Add the project root to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../src"))
@@ -373,7 +374,7 @@ class TestLargeDatasets:
                 x_vals.extend([x] * 100)
                 y_vals.extend([y] * 100)
                 z_vals.extend(np.random.rand(100))
-        
+
         data = pd.DataFrame(
             {
                 "x": pd.Categorical(x_vals),
@@ -386,6 +387,7 @@ class TestLargeDatasets:
         assert result.shape == (3, 3)
         # All positions should have values (due to all combinations being present)
         assert (result != 0).all().all()
+
 
 if __name__ == "__main__":
     import os
@@ -401,15 +403,15 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-09-26 07:22:18 (ywatanabe)"
 # # /home/ywatanabe/proj/_scitex_repo_openhands/src/scitex/pd/_from_xyz.py
-# 
+#
 # import pandas as pd
 # import numpy as np
-# 
-# 
+#
+#
 # def from_xyz(data_frame, x=None, y=None, z=None, square=False):
 #     """
 #     Convert a DataFrame with 'x', 'y', 'z' format into a heatmap DataFrame.
-# 
+#
 #     Example
 #     -------
 #     import pandas as pd
@@ -421,7 +423,7 @@ if __name__ == "__main__":
 #     data = data.rename(columns={"col1": "x", "col2": "y", "p_val": "z"})
 #     result = from_xyz(data)
 #     print(result)
-# 
+#
 #     Parameters
 #     ----------
 #     data_frame : pandas.DataFrame
@@ -434,7 +436,7 @@ if __name__ == "__main__":
 #         Name of the column to use as z-values. Defaults to 'z'.
 #     square : bool, optional
 #         If True, force the output to be a square matrix. Defaults to False.
-# 
+#
 #     Returns
 #     -------
 #     pandas.DataFrame
@@ -443,19 +445,19 @@ if __name__ == "__main__":
 #     x = x or "x"
 #     y = y or "y"
 #     z = z or "z"
-# 
+#
 #     heatmap = pd.pivot_table(data_frame, values=z, index=y, columns=x, aggfunc="first")
-# 
+#
 #     if square:
 #         # Make it square by including all unique labels
 #         all_labels = sorted(set(heatmap.index) | set(heatmap.columns))
 #         heatmap = heatmap.reindex(index=all_labels, columns=all_labels)
-# 
+#
 #     heatmap = heatmap.fillna(0)
-# 
+#
 #     return heatmap
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     np.random.seed(42)
 #     stats = pd.DataFrame(

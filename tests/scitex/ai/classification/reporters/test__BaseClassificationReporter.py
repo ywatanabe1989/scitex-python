@@ -17,35 +17,35 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Base Classification Reporter - Unified API Interface.
-# 
+#
 # This module provides the base class and interface for all classification reporters,
 # ensuring consistent APIs and behavior across single-task and multi-task scenarios.
 # """
-# 
+#
 # from abc import ABC, abstractmethod
 # from pathlib import Path
 # from typing import Any, Dict, List, Optional, Union
-# 
+#
 # import numpy as np
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # class BaseClassificationReporter(ABC):
 #     """
 #     Abstract base class for all classification reporters.
-# 
+#
 #     This class defines the unified API that all classification reporters must implement,
 #     ensuring consistent parameter names, method signatures, and behavior.
-# 
+#
 #     Parameters
 #     ----------
 #     output_dir : Union[str, Path]
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 #     precision : int, default 3
 #         Number of decimal places for numerical outputs
 #     """
-# 
+#
 #     def __init__(
 #         self,
 #         output_dir: Union[str, Path],
@@ -62,27 +62,27 @@ if __name__ == "__main__":
 #     ):
 #         self.precision = precision
 #         self._dirs_created = False
-# 
+#
 #         # Set default output directory if not provided
 #         if output_dir is None:
 #             from datetime import datetime
-# 
+#
 #             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 #             output_dir = Path(f"./results/classification_{timestamp}")
-# 
+#
 #         self.output_dir = Path(output_dir)
-# 
+#
 #         if verbose:
 #             logger.info(
 #                 f"Classification reporter initialized (output directory: {str(output_dir)})"
 #             )
-# 
+#
 #     def _create_subdir_if_needed(self, subdir: str) -> Path:
 #         """Create a subdirectory only when needed."""
 #         subdir_path = self.output_dir / subdir
 #         subdir_path.mkdir(parents=True, exist_ok=True)
 #         return subdir_path
-# 
+#
 #     def _round_numeric(self, value: Any) -> Any:
 #         """Round numeric values to specified precision."""
 #         if isinstance(value, (int, float, np.integer, np.floating)):
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 #             return type(value)(self._round_numeric(v) for v in value)
 #         else:
 #             return value
-# 
+#
 #     @abstractmethod
 #     def calculate_metrics(
 #         self,
@@ -106,9 +106,9 @@ if __name__ == "__main__":
 #     ) -> Dict[str, Any]:
 #         """
 #         Calculate and save classification metrics.
-# 
+#
 #         This is the unified method signature that all reporters must implement.
-# 
+#
 #         Parameters
 #         ----------
 #         y_true : np.ndarray
@@ -121,30 +121,30 @@ if __name__ == "__main__":
 #             Class labels for display
 #         fold : int, optional
 #             Fold index for cross-validation
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
 #             Dictionary of calculated metrics
 #         """
 #         pass
-# 
+#
 #     @abstractmethod
 #     def get_summary(self) -> Dict[str, Any]:
 #         """
 #         Get summary of all calculated metrics.
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
 #             Summary of metrics across all folds/tasks
 #         """
 #         pass
-# 
+#
 #     def get_output_paths(self) -> Dict[str, Path]:
 #         """
 #         Get dictionary of output paths for different content types.
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Path]
@@ -157,26 +157,26 @@ if __name__ == "__main__":
 #             "tables": self.output_dir / "tables",
 #             "reports": self.output_dir / "reports",
 #         }
-# 
+#
 #     def __repr__(self) -> str:
 #         return f"{self.__class__.__name__}(output_dir='{self.output_dir}')"
-# 
-# 
+#
+#
 # class ReporterConfig:
 #     """
 #     Configuration class for classification reporters.
-# 
+#
 #     This class encapsulates all configuration settings for classification
 #     reporters, providing a centralized way to manage reporting behavior,
 #     output formatting, and metric requirements.
-# 
+#
 #     Attributes
 #     ----------
 #     precision : int
 #         Number of decimal places for numerical outputs in reports
 #     required_metrics : List[str]
 #         List of metric names that must be calculated and reported
-# 
+#
 #     Examples
 #     --------
 #     >>> # Create default configuration
@@ -194,7 +194,7 @@ if __name__ == "__main__":
 #     >>> # Convert to dictionary for serialization
 #     >>> config_dict = config.to_dict()
 #     """
-# 
+#
 #     def __init__(
 #         self,
 #         precision: int = 3,
@@ -212,7 +212,7 @@ if __name__ == "__main__":
 #     ):
 #         """
 #         Initialize ReporterConfig with specified settings.
-# 
+#
 #         Parameters
 #         ----------
 #         precision : int, default 3
@@ -220,7 +220,7 @@ if __name__ == "__main__":
 #             Controls the precision of all floating-point values in reports,
 #             metrics, and summaries. Higher values provide more detail but
 #             may introduce numerical noise.
-# 
+#
 #         required_metrics : List[str], optional
 #             List of metric names that must be calculated and reported.
 #             If None, defaults to a comprehensive set including:
@@ -232,7 +232,7 @@ if __name__ == "__main__":
 #             - roc_curve: ROC curve data points
 #             - pre_rec_auc: Area under Precision-Recall curve
 #             - pre_rec_curve: PR curve data points
-# 
+#
 #         Notes
 #         -----
 #         The precision setting affects:
@@ -240,7 +240,7 @@ if __name__ == "__main__":
 #         - CSV and JSON output files
 #         - Console display formatting
 #         - Plot annotations and labels
-# 
+#
 #         The required_metrics list is used for:
 #         - Validation of calculated metrics
 #         - Determining which plots to generate
@@ -248,10 +248,10 @@ if __name__ == "__main__":
 #         - Creating comprehensive reports
 #         """
 #         self.precision = precision
-# 
+#
 #         # Set default comprehensive metrics if not provided
 #         self.required_metrics = required_metrics
-# 
+#
 #         required_metrics_str = ""
 #         for required_metric in required_metrics:
 #             required_metrics_str += f"        {required_metric}\n"
@@ -264,21 +264,21 @@ if __name__ == "__main__":
 #                     f"{required_metrics_str}"
 #                 )
 #             )
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         """
 #         Convert configuration to dictionary format.
-# 
+#
 #         Useful for serialization, logging, and saving configuration
 #         alongside experiment results.
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
 #             Dictionary containing all configuration parameters with keys:
 #             - 'precision': int, decimal precision setting
 #             - 'required_metrics': List[str], required metric names
-# 
+#
 #         Examples
 #         --------
 #         >>> config = ReporterConfig(precision=4)
@@ -290,8 +290,8 @@ if __name__ == "__main__":
 #             "precision": self.precision,
 #             "required_metrics": self.required_metrics,
 #         }
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

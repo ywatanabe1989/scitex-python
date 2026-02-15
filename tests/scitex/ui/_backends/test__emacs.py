@@ -13,23 +13,23 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: "2026-01-13 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/ui/_backends/_emacs.py
-# 
+#
 # """Emacs notification backend using emacsclient."""
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import asyncio
 # import shutil
 # import subprocess
 # from datetime import datetime
 # from typing import Optional
-# 
+#
 # from ._types import BaseNotifyBackend, NotifyLevel, NotifyResult
-# 
-# 
+#
+#
 # class EmacsBackend(BaseNotifyBackend):
 #     """Notification via Emacs using emacsclient.
-# 
+#
 #     Displays notifications in Emacs minibuffer or as alerts.
 #     Supports different display methods:
 #     - popup: temporary popup buffer (default, most noticeable)
@@ -37,12 +37,12 @@ if __name__ == "__main__":
 #     - alert: alert.el package
 #     - notifications: notifications.el (desktop notifications from Emacs)
 #     """
-# 
+#
 #     name = "emacs"
-# 
+#
 #     def __init__(self, method: str = "popup", timeout: float = 5.0):
 #         """Initialize Emacs backend.
-# 
+#
 #         Parameters
 #         ----------
 #         method : str
@@ -52,15 +52,15 @@ if __name__ == "__main__":
 #         """
 #         self.method = method
 #         self.timeout = timeout
-# 
+#
 #     def is_available(self) -> bool:
 #         """Check if emacsclient is available."""
 #         return shutil.which("emacsclient") is not None
-# 
+#
 #     def _escape_elisp_string(self, s: str) -> str:
 #         """Escape a string for use in elisp."""
 #         return s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
-# 
+#
 #     def _get_face_for_level(self, level: NotifyLevel) -> str:
 #         """Get Emacs face name for notification level."""
 #         faces = {
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 #             NotifyLevel.CRITICAL: "error",
 #         }
 #         return faces.get(level, "default")
-# 
+#
 #     async def send(
 #         self,
 #         message: str,
@@ -82,12 +82,12 @@ if __name__ == "__main__":
 #         try:
 #             method = kwargs.get("method", self.method)
 #             timeout = kwargs.get("timeout", self.timeout)
-# 
+#
 #             # Escape strings for elisp
 #             msg_escaped = self._escape_elisp_string(message)
 #             title_escaped = self._escape_elisp_string(title or "SciTeX")
 #             face = self._get_face_for_level(level)
-# 
+#
 #             # Build elisp command based on method
 #             if method == "popup":
 #                 # Popup buffer - most noticeable
@@ -166,13 +166,13 @@ if __name__ == "__main__":
 #                 (let ((msg (propertize "[{level.value.upper()}] {title_escaped}: {msg_escaped}" 'face '{face})))
 #                   (message "%s" msg))
 #                 """
-# 
+#
 #             # Clean up elisp (remove extra whitespace)
 #             elisp = " ".join(elisp.split())
-# 
+#
 #             # Execute via emacsclient
 #             cmd = ["emacsclient", "--eval", elisp]
-# 
+#
 #             loop = asyncio.get_event_loop()
 #             result = await loop.run_in_executor(
 #                 None,
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 #                     timeout=10,
 #                 ),
 #             )
-# 
+#
 #             if result.returncode == 0:
 #                 return NotifyResult(
 #                     success=True,
@@ -200,7 +200,7 @@ if __name__ == "__main__":
 #                     timestamp=datetime.now().isoformat(),
 #                     error=result.stderr.strip() or "emacsclient failed",
 #                 )
-# 
+#
 #         except subprocess.TimeoutExpired:
 #             return NotifyResult(
 #                 success=False,
@@ -217,8 +217,8 @@ if __name__ == "__main__":
 #                 timestamp=datetime.now().isoformat(),
 #                 error=str(e),
 #             )
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

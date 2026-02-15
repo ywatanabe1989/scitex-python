@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/browser/interaction/handle_popups.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -25,7 +26,8 @@ This is a universal utility that works across any website.
 
 import asyncio
 from typing import Dict, List, Optional, Tuple
-from playwright.async_api import Page, ElementHandle
+
+from playwright.async_api import ElementHandle, Page
 
 from scitex import logging
 
@@ -116,25 +118,25 @@ class PopupHandler:
                 () => {
                     const modalSelectors = %s;
                     const found = [];
-                    
+
                     for (const selector of modalSelectors) {
                         try {
                             const elements = document.querySelectorAll(selector);
                             for (const el of elements) {
                                 const style = window.getComputedStyle(el);
                                 const rect = el.getBoundingClientRect();
-                                
+
                                 // Check if element is visible
-                                if (style.display !== 'none' && 
-                                    style.visibility !== 'hidden' && 
-                                    rect.width > 0 && 
+                                if (style.display !== 'none' &&
+                                    style.visibility !== 'hidden' &&
+                                    rect.width > 0 &&
                                     rect.height > 0 &&
                                     style.opacity !== '0') {
-                                    
+
                                     // Get text preview
                                     let text = el.innerText || el.textContent || '';
                                     text = text.substring(0, 200).trim();
-                                    
+
                                     // Try to identify popup type
                                     let type = 'unknown';
                                     const lowerText = text.toLowerCase();
@@ -147,7 +149,7 @@ class PopupHandler:
                                     } else if (lowerText.includes('ai') || lowerText.includes('assistant')) {
                                         type = 'ai_promotion';
                                     }
-                                    
+
                                     found.push({
                                         selector: selector,
                                         type: type,
@@ -166,14 +168,14 @@ class PopupHandler:
                             // Ignore selector errors
                         }
                     }
-                    
+
                     // Sort by z-index (highest first)
                     found.sort((a, b) => {
                         const zA = parseInt(a.zIndex) || 0;
                         const zB = parseInt(b.zIndex) || 0;
                         return zB - zA;
                     });
-                    
+
                     return found;
                 }
             """
@@ -422,6 +424,7 @@ async def ensure_no_popups_async(page: Page, check_interval_ms: int = 1000) -> b
 def main(args):
     """Demonstrate PopupHandler functionality."""
     import asyncio
+
     from playwright.async_api import async_playwright
 
     async def demo():

@@ -169,7 +169,9 @@ class TestBrandingFunctions:
         """Test SSH client IP extraction from SSH_CONNECTION."""
         from scitex.audio._branding import get_ssh_client_ip
 
-        with patch.dict(os.environ, {"SSH_CONNECTION": "10.0.0.50 54321 10.0.0.1 22"}, clear=True):
+        with patch.dict(
+            os.environ, {"SSH_CONNECTION": "10.0.0.50 54321 10.0.0.1 22"}, clear=True
+        ):
             # Clear SSH_CLIENT to test SSH_CONNECTION fallback
             os.environ.pop("SSH_CLIENT", None)
             assert get_ssh_client_ip() == "10.0.0.50"
@@ -245,7 +247,10 @@ class TestSpeakHandlers:
 
         mock_sink = {"available": False, "state": "SUSPENDED", "reason": "No output"}
         with patch.dict(os.environ, {"SCITEX_AUDIO_MODE": "local"}, clear=False):
-            with patch("scitex.audio._mcp.speak_handlers.check_audio_sink_state", return_value=mock_sink):
+            with patch(
+                "scitex.audio._mcp.speak_handlers.check_audio_sink_state",
+                return_value=mock_sink,
+            ):
                 result = await speak_local_handler("Test text", play=True)
                 assert result["success"] is False
                 assert "SUSPENDED" in result.get("sink_state", "")

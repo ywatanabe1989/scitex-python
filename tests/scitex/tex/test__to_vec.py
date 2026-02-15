@@ -265,6 +265,7 @@ class TestFallbackAvailability:
         result = to_vec("test", enable_fallback=False)
         assert result == r"\overrightarrow{\mathrm{test}}"
 
+
 if __name__ == "__main__":
     import os
 
@@ -279,10 +280,10 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2025-06-05 12:00:00 (ywatanabe)"
 # # File: ./src/scitex/tex/_to_vec.py
-# 
+#
 # """
 # LaTeX vector notation with fallback mechanisms.
-# 
+#
 # Functionality:
 #     - Convert strings to LaTeX vector notation with automatic fallback
 #     - Handle LaTeX rendering failures gracefully
@@ -293,29 +294,29 @@ if __name__ == "__main__":
 # Prerequisites:
 #     scitex.str._latex_fallback
 # """
-# 
+#
 # try:
 #     from scitex.str._latex_fallback import safe_latex_render, latex_fallback_decorator
-# 
+#
 #     FALLBACK_AVAILABLE = True
 # except ImportError:
 #     FALLBACK_AVAILABLE = False
-# 
+#
 #     def latex_fallback_decorator(fallback_strategy="auto", preserve_math=True):
 #         def decorator(func):
 #             return func
-# 
+#
 #         return decorator
-# 
+#
 #     def safe_latex_render(text, fallback_strategy="auto", preserve_math=True):
 #         return text
-# 
-# 
+#
+#
 # @latex_fallback_decorator(fallback_strategy="auto", preserve_math=True)
 # def to_vec(v_str, enable_fallback=True, fallback_strategy="auto"):
 #     r"""
 #     Convert a string to LaTeX vector notation with automatic fallback.
-# 
+#
 #     Parameters
 #     ----------
 #     v_str : str
@@ -324,20 +325,20 @@ if __name__ == "__main__":
 #         Whether to enable LaTeX fallback mechanisms, by default True
 #     fallback_strategy : str, optional
 #         Fallback strategy: "auto", "mathtext", "unicode", "plain", by default "auto"
-# 
+#
 #     Returns
 #     -------
 #     str
 #         LaTeX representation of the vector with automatic fallback
-# 
+#
 #     Examples
 #     --------
 #     >>> vector = to_vec("AB")
 #     >>> print(vector)  # LaTeX: \overrightarrow{\mathrm{AB}}
-# 
+#
 #     >>> vector = to_vec("AB")  # Falls back to unicode if LaTeX fails
 #     >>> print(vector)  # Unicode: A⃗B or AB⃗
-# 
+#
 #     Notes
 #     -----
 #     If LaTeX rendering fails, this function automatically falls back to:
@@ -347,10 +348,10 @@ if __name__ == "__main__":
 #     """
 #     if not v_str:
 #         return ""
-# 
+#
 #     # Create LaTeX vector notation
 #     latex_vector = f"\\overrightarrow{{\\mathrm{{{v_str}}}}}"
-# 
+#
 #     if enable_fallback and FALLBACK_AVAILABLE:
 #         # Custom fallback handling for vectors
 #         if fallback_strategy == "auto":
@@ -369,30 +370,30 @@ if __name__ == "__main__":
 #             return safe_latex_render(f"${latex_vector}$", fallback_strategy)
 #     else:
 #         return latex_vector
-# 
-# 
+#
+#
 # def safe_to_vec(v_str, fallback_strategy="auto"):
 #     """
 #     Safe version of to_vec with explicit fallback control.
-# 
+#
 #     Parameters
 #     ----------
 #     v_str : str
 #         String representation of the vector
 #     fallback_strategy : str, optional
 #         Explicit fallback strategy: "auto", "mathtext", "unicode", "plain"
-# 
+#
 #     Returns
 #     -------
 #     str
 #         Vector notation with specified fallback behavior
 #     """
 #     return to_vec(v_str, enable_fallback=True, fallback_strategy=fallback_strategy)
-# 
-# 
+#
+#
 # # Backward compatibility
 # vector_notation = to_vec
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

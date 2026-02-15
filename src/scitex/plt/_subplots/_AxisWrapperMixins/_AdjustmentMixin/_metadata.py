@@ -18,6 +18,7 @@ class MetadataMixin:
     def _get_ax_module(self):
         """Lazy import ax module to avoid circular imports."""
         from .....plt import ax as ax_module
+
         return ax_module
 
     def set_xyt(

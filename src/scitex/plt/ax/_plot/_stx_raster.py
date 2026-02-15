@@ -9,12 +9,13 @@ __FILE__ = "./src/scitex/plt/ax/_plot/_plot_raster.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
-import matplotlib
 from bisect import bisect_left
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
 from ....plt.utils import assert_valid_axis
 
 

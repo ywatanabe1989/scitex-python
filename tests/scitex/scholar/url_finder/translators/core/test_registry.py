@@ -17,34 +17,34 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/zotero_translators_python/core/registry.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """Translator registry for managing and discovering translators.
-# 
+#
 # The registry finds the right translator for a URL and extracts PDF links.
-# 
+#
 # Usage:
 #     from scitex.scholar.url_finder.translators import TranslatorRegistry
-# 
+#
 #     # Find translator
 #     translator = TranslatorRegistry.get_translator_for_url(url)
-# 
+#
 #     # Extract PDFs
 #     pdf_urls = await TranslatorRegistry.extract_pdf_urls_async(url, page)
 # """
-# 
+#
 # import logging
 # from typing import List, Optional, Type
-# 
+#
 # from playwright.async_api import Page
-# 
+#
 # from .base import BaseTranslator
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
+#
 # from ..individual.abc_news_australia import ABCNewsAustraliaTranslator
 # from ..individual.access_engineering import AccessEngineeringTranslator
 # from ..individual.access_science import AccessScienceTranslator
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 # from ..individual.aclweb import ACLWebTranslator
 # from ..individual.acm import ACMTranslator
 # from ..individual.acs import ACSTranslator
-# 
+#
 # # from ..individual.cambridge_core import CambridgeCoreTranslator  # Not yet implemented
 # from ..individual.acs_publications import ACSPublicationsTranslator
 # from ..individual.adam_matthew_digital import AdamMatthewDigitalTranslator
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 # from ..individual.arxiv import ArXivTranslator
 # from ..individual.arxiv_org import ArXivOrgTranslator
 # from ..individual.asce import ASCETranslator
-# 
+#
 # # from ..individual.atypon import AtyponTranslator  # Deprecated - use AtyponJournalsTranslator
 # from ..individual.atypon_journals import AtyponJournalsTranslator
 # from ..individual.biomed_central import BioMedCentralTranslator
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 # from ..individual.semantic_scholar import SemanticScholarTranslator
 # from ..individual.silverchair import SilverchairTranslator
 # from ..individual.springer import SpringerTranslator
-# 
+#
 # # Import all translator implementations
 # from ..individual.ssrn import SSRNTranslator
 # from ..individual.state_records_office_wa import StateRecordsOfficeWATranslator
@@ -176,15 +176,15 @@ if __name__ == "__main__":
 # from ..individual.ypfs import YPFSTranslator
 # from ..individual.zbmath import ZbMATHTranslator
 # from ..individual.zobodat import ZOBODATTranslator
-# 
-# 
+#
+#
 # class TranslatorRegistry:
 #     """Central registry for all Python translator implementations.
-# 
+#
 #     Translators are checked in order. The first matching translator wins.
 #     DOI is first because it redirects to publisher pages and delegates to them.
 #     """
-# 
+#
 #     _translators: List[Type[BaseTranslator]] = [
 #         # DOI first - it redirects to publishers and delegates
 #         DOITranslator,
@@ -296,57 +296,57 @@ if __name__ == "__main__":
 #         AGRISTranslator,
 #         # Add more translators here as they are implemented
 #     ]
-# 
+#
 #     def __init__(self):
 #         self.name = self.__class__.__name__
-# 
+#
 #     @classmethod
 #     def get_translator_for_url(cls, url: str) -> Optional[Type[BaseTranslator]]:
 #         """Find the appropriate translator for a given URL.
-# 
+#
 #         Args:
 #             url: URL to find translator for
-# 
+#
 #         Returns:
 #             Translator class if found, None otherwise
 #         """
 #         # Check if pattern-based extraction can handle it
 #         try:
 #             from .patterns import AccessPattern, detect_pattern
-# 
+#
 #             pattern, _ = detect_pattern(url)
 #             if pattern == AccessPattern.DIRECT_PDF:
 #                 # Signal that we can handle it (patterns.py will extract)
 #                 return type("DirectPDFTranslator", (), {"LABEL": "Direct PDF"})
 #         except Exception:
 #             pass
-# 
+#
 #         for translator in cls._translators:
 #             if translator.matches_url(url):
 #                 return translator
 #         return None
-# 
+#
 #     @classmethod
 #     async def extract_pdf_urls_async(cls, url: str, page: Page) -> List[str]:
 #         """Extract PDF URLs using the appropriate translator.
-# 
+#
 #         Args:
 #             url: URL of the page
 #             page: Playwright page object
-# 
+#
 #         Returns:
 #             List of PDF URLs found, or empty list if no translator found
 #         """
 #         # Try pattern-based extraction first
 #         try:
 #             from .patterns import extract_pdf_urls_by_pattern
-# 
+#
 #             pdf_urls = await extract_pdf_urls_by_pattern(url, page)
 #             if pdf_urls:
 #                 return pdf_urls
 #         except Exception as e:
 #             logger.debug(f"{self.name}: Pattern extraction failed for {url}: {e}")
-# 
+#
 #         # Fall back to translator-based approach
 #         translator = cls.get_translator_for_url(url)
 #         if translator:
@@ -357,30 +357,30 @@ if __name__ == "__main__":
 #                     f"{self.name}: Translator {translator.LABEL} failed for {url}: {e}"
 #                 )
 #                 return []
-# 
+#
 #         logger.debug(f"{self.name}: No translator found for {url}")
 #         return []
-# 
+#
 #     @classmethod
 #     def register(cls, translator: Type[BaseTranslator]) -> None:
 #         """Register a new translator.
-# 
+#
 #         Args:
 #             translator: Translator class to register
 #         """
 #         if translator not in cls._translators:
 #             cls._translators.append(translator)
-# 
+#
 #     @classmethod
 #     def list_translators(cls) -> List[Type[BaseTranslator]]:
 #         """Get list of all registered translators.
-# 
+#
 #         Returns:
 #             List of translator classes
 #         """
 #         return cls._translators.copy()
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

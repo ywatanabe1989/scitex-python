@@ -7,9 +7,7 @@ from __future__ import annotations
 
 import os
 
-__FILE__ = (
-    "./src/scitex/sh/test_sh_simple.py"
-)
+__FILE__ = "./src/scitex/sh/test_sh_simple.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 

@@ -191,14 +191,16 @@ def collect_console_logs(page: "Page") -> list:
         List of log strings in format "[LEVEL] source message"
     """
     try:
-        logs = page.evaluate("""
+        logs = page.evaluate(
+            """
         () => {
             if (window._scitex_console_logs) {
                 return window._scitex_console_logs;
             }
             return [];
         }
-        """)
+        """
+        )
         return logs or []
     except Exception:
         return []
@@ -211,14 +213,16 @@ def collect_console_logs_detailed(page: "Page") -> list:
         List of dicts with keys: level, message, source, timestamp, url
     """
     try:
-        history = page.evaluate("""
+        history = page.evaluate(
+            """
         () => {
             if (window._scitex_console_history) {
                 return window._scitex_console_history;
             }
             return [];
         }
-        """)
+        """
+        )
         return history or []
     except Exception:
         return []

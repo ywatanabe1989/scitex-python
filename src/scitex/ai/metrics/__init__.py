@@ -6,30 +6,33 @@ Standardized naming convention:
 - Legacy names (bACC, balanced_accuracy, etc.): For backward compatibility
 """
 
-# Modern standardized calc_* functions
-from ._normalize_labels import normalize_labels as _normalize_labels
 from ._calc_bacc import calc_bacc
-from ._calc_mcc import calc_mcc
-from ._calc_conf_mat import calc_conf_mat
-from ._calc_clf_report import calc_clf_report
-from ._calc_roc_auc import calc_roc_auc
-from ._calc_pre_rec_auc import calc_pre_rec_auc
 from ._calc_bacc_from_conf_mat import calc_bacc_from_conf_mat
-from ._calc_seizure_prediction_metrics import (
-    calc_seizure_window_prediction_metrics,
-    calc_seizure_event_prediction_metrics,
-    calc_seizure_prediction_metrics,  # backward compat alias
-)
-from ._calc_silhouette_score import (
-    calc_silhouette_score_slow,
-    calc_silhouette_samples_slow,
-    calc_silhouette_score_block,
-    calc_silhouette_samples_block,
-)
+from ._calc_clf_report import calc_clf_report
+from ._calc_conf_mat import calc_conf_mat
 from ._calc_feature_importance import (
     calc_feature_importance,
     calc_permutation_importance,
 )
+from ._calc_mcc import calc_mcc
+from ._calc_pre_rec_auc import calc_pre_rec_auc
+from ._calc_roc_auc import calc_roc_auc
+from ._calc_seizure_prediction_metrics import (
+    calc_seizure_prediction_metrics,  # backward compat alias
+)
+from ._calc_seizure_prediction_metrics import (
+    calc_seizure_event_prediction_metrics,
+    calc_seizure_window_prediction_metrics,
+)
+from ._calc_silhouette_score import (
+    calc_silhouette_samples_block,
+    calc_silhouette_samples_slow,
+    calc_silhouette_score_block,
+    calc_silhouette_score_slow,
+)
+
+# Modern standardized calc_* functions
+from ._normalize_labels import normalize_labels as _normalize_labels
 
 __all__ = [
     "calc_bacc",

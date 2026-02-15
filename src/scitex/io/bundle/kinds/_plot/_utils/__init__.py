@@ -4,6 +4,12 @@
 
 """Utilities for FTS figures - layout, defaults, validation."""
 
+# Auto layout
+from ._auto_layout import auto_crop_layout, auto_layout_grid
+
+# Bounds calculation
+from ._calc_bounds import Bounds, content_bounds, element_bounds, validate_within_bounds
+
 # Constants
 from ._const_sizes import (
     A4_HEIGHT_MM,
@@ -20,6 +26,9 @@ from ._const_sizes import (
     SCIENCE_DOUBLE_COLUMN_MM,
     SCIENCE_SINGLE_COLUMN_MM,
 )
+
+# Coordinate conversion
+from ._convert_coords import to_absolute, to_relative
 
 # Templates
 from ._get_template import (
@@ -43,20 +52,6 @@ from ._normalize import (
     normalize_position,
     normalize_size,
 )
-
-# Coordinate conversion
-from ._convert_coords import to_absolute, to_relative
-
-# Bounds calculation
-from ._calc_bounds import (
-    Bounds,
-    content_bounds,
-    element_bounds,
-    validate_within_bounds,
-)
-
-# Auto layout
-from ._auto_layout import auto_crop_layout, auto_layout_grid
 
 # Layout visualization
 from ._plot_layout import BLUEPRINT_STYLE, plot_auto_crop_comparison, plot_layout

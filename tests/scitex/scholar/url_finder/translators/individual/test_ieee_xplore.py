@@ -13,11 +13,11 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # """IEEE Xplore translator.
-# 
+#
 # Based on IEEE Xplore.js translator from Zotero.
 # Original JavaScript implementation by Simon Kornblith, Michael Berkowitz,
 # Bastian Koenings, and Avram Lyon.
-# 
+#
 # Supports:
 # - Journal articles
 # - Conference papers
@@ -25,62 +25,62 @@ if __name__ == "__main__":
 # - Search results pages
 # - Issue pages
 # - Conference proceedings
-# 
+#
 # IEEE Xplore provides academic papers in electrical engineering, computer science,
 # and electronics.
 # """
-# 
+#
 # import re
 # import json
 # from typing import List, Dict, Optional
 # from urllib.parse import quote, urljoin
 # from playwright.async_api import Page
 # from ..core.base import BaseTranslator
-# 
-# 
+#
+#
 # class IEEEXploreTranslator(BaseTranslator):
 #     """IEEE Xplore translator.
-# 
+#
 #     Based on JavaScript translator (IEEE Xplore.js).
 #     """
-# 
+#
 #     LABEL = "IEEE Xplore"
 #     URL_TARGET_PATTERN = r"^https?://([^/]+\.)?ieeexplore\.ieee\.org/([^#]+[&?]arnumber=\d+|(abstract/)?document/|search/(searchresult|selected)\.jsp|xpl/(mostRecentIssue|tocresult)\.jsp\?|xpl/conhome/\d+/proceeding)"
-# 
+#
 #     @classmethod
 #     def matches_url(cls, url: str) -> bool:
 #         """Check if URL matches IEEE Xplore pattern.
-# 
+#
 #         Based on JavaScript detectWeb() (lines 38-82).
 #         """
 #         return bool(re.match(cls.URL_TARGET_PATTERN, url))
-# 
+#
 #     @classmethod
 #     async def extract_pdf_urls_async(cls, page: Page) -> List[str]:
 #         """Extract PDF URLs from IEEE Xplore page.
-# 
+#
 #         Based on JavaScript scrape() function (lines 134-261).
-# 
+#
 #         The JavaScript implementation:
 #         1. Extracts arnumber from URL or page
 #         2. Fetches BibTeX metadata via REST API
 #         3. Constructs PDF URL using arnumber
 #         4. Checks for PDF gateway URL or direct PDF
 #         5. Returns PDF attachment
-# 
+#
 #         Python implementation:
 #         - Extracts arnumber from URL or page
 #         - Constructs PDF URL using IEEE's stamp/getPDF endpoint
 #         - Returns list of PDF URLs
-# 
+#
 #         Args:
 #             page: Playwright page object on IEEE Xplore
-# 
+#
 #         Returns:
 #             List containing PDF URL if arnumber found, empty list otherwise
 #         """
 #         pdf_urls = []
-# 
+#
 #         try:
 #             # Method 1: Extract arnumber from current URL (JS line 135)
 #             # Match patterns: arnumber=123456 or /document/123456
@@ -88,20 +88,20 @@ if __name__ == "__main__":
 #             arnumber_match = re.search(r"arnumber=(\d+)", current_url)
 #             if not arnumber_match:
 #                 arnumber_match = re.search(r"/document/(\d+)", current_url)
-# 
+#
 #             if arnumber_match:
 #                 arnumber = arnumber_match.group(1)
-# 
+#
 #                 # Try to get the actual PDF URL by checking the stamp page (JS lines 166-180)
 #                 try:
 #                     # Navigate to the PDF gateway page
 #                     pdf_gateway_url = f"https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber={arnumber}"
-# 
+#
 #                     # Look for embedded PDF iframe or redirect
 #                     # JavaScript uses requestDocument, we use page.goto with a short timeout
 #                     # to check if we can access the PDF
 #                     pdf_url = None
-# 
+#
 #                     # Try to extract PDF URL from metadata or page content
 #                     # Check for PDF link in the page (JS lines 176-177)
 #                     try:
@@ -118,24 +118,24 @@ if __name__ == "__main__":
 #                                 pdf_url = iframe_src
 #                     except Exception:
 #                         pass
-# 
+#
 #                     # Fallback to direct getPDF URL (JS lines 182-184)
 #                     if not pdf_url:
 #                         pdf_url = f"https://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber={arnumber}&ref="
-# 
+#
 #                     if pdf_url:
 #                         pdf_urls.append(pdf_url)
-# 
+#
 #                 except Exception:
 #                     # If we can't access the gateway, use the fallback URL
 #                     pdf_url = f"https://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber={arnumber}&ref="
 #                     pdf_urls.append(pdf_url)
-# 
+#
 #                 return pdf_urls
-# 
+#
 #         except Exception:
 #             pass
-# 
+#
 #         # Method 2: Look for PDF download link on the page
 #         try:
 #             # Check for direct PDF download links
@@ -152,7 +152,7 @@ if __name__ == "__main__":
 #                 return pdf_urls
 #         except Exception:
 #             pass
-# 
+#
 #         # Method 3: Extract from metadata in page script (JS lines 138-149)
 #         try:
 #             # Look for global.document.metadata in script tags
@@ -164,7 +164,7 @@ if __name__ == "__main__":
 #                     arnumber_match = re.search(r'"arnumber"\s*:\s*"(\d+)"', script)
 #                     if not arnumber_match:
 #                         arnumber_match = re.search(r'"articleId"\s*:\s*"(\d+)"', script)
-# 
+#
 #                     if arnumber_match:
 #                         arnumber = arnumber_match.group(1)
 #                         pdf_url = f"https://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber={arnumber}&ref="
@@ -172,15 +172,15 @@ if __name__ == "__main__":
 #                         return pdf_urls
 #         except Exception:
 #             pass
-# 
+#
 #         return pdf_urls
-# 
+#
 #     @classmethod
 #     async def extract_metadata_async(cls, page: Page) -> Optional[Dict]:
 #         """Extract metadata from IEEE Xplore page.
-# 
+#
 #         Based on JavaScript scrape() function (lines 134-261).
-# 
+#
 #         Extracts:
 #         - Article number (arnumber)
 #         - Title
@@ -191,28 +191,28 @@ if __name__ == "__main__":
 #         - Volume, issue, pages
 #         - Publication date
 #         - Keywords
-# 
+#
 #         Args:
 #             page: Playwright page object on IEEE Xplore
-# 
+#
 #         Returns:
 #             Dictionary containing metadata, or None if extraction fails
 #         """
 #         metadata = {}
-# 
+#
 #         try:
 #             # Extract arnumber from URL (JS line 135)
 #             current_url = page.url
 #             arnumber_match = re.search(r"arnumber=(\d+)", current_url)
 #             if not arnumber_match:
 #                 arnumber_match = re.search(r"/document/(\d+)", current_url)
-# 
+#
 #             if not arnumber_match:
 #                 return None
-# 
+#
 #             arnumber = arnumber_match.group(1)
 #             metadata["arnumber"] = arnumber
-# 
+#
 #             # Extract metadata from script tag (JS lines 138-149)
 #             script_elements = await page.locator('script[type="text/javascript"]').all()
 #             for script_element in script_elements:
@@ -224,7 +224,7 @@ if __name__ == "__main__":
 #                         data_raw = re.sub(r"^=", "", data_raw)
 #                         data_raw = re.sub(r"};[\s\S]*$", "}", data_raw)
 #                         data = json.loads(data_raw)
-# 
+#
 #                         # Extract authors (JS lines 220-229)
 #                         if "authors" in data and data["authors"]:
 #                             authors = []
@@ -235,7 +235,7 @@ if __name__ == "__main__":
 #                                 }
 #                                 authors.append(author_name)
 #                             metadata["authors"] = authors
-# 
+#
 #                         # Extract other metadata
 #                         if "title" in data:
 #                             metadata["title"] = data["title"]
@@ -247,11 +247,11 @@ if __name__ == "__main__":
 #                             metadata["publicationTitle"] = data["publicationTitle"]
 #                         if "issn" in data:
 #                             metadata["issn"] = data.get("issn", [])
-# 
+#
 #                         break
 #                     except Exception:
 #                         continue
-# 
+#
 #             # Determine item type (JS lines 44-50)
 #             # Check breadcrumbs for "Conferences"
 #             try:
@@ -264,16 +264,16 @@ if __name__ == "__main__":
 #                     metadata["itemType"] = "journalArticle"
 #             except Exception:
 #                 metadata["itemType"] = "journalArticle"
-# 
+#
 #             # Clean URL (JS lines 237-239)
 #             metadata["url"] = re.sub(r"[?#].*", "", current_url)
-# 
+#
 #             return metadata
-# 
+#
 #         except Exception:
 #             return None
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

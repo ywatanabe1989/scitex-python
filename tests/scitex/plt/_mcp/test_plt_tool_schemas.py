@@ -14,10 +14,10 @@ if __name__ == "__main__":
 # # Timestamp: 2026-01-08
 # # File: src/scitex/plt/_mcp.tool_schemas.py
 # # ----------------------------------------
-# 
+#
 # """
 # MCP Tool schemas for SciTeX plt module.
-# 
+#
 # Defines tools for publication-quality plotting:
 # - get_style: Get current style configuration
 # - set_style: Set global style overrides
@@ -25,12 +25,12 @@ if __name__ == "__main__":
 # - create_figure: Create figure with publication style
 # - crop_figure: Auto-crop figure whitespace
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import mcp.types as types
-# 
-# 
+#
+#
 # def get_tool_schemas() -> list[types.Tool]:
 #     """Return list of available MCP tools for plt operations."""
 #     return [
@@ -502,10 +502,10 @@ if __name__ == "__main__":
 #             },
 #         ),
 #     ]
-# 
-# 
+#
+#
 # __all__ = ["get_tool_schemas"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

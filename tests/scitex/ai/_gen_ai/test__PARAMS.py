@@ -17,15 +17,15 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/ai/_gen_ai/PARAMS.py"
-# 
+#
 # import pandas as pd
-# 
+#
 # # https://api-docs.deepseek.com/quick_start/pricing
 # DEEPSEEK_MODELS = [
 #     {
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 #         "provider": "DeepSeek",
 #     },
 # ]
-# 
+#
 # # https://openai.com/api/pricing/
 # OPENAI_MODELS = [
 #     # o3
@@ -209,7 +209,7 @@ if __name__ == "__main__":
 #         "provider": "OpenAI",
 #     },
 # ]
-# 
+#
 # # https://docs.anthropic.com/en/docs/about-claude/models/all-models
 # # https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#pricing
 # # https://docs.anthropic.com/en/docs/about-claude/models#model-comparison-table
@@ -292,8 +292,8 @@ if __name__ == "__main__":
 #         "provider": "Anthropic",
 #     },
 # ]
-# 
-# 
+#
+#
 # # https://ai.google.dev/gemini-api/docs/pricing
 # GOOGLE_MODELS = [
 #     {
@@ -332,7 +332,7 @@ if __name__ == "__main__":
 #         "provider": "Google",
 #     },
 # ]
-# 
+#
 # PERPLEXITY_MODELS = [
 #     {
 #         "name": "llama-3.1-sonar-small-128k-online",
@@ -419,7 +419,7 @@ if __name__ == "__main__":
 #         "provider": "Perplexity",
 #     },
 # ]
-# 
+#
 # LLAMA_MODELS = [
 #     {
 #         "name": "llama-3-70b",
@@ -443,7 +443,7 @@ if __name__ == "__main__":
 #         "provider": "Llama",
 #     },
 # ]
-# 
+#
 # # https://console.groq.com/docs/models
 # GROQ_MODELS = [
 #     {
@@ -545,7 +545,7 @@ if __name__ == "__main__":
 #         "provider": "Groq",
 #     },
 # ]
-# 
+#
 # MODELS = pd.DataFrame(
 #     OPENAI_MODELS
 #     + ANTHROPIC_MODELS
@@ -555,12 +555,12 @@ if __name__ == "__main__":
 #     + DEEPSEEK_MODELS
 #     + GROQ_MODELS
 # )
-# 
-# 
+#
+#
 # # curl -L -X GET 'https://api.deepseek.com/models' \
 # # -H 'Accept: application/json' \
 # # -H 'Authorization: Bearer sk-43412ea536ff482e87a38010231ce7c3'
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

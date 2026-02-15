@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # File: ./src/scitex/bridge/_plt_vis.py
 # Time-stamp: "2024-12-09 10:00:00 (ywatanabe)"
 """
@@ -11,31 +10,27 @@ Provides adapters to:
 - Synchronize matplotlib state with vis JSON
 """
 
-from typing import Optional, Dict, Any, List, Tuple, Union
 import warnings
+from typing import Any, Dict, List, Optional, Tuple
 
-# Legacy model imports - may not be available (deleted module)
+# Legacy model imports - deprecated module, suppress warnings
 try:
-    from scitex.canvas.model import (
-        FigureModel,
-        AxesModel,
-        PlotModel,
-        AnnotationModel,
-        GuideModel,
-        PlotStyle,
-        AxesStyle,
-        TextStyle,
-    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        from scitex.canvas.model import (
+            AnnotationModel,
+            AxesModel,
+            AxesStyle,
+            FigureModel,
+            GuideModel,
+            PlotModel,
+            PlotStyle,
+            TextStyle,
+        )
     VIS_MODEL_AVAILABLE = True
 except ImportError:
-    FigureModel = None
-    AxesModel = None
-    PlotModel = None
-    AnnotationModel = None
-    GuideModel = None
-    PlotStyle = None
-    AxesStyle = None
-    TextStyle = None
+    FigureModel = AxesModel = PlotModel = AnnotationModel = None
+    GuideModel = PlotStyle = AxesStyle = TextStyle = None
     VIS_MODEL_AVAILABLE = False
 
 
@@ -179,7 +174,9 @@ def axes_to_vis_axes(
     if include_data and scitex_ax and hasattr(scitex_ax, "history"):
         plots = tracking_to_plot_configs(scitex_ax.history)
         for plot in plots:
-            axes_model.plots.append(plot.to_dict() if hasattr(plot, "to_dict") else plot)
+            axes_model.plots.append(
+                plot.to_dict() if hasattr(plot, "to_dict") else plot
+            )
 
     # Extract annotations
     for text_obj in mpl_ax.texts:
@@ -284,8 +281,7 @@ def collect_figure_data(
                 # Extract data arrays from tracked_dict
                 if "args" in tracked:
                     plot_data["args"] = [
-                        _array_to_list(a) for a in tracked["args"]
-                        if _is_array_like(a)
+                        _array_to_list(a) for a in tracked["args"] if _is_array_like(a)
                     ]
                 axes_data["plots"].append(plot_data)
 
@@ -345,6 +341,7 @@ def _infer_layout(axes_list, fig) -> Tuple[int, int]:
     else:
         # Try to make it roughly square
         import math
+
         ncols = int(math.ceil(math.sqrt(n)))
         nrows = int(math.ceil(n / ncols))
         return nrows, ncols
@@ -354,12 +351,9 @@ def _color_to_hex(color) -> str:
     """Convert matplotlib color to hex string."""
     try:
         import matplotlib.colors as mcolors
+
         rgb = mcolors.to_rgb(color)
-        return "#{:02x}{:02x}{:02x}".format(
-            int(rgb[0] * 255),
-            int(rgb[1] * 255),
-            int(rgb[2] * 255),
-        )
+        return f"#{int(rgb[0] * 255):02x}{int(rgb[1] * 255):02x}{int(rgb[2] * 255):02x}"
     except (ValueError, TypeError):
         return "#ffffff"
 
@@ -423,25 +417,35 @@ def _extract_guides(mpl_ax) -> List[GuideModel]:
             # Check if horizontal (y values same)
             if data[0][1] == data[-1][1] and data[0][0] != data[-1][0]:
                 xlim = mpl_ax.get_xlim()
-                if abs(data[0][0] - xlim[0]) < 0.01 and abs(data[-1][0] - xlim[1]) < 0.01:
-                    guides.append(GuideModel(
-                        guide_type="axhline",
-                        y=data[0][1],
-                        color=_color_to_hex(line.get_color()),
-                        linestyle=line.get_linestyle(),
-                        linewidth=line.get_linewidth(),
-                    ))
+                if (
+                    abs(data[0][0] - xlim[0]) < 0.01
+                    and abs(data[-1][0] - xlim[1]) < 0.01
+                ):
+                    guides.append(
+                        GuideModel(
+                            guide_type="axhline",
+                            y=data[0][1],
+                            color=_color_to_hex(line.get_color()),
+                            linestyle=line.get_linestyle(),
+                            linewidth=line.get_linewidth(),
+                        )
+                    )
             # Check if vertical
             elif data[0][0] == data[-1][0] and data[0][1] != data[-1][1]:
                 ylim = mpl_ax.get_ylim()
-                if abs(data[0][1] - ylim[0]) < 0.01 and abs(data[-1][1] - ylim[1]) < 0.01:
-                    guides.append(GuideModel(
-                        guide_type="axvline",
-                        x=data[0][0],
-                        color=_color_to_hex(line.get_color()),
-                        linestyle=line.get_linestyle(),
-                        linewidth=line.get_linewidth(),
-                    ))
+                if (
+                    abs(data[0][1] - ylim[0]) < 0.01
+                    and abs(data[-1][1] - ylim[1]) < 0.01
+                ):
+                    guides.append(
+                        GuideModel(
+                            guide_type="axvline",
+                            x=data[0][0],
+                            color=_color_to_hex(line.get_color()),
+                            linestyle=line.get_linestyle(),
+                            linewidth=line.get_linewidth(),
+                        )
+                    )
 
     return guides
 
@@ -524,6 +528,7 @@ def _is_array_like(obj) -> bool:
 def _is_serializable(obj) -> bool:
     """Check if object is JSON serializable."""
     import json
+
     try:
         json.dumps(obj)
         return True

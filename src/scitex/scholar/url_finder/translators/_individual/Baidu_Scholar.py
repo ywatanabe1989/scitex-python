@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2021-06-16 17:43:54
 """
 
-from typing import Dict, Any, List, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class BaiduScholarTranslator:

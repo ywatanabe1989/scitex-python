@@ -9,7 +9,7 @@ Each paper entry in the Scholar library needs to track multiple types of URLs fo
 - **`url_doi`**: The DOI resolver URL (e.g., `https://doi.org/10.1038/s41593-025-01990-7`)
   - Purpose: Permanent identifier, always redirects to current publisher location
   - Source: DOI resolver services (CrossRef, DataCite)
-  
+
 - **`canonical_url`**: The canonical/preferred URL for the article
   - Purpose: The "official" URL that should be cited
   - Source: Publisher metadata or DOI resolution
@@ -33,7 +33,7 @@ Each paper entry in the Scholar library needs to track multiple types of URLs fo
 ### 3. Download URLs
 - **`urls_pdf`**: Array of direct PDF download URLs
   - Purpose: Direct links to PDF files (may require authentication)
-  - Examples: 
+  - Examples:
     - `https://www.nature.com/articles/s41593-025-01990-7.pdf`
     - `https://www.nature.com/articles/s41593-025-01990-7.pdf?proof=t`
   - Source: Zotero translators, page scraping, publisher patterns
@@ -46,7 +46,7 @@ Each paper entry in the Scholar library needs to track multiple types of URLs fo
 ### 4. Alternative Access URLs
 - **`preprint_url`**: Link to preprint version (if available)
   - Purpose: Free access to early version
-  - Examples: 
+  - Examples:
     - `https://arxiv.org/abs/2303.12345`
     - `https://www.biorxiv.org/content/10.1101/...`
   - Source: DOI metadata, CrossRef, arXiv API
@@ -118,7 +118,7 @@ Each paper entry in the Scholar library needs to track multiple types of URLs fo
 {
   "scitex_id": "F99329E1",
   "title": "Example Paper Title",
-  
+
   "urls": {
     "identification": {
       "url_doi": "https://doi.org/10.1038/...",
@@ -126,7 +126,7 @@ Each paper entry in the Scholar library needs to track multiple types of URLs fo
       "canonical_url": "https://www.nature.com/articles/...",
       "canonical_url_source": "DOI_resolution"
     },
-    
+
     "access": {
       "article_url": "https://www.nature.com/articles/...",
       "article_url_source": "user_input",
@@ -135,7 +135,7 @@ Each paper entry in the Scholar library needs to track multiple types of URLs fo
       "openurl": "https://unimelb.hosted.exlibrisgroup.com/...",
       "openurl_source": "OpenURLResolver"
     },
-    
+
     "download": {
       "urls_pdf": [
         {
@@ -148,14 +148,14 @@ Each paper entry in the Scholar library needs to track multiple types of URLs fo
       "pdf_viewer_url": "https://www.nature.com/articles/...pdf#view",
       "pdf_viewer_url_source": "browser_navigation"
     },
-    
+
     "alternative": {
       "preprint_url": "https://arxiv.org/abs/...",
       "preprint_url_source": "CrossRef",
       "author_manuscript_url": "https://www.ncbi.nlm.nih.gov/pmc/...",
       "author_manuscript_url_source": "PubMed"
     },
-    
+
     "supplementary": [
       {
         "url": "https://...",
@@ -165,23 +165,23 @@ Each paper entry in the Scholar library needs to track multiple types of URLs fo
         "source": "article_page"
       }
     ],
-    
+
     "related": {
       "dataset_urls": ["https://..."],
       "code_repository_url": "https://github.com/..."
     },
-    
+
     "metadata_api": {
       "crossref_api_url": "https://api.crossref.org/works/...",
       "semantic_scholar_url": "https://www.semanticscholar.org/paper/..."
     },
-    
+
     "archive": {
       "wayback_url": "https://web.archive.org/web/...",
       "perma_cc_url": "https://perma.cc/..."
     }
   },
-  
+
   "url_resolution_status": {
     "doi_resolved": true,
     "openurl_resolved": true,

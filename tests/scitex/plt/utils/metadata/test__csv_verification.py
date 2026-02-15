@@ -13,24 +13,24 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: scitex/plt/utils/metadata/_csv_verification.py
-# 
+#
 # """
 # CSV-JSON consistency verification utilities.
-# 
+#
 # This module provides functions to verify that CSV columns match JSON metadata exactly.
 # """
-# 
+#
 # import json
 # import pandas as pd
 # from pathlib import Path
-# 
-# 
+#
+#
 # def assert_csv_json_consistency(csv_path: str, json_path: str = None) -> None:
 #     """
 #     Assert that CSV columns match JSON metadata exactly.
-# 
+#
 #     Raises AssertionError if inconsistencies are found.
-# 
+#
 #     Parameters
 #     ----------
 #     csv_path : str
@@ -41,19 +41,19 @@ if __name__ == "__main__":
 #     result = verify_csv_json_consistency(csv_path, json_path)
 #     if result["status"] != "consistent":
 #         raise AssertionError(f"CSV-JSON inconsistency: {result['message']}")
-# 
-# 
+#
+#
 # def verify_csv_json_consistency(csv_path: str, json_path: str = None) -> dict:
 #     """
 #     Verify CSV columns match JSON metadata.
-# 
+#
 #     Parameters
 #     ----------
 #     csv_path : str
 #         Path to CSV file
 #     json_path : str, optional
 #         Path to JSON file (defaults to csv_path with .json extension)
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -62,21 +62,21 @@ if __name__ == "__main__":
 #     # Determine JSON path
 #     if json_path is None:
 #         json_path = str(Path(csv_path).with_suffix('.json'))
-# 
+#
 #     try:
 #         # Load CSV
 #         df = pd.read_csv(csv_path)
 #         csv_columns = set(df.columns)
-# 
+#
 #         # Load JSON
 #         with open(json_path, 'r') as f:
 #             metadata = json.load(f)
-# 
+#
 #         # Extract column names from JSON metadata
 #         json_columns = set()
 #         if "data" in metadata and "columns_actual" in metadata["data"]:
 #             json_columns = set(metadata["data"]["columns_actual"])
-# 
+#
 #         # Compare
 #         if csv_columns == json_columns:
 #             return {
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 #                     "missing_in_csv": sorted(missing_in_csv),
 #                 }
 #             }
-# 
+#
 #     except Exception as e:
 #         return {
 #             "status": "error",

@@ -3,10 +3,11 @@
 # File: ./src/scitex/vis/backend/render.py
 """Render figure models to matplotlib figures using scitex.plt."""
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 import numpy as np
 
-from ..model import FigureModel, AxesModel, PlotModel, GuideModel, AnnotationModel
+from ..model import AnnotationModel, AxesModel, FigureModel, GuideModel, PlotModel
 from ._parser import parse_figure_json
 
 

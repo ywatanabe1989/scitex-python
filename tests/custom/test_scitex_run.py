@@ -88,6 +88,7 @@ def run_main() -> None:
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex
 
     args = parse_args()

@@ -11,7 +11,8 @@ with different strategies (child, parent, origin).
 
 from pathlib import Path
 from typing import Optional
-from git import Repo, InvalidGitRepositoryError
+
+from git import InvalidGitRepositoryError, Repo
 
 from scitex.logging import getLogger
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """LaTeX utilities module for scitex."""
 
-from ._export import export_tex, compile_tex, CompileResult
+from ._export import CompileResult, compile_tex, export_tex
 from ._preview import preview
 from ._to_vec import to_vec
 

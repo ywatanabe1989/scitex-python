@@ -3,8 +3,8 @@
 # File: ./src/scitex/vis/model/annotations.py
 """Annotation JSON model for scitex.canvas."""
 
-from typing import Optional, Dict, Any, Tuple
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, Optional, Tuple
 
 from ._styles import TextStyle
 

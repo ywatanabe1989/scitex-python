@@ -13,21 +13,21 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2026-01-13
 # # File: src/scitex/plt/_mcp/_handlers_style.py
-# 
+#
 # """Style-related MCP handlers for SciTeX plt module."""
-# 
+#
 # from __future__ import annotations
-# 
+#
 # from typing import Optional
-# 
-# 
+#
+#
 # async def get_style_handler() -> dict:
 #     """Get current SciTeX publication style configuration."""
 #     try:
 #         from scitex.plt.styles.presets import get_style
-# 
+#
 #         style = get_style()
-# 
+#
 #         return {
 #             "success": True,
 #             "style": style,
@@ -35,8 +35,8 @@ if __name__ == "__main__":
 #         }
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def set_style_handler(
 #     axes_width_mm: Optional[float] = None,
 #     axes_height_mm: Optional[float] = None,
@@ -55,10 +55,10 @@ if __name__ == "__main__":
 #     """Set global style overrides for publication figures."""
 #     try:
 #         from scitex.plt.styles.presets import get_style, set_style
-# 
+#
 #         if reset:
 #             set_style(None)
-# 
+#
 #         style_updates = {}
 #         if axes_width_mm is not None:
 #             style_updates["axes_width_mm"] = axes_width_mm
@@ -84,12 +84,12 @@ if __name__ == "__main__":
 #             style_updates["legend_font_size_pt"] = legend_font_size_pt
 #         if trace_thickness_mm is not None:
 #             style_updates["trace_thickness_mm"] = trace_thickness_mm
-# 
+#
 #         if style_updates:
 #             set_style(style_updates)
-# 
+#
 #         final_style = get_style()
-# 
+#
 #         return {
 #             "success": True,
 #             "updated_parameters": list(style_updates.keys()),
@@ -98,8 +98,8 @@ if __name__ == "__main__":
 #         }
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def list_presets_handler() -> dict:
 #     """List available publication style presets."""
 #     try:
@@ -140,7 +140,7 @@ if __name__ == "__main__":
 #                 "notes": "Single column width: 3.5 inches",
 #             },
 #         ]
-# 
+#
 #         return {
 #             "success": True,
 #             "count": len(presets),
@@ -149,8 +149,8 @@ if __name__ == "__main__":
 #         }
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def get_dpi_settings_handler() -> dict:
 #     """Get DPI settings for different output contexts."""
 #     try:
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 #             get_display_dpi,
 #             get_preview_dpi,
 #         )
-# 
+#
 #         return {
 #             "success": True,
 #             "dpi_settings": {
@@ -180,16 +180,16 @@ if __name__ == "__main__":
 #         }
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def get_color_palette_handler(format: str = "hex") -> dict:
 #     """Get the SciTeX color palette."""
 #     try:
 #         from scitex.plt import color as color_module
-# 
+#
 #         params = getattr(color_module, "PARAMS", {})
 #         rgba_cycle = params.get("RGBA_NORM_FOR_CYCLE", {})
-# 
+#
 #         colors = {}
 #         for name, rgba in rgba_cycle.items():
 #             if format == "hex":
@@ -208,7 +208,7 @@ if __name__ == "__main__":
 #                     "b": rgba[2],
 #                     "a": rgba[3] if len(rgba) > 3 else 1.0,
 #                 }
-# 
+#
 #         return {
 #             "success": True,
 #             "format": format,
@@ -218,8 +218,8 @@ if __name__ == "__main__":
 #         }
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # __all__ = [
 #     "get_style_handler",
 #     "set_style_handler",
@@ -227,7 +227,7 @@ if __name__ == "__main__":
 #     "get_dpi_settings_handler",
 #     "get_color_palette_handler",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

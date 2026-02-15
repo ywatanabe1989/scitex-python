@@ -13,10 +13,10 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_metadata.py
-# 
+#
 # """
 # Image and PDF metadata embedding and extraction for research reproducibility.
-# 
+#
 # This module re-exports from _metadata_modules for backwards compatibility.
 # See _metadata_modules/ for format-specific implementations:
 # - PNG: tEXt chunks
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 # - SVG: <metadata> element with scitex namespace
 # - PDF: XMP metadata (industry standard)
 # """
-# 
+#
 # from ._metadata_modules import (
 #     embed_metadata,
 #     read_metadata,
@@ -38,10 +38,10 @@ if __name__ == "__main__":
 #     read_metadata_svg,
 #     read_metadata_pdf,
 # )
-# 
+#
 # # Backwards compatibility alias
 # _convert_for_json = None  # Removed - use _metadata_modules._utils.convert_for_json
-# 
+#
 # __all__ = [
 #     "embed_metadata",
 #     "read_metadata",
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 #     "read_metadata_svg",
 #     "read_metadata_pdf",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

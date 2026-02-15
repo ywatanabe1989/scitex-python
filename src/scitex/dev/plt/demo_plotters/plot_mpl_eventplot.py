@@ -18,9 +18,9 @@ def plot_mpl_eventplot(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     positions = [rng.uniform(0, 10, rng.integers(5, 15)) for _ in range(5)]
-    ax.mpl_eventplot(positions, orientation='horizontal')
+    ax.mpl_eventplot(positions, orientation="horizontal")
     ax.set_xyt("X", "Y", "mpl_eventplot")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

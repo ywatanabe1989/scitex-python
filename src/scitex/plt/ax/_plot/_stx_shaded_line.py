@@ -12,6 +12,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 
 from scitex.types import ColorLike
+
 from ....plt.utils import assert_valid_axis
 
 
@@ -56,9 +57,9 @@ def _plot_single_shaded_line(
     assert_valid_axis(
         axis, "First argument must be a matplotlib axis or scitex axis wrapper"
     )
-    assert len(xx) == len(y_middle) == len(y_lower) == len(y_upper), (
-        "All arrays must have the same length"
-    )
+    assert (
+        len(xx) == len(y_middle) == len(y_lower) == len(y_upper)
+    ), "All arrays must have the same length"
 
     label = kwargs.pop("label", None)
     axis.plot(xx, y_middle, color=color, alpha=alpha, label=label, **kwargs)
@@ -109,9 +110,9 @@ def _plot_shaded_line(
     assert_valid_axis(
         axis, "First argument must be a matplotlib axis or scitex axis wrapper"
     )
-    assert len(xs) == len(ys_lower) == len(ys_middle) == len(ys_upper), (
-        "All input lists must have the same length"
-    )
+    assert (
+        len(xs) == len(ys_lower) == len(ys_middle) == len(ys_upper)
+    ), "All input lists must have the same length"
 
     results = []
     colors = color
@@ -203,9 +204,9 @@ def stx_shaded_line(
     )
 
     if is_single:
-        assert len(xs) == len(ys_lower) == len(ys_middle) == len(ys_upper), (
-            "All arrays must have the same length for single line plot"
-        )
+        assert (
+            len(xs) == len(ys_lower) == len(ys_middle) == len(ys_upper)
+        ), "All arrays must have the same length for single line plot"
 
         return _plot_single_shaded_line(
             axis, xs, ys_lower, ys_middle, ys_upper, color=color, **kwargs

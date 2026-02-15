@@ -12,8 +12,10 @@ supporting both single-fold and cross-validation summary plots.
 
 from pathlib import Path
 from typing import Dict, List, Optional, Union
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
+
 import scitex as stx
 
 
@@ -231,8 +233,8 @@ def plot_feature_importance_cv_summary(
 
 def main(args):
     """Demo feature importance plotting."""
-    from sklearn.ensemble import RandomForestClassifier
     from sklearn import datasets
+    from sklearn.ensemble import RandomForestClassifier
 
     # Load iris dataset
     iris = datasets.load_iris()
@@ -289,7 +291,9 @@ def run_main():
     global CONFIG, CC, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

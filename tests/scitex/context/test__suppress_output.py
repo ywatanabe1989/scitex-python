@@ -170,6 +170,7 @@ class TestSuppressOutput:
 
     def test_return_values_preserved(self):
         """Test that return values from functions work within suppressed context."""
+
         def test_function():
             print("This should be suppressed")
             return "test_value"
@@ -205,8 +206,8 @@ class TestSuppressOutput:
         """Test that suppress_output properly implements context manager protocol."""
         # Test __enter__ and __exit__ methods exist
         context_manager = suppress_output()
-        assert hasattr(context_manager, '__enter__')
-        assert hasattr(context_manager, '__exit__')
+        assert hasattr(context_manager, "__enter__")
+        assert hasattr(context_manager, "__exit__")
 
         # Test manual context manager usage
         captured_output = StringIO()
@@ -269,6 +270,7 @@ class TestSuppressOutput:
         assert len(output) == 0
         assert len(error_output) == 0
 
+
 if __name__ == "__main__":
     import os
 
@@ -286,19 +288,19 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/context/_suppress_output.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # from contextlib import contextmanager, redirect_stderr, redirect_stdout
-# 
-# 
+#
+#
 # @contextmanager
 # def suppress_output(suppress=True):
 #     """
 #     A context manager that suppresses stdout and stderr.
-# 
+#
 #     Example:
 #         with suppress_output():
 #             print("This will not be printed to the console.")
@@ -313,10 +315,10 @@ if __name__ == "__main__":
 #     else:
 #         # If suppress is False, just yield without redirecting output
 #         yield
-# 
-# 
+#
+#
 # quiet = suppress_output
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

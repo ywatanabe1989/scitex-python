@@ -9,8 +9,9 @@ This module provides functions to compute hashes of CSV data for reproducibility
 verification and linking JSON metadata to CSV files.
 """
 
-from typing import Optional
 import hashlib
+from typing import Optional
+
 import pandas as pd
 
 

@@ -33,9 +33,9 @@ def xarray_fn(func: Callable) -> Callable:
 
         # Convert args to xarray DataArrays
         def to_xarray(data):
-            import xarray as xr
             import pandas as pd
             import torch
+            import xarray as xr
 
             if isinstance(data, xr.DataArray):
                 return data
@@ -59,9 +59,9 @@ def xarray_fn(func: Callable) -> Callable:
         import xarray as xr
 
         for arg_index, arg in enumerate(converted_args):
-            assert isinstance(arg, xr.DataArray), (
-                f"Argument {arg_index} not converted to DataArray: {type(arg)}"
-            )
+            assert isinstance(
+                arg, xr.DataArray
+            ), f"Argument {arg_index} not converted to DataArray: {type(arg)}"
 
         results = func(*converted_args, **converted_kwargs)
 

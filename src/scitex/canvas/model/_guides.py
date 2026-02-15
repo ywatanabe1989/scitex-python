@@ -3,8 +3,8 @@
 # File: ./src/scitex/vis/model/guides.py
 """Guide elements (lines, spans) JSON model for scitex.canvas."""
 
-from typing import Optional, List, Dict, Any
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional
 
 from ._styles import GuideStyle
 

@@ -14,11 +14,12 @@ Features:
 
 import time
 import xml.etree.ElementTree as ET
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 from urllib.parse import quote
 
 from scitex import logging
 from scitex.scholar.metadata_engines.individual.ArXivEngine import ArXivEngine
+
 from .._BaseSearchEngine import BaseSearchEngine
 
 logger = logging.getLogger(__name__)

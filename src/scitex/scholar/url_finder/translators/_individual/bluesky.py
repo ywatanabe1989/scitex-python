@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2025-03-26 14:26:25
 """
 
-from typing import Dict, Any, List, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class BlueskyTranslator:

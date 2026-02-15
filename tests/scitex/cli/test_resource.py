@@ -211,6 +211,7 @@ class TestResourceMonitor:
                 assert result.exit_code == 0
                 assert "stopped" in result.output.lower()
 
+
 if __name__ == "__main__":
     import os
 
@@ -224,26 +225,26 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # """
 # SciTeX CLI - Resource Commands (System Monitoring)
-# 
+#
 # Provides system resource monitoring and specifications.
 # """
-# 
+#
 # import sys
-# 
+#
 # import click
-# 
-# 
+#
+#
 # @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 # def resource():
 #     """
 #     System resource monitoring
-# 
+#
 #     \b
 #     Commands:
 #       specs     Show system specifications
 #       usage     Show current resource usage
 #       monitor   Continuously monitor resource usage
-# 
+#
 #     \b
 #     Examples:
 #       scitex resource specs              # Show system specs
@@ -251,8 +252,8 @@ if __name__ == "__main__":
 #       scitex resource monitor --interval 5
 #     """
 #     pass
-# 
-# 
+#
+#
 # @resource.command()
 # @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 # @click.option(
@@ -265,7 +266,7 @@ if __name__ == "__main__":
 # def specs(as_json, category):
 #     """
 #     Show system specifications
-# 
+#
 #     \b
 #     Categories:
 #       cpu     - Processor information
@@ -275,7 +276,7 @@ if __name__ == "__main__":
 #       gpu     - GPU/CUDA information
 #       os      - Operating system details
 #       python  - Python environment
-# 
+#
 #     \b
 #     Examples:
 #       scitex resource specs
@@ -284,9 +285,9 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.resource import get_specs
-# 
+#
 #         specs_data = get_specs()
-# 
+#
 #         # Filter categories if specified
 #         if category:
 #             category_map = {
@@ -306,15 +307,15 @@ if __name__ == "__main__":
 #                 elif cat in specs_data:
 #                     filtered[cat] = specs_data[cat]
 #             specs_data = filtered
-# 
+#
 #         if as_json:
 #             import json
-# 
+#
 #             click.echo(json.dumps(specs_data, indent=2, default=str))
 #         else:
 #             click.secho("System Specifications", fg="cyan", bold=True)
 #             click.echo("=" * 50)
-# 
+#
 #             for section, data in specs_data.items():
 #                 section_name = (
 #                     section.replace("_info", "").replace("_supple_", "").upper()
@@ -325,18 +326,18 @@ if __name__ == "__main__":
 #                         click.echo(f"  {key}: {value}")
 #                 else:
 #                     click.echo(f"  {data}")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @resource.command()
 # @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 # def usage(as_json):
 #     """
 #     Show current resource usage (CPU, memory, GPU)
-# 
+#
 #     \b
 #     Examples:
 #       scitex resource usage
@@ -344,30 +345,30 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.resource import get_processor_usages
-# 
+#
 #         usage_data = get_processor_usages()
-# 
+#
 #         if as_json:
 #             import json
-# 
+#
 #             click.echo(json.dumps(usage_data, indent=2, default=str))
 #         else:
 #             click.secho("Resource Usage", fg="cyan", bold=True)
 #             click.echo("=" * 50)
-# 
+#
 #             # CPU
 #             cpu = usage_data.get("cpu", {})
 #             click.secho("\nCPU:", fg="yellow")
 #             click.echo(f"  Usage: {cpu.get('percent', 'N/A')}%")
 #             click.echo(f"  Cores: {cpu.get('count', 'N/A')}")
-# 
+#
 #             # Memory
 #             mem = usage_data.get("memory", {})
 #             click.secho("\nMemory:", fg="yellow")
 #             click.echo(f"  Used: {mem.get('percent', 'N/A')}%")
 #             click.echo(f"  Total: {mem.get('total_gb', 'N/A')} GB")
 #             click.echo(f"  Available: {mem.get('available_gb', 'N/A')} GB")
-# 
+#
 #             # GPU (if available)
 #             gpu = usage_data.get("gpu", {})
 #             if gpu:
@@ -378,12 +379,12 @@ if __name__ == "__main__":
 #                         f"      Memory: {g.get('memory_used', 'N/A')} / {g.get('memory_total', 'N/A')} MB"
 #                     )
 #                     click.echo(f"      Utilization: {g.get('utilization', 'N/A')}%")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @resource.command()
 # @click.option(
 #     "--interval",
@@ -397,7 +398,7 @@ if __name__ == "__main__":
 # def monitor(interval, count, log):
 #     """
 #     Continuously monitor resource usage
-# 
+#
 #     \b
 #     Examples:
 #       scitex resource monitor
@@ -406,24 +407,24 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         import time
-# 
+#
 #         from scitex.resource import get_processor_usages
-# 
+#
 #         click.echo(f"Monitoring resources (interval: {interval}s)")
 #         click.echo("Press Ctrl+C to stop")
 #         click.echo()
-# 
+#
 #         log_file = None
 #         if log:
 #             log_file = open(log, "w")
 #             log_file.write("timestamp,cpu_percent,memory_percent,gpu_percent\n")
-# 
+#
 #         iteration = 0
 #         try:
 #             while True:
 #                 if count and iteration >= count:
 #                     break
-# 
+#
 #                 usage_data = get_processor_usages()
 #                 cpu_pct = usage_data.get("cpu", {}).get("percent", 0)
 #                 mem_pct = usage_data.get("memory", {}).get("percent", 0)
@@ -431,34 +432,34 @@ if __name__ == "__main__":
 #                 gpu_info = usage_data.get("gpu", {})
 #                 if gpu_info and gpu_info.get("devices"):
 #                     gpu_pct = gpu_info["devices"][0].get("utilization", 0)
-# 
+#
 #                 # Display
 #                 from datetime import datetime
-# 
+#
 #                 ts = datetime.now().strftime("%H:%M:%S")
 #                 line = f"[{ts}] CPU: {cpu_pct:5.1f}%  MEM: {mem_pct:5.1f}%  GPU: {gpu_pct:5.1f}%"
 #                 click.echo(line)
-# 
+#
 #                 # Log
 #                 if log_file:
 #                     log_file.write(f"{ts},{cpu_pct},{mem_pct},{gpu_pct}\n")
 #                     log_file.flush()
-# 
+#
 #                 iteration += 1
 #                 time.sleep(interval)
-# 
+#
 #         except KeyboardInterrupt:
 #             click.echo("\nMonitoring stopped")
 #         finally:
 #             if log_file:
 #                 log_file.close()
 #                 click.echo(f"Log saved: {log}")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     resource()
 

@@ -16,21 +16,21 @@ if __name__ == "__main__":
 # # File: /ssh:sp:/home/ywatanabe/proj/.claude-worktree/scitex_repo/src/scitex/io/_save_modules/_html.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/io/_save_modules/_html.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # HTML saving functionality for scitex.io.save
 # """
-# 
+#
 # import plotly
-# 
-# 
+#
+#
 # def save_html(obj, spath, **kwargs):
 #     """Handle HTML file saving (primarily for Plotly figures).
-# 
+#
 #     Parameters
 #     ----------
 #     obj : plotly.graph_objs.Figure or str
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 #         Path where HTML file will be saved
 #     **kwargs
 #         Additional keyword arguments passed to plotly.io.write_html()
-# 
+#
 #     Notes
 #     -----
 #     - Primarily designed for saving Plotly interactive figures
@@ -55,8 +55,8 @@ if __name__ == "__main__":
 #     else:
 #         # Try to convert to HTML using plotly
 #         plotly.io.write_html(obj, spath, **kwargs)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

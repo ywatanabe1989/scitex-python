@@ -1,5 +1,6 @@
-import torch
 import warnings
+
+import torch
 
 
 def verify_n_gpus(n_gpus):

@@ -14,16 +14,16 @@ if __name__ == "__main__":
 # # Timestamp: "2025-12-27 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/audio/_mcp.tool_schemas.py
 # # ----------------------------------------
-# 
+#
 # """Tool schemas for the scitex-audio MCP server."""
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import mcp.types as types
-# 
+#
 # __all__ = ["get_tool_schemas"]
-# 
-# 
+#
+#
 # def get_tool_schemas() -> list[types.Tool]:
 #     """Return all tool schemas for the MCP server."""
 #     return [
@@ -210,8 +210,8 @@ if __name__ == "__main__":
 #             },
 #         ),
 #     ]
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

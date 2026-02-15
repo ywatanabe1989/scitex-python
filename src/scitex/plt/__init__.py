@@ -36,11 +36,11 @@ except ImportError:
     _fr = None
 
 # Standard library and matplotlib imports
-import matplotlib as mpl
-import matplotlib.font_manager as fm
-import matplotlib.pyplot as _plt
+import matplotlib as mpl  # noqa: E402
+import matplotlib.font_manager as fm  # noqa: E402
+import matplotlib.pyplot as _plt  # noqa: E402
 
-from scitex import logging as _logging
+from scitex import logging as _logging  # noqa: E402
 
 _logger = _logging.getLogger(__name__)
 
@@ -54,7 +54,6 @@ if _FIGRECIPE_AVAILABLE:
     # Core public API
     from figrecipe import (
         Diagram,
-        Schematic,
         compose,
         crop,
         extract_data,
@@ -84,9 +83,9 @@ if _FIGRECIPE_AVAILABLE:
 
     # Backward compatibility alias
     smart_align = align_smart
-    from figrecipe._graph_presets import get_preset as get_graph_preset
-    from figrecipe._graph_presets import list_presets as list_graph_presets
-    from figrecipe._graph_presets import register_preset as register_graph_preset
+    from figrecipe._graph._presets import get_preset as get_graph_preset
+    from figrecipe._graph._presets import list_presets as list_graph_presets
+    from figrecipe._graph._presets import register_preset as register_graph_preset
 
     # Also export load as alias for reproduce
     load = reproduce
@@ -100,7 +99,6 @@ else:
         )
 
     Diagram = _not_available
-    Schematic = _not_available
     STYLE = None
     load_style = _not_available
     unload_style = _not_available
@@ -139,11 +137,11 @@ except ImportError:
     termplot = None
 
 # Backward compatibility: expose styles submodule (deprecated, use figrecipe)
-from . import ax, color, gallery, styles, utils
+from . import ax, color, gallery, styles, utils  # noqa: E402
 
 # Import draw_graph from figrecipe integration (handles AxisWrapper)
-from ._figrecipe_integration import draw_graph
-from .styles import presets
+from ._figrecipe_integration import draw_graph  # noqa: E402
+from .styles import presets  # noqa: E402
 
 # ============================================================================
 # Auto-configure matplotlib with SciTeX defaults on import
@@ -181,16 +179,14 @@ def _register_arial_fonts():
 
 def _auto_configure_mpl():
     """Apply SciTeX style configuration automatically on import."""
-    # Try to use figrecipe's style system first
+    # Load SCITEX style preset from figrecipe (caches for per-figure use)
     if _FIGRECIPE_AVAILABLE:
         try:
-            # Load SCITEX style preset from figrecipe
             load_style("SCITEX")
-            return
         except Exception:
             pass
 
-    # Fallback: use local style loader
+    # Always set global rcParams for consistent defaults
     from .styles import resolve_style_value
 
     # mm to pt conversion factor
@@ -323,8 +319,7 @@ def figure(*args, **kwargs):
 
 
 def tight_layout(**kwargs):
-    """
-    Wrapper for matplotlib.pyplot.tight_layout that handles colorbar layout compatibility.
+    """Apply tight layout to current figure with colorbar compatibility handling.
 
     This function calls tight_layout on the current figure and gracefully handles:
     1. UserWarning: "The figure layout has changed to tight" - informational only
@@ -430,7 +425,6 @@ def close(fig=None):
 __all__ = [
     # Figrecipe classes
     "Diagram",
-    "Schematic",
     # Figrecipe core (re-exported with branding)
     "subplots",
     "save",
@@ -483,8 +477,8 @@ __all__ = [
 
 
 def __getattr__(name):
-    """
-    Fallback to matplotlib.pyplot for any missing attributes.
+    """Fallback to matplotlib.pyplot for any missing attributes.
+
     This makes scitex.plt a complete drop-in replacement for matplotlib.pyplot.
     """
     if hasattr(_plt, name):
@@ -493,9 +487,7 @@ def __getattr__(name):
 
 
 def __dir__():
-    """
-    Provide comprehensive directory listing including matplotlib.pyplot functions.
-    """
+    """Provide comprehensive directory listing including matplotlib.pyplot functions."""
     local_attrs = list(__all__)
     # Add matplotlib.pyplot attributes
     mpl_attrs = [attr for attr in dir(_plt) if not attr.startswith("_")]

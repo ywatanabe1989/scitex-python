@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 # Time-stamp: "2024-04-02 09:21:12 (ywatanabe)"
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-import matplotlib.pyplot as plt
+
 import scitex
 from scitex.decorators import numpy_fn, torch_fn
 
@@ -107,9 +108,7 @@ def normalize(x, axis=-1, amp=1.0, cuda=False):
 @torch_fn
 def spectrograms(x, fs, dj=0.125, cuda=False):
     try:
-        from wavelets_pytorch.transform import (
-            WaveletTransformTorch,
-        )  # PyTorch version
+        from wavelets_pytorch.transform import WaveletTransformTorch  # PyTorch version
     except ImportError:
         raise ImportError(
             "The spectrograms function requires the wavelets-pytorch package. "
@@ -138,9 +137,10 @@ def spectrograms(x, fs, dj=0.125, cuda=False):
 
 
 if __name__ == "__main__":
-    import scitex
     import seaborn as sns
     import torchaudio
+
+    import scitex
 
     fs = 1024  # 128
     t_sec = 10

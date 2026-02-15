@@ -68,13 +68,13 @@ auth_manager = AuthenticationManager(
 # IMPORTANT: Use standard OpenURLResolver for paywalled content
 # NOT ZenRowsOpenURLResolver!
 resolver = OpenURLResolver(
-    auth_manager, 
+    auth_manager,
     os.getenv("SCITEX_SCHOLAR_OPENURL_RESOLVER_URL")
 )
 
 async def resolve_paywalled_papers():
     """Resolve paywalled papers with authentication."""
-    
+
     # Ensure authenticated
     is_auth = await auth_manager.is_authenticated()
     if not is_auth:
@@ -83,10 +83,10 @@ async def resolve_paywalled_papers():
         if not success:
             print("❌ Authentication failed!")
             return
-    
+
     # Test with a paywalled paper
     doi = "10.1038/nature12373"  # Nature paper
-    
+
     print(f"\nResolving paywalled DOI: {doi}")
     result = await resolver._resolve_single_async(
         doi=doi,
@@ -94,14 +94,14 @@ async def resolve_paywalled_papers():
         journal="Nature",
         year=2014
     )
-    
+
     if result and result.get('success'):
         print(f"✅ Success! Resolved to: {result.get('final_url')}")
         print(f"   Access type: {result.get('access_type')}")
     else:
         print(f"❌ Failed to resolve")
         print(f"   Reason: {result.get('access_type', 'Unknown')}")
-    
+
     return result
 
 # Run async resolution

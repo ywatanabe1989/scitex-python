@@ -9,8 +9,10 @@ import re as _re
 from glob import glob as _glob
 from pathlib import Path
 from typing import Union
-from scitex.str._parse import parse as _parse
+
 from natsort import natsorted as _natsorted
+
+from scitex.str._parse import parse as _parse
 
 
 def glob(expression: Union[str, Path], parse=False, ensure_one=False):

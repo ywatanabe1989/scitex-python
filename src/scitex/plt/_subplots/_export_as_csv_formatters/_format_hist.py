@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -61,11 +62,21 @@ def _format_hist(id, tracked_dict, kwargs):
         bin_widths = bin_edges[1:] - bin_edges[:-1]
 
         # Use structured column naming
-        col_centers = get_csv_column_name("bin-centers", ax_row, ax_col, trace_id=trace_id)
-        col_counts = get_csv_column_name("bin-counts", ax_row, ax_col, trace_id=trace_id)
-        col_widths = get_csv_column_name("bin-widths", ax_row, ax_col, trace_id=trace_id)
-        col_left = get_csv_column_name("bin-edges-left", ax_row, ax_col, trace_id=trace_id)
-        col_right = get_csv_column_name("bin-edges-right", ax_row, ax_col, trace_id=trace_id)
+        col_centers = get_csv_column_name(
+            "bin-centers", ax_row, ax_col, trace_id=trace_id
+        )
+        col_counts = get_csv_column_name(
+            "bin-counts", ax_row, ax_col, trace_id=trace_id
+        )
+        col_widths = get_csv_column_name(
+            "bin-widths", ax_row, ax_col, trace_id=trace_id
+        )
+        col_left = get_csv_column_name(
+            "bin-edges-left", ax_row, ax_col, trace_id=trace_id
+        )
+        col_right = get_csv_column_name(
+            "bin-edges-right", ax_row, ax_col, trace_id=trace_id
+        )
 
         # Add bin information to DataFrame
         columns[col_centers] = bin_centers
@@ -81,7 +92,7 @@ def _format_hist(id, tracked_dict, kwargs):
                 # Pad with NaN if needed - convert to float first for NaN support
                 arr = np.asarray(value, dtype=float)
                 padded = np.full(max_length, np.nan)
-                padded[:len(arr)] = arr
+                padded[: len(arr)] = arr
                 columns[key] = padded
 
     # Return DataFrame or empty DataFrame if no data

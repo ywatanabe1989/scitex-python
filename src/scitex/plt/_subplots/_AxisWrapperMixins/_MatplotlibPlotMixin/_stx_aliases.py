@@ -10,8 +10,8 @@ from typing import List, Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
-from matplotlib.container import BarContainer
 from matplotlib.collections import PathCollection
+from matplotlib.container import BarContainer
 from matplotlib.contour import QuadContourSet
 from matplotlib.image import AxesImage
 

@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 # Timestamp: "2025-10-01 18:14:34 (ywatanabe)"
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/stats/tests/nonparametric/_test_kruskal.py
-# ----------------------------------------
-from __future__ import annotations
 
-import os
+r"""
+Kruskal-Wallis H test for independent samples.
 
-__FILE__ = __file__
-__DIR__ = os.path.dirname(__FILE__)
-# ----------------------------------------
-
-"""
 Functionalities:
   - Perform Kruskal-Wallis H test for independent samples
   - Non-parametric alternative to one-way ANOVA
@@ -26,8 +20,10 @@ IO:
   - output: Test results (dict or DataFrame) and optional figure
 """
 
-"""Imports"""
+from __future__ import annotations
+
 import argparse
+import os
 from typing import List, Literal, Optional, Union
 
 import matplotlib
@@ -38,23 +34,28 @@ from scipy import stats
 
 import scitex as stx
 from scitex.logging import getLogger
+from scitex.stats._utils._formatters import fmt_stat
+
+__FILE__ = __file__
+__DIR__ = os.path.dirname(__FILE__)
 
 logger = getLogger(__name__)
 
-"""Functions"""
 
-
-def test_kruskal(
-    groups: List[Union[np.ndarray, pd.Series]],
+def test_kruskal(  # noqa: C901
+    groups: Optional[List[Union[np.ndarray, pd.Series]]] = None,
     var_names: Optional[List[str]] = None,
     alpha: float = 0.05,
     plot: bool = False,
     ax: Optional[matplotlib.axes.Axes] = None,
+    data: Union[pd.DataFrame, str, None] = None,
+    value_col: Optional[str] = None,
+    group_col: Optional[str] = None,
     return_as: Literal["dict", "dataframe"] = "dict",
     decimals: int = 3,
     verbose: bool = False,
 ) -> Union[dict, pd.DataFrame]:
-    """
+    r"""
     Perform Kruskal-Wallis H test for independent samples.
 
     Parameters
@@ -70,6 +71,13 @@ def test_kruskal(
     ax : matplotlib.axes.Axes, optional
         Axes object to plot on. If None and plot=True, creates new figure.
         If provided, automatically enables plotting.
+    data : DataFrame, str, or None, optional
+        DataFrame or CSV path. When provided with value_col and group_col,
+        groups are extracted automatically (seaborn-style).
+    value_col : str, optional
+        Column containing measurement values (used with data=).
+    group_col : str, optional
+        Column containing group labels (used with data=).
     return_as : {'dict', 'dataframe'}, default 'dict'
         Output format
     decimals : int, default 3
@@ -123,7 +131,7 @@ def test_kruskal(
     **Test Statistic H**:
 
     .. math::
-        H = \\frac{12}{N(N+1)} \\sum_{i=1}^{k} \\frac{R_i^2}{n_i} - 3(N+1)
+        H = \frac{12}{N(N+1)} \sum_{i=1}^{k} \frac{R_i^2}{n_i} - 3(N+1)
 
     Where:
     - k: Number of groups
@@ -134,7 +142,7 @@ def test_kruskal(
     **Effect Size (Epsilon-squared)**:
 
     .. math::
-        \\epsilon^2 = \\frac{H - k + 1}{N - k}
+        \epsilon^2 = \frac{H - k + 1}{N - k}
 
     Interpretation (similar to eta-squared):
     - ε² < 0.01:  negligible
@@ -187,6 +195,14 @@ def test_kruskal(
     from scitex.stats._utils._formatters import p2stars
     from scitex.stats._utils._normalizers import convert_results, force_dataframe
 
+    # Resolve groups from DataFrame (seaborn-style data= parameter)
+    if data is not None and value_col is not None and group_col is not None:
+        from scitex.stats._utils._csv_support import resolve_groups
+
+        groups, group_names = resolve_groups(data, value_col, group_col)
+        if var_names is None:
+            var_names = group_names
+
     # Validate input
     if len(groups) < 2:
         raise ValueError("Kruskal-Wallis test requires at least 2 groups")
@@ -213,7 +229,6 @@ def test_kruskal(
     # Get sample sizes
     n_samples = [len(g) for g in groups]
     n_groups = len(groups)
-    n_total = sum(n_samples)
 
     # Perform Kruskal-Wallis test
     h_result = stats.kruskal(*groups)
@@ -268,7 +283,7 @@ def test_kruskal(
     # Generate plot if requested
     if plot:
         if ax is None:
-            fig, ax = stx.plt.subplots()
+            _fig, ax = stx.plt.subplots()
         _plot_kruskal(groups, var_names, result, ax)
 
     # Convert to requested format
@@ -283,85 +298,33 @@ def test_kruskal(
 
 def _plot_kruskal(groups, var_names, result, ax):
     """Create violin+swarm visualization on given axes."""
+    from scitex.stats._plot_helpers import (
+        significance_bracket,
+        stats_text_box,
+        violin_swarm,
+    )
+
     n_groups = len(groups)
-    positions = np.arange(n_groups)
-    colors = [f"C{i}" for i in range(n_groups)]
+    positions = list(range(n_groups))
 
-    # Violin plot (background, transparent)
-    parts = ax.violinplot(
-        groups,
-        positions=positions,
-        widths=0.6,
-        showmeans=False,
-        showmedians=False,
-        showextrema=False,
-    )
+    violin_swarm(ax, groups, positions, var_names)
 
-    for i, pc in enumerate(parts["bodies"]):
-        pc.set_facecolor(colors[i])
-        pc.set_alpha(0.3)
-        pc.set_edgecolor(colors[i])
-        pc.set_linewidth(1.5)
-
-    # Swarm plot (foreground - scatter in front!)
-    np.random.seed(42)
-    for i, vals in enumerate(groups):
-        y_vals = vals
-        x_vals = np.random.normal(positions[i], 0.04, size=len(vals))
-        ax.scatter(
-            x_vals,
-            y_vals,
-            alpha=0.6,
-            s=40,
-            color=colors[i],
-            edgecolors="white",
-            linewidths=0.5,
-            zorder=3,  # In front!
-        )
-
-    # Add median lines
-    for i, vals in enumerate(groups):
-        median = np.median(vals)
-        ax.hlines(
-            median,
-            positions[i] - 0.3,
-            positions[i] + 0.3,
-            colors="black",
-            linewidth=2,
-            zorder=4,
-        )
-
-    # Significance annotation
     if result["significant"]:
-        y_max = max(np.max(g) for g in groups)
-        y_min = min(np.min(g) for g in groups)
-        y_range = y_max - y_min
-        y_pos = y_max + 0.1 * y_range
+        significance_bracket(ax, 0, n_groups - 1, result["stars"], groups)
 
-        ax.plot([0, n_groups - 1], [y_pos, y_pos], "k-", linewidth=1.5)
-        ax.text(
-            (n_groups - 1) / 2,
-            y_pos + 0.02 * y_range,
-            result["stars"],
-            ha="center",
-            va="bottom",
-            fontsize=14,
-            fontweight="bold",
-        )
-
-    ax.set_xticks(positions)
-    ax.set_xticklabels(var_names)
-    ax.set_ylabel("Value")
-    ax.set_title(
-        f"Kruskal-Wallis Test\nH = {result['statistic']:.2f}, p = {result['pvalue']:.4f} {result['stars']}"
+    stats_text_box(
+        ax,
+        [
+            fmt_stat("H", result["statistic"]),
+            fmt_stat("p", result["pvalue"], fmt=".4f", stars=result["stars"]),
+            fmt_stat("epsilon2", result["effect_size"]),
+        ],
     )
-    ax.grid(True, alpha=0.3, axis="y")
+
+    ax.set_title("Kruskal-Wallis Test")
 
 
-"""Main function"""
-
-
-def main(args):
+def main(args):  # noqa: C901
     """Demonstrate Kruskal-Wallis test functionality."""
     logger.info("Demonstrating Kruskal-Wallis H test")
 
@@ -397,9 +360,7 @@ def main(args):
     # Example 3: Non-normal data with outliers (with visualization)
     logger.info("\n=== Example 3: Non-normal data with outliers ===")
 
-    group1 = np.concatenate(
-        [np.random.exponential(2, 25), [20, 22]]  # Outliers
-    )
+    group1 = np.concatenate([np.random.exponential(2, 25), [20, 22]])  # Outliers
     group2 = np.random.exponential(3, 27)
     group3 = np.random.exponential(4, 28)
 
@@ -486,9 +447,9 @@ def main(args):
         logger.info("\nAfter Bonferroni correction:")
         for res in corrected:
             logger.info(
-                f"{res['var_x']} vs {res['var_y']}: "
-                f"p_adjusted = {res['pvalue_adjusted']:.4f}, "
-                f"significant = {res['significant']}"
+                f"{res['var_x']} vs {res['var_y']}: "  # type: ignore[index]
+                f"p_adjusted = {res['pvalue_adjusted']:.4f}, "  # type: ignore[index]
+                f"significant = {res['significant']}"  # type: ignore[index]
             )
 
     # Example 7: Export results
@@ -505,11 +466,11 @@ def main(args):
     logger.info(f"Columns: {df.columns.tolist()}")
 
     # Export to Excel with styling
-    convert_results(test_results, return_as="excel", path="./kruskal_tests.xlsx")
+    convert_results(test_results, return_as="excel", path="./kruskal_tests.xlsx")  # type: ignore[arg-type]
     logger.info("Results exported to Excel")
 
     # Export to CSV
-    convert_results(test_results, return_as="csv", path="./kruskal_tests.csv")
+    convert_results(test_results, return_as="csv", path="./kruskal_tests.csv")  # type: ignore[arg-type]
     logger.info("Results exported to CSV")
 
     return 0
@@ -524,15 +485,13 @@ def parse_args():
 
 def run_main():
     """Initialize SciTeX framework and run main."""
-    global CONFIG, sys, plt, rng
-
     import sys
 
     import matplotlib.pyplot as plt
 
     args = parse_args()
 
-    CONFIG, sys.stdout, sys.stderr, plt, CC, rng_manager = stx.session.start(
+    CONFIG, sys.stdout, sys.stderr, plt, _CC, _rng_manager = stx.session.start(
         sys,
         plt,
         args=args,

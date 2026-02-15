@@ -3,7 +3,7 @@
 # File: ./src/scitex/vis/utils/validate.py
 """Validation utilities for figure JSON specifications."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 def validate_json_structure(fig_json: Dict[str, Any]) -> bool:

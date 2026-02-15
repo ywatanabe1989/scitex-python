@@ -112,20 +112,22 @@ def generate_toml_extras(module_deps: dict) -> str:
     lines.append("")
 
     # Dev dependencies
-    lines.extend([
-        "# Development tools",
-        "dev = [",
-        '    "pytest",',
-        '    "pytest-cov",',
-        '    "pytest-xdist",',
-        '    "pytest-timeout",',
-        '    "pytest-mock",',
-        '    "pytest-asyncio",',
-        '    "ruff",',
-        '    "mypy",',
-        '    "pre-commit",',
-        "]",
-    ])
+    lines.extend(
+        [
+            "# Development tools",
+            "dev = [",
+            '    "pytest",',
+            '    "pytest-cov",',
+            '    "pytest-xdist",',
+            '    "pytest-timeout",',
+            '    "pytest-mock",',
+            '    "pytest-asyncio",',
+            '    "ruff",',
+            '    "mypy",',
+            '    "pre-commit",',
+            "]",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -162,23 +164,32 @@ def main():
         description="Generate module-level dependencies for scitex"
     )
     parser.add_argument(
-        "--src-dir", type=Path, default=Path(__file__).parent.parent.parent / "src",
+        "--src-dir",
+        type=Path,
+        default=Path(__file__).parent.parent.parent / "src",
         help="Source directory containing scitex package",
     )
     parser.add_argument(
-        "--output-dir", type=Path, default=None,
+        "--output-dir",
+        type=Path,
+        default=None,
         help="Output directory for requirements files",
     )
     parser.add_argument(
-        "--format", choices=["requirements", "toml", "both"], default="toml",
+        "--format",
+        choices=["requirements", "toml", "both"],
+        default="toml",
         help="Output format",
     )
     parser.add_argument(
-        "--update-pyproject", action="store_true",
+        "--update-pyproject",
+        action="store_true",
         help="Update pyproject.toml directly",
     )
     parser.add_argument(
-        "--include-empty", action="store_true", default=True,
+        "--include-empty",
+        action="store_true",
+        default=True,
         help="Include modules with no external dependencies",
     )
 

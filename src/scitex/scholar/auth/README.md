@@ -9,7 +9,7 @@
 This module provides authentication through various institutional systems:
 
 1. **OpenAthens** - Single sign-on system (fully implemented)
-2. **EZProxy** - Library proxy server (placeholder)  
+2. **EZProxy** - Library proxy server (placeholder)
 3. **Shibboleth** - Federated identity management (placeholder)
 
 ## Quick Start

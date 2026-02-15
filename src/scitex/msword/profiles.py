@@ -22,7 +22,7 @@ The profiles define:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Callable
+from typing import Callable, Dict, List, Optional
 
 
 @dataclass

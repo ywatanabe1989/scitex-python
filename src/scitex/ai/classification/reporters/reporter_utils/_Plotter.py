@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ml/classification/reporters/reporter_utils/_Plotter.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/ml/classification/reporters/reporter_utils/_Plotter.py"
@@ -45,9 +46,9 @@ try:
 
     # Import scitex plotting functions
     import scitex as stx
-    from scitex.ai.plt.stx_conf_mat import stx_conf_mat as conf_mat
-    from scitex.ai.plt.plot_roc_curve import plot_roc_curve as roc_auc
     from scitex.ai.plt.plot_pre_rec_curve import plot_pre_rec_curve as pre_rec_auc
+    from scitex.ai.plt.plot_roc_curve import plot_roc_curve as roc_auc
+    from scitex.ai.plt.stx_conf_mat import stx_conf_mat as conf_mat
 
     PLOTTING_AVAILABLE = True
 except ImportError:
@@ -338,6 +339,7 @@ class Plotter:
             if save_path:
                 try:
                     from pathlib import Path
+
                     from scitex.io import save as stx_io_save
 
                     # Resolve to absolute path to prevent _out directory creation
@@ -442,6 +444,7 @@ class Plotter:
 
             if save_path:
                 from pathlib import Path
+
                 from scitex.io import save as stx_io_save
 
                 # Resolve to absolute path to prevent _out directory creation
@@ -749,6 +752,7 @@ class Plotter:
             # Save figure
             if save_path:
                 from pathlib import Path
+
                 from scitex.io import save as stx_io_save
 
                 # Resolve to absolute path to prevent _out directory creation

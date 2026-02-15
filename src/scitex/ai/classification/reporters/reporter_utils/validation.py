@@ -5,11 +5,12 @@ Validation utilities for classification metrics.
 Provides validation for completeness, consistency, and scientific requirements.
 """
 
+import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
-import json
 
 
 class MetricValidator:
@@ -167,9 +168,9 @@ class MetricValidator:
                 i for i, fold_data in enumerate(folds_data) if metric not in fold_data
             ]
             if missing_folds:
-                validation_report["summary"]["missing_by_metric"][metric] = (
-                    missing_folds
-                )
+                validation_report["summary"]["missing_by_metric"][
+                    metric
+                ] = missing_folds
 
         # Check consistency across folds
         validation_report["summary"]["consistency"] = self._check_consistency(

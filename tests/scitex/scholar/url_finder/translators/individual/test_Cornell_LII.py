@@ -12,9 +12,9 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # """
 # Cornell LII Translator
-# 
+#
 # Translates Cornell Legal Information Institute case law pages to Zotero format.
-# 
+#
 # Metadata:
 #     translatorID: 930d49bc-44a1-4c22-9dde-aa6f72fb11e5
 #     label: Cornell LII
@@ -27,15 +27,15 @@ if __name__ == "__main__":
 #     browserSupport: gcsbv
 #     lastUpdated: 2013-02-09 12:09:10
 # """
-# 
+#
 # from typing import Dict, Any, Optional, List
 # from bs4 import BeautifulSoup
 # import re
-# 
-# 
+#
+#
 # class CornellLIITranslator:
 #     """Translator for Cornell Legal Information Institute case law."""
-# 
+#
 #     METADATA = {
 #         "translatorID": "930d49bc-44a1-4c22-9dde-aa6f72fb11e5",
 #         "label": "Cornell LII",
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 #         "browserSupport": "gcsbv",
 #         "lastUpdated": "2013-02-09 12:09:10",
 #     }
-# 
+#
 #     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
 #         """Detect if the page contains case law."""
 #         lii_regexp = re.compile(r"/supct/html/.+")
@@ -60,13 +60,13 @@ if __name__ == "__main__":
 #                 if lii_regexp.search(a["href"]):
 #                     return "multiple"
 #         return ""
-# 
+#
 #     def do_web(self, doc: BeautifulSoup, url: str) -> List[Dict[str, Any]]:
 #         """Extract case data."""
 #         if self.detect_web(doc, url) == "case":
 #             return [self.scrape(doc, url)]
 #         return []
-# 
+#
 #     def scrape(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
 #         """Scrape case data from the document."""
 #         item = {
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 #             "attachments": [],
 #             "notes": [],
 #         }
-# 
+#
 #         # Extract casename
 #         casename_meta = doc.find("meta", {"name": "CASENAME"})
 #         if casename_meta and casename_meta.get("content"):
@@ -95,12 +95,12 @@ if __name__ == "__main__":
 #             casename_capitalized = casename_capitalized.replace(" V. ", " v. ")
 #             item["caseName"] = casename_capitalized
 #             item["shortTitle"] = casename_capitalized
-# 
+#
 #         # Extract history
 #         history_meta = doc.find("meta", {"name": "COURTBELOW"})
 #         if history_meta and history_meta.get("content"):
 #             item["history"] = history_meta["content"]
-# 
+#
 #         # Extract judge/author
 #         author_meta = doc.find("meta", attrs={"name": re.compile("AUTHOR", re.I)})
 #         if author_meta:
@@ -112,13 +112,13 @@ if __name__ == "__main__":
 #                     "fieldMode": True,
 #                 }
 #             )
-# 
+#
 #         # Extract tags from GROUP meta tags
 #         for tag_meta in doc.find_all("meta", attrs={"name": re.compile("GROUP", re.I)}):
 #             tag_value = tag_meta.get("content")
 #             if tag_value:
 #                 item["tags"].append({"tag": tag_value})
-# 
+#
 #         # Parse decision date
 #         decdate_meta = doc.find("meta", attrs={"name": re.compile("DECDATE", re.I)})
 #         if decdate_meta:
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 #             if date_match:
 #                 month, day, year = date_match.groups()
 #                 item["dateDecided"] = f"{year} {month} {day}"
-# 
+#
 #         # Create attachment to PDF
 #         pdf_match = re.match(r"^(.+)/html/(.+)(\.Z\w+)\.html$", url)
 #         if pdf_match:
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 #             item["attachments"].append(
 #                 {"url": pdf_url, "title": "PDF version", "mimeType": "application/pdf"}
 #             )
-# 
+#
 #         # Parse citation from CASENUMBER
 #         cite_elem = doc.find("CASENUMBER")
 #         if cite_elem:
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 #             if cite_match:
 #                 item["reporterVolume"] = cite_match.group(1)
 #                 item["firstPage"] = cite_match.group(2)
-# 
+#
 #         # Look for citation in span.offcite
 #         for span in doc.find_all("span", class_="offcite"):
 #             cite_match = re.search(r"([0-9]+)\s+U\.S\.\s+([0-9]+)", span.get_text())
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 #                 item["reporterVolume"] = cite_match.group(1)
 #                 item["firstPage"] = cite_match.group(2)
 #                 break
-# 
+#
 #         # Create bluebook citation note
 #         if "reporterVolume" in item and "firstPage" in item:
 #             year = re.search(r"\d{4}", item.get("dateDecided", ""))
@@ -165,7 +165,7 @@ if __name__ == "__main__":
 #                 bluebook += f" ({year_str})"
 #             bluebook += "."
 #             item["notes"].append({"note": bluebook})
-# 
+#
 #         # Parse disposition
 #         disposition_elem = doc.find("DISPOSITION")
 #         if disposition_elem:
@@ -173,7 +173,7 @@ if __name__ == "__main__":
 #             disposition = re.sub(r"\s+", " ", disposition)
 #             item["title"] = f"{item.get('title', '')} ({disposition})"
 #             item["caseName"] = f"{item.get('caseName', '')} ({disposition})"
-# 
+#
 #         return item
 
 # --------------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/browser/ScholarBrowserManager.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/browser/ScholarBrowserManager.py"
@@ -25,9 +26,7 @@ from scitex import logging
 from scitex.browser.automation import CookieAutoAcceptor
 from scitex.browser.core import BrowserMixin, ChromeProfileManager
 from scitex.browser.stealth import StealthManager
-from scitex.scholar.browser.utils.close_unwanted_pages import (
-    close_unwanted_pages,
-)
+from scitex.scholar.browser.utils.close_unwanted_pages import close_unwanted_pages
 from scitex.scholar.config import ScholarConfig
 
 logger = logging.getLogger(__name__)

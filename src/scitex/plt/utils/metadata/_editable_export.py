@@ -11,19 +11,20 @@ orchestrates geometry extraction for all elements in a matplotlib figure,
 producing a JSON-serializable dictionary suitable for interactive editing.
 """
 
-from typing import Dict, Any, Optional, List
-import numpy as np
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import numpy as np
 
 from ._geometry_extraction import (
     extract_axes_bbox_px,
+    extract_bar_group_geometry,
+    extract_image_geometry,
     extract_line_geometry,
-    extract_scatter_geometry,
     extract_polygon_geometry,
     extract_rectangle_geometry,
-    extract_bar_group_geometry,
+    extract_scatter_geometry,
     extract_text_geometry,
-    extract_image_geometry,
 )
 
 
@@ -67,7 +68,7 @@ def export_editable_figure(
         - output: {} (rendering metadata)
     """
     # Handle scitex FigureWrapper
-    mpl_fig = fig.figure if hasattr(fig, 'figure') else fig
+    mpl_fig = fig.figure if hasattr(fig, "figure") else fig
 
     # Ensure we have a renderer
     try:
@@ -110,7 +111,7 @@ def export_editable_figure(
 
     for ax_idx, ax in enumerate(axes_list):
         # Handle scitex AxisWrapper
-        mpl_ax = ax._axis_mpl if hasattr(ax, '_axis_mpl') else ax
+        mpl_ax = ax._axis_mpl if hasattr(ax, "_axis_mpl") else ax
 
         ax_id = f"ax_{ax_idx:02d}"
 
@@ -125,7 +126,10 @@ def export_editable_figure(
 
         # Extract elements from this axes
         elements = _extract_axes_elements(
-            mpl_ax, mpl_fig, ax_id, renderer,
+            mpl_ax,
+            mpl_fig,
+            ax_id,
+            renderer,
             include_full_paths=include_full_paths,
             simplify_threshold=simplify_threshold,
         )
@@ -135,7 +139,10 @@ def export_editable_figure(
 
 
 def _extract_axes_elements(
-    ax, fig, ax_id: str, renderer,
+    ax,
+    fig,
+    ax_id: str,
+    renderer,
     include_full_paths: bool = False,
     simplify_threshold: float = 0.5,
 ) -> Dict[str, Any]:
@@ -169,7 +176,7 @@ def _extract_axes_elements(
     for idx, line in enumerate(ax.lines):
         elem_id = f"{ax_id}_line_{idx:02d}"
         label = line.get_label()
-        if label is None or label.startswith('_'):
+        if label is None or label.startswith("_"):
             label = f"line_{idx}"
 
         geom = extract_line_geometry(line, ax, fig, simplify_threshold)
@@ -195,7 +202,7 @@ def _extract_axes_elements(
             # Scatter plot
             elem_id = f"{ax_id}_scatter_{idx:02d}"
             label = coll.get_label()
-            if label is None or label.startswith('_'):
+            if label is None or label.startswith("_"):
                 label = f"scatter_{idx}"
 
             geom = extract_scatter_geometry(coll, ax, fig)
@@ -216,7 +223,7 @@ def _extract_axes_elements(
             # Fill_between, violin, etc.
             elem_id = f"{ax_id}_fill_{idx:02d}"
             label = coll.get_label()
-            if label is None or label.startswith('_'):
+            if label is None or label.startswith("_"):
                 label = f"fill_{idx}"
 
             geom = extract_polygon_geometry(coll, ax, fig)
@@ -380,8 +387,8 @@ def _extract_bar_style(patch) -> Dict[str, Any]:
     ec = patch.get_edgecolor()
 
     return {
-        "facecolor": list(fc) if hasattr(fc, '__iter__') else fc,
-        "edgecolor": list(ec) if hasattr(ec, '__iter__') else ec,
+        "facecolor": list(fc) if hasattr(fc, "__iter__") else fc,
+        "edgecolor": list(ec) if hasattr(ec, "__iter__") else ec,
         "linewidth": patch.get_linewidth(),
         "alpha": patch.get_alpha(),
     }

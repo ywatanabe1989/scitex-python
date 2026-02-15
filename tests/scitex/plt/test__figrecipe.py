@@ -16,11 +16,11 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # """
 # Figrecipe integration for scitex.
-# 
+#
 # This module provides integration with figrecipe for reproducible matplotlib figures.
 # Uses csv_format="single" by default for backward compatibility with scitex's
 # SigmaPlot-compatible CSV format.
-# 
+#
 # Usage
 # -----
 # >>> import scitex.plt as splt
@@ -28,53 +28,53 @@ if __name__ == "__main__":
 # >>> ax.plot([1, 2, 3], [4, 5, 6], id='data')
 # >>> splt.save_recipe(fig, 'figure.yaml')  # Saves recipe with single CSV
 # """
-# 
+#
 # from pathlib import Path
 # from typing import Any, Dict, Literal, Optional, Tuple, Union
-# 
+#
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
+#
 # # Check if figrecipe is available
 # try:
 #     import figrecipe as fr
-# 
+#
 #     FIGRECIPE_AVAILABLE = True
 # except ImportError:
 #     FIGRECIPE_AVAILABLE = False
 #     fr = None
-# 
-# 
+#
+#
 # def check_figrecipe_available() -> bool:
 #     """Check if figrecipe is installed."""
 #     return FIGRECIPE_AVAILABLE
-# 
-# 
+#
+#
 # def subplots(
 #     nrows: int = 1,
 #     ncols: int = 1,
 #     **kwargs,
 # ) -> Tuple[Any, Any]:
 #     """Create recording-enabled subplots using figrecipe.
-# 
+#
 #     This is a wrapper around figrecipe.subplots() that creates
 #     figures with recording capabilities for reproducibility.
-# 
+#
 #     Parameters
 #     ----------
 #     nrows, ncols : int
 #         Number of rows and columns.
 #     **kwargs
 #         Additional arguments passed to figrecipe.subplots().
-# 
+#
 #     Returns
 #     -------
 #     fig : RecordingFigure
 #         Figrecipe's wrapped figure.
 #     axes : RecordingAxes or ndarray
 #         Wrapped axes.
-# 
+#
 #     Raises
 #     ------
 #     ImportError
@@ -84,10 +84,10 @@ if __name__ == "__main__":
 #         raise ImportError(
 #             "figrecipe is not installed. Install with: pip install figrecipe"
 #         )
-# 
+#
 #     return fr.subplots(nrows, ncols, **kwargs)
-# 
-# 
+#
+#
 # def save_recipe(
 #     fig,
 #     path: Union[str, Path],
@@ -98,11 +98,11 @@ if __name__ == "__main__":
 #     **kwargs,
 # ) -> Optional[Tuple[Path, Path]]:
 #     """Save figure recipe using figrecipe with scitex-compatible CSV format.
-# 
+#
 #     This function saves a matplotlib figure as a reproducible recipe using
 #     figrecipe. By default, uses csv_format="single" for backward compatibility
 #     with scitex's SigmaPlot-compatible CSV format.
-# 
+#
 #     Parameters
 #     ----------
 #     fig : matplotlib.figure.Figure or RecordingFigure
@@ -121,12 +121,12 @@ if __name__ == "__main__":
 #         If True (default), print save status.
 #     **kwargs
 #         Additional arguments passed to figrecipe.save().
-# 
+#
 #     Returns
 #     -------
 #     tuple or None
 #         (image_path, yaml_path) if successful, None if figrecipe unavailable.
-# 
+#
 #     Examples
 #     --------
 #     >>> import scitex.plt as splt
@@ -141,9 +141,9 @@ if __name__ == "__main__":
 #             "Install with: pip install figrecipe"
 #         )
 #         return None
-# 
+#
 #     path = Path(path)
-# 
+#
 #     # Handle different figure types
 #     # If it's a scitex FigWrapper, extract the matplotlib figure
 #     if hasattr(fig, "_fig_mpl"):
@@ -152,7 +152,7 @@ if __name__ == "__main__":
 #         mpl_fig = fig.figure
 #     else:
 #         mpl_fig = fig
-# 
+#
 #     # Check if fig is already a figrecipe RecordingFigure
 #     if hasattr(fig, "_recorder"):
 #         # Already a RecordingFigure, use figrecipe's save directly
@@ -165,7 +165,7 @@ if __name__ == "__main__":
 #             verbose=verbose,
 #             **kwargs,
 #         )
-# 
+#
 #     # For regular matplotlib figures, we need to wrap them first
 #     # This requires re-creating the figure with figrecipe
 #     logger.warning(
@@ -173,23 +173,23 @@ if __name__ == "__main__":
 #         "create figures with fr.subplots() or splt.subplots_recipe()."
 #     )
 #     return None
-# 
-# 
+#
+#
 # def load_recipe(path: Union[str, Path]) -> Tuple[Any, Any]:
 #     """Load and reproduce a figure from a recipe file.
-# 
+#
 #     Parameters
 #     ----------
 #     path : str or Path
 #         Path to .yaml recipe file.
-# 
+#
 #     Returns
 #     -------
 #     fig : matplotlib.figure.Figure
 #         Reproduced figure.
 #     axes : Axes or list of Axes
 #         Reproduced axes.
-# 
+#
 #     Raises
 #     ------
 #     ImportError
@@ -199,23 +199,23 @@ if __name__ == "__main__":
 #         raise ImportError(
 #             "figrecipe is not installed. Install with: pip install figrecipe"
 #         )
-# 
+#
 #     return fr.reproduce(path)
-# 
-# 
+#
+#
 # def recipe_info(path: Union[str, Path]) -> Dict[str, Any]:
 #     """Get information about a recipe without reproducing.
-# 
+#
 #     Parameters
 #     ----------
 #     path : str or Path
 #         Path to .yaml recipe file.
-# 
+#
 #     Returns
 #     -------
 #     dict
 #         Recipe information including figure settings, calls, etc.
-# 
+#
 #     Raises
 #     ------
 #     ImportError
@@ -225,15 +225,15 @@ if __name__ == "__main__":
 #         raise ImportError(
 #             "figrecipe is not installed. Install with: pip install figrecipe"
 #         )
-# 
+#
 #     return fr.info(path)
-# 
-# 
+#
+#
 # # Convenience aliases
 # reproduce = load_recipe
 # info = recipe_info
-# 
-# 
+#
+#
 # __all__ = [
 #     "FIGRECIPE_AVAILABLE",
 #     "check_figrecipe_available",
@@ -244,7 +244,7 @@ if __name__ == "__main__":
 #     "recipe_info",
 #     "info",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

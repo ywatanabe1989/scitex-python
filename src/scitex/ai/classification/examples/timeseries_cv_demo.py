@@ -12,13 +12,14 @@ This script shows how to use:
 3. Integration with classification reporters
 """
 
+from typing import List, Tuple
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import balanced_accuracy_score
-import matplotlib.pyplot as plt
-from typing import List, Tuple
 
 
 def generate_synthetic_timeseries(
@@ -89,9 +90,9 @@ def demo_basic_splitters():
     print("=" * 70)
 
     from scitex.ai.classification import (
-        StratifiedTimeSeriesSplit,
         BlockingTimeSeriesSplit,
         SlidingWindowSplit,
+        StratifiedTimeSeriesSplit,
     )
 
     # Generate data
@@ -213,8 +214,8 @@ def demo_with_classifier():
     print("=" * 70)
 
     from scitex.ai.classification import (
-        TimeSeriesCVCoordinator,
         SingleTaskClassificationReporter,
+        TimeSeriesCVCoordinator,
     )
 
     # Generate data
@@ -319,8 +320,8 @@ def visualize_cv_splits():
     print("=" * 70)
 
     from scitex.ai.classification import (
-        StratifiedTimeSeriesSplit,
         SlidingWindowSplit,
+        StratifiedTimeSeriesSplit,
         TimeSeriesCVCoordinator,
     )
 

@@ -10,6 +10,7 @@ axes objects, including dimensions, axis info, and plot content.
 """
 
 from typing import Dict
+
 from ._dimensions import _extract_axes_dimensions, _extract_axis_info
 from ._label_parsing import _parse_label_unit
 

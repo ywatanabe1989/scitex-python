@@ -8,16 +8,18 @@ This conftest ensures proper test isolation by reloading scitex.plt
 after each test module to prevent state corruption between tests.
 """
 
-import pytest
 import sys
+
+import pytest
 
 
 @pytest.fixture(autouse=True)
 def cleanup_matplotlib():
     """Clean up matplotlib state after each test."""
     import matplotlib.pyplot as plt
+
     yield
-    plt.close('all')
+    plt.close("all")
 
 
 @pytest.fixture(autouse=True)
@@ -31,13 +33,13 @@ def ensure_scitex_plt_callable():
     import scitex.plt
 
     # Check if subplots is callable
-    if not callable(getattr(scitex.plt, 'subplots', None)):
+    if not callable(getattr(scitex.plt, "subplots", None)):
         # Force reimport
-        keys_to_remove = [k for k in sys.modules.keys() if k.startswith('scitex.plt')]
+        keys_to_remove = [k for k in sys.modules.keys() if k.startswith("scitex.plt")]
         for key in keys_to_remove:
             del sys.modules[key]
-        if 'scitex' in sys.modules:
-            del sys.modules['scitex']
+        if "scitex" in sys.modules:
+            del sys.modules["scitex"]
 
         import scitex
         import scitex.plt

@@ -12,9 +12,9 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # """
 # Central and Eastern European Online Library Journals Translator
-# 
+#
 # Translates journal articles from CEEOL to Zotero format.
-# 
+#
 # Metadata:
 #     translatorID: 19cef926-c5b6-42e2-a91c-6f2722f8b36d
 #     label: Central and Eastern European Online Library Journals
@@ -27,14 +27,14 @@ if __name__ == "__main__":
 #     browserSupport: gcsibv
 #     lastUpdated: 2021-09-22 20:12:37
 # """
-# 
+#
 # from typing import Dict, Any
 # from bs4 import BeautifulSoup
-# 
-# 
+#
+#
 # class CentralAndEasternEuropeanOnlineLibraryJournalsTranslator:
 #     """Translator for CEEOL journal articles."""
-# 
+#
 #     METADATA = {
 #         "translatorID": "19cef926-c5b6-42e2-a91c-6f2722f8b36d",
 #         "label": "Central and Eastern European Online Library Journals",
@@ -47,24 +47,24 @@ if __name__ == "__main__":
 #         "browserSupport": "gcsibv",
 #         "lastUpdated": "2021-09-22 20:12:37",
 #     }
-# 
+#
 #     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
 #         """Detect if page is an article or search results."""
 #         if "/article-detail?" in url:
 #             return "journalArticle"
-# 
+#
 #         # Check for search results
 #         if doc.select(".description a, .article-details > h3 > a"):
 #             return "multiple"
-# 
+#
 #         return ""
-# 
+#
 #     def do_web(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
 #         """Extract article data using embedded metadata."""
 #         item = self._extract_embedded_metadata(doc, url)
 #         self._post_process(doc, item)
 #         return item
-# 
+#
 #     def _extract_embedded_metadata(
 #         self, doc: BeautifulSoup, url: str
 #     ) -> Dict[str, Any]:
@@ -76,39 +76,39 @@ if __name__ == "__main__":
 #             "attachments": [],
 #             "url": url,
 #         }
-# 
+#
 #         # Title
 #         title_meta = doc.find("meta", attrs={"name": "citation_title"})
 #         if title_meta:
 #             item["title"] = title_meta.get("content", "")
-# 
+#
 #         # Authors
 #         author_metas = doc.find_all("meta", attrs={"name": "citation_author"})
 #         for author_meta in author_metas:
 #             author_name = author_meta.get("content", "")
 #             if author_name:
 #                 item["creators"].append(self._clean_author(author_name))
-# 
+#
 #         # Publication title
 #         journal_meta = doc.find("meta", attrs={"name": "citation_journal_title"})
 #         if journal_meta:
 #             item["publicationTitle"] = journal_meta.get("content", "")
-# 
+#
 #         # Date
 #         date_meta = doc.find("meta", attrs={"name": "citation_publication_date"})
 #         if date_meta:
 #             item["date"] = date_meta.get("content", "")
-# 
+#
 #         # Volume
 #         volume_meta = doc.find("meta", attrs={"name": "citation_volume"})
 #         if volume_meta:
 #             item["volume"] = volume_meta.get("content", "")
-# 
+#
 #         # Issue
 #         issue_meta = doc.find("meta", attrs={"name": "citation_issue"})
 #         if issue_meta:
 #             item["issue"] = issue_meta.get("content", "")
-# 
+#
 #         # Pages
 #         first_page_meta = doc.find("meta", attrs={"name": "citation_firstpage"})
 #         last_page_meta = doc.find("meta", attrs={"name": "citation_lastpage"})
@@ -117,17 +117,17 @@ if __name__ == "__main__":
 #             last_page = last_page_meta.get("content", "")
 #             if first_page and last_page:
 #                 item["pages"] = f"{first_page}-{last_page}"
-# 
+#
 #         # ISSN
 #         issn_meta = doc.find("meta", attrs={"name": "citation_issn"})
 #         if issn_meta:
 #             item["ISSN"] = issn_meta.get("content", "")
-# 
+#
 #         # Language
 #         lang_meta = doc.find("meta", attrs={"name": "citation_language"})
 #         if lang_meta:
 #             item["language"] = lang_meta.get("content", "")
-# 
+#
 #         # Keywords
 #         keywords_meta = doc.find("meta", attrs={"name": "citation_keywords"})
 #         if keywords_meta:
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 #                 keyword = keyword.strip()
 #                 if keyword:
 #                     item["tags"].append({"tag": keyword})
-# 
+#
 #         # PDF URL
 #         pdf_meta = doc.find("meta", attrs={"name": "citation_pdf_url"})
 #         if pdf_meta:
@@ -149,20 +149,20 @@ if __name__ == "__main__":
 #                         "mimeType": "application/pdf",
 #                     }
 #                 )
-# 
+#
 #         return item
-# 
+#
 #     def _post_process(self, doc: BeautifulSoup, item: Dict[str, Any]):
 #         """Post-process to add abstract if not in embedded metadata."""
 #         if not item.get("abstractNote"):
 #             abstract_elem = doc.select_one("p.summary")
 #             if abstract_elem:
 #                 item["abstractNote"] = abstract_elem.get_text().strip()
-# 
+#
 #     def _clean_author(self, name: str) -> Dict[str, Any]:
 #         """Parse author name."""
 #         name = name.strip()
-# 
+#
 #         # Handle comma-separated (LastName, FirstName)
 #         if "," in name:
 #             parts = name.split(",", 1)

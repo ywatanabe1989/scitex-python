@@ -13,11 +13,11 @@ from typing import Union
 
 # Precision settings for JSON output
 PRECISION = {
-    "mm": 2,      # Millimeters: 0.01mm precision (10 microns)
-    "inch": 3,    # Inches: 0.001 inch precision
-    "position": 3, # Normalized position: 0.001 precision
-    "lim": 2,     # Axis limits: 2 decimal places
-    "linewidth": 2, # Line widths: 0.01 precision
+    "mm": 2,  # Millimeters: 0.01mm precision (10 microns)
+    "inch": 3,  # Inches: 0.001 inch precision
+    "position": 3,  # Normalized position: 0.001 precision
+    "lim": 2,  # Axis limits: 2 decimal places
+    "linewidth": 2,  # Line widths: 0.01 precision
 }
 
 
@@ -27,6 +27,7 @@ class FixedFloat:
 
     Example: FixedFloat(0.25, 3) -> "0.250" in JSON
     """
+
     def __init__(self, value: float, precision: int):
         self.value = round(value, precision)
         self.precision = precision
@@ -38,7 +39,9 @@ class FixedFloat:
         return self.value
 
 
-def _round_value(value: Union[float, int], precision: int, fixed: bool = False) -> Union[float, int, FixedFloat]:
+def _round_value(
+    value: Union[float, int], precision: int, fixed: bool = False
+) -> Union[float, int, FixedFloat]:
     """
     Round a single value to specified precision.
 

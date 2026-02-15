@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -55,8 +56,12 @@ def _format_violinplot(id, tracked_dict, kwargs):
 
             if rows:
                 df = pd.DataFrame(rows)
-                col_group = get_csv_column_name("group", ax_row, ax_col, trace_id=trace_id)
-                col_value = get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id)
+                col_group = get_csv_column_name(
+                    "group", ax_row, ax_col, trace_id=trace_id
+                )
+                col_value = get_csv_column_name(
+                    "value", ax_row, ax_col, trace_id=trace_id
+                )
                 df.columns = [col_group, col_value]
                 return df
 
@@ -71,8 +76,12 @@ def _format_violinplot(id, tracked_dict, kwargs):
 
             if rows:
                 df = pd.DataFrame(rows)
-                col_group = get_csv_column_name("group", ax_row, ax_col, trace_id=trace_id)
-                col_value = get_csv_column_name("value", ax_row, ax_col, trace_id=trace_id)
+                col_group = get_csv_column_name(
+                    "group", ax_row, ax_col, trace_id=trace_id
+                )
+                col_value = get_csv_column_name(
+                    "value", ax_row, ax_col, trace_id=trace_id
+                )
                 df.columns = [col_group, col_value]
                 return df
 

@@ -26,12 +26,8 @@ from ._project.clone_research import clone_research
 from ._project.clone_research_minimal import clone_research_minimal
 from ._project.clone_singularity import TEMPLATE_REPO_URL as SINGULARITY_URL
 from ._project.clone_singularity import clone_singularity
-from ._project.clone_writer_directory import (
-    TEMPLATE_REPO_URL as PAPER_DIRECTORY_URL,
-)
-from ._project.clone_writer_directory import (
-    clone_writer_directory,
-)
+from ._project.clone_writer_directory import TEMPLATE_REPO_URL as PAPER_DIRECTORY_URL
+from ._project.clone_writer_directory import clone_writer_directory
 
 
 def get_available_templates_info():

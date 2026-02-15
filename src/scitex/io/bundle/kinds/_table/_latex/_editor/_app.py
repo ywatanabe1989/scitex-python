@@ -567,7 +567,9 @@ class LaTeXEditor:
                     self.latex_code = code
                     return jsonify({"success": True, "path": str(tex_path)})
                 else:
-                    return jsonify({"success": False, "error": "No output path configured"})
+                    return jsonify(
+                        {"success": False, "error": "No output path configured"}
+                    )
             except Exception as e:
                 return jsonify({"success": False, "error": str(e)})
 
@@ -598,7 +600,9 @@ class LaTeXEditor:
                         # Copy to temp location accessible by preview route
                         import shutil
 
-                        self._compiled_pdf = Path(tempfile.gettempdir()) / "fsb_preview.pdf"
+                        self._compiled_pdf = (
+                            Path(tempfile.gettempdir()) / "fsb_preview.pdf"
+                        )
                         shutil.copy(pdf_path, self._compiled_pdf)
                         return jsonify({"success": True})
                     else:

@@ -16,14 +16,14 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/ax/_plot/_plot_scatter_hist.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/plt/ax/_plot/_plot_scatter_hist.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # import numpy as np
-# 
-# 
+#
+#
 # def stx_scatter_hist(
 #     ax,
 #     x,
@@ -41,7 +41,7 @@ if __name__ == "__main__":
 # ):
 #     """
 #     Plot a scatter plot with histograms on the x and y axes.
-# 
+#
 #     Parameters
 #     ----------
 #     ax : matplotlib.axes.Axes
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 #         Ratio of main plot to histograms, default 0.8
 #     **kwargs
 #         Additional keyword arguments passed to scatter and hist functions
-# 
+#
 #     Returns
 #     -------
 #     tuple
@@ -80,11 +80,11 @@ if __name__ == "__main__":
 #     # Get the current figure if not provided
 #     if fig is None:
 #         fig = ax.figure
-# 
+#
 #     # Calculate the positions based on scatter_ratio
 #     margin = 0.1 * (1 - scatter_ratio)
 #     hist_size = 0.2 * scatter_ratio
-# 
+#
 #     # Create the histogram axes
 #     ax_histx = fig.add_axes(
 #         [
@@ -102,11 +102,11 @@ if __name__ == "__main__":
 #             ax.get_position().height * scatter_ratio,
 #         ]
 #     )
-# 
+#
 #     # No labels for histograms
 #     ax_histx.tick_params(axis="x", labelbottom=False)
 #     ax_histy.tick_params(axis="y", labelleft=False)
-# 
+#
 #     # The scatter plot
 #     ax.scatter(
 #         x,
@@ -116,11 +116,11 @@ if __name__ == "__main__":
 #         color=scatter_color,
 #         **kwargs,
 #     )
-# 
+#
 #     # Calculate histogram data
 #     hist_x, bin_edges_x = np.histogram(x, bins=hist_bins)
 #     hist_y, bin_edges_y = np.histogram(y, bins=hist_bins)
-# 
+#
 #     # Plot histograms
 #     ax_histx.hist(x, bins=hist_bins, color=hist_color_x, alpha=hist_alpha)
 #     ax_histy.hist(
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 #         color=hist_color_y,
 #         alpha=hist_alpha,
 #     )
-# 
+#
 #     # Create return data structure
 #     hist_data = {
 #         "hist_x": hist_x,
@@ -138,10 +138,10 @@ if __name__ == "__main__":
 #         "bin_edges_x": bin_edges_x,
 #         "bin_edges_y": bin_edges_y,
 #     }
-# 
+#
 #     return ax, ax_histx, ax_histy, hist_data
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

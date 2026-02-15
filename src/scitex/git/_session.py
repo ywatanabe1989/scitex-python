@@ -7,8 +7,11 @@ Session management utilities for git module CLI tools.
 """
 
 import sys
+
 import matplotlib.pyplot as plt
+
 import scitex as stx
+
 from ._constants import EXIT_SUCCESS
 
 

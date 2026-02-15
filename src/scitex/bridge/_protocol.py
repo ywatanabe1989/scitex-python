@@ -19,9 +19,8 @@ Usage:
     from scitex.bridge import BRIDGE_PROTOCOL_VERSION, check_protocol_compatibility
 """
 
-from typing import Dict, Any, Tuple, Optional
 from dataclasses import dataclass
-
+from typing import Any, Dict, Optional, Tuple
 
 # =============================================================================
 # Protocol Version

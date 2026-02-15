@@ -23,10 +23,7 @@ def create_panels_route(app, editor: "WebEditor"):
     """Create the panels route for multi-panel figure bundles."""
     from flask import jsonify
 
-    from .._bbox import (
-        extract_bboxes_from_geometry_px,
-        extract_bboxes_from_metadata,
-    )
+    from .._bbox import extract_bboxes_from_geometry_px, extract_bboxes_from_metadata
     from ..edit import load_panel_data
 
     @app.route("/panels")
@@ -142,10 +139,7 @@ def create_switch_panel_route(app, editor: "WebEditor"):
     """Create the switch_panel route."""
     from flask import jsonify
 
-    from .._bbox import (
-        extract_bboxes_from_geometry_px,
-        extract_bboxes_from_metadata,
-    )
+    from .._bbox import extract_bboxes_from_geometry_px, extract_bboxes_from_metadata
     from ..edit import load_panel_data
 
     @app.route("/switch_panel/<int:panel_index>")
@@ -239,12 +233,15 @@ def create_switch_panel_route(app, editor: "WebEditor"):
         except Exception as e:
             import traceback
 
-            return jsonify(
-                {
-                    "error": f"Failed to switch panel: {str(e)}",
-                    "traceback": traceback.format_exc(),
-                }
-            ), 500
+            return (
+                jsonify(
+                    {
+                        "error": f"Failed to switch panel: {str(e)}",
+                        "traceback": traceback.format_exc(),
+                    }
+                ),
+                500,
+            )
 
     return switch_panel
 

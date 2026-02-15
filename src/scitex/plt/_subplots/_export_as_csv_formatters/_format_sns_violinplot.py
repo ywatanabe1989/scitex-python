@@ -36,14 +36,18 @@ def _format_sns_violinplot(id, tracked_dict, kwargs):
     def _format_dataframe(df):
         result = pd.DataFrame()
         for col in df.columns:
-            col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+            col_name = get_csv_column_name(
+                f"data-{col}", ax_row, ax_col, trace_id=trace_id
+            )
             result[col_name] = df[col]
         return result
 
     def _format_list_of_arrays(data):
         result = pd.DataFrame()
         for i, group_data in enumerate(data):
-            col_name = get_csv_column_name(f"data-{i}", ax_row, ax_col, trace_id=trace_id)
+            col_name = get_csv_column_name(
+                f"data-{i}", ax_row, ax_col, trace_id=trace_id
+            )
             result[col_name] = pd.Series(group_data)
         return result
 
@@ -60,29 +64,50 @@ def _format_sns_violinplot(id, tracked_dict, kwargs):
                         x_var = kwargs.get("x") if kwargs else None
                         y_var = kwargs.get("y") if kwargs else None
 
-                        if x_var and y_var and x_var in data.columns and y_var in data.columns:
-                            return pd.DataFrame({
-                                get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): data[x_var],
-                                get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): data[y_var],
-                            })
+                        if (
+                            x_var
+                            and y_var
+                            and x_var in data.columns
+                            and y_var in data.columns
+                        ):
+                            return pd.DataFrame(
+                                {
+                                    get_csv_column_name(
+                                        "x", ax_row, ax_col, trace_id=trace_id
+                                    ): data[x_var],
+                                    get_csv_column_name(
+                                        "y", ax_row, ax_col, trace_id=trace_id
+                                    ): data[y_var],
+                                }
+                            )
                         elif len(data.columns) > 0:
                             first_col = data.columns[0]
-                            return pd.DataFrame({
-                                get_csv_column_name("data", ax_row, ax_col, trace_id=trace_id): data[first_col]
-                            })
+                            return pd.DataFrame(
+                                {
+                                    get_csv_column_name(
+                                        "data", ax_row, ax_col, trace_id=trace_id
+                                    ): data[first_col]
+                                }
+                            )
                     except Exception:
                         return pd.DataFrame()
 
             elif isinstance(data, (list, np.ndarray)):
                 try:
-                    if isinstance(data, list) and len(data) > 0 and all(
-                        isinstance(item, (list, np.ndarray)) for item in data
+                    if (
+                        isinstance(data, list)
+                        and len(data) > 0
+                        and all(isinstance(item, (list, np.ndarray)) for item in data)
                     ):
                         return _format_list_of_arrays(data)
                     else:
-                        return pd.DataFrame({
-                            get_csv_column_name("data", ax_row, ax_col, trace_id=trace_id): data
-                        })
+                        return pd.DataFrame(
+                            {
+                                get_csv_column_name(
+                                    "data", ax_row, ax_col, trace_id=trace_id
+                                ): data
+                            }
+                        )
                 except Exception:
                     return pd.DataFrame()
 
@@ -99,9 +124,13 @@ def _format_sns_violinplot(id, tracked_dict, kwargs):
                     if all(isinstance(item, (list, np.ndarray)) for item in data):
                         return _format_list_of_arrays(data)
                     else:
-                        return pd.DataFrame({
-                            get_csv_column_name("data", ax_row, ax_col, trace_id=trace_id): data
-                        })
+                        return pd.DataFrame(
+                            {
+                                get_csv_column_name(
+                                    "data", ax_row, ax_col, trace_id=trace_id
+                                ): data
+                            }
+                        )
                 except Exception:
                     return pd.DataFrame()
 
@@ -113,9 +142,13 @@ def _format_sns_violinplot(id, tracked_dict, kwargs):
             try:
                 if len(tracked_dict.columns) > 0:
                     first_col = tracked_dict.columns[0]
-                    return pd.DataFrame({
-                        get_csv_column_name("data", ax_row, ax_col, trace_id=trace_id): tracked_dict[first_col]
-                    })
+                    return pd.DataFrame(
+                        {
+                            get_csv_column_name(
+                                "data", ax_row, ax_col, trace_id=trace_id
+                            ): tracked_dict[first_col]
+                        }
+                    )
             except Exception:
                 return pd.DataFrame()
 
@@ -125,9 +158,13 @@ def _format_sns_violinplot(id, tracked_dict, kwargs):
             if all(isinstance(item, (list, np.ndarray)) for item in tracked_dict):
                 return _format_list_of_arrays(tracked_dict)
             else:
-                return pd.DataFrame({
-                    get_csv_column_name("data", ax_row, ax_col, trace_id=trace_id): tracked_dict
-                })
+                return pd.DataFrame(
+                    {
+                        get_csv_column_name(
+                            "data", ax_row, ax_col, trace_id=trace_id
+                        ): tracked_dict
+                    }
+                )
         except Exception:
             return pd.DataFrame()
 

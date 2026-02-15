@@ -26,8 +26,10 @@ along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import re
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 from playwright.async_api import Page
+
 from .._core.base import BaseTranslator
 
 

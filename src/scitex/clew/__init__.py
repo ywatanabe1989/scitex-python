@@ -66,27 +66,13 @@ from ._chain import (
 )
 
 # Database
-from ._db import (
-    VerificationDB,
-    get_db,
-)
+from ._db import VerificationDB, get_db
 
 # Hash utilities
-from ._hash import (
-    combine_hashes,
-    hash_directory,
-    hash_file,
-    hash_files,
-    verify_hash,
-)
+from ._hash import combine_hashes, hash_directory, hash_file, hash_files, verify_hash
 
 # Integration hooks
-from ._integration import (
-    on_io_load,
-    on_io_save,
-    on_session_close,
-    on_session_start,
-)
+from ._integration import on_io_load, on_io_save, on_session_close, on_session_start
 
 # Rerun verification (separate module to avoid circular imports)
 from ._rerun import verify_by_rerun, verify_run_from_scratch

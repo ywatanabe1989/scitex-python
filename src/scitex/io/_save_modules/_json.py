@@ -18,9 +18,10 @@ class PrecisionEncoder(json.JSONEncoder):
     instead of:
         "position": [0.25, 0.294, 0.5, 0.412]
     """
+
     def default(self, obj):
         # Handle FixedFloat from _collect_figure_metadata
-        if hasattr(obj, 'value') and hasattr(obj, 'precision'):
+        if hasattr(obj, "value") and hasattr(obj, "precision"):
             # Return a special marker that we'll post-process
             return f"__FIXED_{obj.precision}_{obj.value}__"
         return super().default(obj)
@@ -54,7 +55,12 @@ def _convert_to_serializable(obj: Any) -> Any:
     - etc.
     """
     # Handle FixedFloat (from _collect_figure_metadata)
-    if hasattr(obj, 'value') and hasattr(obj, 'precision') and hasattr(obj, '__class__') and obj.__class__.__name__ == 'FixedFloat':
+    if (
+        hasattr(obj, "value")
+        and hasattr(obj, "precision")
+        and hasattr(obj, "__class__")
+        and obj.__class__.__name__ == "FixedFloat"
+    ):
         return f"__FIXED_{obj.precision}_{obj.value}__"
 
     # Handle DotDict

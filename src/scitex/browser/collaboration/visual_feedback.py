@@ -9,8 +9,9 @@ Visual feedback for collaborative browser sessions.
 Shows who's controlling the browser and what they're doing.
 """
 
-from playwright.async_api import Page
 from typing import Optional
+
+from playwright.async_api import Page
 
 
 class VisualFeedback:
@@ -32,7 +33,8 @@ class VisualFeedback:
         if self.initialized:
             return
 
-        await self.page.add_init_script("""
+        await self.page.add_init_script(
+            """
             () => {
                 // Create feedback container
                 const container = document.createElement('div');
@@ -144,7 +146,8 @@ class VisualFeedback:
                     document.head.appendChild(style);
                 });
             }
-        """)
+        """
+        )
 
         self.initialized = True
 

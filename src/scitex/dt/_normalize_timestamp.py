@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/ml/classification/_normalize_timestamp.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -35,8 +36,7 @@ Prerequisites:
 
 """Imports"""
 import argparse
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime, timezone
 from typing import Union
 
 import scitex as stx
@@ -404,6 +404,7 @@ def run_main() -> None:
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

@@ -7,11 +7,12 @@ Uses mendeley python SDK: https://github.com/Mendeley/mendeley-python-sdk
 Install: pip install mendeley
 """
 
-from typing import List, Optional
 import os
+from typing import List, Optional
 
 from scitex import logging
 from scitex.scholar.core.Papers import Papers
+
 from ..base import BaseImporter
 from .mapper import MendeleyMapper
 

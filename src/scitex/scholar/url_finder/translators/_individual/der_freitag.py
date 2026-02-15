@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2022-04-15 16:29:59
 """
 
-from typing import Dict, Any, Optional, List
-from bs4 import BeautifulSoup
 import json
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class DerFreitagTranslator:

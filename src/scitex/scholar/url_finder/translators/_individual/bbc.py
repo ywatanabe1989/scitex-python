@@ -4,11 +4,10 @@ Description: BBC translator for Zotero
 Translator ID: f4130157-93f7-4493-8f24-a7c85549013d
 """
 
-from typing import Any, Dict, Optional, List
-import re
 import json
+import re
 from datetime import datetime
-
+from typing import Any, Dict, List, Optional
 
 TRANSLATOR_INFO = {
     "translator_id": "f4130157-93f7-4493-8f24-a7c85549013d",

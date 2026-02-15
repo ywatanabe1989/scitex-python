@@ -13,8 +13,8 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-11-10 22:38:40 (ywatanabe)"
-# 
-# 
+#
+#
 # def flatten(nested_dict, parent_key="", sep="_"):
 #     items = []
 #     for key, value in nested_dict.items():
@@ -27,8 +27,8 @@ if __name__ == "__main__":
 #         else:
 #             items.append((new_key, value))
 #     return dict(items)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

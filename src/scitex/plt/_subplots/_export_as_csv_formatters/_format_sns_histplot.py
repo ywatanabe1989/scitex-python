@@ -47,11 +47,21 @@ def _format_sns_histplot(id, tracked_dict, kwargs):
         bin_widths = bin_edges[1:] - bin_edges[:-1]
 
         # Add bin information with standard naming
-        columns[get_csv_column_name("bin-centers", ax_row, ax_col, trace_id=trace_id)] = bin_centers
-        columns[get_csv_column_name("bin-counts", ax_row, ax_col, trace_id=trace_id)] = counts
-        columns[get_csv_column_name("bin-widths", ax_row, ax_col, trace_id=trace_id)] = bin_widths
-        columns[get_csv_column_name("bin-edges-left", ax_row, ax_col, trace_id=trace_id)] = bin_edges[:-1]
-        columns[get_csv_column_name("bin-edges-right", ax_row, ax_col, trace_id=trace_id)] = bin_edges[1:]
+        columns[
+            get_csv_column_name("bin-centers", ax_row, ax_col, trace_id=trace_id)
+        ] = bin_centers
+        columns[
+            get_csv_column_name("bin-counts", ax_row, ax_col, trace_id=trace_id)
+        ] = counts
+        columns[
+            get_csv_column_name("bin-widths", ax_row, ax_col, trace_id=trace_id)
+        ] = bin_widths
+        columns[
+            get_csv_column_name("bin-edges-left", ax_row, ax_col, trace_id=trace_id)
+        ] = bin_edges[:-1]
+        columns[
+            get_csv_column_name("bin-edges-right", ax_row, ax_col, trace_id=trace_id)
+        ] = bin_edges[1:]
 
     # Get raw data if available
     if "data" in tracked_dict:
@@ -59,7 +69,9 @@ def _format_sns_histplot(id, tracked_dict, kwargs):
         if isinstance(df, pd.DataFrame):
             x_col = kwargs.get("x")
             if x_col and x_col in df.columns:
-                columns[get_csv_column_name("raw-data", ax_row, ax_col, trace_id=trace_id)] = df[x_col].values
+                columns[
+                    get_csv_column_name("raw-data", ax_row, ax_col, trace_id=trace_id)
+                ] = df[x_col].values
 
     # Legacy handling for args
     elif "args" in tracked_dict:
@@ -67,9 +79,13 @@ def _format_sns_histplot(id, tracked_dict, kwargs):
         if len(args) >= 1:
             x = args[0]
             if hasattr(x, "values"):
-                columns[get_csv_column_name("raw-data", ax_row, ax_col, trace_id=trace_id)] = x.values
+                columns[
+                    get_csv_column_name("raw-data", ax_row, ax_col, trace_id=trace_id)
+                ] = x.values
             else:
-                columns[get_csv_column_name("raw-data", ax_row, ax_col, trace_id=trace_id)] = x
+                columns[
+                    get_csv_column_name("raw-data", ax_row, ax_col, trace_id=trace_id)
+                ] = x
 
     # If we have data to return
     if columns:

@@ -5,11 +5,11 @@ Handles all SQL queries to the CrossRef SQLite database with
 optimized queries and connection management.
 """
 
-import sqlite3
 import json
-from pathlib import Path
-from typing import List, Tuple, Dict, Optional
+import sqlite3
 from collections import Counter
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 
 class CitationDatabase:

@@ -130,7 +130,9 @@ def export_table_to_latex(
 
     # Validate type
     if node.type != "table":
-        raise ValueError(f"Cannot export node type '{node.type}' as table. Expected 'table'.")
+        raise ValueError(
+            f"Cannot export node type '{node.type}' as table. Expected 'table'."
+        )
 
     # Get column definitions
     col_defs = options.column_defs or _extract_column_defs(bundle, options)
@@ -311,12 +313,16 @@ def _format_cell(value: Any, col: ColumnDef, options: TableExportOptions) -> str
 
     # Handle numeric values
     if isinstance(value, (int, float)):
-        return format_number(value, precision=col.precision, use_siunitx=options.use_siunitx)
+        return format_number(
+            value, precision=col.precision, use_siunitx=options.use_siunitx
+        )
 
     # Handle string numeric values
     try:
         num_val = float(value)
-        return format_number(num_val, precision=col.precision, use_siunitx=options.use_siunitx)
+        return format_number(
+            num_val, precision=col.precision, use_siunitx=options.use_siunitx
+        )
     except (ValueError, TypeError):
         pass
 
@@ -324,7 +330,9 @@ def _format_cell(value: Any, col: ColumnDef, options: TableExportOptions) -> str
     return escape_latex(str(value))
 
 
-def generate_table_preamble(use_booktabs: bool = True, use_siunitx: bool = False) -> str:
+def generate_table_preamble(
+    use_booktabs: bool = True, use_siunitx: bool = False
+) -> str:
     """Generate required LaTeX preamble for tables.
 
     Args:

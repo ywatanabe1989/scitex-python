@@ -20,13 +20,14 @@ Version: 0.1.0-alpha (experimental)
 
 __experimental__ = True
 
-# Import components
-from .shared_session import SharedBrowserSession, SessionConfig
-from .visual_feedback import VisualFeedback
-from .credential_manager import CredentialManager
-
 # Re-export auth helpers for convenience
 from scitex.browser.auth import GoogleAuthHelper, google_login
+
+from .credential_manager import CredentialManager
+
+# Import components
+from .shared_session import SessionConfig, SharedBrowserSession
+from .visual_feedback import VisualFeedback
 
 # Exports
 __all__ = [

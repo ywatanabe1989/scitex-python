@@ -10,6 +10,7 @@ Commands for managing SciTeX configuration and paths.
 """
 
 import os
+
 import click
 
 

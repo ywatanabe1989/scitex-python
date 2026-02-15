@@ -39,9 +39,9 @@ def _compute_boxplot_stats(ax_for_detection):
                 args = tracked_dict.get("args", [])
                 if args and len(args) > 0:
                     data = args[0]
-                    if hasattr(data, '__len__') and not isinstance(data, str):
+                    if hasattr(data, "__len__") and not isinstance(data, str):
                         # Check if it's list of arrays or single array
-                        if hasattr(data[0], '__len__') and not isinstance(data[0], str):
+                        if hasattr(data[0], "__len__") and not isinstance(data[0], str):
                             num_boxes = len(data)
                             boxplot_data = data
                         else:
@@ -52,6 +52,7 @@ def _compute_boxplot_stats(ax_for_detection):
     # Compute statistics
     if boxplot_data is not None:
         import numpy as np
+
         for box_idx, box_data in enumerate(boxplot_data):
             try:
                 arr = np.asarray(box_data)
@@ -64,16 +65,18 @@ def _compute_boxplot_stats(ax_for_detection):
                     whisker_low = float(max(arr.min(), q1 - 1.5 * iqr))
                     whisker_high = float(min(arr.max(), q3 + 1.5 * iqr))
                     fliers = arr[(arr < whisker_low) | (arr > whisker_high)]
-                    boxplot_stats.append({
-                        "box_index": box_idx,
-                        "median": median,
-                        "q1": q1,
-                        "q3": q3,
-                        "whisker_low": whisker_low,
-                        "whisker_high": whisker_high,
-                        "n_fliers": int(len(fliers)),
-                        "n_samples": int(len(arr)),
-                    })
+                    boxplot_stats.append(
+                        {
+                            "box_index": box_idx,
+                            "median": median,
+                            "q1": q1,
+                            "q3": q3,
+                            "whisker_low": whisker_low,
+                            "whisker_high": whisker_high,
+                            "n_fliers": int(len(fliers)),
+                            "n_samples": int(len(arr)),
+                        }
+                    )
             except (ValueError, TypeError):
                 pass
 

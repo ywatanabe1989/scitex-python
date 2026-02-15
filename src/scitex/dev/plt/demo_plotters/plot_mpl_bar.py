@@ -21,7 +21,7 @@ def plot_mpl_bar(plt, rng, ax=None):
     height = rng.uniform(2, 8, 5)
     ax.mpl_bar(x, height)
     ax.set_xyt("X", "Y", "mpl_bar")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

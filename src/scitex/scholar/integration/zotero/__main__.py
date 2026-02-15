@@ -10,12 +10,13 @@ Usage:
 """
 
 import argparse
-import sys
 import os
+import sys
 
 from scitex import logging
-from .importer import ZoteroImporter
+
 from .exporter import ZoteroExporter
+from .importer import ZoteroImporter
 from .linker import ZoteroLinker
 
 logger = logging.getLogger(__name__)

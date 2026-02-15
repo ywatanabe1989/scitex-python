@@ -13,33 +13,33 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-19
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/schema/_encoding.py
-# 
+#
 # """
 # Encoding Schema - Data to Visual Mapping for Scientific Rigor.
-# 
+#
 # This module defines the encoding layer that maps data columns to visual channels.
 # This separation ensures scientific reproducibility by explicitly documenting
 # how data is transformed into visual representation.
-# 
+#
 # Encoding (encoding.json) - Data→Visual Mapping:
 #   - Column bindings (x, y, color, size, shape)
 #   - Data transformations (log, normalize, bin)
 #   - Scale types (linear, log, categorical)
 #   - Missing value handling
 # """
-# 
+#
 # import json
 # from dataclasses import dataclass, field
 # from typing import Any, Dict, List, Optional
-# 
+#
 # ENCODING_VERSION = "1.0.0"
-# 
-# 
+#
+#
 # @dataclass
 # class ChannelBinding:
 #     """
 #     Binding from data column to visual channel.
-# 
+#
 #     Parameters
 #     ----------
 #     channel : str
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 #     transform : str, optional
 #         Data transformation (log, sqrt, normalize, zscore, rank)
 #     """
-# 
+#
 #     channel: str
 #     column: str
 #     scale: str = "linear"
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 #     range: Optional[List[Any]] = None
 #     transform: Optional[str] = None
 #     missing_value: Optional[str] = "drop"  # "drop", "zero", "mean", "interpolate"
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "channel": self.channel,
@@ -79,17 +79,17 @@ if __name__ == "__main__":
 #         if self.missing_value != "drop":
 #             result["missing_value"] = self.missing_value
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "ChannelBinding":
 #         return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
-# 
-# 
+#
+#
 # @dataclass
 # class TraceEncoding:
 #     """
 #     Encoding specification for a single trace.
-# 
+#
 #     Parameters
 #     ----------
 #     trace_id : str
@@ -101,12 +101,12 @@ if __name__ == "__main__":
 #     group_by : list, optional
 #         Columns to group by before aggregation
 #     """
-# 
+#
 #     trace_id: str
 #     bindings: List[ChannelBinding] = field(default_factory=list)
 #     aggregate: Optional[str] = None
 #     group_by: Optional[List[str]] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "trace_id": self.trace_id,
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 #         if self.group_by:
 #             result["group_by"] = self.group_by
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "TraceEncoding":
 #         bindings = [ChannelBinding.from_dict(b) for b in data.get("bindings", [])]
@@ -127,16 +127,16 @@ if __name__ == "__main__":
 #             aggregate=data.get("aggregate"),
 #             group_by=data.get("group_by"),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class PlotEncoding:
 #     """
 #     Complete encoding specification for a plot.
-# 
+#
 #     Stored in encoding.json. Documents how data maps to visual channels
 #     for scientific reproducibility.
-# 
+#
 #     Parameters
 #     ----------
 #     traces : list of TraceEncoding
@@ -144,14 +144,14 @@ if __name__ == "__main__":
 #     data_hash : str, optional
 #         Hash of source data for integrity verification
 #     """
-# 
+#
 #     traces: List[TraceEncoding] = field(default_factory=list)
 #     data_hash: Optional[str] = None
-# 
+#
 #     # Schema metadata
 #     scitex_schema: str = "scitex.plt.encoding"
 #     scitex_schema_version: str = ENCODING_VERSION
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "schema": {
@@ -163,37 +163,37 @@ if __name__ == "__main__":
 #         if self.data_hash:
 #             result["data_hash"] = self.data_hash
 #         return result
-# 
+#
 #     def to_json(self, indent: int = 2) -> str:
 #         return json.dumps(self.to_dict(), indent=indent)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "PlotEncoding":
 #         return cls(
 #             traces=[TraceEncoding.from_dict(t) for t in data.get("traces", [])],
 #             data_hash=data.get("data_hash"),
 #         )
-# 
+#
 #     @classmethod
 #     def from_json(cls, json_str: str) -> "PlotEncoding":
 #         return cls.from_dict(json.loads(json_str))
-# 
+#
 #     @classmethod
 #     def from_spec_and_style(cls, spec: dict, style: dict) -> "PlotEncoding":
 #         """
 #         Create encoding from spec and style for backward compatibility.
-# 
+#
 #         Extracts column bindings from PlotSpec traces and color/size mappings
 #         from PlotStyle trace overrides.
 #         """
 #         traces = []
 #         spec_traces = spec.get("traces", [])
 #         style_traces = {t.get("trace_id"): t for t in style.get("traces", [])}
-# 
+#
 #         for trace in spec_traces:
 #             trace_id = trace.get("id", "")
 #             bindings = []
-# 
+#
 #             # X column
 #             if trace.get("x_col"):
 #                 bindings.append(
@@ -202,7 +202,7 @@ if __name__ == "__main__":
 #                         column=trace["x_col"],
 #                     )
 #                 )
-# 
+#
 #             # Y column
 #             if trace.get("y_col"):
 #                 bindings.append(
@@ -211,7 +211,7 @@ if __name__ == "__main__":
 #                         column=trace["y_col"],
 #                     )
 #                 )
-# 
+#
 #             # Data columns (for boxplot, etc.)
 #             for i, col in enumerate(trace.get("data_cols", [])):
 #                 bindings.append(
@@ -220,7 +220,7 @@ if __name__ == "__main__":
 #                         column=col,
 #                     )
 #                 )
-# 
+#
 #             # Value column (for heatmap)
 #             if trace.get("value_col"):
 #                 bindings.append(
@@ -229,7 +229,7 @@ if __name__ == "__main__":
 #                         column=trace["value_col"],
 #                     )
 #                 )
-# 
+#
 #             # Vector columns (for quiver)
 #             if trace.get("u_col"):
 #                 bindings.append(
@@ -245,7 +245,7 @@ if __name__ == "__main__":
 #                         column=trace["v_col"],
 #                     )
 #                 )
-# 
+#
 #             # Style overrides that are data-driven
 #             style_trace = style_traces.get(trace_id, {})
 #             if style_trace.get("color_by"):
@@ -262,7 +262,7 @@ if __name__ == "__main__":
 #                         column=style_trace["size_by"],
 #                     )
 #                 )
-# 
+#
 #             if bindings:
 #                 traces.append(
 #                     TraceEncoding(
@@ -270,18 +270,18 @@ if __name__ == "__main__":
 #                         bindings=bindings,
 #                     )
 #                 )
-# 
+#
 #         return cls(traces=traces)
-# 
-# 
+#
+#
 # __all__ = [
 #     "ENCODING_VERSION",
 #     "ChannelBinding",
 #     "TraceEncoding",
 #     "PlotEncoding",
 # ]
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

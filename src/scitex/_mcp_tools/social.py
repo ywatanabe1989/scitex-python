@@ -10,12 +10,17 @@ from __future__ import annotations
 
 
 def register_social_tools(mcp) -> None:
-    """Register social tools by delegating to socialia package."""
-    try:
-        from socialia._mcp.tools import register_all_tools
+    """Register social tools by delegating to socialia package.
 
-        # Delegate all MCP tools to socialia
-        register_all_tools(mcp)
+    Only registers core tools (post, delete, status).
+    Analytics tools are excluded to reduce tool count.
+    """
+    try:
+        from socialia._mcp.tools import social
+
+        # Register only core social tools (post, delete, status)
+        # Analytics tools (pageviews, realtime, sources, track) excluded
+        social.register_tools(mcp)
     except ImportError:
         # Fallback when socialia is not installed
         @mcp.tool()

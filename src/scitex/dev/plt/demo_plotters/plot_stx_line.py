@@ -17,10 +17,10 @@ def plot_stx_line(plt, rng, ax=None):
     else:
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
-    y = np.sin(np.linspace(0, 4*np.pi, 100)) + rng.normal(0, 0.1, 100)
-    ax.stx_line(y, label='Signal')
+    y = np.sin(np.linspace(0, 4 * np.pi, 100)) + rng.normal(0, 0.1, 100)
+    ax.stx_line(y, label="Signal")
     ax.set_xyt("X", "Y", "stx_line")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

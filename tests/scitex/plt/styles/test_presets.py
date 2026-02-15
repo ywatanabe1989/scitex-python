@@ -14,36 +14,36 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-01 21:30:00 (ywatanabe)"
 # # File: ./src/scitex/plt/styles/presets.py
-# 
+#
 # """
 # SciTeX style configuration.
-# 
+#
 # Style Control Levels:
 #     1. Global level (subplots): axes dimensions, fonts, default line thickness
 #     2. Plot level (per-call): override for individual ax.plot(), ax.scatter(), etc.
-# 
+#
 # Priority cascade: direct → env → yaml → default
-# 
+#
 # Style Management:
 #     - load_style(path): Load style from YAML/JSON file
 #     - save_style(path): Export current style to file
 #     - set_style(style_dict): Change active style globally
 #     - get_style(): Get current active style
-# 
+#
 # Usage:
 #     from scitex.plt.styles import load_style, save_style, set_style
-# 
+#
 #     # Load and use custom style
 #     style = load_style("my_style.yaml")
 #     fig, ax = stx.plt.subplots(**style)
-# 
+#
 #     # Export current style
 #     save_style("exported_style.yaml")
-# 
+#
 #     # Change global style
 #     set_style({"axes_width_mm": 60, "trace_thickness_mm": 0.3})
 # """
-# 
+#
 # __all__ = [
 #     "SCITEX_STYLE",
 #     "STYLE",
@@ -60,18 +60,18 @@ if __name__ == "__main__":
 #     "DPI_DISPLAY",
 #     "DPI_PREVIEW",
 # ]
-# 
+#
 # from pathlib import Path
 # from typing import Any, Dict, Optional, Union
-# 
+#
 # import scitex.io
 # from scitex.config import PriorityConfig
-# 
+#
 # _STYLE_FILE = Path(__file__).parent / "SCITEX_STYLE.yaml"
 # _config: Optional[PriorityConfig] = None
 # _active_style: Optional[Dict[str, Any]] = None  # User-set style override
-# 
-# 
+#
+#
 # def _get_config(yaml_path: Optional[Path] = None) -> PriorityConfig:
 #     """Get or create PriorityConfig from YAML."""
 #     global _config
@@ -85,19 +85,19 @@ if __name__ == "__main__":
 #         }
 #         _config = PriorityConfig(flat, env_prefix="SCITEX_PLT_", auto_uppercase=True)
 #     return _config
-# 
-# 
+#
+#
 # def resolve_style_value(
 #     key: str, direct_val: Any = None, default: Any = None, type: type = float
 # ) -> Any:
 #     """Resolve value with priority: direct → env → yaml → default.
-# 
+#
 #     Key format: 'axes.width_mm' - dots for YAML hierarchy, underscores for env vars.
 #     Env var: SCITEX_PLT_AXES_WIDTH_MM (prefix + key with dots→underscores, uppercased)
 #     """
 #     return _get_config().resolve(key, direct_val, default, type)
-# 
-# 
+#
+#
 # # =============================================================================
 # # DPI Resolution - Central Source of Truth
 # # =============================================================================
@@ -120,55 +120,55 @@ if __name__ == "__main__":
 # #   # When loading from bundle, use bundle's DPI:
 # #   dpi = bundle.get("geometry", {}).get("dpi") or get_default_dpi()
 # #
-# 
+#
 # # Fallback values (only used if config unavailable)
 # _FALLBACK_DPI_SAVE = 300
 # _FALLBACK_DPI_DISPLAY = 100
 # _FALLBACK_DPI_PREVIEW = 150
-# 
-# 
+#
+#
 # def get_default_dpi() -> int:
 #     """Get default DPI for saving/publication from config.
-# 
+#
 #     Priority: SCITEX_STYLE.yaml → env var → fallback 300
-# 
+#
 #     Returns:
 #         int: DPI value for publication-quality output
 #     """
 #     return int(resolve_style_value("output.dpi", None, _FALLBACK_DPI_SAVE, int))
-# 
-# 
+#
+#
 # def get_display_dpi() -> int:
 #     """Get DPI for screen display (lower resolution for speed).
-# 
+#
 #     Returns approximately 1/3 of save DPI, minimum 100.
-# 
+#
 #     Returns:
 #         int: DPI value for screen display
 #     """
 #     save_dpi = get_default_dpi()
 #     return max(_FALLBACK_DPI_DISPLAY, save_dpi // 3)
-# 
-# 
+#
+#
 # def get_preview_dpi() -> int:
 #     """Get DPI for editor previews and thumbnails.
-# 
+#
 #     Returns 1/2 of save DPI, clamped between 100-200.
-# 
+#
 #     Returns:
 #         int: DPI value for previews
 #     """
 #     save_dpi = get_default_dpi()
 #     return max(_FALLBACK_DPI_DISPLAY, min(200, save_dpi // 2))
-# 
-# 
+#
+#
 # # Module-level constants (evaluated at import time)
 # # Use functions for dynamic resolution, constants for static defaults
 # DPI_SAVE = _FALLBACK_DPI_SAVE      # Use get_default_dpi() for dynamic
 # DPI_DISPLAY = _FALLBACK_DPI_DISPLAY
 # DPI_PREVIEW = _FALLBACK_DPI_PREVIEW
-# 
-# 
+#
+#
 # def load_style(path: Optional[Union[str, Path]] = None) -> Dict[str, Any]:
 #     """Load style from YAML as subplots kwargs."""
 #     cfg = _get_config(Path(path) if path else None)
@@ -208,11 +208,11 @@ if __name__ == "__main__":
 #         "auto_scale_axes": g("behavior.auto_scale_axes", True, bool),
 #         "mode": "publication",
 #     }
-# 
-# 
+#
+#
 # def get_style() -> Dict[str, Any]:
 #     """Get current active style configuration.
-# 
+#
 #     Returns style with priority: active_style → env → yaml → default
 #     """
 #     global _active_style
@@ -220,14 +220,14 @@ if __name__ == "__main__":
 #     if _active_style:
 #         base.update(_active_style)
 #     return base
-# 
-# 
+#
+#
 # def set_style(style_dict: Optional[Dict[str, Any]] = None) -> None:
 #     """Set active style globally.
-# 
+#
 #     Args:
 #         style_dict: Style values to override. Pass None to reset to defaults.
-# 
+#
 #     Example:
 #         set_style({"axes_width_mm": 60, "trace_thickness_mm": 0.3})
 #         set_style(None)  # Reset to defaults
@@ -236,35 +236,35 @@ if __name__ == "__main__":
 #     _active_style = style_dict
 #     SCITEX_STYLE = get_style()
 #     STYLE = SCITEX_STYLE
-# 
-# 
+#
+#
 # def save_style(path: Union[str, Path], style: Optional[Dict[str, Any]] = None) -> Path:
 #     """Export style to YAML or JSON file.
-# 
+#
 #     Args:
 #         path: Output file path (.yaml, .yml, or .json)
 #         style: Style dict to export. If None, exports current active style.
-# 
+#
 #     Returns:
 #         Path to saved file.
-# 
+#
 #     Example:
 #         save_style("my_style.yaml")
 #         save_style("custom.json", {"axes_width_mm": 60})
 #     """
 #     path = Path(path)
 #     style = style or get_style()
-# 
+#
 #     # Convert flat style dict to hierarchical YAML structure
 #     hierarchical = _flat_to_hierarchical(style)
-# 
+#
 #     scitex.io.save(hierarchical, path)
 #     return path
-# 
-# 
+#
+#
 # def _flat_to_hierarchical(style: Dict[str, Any]) -> Dict[str, Any]:
 #     """Convert flat style dict to hierarchical YAML structure.
-# 
+#
 #     Example:
 #         {"axes_width_mm": 40} -> {"axes": {"width_mm": 40}}
 #     """
@@ -303,7 +303,7 @@ if __name__ == "__main__":
 #         "transparent": ("output", "transparent"),
 #         "auto_scale_axes": ("behavior", "auto_scale_axes"),
 #     }
-# 
+#
 #     result: Dict[str, Any] = {}
 #     for flat_key, value in style.items():
 #         if flat_key in mapping:
@@ -312,14 +312,14 @@ if __name__ == "__main__":
 #                 result[section] = {}
 #             result[section][key] = value
 #         # Skip keys not in mapping (like 'mode')
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # SCITEX_STYLE = load_style()
 # STYLE = SCITEX_STYLE
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

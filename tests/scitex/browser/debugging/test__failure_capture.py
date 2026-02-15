@@ -14,10 +14,10 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: 2025-12-08
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/browser/debugging/_failure_capture.py
-# 
+#
 # """
 # Automatic failure capture utilities for Playwright E2E tests.
-# 
+#
 # Features:
 # - Console log collection with source file/line tracking
 # - Error interception (JS errors, unhandled promise rejections, resource failures)
@@ -25,9 +25,9 @@ if __name__ == "__main__":
 # - Page HTML capture for debugging
 # - DevTools-like formatted output
 # - Pytest integration via fixtures
-# 
+#
 # Based on scitex-cloud's console-interceptor.ts functionality.
-# 
+#
 # Usage in conftest.py:
 #     from scitex.browser.debugging import (
 #         setup_console_interceptor,
@@ -36,26 +36,26 @@ if __name__ == "__main__":
 #         create_failure_capture_fixture,
 #     )
 # """
-# 
+#
 # from datetime import datetime
 # from pathlib import Path
 # from typing import TYPE_CHECKING
-# 
+#
 # if TYPE_CHECKING:
 #     from playwright.sync_api import Page
-# 
-# 
+#
+#
 # # JavaScript code for advanced console interception
 # # Mirrors functionality from scitex-cloud/static/shared/ts/utils/console-interceptor.ts
 # CONSOLE_INTERCEPTOR_JS = """
 # () => {
 #     if (window._scitex_console_interceptor_setup) return;
-# 
+#
 #     // Store for captured logs with full details
 #     window._scitex_console_logs = [];
 #     window._scitex_console_history = [];
 #     const maxHistory = 2000;
-# 
+#
 #     // Store original console methods
 #     const originalConsole = {
 #         log: console.log,
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 #         error: console.error,
 #         debug: console.debug
 #     };
-# 
+#
 #     // Get source file and line number from stack trace
 #     function getSource() {
 #         try {
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 #         } catch (e) {}
 #         return '';
 #     }
-# 
+#
 #     // Format message from arguments
 #     function formatMessage(args) {
 #         return args.map(arg => {
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 #             return String(arg);
 #         }).join(' ');
 #     }
-# 
+#
 #     // Capture log entry
 #     function capture(level, args) {
 #         const message = formatMessage(args);
@@ -107,19 +107,19 @@ if __name__ == "__main__":
 #             timestamp: Date.now(),
 #             url: window.location.href
 #         };
-# 
+#
 #         window._scitex_console_history.push(entry);
 #         if (window._scitex_console_history.length > maxHistory) {
 #             window._scitex_console_history.shift();
 #         }
-# 
+#
 #         // Also store simple format for backwards compatibility
 #         window._scitex_console_logs.push(`[${level.toUpperCase()}] ${source ? source + ' ' : ''}${message}`);
 #         if (window._scitex_console_logs.length > 500) {
 #             window._scitex_console_logs.shift();
 #         }
 #     }
-# 
+#
 #     // Intercept console methods
 #     ['log', 'info', 'warn', 'error', 'debug'].forEach(level => {
 #         console[level] = function(...args) {
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 #             capture(level, args);
 #         };
 #     });
-# 
+#
 #     // Capture unhandled JavaScript errors
 #     window.addEventListener('error', (event) => {
 #         let entry;
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 #             window._scitex_console_logs.push(`[ERROR] ${entry.source} ${entry.message}`);
 #         }
 #     }, true);
-# 
+#
 #     // Capture unhandled promise rejections
 #     window.addEventListener('unhandledrejection', (event) => {
 #         const entry = {
@@ -172,33 +172,33 @@ if __name__ == "__main__":
 #         window._scitex_console_history.push(entry);
 #         window._scitex_console_logs.push(`[ERROR] Uncaught (in promise): ${event.reason}`);
 #     });
-# 
+#
 #     window._scitex_console_interceptor_setup = true;
 # }
 # """
-# 
-# 
+#
+#
 # def setup_console_interceptor(page: "Page") -> None:
 #     """Set up console log interceptor with source tracking and error capture.
-# 
+#
 #     Features (mirroring console-interceptor.ts):
 #     - Intercepts console.log, info, warn, error, debug
 #     - Captures source file and line number
 #     - Captures unhandled JS errors
 #     - Captures unhandled promise rejections
 #     - Captures resource loading failures
-# 
+#
 #     Call this at the start of each test to begin capturing logs.
 #     """
 #     try:
 #         page.evaluate(CONSOLE_INTERCEPTOR_JS)
 #     except Exception:
 #         pass
-# 
-# 
+#
+#
 # def collect_console_logs(page: "Page") -> list:
 #     """Collect all captured console logs from the browser.
-# 
+#
 #     Returns:
 #         List of log strings in format "[LEVEL] source message"
 #     """
@@ -214,11 +214,11 @@ if __name__ == "__main__":
 #         return logs or []
 #     except Exception:
 #         return []
-# 
-# 
+#
+#
 # def collect_console_logs_detailed(page: "Page") -> list:
 #     """Collect all captured console logs with full details.
-# 
+#
 #     Returns:
 #         List of dicts with keys: level, message, source, timestamp, url
 #     """
@@ -234,20 +234,20 @@ if __name__ == "__main__":
 #         return history or []
 #     except Exception:
 #         return []
-# 
-# 
+#
+#
 # def format_logs_devtools_style(logs: list) -> str:
 #     """Format logs in DevTools-like style.
-# 
+#
 #     Args:
 #         logs: List of detailed log entries from collect_console_logs_detailed()
-# 
+#
 #     Returns:
 #         Formatted string like browser DevTools output
 #     """
 #     if not logs:
 #         return "No console logs captured."
-# 
+#
 #     level_icons = {
 #         "error": "[ERROR]",
 #         "warn": "[WARN]",
@@ -255,7 +255,7 @@ if __name__ == "__main__":
 #         "debug": "[DEBUG]",
 #         "log": "[LOG]",
 #     }
-# 
+#
 #     output = []
 #     for entry in logs:
 #         if isinstance(entry, dict):
@@ -267,10 +267,10 @@ if __name__ == "__main__":
 #             output.append(f"{icon}{source_str} {message}")
 #         else:
 #             output.append(str(entry))
-# 
+#
 #     return "\n".join(output)
-# 
-# 
+#
+#
 # def save_failure_artifacts(
 #     page: "Page",
 #     test_name: str,
@@ -278,13 +278,13 @@ if __name__ == "__main__":
 #     console_logs: list | None = None,
 # ) -> dict:
 #     """Save screenshot, console logs, and page HTML on test failure.
-# 
+#
 #     Args:
 #         page: Playwright page object
 #         test_name: Name of the failed test (e.g., request.node.nodeid)
 #         artifacts_dir: Directory to save artifacts
 #         console_logs: Pre-collected console logs (optional, will collect if None)
-# 
+#
 #     Returns:
 #         Dict with paths to saved artifacts
 #     """
@@ -295,17 +295,17 @@ if __name__ == "__main__":
 #         .replace("]", "")
 #         .replace("/", "_")
 #     )
-# 
+#
 #     # Create artifacts directory with timestamp
 #     artifacts_path = Path(artifacts_dir) / timestamp
 #     artifacts_path.mkdir(parents=True, exist_ok=True)
-# 
+#
 #     saved_files = {}
-# 
+#
 #     # Collect console logs if not provided
 #     if console_logs is None:
 #         console_logs = collect_console_logs(page)
-# 
+#
 #     # Save screenshot
 #     try:
 #         screenshot_path = artifacts_path / f"{safe_test_name}_screenshot.png"
@@ -314,7 +314,7 @@ if __name__ == "__main__":
 #         print(f"\n[FAILURE] Screenshot saved: {screenshot_path}")
 #     except Exception as e:
 #         print(f"\n[FAILURE] Failed to save screenshot: {e}")
-# 
+#
 #     # Save console logs
 #     try:
 #         logs_path = artifacts_path / f"{safe_test_name}_console.log"
@@ -331,7 +331,7 @@ if __name__ == "__main__":
 #         print(f"[FAILURE] Console logs saved: {logs_path}")
 #     except Exception as e:
 #         print(f"[FAILURE] Failed to save console logs: {e}")
-# 
+#
 #     # Save page HTML
 #     try:
 #         html_path = artifacts_path / f"{safe_test_name}_page.html"
@@ -342,28 +342,28 @@ if __name__ == "__main__":
 #         print(f"[FAILURE] Page HTML saved: {html_path}")
 #     except Exception as e:
 #         print(f"[FAILURE] Failed to save page HTML: {e}")
-# 
+#
 #     return saved_files
-# 
-# 
+#
+#
 # def create_failure_capture_fixture(artifacts_dir: Path | str):
 #     """Create a pytest fixture for automatic failure capture.
-# 
+#
 #     Usage in conftest.py:
 #         from scitex.browser.debugging import create_failure_capture_fixture
-# 
+#
 #         capture_on_failure = create_failure_capture_fixture(
 #             Path(__file__).parent / "artifacts"
 #         )
-# 
+#
 #     Args:
 #         artifacts_dir: Directory to save failure artifacts
-# 
+#
 #     Returns:
 #         A pytest fixture function
 #     """
 #     import pytest
-# 
+#
 #     @pytest.fixture(autouse=True)
 #     def capture_on_failure(request, page):
 #         """Automatically capture console logs and screenshot on test failure."""
@@ -374,10 +374,10 @@ if __name__ == "__main__":
 #             save_failure_artifacts(
 #                 page, request.node.nodeid, artifacts_dir, console_logs
 #             )
-# 
+#
 #     return capture_on_failure
-# 
-# 
+#
+#
 # # Pytest hook for capturing test results - add to conftest.py
 # PYTEST_HOOK_CODE = '''
 # @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -387,7 +387,7 @@ if __name__ == "__main__":
 #     rep = outcome.get_result()
 #     setattr(item, f"rep_{rep.when}", rep)
 # '''
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

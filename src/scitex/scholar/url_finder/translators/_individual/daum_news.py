@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2021-06-07 16:41:08
 """
 
-from typing import Dict, Any
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict
+
+from bs4 import BeautifulSoup
 
 
 class DaumNewsTranslator:

@@ -10,6 +10,6 @@ This module provides utility functions that don't fit into other categories,
 such as keyboard input handling for interactive programs.
 """
 
-from .wait_key import wait_key, count
+from .wait_key import count, wait_key
 
 __all__ = ["wait_key", "count"]

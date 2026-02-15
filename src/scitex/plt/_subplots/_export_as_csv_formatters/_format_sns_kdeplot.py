@@ -43,14 +43,24 @@ def _format_sns_kdeplot(id, tracked_dict, kwargs):
         # Handle DataFrame input with x, y variables
         if isinstance(data, pd.DataFrame) and x_var:
             if y_var and y_var in data.columns:  # Bivariate KDE
-                return pd.DataFrame({
-                    get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): data[x_var],
-                    get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): data[y_var],
-                })
+                return pd.DataFrame(
+                    {
+                        get_csv_column_name(
+                            "x", ax_row, ax_col, trace_id=trace_id
+                        ): data[x_var],
+                        get_csv_column_name(
+                            "y", ax_row, ax_col, trace_id=trace_id
+                        ): data[y_var],
+                    }
+                )
             elif x_var in data.columns:  # Univariate KDE
-                return pd.DataFrame({
-                    get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): data[x_var]
-                })
+                return pd.DataFrame(
+                    {
+                        get_csv_column_name(
+                            "x", ax_row, ax_col, trace_id=trace_id
+                        ): data[x_var]
+                    }
+                )
 
         # Handle direct data array input
         elif isinstance(data, (np.ndarray, list)):
@@ -61,20 +71,28 @@ def _format_sns_kdeplot(id, tracked_dict, kwargs):
             )
 
             if y_data is not None:  # Bivariate KDE
-                return pd.DataFrame({
-                    get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): data,
-                    get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id): y_data,
-                })
+                return pd.DataFrame(
+                    {
+                        get_csv_column_name(
+                            "x", ax_row, ax_col, trace_id=trace_id
+                        ): data,
+                        get_csv_column_name(
+                            "y", ax_row, ax_col, trace_id=trace_id
+                        ): y_data,
+                    }
+                )
             else:  # Univariate KDE
-                return pd.DataFrame({
-                    get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): data
-                })
+                return pd.DataFrame(
+                    {get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id): data}
+                )
 
         # Handle DataFrame input without x, y specified
         elif isinstance(data, pd.DataFrame):
             result = pd.DataFrame()
             for col in data.columns:
-                col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                col_name = get_csv_column_name(
+                    f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                )
                 result[col_name] = data[col]
             return result
 
@@ -84,7 +102,9 @@ def _format_sns_kdeplot(id, tracked_dict, kwargs):
         if isinstance(data, pd.DataFrame):
             result = pd.DataFrame()
             for col in data.columns:
-                col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                col_name = get_csv_column_name(
+                    f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                )
                 result[col_name] = data[col]
             return result
 

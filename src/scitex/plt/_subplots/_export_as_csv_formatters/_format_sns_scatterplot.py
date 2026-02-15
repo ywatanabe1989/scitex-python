@@ -40,20 +40,30 @@ def _format_sns_scatterplot(id, tracked_dict, kwargs=None):
             y_var = kwargs.get("y")
 
             if x_var and y_var and x_var in data.columns and y_var in data.columns:
-                result[get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)] = data[x_var]
-                result[get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)] = data[y_var]
+                result[get_csv_column_name("x", ax_row, ax_col, trace_id=trace_id)] = (
+                    data[x_var]
+                )
+                result[get_csv_column_name("y", ax_row, ax_col, trace_id=trace_id)] = (
+                    data[y_var]
+                )
 
                 # Also extract hue, size, style if specified
                 for extra_var in ["hue", "size", "style"]:
                     var_name = kwargs.get(extra_var)
                     if var_name and var_name in data.columns:
-                        result[get_csv_column_name(extra_var, ax_row, ax_col, trace_id=trace_id)] = data[var_name]
+                        result[
+                            get_csv_column_name(
+                                extra_var, ax_row, ax_col, trace_id=trace_id
+                            )
+                        ] = data[var_name]
 
                 return result
             else:
                 # If columns aren't specified, include all columns
                 for col in data.columns:
-                    col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                    col_name = get_csv_column_name(
+                        f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                    )
                     result[col_name] = data[col]
                 return result
 
@@ -64,7 +74,9 @@ def _format_sns_scatterplot(id, tracked_dict, kwargs=None):
             result = pd.DataFrame()
 
             for col in data.columns:
-                col_name = get_csv_column_name(f"data-{col}", ax_row, ax_col, trace_id=trace_id)
+                col_name = get_csv_column_name(
+                    f"data-{col}", ax_row, ax_col, trace_id=trace_id
+                )
                 result[col_name] = data[col]
 
             return result

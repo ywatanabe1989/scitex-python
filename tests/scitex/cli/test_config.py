@@ -279,6 +279,7 @@ class TestConfigIntegration:
                 assert result2.exit_code == 0
                 assert str(logs_path) in result2.output
 
+
 if __name__ == "__main__":
     import os
 
@@ -293,22 +294,22 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-09 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/cli/config.py
-# 
+#
 # """
 # SciTeX Configuration CLI Commands
-# 
+#
 # Commands for managing SciTeX configuration and paths.
 # """
-# 
+#
 # import os
 # import click
-# 
-# 
+#
+#
 # @click.group()
 # def config():
 #     """
 #     Configuration management commands.
-# 
+#
 #     \b
 #     Examples:
 #       scitex config list          # Show all configured paths
@@ -316,8 +317,8 @@ if __name__ == "__main__":
 #       scitex config init          # Initialize all directories
 #     """
 #     pass
-# 
-# 
+#
+#
 # @config.command("list")
 # @click.option(
 #     "--env",
@@ -338,7 +339,7 @@ if __name__ == "__main__":
 # def list_config(env, exists, as_json):
 #     """
 #     List all configured paths and settings.
-# 
+#
 #     \b
 #     Examples:
 #       scitex config list            # Show all paths
@@ -347,13 +348,13 @@ if __name__ == "__main__":
 #       scitex config list --json     # Output as JSON
 #     """
 #     from scitex.config import ScitexPaths, get_scitex_dir
-# 
+#
 #     paths = ScitexPaths()
 #     all_paths = paths.list_all()
-# 
+#
 #     if as_json:
 #         import json
-# 
+#
 #         output = {}
 #         if env:
 #             output["environment"] = {
@@ -366,12 +367,12 @@ if __name__ == "__main__":
 #             }
 #         click.echo(json.dumps(output, indent=2))
 #         return
-# 
+#
 #     # Header
 #     click.secho("SciTeX Configuration", fg="cyan", bold=True)
 #     click.echo("=" * 50)
 #     click.echo()
-# 
+#
 #     # Environment variables
 #     if env:
 #         click.secho("Environment Variables:", fg="yellow", bold=True)
@@ -381,7 +382,7 @@ if __name__ == "__main__":
 #         else:
 #             click.echo(f"  SCITEX_DIR = (not set, using default: ~/.scitex)")
 #         click.echo()
-# 
+#
 #     # Base directory
 #     click.secho("Base Directory:", fg="yellow", bold=True)
 #     base = paths.base
@@ -390,10 +391,10 @@ if __name__ == "__main__":
 #     )
 #     click.echo(f"  {exists_mark} {base}")
 #     click.echo()
-# 
+#
 #     # All paths
 #     click.secho("Configured Paths:", fg="yellow", bold=True)
-# 
+#
 #     # Group paths by category
 #     categories = {
 #         "Core": ["logs", "cache", "function_cache", "capture", "screenshots", "rng"],
@@ -408,7 +409,7 @@ if __name__ == "__main__":
 #         "Scholar": ["scholar", "scholar_cache", "scholar_library"],
 #         "Other": ["writer"],
 #     }
-# 
+#
 #     for category, path_names in categories.items():
 #         click.secho(f"\n  {category}:", fg="blue")
 #         for name in path_names:
@@ -429,10 +430,10 @@ if __name__ == "__main__":
 #             except ValueError:
 #                 display_path = str(path)
 #             click.echo(f"    {exists_mark} {name:<22} {display_path}")
-# 
+#
 #     click.echo()
-# 
-# 
+#
+#
 # @config.command("init")
 # @click.option(
 #     "--dry-run",
@@ -442,25 +443,25 @@ if __name__ == "__main__":
 # def init_config(dry_run):
 #     """
 #     Initialize all SciTeX directories.
-# 
+#
 #     Creates all standard directories if they don't exist.
-# 
+#
 #     \b
 #     Examples:
 #       scitex config init            # Create all directories
 #       scitex config init --dry-run  # Show what would be created
 #     """
 #     from scitex.config import ScitexPaths
-# 
+#
 #     paths = ScitexPaths()
 #     all_paths = paths.list_all()
-# 
+#
 #     click.secho("Initializing SciTeX directories...", fg="cyan", bold=True)
 #     click.echo()
-# 
+#
 #     created = 0
 #     existed = 0
-# 
+#
 #     for name, path in all_paths.items():
 #         if path.exists():
 #             existed += 1
@@ -472,36 +473,36 @@ if __name__ == "__main__":
 #                 path.mkdir(parents=True, exist_ok=True)
 #                 click.echo(f"  {click.style('CREATED', fg='green')}: {path}")
 #             created += 1
-# 
+#
 #     click.echo()
 #     if dry_run:
 #         click.echo(f"Would create {created} directories ({existed} already exist)")
 #     else:
 #         click.echo(f"Created {created} directories ({existed} already existed)")
-# 
-# 
+#
+#
 # @config.command("show")
 # @click.argument("path_name")
 # def show_path(path_name):
 #     """
 #     Show a specific configured path.
-# 
+#
 #     \b
 #     PATH_NAME can be one of:
 #       base, logs, cache, function_cache, capture, screenshots,
 #       browser, browser_screenshots, browser_sessions, browser_persistent,
 #       test_monitor, impact_factor_cache, openathens_cache,
 #       scholar, scholar_cache, scholar_library, writer, rng
-# 
+#
 #     \b
 #     Examples:
 #       scitex config show logs
 #       scitex config show scholar_library
 #     """
 #     from scitex.config import ScitexPaths
-# 
+#
 #     paths = ScitexPaths()
-# 
+#
 #     if hasattr(paths, path_name):
 #         path = getattr(paths, path_name)
 #         click.echo(str(path))
@@ -510,8 +511,8 @@ if __name__ == "__main__":
 #         click.secho(f"Unknown path: {path_name}", fg="red", err=True)
 #         click.echo(f"Available paths: {', '.join(available)}", err=True)
 #         raise SystemExit(1)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

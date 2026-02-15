@@ -13,6 +13,7 @@ from matplotlib.axes import Axes
 
 from scitex import logging
 from scitex.pd._force_df import force_df as scitex_pd_force_df
+
 from ....plt.utils import assert_valid_axis, mm_to_pt
 
 logger = logging.getLogger(__name__)

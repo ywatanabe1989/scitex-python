@@ -53,9 +53,7 @@ from scitex.bridge._figrecipe import (
 )
 
 # High-level helpers
-from scitex.bridge._helpers import (
-    add_stats_from_results,
-)
+from scitex.bridge._helpers import add_stats_from_results
 
 # Plt ↔ Vis bridges
 from scitex.bridge._plt_vis import (

@@ -18,6 +18,8 @@ from scitex import logging
 
 logger = logging.getLogger(__name__)
 
+from scitex.plt.styles import apply_plot_defaults, apply_plot_postprocess
+
 from ._AxisWrapperMixins import (
     AdjustmentMixin,
     MatplotlibPlotMixin,
@@ -26,7 +28,6 @@ from ._AxisWrapperMixins import (
     TrackingMixin,
     UnitAwareMixin,
 )
-from scitex.plt.styles import apply_plot_defaults, apply_plot_postprocess
 
 
 class AxisWrapper(

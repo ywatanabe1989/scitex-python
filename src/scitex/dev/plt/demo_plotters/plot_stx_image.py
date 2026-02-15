@@ -18,9 +18,9 @@ def plot_stx_image(plt, rng, ax=None):
         fig = ax.get_figure() if hasattr(ax, "get_figure") else ax._fig_scitex
 
     data = rng.uniform(0, 1, (10, 10))
-    ax.stx_image(data, cmap='viridis')
+    ax.stx_image(data, cmap="viridis")
     ax.set_xyt("X", "Y", "stx_image")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

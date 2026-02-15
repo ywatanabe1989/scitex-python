@@ -13,17 +13,17 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_models/_plot_types/_image.py
-# 
+#
 # """Image and heatmap configurations."""
-# 
+#
 # from dataclasses import dataclass
 # from typing import Any, List, Optional, Union
-# 
-# 
+#
+#
 # @dataclass
 # class ImshowConfig:
 #     """Image display configuration."""
-# 
+#
 #     img: Any
 #     cmap: Optional[str] = "viridis"
 #     aspect: str = "auto"
@@ -32,12 +32,12 @@ if __name__ == "__main__":
 #     vmax: Optional[float] = None
 #     origin: str = "upper"
 #     id: Optional[str] = None
-# 
-# 
+#
+#
 # @dataclass
 # class ContourConfig:
 #     """Contour plot configuration."""
-# 
+#
 #     x: List[float]
 #     y: List[float]
 #     z: Any
@@ -50,12 +50,12 @@ if __name__ == "__main__":
 #     vmin: Optional[float] = None
 #     vmax: Optional[float] = None
 #     id: Optional[str] = None
-# 
-# 
+#
+#
 # @dataclass
 # class HeatmapConfig:
 #     """Heatmap configuration (scitex.plt.ax.stx_heatmap)."""
-# 
+#
 #     data: Any
 #     x_labels: Optional[List[str]] = None
 #     y_labels: Optional[List[str]] = None
@@ -66,10 +66,10 @@ if __name__ == "__main__":
 #     show_annot: bool = False
 #     value_format: str = "{x:.2f}"
 #     id: Optional[str] = None
-# 
-# 
+#
+#
 # __all__ = ["ImshowConfig", "ContourConfig", "HeatmapConfig"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

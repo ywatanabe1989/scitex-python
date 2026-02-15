@@ -21,7 +21,7 @@ class TestUnderSample:
     def test_basic_undersampling(self):
         """Test basic undersampling with imbalanced classes."""
         # Create imbalanced dataset: 'a' has 2, 'b' has 4, 'c' has 6
-        y = np.array(['a', 'a', 'b', 'b', 'b', 'b', 'c', 'c', 'c', 'c', 'c', 'c'])
+        y = np.array(["a", "a", "b", "b", "b", "b", "c", "c", "c", "c", "c", "c"])
 
         indices = under_sample(y)
 
@@ -31,9 +31,9 @@ class TestUnderSample:
         # Check balanced sampling
         sampled_labels = y[indices]
         counts = Counter(sampled_labels)
-        assert counts['a'] == 2
-        assert counts['b'] == 2
-        assert counts['c'] == 2
+        assert counts["a"] == 2
+        assert counts["b"] == 2
+        assert counts["c"] == 2
 
     def test_numeric_labels(self):
         """Test with numeric labels."""
@@ -50,7 +50,7 @@ class TestUnderSample:
 
     def test_already_balanced(self):
         """Test with already balanced classes."""
-        y = np.array(['x', 'x', 'y', 'y', 'z', 'z'])
+        y = np.array(["x", "x", "y", "y", "z", "z"])
 
         indices = under_sample(y)
 
@@ -82,7 +82,7 @@ class TestUnderSample:
 
     def test_indices_are_valid(self):
         """Test that returned indices are valid."""
-        y = np.array(['a', 'b', 'c', 'b', 'c', 'a', 'c'])
+        y = np.array(["a", "b", "c", "b", "c", "a", "c"])
 
         indices = under_sample(y)
 
@@ -133,7 +133,7 @@ class TestUnderSample:
 
     def test_three_classes_different_sizes(self):
         """Test with three classes of different sizes."""
-        y = np.array([0]*10 + [1]*5 + [2]*3)  # Minority has 3
+        y = np.array([0] * 10 + [1] * 5 + [2] * 3)  # Minority has 3
 
         indices = under_sample(y)
 
@@ -159,7 +159,7 @@ class TestUnderSample:
 
     def test_with_list_input(self):
         """Test with Python list input - needs conversion to numpy array."""
-        y = ['a', 'b', 'c', 'b', 'c', 'a', 'c']
+        y = ["a", "b", "c", "b", "c", "a", "c"]
 
         # The function expects numpy array, so we need to convert
         y_array = np.array(y)
@@ -171,7 +171,7 @@ class TestUnderSample:
         counts = Counter(sampled)
         assert all(count == 2 for count in counts.values())
 
-    @patch('numpy.random.choice')
+    @patch("numpy.random.choice")
     def test_random_choice_called_correctly(self, mock_choice):
         """Test that numpy.random.choice is called with correct parameters."""
         y = np.array([0, 0, 0, 1, 1])
@@ -179,7 +179,7 @@ class TestUnderSample:
         # Setup mock to return valid indices
         mock_choice.side_effect = [
             np.array([0, 1]),  # For class 0
-            np.array([3, 4])   # For class 1
+            np.array([3, 4]),  # For class 1
         ]
 
         indices = under_sample(y)
@@ -191,8 +191,8 @@ class TestUnderSample:
         calls = mock_choice.call_args_list
         # First call for class 0
         assert np.array_equal(calls[0][0][0], [0, 1, 2])  # indices where y==0
-        assert calls[0][1]['size'] == 2
-        assert calls[0][1]['replace'] == False
+        assert calls[0][1]["size"] == 2
+        assert calls[0][1]["replace"] == False
 
     def test_empty_array_error(self):
         """Test error handling with empty array."""
@@ -223,7 +223,7 @@ class TestUnderSample:
         """
         # Test case: class 0 has 5, class 1 has 2, class 2 has 5
         # Minority is class 1 with 2 samples
-        y = np.array([0]*5 + [1]*2 + [2]*5)
+        y = np.array([0] * 5 + [1] * 2 + [2] * 5)
 
         # Should successfully sample 2 from each class (no error)
         indices = under_sample(y, replace=False)
@@ -241,6 +241,7 @@ class TestUnderSample:
         # Verify all indices are unique (no replacement)
         assert len(indices) == len(set(indices))
 
+
 if __name__ == "__main__":
     import os
 
@@ -252,20 +253,20 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/_under_sample.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# 
-# 
+#
+#
 # from collections import Counter
-# 
+#
 # import numpy as np
-# 
-# 
+#
+#
 # def under_sample(y, replace=False):
 #     """
 #     Input:
 #         Labels
 #     Return:
 #         Indices
-# 
+#
 #     Example:
 #         t = ['a', 'b', 'c', 'b', 'c', 'a', 'c']
 #         print(under_sample(t))
@@ -273,17 +274,17 @@ if __name__ == "__main__":
 #         print(under_sample(t))
 #         # [5 0 1 3 6 2]
 #     """
-# 
+#
 #     # find the minority and majority classes
 #     class_counts = Counter(y)
 #     # majority_class = max(class_counts, key=class_counts.get)
 #     minority_class = min(class_counts, key=class_counts.get)
-# 
+#
 #     # compute the number of sample to draw from the majority class using
 #     # a negative binomial distribution
 #     n_minority_class = class_counts[minority_class]
 #     n_majority_resampled = n_minority_class
-# 
+#
 #     # draw randomly with or without replacement
 #     indices = np.hstack(
 #         [
@@ -295,10 +296,10 @@ if __name__ == "__main__":
 #             for k in class_counts.keys()
 #         ]
 #     )
-# 
+#
 #     return indices
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     t = np.array(["a", "b", "c", "b", "c", "a", "c"])
 #     print(under_sample(t))

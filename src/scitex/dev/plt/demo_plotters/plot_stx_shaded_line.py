@@ -19,9 +19,9 @@ def plot_stx_shaded_line(plt, rng, ax=None):
 
     x = np.linspace(0, 10, 100)
     y = np.sin(x)
-    ax.stx_shaded_line(x, y, y - 0.2, y + 0.2, label='Shaded')
+    ax.stx_shaded_line(x, y, y - 0.2, y + 0.2, label="Shaded")
     ax.set_xyt("X", "Y", "stx_shaded_line")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

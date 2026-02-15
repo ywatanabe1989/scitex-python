@@ -14,6 +14,7 @@ Key features:
 
 import re
 from typing import List
+
 from playwright.async_api import Page
 
 
@@ -39,7 +40,8 @@ class ZbMATHTranslator:
             pass
 
         # Extract PDF URLs from download links
-        urls = await page.evaluate("""
+        urls = await page.evaluate(
+            """
             () => {
                 const pdfUrls = [];
 
@@ -60,7 +62,8 @@ class ZbMATHTranslator:
 
                 return pdfUrls;
             }
-        """)
+        """
+        )
 
         pdf_urls.extend(urls)
         return pdf_urls
@@ -68,6 +71,7 @@ class ZbMATHTranslator:
 
 if __name__ == "__main__":
     import asyncio
+
     from playwright.async_api import async_playwright
 
     async def main():

@@ -7,10 +7,10 @@ import os
 
 __FILE__ = "./src/scitex/decorators/_batch_fn.py"
 __DIR__ = os.path.dirname(__FILE__)
+from functools import wraps
+
 # ----------------------------------------
 from typing import Any as _Any
-
-from functools import wraps
 from typing import Callable
 
 import numpy as np

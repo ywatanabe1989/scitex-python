@@ -37,10 +37,10 @@ class TestEmbedMetadataDispatcher:
 
     def test_embed_svg(self):
         """Test embedding metadata into SVG via dispatcher."""
-        svg_content = '''<?xml version="1.0"?>
+        svg_content = """<?xml version="1.0"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
 <rect width="100" height="100"/>
-</svg>'''
+</svg>"""
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".svg", delete=False, encoding="utf-8"
         ) as f:
@@ -111,9 +111,7 @@ class TestEmbedMetadataDispatcher:
             os.unlink(png_path)
 
         # SVG
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".svg", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".svg", delete=False) as f:
             f.write('<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>')
             svg_path = f.name
         try:
@@ -121,6 +119,7 @@ class TestEmbedMetadataDispatcher:
             assert read_metadata(svg_path) == metadata
         finally:
             os.unlink(svg_path)
+
 
 if __name__ == "__main__":
     import os
@@ -135,27 +134,27 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_metadata_modules/_embed.py
-# 
+#
 # """Main embed_metadata dispatcher."""
-# 
+#
 # import os
 # from typing import Any, Dict
-# 
+#
 # from ._utils import serialize_metadata
-# 
-# 
+#
+#
 # def embed_metadata(image_path: str, metadata: Dict[str, Any]) -> None:
 #     """
 #     Embed metadata into an existing image or PDF file.
-# 
+#
 #     Args:
 #         image_path: Path to the image/PDF file (PNG, JPEG, SVG, or PDF)
 #         metadata: Dictionary containing metadata (must be JSON serializable)
-# 
+#
 #     Raises:
 #         ValueError: If file format is not supported or metadata is not JSON serializable
 #         FileNotFoundError: If file doesn't exist
-# 
+#
 #     Example:
 #         >>> metadata = {
 #         ...     'experiment': 'seizure_prediction_001',
@@ -167,40 +166,40 @@ if __name__ == "__main__":
 #     """
 #     if not os.path.exists(image_path):
 #         raise FileNotFoundError(f"File not found: {image_path}")
-# 
+#
 #     # Serialize metadata to JSON
 #     metadata_json = serialize_metadata(metadata)
-# 
+#
 #     path_lower = image_path.lower()
-# 
+#
 #     # Dispatch to format-specific handlers
 #     if path_lower.endswith(".png"):
 #         from .embed_metadata_png import embed_metadata_png
-# 
+#
 #         embed_metadata_png(image_path, metadata_json)
-# 
+#
 #     elif path_lower.endswith((".jpg", ".jpeg")):
 #         from .embed_metadata_jpeg import embed_metadata_jpeg
-# 
+#
 #         embed_metadata_jpeg(image_path, metadata_json)
-# 
+#
 #     elif path_lower.endswith(".svg"):
 #         from .embed_metadata_svg import embed_metadata_svg
-# 
+#
 #         embed_metadata_svg(image_path, metadata_json)
-# 
+#
 #     elif path_lower.endswith(".pdf"):
 #         from .embed_metadata_pdf import embed_metadata_pdf
-# 
+#
 #         embed_metadata_pdf(image_path, metadata_json, metadata)
-# 
+#
 #     else:
 #         raise ValueError(
 #             f"Unsupported file format: {image_path}. "
 #             "Only PNG, JPEG, SVG, and PDF formats are supported."
 #         )
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

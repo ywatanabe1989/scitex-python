@@ -14,31 +14,31 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-13 (ywatanabe)"
 # # File: _statistical.py - Statistical plot methods
-# 
+#
 # """Statistical plotting methods including line plots, box plots, and violin plots."""
-# 
+#
 # import os
 # from typing import List, Optional, Sequence, Tuple, Union
-# 
+#
 # import numpy as np
 # import pandas as pd
-# 
+#
 # from scitex.types import ArrayLike
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
-# 
-# 
+#
+#
 # class StatisticalPlotMixin:
 #     """Mixin for statistical plotting methods.
-# 
+#
 #     Provides methods for:
 #     - Distribution plots (boxplot, violin)
 #     - Line plots with uncertainty (mean±std, mean±CI, median±IQR)
 #     - Histograms with bin alignment
 #     - Geometric shapes (rectangles, filled regions)
 #     """
-# 
+#
 #     def stx_rectangle(
 #         self,
 #         x: float,
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> "Axes":
 #         """Draw a rectangle on the axes.
-# 
+#
 #         Parameters
 #         ----------
 #         x : float
@@ -68,29 +68,29 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the rectangle function.
-# 
+#
 #         Returns
 #         -------
 #         Axes
 #             The axes with the rectangle added.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_rectangle(0, 0, 1, 2, color='blue', alpha=0.5)
 #         """
 #         method_name = "stx_rectangle"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl = self._get_ax_module().stx_rectangle(
 #                 self._axis_mpl, x, y, width, height, **kwargs
 #             )
-# 
+#
 #         tracked_dict = {"x": x, "y": y, "width": width, "height": height}
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl
-# 
+#
 #     def stx_fillv(
 #         self,
 #         starts: ArrayLike,
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> "Axes":
 #         """Fill vertical spans between start and end positions.
-# 
+#
 #         Parameters
 #         ----------
 #         starts : array-like
@@ -120,29 +120,29 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the fill function.
-# 
+#
 #         Returns
 #         -------
 #         Axes
 #             The axes with the filled spans added.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_fillv([0, 2, 4], [1, 3, 5], color='green')
 #         """
 #         method_name = "stx_fillv"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl = self._get_ax_module().stx_fillv(
 #                 self._axis_mpl, starts, ends, color=color, alpha=alpha
 #             )
-# 
+#
 #         tracked_dict = {"starts": starts, "ends": ends}
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl
-# 
+#
 #     def stx_box(
 #         self,
 #         data: Union[ArrayLike, Sequence[ArrayLike]],
@@ -153,7 +153,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> dict:
 #         """Create a boxplot with SciTeX styling and tracking.
-# 
+#
 #         Parameters
 #         ----------
 #         data : array-like or sequence of array-like
@@ -167,52 +167,52 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to `matplotlib.axes.Axes.boxplot`.
-# 
+#
 #         Returns
 #         -------
 #         dict
 #             Dictionary mapping component names ('boxes', 'whiskers', etc.)
 #             to lists of Line2D or Patch artists.
-# 
+#
 #         See Also
 #         --------
 #         stx_boxplot : Alias for this method.
 #         sns_boxplot : DataFrame-based boxplot.
 #         stx_violin : Violin plot alternative.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_box([data1, data2, data3], labels=['A', 'B', 'C'])
 #         >>> ax.stx_box(data, notch=True, patch_artist=True)
 #         """
 #         method_name = "stx_box"
-# 
+#
 #         _data = data.copy()
-# 
+#
 #         if kwargs.get("label"):
 #             n_per_group = [len(g) for g in data]
 #             n_min, n_max = min(n_per_group), max(n_per_group)
 #             n_str = str(n_min) if n_min == n_max else f"{n_min}-{n_max}"
 #             kwargs["label"] = kwargs["label"] + f" ($n$={n_str})"
-# 
+#
 #         if "patch_artist" not in kwargs:
 #             kwargs["patch_artist"] = True
-# 
+#
 #         with self._no_tracking():
 #             result = self._axis_mpl.boxplot(data, **kwargs)
-# 
+#
 #         n_per_group = [len(g) for g in data]
 #         tracked_dict = {"data": _data, "n": n_per_group}
 #         self._track(track, id, method_name, tracked_dict, None)
-# 
+#
 #         from scitex.plt.ax import style_boxplot
-# 
+#
 #         style_boxplot(result, colors=colors)
-# 
+#
 #         self._apply_scitex_postprocess(method_name, result)
-# 
+#
 #         return result
-# 
+#
 #     def hist(
 #         self,
 #         x: ArrayLike,
@@ -225,7 +225,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple[np.ndarray, np.ndarray, "BarContainer"]:
 #         """Plot a histogram with optional bin alignment across multiple histograms.
-# 
+#
 #         Parameters
 #         ----------
 #         x : array-like
@@ -242,36 +242,36 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to `matplotlib.axes.Axes.hist`.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (counts, bin_edges, patches) from matplotlib hist.
-# 
+#
 #         See Also
 #         --------
 #         sns_histplot : DataFrame-based histogram with KDE support.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.hist(data, bins=20, density=True)
 #         >>> ax.hist(data, bins='auto', alpha=0.7, label='Group A')
 #         """
 #         method_name = "hist"
-# 
+#
 #         axis_id = str(hash(self._axis_mpl))
 #         hist_id = id if id is not None else str(self.id)
-# 
+#
 #         if align_bins:
 #             from .....plt.utils import histogram_bin_manager
-# 
+#
 #             bins, range = histogram_bin_manager.register_histogram(
 #                 axis_id, hist_id, x, bins, range
 #             )
-# 
+#
 #         with self._no_tracking():
 #             hist_data = self._axis_mpl.hist(x, bins=bins, range=range, **kwargs)
-# 
+#
 #         tracked_dict = {
 #             "args": (x,),
 #             "hist_result": (hist_data[0], hist_data[1]),
@@ -280,9 +280,9 @@ if __name__ == "__main__":
 #         }
 #         self._track(track, id, method_name, tracked_dict, kwargs)
 #         self._apply_scitex_postprocess(method_name, hist_data)
-# 
+#
 #         return hist_data
-# 
+#
 #     def stx_violin(
 #         self,
 #         data: Union[pd.DataFrame, List, ArrayLike],
@@ -298,7 +298,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> "Axes":
 #         """Create a violin plot with SciTeX styling and tracking.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame, list, or array-like
@@ -323,25 +323,25 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the violin function.
-# 
+#
 #         Returns
 #         -------
 #         Axes
 #             The axes with the violin plot.
-# 
+#
 #         See Also
 #         --------
 #         stx_violinplot : Alias for this method.
 #         sns_violinplot : DataFrame-based violin plot.
 #         stx_box : Boxplot alternative.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_violin([data1, data2], labels=['A', 'B'])
 #         >>> ax.stx_violin(df, x='group', y='value', hue='category')
 #         """
 #         method_name = "stx_violin"
-# 
+#
 #         with self._no_tracking():
 #             if isinstance(data, list) and all(
 #                 isinstance(item, (list, np.ndarray)) for item in data
@@ -364,7 +364,7 @@ if __name__ == "__main__":
 #                     half=half,
 #                     **kwargs,
 #                 )
-# 
+#
 #         tracked_dict = {
 #             "data": data,
 #             "x": x,
@@ -376,9 +376,9 @@ if __name__ == "__main__":
 #         }
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl
-# 
+#
 #     def stx_line(
 #         self,
 #         y: ArrayLike,
@@ -389,7 +389,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple["Axes", pd.DataFrame]:
 #         """Plot a simple line with SciTeX styling.
-# 
+#
 #         Parameters
 #         ----------
 #         y : array-like
@@ -402,36 +402,36 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the line plot function.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (Axes, DataFrame) - The axes and a DataFrame with the plotted data.
-# 
+#
 #         See Also
 #         --------
 #         stx_mean_std : Line with standard deviation shading.
 #         stx_shaded_line : Line with custom shaded region.
 #         sns_lineplot : DataFrame-based line plot.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_line(y_values)
 #         >>> ax.stx_line(y, x=x, label='Series A', color='blue')
 #         """
 #         method_name = "stx_line"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl, plot_df = self._get_ax_module().stx_line(
 #                 self._axis_mpl, y, xx=x, **kwargs
 #             )
-# 
+#
 #         tracked_dict = {"plot_df": plot_df}
 #         self._track(track, id, method_name, tracked_dict, kwargs)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl, plot_df
-# 
+#
 #     def stx_mean_std(
 #         self,
 #         data: ArrayLike,
@@ -443,7 +443,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple["Axes", pd.DataFrame]:
 #         """Plot mean line with standard deviation shading.
-# 
+#
 #         Parameters
 #         ----------
 #         data : array-like
@@ -458,35 +458,35 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the plot function.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (Axes, DataFrame) - The axes and a DataFrame with mean, upper, lower.
-# 
+#
 #         See Also
 #         --------
 #         stx_mean_ci : Mean with confidence interval.
 #         stx_median_iqr : Median with interquartile range.
 #         stx_shaded_line : Custom shaded line.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_mean_std(data_2d, sd=2, label='Mean±2SD')
 #         """
 #         method_name = "stx_mean_std"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl, plot_df = self._get_ax_module().stx_mean_std(
 #                 self._axis_mpl, data, xx=x, sd=sd, **kwargs
 #             )
-# 
+#
 #         tracked_dict = {"plot_df": plot_df}
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl, plot_df
-# 
+#
 #     def stx_mean_ci(
 #         self,
 #         data: ArrayLike,
@@ -498,7 +498,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple["Axes", pd.DataFrame]:
 #         """Plot mean line with confidence interval shading.
-# 
+#
 #         Parameters
 #         ----------
 #         data : array-like
@@ -513,34 +513,34 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the plot function.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (Axes, DataFrame) - The axes and a DataFrame with mean, upper, lower.
-# 
+#
 #         See Also
 #         --------
 #         stx_mean_std : Mean with standard deviation.
 #         stx_median_iqr : Median with interquartile range.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_mean_ci(data_2d, ci=99, label='Mean±99%CI')
 #         """
 #         method_name = "stx_mean_ci"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl, plot_df = self._get_ax_module().stx_mean_ci(
 #                 self._axis_mpl, data, xx=x, perc=ci, **kwargs
 #             )
-# 
+#
 #         tracked_dict = {"plot_df": plot_df}
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl, plot_df
-# 
+#
 #     def stx_median_iqr(
 #         self,
 #         data: ArrayLike,
@@ -551,7 +551,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple["Axes", pd.DataFrame]:
 #         """Plot median line with interquartile range shading.
-# 
+#
 #         Parameters
 #         ----------
 #         data : array-like
@@ -564,34 +564,34 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the plot function.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (Axes, DataFrame) - The axes and a DataFrame with median, Q1, Q3.
-# 
+#
 #         See Also
 #         --------
 #         stx_mean_std : Mean with standard deviation.
 #         stx_mean_ci : Mean with confidence interval.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_median_iqr(data_2d, label='Median±IQR')
 #         """
 #         method_name = "stx_median_iqr"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl, plot_df = self._get_ax_module().stx_median_iqr(
 #                 self._axis_mpl, data, xx=x, **kwargs
 #             )
-# 
+#
 #         tracked_dict = {"plot_df": plot_df}
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl, plot_df
-# 
+#
 #     def stx_shaded_line(
 #         self,
 #         x: ArrayLike,
@@ -606,7 +606,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple["Axes", pd.DataFrame]:
 #         """Plot a line with shaded area between lower and upper bounds.
-# 
+#
 #         Parameters
 #         ----------
 #         x : array-like
@@ -627,23 +627,23 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the plot function.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (Axes, DataFrame) - The axes and a DataFrame with the plotted data.
-# 
+#
 #         See Also
 #         --------
 #         stx_mean_std : Mean with standard deviation.
 #         stx_fill_between : Simple fill between curves.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_shaded_line(x, lower, mean, upper, color='blue', label='Result')
 #         """
 #         method_name = "stx_shaded_line"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl, plot_df = self._get_ax_module().stx_shaded_line(
 #                 self._axis_mpl,
@@ -655,14 +655,14 @@ if __name__ == "__main__":
 #                 label=label,
 #                 **kwargs,
 #             )
-# 
+#
 #         tracked_dict = {"plot_df": plot_df}
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl, plot_df
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -10,7 +10,7 @@ All plt_* tools are thin wrappers around figrecipe's canonical implementation.
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional, Tuple  # noqa: F401
 
 
 def register_plt_tools(mcp) -> None:
@@ -36,8 +36,6 @@ def register_plt_tools(mcp) -> None:
         _validate = fr_mcp.plt_validate.fn
         _crop = fr_mcp.plt_crop.fn
         _extract_data = fr_mcp.plt_extract_data.fn
-        _list_styles = fr_mcp.plt_list_styles.fn
-        _get_plot_types = fr_mcp.plt_get_plot_types.fn
 
         _FIGRECIPE_AVAILABLE = True
     except ImportError:
@@ -64,13 +62,18 @@ def register_plt_tools(mcp) -> None:
     ) -> Dict[str, Any]:
         """[plt] Create a matplotlib figure from a declarative specification.
 
-        See figrecipe._api._plot module docstring for full spec format.
-
         Parameters
         ----------
         spec : dict
             Declarative specification. Key sections: figure, plots, stat_annotations,
             xlabel, ylabel, title, legend, xlim, ylim.
+
+            Plot types: line, plot, step, fill, fill_between, fill_betweenx, errorbar,
+            scatter, bar, barh, hist, hist2d, boxplot, box, violinplot, violin, imshow,
+            matshow, pcolormesh, contour, contourf, pie, stem, eventplot, hexbin,
+            specgram, psd, heatmap.
+
+            Style presets: MATPLOTLIB, SCITEX (set via figure.style).
         output_path : str
             Path to save the output figure.
         dpi : int
@@ -82,11 +85,6 @@ def register_plt_tools(mcp) -> None:
         -------
         dict
             Result with 'image_path' and 'recipe_path'.
-
-        Raises
-        ------
-        ValueError
-            If no plots are specified or data is missing.
         """
         return _plot(spec, output_path, dpi, save_recipe)
 
@@ -94,7 +92,7 @@ def register_plt_tools(mcp) -> None:
     def plt_reproduce(
         recipe_path: str,
         output_path: Optional[str] = None,
-        format: str = "png",
+        format: Literal["png", "pdf", "svg"] = "png",
         dpi: int = 300,
     ) -> Dict[str, Any]:
         """[plt] Reproduce a figure from a saved YAML recipe.
@@ -125,11 +123,11 @@ def register_plt_tools(mcp) -> None:
     def plt_compose(
         sources: List[str],
         output_path: str,
-        layout: str = "horizontal",
+        layout: Literal["horizontal", "vertical", "grid"] = "horizontal",
         gap_mm: float = 5.0,
         dpi: int = 300,
         panel_labels: bool = True,
-        label_style: str = "uppercase",
+        label_style: Literal["uppercase", "lowercase", "numeric"] = "uppercase",
         caption: Optional[str] = None,
         create_symlinks: bool = True,
         canvas_size_mm: Optional[Tuple[float, float]] = None,
@@ -278,28 +276,6 @@ def register_plt_tools(mcp) -> None:
             Nested dict: {call_id: {'x': list, 'y': list, ...}}
         """
         return _extract_data(recipe_path)
-
-    @mcp.tool()
-    def plt_list_styles() -> Dict[str, Any]:
-        """[plt] List available figure style presets.
-
-        Returns
-        -------
-        dict
-            Dictionary with 'presets' list of available style names.
-        """
-        return _list_styles()
-
-    @mcp.tool()
-    def plt_get_plot_types() -> Dict[str, Any]:
-        """[plt] Get list of supported plot types.
-
-        Returns
-        -------
-        dict
-            Dictionary with 'plot_types' and their descriptions.
-        """
-        return _get_plot_types()
 
 
 # EOF

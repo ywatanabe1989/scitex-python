@@ -5,13 +5,14 @@ Data models for classification reporting using dataclasses.
 Provides type-safe, validated data structures for metrics and reports.
 """
 
-from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional, Any, Union
+import json
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
 import numpy as np
 import pandas as pd
-from datetime import datetime
-import json
 
 
 @dataclass
@@ -194,9 +195,9 @@ class ExperimentResults:
         # Check number of folds
         if len(self.fold_results) != self.config.n_folds:
             validation["complete"] = False
-            validation["summary"]["error"] = (
-                f"Expected {self.config.n_folds} folds, got {len(self.fold_results)}"
-            )
+            validation["summary"][
+                "error"
+            ] = f"Expected {self.config.n_folds} folds, got {len(self.fold_results)}"
 
         # Check each fold
         for fold_result in self.fold_results:

@@ -15,7 +15,7 @@ Metadata:
     lastUpdated: 2024-11-30 08:38:44
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class DagstuhlTranslator:

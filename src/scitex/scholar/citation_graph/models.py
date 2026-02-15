@@ -3,7 +3,7 @@ Data models for citation graphs.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 
 @dataclass

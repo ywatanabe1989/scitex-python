@@ -12,6 +12,7 @@ __DIR__ = os.path.dirname(__FILE__)
 import pandas as pd
 
 from scitex.plt.utils._csv_column_naming import get_csv_column_name
+
 from ._format_plot import _parse_tracking_id
 
 
@@ -37,7 +38,9 @@ def _format_sns_pairplot(id, tracked_dict, kwargs):
             result = data.copy()
             if id is not None:
                 result.columns = [
-                    get_csv_column_name(f"pair_{col}", ax_row, ax_col, trace_id=trace_id)
+                    get_csv_column_name(
+                        f"pair_{col}", ax_row, ax_col, trace_id=trace_id
+                    )
                     for col in result.columns
                 ]
 
@@ -47,7 +50,9 @@ def _format_sns_pairplot(id, tracked_dict, kwargs):
                 # Keep only the specified columns
                 result = pd.DataFrame(
                     {
-                        get_csv_column_name(f"pair_{col}", ax_row, ax_col, trace_id=trace_id): data[col]
+                        get_csv_column_name(
+                            f"pair_{col}", ax_row, ax_col, trace_id=trace_id
+                        ): data[col]
                         for col in vars_list
                     }
                 )

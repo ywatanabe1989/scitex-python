@@ -3,9 +3,9 @@
 from .AuthenticationGateway import AuthenticationGateway, URLContext
 from .BrowserAuthenticator import BrowserAuthenticator
 from .StrategyResolver import (
-    AuthenticationStrategyResolver,
-    AuthenticationStrategy,
     AuthenticationMethod,
+    AuthenticationStrategy,
+    AuthenticationStrategyResolver,
 )
 
 __all__ = [

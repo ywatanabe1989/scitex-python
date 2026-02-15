@@ -3,13 +3,14 @@
 # Time-stamp: "2024-11-05 10:00:00 (ywatanabe)"
 # File: ./tests/scitex/pd/test__find_indi.py
 
-import pytest
-import numpy as np
-import pandas as pd
-from unittest.mock import Mock, patch, MagicMock
-import tempfile
 import os
 import sys
+import tempfile
+from unittest.mock import MagicMock, Mock, patch
+
+import numpy as np
+import pandas as pd
+import pytest
 
 
 class TestFindIndiBasic:
@@ -336,6 +337,7 @@ class TestFindIndiDocumentationExamples:
         # Should find rows where A is 1 or 2 AND B is 'x'
         assert result == [0]
 
+
 if __name__ == "__main__":
     import os
 
@@ -350,15 +352,15 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-05 08:11:05 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/pd/_find_indi.py
-# 
+#
 # from typing import Dict, List, Union
-# 
+#
 # import pandas as pd
-# 
-# 
+#
+#
 # # def find_indi(df: pd.DataFrame, conditions: Dict[str, Union[str, int, float, List]]) -> pd.Series:
 # #     """Finds indices of rows that satisfy all given conditions in a DataFrame.
-# 
+#
 # #     Example
 # #     -------
 # #     >>> df = pd.DataFrame({'A': [1, 2, 3], 'B': ['x', 'y', 'x']})
@@ -369,19 +371,19 @@ if __name__ == "__main__":
 # #     1    False
 # #     2    False
 # #     dtype: bool
-# 
+#
 # #     Parameters
 # #     ----------
 # #     df : pd.DataFrame
 # #         Input DataFrame to search in
 # #     conditions : Dict[str, Union[str, int, float, List]]
 # #         Dictionary of column names and their target values
-# 
+#
 # #     Returns
 # #     -------
 # #     pd.Series
 # #         Boolean Series indicating which rows satisfy all conditions
-# 
+#
 # #     Raises
 # #     ------
 # #     KeyError
@@ -390,35 +392,35 @@ if __name__ == "__main__":
 # #     if not all(col in df.columns for col in conditions):
 # #         missing_cols = [col for col in conditions if col not in df.columns]
 # #         raise KeyError(f"Columns not found in DataFrame: {missing_cols}")
-# 
+#
 # #     condition_series = []
 # #     for key, value in conditions.items():
 # #         if isinstance(value, (list, tuple)):
 # #             condition_series.append(df[key].isin(value))
 # #         else:
 # #             condition_series.append(df[key] == value)
-# 
+#
 # #     return pd.concat(condition_series, axis=1).all(axis=1)
-# 
-# 
+#
+#
 # def find_indi(
 #     df: pd.DataFrame, conditions: Dict[str, Union[str, int, float, List]]
 # ) -> List[int]:
 #     """Finds indices of rows that satisfy conditions, handling NaN values.
-# 
+#
 #     Example
 #     -------
 #     >>> df = pd.DataFrame({'A': [1, 2, None], 'B': ['x', 'y', 'x']})
 #     >>> conditions = {'A': [1, None], 'B': 'x'}
 #     >>> result = find_indi(df, conditions)
-# 
+#
 #     Parameters
 #     ----------
 #     df : pd.DataFrame
 #         Input DataFrame
 #     conditions : Dict[str, Union[str, int, float, List]]
 #         Column conditions
-# 
+#
 #     Returns
 #     -------
 #     List[int]
@@ -426,11 +428,11 @@ if __name__ == "__main__":
 #     """
 #     if not conditions:
 #         return []
-# 
+#
 #     if not all(col in df.columns for col in conditions):
 #         missing_cols = [col for col in conditions if col not in df.columns]
 #         raise KeyError(f"Columns not found in DataFrame: {missing_cols}")
-# 
+#
 #     condition_series = []
 #     for key, value in conditions.items():
 #         if isinstance(value, (list, tuple)):
@@ -451,7 +453,7 @@ if __name__ == "__main__":
 #                 has_na = any(
 #                     pd.isna(v) if not isinstance(v, str) else False for v in value
 #                 )
-# 
+#
 #             if has_na:
 #                 condition = df[key].isin(value) | df[key].isna()
 #             else:
@@ -463,14 +465,14 @@ if __name__ == "__main__":
 #             else:
 #                 condition = df[key] == value
 #         condition_series.append(condition)
-# 
+#
 #     if condition_series:
 #         mask = pd.concat(condition_series, axis=1).all(axis=1)
 #         return df.index[mask].tolist()
 #     else:
 #         return []
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

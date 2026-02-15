@@ -17,18 +17,18 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # """
 # Standardized user interaction patterns for smooth AI-human collaboration.
-# 
+#
 # Provides consistent, reusable interaction patterns.
 # """
-# 
+#
 # from enum import Enum
 # from typing import Optional, Any
 # from playwright.async_api import Page
-# 
-# 
+#
+#
 # class UserResponse(Enum):
 #     """Standardized user responses."""
-# 
+#
 #     YES = "yes"
 #     NO = "no"
 #     ACCEPT = "accept"
@@ -41,24 +41,24 @@ if __name__ == "__main__":
 #     HINT = "hint"  # Show me a hint
 #     HELP = "help"  # Show help
 #     CUSTOM = "custom"  # User provides custom input
-# 
-# 
+#
+#
 # class StandardInteractions:
 #     """
 #     Standardized interaction patterns.
-# 
+#
 #     Makes AI-human communication smooth and predictable.
 #     """
-# 
+#
 #     def __init__(self, page: Page):
 #         self.page = page
 #         self.initialized = False
-# 
+#
 #     async def initialize(self):
 #         """Initialize standard interactions UI."""
 #         if self.initialized:
 #             return
-# 
+#
 #         await self.page.add_init_script("""
 #             () => {
 #                 window.scitexStandard = {
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 #                                 align-items: center;
 #                                 justify-content: center;
 #                             `;
-# 
+#
 #                             const dialog = document.createElement('div');
 #                             dialog.style.cssText = `
 #                                 background: white;
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 #                                 max-width: 500px;
 #                                 width: 90%;
 #                             `;
-# 
+#
 #                             const questionEl = document.createElement('div');
 #                             questionEl.style.cssText = `
 #                                 font-size: 16px;
@@ -98,14 +98,14 @@ if __name__ == "__main__":
 #                                 color: #333;
 #                             `;
 #                             questionEl.textContent = question;
-# 
+#
 #                             const buttonsContainer = document.createElement('div');
 #                             buttonsContainer.style.cssText = `
 #                                 display: grid;
 #                                 grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 #                                 gap: 8px;
 #                             `;
-# 
+#
 #                             const buttonStyles = {
 #                                 yes: { bg: '#4CAF50', text: '✓ Yes' },
 #                                 no: { bg: '#F44336', text: '✗ No' },
@@ -120,11 +120,11 @@ if __name__ == "__main__":
 #                                 help: { bg: '#607D8B', text: '❓ Help' },
 #                                 custom: { bg: '#795548', text: '✏️ Custom' },
 #                             };
-# 
+#
 #                             options.forEach(option => {
 #                                 const btn = document.createElement('button');
 #                                 const style = buttonStyles[option] || { bg: '#9E9E9E', text: option };
-# 
+#
 #                                 btn.style.cssText = `
 #                                     padding: 10px 16px;
 #                                     background: ${style.bg};
@@ -136,40 +136,40 @@ if __name__ == "__main__":
 #                                     font-weight: 500;
 #                                     transition: transform 0.1s, box-shadow 0.1s;
 #                                 `;
-# 
+#
 #                                 btn.textContent = style.text;
 #                                 btn.value = option;
-# 
+#
 #                                 btn.onmouseover = () => {
 #                                     btn.style.transform = 'translateY(-2px)';
 #                                     btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
 #                                 };
-# 
+#
 #                                 btn.onmouseout = () => {
 #                                     btn.style.transform = 'translateY(0)';
 #                                     btn.style.boxShadow = 'none';
 #                                 };
-# 
+#
 #                                 btn.onclick = () => {
 #                                     overlay.remove();
 #                                     resolve(option);
 #                                 };
-# 
+#
 #                                 buttonsContainer.appendChild(btn);
 #                             });
-# 
+#
 #                             dialog.appendChild(questionEl);
 #                             dialog.appendChild(buttonsContainer);
 #                             overlay.appendChild(dialog);
 #                             document.body.appendChild(overlay);
 #                         });
 #                     },
-# 
+#
 #                     // Quick yes/no
 #                     askYesNo: function(question) {
 #                         return this.askChoice(question, ['yes', 'no']);
 #                     },
-# 
+#
 #                     // Accept/Reject with memory options
 #                     askWithMemory: function(question) {
 #                         return this.askChoice(question, [
@@ -179,7 +179,7 @@ if __name__ == "__main__":
 #                             'memorize_persistent'
 #                         ]);
 #                     },
-# 
+#
 #                     // Action approval
 #                     askApproval: function(action) {
 #                         return this.askChoice(`Approve: ${action}?`, [
@@ -190,18 +190,18 @@ if __name__ == "__main__":
 #                         ]);
 #                     },
 #                 };
-# 
+#
 #                 console.log('✅ Standard interactions initialized');
 #             }
 #         """)
-# 
+#
 #         self.initialized = True
 #         print("✅ Standard interactions initialized")
-# 
+#
 #     async def ask_yes_no(self, question: str) -> bool:
 #         """
 #         Ask yes/no question.
-# 
+#
 #         Returns:
 #             True for yes, False for no
 #         """
@@ -209,15 +209,15 @@ if __name__ == "__main__":
 #             f"window.scitexStandard?.askYesNo('{self._escape_js(question)}')"
 #         )
 #         return result == "yes"
-# 
+#
 #     async def ask_choice(self, question: str, options: list) -> str:
 #         """
 #         Ask user to choose from options.
-# 
+#
 #         Args:
 #             question: Question to ask
 #             options: List of option keys (yes, no, accept, etc.)
-# 
+#
 #         Returns:
 #             Selected option key
 #         """
@@ -226,11 +226,11 @@ if __name__ == "__main__":
 #             f"window.scitexStandard?.askChoice('{self._escape_js(question)}', {options_json})"
 #         )
 #         return result
-# 
+#
 #     async def ask_with_memory(self, question: str) -> str:
 #         """
 #         Ask with memory options.
-# 
+#
 #         Returns:
 #             'accept', 'reject', 'memorize_session', or 'memorize_persistent'
 #         """
@@ -238,11 +238,11 @@ if __name__ == "__main__":
 #             f"window.scitexStandard?.askWithMemory('{self._escape_js(question)}')"
 #         )
 #         return result
-# 
+#
 #     async def ask_approval(self, action: str) -> str:
 #         """
 #         Ask approval for action.
-# 
+#
 #         Returns:
 #             'accept', 'reject', 'hint', or 'custom'
 #         """
@@ -250,12 +250,12 @@ if __name__ == "__main__":
 #             f"window.scitexStandard?.askApproval('{self._escape_js(action)}')"
 #         )
 #         return result
-# 
+#
 #     def _escape_js(self, text: str) -> str:
 #         """Escape text for JavaScript."""
 #         return text.replace("'", "\\'").replace("\n", "\\n")
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -138,6 +138,7 @@ class TestEdit:
         with pytest.raises(ImportError, match="figrecipe"):
             draw_graph(None, G)
 
+
 if __name__ == "__main__":
     import os
 
@@ -152,18 +153,18 @@ if __name__ == "__main__":
 # # Timestamp: "2026-01-12 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/_figrecipe_integration.py
 # """Figrecipe integration for scitex.plt (graph visualization, editor)."""
-# 
+#
 # from typing import Any, Callable, Dict, Optional, Union
-# 
+#
 # try:
 #     import figrecipe as fr
 #     from figrecipe._graph import draw_graph as _fr_draw_graph
-# 
+#
 #     _AVAILABLE = True
 # except ImportError:
 #     _AVAILABLE = False
-# 
-# 
+#
+#
 # def draw_graph(
 #     ax,
 #     G,
@@ -184,7 +185,7 @@ if __name__ == "__main__":
 #     **kwargs,
 # ) -> Dict[str, Any]:
 #     """Draw a NetworkX graph on axes.
-# 
+#
 #     Parameters
 #     ----------
 #     ax : Axes or AxisWrapper
@@ -209,7 +210,7 @@ if __name__ == "__main__":
 #         Label font size (6pt default for publication).
 #     colormap : str
 #         Colormap for numeric node colors.
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -217,10 +218,10 @@ if __name__ == "__main__":
 #     """
 #     if not _AVAILABLE:
 #         raise ImportError("figrecipe >= 0.13.0 required: pip install figrecipe")
-# 
+#
 #     # Unwrap scitex AxisWrapper
 #     ax_mpl = getattr(ax, "_axis_mpl", getattr(ax, "_ax", ax))
-# 
+#
 #     return _fr_draw_graph(
 #         ax_mpl,
 #         G,
@@ -239,11 +240,11 @@ if __name__ == "__main__":
 #         colormap=colormap,
 #         **kwargs,
 #     )
-# 
-# 
+#
+#
 # def edit(source=None, style=None, port: int = 5050, **kwargs):
 #     """Launch interactive GUI editor for figure styling.
-# 
+#
 #     Parameters
 #     ----------
 #     source : RecordingFigure, str, Path, or None
@@ -254,7 +255,7 @@ if __name__ == "__main__":
 #         Server port (default: 5050).
 #     **kwargs
 #         Additional args (host, open_browser, desktop, etc.)
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -262,12 +263,12 @@ if __name__ == "__main__":
 #     """
 #     if not _AVAILABLE:
 #         raise ImportError("figrecipe >= 0.13.0 required: pip install figrecipe")
-# 
+#
 #     return fr.edit(source, style=style, port=port, **kwargs)
-# 
-# 
+#
+#
 # __all__ = ["draw_graph", "edit"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

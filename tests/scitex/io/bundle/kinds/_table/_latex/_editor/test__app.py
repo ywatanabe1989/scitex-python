@@ -13,9 +13,9 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_tables/_latex/_editor/_app.py
-# 
+#
 # """Flask application for LaTeX error editor."""
-# 
+#
 # import json
 # import socket
 # import subprocess
@@ -23,15 +23,15 @@ if __name__ == "__main__":
 # import webbrowser
 # from pathlib import Path
 # from typing import TYPE_CHECKING, Optional
-# 
+#
 # from flask import Flask, jsonify, render_template_string, request
-# 
+#
 # from .._validator import ValidationResult, validate_latex
-# 
+#
 # if TYPE_CHECKING:
 #     from scitex.io.bundle import FTS
-# 
-# 
+#
+#
 # # HTML template with CodeMirror editor
 # EDITOR_TEMPLATE = """
 # <!DOCTYPE html>
@@ -55,13 +55,13 @@ if __name__ == "__main__":
 #             --success: #4ec9b0;
 #             --border: #3c3c3c;
 #         }
-# 
+#
 #         * {
 #             box-sizing: border-box;
 #             margin: 0;
 #             padding: 0;
 #         }
-# 
+#
 #         body {
 #             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 #             background: var(--bg-primary);
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 #             display: flex;
 #             flex-direction: column;
 #         }
-# 
+#
 #         header {
 #             background: var(--bg-secondary);
 #             padding: 12px 20px;
@@ -79,17 +79,17 @@ if __name__ == "__main__":
 #             align-items: center;
 #             border-bottom: 1px solid var(--border);
 #         }
-# 
+#
 #         header h1 {
 #             font-size: 16px;
 #             font-weight: 500;
 #         }
-# 
+#
 #         .controls {
 #             display: flex;
 #             gap: 10px;
 #         }
-# 
+#
 #         button {
 #             background: var(--bg-tertiary);
 #             color: var(--text-primary);
@@ -100,49 +100,49 @@ if __name__ == "__main__":
 #             font-size: 13px;
 #             transition: background 0.2s;
 #         }
-# 
+#
 #         button:hover {
 #             background: var(--accent);
 #             color: #fff;
 #         }
-# 
+#
 #         button.primary {
 #             background: var(--accent);
 #             color: #fff;
 #             border-color: var(--accent);
 #         }
-# 
+#
 #         button.primary:hover {
 #             background: #4a8bc9;
 #         }
-# 
+#
 #         .main-container {
 #             flex: 1;
 #             display: flex;
 #             overflow: hidden;
 #         }
-# 
+#
 #         .editor-panel {
 #             flex: 1;
 #             display: flex;
 #             flex-direction: column;
 #             border-right: 1px solid var(--border);
 #         }
-# 
+#
 #         .CodeMirror {
 #             flex: 1;
 #             font-family: 'Fira Code', 'Consolas', monospace;
 #             font-size: 14px;
 #             line-height: 1.6;
 #         }
-# 
+#
 #         .error-panel {
 #             width: 350px;
 #             background: var(--bg-secondary);
 #             display: flex;
 #             flex-direction: column;
 #         }
-# 
+#
 #         .error-panel h2 {
 #             padding: 12px 16px;
 #             font-size: 14px;
@@ -150,13 +150,13 @@ if __name__ == "__main__":
 #             background: var(--bg-tertiary);
 #             border-bottom: 1px solid var(--border);
 #         }
-# 
+#
 #         .error-list {
 #             flex: 1;
 #             overflow-y: auto;
 #             padding: 8px;
 #         }
-# 
+#
 #         .error-item {
 #             padding: 10px 12px;
 #             margin-bottom: 8px;
@@ -164,23 +164,23 @@ if __name__ == "__main__":
 #             cursor: pointer;
 #             transition: background 0.2s;
 #         }
-# 
+#
 #         .error-item:hover {
 #             background: var(--bg-tertiary);
 #         }
-# 
+#
 #         .error-item.error {
 #             border-left: 3px solid var(--error);
 #         }
-# 
+#
 #         .error-item.warning {
 #             border-left: 3px solid var(--warning);
 #         }
-# 
+#
 #         .error-item.info {
 #             border-left: 3px solid var(--accent);
 #         }
-# 
+#
 #         .error-code {
 #             display: inline-block;
 #             background: var(--bg-tertiary);
@@ -189,30 +189,30 @@ if __name__ == "__main__":
 #             font-size: 11px;
 #             margin-right: 8px;
 #         }
-# 
+#
 #         .error-location {
 #             color: var(--text-secondary);
 #             font-size: 12px;
 #             margin-top: 4px;
 #         }
-# 
+#
 #         .error-message {
 #             font-size: 13px;
 #             margin-top: 4px;
 #         }
-# 
+#
 #         .error-suggestion {
 #             color: var(--success);
 #             font-size: 12px;
 #             margin-top: 6px;
 #         }
-# 
+#
 #         .no-errors {
 #             padding: 20px;
 #             text-align: center;
 #             color: var(--success);
 #         }
-# 
+#
 #         .status-bar {
 #             background: var(--bg-secondary);
 #             padding: 6px 16px;
@@ -221,35 +221,35 @@ if __name__ == "__main__":
 #             justify-content: space-between;
 #             border-top: 1px solid var(--border);
 #         }
-# 
+#
 #         .status-item {
 #             display: flex;
 #             align-items: center;
 #             gap: 6px;
 #         }
-# 
+#
 #         .status-dot {
 #             width: 8px;
 #             height: 8px;
 #             border-radius: 50%;
 #         }
-# 
+#
 #         .status-dot.valid {
 #             background: var(--success);
 #         }
-# 
+#
 #         .status-dot.invalid {
 #             background: var(--error);
 #         }
-# 
+#
 #         .cm-error-line {
 #             background: rgba(244, 71, 71, 0.15) !important;
 #         }
-# 
+#
 #         .cm-warning-line {
 #             background: rgba(255, 204, 0, 0.1) !important;
 #         }
-# 
+#
 #         /* Loading spinner */
 #         .loading {
 #             display: none;
@@ -262,7 +262,7 @@ if __name__ == "__main__":
 #             border-radius: 8px;
 #             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 #         }
-# 
+#
 #         .loading.active {
 #             display: block;
 #         }
@@ -277,12 +277,12 @@ if __name__ == "__main__":
 #             <button class="primary" onclick="saveCode()">Save</button>
 #         </div>
 #     </header>
-# 
+#
 #     <div class="main-container">
 #         <div class="editor-panel">
 #             <textarea id="latex-editor">{{ latex_code }}</textarea>
 #         </div>
-# 
+#
 #         <div class="error-panel">
 #             <h2>Issues <span id="issue-count">({{ error_count }})</span></h2>
 #             <div class="error-list" id="error-list">
@@ -305,7 +305,7 @@ if __name__ == "__main__":
 #             </div>
 #         </div>
 #     </div>
-# 
+#
 #     <div class="status-bar">
 #         <div class="status-item">
 #             <span class="status-dot {{ 'valid' if is_valid else 'invalid' }}"></span>
@@ -315,15 +315,15 @@ if __name__ == "__main__":
 #             <span id="cursor-pos">Line 1, Col 1</span>
 #         </div>
 #     </div>
-# 
+#
 #     <div class="loading" id="loading">Processing...</div>
-# 
+#
 #     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 #     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
 #     <script>
 #         let editor;
 #         let lineWidgets = [];
-# 
+#
 #         document.addEventListener('DOMContentLoaded', function() {
 #             editor = CodeMirror.fromTextArea(document.getElementById('latex-editor'), {
 #                 mode: 'stex',
@@ -336,27 +336,27 @@ if __name__ == "__main__":
 #                 matchBrackets: true,
 #                 autoCloseBrackets: true
 #             });
-# 
+#
 #             editor.on('cursorActivity', function() {
 #                 const pos = editor.getCursor();
 #                 document.getElementById('cursor-pos').textContent =
 #                     `Line ${pos.line + 1}, Col ${pos.ch + 1}`;
 #             });
-# 
+#
 #             // Highlight initial errors
 #             highlightErrors({{ errors_json|safe }});
 #         });
-# 
+#
 #         function goToLine(line, col) {
 #             editor.setCursor(line - 1, col - 1);
 #             editor.focus();
 #         }
-# 
+#
 #         function highlightErrors(errors) {
 #             // Clear previous highlights
 #             lineWidgets.forEach(w => w.clear());
 #             lineWidgets = [];
-# 
+#
 #             errors.forEach(error => {
 #                 if (error.line > 0) {
 #                     const className = error.severity === 'error' ? 'cm-error-line' : 'cm-warning-line';
@@ -367,11 +367,11 @@ if __name__ == "__main__":
 #                 }
 #             });
 #         }
-# 
+#
 #         function showLoading(show) {
 #             document.getElementById('loading').classList.toggle('active', show);
 #         }
-# 
+#
 #         async function validateCode() {
 #             showLoading(true);
 #             try {
@@ -391,7 +391,7 @@ if __name__ == "__main__":
 #             }
 #             showLoading(false);
 #         }
-# 
+#
 #         async function saveCode() {
 #             showLoading(true);
 #             try {
@@ -413,7 +413,7 @@ if __name__ == "__main__":
 #             }
 #             showLoading(false);
 #         }
-# 
+#
 #         async function compilePreview() {
 #             showLoading(true);
 #             try {
@@ -436,13 +436,13 @@ if __name__ == "__main__":
 #             }
 #             showLoading(false);
 #         }
-# 
+#
 #         function updateErrors(errors) {
 #             const list = document.getElementById('error-list');
 #             const count = document.getElementById('issue-count');
-# 
+#
 #             count.textContent = `(${errors.length})`;
-# 
+#
 #             if (errors.length === 0) {
 #                 list.innerHTML = '<div class="no-errors">No issues found</div>';
 #             } else {
@@ -456,14 +456,14 @@ if __name__ == "__main__":
 #                     </div>
 #                 `).join('');
 #             }
-# 
+#
 #             highlightErrors(errors);
 #         }
-# 
+#
 #         function updateStatus(isValid) {
 #             const dot = document.querySelector('.status-dot');
 #             const text = document.getElementById('status-text');
-# 
+#
 #             dot.className = 'status-dot ' + (isValid ? 'valid' : 'invalid');
 #             text.textContent = isValid ? 'Valid' : 'Has issues';
 #         }
@@ -471,11 +471,11 @@ if __name__ == "__main__":
 # </body>
 # </html>
 # """
-# 
-# 
+#
+#
 # class LaTeXEditor:
 #     """Flask-based LaTeX editor with error highlighting."""
-# 
+#
 #     def __init__(
 #         self,
 #         latex_code: str,
@@ -483,7 +483,7 @@ if __name__ == "__main__":
 #         output_path: Optional[Path] = None,
 #     ):
 #         """Initialize editor.
-# 
+#
 #         Args:
 #             latex_code: Initial LaTeX code
 #             bundle: Associated FTS bundle
@@ -496,15 +496,15 @@ if __name__ == "__main__":
 #         self._setup_routes()
 #         self._validation_result: Optional[ValidationResult] = None
 #         self._compiled_pdf: Optional[Path] = None
-# 
+#
 #     def _setup_routes(self) -> None:
 #         """Setup Flask routes."""
-# 
+#
 #         @self.app.route("/")
 #         def index():
 #             # Validate code
 #             self._validation_result = validate_latex(self.latex_code, level="semantic")
-# 
+#
 #             errors = self._validation_result.all_issues
 #             errors_json = json.dumps(
 #                 [
@@ -519,11 +519,11 @@ if __name__ == "__main__":
 #                     for e in errors
 #                 ]
 #             )
-# 
+#
 #             bundle_name = "Untitled"
 #             if self.bundle:
 #                 bundle_name = self.bundle.node.name or self.bundle.node.id
-# 
+#
 #             return render_template_string(
 #                 EDITOR_TEMPLATE,
 #                 latex_code=self.latex_code,
@@ -533,16 +533,16 @@ if __name__ == "__main__":
 #                 is_valid=self._validation_result.is_valid,
 #                 bundle_name=bundle_name,
 #             )
-# 
+#
 #         @self.app.route("/validate", methods=["POST"])
 #         def validate():
 #             data = request.get_json()
 #             code = data.get("code", "")
 #             level = data.get("level", "semantic")
-# 
+#
 #             result = validate_latex(code, level=level)
 #             self.latex_code = code
-# 
+#
 #             return jsonify(
 #                 {
 #                     "is_valid": result.is_valid,
@@ -559,12 +559,12 @@ if __name__ == "__main__":
 #                     ],
 #                 }
 #             )
-# 
+#
 #         @self.app.route("/save", methods=["POST"])
 #         def save():
 #             data = request.get_json()
 #             code = data.get("code", "")
-# 
+#
 #             try:
 #                 if self.output_path:
 #                     self.output_path.write_text(code, encoding="utf-8")
@@ -582,21 +582,21 @@ if __name__ == "__main__":
 #                     return jsonify({"success": False, "error": "No output path configured"})
 #             except Exception as e:
 #                 return jsonify({"success": False, "error": str(e)})
-# 
+#
 #         @self.app.route("/compile", methods=["POST"])
 #         def compile():
 #             data = request.get_json()
 #             code = data.get("code", "")
-# 
+#
 #             # Wrap in document if needed
 #             if "\\documentclass" not in code:
 #                 code = _wrap_in_document(code)
-# 
+#
 #             try:
 #                 with tempfile.TemporaryDirectory() as tmpdir:
 #                     tex_path = Path(tmpdir) / "document.tex"
 #                     tex_path.write_text(code, encoding="utf-8")
-# 
+#
 #                     proc = subprocess.run(
 #                         ["pdflatex", "-interaction=nonstopmode", str(tex_path)],
 #                         cwd=tmpdir,
@@ -604,12 +604,12 @@ if __name__ == "__main__":
 #                         text=True,
 #                         timeout=30,
 #                     )
-# 
+#
 #                     pdf_path = Path(tmpdir) / "document.pdf"
 #                     if pdf_path.exists():
 #                         # Copy to temp location accessible by preview route
 #                         import shutil
-# 
+#
 #                         self._compiled_pdf = Path(tempfile.gettempdir()) / "fsb_preview.pdf"
 #                         shutil.copy(pdf_path, self._compiled_pdf)
 #                         return jsonify({"success": True})
@@ -632,54 +632,54 @@ if __name__ == "__main__":
 #                                 ],
 #                             }
 #                         )
-# 
+#
 #             except FileNotFoundError:
 #                 return jsonify({"success": False, "error": "pdflatex not found"})
 #             except subprocess.TimeoutExpired:
 #                 return jsonify({"success": False, "error": "Compilation timed out"})
 #             except Exception as e:
 #                 return jsonify({"success": False, "error": str(e)})
-# 
+#
 #         @self.app.route("/preview")
 #         def preview():
 #             if self._compiled_pdf and self._compiled_pdf.exists():
 #                 from flask import send_file
-# 
+#
 #                 return send_file(self._compiled_pdf, mimetype="application/pdf")
 #             return "No preview available", 404
-# 
+#
 #         @self.app.route("/shutdown", methods=["POST"])
 #         def shutdown():
 #             func = request.environ.get("werkzeug.server.shutdown")
 #             if func:
 #                 func()
 #             return "Shutting down..."
-# 
+#
 #     def run(self, port: int = 5051, open_browser: bool = True) -> None:
 #         """Run the editor server.
-# 
+#
 #         Args:
 #             port: Port to run on
 #             open_browser: Whether to open browser automatically
 #         """
 #         # Find available port
 #         port = _find_available_port(port)
-# 
+#
 #         url = f"http://127.0.0.1:{port}"
 #         print(f"LaTeX Editor running at {url}")
-# 
+#
 #         if open_browser:
 #             webbrowser.open(url)
-# 
+#
 #         self.app.run(host="127.0.0.1", port=port, debug=False, use_reloader=False)
-# 
-# 
+#
+#
 # def _find_available_port(start_port: int = 5051) -> int:
 #     """Find an available port.
-# 
+#
 #     Args:
 #         start_port: Port to start searching from
-# 
+#
 #     Returns:
 #         Available port number
 #     """
@@ -691,14 +691,14 @@ if __name__ == "__main__":
 #         except OSError:
 #             continue
 #     raise RuntimeError("No available ports found")
-# 
-# 
+#
+#
 # def _wrap_in_document(content: str) -> str:
 #     """Wrap content in a minimal LaTeX document.
-# 
+#
 #     Args:
 #         content: LaTeX content
-# 
+#
 #     Returns:
 #         Complete document string
 #     """
@@ -710,8 +710,8 @@ if __name__ == "__main__":
 # {content}
 # \\end{{document}}
 # """
-# 
-# 
+#
+#
 # def launch_editor(
 #     latex_code: str,
 #     bundle: Optional["FTS"] = None,
@@ -720,7 +720,7 @@ if __name__ == "__main__":
 #     open_browser: bool = True,
 # ) -> None:
 #     """Launch the LaTeX editor.
-# 
+#
 #     Args:
 #         latex_code: LaTeX code to edit
 #         bundle: Associated FTS bundle
@@ -730,10 +730,10 @@ if __name__ == "__main__":
 #     """
 #     editor = LaTeXEditor(latex_code, bundle, output_path)
 #     editor.run(port=port, open_browser=open_browser)
-# 
-# 
+#
+#
 # __all__ = ["LaTeXEditor", "launch_editor"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

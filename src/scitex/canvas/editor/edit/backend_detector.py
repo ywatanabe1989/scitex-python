@@ -55,6 +55,7 @@ def detect_best_backend() -> str:
     # Try Flask - best for modern UI
     try:
         import flask
+
         return "flask"
     except ImportError:
         pass
@@ -62,6 +63,7 @@ def detect_best_backend() -> str:
     # Try DearPyGui - GPU-accelerated, modern
     try:
         import dearpygui
+
         return "dearpygui"
     except ImportError:
         warnings.warn(
@@ -71,6 +73,7 @@ def detect_best_backend() -> str:
     # Try DearPyGui again
     try:
         import dearpygui
+
         return "dearpygui"
     except ImportError:
         pass
@@ -90,6 +93,7 @@ def detect_best_backend() -> str:
     # Try Tkinter (built-in, good features)
     try:
         import tkinter
+
         warnings.warn(
             "Qt not available. Consider: pip install PyQt6\n"
             "Using Tkinter backend (basic features)."

@@ -5,7 +5,9 @@
 """Find PDF URLs from dropdown/button elements."""
 
 from typing import List
+
 from playwright.async_api import Page
+
 from scitex import logging
 from scitex.browser.debugging import browser_logger
 from scitex.scholar.config import ScholarConfig

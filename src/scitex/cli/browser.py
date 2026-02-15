@@ -147,9 +147,11 @@ def open(url, stealth, timeout, background):
         browser_id = str(uuid.uuid4())[:8]
 
         # Show browser ID in the page title
-        await page.evaluate(f"""
+        await page.evaluate(
+            f"""
             document.title = '[{browser_id}] ' + document.title;
-        """)
+        """
+        )
 
         click.echo(f"Browser ID: {browser_id}")
         click.echo(
@@ -213,9 +215,11 @@ def open(url, stealth, timeout, background):
             browser_instance.pages = [page]
 
             # Restore browser ID in title
-            await page.evaluate(f"""
+            await page.evaluate(
+                f"""
                 document.title = '[{browser_id}] ' + document.title;
-            """)
+            """
+            )
 
         if timeout > 0:
             click.echo(f"Auto-closing in {timeout} seconds...")

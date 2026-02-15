@@ -4,9 +4,9 @@
 """Flask-based web editor for SciTeX figures."""
 
 from ._core import WebEditor
-from ._utils import find_available_port, kill_process_on_port, check_port_available
-from ._renderer import render_preview_with_bboxes
 from ._plotter import plot_from_csv
+from ._renderer import render_preview_with_bboxes
+from ._utils import check_port_available, find_available_port, kill_process_on_port
 
 __all__ = [
     "WebEditor",

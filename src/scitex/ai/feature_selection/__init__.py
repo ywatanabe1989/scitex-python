@@ -12,11 +12,11 @@ This module provides comprehensive feature selection and importance analysis:
 """
 
 from .feature_selection import (
+    aggregate_feature_importances,
+    analyze_feature_consistency,
+    create_feature_importance_dataframe,
     extract_feature_importance,
     select_features_univariate,
-    analyze_feature_consistency,
-    aggregate_feature_importances,
-    create_feature_importance_dataframe,
 )
 
 __all__ = [

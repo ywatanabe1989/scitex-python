@@ -7,9 +7,9 @@
 Test module for scitex.pd.to_numeric function.
 """
 
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 from pandas.testing import assert_frame_equal, assert_series_equal
 
 
@@ -257,6 +257,7 @@ class TestToNumeric:
         # Nums column should always be converted
         assert pd.api.types.is_numeric_dtype(result["nums"])
 
+
 if __name__ == "__main__":
     import os
 
@@ -271,13 +272,13 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-08 04:35:31 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/pd/_to_numeric.py
-# 
+#
 # import pandas as pd
-# 
-# 
+#
+#
 # def to_numeric(df, errors="coerce"):
 #     """Convert all possible columns in a DataFrame to numeric types.
-# 
+#
 #     Parameters
 #     ----------
 #     df : pd.DataFrame
@@ -285,7 +286,7 @@ if __name__ == "__main__":
 #     errors : str, optional
 #         How to handle errors. 'coerce' (default) converts invalid values to NaN,
 #         'ignore' leaves non-numeric columns unchanged, 'raise' raises exceptions.
-# 
+#
 #     Returns
 #     -------
 #     pd.DataFrame
@@ -296,7 +297,7 @@ if __name__ == "__main__":
 #         # First try to convert
 #         original_col = df_copy[col]
 #         converted_col = pd.to_numeric(df_copy[col], errors="coerce")
-# 
+#
 #         # Check if conversion resulted in all NaN when original had values
 #         if converted_col.isna().all() and not original_col.isna().all():
 #             # This is likely a pure string column
@@ -317,8 +318,8 @@ if __name__ == "__main__":
 #             elif errors == "raise":
 #                 df_copy[col] = pd.to_numeric(df_copy[col], errors="raise")
 #     return df_copy
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

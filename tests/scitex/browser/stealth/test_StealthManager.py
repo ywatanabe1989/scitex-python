@@ -17,22 +17,22 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/browser/stealth/StealthManager.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # __FILE__ = __file__
-# 
+#
 # import asyncio
 # import random
-# 
+#
 # from playwright.async_api import Browser, BrowserContext, Page
-# 
+#
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
+#
 # # User Agent(Old)	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
 # # WebDriver(New)	missing (passed)
 # # WebDriver Advanced	passed
@@ -44,8 +44,8 @@ if __name__ == "__main__":
 # # WebGL Vendor	Google Inc. (AMD)
 # # WebGL Renderer	ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001636) Direct3D11 vs_5_0 ps_5_0, D3D11)
 # # Broken Image Dimensions	16x16
-# 
-# 
+#
+#
 # class StealthManager:
 #     def __init__(
 #         self,
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 #         self.name = self.__class__.__name__
 #         self.viewport_size = viewport_size
 #         self.spoof_dimension = spoof_dimension
-# 
+#
 #     def get_random_user_agent(self) -> str:
 #         user_agents = [
 #             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 #         user_agent = random.choice(user_agents)
 #         logger.debug(f"{self.name}: User Agent randomly selected: {user_agent}")
 #         return user_agent
-# 
+#
 #     def get_random_viewport(self) -> dict:
 #         if self.viewport_size:
 #             viewport = {
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 #                 f"{self.name}: Viewport defined as specified in Stealth Manager initiation: {viewport}"
 #             )
 #             return viewport
-# 
+#
 #         if self.spoof_dimension:
 #             # viewport = {"width": 1, "height": 1}
 #             viewport = {"width": 1920, "height": 1080}
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 #                 f"{self.name}: Viewport defined as spoof_dimension passed during Stealth Manager initiation: {viewport}"
 #             )
 #             return viewport
-# 
+#
 #         else:
 #             viewport = random.choice(
 #                 [
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 #             )
 #             logger.debug(f"{self.name}: Viewport randomly selected: {viewport}")
 #             return viewport
-# 
+#
 #     def get_stealth_options(self) -> dict:
 #         return {
 #             "viewport": self.get_random_viewport(),
@@ -124,7 +124,7 @@ if __name__ == "__main__":
 #             "ignore_https_errors": True,
 #             "java_script_enabled": True,
 #         }
-# 
+#
 #     def get_stealth_options_additional(self) -> list:
 #         stealth_args = [
 #             # Core security and sandbox
@@ -207,7 +207,7 @@ if __name__ == "__main__":
 #             "--disable-features=AutofillServerCommunication",
 #             "--enable-extensions",
 #         ]
-# 
+#
 #         # Apply window size and position based on mode
 #         if self.spoof_dimension:
 #             # 1x1 window completely off-screen for true invisibility
@@ -223,17 +223,17 @@ if __name__ == "__main__":
 #                 )
 #             else:
 #                 stealth_args.append("--window-size=1920,1080")
-# 
+#
 #         if self.spoof_dimension:
 #             config_desc = "Invisible (1x1)"
 #         elif self.viewport_size:
 #             config_desc = f"{self.viewport_size[0]}x{self.viewport_size[1]}"
 #         else:
 #             config_desc = "Default (1920x1080)"
-# 
+#
 #         logger.debug(f"{self.name}: Browser window configuration: {config_desc}")
 #         return stealth_args
-# 
+#
 #     def get_network_evasion_headers(self) -> dict:
 #         """Generate realistic HTTP headers to avoid network-level detection."""
 #         return {
@@ -254,14 +254,14 @@ if __name__ == "__main__":
 #             "X-Forwarded-For": f"{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}",
 #             "X-Real-IP": f"{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}.{random.randint(1, 254)}",
 #         }
-# 
+#
 #     async def add_human_behavior_async(self, page: Page):
 #         """Add human-like behavior patterns to avoid detection."""
 #         # Random delay before starting interactions
 #         delay = random.uniform(2, 5)
 #         logger.debug(f"{self.name}: Adding human behavior delay: {delay:.2f} seconds")
 #         await asyncio.sleep(delay)
-# 
+#
 #         # Simulate scrolling behavior
 #         try:
 #             await page.evaluate(
@@ -275,11 +275,11 @@ if __name__ == "__main__":
 #             await asyncio.sleep(random.uniform(1, 3))
 #         except Exception as e:
 #             logger.debug(f"{self.name}: Human behavior simulation failed: {e}")
-# 
+#
 #     async def handle_cloudflare_challenge_async(self, page: Page, max_wait: int = 45):
 #         """Enhanced Cloudflare challenge detection and handling."""
 #         logger.debug(f"{self.name}: Checking for Cloudflare challenge...")
-# 
+#
 #         cloudflare_indicators = [
 #             "Just a moment",
 #             "Checking your browser",
@@ -292,36 +292,36 @@ if __name__ == "__main__":
 #             "Browser verification",
 #             "cf-challenge-running",
 #         ]
-# 
+#
 #         try:
 #             # First check if we're on a Cloudflare challenge page
 #             page_content = await page.content()
 #             title = await page.title()
-# 
+#
 #             is_challenge = any(
 #                 indicator.lower() in page_content.lower()
 #                 or indicator.lower() in title.lower()
 #                 for indicator in cloudflare_indicators
 #             )
-# 
+#
 #             if not is_challenge:
 #                 logger.debug(f"{self.name}: No Cloudflare challenge detected")
 #                 return True
-# 
+#
 #             logger.debug(
 #                 f"{self.name}: Cloudflare challenge detected, waiting for completion..."
 #             )
-# 
+#
 #             # Add human-like behavior during challenge
 #             await self.add_human_behavior_async(page)
-# 
+#
 #             # Wait for challenge completion with multiple conditions
 #             await page.wait_for_function(
 #                 """
 #                 () => {
 #                     const content = document.documentElement.innerText.toLowerCase();
 #                     const title = document.title.toLowerCase();
-# 
+#
 #                     // Challenge completion indicators
 #                     const challengeComplete = !content.includes('just a moment') &&
 #                                             !content.includes('checking your browser') &&
@@ -329,28 +329,28 @@ if __name__ == "__main__":
 #                                             !content.includes('please wait') &&
 #                                             !content.includes('verify you are human') &&
 #                                             !title.includes('just a moment');
-# 
+#
 #                     // Also check if we've been redirected or if the URL changed
 #                     const urlChanged = window.location.href !== window.initialUrl;
 #                     window.initialUrl = window.initialUrl || window.location.href;
-# 
+#
 #                     return challengeComplete || urlChanged;
 #                 }
 #                 """,
 #                 timeout=max_wait * 1000,
 #             )
-# 
+#
 #             # Additional wait to ensure page is fully loaded
 #             await asyncio.sleep(random.uniform(2, 4))
-# 
+#
 #             logger.debug(f"{self.name}: Cloudflare challenge passed successfully")
 #             return True
-# 
+#
 #         except Exception as e:
 #             logger.warning(
 #                 f"{self.name}: Cloudflare challenge handling timeout or error: {e}"
 #             )
-# 
+#
 #             # Try to detect if we're still on challenge page
 #             try:
 #                 final_content = await page.content()
@@ -358,7 +358,7 @@ if __name__ == "__main__":
 #                     indicator.lower() in final_content.lower()
 #                     for indicator in cloudflare_indicators
 #                 )
-# 
+#
 #                 if still_challenged:
 #                     logger.error(
 #                         f"{self.name}: Still on Cloudflare challenge page after timeout"
@@ -369,21 +369,21 @@ if __name__ == "__main__":
 #                         f"{self.name}: Challenge may have completed despite timeout"
 #                     )
 #                     return True
-# 
+#
 #             except:
 #                 return False
-# 
+#
 #     def get_init_script(self) -> str:
 #         return """
 # (() => {
 #     'use strict';
-# 
+#
 #     // === CORE WEBDRIVER DETECTION REMOVAL ===
 #     Object.defineProperty(navigator, 'webdriver', {
 #         get: () => undefined,
 #         configurable: true
 #     });
-# 
+#
 #     // Remove all automation-related properties
 #     const automationProps = [
 #         'webdriver', '__driver_evaluate', '__webdriver_evaluate', '__selenium_evaluate',
@@ -396,7 +396,7 @@ if __name__ == "__main__":
 #         'webdriverCommand', 'webdriver-evaluate-response', '__webdriverFunc', '__webdriver_script_func',
 #         '__$webdriverAsyncExecutor', '$chrome_asyncScriptInfo', '$cdc_asdjflasutopfhvcZLmcfl_'
 #     ];
-# 
+#
 #     automationProps.forEach(prop => {
 #         try {
 #             delete window[prop];
@@ -404,7 +404,7 @@ if __name__ == "__main__":
 #             delete navigator[prop];
 #         } catch (e) {}
 #     });
-# 
+#
 #     // === NAVIGATOR PROPERTIES ===
 #     // Mock realistic Chrome object with proper methods
 #     if (!window.chrome || Object.getPrototypeOf(window.chrome) === Object.prototype) {
@@ -441,7 +441,7 @@ if __name__ == "__main__":
 #                 navigationType: 'Other'
 #             })
 #         };
-# 
+#
 #         // Make chrome object non-enumerable to match real Chrome
 #         Object.defineProperty(window, 'chrome', {
 #             value: window.chrome,
@@ -450,18 +450,18 @@ if __name__ == "__main__":
 #             configurable: false
 #         });
 #     }
-# 
+#
 #     // === LANGUAGE AND LOCALE ===
 #     Object.defineProperty(navigator, 'languages', {
 #         get: () => ['en-US', 'en'],
 #         configurable: true
 #     });
-# 
+#
 #     Object.defineProperty(navigator, 'language', {
 #         get: () => 'en-US',
 #         configurable: true
 #     });
-# 
+#
 #     // === REALISTIC PLUGINS ===
 #     const mockPlugins = [
 #         {
@@ -487,18 +487,18 @@ if __name__ == "__main__":
 #             name: "Native Client"
 #         }
 #     ];
-# 
+#
 #     Object.defineProperty(navigator, 'plugins', {
 #         get: () => mockPlugins,
 #         configurable: true
 #     });
-# 
+#
 #     // === HARDWARE CONCURRENCY ===
 #     Object.defineProperty(navigator, 'hardwareConcurrency', {
 #         get: () => Math.max(2, Math.min(16, Math.floor(Math.random() * 8) + 4)),
 #         configurable: true
 #     });
-# 
+#
 #     // === PERMISSIONS API ===
 #     if (navigator.permissions && navigator.permissions.query) {
 #         const originalQuery = navigator.permissions.query.bind(navigator.permissions);
@@ -517,7 +517,7 @@ if __name__ == "__main__":
 #             }
 #         };
 #     }
-# 
+#
 #     // === Camvas FINGERPRINTING PROTECTION ===
 #     const getImageData = HTMLCanvasElement.prototype.toDataURL;
 #     HTMLCanvasElement.prototype.toDataURL = function(type) {
@@ -525,10 +525,10 @@ if __name__ == "__main__":
 #         const originalImageData = getImageData.apply(this, arguments);
 #         return originalImageData;
 #     };
-# 
+#
 #     // === WEBGL FINGERPRINTING PROTECTION ===
 #     const glContexts = ['webgl', 'webgl2', 'experimental-webgl', 'experimental-webgl2'];
-# 
+#
 #     glContexts.forEach(contextType => {
 #         try {
 #             const canvas = document.createElement('canvas');
@@ -554,7 +554,7 @@ if __name__ == "__main__":
 #             }
 #         } catch (e) {}
 #     });
-# 
+#
 #     // === CANVAS FINGERPRINTING PROTECTION ===
 #     const getContext = HTMLCanvasElement.prototype.getContext;
 #     HTMLCanvasElement.prototype.getContext = function(contextType, ...args) {
@@ -563,7 +563,7 @@ if __name__ == "__main__":
 #             if (context) {
 #                 const originalFillText = context.fillText;
 #                 const originalStrokeText = context.strokeText;
-# 
+#
 #                 context.fillText = function(...args) {
 #                     // Add slight noise to prevent consistent fingerprints
 #                     if (args.length >= 3) {
@@ -572,7 +572,7 @@ if __name__ == "__main__":
 #                     }
 #                     return originalFillText.apply(this, args);
 #                 };
-# 
+#
 #                 context.strokeText = function(...args) {
 #                     if (args.length >= 3) {
 #                         args[1] += Math.random() * 0.01 - 0.005;
@@ -585,7 +585,7 @@ if __name__ == "__main__":
 #         }
 #         return getContext.call(this, contextType, ...args);
 #     };
-# 
+#
 #     // === TIMEZONE AND LOCALE CONSISTENCY ===
 #     if (Intl && Intl.DateTimeFormat) {
 #         const originalResolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions;
@@ -595,7 +595,7 @@ if __name__ == "__main__":
 #             return options;
 #         };
 #     }
-# 
+#
 #     // === SCREEN PROPERTIES ===
 #     const screenProps = {
 #         width: 1920,
@@ -609,7 +609,7 @@ if __name__ == "__main__":
 #             type: 'landscape-primary'
 #         }
 #     };
-# 
+#
 #     Object.keys(screenProps).forEach(prop => {
 #         if (prop !== 'orientation') {
 #             Object.defineProperty(screen, prop, {
@@ -618,13 +618,13 @@ if __name__ == "__main__":
 #             });
 #         }
 #     });
-# 
+#
 #     // === PREVENT TIMING ATTACKS ===
 #     const originalNow = performance.now;
 #     performance.now = function() {
 #         return originalNow.call(this) + Math.random() * 0.1;
 #     };
-# 
+#
 #     // === MEMORY INFO SPOOFING ===
 #     if (performance.memory) {
 #         Object.defineProperty(performance, 'memory', {
@@ -636,18 +636,18 @@ if __name__ == "__main__":
 #             configurable: true
 #         });
 #     }
-# 
+#
 #     // === PREVENT IFRAME DETECTION ===
 #     Object.defineProperty(window, 'top', {
 #         get: () => window,
 #         configurable: true
 #     });
-# 
+#
 #     Object.defineProperty(window, 'parent', {
 #         get: () => window,
 #         configurable: true
 #     });
-# 
+#
 #     // === CONSOLE CLEANING ===
 #     const originalConsole = { ...console };
 #     const cleanMethods = ['debug', 'log', 'info', 'warn', 'error'];
@@ -662,13 +662,13 @@ if __name__ == "__main__":
 #             return originalConsole[method](...args);
 #         };
 #     });
-# 
+#
 #     // === MOUSE MOVEMENT SIMULATION ===
 #     let mouseActivity = Date.now();
 #     document.addEventListener('mousemove', () => {
 #         mouseActivity = Date.now();
 #     }, true);
-# 
+#
 #     // Simulate natural mouse movements
 #     setInterval(() => {
 #         if (Date.now() - mouseActivity > 30000) {
@@ -682,14 +682,14 @@ if __name__ == "__main__":
 #             document.dispatchEvent(event);
 #         }
 #     }, 30000 + Math.random() * 15000);
-# 
+#
 #     // === FINAL CLEANUP ===
 #     // Remove any remaining automation traces
 #     delete window.cdc_adoQpoasnfa76pfcZLmcfl_;
 #     delete window.$cdc_asdjflasutopfhvcZLmcfl_;
 #     delete window.$chrome_asyncScriptInfo;
 #     delete window.__$webdriverAsyncExecutor;
-# 
+#
 #     // Freeze important objects to prevent modification
 #     try {
 #         Object.freeze(navigator);
@@ -697,15 +697,15 @@ if __name__ == "__main__":
 #     } catch (e) {}
 # })();
 # """
-# 
+#
 #     def get_dimension_spoofing_script(self) -> str:
 #         """
 #         Generate comprehensive JavaScript dimension spoofing script for invisible browser mode.
-# 
+#
 #         This creates a dual-layer window configuration:
 #         - Physical window: 1x1 pixel (invisible to user)
 #         - Reported dimensions: 1920x1080 (natural desktop size for bot detection)
-# 
+#
 #         The script is bulletproof and handles all dimension-related APIs that
 #         bot detectors commonly check.
 #         """
@@ -714,7 +714,7 @@ if __name__ == "__main__":
 #         )
 #         if not self.spoof_dimension:
 #             return ""
-# 
+#
 #         return """
 # (() => {
 #     // Target dimensions to report to JavaScript (natural desktop)
@@ -724,64 +724,64 @@ if __name__ == "__main__":
 #     const TARGET_SCREEN_HEIGHT = 1080;
 #     const TARGET_AVAILABLE_WIDTH = 1920;
 #     const TARGET_AVAILABLE_HEIGHT = 1040; // Account for taskbar
-# 
+#
 #     // === WINDOW DIMENSIONS ===
 #     // Override all window size properties
 #     Object.defineProperty(window, 'innerWidth', {
 #         get: () => TARGET_WINDOW_WIDTH,
 #         configurable: true
 #     });
-# 
+#
 #     Object.defineProperty(window, 'innerHeight', {
 #         get: () => TARGET_WINDOW_HEIGHT,
 #         configurable: true
 #     });
-# 
+#
 #     Object.defineProperty(window, 'outerWidth', {
 #         get: () => TARGET_WINDOW_WIDTH,
 #         configurable: true
 #     });
-# 
+#
 #     Object.defineProperty(window, 'outerHeight', {
 #         get: () => TARGET_WINDOW_HEIGHT + 100, // Account for browser chrome
 #         configurable: true
 #     });
-# 
+#
 #     // Override client dimensions (commonly checked by bot detectors)
 #     if (document.documentElement) {
 #         Object.defineProperty(document.documentElement, 'clientWidth', {
 #             get: () => TARGET_WINDOW_WIDTH,
 #             configurable: true
 #         });
-# 
+#
 #         Object.defineProperty(document.documentElement, 'clientHeight', {
 #             get: () => TARGET_WINDOW_HEIGHT,
 #             configurable: true
 #         });
 #     }
-# 
+#
 #     // === SCREEN DIMENSIONS ===
 #     // Override all screen properties
 #     Object.defineProperty(window.screen, 'width', {
 #         get: () => TARGET_SCREEN_WIDTH,
 #         configurable: true
 #     });
-# 
+#
 #     Object.defineProperty(window.screen, 'height', {
 #         get: () => TARGET_SCREEN_HEIGHT,
 #         configurable: true
 #     });
-# 
+#
 #     Object.defineProperty(window.screen, 'availWidth', {
 #         get: () => TARGET_AVAILABLE_WIDTH,
 #         configurable: true
 #     });
-# 
+#
 #     Object.defineProperty(window.screen, 'availHeight', {
 #         get: () => TARGET_AVAILABLE_HEIGHT,
 #         configurable: true
 #     });
-# 
+#
 #     // === VIEWPORT AND VISUAL DIMENSIONS ===
 #     // Override visual viewport (modern API)
 #     if (window.visualViewport) {
@@ -789,13 +789,13 @@ if __name__ == "__main__":
 #             get: () => TARGET_WINDOW_WIDTH,
 #             configurable: true
 #         });
-# 
+#
 #         Object.defineProperty(window.visualViewport, 'height', {
 #             get: () => TARGET_WINDOW_HEIGHT,
 #             configurable: true
 #         });
 #     }
-# 
+#
 #     // === DOCUMENT DIMENSIONS ===
 #     // Override document element dimensions (wait for DOM to be ready)
 #     const overrideDocumentDimensions = () => {
@@ -804,59 +804,59 @@ if __name__ == "__main__":
 #                 get: () => TARGET_WINDOW_WIDTH,
 #                 configurable: true
 #             });
-# 
+#
 #             Object.defineProperty(document.documentElement, 'clientHeight', {
 #                 get: () => TARGET_WINDOW_HEIGHT,
 #                 configurable: true
 #             });
-# 
+#
 #             Object.defineProperty(document.documentElement, 'offsetWidth', {
 #                 get: () => TARGET_WINDOW_WIDTH,
 #                 configurable: true
 #             });
-# 
+#
 #             Object.defineProperty(document.documentElement, 'offsetHeight', {
 #                 get: () => TARGET_WINDOW_HEIGHT,
 #                 configurable: true
 #             });
-# 
+#
 #             Object.defineProperty(document.documentElement, 'scrollWidth', {
 #                 get: () => TARGET_WINDOW_WIDTH,
 #                 configurable: true
 #             });
-# 
+#
 #             Object.defineProperty(document.documentElement, 'scrollHeight', {
 #                 get: () => TARGET_WINDOW_HEIGHT,
 #                 configurable: true
 #             });
 #         }
-# 
+#
 #         if (document.body) {
 #             Object.defineProperty(document.body, 'clientWidth', {
 #                 get: () => TARGET_WINDOW_WIDTH,
 #                 configurable: true
 #             });
-# 
+#
 #             Object.defineProperty(document.body, 'clientHeight', {
 #                 get: () => TARGET_WINDOW_HEIGHT,
 #                 configurable: true
 #             });
 #         }
 #     };
-# 
+#
 #     // Apply immediately if DOM is ready, otherwise wait
 #     if (document.readyState === 'loading') {
 #         document.addEventListener('DOMContentLoaded', overrideDocumentDimensions);
 #     } else {
 #         overrideDocumentDimensions();
 #     }
-# 
+#
 #     // === MEDIA QUERIES ===
 #     // Override matchMedia for responsive design queries
 #     const originalMatchMedia = window.matchMedia;
 #     window.matchMedia = function(query) {
 #         const result = originalMatchMedia.call(this, query);
-# 
+#
 #         // Override common responsive breakpoints based on our spoofed dimensions
 #         if (query.includes('max-width')) {
 #             const maxWidth = parseInt(query.match(/max-width:\\s*(\d+)px/)?.[1] || '0');
@@ -864,17 +864,17 @@ if __name__ == "__main__":
 #                 Object.defineProperty(result, 'matches', { get: () => false });
 #             }
 #         }
-# 
+#
 #         if (query.includes('min-width')) {
 #             const minWidth = parseInt(query.match(/min-width:\\s*(\d+)px/)?.[1] || '0');
 #             if (minWidth <= TARGET_WINDOW_WIDTH) {
 #                 Object.defineProperty(result, 'matches', { get: () => true });
 #             }
 #         }
-# 
+#
 #         return result;
 #     };
-# 
+#
 #     // === EVENT HANDLING ===
 #     // Override resize events to maintain consistency
 #     const originalAddEventListener = window.addEventListener;
@@ -898,84 +898,84 @@ if __name__ == "__main__":
 #     };
 # })();
 #         """
-# 
+#
 #     async def human_delay_async(self, min_ms: int = 1000, max_ms: int = 3000):
 #         delay = random.randint(min_ms, max_ms)
 #         await asyncio.sleep(delay / 1000)
-# 
+#
 #     async def human_click_async(self, page: Page, element):
 #         await element.hover()
 #         await self.human_delay_async(200, 500)
 #         await element.click()
-# 
+#
 #     async def human_mouse_move_async(self, page: Page):
 #         await page.mouse.move(random.randint(100, 800), random.randint(100, 600))
-# 
+#
 #     async def human_scroll_async(self, page: Page):
 #         scroll_distance = random.randint(300, 800)
 #         await page.evaluate(f"window.scrollBy(0, {scroll_distance})")
 #         await self.human_delay_async(500, 1500)
-# 
+#
 #     async def human_type_async(self, page: Page, selector: str, text: str):
 #         element = page.locator(selector)
 #         await element.click()
 #         for char in text:
 #             await element.type(char)
 #             await self.human_delay_async(50, 200)
-# 
-# 
+#
+#
 # def main(args):
 #     """Demonstrate StealthManager functionality."""
 #     import asyncio
-# 
+#
 #     from playwright.async_api import async_playwright
-# 
+#
 #     async def demo():
 #         stealth_manager = StealthManager()
-# 
+#
 #         async with async_playwright() as p:
 #             browser = await p.chromium.launch(
 #                 headless=False,
 #                 args=stealth_manager.get_stealth_options_additional(),
 #             )
-# 
+#
 #             stealth_options = stealth_manager.get_stealth_options()
 #             context = await browser.new_context(**stealth_options)
 #             await context.add_init_script(stealth_manager.get_init_script())
-# 
+#
 #             page = await context.new_page()
 #             await page.goto("https://bot.sannysoft.com/", timeout=30000)
 #             await stealth_manager.human_delay_async(2000, 3000)
-# 
+#
 #             await page.screenshot(path="/tmp/stealth_test.png")
 #             print("✓ Stealth test complete: /tmp/stealth_test.png")
-# 
+#
 #             await browser.close()
-# 
+#
 #     asyncio.run(demo())
 #     return 0
-# 
-# 
+#
+#
 # def parse_args():
 #     """Parse command line arguments."""
 #     import argparse
-# 
+#
 #     parser = argparse.ArgumentParser(description="StealthManager demo")
 #     return parser.parse_args()
-# 
-# 
+#
+#
 # def run_main() -> None:
 #     """Initialize scitex framework, run main function, and cleanup."""
 #     global CONFIG, CC, sys, plt, rng
-# 
+#
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     import scitex as stx
-# 
+#
 #     args = parse_args()
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
 #         sys,
 #         plt,
@@ -985,9 +985,9 @@ if __name__ == "__main__":
 #         verbose=False,
 #         agg=True,
 #     )
-# 
+#
 #     exit_status = main(args)
-# 
+#
 #     stx.session.close(
 #         CONFIG,
 #         verbose=False,
@@ -995,13 +995,13 @@ if __name__ == "__main__":
 #         message="",
 #         exit_status=exit_status,
 #     )
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     run_main()
-# 
+#
 # # python -m scitex.browser.stealth.StealthManager
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

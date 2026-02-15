@@ -4,24 +4,21 @@
 
 """Statistics-specific dataclasses for FTS with GUI support."""
 
-from ._Stats import (
+from ._Stats import (  # Type aliases; GUI classes; Core classes
     STATS_VERSION,
-    # Type aliases
-    PositionMode,
-    UnitType,
-    SymbolStyle,
-    # GUI classes
-    Position,
-    StatStyling,
-    StatPositioning,
-    # Core classes
     Analysis,
     DataRef,
     EffectSize,
+    Position,
+    PositionMode,
     StatDisplay,
     StatMethod,
+    StatPositioning,
     StatResult,
     Stats,
+    StatStyling,
+    SymbolStyle,
+    UnitType,
 )
 
 __all__ = [

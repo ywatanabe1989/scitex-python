@@ -7,9 +7,10 @@
 Scientific metadata management for figures with YAML export.
 """
 
+from typing import Any, Dict, List, Optional
+
 # Imports
 import yaml
-from typing import Optional, List, Dict, Any
 
 
 # Functions
@@ -266,7 +267,9 @@ def export_metadata_yaml(fig, filepath):
 if __name__ == "__main__":
     # Start
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex
 
     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)

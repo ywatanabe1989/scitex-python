@@ -7,12 +7,12 @@ import pytest
 
 from scitex.bridge._protocol import (
     BRIDGE_PROTOCOL_VERSION,
-    ProtocolInfo,
-    parse_version,
-    check_protocol_compatibility,
-    add_protocol_metadata,
-    extract_protocol_metadata,
     COORDINATE_SYSTEMS,
+    ProtocolInfo,
+    add_protocol_metadata,
+    check_protocol_compatibility,
+    extract_protocol_metadata,
+    parse_version,
 )
 
 
@@ -144,7 +144,10 @@ class TestProtocolMetadata:
         result = add_protocol_metadata(data, "stats", "vis", "data")
 
         assert "_bridge_protocol" in result
-        assert result["_bridge_protocol"]["bridge_protocol_version"] == BRIDGE_PROTOCOL_VERSION
+        assert (
+            result["_bridge_protocol"]["bridge_protocol_version"]
+            == BRIDGE_PROTOCOL_VERSION
+        )
         assert result["_bridge_protocol"]["source_module"] == "stats"
         assert result["_bridge_protocol"]["target_module"] == "vis"
 
@@ -157,7 +160,7 @@ class TestProtocolMetadata:
                 "source_module": "plt",
                 "target_module": "vis",
                 "coordinate_system": "axes",
-            }
+            },
         }
         info = extract_protocol_metadata(data)
 
@@ -212,33 +215,33 @@ if __name__ == "__main__":
 # # Time-stamp: "2024-12-09 09:30:00 (ywatanabe)"
 # """
 # Bridge Protocol - Versioning and compatibility for cross-module communication.
-# 
+#
 # This module defines the bridge protocol version and provides utilities
 # for ensuring compatibility between different versions of scitex modules.
-# 
+#
 # Protocol Versioning
 # -------------------
 # The bridge protocol version follows semantic versioning:
 # - MAJOR: Breaking changes in bridge interfaces
 # - MINOR: New bridge functions added (backward compatible)
 # - PATCH: Bug fixes (backward compatible)
-# 
+#
 # Usage:
 #     from scitex.bridge import BRIDGE_PROTOCOL_VERSION, check_protocol_compatibility
 # """
-# 
+#
 # from typing import Dict, Any, Tuple, Optional
 # from dataclasses import dataclass
-# 
-# 
+#
+#
 # # =============================================================================
 # # Protocol Version
 # # =============================================================================
-# 
+#
 # BRIDGE_PROTOCOL_VERSION = "1.0.0"
 # """
 # Current bridge protocol version.
-# 
+#
 # Changes:
 # - 1.0.0: Initial protocol
 #     - Stats → Plt: add_stat_to_axes, extract_stats_from_axes
@@ -246,18 +249,18 @@ if __name__ == "__main__":
 #     - Plt → Vis: figure_to_vis_model, axes_to_vis_axes
 #     - Coordinate conventions: axes coords (0-1) for plt, data coords for vis
 # """
-# 
-# 
+#
+#
 # # =============================================================================
 # # Protocol Metadata
 # # =============================================================================
-# 
-# 
+#
+#
 # @dataclass
 # class ProtocolInfo:
 #     """
 #     Bridge protocol information for serialization and compatibility.
-# 
+#
 #     Parameters
 #     ----------
 #     version : str
@@ -269,12 +272,12 @@ if __name__ == "__main__":
 #     coordinate_system : str
 #         Coordinate system used ("axes", "data", "figure", "mm", "px")
 #     """
-# 
+#
 #     version: str = BRIDGE_PROTOCOL_VERSION
 #     source_module: str = ""
 #     target_module: str = ""
 #     coordinate_system: str = "data"
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         """Convert to dictionary."""
 #         return {
@@ -283,7 +286,7 @@ if __name__ == "__main__":
 #             "target_module": self.target_module,
 #             "coordinate_system": self.coordinate_system,
 #         }
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "ProtocolInfo":
 #         """Create from dictionary."""
@@ -293,22 +296,22 @@ if __name__ == "__main__":
 #             target_module=data.get("target_module", ""),
 #             coordinate_system=data.get("coordinate_system", "data"),
 #         )
-# 
-# 
+#
+#
 # # =============================================================================
 # # Compatibility Utilities
 # # =============================================================================
-# 
-# 
+#
+#
 # def parse_version(version: str) -> Tuple[int, int, int]:
 #     """
 #     Parse a version string into (major, minor, patch) tuple.
-# 
+#
 #     Parameters
 #     ----------
 #     version : str
 #         Version string like "1.2.3"
-# 
+#
 #     Returns
 #     -------
 #     tuple
@@ -319,35 +322,35 @@ if __name__ == "__main__":
 #     minor = int(parts[1]) if len(parts) > 1 else 0
 #     patch = int(parts[2]) if len(parts) > 2 else 0
 #     return (major, minor, patch)
-# 
-# 
+#
+#
 # def check_protocol_compatibility(
 #     data_version: str,
 #     current_version: str = BRIDGE_PROTOCOL_VERSION,
 # ) -> Tuple[bool, Optional[str]]:
 #     """
 #     Check if a data version is compatible with the current protocol.
-# 
+#
 #     Parameters
 #     ----------
 #     data_version : str
 #         Version of the data being loaded
 #     current_version : str
 #         Current protocol version (default: BRIDGE_PROTOCOL_VERSION)
-# 
+#
 #     Returns
 #     -------
 #     tuple
 #         (is_compatible, warning_message)
 #         - is_compatible: True if data can be safely used
 #         - warning_message: None if compatible, else a warning string
-# 
+#
 #     Examples
 #     --------
 #     >>> is_compat, msg = check_protocol_compatibility("1.0.0")
 #     >>> is_compat
 #     True
-# 
+#
 #     >>> is_compat, msg = check_protocol_compatibility("2.0.0")
 #     >>> is_compat
 #     False
@@ -356,14 +359,14 @@ if __name__ == "__main__":
 #     """
 #     data_major, data_minor, _ = parse_version(data_version)
 #     curr_major, curr_minor, _ = parse_version(current_version)
-# 
+#
 #     # Major version mismatch = incompatible
 #     if data_major != curr_major:
 #         return (
 #             False,
 #             f"Major version mismatch: data v{data_version}, current v{current_version}",
 #         )
-# 
+#
 #     # Minor version newer than current = warning (may have unknown fields)
 #     if data_minor > curr_minor:
 #         return (
@@ -371,10 +374,10 @@ if __name__ == "__main__":
 #             f"Data version newer than current: data v{data_version}, "
 #             f"current v{current_version}. Some features may be ignored.",
 #         )
-# 
+#
 #     return (True, None)
-# 
-# 
+#
+#
 # def add_protocol_metadata(
 #     data: Dict[str, Any],
 #     source_module: str,
@@ -383,7 +386,7 @@ if __name__ == "__main__":
 # ) -> Dict[str, Any]:
 #     """
 #     Add bridge protocol metadata to a dictionary.
-# 
+#
 #     Parameters
 #     ----------
 #     data : dict
@@ -394,12 +397,12 @@ if __name__ == "__main__":
 #         Target module name (e.g., "vis", "plt")
 #     coordinate_system : str
 #         Coordinate system used (default: "data")
-# 
+#
 #     Returns
 #     -------
 #     dict
 #         Data with protocol metadata added
-# 
+#
 #     Examples
 #     --------
 #     >>> data = {"x": 10, "y": 20}
@@ -414,17 +417,17 @@ if __name__ == "__main__":
 #     )
 #     data["_bridge_protocol"] = protocol.to_dict()
 #     return data
-# 
-# 
+#
+#
 # def extract_protocol_metadata(data: Dict[str, Any]) -> Optional[ProtocolInfo]:
 #     """
 #     Extract bridge protocol metadata from a dictionary.
-# 
+#
 #     Parameters
 #     ----------
 #     data : dict
 #         Data dictionary that may contain protocol metadata
-# 
+#
 #     Returns
 #     -------
 #     ProtocolInfo or None
@@ -433,12 +436,12 @@ if __name__ == "__main__":
 #     if "_bridge_protocol" in data:
 #         return ProtocolInfo.from_dict(data["_bridge_protocol"])
 #     return None
-# 
-# 
+#
+#
 # # =============================================================================
 # # Coordinate System Definitions
 # # =============================================================================
-# 
+#
 # COORDINATE_SYSTEMS = {
 #     "axes": {
 #         "description": "Normalized axes coordinates (0-1)",
@@ -471,12 +474,12 @@ if __name__ == "__main__":
 #         "used_by": ["canvas", "gui"],
 #     },
 # }
-# 
-# 
+#
+#
 # # =============================================================================
 # # Public API
 # # =============================================================================
-# 
+#
 # __all__ = [
 #     "BRIDGE_PROTOCOL_VERSION",
 #     "ProtocolInfo",
@@ -486,8 +489,8 @@ if __name__ == "__main__":
 #     "extract_protocol_metadata",
 #     "COORDINATE_SYSTEMS",
 # ]
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

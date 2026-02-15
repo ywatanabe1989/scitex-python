@@ -14,10 +14,7 @@ from .handlers import (
     speak_handler,
     speech_queue_status_handler,
 )
-from .speak_handlers import (
-    speak_local_handler,
-    speak_relay_handler,
-)
+from .speak_handlers import speak_local_handler, speak_relay_handler
 
 __all__ = [
     "speak_handler",
@@ -33,4 +30,3 @@ __all__ = [
     "speech_queue_status_handler",
     "announce_context_handler",
 ]
-

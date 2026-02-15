@@ -47,27 +47,27 @@ logger = logging.getLogger(__name__)
 
 async def main():
     """Main execution function."""
-    
+
     # 1. Initialize the Authentication Manager
     # This will use the local browser + ZenRows proxy method.
     auth_manager = ScholarAuthManager(
         email_openathens=os.getenv("SCITEX_SCHOLAR_OPENATHENS_EMAIL")
     )
-    
+
     # 2. Authenticate
     # This will open a local browser window. You must complete the login manually.
     # The script will wait until you have successfully logged in.
     logger.info("Starting authentication process...")
     await auth_manager.ensure_authenticate_async()
     logger.success("Authentication successful! Session is now active.")
-    
+
     # 3. Initialize the OpenURL Resolver WITH the authenticate_async manager
     # It will automatically use the same browser and session.
     resolver = OpenURLResolver(
         auth_manager=auth_manager,
         resolver_url=os.getenv("SCITEX_SCHOLAR_OPENURL_RESOLVER_URL"),
     )
-    
+
     dois_to_resolve = [
         "10.1002/hipo.22488",        # Wiley
         "10.1038/nature12373",      # Nature
@@ -75,13 +75,13 @@ async def main():
         "10.1126/science.1172133",      # Science
         "10.1073/pnas.0608765104",      # PNAS (often has strong bot detection)
     ]
-    
+
     # 4. Resolve DOIs using the now-authenticate_async session
     logger.info(f"Attempting to resolve {len(dois_to_resolve)} DOIs...")
-    
+
     # Use the synchronous wrapper for simplicity here
     results = resolver.resolve(dois_to_resolve)
-    
+
     logger.info("--- Resolution Complete ---")
     for doi, result in zip(dois_to_resolve, results):
         if result and result.get("success"):

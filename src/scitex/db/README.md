@@ -48,7 +48,7 @@ results = db.get_rows("users", where="name LIKE 'J%'")
 print(results)
 
 # Update data
-db.update_where("users", 
+db.update_where("users",
     {"email": "newemail@example.com"},
     "name = 'John'"
 )
@@ -64,7 +64,7 @@ import numpy as np
 
 # Save numpy arrays
 data = np.random.rand(100, 50)
-db.save_array("experiments", data, column="features", 
+db.save_array("experiments", data, column="features",
               additional_columns={"experiment_id": 1})
 
 # Load arrays
@@ -103,7 +103,7 @@ db.insert_many("users", users, batch_size=100)
 
 # Batch update
 updates = [
-    {"id": ii, "status": "active"} 
+    {"id": ii, "status": "active"}
     for ii in range(1, 101)
 ]
 db.update_many("users", updates, where="id = ?")
@@ -186,7 +186,7 @@ postgres=# \q
  !-- ```bash
  !-- sudo nano /etc/postgresql/[version]/main/postgresql.conf
  !-- # Set: listen_addresses = '*'
- !-- 
+ !--
  !-- sudo nano /etc/postgresql/[version]/main/pg_hba.conf
  !-- # Add: host all all 0.0.0.0/0 md5
  !-- ``` -->
@@ -235,7 +235,7 @@ results = db.select("users", where="name LIKE 'J%'")
 print(results)
 
 # Update data
-db.update("users", 
+db.update("users",
     data={"email": "newemail@example.com"},
     where="name = 'John Doe'"
 )

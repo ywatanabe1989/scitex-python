@@ -21,9 +21,9 @@ def plot_mpl_stackplot(plt, rng, ax=None):
     y1 = rng.uniform(1, 3, 10)
     y2 = rng.uniform(1, 3, 10)
     y3 = rng.uniform(1, 3, 10)
-    ax.mpl_stackplot(x, y1, y2, y3, labels=['A', 'B', 'C'])
+    ax.mpl_stackplot(x, y1, y2, y3, labels=["A", "B", "C"])
     ax.set_xyt("X", "Y", "mpl_stackplot")
-    if hasattr(ax, 'legend') and ax.get_legend_handles_labels()[0]:
+    if hasattr(ax, "legend") and ax.get_legend_handles_labels()[0]:
         ax.legend()
     return fig, ax
 

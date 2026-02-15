@@ -14,11 +14,12 @@ Imports
 import sys
 
 import matplotlib.pyplot as plt
-import scitex
 import numpy as np
 import umap.umap_ as umap_orig
 from natsort import natsorted
 from sklearn.preprocessing import LabelEncoder
+
+import scitex
 
 # sys.path = ["."] + sys.path
 # from scripts import utils, load
@@ -157,9 +158,7 @@ def _plot(
         fig = (
             axes[0].get_figure()
             # axes
-            if isinstance(
-                axes, (np.ndarray, scitex.plt._subplots.AxesWrapper)
-            )
+            if isinstance(axes, (np.ndarray, scitex.plt._subplots.AxesWrapper))
             # axis
             else axes.get_figure()
         )

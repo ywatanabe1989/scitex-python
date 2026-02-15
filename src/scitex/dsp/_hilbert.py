@@ -10,9 +10,9 @@ This script does XYZ.
 import sys
 
 import matplotlib.pyplot as plt
-from scitex.nn._Hilbert import Hilbert
 
 from scitex.decorators import signal_fn
+from scitex.nn._Hilbert import Hilbert
 
 
 # Functions

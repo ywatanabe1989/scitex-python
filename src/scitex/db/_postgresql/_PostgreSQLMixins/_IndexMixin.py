@@ -8,6 +8,7 @@ THIS_FILE = (
 )
 
 from typing import List
+
 import psycopg2
 
 
