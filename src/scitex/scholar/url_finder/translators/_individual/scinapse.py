@@ -14,6 +14,7 @@ Key features:
 
 import re
 from typing import List
+
 from playwright.async_api import Page
 
 
@@ -42,7 +43,8 @@ class ScinapseTranslator:
             pass
 
         # Extract PDF URL (line 99)
-        urls = await page.evaluate("""
+        urls = await page.evaluate(
+            """
             () => {
                 const pdfUrls = [];
 
@@ -68,7 +70,8 @@ class ScinapseTranslator:
 
                 return pdfUrls;
             }
-        """)
+        """
+        )
 
         pdf_urls.extend(urls)
         return pdf_urls
@@ -76,6 +79,7 @@ class ScinapseTranslator:
 
 if __name__ == "__main__":
     import asyncio
+
     from playwright.async_api import async_playwright
 
     async def main():

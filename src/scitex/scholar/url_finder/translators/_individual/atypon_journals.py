@@ -49,7 +49,9 @@ Atypon is a major publishing platform serving 100+ publishers including:
 
 import re
 from typing import List, Optional
+
 from playwright.async_api import Page
+
 from .._core.base import BaseTranslator
 
 
@@ -203,6 +205,7 @@ class AtyponJournalsTranslator(BaseTranslator):
 
 if __name__ == "__main__":
     import asyncio
+
     from playwright.async_api import async_playwright
 
     async def main():

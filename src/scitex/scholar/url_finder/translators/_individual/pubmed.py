@@ -12,12 +12,14 @@ Strategy:
 4. Extract PDF URLs from publisher links when available
 """
 
-import re
 import logging
+import re
+from typing import Any, Dict, List, Optional
+
 import httpx
-from typing import List, Optional, Dict, Any
-from playwright.async_api import Page
 from bs4 import BeautifulSoup
+from playwright.async_api import Page
+
 from .._core.base import BaseTranslator
 
 logger = logging.getLogger(__name__)

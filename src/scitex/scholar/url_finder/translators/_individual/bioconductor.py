@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2019-09-17 16:47:07
 """
 
-from typing import Dict, Any, List, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class BioconductorTranslator:

@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/zotero-translators-python/src/zotero_translators_python/individual/ssrn.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/zotero_translators_python/individual/ssrn.py"

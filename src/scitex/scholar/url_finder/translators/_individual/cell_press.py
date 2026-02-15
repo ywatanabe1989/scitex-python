@@ -49,12 +49,14 @@ class CellPressTranslator(BaseTranslator):
 
         # Strategy 1: Look for citation_pdf_url meta tag
         try:
-            pdf_meta = await page.evaluate("""
+            pdf_meta = await page.evaluate(
+                """
                 () => {
                     const meta = document.querySelector('meta[name="citation_pdf_url"]');
                     return meta ? meta.getAttribute('content') : null;
                 }
-            """)
+            """
+            )
             if pdf_meta:
                 pdf_urls.append(pdf_meta)
         except Exception:
@@ -62,7 +64,8 @@ class CellPressTranslator(BaseTranslator):
 
         # Strategy 2: Look for PDF download links on the page
         try:
-            pdf_links = await page.evaluate("""
+            pdf_links = await page.evaluate(
+                """
                 () => {
                     const links = [];
                     // Look for PDF download buttons/links
@@ -85,7 +88,8 @@ class CellPressTranslator(BaseTranslator):
                     }
                     return links;
                 }
-            """)
+            """
+            )
             for link in pdf_links or []:
                 # Make absolute URL if relative
                 if link.startswith("/"):
@@ -123,7 +127,8 @@ class CellPressTranslator(BaseTranslator):
         # Strategy 4: Look for ScienceDirect-style PDF links
         # Cell Press uses ScienceDirect backend
         try:
-            sd_links = await page.evaluate("""
+            sd_links = await page.evaluate(
+                """
                 () => {
                     const links = [];
                     // ScienceDirect PDF patterns
@@ -140,7 +145,8 @@ class CellPressTranslator(BaseTranslator):
                     });
                     return links;
                 }
-            """)
+            """
+            )
             for link in sd_links or []:
                 if link not in pdf_urls:
                     pdf_urls.append(link)

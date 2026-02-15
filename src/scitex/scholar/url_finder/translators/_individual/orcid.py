@@ -16,7 +16,7 @@ not PDF URLs. It uses the ORCID public API to fetch work information.
 """
 
 import re
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 from xml.etree import ElementTree as ET
 
 import httpx
@@ -226,6 +226,7 @@ class ORCIDTranslator:
 
 if __name__ == "__main__":
     import asyncio
+
     from playwright.async_api import async_playwright
 
     async def main():

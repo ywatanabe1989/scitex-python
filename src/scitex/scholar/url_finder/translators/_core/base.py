@@ -4,6 +4,7 @@
 
 from abc import ABC, abstractmethod
 from typing import List
+
 from playwright.async_api import Page
 
 

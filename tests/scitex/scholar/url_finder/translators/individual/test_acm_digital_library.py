@@ -13,10 +13,10 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # """ACM Digital Library translator.
-# 
+#
 # Based on ACM Digital Library.js translator from Zotero.
 # Original JavaScript implementation by Guy Aglionby.
-# 
+#
 # Supports:
 # - Conference papers
 # - Journal articles
@@ -27,50 +27,50 @@ if __name__ == "__main__":
 # - Search results pages
 # - Author profile pages
 # - TOC/issue pages
-# 
+#
 # ACM Digital Library is a major repository for computer science and IT publications.
 # """
-# 
+#
 # import re
 # import json
 # from typing import List, Dict, Optional
 # from urllib.parse import quote, urlencode
 # from playwright.async_api import Page
 # from ..core.base import BaseTranslator
-# 
-# 
+#
+#
 # class ACMDigitalLibraryTranslator(BaseTranslator):
 #     """ACM Digital Library translator.
-# 
+#
 #     Based on JavaScript translator (ACM Digital Library.js).
 #     Extracts metadata and PDFs from dl.acm.org.
 #     """
-# 
+#
 #     LABEL = "ACM Digital Library"
 #     URL_TARGET_PATTERN = r"^https://dl\.acm\.org/(doi|do|profile|toc|topic|keyword|action/doSearch|acmbooks|browse)"
-# 
+#
 #     @classmethod
 #     def matches_url(cls, url: str) -> bool:
 #         """Check if URL matches ACM Digital Library pattern.
-# 
+#
 #         Based on JavaScript detectWeb() and isContentUrl() (lines 37-103).
 #         """
 #         return bool(re.match(cls.URL_TARGET_PATTERN, url))
-# 
+#
 #     @classmethod
 #     def _is_content_url(cls, url: str) -> bool:
 #         """Check if URL is a content page (not search/browse).
-# 
+#
 #         Based on JavaScript isContentUrl() (lines 101-103).
 #         """
 #         return ("/doi/" in url or "/do/" in url) and "/doi/proceedings" not in url
-# 
+#
 #     @classmethod
 #     async def extract_pdf_urls_async(cls, page: Page) -> List[str]:
 #         """Extract PDF URLs from ACM Digital Library page.
-# 
+#
 #         Based on JavaScript scrape() function (lines 131-235).
-# 
+#
 #         The JavaScript implementation:
 #         1. Extracts DOI from page input field
 #         2. Fetches CSL JSON from ACM's exportCiteProcCitation API
@@ -78,26 +78,26 @@ if __name__ == "__main__":
 #         4. Extracts abstract from page
 #         5. Finds PDF download link via "View PDF" anchor
 #         6. Returns item with PDF attachment
-# 
+#
 #         Python implementation:
 #         - Extracts DOI from page
 #         - Finds PDF download link
 #         - Returns PDF URL for download
-# 
+#
 #         Args:
 #             page: Playwright page object on ACM Digital Library
-# 
+#
 #         Returns:
 #             List containing PDF URL if found, empty list otherwise
 #         """
 #         pdf_urls = []
-# 
+#
 #         try:
 #             # Check if this is a content URL
 #             current_url = page.url
 #             if not cls._is_content_url(current_url):
 #                 return []
-# 
+#
 #             # Method 1: Look for "View PDF" link on page (JS lines 170-176)
 #             # JavaScript: let pdfElement = doc.querySelector('a[title="View PDF"]');
 #             try:
@@ -114,7 +114,7 @@ if __name__ == "__main__":
 #                     return pdf_urls
 #             except Exception:
 #                 pass
-# 
+#
 #             # Method 2: Construct PDF URL from DOI (JS lines 132-133)
 #             # JavaScript: let doi = attr(doc, 'input[name=doiVal]', 'value');
 #             try:
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 #                     return pdf_urls
 #             except Exception:
 #                 pass
-# 
+#
 #             # Method 3: Extract DOI from URL and construct PDF link
 #             try:
 #                 # Match patterns: /doi/10.1145/... or /doi/abs/10.1145/...
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 #                     return pdf_urls
 #             except Exception:
 #                 pass
-# 
+#
 #             # Method 4: Look for any PDF download link
 #             try:
 #                 pdf_link = await page.locator(
@@ -157,18 +157,18 @@ if __name__ == "__main__":
 #                     return pdf_urls
 #             except Exception:
 #                 pass
-# 
+#
 #         except Exception:
 #             pass
-# 
+#
 #         return pdf_urls
-# 
+#
 #     @classmethod
 #     async def extract_metadata_async(cls, page: Page) -> Optional[Dict]:
 #         """Extract metadata from ACM Digital Library page.
-# 
+#
 #         Based on JavaScript scrape() function (lines 131-235).
-# 
+#
 #         Extracts:
 #         - DOI
 #         - Title
@@ -181,20 +181,20 @@ if __name__ == "__main__":
 #         - ISBN/ISSN
 #         - Keywords/tags
 #         - Publisher
-# 
+#
 #         Args:
 #             page: Playwright page object on ACM Digital Library
-# 
+#
 #         Returns:
 #             Dictionary containing metadata, or None if extraction fails
 #         """
 #         metadata = {}
-# 
+#
 #         try:
 #             current_url = page.url
 #             if not cls._is_content_url(current_url):
 #                 return None
-# 
+#
 #             # Extract DOI (JS lines 132-133)
 #             try:
 #                 doi = await page.locator("input[name=doiVal]").first.get_attribute(
@@ -207,15 +207,15 @@ if __name__ == "__main__":
 #                 doi_match = re.search(r"/doi/(abs/)?(10\.[^?#/]+/[^?#/]+)", current_url)
 #                 if doi_match:
 #                     metadata["doi"] = doi_match.group(2)
-# 
+#
 #             if not metadata.get("doi"):
 #                 return None
-# 
+#
 #             # Fetch CSL JSON metadata from ACM API (JS lines 133-139)
 #             # JavaScript: let postBody = 'targetFile=custom-bibtex&format=bibTex&dois=' + encodeURIComponent(doi);
 #             # This would require making an HTTP request, which we'll skip for now
 #             # Instead, we'll scrape metadata directly from the page
-# 
+#
 #             # Extract item type from page context (JS lines 95-99)
 #             try:
 #                 pb_context = await page.locator(
@@ -226,7 +226,7 @@ if __name__ == "__main__":
 #                     subtype_match = re.search(r"csubtype:string:(\w+)", pb_context)
 #                     if subtype_match:
 #                         subtype = subtype_match.group(1).lower()
-# 
+#
 #                         # Determine item type (JS lines 38-80)
 #                         if subtype == "conference":
 #                             metadata["itemType"] = "conferencePaper"
@@ -263,7 +263,7 @@ if __name__ == "__main__":
 #                         metadata["itemType"] = "journalArticle"
 #             except Exception:
 #                 metadata["itemType"] = "journalArticle"
-# 
+#
 #             # Extract title (JS line 162)
 #             try:
 #                 title = await page.locator("h1.citation__title").first.text_content(
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 #                     metadata["title"] = title.strip()
 #             except Exception:
 #                 pass
-# 
+#
 #             # Extract authors (JS lines 201-209)
 #             try:
 #                 author_elements = await page.locator(
@@ -300,7 +300,7 @@ if __name__ == "__main__":
 #                     metadata["authors"] = authors
 #             except Exception:
 #                 pass
-# 
+#
 #             # Extract abstract (JS lines 164-168)
 #             try:
 #                 abstract_elements = await page.locator(
@@ -317,7 +317,7 @@ if __name__ == "__main__":
 #                         metadata["abstract"] = abstract
 #             except Exception:
 #                 pass
-# 
+#
 #             # Extract publication title (JS lines 182-188)
 #             try:
 #                 pub_title = await page.locator(
@@ -327,7 +327,7 @@ if __name__ == "__main__":
 #                     metadata["publicationTitle"] = pub_title.strip()
 #             except Exception:
 #                 pass
-# 
+#
 #             # Extract tags/keywords (JS lines 222-225)
 #             try:
 #                 tag_elements = await page.locator("div.tags-widget a").all()
@@ -340,7 +340,7 @@ if __name__ == "__main__":
 #                     metadata["tags"] = tags
 #             except Exception:
 #                 pass
-# 
+#
 #             # Extract number of pages (JS lines 217-220)
 #             try:
 #                 num_pages = await page.locator(
@@ -350,20 +350,20 @@ if __name__ == "__main__":
 #                     metadata["numPages"] = num_pages.strip()
 #             except Exception:
 #                 pass
-# 
+#
 #             # Construct clean URL (JS lines 177-179)
 #             if metadata.get("doi"):
 #                 metadata["url"] = f"https://dl.acm.org/doi/{metadata['doi']}"
-# 
+#
 #             # Set library catalog
 #             metadata["libraryCatalog"] = "ACM Digital Library"
-# 
+#
 #             return metadata
-# 
+#
 #         except Exception:
 #             return None
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

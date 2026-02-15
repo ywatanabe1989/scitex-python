@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2016-09-09 19:45:42
 """
 
-from typing import Dict, Any
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict
+
+from bs4 import BeautifulSoup
 
 
 class CanadianLettersAndImagesTranslator:

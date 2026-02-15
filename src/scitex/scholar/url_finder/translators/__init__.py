@@ -22,8 +22,8 @@ Internal modules (not part of public API):
 
 # Public API - only expose what users need
 from ._core.base import (
-    BaseTranslator as _BaseTranslator,
-)  # Hidden, use TranslatorRegistry
+    BaseTranslator as _BaseTranslator,  # Hidden, use TranslatorRegistry
+)
 from ._core.registry import TranslatorRegistry
 
 # Everything else is internal implementation

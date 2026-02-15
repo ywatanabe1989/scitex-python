@@ -15,13 +15,14 @@ Note: This is a search translator (translatorType 8) that doesn't match URLs
 but is called programmatically with DOI or query parameters.
 """
 
-import re
 import html
 import json
-from typing import List, Dict, Any, Optional
+import re
+from typing import Any, Dict, List, Optional
 from urllib.parse import quote
 
 from playwright.async_api import Page
+
 from .._core.base import BaseTranslator
 
 

@@ -4,10 +4,9 @@ Description: Artforum translator for Zotero
 Translator ID: a127f012-4ea4-4d05-a657-24d47f91b016
 """
 
-from typing import Any, Dict, Optional, List
-import re
 import json
-
+import re
+from typing import Any, Dict, List, Optional
 
 TRANSLATOR_INFO = {
     "translator_id": "a127f012-4ea4-4d05-a657-24d47f91b016",

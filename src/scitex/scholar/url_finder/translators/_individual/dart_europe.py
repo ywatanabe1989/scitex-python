@@ -15,7 +15,7 @@ Metadata:
     lastUpdated: 2022-05-04 03:09:28
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class DARTEuropeTranslator:

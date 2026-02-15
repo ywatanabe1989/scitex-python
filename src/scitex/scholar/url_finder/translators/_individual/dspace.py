@@ -15,8 +15,8 @@ Metadata:
     lastUpdated: 2022-12-24 19:29:02
 """
 
-from typing import Dict, Any, List, Optional
 import re
+from typing import Any, Dict, List, Optional
 
 
 class DSpaceTranslator:

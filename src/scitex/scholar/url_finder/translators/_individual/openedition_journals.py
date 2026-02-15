@@ -12,10 +12,12 @@ Key features:
 - Test cases show "Full Text PDF" attachments
 """
 
-import re
 import logging
+import re
 from typing import List
-from playwright.async_api import Page, Error as PlaywrightError
+
+from playwright.async_api import Error as PlaywrightError
+from playwright.async_api import Page
 
 # Explicit public API - only export the translator class
 __all__ = ["OpenEditionJournalsTranslator"]
@@ -64,7 +66,8 @@ class OpenEditionJournalsTranslator:
 
         try:
             # Extract PDF URLs via JavaScript
-            urls = await page.evaluate("""
+            urls = await page.evaluate(
+                """
                 () => {
                     const pdfUrls = [];
 
@@ -97,7 +100,8 @@ class OpenEditionJournalsTranslator:
 
                     return pdfUrls;
                 }
-            """)
+            """
+            )
 
             # Validate and filter URLs
             if urls and isinstance(urls, list):
@@ -118,6 +122,7 @@ class OpenEditionJournalsTranslator:
 if __name__ == "__main__":
     # Private demo - imports only needed when running as script
     import asyncio
+
     from playwright.async_api import async_playwright
 
     async def _demo():

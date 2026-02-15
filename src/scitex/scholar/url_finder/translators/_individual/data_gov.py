@@ -15,7 +15,7 @@ Metadata:
     lastUpdated: 2021-07-21 21:34:07
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class DataGovTranslator:

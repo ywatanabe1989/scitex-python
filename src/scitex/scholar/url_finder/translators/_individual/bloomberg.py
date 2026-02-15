@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2016-09-08 20:56:54
 """
 
-from typing import Dict, Any, List, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class BloombergTranslator:

@@ -13,32 +13,32 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # """MDPI Journals translator."""
-# 
+#
 # import re
 # from typing import List
 # from playwright.async_api import Page
 # from ..core.base import BaseTranslator
-# 
-# 
+#
+#
 # class MDPITranslator(BaseTranslator):
 #     """MDPI Journals."""
-# 
+#
 #     LABEL = "MDPI Journals"
 #     URL_TARGET_PATTERN = r"^https?://www\.mdpi\.com"
-# 
+#
 #     @classmethod
 #     def matches_url(cls, url: str) -> bool:
 #         return bool(re.match(cls.URL_TARGET_PATTERN, url))
-# 
+#
 #     @classmethod
 #     async def extract_pdf_urls_async(cls, page: Page) -> List[str]:
 #         """Extract PDF URLs from MDPI article page.
-# 
+#
 #         Based on JavaScript translator (MDPI Journals.js).
 #         MDPI uses embedded metadata for PDF links.
 #         """
 #         pdf_urls = []
-# 
+#
 #         # Method 1: citation_pdf_url meta tag (primary method for MDPI)
 #         try:
 #             pdf_url = await page.locator(
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 #                 return pdf_urls
 #         except:
 #             pass
-# 
+#
 #         # Method 2: Direct PDF download link
 #         try:
 #             # MDPI typically has a download link with specific class
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 #                 return pdf_urls
 #         except:
 #             pass
-# 
+#
 #         # Method 3: Construct PDF URL from article URL
 #         # MDPI pattern: https://www.mdpi.com/2076-3425/9/7/156 -> https://www.mdpi.com/2076-3425/9/7/156/pdf
 #         try:
@@ -79,10 +79,10 @@ if __name__ == "__main__":
 #                 return pdf_urls
 #         except:
 #             pass
-# 
+#
 #         return pdf_urls
-# 
-# 
+#
+#
 # # Demo usage
 # # Note: Due to relative imports, run the demo script instead:
 # # python scripts/demo_mdpi.py

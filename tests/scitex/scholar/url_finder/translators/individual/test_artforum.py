@@ -15,12 +15,12 @@ if __name__ == "__main__":
 # Description: Artforum translator for Zotero
 # Translator ID: a127f012-4ea4-4d05-a657-24d47f91b016
 # """
-# 
+#
 # from typing import Any, Dict, Optional, List
 # import re
 # import json
-# 
-# 
+#
+#
 # TRANSLATOR_INFO = {
 #     "translator_id": "a127f012-4ea4-4d05-a657-24d47f91b016",
 #     "label": "Artforum",
@@ -33,8 +33,8 @@ if __name__ == "__main__":
 #     "browser_support": "gcsibv",
 #     "last_updated": "2021-09-02 00:33:38",
 # }
-# 
-# 
+#
+#
 # def detect_web(doc: Any, url: str) -> Optional[str]:
 #     """Detect if the page is a single item or multiple items"""
 #     if re.search(r"-\d{5,}([?#].*)?$", url):
@@ -44,8 +44,8 @@ if __name__ == "__main__":
 #     elif get_search_results(doc, check_only=True):
 #         return "multiple"
 #     return None
-# 
-# 
+#
+#
 # def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str, str]]:
 #     """Get search results from a multiple item page"""
 #     items = {}
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 #         "h3.hp-news__title, h3.hp-twocolumn__title a, h3.hp-artguide__title, "
 #         "p.hp-bloglist__teaser a"
 #     )
-# 
+#
 #     for row in rows:
 #         link = row.select_one("a")
 #         if not link:
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 #                 parent = row.find_parent("a")
 #                 if parent:
 #                     link = parent
-# 
+#
 #         if link:
 #             href = link.get("href")
 #             title = row.get_text(strip=True)
@@ -72,14 +72,14 @@ if __name__ == "__main__":
 #                 if check_only:
 #                     return True
 #                 items[href] = title
-# 
+#
 #     return items if items else None
-# 
-# 
+#
+#
 # def scrape(doc: Any, url: str) -> Dict[str, Any]:
 #     """Scrape a single item page"""
 #     item_type = "magazineArticle" if "print/" in url else "blogPost"
-# 
+#
 #     item = {
 #         "itemType": item_type,
 #         "title": "",
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 #         "notes": [],
 #         "seeAlso": [],
 #     }
-# 
+#
 #     # Try to get data from JSON-LD
 #     json_ld_tag = doc.select_one('script[type="application/ld+json"]')
 #     if json_ld_tag:
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 #             item["date"] = json_data.get("dateModified") or json_data.get(
 #                 "datePublished", ""
 #             )
-# 
+#
 #             if not item["creators"] and json_data.get("author"):
 #                 author_name = json_data["author"].get("name", "")
 #                 if author_name:
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 #                         )
 #         except (json.JSONDecodeError, KeyError):
 #             pass
-# 
+#
 #     # Get authors from metadata
 #     author_links = doc.select(".contrib-link a")
 #     for link in author_links:
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 #                     "creatorType": "author",
 #                 }
 #             )
-# 
+#
 #     # Handle magazine articles
 #     if item_type == "magazineArticle":
 #         item["ISSN"] = "0004-3532"
@@ -140,21 +140,21 @@ if __name__ == "__main__":
 #         if issue_date_elem:
 #             date_text = issue_date_elem.get_text(strip=True).replace("PRINT ", "")
 #             item["date"] = date_text
-# 
+#
 #             # Try to get volume and issue from linked page
 #             issue_link = issue_date_elem.select_one("a")
 #             if issue_link:
 #                 # Note: In a real implementation, you would fetch this page
 #                 # and extract volume/issue. For now, we'll leave them empty
 #                 pass
-# 
+#
 #     return item
-# 
-# 
+#
+#
 # def do_web(doc: Any, url: str) -> List[Dict[str, Any]]:
 #     """Main entry point for the translator"""
 #     web_type = detect_web(doc, url)
-# 
+#
 #     if web_type == "multiple":
 #         items = get_search_results(doc, check_only=False)
 #         # In a real implementation, you would use Zotero.selectItems

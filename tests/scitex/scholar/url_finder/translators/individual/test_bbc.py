@@ -15,13 +15,13 @@ if __name__ == "__main__":
 # Description: BBC translator for Zotero
 # Translator ID: f4130157-93f7-4493-8f24-a7c85549013d
 # """
-# 
+#
 # from typing import Any, Dict, Optional, List
 # import re
 # import json
 # from datetime import datetime
-# 
-# 
+#
+#
 # TRANSLATOR_INFO = {
 #     "translator_id": "f4130157-93f7-4493-8f24-a7c85549013d",
 #     "label": "BBC",
@@ -34,12 +34,12 @@ if __name__ == "__main__":
 #     "browser_support": "gcsibv",
 #     "last_updated": "2019-06-10 21:51:43",
 # }
-# 
-# 
+#
+#
 # def detect_web(doc: Any, url: str) -> Optional[str]:
 #     """Detect if the page is a newspaper article, blog post, video, or multiple items"""
 #     url = re.sub(r"[?#].+", "", url)
-# 
+#
 #     if re.search(r"\d{8}$", url) or re.search(r"\d{7}\.(stm)$", url):
 #         page_node = doc.select_one("#page")
 #         if page_node:
@@ -49,25 +49,25 @@ if __name__ == "__main__":
 #             if any(cls in classes for cls in ["media-asset-page", "vxp-headlines"]):
 #                 return "videoRecording"
 #         return "newspaperArticle"
-# 
+#
 #     if "/newsbeat/article" in url:
 #         return "blogPost"
-# 
+#
 #     if get_search_results(doc, check_only=True):
 #         return "multiple"
-# 
+#
 #     return None
-# 
-# 
+#
+#
 # def get_search_results(doc: Any, check_only: bool = False) -> Optional[Dict[str, str]]:
 #     """Get search results from a multiple item page"""
 #     items = {}
 #     rows = doc.select("a:has(h3)")
-# 
+#
 #     # For NewsBeat
 #     if not rows:
 #         rows = doc.select('article div h1[itemprop="headline"] a')
-# 
+#
 #     for row in rows:
 #         href = row.get("href")
 #         title = row.get_text(strip=True)
@@ -75,17 +75,17 @@ if __name__ == "__main__":
 #             if check_only:
 #                 return True
 #             items[href] = title
-# 
+#
 #     return items if items else None
-# 
-# 
+#
+#
 # def scrape(doc: Any, url: str) -> Dict[str, Any]:
 #     """Scrape a single item page"""
 #     url = re.sub(r"[?#].+", "", url)
 #     item_type = detect_web(doc, url)
 #     if not item_type or item_type == "multiple":
 #         return {}
-# 
+#
 #     item = {
 #         "itemType": item_type,
 #         "title": "",
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 #         "notes": [],
 #         "seeAlso": [],
 #     }
-# 
+#
 #     # Try to get data from JSON-LD
 #     json_ld_tag = doc.select_one('script[type="application/ld+json"]')
 #     if json_ld_tag:
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 #                 item["date"] = json_data["datePublished"]
 #         except (json.JSONDecodeError, AttributeError):
 #             pass
-# 
+#
 #     # Get date from data-seconds attribute
 #     if not item["date"]:
 #         seconds_elem = doc.select_one('div:has(h1, h2) *[class*="date"][data-seconds]')
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 #                     item["date"] = dt.isoformat()
 #                 except (ValueError, TypeError):
 #                     pass
-# 
+#
 #     # Try other date sources
 #     if not item["date"]:
 #         date_meta = doc.select_one('meta[property="rnews:datePublished"]')
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 #                 date_meta2 = doc.select_one('meta[name="OriginalPublicationDate"]')
 #                 if date_meta2:
 #                     item["date"] = date_meta2.get("content", "")
-# 
+#
 #     # Get title from embedded metadata
 #     title_meta = doc.select_one('meta[property="og:title"]')
 #     if title_meta:
@@ -145,23 +145,23 @@ if __name__ == "__main__":
 #         h1 = doc.select_one("h1")
 #         if h1:
 #             item["title"] = h1.get_text(strip=True)
-# 
+#
 #     # For old .stm pages
 #     if url.endswith(".stm"):
 #         headline_meta = doc.select_one('meta[name="Headline"]')
 #         if headline_meta:
 #             item["title"] = headline_meta.get("content", "")
-# 
+#
 #     # Get authors from byline
 #     byline_elem = doc.select_one("span.byline__name")
 #     if byline_elem:
 #         author_string = byline_elem.get_text(strip=True)
 #         author_string = author_string.replace("By", "").replace("...", "").strip()
-# 
+#
 #         # Check if author is real or just webpage title
 #         h1_elem = doc.select_one("h1")
 #         webpage_title = h1_elem.get_text(strip=True).lower() if h1_elem else ""
-# 
+#
 #         authors = author_string.split("&")
 #         for author in authors:
 #             author = author.strip()
@@ -197,7 +197,7 @@ if __name__ == "__main__":
 #                             "creatorType": "author",
 #                         }
 #                     )
-# 
+#
 #     # Get abstract
 #     desc_meta = doc.select_one('meta[property="og:description"]')
 #     if desc_meta:
@@ -206,20 +206,20 @@ if __name__ == "__main__":
 #         desc_meta2 = doc.select_one('meta[name="Description"]')
 #         if desc_meta2:
 #             item["abstractNote"] = desc_meta2.get("content", "")
-# 
+#
 #     # Get publication title and section
 #     if item_type == "newspaperArticle":
 #         item["publicationTitle"] = "BBC News"
 #         section_meta = doc.select_one('meta[property="article:section"]')
 #         if section_meta:
 #             item["section"] = section_meta.get("content", "")
-# 
+#
 #     elif item_type == "blogPost":
 #         item["blogTitle"] = "BBC Newsbeat"
-# 
+#
 #     elif item_type == "videoRecording":
 #         item["studio"] = "BBC"
-# 
+#
 #     # Get tags
 #     tags_meta = doc.select('meta[property="article:tag"]')
 #     for tag_meta in tags_meta:
@@ -227,14 +227,14 @@ if __name__ == "__main__":
 #         if tag_content:
 #             # Capitalize first letter
 #             item["tags"].append(tag_content[0].upper() + tag_content[1:])
-# 
+#
 #     return item
-# 
-# 
+#
+#
 # def do_web(doc: Any, url: str) -> List[Dict[str, Any]]:
 #     """Main entry point for the translator"""
 #     web_type = detect_web(doc, url)
-# 
+#
 #     if web_type == "multiple":
 #         return []
 #     else:

@@ -15,8 +15,8 @@ Metadata:
     lastUpdated: 2019-12-07 20:44:27
 """
 
-from typing import Dict, Any, List, Optional
 import re
+from typing import Any, Dict, List, Optional
 
 
 class DEPATISnetTranslator:

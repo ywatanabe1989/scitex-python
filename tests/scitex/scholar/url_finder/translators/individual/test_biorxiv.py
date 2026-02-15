@@ -13,67 +13,67 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # """bioRxiv/medRxiv translator.
-# 
+#
 # Translates bioRxiv and medRxiv URLs to extract PDF links and metadata.
 # bioRxiv is the preprint server for biology, medRxiv for medical sciences.
-# 
+#
 # Supports:
 # - Article pages: https://www.biorxiv.org/content/10.1101/YYYY.MM.DD.NNNNNNvN
 # - Search results: https://www.biorxiv.org/search/...
 # - Collections: https://www.biorxiv.org/collection/...
 # - Both bioRxiv and medRxiv domains
 # """
-# 
+#
 # import re
 # from typing import List
 # from playwright.async_api import Page
 # from ..core.base import BaseTranslator
-# 
-# 
+#
+#
 # class BioRxivTranslator(BaseTranslator):
 #     """bioRxiv/medRxiv translator for extracting PDF URLs.
-# 
+#
 #     bioRxiv and medRxiv are open-access preprint servers.
 #     All articles have freely available PDFs.
 #     """
-# 
+#
 #     LABEL = "bioRxiv/medRxiv"
 #     URL_TARGET_PATTERN = (
 #         r"^https?://(www\.)?(biorxiv|medrxiv)\.org/(content|search|collection)/"
 #     )
-# 
+#
 #     @classmethod
 #     def matches_url(cls, url: str) -> bool:
 #         """Check if URL is a bioRxiv or medRxiv URL.
-# 
+#
 #         Args:
 #             url: URL to check
-# 
+#
 #         Returns:
 #             True if URL matches bioRxiv/medRxiv pattern
 #         """
 #         return bool(re.match(cls.URL_TARGET_PATTERN, url))
-# 
+#
 #     @classmethod
 #     async def extract_pdf_urls_async(cls, page: Page) -> List[str]:
 #         """Extract PDF URLs from bioRxiv/medRxiv page.
-# 
+#
 #         For article pages, extracts the PDF download link.
 #         For search/collection pages, extracts all article PDF links.
-# 
+#
 #         bioRxiv/medRxiv PDF URL patterns:
 #         - Article: https://www.biorxiv.org/content/10.1101/YYYY.MM.DD.NNNNNNvN.full.pdf
 #         - Early: https://www.biorxiv.org/content/biorxiv/early/YYYY/MM/DD/DOI.full.pdf
-# 
+#
 #         Args:
 #             page: Playwright page object
-# 
+#
 #         Returns:
 #             List of PDF URLs found on the page
 #         """
 #         url = page.url
 #         pdf_urls = []
-# 
+#
 #         # Method 1: citation_pdf_url meta tag (primary method)
 #         # bioRxiv embeds PDF URL in standard citation meta tag
 #         try:
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 #                 return pdf_urls
 #         except Exception:
 #             pass
-# 
+#
 #         # Method 2: Direct PDF download link
 #         # Look for the "Download PDF" button
 #         try:
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 #                 return pdf_urls
 #         except Exception:
 #             pass
-# 
+#
 #         # Method 3: Construct PDF URL from DOI if on article page
 #         # bioRxiv pattern: /content/{DOI}v{version} -> {DOI}v{version}.full.pdf
 #         if "/content/" in url and not any(x in url for x in ["/search", "/collection"]):
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 #                     return pdf_urls
 #             except Exception:
 #                 pass
-# 
+#
 #         # Method 4: Search/collection pages - extract DOIs from results
 #         if any(x in url for x in ["/search", "/collection"]):
 #             try:
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 #                 doi_elements = await page.query_selector_all(
 #                     ".highwire-cite-metadata-doi"
 #                 )
-# 
+#
 #                 for doi_elem in doi_elements:
 #                     doi_text = await doi_elem.inner_text()
 #                     # Extract DOI, removing "doi:" prefix and "https://doi.org/" if present
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 #                         .replace("https://doi.org/", "")
 #                         .strip()
 #                     )
-# 
+#
 #                     if doi.startswith("10.1101/"):
 #                         # Determine base URL (biorxiv or medrxiv)
 #                         base_domain = (
@@ -147,14 +147,14 @@ if __name__ == "__main__":
 #                         # bioRxiv search results don't include version, so use bare DOI
 #                         pdf_url = f"https://www.{base_domain}/content/{doi}.full.pdf"
 #                         pdf_urls.append(pdf_url)
-# 
+#
 #                 if pdf_urls:
 #                     return pdf_urls
-# 
+#
 #             except Exception as e:
 #                 # Log error but don't fail completely
 #                 print(f"Error extracting PDF URLs from bioRxiv search: {e}")
-# 
+#
 #         return pdf_urls
 
 # --------------------------------------------------------------------------------

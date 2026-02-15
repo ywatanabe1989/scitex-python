@@ -15,7 +15,7 @@ Metadata:
     lastUpdated: 2021-09-14 00:23:40
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class DBpiaTranslator:

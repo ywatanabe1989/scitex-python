@@ -16,10 +16,11 @@ Metadata:
     lastUpdated: 2023-05-01 12:09:04
 """
 
-from typing import Dict, Any, Optional
-from bs4 import BeautifulSoup
 import json
 import re
+from typing import Any, Dict, Optional
+
+from bs4 import BeautifulSoup
 
 
 class DataverseTranslator:

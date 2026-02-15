@@ -4,10 +4,9 @@ Description: Boletín Oficial del Estado (BOE) translator for Zotero
 Translator ID: 3f1b68b1-8ee7-4ab7-a514-185d72b2f80d
 """
 
-from typing import Any, Dict, Optional, List
 import re
+from typing import Any, Dict, List, Optional
 from xml.etree import ElementTree as ET
-
 
 TRANSLATOR_INFO = {
     "translator_id": "3f1b68b1-8ee7-4ab7-a514-185d72b2f80d",

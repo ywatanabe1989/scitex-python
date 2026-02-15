@@ -4,9 +4,8 @@ Description: Biblioteca Online de Ciências da Comunicação translator for Zote
 Translator ID: ecd1b7c6-8d31-4056-8c15-1807b2489254
 """
 
-from typing import Any, Dict, Optional, List
 import re
-
+from typing import Any, Dict, List, Optional
 
 TRANSLATOR_INFO = {
     "translator_id": "ecd1b7c6-8d31-4056-8c15-1807b2489254",

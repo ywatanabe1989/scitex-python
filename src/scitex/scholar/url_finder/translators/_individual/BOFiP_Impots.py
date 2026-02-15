@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2017-01-01 14:53:42
 """
 
-from typing import Dict, Any, List, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class BOFiPImpotsTranslator:

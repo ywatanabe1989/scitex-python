@@ -4,9 +4,8 @@ Description: BIBSYS translator for Zotero
 Translator ID: ab961e61-2a8a-4be1-b8a3-044f20d52d78
 """
 
-from typing import Any, Dict, Optional, List
 import re
-
+from typing import Any, Dict, List, Optional
 
 TRANSLATOR_INFO = {
     "translator_id": "ab961e61-2a8a-4be1-b8a3-044f20d52d78",

@@ -14,6 +14,7 @@ Key features:
 
 import re
 from typing import List, Optional
+
 from playwright.async_api import Page
 
 
@@ -45,13 +46,15 @@ class DBLPTranslator:
             pass
 
         # Extract URLs from BibTeX data
-        bibtex_data = await page.evaluate("""
+        bibtex_data = await page.evaluate(
+            """
             () => {
                 const pre = document.querySelector('#bibtex-section > pre');
                 if (!pre) return null;
                 return pre.textContent;
             }
-        """)
+        """
+        )
 
         if bibtex_data:
             # Look for ee (electronic edition) or url fields
@@ -70,6 +73,7 @@ class DBLPTranslator:
 
 if __name__ == "__main__":
     import asyncio
+
     from playwright.async_api import async_playwright
 
     async def main():

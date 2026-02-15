@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2021-08-07 00:42:35
 """
 
-from typing import Dict, Any, Optional, List
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class CurrentAffairsTranslator:

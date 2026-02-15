@@ -12,9 +12,9 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # """
 # Chicago Journal of Theoretical Computer Science Translator
-# 
+#
 # Translates journal articles from CJTCS to Zotero format.
-# 
+#
 # Metadata:
 #     translatorID: 1e2a9aba-eb04-4398-9e3a-630e6132db13
 #     label: Chicago Journal of Theoretical Computer Science
@@ -27,15 +27,15 @@ if __name__ == "__main__":
 #     browserSupport: gcsibv
 #     lastUpdated: 2025-05-14 00:10:19
 # """
-# 
+#
 # from typing import Dict, Any
 # from bs4 import BeautifulSoup
 # import re
-# 
-# 
+#
+#
 # class ChicagoJournalOfTheoreticalComputerScienceTranslator:
 #     """Translator for Chicago Journal of Theoretical Computer Science."""
-# 
+#
 #     METADATA = {
 #         "translatorID": "1e2a9aba-eb04-4398-9e3a-630e6132db13",
 #         "label": "Chicago Journal of Theoretical Computer Science",
@@ -48,14 +48,14 @@ if __name__ == "__main__":
 #         "browserSupport": "gcsibv",
 #         "lastUpdated": "2025-05-14 00:10:19",
 #     }
-# 
+#
 #     SINGLE_RE = re.compile(
 #         r"^https?://cjtcs\.cs\.uchicago\.edu/articles/\w+/\d+/contents\.html"
 #     )
 #     MULTIPLE_RE = re.compile(
 #         r"^https?://cjtcs\.cs\.uchicago\.edu/articles/\w+/contents\.html"
 #     )
-# 
+#
 #     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
 #         """Detect if page is an article or volume contents."""
 #         if self.MULTIPLE_RE.match(url):
@@ -65,26 +65,26 @@ if __name__ == "__main__":
 #                 return "multiple"
 #         elif self.SINGLE_RE.match(url):
 #             return "journalArticle"
-# 
+#
 #         return ""
-# 
+#
 #     async def do_web(
 #         self, doc: BeautifulSoup, url: str, request_text_func
 #     ) -> Dict[str, Any]:
 #         """Extract article data."""
 #         return await self.scrape(doc, url, request_text_func)
-# 
+#
 #     async def scrape(
 #         self, doc: BeautifulSoup, url: str, request_text_func
 #     ) -> Dict[str, Any]:
 #         """
 #         Scrape article data by fetching and parsing BibTeX.
-# 
+#
 #         Args:
 #             doc: BeautifulSoup parsed document
 #             url: URL of the page
 #             request_text_func: Function to request text content
-# 
+#
 #         Returns:
 #             Dictionary containing article metadata
 #         """
@@ -94,14 +94,14 @@ if __name__ == "__main__":
 #             "tags": [],
 #             "attachments": [],
 #         }
-# 
+#
 #         # Find BibTeX link
 #         bib_link = doc.select_one('a[href$=".bib"]')
 #         if bib_link and bib_link.get("href"):
 #             bib_url = bib_link["href"]
 #             if not bib_url.startswith("http"):
 #                 bib_url = "http://cjtcs.cs.uchicago.edu" + bib_url
-# 
+#
 #             # Fetch BibTeX
 #             bib_text = await request_text_func(bib_url)
 #             if bib_text:
@@ -109,13 +109,13 @@ if __name__ == "__main__":
 #                 bib_text = self._fix_author_line(bib_text)
 #                 # Parse BibTeX
 #                 self._parse_bibtex(bib_text, item)
-# 
+#
 #         # Extract DOI
 #         doi_link = doc.select_one('a[href*="dx.doi.org"]')
 #         if doi_link and doi_link.get("href"):
 #             doi_url = doi_link["href"]
 #             item["DOI"] = re.sub(r"https?://(?:dx\.)?doi\.org/", "", doi_url)
-# 
+#
 #         # Add PDF attachment if available
 #         pdf_link = doc.select_one('a[href$=".pdf"]')
 #         if pdf_link and pdf_link.get("href"):
@@ -134,9 +134,9 @@ if __name__ == "__main__":
 #             item["attachments"].append(
 #                 {"title": "Snapshot", "mimeType": "text/html", "url": url}
 #             )
-# 
+#
 #         return item
-# 
+#
 #     def _fix_author_line(self, bib_text: str) -> str:
 #         """Fix BibTeX author line if missing equals sign."""
 #         lines = bib_text.split("\n")
@@ -146,7 +146,7 @@ if __name__ == "__main__":
 #             fixed_line = re.sub(r"^(\s*author)(?!\s*=)", r"\1=", line)
 #             fixed_lines.append(fixed_line)
 #         return "\n".join(fixed_lines)
-# 
+#
 #     def _parse_bibtex(self, bib_text: str, item: Dict[str, Any]):
 #         """Parse BibTeX and fill item fields."""
 #         # Simple BibTeX parser
@@ -156,7 +156,7 @@ if __name__ == "__main__":
 #         )
 #         if title_match:
 #             item["title"] = title_match.group(1).strip()
-# 
+#
 #         # Extract authors
 #         author_match = re.search(
 #             r'author\s*=\s*[{"](.*?)[}"]', bib_text, re.IGNORECASE | re.DOTALL
@@ -168,35 +168,35 @@ if __name__ == "__main__":
 #                 author = author.strip()
 #                 if author:
 #                     item["creators"].append(self._parse_author(author))
-# 
+#
 #         # Extract year/date
 #         year_match = re.search(r'year\s*=\s*[{"](.*?)[}"]', bib_text, re.IGNORECASE)
 #         if year_match:
 #             item["date"] = year_match.group(1).strip()
-# 
+#
 #         # Extract volume
 #         volume_match = re.search(r'volume\s*=\s*[{"](.*?)[}"]', bib_text, re.IGNORECASE)
 #         if volume_match:
 #             item["volume"] = volume_match.group(1).strip()
-# 
+#
 #         # Extract issue/number
 #         issue_match = re.search(
 #             r'(?:issue|number)\s*=\s*[{"](.*?)[}"]', bib_text, re.IGNORECASE
 #         )
 #         if issue_match:
 #             item["issue"] = issue_match.group(1).strip()
-# 
+#
 #         # Extract journal
 #         journal_match = re.search(
 #             r'journal\s*=\s*[{"](.*?)[}"]', bib_text, re.IGNORECASE
 #         )
 #         if journal_match:
 #             item["publicationTitle"] = journal_match.group(1).strip()
-# 
+#
 #     def _parse_author(self, author_str: str) -> Dict[str, Any]:
 #         """Parse author name from BibTeX format."""
 #         author_str = author_str.strip()
-# 
+#
 #         # Handle "Last, First" format
 #         if "," in author_str:
 #             parts = author_str.split(",", 1)

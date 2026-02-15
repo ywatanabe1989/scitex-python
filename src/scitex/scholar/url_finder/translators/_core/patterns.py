@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 """Pattern-based PDF extraction."""
 
+import re
 from enum import Enum
 from typing import List, Optional
+
 from playwright.async_api import Page
-import re
 
 
 class AccessPattern(Enum):

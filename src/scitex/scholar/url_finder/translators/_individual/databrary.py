@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2023-04-19 16:49:05
 """
 
-from typing import Dict, Any, List, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class DatabaryTranslator:

@@ -15,9 +15,9 @@ Metadata:
     lastUpdated: 2023-09-26 16:11:18
 """
 
-from typing import Dict, Any, List, Optional
-import re
 import json
+import re
+from typing import Any, Dict, List, Optional
 
 
 class CamaraBrasileiraDoLivroISBNTranslator:

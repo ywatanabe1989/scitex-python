@@ -4,9 +4,8 @@ Description: BBC Genome translator for Zotero
 Translator ID: 777e5ce0-0b16-4a12-8e6c-5a1a2cb33189
 """
 
-from typing import Any, Dict, Optional, List
 import re
-
+from typing import Any, Dict, List, Optional
 
 TRANSLATOR_INFO = {
     "translator_id": "777e5ce0-0b16-4a12-8e6c-5a1a2cb33189",

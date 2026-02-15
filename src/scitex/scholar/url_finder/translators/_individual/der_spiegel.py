@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2021-07-05 17:55:21
 """
 
-from typing import Dict, Any, Optional, List
-from bs4 import BeautifulSoup
 import json
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class DerSpiegelTranslator:

@@ -12,9 +12,9 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # """
 # Bezneng Gajit Translator
-# 
+#
 # Translates Bezneng Gajit (Tatar newspaper) articles to Zotero format.
-# 
+#
 # Metadata:
 #     translatorID: 7500180d-ca99-4ef7-a9a9-3e58bba91d28
 #     label: Bezneng Gajit
@@ -27,15 +27,15 @@ if __name__ == "__main__":
 #     browserSupport: gcsbv
 #     lastUpdated: 2016-11-01 18:22:20
 # """
-# 
+#
 # from typing import Dict, Any, List, Optional
 # from bs4 import BeautifulSoup
 # import re
-# 
-# 
+#
+#
 # class BeznengGajitTranslator:
 #     """Translator for Bezneng Gajit (Безнең гәҗит) Tatar newspaper."""
-# 
+#
 #     METADATA = {
 #         "translatorID": "7500180d-ca99-4ef7-a9a9-3e58bba91d28",
 #         "label": "Bezneng Gajit",
@@ -48,15 +48,15 @@ if __name__ == "__main__":
 #         "browserSupport": "gcsbv",
 #         "lastUpdated": "2016-11-01 18:22:20",
 #     }
-# 
+#
 #     def detect_web(self, doc: BeautifulSoup, url: str) -> str:
 #         """
 #         Detect if the page is a single article or multiple articles.
-# 
+#
 #         Args:
 #             doc: BeautifulSoup parsed document
 #             url: URL of the page
-# 
+#
 #         Returns:
 #             'newspaperArticle' for single item, 'multiple' for list, empty string otherwise
 #         """
@@ -68,15 +68,15 @@ if __name__ == "__main__":
 #             if self._get_search_results(doc, check_only=True):
 #                 return "multiple"
 #         return ""
-# 
+#
 #     def do_web(self, doc: BeautifulSoup, url: str) -> List[Dict[str, Any]]:
 #         """
 #         Extract article data from Bezneng Gajit page.
-# 
+#
 #         Args:
 #             doc: BeautifulSoup parsed document
 #             url: URL of the page
-# 
+#
 #         Returns:
 #             List of dictionaries containing article metadata
 #         """
@@ -85,15 +85,15 @@ if __name__ == "__main__":
 #             return [{"itemType": "multiple", "urls": results}]
 #         else:
 #             return [self.scrape(doc, url)]
-# 
+#
 #     def scrape(self, doc: BeautifulSoup, url: str) -> Dict[str, Any]:
 #         """
 #         Scrape article data from the document.
-# 
+#
 #         Args:
 #             doc: BeautifulSoup parsed document
 #             url: URL of the page
-# 
+#
 #         Returns:
 #             Dictionary containing article metadata
 #         """
@@ -106,12 +106,12 @@ if __name__ == "__main__":
 #             "tags": [],
 #             "attachments": [],
 #         }
-# 
+#
 #         # Extract title
 #         title_elem = doc.select_one("h1.entry-title")
 #         if title_elem:
 #             item["title"] = title_elem.get_text().strip()
-# 
+#
 #         # Extract creators from authors paragraph
 #         # Skip entries that say "Килгән хатлардан" (from letters)
 #         author_elems = doc.select("div.entry-meta p.authors a")
@@ -123,7 +123,7 @@ if __name__ == "__main__":
 #                 if author_text == author_text.upper():
 #                     author_text = self._capitalize_name(author_text)
 #                 item["creators"].append(self._clean_author(author_text))
-# 
+#
 #         # Extract date from post-category paragraph
 #         # Format: "2011, № 41 (19 октябрь 2011)"
 #         date_elem = doc.select_one("div.entry-meta p.post-category")
@@ -134,63 +134,63 @@ if __name__ == "__main__":
 #             if date_match:
 #                 year, date_full = date_match.groups()
 #                 item["date"] = date_full
-# 
+#
 #             # Extract issue number
 #             issue_match = re.search(r"№\s*(\d+)", date_text)
 #             if issue_match:
 #                 item["issue"] = issue_match.group(1)
-# 
+#
 #         # Add snapshot attachment
 #         item["attachments"].append(
 #             {"title": "Безнең гәҗит Snapshot", "mimeType": "text/html", "url": url}
 #         )
-# 
+#
 #         return item
-# 
+#
 #     def _get_search_results(
 #         self, doc: BeautifulSoup, check_only: bool = False
 #     ) -> Optional[Dict[str, str]]:
 #         """
 #         Get search results from a page.
-# 
+#
 #         Args:
 #             doc: BeautifulSoup parsed document
 #             check_only: If True, just check if results exist
-# 
+#
 #         Returns:
 #             Dictionary mapping URLs to titles, or True/None if check_only
 #         """
 #         # Look for article links in h2.entry-title that contain /basma/
 #         rows = doc.select('h2.entry-title a[href*="/basma/"]')
-# 
+#
 #         if not rows:
 #             return None
-# 
+#
 #         if check_only:
 #             return True
-# 
+#
 #         items = {}
 #         for row in rows:
 #             href = row.get("href")
 #             title = row.get_text().strip()
 #             if href and title:
 #                 items[href] = title
-# 
+#
 #         return items if items else None
-# 
+#
 #     def _clean_author(self, name: str) -> Dict[str, Any]:
 #         """
 #         Parse author name into first and last name.
-# 
+#
 #         Args:
 #             name: Full author name
-# 
+#
 #         Returns:
 #             Dictionary with firstName and lastName
 #         """
 #         name = name.strip()
 #         parts = name.split()
-# 
+#
 #         if len(parts) >= 2:
 #             return {
 #                 "firstName": " ".join(parts[:-1]),
@@ -199,14 +199,14 @@ if __name__ == "__main__":
 #             }
 #         else:
 #             return {"lastName": name, "creatorType": "author", "fieldMode": True}
-# 
+#
 #     def _capitalize_name(self, name: str) -> str:
 #         """
 #         Capitalize a name that is in all uppercase.
-# 
+#
 #         Args:
 #             name: Name in uppercase
-# 
+#
 #         Returns:
 #             Name with proper capitalization
 #         """

@@ -16,7 +16,8 @@ Metadata:
     lastUpdated: 2021-10-29 00:35:04
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 from bs4 import BeautifulSoup
 
 
@@ -84,9 +85,11 @@ class CascadillaProceedingsProjectTranslator:
         if pdf_link and pdf_link.get("href"):
             item["attachments"].append(
                 {
-                    "url": pdf_link["href"]
-                    if pdf_link["href"].startswith("http")
-                    else "https://www.lingref.com" + pdf_link["href"],
+                    "url": (
+                        pdf_link["href"]
+                        if pdf_link["href"].startswith("http")
+                        else "https://www.lingref.com" + pdf_link["href"]
+                    ),
                     "title": "Full Text PDF",
                     "mimeType": "application/pdf",
                 }

@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2022-01-20 14:35:30
 """
 
-from typing import Dict, Any, Optional
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, Optional
+
+from bs4 import BeautifulSoup
 
 
 class DelpherTranslator:

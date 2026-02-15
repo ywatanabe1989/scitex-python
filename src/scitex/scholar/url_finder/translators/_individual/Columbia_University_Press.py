@@ -16,9 +16,10 @@ Metadata:
     lastUpdated: 2016-09-10 11:35:07
 """
 
-from typing import Dict, Any, Optional, List
-from bs4 import BeautifulSoup
 import re
+from typing import Any, Dict, List, Optional
+
+from bs4 import BeautifulSoup
 
 
 class ColumbiaUniversityPressTranslator:

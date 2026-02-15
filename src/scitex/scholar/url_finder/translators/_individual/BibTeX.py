@@ -18,8 +18,8 @@ Metadata:
     lastUpdated: 2024-05-23 02:08:36
 """
 
-from typing import Dict, Any, List, Optional
 import re
+from typing import Any, Dict, List, Optional
 
 
 class BibTeXTranslator:
